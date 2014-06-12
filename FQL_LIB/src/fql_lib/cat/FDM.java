@@ -12,6 +12,7 @@ import fql_lib.cat.categories.FinSet.Fn;
 import fql_lib.cat.categories.Inst;
 import fql_lib.cat.categories.Pi;
 
+
 public class FDM {
 	
 	
@@ -50,7 +51,7 @@ public class FDM {
 
 	// TODO: lineage assumes all IDs in output of sigma are unique
 
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O1, A1, O2, A2> Adjunction<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> sigmaDelta(
 			Functor<O2, A2, O1, A1> F) {
 
@@ -89,7 +90,7 @@ public class FDM {
 		return new Adjunction<>(sigmaF(F), deltaF(F), f, g);
 	}
 	
-	
+	@SuppressWarnings({ "rawtypes" })
 	public static <O1, A1, O2, A2> Functor<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> piF(
 			Functor<O1, A1, O2, A2> F) {
 
@@ -103,6 +104,7 @@ public class FDM {
 		return new Functor<>(src, dst, o, a);
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O1, A1, O2, A2> Adjunction<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>, Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> deltaPi(
 			Functor<O2, A2, O1, A1> F) {
 		Category<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> D = Inst.get(F.source);

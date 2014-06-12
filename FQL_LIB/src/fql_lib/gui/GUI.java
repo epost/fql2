@@ -154,56 +154,6 @@ public class GUI extends JPanel {
 		MenuShortcut q = new MenuShortcut(ctrlQ.getKeyCode());
 		exitItem.setShortcut(q);
 
-		// Menu optionsMenu = new Menu("Options");
-/*		MenuItem optionsItem = new MenuItem("Show Options");
-		editMenu.add(optionsItem);
-		optionsItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				DEBUG.debug.showOptions();
-			}
-		}); */
-
-/*		MenuItem formatItem = new MenuItem("Format Code");
-		editMenu.add(formatItem);
-		formatItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				formatAction();
-			}
-		}); */ //TODO
-		
-
-/*		MenuItem checkItem = new MenuItem("Type Check");
-		toolsMenu.add(checkItem);
-		checkItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				checkAction();
-			}
-		}); */ //TODO
-
-/*		MenuItem raToFqlItem = new MenuItem("SPCU to FQL");
-		transMenu.add(raToFqlItem);
-		raToFqlItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				raToFqlAction();
-			}
-		}); */ //TODO
-
-/*		MenuItem sqlToFqlItem = new MenuItem("SQL Schema to FQL");
-		transMenu.add(sqlToFqlItem);
-		sqlToFqlItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				sqlToFqlAction();
-			}
-		}); */ //TODO
-		
-/*		MenuItem ringToFqlItem = new MenuItem("Polynomials to FQL");
-		transMenu.add(ringToFqlItem);
-		ringToFqlItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ringToFqlAction();
-			}
-		}); */ //TODO
-
 		MenuItem abortItem = new MenuItem("Abort");
 		toolsMenu.add(abortItem);
 		abortItem.addActionListener(new ActionListener() {
@@ -370,16 +320,7 @@ public class GUI extends JPanel {
 			}
 		});
 
-/*		MenuItem vItem = new MenuItem("Visually Edit");
-		editMenu.add(vItem);
-		vItem.addActionListener(new ActionListener() {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				vedit();
-			}
-			
-		}); */ //TODO
 		
 
 		// JPanel temp2 = new JPanel();

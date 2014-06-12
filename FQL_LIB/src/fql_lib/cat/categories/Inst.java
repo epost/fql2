@@ -315,7 +315,6 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 		return new Functor<O,A,Set,Fn>(I.source, FinSet.FinSet, f, g);
 	}
 	
-	//TODO: sub-object classifier for C-Inst
 	//TODO: exponentials for C-Cat
 
 	@Override
@@ -409,8 +408,6 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 
 		return new Transform(X, Y, x -> d.get(x));
 	}
-	
-	//TODO: why do some graphs bounce around?
 	
 	public Transform<O,A,Set,Fn> eval(Functor<O,A,Set,Fn> a, Functor<O,A,Set,Fn> b) {
 		if (!a.source.equals(b.source)) {
@@ -593,9 +590,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 		
 		return new Transform<>(J, prop, map::get);
 	}
-	
-	//TODO: omit graph when > X vertices
-	
+		
 	public Transform<O,A,Set,Fn> kernel(Transform<O,A,Set,Fn> L) {
 		Functor<O,A,Set,Fn> J = L.source;
 		

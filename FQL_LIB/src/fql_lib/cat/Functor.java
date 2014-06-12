@@ -1,21 +1,12 @@
 package fql_lib.cat;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import fql_lib.Chc;
 import fql_lib.DEBUG;
-import fql_lib.Pair;
 import fql_lib.Util;
 import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.FinSet.Fn;

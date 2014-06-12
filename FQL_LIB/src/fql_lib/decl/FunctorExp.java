@@ -1384,8 +1384,6 @@ public abstract class FunctorExp {
 
 	}
 	
-	//TODO: cod and dom for transforms
-	
 	public abstract int hashCode();
 
 	public interface FunctorExpVisitor<R, E> {

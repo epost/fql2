@@ -272,6 +272,4 @@ public class IntegrationExample extends Example {
 			+ "\n} : C1 -> (Set^PushoutSchema)"
 			+ "\n";
 	
-	//TODO add APPLY, CURRY, uncurry as keywords
-
 }

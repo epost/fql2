@@ -36,7 +36,6 @@ import fql_lib.gui.GUI;
 @SuppressWarnings("serial")
 public class DEBUG implements Serializable {
 
-	//TODO category of elements for intances
 	
 	public static enum SQLKIND {
 		H2, NATIVE, JDBC

@@ -224,8 +224,6 @@ public abstract class TransExp {
 		
 	}
 	
-	//TODO left right whisker to syntax highlighting
-	
 	public static class Whisker extends TransExp {
 		boolean left;
 		FunctorExp func;

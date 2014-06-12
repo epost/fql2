@@ -133,6 +133,7 @@ public class SubInstances {
 		return null;
 	}
 	
+	@SuppressWarnings({ "rawtypes" })
 	public static <O,A> List<Functor<O,A,Set,Fn>> subInstances(Functor<O,A,Set,Fn> I) {
 		List<Functor<O,A,Set,Fn>> ret = new LinkedList<>();
 		for (Map<Chc<O,A>, Set<Pair<Object, Object>>> k : subInstances_fast0(
@@ -145,6 +146,7 @@ public class SubInstances {
 		return ret;
 	}
 	
+	@SuppressWarnings({ "rawtypes"  })
 	private static <O,A> Map<Chc<O,A>, Set<Pair<Object, Object>>> toData(Functor<O,A,Set,Fn> I) {
 		Map<Chc<O, A>, Set<Pair<Object, Object>>> ret = new HashMap<>();
 		for (O o : I.source.objects()) {
@@ -156,6 +158,7 @@ public class SubInstances {
 		return ret;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static Set<Pair<Object, Object>> up2(Fn f) {
 		Set<Pair<Object, Object>> ret = new HashSet<>();
 		for (Object o : f.source) {
@@ -164,6 +167,7 @@ public class SubInstances {
 		return ret;
 	}
 
+	@SuppressWarnings({ "rawtypes"})
 	private static Set<Pair<Object, Object>> up1(Set s) {
 		Set<Pair<Object, Object>> ret = new HashSet<>();
 		for (Object o : s) {

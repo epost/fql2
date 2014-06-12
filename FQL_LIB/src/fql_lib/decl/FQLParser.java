@@ -24,7 +24,6 @@ import fql_lib.Unit;
 import fql_lib.cat.categories.FinSet.Fn;
 import fql_lib.decl.FQLProgram.NewDecl;
 import fql_lib.decl.FunctorExp.CatConst;
-import fql_lib.decl.FunctorExp.Dom;
 import fql_lib.decl.FunctorExp.FinalConst;
 import fql_lib.decl.FunctorExp.InstConst;
 import fql_lib.decl.FunctorExp.MapConst;

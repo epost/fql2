@@ -29,7 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -37,7 +36,6 @@ import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.collections15.Transformer;
 
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -65,6 +63,8 @@ import fql_lib.decl.CatOps;
 import fql_lib.decl.Environment;
 import fql_lib.decl.FQLProgram;
 import fql_lib.decl.FunctorExp;
+//import org.apache.commons.collections15.Transformer;
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
 
 /**
  * 

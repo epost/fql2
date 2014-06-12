@@ -16,8 +16,6 @@ public class Sig extends Category<Signature<?, ?>, Mapping<?, ?, ?, ?>> {
 		return true;
 	}
 
-	//TODO check if uncurry highlights
-	
 	@Override
 	public String toString() {
 		return "Sig";

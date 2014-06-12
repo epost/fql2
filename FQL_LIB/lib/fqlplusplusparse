@@ -21,6 +21,8 @@
     <keyword>transform</keyword>
   </keywords>
   <keywords2>
+    <keyword>APPLY</keyword>
+    <keyword>CURRY</keyword>
     <keyword>Cat</keyword>
     <keyword>Set</keyword>
     <keyword>and</keyword>
@@ -50,6 +52,7 @@
     <keyword>iso2</keyword>
     <keyword>kernel</keyword>
     <keyword>kleisli</keyword>
+    <keyword>left</keyword>
     <keyword>not</keyword>
     <keyword>object</keyword>
     <keyword>objects</keyword>
@@ -61,12 +64,15 @@
     <keyword>range</keyword>
     <keyword>relationalize</keyword>
     <keyword>return</keyword>
+    <keyword>right</keyword>
     <keyword>sigma</keyword>
     <keyword>snd</keyword>
     <keyword>true</keyword>
     <keyword>tt</keyword>
+    <keyword>uncurry</keyword>
     <keyword>unit</keyword>
     <keyword>void</keyword>
+    <keyword>whisker</keyword>
   </keywords2>
   <dataTypes/>
   <functions/>

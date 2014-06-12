@@ -487,7 +487,7 @@ public class CodeEditor extends JPanel implements Runnable {
 
 		});
 
-//		topArea.getPopupMenu().add(visualEdit, 0); //TODO
+//		topArea.getPopupMenu().add(visualEdit, 0); 
 	//	topArea.getPopupMenu().add(s, 1);
 		// topArea.getPopupMenu().setLightWeightPopupEnabled(true);
 
@@ -703,7 +703,7 @@ public class CodeEditor extends JPanel implements Runnable {
 				foo += " - "
 						+ format.format(new Date(System.currentTimeMillis()));
 			}			
-			display = new Display(foo, init, env); //(init, env); //TODO
+			display = new Display(foo, init, env); 
 			toDisplay = "Done";
 			respArea.setText("Done");
 
@@ -832,7 +832,7 @@ public class CodeEditor extends JPanel implements Runnable {
 		o = p.transforms.get(k);
 		if (o != null) {
 			return new Pair<>("transform", o);
-		} */ //TODO
+		} */ 
 		
 		//throw new RuntimeException("Cannot find " + k);
 	//}

@@ -125,7 +125,6 @@ public class Transform<O1, A1, O2, A2> {
 		if (s1.isInfinite()) {
 			return;
 		}
-		//TODO: check that v : F(n) -> G(n)
 		for (O1 n : s1.objects()) {
 			A2 v = apply(n);
 			if (!t1.isArrow(v)) {
@@ -214,6 +213,7 @@ public class Transform<O1, A1, O2, A2> {
 		return new Transform<CO,CA,EO,EA>(Functor.compose(A, t), Functor.compose(B, t), c -> t.applyA(e.apply(c)));
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O,A> Functor<O,A,Set,Fn> preimage(Transform<O,A,Set,Fn> t, Functor<O,A,Set,Fn> a) {
 		if (t.source.source.isInfinite() || !t.source.target.equals(FinSet.FinSet)) {
 			throw new RuntimeException();

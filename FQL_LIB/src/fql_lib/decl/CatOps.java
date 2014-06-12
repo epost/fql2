@@ -88,6 +88,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 		this.ENV = ENV;
 	}
 
+	@SuppressWarnings("unused")
 	private CatOps() { }
 	
 	@Override
@@ -242,7 +243,6 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 		return new Functor(src, FinSet.FinSet, I.nm::get, f);
 	}
 	
-	//TODO highlight uncurry
 
 	@Override
 	public Functor visit(FQLProgram env, MapConst ic) {

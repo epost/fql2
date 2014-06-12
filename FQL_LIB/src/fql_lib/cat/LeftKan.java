@@ -24,7 +24,6 @@ public class LeftKan<O1,A1,O2,A2> {
 	private Signature<O2,A2> B;
 	public  Mapping<O1,A1,O2,A2> F;
 	private Instance<O1,A1> X;
-	//Map<Object, Integer> rank = new HashMap<>(); //assumes all IDs globally unique //TODO
 	public int fresh; 	
 	
 	private boolean gamma() {
@@ -326,7 +325,6 @@ public class LeftKan<O1,A1,O2,A2> {
 		return ret;
 	}
 	
-	//TODO: wrong.  lineage maps each *new* ID to a list of target edges and a source ID and node
 	public Map<Object, List<Pair<Signature<O2,A2>.Edge, Object>>> lineage = new HashMap<>();
 	
 	void updateLineage(Signature<O2,A2>.Edge col, Object old, Object nw) {

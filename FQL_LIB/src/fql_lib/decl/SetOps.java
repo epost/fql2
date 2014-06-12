@@ -49,6 +49,7 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLProgram>, FnExpVisitor<F
 		this.ENV = ENV;
 	}
 	
+	@SuppressWarnings("unused")
 	private SetOps() { }
 	
 	@Override

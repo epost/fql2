@@ -306,7 +306,6 @@ public abstract class Category<O,A> {
 		return i;
 	}
 	
-	//TODO: toSig
 	private Signature<O,A> sig;
 	public Signature<O,A> toSig() {
 		if (sig != null) {
@@ -351,8 +350,8 @@ public abstract class Category<O,A> {
 		return new Signature<>(objects(), a, e);
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Map<O, Functor<O,A,Set<A>,Fn<A,A>>> repMap = new HashMap<>();
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Functor<O,A,Set<A>,Fn<A,A>> rep(O c) {
 		if (repMap.containsKey(c)) {
 			return repMap.get(c);

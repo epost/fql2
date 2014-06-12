@@ -148,6 +148,7 @@ public class FinSet extends Category<Set, Fn> {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <X> Category<Set<X>, Fn<X,X>> FinSet() {
 		return (Category<Set<X>, Fn<X,X>>) ((Object)FinSet);
 	}

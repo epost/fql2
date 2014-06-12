@@ -1,5 +1,6 @@
 package fql_lib.cat.categories;
 
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -19,7 +20,7 @@ import fql_lib.cat.Functor;
 import fql_lib.cat.Transform;
 import fql_lib.cat.categories.FinSet.Fn;
 
-
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Pi {
 	
 	private static  Set squish(Set<Map> r) {
@@ -121,7 +122,6 @@ public class Pi {
 		throw new RuntimeException("Cannot find " + x + " in " + set);
 	}
 	
-	
 	public static <O1,A1,O2,A2> Triple<Functor<O2,A2,Set,Fn>, Map<O2, Set<Map>>,Map<O2, Triple<O2,O1,A2>[]>> 
 	pi(Functor<O1,A1,O2,A2> F, Functor<O1,A1,Set,Fn> inst) {
 		Category<O2,A2> D = F.target;
@@ -200,6 +200,7 @@ public class Pi {
 	
 	}
 	
+	/* used for naive
 	private static <OA,AA,OB,AB,OC,AC> Set<Map> productN(Functor<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>, Set, Fn> I) {
 		Set<Map> ret = null;
 	//	System.out.println("number of source objects: " + I.source.objects());
@@ -220,7 +221,7 @@ public class Pi {
 					+ " and  + objs");
 		}
 		return ret;
-	}
+	} */
 	
 	private static Set<Map> product(Set<Map> A, Set<Map> B) {
 		Set<Map> ret = new HashSet<>();
@@ -240,6 +241,7 @@ public class Pi {
 		return ret;
 	}
 
+	/* used for naive
 	private static <Y,X> Set<Map> up(Set<Object> set) {
 		Set<Map> ret = new HashSet<>();
 		for (Object s : set) {
@@ -248,7 +250,7 @@ public class Pi {
 			ret.add(m);
 		}
 		return ret;
-	}
+	} */
 
 	private static <A,B,C,Y> Triple<A,B,C>[] cnames(Category<Triple<A,B,C>,Y> cat) {
 		int m = cat.objects().size();
@@ -260,7 +262,6 @@ public class Pi {
 
 		return cnames;
 	}
-	
 	
 	private static <OA, AA, OB, AB, OC, AC> Set<Map> lim2
 	(Functor<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>, Set, Fn> I) {
@@ -356,7 +357,8 @@ public class Pi {
 		return ret;
 	}
 
-	///* naive
+	//
+	/* naive
 	private static <OA, AA, OB, AB, OC, AC> Set<Map> lim
 	(Functor<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>, Set, Fn> I) {
 	
@@ -390,7 +392,7 @@ public class Pi {
 			ret.add(m);
 		}
 		return ret;
-	}
+	} */
 	
 	private static <Obj> int cnamelkp(Obj[] cnames, Obj s) {
 		for (int i = 0; i < cnames.length; i++) {
@@ -413,6 +415,7 @@ public class Pi {
 	}
 	
 	//only keeps first size columns (projection)
+	/* used for naive
 	private static Set<Map> projN(Set<Map> X, int size) {
 		Set<Map> ret = new HashSet<>();
 		for (Map x : X) {
@@ -423,7 +426,7 @@ public class Pi {
 			ret.add(g);
 		}
 		return ret;
-	}
+	} */
 	
 	//adds ID column
 	private static Set<Map> keygen(Set<Map> x0) {
@@ -438,6 +441,6 @@ public class Pi {
 			ret.add(y);
 		}
 		return ret;
-	}
+	} 
 	
 }
