@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<TokenMakerDefinition>
+  <general>
+    <package>fql_lib.decl</package>
+    <className>FqlTokenMaker</className>
+    <extendedClass>AbstractJFlexCTokenMaker</extendedClass>
+    <classComment/>
+    <ignoreCase>false</ignoreCase>
+    <booleanLiterals>false</booleanLiterals>
+  </general>
+  <comments>
+    <lineComments enabled="true" start="//"/>
+    <multiLineComments enabled="true" end="*/" start="/*"/>
+    <docComments enabled="false" end="" start=""/>
+  </comments>
+  <keywords>
+    <keyword>category</keyword>
+    <keyword>function</keyword>
+    <keyword>functor</keyword>
+    <keyword>set</keyword>
+    <keyword>transform</keyword>
+  </keywords>
+  <keywords2>
+    <keyword>Cat</keyword>
+    <keyword>Set</keyword>
+    <keyword>and</keyword>
+    <keyword>apply</keyword>
+    <keyword>arrow</keyword>
+    <keyword>arrows</keyword>
+    <keyword>char</keyword>
+    <keyword>cod</keyword>
+    <keyword>cokleisli</keyword>
+    <keyword>coreturn</keyword>
+    <keyword>curry</keyword>
+    <keyword>delta</keyword>
+    <keyword>dom</keyword>
+    <keyword>equations</keyword>
+    <keyword>eval</keyword>
+    <keyword>exists</keyword>
+    <keyword>false</keyword>
+    <keyword>ff</keyword>
+    <keyword>forall</keyword>
+    <keyword>fst</keyword>
+    <keyword>id</keyword>
+    <keyword>implies</keyword>
+    <keyword>in</keyword>
+    <keyword>inl</keyword>
+    <keyword>inr</keyword>
+    <keyword>iso1</keyword>
+    <keyword>iso2</keyword>
+    <keyword>kernel</keyword>
+    <keyword>kleisli</keyword>
+    <keyword>not</keyword>
+    <keyword>object</keyword>
+    <keyword>objects</keyword>
+    <keyword>on</keyword>
+    <keyword>or</keyword>
+    <keyword>path</keyword>
+    <keyword>pi</keyword>
+    <keyword>prop</keyword>
+    <keyword>range</keyword>
+    <keyword>relationalize</keyword>
+    <keyword>return</keyword>
+    <keyword>sigma</keyword>
+    <keyword>snd</keyword>
+    <keyword>true</keyword>
+    <keyword>tt</keyword>
+    <keyword>unit</keyword>
+    <keyword>void</keyword>
+  </keywords2>
+  <dataTypes/>
+  <functions/>
+  <numbers>
+    <hexLiteral/>
+    <intLiteral>{Digit}+</intLiteral>
+    <floatLiteral/>
+  </numbers>
+  <stringLiterals enabled="true" multiLine="false"/>
+  <charLiterals enabled="false" multiLine="false"/>
+  <backtickLiterals enabled="false"/>
+  <operators>
+    <operator>(</operator>
+    <operator>)</operator>
+    <operator>*</operator>
+    <operator>+</operator>
+    <operator>,</operator>
+    <operator>-&gt;</operator>
+    <operator>:</operator>
+    <operator>;</operator>
+    <operator>=</operator>
+    <operator>=&gt;</operator>
+    <operator>^</operator>
+    <operator>{</operator>
+    <operator>|</operator>
+    <operator>}</operator>
+  </operators>
+</TokenMakerDefinition>
