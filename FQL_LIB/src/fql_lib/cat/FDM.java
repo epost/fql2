@@ -1,5 +1,6 @@
 package fql_lib.cat;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,11 +16,16 @@ import fql_lib.cat.categories.Pi;
 
 public class FDM {
 	
-	
+	private static Map<Functor, Functor> deltas = new HashMap<>();
+	private static Map<Functor, Functor> sigmas = new HashMap<>();
+	private static Map<Functor, Functor> pis = new HashMap<>();
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O1, A1, O2, A2> Functor<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> deltaF(
 			Functor<O2, A2, O1, A1> F) {
+		if (deltas.containsKey(F)) {
+			return deltas.get(F);
+		}
 
 		Category<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> src = Inst.get(F.target);
 		Category<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> dst = Inst.get(F.source);
@@ -29,12 +35,16 @@ public class FDM {
 				o.apply(f.source), o.apply(f.target), d -> new Fn<>(o.apply(f.source).applyO(d), o
 						.apply(f.target).applyO(d), i -> f.apply(F.applyO(d)).apply(i)));
 
-		return new Functor<>(src, dst, o, a);
+		deltas.put(F, new Functor<>(src, dst, o, a));
+		return deltas.get(F);
 	}
 
 	@SuppressWarnings({ "rawtypes" })
 	public static <O1, A1, O2, A2> Functor<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> sigmaF(
 			Functor<O1, A1, O2, A2> F) {
+		if (sigmas.containsKey(F)) {
+			return sigmas.get(F);
+		}
 
 		Category<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> src = Inst.get(F.source);
 		Category<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> dst = Inst.get(F.target);
@@ -46,7 +56,8 @@ public class FDM {
 				.fullSigma(F, t.source, Transform.compose(t,
 						LeftKanSigma.fullSigma(F, t.target, null, null).second), o.apply(t.target)).third;
 
-		return new Functor<>(src, dst, o, a);
+		sigmas.put(F, new Functor<>(src, dst, o, a));
+		return sigmas.get(F);
 	}
 
 	// TODO: lineage assumes all IDs in output of sigma are unique
@@ -93,6 +104,9 @@ public class FDM {
 	@SuppressWarnings({ "rawtypes" })
 	public static <O1, A1, O2, A2> Functor<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> piF(
 			Functor<O1, A1, O2, A2> F) {
+		if (pis.containsKey(F)) {
+			return pis.get(F);
+		}
 
 		Category<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> src = Inst.get(F.source);
 		Category<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> dst = Inst.get(F.target);
@@ -101,7 +115,8 @@ public class FDM {
 
 		Function<Transform<O1, A1, Set, Fn>, Transform<O2, A2, Set, Fn>> a = t -> Pi.pi(F, t);
 
-		return new Functor<>(src, dst, o, a);
+		pis.put(F, new Functor<>(src, dst, o, a));
+		return pis.get(F);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -167,48 +182,6 @@ public class FDM {
 
 		return new Adjunction<>(deltaF(F), sigmaF(F), counit, unit);
 	}
-/*
- * 	for (Node m : f.source.nodes) {
-						Node n = f.nm.get(m);
-						Triple<Node, Node, Arr<Node, Path>>[] col = colmap
-								.get(n.string);
-						// System.out.println("n " + n);
-						// System.out.println("m " + m);
-						// System.out.println(Arrays.toString(col));
 
-						Triple<Node, Node, Arr<Node, Path>> toFind = new Triple<>(
-								n, m, new Arr<Node, Path>(
-										new Path(f.target, n), n, n));
-						int i = 0;
-						boolean found = false;
-						for (Triple<Node, Node, Arr<Node, Path>> cand : col) {
-							if (cand.equals(toFind)) {
-								found = true;
-								Map<String, String> from = new HashMap<>();
-								from.put("lim", middle + "_" + n + "_limit");
-								LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
-								select.put("c0", new Pair<>("lim", "guid"));
-								select.put("c1", new Pair<>("lim", "c" + i));
-								List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
-								Flower flower = new Flower(select, from, where);
-								ret.add(new SimpleCreateTable(xxx, PSM
-										.VARCHAR(), false));
-								ret.add(new InsertSQL(xxx, flower, "c0", "c1"));
-
-								ret.add(new InsertSQL(
-										env + "_" + m,
-										PSMGen.compose(new String[] {
-												e.inst + "_" + m + "_subst_inv",
-												xxx }), "c0", "c1"));
-								ret.add(new DropTable(xxx));
-								break;
-							}
-							i++;
-						}
-						if (!found) {
-							throw new RuntimeException();
-						}
-					}
- */
 	
 }

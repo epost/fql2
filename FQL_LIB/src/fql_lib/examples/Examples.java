@@ -14,8 +14,10 @@ public class Examples {
 	public static Example piExample = new PiExample();
 	public static Example expExample = new ExpExample();
 	public static Example propExample = new PropExample();
+	public static Example nistExample = new NistExampl();
+	public static Example nist2 = new Nist2();
 	
-	public static Example[] examples = new Example[] { propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
+	public static Example[] examples = new Example[] { nist2, nistExample, propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
 	
 	public static Example[] key_examples = examples; //new Example[] { deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
 

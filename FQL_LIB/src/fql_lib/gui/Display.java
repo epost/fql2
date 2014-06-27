@@ -155,10 +155,12 @@ public class Display {
 					px.add("Schema", new JPanel());
 				} else if (g.getVertexCount() > DEBUG.debug.MAX_NODES) {
 					FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + DEBUG.debug.MAX_NODES);
-					JPanel ret = new JPanel(new GridLayout(1,1));
-					ret.add(xxx);
-					return ret;
-				} else {
+					px.add("Schema", xxx);
+				} else if (g.getEdgeCount() > DEBUG.debug.MAX_EDGES) {
+					FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + DEBUG.debug.MAX_EDGES);
+					px.add("Schema", xxx);
+				}
+				else {
 					JComponent yyy = doSchemaView(c, g);
 					px.add("Schema", yyy);
 				}	
@@ -377,10 +379,12 @@ public class Display {
 				px.add("Elements", new JPanel());
 			} else if (g.getVertexCount() > DEBUG.debug.MAX_NODES) {
 				FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + DEBUG.debug.MAX_NODES);
-				JPanel ret = new JPanel(new GridLayout(1,1));
-				ret.add(xxx);
-				return ret;
-			} else {
+				px.add("Elements", xxx);
+			} else if (g.getEdgeCount() > DEBUG.debug.MAX_EDGES) {
+				FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + DEBUG.debug.MAX_EDGES);
+				px.add("Elements", xxx);
+			} 
+			else {
 				JComponent yyy = doElementsView(c, g);
 				px.add("Elements", yyy);
 			}
@@ -394,10 +398,11 @@ public class Display {
 				px.add("Mapping", new JPanel());
 			} else if (g.getVertexCount() > DEBUG.debug.MAX_NODES) {
 				FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + DEBUG.debug.MAX_NODES);
-				JPanel ret = new JPanel(new GridLayout(1,1));
-				ret.add(xxx);
-				return ret;
-			} else {
+				px.add("Mapping", xxx);
+			} else if (g.getEdgeCount() > DEBUG.debug.MAX_EDGES) {
+				FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + DEBUG.debug.MAX_EDGES);
+				px.add("Mapping", xxx);
+			}else {
 				JComponent zzz = doMappingView(c, getColor(view.target), g);
 				JPanel xxx = new JPanel(new GridLayout(1, 1));
 				xxx.add(zzz);
@@ -408,10 +413,17 @@ public class Display {
 
 		if (DEBUG.debug.ftr_graph) {
 			JPanel vwr = new JPanel(new GridLayout(1, 1));
+			Graph g = buildFromCat(view.source);
 			if (view.source.objects().size() == 0) {
 				px.add("Graph", vwr);
+			} else if (g.getVertexCount() > DEBUG.debug.MAX_NODES) {
+				FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + DEBUG.debug.MAX_NODES);
+				px.add("Graph", xxx);
+			} else if (g.getEdgeCount() > DEBUG.debug.MAX_EDGES) {
+				FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + DEBUG.debug.MAX_EDGES);
+				px.add("Graph", xxx);
 			} else {
-				JComponent zzz = doFNView(view, vwr, c, buildFromCat(view.source));
+				JComponent zzz = doFNView(view, vwr, c, g);
 				JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 				newthing.setResizeWeight(.5d);
 				newthing.add(zzz);
@@ -524,10 +536,11 @@ public class Display {
 				px.add("Elements", new JPanel());
 			} else if (g.getVertexCount() > DEBUG.debug.MAX_NODES) {
 				FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + DEBUG.debug.MAX_NODES);
-				JPanel ret = new JPanel(new GridLayout(1,1));
-				ret.add(xxx);
-				return ret;
-			} else {
+				px.add("Elements", xxx);
+			} else if (g.getEdgeCount() > DEBUG.debug.MAX_EDGES) {
+				FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + DEBUG.debug.MAX_EDGES);
+				px.add("Elements", xxx);
+			}else {
 				JComponent zzz = doElements2View(c, g);
 				JPanel xxx = new JPanel(new GridLayout(1, 1));
 				xxx.add(zzz);
@@ -1093,6 +1106,11 @@ public class Display {
 			JPanel ret = new JPanel(new GridLayout(1,1));
 			ret.add(xxx);
 			return ret;
+		} else if (g.getEdgeCount() > DEBUG.debug.MAX_EDGES) {
+			FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + DEBUG.debug.MAX_EDGES);
+			JPanel ret = new JPanel(new GridLayout(1,1));
+			ret.add(xxx);
+			return ret;
 		}
 		return doCatView(clr, g);
 	}
@@ -1103,6 +1121,11 @@ public class Display {
 			return new JPanel();
 		} else if (g.getVertexCount() > DEBUG.debug.MAX_NODES) {
 			FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + DEBUG.debug.MAX_NODES);
+			JPanel ret = new JPanel(new GridLayout(1,1));
+			ret.add(xxx);
+			return ret;
+		}else if (g.getEdgeCount() > DEBUG.debug.MAX_EDGES) {
+			FQLTextPanel xxx = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + DEBUG.debug.MAX_EDGES);
 			JPanel ret = new JPanel(new GridLayout(1,1));
 			ret.add(xxx);
 			return ret;

@@ -9,6 +9,45 @@ import fql_lib.Triple;
 
 public abstract class CatExp {
 	
+	public static class Pivot extends CatExp {
+		String F;
+		
+		@Override
+		public <R, E> R accept(E env, CatExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Pivot other = (Pivot) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			return true;
+		}
+
+		public Pivot(String f) {
+			F = f;
+		}
+
+	}
+	
 	public static class Kleisli extends CatExp {
 		String F, unit, join;
 		
@@ -585,6 +624,7 @@ public abstract class CatExp {
 		public R visit (E env, Cod e);		
 		public R visit (E env, Named e);	
 		public R visit (E env, Kleisli e);
+		public R visit (E env, Pivot e);
 	}
 	
 }

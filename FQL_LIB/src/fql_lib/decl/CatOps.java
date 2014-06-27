@@ -19,6 +19,7 @@ import fql_lib.cat.categories.FinCat;
 import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.FinSet.Fn;
 import fql_lib.cat.categories.FunCat;
+import fql_lib.cat.categories.Groth;
 import fql_lib.cat.categories.Inst;
 import fql_lib.cat.presentation.Instance;
 import fql_lib.cat.presentation.Mapping;
@@ -34,6 +35,7 @@ import fql_lib.decl.CatExp.Exp;
 import fql_lib.decl.CatExp.Kleisli;
 import fql_lib.decl.CatExp.Named;
 import fql_lib.decl.CatExp.One;
+import fql_lib.decl.CatExp.Pivot;
 import fql_lib.decl.CatExp.Plus;
 import fql_lib.decl.CatExp.Times;
 import fql_lib.decl.CatExp.Zero;
@@ -998,7 +1000,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 
 	@Override
 	public Transform visit(FQLProgram env, Whisker e) {
-		Functor F = e.func .accept(env, this);
+		Functor F  = e.func .accept(env, this);
 		Transform T=e.trans.accept(env, this);
 		
 		if (e.left) {
@@ -1061,5 +1063,15 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 		Transform t = e.t.accept(env, this);
 		Signature.Node n = t.source.source.toSig().new Node(e.node);
 		return (Transform) t.apply(n);
+	}
+
+	@Override
+	public Category visit(FQLProgram env, Pivot e) {
+		Functor F = new FunctorExp.Var(e.F).accept(env, this);
+		Category ret = Groth.pivot(F);
+//			System.out.println(ret.objects().size());
+	//		System.out.println(ret.arrows().size());
+		//	System.out.println(ret);
+		return ret;
 	}
 }

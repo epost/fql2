@@ -97,18 +97,28 @@ public abstract class Category<O,A> {
 			return "(cannot print)";
 		}
 		String o = "";
+		if (objects().size() < 2048) {
+
 		for (O oo : objects()) {
 			o += "\t" + oo + "\n";
 		}
+		} else {
+			o = "too many to print";
+		}
 
 		String a = "";
+		if (arrows().size() < 2048) {
 		for (A aa : arrows()) {
 			a += "\t" + aa + " : " + source(aa) + " -> " + target(aa) + "\n";
+		}
+		} else {
+			a += "too many to print";
 		}
 
 		String c = "";
 		int count = 0;
-		for (A a1 : arrows()) {
+		String count_str = "";
+		outer: for (A a1 : arrows()) {
 			for (A a2 : arrows()) {
 				if (!target(a1).equals(source(a2))) {
 					continue;
@@ -116,15 +126,24 @@ public abstract class Category<O,A> {
 				A a3 = compose(a1, a2);
 				c += "\t" + a1 + " ; " + a2 + " = " + a3 + "\n";
 				count++;
+				if (count > 2048) {
+					c = "too many to print";
+					count = -1;
+					break outer;
+				}
 			}
 		}
-
+		
 		String j = "";
+		if (objects().size() < 2048) {
 		for (O oo : objects()) {
 			j += "\t" + "id " + oo + " = " + identity(oo) + "\n";
 		}
+		} else {
+			j = "too many to print";
+		}
 
-		return "objects (" + objects().size() + "):\n" + o + "\n\narrows (" + arrows().size() + "):\n" + a + "\n\ncomposition (" + count + "):\n"
+		return "objects (" + objects().size() + "):\n" + o + "\n\narrows (" + arrows().size() + "):\n" + a + "\n\ncomposition (" + (count == -1 ? "> 2048" : count) + "):\n"
 				+ c + "\n\nidentities (" + objects().size() + "):\n" + j;
 	}
 	

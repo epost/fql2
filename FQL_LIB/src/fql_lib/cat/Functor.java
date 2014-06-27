@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import fql_lib.DEBUG;
+import fql_lib.Pair;
 import fql_lib.Util;
 import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.FinSet.Fn;
@@ -20,16 +21,27 @@ public class Functor<O1, A1, O2, A2> {
 	private Function<O1, O2> o;
 	private Function<A1, A2> a;
 
+	private static Map<Category, Functor> ids = new HashMap<>();
 	public static <O, A> Functor<O, A, O, A> identity(Category<O, A> o) {
-		return new Functor<>(o, o, x -> x, x -> x);
+		if (ids.containsKey(o)) {
+			return ids.get(o);
+		}
+		ids.put(o, new Functor<>(o, o, x -> x, x -> x));
+		return ids.get(o);
 	}
 
+	static Map<Pair<Functor, Functor>, Functor> cache = new HashMap<>();
 	public static <O1, A1, O2, A2, O3, A3> Functor<O1, A1, O3, A3> compose(
 			Functor<O1, A1, O2, A2> a1, Functor<O2, A2, O3, A3> a2) {
+		Pair p = new Pair<>(a1, a2);
+		if (cache.containsKey(p)) {
+			return cache.get(p);
+		}
 		if (!a1.target.equals(a2.source)) {
 			throw new RuntimeException("Dom/Cod mismatch on " + a1 + " and " + a2);
 		}
-		return new Functor<>(a1.source, a2.target, a1.o.andThen(a2.o), a1.a.andThen(a2.a));
+		cache.put(p, new Functor<>(a1.source, a2.target, a1.o.andThen(a2.o), a1.a.andThen(a2.a)));
+		return cache.get(p);
 	}
 
 	public O2 applyO(O1 x) {
@@ -119,14 +131,14 @@ public class Functor<O1, A1, O2, A2> {
 			return false;
 		}
 		Functor<?, ?, ?, ?> otherX = (Functor<?, ?, ?, ?>) ooo;
+		if (source.isInfinite()) {
+			return this == ooo;
+		}
 		if (!source.equals(otherX.source)) {
 			return false;
 		}
 		if (!target.equals(otherX.target)) {
 			return false;
-		}
-		if (source.isInfinite()) {
-			return this == ooo;
 		}
 		@SuppressWarnings("unchecked")
 		Functor<O1, A1, O2, A2> other = (Functor<O1, A1, O2, A2>) otherX;

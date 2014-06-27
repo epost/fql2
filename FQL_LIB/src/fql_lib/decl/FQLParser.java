@@ -48,7 +48,7 @@ public class FQLParser {
 			 "transform",  "arrows", "Set", "Cat", "kleisli", "cokleisli",
 			"equations", "id", "delta", "sigma", "pi", "eval", "in", "path",
 			"relationalize",  "fst", "forall", "exists", "tt", "ff", "APPLY",
-			"snd", "inl", "inr", "curry",  "void", "unit", "CURRY",
+			"snd", "inl", "inr", "curry",  "void", "unit", "CURRY", "pivot",
 			"prop", "iso1", "iso2", "true", "false", "char", "kernel" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -202,10 +202,11 @@ public class FQLParser {
 		
 		Parser<?> kleisli  = Parsers.tuple(term("kleisli"), ident(), ident(), ident());
 		Parser<?> cokleisli= Parsers.tuple(term("cokleisli"), ident(), ident(), ident());
+		Parser<?> pivot = Parsers.tuple(term("pivot"), ident());
 		
 		Parser<?> a = Parsers.or(new Parser<?>[] { term("void"), term("unit"), 
 				 plusTy, prodTy, expTy, k, v,
-				ident() , catConst(), term("Cat"), term("Set"), kleisli, cokleisli  });
+				ident() , catConst(), term("Cat"), term("Set"), kleisli, cokleisli, pivot });
 
 		ref.set(a);
 
@@ -422,7 +423,9 @@ public class FQLParser {
 				return new CatExp.Dom(toFtr(p.b));
 			} else if (p.a.toString().equals("cod")) {
 				return new CatExp.Cod(toFtr(p.b));
-			} 
+			} else if (p.a.toString().equals("pivot")) {
+				return new CatExp.Pivot(p.b.toString());
+			}
 		} catch (RuntimeException cce) {
 		}
 

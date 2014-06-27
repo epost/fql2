@@ -236,7 +236,6 @@ public class LeftKan<O1,A1,O2,A2> {
 		return ret;
 	}
 	
-	
 	public Set<Pair<Integer, Integer>> eval(Signature<O2,A2>.Path p) {
 		Set<Pair<Integer, Integer>> ret = Pb.get(p.source);
 		for (Signature<O2,A2>.Edge e : p.path) {

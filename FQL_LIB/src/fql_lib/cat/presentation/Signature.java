@@ -692,10 +692,17 @@ public class Signature<O,A> {
 
 	private static <O, A> Function<Signature<O, A>.Path, Integer> makeFunction(
 			final LeftKan<O, A, O, A> lk) {
+		Map<Pair<Signature<O,A>.Node, List<Signature<O, A>.Edge>>, Integer> cache = new HashMap<>();
 		return p -> {
+			if (cache.containsKey(new Pair<>(p.source, p.path))) {
+				return cache.get(new Pair<>(p.source, p.path));
+			}
+			Set<Pair<Integer, Integer>> s = lk.eval(p);
 			Set<Pair<Object, Integer>> set = Util.compose(lk.ua.get(p.source),
-					lk.eval(p));
-			return getOne(set).second;
+					s);
+			Integer ret = getOne(set).second;
+			cache.put(new Pair<>(p.source, p.path), ret);
+			return ret;
 		};
 	}
 

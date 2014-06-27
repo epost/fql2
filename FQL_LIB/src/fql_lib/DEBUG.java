@@ -66,6 +66,7 @@ public class DEBUG implements Serializable {
 	public static DEBUG debug = new DEBUG();
 	
 	public int MAX_NODES = 32;
+	public int MAX_EDGES = 128;
 
 	public void clear() {
 		debug = new DEBUG();
@@ -212,8 +213,8 @@ public class DEBUG implements Serializable {
 		JPanel sql1 = new JPanel(new GridLayout(10, 1));
 		JPanel sql2 = new JPanel(new GridLayout(10, 1));
 
-		JPanel viewer1 = new JPanel(new GridLayout(7, 1));
-		JPanel viewer2 = new JPanel(new GridLayout(7, 1));
+		JPanel viewer1 = new JPanel(new GridLayout(8, 1));
+		JPanel viewer2 = new JPanel(new GridLayout(8, 1));
 
 		JSplitPane generalsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		JSplitPane sqlsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -276,6 +277,10 @@ public class DEBUG implements Serializable {
 		JTextField node_limit_field = new JTextField(Integer.toString(MAX_NODES));
 		viewer1.add(new JLabel("Graph node size limit"));
 		viewer2.add(node_limit_field);
+		
+		JTextField edge_limit_field = new JTextField(Integer.toString(MAX_EDGES));
+		viewer1.add(new JLabel("Graph edge size limit"));
+		viewer2.add(edge_limit_field);
 
 		JCheckBox jcbM = new JCheckBox("", MultiView);
 		jcbM.setToolTipText(labelMtext);
@@ -702,12 +707,14 @@ public class DEBUG implements Serializable {
 			int d = varlen;
 			int f = FONT_SIZE;
 			int n = MAX_NODES;
+			int ee = MAX_EDGES;
 			try {
 				a = Integer.parseInt(plen.getText());
 				b = Integer.parseInt(iter.getText());
 				d = Integer.parseInt(vlen.getText());
 				f = Integer.parseInt(font_field.getText());
 				n = Integer.parseInt(node_limit_field.getText());
+				ee = Integer.parseInt(edge_limit_field.getText());
 				if (f < 1) {
 					f = FONT_SIZE;
 				}
@@ -715,6 +722,7 @@ public class DEBUG implements Serializable {
 				return;
 			}
 			MAX_NODES = n;
+			MAX_EDGES = ee;
 //			continue_on_error = coeB.isSelected();
 //			VALIDATE_WITH_EDS = ed.isSelected();
 //			ALLOW_NULLS = nullbox.isSelected();
@@ -781,6 +789,9 @@ public class DEBUG implements Serializable {
 			trans_graph = t_graph_box.isSelected();
 			
 			cat_schema = cat_schema_box.isSelected();
+			cat_graph = cat_graph_box.isSelected();
+			cat_textual = cat_textual_box.isSelected();
+			cat_tabular = cat_tabular_box.isSelected();
 			ftr_elements = ftr_elements_box.isSelected();
 			ftr_instance = ftr_instance_box.isSelected();
 			ftr_joined = ftr_joined_box.isSelected();

@@ -39,6 +39,7 @@ import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.examples.Example;
 import fql_lib.examples.Examples;
+import fql_lib.nested.NraViewer;
 
 @SuppressWarnings("serial")
 /**
@@ -138,7 +139,7 @@ public class GUI extends JPanel {
 		openItem.setShortcut(o);
 
 		Menu toolsMenu = new Menu("Tools");
-		//Menu transMenu = new Menu("Translate");
+		Menu transMenu = new Menu("Translate");
 
 		final Menu editMenu = new Menu("Edit");
 		MenuItem findItem = new MenuItem("Find");
@@ -161,6 +162,10 @@ public class GUI extends JPanel {
 				abortAction();
 			}
 		});
+		
+		MenuItem shredItem = new MenuItem("Shred");
+		transMenu.add(shredItem);
+		shredItem.addActionListener(x -> { new NraViewer(); });
 
 		Menu helpMenu = new Menu("About");
 		/*		MenuItem helpItem = new MenuItem("Help");
@@ -215,7 +220,7 @@ public class GUI extends JPanel {
 		menuBar.add(fileMenu);
 		menuBar.add(editMenu);
 		menuBar.add(toolsMenu);
-//		menuBar.add(transMenu);
+		menuBar.add(transMenu);
 		// menuBar.add(optionsMenu);
 
 		// menuBar.add(webMenu);
