@@ -8,12 +8,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
+import fql_lib.DEBUG;
+import fql_lib.FUNCTION;
 import fql_lib.Pair;
 import fql_lib.Quad;
 import fql_lib.Triple;
 import fql_lib.Unit;
+import fql_lib.Util;
 import fql_lib.cat.Category;
 import fql_lib.cat.FiniteCategory;
 import fql_lib.cat.Functor;
@@ -90,7 +92,7 @@ public class Pi {
 			}
 			ret.put(d0, m);
 		}
-		Function<O2, Fn> t = d0 -> new Fn<>(k1.first.applyO(d0), k2.first.applyO(d0), ret.get(d0)::get);
+		FUNCTION<O2, Fn> t = d0 -> new Fn<>(k1.first.applyO(d0), k2.first.applyO(d0), ret.get(d0)::get);
 		return new Transform<>(k1.first, k2.first, t);
 	}
 	
@@ -434,7 +436,13 @@ public class Pi {
 		Set<Map> ret = new HashSet<>();
 		for (Map x : x0) {
 			Map y =  new HashMap();
-			y.put(0, id++);
+			if (DEBUG.debug.piLineage.equals("Fresh IDs")) {
+				y.put(0, id++);
+			} else if (DEBUG.debug.piLineage.equals("Lineage as ID")) {
+				y.put(0, x);
+			} else {
+				y.put(0, Util.printForPi(x));
+			}
 			for (int j = 1; j <= x.size(); j++) {
 				y.put(j, x.get(j - 1));
 			}

@@ -1,12 +1,14 @@
 package fql_lib.cat;
 
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import fql_lib.DEBUG;
+import fql_lib.FUNCTION;
 import fql_lib.Pair;
 import fql_lib.Util;
 import fql_lib.cat.categories.FinSet;
@@ -15,11 +17,11 @@ import fql_lib.cat.presentation.Instance;
 import fql_lib.cat.presentation.Mapping;
 import fql_lib.cat.presentation.Signature;
 
-public class Functor<O1, A1, O2, A2> {
+public class Functor<O1, A1, O2, A2> implements Serializable {
 	public Category<O1, A1> source;
 	public Category<O2, A2> target;
-	private Function<O1, O2> o;
-	private Function<A1, A2> a;
+	private FUNCTION<O1, O2> o;
+	private FUNCTION<A1, A2> a;
 
 	private static Map<Category, Functor> ids = new HashMap<>();
 	public static <O, A> Functor<O, A, O, A> identity(Category<O, A> o) {
@@ -46,7 +48,7 @@ public class Functor<O1, A1, O2, A2> {
 
 	public O2 applyO(O1 x) {
 		if (!(source.isObject(x))) {
-			throw new RuntimeException(x + " is not in " + source);
+			throw new RuntimeException(x + " is not in " + target);
 		}
 		O2 y = o.apply(x);
 		if (!(target.isObject(y))) {
@@ -78,8 +80,8 @@ public class Functor<O1, A1, O2, A2> {
 		return y;
 	}
 
-	public Functor(Category<O1, A1> source, Category<O2, A2> target, Function<O1, O2> o,
-			Function<A1, A2> a) {
+	public Functor(Category<O1, A1> source, Category<O2, A2> target, FUNCTION<O1, O2> o,
+			FUNCTION<A1, A2> a) {
 		this.source = source;
 		this.target = target;
 		this.o = o;
@@ -102,6 +104,7 @@ public class Functor<O1, A1, O2, A2> {
 			return a1 + a2; // + "Source    :\n" + l + "\n" +
 							// "Target    :\n" + r;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return "(Cannot print functor)";
 		}
 	}
@@ -168,10 +171,16 @@ public class Functor<O1, A1, O2, A2> {
 		if (source.isInfinite()) {
 			return;
 		}
+		//System.out.println("Validating ---------------- ");
 		for (O1 x : source.objects()) {
 			if (!target.isObject(o.apply(x))) {
 				throw new RuntimeException(x + " mapped to " + o.apply(x) + " not in " + target);
 			}
+		//	System.out.println("checking " + x);
+		//	System.out.println(source.identity(x));
+		//	System.out.println(o.apply(x));
+		//	System.out.println(a.apply(source.identity(x)));
+		//	System.out.println(target.identity(o.apply(x)));
 			if (!a.apply(source.identity(x)).equals(target.identity(o.apply(x)))) {
 				throw new RuntimeException("Does not preserve identity on " + x + ": lhs is "
 						+ a.apply(source.identity(x)) + " rhs is " + target.identity(o.apply(x)));
@@ -181,6 +190,10 @@ public class Functor<O1, A1, O2, A2> {
 			if (!target.isArrow(a.apply(x))) {
 				throw new RuntimeException(x + " mapped to " + a.apply(x) + " not in " + target);
 			}
+			//System.out.println("On arrow: " + x + ", source is " + source.source(x) + " (transforms to " + o.apply(source.source(x)) + 
+				//	") and target is " + source.target(x) +
+				//	" (transforms to " + o.apply(source.target(x)) + "). The arrow itself transforms to " + a.apply(x) + " with source " +
+				//	target.source(a.apply(x)) + " and target " + target.target(a.apply(x)));
 			if (!target.source(a.apply(x)).equals(o.apply(source.source(x)))) {
 				throw new RuntimeException(x + " mapped to " + a.apply(x)
 						+ " does not preserve source.");
@@ -200,6 +213,7 @@ public class Functor<O1, A1, O2, A2> {
 				}
 			}
 		}
+		//System.out.println("done");
 	}
 	
 	private Instance<O1,A1> instance;
@@ -207,17 +221,17 @@ public class Functor<O1, A1, O2, A2> {
 		if (instance != null) {
 			return instance;
 		}
-		instance = toInstanceX();
+		instance = toInstanceX(source.toSig());
 		return instance;
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Instance<O1,A1> toInstanceX() {
+	public Instance<O1,A1> toInstanceX(Signature<O1,A1> src) {
 		if (source.isInfinite() || !target.equals(FinSet.FinSet)) {
 			throw new RuntimeException("Cannot create mapping from " + this);
 		}
 
-		Signature<O1,A1> src = source.toSig();
+		//Signature<O1,A1> src = source.toSig();
 
 		Map<Signature<O1,A1>.Node, Set<Object>> nm = new HashMap<>();
 		Map<Signature<O1,A1>.Edge, Map<Object,Object>> em = new HashMap<>();
@@ -226,10 +240,14 @@ public class Functor<O1, A1, O2, A2> {
 			nm.put(src.new Node(o), (Set) applyO(o));
 		}
 		
-		for (A1 a : source.arrows()) {
-			Fn f = (Fn) applyA(a);
-			em.put(src.getEdge(a), Util.reify(f::apply, f.source));
+		for (Signature<O1, A1>.Edge a : src.edges) {
+				Fn f = (Fn) applyA(a.name);
+				em.put(a, Util.reify(f::apply, f.source));
 		}
+		//for (A1 a : source.arrows()) {
+		//	Fn f = (Fn) applyA(a);
+		//	em.put(src.getEdge(a), Util.reify(f::apply, f.source));
+		//}
 		
 		return new Instance<>(nm, em, src);
 	}
@@ -244,7 +262,7 @@ public class Functor<O1, A1, O2, A2> {
 		mapping = toMappingX();
 		return mapping;
 	}
-	private Mapping<O1,A1,O2,A2> toMappingX() {
+	public Mapping<O1,A1,O2,A2> toMappingX() {
 		if (source.isInfinite() || target.isInfinite()) {
 			throw new RuntimeException("Cannot create mapping from " + this);
 		}
@@ -259,12 +277,70 @@ public class Functor<O1, A1, O2, A2> {
 			nm.put(src.new Node(o), dst.new Node(applyO(o)));
 		}
 		
-		for (A1 a : source.arrows()) {
-			em.put(src.getEdge(a), dst.path(dst.getEdge(applyA(a))));
+		for (Signature<O1, A1>.Edge a : src.edges) {
+			A2 b = applyA(a.name);
+			O2 s = target.source(b);
+			if (target.isId(b)) {
+				em.put(a, dst.path(s, new LinkedList<>())); //dst.new Node(s); //(path(s)); //dst.getEdge(applyA(a.name))));				
+			} else {
+				em.put(a, dst.path(dst.getEdge(applyA(a.name))));				
+			}
 		}
+
+		return new Mapping<>(nm, em, src, dst);
+	}
+	
+	public Mapping<O1,A1,O2,A2> toMappingZ(Signature<O1,A1> src, Signature<O2,A2> dst) {
+		if (source.isInfinite() || target.isInfinite()) {
+			throw new RuntimeException("Cannot create mapping from " + this);
+		}
+
+//		Signature<O1,A1> src = source.toSig();
+	//	Signature<O2,A2> dst = target.toSig();
+
+		Map<Signature<O1,A1>.Node, Signature<O2,A2>.Node> nm = new HashMap<>();
+		Map<Signature<O1,A1>.Edge, Signature<O2,A2>.Path> em = new HashMap<>();
+		
+		for (O1 o : source.objects()) {
+			nm.put(src.new Node(o), dst.new Node(applyO(o)));
+		}
+		
+		for (Signature<O1, A1>.Edge a : src.edges) {
+			A2 b = applyA(a.name);
+			O2 s = target.source(b);
+		//	if (target.isId(b)) {
+		//		em.put(a, dst.path(s, new LinkedList<>())); //dst.new Node(s); //(path(s)); //dst.getEdge(applyA(a.name))));				
+		//	} else {
+				
+			//	List<Signature<O1, A1>.Edge> aaa = (List<Signature<O1, A1>.Edge>) a.name;
+				
+			//	aaa.stream().map(z -> dst.getEdge(applyA(z.name))).collect(Collectors.toList());
+				
+			Signature<O2, A2>.Path p = (Signature<O2, A2>.Path) b;
+			p.source = p.sig().new Node((O2) p.source);
+			p.target = p.sig().new Node((O2) p.target);
+			
+			em.put(a, p); // dst.path(dst.getEdge(applyA(a.name))));			/	
+			//}
+		}
+		
+/*
+		for (A1 a : source.arrows()) {
+			boolean found = false;
+			for (Signature<O1, A1>.Edge a2 : src.edges) {
+				if (a2.name.equals(a) && !source.isId(a)) {
+					found = true;
+				}
+			}
+			if (found) {
+				em.put(src.getEdge(a), dst.path(dst.getEdge(applyA(a))));
+			}
+		} */
+
 		
 		return new Mapping<>(nm, em, src, dst);
 	}
+
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public List<Functor<O1,A1,Set,Fn>> subInstances() {
@@ -273,5 +349,8 @@ public class Functor<O1, A1, O2, A2> {
 		}
 		return SubInstances.subInstances((Functor<O1,A1,Set,Fn>)this);
 	}
+	
+	public Instance instance0;
+	public Mapping mapping0;
 
 }

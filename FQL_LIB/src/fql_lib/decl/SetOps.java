@@ -1,5 +1,6 @@
 package fql_lib.decl;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -40,9 +41,8 @@ import fql_lib.decl.SetExp.SetExpVisitor;
 import fql_lib.decl.SetExp.Times;
 import fql_lib.decl.SetExp.Zero;
 
-
 @SuppressWarnings("rawtypes")
-public class SetOps implements SetExpVisitor<Set<?>, FQLProgram>, FnExpVisitor<FinSet.Fn, FQLProgram> {
+public class SetOps implements SetExpVisitor<Set<?>, FQLProgram>, FnExpVisitor<FinSet.Fn, FQLProgram> , Serializable {
 
 	private Environment ENV;
 	public SetOps(Environment ENV) {

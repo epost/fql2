@@ -1,5 +1,6 @@
 package fql_lib.decl;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ import fql_lib.Chc;
 import fql_lib.Pair;
 
 
-public abstract class TransExp {
+public abstract class TransExp implements Serializable{
 
 	public abstract <R, E> R accept(E env, TransExpVisitor<R, E> v);
 

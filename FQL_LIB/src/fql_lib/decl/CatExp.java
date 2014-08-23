@@ -1,5 +1,6 @@
 package fql_lib.decl;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -7,10 +8,10 @@ import fql_lib.Pair;
 import fql_lib.Triple;
 
 
-public abstract class CatExp {
+public abstract class CatExp implements Serializable {
 	
-	public static class Pivot extends CatExp {
-		String F;
+	public static class Union extends CatExp {
+		CatExp l, r;
 		
 		@Override
 		public <R, E> R accept(E env, CatExpVisitor<R, E> v) {
@@ -21,7 +22,8 @@ public abstract class CatExp {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((l == null) ? 0 : l.hashCode());
+			result = prime * result + ((r == null) ? 0 : r.hashCode());
 			return result;
 		}
 
@@ -33,20 +35,31 @@ public abstract class CatExp {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Pivot other = (Pivot) obj;
-			if (F == null) {
-				if (other.F != null)
+			Union other = (Union) obj;
+			if (l == null) {
+				if (other.l != null)
 					return false;
-			} else if (!F.equals(other.F))
+			} else if (!l.equals(other.l))
+				return false;
+			if (r == null) {
+				if (other.r != null)
+					return false;
+			} else if (!r.equals(other.r))
 				return false;
 			return true;
 		}
 
-		public Pivot(String f) {
-			F = f;
+		public Union(CatExp l, CatExp r) {
+			super();
+			this.l = l;
+			this.r = r;
 		}
-
+		
+		
+		
 	}
+	
+	
 	
 	public static class Kleisli extends CatExp {
 		String F, unit, join;
@@ -624,7 +637,8 @@ public abstract class CatExp {
 		public R visit (E env, Cod e);		
 		public R visit (E env, Named e);	
 		public R visit (E env, Kleisli e);
-		public R visit (E env, Pivot e);
+		public R visit (E env, Union e);
+
 	}
 	
 }

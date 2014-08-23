@@ -1,6 +1,8 @@
 package fql_lib;
 
-public class Chc<X,Y> {
+import java.io.Serializable;
+
+public class Chc<X,Y> implements Serializable{
 	public Boolean left;
 	
 	public X l;

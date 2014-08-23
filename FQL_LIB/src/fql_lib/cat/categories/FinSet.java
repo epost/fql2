@@ -1,5 +1,6 @@
 package fql_lib.cat.categories;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,10 +12,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import fql_lib.Chc;
 import fql_lib.DEBUG;
+import fql_lib.FUNCTION;
 import fql_lib.Pair;
 import fql_lib.Unit;
 import fql_lib.Util;
@@ -40,10 +41,10 @@ public class FinSet extends Category<Set, Fn> {
 		return (a instanceof Fn);
 	}
 
-	public static class Fn<X,Y> {
+	public static class Fn<X,Y> implements Serializable {
 		public Set<X> source;
 		public Set<Y> target;
-		private Function<X,Y> function;
+		private FUNCTION<X,Y> function;
 		
 		public Y apply(X o) {
 			if (DEBUG.debug.VALIDATE) {
@@ -55,7 +56,7 @@ public class FinSet extends Category<Set, Fn> {
 			return y;
 		}
 		
-		public Fn(Set<X> source, Set<Y> target, Function<X,Y> function) {
+		public Fn(Set<X> source, Set<Y> target, FUNCTION<X,Y> function) {
 			this.source = source;
 			this.target = target;
 			this.function = function;
@@ -87,14 +88,14 @@ public class FinSet extends Category<Set, Fn> {
 		public String toString() {
 			//String l = source.toString();
 			//String r = target.toString();
-			String z = Util.sep(source.stream().map(x -> new Pair<>(x, function.apply(x)).toString()).iterator(), ",");
+			String z = Util.sep(source.stream().map(x -> new Pair<>(x, function.apply(x)).toString()).iterator(), ", ");
 			return "[" + z + "]"; //Source: " + l + "\nTarget: " + r;
 		}
 		
 		public String toStringLong() {
 			String l = source.toString();
 			String r = target.toString();
-			String z = Util.sep(source.stream().map(x -> new Pair<>(x, function.apply(x)).toString()).iterator(), ",");
+			String z = Util.sep(source.stream().map(x -> new Pair<>(x, function.apply(x)).toString()).iterator(), ", ");
 			return "[" + z + "]\nSource: " + l + "\nTarget: " + r;
 		}
 		

@@ -18,6 +18,7 @@ import fql_lib.cat.Category;
 import fql_lib.cat.FiniteCategory;
 import fql_lib.cat.Functor;
 import fql_lib.cat.Transform;
+import fql_lib.FUNCTION;
 
 public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 
@@ -227,9 +228,9 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		if (!a1.target.equals(a2.target)) {
 			throw new RuntimeException();
 		}
-		Function<Chc<O1, O2>, O> o = x -> x.left ? a1.applyO(x.l) : a2
+		FUNCTION<Chc<O1, O2>, O> o = x -> x.left ? a1.applyO(x.l) : a2
 				.applyO(x.r);
-		Function<Chc<A1, A2>, A> a = x -> x.left ? a1.applyA(x.l) : a2
+		FUNCTION<Chc<A1, A2>, A> a = x -> x.left ? a1.applyA(x.l) : a2
 				.applyA(x.r);
 		return new Functor<>(coproduct(a1.source, a2.source), a1.target, o, a);
 	}
@@ -330,11 +331,11 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 	// A^B * B -> A
 	public <AO, AA, BO, BA> Functor<Pair<Functor<BO, BA, AO, AA>, BO>, Pair<Transform<BO, BA, AO, AA>, BA>, AO, AA> eval(
 			Category<AO, AA> A, Category<BO, BA> B) {
-		Function<Pair<Functor<BO, BA, AO, AA>, BO>, AO> f = x -> {
+		FUNCTION<Pair<Functor<BO, BA, AO, AA>, BO>, AO> f = x -> {
 			AO ret = x.first.applyO(x.second);
 			return ret;
 		};
-		Function<Pair<Transform<BO, BA, AO, AA>, BA>, AA> g = x -> {
+		FUNCTION<Pair<Transform<BO, BA, AO, AA>, BA>, AA> g = x -> {
 			AA ff = x.first.source.applyA(x.second);
 			AA gg = x.first.apply(B.target(x.second));
 			return A.compose(ff, gg);
@@ -349,13 +350,13 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		Category<AO, AA> A = w.first;
 		Category<BO, BA> B = w.second;
 		Category<CO, CA> C = F.target;
-		Function<AO, Functor<BO, BA, CO, CA>> p = a -> {
-			Function<BO, CO> f1 = b -> F.applyO(new Pair<>(a, b));
-			Function<BA, CA> f2 = g -> F.applyA(new Pair<>(A.identity(a), g));
+		FUNCTION<AO, Functor<BO, BA, CO, CA>> p = a -> {
+			FUNCTION<BO, CO> f1 = b -> F.applyO(new Pair<>(a, b));
+			FUNCTION<BA, CA> f2 = g -> F.applyA(new Pair<>(A.identity(a), g));
 			return new Functor<>(B, C, f1, f2);
 		};
-		Function<AA, Transform<BO, BA, CO, CA>> q = f -> {
-			Function<BO, CA> t = b -> F.applyA(new Pair<>(f, B.identity(b)));
+		FUNCTION<AA, Transform<BO, BA, CO, CA>> q = f -> {
+			FUNCTION<BO, CA> t = b -> F.applyA(new Pair<>(f, B.identity(b)));
 			return new Transform<>(p.apply(A.source(f)), p.apply(A.target(f)), t);
 		};
 		return new Functor<>(A, exp(C, B), p, q);

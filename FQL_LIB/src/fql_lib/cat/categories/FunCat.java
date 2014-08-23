@@ -3,7 +3,6 @@ package fql_lib.cat.categories;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import fql_lib.Chc;
 import fql_lib.Pair;
@@ -11,6 +10,7 @@ import fql_lib.Unit;
 import fql_lib.cat.Category;
 import fql_lib.cat.Functor;
 import fql_lib.cat.Transform;
+import fql_lib.FUNCTION;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Transform<O, A, Category, Functor>> {
@@ -92,7 +92,7 @@ public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Tra
 	}
 
 	public Transform<O, A, Category, Functor> terminal(Functor<O, A, Category, Functor> o) {
-		Function<O, Functor> fn = x -> new Functor<>(o.applyO(x), FinCat.FinCat.terminal(), y -> new Unit(), y -> new Unit());
+		FUNCTION<O, Functor> fn = x -> new Functor<>(o.applyO(x), FinCat.FinCat.terminal(), y -> new Unit(), y -> new Unit());
 		return new Transform(o, terminal(), fn);
 	}
 	
@@ -101,41 +101,41 @@ public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Tra
 	}
 		 
 	public Transform<O, A, Category, Functor> initial(Functor<O, A, Category, Functor> o) {
-		Function<O, Functor> fn = x -> new Functor<>(FinCat.FinCat.initial(), o.applyO(x), y -> { throw new RuntimeException(); }, y -> { throw new RuntimeException(); });
+		FUNCTION<O, Functor> fn = x -> new Functor<>(FinCat.FinCat.initial(), o.applyO(x), y -> { throw new RuntimeException(); }, y -> { throw new RuntimeException(); });
 		return new Transform(initial(), o, fn);
 	}
 
 	public Functor<O, A, Category, Functor> product(Functor<O, A, Category, Functor> f, Functor<O, A, Category, Functor> g) {
-		Function<O, Category> h = x -> FinCat.FinCat.product(f.applyO(x), g.applyO(x));
-		Function<A, Functor> i = x -> FinCat.FinCat.pairF(f.applyA(x), g.applyA(x));
+		FUNCTION<O, Category> h = x -> FinCat.FinCat.product(f.applyO(x), g.applyO(x));
+		FUNCTION<A, Functor> i = x -> FinCat.FinCat.pairF(f.applyA(x), g.applyA(x));
 		return new Functor(cat, FinCat.FinCat, h, i);
 	}
 	
 	public Functor<O, A, Category, Functor> coproduct(Functor<O, A, Category, Functor> f, Functor<O, A, Category, Functor> g) {
-		Function<O, Category> h = x -> FinCat.FinCat.coproduct(f.applyO(x), g.applyO(x));
-		Function<A, Functor> i = x -> FinCat.FinCat.matchF(f.applyA(x), g.applyA(x));
+		FUNCTION<O, Category> h = x -> FinCat.FinCat.coproduct(f.applyO(x), g.applyO(x));
+		FUNCTION<A, Functor> i = x -> FinCat.FinCat.matchF(f.applyA(x), g.applyA(x));
 		return new Functor(cat, FinCat.FinCat, h, i);
 	}
 	
 	public Transform<O, A, Category, Functor> first(Functor<O, A, Category, Functor> o1, Functor<O, A, Category, Functor> o2) {
-		Function<O, Functor> f = o -> new Functor<>(FinCat.FinCat.product(o1.applyO(o),
+		FUNCTION<O, Functor> f = o -> new Functor<>(FinCat.FinCat.product(o1.applyO(o),
 				o2.applyO(o)), o1.applyO(o), x -> x.first, x -> x.first);
 		return new Transform(product(o1, o2), o1, f);
 	}
 	public Transform<O, A, Category, Functor> second(Functor<O, A, Category, Functor> o1, Functor<O, A, Category, Functor> o2) {
-		Function<O, Functor> f = o -> new Functor<>(FinCat.FinCat.product(o1.applyO(o),
+		FUNCTION<O, Functor> f = o -> new Functor<>(FinCat.FinCat.product(o1.applyO(o),
 				o2.applyO(o)), o2.applyO(o), x -> x.second, x -> x.second);
 		return new Transform(product(o1, o2), o2, f);
 	}
 	
 	public Transform<O, A, Category, Functor> inleft(Functor<O, A, Category, Functor> o1, Functor<O, A, Category, Functor> o2) {
-		Function<O, Functor> f = o -> new Functor<>(o1.applyO(o), FinCat.FinCat.coproduct(o1.applyO(o),
+		FUNCTION<O, Functor> f = o -> new Functor<>(o1.applyO(o), FinCat.FinCat.coproduct(o1.applyO(o),
 				o2.applyO(o)), x -> Chc.inLeft(x), x -> Chc.inLeft(x));
 		return new Transform(o1, coproduct(o1, o2), f);
 	}
 
 	public Transform<O, A, Category, Functor> inright(Functor<O, A, Category, Functor> o1, Functor<O, A, Category, Functor> o2) {
-		Function<O, Functor> f = o -> new Functor<>(o2.applyO(o), FinCat.FinCat.coproduct(o1.applyO(o),
+		FUNCTION<O, Functor> f = o -> new Functor<>(o2.applyO(o), FinCat.FinCat.coproduct(o1.applyO(o),
 				o2.applyO(o)), x -> Chc.inRight(x), x -> Chc.inRight(x));
 		return new Transform(o2, coproduct(o1, o2), f);
 	}
@@ -144,7 +144,7 @@ public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Tra
 		if (!f.source.equals(g.source)) {
 			throw new RuntimeException();
 		}
-		Function<O, Functor> fn = o -> 
+		FUNCTION<O, Functor> fn = o -> 
 		  new Functor<>(f.source.applyO(o), FinCat.FinCat.product(f.target.applyO(o), g.target.applyO(o)), 
 				  x -> new Pair<>(f.apply(o).applyO(x), g.apply(o).applyO(x)), 
 				  x -> new Pair<>(f.apply(o).applyA(x), g.apply(o).applyA(x)));
@@ -154,7 +154,7 @@ public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Tra
 		if (!f.target.equals(g.target)) {
 			throw new RuntimeException();
 		}
-		Function<O, Functor> fn = o -> new Functor<>(FinCat.FinCat.coproduct(f.source.applyO(o), g.source.applyO(o)), 
+		FUNCTION<O, Functor> fn = o -> new Functor<>(FinCat.FinCat.coproduct(f.source.applyO(o), g.source.applyO(o)), 
 				f.target.applyO(o), 
 				x -> x.left ? f.apply(o).applyO(x.l) : g.apply(o).applyO(x.r),
 				x -> x.left ? f.apply(o).applyA(x.l) : g.apply(o).applyA(x.r));

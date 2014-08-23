@@ -7,7 +7,7 @@ import fql_lib.Quad;
 import fql_lib.Triple;
 import fql_lib.cat.Category;
 import fql_lib.cat.Functor;
-
+import fql_lib.FUNCTION;
 
 //TODO in future, don't have arrows(); only have arrows(node, node)
 public class Comma {

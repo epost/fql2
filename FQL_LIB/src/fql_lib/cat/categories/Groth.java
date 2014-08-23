@@ -7,6 +7,7 @@ import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.cat.Category;
 import fql_lib.cat.Functor;
+import fql_lib.cat.LeftKanSigma;
 import fql_lib.cat.categories.FinSet.Fn;
 
 public class Groth {
@@ -16,7 +17,20 @@ public class Groth {
     An arrow (A,a) \to (B,b) is an arrow f: A \to B in C such that (Ff)a = b.
 	 */
 	
-	public static <O,A,X> Category<Pair<O,X>,Triple<Pair<O,X>,Pair<O,X>,A>> pivot(Functor<O,A,Set<X>,Fn<X,X>> F) {
+	/*Given a functor F:C-->D, define 
+depivot F = SIGMA F unit,
+where unit is the terminal instance on C.*/
+	
+	public static <O1,A1,O2,A2> Functor <O2,A2,Set,Fn> unpivot(Functor<O1,A1,O2,A2> F) {
+		return LeftKanSigma.fullSigma(F, Inst.get(F.source).terminal(), null, null).first;
+	}
+	
+	public static <O,A,X> Functor<Pair<O,X>,Triple<Pair<O,X>,Pair<O,X>,A>,O,A> pivot(Functor<O,A,Set<X>,Fn<X,X>> F) {
+		Category<Pair<O,X>,Triple<Pair<O,X>,Pair<O,X>,A>> C = pivotX(F);
+		return new Functor<>(C, F.source, x -> x.first, x -> x.third);
+	}
+	
+	public static <O,A,X> Category<Pair<O,X>,Triple<Pair<O,X>,Pair<O,X>,A>> pivotX(Functor<O,A,Set<X>,Fn<X,X>> F) {
 		
 		Set<Pair<O, X>> objects = new HashSet<>();
 		Set<Triple<Pair<O,X>, Pair<O,X>, A>> arrows = new HashSet<>();

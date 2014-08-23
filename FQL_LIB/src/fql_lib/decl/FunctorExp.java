@@ -1,5 +1,6 @@
 package fql_lib.decl;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -7,11 +8,102 @@ import fql_lib.Chc;
 import fql_lib.Pair;
 
 
-public abstract class FunctorExp {
+public abstract class FunctorExp implements Serializable{
 
 	public abstract <R, E> R accept(E env, FunctorExpVisitor<R, E> v);
 
 	public abstract boolean equals(Object o);
+	
+	public static class Pushout extends FunctorExp {
+		String l, r;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((l == null) ? 0 : l.hashCode());
+			result = prime * result + ((r == null) ? 0 : r.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Pushout other = (Pushout) obj;
+			if (l == null) {
+				if (other.l != null)
+					return false;
+			} else if (!l.equals(other.l))
+				return false;
+			if (r == null) {
+				if (other.r != null)
+					return false;
+			} else if (!r.equals(other.r))
+				return false;
+			return true;
+		}
+
+		public Pushout(String l, String r) {
+			super();
+			this.l = l;
+			this.r = r;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, FunctorExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+	}
+	
+	public static class Pivot extends FunctorExp {
+		FunctorExp F;
+		boolean pivot;
+
+		@Override
+		public <R, E> R accept(E env, FunctorExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + (pivot ? 1231 : 1237);
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Pivot other = (Pivot) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (pivot != other.pivot)
+				return false;
+			return true;
+		}
+
+		public Pivot(FunctorExp f, boolean b) {
+			F = f;
+			pivot = b;
+		}
+
+	}
 	
 	public static class Dom extends FunctorExp {
 		String t;
@@ -100,8 +192,8 @@ public abstract class FunctorExp {
 	}
 	
 	public static class Migrate extends FunctorExp {
-		FunctorExp F;
-		String which;
+		public FunctorExp F;
+		public String which;
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -1414,6 +1506,8 @@ public abstract class FunctorExp {
 		public R visit(E env, Exp e);
 		public R visit(E env, Prop e);
 		public R visit(E env, Dom e);
+		public R visit(E env, Pivot e);
+		public R visit(E env, Pushout e);
 	}
 
 }

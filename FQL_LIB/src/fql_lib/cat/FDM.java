@@ -12,13 +12,13 @@ import fql_lib.Triple;
 import fql_lib.cat.categories.FinSet.Fn;
 import fql_lib.cat.categories.Inst;
 import fql_lib.cat.categories.Pi;
-
+import fql_lib.FUNCTION;
 
 public class FDM {
 	
 	private static Map<Functor, Functor> deltas = new HashMap<>();
-	private static Map<Functor, Functor> sigmas = new HashMap<>();
-	private static Map<Functor, Functor> pis = new HashMap<>();
+	public static Map<Functor, Functor> sigmas = new HashMap<>();
+	public static Map<Functor, Functor> pis = new HashMap<>();
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O1, A1, O2, A2> Functor<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> deltaF(
@@ -30,8 +30,8 @@ public class FDM {
 		Category<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> src = Inst.get(F.target);
 		Category<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> dst = Inst.get(F.source);
 
-		Function<Functor<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>> o = I -> Functor.compose(F, I);
-		Function<Transform<O1, A1, Set, Fn>, Transform<O2, A2, Set, Fn>> a = f -> new Transform<>(
+		FUNCTION<Functor<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>> o = I -> Functor.compose(F, I);
+		FUNCTION<Transform<O1, A1, Set, Fn>, Transform<O2, A2, Set, Fn>> a = f -> new Transform<>(
 				o.apply(f.source), o.apply(f.target), d -> new Fn<>(o.apply(f.source).applyO(d), o
 						.apply(f.target).applyO(d), i -> f.apply(F.applyO(d)).apply(i)));
 
@@ -45,14 +45,23 @@ public class FDM {
 		if (sigmas.containsKey(F)) {
 			return sigmas.get(F);
 		}
+		
+		//TODO: add more caching?
+		Map<Functor<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>> cache = new HashMap<>();
 
 		Category<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> src = Inst.get(F.source);
 		Category<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> dst = Inst.get(F.target);
 
-		Function<Functor<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>> o = I -> LeftKanSigma
-				.fullSigma(F, I, null, null).first;
-
-		Function<Transform<O1, A1, Set, Fn>, Transform<O2, A2, Set, Fn>> a = t -> LeftKanSigma
+		FUNCTION<Functor<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>> o = I -> {
+			Functor<O2, A2, Set, Fn> J = cache.get(I);
+			if (J == null) {
+				J = LeftKanSigma.fullSigma(F, I, null, null).first;
+				cache.put(I, J);
+			}
+			return J;
+		};
+			
+		FUNCTION<Transform<O1, A1, Set, Fn>, Transform<O2, A2, Set, Fn>> a = t -> LeftKanSigma
 				.fullSigma(F, t.source, Transform.compose(t,
 						LeftKanSigma.fullSigma(F, t.target, null, null).second), o.apply(t.target)).third;
 
@@ -68,7 +77,7 @@ public class FDM {
 
 		Category<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> D = Inst.get(F.source);
 		Category<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> C = Inst.get(F.target);
-		Function<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> g0 = I -> {
+		FUNCTION<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> g0 = I -> {
 			Functor<O2, A2, Set, Fn> deltad = deltaF(F).applyO(I);
 			Quad<Functor<O1, A1, Set, Fn>, Transform<O2, A2, Set, Fn>, Transform<O1, A1, Set, Fn>, Map<Object, List<Pair<A1, Object>>>> q = LeftKanSigma
 					.fullSigma(F, deltad, null, null);
@@ -76,7 +85,7 @@ public class FDM {
 			Map<Object, List<Pair<A1, Object>>> lineage = q.fourth;
 			// System.out.println("lineage " + lineage);
 			return new Transform<>(sigmad, I, n -> {
-				Function<Object, Object> h = i -> {
+				FUNCTION<Object, Object> h = i -> {
 					List<Pair<A1, Object>> l = lineage.get(i);
 					Object ret = l.get(0).second;
 					for (int e = 1; e < l.size(); e++) {
@@ -93,7 +102,7 @@ public class FDM {
 		Transform<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> f = new Transform<>(
 				Functor.compose(deltaF(F), sigmaF(F)), Functor.identity(C), g0);
 
-		Function<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> f0 = I -> LeftKanSigma
+		FUNCTION<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> f0 = I -> LeftKanSigma
 				.fullSigma(F, I, null, null).second;
 		Transform<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> g = new Transform<>(
 				Functor.identity(D), Functor.compose(sigmaF(F), deltaF(F)), f0);
@@ -111,9 +120,9 @@ public class FDM {
 		Category<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> src = Inst.get(F.source);
 		Category<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> dst = Inst.get(F.target);
 
-		Function<Functor<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>> o = I -> Pi.pi(F, I).first;
+		FUNCTION<Functor<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>> o = I -> Pi.pi(F, I).first;
 
-		Function<Transform<O1, A1, Set, Fn>, Transform<O2, A2, Set, Fn>> a = t -> Pi.pi(F, t);
+		FUNCTION<Transform<O1, A1, Set, Fn>, Transform<O2, A2, Set, Fn>> a = t -> Pi.pi(F, t);
 
 		pis.put(F, new Functor<>(src, dst, o, a));
 		return pis.get(F);
@@ -126,9 +135,9 @@ public class FDM {
 		Category<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> C = Inst.get(F.target);
 
 		
-		Function<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> f = I -> {
+		FUNCTION<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> f = I -> {
 			Triple<Functor<O1,A1,Set,Fn>,Map<O1,Set<Map>>,Map<O1, Triple<O1,O2,A1>[]>> xxx = Pi.pi(F, Functor.compose(F, I));
-			Function<O1, Fn> j = n -> {
+			FUNCTION<O1, Fn> j = n -> {
 				return new Fn<>(I.applyO(n), xxx.first.applyO(n), i -> {
 					outer: for (Map m : xxx.second.get(n)) {
 						for (int p = 1; p < m.size(); p++) {
@@ -148,10 +157,10 @@ public class FDM {
 		Transform<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> unit 
 		 = new Transform<>(Functor.identity(C), Functor.compose(deltaF(F), piF(F)), f);
 
-		Function<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> g =  I -> {
+		FUNCTION<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> g =  I -> {
 			Triple<Functor<O1,A1,Set,Fn>,Map<O1,Set<Map>>,Map<O1, Triple<O1,O2,A1>[]>> xxx = Pi.pi(F, I);
 			Functor<O2,A2,Set,Fn> deltad = Functor.compose(F, xxx.first);
-			Function<O2, Fn> j = m -> {
+			FUNCTION<O2, Fn> j = m -> {
 				O1 n = F.applyO(m);
 				Triple<O1,O2,A1>[] col = xxx.third.get(n);
 				Triple<O1,O2,A1> tofind = new Triple<>(n, m, F.target.identity(n));
@@ -162,7 +171,7 @@ public class FDM {
 						i[0]++;
 						continue;
 					}
-					Function h = id -> {
+					FUNCTION h = id -> {
 						for (Map row : lim) {
 							if (row.get(0).equals(id)) {
 								return row.get(i[0]+1);

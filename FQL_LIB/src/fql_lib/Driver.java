@@ -2,6 +2,7 @@ package fql_lib;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import fql_lib.cat.Category;
@@ -15,21 +16,26 @@ import fql_lib.decl.FQLProgram;
 import fql_lib.decl.FnExp;
 import fql_lib.decl.FunctorExp;
 import fql_lib.decl.LineException;
+import fql_lib.decl.PreProcessor;
 import fql_lib.decl.SetExp;
 import fql_lib.decl.SetOps;
 import fql_lib.decl.TransExp;
 
 public class Driver {
 
-	public static Environment makeEnv(FQLProgram init) {
+	public static Environment makeEnv(String str, FQLProgram init) {
 	//	System.out.println("Driver input: " + init);
 		Map<String, Fn<?,?>> fns = new HashMap<>();
 		Map<String, Set<?>> sets = new HashMap<>();
 		Map<String, Category<?,?>> cats = new HashMap<>();
 		Map<String, Functor<?,?,?,?>> ftrs = new HashMap<>();
 		Map<String, Transform<?,?,?,?>> trans = new HashMap<>();
-		Environment ret = new Environment(sets, fns, cats, ftrs, trans);
+		Environment ret = new Environment(init, str, sets, fns, cats, ftrs, trans);
 
+		for (Entry<String, CatExp> k : init.cats.entrySet()) {
+			init.cats.put(k.getKey(), k.getValue().accept(init, new PreProcessor()));
+		}
+		
 		
 		for (String k : init.order) {
 			SetExp se = init.sets.get(k);
@@ -59,6 +65,7 @@ public class Driver {
 				}
 			}
 			CatExp ce = init.cats.get(k);
+//			CatExp ce = ce0.accept(init, new PreProcessor());
 			if (ce != null) {
 				try {
 					Category<?,?> xxx = ce.accept(init, new CatOps(ret));

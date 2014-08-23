@@ -1,8 +1,10 @@
 package fql_lib.decl;
 
-import java.util.function.Function;
+import java.io.Serializable;
 
-public abstract class FnExp {
+import fql_lib.FUNCTION;
+
+public abstract class FnExp implements Serializable{
 
 	
 	public static class ApplyTrans extends FnExp {
@@ -290,7 +292,7 @@ public abstract class FnExp {
 	
 	public static class Const extends FnExp {
 		
-		Function<?,?> f;
+		FUNCTION<?,?> f;
 		SetExp src, dst; 
 		
 		@Override
@@ -298,7 +300,7 @@ public abstract class FnExp {
 			return v.visit(env, this);
 		}
 
-		public Const(Function<?,?> f, SetExp src, SetExp dst) {
+		public Const(FUNCTION<?,?> f, SetExp src, SetExp dst) {
 			super();
 			this.f = f;
 			this.src = src;

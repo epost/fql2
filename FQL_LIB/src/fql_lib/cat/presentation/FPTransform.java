@@ -1,16 +1,17 @@
 package fql_lib.cat.presentation;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
 
+import fql_lib.FUNCTION;
 import fql_lib.Util;
 import fql_lib.cat.Transform;
 import fql_lib.cat.categories.FinSet.Fn;
 
-public class FPTransform<O, A> {
+public class FPTransform<O, A> implements Serializable {
 
 	public Instance<O, A> src, dst;
 	public Map<Signature<O, A>.Node, Map<Object, Object>> data;
@@ -161,7 +162,7 @@ public class FPTransform<O, A> {
 	}
 	@SuppressWarnings({ "rawtypes" })
 	private Transform<Signature<O,A>.Node,Signature<O,A>.Path,Set,Fn> toTransformX() {
-		Function<Signature<O,A>.Node, Fn> f = n ->
+		FUNCTION<Signature<O,A>.Node, Fn> f = n ->
 		  new Fn<>(src.nm.get(n), dst.nm.get(n), x -> data.get(n).get(x));
 		return new Transform<>(src.toFunctor(), dst.toFunctor(), f); 
 	}

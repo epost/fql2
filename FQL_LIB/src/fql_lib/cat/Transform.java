@@ -1,12 +1,13 @@
 package fql_lib.cat;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import fql_lib.DEBUG;
+import fql_lib.FUNCTION;
 import fql_lib.Pair;
 import fql_lib.Util;
 import fql_lib.cat.categories.FinSet;
@@ -14,13 +15,13 @@ import fql_lib.cat.categories.FinSet.Fn;
 import fql_lib.cat.presentation.FPTransform;
 import fql_lib.cat.presentation.Signature;
 
-public class Transform<O1, A1, O2, A2> {
+public class Transform<O1, A1, O2, A2> implements Serializable {
 	public Functor<O1, A1, O2, A2> source;
 	public Functor<O1, A1, O2, A2> target;
-	private Function<O1, A2> t;
+	private FUNCTION<O1, A2> t;
 
 	public Transform(Functor<O1, A1, O2, A2> source, Functor<O1, A1, O2, A2> target,
-			Function<O1, A2> t) {
+			FUNCTION<O1, A2> t) {
 		this.source = source;
 		this.target = target; 
 		this.t = t;
@@ -72,7 +73,7 @@ public class Transform<O1, A1, O2, A2> {
 			String z1 = Util.sep(
 					source.source.objects().stream()
 							.map(x -> new Pair<>(x, apply(x)).toString())
-							.iterator(), ",");
+							.iterator(), ", ");
 			String a1 = "[" + z1 + "]\n";
 			return a1 + "  :\n" + l + "\n  ->\n" + r;
 		} catch (Exception e) {
@@ -85,7 +86,7 @@ public class Transform<O1, A1, O2, A2> {
 			String z1 = Util.sep(
 					source.source.objects().stream()
 							.map(x -> new Pair<>(x, apply(x)).toString())
-							.iterator(), ",");
+							.iterator(), ", ");
 			return "[" + z1 + "]\n";
 		} catch (Exception e) {
 			return "(Cannot print)";
@@ -174,7 +175,7 @@ public class Transform<O1, A1, O2, A2> {
 			Functor<O1, A1, O2, A2> k) {
 		return new Transform<>(k, k, o -> k.target.identity(k.applyO(o)));
 	}
-		
+	
 	private FPTransform<O1,A1> fptrans;
 	public  FPTransform<O1,A1> toFPTransform() {
 		if (fptrans != null) {

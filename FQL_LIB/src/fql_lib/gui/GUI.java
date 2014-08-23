@@ -13,8 +13,10 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,8 +39,10 @@ import javax.swing.filechooser.FileFilter;
 
 import fql_lib.DEBUG;
 import fql_lib.Pair;
+import fql_lib.decl.Environment;
 import fql_lib.examples.Example;
 import fql_lib.examples.Examples;
+import fql_lib.nested.KBViewer;
 import fql_lib.nested.NraViewer;
 
 @SuppressWarnings("serial")
@@ -49,7 +53,7 @@ import fql_lib.nested.NraViewer;
  * Top level gui
  */
 public class GUI extends JPanel {
-
+	
 	public static JTabbedPane editors = new JTabbedPane();
 
 	public static JComboBox<Example> box = null;
@@ -68,12 +72,14 @@ public class GUI extends JPanel {
 		Menu fileMenu = new Menu("File");
 		MenuItem newItem = new MenuItem("New");
 		MenuItem openItem = new MenuItem("Open");
+//		MenuItem openItem2 = new MenuItem("Open GUI");
 		MenuItem saveItem = new MenuItem("Save");
 		MenuItem saveAsItem = new MenuItem("Save As");
 		MenuItem closeItem = new MenuItem("Close");
 		MenuItem exitItem = new MenuItem("Exit");
 		fileMenu.add(newItem);
 		fileMenu.add(openItem);
+		//fileMenu.add(openItem2);
 		fileMenu.add(saveItem);
 		fileMenu.add(saveAsItem);
 		fileMenu.add(closeItem);
@@ -166,6 +172,11 @@ public class GUI extends JPanel {
 		MenuItem shredItem = new MenuItem("Shred");
 		transMenu.add(shredItem);
 		shredItem.addActionListener(x -> { new NraViewer(); });
+		
+		MenuItem kbItem = new MenuItem("Knuth-Bendix");
+		transMenu.add(kbItem);
+		kbItem.addActionListener(x -> { new KBViewer(); });
+		
 
 		Menu helpMenu = new Menu("About");
 		/*		MenuItem helpItem = new MenuItem("Help");
@@ -216,6 +227,8 @@ public class GUI extends JPanel {
 
 			}
 		});
+		
+		//openItem2.addActionListener(x -> openAction2());
 
 		menuBar.add(fileMenu);
 		menuBar.add(editMenu);
@@ -280,6 +293,8 @@ public class GUI extends JPanel {
 				openAction();
 			}
 		});
+		
+		
 		// if (FQLApplet.isapplet) {
 		// open_button.setEnabled(false);
 		// }
@@ -503,6 +518,20 @@ public class GUI extends JPanel {
 			return "FQL++ files (*.fqlpp)";
 		}
 	}
+	
+	public static class Filter2 extends FileFilter {
+		@Override
+		public boolean accept(File f) {
+			return f.getName().toLowerCase().endsWith(".fqlppo")
+					|| f.isDirectory();
+		}
+
+		@Override
+		public String getDescription() {
+			return "Compiled FQL++ files (*.fqlppo)";
+		}
+	}
+
 
 	protected static void saveAsAction() {
 		delay();
@@ -513,8 +542,8 @@ public class GUI extends JPanel {
 		if (f == null) {
 			return;
 		}
-		if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fql")) {
-			f = new File(jfc.getSelectedFile() + ".fql");
+		if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlpp")) {
+			f = new File(jfc.getSelectedFile() + ".fqlpp");
 		}
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
 				.getSelectedIndex());
@@ -533,6 +562,17 @@ public class GUI extends JPanel {
 		Integer i = newAction(f.getName(), s);
 		files.put(i, f);
 	}
+	
+	static void doOpen2(File f) {
+		try {
+		Environment env = Environment.load(f);
+		Integer i = newAction(f.getName(), env.text);
+		new Display(f.getName(), env.prog, env);
+		files.put(i, f);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	static protected void openAction() {
 		delay();
@@ -544,6 +584,18 @@ public class GUI extends JPanel {
 			return;
 		}
 		doOpen(f);
+	}
+	
+	static protected void openAction2() {
+		delay();
+		JFileChooser jfc = new JFileChooser(DEBUG.debug.FILE_PATH);
+		jfc.setFileFilter(new Filter2());
+		jfc.showOpenDialog(null);
+		File f = jfc.getSelectedFile();
+		if (f == null) {
+			return;
+		}
+		doOpen2(f);
 	}
 
 	static void setDirty(Integer i, boolean b) {
@@ -625,6 +677,32 @@ public class GUI extends JPanel {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
+		}
+	}
+
+
+	//TODO
+	public static void save2(Environment env) {
+		delay();
+		JFileChooser jfc = new JFileChooser(DEBUG.debug.FILE_PATH);
+		jfc.setFileFilter(new Filter2());
+		jfc.showSaveDialog(null);
+		File f = jfc.getSelectedFile();
+		if (f == null) {
+			return;
+		}
+		if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlppo")) {
+			f = new File(jfc.getSelectedFile() + ".fqlppo");
+		}
+		try {
+			FileOutputStream fileOut = new FileOutputStream(f);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(env);
+			out.close();
+			fileOut.close();
+		} catch (Exception i) {
+			i.printStackTrace();
+			JOptionPane.showMessageDialog(null, i.getLocalizedMessage());
 		}
 	}
 

@@ -1,5 +1,6 @@
 package fql_lib.cat;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -16,8 +17,9 @@ import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.FinSet.Fn;
 import fql_lib.cat.presentation.Signature;
 
-public abstract class Category<O,A> {
+public abstract class Category<O,A> implements Serializable {
 	
+
 	public boolean isInfinite() {
 		return false;
 	}
@@ -325,6 +327,8 @@ public abstract class Category<O,A> {
 		return i;
 	}
 	
+	public Signature origin = null;
+		
 	private Signature<O,A> sig;
 	public Signature<O,A> toSig() {
 		if (sig != null) {
@@ -343,13 +347,14 @@ public abstract class Category<O,A> {
 		Set<Pair<Pair<O,List<A>>, Pair<O,List<A>>>> e = new HashSet<>();
 		
 		for (A x : arrows()) {
-			a.add(new Triple<>(x, source(x), target(x)));
 			if (isId(x)) {
+				continue; /*
 				List<A> l = new LinkedList<>();
 				l.add(x);
 				List<A> r = new LinkedList<>();
-				e.add(new Pair<>(new Pair<>(source(x), l), new Pair<>(source(x), r)));
+				e.add(new Pair<>(new Pair<>(source(x), l), new Pair<>(source(x), r))); */
 			}
+			a.add(new Triple<>(x, source(x), target(x)));
 		}
 		for (A x : arrows()) {
 			for (A y : arrows()) {
@@ -358,15 +363,28 @@ public abstract class Category<O,A> {
 				}
 				A z = compose(x, y);
 				List<A> l = new LinkedList<>();
+				if (!isId(x)) {
 				l.add(x);
+				}
+				if (!isId(y)) {
 				l.add(y);
+				}
 				List<A> r = new LinkedList<>();
+				if (!isId(z)) {
 				r.add(z);
-				e.add(new Pair<>(new Pair<>(source(x), l), new Pair<>(source(x), r)));
+				}
+				Pair lhs = new Pair<>(source(x), l);
+				Pair rhs = new Pair<>(source(x), r);
+				Pair p = new Pair<>(lhs, rhs);
+				if (!lhs.equals(rhs) && !e.contains(new Pair<>(rhs, lhs))) {
+				e.add(p);
+				}
 			}
 		}
 		
-		return new Signature<>(objects(), a, e);
+		Signature ret = new Signature<>(objects(), a, e);
+//		System.out.println("returning " + ret);
+		return ret;
 	}
 	
 	private Map<O, Functor<O,A,Set<A>,Fn<A,A>>> repMap = new HashMap<>();

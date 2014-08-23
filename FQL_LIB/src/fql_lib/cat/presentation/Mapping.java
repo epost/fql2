@@ -1,12 +1,14 @@
 package fql_lib.cat.presentation;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import fql_lib.cat.Functor;
+import fql_lib.FUNCTION;
 
-public class Mapping<O1, A1, O2, A2> {
+public class Mapping<O1, A1, O2, A2> implements Serializable {
 
 	public Signature<O1, A1> source;
 	public Signature<O2, A2> target;
@@ -34,7 +36,39 @@ public class Mapping<O1, A1, O2, A2> {
 		this.target = target;
 		this.nm = nm;
 		this.em = em;
-	//	validate(); //TODO
+		validate(); 
+	}
+
+	private void validate() {
+//		System.out.println("Validating " + this);
+		for (Signature<O1, A1>.Node n : nm.keySet()) {
+			if (!source.nodes.contains(n)) {
+				throw new RuntimeException("Mapping contains object, " + n + " that is not in source schema " + source);
+			}
+		}
+		for (Signature<O1, A1>.Node n : source.nodes) {
+			if (!nm.keySet().contains(n)) {
+				throw new RuntimeException("Mapping does not contain object mapping for " + n);
+			}
+			Signature<O2, A2>.Node m = nm.get(n);
+			if (!target.nodes.contains(m)) {
+				throw new RuntimeException("Object " + n + " maps to " + m + " is not in target schema.");
+			}			
+		}
+		for (Signature<O1, A1>.Edge n : em.keySet()) {
+			if (!source.edges.contains(n)) {
+				throw new RuntimeException("Mapping contains arrow, " + n + " that is not in source schema.");
+			}
+		}
+		for (Signature<O1, A1>.Edge n : source.edges) {
+			if (!em.keySet().contains(n)) {
+				throw new RuntimeException("Mapping does not contain arrow mapping for " + n);
+			}
+			Signature<O2, A2>.Path m = em.get(n);
+			if (m == null) {
+				throw new RuntimeException("Arrow " + n + " maps to " + m + " is not in target schema.");
+			}
+		}
 	}
 
 	@Override

@@ -1,6 +1,8 @@
 package fql_lib;
 
-public class Unit {
+import java.io.Serializable;
+
+public class Unit implements Serializable{
 
 	@Override
 	public String toString() {

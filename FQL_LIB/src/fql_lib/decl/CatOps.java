@@ -1,18 +1,23 @@
 package fql_lib.decl;
 
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import fql_lib.Chc;
+import fql_lib.FUNCTION;
 import fql_lib.Pair;
+import fql_lib.Triple;
 import fql_lib.cat.Category;
 import fql_lib.cat.CoMonad;
 import fql_lib.cat.FDM;
+import fql_lib.cat.FiniteCategory;
 import fql_lib.cat.Functor;
+import fql_lib.cat.LeftKanSigma;
 import fql_lib.cat.Monad;
 import fql_lib.cat.Transform;
 import fql_lib.cat.categories.FinCat;
@@ -35,9 +40,9 @@ import fql_lib.decl.CatExp.Exp;
 import fql_lib.decl.CatExp.Kleisli;
 import fql_lib.decl.CatExp.Named;
 import fql_lib.decl.CatExp.One;
-import fql_lib.decl.CatExp.Pivot;
 import fql_lib.decl.CatExp.Plus;
 import fql_lib.decl.CatExp.Times;
+import fql_lib.decl.CatExp.Union;
 import fql_lib.decl.CatExp.Zero;
 import fql_lib.decl.FunctorExp.Apply;
 import fql_lib.decl.FunctorExp.Case;
@@ -56,8 +61,10 @@ import fql_lib.decl.FunctorExp.InstConst;
 import fql_lib.decl.FunctorExp.Iso;
 import fql_lib.decl.FunctorExp.MapConst;
 import fql_lib.decl.FunctorExp.Migrate;
+import fql_lib.decl.FunctorExp.Pivot;
 import fql_lib.decl.FunctorExp.Prod;
 import fql_lib.decl.FunctorExp.Prop;
+import fql_lib.decl.FunctorExp.Pushout;
 import fql_lib.decl.FunctorExp.SetSetConst;
 import fql_lib.decl.FunctorExp.Snd;
 import fql_lib.decl.FunctorExp.TT;
@@ -83,7 +90,7 @@ import fql_lib.decl.TransExp.Whisker;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class CatOps implements CatExpVisitor<Category, FQLProgram>,
-		FunctorExpVisitor<Functor, FQLProgram>, TransExpVisitor<Transform, FQLProgram> {
+		FunctorExpVisitor<Functor, FQLProgram>, TransExpVisitor<Transform, FQLProgram> , Serializable {
 
 	private Environment ENV;
 	public CatOps(Environment ENV) {
@@ -144,6 +151,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 	@Override
 	public Category visit(FQLProgram env, fql_lib.decl.CatExp.Const e) {
 		Signature<String, String> s = new Signature<>(e.nodes, e.arrows, e.eqs);
+		//		s.KB();
 		return s.toCat();
 	}
 
@@ -181,14 +189,71 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 
 	public static CatExp resolve(FQLProgram env, CatExp c) {
 		if (c instanceof CatExp.Var) {
-			return resolve(env, env.cats.get(((CatExp.Var) c).v));
+			CatExp.Var v = (CatExp.Var) c;
+			if (!env.cats.containsKey(v.v)) {
+				throw new RuntimeException("Missing catgory: " + v.v);
+			}
+			return resolve(env, env.cats.get(v.v));
 		}
 		return c;
 	}
 
+	public Pair<Category, Instance<String,String>> toInstance(FQLProgram env, InstConst ic) {
+		CatExp e = resolve(env, ic.sig);
+		if (!(e instanceof Const)) {
+			throw new RuntimeException(
+					"Can only create instances for finitely-presented categories.");
+		}
+		Const c = (Const) e;
+
+		Category src = c.accept(env, this);
+		Signature<String, String> sig = new Signature<>(c.nodes, c.arrows, c.eqs);
+
+		Map<Node, Set> nm = new HashMap<>();
+		for (String n0 : ic.nm.keySet()) {
+			Node n = sig.getNode(n0);
+			SetExp kkk = ic.nm.get(n.name);
+			if (kkk == null) {
+				throw new RuntimeException("Missing node mapping from " + n);
+			}
+			nm.put(n, kkk.accept(env, new SetOps(ENV)));
+		}
+		Map<Edge, Map> em = new HashMap<>();
+		for (String n0 : ic.em.keySet()) {
+			Edge n = sig.getEdge(n0);
+			Chc<FnExp, SetExp> chc = ic.em.get(n.name);
+			if (chc == null) {
+				throw new RuntimeException("Missing edge mapping from " + n);
+			}
+			if (chc.left) {
+				FnExp kkk = chc.l;
+				em.put(n, kkk.accept(env, new SetOps(ENV)).toMap());
+			} else {
+				SetExp sss = chc.r;
+				Set vvv = sss.accept(env, new SetOps(ENV));
+				Map<Object, Object> uuu = new HashMap<>();
+				for (Object o : vvv) {
+					if (!(o instanceof Pair)) {
+						throw new RuntimeException("Not a pair: " + o);
+					}
+					Pair oo = (Pair) o;
+					if (uuu.containsKey(oo.first)) {
+						throw new RuntimeException("Duplicate domain entry: " + o + " in " + ic);
+					}
+					uuu.put(oo.first, oo.second);
+				}
+				FnExp kkk = new FnExp.Const(x -> uuu.get(x), ic.nm.get(n.source.name),
+						ic.nm.get(n.target.name));
+				em.put(n, kkk.accept(env, new SetOps(ENV)).toMap());
+			}
+		}
+
+		return new Pair<>(src, new Instance(nm, em, sig));
+	}
+	
 	@Override
 	public Functor visit(FQLProgram env, InstConst ic) {
-		CatExp e = resolve(env, ic.sig);
+	/*	CatExp e = resolve(env, ic.sig);
 		if (!(e instanceof Const)) {
 			throw new RuntimeException(
 					"Can only create instances for finitely-presented categories.");
@@ -233,21 +298,26 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 						ic.nm.get(n.target.name));
 				em.put(n, kkk.accept(env, new SetOps(ENV)).toMap());
 			}
-		}
+		} */
 
-		Instance<String, String> I = new Instance(nm, em, sig);
-
-		Function f = p0 -> {
+		Pair<Category, Instance<String,String>> xxx = toInstance(env, ic); //new Instance(nm, em, sig);
+		Functor ret = toFunctor(xxx.first, xxx.second);
+		ret.instance0 = xxx.second;
+		return ret;
+	}
+	
+	private Functor toFunctor(Category C, Instance<String, String> I) {
+		FUNCTION f = p0 -> {
 			Path p = (Path) p0;
 			return new Fn(I.nm.get(p.source), I.nm.get(p.target), x -> I.evaluate(p).get(x));
 		};
 
-		return new Functor(src, FinSet.FinSet, I.nm::get, f);
+		return new Functor(C, FinSet.FinSet, x -> I.nm.get(x), f);
 	}
 	
 
-	@Override
-	public Functor visit(FQLProgram env, MapConst ic) {
+	
+	private Triple<Category, Category, Mapping<String,String,String,String>> toMapping(FQLProgram env, MapConst ic) {
 		CatExp src0 = resolve(env, ic.src);
 		if (src0 == null) {
 			throw new RuntimeException("Missing category: " + ic.src);
@@ -272,22 +342,43 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 		Signature<String, String> dstY = new Signature<>(dst.nodes, dst.arrows, dst.eqs);
 
 		Map<Node, Node> nm = new HashMap<>();
-		for (Node n : srcY.nodes) {
-			nm.put(n, dstY.getNode(ic.nm.get(n.name)));
+		for (String n0 : ic.nm.keySet()) {
+			Signature<String, String>.Node n = srcY.getNode(n0);
+			String v = ic.nm.get(n.name);
+			if (v == null) {
+				throw new RuntimeException("Missing object mapping for " + n.name);
+			}
+			nm.put(n, dstY.getNode(v));
 		}
 		Map<Edge, Path> em = new HashMap<>();
-		for (Edge n : srcY.edges) {
+		for (String n0 : ic.em.keySet()) {
+			Signature<String, String>.Edge n = srcY.getEdge(n0);
 			Pair<String, List<String>> k = ic.em.get(n.name);
+			if (k == null) {
+				throw new RuntimeException("Missing arrow mapping for " + n.name);
+			}
 			em.put(n, dstY.path(k.first, k.second));
 		}
 
 		Mapping<String, String, String, String> I = new Mapping(nm, em, srcY, dstY);
-		Function f = p0 -> {
+		
+		return new Triple<>(srcX, dstX, I);
+	}
+	
+	//TODO
+	@Override
+	public Functor visit(FQLProgram env, MapConst ic) {
+		Triple<Category, Category, Mapping<String, String, String, String>> xxx = toMapping(env, ic);
+		Mapping<String, String, String, String> I = xxx.third;
+
+		FUNCTION f = p0 -> {
 			Path p = (Path) p0;
 			return I.apply(p);
 		};
 
-		return new Functor(srcX, dstX, I.nm::get, f);
+		Functor et = new Functor(xxx.first, xxx.second, x -> I.nm.get(x), f);
+		et.mapping0 = xxx.third;
+		return et;
 	}
 
 	@Override
@@ -319,7 +410,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 			em.put(n, chc.accept(env, this));
 		}
 
-		Function fff = p0 -> {
+		FUNCTION fff = p0 -> {
 			Path p = (Path) p0;
 			Functor fn = FinCat.FinCat.identity(nm.get(p.source));
 			for (Object nnn : p.path) {
@@ -329,7 +420,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 			return fn;
 		};
 
-		return new Functor<>(cat, FinCat.FinCat, nm::get, fff);
+		return new Functor<>(cat, FinCat.FinCat, x -> nm.get(x), fff);
 	}
 
 	@Override
@@ -364,7 +455,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 			em.put(n, chc.accept(env, this));
 		}
 
-		Function fff = p0 -> {
+		FUNCTION fff = p0 -> {
 			Path p = (Path) p0;
 			Object fn = target.identity(nm.get(p.source));
 			for (Object nnn : p.path) {
@@ -374,7 +465,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 			return fn;
 		};
 
-		return new Functor<>(cat, target, nm::get, fff);
+		return new Functor<>(cat, target, x -> nm.get(x), fff);
 	}
 
 	@Override
@@ -508,7 +599,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 
 	@Override
 	public Functor visit(FQLProgram env, SetSetConst e) {
-		Function o = x -> {
+		FUNCTION o = x -> {
 			Set s = (Set) x;
 			Environment env2 = new Environment(ENV);
 //			FQLProgram env2 = new FQLProgram(env);
@@ -517,7 +608,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 			return e.set.accept(env, new SetOps(env2));
 		};
 
-		Function a = x -> {
+		FUNCTION a = x -> {
 			Fn s = (Fn) x;
 			Set src = s.source;
 			Set dst = s.target;
@@ -571,7 +662,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 	public Transform visit(FQLProgram env, SetSet e) {
 		Functor s = e.src.accept(env, this);
 		Functor t = e.dst.accept(env, this);
-		Function o = x -> {
+		FUNCTION o = x -> {
 			Set set = (Set) x;
 			Environment env2 = new Environment(ENV);
 		//	SetExp c = new SetExp.Const(set);
@@ -601,7 +692,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 		Signature<String, String> tsig = new Signature<String, String>(tcon.nodes, tcon.arrows,
 				tcon.eqs);
 
-		Function o = x -> {
+		FUNCTION o = x -> {
 			Node n = (Node) x;
 			// Set src = (Set) s.applyO(n);
 			// Set dst = (Set) t.applyO(n);
@@ -617,7 +708,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 	public Transform visit(FQLProgram env, ToSet e) {
 		Functor s = e.src.accept(env, this);
 		Functor t = e.dst.accept(env, this);
-		Function o = x -> {
+		FUNCTION o = x -> {
 			Node n = (Node) x;
 			Chc<FnExp, SetExp> chc = e.fun.get(n.name);
 			if (chc == null) {
@@ -636,7 +727,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 					}
 					map.put(h.first, h.second);
 				}
-				return new Fn(src, dst, map::get);
+				return new Fn(src, dst, q -> map.get(q));
 			}
 		};
 
@@ -647,7 +738,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 	public Transform visit(FQLProgram env, ToCat e) {
 		Functor s = e.src.accept(env, this);
 		Functor t = e.dst.accept(env, this);
-		Function o = x -> {
+		FUNCTION o = x -> {
 			Node n = (Node) x;
 			// Set src = (Set) s.applyO(n);
 			// Set dst = (Set) t.applyO(n);
@@ -663,7 +754,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 	public Transform visit(FQLProgram env, ToInst e) {
 		Functor s = e.src.accept(env, this);
 		Functor t = e.dst.accept(env, this);
-		Function o = x -> {
+		FUNCTION o = x -> {
 			Node n = (Node) x;
 			// Set src = (Set) s.applyO(n);
 			// Set dst = (Set) t.applyO(n);
@@ -822,7 +913,7 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 				return FunCat.get(l.source).inright(l, r);
 			}
 		} else {
-			throw new RuntimeException("Report this error to ryan");
+			throw new RuntimeException("Cannot inject: " + e + " to get a transform.");
 		}
 	}
 
@@ -869,6 +960,46 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 
 	@Override
 	public Functor visit(FQLProgram env, Apply e) {
+		//This breaks Peter's example
+	/*	if (DEBUG.debug.use_fast_sigma) {
+		
+		 if (e.F instanceof FunctorExp.Migrate) {
+			FunctorExp.Migrate M = (FunctorExp.Migrate) e.F;
+			if (M.which.equals("sigma") && M.F instanceof FunctorExp.Var) {
+				FunctorExp.Var v = (FunctorExp.Var) M.F;
+				FunctorExp v2 = env.ftrs.get(v.v);
+				if (v2 == null) {
+					throw new RuntimeException("Missing functor: " + v);
+				}
+				if (v2 instanceof FunctorExp.MapConst) {
+					FunctorExp.MapConst f = (FunctorExp.MapConst) v2;
+					CatExp src1 = resolve(env, f.src);
+					CatExp dst1 = resolve(env, f.dst);
+					if (src1 instanceof CatExp.Const && dst1 instanceof CatExp.Const) {
+						CatExp.Const src = (CatExp.Const) src1;
+						CatExp.Const dst = (CatExp.Const) dst1;
+						if (e.I instanceof FunctorExp.Var) {
+							FunctorExp.Var iv = (FunctorExp.Var) e.I;
+							FunctorExp iv2 = env.ftrs.get(iv.v);
+							if (iv2 == null) {
+								throw new RuntimeException("Missing functor: " + iv);
+							}
+							if (iv2 instanceof FunctorExp.InstConst) {
+								FunctorExp.InstConst i = (FunctorExp.InstConst) iv2;
+								
+								if (f.dst instanceof CatExp.Var) {			
+									Category cat = ENV.cats.get(((CatExp.Var)f.dst).v);
+									return fastSigma(env, cat, src, dst, f, i);
+								}
+							}
+						}
+					}
+
+				}
+			} 
+		 }
+		} */
+		
 		Functor ret1 = null;
 		Exception ret1_e = null;
 		
@@ -906,6 +1037,19 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 		ret1_e.printStackTrace();
 		ret2_e.printStackTrace();
 		throw new RuntimeException("Cannot apply:\n\nmost probable cause: " + ret1_e.getMessage() + "\n\nless probable cause: " + ret2_e.getMessage());
+	}
+
+	private Functor fastSigma(FQLProgram env, Category C, Const src, Const dst, MapConst f, InstConst i) {
+		//System.out.println("Running fast sigma"); //TODO
+//		Signature s = new Signature(src.nodes, src.arrows, src.eqs);
+	//	Signature t = new Signature(dst.nodes, dst.arrows, dst.eqs);
+		Mapping F = toMapping(env, f).third; 
+		Instance I = toInstance(env, i).second;
+		//System.out.println("F " + F);
+		//System.out.println("I " + I);
+		Instance J = (Instance<String,String>) LeftKanSigma.fullSigmaOnPresentation(F, I, null, null, 0).first;
+		//System.out.println("J " + J);
+		return toFunctor(C, J); // new InstConst(dst, J.nm, J.em); //.accept(env, v);
 	}
 
 	@Override
@@ -1066,12 +1210,118 @@ public class CatOps implements CatExpVisitor<Category, FQLProgram>,
 	}
 
 	@Override
-	public Category visit(FQLProgram env, Pivot e) {
-		Functor F = new FunctorExp.Var(e.F).accept(env, this);
-		Category ret = Groth.pivot(F);
-//			System.out.println(ret.objects().size());
-	//		System.out.println(ret.arrows().size());
-		//	System.out.println(ret);
-		return ret;
+	public Functor visit(FQLProgram env, Pivot e) {
+		Functor F = e.F.accept(env, this);
+		if (e.pivot) {
+			return Groth.pivot(F);
+		} else {
+			return Groth.unpivot(F);
+		}
+	}
+
+	@Override
+	public Functor visit(FQLProgram env, Pushout e) {
+		Transform l = ENV.trans.get(e.l);
+		if (l == null) {
+			throw new RuntimeException("Missing transform: " + e.l);
+		}
+		Transform r = ENV.trans.get(e.r);
+		if (r == null) {
+			throw new RuntimeException("Missing transform: " + e.r);
+		}
+		
+		if (!l.source.equals(r.source)) {
+			throw new RuntimeException("Source functors do not match.");
+		}
+		Category<Object, Object> D = l.source.source;
+		
+		Set<String> objects = new HashSet<>();
+		objects.add("A");
+		objects.add("B");
+		objects.add("C");
+		Set<String> arrows = new HashSet<>();
+		arrows.add("f");
+		arrows.add("g");
+		arrows.add("a");
+		arrows.add("b");
+		arrows.add("c");
+		Map<String, String> sources = new HashMap<>();
+		sources.put("f", "A");
+		sources.put("g", "A");
+		sources.put("a", "A");
+		sources.put("b", "B");
+		sources.put("c", "C");
+		Map<String, String> targets = new HashMap<>();
+		targets.put("f", "B");
+		targets.put("g", "C");
+		targets.put("a", "A");
+		targets.put("b", "B");
+		targets.put("c", "C");
+		Map<Pair<String, String>, String> composition = new HashMap<>();
+		composition.put(new Pair<>("a", "a"), "a");
+		composition.put(new Pair<>("b", "b"), "b");
+		composition.put(new Pair<>("c", "c"), "c");
+		composition.put(new Pair<>("a", "f"), "f");
+		composition.put(new Pair<>("a", "g"), "g");
+		composition.put(new Pair<>("f", "b"), "f");
+		composition.put(new Pair<>("g", "c"), "g");
+		Map<String, String> identities = new HashMap<>();
+		identities.put("A", "a");
+		identities.put("B", "b");
+		identities.put("C", "c");
+		Category<String,String> span = new FiniteCategory<>(objects, arrows, sources, targets, composition, identities);
+		
+		Category<Pair<Object, String>,Pair<Object,String>> Dspan = FinCat.FinCat.product(D, span);
+		Functor<Pair<Object,String>,Pair<Object,String>,Object,Object> fst = FinCat.FinCat.first(D, span);
+		
+		
+		FUNCTION<Pair<Object,String>,Set> o = p -> {
+			if (p.second.equals("A")) {
+				return (Set) l.source.applyO(p.first);
+			} else if (p.second.equals("B")) {
+				return (Set) l.target.applyO(p.first);
+			} else if (p.second.equals("C")) {
+				return (Set) r.target.applyO(p.first);
+			} else {
+				throw new RuntimeException();
+			}
+		};
+		FUNCTION<Pair<Object,String>,Fn> x = fp -> {
+			Object f = fp.first;
+			String p = fp.second;
+			Object a = D.source(f);
+			Object b = D.target(f);
+			String i = span.source(p);
+			String j = span.target(p);
+			Functor I = i == "A" ? l.source : i == "B" ? l.target : r.target;
+			Functor J = j == "A" ? l.source : j == "B" ? l.target : r.target;
+			Fn If = (Fn) I.applyA(f);
+			Fn Jf = (Fn) J.applyA(f);
+			Transform P = p == "f" ? l : p == "g" ? r : p == "a" ? Transform.id(l.source) : p == "b" ? Transform.id(l.target) : Transform.id(r.target);
+			Fn Pb = (Fn) P.apply(b);
+			Fn Pa = (Fn) P.apply(a);
+			return Fn.compose(Pa, Jf);
+/*			if (p.second.equals("f")) {
+				return (Fn) l.apply(p.first);
+			} else if (p.second.equals("g")) {
+				return (Fn) r.apply(p.first);
+			} else if (p.second.equals("a")) {
+				return (Fn) l.source.applyA(p.first); //Fn.id(o.apply(new Pair<>(p.first, "A")));
+			} else if (p.second.equals("b")) {
+				return (Fn) l.target.applyA(p.first); //Fn.id(o.apply(new Pair<>(p.first, "B")));
+			} else if (p.second.equals("c")) {
+				return (Fn) r.target.applyA(p.first); //Fn.id(o.apply(new Pair<>(p.first, "C")));
+			} else {
+				throw new RuntimeException();
+			} */
+		};
+		Functor I = new Functor(Dspan, FinSet.FinSet(), o, x);
+		
+		return FDM.sigmaF(fst).applyO(I);		
+	}
+
+	@Override
+	public Category visit(FQLProgram env, Union e) {
+		throw new RuntimeException("Union should have been eliminated by pre-processing.");
 	}
 }

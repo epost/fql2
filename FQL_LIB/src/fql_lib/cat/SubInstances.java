@@ -8,12 +8,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.Function;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import fql_lib.Chc;
+import fql_lib.FUNCTION;
 import fql_lib.Pair;
 import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.FinSet.Fn;
@@ -176,7 +176,7 @@ public class SubInstances {
 		return ret;
 	}
 
-	private static Function<Object, Object> down2(Set<Pair<Object, Object>> set) {
+	private static FUNCTION<Object, Object> down2(Set<Pair<Object, Object>> set) {
 		return x -> {
 			for (Pair<Object, Object> p : set) {
 				if (p.first.equals(x)) {

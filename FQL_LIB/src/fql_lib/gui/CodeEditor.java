@@ -366,7 +366,7 @@ public class CodeEditor extends JPanel implements Runnable {
 		ctm.addTemplate(ct);
 
 		ct = new StaticCodeTemplate("transform", "transform ",
-				" = {\n\tnobjects;\n} : ( :  -> ) -> ( :  -> ) "); 
+				" = {\n\tobjects;\n} : ( :  -> ) -> ( :  -> ) "); 
 		ctm.addTemplate(ct); 
 
 		topArea = new RSyntaxTextArea();
@@ -651,7 +651,7 @@ public class CodeEditor extends JPanel implements Runnable {
 		}
 
 		try {
-			env = Driver.makeEnv(init);
+			env = Driver.makeEnv(program, init);
 			// Driver.check(init);
 	/*		Triple<Environment, String, List<Throwable>> envX = Driver
 					.makeEnv(init);

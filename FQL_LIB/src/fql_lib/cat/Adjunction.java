@@ -1,7 +1,7 @@
 package fql_lib.cat;
 
 import fql_lib.DEBUG;
-
+import fql_lib.FUNCTION;
 public class Adjunction<CO, CA, DO, DA> {
 
 	public Functor<DO, DA, CO, CA> F;

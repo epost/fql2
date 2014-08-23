@@ -333,13 +333,15 @@ public class IntegrationExample extends Example {
 			+ "\ntransform x1t2_r = APPLY ettta2 on P"
 			+ "\ntransform x2t2_r = APPLY ettta2 on T"
 			+ "\n"
+			+ "\nfunctor ANSWER = apply colimZ2 on object uniq"
+			+ "\n"
 			+ "\n//and this is our commutative square"
 			+ "\nfunctor check4 = {"
 			+ "\n	objects "
 			+ "\n		O -> dom ft2_r, "
 			+ "\n		P -> cod ft2_r, "
 			+ "\n		T -> cod gt2_r,"
-			+ "\n		X -> apply colimZ2 on object uniq;"
+			+ "\n		X -> ANSWER;"
 			+ "\n	arrows "
 			+ "\n		f -> ft2_r, "
 			+ "\n		g -> gt2_r, "
@@ -347,6 +349,8 @@ public class IntegrationExample extends Example {
 			+ "\n		x2 -> x2t2_r;"
 			+ "\n} : C1 -> (Set^PushoutSchema)"
 			+ "\n";
+
+
 
 	
 }

@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -21,7 +20,7 @@ import fql_lib.cat.Category;
 import fql_lib.cat.Functor;
 import fql_lib.cat.Transform;
 import fql_lib.cat.categories.FinSet.Fn;
-
+import fql_lib.FUNCTION;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A, Set, Fn>> {
@@ -115,25 +114,25 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 	public <X> Transform<O, A, Set, Fn> terminal(Functor<O, A, Set, Fn> o) {
 		Set<Unit> ret = new HashSet<>();
 		ret.add(new Unit());
-		Function<O, Fn> fn = x -> new Fn<>(o.applyO(x), ret, y -> new Unit());
+		FUNCTION<O, Fn> fn = x -> new Fn<>(o.applyO(x), ret, y -> new Unit());
 		return new Transform<>(o, terminal(), fn);
 	}
 
 	public Functor<O, A, Set, Fn> product(Functor<O, A, Set, Fn> f, Functor<O, A, Set, Fn> g) {
-		Function<O, Set> h = x -> FinSet.FinSet.product(f.applyO(x), g.applyO(x));
-		Function<A, Fn> i = x -> FinSet.FinSet.pairF(f.applyA(x), g.applyA(x));
+		FUNCTION<O, Set> h = x -> FinSet.FinSet.product(f.applyO(x), g.applyO(x));
+		FUNCTION<A, Fn> i = x -> FinSet.FinSet.pairF(f.applyA(x), g.applyA(x));
 		return new Functor<>(cat, FinSet.FinSet, h, i);
 	} 
 	
 
 	public Transform<O, A, Set, Fn> first(Functor<O, A, Set, Fn> o1, Functor<O, A, Set, Fn> o2) {
-		Function<O, Fn> f = o -> new Fn<Pair, Object>(FinSet.FinSet.product(o1.applyO(o),
+		FUNCTION<O, Fn> f = o -> new Fn<Pair, Object>(FinSet.FinSet.product(o1.applyO(o),
 				o2.applyO(o)), o1.applyO(o), x -> x.first);
 		return new Transform<>(product(o1, o2), o1, f);
 	}
 
 	public Transform<O, A, Set, Fn> second(Functor<O, A, Set, Fn> o1, Functor<O, A, Set, Fn> o2) {
-		Function<O, Fn> f = o -> new Fn<Pair, Object>(FinSet.FinSet.product(o1.applyO(o),
+		FUNCTION<O, Fn> f = o -> new Fn<Pair, Object>(FinSet.FinSet.product(o1.applyO(o),
 				o2.applyO(o)), o2.applyO(o), x -> x.second);
 		return new Transform<>(product(o1, o2), o2, f);
 	}
@@ -142,7 +141,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 		if (!f.source.equals(g.source)) {
 			throw new RuntimeException();
 		}
-		Function<O, Fn> fn = o -> new Fn<>(f.source.applyO(o), FinSet.FinSet.product(
+		FUNCTION<O, Fn> fn = o -> new Fn<>(f.source.applyO(o), FinSet.FinSet.product(
 				f.target.applyO(o), g.target.applyO(o)), x -> new Pair<>(f.apply(o).apply(x), g
 				.apply(o).apply(x)));
 		return new Transform<>(f.source, product(f.target, g.target), fn);
@@ -150,7 +149,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 	
 	public Transform<O, A, Set, Fn> initial(Functor<O, A, Set, Fn> o) {
 		Set ret = new HashSet<>();
-		Function<O, Fn> fn = x -> new Fn<>(ret, o.applyO(x), y -> { throw new RuntimeException(); });
+		FUNCTION<O, Fn> fn = x -> new Fn<>(ret, o.applyO(x), y -> { throw new RuntimeException(); });
 		return new Transform<>(initial(), o, fn);
 	}
 	
@@ -163,19 +162,19 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 	
 	
 	public Functor<O, A, Set, Fn> coproduct(Functor<O, A, Set, Fn> f, Functor<O, A, Set, Fn> g) {
-		Function<O, Set> h = x -> FinSet.FinSet.coproduct(f.applyO(x), g.applyO(x));
-		Function<A, Fn> i = x -> FinSet.FinSet.matchF(f.applyA(x), g.applyA(x));
+		FUNCTION<O, Set> h = x -> FinSet.FinSet.coproduct(f.applyO(x), g.applyO(x));
+		FUNCTION<A, Fn> i = x -> FinSet.FinSet.matchF(f.applyA(x), g.applyA(x));
 		return new Functor<>(cat, FinSet.FinSet, h, i);
 	}
 
 	public Transform<O, A, Set, Fn> inleft(Functor<O, A, Set, Fn> o1, Functor<O, A, Set, Fn> o2) {
-		Function<O, Fn<?, Chc>> f = o -> new Fn<Object, Chc>(o1.applyO(o), FinSet.FinSet.coproduct(o1.applyO(o),
+		FUNCTION<O, Fn<?, Chc>> f = o -> new Fn<Object, Chc>(o1.applyO(o), FinSet.FinSet.coproduct(o1.applyO(o),
 				o2.applyO(o)), x -> Chc.inLeft(x));
 		return new Transform(o1, coproduct(o1, o2), f);
 	}
 
 	public Transform<O, A, Set, Fn> inright(Functor<O, A, Set, Fn> o1, Functor<O, A, Set, Fn> o2) {
-		Function<O, Fn<?, Chc>> f = o -> new Fn<Object, Chc>(o2.applyO(o), FinSet.FinSet.coproduct(o1.applyO(o),
+		FUNCTION<O, Fn<?, Chc>> f = o -> new Fn<Object, Chc>(o2.applyO(o), FinSet.FinSet.coproduct(o1.applyO(o),
 				o2.applyO(o)), x -> Chc.inRight(x));
 		return new Transform(o2, coproduct(o1, o2), f);
 	}
@@ -184,7 +183,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 		if (!f.target.equals(g.target)) {
 			throw new RuntimeException();
 		}
-		Function<O, Fn<Chc, ?>> fn = o -> new Fn<Chc, Object>(FinSet.FinSet.coproduct(f.source.applyO(o), g.source.applyO(o)), 
+		FUNCTION<O, Fn<Chc, ?>> fn = o -> new Fn<Chc, Object>(FinSet.FinSet.coproduct(f.source.applyO(o), g.source.applyO(o)), 
 				f.target.applyO(o), x -> x.left ? f.apply(o).apply(x.l) : g.apply(o).apply(x.r));
 		return new Transform(coproduct(f.source, g.source), f.target, fn);
 	}
@@ -202,8 +201,8 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 		Category<O1, A1> A = F.source;
 		Category<Pair<O1,O2>,Pair<A1,A2>> AB = FinCat.FinCat.product(A, B);
 		
-		Function<Pair<O1,O2>, Set> f = x -> F.applyO(x.first).applyO(x.second);
-		Function<Pair<A1,A2>, Fn>  g = x -> { 
+		FUNCTION<Pair<O1,O2>, Set> f = x -> F.applyO(x.first).applyO(x.second);
+		FUNCTION<Pair<A1,A2>, Fn>  g = x -> { 
 			Fn k = F.applyA(x.first).apply(B.source(x.second));
 			Fn l = F.applyO(A.target(x.first)).applyA(x.second);
 			return Fn.compose(k, l);
@@ -235,9 +234,9 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 		
 		Category<Functor<O2,A2,Set,Fn>, Transform<O2,A2,Set,Fn>> SetB = Inst.get(B);
 		
-		Function<O1, Functor<O2,A2,Set,Fn>> f 
+		FUNCTION<O1, Functor<O2,A2,Set,Fn>> f 
 		  = o1 -> new Functor<>(B, FinSet.FinSet, o2 -> F.applyO(new Pair<>(o1,o2)), a2 -> F.applyA(new Pair<>(A.identity(o1), a2))); 
-		Function<A1, Transform<O2,A2,Set,Fn>> g 
+		FUNCTION<A1, Transform<O2,A2,Set,Fn>> g 
 		  = a1 -> new Transform<>(f.apply(A.source(a1)), f.apply(A.target(a1)), o2 -> F.applyA(new Pair<>(a1,B.identity(o2)))); 
 		
 		return new Functor<O1,A1,Functor<O2,A2,Set,Fn>, Transform<O2,A2,Set,Fn>>(A, SetB, f, g);
@@ -301,9 +300,9 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 	
 	public Functor<O,A,Set,Fn> apply(Transform<O,A,Set,Fn> t1, Functor<O,A,Set,Fn> I) {
 		
-		Function<O, Set> f = o -> (Set) I.applyO(o).stream().map(i -> t1.apply(o).apply(i)).collect(Collectors.toSet());
+		FUNCTION<O, Set> f = o -> (Set) I.applyO(o).stream().map(i -> t1.apply(o).apply(i)).collect(Collectors.toSet());
 		
-		Function<A, Fn> g = a -> { 
+		FUNCTION<A, Fn> g = a -> { 
 			Map<Object,Object> m = Util.reify(I.applyA(a)::apply, I.applyO(I.source.source(a)));
 			Map n = new HashMap<>();
 			for (Entry e : m.entrySet()) {
@@ -662,7 +661,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 			nm.put(n, set);
 		}
 		for (A n : cat.arrows()) {
-			Function g = x -> {
+			FUNCTION g = x -> {
 				Object p = a.applyA(n).apply(x);
 				Object q = b.applyA(n).apply(x);
 				if (!p.equals(q)) {
@@ -688,7 +687,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 			nm.put(n, set);
 		}
 		for (A n : cat.arrows()) {
-			Function g = x -> {
+			FUNCTION g = x -> {
 				Object a_out = null;
 				Object b_out = null;
 				if (a.applyA(n).source.contains(x)) {

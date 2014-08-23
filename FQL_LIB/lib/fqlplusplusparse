@@ -60,6 +60,7 @@
     <keyword>or</keyword>
     <keyword>path</keyword>
     <keyword>pi</keyword>
+    <keyword>pivot</keyword>
     <keyword>prop</keyword>
     <keyword>range</keyword>
     <keyword>relationalize</keyword>
@@ -70,7 +71,9 @@
     <keyword>true</keyword>
     <keyword>tt</keyword>
     <keyword>uncurry</keyword>
+    <keyword>union</keyword>
     <keyword>unit</keyword>
+    <keyword>unpivot</keyword>
     <keyword>void</keyword>
     <keyword>whisker</keyword>
   </keywords2>

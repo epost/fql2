@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -36,6 +37,8 @@ import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.collections15.Transformer;
 
+//import org.apache.commons.collections15.Transformer;
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -63,8 +66,6 @@ import fql_lib.decl.CatOps;
 import fql_lib.decl.Environment;
 import fql_lib.decl.FQLProgram;
 import fql_lib.decl.FunctorExp;
-//import org.apache.commons.collections15.Transformer;
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
 
 /**
  * 
@@ -200,7 +201,8 @@ public class Display {
 
 	@SuppressWarnings({ "unchecked" })
 	private JPanel catTable(Category view) {
-		JPanel gp = new JPanel(new GridLayout(2, 3));
+//		JPanel gp = new JPanel(new GridLayout(2, 3));
+		List<JComponent> gp = new LinkedList<>();
 
 		Object[][] rowData1 = new Object[view.objects().size()][1];
 		int i = 0;
@@ -231,8 +233,8 @@ public class Display {
 			i++;
 		}
 		Object[] colNames3 = new Object[] { "Object", "Arrow" };
-		JPanel gp3 = Util.makeTable(BorderFactory.createEtchedBorder(), "Identities ("
-				+ view.arrows().size() + ")", rowData3, colNames3);
+		JPanel gp3 = Util.makeTable(BorderFactory.createEtchedBorder(), "s ("
+				+ view.objects().size() + ")", rowData3, colNames3);
 
 		Object[][] rowData4 = new Object[view.arrows().size()][2];
 		i = 0;
@@ -279,7 +281,7 @@ public class Display {
 		gp.add(gp2);
 		gp.add(gp5);
 		gp.add(gp6);
-		return gp;
+		return Util.makeGrid(gp);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -370,7 +372,7 @@ public class Display {
 			}
 
 			if (DEBUG.debug.ftr_joined) {
-			px.add("Joined", makeJoined(src_sig, view).first);
+			px.add("Joined", (JPanel) makeJoined(src_sig, view).first); //cast needed for javac for some reason
 			}
 
 			if (DEBUG.debug.ftr_elements) {
@@ -435,7 +437,8 @@ public class Display {
 		}
 
 		if (DEBUG.debug.ftr_tabular) {
-			JPanel gp = new JPanel(new GridLayout(2, 1));
+			List<JComponent> gp = new LinkedList<>();
+			//JPanel gp = new JPanel(new GridLayout(2, 1));
 
 			Object[][] rowData = new Object[view.source.objects().size()][2];
 			int i = 0;
@@ -467,7 +470,7 @@ public class Display {
 			gp.add(gp1);
 			gp.add(gp2);
 
-			px.add("Table", gp);
+			px.add("Table", Util.makeGrid(gp));
 		}
 
 		if (DEBUG.debug.ftr_textual) {
@@ -762,11 +765,13 @@ public class Display {
 			 */
 	FQLProgram prog;
 	Environment env;
+	GUI gui;
 
 	// private Map<String, Color> cmap = new HashMap<>();
 	public Display(String title, FQLProgram p, Environment env) {
 		this.prog = p;
 		this.env = env;
+		this.gui = gui;
 
 		for (String c : p.order) {
 			if (env.sets.containsKey(c)) {
@@ -861,7 +866,8 @@ public class Display {
 				"Select:"));
 		JScrollPane yyy1 = new JScrollPane(yyy);
 		temp1.add(yyy1);
-		temp1.setMinimumSize(new Dimension(200, 600));
+	//	temp1.setMinimumSize(new Dimension(200, 600));
+	//	yyy.setPreferredSize(new Dimension(200, 600));
 		yyy.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		yyy.addListSelectionListener(new ListSelectionListener() {
@@ -878,13 +884,20 @@ public class Display {
 
 		});
 
-		JPanel north = new JPanel(new GridLayout(2, 1));
-		FQLSplit px = new FQLSplit(.5, JSplitPane.HORIZONTAL_SPLIT);
-		px.setDividerSize(6);
+		JPanel north = new JPanel(new GridLayout(1, 1));
+	//	JButton saveButton = new JButton("Save GUI");
+	//	north.add(saveButton);
+	//	saveButton.setMinimumSize(new Dimension(10,10));
+	//	saveButton.addActionListener(x -> GUI.save2(env));
+		JSplitPane px = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		//px.setResizeWeight(.8);
+		px.setDividerLocation(200);
+//		FQLSplit px = new FQLSplit(.5, JSplitPane.HORIZONTAL_SPLIT);
+		px.setDividerSize(4);
 		frame = new JFrame(/* "Viewer for " + */s);
 
 		JSplitPane temp2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		temp2.setResizeWeight(1);
+	temp2.setResizeWeight(1);
 		temp2.setDividerSize(0);
 		temp2.setBorder(BorderFactory.createEmptyBorder());
 		temp2.add(temp1);
@@ -901,7 +914,7 @@ public class Display {
 
 		// frame.setContentPane(bd);
 		frame.setContentPane(px);
-		frame.setSize(850, 600);
+		frame.setSize(900, 600);
 
 		ActionListener escListener = new ActionListener() {
 			@Override
@@ -1282,7 +1295,7 @@ public class Display {
 		vv.getRenderContext().setVertexLabelTransformer(ttt);
 		vv.getRenderContext().setEdgeLabelTransformer(ttt);
 
-		Map<Object, JPanel> map = makeJoined(sig, fn).second;
+		Map<Object, JPanel> map = (Map<Object, JPanel>) makeJoined(sig, fn).second; //javac again
 		vv.getPickedVertexState().addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -1504,10 +1517,11 @@ public class Display {
 		}
 
 		int x = (int) Math.ceil(Math.sqrt(sig.nodes.size()));
-		if (x == 0) {
-			return new Pair<>(new JPanel(), new HashMap<>());
-		}
-		JPanel ret = new JPanel(new GridLayout(x, x));
+		List<JComponent> ret = new LinkedList<>();
+//		if (x == 0) {
+	//		return new Pair<>(new JPanel(), new HashMap<>());
+	//	}
+	//	JPanel ret = new JPanel(new GridLayout(x, x));
 
 		for (Signature.Node n : sig.nodes) {
 			List<Signature<String, String>.Edge> cols = map.get(n);
@@ -1556,7 +1570,7 @@ public class Display {
 			mapX.put(t.name, p);
 		}
 
-		return new Pair<>(ret, mapX);
+		return new Pair<>(Util.makeGrid(ret), mapX);
 	}
 
 

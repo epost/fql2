@@ -1,6 +1,8 @@
 package fql_lib;
 
-public class Triple<S1, S2, S3> implements Comparable<Triple<S1, S2, S3>> {
+import java.io.Serializable;
+
+public class Triple<S1, S2, S3> implements Comparable<Triple<S1, S2, S3>>, Serializable {
 
 	public Triple(S1 a, S2 b, S3 c) {
 		first = a; second = b; third = c;

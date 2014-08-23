@@ -2,11 +2,13 @@ package fql_lib;
 
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
@@ -23,6 +25,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import fql_lib.cat.FDM;
 import fql_lib.examples.Example;
 import fql_lib.examples.Examples;
 import fql_lib.gui.GUI;
@@ -121,6 +124,8 @@ public class DEBUG implements Serializable {
 	public int varlen = 128;
 
 	public boolean VALIDATE = true;
+	
+	public boolean use_fast_sigma = false;
 
 	public int MAX_PATH_LENGTH = 8;
 
@@ -128,6 +133,9 @@ public class DEBUG implements Serializable {
 
 	public boolean ALL_GR_PATHS = false;
 
+	public String useLineage = "Summary as ID";
+	public String piLineage = "Summary as ID";
+	
 	public boolean VALIDATE_WITH_EDS = false;
 
 	public boolean continue_on_error = false;
@@ -207,8 +215,8 @@ public class DEBUG implements Serializable {
 
 		JTabbedPane jtb = new JTabbedPane();
 
-		JPanel general1 = new JPanel(new GridLayout(7, 1));
-		JPanel general2 = new JPanel(new GridLayout(7, 1));
+		JPanel general1 = new JPanel(new GridLayout(9, 1));
+		JPanel general2 = new JPanel(new GridLayout(9, 1));
 
 		JPanel sql1 = new JPanel(new GridLayout(10, 1));
 		JPanel sql2 = new JPanel(new GridLayout(10, 1));
@@ -240,6 +248,11 @@ public class DEBUG implements Serializable {
 		general2.add(surjB);
 		surjL.setToolTipText("Allows the attribute mapping of pi migrations to be surjections.");
 */
+		
+//		JCheckBox fastbox = new JCheckBox("", use_fast_sigma);
+	//	JLabel fastboxl = new JLabel("Use fast sigma (dangerous - will break things):");
+	//	general1.add(fastboxl);
+	//	general2.add(fastbox);
 		
 		JCheckBox limex = new JCheckBox("", limit_examples);
 		JLabel limexL = new JLabel("Show only some examples:");
@@ -300,6 +313,18 @@ public class DEBUG implements Serializable {
 		label4.setToolTipText(label4text);
 		general1.add(label4);
 		general2.add(jcb0); */
+		
+		JComboBox lineageBox = new JComboBox(new Object[] {"Fresh IDs", "Lineage as ID", "Summary as ID"});
+		lineageBox.setSelectedItem(useLineage);
+		JLabel lineageLabel = new JLabel("Sigma ID creation strategy:");
+		general1.add(lineageLabel);
+		general2.add(lineageBox);
+		
+		JComboBox pilineageBox = new JComboBox(new Object[] {"Fresh IDs", "Lineage as ID", "Summary as ID"});
+		pilineageBox.setSelectedItem(piLineage);
+		JLabel pilineageLabel = new JLabel("Pi ID creation strategy:");
+		general1.add(pilineageLabel);
+		general2.add(pilineageBox);
 
 		JCheckBox jcb = new JCheckBox("", VALIDATE);
 		JLabel label5 = new JLabel("Validate categories/functors/etc:");
@@ -733,7 +758,9 @@ public class DEBUG implements Serializable {
 			// SHOW_QUERY_PATHS = jcb1.isSelected();
 			MultiView = jcbM.isSelected();
 			limit_examples = limex.isSelected();
-
+			useLineage = (String) lineageBox.getSelectedItem();
+			piLineage = (String) pilineageBox.getSelectedItem();
+			
 			// CHECK_MAPPINGS = jcb1.isSelected();
 			MAX_PATH_LENGTH = a;
 			MAX_DENOTE_ITERATIONS = b;
@@ -750,6 +777,7 @@ public class DEBUG implements Serializable {
 			schema_tabular = schema_tabular_box.isSelected();
 			schema_textual = schema_textual_box.isSelected();
 			schema_rdf = schema_rdf_box.isSelected();
+		//	use_fast_sigma = fastbox.isSelected();
 			
 			mapping_ed = mapping_ed_box.isSelected();
 			mapping_graphical = mapping_graphical_box.isSelected();
@@ -797,6 +825,9 @@ public class DEBUG implements Serializable {
 			ftr_joined = ftr_joined_box.isSelected();
 			ftr_mapping = ftr_mapping_box.isSelected();
 			trans_elements = t_elements_box.isSelected();
+			
+			FDM.pis = new HashMap<>();
+			FDM.sigmas = new HashMap<>();
 
 			
 		//	allow_surjective = surjB.isSelected();
@@ -816,7 +847,11 @@ public class DEBUG implements Serializable {
 			jdbcUrl = jdbcField.getText();
 			jdbcClass = jdbcField2.getText();
 			FILE_PATH = fileArea.getText();
-			
+			File FILE = new File(FILE_PATH);
+			if (!FILE_PATH.trim().equals("") && (!FILE.exists() || !FILE.isDirectory())) {
+				JOptionPane.showMessageDialog(null, "Bad file-system path");				
+			}
+
 		//	kan_option =  lkb.getSelectedItem().toString();
 			
 			if (!lfb.getSelectedItem().equals(look_and_feel)) {

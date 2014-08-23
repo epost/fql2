@@ -43,20 +43,20 @@ public class FQLParser {
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
 	static String[] res = new String[] {  "set", "function", "category", "functor", "range",
-		    "not", "and", "or", "implies", "return", "coreturn", "uncurry",
+		    "not", "and", "or", "implies", "return", "coreturn", "uncurry", "pushout",
 			 "match",  "objects", "cod", "dom", "apply", "on", "object", "arrow", "left", "right", "whisker",
 			 "transform",  "arrows", "Set", "Cat", "kleisli", "cokleisli",
-			"equations", "id", "delta", "sigma", "pi", "eval", "in", "path",
+			"equations", "id", "delta", "sigma", "pi", "eval", "in", "path", "union",
 			"relationalize",  "fst", "forall", "exists", "tt", "ff", "APPLY",
-			"snd", "inl", "inr", "curry",  "void", "unit", "CURRY", "pivot",
+			"snd", "inl", "inr", "curry",  "void", "unit", "CURRY", "pivot", "unpivot",
 			"prop", "iso1", "iso2", "true", "false", "char", "kernel" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
-	static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
+	public static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
-	static final Parser<?> TOKENIZER = Parsers.or(
+	public static final Parser<?> TOKENIZER = Parsers.or(
 			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
 			RESERVED.tokenizer(), (Parser<?>) Terminals.Identifier.TOKENIZER,
 			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
@@ -202,11 +202,12 @@ public class FQLParser {
 		
 		Parser<?> kleisli  = Parsers.tuple(term("kleisli"), ident(), ident(), ident());
 		Parser<?> cokleisli= Parsers.tuple(term("cokleisli"), ident(), ident(), ident());
-		Parser<?> pivot = Parsers.tuple(term("pivot"), ident());
+		
+		Parser<?> union = Parsers.tuple(term("union"), ref.lazy(), ref.lazy());
 		
 		Parser<?> a = Parsers.or(new Parser<?>[] { term("void"), term("unit"), 
 				 plusTy, prodTy, expTy, k, v,
-				ident() , catConst(), term("Cat"), term("Set"), kleisli, cokleisli, pivot });
+				ident() , catConst(), term("Cat"), term("Set"), kleisli, cokleisli, union });
 
 		ref.set(a);
 
@@ -354,7 +355,7 @@ public class FQLParser {
 		return new SetExp.Var(o.toString()); 
 	}
 
-	public static final CatExp toCatConst(Object y) {
+	public static final CatExp.Const toCatConst(Object y) {
 		Set<String> nodes = new HashSet<>();
 		Set<Triple<String, String, String>> arrows = new HashSet<>();
 		Set<Pair<Pair<String, List<String>>, Pair<String, List<String>>>> eqs = new HashSet<>();
@@ -411,7 +412,10 @@ public class FQLParser {
 				return new CatExp.Times(toCat(t.a), toCat(t.c));
 			} else if (y.equals("^")) {
 				return new CatExp.Exp(toCat(t.a), toCat(t.c));
-			} else {
+			} else if (t.a.toString().equals("union")) {
+				return new CatExp.Union(toCat(t.b), toCat(t.c));
+			}
+			else {
 				return toCatConst(o);
 			}
 		} catch (RuntimeException cce) {
@@ -423,9 +427,7 @@ public class FQLParser {
 				return new CatExp.Dom(toFtr(p.b));
 			} else if (p.a.toString().equals("cod")) {
 				return new CatExp.Cod(toFtr(p.b));
-			} else if (p.a.toString().equals("pivot")) {
-				return new CatExp.Pivot(p.b.toString());
-			}
+			} 
 		} catch (RuntimeException cce) {
 		}
 
@@ -657,6 +659,9 @@ public class FQLParser {
 				Parsers.tuple(term("delta"), ref.lazy()),
 				Parsers.tuple(term("sigma"), ref.lazy()),
 				Parsers.tuple(term("pi"), ref.lazy()),
+				Parsers.tuple(term("pivot"), ref.lazy()),
+				Parsers.tuple(term("unpivot"), ref.lazy()),
+				Parsers.tuple(term("pushout"), ident(), ident()),
 				Parsers.tuple(term("apply"), ref.lazy(), term("on"), term("object"), ref.lazy()),
 				Parsers.tuple(term("id"), cat()),
 				Parsers.tuple(term("prop"), cat()),
@@ -1248,7 +1253,9 @@ public class FQLParser {
 				return new FunctorExp.One(toCat(p.b), toCat(p.c));	
 			} else if (p1.equals("void")) {
 				return new FunctorExp.Zero(toCat(p.b), toCat(p.c));	
-			} 
+			} else if (p1.equals("pushout")) {
+				return new FunctorExp.Pushout(p.b.toString(), p.c.toString());					
+			}
 
 		} catch (RuntimeException re) {
 		}
@@ -1276,7 +1283,11 @@ public class FQLParser {
 				return new FunctorExp.Dom(p2.toString(), true);
 			} else if (p1.equals("cod")) {
 				return new FunctorExp.Dom(p2.toString(), false);
-			}
+			} else if (p1.equals("pivot")) {
+				return new FunctorExp.Pivot(toFtr(p2), true);
+			} else if (p1.equals("unpivot")) {
+				return new FunctorExp.Pivot(toFtr(p2), false);
+			} 
 		} catch (RuntimeException re) {
 
 		}

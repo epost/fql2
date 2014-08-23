@@ -47,7 +47,13 @@ public class EmployeeExample extends Example {
 			+ "\n	manager -> id emps,"
 			+ "\n	worksIn -> (foo ; snd emps depts),"
 			+ "\n	secretary -> { (q10, 101), (x02, 102) } : depts -> emps ;"
-			+ "\n} : S -> Set";
+			+ "\n} : S -> Set"
+			+ "\n"
+			+ "\nfunctor K = pivot J"
+            + "\ncategory grothJ = dom K"
+            + "\nfunctor L = unpivot K"
+            + "\ntransform JK = iso1 J L"
+			+ "\n";
 
 
 

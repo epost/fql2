@@ -1,7 +1,9 @@
 package fql_lib;
 
+import java.io.Serializable;
 
-public class Pair<T1, T2> implements Comparable<Pair<T1, T2>> {
+
+public class Pair<T1, T2> implements Comparable<Pair<T1, T2>>, Serializable {
 
 	public T1 first;
 	public T2 second;

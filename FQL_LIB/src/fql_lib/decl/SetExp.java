@@ -1,14 +1,16 @@
 package fql_lib.decl;
 
+import java.io.Serializable;
 import java.util.Set;
 //import fql.parse.PrettyPrinter;
 
 
 
 
+
 import fql_lib.Util;
 
-public abstract class SetExp {
+public abstract class SetExp implements Serializable{
 	
 	public static class Apply extends SetExp {
 		public String f;

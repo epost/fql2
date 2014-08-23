@@ -1,5 +1,6 @@
 package fql_lib.cat.presentation;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -7,32 +8,44 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import fql_lib.DEBUG;
+import fql_lib.FUNCTION;
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Unit;
 import fql_lib.Util;
 import fql_lib.cat.Category;
+import fql_lib.cat.KB;
 import fql_lib.cat.LeftKan;
 
 //this requires finite denotations (paths always normalized)
-public class Signature<O,A> {
+public class Signature<O,A> implements Serializable {
 	
-	public class Node {
+	public class Node implements Serializable{
 		public O name;
 		
 		public String toString() {
 			return name.toString();
 		}
+		
+		private Node() { }
 
 		public Node(O o) {
+			if (o == null) {
+				throw new RuntimeException();
+			}
 			this.name = o;
 		}
 
 		@Override
 		public int hashCode() {
-			return name.hashCode();
+			final int prime = 31;
+			int result = 1;
+		//	result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			return result;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -51,7 +64,7 @@ public class Signature<O,A> {
 	
 	}
 	
-	public class Edge {
+	public class Edge implements Serializable{
 		public A name;
 		public Node source;
 		public Node target;
@@ -111,7 +124,7 @@ public class Signature<O,A> {
 		
 	}
 	
-	public class Path {
+	public class Path implements Serializable {
 		public Node source, target;
 		public List<Edge> path;
 		
@@ -160,6 +173,9 @@ public class Signature<O,A> {
 			for (Edge e : p1.path) {
 				n = e.target;
 				this.path.add(e);
+			}
+			if (!p2.source.equals(n)) {
+				throw new RuntimeException("Cannot append: " + p1 + " and " + p2 + ", not equal: " + p2.source + " and " + n);
 			}
 			for (Edge e : p2.path) {
 				n = e.target;
@@ -292,7 +308,7 @@ public class Signature<O,A> {
 				return e;
 			}
 		}
-		throw new RuntimeException("Bad edge: " + a);
+		throw new RuntimeException("Cannot find arrow " + a + " in " + this);
 	}
 		
 	public Node getNode(O a) {
@@ -301,10 +317,10 @@ public class Signature<O,A> {
 				return e;
 			}
 		}
-		throw new RuntimeException("Cannot find " + a + " in " + this);
+		throw new RuntimeException("Cannot find object " + a + " in " + this);
 	}
 	
-	public class Eq {
+	public class Eq implements Serializable {
 		public Path lhs, rhs;
 
 		@Override
@@ -364,9 +380,9 @@ public class Signature<O,A> {
 		return getCat().second.apply(p);
 	}
 	
-	private Pair<Category<Node, Path>, Function<Path, Path>> cat;
+	private Pair<Category<Node, Path>, FUNCTION<Path, Path>> cat;
 	
-	private Pair<Category<Node, Path>, Function<Path, Path>> getCat() {
+	private Pair<Category<Node, Path>, FUNCTION<Path, Path>> getCat() {
 		if (cat == null) {
 			cat = toCategory();
 		}
@@ -519,7 +535,20 @@ public class Signature<O,A> {
 		return ret;
 	}
 
-	private Pair<Category<Signature<O, A>.Node, Signature<O, A>.Path>, Function<Signature<O, A>.Path, Signature<O, A>.Path>> toCategory() {
+	private void doInfiniteCheck() {
+		if (eqs.size() > 0) {
+			return;
+		}
+		for (Signature<O, A>.Edge e : edges) {
+			if (e.source.equals(e.target)) {
+				throw new RuntimeException("Category is infinite (contains self-loop and no equations)");
+			}
+		}
+	}
+	
+	private Pair<Category<Signature<O, A>.Node, Signature<O, A>.Path>, FUNCTION<Signature<O, A>.Path, Signature<O, A>.Path>> toCategory() {
+		doInfiniteCheck();		
+		
 		Pair<Signature<O, A>, Mapping<O, A, O, A>> AF = onlyObjects();
 		Signature<O, A> A = AF.first;
 		Mapping<O, A, O, A> F = AF.second;
@@ -534,7 +563,7 @@ public class Signature<O,A> {
 		return helper(lk);
 	}
 
-	private Pair<Category<Signature<O, A>.Node, Signature<O, A>.Path>, Function<Signature<O, A>.Path, Signature<O, A>.Path>> helper(
+	private Pair<Category<Signature<O, A>.Node, Signature<O, A>.Path>, FUNCTION<Signature<O, A>.Path, Signature<O, A>.Path>> helper(
 			LeftKan<O, A, O, A> lk) {
 		// System.out.println("doing " + B);
 		Set<Signature<O, A>.Node> objects = nodes;
@@ -542,9 +571,9 @@ public class Signature<O,A> {
 		Set<Signature<O, A>.Path> arrows = new HashSet<>();
 		Map<Signature<O, A>.Node, Signature<O, A>.Path> identities = new HashMap<>();
 
-		final Function<Signature<O, A>.Path, Integer> fn = makeFunction(lk);
+		final Function<Signature<O, A>.Path, Object> fn = makeFunction(lk);
 		List<Signature<O, A>.Path> paths = new LinkedList<>();
-		final Map<Integer, Signature<O, A>.Path> fn2 = new HashMap<>();
+		final Map<Object, Signature<O, A>.Path> fn2 = new HashMap<>();
 
 		int numarrs = numarrs(lk);
 		for (Signature<O, A>.Node n : nodes) {
@@ -552,7 +581,7 @@ public class Signature<O,A> {
 		}
 		outer: for (int iter = 0; iter < DEBUG.debug.MAX_PATH_LENGTH; iter++) {
 			for (Signature<O, A>.Path p : paths) {
-				Integer i = fn.apply(p);
+				Object i = fn.apply(p);
 				if (fn2.get(i) == null) {
 					fn2.put(i, p);
 				}
@@ -581,21 +610,21 @@ public class Signature<O,A> {
 			throw new RuntimeException(old_str);
 		}
 
-		for (Integer i : fn2.keySet()) {
+		for (Object i : fn2.keySet()) {
 			Signature<O, A>.Path p = fn2.get(i);
 			arrows.add(p);
 		}
 
 		for (Signature<O, A>.Node n : objects) {
-			Signature<O, A>.Path a = fn2.get(getOne(lk.ua.get(n)).second);
+			Signature<O, A>.Path a = fn2.get(getOne(lk.ua2.get(n)).second);
 			identities.put(n, a);
-			for (Pair<Integer, Integer> i : lk.Pb.get(n)) {
+			for (Pair<Object, Object> i : lk.Pb2.get(n)) {
 				Signature<O, A>.Path p = fn2.get(i.first);
 				arrows.add(p);
 			}
 		}
 
-		Function<Signature<O, A>.Path, Signature<O, A>.Path> r2 = x -> {
+		FUNCTION<Signature<O, A>.Path, Signature<O, A>.Path> r2 = x -> {
 			if (fn2.get(fn.apply(x)) == null) {
 				throw new RuntimeException("Given path " + x
 						+ ", transforms to " + fn.apply(x)
@@ -621,6 +650,8 @@ public class Signature<O,A> {
 			targets.put(p, p.target);
 		} */
 
+//		Signature<Signature<O, A>.Node, Signature<O, A>.Path> injected = inject();
+		
 		Category<Signature<O, A>.Node, Signature<O, A>.Path> r1 = new Category<Signature<O, A>.Node, Signature<O, A>.Path>() {
 			
 			@Override
@@ -660,21 +691,81 @@ public class Signature<O,A> {
 				return r2.apply(new Path(x, y));
 			}
 			
+//			@Override
+//			public Signature<Signature<O, A>.Node, Signature<O, A>.Path> toSig() {
+//				return injected;
+//			}
+			
 		};
+		
+		r1.origin = this;
 		
 //		FiniteCategory<Signature<O, A>.Node, Signature<O, A>.Path> r1 = new FiniteCategory<Signature<O, A>.Node, Signature<O, A>.Path>(
 	//			objects, arrows, sources, targets, composition, identities);
 
 		// System.out.println(r1);
-
+		
+		//TODO KB stuff
+		
 		return new Pair<>(r1, r2);
+	}
+	
+	public void KB() {
+		List<Path> paths = new LinkedList<>();
+		for (Signature<O, A>.Node n : nodes) {
+			paths.add(new Path(n));
+		}
+		for (int iter = 0; iter < DEBUG.debug.MAX_PATH_LENGTH; iter++) {
+			List<Signature<O, A>.Path> paths0 = new LinkedList<>();
+			for (Signature<O, A>.Path p : paths) {
+				for (Signature<O, A>.Edge e : outEdges(p.target)) {
+					paths0.add(new Path(p, new Path(e)));
+				}
+			}
+			paths = paths0;
+		}
+		
+		Set<Pair<List<Edge>, List<Edge>>> rules = new HashSet<>();
+		for (Eq eq : eqs) {
+			rules.add(new Pair<>(eq.lhs.path, eq.rhs.path));
+		}
+		KB<Edge> kb = new KB<>(rules, 100);
+		for (Path path1 : paths) {
+			for (Path path2 : paths) {
+				if (path1.source.equals(path2.source) && path1.target.equals(path2.target)) {
+					System.out.println("Trying " + path1 + " and " + path2);
+					boolean b1 = normalize(path1).equals(normalize(path2));
+					System.out.println("starting kb");
+					boolean b2 = kb.equiv(path1.path, path2.path);
+					if (b1 != b2) {
+						throw new RuntimeException("Mismatch on " + path1 + " and " + path2 + " b1 " + b1 + " b2 " + b2);
+					}
+					System.out.println("ok");
+				}
+			}
+		}
+
+	}
+	
+	
+	public Signature<Signature<O, A>.Node, Signature<O, A>.Path> inject() {
+		Set<Triple<Signature<O, A>.Path,Signature<O, A>.Node,Signature<O, A>.Node>> arrows = new HashSet<>();
+		for (Edge e : edges) {
+			arrows.add(new Triple<>(new Path(e), e.source, e.target));
+		}
+		Set<Pair<Pair<Signature<O, A>.Node,List<Signature<O, A>.Path>>, Pair<Signature<O, A>.Node, List<Signature<O, A>.Path>>>> equivs = new HashSet<>();
+		for (Eq eq : eqs) {
+			equivs.add(new Pair<>(new Pair<>(eq.lhs.source, eq.lhs.path.stream().map(x -> new Path(x)).collect(Collectors.toList())), 
+					              new Pair<>(eq.rhs.source, eq.rhs.path.stream().map(x -> new Path(x)).collect(Collectors.toList()))));
+		}
+		return new Signature<>(nodes, arrows, equivs);
 	}
 
 	private static <O, A> int numarrs(LeftKan<O, A, O, A> lk) {
 		int ret = 0;
 
-		for (Signature<O, A>.Node k : lk.Pb.keySet()) {
-			ret += lk.Pb.get(k).size();
+		for (Signature<O, A>.Node k : lk.Pb2.keySet()) {
+			ret += lk.Pb2.get(k).size();
 		}
 
 		return ret;
@@ -690,20 +781,37 @@ public class Signature<O,A> {
 		throw new RuntimeException();
 	}
 
-	private static <O, A> Function<Signature<O, A>.Path, Integer> makeFunction(
+	private static <O, A> FUNCTION<Signature<O, A>.Path, Object> makeFunction(
 			final LeftKan<O, A, O, A> lk) {
-		Map<Pair<Signature<O,A>.Node, List<Signature<O, A>.Edge>>, Integer> cache = new HashMap<>();
+		Map<Pair<Signature<O,A>.Node, List<Signature<O, A>.Edge>>, Object> cache = new HashMap<>();
 		return p -> {
 			if (cache.containsKey(new Pair<>(p.source, p.path))) {
 				return cache.get(new Pair<>(p.source, p.path));
 			}
-			Set<Pair<Integer, Integer>> s = lk.eval(p);
-			Set<Pair<Object, Integer>> set = Util.compose(lk.ua.get(p.source),
-					s);
-			Integer ret = getOne(set).second;
+			Set<Pair<Object, Object>> s = lk.eval2(p);
+			Set<Pair<Object, Object>> set = Util.compose(lk.ua2.get(p.source), s);
+			Object ret = getOne(set).second;
 			cache.put(new Pair<>(p.source, p.path), ret);
 			return ret;
 		};
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

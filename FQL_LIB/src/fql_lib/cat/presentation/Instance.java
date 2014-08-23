@@ -1,19 +1,20 @@
 package fql_lib.cat.presentation;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
 
+import fql_lib.FUNCTION;
 import fql_lib.Unit;
 import fql_lib.Util;
 import fql_lib.cat.Functor;
 import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.FinSet.Fn;
 
-public class Instance<O, A> {
+public class Instance<O, A> implements Serializable{
 
 	public Signature<O, A> thesig;
 	public Map<Signature<O, A>.Node, Set<Object>> nm = new HashMap<>();
@@ -234,7 +235,7 @@ public class Instance<O, A> {
 	
 	@SuppressWarnings({ "rawtypes" })
 	private Functor<Signature<O,A>.Node,Signature<O,A>.Path,Set,Fn> toFunctorX() {
-		Function<Signature<O,A>.Path, Fn> f = p ->
+		FUNCTION<Signature<O,A>.Path, Fn> f = p ->
 		  new Fn<>(nm.get(p.source), nm.get(p.target), x -> evaluate(p).get(x));
 		return new Functor<>(thesig.toCat(), FinSet.FinSet, nm::get, f); 
 	}
