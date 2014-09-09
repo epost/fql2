@@ -45,6 +45,13 @@ public class KB<Y> {
 		finished = true;
 	}
 	
+	public List<Y> normalize(List<Y> e) {
+		if (!finished) {
+			throw new RuntimeException("Must finish completion to obtain normal forms.");
+		}
+		return normal_form(e, rules);
+	}
+	
 	public boolean equiv(List<Y> a, List<Y> b) {
 		Pair<List<Y>, List<Y>> pair = new Pair<>(a,b);
 		if (equivs.containsKey(pair)) {
@@ -102,6 +109,7 @@ public class KB<Y> {
 	
 	 private static <X> void go(Set<Pair<List<X>, List<X>>> t, int iteration, int max_iterations) {
 		while (!step(t)) {
+//			System.out.println(iteration);
 			if (iteration++ > max_iterations) {
 				throw new RuntimeException("Max iterations exceeded: " + max_iterations);
 			}
@@ -152,11 +160,10 @@ public class KB<Y> {
 	}
 	
 	 private static <X> void normalize(Set<Pair<List<X>, List<X>>> t) {
-	//	System.out.println("normalize " + t);
 		Set<Pair<List<X>, List<X>>> marked = new HashSet<>();
 		Pair<List<X>, List<X>> lr = null;
 		while ((lr = getUnmarked(marked, t)) != null) {
-		//	System.out.println("lr " + lr + " marked " + marked + " t " + t);
+	//		System.out.println("lr " + lr + " marked " + marked + " t " + t);
 			t.remove(lr);
 			List<X> l0 = normal_form(lr.first , t);
 			List<X> r0 = normal_form(lr.second, t);
@@ -166,13 +173,14 @@ public class KB<Y> {
 				t.add(l0r0);
 				marked.add(l0r0);
 			}
+			marked.add(lr); //TODO added, only in paper in some examples
 		}
 	}
 	
 	 private static <X> List<X> normal_form(List<X> e, Set<Pair<List<X>, List<X>>> t) {
 	//	System.out.println("normalizing " + e + " on " + t);
 		if (e.size() > 20) {
-			throw new RuntimeException(e.toString());
+			throw new RuntimeException("Normal forms too big - report to Ryan.");
 		}
 		List<X> ret = new LinkedList<>(e);
 		for (Pair<List<X>, List<X>> rule : t) {

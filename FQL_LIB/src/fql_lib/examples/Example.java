@@ -2,9 +2,13 @@ package fql_lib.examples;
 
 public abstract class Example implements Comparable<Example> {
 	
-	public abstract String getName();
+	public abstract String getName(); 
 	
 	public abstract String getText();
+	
+	public boolean isPatrick() {
+		return false;
+	}
 
 	@Override 
 	public String toString() {

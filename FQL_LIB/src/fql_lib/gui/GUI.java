@@ -71,6 +71,7 @@ public class GUI extends JPanel {
 
 		Menu fileMenu = new Menu("File");
 		MenuItem newItem = new MenuItem("New");
+		MenuItem newItem2 = new MenuItem("New Patrick");
 		MenuItem openItem = new MenuItem("Open");
 //		MenuItem openItem2 = new MenuItem("Open GUI");
 		MenuItem saveItem = new MenuItem("Save");
@@ -78,6 +79,7 @@ public class GUI extends JPanel {
 		MenuItem closeItem = new MenuItem("Close");
 		MenuItem exitItem = new MenuItem("Exit");
 		fileMenu.add(newItem);
+		fileMenu.add(newItem2);
 		fileMenu.add(openItem);
 		//fileMenu.add(openItem2);
 		fileMenu.add(saveItem);
@@ -199,7 +201,12 @@ public class GUI extends JPanel {
 
 		newItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				newAction(null, "");
+				newAction(null, "", false);
+			}
+		});
+		newItem2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				newAction(null, "", true);
 			}
 		});
 		openItem.addActionListener(new ActionListener() {
@@ -273,9 +280,16 @@ public class GUI extends JPanel {
 		JButton new_button = new JButton("New");
 		new_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				newAction(null, "");
+				newAction(null, "", false);
 			}
 		});
+		
+/*		JButton new_button2 = new JButton("New Patrick");
+		new_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				newAction(null, "", true);
+			}
+		}); */
 
 		JButton save_button = new JButton("Save");
 		save_button.addActionListener(new ActionListener() {
@@ -354,7 +368,7 @@ public class GUI extends JPanel {
 		pan.add(toolBar, BorderLayout.PAGE_START);
 		pan.add(editors, BorderLayout.CENTER);
 
-		newAction(null, "");
+		newAction(null, "", false);
 
 		// editors.setFocusCycleRoot(true);
 		// editors.requestFocusInWindow();
@@ -368,7 +382,7 @@ public class GUI extends JPanel {
 		if (e == null) {
 			return;
 		}
-		newAction(e.getName(), e.getText());
+		newAction(e.getName(), e.getText(), e.isPatrick());
 	}
 /*	
 	private static void formatAction() {
@@ -542,28 +556,35 @@ public class GUI extends JPanel {
 		if (f == null) {
 			return;
 		}
-		if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlpp")) {
-			f = new File(jfc.getSelectedFile() + ".fqlpp");
-		}
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
 				.getSelectedIndex());
+		if (e.isPatrick()) {
+			if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlpatrick")) {
+				f = new File(jfc.getSelectedFile() + ".fqlpatrick");
+			}
+		} else {
+			if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlpp")) {
+				f = new File(jfc.getSelectedFile() + ".fqlpp");
+			}
+		}
+
 		doSave(f, e.getText());
 		// change for david
 		dirty.put(e.id, false);
 		closeAction();
-		doOpen(f);
+		doOpen(f, e.isPatrick());
 	}
 
-	static void doOpen(File f) {
+	static void doOpen(File f, boolean isPatrick) {
 		String s = readFile(f.getAbsolutePath());
 		if (s == null) {
 			return;
 		}
-		Integer i = newAction(f.getName(), s);
+		Integer i = newAction(f.getName(), s, isPatrick);
 		files.put(i, f);
 	}
 	
-	static void doOpen2(File f) {
+/*	static void doOpen2(File f) {
 		try {
 		Environment env = Environment.load(f);
 		Integer i = newAction(f.getName(), env.text);
@@ -572,7 +593,7 @@ public class GUI extends JPanel {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
+	} */
 
 	static protected void openAction() {
 		delay();
@@ -583,10 +604,14 @@ public class GUI extends JPanel {
 		if (f == null) {
 			return;
 		}
-		doOpen(f);
+		if (f.getAbsolutePath().endsWith("fqlpatrick")) {
+			doOpen(f, true);
+		} else {
+			doOpen(f, false);
+		}
 	}
 	
-	static protected void openAction2() {
+/*	static protected void openAction2() {
 		delay();
 		JFileChooser jfc = new JFileChooser(DEBUG.debug.FILE_PATH);
 		jfc.setFileFilter(new Filter2());
@@ -596,7 +621,7 @@ public class GUI extends JPanel {
 			return;
 		}
 		doOpen2(f);
-	}
+	} */
 
 	static void setDirty(Integer i, boolean b) {
 		dirty.put(i, b);
@@ -627,9 +652,14 @@ public class GUI extends JPanel {
 		return titles.get(i);
 	}
 
-	static Integer newAction(String title, String content) {
+	static Integer newAction(String title, String content, boolean isPatrick) {
 		untitled_count++;
-		CodeEditor c = new CodeEditor(untitled_count, content);
+		CodeEditor c;
+		if (isPatrick) {
+			c = new XCodeEditor(untitled_count, content);
+		} else {
+			c = new FQLCodeEditor(untitled_count, content);
+		}
 		int i = editors.getTabCount();
 		keys.put(untitled_count, c);
 		dirty.put(untitled_count, false);

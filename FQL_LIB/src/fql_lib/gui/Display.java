@@ -74,7 +74,7 @@ import fql_lib.decl.FunctorExp;
  *         Class for showing all the viewers.
  */
 @SuppressWarnings("rawtypes")
-public class Display {
+public class Display implements FQLDisp {
 
 	Map<Object, Color> colors = new HashMap<>();
 
@@ -600,169 +600,8 @@ public class Display {
 		return top;
 	}
 
-	/*
-	 * public JPanel showInst(String c, Color clr, /* Color color Environment
-	 * environment, String c, Instance view) throws FQLException { JTabbedPane
-	 * px = new JTabbedPane();
-	 * 
-	 * if (DEBUG.debug.inst_graphical) { JPanel gp = view.pretty(clr); // JPanel
-	 * gp0 = new JPanel(new GridLayout(1, 1)); //
-	 * gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2)); //
-	 * gp0.add(gp); px.add("Graphical", gp); // gp.setSize(600, 600); }
-	 * 
-	 * if (DEBUG.debug.inst_textual) { JPanel ta = view.text();
-	 * px.add("Textual", ta); }
-	 * 
-	 * if (DEBUG.debug.inst_tabular) { JPanel tp = view.view();
-	 * px.add("Tabular", tp); }
-	 * 
-	 * if (DEBUG.debug.inst_joined) { JPanel joined = view.join();
-	 * px.add("Joined", joined); }
-	 * 
-	 * if (DEBUG.debug.inst_gr) { JPanel groth = view.groth(clr);
-	 * px.add("Elements", groth); }
-	 * 
-	 * if (DEBUG.debug.inst_obs) { JPanel rel = view.observables2();
-	 * px.add("Observables", rel); }
-	 * 
-	 * if (DEBUG.debug.inst_rdf) { JPanel rel = view.rdf(c); px.add("RDF", rel);
-	 * }
-	 * 
-	 * JPanel top = new JPanel(new GridLayout(1, 1));
-	 * top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2)); top.add(px);
-	 * /* System.out.println("start"); long start = System.currentTimeMillis();
-	 * System.out.println("fast " + view.subInstances_fast().size()); long x1 =
-	 * System.currentTimeMillis(); System.out.println("old " +
-	 * view.subInstances().size()); long x2 = System.currentTimeMillis();
-	 * System.out.println("fast time " + (x1 - start));
-	 * System.out.println("old time " + (x2 - x1));
-	 *//*
-		 * return top;
-		 * 
-		 * }
-		 * 
-		 * public JPanel showMapping(Environment environment, Color scolor,
-		 * Color tcolor, Mapping view) throws FQLException {
-		 * 
-		 * JTabbedPane px = new JTabbedPane();
-		 * 
-		 * if (DEBUG.debug.mapping_graphical) { JPanel gp = view.pretty(scolor,
-		 * tcolor, environment); // JPanel gp0 = new JPanel(new GridLayout(1,
-		 * 1)); // gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-		 * // gp0.add(gp); px.add("Graphical", gp); // new JScrollPane(gp0, //
-		 * JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, //
-		 * JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS)); // gp0.setSize(600, 600);
-		 * }
-		 * 
-		 * if (DEBUG.debug.mapping_textual) { JPanel ta = view.text();
-		 * px.add("Textual", ta); }
-		 * 
-		 * if (DEBUG.debug.mapping_tabular) { JPanel tp = view.view();
-		 * px.add("Tabular", tp); }
-		 * 
-		 * if (DEBUG.debug.mapping_ed) { JPanel map = view.constraint();
-		 * px.add("ED", map); }
-		 * 
-		 * JPanel top = new JPanel(new GridLayout(1, 1));
-		 * top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-		 * top.add(px); return top; }
-		 * 
-		 * public JPanel showTransform(Color scolor, Color tcolor, Environment
-		 * environment, String src_n, String dst_n, Transform view) throws
-		 * FQLException { JTabbedPane px = new JTabbedPane();
-		 * 
-		 * if (DEBUG.debug.transform_graphical) { JPanel gp =
-		 * view.graphical(scolor, tcolor, src_n, dst_n); // JPanel gp0 = new
-		 * JPanel(new GridLayout(1, 1)); //
-		 * gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2)); //
-		 * gp0.add(gp); px.add("Graphical", gp); // new JScrollPane(gp0, //
-		 * JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, //
-		 * JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS)); // gp0.setSize(600, 600);
-		 * }
-		 * 
-		 * if (DEBUG.debug.transform_textual) { JPanel ta = view.text();
-		 * px.add("Textual", ta); }
-		 * 
-		 * if (DEBUG.debug.transform_tabular) { JPanel tp = view.view(src_n,
-		 * dst_n); px.add("Tabular", tp); }
-		 * 
-		 * JPanel top = new JPanel(new GridLayout(1, 1));
-		 * top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-		 * top.add(px); return top; }
-		 * 
-		 * // FQLProgram prog;
-		 * 
-		 * public JPanel showSchema(Environment environment, Color clr,
-		 * Signature view) throws FQLException { JTabbedPane px = new
-		 * JTabbedPane();
-		 * 
-		 * if (DEBUG.debug.schema_graphical) { JComponent gp = view.pretty(clr);
-		 * // JPanel gp0 = new JPanel(new GridLayout(1, 1)); //
-		 * gp0.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2)); //
-		 * gp0.add(gp); px.add("Graphical", gp); // gp0.setSize(600, 600); }
-		 * 
-		 * if (DEBUG.debug.schema_textual) { JPanel ta = view.text();
-		 * px.add("Textual", ta); }
-		 * 
-		 * if (DEBUG.debug.schema_tabular) { JPanel tp = view.view();
-		 * px.add("Tabular", tp); }
-		 * 
-		 * if (DEBUG.debug.schema_ed) { JPanel map = view.constraint();
-		 * px.add("ED", map); }
-		 * 
-		 * if (DEBUG.debug.schema_denotation) { JPanel den = view.denotation();
-		 * px.add("Denotation", den); }
-		 * 
-		 * if (DEBUG.debug.schema_rdf) { JPanel rel = view.rdf(); px.add("OWL",
-		 * rel); }
-		 * 
-		 * JPanel top = new JPanel(new GridLayout(1, 1));
-		 * top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-		 * top.add(px); return top; }
-		 * 
-		 * public JPanel showFullQuery(FQLProgram p, Environment env, FullQuery
-		 * view, FullQueryExp x) throws FQLException { JTabbedPane px = new
-		 * JTabbedPane();
-		 * 
-		 * 
-		 * JTextArea area = new JTextArea(x.printNicely(p));
-		 * 
-		 * if (DEBUG.debug.query_graphical) { px.add("Graphical",
-		 * view.pretty()); } if (DEBUG.debug.query_textual) { px.add("Text", new
-		 * JScrollPane(area)); }
-		 * 
-		 * JPanel top = new JPanel(new GridLayout(1, 1));
-		 * top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-		 * top.add(px); return top;
-		 * 
-		 * }
-		 * 
-		 * public JPanel showQuery(FQLProgram prog, Environment environment /* ,
-		 * String c
-		 *//*
-			 * , Query view) throws FQLException { JTabbedPane px = new
-			 * JTabbedPane();
-			 * 
-			 * Mapping d = view.project; Mapping p = view.join; Mapping u =
-			 * view.union; Signature s = d.target; Signature i1 = d.source;
-			 * Signature i2 = p.target; Signature t = u.target;
-			 * 
-			 * px.add("Source", showSchema(environment, prog.smap(s.toConst()),
-			 * s)); px.add("Delta", showMapping(environment,
-			 * prog.smap(i1.toConst()), prog.smap(s.toConst()), d));
-			 * px.add("Intermediate 1", showSchema(environment,
-			 * prog.smap(i1.toConst()), i1)); px.add("Pi",
-			 * showMapping(environment, prog.smap(i1.toConst()),
-			 * prog.smap(i2.toConst()), p)); px.add("Intermediate 2",
-			 * showSchema(environment, prog.smap(i2.toConst()), i2));
-			 * px.add("Sigma", showMapping(environment, prog.smap(i2.toConst()),
-			 * prog.smap(t.toConst()), u)); px.add("Target",
-			 * showSchema(environment, prog.smap(t.toConst()), t));
-			 * 
-			 * JPanel top = new JPanel(new GridLayout(1, 1));
-			 * top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-			 * top.add(px); return top; }
-			 */
+	
+			 
 	FQLProgram prog;
 	Environment env;
 	GUI gui;
@@ -771,7 +610,7 @@ public class Display {
 	public Display(String title, FQLProgram p, Environment env) {
 		this.prog = p;
 		this.env = env;
-		this.gui = gui;
+	//	this.gui = gui;
 
 		for (String c : p.order) {
 			if (env.sets.containsKey(c)) {
@@ -897,7 +736,7 @@ public class Display {
 		frame = new JFrame(/* "Viewer for " + */s);
 
 		JSplitPane temp2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-	temp2.setResizeWeight(1);
+		temp2.setResizeWeight(1);
 		temp2.setDividerSize(0);
 		temp2.setBorder(BorderFactory.createEmptyBorder());
 		temp2.add(temp1);
