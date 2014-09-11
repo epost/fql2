@@ -14,6 +14,7 @@ import org.codehaus.jparsec.functors.Tuple5;
 
 import fql_lib.Pair;
 import fql_lib.Triple;
+import fql_lib.X.XExp.XInst;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class XParser {
@@ -28,7 +29,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "type", "constant", "function", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "transform", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "variables", "type", "constant", "function", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "transform", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -139,7 +140,7 @@ public class XParser {
 
 		Parser<?> p3 = Parsers.tuple(path(), term("="), path());
 		
-		Parser<?> xxx = Parsers.tuple(section("nodes", node), 
+		Parser<?> xxx = Parsers.tuple(section("variables", node), 
 				section("equations", p3));
 		Parser<?> constant = Parsers
 				.tuple(Parsers.between(term("instance").followedBy(term("{")), xxx, term("}")), term(":"),
@@ -314,6 +315,13 @@ public class XParser {
 			return toCatConst(c);
 		} catch (Exception e) { }
 		
+		try {
+			return toInstConst(c);
+		} catch (Exception e) { }
+		
+		try {
+			return toMapping(c);
+		} catch (Exception e) { }
 		/*	
 		return Parsers.tuple(term("type"), string());
 		return Parsers.tuple(term("function"), ident(), term("->"), ident(), string());
@@ -331,6 +339,10 @@ public class XParser {
 		} 
 		if (c instanceof Tuple3) {
 			Tuple3 p = (Tuple3) c;
+			if (p.a.toString().equals("sigma")) {
+				return new XExp.XSigma(toExp(p.b), toExp(p.c));
+			}
+			
 			return new XExp.XConst((String) p.b, (String) p.c);
 		}
 		if (c instanceof org.codehaus.jparsec.functors.Pair) {
@@ -339,6 +351,65 @@ public class XParser {
 		}
 		
 		throw new RuntimeException("x: " + c.getClass());
+	}
+	
+	public static XExp.XInst toInstConst(Object decl) {
+		Tuple3 y = (Tuple3) decl;
+		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		
+		Tuple3 nodes = (Tuple3) x.a;
+		Tuple3 arrows = (Tuple3) x.b;
+		
+		List nodes0 = (List) nodes.b;
+		List arrows0 = (List) arrows.b;
+
+
+		List<Pair<String, String>> nodesX = new LinkedList<>();
+		for (Object o : nodes0) {
+			Tuple3 u = (Tuple3) o;
+			String n = (String) u.a;
+			String l = (String) u.c;
+			nodesX.add(new Pair<>(n, l));
+		} 
+		
+		List<Pair<List<String>, List<String>>> eqsX = new LinkedList<>();
+		 for (Object o : arrows0) {
+			Tuple3 u = (Tuple3) o;
+			List<String> n = (List<String>) u.a;
+			List<String> m = (List<String>) u.c;
+			eqsX.add(new Pair<>((List<String>) n, (List<String>) m));
+		 }
+		XInst ret = new XInst(toExp(y.c), nodesX, eqsX);
+		return ret;
+	}
+	
+	public static XExp.XMapConst toMapping(Object decl) {
+		Tuple5 y = (Tuple5) decl;
+		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		
+		Tuple3 nodes = (Tuple3) x.a;
+		Tuple3 arrows = (Tuple3) x.b;
+		
+		List nodes0 = (List) nodes.b;
+		List arrows0 = (List) arrows.b;
+
+		List<Pair<String, String>> nodesX = new LinkedList<>();
+		for (Object o : nodes0) {
+			Tuple3 u = (Tuple3) o;
+			String n = (String) u.a;
+			String l = (String) u.c;
+			nodesX.add(new Pair<>(n, l));
+		} 
+		
+		List<Pair<String, List<String>>> eqsX = new LinkedList<>();
+		 for (Object o : arrows0) {
+			Tuple3 u = (Tuple3) o;
+			String n = (String) u.a;
+			List<String> m = (List<String>) u.c;
+			eqsX.add(new Pair<>(n, (List<String>) m));
+		 }
+		XExp.XMapConst ret = new XExp.XMapConst(toExp(y.c), toExp(y.e), nodesX, eqsX);
+		return ret;
 	}
 
 	private static Parser<List<String>> path() {

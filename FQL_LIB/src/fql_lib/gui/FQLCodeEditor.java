@@ -72,4 +72,9 @@ public class FQLCodeEditor extends CodeEditor<FQLProgram, Environment, Display> 
 		return new Display(foo, init, env);
 	}
 
+	@Override
+	protected String textFor(Environment env) {
+		return "Done";
+	}
+
 }

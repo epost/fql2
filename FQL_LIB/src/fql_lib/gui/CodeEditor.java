@@ -494,8 +494,8 @@ public abstract class CodeEditor<Prog extends FQLProg, Env, Disp extends FQLDisp
 						+ format.format(new Date(System.currentTimeMillis()));
 			}			
 			display = makeDisplay(foo, init, env); 
-			toDisplay = "Done";
-			respArea.setText("Done");
+			toDisplay = textFor(env); //"Done";
+			respArea.setText(textFor(env)); //"Done");
 
 		} catch (Throwable ee) {
 			toDisplay = ee.toString();
@@ -522,6 +522,8 @@ public abstract class CodeEditor<Prog extends FQLProg, Env, Disp extends FQLDisp
 
 	}
 	
+	protected abstract String textFor(Env env);
+
 	protected abstract Disp makeDisplay(String foo, Prog init, Env env);
 
 	protected abstract Env makeEnv(String program, Prog init);

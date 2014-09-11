@@ -19,8 +19,11 @@ public class Examples {
 	public static Example vik = new VikExample();
 	public static Example all = new AllSyntax();
 	public static Example patrick = new PatrickExample();
+	public static Example patrick2 = new Patrick2Example();
+	public static Example patrick3 = new Patrick3Example();
+	public static Example patrick4 = new Patrick4Example();
 	
-	public static Example[] examples = new Example[] {patrick, all, vik,  /*nist2, */ nistExample, propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
+	public static Example[] examples = new Example[] {patrick, patrick2, patrick3, patrick4, all, vik,  /*nist2, */ nistExample, propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
 	
 	public static Example[] key_examples = examples; //new Example[] { deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
 

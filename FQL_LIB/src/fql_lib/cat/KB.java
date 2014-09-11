@@ -21,9 +21,9 @@ public class KB<Y> {
 			String s1 = Util.sep(x.first, ".");
 			String s2 = Util.sep(x.second, ".");
 			if (x.first.size() == x.second.size()) {
-				return s1 + " = " + s2;
+				return "  " + s1 + " = " + s2;
 			} 
-			return s1 + " -> " + s2;
+			return "  " + s1 + " -> " + s2;
 		}).collect(Collectors.toSet());
 		return Util.sep(ret, "\n");
 	}
@@ -45,12 +45,13 @@ public class KB<Y> {
 		finished = true;
 	}
 	
-	public List<Y> normalize(List<Y> e) {
+	//TODO THIS DOES NOT PROVIDE A TRUE NORMAL FORM!!! ONLY NORMAL WRT LENGTH-PRESERVING EQUATIONS!!
+/*	public List<Y> normalize(String s, List<Y> e) {
 		if (!finished) {
 			throw new RuntimeException("Must finish completion to obtain normal forms.");
 		}
 		return normal_form(e, rules);
-	}
+	} */
 	
 	public boolean equiv(List<Y> a, List<Y> b) {
 		Pair<List<Y>, List<Y>> pair = new Pair<>(a,b);
