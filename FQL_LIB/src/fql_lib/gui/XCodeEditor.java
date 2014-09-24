@@ -63,7 +63,7 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XViewer> {
 		String ret = "";
 		for (Entry<String, XObject> o : env.objs.entrySet()) {
 			if (o.getValue() instanceof XMapping) {
-				XMapping<String> m = (XMapping<String>) o.getValue();
+				XMapping<String, String> m = (XMapping<String, String>) o.getValue();
 				for (Entry<Pair<List<String>, List<String>>, String> k : m.unprovable.entrySet()) {
 					if (!k.getValue().equals("true")) {
 						ret += "\nWarning: in " + o.getKey() + ", could not prove " + Util.sep(k.getKey().first, ".") + " = " + Util.sep(k.getKey().second, ".");

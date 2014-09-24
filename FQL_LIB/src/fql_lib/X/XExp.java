@@ -1,15 +1,119 @@
 package fql_lib.X;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Util;
-import fql_lib.X.XExp.XMapConst;
 
 public abstract class XExp {
+	
+	public static class XUnit extends XExp {
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		String kind;
+		XExp F, I;
+		public XUnit(String kind, XExp f, XExp i) {
+			super();
+			this.kind = kind;
+			F = f;
+			I = i;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((kind == null) ? 0 : kind.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XUnit other = (XUnit) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (kind == null) {
+				if (other.kind != null)
+					return false;
+			} else if (!kind.equals(other.kind))
+				return false;
+			return true;
+		}
+		
+		
+	}
+	
+	public static class XCounit extends XExp {
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		String kind;
+		XExp F, I;
+		public XCounit(String kind, XExp f, XExp i) {
+			super();
+			this.kind = kind;
+			F = f;
+			I = i;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((kind == null) ? 0 : kind.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XCounit other = (XCounit) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (kind == null) {
+				if (other.kind != null)
+					return false;
+			} else if (!kind.equals(other.kind))
+				return false;
+			return true;
+		}		
+		
+		
+	}
+	
 	
 	@Override
 	public abstract boolean equals(Object o);
@@ -22,13 +126,18 @@ public abstract class XExp {
 	public interface XExpVisitor<R, E> {
 		public R visit (E env, XSchema e);
 		public R visit (E env, XMapConst e);
+		public R visit (E env, XTransConst e);
 		public R visit (E env, XSigma e);
+		public R visit (E env, XDelta e);
 		public R visit (E env, XInst e);
 		public R visit (E env, Var e);
 		public R visit (E env, XTy e);
 		public R visit (E env, XFn e);
 		public R visit (E env, XConst e);
 		public R visit (E env, XEq e);
+		public R visit (E env, XUnit e);
+		public R visit (E env, XCounit e);
+		
 	}
 	
 	public static class XTy extends XExp {
@@ -424,6 +533,62 @@ public abstract class XExp {
 		}
 	}
 
+	public static class XTransConst extends XExp {
+		XExp src, dst;
+		public List<Pair<String, List<String>>> vm;
+		
+
+		public XTransConst(XExp src, XExp dst, List<Pair<String, List<String>>> vm) {
+			super();
+			this.src = src;
+			this.dst = dst;
+			this.vm = vm;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			result = prime * result + ((vm == null) ? 0 : vm.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XTransConst other = (XTransConst) obj;
+			if (dst == null) {
+				if (other.dst != null)
+					return false;
+			} else if (!dst.equals(other.dst))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			if (vm == null) {
+				if (other.vm != null)
+					return false;
+			} else if (!vm.equals(other.vm))
+				return false;
+			return true;
+		}
+
+
+
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
 	
 	public static class XMapConst extends XExp {
 		
@@ -522,6 +687,54 @@ public abstract class XExp {
 			if (getClass() != obj.getClass())
 				return false;
 			XSigma other = (XSigma) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+	}
+	
+	public static class XDelta extends XExp {
+		XExp F, I;
+		
+
+		public XDelta(XExp f, XExp i) {
+			super();
+			F = f;
+			I = i;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XDelta other = (XDelta) obj;
 			if (F == null) {
 				if (other.F != null)
 					return false;

@@ -9,7 +9,7 @@ public class Patrick2Example extends Example {
 
 	@Override
 	public String getName() {
-		return "Patrick 2";
+		return "P Sigma";
 	}
 
 	@Override
@@ -88,7 +88,26 @@ public class Patrick2Example extends Example {
 			+ "\n"
 			+ "\nJ = sigma F I"
 			+ "\n"
-;
+			+ "\nI0 = instance {"
+			+ "\n	variables "
+			+ "\n		xa1: Amphibian," 
+			+ "\n		xl1: LandAnimal, xl2: LandAnimal, xl3: LandAnimal, xl4: LandAnimal, "
+			+ "\n		xw1: WaterAnimal, xw2: WaterAnimal, xw3: WaterAnimal;"
+			+ "\n	equations"
+			+ "\n		xa1.attA = gecko, "
+			+ "\n		xl1.attL = gecko, xl2.attL = frog, xl3.attL = human, xl4.attL = cow, "
+			+ "\n		xw1.attW = fish, xw2.attW = gecko, xw3.attW = frog, "
+			+ "\n		xa1.IsAL = xl1, "
+			+ "\n		xa1.IsAW = xw2; "
+			+ "\n} : C"
++ "\n"
+			+ "\nt = transform {"
+			+ "\n	variables "
+			+ "\n		xa1 -> a1, xl1 -> l1, xl2 -> l2, xl3 -> l3, xl4 -> l4, xw1 -> w1, xw2 -> w2, xw3 -> w3;"
+			+ "\n} : I0 -> I"
++ "\n"
+			+"\nt0 = sigma F t"
+			+"\n";
 
 
 

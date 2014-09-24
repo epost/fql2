@@ -29,7 +29,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "variables", "type", "constant", "function", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "transform", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "unit", "counit", "variables", "type", "constant", "function", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "transform", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -59,8 +59,12 @@ public class XParser {
 		Reference ref = Parser.newReference();
 
 		Parser<?> sigma = Parsers.tuple(term("sigma"), ref.lazy(), ref.lazy());
+		Parser<?> delta = Parsers.tuple(term("delta"), ref.lazy(), ref.lazy());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { ident(), schema(), mapping(ref), instance(ref), sigma});
+		Parser<?> unit = Parsers.tuple(term("unit"), ref.lazy(), ref.lazy());
+		Parser<?> counit = Parsers.tuple(term("counit"), ref.lazy(), ref.lazy());
+		
+		Parser<?> a = Parsers.or(new Parser<?>[] { unit, counit, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 
@@ -159,6 +163,15 @@ public class XParser {
 				section("edges", arrow));
 		Parser<?> constant = Parsers
 				.tuple(Parsers.between(term("mapping").followedBy(term("{")), xxx, term("}")), term(":"),
+						ref.lazy(), term("->"), ref.lazy());
+		return constant;
+	} 
+	
+	public static final Parser<?> transform(Reference ref) {
+		Parser<?> node = Parsers.tuple(ident(), term("->"), path());
+		Parser<?> xxx =section("variables", node);
+		Parser<?> constant = Parsers
+				.tuple(Parsers.between(term("transform").followedBy(term("{")), xxx, term("}")), term(":"),
 						ref.lazy(), term("->"), ref.lazy());
 		return constant;
 	} 
@@ -322,6 +335,11 @@ public class XParser {
 		try {
 			return toMapping(c);
 		} catch (Exception e) { }
+		
+		try {
+			return toTrans(c);
+		} catch (Exception e) { }
+		
 		/*	
 		return Parsers.tuple(term("type"), string());
 		return Parsers.tuple(term("function"), ident(), term("->"), ident(), string());
@@ -330,8 +348,8 @@ public class XParser {
         */
 
 		if (c instanceof Tuple5) {
-			Tuple5 p = (Tuple5) c;
-			return new XExp.XFn((String) p.b, (String) p.d, (String) p.e);
+			Tuple5 p = (Tuple5) c; 
+				return new XExp.XFn((String) p.b, (String) p.d, (String) p.e);
 		}
 		if (c instanceof Tuple4) {
 			Tuple4 p = (Tuple4) c;
@@ -341,6 +359,15 @@ public class XParser {
 			Tuple3 p = (Tuple3) c;
 			if (p.a.toString().equals("sigma")) {
 				return new XExp.XSigma(toExp(p.b), toExp(p.c));
+			}
+			if (p.a.toString().equals("delta")) {
+				return new XExp.XDelta(toExp(p.b), toExp(p.c));
+			}
+			if (p.a.toString().equals("unit")) {
+				return new XExp.XUnit("sigma", toExp(p.b), toExp(p.c));
+			}
+			if (p.a.toString().equals("counit")) {
+				return new XExp.XCounit("sigma", toExp(p.b), toExp(p.c));
 			}
 			
 			return new XExp.XConst((String) p.b, (String) p.c);
@@ -409,6 +436,27 @@ public class XParser {
 			eqsX.add(new Pair<>(n, (List<String>) m));
 		 }
 		XExp.XMapConst ret = new XExp.XMapConst(toExp(y.c), toExp(y.e), nodesX, eqsX);
+		return ret;
+	}
+	
+	public static XExp.XTransConst toTrans(Object decl) {
+		Tuple5 y = (Tuple5) decl;
+//		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		
+		Tuple3 nodes = (Tuple3) y.a;
+//		Tuple3 arrows = (Tuple3) x.b;
+		
+		List nodes0 = (List) nodes.b;
+//		List arrows0 = (List) arrows.b;
+
+		List<Pair<String, List<String>>> eqsX = new LinkedList<>();
+		 for (Object o : nodes0) {
+			Tuple3 u = (Tuple3) o;
+			String n = (String) u.a;
+			List<String> m = (List<String>) u.c;
+			eqsX.add(new Pair<>(n, (List<String>) m));
+		 }
+		XExp.XTransConst ret = new XExp.XTransConst(toExp(y.c), toExp(y.e), eqsX);
 		return ret;
 	}
 

@@ -166,6 +166,12 @@ public abstract class Category<O,A> implements Serializable {
 			if (target(a) == null) {
 				throw new RuntimeException(a + " has no dst ");
 			}
+			if (!isObject(source(a))) {
+				throw new RuntimeException(a + " has a bad source " + this);
+			}
+			if (!isObject(target(a))) {
+				throw new RuntimeException(a + " has a bad target " + this);
+			}
 		}
 		for (O o : objects()) {
 			A i = identity(o);

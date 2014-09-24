@@ -12,18 +12,25 @@ import fql_lib.X.XExp.XTy;
 
 public class XEnvironment {
 
+	XCtx<String> global;
 	public XProgram prog;
 	public String str;
 	public Map<String, XObject> objs;
-	public Set<String> types;
-	public Map<String, Pair<String, String>> fns;
-	public Set<Pair<List<String>, List<String>>> eqs = new HashSet<>();
+//	public Set<String> types;
+//	public Map<String, Pair<String, String>> fns;
+//	public Set<Pair<List<String>, List<String>>> eqs = new HashSet<>();
 	// a.b.c = p.q.r
 	
 	public XEnvironment(XProgram prog, String str) {
 		this.prog = prog;
 		this.str = str;
+		
+		Set<String> types;
+		Map<String, Pair<String, String>> fns;
+		Set<Pair<List<String>, List<String>>> eqs = new HashSet<>();
+
 		objs = new HashMap<>();
+		
 		types = new HashSet<>();
 		types.add("1");
 		fns = new HashMap<>();
@@ -60,6 +67,8 @@ public class XEnvironment {
 				eqs.add(new Pair<>(((XExp.XEq) e).lhs, ((XExp.XEq) e).rhs));
 			}
 		}
+		
+		global = new XCtx<String>(types, fns, eqs, null, null);		
 	}
 	
 }

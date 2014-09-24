@@ -9,7 +9,7 @@ public class PatrickExample extends Example {
 
 	@Override
 	public String getName() {
-		return "Patrick";
+		return "P Employees";
 	}
 
 	@Override

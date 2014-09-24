@@ -46,12 +46,12 @@ public class KB<Y> {
 	}
 	
 	//TODO THIS DOES NOT PROVIDE A TRUE NORMAL FORM!!! ONLY NORMAL WRT LENGTH-PRESERVING EQUATIONS!!
-/*	public List<Y> normalize(String s, List<Y> e) {
+	public List<Y> normalize(String s, List<Y> e) {
 		if (!finished) {
 			throw new RuntimeException("Must finish completion to obtain normal forms.");
 		}
 		return normal_form(e, rules);
-	} */
+	} 
 	
 	public boolean equiv(List<Y> a, List<Y> b) {
 		Pair<List<Y>, List<Y>> pair = new Pair<>(a,b);
