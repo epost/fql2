@@ -28,16 +28,15 @@ import javax.swing.event.ListSelectionListener;
 import fql_lib.Pair;
 import fql_lib.gui.FQLDisp;
 
-public class XViewer implements FQLDisp {
+public class XDisplay implements FQLDisp {
 
-	public XViewer(String title, XProgram p, XEnvironment env) {
-//		this.prog = p;
-	//	this.env = env;
-	//	this.gui = gui;
-
+	public XDisplay(String title, XProgram p, XEnvironment env) {
 		for (String c : p.order) {
 			XObject obj = env.objs.get(c);
-			frames.add(new Pair<>(c, obj.display()));
+			if (obj instanceof XString) {
+				continue;
+			}
+			frames.add(new Pair<>(obj.kind() + " " + c, obj.display()));
 		}
 		
 		display(title, p.order);

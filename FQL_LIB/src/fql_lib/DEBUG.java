@@ -901,7 +901,7 @@ public class DEBUG implements Serializable {
 				JOptionPane.PLAIN_MESSAGE, null);
 	}
 
-	static String about = "FQL++ IDE Copyright (C) 2012-2014 David Spivak and Ryan Wisnesky"
+	static String about = "FQL++/FPQL IDE Copyright (C) 2012-2014 Patrick Schultz, David Spivak, and Ryan Wisnesky"
 			+ "\n\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
 			+ "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)"; //\nH2 (SQL)";
 

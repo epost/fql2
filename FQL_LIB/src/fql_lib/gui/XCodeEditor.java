@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.codehaus.jparsec.error.ParserException;
+import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.templates.CodeTemplate;
+import org.fife.ui.rsyntaxtextarea.templates.StaticCodeTemplate;
 
 import fql_lib.Pair;
 import fql_lib.Util;
@@ -13,10 +17,10 @@ import fql_lib.X.XMapping;
 import fql_lib.X.XObject;
 import fql_lib.X.XParser;
 import fql_lib.X.XProgram;
-import fql_lib.X.XViewer;
+import fql_lib.X.XDisplay;
 
 @SuppressWarnings("serial")
-public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XViewer> {
+public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 
 	public XCodeEditor(int untitled_count, String content) {
 		super(untitled_count, content);
@@ -34,11 +38,43 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XViewer> {
 
 	@Override
 	protected String getATMFrhs() {
-		return null;
+		return "fql_lib.X.FpqlTokenMaker";
 	}
 
 	@Override
 	protected void doTemplates() {
+		CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
+		CodeTemplate ct = new StaticCodeTemplate("type", "type ",
+				" \"\"");
+		ctm.addTemplate(ct);
+
+		ct = new StaticCodeTemplate("fn", "fn ",
+				" ->  \"\"");
+		ctm.addTemplate(ct);
+		
+		ct = new StaticCodeTemplate("constant", "constant ",
+				" \"\"");
+		ctm.addTemplate(ct);
+		
+		ct = new StaticCodeTemplate("assume", "assume ",
+				"   =  ");
+		ctm.addTemplate(ct);
+		
+		ct = new StaticCodeTemplate("schema", "schema ",
+				"{\n\tnodes;\n\tedges;\n\tequations;\n}");
+		ctm.addTemplate(ct);
+
+		ct = new StaticCodeTemplate("mapping", "mapping ",
+				"{\n\tnodes;\n\tedges;\n} :  -> ");
+		ctm.addTemplate(ct);
+		
+		ct = new StaticCodeTemplate("instance", "instance ",
+				"{\n\tvariables;\n\tequations;\n} : ");
+		ctm.addTemplate(ct);
+
+		ct = new StaticCodeTemplate("homomorphism", "homomorphism ",
+				"{\n\tvariables;\n} :  ->  "); 
+		ctm.addTemplate(ct);
 	}
 
 	
@@ -49,8 +85,8 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XViewer> {
 	}
 
 	@Override
-	protected XViewer makeDisplay(String foo, XProgram init, XEnvironment env) {
-		return new XViewer(foo, init, env);
+	protected XDisplay makeDisplay(String foo, XProgram init, XEnvironment env) {
+		return new XDisplay(foo, init, env);
 	}
 
 	@Override

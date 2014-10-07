@@ -39,6 +39,7 @@ import javax.swing.filechooser.FileFilter;
 
 import fql_lib.DEBUG;
 import fql_lib.Pair;
+import fql_lib.X.XRaToFpql;
 import fql_lib.decl.Environment;
 import fql_lib.examples.Example;
 import fql_lib.examples.Examples;
@@ -70,8 +71,8 @@ public class GUI extends JPanel {
 		// MenuItem m = new MenuItem()
 
 		Menu fileMenu = new Menu("File");
-		MenuItem newItem = new MenuItem("New");
-		MenuItem newItem2 = new MenuItem("New Patrick");
+		MenuItem newItem = new MenuItem("New FQL++");
+		MenuItem newItem2 = new MenuItem("New FPQL");
 		MenuItem openItem = new MenuItem("Open");
 //		MenuItem openItem2 = new MenuItem("Open GUI");
 		MenuItem saveItem = new MenuItem("Save");
@@ -178,6 +179,10 @@ public class GUI extends JPanel {
 		MenuItem kbItem = new MenuItem("Knuth-Bendix");
 		transMenu.add(kbItem);
 		kbItem.addActionListener(x -> { new KBViewer(); });
+		
+		MenuItem raItem = new MenuItem("RA to FPQL");
+		transMenu.add(raItem);
+		raItem.addActionListener(x -> { new XRaToFpql(); });
 		
 
 		Menu helpMenu = new Menu("About");
@@ -533,6 +538,19 @@ public class GUI extends JPanel {
 		}
 	}
 	
+	public static class Filter4 extends FileFilter {
+		@Override
+		public boolean accept(File f) {
+			return f.getName().toLowerCase().endsWith(".fqlpp") || f.getName().toLowerCase().endsWith(".fpql")
+					|| f.isDirectory();
+		}
+
+		@Override
+		public String getDescription() {
+			return "FQL++ files (*.fqlpp) or FPQL files (*.fpql)";
+		}
+	}
+	
 	public static class Filter2 extends FileFilter {
 		@Override
 		public boolean accept(File f) {
@@ -545,22 +563,41 @@ public class GUI extends JPanel {
 			return "Compiled FQL++ files (*.fqlppo)";
 		}
 	}
+	
+	public static class Filter3 extends FileFilter {
+		@Override
+		public boolean accept(File f) {
+			return f.getName().toLowerCase().endsWith(".fpql")
+					|| f.isDirectory();
+		}
+
+		@Override
+		public String getDescription() {
+			return "FPQL files (*.fpql)";
+		}
+	}
+	
 
 
 	protected static void saveAsAction() {
 		delay();
 		JFileChooser jfc = new JFileChooser(DEBUG.debug.FILE_PATH);
-		jfc.setFileFilter(new Filter());
+		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
+				.getSelectedIndex());
+
+		if (e.isPatrick()) {
+			jfc.setFileFilter(new Filter3());
+		} else {
+			jfc.setFileFilter(new Filter());			
+		}
 		jfc.showSaveDialog(null);
 		File f = jfc.getSelectedFile();
 		if (f == null) {
 			return;
 		}
-		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
-				.getSelectedIndex());
 		if (e.isPatrick()) {
-			if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlpatrick")) {
-				f = new File(jfc.getSelectedFile() + ".fqlpatrick");
+			if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fpql")) {
+				f = new File(jfc.getSelectedFile() + ".fpql");
 			}
 		} else {
 			if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlpp")) {
@@ -598,13 +635,13 @@ public class GUI extends JPanel {
 	static protected void openAction() {
 		delay();
 		JFileChooser jfc = new JFileChooser(DEBUG.debug.FILE_PATH);
-		jfc.setFileFilter(new Filter());
+		jfc.setFileFilter(new Filter4());
 		jfc.showOpenDialog(null);
 		File f = jfc.getSelectedFile();
 		if (f == null) {
 			return;
 		}
-		if (f.getAbsolutePath().endsWith("fqlpatrick")) {
+		if (f.getAbsolutePath().endsWith(".fpql")) {
 			doOpen(f, true);
 		} else {
 			doOpen(f, false);

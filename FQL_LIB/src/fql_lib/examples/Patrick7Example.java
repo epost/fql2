@@ -9,7 +9,7 @@ public class Patrick7Example extends Example {
 	
 	@Override
 	public String getName() {
-		return "P Unit";
+		return "P Monad";
 	}
 
 	@Override
@@ -51,9 +51,9 @@ public class Patrick7Example extends Example {
 			+ "\nI = delta F Components"
 			+ "\n"
 			+ "\n//gives the transform from the original graph to the connected components"
-			+ "\nt = unit F G"
+			+ "\nt = return F G"
 			+ "\n"
-			+ "\nu = counit F Components"
+			+ "\nu = coreturn F Components"
 			+ "\n";
 
 

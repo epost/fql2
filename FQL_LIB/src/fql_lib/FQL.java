@@ -36,7 +36,7 @@ public class FQL {
 					
 					UIManager.setLookAndFeel(DEBUG.debug.look_and_feel);			
 
-					final JFrame f = new JFrame("FQL++ IDE");
+					final JFrame f = new JFrame("FQL++/FPQL IDE");
 					final Pair<JPanel, MenuBar> gui = GUI.makeGUI(f);
 
 					f.setContentPane(gui.first);

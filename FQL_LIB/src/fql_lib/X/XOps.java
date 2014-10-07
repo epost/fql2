@@ -1,5 +1,6 @@
 package fql_lib.X;
 
+import fql_lib.Util;
 import fql_lib.X.XExp.Var;
 import fql_lib.X.XExp.XConst;
 import fql_lib.X.XExp.XCounit;
@@ -9,6 +10,8 @@ import fql_lib.X.XExp.XExpVisitor;
 import fql_lib.X.XExp.XFn;
 import fql_lib.X.XExp.XInst;
 import fql_lib.X.XExp.XMapConst;
+import fql_lib.X.XExp.XPi;
+import fql_lib.X.XExp.XRel;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
 import fql_lib.X.XExp.XTransConst;
@@ -128,7 +131,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 
 	@Override
 	public XObject visit(XProgram env, XEq e) {
-		return new XString("Assumption", e.lhs + " = " + e.rhs);
+		return new XString("Assumption", Util.sep(e.lhs, ".") + " = " + Util.sep(e.rhs, "."));
 	}
 
 	@Override
@@ -158,7 +161,10 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 		XMapping<String, String> ctx = (XMapping<String, String>) o;
 		XCtx<String> ctx2 = (XCtx<String>) o2;
-		return ctx.unit(ctx2); 
+		if (e.kind.equals("sigma")) {
+			return ctx.unit(ctx2); 
+		}
+		return ctx.pi_unit(ctx2);
 	}
 
 	@Override
@@ -173,8 +179,38 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 		XMapping<String, String> ctx = (XMapping<String, String>) o;
 		XCtx<String> ctx2 = (XCtx<String>) o2;
-		return ctx.counit(ctx2); 
+		if (e.kind.equals("sigma")) {
+			return ctx.counit(ctx2); 
+		}
+		return ctx.pi_counit(ctx2);
+	}
 
+	@Override
+	public XObject visit(XProgram env, XPi e) {
+		XObject o = e.F.accept(env, this);
+		if (!(o instanceof XMapping<?,?>)) {
+			throw new RuntimeException("Not a mapping: " + e.F);
+		}
+		XMapping<String,String> ctx = (XMapping<String,String>) o;
+		XObject o2 = e.I.accept(env, this);
+		if (o2 instanceof XCtx<?>) {
+			XCtx<String> ctx2 = (XCtx<String>) o2;
+			return ctx.pi(ctx2);
+		} else if (o2 instanceof XMapping<?,?>) {
+			XMapping<String,String> ctx2 = (XMapping<String,String>) o2;
+			return ctx.piT(ctx2);			
+		}
+		throw new RuntimeException("Not an instance or transform: " + e.I + " (class " + o2.getClass() + ")"); 
+	}
+
+	@Override
+	public XCtx<?> visit(XProgram env, XRel e) {
+		XObject o = e.I.accept(env, this);
+		if (!(o instanceof XCtx<?>)) {
+			throw new RuntimeException("Not an istance: " + e.I);
+		}
+		XCtx<?> x = (XCtx<?>) o;
+		return x.rel();
 	}
 
 }

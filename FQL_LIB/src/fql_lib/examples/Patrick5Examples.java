@@ -94,7 +94,7 @@ public class Patrick5Examples extends Example {
 			+ "\n	zXF667.salary0 = c250, zXF891.salary0 = c300, zXF221.salary0 = c100, v.salary0 = c0;"
 			+ "\n} : D "
 			+ "\n"
-			+ "\ntrans = transform {"
+			+ "\ntrans = homomorphism {"
 			+ "\n variables"
 			+ "\n 	XF667 -> zXF667, XF891 -> zXF891, XF221 -> zXF221;"
 			+ "\n} : J -> J0"

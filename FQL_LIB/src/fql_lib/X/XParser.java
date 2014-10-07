@@ -29,7 +29,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "unit", "counit", "variables", "type", "constant", "function", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "transform", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -60,11 +60,16 @@ public class XParser {
 
 		Parser<?> sigma = Parsers.tuple(term("sigma"), ref.lazy(), ref.lazy());
 		Parser<?> delta = Parsers.tuple(term("delta"), ref.lazy(), ref.lazy());
+		Parser<?> pi = Parsers.tuple(term("pi"), ref.lazy(), ref.lazy());
 		
-		Parser<?> unit = Parsers.tuple(term("unit"), ref.lazy(), ref.lazy());
-		Parser<?> counit = Parsers.tuple(term("counit"), ref.lazy(), ref.lazy());
+		Parser<?> rel = Parsers.tuple(term("relationalize"), ref.lazy());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { unit, counit, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> unit = Parsers.tuple(term("return"), term("sigma"), term("delta"), ref.lazy(), ref.lazy());
+		Parser<?> counit = Parsers.tuple(term("coreturn"), term("sigma"), term("delta"), ref.lazy(), ref.lazy());
+		Parser<?> unit1 = Parsers.tuple(term("return"), term("delta"), term("pi"), ref.lazy(), ref.lazy());
+		Parser<?> counit1 = Parsers.tuple(term("coreturn"), term("delta"), term("pi"), ref.lazy(), ref.lazy());
+		
+		Parser<?> a = Parsers.or(new Parser<?>[] { rel, pi, unit, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 
@@ -76,7 +81,7 @@ public class XParser {
 	}
 	
 	public static final Parser<?> fn() {
-		return Parsers.tuple(term("function"), ident(), term("->"), ident(), string());
+		return Parsers.tuple(term("fn"), ident(), term("->"), ident(), string());
 	}
 	
 	public static final Parser<?> constx() {
@@ -171,7 +176,7 @@ public class XParser {
 		Parser<?> node = Parsers.tuple(ident(), term("->"), path());
 		Parser<?> xxx =section("variables", node);
 		Parser<?> constant = Parsers
-				.tuple(Parsers.between(term("transform").followedBy(term("{")), xxx, term("}")), term(":"),
+				.tuple(Parsers.between(term("homomorphism").followedBy(term("{")), xxx, term("}")), term(":"),
 						ref.lazy(), term("->"), ref.lazy());
 		return constant;
 	} 
@@ -329,7 +334,9 @@ public class XParser {
 		} catch (Exception e) { }
 		
 		try {
-			return toInstConst(c);
+			if (c.toString().contains("variables")) {
+				return toInstConst(c);
+			}
 		} catch (Exception e) { }
 		
 		try {
@@ -349,7 +356,20 @@ public class XParser {
 
 		if (c instanceof Tuple5) {
 			Tuple5 p = (Tuple5) c; 
-				return new XExp.XFn((String) p.b, (String) p.d, (String) p.e);
+			if (p.a.toString().equals("return") && p.b.toString().equals("sigma")) {
+				return new XExp.XUnit("sigma", toExp(p.d), toExp(p.e));
+			}
+			if (p.a.toString().equals("coreturn") && p.b.toString().equals("sigma")) {
+				return new XExp.XCounit("sigma", toExp(p.d), toExp(p.e));
+			}
+			if (p.a.toString().equals("return") && p.b.toString().equals("delta")) {
+				return new XExp.XUnit("pi", toExp(p.d), toExp(p.e));
+			}
+			if (p.a.toString().equals("coreturn") && p.b.toString().equals("delta")) {
+				return new XExp.XCounit("pi", toExp(p.d), toExp(p.e));
+			}
+
+			return new XExp.XFn((String) p.b, (String) p.d, (String) p.e);
 		}
 		if (c instanceof Tuple4) {
 			Tuple4 p = (Tuple4) c;
@@ -363,21 +383,22 @@ public class XParser {
 			if (p.a.toString().equals("delta")) {
 				return new XExp.XDelta(toExp(p.b), toExp(p.c));
 			}
-			if (p.a.toString().equals("unit")) {
-				return new XExp.XUnit("sigma", toExp(p.b), toExp(p.c));
-			}
-			if (p.a.toString().equals("counit")) {
-				return new XExp.XCounit("sigma", toExp(p.b), toExp(p.c));
+			if (p.a.toString().equals("pi")) {
+				return new XExp.XPi(toExp(p.b), toExp(p.c));
 			}
 			
 			return new XExp.XConst((String) p.b, (String) p.c);
 		}
 		if (c instanceof org.codehaus.jparsec.functors.Pair) {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) c;
-			return new XExp.XTy((String)p.b);
+			if (p.a.toString().contains("relationalize")) {
+				return new XExp.XRel(toExp(p.b));
+			} else {
+				return new XExp.XTy((String)p.b);
+			}
 		}
 		
-		throw new RuntimeException("x: " + c.getClass());
+		throw new RuntimeException("x: " + c.getClass() + " " + c);
 	}
 	
 	public static XExp.XInst toInstConst(Object decl) {

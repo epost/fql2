@@ -13,7 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
@@ -36,6 +38,7 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Triple;
+import fql_lib.Unit;
 import fql_lib.Util;
 import fql_lib.X.XExp.XInst;
 import fql_lib.X.XExp.XSchema;
@@ -47,13 +50,17 @@ public class XCtx<C> implements XObject {
 
 	private KB<C> kb;
 	Set<C> ids;
-//	Set<C> terms;
 	XCtx<C> global;
 	XCtx<C> schema;
-//	Set<C> local;
 	Map<C, Pair<C, C>> types;
 	Set<Pair<List<C>, List<C>>> eqs;
 	private boolean initialized = false;
+	
+	String kind = "TODO";
+	@Override
+	public String kind() {
+		return kind;
+	}
 
 	public Set<C> terms() {
 		return types.keySet();
@@ -111,7 +118,7 @@ public class XCtx<C> implements XObject {
 //	}
 
 	public XCtx(Set<C> ids, Map<C, Pair<C, C>> types,
-			Set<Pair<List<C>, List<C>>> eqs, XCtx<C> global, XCtx<C> schema) {
+			Set<Pair<List<C>, List<C>>> eqs, XCtx<C> global, XCtx<C> schema, String kind) {
 		this.types = types;
 		this.eqs = eqs;
 		this.ids = ids;
@@ -119,6 +126,7 @@ public class XCtx<C> implements XObject {
 		this.schema = schema;
 //		this.local = local;
 		init();
+		this.kind = kind;
 		//validate();
 	}
 
@@ -187,10 +195,10 @@ public class XCtx<C> implements XObject {
 
 		for (Pair<List<C>, List<C>> eq : eqs) {
 			if (!allTerms().containsAll(eq.first)) {
-				throw new RuntimeException("unknown const in: " + eq.first + " in " + this);
+				throw new RuntimeException("unknown const in: " + eq.first + " in " + this + " (first)");
 			}
 			if (!allTerms().containsAll(eq.second)) {
-				throw new RuntimeException("unknown const in: " + eq.second + " in " + this);
+				throw new RuntimeException("unknown const in: " + eq.second + " in " + this + " (second)");
 			}
 			if (!type(eq.first).equals(type(eq.second))) {
 				throw new RuntimeException("Type mismatch on " + eq);
@@ -200,7 +208,7 @@ public class XCtx<C> implements XObject {
 
 	public Pair<C, C> type(List<C> first) {
 		if (first.size() == 0) {
-			throw new RuntimeException("Empty eq");
+			throw new RuntimeException("Empty");
 		}
 		Iterator<C> it = first.iterator();
 		Pair<C, C> ret = type(it.next());
@@ -277,7 +285,7 @@ public class XCtx<C> implements XObject {
 		JComponent ctp = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", cat);
 		//JComponent small_ctp = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", small_cat);
 
-		JComponent tables = makeTables();
+		JComponent tables = makeTables(x -> cat().arrows(), new HashSet<>());
 //		JComponent tables2 = makeTables2(small_cat());
 		
 		JComponent graph = makeGraph();
@@ -286,10 +294,11 @@ public class XCtx<C> implements XObject {
 		ret.addTab("Text", kbc);
 		ret.addTab("Graph", graph);
 		ret.addTab("Category", ctp);
-		ret.addTab("Tables", tables);
-	//	ret.addTab("Category 2", small_ctp);
 		if (schema != null) {
-			ret.addTab("Tables 2", foo());
+			ret.addTab("Full Tables", tables);
+	//	ret.addTab("Category 2", small_ctp);
+	//	if (schema != null) {
+			ret.addTab("Adom Tables", makeTables(z -> foo(), global.ids));
 		}
 		return ret;
 	}
@@ -300,8 +309,11 @@ public class XCtx<C> implements XObject {
 		Graph<C,C> sgv = buildFromSig();
 		
 		Layout<C, C> layout = new FRLayout<>(sgv);
+	//	Layout<C, C> layout = new ISOMLayout<>(sgv);
+//		Layout<C, C> layout = new edu.uci.ics.jung.algorithms.layout.<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<C, C> vv = new VisualizationViewer<>(layout);
+		vv.getRenderContext().setLabelOffset(20);
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -324,7 +336,13 @@ public class XCtx<C> implements XObject {
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
 	//	Transformer ttt = arg0 -> Util.nice(arg0.toString());
-		Transformer ttt = new ToStringLabeller();
+		Transformer<C,String> ttt = arg0 -> {
+			String ret = arg0.toString();
+			if (ret.length() > 16) {
+				return ret.substring(0, 15) + "...";
+			}
+			return ret;
+		};
 		vv.getRenderContext().setVertexLabelTransformer(ttt);
 		vv.getRenderContext().setEdgeLabelTransformer(ttt);
 
@@ -406,7 +424,75 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 	
-	private JComponent foo() {
+	private List<Triple<C, C, List<C>>> foo() {
+		//try {
+			
+			List<Triple<C, C, List<C>>> paths = new LinkedList<>();
+			for (C c : allIds()) {
+				paths.add(new Triple<>(c, c, new LinkedList<>()));
+			}
+			
+			List<Triple<C, C, List<C>>> consts = new LinkedList<>();
+			for (C c : global.terms()) {
+				if (!global.ids.contains(c)) {
+					if (global.type(c).first.equals("1")) {
+						List<C> l = new LinkedList<>();
+						l.add(c);
+						consts.add(new Triple<>(global.type(c).first, global.type(c).second, l));
+					}
+				}
+			}
+
+			int iter = 0;
+			for (; iter < DEBUG.debug.MAX_PATH_LENGTH; iter++) {
+				Set<Triple<C, C, List<C>>> newPaths1 = extend2(paths, global.types, consts);
+				paths.addAll(newPaths1);
+				Set<Triple<C, C, List<C>>> newPaths2 = extend2(paths, schema.types, consts);
+				paths.addAll(newPaths2);
+				Set<Triple<C, C, List<C>>> newPaths3 = extend2(paths, types, consts);
+				if (paths.containsAll(newPaths3)) {
+					//need one more iteration for all attributes
+					newPaths1 = extend2(paths, global.types, consts);
+					paths.addAll(newPaths1);
+					newPaths2 = extend2(paths, schema.types, consts);
+					paths.addAll(newPaths2);
+					break;
+				}
+				paths.addAll(newPaths3);
+			}
+			if (iter == DEBUG.debug.MAX_PATH_LENGTH) {
+				throw new RuntimeException("Exceeded maximum path length");
+			}
+			
+			return paths; //new FQLTextPanel(BorderFactory.createEtchedBorder(), "", paths.toString());
+	//	} catch (Exception e) {
+		//	e.printStackTrace();
+		//	return new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR: " + e.getMessage());			
+		//}
+	}
+
+	private Set<Triple<C, C, List<C>>> extend2(List<Triple<C, C, List<C>>> paths,
+			Map<C, Pair<C, C>> t, List<Triple<C, C, List<C>>> consts) {
+		Set<Triple<C, C, List<C>>> newPaths = new HashSet<>();
+		for (Triple<C, C, List<C>> p : paths) {
+			for (C e : outEdges(t, p.second)) {
+				List<C> p0 = new LinkedList<>(p.third);
+				p0.add(e);
+				Triple<C, C, List<C>> toAdd = new Triple<>(p.first, t.get(e).second, p0);
+				Triple<C, C, List<C>> found = find(kb, toAdd, paths); 
+				if (found == null) {
+					found = find(kb, toAdd, newPaths);
+					if (found == null) {
+						find(kb, toAdd, consts);
+						newPaths.add(toAdd);
+					}
+				}
+			}
+		}
+		return newPaths;
+	}
+	
+	private JComponent bar() {
 		try {
 			String text = "";
 		//	List<Triple<C, C, List<C>>> consts = new LinkedList<>();
@@ -580,18 +666,19 @@ public class XCtx<C> implements XObject {
 		return null;
 	}
 
-	private JComponent makeTables() {
+	private JComponent makeTables(Function<Unit, Collection<Triple<C, C, List<C>>>> fn, Set<C> ignore) {
 		try {
-			Category<C, Triple<C, C, List<C>>> cat = cat();
+//			Category<C, Triple<C, C, List<C>>> cat = cat();
 			List<JComponent> grid = new LinkedList<>();
-
+			Collection<Triple<C, C, List<C>>> cat = fn.apply(new Unit());
+			
 			Map<C, Set<List<C>>> entities = new HashMap<>();
 			Map<C, Set<C>> m = new HashMap<>();
 			for (C c : allIds()) {
 				entities.put(c, new HashSet<>());
 				m.put(c, new HashSet<>());
 			}
-			for (Triple<C, C, List<C>> k : cat.arrows()) {
+			for (Triple<C, C, List<C>> k : cat) {
 				if (k.first.equals("1")) { // uncomment causes exception
 					Set<List<C>> set = entities.get(k.second);
 					set.add(k.third);
@@ -614,6 +701,9 @@ public class XCtx<C> implements XObject {
 
 			for (C c : keys) {
 				if (c.equals("1")) {
+					continue;
+				}
+				if (ignore.contains(c)) {
 					continue;
 				}
 				Pair<C, C> t = type(c);
@@ -641,7 +731,13 @@ public class XCtx<C> implements XObject {
 					for (C col : cols) {
 						List<C> r = new LinkedList<>(l);
 						r.add(col);
-						for (Triple<C, C, List<C>> cand : cat.hom((C)"1", type(col).second)) {
+						for (Triple<C, C, List<C>> cand : cat) { //TODO sort by hom
+							if (!cand.first.equals("1")) {
+								continue;
+							}
+							if (!cand.second.equals(type(col).second)) {
+								continue;
+							}
 							if (kb.equiv(cand.third, r)) {
 								rowData[row][cl] = Util.sep(cand.third, ".");
 								break;
@@ -791,13 +887,13 @@ public class XCtx<C> implements XObject {
 	private static <C> Set<C> outEdges(Map<C, Pair<C,C>> t, C p) {
 		Set<C> ret = new HashSet<>();
 		for (C c : t.keySet()) {
-			//if (c.equals(p)) {
-			//	continue;
-			//}
+			if (c.equals(p)) {
+				continue;
+			}
 			if (t.get(c).first.equals(p)) {
 				ret.add(c);
 			}
-		}
+		} 
 		return ret;
 	}
 	
@@ -902,6 +998,115 @@ public class XCtx<C> implements XObject {
 
 			@Override
 			public Triple<C, C, List<C>> compose(Triple<C, C, List<C>> a1, Triple<C, C, List<C>> a2) {
+				Triple<C, C, List<C>> r = cache.get(new Pair<>(a1, a2));
+				if (r != null) {
+					return r;
+				}
+				List<C> ret = new LinkedList<>(a1.third);
+				ret.addAll(a2.third);
+				Triple<C, C, List<C>> xxx = new Triple<>(a1.first, a2.second, ret);
+				Triple<C, C, List<C>> yyy = find(getKB(), xxx, hom(a1.first, a2.second));
+				if (yyy == null) {
+					throw new RuntimeException("Found nothing equivalent to " + ret + " in " + arrows());
+				}
+				cache.put(new Pair<>(a1, a2), yyy);
+				return yyy;
+			}
+			
+			Map<Pair<Triple<C, C, List<C>>, Triple<C, C, List<C>>>, Triple<C, C, List<C>>> cache = new HashMap<>();
+		};
+
+		//TODO: too hard to validate here
+//		xcat2.validate();
+		
+		xcat = xcat2;
+		
+		return xcat; 
+	}
+	
+	//TODO: cache these?
+	public Category<C, Triple<C, C, List<C>>> small_cat() {
+		Set<C> localIds = new HashSet<>(ids);
+		List<Triple<C, C, List<C>>> paths = new LinkedList<>();
+		LinkedHashMap<C, Pair<C,C>> t = new LinkedHashMap<>();
+
+		List<Triple<C, C, List<C>>> consts = new LinkedList<>();
+		
+		if (global != null) {
+			for (C c : global.ids) {
+				if (c.equals("1")) {
+					continue;
+				}
+				paths.add(new Triple<>(c, c, new LinkedList<>()));
+				localIds.add(c);
+			}
+//			for (C c : global.terms()) {
+	//			if (!global.ids.contains(c)) {
+/*					if (global.type(c).first.equals("1")) {
+						List<C> l = new LinkedList<>();
+						l.add(c);
+						consts.add(new Triple<>(global.type(c).first, global.type(c).second, l));
+					} */
+			//	}
+			//}
+			for (Entry<C, Pair<C, C>> k : global.types.entrySet()) {
+				if (k.getValue().first.equals("1") || k.getValue().second.equals("1") || k.getKey().equals("1")) {
+					continue;
+				}
+				t.put(k.getKey(), k.getValue());
+			}
+
+//			t.putAll(global.types); //TODO
+			extend(global.getKB(), paths, t, consts);
+		}	
+		
+		if (schema != null) {
+			throw new RuntimeException();
+		}	
+		
+		for (C c : ids) {
+			paths.add(new Triple<>(c, c, new LinkedList<>()));
+		}
+		for (Entry<C, Pair<C, C>> k : types.entrySet()) {
+			if (k.getValue().first.equals("1") || k.getValue().second.equals("1") || k.getKey().equals("1")) {
+				continue;
+			}
+			t.put(k.getKey(), k.getValue());
+		}
+//		t.putAll(types);
+		extend(getKB(), paths, t, consts);
+		
+		Set<Triple<C, C, List<C>>> arrows = new HashSet<>(paths);
+
+		Category<C, Triple<C, C, List<C>>> xcat2 = new Category<C, Triple<C, C, List<C>>>() {
+
+			@Override
+			public Set<C> objects() {
+				return localIds;
+			}
+
+			@Override
+			public Set<Triple<C, C, List<C>>> arrows() {
+				return arrows;
+			}
+
+			@Override
+			public C source(Triple<C, C, List<C>> a) {
+				return a.first;
+			}
+
+			@Override
+			public C target(Triple<C, C, List<C>> a) {
+				return a.second;
+			}
+
+			@Override
+			public Triple<C, C, List<C>> identity(C o) {
+				return new Triple<>(o, o, new LinkedList<>());
+			}
+
+			@Override
+			public Triple<C, C, List<C>> compose(Triple<C, C, List<C>> a1, Triple<C, C, List<C>> a2) {
 				List<C> ret = new LinkedList<>(a1.third);
 				ret.addAll(a2.third);
 				Triple<C, C, List<C>> xxx = new Triple<>(a1.first, a2.second, ret);
@@ -915,10 +1120,11 @@ public class XCtx<C> implements XObject {
 
 		xcat2.validate();
 		
-		xcat = xcat2;
+	//	xcat = xcat2;
 		
-		return xcat; 
+		return xcat2; 
 	}
+
 	
 	//mutate paths in place
 	public static <C> void extend(KB<C> kb, Collection<Triple<C, C, List<C>>> paths, Map<C, Pair<C,C>> t, Collection<Triple<C, C, List<C>>> consts) {
@@ -1282,7 +1488,7 @@ public class XCtx<C> implements XObject {
 		//	s.parent = s_old;
 		//s.validate();
 		// s.init();
-		return new XCtx<String>(new HashSet<>(), t, e , S.global, S);
+		return new XCtx<String>(new HashSet<>(), t, e , S.global, S, "instance");
 	} 
 
 
@@ -1350,7 +1556,7 @@ public class XCtx<C> implements XObject {
 
 		Set<Pair<List<String>, List<String>>> e = new HashSet<>(s.eqs);
 
-		return new XCtx<>(i, t, e, env, null);
+		return new XCtx<>(i, t, e, env, null, "schema");
 	}
 
 	/* public Set<Triple<C, C, List<C>>> hom(C src, C dst) {
@@ -1405,6 +1611,55 @@ public class XCtx<C> implements XObject {
 		} else if (!types.equals(other.types))
 			return false;
 		return true;
+	}
+
+	public XCtx<C> rel() {
+		Set<Pair<List<C>, List<C>>> new_eqs = new HashSet<>(eqs);
+		if (schema == null) {
+			throw new RuntimeException("Problem with relationalize");
+		}
+		for (C x : terms()) {
+			if (!type(x).first.equals("1")) {
+				continue;
+			}
+			loop: for (C y : terms()) {
+				if (!type(y).first.equals("1")) {
+					continue;
+				}
+				if (!type(x).second.equals(type(y).second)) {
+					continue;
+				}
+				if (x.equals(y)) {
+					continue;
+				}
+				for (C b : allIds()) {
+					for (Triple<C, C, List<C>> p : cat().hom(type(x).second, b)) {
+						for (C t : global.allIds()) {
+							for (Triple<C, C, List<C>> att : cat().hom(b, t)) {
+								List<C> lhs = new LinkedList<>();
+								lhs.add(x);
+								lhs.addAll(p.third);
+								lhs.addAll(att.third);								
+								List<C> rhs = new LinkedList<>();
+								rhs.add(y);
+								rhs.addAll(p.third);
+								rhs.addAll(att.third);
+								if (!getKB().equiv(lhs, rhs)) {
+									continue loop;
+								}
+							}
+						}
+					}					
+				}
+				List<C> lhs = new LinkedList<>();
+				List<C> rhs = new LinkedList<>();
+				lhs.add(x);
+				rhs.add(y);
+				new_eqs.add(new Pair<>(lhs, rhs));
+			}
+		}
+		
+		return new XCtx<>(ids, types, new_eqs, global, schema, kind);
 	}
 	
 	

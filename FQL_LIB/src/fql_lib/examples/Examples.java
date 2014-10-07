@@ -25,8 +25,11 @@ public class Examples {
 	public static Example patrick5 = new Patrick5Examples();
 	public static Example patrick6 = new Patrick6Example();
 	public static Example patrick7 = new Patrick7Example();
+	public static Example patrick8 = new Patrick8Example();
+	public static Example patrick9 = new Patrick9Example();
+	public static Example patrick10=new Patrick10Example();
 	
-	public static Example[] examples = new Example[] {patrick, patrick2, patrick3, patrick4, patrick5, patrick6, patrick7, all, vik,  /*nist2, */ nistExample, propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
+	public static Example[] examples = new Example[] {patrick9, patrick8, patrick, patrick2, patrick3, patrick4, patrick5, patrick6, patrick7, all, vik,  /*nist2, */ nistExample, propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
 	
 	public static Example[] key_examples = examples; //new Example[] { deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
 

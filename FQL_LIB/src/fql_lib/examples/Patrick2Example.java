@@ -101,7 +101,7 @@ public class Patrick2Example extends Example {
 			+ "\n		xa1.IsAW = xw2; "
 			+ "\n} : C"
 + "\n"
-			+ "\nt = transform {"
+			+ "\nt = homomorphism {"
 			+ "\n	variables "
 			+ "\n		xa1 -> a1, xl1 -> l1, xl2 -> l2, xl3 -> l3, xl4 -> l4, xw1 -> w1, xw2 -> w2, xw3 -> w3;"
 			+ "\n} : I0 -> I"

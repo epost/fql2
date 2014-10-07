@@ -173,7 +173,10 @@ public class Pi {
 		Functor<O2,A2,Set,Fn> ret = new Functor<>(F.target, FinSet.FinSet, ret1::get, a -> new Fn<>(ret1.get(F.target.source(a)), ret1.get(F.target.target(a)), ret2.get(a)::get));
 	//	return null;
 		//return new Inst<>(ret1, ret2, D);
-		return new Triple<>(ret, nodetables, nodecats);
+		Triple xxx = new Triple<>(ret, nodetables, nodecats);
+		System.out.println(ret);
+		
+		return xxx;
 	}
 	
 	private static  Map project(Set<Map> x, int i, int j) {

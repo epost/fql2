@@ -22,4 +22,10 @@ public class XString implements XObject {
 		return new FQLTextPanel(BorderFactory.createEtchedBorder(), title, value);
 	}
 
+
+	@Override
+	public String kind() {
+		return "black-box";
+	}
+
 }

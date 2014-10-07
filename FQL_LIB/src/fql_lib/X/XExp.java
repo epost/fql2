@@ -1,12 +1,53 @@
 package fql_lib.X;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Util;
 
 public abstract class XExp {
+	
+	public static class XRel extends XExp {
+		XExp I;
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		public XRel(XExp i) {
+			super();
+			I = i;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XRel other = (XRel) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+		
+		
+	}
 	
 	public static class XUnit extends XExp {
 		@Override
@@ -137,7 +178,8 @@ public abstract class XExp {
 		public R visit (E env, XEq e);
 		public R visit (E env, XUnit e);
 		public R visit (E env, XCounit e);
-		
+		public R visit (E env, XPi e);
+		public R visit (E env, XRel e);
 	}
 	
 	public static class XTy extends XExp {
@@ -379,6 +421,22 @@ public abstract class XExp {
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		
+		@Override
+		public String toString() {
+			String x = "\n variables\n";
+			boolean b = false;
+			
+			List<String> nodes2 = nodes.stream().map(z -> "  " + z.first + ": " + z.second).collect(Collectors.toList());
+			x += Util.sep(nodes2, ",\n");
+			x = x.trim();
+			x += ";\n";
+			x += " equations\n";
+			List<String> eqs2 = eqs.stream().map(z -> "  " + Util.sep(z.first, ".") + " = " + Util.sep(z.second, ".")).collect(Collectors.toList());
+			x += Util.sep(eqs2, ",\n");
+			x = x.trim();
+			return "instance {\n " + x + ";\n}";
+		}
 	}
 	
 	public static class XSchema extends XExp {
@@ -438,10 +496,9 @@ public abstract class XExp {
 			return true;
 		}
 		
-		//TODO
 		@Override
 		public String toString() {
-			String x = "\n objects\n";
+			String x = "\n nodes\n";
 			boolean b = false;
 			for (String n : nodes) {
 				if (b) {
@@ -453,7 +510,7 @@ public abstract class XExp {
 			
 			x = x.trim();
 			x += ";\n";
-			x += " arrows\n";
+			x += " edges\n";
 
 			b = false;
 			for (Triple<String, String, String> a : arrows) {
@@ -477,8 +534,7 @@ public abstract class XExp {
 				b = true;
 			}
 			x = x.trim();
-			return "{\n " + x + ";\n}";
-
+			return "schema {\n " + x + ";\n}";
 		}
 		
 		private String printOneEq(List<String> l) {
@@ -654,6 +710,35 @@ public abstract class XExp {
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		
+		@Override
+		public String toString() {	
+			String nm0 = "\n nodes\n";
+			boolean b = false;
+			for (Pair<String, String> k : nm) {
+				if (b) {
+					nm0 += ",\n";
+				}
+				b = true;
+				nm0 += "  " + k.first + " -> " + k.second;
+			}
+			nm0 = nm0.trim();
+			nm0 += ";\n";
+
+			nm0 += " edges\n";
+			b = false;
+			for (Pair<String, List<String>> k : em) {
+				if (b) {
+					nm0 += ",\n";
+				}
+				b = true;
+				nm0 += "  " + k.first + " -> " + Util.sep(k.second, ".");
+			}
+			nm0 = nm0.trim();
+			nm0 += ";\n";
+
+			return "mapping {\n " + nm0 + "}"; // : " + src + " -> " + dst;
+		}
 
 	}
 	
@@ -706,6 +791,55 @@ public abstract class XExp {
 		}
 		
 	}
+	
+	public static class XPi extends XExp {
+		XExp F, I;
+		
+
+		public XPi(XExp f, XExp i) {
+			super();
+			F = f;
+			I = i;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XPi other = (XPi) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+	}
+
 	
 	public static class XDelta extends XExp {
 		XExp F, I;

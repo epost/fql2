@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<TokenMakerDefinition>
+  <general>
+    <package>fql_lib.X</package>
+    <className>FpqlTokenMaker</className>
+    <extendedClass>AbstractJFlexCTokenMaker</extendedClass>
+    <classComment/>
+    <ignoreCase>false</ignoreCase>
+    <booleanLiterals>false</booleanLiterals>
+  </general>
+  <comments>
+    <lineComments enabled="true" start="//"/>
+    <multiLineComments enabled="true" end="*/" start="/*"/>
+    <docComments enabled="false" end="" start=""/>
+  </comments>
+  <keywords>
+    <keyword>assume</keyword>
+    <keyword>constant</keyword>
+    <keyword>coreturn</keyword>
+    <keyword>delta</keyword>
+    <keyword>fn</keyword>
+    <keyword>homomorphism</keyword>
+    <keyword>instance</keyword>
+    <keyword>mapping</keyword>
+    <keyword>pi</keyword>
+    <keyword>return</keyword>
+    <keyword>schema</keyword>
+    <keyword>sigma</keyword>
+    <keyword>transform</keyword>
+    <keyword>type</keyword>
+  </keywords>
+  <keywords2>
+    <keyword>edges</keyword>
+    <keyword>equations</keyword>
+    <keyword>nodes</keyword>
+    <keyword>variables</keyword>
+  </keywords2>
+  <dataTypes/>
+  <functions/>
+  <numbers>
+    <hexLiteral/>
+    <intLiteral>{Digit}+</intLiteral>
+    <floatLiteral/>
+  </numbers>
+  <stringLiterals enabled="true" multiLine="false"/>
+  <charLiterals enabled="false" multiLine="false"/>
+  <backtickLiterals enabled="false"/>
+  <operators>
+    <operator>(</operator>
+    <operator>)</operator>
+    <operator>,</operator>
+    <operator>-&gt;</operator>
+    <operator>:</operator>
+    <operator>;</operator>
+    <operator>=</operator>
+    <operator>{</operator>
+    <operator>}</operator>
+  </operators>
+</TokenMakerDefinition>

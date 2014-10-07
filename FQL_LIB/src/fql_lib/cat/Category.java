@@ -233,16 +233,16 @@ public abstract class Category<O,A> implements Serializable {
 	//TODO Set, Cat, etc can override this
 	Map<Pair<O,O>, Set<A>> cached = new HashMap<>();
 	public Set<A> hom(O A, O B) {
+		if (!objects().contains(A)) {
+			throw new RuntimeException(A.toString() + " not in " + objects() + " (src)");
+		}
+		if (!objects().contains(B)) {
+			throw new RuntimeException(B.toString() + " not in " + objects() + " (dst)");
+		}
 		Pair<O,O> p = new Pair<>(A,B);
 		Set<A> retX = cached.get(p);
 		if (retX != null) {
 			return retX;
-		}
-		if (!objects().contains(A)) {
-			throw new RuntimeException(A.toString() + " not in " + objects());
-		}
-		if (!objects().contains(B)) {
-			throw new RuntimeException(B.toString() + " not in " + objects());
 		}
 		Set<A> ret = new HashSet<>();
 		for (A a : arrows()) {
