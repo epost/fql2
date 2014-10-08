@@ -7,11 +7,24 @@ public class Triple<S1, S2, S3> implements Comparable<Triple<S1, S2, S3>>, Seria
 	public Triple(S1 a, S2 b, S3 c) {
 		first = a; second = b; third = c;
 	}
+	
+////	@Override
+////	public int hashCode() {
+	//	return 0;
+	//}
+	
 	@Override
 	public int hashCode() {
-		return 0;
-	}
-	@SuppressWarnings("rawtypes")
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((first == null) ? 0 : first.hashCode());
+		result = prime * result + ((second == null) ? 0 : second.hashCode());
+		result = prime * result + ((third == null) ? 0 : third.hashCode());
+		return result;
+	} 
+
+
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

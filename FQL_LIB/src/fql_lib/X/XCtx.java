@@ -195,10 +195,10 @@ public class XCtx<C> implements XObject {
 
 		for (Pair<List<C>, List<C>> eq : eqs) {
 			if (!allTerms().containsAll(eq.first)) {
-				throw new RuntimeException("unknown const in: " + eq.first + " in " + this + " (first)");
+				throw new RuntimeException("unknown const: " + eq.first + " in " + this + " (first)");
 			}
 			if (!allTerms().containsAll(eq.second)) {
-				throw new RuntimeException("unknown const in: " + eq.second + " in " + this + " (second)");
+				throw new RuntimeException("unknown const: " + eq.second + " in " + this + " (second)");
 			}
 			if (!type(eq.first).equals(type(eq.second))) {
 				throw new RuntimeException("Type mismatch on " + eq);

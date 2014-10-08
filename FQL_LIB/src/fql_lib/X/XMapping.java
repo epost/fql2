@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
@@ -17,23 +16,20 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import fql_lib.DEBUG;
-import fql_lib.FUNCTION;
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Util;
 import fql_lib.X.XExp.XMapConst;
 import fql_lib.X.XExp.XTransConst;
-import fql_lib.cat.Category;
-import fql_lib.cat.Functor;
-import fql_lib.cat.categories.FinSet;
-import fql_lib.cat.categories.FinSet.Fn;
-import fql_lib.cat.categories.Pi;
 import fql_lib.gui.FQLTextPanel;
 
 public class XMapping<C, D> implements XObject {
 	public Map<Pair<List<C>, List<C>>, String> unprovable = new HashMap<>();
 
+	
+	
+	
+	
 	@Override
 	public String kind() {
 		return kind;
@@ -415,77 +411,7 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping<>(src0, dst0, ret, "homomorphism");
 	}
 
-	/*
-	 * public XCtx<Triple<D, List<D>, C>> delta(XCtx<D> I) { //XCtx ret =
-	 * src.copy(); //ret.local = new HashSet<>(); //ret.parent = src;
-	 * Set<Triple<D, List<D>, C>> gens = new HashSet<>(); //
-	 * System.out.println(I); // System.out.println("******"); //
-	 * System.out.println(I.parent);
-	 * 
-	 * //TODO variables of type Type must get copied over //TODO copy over
-	 * equations that start at type
-	 * 
-	 * for (C c : src.ids) { // if (!src.local.contains(c)) { // continue; //}
-	 * for (D d : I.consts) { // System.out.println("zzzz " + d); // if
-	 * (!I.local.contains(d)) { // continue; //} //
-	 * System.out.println("yyyyyy "); if (I.parent.consts.contains(d)) {
-	 * continue; } if (!I.typeOf.get(d).first.equals("1")) { throw new
-	 * RuntimeException(); } D x = I.typeOf.get(d).second; if (em.get(c).size()
-	 * != 1) { throw new RuntimeException(); } // System.out.println("XXXX");
-	 * 
-	 * D y = em.get(c).get(0); Set<Triple<D, D, List<D>>> paths = I.hom(x, y);
-	 * for (Triple<D, D, List<D>> path : paths) { Triple tr = new Triple(d,
-	 * path.third, c); ret.consts.add(tr); gens.add(tr); ret.local.add(tr);
-	 * ret.typeOf.put(tr, new Pair("1", c)); } } }
-	 * 
-	 * for (Triple<D, List<D>, C> t1 : gens) { for (Triple<D, List<D>, C> t2 :
-	 * gens) { if (t1.equals(t2)) { continue; } if (!t1.third.equals(t2.third))
-	 * { continue; } List<D> t1x = new LinkedList<>(t1.second); t1x.add(0,
-	 * t1.first); List<D> t2x = new LinkedList<>(t2.second); t2x.add(0,
-	 * t2.first); if (I.getKB().equiv(t1x, t2x)) { List l1 = new LinkedList<>();
-	 * List l2 = new LinkedList<>(); l1.add(t1); l2.add(t2); ret.eqs.add(new
-	 * Pair<>(l1, l2)); } } }
-	 * 
-	 * for (Triple<D, List<D>, C> t1 : gens) { for (C c : src.consts) { //if
-	 * (!src.local.contains(c)) { // continue; //} if (src.ids.contains(c)) {
-	 * continue; }
-	 * 
-	 * Pair<C, C> t = src.typeOf.get(c); if (t1.third.equals(t.first)) { List l
-	 * = new LinkedList<>(); l.add(t1); l.add(c);
-	 * 
-	 * List j = new LinkedList<>(t1.second); j.addAll(em.get(c));
-	 * 
-	 * D dsrc = I.typeOf.get(t1.first).second; D ddst = em.get(t1.third).get(0);
-	 * for (Triple<D, D, List<D>> arr : I.cat().arrows()) { if
-	 * (!arr.first.equals(dsrc) || !arr.second.equals(ddst)) { continue; } if
-	 * (I.getKB().equiv(arr.third, j)) { Triple g = new Triple<>(t1.first,
-	 * arr.third, t.second); List z = new LinkedList<>(); z.add(g); if
-	 * (!ret.eqs.contains(new Pair<>(l,z)) || !ret.eqs.contains(new
-	 * Pair<>(z,l))) { ret.eqs.add(new Pair(l, z)); } break; } }
-	 * 
-	 * } } }
-	 * 
-	 * for (Triple<D, List<D>, C> t1 : gens) { List<D> z = new
-	 * LinkedList<>(t1.second); z.add(0, t1.first); Pair t = I.type(z);
-	 * 
-	 * for (D d : dst.consts) { if (!I.typeOf.get(d).equals(t)) { continue; }
-	 * 
-	 * List<D> l = new LinkedList<>(); l.add(d); List r = new LinkedList<>();
-	 * r.add(t1); if (I.getKB().equiv(z, l)) { ret.eqs.add(new Pair<>(l, r)); }
-	 * }
-	 * 
-	 * // if (t1.second.isEmpty() && !I.parent.local.contains(t1.first) &&
-	 * !I.local.contains(t1.first) && !I.parent.local.contains(t1.third) &&
-	 * !I.local.contains(t1.third)) { // List lhs = new LinkedList<>(); //
-	 * lhs.add(t1); // List rhs = new LinkedList<>(); // rhs.add(t1.first); //
-	 * ret.eqs.add(new Pair<>(lhs, rhs)); } }
-	 * 
-	 * //src, dst
-	 * 
-	 * ret.init();
-	 * 
-	 * return ret; }
-	 */
+	
 
 	public XMapping<Pair<Triple<D, D, List<D>>, C>, Pair<Triple<D, D, List<D>>, C>> deltaT(
 			XMapping<D, D> t) {
@@ -666,58 +592,7 @@ public class XMapping<C, D> implements XObject {
 				(XCtx<Pair<Triple<D, D, List<D>>, C>>) src, "instance");
 	}
 
-	/*
-	 * public XCtx<Map<C, Map<Triple<D, D, List<D>>, Triple<C, C, List<C>>>>>
-	 * pi(XCtx<C> I) { Map<D, List<Map<C, Map<Triple<D, D, List<D>>, Triple<C,
-	 * C, List<C>>>>>> thetas_d = new HashMap<>(); Map<Map<C, Map<Triple<D, D,
-	 * List<D>>, Triple<C, C, List<C>>>>, Pair<Map<C, Map<Triple<D, D, List<D>>,
-	 * Triple<C, C, List<C>>>>, Map<C, Map<Triple<D, D, List<D>>, Triple<C, C,
-	 * List<C>>>>>> tys;
-	 * 
-	 * Map<Map<C, Map<Triple<D, D, List<D>>, Triple<C, C, List<C>>>>, Pair<D,
-	 * D>> types = new HashMap<>(); for (D d : dst.allIds()) {
-	 * System.out.println(d); List<Map<C, Map<Triple<D, D, List<D>>, Triple<C,
-	 * C, List<C>>>>> thetas = new LinkedList<>(); Map<C,
-	 * List<LinkedHashMap<Triple<D, D, List<D>>, Triple<C, C, List<C>>>>> theta
-	 * = new HashMap<>(); for (C c : src.allIds()) { Map<Triple<D, D, List<D>>,
-	 * List<Triple<C, C, List<C>>>> theta2 = new HashMap<>(); for (Triple<D, D,
-	 * List<D>> f : dst.cat().hom(d, em.get(c).get(0))) { List<Triple<C, C,
-	 * List<C>>> filtered = I.cat().hom((C) "1", c).stream() .filter(k ->
-	 * pifilter(d, c, f, k)).collect(Collectors.toList()); theta2.put(f,
-	 * filtered); } List<LinkedHashMap<Triple<D, D, List<D>>, Triple<C, C,
-	 * List<C>>>> theta3 = FinSet .homomorphs(theta2); theta.put(c, theta3); }
-	 * System.out.println("finished inner"); List<LinkedHashMap<C,
-	 * LinkedHashMap<Triple<D, D, List<D>>, Triple<C, C, List<C>>>>> theta4 =
-	 * FinSet .homomorphs(theta); System.out.println("size: " + theta4.size());
-	 * 
-	 * // outer: for (LinkedHashMap<C, LinkedHashMap<Triple<D, D, List<D>>,
-	 * Triple<C, C, List<C>>>> cand : theta4) {
-	 * 
-	 * thetas_d.put(d, thetas); }
-	 * 
-	 * System.out.println("Finisihed with thetas");
-	 * 
-	 * Set<Pair<List<Map<C, Map<Triple<D, D, List<D>>, Triple<C, C, List<C>>>>>,
-	 * List<Map<C, Map<Triple<D, D, List<D>>, Triple<C, C, List<C>>>>>>> eqs =
-	 * new HashSet<>(); for (D h : dst.allTerms()) { Pair<D, D> t = dst.type(h);
-	 * for (Map<C, Map<Triple<D, D, List<D>>, Triple<C, C, List<C>>>> theta :
-	 * thetas_d .get(t.first)) { Map<C, Map<Triple<D, D, List<D>>, Triple<C, C,
-	 * List<C>>>> theta0 = new HashMap<>();
-	 * 
-	 * for (C c : src.allIds()) { Map<Triple<D, D, List<D>>, Triple<C, C,
-	 * List<C>>> theta1 = new HashMap<>(); for (Triple<D, D, List<D>> f :
-	 * dst.cat().hom(t.first, em.get(c).get(0))) { List<D> f0 = new
-	 * LinkedList<>(); f0.add(0, h); Triple<D, D, List<D>> key =
-	 * dst.find(dst.getKB(), new Triple<>(t.first, f.second, f0),
-	 * dst.cat().hom(t.first, f.second)); theta1.put(f, theta.get(c).get(key));
-	 * } theta0.put(c, theta1); }
-	 * 
-	 * List lhs = new LinkedList<>(); lhs.add(theta); lhs.add(h); List rhs = new
-	 * LinkedList<>(); rhs.add(theta0); eqs.add(new Pair<>(lhs, rhs)); } }
-	 * 
-	 * return new XCtx(new HashSet<>(), types, eqs, src.global, dst,
-	 * "instance"); }
-	 */
+
 
 	public XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> pi(XCtx<C> I) {
 		Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>> thetas_d = makeThetas2(I);
@@ -758,6 +633,17 @@ public class XMapping<C, D> implements XObject {
 					}
 				//	theta0.put(c, theta1);
 				}
+				
+				boolean found = false;
+				for (Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> thetaX : thetas_d.get(t.second)) {
+					if (theta0.equals(thetaX)) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					throw new RuntimeException("At h=" + h + ": " + t + ", Constructed theta^prime " + theta0 + " not found in\n\n" + Util.sep(thetas_d.get(t.second), "\n"));
+				}
 
 				List lhs = new LinkedList<>();
 				lhs.add(theta);
@@ -796,84 +682,7 @@ public class XMapping<C, D> implements XObject {
 	 * } }
 	 */
 
-	private Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>> makeThetas(
-			XCtx<C> I) {
-
-		Category<C, Triple<C, C, List<C>>> scat = src.small_cat();
-		Category<D, Triple<D, D, List<D>>> dcat = dst.small_cat();
-
-		FUNCTION<C, Set> o = c -> {
-			return I.cat().hom((C) "1", c);
-		};
-
-		FUNCTION<Triple<C, C, List<C>>, Fn> a = arr -> {
-			FUNCTION f = tr -> {
-				Triple<C, C, List<C>> input = (Triple<C, C, List<C>>) tr;
-				List<C> l = new LinkedList<>(input.third);
-				l.addAll(arr.third);
-				Triple<C, C, List<C>> tofind = new Triple<>((C) "1", arr.second, l);
-				Object y = I.find(I.getKB(), tofind, I.cat().hom((C) "1", arr.second));
-				if (y == null) {
-					throw new RuntimeException("On arrow " + arr + ", input ID " + tr + ", tofind "
-							+ tofind + ", not in " + I.cat().hom((C) "1", arr.second));
-				}
-				return y;
-			};
-			return new Fn(o.apply(arr.first), o.apply(arr.second), f);
-		};
-
-		//
-		Functor<C, Triple<C, C, List<C>>, Set, Fn> I0 = new Functor<>(scat, FinSet.FinSet, o, a);
-
-		FUNCTION<C, D> o2 = c -> {
-			return em.get(c).get(0);
-		};
-		FUNCTION<Triple<C, C, List<C>>, Triple<D, D, List<D>>> a2 = x -> {
-			List<C> l = new LinkedList<>(x.third);
-			l.add(0, x.first);
-			Triple<D, D, List<D>> t = new Triple<>(em.get(x.first).get(0), em.get(x.second).get(0),
-					apply(l));
-			return dst.find(dst.getKB(), t, dst.cat().hom(t.first, t.second));
-		};
-
-		Functor F = new Functor<>(scat, dcat, o2, a2);
-		//
-
-		// maps number -> value, colnames
-		System.out.println("Starting pi");
-		String old_lineage = DEBUG.debug.piLineage;
-		DEBUG.debug.piLineage = "Lineage as ID";
-		Triple<Functor<Object, Object, Set, FinSet.Fn>, Map<Object, Set<Map>>, Map<Object, Triple<Object, C, Object>[]>> J0 = Pi
-				.pi(F, I0);
-		DEBUG.debug.piLineage = old_lineage;
-		System.out.println("done");
-		Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>> ret = new HashMap<>();
-
-		for (D d : dst.allIds()) {
-			if (d.equals("1")) {
-				continue;
-			}
-			List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> l = new LinkedList<>();
-			Triple<Object, C, Object>[] cols = J0.third.get(d);
-			Set<Map> maps = J0.second.get(d);
-//			System.out.println("Maps: " + maps);
-			for (Map m : maps) {
-				Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> n = new HashMap<>();
-				int i = 0;
-				for (Triple<Object, C, Object> col : cols) {
-	//				System.out.println("col " + col.third + " " + col.getClass());
-		//			System.out.println("mget " + m.get(i) + " " + m.get(i).getClass());
-					n.put(new Pair<>(col.second, (Triple<D, D, List<D>>) col.third), (Triple<C, C, List<C>>) ((Map)m.get(0)).get(i));
-					i++;
-				}
-				l.add(n);
-			}
-			ret.put(d, l);
-		}
-		ret.put((D)"1", pi_old(I));
-		return ret;
-	}
-
+	
 	public XMapping<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>, Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> piT(XMapping<C, C> t) {
 		XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> src = pi(t.src);
 		XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> dst = pi(t.dst);
@@ -911,57 +720,13 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping<>(src, dst, em, "homomorphism");
 	}
 
-	public List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> pi_old(XCtx<C> I) {
-	    Map<Pair<C, Triple<D, D, List<D>>>, List<Triple<C, C, List<C>>>> theta = new HashMap<>();
-		for (C c : src.allIds()) {
-			for (Triple<D, D, List<D>> f : dst.cat().hom((D)"1", em.get(c).get(0))) {
-				theta.put(new Pair<>(c, f), new LinkedList<>(I.cat().hom((C) "1", c)));
-			}
-		}
-		List<LinkedHashMap<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> thetas = FinSet.homomorphs(theta);
-		List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> ret = new LinkedList<>();
-		outer: for (LinkedHashMap<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> cand : thetas) {
-			for (C c : src.allIds()) {
-				for (Triple<D, D, List<D>> f : dst.cat().hom((D)"1", em.get(c).get(0))) {
-					for (C g : src.allTerms()) {
-						Pair<C, C> t = src.type(g);
-						if (!t.first.equals(c)) {
-							continue;
-						}
-						List<D> fFg = new LinkedList<>(em.get(g));
-						fFg.addAll(0, f.third);
-						Triple<D, D, List<D>> found = dst.find(dst.getKB(),
-								new Triple<D, D, List<D>>(f.first, dst.type(fFg).second, fFg),
-								dst.cat().arrows());
-						Triple<C, C, List<C>> lhs = cand.get(new Pair<>(t.second, found));
-
-						Triple<C, C, List<C>> rhs1 = cand.get(new Pair<>(t.first, f));
-						List<C> rhsx = new LinkedList<>(rhs1.third);
-						rhsx.add(g);
-						Triple<C, C, List<C>> rhs2 = new Triple<>(rhs1.first, t.second, rhsx);
-						Triple<C, C, List<C>> rhs = I.find(I.getKB(), rhs2, I.cat().arrows());
-
-						if (!lhs.first.equals(rhs.first)) {
-							throw new RuntimeException();
-						}
-						if (!lhs.second.equals(rhs.second)) {
-							throw new RuntimeException();
-						}
-						if (!I.getKB().equiv(lhs.third, rhs.third)) {
-							continue outer;
-						}
-					}
-					ret.add((Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>) ((Object) cand));
-				}
-			}
-		}
-		return ret;
-	}
 	
 	
 	boolean fill(XCtx<C> I, Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
 	        Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
    			Pair<C, Triple<D, D, List<D>>> tag, Triple<C, C, List<C>> y) {
+		
+		
 		C c = tag.first;
 		Triple<D, D, List<D>> f = tag.second;
 		for (C c0 : src.allIds()) {
@@ -973,17 +738,26 @@ public class XMapping<C, D> implements XObject {
 				fFg.add(0, f.first);
 				D t = em.get(c0).get(0);
 				Triple<D, D, List<D>> found = dst.find(dst.getKB(), new Triple<>(f.first, t, fFg), dst.cat().hom(f.first, t));
+				if (found == null) {
+					throw new RuntimeException();
+				}
 				Triple<C, C, List<C>> val = theta.get(new Pair<>(c0, found));
-				
 				List<C> yIg = new LinkedList<>(y.third);
 				yIg.add(0, y.first);
 				yIg.addAll(g.third);
 				Triple<C, C, List<C>> found2 = I.find(I.getKB(), new Triple<>((C)"1", g.second, yIg), I.cat().hom((C)"1", g.second));
-		
+				if (found2 == null) {
+					throw new RuntimeException();
+				}
 				if (val == null) {
+					if (!theta.containsKey(new Pair<>(c0, found))) {
+						throw new RuntimeException();
+					}
 					theta.put (new Pair<>(c0, found), found2);
 					theta2.put(new Pair<>(c0, found), tag);
+			//		System.out.println(theta.keySet());
 				} else if (!I.getKB().equiv(val.third, found2.third)) {
+			//		System.out.println("contra");
 					return false;
 				}
 			}
@@ -991,15 +765,17 @@ public class XMapping<C, D> implements XObject {
 		return true;
 	}
 
+	//TODO: check on cleanup
 	void cleanup(Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
 	        Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
-   			Pair<C, Triple<D, D, List<D>>> tag) {
+   			Pair<C, Triple<D, D, List<D>>> tag, Triple<C, C, List<C>> y) {
+		//System.out.println(theta.keySet());
 		for (Pair<C, Triple<D, D, List<D>>> k : theta.keySet()) {
 			Pair<C, Triple<D, D, List<D>>> v = theta2.get(k);
 			if (v == null) { 
 				continue;
 			}
-			if (v.equals(tag)) {
+			if (v.equals(tag) /*&& theta.get(k).equals(y)*/ ) {
 				theta.put(k , null);
 				theta2.put(k, null);
 			}
@@ -1012,12 +788,17 @@ public class XMapping<C, D> implements XObject {
 			        Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
 			        Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
            			Pair<C, Triple<D, D, List<D>>> tag, Triple<C, C, List<C>> y) {
+	//	System.out.println("try_branch at " + theta + " and " + theta2 + " and tag= " + tag + " y= " + y);
 		C c = tag.first;
 		Triple<D, D, List<D>> f = tag.second;
-		
+		if (!theta.keySet().contains(new Pair<>(c, f))) {
+			throw new RuntimeException();
+		}
 		theta.put(new Pair<>(c, f) , y);
 		theta2.put(new Pair<>(c, f), new Pair<>(c, f));
-		if (fill(I, theta, theta2, tag, y)) {
+		boolean contra = fill(I, theta, theta2, tag, y);
+	//	System.out.println("filled " + theta);
+		if (contra) {
 			Pair<C, Triple<D, D, List<D>>> c0f0 = next(theta, tag);
 			if (c0f0 != null) {
 				C c0 = c0f0.first;
@@ -1026,22 +807,28 @@ public class XMapping<C, D> implements XObject {
 					try_branch(I, thetas, theta, theta2, c0f0, x0);
 				}
 			} else {
+			//	System.out.println(theta.keySet());
 				for (Pair<C, Triple<D, D, List<D>>> k : theta.keySet()) {
 					if (theta.get(k) == null) {
 						throw new RuntimeException("Tried to add " + theta);
 					}
 				}
-//				System.out.println("adding " + theta);
-				thetas.add(new HashMap<>(theta));
+			//	System.out.println("adding " + theta);
+			//	System.out.println(theta.keySet());
+			//	System.out.println("Added");
+				thetas.add(new LinkedHashMap<>(theta)); //ok, irrelevent
 			}
-		}
-		cleanup(theta, theta2, tag);
+		} 
+		cleanup(theta, theta2, tag, y);
+		//System.out.println("cleans up to " + theta);
 	}
 
+	
 	private Pair<C, Triple<D, D, List<D>>> next(
 			Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
 			Pair<C, Triple<D, D, List<D>>> tag) {
 		boolean seen = false;
+		//System.out.println(theta.keySet());
 		for (Pair<C, Triple<D, D, List<D>>> k : theta.keySet()) {
 			if (k.equals(tag)) {
 				seen = true;
@@ -1056,7 +843,7 @@ public class XMapping<C, D> implements XObject {
 			throw new RuntimeException(tag +  " not seen in " + theta);
 		}
 		return null;
-	}
+	} 
 
 	private Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>> makeThetas2(
 			XCtx<C> I) {
@@ -1066,22 +853,26 @@ public class XMapping<C, D> implements XObject {
 		for (D d : dst.allIds()) {
 			List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> thetas = new LinkedList<>();
 			Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta = new LinkedHashMap<>();
-			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2 = new LinkedHashMap<>();
+			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2 = new LinkedHashMap<>(); //ok (irrelevent)
 			for (C c : src.allIds()) {
 				for (Triple<D, D, List<D>> f : dst.cat().hom(d, em.get(c).get(0))) {
 					theta.put(new Pair<>(c, f), null);
 					theta2.put(new Pair<>(c, f), null);
 				}
 			}
+//			System.out.println("at " + d + " ordering is " + theta.keySet());
 			for (Pair<C, Triple<D, D, List<D>>> cf : theta.keySet()) {
 				for (Triple<C, C, List<C>> x : I.cat().hom((C)"1", cf.first)) {
 					try_branch(I, thetas, theta, theta2, cf, x);
-					break;
+					
+					//break;
 				}
 				break;
 			}
+	//		System.out.println("at " + d + ", " + thetas.size());
 			ret.put(d, thetas);
 		}
+		
 		
 		return ret;
 	}
@@ -1136,6 +927,8 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping(J, pideltaI, m, "homomorphism");
 	}
 
+	//TODO: maybe should not have extra constants in delta?
+	//TODO: or, not need map all vars? only need map eqcs?
 	public XMapping pi_counit(XCtx<C> I) {
 		XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> piI = pi(I); //XCtx<Pair<Triple<D, D, List<D>>, C>>
 		XCtx deltapiI = delta((XCtx)piI); //<Pair<Triple<D, D, List<D>>, C>>
