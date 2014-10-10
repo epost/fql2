@@ -424,7 +424,7 @@ public class XRaToFpql {
 
 				JOptionPane pane = new JOptionPane(p);
 				// Configure via set methods
-				JDialog dialog = pane.createDialog(null, "Help on SPCU to FQL");
+				JDialog dialog = pane.createDialog(null, "Help on SPCU to FPQL");
 				dialog.setModal(false);
 				dialog.setVisible(true);
 				dialog.setResizable(true);

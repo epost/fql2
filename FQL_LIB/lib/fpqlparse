@@ -15,19 +15,30 @@
   </comments>
   <keywords>
     <keyword>assume</keyword>
+    <keyword>case</keyword>
     <keyword>constant</keyword>
     <keyword>coreturn</keyword>
     <keyword>delta</keyword>
+    <keyword>ff</keyword>
     <keyword>fn</keyword>
+    <keyword>fst</keyword>
     <keyword>homomorphism</keyword>
+    <keyword>inl</keyword>
+    <keyword>inr</keyword>
     <keyword>instance</keyword>
     <keyword>mapping</keyword>
+    <keyword>pair</keyword>
     <keyword>pi</keyword>
+    <keyword>relationalize</keyword>
     <keyword>return</keyword>
     <keyword>schema</keyword>
     <keyword>sigma</keyword>
+    <keyword>snd</keyword>
     <keyword>transform</keyword>
+    <keyword>tt</keyword>
     <keyword>type</keyword>
+    <keyword>unit</keyword>
+    <keyword>void</keyword>
   </keywords>
   <keywords2>
     <keyword>edges</keyword>

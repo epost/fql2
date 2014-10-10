@@ -37,7 +37,6 @@ public class VikExample extends Example {
 			+ "\n		Isbn_num->{1,2,3,249,258,4597},"
 			+ "\n		String->{\"a\",\"b\",\"GoneWind\",\"Catch22\",\"CatTheory\"};"
 			+ "\n	arrows"
-			+ "\n		att->{(1,1),(2,2),(3,3),(4,4),(5,5)},"
 			+ "\n		title->{(1,\"GoneWind\"),(2,\"Catch22\"), (3,\"CatTheory\")},"
 			+ "\n		isbn->{(1,258),(2,4597),(3,249)}, //Note the last digit of the ISBN is the number of letters in the title."
 			+ "\n		i->{(1,1),(2,2)},"

@@ -8,6 +8,223 @@ import fql_lib.Triple;
 import fql_lib.Util;
 
 public abstract class XExp {
+
+	public static class XFF extends XExp {
+		XExp S;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((S == null) ? 0 : S.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XFF other = (XFF) obj;
+			if (S == null) {
+				if (other.S != null)
+					return false;
+			} else if (!S.equals(other.S))
+				return false;
+			return true;
+		}
+
+		public XFF(XExp s) {
+			super();
+			S = s;
+		}
+	
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+	}
+	
+	public static class XVoid extends XExp {
+		XExp S;
+
+		public XVoid(XExp s) {
+			super();
+			S = s;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((S == null) ? 0 : S.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XVoid other = (XVoid) obj;
+			if (S == null) {
+				if (other.S != null)
+					return false;
+			} else if (!S.equals(other.S))
+				return false;
+			return true;
+		}
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+	}
+	
+	public static class XCoprod extends XExp {
+		XExp l, r;
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		public XCoprod(XExp l, XExp r) {
+			super();
+			this.l = l;
+			this.r = r;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((l == null) ? 0 : l.hashCode());
+			result = prime * result + ((r == null) ? 0 : r.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XCoprod other = (XCoprod) obj;
+			if (l == null) {
+				if (other.l != null)
+					return false;
+			} else if (!l.equals(other.l))
+				return false;
+			if (r == null) {
+				if (other.r != null)
+					return false;
+			} else if (!r.equals(other.r))
+				return false;
+			return true;
+		}
+		
+	}
+	
+	public static class XInj extends XExp {
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		XExp l, r;
+		boolean left;
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((l == null) ? 0 : l.hashCode());
+			result = prime * result + (left ? 1231 : 1237);
+			result = prime * result + ((r == null) ? 0 : r.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XInj other = (XInj) obj;
+			if (l == null) {
+				if (other.l != null)
+					return false;
+			} else if (!l.equals(other.l))
+				return false;
+			if (left != other.left)
+				return false;
+			if (r == null) {
+				if (other.r != null)
+					return false;
+			} else if (!r.equals(other.r))
+				return false;
+			return true;
+		}
+		public XInj(XExp l, XExp r, boolean left) {
+			super();
+			this.l = l;
+			this.r = r;
+			this.left = left;
+		}
+	}
+	
+	public static class XMatch extends XExp {
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		XExp l, r;
+
+		public XMatch(XExp l, XExp r) {
+			super();
+			this.l = l;
+			this.r = r;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((l == null) ? 0 : l.hashCode());
+			result = prime * result + ((r == null) ? 0 : r.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XMatch other = (XMatch) obj;
+			if (l == null) {
+				if (other.l != null)
+					return false;
+			} else if (!l.equals(other.l))
+				return false;
+			if (r == null) {
+				if (other.r != null)
+					return false;
+			} else if (!r.equals(other.r))
+				return false;
+			return true;
+		}
+	}
+	
 	
 	public static class XRel extends XExp {
 		XExp I;
@@ -180,6 +397,11 @@ public abstract class XExp {
 		public R visit (E env, XCounit e);
 		public R visit (E env, XPi e);
 		public R visit (E env, XRel e);
+		public R visit (E env, XCoprod e);
+		public R visit (E env, XInj e);
+		public R visit (E env, XMatch e);
+		public R visit (E env, XVoid e);
+		public R visit (E env, XFF e);
 	}
 	
 	public static class XTy extends XExp {
