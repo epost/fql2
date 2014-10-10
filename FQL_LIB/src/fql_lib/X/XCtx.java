@@ -140,7 +140,7 @@ public class XCtx<C> implements XObject {
 			return;
 		}
 
-		validate();
+		validate(true);
 
 		for (C c : ids) {
 			types.put((C) ("!_" + c), new Pair<>(c, (C) "1"));
@@ -162,7 +162,7 @@ public class XCtx<C> implements XObject {
 			eqs.add(new Pair<>(lhs, rhs));
 		}
 
-		validate();
+		validate(false);
 		kb();
 		initialized = true;
 	}
@@ -177,7 +177,7 @@ public class XCtx<C> implements XObject {
 		kb = new KB<C>(rules, 32); // TODO
 	}
 
-	private void validate() {
+	private void validate(boolean initial) {
 		if (!types.keySet().containsAll(ids)) {
 			throw new RuntimeException("ids not contained in const");
 		}
@@ -195,13 +195,19 @@ public class XCtx<C> implements XObject {
 
 		for (Pair<List<C>, List<C>> eq : eqs) {
 			if (!allTerms().containsAll(eq.first)) {
+				if (!initial || !eq.first.toString().contains("!")) {
 				throw new RuntimeException("unknown const: " + eq.first + " in " + this + " (first)");
+				}
 			}
 			if (!allTerms().containsAll(eq.second)) {
+				if (!initial || !eq.second.toString().contains("!")) {
 				throw new RuntimeException("unknown const: " + eq.second + " in " + this + " (second)");
+				}
 			}
-			if (!type(eq.first).equals(type(eq.second))) {
-				throw new RuntimeException("Type mismatch on " + eq);
+			if (!initial || (!eq.second.toString().contains("!") && !eq.first.toString().contains("!"))) {
+				if (!type(eq.first).equals(type(eq.second))) {
+					throw new RuntimeException("Type mismatch on " + eq + ": lhs=" + type(eq.first) + ",rhs=" + type(eq.second));
+				}
 			}
 		} 
 	}

@@ -482,7 +482,7 @@ public class XParser {
 	}
 
 	private static Parser<List<String>> path() {
-		return Terminals.Identifier.PARSER.sepBy1(term("."));
+		return  Parsers.or(Terminals.StringLiteral.PARSER, Terminals.Identifier.PARSER).sepBy1(term("."));
 	}
 
 	public static Parser<?> section(String s, Parser<?> p) {

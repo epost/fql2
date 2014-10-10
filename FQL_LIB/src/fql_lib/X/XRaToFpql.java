@@ -282,12 +282,52 @@ public class XRaToFpql {
 //	}
 
 
-	protected Example[] examples = { new PeopleExample() /* , new NegExample() */, new EDExample() };
+	protected Example[] examples = { new PeopleExample() /* , new NegExample() */, new EDExample(), new SelectExample() };
 
 	String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries *of base relations* are supported, using DISTINCT and ALL for set semantics.  (The translated FQL will not compile if not translating unions of conjunctive queries of base relations).  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.  SQL keywords MUST be capitalized.  The observables viewer pane is useful for visualizing instances.";
 
 	protected String kind() {
 		return "SPCU";
+	}
+	
+	static class SelectExample extends Example {
+
+		@Override
+		public String getName() {
+			return "Select const";
+		}
+
+		@Override
+		public String getText() {
+			return s;
+		}
+		
+		
+		String s =
+		"CREATE TABLE R ("
+				+ "\n c1 VARCHAR(255), "
+				+ "\n c2 VARCHAR(255)"
+				+ "\n);"
+				+ "\n"
+				+ "\nINSERT INTO R VALUES (\"one\", \"one\"), (\"one\", \"one\"), (\"one\", \"two\"), (\"two\", \"three\") ;"
+				+ "\n"
+				+ "\nq1 = SELECT r.c1 AS col1, r.c2 AS col2"
+				+ "\n     FROM R AS r "
+				+ "\n     WHERE r.c1 = \"one\" "
+				+ "\n"
+				+ "\nq2 = SELECT DISTINCT r.c1 AS col1, r.c2 AS col2"
+				+ "\n     FROM R AS r "
+				+ "\n     WHERE r.c1 = \"one\" "
+				+ "\n"
+				+ "\nq3 = SELECT r.c1 AS col1, r.c2 AS col2"
+				+ "\n     FROM R AS r "
+				+ "\n     WHERE r.c1 = \"four\" "
+				+ "\n"
+				+ "\nq4 = SELECT r.c1 AS col1, r.c2 AS col2"
+				+ "\n     FROM R AS r "
+				+ "\n     WHERE r.c1 = \"one\" AND r.c1 = \"two\""
+				+ "\n";
+
 	}
 
 	static class EDExample extends Example {
@@ -533,6 +573,9 @@ public class XRaToFpql {
 			if (k0 instanceof EInsertValues) {
 				EInsertValues k = (EInsertValues) k0;
 				List<String> lcols = cols.get(k.target);
+				if (lcols == null) {
+					throw new RuntimeException("Missing: " + k.target);
+				}
 				for (List<String> tuple : k.values) {
 					if (lcols.size() != tuple.size()) {
 						throw new RuntimeException("Column size mismatch " + tuple + " in "
@@ -584,7 +627,7 @@ public class XRaToFpql {
 			EExternal gh = gh0.second;
 			if (gh instanceof EFlower) {
 				EFlower fl = (EFlower) gh;
-				Pair<String, XSchema> yyy = trans(exp, fl, k);
+				Pair<String, XSchema> yyy = trans(exp, fl, k, enums);
 				xxx += yyy.first + "\n\n";
 				schemas.put(k, k + "Schema");
 				schemas0.put(k, yyy.second);
@@ -825,10 +868,10 @@ public class XRaToFpql {
 
 	}
 
-	private static Pair<String, XSchema> trans(XSchema src, EFlower fl, String pre) {
+	private static Pair<String, XSchema> trans(XSchema src, EFlower fl, String pre, Set<Object> enums) {
 		// SigExp src0 = new SigExp.Var("S");
 
-		LinkedList<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
+//		LinkedList<Pair<List<String>, List<String>>> eqs = 
 
 		List<String> nodes1 = new LinkedList<>();
 		List<String> nodes2 = new LinkedList<>();
@@ -882,6 +925,8 @@ public class XRaToFpql {
 		}
 
 		List<List<Triple<String, String, String>>> eqcs = merge(edges2, fl);
+		
+		//for each p.q = 3, add (eqc_for(p.q).get(0) = 3) to some list
 
 		// System.out.println("eqcs " + eqcs);
 		// System.out.println("edges2 " + edges2);
@@ -944,9 +989,36 @@ public class XRaToFpql {
 			}
 		}
 
-		XSchema sig1 = doSchema(nodes1, attrs, edges1, eqs);
-		XSchema sig2 = doSchema(nodes2, attrs, edges2, eqs);
-		XSchema sig3 = doSchema(nodes3, attrs, edges3, eqs);
+		XSchema sig1 = doSchema(nodes1, attrs, edges1, new LinkedList<>());
+		XSchema sig2 = doSchema(nodes2, attrs, edges2, new LinkedList<>());
+		XSchema sig3 = doSchema(nodes3, attrs, edges3, new LinkedList<>());
+		
+		for (Pair<Pair<String, String>, Pair<String, String>> x : fl.where) {
+			if (x.second.second != null) {
+				continue;
+			}
+			String c = x.second.first; //TODO: add to global consts
+			enums.add(c);
+			Triple<String, String, String> found = null;
+			Triple<String, String, String> tofind = new Triple<>(x.first.first + "_" + fl.from.get(x.first.first) + "_" + x.first.second, "guid", "adom");
+			for (List<Triple<String, String, String>> eqc : eqcs) {
+				if (eqc.contains(tofind)) {
+					found = eqc.get(0);
+					break;
+				}
+			}
+			if (found == null) {
+				throw new RuntimeException("Bad flower: " + fl);
+			}
+			List<String> lhs = new LinkedList<>();
+			lhs.add(found.first);
+			lhs.add("att");
+			List<String> rhs = new LinkedList<>();
+			rhs.add("\"!_guid\"");
+			rhs.add(c);
+			Pair<List<String>, List<String>> eq = new Pair<>(lhs, rhs);
+			sig2.eqs.add(eq);
+		}
 
 		XMapConst map1 = doMapping(inodes1, iattrs, iedges1, sig1, new XExp.Var("S"));
 		XMapConst map2 = doMapping(inodes2, iattrs, iedges2, src, sig2);
@@ -997,6 +1069,9 @@ public class XRaToFpql {
 			eqcs.add(l);
 		}
 		for (Pair<Pair<String, String>, Pair<String, String>> k : ef.where) {
+			if (k.second.second == null) {
+				continue;
+			}
 			mergeEqc(eqcs, k.first, k.second, ef.from);
 		}
 
@@ -1381,12 +1456,12 @@ public class XRaToFpql {
 	}
 
 	public static final Parser<?> flower() {
-		Parser<?> tuple = Parsers.tuple(ident(), term("."), ident());
+		Parser tuple = Parsers.tuple(ident(), term("."), ident());
 
 		Parser<?> from0 = Parsers.tuple(ident(), term("AS"), ident()).sepBy(term(","));
 		Parser<?> from = Parsers.tuple(term("FROM"), from0);
 
-		Parser<?> where0 = Parsers.tuple(tuple, term("="), tuple).sepBy(term("AND"));
+		Parser<?> where0 = Parsers.tuple(tuple, term("="), tuple.or(string())).sepBy(term("AND"));
 		Parser<?> where = Parsers.tuple(term("WHERE"), where0); // TODO
 																// .optional();
 
@@ -1484,9 +1559,14 @@ public class XRaToFpql {
 			List<Tuple3> where1 = (List<Tuple3>) where0.b;
 			for (Tuple3 k : where1) {
 				Tuple3 l = (Tuple3) k.a;
+				if (k.c instanceof Tuple3) {
 				Tuple3 r = (Tuple3) k.c;
 				where.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r.a
 						.toString(), r.c.toString())));
+				} else {
+					String r = (String) k.c;
+					where.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r, null)));
+				}
 			}
 		}
 
