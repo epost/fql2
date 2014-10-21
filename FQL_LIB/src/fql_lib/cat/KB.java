@@ -38,6 +38,7 @@ public class KB<Y> {
 	public KB(Set<Pair<List<Y>, List<Y>>> rules, int max_iterations) {
 		this.rules = rules;
 		this.max_iterations = max_iterations;
+		orient(this.rules);
 	}
 	
 	public void complete() {
@@ -54,6 +55,8 @@ public class KB<Y> {
 	} 
 	
 	public boolean equiv(List<Y> a, List<Y> b) {
+		//System.out.println("checking " + a + " vs " + b + " in " + this);
+		check_oriented(rules);
 		Pair<List<Y>, List<Y>> pair = new Pair<>(a,b);
 		if (equivs.containsKey(pair)) {
 			return equivs.get(pair);
@@ -178,8 +181,18 @@ public class KB<Y> {
 		}
 	}
 	
+	static <X> void check_oriented(Set<Pair<List<X>, List<X>>> t) {
+		 for (Pair<List<X>, List<X>> r : t) {
+			 if (r.first.size() < r.second.size()) {
+				 throw new RuntimeException(t.toString());
+			 }
+		 }
+	 }
+	 
 	 private static <X> List<X> normal_form(List<X> e, Set<Pair<List<X>, List<X>>> t) {
-	//	System.out.println("normalizing " + e + " on " + t);
+		//System.out.println("normalizing " + e + " on " + t);
+		//TODO
+		 //check_oriented(t);
 		if (e.size() > 20) {
 			throw new RuntimeException("Normal forms too big - report to Ryan.");
 		}
@@ -192,7 +205,7 @@ public class KB<Y> {
 			if (i == -1) {
 				continue;
 			}
-			//System.out.println("deleting at " + i + " size " + rule.first.size());
+//			System.out.println("deleting at " + i + " size " + rule.first.size());
 			delete(ret, i, rule.first.size());
 			add(ret, i, rule.second);
 			if (!e.equals(ret)) {

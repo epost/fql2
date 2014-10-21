@@ -51,9 +51,9 @@ public class Patrick7Example extends Example {
 			+ "\nI = delta F Components"
 			+ "\n"
 			+ "\n//gives the transform from the original graph to the connected components"
-			+ "\nt = return F G"
+			+ "\nt = return sigma delta F G"
 			+ "\n"
-			+ "\nu = coreturn F Components"
+			+ "\nu = coreturn sigma delta F Components"
 			+ "\n";
 
 

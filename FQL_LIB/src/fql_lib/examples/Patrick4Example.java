@@ -17,11 +17,11 @@ public class Patrick4Example extends Example {
 		return s;
 	}
 	
-	String s = "string = type \"java.lang.String\""
-			+ "\nnat = type \"java.lang.Integer\""
+	String s = "string : type"
+			+ "\nnat : type"
 			+ "\n"
-			+ "\nlength = fn string -> nat \"fql.primitives.length\""
-			+ "\nreverse = fn string -> string \"fql.primitives.reverse\""
+			+ "\nlength : string -> nat"
+			+ "\nreverse : string -> string "
 			+ "\n"
 			+ "\nC = schema {"
 			+ "\n nodes X;"
@@ -34,7 +34,7 @@ public class Patrick4Example extends Example {
 			+ "\n edges att1 -> X.att1.reverse.reverse, att2 -> X.att2;"
 			+ "\n} : C -> C"
 			+ "\n"
-			+ "\n//eq1 = assume reverse.reverse = string"
+			+ "\n//eq1 : reverse.reverse = string"
 			+ "\n";
 
 

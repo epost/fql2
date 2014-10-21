@@ -14,10 +14,15 @@ import fql_lib.X.XExp.XInj;
 import fql_lib.X.XExp.XInst;
 import fql_lib.X.XExp.XMapConst;
 import fql_lib.X.XExp.XMatch;
+import fql_lib.X.XExp.XOne;
+import fql_lib.X.XExp.XPair;
 import fql_lib.X.XExp.XPi;
+import fql_lib.X.XExp.XTimes;
+import fql_lib.X.XExp.XProj;
 import fql_lib.X.XExp.XRel;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
+import fql_lib.X.XExp.XTT;
 import fql_lib.X.XExp.XTransConst;
 import fql_lib.X.XExp.XTy;
 import fql_lib.X.XExp.XUnit;
@@ -271,7 +276,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 	public XObject visit(XProgram env, XVoid e) {
 		XObject x = e.S.accept(env, this);
 		if (!(x instanceof XCtx)) {
-			throw new RuntimeException("Not an instance");
+			throw new RuntimeException("Not a schema");
 		}
 		XCtx c = (XCtx) x;
 		return XProd.zero(c);
@@ -285,7 +290,78 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 		XCtx c = (XCtx) x;
 		return XProd.ff(c);
+	}
+	
+	@Override
+	public XObject visit(XProgram env, XTimes e) {
+		XObject l = e.l.accept(env, this);
+		if (!(l instanceof XCtx)) {
+			throw new RuntimeException("LHS not an instance in " + e);
+		}
+		XObject r = e.r.accept(env, this);
+		if (!(l instanceof XCtx)) {
+			throw new RuntimeException("LHS not an instance in " + e);
+		}
+		XCtx<String> ll = (XCtx<String>) l;
+		XCtx<String> rr = (XCtx<String>) r;
+		return XProd.prod(ll, rr);
 
 	}
+
+	@Override
+	public XObject visit(XProgram env, XProj e) {
+		XObject l = e.l.accept(env, this);
+		if (!(l instanceof XCtx)) {
+			throw new RuntimeException("LHS not an instance in " + e);
+		}
+		XObject r = e.r.accept(env, this);
+		if (!(l instanceof XCtx)) {
+			throw new RuntimeException("LHS not an instance in " + e);
+		}
+		XCtx ll = (XCtx) l;
+		XCtx rr = (XCtx) r;
+		if (e.left) {
+			return XProd.fst(ll, rr);
+		} else {
+			return XProd.snd(ll, rr);
+		}
+	}
+
+	@Override
+	public XObject visit(XProgram env, XPair e) {
+		XObject l = e.l.accept(env, this);
+		if (!(l instanceof XMapping)) {
+			throw new RuntimeException("LHS not a homomorphism");
+		}
+		XObject r = e.r.accept(env, this);
+		if (!(l instanceof XMapping)) {
+			throw new RuntimeException("RHS not a homomorphism");
+		}
+		XMapping ll = (XMapping) l;
+		XMapping rr = (XMapping) r;
+		return XProd.pair(ll, rr);
+	}
+
+	@Override
+	public XObject visit(XProgram env, XOne e) {
+		XObject x = e.S.accept(env, this);
+		if (!(x instanceof XCtx)) {
+			throw new RuntimeException("Not a schema");
+		}
+		XCtx c = (XCtx) x;
+		return XProd.one(c);
+	}
+
+	@Override
+	public XObject visit(XProgram env, XTT e) {
+		XObject x = e.S.accept(env, this);
+		if (!(x instanceof XCtx)) {
+			throw new RuntimeException("Not an instance in " + e);
+		}
+		XCtx c = (XCtx) x;
+		return XProd.tt(c);
+	}
+
+	
 
 }

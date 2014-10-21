@@ -17,14 +17,14 @@ public class Patrick9Example extends Example {
 		return s;
 	}
 	
-	String s = "string = type \"\""
-			+ "\nRyan = constant string \"\""
-			+ "\nWisnesky = constant string \"\""
-			+ "\nDavid = constant string \"\""
-			+ "\nSpivak = constant string \"\""
-			+ "\nHarvard = constant string \"\""
-			+ "\nMIT = constant string \"\""
-			+ "\nLeslie = constant string \"\""
+	String s = "string : type"
+			+ "\nRyan : string"
+			+ "\nWisnesky : string"
+			+ "\nDavid : string"
+			+ "\nSpivak : string"
+			+ "\nHarvard : string"
+			+ "\nMIT : string"
+			+ "\nLeslie : string"
 			+ "\n"
 			+ "\nC = schema {"
 			+ "\n nodes "

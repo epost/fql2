@@ -17,15 +17,15 @@ public class Patrick2Example extends Example {
 		return s;
 	}
 	
-	String s = "String = type \"java.lang.String\""
+	String s = "String : type"
 			+ "\n"
-			+ "\ngecko = constant String \"fql.primitives.Gecko\""
-			+ "\nfrog = constant String \"fql.primitives.Frog\""
-			+ "\nhuman = constant String \"fql.primitives.Human\""
-			+ "\ncow = constant String \"fql.primitives.Cow\""
-			+ "\nhorse = constant String \"fql.primitives.Horse\""
-			+ "\ndolphin = constant String \"fql.primitives.Dolphin\""
-			+ "\nfish = constant String \"fql.primitives.Fish\""
+			+ "\ngecko : String"
+			+ "\nfrog : String"
+			+ "\nhuman : String"
+			+ "\ncow : String"
+			+ "\nhorse : String"
+			+ "\ndolphin : String"
+			+ "\nfish : String"
 			+ "\n"
 			+ "\nC = schema {"
 			+ "\n	nodes "

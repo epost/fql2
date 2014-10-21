@@ -18,12 +18,12 @@ public class Patrick6Example extends Example {
 	}
 	
 	String s =
-			"\nInt = type \"java.lang.Integer\""
+			"\nInt : type"
 +			"\n"
-+			"\none = constant Int \"fql.primitives.One\""
-+			"\ntwo = constant Int \"fql.primitives.Two\""
++			"\none : Int"
++			"\ntwo : Int"
 +			"\n"
-+			"\n//eq1 = assume one = two"
++			"\n//eq1 : one = two"
 +			"\n"
 +			"\nX = schema { "
 +			"\n      nodes;"
