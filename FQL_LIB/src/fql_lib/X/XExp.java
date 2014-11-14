@@ -1,6 +1,7 @@
 package fql_lib.X;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import fql_lib.Pair;
@@ -8,6 +9,73 @@ import fql_lib.Triple;
 import fql_lib.Util;
 
 public abstract class XExp {
+	
+	
+	public static class Flower extends XExp {
+		Map<String, List<String>> select;
+		Map<String, String> from;
+		List<Pair<List<String>, List<String>>> where;
+		XExp src;
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((from == null) ? 0 : from.hashCode());
+			result = prime * result + ((select == null) ? 0 : select.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			result = prime * result + ((where == null) ? 0 : where.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Flower other = (Flower) obj;
+			if (from == null) {
+				if (other.from != null)
+					return false;
+			} else if (!from.equals(other.from))
+				return false;
+			if (select == null) {
+				if (other.select != null)
+					return false;
+			} else if (!select.equals(other.select))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			if (where == null) {
+				if (other.where != null)
+					return false;
+			} else if (!where.equals(other.where))
+				return false;
+			return true;
+		}
+
+		public Flower(Map<String, List<String>> select, Map<String, String> from,
+				List<Pair<List<String>, List<String>>> where, XExp src) {
+			super();
+			this.select = select;
+			this.from = from;
+			this.where = where;
+			this.src = src;
+		}
+
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+	}
+	
 	
 	public static class XTimes extends XExp {
 		XExp l, r;
@@ -624,6 +692,7 @@ public abstract class XExp {
 		public R visit (E env, XPair e);
 		public R visit (E env, XOne e);
 		public R visit (E env, XTT e);
+		public R visit (E env, Flower e);
 	}
 	
 	public static class XTy extends XExp {
@@ -1088,6 +1157,25 @@ public abstract class XExp {
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		
+		@Override
+		public String toString() {	
+			String nm0 = "\n variables\n";
+			boolean b = false;
+			for (Pair<String, List<String>> k : vm) {
+				if (b) {
+					nm0 += ",\n";
+				}
+				b = true;
+				nm0 += "  " + k.first + " -> " + Util.sep(k.second, ".");
+			}
+			nm0 = nm0.trim();
+			nm0 += ";\n";
+
+			return "homomorphism {\n " + nm0 + "}"; // : " + src + " -> " + dst;
+		}
+
+	
 	}
 	
 	public static class XMapConst extends XExp {

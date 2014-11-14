@@ -1,6 +1,7 @@
 package fql_lib.X;
 
 import fql_lib.Util;
+import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.Var;
 import fql_lib.X.XExp.XConst;
 import fql_lib.X.XExp.XCoprod;
@@ -214,13 +215,17 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 	}
 
 	@Override
-	public XCtx<?> visit(XProgram env, XRel e) {
+	public XObject visit(XProgram env, XRel e) {
 		XObject o = e.I.accept(env, this);
-		if (!(o instanceof XCtx<?>)) {
-			throw new RuntimeException("Not an istance: " + e.I);
+		if (o instanceof XCtx<?>) {
+			XCtx<?> x = (XCtx<?>) o;
+			return x.rel();			
 		}
-		XCtx<?> x = (XCtx<?>) o;
-		return x.rel();
+		if (o instanceof XMapping<?,?>) {
+			XMapping<?,?> x = (XMapping<?,?>) o;
+			return x.rel();
+		}
+		throw new RuntimeException("Not a instance or homomorphism: " + o);
 	}
 
 	@Override
@@ -360,6 +365,16 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 		XCtx c = (XCtx) x;
 		return XProd.tt(c);
+	}
+
+	@Override
+	public XObject visit(XProgram env, Flower e) {
+		XObject src0 = e.src.accept(env, this);
+		if (!(src0 instanceof XCtx)) {
+			throw new RuntimeException("Not an instance in " + e);			
+		}
+		XCtx src = (XCtx) src0;
+		return XProd.flower(e, src);		
 	}
 
 	

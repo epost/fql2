@@ -34,7 +34,6 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
-import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Triple;
@@ -143,13 +142,13 @@ public class XCtx<C> implements XObject {
 		validate(true);
 
 		for (C c : ids) {
-			types.put((C) ("!_" + c), new Pair<>(c, (C) "1"));
+			types.put((C) ("!_" + c), new Pair<>(c, (C) "_1"));
 		}
 	//	types.put((C) ("!_1"), new Pair<>((C) "1", (C) "1"));
 		List lhs = new LinkedList<>();
-		lhs.add("1");
+		lhs.add("_1");
 		List rhs = new LinkedList<>();
-		rhs.add("!_" + 1);
+		rhs.add("!_" + "_1");
 		eqs.add(new Pair<>(lhs, rhs));
 
 		for (C c : terms()) {
@@ -441,7 +440,7 @@ public class XCtx<C> implements XObject {
 			List<Triple<C, C, List<C>>> consts = new LinkedList<>();
 			for (C c : global.terms()) {
 				if (!global.ids.contains(c)) {
-					if (global.type(c).first.equals("1")) {
+					if (global.type(c).first.equals("_1")) {
 						List<C> l = new LinkedList<>();
 						l.add(c);
 						consts.add(new Triple<>(global.type(c).first, global.type(c).second, l));
@@ -511,7 +510,7 @@ public class XCtx<C> implements XObject {
 				Set<List<C>> set = new HashSet<>();
 				int i = 1;
 				for (; i < DEBUG.debug.MAX_PATH_LENGTH; i++) {
-					Set<List<C>> cands = pathsUpTo(i, (C)"1", c);
+					Set<List<C>> cands = pathsUpTo(i, (C)"_1", c);
 					System.out.println("set " + set);
 					System.out.println("cands at " + i + " are " + cands);
 					Set<List<C>> toAdd = new HashSet<>();
@@ -552,7 +551,7 @@ public class XCtx<C> implements XObject {
 				if (global.ids.contains(c)) {
 					continue;
 				}
-				if (!type(c).first.equals("1")) {
+				if (!type(c).first.equals("_1")) {
 					continue;
 				}
 				Set<List<C>> set = consts.get(type(c).second);
@@ -685,7 +684,7 @@ public class XCtx<C> implements XObject {
 				m.put(c, new HashSet<>());
 			}
 			for (Triple<C, C, List<C>> k : cat) {
-				if (k.first.equals("1")) { // uncomment causes exception
+				if (k.first.equals("_1")) { // uncomment causes exception
 					Set<List<C>> set = entities.get(k.second);
 					set.add(k.third);
 				}
@@ -706,7 +705,7 @@ public class XCtx<C> implements XObject {
 			});
 
 			for (C c : keys) {
-				if (c.equals("1")) {
+				if (c.equals("_1")) {
 					continue;
 				}
 				if (ignore.contains(c)) {
@@ -715,15 +714,28 @@ public class XCtx<C> implements XObject {
 				Pair<C, C> t = type(c);
 				Set<List<C>> src = entities.get(t.first);
 				List<C> cols = new LinkedList<>(m.get(c));
+//				System.out.println("cols before " + cols);
 				cols = cols.stream().filter(x -> !x.toString().startsWith("!")).collect(Collectors.toList());
-
+	//			System.out.println("cols after " + cols);
+				
 				Object[][] rowData = new Object[src.size()][cols.size()];
 				int idx = cols.indexOf(c);
-				if (idx != 0) {
+				if (idx != -1) {
 					C old = cols.get(0);
 					cols.set(0, c);
 					cols.set(idx, old);
+					if (cols.size() > 1) {
+						List<C> colsX = new LinkedList<>(cols.subList(1, cols.size()));
+						colsX.sort(null);
+						colsX.add(0, c);
+						cols = colsX;
+					}
 				}
+			//	} else {
+				//	cols.sort(null);
+				//}
+//				System.out.println("order " + cols);
+				
 				List<String> colNames3 = cols
 						.stream()
 						.map(x -> type(x).second.equals(x) ? x.toString() : x + " ("
@@ -738,7 +750,7 @@ public class XCtx<C> implements XObject {
 						List<C> r = new LinkedList<>(l);
 						r.add(col);
 						for (Triple<C, C, List<C>> cand : cat) { //TODO sort by hom
-							if (!cand.first.equals("1")) {
+							if (!cand.first.equals("_1")) {
 								continue;
 							}
 							if (!cand.second.equals(type(col).second)) {
@@ -948,7 +960,7 @@ public class XCtx<C> implements XObject {
 			}
 			for (C c : global.terms()) {
 				if (!global.ids.contains(c)) {
-					if (global.type(c).first.equals("1")) {
+					if (global.type(c).first.equals("_1")) {
 						List<C> l = new LinkedList<>();
 						l.add(c);
 						consts.add(new Triple<>(global.type(c).first, global.type(c).second, l));
@@ -1040,7 +1052,7 @@ public class XCtx<C> implements XObject {
 		
 		if (global != null) {
 			for (C c : global.ids) {
-				if (c.equals("1")) {
+				if (c.equals("_1")) {
 					continue;
 				}
 				paths.add(new Triple<>(c, c, new LinkedList<>()));
@@ -1056,7 +1068,7 @@ public class XCtx<C> implements XObject {
 			//	}
 			//}
 			for (Entry<C, Pair<C, C>> k : global.types.entrySet()) {
-				if (k.getValue().first.equals("1") || k.getValue().second.equals("1") || k.getKey().equals("1")) {
+				if (k.getValue().first.equals("_1") || k.getValue().second.equals("_1") || k.getKey().equals("_1")) {
 					continue;
 				}
 				t.put(k.getKey(), k.getValue());
@@ -1074,7 +1086,7 @@ public class XCtx<C> implements XObject {
 			paths.add(new Triple<>(c, c, new LinkedList<>()));
 		}
 		for (Entry<C, Pair<C, C>> k : types.entrySet()) {
-			if (k.getValue().first.equals("1") || k.getValue().second.equals("1") || k.getKey().equals("1")) {
+			if (k.getValue().first.equals("_1") || k.getValue().second.equals("_1") || k.getKey().equals("_1")) {
 				continue;
 			}
 			t.put(k.getKey(), k.getValue());
@@ -1483,7 +1495,7 @@ public class XCtx<C> implements XObject {
 			if (S.global.types.containsKey(k.first)) {
 				throw new RuntimeException("Name of variable is also global " + k);
 			}
-			t.put(k.first, new Pair<>("1", k.second));
+			t.put(k.first, new Pair<>("_1", k.second));
 		}
 
 		for (Pair<List<String>, List<String>> k : I.eqs) {
@@ -1625,11 +1637,11 @@ public class XCtx<C> implements XObject {
 			throw new RuntimeException("Problem with relationalize");
 		}
 		for (C x : terms()) {
-			if (!type(x).first.equals("1")) {
+			if (!type(x).first.equals("_1")) {
 				continue;
 			}
 			loop: for (C y : terms()) {
-				if (!type(y).first.equals("1")) {
+				if (!type(y).first.equals("_1")) {
 					continue;
 				}
 				if (!type(x).second.equals(type(y).second)) {

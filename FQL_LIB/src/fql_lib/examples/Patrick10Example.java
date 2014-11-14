@@ -17,14 +17,14 @@ public class Patrick10Example extends Example {
 		return s;
 	}
 	
-	String s ="string = type"
-			+"\nc1 = string"
-			+"\nc2 = string"
-			+"\nc3 = string"
-			+"\nc4 = string"
-			+"\nc5 = string"
-			+"\nc6 = string"
-			+"\nc7 = string"
+	String s ="string : type"
+			+"\nc1 : string"
+			+"\nc2 : string"
+			+"\nc3 : string"
+			+"\nc4 : string"
+			+"\nc5 : string"
+			+"\nc6 : string"
+			+"\nc7 : string"
 			+"\n"
 			+"\nC = schema {"
 			+"\n	nodes A;"

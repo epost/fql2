@@ -12,9 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -39,45 +38,38 @@ import org.codehaus.jparsec.functors.Tuple5;
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Util;
-import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XInst;
 import fql_lib.X.XExp.XMapConst;
+import fql_lib.X.XExp.XSchema;
+import fql_lib.X.XExp.XTransConst;
 import fql_lib.examples.Example;
 import fql_lib.gui.FQLTextPanel;
 
 public class XRaToFpql {
 
-	private static XMapConst doMapping(List<Pair<String, String>> nm,
-			List<Pair<String, String>> am, List<Pair<String, List<String>>> em, XExp src, XExp dst) {
+	public static XMapConst doMapping(List<Pair<String, String>> nm,
+			/* List<Pair<String, String>> am, */ List<Pair<String, List<String>>> em, XExp src, XExp dst) {
 		List<Pair<String, List<String>>> em2 = new LinkedList<>(em);
-		for (Pair<String, String> k : am) {
-			List<String> l = new LinkedList<>();
-			l.add(k.second);
-			em2.add(new Pair<>(k.first, l));
-		}
 		return new XMapConst(src, dst, nm, em2);
 	}
 
-	private static XSchema doSchema(List<String> nodes, List<Triple<String, String, String>> attrs,
+	public static XSchema doSchema(List<String> nodes, /* List<Triple<String, String, String>> attrs, */
 			List<Triple<String, String, String>> arrows, List<Pair<List<String>, List<String>>> eqs) {		
-		List<Triple<String, String, String>> edges = new LinkedList<>();
-		edges.addAll(attrs);
-		edges.addAll(arrows);
-		return new XSchema(nodes, edges, eqs);
+		return new XSchema(new LinkedList<>(nodes), new LinkedList<>(arrows), new LinkedList<>(eqs));
 	}
 
-	private static XInst doInst(List<Pair<String, List<Pair<Object, Object>>>> nodes,
-			List<Pair<String, List<Pair<Object, Object>>>> attrs,
+	public static XInst doInst(List<Pair<String, List<Pair<Object, Object>>>> nodes,
+		//	List<Pair<String, List<Pair<Object, Object>>>> attrs,
 			List<Pair<String, List<Pair<Object, Object>>>> arrows, XExp sch) {
 		List<Pair<String, String>> vars = new LinkedList<>();
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
 		
 		for (Pair<String, List<Pair<Object, Object>>> k : nodes) {
 			for (Pair<Object, Object> v : k.second) {
-				vars.add(new Pair<>("v" + v.first.toString(), k.first));
+				vars.add(new Pair<>(v.first.toString(), k.first));
 			}
 		}
-		for (Pair<String, List<Pair<Object, Object>>> k : attrs) {
+		/*for (Pair<String, List<Pair<Object, Object>>> k : attrs) {
 			for (Pair<Object, Object> v : k.second) {
 				List<String> lhs = new LinkedList<>();
 				List<String> rhs = new LinkedList<>();
@@ -86,14 +78,14 @@ public class XRaToFpql {
 				rhs.add(v.second.toString());
 				eqs.add(new Pair<>(lhs, rhs));
 			}
-		}
+		} */
 		for (Pair<String, List<Pair<Object, Object>>> k : arrows) {
 			for (Pair<Object, Object> v : k.second) {
 				List<String> lhs = new LinkedList<>();
 				List<String> rhs = new LinkedList<>();
-				lhs.add("v" + v.first.toString());
+				lhs.add(v.first.toString());
 				lhs.add(k.first);
-				rhs.add("v" + v.second.toString());
+				rhs.add(v.second.toString());
 				eqs.add(new Pair<>(lhs, rhs));
 			}
 		}
@@ -105,9 +97,9 @@ public class XRaToFpql {
 	 * public static String doAdom(SigExp.Const A, String a) { String k = a;
 	 * List<Pair<List<String>, List<String>>> eeqs = new LinkedList<>();
 	 * List<Triple<String, String, String>> attrs = new LinkedList<>();
-	 * attrs.add(new Triple<>("att", "adom", "str")); List<Triple<String,
+	 * attrs.add(new Triple<>("att", "adom", "adom")); List<Triple<String,
 	 * String, String>> dd_attrs = new LinkedList<>(); dd_attrs.add(new
-	 * Triple<>("att", "x", "str"));
+	 * Triple<>("att", "x", "adom"));
 	 * 
 	 * List<Triple<String, String, String>> e_attrs = new LinkedList<>();
 	 * 
@@ -344,7 +336,7 @@ public class XRaToFpql {
 					+ "\n" + "\nINSERT INTO P VALUES (\"a\"),(\"b\"),(\"c\");  "
 					+ "\nINSERT INTO Q VALUES (\"a\", \"b\"),(\"x\",\"x\");" + "\n"
 					+ "\nc1 = FORALL Q AS Q1 " + "\n     WHERE Q1.g = Q1.h"
-					+ "\n     EXISTS P AS P1, P AS P2" + "\n     WHERE P1.f = Q1.g " + "\n";
+					+ "\n     EXISTS P AS P1, P AS P2" + "\n     WHERE P1.f = a " + "\n";
 		}
 
 	}
@@ -459,7 +451,7 @@ public class XRaToFpql {
 		// p.add(bp, BorderLayout.SOUTH);
 		p.add(jsp, BorderLayout.CENTER);
 		p.add(tp, BorderLayout.NORTH);
-		JFrame f = new JFrame(kind() + " to FQL");
+		JFrame f = new JFrame(kind() + " to FPQL");
 		f.setContentPane(p);
 		f.pack();
 		f.setSize(new Dimension(700, 600));
@@ -520,22 +512,22 @@ public class XRaToFpql {
 	public static String transSQLSchema(List<Pair<String, EExternal>> in) {
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
-		List<Triple<String, String, String>> attrs = new LinkedList<>();
+		//List<Triple<String, String, String>> attrs = new LinkedList<>();
 		List<String> nodes = new LinkedList<>();
 
 		List<Pair<String, List<Pair<Object, Object>>>> inodes = new LinkedList<>();
-		List<Pair<String, List<Pair<Object, Object>>>> iattrs = new LinkedList<>();
+		//List<Pair<String, List<Pair<Object, Object>>>> iattrs = new LinkedList<>();
 		List<Pair<String, List<Pair<Object, Object>>>> iarrows = new LinkedList<>();
-		String adom = "adom";
-		nodes.add(adom);
+		//String adom = "adom";
+		//nodes.add(adom);
 		List<Pair<Object, Object>> adomT = new LinkedList<>();
-		LinkedList<Pair<Object, Object>> attT = new LinkedList<>();
-		inodes.add(new Pair<String, List<Pair<Object, Object>>>(adom, adomT));
-		iattrs.add(new Pair<String, List<Pair<Object, Object>>>("att", attT));
-		attrs.add(new Triple<>("att", adom, "str"));
+		//LinkedList<Pair<Object, Object>> attT = new LinkedList<>();
+		//inodes.add(new Pair<String, List<Pair<Object, Object>>>(adom, adomT));
+	//	iattrs.add(new Pair<String, List<Pair<Object, Object>>>("att", attT));
+	//	attrs.add(new Triple<>("att", adom, "adom"));
 		Set<Object> enums = new HashSet<>();
 
-		HashMap<String, Integer> dom1 = new HashMap<String, Integer>();
+		HashMap<String, Object> dom1 = new HashMap<>();
 
 		List<Pair<String, EExternal>> queries = new LinkedList<>();
 
@@ -564,7 +556,7 @@ public class XRaToFpql {
 						throw new RuntimeException("Duplicate name: " + col.first);
 					}
 					seen.add(col.first);
-					arrows.add(new Triple<>(k.name + "_" + col.first, k.name, adom));
+					arrows.add(new Triple<>(k.name + "_" + col.first, k.name, "adom"));
 					iarrows.add(new Pair<String, List<Pair<Object, Object>>>(k.name + "_"
 							+ col.first, new LinkedList<Pair<Object, Object>>()));
 				}
@@ -586,19 +578,19 @@ public class XRaToFpql {
 						throw new RuntimeException("Missing table " + k.target);
 					}
 
-					String id = "" + count++;
+					String id = "v" + count++;
 					node.add(new Pair<Object, Object>(id, id));
 
 					for (int colNum = 0; colNum < tuple.size(); colNum++) {
-						Integer xxx = dom1.get(tuple.get(colNum));
+						Object xxx = dom1.get(tuple.get(colNum));
 						if (xxx == null) {
-							dom1.put(tuple.get(colNum), count);
+							dom1.put(tuple.get(colNum), tuple.get(colNum)); //was 2nd=count
 							enums.add(tuple.get(colNum));
-							adomT.add(new Pair<Object, Object>(count, count));
-							attT.add(new Pair<Object, Object>(count, tuple.get(colNum)
-									));
-							xxx = count;
-							count++;
+						//	adomT.add(new Pair<Object, Object>(count, count));
+					//		adomT.add(new Pair<Object, Object>(count, tuple.get(colNum)
+						//			));
+							xxx = dom1.get(tuple.get(colNum));
+	//						count++;
 						}
 
 						List<Pair<Object, Object>> yyy = lookup2(
@@ -614,8 +606,8 @@ public class XRaToFpql {
 			}
 		}
 
-		XExp.XSchema exp = doSchema(nodes, attrs, arrows, eqs);
-		XExp.XInst inst = doInst(inodes, iattrs, iarrows, new XExp.Var("S"));
+		XExp.XSchema exp = doSchema(nodes, /* attrs, */ arrows, eqs);
+		XExp.XInst inst = doInst(inodes, /* iattrs, */ iarrows, new XExp.Var("S"));
 
 		// int ctx = 0;
 		String xxx = "\n\n";
@@ -694,41 +686,36 @@ public class XRaToFpql {
 			 */
 			else if (gh instanceof EED) {
 				EED c = (EED) gh;
-				XMapConst f = doED(cols, c.from1, c.where1, exp);
-				XSchema src = (XSchema) f.src;
+				XInst f = doED(/*cols, */ c.from1, c.where1, exp);
+		//		XSchema src = (XSchema) f.src;
 			//	System.out.println(f.src);
 			//	System.out.println(f.dst);
 			//	System.out.println(f);
 
 				c.from2.putAll(c.from1);
 				c.where2.addAll(c.where1);
-				XMapConst g = doED(cols, c.from2, c.where2, exp);
+				XInst g = doED(/* cols, */ c.from2, c.where2, exp);
 			//	System.out.println("===");
 			//	System.out.println(g.src);
 			//	System.out.println(g.dst);
 			//	System.out.println(g);
 
-				List<Pair<String, String>> l = new LinkedList<>();
-				for (String x : src.nodes) {
-					l.add(new Pair<>(x, x));
+				List<Pair<String, List<String>>> vm = new LinkedList<>();
+				for (Pair<String, String> x : f.nodes) {
+					List<String> l = new LinkedList<>();
+					l.add(x.first);
+					vm.add(new Pair<>(x.first, l));
 				}
-				List<Pair<String, List<String>>> em = new LinkedList<>();
-				for (Triple<String, String, String> e : src.arrows) {
-					List<String> y = new LinkedList<>();
-					y.add(e.second);
-					y.add(e.first);
-					em.add(new Pair<>(e.first, y));
-				}
-
-				XMapConst i = doMapping(l, new LinkedList<Pair<String, String>>(), em, f.src, g.src);
+				
+				XTransConst i = new XTransConst(f, g, vm);
 				// System.out.println("^^^");
 				// System.out.println(i);
 
 				xxx += longSlash + "\n/* Translation of " + k + " */\n" + longSlash;
-				xxx += "\n\n" + k + "A = " + f.src;
-				xxx += "\n\n" + k + "E = " + g.src;
+				xxx += "\n\n" + k + "A = " + f + " : S";
+				xxx += "\n\n" + k + "E = " + g + " : S";
 				xxx += "\n\n" + k + "I = " + i + " : " + k + "A -> " + k + "E";
-				xxx += "\n\n" + k + " = " + g + " : " + k + "E -> S";
+			//	xxx += "\n\n" + k + " = " + g + " : " + k + "E -> S";
 				xxx += "\n\n";
 
 			} else {
@@ -748,8 +735,8 @@ public class XRaToFpql {
 		//	enum0 += "\"" + o + "\"";
 		//}
 		String comment = "//schema S and instance I represent the entire input database.\n\n";
-		String preS = "str = type \"\"\n"; 
-		String senums0 = preS + Util.sep(enums.stream().map(x -> x + " = constant str \"\"").collect(Collectors.toList()), "\n");
+		String preS = "adom : type\n"; 
+		String senums0 = preS + Util.sep(enums.stream().map(x -> x + " : adom").collect(Collectors.toList()), "\n");
 		return comment + senums0 + "\n\nS = " + exp + "\n\nI = " + inst + " : S" + xxx;
 	}
 
@@ -759,113 +746,39 @@ public class XRaToFpql {
 	 * x.second; } } return ret; }
 	 */
 
-	private static XMapConst doED(HashMap<String, List<String>> cols, Map<String, String> from,
-			List<Pair<Pair<String, String>, Pair<String, String>>> where, XSchema target
-	/*
-	 * , List<Pair<String, String>> pres, Map<String,
-	 * Triple<String,String,String>> arr
-	 */) {
+	private static XInst doED(/* HashMap<String, List<String>> cols, */Map<String, String> from,
+			List<Pair<Pair<String, String>, Pair<String, String>>> where, XSchema S) {
+		List<Pair<String, String>> nodes = new LinkedList<>();
+		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
 
-		Set<Triple<String, String, Map<String, String>>> s = new HashSet<>();
-		Set<Pair<String, String>> e = new HashSet<>(); // can process some
-
-		Map<String, String> origin = new HashMap<>();
-		Map<String, String> origin2 = new HashMap<>();
-		Map<String, String> origin3 = new HashMap<>();
-
-		for (Entry<String, String> x : from.entrySet()) { // a AS b
-			Map<String, String> map = new HashMap<>();
-			if (!cols.containsKey(x.getValue())) {
-				throw new RuntimeException("No table " + x.getValue() + " found in " + cols);
-			}
-			origin.put(x.getKey(), x.getValue());
-			for (String col : cols.get(x.getValue())) {
-				map.put(col, x.getKey() + "_" + col);
-				origin.put(x.getKey() + "_" + col, "adom");
-				origin3.put(x.getKey() + "_" + col, x.getValue());
-				origin2.put(x.getKey() + "_" + col, col);
-			}
-			s.add(new Triple<>(x.getValue(), x.getKey(), map));
-		}
-		for (Pair<Pair<String, String>, Pair<String, String>> x : where) {
-			e.add(new Pair<>(x.first.first + "_" + x.first.second, x.second.first + "_"
-					+ x.second.second));
+		for (String v : from.keySet()) {
+			String t = from.get(v);
+			nodes.add(new Pair<>(v, t));
 		}
 
-		// /////////////////////////////
+		//TODO: no constants for now
+		for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
+			String v1 = eq.first.first;
+			String t1 = from.get(v1);
+			List<String> lhs = new LinkedList<>();
+			lhs.add(v1);
+			lhs.add(t1 + "_" + eq.first.second);
+			List<String> rhs = new LinkedList<>();
 
-		Set<Pair<String, Pair<String, String>>> sx = new HashSet<>();
-		for (Triple<String, String, Map<String, String>> x : s) { // table name,
-																	// fresh,
-																	// map
-			// sx.add(new Pair<>(x.first, new Pair<>(x.second, x.second)));
-			for (Entry<String, String> y : x.third.entrySet()) {
-				sx.add(new Pair<>(x.first, new Pair<>(x.second, y.getValue())));
-				// sx.add(new Pair<>("att", new Pair<>(y.getValue(),
-				// y.getValue())));
-			}
-		}
-
-		// ////////////////////////////
-
-		List<String> wn = new LinkedList<>();
-		List<Triple<String, String, String>> wa = new LinkedList<>();
-		List<Pair<List<String>, List<String>>> we = new LinkedList<>();
-		List<Triple<String, String, String>> wat = new LinkedList<>();
-
-		for (Pair<String, Pair<String, String>> x : sx) {
-			if (!wn.contains(x.second.first)) {
-				wn.add(x.second.first);
-			}
-			if (!wn.contains(x.second.second)) {
-				wn.add(x.second.second);
-			}
-			Triple<String, String, String> t = new Triple<>(x.first + "_" + x.second.first + "_"
-					+ x.second.second, x.second.first, x.second.second);
-			if (!wa.contains(t)) {
-				// arr.put(x.first + "_" + x.second.first + "_" +
-				// x.second.second, new Triple<>(x.first, x.second.first,
-				// x.second.second));
-				wa.add(t);
-			}
-		}
-		Set<Triple<String, String, String>> eqE = new HashSet<>();
-		for (Pair<String, String> eq : e) {
-			Triple<String, String, String> t = new Triple<>(eq.first + "_" + eq.second, eq.first,
-					eq.second);
-			if (!wa.contains(t)) {
-				wa.add(t);
-				eqE.add(t);
-			}
-		}
-
-		XSchema w = doSchema(wn, wat, wa, we);
-
-		List<Pair<String, String>> omx = new LinkedList<>();
-		for (String x : wn) {
-			omx.add(new Pair<>(x, origin.get(x)));
-		}
-		List<Pair<String, List<String>>> emx = new LinkedList<>();
-
-		for (Triple<String, String, String> x : wa) {
-			String n = origin3.get(x.third);
-			String m = origin2.get(x.third);
-			List<String> l = new LinkedList<>();
-			if (eqE.contains(x)) {
-				l.add("adom");
+			if (eq.second.second != null) {
+				String v2 = eq.second.first;
+				String t2 = from.get(v2);
+				rhs.add(v2);
+				rhs.add(t2 + "_" + eq.second.second);
 			} else {
-				l.add(n);
-				l.add(n + "_" + m);
+				rhs.add(eq.second.first);
 			}
-			if (!emx.contains(new Pair<>(x.first, l))) {
-				emx.add(new Pair<>(x.first, l));
-			}
+
+			eqs.add(new Pair<>(lhs, rhs));
+
 		}
-
-		XMapConst f = doMapping(omx, new LinkedList<Pair<String, String>>(), emx, w, target);
-
-		return f;
-
+		
+		return new XInst(S, nodes, eqs);
 	}
 
 	private static Pair<String, XSchema> trans(XSchema src, EFlower fl, String pre, Set<Object> enums) {
@@ -876,13 +789,13 @@ public class XRaToFpql {
 		List<String> nodes1 = new LinkedList<>();
 		List<String> nodes2 = new LinkedList<>();
 		List<String> nodes3 = new LinkedList<>();
-		nodes1.add("adom");
-		nodes2.add("adom");
+	//	nodes1.add("adom");
+	//	nodes2.add("adom");
 		nodes2.add("guid");
-		nodes3.add("adom");
+	//	nodes3.add("adom");
 
-		List<Triple<String, String, String>> attrs = new LinkedList<>();
-		attrs.add(new Triple<>("att", "adom", "str"));
+	//	List<Triple<String, String, String>> attrs = new LinkedList<>();
+	//	attrs.add(new Triple<>("att", "adom", "adom"));
 
 		List<Triple<String, String, String>> edges1 = new LinkedList<>();
 		List<Triple<String, String, String>> edges2 = new LinkedList<>();
@@ -891,12 +804,12 @@ public class XRaToFpql {
 		List<Pair<String, String>> inodes1 = new LinkedList<>();
 		List<Pair<String, String>> inodes2 = new LinkedList<>();
 		List<Pair<String, String>> inodes3 = new LinkedList<>();
-		inodes1.add(new Pair<>("adom", "adom"));
-		inodes2.add(new Pair<>("adom", "adom"));
-		inodes3.add(new Pair<>("adom", "adom"));
+	//	inodes1.add(new Pair<>("adom", "adom"));
+	//	inodes2.add(new Pair<>("adom", "adom"));
+	//	inodes3.add(new Pair<>("adom", "adom"));
 
-		List<Pair<String, String>> iattrs = new LinkedList<>();
-		iattrs.add(new Pair<>("att", "att"));
+	//	List<Pair<String, String>> iattrs = new LinkedList<>();
+	//	iattrs.add(new Pair<>("att", "att"));
 
 		List<Pair<String, List<String>>> iedges1 = new LinkedList<>();
 		List<Pair<String, List<String>>> iedges2 = new LinkedList<>();
@@ -989,9 +902,9 @@ public class XRaToFpql {
 			}
 		}
 
-		XSchema sig1 = doSchema(nodes1, attrs, edges1, new LinkedList<>());
-		XSchema sig2 = doSchema(nodes2, attrs, edges2, new LinkedList<>());
-		XSchema sig3 = doSchema(nodes3, attrs, edges3, new LinkedList<>());
+		XSchema sig1 = doSchema(nodes1, /* attrs, */ edges1, new LinkedList<>());
+		XSchema sig2 = doSchema(nodes2, /* attrs, */ edges2, new LinkedList<>());
+		XSchema sig3 = doSchema(nodes3, /* attrs, */ edges3, new LinkedList<>());
 		
 		for (Pair<Pair<String, String>, Pair<String, String>> x : fl.where) {
 			if (x.second.second != null) {
@@ -1012,7 +925,7 @@ public class XRaToFpql {
 			}
 			List<String> lhs = new LinkedList<>();
 			lhs.add(found.first);
-			lhs.add("att");
+			//lhs.add("att");
 			List<String> rhs = new LinkedList<>();
 			rhs.add("\"!_guid\"");
 			rhs.add(c);
@@ -1020,9 +933,9 @@ public class XRaToFpql {
 			sig2.eqs.add(eq);
 		}
 
-		XMapConst map1 = doMapping(inodes1, iattrs, iedges1, sig1, new XExp.Var("S"));
-		XMapConst map2 = doMapping(inodes2, iattrs, iedges2, src, sig2);
-		XMapConst map3 = doMapping(inodes3, iattrs, iedges3, sig3, sig2);
+		XMapConst map1 = doMapping(inodes1, /* iattrs, */ iedges1, sig1, new XExp.Var("S"));
+		XMapConst map2 = doMapping(inodes2, /* iattrs, */ iedges2, src, sig2);
+		XMapConst map3 = doMapping(inodes3, /* iattrs, */ iedges3, sig3, sig2);
 
 		// return new Triple<>(new Pair<>(sig1, map1), new Pair<>(sig2, map2),
 		// new Pair<>(sig3, map3));
@@ -1443,13 +1356,15 @@ public class XRaToFpql {
 	}
 
 	public static final Parser<?> ed() {
-		Parser<?> tuple = Parsers.tuple(ident(), term("."), ident());
+		Parser tuple = Parsers.tuple(ident(), term("."), ident());
 
 		Parser<?> from0 = Parsers.tuple(ident(), term("AS"), ident()).sepBy1(term(","));
 		Parser<?> from1 = Parsers.tuple(term("FORALL"), from0);
 		Parser<?> from2 = Parsers.tuple(term("EXISTS"), from0);
 
-		Parser<?> where0 = Parsers.tuple(tuple, term("="), tuple).sepBy(term("AND"));
+		Parser<?> where0 = Parsers.tuple(tuple, term("="), tuple.or(string())).sepBy(term("AND"));
+
+//		Parser<?> where0 = Parsers.tuple(tuple, term("="), tuple).sepBy(term("AND"));
 		Parser<?> where = Parsers.tuple(term("WHERE"), where0).optional();
 
 		return Parsers.tuple(from1, where, from2, where);
@@ -1496,9 +1411,14 @@ public class XRaToFpql {
 		List<Tuple3> where10x = (List<Tuple3>) where10.b;
 		for (Tuple3 k : where10x) {
 			Tuple3 l = (Tuple3) k.a;
+			if (k.c instanceof Tuple3) {
 			Tuple3 r = (Tuple3) k.c;
 			where1.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r.a
 					.toString(), r.c.toString())));
+			} else {
+				String r = (String) k.c;
+				where1.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r, null)));				
+			}
 		}
 		// }
 
@@ -1513,9 +1433,14 @@ public class XRaToFpql {
 		List<Tuple3> where11x = (List<Tuple3>) where11.b;
 		for (Tuple3 k : where11x) {
 			Tuple3 l = (Tuple3) k.a;
-			Tuple3 r = (Tuple3) k.c;
-			where2.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r.a
-					.toString(), r.c.toString())));
+			if (k.c instanceof Tuple3) {
+				Tuple3 r = (Tuple3) k.c;
+				where2.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r.a
+						.toString(), r.c.toString())));
+				} else {
+					String r = (String) k.c;
+					where2.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r, null)));				
+				}
 		}
 		// }
 

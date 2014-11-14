@@ -32,15 +32,15 @@ public class XEnvironment {
 		objs = new HashMap<>();
 		
 		types = new HashSet<>();
-		types.add("1");
+		types.add("_1");
 		fns = new HashMap<>();
-		fns.put("1", new Pair<>("1", "1"));
+		fns.put("_1", new Pair<>("_1", "_1"));
 		eqs = new HashSet<>();
 
 		for (Entry<String, XExp> k : prog.exps.entrySet()) {
 			XExp e = k.getValue();
 			if (e instanceof XTy) {
-				if (k.getKey().equals("1")) {
+				if (k.getKey().equals("_1")) {
 					throw new RuntimeException("Type 1 re-bound by user");
 				}
 				types.add(k.getKey());
@@ -60,7 +60,7 @@ public class XEnvironment {
 				if (!types.contains(((XExp.XConst) e).dst)) {
 					throw new RuntimeException("Unknown type: " + ((XExp.XConst) e).dst);
 				}
-				fns.put(k.getKey(), new Pair<>("1", ((XExp.XConst) e).dst));
+				fns.put(k.getKey(), new Pair<>("_1", ((XExp.XConst) e).dst));
 			}
 			//TODO: check these here?
 			if (e instanceof XExp.XEq) {

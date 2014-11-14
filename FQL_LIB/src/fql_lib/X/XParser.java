@@ -1,7 +1,9 @@
 package fql_lib.X;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parser.Reference;
@@ -29,7 +31,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -46,7 +48,7 @@ public class XParser {
 	}
 
 	public static Parser<?> ident() {
-		return Terminals.Identifier.PARSER;
+		return string(); //Terminals.Identifier.PARSER;
 	}
 
 	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
@@ -83,7 +85,9 @@ public class XParser {
 		Parser<?> unit1 = Parsers.tuple(term("return"), term("delta"), term("pi"), ref.lazy(), ref.lazy());
 		Parser<?> counit1 = Parsers.tuple(term("coreturn"), term("delta"), term("pi"), ref.lazy(), ref.lazy());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> flower = flower(ref);
+		
+		Parser<?> a = Parsers.or(new Parser<?>[] { flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 
@@ -365,7 +369,7 @@ public class XParser {
 		return new XExp.XEq((List<String>) t.a, (List<String>) t.c);
 
 	}
-	
+
 	private static XExp toExp(Object c) {
 		if (c instanceof String) {
 			return new XExp.Var((String) c);
@@ -389,13 +393,6 @@ public class XParser {
 			return toTrans(c);
 		} catch (Exception e) { }
 		
-		/*	
-		return Parsers.tuple(term("type"), string());
-		return Parsers.tuple(term("function"), ident(), term("->"), ident(), string());
-		return Parsers.tuple(term("constant"), ident(), string());
-		return Parsers.tuple(term("assume"), path(), term("="), path());
-        */
-
 		if (c instanceof Tuple5) {
 			Tuple5 p = (Tuple5) c; 
 			if (p.c.toString().equals("+")) {
@@ -425,6 +422,56 @@ public class XParser {
 		} 
 		if (c instanceof Tuple3) {
 			Tuple3 p = (Tuple3) c;
+			if (p.a.toString().equals("flower")) {
+				/*
+				Parser<?> from0 = Parsers.tuple(ident(), term("as"), ident()).sepBy(term(","));
+				Parser<?> from = Parsers.tuple(term("from"), from0, term(";"));
+				Parser<?> where0 = Parsers.tuple(path(), term("="), path()).sepBy(term(","));
+				Parser<?> where = Parsers.tuple(term("where"), where0, term(";")); 
+				Parser<?> select0 = Parsers.tuple(path(), term("as"), ident()).sepBy(term(","));
+				Parser<?> select = Parsers.tuple(term("select"), select0, term(";"));
+				Parser p = Parsers.tuple(select, from, where);
+				return Parsers.tuple(term("flower"), p.between(term("{"), term("}")), self.lazy()); */
+		
+				XExp I = toExp(p.c);
+				Tuple3 q = (Tuple3) p.b;
+				
+				List s = (List) ((Tuple3)q.a).b; //list of tuple3 of (path, string)
+				List f = (List) ((Tuple3)q.b).b; //list of tuple3 of (string, string)
+				List w = (List) ((Tuple3)q.c).b; //list of tuple3 of (path, path)
+				
+				Map<String, List<String>> select = new HashMap<>();
+				Map<String, String> from = new HashMap<>();
+				List<Pair<List<String>, List<String>>> where = new LinkedList<>();
+				
+				for (Object o : f) {
+					Tuple3 t = (Tuple3) o;
+					String lhs = t.a.toString();
+					String rhs = t.c.toString();
+					if (from.containsKey(rhs)) {
+						throw new RuntimeException("Duplicate AS name: " + rhs);
+					}
+					from.put(rhs, lhs);
+				}
+				for (Object o : w) {
+					Tuple3 t = (Tuple3) o;
+					List lhs = (List) t.a;
+					List rhs = (List) t.c;
+					where.add(new Pair<>(rhs, lhs));
+				}
+				for (Object o : s) {
+					Tuple3 t = (Tuple3) o;
+					List lhs = (List) t.a;
+					String rhs = t.c.toString();
+					if (from.containsKey(rhs)) {
+						throw new RuntimeException("Duplicate AS name: " + rhs);
+					}
+					select.put(rhs, lhs);
+				}
+				
+				return new XExp.Flower(select, from, where, I);				
+			}
+			
 			if (p.a.toString().equals("sigma")) {
 				return new XExp.XSigma(toExp(p.b), toExp(p.c));
 			}
@@ -561,8 +608,8 @@ public class XParser {
 		return ret;
 	}
 
-	private static Parser<List<String>> path() {
-		return  Parsers.or(Terminals.StringLiteral.PARSER, Terminals.Identifier.PARSER).sepBy1(term("."));
+	private static Parser path() {
+		return  Parsers.or(ident()).sepBy1(term("."));
 	}
 
 	public static Parser<?> section(String s, Parser<?> p) {
@@ -573,5 +620,22 @@ public class XParser {
 		return Parsers.or(Terminals.StringLiteral.PARSER,
 				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
 	} 
+	 
+	public static final Parser<?> flower(Reference self) {
+		Parser<?> from0 = Parsers.tuple(ident(), term("as"), ident()).sepBy(term(","));
+		Parser<?> from = Parsers.tuple(term("from"), from0, term(";"));
+
+		Parser<?> where0 = Parsers.tuple(path(), term("="), path()).sepBy(term(","));
+		Parser<?> where = Parsers.tuple(term("where"), where0, term(";")); 
+
+		Parser<?> select0 = Parsers.tuple(path(), term("as"), ident()).sepBy(term(","));
+		Parser<?> select = Parsers.tuple(term("select"), select0, term(";"));
+
+		Parser p = Parsers.tuple(select, from, where);
+		Parser ret = Parsers.tuple(term("flower"), p.between(term("{"), term("}")), self.lazy());
+		
+		return ret;
+	}
+
 
 }

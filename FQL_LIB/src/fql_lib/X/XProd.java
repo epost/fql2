@@ -5,12 +5,15 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import fql_lib.Chc;
 import fql_lib.Pair;
 import fql_lib.Triple;
+import fql_lib.X.XExp.Flower;
+import fql_lib.X.XExp.XPi;
 
 public class XProd {
 	
@@ -24,7 +27,7 @@ public class XProd {
 		
 		for (X O : S.allIds()) {
 			X x = (X) ("1_" + O);
-			tys.put(x, new Pair<>((X)"1", O));
+			tys.put(x, new Pair<>((X)"_1", O));
 			for (X f : S.allTerms()) {
 				if (!S.type(f).first.equals(O)) {
 					continue;
@@ -51,7 +54,7 @@ public class XProd {
 		
 		for (X x : I.terms()) {
 			Pair<X,X> t = I.type(x);
-			if (!t.first.equals("1")) {
+			if (!t.first.equals("_1")) {
 				throw new RuntimeException();
 			}
 			X y = (X) ("1_" + t.second);
@@ -182,9 +185,9 @@ edge f:X->Y in S (including edges in type, like length or succ),
 (i,j);f = (i;f, j;f). */
 		for (X x :I.schema.allIds()) {
 			Set<Pair<Triple<X,X,List<X>>, Triple<X,X,List<X>>>> s = new HashSet<>();
-			for (Triple<X, X, List<X>> i : I.cat().hom((X)"1", x)) {
-				for (Triple<X, X, List<X>> j : J.cat().hom((X)"1", x)) {
-					types.put(new Pair<>(i,j), new Pair<>("1", x));
+			for (Triple<X, X, List<X>> i : I.cat().hom((X)"_1", x)) {
+				for (Triple<X, X, List<X>> j : J.cat().hom((X)"_1", x)) {
+					types.put(new Pair<>(i,j), new Pair<>("_1", x));
 					s.add(new Pair<>(i,j));
 				}
 			}
@@ -203,8 +206,8 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					l1.add(xy.first.first);
 					l1.addAll(xy.first.third);
 					l1.add(f);
-					Triple<X,X,List<X>> tofind1 = new Triple<>((X)"1", t.second, l1);
-					Triple<X,X,List<X>> found1 = I.find(I.getKB(), tofind1 , I.cat().hom((X)"1", t.second));
+					Triple<X,X,List<X>> tofind1 = new Triple<>((X)"_1", t.second, l1);
+					Triple<X,X,List<X>> found1 = I.find(I.getKB(), tofind1 , I.cat().hom((X)"_1", t.second));
 					if (found1 == null) {
 						throw new RuntimeException("foudn1");
 					}
@@ -213,8 +216,8 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					l2.add(xy.second.first);
 					l2.addAll(xy.second.third);
 					l2.add(f);
-					Triple<X,X,List<X>> tofind2 = new Triple<>((X)"1", t.second, l2);
-					Triple<X,X,List<X>> found2 = J.find(J.getKB(), tofind2 , J.cat().hom((X)"1", t.second));
+					Triple<X,X,List<X>> tofind2 = new Triple<>((X)"_1", t.second, l2);
+					Triple<X,X,List<X>> found2 = J.find(J.getKB(), tofind2 , J.cat().hom((X)"_1", t.second));
 					if (found2 == null) {
 						throw new RuntimeException("ouns 2");
 					}
@@ -328,10 +331,10 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		Map em = new HashMap<>();
 		for (A x : l.src.terms()) {
 			List<A> x1 = l.em.get(x);
-			Triple t1 = l.dst.find(l.dst.getKB(), new Triple<A,A,List<A>>((A)"1", l.dst.type(x1).second, x1), l.dst.cat().hom((A)"1", l.dst.type(x1).second));
+			Triple t1 = l.dst.find(l.dst.getKB(), new Triple<A,A,List<A>>((A)"_1", l.dst.type(x1).second, x1), l.dst.cat().hom((A)"_1", l.dst.type(x1).second));
 
 			List<A> x2 = r.em.get(x);
-			Triple t2 = r.dst.find(r.dst.getKB(), new Triple<A,A,List<A>>((A)"1", r.dst.type(x2).second, x2), r.dst.cat().hom((A)"1", r.dst.type(x2).second));
+			Triple t2 = r.dst.find(r.dst.getKB(), new Triple<A,A,List<A>>((A)"_1", r.dst.type(x2).second, x2), r.dst.cat().hom((A)"_1", r.dst.type(x2).second));
 
 			List xl = new LinkedList();
 			xl.add(new Pair<>(t1, t2));
@@ -349,5 +352,65 @@ edge f:X->Y in S (including edges in type, like length or succ),
 
 		
 		return new XMapping(l.src, dst, em, "homomorphism");
+	}
+
+	//TODO: constants
+	public static XCtx flower(Flower e, XCtx I) {
+		Set ids = new HashSet<>(I.schema.ids);
+		Map types = new HashMap<>(I.schema.types);
+		Set eqs = new HashSet<>(I.schema.eqs);
+		
+		ids.add("_Q");
+		types.put("_Q", new Pair<>("_Q", "_Q"));
+//		types.put("!__Q", new Pair<>("_Q", "_1"));  needed?
+		
+		for (Entry<String, String> k : e.from.entrySet()) {
+			types.put(k.getKey(), new Pair<>("_Q", k.getValue()));
+		}
+		eqs.addAll(e.where);
+
+		XCtx c = new XCtx(ids, types, eqs, I.global, null, "schema");
+		Map em = new HashMap<>();
+		for (Object o : I.schema.allTerms()) {
+			List l = new LinkedList<>();
+			l.add(o);
+			em.put(o, l);
+		}
+		XMapping m = new XMapping(I.schema, c, em, "mapping");
+		
+		XCtx J = m.pi(I);
+		
+		Set ids2 = new HashSet<>();
+		Map types2 = new HashMap<>();
+		Set eqs2 = new HashSet<>();
+		Map em2 = new HashMap<>();
+		ids2.add("_Q");
+		types2.put("_Q", new Pair<>("_Q", "_Q"));
+		List ll = new LinkedList<>();
+		ll.add("_Q");
+		em2.put("_Q", ll);
+//		System.out.println("C is " + c);
+		for (Entry o : e.select.entrySet()) {
+			//System.out.println("trying " + o.getValue());
+			Object tgt = c.type((List)o.getValue()).second;
+			types2.put(o.getKey(), new Pair<>("_Q", tgt));
+			if (!I.global.allTerms().contains(tgt)) {
+				ids2.add(tgt);
+				types2.put(tgt, new Pair<>(tgt, tgt));
+			}
+			em2.put(o.getKey(), o.getValue());
+		}
+		XCtx c2 = new XCtx(ids2, types2, eqs2, I.global, null, "schema");
+		for (Object o : c2.allTerms()) {
+			if (em2.containsKey(o)) {
+				continue;
+			}
+			List l = new LinkedList<>();
+			l.add(o);
+			em2.put(o, l);
+		}
+		XMapping m2 = new XMapping(c2, c, em2, "mapping"); 
+		
+		return m2.delta(J);
 	}
 }

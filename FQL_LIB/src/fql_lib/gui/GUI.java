@@ -40,6 +40,7 @@ import javax.swing.filechooser.FileFilter;
 import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.X.XRaToFpql;
+import fql_lib.X.XSqlToFql;
 import fql_lib.decl.Environment;
 import fql_lib.examples.Example;
 import fql_lib.examples.Examples;
@@ -183,6 +184,10 @@ public class GUI extends JPanel {
 		MenuItem raItem = new MenuItem("RA to FPQL");
 		transMenu.add(raItem);
 		raItem.addActionListener(x -> { new XRaToFpql(); });
+		
+		MenuItem sqlItem = new MenuItem("SQL to FPQL");
+		transMenu.add(sqlItem);
+		sqlItem.addActionListener(x -> { new XSqlToFql(); });
 		
 
 		Menu helpMenu = new Menu("About");
