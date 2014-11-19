@@ -53,7 +53,7 @@ public class Patrick8Example extends Example {
 			+ "\n"
 			+ "\nx1 = return sigma delta F I"
 			+ "\nx2 = coreturn sigma delta F I"
-			+ "\nx3 = return delta pi F I"
+			+ "\n//x3 = return delta pi F I"
 			+ "\nx4 = coreturn delta pi F I"
 			+ "\n"
 			+ "\nI0 = (I * I)"

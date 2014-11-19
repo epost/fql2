@@ -14,13 +14,14 @@
     <docComments enabled="false" end="" start=""/>
   </comments>
   <keywords>
-    <keyword>assume</keyword>
+    <keyword>INSTANCE</keyword>
+    <keyword>as</keyword>
     <keyword>case</keyword>
-    <keyword>constant</keyword>
     <keyword>coreturn</keyword>
     <keyword>delta</keyword>
     <keyword>ff</keyword>
-    <keyword>fn</keyword>
+    <keyword>flower</keyword>
+    <keyword>from</keyword>
     <keyword>fst</keyword>
     <keyword>homomorphism</keyword>
     <keyword>inl</keyword>
@@ -32,6 +33,7 @@
     <keyword>relationalize</keyword>
     <keyword>return</keyword>
     <keyword>schema</keyword>
+    <keyword>select</keyword>
     <keyword>sigma</keyword>
     <keyword>snd</keyword>
     <keyword>transform</keyword>
@@ -39,6 +41,7 @@
     <keyword>type</keyword>
     <keyword>unit</keyword>
     <keyword>void</keyword>
+    <keyword>where</keyword>
   </keywords>
   <keywords2>
     <keyword>edges</keyword>

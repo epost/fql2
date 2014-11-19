@@ -34,19 +34,12 @@ public class Patrick14Example extends Example {
 			+ "\n	equations m1.f.att = 1, m1.f.g.att = 2;"
 			+ "\n} : S "
 			+ "\n"
-			+ "\nJ = flower {"
+			+ "\nJ:T = flower {"
 			+ "\n	select m1.f.g.att as x, n as y;"
 			+ "\n	from M as m1, M as m2, N as n;"
 			+ "\n	where m1.f = m2.f;"
 			+ "\n} I"
 			+ "\n"
-			+ "\n/* possible alternative syntax:"
-			+ "\nJ = flower {"
-			+ "\n	for m1:M, m2:M, n:N;"
-			+ "\n	where m1.f = m2.f;"
-			+ "\n	return x:m1.f.g, y:n;"
-			+ "\n} I"
-			+ "\n */"
 			+ "\n";
 
 

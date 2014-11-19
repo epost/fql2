@@ -221,7 +221,7 @@ public abstract class Category<O,A> implements Serializable {
 							if (!xxx.equals(
 									compose(compose(a, b), cc))) {
 								throw new RuntimeException("Not associative "
-										+ a + b + cc);
+										+ a + b + cc + "\n\n" + xxx + "\n\n" + compose(compose(a, b), cc));
 							}
 						}
 					}

@@ -16,6 +16,7 @@ public abstract class XExp {
 		Map<String, String> from;
 		List<Pair<List<String>, List<String>>> where;
 		XExp src;
+		String ty;
 		
 		@Override
 		public int hashCode() {
@@ -24,6 +25,7 @@ public abstract class XExp {
 			result = prime * result + ((from == null) ? 0 : from.hashCode());
 			result = prime * result + ((select == null) ? 0 : select.hashCode());
 			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			result = prime * result + ((ty == null) ? 0 : ty.hashCode());
 			result = prime * result + ((where == null) ? 0 : where.hashCode());
 			return result;
 		}
@@ -51,6 +53,11 @@ public abstract class XExp {
 				if (other.src != null)
 					return false;
 			} else if (!src.equals(other.src))
+				return false;
+			if (ty == null) {
+				if (other.ty != null)
+					return false;
+			} else if (!ty.equals(other.ty))
 				return false;
 			if (where == null) {
 				if (other.where != null)
@@ -880,6 +887,7 @@ public abstract class XExp {
 	}
 	
 	public static class XInst extends XExp {
+		public boolean saturated = false;
 		public XExp schema;
 		public XInst(XExp schema, List<Pair<String, String>> nodes,
 				List<Pair<List<String>, List<String>>> eqs) {
@@ -1104,10 +1112,10 @@ public abstract class XExp {
 
 	public static class XTransConst extends XExp {
 		XExp src, dst;
-		public List<Pair<String, List<String>>> vm;
+		public List<Pair<Pair<String, String>, List<String>>> vm;
 		
 
-		public XTransConst(XExp src, XExp dst, List<Pair<String, List<String>>> vm) {
+		public XTransConst(XExp src, XExp dst, List<Pair<Pair<String, String>, List<String>>> vm) {
 			super();
 			this.src = src;
 			this.dst = dst;
@@ -1162,12 +1170,16 @@ public abstract class XExp {
 		public String toString() {	
 			String nm0 = "\n variables\n";
 			boolean b = false;
-			for (Pair<String, List<String>> k : vm) {
+			for (Pair<Pair<String, String>, List<String>> k : vm) {
 				if (b) {
 					nm0 += ",\n";
 				}
 				b = true;
-				nm0 += "  " + k.first + " -> " + Util.sep(k.second, ".");
+				if (k.first.second != null) {
+					nm0 += "  " + k.first.first + ":" + k.first.second + " -> " + Util.sep(k.second, ".");
+				} else {
+					nm0 += "  " + k.first.first + " -> " + Util.sep(k.second, ".");
+				}
 			}
 			nm0 = nm0.trim();
 			nm0 += ";\n";

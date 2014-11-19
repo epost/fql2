@@ -27,9 +27,6 @@ public class XMapping<C, D> implements XObject {
 	public Map<Pair<List<C>, List<C>>, String> unprovable = new HashMap<>();
 
 	
-	
-	
-	
 	@Override
 	public String kind() {
 		return kind;
@@ -300,7 +297,9 @@ public class XMapping<C, D> implements XObject {
 			ret.put(k.first, l);
 		}
 		for (String l : src.allIds()) {
-			// if (l != "1") {
+		//	 if (l.equals("_1")) {
+		//		 continue;
+		//	 }
 			List h = new LinkedList();
 			if (ret.get(l) == null) {
 				h.add("!_" + l);
@@ -349,6 +348,7 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping<>(src, dst, ret, "mapping");
 	}
 
+	//TODO
 	public static XMapping<String, String> make(XCtx<String> src, XCtx<String> dst, XTransConst e) {
 		if (src.schema == null) {
 			throw new RuntimeException("source is not an instance");
@@ -360,26 +360,64 @@ public class XMapping<C, D> implements XObject {
 			throw new RuntimeException("not on same schema");
 		}
 
-		Map<String, List<String>> ret = new HashMap<>();
+		Map ret = new HashMap<>(); //TODO
 		for (String c : src.schema.allTerms()) {
 			List<String> l = new LinkedList<>();
 			l.add(c);
 			ret.put(c, l);
 		}
 
-		for (Pair<String, List<String>> k : e.vm) {
-			if (!src.terms().contains(k.first)) {
+		//will mutate in place
+		for (Pair<Pair<String,String>, List<String>> k : e.vm) {
+			boolean leftok = false;
+			boolean rightok = false;
+			Pair lhs = new Pair<>(k.first.first, k.first.second);
+			if (k.first.second == null) {
+				Set cands = new HashSet();
+				for (Object o : src.terms()) {
+					if (((Pair)o).first.equals(lhs.first)) {
+						cands.add(o);
+					}
+				}
+				if (cands.size() == 1) {
+					lhs = (Pair) new LinkedList<>(cands).get(0);
+					leftok = true;
+				}
+			}
+			List rhs = new LinkedList<>(k.second);
+			Set sofar = new HashSet();
+			List l = new LinkedList();
+			sofar.add(l);
+			Set<List> rhs0 = XCtx.expand(sofar, rhs, dst.schema, dst);
+			if (rhs0.size() == 1) {
+				rhs = (List) new LinkedList(rhs0).get(0);
+				rightok = true;
+			}
+			//v:t -> u:?
+			if (!rightok && leftok && rhs.size() == 1 && dst.terms().contains(rhs.get(0))) {
+				List rhsX = new LinkedList<>();
+				rhsX.add(new Pair<>(((Pair)rhs.get(0)).first, lhs.second));
+				rightok = true;
+			}
+			//v:? -> p:t
+			if (!leftok && rightok) {
+				Pair p = dst.type(rhs);
+				lhs.second = p.second;
+				leftok = true;
+			}
+			
+			if (!src.terms().contains(lhs)) {
 				throw new RuntimeException("Source does not contain variable " + k.first);
 			}
-			if (src.schema.allTerms().contains(k.first)) {
+			if (src.schema.allTerms().contains(lhs)) {
 				throw new RuntimeException("Not a variable: " + k.first);
 			}
-			if (ret.containsKey(k.first)) {
+			if (ret.containsKey(lhs)) {
 				throw new RuntimeException("Duplicate node mapping for " + k.first);
 			}
-			ret.put(k.first, k.second);
+			ret.put(lhs, rhs);
 		}
-		for (String c : src.allTerms()) {
+		for (Object c : src.allTerms()) {
 			if (!ret.containsKey(c)) {
 				throw new RuntimeException("Does not map " + c);
 			}
@@ -533,15 +571,16 @@ public class XMapping<C, D> implements XObject {
 
 		for (C c : src.allIds()) {
 			for (Triple<D, D, List<D>> arr : I.cat().hom((D) "_1", em.get(c).get(0))) {
-				/*
-				 * if (!arr.first.equals("1")) { continue; } if
-				 * (!arr.second.equals(em.get(c).get(0))) { continue; }
-				 */
+				if (I.global.cat().objects().contains(c)) {
+					if (I.global.cat().hom((D) "_1", (D)c).contains(arr)) {
+						continue;
+					}
+				}
 				Pair tr = new Pair(arr, c);
 				types.put(tr, new Pair("_1", c));
 			}
 		}
-
+		
 		for (Pair<Triple<D, D, List<D>>, C> t1 : types.keySet()) {
 			for (C c : src.allTerms()) { // f
 				if (src.ids.contains(c)) {
@@ -560,36 +599,38 @@ public class XMapping<C, D> implements XObject {
 					List j = new LinkedList<>(t1.first.third);
 					j.addAll(em.get(c));
 					Triple rhs = new Triple(dsrc, ddst, j);
+				//	System.out.println("looking for " + rhs + " in\n\n" + Util.sep(I.cat().hom(dsrc, ddst), "\n\n"));
 					Triple rhsX = XCtx.find(I.getKB(), rhs, I.cat().hom(dsrc, ddst));
 					List g = new LinkedList<>();
 					g.add(new Pair<>(rhsX, t.second));
 
-					eqs.add(new Pair<>(lhs, g));
+					if (I.global.allIds().contains(t.second)) { //a' in G
+						Triple ooo = XCtx.find(I.global.getKB(), rhsX,
+							I.global.cat().arrows());
+						if (ooo != null) {
+							List lll = new LinkedList();
+							if (((List)ooo.third).isEmpty()) {
+								lll.add(ooo.first);
+							}
+							lll.addAll((List)ooo.third);
+							
+							eqs.add(new Pair(lhs, lll));
+						} else {
+							eqs.add(new Pair<>(lhs, g));
+						}
+					} else {
+						eqs.add(new Pair<>(lhs, g));
+					}
 				}
 			}
 		}
 
-		for (Pair<Triple<D, D, List<D>>, C> t1 : types.keySet()) {
-			Pair t = new Pair<>(t1.first.first, t1.first.second);
 
-			for (D d : dst.allTerms()) {
-				if (!I.type(d).equals(t)) {
-					continue;
-				}
-
-				List<D> l = new LinkedList<>();
-				l.add(d);
-				List r = new LinkedList<>();
-				r.add(t1);
-				if (I.getKB().equiv(t1.first.third, l)) {
-					eqs.add(new Pair(l, r));
-				}
-			}
-		}
-
-		return new XCtx<Pair<Triple<D, D, List<D>>, C>>(ids, types, eqs,
+		XCtx ret = new XCtx<Pair<Triple<D, D, List<D>>, C>>(ids, types, eqs,
 				(XCtx<Pair<Triple<D, D, List<D>>, C>>) src.global,
 				(XCtx<Pair<Triple<D, D, List<D>>, C>>) src, "instance");
+		ret.saturated = I.saturated;
+		return ret;
 	}
 
 
@@ -605,7 +646,6 @@ public class XMapping<C, D> implements XObject {
 			}
 		}
 		
-
 		Set<Pair<List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>>> eqs = new HashSet<>();
 		for (D h : dst.allTerms()) {
 			Pair<D, D> t = dst.type(h);
@@ -614,6 +654,9 @@ public class XMapping<C, D> implements XObject {
 				Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta0 = new HashMap<>();
 
 				for (C c : src.allIds()) {
+			//		if (c.equals("_1")) {
+				//		continue;
+				//	}
 			//		Map<Triple<D, D, List<D>>, Triple<C, C, List<C>>> theta1 = new HashMap<>();
 					for (Triple<D, D, List<D>> f : dst.cat().hom(t.second, em.get(c).get(0))) {
 						List<D> f0 = new LinkedList<>();
@@ -654,7 +697,9 @@ public class XMapping<C, D> implements XObject {
 				eqs.add(new Pair<>(lhs, rhs));
 			}
 		}
-		return new XCtx(new HashSet<>(), types, eqs, src.global, dst, "instance");
+		XCtx ret = new XCtx(new HashSet<>(), types, eqs, src.global, dst, "instance");
+		//ret.saturated = true; //TODO
+		return ret;
 	}
 
 	/*
@@ -889,9 +934,11 @@ public class XMapping<C, D> implements XObject {
 			if (!J.type(x).first.equals("_1")) {
 				throw new RuntimeException();
 			}
+	
 			Map theta = new HashMap();
 			for (C c : src.allIds()) {
 				for (Triple<D, D, List<D>> f : dst.cat().hom(d, em.get(c).get(0))) {
+
 					List<D> tofind = new LinkedList<>();
 					tofind.add(x);
 					tofind.addAll(f.third);
@@ -905,6 +952,10 @@ public class XMapping<C, D> implements XObject {
 					Triple tr = new Triple<>("_1", c, g);
 					//	Triple<C,C,List<Pair<Triple<D,D,List<D>>, C>>> tr = new Triple<>((C)"1", c, g);
 					Object xxx = deltaI.find(deltaI.getKB(), tr, deltaI.cat().arrows());
+					
+					if (xxx == null) {
+						throw new RuntimeException("cannot find " + tr);
+					}
 					theta.put(new Pair<>(c, f), xxx);
 				}
 			}

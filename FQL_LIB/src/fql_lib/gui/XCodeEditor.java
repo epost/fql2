@@ -47,17 +47,9 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 		CodeTemplate ct = new StaticCodeTemplate("type", "type ",
 				" \"\"");
 		ctm.addTemplate(ct);
-
-		ct = new StaticCodeTemplate("fn", "fn ",
-				" ->  \"\"");
-		ctm.addTemplate(ct);
 		
-		ct = new StaticCodeTemplate("constant", "constant ",
-				" \"\"");
-		ctm.addTemplate(ct);
-		
-		ct = new StaticCodeTemplate("assume", "assume ",
-				"   =  ");
+		ct = new StaticCodeTemplate("flower", "flower ",
+				"{\n\tselect;\n\tfrom;\n\twhere;\n} ");
 		ctm.addTemplate(ct);
 		
 		ct = new StaticCodeTemplate("schema", "schema ",

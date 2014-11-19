@@ -700,11 +700,11 @@ public class XRaToFpql {
 			//	System.out.println(g.dst);
 			//	System.out.println(g);
 
-				List<Pair<String, List<String>>> vm = new LinkedList<>();
+				List<Pair<Pair<String, String>, List<String>>> vm = new LinkedList<>();
 				for (Pair<String, String> x : f.nodes) {
 					List<String> l = new LinkedList<>();
 					l.add(x.first);
-					vm.add(new Pair<>(x.first, l));
+					vm.add(new Pair<>(new Pair<>(x.first, null), l));
 				}
 				
 				XTransConst i = new XTransConst(f, g, vm);

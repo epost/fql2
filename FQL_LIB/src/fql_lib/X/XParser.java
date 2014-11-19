@@ -1,9 +1,11 @@
 package fql_lib.X;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parser.Reference;
@@ -16,6 +18,7 @@ import org.codehaus.jparsec.functors.Tuple5;
 
 import fql_lib.Pair;
 import fql_lib.Triple;
+import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.XInst;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -31,7 +34,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -159,26 +162,26 @@ public class XParser {
 	public static final Parser<?> decl() {
 		Parser e = Parsers.or(new Parser[] { exp(), type(), fn(), constx(), assume() });
 		
+		Parser p0 = Parsers.tuple(Parsers.tuple(ident(), term(":"), ident()), term("="), exp());
 		Parser p1 = Parsers.tuple(ident(), term("="), exp());
 		Parser p3 = Parsers.tuple(ident(), term(":"), Parsers.tuple(ident(), term("->"), ident()));
 		Parser p4 = Parsers.tuple(ident(), term(":"), term("type"));
 		Parser p5 = Parsers.tuple(ident(), term(":"), Parsers.tuple(path(), term("="), path()));
 		Parser p2 = Parsers.tuple(ident(), term(":"), ident());
 		
-		return Parsers.or(new Parser[] {p1, p3, p4, p5, p2});
+		return Parsers.or(new Parser[] {p0, p1, p3, p4, p5, p2});
 		
 //		return Parsers.tuple(ident(), Parsers.or(term("="), term(":")), e);
 	}
 	
 	public static final Parser<?> instance(Reference ref) {
 		Parser<?> node = Parsers.tuple(ident(), term(":"), ident());
-
 		Parser<?> p3 = Parsers.tuple(path(), term("="), path());
-		
 		Parser<?> xxx = Parsers.tuple(section("variables", node), 
 				section("equations", p3));
+		Parser kkk = ((Parser)term("INSTANCE")).or((Parser) term("instance"));
 		Parser<?> constant = Parsers
-				.tuple(Parsers.between(term("instance").followedBy(term("{")), xxx, term("}")), term(":"),
+				.tuple(kkk, xxx.between(term("{"), term("}")), term(":"),
 						ref.lazy());
 		return constant;
 	} 
@@ -199,7 +202,8 @@ public class XParser {
 	} 
 	
 	public static final Parser<?> transform(Reference ref) {
-		Parser<?> node = Parsers.tuple(ident(), term("->"), path());
+		Parser p = Parsers.tuple(ident(), term(":"), ident());
+		Parser<?> node = Parsers.tuple(p.or(ident()), term("->"), path());
 		Parser<?> xxx =section("variables", node);
 		Parser<?> constant = Parsers
 				.tuple(Parsers.between(term("homomorphism").followedBy(term("{")), xxx, term("}")), term(":"),
@@ -343,11 +347,23 @@ public class XParser {
 				throw new RuntimeException();
 			}
 
-			String name = decl.a.toString();
-			if (decl.b.toString().equals(":")) {
-				ret.add(new Triple<>(name, idx, newToExp(decl.c)));				
+			//TODO enforce only flowers on RHS
+			if (!(decl.a instanceof String)) {
+				Tuple3 t = (Tuple3) decl.a;
+				Object ooo = toExp(decl.c);
+				if (!(ooo instanceof Flower)) {
+					throw new RuntimeException("Can only use v:T for flowers");
+				}
+				Flower f = (Flower) toExp(decl.c);
+				f.ty = t.c.toString();
+				ret.add(new Triple<>(t.a.toString(), idx, f));				
 			} else {
-				ret.add(new Triple<>(name, idx, toExp(decl.c)));
+				String name = decl.a.toString();
+				if (decl.b.toString().equals(":")) {
+					ret.add(new Triple<>(name, idx, newToExp(decl.c)));				
+				} else {
+					ret.add(new Triple<>(name, idx, toExp(decl.c)));
+				}
 			}
 		}
 
@@ -444,30 +460,38 @@ public class XParser {
 				Map<String, String> from = new HashMap<>();
 				List<Pair<List<String>, List<String>>> where = new LinkedList<>();
 				
-				for (Object o : f) {
-					Tuple3 t = (Tuple3) o;
-					String lhs = t.a.toString();
-					String rhs = t.c.toString();
-					if (from.containsKey(rhs)) {
-						throw new RuntimeException("Duplicate AS name: " + rhs);
-					}
-					from.put(rhs, lhs);
-				}
+				Set<String> seen = new HashSet<>();
 				for (Object o : w) {
 					Tuple3 t = (Tuple3) o;
 					List lhs = (List) t.a;
 					List rhs = (List) t.c;
 					where.add(new Pair<>(rhs, lhs));
+			//		seen.addAll(rhs);
+			//		seen.addAll(lhs);
 				}
 				for (Object o : s) {
 					Tuple3 t = (Tuple3) o;
 					List lhs = (List) t.a;
 					String rhs = t.c.toString();
-					if (from.containsKey(rhs)) {
-						throw new RuntimeException("Duplicate AS name: " + rhs);
+					if (seen.contains(rhs)) {
+						throw new RuntimeException("Duplicate AS name: " + rhs + " (note: AS names can't be used in the schema either)");
 					}
+					seen.add(rhs);
+				//	seen.addAll(lhs);
 					select.put(rhs, lhs);
 				}
+				for (Object o : f) {
+					Tuple3 t = (Tuple3) o;
+					String lhs = t.a.toString();
+					String rhs = t.c.toString();
+					if (seen.contains(rhs)) {
+						throw new RuntimeException("Duplicate AS name: " + rhs + " (note: AS names can't be used in the schema either)");
+					}
+					seen.add(rhs);
+				//	seen.add(lhs);
+					from.put(rhs, lhs);
+				}
+
 				
 				return new XExp.Flower(select, from, where, I);				
 			}
@@ -528,16 +552,25 @@ public class XParser {
 		throw new RuntimeException("x: " + c.getClass() + " " + c);
 	}
 	
+	/* public static final Parser<?> instance(Reference ref) {
+		Parser<?> node = Parsers.tuple(ident(), term(":"), ident());
+		Parser<?> p3 = Parsers.tuple(path(), term("="), path());
+		Parser<?> xxx = Parsers.tuple(section("variables", node), 
+				section("equations", p3));
+		Parser kkk = ((Parser)term("INSTANCE")).or((Parser) term("instance"));
+		Parser<?> constant = Parsers
+				.tuple(kkk, xxx.between(term("{"), term("}")), term(":"),
+						ref.lazy());
+		return constant;  */
 	public static XExp.XInst toInstConst(Object decl) {
-		Tuple3 y = (Tuple3) decl;
-		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		Tuple4 y = (Tuple4) decl;
+		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.b;
 		
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 arrows = (Tuple3) x.b;
 		
 		List nodes0 = (List) nodes.b;
 		List arrows0 = (List) arrows.b;
-
 
 		List<Pair<String, String>> nodesX = new LinkedList<>();
 		for (Object o : nodes0) {
@@ -554,7 +587,10 @@ public class XParser {
 			List<String> m = (List<String>) u.c;
 			eqsX.add(new Pair<>((List<String>) n, (List<String>) m));
 		 }
-		XInst ret = new XInst(toExp(y.c), nodesX, eqsX);
+		XInst ret = new XInst(toExp(y.d), nodesX, eqsX);
+		if (y.a.toString().equals("INSTANCE")) {
+			ret.saturated = true;
+		}
 		return ret;
 	}
 	
@@ -597,12 +633,19 @@ public class XParser {
 		List nodes0 = (List) nodes.b;
 //		List arrows0 = (List) arrows.b;
 
-		List<Pair<String, List<String>>> eqsX = new LinkedList<>();
+		List<Pair<Pair<String, String>, List<String>>> eqsX = new LinkedList<>();
 		 for (Object o : nodes0) {
 			Tuple3 u = (Tuple3) o;
-			String n = (String) u.a;
 			List<String> m = (List<String>) u.c;
-			eqsX.add(new Pair<>(n, (List<String>) m));
+
+			if (u.a instanceof Tuple3) {
+				Tuple3 n = (Tuple3) u.a;
+				eqsX.add(new Pair<>(new Pair<>(n.a.toString(), n.c.toString()), (List<String>) m));
+			} else {
+				String n = (String) u.a;
+				eqsX.add(new Pair<>(new Pair<>(n, null), (List<String>) m));
+			}
+
 		 }
 		XExp.XTransConst ret = new XExp.XTransConst(toExp(y.c), toExp(y.e), eqsX);
 		return ret;
