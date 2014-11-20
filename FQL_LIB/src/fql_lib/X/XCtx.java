@@ -1018,7 +1018,7 @@ public class XCtx<C> implements XObject {
 		return xcat;
 	}
 
-	private Map<Pair<C, C>, C> eqm;
+	private Map<Pair<C, C>, List<C>> eqm;
 
 	private Category<C, Triple<C, C, List<C>>> satcat() {
 		Category<C, Triple<C, C, List<C>>> sch = schema.cat();
@@ -1154,7 +1154,7 @@ public class XCtx<C> implements XObject {
 					if (g.third.get(0).toString().startsWith("!") && a.equals("_1")) {
 						List<C> l = new LinkedList();
 						l.addAll(g.third.subList(1, g.third.size()));
-						Triple<C, C, List<C>> ret = new Triple<>(a, g.second, l);
+						Triple<C, C, List<C>> ret = new Triple<>(f.first, g.second, l);
 						if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
 							throw new RuntimeException();
 						}
@@ -1168,15 +1168,35 @@ public class XCtx<C> implements XObject {
 					vl.add(v);
 					Triple<C, C, List<C>> sofar = new Triple<>(type(v).first, type(v).second, vl);
 
+					System.out.println("starting at " + sofar);
+					List gnX = new LinkedList<>(g.third);
 					for (C gn : g.third) {
+						gnX.remove(0);
+						System.out.println("doing edge " + gn);
 						sofar = findEq(sofar, gn);
+						System.out.println("result " + sofar);
+						List hhh = new LinkedList();
+						hhh.addAll(sofar.third);
+						hhh.addAll(gnX);
+						if (sch.arrows().contains(sofar)) {
+							Triple ret0 = new Triple<>(sofar.first, g.second, hhh);
+							Triple ret = schema.find(schema.getKB(), ret0, sch.arrows());
+							if (!arrows().contains(ret)) {
+								throw new RuntimeException("f " + f + " and " + g + "\n\nbad: " + ret.toString() + " not found inn\n\n" + Util.sep(arrows(), "\n"));
+							}
+							return ret;
+						} else {
+						//	System.out.println("Did not fire on " + sofar);
+						}
 					}
 
 					List<C> retl = new LinkedList<>();
 					retl.add((C) ("!_" + a));
 					retl.addAll(sofar.third);
-					Triple<C, C, List<C>> ret = new Triple<>(a, sofar.second, retl);
+					Triple<C, C, List<C>> ret = new Triple<>(f.first, g.second, retl);
 
+					System.out.println("want to return " + ret);
+					
 					if (a.equals("_1") && global.allIds().contains(sofar.second)
 							&& global.cat().hom((C) "_1", sofar.second).contains(sofar)) {
 						if (!arrows().contains(sofar)) {
@@ -1188,10 +1208,10 @@ public class XCtx<C> implements XObject {
 						return sofar;
 					}
 					if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
-						throw new RuntimeException();
+						throw new RuntimeException( ret + " not " + f + " and " + g);
 					}
 					if (!arrows().contains(ret)) {
-						throw new RuntimeException(ret.toString());
+						throw new RuntimeException("f " + f + " and " + g + "\n\nbad: " + ret.toString() + " not found inn\n\n" + Util.sep(arrows(), "\n"));
 					}
 					return ret;
 				}
@@ -1224,7 +1244,7 @@ public class XCtx<C> implements XObject {
 				List<C> tofind = new LinkedList<>();
 				tofind.add(v);
 				tofind.add(gn);
-				C found = eqm.get(new Pair<>(v, gn));
+				List<C> found = eqm.get(new Pair<>(v, gn));
 				//TODO
 			//	if (found != null) {
 				for (Pair<List<C>, List<C>> eq : eqs) {
@@ -1232,17 +1252,17 @@ public class XCtx<C> implements XObject {
 						break;
 					}
 					if (eq.first.equals(tofind)) {
-						if (eq.second.size() != 1) {
-							throw new RuntimeException("eq is " + eq);
-						}
-						found = eq.second.get(0);
+					//	if (eq.second.size() != 1) {
+				//			throw new RuntimeException("eq is " + eq);
+				//		}
+						found = eq.second; //.get(0);
 						break;
 					}
 					if (eq.second.equals(tofind)) {
-						if (eq.first.size() != 1) {
-							throw new RuntimeException();
-						}
-						found = eq.first.get(0);
+					//	if (eq.first.size() != 1) {
+					//		throw new RuntimeException();
+					//	}
+						found = eq.first; //.get(0);
 						break;
 					}
 				}
@@ -1256,7 +1276,7 @@ public class XCtx<C> implements XObject {
 				// }
 				List l = new LinkedList<>();
 
-				l.add(found);
+				l.addAll(found);
 				Triple<C, C, List<C>> ret = new Triple<>(type(found).first, type(found).second, l);
 				// if (!arrows().contains(ret)) {
 				// throw new RuntimeException("Want to construct " + ret +

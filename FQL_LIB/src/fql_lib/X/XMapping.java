@@ -628,7 +628,7 @@ public class XMapping<C, D> implements XObject {
 		XCtx ret = new XCtx<Pair<Triple<D, D, List<D>>, C>>(ids, types, eqs,
 				(XCtx<Pair<Triple<D, D, List<D>>, C>>) src.global,
 				(XCtx<Pair<Triple<D, D, List<D>>, C>>) src, "instance");
-		ret.saturated = I.saturated;
+		ret.saturated =  true; //I.saturated;
 		return ret;
 	}
 
@@ -946,16 +946,19 @@ public class XMapping<C, D> implements XObject {
 						throw new RuntimeException();
 					}
 					List<Pair<Triple<D,D,List<D>>, C>> g = new LinkedList<>();
-					g.add(new Pair<>(found, c));
-					//Triple<Pair<Triple<D,D,List<D>>, C>, Pair<Triple<D,D,List<D>>, C>, List<Pair<Triple<D,D,List<D>>, C>>> tr 
-					Triple tr = new Triple<>("_1", c, g);
-					//	Triple<C,C,List<Pair<Triple<D,D,List<D>>, C>>> tr = new Triple<>((C)"1", c, g);
-					Object xxx = deltaI.find(deltaI.getKB(), tr, deltaI.cat().arrows());
-					
-					if (xxx == null) {
-						throw new RuntimeException("cannot find " + tr);
+					Pair<Triple<D, D, List<D>>, C> pr = new Pair<>(found, c);
+					g.add(pr);
+			
+					if (src.global.allIds().contains(pr.second) && src.global.cat().arrows().contains(pr.first) ) {
+						theta.put(new Pair<>(c, f), pr.first);						
+					} else {
+						Triple tr = new Triple<>("_1", c, g);
+						Object xxx = deltaI.find(deltaI.getKB(), tr, deltaI.cat().arrows());
+						if (xxx == null) {
+							throw new RuntimeException("cannot find " + tr);
+						}
+						theta.put(new Pair<>(c, f), xxx);
 					}
-					theta.put(new Pair<>(c, f), xxx);
 				}
 			}
 			List l = new LinkedList();
