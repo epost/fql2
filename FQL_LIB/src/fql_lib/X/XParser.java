@@ -18,6 +18,7 @@ import org.codehaus.jparsec.functors.Tuple5;
 
 import fql_lib.Pair;
 import fql_lib.Triple;
+import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.XInst;
 
@@ -34,7 +35,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -89,8 +90,9 @@ public class XParser {
 		Parser<?> counit1 = Parsers.tuple(term("coreturn"), term("delta"), term("pi"), ref.lazy(), ref.lazy());
 		
 		Parser<?> flower = flower(ref);
+		Parser<?> FLOWER = FLOWER(ref);
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> a = Parsers.or(new Parser<?>[] { FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 
@@ -351,12 +353,18 @@ public class XParser {
 			if (!(decl.a instanceof String)) {
 				Tuple3 t = (Tuple3) decl.a;
 				Object ooo = toExp(decl.c);
-				if (!(ooo instanceof Flower)) {
-					throw new RuntimeException("Can only use v:T for flowers");
-				}
+				if (ooo instanceof Flower) {
 				Flower f = (Flower) toExp(decl.c);
 				f.ty = t.c.toString();
 				ret.add(new Triple<>(t.a.toString(), idx, f));				
+				} else if (ooo instanceof FLOWER2) {
+					FLOWER2 f = (FLOWER2) toExp(decl.c);
+					f.ty = t.c.toString();
+					ret.add(new Triple<>(t.a.toString(), idx, f));				
+					
+				} else {
+					throw new RuntimeException("Can only use v:T for flowers");
+				}
 			} else {
 				String name = decl.a.toString();
 				if (decl.b.toString().equals(":")) {
@@ -439,16 +447,6 @@ public class XParser {
 		if (c instanceof Tuple3) {
 			Tuple3 p = (Tuple3) c;
 			if (p.a.toString().equals("flower")) {
-				/*
-				Parser<?> from0 = Parsers.tuple(ident(), term("as"), ident()).sepBy(term(","));
-				Parser<?> from = Parsers.tuple(term("from"), from0, term(";"));
-				Parser<?> where0 = Parsers.tuple(path(), term("="), path()).sepBy(term(","));
-				Parser<?> where = Parsers.tuple(term("where"), where0, term(";")); 
-				Parser<?> select0 = Parsers.tuple(path(), term("as"), ident()).sepBy(term(","));
-				Parser<?> select = Parsers.tuple(term("select"), select0, term(";"));
-				Parser p = Parsers.tuple(select, from, where);
-				return Parsers.tuple(term("flower"), p.between(term("{"), term("}")), self.lazy()); */
-		
 				XExp I = toExp(p.c);
 				Tuple3 q = (Tuple3) p.b;
 				
@@ -466,8 +464,6 @@ public class XParser {
 					List lhs = (List) t.a;
 					List rhs = (List) t.c;
 					where.add(new Pair<>(rhs, lhs));
-			//		seen.addAll(rhs);
-			//		seen.addAll(lhs);
 				}
 				for (Object o : s) {
 					Tuple3 t = (Tuple3) o;
@@ -477,7 +473,6 @@ public class XParser {
 						throw new RuntimeException("Duplicate AS name: " + rhs + " (note: AS names can't be used in the schema either)");
 					}
 					seen.add(rhs);
-				//	seen.addAll(lhs);
 					select.put(rhs, lhs);
 				}
 				for (Object o : f) {
@@ -488,12 +483,46 @@ public class XParser {
 						throw new RuntimeException("Duplicate AS name: " + rhs + " (note: AS names can't be used in the schema either)");
 					}
 					seen.add(rhs);
-				//	seen.add(lhs);
 					from.put(rhs, lhs);
 				}
-
 				
 				return new XExp.Flower(select, from, where, I);				
+			}
+			if (p.a.toString().equals("FLOWER")) {
+				XExp I = toExp(p.c);
+				Tuple3 q = (Tuple3) p.b;
+				
+				List s = (List) ((Tuple3)q.a).b; //list of tuple3 of (path, string)
+				List f = (List) ((Tuple3)q.b).b; //list of tuple3 of (string, string)
+				Object w =  ((Tuple3)q.c).b; //list of tuple3 of (path, path)
+				
+				Map<String, List<String>> select = new HashMap<>();
+				Map<String, String> from = new HashMap<>();
+			//	List<Pair<List<String>, List<String>>> where = new LinkedList<>();
+				
+				Set<String> seen = new HashSet<>();
+				for (Object o : s) {
+					Tuple3 t = (Tuple3) o;
+					List lhs = (List) t.a;
+					String rhs = t.c.toString();
+					if (seen.contains(rhs)) {
+						throw new RuntimeException("Duplicate AS name: " + rhs + " (note: AS names can't be used in the schema either)");
+					}
+					seen.add(rhs);
+					select.put(rhs, lhs);
+				}
+				for (Object o : f) {
+					Tuple3 t = (Tuple3) o;
+					String lhs = t.a.toString();
+					String rhs = t.c.toString();
+					if (seen.contains(rhs)) {
+						throw new RuntimeException("Duplicate AS name: " + rhs + " (note: AS names can't be used in the schema either)");
+					}
+					seen.add(rhs);
+					from.put(rhs, lhs);
+				}
+				
+				return new XExp.FLOWER2(select, from, toWhere(w), I);				
 			}
 			
 			if (p.a.toString().equals("sigma")) {
@@ -654,6 +683,35 @@ public class XParser {
 	private static Parser path() {
 		return  Parsers.or(ident()).sepBy1(term("."));
 	}
+	
+	private static XExp.XBool toWhere(Object o) {
+		if (o instanceof Tuple5) {
+			Tuple5 o2 = (Tuple5) o;
+			boolean isAnd = o2.c.toString().equals("and");
+			return new XExp.XBool(toWhere(o2.b), toWhere(o2.d), isAnd);
+		}
+		
+		if (o instanceof Tuple3) {
+			Tuple3 o2 = (Tuple3) o;
+			return new XExp.XBool((List<String>)o2.a, (List<String>)o2.c);
+		}
+		
+		return null;
+	}
+	
+	private static Parser where() {
+		Reference ref = Parser.newReference();	
+		
+		Parser p1 = Parsers.tuple(term("("), ref.lazy(), term("and"), ref.lazy(), term(")"));
+		Parser p2 = Parsers.tuple(term("("), ref.lazy(), term("or"), ref.lazy(), term(")"));
+		Parser p3 = Parsers.tuple(path(), term("="), path());
+		
+		Parser p = Parsers.or(p1, p2, p3, Parsers.always());
+		
+		ref.set(p);
+		
+		return p;
+	}
 
 	public static Parser<?> section(String s, Parser<?> p) {
 		return Parsers.tuple(term(s), p.sepBy(term(",")), term(";"));
@@ -676,6 +734,21 @@ public class XParser {
 
 		Parser p = Parsers.tuple(select, from, where);
 		Parser ret = Parsers.tuple(term("flower"), p.between(term("{"), term("}")), self.lazy());
+		
+		return ret;
+	}
+	
+	public static final Parser<?> FLOWER(Reference self) {
+		Parser<?> from0 = Parsers.tuple(ident(), term("as"), ident()).sepBy(term(","));
+		Parser<?> from = Parsers.tuple(term("from"), from0, term(";"));
+
+		Parser<?> where = Parsers.tuple(term("where"), where(), term(";")); 
+
+		Parser<?> select0 = Parsers.tuple(path(), term("as"), ident()).sepBy(term(","));
+		Parser<?> select = Parsers.tuple(term("select"), select0, term(";"));
+
+		Parser p = Parsers.tuple(select, from, where);
+		Parser ret = Parsers.tuple(term("FLOWER"), p.between(term("{"), term("}")), self.lazy());
 		
 		return ret;
 	}

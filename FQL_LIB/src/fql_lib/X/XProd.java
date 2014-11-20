@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import fql_lib.Chc;
 import fql_lib.Pair;
 import fql_lib.Triple;
+import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;
-import fql_lib.X.XExp.XPi;
 
 public class XProd {
 	
@@ -413,4 +414,193 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		
 		return m2.delta(J);
 	}
+	
+	private static Set<Flower> normalize(FLOWER2 e) {
+		System.out.println("normalizing " + e);
+		Set<Flower> ret = new HashSet<>();
+		
+		if (e.where == null) {
+			Flower f = new Flower(e.select, e.from, new LinkedList<>(), e.src);
+			f.ty = e.ty;
+			ret.add(f);
+			System.out.println("result " + ret);
+
+			return ret;
+		}
+		
+		if (e.where.lhs != null && e.where.rhs != null) {
+			List<Pair<List<String>, List<String>>> l = new LinkedList<>();
+			l.add(new Pair<>(e.where.lhs, e.where.rhs));
+			Flower f = new Flower(e.select, e.from, l, e.src);
+			f.ty = e.ty;
+			ret.add(f);
+			System.out.println("result " + ret);
+
+			return ret;
+		}
+		
+		e.where.normalize();
+		e.where.assoc();
+		
+		//abc + de + f
+		if (e.where.isAnd) {
+			List<Pair<List<String>, List<String>>> l = e.where.fromAnd();
+			Flower f = new Flower(e.select, e.from, l, e.src);
+			f.ty = e.ty;
+			ret.add(f);
+			System.out.println("result " + ret);
+
+			return ret;
+		}
+		
+		if (!e.where.isAnd) {
+			List<List<Pair<List<String>, List<String>>>> ll = e.where.fromOr();
+			for (List<Pair<List<String>, List<String>>> l : ll) {
+				Flower f = new Flower(e.select, e.from, l, e.src);
+				f.ty = e.ty;
+				ret.add(f);
+			}
+			System.out.println("result " + ret);
+
+			return ret;
+		}
+		
+		throw new RuntimeException();
+	}
+	
+	public static XCtx FLOWER(FLOWER2 e0, XCtx I) {
+		Set ids = new HashSet<>(I.schema.ids);
+		Map types = new HashMap<>(I.schema.types);
+		Set eqs = new HashSet<>(I.schema.eqs);
+		
+		Set<Flower> flowers = normalize(e0);
+		
+		int i = 0;
+		for (Flower e : flowers) {
+			String qi = "_Q" + i;
+			ids.add(qi);
+			types.put(qi, new Pair<>(qi, qi));
+
+			for (Entry<String, String> k : e.from.entrySet()) {
+				types.put(qi + k.getKey(), new Pair<>(qi, k.getValue()));
+			}
+			//!__Q -> !__Q1
+			for (Pair<List<String>, List<String>> eq : e.where) {
+				Function<String, String> f = x -> e.from.keySet().contains(x) ? qi + x : x;
+				List<String> lhs = eq.first.stream().map(f).collect(Collectors.toList());
+				List<String> rhs = eq.second.stream().map(f).collect(Collectors.toList());
+				Function<String, String> g = x -> x.equals("!__Q") ? "!_" + qi : x;
+				lhs = lhs.stream().map(g).collect(Collectors.toList());
+				rhs = rhs.stream().map(g).collect(Collectors.toList());
+				eqs.add(new Pair<>(lhs, rhs));
+			}
+			i++;
+		}
+		
+		XCtx c = new XCtx(ids, types, eqs, I.global, null, "schema");
+		Map em = new HashMap<>();
+		for (Object o : I.schema.allTerms()) {
+			List l = new LinkedList<>();
+			l.add(o);
+			em.put(o, l);
+		}
+		XMapping m = new XMapping(I.schema, c, em, "mapping");
+		
+		XCtx J = m.pi(I);
+		
+		Set ids2 = new HashSet<>();
+		Map types2 = new HashMap<>();
+		Set eqs2 = new HashSet<>();
+		Map em2 = new HashMap<>();
+		
+		i = 0;
+		for (Flower e : flowers) {
+			String qi = "_Q" + i;
+			ids2.add(qi);
+			types2.put(qi, new Pair<>(qi, qi));
+			List ll = new LinkedList<>();
+			ll.add(qi);
+			em2.put(qi, ll);
+			for (Entry<String, List<String>> o : e.select.entrySet()) { 
+				Function<String, String> f = x -> e.from.keySet().contains(x) ? qi + x : x;
+				List<String> lll = o.getValue().stream().map(f).collect(Collectors.toList());
+
+				Object tgt = c.type(lll).second;
+				types2.put(qi + o.getKey(), new Pair<>(qi, tgt));
+				if (!I.global.allTerms().contains(tgt)) {
+					ids2.add(tgt);
+					types2.put(tgt, new Pair<>(tgt, tgt));
+				}
+				em2.put(qi + o.getKey(), lll);
+			}
+			i++;
+		}
+		XCtx c2 = new XCtx(ids2, types2, eqs2, I.global, null, "schema");
+		for (Object o : c2.allTerms()) {
+			if (em2.containsKey(o)) {
+				continue;
+			}
+			List l = new LinkedList<>();
+			l.add(o);
+			em2.put(o, l);
+		}
+		XMapping m2 = new XMapping(c2, c, em2, "mapping"); 
+		
+		XCtx K = m2.delta(J);
+		
+		Set ids3 = new HashSet<>();
+		Map types3 = new HashMap<>();
+		Set eqs3 = new HashSet<>();
+		Map em3 = new HashMap<>();
+		
+		ids3.add("_Q");
+		types3.put("_Q", new Pair<>("_Q", "_Q"));
+
+		i = 0;
+		for (Flower e : flowers) {
+			String qi = "_Q" + i;
+			List ll = new LinkedList<>();
+			ll.add("_Q");
+			em3.put(qi, ll);
+			List jj = new LinkedList<>();
+			jj.add("!__Q");
+			em3.put("!_" + qi, jj);
+
+			for (Entry<String, List<String>> o : e.select.entrySet()) { 
+				Function<String, String> f = x -> e.from.keySet().contains(x) ? qi + x : x;
+				List<String> lll = o.getValue().stream().map(f).collect(Collectors.toList());
+
+				Object tgt = c.type(lll).second;
+				types3.put(o.getKey(), new Pair<>("_Q", tgt));
+				if (!I.global.allTerms().contains(tgt)) {
+					ids3.add(tgt);
+					types3.put(tgt, new Pair<>(tgt, tgt));
+				}
+				List u = new LinkedList();
+				u.add(o.getKey());
+				em3.put(qi + o.getKey(), u);
+			}
+			i++;
+		}
+		XCtx c3 = new XCtx(ids3, types3, eqs3, I.global, null, "schema");
+		for (Object o : c2.allTerms()) {
+			if (em3.containsKey(o)) {
+				continue;
+			}
+			List l = new LinkedList<>();
+			l.add(o);
+			em3.put(o, l);
+		}
+
+		XMapping m3 = new XMapping(c2, c3, em3, "mapping"); 
+		
+		XCtx L = m3.apply0(K);
+		
+		return L;
+	}
+	
+	
+	
+	
+	
 }

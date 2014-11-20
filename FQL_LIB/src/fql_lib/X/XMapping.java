@@ -232,7 +232,7 @@ public class XMapping<C, D> implements XObject {
 				+ unprovable + "]";
 	}
 
-	public XCtx<D> apply0(XCtx<D> global, XCtx<C> I) {
+	public XCtx<D> apply0(XCtx<C> I) {
 		// XCtx<D> ret = dst.copy();
 		// ret.local = new HashSet<>(); //(Set<D>) I.local;
 		Map<D, Pair<D, D>> ret = new HashMap<>();
@@ -266,7 +266,7 @@ public class XMapping<C, D> implements XObject {
 			eqs.add(new Pair<>(lhs, rhs));
 		}
 
-		return new XCtx<D>(new HashSet<>(), ret, eqs, global, dst, "instance");
+		return new XCtx(new HashSet<>(), ret, eqs, I.global, dst, "instance");
 	}
 
 	public static XMapping<String, String> make(XEnvironment eNV, XCtx<String> src,
@@ -428,8 +428,8 @@ public class XMapping<C, D> implements XObject {
 
 	// on transforms
 	public XObject apply(XMapping<C, C> t) {
-		XCtx<D> src0 = this.apply0((XCtx<D>) t.src.global, t.src);
-		XCtx<D> dst0 = this.apply0((XCtx<D>) t.dst.global, t.dst);
+		XCtx<D> src0 = this.apply0(t.src);
+		XCtx<D> dst0 = this.apply0(t.dst);
 
 		Map<D, List<D>> ret = new HashMap<>();
 		for (D c : src0.allTerms()) {
@@ -498,7 +498,7 @@ public class XMapping<C, D> implements XObject {
 	}
 
 	public XMapping<C, Pair<Triple<D, D, List<D>>, C>> unit(XCtx<C> I) {
-		XCtx<D> FI = apply0(dst.global, I);
+		XCtx<D> FI = apply0(I);
 		XCtx<Pair<Triple<D, D, List<D>>, C>> FFI = delta(FI);
 		Map m = new HashMap<>();
 
@@ -541,8 +541,7 @@ public class XMapping<C, D> implements XObject {
 	public XMapping<Pair<Triple<D, D, List<D>>, C>, D> counit(XCtx<D> I) {
 		XCtx<Pair<Triple<D, D, List<D>>, C>> FI = delta(I);
 		XMapping<Pair<Triple<D, D, List<D>>, C>, Pair<Triple<D, D, List<D>>, C>> f = (XMapping<Pair<Triple<D, D, List<D>>, C>, Pair<Triple<D, D, List<D>>, C>>) this;
-		XCtx<Pair<Triple<D, D, List<D>>, C>> FFI = f.apply0(
-				(XCtx<Pair<Triple<D, D, List<D>>, C>>) I.global, FI);
+		XCtx<Pair<Triple<D, D, List<D>>, C>> FFI = f.apply0(FI);
 
 		Map m = new HashMap<>();
 

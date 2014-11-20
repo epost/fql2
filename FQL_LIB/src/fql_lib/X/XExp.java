@@ -1,5 +1,6 @@
 package fql_lib.X;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,6 +11,198 @@ import fql_lib.Util;
 
 public abstract class XExp {
 	
+	public static class XBool {
+		
+		@Override
+		public String toString() {
+			if (lhs != null && rhs != null) {
+				return Util.sep(lhs, ".") + " = " + Util.sep(rhs, ".");
+			}
+			if (l != null && rhs != null) {
+				String s = isAnd ? " and " : " or ";
+				return "(" + l + s + r + ")";
+			}			
+			throw new RuntimeException();
+		}
+		
+		//(a . b) . c --> a . (b . c)
+		public void assoc() {
+			if (l == null && r == null) {
+				return;
+			}
+
+			if (l.l != null && l.r != null) {
+				XBool a = l.l;
+				XBool b = l.r;
+				XBool c = r;
+				a.assoc();
+				b.assoc();
+				c.assoc();
+				XBool bc = new XBool(b, c, isAnd);
+				l = a;
+				r = bc;
+			}			
+		}
+		
+		public void normalize() {
+			if (l == null && r == null) {
+				return;
+			}
+			
+			l.normalize();
+			r.normalize();
+			
+			if (!isAnd) {
+				return;
+			}
+			
+			if (r.l == null) {
+				return;
+			}
+			
+			if (r.isAnd) {
+				return;
+			}
+			
+			l = new XBool(l.l, r.l, true);
+			r = new XBool(l.l, r.r, true);
+			isAnd = false;			
+		}
+		
+		public XBool(List<String> lhs, List<String> rhs) {
+			this.lhs = lhs;
+			this.rhs = rhs;
+		}
+		
+		public XBool(XBool l, XBool r, boolean isAnd) {
+			this.l = l;
+			this.r = r;
+			this.isAnd = isAnd;
+		}
+		
+		public List<String> lhs, rhs;
+		public XBool l,r;
+		public boolean isAnd;
+		public List<Pair<List<String>, List<String>>> fromAnd() {
+			if (lhs != null && rhs != null) {
+				List<Pair<List<String>, List<String>>> ret = new LinkedList<>();
+				ret.add(new Pair<>(lhs, rhs));
+				return ret;
+			}
+			if (!isAnd) {
+				throw new RuntimeException();
+			}
+			if (l == null || r == null) {
+				throw new RuntimeException();
+			}
+
+			List<Pair<List<String>, List<String>>> l2 = l.fromAnd();
+			List<Pair<List<String>, List<String>>> r2 = r.fromAnd();
+			
+			List<Pair<List<String>, List<String>>> ret = new LinkedList<>();
+			ret.addAll(l2);
+			ret.addAll(r2);
+			
+			return ret;
+		}
+		public List<List<Pair<List<String>, List<String>>>> fromOr() {
+			if (lhs != null && rhs != null) {
+				List<Pair<List<String>, List<String>>> ret = new LinkedList<>();
+				ret.add(new Pair<>(lhs, rhs));
+				List<List<Pair<List<String>, List<String>>>> ret2 = new LinkedList<>();
+				ret2.add(ret);
+				return ret2;
+			}
+			if (isAnd) {
+				throw new RuntimeException();
+			}
+			if (l == null || r == null) {
+				throw new RuntimeException();
+			}
+
+			List<Pair<List<String>, List<String>>> l2 = l.fromAnd();
+			List<List<Pair<List<String>, List<String>>>> r2 = r.fromOr();
+			
+			List<List<Pair<List<String>, List<String>>>> ret = new LinkedList<>();
+			ret.add(l2);
+			ret.addAll(r2);
+			
+			return ret;
+		}
+	}
+	
+	public static class FLOWER2 extends XExp {
+		Map<String, List<String>> select;
+		Map<String, String> from;
+		XBool where;
+		XExp src; 
+		String ty;
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((from == null) ? 0 : from.hashCode());
+			result = prime * result + ((select == null) ? 0 : select.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			result = prime * result + ((ty == null) ? 0 : ty.hashCode());
+			result = prime * result + ((where == null) ? 0 : where.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Flower other = (Flower) obj;
+			if (from == null) {
+				if (other.from != null)
+					return false;
+			} else if (!from.equals(other.from))
+				return false;
+			if (select == null) {
+				if (other.select != null)
+					return false;
+			} else if (!select.equals(other.select))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			if (ty == null) {
+				if (other.ty != null)
+					return false;
+			} else if (!ty.equals(other.ty))
+				return false;
+			if (where == null) {
+				if (other.where != null)
+					return false;
+			} else if (!where.equals(other.where))
+				return false;
+			return true;
+		}
+
+		public FLOWER2(Map<String, List<String>> select, Map<String, String> from,
+				XBool where, XExp src) {
+			super();
+			this.select = select;
+			this.from = from;
+			this.where = where;
+			this.src = src;
+		}
+
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+	}
+	
 	
 	public static class Flower extends XExp {
 		Map<String, List<String>> select;
@@ -17,7 +210,7 @@ public abstract class XExp {
 		List<Pair<List<String>, List<String>>> where;
 		XExp src;
 		String ty;
-		
+		 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -700,6 +893,7 @@ public abstract class XExp {
 		public R visit (E env, XOne e);
 		public R visit (E env, XTT e);
 		public R visit (E env, Flower e);
+		public R visit (E env, FLOWER2 e);
 	}
 	
 	public static class XTy extends XExp {

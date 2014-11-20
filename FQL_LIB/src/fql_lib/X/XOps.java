@@ -1,6 +1,7 @@
 package fql_lib.X;
 
 import fql_lib.Util;
+import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.Var;
 import fql_lib.X.XExp.XConst;
@@ -18,12 +19,12 @@ import fql_lib.X.XExp.XMatch;
 import fql_lib.X.XExp.XOne;
 import fql_lib.X.XExp.XPair;
 import fql_lib.X.XExp.XPi;
-import fql_lib.X.XExp.XTimes;
 import fql_lib.X.XExp.XProj;
 import fql_lib.X.XExp.XRel;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
 import fql_lib.X.XExp.XTT;
+import fql_lib.X.XExp.XTimes;
 import fql_lib.X.XExp.XTransConst;
 import fql_lib.X.XExp.XTy;
 import fql_lib.X.XExp.XUnit;
@@ -73,7 +74,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		XObject o2 = e.I.accept(env, this);
 		if (o2 instanceof XCtx<?>) {
 			XCtx<String> ctx2 = (XCtx<String>) o2;
-			return ctx.apply0(ENV.global, ctx2);
+			return ctx.apply0(ctx2);
 		} else if (o2 instanceof XMapping<?,?>) {
 			XMapping<String,String> ctx2 = (XMapping<String,String>) o2;
 			return ctx.apply(ctx2);			
@@ -377,6 +378,15 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		return XProd.flower(e, src);		
 	}
 
+	@Override
+	public XObject visit(XProgram env, FLOWER2 e) {
+		XObject src0 = e.src.accept(env, this);
+		if (!(src0 instanceof XCtx)) {
+			throw new RuntimeException("Not an instance in " + e);			
+		}
+		XCtx src = (XCtx) src0;
+		return XProd.FLOWER(e, src);		
+	}
 	
 
 }
