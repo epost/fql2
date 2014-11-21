@@ -919,7 +919,6 @@ public class XCtx<C> implements XObject {
 		}
 
 		if (saturated) {
-			 System.out.println("saturated");
 			xcat = satcat();
 			return xcat;
 		}
@@ -1079,15 +1078,15 @@ public class XCtx<C> implements XObject {
 					throw new RuntimeException(g.toString());
 				}
 				if (!f.second.equals(g.first)) {
-					throw new RuntimeException();
+					throw new RuntimeException("cannot compose " + f + " and " + g);
 				}
 				if (sch.hom(f.first, f.second).contains(f)
 						&& sch.hom(g.first, g.second).contains(g)) {
 					return sch.compose(f, g);
 				}
 				if (new_arrs.contains(f) && new_arrs.contains(g)) {
-					Pair<C, C> ft = new Pair<>(f.first, f.second); // type(f);
-					Pair<C, C> gt = new Pair<>(g.first, g.second); // type(g);
+					Pair<C, C> ft = new Pair<>(f.first, f.second); 
+					Pair<C, C> gt = new Pair<>(g.first, g.second); 
 					C a = ft.first;
 					C b = gt.first;
 					C v = f.third.get(1);
@@ -1100,7 +1099,6 @@ public class XCtx<C> implements XObject {
 						if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
 							throw new RuntimeException();
 						}
-
 						if (!arrows().contains(ret)) {
 							throw new RuntimeException(ret.toString());
 						}
@@ -1109,6 +1107,12 @@ public class XCtx<C> implements XObject {
 				}
 				if (new_arrs.contains(f) && sch.arrows().contains(g)) {
 					if (g.third.isEmpty()) {
+						if (!f.first.equals(f.first) || !f.second.equals(g.second)) {
+							throw new RuntimeException();
+						}
+						if (!arrows().contains(f)) {
+							throw new RuntimeException(f.toString());
+						}
 						return f;
 					}
 					C b = g.first;
@@ -1120,7 +1124,6 @@ public class XCtx<C> implements XObject {
 						if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
 							throw new RuntimeException();
 						}
-
 						if (!arrows().contains(ret)) {
 							throw new RuntimeException(ret.toString());
 						}
@@ -1168,21 +1171,27 @@ public class XCtx<C> implements XObject {
 					vl.add(v);
 					Triple<C, C, List<C>> sofar = new Triple<>(type(v).first, type(v).second, vl);
 
-					System.out.println("starting at " + sofar);
+					
+				//	System.out.println("starting at " + sofar);
 					List gnX = new LinkedList<>(g.third);
 					for (C gn : g.third) {
 						gnX.remove(0);
-						System.out.println("doing edge " + gn);
+				//		System.out.println("doing edge " + gn);
 						sofar = findEq(sofar, gn);
-						System.out.println("result " + sofar);
-						List hhh = new LinkedList();
-						hhh.addAll(sofar.third);
-						hhh.addAll(gnX);
+				//		System.out.println("result " + sofar);
 						if (sch.arrows().contains(sofar)) {
-							Triple ret0 = new Triple<>(sofar.first, g.second, hhh);
-							Triple ret = schema.find(schema.getKB(), ret0, sch.arrows());
+							List hhh = new LinkedList();
+							hhh.add((C) ("!_" + a));
+							hhh.addAll(sofar.third);
+							hhh.addAll(gnX);
+						
+							Triple ret0 = new Triple<>(a, g.second, hhh);
+							Triple ret = schema.find(schema.getKB(), ret0, sch.hom(a, g.second));
 							if (!arrows().contains(ret)) {
 								throw new RuntimeException("f " + f + " and " + g + "\n\nbad: " + ret.toString() + " not found inn\n\n" + Util.sep(arrows(), "\n"));
+							}
+							if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
+								throw new RuntimeException();
 							}
 							return ret;
 						} else {
@@ -1195,7 +1204,7 @@ public class XCtx<C> implements XObject {
 					retl.addAll(sofar.third);
 					Triple<C, C, List<C>> ret = new Triple<>(f.first, g.second, retl);
 
-					System.out.println("want to return " + ret);
+					//System.out.println("want to return " + ret);
 					
 					if (a.equals("_1") && global.allIds().contains(sofar.second)
 							&& global.cat().hom((C) "_1", sofar.second).contains(sofar)) {
@@ -1246,28 +1255,24 @@ public class XCtx<C> implements XObject {
 				tofind.add(gn);
 				List<C> found = eqm.get(new Pair<>(v, gn));
 				//TODO
-			//	if (found != null) {
+		//		Pair<List<C>, List<C>> xxx = null;
 				for (Pair<List<C>, List<C>> eq : eqs) {
 					if (found != null) {
 						break;
 					}
 					if (eq.first.equals(tofind)) {
-					//	if (eq.second.size() != 1) {
-				//			throw new RuntimeException("eq is " + eq);
-				//		}
-						found = eq.second; //.get(0);
+						found = eq.second; 
+		//				xxx = eq;
 						break;
 					}
 					if (eq.second.equals(tofind)) {
-					//	if (eq.first.size() != 1) {
-					//		throw new RuntimeException();
-					//	}
-						found = eq.first; //.get(0);
+						found = eq.first;
+				//		xxx = eq;
 						break;
 					}
 				}
-		//		}
 				eqm.put(new Pair<>(v, gn), found);
+			//	System.out.println("returning eqation " + new Pair<>(v, gn) + " and " + found + "\n\noriginal " + xxx);
 				if (found == null) {
 					throw new RuntimeException("sofar " + sofar + " gn " + gn + "\n\n" + allEqs());
 				}
@@ -1291,12 +1296,6 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 
-	/*
-	 * private boolean livesInSchema(List<C> l) { try { schema.type(l); return
-	 * true; } catch (Exception e) {
-	 * 
-	 * } return false; }
-	 */
 
 	// TODO: cache these?
 	public Category<C, Triple<C, C, List<C>>> small_cat() {
@@ -1314,24 +1313,13 @@ public class XCtx<C> implements XObject {
 				paths.add(new Triple<>(c, c, new LinkedList<>()));
 				localIds.add(c);
 			}
-			// for (C c : global.terms()) {
-			// if (!global.ids.contains(c)) {
-			/*
-			 * if (global.type(c).first.equals("1")) { List<C> l = new
-			 * LinkedList<>(); l.add(c); consts.add(new
-			 * Triple<>(global.type(c).first, global.type(c).second, l)); }
-			 */
-			// }
-			// }
-			for (Entry<C, Pair<C, C>> k : global.types.entrySet()) {
+				for (Entry<C, Pair<C, C>> k : global.types.entrySet()) {
 				if (k.getValue().first.equals("_1") || k.getValue().second.equals("_1")
 						|| k.getKey().equals("_1")) {
 					continue;
 				}
 				t.put(k.getKey(), k.getValue());
 			}
-
-			// t.putAll(global.types); //TODO
 			extend(global.getKB(), paths, t, consts);
 		}
 
@@ -1349,7 +1337,7 @@ public class XCtx<C> implements XObject {
 			}
 			t.put(k.getKey(), k.getValue());
 		}
-		// t.putAll(types);
+	
 		extend(getKB(), paths, t, consts);
 
 		Set<Triple<C, C, List<C>>> arrows = new HashSet<>(paths);

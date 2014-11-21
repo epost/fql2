@@ -416,15 +416,12 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	}
 	
 	private static Set<Flower> normalize(FLOWER2 e) {
-		System.out.println("normalizing " + e);
 		Set<Flower> ret = new HashSet<>();
 		
 		if (e.where == null) {
 			Flower f = new Flower(e.select, e.from, new LinkedList<>(), e.src);
 			f.ty = e.ty;
 			ret.add(f);
-			System.out.println("result " + ret);
-
 			return ret;
 		}
 		
@@ -434,38 +431,18 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			Flower f = new Flower(e.select, e.from, l, e.src);
 			f.ty = e.ty;
 			ret.add(f);
-			System.out.println("result " + ret);
-
 			return ret;
 		}
 		
 		e.where.normalize();
-		e.where.assoc();
 		
-		//abc + de + f
-		if (e.where.isAnd) {
-			List<Pair<List<String>, List<String>>> l = e.where.fromAnd();
+		List<List<Pair<List<String>, List<String>>>> ll = e.where.fromOr();
+		for (List<Pair<List<String>, List<String>>> l : ll) {
 			Flower f = new Flower(e.select, e.from, l, e.src);
 			f.ty = e.ty;
 			ret.add(f);
-			System.out.println("result " + ret);
-
-			return ret;
 		}
-		
-		if (!e.where.isAnd) {
-			List<List<Pair<List<String>, List<String>>>> ll = e.where.fromOr();
-			for (List<Pair<List<String>, List<String>>> l : ll) {
-				Flower f = new Flower(e.select, e.from, l, e.src);
-				f.ty = e.ty;
-				ret.add(f);
-			}
-			System.out.println("result " + ret);
-
-			return ret;
-		}
-		
-		throw new RuntimeException();
+		return ret;
 	}
 	
 	public static XCtx FLOWER(FLOWER2 e0, XCtx I) {

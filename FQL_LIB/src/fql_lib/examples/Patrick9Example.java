@@ -94,9 +94,9 @@ public class Patrick9Example extends Example {
 			+ "\n  a.a3 = Leslie, b.a3 = Leslie, c.a3 = Leslie;"
 			+ "\n} : D"
 			+ "\n"
-			+ "\n//ret = return delta pi F XXX"
+			+ "\nret = return delta pi F XXX"
 			+ "\n"
-			+ "\ncoret = coreturn delta pi F I"
+			+ "\n//coret = coreturn delta pi F I"
 			+ "\n";
 
 

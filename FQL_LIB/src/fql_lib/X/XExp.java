@@ -18,7 +18,7 @@ public abstract class XExp {
 			if (lhs != null && rhs != null) {
 				return Util.sep(lhs, ".") + " = " + Util.sep(rhs, ".");
 			}
-			if (l != null && rhs != null) {
+			if (l != null && r != null) {
 				String s = isAnd ? " and " : " or ";
 				return "(" + l + s + r + ")";
 			}			
@@ -26,6 +26,7 @@ public abstract class XExp {
 		}
 		
 		//(a . b) . c --> a . (b . c)
+		/*
 		public void assoc() {
 			if (l == null && r == null) {
 				return;
@@ -43,6 +44,7 @@ public abstract class XExp {
 				r = bc;
 			}			
 		}
+		*/
 		
 		public void normalize() {
 			if (l == null && r == null) {
@@ -55,18 +57,30 @@ public abstract class XExp {
 			if (!isAnd) {
 				return;
 			}
-			
-			if (r.l == null) {
+
+			//(a+b)*c --> a*b + b*c 
+			if (l.l != null && l.r != null) {
+				XBool l2 = new XBool(l.l, r, true);
+				XBool r2 = new XBool(l.r, r, true);				
+				isAnd = false;
+				l = l2;
+				r = r2;
+				l.normalize();
+				r.normalize();
+				return;
+			}
+			//a*(b+c) --> a*b + a*c
+			if (r.l != null && r.r != null) {
+				XBool l2 = new XBool(l, r.l, true);
+				XBool r2 = new XBool(l, r.r, true);				
+				isAnd = false;
+				l = l2;
+				r = r2;
+				l.normalize();
+				r.normalize();
 				return;
 			}
 			
-			if (r.isAnd) {
-				return;
-			}
-			
-			l = new XBool(l.l, r.l, true);
-			r = new XBool(l.l, r.r, true);
-			isAnd = false;			
 		}
 		
 		public XBool(List<String> lhs, List<String> rhs) {
@@ -90,7 +104,7 @@ public abstract class XExp {
 				return ret;
 			}
 			if (!isAnd) {
-				throw new RuntimeException();
+				throw new RuntimeException("Cannot fromAnd " + this);
 			}
 			if (l == null || r == null) {
 				throw new RuntimeException();
@@ -106,27 +120,14 @@ public abstract class XExp {
 			return ret;
 		}
 		public List<List<Pair<List<String>, List<String>>>> fromOr() {
-			if (lhs != null && rhs != null) {
-				List<Pair<List<String>, List<String>>> ret = new LinkedList<>();
-				ret.add(new Pair<>(lhs, rhs));
-				List<List<Pair<List<String>, List<String>>>> ret2 = new LinkedList<>();
-				ret2.add(ret);
-				return ret2;
-			}
-			if (isAnd) {
-				throw new RuntimeException();
-			}
-			if (l == null || r == null) {
-				throw new RuntimeException();
-			}
-
-			List<Pair<List<String>, List<String>>> l2 = l.fromAnd();
-			List<List<Pair<List<String>, List<String>>>> r2 = r.fromOr();
-			
 			List<List<Pair<List<String>, List<String>>>> ret = new LinkedList<>();
-			ret.add(l2);
-			ret.addAll(r2);
-			
+			//a + b
+			if (l != null && r != null && !isAnd) {
+				ret.addAll(l.fromOr());
+				ret.addAll(r.fromOr());
+			} else {			
+				ret.add(fromAnd());
+			}
 			return ret;
 		}
 	}
