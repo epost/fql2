@@ -14,11 +14,14 @@
     <docComments enabled="false" end="" start=""/>
   </comments>
   <keywords>
+    <keyword>FLOWER</keyword>
     <keyword>INSTANCE</keyword>
+    <keyword>and</keyword>
     <keyword>as</keyword>
     <keyword>case</keyword>
     <keyword>coreturn</keyword>
     <keyword>delta</keyword>
+    <keyword>false</keyword>
     <keyword>ff</keyword>
     <keyword>flower</keyword>
     <keyword>from</keyword>
@@ -28,6 +31,7 @@
     <keyword>inr</keyword>
     <keyword>instance</keyword>
     <keyword>mapping</keyword>
+    <keyword>or</keyword>
     <keyword>pair</keyword>
     <keyword>pi</keyword>
     <keyword>relationalize</keyword>
@@ -37,6 +41,7 @@
     <keyword>sigma</keyword>
     <keyword>snd</keyword>
     <keyword>transform</keyword>
+    <keyword>true</keyword>
     <keyword>tt</keyword>
     <keyword>type</keyword>
     <keyword>unit</keyword>

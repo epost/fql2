@@ -96,7 +96,7 @@ public class Patrick9Example extends Example {
 			+ "\n"
 			+ "\nret = return delta pi F XXX"
 			+ "\n"
-			+ "\n//coret = coreturn delta pi F I"
+			+ "\ncoret = coreturn delta pi F I"
 			+ "\n";
 
 

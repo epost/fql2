@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import fql_lib.Pair;
 import fql_lib.Triple;
+import fql_lib.Unit;
 import fql_lib.Util;
 
 public abstract class XExp {
@@ -22,29 +23,14 @@ public abstract class XExp {
 				String s = isAnd ? " and " : " or ";
 				return "(" + l + s + r + ")";
 			}			
+			if (isTrue != null) {
+				return "true";
+			}
+			if (isFalse != null) {
+				return "false";
+			}
 			throw new RuntimeException();
 		}
-		
-		//(a . b) . c --> a . (b . c)
-		/*
-		public void assoc() {
-			if (l == null && r == null) {
-				return;
-			}
-
-			if (l.l != null && l.r != null) {
-				XBool a = l.l;
-				XBool b = l.r;
-				XBool c = r;
-				a.assoc();
-				b.assoc();
-				c.assoc();
-				XBool bc = new XBool(b, c, isAnd);
-				l = a;
-				r = bc;
-			}			
-		}
-		*/
 		
 		public void normalize() {
 			if (l == null && r == null) {
@@ -54,9 +40,41 @@ public abstract class XExp {
 			l.normalize();
 			r.normalize();
 			
+			//a + b --> a' + b'
+
+			//OR
 			if (!isAnd) {
+				//true \/ p  p \/ true ---> true
+				if (l.equals(new XBool(true)) || r.equals(new XBool(true))) {
+					isTrue = new Unit();
+					l = null;
+					r = null;
+				} else
+				//false \/ p --> p
+				if (l.equals(new XBool(false))) {
+					become(r);
+				} else
+				//p \/ false --> p 
+				if (r.equals(new XBool(false))) {
+					become(l);
+				}
 				return;
 			}
+			
+			//false /\ p  p /\ false ---> false
+			if (l.equals(new XBool(false)) || r.equals(new XBool(false))) {
+				isFalse = new Unit();
+				l = null;
+				r = null;
+			} else
+			//true /\ p --> p
+			if (l.equals(new XBool(true))) {
+				become(r);
+			} else
+			//p /\ true --> p 
+			if (r.equals(new XBool(false))) {
+				become(l);
+			} else
 
 			//(a+b)*c --> a*b + b*c 
 			if (l.l != null && l.r != null) {
@@ -67,8 +85,8 @@ public abstract class XExp {
 				r = r2;
 				l.normalize();
 				r.normalize();
-				return;
-			}
+				return; 
+			} else
 			//a*(b+c) --> a*b + a*c
 			if (r.l != null && r.r != null) {
 				XBool l2 = new XBool(l, r.l, true);
@@ -83,6 +101,16 @@ public abstract class XExp {
 			
 		}
 		
+		public void become(XBool x) {
+			this.isAnd = x.isAnd;
+			this.isFalse = x.isFalse;
+			this.isTrue = x.isTrue;
+			this.l = x.l;
+			this.r = x.r;
+			this.lhs = x.lhs;
+			this.rhs = x.rhs;
+		}
+		
 		public XBool(List<String> lhs, List<String> rhs) {
 			this.lhs = lhs;
 			this.rhs = rhs;
@@ -94,17 +122,34 @@ public abstract class XExp {
 			this.isAnd = isAnd;
 		}
 		
+		public XBool(boolean b) {
+			if (b) {
+				isTrue = new Unit();
+			} else {
+				isFalse = new Unit();
+			}
+		}
+		
 		public List<String> lhs, rhs;
 		public XBool l,r;
 		public boolean isAnd;
+		
+		public Object isTrue, isFalse;
+		
 		public List<Pair<List<String>, List<String>>> fromAnd() {
 			if (lhs != null && rhs != null) {
 				List<Pair<List<String>, List<String>>> ret = new LinkedList<>();
 				ret.add(new Pair<>(lhs, rhs));
 				return ret;
 			}
+			if (isTrue != null) {
+				return new LinkedList<>();
+			}
 			if (!isAnd) {
 				throw new RuntimeException("Cannot fromAnd " + this);
+			}
+			if (isFalse != null) {
+				throw new RuntimeException();
 			}
 			if (l == null || r == null) {
 				throw new RuntimeException();
@@ -125,10 +170,70 @@ public abstract class XExp {
 			if (l != null && r != null && !isAnd) {
 				ret.addAll(l.fromOr());
 				ret.addAll(r.fromOr());
-			} else {			
+			} else if (isFalse != null) {
+			}
+			else {			
 				ret.add(fromAnd());
 			}
 			return ret;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + (isAnd ? 1231 : 1237);
+			result = prime * result + ((isFalse == null) ? 0 : isFalse.hashCode());
+			result = prime * result + ((isTrue == null) ? 0 : isTrue.hashCode());
+			result = prime * result + ((l == null) ? 0 : l.hashCode());
+			result = prime * result + ((lhs == null) ? 0 : lhs.hashCode());
+			result = prime * result + ((r == null) ? 0 : r.hashCode());
+			result = prime * result + ((rhs == null) ? 0 : rhs.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XBool other = (XBool) obj;
+			if (isAnd != other.isAnd)
+				return false;
+			if (isFalse == null) {
+				if (other.isFalse != null)
+					return false;
+			} else if (!isFalse.equals(other.isFalse))
+				return false;
+			if (isTrue == null) {
+				if (other.isTrue != null)
+					return false;
+			} else if (!isTrue.equals(other.isTrue))
+				return false;
+			if (l == null) {
+				if (other.l != null)
+					return false;
+			} else if (!l.equals(other.l))
+				return false;
+			if (lhs == null) {
+				if (other.lhs != null)
+					return false;
+			} else if (!lhs.equals(other.lhs))
+				return false;
+			if (r == null) {
+				if (other.r != null)
+					return false;
+			} else if (!r.equals(other.r))
+				return false;
+			if (rhs == null) {
+				if (other.rhs != null)
+					return false;
+			} else if (!rhs.equals(other.rhs))
+				return false;
+			return true;
 		}
 	}
 	

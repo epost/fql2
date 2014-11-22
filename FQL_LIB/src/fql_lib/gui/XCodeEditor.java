@@ -52,6 +52,10 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 				"{\n\tselect;\n\tfrom;\n\twhere;\n} ");
 		ctm.addTemplate(ct);
 		
+		ct = new StaticCodeTemplate("FLOWER", "FLOWER ",
+				"{\n\tselect;\n\tfrom;\n\twhere;\n} ");
+		ctm.addTemplate(ct);
+		
 		ct = new StaticCodeTemplate("schema", "schema ",
 				"{\n\tnodes;\n\tedges;\n\tequations;\n}");
 		ctm.addTemplate(ct);
@@ -61,6 +65,10 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 		ctm.addTemplate(ct);
 		
 		ct = new StaticCodeTemplate("instance", "instance ",
+				"{\n\tvariables;\n\tequations;\n} : ");
+		ctm.addTemplate(ct);
+		
+		ct = new StaticCodeTemplate("INSTANCE", "INSTANCE ",
 				"{\n\tvariables;\n\tequations;\n} : ");
 		ctm.addTemplate(ct);
 

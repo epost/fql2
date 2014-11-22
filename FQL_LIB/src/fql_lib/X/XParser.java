@@ -35,7 +35,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -696,7 +696,13 @@ public class XParser {
 			return new XExp.XBool((List<String>)o2.a, (List<String>)o2.c);
 		}
 		
-		return null;
+		if (o.toString().equals("true")) {
+			return new XExp.XBool(true);
+		}
+		if (o.toString().equals("false")) {
+			return new XExp.XBool(false);
+		}
+		throw new RuntimeException();
 	}
 	
 	private static Parser where() {
@@ -706,7 +712,7 @@ public class XParser {
 		Parser p2 = Parsers.tuple(term("("), ref.lazy(), term("or"), ref.lazy(), term(")"));
 		Parser p3 = Parsers.tuple(path(), term("="), path());
 		
-		Parser p = Parsers.or(p1, p2, p3, Parsers.always());
+		Parser p = Parsers.or(p1, p2, p3, term("true"), term("false"));
 		
 		ref.set(p);
 		

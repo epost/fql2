@@ -631,8 +631,52 @@ public class XMapping<C, D> implements XObject {
 		ret.saturated =  true; //I.saturated;
 		return ret;
 	}
+	
+	private boolean isSkipKey(C c, Triple<D, D, List<D>> f) {
+		if (f.first.equals("_1")) { //added
+			if (src.global.cat().arrows().contains(f)) {
+				return true;
+			}
+		} else {
+			if (f.third.isEmpty()) {
+			} else if (f.third.get(0).equals("!_" + f.first)) {
+				Triple<D, D, List<D>> ff = new Triple<>((D)"_1", f.second, f.third.subList(1, f.third.size()));
+				if (src.global.cat().arrows().contains(ff)) {
+					return true;
+				}
+			}
+		}	
+		return false;
+	}
 
+	private Triple<C, C, List<C>> getWrapper(XCtx I,
+			Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta, 
+			                   Pair<C, Triple<D, D, List<D>>> key) {
+		Triple<D, D, List<D>> f = key.second;
+		C c = key.first;
 
+		Triple<C, C, List<C>> ret = theta.get(key);
+		if (ret != null) {
+			return ret;
+		}
+
+		if (!isSkipKey(c, f)) {
+			return null;
+		}
+		
+		if (f.first.equals("_1")) {
+			return (Triple) f;
+		}
+		
+		if (!f.third.get(0).equals("!_" + f.first)) {
+			throw new RuntimeException();
+		}
+		Triple newfound = new Triple("_1", f.second, f.third.subList(1, f.third.size()));
+		if (!I.cat().arrows().contains(newfound)) {
+			throw new RuntimeException();
+		}
+		return newfound;
+	}
 
 	public XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> pi(XCtx<C> I) {
 		Pair<Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>>, Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>>> zzz = makeThetas2(I);
@@ -656,20 +700,24 @@ public class XMapping<C, D> implements XObject {
 
 				for (C c : src.allIds()) {
 					for (Triple<D, D, List<D>> f : dst.cat().hom(t.second, em.get(c).get(0))) {
+						if (isSkipKey(c, f)) {
+							continue;
+						}
+						
 						List<D> f0 = new LinkedList<>();
 						f0.add(h);
 						f0.addAll(f.third);
 						Triple<D, D, List<D>> key = dst.find(dst.getKB(), new Triple<>(t.first,
-								f.second, f0), dst.cat().arrows()); // dst.cat().hom(t.first,
-																	// f.second));
+								f.second, f0), dst.cat().arrows()); 
 						if (key == null) {
 							throw new RuntimeException("Cannot find " + key + " in "
 									+ dst.cat().arrows());
 						}
-						if (theta.get(new Pair<>(c, key)) == null) {
+						Triple<C, C, List<C>> toStore = getWrapper(I, theta,new Pair<>(c, key));
+						if (toStore == null) {
 							throw new RuntimeException("Cannot find " + new Pair<>(c, key) + " in " + theta);
 						}
-						theta0.put(new Pair<>(c,f), theta.get(new Pair<>(c, key)));
+						theta0.put(new Pair<>(c,f), toStore);
 					}
 				}
 
@@ -681,13 +729,11 @@ public class XMapping<C, D> implements XObject {
 					List rhs = new LinkedList<>();
 					rhs.add(theta0);
 			
-		//			System.out.println("badthetas keyset " + bad_thetas.keySet());
-			//		System.out.println("want " + t.second);
 					if (bad_thetas.get(t.second).contains(theta0)) {
 						Object o1 = t.second;
 						Object o2 = new Triple<>(t.second, t.second, new LinkedList<>());
 						Pair key = new Pair(o1, o2);
-						Triple val = (Triple) theta0.get(key);
+						Triple<C,C,List<C>> val = getWrapper(I, theta0, key); //theta0.get(key);
 						if (val == null) {
 							throw new RuntimeException();
 						}
@@ -781,24 +827,42 @@ public class XMapping<C, D> implements XObject {
 				fFg.addAll(0, f.third);
 				fFg.add(0, f.first);
 				D t = em.get(c0).get(0);
-				Triple<D, D, List<D>> found = dst.find(dst.getKB(), new Triple<>(f.first, t, fFg), dst.cat().hom(f.first, t));
+				Triple<D, D, List<D>> found = dst.find(dst.getKB(), new Triple<>(f.first, t, fFg), dst.cat().hom(f.first, t)); //morally fFg
 				if (found == null) {
 					throw new RuntimeException();
 				}
-				Triple<C, C, List<C>> val = theta.get(new Pair<>(c0, found));
+				
+				//Triple<C, C, List<C>> val = theta.get(new Pair<>(c0, found));
+				Triple<C, C, List<C>> val = getWrapper(I, theta, new Pair<>(c0, found));
 				List<C> yIg = new LinkedList<>(y.third);
 				yIg.add(0, y.first);
 				yIg.addAll(g.third);
-				Triple<C, C, List<C>> found2 = I.find(I.getKB(), new Triple<>((C)"_1", g.second, yIg), I.cat().hom((C)"_1", g.second));
+				Triple<C, C, List<C>> found2 = I.find(I.getKB(), new Triple<>((C)"_1", g.second, yIg), I.cat().hom((C)"_1", g.second)); //morally yIg
 				if (found2 == null) {
 					throw new RuntimeException();
 				}
+				
 				if (val == null) {
-					if (!theta.containsKey(new Pair<>(c0, found))) {
-						throw new RuntimeException();
-					}
-					theta.put (new Pair<>(c0, found), found2);
-					theta2.put(new Pair<>(c0, found), tag);
+					/* if (!theta.containsKey(new Pair<>(c0, found))) { //added
+						if (f.first.equals("1")) {
+							if (!I.getKB().equiv((List<C>)found.third, found2.third)) {
+								return false;
+							}
+							//return true;
+						} else {
+							if (!found.third.get(0).equals("!_" + found.first)) {
+								throw new RuntimeException();
+							}
+							Triple newfound = new Triple("_1", found.second, found.third.subList(1, found.third.size()));
+							if (!I.getKB().equiv((List<C>)newfound.third, found2.third)) {
+								return false;
+							}
+							//return true;
+						}
+					} else { */
+						theta.put (new Pair<>(c0, found), found2);
+						theta2.put(new Pair<>(c0, found), tag);
+					//}
 			//		System.out.println(theta.keySet());
 				} else if (!I.getKB().equiv(val.third, found2.third)) {
 			//		System.out.println("contra");
@@ -898,6 +962,12 @@ public class XMapping<C, D> implements XObject {
 		}
 		return null;
 	} 
+	
+	///////////////////////////////////////
+	
+	
+	
+	//////////////////////////////////////
 
 	private Pair<Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>>,
 	             Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>>> makeThetas2(
@@ -913,6 +983,9 @@ public class XMapping<C, D> implements XObject {
 					Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> bad_theta = new LinkedHashMap<>();
 					for (C c : src.allIds()) {
 						for (Triple<D, D, List<D>> f : dst.cat().hom(d, em.get(c).get(0))) {
+							if (isSkipKey(c,f)) {
+								continue;
+							}
 							Triple composed = dst.global.cat().compose(constant, f);
 							bad_theta.put(new Pair<>(c, f), composed);
 						}
@@ -922,13 +995,27 @@ public class XMapping<C, D> implements XObject {
 			}
 			ret2.put(d,  bad_thetas);
 			
-//			System.out.println("At " + d + ", bad thetas are " + Util.sep(bad_thetas, "\n\n"));
-			
 			List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> thetas = new LinkedList<>();
 			Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta = new LinkedHashMap<>();
 			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2 = new LinkedHashMap<>(); //ok (irrelevent)
 			for (C c : src.allIds()) {
 				for (Triple<D, D, List<D>> f : dst.cat().hom(d, em.get(c).get(0))) {
+					if (src.global.allIds().contains(c)) {
+						if (f.first.equals("_1")) {
+							if (src.global.cat().arrows().contains(f)) {
+								continue;
+							}
+						} else {
+							if (f.third.isEmpty()) {
+								
+							} else if (f.third.get(0).equals("!_" + f.first)) {
+								Triple<D, D, List<D>> ff = new Triple<>((D)"_1", f.second, f.third.subList(1, f.third.size()));
+								if (src.global.cat().arrows().contains(ff)) {
+									continue;
+								}
+							}
+						}
+					}
 					theta.put(new Pair<>(c, f), null);
 					theta2.put(new Pair<>(c, f), null);
 				}
@@ -966,7 +1053,9 @@ public class XMapping<C, D> implements XObject {
 			Map theta = new HashMap();
 			for (C c : src.allIds()) {
 				for (Triple<D, D, List<D>> f : dst.cat().hom(d, em.get(c).get(0))) {
-
+					if (isSkipKey(c,f)) {
+						continue;
+					}
 					List<D> tofind = new LinkedList<>();
 					tofind.add(x);
 					tofind.addAll(f.third);
@@ -1009,13 +1098,9 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping(J, pideltaI, m, "homomorphism");
 	}
 
-	//TODO: maybe should not have extra constants in delta?
-	//TODO: or, not need map all vars? only need map eqcs?
 	public XMapping pi_counit(XCtx<C> I) {
 		XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> piI = pi(I); //XCtx<Pair<Triple<D, D, List<D>>, C>>
-		XCtx deltapiI = delta((XCtx)piI); //<Pair<Triple<D, D, List<D>>, C>>
-		
-		//System.out.println(deltapiI);
+		XCtx deltapiI = delta((XCtx)piI); 
 		
 		Map m = new HashMap();
 		
@@ -1027,12 +1112,23 @@ public class XMapping<C, D> implements XObject {
 				l.addAll(x0.first.third);
 				m.put(x, l);
 				continue;
-			}			
-			if (x0.first.third.size() != 1) {
-				throw new RuntimeException();
-			}
-			Map theta = (Map) x0.first.third.get(0);
+			}	
 			
+			Map theta = null;
+			if (deltapiI.saturated) {
+				if (x0.first.third.size() != 2) {
+					throw new RuntimeException();
+				}
+				if (!x0.first.third.get(0).equals("!__1")) {
+					throw new RuntimeException();
+				}
+				theta = (Map) x0.first.third.get(1);
+			} else {
+				if (x0.first.third.size() != 1) {
+					throw new RuntimeException();
+				}
+				theta = (Map) x0.first.third.get(0);
+			}
 			Object o = theta.get(new Pair<>(x0.second, new Triple<>(em.get(x0.second).get(0), em.get(x0.second).get(0), new LinkedList<>())));
 			if (o == null) {
 				throw new RuntimeException();
