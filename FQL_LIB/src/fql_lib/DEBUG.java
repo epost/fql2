@@ -210,6 +210,15 @@ public class DEBUG implements Serializable {
 	static String labelMtext = "Allows multiple viewers for the same editor.";
 
 	static int selected_tab = 0;
+	
+	public boolean fast_amalgams = true;
+	public boolean validate_amalgams = false;
+	public boolean direct_flower = true;
+	public boolean x_text = true;
+	public boolean x_graph = true;
+	public boolean x_cat = true;
+	public boolean x_tables = true;
+	public boolean x_adom = true;
 
 	public void showOptions() {
 
@@ -221,12 +230,16 @@ public class DEBUG implements Serializable {
 		JPanel sql1 = new JPanel(new GridLayout(10, 1));
 		JPanel sql2 = new JPanel(new GridLayout(10, 1));
 
-		JPanel viewer1 = new JPanel(new GridLayout(8, 1));
-		JPanel viewer2 = new JPanel(new GridLayout(8, 1));
+		JPanel viewer1 = new JPanel(new GridLayout(9, 1));
+		JPanel viewer2 = new JPanel(new GridLayout(9, 1));
+		
+		JPanel x_1 = new JPanel(new GridLayout(9, 1));
+		JPanel x_2 = new JPanel(new GridLayout(9, 1));
 
 		JSplitPane generalsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		JSplitPane sqlsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		JSplitPane viewersplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		JSplitPane xsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 
 		generalsplit.add(general1);
 		generalsplit.add(general2);
@@ -234,9 +247,12 @@ public class DEBUG implements Serializable {
 		sqlsplit.add(sql2);
 		viewersplit.add(viewer1);
 		viewersplit.add(viewer2);
+		xsplit.add(x_1);
+		xsplit.add(x_2);
 
 		jtb.add("General", generalsplit);
 		jtb.add("Viewer", viewersplit);
+		jtb.add("FPQL", xsplit);
 	//	jtb.add("SQL", sqlsplit);
 
 		jtb.setSelectedIndex(selected_tab);
@@ -258,7 +274,51 @@ public class DEBUG implements Serializable {
 		JLabel limexL = new JLabel("Show only some examples:");
 		general1.add(limexL);
 		general2.add(limex);
-		limexL.setToolTipText("The examples combo box will only display some examples.");
+		/*	public boolean fast_amalgams = true;
+	public boolean validate_amalgams = false;
+	public boolean direct_flower = true;
+	public boolean x_text = true;
+	public boolean x_graph = true;
+	public boolean x_cat = true;
+	public boolean x_tables = true;
+	public boolean x_adom = true; */
+		JCheckBox fast_amalgams_box = new JCheckBox("", limit_examples);
+		JLabel fast_amalgams_label = new JLabel("Use fast amalgams on saturated presentations:");
+		x_1.add(fast_amalgams_label);
+		x_2.add(fast_amalgams_box);
+		
+		JCheckBox validate_amalgams_box = new JCheckBox("", validate_amalgams);
+		JLabel validate_amalgams_label = new JLabel("Validate amalgams (if validating categories):");
+		x_1.add(validate_amalgams_label);
+		x_2.add(validate_amalgams_box);
+		
+		JCheckBox direct_flower_box = new JCheckBox("", direct_flower);
+		JLabel direct_flower_label = new JLabel("Evaluate flowers directly:");
+		x_1.add(direct_flower_label);
+		x_2.add(direct_flower_box);
+
+		JPanel xArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JCheckBox x_cat_box = new JCheckBox("Category", x_cat);
+		JCheckBox x_graph_box = new JCheckBox("Graph", x_graph);
+		JCheckBox x_textual_box = new JCheckBox("Text", x_text);
+		JCheckBox x_tabular_box = new JCheckBox("Table", x_tables);
+		JCheckBox x_adom_box = new JCheckBox("Adom", x_adom);
+		xArea.add(x_textual_box); xArea.add(x_graph_box); xArea.add(x_cat_box); xArea.add(x_tabular_box); xArea.add(x_adom_box);
+		x_1.add(new JLabel("Viewers:"));
+		x_2.add(xArea);
+
+		x_1.add(new JLabel());
+		x_2.add(new JLabel());
+		x_1.add(new JLabel());
+		x_2.add(new JLabel());
+		x_1.add(new JLabel());
+		x_2.add(new JLabel());
+		x_1.add(new JLabel());
+		x_2.add(new JLabel());
+		x_1.add(new JLabel());
+		x_2.add(new JLabel());
+//		x_1.add(new JLabel());
+	//	x_2.add(new JLabel());
 /*
 		JCheckBox coeB = new JCheckBox("", continue_on_error);
 		JLabel coeL = new JLabel("Continue on errors (dangerous):");
@@ -684,8 +744,8 @@ public class DEBUG implements Serializable {
 		// viewer.add(queryLayoutLabel);
 		// viewer.add(queryLayout);
 
-	//	viewer1.add(new JLabel());
-	//	viewer2.add(new JLabel());
+		viewer1.add(new JLabel());
+		viewer2.add(new JLabel());
 	//	viewer1.add(new JLabel());
 	//	viewer2.add(new JLabel());
 		//viewer1.add(new JLabel());
@@ -770,6 +830,15 @@ public class DEBUG implements Serializable {
 			
 			GUI.setFontSize(f);
 			FONT_SIZE = f;
+			
+			this.x_adom = x_adom_box.isSelected();
+			this.x_cat = x_cat_box.isSelected();
+			this.x_graph = x_graph_box.isSelected();
+			this.x_tables = x_tabular_box.isSelected();
+			this.x_adom = x_adom_box.isSelected();
+			this.fast_amalgams = fast_amalgams_box.isSelected();
+			this.validate_amalgams = validate_amalgams_box.isSelected();
+			this.direct_flower = direct_flower_box.isSelected();
 
 			schema_denotation = schema_denotation_box.isSelected();
 			schema_ed = schema_ed_box.isSelected();

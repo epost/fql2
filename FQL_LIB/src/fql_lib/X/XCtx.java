@@ -278,6 +278,10 @@ public class XCtx<C> implements XObject {
 	@Override
 	public JComponent display() {
 		init();
+
+		JTabbedPane ret = new JTabbedPane();
+
+		if (DEBUG.debug.x_text) {
 		String kb_text = "types:\n  " + Util.sep(allIds(), ",\n  ");
 		List<String> tms = allTerms().stream()
 				.map(x -> x + " : " + type(x).first + " -> " + type(x).second)
@@ -298,40 +302,34 @@ public class XCtx<C> implements XObject {
 			e.printStackTrace();
 			kb_text = "\n\nERROR in Knuth-Bendix\n\n" + e.getMessage();
 		}
-
-		String cat = "";
-		try {
-			cat = cat().toString();
-		} catch (Exception e) {
-			e.printStackTrace();
-			cat = "ERROR\n\n" + e.getMessage();
-		}
-
-		String small_cat = "TODO";
-		/*
-		 * try { small_cat = small_cat().toString(); } catch (Exception e) { //
-		 * e.printStackTrace(); small_cat = "ERROR\n\n" + e.getMessage(); }
-		 */
-
 		JComponent kbc = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", kb_text);
-		JComponent ctp = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", cat);
-		// JComponent small_ctp = new
-		// FQLTextPanel(BorderFactory.createEtchedBorder(), "", small_cat);
-
-		JComponent tables = makeTables(x -> cat().arrows(), new HashSet<>());
-		// JComponent tables2 = makeTables2(small_cat());
-
-		JComponent graph = makeGraph();
-
-		JTabbedPane ret = new JTabbedPane();
 		ret.addTab("Text", kbc);
-		ret.addTab("Graph", graph);
+	}
+		
+		if (DEBUG.debug.x_graph) {
+			ret.addTab("Graph", makeGraph());
+		}
+		
+		if (DEBUG.debug.x_cat) {
+			String cat = "";
+			try {
+				cat = cat().toString();
+			} catch (Exception e) {
+				e.printStackTrace();
+				cat = "ERROR\n\n" + e.getMessage();
+			}
+		JComponent ctp = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", cat);
 		ret.addTab("Category", ctp);
+	}	
+
 		if (schema != null) {
-			ret.addTab("Full Tables", tables);
-			// ret.addTab("Category 2", small_ctp);
-			// if (schema != null) {
-			ret.addTab("Adom Tables", makeTables(z -> foo(), global.ids));
+			if (DEBUG.debug.x_tables) {
+				JComponent tables = makeTables(x -> cat().arrows(), new HashSet<>());
+				ret.addTab("Full Tables", tables);
+			}
+			if (DEBUG.debug.x_adom) {
+				ret.addTab("Adom Tables", makeTables(z -> foo(), global.ids));
+			}
 		}
 		return ret;
 	}
@@ -918,7 +916,7 @@ public class XCtx<C> implements XObject {
 			return xcat;
 		}
 
-		if (saturated) {
+		if (saturated && DEBUG.debug.fast_amalgams) {
 			xcat = satcat();
 			return xcat;
 		}
@@ -1009,9 +1007,9 @@ public class XCtx<C> implements XObject {
 			Map<Pair<Triple<C, C, List<C>>, Triple<C, C, List<C>>>, Triple<C, C, List<C>>> cache = new HashMap<>();
 		};
 
-		// TODO: too hard to validate here
-		// xcat2.validate();
-
+		if (DEBUG.debug.validate_amalgams) {
+		 xcat2.validate();
+		}
 		xcat = xcat2;
 
 		return xcat;
@@ -1292,7 +1290,9 @@ public class XCtx<C> implements XObject {
 
 		};
 		//TODO: cache the composition table
-		// ret.validate(); //TODO
+		if (DEBUG.debug.validate_amalgams) {
+			ret.validate(); //TODO
+		}
 		return ret;
 	}
 

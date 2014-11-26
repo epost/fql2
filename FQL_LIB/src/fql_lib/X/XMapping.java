@@ -16,6 +16,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Util;
@@ -123,6 +124,9 @@ public class XMapping<C, D> implements XObject {
 
 	@Override
 	public JComponent display() {
+		JTabbedPane pane = new JTabbedPane();
+
+		if (DEBUG.debug.x_text) {
 		// System.out.println(this);
 		String ret = Util.sep(
 				src.allTerms().stream().map(x -> x + " -> " + Util.sep(em.get(x), "."))
@@ -139,12 +143,17 @@ public class XMapping<C, D> implements XObject {
 
 		ret = ret.trim();
 
-		JTabbedPane pane = new JTabbedPane();
 		pane.addTab("Text", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", ret));
+		}
+		
 		if (src.schema != null) {
+			if (DEBUG.debug.x_tables) {
 			pane.addTab("Tables", makeTables());
+			}
 		} else {
+			if (DEBUG.debug.x_tables) {
 			pane.addTab("Tables", makeTables2());
+			}
 		}
 		return pane;
 	}
@@ -1115,7 +1124,7 @@ public class XMapping<C, D> implements XObject {
 			}	
 			
 			Map theta = null;
-			if (deltapiI.saturated) {
+			if (deltapiI.saturated && DEBUG.debug.fast_amalgams) {
 				if (x0.first.third.size() != 2) {
 					throw new RuntimeException();
 				}
