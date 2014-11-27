@@ -390,11 +390,11 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	}
 	*/
 	
-	 public static <C> List subst2(List<String> eq, Map<String, Triple<C, C, List<C>>> tuple, Set<String> keys, Set xxx) {
+	 public static <C> List subst2(String yyy, List<String> eq, Map<String, Triple<C, C, List<C>>> tuple, Set<String> keys, Set xxx) {
 		List ret = eq.stream().flatMap(x -> { 
 			List l = new LinkedList<>();
 			if (tuple.containsKey(x)) {
-				l.add("!__Q");
+				l.add(yyy);
 				l.add(tuple.get(x).first);
 				l.addAll(tuple.get(x).third);
 				return l.stream();
@@ -428,6 +428,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return ret;
 	} 
 
+	 //TODO: empty FROM
 	 //FROM schema, SELECT schema, 
 	public static <C> XCtx fast_flower(Flower flower, XCtx<C> I, XCtx<C> S, XCtx<C> Z) {
 		System.out.println("happening");
@@ -445,8 +446,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		eqs.addAll(I.global.eqs);
 		
 		XCtx<C> IS = new XCtx<C>(ids, types, eqs, I.global, S, "instance");
-		
-		
+			
 		Set<Map<String, Triple<C, C, List<C>>>> ret = new HashSet<>();
 		Map<String, Triple<C, C, List<C>>> m = new HashMap<>();
 		ret.add(m);
@@ -456,89 +456,125 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			Set<Map<String, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
 			for (Map<String, Triple<C, C, List<C>>> tuple : ret) {
 				outer: for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", (C)node)) {
-//					System.out.println("t " + t);
 					Map<String, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
 					merged.put(var, t);
 					
-					
 					for (Pair<List<String>, List<String>> eq : flower.where) {
-					//	System.out.println("eq " + eq);
 						Set xxx = new HashSet();
-						List lhs = subst2(eq.first, merged, flower.from.keySet(), xxx);
+						List lhs = subst2("!__Q", eq.first, merged, flower.from.keySet(), xxx);
 						Set yyy = new HashSet();
-						List rhs = subst2(eq.second, merged, flower.from.keySet(), yyy);
-				//		System.out.println("lhs " + lhs);
-				//		System.out.println("rhs " + rhs);
-
+						List rhs = subst2("!__Q", eq.second, merged, flower.from.keySet(), yyy);
 						if (xxx.isEmpty() && yyy.isEmpty() && !IS.getKB().equiv(lhs, rhs)) {
-				//			System.out.println("not equiv");
 							continue outer;
 						}
 					}
 					ret2.add(merged);
-			//		System.out.println("equiv");
 				}
 			}
 			ret = ret2;
 		}
-		/*
-		System.out.println("pre-ret is " + ret);
-		Iterator<Map<String, Triple<C, C, List<C>>>> it = ret.iterator();
-		while (it.hasNext()) {
-			Map<String, Triple<C, C, List<C>>> merged = it.next();
-			for (Pair<List<String>, List<String>> eq : flower.where) {
-				System.out.println("eq " + eq);
-				List lhs = subst(eq.first, merged);
-				List rhs = subst(eq.second, merged);
-				System.out.println("lhs " + lhs);
-				System.out.println("rhs " + rhs);
-				if (!IS.getKB().equiv(lhs, rhs)) {
-					System.out.println("not equiv");
-					it.remove();
-					break;
-				}
-				System.out.println("equiv");
-			}
-		}
-		System.out.println("ret is " + ret); */
 		
 		ids = new HashSet<>();
-		ids.addAll(Z.ids);
-		ids.addAll(Z.global.ids);
 		types = new HashMap<>();
-		types.putAll(Z.types);
-		types.putAll(Z.global.types);
 		eqs = new HashSet<>();
-		eqs.addAll(Z.eqs);
-		eqs.addAll(Z.global.eqs);
-		//k : 1 -> Q
-		//k ; f : 1 -> adom
 		for (Map<String, Triple<C, C, List<C>>> k : ret) {
 			types.put(k, new Pair("_1", "_Q"));
-			for (String edge : flower.select.keySet()) {
+			for (String edge : flower.from.keySet()) {
 				List lhs = new LinkedList();
 				lhs.add(k);
 				lhs.add(edge);
-				if (!I.global.ids.contains(IS.type((List)flower.select.get(edge)).second)) {
-					throw new RuntimeException("Cannot fast_flower with selection paths into non-types");
-				}
-				List rhs0 = subst(flower.select.get(edge), k);
-				//this should give a constant
-				List rhsX = IS.getKB().normalize("", rhs0);
-				//Triple<C,C,List<C>> rhs2 = IS.find(IS.getKB(), new Triple("_1", IS.type(rhs0).second, rhsX), I.global.cat().hom((C)"_1", IS.type(rhs0).second));
-				if (rhsX.size() != 2) {
-					throw new RuntimeException();
-				}
-				//System.out.println("Cannot find " + new Triple("_1", IS.type(rhs0).second, rhsX) + "\n\nin\n\n" + I.global.cat().hom((C)"_1", IS.type(rhs0).second));
-				List rh3 = new LinkedList<>();
-				rh3.add(rhsX.get(1));
-				//rh3.addAll(rhs2.third);
-			eqs.add(new Pair(lhs, rh3));
+				List rhs = new LinkedList();
+				rhs.add(k.get(edge).first);
+				rhs.addAll(k.get(edge).third);
+				eqs.add(new Pair(lhs, rhs));
 			}
-		} //TODO: must end on type
+		} 
 		
-		XCtx<C> J = new XCtx<C>(ids, types, eqs, I.global, Z, "instance");
-		//J.saturated = true; TODO
+		//this is the from/where part
+		XCtx<C> J = new XCtx<C>(ids, types, eqs, I.global, IS, "instance");
+		J.saturated = I.saturated; 
+		return J;
+	}
+	
+
+	public static <C> XCtx fast_flower(Set<Flower> flowers, XCtx<C> I, XCtx<C> S, XCtx<C> Z) {
+		System.out.println("happening");
+		Set<C> ids = new HashSet<>();
+		ids.addAll(S.ids);
+		ids.addAll(I.ids);
+		ids.addAll(I.global.ids);
+		Map types = new HashMap<>();
+		types.putAll(S.types);
+		types.putAll(I.types);
+		types.putAll(I.global.types);
+		Set<Pair<List<C>, List<C>>> eqs = new HashSet<>();
+		eqs.addAll(S.eqs);
+		eqs.addAll(I.eqs);
+		eqs.addAll(I.global.eqs);
+		
+		XCtx<C> IS = new XCtx<C>(ids, types, eqs, I.global, S, "instance");
+			
+		int i = 0;
+		Map<Flower, Set<Map<String, Triple<C, C, List<C>>>>> rets = new HashMap<>();
+		for (Flower flower : flowers) {
+			String qi = "_Q" + i;
+			Set<Map<String, Triple<C, C, List<C>>>> ret = new HashSet<>();
+			Map<String, Triple<C, C, List<C>>> m = new HashMap<>();
+			ret.add(m);
+
+			for (String var : flower.from.keySet()) {
+				//String var = qi + var0;
+				String node = flower.from.get(var);
+				Set<Map<String, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
+				for (Map<String, Triple<C, C, List<C>>> tuple : ret) {
+					outer: for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", (C)node)) {
+						Map<String, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
+						merged.put(var, t);
+						
+						for (Pair<List<String>, List<String>> eq : flower.where) {
+							Set xxx = new HashSet();
+							List lhs = subst2("!_" + qi, eq.first, merged, flower.from.keySet(), xxx);
+							Set yyy = new HashSet();
+							List rhs = subst2("!_" + qi, eq.second, merged, flower.from.keySet(), yyy);
+							if (xxx.isEmpty() && yyy.isEmpty() && !IS.getKB().equiv(lhs, rhs)) {
+								continue outer;
+							}
+						}
+						ret2.add(merged);
+					}
+				}
+				ret = ret2;
+			}
+			rets.put(flower, ret);
+			i++;
+		}
+		
+		ids = new HashSet<>();
+		types = new HashMap<>();
+		eqs = new HashSet<>();
+		
+		i = 0;
+		for (Flower flower : flowers) {
+			String qi = "_Q" + i;
+			Set<Map<String, Triple<C, C, List<C>>>> ret = rets.get(flower);
+			for (Map<String, Triple<C, C, List<C>>> k : ret) {
+				types.put(k, new Pair("_1", qi));
+				for (String edge : flower.from.keySet()) {
+					List lhs = new LinkedList();
+					lhs.add(k);
+					lhs.add(qi + edge);
+					List rhs = new LinkedList();
+					rhs.add(k.get(edge).first);
+					rhs.addAll(k.get(edge).third);
+					eqs.add(new Pair(lhs, rhs));
+				}
+			} 
+			i++;
+		}
+		
+		//this is the from/where part
+		XCtx<C> J = new XCtx<C>(ids, types, eqs, I.global, IS, "instance");
+		J.saturated = I.saturated; 
 		return J;
 	}
 	
@@ -576,7 +612,6 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		throw new RuntimeException();
 	} */
 	
-	//TODO: constants
 	public static XCtx flower(Flower e, XCtx I) {
 		Set ids = new HashSet<>(I.schema.ids);
 		Map types = new HashMap<>(I.schema.types);
@@ -633,11 +668,13 @@ edge f:X->Y in S (including edges in type, like length or succ),
 
 		XMapping m2 = new XMapping(c2, c, em2, "mapping"); 
 		
+		XCtx J = null;
 		if (DEBUG.debug.direct_flower) {
-			return fast_flower(e, I, c, c2);
+			J = fast_flower(e, I, c, c2);
+		} else {
+			J = m.pi(I);			
 		}
-		
-		XCtx J = m.pi(I);
+				
 		return m2.delta(J);
 	}
 	
@@ -793,7 +830,13 @@ edge f:X->Y in S (including edges in type, like length or succ),
 
 		XMapping m3 = new XMapping(c2, c3, em3, "mapping"); 
 		
-		XCtx J = m.pi(I);
+		XCtx J = null;
+		if (DEBUG.debug.direct_flower) {
+			J = fast_flower(flowers, I, c, c2);
+		} else {
+			J = m.pi(I);			
+		}
+//		XCtx J = m.pi(I);
 		XCtx K = m2.delta(J);
 		XCtx L = m3.apply0(K);
 		

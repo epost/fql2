@@ -17,9 +17,11 @@ public class Patrick14Example extends Example {
 		return s;
 	}
 	
-	String s = "S = schema {"
+	String s = "adom : type"
+			+ "\n"
+			+ "\nS = schema {"
 			+ "\n	nodes two, three;"
-			+ "\n	edges;"
+			+ "\n	edges two_att : two -> adom, three_att : three -> adom;"
 			+ "\n	equations;"
 			+ "\n}"
 			+ "\n"
@@ -29,11 +31,13 @@ public class Patrick14Example extends Example {
 			+ "\n} : S"
 			+ "\n"
 			+ "\nSix = flower {"
-			+ "\n	select;"
+			+ "\n	select x.two_att as c1, y.three_att as c2;"
 			+ "\n	from two as x, three as y;"
 			+ "\n	where;"
 			+ "\n} TwoThree"
 			+ "\n";
+
+
 
 
 
