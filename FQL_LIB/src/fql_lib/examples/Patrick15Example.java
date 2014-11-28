@@ -17,7 +17,7 @@ public class Patrick15Example extends Example {
 		return s;
 	}
 	
-	String s = "//takes 5-10mins to load initial data"
+	String s = "//takes a few minutes to load initial data"
 			+ "\nadom : type"
 			+ "\n"
 			+ "\n\"Micro Hole EDM\" : adom"

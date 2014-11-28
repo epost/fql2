@@ -1040,6 +1040,8 @@ public class XCtx<C> implements XObject {
 		Set<Triple<C, C, List<C>>> arrs = new HashSet<>();
 		arrs.addAll(sch.arrows());
 		arrs.addAll(new_arrs);
+		
+		Map<Pair<Triple<C, C, List<C>>,Triple<C, C, List<C>>>, Triple<C, C, List<C>>> comp_cache = new HashMap<>();
 
 		Category<C, Triple<C, C, List<C>>> ret = new Category<C, Triple<C, C, List<C>>>() {
 			@Override
@@ -1069,6 +1071,17 @@ public class XCtx<C> implements XObject {
 
 			@Override
 			public Triple<C, C, List<C>> compose(Triple<C, C, List<C>> f, Triple<C, C, List<C>> g) {
+				Pair<Triple<C, C, List<C>>, Triple<C, C, List<C>>> p = new Pair<>(f, g);
+				Triple<C, C, List<C>> ret = comp_cache.get(p);
+				if (ret != null) {
+					return ret;
+				}
+				ret = local_compose(f, g);
+				comp_cache.put(p, ret);
+				return ret;
+			}
+			
+			private Triple<C, C, List<C>> local_compose(Triple<C, C, List<C>> f, Triple<C, C, List<C>> g) {
 				if (!arrows().contains(f)) {
 					throw new RuntimeException(f.toString());
 				}
@@ -1144,6 +1157,7 @@ public class XCtx<C> implements XObject {
 						l.add((C) ("!_" + a));
 						l.addAll(g.third.subList(1, g.third.size()));
 						Triple<C, C, List<C>> ret = new Triple<>(a, g.second, l);
+						ret = (find(getKB(), ret, arrows()));
 						if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
 							throw new RuntimeException();
 						}
@@ -1159,6 +1173,8 @@ public class XCtx<C> implements XObject {
 						if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
 							throw new RuntimeException();
 						}
+						//must find equivalent - see CTDB example
+						ret = (find(getKB(), ret, arrows()));
 						if (!arrows().contains(ret)) {
 							throw new RuntimeException(ret.toString());
 						}

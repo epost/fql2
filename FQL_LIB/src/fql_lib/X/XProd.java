@@ -435,7 +435,6 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	 //TODO: empty FROM
 	 //FROM schema, SELECT schema, 
 	public static <C> XCtx fast_flower(Flower flower, XCtx<C> I, XCtx<C> S, XCtx<C> Z) {
-		System.out.println("happening");
 		Set<C> ids = new HashSet<>();
 		ids.addAll(S.ids);
 		ids.addAll(I.ids);
@@ -502,7 +501,6 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	
 
 	public static <C> XCtx fast_flower(Set<Flower> flowers, XCtx<C> I, XCtx<C> S, XCtx<C> Z) {
-		System.out.println("happening");
 		Set<C> ids = new HashSet<>();
 		ids.addAll(S.ids);
 		ids.addAll(I.ids);
@@ -550,8 +548,6 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			rets.put(flower, ret);
 			i++;
 		}
-		
-		System.out.println("rets " + rets);
 		
 		ids = new HashSet<>();
 		types = new HashMap<>();

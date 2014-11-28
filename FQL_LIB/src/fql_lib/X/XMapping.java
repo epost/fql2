@@ -750,7 +750,9 @@ public class XMapping<C, D> implements XObject {
 						if (((List)val.third).isEmpty()) {
 							lll.add(val.first);
 						} else {
-							lll.add(((List)val.third).get(0));							
+							lll.addAll(((List)val.third));			//	TODO changed by ryan			
+
+//							lll.add(((List)val.third).get(0));			//				
 						}
 						eqs.add(new Pair(lhs, lll));
 					} else {

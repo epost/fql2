@@ -18,13 +18,7 @@ public class Patrick10Example extends Example {
 	}
 	
 	String s ="string : type"
-			+"\nc1 : string"
-			+"\nc2 : string"
-			+"\nc3 : string"
-			+"\nc4 : string"
-			+"\nc5 : string"
-			+"\nc6 : string"
-			+"\nc7 : string"
+			+"\nc1 c2 c3 c4 c5 c6 c7 : string"
 			+"\n"
 			+"\nC = schema {"
 			+"\n	nodes A;"
@@ -33,7 +27,7 @@ public class Patrick10Example extends Example {
 			+"\n}"
 			+"\n"
 			+"\nI = instance {"
-			+"\n	variables x1:A,x2:A,x3:A,x4:A,x5:A,x6:A,x7:A;"
+			+"\n	variables x1 x2 x3 x4 x5 x6 x7 : A;"
 			+"\n	equations x1.att=c1,x2.att=c2,x3.att=c3,x4.att=c1,x5.att=c5,x6.att=c3,x7.att=c5,"
 			+"\n	 x1.f=x2,x2.f=x3,x3.f=x5,x4.f=x2,x5.f=x3,x6.f=x7,x7.f=x6;"
 			+"\n} : C"

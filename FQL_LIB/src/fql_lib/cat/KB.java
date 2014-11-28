@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Quad;
 import fql_lib.Util;
@@ -111,7 +112,7 @@ public class KB<Y> {
 		simplify(t);
 	} */
 	
-	 private static <X> void go(Set<Pair<List<X>, List<X>>> t, int iteration, int max_iterations) {
+	 private  <X> void go(Set<Pair<List<X>, List<X>>> t, int iteration, int max_iterations) {
 		while (!step(t)) {
 //			System.out.println(iteration);
 			if (iteration++ > max_iterations) {
@@ -121,7 +122,7 @@ public class KB<Y> {
 	}
 	
 	//true = finished
-	 private static <X> boolean step(Set<Pair<List<X>, List<X>>> t) {
+	 private  <X> boolean step(Set<Pair<List<X>, List<X>>> t) {
 		orient(t);
 		normalize(t);
 		Set<Pair<List<X>, List<X>>> ce = cp(t);
@@ -146,7 +147,7 @@ public class KB<Y> {
 		return null;
 	}
 	
-	 private static <X> void simplify(Set<Pair<List<X>, List<X>>> t) {
+	 private  <X> void simplify(Set<Pair<List<X>, List<X>>> t) {
 		Iterator<Pair<List<X>, List<X>>> it = t.iterator();
 		while (it.hasNext()) {
 			Pair<List<X>, List<X>> rule = it.next();
@@ -163,7 +164,7 @@ public class KB<Y> {
 		}
 	}
 	
-	 private static <X> void normalize(Set<Pair<List<X>, List<X>>> t) {
+	 private  <X> void normalize(Set<Pair<List<X>, List<X>>> t) {
 		Set<Pair<List<X>, List<X>>> marked = new HashSet<>();
 		Pair<List<X>, List<X>> lr = null;
 		while ((lr = getUnmarked(marked, t)) != null) {
@@ -182,6 +183,9 @@ public class KB<Y> {
 	}
 	
 	static <X> void check_oriented(Set<Pair<List<X>, List<X>>> t) {
+		 if (!DEBUG.debug.check_oriented) {
+			 return;
+		 }
 		 for (Pair<List<X>, List<X>> r : t) {
 			 if (r.first.size() < r.second.size()) {
 				 throw new RuntimeException(t.toString());
@@ -189,7 +193,7 @@ public class KB<Y> {
 		 }
 	 }
 	 
-	 private static <X> List<X> normal_form(List<X> e, Set<Pair<List<X>, List<X>>> t) {
+	 private <X> List<X> normal_form(List<X> e, Set<Pair<List<X>, List<X>>> t) {
 		//System.out.println("normalizing " + e + " on " + t);
 		//TODO
 		 //check_oriented(t);
@@ -216,7 +220,7 @@ public class KB<Y> {
 		return ret;
 	}
 	
-	 private static <X> List<X> apply(List<X> e, Pair<List<X>, List<X>> rule) {
+	 private <X> List<X> apply(List<X> e, Pair<List<X>, List<X>> rule) {
 		List<X> ret = new LinkedList<>(e);
 		int i = occurs(ret, rule.first);
 		if (i == -1) {
@@ -240,27 +244,53 @@ public class KB<Y> {
 		}
 	}
 	
-	 private static <X> int occurs(List<X> l, List<X> find) {
+	 //caching seems to hurt
+	// Map<Pair<List, List>, Integer> occurs_cache = new HashMap<>();
+	private <X> int occurs(List<X> l, List<X> find) {
+	//	if (l)
+	//	Pair<List, List> p = new Pair<>(l, find);
+	//	Integer ret = occurs_cache.get(p);
+	//	if (ret != null) {
+	//		return ret;
+	//	}
+		
+		// System.out.println(l.toString() + find.toString());
+	//	return java.util.Collections.indexOfSubList(l, find); //no different in speed here
+	//	occurs_cache.put(p, ret);
+	//	return ret;
+		// l.
+		 
 		for (int i = 0; i <= l.size() - find.size(); i++) {
 		//	System.out.println("checking " + i);
 			if (occursAt(l, find, i)) {
 				return i;
 			}
 		}
-		return -1;
+		return -1; 
 	}
 	
 	//assumes does not 'run out the end' (prevented by occurs)
 	 private static <X> boolean occursAt(List<X> l, List<X> find, int i) {
+		// if (find.size() > l.size() - i) {
+			// return false;
+		// }
+		// List<X> sl1 = l.subList(i, find.size());
+	//	 if (sl1.size() < find.size()) {
+		//	 return false;
+//		 }
+	//	 sl1 = sl1.subList(0, find.size());
+	//	 return sl1.equals(find);
+	//	 java.util.Collections.
+		 
 		for (int j = i, k = 0; j < i + find.size(); j++, k++) {
 			if (!l.get(j).equals(find.get(k))) {
 				return false;
 			}
 		}
-		return true;
+		return true; 
 	}
 	
-	 private static <X> boolean almost_joinable(List<X> e, List<X> f, Set<Pair<List<X>, List<X>>> t) {
+	 private <X> boolean almost_joinable(List<X> e, List<X> f, Set<Pair<List<X>, List<X>>> t) {
 	//	System.out.println("almost_joinable " + e + " and " + f + " and " + t);
 		List<X> e0 = normal_form(e, t);
 		List<X> f0 = normal_form(f, t);
@@ -273,7 +303,7 @@ public class KB<Y> {
 		return e0_closed.contains(f0);
 	}
 	
-	 private static <X> Set<List<X>> close(List<X> e, Set<Pair<List<X>, List<X>>> t) {
+	 private  <X> Set<List<X>> close(List<X> e, Set<Pair<List<X>, List<X>>> t) {
 		//System.out.println("Closing: " + e + " under " + t);
 		Set<List<X>> init = new HashSet<>();
 		init.add(e);
@@ -288,7 +318,7 @@ public class KB<Y> {
 		}
 	}
 	
-	 private static <X> Set<List<X>> close1(Set<List<X>> set, Set<Pair<List<X>, List<X>>> t) {
+	 private  <X> Set<List<X>> close1(Set<List<X>> set, Set<Pair<List<X>, List<X>>> t) {
 		Set<List<X>> ret = new HashSet<>(set);
 		
 		for (List<X> e : set) {
@@ -369,7 +399,7 @@ public class KB<Y> {
 		}
 	} */
 		
-	 private static <X> Set<Pair<List<X>, List<X>>> cp(Set<Pair<List<X>, List<X>>> t) {
+	 private  <X> Set<Pair<List<X>, List<X>>> cp(Set<Pair<List<X>, List<X>>> t) {
 		//System.out.println("cp " + t);
 		Set<Pair<List<X>, List<X>>> ret = new HashSet<>();
 		for (Pair<List<X>, List<X>> rule1 : t) {
@@ -412,7 +442,7 @@ public class KB<Y> {
 		return ret;
 	}
 	
-	 private static <X> void addCP1(List<X> li, List<X> ri, List<X> lj, List<X> rj, Set<Pair<List<X>, List<X>>> t, Set<Pair<List<X>, List<X>>> ret) {
+	 private  <X> void addCP1(List<X> li, List<X> ri, List<X> lj, List<X> rj, Set<Pair<List<X>, List<X>>> t, Set<Pair<List<X>, List<X>>> ret) {
 		for (Pair<List<X>, List<X>> uv : split(li)) {
 			for (Pair<List<X>, List<X>> vw : split(lj)) {
 				if (!uv.second.equals(vw.first)) {
@@ -429,7 +459,7 @@ public class KB<Y> {
 		}
 	}
 	 
-	 private static <X> void addCP2(List<X> li, List<X> ri, List<X> lj, List<X> rj, Set<Pair<List<X>, List<X>>> t, Set<Pair<List<X>, List<X>>> ret) {
+	 private  <X> void addCP2(List<X> li, List<X> ri, List<X> lj, List<X> rj, Set<Pair<List<X>, List<X>>> t, Set<Pair<List<X>, List<X>>> ret) {
 		Set<Integer> uws = middle(li, lj);
 		for (Integer i : uws) {
 			List<X> u = li.subList(0, i);

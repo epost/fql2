@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Unit;
@@ -375,7 +376,11 @@ public abstract class XExp {
 			this.select = select;
 			this.where = where;
 			this.src = src;
-			this.from = sort(from);
+			if (DEBUG.debug.reorder_joins) {
+				this.from = sort(from);
+			} else {
+				this.from = from;
+			}
 		}
 		
 		private void count(List<String> l, Map<String, Integer> counts) {

@@ -18,7 +18,7 @@ public class Patrick8Example extends Example {
 	}
 	
 	String s = "string : type"
-			+ "\nbill : string"
+			+ "\nbill george harry : string"
 			+ "\nreverse : string -> string"
 			+ "\neq1 : reverse.reverse = string"
 			+ "\n"
@@ -53,7 +53,7 @@ public class Patrick8Example extends Example {
 			+ "\n	select n1.att as col1, n2.att as col2;"
 			+ "\n	from N as n1, N as n2;"
 			+ "\n	where n1.f.att = n2.att;"
-			+ "\n} I"
+			+ "\n} I //(q1:var) = flower ... will bind var to the result schema"
 			+ "\n"
 			+ "\n//n-ary unions of conjunctive queries (does relationalize)"
 			+ "\nq2 = FLOWER {"

@@ -18,12 +18,7 @@ public class Patrick17Example extends Example {
 	}
 	
 	String s = "adom:type"
-			+ "\n1:adom"
-			+ "\n2:adom"
-			+ "\n3:adom"
-			+ "\n4:adom"
-			+ "\n5:adom"
-			+ "\n6:adom"
+			+ "\n1 2 3 4 5 6:adom"
 			+ "\n"
 			+ "\nS = schema {"
 			+ "\n	nodes A, B;"
@@ -32,7 +27,7 @@ public class Patrick17Example extends Example {
 			+ "\n}"
 			+ "\n"
 			+ "\nI = instance {"
-			+ "\n	variables a1:A, a2:A, a3:A, b1:B, b2:B, b3:B;"
+			+ "\n	variables a1 a2 a3 : A, b1 b2 b3 : B;"
 			+ "\n	equations a1.f = b1, a2.f = b1, a3.f = b1, "
 			+ "\n	          a1.A_att=1, a2.A_att=2, a3.A_att=3, "
 			+ "\n	          b1.B_att=4, b2.B_att=5, b3.B_att=6;"

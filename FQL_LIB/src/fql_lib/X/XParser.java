@@ -164,12 +164,12 @@ public class XParser {
 	public static final Parser<?> decl() {
 		Parser e = Parsers.or(new Parser[] { exp(), type(), fn(), constx(), assume() });
 		
-		Parser p0 = Parsers.tuple(Parsers.tuple(ident(), term(":"), ident()), term("="), exp());
+		Parser p0 = Parsers.tuple(Parsers.tuple(ident(), term(":"), ident()).between(term("("), term(")")), term("="), exp());
 		Parser p1 = Parsers.tuple(ident(), term("="), exp());
-		Parser p3 = Parsers.tuple(ident(), term(":"), Parsers.tuple(ident(), term("->"), ident()));
-		Parser p4 = Parsers.tuple(ident(), term(":"), term("type"));
+		Parser p3 = Parsers.tuple(ident().many1(), term(":"), Parsers.tuple(ident(), term("->"), ident()));
+		Parser p4 = Parsers.tuple(ident().many1(), term(":"), term("type"));
 		Parser p5 = Parsers.tuple(ident(), term(":"), Parsers.tuple(path(), term("="), path()));
-		Parser p2 = Parsers.tuple(ident(), term(":"), ident());
+		Parser p2 = Parsers.tuple(ident().many1(), term(":"), ident());
 		
 		return Parsers.or(new Parser[] {p0, p1, p3, p4, p5, p2});
 		
@@ -177,7 +177,7 @@ public class XParser {
 	}
 	
 	public static final Parser<?> instance(Reference ref) {
-		Parser<?> node = Parsers.tuple(ident(), term(":"), ident());
+		Parser<?> node = Parsers.tuple(ident().many1(), term(":"), ident());
 		Parser<?> p3 = Parsers.tuple(path(), term("="), path());
 		Parser<?> xxx = Parsers.tuple(section("variables", node), 
 				section("equations", p3));
@@ -343,40 +343,51 @@ public class XParser {
 		for (Object d : decls) {
 			org.codehaus.jparsec.functors.Pair pr = (org.codehaus.jparsec.functors.Pair) d;
 			Tuple3 decl = (Tuple3) pr.b;
-			String txt = pr.a.toString();
-			int idx = s.indexOf(txt);
-			if (idx < 0) {
-				throw new RuntimeException();
-			}
-
-			//TODO enforce only flowers on RHS
-			if (!(decl.a instanceof String)) {
-				Tuple3 t = (Tuple3) decl.a;
-				Object ooo = toExp(decl.c);
-				if (ooo instanceof Flower) {
-				Flower f = (Flower) toExp(decl.c);
-				f.ty = t.c.toString();
-				ret.add(new Triple<>(t.a.toString(), idx, f));				
-				} else if (ooo instanceof FLOWER2) {
-					FLOWER2 f = (FLOWER2) toExp(decl.c);
-					f.ty = t.c.toString();
-					ret.add(new Triple<>(t.a.toString(), idx, f));				
-					
-				} else {
-					throw new RuntimeException("Can only use v:T for flowers");
+			
+			if (decl.a instanceof List) {
+				List l = (List) decl.a;
+				for (Object o : l) {
+					toProgHelper(pr.a.toString(), s, ret, new Tuple3(o, decl.b, decl.c));
 				}
 			} else {
-				String name = decl.a.toString();
-				if (decl.b.toString().equals(":")) {
-					ret.add(new Triple<>(name, idx, newToExp(decl.c)));				
-				} else {
-					ret.add(new Triple<>(name, idx, toExp(decl.c)));
-				}
+				toProgHelper(pr.a.toString(), s, ret, decl);
 			}
 		}
 
 		return new XProgram(ret); 
 	}
+
+private static void toProgHelper(String z, String s, List<Triple<String, Integer, XExp>> ret, Tuple3 decl) {
+	String txt = z.toString();
+	int idx = s.indexOf(txt);
+	if (idx < 0) {
+		throw new RuntimeException();
+	}
+
+	//TODO enforce only flowers on RHS
+	if (decl.a instanceof Tuple3) {
+		Tuple3 t = (Tuple3) decl.a;
+		Object ooo = toExp(decl.c);
+		if (ooo instanceof Flower) {
+			Flower f = (Flower) toExp(decl.c);
+			f.ty = t.c.toString();
+			ret.add(new Triple<>(t.a.toString(), idx, f));				
+		} else if (ooo instanceof FLOWER2) {
+			FLOWER2 f = (FLOWER2) toExp(decl.c);
+			f.ty = t.c.toString();
+			ret.add(new Triple<>(t.a.toString(), idx, f));				
+		} else {
+			throw new RuntimeException("Can only use (v:T) for flowers");
+		}
+	} else { 
+		String name = decl.a.toString();
+		if (decl.b.toString().equals(":")) {
+			ret.add(new Triple<>(name, idx, newToExp(decl.c)));				
+		} else {
+			ret.add(new Triple<>(name, idx, toExp(decl.c)));
+		}
+	}
+}
 	
 
 	private static XExp newToExp(Object c) {
@@ -604,9 +615,13 @@ public class XParser {
 		List<Pair<String, String>> nodesX = new LinkedList<>();
 		for (Object o : nodes0) {
 			Tuple3 u = (Tuple3) o;
-			String n = (String) u.a;
+			List<String> n2 = (List) u.a;
 			String l = (String) u.c;
-			nodesX.add(new Pair<>(n, l));
+			
+			for (String n : n2) {
+		//		String n = (String) u.a;
+				nodesX.add(new Pair<>(n, l));
+			}
 		} 
 		
 		List<Pair<List<String>, List<String>>> eqsX = new LinkedList<>();

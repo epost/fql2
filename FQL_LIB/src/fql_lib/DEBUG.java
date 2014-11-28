@@ -214,11 +214,13 @@ public class DEBUG implements Serializable {
 	public boolean fast_amalgams = true;
 	public boolean validate_amalgams = false;
 	public boolean direct_flower = true;
+	public boolean check_oriented = false;
+	public boolean reorder_joins = true;
 	public boolean x_text = true;
 	public boolean x_graph = true;
 	public boolean x_cat = true;
 	public boolean x_tables = true;
-	public boolean x_adom = true;
+	public boolean x_adom = false;
 
 	public void showOptions() {
 
@@ -282,7 +284,7 @@ public class DEBUG implements Serializable {
 	public boolean x_cat = true;
 	public boolean x_tables = true;
 	public boolean x_adom = true; */
-		JCheckBox fast_amalgams_box = new JCheckBox("", limit_examples);
+		JCheckBox fast_amalgams_box = new JCheckBox("", fast_amalgams);
 		JLabel fast_amalgams_label = new JLabel("Use fast amalgams on saturated presentations:");
 		x_1.add(fast_amalgams_label);
 		x_2.add(fast_amalgams_box);
@@ -296,7 +298,17 @@ public class DEBUG implements Serializable {
 		JLabel direct_flower_label = new JLabel("Evaluate flowers directly:");
 		x_1.add(direct_flower_label);
 		x_2.add(direct_flower_box);
+		
+		JCheckBox check_oriented_box = new JCheckBox("", check_oriented);
+		JLabel check_oriented_label = new JLabel("Validate orientation in Knuth-Bendix:");
+		x_1.add(check_oriented_label);
+		x_2.add(check_oriented_box);
 
+		JCheckBox reorder_joins_box = new JCheckBox("", reorder_joins);
+		JLabel reorder_joins_label = new JLabel("Re-order FROM clauses:");
+		x_1.add(reorder_joins_label);
+		x_2.add(reorder_joins_box);
+		
 		JPanel xArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox x_cat_box = new JCheckBox("Category", x_cat);
 		JCheckBox x_graph_box = new JCheckBox("Graph", x_graph);
@@ -313,10 +325,7 @@ public class DEBUG implements Serializable {
 		x_2.add(new JLabel());
 		x_1.add(new JLabel());
 		x_2.add(new JLabel());
-		x_1.add(new JLabel());
-		x_2.add(new JLabel());
-		x_1.add(new JLabel());
-		x_2.add(new JLabel());
+
 //		x_1.add(new JLabel());
 	//	x_2.add(new JLabel());
 /*
@@ -839,7 +848,9 @@ public class DEBUG implements Serializable {
 			this.fast_amalgams = fast_amalgams_box.isSelected();
 			this.validate_amalgams = validate_amalgams_box.isSelected();
 			this.direct_flower = direct_flower_box.isSelected();
-
+			this.check_oriented = check_oriented_box.isSelected();
+			this.reorder_joins = reorder_joins_box.isSelected();
+			
 			schema_denotation = schema_denotation_box.isSelected();
 			schema_ed = schema_ed_box.isSelected();
 			schema_graphical = schema_graphical_box.isSelected();
