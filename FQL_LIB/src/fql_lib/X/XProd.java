@@ -393,6 +393,10 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	 public static <C> List subst2(String yyy, List<String> eq, Map<String, Triple<C, C, List<C>>> tuple, Set<String> keys, Set xxx) {
 		List ret = eq.stream().flatMap(x -> { 
 			List l = new LinkedList<>();
+			if (x.equals("!__Q")) {
+				l.add(yyy);
+				return l.stream();
+			}
 			if (tuple.containsKey(x)) {
 				l.add(yyy);
 				l.add(tuple.get(x).first);
@@ -523,14 +527,12 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			ret.add(m);
 
 			for (String var : flower.from.keySet()) {
-				//String var = qi + var0;
 				String node = flower.from.get(var);
 				Set<Map<String, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
 				for (Map<String, Triple<C, C, List<C>>> tuple : ret) {
 					outer: for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", (C)node)) {
 						Map<String, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
 						merged.put(var, t);
-						
 						for (Pair<List<String>, List<String>> eq : flower.where) {
 							Set xxx = new HashSet();
 							List lhs = subst2("!_" + qi, eq.first, merged, flower.from.keySet(), xxx);
@@ -548,6 +550,8 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			rets.put(flower, ret);
 			i++;
 		}
+		
+		System.out.println("rets " + rets);
 		
 		ids = new HashSet<>();
 		types = new HashMap<>();
@@ -836,9 +840,11 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		} else {
 			J = m.pi(I);			
 		}
-//		XCtx J = m.pi(I);
+//		System.out.println(J);
 		XCtx K = m2.delta(J);
+	//	System.out.println(K);
 		XCtx L = m3.apply0(K);
+	//	System.out.println(L);
 		
 		return L.rel();
 	}

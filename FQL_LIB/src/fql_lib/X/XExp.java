@@ -1,5 +1,8 @@
 package fql_lib.X;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -370,9 +373,42 @@ public abstract class XExp {
 				List<Pair<List<String>, List<String>>> where, XExp src) {
 			super();
 			this.select = select;
-			this.from = from;
 			this.where = where;
 			this.src = src;
+			this.from = sort(from);
+		}
+		
+		private void count(List<String> l, Map<String, Integer> counts) {
+			for (String s : l) {
+				Integer i = counts.get(s);
+				if (i == null) {
+					continue;
+				}
+				counts.put(s, i+1);
+			}
+		}
+
+		public Map<String, String> sort(Map<String, String> m) {
+			Map<String, Integer> count = new HashMap<>();
+			for (String s : m.keySet()) {
+				count.put(s, 0);
+			}
+			for (Pair<List<String>, List<String>> k : where) {
+				count(k.first, count);
+				count(k.first, count);
+			}
+			List<String> l = new LinkedList<>(m.keySet());
+			l.sort(new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+					return count.get(o2) - count.get(o1);
+				}
+			});
+			Map<String, String> ret = new LinkedHashMap<>();
+			for (String s : l) {
+				ret.put(s, m.get(s));
+			}
+			return ret;
 		}
 
 		@Override
