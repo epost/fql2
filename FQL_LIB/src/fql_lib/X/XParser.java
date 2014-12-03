@@ -35,7 +35,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "not", "id", "ID", "apply", "iterate", "query", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -91,8 +91,15 @@ public class XParser {
 		
 		Parser<?> flower = flower(ref);
 		Parser<?> FLOWER = FLOWER(ref);
+		Parser id1 = Parsers.tuple(term("id"), ref.lazy());
+		Parser id2 = Parsers.tuple(term("ID"), ref.lazy());
+		Parser<?> comp = Parsers.tuple(term("("), ref.lazy(), term(";"), ref.lazy(), term(")"));
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> query = query(ref);
+		Parser<?> apply = Parsers.tuple(term("apply"), ref.lazy(), ref.lazy());
+		Parser<?> iter = Parsers.tuple(term("iterate"), Terminals.IntegerLiteral.PARSER, ref.lazy(), ref.lazy());
+		
+		Parser<?> a = Parsers.or(new Parser<?>[] { id1, id2, comp, apply, iter, query, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 
@@ -176,6 +183,16 @@ public class XParser {
 //		return Parsers.tuple(ident(), Parsers.or(term("="), term(":")), e);
 	}
 	
+	public static final Parser<?> query(Reference ref) {
+		Parser<?> xxx = ref.lazy().between(term("pi"), term(";"));
+		Parser<?> yyy = ref.lazy().between(term("delta"), term(";"));
+		Parser<?> zzz = ref.lazy().between(term("sigma"), term(";"));
+		Parser p = Parsers.tuple(xxx, yyy, zzz);
+		
+		Parser<?> ret = Parsers.tuple(term("query"), p.between(term("{"), term("}")));
+		return ret;
+	}
+		
 	public static final Parser<?> instance(Reference ref) {
 		Parser<?> node = Parsers.tuple(ident().many1(), term(":"), ident());
 		Parser<?> p3 = Parsers.tuple(path(), term("="), path());
@@ -364,7 +381,6 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 		throw new RuntimeException();
 	}
 
-	//TODO enforce only flowers on RHS
 	if (decl.a instanceof Tuple3) {
 		Tuple3 t = (Tuple3) decl.a;
 		Object ooo = toExp(decl.c);
@@ -435,6 +451,9 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 			}
 			if (p.c.toString().equals("*")) {
 				return new XExp.XTimes(toExp(p.b), toExp(p.d));
+			}
+			if (p.c.toString().equals(";")) {
+				return new XExp.Compose(toExp(p.b), toExp(p.d));
 			}
 			if (p.a.toString().equals("return") && p.b.toString().equals("sigma")) {
 				return new XExp.XUnit("sigma", toExp(p.d), toExp(p.e));
@@ -563,7 +582,9 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 			if (p.a.toString().equals("pair")) {
 				return new XExp.XPair(toExp(p.b), toExp(p.c));
 			}
-			
+			if (p.a.toString().equals("apply")) {
+				return new XExp.Apply(toExp(p.b), toExp(p.c));
+			}
 			return new XExp.XConst((String) p.b, (String) p.c);
 		}
 		if (c instanceof org.codehaus.jparsec.functors.Pair) {
@@ -582,6 +603,16 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 			}
 			if (p.a.toString().equals("tt")) {
 				return new XExp.XTT(toExp(p.b));
+			}
+			if (p.a.toString().equals("id")) {
+				return new XExp.Id(false, toExp(p.b));
+			}
+			if (p.a.toString().equals("ID")) {
+				return new XExp.Id(true, toExp(p.b));
+			}
+			if (p.a.toString().equals("query")) {
+				Tuple3 t = (Tuple3) p.b;
+				return new XExp.XQueryExp(toExp(t.a), toExp(t.b), toExp(t.c));
 			}
 			
 			else {
@@ -705,12 +736,15 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 			boolean isAnd = o2.c.toString().equals("and");
 			return new XExp.XBool(toWhere(o2.b), toWhere(o2.d), isAnd);
 		}
-		
 		if (o instanceof Tuple3) {
 			Tuple3 o2 = (Tuple3) o;
 			return new XExp.XBool((List<String>)o2.a, (List<String>)o2.c);
 		}
-		
+		if (o instanceof org.codehaus.jparsec.functors.Pair) {
+			org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) o;
+			return new XExp.XBool(toWhere(x.b));
+
+		}
 		if (o.toString().equals("true")) {
 			return new XExp.XBool(true);
 		}
@@ -726,8 +760,9 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 		Parser p1 = Parsers.tuple(term("("), ref.lazy(), term("and"), ref.lazy(), term(")"));
 		Parser p2 = Parsers.tuple(term("("), ref.lazy(), term("or"), ref.lazy(), term(")"));
 		Parser p3 = Parsers.tuple(path(), term("="), path());
+		Parser p4 = Parsers.tuple(term("not"), ref.lazy());
 		
-		Parser p = Parsers.or(p1, p2, p3, term("true"), term("false"));
+		Parser p = Parsers.or(p1, p2, p3, p4, term("true"), term("false"));
 		
 		ref.set(p);
 		

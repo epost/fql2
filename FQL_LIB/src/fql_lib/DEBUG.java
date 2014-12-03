@@ -294,10 +294,10 @@ public class DEBUG implements Serializable {
 		x_1.add(validate_amalgams_label);
 		x_2.add(validate_amalgams_box);
 		
-		JCheckBox direct_flower_box = new JCheckBox("", direct_flower);
-		JLabel direct_flower_label = new JLabel("Evaluate flowers directly:");
-		x_1.add(direct_flower_label);
-		x_2.add(direct_flower_box);
+	//	JCheckBox direct_flower_box = new JCheckBox("", direct_flower);
+	//	JLabel direct_flower_label = new JLabel("Evaluate flowers directly:");
+	//	x_1.add(direct_flower_label);
+	//	x_2.add(direct_flower_box);
 		
 		JCheckBox check_oriented_box = new JCheckBox("", check_oriented);
 		JLabel check_oriented_label = new JLabel("Validate orientation in Knuth-Bendix:");
@@ -325,9 +325,8 @@ public class DEBUG implements Serializable {
 		x_2.add(new JLabel());
 		x_1.add(new JLabel());
 		x_2.add(new JLabel());
-
-//		x_1.add(new JLabel());
-	//	x_2.add(new JLabel());
+		x_1.add(new JLabel());
+		x_2.add(new JLabel());
 /*
 		JCheckBox coeB = new JCheckBox("", continue_on_error);
 		JLabel coeL = new JLabel("Continue on errors (dangerous):");
@@ -847,7 +846,7 @@ public class DEBUG implements Serializable {
 			this.x_adom = x_adom_box.isSelected();
 			this.fast_amalgams = fast_amalgams_box.isSelected();
 			this.validate_amalgams = validate_amalgams_box.isSelected();
-			this.direct_flower = direct_flower_box.isSelected();
+			//this.direct_flower = direct_flower_box.isSelected();
 			this.check_oriented = check_oriented_box.isSelected();
 			this.reorder_joins = reorder_joins_box.isSelected();
 			

@@ -1,8 +1,12 @@
 package fql_lib.X;
 
 import fql_lib.Util;
+import fql_lib.X.XExp.Apply;
+import fql_lib.X.XExp.Compose;
 import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;
+import fql_lib.X.XExp.Id;
+import fql_lib.X.XExp.Iter;
 import fql_lib.X.XExp.Var;
 import fql_lib.X.XExp.XConst;
 import fql_lib.X.XExp.XCoprod;
@@ -20,6 +24,7 @@ import fql_lib.X.XExp.XOne;
 import fql_lib.X.XExp.XPair;
 import fql_lib.X.XExp.XPi;
 import fql_lib.X.XExp.XProj;
+import fql_lib.X.XExp.XQueryExp;
 import fql_lib.X.XExp.XRel;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
@@ -385,7 +390,95 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			throw new RuntimeException("Not an instance in " + e);			
 		}
 		XCtx src = (XCtx) src0;
-		return XProd.FLOWER(e, src);		
+		return XProd.flower2(e, src);		
+	}
+
+	@Override
+	public XObject visit(XProgram env, XQueryExp e) {
+		Object delta0 = e.delta.accept(env, this);
+		if (!(delta0 instanceof XMapping)) {
+			throw new RuntimeException("Delta not a mapping in " + e);
+		}
+		Object pi0 = e.pi.accept(env, this);
+		if (!(pi0 instanceof XMapping)) {
+			throw new RuntimeException("Pi not a mapping in " + e);
+		}
+		Object sigma0 = e.sigma.accept(env, this);
+		if (!(sigma0 instanceof XMapping)) {
+			throw new RuntimeException("Sigma not a mapping in " + e);
+		}
+		return new XQuery((XMapping)pi0, (XMapping)delta0, (XMapping)sigma0);
+	}
+
+	@Override
+	public XObject visit(XProgram env, Apply e) {
+		XObject f = e.f.accept(env, this);
+		if (!(f instanceof XQuery)) {
+			throw new RuntimeException("Not a query in " + e);
+		}
+		XObject i = e.I.accept(env, this);
+		if (!(f instanceof XCtx)) {
+			throw new RuntimeException("Not an instance in " + e);
+		}
+		return ((XQuery)f).apply((XCtx)i);
+	}
+
+	@Override
+	public XObject visit(XProgram env, Iter e) {
+		XObject f = e.f.accept(env, this);
+		if (!(f instanceof XQuery)) {
+			throw new RuntimeException("Not a query in " + e);
+		}
+		XObject i = e.initial.accept(env, this);
+		if (!(f instanceof XCtx)) {
+			throw new RuntimeException("Not an instance in " + e);
+		}
+		XQuery F = (XQuery) f;
+		XCtx I = (XCtx) i;
+		
+		for (int j = 0; j < e.num; j++) {
+			I = F.apply(I);
+		}
+		
+		return I;
+	}
+
+	@Override
+	public XObject visit(XProgram env, Id e) {
+		Object o = e.C.accept(env, this);
+		if (!(o instanceof XCtx)) {
+			throw new RuntimeException("Not schema/instance in " + e);
+		}
+		XCtx C = (XCtx) o;
+		String str = null;
+		if (C.kind().equals("schema")) {
+			str = "mapping";
+		}
+		if (C.kind().equals("instance")) {
+			str = "homomorphism";
+		}
+		if (str == null) {
+			throw new RuntimeException();
+		}
+		XMapping F = new XMapping(C, str);
+		if (e.isQuery) {
+			return new XQuery(F, F, F);
+		} 
+		return F;
+	}
+
+	@Override
+	public XObject visit(XProgram env, Compose e) {
+		Object f0 = e.f.accept(env, this);
+		Object g0 = e.g.accept(env, this);
+		if (f0 instanceof XMapping && g0 instanceof XMapping) {
+			XMapping F = (XMapping) f0;
+			XMapping G = (XMapping) g0;
+			return new XMapping(F, G);
+		} else if (f0 instanceof XQuery && g0 instanceof XQuery) {
+			throw new RuntimeException("Cannot compose queries yet.");			
+		}
+		throw new RuntimeException("Cannot compose in " + e);
 	}
 	
 

@@ -1,6 +1,6 @@
 package fql_lib.examples;
 
-public class Patrick13Example extends Example {
+public class Patrick13ExampleProd extends Example {
 
 	@Override
 	public boolean isPatrick() {

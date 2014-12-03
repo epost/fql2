@@ -15,8 +15,11 @@
   </comments>
   <keywords>
     <keyword>FLOWER</keyword>
+    <keyword>ID</keyword>
     <keyword>INSTANCE</keyword>
+    <keyword>QUERY</keyword>
     <keyword>and</keyword>
+    <keyword>apply</keyword>
     <keyword>as</keyword>
     <keyword>case</keyword>
     <keyword>coreturn</keyword>
@@ -27,20 +30,23 @@
     <keyword>from</keyword>
     <keyword>fst</keyword>
     <keyword>homomorphism</keyword>
+    <keyword>id</keyword>
     <keyword>inl</keyword>
     <keyword>inr</keyword>
     <keyword>instance</keyword>
+    <keyword>iterate</keyword>
     <keyword>mapping</keyword>
+    <keyword>not</keyword>
     <keyword>or</keyword>
     <keyword>pair</keyword>
     <keyword>pi</keyword>
+    <keyword>query</keyword>
     <keyword>relationalize</keyword>
     <keyword>return</keyword>
     <keyword>schema</keyword>
     <keyword>select</keyword>
     <keyword>sigma</keyword>
     <keyword>snd</keyword>
-    <keyword>transform</keyword>
     <keyword>true</keyword>
     <keyword>tt</keyword>
     <keyword>type</keyword>

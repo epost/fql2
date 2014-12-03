@@ -22,18 +22,18 @@ public class Examples {
 	public static Example patrick2 = new Patrick2Example();
 	public static Example patrick3 = new Patrick3Example();
 	public static Example patrick4 = new Patrick4Example();
-	public static Example patrick5 = new Patrick5Examples();
+	public static Example patrick5 = new Patrick5ExampleDelta();
 	public static Example patrick6 = new Patrick6Example();
 	public static Example patrick7 = new Patrick7Example();
-	public static Example patrick8 = new Patrick8Example();
+	public static Example patrick8 = new Patrick8ExampleAllSyntax();
 	public static Example patrick9 = new Patrick9Example();
 	public static Example patrick10=new Patrick10Example();
 	public static Example patrick11=new Patrick11Example();
-	public static Example patrick12=new Patrick12Example();
-	public static Example patrick13=new Patrick13Example();
-	public static Example patrick14=new Patrick14Example();
-	public static Example patrick15=new Patrick15Example();
-	public static Example patrick16=new Patrick16Example();
+	public static Example patrick12=new Patrick12ExampleCoprod();
+	public static Example patrick13=new Patrick13ExampleProd();
+	public static Example patrick14=new Patrick14ExampleFlower1();
+	public static Example patrick15=new Patrick15ExampleNist();
+	public static Example patrick16=new Patrick16ExampleFlower2();
 	public static Example patrick17=new Patrick17Example();
 	public static Example patrick18=new Patrick18Example();
 	

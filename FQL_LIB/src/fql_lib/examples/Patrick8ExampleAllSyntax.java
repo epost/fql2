@@ -1,6 +1,6 @@
 package fql_lib.examples;
 
-public class Patrick8Example extends Example {
+public class Patrick8ExampleAllSyntax extends Example {
 
 	@Override
 	public boolean isPatrick() {
@@ -43,10 +43,14 @@ public class Patrick8Example extends Example {
 			+ "\n	nodes N -> N;"
 			+ "\n	edges f -> f.f, att -> att;"
 			+ "\n} : S -> S"
+			+ "\nF1 = id S"
+			+ "\nF2 = (F1 ; F1)"
 			+ "\n"
 			+ "\nh = homomorphism {"
 			+ "\n	variables v -> v;"
 			+ "\n} : I -> I"
+			+ "\nh1 = id I"
+			+ "\nh2 = (h1 ; h1)"
 			+ "\n"
 			+ "\n//conjunctive queries (does not relationalize)"
 			+ "\nq1 = flower {"
@@ -55,7 +59,7 @@ public class Patrick8Example extends Example {
 			+ "\n	where n1.f.att = n2.att;"
 			+ "\n} I //(q1:var) = flower ... will bind var to the result schema"
 			+ "\n"
-			+ "\n//n-ary unions of conjunctive queries (does relationalize)"
+			+ "\n//allows propositional logic"
 			+ "\nq2 = FLOWER {"
 			+ "\n	select n1.att as col1, n2.att as col2;"
 			+ "\n	from N as n1, N as n2;"

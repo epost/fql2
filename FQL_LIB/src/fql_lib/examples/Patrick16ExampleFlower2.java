@@ -1,6 +1,6 @@
 package fql_lib.examples;
 
-public class Patrick16Example extends Example {
+public class Patrick16ExampleFlower2 extends Example {
 	
 	@Override
 	public boolean isPatrick() {
@@ -51,14 +51,14 @@ public class Patrick16Example extends Example {
 			+ "\nBiggestDeptIsMath = flower {"
 			+ "\n	select p.lastName as name, p.instituteOf.schoolName as school;"
 			+ "\n	from Person as p;"
-			+ "\n	where p.advisor.instituteOf.biggestDept.deptName = \"!__Q\".Math;"
+			+ "\n	where p.advisor.instituteOf.biggestDept.deptName = Math;"
 			+ "\n} I "
 			+ "\n"
 			+ "\nAllPeople = FLOWER {"
 			+ "\n	select p.lastName as name, p.instituteOf.schoolName as school;"
 			+ "\n	from Person as p;"
-			+ "\n	where (p.advisor.instituteOf.biggestDept.deptName = \"!__Q\".Math or"
-			+ "\n	       p.advisor.instituteOf.biggestDept.deptName = \"!__Q\".CS);"
+			+ "\n	where (p.advisor.instituteOf.biggestDept.deptName = Math or"
+			+ "\n	       p.advisor.instituteOf.biggestDept.deptName = CS);"
 			+ "\n} I "
 			+ "\n"
 			+ "\n//Find all people sharing the same school, and the name of their schools"

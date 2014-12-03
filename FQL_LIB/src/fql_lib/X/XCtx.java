@@ -112,7 +112,7 @@ public class XCtx<C> implements XObject {
 		if (global != null) {
 			return global.type(c);
 		}
-		throw new RuntimeException("Cannot type " + c + " in " + this);
+		throw new RuntimeException("Cannot type " + c); //don't toString here, since used by expand()
 	}
 
 	// public XCtx<C> copy() {
@@ -129,10 +129,22 @@ public class XCtx<C> implements XObject {
 		this.ids = ids;
 		this.global = global;
 		this.schema = schema;
-		// this.local = local;
+		if (schema != null) {
+			for (Object o : types.keySet()) {
+				if (schema.types.keySet().contains(o)) {
+					throw new RuntimeException("Attempt to shadow name " + o);
+				}
+			}
+		}
+		if (global != null) {
+			for (Object o : types.keySet()) {
+				if (global.types.keySet().contains(o)) {
+					throw new RuntimeException("Attempt to shadow name " + o);
+				}
+			}
+		}
 		init();
 		this.kind = kind;
-		// validate();
 	}
 
 	public KB<C> getKB() {
@@ -249,15 +261,20 @@ public class XCtx<C> implements XObject {
 		while (it.hasNext()) {
 			Pair<C, C> next = type(it.next());
 			if (!ret.second.equals(next.first)) {
-				throw new RuntimeException("Ill-typed: " + first);
+				throw new RuntimeException("Ill-typed: " + first + " in " + this);
 			}
 			ret = new Pair<>(ret.first, next.second);
 		}
 		return ret;
 	}
 
+	String toString = null;
+
 	@Override
 	public String toString() {
+		if (toString != null) {
+			return toString;
+		}
 		String kb_text = "types:\n  " + Util.sep(allIds(), ",\n  ");
 		List<String> tt = allTerms().stream()
 				.map(x -> x + " : " + type(x).first + " -> " + type(x).second)
@@ -272,6 +289,7 @@ public class XCtx<C> implements XObject {
 		kb_text = kb_text.trim();
 		kb_text += "\n\nlocal: " + terms();
 
+		toString = kb_text;
 		return kb_text;
 	}
 
@@ -507,11 +525,11 @@ public class XCtx<C> implements XObject {
 				List<C> p0 = new LinkedList<>(p.third);
 				p0.add(e);
 				Triple<C, C, List<C>> toAdd = new Triple<>(p.first, t.get(e).second, p0);
-				Triple<C, C, List<C>> found = find(kb, toAdd, paths);
+				Triple<C, C, List<C>> found = find_old(kb, toAdd, paths);
 				if (found == null) {
-					found = find(kb, toAdd, newPaths);
+					found = find_old(kb, toAdd, newPaths);
 					if (found == null) {
-						find(kb, toAdd, consts);
+						find_old(kb, toAdd, consts);
 						newPaths.add(toAdd);
 					}
 				}
@@ -800,68 +818,7 @@ public class XCtx<C> implements XObject {
 		}
 	}
 
-	/*
-	 * private JComponent makeTables2(Category<C, Triple<C, C, List<C>>> cat) {
-	 * try { // cat(); List<JComponent> grid = new LinkedList<>();
-	 * 
-	 * Map<C, Set<List<C>>> entities = new HashMap<>(); Map<C, Set<C>> m = new
-	 * HashMap<>(); for (C c : ids) { entities.put(c, new HashSet<>()); m.put(c,
-	 * new HashSet<>()); } for (Triple<C, C, List<C>> k : cat.arrows()) { if
-	 * (k.first.equals("1") ) { // uncomment causes exception Set<List<C>> set =
-	 * entities.get(k.second); set.add(k.third); } }
-	 * 
-	 * for (C c : consts) { Pair<C, C> t = typeOf.get(c); // if
-	 * (t.first.equals("1")) { // continue; // } // // if
-	 * (!local.contains(t.first)) { // continue; // } Set<C> set =
-	 * m.get(t.first);
-	 * 
-	 * set.add(c); }
-	 * 
-	 * List<C> keys = new LinkedList<>(m.keySet()); keys.sort(new Comparator() {
-	 * 
-	 * @Override public int compare(Object o1, Object o2) { return ((Comparable)
-	 * o1).compareTo(o2); } });
-	 * 
-	 * // System.out.println(entities);
-	 * 
-	 * Set<Triple<C, C, List<C>>> adom = new HashSet<>(); Set<C> local0 = new
-	 * HashSet<>(local); if (parent != null) { local0.addAll(parent.local); }
-	 * for (C c : keys) { if (!local0.contains(c)) { continue; } if
-	 * (c.equals("1")) { continue; } Pair<C, C> t = typeOf.get(c); Set<List<C>>
-	 * src = entities.get(t.first); List<C> cols = new LinkedList<>(m.get(c));
-	 * 
-	 * Object[][] rowData = new Object[src.size()][cols.size()]; // List<C>
-	 * colNames2 = new LinkedList<>(cols); int idx = cols.indexOf(c); if (idx !=
-	 * 0) { C old = cols.get(0); cols.set(0, c); cols.set(idx, old); }
-	 * List<String> colNames3 = cols .stream() .map(x ->
-	 * typeOf.get(x).second.equals(x) ? x.toString() : x + " (" +
-	 * typeOf.get(x).second + ")").collect(Collectors.toList()); Object[]
-	 * colNames = colNames3.toArray();
-	 * 
-	 * int row = 0; for (List<C> l : src) { rowData[row][0] = l; int cl = 0; for
-	 * (C col : cols) { List<C> r = new LinkedList<>(l); r.add(col);
-	 * 
-	 * boolean found = false; for (Triple<C, C, List<C>> cand : adom) { if
-	 * (!cand.first.equals("1") || !cand.second.equals(typeOf.get(col).second))
-	 * { continue; } //
-	 * 
-	 * if (kb.equiv(cand.third, r)) { rowData[row][cl] = Util.sep(cand.third,
-	 * "."); found = true; break; } }
-	 * 
-	 * if (!found) { List<C> w = kb.normalize("", r); rowData[row][cl] =
-	 * Util.sep(w, "."); adom.add(new Triple("1", typeOf.get(col).second, w)); }
-	 * 
-	 * // List<C> w = kb.normalize(r); cl++; } row++; } JPanel table =
-	 * Util.makeTable(BorderFactory.createEtchedBorder(), c + " (" + src.size()
-	 * + ") rows", rowData, colNames); grid.add(table); }
-	 * 
-	 * 
-	 * 
-	 * return Util.makeGrid(grid); } catch (Exception e) { //
-	 * e.printStackTrace(); return new
-	 * FQLTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR\n\n" +
-	 * e.getMessage()); } }
-	 */
+	
 
 	private Category<C, Triple<C, C, List<C>>> xcat;
 
@@ -879,9 +836,19 @@ public class XCtx<C> implements XObject {
 		}
 		return ret;
 	}
+	
+	Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> find_cache = new HashMap<>();
+	public Triple<C, C, List<C>> find_fast(Triple<C, C, List<C>> tofind) {
+		if (find_cache.containsKey(tofind)) {
+			return find_cache.get(tofind);
+		}
+		Triple<C,C,List<C>> found = find_old(getKB(), tofind, cat().hom(tofind.first, tofind.second));
+		find_cache.put(tofind, found);
+		return found;
+	}
 
 	// TODO: test for inconsistency here?
-	public static <D> Triple<D, D, List<D>> find(KB<D> kb, Triple<D, D, List<D>> tofind,
+	public static <D> Triple<D, D, List<D>> find_old(KB<D> kb, Triple<D, D, List<D>> tofind,
 			Collection<Triple<D, D, List<D>>> cat) {
 		Set<Triple<D, D, List<D>>> ret = new HashSet<>();
 		for (Triple<D, D, List<D>> arr : cat) {
@@ -995,7 +962,7 @@ public class XCtx<C> implements XObject {
 				List<C> ret = new LinkedList<>(a1.third);
 				ret.addAll(a2.third);
 				Triple<C, C, List<C>> xxx = new Triple<>(a1.first, a2.second, ret);
-				Triple<C, C, List<C>> yyy = find(getKB(), xxx, hom(a1.first, a2.second));
+				Triple<C, C, List<C>> yyy = find_old(getKB(), xxx, hom(a1.first, a2.second));
 				if (yyy == null) {
 					throw new RuntimeException("Found nothing equivalent to " + ret + " in "
 							+ arrows());
@@ -1157,7 +1124,7 @@ public class XCtx<C> implements XObject {
 						l.add((C) ("!_" + a));
 						l.addAll(g.third.subList(1, g.third.size()));
 						Triple<C, C, List<C>> ret = new Triple<>(a, g.second, l);
-						ret = (find(getKB(), ret, arrows()));
+						ret = find_old(getKB(), ret, hom(ret.first, ret.second)); 
 						if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
 							throw new RuntimeException();
 						}
@@ -1174,7 +1141,7 @@ public class XCtx<C> implements XObject {
 							throw new RuntimeException();
 						}
 						//must find equivalent - see CTDB example
-						ret = (find(getKB(), ret, arrows()));
+						ret = find_old(getKB(), ret, hom(ret.first, ret.second));
 						if (!arrows().contains(ret)) {
 							throw new RuntimeException(ret.toString());
 						}
@@ -1199,8 +1166,8 @@ public class XCtx<C> implements XObject {
 							hhh.addAll(sofar.third);
 							hhh.addAll(gnX);
 						
-							Triple ret0 = new Triple<>(a, g.second, hhh);
-							Triple ret = schema.find(schema.getKB(), ret0, sch.hom(a, g.second));
+							Triple<C,C,List<C>> ret0 = new Triple<>(a, g.second, hhh);
+							Triple ret = find_old(schema.getKB(), ret0, sch.hom(ret0.first, ret0.second));
 							if (!arrows().contains(ret)) {
 								throw new RuntimeException("f " + f + " and " + g + "\n\nbad: " + ret.toString() + " not found inn\n\n" + Util.sep(arrows(), "\n"));
 							}
@@ -1233,6 +1200,8 @@ public class XCtx<C> implements XObject {
 					if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
 						throw new RuntimeException( ret + " not " + f + " and " + g);
 					}
+					//another one where have to use KB 
+					ret = find_old(getKB(), ret, hom(ret.first, ret.second));
 					if (!arrows().contains(ret)) {
 						throw new RuntimeException("f " + f + " and " + g + "\n\nbad: " + ret.toString() + " not found inn\n\n" + Util.sep(arrows(), "\n"));
 					}
@@ -1261,7 +1230,7 @@ public class XCtx<C> implements XObject {
 
 			private Triple<C, C, List<C>> findEq(Triple<C, C, List<C>> sofar, C gn) {
 				if (sofar.third.size() != 1) {
-					throw new RuntimeException();
+					throw new RuntimeException("sofar third not length 1 is " + sofar);
 				}
 				C v = sofar.third.get(0);
 				List<C> tofind = new LinkedList<>();
@@ -1390,7 +1359,7 @@ public class XCtx<C> implements XObject {
 				List<C> ret = new LinkedList<>(a1.third);
 				ret.addAll(a2.third);
 				Triple<C, C, List<C>> xxx = new Triple<>(a1.first, a2.second, ret);
-				Triple<C, C, List<C>> yyy = find(getKB(), xxx, hom(a1.first, a2.second));
+				Triple<C, C, List<C>> yyy = find_old(getKB(), xxx, hom(a1.first, a2.second));
 				if (yyy == null) {
 					throw new RuntimeException("Found nothing equivalent to " + ret + " in "
 							+ arrows());
@@ -1418,15 +1387,15 @@ public class XCtx<C> implements XObject {
 					p0.add(e);
 
 					Triple<C, C, List<C>> toAdd = new Triple<>(p.first, t.get(e).second, p0);
-					Triple<C, C, List<C>> found = find(kb, toAdd, paths); // TODO:
+					Triple<C, C, List<C>> found = find_old(kb, toAdd, paths); // TODO:
 																			// sort
 																			// into
 																			// hom
 
 					if (found == null) {
-						found = find(kb, toAdd, newPaths);
+						found = find_old(kb, toAdd, newPaths);
 						if (found == null) {
-							find(kb, toAdd, consts);
+							find_old(kb, toAdd, consts);
 							newPaths.add(toAdd);
 						}
 					}
@@ -1442,159 +1411,8 @@ public class XCtx<C> implements XObject {
 		}
 	}
 
-	/*
-	 * @SuppressWarnings("serial") public Category<C, Triple<C, C, List<C>>>
-	 * cat() { if (xcat != null) { return xcat; }
-	 * 
-	 * init(); kb.complete();
-	 * 
-	 * Set<Triple<C, C, List<C>>> paths = new TreeSet<>(new Comparator() {
-	 * 
-	 * @Override public int compare(Object o1, Object o2) { if
-	 * (o1.toString().length() != o2.toString().length()) { return new
-	 * Integer(o1.toString().length()).compareTo(o2.toString().length()); }
-	 * return o1.toString().compareTo(o2.toString()); } });
-	 * 
-	 * for (C c : ids) { paths.add(new Triple<>(c, c, new LinkedList<>())); }
-	 * 
-	 * int iter; for (iter = 0; iter < DEBUG.debug.MAX_PATH_LENGTH; iter++) {
-	 * Set<Triple<C, C, List<C>>> newPaths = new TreeSet<>(new Comparator() {
-	 * 
-	 * @Override public int compare(Object o1, Object o2) { if
-	 * (o1.toString().length() != o2.toString().length()) { return new
-	 * Integer(o1.toString().length()) .compareTo(o2.toString().length()); }
-	 * return o1.toString().compareTo(o2.toString()); } }); for (Triple<C, C,
-	 * List<C>> p : paths) { for (Triple<C, C, C> e : outEdges(p.second)) {
-	 * List<C> p0 = new LinkedList<>(p.third); p0.add(e.third);
-	 * 
-	 * Triple<C, C, List<C>> toAdd = new Triple<>(p.first, e.second, p0);
-	 * 
-	 * boolean found = false; for (Triple<C, C, List<C>> xxx : paths) { if
-	 * (!xxx.first.equals(toAdd.first) || !xxx.second.equals(toAdd.second)) { //
-	 * continue; } if (kb.equiv(xxx.third, toAdd.third)) { found = true; break;
-	 * } } if (!found) { for (Triple<C, C, List<C>> xxx : newPaths) { if
-	 * (!xxx.first.equals(toAdd.first) || !xxx.second.equals(toAdd.second)) { //
-	 * continue; } if (kb.equiv(xxx.third, toAdd.third)) { found = true; break;
-	 * } } if (!found) { newPaths.add(toAdd); } } } } if
-	 * (paths.containsAll(newPaths)) { break; } paths.addAll(newPaths); } if
-	 * (iter == DEBUG.debug.MAX_PATH_LENGTH) { throw new
-	 * RuntimeException("Exceeded maximum path length in " + this); }
-	 * 
-	 * Set<Triple<C, C, List<C>>> arrows = new HashSet<>(paths);
-	 * System.out.println("ZZZZZZZZZZ"); System.out.println("Arrows are " +
-	 * arrows);
-	 * 
-	 * xcat = new Category<C, Triple<C, C, List<C>>>() {
-	 * 
-	 * @Override public Set<C> objects() { return ids; }
-	 * 
-	 * @Override public Set<Triple<C, C, List<C>>> arrows() { return arrows; }
-	 * 
-	 * @Override public C source(Triple<C, C, List<C>> a) { return a.first; }
-	 * 
-	 * @Override public C target(Triple<C, C, List<C>> a) { return a.second; }
-	 * 
-	 * @Override public Triple<C, C, List<C>> identity(C o) { return new
-	 * Triple<>(o, o, new LinkedList<>()); }
-	 * 
-	 * @Override public Triple<C, C, List<C>> compose(Triple<C, C, List<C>> a1,
-	 * Triple<C, C, List<C>> a2) { List<C> ret = new LinkedList<>(a1.third);
-	 * ret.addAll(a2.third); Triple<C, C, List<C>> xxx = new Triple<>(a1.first,
-	 * a2.second, ret); for (Triple<C, C, List<C>> k : arrows()) { if
-	 * (!k.first.equals(xxx.first) || !k.second.equals(xxx.second)) { continue;
-	 * } if (kb.equiv(k.third, xxx.third)) { // return k; } } throw new
-	 * RuntimeException("Found nothing equivalent to " + ret + " in " +
-	 * arrows()); } };
-	 * 
-	 * return xcat; }
-	 */
+	
 
-	/*
-	 * @SuppressWarnings("serial") public Category<C, Triple<C, C, List<C>>>
-	 * small_cat() { HashSet<C> local0 = new HashSet<>(local); if (parent !=
-	 * null) { local0.addAll(parent.local); }
-	 * 
-	 * if (small_cat != null) { return small_cat; }
-	 * 
-	 * init(); kb.complete();
-	 * 
-	 * Set<Triple<C, C, List<C>>> paths = new HashSet<>(); Set<C> local_ids =
-	 * new HashSet<>(); for (C c : ids) { if (!local0.contains(c) &&
-	 * !c.equals("1")) { continue; } paths.add(new Triple<>(c, c, new
-	 * LinkedList<>())); local_ids.add(c); }
-	 * 
-	 * // System.out.println("locals are " + local);
-	 * 
-	 * int iter; for (iter = 0; iter < DEBUG.debug.MAX_PATH_LENGTH; iter++) {
-	 * Set<Triple<C, C, List<C>>> newPaths = new HashSet<>(); for (Triple<C, C,
-	 * List<C>> p : paths) { for (Triple<C, C, C> e : outEdges_local(local0,
-	 * p.second)) { List<C> p0 = new LinkedList<>(p.third); p0.add(e.third);
-	 * 
-	 * Triple<C, C, List<C>> toAdd = new Triple<>(p.first, e.second, p0);
-	 * 
-	 * boolean found = false; for (Triple<C, C, List<C>> xxx : paths) { if
-	 * (!xxx.first.equals(toAdd.first) || !xxx.second.equals(toAdd.second)) { //
-	 * TODO continue; } if (kb.equiv(xxx.third, toAdd.third)) { found = true;
-	 * break; } } if (!found) { for (Triple<C, C, List<C>> xxx : newPaths) { if
-	 * (!xxx.first.equals(toAdd.first) || !xxx.second.equals(toAdd.second)) { //
-	 * TODO continue; } if (kb.equiv(xxx.third, toAdd.third)) { found = true;
-	 * break; } } if (!found) { newPaths.add(toAdd); } } } } if
-	 * (paths.containsAll(newPaths)) { break; } paths.addAll(newPaths); } if
-	 * (iter == DEBUG.debug.MAX_PATH_LENGTH) { throw new
-	 * RuntimeException("Exceeded maximum path length"); }
-	 * 
-	 * Set<Triple<C, C, List<C>>> arrows = new HashSet<>(paths); //
-	 * System.out.println("Arrows are " + arrows);
-	 * 
-	 * small_cat = new Category<C, Triple<C, C, List<C>>>() {
-	 * 
-	 * @Override public Set<C> objects() { return local_ids; }
-	 * 
-	 * @Override public Set<Triple<C, C, List<C>>> arrows() { return arrows; }
-	 * 
-	 * @Override public C source(Triple<C, C, List<C>> a) { return a.first; }
-	 * 
-	 * @Override public C target(Triple<C, C, List<C>> a) { return a.second; }
-	 * 
-	 * @Override public Triple<C, C, List<C>> identity(C o) { return new
-	 * Triple<>(o, o, new LinkedList<>()); }
-	 * 
-	 * @Override public Triple<C, C, List<C>> compose(Triple<C, C, List<C>> a1,
-	 * Triple<C, C, List<C>> a2) { List<C> ret = new LinkedList<>(a1.third);
-	 * ret.addAll(a2.third); Triple<C, C, List<C>> xxx = new Triple<>(a1.first,
-	 * a2.second, ret); for (Triple<C, C, List<C>> k : arrows()) { if
-	 * (!k.first.equals(xxx.first) || !k.second.equals(xxx.second)) { continue;
-	 * } if (kb.equiv(k.third, xxx.third)) { // TODO return k; } } throw new
-	 * RuntimeException("Found nothing equivalent to " + ret + " in " +
-	 * arrows()); } };
-	 * 
-	 * small_cat.validate(); return small_cat; }
-	 */
-	/*
-	 * private Set<Triple<C, C, C>> outEdges(C p) { if (!ids.contains(p)) {
-	 * throw new RuntimeException(); } Set<Triple<C, C, C>> ret = new
-	 * HashSet<>(); List<C> consts2 = new LinkedList<>(consts); consts2.sort(new
-	 * Comparator() {
-	 * 
-	 * @Override public int compare(Object o1, Object o2) { if
-	 * (o1.toString().length() != o2.toString().length()) { return new
-	 * Integer(o1.toString().length()).compareTo(o2.toString().length()); }
-	 * return o1.toString().compareTo(o2.toString()); } });
-	 * System.out.println("^^^^^"); for (C c : consts2) { System.out.println(c);
-	 * if (c.equals(p)) { continue; } if (typeOf.get(c).first.equals(p)) {
-	 * ret.add(new Triple<C, C, C>(null, typeOf.get(c).second, c)); } } return
-	 * ret; }
-	 * 
-	 * private Set<Triple<C, C, C>> outEdges_local(Set<C> local, C p) { if
-	 * (!ids.contains(p)) { throw new RuntimeException(); } Set<Triple<C, C, C>>
-	 * ret = new HashSet<>(); for (C c : consts) { if (c.equals(p)) { continue;
-	 * } if (!local.contains(c)) { continue; } Pair<C, C> t = typeOf.get(c); if
-	 * (!local.contains(t.second)) { continue; } if
-	 * (typeOf.get(c).first.equals(p)) { ret.add(new Triple<C, C, C>(null,
-	 * typeOf.get(c).second, c)); } } return ret; }
-	 */
-
-	// TODO: delta preserves saturation
 	public static XCtx<String> make(XCtx<String> S, XInst I) {
 		// Set<String> seen = new HashSet<>();
 		Map t = new HashMap<>();

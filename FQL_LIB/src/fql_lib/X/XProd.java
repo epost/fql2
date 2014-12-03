@@ -2,22 +2,20 @@ package fql_lib.X;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import fql_lib.Chc;
-import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Unit;
 import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;
+import fql_lib.X.XExp.XBool;
 
 public class XProd {
 	
@@ -51,7 +49,7 @@ public class XProd {
 	
 	public static <X> XMapping<X,X> tt(XCtx<X> I) {
 		if (I.schema == null) {
-			throw new RuntimeException();
+			throw new RuntimeException("Not an instance");
 		}
 		
 		Map em = new HashMap();
@@ -211,7 +209,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					l1.addAll(xy.first.third);
 					l1.add(f);
 					Triple<X,X,List<X>> tofind1 = new Triple<>((X)"_1", t.second, l1);
-					Triple<X,X,List<X>> found1 = I.find(I.getKB(), tofind1 , I.cat().hom((X)"_1", t.second));
+					Triple<X,X,List<X>> found1 = I.find_fast(tofind1);
 					if (found1 == null) {
 						throw new RuntimeException("foudn1");
 					}
@@ -221,7 +219,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					l2.addAll(xy.second.third);
 					l2.add(f);
 					Triple<X,X,List<X>> tofind2 = new Triple<>((X)"_1", t.second, l2);
-					Triple<X,X,List<X>> found2 = J.find(J.getKB(), tofind2 , J.cat().hom((X)"_1", t.second));
+					Triple<X,X,List<X>> found2 = J.find_fast(tofind2);
 					if (found2 == null) {
 						throw new RuntimeException("ouns 2");
 					}
@@ -335,10 +333,10 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		Map em = new HashMap<>();
 		for (A x : l.src.terms()) {
 			List<A> x1 = l.em.get(x);
-			Triple t1 = l.dst.find(l.dst.getKB(), new Triple<A,A,List<A>>((A)"_1", l.dst.type(x1).second, x1), l.dst.cat().hom((A)"_1", l.dst.type(x1).second));
+			Triple t1 = l.dst.find_fast(new Triple<A,A,List<A>>((A)"_1", l.dst.type(x1).second, x1));
 
 			List<A> x2 = r.em.get(x);
-			Triple t2 = r.dst.find(r.dst.getKB(), new Triple<A,A,List<A>>((A)"_1", r.dst.type(x2).second, x2), r.dst.cat().hom((A)"_1", r.dst.type(x2).second));
+			Triple t2 = r.dst.find_fast(new Triple<A,A,List<A>>((A)"_1", r.dst.type(x2).second, x2));
 
 			List xl = new LinkedList();
 			xl.add(new Pair<>(t1, t2));
@@ -390,6 +388,26 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	}
 	*/
 	
+	public static <C> List subst_new(List<String> eq, Map<String, Triple<C, C, List<C>>> tuple, Set<String> keys, Set xxx) {
+		List ret = eq.stream().flatMap(x -> { 
+			List l = new LinkedList<>();
+			if (tuple.containsKey(x)) {
+				l.add(tuple.get(x).first);
+				l.addAll(tuple.get(x).third);
+				return l.stream();
+			} else if (keys.contains(x)) { 
+				l.add(x);
+				xxx.add(new Unit());
+				return l.stream();
+			}	else {
+				l.add(x);
+				return l.stream();
+			}
+		}).collect(Collectors.toList());
+		
+		return ret;
+	} 
+	
 	 public static <C> List subst2(String yyy, List<String> eq, Map<String, Triple<C, C, List<C>>> tuple, Set<String> keys, Set xxx) {
 		List ret = eq.stream().flatMap(x -> { 
 			List l = new LinkedList<>();
@@ -434,7 +452,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 
 	 //TODO: empty FROM
 	 //FROM schema, SELECT schema, 
-	public static <C> XCtx fast_flower(Flower flower, XCtx<C> I, XCtx<C> S, XCtx<C> Z) {
+/*	public static <C> XCtx fast_flower(Flower flower, XCtx<C> I, XCtx<C> S, XCtx<C> Z) {
 		Set<C> ids = new HashSet<>();
 		ids.addAll(S.ids);
 		ids.addAll(I.ids);
@@ -499,7 +517,8 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return J;
 	}
 	
-
+*/
+	 /*
 	public static <C> XCtx fast_flower(Set<Flower> flowers, XCtx<C> I, XCtx<C> S, XCtx<C> Z) {
 		Set<C> ids = new HashSet<>();
 		ids.addAll(S.ids);
@@ -576,7 +595,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		XCtx<C> J = new XCtx<C>(ids, types, eqs, I.global, IS, "instance");
 		J.saturated = I.saturated; 
 		return J;
-	}
+	} */
 	
 /*	public static <C> XCtx fast_flower(Flower flower, XCtx<C> I) {
 		Set<Map<String, Triple<C, C, List<C>>>> ret = new HashSet<>();
@@ -612,6 +631,206 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		throw new RuntimeException();
 	} */
 	
+	private static void typecheck(XBool where, XCtx S) {
+		if (where.not != null) {
+			typecheck(where.not, S);
+			return;
+		}
+		if (where.l != null && where.r != null) {
+			typecheck(where.l, S);
+			typecheck(where.r, S);
+			return;
+		}
+		if (where.lhs != null && where.rhs != null) {
+			S.type(where.lhs);
+			S.type(where.rhs);
+		}
+	}
+	public static XCtx frozen(FLOWER2 flower, XCtx S) {
+		Set ids = new HashSet<>();
+		Map types = new HashMap<>();
+		Set eqs = new HashSet<>();
+		
+		for (Entry<String, String> k : flower.from.entrySet()) {
+			types.put(k.getKey(), new Pair<>("_1", k.getValue()));
+		}
+		//eqs.addAll(from.where);
+		
+		XCtx ret = new XCtx(ids, types, eqs, S.global, S, "instance");
+		
+		for (String k : flower.select.keySet()) {
+			List<String> v = flower.select.get(k);
+			ret.type(v);
+		}
+		
+		typecheck(flower.where, ret);
+		
+		return ret;
+	}
+	
+	
+	
+	public static <C> String eval(XExp.XBool where, Map<String, Triple<C, C, List<C>>> k, Set<String> keys, XCtx I) {
+		if (where.isFalse != null) {
+			return "false";
+		}
+		if (where.isTrue != null) {
+			return "true";
+		}
+		if (where.not != null) {
+			String x = eval(where.not, k, keys, I);
+			if (x.equals("true")) {
+				return "false";
+			}
+			if (x.equals("false")) {
+				return "true";
+			}
+			return x;
+		}
+		if (where.l != null && where.r != null) {
+			String l = eval(where.l, k, keys, I);
+			String r = eval(where.r, k, keys, I);
+			if (where.isAnd) {
+				if (l.equals("false") || r.equals("false")) {
+					return "false";
+				}
+				if (l.equals("true") && r.equals("true")) {
+					return "true";
+				}
+				return "unknown";
+			} else {
+				if (l.equals("true") || r.equals("true")) {
+					return "true";
+				}
+				if (l.equals("false") && r.equals("false")) {
+					return "false";
+				}
+				return "unknown";
+			}
+		}
+		
+		Set xxx = new HashSet();
+		List lhs = subst_new(where.lhs, k, keys, xxx);
+		Set yyy = new HashSet();
+		List rhs = subst_new(where.rhs, k, keys, yyy);
+		if (!xxx.isEmpty() || !yyy.isEmpty()) {
+			return "unknown";
+		}
+		boolean b = I.getKB().equiv(lhs, rhs);
+		return b ? "true" : "false";
+	}
+	
+	public static <C> XCtx<C> flower2(FLOWER2 flower, XCtx<C> I) {
+		XCtx c = frozen(flower, I.schema); 
+		
+		Set<Map<String, Triple<C, C, List<C>>>> ret = new HashSet<>();
+		Map<String, Triple<C, C, List<C>>> m = new HashMap<>();
+		ret.add(m);
+		
+		for (String var : flower.from.keySet()) {
+			String node = flower.from.get(var);
+			Set<Map<String, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
+			for (Map<String, Triple<C, C, List<C>>> tuple : ret) {
+				outer: for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", (C)node)) {
+					Map<String, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
+					merged.put(var, t);
+					String result = eval(flower.where, merged, flower.from.keySet(), I);
+					if (result.equals("false")) {
+						continue outer;
+					}
+					ret2.add(merged);
+				}
+			}
+			ret = ret2;
+		}
+		
+		//instance
+		Set ids = new HashSet<>();
+		Map types = new HashMap<>();
+		Set eqs = new HashSet<>();
+		//schema
+		Set ids2 = new HashSet<>();
+		Map types2 = new HashMap<>();
+		Set eqs2 = new HashSet<>();
+		ids2.add("_Q");
+		types2.put("_Q", new Pair<>("_Q", "_Q"));
+		for (Map<String, Triple<C, C, List<C>>> k : ret) {
+			types.put(k, new Pair("_1", "_Q"));
+			for (String edge : flower.select.keySet()) {
+				Object tgt = c.type(flower.select.get(edge)).second;
+				if (!I.global.ids.contains(tgt)) {
+					throw new RuntimeException("Selection path " + edge + " does not target a type");
+				}
+				types2.put(edge, new Pair<>("_Q", tgt));
+
+				List lhs = new LinkedList();
+				lhs.add(k);
+				lhs.add(edge);
+				//must normalize in I
+				List<C> rhs0 = subst_new(flower.select.get(edge), k, new HashSet(), new HashSet());
+				Triple<C,C,List<C>> rhs = I.find_fast(new Triple((C)"_1", (C)tgt, rhs0));
+				List rhsX = new LinkedList();
+				if (I.schema.cat().hom((C)"_1", (C)tgt).contains(rhs)) {
+					rhsX.add(rhs.first);
+					rhsX.addAll(rhs.third);
+				} else {
+					rhsX.add(rhs);
+				}
+				eqs.add(new Pair(lhs, rhsX));
+				
+			}
+		} 
+		
+		for (C t : I.global.ids) {
+			for (Triple<C, C, List<C>> arr : I.cat().hom((C)"_1", t)) {
+				if (I.global.cat().hom((C)"_1", t).contains(arr)) {
+					continue;
+				}
+				types.put(arr, new Pair<>("_1", t));
+				for (Entry<C, Pair<C, C>> e : I.global.types.entrySet()) {
+					if (!e.getValue().first.equals(t)) {
+						continue;
+					}
+					List lhs = new LinkedList();
+					lhs.add(arr);
+					lhs.add(e.getKey());
+					
+					List<C> rhs0 = new LinkedList<>();
+					//rhs0.add(arr.second);
+					rhs0.addAll(arr.third);
+					rhs0.add(e.getKey());
+					Triple<C,C,List<C>> rhsX = I.find_fast(new Triple<>((C)"_1", e.getValue().second, rhs0));
+					List rhs = new LinkedList();
+					if (I.schema.cat().hom((C)"_1", (C)e.getValue().second).contains(rhsX)) {
+						rhs.add(rhsX.first);
+						rhs.addAll(rhsX.third);
+					} else {
+						rhs.add(rhsX);
+					}
+					eqs.add(new Pair<>(lhs, rhs));
+				}
+			}
+		}
+		
+		XCtx c2 = new XCtx(ids2, types2, eqs2, I.global, null, "schema");		
+		XCtx<C> J = new XCtx<C>(ids, types, eqs, I.global, c2, "instance");
+		J.saturated = true; 
+		return J;
+	}
+	
+	public static XCtx flower(Flower e, XCtx I) {
+		return flower2(convert(e), I);
+	}
+	
+	public static FLOWER2 convert(Flower flower) {
+		XBool where = new XBool(true);
+		for (Pair<List<String>, List<String>> eq : flower.where) {
+			where = new XBool(new XBool(eq.first, eq.second), where, true);
+		}
+		return new FLOWER2(flower.select, flower.from, where, flower.src);
+	}
+	
+	/*
 	public static XCtx flower(Flower e, XCtx I) {
 		Set ids = new HashSet<>(I.schema.ids);
 		Map types = new HashMap<>(I.schema.types);
@@ -677,7 +896,8 @@ edge f:X->Y in S (including edges in type, like length or succ),
 				
 		return m2.delta(J);
 	}
-	
+	*/
+	/*
 	private static Set<Flower> normalize(FLOWER2 e) {
 		Set<Flower> ret = new HashSet<>();
 		
@@ -707,7 +927,8 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		}
 		return ret;
 	}
-	
+	*/
+	/*
 	public static XCtx FLOWER(FLOWER2 e0, XCtx I) {
 		Set ids = new HashSet<>(I.schema.ids);
 		Map types = new HashMap<>(I.schema.types);
@@ -845,7 +1066,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return L.rel();
 	}
 	
-	
+	*/
 	
 	
 	

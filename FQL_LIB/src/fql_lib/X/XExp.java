@@ -16,6 +16,251 @@ import fql_lib.Util;
 
 public abstract class XExp {
 	
+	public static class Id extends XExp {
+		
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+		boolean isQuery;
+		public XExp C;
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((C == null) ? 0 : C.hashCode());
+			result = prime * result + (isQuery ? 1231 : 1237);
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Id other = (Id) obj;
+			if (C == null) {
+				if (other.C != null)
+					return false;
+			} else if (!C.equals(other.C))
+				return false;
+			if (isQuery != other.isQuery)
+				return false;
+			return true;
+		}
+		public Id(boolean isQuery, XExp c) {
+			super();
+			this.isQuery = isQuery;
+			C = c;
+		}
+		
+	}
+	
+	public static class Compose extends XExp {
+		
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+		XExp f, g;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((f == null) ? 0 : f.hashCode());
+			result = prime * result + ((g == null) ? 0 : g.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Compose other = (Compose) obj;
+			if (f == null) {
+				if (other.f != null)
+					return false;
+			} else if (!f.equals(other.f))
+				return false;
+			if (g == null) {
+				if (other.g != null)
+					return false;
+			} else if (!g.equals(other.g))
+				return false;
+			return true;
+		}
+
+		public Compose(XExp f, XExp g) {
+			super();
+			this.f = f;
+			this.g = g;
+		}
+		
+		
+		
+	}
+	
+	public static class Apply extends XExp {
+		XExp f, I;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((f == null) ? 0 : f.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Apply other = (Apply) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (f == null) {
+				if (other.f != null)
+					return false;
+			} else if (!f.equals(other.f))
+				return false;
+			return true;
+		}
+
+		public Apply(XExp f, XExp i) {
+			super();
+			this.f = f;
+			I = i;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
+	
+	public static class Iter extends XExp {
+		XExp f, initial;
+		int num;
+		
+		public Iter(XExp f, XExp initial, int num) {
+			super();
+			this.f = f;
+			this.initial = initial;
+			this.num = num;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((f == null) ? 0 : f.hashCode());
+			result = prime * result + ((initial == null) ? 0 : initial.hashCode());
+			result = prime * result + num;
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Iter other = (Iter) obj;
+			if (f == null) {
+				if (other.f != null)
+					return false;
+			} else if (!f.equals(other.f))
+				return false;
+			if (initial == null) {
+				if (other.initial != null)
+					return false;
+			} else if (!initial.equals(other.initial))
+				return false;
+			if (num != other.num)
+				return false;
+			return true;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+	}
+	
+	public static class XQueryExp extends XExp {
+		XExp pi, delta, sigma;
+		 
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((delta == null) ? 0 : delta.hashCode());
+			result = prime * result + ((pi == null) ? 0 : pi.hashCode());
+			result = prime * result + ((sigma == null) ? 0 : sigma.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XQueryExp other = (XQueryExp) obj;
+			if (delta == null) {
+				if (other.delta != null)
+					return false;
+			} else if (!delta.equals(other.delta))
+				return false;
+			if (pi == null) {
+				if (other.pi != null)
+					return false;
+			} else if (!pi.equals(other.pi))
+				return false;
+			if (sigma == null) {
+				if (other.sigma != null)
+					return false;
+			} else if (!sigma.equals(other.sigma))
+				return false;
+			return true;
+		}
+
+		public XQueryExp(XExp pi, XExp delta, XExp sigma) {
+			super();
+			this.pi = pi;
+			this.delta = delta;
+			this.sigma = sigma;
+		}
+		
+		
+		
+	}
+	
 	public static class XBool {
 		
 		@Override
@@ -33,9 +278,12 @@ public abstract class XExp {
 			if (isFalse != null) {
 				return "false";
 			}
+			if (not != null) {
+				return "not " + not;
+			}
 			throw new RuntimeException();
 		}
-		
+		/*
 		public void normalize() {
 			if (l == null && r == null) {
 				return;
@@ -114,7 +362,10 @@ public abstract class XExp {
 			this.lhs = x.lhs;
 			this.rhs = x.rhs;
 		}
-		
+		*/
+		public XBool(XBool not) {
+			this.not = not;
+		}
 		public XBool(List<String> lhs, List<String> rhs) {
 			this.lhs = lhs;
 			this.rhs = rhs;
@@ -137,51 +388,10 @@ public abstract class XExp {
 		public List<String> lhs, rhs;
 		public XBool l,r;
 		public boolean isAnd;
+		public XBool not;
 		
 		public Object isTrue, isFalse;
 		
-		public List<Pair<List<String>, List<String>>> fromAnd() {
-			if (lhs != null && rhs != null) {
-				List<Pair<List<String>, List<String>>> ret = new LinkedList<>();
-				ret.add(new Pair<>(lhs, rhs));
-				return ret;
-			}
-			if (isTrue != null) {
-				return new LinkedList<>();
-			}
-			if (!isAnd) {
-				throw new RuntimeException("Cannot fromAnd " + this);
-			}
-			if (isFalse != null) {
-				throw new RuntimeException();
-			}
-			if (l == null || r == null) {
-				throw new RuntimeException();
-			}
-
-			List<Pair<List<String>, List<String>>> l2 = l.fromAnd();
-			List<Pair<List<String>, List<String>>> r2 = r.fromAnd();
-			
-			List<Pair<List<String>, List<String>>> ret = new LinkedList<>();
-			ret.addAll(l2);
-			ret.addAll(r2);
-			
-			return ret;
-		}
-		public List<List<Pair<List<String>, List<String>>>> fromOr() {
-			List<List<Pair<List<String>, List<String>>>> ret = new LinkedList<>();
-			//a + b
-			if (l != null && r != null && !isAnd) {
-				ret.addAll(l.fromOr());
-				ret.addAll(r.fromOr());
-			} else if (isFalse != null) {
-			}
-			else {			
-				ret.add(fromAnd());
-			}
-			return ret;
-		}
-
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -191,6 +401,7 @@ public abstract class XExp {
 			result = prime * result + ((isTrue == null) ? 0 : isTrue.hashCode());
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((lhs == null) ? 0 : lhs.hashCode());
+			result = prime * result + ((not == null) ? 0 : not.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
 			result = prime * result + ((rhs == null) ? 0 : rhs.hashCode());
 			return result;
@@ -226,6 +437,11 @@ public abstract class XExp {
 				if (other.lhs != null)
 					return false;
 			} else if (!lhs.equals(other.lhs))
+				return false;
+			if (not == null) {
+				if (other.not != null)
+					return false;
+			} else if (!not.equals(other.not))
 				return false;
 			if (r == null) {
 				if (other.r != null)
@@ -304,6 +520,58 @@ public abstract class XExp {
 			this.from = from;
 			this.where = where;
 			this.src = src;
+			if (DEBUG.debug.reorder_joins) {
+				this.from = sort(from);
+			} else {
+				this.from = from;
+			}
+		}
+		
+		private void count(XBool b, Map<String, Integer> counts) {
+			if (b.isTrue != null || b.isFalse != null) {
+				return;
+			}
+			if (b.not != null) {
+				count(b.not, counts);
+				return;
+			}
+			if (b.l != null && b.r != null) {
+				count(b.l, counts);
+				count(b.r, counts);
+				return;
+			}
+			countX(b.lhs, counts);
+			countX(b.rhs, counts);
+		}
+		
+		private void countX(List<String> l, Map<String, Integer> counts) {
+			for (String s : l) {
+				Integer i = counts.get(s);
+				if (i == null) {
+					continue;
+				}
+				counts.put(s, i+1);
+			}
+		}
+
+		public Map<String, String> sort(Map<String, String> m) {
+			Map<String, Integer> count = new HashMap<>();
+			for (String s : m.keySet()) {
+				count.put(s, 0);
+			}
+			count(where, count);
+			List<String> l = new LinkedList<>(m.keySet());
+			l.sort(new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+					return count.get(o2) - count.get(o1);
+				}
+			});
+			Map<String, String> ret = new LinkedHashMap<>();
+			for (String s : l) {
+				ret.put(s, m.get(s));
+			}
+			return ret;
 		}
 
 		@Override
@@ -1013,35 +1281,7 @@ public abstract class XExp {
 	@Override
 	public abstract int hashCode();
 	
-	public interface XExpVisitor<R, E> {
-		public R visit (E env, XSchema e);
-		public R visit (E env, XMapConst e);
-		public R visit (E env, XTransConst e);
-		public R visit (E env, XSigma e);
-		public R visit (E env, XDelta e);
-		public R visit (E env, XInst e);
-		public R visit (E env, Var e);
-		public R visit (E env, XTy e);
-		public R visit (E env, XFn e);
-		public R visit (E env, XConst e);
-		public R visit (E env, XEq e);
-		public R visit (E env, XUnit e);
-		public R visit (E env, XCounit e);
-		public R visit (E env, XPi e);
-		public R visit (E env, XRel e);
-		public R visit (E env, XCoprod e);
-		public R visit (E env, XInj e);
-		public R visit (E env, XMatch e);
-		public R visit (E env, XVoid e);
-		public R visit (E env, XFF e);
-		public R visit (E env, XTimes e);
-		public R visit (E env, XProj e);
-		public R visit (E env, XPair e);
-		public R visit (E env, XOne e);
-		public R visit (E env, XTT e);
-		public R visit (E env, Flower e);
-		public R visit (E env, FLOWER2 e);
-	}
+	
 	
 	public static class XTy extends XExp {
 		@Override
@@ -1774,5 +2014,39 @@ public abstract class XExp {
 		
 	}
 	
+	public interface XExpVisitor<R, E> {
+		public R visit (E env, XSchema e);
+		public R visit (E env, XMapConst e);
+		public R visit (E env, XTransConst e);
+		public R visit (E env, XSigma e);
+		public R visit (E env, XDelta e);
+		public R visit (E env, XInst e);
+		public R visit (E env, Var e);
+		public R visit (E env, XTy e);
+		public R visit (E env, XFn e);
+		public R visit (E env, XConst e);
+		public R visit (E env, XEq e);
+		public R visit (E env, XUnit e);
+		public R visit (E env, XCounit e);
+		public R visit (E env, XPi e);
+		public R visit (E env, XRel e);
+		public R visit (E env, XCoprod e);
+		public R visit (E env, XInj e);
+		public R visit (E env, XMatch e);
+		public R visit (E env, XVoid e);
+		public R visit (E env, XFF e);
+		public R visit (E env, XTimes e);
+		public R visit (E env, XProj e);
+		public R visit (E env, XPair e);
+		public R visit (E env, XOne e);
+		public R visit (E env, XTT e);
+		public R visit (E env, Flower e);
+		public R visit (E env, FLOWER2 e);
+		public R visit (E env, XQueryExp e);
+		public R visit (E env, Apply e);
+		public R visit (E env, Iter e);
+		public R visit (E env, Id e);
+		public R visit (E env, Compose e);
+	}
 
 }

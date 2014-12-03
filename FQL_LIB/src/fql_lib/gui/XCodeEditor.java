@@ -48,6 +48,10 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 				" \"\"");
 		ctm.addTemplate(ct);
 		
+		ct = new StaticCodeTemplate("query", "query ",
+				"{\n\tpi;\n\tdelta;\n\tsigma;\n} ");
+		ctm.addTemplate(ct);
+		
 		ct = new StaticCodeTemplate("flower", "flower ",
 				"{\n\tselect;\n\tfrom;\n\twhere;\n} ");
 		ctm.addTemplate(ct);

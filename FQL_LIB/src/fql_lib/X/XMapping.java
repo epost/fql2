@@ -27,6 +27,36 @@ import fql_lib.gui.FQLTextPanel;
 public class XMapping<C, D> implements XObject {
 	public Map<Pair<List<C>, List<C>>, String> unprovable = new HashMap<>();
 
+	public XMapping(XCtx C, String kind) {
+		this.kind = kind;
+		src = C;
+		dst = C;
+		em = new HashMap();
+		for (Object c : C.allTerms()) {
+			List l = new LinkedList();
+			l.add(c);
+			em.put((C)c, l);
+		}
+	}
+	
+	public <X> XMapping(XMapping<C,X> F, XMapping<X,D> G) {
+		if (!F.kind().equals(G.kind())) {
+			throw new RuntimeException("Mismatch on " + F + " and " + G);
+		}
+		if (!F.dst.equals(G.src)) {
+			throw new RuntimeException("Dom/Cod mismatch on " + F + " and " + G);
+		}
+		this.kind = G.kind;
+		src = F.src;
+		dst = G.dst;
+		em = new HashMap<>();
+		for (C c : src.allTerms()) {
+			List<X> l1 = F.em.get(c);
+			List<D> l2 = l1.stream().flatMap(x -> G.em.get(x).stream()).collect(Collectors.toList());
+			em.put(c, l2);
+		}
+	}
+	
 	
 	@Override
 	public String kind() {
@@ -127,23 +157,8 @@ public class XMapping<C, D> implements XObject {
 		JTabbedPane pane = new JTabbedPane();
 
 		if (DEBUG.debug.x_text) {
-		// System.out.println(this);
-		String ret = Util.sep(
-				src.allTerms().stream().map(x -> x + " -> " + Util.sep(em.get(x), "."))
-						.collect(Collectors.toList()), "\n");
-		ret += "\n";
-		for (Pair<List<C>, List<C>> eq : src.allEqs()) {
-			List<D> lhs = apply(eq.first);
-			List<D> rhs = apply(eq.second);
-			ret += "\nEquation: " + Util.sep(eq.first, ".") + " = " + Util.sep(eq.second, ".");
-			ret += "\nTransformed: " + Util.sep(lhs, ".") + " = " + Util.sep(rhs, ".");
-			ret += "\nProvable: " + unprovable.get(eq);
-			ret += "\n";
-		}
-
-		ret = ret.trim();
-
-		pane.addTab("Text", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", ret));
+			String ret = toString();
+			pane.addTab("Text", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", ret));
 		}
 		
 		if (src.schema != null) {
@@ -235,10 +250,30 @@ public class XMapping<C, D> implements XObject {
 		}
 	}
 
+	String toString = null;
 	@Override
 	public String toString() {
-		return "XMapping [src=" + src + ", dst=" + dst + ", em=" + em + ", unprovable="
-				+ unprovable + "]";
+		if (toString != null) {
+			return toString;
+		}
+		// System.out.println(this);
+		String ret = Util.sep(
+				src.allTerms().stream().map(x -> x + " -> " + Util.sep(em.get(x), "."))
+						.collect(Collectors.toList()), "\n");
+		ret += "\n";
+		for (Pair<List<C>, List<C>> eq : src.allEqs()) {
+			List<D> lhs = apply(eq.first);
+			List<D> rhs = apply(eq.second);
+			ret += "\nEquation: " + Util.sep(eq.first, ".") + " = " + Util.sep(eq.second, ".");
+			ret += "\nTransformed: " + Util.sep(lhs, ".") + " = " + Util.sep(rhs, ".");
+			ret += "\nProvable: " + unprovable.get(eq);
+			ret += "\n";
+		}
+
+		ret = ret.trim();
+		toString = ret;
+		return ret;
+
 	}
 
 	public XCtx<D> apply0(XCtx<C> I) {
@@ -608,13 +643,12 @@ public class XMapping<C, D> implements XObject {
 					j.addAll(em.get(c));
 					Triple rhs = new Triple(dsrc, ddst, j);
 				//	System.out.println("looking for " + rhs + " in\n\n" + Util.sep(I.cat().hom(dsrc, ddst), "\n\n"));
-					Triple rhsX = XCtx.find(I.getKB(), rhs, I.cat().hom(dsrc, ddst));
+					Triple rhsX = I.find_fast(rhs);
 					List g = new LinkedList<>();
 					g.add(new Pair<>(rhsX, t.second));
 
 					if (I.global.allIds().contains(t.second)) { //a' in G
-						Triple ooo = XCtx.find(I.global.getKB(), rhsX,
-							I.global.cat().arrows());
+						Triple ooo = I.global.find_fast(rhsX);
 						if (ooo != null) {
 							List lll = new LinkedList();
 							if (((List)ooo.third).isEmpty()) {
@@ -642,7 +676,7 @@ public class XMapping<C, D> implements XObject {
 	}
 	
 	private boolean isSkipKey(C c, Triple<D, D, List<D>> f) {
-		if (f.first.equals("_1")) { //added
+		/* if (f.first.equals("_1")) { //added
 			if (src.global.cat().arrows().contains(f)) {
 				return true;
 			}
@@ -654,7 +688,7 @@ public class XMapping<C, D> implements XObject {
 					return true;
 				}
 			}
-		}	
+		}	*/ //TODO faster?
 		return false;
 	}
 
@@ -716,8 +750,7 @@ public class XMapping<C, D> implements XObject {
 						List<D> f0 = new LinkedList<>();
 						f0.add(h);
 						f0.addAll(f.third);
-						Triple<D, D, List<D>> key = dst.find(dst.getKB(), new Triple<>(t.first,
-								f.second, f0), dst.cat().arrows()); 
+						Triple<D, D, List<D>> key = dst.find_fast(new Triple<>(t.first, f.second, f0)); 
 						if (key == null) {
 							throw new RuntimeException("Cannot find " + key + " in "
 									+ dst.cat().arrows());
@@ -798,7 +831,7 @@ public class XMapping<C, D> implements XObject {
 				i2.add(0, i.first);
 				List<C> i2ap = t.apply(i2);
 				Triple<C, C, List<C>> i2ap0 = new Triple<>(i.first, i.second, i2ap);
-				Triple<C, C, List<C>> found = t.dst.find(t.dst.getKB(), i2ap0, t.dst.cat().hom(i.first, i.second));
+				Triple<C, C, List<C>> found = t.dst.find_fast(i2ap0);
 				if (found == null) {
 					throw new RuntimeException("not found " + i2ap0 + " in " + t.src.cat().hom(i.first, i.second));
 				}
@@ -838,7 +871,7 @@ public class XMapping<C, D> implements XObject {
 				fFg.addAll(0, f.third);
 				fFg.add(0, f.first);
 				D t = em.get(c0).get(0);
-				Triple<D, D, List<D>> found = dst.find(dst.getKB(), new Triple<>(f.first, t, fFg), dst.cat().hom(f.first, t)); //morally fFg
+				Triple<D, D, List<D>> found = dst.find_fast(new Triple<>(f.first, t, fFg)); //morally fFg
 				if (found == null) {
 					throw new RuntimeException();
 				}
@@ -848,7 +881,7 @@ public class XMapping<C, D> implements XObject {
 				List<C> yIg = new LinkedList<>(y.third);
 				yIg.add(0, y.first);
 				yIg.addAll(g.third);
-				Triple<C, C, List<C>> found2 = I.find(I.getKB(), new Triple<>((C)"_1", g.second, yIg), I.cat().hom((C)"_1", g.second)); //morally yIg
+				Triple<C, C, List<C>> found2 = I.find_fast(new Triple<>((C)"_1", g.second, yIg)); //morally yIg
 				if (found2 == null) {
 					throw new RuntimeException();
 				}
@@ -1005,13 +1038,17 @@ public class XMapping<C, D> implements XObject {
 				}
 			}
 			ret2.put(d,  bad_thetas);
+//			System.out.println("bad thetas at " + d + " is " + bad_thetas);
 			
 			List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> thetas = new LinkedList<>();
 			Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta = new LinkedHashMap<>();
-			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2 = new LinkedHashMap<>(); //ok (irrelevent)
+			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2 = new LinkedHashMap<>(); 
 			for (C c : src.allIds()) {
 				for (Triple<D, D, List<D>> f : dst.cat().hom(d, em.get(c).get(0))) {
-					if (src.global.allIds().contains(c)) {
+					if (isSkipKey(c,f)) {
+						continue;
+					}
+/*					if (src.global.allIds().contains(c)) {
 						if (f.first.equals("_1")) {
 							if (src.global.cat().arrows().contains(f)) {
 								continue;
@@ -1026,22 +1063,26 @@ public class XMapping<C, D> implements XObject {
 								}
 							}
 						}
-					}
+					} */
 					theta.put(new Pair<>(c, f), null);
 					theta2.put(new Pair<>(c, f), null);
 				}
 			}
-//			System.out.println("at " + d + " ordering is " + theta.keySet());
+
+			if (theta.keySet().isEmpty()) {
+				thetas.add(new HashMap<>());
+			} else {
 			for (Pair<C, Triple<D, D, List<D>>> cf : theta.keySet()) {
 				for (Triple<C, C, List<C>> x : I.cat().hom((C)"_1", cf.first)) {
 					try_branch(I, thetas, theta, theta2, cf, x, bad_thetas);
-					
 					//break;
 				}
-				break;
+				break; //this is fine - just do first key
 			}
-	//		System.out.println("at " + d + ", " + thetas.size());
+			}
+		//	System.out.println("at " + d + ", thetas are " + thetas);
 			ret.put(d, thetas);
+			
 		}
 		
 		
@@ -1070,7 +1111,7 @@ public class XMapping<C, D> implements XObject {
 					List<D> tofind = new LinkedList<>();
 					tofind.add(x);
 					tofind.addAll(f.third);
-					Triple<D, D, List<D>> found = J.find(J.getKB(), new Triple<>((D)"_1", f.second, tofind), J.cat().hom((D)"_1", f.second));
+					Triple<D, D, List<D>> found = J.find_fast(new Triple<>((D)"_1", f.second, tofind));
 					if (found == null) {
 						throw new RuntimeException();
 					}
@@ -1082,7 +1123,7 @@ public class XMapping<C, D> implements XObject {
 						theta.put(new Pair<>(c, f), pr.first);						
 					} else {
 						Triple tr = new Triple<>("_1", c, g);
-						Object xxx = deltaI.find(deltaI.getKB(), tr, deltaI.cat().arrows());
+						Object xxx = deltaI.find_fast(tr);
 						if (xxx == null) {
 							throw new RuntimeException("cannot find " + tr);
 						}
