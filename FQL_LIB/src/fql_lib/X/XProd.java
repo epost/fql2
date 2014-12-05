@@ -771,11 +771,15 @@ edge f:X->Y in S (including edges in type, like length or succ),
 				Triple<C,C,List<C>> rhs = I.find_fast(new Triple((C)"_1", (C)tgt, rhs0));
 				List rhsX = new LinkedList();
 				if (I.schema.cat().hom((C)"_1", (C)tgt).contains(rhs)) {
-					rhsX.add(rhs.first);
-					rhsX.addAll(rhs.third);
+					if (rhs.third.isEmpty()) {
+						rhsX.add(rhs.first);
+					} else {
+						rhsX.addAll(rhs.third);
+					}
 				} else {
 					rhsX.add(rhs);
 				}
+			//	System.out.println("adding 1: " + new Pair(lhs, rhsX));
 				eqs.add(new Pair(lhs, rhsX));
 				
 			}
@@ -802,11 +806,16 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					Triple<C,C,List<C>> rhsX = I.find_fast(new Triple<>((C)"_1", e.getValue().second, rhs0));
 					List rhs = new LinkedList();
 					if (I.schema.cat().hom((C)"_1", (C)e.getValue().second).contains(rhsX)) {
-						rhs.add(rhsX.first);
-						rhs.addAll(rhsX.third);
+						if (rhsX.third.isEmpty()) {
+							rhs.add(rhsX.first);
+						} else {
+							rhs.addAll(rhsX.third);
+						}
 					} else {
 						rhs.add(rhsX);
 					}
+					//System.out.println("adding 2: " + new Pair(lhs, rhs));
+					
 					eqs.add(new Pair<>(lhs, rhs));
 				}
 			}

@@ -1151,15 +1151,15 @@ public class XCtx<C> implements XObject {
 					List<C> vl = new LinkedList<>();
 					vl.add(v);
 					Triple<C, C, List<C>> sofar = new Triple<>(type(v).first, type(v).second, vl);
-
 					
+					//System.out.println("want to compose " + f + " and " + g);
 				//	System.out.println("starting at " + sofar);
 					List gnX = new LinkedList<>(g.third);
 					for (C gn : g.third) {
 						gnX.remove(0);
 				//		System.out.println("doing edge " + gn);
 						sofar = findEq(sofar, gn);
-				//		System.out.println("result " + sofar);
+//						System.out.println("result " + sofar);
 						if (sch.arrows().contains(sofar)) {
 							List hhh = new LinkedList();
 							hhh.add((C) ("!_" + a));
