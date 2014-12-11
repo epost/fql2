@@ -1652,7 +1652,7 @@ public class XCtx<C> implements XObject {
 		return true;
 	}
 
-	public XCtx<C> rel() {
+	public XCtx<C> rel2() {
 		Set<Pair<List<C>, List<C>>> new_eqs = new HashSet<>(eqs);
 		if (schema == null) {
 			throw new RuntimeException("Problem with relationalize");
@@ -1782,6 +1782,121 @@ public class XCtx<C> implements XObject {
 		eqs = new_eqs;
 	}
 	
+	public Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> obs(Triple<C, C, List<C>> i) {
+		if (!i.first.equals("_1")) {
+			throw new RuntimeException();
+		}
+		if (global.allIds().contains(i.second)) {
+			throw new RuntimeException();
+		}
+		Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> ret = new HashMap<>();
+		for (C t : global.allIds()) {
+			for (Triple<C, C, List<C>> arr : cat().hom(i.second, t)) {
+				Triple<C, C, List<C>> val = cat().compose(i, arr);
+				ret.put(arr, val);
+			}
+		}
+		return ret;
+	}
 	
+	
+	public List<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> obs(List<C> i) {
+		Function<C, Object> f = c -> {
+			if (schema.allTerms().contains(c)) {
+				return c;
+			}
+			List<C> l = new LinkedList<>();
+			l.add(c);
+			Triple<C, C, List<C>> t = new Triple<>(type(c).first, type(c).second, l); 
+			Triple<C, C, List<C>> u = find_fast(t);
+			return obs(u);
+		};
+		Object ret = i.stream().map(f).collect(Collectors.toList());
+		return (List<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>>) ret;
+	}
+	
+	
+	
+	public XCtx<C> rel() {
+		Set<Pair<List<C>, List<C>>> new_eqs = new HashSet<>();
+		if (schema == null) {
+			throw new RuntimeException("Problem with relationalize");
+		}
+		Map new_types = new HashMap<>();
+		
+		Set<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> gens = new HashSet<>();
+		Map<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>, Triple<C, C, List<C>>> genMap = new HashMap<>();
+		Map<Triple<C, C, List<C>>, Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> genMap2= new HashMap<>();
+		
+		for (C c : schema.ids) {
+			if (global.ids.contains(c)) {
+				continue;
+			}
+			for (Triple<C, C, List<C>> i : cat().hom((C)"_1", c)) {
+				Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> o = obs(i);
+				new_types.put(o, new Pair("_1", c));
+				genMap.put(o, i);
+				genMap2.put(i,o);
+			}
+		}
+		
+		for (Object iX : new_types.keySet()) {
+			Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> o = (Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>) iX;
+			Triple<C, C, List<C>> i = genMap.get(o);
+			for (C e : allTerms()) {
+				if (!type(e).first.equals(i.second)) {
+					continue;
+				}
+				List<C> lhs = new LinkedList<>();
+				lhs.add((C)o);
+				lhs.add(e);
+				
+				List<C> tofind = new LinkedList<>();
+				tofind.addAll(i.third);
+				tofind.add(e);
+				Triple<C, C, List<C>> rhs0 = new Triple<>(i.first, type(e).second, tofind);
+				Triple<C, C, List<C>> rhsX = find_fast(rhs0);
+				if (rhsX == null) {
+					throw new RuntimeException();
+				}
+				List<C> rhs = new LinkedList<>();
+				if (global.allIds().contains(type(e).second)) {
+					//is constant
+					if (rhsX.third.isEmpty()) {
+						rhs.add(rhsX.first);
+					} else {
+						rhs.addAll(rhsX.third);
+					}
+				} else {
+					Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> o2 = genMap2.get(rhsX);
+					if (o2 == null) {
+						throw new RuntimeException();
+					}
+					rhs.add((C)o2);
+				}
+				new_eqs.add(new Pair<>(lhs, rhs));
+			}
+		}		
+
+		XCtx<C> ret = new XCtx<>(new HashSet<>(), new_types, new_eqs, global, schema, kind);
+		ret.saturated = true;
+		return ret;
+	}
 	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

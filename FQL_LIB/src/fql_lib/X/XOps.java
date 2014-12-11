@@ -480,6 +480,21 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 		throw new RuntimeException("Cannot compose in " + e);
 	}
+
+	@Override
+	public XObject visit(XProgram env, XPoly e) {
+		Object a = e.src_e.accept(env, this);
+		if (!(a instanceof XCtx)) {
+			throw new RuntimeException("Not a schema: " + a);
+		}
+		Object b = e.dst_e.accept(env, this);
+		if (!(a instanceof XCtx)) {
+			throw new RuntimeException("Not a schema: " + a);
+		}
+		e.src = (XCtx) a;
+		e.dst = (XCtx) b;
+		return e;
+	}
 	
 
 }

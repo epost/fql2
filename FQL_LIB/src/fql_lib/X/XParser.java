@@ -21,6 +21,7 @@ import fql_lib.Triple;
 import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.XInst;
+import fql_lib.X.XPoly.Block;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class XParser {
@@ -35,7 +36,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "not", "id", "ID", "apply", "iterate", "query", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "query", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -99,7 +100,7 @@ public class XParser {
 		Parser<?> apply = Parsers.tuple(term("apply"), ref.lazy(), ref.lazy());
 		Parser<?> iter = Parsers.tuple(term("iterate"), Terminals.IntegerLiteral.PARSER, ref.lazy(), ref.lazy());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { id1, id2, comp, apply, iter, query, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> a = Parsers.or(new Parser<?>[] { poly(ref), id1, id2, comp, apply, iter, query, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 
@@ -425,6 +426,11 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 		if (c instanceof String) {
 			return new XExp.Var((String) c);
 		}
+		
+		try {
+			return fromPoly((Tuple4)c);
+		} catch (Exception e) { }
+		
 		
 		try {
 			return toCatConst(c);
@@ -808,6 +814,94 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 		
 		return ret;
 	}
+/*{ from a1:A, a2:A;
+           where a1.att2=a2.f.att1;
+           attributes att3 = a2.att2,
+                      att4 = a2.att2;
+           edges e1 = {b2=a1.f, b3=a1.f} : q2,
+                 e2 = { ... } : q3; 
+           } */
+	public static final Parser<?> block() {
+		Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(",")).between(term("for"), term(";"));
+		Parser p2 = Parsers.tuple(ident().sepBy1(term(".")), term("="), ident().sepBy1(term("."))).sepBy(term(",")).between(term("where"), term(";"));
+		Parser p3 = Parsers.tuple(ident(), term("="), ident().sepBy1(term("."))).sepBy(term(",")).between(term("attributes"), term(";"));
+		
+		Parser q = Parsers.tuple(ident(), term("="), ident().sepBy1(term("."))).sepBy(term(",")).between(term("{"), term("}"));
+		Parser a = Parsers.tuple(ident(), term("="), q, term(":"), ident());
+		Parser p4= a.sepBy(term(",")).between(term("edges"), term(";"));
+		
+		Parser p = Parsers.tuple(p1, p2, p3, p4);
+		return p.between(term("{"), term("}"));
+	}
+	
+	public static Block<String, String> fromBlock(Object o) {
+		Tuple4<List, List, List, List> t = (Tuple4<List, List, List, List>) o;
+		Map<String, String> from = new HashMap<>();
+		Set<Pair<List<String>, List<String>>> where = new HashSet<>();
+		Map<String, List<String>> attrs = new HashMap<>();
+		Map<String, Pair<String, Map<String, List<String>>>> edges = new HashMap<>();
+		
+		for (Object x : t.a) {
+			Tuple3 l = (Tuple3) x;
+			if (from.containsKey(l.a.toString())) {
+				throw new RuntimeException("Duplicate for: " + l.a);
+			}
+			from.put(l.a.toString(), l.c.toString());
+		}
+		
+		for (Object x : t.b) {
+			Tuple3 l = (Tuple3) x;
+			where.add(new Pair<>((List<String>)l.a, (List<String>)l.c));
+		}
+		
+		for (Object x : t.c) {
+			Tuple3 l = (Tuple3) x;
+			if (attrs.containsKey(l.a.toString())) {
+				throw new RuntimeException("Duplicate for: " + l.a);
+			}
+			attrs.put(l.a.toString(), (List<String>)l.c);
+		}
+		
+		for (Object x : t.d) {
+			Tuple5 l = (Tuple5) x;
+			if (from.containsKey(l.a.toString())) {
+				throw new RuntimeException("Duplicate for: " + l.a);
+			}
+			edges.put(l.a.toString(), new Pair<>(l.e.toString(), fromBlockHelper(l.c)));
+		}
 
-
+		return new Block<String, String>(from, where, attrs, edges);
+	}
+	
+	//{b2=a1.f, b3=a1.f}
+	public static Map<String, List<String>> fromBlockHelper(Object o) {
+		List<Tuple3> l = (List<Tuple3>) o;
+		Map<String, List<String>> ret = new HashMap<>();
+		for (Tuple3 t : l) {
+			if (ret.containsKey(t.a.toString())) {
+				throw new RuntimeException("Duplicate column: " + t.a);
+			}
+			ret.put(t.a.toString(), (List<String>)t.c);
+		}
+		return ret;
+	}
+	
+	public static Map<String, Pair<String, Block<String, String>>> fromBlocks(List l) {
+		Map<String, Pair<String, Block<String, String>>> ret = new HashMap<>();
+		for (Object o : l) {
+			Tuple5 t = (Tuple5) o;
+			Block<String, String> b = fromBlock(t.c);
+			ret.put(t.a.toString(), new Pair<>(t.e.toString(), b));
+		}
+		return ret;
+	}
+	public static XPoly<String, String> fromPoly(Tuple4 o) {
+		Map<String, Pair<String, Block<String, String>>> blocks = fromBlocks((List)o.a);
+		return new XPoly<String, String>(toExp(o.b), toExp(o.d), blocks);
+	}
+	public static final Parser<?> poly(Reference ref) {
+		Parser p = Parsers.tuple(ident(), term("="), block(), term(":"), ident());
+		Parser p2 = p.sepBy(term(",")).between(term("{"), term("}")).between(term("polynomial"), term(":"));
+		return Parsers.tuple(p2, ref.lazy(), term("->"), ref.lazy());
+	}
 }

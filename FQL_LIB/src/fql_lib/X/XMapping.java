@@ -1204,7 +1204,34 @@ public class XMapping<C, D> implements XObject {
 	}
 
 	public XMapping<C, D> rel() {
-		return new XMapping<>(src.rel(), dst.rel(), new HashMap<>(em), "homomorphism");
+		Map m = new HashMap<>();
+		
+		for (C c : src.terms()) {
+			Pair<C, C> t = src.type(c);
+			if (src.schema.allTerms().contains(c)) {
+				continue;
+			}
+			
+			List<C> l = new LinkedList<>();
+			l.add(c);
+			List<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> lx = src.obs(l);
+			
+			List<Map<Triple<D, D, List<D>>, Triple<D, D, List<D>>>> rx = dst.obs(em.get(c));
+			dst.rel().type((List<D>)rx);
+			
+			m.put(lx.get(0), rx);
+		}
+
+		for (Object o : src.schema.allTerms()) {
+			if (m.containsKey(o)) {
+				continue;
+			}
+			List l = new LinkedList();
+			l.add(o);
+			m.put(o, l);
+		} 
+
+		return new XMapping<>(src.rel(), dst.rel(), m, "homomorphism");
 	}
 
 }

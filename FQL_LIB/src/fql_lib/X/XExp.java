@@ -2047,6 +2047,7 @@ public abstract class XExp {
 		public R visit (E env, Iter e);
 		public R visit (E env, Id e);
 		public R visit (E env, Compose e);
+		public R visit (E env, XPoly e);
 	}
 
 }
