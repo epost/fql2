@@ -36,6 +36,9 @@ public class XDisplay implements FQLDisp {
 			if (obj instanceof XString) {
 				continue;
 			}
+			if (obj instanceof XPoly) {
+				continue;
+			}
 			frames.add(new Pair<>(obj.kind() + " " + c, obj.display()));
 		}
 		

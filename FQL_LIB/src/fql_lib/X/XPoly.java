@@ -1,7 +1,10 @@
 package fql_lib.X;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,6 +12,7 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 
+import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.gui.FQLTextPanel;
 
@@ -31,12 +35,52 @@ public class XPoly<C,D> extends XExp implements XObject {
 			this.where = where;
 			this.attrs = attrs;
 			this.edges = edges;
+			if (DEBUG.debug.reorder_joins) {
+				this.from = sort(from);
+			} else {
+				this.from = from;
+			}
+		}
+		
+		private void count(List<C> first, Map counts) {
+			for (C s : first) {
+				Integer i = (Integer) counts.get(s);
+				if (i == null) {
+					continue;
+				}
+				counts.put(s, i+1);
+			}
 		}
 
-		Map<String, C> from = new HashMap<>(); //String should be C
+		public Map<String, C> sort(Map m) {
+			Map count = new HashMap<>();
+			for (Object s : m.keySet()) {
+				count.put(s, 0);
+			}
+			for (Pair<List<C>, List<C>> k : where) {
+				count(k.first, count);
+				count(k.first, count);
+			}
+			List<String> l = new LinkedList<>(m.keySet());
+			l.sort(new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+					return ((Integer)count.get(o2)) - ((Integer)count.get(o1));
+				}
+			});
+			Map ret = new LinkedHashMap<>();
+			for (String s : l) {
+				ret.put(s, m.get(s));
+			}
+			return ret;
+		}
+		
+
+		Map<String, C> from = new HashMap<>(); 
 		Set<Pair<List<C>, List<C>>> where = new HashSet<>();
 		Map<D, List<C>> attrs = new HashMap<>();
 		Map<D, Pair<String, Map<D, List<C>>>> edges = new HashMap<>();
+		
 		@Override
 		public String toString() {
 			return "Block [from=" + from + ", where=" + where + ", attrs=" + attrs + ", edges="
@@ -59,7 +103,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 
 	@Override
 	public String toString() {
-		return "XPoly [src=" + src + ", dst=" + dst + ", blocks=" + blocks + "]";
+		return "XPoly [" + blocks + "]";
 	}
 
 	@Override

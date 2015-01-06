@@ -44,6 +44,7 @@ import fql_lib.X.XSqlToFql;
 import fql_lib.decl.Environment;
 import fql_lib.examples.Example;
 import fql_lib.examples.Examples;
+import fql_lib.nested.EnrichViewer;
 import fql_lib.nested.KBViewer;
 import fql_lib.nested.NraViewer;
 
@@ -174,13 +175,17 @@ public class GUI extends JPanel {
 		});
 		
 		MenuItem shredItem = new MenuItem("Shred");
-		transMenu.add(shredItem);
+		toolsMenu.add(shredItem);
 		shredItem.addActionListener(x -> { new NraViewer(); });
 		
 		MenuItem kbItem = new MenuItem("Knuth-Bendix");
-		transMenu.add(kbItem);
+		toolsMenu.add(kbItem);
 		kbItem.addActionListener(x -> { new KBViewer(); });
-		
+
+		MenuItem enrichItem = new MenuItem("Enrich");
+		toolsMenu.add(enrichItem);
+		enrichItem.addActionListener(x -> { new EnrichViewer(); });
+	
 		MenuItem raItem = new MenuItem("RA to FPQL");
 		transMenu.add(raItem);
 		raItem.addActionListener(x -> { new XRaToFpql(); });

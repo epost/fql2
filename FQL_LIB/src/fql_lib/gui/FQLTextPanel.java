@@ -14,6 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 import javax.swing.event.UndoableEditEvent;
@@ -29,7 +30,7 @@ import javax.swing.undo.UndoManager;
  */
 public class FQLTextPanel extends JPanel {
 
-	JTextArea area = new JTextArea();
+	public JTextArea area = new JTextArea();
 
 	public void setText(String s) {
 		area.setText(s);

@@ -413,14 +413,14 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 	@Override
 	public XObject visit(XProgram env, Apply e) {
 		XObject f = e.f.accept(env, this);
-		if (!(f instanceof XQuery)) {
+		if (!(f instanceof XPoly)) {
 			throw new RuntimeException("Not a query in " + e);
 		}
 		XObject i = e.I.accept(env, this);
-		if (!(f instanceof XCtx)) {
+		if (!(i instanceof XCtx)) {
 			throw new RuntimeException("Not an instance in " + e);
 		}
-		return ((XQuery)f).apply((XCtx)i);
+		return XProd.uberflower((XPoly)f, (XCtx)i);
 	}
 
 	@Override
@@ -496,5 +496,6 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		return e;
 	}
 	
+	//TODO join reordering for polys
 
 }

@@ -16,6 +16,7 @@ import fql_lib.Unit;
 import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.XBool;
+import fql_lib.X.XPoly.Block;
 
 public class XProd {
 	
@@ -388,7 +389,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	}
 	*/
 	
-	public static <C> List subst_new(List<String> eq, Map<String, Triple<C, C, List<C>>> tuple, Set<String> keys, Set xxx) {
+	public static <C,D,E> List subst_new(List<D> eq, Map<E, Triple<C, C, List<C>>> tuple, Set<E> keys, Set xxx) {
 		List ret = eq.stream().flatMap(x -> { 
 			List l = new LinkedList<>();
 			if (tuple.containsKey(x)) {
@@ -646,6 +647,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			S.type(where.rhs);
 		}
 	}
+	
 	public static XCtx frozen(FLOWER2 flower, XCtx S) {
 		Set ids = new HashSet<>();
 		Map types = new HashMap<>();
@@ -668,7 +670,31 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return ret;
 	}
 	
-	
+	public static XCtx frozen(Block flower, XCtx S) {
+		Set ids = new HashSet<>();
+		Map types = new HashMap<>();
+		Set eqs = new HashSet<>();
+		
+		for (Object k0 : flower.from.entrySet()) {
+			Entry k = (Entry) k0;
+			types.put(k.getKey(), new Pair<>("_1", k.getValue()));
+		}
+		//eqs.addAll(from.where);
+		
+		XCtx ret = new XCtx(ids, types, eqs, S.global, S, "instance");
+		
+		typecheck(convert2(flower.where), ret);
+		
+		for (Object k : flower.attrs.keySet()) {
+			Object v = flower.attrs.get(k);
+			ret.type((List)v);
+		}
+				
+		//TODO: typecheck edges?
+		
+		return ret;
+	}
+
 	
 	public static <C> String eval(XExp.XBool where, Map<String, Triple<C, C, List<C>>> k, Set<String> keys, XCtx I) {
 		if (where.isFalse != null) {
@@ -829,6 +855,14 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	
 	public static XCtx flower(Flower e, XCtx I) {
 		return flower2(convert(e), I);
+	}
+	
+	public static <C> XBool convert2(Set<Pair<List<C>, List<C>>> eqs) {
+		XBool where = new XBool(true);
+		for (Pair<List<C>, List<C>> eq : eqs) {
+			where = new XBool(new XBool((List<String>)eq.first, (List<String>)eq.second), where, true);
+		}
+		return where;
 	}
 	
 	public static FLOWER2 convert(Flower flower) {
@@ -1077,6 +1111,210 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	
 	*/
 	
+	public static <C,D> XCtx<D> uberflower(XPoly<C,D> poly, XCtx<C> I) {
+		//XCtx c = frozen(flower, I.schema); 
+		
+		Map<String, Set<Map<String, Triple<C, C, List<C>>>>> top = new HashMap<>();
+		Map<String, XCtx> frozens = new HashMap();
+		
+		for (String flower_name : poly.blocks.keySet()) {
+			Pair<D, Block<C, D>> flowerX = poly.blocks.get(flower_name);
+			D flower_dst = flowerX.first;
+			Block<C, D> flower = flowerX.second;
+
+			Set<Map<String, Triple<C, C, List<C>>>> ret = new HashSet<>();
+			Map<String, Triple<C, C, List<C>>> m = new HashMap<>();
+			ret.add(m);
+			for (String var : flower.from.keySet()) {
+				C node = flower.from.get(var);
+				Set<Map<String, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
+				for (Map<String, Triple<C, C, List<C>>> tuple : ret) {
+					outer: for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", (C)node)) {
+						Map<String, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
+						merged.put(var, t);
+						String result = eval(convert2(flower.where), merged, flower.from.keySet(), I);
+						if (result.equals("false")) {
+							continue outer;
+						}
+						ret2.add(merged);
+					}
+				}
+				ret = ret2;
+			}
+		
+			top.put(flower_name, ret);
+			frozens.put(flower_name, frozen(flower, I.schema));
+		}
+		
+		checkEdges(poly, frozens);
+				
+		//instance
+		Set<Map<String, Triple<C, C, List<C>>>> ids = new HashSet<>();
+		Map<Map<String, Triple<C, C, List<C>>>, Pair<Map<String, Triple<C, C, List<C>>>, Map<String, Triple<C, C, List<C>>>>> types = new HashMap<>();
+		Set<Pair<List<Map<String, Triple<C, C, List<C>>>>, List<Map<String, Triple<C, C, List<C>>>>>> eqs = new HashSet<>();
+		
+		for (String flower_name : poly.blocks.keySet()) {
+			Set<Map<String, Triple<C, C, List<C>>>> ret = top.get(flower_name);
+			Pair<D, Block<C, D>> flowerX = poly.blocks.get(flower_name);
+			D flower_dst = flowerX.first;
+			Block<C, D> flower = flowerX.second;
+			XCtx c = frozens.get(flower_name);
+			
+			for (Map<String, Triple<C, C, List<C>>> k : ret) {
+				types.put(k, new Pair("_1", flower_dst));
+				for (D edge : flower.attrs.keySet()) {
+					Object tgt = c.type(flower.attrs.get(edge)).second;
+					if (!I.global.ids.contains(tgt)) {
+						throw new RuntimeException("Selection path " + edge + " does not target a type");
+					}
 	
+					List lhs = new LinkedList();
+					lhs.add(k);
+					lhs.add(edge);
+					//must normalize in I
+					List<C> rhs0 = subst_new(flower.attrs.get(edge), k, new HashSet(), new HashSet());
+					Triple<C,C,List<C>> rhs = I.find_fast(new Triple((C)"_1", (C)tgt, rhs0));
+					List rhsX = new LinkedList();
+					if (I.schema.cat().hom((C)"_1", (C)tgt).contains(rhs)) {
+						if (rhs.third.isEmpty()) {
+							rhsX.add(rhs.first);
+						} else {
+							rhsX.addAll(rhs.third);
+						}
+					} else {
+						rhsX.add(rhs);
+					}
+					eqs.add(new Pair(lhs, rhsX));
+				}
+				
+				for (D edge : flower.edges.keySet()) {
+				//	Object tgt = c.type(flower.edges.get(edge).second).second;
+					D tgt = poly.dst.type(edge).second;
+					//if (!I.global.ids.contains(tgt)) {
+						//throw new RuntimeException("Selection path " + edge + " does not target a type");
+				//	}
+	
+					List lhs = new LinkedList();
+					lhs.add(k);
+					lhs.add(edge);
+					//must normalize in I
+					
+					Map rhs0Q = new HashMap();
+					for (D str : flower.edges.get(edge).second.keySet()) {
+						List<C> rhs0Z = subst_new(flower.edges.get(edge).second.get(str), k, new HashSet(), new HashSet());
+						rhs0Q.put(str,  rhs0Z);
+					}
+					
+					Map found = null;
+					outer: for (Map<String, Triple<C, C, List<C>>> map : top.get(flower.edges.get(edge).first)) {
+						for (String str : map.keySet()) {
+							if (!I.getKB().equiv(map.get(str).third, (List<C>)rhs0Q.get(str))) {
+								continue outer;
+							}
+						}
+						if (found != null) {
+							throw new RuntimeException();
+						}
+						found = map;
+					}
+					
+					if (found == null) {
+						throw new RuntimeException("Cannot find ID " + rhs0Q + " in " + top.get(flower.edges.get(edge)));
+					}
+					List rhsX = new LinkedList();
+					rhsX.add(found);
+					eqs.add(new Pair(lhs, rhsX));
+				}
+				
+			} 
+			
+		}
+		
+		Map types0 = types;
+		for (C t : I.global.ids) {
+			for (Triple<C, C, List<C>> arr : I.cat().hom((C)"_1", t)) {
+				if (I.global.cat().hom((C)"_1", t).contains(arr)) {
+					continue;
+				}
+				types0.put(arr, new Pair<>("_1", t));
+				for (Entry<C, Pair<C, C>> e : I.global.types.entrySet()) {
+					if (!e.getValue().first.equals(t)) {
+						continue;
+					}
+					List lhs = new LinkedList();
+					lhs.add(arr);
+					lhs.add(e.getKey());
+					
+					List<C> rhs0 = new LinkedList<>();
+					//rhs0.add(arr.second);
+					rhs0.addAll(arr.third);
+					rhs0.add(e.getKey());
+					Triple<C,C,List<C>> rhsX = I.find_fast(new Triple<>((C)"_1", e.getValue().second, rhs0));
+					List rhs = new LinkedList();
+					if (I.schema.cat().hom((C)"_1", (C)e.getValue().second).contains(rhsX)) {
+						if (rhsX.third.isEmpty()) {
+							rhs.add(rhsX.first);
+						} else {
+							rhs.addAll(rhsX.third);
+						}
+					} else {
+						rhs.add(rhsX);
+					}
+					//System.out.println("adding 2: " + new Pair(lhs, rhs));
+					
+					eqs.add(new Pair<>(lhs, rhs));
+				}
+			}
+		}
+		
+		XCtx<D> J = new XCtx(ids, types, eqs, I.global, poly.dst, "instance");
+		J.saturated = true; 
+		return J;
+	}
+	
+	static <C,D> void checkEdges(XPoly<C,D> poly, Map<String, XCtx> frozens) {
+		for (String k : poly.blocks.keySet()) {
+			Pair<D, Block<C, D>> b = poly.blocks.get(k);
+			XCtx src = frozens.get(k);
+			
+			for (D term : poly.dst.terms()) {
+				Pair<D, D> t = poly.dst.type(term);
+				if (!t.first.equals(b.first)) {
+					continue;
+				}
+				if (t.second.equals("_1")) {
+					continue;
+				}
+				if (poly.dst.allIds().contains(term)) {
+					continue;
+				}
+				if (poly.dst.global.allTerms().contains(t.second)) {
+					continue;
+				}
+				if (!b.second.edges.containsKey(term)) {
+					throw new RuntimeException("Missing mapping for edge " + term + " in " + k);
+				}
+			}
+			
+			for (D k2 : b.second.edges.keySet()) {
+				Pair<String, Map<D, List<C>>> v2 = b.second.edges.get(k2);
+				XCtx dst = frozens.get(v2.first);
+				
+				
+				Map em = new HashMap<>(v2.second);
+				for (Object o : dst.schema.allTerms()) {
+					if (em.containsKey(o)) {
+						continue;
+					}
+					List l = new LinkedList();
+					l.add(o);
+					em.put(o, l);
+				}
+				new XMapping(dst, src, em, "transform");
+			}
+			
+		}
+	}
+
 	
 }

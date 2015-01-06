@@ -70,5 +70,11 @@ public class XEnvironment {
 		
 		global = new XCtx<String>(types, fns, eqs, null, null, "global");		
 	}
+
+	@Override
+	public String toString() {
+		return "XEnvironment [global=" + global + ", prog=" + prog + ", str=" + str + ", objs="
+				+ objs + "]";
+	}
 	
 }
