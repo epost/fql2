@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -14,6 +15,7 @@ import javax.swing.JComponent;
 
 import fql_lib.DEBUG;
 import fql_lib.Pair;
+import fql_lib.Util;
 import fql_lib.gui.FQLTextPanel;
 
 public class XPoly<C,D> extends XExp implements XObject {
@@ -80,14 +82,88 @@ public class XPoly<C,D> extends XExp implements XObject {
 		Set<Pair<List<C>, List<C>>> where = new HashSet<>();
 		Map<D, List<C>> attrs = new HashMap<>();
 		Map<D, Pair<String, Map<D, List<C>>>> edges = new HashMap<>();
-		
+		/*{ for a:A;
+           where a.attA=1;
+           attributes attA = a.attA;
+           edges f = {b=a.f} : qB;
+           } */
 		@Override
 		public String toString() {
-			return "Block [from=" + from + ", where=" + where + ", attrs=" + attrs + ", edges="
-					+ edges + "]";
+			String for_str = printFor();
+			String where_str = printWhere();
+			String attr_str = printAttrs();
+			String edges_str = printEdges();
+			
+			return "{for " + for_str + "; where " + where_str + "; attributes " 
+			+ attr_str + "; edges " + edges_str + ";}" ;
 		}
-		
-		
+
+		private String printEdges() {
+			boolean first = false;
+			String ret = "";
+			for (Entry<D, Pair<String, Map<D, List<C>>>> k : edges.entrySet()) {
+				if (first) {
+					ret += ", ";
+				}
+				first = true;
+				ret += k.getKey() + " = {" + printSub(k.getValue().second) + "} : " + k.getValue().first;
+			}			
+			return ret;
+		}
+
+		private static <C,D> String printSub(Map<D, List<C>> map) {
+			boolean first = false;
+			String ret = "";
+			for (Entry<D, List<C>> k : map.entrySet()) {
+				if (first) {
+					ret += ", ";
+				}
+				first = true;
+				ret += k.getKey() + " = " + Util.sep(k.getValue(), ".");
+			}			
+			return ret;
+
+		}
+
+		private String printAttrs() {
+			boolean first = false;
+			String ret = "";
+			for (Entry<D, List<C>> k : attrs.entrySet()) {
+				if (first) {
+					ret += ", ";
+				}
+				first = true;
+				ret += k.getKey() + " = " + Util.sep(k.getValue(), ".");
+			}			
+			return ret;
+
+		}
+
+		private String printWhere() {
+			boolean first = false;
+			String ret = "";
+			for (Pair<List<C>, List<C>> k : where) {
+				if (first) {
+					ret += ", ";
+				}
+				first = true;
+				ret += Util.sep(k.first, ".") + " = " + Util.sep(k.second, ".");
+			}			
+			return ret;
+		}
+
+		private String printFor() {
+			boolean first = false;
+			String ret = "";
+			for (Entry<String, C> k : from.entrySet()) {
+				if (first) {
+					ret += ", ";
+				}
+				first = true;
+				ret += k.getKey() + ":" + k.getValue();
+			}			
+			return ret;
+		}		
 	}
 	
 	XExp src_e, dst_e;
@@ -103,7 +179,21 @@ public class XPoly<C,D> extends XExp implements XObject {
 
 	@Override
 	public String toString() {
-		return "XPoly [" + blocks + "]";
+		return "polynomial {" + printBlocks() + "\n} : " + src_e + " -> " + dst_e;
+	}
+
+	private String printBlocks() {
+		boolean first = false;
+		String ret = "";
+		for (Entry<String, Pair<D, Block<C, D>>> k : blocks.entrySet()) {
+			if (first) {
+				ret += ", ";
+			}
+			first = true;
+			ret += "\n  " + k.getKey() + " = " + k.getValue().second + " : " + k.getValue().first;
+		}
+		
+		return ret;
 	}
 
 	@Override

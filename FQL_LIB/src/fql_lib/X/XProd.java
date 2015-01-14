@@ -276,7 +276,9 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			eqs.add(new Pair(lhs, rhs));
 		}
 		
-		return new XCtx<Chc<X,Y>>(ids, types, eqs, (XCtx)I.global, (XCtx)I.schema, "instance");
+		XCtx<Chc<X,Y>> ret = new XCtx<Chc<X,Y>>(ids, types, eqs, (XCtx)I.global, (XCtx)I.schema, "instance");
+		ret.saturated = I.saturated && J.saturated;
+		return ret;
 	}
 	
 	public static <X,Y> XMapping fst(XCtx<X> I, XCtx<X> J) {
@@ -1272,6 +1274,8 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return J;
 	}
 	
+	//TODO: check that INSTANCEs are saturated?
+	
 	static <C,D> void checkEdges(XPoly<C,D> poly, Map<String, XCtx> frozens) {
 		for (String k : poly.blocks.keySet()) {
 			Pair<D, Block<C, D>> b = poly.blocks.get(k);
@@ -1296,11 +1300,32 @@ edge f:X->Y in S (including edges in type, like length or succ),
 				}
 			}
 			
+			Set atts = new HashSet();
+			for (D arr : poly.dst.allTerms()) {
+				if (poly.dst.allIds().contains(arr)) {
+					continue;
+				}
+				Pair<D, D> ty = poly.dst.type(arr);
+				if (ty.second.equals("_1")) {
+					continue;
+				}
+				if (!ty.first.equals(b.first)) {
+					continue;
+				}
+				if (!poly.dst.ids.contains(ty.second)) {
+					atts.add(arr);
+				}
+			}
+			if (!atts.equals(b.second.attrs.keySet())) {
+				throw new RuntimeException("Bad attributes in " + k + ": " + atts + " vs " + b.second.attrs.keySet());
+			}
+			
 			for (D k2 : b.second.edges.keySet()) {
 				Pair<String, Map<D, List<C>>> v2 = b.second.edges.get(k2);
 				XCtx dst = frozens.get(v2.first);
-				
-				
+				if (dst == null) {
+					throw new RuntimeException("Edge goes to non-existent node " + dst);
+				}
 				Map em = new HashMap<>(v2.second);
 				for (Object o : dst.schema.allTerms()) {
 					if (em.containsKey(o)) {
@@ -1311,8 +1336,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					em.put(o, l);
 				}
 				new XMapping(dst, src, em, "transform");
-			}
-			
+			}			
 		}
 	}
 

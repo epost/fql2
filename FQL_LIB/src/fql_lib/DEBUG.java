@@ -218,7 +218,7 @@ public class DEBUG implements Serializable {
 	public boolean reorder_joins = true;
 	public boolean x_text = true;
 	public boolean x_graph = true;
-	public boolean x_cat = true;
+	public boolean x_cat = false;
 	public boolean x_tables = true;
 	public boolean x_adom = false;
 

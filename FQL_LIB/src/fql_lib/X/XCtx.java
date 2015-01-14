@@ -22,6 +22,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -353,6 +354,9 @@ public class XCtx<C> implements XObject {
 	}
 
 	public JComponent makeGraph() {
+		if (allTerms().size() > 128) {
+			return new JTextArea("Too large to display");
+		}
 		Graph<C, C> sgv = buildFromSig();
 
 		Layout<C, C> layout = new FRLayout<>(sgv);
