@@ -36,7 +36,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "query", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "uberpi", "hom", "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "query", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -100,7 +100,10 @@ public class XParser {
 		Parser<?> apply = Parsers.tuple(term("apply"), ref.lazy(), ref.lazy());
 		Parser<?> iter = Parsers.tuple(term("iterate"), Terminals.IntegerLiteral.PARSER, ref.lazy(), ref.lazy());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { poly(ref), id1, id2, comp, apply, iter, query, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> hom = Parsers.tuple(term("hom"), ref.lazy(), ref.lazy());
+		Parser<?> uberpi = Parsers.tuple(term("uberpi"), ref.lazy());
+		
+		Parser<?> a = Parsers.or(new Parser<?>[] { uberpi, hom, poly(ref), id1, id2, comp, apply, iter, query, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 
@@ -490,9 +493,9 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 				List f = (List) ((Tuple3)q.b).b; //list of tuple3 of (string, string)
 				List w = (List) ((Tuple3)q.c).b; //list of tuple3 of (path, path)
 				
-				Map<String, List<String>> select = new HashMap<>();
-				Map<String, String> from = new HashMap<>();
-				List<Pair<List<String>, List<String>>> where = new LinkedList<>();
+				Map<Object, List<Object>> select = new HashMap<>();
+				Map<Object, Object> from = new HashMap<>();
+				List<Pair<List<Object>, List<Object>>> where = new LinkedList<>();
 				
 				Set<String> seen = new HashSet<>();
 				for (Object o : w) {
@@ -532,8 +535,8 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 				List f = (List) ((Tuple3)q.b).b; //list of tuple3 of (string, string)
 				Object w =  ((Tuple3)q.c).b; //list of tuple3 of (path, path)
 				
-				Map<String, List<String>> select = new HashMap<>();
-				Map<String, String> from = new HashMap<>();
+				Map<Object, List<Object>> select = new HashMap<>();
+				Map<Object, Object> from = new HashMap<>();
 			//	List<Pair<List<String>, List<String>>> where = new LinkedList<>();
 				
 				Set<String> seen = new HashSet<>();
@@ -561,6 +564,9 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 				return new XExp.FLOWER2(select, from, toWhere(w), I);				
 			}
 			
+			if (p.a.toString().equals("hom")) {
+				return new XExp.XToQuery(toExp(p.b), toExp(p.c));
+			}
 			if (p.a.toString().equals("sigma")) {
 				return new XExp.XSigma(toExp(p.b), toExp(p.c));
 			}
@@ -595,6 +601,9 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 		}
 		if (c instanceof org.codehaus.jparsec.functors.Pair) {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) c;
+			if (p.a.toString().equals("uberpi")) {
+				return new XExp.XUberPi(toExp(p.b));
+			}
 			if (p.a.toString().equals("relationalize")) {
 				return new XExp.XRel(toExp(p.b));
 			} 
@@ -744,7 +753,7 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 		}
 		if (o instanceof Tuple3) {
 			Tuple3 o2 = (Tuple3) o;
-			return new XExp.XBool((List<String>)o2.a, (List<String>)o2.c);
+			return new XExp.XBool((List<Object>)o2.a, (List<Object>)o2.c);
 		}
 		if (o instanceof org.codehaus.jparsec.functors.Pair) {
 			org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) o;
@@ -836,10 +845,10 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 	
 	public static Block<String, String> fromBlock(Object o) {
 		Tuple4<List, List, List, List> t = (Tuple4<List, List, List, List>) o;
-		Map<String, String> from = new HashMap<>();
-		Set<Pair<List<String>, List<String>>> where = new HashSet<>();
-		Map<String, List<String>> attrs = new HashMap<>();
-		Map<String, Pair<String, Map<String, List<String>>>> edges = new HashMap<>();
+		Map<Object, String> from = new HashMap<>();
+		Set<Pair<List<Object>, List<Object>>> where = new HashSet<>();
+		Map<String, List<Object>> attrs = new HashMap<>();
+		Map<String, Pair<Object, Map<Object, List<Object>>>> edges = new HashMap<>();
 		
 		for (Object x : t.a) {
 			Tuple3 l = (Tuple3) x;
@@ -851,7 +860,7 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 		
 		for (Object x : t.b) {
 			Tuple3 l = (Tuple3) x;
-			where.add(new Pair<>((List<String>)l.a, (List<String>)l.c));
+			where.add(new Pair((List<String>)l.a, (List<String>)l.c));
 		}
 		
 		for (Object x : t.c) {
@@ -859,7 +868,7 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 			if (attrs.containsKey(l.a.toString())) {
 				throw new RuntimeException("Duplicate for: " + l.a);
 			}
-			attrs.put(l.a.toString(), (List<String>)l.c);
+			attrs.put(l.a.toString(), (List<Object>)l.c);
 		}
 		
 		for (Object x : t.d) {
@@ -867,7 +876,7 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 			if (from.containsKey(l.a.toString())) {
 				throw new RuntimeException("Duplicate for: " + l.a);
 			}
-			edges.put(l.a.toString(), new Pair<>(l.e.toString(), fromBlockHelper(l.c)));
+			edges.put(l.a.toString(), new Pair(l.e.toString(), fromBlockHelper(l.c)));
 		}
 
 		return new Block<String, String>(from, where, attrs, edges);
@@ -886,8 +895,8 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 		return ret;
 	}
 	
-	public static Map<String, Pair<String, Block<String, String>>> fromBlocks(List l) {
-		Map<String, Pair<String, Block<String, String>>> ret = new HashMap<>();
+	public static Map<Object, Pair<String, Block<String, String>>> fromBlocks(List l) {
+		Map<Object, Pair<String, Block<String, String>>> ret = new HashMap<>();
 		for (Object o : l) {
 			Tuple5 t = (Tuple5) o;
 			Block<String, String> b = fromBlock(t.c);
@@ -896,7 +905,7 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 		return ret;
 	}
 	public static XPoly<String, String> fromPoly(Tuple4 o) {
-		Map<String, Pair<String, Block<String, String>>> blocks = fromBlocks((List)o.a);
+		Map<Object, Pair<String, Block<String, String>>> blocks = fromBlocks((List)o.a);
 		return new XPoly<String, String>(toExp(o.b), toExp(o.d), blocks);
 	}
 	public static final Parser<?> poly(Reference ref) {

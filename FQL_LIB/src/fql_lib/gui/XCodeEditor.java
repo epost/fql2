@@ -48,6 +48,10 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 				" \"\"");
 		ctm.addTemplate(ct);
 		
+		ct = new StaticCodeTemplate("polynomial", "polynomial ",
+				"{\n\t q = {for v:t; where v=v; attributes l=v.l; edges f = {e=v.l} : q;} : t\n} : s -> s");
+		ctm.addTemplate(ct);
+		
 		ct = new StaticCodeTemplate("query", "query ",
 				"{\n\tpi;\n\tdelta;\n\tsigma;\n} ");
 		ctm.addTemplate(ct);
@@ -89,8 +93,8 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 	}
 
 	@Override
-	protected XDisplay makeDisplay(String foo, XProgram init, XEnvironment env) {
-		return new XDisplay(foo, init, env);
+	protected XDisplay makeDisplay(String foo, XProgram init, XEnvironment env, long start, long middle) {
+		return new XDisplay(foo, init, env, start, middle);
 	}
 
 	@Override

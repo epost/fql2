@@ -23,6 +23,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -113,7 +114,9 @@ public class XCtx<C> implements XObject {
 		if (global != null) {
 			return global.type(c);
 		}
-		throw new RuntimeException("Cannot type " + c); //don't toString here, since used by expand()
+		throw new RuntimeException("Cannot type " + c); // don't toString here,
+														// since used by
+														// expand()
 	}
 
 	// public XCtx<C> copy() {
@@ -161,12 +164,12 @@ public class XCtx<C> implements XObject {
 		validate(true);
 
 		for (C c : ids) {
-	//		if (c.equals("_1")) {
-		//		continue;
-		//	}
+			// if (c.equals("_1")) {
+			// continue;
+			// }
 			types.put((C) ("!_" + c), new Pair<>(c, (C) "_1"));
 		}
-		//types.put((C) ("!_1"), new Pair<>((C) "1", (C) "1"));
+		// types.put((C) ("!_1"), new Pair<>((C) "1", (C) "1"));
 		List lhs = new LinkedList<>();
 		lhs.add("_1");
 		List rhs = new LinkedList<>();
@@ -175,23 +178,23 @@ public class XCtx<C> implements XObject {
 
 		for (C c : terms()) {
 			Pair<C, C> t = types.get(c);
-		//	if (t.second.equals("_1")) {
-		//		
-		//	} else if (t.first.equals("_1") && !t.second.equals("_1")) {
-		//		lhs = new LinkedList<>();
-		//		lhs.add(c);
-		//		lhs.add("!_" + t.second);
-		//		rhs = new LinkedList<>();
-		//		rhs.add("_1");
-		//		eqs.add(new Pair<>(lhs, rhs));
-		//	} else {
-				lhs = new LinkedList<>();
-				lhs.add(c);
-				lhs.add("!_" + t.second);
-				rhs = new LinkedList<>();
-				rhs.add("!_" + t.first);
-				eqs.add(new Pair<>(lhs, rhs));
-		//	}
+			// if (t.second.equals("_1")) {
+			//
+			// } else if (t.first.equals("_1") && !t.second.equals("_1")) {
+			// lhs = new LinkedList<>();
+			// lhs.add(c);
+			// lhs.add("!_" + t.second);
+			// rhs = new LinkedList<>();
+			// rhs.add("_1");
+			// eqs.add(new Pair<>(lhs, rhs));
+			// } else {
+			lhs = new LinkedList<>();
+			lhs.add(c);
+			lhs.add("!_" + t.second);
+			rhs = new LinkedList<>();
+			rhs.add("!_" + t.first);
+			eqs.add(new Pair<>(lhs, rhs));
+			// }
 		}
 
 		validate(false);
@@ -221,7 +224,7 @@ public class XCtx<C> implements XObject {
 		}).collect(Collectors.toSet());
 		if (!allIds().containsAll(values)) {
 			values.removeAll(allIds());
-			throw new RuntimeException("typeof returns non-ids: " + values);
+			throw new RuntimeException("typeof returns non-ids: " + values + " in " + this);
 		}
 		for (C c : ids) {
 			Pair<C, C> t = types.get(c);
@@ -301,49 +304,56 @@ public class XCtx<C> implements XObject {
 		JTabbedPane ret = new JTabbedPane();
 
 		if (DEBUG.debug.x_text) {
-		String kb_text = "types:\n  " + Util.sep(allIds(), ",\n  ");
-		List<String> tms = allTerms().stream()
-				.map(x -> x + " : " + type(x).first + " -> " + type(x).second)
-				.collect(Collectors.toList());
-		kb_text = kb_text.trim();
-		kb_text += "\n\nterms:\n  " + Util.sep(tms, ",\n  ");
-		List<String> xx = allEqs().stream()
-				.map(x -> Util.sep(x.first, ".") + " = " + Util.sep(x.second, "."))
-				.collect(Collectors.toList());
-		kb_text = kb_text.trim();
-		kb_text += "\n\nequations:\n  " + Util.sep(xx, ",\n  ");
-		kb_text = kb_text.trim();
+			String kb_text = "types:\n  " + Util.sep(allIds(), ",\n  ");
+			List<String> tms = allTerms().stream()
+					.map(x -> x + " : " + type(x).first + " -> " + type(x).second)
+					.collect(Collectors.toList());
+			kb_text = kb_text.trim();
+			kb_text += "\n\nterms:\n  " + Util.sep(tms, ",\n  ");
+			List<String> xx = allEqs().stream()
+					.map(x -> Util.sep(x.first, ".") + " = " + Util.sep(x.second, "."))
+					.collect(Collectors.toList());
+			kb_text = kb_text.trim();
+			kb_text += "\n\nequations:\n  " + Util.sep(xx, ",\n  ");
+			kb_text = kb_text.trim();
 
-		try {
-			kb.complete();
-			kb_text += "\n\nKnuth-Bendix Completion:\n" + kb.toString();
-		} catch (Exception e) {
-			e.printStackTrace();
-			kb_text = "\n\nERROR in Knuth-Bendix\n\n" + e.getMessage();
+			try {
+				kb.complete();
+				kb_text += "\n\nKnuth-Bendix Completion:\n" + kb.toString();
+			} catch (Exception e) {
+				e.printStackTrace();
+				kb_text = "\n\nERROR in Knuth-Bendix\n\n" + e.getMessage();
+			}
+			JComponent kbc = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", kb_text);
+			ret.addTab("Text", kbc);
 		}
-		JComponent kbc = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", kb_text);
-		ret.addTab("Text", kbc);
-	}
-		
+
 		if (DEBUG.debug.x_graph) {
 			ret.addTab("Graph", makeGraph());
 		}
-		
+
+		String cat = null;
 		if (DEBUG.debug.x_cat) {
-			String cat = "";
+			cat = "";
 			try {
 				cat = cat().toString();
 			} catch (Exception e) {
 				e.printStackTrace();
 				cat = "ERROR\n\n" + e.getMessage();
 			}
-		JComponent ctp = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", cat);
-		ret.addTab("Category", ctp);
-	}	
+			JComponent ctp = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", cat);
+			ret.addTab("Category", ctp);
+		}
 
 		if (schema != null) {
 			if (DEBUG.debug.x_tables) {
-				JComponent tables = makeTables(x -> cat().arrows(), new HashSet<>());
+				// TODO: if category tab blew up, so should this
+				JComponent tables = null;
+				if (cat != null && cat.startsWith("ERROR")) {
+					tables = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", cat);
+				} else {
+					tables = makeTables(x -> cat().arrows(), new HashSet<>());
+				}
 				ret.addTab("Full Tables", tables);
 			}
 			if (DEBUG.debug.x_adom) {
@@ -714,7 +724,7 @@ public class XCtx<C> implements XObject {
 			Collection<Triple<C, C, List<C>>> cat = fn.apply(new Unit());
 			// System.out.println(eqm);
 
-			//Map<C, Set<List<C>>> entities = new HashMap<>();
+			// Map<C, Set<List<C>>> entities = new HashMap<>();
 			Map entities = new HashMap<>();
 			Map<C, Set<C>> m = new HashMap<>();
 			for (C c : allIds()) {
@@ -725,12 +735,12 @@ public class XCtx<C> implements XObject {
 			for (Triple<C, C, List<C>> k : cat) {
 				if (k.first.equals("_1")) { // uncomment causes exception
 					Set set = (Set<List<C>>) entities.get(k.second);
-	//				set.add(k);
+					// set.add(k);
 					set.add(k.third);
 				}
 			}
-			
-//			System.out.println(entities);
+
+			// System.out.println(entities);
 
 			for (C c : allTerms()) {
 				Pair<C, C> t = type(c);
@@ -822,8 +832,6 @@ public class XCtx<C> implements XObject {
 		}
 	}
 
-	
-
 	private Category<C, Triple<C, C, List<C>>> xcat;
 
 	private Category<C, Triple<C, C, List<C>>> small_cat;
@@ -840,13 +848,15 @@ public class XCtx<C> implements XObject {
 		}
 		return ret;
 	}
-	
+
 	Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> find_cache = new HashMap<>();
+
 	public Triple<C, C, List<C>> find_fast(Triple<C, C, List<C>> tofind) {
 		if (find_cache.containsKey(tofind)) {
 			return find_cache.get(tofind);
 		}
-		Triple<C,C,List<C>> found = find_old(getKB(), tofind, cat().hom(tofind.first, tofind.second));
+		Triple<C, C, List<C>> found = find_old(getKB(), tofind,
+				cat().hom(tofind.first, tofind.second));
 		find_cache.put(tofind, found);
 		return found;
 	}
@@ -979,7 +989,7 @@ public class XCtx<C> implements XObject {
 		};
 
 		if (DEBUG.debug.validate_amalgams) {
-		 xcat2.validate();
+			xcat2.validate();
 		}
 		xcat = xcat2;
 
@@ -1011,8 +1021,8 @@ public class XCtx<C> implements XObject {
 		Set<Triple<C, C, List<C>>> arrs = new HashSet<>();
 		arrs.addAll(sch.arrows());
 		arrs.addAll(new_arrs);
-		
-		Map<Pair<Triple<C, C, List<C>>,Triple<C, C, List<C>>>, Triple<C, C, List<C>>> comp_cache = new HashMap<>();
+
+		Map<Pair<Triple<C, C, List<C>>, Triple<C, C, List<C>>>, Triple<C, C, List<C>>> comp_cache = new HashMap<>();
 
 		Category<C, Triple<C, C, List<C>>> ret = new Category<C, Triple<C, C, List<C>>>() {
 			@Override
@@ -1051,8 +1061,9 @@ public class XCtx<C> implements XObject {
 				comp_cache.put(p, ret);
 				return ret;
 			}
-			
-			private Triple<C, C, List<C>> local_compose(Triple<C, C, List<C>> f, Triple<C, C, List<C>> g) {
+
+			private Triple<C, C, List<C>> local_compose(Triple<C, C, List<C>> f,
+					Triple<C, C, List<C>> g) {
 				if (!arrows().contains(f)) {
 					throw new RuntimeException(f.toString());
 				}
@@ -1067,8 +1078,8 @@ public class XCtx<C> implements XObject {
 					return sch.compose(f, g);
 				}
 				if (new_arrs.contains(f) && new_arrs.contains(g)) {
-					Pair<C, C> ft = new Pair<>(f.first, f.second); 
-					Pair<C, C> gt = new Pair<>(g.first, g.second); 
+					Pair<C, C> ft = new Pair<>(f.first, f.second);
+					Pair<C, C> gt = new Pair<>(g.first, g.second);
 					C a = ft.first;
 					C b = gt.first;
 					C v = f.third.get(1);
@@ -1128,7 +1139,7 @@ public class XCtx<C> implements XObject {
 						l.add((C) ("!_" + a));
 						l.addAll(g.third.subList(1, g.third.size()));
 						Triple<C, C, List<C>> ret = new Triple<>(a, g.second, l);
-						ret = find_old(getKB(), ret, hom(ret.first, ret.second)); 
+						ret = find_old(getKB(), ret, hom(ret.first, ret.second));
 						if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
 							throw new RuntimeException();
 						}
@@ -1144,7 +1155,7 @@ public class XCtx<C> implements XObject {
 						if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
 							throw new RuntimeException();
 						}
-						//must find equivalent - see CTDB example
+						// must find equivalent - see CTDB example
 						ret = find_old(getKB(), ret, hom(ret.first, ret.second));
 						if (!arrows().contains(ret)) {
 							throw new RuntimeException(ret.toString());
@@ -1155,32 +1166,35 @@ public class XCtx<C> implements XObject {
 					List<C> vl = new LinkedList<>();
 					vl.add(v);
 					Triple<C, C, List<C>> sofar = new Triple<>(type(v).first, type(v).second, vl);
-					
-					//System.out.println("want to compose " + f + " and " + g);
-				//	System.out.println("starting at " + sofar);
+
+					// System.out.println("want to compose " + f + " and " + g);
+					// System.out.println("starting at " + sofar);
 					List gnX = new LinkedList<>(g.third);
 					for (C gn : g.third) {
 						gnX.remove(0);
-				//		System.out.println("doing edge " + gn);
+						// System.out.println("doing edge " + gn);
 						sofar = findEq(sofar, gn);
-//						System.out.println("result " + sofar);
+						// System.out.println("result " + sofar);
 						if (sch.arrows().contains(sofar)) {
 							List hhh = new LinkedList();
 							hhh.add((C) ("!_" + a));
 							hhh.addAll(sofar.third);
 							hhh.addAll(gnX);
-						
-							Triple<C,C,List<C>> ret0 = new Triple<>(a, g.second, hhh);
-							Triple ret = find_old(schema.getKB(), ret0, sch.hom(ret0.first, ret0.second));
+
+							Triple<C, C, List<C>> ret0 = new Triple<>(a, g.second, hhh);
+							Triple ret = find_old(schema.getKB(), ret0,
+									sch.hom(ret0.first, ret0.second));
 							if (!arrows().contains(ret)) {
-								throw new RuntimeException("f " + f + " and " + g + "\n\nbad: " + ret.toString() + " not found inn\n\n" + Util.sep(arrows(), "\n"));
+								throw new RuntimeException("f " + f + " and " + g + "\n\nbad: "
+										+ ret.toString() + " not found inn\n\n"
+										+ Util.sep(arrows(), "\n"));
 							}
 							if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
 								throw new RuntimeException();
 							}
 							return ret;
 						} else {
-						//	System.out.println("Did not fire on " + sofar);
+							// System.out.println("Did not fire on " + sofar);
 						}
 					}
 
@@ -1189,8 +1203,8 @@ public class XCtx<C> implements XObject {
 					retl.addAll(sofar.third);
 					Triple<C, C, List<C>> ret = new Triple<>(f.first, g.second, retl);
 
-					//System.out.println("want to return " + ret);
-					
+					// System.out.println("want to return " + ret);
+
 					if (a.equals("_1") && global.allIds().contains(sofar.second)
 							&& global.cat().hom((C) "_1", sofar.second).contains(sofar)) {
 						if (!arrows().contains(sofar)) {
@@ -1202,12 +1216,13 @@ public class XCtx<C> implements XObject {
 						return sofar;
 					}
 					if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
-						throw new RuntimeException( ret + " not " + f + " and " + g);
+						throw new RuntimeException(ret + " not " + f + " and " + g);
 					}
-					//another one where have to use KB 
+					// another one where have to use KB
 					ret = find_old(getKB(), ret, hom(ret.first, ret.second));
 					if (!arrows().contains(ret)) {
-						throw new RuntimeException("f " + f + " and " + g + "\n\nbad: " + ret.toString() + " not found inn\n\n" + Util.sep(arrows(), "\n"));
+						throw new RuntimeException("f " + f + " and " + g + "\n\nbad: "
+								+ ret.toString() + " not found inn\n\n" + Util.sep(arrows(), "\n"));
 					}
 					return ret;
 				}
@@ -1241,25 +1256,26 @@ public class XCtx<C> implements XObject {
 				tofind.add(v);
 				tofind.add(gn);
 				List<C> found = eqm.get(new Pair<>(v, gn));
-				//TODO
-		//		Pair<List<C>, List<C>> xxx = null;
+				// TODO
+				// Pair<List<C>, List<C>> xxx = null;
 				for (Pair<List<C>, List<C>> eq : eqs) {
 					if (found != null) {
 						break;
 					}
 					if (eq.first.equals(tofind)) {
-						found = eq.second; 
-		//				xxx = eq;
+						found = eq.second;
+						// xxx = eq;
 						break;
 					}
 					if (eq.second.equals(tofind)) {
 						found = eq.first;
-				//		xxx = eq;
+						// xxx = eq;
 						break;
 					}
 				}
 				eqm.put(new Pair<>(v, gn), found);
-			//	System.out.println("returning eqation " + new Pair<>(v, gn) + " and " + found + "\n\noriginal " + xxx);
+				// System.out.println("returning eqation " + new Pair<>(v, gn) +
+				// " and " + found + "\n\noriginal " + xxx);
 				if (found == null) {
 					throw new RuntimeException("sofar " + sofar + " gn " + gn + "\n\n" + allEqs());
 				}
@@ -1278,13 +1294,12 @@ public class XCtx<C> implements XObject {
 			}
 
 		};
-		//TODO: cache the composition table
+		// TODO: cache the composition table
 		if (DEBUG.debug.validate_amalgams) {
-			ret.validate(); //TODO
+			ret.validate(); // TODO
 		}
 		return ret;
 	}
-
 
 	// TODO: cache these?
 	public Category<C, Triple<C, C, List<C>>> small_cat() {
@@ -1302,7 +1317,7 @@ public class XCtx<C> implements XObject {
 				paths.add(new Triple<>(c, c, new LinkedList<>()));
 				localIds.add(c);
 			}
-				for (Entry<C, Pair<C, C>> k : global.types.entrySet()) {
+			for (Entry<C, Pair<C, C>> k : global.types.entrySet()) {
 				if (k.getValue().first.equals("_1") || k.getValue().second.equals("_1")
 						|| k.getKey().equals("_1")) {
 					continue;
@@ -1326,7 +1341,7 @@ public class XCtx<C> implements XObject {
 			}
 			t.put(k.getKey(), k.getValue());
 		}
-	
+
 		extend(getKB(), paths, t, consts);
 
 		Set<Triple<C, C, List<C>>> arrows = new HashSet<>(paths);
@@ -1392,9 +1407,9 @@ public class XCtx<C> implements XObject {
 
 					Triple<C, C, List<C>> toAdd = new Triple<>(p.first, t.get(e).second, p0);
 					Triple<C, C, List<C>> found = find_old(kb, toAdd, paths); // TODO:
-																			// sort
-																			// into
-																			// hom
+																				// sort
+																				// into
+																				// hom
 
 					if (found == null) {
 						found = find_old(kb, toAdd, newPaths);
@@ -1414,8 +1429,6 @@ public class XCtx<C> implements XObject {
 			throw new RuntimeException("Exceeded maximum path length");
 		}
 	}
-
-	
 
 	public static XCtx<String> make(XCtx<String> S, XInst I) {
 		// Set<String> seen = new HashSet<>();
@@ -1656,65 +1669,34 @@ public class XCtx<C> implements XObject {
 		return true;
 	}
 
-	public XCtx<C> rel2() {
-		Set<Pair<List<C>, List<C>>> new_eqs = new HashSet<>(eqs);
-		if (schema == null) {
-			throw new RuntimeException("Problem with relationalize");
-		}
-		for (C x : terms()) {
-			if (!type(x).first.equals("_1")) {
-				continue;
-			}
-			loop: for (C y : terms()) {
-				if (!type(y).first.equals("_1")) {
-					continue;
-				}
-				if (!type(x).second.equals(type(y).second)) {
-					continue;
-				}
-				if (x.equals(y)) {
-					continue;
-				}
-				for (C b : allIds()) {
-					for (Triple<C, C, List<C>> p : cat().hom(type(x).second, b)) {
-						for (C t : global.allIds()) {
-							for (Triple<C, C, List<C>> att : cat().hom(b, t)) {
-								List<C> lhs = new LinkedList<>();
-								lhs.add(x);
-								lhs.addAll(p.third);
-								lhs.addAll(att.third);
-								List<C> rhs = new LinkedList<>();
-								rhs.add(y);
-								rhs.addAll(p.third);
-								rhs.addAll(att.third);
-								if (!getKB().equiv(lhs, rhs)) {
-									continue loop;
-								}
-							}
-						}
-					}
-				}
-				List<C> lhs = new LinkedList<>();
-				List<C> rhs = new LinkedList<>();
-				lhs.add(x);
-				rhs.add(y);
-				new_eqs.add(new Pair<>(lhs, rhs));
-			}
-		}
-
-		return new XCtx<>(ids, types, new_eqs, global, schema, kind);
-	}
-
+	/*
+	 * public XCtx<C> rel2() { Set<Pair<List<C>, List<C>>> new_eqs = new
+	 * HashSet<>(eqs); if (schema == null) { throw new
+	 * RuntimeException("Problem with relationalize"); } for (C x : terms()) {
+	 * if (!type(x).first.equals("_1")) { continue; } loop: for (C y : terms())
+	 * { if (!type(y).first.equals("_1")) { continue; } if
+	 * (!type(x).second.equals(type(y).second)) { continue; } if (x.equals(y)) {
+	 * continue; } for (C b : allIds()) { for (Triple<C, C, List<C>> p :
+	 * cat().hom(type(x).second, b)) { for (C t : global.allIds()) { for
+	 * (Triple<C, C, List<C>> att : cat().hom(b, t)) { List<C> lhs = new
+	 * LinkedList<>(); lhs.add(x); lhs.addAll(p.third); lhs.addAll(att.third);
+	 * List<C> rhs = new LinkedList<>(); rhs.add(y); rhs.addAll(p.third);
+	 * rhs.addAll(att.third); if (!getKB().equiv(lhs, rhs)) { continue loop; } }
+	 * } } } List<C> lhs = new LinkedList<>(); List<C> rhs = new LinkedList<>();
+	 * lhs.add(x); rhs.add(y); new_eqs.add(new Pair<>(lhs, rhs)); } }
+	 * 
+	 * return new XCtx<>(ids, types, new_eqs, global, schema, kind); }
+	 */
 	public void simp() {
 		if (!initialized) {
 			throw new RuntimeException();
 		}
 		xcat = null;
 		eqm = null;
-		kb  = null;
-		
-		subst((C)"!__1", (C)"_1");
-		
+		kb = null;
+
+		subst((C) "!__1", (C) "_1");
+
 		for (;;) {
 			boolean b1 = cleanup();
 			boolean b2 = match();
@@ -1722,20 +1704,18 @@ public class XCtx<C> implements XObject {
 				break;
 			}
 		}
-		
+
 		kb();
 	}
-	
-	private boolean cleanup() {
-		Set<Pair<C,C>> substs = new HashSet<>();
 
-		
+	private boolean cleanup() {
+		Set<Pair<C, C>> substs = new HashSet<>();
+
 		return true;
 	}
-	
-	
+
 	private boolean match() {
-		Set<Pair<C,C>> substs = new HashSet<>();
+		Set<Pair<C, C>> substs = new HashSet<>();
 		for (Pair<List<C>, List<C>> eq1 : allEqs()) {
 			for (Pair<List<C>, List<C>> eq2 : allEqs()) {
 				if (eq1.first.size() != 2) {
@@ -1757,22 +1737,22 @@ public class XCtx<C> implements XObject {
 				}
 			}
 		}
-		
+
 		if (substs.size() == 0) {
 			return false;
 		}
-		
-		for (Pair<C,C> p : substs) {
+
+		for (Pair<C, C> p : substs) {
 			subst(p.first, p.second);
 		}
-		
+
 		return true;
 	}
-	
+
 	private List<C> subst(C s, C t, List<C> l) {
 		return l.stream().map(x -> x.equals(s) ? t : x).collect(Collectors.toList());
 	}
-	
+
 	private void subst(C s, C t) {
 		if (!types.containsKey(s)) {
 			throw new RuntimeException();
@@ -1780,12 +1760,13 @@ public class XCtx<C> implements XObject {
 		types.remove(s);
 		Set<Pair<List<C>, List<C>>> new_eqs = new HashSet<>();
 		for (Pair<List<C>, List<C>> eq : eqs) {
-			Pair<List<C>, List<C>> new_eq = new Pair<>(subst(s, t, eq.first), subst(s, t, eq.second));
+			Pair<List<C>, List<C>> new_eq = new Pair<>(subst(s, t, eq.first),
+					subst(s, t, eq.second));
 			new_eqs.add(new_eq);
 		}
 		eqs = new_eqs;
 	}
-	
+
 	public Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> obs(Triple<C, C, List<C>> i) {
 		if (!i.first.equals("_1")) {
 			throw new RuntimeException();
@@ -1802,8 +1783,7 @@ public class XCtx<C> implements XObject {
 		}
 		return ret;
 	}
-	
-	
+
 	public List<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> obs(List<C> i) {
 		Function<C, Object> f = c -> {
 			if (schema.allTerms().contains(c)) {
@@ -1811,39 +1791,46 @@ public class XCtx<C> implements XObject {
 			}
 			List<C> l = new LinkedList<>();
 			l.add(c);
-			Triple<C, C, List<C>> t = new Triple<>(type(c).first, type(c).second, l); 
+			Triple<C, C, List<C>> t = new Triple<>(type(c).first, type(c).second, l);
 			Triple<C, C, List<C>> u = find_fast(t);
 			return obs(u);
 		};
 		Object ret = i.stream().map(f).collect(Collectors.toList());
 		return (List<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>>) ret;
 	}
-	
-	
-	
+
 	public XCtx<C> rel() {
 		Set<Pair<List<C>, List<C>>> new_eqs = new HashSet<>();
 		if (schema == null) {
 			throw new RuntimeException("Problem with relationalize");
 		}
 		Map new_types = new HashMap<>();
-		
+
 		Set<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> gens = new HashSet<>();
 		Map<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>, Triple<C, C, List<C>>> genMap = new HashMap<>();
-		Map<Triple<C, C, List<C>>, Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> genMap2= new HashMap<>();
-		
+		Map<Triple<C, C, List<C>>, Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> genMap2 = new HashMap<>();
+
 		for (C c : schema.ids) {
-			if (global.ids.contains(c)) {
-				continue;
-			}
-			for (Triple<C, C, List<C>> i : cat().hom((C)"_1", c)) {
+			for (Triple<C, C, List<C>> i : cat().hom((C) "_1", c)) {
 				Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> o = obs(i);
 				new_types.put(o, new Pair("_1", c));
 				genMap.put(o, i);
-				genMap2.put(i,o);
+				genMap2.put(i, o);
 			}
 		}
-		
+		for (C c : schema.global.ids) {
+			for (Triple<C, C, List<C>> i : cat().hom((C) "_1", c)) {
+				if (schema.global.cat().hom((C) "_1", c).contains(i)) {
+					continue;
+				}
+				Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> o = new HashMap<>();
+				o.put(new Triple<>(c, c, new LinkedList<>()), i);
+				new_types.put(o, new Pair("_1", c));
+				genMap.put(o, i);
+				genMap2.put(i, o);
+			}
+		}
+
 		for (Object iX : new_types.keySet()) {
 			Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> o = (Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>) iX;
 			Triple<C, C, List<C>> i = genMap.get(o);
@@ -1852,9 +1839,9 @@ public class XCtx<C> implements XObject {
 					continue;
 				}
 				List<C> lhs = new LinkedList<>();
-				lhs.add((C)o);
+				lhs.add((C) o);
 				lhs.add(e);
-				
+
 				List<C> tofind = new LinkedList<>();
 				tofind.addAll(i.third);
 				tofind.add(e);
@@ -1863,44 +1850,42 @@ public class XCtx<C> implements XObject {
 				if (rhsX == null) {
 					throw new RuntimeException();
 				}
+
 				List<C> rhs = new LinkedList<>();
-				if (global.allIds().contains(type(e).second)) {
-					//is constant
+
+				Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> o2 = genMap2.get(rhsX);
+				if (o2 == null) {
 					if (rhsX.third.isEmpty()) {
 						rhs.add(rhsX.first);
 					} else {
 						rhs.addAll(rhsX.third);
 					}
 				} else {
-					Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> o2 = genMap2.get(rhsX);
-					if (o2 == null) {
-						throw new RuntimeException();
-					}
-					rhs.add((C)o2);
+					rhs.add((C) o2);
 				}
+
+				/*
+				 * if (global.allIds().contains(type(e).second)) { if
+				 * (rhsX.third.isEmpty()) { rhs.add(rhsX.first); } else {
+				 * rhs.addAll(rhsX.third); } } else { Map<Triple<C, C, List<C>>,
+				 * Triple<C, C, List<C>>> o2 = genMap2.get(rhsX); if (o2 ==
+				 * null) { throw new RuntimeException(); } rhs.add((C)o2); }
+				 */
 				new_eqs.add(new Pair<>(lhs, rhs));
 			}
-		}		
+		}
 
 		XCtx<C> ret = new XCtx<>(new HashSet<>(), new_types, new_eqs, global, schema, kind);
 		ret.saturated = true;
 		return ret;
 	}
 	
+	public XCtx<C> y(C name, C type) {
+		Map<C, Pair<C, C>> types0 = new HashMap<>();
+		
+		types0.put(name, new Pair<>((C)"_1", type));
+		
+		return new XCtx<C>(new HashSet<>(), types0, new HashSet<>(), global, this, "instance");
+	}
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

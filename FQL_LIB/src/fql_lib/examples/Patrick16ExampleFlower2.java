@@ -9,7 +9,7 @@ public class Patrick16ExampleFlower2 extends Example {
 
 	@Override
 	public String getName() {
-		return "P Flower 2";
+		return "P Flower";
 	}
 
 	@Override

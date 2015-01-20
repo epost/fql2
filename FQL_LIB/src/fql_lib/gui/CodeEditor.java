@@ -465,8 +465,12 @@ public abstract class CodeEditor<Prog extends FQLProg, Env, Disp extends FQLDisp
 			return;
 		}
 
+		long start = 0;
+		long middle = 0;
 		try {
+			start = System.currentTimeMillis();
 			env = makeEnv(program, init);
+			middle = System.currentTimeMillis();
 		} catch (LineException e) {
 			toDisplay = "Error in " + e.kind + " " + e.decl + ": "
 					+ e.getLocalizedMessage();
@@ -491,9 +495,9 @@ public abstract class CodeEditor<Prog extends FQLProg, Env, Disp extends FQLDisp
 			String foo = GUI.getTitle(id);
 			if (DEBUG.debug.MultiView) {
 				foo += " - "
-						+ format.format(new Date(System.currentTimeMillis()));
+						+ format.format(new Date(start));
 			}			
-			display = makeDisplay(foo, init, env); 
+			display = makeDisplay(foo, init, env, start, middle); 
 			toDisplay = textFor(env); //"Done";
 			respArea.setText(textFor(env)); //"Done");
 
@@ -524,7 +528,7 @@ public abstract class CodeEditor<Prog extends FQLProg, Env, Disp extends FQLDisp
 	
 	protected abstract String textFor(Env env);
 
-	protected abstract Disp makeDisplay(String foo, Prog init, Env env);
+	protected abstract Disp makeDisplay(String foo, Prog init, Env env, long start, long middle);
 
 	protected abstract Env makeEnv(String program, Prog init);
 

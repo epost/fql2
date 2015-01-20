@@ -9,7 +9,7 @@ public class Patrick15ExampleNist extends Example {
 	
 	@Override
 	public String getName() {
-		return "P NIST";
+		return "P NIST Data";
 	}
 
 	@Override
@@ -17,8 +17,7 @@ public class Patrick15ExampleNist extends Example {
 		return s;
 	}
 	
-	String s = "//takes a few minutes to load initial data, 10 minutes for all queries"
-			+ "\nadom : type"
+	String s ="adom : type"
 			+ "\n"
 			+ "\n88 : adom"
 			+ "\n\"Micro Hole EDM\" : adom"
@@ -220,7 +219,7 @@ public class Patrick15ExampleNist extends Example {
 			+ "\n  capability.capability_Parent_id.capability_Parent_id.capability_Parent_id = capability.capability_Parent_id.capability_Parent_id.capability_Parent_id.capability_Parent_id;"
 			+ "\n}"
 			+ "\n"
-			+ "\nI = instance {"
+			+ "\nI = INSTANCE {"
 			+ "\n variables"
 			+ "\n  v0: unitcode,"
 			+ "\n  v1: unitcode,"

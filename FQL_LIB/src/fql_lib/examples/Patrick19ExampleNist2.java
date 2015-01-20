@@ -9,7 +9,7 @@ public class Patrick19ExampleNist2 extends Example {
 	
 	@Override
 	public String getName() {
-		return "P NIST 2";
+		return "P NIST IsA";
 	}
 
 	@Override

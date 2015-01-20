@@ -1,5 +1,14 @@
 package fql_lib.X;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import fql_lib.Pair;
 import fql_lib.Util;
 import fql_lib.X.XExp.Apply;
 import fql_lib.X.XExp.Compose;
@@ -30,8 +39,10 @@ import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
 import fql_lib.X.XExp.XTT;
 import fql_lib.X.XExp.XTimes;
+import fql_lib.X.XExp.XToQuery;
 import fql_lib.X.XExp.XTransConst;
 import fql_lib.X.XExp.XTy;
+import fql_lib.X.XExp.XUberPi;
 import fql_lib.X.XExp.XUnit;
 import fql_lib.X.XExp.XVoid;
 
@@ -495,7 +506,64 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		e.dst = (XCtx) b;
 		return e;
 	}
-	
-	//TODO join reordering for polys
 
+	@Override
+	public XObject visit(XProgram env, XToQuery e) {
+		Object o = e.inst.accept(env, this);
+		if (!(o instanceof XCtx)) {
+			throw new RuntimeException("Not instance: " + o);
+		}
+		XCtx c = (XCtx) o;
+
+		int i = 0;
+		Map m1 = new HashMap();
+		Map m2 = new HashMap();
+	//	Map mty = new HashMap();
+		
+		Map from = new HashMap<>();
+		for (Object t : c.terms()) {
+			m1.put("v_v"+i, t);
+			m2.put(t, "v_v"+i);
+			from.put("v_v"+i, c.type(t).second);
+//			from.put("v"+i, c.type(((Pair)t).second);
+			i++;
+		}
+		List where = new LinkedList<>();
+
+		System.out.println("m1 : " + m1);
+		
+		Function f = x -> {
+			Object j = m2.get(x);
+			if (j == null) {
+				return x;
+			}
+			return j;
+		};
+		for (Object k : c.eqs) {
+			List l = (List) ((Pair)k).first;
+			List r = (List) ((Pair)k).second;
+			//lookup m2
+			where.add(new Pair<>(l.stream().map(f).collect(Collectors.toList()),
+					             r.stream().map(f).collect(Collectors.toList())));
+		}
+		
+		Flower iii= new Flower(new HashMap<>(), from, where, e.applyTo);
+	//	System.out.println(iii);
+		return iii.accept(env, this);		
+	}
+
+	@Override
+	public XObject visit(XProgram env, XUberPi e) {
+		XObject eF = e.F.accept(env, this);
+		
+		if (!(eF instanceof XMapping)) {
+			throw new RuntimeException("Not a mapping: " + e.F);
+		}
+		
+		XMapping m = (XMapping) eF;
+		return m.uber();
+	}
+	
+
+	
 }

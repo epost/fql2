@@ -405,7 +405,7 @@ public class EnrichViewer {
 
 	private static XPoly<String, String> enrich(XCtx<String> S0, XSchema S, String s, String T, String mat, String name, 
 			 String a, /*String b,*/ String l, String r, String n) {
-		Map<String, Pair<String, Block<String, String>>> blocks = new HashMap<>();
+		Map<Object, Pair<String, Block<String, String>>> blocks = new HashMap<>();
 		Map<String, Map<String, Triple<String, String, List<String>>>> vars1 = new HashMap<>();
 		Map<String, Map<Triple<String, String, List<String>>, String>> vars2 = new HashMap<>();
 		int i = 0;
@@ -422,11 +422,11 @@ public class EnrichViewer {
 		}
 		
 		for (String X : S.nodes) {
-			Map<String, String> from = new HashMap<>();
+			Map<Object, String> from = new HashMap<>();
 			from.put("x", X);
-			Set<Pair<List<String>, List<String>>> where = new HashSet<>();
-			Map<String, List<String>> attrs = new HashMap<>();
-			Map<String, Pair<String, Map<String, List<String>>>> edges = new HashMap<>();
+			Set<Pair<List<Object>, List<Object>>> where = new HashSet<>();
+			Map<String, List<Object>> attrs = new HashMap<>();
+			Map<String, Pair<Object, Map<Object, List<Object>>>> edges = new HashMap<>();
 			
 		//	Map<String, Triple<String, String, List<String>>> m1 = vars1.get(X); //new HashMap<>();
 			Map<Triple<String, String, List<String>>, String> m2 = vars2.get(X); //new HashMap<>();
@@ -441,7 +441,7 @@ public class EnrichViewer {
 				rhs.add(rp);
 				rhs.add(l);
 				rhs.add(n);
-				where.add(new Pair<>(lhs, rhs));
+				where.add(new Pair(lhs, rhs));
 			}
 			for (Triple<String, String, String> e : S.arrows) {
 				Map<String, List<String>> map = new HashMap<>();
@@ -469,10 +469,10 @@ public class EnrichViewer {
 						List<String> yyh = Collections.singletonList(tgt);
 						map.put(rep0, yyh);
 					}
-					edges.put(e.first, new Pair<>("q" + e.third, map));
+					edges.put(e.first, new Pair("q" + e.third, map));
 				 //edge	
 				} else {
-					List<String> list = new LinkedList<>();
+					List<Object> list = new LinkedList<>();
 					if (e.first.equals(name) && X.equals(mat)) {
 						Triple<String, String, List<String>> id = S0.find_fast(new Triple<>(mat, mat, new LinkedList<>()));
 						list.add(m2.get(id));
@@ -551,13 +551,13 @@ public class EnrichViewer {
 	}
 
 	private static XPoly<String, String> idPoly(XSchema isa, String isa0, String merged) {
-		Map<String, Pair<String, Block<String, String>>> blocks = new HashMap<>();
+		Map<Object, Pair<String, Block<String, String>>> blocks = new HashMap<>();
 		for (String node : isa.nodes) {
-			Map<String, String> from = new HashMap<>();
+			Map<Object, String> from = new HashMap<>();
 			from.put("v", node);
-			Set<Pair<List<String>, List<String>>> where = new HashSet<>();
-			Map<String, List<String>> attrs = new HashMap<>();
-			Map<String, Pair<String, Map<String, List<String>>>> edges = new HashMap<>();
+			Set<Pair<List<Object>, List<Object>>> where = new HashSet<>();
+			Map<String, List<Object>> attrs = new HashMap<>();
+			Map<String, Pair<Object, Map<Object, List<Object>>>> edges = new HashMap<>();
 			for (Triple<String, String, String> arrow : isa.arrows) {
 				if (!arrow.second.equals(node)) {
 					continue;
@@ -568,9 +568,9 @@ public class EnrichViewer {
 					l.add("v");
 					l.add(arrow.first);
 					map.put("v", l);
-					edges.put(arrow.first, new Pair<>("q_" + arrow.third, map));
+					edges.put(arrow.first, new Pair("q_" + arrow.third, map));
 				} else {
-					List<String> l = new LinkedList<>();
+					List<Object> l = new LinkedList<>();
 					l.add("v");
 					l.add(arrow.first);
 					attrs.put(arrow.first, l);
@@ -580,7 +580,7 @@ public class EnrichViewer {
 			Block<String, String> block = new Block<String, String>(from, where, attrs, edges);
 			blocks.put("q_" + node, new Pair<>(node, block));
 		}
-		return new XPoly<>(new XExp.Var(isa0), new XExp.Var(merged), blocks);
+		return new XPoly<String, String>(new XExp.Var(isa0), new XExp.Var(merged), blocks);
 	}
 	
 	/* @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -625,8 +625,8 @@ public class EnrichViewer {
 		
 		String s = "adom : type"
 				+ "\n"
-			//	+ "\nWisnesky Spivak Chlipala Morrisett Malecha Gross Harvard MIT Math CS Stanford : adom"
-			//	+ "\n"
+				+ "\nWisnesky Spivak Chlipala Morrisett Malecha Gross Harvard MIT Math CS Stanford : adom"
+				+ "\n"
 				+ "\nS = schema {"
 				+ "\n	nodes Person, School, Dept;"
 				+ "\n	edges advisor : Person -> Person, "
@@ -639,7 +639,21 @@ public class EnrichViewer {
 				+ "\n	equations advisor . advisor = advisor;"
 				+ "\n}"
 				+ "\n"
-/*				+ "\nI = instance {"
+			//	+ "\n"
+				+ "\nisa_schema = schema {"
+				+ "\n	nodes nodeA, nodeB;"
+				+ "\n	edges left : nodeA -> nodeB, right : nodeA -> nodeB, theatt : nodeB -> adom;"
+				+ "\n	equations;"
+				+ "\n}"
+				+ "\n"
+				+ "\nisa_inst = instance {"
+				+ "\n	variables a0 a1 : nodeA, b0 b1 b2 : nodeB;"
+				+ "\n	equations b0.theatt = MIT, b1.theatt = Harvard, b2.theatt = Stanford,"
+				+ "\n	          a0.left = b0, a0.right = b0,"
+				+ "\n	          a1.left = b1, a1.right = b2"
+				+ "\n	;"
+				+ "\n} : isa_schema"
+				+ "\n"				+ "\nI = instance {"
 				+ "\n	variables ryan david adam greg gregory jason : Person,"
 				+ "\n	          harvard mit : School, math cs : Dept;"
 				+ "\n	equations ryan.lastName = Wisnesky, ryan.advisor = david, ryan.instituteOf = harvard, ryan.deptOf = math,"
@@ -651,22 +665,8 @@ public class EnrichViewer {
 				+ "\n	          mit.schoolName = MIT, harvard.schoolName = Harvard,"
 				+ "\n	          math.deptName = Math, cs.deptName = CS,"
 				+ "\n	          harvard.biggestDept = math, mit.biggestDept = cs;"
-				+ "\n} : S " */
-			//	+ "\n"
-				+ "\nisa_schema = schema {"
-				+ "\n	nodes nodeA, nodeB;"
-				+ "\n	edges left : nodeA -> nodeB, right : nodeA -> nodeB, theatt : nodeB -> adom;"
-				+ "\n	equations;"
-				+ "\n}"
-				+ "\n";
-/*				+ "\nisa_inst = instance {"
-				+ "\n	variables a0 a1 : nodeA, b0 b1 b2 : nodeB;"
-				+ "\n	equations b0.theatt = MIT, b1.theatt = Harvard, b2.theatt = Stanford,"
-				+ "\n	          a0.left = b0, a0.right = b0,"
-				+ "\n	          a1.left = b1, a1.right = b2"
-				+ "\n	;"
-				+ "\n} : isa_schema"
-				+ "\n"; */
+				+ "\n} : S " ;
+
 
 
 		

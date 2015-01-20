@@ -16,6 +16,107 @@ import fql_lib.Util;
 
 public abstract class XExp {
 	
+	public static class XUberPi extends XExp {
+		public XExp F;
+
+	
+		
+		public XUberPi(XExp f) {
+			super();
+			F = f;
+		}
+
+
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			return result;
+		}
+
+
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XUberPi other = (XUberPi) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			return true;
+		}
+
+
+
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
+	
+	
+	public static class XToQuery extends XExp {
+		
+		public XExp inst;
+		public XExp applyTo;
+		
+		public XToQuery(XExp inst, XExp applyTo) {
+			super();
+			this.inst = inst;
+			this.applyTo = applyTo;
+		}
+
+
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((applyTo == null) ? 0 : applyTo.hashCode());
+			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
+			return result;
+		}
+
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XToQuery other = (XToQuery) obj;
+			if (applyTo == null) {
+				if (other.applyTo != null)
+					return false;
+			} else if (!applyTo.equals(other.applyTo))
+				return false;
+			if (inst == null) {
+				if (other.inst != null)
+					return false;
+			} else if (!inst.equals(other.inst))
+				return false;
+			return true;
+		}
+
+	}
+	
+	
 	public static class Id extends XExp {
 		
 		@Override
@@ -366,7 +467,7 @@ public abstract class XExp {
 		public XBool(XBool not) {
 			this.not = not;
 		}
-		public XBool(List<String> lhs, List<String> rhs) {
+		public XBool(List<Object> lhs, List<Object> rhs) {
 			this.lhs = lhs;
 			this.rhs = rhs;
 		}
@@ -385,7 +486,7 @@ public abstract class XExp {
 			}
 		}
 		
-		public List<String> lhs, rhs;
+		public List<Object> lhs, rhs;
 		public XBool l,r;
 		public boolean isAnd;
 		public XBool not;
@@ -458,8 +559,8 @@ public abstract class XExp {
 	}
 	
 	public static class FLOWER2 extends XExp {
-		Map<String, List<String>> select;
-		Map<String, String> from;
+		Map<Object, List<Object>> select;
+		Map<Object, Object> from;
 		XBool where;
 		XExp src; 
 		String ty;
@@ -513,7 +614,7 @@ public abstract class XExp {
 			return true;
 		}
 
-		public FLOWER2(Map<String, List<String>> select, Map<String, String> from,
+		public FLOWER2(Map<Object, List<Object>> select, Map<Object, Object> from,
 				XBool where, XExp src) {
 			super();
 			this.select = select;
@@ -544,9 +645,9 @@ public abstract class XExp {
 			countX(b.rhs, counts);
 		}
 		
-		private void countX(List<String> l, Map<String, Integer> counts) {
-			for (String s : l) {
-				Integer i = counts.get(s);
+		private void countX(List l, Map counts) {
+			for (Object s : l) {
+				Integer i = (Integer) counts.get(s);
 				if (i == null) {
 					continue;
 				}
@@ -554,21 +655,21 @@ public abstract class XExp {
 			}
 		}
 
-		public Map<String, String> sort(Map<String, String> m) {
-			Map<String, Integer> count = new HashMap<>();
-			for (String s : m.keySet()) {
+		public Map sort(Map m) {
+			Map count = new HashMap<>();
+			for (Object s : m.keySet()) {
 				count.put(s, 0);
 			}
 			count(where, count);
-			List<String> l = new LinkedList<>(m.keySet());
-			l.sort(new Comparator<String>() {
+			List l = new LinkedList<>(m.keySet());
+			l.sort(new Comparator() {
 				@Override
-				public int compare(String o1, String o2) {
-					return count.get(o2) - count.get(o1);
+				public int compare(Object o1, Object o2) {
+					return ((Integer)count.get(o2)) - ((Integer)count.get(o1));
 				}
 			});
-			Map<String, String> ret = new LinkedHashMap<>();
-			for (String s : l) {
+			Map ret = new LinkedHashMap<>();
+			for (Object s : l) {
 				ret.put(s, m.get(s));
 			}
 			return ret;
@@ -583,9 +684,9 @@ public abstract class XExp {
 	
 	
 	public static class Flower extends XExp {
-		Map<String, List<String>> select;
-		Map<String, String> from;
-		List<Pair<List<String>, List<String>>> where;
+		Map<Object, List<Object>> select;
+		Map<Object, Object> from;
+		List<Pair<List<Object>, List<Object>>> where;
 		XExp src;
 		String ty;
 		 
@@ -638,8 +739,8 @@ public abstract class XExp {
 			return true;
 		}
 
-		public Flower(Map<String, List<String>> select, Map<String, String> from,
-				List<Pair<List<String>, List<String>>> where, XExp src) {
+		public Flower(Map<Object, List<Object>> select, Map<Object, Object> from,
+				List<Pair<List<Object>, List<Object>>> where, XExp src) {
 			super();
 			this.select = select;
 			this.where = where;
@@ -651,9 +752,9 @@ public abstract class XExp {
 			}
 		}
 		
-		private void count(List<String> l, Map<String, Integer> counts) {
-			for (String s : l) {
-				Integer i = counts.get(s);
+		private void count(List<Object> l, Map counts) {
+			for (Object s : l) {
+				Integer i = (Integer) counts.get(s);
 				if (i == null) {
 					continue;
 				}
@@ -661,24 +762,24 @@ public abstract class XExp {
 			}
 		}
 
-		public Map<String, String> sort(Map<String, String> m) {
-			Map<String, Integer> count = new HashMap<>();
-			for (String s : m.keySet()) {
+		public Map sort(Map<Object, Object> m) {
+			Map count = new HashMap<>();
+			for (Object s : m.keySet()) {
 				count.put(s, 0);
 			}
-			for (Pair<List<String>, List<String>> k : where) {
+			for (Pair<List<Object>, List<Object>> k : where) {
 				count(k.first, count);
 				count(k.first, count);
 			}
-			List<String> l = new LinkedList<>(m.keySet());
-			l.sort(new Comparator<String>() {
+			List l = new LinkedList(m.keySet());
+			l.sort(new Comparator() {
 				@Override
-				public int compare(String o1, String o2) {
-					return count.get(o2) - count.get(o1);
+				public int compare(Object o1, Object o2) {
+					return ((Integer)count.get(o2)) - ((Integer)count.get(o1));
 				}
 			});
-			Map<String, String> ret = new LinkedHashMap<>();
-			for (String s : l) {
+			Map ret = new LinkedHashMap<>();
+			for (Object s : l) {
 				ret.put(s, m.get(s));
 			}
 			return ret;
@@ -687,6 +788,12 @@ public abstract class XExp {
 		@Override
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
+		}
+
+		@Override
+		public String toString() {
+			return "Flower [select=" + select + ", from=" + from + ", where=" + where + ", src="
+					+ src + ", ty=" + ty + "]";
 		}
 		
 	}
@@ -2048,6 +2155,8 @@ public abstract class XExp {
 		public R visit (E env, Id e);
 		public R visit (E env, Compose e);
 		public R visit (E env, XPoly e);
+		public R visit (E env, XToQuery e);
+		public R visit (E env, XUberPi e);
 	}
 
 }

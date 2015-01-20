@@ -1,5 +1,6 @@
 package fql_lib.X;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,6 +14,7 @@ import fql_lib.Chc;
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Unit;
+import fql_lib.Util;
 import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.XBool;
@@ -655,15 +657,15 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		Map types = new HashMap<>();
 		Set eqs = new HashSet<>();
 		
-		for (Entry<String, String> k : flower.from.entrySet()) {
+		for (Entry k : flower.from.entrySet()) {
 			types.put(k.getKey(), new Pair<>("_1", k.getValue()));
 		}
 		//eqs.addAll(from.where);
 		
 		XCtx ret = new XCtx(ids, types, eqs, S.global, S, "instance");
 		
-		for (String k : flower.select.keySet()) {
-			List<String> v = flower.select.get(k);
+		for (Object k : flower.select.keySet()) {
+			List v = flower.select.get(k);
 			ret.type(v);
 		}
 		
@@ -698,7 +700,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	}
 
 	
-	public static <C> String eval(XExp.XBool where, Map<String, Triple<C, C, List<C>>> k, Set<String> keys, XCtx I) {
+	public static <C> String eval(XExp.XBool where, Map<Object, Triple<C, C, List<C>>> k, Set<Object> keys, XCtx I) {
 		if (where.isFalse != null) {
 			return "false";
 		}
@@ -751,16 +753,20 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	public static <C> XCtx<C> flower2(FLOWER2 flower, XCtx<C> I) {
 		XCtx c = frozen(flower, I.schema); 
 		
-		Set<Map<String, Triple<C, C, List<C>>>> ret = new HashSet<>();
-		Map<String, Triple<C, C, List<C>>> m = new HashMap<>();
+		Set<Map<Object, Triple<C, C, List<C>>>> ret = new HashSet<>();
+		Map<Object, Triple<C, C, List<C>>> m = new HashMap<>();
 		ret.add(m);
 		
-		for (String var : flower.from.keySet()) {
-			String node = flower.from.get(var);
-			Set<Map<String, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
-			for (Map<String, Triple<C, C, List<C>>> tuple : ret) {
+		//TODO: check from vars do not occur in I
+		if (!Collections.disjoint(flower.from.keySet(), I.allTerms())) {
+			throw new RuntimeException("FROM variable is also in instance");
+		}
+		for (Object var : flower.from.keySet()) {
+			Object node = flower.from.get(var);
+			Set<Map<Object, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
+			for (Map<Object, Triple<C, C, List<C>>> tuple : ret) {
 				outer: for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", (C)node)) {
-					Map<String, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
+					Map<Object, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
 					merged.put(var, t);
 					String result = eval(flower.where, merged, flower.from.keySet(), I);
 					if (result.equals("false")) {
@@ -782,9 +788,9 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		Set eqs2 = new HashSet<>();
 		ids2.add("_Q");
 		types2.put("_Q", new Pair<>("_Q", "_Q"));
-		for (Map<String, Triple<C, C, List<C>>> k : ret) {
+		for (Map<Object, Triple<C, C, List<C>>> k : ret) {
 			types.put(k, new Pair("_1", "_Q"));
-			for (String edge : flower.select.keySet()) {
+			for (Object edge : flower.select.keySet()) {
 				Object tgt = c.type(flower.select.get(edge)).second;
 				if (!I.global.ids.contains(tgt)) {
 					throw new RuntimeException("Selection path " + edge + " does not target a type");
@@ -862,14 +868,14 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	public static <C> XBool convert2(Set<Pair<List<C>, List<C>>> eqs) {
 		XBool where = new XBool(true);
 		for (Pair<List<C>, List<C>> eq : eqs) {
-			where = new XBool(new XBool((List<String>)eq.first, (List<String>)eq.second), where, true);
+			where = new XBool(new XBool((List<Object>)eq.first, (List<Object>)eq.second), where, true);
 		}
 		return where;
 	}
 	
 	public static FLOWER2 convert(Flower flower) {
 		XBool where = new XBool(true);
-		for (Pair<List<String>, List<String>> eq : flower.where) {
+		for (Pair<List<Object>, List<Object>> eq : flower.where) {
 			where = new XBool(new XBool(eq.first, eq.second), where, true);
 		}
 		return new FLOWER2(flower.select, flower.from, where, flower.src);
@@ -1116,23 +1122,23 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	public static <C,D> XCtx<D> uberflower(XPoly<C,D> poly, XCtx<C> I) {
 		//XCtx c = frozen(flower, I.schema); 
 		
-		Map<String, Set<Map<String, Triple<C, C, List<C>>>>> top = new HashMap<>();
-		Map<String, XCtx> frozens = new HashMap();
+		Map<Object, Set<Map<Object, Triple<C, C, List<C>>>>> top = new HashMap<>();
+		Map<Object, XCtx> frozens = new HashMap();
 		
-		for (String flower_name : poly.blocks.keySet()) {
+		for (Object flower_name : poly.blocks.keySet()) {
 			Pair<D, Block<C, D>> flowerX = poly.blocks.get(flower_name);
 			D flower_dst = flowerX.first;
 			Block<C, D> flower = flowerX.second;
 
-			Set<Map<String, Triple<C, C, List<C>>>> ret = new HashSet<>();
-			Map<String, Triple<C, C, List<C>>> m = new HashMap<>();
+			Set<Map<Object, Triple<C, C, List<C>>>> ret = new HashSet<>();
+			Map<Object, Triple<C, C, List<C>>> m = new HashMap<>();
 			ret.add(m);
-			for (String var : flower.from.keySet()) {
+			for (Object var : flower.from.keySet()) {
 				C node = flower.from.get(var);
-				Set<Map<String, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
-				for (Map<String, Triple<C, C, List<C>>> tuple : ret) {
+				Set<Map<Object, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
+				for (Map<Object, Triple<C, C, List<C>>> tuple : ret) {
 					outer: for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", (C)node)) {
-						Map<String, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
+						Map<Object, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
 						merged.put(var, t);
 						String result = eval(convert2(flower.where), merged, flower.from.keySet(), I);
 						if (result.equals("false")) {
@@ -1151,18 +1157,18 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		checkEdges(poly, frozens);
 				
 		//instance
-		Set<Map<String, Triple<C, C, List<C>>>> ids = new HashSet<>();
-		Map<Map<String, Triple<C, C, List<C>>>, Pair<Map<String, Triple<C, C, List<C>>>, Map<String, Triple<C, C, List<C>>>>> types = new HashMap<>();
-		Set<Pair<List<Map<String, Triple<C, C, List<C>>>>, List<Map<String, Triple<C, C, List<C>>>>>> eqs = new HashSet<>();
+		Set<Map<Object, Triple<C, C, List<C>>>> ids = new HashSet<>();
+		Map<Map<Object, Triple<C, C, List<C>>>, Pair<Map<String, Triple<C, C, List<C>>>, Map<String, Triple<C, C, List<C>>>>> types = new HashMap<>();
+		Set<Pair<List<Map<Object, Triple<C, C, List<C>>>>, List<Map<Object, Triple<C, C, List<C>>>>>> eqs = new HashSet<>();
 		
-		for (String flower_name : poly.blocks.keySet()) {
-			Set<Map<String, Triple<C, C, List<C>>>> ret = top.get(flower_name);
+		for (Object flower_name : poly.blocks.keySet()) {
+			Set<Map<Object, Triple<C, C, List<C>>>> ret = top.get(flower_name);
 			Pair<D, Block<C, D>> flowerX = poly.blocks.get(flower_name);
 			D flower_dst = flowerX.first;
 			Block<C, D> flower = flowerX.second;
 			XCtx c = frozens.get(flower_name);
 			
-			for (Map<String, Triple<C, C, List<C>>> k : ret) {
+			for (Map<Object, Triple<C, C, List<C>>> k : ret) {
 				types.put(k, new Pair("_1", flower_dst));
 				for (D edge : flower.attrs.keySet()) {
 					Object tgt = c.type(flower.attrs.get(edge)).second;
@@ -1202,14 +1208,14 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					//must normalize in I
 					
 					Map rhs0Q = new HashMap();
-					for (D str : flower.edges.get(edge).second.keySet()) {
+					for (Object str : flower.edges.get(edge).second.keySet()) {
 						List<C> rhs0Z = subst_new(flower.edges.get(edge).second.get(str), k, new HashSet(), new HashSet());
 						rhs0Q.put(str,  rhs0Z);
 					}
 					
 					Map found = null;
-					outer: for (Map<String, Triple<C, C, List<C>>> map : top.get(flower.edges.get(edge).first)) {
-						for (String str : map.keySet()) {
+					outer: for (Map<Object, Triple<C, C, List<C>>> map : top.get(flower.edges.get(edge).first)) {
+						for (Object str : map.keySet()) {
 							if (!I.getKB().equiv(map.get(str).third, (List<C>)rhs0Q.get(str))) {
 								continue outer;
 							}
@@ -1276,8 +1282,8 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	
 	//TODO: check that INSTANCEs are saturated?
 	
-	static <C,D> void checkEdges(XPoly<C,D> poly, Map<String, XCtx> frozens) {
-		for (String k : poly.blocks.keySet()) {
+	static <C,D> void checkEdges(XPoly<C,D> poly, Map<Object, XCtx> frozens) {
+		for (Object k : poly.blocks.keySet()) {
 			Pair<D, Block<C, D>> b = poly.blocks.get(k);
 			XCtx src = frozens.get(k);
 			
@@ -1321,7 +1327,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			}
 			
 			for (D k2 : b.second.edges.keySet()) {
-				Pair<String, Map<D, List<C>>> v2 = b.second.edges.get(k2);
+				Pair<Object, Map<Object, List<Object>>> v2 = b.second.edges.get(k2);
 				XCtx dst = frozens.get(v2.first);
 				if (dst == null) {
 					throw new RuntimeException("Edge goes to non-existent node " + dst);

@@ -68,7 +68,7 @@ public class FQLCodeEditor extends CodeEditor<FQLProgram, Environment, Display> 
 	}
 
 	@Override
-	protected Display makeDisplay(String foo, FQLProgram init, Environment env) {
+	protected Display makeDisplay(String foo, FQLProgram init, Environment env, long start, long middle) {
 		return new Display(foo, init, env);
 	}
 

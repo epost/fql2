@@ -30,19 +30,21 @@ import fql_lib.gui.FQLDisp;
 
 public class XDisplay implements FQLDisp {
 
-	public XDisplay(String title, XProgram p, XEnvironment env) {
+	public XDisplay(String title, XProgram p, XEnvironment env, long start, long middle) {
 		for (String c : p.order) {
 			XObject obj = env.objs.get(c);
 			if (obj instanceof XString) {
 				continue;
 			}
-			if (obj instanceof XPoly) {
-				continue;
-			}
+		//	if (obj instanceof XPoly) {
+			//	continue;
+			//}
 			frames.add(new Pair<>(obj.kind() + " " + c, obj.display()));
 		}
-		
-		display(title, p.order);
+		long end = System.currentTimeMillis();
+		int c1 = (int) ((middle - start) / (1000f));
+		int c2 = (int) ((end - middle) / (1000f));
+		display(title + " | (exec: " + c1 + "s)(gui: " + c2 + "s)", p.order);
 	}
 	
 	JFrame frame = null;

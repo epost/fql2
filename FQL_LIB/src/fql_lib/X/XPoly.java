@@ -21,7 +21,7 @@ import fql_lib.gui.FQLTextPanel;
 public class XPoly<C,D> extends XExp implements XObject {
 
 
-	public XPoly(XExp src, XExp dst, Map<String, Pair<D, Block<C, D>>> blocks) {
+	public XPoly(XExp src, XExp dst, Map<Object, Pair<D, Block<C, D>>> blocks) {
 		super();
 		this.src_e = src;
 		this.dst_e = dst;
@@ -30,8 +30,8 @@ public class XPoly<C,D> extends XExp implements XObject {
 
 	public static class Block<C, D> {
 		
-		public Block(Map<String, C> from, Set<Pair<List<C>, List<C>>> where, Map<D, List<C>> attrs,
-				Map<D, Pair<String, Map<D, List<C>>>> edges) {
+		public Block(Map<Object, C> from, Set<Pair<List<Object>, List<Object>>> where, Map<D, List<Object>> attrs,
+				Map<D, Pair<Object, Map<Object, List<Object>>>> edges) {
 			super();
 			this.from = from;
 			this.where = where;
@@ -44,8 +44,8 @@ public class XPoly<C,D> extends XExp implements XObject {
 			}
 		}
 		
-		private void count(List<C> first, Map counts) {
-			for (C s : first) {
+		private void count(List<Object> first, Map counts) {
+			for (Object s : first) {
 				Integer i = (Integer) counts.get(s);
 				if (i == null) {
 					continue;
@@ -54,34 +54,34 @@ public class XPoly<C,D> extends XExp implements XObject {
 			}
 		}
 
-		public Map<String, C> sort(Map m) {
+		public Map<Object, C> sort(Map m) {
 			Map count = new HashMap<>();
 			for (Object s : m.keySet()) {
 				count.put(s, 0);
 			}
-			for (Pair<List<C>, List<C>> k : where) {
+			for (Pair<List<Object>, List<Object>> k : where) {
 				count(k.first, count);
 				count(k.first, count);
 			}
-			List<String> l = new LinkedList<>(m.keySet());
-			l.sort(new Comparator<String>() {
+			List l = new LinkedList<>(m.keySet());
+			l.sort(new Comparator() {
 				@Override
-				public int compare(String o1, String o2) {
+				public int compare(Object o1, Object o2) {
 					return ((Integer)count.get(o2)) - ((Integer)count.get(o1));
 				}
 			});
 			Map ret = new LinkedHashMap<>();
-			for (String s : l) {
+			for (Object s : l) {
 				ret.put(s, m.get(s));
 			}
 			return ret;
 		}
 		
 
-		Map<String, C> from = new HashMap<>(); 
-		Set<Pair<List<C>, List<C>>> where = new HashSet<>();
-		Map<D, List<C>> attrs = new HashMap<>();
-		Map<D, Pair<String, Map<D, List<C>>>> edges = new HashMap<>();
+		Map<Object, C> from = new HashMap<>(); 
+		Set<Pair<List<Object>, List<Object>>> where = new HashSet<>();
+		Map<D, List<Object>> attrs = new HashMap<>();
+		Map<D, Pair<Object, Map<Object, List<Object>>>> edges = new HashMap<>();
 		/*{ for a:A;
            where a.attA=1;
            attributes attA = a.attA;
@@ -101,7 +101,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 		private String printEdges() {
 			boolean first = false;
 			String ret = "";
-			for (Entry<D, Pair<String, Map<D, List<C>>>> k : edges.entrySet()) {
+			for (Entry<D, Pair<Object, Map<Object, List<Object>>>> k : edges.entrySet()) {
 				if (first) {
 					ret += ", ";
 				}
@@ -128,7 +128,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 		private String printAttrs() {
 			boolean first = false;
 			String ret = "";
-			for (Entry<D, List<C>> k : attrs.entrySet()) {
+			for (Entry<D, List<Object>> k : attrs.entrySet()) {
 				if (first) {
 					ret += ", ";
 				}
@@ -142,7 +142,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 		private String printWhere() {
 			boolean first = false;
 			String ret = "";
-			for (Pair<List<C>, List<C>> k : where) {
+			for (Pair<List<Object>, List<Object>> k : where) {
 				if (first) {
 					ret += ", ";
 				}
@@ -155,7 +155,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 		private String printFor() {
 			boolean first = false;
 			String ret = "";
-			for (Entry<String, C> k : from.entrySet()) {
+			for (Entry<Object, C> k : from.entrySet()) {
 				if (first) {
 					ret += ", ";
 				}
@@ -170,7 +170,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 	
 	XCtx<C> src;
 	XCtx<D> dst;
-	Map<String, Pair<D, Block<C,D>>> blocks = new HashMap<>();
+	Map<Object, Pair<D, Block<C,D>>> blocks = new HashMap<>();
 	
 	@Override
 	public String kind() {
@@ -185,7 +185,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 	private String printBlocks() {
 		boolean first = false;
 		String ret = "";
-		for (Entry<String, Pair<D, Block<C, D>>> k : blocks.entrySet()) {
+		for (Entry<Object, Pair<D, Block<C, D>>> k : blocks.entrySet()) {
 			if (first) {
 				ret += ", ";
 			}
