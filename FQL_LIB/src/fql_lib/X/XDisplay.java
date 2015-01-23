@@ -36,9 +36,11 @@ public class XDisplay implements FQLDisp {
 			if (obj instanceof XString) {
 				continue;
 			}
-		//	if (obj instanceof XPoly) {
-			//	continue;
-			//}
+			if (obj instanceof XPoly) {
+				//TODO
+//				((XPoly)obj).validate();
+				continue;
+			}
 			frames.add(new Pair<>(obj.kind() + " " + c, obj.display()));
 		}
 		long end = System.currentTimeMillis();

@@ -25,8 +25,10 @@ import fql_lib.X.XExp.XEq;
 import fql_lib.X.XExp.XExpVisitor;
 import fql_lib.X.XExp.XFF;
 import fql_lib.X.XExp.XFn;
+import fql_lib.X.XExp.XIdPoly;
 import fql_lib.X.XExp.XInj;
 import fql_lib.X.XExp.XInst;
+import fql_lib.X.XExp.XLabel;
 import fql_lib.X.XExp.XMapConst;
 import fql_lib.X.XExp.XMatch;
 import fql_lib.X.XExp.XOne;
@@ -504,6 +506,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 		e.src = (XCtx) a;
 		e.dst = (XCtx) b;
+		e.validate();
 		return e;
 	}
 
@@ -562,6 +565,30 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		
 		XMapping m = (XMapping) eF;
 		return m.uber();
+	}
+
+	@Override
+	public XObject visit(XProgram env, XLabel e) {
+		XObject eF = e.F.accept(env, this);
+		
+		if (!(eF instanceof XPoly)) {
+			throw new RuntimeException("Not a poly: " + e.F);
+		}
+		
+		XPoly m = (XPoly) eF;
+		return m.o();
+	}
+
+	@Override
+	public XObject visit(XProgram env, XIdPoly e) {
+		XObject eF = e.F.accept(env, this);
+		
+		if (!(eF instanceof XCtx)) {
+			throw new RuntimeException("Not a schema: " + e.F);
+		}
+		
+		XCtx m = (XCtx) eF;
+		return XPoly.id(m);
 	}
 	
 

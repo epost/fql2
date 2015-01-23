@@ -1119,6 +1119,10 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	
 	*/
 	
+	//TODO: make sure this is conjunctive otherwise throw an error //duplicate for later
+	//TODO: on saturated with discrete op will be saturated
+	//TODO: must add (not query label) (TARGET NODE) EVEN FOR THE CONJUNCTIVE CASE //add label here
+	//TODO: do pre-filtering based on lhs = const (ground) here //won't help
 	public static <C,D> XCtx<D> uberflower(XPoly<C,D> poly, XCtx<C> I) {
 		//XCtx c = frozen(flower, I.schema); 
 		
@@ -1157,9 +1161,9 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		checkEdges(poly, frozens);
 				
 		//instance
-		Set<Map<Object, Triple<C, C, List<C>>>> ids = new HashSet<>();
-		Map<Map<Object, Triple<C, C, List<C>>>, Pair<Map<String, Triple<C, C, List<C>>>, Map<String, Triple<C, C, List<C>>>>> types = new HashMap<>();
-		Set<Pair<List<Map<Object, Triple<C, C, List<C>>>>, List<Map<Object, Triple<C, C, List<C>>>>>> eqs = new HashSet<>();
+		Set<Pair<Object, Map<Object, Triple<C, C, List<C>>>>> ids = new HashSet<>();
+		Map<Pair<Object, Map<Object, Triple<C, C, List<C>>>>, Pair<Pair<Object, Map<Object, Triple<C, C, List<C>>>>,Pair<Object, Map<Object, Triple<C, C, List<C>>>>>> types = new HashMap<>();
+		Set<Pair<List<Pair<Object, Map<Object, Triple<C, C, List<C>>>>>, List<Pair<Object, Map<Object, Triple<C, C, List<C>>>>>>> eqs = new HashSet<>();
 		
 		for (Object flower_name : poly.blocks.keySet()) {
 			Set<Map<Object, Triple<C, C, List<C>>>> ret = top.get(flower_name);
@@ -1169,7 +1173,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			XCtx c = frozens.get(flower_name);
 			
 			for (Map<Object, Triple<C, C, List<C>>> k : ret) {
-				types.put(k, new Pair("_1", flower_dst));
+				types.put(new Pair<>(flower_name, k), new Pair("_1", flower_dst));
 				for (D edge : flower.attrs.keySet()) {
 					Object tgt = c.type(flower.attrs.get(edge)).second;
 					if (!I.global.ids.contains(tgt)) {
@@ -1177,7 +1181,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					}
 	
 					List lhs = new LinkedList();
-					lhs.add(k);
+					lhs.add(new Pair<>(flower_name, k));
 					lhs.add(edge);
 					//must normalize in I
 					List<C> rhs0 = subst_new(flower.attrs.get(edge), k, new HashSet(), new HashSet());
@@ -1196,14 +1200,10 @@ edge f:X->Y in S (including edges in type, like length or succ),
 				}
 				
 				for (D edge : flower.edges.keySet()) {
-				//	Object tgt = c.type(flower.edges.get(edge).second).second;
 					D tgt = poly.dst.type(edge).second;
-					//if (!I.global.ids.contains(tgt)) {
-						//throw new RuntimeException("Selection path " + edge + " does not target a type");
-				//	}
 	
 					List lhs = new LinkedList();
-					lhs.add(k);
+					lhs.add(new Pair<>(flower_name, k));
 					lhs.add(edge);
 					//must normalize in I
 					
@@ -1225,17 +1225,14 @@ edge f:X->Y in S (including edges in type, like length or succ),
 						}
 						found = map;
 					}
-					
 					if (found == null) {
 						throw new RuntimeException("Cannot find ID " + rhs0Q + " in " + top.get(flower.edges.get(edge)));
 					}
 					List rhsX = new LinkedList();
-					rhsX.add(found);
+					rhsX.add(new Pair<>(flower.edges.get(edge).first, found));
 					eqs.add(new Pair(lhs, rhsX));
 				}
-				
 			} 
-			
 		}
 		
 		Map types0 = types;
@@ -1330,7 +1327,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 				Pair<Object, Map<Object, List<Object>>> v2 = b.second.edges.get(k2);
 				XCtx dst = frozens.get(v2.first);
 				if (dst == null) {
-					throw new RuntimeException("Edge goes to non-existent node " + dst);
+					throw new RuntimeException("Edge " + k2 + " goes to non-existent node ");
 				}
 				Map em = new HashMap<>(v2.second);
 				for (Object o : dst.schema.allTerms()) {

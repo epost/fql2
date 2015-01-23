@@ -16,17 +16,48 @@ import fql_lib.Util;
 
 public abstract class XExp {
 	
-	public static class XUberPi extends XExp {
+	public static class XIdPoly extends XExp {
 		public XExp F;
 
-	
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
 		
-		public XUberPi(XExp f) {
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XIdPoly other = (XIdPoly) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			return true;
+		}
+
+		public XIdPoly(XExp f) {
 			super();
 			F = f;
 		}
-
-
+		
+	}
+	
+	public static class XLabel extends XExp {
+		public XExp F;
 
 		@Override
 		public int hashCode() {
@@ -36,7 +67,49 @@ public abstract class XExp {
 			return result;
 		}
 
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XLabel other = (XLabel) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			return true;
+		}
 
+		public XLabel(XExp f) {
+			super();
+			F = f;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
+	
+	public static class XUberPi extends XExp {
+		public XExp F;
+
+		public XUberPi(XExp f) {
+			super();
+			F = f;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			return result;
+		}
 
 		@Override
 		public boolean equals(Object obj) {
@@ -54,8 +127,6 @@ public abstract class XExp {
 				return false;
 			return true;
 		}
-
-
 
 		@Override
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
@@ -2157,6 +2228,8 @@ public abstract class XExp {
 		public R visit (E env, XPoly e);
 		public R visit (E env, XToQuery e);
 		public R visit (E env, XUberPi e);
+		public R visit (E env, XLabel e);
+		public R visit (E env, XIdPoly e);
 	}
 
 }

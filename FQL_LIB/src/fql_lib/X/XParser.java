@@ -36,7 +36,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "uberpi", "hom", "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "query", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "idpoly", "labels", "uberpi", "hom", "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "query", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -102,8 +102,9 @@ public class XParser {
 		
 		Parser<?> hom = Parsers.tuple(term("hom"), ref.lazy(), ref.lazy());
 		Parser<?> uberpi = Parsers.tuple(term("uberpi"), ref.lazy());
-		
-		Parser<?> a = Parsers.or(new Parser<?>[] { uberpi, hom, poly(ref), id1, id2, comp, apply, iter, query, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> labels = Parsers.tuple(term("labels"), ref.lazy());
+		Parser<?> idpoly = Parsers.tuple(term("idpoly"), ref.lazy());
+		Parser<?> a = Parsers.or(new Parser<?>[] { idpoly, labels, uberpi, hom, poly(ref), id1, id2, comp, apply, iter, query, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 
@@ -601,8 +602,14 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 		}
 		if (c instanceof org.codehaus.jparsec.functors.Pair) {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) c;
+			if (p.a.toString().equals("idpoly")) {
+				return new XExp.XIdPoly(toExp(p.b));
+			}
 			if (p.a.toString().equals("uberpi")) {
 				return new XExp.XUberPi(toExp(p.b));
+			}
+			if (p.a.toString().equals("labels")) {
+				return new XExp.XLabel(toExp(p.b));
 			}
 			if (p.a.toString().equals("relationalize")) {
 				return new XExp.XRel(toExp(p.b));

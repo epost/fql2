@@ -48,6 +48,24 @@ import fql_lib.cat.KB;
 import fql_lib.gui.FQLTextPanel;
 
 public class XCtx<C> implements XObject {
+	
+	private Set<C> hom(C src, C dst, Set<C> set) {
+		Set<C> ret = new HashSet<>();
+		for (C c : set) {
+			Pair<C, C> t = type(c);
+			if (t.first.equals(src) && t.second.equals(dst)) {
+				ret.add(c);
+			}
+		}
+		return ret;
+	}
+	
+	public Set<C> localhom(C src, C dst) {
+		return hom(src, dst, terms());
+	}
+	public Set<C> allHom(C src, C dst) {
+		return hom(src, dst, allTerms());
+	}
 
 	public boolean saturated = false;
 
@@ -125,6 +143,21 @@ public class XCtx<C> implements XObject {
 	// new HashSet<>(eqs), new HashSet<>(local));
 	// throw new RuntimeException();
 	// }
+	
+	public static <C> XCtx<C> empty_global() {
+		Set<C> i = new HashSet<>();
+		Map<C, Pair<C, C>> t = new HashMap<>();
+	
+		i.add((C)"_1");
+		t.put((C)"_1", new Pair("_1", "_1"));
+		
+		return new XCtx<C>(i, t, new HashSet<>(), null, null, "schema");		
+	}
+	
+	public static <C> XCtx<C> empty_schema() {
+		return new XCtx<C>(new HashSet<>(), new HashMap<>(), new HashSet<>(), empty_global(), null, "schema");
+
+	}
 
 	public XCtx(Set<C> ids, Map<C, Pair<C, C>> types, Set<Pair<List<C>, List<C>>> eqs,
 			XCtx<C> global, XCtx<C> schema, String kind) {
@@ -160,8 +193,9 @@ public class XCtx<C> implements XObject {
 		if (initialized) {
 			return;
 		}
-
+				
 		validate(true);
+
 
 		for (C c : ids) {
 			// if (c.equals("_1")) {
@@ -1880,12 +1914,52 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 	
+	private Map<Pair<C,C>, XCtx<C>> y_cache = new HashMap<>();
+	
 	public XCtx<C> y(C name, C type) {
+		Pair<C,C> p = new Pair<>(name, type);
+		XCtx ret = y_cache.get(p);
+		if (ret != null) {
+			return ret;
+		}
+		
 		Map<C, Pair<C, C>> types0 = new HashMap<>();
 		
 		types0.put(name, new Pair<>((C)"_1", type));
 		
-		return new XCtx<C>(new HashSet<>(), types0, new HashSet<>(), global, this, "instance");
+		ret = new XCtx<C>(new HashSet<>(), types0, new HashSet<>(), global, this, "instance");
+		y_cache.put(p, ret);
+		return ret;
+	}
+	
+	public XCtx<C> hat() {
+		Map<C, Pair<C, C>> new_types = new HashMap<>();
+		for (C k : types.keySet()) {
+			Pair<C, C> v = types.get(k);
+			if (!global.ids.contains(v.first) && !global.ids.contains(v.second)) {
+				new_types.put(k,v);
+			} 
+		}
+		
+		Set<Pair<List<C>, List<C>>> new_eqs = new HashSet<>();
+		for (Pair<List<C>, List<C>> p : eqs) {
+			if (containsType(p.first) || containsType(p.second)) {
+				continue;
+			}
+			new_eqs.add(p);
+		}
+		
+		return new XCtx<C>(ids, new_types, new_eqs, XCtx.empty_global(), null, "schema");
+	}
+	
+	private boolean containsType(List<C> l) {
+		for (C k : l) {
+			Pair<C, C> v = type(k);
+			if (global.ids.contains(v.first) || global.ids.contains(v.second)) {
+				return true;
+			} 
+		}
+		return false;
 	}
 
 }

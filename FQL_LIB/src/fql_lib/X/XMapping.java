@@ -39,6 +39,7 @@ public class XMapping<C, D> implements XObject {
 			l.add(c);
 			em.put((C) c, l);
 		}
+		validate();
 	}
 
 	public <X> XMapping(XMapping<C, X> F, XMapping<X, D> G) {
@@ -58,6 +59,7 @@ public class XMapping<C, D> implements XObject {
 					.collect(Collectors.toList());
 			em.put(c, l2);
 		}
+		validate();
 	}
 
 	@Override
@@ -847,8 +849,12 @@ public class XMapping<C, D> implements XObject {
 				theta2.put(cf, found);
 			}
 			List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> l = new LinkedList<>();
-			l.add(theta2);
-			em.put(theta, l);
+			if (dst.terms().contains(theta2)) {
+				l.add(theta2);
+				em.put(theta, l);
+			} else {
+				//fixed? 
+			}
 		}
 
 		for (Object o : src.allTerms()) {
@@ -1345,14 +1351,12 @@ public class XMapping<C, D> implements XObject {
 			map.put("q" + d, new Pair<>(d, block));
 		}
 		
-		XPoly<C, D> ret = new XPoly<C, D>(null, null, map);
-		ret.src = src;
-		ret.dst = dst;
+		XPoly<C, D> ret = new XPoly<C, D>(src, dst, map);
 		return ret;
 	}
 
 	//must reverse
-	private static <C, D> XMapping<D, D> uber_sub(D d, D d0, D e, XCtx<D> I,
+	public static <C, D> XMapping<D, D> uber_sub(D d, D d0, D e, XCtx<D> I,
 			XCtx<D> J) {
 		Map<D, List<D>> m = new HashMap<>();
 		List<D> l = new LinkedList<>();
@@ -1367,5 +1371,21 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping<D, D>(J, I, m, "homomorphism");
 	}
 
+	public static <X> boolean transform_eq(XMapping<X,X> h1, XMapping<X,X> h2) {
+		if (!h1.src.equals(h2.src)) {
+			throw new RuntimeException("Not equal:\n\n" + h1.src + "\n\nand\n\n" + h2.src);
+		}
+		if (!h1.dst.equals(h2.dst)) {
+			throw new RuntimeException();
+		}
+		for (X x : h1.src.terms()) {
+			List<X> y1 = h1.em.get(x);
+			List<X> y2 = h2.em.get(x);
+			if (!h1.dst.getKB().equiv(y1, y2)) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 }
