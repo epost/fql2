@@ -15,11 +15,13 @@ import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JTabbedPane;
 
 import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Util;
+import fql_lib.cat.Transform;
 import fql_lib.gui.FQLTextPanel;
 
 public class XPoly<C,D> extends XExp implements XObject {
@@ -76,13 +78,13 @@ public class XPoly<C,D> extends XExp implements XObject {
 		public XCtx<C> frozen(XCtx<C> src) {
 			Set<C> ids = new HashSet<>();
 			Map<C, Pair<C,C>> types = new HashMap<>();
-			Set<Pair<List<C>, List<C>>> eqs = new HashSet<>();
+			Set eqs = new HashSet<>();
 			
 			for (Object k0 : from.entrySet()) {
 				Entry k = (Entry) k0;
 				types.put((C)k.getKey(), new Pair<>((C)"_1", (C) k.getValue()));
 			}
-			//eqs.addAll(from.where);
+			eqs.addAll(where);
 			
 			XCtx<C> ret = new XCtx<C>(ids, types, eqs, src.global, src, "instance");
 			
@@ -257,7 +259,17 @@ public class XPoly<C,D> extends XExp implements XObject {
 
 	@Override
 	public JComponent display() {
-		return new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
+		JTabbedPane ret = new JTabbedPane();
+		
+		ret.addTab("Text", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString()));
+
+		ret.addTab("Hat", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", hat().toString()));
+		
+		ret.addTab("GrothO", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", grotho().toString()));
+
+		ret.addTab("Tilde", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", tilde().toString()));
+		
+		return ret;
 	}
 
 	@Override
@@ -314,6 +326,100 @@ public class XPoly<C,D> extends XExp implements XObject {
 		return result;
 	}
 	
+	public XPoly<C,D> tilde() {
+		Map<Object, Pair<D, Block<C, D>>> bs = new HashMap<>();
+		for (Object l : blocks.keySet()) {
+			Pair<D, Block<C, D>> b2 = blocks.get(l);
+			D d = b2.first;
+			Block<C, D> block = b2.second;
+			
+			Map<D, Pair<Object, Map<Object, List<Object>>>> edges = new HashMap<>();
+			for (D e : block.edges.keySet()) {
+				Pair<Object, Map<Object, List<Object>>> p = block.edges.get(e);
+				edges.put((D)new Pair(l, e), p);
+			}
+			Map<D, List<Object>> attrs = new HashMap<>();
+			for (D e : block.attrs.keySet()) {
+				List<Object> p = block.attrs.get(e);
+				attrs.put((D)new Pair(l, e), p);
+			}
+			Object ooo = "!__1"; //TODO using toString for ! is very bad
+			attrs.put((D)new Pair(l, "!_" + d), Collections.singletonList(ooo));
+			
+			Block<C, D> newblock = new Block<C, D>(block.from, block.where, attrs, edges);
+			bs.put(l, new Pair(new Pair(l, d), newblock));
+		}
+	//	System.out.println(bs);
+		return new XPoly<C,D>(src, grotho(), bs);
+	}
+	
+	public XCtx<D> grotho() {
+		Set new_ids = new HashSet<>();
+		Map new_types = new HashMap();
+		for (Object l : blocks.keySet()) {
+			new_ids.add(new Pair(l, blocks.get(l).first));
+			new_types.put(new Pair(l, blocks.get(l).first), new Pair(new Pair(l, blocks.get(l).first), new Pair(l, blocks.get(l).first)));
+		}
+		for (Object l : blocks.keySet()) {
+			for (D e : blocks.get(l).second.edges.keySet()) {
+				Pair<D,D> t = dst.type((D)e);
+				new_types.put(new Pair(l, e), new Pair(new Pair(l, t.first), new Pair(blocks.get(l).second.edges.get(e).first, t.second)));				
+			}
+			for (D e : blocks.get(l).second.attrs.keySet()) {
+				Pair<D,D> t = dst.type((D)e);
+				new_types.put(new Pair(l, e), new Pair(new Pair(l, t.first), t.second));				
+			}
+			//necessary
+			new_types.put(new Pair(l, "!_" + blocks.get(l).first), new Pair(new Pair(l, blocks.get(l).first), "_1"));				
+		}
+		Set new_eqs = new HashSet();
+		for (Pair<List<D>, List<D>> p : dst.eqs) {
+			List<D> lhs = p.first;
+			List<D> rhs = p.second;
+			Pair<D, D> t = dst.type(lhs);
+			D d = t.first;
+			D d0= t.second;
+			for (Object l : blocks.keySet()) {
+				if (!blocks.get(l).first.equals(d)) {
+					continue;
+				}
+				Function<List<D>, List> follow = list -> {
+					List ret = new LinkedList();
+					Object l0 = l;
+				//	D x = list.get(0);
+					for (D y : list) { //.subList(1, list.size())) {
+						Pair<D,D> ty = dst.type(y);
+						if (dst.global.ids.contains(ty.first)) {
+							ret.add(y);
+							continue;
+						}
+						if (dst.global.ids.contains(ty.second)) {
+							ret.add(new Pair(l0, y));
+							l0 = null;
+							continue;
+						} else {
+							if (l0 == null) {
+								throw new RuntimeException();
+							}
+				//			System.out.println("looking for " + y + " in " + blocks.get(l0).second.edges.keySet());
+							ret.add(new Pair(l0, y));
+							if (dst.ids.contains(y)) {
+							} else {
+								l0 = blocks.get(l0).second.edges.get(y).first;
+							}
+							continue;
+						}
+					}
+					return ret;
+				};
+				List lhs0 = follow.apply(lhs);
+				List rhs0 = follow.apply(rhs);
+				new_eqs.add(new Pair(lhs0, rhs0));
+			}
+		}
+		return new XCtx<D>(new_ids, new_types, new_eqs, dst.global, null, "schema");
+	}
+	
 	private XCtx<D> o_cache = null;
 	public XCtx<D> o() {
 		if (o_cache != null) {
@@ -339,6 +445,41 @@ public class XPoly<C,D> extends XExp implements XObject {
 		
 		o_cache = new XCtx<D>(new HashSet<>(), types, eqs, XCtx.empty_global(), dst.hat(), "instance");
 		return o_cache;
+	}
+
+	Map<Object, D> conj1 = null; 
+	Map<D, Object> conj2 = null;
+	public XCtx<C> T(D d) {
+		initConjs();
+		return freeze().apply(new Pair<>(conj2.get(d), Collections.singletonList(d))).src;
+	}
+	public XMapping<C, C> T(List<D> d) {
+		initConjs();
+		D t = dst.type(d).first;
+		if (conj2.containsKey(t)) {
+			return freeze().apply(new Pair<>(conj2.get(t), d));
+		} else {
+			return freeze().apply(new Pair<>(t, d));
+		}
+	}
+	
+	public void initConjs() {
+		if (conj1 != null && conj2 != null) {
+			return;
+		}
+		conj1 = new HashMap<>();
+		conj2 = new HashMap<>();
+		for (Object l : blocks.keySet()) {
+			if (conj1.containsKey(l)) {
+				throw new RuntimeException("Duplicate label + l");
+			}
+			D d = blocks.get(l).first;
+			if (conj2.containsKey(d)) {
+				throw new RuntimeException("Not conjunctive on " + d);
+			}
+			conj1.put(l, d);
+			conj2.put(d, l);			
+		}
 	}
 
 	private Function<Pair<Object, List<D>>, XMapping<C,C>> frozen = null;
@@ -451,11 +592,12 @@ public class XPoly<C,D> extends XExp implements XObject {
 			D e = p.second.get(0);
 			XMapping<C,C> h = transforms.get(new Pair<>(l, e));
 			if (h == null) {
-				throw new RuntimeException("(" + l + "," + e + ") not in " + transforms.keySet());
+				h = transforms2.get(e);
+				if (h == null) {
+					throw new RuntimeException("(" + l + "," + e + ") not in " + transforms.keySet() + " or " + transforms2.keySet());
+				}
 			}
 
-			//need filter b/c don't have identity edges in the blocks
-	//		for (D eX : p.second.subList(1, p.second.size()).stream().filter(z -> !dst.allIds().contains(z)).collect(Collectors.toList())) {
 			for (D eX : p.second.subList(1, p.second.size()) /*.stream().filter(z -> dst.ids.contains(z)).collect(Collectors.toList()) */ ) {
 				XMapping<C, C> hX = null;
 				if (transforms2.containsKey(eX)) {
@@ -468,12 +610,6 @@ public class XPoly<C,D> extends XExp implements XObject {
 					if (l == null) {
 						throw new RuntimeException();
 					}
-				/*	if (!blocks.containsKey(l)) {
-						throw new RuntimeException();
-					}
-					if (!blocks.get(l).second.edges.containsKey(e)) {
-						throw new RuntimeException("Missing " + e + " in " + blocks.get(l).second.edges.keySet() + " at label " + l);
-					} */
 					Object lX = null;
 					if (dst.ids.contains(e)) {
 						lX = l;
@@ -494,6 +630,8 @@ public class XPoly<C,D> extends XExp implements XObject {
 		};
 		return frozen;
 	}
+	
+	
 	
 	public void validate() {
 		Function<Pair<Object, List<D>>, XMapping<C,C>> f = freeze();
@@ -542,21 +680,267 @@ public class XPoly<C,D> extends XExp implements XObject {
 		} 
 	}
 	
+	public XMapping<C, C> coapply(XMapping<D,D> h) {
+		XCtx<C> src0 = coapply(h.src);
+		XCtx<C> dst0 = coapply(h.dst);
+		
+		Map<C, List<C>> em0 = new HashMap<>();
+		for (C c : src0.terms()) {
+			Triple t = (Triple) c;
+		
+			//Triple u = new Triple(t.first, h.ap)
+		}
+		
+		
+		for (C c : src0.allTerms()) {
+			if (em0.containsKey(c)) {
+				continue;
+			}
+			em0.put(c, Collections.singletonList(c));
+		}
+		return new XMapping<C, C>(src0, dst0, em0 , "homomorphism");
+	}
+	
+	XCtx<C> coapply(XCtx<D> I) {
+		Map types = new HashMap<>();
+		Set eqs = new HashSet<>();
+ 
+		for (D d : dst.allIds()) {
+			for (D x : I.terms()) {
+				Pair<D, D> t = I.type(x);
+				if (!t.first.equals("_1")) {
+					throw new RuntimeException();
+				}
+				if (!t.second.equals(d)) {
+					continue;
+				}
+				for (C k : T(d).terms()) {
+					Pair<C, C> u = T(d).type(k);
+					if (!u.first.equals("_1")) {
+						throw new RuntimeException();
+					}
+					C c = u.second;
+					Triple<D, D, C> gen = new Triple<>(d, x, k);
+					types.put(gen, new Pair("_1", c));
+				}
+				for (Pair<List<C>, List<C>> eq : T(d).eqs) {
+					Function prepend = y -> {
+						if (T(d).terms().contains(y)) {
+							return new Triple(d, x, y);
+						}
+						return y;
+					};
+					if (eq.first.stream().filter(T(d).terms()::contains).count() > 1) {
+						throw new RuntimeException("Has too many variables: " + eq.first);
+					}
+					if (eq.second.stream().filter(T(d).terms()::contains).count() > 1) {
+						throw new RuntimeException("Has too many variables: " + eq.second);
+					}
+					List<C> lhs = (List<C>) eq.first.stream().map(prepend).collect(Collectors.toList());
+					List<C> rhs = (List<C>) eq.second.stream().map(prepend).collect(Collectors.toList());
+				//	System.out.println("processing " + eq);
+				//	System.out.println("adding 1 " + new Pair(lhs, rhs));
+					eqs.add(new Pair(lhs, rhs));
+				}
+			}
+		}
+		for (Pair<List<D>, List<D>> eq : I.eqs) {
+			D d0 = I.type(eq.first).second;
+			Pair<D, List<D>> lhs = trySplit(eq.first, dst, d0); //must be nonempty
+			Pair<D, List<D>> rhs = trySplit(eq.second, dst, d0);	
+			D d1 = I.type(lhs.second).first;
+			D d2 = I.type(rhs.second).first;
+	
+			XMapping<C, C> Tq1 = T(lhs.second);
+			XMapping<C, C> Tq2 = T(rhs.second);
+			for (C Tjd0 : T(d0).terms()) {
+				List<C> a1 = Tq1.em.get(Tjd0);
+				List<C> a2 = Tq2.em.get(Tjd0);
+				
+				Pair<C, List<C>> a1x = trySplit(a1, src, Tq1.dst.type(a1).second);
+				Pair<C, List<C>> a2x = trySplit(a2, src, Tq2.dst.type(a2).second);
+				
+				List newlhs = null;
+				List newrhs = null;
+				if (lhs.first == null) {
+		//			System.out.println("fireA");
+					newlhs = eq.first;
+				} else if (a1x.first == null) {
+			//		System.out.println("fireB");
+					newlhs = a1;
+				} else {
+			//		System.out.println("fireC");
+					newlhs = new LinkedList();
+					newlhs.add(new Triple(d1, lhs.first, a1x.first));
+					newlhs.addAll(a1x.second);
+				}
+				if (rhs.first == null) {
+					newrhs = eq.second;
+				} else if (a2x.first == null) {
+					newrhs = a2;
+				} else {
+					newrhs = new LinkedList();
+					newrhs.add(new Triple(d2, rhs.first, a2x.first));
+					newrhs.addAll(a2x.second);
+				}
+			//	System.out.println("adding2 " + new Pair(newlhs, newrhs));
+				eqs.add(new Pair(newlhs, newrhs));
+			}
+		}
+		
+		return new XCtx<C>(new HashSet<>(), types, eqs, src.global, src, "instance");
+	}
+
+
+
+	private static <C> Pair<C, List<C>> trySplit(List<C> l, XCtx<C> S, C o) {
+		C ret = null;
+		int i = 0;
+		int j = 0;
+		for (C c : l) {
+			i++;
+			if (!S.allTerms().contains(c)) {
+				if (ret != null) {
+					throw new RuntimeException("Too many vars in try split " + l);
+				}
+				j = i;
+				ret = c;
+			}
+		}
+		List retl = l.subList(j, l.size());
+		if (retl.size() == 0) {
+			retl = Collections.singletonList(o);
+		}
+		return new Pair<>(ret, retl);
+
+	}
+	
+	public XPoly<C,D> hat() {
+		Map<Object, Pair<D, Block<C, D>>> bs = new HashMap<>();
+		for (Object l : blocks.keySet()) {
+			Pair<D, Block<C, D>> b = blocks.get(l);
+			Map<Object, C> from = new HashMap<>();
+			for (Entry<Object, C> fr : b.second.from.entrySet()) {
+				if (!src.global.allIds().contains(fr.getValue())) {
+					from.put(fr.getKey(), fr.getValue());
+				} 
+			}
+			Set<Pair<List<Object>, List<Object>>> where = new HashSet<>();
+			for (Pair<List<Object>, List<Object>> p : b.second.where) {
+				if (!containsType(b.second.from, src, p.first) && !containsType(b.second.from, src, p.second)) {
+					where.add(p);
+				}
+			}
+			Map<D, Pair<Object, Map<Object, List<Object>>>> edges = new HashMap<>();
+			for (Entry<D, Pair<Object, Map<Object, List<Object>>>> fr : b.second.edges.entrySet()) {
+				Map<Object, List<Object>> xxx = new HashMap<>();
+				for (Entry<Object, List<Object>> hh : fr.getValue().second.entrySet()) {
+					Object t = blocks.get(fr.getValue().first).second.from.get(hh.getKey());
+					if (!src.global.allIds().contains(t)) {
+						xxx.put(hh.getKey(), hh.getValue());
+					}
+				}
+				edges.put(fr.getKey(), new Pair<>(fr.getValue().first, xxx));
+			}
+			Block<C, D> b2 = new Block<C, D>(from, where, new HashMap<>(), edges);
+			bs.put(l, new Pair<>(b.first, b2));
+		}
+		
+		return new XPoly<C, D>(src.hat(), dst.hat(), bs);
+	}
+	
+	private static <C,D> boolean containsType(Map<Object, C> F, XCtx<C> S, List<Object> p) {
+		for (Object o : p) {
+			if (F.containsKey(o)) {
+				C c = F.get(o);
+				if (S.global.allIds().contains(c)) {
+					return true;
+				}
+			} else {
+				Pair<C, C> v = S.type((C)o);
+				if (S.global.allIds().contains(v.first) || S.global.allIds().contains(v.second)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+
+	public XCtx<Pair<Object, Map<Object, Triple<C, C, List<C>>>>> apply(XCtx<C> I) {
+		return XProd.uberflower(this, I);
+	}
+	
+	public static <C,D,E> XPoly<C,E> compose(XPoly<C,D> Q, XPoly<D,E> Q0) {
+		
+		XCtx<D> Qo = Q.o();
+		XPoly<D, E> Q0hat = Q0.hat();
+		XCtx<Pair<Object, Map<Object, Triple<D, D, List<D>>>>> labels = Q0hat.apply(Qo);
+		for (Pair<Object, Map<Object, Triple<D, D, List<D>>>> label : labels.terms()) {
+			Object l = label.first;
+			Object A = labels.type(label).second;
+			Map<Object, Triple<D, D, List<D>>> valuation = label.second;
+
+			XCtx<D> frc = Q0hat.freeze().apply(new Pair(l, Collections.singletonList(A))).src;			
+			Map<D, List<D>> map = new HashMap<>();
+			for (Object k : valuation.keySet()) {
+				List<D> list = new LinkedList<>(valuation.get(k).third);
+				list.add(0, valuation.get(k).first);
+				map.put((D)k, list);
+			}
+			for (Object o : frc.allTerms()) {
+				if (map.containsKey(o)) {
+					continue;
+				}
+				map.put((D)o, Collections.singletonList((D)o));
+			}
+			XMapping<D,D> h = new XMapping<D, D>(frc, Qo, map, "homomorphism");
+		
+			XCtx<D> intQo = Q.grotho();
+			Map<D, Pair<D, D>> types = new HashMap<>();
+			for (D gen : frc.terms()) {
+				D ty = frc.type(gen).second;
+				List<D> hgen = h.em.get(gen);
+				if (hgen.size() != 2) {
+					throw new RuntimeException(gen + " mapsto " + hgen);
+				}
+				types.put(gen, new Pair((D)"_1", new Pair(hgen.get(1), ty)));
+			}
+			XCtx<D> inth_pre = new XCtx<D>(new HashSet<>(), types, new HashSet<>(), intQo.global, intQo, "instance");
+			Set<Pair<List<D>, List<D>>> new_eqs = new HashSet<>();
+			for (Pair<List<D>, List<D>> eq : h.src.eqs) {
+				try { //morally should transform !, but can't so hack
+					inth_pre.type(eq.first);
+					inth_pre.type(eq.second);
+					new_eqs.add(eq);
+				} catch (Exception ex) {
+					continue;
+				}
+			}
+			XCtx<D> inth = new XCtx<D>(new HashSet<>(), types, new_eqs, intQo.global, intQo, "instance");
+			XCtx<C> fr = Q.tilde().coapply(inth);
+		}
+		
+		return (XPoly<C, E>) Q;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 }
 
-
-/*			Set<D> atts = new HashSet();
-for (D arr : dst.allTerms()) {
-	Pair<D, D> ty = dst.type(arr);
-	if (ty.second.equals("_1") || dst.allIds().contains(arr) || !ty.first.equals(b.first)) {
-		continue;
-	}
-	if (!dst.ids.contains(ty.second)) {
-		atts.add(arr);
-	}
-}
-if (!atts.equals(b.second.attrs.keySet())) {
-	throw new RuntimeException("Bad attributes in " + k + ": " + atts + " vs " + b.second.attrs.keySet());
-} */
 

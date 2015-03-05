@@ -1,6 +1,14 @@
 package fql_lib.X;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Paint;
+import java.awt.Stroke;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,8 +23,22 @@ import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 
+import org.apache.commons.collections15.Transformer;
+
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
+import fql_lib.Chc;
 import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Triple;
@@ -174,6 +196,11 @@ public class XMapping<C, D> implements XObject {
 				pane.addTab("Tables", makeTables2());
 			}
 		}
+		
+		if (DEBUG.debug.x_graph && src.schema == null) {
+			pane.addTab("Graph", makeGraph());
+		}
+
 		return pane;
 	}
 
@@ -716,6 +743,10 @@ public class XMapping<C, D> implements XObject {
 	}
 
 	public XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> pi(XCtx<C> I) {
+		if (!DEBUG.debug.x_backtracking) {
+			return pi2(I);
+		}
+		
 		Pair<Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>>, Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>>> zzz = makeThetas2(I);
 		Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>> thetas_d = zzz.first;
 		Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>> bad_thetas = zzz.second;
@@ -825,8 +856,16 @@ public class XMapping<C, D> implements XObject {
 		return ret;
 	}
 
+	private XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> pi2(XCtx<C> i) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public XMapping<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>, Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> piT(
 			XMapping<C, C> t) {
+		if (!DEBUG.debug.x_backtracking) {
+			return piT2(t);
+		}
 		XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> src = pi(t.src);
 		XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> dst = pi(t.dst);
 
@@ -867,6 +906,12 @@ public class XMapping<C, D> implements XObject {
 		}
 
 		return new XMapping<>(src, dst, em, "homomorphism");
+	}
+
+	private XMapping<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>, Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> piT2(
+			XMapping<C, C> t) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	boolean fill(XCtx<C> I, Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
@@ -1077,6 +1122,9 @@ public class XMapping<C, D> implements XObject {
 	}
 
 	public XMapping pi_unit(XCtx<D> J) {
+		if (!DEBUG.debug.x_backtracking) {
+			return pi_unit2(J);
+		}
 		XCtx<Pair<Triple<D, D, List<D>>, C>> deltaI = delta(J); // XCtx<Pair<Triple<D,
 																// D, List<D>>,
 																// C>>
@@ -1142,7 +1190,16 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping(J, pideltaI, m, "homomorphism");
 	}
 
+	private XMapping pi_unit2(XCtx<D> j) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public XMapping pi_counit(XCtx<C> I) {
+		if (!DEBUG.debug.x_backtracking) {
+			return pi_counit2(I);
+		}
+		
 		XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> piI = pi(I); // XCtx<Pair<Triple<D,
 																						// D,
 																						// List<D>>,
@@ -1197,6 +1254,11 @@ public class XMapping<C, D> implements XObject {
 		}
 
 		return new XMapping(deltapiI, I, m, "homomorphism");
+	}
+
+	private XMapping pi_counit2(XCtx<C> i) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public XMapping<C, D> rel() {
@@ -1387,5 +1449,113 @@ public class XMapping<C, D> implements XObject {
 		}
 		return true;
 	}
+	
+	private Graph<Chc<C,D>, Object> buildFromSig() {
+		String pre = "_38u5n";
+		int i = 0;
+		Graph<Chc<C,D>, Object> G = new DirectedSparseMultigraph<>();
+		for (C n : src.ids) {
+			G.addVertex(Chc.inLeft(n));
+			G.addEdge(pre + i++, Chc.inLeft(n), Chc.inRight(em.get(n).get(0)));
+		}
+		for (D n : dst.ids) {
+			G.addVertex(Chc.inRight(n));
+		}
+		
+		for (C e : src.terms()) {
+			if (src.allIds().contains(e)) {
+				continue;
+			}
+			if (e.toString().startsWith("!")) {
+				continue;
+			}
+			Pair<C,C> t = src.type(e);
+			if (src.global.ids.contains(t.first) || src.global.ids.contains(t.second)) {
+				continue;
+			}
+			G.addEdge(Chc.inLeft(e), Chc.inLeft(t.first), Chc.inLeft(t.second));
+		}
+		for (D e : dst.terms()) {
+			if (dst.allIds().contains(e)) {
+				continue;
+			}
+			if (e.toString().startsWith("!")) {
+				continue;
+			}
+			Pair<D,D> t = dst.type(e);
+			if (dst.global.ids.contains(t.first) || dst.global.ids.contains(t.second)) {
+				continue;
+			}
+			G.addEdge(Chc.inRight(e), Chc.inRight(t.first), Chc.inRight(t.second));
+		}
+		
+		return G;
+	}
+	
+	public JComponent makeGraph() {
+		if (src.allTerms().size() > 128) {
+			return new JTextArea("Too large to display");
+		}
+		Graph<Chc<C, D>, Object> sgv = buildFromSig();
+
+		Layout<Chc<C, D>, Object> layout = new FRLayout<>(sgv);
+		layout.setSize(new Dimension(600, 400));
+		VisualizationViewer<Chc<C, D>, Object> vv = new VisualizationViewer<>(layout);
+		vv.getRenderContext().setLabelOffset(20);
+		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
+		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		vv.setGraphMouse(gm);
+		gm.setMode(Mode.PICKING);
+
+		Transformer<Chc<C, D>, Paint> vertexPaint = x -> {
+			if (x.left) {
+				return Color.BLUE;
+			}
+			return Color.GREEN;
+		};
+		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		
+		Transformer<Chc<C, D>, String> ttt = arg0 -> {
+			if (arg0.left) {
+				return arg0.l.toString();
+			}
+			return arg0.r.toString();
+		};
+		Transformer<Object, String> hhh = arg0 -> {
+			if (!(arg0 instanceof Chc)) {
+				return "";
+			}
+			Chc xxx = (Chc) arg0;
+			if (xxx.left) {
+				return xxx.l.toString();
+			}
+			return xxx.r.toString();
+		};
+		vv.getRenderContext().setVertexLabelTransformer(ttt);
+		vv.getRenderContext().setEdgeLabelTransformer(hhh);
+		
+		float dash[] = { 10.0f };
+		final Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
+				BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
+		final Stroke bs = new BasicStroke();
+
+		Transformer<Object, Stroke> edgeStrokeTransformer = new Transformer<Object, Stroke>() {
+			public Stroke transform(Object s) {
+				if (!(s instanceof Chc)) {
+					return edgeStroke;
+				}
+				return bs;
+			}
+		};
+		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
+
+		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+		JPanel ret = new JPanel(new GridLayout(1, 1));
+		ret.add(zzz);
+		ret.setBorder(BorderFactory.createEtchedBorder());
+		return ret;		
+	}
+
 	
 }

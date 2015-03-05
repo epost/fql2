@@ -1119,11 +1119,34 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	
 	*/
 	
+	public static <C, D> XMapping<Pair<Object, Map<Object, Triple<C, C, List<C>>>>, Pair<Object, Map<Object, Triple<C, C, List<C>>>>> uberflower(XPoly<C, D> poly, XMapping<C,C> h) {
+		//poly.initConjs(); works on full ubers
+		XCtx<Pair<Object, Map<Object, Triple<C, C, List<C>>>>> hsrc = uberflower(poly, h.src);
+		XCtx<Pair<Object, Map<Object, Triple<C, C, List<C>>>>> hdst = uberflower(poly, h.dst);
+		Map em = new HashMap<>();
+		
+		for (Pair<Object, Map<Object, Triple<C, C, List<C>>>> k : hsrc.ids) {
+			Map<Object, Triple<C, C, List<C>>> cand = new HashMap<>();
+			for (Object v : k.second.keySet()) {
+				Triple<C, C, List<C>> p = k.second.get(v);
+				cand.put(v, h.dst.find_fast(new Triple<>(p.first, p.second, h.apply(p.third))));
+			}
+			em.put(k, new Pair<>(k.first, cand));
+		}
+		
+		for (Object k : hsrc.allTerms()) {
+			if (!em.containsKey(k)) {
+				em.put(k, Collections.singletonList(k));
+			}
+		}
+		return new XMapping<Pair<Object, Map<Object, Triple<C, C, List<C>>>>, Pair<Object, Map<Object, Triple<C, C, List<C>>>>>(uberflower(poly, h.src), uberflower(poly, h.dst), em, "homomorphism");
+	}
+	
 	//TODO: make sure this is conjunctive otherwise throw an error //duplicate for later
 	//TODO: on saturated with discrete op will be saturated
 	//TODO: must add (not query label) (TARGET NODE) EVEN FOR THE CONJUNCTIVE CASE //add label here
 	//TODO: do pre-filtering based on lhs = const (ground) here //won't help
-	public static <C,D> XCtx<D> uberflower(XPoly<C,D> poly, XCtx<C> I) {
+	public static <C,D> XCtx<Pair<Object, Map<Object, Triple<C, C, List<C>>>>> uberflower(XPoly<C,D> poly, XCtx<C> I) {
 		//XCtx c = frozen(flower, I.schema); 
 		
 		Map<Object, Set<Map<Object, Triple<C, C, List<C>>>>> top = new HashMap<>();
@@ -1272,7 +1295,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			}
 		}
 		
-		XCtx<D> J = new XCtx(ids, types, eqs, I.global, poly.dst, "instance");
+		XCtx J = new XCtx(ids, types, eqs, I.global, poly.dst, "instance");
 		J.saturated = true; 
 		return J;
 	}
@@ -1343,5 +1366,27 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		}
 	}
 
+	public static <X,A,B> XCtx<Chc<A,B>> pushout(XMapping<X,A> f, XMapping<X,B> g) {
+		if (!f.src.equals(g.src)) {
+			throw new RuntimeException("not common source");
+		}
+		XCtx<Chc<A,B>> I = coprod(f.dst, g.dst);
+		XMapping<A,Chc<A,B>> inj1 = inl(f.dst, g.dst);
+		XMapping<B,Chc<A,B>> inj2 = inr(f.dst, g.dst);
+		
+		Set<Pair<List<Chc<A, B>>, List<Chc<A, B>>>> eqs = new HashSet<>(I.eqs);
+		for (X gen : f.src.terms()) {
+			List<A> fgen = f.em.get(gen);
+			List<B> ggen = g.em.get(gen);
+			List<Chc<A,B>> inj1fgen = inj1.apply(fgen);
+			List<Chc<A,B>> inj2ggen = inj2.apply(ggen);
+			eqs.add(new Pair<>(inj1fgen, inj2ggen));
+		}
+		
+		XCtx<Chc<A,B>> ret = new XCtx<Chc<A,B>>(I.ids, I.types, eqs , (XCtx)I.global, (XCtx)I.schema, "instance");
+		ret.saturated = false;
+		//	ret.saturated = f.dst.saturated && g..saturated;
+		return ret;
+	}
 	
 }

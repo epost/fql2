@@ -16,6 +16,139 @@ import fql_lib.Util;
 
 public abstract class XExp {
 	
+	public static class XPushout extends XExp {
+		XExp f,g;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((f == null) ? 0 : f.hashCode());
+			result = prime * result + ((g == null) ? 0 : g.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XPushout other = (XPushout) obj;
+			if (f == null) {
+				if (other.f != null)
+					return false;
+			} else if (!f.equals(other.f))
+				return false;
+			if (g == null) {
+				if (other.g != null)
+					return false;
+			} else if (!g.equals(other.g))
+				return false;
+			return true;
+		}
+
+		public XPushout(XExp f, XExp g) {
+			super();
+			this.f = f;
+			this.g = g;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
+	
+	public static class XCoApply extends XExp {
+		XExp f, I;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((f == null) ? 0 : f.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XCoApply other = (XCoApply) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (f == null) {
+				if (other.f != null)
+					return false;
+			} else if (!f.equals(other.f))
+				return false;
+			return true;
+		}
+
+		public XCoApply(XExp f, XExp i) {
+			super();
+			this.f = f;
+			I = i;
+		}
+
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
+	
+	public static class XGrothLabels extends XExp {
+		public XExp F;
+
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XGrothLabels other = (XGrothLabels) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			return true;
+		}
+
+		public XGrothLabels(XExp f) {
+			super();
+			F = f;
+		}
+
+		
+	}
+	
 	public static class XIdPoly extends XExp {
 		public XExp F;
 
@@ -377,7 +510,7 @@ public abstract class XExp {
 		
 	}
 	
-	public static class XQueryExp extends XExp {
+/*	public static class XQueryExp extends XExp {
 		XExp pi, delta, sigma;
 		 
 		@Override
@@ -428,10 +561,7 @@ public abstract class XExp {
 			this.delta = delta;
 			this.sigma = sigma;
 		}
-		
-		
-		
-	}
+	} */
 	
 	public static class XBool {
 		
@@ -2220,7 +2350,7 @@ public abstract class XExp {
 		public R visit (E env, XTT e);
 		public R visit (E env, Flower e);
 		public R visit (E env, FLOWER2 e);
-		public R visit (E env, XQueryExp e);
+//		public R visit (E env, XQueryExp e);
 		public R visit (E env, Apply e);
 		public R visit (E env, Iter e);
 		public R visit (E env, Id e);
@@ -2230,6 +2360,9 @@ public abstract class XExp {
 		public R visit (E env, XUberPi e);
 		public R visit (E env, XLabel e);
 		public R visit (E env, XIdPoly e);
+		public R visit (E env, XGrothLabels e);
+		public R visit (E env, XCoApply e);
+		public R visit (E env, XPushout e);
 	}
 
 }

@@ -1,9 +1,12 @@
 package fql_lib.X;
 
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,8 +22,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -358,12 +364,29 @@ public class XCtx<C> implements XObject {
 				e.printStackTrace();
 				kb_text = "\n\nERROR in Knuth-Bendix\n\n" + e.getMessage();
 			}
+			JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			JPanel bot = new JPanel(new GridLayout(1,3));
+			JTextField fff = new JTextField();
+			JButton but = new JButton("Reduce");
+			JTextField ggg = new JTextField();
+			bot.add(fff);
+			bot.add(but);
+			bot.add(ggg);
+			pane.setResizeWeight(1);
+			but.addActionListener(x -> {
+				String s = fff.getText();
+				List l = XParser.path(s);
+				try {
+					ggg.setText(Util.sep(getKB().normalize("", l), "."));
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					ggg.setText(ex.getMessage());
+				}
+			});
 			JComponent kbc = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", kb_text);
-			ret.addTab("Text", kbc);
-		}
-
-		if (DEBUG.debug.x_graph) {
-			ret.addTab("Graph", makeGraph());
+			pane.add(kbc);
+			pane.add(bot);
+			ret.addTab("Text", pane);
 		}
 
 		String cat = null;
@@ -394,18 +417,21 @@ public class XCtx<C> implements XObject {
 				ret.addTab("Adom Tables", makeTables(z -> foo(), global.ids));
 			}
 		}
+		
+		if (DEBUG.debug.x_graph) {
+			ret.addTab("Graph", makeGraph(schema != null));
+		}
+
 		return ret;
 	}
 
-	public JComponent makeGraph() {
+	public JComponent makeGraph(boolean isInstance) {
 		if (allTerms().size() > 128) {
 			return new JTextArea("Too large to display");
 		}
 		Graph<C, C> sgv = buildFromSig();
 
 		Layout<C, C> layout = new FRLayout<>(sgv);
-		// Layout<C, C> layout = new ISOMLayout<>(sgv);
-		// Layout<C, C> layout = new edu.uci.ics.jung.algorithms.layout.<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<C, C> vv = new VisualizationViewer<>(layout);
 		vv.getRenderContext().setLabelOffset(20);
@@ -419,15 +445,25 @@ public class XCtx<C> implements XObject {
 				return Color.RED;
 			}
 			return Color.GREEN;
-			/*
-			 * if (schema == null) { return Color.GREEN; } else { if
-			 * (schema.terms().contains(x)) { return Color.GREEN; } } return
-			 * Color.BLUE;
-			 */
 		};
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-
-		// Transformer ttt = arg0 -> Util.nice(arg0.toString());
+		vv.getPickedVertexState().addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() != ItemEvent.SELECTED) {
+					return;
+				}
+				vv.getPickedEdgeState().clear();
+				Object str = e.getItem();
+				if (cl == null) {
+					//System.out.println("return");
+					return;
+				}
+//				System.out.println("showing " + str + " at " + xgrid.get(str) );
+				cl.show(clx, xgrid.get(str));
+			}
+		});
+		
 		Transformer<C, String> ttt = arg0 -> {
 			String ret = arg0.toString();
 			if (ret.length() > 16) {
@@ -442,12 +478,25 @@ public class XCtx<C> implements XObject {
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 		ret.add(zzz);
 		ret.setBorder(BorderFactory.createEtchedBorder());
-		return ret;
+		
+		if (isInstance && DEBUG.debug.x_tables) {
+			JSplitPane jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			jsp.setResizeWeight(.8d); // setDividerLocation(.9d);
+			jsp.add(ret);
+			jsp.add(clx);
+			return jsp;
+		} else {
+			return ret;
+		}
+		
 	}
 
 	private Graph<C, C> buildFromSig() {
 		Graph<C, C> g2 = new DirectedSparseMultigraph<>();
 		for (C n : allIds()) {
+			if (n.equals("_1")) {
+				continue;
+			}
 			g2.addVertex(n);
 		}
 		for (C e : allTerms()) {
@@ -455,6 +504,10 @@ public class XCtx<C> implements XObject {
 				continue;
 			}
 			if (e.toString().startsWith("!")) {
+				continue;
+			}
+			Pair<C,C> t = type(e);
+			if (t.first.equals("_1") || t.second.equals("_1")) {
 				continue;
 			}
 			g2.addEdge(e, type(e).first, type(e).second);
@@ -748,10 +801,34 @@ public class XCtx<C> implements XObject {
 		}
 		return null;
 	}
+	
+	private JComponent clx;
+	private CardLayout cl;
+	private Map<C, String> xgrid;
+//	public JComponent getGrid(C c) {
+//		if (xgrid != null) {
+//			return xgrid.get(c);
+//		}
+//		if (DEBUG.debug.x_tables) {
+////			makeTables(x -> cat().arrows(), new HashSet<>());
+//			return getGrid(c);
+//		}
+//		return new JPanel();
+//	}
+	
 
 	// TODO: have this suppress pair IDs when possible
 	private JComponent makeTables(Function<Unit, Collection<Triple<C, C, List<C>>>> fn,
 			Set<C> ignore) {
+		cl = new CardLayout();
+		xgrid = new HashMap<>();
+		clx = new JPanel();
+		clx.setLayout(cl);
+		clx.add(new JPanel(), "0");
+		cl.show(clx, "0");
+		xgrid.put((C)"_1", "0");
+
+		int www = 1;
 		try {
 			// Category<C, Triple<C, C, List<C>>> cat = cat();
 			List<JComponent> grid = new LinkedList<>();
@@ -855,6 +932,11 @@ public class XCtx<C> implements XObject {
 				}
 				JPanel table = Util.makeTable(BorderFactory.createEtchedBorder(),
 						c + " (" + src.size() + ") rows", rowData, colNames);
+				JPanel table2 = Util.makeTable(BorderFactory.createEtchedBorder(),
+						c + " (" + src.size() + ") rows", rowData, colNames);
+				xgrid.put(c, Integer.toString(www));
+				clx.add(new JScrollPane(table2), Integer.toString(www));
+				www++;
 				grid.add(table);
 			}
 

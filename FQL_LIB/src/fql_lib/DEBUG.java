@@ -221,6 +221,7 @@ public class DEBUG implements Serializable {
 	public boolean x_cat = false;
 	public boolean x_tables = true;
 	public boolean x_adom = false;
+	public boolean x_backtracking = true;
 
 	public void showOptions() {
 
@@ -288,6 +289,11 @@ public class DEBUG implements Serializable {
 		JLabel fast_amalgams_label = new JLabel("Use fast amalgams on saturated presentations:");
 		x_1.add(fast_amalgams_label);
 		x_2.add(fast_amalgams_box);
+		
+	//	JCheckBox backtracking_box = new JCheckBox("", x_backtracking);
+	//	JLabel backtracking_label = new JLabel("Use backtracking pi");
+	//	x_1.add(backtracking_label);
+	//	x_2.add(backtracking_box);
 		
 		JCheckBox validate_amalgams_box = new JCheckBox("", validate_amalgams);
 		JLabel validate_amalgams_label = new JLabel("Validate amalgams (if validating categories):");
@@ -844,6 +850,7 @@ public class DEBUG implements Serializable {
 			this.x_graph = x_graph_box.isSelected();
 			this.x_tables = x_tabular_box.isSelected();
 			this.x_adom = x_adom_box.isSelected();
+		//	this.x_backtracking = backtracking_box.isSelected();
 			this.fast_amalgams = fast_amalgams_box.isSelected();
 			this.validate_amalgams = validate_amalgams_box.isSelected();
 			//this.direct_flower = direct_flower_box.isSelected();

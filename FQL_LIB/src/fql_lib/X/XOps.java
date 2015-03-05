@@ -1,6 +1,5 @@
 package fql_lib.X;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +16,7 @@ import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.Id;
 import fql_lib.X.XExp.Iter;
 import fql_lib.X.XExp.Var;
+import fql_lib.X.XExp.XCoApply;
 import fql_lib.X.XExp.XConst;
 import fql_lib.X.XExp.XCoprod;
 import fql_lib.X.XExp.XCounit;
@@ -25,6 +25,7 @@ import fql_lib.X.XExp.XEq;
 import fql_lib.X.XExp.XExpVisitor;
 import fql_lib.X.XExp.XFF;
 import fql_lib.X.XExp.XFn;
+import fql_lib.X.XExp.XGrothLabels;
 import fql_lib.X.XExp.XIdPoly;
 import fql_lib.X.XExp.XInj;
 import fql_lib.X.XExp.XInst;
@@ -35,7 +36,7 @@ import fql_lib.X.XExp.XOne;
 import fql_lib.X.XExp.XPair;
 import fql_lib.X.XExp.XPi;
 import fql_lib.X.XExp.XProj;
-import fql_lib.X.XExp.XQueryExp;
+import fql_lib.X.XExp.XPushout;
 import fql_lib.X.XExp.XRel;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
@@ -406,7 +407,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		return XProd.flower2(e, src);		
 	}
 
-	@Override
+/*	@Override
 	public XObject visit(XProgram env, XQueryExp e) {
 		Object delta0 = e.delta.accept(env, this);
 		if (!(delta0 instanceof XMapping)) {
@@ -421,7 +422,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			throw new RuntimeException("Sigma not a mapping in " + e);
 		}
 		return new XQuery((XMapping)pi0, (XMapping)delta0, (XMapping)sigma0);
-	}
+	} */
 
 	@Override
 	public XObject visit(XProgram env, Apply e) {
@@ -430,15 +431,30 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			throw new RuntimeException("Not a query in " + e);
 		}
 		XObject i = e.I.accept(env, this);
+		if (i instanceof XCtx) {
+			return XProd.uberflower((XPoly)f, (XCtx)i);
+		}
+		return XProd.uberflower((XPoly)f, (XMapping)i);
+	}
+	//TODO: coapply on transforms, unit,counit for apply/coapply
+	@Override
+	public XObject visit(XProgram env, XCoApply e) {
+		XObject f = e.f.accept(env, this);
+		if (!(f instanceof XPoly)) {
+			throw new RuntimeException("Not a query in " + e);
+		}
+		XObject i = e.I.accept(env, this);
 		if (!(i instanceof XCtx)) {
 			throw new RuntimeException("Not an instance in " + e);
 		}
-		return XProd.uberflower((XPoly)f, (XCtx)i);
+		return ((XPoly)f).coapply((XCtx)i);
 	}
 
 	@Override
 	public XObject visit(XProgram env, Iter e) {
-		XObject f = e.f.accept(env, this);
+		throw new RuntimeException("todo: remove iter");
+	}
+/*		XObject f = e.f.accept(env, this);
 		if (!(f instanceof XQuery)) {
 			throw new RuntimeException("Not a query in " + e);
 		}
@@ -454,7 +470,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 		
 		return I;
-	}
+	} */
 
 	@Override
 	public XObject visit(XProgram env, Id e) {
@@ -474,9 +490,9 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			throw new RuntimeException();
 		}
 		XMapping F = new XMapping(C, str);
-		if (e.isQuery) {
-			return new XQuery(F, F, F);
-		} 
+		//if (e.isQuery) {
+		//	return new XQuery(F, F, F);
+		//} 
 		return F;
 	}
 
@@ -488,8 +504,10 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			XMapping F = (XMapping) f0;
 			XMapping G = (XMapping) g0;
 			return new XMapping(F, G);
-		} else if (f0 instanceof XQuery && g0 instanceof XQuery) {
-			throw new RuntimeException("Cannot compose queries yet.");			
+		} else if (f0 instanceof XPoly && g0 instanceof XPoly) {
+			XPoly F = (XPoly) f0;
+			XPoly G = (XPoly) g0;
+			return XPoly.compose(F, G);
 		}
 		throw new RuntimeException("Cannot compose in " + e);
 	}
@@ -501,8 +519,8 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			throw new RuntimeException("Not a schema: " + a);
 		}
 		Object b = e.dst_e.accept(env, this);
-		if (!(a instanceof XCtx)) {
-			throw new RuntimeException("Not a schema: " + a);
+		if (!(b instanceof XCtx)) {
+			throw new RuntimeException("Not a schema: " + b);
 		}
 		e.src = (XCtx) a;
 		e.dst = (XCtx) b;
@@ -533,7 +551,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 		List where = new LinkedList<>();
 
-		System.out.println("m1 : " + m1);
+	//	System.out.println("m1 : " + m1);
 		
 		Function f = x -> {
 			Object j = m2.get(x);
@@ -589,6 +607,33 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		
 		XCtx m = (XCtx) eF;
 		return XPoly.id(m);
+	}
+
+	@Override
+	public XObject visit(XProgram env, XGrothLabels e) {
+		XObject eF = e.F.accept(env, this);
+		
+		if (!(eF instanceof XPoly)) {
+			throw new RuntimeException("Not a poly: " + e.F);
+		}
+		
+		XPoly m = (XPoly) eF;
+		return m.grotho();
+
+	}
+
+	@Override
+	public XObject visit(XProgram env, XPushout e) {
+		Object a = e.f.accept(env, this);
+		if (!(a instanceof XMapping)) {
+			throw new RuntimeException("Not a homomorphism: " + a);
+		}
+		Object b = e.g.accept(env, this);
+		if (!(b instanceof XMapping)) {
+			throw new RuntimeException("Not a homomorphism: " + b);
+		}
+
+		return XProd.pushout((XMapping)a, (XMapping)b);
 	}
 	
 

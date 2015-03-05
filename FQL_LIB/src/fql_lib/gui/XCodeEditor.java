@@ -49,7 +49,7 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 		ctm.addTemplate(ct);
 		
 		ct = new StaticCodeTemplate("polynomial", "polynomial ",
-				"{\n\t q = {for v:t; where v=v; attributes l=v.l; edges f = {e=v.l} : q;} : t\n} : s -> s");
+				"{\n\t q = {for v:t; where v=v; attributes l=v.l; edges f = {e=v.l} : q;} : t\n}\n : s -> s");
 		ctm.addTemplate(ct);
 		
 		ct = new StaticCodeTemplate("query", "query ",
@@ -69,19 +69,19 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 		ctm.addTemplate(ct);
 
 		ct = new StaticCodeTemplate("mapping", "mapping ",
-				"{\n\tnodes;\n\tedges;\n} :  -> ");
+				"{\n\tnodes;\n\tedges;\n}\n :  -> ");
 		ctm.addTemplate(ct);
 		
 		ct = new StaticCodeTemplate("instance", "instance ",
-				"{\n\tvariables;\n\tequations;\n} : ");
+				"{\n\tvariables;\n\tequations;\n}\n : ");
 		ctm.addTemplate(ct);
 		
 		ct = new StaticCodeTemplate("INSTANCE", "INSTANCE ",
-				"{\n\tvariables;\n\tequations;\n} : ");
+				"{\n\tvariables;\n\tequations;\n}\n : ");
 		ctm.addTemplate(ct);
 
 		ct = new StaticCodeTemplate("homomorphism", "homomorphism ",
-				"{\n\tvariables;\n} :  ->  "); 
+				"{\n\tvariables;\n}\n :  ->  "); 
 		ctm.addTemplate(ct);
 	}
 

@@ -36,7 +36,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "idpoly", "labels", "uberpi", "hom", "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "query", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "pushout", "coapply", "grothlabels", "idpoly", "labels", "uberpi", "hom", "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -96,15 +96,19 @@ public class XParser {
 		Parser id2 = Parsers.tuple(term("ID"), ref.lazy());
 		Parser<?> comp = Parsers.tuple(term("("), ref.lazy(), term(";"), ref.lazy(), term(")"));
 		
-		Parser<?> query = query(ref);
+//		Parser<?> query = query(ref);
 		Parser<?> apply = Parsers.tuple(term("apply"), ref.lazy(), ref.lazy());
 		Parser<?> iter = Parsers.tuple(term("iterate"), Terminals.IntegerLiteral.PARSER, ref.lazy(), ref.lazy());
 		
 		Parser<?> hom = Parsers.tuple(term("hom"), ref.lazy(), ref.lazy());
 		Parser<?> uberpi = Parsers.tuple(term("uberpi"), ref.lazy());
 		Parser<?> labels = Parsers.tuple(term("labels"), ref.lazy());
+		Parser<?> glabels = Parsers.tuple(term("grothlabels"), ref.lazy());
 		Parser<?> idpoly = Parsers.tuple(term("idpoly"), ref.lazy());
-		Parser<?> a = Parsers.or(new Parser<?>[] { idpoly, labels, uberpi, hom, poly(ref), id1, id2, comp, apply, iter, query, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> coapply = Parsers.tuple(term("coapply"), ref.lazy(), ref.lazy());
+		Parser<?> pushout = Parsers.tuple(term("pushout"), ref.lazy(), ref.lazy());
+
+		Parser<?> a = Parsers.or(new Parser<?>[] { pushout, coapply, glabels, idpoly, labels, uberpi, hom, poly(ref), id1, id2, comp, apply, iter, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 
@@ -188,7 +192,7 @@ public class XParser {
 //		return Parsers.tuple(ident(), Parsers.or(term("="), term(":")), e);
 	}
 	
-	public static final Parser<?> query(Reference ref) {
+/*	public static final Parser<?> query(Reference ref) {
 		Parser<?> xxx = ref.lazy().between(term("pi"), term(";"));
 		Parser<?> yyy = ref.lazy().between(term("delta"), term(";"));
 		Parser<?> zzz = ref.lazy().between(term("sigma"), term(";"));
@@ -196,7 +200,7 @@ public class XParser {
 		
 		Parser<?> ret = Parsers.tuple(term("query"), p.between(term("{"), term("}")));
 		return ret;
-	}
+	} */
 		
 	public static final Parser<?> instance(Reference ref) {
 		Parser<?> node = Parsers.tuple(ident().many1(), term(":"), ident());
@@ -358,6 +362,29 @@ public class XParser {
 		return ret;
 	} */
 
+	public static final List path(String s) {
+		Parser p = Parsers.or(Terminals.StringLiteral.PARSER,
+				              Terminals.IntegerLiteral.PARSER, 
+				              Terminals.Identifier.PARSER);
+		Parser e = Parsers.tuple(p, term(","), p);
+		Parser q = Parsers.between(term("("), e, term(")"));
+		Parser a = Parsers.or(q, p).sepBy1(term("."));
+
+		List l = (List) a.from(TOKENIZER, IGNORED).parse(s);
+		List ret = new LinkedList();
+		
+		for (Object o : l) {
+			if (o instanceof Tuple3) {
+				Tuple3 z = (Tuple3) o;
+				ret.add(new Pair(z.a, z.c));
+			} else {
+				ret.add(o);
+			}
+		}
+		
+		return ret;
+	}
+	
 	public static final XProgram program(String s) {
 		List<Triple<String, Integer, XExp>> ret = new LinkedList<>();
 		List decls = (List) program.parse(s);
@@ -565,6 +592,9 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 				return new XExp.FLOWER2(select, from, toWhere(w), I);				
 			}
 			
+			if (p.a.toString().equals("pushout")) {
+				return new XExp.XPushout(toExp(p.b), toExp(p.c));
+			}
 			if (p.a.toString().equals("hom")) {
 				return new XExp.XToQuery(toExp(p.b), toExp(p.c));
 			}
@@ -598,6 +628,9 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 			if (p.a.toString().equals("apply")) {
 				return new XExp.Apply(toExp(p.b), toExp(p.c));
 			}
+			if (p.a.toString().equals("coapply")) {
+				return new XExp.XCoApply(toExp(p.b), toExp(p.c));
+			}
 			return new XExp.XConst((String) p.b, (String) p.c);
 		}
 		if (c instanceof org.codehaus.jparsec.functors.Pair) {
@@ -610,6 +643,9 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 			}
 			if (p.a.toString().equals("labels")) {
 				return new XExp.XLabel(toExp(p.b));
+			}
+			if (p.a.toString().equals("grothlabels")) {
+				return new XExp.XGrothLabels(toExp(p.b));
 			}
 			if (p.a.toString().equals("relationalize")) {
 				return new XExp.XRel(toExp(p.b));
@@ -632,10 +668,10 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 			if (p.a.toString().equals("ID")) {
 				return new XExp.Id(true, toExp(p.b));
 			}
-			if (p.a.toString().equals("query")) {
-				Tuple3 t = (Tuple3) p.b;
-				return new XExp.XQueryExp(toExp(t.a), toExp(t.b), toExp(t.c));
-			}
+//			if (p.a.toString().equals("query")) {
+	//			Tuple3 t = (Tuple3) p.b;
+		//		return new XExp.XQueryExp(toExp(t.a), toExp(t.b), toExp(t.c));
+			//}
 			
 			else {
 				return new XExp.XTy((String)p.b);

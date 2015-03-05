@@ -29,19 +29,65 @@ import fql_lib.Pair;
 import fql_lib.gui.FQLDisp;
 
 public class XDisplay implements FQLDisp {
+	
+	private static String doLookup(String c, XObject obj, Map<Object, String> map) {
+		String front = obj.kind() + " " + c;
+		if (obj instanceof XCtx) {
+			XCtx ctx = (XCtx) obj;
+			if (ctx.global == null) {
+				throw new RuntimeException();
+			} else if (ctx.schema == null) {
+				return front;
+			} else {
+				String s = map.get(ctx.schema);
+				if (s == null) {
+					return front + " : ?";
+				} else {
+					return front + " : " + s;
+				}
+			}
+		} else if (obj instanceof XMapping) {
+			XMapping m = (XMapping) obj;
+			String s = "?";
+			String t = "?";
+			if (map.containsKey(m.src)) {
+				s = map.get(m.src);
+			}
+			if (map.containsKey(m.dst)) {
+				t = map.get(m.dst);
+			}
+			return front + " : " + s + " -> " + t;
+		} else if (obj instanceof XPoly) {
+			XPoly m = (XPoly) obj;
+			String s = "?";
+			String t = "?";
+			if (map.containsKey(m.src)) {
+				s = map.get(m.src);
+			}
+			if (map.containsKey(m.dst)) {
+				t = map.get(m.dst);
+			}
+			return front + " : " + s + " -> " + t;
+		}
+		
+		return front; //TODO - queries?
+		
+	}
 
 	public XDisplay(String title, XProgram p, XEnvironment env, long start, long middle) {
+		Map<Object, String> map = new HashMap<>();
 		for (String c : p.order) {
 			XObject obj = env.objs.get(c);
+			map.put(obj, c);
 			if (obj instanceof XString) {
 				continue;
 			}
 			if (obj instanceof XPoly) {
 				//TODO
 //				((XPoly)obj).validate();
-				continue;
+		//		continue;
 			}
-			frames.add(new Pair<>(obj.kind() + " " + c, obj.display()));
+			frames.add(new Pair<>(doLookup(c, obj, map), obj.display()));
 		}
 		long end = System.currentTimeMillis();
 		int c1 = (int) ((middle - start) / (1000f));

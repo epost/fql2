@@ -3,7 +3,7 @@ package fql_lib.X;
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 
-public class XQuery implements XObject {
+public class XQuery { } /* implements XObject {
 	
 	public XCtx apply(XCtx I) {
 		return sigma.apply0(delta.delta(pi.pi(I)));
@@ -38,4 +38,4 @@ public class XQuery implements XObject {
 		return ret;
 	}
 
-}
+} */
