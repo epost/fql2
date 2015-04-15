@@ -17,8 +17,10 @@ public class Patrick8ExampleAllSyntax extends Example {
 		return s;
 	}
 	
-	String s = "string : type"
-			+ "\nbill george harry : string"
+	String s = "//Don't forget to enable 'adom tables' in the options menu to display instances on infinite schemas"
+			+ "\nstring : type"
+			+ "\nbill : string" 
+			+ "\ngeorge harry : string"
 			+ "\nreverse : string -> string"
 			+ "\neq1 : reverse.reverse = string"
 			+ "\n"
@@ -27,10 +29,20 @@ public class Patrick8ExampleAllSyntax extends Example {
 			+ "\n	edges f : N -> N, att : N -> string;"
 			+ "\n	equations f.f = f;"
 			+ "\n}"
+			+ "\nSS = schema {"
+			+ "\nnodes N;"
+			+ "\nedges f : N -> string;"
+			+ "\nequations \"!_N\".bill = f;"
+			+ "\n}"
 			+ "\n"
 			+ "\nI = instance {"
 			+ "\n	variables v:N, u:string;"
 			+ "\n	equations v.att = bill.reverse;"
+			+ "\n} : S"
+			+ "\n"
+			+ "\nII = instance {"
+			+ "\n	variables v:N, vx:N, vy yz:N;"
+			+ "\n	equations;"
 			+ "\n} : S"
 			+ "\n"
 			+ "\n//asserts that an instance is saturated"
@@ -100,7 +112,26 @@ public class Patrick8ExampleAllSyntax extends Example {
 			+ "\nI9 = ff I"
 			+ "\nI10 = unit S"
 			+ "\nI11= tt I"
-			+ "\n";
+			+ "\n"
+	+ "\n//illustrates warning for non functors"
+	+ "\nSch1 = schema {"
+	+ "\n	nodes n;"
+	+ "\n	edges f:n-> n;"
+	+ "\n	equations f.f = n;"
+	+ "\n}"
+	+ "\n"
+	+ "\nSch2 = schema {"
+	+ "\n	nodes n;"
+	+ "\n	edges f:n-> n;"
+	+ "\n	equations;"
+	+ "\n}"
+	+ "\n";
+//	+ "\nNonFun = mapping {"
+//	+ "\n	nodes n -> n;"
+//	+ "\n	edges f -> f;"
+//	+ "\n} : Sch1 -> Sch2"
+//	+ "\n";
+
 
 
 

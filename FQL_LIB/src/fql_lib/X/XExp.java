@@ -16,6 +16,14 @@ import fql_lib.Util;
 
 public abstract class XExp {
 	
+	public String kind(Map<String, XExp> env) {
+		return accept(env, new XKind());
+	}
+	
+	public Pair<XExp, XExp> type(Map<String, XExp> env) {
+		return accept(env, new XChecker());
+	}
+	
 	public static class XPushout extends XExp {
 		XExp f,g;
 
@@ -105,6 +113,11 @@ public abstract class XExp {
 		@Override
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
+		}
+		
+		@Override
+		public String toString() {
+			return "coapply " + f + " " + I;
 		}
 	}
 	
@@ -411,7 +424,10 @@ public abstract class XExp {
 		}
 		
 		
-		
+		@Override
+		public String toString() {
+			return "(" + f + " ; " + g + ")";
+		}
 	}
 	
 	public static class Apply extends XExp {
@@ -458,6 +474,12 @@ public abstract class XExp {
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		
+		@Override
+		public String toString() {
+			return "coapply " + f + " " + I;
+		}
+
 	}
 	
 	public static class Iter extends XExp {
@@ -1042,7 +1064,11 @@ public abstract class XExp {
 				return false;
 			return true;
 		}
-		
+	
+		@Override
+		public String toString() {
+			return "(" + l + " * " + r + ")";
+		}
 	}
 	
 	public static class XProj extends XExp {
@@ -1135,6 +1161,12 @@ public abstract class XExp {
 				return false;
 			return true;
 		}
+		
+		@Override
+		public String toString() {
+			return "pair " + l + " " + r;
+		}
+
 	}
 	
 	public static class XTT extends XExp {
@@ -1175,6 +1207,11 @@ public abstract class XExp {
 			return v.visit(env, this);
 		}
 
+		@Override
+		public String toString() {
+			return "tt " + S;
+		}
+
 	}
 	
 	public static class XOne extends XExp {
@@ -1212,6 +1249,10 @@ public abstract class XExp {
 		@Override
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
+		}
+		@Override
+		public String toString() {
+			return "unit " + S;
 		}
 
 	}
@@ -1255,6 +1296,11 @@ public abstract class XExp {
 			return v.visit(env, this);
 		}
 
+		@Override
+		public String toString() {
+			return "ff " + S;
+		}
+
 	}
 	
 	public static class XVoid extends XExp {
@@ -1292,6 +1338,11 @@ public abstract class XExp {
 		@Override
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
+		}
+
+		@Override
+		public String toString() {
+			return "void " + S;
 		}
 
 	}
@@ -1339,6 +1390,10 @@ public abstract class XExp {
 			return true;
 		}
 		
+		@Override
+		public String toString() {
+			return "(" + l + " + " + r + ")";
+		}
 	}
 	
 	public static class XInj extends XExp {
@@ -1386,6 +1441,13 @@ public abstract class XExp {
 			this.r = r;
 			this.left = left;
 		}
+		
+		@Override
+		public String toString() {
+			String tag = left ? "inl " : "inr ";
+			return tag + l + " " + r;		
+		}
+
 	}
 	
 	public static class XMatch extends XExp {
@@ -1431,6 +1493,12 @@ public abstract class XExp {
 				return false;
 			return true;
 		}
+		
+		@Override
+		public String toString() {
+			return "case " + l + " " + r;
+		}
+
 	}
 	
 	
@@ -1471,7 +1539,11 @@ public abstract class XExp {
 			return true;
 		}
 		
-		
+		@Override
+		public String toString() {
+			return "relationalize " + I;
+		}
+
 	}
 	
 	public static class XUnit extends XExp {
@@ -1524,7 +1596,14 @@ public abstract class XExp {
 			return true;
 		}
 		
-		
+		@Override public String toString() {
+			if (kind.equals("sigma")) {
+				return "return sigma delta " + F + " " + I;
+			} else if (kind.equals("pi")) {
+				return "return delta pi " + F + " " + I;
+			}
+			throw new RuntimeException();
+		}
 	}
 	
 	public static class XCounit extends XExp {
@@ -1577,6 +1656,14 @@ public abstract class XExp {
 			return true;
 		}		
 		
+		@Override public String toString() {
+			if (kind.equals("sigma")) {
+				return "coreturn sigma delta " + F + " " + I;
+			} else if (kind.equals("pi")) {
+				return "coreturn delta pi " + F + " " + I;
+			}
+			throw new RuntimeException();
+		}
 		
 	}
 	
@@ -2180,7 +2267,6 @@ public abstract class XExp {
 	public static class XSigma extends XExp {
 		XExp F, I;
 		
-
 		public XSigma(XExp f, XExp i) {
 			super();
 			F = f;
@@ -2222,6 +2308,11 @@ public abstract class XExp {
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		
+		@Override public String toString() {
+			return "sigma " + F + " " + I;
+		}
+
 		
 	}
 	
@@ -2271,13 +2362,16 @@ public abstract class XExp {
 			return v.visit(env, this);
 		}
 		
+		@Override public String toString() {
+			return "pi " + F + " " + I;
+		}
+
 	}
 
 	
 	public static class XDelta extends XExp {
 		XExp F, I;
 		
-
 		public XDelta(XExp f, XExp i) {
 			super();
 			F = f;
@@ -2320,6 +2414,9 @@ public abstract class XExp {
 			return v.visit(env, this);
 		}
 		
+		@Override public String toString() {
+			return "delta " + F + " " + I;
+		}
 	}
 	
 	public interface XExpVisitor<R, E> {

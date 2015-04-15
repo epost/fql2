@@ -344,7 +344,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 				attrs.put((D)new Pair(l, e), p);
 			}
 			Object ooo = "!__1"; //TODO using toString for ! is very bad
-			attrs.put((D)new Pair(l, "!_" + d), Collections.singletonList(ooo));
+			attrs.put((D)new Pair(l, "!_" + d), Util.singList(ooo));
 			
 			Block<C, D> newblock = new Block<C, D>(block.from, block.where, attrs, edges);
 			bs.put(l, new Pair(new Pair(l, d), newblock));
@@ -451,7 +451,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 	Map<D, Object> conj2 = null;
 	public XCtx<C> T(D d) {
 		initConjs();
-		return freeze().apply(new Pair<>(conj2.get(d), Collections.singletonList(d))).src;
+		return freeze().apply(new Pair<>(conj2.get(d), Util.singList(d))).src;
 	}
 	public XMapping<C, C> T(List<D> d) {
 		initConjs();
@@ -510,7 +510,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 				if (em.containsKey(o)) {
 					continue;
 				}
-				em.put(o, Collections.singletonList(o));
+				em.put(o, Util.singList(o));
 			}
 			XMapping<C,C> m = new XMapping(dstX, srcX, em, "homomorphism");
 			transforms2.put(e, m);
@@ -529,24 +529,28 @@ public class XPoly<C,D> extends XExp implements XObject {
 					continue;
 				}
 				if (!dst.ids.contains(term) && dst.ids.contains(t.second) && !b.second.edges.containsKey(term)) {
-					throw new RuntimeException("Missing mapping for edge " + term + " in " + k + " in " + this);
+					throw new RuntimeException("Missing mapping for edge " + term + " in " + k);
 				} else if (!t.second.equals("_1") && dst.global.ids.contains(t.second) && !b.second.attrs.containsKey(term)){
-					throw new RuntimeException("Missing mapping for attr " + term + " in " + k + " in " + this);
+					throw new RuntimeException("Missing mapping for attr " + term + " in " + k);
 				}
 			}
 
 			for (D k2 : b.second.edges.keySet()) {
 				Pair<Object, Map<Object, List<Object>>> v2 = b.second.edges.get(k2);
 				XCtx<C> dstX = frozens.get(v2.first);
+				if (dstX == null) {
+					throw new RuntimeException("Subquery not found: " + v2.first);
+				}
 				Map em = new HashMap<>(v2.second);
 				for (Object o : dstX.schema.allTerms()) {
 					if (em.containsKey(o)) {
 						continue;
 					}
-					em.put(o, Collections.singletonList(o));
+					em.put(o, Util.singList(o));
 				}
-				XMapping<C,C> m = new XMapping(dstX, srcX, em, "homomorphism");
-				transforms.put(new Pair<>(k,k2),m);
+				XMapping<C,C> mmm = new XMapping(dstX, srcX, em, "homomorphism");
+
+				transforms.put(new Pair<>(k,k2),mmm);
 			}			
 			
 			for (D k2 : b.second.attrs.keySet()) {
@@ -558,15 +562,16 @@ public class XPoly<C,D> extends XExp implements XObject {
 					if (em.containsKey(o)) {
 						continue;
 					}
-					em.put(o, Collections.singletonList(o));
+					em.put(o, Util.singList(o));
 				}
-				XMapping<C,C> m = new XMapping(dstX, srcX, em, "homomorphism");
-				transforms.put(new Pair<>(k,k2), m);
+				XMapping<C,C> mmm = new XMapping(dstX, srcX, em, "homomorphism");
+
+				transforms.put(new Pair<>(k,k2), mmm);
 			}	
 			
 			D k2 = (D) ("!_" + b.first);
 			//List v2 = Collections.singletonList(k2); //b.second.attrs.get(k2);
-			List v2 = Collections.singletonList("_1"); //b.second.attrs.get(k2);
+			List v2 = Util.singList("_1"); //b.second.attrs.get(k2);
 			XCtx<C> dstX = frozens.get(dst.type(k2).second);
 			Map em = new HashMap<>();
 			em.put("y_a", v2);
@@ -574,12 +579,13 @@ public class XPoly<C,D> extends XExp implements XObject {
 				if (em.containsKey(o)) {
 					continue;
 				}
-				em.put(o, Collections.singletonList(o));
+				em.put(o, Util.singList(o));
 			}
 			XMapping<C,C> m = new XMapping(dstX, srcX, em, "homomorphism");
 			transforms.put(new Pair<>(k, k2), m);
-	
-			transforms.put(new Pair<>(k, b.first), new XMapping<>(srcX, "homomorphism"));			
+			XMapping mmm = new XMapping<>(srcX, "homomorphism");
+			
+			transforms.put(new Pair<>(k, b.first), mmm);			
 			
 		}
 
@@ -635,18 +641,18 @@ public class XPoly<C,D> extends XExp implements XObject {
 	
 	public void validate() {
 		Function<Pair<Object, List<D>>, XMapping<C,C>> f = freeze();
-		/* for (Object l : blocks.keySet()) {
-			D d = blocks.get(l).first;
-			for (D d0 : dst.allIds()) {
-				for (Triple<D, D, List<D>> p : dst.cat().hom(d, d0)) {
-					List<D> p0 = new LinkedList<>();
-					p0.add(p.first);
-					p0.addAll(p.third);
-					f.apply(new Pair<>(l, p0));
-					System.out.println(p);
-				}			
-			}
-		}  */
+//		 for (Object l : blocks.keySet()) {
+//			D d = blocks.get(l).first;
+//			for (D d0 : dst.allIds()) {
+//				for (Triple<D, D, List<D>> p : dst.cat().hom(d, d0)) {
+//					List<D> p0 = new LinkedList<>();
+//					p0.add(p.first);
+//					p0.addAll(p.third);
+//					f.apply(new Pair<>(l, p0));
+//					System.out.println(p);
+//				}			
+//			}
+//		}  
 		for (Pair<List<D>, List<D>> eq : dst.allEqs()) {
 			List<D> p = eq.first;
 			List<D> q = eq.second;
@@ -696,7 +702,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			if (em0.containsKey(c)) {
 				continue;
 			}
-			em0.put(c, Collections.singletonList(c));
+			em0.put(c, Util.singList(c));
 		}
 		return new XMapping<C, C>(src0, dst0, em0 , "homomorphism");
 	}
@@ -809,7 +815,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 		}
 		List retl = l.subList(j, l.size());
 		if (retl.size() == 0) {
-			retl = Collections.singletonList(o);
+			retl = Util.singList(o);
 		}
 		return new Pair<>(ret, retl);
 
@@ -881,7 +887,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			Object A = labels.type(label).second;
 			Map<Object, Triple<D, D, List<D>>> valuation = label.second;
 
-			XCtx<D> frc = Q0hat.freeze().apply(new Pair(l, Collections.singletonList(A))).src;			
+			XCtx<D> frc = Q0hat.freeze().apply(new Pair(l, Util.singList(A))).src;			
 			Map<D, List<D>> map = new HashMap<>();
 			for (Object k : valuation.keySet()) {
 				List<D> list = new LinkedList<>(valuation.get(k).third);
@@ -892,7 +898,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 				if (map.containsKey(o)) {
 					continue;
 				}
-				map.put((D)o, Collections.singletonList((D)o));
+				map.put((D)o, Util.singList((D)o));
 			}
 			XMapping<D,D> h = new XMapping<D, D>(frc, Qo, map, "homomorphism");
 		

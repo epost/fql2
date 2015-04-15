@@ -116,6 +116,9 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 			}
 			ret += "\n";
 		}
+		
+		//ret += "\n\n" + env.prog.typeReport(); 
+		
 		return ret.trim();
 	}
 

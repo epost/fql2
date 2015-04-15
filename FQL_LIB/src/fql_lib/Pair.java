@@ -27,7 +27,6 @@ public class Pair<T1, T2> implements Comparable<Pair<T1, T2>>, Serializable {
 		return result;
 	}
 	
-	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

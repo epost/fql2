@@ -572,12 +572,12 @@ public abstract class CodeEditor<Prog extends FQLProg, Env, Disp extends FQLDisp
 		}
 
 		int choice = JOptionPane.showConfirmDialog(null,
-				"Unsaved Changes - Continue?", "Continue?",
+				"Unsaved Changes - Continue to close?", "Close?",
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null);
-		if (choice == JOptionPane.NO_OPTION) {
-			return true;
+		if (choice == JOptionPane.YES_OPTION) {
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 }

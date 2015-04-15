@@ -4,12 +4,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import fql_lib.DEBUG;
 import fql_lib.X.XExp.Flower;
 import fql_lib.decl.LineException;
+
 
 public class XDriver {
 
 	public static XEnvironment makeEnv(String str, XProgram init) {
+		if (DEBUG.debug.x_typing) {
+			init.doTypes();
+		}
 		XEnvironment ret = new XEnvironment(init, str);
 		Map<String, Integer> extra = new HashMap<>();
 		

@@ -18,6 +18,7 @@ public class Patrick27ExampleIntegration extends Example {
 	}
 	
 	String s ="//Example via Peter Gates"
+			+ "\n//Requires disabling type checking"
 			+ "\n//Types:"
 			+ "\ndom:type"
 			+ "\nxPeter xPaul xM xF xBloodPressure xBodyWeight xHeartRate xPete xJane  : dom"

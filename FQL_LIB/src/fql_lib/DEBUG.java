@@ -222,7 +222,9 @@ public class DEBUG implements Serializable {
 	public boolean x_tables = true;
 	public boolean x_adom = false;
 	public boolean x_backtracking = true;
-
+	public boolean x_typing = true;
+	public boolean x_elements = true;
+	
 	public void showOptions() {
 
 		JTabbedPane jtb = new JTabbedPane();
@@ -315,13 +317,20 @@ public class DEBUG implements Serializable {
 		x_1.add(reorder_joins_label);
 		x_2.add(reorder_joins_box);
 		
+		
+		JCheckBox x_typing_box = new JCheckBox("", x_typing);
+		JLabel typing_label = new JLabel("Type check:"); //.add(x_typing_bix)
+		x_1.add(typing_label);
+		x_2.add(x_typing_box);
+		
 		JPanel xArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox x_cat_box = new JCheckBox("Category", x_cat);
 		JCheckBox x_graph_box = new JCheckBox("Graph", x_graph);
 		JCheckBox x_textual_box = new JCheckBox("Text", x_text);
 		JCheckBox x_tabular_box = new JCheckBox("Table", x_tables);
-		JCheckBox x_adom_box = new JCheckBox("Adom", x_adom);
-		xArea.add(x_textual_box); xArea.add(x_graph_box); xArea.add(x_cat_box); xArea.add(x_tabular_box); xArea.add(x_adom_box);
+		JCheckBox x_adom_box = new JCheckBox("Active Domain", x_adom);
+		JCheckBox x_elem_box = new JCheckBox("Elements", x_elements);
+		xArea.add(x_textual_box); xArea.add(x_graph_box); xArea.add(x_cat_box); xArea.add(x_tabular_box); xArea.add(x_adom_box); xArea.add(x_elem_box);	
 		x_1.add(new JLabel("Viewers:"));
 		x_2.add(xArea);
 
@@ -331,29 +340,6 @@ public class DEBUG implements Serializable {
 		x_2.add(new JLabel());
 		x_1.add(new JLabel());
 		x_2.add(new JLabel());
-		x_1.add(new JLabel());
-		x_2.add(new JLabel());
-/*
-		JCheckBox coeB = new JCheckBox("", continue_on_error);
-		JLabel coeL = new JLabel("Continue on errors (dangerous):");
-		general1.add(coeL);
-		general2.add(coeB);
-		coeL.setToolTipText("FQL will attempt to continue on errors, and report these after opening the viewer.");
-*/
-		/*
-		JCheckBox ed = new JCheckBox("", VALIDATE_WITH_EDS);
-		ed.setToolTipText("Validates Sigma/Delta migrations (on objects) using embedded dependencies");
-		JLabel edL = new JLabel("Validate sigmas and deltas using EDs:");
-		general1.add(edL);
-		general2.add(ed);
-		*/
-/*
-		JCheckBox nullbox = new JCheckBox("", ALLOW_NULLS);
-		nullbox.setToolTipText("Allow full sigma to create null attribute values");
-		JLabel nullL = new JLabel("Allow SIGMA to create nulls (dangerous):");
-		general1.add(nullL);
-		general2.add(nullbox);
-		*/
 
 		JCheckBox gr = new JCheckBox("", ALL_GR_PATHS);
 		gr.setToolTipText("Show all paths in category of elements");
@@ -375,18 +361,6 @@ public class DEBUG implements Serializable {
 		viewer1.add(labelM);
 		viewer2.add(jcbM);
 
-		/*
-		 * JCheckBox jcbX = new JCheckBox("", DO_NOT_GUIDIFY); JPanel p0 = new
-		 * JPanel(); JLabel label3 = new JLabel("Do not GUIDify (dangerous):");
-		 * label3.setToolTipText(label3text); p.add(label3); p.add(jcbX);
-		 */
-/*
-		JCheckBox jcb0 = new JCheckBox("", ALLOW_INFINITES);
-		JLabel label4 = new JLabel(
-				"Allow some infinite schemas and migrations (dangerous):");
-		label4.setToolTipText(label4text);
-		general1.add(label4);
-		general2.add(jcb0); */
 		
 		JComboBox lineageBox = new JComboBox(new Object[] {"Fresh IDs", "Lineage as ID", "Summary as ID"});
 		lineageBox.setSelectedItem(useLineage);
@@ -534,12 +508,6 @@ public class DEBUG implements Serializable {
 		//viewer1.add(schema_label);
 		//viewer2.add(schemaArea);
 
-		
-
-		// JComboBox schemaLayout = new JComboBox(layouts);
-		// viewer.add(schemaLayoutLabel);
-		// viewer.add(schemaGraphPanel);
-
 		JPanel setArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox set_textual_box = new JCheckBox("Text", set_textual);
 		setArea.add(set_textual_box);
@@ -566,8 +534,6 @@ public class DEBUG implements Serializable {
 		viewer1.add(fn_label);
 		viewer2.add(fnArea);
 		
-		
-
 		JPanel catArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox cat_textual_box = new JCheckBox("Text", cat_textual);
 		catArea.add(cat_textual_box);
@@ -604,7 +570,6 @@ public class DEBUG implements Serializable {
 		viewer1.add(ftr_label);
 		viewer2.add(ftrArea);
 		
-		
 		JPanel tArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox t_textual_box = new JCheckBox("Text", trans_textual);
 		tArea.add(t_textual_box);
@@ -619,7 +584,6 @@ public class DEBUG implements Serializable {
 		t_label.setToolTipText("Sets which viewers to use for transforms.");
 		viewer1.add(t_label);
 		viewer2.add(tArea);
-		
 		
 		JPanel mappingArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox mapping_graphical_box = new JCheckBox("Graph",
@@ -645,13 +609,6 @@ public class DEBUG implements Serializable {
 	//	viewer1.add(mapping_label);
 	//	viewer2.add(mappingArea);
 
-
-		// JLabel mappingLayoutLabel = new
-		// JLabel("Layout engine to use for mapping graph (requires re-compile)");
-		// JComboBox mappingLayout = new JComboBox(layouts);
-		// viewer.add(mappingLayoutLabel);
-		// viewer.add(mappingLayout);
-
 		JPanel instArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox inst_graphical_box = new JCheckBox("Graph", inst_graphical);
 		JCheckBox inst_textual_box = new JCheckBox("Text", inst_textual);
@@ -674,15 +631,8 @@ public class DEBUG implements Serializable {
 		instArea.add(inst_rdf_box);
 		JLabel inst_label = new JLabel("Instance viewer panels:");
 		inst_label.setToolTipText("Sets which viewers to use for instances.");
-	//	viewer1.add(inst_label);
-	//	viewer2.add(instArea);
 
-	//	JLabel instLayoutLabel = new JLabel(
-		//		"Layout engine to use for instance graph (requires re-compile)");
-		//JComboBox instLayout = new JComboBox(layouts);
 		instBox.setToolTipText(layout_string);
-		// viewer.add(instLayoutLabel);
-		// viewer.add(instLayout);
 
 		JPanel transformArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox transform_graphical_box = new JCheckBox("Graph",
@@ -705,12 +655,6 @@ public class DEBUG implements Serializable {
 				.setToolTipText("Sets which viewers to use for transforms.");
 	//	viewer1.add(transform_label);
 	//	viewer2.add(transformArea);
-
-//		JLabel transLayoutLabel = new JLabel(
-	//			"Layout engine to use for transform graph (requires re-compile)");
-		//JComboBox transLayout = new JComboBox(layouts);
-		// viewer.add(transLayoutLabel);
-		// viewer.add(transLayout);
 
 		JPanel fullQueryArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox query_graphical_box = new JCheckBox("Graph", query_graphical);
@@ -751,19 +695,8 @@ public class DEBUG implements Serializable {
 	//	viewer1.add(schFlow_label);
 	//	viewer2.add(schFlowArea);
 
-
-		// JLabel queryLayoutLabel = new
-		// JLabel("Layout engine to use for full query graph (requires re-compile)");
-		// JComboBox queryLayout = new JComboBox(layouts);
-		// viewer.add(queryLayoutLabel);
-		// viewer.add(queryLayout);
-
 		viewer1.add(new JLabel());
 		viewer2.add(new JLabel());
-	//	viewer1.add(new JLabel());
-	//	viewer2.add(new JLabel());
-		//viewer1.add(new JLabel());
-		//viewer2.add(new JLabel());
 
 		sql1.add(new JLabel());
 		sql2.add(new JLabel());
@@ -784,13 +717,6 @@ public class DEBUG implements Serializable {
 		lfb.setSelectedItem(look_and_feel);
 		general2.add(lfb);
 		
-	//	general1.add(new JLabel("Left-Kan Algorithm:"));
-	//	JComboBox<String> lkb = new JComboBox<>(kan_options);
-	//	lkb.setSelectedItem(kan_option);
-	//	general2.add(lkb);
-		
-		//general1.add(new JLabel());
-		//general2.add(new JLabel());
 		
 		int ret = JOptionPane.showOptionDialog(null, jtb, "Options",
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
@@ -822,20 +748,13 @@ public class DEBUG implements Serializable {
 			}
 			MAX_NODES = n;
 			MAX_EDGES = ee;
-//			continue_on_error = coeB.isSelected();
-//			VALIDATE_WITH_EDS = ed.isSelected();
-//			ALLOW_NULLS = nullbox.isSelected();
 			ALL_GR_PATHS = gr.isSelected();
-//			ALLOW_INFINITES = jcb0.isSelected();
 			VALIDATE = jcb.isSelected();
-			// DO_NOT_GUIDIFY = jcbX.isSelected();
-			// SHOW_QUERY_PATHS = jcb1.isSelected();
 			MultiView = jcbM.isSelected();
 			limit_examples = limex.isSelected();
 			useLineage = (String) lineageBox.getSelectedItem();
 			piLineage = (String) pilineageBox.getSelectedItem();
 			
-			// CHECK_MAPPINGS = jcb1.isSelected();
 			MAX_PATH_LENGTH = a;
 			MAX_DENOTE_ITERATIONS = b;
 			varlen = d;
@@ -850,12 +769,12 @@ public class DEBUG implements Serializable {
 			this.x_graph = x_graph_box.isSelected();
 			this.x_tables = x_tabular_box.isSelected();
 			this.x_adom = x_adom_box.isSelected();
-		//	this.x_backtracking = backtracking_box.isSelected();
 			this.fast_amalgams = fast_amalgams_box.isSelected();
 			this.validate_amalgams = validate_amalgams_box.isSelected();
-			//this.direct_flower = direct_flower_box.isSelected();
 			this.check_oriented = check_oriented_box.isSelected();
 			this.reorder_joins = reorder_joins_box.isSelected();
+			this.x_typing = x_typing_box.isSelected();
+			this.x_elements = x_elem_box.isSelected();
 			
 			schema_denotation = schema_denotation_box.isSelected();
 			schema_ed = schema_ed_box.isSelected();
@@ -863,7 +782,6 @@ public class DEBUG implements Serializable {
 			schema_tabular = schema_tabular_box.isSelected();
 			schema_textual = schema_textual_box.isSelected();
 			schema_rdf = schema_rdf_box.isSelected();
-		//	use_fast_sigma = fastbox.isSelected();
 			
 			mapping_ed = mapping_ed_box.isSelected();
 			mapping_graphical = mapping_graphical_box.isSelected();
@@ -987,7 +905,7 @@ public class DEBUG implements Serializable {
 				JOptionPane.PLAIN_MESSAGE, null);
 	}
 
-	static String about = "FQL++/FPQL IDE Copyright (C) 2012-2014 Patrick Schultz, David Spivak, and Ryan Wisnesky"
+	static String about = "FQL++/FPQL IDE Copyright (C) 2012-2015 Patrick Schultz, David Spivak, and Ryan Wisnesky"
 			+ "\n\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
 			+ "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)"; //\nH2 (SQL)";
 

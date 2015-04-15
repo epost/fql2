@@ -28,6 +28,12 @@ import fql_lib.gui.MyTableRowSorter;
 
 public class Util {
 	
+	public static <X> List<X> singList(X x) {
+		List<X> ret = new LinkedList<>();
+		ret.add(x);
+		return ret;
+	}
+	
 	public static <X> String print(Collection<X[]> c) {
 		String ret = "";
 		for (X[] x : c) {

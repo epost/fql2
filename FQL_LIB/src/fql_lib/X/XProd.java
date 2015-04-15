@@ -27,6 +27,9 @@ public class XProd {
 	}
 	
 	public static <X> XCtx<X> one(XCtx<X> S) {
+		if (S.schema != null) {
+			throw new RuntimeException("foovar");
+		}
 		Map<X, Pair<X, X>> tys = new HashMap<>();
 		Set<Pair<List<X>, List<X>>> eqs = new HashSet<>();
 		
@@ -77,7 +80,8 @@ public class XProd {
 			em.put(x, l);
 		}
 
-		return new XMapping<X,X>(I, one(I.schema), em, "homomorphism");
+		XMapping ret = new XMapping<X,X>(I, one(I.schema), em, "homomorphism");
+		return ret;
 	}
 	
 	public static <X> XMapping<X,X> ff(XCtx<X> I) {
@@ -1136,7 +1140,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		
 		for (Object k : hsrc.allTerms()) {
 			if (!em.containsKey(k)) {
-				em.put(k, Collections.singletonList(k));
+				em.put(k, Util.singList(k));
 			}
 		}
 		return new XMapping<Pair<Object, Map<Object, Triple<C, C, List<C>>>>, Pair<Object, Map<Object, Triple<C, C, List<C>>>>>(uberflower(poly, h.src), uberflower(poly, h.dst), em, "homomorphism");

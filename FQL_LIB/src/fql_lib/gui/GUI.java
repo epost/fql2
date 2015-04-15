@@ -131,6 +131,22 @@ public class GUI extends JPanel {
 		inputMap.put(ctrlW, "closeTab");
 		inputMap.put(commandW, "closeTab");
 
+		KeyStroke ctrlR = KeyStroke.getKeyStroke(KeyEvent.VK_R,
+				InputEvent.CTRL_MASK);
+		KeyStroke commandR = KeyStroke.getKeyStroke(KeyEvent.VK_R,
+				InputEvent.META_MASK);
+		AbstractAction runAction = new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+			((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
+					.runAction();
+			}
+		};
+		
+		inputMap.put(ctrlR, "run");
+		inputMap.put(commandR, "run");
+		editors.getActionMap().put("run", runAction);
+		
 		// Now add a single binding for the action name to the anonymous action
 		AbstractAction closeTabAction = new AbstractAction() {
 			@Override
@@ -138,12 +154,14 @@ public class GUI extends JPanel {
 				closeAction();
 			}
 		};
+		
+		
 		editors.getActionMap().put("closeTab", closeTabAction);
 
 		KeyStroke ctrlN = KeyStroke.getKeyStroke(KeyEvent.VK_N,
 				InputEvent.CTRL_MASK);
 		MenuShortcut n = new MenuShortcut(ctrlN.getKeyCode());
-		newItem.setShortcut(n);
+		newItem2.setShortcut(n);
 		KeyStroke ctrlO = KeyStroke.getKeyStroke(KeyEvent.VK_O,
 				InputEvent.CTRL_MASK);
 		MenuShortcut o = new MenuShortcut(ctrlO.getKeyCode());
@@ -166,6 +184,18 @@ public class GUI extends JPanel {
 		MenuShortcut q = new MenuShortcut(ctrlQ.getKeyCode());
 		exitItem.setShortcut(q);
 
+		MenuItem runItem = new MenuItem("Run");
+		toolsMenu.add(runItem);
+		runItem.addActionListener(new ActionListener() {
+			@Override
+				public void actionPerformed(ActionEvent e) {
+				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
+						.runAction();
+				}
+		});
+		MenuShortcut q2 = new MenuShortcut(ctrlR.getKeyCode());
+		runItem.setShortcut(q2);
+		
 		MenuItem abortItem = new MenuItem("Abort");
 		toolsMenu.add(abortItem);
 		abortItem.addActionListener(new ActionListener() {
@@ -274,13 +304,11 @@ public class GUI extends JPanel {
 
 		JButton compileB = new JButton("Run");
 		compileB.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
 						.runAction();
 			}
-
 		});
 
 		JButton helpB = new JButton("Help");
@@ -292,10 +320,10 @@ public class GUI extends JPanel {
 			}
 		});
 
-		JButton new_button = new JButton("New");
+		JButton new_button = new JButton("New FPQL");
 		new_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				newAction(null, "", false);
+				newAction(null, "", true);
 			}
 		});
 		
@@ -383,7 +411,7 @@ public class GUI extends JPanel {
 		pan.add(toolBar, BorderLayout.PAGE_START);
 		pan.add(editors, BorderLayout.CENTER);
 
-		newAction(null, "", false);
+		newAction(null, "", true);
 
 		// editors.setFocusCycleRoot(true);
 		// editors.requestFocusInWindow();

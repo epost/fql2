@@ -144,9 +144,13 @@ public class XMapping<C, D> implements XObject {
 			}
 			try {
 				boolean b = dst.getKB().equiv(lhs, rhs);
+				if (!b) {
+					throw new RuntimeException("cannot prove " + eq);
+				}
 				unprovable.put(eq, b ? "true" : "false");
 			} catch (Exception ex) {
-				unprovable.put(eq, "unknown");
+				throw new RuntimeException("cannot prove " + eq);
+	//			unprovable.put(eq, "unknown");
 			}
 		}
 		// System.out.println(unprovable);
@@ -1304,11 +1308,11 @@ public class XMapping<C, D> implements XObject {
 			}
 
 			if (m.containsKey(lx)) {
-				if (!m.get(lx).equals(Collections.singletonList(rx))) {
+				if (!m.get(lx).equals(Util.singList(rx))) {
 					throw new RuntimeException();
 				}
 			}
-			m.put(lx, Collections.singletonList(rx));
+			m.put(lx, Util.singList(rx));
 		}
 
 		for (Object o : src.schema.allTerms()) {
@@ -1400,7 +1404,7 @@ public class XMapping<C, D> implements XObject {
 					edges.put(e, new Pair<>("q" + d0, edge_m));
 				} else {
 					//System.out.println(d0 + " not in " + dst.ids);
-					List lll = dfh.em.get(new Pair<>(new Triple<>((D)"_1", d0, Collections.singletonList((D)"u_u")), (C)d0));
+					List lll = dfh.em.get(new Pair<>(new Triple<>((D)"_1", d0, Util.singList((D)"u_u")), (C)d0));
 					if (lll == null) {
 						throw new RuntimeException();
 					}
@@ -1427,7 +1431,7 @@ public class XMapping<C, D> implements XObject {
 		m.put(d, l);
 		for (D x : J.allTerms()) {
 			if (!m.containsKey(x)) {
-				m.put(x, Collections.singletonList(x));
+				m.put(x, Util.singList(x));
 			}
 		}
 		return new XMapping<D, D>(J, I, m, "homomorphism");

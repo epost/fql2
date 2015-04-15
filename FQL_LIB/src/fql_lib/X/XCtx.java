@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -38,10 +39,13 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
+import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
+import edu.uci.ics.jung.visualization.renderers.Renderer;
+import edu.uci.ics.jung.visualization.transform.shape.GraphicsDecorator;
 import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Triple;
@@ -54,6 +58,49 @@ import fql_lib.cat.KB;
 import fql_lib.gui.FQLTextPanel;
 
 public class XCtx<C> implements XObject {
+	
+/*	public void equalCheck(XCtx other) {
+		sane();
+		other.sane();
+		
+		System.out.println("ids " + ids.equals(other.ids));
+		System.out.println("eqs " + eqs.equals(other.eqs));
+		System.out.println(other.eqs);
+		for (Object eq : eqs) {
+			System.out.println(eq);
+			System.out.println(other.eqs.contains(eq));
+			if (!other.eqs.contains(eq)) {
+				for (Object eq2 : other.eqs) {
+					System.out.println("comparing against " + eq2);
+					System.out.println(eq.equals(eq2));
+					System.out.println(eq2.equals(eq));
+					System.out.println(eq.hashCode());
+					System.out.println(eq2.hashCode());
+					System.out.println(other.eqs.contains(eq));
+					System.out.println(other.eqs.contains(eq2));
+					System.out.println(eqs.contains(eq));
+					System.out.println(eqs.contains(eq2));
+				}
+			}
+		}
+//		System.out.println("types " + types.equals(other.types));
+	}
+	public void equalCheck0(XCtx other) {
+		System.out.println("local");
+		equalCheck(other);
+//		System.out.println("schema");
+	//	schema.equalCheck(other.schema);
+//		System.out.println("schema");
+	//	global.equalCheck(other.global);
+	}
+	
+	*/
+	
+	public String toStringX() {
+		String rec1 = schema == null ? "null" : schema.toStringX();
+		String rec2 = global == null ? "null" : global.toStringX();
+		return "[[[" + ids + " ||| " + types + " ||| " + eqs + " ||| " + rec1 + " ||| " + rec2 + "]]]";
+	}
 	
 	private Set<C> hom(C src, C dst, Set<C> set) {
 		Set<C> ret = new HashSet<>();
@@ -83,6 +130,21 @@ public class XCtx<C> implements XObject {
 	Set<Pair<List<C>, List<C>>> eqs;
 	private boolean initialized = false;
 
+	private boolean shouldAbbreviate = false;
+	
+	private String abbrPrint(List<?> l) {
+		if (!shouldAbbreviate) {
+			return Util.sep(l, ".");
+		}
+		List<Object> r = l.stream().map(x -> {
+			if (x instanceof Pair) {
+				return ((Pair)x).first;
+			}
+			return x;
+		}).collect(Collectors.toList());
+		return Util.sep(r, ".");
+	}
+	
 	String kind = "TODO";
 
 	@Override
@@ -167,9 +229,9 @@ public class XCtx<C> implements XObject {
 
 	public XCtx(Set<C> ids, Map<C, Pair<C, C>> types, Set<Pair<List<C>, List<C>>> eqs,
 			XCtx<C> global, XCtx<C> schema, String kind) {
-		this.types = types;
-		this.eqs = eqs;
-		this.ids = ids;
+		this.types = new HashMap<>(types);
+		this.eqs = new HashSet<>(eqs);
+		this.ids = new HashSet<>(ids);
 		this.global = global;
 		this.schema = schema;
 		if (schema != null) {
@@ -186,7 +248,9 @@ public class XCtx<C> implements XObject {
 				}
 			}
 		}
+		sane();
 		init();
+		sane();
 		this.kind = kind;
 	}
 
@@ -196,54 +260,44 @@ public class XCtx<C> implements XObject {
 	}
 
 	private void init() {
+		sane();
 		if (initialized) {
 			return;
-		}
-				
+		}				
 		validate(true);
-
-
+		sane();
 		for (C c : ids) {
-			// if (c.equals("_1")) {
-			// continue;
-			// }
 			types.put((C) ("!_" + c), new Pair<>(c, (C) "_1"));
 		}
-		// types.put((C) ("!_1"), new Pair<>((C) "1", (C) "1"));
 		List lhs = new LinkedList<>();
 		lhs.add("_1");
 		List rhs = new LinkedList<>();
 		rhs.add("!_" + "_1");
 		eqs.add(new Pair<>(lhs, rhs));
-
+		sane();
 		for (C c : terms()) {
 			Pair<C, C> t = types.get(c);
-			// if (t.second.equals("_1")) {
-			//
-			// } else if (t.first.equals("_1") && !t.second.equals("_1")) {
-			// lhs = new LinkedList<>();
-			// lhs.add(c);
-			// lhs.add("!_" + t.second);
-			// rhs = new LinkedList<>();
-			// rhs.add("_1");
-			// eqs.add(new Pair<>(lhs, rhs));
-			// } else {
 			lhs = new LinkedList<>();
 			lhs.add(c);
 			lhs.add("!_" + t.second);
 			rhs = new LinkedList<>();
 			rhs.add("!_" + t.first);
 			eqs.add(new Pair<>(lhs, rhs));
-			// }
 		}
-
+		sane();
 		validate(false);
+		sane();
 		kb();
+		sane();
 		initialized = true;
 	}
 
+	//this will destroy terms, so must copy
 	private void kb() {
-		Set<Pair<List<C>, List<C>>> rules = new HashSet<>(allEqs());
+		Set<Pair<List<C>, List<C>>> rules = new HashSet<>();
+		for (Pair<List<C>, List<C>> eq : allEqs()) {
+			rules.add(new Pair<>(new LinkedList<>(eq.first), new LinkedList<>(eq.second)));
+		}
 		for (C id : allIds()) {
 			List<C> l = new LinkedList<>();
 			l.add(id);
@@ -253,6 +307,7 @@ public class XCtx<C> implements XObject {
 	}
 
 	private void validate(boolean initial) {
+		sane();
 		if (!types.keySet().containsAll(ids)) {
 			throw new RuntimeException("ids not contained in const");
 		}
@@ -276,25 +331,45 @@ public class XCtx<C> implements XObject {
 		for (Pair<List<C>, List<C>> eq : eqs) {
 			if (!allTerms().containsAll(eq.first)) {
 				if (!initial || !eq.first.toString().contains("!")) {
-					throw new RuntimeException("unknown const: " + eq.first + " in " + this
+					throw new RuntimeException("unknown const in: " + Util.sep(eq.first, ".") + " in " + this
 							+ " (first)");
 				}
 			}
 			if (!allTerms().containsAll(eq.second)) {
 				if (!initial || !eq.second.toString().contains("!")) {
-					throw new RuntimeException("unknown const: " + eq.second + " in " + this
+					throw new RuntimeException("unknown const in: " + Util.sep(eq.second, ".") + " in " + this
 							+ " (second)");
 				}
 			}
 			if (!initial
 					|| (!eq.second.toString().contains("!") && !eq.first.toString().contains("!"))) {
 				if (!type(eq.first).equals(type(eq.second))) {
-					throw new RuntimeException("Type mismatch on " + eq + ": lhs=" + type(eq.first)
-							+ ",rhs=" + type(eq.second));
+					throw new RuntimeException("Type mismatch on equation " + Util.sep(eq.first,".") + " : " +  type(eq.first).first + " -> " + type(eq.first).second 
+							+ " = " + 
+							Util.sep(eq.second, ".") + " : " + type(eq.second).first + " -> " + type(eq.second).second);
 				}
 			}
 		}
+		
+		sane();
 	}
+	
+	public void sane() {
+		/* for (Object o : eqs) {
+			if (!eqs.contains(o)) {
+			//	tryFind(o, eqs);
+				throw new RuntimeException("??? " + o + " in " + eqs);
+			}
+		} */
+	}
+	
+/*	private static tryFind(Object o, List l) {
+		for (Object o2 : l) {
+			if (o.equals(o2)) {
+				System.out.println("found: " + )
+			}
+		}
+	} */
 
 	public Pair<C, C> type(List<C> first) {
 		if (first.size() == 0) {
@@ -305,7 +380,7 @@ public class XCtx<C> implements XObject {
 		while (it.hasNext()) {
 			Pair<C, C> next = type(it.next());
 			if (!ret.second.equals(next.first)) {
-				throw new RuntimeException("Ill-typed: " + first + " in " + this);
+				throw new RuntimeException("Ill-typed: " + Util.sep(first, ".") + " in " + this);
 			}
 			ret = new Pair<>(ret.first, next.second);
 		}
@@ -421,6 +496,10 @@ public class XCtx<C> implements XObject {
 		if (DEBUG.debug.x_graph) {
 			ret.addTab("Graph", makeGraph(schema != null));
 		}
+		
+		if (DEBUG.debug.x_graph && (schema != null)) {
+			ret.addTab("Elements", elements());
+		}
 
 		return ret;
 	}
@@ -436,9 +515,8 @@ public class XCtx<C> implements XObject {
 		VisualizationViewer<C, C> vv = new VisualizationViewer<>(layout);
 		vv.getRenderContext().setLabelOffset(20);
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(ModalGraphMouse.Mode.PICKING); //was TRANSFORMING
 		vv.setGraphMouse(gm);
-		gm.setMode(Mode.PICKING);
 
 		Transformer<C, Paint> vertexPaint = x -> {
 			if (global.terms().contains(x)) {
@@ -447,6 +525,19 @@ public class XCtx<C> implements XObject {
 			return Color.GREEN;
 		};
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		
+		Transformer<C, String> ttt = arg0 -> {
+			String ret = arg0.toString();
+			if (ret.length() > 40) {
+				return ret.substring(0, 39) + "...";
+			}
+			return ret;
+		};
+		vv.getRenderContext().setVertexLabelTransformer(ttt);
+//		vv.getRenderer().setVertexRenderer(new MyRenderer());
+		vv.getRenderContext().setEdgeLabelTransformer(ttt);
+		
+		
 		vv.getPickedVertexState().addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
@@ -463,25 +554,16 @@ public class XCtx<C> implements XObject {
 				cl.show(clx, xgrid.get(str));
 			}
 		});
-		
-		Transformer<C, String> ttt = arg0 -> {
-			String ret = arg0.toString();
-			if (ret.length() > 16) {
-				return ret.substring(0, 15) + "...";
-			}
-			return ret;
-		};
-		vv.getRenderContext().setVertexLabelTransformer(ttt);
-		vv.getRenderContext().setEdgeLabelTransformer(ttt);
 
 		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 		ret.add(zzz);
 		ret.setBorder(BorderFactory.createEtchedBorder());
 		
-		if (isInstance && DEBUG.debug.x_tables) {
+		if (isInstance && DEBUG.debug.x_tables && xcat != null) {
 			JSplitPane jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 			jsp.setResizeWeight(.8d); // setDividerLocation(.9d);
+			jsp.setDividerSize(2);
 			jsp.add(ret);
 			jsp.add(clx);
 			return jsp;
@@ -756,7 +838,7 @@ public class XCtx<C> implements XObject {
 						if (arrs.containsKey(type(col).second)) {
 							for (List<C> cand : arrs.get(type(col).second)) {
 								if (kb.equiv(cand, r)) {
-									rowData[row][cl] = Util.sep(cand, ".");
+									rowData[row][cl] = abbrPrint(cand);
 									break;
 								}
 							}
@@ -764,13 +846,13 @@ public class XCtx<C> implements XObject {
 							boolean found = false;
 							for (List<C> cand : consts.get(type(col).second)) {
 								if (kb.equiv(cand, r)) {
-									rowData[row][cl] = Util.sep(cand, ".");
+									rowData[row][cl] = abbrPrint(cand);
 									break;
 								}
 							}
 							if (!found) {
 								consts.get(type(col).second).add(r);
-								rowData[row][cl] = Util.sep(r, ".");
+								rowData[row][cl] = abbrPrint(r);
 							}
 						}
 						cl++;
@@ -922,7 +1004,7 @@ public class XCtx<C> implements XObject {
 								continue;
 							}
 							if (kb.equiv(cand.third, r)) {
-								rowData[row][cl] = Util.sep(cand.third, ".");
+								rowData[row][cl] = abbrPrint(cand.third);
 								break;
 							}
 						}
@@ -1595,14 +1677,25 @@ public class XCtx<C> implements XObject {
 				lhsX.add(x);
 				lhs = lhsX;
 			}
-
-			if (rhs.size() != 1) {
-				throw new RuntimeException("Ambiguous/Unsatisfiable: " + k.second
-						+ ", candidates: " + rhs);
+			if (rhs.size() ==  0) {
+				throw new RuntimeException("In equation " 
+			+ Util.sep(k.first, ".") + " = " + Util.sep(k.second, ".") + ", the right hand side refers to non-existent terms.  You should probably add terms at the global or instance level.");
 			}
-			if (lhs.size() != 1) {
-				throw new RuntimeException("Ambiguous/Unsatisfiable: " + k.first + ", candidates: "
-						+ lhs);
+			if (lhs.size() ==  0) {
+				throw new RuntimeException("In equation " 
+			+ Util.sep(k.first, ".") + " = " + Util.sep(k.second, ".") + ", the left hand side refers to non-existent terms.  You should probably add terms at the global or instance level.");
+			}
+			if (rhs.size() > 1) {
+				throw new RuntimeException("In equation " 
+			+ Util.sep(k.first, ".") + " = " + Util.sep(k.second, ".") + ", the right hand is ambiguous, and could mean any of {"  +
+						printDirty(rhs) + "}");
+				
+			}
+			if (lhs.size() > 1) {
+				throw new RuntimeException("In equation " 
+			+ Util.sep(k.first, ".") + " = " + Util.sep(k.second, ".") + ", the left hand is ambiguous, and could mean any of {"  +
+						printDirty(lhs) + "}");
+				
 			}
 
 			e.add(new Pair<>(new LinkedList<>(lhs).get(0), new LinkedList<>(rhs).get(0)));
@@ -1613,7 +1706,13 @@ public class XCtx<C> implements XObject {
 		// s.init();
 		XCtx<String> ret = new XCtx<>(new HashSet<>(), t, e, S.global, S, "instance");
 		ret.saturated = I.saturated;
+		ret.shouldAbbreviate = true;
 		return ret;
+	}
+
+	private static String printDirty(List<List> xxx) {
+		List yyy = xxx.stream().map(x -> Util.sep(x, ".")).collect(Collectors.toList());
+		return Util.sep(yyy, ",");
 	}
 
 	public static Set<List> expand(Set<List> sofar, List rest, XCtx s, XCtx I) {
@@ -1729,12 +1828,6 @@ public class XCtx<C> implements XObject {
 		return new XCtx<>(i, t, e, env, null, "schema");
 	}
 
-	/*
-	 * public Set<Triple<C, C, List<C>>> hom(C src, C dst) { Category<C,
-	 * Triple<C, C, List<C>>> cat = cat();
-	 * 
-	 * return cat.hom(src, dst); }
-	 */
 
 	@Override
 	public int hashCode() {
@@ -1785,24 +1878,6 @@ public class XCtx<C> implements XObject {
 		return true;
 	}
 
-	/*
-	 * public XCtx<C> rel2() { Set<Pair<List<C>, List<C>>> new_eqs = new
-	 * HashSet<>(eqs); if (schema == null) { throw new
-	 * RuntimeException("Problem with relationalize"); } for (C x : terms()) {
-	 * if (!type(x).first.equals("_1")) { continue; } loop: for (C y : terms())
-	 * { if (!type(y).first.equals("_1")) { continue; } if
-	 * (!type(x).second.equals(type(y).second)) { continue; } if (x.equals(y)) {
-	 * continue; } for (C b : allIds()) { for (Triple<C, C, List<C>> p :
-	 * cat().hom(type(x).second, b)) { for (C t : global.allIds()) { for
-	 * (Triple<C, C, List<C>> att : cat().hom(b, t)) { List<C> lhs = new
-	 * LinkedList<>(); lhs.add(x); lhs.addAll(p.third); lhs.addAll(att.third);
-	 * List<C> rhs = new LinkedList<>(); rhs.add(y); rhs.addAll(p.third);
-	 * rhs.addAll(att.third); if (!getKB().equiv(lhs, rhs)) { continue loop; } }
-	 * } } } List<C> lhs = new LinkedList<>(); List<C> rhs = new LinkedList<>();
-	 * lhs.add(x); rhs.add(y); new_eqs.add(new Pair<>(lhs, rhs)); } }
-	 * 
-	 * return new XCtx<>(ids, types, new_eqs, global, schema, kind); }
-	 */
 	public void simp() {
 		if (!initialized) {
 			throw new RuntimeException();
@@ -1980,13 +2055,6 @@ public class XCtx<C> implements XObject {
 					rhs.add((C) o2);
 				}
 
-				/*
-				 * if (global.allIds().contains(type(e).second)) { if
-				 * (rhsX.third.isEmpty()) { rhs.add(rhsX.first); } else {
-				 * rhs.addAll(rhsX.third); } } else { Map<Triple<C, C, List<C>>,
-				 * Triple<C, C, List<C>>> o2 = genMap2.get(rhsX); if (o2 ==
-				 * null) { throw new RuntimeException(); } rhs.add((C)o2); }
-				 */
 				new_eqs.add(new Pair<>(lhs, rhs));
 			}
 		}
@@ -2044,4 +2112,227 @@ public class XCtx<C> implements XObject {
 		return false;
 	}
 
+	private Graph<Triple<C,C,List<C>>, Pair<Integer, C>> elemGraph() {
+		Graph<Triple<C,C,List<C>>, Pair<Integer, C>> g = new DirectedSparseMultigraph<>();
+		for (Triple<C, C, List<C>> arr : cat().arrowsFrom((C)"_1")) {
+			if (global.ids.contains(arr.second)) {
+				continue;
+			}
+			if (arr.second.equals("_1")) {
+				continue;
+			}
+			g.addVertex(arr);
+		}
+		int i = 0;
+		for (Triple<C, C, List<C>> arr : cat().arrowsFrom((C)"_1")) {
+			if (global.ids.contains(arr.second)) {
+				continue;
+			}
+			if (cat().isId(arr)) {
+				continue;
+			}
+			if (arr.second.equals("_1")) {
+				continue;
+			}
+			for (C c : schema.terms()) {
+				Pair<C, C> t = schema.type(c);
+				if (!t.first.equals(arr.second)) {
+					continue;
+				}
+				if (global.ids.contains(t.second)) {
+					continue;
+				}
+				if (t.second.equals("_1")) {
+					continue;
+				}
+				if (schema.ids.contains(c)) {
+					continue;
+				}
+				List<C> l = new LinkedList<>(arr.third);
+				l.add(c);
+				Triple<C, C, List<C>> tofind = new Triple<>(arr.first, t.second, l);
+				Triple<C, C, List<C>> found = find_fast(tofind);
+				g.addEdge(new Pair<>(i++, c), arr, found);
+			}
+		}
+		return g;
+	}
+	
+	public JPanel elements() {
+		if (schema == null || global == null) {
+			throw new RuntimeException();
+		}
+		JPanel ret = new JPanel(new GridLayout(1,1));
+		try {
+			ret.add(makeElems());
+		} catch (Exception e) {
+			ret.add(new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR\n\n" +  e.getMessage()));
+		}
+		return ret;
+	}
+	
+	public static Color[] colors = { Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.YELLOW, Color.CYAN, Color.WHITE, Color.GRAY, Color.BLACK, Color.PINK, Color.ORANGE };
+	private Map<C, Color> colorMap = new HashMap<>();
+	private void initColors() {
+		int i = 0;
+		for (C c : schema.ids) {
+			colorMap.put(c, colors[i]);
+			i++;
+			if (i == colors.length) {
+				i = 0;
+			}
+		}
+	}
+	
+	private Map<Triple<C, C, List<C>>, JPanel> attPanels = new HashMap<>(); 
+	private JPanel attsFor(Triple<C, C, List<C>> arr) {
+		Map<C, String> tys = new HashMap<>();
+		Map<C, String> vals = new HashMap<>();
+		for (C c : schema.terms()) {
+			Pair<C, C> t = schema.type(c);
+			if (!t.first.equals(arr.second)) {
+				continue;
+			}
+			if (schema.ids.contains(t.second)) {
+				continue;
+			}
+			if (t.second.equals("_1")) {
+				continue;
+			}
+			tys.put(c, t.second.toString());
+			List<C> l = new LinkedList<>(arr.third);
+			l.add(c);
+			Triple<C, C, List<C>> tofind = new Triple<>(arr.first, t.second, l);
+			Triple<C, C, List<C>> found = find_fast(tofind);
+			vals.put(c, abbrPrint(found.third));
+		}
+		
+		Object[][] rowData = new Object[tys.keySet().size()][3];
+		Object[] colNames = {"Attribute", "Type", "Value" };
+		
+		int i = 0;
+		for (C c : tys.keySet()) {
+			rowData[i][0] = c;
+			rowData[i][1] = tys.get(c);
+			rowData[i][2] = vals.get(c);
+			i++;
+		}
+		
+		String str = "Attributes for " + abbrPrint(arr.third) + " (" + rowData.length + ")";
+		JPanel ret = new JPanel(new GridLayout(1,1));
+		ret.add(Util.makeTable(BorderFactory.createEmptyBorder(), str, rowData, colNames));
+		return ret;
+	}
+	
+	public JComponent makeElems() {
+		Graph<Triple<C,C,List<C>>, Pair<Integer, C>> sgv = elemGraph();
+		if (sgv.getVertexCount() > 64) {
+			return new JTextArea("Too large to display");
+		}
+		initColors();
+		Layout<Triple<C,C,List<C>>, Pair<Integer, C>> layout = new FRLayout<>(sgv);
+		layout.setSize(new Dimension(600, 400));
+		VisualizationViewer<Triple<C,C,List<C>>, Pair<Integer, C>> vv = new VisualizationViewer<>(layout);
+		vv.getRenderContext().setLabelOffset(20);
+		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
+		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		vv.setGraphMouse(gm);
+		gm.setMode(Mode.PICKING);
+		
+		JPanel botPanel = new JPanel(new GridLayout(1,1));
+
+		Transformer<Triple<C,C,List<C>>, Paint> vertexPaint = x -> {
+			return colorMap.get(x.second);
+		};
+		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+		vv.getPickedVertexState().addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() != ItemEvent.SELECTED) {
+					return;
+				}
+				vv.getPickedEdgeState().clear();
+				Triple<C, C, List<C>> arr = (Triple<C, C, List<C>>)e.getItem();
+				
+				//System.out.println("showing " + arr);
+		//		cl.show(clx, xgrid.get(str));
+				JPanel foo = attPanels.get(arr);
+				if (foo == null) {
+					foo = attsFor(arr);
+					attPanels.put(arr, foo);
+				}
+				botPanel.removeAll();
+				botPanel.add(foo);
+				botPanel.revalidate();
+			}
+		});
+		
+		Transformer<Triple<C,C,List<C>>, String> ttt = arg0 -> {
+			String ret = abbrPrint(arg0.third); //.toString();
+			if (ret.length() > 32) {
+				return ret.substring(0, 31) + "...";
+			}
+			return ret;
+		};
+		Transformer<Pair<Integer, C>, String> ttt2 = arg0 -> {
+			return arg0.second.toString();
+		};
+		
+		vv.getRenderContext().setVertexLabelTransformer(ttt);
+		vv.getRenderContext().setEdgeLabelTransformer(ttt2);
+
+		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+		JPanel ret = new JPanel(new GridLayout(1, 1));
+		ret.add(zzz);
+		ret.setBorder(BorderFactory.createEtchedBorder());
+
+			JSplitPane jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			jsp.setResizeWeight(.8d); // setDividerLocation(.9d);
+			jsp.setDividerSize(4);
+			jsp.add(ret);
+			jsp.add(botPanel);
+			return jsp;
+		
+	}
+	
+	
+	 /*re-implement the render functionality to work with internal frames(JInternalFrame)*/
+     class MyRenderer extends JPanel implements Renderer.Vertex<C, C>
+    {
+        static final long serialVersionUID = 420000L;
+        @Override
+        public void paintVertex(RenderContext<C, C> rc,
+                                Layout<C, C> layout, C vertex)
+        {
+            try
+            {
+                GraphicsDecorator graphicsContext = rc.getGraphicsContext();
+                Point2D center = layout.transform(vertex);
+                Dimension size = new Dimension(100, 80);
+
+             //   System.out.printf("Vertex[%d] X = %d Y = %d: Running paintVertex()\n", vertex, (int)center.getX(), (int)center.getY());
+
+                JPanel sv = new JPanel(new GridLayout(1,1));
+                sv.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+//                sv.setBackground(Color.GREEN);
+  //              sv.setPreferredSize(size);
+                JTextArea area = new JTextArea(vertex.toString());
+                area.setLineWrap(true);
+                area.setWrapStyleWord(true);
+                sv.add(new JScrollPane(area));
+                //OK
+                graphicsContext.draw(sv, rc.getRendererPane(), (int)center.getX(), 
+                                     (int)center.getY(), (int)size.getWidth(), (int)size.getHeight(), true);
+            }
+            catch (Exception e)
+            {
+                System.err.println("Failed to render images!\n");
+                System.err.println("Caught Exception: " + e.getMessage());
+            }
+        }
+    }
+
+	
+	
+	
 }
