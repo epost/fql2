@@ -46,8 +46,9 @@ public class Examples {
 	public static Example patrick26=new Patrick26ExampleCata();
 	public static Example patrick27= new Patrick27ExampleIntegration();
 	public static Example patrick28 = new Patrick28ExampleOlog();
+	public static Example patrick29 = new Patrick29ExampleEpiMono();
 	
-	public static Example[] examples = new Example[] {patrick28, patrick27, patrick26, patrick25, patrick24, patrick23, /*patrick22, patrick21,*/ patrick20, patrick19, patrick18, patrick17, patrick16, patrick15, /* patrick14, */ patrick13, patrick12, patrick11, patrick10, patrick9, patrick8, patrick, patrick2, patrick3, patrick4, patrick5, patrick6, patrick7, all, vik,  /*nist2, */ nistExample, propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
+	public static Example[] examples = new Example[] {patrick29, patrick28, patrick27, patrick26, patrick25, patrick24, patrick23, /*patrick22, patrick21,*/ patrick20, patrick19, patrick18, patrick17, patrick16, patrick15, /* patrick14, */ patrick13, patrick12, patrick11, patrick10, patrick9, patrick8, patrick, patrick2, patrick3, patrick4, patrick5, patrick6, patrick7, all, vik,  /*nist2, */ nistExample, propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
 	
 	public static Example[] key_examples = examples; //new Example[] { deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
 
