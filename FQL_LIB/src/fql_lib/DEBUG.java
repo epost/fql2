@@ -224,6 +224,7 @@ public class DEBUG implements Serializable {
 	public boolean x_backtracking = true;
 	public boolean x_typing = true;
 	public boolean x_elements = true;
+	public boolean x_json = true;
 	
 	public void showOptions() {
 
@@ -330,7 +331,8 @@ public class DEBUG implements Serializable {
 		JCheckBox x_tabular_box = new JCheckBox("Table", x_tables);
 		JCheckBox x_adom_box = new JCheckBox("Active Domain", x_adom);
 		JCheckBox x_elem_box = new JCheckBox("Elements", x_elements);
-		xArea.add(x_textual_box); xArea.add(x_graph_box); xArea.add(x_cat_box); xArea.add(x_tabular_box); xArea.add(x_adom_box); xArea.add(x_elem_box);	
+		JCheckBox x_json_box = new JCheckBox("JSON", x_json);
+		xArea.add(x_textual_box); xArea.add(x_graph_box); xArea.add(x_cat_box); xArea.add(x_tabular_box); xArea.add(x_adom_box); xArea.add(x_elem_box); xArea.add(x_json_box);	
 		x_1.add(new JLabel("Viewers:"));
 		x_2.add(xArea);
 
@@ -775,6 +777,7 @@ public class DEBUG implements Serializable {
 			this.reorder_joins = reorder_joins_box.isSelected();
 			this.x_typing = x_typing_box.isSelected();
 			this.x_elements = x_elem_box.isSelected();
+			this.x_json = x_json_box.isSelected();
 			
 			schema_denotation = schema_denotation_box.isSelected();
 			schema_ed = schema_ed_box.isSelected();
@@ -907,7 +910,7 @@ public class DEBUG implements Serializable {
 
 	static String about = "FQL++/FPQL IDE Copyright (C) 2012-2015 Patrick Schultz, David Spivak, and Ryan Wisnesky"
 			+ "\n\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
-			+ "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)"; //\nH2 (SQL)";
+			+ "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)\nJSONP"; //\nH2 (SQL)";
 
 	public static int chase_limit = 64;
 

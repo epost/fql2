@@ -500,6 +500,10 @@ public class XCtx<C> implements XObject {
 		if (DEBUG.debug.x_graph && (schema != null)) {
 			ret.addTab("Elements", elements());
 		}
+		
+		if (DEBUG.debug.x_json) {
+			ret.addTab("JSON", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toJSON()));
+		}
 
 		return ret;
 	}
@@ -2332,6 +2336,90 @@ public class XCtx<C> implements XObject {
         }
     }
 
+     public String toJSON() {
+    	 if (global == null) {
+    		  throw new RuntimeException("Attempt to JSON the type side");
+    	 } else if (schema == null) {
+    		 return toJSONSchema();
+    	 } else {
+    		 return toJSONInstance();
+    	 }
+     }
+     
+     public String toJSONSchema() {
+    	 String ns = "";
+    	 String es = "";
+    	 
+    	 Set<String> ns0 = new HashSet<>();
+    	 Set<String> es0 = new HashSet<>();
+    		 for (C k : global.ids) {
+    			 String s = "{\"id\": \"" + k + "\", \"type\":\"type\", \"label\":\"" + k + "\"}";  
+        		 ns0.add(s);
+    		 }
+    		 for (C k : global.terms()) {
+    			 if (global.ids.contains(k)) {
+    				 continue;
+    			 }
+    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
+    			 + global.type(k).first + "\", \"target\":\"" + global.type(k).second + "\"}";  
+        		 es0.add(s);
+    		 }
+    		 for (C k : ids) {
+    			 String s = "{\"id\": \"" + k + "\", \"type\":\"entity\", \"label\":\"" + k + "\"}";  
+        		 ns0.add(s);
+    		 }
+    		 for (C k : terms()) {
+    			 if (ids.contains(k)) {
+    				 continue;
+    			 }
+    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
+    					 + type(k).first + "\", \"target\":\"" + type(k).second + "\"}";  
+    			 es0.add(s);
+    		 }
+    		
+    	 
+    	 return "{\"graph\": { \"directed\":true,\n\"nodes\":[\n" + Util.sep(ns0, ",\n") + "], \n\"edges\":[\n" + Util.sep(es0, ",\n") + "\n]}}";
+     }
+     
+     //repeat for global, for schema
+     public String toJSONInstance() {
+    	 String ns = "";
+    	 String es = "";
+    	 
+    	 Set<String> ns0 = new HashSet<>();
+    	 Set<String> es0 = new HashSet<>();
+    		 for (C k : global.ids) {
+    			 String s = "{\"id\": \"" + k + "\", \"type\":\"type\", \"label\":\"" + k + "\"}";  
+        		 ns0.add(s);
+    		 }
+    		 for (C k : global.terms()) {
+    			 if (global.ids.contains(k)) {
+    				 continue;
+    			 }
+    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
+    			 + global.type(k).first + "\", \"target\":\"" + global.type(k).second + "\"}";  
+        		 es0.add(s);
+    		 }
+    		 for (C k : schema.ids) {
+    			 String s = "{\"id\": \"" + k + "\", \"type\":\"entity\", \"label\":\"" + k + "\"}";  
+        		 ns0.add(s);
+    		 }
+    		 for (C k : schema.terms()) {
+    			 if (schema.ids.contains(k)) {
+    				 continue;
+    			 }
+    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
+    					 + schema.type(k).first + "\", \"target\":\"" + schema.type(k).second + "\"}";  
+    			 es0.add(s);
+    		 }
+    		 for (C k : terms()) {
+    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
+    					 + type(k).first + "\", \"target\":\"" + type(k).second + "\"}";  
+    			 es0.add(s);
+    		 }
+    	 
+    	 return "{\"graph\": { \"directed\":true,\n\"nodes\":[\n" + Util.sep(ns0, ",\n") + "],\n\"edges\":[\n" + Util.sep(es0, ",\n") + "\n]}}";
+     }
 	
 	
 	

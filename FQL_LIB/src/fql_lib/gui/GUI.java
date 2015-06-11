@@ -39,6 +39,7 @@ import javax.swing.filechooser.FileFilter;
 
 import fql_lib.DEBUG;
 import fql_lib.Pair;
+import fql_lib.X.XJsonToFQL;
 import fql_lib.X.XRaToFpql;
 import fql_lib.X.XSqlToFql;
 import fql_lib.decl.Environment;
@@ -224,6 +225,9 @@ public class GUI extends JPanel {
 		transMenu.add(sqlItem);
 		sqlItem.addActionListener(x -> { new XSqlToFql(); });
 		
+		MenuItem jsonItem = new MenuItem("JSON to FPQL");
+		transMenu.add(jsonItem);
+		jsonItem.addActionListener(x -> { new XJsonToFQL(); });
 
 		Menu helpMenu = new Menu("About");
 		/*		MenuItem helpItem = new MenuItem("Help");
