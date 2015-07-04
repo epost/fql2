@@ -3,8 +3,8 @@ package fql_lib.examples;
 public class Patrick13ExampleProd extends Example {
 
 	@Override
-	public boolean isPatrick() {
-		return true;
+	public String isPatrick() {
+		return "true";
 	}
 	
 	@Override

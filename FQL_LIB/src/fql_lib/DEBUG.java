@@ -276,10 +276,10 @@ public class DEBUG implements Serializable {
 	//	general1.add(fastboxl);
 	//	general2.add(fastbox);
 		
-		JCheckBox limex = new JCheckBox("", limit_examples);
-		JLabel limexL = new JLabel("Show only some examples:");
-		general1.add(limexL);
-		general2.add(limex);
+		//JCheckBox limex = new JCheckBox("", limit_examples);
+		//JLabel limexL = new JLabel("Show only some examples:");
+		//general1.add(limexL);
+		//general2.add(limex);
 		/*	public boolean fast_amalgams = true;
 	public boolean validate_amalgams = false;
 	public boolean direct_flower = true;
@@ -753,7 +753,7 @@ public class DEBUG implements Serializable {
 			ALL_GR_PATHS = gr.isSelected();
 			VALIDATE = jcb.isSelected();
 			MultiView = jcbM.isSelected();
-			limit_examples = limex.isSelected();
+		//	limit_examples = limex.isSelected();
 			useLineage = (String) lineageBox.getSelectedItem();
 			piLineage = (String) pilineageBox.getSelectedItem();
 			
@@ -885,7 +885,7 @@ public class DEBUG implements Serializable {
 			// debug.showOptions();
 		}
 
-		int nbox = GUI.box.getModel().getSize();
+	/*	int nbox = GUI.box.getModel().getSize();
 		if (limit_examples) {
 			if (nbox != Examples.key_examples.length) {
 				DefaultComboBoxModel<Example> m = new DefaultComboBoxModel<>(
@@ -900,7 +900,7 @@ public class DEBUG implements Serializable {
 				GUI.box.setModel(m);
 				GUI.box.setSelectedIndex(-1);
 			}
-		}
+		} */
 	}
 
 	public static void showAbout() {
@@ -908,7 +908,7 @@ public class DEBUG implements Serializable {
 				JOptionPane.PLAIN_MESSAGE, null);
 	}
 
-	static String about = "FQL++/FPQL IDE Copyright (C) 2012-2015 Patrick Schultz, David Spivak, and Ryan Wisnesky"
+	static String about = "FQL++/FPQL/OPL IDE Copyright (C) 2012-2015 Patrick Schultz, David Spivak, and Ryan Wisnesky"
 			+ "\n\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
 			+ "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)\nJSONP"; //\nH2 (SQL)";
 

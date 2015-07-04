@@ -6,8 +6,8 @@ public abstract class Example implements Comparable<Example> {
 	
 	public abstract String getText();
 	
-	public boolean isPatrick() {
-		return false;
+	public String isPatrick() {
+		return "false";
 	}
 
 	@Override 

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<TokenMakerDefinition>
+  <general>
+    <package>fql_lib.opl</package>
+    <className>OplTokenMaker</className>
+    <extendedClass>AbstractJFlexCTokenMaker</extendedClass>
+    <classComment/>
+    <ignoreCase>false</ignoreCase>
+    <booleanLiterals>false</booleanLiterals>
+  </general>
+  <comments>
+    <lineComments enabled="true" start="//"/>
+    <multiLineComments enabled="true" end="*/" start="/*"/>
+    <docComments enabled="false" end="" start=""/>
+  </comments>
+  <keywords>
+    <keyword>delta</keyword>
+    <keyword>eval</keyword>
+    <keyword>javascript</keyword>
+    <keyword>mapping</keyword>
+    <keyword>model</keyword>
+    <keyword>theory</keyword>
+    <keyword>transform</keyword>
+  </keywords>
+  <keywords2>
+    <keyword>equations</keyword>
+    <keyword>forall</keyword>
+    <keyword>sorts</keyword>
+    <keyword>symbols</keyword>
+  </keywords2>
+  <dataTypes/>
+  <functions/>
+  <numbers>
+    <hexLiteral/>
+    <intLiteral>{Digit}+</intLiteral>
+    <floatLiteral/>
+  </numbers>
+  <stringLiterals enabled="true" multiLine="false"/>
+  <charLiterals enabled="false" multiLine="false"/>
+  <backtickLiterals enabled="false"/>
+  <operators>
+    <operator>(</operator>
+    <operator>)</operator>
+    <operator>*</operator>
+    <operator>+</operator>
+    <operator>,</operator>
+    <operator>-&gt;</operator>
+    <operator>:</operator>
+    <operator>;</operator>
+    <operator>=</operator>
+    <operator>=&gt;</operator>
+    <operator>^</operator>
+    <operator>{</operator>
+    <operator>|</operator>
+    <operator>}</operator>
+  </operators>
+</TokenMakerDefinition>

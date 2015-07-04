@@ -19,8 +19,8 @@ public class FQLCodeEditor extends CodeEditor<FQLProgram, Environment, Display> 
 	}
 
 	@Override
-	public boolean isPatrick() {
-		return false;
+	public String isPatrick() {
+		return "false";
 	}
 
 	@Override

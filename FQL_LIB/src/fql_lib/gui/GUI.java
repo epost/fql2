@@ -1,6 +1,7 @@
 package fql_lib.gui;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Menu;
@@ -48,6 +49,8 @@ import fql_lib.examples.Examples;
 import fql_lib.nested.EnrichViewer;
 import fql_lib.nested.KBViewer;
 import fql_lib.nested.NraViewer;
+import fql_lib.opl.OplCodeEditor;
+
 
 @SuppressWarnings("serial")
 /**
@@ -60,7 +63,7 @@ public class GUI extends JPanel {
 	
 	public static JTabbedPane editors = new JTabbedPane();
 
-	public static JComboBox<Example> box = null;
+	//public static JComboBox<Example> box = null;
 
 	public static JFrame topFrame;
 	
@@ -76,6 +79,7 @@ public class GUI extends JPanel {
 		Menu fileMenu = new Menu("File");
 		MenuItem newItem = new MenuItem("New FQL++");
 		MenuItem newItem2 = new MenuItem("New FPQL");
+		MenuItem newItem3 = new MenuItem("New OPL");
 		MenuItem openItem = new MenuItem("Open");
 //		MenuItem openItem2 = new MenuItem("Open GUI");
 		MenuItem saveItem = new MenuItem("Save");
@@ -84,6 +88,7 @@ public class GUI extends JPanel {
 		MenuItem exitItem = new MenuItem("Exit");
 		fileMenu.add(newItem);
 		fileMenu.add(newItem2);
+		fileMenu.add(newItem3);
 		fileMenu.add(openItem);
 		//fileMenu.add(openItem2);
 		fileMenu.add(saveItem);
@@ -250,12 +255,17 @@ public class GUI extends JPanel {
 
 		newItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				newAction(null, "", false);
+				newAction(null, "", "false");
 			}
 		});
 		newItem2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				newAction(null, "", true);
+				newAction(null, "", "true");
+			}
+		});
+		newItem3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				newAction(null, "", "opl");
 			}
 		});
 		openItem.addActionListener(new ActionListener() {
@@ -315,28 +325,23 @@ public class GUI extends JPanel {
 			}
 		});
 
-		JButton helpB = new JButton("Help");
+		/*JButton helpB = new JButton("Help");
 		helpB.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				helpAction();
 			}
-		});
+		}); */
 
 		JButton new_button = new JButton("New FPQL");
 		new_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				newAction(null, "", true);
+				newAction(null, "", "true");
 			}
 		});
 		
-/*		JButton new_button2 = new JButton("New Patrick");
-		new_button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				newAction(null, "", true);
-			}
-		}); */
+
 
 		JButton save_button = new JButton("Save");
 		save_button.addActionListener(new ActionListener() {
@@ -344,9 +349,7 @@ public class GUI extends JPanel {
 				saveAction();
 			}
 		});
-		// if (FQLApplet.isapplet) {
-		// save_button.setEnabled(false);
-		// }
+		
 
 		JButton open_button = new JButton("Open");
 		open_button.addActionListener(new ActionListener() {
@@ -354,71 +357,54 @@ public class GUI extends JPanel {
 				openAction();
 			}
 		});
-		
-		
-		// if (FQLApplet.isapplet) {
-		// open_button.setEnabled(false);
-		// }
-
-		// toolBar temp1 = new JPanel();
-		JLabel l = new JLabel("Load Example:", JLabel.RIGHT);
-		
-		if (DEBUG.debug.limit_examples) {
-			box = new JComboBox<>(Examples.key_examples);			
-		} else {
-			box = new JComboBox<>(Examples.examples);
-		}
-		box.setSelectedIndex(-1);
-		box.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doExample((Example) box.getSelectedItem());
-			}
-
-		});
-
-		toolBar.add(compileB);
-
-		// button.setFont(new Font("Arial", 12, Font.PLAIN));
-		// toolBar.setFont(new Font("Arial", 12, Font.PLAIN));
-		// toolBar.addSeparator();
-		toolBar.add(new_button);
-		// toolBar.addSeparator();
-		toolBar.add(open_button);
-		// toolBar.addSeparator();
-		toolBar.add(save_button);
-		// toolBar.add(all_button);
-		// toolBar.addSeparator();
-
-		toolBar.add(helpB);
 
 		JButton optionsb = new JButton("Options");
-		toolBar.add(optionsb);
 		optionsb.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				DEBUG.debug.showOptions();
 			}
 		});
 
+		CardLayout cl = new CardLayout();
+		JPanel boxPanel = new JPanel(cl);
+		JComboBox allBox = allBox = new JComboBox<>(Examples.examples);
+		allBox.setSelectedIndex(-1);
+		allBox.addActionListener(x -> doExample((Example) allBox.getSelectedItem()));
+		JComboBox fqlppBox = new JComboBox(Examples.fqlppOnly());
+		fqlppBox.setSelectedIndex(-1);
+		fqlppBox.addActionListener(x -> doExample((Example) fqlppBox.getSelectedItem()));
+		JComboBox fpqlBox = new JComboBox(Examples.fpqlOnly());
+		fpqlBox.setSelectedIndex(-1);
+		fpqlBox.addActionListener(x -> doExample((Example) fpqlBox.getSelectedItem()));
+		JComboBox oplBox = new JComboBox(Examples.oplOnly());
+		oplBox.setSelectedIndex(-1);
+		oplBox.addActionListener(x -> doExample((Example) oplBox.getSelectedItem()));
 
+		boxPanel.add(allBox, "All");
+		boxPanel.add(fqlppBox, "FQL++");
+		boxPanel.add(fpqlBox, "FPQL" );
+		boxPanel.add(oplBox, "OPL");
+		cl.show(boxPanel, "All");
 		
-
-		// JPanel temp2 = new JPanel();
-		// temp2.add(l);
-		// temp2.add(box);
-
-		// toolBar.add(temp2);
-		toolBar.add(l);
-		toolBar.add(box);
+		JComboBox<String> modeBox = new JComboBox<>(new String[] {"All", "FQL++", "FPQL", "OPL"});
+		modeBox.addActionListener(x -> {
+			cl.show(boxPanel, (String)modeBox.getSelectedItem());
+		});
+		
+		toolBar.add(compileB);
+		toolBar.add(new_button);
+		toolBar.add(open_button);
+		toolBar.add(save_button);
+		toolBar.add(optionsb);
+		toolBar.add(new JLabel("Load Example:", JLabel.RIGHT));
+		toolBar.add(modeBox);
+		toolBar.add(boxPanel);
 
 		pan.add(toolBar, BorderLayout.PAGE_START);
 		pan.add(editors, BorderLayout.CENTER);
 
-		newAction(null, "", true);
+		newAction(null, "", "true");
 
-		// editors.setFocusCycleRoot(true);
-		// editors.requestFocusInWindow();
 		return new Pair<>(pan, menuBar);
 	}
 	
@@ -619,6 +605,18 @@ public class GUI extends JPanel {
 		}
 	}
 	
+	public static class Filter5 extends FileFilter {
+		@Override
+		public boolean accept(File f) {
+			return f.getName().toLowerCase().endsWith(".opl")
+					|| f.isDirectory();
+		}
+
+		@Override
+		public String getDescription() {
+			return "OPL files (*.opl)";
+		}
+	}
 
 
 	protected static void saveAsAction() {
@@ -627,24 +625,32 @@ public class GUI extends JPanel {
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
 				.getSelectedIndex());
 
-		if (e.isPatrick()) {
+		if (e.isPatrick().equals("true")) {
 			jfc.setFileFilter(new Filter3());
-		} else {
+		} else if (e.isPatrick().equals("false")) {
 			jfc.setFileFilter(new Filter());			
+		} else {
+			jfc.setFileFilter(new Filter5());			
 		}
+		
+		
 		jfc.showSaveDialog(null);
 		File f = jfc.getSelectedFile();
 		if (f == null) {
 			return;
 		}
-		if (e.isPatrick()) {
+		if (e.isPatrick().equals("true")) {
 			if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fpql")) {
 				f = new File(jfc.getSelectedFile() + ".fpql");
 			}
-		} else {
+		} else if (e.isPatrick().equals("false")) {
 			if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlpp")) {
 				f = new File(jfc.getSelectedFile() + ".fqlpp");
 			}
+		} else {
+				if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".opl")) {
+					f = new File(jfc.getSelectedFile() + ".opl");
+				}
 		}
 
 		doSave(f, e.getText());
@@ -654,7 +660,7 @@ public class GUI extends JPanel {
 		doOpen(f, e.isPatrick());
 	}
 
-	static void doOpen(File f, boolean isPatrick) {
+	static void doOpen(File f, String isPatrick) {
 		String s = readFile(f.getAbsolutePath());
 		if (s == null) {
 			return;
@@ -684,9 +690,11 @@ public class GUI extends JPanel {
 			return;
 		}
 		if (f.getAbsolutePath().endsWith(".fpql")) {
-			doOpen(f, true);
+			doOpen(f, "true");
+		} else if (f.getAbsolutePath().endsWith(".fql++")){
+			doOpen(f, "false");
 		} else {
-			doOpen(f, false);
+			doOpen(f, "opl");
 		}
 	}
 	
@@ -731,13 +739,15 @@ public class GUI extends JPanel {
 		return titles.get(i);
 	}
 
-	static Integer newAction(String title, String content, boolean isPatrick) {
+	static Integer newAction(String title, String content, String isPatrick) {
 		untitled_count++;
 		CodeEditor c;
-		if (isPatrick) {
+		if (isPatrick.equals("true")) {
 			c = new XCodeEditor(untitled_count, content);
-		} else {
+		} else if (isPatrick.equals("false")) {
 			c = new FQLCodeEditor(untitled_count, content);
+		} else {
+			c = new OplCodeEditor(untitled_count, content);
 		}
 		int i = editors.getTabCount();
 		keys.put(untitled_count, c);

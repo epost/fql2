@@ -27,8 +27,8 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 	}
 
 	@Override
-	public boolean isPatrick() {
-		return true;
+	public String isPatrick() {
+		return "true";
 	}
 
 	@Override

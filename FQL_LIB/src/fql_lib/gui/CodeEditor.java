@@ -57,11 +57,11 @@ import fql_lib.examples.Example;
  */
 public abstract class CodeEditor<Prog extends FQLProg, Env, Disp extends FQLDisp> extends JPanel implements Runnable {
 
-	public abstract boolean isPatrick();
+	public abstract String isPatrick();
 	
 	final Integer id;
 
-	Disp display;
+	Disp display; 
 
 	private static final long serialVersionUID = 1L;
 

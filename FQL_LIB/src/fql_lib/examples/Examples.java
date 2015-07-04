@@ -1,5 +1,8 @@
 package fql_lib.examples;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class Examples {
 
 	public static Example setExample = new SetsExample();
@@ -48,11 +51,51 @@ public class Examples {
 	public static Example patrick28 = new Patrick28ExampleOlog();
 	public static Example patrick29 = new Patrick29ExampleEpiMono();
 	
-	public static Example[] examples = new Example[] {patrick29, patrick28, patrick27, patrick26, patrick25, patrick24, patrick23, /*patrick22, patrick21,*/ patrick20, patrick19, patrick18, patrick17, patrick16, patrick15, /* patrick14, */ patrick13, patrick12, patrick11, patrick10, patrick9, patrick8, patrick, patrick2, patrick3, patrick4, patrick5, patrick6, patrick7, all, vik,  /*nist2, */ nistExample, propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
+	public static Example mod4 = new Mod4Example();
+	public static Example js = new JSExample();
+	public static Example sk = new SKExample();
+	public static Example oplDelta = new OplDeltaExample();
+	public static Example oplStack = new OplStackExample();
 	
-	public static Example[] key_examples = examples; //new Example[] { deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
+	public static Example[] examples = new Example[] {oplStack, oplDelta, sk, js, mod4, patrick29, patrick28, patrick27, patrick26, patrick25, patrick24, patrick23, /*patrick22, patrick21,*/ patrick20, patrick19, patrick18, patrick17, patrick16, patrick15, /* patrick14, */ patrick13, patrick12, patrick11, patrick10, patrick9, patrick8, patrick, patrick2, patrick3, patrick4, patrick5, patrick6, patrick7, all, vik,  /*nist2, */ nistExample, propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
+		
+	//public static Example[] key_examples = examples; //new Example[] { deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
 
 	public static final String helpString = ""; //TODO
+
+	public static Example[] fqlppOnly() {
+		List<Example> ret = new LinkedList<>();
+		for (Example e : examples) {
+			if (e.getName().startsWith("P ")) {
+				continue;
+			}
+			if (e.getName().startsWith("O ")) {
+				continue;
+			}
+			ret.add(e);
+		}
+		return ret.toArray(new Example[] { });
+	}
+	
+	public static Example[] fpqlOnly() {
+		List<Example> ret = new LinkedList<>();
+		for (Example e : examples) {
+			if (e.getName().startsWith("P ")) {
+				ret.add(e);
+			}
+		}
+		return ret.toArray(new Example[] { });
+	}
+	
+	public static Example[] oplOnly() {
+		List<Example> ret = new LinkedList<>();
+		for (Example e : examples) {
+			if (e.getName().startsWith("O ")) {
+				ret.add(e);
+			}
+		}
+		return ret.toArray(new Example[] { });
+	}
 
 }
 

@@ -1,0 +1,57 @@
+package fql_lib.examples;
+
+public class SKExample extends Example {
+
+	@Override
+	public String isPatrick() {
+		return "opl";
+	}
+	
+	@Override
+	public String getName() {
+		return "O SK";
+	}
+
+	@Override
+	public String getText() {
+		return s;
+	}
+	
+	String s = "SK = theory {"
+			+ "\n	sorts "
+			+ "\n		U;"
+			+ "\n	symbols "
+			+ "\n		o : U,U -> U,"
+			+ "\n		S : -> U,"
+			+ "\n		K : -> U,"
+			+ "\n		a : -> U,"
+			+ "\n		b : -> U,"
+			+ "\n		c : -> U;"
+			+ "\n	equations	"
+			+ "\n		forall x:U, y:U. o(o(K(), x), y) = x,"
+			+ "\n		forall x:U, y:U, z:U. o(o(o(S(), x), y), z) = o(o(x, z), o(y, z));"
+			+ "\n}"
+			+ "\n"
+			+ "\nM = javascript {"
+			+ "\n	symbols"
+			+ "\n		a -> \"function a(input) { return \\\"a\\\"; }\","
+			+ "\n		b -> \"function b(input) { return \\\"b\\\"; }\","
+			+ "\n		c -> \"function c(input) { return \\\"c\\\"; }\","
+			+ "\n		K -> \"function K(input) { return function(x) { return function(y) { return x; }; }; }\","
+			+ "\n		S -> \"function S(input) { return function(x) { return function(y) { return function(z) { return (x(z))(y(z)); }; }; }; }\","
+			+ "\n		o -> \"function o(input) { return input[0](input[1]); }\";"
+			+ "\n} : SK"
+			+ "\n"
+			+ "\na = eval M a()"
+			+ "\nb = eval M b()"
+			+ "\nKa = eval M o(K(), a()) "
+			+ "\nKab = eval M o(o(K(), a()), b()) // = a()"
+			+ "\n"
+			+ "\nSK0 = eval M o(S(), K())"
+			+ "\nSKK0 = eval M o(o(S(), K()), K()) "
+			+ "\nSKKa = eval M o(o(o(S(), K()), K()), a()) // = a()"
+			+ "\n";
+
+
+
+}

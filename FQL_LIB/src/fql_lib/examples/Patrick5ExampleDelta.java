@@ -3,8 +3,8 @@ package fql_lib.examples;
 public class Patrick5ExampleDelta extends Example {
 
 	@Override
-	public boolean isPatrick() {
-		return true;
+	public String isPatrick() {
+		return "true";
 	}
 	
 	@Override

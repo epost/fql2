@@ -29,14 +29,14 @@ public class FQL {
 			public void run() {
 				try {
 					Arrays.sort(Examples.examples);
-					Arrays.sort(Examples.key_examples);
+				//	Arrays.sort(Examples.key_examples);
 
 					DEBUG.load(true);
 					//f = new JFrame("FQL IDE");
 					
 					UIManager.setLookAndFeel(DEBUG.debug.look_and_feel);			
 
-					final JFrame f = new JFrame("FQL++/FPQL IDE");
+					final JFrame f = new JFrame("FQL++/FPQL/OPL IDE");
 					final Pair<JPanel, MenuBar> gui = GUI.makeGUI(f);
 
 					f.setContentPane(gui.first);

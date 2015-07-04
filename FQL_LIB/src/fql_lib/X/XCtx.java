@@ -502,7 +502,10 @@ public class XCtx<C> implements XObject {
 		}
 		
 		if (DEBUG.debug.x_json) {
-			ret.addTab("JSON", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toJSON()));
+			String tj = toJSON();
+			if (tj != null) {
+				ret.addTab("JSON", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", tj));
+			}
 		}
 
 		return ret;
@@ -2342,7 +2345,7 @@ public class XCtx<C> implements XObject {
     	 } else if (schema == null) {
     		 return toJSONSchema();
     	 } else {
-    		 return toJSONInstance();
+    		 return null;
     	 }
      }
      
@@ -2352,6 +2355,7 @@ public class XCtx<C> implements XObject {
     	 
     	 Set<String> ns0 = new HashSet<>();
     	 Set<String> es0 = new HashSet<>();
+    	 Set<String> eq0 = new HashSet<>();
     		 for (C k : global.ids) {
     			 String s = "{\"id\": \"" + k + "\", \"type\":\"type\", \"label\":\"" + k + "\"}";  
         		 ns0.add(s);
@@ -2363,6 +2367,12 @@ public class XCtx<C> implements XObject {
     			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
     			 + global.type(k).first + "\", \"target\":\"" + global.type(k).second + "\"}";  
         		 es0.add(s);
+    		 }
+    		 for (Pair<List<C>, List<C>> k : global.eqs) {
+    			 List<String> lhs = k.first.stream().map(x -> "\"" + x + "\"").collect(Collectors.toList());
+    			 List<String> rhs = k.second.stream().map(x -> "\"" + x + "\"").collect(Collectors.toList());
+    			 String s = "{\"lhs\": [" + Util.sep(lhs, ", ") + "], \"rhs\": [" + Util.sep(rhs, ", ") + "]}";
+    			 eq0.add(s);
     		 }
     		 for (C k : ids) {
     			 String s = "{\"id\": \"" + k + "\", \"type\":\"entity\", \"label\":\"" + k + "\"}";  
@@ -2376,50 +2386,57 @@ public class XCtx<C> implements XObject {
     					 + type(k).first + "\", \"target\":\"" + type(k).second + "\"}";  
     			 es0.add(s);
     		 }
-    		
+    		 for (Pair<List<C>, List<C>> k : eqs) {
+    			 List<String> lhs = k.first.stream().map(x -> "\"" + x + "\"").collect(Collectors.toList());
+    			 List<String> rhs = k.second.stream().map(x -> "\"" + x + "\"").collect(Collectors.toList());
+    			 String s = "{\"lhs\": [" + Util.sep(lhs, ", ") + "], \"rhs\": [" + Util.sep(rhs, ", ") + "]}";
+    			 eq0.add(s);
+    		 }
     	 
-    	 return "{\"graph\": { \"directed\":true,\n\"nodes\":[\n" + Util.sep(ns0, ",\n") + "], \n\"edges\":[\n" + Util.sep(es0, ",\n") + "\n]}}";
+    	 return "{\"graph\": { \"directed\":true,\n\"nodes\":[\n" + Util.sep(ns0, ",\n") + 
+    			 	"],\n\"edges\":[\n" + Util.sep(es0, ",\n") + "\n]," + 
+    			 	"\n\"equations\":[\n" + Util.sep(eq0, ",\n") + "\n]}}";
      }
      
-     //repeat for global, for schema
-     public String toJSONInstance() {
-    	 String ns = "";
-    	 String es = "";
-    	 
-    	 Set<String> ns0 = new HashSet<>();
-    	 Set<String> es0 = new HashSet<>();
-    		 for (C k : global.ids) {
-    			 String s = "{\"id\": \"" + k + "\", \"type\":\"type\", \"label\":\"" + k + "\"}";  
-        		 ns0.add(s);
-    		 }
-    		 for (C k : global.terms()) {
-    			 if (global.ids.contains(k)) {
-    				 continue;
-    			 }
-    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
-    			 + global.type(k).first + "\", \"target\":\"" + global.type(k).second + "\"}";  
-        		 es0.add(s);
-    		 }
-    		 for (C k : schema.ids) {
-    			 String s = "{\"id\": \"" + k + "\", \"type\":\"entity\", \"label\":\"" + k + "\"}";  
-        		 ns0.add(s);
-    		 }
-    		 for (C k : schema.terms()) {
-    			 if (schema.ids.contains(k)) {
-    				 continue;
-    			 }
-    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
-    					 + schema.type(k).first + "\", \"target\":\"" + schema.type(k).second + "\"}";  
-    			 es0.add(s);
-    		 }
-    		 for (C k : terms()) {
-    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
-    					 + type(k).first + "\", \"target\":\"" + type(k).second + "\"}";  
-    			 es0.add(s);
-    		 }
-    	 
-    	 return "{\"graph\": { \"directed\":true,\n\"nodes\":[\n" + Util.sep(ns0, ",\n") + "],\n\"edges\":[\n" + Util.sep(es0, ",\n") + "\n]}}";
-     }
+
+//     public String toJSONInstance() {
+//    	 String ns = "";
+//    	 String es = "";
+//    	 
+//    	 Set<String> ns0 = new HashSet<>();
+//    	 Set<String> es0 = new HashSet<>();
+//    		 for (C k : global.ids) {
+//    			 String s = "{\"id\": \"" + k + "\", \"type\":\"type\", \"label\":\"" + k + "\"}";  
+//        		 ns0.add(s);
+//    		 }
+//    		 for (C k : global.terms()) {
+//    			 if (global.ids.contains(k)) {
+//    				 continue;
+//    			 }
+//    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
+//    			 + global.type(k).first + "\", \"target\":\"" + global.type(k).second + "\"}";  
+//        		 es0.add(s);
+//    		 }
+//    		 for (C k : schema.ids) {
+//    			 String s = "{\"id\": \"" + k + "\", \"type\":\"entity\", \"label\":\"" + k + "\"}";  
+//        		 ns0.add(s);
+//    		 }
+//    		 for (C k : schema.terms()) {
+//    			 if (schema.ids.contains(k)) {
+//    				 continue;
+//    			 }
+//    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
+//    					 + schema.type(k).first + "\", \"target\":\"" + schema.type(k).second + "\"}";  
+//    			 es0.add(s);
+//    		 }
+//    		 for (C k : terms()) {
+//    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
+//    					 + type(k).first + "\", \"target\":\"" + type(k).second + "\"}";  
+//    			 es0.add(s);
+//    		 }
+//    	 
+//    	 return "{\"graph\": { \"directed\":true,\n\"nodes\":[\n" + Util.sep(ns0, ",\n") + "],\n\"edges\":[\n" + Util.sep(es0, ",\n") + "\n]}}";
+//     }
 	
 	
 	
