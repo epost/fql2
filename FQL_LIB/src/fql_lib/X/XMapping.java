@@ -312,6 +312,9 @@ public class XMapping<C, D> implements XObject {
 
 	}
 
+	/**
+	 * Sigma
+	 */
 	public XCtx<D> apply0(XCtx<C> I) {
 		// XCtx<D> ret = dst.copy();
 		// ret.local = new HashSet<>(); //(Set<D>) I.local;

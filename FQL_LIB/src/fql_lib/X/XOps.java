@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import fql_lib.Pair;
+import fql_lib.Triple;
 import fql_lib.Util;
 import fql_lib.X.XExp.Apply;
 import fql_lib.X.XExp.Compose;
@@ -38,6 +39,8 @@ import fql_lib.X.XExp.XPi;
 import fql_lib.X.XExp.XProj;
 import fql_lib.X.XExp.XPushout;
 import fql_lib.X.XExp.XRel;
+import fql_lib.X.XExp.XSOED;
+import fql_lib.X.XExp.XSOED.FOED;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
 import fql_lib.X.XExp.XTT;
@@ -634,6 +637,98 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 
 		return XProd.pushout((XMapping)a, (XMapping)b);
+	}
+
+	@Override
+	public XObject visit(XProgram env, XSOED e) {
+		XExp src0 = env.exps.get(e.src);
+		if (src0 == null) {
+			throw new RuntimeException("Missing: " + e.src);
+		}
+		if (!(src0 instanceof XSchema)) {
+			throw new RuntimeException("Not a schema: " + e.src);
+		}
+		XSchema src = (XSchema) src0; 
+		XCtx src1 = (XCtx) ENV.objs.get(e.src);
+		
+		XExp dst0 = env.exps.get(e.dst);
+		if (dst0 == null) {
+			throw new RuntimeException("Missing: " + e.dst);
+		}
+		if (!(dst0 instanceof XSchema)) {
+			throw new RuntimeException("Not a schema: " + e.dst);
+		}
+		XSchema dst = (XSchema) dst0; 
+		XCtx dst1 = (XCtx) ENV.objs.get(e.dst);
+		
+		XObject I0 = ENV.objs.get(e.I);
+		if (I0 == null) {
+			throw new RuntimeException("Missing: " + e.I);
+		}
+		if (!(I0 instanceof XCtx)) {
+			throw new RuntimeException("Not an instance: " + e.I);
+		}
+		XCtx I = (XCtx) I0; 
+		if (!src1.equals(I.schema)) {
+			throw new RuntimeException("Instance schema does not match source");
+		}
+		
+		List<String> nodes = new LinkedList<>();
+		List<Triple<String, String, String>> arrows = new LinkedList<>();
+		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
+		Map em_s = new HashMap();
+		Map em_t = new HashMap();
+	
+		nodes.addAll(src.nodes);
+		nodes.addAll(dst.nodes);
+		arrows.addAll(src.arrows);
+		arrows.addAll(dst.arrows);
+		arrows.addAll(e.es);
+		eqs.addAll(src.eqs);
+		eqs.addAll(dst.eqs);
+		
+		for (FOED k : e.as) {
+			for (Pair<List<String>, List<String>> v : k.eqs) {
+				List<String> l = new LinkedList<>(v.first);
+				List<String> r = new LinkedList<>(v.second);
+				l.removeAll(Util.singList(k.a));
+				r.removeAll(Util.singList(k.a));
+				eqs.add(new Pair<>(l, r));
+			}
+		}
+		
+		for (String n : src.nodes) {
+			em_s.put(n, Util.singList(n));
+		}
+		for (String n : dst.nodes) {
+			em_t.put(n, Util.singList(n));
+		}
+		for (Triple<String, String, String> n : src.arrows) {
+			em_s.put(n.first, Util.singList(n.first));
+		}
+		for (Triple<String, String, String> n : dst.arrows) {
+			em_t.put(n.first, Util.singList(n.first));
+		}
+		for (Object n : src1.allTerms()) {
+			if (em_s.containsKey(n)) {
+				continue;
+			}
+			em_s.put(n, Util.singList(n));
+		}
+		for (Object n : dst1.allTerms()) {
+			if (em_t.containsKey(n)) {
+				continue;
+			}
+			em_t.put(n, Util.singList(n));
+		}
+		
+		XSchema X = new XSchema(nodes, arrows, eqs);
+		XCtx Y = (XCtx) X.accept(env, this);
+		XMapping F = new XMapping(src1, Y, em_s, "mapping");
+		XMapping G = new XMapping(dst1, Y, em_t, "mapping");
+		
+		XCtx J = F.apply0(I);
+		return G.delta(J);
 	}
 	
 

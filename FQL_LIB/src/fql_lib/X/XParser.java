@@ -21,6 +21,8 @@ import fql_lib.Triple;
 import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.XInst;
+import fql_lib.X.XExp.XSOED;
+import fql_lib.X.XExp.XSOED.FOED;
 import fql_lib.X.XPoly.Block;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -36,7 +38,7 @@ public class XParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] { "pushout", "coapply", "grothlabels", "idpoly", "labels", "uberpi", "hom", "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "forall", "exists", "soed", "on", "pushout", "coapply", "grothlabels", "idpoly", "labels", "uberpi", "hom", "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -108,7 +110,9 @@ public class XParser {
 		Parser<?> coapply = Parsers.tuple(term("coapply"), ref.lazy(), ref.lazy());
 		Parser<?> pushout = Parsers.tuple(term("pushout"), ref.lazy(), ref.lazy());
 
-		Parser<?> a = Parsers.or(new Parser<?>[] { pushout, coapply, glabels, idpoly, labels, uberpi, hom, poly(ref), id1, id2, comp, apply, iter, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> soed = soed();
+		
+		Parser<?> a = Parsers.or(new Parser<?>[] { soed, pushout, coapply, glabels, idpoly, labels, uberpi, hom, poly(ref), id1, id2, comp, apply, iter, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 
@@ -129,6 +133,18 @@ public class XParser {
 	
 	public static final Parser<?> assume() {
 		return Parsers.tuple(term("assume"), path(), term("="), path());
+	}
+	
+	public static final Parser<?> soed() {
+		Parser<?> es = Parsers.tuple(ident(), term(":"), ident(), term("->"),
+				ident());
+		Parser<?> x = Parsers.tuple(path(), term("="), path());
+		Parser<?> a = Parsers.tuple(term("forall"), ident().followedBy(term(":")), ident().followedBy(term(",")), x.sepBy(term(",")));
+		Parser<?> foo = Parsers.tuple(term("exists"), es.sepBy(term(",")), term(";"), a.followedBy(term(";")).many());
+		
+		Parser<?> p = Parsers.between(term("soed").followedBy(term("{")), foo, term("}"));
+		Parser<?> q = Parsers.tuple(term(":"), ident().followedBy(term("->")), ident().followedBy(term("on")), ident());
+		return Parsers.tuple(p, q);
 	}
 	
 	public static final Parser<?> schema() {
@@ -452,6 +468,42 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 		return new XExp.XEq((List<String>) t.a, (List<String>) t.c);
 
 	}
+	/*
+J = soed {
+	exists f:A->B, g:C->D;
+	forall a:A, a.f = p.q, a.g = p.f;
+	forall b:B, p = q; 
+} : X -> Y on I
+	 */
+	private static XSOED fromSoed(Object ooo) {
+		org.codehaus.jparsec.functors.Pair ooo1 = (org.codehaus.jparsec.functors.Pair) ooo;
+		
+		Tuple4 a = (Tuple4) ooo1.a;
+		List<Triple<String, String, String>> es = new LinkedList<>();
+		List<FOED> as = new LinkedList<>();
+		
+		List<Tuple5> es0 = (List<Tuple5>) a.b;
+		for (Tuple5 t : es0) {
+			es.add(new Triple(t.a, t.c, t.e));
+		}
+		
+		List<Tuple4> as0 = (List<Tuple4>) a.d;
+		for (Tuple4 t : as0) {
+			List<Tuple3> eqs = (List<Tuple3>) t.d;
+			List<Pair<List<String>, List<String>>> eqs0 = new LinkedList<>();
+			for (Tuple3 x : eqs) {
+				eqs0.add(new Pair(x.a, x.c));
+			}
+			as.add(new FOED((String)t.b, (String)t.c, eqs0));
+		}
+				
+		Tuple4 b = (Tuple4) ooo1.b;
+		String src = (String) b.b;
+		String dst = (String) b.c;
+		String i = (String) b.d;		
+		XSOED ret = new XSOED(es, as, src, dst, i);
+		return ret;
+	}
 
 	private static XExp toExp(Object c) {
 		if (c instanceof String) {
@@ -462,6 +514,11 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 			return fromPoly((Tuple4)c);
 		} catch (Exception e) { }
 		
+		
+		try {
+			return fromSoed(c);
+		} catch (Exception e) {
+		}
 		
 		try {
 			return toCatConst(c);

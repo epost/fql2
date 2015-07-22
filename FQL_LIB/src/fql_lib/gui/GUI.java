@@ -49,6 +49,7 @@ import fql_lib.examples.Examples;
 import fql_lib.nested.EnrichViewer;
 import fql_lib.nested.KBViewer;
 import fql_lib.nested.NraViewer;
+import fql_lib.opl.CfgToOpl;
 import fql_lib.opl.OplCodeEditor;
 
 
@@ -233,6 +234,11 @@ public class GUI extends JPanel {
 		MenuItem jsonItem = new MenuItem("JSON to FPQL");
 		transMenu.add(jsonItem);
 		jsonItem.addActionListener(x -> { new XJsonToFQL(); });
+		
+		MenuItem cfgItem = new MenuItem("CFG to OPL");
+		transMenu.add(cfgItem);
+		cfgItem.addActionListener(x -> { new CfgToOpl(); });
+		
 
 		Menu helpMenu = new Menu("About");
 		/*		MenuItem helpItem = new MenuItem("Help");

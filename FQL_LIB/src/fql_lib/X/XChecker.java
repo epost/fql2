@@ -32,6 +32,7 @@ import fql_lib.X.XExp.XPi;
 import fql_lib.X.XExp.XProj;
 import fql_lib.X.XExp.XPushout;
 import fql_lib.X.XExp.XRel;
+import fql_lib.X.XExp.XSOED;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
 import fql_lib.X.XExp.XTT;
@@ -315,6 +316,11 @@ public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>
 			throw new RuntimeException();
 		}
 	}
+	
+	@Override
+	public Pair<XExp, XExp> visit(Map<String, XExp> env, XSOED e) {
+		return null; //TODO return new Pair<>(new Var(e.src), new Var(e.dst));
+	}
 
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, Flower e) {
@@ -377,5 +383,7 @@ public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, Iter e) {
 		throw null;
 	}
+
+	
 	
 }

@@ -31,6 +31,7 @@ import fql_lib.X.XExp.XPi;
 import fql_lib.X.XExp.XProj;
 import fql_lib.X.XExp.XPushout;
 import fql_lib.X.XExp.XRel;
+import fql_lib.X.XExp.XSOED;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
 import fql_lib.X.XExp.XTT;
@@ -212,6 +213,12 @@ public class XKind implements XExpVisitor<String, 	Map<String, XExp>> {
 	public String visit(Map<String, XExp> env, XIdPoly e) {
 		return "query";
 	}
+	
+	@Override
+	public String visit(Map<String, XExp> env, XSOED e) {
+		return "query";
+	}
+	
 
 	/////////////////////////////////////////////////////////
 	
@@ -265,6 +272,7 @@ public class XKind implements XExpVisitor<String, 	Map<String, XExp>> {
 	public String visit(Map<String, XExp> env, XEq e) {
 		return null;
 	}
+
 	
 	
 }

@@ -24,6 +24,141 @@ public abstract class XExp {
 		return accept(env, new XChecker());
 	}
 	
+	public static class XSOED extends XExp {
+				
+		List<Triple<String, String, String>> es;
+		List<FOED> as;
+		
+		String src, dst, I;
+		
+		public XSOED(List<Triple<String, String, String>> es, List<FOED> as, String src,
+				String dst, String i) {
+			this.es = es;
+			this.as = as;
+			this.src = src;
+			this.dst = dst;
+			this.I = i;
+		}
+
+		static class FOED {
+			String a;
+			String t;
+			List<Pair<List<String>, List<String>>> eqs;
+			
+			public FOED(String a, String t, List<Pair<List<String>, List<String>>> eqs) {
+				super();
+				this.a = a;
+				this.t = t;
+				this.eqs = eqs;
+			}
+
+			@Override
+			public String toString() {
+				return "FOED [a=" + a + ", t=" + t + ", eqs=" + eqs + "]";
+			}
+
+			@Override
+			public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ((a == null) ? 0 : a.hashCode());
+				result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
+				result = prime * result + ((t == null) ? 0 : t.hashCode());
+				return result;
+			}
+
+			@Override
+			public boolean equals(Object obj) {
+				if (this == obj)
+					return true;
+				if (obj == null)
+					return false;
+				if (getClass() != obj.getClass())
+					return false;
+				FOED other = (FOED) obj;
+				if (a == null) {
+					if (other.a != null)
+						return false;
+				} else if (!a.equals(other.a))
+					return false;
+				if (eqs == null) {
+					if (other.eqs != null)
+						return false;
+				} else if (!eqs.equals(other.eqs))
+					return false;
+				if (t == null) {
+					if (other.t != null)
+						return false;
+				} else if (!t.equals(other.t))
+					return false;
+				return true;
+			}
+			
+		}
+		
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((as == null) ? 0 : as.hashCode());
+			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+			result = prime * result + ((es == null) ? 0 : es.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XSOED other = (XSOED) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (as == null) {
+				if (other.as != null)
+					return false;
+			} else if (!as.equals(other.as))
+				return false;
+			if (dst == null) {
+				if (other.dst != null)
+					return false;
+			} else if (!dst.equals(other.dst))
+				return false;
+			if (es == null) {
+				if (other.es != null)
+					return false;
+			} else if (!es.equals(other.es))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "XSOED [es=" + es + ", as=" + as + ", src=" + src + ", dst=" + dst + ", I=" + I
+					+ "]";
+		}
+		
+		
+	}
+	
 	public static class XPushout extends XExp {
 		XExp f,g;
 
@@ -2460,6 +2595,7 @@ public abstract class XExp {
 		public R visit (E env, XGrothLabels e);
 		public R visit (E env, XCoApply e);
 		public R visit (E env, XPushout e);
+		public R visit (E env, XSOED e);
 	}
 
 }
