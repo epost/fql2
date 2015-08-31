@@ -35,6 +35,7 @@ import fql_lib.X.XExp.XRel;
 import fql_lib.X.XExp.XSOED;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
+import fql_lib.X.XExp.XSuperED;
 import fql_lib.X.XExp.XTT;
 import fql_lib.X.XExp.XTimes;
 import fql_lib.X.XExp.XToQuery;
@@ -319,6 +320,11 @@ public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>
 	
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, XSOED e) {
+		return null; //TODO return new Pair<>(new Var(e.src), new Var(e.dst));
+	}
+	
+	@Override
+	public Pair<XExp, XExp> visit(Map<String, XExp> env, XSuperED e) {
 		return null; //TODO return new Pair<>(new Var(e.src), new Var(e.dst));
 	}
 

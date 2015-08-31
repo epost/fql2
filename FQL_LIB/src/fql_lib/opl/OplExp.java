@@ -1,6 +1,5 @@
 package fql_lib.opl;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -22,8 +21,18 @@ import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Util;
 import fql_lib.gui.FQLTextPanel;
+import fql_lib.kb.KB;
+import fql_lib.kb.OplToKB;
 
 public abstract class OplExp implements OplObject {
+	
+	@Override
+	public JComponent display() {
+		FQLTextPanel p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
+		JTabbedPane ret = new JTabbedPane();
+		ret.add(p, "Text");
+		return ret;
+	}
 	
 	public static class OplString extends OplExp {
 		String str;
@@ -40,21 +49,14 @@ public abstract class OplExp implements OplObject {
 		}
 	}
 	
-	@Override
-	public JComponent display() {
-		FQLTextPanel p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
-		JTabbedPane ret = new JTabbedPane();
-		ret.add(p, "Text");
-		return ret;
-	}
-	
+		
 	public abstract <R, E> R accept(E env, OplExpVisitor<R, E> v);
 
 	public static class OplTerm {
-		String var;
+		public String var;
 		
-		String head;
-		List<OplTerm> args;
+		public String head;
+		public List<OplTerm> args;
 		
 		public OplTerm(String a) {
 			if (a == null) {
@@ -294,9 +296,44 @@ public abstract class OplExp implements OplObject {
 	}
 	
 	public static class OplSig extends OplExp {
-		Set<String> sorts;
-		Map<String, Pair<List<String>, String>> symbols;
-		List<Triple<OplCtx<String>, OplTerm, OplTerm>> equations;
+		
+		@Override
+		public JComponent display() {
+			JTabbedPane ret = new JTabbedPane();
+
+			FQLTextPanel p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
+			ret.add(p, "Text");
+			
+			KB<String, String> kb0 = OplToKB.convert(this, "lpo");
+			String s1 = ""; // kb0.printEqs() + "\n\n--------\n\n";
+			try {
+				kb0.complete(16);
+				s1 += kb0.toString();
+			} catch (RuntimeException ex) {
+				ex.printStackTrace();
+				s1 += ex.getMessage();
+			}
+			p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", s1);
+			ret.add(p, "KB (LPO)");
+/*
+			kb0 = OplToKB.convert(this, "rpo");
+			s1 = kb0.printEqs() + "\n\n--------\n\n";
+			try {
+				kb0.complete(8);
+				s1 += kb0.printReds();
+			} catch (RuntimeException ex) {
+				ex.printStackTrace();
+				s1 += ex.getMessage();
+			}
+			p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", s1);
+			ret.add(p, "KB (LPO)"); */
+
+			return ret;
+		}
+		
+		public Set<String> sorts;
+		public Map<String, Pair<List<String>, String>> symbols;
+		public List<Triple<OplCtx<String>, OplTerm, OplTerm>> equations;
 		
 		@Override
 		public String toString() {

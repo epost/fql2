@@ -24,6 +24,163 @@ public abstract class XExp {
 		return accept(env, new XChecker());
 	}
 	
+	
+	public static class XSuperED extends XExp {
+
+		Map<String, List<String>> dom;
+		Map<String, String> cod;
+		List<SuperFOED> as;
+		String S;
+		String T;
+		String I;
+		
+		
+
+
+
+		@Override
+		public String toString() {
+			return "XSuperED [dom=" + dom + ", cod=" + cod + ", as=" + as + ", S=" + S + ", T=" + T
+					+ ", I=" + I + "]";
+		}
+
+
+
+		public XSuperED(Map<String, List<String>> dom, Map<String, String> cod, List<SuperFOED> as,
+				String s, String t, String i) {
+			super();
+			this.dom = dom;
+			this.cod = cod;
+			this.as = as;
+			S = s;
+			T = t;
+			I = i;
+		}
+
+
+
+		//f(x.p.q,y,z).a.b = 
+		static class SuperFOED {
+			Map<String, String> a;
+			List<Pair< Triple<String,List<List<String>>,List<String>>  , 
+				       Triple<String,List<List<String>>,List<String>>  >> lhs, rhs;
+			public SuperFOED(
+					Map<String, String> a,
+					List<Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>> lhs,
+					List<Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>> rhs) {
+				super();
+				this.a = a;
+				this.lhs = lhs;
+				this.rhs = rhs;
+			}
+			@Override
+			public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + ((a == null) ? 0 : a.hashCode());
+				result = prime * result + ((lhs == null) ? 0 : lhs.hashCode());
+				result = prime * result + ((rhs == null) ? 0 : rhs.hashCode());
+				return result;
+			}
+			@Override
+			public boolean equals(Object obj) {
+				if (this == obj)
+					return true;
+				if (obj == null)
+					return false;
+				if (getClass() != obj.getClass())
+					return false;
+				SuperFOED other = (SuperFOED) obj;
+				if (a == null) {
+					if (other.a != null)
+						return false;
+				} else if (!a.equals(other.a))
+					return false;
+				if (lhs == null) {
+					if (other.lhs != null)
+						return false;
+				} else if (!lhs.equals(other.lhs))
+					return false;
+				if (rhs == null) {
+					if (other.rhs != null)
+						return false;
+				} else if (!rhs.equals(other.rhs))
+					return false;
+				return true;
+			}
+			
+			
+			
+		}
+
+		
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((S == null) ? 0 : S.hashCode());
+			result = prime * result + ((T == null) ? 0 : T.hashCode());
+			result = prime * result + ((as == null) ? 0 : as.hashCode());
+			result = prime * result + ((cod == null) ? 0 : cod.hashCode());
+			result = prime * result + ((dom == null) ? 0 : dom.hashCode());
+			return result;
+		}
+
+
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			XSuperED other = (XSuperED) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (S == null) {
+				if (other.S != null)
+					return false;
+			} else if (!S.equals(other.S))
+				return false;
+			if (T == null) {
+				if (other.T != null)
+					return false;
+			} else if (!T.equals(other.T))
+				return false;
+			if (as == null) {
+				if (other.as != null)
+					return false;
+			} else if (!as.equals(other.as))
+				return false;
+			if (cod == null) {
+				if (other.cod != null)
+					return false;
+			} else if (!cod.equals(other.cod))
+				return false;
+			if (dom == null) {
+				if (other.dom != null)
+					return false;
+			} else if (!dom.equals(other.dom))
+				return false;
+			return true;
+		}
+
+
+
+		@Override
+		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+	}
+	
 	public static class XSOED extends XExp {
 				
 		List<Triple<String, String, String>> es;
@@ -46,7 +203,6 @@ public abstract class XExp {
 			List<Pair<List<String>, List<String>>> eqs;
 			
 			public FOED(String a, String t, List<Pair<List<String>, List<String>>> eqs) {
-				super();
 				this.a = a;
 				this.t = t;
 				this.eqs = eqs;
@@ -2596,6 +2752,7 @@ public abstract class XExp {
 		public R visit (E env, XCoApply e);
 		public R visit (E env, XPushout e);
 		public R visit (E env, XSOED e);
+		public R visit (E env, XSuperED e);
 	}
 
 }

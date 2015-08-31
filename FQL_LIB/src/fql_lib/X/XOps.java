@@ -43,6 +43,7 @@ import fql_lib.X.XExp.XSOED;
 import fql_lib.X.XExp.XSOED.FOED;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
+import fql_lib.X.XExp.XSuperED;
 import fql_lib.X.XExp.XTT;
 import fql_lib.X.XExp.XTimes;
 import fql_lib.X.XExp.XToQuery;
@@ -729,6 +730,45 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		
 		XCtx J = F.apply0(I);
 		return G.delta(J);
+	}
+
+	@Override
+	public XObject visit(XProgram env, XSuperED e) {
+		XExp src0 = env.exps.get(e.S);
+		if (src0 == null) {
+			throw new RuntimeException("Missing: " + e.S);
+		}
+		if (!(src0 instanceof XSchema)) {
+			throw new RuntimeException("Not a schema: " + e.S);
+		}
+		XSchema src = (XSchema) src0; 
+		XCtx src1 = (XCtx) ENV.objs.get(e.S);
+		
+		XExp dst0 = env.exps.get(e.T);
+		if (dst0 == null) {
+			throw new RuntimeException("Missing: " + e.T);
+		}
+		if (!(dst0 instanceof XSchema)) {
+			throw new RuntimeException("Not a schema: " + e.T);
+		}
+		XSchema dst = (XSchema) dst0; 
+		XCtx dst1 = (XCtx) ENV.objs.get(e.T);
+		
+		XObject I0 = ENV.objs.get(e.I);
+		if (I0 == null) {
+			throw new RuntimeException("Missing: " + e.I);
+		}
+		if (!(I0 instanceof XCtx)) {
+			throw new RuntimeException("Not an instance: " + e.I);
+		}
+		XCtx I = (XCtx) I0; 
+		if (!src1.equals(I.schema)) {
+			throw new RuntimeException("Instance schema does not match source");
+		}
+
+		XChaser.validate(e, src1, dst1);
+		
+		return XChaser.chase(e, src1, dst1, I);
 	}
 	
 

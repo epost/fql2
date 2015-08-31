@@ -189,6 +189,30 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 
+	public Pair<C, C> typeWith0(C c, Map<C, C> m) {
+		C x = m.get(c);
+		if (x != null) {
+			if (!ids.contains(x) && !x.equals("DOM")) {
+				throw new RuntimeException("Bad entity: " + x);
+			}
+			return new Pair<>((C)"_1", x);
+		}		
+		Pair<C, C> ret = types.get(c);
+		if (ret != null) {
+			return ret;
+		}
+		if (schema != null) {
+			return schema.type(c);
+		}
+		if (global != null) {
+			return global.type(c);
+		}
+
+		throw new RuntimeException("Cannot type " + c); // don't toString here,
+		// since used by
+		// expand()
+	}
+	
 	public Pair<C, C> type(C c) {
 		Pair<C, C> ret = types.get(c);
 		if (ret != null) {
@@ -386,6 +410,24 @@ public class XCtx<C> implements XObject {
 		}
 		return ret;
 	}
+	
+	public Pair<C,C> typeWith(List<C> first, Map<C, C> ctx) {
+		if (first.size() == 0) {
+			throw new RuntimeException("Empty");
+		}
+		Iterator<C> it = first.iterator();
+		Pair<C, C> ret = typeWith0(it.next(), ctx);
+		while (it.hasNext()) {
+			Pair<C, C> next = typeWith0(it.next(), ctx);
+			if (!ret.second.equals(next.first)) {
+				throw new RuntimeException("Ill-typed: " + Util.sep(first, ".") + " in " + this);
+			}
+			ret = new Pair<>(ret.first, next.second);
+		}
+		return ret;
+	}
+	
+	
 
 	String toString = null;
 

@@ -23,6 +23,8 @@ import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.XInst;
 import fql_lib.X.XExp.XSOED;
 import fql_lib.X.XExp.XSOED.FOED;
+import fql_lib.X.XExp.XSuperED;
+import fql_lib.X.XExp.XSuperED.SuperFOED;
 import fql_lib.X.XPoly.Block;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -36,9 +38,10 @@ public class XParser {
 			});
 
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
-			")", "=", "->", "+", "*", "^", "|", "?" };
+			")", "=", "->", "+", "*", "^", "|", "?", "@", };
+	
 
-	static String[] res = new String[] { "forall", "exists", "soed", "on", "pushout", "coapply", "grothlabels", "idpoly", "labels", "uberpi", "hom", "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	static String[] res = new String[] { "forall", "exists", "supersoed", "soed", "on", "pushout", "coapply", "grothlabels", "idpoly", "labels", "uberpi", "hom", "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -111,8 +114,9 @@ public class XParser {
 		Parser<?> pushout = Parsers.tuple(term("pushout"), ref.lazy(), ref.lazy());
 
 		Parser<?> soed = soed();
+		Parser<?> supersoed = superSoed();
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { soed, pushout, coapply, glabels, idpoly, labels, uberpi, hom, poly(ref), id1, id2, comp, apply, iter, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> a = Parsers.or(new Parser<?>[] { supersoed, soed, pushout, coapply, glabels, idpoly, labels, uberpi, hom, poly(ref), id1, id2, comp, apply, iter, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 
@@ -133,6 +137,28 @@ public class XParser {
 	
 	public static final Parser<?> assume() {
 		return Parsers.tuple(term("assume"), path(), term("="), path());
+	}
+	
+	public static final Parser<?> superSoed() {
+		Parser<?> es = Parsers.tuple(ident(), term(":"), ident().sepBy(term(",")), term("->"),
+				ident());
+		
+		//bulb
+		//bulb . path
+		//path
+		Parser bulb = Parsers.tuple(term("@"), ident(), Parsers.tuple(term("("), path().sepBy(term(",")), term(")")));
+		Parser bulbpath = Parsers.tuple(bulb, term("."), path());
+		
+		Parser superPath = Parsers.or(new Parser[] { bulbpath, bulb, path()});
+		
+		Parser<?> x = Parsers.tuple(superPath, term("="), superPath);
+		Parser<?> y = Parsers.tuple(x.sepBy(term(",")), term("->"), x.sepBy(term(",")));
+		Parser<?> a = Parsers.tuple(term("forall"), Parsers.tuple(ident(),term(":"), ident()).sepBy(term(",")), term(","), y);
+		Parser<?> foo = Parsers.tuple(term("exists"), es.sepBy(term(",")), term(";"), a.followedBy(term(";")).many());
+		
+		Parser<?> p = Parsers.between(term("supersoed").followedBy(term("{")), foo, term("}"));
+		Parser<?> q = Parsers.tuple(term(":"), ident().followedBy(term("->")), ident().followedBy(term("on")), ident());
+		return Parsers.tuple(p, q);
 	}
 	
 	public static final Parser<?> soed() {
@@ -504,6 +530,84 @@ J = soed {
 		XSOED ret = new XSOED(es, as, src, dst, i);
 		return ret;
 	}
+/*
+	J = soed {
+		exists f:A->B, g:C->D;
+		forall a:A, a.f = p.q, a.g = p.f;
+		forall b:B, p = q; 
+	} : X -> Y on I
+		 */
+		private static XSuperED fromSuperSoed(Object ooo) {
+			org.codehaus.jparsec.functors.Pair ooo1 = (org.codehaus.jparsec.functors.Pair) ooo;
+			
+			Tuple4 a = (Tuple4) ooo1.a;
+		//	List<Triple<String, List<String>, String>> es = new LinkedList<>();
+			List<SuperFOED> as = new LinkedList<>();
+			Map<String, List<String>> dom = new HashMap<>();
+			Map<String, String> cod = new HashMap<>();
+			
+			List<Tuple5> es0 = (List<Tuple5>) a.b;
+			for (Tuple5 t : es0) {
+				if (dom.keySet().contains(t.a)) {
+					throw new RuntimeException("Duplicate function name " + t.a);
+				}
+				dom.put((String) t.a, (List<String>) t.c);
+				cod.put((String) t.a, (String) t.e);
+			}
+			
+			List<Tuple4> as0 = (List<Tuple4>) a.d;
+			for (Tuple4 t : as0) {
+				List<Tuple3> aas = (List<Tuple3>) t.b;
+				Map<String, String> aa = new HashMap<>();
+				for (Tuple3 xxx : aas) {
+					if (aa.containsKey(xxx.a)) {
+						throw new RuntimeException("Duplicate var " + xxx.a);
+					}
+					aa.put((String) xxx.a, (String) xxx.c);
+				}
+				
+				Tuple3 td = (Tuple3) t.d;
+				List<Tuple3> lhss = (List<Tuple3>) td.a;
+				List<Tuple3> rhss = (List<Tuple3>) td.c;
+				
+				List<Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>> cc = new LinkedList<>();
+				List<Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>> bb = new LinkedList<>();
+
+				for (Tuple3 o : lhss) {
+					bb.add(new Pair<>(fromBulb(o.a), fromBulb(o.c)));
+				}
+				for (Tuple3 o : rhss) {
+					cc.add(new Pair<>(fromBulb(o.a), fromBulb(o.c)));
+				}
+				
+				as.add(new SuperFOED(aa , bb, cc));
+			}
+					
+			Tuple4 b = (Tuple4) ooo1.b;
+			String src = (String) b.b;
+			String dst = (String) b.c;
+			String i = (String) b.d;		
+			XSuperED ret = new XSuperED(dom, cod, as, src, dst, i); //es, as, src, dst, i);
+			return ret;
+		}
+	
+
+		private static Triple<String, List<List<String>>, List<String>> fromBulb(Object o) {
+			try {
+				Tuple3 t = (Tuple3) o;
+				Tuple3 a = (Tuple3) t.a;
+				Tuple3 b = (Tuple3) a.c;
+				return new Triple<>((String)a.b, (List<List<String>>) b.b, (List<String>)t.c);
+			} catch (Exception ee) { 
+			}
+			try {
+				Tuple3 a = (Tuple3) o;
+				Tuple3 b = (Tuple3) a.c;
+				return new Triple<>((String)a.b, (List<List<String>>) b.b, null);
+			} catch (Exception ee) { 
+			}
+			return new Triple<>(null, null, (List<String>) o);
+		}
 
 	private static XExp toExp(Object c) {
 		if (c instanceof String) {
@@ -519,6 +623,8 @@ J = soed {
 			return fromSoed(c);
 		} catch (Exception e) {
 		}
+		
+		
 		
 		try {
 			return toCatConst(c);
@@ -731,9 +837,18 @@ J = soed {
 			//}
 			
 			else {
+				
+				try {
+					return fromSuperSoed(c);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
 				return new XExp.XTy((String)p.b);
 			}
 		}
+		
+	
 		
 		throw new RuntimeException("x: " + c.getClass() + " " + c);
 	}

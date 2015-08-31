@@ -34,6 +34,7 @@ import fql_lib.X.XExp.XRel;
 import fql_lib.X.XExp.XSOED;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XSigma;
+import fql_lib.X.XExp.XSuperED;
 import fql_lib.X.XExp.XTT;
 import fql_lib.X.XExp.XTimes;
 import fql_lib.X.XExp.XToQuery;
@@ -219,7 +220,10 @@ public class XKind implements XExpVisitor<String, 	Map<String, XExp>> {
 		return "query";
 	}
 	
-
+	@Override
+	public String visit(Map<String, XExp> env, XSuperED e) {
+		return "functor";
+	}
 	/////////////////////////////////////////////////////////
 	
 
