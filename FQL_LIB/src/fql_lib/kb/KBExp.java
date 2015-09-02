@@ -16,7 +16,6 @@ import fql_lib.Util;
 public abstract class KBExp<C,V> {
 	
 	
-
 	static class KBVar<C,V> extends KBExp<C,V> {
 		public V var;
 		
@@ -73,9 +72,13 @@ public abstract class KBExp<C,V> {
 			return ret;
 		}
 
+		Set<V> vars_cache = null;
 		@Override
 		public Set<V> vars() {
-			return Collections.singleton(var);
+			if (vars_cache == null) {
+				vars_cache = Collections.singleton(var);
+			}
+			return vars_cache;
 		}
 
 		@Override
@@ -91,14 +94,14 @@ public abstract class KBExp<C,V> {
 			throw new RuntimeException("Cannot replace");
 		}
 
-		@Override
-		public KBExp<C, V> clone() {
-			return new KBVar<>(var);
-		}
-
+		
+		KBExp<C, V> frozen = null;
 		@Override
 		public KBExp<C, V> freeze() {
-			return new KBApp(this, new LinkedList<>());
+			if (frozen == null) {
+				frozen = new KBApp(this, new LinkedList<>());
+			}
+			return frozen;
 		}
 
 		@Override
@@ -116,7 +119,7 @@ public abstract class KBExp<C,V> {
 		public KBApp(C f, List<KBExp<C, V>> args) {
 			super();
 			this.f = f;
-			this.args = args.stream().map(x -> { return x.clone(); }).collect(Collectors.toList());
+			this.args = args; 
 		}
 
 		@Override
@@ -188,13 +191,17 @@ public abstract class KBExp<C,V> {
 			return new KBApp<>(f, n);
 		}
 
+		Set<V> vars = null;
+		
 		@Override
 		public Set<V> vars() {
-			Set<V> ret = new HashSet<>();
-			for (KBExp<C,V> e : args) {
-				ret.addAll(e.vars());
+			if (vars == null) {
+				vars = new HashSet<>();
+				for (KBExp<C,V> e : args) {
+					vars.addAll(e.vars());
+				}
 			}
-			return ret;
+			return vars;
 		}
 
 		@Override
@@ -207,39 +214,31 @@ public abstract class KBExp<C,V> {
 				p0.add(q++); //TODO
 				ret.addAll(arg.cp(inv, p0, a, b, g, d, false));
 			}
-			if (first) {
-				return ret;
-			}
+			//if (first) {
+			//	return ret;
+			//}
 		//	if (a == g && p.isEmpty()) {
 				//System.out.println("!!!!!!!!"); //TODO
 			//	return ret;
 			//}
-			try {
-				
-				Map<V, KBExp<C,V>> s = KBUnifier.unify0(this, a);
-	//System.out.println("this is " + this);
-	//System.out.println("a is " + a);
-	//System.out.println("b is " + b);
-	//System.out.println("g is " + g);
-	//System.out.println("d is " + d);
-	
-		//		System.out.println("pos is " + p);
-			//	System.out.println("trying to unify " + this + " and " + a);
+			/*System.out.println("this is " + this);
+			System.out.println("a is " + a);
+			System.out.println("b is " + b);
+			System.out.println("g is " + g);
+			System.out.println("d is " + d);
+			System.out.println("pos is " + p);
+			System.out.println("trying to unify " + this + " and " + a); */
 			
+			Map<V, KBExp<C,V>> s = KBUnifier.unify0(this, a);
+			if (s != null) {
 				//System.out.println("result " + s);
 				//System.out.println(g + " after replacement is " + g.replace(p, b));
 				Pair<KBExp<C,V>, KBExp<C,V>> toadd = new Pair<>(d.subst(s), g.replace(p, b).subst(s));
-				////z = (I(ee) o (z o z))
-				//if (toadd.first.subst(inv).toString().equals("z") && toadd.second.subst(inv).toString().equals("(I(ee) o (z o z))")) {
-					//throw new RuntimeException("$$!! this " + this + " a= " + a + " b= " + b + " g= " + g + " d= " + d + " p=" + p);
-				//}
-			//	System.out.println("adding " + toadd);
-			//	System.out.println();
+				//System.out.println("adding " + toadd);
 				ret.add(toadd);
-
-			//	System.out.println("after subst " + g.replace(p, b).subst(s));
-				//System.out.println("added");
-			} catch (RuntimeException ex) { }
+			} else {
+				//System.out.println("failure");
+			}
 			return ret;
 		}
 
@@ -260,22 +259,27 @@ public abstract class KBExp<C,V> {
 			return new KBApp<>(f, new_args);
 		}
 
-		@Override
-		public KBExp<C, V> clone() {
-			return new KBApp<C, V>(f, args.stream().map(x -> { return x.clone(); }).collect(Collectors.toList()));
-		}
-
+		
+		KBExp<C, V> freeze = null;
 		@Override
 		public KBExp<C, V> freeze() {
-			return new KBApp<>(f, args.stream().map(x -> { return x.freeze(); }).collect(Collectors.toList()));
+			if (freeze == null) {
+				freeze = new KBApp<>(f, args.stream().map(x -> { return x.freeze(); }).collect(Collectors.toList()));
+			}
+			return freeze;
 		}
 
+		KBExp<C, V> unfreeze = null;
 		@Override
 		public KBExp<C, V> unfreeze() {
-			if (f instanceof KBVar) {
-				return (KBVar) f;
+			if (unfreeze == null) {
+				if (f instanceof KBVar) {
+					unfreeze = (KBVar<C,V>) f;
+				} else {
+					unfreeze = new KBApp<C, V>(f, args.stream().map(x -> { return x.unfreeze(); }).collect(Collectors.toList()));
+				}
 			}
-			return new KBApp<C, V>(f, args.stream().map(x -> { return x.unfreeze(); }).collect(Collectors.toList()));
+			return unfreeze;
 		}
 
 	}
@@ -301,11 +305,9 @@ public abstract class KBExp<C,V> {
 	public abstract KBExp<C, V> freeze();
 	public abstract KBExp<C, V> unfreeze();
 	
-	@Override
-	public abstract KBExp<C, V> clone();
-	//TODO: be sure to consider critical pairs against itself, but renamed
+		//TODO: be sure to consider critical pairs against itself, but renamed
 	
-/*	public static void main(String[] args) {
+	/* public static void main(String[] args) {
 		KBExp<String, String> u = new KBVar<>("u");
 		KBExp<String, String> e = new KBApp<>("e", new LinkedList<>());
 		KBExp<String, String> Iu = new KBApp<>("I", Collections.singletonList(u));
@@ -326,7 +328,7 @@ public abstract class KBExp<C,V> {
 		KBExp<String, String> g = xyQz;
 		KBExp<String, String> d = xQyz;
 		
-		Set<Pair<KBExp<String, String>, KBExp<String, String>>> res = g.cp(new LinkedList<>(), a, b, g, d, true);
+		Set<Pair<KBExp<String, String>, KBExp<String, String>>> res = g.cp(new HashMap<>(), new LinkedList<>(), a, b, g, d, true);
 		System.out.println("critical pairs for " + a + " -> " + b + " and " + g + " -> " + d + " are " + Util.sep(res, "\n"));
 	} */
 	
@@ -371,7 +373,7 @@ public abstract class KBExp<C,V> {
 
 	} */
 	//a critical pair of (I((I(x) o (x o z))) o (z o z)) -> z and (I(x2) o x2) -> ee is z = (I(ee) o (z o z))
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		KBExp<String, String> x = new KBVar<>("x");
 		KBExp<String, String> y = new KBVar<>("y");
 		KBExp<String, String> z = new KBVar<>("z");
@@ -406,7 +408,7 @@ public abstract class KBExp<C,V> {
 		List<Pair<KBExp<String, String>, KBExp<String, String>>> res2 = new LinkedList<>(a.cp(new HashMap<>(), new LinkedList<>(), g, d, a, b, true));
 		System.out.println("critical pairs for " + g + " -> " + d + " and " + a + " -> " + b + " are " + Util.sep(res2, "\n"));
 
-	}
+	} */
 	/*
 	public static void main(String[] args) {
 		KBExp<String, String> x = new KBVar<>("x");
@@ -447,4 +449,161 @@ public abstract class KBExp<C,V> {
 		System.out.println("subsumed: " + KB.subsumes(res0.get(0), res2.get(0)));
 	}
 	*/
+	
+	//5 (I(I(x)) o ee) -> x
+	//7 (I(I(x)) o z) -> (x o z)
+	
+	/*public static void main(String[] args) {
+		KBExp<String, String> x = new KBVar<>("x");
+		KBExp<String, String> z = new KBVar<>("z");
+		
+
+		KBExp<String, String> ee = new KBApp<String,String>("ee", Arrays.asList(new KBExp[] { }) );
+		KBExp<String, String> ix = new KBApp<String,String>("I", Arrays.asList(new KBExp[] { x }) );
+		KBExp<String, String> iix = new KBApp<String,String>("I", Arrays.asList(new KBExp[] { ix }) );
+		KBExp<String, String> xz = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { x, z }) );
+		KBExp<String, String> iixee = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { iix, ee }) );
+		KBExp<String, String> iixz = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { iix, z }) );
+		
+		KBExp<String, String> a = iixee;
+		KBExp<String, String> b = x;
+		KBExp<String, String> g =iixz;
+		KBExp<String, String> d = xz;
+		
+		Set<Pair<KBExp<String, String>, KBExp<String, String>>> res0 = g.cp(new HashMap<>(), new LinkedList<>(), a, b, g, d, true);
+		System.out.println("critical pairs for " + a + " -> " + b + " and " + g + " -> " + d + " are " + Util.sep(res0, "\n"));
+
+		System.out.println();
+		res0 = g.cp(new HashMap<>(), new LinkedList<>(), g, b, g, b, true);
+		System.out.println("critical pairs for " + g + " -> " + d + " and " + a + " -> " + b + " are " + Util.sep(res0, "\n"));
+
+	}*/
+	
+	/*public static void main(String[] args) {
+		KBExp<String, String> x = new KBVar<>("x");
+		KBExp<String, String> y = new KBVar<>("y");
+		
+		KBExp<String, String> e = new KBApp<String,String>("ee", Arrays.asList(new KBExp[] { }) );
+		KBExp<String, String> ie = new KBApp<String,String>("I", Arrays.asList(new KBExp[] { e }) );
+		
+		KBExp<String, String> ye = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { y, e }) );
+		KBExp<String, String> iex = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { ie, x }) );
+		
+		KBExp<String, String> a = iex;
+		KBExp<String, String> b = x;
+		KBExp<String, String> g = ye;
+		KBExp<String, String> d = y;
+		
+		Set<Pair<KBExp<String, String>, KBExp<String, String>>> res0 = g.cp(new HashMap<>(), new LinkedList<>(), a, b, g, d, true);
+		System.out.println("critical pairs for " + a + " -> " + b + " and " + g + " -> " + d + " are " + Util.sep(res0, "\n"));
+
+		System.out.println();
+		res0 = a.cp(new HashMap<>(), new LinkedList<>(), g, d, a, b, true);
+		System.out.println("critical pairs for " + g + " -> " + d + " and " + a + " -> " + b + " are " + Util.sep(res0, "\n"));
+
+	} */
+	
+	//6 (I(ee) o x) -> x
+	//8 (y o ee) -> y
+	// send y to I(ee) and x to ee gives
+	//
+	
+	//3 ((x o y) o z) -> (x o (y o z))
+	//11 (u o I(u)) -> ee
+	
+	/*public static void main(String[] args) {
+		KBExp<String, String> x = new KBVar<>("x");
+		KBExp<String, String> y = new KBVar<>("y");
+		KBExp<String, String> z = new KBVar<>("z");
+		KBExp<String, String> xy = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { x, y }) );
+		KBExp<String, String> yz = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { y, z }) );
+		
+		KBExp<String, String> xyQz = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { xy, z }) );
+		KBExp<String, String> xQyz = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { x, yz }) );
+
+		KBExp<String, String> u = new KBVar<>("u");
+		KBExp<String, String> iu = new KBApp<String,String>("I", Arrays.asList(new KBExp[] { u }) );
+		KBExp<String, String> uiu = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { u, iu }) );
+		KBExp<String, String> e = new KBApp<String,String>("ee", Arrays.asList(new KBExp[] { }) );
+		
+		KBExp<String, String> a = xyQz;
+		KBExp<String, String> b = xQyz;
+		KBExp<String, String> g = uiu;
+		KBExp<String, String> d = e;
+		
+		Set<Pair<KBExp<String, String>, KBExp<String, String>>> res0 = g.cp(new HashMap<>(), new LinkedList<>(), a, b, g, d, true);
+		System.out.println("critical pairs for " + a + " -> " + b + " and " + g + " -> " + d + " are " + Util.sep(res0, "\n"));
+
+		System.out.println();
+		res0 = a.cp(new HashMap<>(), new LinkedList<>(), g, d, a, b, true);
+		System.out.println("critical pairs for " + g + " -> " + d + " and " + a + " -> " + b + " are " + Util.sep(res0, "\n"));
+
+	} */
+
+	//13 x o (y o I(x o y) ) -> e
+	//4 (I(u) o (u o v)) -> v
+/*	public static void main(String[] args) {
+	KBExp<String, String> x = new KBVar<>("x");
+	KBExp<String, String> y = new KBVar<>("y");
+	KBExp<String, String> u = new KBVar<>("u");
+	KBExp<String, String> v = new KBVar<>("v");
+	KBExp<String, String> uv = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { u, v }) );
+	KBExp<String, String> xy = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { x, y }) );
+	KBExp<String, String> e = new KBApp<String,String>("ee", Arrays.asList(new KBExp[] { }) );
+	
+	KBExp<String, String> iu = new KBApp<String,String>("I", Arrays.asList(new KBExp[] { u }) );
+	KBExp<String, String> ixy = new KBApp<String,String>("I", Arrays.asList(new KBExp[] { xy }) );
+	KBExp<String, String> yixy = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { y, ixy }) );
+	KBExp<String, String> xyixy = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { x, yixy }) );
+	
+	KBExp<String, String> iuuv = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { iu, uv }) );
+	
+	
+	KBExp<String, String> a = xyixy;
+	KBExp<String, String> b = e;
+	KBExp<String, String> g = iuuv;
+	KBExp<String, String> d = v;
+	
+	Set<Pair<KBExp<String, String>, KBExp<String, String>>> res0 = g.cp(new HashMap<>(), new LinkedList<>(), a, b, g, d, true);
+	System.out.println("critical pairs for " + a + " -> " + b + " and " + g + " -> " + d + " are " + Util.sep(res0, "\n"));
+
+	System.out.println();
+	res0 = a.cp(new HashMap<>(), new LinkedList<>(), g, d, a, b, true);
+	System.out.println("critical pairs for " + g + " -> " + d + " and " + a + " -> " + b + " are " + Util.sep(res0, "\n"));
+
+}  */
+	
+	//14 y o I(x o y) -> I(x)
+		//4 (I(u) o (u o v)) -> v
+	public static void main(String[] args) {
+		KBExp<String, String> x = new KBVar<>("x");
+		KBExp<String, String> y = new KBVar<>("y");
+		KBExp<String, String> u = new KBVar<>("u");
+		KBExp<String, String> v = new KBVar<>("v");
+		KBExp<String, String> uv = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { u, v }) );
+		KBExp<String, String> xy = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { x, y }) );
+		//KBExp<String, String> e = new KBApp<String,String>("ee", Arrays.asList(new KBExp[] { }) );
+		
+		KBExp<String, String> iu = new KBApp<String,String>("I", Arrays.asList(new KBExp[] { u }) );
+		KBExp<String, String> ix = new KBApp<String,String>("I", Arrays.asList(new KBExp[] { x }) );
+		KBExp<String, String> ixy = new KBApp<String,String>("I", Arrays.asList(new KBExp[] { xy }) );
+		KBExp<String, String> yixy = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { y, ixy }) );
+		
+		KBExp<String, String> iuuv = new KBApp<String,String>("o", Arrays.asList(new KBExp[] { iu, uv }) );
+		
+		
+		KBExp<String, String> a = yixy;
+		KBExp<String, String> b = ix;
+		KBExp<String, String> g = iuuv;
+		KBExp<String, String> d = v;
+		
+		Set<Pair<KBExp<String, String>, KBExp<String, String>>> res0 = g.cp(new HashMap<>(), new LinkedList<>(), a, b, g, d, true);
+		System.out.println("critical pairs for " + a + " -> " + b + " and " + g + " -> " + d + " are " + Util.sep(res0, "\n"));
+
+		System.out.println();
+		res0 = a.cp(new HashMap<>(), new LinkedList<>(), g, d, a, b, true);
+		System.out.println("critical pairs for " + g + " -> " + d + " and " + a + " -> " + b + " are " + Util.sep(res0, "\n"));
+
+	} 
+	
 }

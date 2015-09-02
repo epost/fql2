@@ -307,7 +307,7 @@ public abstract class OplExp implements OplObject {
 			KB<String, String> kb0 = OplToKB.convert(this, "lpo");
 			String s1 = ""; // kb0.printEqs() + "\n\n--------\n\n";
 			try {
-				kb0.complete(16);
+				kb0.complete_old(64);
 				s1 += kb0.toString();
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();

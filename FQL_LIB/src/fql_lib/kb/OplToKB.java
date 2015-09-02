@@ -17,6 +17,8 @@ import fql_lib.opl.OplExp.OplTerm;
 
 public class OplToKB {
 
+	
+	
 	private static KBExp<String, String> convert(OplTerm t) {
 		if (t.var != null) {
 			return new KBVar<>(t.var);
@@ -32,7 +34,15 @@ public class OplToKB {
 		}
 		
 		Function<Pair<String, String>, Boolean> gt = x -> {
-			return x.first.compareTo(x.second) > 0;
+			String l = x.first;
+			String r = x.second;
+		/*	int la = s.symbols.get(l).first.size();
+			int ra = s.symbols.get(r).first.size();
+			if (la > ra) {
+				return true;
+			} */
+			
+			return l.compareTo(r) < 0;
 		};
 		
 		Iterator<String> fr = new Iterator<String>() {

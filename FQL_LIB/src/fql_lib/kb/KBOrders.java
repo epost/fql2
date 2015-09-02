@@ -61,8 +61,9 @@ public class KBOrders {
 				KBExp<C, V> t = xxx.second;
 
 				if (t instanceof KBVar /* && s.vars().contains(((KBVar)t).var) */) {
-					return true;
-					//return s.vars().contains(((KBVar)t).var);
+					//return true;
+					return !t.equals(s) && s.vars().contains(((KBVar)t).var);
+					//return false;
 				}
 				if (s instanceof KBVar) {
 					return false;

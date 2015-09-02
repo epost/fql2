@@ -59,11 +59,19 @@ public class KBUnifier<C,V> {
 	
 	public static <C,V> Map<V, KBExp<C,V>> unify0(KBExp<C,V> s, KBExp<C,V> t) {
 		if (s instanceof KBVar<?,?>) {
-			return singleton(((KBVar<C,V>)s).var, t);
+			V v = ((KBVar<C,V>)s).var;
+			if (!(t instanceof KBVar<?,?>) && t.vars().contains(v)) {
+				return null; //occurs check failed
+			}
+			return singleton(v, t);
 		}
 		KBApp<C,V> s0 = (KBApp<C,V>) s;
 		if (t instanceof KBVar<?,?>) {
-			return singleton(((KBVar<C,V>)t).var, s);
+			V v = ((KBVar<C,V>)t).var;
+			if (s.vars().contains(v)) {
+				return null; //occurs check failed
+			}
+			return singleton(v, s);
 		}
 		KBApp<C,V> t0 = (KBApp<C,V>) t;
 		if (!s0.f.equals(t0.f)) {
@@ -74,19 +82,20 @@ public class KBUnifier<C,V> {
 		}
 		Map<V, KBExp<C,V>> ret = new HashMap<>();
 		for (int i = 0; i < s0.args.size(); i++) {
-			Map<V, KBExp<C,V>> m = unify0(s0.args.get(i), t0.args.get(i));
+			Map<V, KBExp<C,V>> m = unify0(s0.args.get(i).subst(ret), t0.args.get(i).subst(ret));
 			if (m == null) {
 				return null;
 			}
-			ret = compose(m, ret);
+//			ret = compose(m, ret);
+			ret = andThen(ret, m);
 		}
-		if (ret != null && !s.subst(ret).equals(t)) {
-			throw new RuntimeException("trying to map " + s + " into " + t + " yields " + ret + " and " + s.subst(ret));
-		}
+		//if (ret != null && !s.subst(ret).equals(t.subst(ret))) {
+		//	throw new RuntimeException("trying to unify " + s + " and " + t + " yields " + ret + " but " + s.subst(ret) + " and " + t.subst(ret));
+		//}
 		return ret;
 	}
 	
-	//works fine
+	/* //works fine
 	public static <C,V>  Map<V, KBExp<C,V>> unifyXXX(KBExp<C,V> s, KBExp<C,V> t) {
 		KBUnifier<C,V> x = new KBUnifier<C,V>();
 		x.unify(s, t);
@@ -94,14 +103,14 @@ public class KBUnifier<C,V> {
 			System.out.println("!!!!!!!!!!unified " + s + " and " + t + " using " + x.sigma + " but bad" );
 		}
 		return x.sigma;
-	}
+	} */
 
 	private Map<V, KBExp<C,V>> sigma;
 	
 	private KBUnifier() { 
 		sigma = new HashMap<>();
 	}
-	
+	/*
 	private void unify(KBExp<C,V> s, KBExp<C,V> t) {
 		if (s instanceof KBVar<?,?>) {
 			s = s.subst(sigma); 
@@ -137,9 +146,9 @@ public class KBUnifier<C,V> {
 		}
 		else {
 //			sigma = compose(singleton(((KBVar<C,V>)s).var, t), sigma); 
-			sigma = compose(sigma, singleton(((KBVar<C,V>)s).var, t)); 
+			sigma = andThen(sigma, singleton(((KBVar<C,V>)s).var, t)); 
 		}
-	}
+	} */
 
 	private static <C,V> Map<V, KBExp<C, V>> singleton(V v, KBExp<C, V> t) {
 		Map<V, KBExp<C, V>> ret = new HashMap<>();
@@ -147,29 +156,18 @@ public class KBUnifier<C,V> {
 		return ret;
 	}
 
-	private static <C,V> Map<V, KBExp<C, V>> compose(Map<V, KBExp<C, V>> sigma, Map<V, KBExp<C, V>> theta) {
-		Map<V, KBExp<C, V>> sigma1 = new HashMap<>();
-		for (V x : sigma.keySet()) {
-			 KBExp<C, V> t = sigma.get(x);
-			 KBExp<C, V> t0= t.subst(theta);
-			 if (t0.equals(new KBVar<>(x))) {
-				 continue;
-			 }
-			 sigma1.put(x, t0);
-		}
-		Map<V, KBExp<C, V>> theta1 = new HashMap<>();
-		 for (V x : theta.keySet()) {
-			 if (sigma.keySet().contains(x)) {
-				 continue;
-			 }
-			 KBExp<C, V> t = theta.get(x);
-			 if (t.equals(new KBVar<>(x))) {
-				 continue;
-			 }
-			 theta1.put(x, t);
+
+	private static <C,V> Map<V, KBExp<C, V>> andThen(Map<V, KBExp<C, V>> s, Map<V, KBExp<C, V>> t) {
+		 Map<V, KBExp<C, V>> ret = new HashMap<>();
+
+		 for (V k : s.keySet()) {
+			 ret.put(k, s.get(k).subst(t));
 		 }
-		 Map<V, KBExp<C, V>> ret = new HashMap<>(sigma1);
-		 ret.putAll(theta1);
+		 for (V k : t.keySet()) {
+			 if (!s.containsKey(k)) {
+				 ret.put(k, t.get(k));
+			 }
+		 }
 		 
 		 return ret;
 	}
