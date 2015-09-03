@@ -421,18 +421,21 @@ public class KB<C, V> {
 	}
 	*/
 
+	static Map<KBExp, KBExp> red_cache = null;
 	private void simplify(boolean print) {
+		red_cache = new HashMap<>();
 		Queue<Pair<KBExp<C, V>, KBExp<C, V>>> newE = newQ();
 		for (Pair<KBExp<C, V>, KBExp<C, V>> e : E) {
-			KBExp<C, V> lhs_red = red(fresh, R, e.first);
+			KBExp<C, V>	lhs_red = red(fresh, R, e.first);
 			log = new LinkedList<>();
 			KBExp<C, V> rhs_red = red(fresh, R, e.second);
-			if ( !lhs_red.equals(rhs_red)) {
+			if (!lhs_red.equals(rhs_red)) {
 				//System.out.println("Added: " + e.first + " = "+ e.second + " goes to " + lhs_red + " = " + rhs_red);
 				add(newE, new Pair<>(lhs_red, rhs_red));
 			}
 		}
 		E = newE;
+		red_cache = null;
 	}
 
 	private void delete() {
@@ -504,7 +507,7 @@ public class KB<C, V> {
 	void deduce() {
 		for (Pair<KBExp<C, V>, KBExp<C, V>> r1 : R) {
 			for (Pair<KBExp<C, V>, KBExp<C, V>> r2 : R) {
-				E.addAll(cp(fresh, r1, r2));
+				E.addAll(cp(r1, r2));
 				//E.addAll(cp(r2, r1));
 			}
 		}
@@ -551,6 +554,12 @@ public class KB<C, V> {
 		}
 	}
 	
+	public static <X> void addFront(Queue<X> X, X x) {
+		if (!X.contains(x)) {
+			((List)X).add(0, x);
+		}
+	}
+	
 	public static <X> void addAll(Queue<X> X, Collection<X> x) {
 		for (X xx : x) {
 			add(X, xx);
@@ -579,7 +588,7 @@ public class KB<C, V> {
 		return (subst != null);
 	}
 
-	public void complete_old(int limit) {
+	/*public void complete_old(int limit) {
 		int count = 0;
 		limit = 128;
 		Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen = new HashSet<>();
@@ -639,6 +648,105 @@ public class KB<C, V> {
 			//collapse(); //slows it down
 		}
 
+	}  */
+	
+	public void complete_old(int limit) {
+		int count = 0;
+		limit = 256;
+		Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen = new HashSet<>();
+		for (;;) {
+			count++;
+			System.out.println("Starting: " + this);
+			validateRules();
+			if (count > limit) {
+				throw new RuntimeException("Exceeded iteration limit");
+			}
+			if (E.isEmpty()) {
+				break;
+			}
+			Pair<KBExp<C, V>, KBExp<C, V>> st = pick(E);
+
+			KBExp<C, V> s = st.first;
+			KBExp<C, V> t = st.second;
+			KBExp<C, V> s0 = red(fresh, R, s);
+			KBExp<C, V> t0 = red(fresh, R, t);
+			if (s0.equals(t0)) {
+				remove(E, st); 
+				continue;
+			}
+			KBExp<C, V> a, b;
+			if (gt.apply(new Pair<>(s0, t0))) {
+				a = s0;
+				b = t0;
+			} else if (gt.apply(new Pair<>(t0, s0))) {
+				a = t0;
+				b = s0;
+			} else {
+				remove(E, st);
+				add(E, st); 
+				continue; //needed
+			}
+			Pair<KBExp<C, V>, KBExp<C, V>> ab = new Pair<>(a, b);
+			
+			Set<Pair<KBExp<C, V>, KBExp<C, V>>> CP0 = allcps(seen, ab); 
+			List<Pair<KBExp<C, V>, KBExp<C, V>>> CPX = new LinkedList<>(CP0);
+			CPX.sort(new Comparator() {
+				@Override
+				public int compare(Object o1, Object o2) {
+					if (o1.toString().length() > o2.toString().length()) {
+						return 1;
+					} else if (o1.toString().length() < o2.toString().length()) {
+						return -1;
+					}
+					return 0;
+				}
+			});
+			List<Pair<KBExp<C, V>, KBExp<C, V>>> CP = new LinkedList<>();
+			outer: for (Pair<KBExp<C, V>, KBExp<C, V>> cand : CPX) {
+				for (Pair<KBExp<C, V>, KBExp<C, V>> e : E) {
+					if (subsumes(fresh, cand, e)) {
+						continue outer; //CP.add(cand);
+					}
+				}
+				CP.add(cand);
+			}
+			//TODO: add subsumedBy cache
+			//addAll(CP, CP0);
+			
+			validateRules();
+			R.add(ab);
+			validateRules();
+			
+			addAll(E, CP); 
+			validateRules();
+			remove(E, st); 
+			compose();
+			collapseBy(ab);
+		//	System.out.println("before simpl " + this);
+			simplify(false); //definitely needed... but why?
+		//	System.out.println("after " + this);
+			//	delete();
+		//	removeSubsumedOfE();
+
+			//collapse(); //slows it down
+		}
+
+	} 
+
+	private void collapseBy(Pair<KBExp<C, V>, KBExp<C, V>> ab) {
+		Set<Pair<KBExp<C, V>, KBExp<C, V>>> AB = Collections.singleton(ab);
+		Iterator<Pair<KBExp<C, V>, KBExp<C, V>>> it = R.iterator();
+		while (it.hasNext()) {
+		Pair<KBExp<C, V>, KBExp<C, V>> r = it.next();
+			if (r.equals(ab)) {
+				continue;
+			}
+			KBExp<C, V> lhs = red(fresh, AB, r.first);
+			if (!r.first.equals(lhs)) {
+				addFront(E, new Pair<>(lhs, r.second));	
+				it.remove();
+			} 
+		}
 	}
 
 	private static <X> X pick(Queue<X> X) {
@@ -657,13 +765,13 @@ public class KB<C, V> {
 		for (Pair<KBExp<C, V>, KBExp<C, V>> gd : R) {
 			Set<Pair<KBExp<C, V>, KBExp<C, V>>> s;
 			if (!seen.contains(new Pair<>(ab, gd))) {
-				s = cp(fresh, ab, gd);
+				s = cp( ab, gd);
 				ret.addAll(s);
 				seen.add(new Pair<>(ab, gd));
 			}
 
 			if (!seen.contains(new Pair<>(gd, ab))) {
-				s = cp(fresh, gd, ab);
+				s = cp(gd, ab);
 				ret.addAll(s);
 				seen.add(new Pair<>(gd, ab));
 			}
@@ -672,9 +780,9 @@ public class KB<C, V> {
 	}
 
 	// rules in R are gd
-	static Map cp_cache = new HashMap();
-	private static<C, V> Set<Pair<KBExp<C, V>, KBExp<C, V>>> 
-	cp(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> gd0,
+	 Map cp_cache = new HashMap();
+	private  Set<Pair<KBExp<C, V>, KBExp<C, V>>> 
+	cp( Pair<KBExp<C, V>, KBExp<C, V>> gd0,
 			Pair<KBExp<C, V>, KBExp<C, V>> ab0) {
 		Object entry = new Pair(gd0, ab0);
 		Object value = cp_cache.get(entry);
@@ -738,12 +846,19 @@ public class KB<C, V> {
 	List<String> log;
 
 	private static <C, V> KBExp<C, V> step1(Iterator<V> fresh,
-			Set<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> e) {
+			Set<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> e0) {
+		KBExp<C, V> e = e0;
+		if (red_cache != null && red_cache.containsKey(e)) {
+			return red_cache.get(e);
+		}
 		for (Pair<KBExp<C, V>, KBExp<C, V>> r0 : R) {
 			Pair<KBExp<C, V>, KBExp<C, V>> r = freshen(fresh, r0);
 			KBExp<C, V> lhs = r.first;
 			KBExp<C, V> rhs = r.second;
 			if (!Collections.disjoint(e.vars(), lhs.vars())) {
+				System.out.println("rule was " + r0);
+				System.out.println("freshened to " + r);
+				System.out.println("e was " + e);
 				throw new RuntimeException("Not disjoint: " + e + " and " + lhs);
 			}
 			Map<V, KBExp<C, V>> s = KBUnifier.findSubst(lhs, e);
@@ -755,6 +870,9 @@ public class KB<C, V> {
 						+ s);
 			}
 			e = rhs.subst(s);
+		}
+		if (red_cache != null) {
+			red_cache.put(e0, e);
 		}
 		return e;
 	}
