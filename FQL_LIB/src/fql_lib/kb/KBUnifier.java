@@ -11,19 +11,18 @@ import fql_lib.kb.KBExp.KBVar;
 public class KBUnifier<C,V> {
 	
 	public static <C,V> Map<V, KBExp<C,V>> findSubst(KBExp<C,V> s, KBExp<C,V> t) {
-		if (!Collections.disjoint(s.vars(), t.vars())) {
-			throw new RuntimeException("not disjoint in findsubst");
-		}
-		try {
+	//	if (!Collections.disjoint(s.vars_fast(), t.vars_fast())) { 
+		//	throw new RuntimeException("not disjoint in findsubst");
+		//}
 			Map<V, KBExp<C,V>> m = unify0(s, t.freeze());
+			if (m == null) {
+				return null;
+			}
 			Map<V, KBExp<C,V>> ret = new HashMap<>();
 			for (V v : m.keySet()) {
 				ret.put(v, m.get(v).unfreeze());
 			}
 			return ret;
-		} catch (Exception ex) {
-			return null;
-		}
 	}
 	/*
 	public static <C,V> Map<V, KBExp<C,V>> findSubst(KBExp<C,V> s, KBExp<C,V> t) {
@@ -58,22 +57,22 @@ public class KBUnifier<C,V> {
 
 	
 	public static <C,V> Map<V, KBExp<C,V>> unify0(KBExp<C,V> s, KBExp<C,V> t) {
-		if (s instanceof KBVar<?,?>) {
-			V v = ((KBVar<C,V>)s).var;
-			if (!(t instanceof KBVar<?,?>) && t.vars().contains(v)) {
+		if (s.isVar) {
+			V v = s.getVar().var;
+			if (!t.isVar && t.vars().contains(v)) {
 				return null; //occurs check failed
 			}
 			return singleton(v, t);
 		}
 		KBApp<C,V> s0 = (KBApp<C,V>) s;
-		if (t instanceof KBVar<?,?>) {
-			V v = ((KBVar<C,V>)t).var;
+		if (t.isVar) {
+			V v = t.getVar().var;
 			if (s.vars().contains(v)) {
 				return null; //occurs check failed
 			}
 			return singleton(v, s);
 		}
-		KBApp<C,V> t0 = (KBApp<C,V>) t;
+		KBApp<C,V> t0 = t.getApp();
 		if (!s0.f.equals(t0.f)) {
 			return null;
 		}
@@ -86,7 +85,6 @@ public class KBUnifier<C,V> {
 			if (m == null) {
 				return null;
 			}
-//			ret = compose(m, ret);
 			ret = andThen(ret, m);
 		}
 		//if (ret != null && !s.subst(ret).equals(t.subst(ret))) {
@@ -105,11 +103,11 @@ public class KBUnifier<C,V> {
 		return x.sigma;
 	} */
 
-	private Map<V, KBExp<C,V>> sigma;
+	//private Map<V, KBExp<C,V>> sigma;
 	
-	private KBUnifier() { 
-		sigma = new HashMap<>();
-	}
+//	private KBUnifier() { 
+	//	sigma = new HashMap<>();
+	//}
 	/*
 	private void unify(KBExp<C,V> s, KBExp<C,V> t) {
 		if (s instanceof KBVar<?,?>) {

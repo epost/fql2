@@ -307,26 +307,14 @@ public abstract class OplExp implements OplObject {
 			KB<String, String> kb0 = OplToKB.convert(this, "lpo");
 			String s1 = ""; // kb0.printEqs() + "\n\n--------\n\n";
 			try {
-				kb0.complete_old(64);
+				kb0.complete_old(128);
 				s1 += kb0.toString();
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				s1 += ex.getMessage();
 			}
 			p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", s1);
-			ret.add(p, "KB (LPO)");
-/*
-			kb0 = OplToKB.convert(this, "rpo");
-			s1 = kb0.printEqs() + "\n\n--------\n\n";
-			try {
-				kb0.complete(8);
-				s1 += kb0.printReds();
-			} catch (RuntimeException ex) {
-				ex.printStackTrace();
-				s1 += ex.getMessage();
-			}
-			p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", s1);
-			ret.add(p, "KB (LPO)"); */
+			ret.add(p, "KB");
 
 			return ret;
 		}

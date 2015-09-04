@@ -16,41 +16,7 @@ import fql_lib.kb.KBExp.KBVar;
 
 public class KBOrders {
 	
-	public static void main(String[] args) {
-		KBExp<String, String> e = new KBApp<>("e", new LinkedList<>());
-		KBExp<String, String> Ie = new KBApp<>("I", Collections.singletonList(e));
-		Function<Pair<String, String>, Boolean> gt = x -> { return x.first.compareTo(x.second) > 0; };
-		Function<Pair<KBExp<String, String>, KBExp<String, String>>, Boolean> r = pogt(gt, "lpo");
-		System.out.println("e > I: " + gt.apply(new Pair<>("e", "I")));
-		System.out.println("I > e: " + gt.apply(new Pair<>("I", "e")));
-		System.out.println("***********");
-		
-		System.out.println("e > I(e): " + r.apply(new Pair<>(e, Ie)));
-		System.out.println("***********");
-		System.out.println("I(e) > e: " + r.apply(new Pair<>(Ie, e)));	
-
-		System.out.println("\n\n-----------------");
-
-		KBExp<String, String> v = new KBVar<>("v");
-		KBExp<String, String> oev = new KBApp<String, String>("o", Arrays.asList(new KBExp[] { e, v }));
-		
-		System.out.println("e > o: " + gt.apply(new Pair<>("e", "o")));
-		System.out.println("o > e: " + gt.apply(new Pair<>("o", "e")));
-		System.out.println("e > o(e,v): " + r.apply(new Pair<>(e, oev)));
-		System.out.println("***********");
-		System.out.println("o(e,v) > e: " + r.apply(new Pair<>(oev, e)));	
-
-		System.out.println("\n\n-----------------");
-		System.out.println("e > v: " + r.apply(new Pair<>(e, v)));
-		System.out.println("v > e: " + r.apply(new Pair<>(v, e)));
-
-		System.out.println("\n\n-----------------");
-		KBExp<String, String> Iv = new KBApp<>("I", Collections.singletonList(v));
-		System.out.println("e > I(v): " + r.apply(new Pair<>(e, Iv)));
-		System.out.println("I(v) > e: " + r.apply(new Pair<>(Iv, e)));	
-
-		//e -> o(e,v24)
-	}
+	
 
 	public static <C, V> Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> pogt(
 			Function<Pair<C, C>, Boolean> gt, String which) {
@@ -60,24 +26,23 @@ public class KBOrders {
 				KBExp<C, V> s = xxx.first;
 				KBExp<C, V> t = xxx.second;
 
-				if (t instanceof KBVar /* && s.vars().contains(((KBVar)t).var) */) {
-					//return true;
-					return !t.equals(s) && s.vars().contains(((KBVar)t).var);
-					//return false;
+				if (s.hasAsSubterm(t) && !t.equals(s)) {
+					return true;
 				}
-				if (s instanceof KBVar) {
+				if (t.isVar) {
+					return !t.equals(s) && s.vars().contains(t.getVar().var);
+				}
+				if (s.isVar) {
 					return false;
-				}
+				} 
 
-				KBApp<C, V> s0 = (KBApp<C, V>) s;
-				KBApp<C, V> t0 = (KBApp<C, V>) t;
+				KBApp<C, V> s0 = s.getApp();
+				KBApp<C, V> t0 = t.getApp();
 				C f = s0.f;
 				C g = t0.f;
-				if (gt.apply(new Pair<>(f, g))) { //f = e, g = I(e)
+				if (gt.apply(new Pair<>(f, g))) { 
 					for (KBExp<C, V> ti : t0.args) {
 						if (!apply(new Pair<>(s, ti))) {
-		//				if (!(apply(new Pair<>(s, ti)) || ti.equals(s))) { 
-				//			System.out.println("a");
 							return false;
 						}
 					}
@@ -87,18 +52,15 @@ public class KBOrders {
 						return baglt(this).apply(new Pair<>(tobag(s0.args), tobag(t0.args)));
 					} else if (which == "lpo") {
 						return lexlt(this).apply(new Pair<>(t0.args, s0.args));
-//						return lexlt(this).apply(new Pair<>(s0.args, t0.args));
 					} else {
 						throw new RuntimeException();
 					}
 				} else {
 					for (KBExp<C, V> si : s0.args) {
 						if (apply(new Pair<>(si, t)) || si.equals(t)) {
-//						if (apply(new Pair<>(si, t))) {
 							return true;
 						}
 					}
-				//	System.out.println("b");
 					return false;
 				}
 			}
@@ -142,9 +104,6 @@ public class KBOrders {
 						return apply(new Pair<>(A.subList(1, A.size()), B.subList(1, B.size())));
 					}
 					return false;
-					//else {
-						//throw new RuntimeException("lexlt on " + a + " and " + b);
-					//}
 			}
 		};
 	}
