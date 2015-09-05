@@ -1,6 +1,5 @@
 package fql_lib.kb;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,6 +13,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Util;
 import fql_lib.kb.KBExp.KBApp;
@@ -37,6 +37,11 @@ public class KB<C, V> {
 	// private Function<Pair<C,C>, Boolean> gt;
 	private Iterator<V> fresh;
 	private Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> gt;
+	
+	public Set<Pair<KBExp<C, V>, KBExp<C, V>>> R() {
+		return R;
+	}
+
 
 	private static <C, V> Pair<KBExp<C, V>, KBExp<C, V>> freshen(Iterator<V> fresh,
 			Pair<KBExp<C, V>, KBExp<C, V>> eq) {
@@ -228,14 +233,14 @@ public class KB<C, V> {
 		});
 	}
 	
-	public void complete_old(int limit) {
+	public void complete() {
 		int count = 0;
 		Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen = new HashSet<>();
 		for (;;) {
 			System.out.println("iteration " + count);
 			count++;
 			//validateRules();
-			if (count > limit) {
+			if (count > DEBUG.debug.opl_iterations) {
 				throw new RuntimeException("Exceeded iteration limit");
 			}
 			if (E.isEmpty()) {
@@ -243,44 +248,50 @@ public class KB<C, V> {
 			}
 			Pair<KBExp<C, V>, KBExp<C, V>> st = E.get(0);
 
-			KBExp<C, V> s = st.first;
-			KBExp<C, V> t = st.second;
-			KBExp<C, V> s0 = s; //red(null, fresh, R, s);
-			KBExp<C, V> t0 = t; //red(null, fresh, R, t);
+			KBExp<C, V> s0 = st.first;
+			KBExp<C, V> t0 = st.second;
+			//KBExp<C, V> s0 = red(null, fresh, R, s);
+			//KBExp<C, V> t0 = red(null, fresh, R, t);
+			
+			//KBExp<C, V> s0 = s; 
+			//KBExp<C, V> t0 = t; 
 			//if (s0.equals(t0)) {
 				//throw new RuntimeException();
-				//remove(E, st); 
-				//continue;
-			//}
+			//	remove(E, st); 
+			//	continue;
+		//	}
 			KBExp<C, V> a, b;
 			if (gt.apply(new Pair<>(s0, t0))) {
 				a = s0; b = t0;
 			} else if (gt.apply(new Pair<>(t0, s0))) {
 				a = t0; b = s0;
 			} else {
-				throw new RuntimeException("Cannot orient " + s0 + " and " + t0);
-//				remove(E, st); add(E, st); continue; //needed
+				if (DEBUG.debug.opl_unfailing) {
+					remove(E, st); add(E, st); continue; 					
+				} else {
+					throw new RuntimeException("Cannot orient " + s0 + " and " + t0);
+				}
 			}
 			Pair<KBExp<C, V>, KBExp<C, V>> ab = new Pair<>(a, b);
 			
-			//TODO: need to find critical pairs with itself?
 			R.add(ab);
 			List<Pair<KBExp<C, V>, KBExp<C, V>>> CP = filterSubsumed(allcps(seen, ab));
-			//sortByStrLen(CP);
 			
 			addAll(E, CP);
 			remove(E, st); 
 			
-			//validateRules();
-			
 			compose();
 			collapseBy(ab);
 
-			simplify(); //definitely needed... but why?
+			simplify(); //definitely needed... cuts down on number of iterations
 			
-			sortByStrLen(E);
+			if (DEBUG.debug.opl_sort_cps) {
+				sortByStrLen(E);
+			}
 		}
+		
 	} 
+	
 
 	private List<Pair<KBExp<C, V>, KBExp<C, V>>> filterSubsumed(
 			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> CPX) {
@@ -370,7 +381,10 @@ public class KB<C, V> {
 		return ret;
 	}
 
-	public static <C, V> KBExp<C, V> red(Map<KBExp<C,V>, KBExp<C,V>> cache, Iterator<V> fresh, Set<Pair<KBExp<C, V>, KBExp<C, V>>> R,
+	public KBExp<C, V> red(KBExp<C, V> e) {
+		return red(null, fresh, R, e);
+	}
+	private static <C, V> KBExp<C, V> red(Map<KBExp<C,V>, KBExp<C,V>> cache, Iterator<V> fresh, Set<Pair<KBExp<C, V>, KBExp<C, V>>> R,
 			KBExp<C, V> e) {
 		int i = 0;
 		KBExp<C, V> orig = e;

@@ -1,5 +1,6 @@
 package fql_lib.opl;
 
+import java.awt.GridLayout;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -14,15 +15,20 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Util;
 import fql_lib.gui.FQLTextPanel;
-import fql_lib.kb.KB;
 import fql_lib.kb.OplToKB;
+import fql_lib.opl.OplParser.DoNotIgnore;
 
 public abstract class OplExp implements OplObject {
 	
@@ -120,9 +126,49 @@ public abstract class OplExp implements OplObject {
 //				System.out.println(ee.getMessage());
 			}
 			return o.toString(); 
+			
+			
+			
 		}
 		
 		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((args == null) ? 0 : args.hashCode());
+			result = prime * result + ((head == null) ? 0 : head.hashCode());
+			result = prime * result + ((var == null) ? 0 : var.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplTerm other = (OplTerm) obj;
+			if (args == null) {
+				if (other.args != null)
+					return false;
+			} else if (!args.equals(other.args))
+				return false;
+			if (head == null) {
+				if (other.head != null)
+					return false;
+			} else if (!head.equals(other.head))
+				return false;
+			if (var == null) {
+				if (other.var != null)
+					return false;
+			} else if (!var.equals(other.var))
+				return false;
+			return true;
+		}
+
 		private static String printNicely(Object o) {
 			if (o instanceof Bindings) {
 				Bindings b = (Bindings) o;
@@ -157,11 +203,11 @@ public abstract class OplExp implements OplObject {
 			
 			List<String> actual = args.stream().map(x -> x.type(sig, ctx)).collect(Collectors.toList());
 			if (t.first.size() != actual.size()) {
-				throw new RuntimeException("Argument length mismatch for " + this + ", expected " + t.first.size() + " but given " + actual.size());
+				throw new DoNotIgnore("Argument length mismatch for " + this + ", expected " + t.first.size() + " but given " + actual.size());
 			}
 			for (int i = 0; i < actual.size(); i++) {
 				if (!t.first.get(i).equals(actual.get(i))) {
-					throw new RuntimeException("Argument mismatch for " + this + 
+					throw new DoNotIgnore("Argument mismatch for " + this + 
 							", expected term of sort " + t.first.get(i) + " but given " + args.get(i) + " of sort " + actual.get(i));					
 				}
 			}
@@ -219,7 +265,7 @@ public abstract class OplExp implements OplObject {
 			vars0 = new LinkedHashMap<>();
 			for (Pair<String, X> k : vars) {
 				if (vars0.containsKey(k.first)) {
-					throw new RuntimeException("Duplicate variable " + k.first);
+					throw new DoNotIgnore("Duplicate variable " + k.first);
 				}
 				vars0.put(k.first, k.second);
 			}
@@ -232,7 +278,7 @@ public abstract class OplExp implements OplObject {
 		public X get(String s) {
 			X ret = vars0.get(s);
 			if (s == null) {
-				throw new RuntimeException("Unbound var " + s);
+				throw new DoNotIgnore("Unbound var " + s);
 			}
 			return ret;
 		}
@@ -241,7 +287,7 @@ public abstract class OplExp implements OplObject {
 			for (String k : vars0.keySet()) {
 				X v = get(k);
 				if (!oplSig.sorts.contains(v)) {
-					throw new RuntimeException("Context has bad sort " + v);
+					throw new DoNotIgnore("Context has bad sort " + v);
 				}
 			}
 		}
@@ -304,21 +350,112 @@ public abstract class OplExp implements OplObject {
 			FQLTextPanel p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 			ret.add(p, "Text");
 			
-			KB<String, String> kb0 = OplToKB.convert(this, "lpo");
-			String s1 = ""; // kb0.printEqs() + "\n\n--------\n\n";
 			try {
-				kb0.complete_old(128);
-				s1 += kb0.toString();
+				OplToKB xxx = new OplToKB(this);
+				ret.add(makeTiny2(xxx), "KB");				
+				try {
+					ret.add(makeTiny(xxx), "Hom");				
+				} catch (RuntimeException ex) {
+						p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", ex.getMessage());
+						ret.add(p, "Hom");
+				}
 			} catch (RuntimeException ex) {
-				ex.printStackTrace();
-				s1 += ex.getMessage();
+				p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", ex.getMessage());
+				ret.add(p, "KB");
 			}
-			p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", s1);
-			ret.add(p, "KB");
 
 			return ret;
 		}
 		
+		JPanel makeTiny2(OplToKB kb) {
+			JPanel ret = new JPanel(new GridLayout(1,1));
+			JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			ret.add(pane);
+			
+			JPanel top = new JPanel();
+			
+			JTextField src = new JTextField(16);
+			JTextField dst = new JTextField(16);
+			
+			JButton go = new JButton("Reduce");
+			go.addActionListener(x -> {   
+				try {
+					OplTerm t = OplParser.parse_term(src.getText());
+					dst.setText(kb.red(t).toString());
+				} catch (Exception ex) {
+					dst.setText(ex.getMessage());
+				}
+			});
+
+			top.add(new JLabel("Input term:"));
+			top.add(src);
+			top.add(go);
+			top.add(new JLabel("Result:"));
+			top.add(dst);
+
+
+
+			FQLTextPanel bot = new FQLTextPanel(BorderFactory.createEtchedBorder(), "Re-write rules", kb.printKB());
+			
+			pane.add(top);
+			pane.add(bot);
+			
+			return ret;
+
+		}
+		
+		JPanel makeTiny(OplToKB kb) {
+			JPanel ret = new JPanel(new GridLayout(1,1));
+			JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			ret.add(pane);
+			
+			JPanel top = new JPanel(new GridLayout(3,1));
+			JPanel p1 = new JPanel();
+			JPanel p2 = new JPanel();
+			JPanel p3 = new JPanel();
+			
+			JTextField src = new JTextField(32);
+			JTextField dst = new JTextField(32);
+			p1.add(new JLabel("source (sep by ,):"));
+			p1.add(src);
+			p2.add(new JLabel("target:"));
+			p2.add(dst);
+
+			FQLTextPanel bot = new FQLTextPanel(BorderFactory.createEtchedBorder(), "Result", "");
+
+			JButton go = new JButton("Compute hom set");
+			go.addActionListener(x -> {   
+				String[] l = src.getText().split(",");
+				String r = dst.getText();
+				List<String> l0 = new LinkedList<>();
+				for (String j : l) {
+					String j2 = j.trim();
+					if (j2.length() > 0) {
+						l0.add(j2);
+					}
+				}			
+				try {
+					Set<Pair<OplCtx<String>, OplTerm>> z = kb.hom(l0, r);
+					List<String> u = z.stream().map(o -> { return o.first + " |- " + OplToKB.convert(o.second).toString(); }).collect(Collectors.toList());
+					bot.setText(Util.sep(u, "\n\n"));
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					bot.setText(ex.getMessage());
+				}
+			});
+			
+			p3.add(go);
+			top.add(p1);
+			top.add(p2);
+			top.add(p3);
+			
+			pane.add(top);
+			pane.add(bot);
+			
+			return ret;
+		}
+		
+		public Map<String, Integer> prec;
 		public Set<String> sorts;
 		public Map<String, Pair<List<String>, String>> symbols;
 		public List<Triple<OplCtx<String>, OplTerm, OplTerm>> equations;
@@ -349,24 +486,26 @@ public abstract class OplExp implements OplObject {
 			return "theory {\n" + ret + "}";
 		}
 
-		public OplSig(Set<String> sorts, Map<String, Pair<List<String>, String>> symbols,
+		public OplSig(Map<String, Integer> prec, Set<String> sorts, 
+				Map<String, Pair<List<String>, String>> symbols,
 				List<Triple<OplCtx<String>, OplTerm, OplTerm>> equations) {
 			super();
 			this.sorts = sorts;
 			this.symbols = symbols;
 			this.equations = equations;
-//			validate();
+			this.prec = prec;
+			validate(); 
 		}
 		
 		void validate() {
 			for (String k : symbols.keySet()) {
 				Pair<List<String>, String> v = symbols.get(k);
 				if (!sorts.contains(v.second)) {
-					throw new RuntimeException("Bad codomain " + v.second + " for " + k);
+					throw new DoNotIgnore("Bad codomain " + v.second + " for " + k);
 				}
 				for (String a : v.first) {
 					if (!sorts.contains(a)) {
-						throw new RuntimeException("Bad argument sort " + a + " for " + k);
+						throw new DoNotIgnore("Bad argument sort " + a + " for " + k);
 					}
 				}
 			}
@@ -375,7 +514,7 @@ public abstract class OplExp implements OplObject {
 				String t1 = eq.second.type(this, eq.first);
 				String t2 = eq.third.type(this, eq.first);
 				if (!t1.equals(t2)) {
-					throw new RuntimeException("Domains do not agree in " + eq.second + " = " + eq.third + ", are " + t1 + " and " + t2);
+					throw new DoNotIgnore("Domains do not agree in " + eq.second + " = " + eq.third + ", are " + t1 + " and " + t2);
 				}
 			}
 		}
@@ -388,7 +527,7 @@ public abstract class OplExp implements OplObject {
 		public Pair<List<String>, String> getSymbol(String var) {
 			Pair<List<String>, String> ret = symbols.get(var);
 			if (ret == null) {
-				throw new RuntimeException("Unknown symbol " + var);
+				throw new DoNotIgnore("Unknown symbol " + var);
 			}
 			return ret;
 		}

@@ -181,8 +181,10 @@ public abstract class KBExp<C,V> {
 			if (args.size() == 2) {
 				return "(" + args.get(0) + " " + f + " " + args.get(1) + ")";
 			}
-			String ret = f + "(" + Util.sep(args, ",") + ")";
-			return ret;
+			if (args.size() == 1 && !args.get(0).isVar && args.get(0).getApp().args.size() == 2) {
+				return f  + Util.sep(args, ",");				
+			}
+			return f + "(" + Util.sep(args, ",") + ")";
 		}
 		
 		@Override
@@ -347,7 +349,7 @@ public abstract class KBExp<C,V> {
 	public abstract KBVar<C, V> getVar();
 	public abstract KBApp<C, V> getApp();
 	
-	Set<V> vars = null;
+	private Set<V> vars = null;
 	public Set<V> vars() {
 		if (vars == null) {
 			vars = new HashSet<>();

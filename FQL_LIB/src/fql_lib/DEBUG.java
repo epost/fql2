@@ -225,6 +225,12 @@ public class DEBUG implements Serializable {
 	public boolean x_typing = true;
 	public boolean x_elements = true;
 	public boolean x_json = true;
+		
+	public boolean opl_unfailing = true;
+	public int opl_iterations = 128;
+	public boolean opl_require_const = true;
+	public boolean opl_sort_cps = true;
+	public int opl_hom_its = 8;
 	
 	public void showOptions() {
 
@@ -241,12 +247,25 @@ public class DEBUG implements Serializable {
 		
 		JPanel x_1 = new JPanel(new GridLayout(9, 1));
 		JPanel x_2 = new JPanel(new GridLayout(9, 1));
+		
+		JPanel opl1 = new JPanel(new GridLayout(9, 1));
+		JPanel opl2 = new JPanel(new GridLayout(9, 1));
 
+		JCheckBox reorder_joins_box = new JCheckBox("", reorder_joins);
+		JLabel reorder_joins_label = new JLabel("Re-order FROM clauses:");
+		x_1.add(reorder_joins_label);
+		x_2.add(reorder_joins_box);
+
+		
 		JSplitPane generalsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		JSplitPane sqlsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		JSplitPane viewersplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		JSplitPane xsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-
+		JSplitPane oplsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		
+		oplsplit.add(opl1);
+		oplsplit.add(opl2);
+		
 		generalsplit.add(general1);
 		generalsplit.add(general2);
 		sqlsplit.add(sql1);
@@ -256,9 +275,10 @@ public class DEBUG implements Serializable {
 		xsplit.add(x_1);
 		xsplit.add(x_2);
 
-		jtb.add("General", generalsplit);
-		jtb.add("Viewer", viewersplit);
+		jtb.add("FQL++ General", generalsplit);
+		jtb.add("FQL++ Viewer", viewersplit);
 		jtb.add("FPQL", xsplit);
+		jtb.add("OPL", oplsplit);
 	//	jtb.add("SQL", sqlsplit);
 
 		jtb.setSelectedIndex(selected_tab);
@@ -313,11 +333,39 @@ public class DEBUG implements Serializable {
 		x_1.add(check_oriented_label);
 		x_2.add(check_oriented_box);
 
-		JCheckBox reorder_joins_box = new JCheckBox("", reorder_joins);
-		JLabel reorder_joins_label = new JLabel("Re-order FROM clauses:");
-		x_1.add(reorder_joins_label);
-		x_2.add(reorder_joins_box);
+		JCheckBox opl_unfailing_box = new JCheckBox("", opl_unfailing);
+		JLabel opl_unfailing_label = new JLabel("Allow unorientable equations:");
+		opl1.add(opl_unfailing_label);
+		opl2.add(opl_unfailing_box);
 		
+		JCheckBox opl_const_box = new JCheckBox("", opl_require_const);
+		JLabel opl_const_label = new JLabel("Require a constant at each sort:");
+		opl2.add(opl_const_box);
+		opl1.add(opl_const_label);
+		
+		JCheckBox opl_sort_box = new JCheckBox("", opl_sort_cps);
+		JLabel opl_sort_label = new JLabel("Sort critical pairs:");
+		opl2.add(opl_sort_box);
+		opl1.add(opl_sort_label);
+		
+		JTextField opl_iterations_box = new JTextField(Integer.toString(opl_iterations), 12);
+		JLabel opl_iterations_label = new JLabel("Knuth-Bendix iterations");
+		opl2.add(opl_iterations_box);
+		opl1.add(opl_iterations_label);
+		
+		JTextField opl_homit_box = new JTextField(Integer.toString(opl_hom_its), 12);
+		JLabel opl_homit_label = new JLabel("Hom-set iterations");
+		opl2.add(opl_homit_box);
+		opl1.add(opl_homit_label);
+		
+		opl1.add(new JLabel());
+		opl2.add(new JLabel());
+		opl1.add(new JLabel());
+		opl2.add(new JLabel());
+		opl1.add(new JLabel());
+		opl2.add(new JLabel());
+		opl1.add(new JLabel());
+		opl2.add(new JLabel());
 		
 		JCheckBox x_typing_box = new JCheckBox("", x_typing);
 		JLabel typing_label = new JLabel("Type check:"); //.add(x_typing_bix)
@@ -735,6 +783,8 @@ public class DEBUG implements Serializable {
 			int f = FONT_SIZE;
 			int n = MAX_NODES;
 			int ee = MAX_EDGES;
+			int opl = opl_iterations;
+			int opl_h = opl_hom_its;
 			try {
 				a = Integer.parseInt(plen.getText());
 				b = Integer.parseInt(iter.getText());
@@ -742,17 +792,25 @@ public class DEBUG implements Serializable {
 				f = Integer.parseInt(font_field.getText());
 				n = Integer.parseInt(node_limit_field.getText());
 				ee = Integer.parseInt(edge_limit_field.getText());
+				opl = Integer.parseInt(opl_iterations_box.getText());
+				opl_h = Integer.parseInt(opl_homit_box.getText());
 				if (f < 1) {
 					f = FONT_SIZE;
 				}
 			} catch (NumberFormatException nfe) {
 				return;
 			}
+			opl_iterations = opl;
+			opl_hom_its = opl_h;
 			MAX_NODES = n;
 			MAX_EDGES = ee;
 			ALL_GR_PATHS = gr.isSelected();
 			VALIDATE = jcb.isSelected();
 			MultiView = jcbM.isSelected();
+			opl_require_const = opl_const_box.isSelected();
+			opl_sort_cps = opl_sort_box.isSelected();
+			opl_unfailing = opl_unfailing_box.isSelected();
+			
 		//	limit_examples = limex.isSelected();
 			useLineage = (String) lineageBox.getSelectedItem();
 			piLineage = (String) pilineageBox.getSelectedItem();
@@ -909,8 +967,8 @@ public class DEBUG implements Serializable {
 	}
 
 	static String about = "FQL++/FPQL/OPL IDE Copyright (C) 2012-2015 Patrick Schultz, David Spivak, and Ryan Wisnesky"
-			+ "\n\nLicense: Creative-Commons Attribution-NonCommercial-NoDerivs 3.0 Unported"
-			+ "\n\nLibraries used:\n\nJParsec (parsing)\nJUNG (graph visualization)\nRSyntaxTextArea (code editor)\nJSONP"; //\nH2 (SQL)";
+			+ "\n\nplease see categoricaldata.net for more information";
+
 
 	public static int chase_limit = 64;
 

@@ -41,7 +41,7 @@ public class OplParser {
 			});
 
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
-			")", "=", "->", "+", "*", "^", "|", "?" };
+			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
 		"transeval", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
@@ -125,7 +125,8 @@ public class OplParser {
 	}
 	
 	public static final Parser<?> theory() {
-		Parser<?> p = Parsers.tuple(ident(), term(":"), ident().sepBy(term(",")), term("->"),
+		Parser<?> q = Parsers.tuple(ident(), Parsers.tuple(term("@"), NUMBER).optional());
+		Parser<?> p = Parsers.tuple(q, term(":"), ident().sepBy(term(",")), term("->"),
 				ident());
 		Parser<?> foo = Parsers.tuple(section("sorts", ident()), 
 				section("symbols", p),
@@ -203,7 +204,10 @@ public class OplParser {
 		
 	
 
-	
+	public static final OplTerm parse_term(String s) {
+		Object o = oplTerm().from(TOKENIZER, IGNORED).parse(s);
+		return toTerm(o);
+	} 
 	
 	public static final OplProgram program(String s) {
 		List<Triple<String, Integer, OplExp>> ret = new LinkedList<>();
@@ -249,8 +253,17 @@ public class OplParser {
 		List<Tuple4> equations0 = (List<Tuple4>) c.b;
 		
 		Map<String, Pair<List<String>, String>> symbols = new HashMap<>();
+		Map<String, Integer> prec = new HashMap<>();
 		for (Tuple5 x : symbols0) {
-			String name = (String) x.a;
+			org.codehaus.jparsec.functors.Pair name0 = (org.codehaus.jparsec.functors.Pair) x.a;
+			String name = (String) name0.a;
+			
+			if (name0.b != null) {
+				org.codehaus.jparsec.functors.Pair zzz = (org.codehaus.jparsec.functors.Pair) name0.b;
+				Integer i = (Integer) zzz.b;
+				prec.put(name, i);
+			}
+
 			List<String> args = (List<String>) x.c;
 			String dom = (String) x.e;
 			if (symbols.containsKey(name)) {
@@ -269,7 +282,7 @@ public class OplParser {
 			equations.add(new Triple<>(ctx, lhs, rhs));
 		}
 		
-		return new OplExp.OplSig(sorts, symbols, equations);
+		return new OplExp.OplSig(prec, sorts, symbols, equations);
 	}
 
 	private static OplExp toModel(Object o) {
@@ -403,7 +416,7 @@ public class OplParser {
 			de.printStackTrace();
 			throw new RuntimeException(de.getMessage());
 		}catch (Exception ee) {
-			ee.printStackTrace();
+			//ee.printStackTrace();
 		}
 		
 		
