@@ -82,9 +82,10 @@ public class OplToKB {
 			for (;;) {
 				Map<String, Set<OplTerm>> k = inc(j);
 				Map<String, Set<OplTerm>> k2= red(k);
-				if (j.get(t).equals(k2.get(t))) {
+				if (j.equals(k2)) {
 					break;
 				}
+
 				count++;
 				if (count > 8) {
 					throw new RuntimeException("exceeded");
@@ -119,7 +120,7 @@ public class OplToKB {
 	}
 	
 	
-	
+	/*
 	Map<String, Set<OplTerm>> upto(Map<String, Set<String>> vars, int n) {
 		Map<String, Set<OplTerm>> m = arity0(vars);
 		for (int i = 0; i < n; i++) {
@@ -127,7 +128,7 @@ public class OplToKB {
 		}
 		return m;
 	}
-	
+	*/
 	private Map<String, Set<OplTerm>> arity0(Map<String, Set<String>> vars) {
 		Map<String, Set<OplTerm>> m = new HashMap<>();
 		for (String s : sig.sorts) {
@@ -227,7 +228,7 @@ public class OplToKB {
 	
 	private static KB<String, String> convert(OplSig s, String which) {
 		if (!s.symbols.keySet().equals(s.prec.keySet())) {
-			throw new RuntimeException("Cannot use Knuth-Bendix - no symbol precedence given.");
+			throw new RuntimeException("Cannot use Knuth-Bendix - not all symbol precedence given.");
 		}
 		
 		Set<Pair<KBExp<String, String>, KBExp<String, String>>> eqs = new HashSet<>();

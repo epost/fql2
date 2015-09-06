@@ -28,6 +28,7 @@ import fql_lib.Pair;
 import fql_lib.gui.FQLDisp;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
+import fql_lib.opl.OplExp.OplPres;
 import fql_lib.opl.OplExp.OplSetInst;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSig;
@@ -56,6 +57,9 @@ public class OplDisplay implements FQLDisp {
 		if (o instanceof OplMapping) {
 			OplMapping x = (OplMapping) o;
 			return "mapping " + c + " : " + x.src0 + " -> " + x.dst0;
+ 		}
+		if (o instanceof OplPres) {
+			return "presentation " + c + " : " + ((OplPres)o).S;
  		}
 		return c;
 	}

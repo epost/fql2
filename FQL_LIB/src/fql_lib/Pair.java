@@ -1,6 +1,7 @@
 package fql_lib;
 
 import java.io.Serializable;
+import java.util.Map;
 
 
 public class Pair<T1, T2> implements Comparable<Pair<T1, T2>>, Serializable {
@@ -51,6 +52,7 @@ public class Pair<T1, T2> implements Comparable<Pair<T1, T2>>, Serializable {
 	public Pair<T2, T1> reverse() {
 		return new Pair<>(second, first);
 	}
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public int compareTo(Pair<T1, T2> o) {

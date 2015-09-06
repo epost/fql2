@@ -8,9 +8,12 @@ import fql_lib.opl.OplExp.OplEval;
 import fql_lib.opl.OplExp.OplExpVisitor;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
+import fql_lib.opl.OplExp.OplPres;
+import fql_lib.opl.OplExp.OplSat;
 import fql_lib.opl.OplExp.OplSetInst;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSig;
+import fql_lib.opl.OplExp.OplSigma;
 import fql_lib.opl.OplExp.OplString;
 import fql_lib.opl.OplExp.OplTerm;
 import fql_lib.opl.OplExp.OplTransEval;
@@ -18,7 +21,6 @@ import fql_lib.opl.OplExp.OplVar;
 
 public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	
-
 	OplEnvironment ENV;
 
 	public OplOps(OplEnvironment env) {
@@ -136,11 +138,8 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			OplSetTrans h = (OplSetTrans) I;
 			return F0.delta(h);
 		}
-		//if (I instanceof OplJavaInst) {
-		//	OplJavaInst I0 = (OplJavaInst) I;
-		//	return F0.delta(I0);			
-		//}
-			throw new RuntimeException("Not a model or transform: " + e.I);
+		
+		throw new RuntimeException("Not a model or transform: " + e.I);
 	}
 
 	@Override
@@ -166,6 +165,50 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			}
 		}
 		throw new RuntimeException("Not a set/js model: " + e.I);
+	}
+
+	@Override
+	public OplObject visit(OplProgram env, OplPres e) {
+		OplObject i = ENV.get(e.S);
+		if (!(i instanceof OplSig)) {
+			throw new RuntimeException("Not a theory: " + e.S);
+		}
+		OplSig S = (OplSig) i;
+
+		e.convert(S);
+		
+		return e;
+	}
+
+	@Override
+	public OplObject visit(OplProgram env, OplSat e) {
+		OplObject i = ENV.get(e.I);
+		if (!(i instanceof OplPres)) {
+			throw new RuntimeException("Not a presentation: " + e.I);
+		}
+		OplPres S = (OplPres) i;
+		return e.convert(S.S, S.sig, S);
+	}
+	
+	@Override
+	public OplObject visit(OplProgram env, OplSigma e) {
+		OplObject F = ENV.get(e.F);
+		if (!(F instanceof OplMapping)) {
+			throw new RuntimeException("Not a mapping: " + e.F);
+		}
+		OplMapping F0 = (OplMapping) F;
+		
+		OplObject I = ENV.get(e.I);
+		if (I instanceof OplPres) {
+			OplPres I0 = (OplPres) I;
+			return F0.sigma(I0);			
+		}
+//		if (I instanceof OplSetTrans) {
+//			OplSetTrans h = (OplSetTrans) I;
+//			return F0.delta(h);
+//		}
+		
+		throw new RuntimeException("Not a presentation of an instance: " + e.I);
 	}
 
 

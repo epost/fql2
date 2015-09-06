@@ -25,8 +25,10 @@ import fql_lib.opl.OplExp.OplDelta;
 import fql_lib.opl.OplExp.OplEval;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
+import fql_lib.opl.OplExp.OplSat;
 import fql_lib.opl.OplExp.OplSetInst;
 import fql_lib.opl.OplExp.OplSetTrans;
+import fql_lib.opl.OplExp.OplSigma;
 import fql_lib.opl.OplExp.OplTerm;
 import fql_lib.opl.OplExp.OplTransEval;
 import fql_lib.opl.OplExp.OplVar;
@@ -44,7 +46,7 @@ public class OplParser {
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
-		"transeval", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
+		"sigma", "saturate", "presentation", "constants", "transeval", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -100,9 +102,12 @@ public class OplParser {
 		Parser<?> java = java();
 		Parser<?> mapping = mapping();
 		Parser<?> delta = Parsers.tuple(term("delta"), ident(), ident());
+		Parser<?> sigma = Parsers.tuple(term("sigma"), ident(), ident());
 		Parser<?> evaltrans = Parsers.tuple(term("transeval"), ident(), ident(), oplTerm());
+		Parser<?> presentation = presentation();
+		Parser<?> sat = Parsers.tuple(term("saturate"), ident());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { delta, mapping, theory, model, eval, trans, java, evaltrans });
+		Parser<?> a = Parsers.or(new Parser<?>[] { sigma, sat, presentation, delta, mapping, theory, model, eval, trans, java, evaltrans });
 		ref.set(a);
 
 		return a;
@@ -132,6 +137,15 @@ public class OplParser {
 				section("symbols", p),
 				section("equations", oplEq()));
 		return Parsers.between(term("theory").followedBy(term("{")), foo, term("}"));
+	}
+	
+	public static final Parser<?> presentation() {
+		Parser<?> q = Parsers.tuple(ident(), Parsers.tuple(term("@"), NUMBER).optional());
+		Parser<?> p = Parsers.tuple(q, term(":"), ident());
+		Parser<?> foo = Parsers.tuple( 
+				section("constants", p),
+				section("equations", oplEq()));
+		return Parsers.tuple(term("presentation").followedBy(term("{")), foo, term("}").followedBy(term(":")), ident());
 	}
 	
 	public static final Parser<?> java() {
@@ -285,6 +299,54 @@ public class OplParser {
 		return new OplExp.OplSig(prec, sorts, symbols, equations);
 	}
 
+	private static OplExp toPresentation(Object o) {
+		Tuple4 t = (Tuple4) o;
+		
+		
+	//	Tuple3 a = (Tuple3) t.a; //presentation
+		org.codehaus.jparsec.functors.Pair e = (org.codehaus.jparsec.functors.Pair) t.b;
+	//	Tuple3 c = (Tuple3) t.c; // :
+		
+		String yyy = (String) t.d;
+		
+		org.codehaus.jparsec.functors.Pair b = (org.codehaus.jparsec.functors.Pair) e.a;
+		org.codehaus.jparsec.functors.Pair c = (org.codehaus.jparsec.functors.Pair) e.b;
+		
+		List<Tuple3> symbols0 = (List<Tuple3>) b.b;
+		List<Tuple4> equations0 = (List<Tuple4>) c.b;
+		
+		Map<String, String> symbols = new HashMap<>();
+		Map<String, Integer> prec = new HashMap<>();
+		for (Tuple3 x : symbols0) {
+			org.codehaus.jparsec.functors.Pair name0 = (org.codehaus.jparsec.functors.Pair) x.a;
+			String name = (String) name0.a;
+			
+			if (name0.b != null) {
+				org.codehaus.jparsec.functors.Pair zzz = (org.codehaus.jparsec.functors.Pair) name0.b;
+				Integer i = (Integer) zzz.b;
+				prec.put(name, i);
+			}
+
+			//List<String> args = (List<String>) x.c;
+			String dom = (String) x.c;
+			if (symbols.containsKey(name)) {
+				throw new DoNotIgnore("Duplicate symbol " + name);
+			}
+			symbols.put(name, dom);
+		}
+		
+		List<Triple<OplCtx<String>, OplTerm, OplTerm>> equations = new LinkedList<>();
+		for (Tuple4 x : equations0) {
+			List<Tuple3> fa = (List<Tuple3>) x.b;
+			OplCtx<String> ctx = toCtx(fa);
+			Tuple3 eq = (Tuple3) x.d;
+			OplTerm lhs = toTerm(eq.a);
+			OplTerm rhs = toTerm(eq.c);
+			equations.add(new Triple<>(ctx, lhs, rhs));
+		}
+		
+		return new OplExp.OplPres(yyy, prec, symbols, equations);
+	}
 	private static OplExp toModel(Object o) {
 		Tuple3 t = (Tuple3) o;
 		
@@ -354,6 +416,14 @@ public class OplParser {
 		if (c instanceof String) {
 			return new OplVar((String) c);
 		}
+		
+		if (c instanceof org.codehaus.jparsec.functors.Pair) {
+			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) c;
+			if (p.a.toString().equals("saturate")) {
+				return new OplSat((String)p.b);
+			}
+		}
+		
 		try {
 			return toTheory(c);
 		} catch (DoNotIgnore de) {
@@ -362,7 +432,7 @@ public class OplParser {
 		}
 		catch (Exception ee) {
 		}
-		
+				
 		try {
 			return toModel(c);
 		} catch (DoNotIgnore de) {
@@ -370,6 +440,15 @@ public class OplParser {
 			throw new RuntimeException(de.getMessage());
 		}catch (Exception ee) { 
 		}
+		
+		try {
+			return toPresentation(c);
+		} catch (DoNotIgnore de) {
+			de.printStackTrace();
+			throw new RuntimeException(de.getMessage());
+		} catch (Exception ee) {
+		}
+
 		try {
 			return toTrans(c);
 		} catch (DoNotIgnore de) {
@@ -395,7 +474,7 @@ public class OplParser {
 		}
 		
 		try {
-			return toDelta(c);
+			return toFDM(c);
 		} catch (DoNotIgnore de) {
 			de.printStackTrace();
 			throw new RuntimeException(de.getMessage());
@@ -552,14 +631,18 @@ public class OplParser {
 		return new OplTransEval(i, f, r);
 	}
 	
-	private static OplExp toDelta(Object c) {
+	private static OplExp toFDM(Object c) {
 		Tuple3 t = (Tuple3) c;
-		if (!t.a.toString().equals("delta")) {
-			throw new RuntimeException();
-		}
 		String i = (String) t.b;
 		String r = (String) t.c;
-		return new OplDelta(i, r);
+
+		if (t.a.toString().equals("delta")) {
+			return new OplDelta(i, r);
+		} else if (t.a.toString().equals("sigma"))  {
+			return new OplSigma(i, r);
+		}
+		throw new RuntimeException();
+
 	}
 
 	public static Parser<?> section(String s, Parser<?> p) {
