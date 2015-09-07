@@ -49,6 +49,8 @@ public class OplEmployeesExample extends Example {
 			+ "\n} : S"
 			+ "\n"
 			+ "\nJ = saturate I"
+			+ "\nK = unsaturate J"
+			+ "\nL = saturte K"
 			+ "\n";
 
 

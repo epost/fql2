@@ -17,7 +17,8 @@ public class OplStackExample extends Example {
 		return s;
 	}
 	
-	String s = "C = theory {"
+	String s = "//requires disabling mapping check"
+			+ "\nC = theory {"
 			+ "\n 	sorts "
 			+ "\n		E;"
 			+ "\n 	symbols"

@@ -227,21 +227,26 @@ public class OplToKB {
 	}
 	
 	private static KB<String, String> convert(OplSig s, String which) {
+		Function<Pair<String, String>, Boolean> gt = x -> {
+			Integer l = s.prec.get(x.first);
+			Integer r = s.prec.get(x.second);
+			return l > r;
+		};
+
 		if (!s.symbols.keySet().equals(s.prec.keySet())) {
-			throw new RuntimeException("Cannot use Knuth-Bendix - not all symbol precedence given.");
+			if (DEBUG.debug.opl_alpha) {
+				gt = x -> {
+					return x.first.toString().compareTo(x.second) > 0;
+				};
+			} else {
+				throw new RuntimeException("Cannot use Knuth-Bendix - not all symbol precedence given.");
+			}
 		}
 		
 		Set<Pair<KBExp<String, String>, KBExp<String, String>>> eqs = new HashSet<>();
 		for (Triple<OplCtx<String>, OplTerm, OplTerm> eq : s.equations) {
 			eqs.add(new Pair<>(convert(eq.second), convert(eq.third)));
 		}
-		
-		Function<Pair<String, String>, Boolean> gt = x -> {
-			Integer l = s.prec.get(x.first);
-			Integer r = s.prec.get(x.second);
-			
-			return l > r;
-		};
 		
 		Iterator<String> fr = new Iterator<String>() {
 			int i = 0;

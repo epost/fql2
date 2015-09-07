@@ -17,6 +17,7 @@ import fql_lib.opl.OplExp.OplSigma;
 import fql_lib.opl.OplExp.OplString;
 import fql_lib.opl.OplExp.OplTerm;
 import fql_lib.opl.OplExp.OplTransEval;
+import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
 
 public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
@@ -188,6 +189,16 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		}
 		OplPres S = (OplPres) i;
 		return e.convert(S.S, S.sig, S);
+	}
+	
+	@Override
+	public OplObject visit(OplProgram env, OplUnSat e) {
+		OplObject i = ENV.get(e.I);
+		if (!(i instanceof OplSetInst)) {
+			throw new RuntimeException("Not a model: " + e.I);
+		}
+		OplSetInst S = (OplSetInst) i;
+		return e.convert(S.sig, S.sig0, S);
 	}
 	
 	@Override

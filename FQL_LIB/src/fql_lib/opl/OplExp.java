@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.script.Bindings;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -24,6 +23,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
+import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Triple;
 import fql_lib.Util;
@@ -368,6 +368,58 @@ public abstract class OplExp implements OplObject {
 		}
 	}
 	
+	public static class OplUnSat extends OplExp {
+		
+		String I;
+		
+		public OplUnSat(String I) {
+			this.I = I;
+		}
+		
+		public OplPres convert(String S, OplSig sig, OplSetInst I) {
+			Map<String, String> symbols = new HashMap<>();
+			for (String s : sig.sorts) {
+				for (String c : I.sorts.get(s)) {
+					symbols.put(c, s);
+				}
+			}
+			
+			List<Triple<OplCtx<String>, OplTerm, OplTerm>> equations = new LinkedList<>();
+			for (String f : sig.symbols.keySet()) {
+				List<String> arg_ts = sig.symbols.get(f).first;
+				if (arg_ts.isEmpty()) {
+					continue;
+				}
+				Map<Integer, List<String>> l = new HashMap<>();
+				int i = 0;
+				for (String t : arg_ts) {
+					l.put(i++, new LinkedList<>(I.sorts.get(t)));
+				}
+				List<LinkedHashMap<Integer, String>> m = FinSet.homomorphs(l);
+				for (HashMap<Integer, String> a : m) {
+					List<String> arg1 = new LinkedList<>();
+					List<OplTerm> arg2 = new LinkedList<>();
+					for (int j = 0; j < i; j++) {
+						arg1.add(a.get(j));
+						arg2.add(new OplTerm(a.get(j), new LinkedList<>()));
+					}
+					OplTerm termA = new OplTerm(f, arg2);
+					OplTerm termB = new OplTerm(I.symbols.get(f).get(arg1), new LinkedList<>());
+					equations.add(new Triple<>(new OplCtx<String>(), termA, termB));
+				}
+			}
+			
+			OplPres ret = new OplPres(S, new HashMap<>(), symbols, equations);
+			ret.convert(sig); //needed
+			return ret;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
+	
 	public static class OplSat extends OplExp {
 		
 		String I;
@@ -377,7 +429,7 @@ public abstract class OplExp implements OplObject {
 		}
 		
 		public OplSetInst convert(String S, OplSig sig, OplPres P) {
-			OplToKB kb = new OplToKB(P.convert(sig));
+			OplToKB kb = P.convert(sig).getKB();
 			
 			Map<String, Set<Pair<OplCtx<String>, OplTerm>>> sorts = new HashMap<>();
 			Map<String, Set<String>> sorts0 = new HashMap<>();
@@ -423,6 +475,15 @@ public abstract class OplExp implements OplObject {
 	
 	public static class OplSig extends OplExp {
 		
+		OplToKB kb;
+		OplToKB getKB() {
+			if (kb != null) {
+				return kb;
+			}
+			kb = new OplToKB(this);
+			return kb;
+		}
+		
 		@Override
 		public JComponent display() {
 			JTabbedPane ret = new JTabbedPane();
@@ -431,10 +492,10 @@ public abstract class OplExp implements OplObject {
 			ret.add(p, "Text");
 			
 			try {
-				OplToKB xxx = new OplToKB(this);
-				ret.add(makeTiny2(xxx), "KB");				
+//				OplToKB xxx = getKB();
+				ret.add(makeTiny2(), "KB");				
 				try {
-					ret.add(makeTiny(xxx), "Hom");				
+					ret.add(makeTiny(), "Hom");				
 				} catch (RuntimeException ex) {
 						p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", ex.getMessage());
 						ret.add(p, "Hom");
@@ -447,7 +508,8 @@ public abstract class OplExp implements OplObject {
 			return ret;
 		}
 		
-		JPanel makeTiny2(OplToKB kb) {
+		JPanel makeTiny2() {
+			OplToKB kb = getKB();
 			JPanel ret = new JPanel(new GridLayout(1,1));
 			JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 			ret.add(pane);
@@ -482,7 +544,8 @@ public abstract class OplExp implements OplObject {
 
 		}
 		
-		JPanel makeTiny(OplToKB kb) {
+		JPanel makeTiny() {
+			OplToKB kb = getKB();
 			JPanel ret = new JPanel(new GridLayout(1,1));
 			JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 			ret.add(pane);
@@ -621,7 +684,6 @@ public abstract class OplExp implements OplObject {
 		public OplSig sig;
 		
 		public OplSig convert(OplSig in) {
-			System.out.println(prec);
 			Map<String, Integer> prec0 = new HashMap<>(in.prec);
 			prec0.putAll(prec);
 			
@@ -722,21 +784,6 @@ public abstract class OplExp implements OplObject {
 				} 
 				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), "Symbols", 
 						rows.toArray(new Object[][] { }), new Object[] {src0 + " (in)", dst0 + " (out)"}));
-
-			 
-/*			 for (String n : symbols.keySet()) {
-				Pair<OplCtx<String>, OplTerm> f = symbols.get(n);
-				List<String> ns = f.first.names();
-				List<String> ts = f.first.values();
-				ns.add(f.second.toString());
-				ts.add(f.second.type(dst, f.first));
-				Object[] row = ns.toArray();
-				Object[] cols = ts.toArray();
-				List<Object[]> rows = new LinkedList<Object[]>();
-				rows.add(row);
-				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), n, 
-						rows.toArray(new Object[][] { }), cols));
-			}  */
 			
 			return Util.makeGrid(list);			
 		}
@@ -767,7 +814,8 @@ public abstract class OplExp implements OplObject {
 			return v.visit(env, this);
 		}
 		
-		public <X> Pair<OplCtx<X>, OplTerm> trans(OplCtx<X> G, OplTerm E) {
+		//TODO: this is used to translate and evaluate terms.  Presumably, is like sigma.
+		 public <X> Pair<OplCtx<X>, OplTerm> trans(OplCtx<X> G, OplTerm E) {
 		
 			OplTerm E0;
 			if (E.var != null) {
@@ -782,7 +830,7 @@ public abstract class OplExp implements OplObject {
 			OplCtx<X> G0 = new OplCtx<>(l);
 			
 			return new Pair<>(G0, E0);
-		}
+		} 
 		
 		public void validate(OplSig src, OplSig dst) {
 			this.src = src;
@@ -812,6 +860,10 @@ public abstract class OplExp implements OplObject {
 				}
 				Pair<OplCtx<String>, OplTerm> v = symbols.get(k);
 				String t = v.second.type(dst, v.first);
+				if (t == null) {
+					throw new RuntimeException("Cannot type " + v.second + " in " + v.first  + ". Mostly likely, forgotten ()");
+				}
+			
 				if (!t.equals(sorts.get(src.symbols.get(k).second))) {
 					throw new RuntimeException("Symbol " + k + " returns a " + src.symbols.get(k).second + " but transforms to " + t);
 				}
@@ -820,7 +872,18 @@ public abstract class OplExp implements OplObject {
 					throw new RuntimeException("Symbol " + k + " inputs a " + v.first.values() + " but transforms to " + trans_t);
 				}
 			}
-			//TODO: equations check
+			
+			if (DEBUG.debug.opl_validate) {
+			for (Triple<OplCtx<String>, OplTerm, OplTerm> eq : src.equations) {
+				OplTerm l = sigma(eq.second);
+				OplTerm r = sigma(eq.third);
+				KBExp<String, String> l0 = dst.getKB().red(l);
+				KBExp<String, String> r0 = dst.getKB().red(r);
+				if (!l0.equals(r0)) {
+					throw new RuntimeException("Not preserved: " + l + " = " + r + " transforms to " + l0 + " = " + r0);
+				}
+			}
+			}
 		}
 
 		public OplMapping(Map<String, String> sorts,
@@ -831,9 +894,6 @@ public abstract class OplExp implements OplObject {
 			this.dst0 = dst0;
 		}
 		
-		//F : C -> D
-		//h : I (D-Inst) => J (D-Inst)
-		//delta F h : delta F A (C-Inst) => delta F B (C-Inst)
 		public OplSetTrans delta(OplSetTrans h) {
 			if (!h.src0.sig.equals(dst0)) {
 				throw new RuntimeException("Source of transform, " + h.src0 + " does not have theory " + dst0);
@@ -872,16 +932,20 @@ public abstract class OplExp implements OplObject {
 			
 			List<Triple<OplCtx<String>, OplTerm, OplTerm>> eqs = new LinkedList<>();
 			for (Triple<OplCtx<String>, OplTerm, OplTerm> eq : eqs) {
-				List<Pair<String, String>> l = eq.first.values2().stream().map(x -> { return new Pair<>(x.first, sorts.get(x.second)); }).collect(Collectors.toList());
-				OplCtx<String> nctx = new OplCtx<String>(l);				
+				OplCtx<String> nctx = sigma(eq.first);				
 				eqs.add(new Triple<>(nctx, sigma(eq.second), sigma(eq.third)));
 			}
 			
 			OplPres ret = new OplPres(dst0, I.prec, sym, eqs);
 			ret.sig = dst;
-			System.out.println(ret);
 			ret.convert(dst); //needed
 			return ret;
+		}
+		
+		OplCtx<String> sigma(OplCtx<String> t) {
+			List<Pair<String, String>> l = t.values2().stream().map(x -> { return new Pair<>(x.first, sorts.get(x.second)); }).collect(Collectors.toList());
+			OplCtx<String> nctx = new OplCtx<String>(l);				
+			return nctx;
 		}
 		
 		OplTerm sigma(OplTerm t) {
@@ -1101,7 +1165,15 @@ public abstract class OplExp implements OplObject {
 				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), n + " (" + rows.size() + ")", 
 						rows.toArray(new Object[][] { }), new Object[] {n} ));
 			}
-			for (String n : symbols.keySet()) {
+			keys = new LinkedList<>(symbols.keySet());
+			keys.sort(new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+					return o1.compareTo(o2);
+				}
+			});
+		
+			for (String n : keys) {
 				if (sig0.symbols.get(n).first.size() == 0) {
 					continue;
 				}
@@ -1115,7 +1187,7 @@ public abstract class OplExp implements OplObject {
 				}
 				List<String> l = new LinkedList<>(sig0.symbols.get(n).first);
 				l.add(sig0.symbols.get(n).second);
-				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), n, rows.toArray(new Object[][] { }), l.toArray()));
+				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), n + " (" + rows.size() + ")", rows.toArray(new Object[][] { }), l.toArray()));
 			}
 			
 			return Util.makeGrid(list);			
@@ -1404,6 +1476,7 @@ public abstract class OplExp implements OplObject {
 		public R visit (E env, OplDelta e);
 		public R visit (E env, OplSigma e);
 		public R visit (E env, OplSat e);		
+		public R visit (E env, OplUnSat e);		
 	}
 
 	private static List<List<String>> prod(List<Set<String>> in1) {

@@ -17,9 +17,8 @@ public class OplSigmaExample extends Example {
 		return s;
 	}
 	
-	String s = "//this file requires KB on sorts without constants"
-			+ "\n"
-			+ "\nC = theory {"
+	String s = 
+			  "C = theory {"
 			+ "\n	sorts "
 			+ "\n		Amphibian,"
 			+ "\n		LandAnimal,"
@@ -85,7 +84,8 @@ public class OplSigmaExample extends Example {
 			+ "\n} : C -> D"
 			+ "\n"
 			+ "\nJ = sigma F I"
-			+ "\nK = saturate J";
+			+ "\nK = saturate J //requires KB on sorts without constants"
+			+ "\n";
 
 
 

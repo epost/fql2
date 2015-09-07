@@ -230,7 +230,9 @@ public class DEBUG implements Serializable {
 	public int opl_iterations = 128;
 	public boolean opl_require_const = true;
 	public boolean opl_sort_cps = true;
+	public boolean opl_alpha = true;
 	public int opl_hom_its = 8;
+	public boolean opl_validate = true;
 	
 	public void showOptions() {
 
@@ -333,6 +335,11 @@ public class DEBUG implements Serializable {
 		x_1.add(check_oriented_label);
 		x_2.add(check_oriented_box);
 
+		JCheckBox opl_validate_box = new JCheckBox("", opl_validate);
+		JLabel opl_validate_label = new JLabel("Validate mappings:");
+		opl1.add(opl_validate_label);
+		opl2.add(opl_validate_box);
+		
 		JCheckBox opl_unfailing_box = new JCheckBox("", opl_unfailing);
 		JLabel opl_unfailing_label = new JLabel("Allow unorientable equations:");
 		opl1.add(opl_unfailing_label);
@@ -347,6 +354,12 @@ public class DEBUG implements Serializable {
 		JLabel opl_sort_label = new JLabel("Sort critical pairs:");
 		opl2.add(opl_sort_box);
 		opl1.add(opl_sort_label);
+
+		JCheckBox opl_alpha_box = new JCheckBox("", opl_sort_cps);
+		JLabel opl_alpha_label = new JLabel("Use alphabetical when precedence not total:");
+		opl2.add(opl_alpha_box);
+		opl1.add(opl_alpha_label);
+
 		
 		JTextField opl_iterations_box = new JTextField(Integer.toString(opl_iterations), 12);
 		JLabel opl_iterations_label = new JLabel("Knuth-Bendix iterations");
@@ -358,10 +371,6 @@ public class DEBUG implements Serializable {
 		opl2.add(opl_homit_box);
 		opl1.add(opl_homit_label);
 		
-		opl1.add(new JLabel());
-		opl2.add(new JLabel());
-		opl1.add(new JLabel());
-		opl2.add(new JLabel());
 		opl1.add(new JLabel());
 		opl2.add(new JLabel());
 		opl1.add(new JLabel());
@@ -810,6 +819,8 @@ public class DEBUG implements Serializable {
 			opl_require_const = opl_const_box.isSelected();
 			opl_sort_cps = opl_sort_box.isSelected();
 			opl_unfailing = opl_unfailing_box.isSelected();
+			opl_alpha = opl_alpha_box.isSelected();
+			opl_validate = opl_validate_box.isSelected();
 			
 		//	limit_examples = limex.isSelected();
 			useLineage = (String) lineageBox.getSelectedItem();

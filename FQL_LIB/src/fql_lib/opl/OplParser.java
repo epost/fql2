@@ -31,6 +31,7 @@ import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSigma;
 import fql_lib.opl.OplExp.OplTerm;
 import fql_lib.opl.OplExp.OplTransEval;
+import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
 
 public class OplParser {
@@ -46,7 +47,7 @@ public class OplParser {
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
-		"sigma", "saturate", "presentation", "constants", "transeval", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
+		"unsaturate", "sigma", "saturate", "presentation", "constants", "transeval", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -106,8 +107,9 @@ public class OplParser {
 		Parser<?> evaltrans = Parsers.tuple(term("transeval"), ident(), ident(), oplTerm());
 		Parser<?> presentation = presentation();
 		Parser<?> sat = Parsers.tuple(term("saturate"), ident());
+		Parser<?> unsat = Parsers.tuple(term("unsaturate"), ident());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { sigma, sat, presentation, delta, mapping, theory, model, eval, trans, java, evaltrans });
+		Parser<?> a = Parsers.or(new Parser<?>[] { sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, java, evaltrans });
 		ref.set(a);
 
 		return a;
@@ -421,6 +423,8 @@ public class OplParser {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) c;
 			if (p.a.toString().equals("saturate")) {
 				return new OplSat((String)p.b);
+			} else if (p.a.toString().equals("unsaturate")) {
+				return new OplUnSat((String)p.b);
 			}
 		}
 		
