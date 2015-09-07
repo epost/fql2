@@ -34,7 +34,7 @@ public class OplToKB {
 		if (DEBUG.debug.opl_require_const) {
 			checkEmpty();
 		}
-		KB = convert(this.sig, "lpo");
+		KB = convert(this.sig);
 		KB.complete();
 	}
 	
@@ -226,7 +226,7 @@ public class OplToKB {
 		return new OplTerm(t2.f, l);
 	}
 	
-	private static KB<String, String> convert(OplSig s, String which) {
+	private static KB<String, String> convert(OplSig s) {
 		Function<Pair<String, String>, Boolean> gt = x -> {
 			Integer l = s.prec.get(x.first);
 			Integer r = s.prec.get(x.second);
@@ -260,7 +260,7 @@ public class OplToKB {
 			}
 		};
 		
-		return new KB<>(eqs, KBOrders.pogt(gt, which), fr);
+		return new KB<>(eqs, KBOrders.pogt(gt), fr);
 	}
 	
 }

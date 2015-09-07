@@ -226,7 +226,7 @@ public class DEBUG implements Serializable {
 	public boolean x_elements = true;
 	public boolean x_json = true;
 		
-	public boolean opl_unfailing = true;
+	public boolean opl_unfailing = false;
 	public int opl_iterations = 128;
 	public boolean opl_require_const = true;
 	public boolean opl_sort_cps = true;
