@@ -83,8 +83,6 @@ public class OplStackExample extends Example {
 			+ "\n		s -> forall x0:S. plus(append(x0, push(empty(), i()))),"
 			+ "\n		plus -> forall x0:S, y0:S. plus(append(x0,y0));		"
 			+ "\n} : C -> D "
-			+ "\n"
-			+ "\ntrans_plus_sz_sz = transeval F DSem plus(s(z()), s(z())) //[2]"
 			+ "\n";
 
 

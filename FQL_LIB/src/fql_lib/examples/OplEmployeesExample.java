@@ -17,9 +17,7 @@ public class OplEmployeesExample extends Example {
 		return s;
 	}
 	
-	String s = "//requires using KB with empty sorts option."
-			+ "\n"
-			+ "\nS = theory { "
+	String s = "S = theory { "
 			+ "\n sorts"
 			+ "\n 	Employee, Department, dom;"
 			+ "\n symbols"
@@ -36,7 +34,7 @@ public class OplEmployeesExample extends Example {
 			+ "\n}"
 			+ "\n"
 			+ "\nI = presentation {"
-			+ "\n	constants a@1:Employee, b@2:Employee, c@3:Employee,"
+			+ "\n	generators a@1:Employee, b@2:Employee, c@3:Employee,"
 			+ "\n	          m@1:Department, s@2:Department,"
 			+ "\n	          Al@1:dom, Akin@2:dom, Bob@3:dom, Bo@4:dom, "
 			+ "\n	          Carl@5:dom, Cork@6:dom, Math@7:dom, Cs@8:dom;"
@@ -50,7 +48,7 @@ public class OplEmployeesExample extends Example {
 			+ "\n"
 			+ "\nJ = saturate I"
 			+ "\nK = unsaturate J"
-			+ "\nL = saturte K"
+			+ "\nL = saturate K"
 			+ "\n";
 
 

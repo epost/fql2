@@ -34,7 +34,7 @@ public class OplSigmaExample extends Example {
 			+ "\n}"
 			+ "\n"
 			+ "\nI = presentation {"
-			+ "\n	constants "
+			+ "\n	generators "
 			+ "\n		a1@1:Amphibian, a2@2:Amphibian,"
 			+ "\n		l1@1:LandAnimal, l2@2:LandAnimal, l3@3:LandAnimal, l4@4:LandAnimal, l5@5:LandAnimal,"
 			+ "\n		w1@1:WaterAnimal, w2@2:WaterAnimal, w3@3:WaterAnimal, w4@4:WaterAnimal,"

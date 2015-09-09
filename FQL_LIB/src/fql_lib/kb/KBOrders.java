@@ -58,7 +58,7 @@ public class KBOrders {
 					return true;
 				} 
 				
-				//LPO2x
+				//LPO2c
 				if (f.equals(g)) {
 					for (KBExp<C, V> ti : t0.args) {
 						if (!this.apply(new Pair<>(s0, ti))) {

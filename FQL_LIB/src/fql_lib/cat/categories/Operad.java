@@ -6,9 +6,9 @@ import java.util.Set;
 public interface Operad<O,A> {
 
 	static class Arrow<O,A> {
-		A a;
-		List<O> src;
-		O dst;
+		public A a;
+		public List<O> src;
+		public O dst;
 		
 		public Arrow(List<O> src, O dst, A a) {
 			this.a = a;
@@ -66,6 +66,6 @@ public interface Operad<O,A> {
 	
 	public Arrow<O,A> id(O o);
 	
-	public Arrow<O,A> comp(List<Arrow<O,A>> F);
+	public Arrow<O,A> comp(Arrow<O,A> F, List<Arrow<O,A>> A);
 	
 }

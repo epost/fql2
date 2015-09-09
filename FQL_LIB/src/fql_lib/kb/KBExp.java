@@ -16,7 +16,7 @@ import fql_lib.Util;
 public abstract class KBExp<C,V> {
 	
 	
-	static class KBVar<C,V> extends KBExp<C,V> {
+	public static class KBVar<C,V> extends KBExp<C,V> {
 		public V var;
 		
 		public KBVar(V var) {
@@ -132,7 +132,7 @@ public abstract class KBExp<C,V> {
 		
 	}
 	
-	static class KBApp<C,V> extends KBExp<C,V> {
+	public static class KBApp<C,V> extends KBExp<C,V> {
 		public C f;
 		public List<KBExp<C,V>> args;
 		

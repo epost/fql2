@@ -31,18 +31,12 @@ public class KB<C, V> {
 		}
 	} */
 	 
-
+	private boolean isComplete = false;
 	private List<Pair<KBExp<C, V>, KBExp<C, V>>> E;
 	private Set<Pair<KBExp<C, V>, KBExp<C, V>>> R;
-	// private Function<Pair<C,C>, Boolean> gt;
 	private Iterator<V> fresh;
 	private Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> gt;
 	
-	public Set<Pair<KBExp<C, V>, KBExp<C, V>>> R() {
-		return R;
-	}
-
-
 	private static <C, V> Pair<KBExp<C, V>, KBExp<C, V>> freshen(Iterator<V> fresh,
 			Pair<KBExp<C, V>, KBExp<C, V>> eq) {
 		Set<V> vars = new HashSet<>();
@@ -174,23 +168,23 @@ public class KB<C, V> {
 		return null;
 	} */
 	
-	public static <X> void remove(Collection<X> X, X x) {
+	private static <X> void remove(Collection<X> X, X x) {
 		while (X.remove(x));
 	}
 	
-	public static <X> void add(Collection<X> X, X x) {
+	private static <X> void add(Collection<X> X, X x) {
 		if (!X.contains(x)) {
 			X.add(x);
 		}
 	}
 	
-	public static <X> void addFront(List<X> X, X x) {
+	private static <X> void addFront(List<X> X, X x) {
 		if (!X.contains(x)) {
 			X.add(0, x);
 		}
 	}
 	
-	public static <X> void addAll(Collection<X> X, Collection<X> x) {
+	private static <X> void addAll(Collection<X> X, Collection<X> x) {
 		for (X xx : x) {
 			add(X, xx);
 		}
@@ -233,63 +227,64 @@ public class KB<C, V> {
 		});
 	}
 	
+	
+	private Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen = new HashSet<>();	
+	private int count = 0;
+
 	public void complete() {
-		int count = 0;
-		Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen = new HashSet<>();
-		for (;;) {
-			System.out.println("iteration " + count);
-			count++;
-			//validateRules();
-			if (count > DEBUG.debug.opl_iterations) {
-				throw new RuntimeException("Exceeded iteration limit");
-			}
-			if (E.isEmpty()) {
-				break;
-			}
-			Pair<KBExp<C, V>, KBExp<C, V>> st = E.get(0);
+		while (!step());
+	}
+		
+	private boolean step() {
+		if (count > DEBUG.debug.opl_iterations) {
+			throw new RuntimeException("Exceeded iteration limit");
+		}
 
-			KBExp<C, V> s0 = st.first;
-			KBExp<C, V> t0 = st.second;
-			//KBExp<C, V> s0 = red(null, fresh, R, s);
-			//KBExp<C, V> t0 = red(null, fresh, R, t);
-			
-			//KBExp<C, V> s0 = s; 
-			//KBExp<C, V> t0 = t; 
-			//if (s0.equals(t0)) {
-				//throw new RuntimeException();
-			//	remove(E, st); 
-			//	continue;
-		//	}
-			KBExp<C, V> a, b;
-			if (gt.apply(new Pair<>(s0, t0))) {
-				a = s0; b = t0;
-			} else if (gt.apply(new Pair<>(t0, s0))) {
-				a = t0; b = s0;
+		System.out.println("iteration " + count);
+		count++;
+
+		if (E.isEmpty()) {
+			isComplete = true;
+			return true;
+		}		
+
+		Pair<KBExp<C, V>, KBExp<C, V>> st = E.get(0);
+		
+		KBExp<C, V> s0 = st.first;
+		KBExp<C, V> t0 = st.second;
+		KBExp<C, V> a, b;
+		if (gt.apply(new Pair<>(s0, t0))) {
+			a = s0; b = t0;
+		} else if (gt.apply(new Pair<>(t0, s0))) {
+			a = t0; b = s0;
+		} else if (s0.equals(t0)) {
+			remove(E, st); return false; //in case x = x coming in
+		}
+		else {
+			if (DEBUG.debug.opl_unfailing) {
+				remove(E, st); add(E, st); return false; 					
 			} else {
-				if (DEBUG.debug.opl_unfailing) {
-					remove(E, st); add(E, st); continue; 					
-				} else {
-					throw new RuntimeException("Cannot orient " + s0 + " and " + t0);
-				}
-			}
-			Pair<KBExp<C, V>, KBExp<C, V>> ab = new Pair<>(a, b);
-			
-			R.add(ab);
-			List<Pair<KBExp<C, V>, KBExp<C, V>>> CP = filterSubsumed(allcps(seen, ab));
-			
-			addAll(E, CP);
-			remove(E, st); 
-			
-			compose();
-			collapseBy(ab);
-
-			simplify(); //definitely needed... cuts down on number of iterations
-			
-			if (DEBUG.debug.opl_sort_cps) {
-				sortByStrLen(E);
+				throw new RuntimeException("Cannot orient " + s0 + " and " + t0 + " equal: " + s0.equals(t0));
 			}
 		}
+		Pair<KBExp<C, V>, KBExp<C, V>> ab = new Pair<>(a, b);
+			
+		R.add(ab);
+		List<Pair<KBExp<C, V>, KBExp<C, V>>> CP = filterSubsumed(allcps(seen, ab));
+			
+		addAll(E, CP);
+		remove(E, st); 
+			
+		compose();
+		collapseBy(ab);
+
+		simplify(); //definitely needed... cuts down on number of iterations
+			
+		if (DEBUG.debug.opl_sort_cps) {
+			sortByStrLen(E);
+		}
 		
+		return false;	
 	} 
 	
 
@@ -346,7 +341,7 @@ public class KB<C, V> {
 	}
 
 	// rules in R are gd
-	Map<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>, Set<Pair<KBExp<C, V>, KBExp<C, V>>>> cp_cache = new HashMap<>();
+	private Map<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>, Set<Pair<KBExp<C, V>, KBExp<C, V>>>> cp_cache = new HashMap<>();
 	private  Set<Pair<KBExp<C, V>, KBExp<C, V>>> cp(Pair<KBExp<C, V>, KBExp<C, V>> gd, Pair<KBExp<C, V>, KBExp<C, V>> ab0) {
 		Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>> entry = new Pair<>(gd, ab0);
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> value = cp_cache.get(entry);
@@ -381,7 +376,25 @@ public class KB<C, V> {
 		return ret;
 	}
 
-	public KBExp<C, V> red(KBExp<C, V> e) {
+	public boolean eq(KBExp<C, V> lhs, KBExp<C, V> rhs) {
+		KBExp<C, V> lhs0 = nf(lhs);
+		KBExp<C, V> rhs0 = nf(rhs);
+		if (lhs0.equals(rhs0)) {
+			return true;
+		}
+		
+		if (isComplete) {
+			return false;
+		}
+		
+		step();
+		return eq(lhs, rhs);
+	}
+	
+	public KBExp<C, V> nf(KBExp<C, V> e) {
+		if (!isComplete) {
+			throw new RuntimeException("Cannot find normal form for incomplete system.");
+		}
 		return red(null, fresh, R, e);
 	}
 	private static <C, V> KBExp<C, V> red(Map<KBExp<C,V>, KBExp<C,V>> cache, Iterator<V> fresh, Set<Pair<KBExp<C, V>, KBExp<C, V>>> R,
@@ -480,7 +493,7 @@ public class KB<C, V> {
 //		return e.accept(new Unit(), new StepVisitor<>(cache, fresh, R));
 	}
 
-	public String printEqs() {
+	private String printEqs() {
 		String ret = "Equations:\n\n";
 		ret += Util.sep(E.stream().map(x -> {
 			return x.first + " = " + x.second;
@@ -488,7 +501,7 @@ public class KB<C, V> {
 		return ret;
 	}
 
-	public String printReds() {
+	private String printReds() {
 		String ret = "Reductions:\n\n";
 		ret += Util.sep(R.stream().map(x -> {
 			return x.first + " -> " + x.second;
@@ -499,6 +512,35 @@ public class KB<C, V> {
 	@Override
 	public String toString() {
 		return printEqs() + "\n\n" + printReds();
+	}
+	
+	public String printKB() {
+		
+		KB<String, String> kb = (KB<String, String>) this;
+		
+		List<String> R0 = new LinkedList<>();
+		for (Pair<KBExp<String, String>, KBExp<String, String>> r : kb.R) {
+			int i = 0;
+			Map<String, KBExp<String, String>> m = new HashMap<>();
+			for (String v : r.first.vars()) {
+				if (v.startsWith("_v") && !m.containsKey(v)) {
+					m.put(v, new KBVar<String, String>("v" + i++));
+				}
+			}
+			for (String v : r.second.vars()) {
+				if (v.startsWith("_v") && !m.containsKey(v)) {
+					m.put(v, new KBVar<String, String>("v" + i++));
+				}
+			}
+			R0.add(r.first.subst(m) + " -> " + r.second.subst(m));
+		}
+		R0.sort(new Comparator<String>() {
+			@Override
+			public int compare(String o1, String o2) {
+				return o1.length() - o2.length();
+			}
+		});
+		return Util.sep(R0, "\n\n");
 	}
 	
 }

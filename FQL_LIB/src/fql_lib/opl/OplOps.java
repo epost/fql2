@@ -19,6 +19,7 @@ import fql_lib.opl.OplExp.OplTerm;
 import fql_lib.opl.OplExp.OplTransEval;
 import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
+import fql_lib.opl.OplParser.VIt;
 
 public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	
@@ -52,14 +53,14 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			OplSetInst i0 = (OplSetInst) i;
 			OplObject s = ENV.get(i0.sig);
 			OplSig s0 = (OplSig) s;		
-			e.e.type(s0, new OplCtx<String>());
-			return new OplString(e.e.eval(s0, i0, new OplCtx<String>()));
+			e.e.type(s0, new OplCtx<String, String>());
+			return new OplString(e.e.eval(s0, i0, new OplCtx<String, String>()).toString());
 		}
 		if (i instanceof OplJavaInst) {
 			OplJavaInst i0 = (OplJavaInst) i;
 			OplObject s = ENV.get(i0.sig);
 			OplSig s0 = (OplSig) s;		
-			e.e.type(s0, new OplCtx<String>());
+			e.e.type(s0, new OplCtx<String, String>());
 			try {
 				return new OplString(e.e.eval0((Invocable)i0.engine));
 			} catch (Exception ee) {
@@ -145,7 +146,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 
 	@Override
 	public OplObject visit(OplProgram env, OplTransEval e) {
-		OplObject i = ENV.get(e.I);
+	/*	OplObject i = ENV.get(e.I);
 		OplObject F = ENV.get(e.F);
 		if (!(F instanceof OplMapping)) {
 			throw new RuntimeException("Not a mapping: " + e.F);
@@ -155,7 +156,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		OplTerm t = F0.trans(new OplCtx<>(), e.e).second;
 				
 		if (i instanceof OplSetInst) {
-			return new OplString(t.eval(F0.dst, (OplSetInst)i, new OplCtx<String>()));
+			return new OplString(t.eval(F0.dst, (OplSetInst)i, new OplCtx<String, String>()).toString());
 		}
 		if (i instanceof OplJavaInst) {
 			try {
@@ -165,7 +166,8 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 				throw new RuntimeException(ee.getMessage());
 			}
 		}
-		throw new RuntimeException("Not a set/js model: " + e.I);
+		throw new RuntimeException("Not a set/js model: " + e.I); */
+		throw new RuntimeException();
 	}
 
 	@Override
@@ -175,10 +177,8 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			throw new RuntimeException("Not a theory: " + e.S);
 		}
 		OplSig S = (OplSig) i;
-
-		e.convert(S);
 		
-		return e;
+		return OplPres.OplPres(e.prec, e.S, S, e.gens, e.equations);
 	}
 
 	@Override
@@ -188,7 +188,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			throw new RuntimeException("Not a presentation: " + e.I);
 		}
 		OplPres S = (OplPres) i;
-		return e.convert(S.S, S.sig, S);
+		return e.saturate(new VIt(), S);
 	}
 	
 	@Override
@@ -198,7 +198,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			throw new RuntimeException("Not a model: " + e.I);
 		}
 		OplSetInst S = (OplSetInst) i;
-		return e.convert(S.sig, S.sig0, S);
+		return e.desaturate(S.sig, S);
 	}
 	
 	@Override

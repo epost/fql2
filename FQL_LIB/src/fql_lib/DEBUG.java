@@ -228,7 +228,7 @@ public class DEBUG implements Serializable {
 		
 	public boolean opl_unfailing = false;
 	public int opl_iterations = 128;
-	public boolean opl_require_const = true;
+	public boolean opl_require_const = false;
 	public boolean opl_sort_cps = true;
 	public boolean opl_alpha = true;
 	public int opl_hom_its = 8;
@@ -341,12 +341,12 @@ public class DEBUG implements Serializable {
 		opl2.add(opl_validate_box);
 		
 		JCheckBox opl_unfailing_box = new JCheckBox("", opl_unfailing);
-		JLabel opl_unfailing_label = new JLabel("Allow unorientable equations:");
+		JLabel opl_unfailing_label = new JLabel("Allow unorientable equations (true=dangerous):");
 		opl1.add(opl_unfailing_label);
 		opl2.add(opl_unfailing_box);
 		
 		JCheckBox opl_const_box = new JCheckBox("", opl_require_const);
-		JLabel opl_const_label = new JLabel("Require a constant at each sort:");
+		JLabel opl_const_label = new JLabel("Require a constant at each sort (false=dangerous):");
 		opl2.add(opl_const_box);
 		opl1.add(opl_const_label);
 		

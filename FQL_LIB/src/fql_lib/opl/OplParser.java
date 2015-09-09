@@ -2,6 +2,7 @@ package fql_lib.opl;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class OplParser {
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
-		"unsaturate", "sigma", "saturate", "presentation", "constants", "transeval", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
+		"unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -104,12 +105,12 @@ public class OplParser {
 		Parser<?> mapping = mapping();
 		Parser<?> delta = Parsers.tuple(term("delta"), ident(), ident());
 		Parser<?> sigma = Parsers.tuple(term("sigma"), ident(), ident());
-		Parser<?> evaltrans = Parsers.tuple(term("transeval"), ident(), ident(), oplTerm());
+		//Parser<?> evaltrans = Parsers.tuple(term("transeval"), ident(), ident(), oplTerm());
 		Parser<?> presentation = presentation();
 		Parser<?> sat = Parsers.tuple(term("saturate"), ident());
 		Parser<?> unsat = Parsers.tuple(term("unsaturate"), ident());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, java, evaltrans });
+		Parser<?> a = Parsers.or(new Parser<?>[] { sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, java });
 		ref.set(a);
 
 		return a;
@@ -145,7 +146,7 @@ public class OplParser {
 		Parser<?> q = Parsers.tuple(ident(), Parsers.tuple(term("@"), NUMBER).optional());
 		Parser<?> p = Parsers.tuple(q, term(":"), ident());
 		Parser<?> foo = Parsers.tuple( 
-				section("constants", p),
+				section("generators", p),
 				section("equations", oplEq()));
 		return Parsers.tuple(term("presentation").followedBy(term("{")), foo, term("}").followedBy(term(":")), ident());
 	}
@@ -288,17 +289,17 @@ public class OplParser {
 			symbols.put(name, new Pair<>(args, dom));
 		}
 		
-		List<Triple<OplCtx<String>, OplTerm, OplTerm>> equations = new LinkedList<>();
+		List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> equations = new LinkedList<>();
 		for (Tuple4 x : equations0) {
 			List<Tuple3> fa = (List<Tuple3>) x.b;
-			OplCtx<String> ctx = toCtx(fa);
+			OplCtx<String, String> ctx = toCtx(fa);
 			Tuple3 eq = (Tuple3) x.d;
 			OplTerm lhs = toTerm(eq.a);
 			OplTerm rhs = toTerm(eq.c);
 			equations.add(new Triple<>(ctx, lhs, rhs));
 		}
 		
-		return new OplExp.OplSig(prec, sorts, symbols, equations);
+		return new OplExp.OplSig<>(new VIt(), prec, sorts, symbols, equations);
 	}
 
 	private static OplExp toPresentation(Object o) {
@@ -337,17 +338,17 @@ public class OplParser {
 			symbols.put(name, dom);
 		}
 		
-		List<Triple<OplCtx<String>, OplTerm, OplTerm>> equations = new LinkedList<>();
+		List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> equations = new LinkedList<>();
 		for (Tuple4 x : equations0) {
 			List<Tuple3> fa = (List<Tuple3>) x.b;
-			OplCtx<String> ctx = toCtx(fa);
+			OplCtx<String, String> ctx = toCtx(fa);
 			Tuple3 eq = (Tuple3) x.d;
 			OplTerm lhs = toTerm(eq.a);
 			OplTerm rhs = toTerm(eq.c);
 			equations.add(new Triple<>(ctx, lhs, rhs));
 		}
 		
-		return new OplExp.OplPres(yyy, prec, symbols, equations);
+		return new OplExp.OplPres(prec, yyy, null, symbols, equations);
 	}
 	private static OplExp toModel(Object o) {
 		Tuple3 t = (Tuple3) o;
@@ -406,12 +407,12 @@ public class OplParser {
 		return new OplTerm(f, l0);
 	}
 
-	private static OplCtx<String> toCtx(List<Tuple3> fa) {
+	private static OplCtx<String, String> toCtx(List<Tuple3> fa) {
 		List<Pair<String, String>> ret = new LinkedList<>();
 		for (Tuple3 t : fa) {
 			ret.add(new Pair<>(t.a.toString(), t.c.toString()));
 		}
-		return new OplCtx<String>(ret);
+		return new OplCtx<String, String>(ret);
 	}
 
 	private static OplExp toExp(Object c) {
@@ -469,13 +470,13 @@ public class OplParser {
 		}catch (Exception ee) { 
 		}
 		
-		try {
+/*		try {
 			return toTransEval(c);
 		} catch (DoNotIgnore de) {
 			de.printStackTrace();
 			throw new RuntimeException(de.getMessage());
 		}catch (Exception ee) { 
-		}
+		} */
 		
 		try {
 			return toFDM(c);
@@ -518,7 +519,7 @@ public class OplParser {
 		List<Tuple3> symbols = (List<Tuple3>) b.b;
 		
 		Map<String, String> sorts0 = new HashMap<>();
-		Map<String, Pair<OplCtx<String>, OplTerm>> symbols0 = new HashMap<>();
+		Map<String, Pair<OplCtx<String, String>, OplTerm<String, String>>> symbols0 = new HashMap<>();
 		
 		for (Tuple3 z : sorts) {
 			String p = (String) z.a;
@@ -553,9 +554,26 @@ public class OplParser {
 		Tuple4 x = (Tuple4) t.c;
 		String src0 = (String) x.b;
 		String dst0 = (String) x.d;
-		return new OplMapping(sorts0, symbols0, src0, dst0);
+		return new OplMapping(new VIt(), sorts0, symbols0, src0, dst0);
 	}
 
+	static class VIt implements Iterator<String> {
+
+		static int i = 0;
+		
+		@Override
+		public boolean hasNext() {
+			return true;
+		}
+
+		@Override
+		public String next() {
+			return "_v" + (i++);
+		}
+		
+	}
+	
+	
 	static class DoNotIgnore extends RuntimeException {
 
 		public DoNotIgnore(String string) {
@@ -624,7 +642,7 @@ public class OplParser {
 		return new OplEval(i, r);
 	}
 	
-	private static OplExp toTransEval(Object c) {
+/*	private static OplExp toTransEval(Object c) {
 		Tuple4 t = (Tuple4) c;
 		if (!t.a.toString().equals("transeval")) {
 			throw new RuntimeException();
@@ -633,7 +651,7 @@ public class OplParser {
 		OplTerm r = toTerm(t.d);
 		String i = (String) t.c;
 		return new OplTransEval(i, f, r);
-	}
+	} */
 	
 	private static OplExp toFDM(Object c) {
 		Tuple3 t = (Tuple3) c;

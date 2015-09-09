@@ -228,7 +228,7 @@ public class CfgToOpl {
 				i++;
 			}
 		}
-		return new OplExp.OplSig(new HashMap<>(), ret.keySet(), symbols, new LinkedList<>());
+		return new OplExp.OplSig(null, new HashMap<>(), ret.keySet(), symbols, new LinkedList<>());
 	}
 	
 	static Parser program() {
