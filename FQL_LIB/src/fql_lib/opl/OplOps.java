@@ -11,15 +11,14 @@ import fql_lib.opl.OplExp.OplMapping;
 import fql_lib.opl.OplExp.OplPres;
 import fql_lib.opl.OplExp.OplSat;
 import fql_lib.opl.OplExp.OplSetInst;
+import fql_lib.opl.OplExp.OplSetTranGens;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSig;
 import fql_lib.opl.OplExp.OplSigma;
 import fql_lib.opl.OplExp.OplString;
-import fql_lib.opl.OplExp.OplTerm;
 import fql_lib.opl.OplExp.OplTransEval;
 import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
-import fql_lib.opl.OplParser.VIt;
 
 public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	
@@ -178,7 +177,9 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		}
 		OplSig S = (OplSig) i;
 		
-		return OplPres.OplPres(e.prec, e.S, S, e.gens, e.equations);
+		OplPres ret = OplPres.OplPres(e.prec, e.S, S, e.gens, e.equations);
+		ret.toSig();
+		return ret;
 	}
 
 	@Override
@@ -188,7 +189,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			throw new RuntimeException("Not a presentation: " + e.I);
 		}
 		OplPres S = (OplPres) i;
-		return e.saturate(new VIt(), S);
+		return e.saturate(S);
 	}
 	
 	@Override
@@ -214,13 +215,28 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			OplPres I0 = (OplPres) I;
 			return F0.sigma(I0);			
 		}
-//		if (I instanceof OplSetTrans) {
-//			OplSetTrans h = (OplSetTrans) I;
-//			return F0.delta(h);
-//		}
+		if (I instanceof OplSetTranGens) {
+			OplSetTranGens h = (OplSetTranGens) I;
+			return F0.sigma(h);
+		}
 		
-		throw new RuntimeException("Not a presentation of an instance: " + e.I);
+		throw new RuntimeException("Not a presentation of an instance or transform: " + e.I);
 	}
 
+	@Override
+	public OplObject visit(OplProgram env, OplSetTranGens e) {
+		OplObject src = ENV.get(e.src0);
+		OplObject dst = ENV.get(e.dst0);
+		if (!(src instanceof OplPres)) {
+			throw new RuntimeException("Source is not a presentation in " + e);
+		}
+		if (!(dst instanceof OplPres)) {
+			throw new RuntimeException("Target is not a presentation in " + e);
+		}
+		OplPres src0 = (OplPres) src;
+		OplPres dst0 = (OplPres) dst;
+		e.validate(src0, dst0);
+		return e;
+	}
 
 }

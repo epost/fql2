@@ -14,7 +14,9 @@ public class KBUnifier<C,V> {
 	//	if (!Collections.disjoint(s.vars_fast(), t.vars_fast())) { 
 		//	throw new RuntimeException("not disjoint in findsubst");
 		//}
+		//System.out.println("findSubst on " + s + " and [" + t.freeze() + "]" + " with t= " + t);
 			Map<V, KBExp<C,V>> m = unify0(s, t.freeze());
+		//	System.out.println(m);
 			if (m == null) {
 				return null;
 			}

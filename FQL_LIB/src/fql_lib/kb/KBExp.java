@@ -1,16 +1,13 @@
 package fql_lib.kb;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import fql_lib.Pair;
+import fql_lib.Triple;
 import fql_lib.Util;
 
 public abstract class KBExp<C,V> {
@@ -83,7 +80,7 @@ public abstract class KBExp<C,V> {
 		} */
 
 		@Override
-		public Set<Pair<KBExp<C, V>, KBExp<C, V>>> cp(Map<V, KBExp<C, V>> inv, List<Integer> l, KBExp<C, V> a, KBExp<C, V> b, KBExp<C,V> g, KBExp<C, V> d, boolean first) {
+		public Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V,KBExp<C,V>>>> cp(List<Integer> l, KBExp<C, V> a, KBExp<C, V> b, KBExp<C,V> g, KBExp<C, V> d, boolean first) {
 			return new HashSet<>();
 		}
 
@@ -232,18 +229,18 @@ public abstract class KBExp<C,V> {
 		}
 
 		@Override
-		public Set<Pair<KBExp<C, V>, KBExp<C, V>>> cp(Map<V, KBExp<C, V>> inv, List<Integer> p, KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d, boolean first) {
-			Set<Pair<KBExp<C, V>, KBExp<C, V>>> ret = new HashSet<>();
+		public Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V,KBExp<C,V>>>> cp(List<Integer> p, KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d, boolean first) {
+			Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V,KBExp<C,V>>>> ret = new HashSet<>();
 			int q = 0;
 			for (KBExp<C, V> arg : args) {
 				List<Integer> p0 = new LinkedList<>(p);
 				p0.add(q++); 
-				ret.addAll(arg.cp(inv, p0, a, b, g, d, false));
+				ret.addAll(arg.cp(p0, a, b, g, d, false));
 			}
 			
 			Map<V, KBExp<C,V>> s = KBUnifier.unify0(this, a);
 			if (s != null) {
-				Pair<KBExp<C,V>, KBExp<C,V>> toadd = new Pair<>(d.subst(s), g.replace(p, b).subst(s));
+				Triple<KBExp<C,V>, KBExp<C,V>, Map<V,KBExp<C,V>>> toadd = new Triple<>(d.subst(s), g.replace(p, b).subst(s), s);
 				ret.add(toadd);
 			} 
 			return ret;
@@ -340,7 +337,7 @@ public abstract class KBExp<C,V> {
 	//public abstract Set<V> vars();
 	public abstract void vars(Set<V> vars);
 
-	public abstract Set<Pair<KBExp<C, V>, KBExp<C, V>>> cp(Map<V, KBExp<C, V>> inv, List<Integer> l, KBExp<C, V> a, KBExp<C, V> b, KBExp<C,V> g, KBExp<C, V> d, boolean first);
+	public abstract Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V,KBExp<C,V>>>> cp(List<Integer> l, KBExp<C, V> a, KBExp<C, V> b, KBExp<C,V> g, KBExp<C, V> d, boolean first);
 	public abstract KBExp<C, V> replace(List<Integer> p, KBExp<C, V> r);
 	public abstract KBExp<C, V> freeze();
 	public abstract KBExp<C, V> unfreeze();

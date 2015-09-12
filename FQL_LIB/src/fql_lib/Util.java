@@ -28,6 +28,14 @@ import fql_lib.gui.MyTableRowSorter;
 
 public class Util {
 	
+	public static <X> Map<X, X> id(Collection<X> X) {
+		Map<X, X> ret = new HashMap<>();
+		for (X x : X) {
+			ret.put(x, x);
+		}
+		return ret;
+	}
+	
 	public static <X> List<X> singList(X x) {
 		List<X> ret = new LinkedList<>();
 		ret.add(x);

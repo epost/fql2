@@ -30,6 +30,7 @@ import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
 import fql_lib.opl.OplExp.OplPres;
 import fql_lib.opl.OplExp.OplSetInst;
+import fql_lib.opl.OplExp.OplSetTranGens;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSig;
 
@@ -61,6 +62,10 @@ public class OplDisplay implements FQLDisp {
 		if (o instanceof OplPres) {
 			return "presentation " + c + " : " + ((OplPres)o).S;
  		}
+		if (o instanceof OplSetTranGens) {
+			OplSetTranGens x = (OplSetTranGens) o;
+			return "transgen " + c + " : " + x.src0 + " -> " + x.dst0;
+		}
 		return c;
 	}
 

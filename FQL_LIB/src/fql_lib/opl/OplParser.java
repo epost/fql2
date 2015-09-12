@@ -28,10 +28,10 @@ import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
 import fql_lib.opl.OplExp.OplSat;
 import fql_lib.opl.OplExp.OplSetInst;
+import fql_lib.opl.OplExp.OplSetTranGens;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSigma;
 import fql_lib.opl.OplExp.OplTerm;
-import fql_lib.opl.OplExp.OplTransEval;
 import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
 
@@ -48,7 +48,7 @@ public class OplParser {
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
-		"unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
+		"transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -100,6 +100,7 @@ public class OplParser {
 		Parser<?> theory = theory();
 		Parser<?> model = model();
 		Parser<?> trans = trans();
+		Parser<?> trans_pres = trans_pres();
 		Parser<?> eval = Parsers.tuple(term("eval"), ident(), oplTerm());
 		Parser<?> java = java();
 		Parser<?> mapping = mapping();
@@ -110,11 +111,19 @@ public class OplParser {
 		Parser<?> sat = Parsers.tuple(term("saturate"), ident());
 		Parser<?> unsat = Parsers.tuple(term("unsaturate"), ident());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, java });
+		Parser<?> a = Parsers.or(new Parser<?>[] { sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
 		ref.set(a);
 
 		return a;
 	}	
+	
+	public static final Parser<?> trans_pres() {
+		Parser<?> q = Parsers.tuple(term("("), ident(), term(","), oplTerm(), term(")")).sepBy(term(","));
+		Parser<?> p = Parsers.tuple(ident(), term("->"), term("{"), q, term("}"));
+		Parser<?> foo = section("sorts", p);
+		return Parsers.tuple(term("transpres").followedBy(term("{")), foo, 
+				Parsers.tuple(term("}").followedBy(term(":")), ident(), term("->"), ident()));
+	}
 	
 	public static final Parser<?> trans() {
 		Parser<?> q = Parsers.tuple(term("("), ident(), term(","), ident(), term(")")).sepBy(term(","));
@@ -463,6 +472,14 @@ public class OplParser {
 		}
 		
 		try {
+			return toTrans_2(c);
+		} catch (DoNotIgnore de) {
+			de.printStackTrace();
+			throw new RuntimeException(de.getMessage());
+		}catch (Exception ee) {
+		}
+		
+		try {
 			return toEval(c);
 		} catch (DoNotIgnore de) {
 			de.printStackTrace();
@@ -554,11 +571,15 @@ public class OplParser {
 		Tuple4 x = (Tuple4) t.c;
 		String src0 = (String) x.b;
 		String dst0 = (String) x.d;
-		return new OplMapping(new VIt(), sorts0, symbols0, src0, dst0);
+		return new OplMapping(sorts0, symbols0, src0, dst0);
 	}
 
-	static class VIt implements Iterator<String> {
+	public static class VIt implements Iterator<String> {
 
+		private VIt() { }
+		
+		public static VIt vit = new VIt();
+		
 		static int i = 0;
 		
 		@Override
@@ -604,6 +625,9 @@ public class OplParser {
 	
 	public static OplExp toTrans(Object c) {
 		Tuple3 t = (Tuple3) c;
+		if (!t.a.toString().equals("transform")) {
+			throw new RuntimeException();
+		}
 		
 		Map<String, Map<String, String>> map = new HashMap<>();
 		Tuple3 tb = (Tuple3) t.b;
@@ -629,6 +653,39 @@ public class OplParser {
 		
 		Tuple4 tc = (Tuple4) t.c;		
 		return new OplSetTrans(map , (String) tc.b, (String) tc.d);
+	}
+	
+	public static OplExp toTrans_2(Object c) {
+		Tuple3 t = (Tuple3) c;
+		if (!t.a.toString().equals("transpres")) {
+			throw new RuntimeException();
+		}
+	
+		
+		Map<String, Map<String, OplTerm>> map = new HashMap<>();
+		Tuple3 tb = (Tuple3) t.b;
+		List<Tuple5> l = (List<Tuple5>) tb.b;
+		
+		for (Tuple5 x : l) {
+			String name = (String) x.a;
+			List<Tuple5> y = (List<Tuple5>) x.d;
+			Map<String, OplTerm> m = new HashMap<>();
+			for (Tuple5 z : y) {
+				String xx = (String) z.b;
+				OplTerm yy = toTerm(z.d);
+				if (m.containsKey(xx)) {
+					throw new DoNotIgnore("Duplicate argument: " + xx);
+				}
+				m.put(xx,  yy);
+			}
+			if (map.containsKey(name)) {
+				throw new DoNotIgnore("Duplicate sort: " + name);
+			}
+			map.put(name, m);
+		}
+		
+		Tuple4 tc = (Tuple4) t.c;		
+		return new OplSetTranGens(map , (String) tc.b, (String) tc.d);
 	}
 	
 	

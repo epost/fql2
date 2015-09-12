@@ -73,8 +73,6 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		return new Arrow<>(new_sorts, F.dst, new Pair<>(new OplCtx<>(new_vs), F.a.second.subst(F.a.first, new_args)));
 		
 	}
-
-
 	
 	private OplSig<S, C, V> sig;
 	private KB<C, V> KB;
@@ -117,10 +115,10 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		if (ret == null) {
 			List<Pair<V, S>> vars = new LinkedList<>();
 			Map<S, Set<V>> vars2 = new HashMap<>();
-			int i = 0;
+			//int i = 0;
 			for (S z : s) {
 				vars.add(new Pair<>(fr.next(), z));
-				i++;
+				//i++;
 			}
 			OplCtx<S,V> ctx = new OplCtx<>(vars);
 			for (S sort : sig.sorts) {
@@ -262,25 +260,49 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		Function<Pair<C, C>, Boolean> gt = x -> {
 			Integer l = s.prec.get(x.first);
 			Integer r = s.prec.get(x.second);
-			return l > r;
+			
+			if (l != null && r != null) {
+				return l > r;				
+			}
+			if (l == null) {
+				return false;
+			}
+			if (r == null) {
+				return true;
+			}
+			String lx = x.first.toString();
+			String rx = x.second.toString();
+			if (lx.length() == rx.length()) {
+				return l.compareTo(r) < 0;
+			}
+			return lx.length() < rx.length();
 		};
 
-		if (!s.symbols.keySet().equals(s.prec.keySet())) {
+/*		if (!s.symbols.keySet().equals(s.prec.keySet())) {
 			if (DEBUG.debug.opl_alpha) {
 				gt = x -> {
-					return x.first.toString().compareTo(x.second.toString()) > 0;
+					String l = x.first.toString();
+					String r = x.second.toString();
+					if (l.length() == r.length()) {
+						return l.compareTo(r) < 0;
+					}
+					return l.length() < r.length();
+					
 				};
 			} else {
 				throw new RuntimeException("Cannot use Knuth-Bendix - not all symbol precedence given.");
-			}
-		}
+			} 
+		} */
 		
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> eqs = new HashSet<>();
 		for (Triple<?, OplTerm<C, V>, OplTerm<C, V>> eq : s.equations) {
 			eqs.add(new Pair<>(convert(eq.second), convert(eq.third)));
 		}
-		
-		return new KB<>(eqs, KBOrders.pogt(gt), fr);
+		if (DEBUG.debug.opl_unfailing) {
+			return new KB_unfailing<>(eqs, KBOrders.pogt(gt), fr);			
+		} else {
+			return new KB_basic<>(eqs, KBOrders.pogt(gt), fr);			
+		}
 	}
 
 
