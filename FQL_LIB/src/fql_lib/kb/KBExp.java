@@ -1,5 +1,8 @@
 package fql_lib.kb;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -180,7 +183,7 @@ public abstract class KBExp<C,V> {
 			}
 			if (args.size() == 1 && !args.get(0).isVar && args.get(0).getApp().args.size() == 2) {
 				return f  + Util.sep(args, ",");				
-			}
+			} 
 			return f + "(" + Util.sep(args, ",") + ")";
 		}
 		
@@ -238,11 +241,23 @@ public abstract class KBExp<C,V> {
 				ret.addAll(arg.cp(p0, a, b, g, d, false));
 			}
 			
+	//		if (alphaEq(new Pair<>(a,b), new Pair<>(g,d)) && g.equals(this)) {
+				//actually, must consider overlaps with itself at top for unfailing
+		//	} else {
+				//System.out.println("not alpha eq " + g + " " + d + " and " + a + " " + b);
 			Map<V, KBExp<C,V>> s = KBUnifier.unify0(this, a);
 			if (s != null) {
+				//no difference
+//				Triple<KBExp<C,V>, KBExp<C,V>, Map<V,KBExp<C,V>>> toadd = new Triple<>(d.subst(s), g.subst(s).replace(p, b.subst(s)), s);
+
 				Triple<KBExp<C,V>, KBExp<C,V>, Map<V,KBExp<C,V>>> toadd = new Triple<>(d.subst(s), g.replace(p, b).subst(s), s);
+	
+				//doesn't seem to work				
+				//Triple<KBExp<C,V>, KBExp<C,V>, Map<V,KBExp<C,V>>> toadd = new Triple<>(d.subst(s), g.replace(p, b.subst(s)), s);
+				//System.out.println("on " + g + "|" + d + " and " + a + "|" + b + " at " + this + " yields subst " + s + " : " + toadd.first + " and " + toadd.second);
 				ret.add(toadd);
-			} 
+			}
+			//} 
 			return ret;
 		}
 
@@ -355,8 +370,39 @@ public abstract class KBExp<C,V> {
 		return vars;
 	}
 	
+	private static <C,V> boolean alphaEq(KBExp<C, V> a, KBExp<C, V> b) {
+		Map<V, V> m = tovar(KBUnifier.findSubst(a, b));
+		if (m == null) {
+			//System.out.println("no subst");
+			return false;
+		}
+		if (!Collections.disjoint(a.vars(), b.vars())) {
+			throw new RuntimeException(a + " and " + b);
+		}
+		return Util.isBijection(m, a.vars(), b.vars());
+	}
 	
-	
+	private static <C,V> Map<V, V> tovar(Map<V, KBExp<C,V>> m) {
+		if (m == null) {
+			return null;
+		}
+		Map<V, V> ret = new HashMap<>();
+		for (V v : m.keySet()) {
+			KBExp<C,V> e = m.get(v);
+			if (e.isVar) {
+				ret.put(v, e.getVar().var);
+			} else {
+				return null;
+			}
+		}
+		return ret;
+	}
+
+	private static <C,V> boolean alphaEq(Pair<KBExp<C, V>,KBExp<C, V>> a, Pair<KBExp<C, V>,KBExp<C, V>> b) {
+		KBExp<C,V> a0 = new KBApp<C,V>((C)"", Arrays.asList(new KBExp[] {a.first, a.second}));
+		KBExp<C,V> b0 = new KBApp<C,V>((C)"", Arrays.asList(new KBExp[] {b.first, b.second}));
+		return alphaEq(a0,b0);
+	}
 
 	
 }

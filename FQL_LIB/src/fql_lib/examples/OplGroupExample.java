@@ -81,7 +81,7 @@ public class OplGroupExample extends Example {
 			+ "\n		forall x:N, y:N. plus(succ(x),y) = succ(plus(x,y)),"
 			+ "\n		forall x:N, y:N. times(succ(x),y) = plus(x,times(x,y));"
 			+ "\n}"
-			+ "\n"
+/*			+ "\n"
 			+ "\nEntropic = theory {"
 			+ "\n	 sorts "
 			+ "\n		S;"
@@ -91,6 +91,7 @@ public class OplGroupExample extends Example {
 			+ "\n	 	forall x:S, y:S, z:S, w:S. o(o(x,y),o(z,w)) = o(o(x,z),o(y,w)),"
 			+ "\n		forall x:S, y:S. o(o(x,y),x) = x;"
 			+ "\n	}"
+			*/
 			+ "\n";
 
 

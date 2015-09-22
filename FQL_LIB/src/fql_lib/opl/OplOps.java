@@ -17,6 +17,7 @@ import fql_lib.opl.OplExp.OplSig;
 import fql_lib.opl.OplExp.OplSigma;
 import fql_lib.opl.OplExp.OplString;
 import fql_lib.opl.OplExp.OplTransEval;
+import fql_lib.opl.OplExp.OplUberSat;
 import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
 
@@ -61,7 +62,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			OplSig s0 = (OplSig) s;		
 			e.e.type(s0, new OplCtx<String, String>());
 			try {
-				return new OplString(e.e.eval0((Invocable)i0.engine));
+				return new OplString(e.e.eval((Invocable)i0.engine).toString());
 			} catch (Exception ee) {
 				ee.printStackTrace();
 				throw new RuntimeException(ee.getMessage());
@@ -185,11 +186,32 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	@Override
 	public OplObject visit(OplProgram env, OplSat e) {
 		OplObject i = ENV.get(e.I);
-		if (!(i instanceof OplPres)) {
-			throw new RuntimeException("Not a presentation: " + e.I);
+		if (i instanceof OplPres) {
+			OplPres S = (OplPres) i;
+			return e.saturate(S);
 		}
-		OplPres S = (OplPres) i;
-		return e.saturate(S);
+		if (i instanceof OplSig) {
+			OplSig S = (OplSig) i;
+			return S.saturate(e.I);
+		}
+		throw new RuntimeException("Not a presentation or theory");
+	}
+	
+	@Override
+	public OplObject visit(OplProgram env, OplUberSat e) {
+		OplObject p = ENV.get(e.P);
+		if (!(p instanceof OplPres)) {
+			throw new RuntimeException("Not a presentation: " + e.P);
+		}
+		OplPres S = (OplPres) p;
+		
+		OplObject i = ENV.get(e.I);
+		if (!(i instanceof OplJavaInst)) {
+			throw new RuntimeException("Not a javascript model: " + e.I);
+		}
+		OplJavaInst I = (OplJavaInst) i;
+		
+		return e.saturate(I, S);
 	}
 	
 	@Override

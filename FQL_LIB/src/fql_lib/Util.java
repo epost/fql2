@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,6 +28,77 @@ import javax.swing.table.TableRowSorter;
 import fql_lib.gui.MyTableRowSorter;
 
 public class Util {
+	
+	public static Comparator<Object> ToStringComparator = new Comparator<Object>() {
+		@Override
+		public int compare(Object o1, Object o2) {
+			if (o1.toString().length() > o2.toString().length()) {
+				return 1;
+			} else if (o1.toString().length() < o2.toString().length()) {
+				return -1;
+			}
+			return o1.toString().compareTo(o2.toString());
+		}
+	};
+	
+	public static <X,Y> boolean isBijection(Map<X, Y> m, Set<X> X, Set<Y> Y) {
+		System.out.println("is bijection? " + m + " with X=" + X + " and Y=" + Y);
+		if (!m.keySet().equals(X)) {
+			System.out.println("a");
+			return false;
+		}
+		if (!new HashSet<>(m.values()).equals(Y)) {
+			System.out.println("b " + m.values());
+			return false;
+		}
+		Map<Y,X> n = rev(m, Y);
+		if (n == null) {
+			System.out.println("c");
+			return false;
+		}
+		
+		Map<X,X> a = compose0(m, n);
+		Map<Y,Y> b = compose0(n, m);
+		
+		if (!a.equals(id(X))) {
+			System.out.println("d");
+			return false;
+		}
+		if (!b.equals(id(Y))) {
+			System.out.println("e");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private static <X,Y> X rev(Map<X, Y> m, Y y) {
+		X x = null;
+		for (X x0 : m.keySet()) {
+			Y y0 = m.get(x0);
+			if (y0.equals(y)) {
+				if (x != null) {
+					return null;
+				}
+				x = x0;
+			}
+		}
+		return x;
+	}
+	
+	private static <X,Y> Map<Y,X> rev(Map<X, Y> m, Set<Y> Y) {
+		Map<Y,X> ret = new HashMap<>();
+		
+		for (Y y : Y) {
+			X x = rev(m, y);
+			if (x == null) {
+				return null;
+			}
+			ret.put(y, x);
+		}
+		
+		return ret;
+	}
 	
 	public static <X> Map<X, X> id(Collection<X> X) {
 		Map<X, X> ret = new HashMap<>();

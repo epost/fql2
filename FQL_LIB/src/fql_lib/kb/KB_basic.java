@@ -8,8 +8,8 @@ import java.util.function.Function;
 
 import fql_lib.Pair;
 
-public class KB_basic<C, V> extends KB<C,V> {
-	
+public class KB_basic<C, V> {
+	/*
 	public KB_basic(Set<Pair<KBExp<C, V>, KBExp<C, V>>> E0,
 			Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> gt0, Iterator<V> fresh) {
 		super(E0, gt0, fresh);
@@ -62,5 +62,5 @@ public class KB_basic<C, V> extends KB<C,V> {
 		step();
 		return eq(lhs, rhs);
 	}
-
+*/
 }

@@ -64,7 +64,7 @@ public class OplDisplay implements FQLDisp {
  		}
 		if (o instanceof OplSetTranGens) {
 			OplSetTranGens x = (OplSetTranGens) o;
-			return "transgen " + c + " : " + x.src0 + " -> " + x.dst0;
+			return "transpres " + c + " : " + x.src0 + " -> " + x.dst0;
 		}
 		return c;
 	}

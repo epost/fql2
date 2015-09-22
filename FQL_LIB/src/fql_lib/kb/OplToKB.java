@@ -1,5 +1,6 @@
 package fql_lib.kb;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +13,10 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.script.Invocable;
+import javax.script.ScriptException;
+
+import fql_lib.Chc;
 import fql_lib.DEBUG;
 import fql_lib.Pair;
 import fql_lib.Triple;
@@ -20,9 +25,12 @@ import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.Operad;
 import fql_lib.kb.KBExp.KBApp;
 import fql_lib.kb.KBExp.KBVar;
+import fql_lib.opl.OplExp.JSWrapper;
 import fql_lib.opl.OplExp.OplCtx;
+import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplSig;
 import fql_lib.opl.OplExp.OplTerm;
+import fql_lib.opl.OplParser.DoNotIgnore;
 
 public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>> {
 	
@@ -77,6 +85,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	private OplSig<S, C, V> sig;
 	private KB<C, V> KB;
 	private Iterator<V> fr;
+//	private OplJavaInst I;
 	
 	public OplToKB(Iterator<V> fr, OplSig<S, C, V> sig) {
 		this.sig = sig;
@@ -102,17 +111,18 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		}
 	}
 	
-	private Map<Pair<List<S>, S>, Set<Pair<OplCtx<S, V>, OplTerm<C, V>>>> hom = new HashMap<>();
-	public Set<Pair<OplCtx<S,V>, OplTerm<C,V>>> hom0(List<S> s, S t) {
-		Set<Pair<OplCtx<S,V>, OplTerm<C,V>>> ret = hom.get(new Pair<>(s, t));
+	private Map<Pair<List<S>, S>, Collection<Pair<OplCtx<S, V>, OplTerm<C, V>>>> hom = new HashMap<>();
+	public Collection<Pair<OplCtx<S,V>, OplTerm<C,V>>> hom0(List<S> s, S t) {
+		Collection<Pair<OplCtx<S,V>, OplTerm<C,V>>> ret = hom.get(new Pair<>(s, t));
 		if (!sig.sorts.contains(t)) {
-			throw new RuntimeException("Bad target sort " + t);
+			throw new DoNotIgnore("Bad target sort " + t);
 		}
 		if (!sig.sorts.containsAll(s)) {
-			throw new RuntimeException("Bad source sort " + s);		
+			throw new DoNotIgnore("Bad source sort " + s);		
 		}
 		
 		if (ret == null) {
+//			ret = new LinkedList<>(ret)
 			List<Pair<V, S>> vars = new LinkedList<>();
 			Map<S, Set<V>> vars2 = new HashMap<>();
 			//int i = 0;
@@ -128,25 +138,37 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 				vars2.get(k.second).add(k.first);
 			}
 			
-			int count = 0;
+		//	int count = 0;
 			Map<S, Set<OplTerm<C, V>>> j = arity0(vars2);
 			for (;;) {
 				Map<S, Set<OplTerm<C, V>>> k = inc(j);
 				Map<S, Set<OplTerm<C, V>>> k2= red(k);
 				if (j.equals(k2)) {
 					break;
-				}
-
-				count++;
-				if (count > 8) {
-					throw new RuntimeException("exceeded");
-				}
+				} 
 				j = k2;
 			}	
-			ret = j.get(t).stream().map(g -> { return new Pair<>(ctx, g); }).collect(Collectors.toSet());
+			ret = j.get(t).stream().map(g -> { return nice(ctx, g); }).collect(Collectors.toList());
+			//ret = new LinkedList<>(ret);
+			((List)ret).sort(Util.ToStringComparator);
+			hom.put(new Pair<>(s,t), ret);
 		}
+		
 		return ret; 
 	}
+	
+	Pair<OplCtx<S,V>, OplTerm<C,V>> nice(OplCtx<S,V> G, OplTerm<C,V> e) {
+		int i = 0;
+		Map m = new HashMap();
+		List<Pair> l = new LinkedList<>();
+		for (V v : G.names()) {
+			l.add(new Pair("v" + i, G.get(v)));
+			m.put(v, new OplTerm("v" + i++));
+		}
+		OplCtx ret = new OplCtx(l);
+		return new Pair(ret, e.subst(m));
+	}
+	
 	
 	private Map<S, Set<OplTerm<C,V>>> red(Map<S, Set<OplTerm<C,V>>> in) {
 		Map<S, Set<OplTerm<C,V>>> ret = new HashMap<>();
@@ -257,6 +279,9 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	}
 	
 	private KB<C, V> convert(OplSig<?,C,V> s) {
+		if (s.prec.keySet().size() != s.prec.values().size()) {
+			throw new RuntimeException("Cannot duplicate precedence");
+		}
 		Function<Pair<C, C>, Boolean> gt = x -> {
 			Integer l = s.prec.get(x.first);
 			Integer r = s.prec.get(x.second);
@@ -278,31 +303,74 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			return lx.length() < rx.length();
 		};
 
-/*		if (!s.symbols.keySet().equals(s.prec.keySet())) {
-			if (DEBUG.debug.opl_alpha) {
-				gt = x -> {
-					String l = x.first.toString();
-					String r = x.second.toString();
-					if (l.length() == r.length()) {
-						return l.compareTo(r) < 0;
-					}
-					return l.length() < r.length();
-					
-				};
-			} else {
-				throw new RuntimeException("Cannot use Knuth-Bendix - not all symbol precedence given.");
-			} 
-		} */
-		
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> eqs = new HashSet<>();
 		for (Triple<?, OplTerm<C, V>, OplTerm<C, V>> eq : s.equations) {
 			eqs.add(new Pair<>(convert(eq.second), convert(eq.third)));
 		}
-		if (DEBUG.debug.opl_unfailing) {
-			return new KB_unfailing<>(eqs, KBOrders.pogt(gt), fr);			
-		} else {
-			return new KB_basic<>(eqs, KBOrders.pogt(gt), fr);			
+		
+		return new KB(eqs, KBOrders.pogt(gt), fr);			
+	}
+
+	public static <C,X,V> KBExp<Chc<Chc<C,X>,JSWrapper>,V> redBy(OplJavaInst I, KBExp<Chc<Chc<C,X>,JSWrapper>,V> e) {				
+		try {
+			if (e.isVar) {
+				return e;
+			}
+				
+			KBApp<Chc<Chc<C,X>,JSWrapper>,V> e0 = e.getApp();
+				
+			List<KBExp<Chc<Chc<C,X>,JSWrapper>,V>> l = new LinkedList<>();
+			List<Object> r = new LinkedList<>();
+			for (KBExp<Chc<Chc<C, X>, JSWrapper>, V> a : e0.args) {
+				KBExp<Chc<Chc<C,X>,JSWrapper>,V> b = redBy(I, a);
+				l.add(b);
+				if (!b.isVar && b.getApp().args.isEmpty() && !b.getApp().f.left) {
+					JSWrapper js = b.getApp().f.r;
+					r.add(js.o);
+				}	
+			}
+			if (l.size() == r.size() && e0.f.left && e0.f.l.left) { 
+				Object o = ((Invocable)I.engine).invokeFunction((String)e0.f.l.l, r);
+				return new KBApp<>(Chc.inRight(new JSWrapper(o)), new LinkedList<>());
+			} 
+			return new KBApp<>(e0.f, l);
+		} catch (ScriptException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException(ex.getMessage());
+		} catch (NoSuchMethodException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException(ex.getMessage());
 		}
+	} 
+
+	public Map<S, Set<OplTerm<C, V>>> doHoms() {
+		HashMap<S, Set<OplTerm<C, V>>> sorts = new HashMap<>();
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				try {
+				for (S s : sig.sorts) {
+					sorts.put(s, hom0(new LinkedList<>(), s).stream().map(x -> x.second).collect(Collectors.toSet()));
+				}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+			//		throw new RuntimeException(ex.getMessage());
+				}
+			}
+		};
+		Thread t = new Thread(r);
+		t.start();
+		try {
+			t.join(DEBUG.debug.opl_hom_its);
+			t.stop();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException(ex.getMessage());
+		}
+		if (sorts.keySet().size() == sig.sorts.size()) {
+			return sorts;
+		}
+		throw new RuntimeException("Timeout exceeded");
 	}
 
 

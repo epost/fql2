@@ -54,6 +54,14 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 				"{\n\tsorts;\n}\n :  ->  "); 
 		ctm.addTemplate(ct);
 		
+		ct = new StaticCodeTemplate("transpres", "transpres ",
+				"{\n\tsorts;\n}\n :  ->  "); 
+		ctm.addTemplate(ct);
+		
+		ct = new StaticCodeTemplate("presentation", "presentation ",
+				"{\n\tgenerators;\n\tequations;\n}\n : ");
+		ctm.addTemplate(ct);
+		
 	}
 
 	

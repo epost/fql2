@@ -227,11 +227,12 @@ public class DEBUG implements Serializable {
 	public boolean x_json = true;
 		
 	public boolean opl_unfailing = true;
-	public int opl_iterations = 128;
+	public int opl_iterations = 5000;
 	public boolean opl_require_const = false;
 	public boolean opl_sort_cps = true;
-	public boolean opl_alpha = true;
-	public int opl_hom_its = 8;
+	//public boolean opl_alpha = true;
+	public int opl_red_its = 32;
+	public int opl_hom_its = 5000;
 	public boolean opl_validate = true;
 	
 	public void showOptions() {
@@ -341,7 +342,7 @@ public class DEBUG implements Serializable {
 		opl2.add(opl_validate_box);
 		
 		JCheckBox opl_unfailing_box = new JCheckBox("", opl_unfailing);
-		JLabel opl_unfailing_label = new JLabel("Allow unorientable equations (true=dangerous):");
+		JLabel opl_unfailing_label = new JLabel("Allow unorientable equations:");
 		opl1.add(opl_unfailing_label);
 		opl2.add(opl_unfailing_box);
 		
@@ -351,25 +352,29 @@ public class DEBUG implements Serializable {
 		opl1.add(opl_const_label);
 		
 		JCheckBox opl_sort_box = new JCheckBox("", opl_sort_cps);
-		JLabel opl_sort_label = new JLabel("Sort critical pairs:");
+		JLabel opl_sort_label = new JLabel("Sort orientable critical pairs by length:");
 		opl2.add(opl_sort_box);
 		opl1.add(opl_sort_label);
 
-		JCheckBox opl_alpha_box = new JCheckBox("", opl_sort_cps);
-		JLabel opl_alpha_label = new JLabel("Use alphabetical when precedence not total:");
-		opl2.add(opl_alpha_box);
-		opl1.add(opl_alpha_label);
-
+//		JCheckBox opl_alpha_box = new JCheckBox("", opl_sort_cps);
+//		JLabel opl_alpha_label = new JLabel("Use alphabetical when precedence not total:");
+//		opl2.add(opl_alpha_box);
+//		opl1.add(opl_alpha_label);
 		
 		JTextField opl_iterations_box = new JTextField(Integer.toString(opl_iterations), 12);
-		JLabel opl_iterations_label = new JLabel("Knuth-Bendix iterations");
+		JLabel opl_iterations_label = new JLabel("Knuth-Bendix timeout (ms)");
 		opl2.add(opl_iterations_box);
 		opl1.add(opl_iterations_label);
 		
 		JTextField opl_homit_box = new JTextField(Integer.toString(opl_hom_its), 12);
-		JLabel opl_homit_label = new JLabel("Hom-set iterations");
+		JLabel opl_homit_label = new JLabel("Saturation timeout (ms)");
 		opl2.add(opl_homit_box);
 		opl1.add(opl_homit_label);
+		
+		JTextField opl_red_box = new JTextField(Integer.toString(opl_red_its), 12);
+		JLabel opl_red_label = new JLabel("Reduction iterations maximum");
+		opl2.add(opl_red_box);
+		opl1.add(opl_red_label);
 		
 		opl1.add(new JLabel());
 		opl2.add(new JLabel());
@@ -794,6 +799,7 @@ public class DEBUG implements Serializable {
 			int ee = MAX_EDGES;
 			int opl = opl_iterations;
 			int opl_h = opl_hom_its;
+			int opl_r = opl_red_its;
 			try {
 				a = Integer.parseInt(plen.getText());
 				b = Integer.parseInt(iter.getText());
@@ -803,6 +809,7 @@ public class DEBUG implements Serializable {
 				ee = Integer.parseInt(edge_limit_field.getText());
 				opl = Integer.parseInt(opl_iterations_box.getText());
 				opl_h = Integer.parseInt(opl_homit_box.getText());
+				opl_r = Integer.parseInt(opl_red_box.getText());
 				if (f < 1) {
 					f = FONT_SIZE;
 				}
@@ -811,6 +818,7 @@ public class DEBUG implements Serializable {
 			}
 			opl_iterations = opl;
 			opl_hom_its = opl_h;
+			opl_red_its = opl_r;
 			MAX_NODES = n;
 			MAX_EDGES = ee;
 			ALL_GR_PATHS = gr.isSelected();
@@ -819,7 +827,7 @@ public class DEBUG implements Serializable {
 			opl_require_const = opl_const_box.isSelected();
 			opl_sort_cps = opl_sort_box.isSelected();
 			opl_unfailing = opl_unfailing_box.isSelected();
-			opl_alpha = opl_alpha_box.isSelected();
+			//opl_alpha = opl_alpha_box.isSelected();
 			opl_validate = opl_validate_box.isSelected();
 			
 		//	limit_examples = limex.isSelected();
