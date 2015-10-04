@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import fql_lib.Pair;
+import catdata.algs.Pair;
 import fql_lib.cat.Functor;
 import fql_lib.cat.Transform;
 import fql_lib.cat.categories.FinSet;

@@ -1,5 +1,4 @@
-Compilation note: FPQL requires the built-in Eclipse compiler that ships with the Eclipse 
-IDE for java developers.  The Oracle JDK compiler will fail with type-inference errors.
+Compilation note: FPQL requires the built-in Eclipse compiler that ships with the Eclipse IDE for java developers.  The Oracle JDK compiler will fail with type-inference errors.
 
 ------
 

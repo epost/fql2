@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import fql_lib.Pair;
+import catdata.algs.Pair;
 import fql_lib.X.XExp.XTy;
 
 public class XEnvironment {

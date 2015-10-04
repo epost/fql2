@@ -1,6 +1,5 @@
 package fql_lib.X;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,11 +16,10 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 
+import catdata.algs.Pair;
+import catdata.algs.Triple;
 import fql_lib.DEBUG;
-import fql_lib.Pair;
-import fql_lib.Triple;
 import fql_lib.Util;
-import fql_lib.cat.Transform;
 import fql_lib.gui.FQLTextPanel;
 
 public class XPoly<C,D> extends XExp implements XObject {

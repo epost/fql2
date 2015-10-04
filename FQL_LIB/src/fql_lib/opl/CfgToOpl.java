@@ -28,7 +28,7 @@ import org.codehaus.jparsec.Terminals;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Tuple3;
 
-import fql_lib.Pair;
+import catdata.algs.Pair;
 import fql_lib.Util;
 import fql_lib.examples.Example;
 import fql_lib.gui.FQLTextPanel;

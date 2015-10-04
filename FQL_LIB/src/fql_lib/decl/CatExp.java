@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
-import fql_lib.Pair;
-import fql_lib.Triple;
+import catdata.algs.Pair;
+import catdata.algs.Triple;
 
 
 public abstract class CatExp implements Serializable {

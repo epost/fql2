@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -37,6 +36,9 @@ import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.collections15.Transformer;
 
+import catdata.algs.Pair;
+import catdata.algs.Quad;
+import catdata.algs.Triple;
 //import org.apache.commons.collections15.Transformer;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -48,9 +50,6 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import fql_lib.DEBUG;
-import fql_lib.Pair;
-import fql_lib.Quad;
-import fql_lib.Triple;
 import fql_lib.Util;
 import fql_lib.cat.Category;
 import fql_lib.cat.Functor;

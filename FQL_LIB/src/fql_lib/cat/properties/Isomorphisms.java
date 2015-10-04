@@ -2,7 +2,7 @@ package fql_lib.cat.properties;
 
 import java.util.Optional;
 
-import fql_lib.Pair;
+import catdata.algs.Pair;
 
 public interface Isomorphisms<O,A> {
 

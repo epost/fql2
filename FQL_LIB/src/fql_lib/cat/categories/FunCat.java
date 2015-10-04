@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import fql_lib.Chc;
-import fql_lib.Pair;
-import fql_lib.Unit;
+import catdata.algs.Chc;
+import catdata.algs.Pair;
+import catdata.algs.Unit;
+import fql_lib.FUNCTION;
 import fql_lib.cat.Category;
 import fql_lib.cat.Functor;
 import fql_lib.cat.Transform;
-import fql_lib.FUNCTION;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Transform<O, A, Category, Functor>> {

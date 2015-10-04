@@ -11,15 +11,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import catdata.algs.Pair;
 import fql_lib.DEBUG;
-import fql_lib.Pair;
 import fql_lib.Util;
 import fql_lib.cat.presentation.FPTransform;
 import fql_lib.cat.presentation.Instance;
 import fql_lib.cat.presentation.Mapping;
 import fql_lib.cat.presentation.Signature;
 
-public class LeftKan<O1, A1, O2, A2>implements Serializable {
+public class LeftKan<O1, A1, O2, A2> implements Serializable {
 
 	private Signature<O1, A1> A;
 	private Signature<O2, A2> B;

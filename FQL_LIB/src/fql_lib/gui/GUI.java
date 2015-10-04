@@ -38,8 +38,8 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 
+import catdata.algs.Pair;
 import fql_lib.DEBUG;
-import fql_lib.Pair;
 import fql_lib.X.XJsonToFQL;
 import fql_lib.X.XRaToFpql;
 import fql_lib.X.XSqlToFql;

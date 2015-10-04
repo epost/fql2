@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import fql_lib.Chc;
-import fql_lib.Pair;
+import catdata.algs.Chc;
+import catdata.algs.Pair;
 
 
 public abstract class TransExp implements Serializable{

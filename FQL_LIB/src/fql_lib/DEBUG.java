@@ -234,6 +234,7 @@ public class DEBUG implements Serializable {
 	public int opl_red_its = 32;
 	public int opl_hom_its = 5000;
 	public boolean opl_validate = true;
+	public boolean opl_david = false;
 	
 	public void showOptions() {
 
@@ -333,8 +334,8 @@ public class DEBUG implements Serializable {
 		
 		JCheckBox check_oriented_box = new JCheckBox("", check_oriented);
 		JLabel check_oriented_label = new JLabel("Validate orientation in Knuth-Bendix:");
-		x_1.add(check_oriented_label);
-		x_2.add(check_oriented_box);
+	//	x_1.add(check_oriented_label);
+	//	x_2.add(check_oriented_box);
 
 		JCheckBox opl_validate_box = new JCheckBox("", opl_validate);
 		JLabel opl_validate_label = new JLabel("Validate mappings:");
@@ -345,6 +346,11 @@ public class DEBUG implements Serializable {
 		JLabel opl_unfailing_label = new JLabel("Allow unorientable equations:");
 		opl1.add(opl_unfailing_label);
 		opl2.add(opl_unfailing_box);
+		
+		JCheckBox opl_david_box = new JCheckBox("", opl_david);
+		JLabel opl_david_label = new JLabel("Let var > const (true=dangerous):");
+//		opl1.add(opl_david_label);
+	//	opl2.add(opl_david_box);
 		
 		JCheckBox opl_const_box = new JCheckBox("", opl_require_const);
 		JLabel opl_const_label = new JLabel("Require a constant at each sort (false=dangerous):");
@@ -398,6 +404,8 @@ public class DEBUG implements Serializable {
 		x_1.add(new JLabel("Viewers:"));
 		x_2.add(xArea);
 
+		x_1.add(new JLabel());
+		x_2.add(new JLabel());
 		x_1.add(new JLabel());
 		x_2.add(new JLabel());
 		x_1.add(new JLabel());
@@ -829,6 +837,7 @@ public class DEBUG implements Serializable {
 			opl_unfailing = opl_unfailing_box.isSelected();
 			//opl_alpha = opl_alpha_box.isSelected();
 			opl_validate = opl_validate_box.isSelected();
+			opl_david = opl_david_box.isSelected();
 			
 		//	limit_examples = limex.isSelected();
 			useLineage = (String) lineageBox.getSelectedItem();

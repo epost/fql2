@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import catdata.algs.Unit;
 import fql_lib.FUNCTION;
-import fql_lib.Unit;
 import fql_lib.Util;
 import fql_lib.cat.Functor;
 import fql_lib.cat.categories.FinSet;

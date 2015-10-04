@@ -10,15 +10,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-import fql_lib.Chc;
-import fql_lib.Pair;
-import fql_lib.Unit;
+import catdata.algs.Chc;
+import catdata.algs.Pair;
+import catdata.algs.Unit;
+import fql_lib.FUNCTION;
 import fql_lib.Util;
 import fql_lib.cat.Category;
 import fql_lib.cat.FiniteCategory;
 import fql_lib.cat.Functor;
 import fql_lib.cat.Transform;
-import fql_lib.FUNCTION;
 
 public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 

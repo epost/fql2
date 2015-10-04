@@ -13,11 +13,11 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
-import fql_lib.Chc;
+import catdata.algs.Chc;
+import catdata.algs.Pair;
+import catdata.algs.Unit;
 import fql_lib.DEBUG;
 import fql_lib.FUNCTION;
-import fql_lib.Pair;
-import fql_lib.Unit;
 import fql_lib.Util;
 import fql_lib.cat.Category;
 import fql_lib.cat.categories.FinSet.Fn;

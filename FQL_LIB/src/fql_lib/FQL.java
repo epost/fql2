@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import catdata.algs.Pair;
 import fql_lib.examples.Examples;
 import fql_lib.gui.CodeEditor;
 import fql_lib.gui.GUI;

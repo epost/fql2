@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import fql_lib.Chc;
+import catdata.algs.Chc;
+import catdata.algs.Pair;
+import catdata.algs.Triple;
 import fql_lib.FUNCTION;
-import fql_lib.Pair;
-import fql_lib.Triple;
 import fql_lib.cat.Category;
 import fql_lib.cat.CoMonad;
 import fql_lib.cat.FDM;

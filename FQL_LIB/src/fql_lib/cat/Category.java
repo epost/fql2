@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.algs.Pair;
+import catdata.algs.Triple;
 import fql_lib.DEBUG;
-import fql_lib.Pair;
-import fql_lib.Triple;
 import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.FinSet.Fn;
 import fql_lib.cat.presentation.Signature;

@@ -2,7 +2,7 @@ package fql_lib.X;
 
 import java.util.Map;
 
-import fql_lib.Pair;
+import catdata.algs.Pair;
 import fql_lib.X.XExp.Apply;
 import fql_lib.X.XExp.Compose;
 import fql_lib.X.XExp.FLOWER2;

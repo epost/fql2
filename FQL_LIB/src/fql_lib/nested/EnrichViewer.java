@@ -28,8 +28,8 @@ import javax.swing.JTextField;
 
 import org.codehaus.jparsec.error.ParserException;
 
-import fql_lib.Pair;
-import fql_lib.Triple;
+import catdata.algs.Pair;
+import catdata.algs.Triple;
 import fql_lib.X.XCtx;
 import fql_lib.X.XDriver;
 import fql_lib.X.XEnvironment;

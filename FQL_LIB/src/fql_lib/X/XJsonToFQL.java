@@ -29,8 +29,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
-import fql_lib.Pair;
-import fql_lib.Triple;
+import catdata.algs.Pair;
+import catdata.algs.Triple;
 import fql_lib.Util;
 import fql_lib.examples.Example;
 import fql_lib.gui.FQLTextPanel;

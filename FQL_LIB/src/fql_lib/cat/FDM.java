@@ -4,15 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
-import fql_lib.Pair;
-import fql_lib.Quad;
-import fql_lib.Triple;
+import catdata.algs.Pair;
+import catdata.algs.Quad;
+import catdata.algs.Triple;
+import fql_lib.FUNCTION;
 import fql_lib.cat.categories.FinSet.Fn;
 import fql_lib.cat.categories.Inst;
 import fql_lib.cat.categories.Pi;
-import fql_lib.FUNCTION;
 
 public class FDM {
 	

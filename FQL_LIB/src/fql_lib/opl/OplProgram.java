@@ -1,16 +1,12 @@
 package fql_lib.opl;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import fql_lib.Pair;
-import fql_lib.Triple;
-import fql_lib.X.XExp;
+import catdata.algs.Triple;
 import fql_lib.decl.FQLProg;
 import fql_lib.decl.LineException;
 

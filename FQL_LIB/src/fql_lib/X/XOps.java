@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import fql_lib.Pair;
-import fql_lib.Triple;
+import catdata.algs.Pair;
+import catdata.algs.Triple;
 import fql_lib.Util;
 import fql_lib.X.XExp.Apply;
 import fql_lib.X.XExp.Compose;

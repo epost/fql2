@@ -3,8 +3,8 @@ package fql_lib.cat.categories;
 import java.util.HashSet;
 import java.util.Set;
 
-import fql_lib.Pair;
-import fql_lib.Triple;
+import catdata.algs.Pair;
+import catdata.algs.Triple;
 import fql_lib.cat.Category;
 import fql_lib.cat.Functor;
 import fql_lib.cat.LeftKanSigma;

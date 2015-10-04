@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import fql_lib.Pair;
-import fql_lib.Quad;
+import catdata.algs.Pair;
+import catdata.algs.Quad;
 import fql_lib.Util;
 import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.FinSet.Fn;
@@ -17,8 +17,6 @@ import fql_lib.cat.presentation.FPTransform;
 import fql_lib.cat.presentation.Instance;
 import fql_lib.cat.presentation.Mapping;
 import fql_lib.cat.presentation.Signature;
-import fql_lib.cat.presentation.Signature.Node;
-import fql_lib.cat.presentation.Signature.Path;
 
 public class LeftKanSigma {
 	/*

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import fql_lib.Pair;
+import catdata.algs.Pair;
 
 
 public class FiniteCategory<O, A> extends Category<O, A> {

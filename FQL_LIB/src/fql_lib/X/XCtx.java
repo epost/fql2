@@ -34,6 +34,10 @@ import javax.swing.JTextField;
 
 import org.apache.commons.collections15.Transformer;
 
+import catdata.algs.Pair;
+import catdata.algs.Triple;
+import catdata.algs.Unit;
+import catdata.algs.kb.KB_Thue;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -47,14 +51,10 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import edu.uci.ics.jung.visualization.transform.shape.GraphicsDecorator;
 import fql_lib.DEBUG;
-import fql_lib.Pair;
-import fql_lib.Triple;
-import fql_lib.Unit;
 import fql_lib.Util;
 import fql_lib.X.XExp.XInst;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.cat.Category;
-import fql_lib.cat.KB;
 import fql_lib.gui.FQLTextPanel;
 
 public class XCtx<C> implements XObject {
@@ -122,7 +122,7 @@ public class XCtx<C> implements XObject {
 
 	public boolean saturated = false;
 
-	private KB<C> kb;
+	private KB_Thue<C> kb;
 	Set<C> ids;
 	XCtx<C> global;
 	XCtx<C> schema;
@@ -278,7 +278,7 @@ public class XCtx<C> implements XObject {
 		this.kind = kind;
 	}
 
-	public KB<C> getKB() {
+	public KB_Thue<C> getKB() {
 		// init();
 		return kb;
 	}
@@ -327,7 +327,7 @@ public class XCtx<C> implements XObject {
 			l.add(id);
 			rules.add(new Pair<>(l, new LinkedList<>()));
 		}
-		kb = new KB<C>(rules, 32); // TODO
+		kb = new KB_Thue<C>(rules, 32); // TODO
 	}
 
 	private void validate(boolean initial) {
@@ -924,7 +924,7 @@ public class XCtx<C> implements XObject {
 		}
 	}
 
-	private List<C> find2(KB<C> kb2, List<C> cand, Set<List<C>> set) {
+	private List<C> find2(KB_Thue<C> kb2, List<C> cand, Set<List<C>> set) {
 		for (List<C> l : set) {
 			if (kb2.equiv(cand, l)) {
 				return l;
@@ -1109,7 +1109,7 @@ public class XCtx<C> implements XObject {
 	}
 
 	// TODO: test for inconsistency here?
-	public static <D> Triple<D, D, List<D>> find_old(KB<D> kb, Triple<D, D, List<D>> tofind,
+	public static <D> Triple<D, D, List<D>> find_old(KB_Thue<D> kb, Triple<D, D, List<D>> tofind,
 			Collection<Triple<D, D, List<D>>> cat) {
 		Set<Triple<D, D, List<D>>> ret = new HashSet<>();
 		for (Triple<D, D, List<D>> arr : cat) {
@@ -1642,7 +1642,7 @@ public class XCtx<C> implements XObject {
 	}
 
 	// mutate paths in place
-	public static <C> void extend(KB<C> kb, Collection<Triple<C, C, List<C>>> paths,
+	public static <C> void extend(KB_Thue<C> kb, Collection<Triple<C, C, List<C>>> paths,
 			Map<C, Pair<C, C>> t, Collection<Triple<C, C, List<C>>> consts) {
 		int iter = 0;
 		for (; iter < DEBUG.debug.MAX_PATH_LENGTH; iter++) {

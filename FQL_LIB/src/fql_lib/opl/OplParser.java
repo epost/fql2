@@ -19,12 +19,13 @@ import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
 
-import fql_lib.Pair;
-import fql_lib.Triple;
+import catdata.algs.Pair;
+import catdata.algs.Triple;
 import fql_lib.X.XExp;
 import fql_lib.opl.OplExp.OplCtx;
 import fql_lib.opl.OplExp.OplDelta;
 import fql_lib.opl.OplExp.OplEval;
+import fql_lib.opl.OplExp.OplFlower;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
 import fql_lib.opl.OplExp.OplSat;
@@ -50,7 +51,7 @@ public class OplParser {
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
-		"SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
+		"as", "where", "select", "from", "flower", "SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -116,8 +117,10 @@ public class OplParser {
 		Parser<?> sat = Parsers.tuple(term("saturate"), ident());
 		Parser<?> ubersat = Parsers.tuple(term("SATURATE"), ident(), ident());
 		Parser<?> unsat = Parsers.tuple(term("unsaturate"), ident());
+		Parser<?> flower = flower();
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
+		
+		Parser<?> a = Parsers.or(new Parser<?>[] { flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
 		ref.set(a);
 
 		return a;
@@ -491,6 +494,15 @@ public class OplParser {
 		}
 		catch (Exception ee) {
 		}
+		
+		try {
+			return toFlower(c);
+		} catch (DoNotIgnore de) {
+			de.printStackTrace();
+			throw new RuntimeException(de.getMessage());
+		}
+		catch (Exception ee) {
+		}
 				
 		try {
 			return toModel(c);
@@ -779,8 +791,67 @@ public class OplParser {
 				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
 	} 
 	 
+	 public static final Parser<?> flower() {
+			Parser<?> from0 = Parsers.tuple(ident(), term("as"), ident()).sepBy(term(","));
+			Parser<?> from = Parsers.tuple(term("from"), from0, term(";"));
+
+			Parser<?> where0 = Parsers.tuple(oplTerm(), term("="), oplTerm()).sepBy(term(","));
+			Parser<?> where = Parsers.tuple(term("where"), where0, term(";")); 
+
+			Parser<?> select0 = Parsers.tuple(oplTerm(), term("as"), ident()).sepBy(term(","));
+			Parser<?> select = Parsers.tuple(term("select"), select0, term(";"));
+
+			Parser p = Parsers.tuple(select, from, where);
+			Parser ret = Parsers.tuple(term("flower"), p.between(term("{"), term("}")), ident());
+			
+			return ret;
+		}
 	
+	 private static OplFlower toFlower(Object c) {
+		 Tuple3 p = (Tuple3) c;
+		// if (p.a.toString().equals("flower")) {
+		 String I = (String) p.c;
+		 Tuple3 q = (Tuple3) p.b;
+					
+		 List s = (List) ((Tuple3)q.a).b; //list of tuple3 of (path, string)
+		 List f = (List) ((Tuple3)q.b).b; //list of tuple3 of (string, string)
+		 List w = (List) ((Tuple3)q.c).b; //list of tuple3 of (path, path)
+					
+		 Map<String, OplTerm<String,String>> select = new HashMap<>();
+		 Map<String, String> from = new HashMap<>();
+		 List<Pair<OplTerm<String, String>, OplTerm<String, String>>> where = new LinkedList<>();
+					
+		 Set<String> seen = new HashSet<>();
+		 for (Object o : w) {
+			 Tuple3 t = (Tuple3) o;
+			 OplTerm lhs = toTerm(from.keySet(), null, t.a); //TODO
+			 OplTerm rhs = toTerm(from.keySet(), null, t.c);
+			 where.add(new Pair<>(rhs, lhs));
+		 }
+		 for (Object o : s) {
+			 Tuple3 t = (Tuple3) o;
+			 OplTerm lhs = toTerm(from.keySet(), null, t.a);
+			 String rhs = t.c.toString();
+			 if (seen.contains(rhs)) {
+				 throw new DoNotIgnore("Duplicate AS name: " + rhs + " (note: AS names can't be used in the schema either)");
+			 }
+			 seen.add(rhs);	
+			 select.put(rhs, lhs);
+		 }
+		 for (Object o : f) {
+			 Tuple3 t = (Tuple3) o;
+			 String lhs = t.a.toString();
+			 String rhs = t.c.toString();
+			 if (seen.contains(rhs)) {
+				 throw new DoNotIgnore("Duplicate AS name: " + rhs + " (note: AS names can't be used in the schema either)");
+			 }
+			 seen.add(rhs);
+			 from.put(rhs, lhs);
+		 }
+					
+		 return new OplFlower<>(select, from, where, I);				
 	
+	 }
 	
 
 }

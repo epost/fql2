@@ -33,6 +33,7 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 	@Override
 	protected void doTemplates() {
 		CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
+		//ctm.
 		
 		StaticCodeTemplate ct = new StaticCodeTemplate("theory", "theory ",
 				"{\n\tsorts;\n\tsymbols;\n\tequations;\n}");

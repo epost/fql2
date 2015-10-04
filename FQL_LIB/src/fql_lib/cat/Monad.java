@@ -3,7 +3,7 @@ package fql_lib.cat;
 import java.util.HashSet;
 import java.util.Set;
 
-import fql_lib.Pair;
+import catdata.algs.Pair;
 
 public class Monad<O,A> {
 	

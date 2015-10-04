@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import catdata.algs.Pair;
+import catdata.algs.Triple;
+import catdata.algs.Unit;
 import fql_lib.DEBUG;
-import fql_lib.Pair;
-import fql_lib.Triple;
-import fql_lib.Unit;
 import fql_lib.Util;
 
 public abstract class XExp {

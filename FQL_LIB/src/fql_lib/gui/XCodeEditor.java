@@ -9,15 +9,15 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.templates.CodeTemplate;
 import org.fife.ui.rsyntaxtextarea.templates.StaticCodeTemplate;
 
-import fql_lib.Pair;
+import catdata.algs.Pair;
 import fql_lib.Util;
+import fql_lib.X.XDisplay;
 import fql_lib.X.XDriver;
 import fql_lib.X.XEnvironment;
 import fql_lib.X.XMapping;
 import fql_lib.X.XObject;
 import fql_lib.X.XParser;
 import fql_lib.X.XProgram;
-import fql_lib.X.XDisplay;
 
 @SuppressWarnings("serial")
 public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {

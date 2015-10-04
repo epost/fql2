@@ -25,6 +25,7 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.table.TableRowSorter;
 
+import catdata.algs.Pair;
 import fql_lib.gui.MyTableRowSorter;
 
 public class Util {
@@ -42,18 +43,14 @@ public class Util {
 	};
 	
 	public static <X,Y> boolean isBijection(Map<X, Y> m, Set<X> X, Set<Y> Y) {
-		System.out.println("is bijection? " + m + " with X=" + X + " and Y=" + Y);
 		if (!m.keySet().equals(X)) {
-			System.out.println("a");
 			return false;
 		}
 		if (!new HashSet<>(m.values()).equals(Y)) {
-			System.out.println("b " + m.values());
 			return false;
 		}
 		Map<Y,X> n = rev(m, Y);
 		if (n == null) {
-			System.out.println("c");
 			return false;
 		}
 		
@@ -61,11 +58,9 @@ public class Util {
 		Map<Y,Y> b = compose0(n, m);
 		
 		if (!a.equals(id(X))) {
-			System.out.println("d");
 			return false;
 		}
 		if (!b.equals(id(Y))) {
-			System.out.println("e");
 			return false;
 		}
 		
@@ -185,7 +180,9 @@ public class Util {
 		};
 		JPanel p = new JPanel(new GridLayout(1, 1));
 		TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
-		sorter.toggleSortOrder(0);
+		if (colNames.length > 0) {
+			sorter.toggleSortOrder(0);
+		}
 		t.setRowSorter(sorter);
 		sorter.allRowsChanged();
 		p.add(new JScrollPane(t));
@@ -212,7 +209,7 @@ public class Util {
 //		return s.replace("[", "{").replace("]", "}");
 	}
 
-	 public static String sep(Collection<?> c, String sep) {
+	public static String sep(Collection<?> c, String sep) {
 		return sep(c.iterator(), sep);
 	}
 
@@ -226,11 +223,7 @@ public class Util {
 			}
 			b = true;
 
-			// if (o instanceof String && ((String)o).contains(" ")) {
-			// ret += "\"" + o + "\"";
-			// } else {
 			ret += o;
-			// }
 		}
 		return ret;
 	} 

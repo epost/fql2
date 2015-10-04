@@ -6,6 +6,7 @@ import fql_lib.opl.OplExp.OplCtx;
 import fql_lib.opl.OplExp.OplDelta;
 import fql_lib.opl.OplExp.OplEval;
 import fql_lib.opl.OplExp.OplExpVisitor;
+import fql_lib.opl.OplExp.OplFlower;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
 import fql_lib.opl.OplExp.OplPres;
@@ -259,6 +260,20 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		OplPres dst0 = (OplPres) dst;
 		e.validate(src0, dst0);
 		return e;
+	}
+
+	@Override
+	public OplObject visit(OplProgram env, OplFlower e) {
+		OplObject I0 = ENV.get(e.I0);
+		if (I0 instanceof OplSetInst) {
+			OplSetInst I = (OplSetInst) I0;
+			return (OplObject) e.eval(I).second;
+		}
+		if (I0 instanceof OplSetTrans) {
+			OplSetTrans h = (OplSetTrans) I0;
+			return e.eval(h);
+		}
+		throw new RuntimeException("Not a set model or transform: " + e.I0);
 	}
 
 }

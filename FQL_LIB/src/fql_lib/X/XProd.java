@@ -10,10 +10,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import fql_lib.Chc;
-import fql_lib.Pair;
-import fql_lib.Triple;
-import fql_lib.Unit;
+import catdata.algs.Chc;
+import catdata.algs.Pair;
+import catdata.algs.Triple;
+import catdata.algs.Unit;
 import fql_lib.Util;
 import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;

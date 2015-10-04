@@ -16,8 +16,8 @@ import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
 
-import fql_lib.Pair;
-import fql_lib.Triple;
+import catdata.algs.Pair;
+import catdata.algs.Triple;
 import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.XInst;

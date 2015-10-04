@@ -1,4 +1,4 @@
-package fql_lib.kb;
+package fql_lib.opl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -16,15 +16,18 @@ import java.util.stream.Collectors;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 
-import fql_lib.Chc;
+import catdata.algs.Chc;
+import catdata.algs.Pair;
+import catdata.algs.Triple;
+import catdata.algs.kb.KB;
+import catdata.algs.kb.KBExp;
+import catdata.algs.kb.KBOrders;
+import catdata.algs.kb.KBExp.KBApp;
+import catdata.algs.kb.KBExp.KBVar;
 import fql_lib.DEBUG;
-import fql_lib.Pair;
-import fql_lib.Triple;
 import fql_lib.Util;
 import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.Operad;
-import fql_lib.kb.KBExp.KBApp;
-import fql_lib.kb.KBExp.KBVar;
 import fql_lib.opl.OplExp.JSWrapper;
 import fql_lib.opl.OplExp.OplCtx;
 import fql_lib.opl.OplExp.OplJavaInst;
@@ -285,30 +288,61 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		Function<Pair<C, C>, Boolean> gt = x -> {
 			Integer l = s.prec.get(x.first);
 			Integer r = s.prec.get(x.second);
-			
+		//	System.out.println("0" + x.first + " and " + x.second);
 			if (l != null && r != null) {
 				return l > r;				
 			}
-			if (l == null) {
+			if (l == null && r != null) {
 				return false;
 			}
-			if (r == null) {
+			if (r == null && r != null) {
 				return true;
 			}
 			String lx = x.first.toString();
 			String rx = x.second.toString();
-			if (lx.length() == rx.length()) {
-				return l.compareTo(r) < 0;
+			//System.out.println("1" + x.first + " and " + x.second);
+			int la = s.symbols.get(x.first).first.size();
+			int ra = s.symbols.get(x.second).first.size();
+			if (la == ra) {
+				if (lx.length() == rx.length()) {
+					return lx.compareTo(rx) < 0;
+				}
+				return lx.length() < rx.length();
 			}
-			return lx.length() < rx.length();
+		//	System.out.println("2" + x.first + " > " + x.second);
+			if (la >= 3 && ra >= 3) {
+				return la > ra;
+			}
+			if (la == 0 && ra > 0) {
+				return false;
+			}
+			if (la == 1 && (ra == 0 || ra == 2)) {
+		//		System.out.println("true");
+				return true;
+			}
+			if (la == 1 && ra > 2) {
+		//		System.out.println("false");
+				return false;
+			}
+			if (la == 2 && ra == 0) {
+		//		System.out.println("true");
+				return true;
+			}
+			if (la == 2 && (ra == 1 || ra > 2)) {
+		//		System.out.println("false");
+				return false;
+			}
+			throw new RuntimeException("Bug in precedence, report to Ryan");
+			//function symbols: arity-0 < arity-2 < arity-1 < arity-3 < arity-4
+			
+			
 		};
 
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> eqs = new HashSet<>();
 		for (Triple<?, OplTerm<C, V>, OplTerm<C, V>> eq : s.equations) {
 			eqs.add(new Pair<>(convert(eq.second), convert(eq.third)));
 		}
-		
-		return new KB(eqs, KBOrders.pogt(gt), fr);			
+		return new KB(eqs, KBOrders.lpogt(gt), fr, DEBUG.debug.opl_unfailing, DEBUG.debug.opl_sort_cps, DEBUG.debug.opl_iterations, DEBUG.debug.opl_red_its);			
 	}
 
 	public static <C,X,V> KBExp<Chc<Chc<C,X>,JSWrapper>,V> redBy(OplJavaInst I, KBExp<Chc<Chc<C,X>,JSWrapper>,V> e) {				

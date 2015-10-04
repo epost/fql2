@@ -1,6 +1,5 @@
 package fql_lib.X;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -10,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import fql_lib.Pair;
-import fql_lib.Triple;
+import catdata.algs.Pair;
+import catdata.algs.Triple;
 import fql_lib.Util;
 import fql_lib.X.XExp.XSuperED;
 import fql_lib.X.XExp.XSuperED.SuperFOED;

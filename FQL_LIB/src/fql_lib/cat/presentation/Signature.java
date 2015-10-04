@@ -10,14 +10,14 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import catdata.algs.Pair;
+import catdata.algs.Triple;
+import catdata.algs.Unit;
+import catdata.algs.kb.KB_Thue;
 import fql_lib.DEBUG;
 import fql_lib.FUNCTION;
-import fql_lib.Pair;
-import fql_lib.Triple;
-import fql_lib.Unit;
 import fql_lib.Util;
 import fql_lib.cat.Category;
-import fql_lib.cat.KB;
 import fql_lib.cat.LeftKan;
 
 //this requires finite denotations (paths always normalized)
@@ -729,7 +729,7 @@ public class Signature<O,A> implements Serializable {
 		for (Eq eq : eqs) {
 			rules.add(new Pair<>(eq.lhs.path, eq.rhs.path));
 		}
-		KB<Edge> kb = new KB<>(rules, 100);
+		KB_Thue<Edge> kb = new KB_Thue<>(rules, 100);
 		for (Path path1 : paths) {
 			for (Path path2 : paths) {
 				if (path1.source.equals(path2.source) && path1.target.equals(path2.target)) {

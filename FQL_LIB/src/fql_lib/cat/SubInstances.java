@@ -12,9 +12,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import fql_lib.Chc;
+import catdata.algs.Chc;
+import catdata.algs.Pair;
 import fql_lib.FUNCTION;
-import fql_lib.Pair;
 import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.FinSet.Fn;
 

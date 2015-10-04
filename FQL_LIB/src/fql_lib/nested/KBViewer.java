@@ -22,8 +22,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
-import fql_lib.Pair;
-import fql_lib.cat.KB;
+import catdata.algs.Pair;
+import catdata.algs.kb.KB_Thue;
 import fql_lib.cat.presentation.Signature;
 import fql_lib.decl.CatExp;
 import fql_lib.decl.FQLParser;
@@ -164,7 +164,7 @@ public class KBViewer {
 			rules.add(new Pair<>(eq.lhs.path.stream().map(x -> x.name).collect(Collectors.toList()), 
 					             eq.rhs.path.stream().map(x -> x.name).collect(Collectors.toList())));
 		}
-		KB<String> kb = new KB<>(rules, 16);
+		KB_Thue<String> kb = new KB_Thue<>(rules, 16);
 		kb.complete();
 		return kb.toString();
 	}

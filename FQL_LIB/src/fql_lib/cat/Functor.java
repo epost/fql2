@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.algs.Pair;
 import fql_lib.DEBUG;
 import fql_lib.FUNCTION;
-import fql_lib.Pair;
 import fql_lib.Util;
 import fql_lib.cat.categories.FinSet;
 import fql_lib.cat.categories.FinSet.Fn;

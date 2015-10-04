@@ -24,7 +24,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import fql_lib.Pair;
+import catdata.algs.Pair;
 import fql_lib.gui.FQLDisp;
 
 public class XDisplay implements FQLDisp {
