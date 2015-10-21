@@ -7,8 +7,8 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>fql2</name>
-  <url>http://maven.apache.org</url>
+  <name>Functorial Query Language++</name>
+  <url>https://github.com/epost/fql2</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -69,6 +69,11 @@
 
 
   <dependencies>
+    <dependency>
+        <groupId>net.categoricaldata</groupId>
+        <artifactId>catdata-algs</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
         <groupId>net.sourceforge.collections</groupId>
         <artifactId>collections-generic</artifactId>
