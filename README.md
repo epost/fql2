@@ -1,9 +1,37 @@
+FQL2
+====
+
+About
+-----
+
+IDE and compiler for the next iteration of FQL, the functorial query language.
+
+Build
+-----
+
 Compilation note: FPQL requires the built-in Eclipse compiler that ships with the Eclipse IDE for java developers.  The Oracle JDK compiler will fail with type-inference errors.
 
-------
+### Maven
+
+First, install the `catdata-algs` dependency into your local Maven repository:
+
+    git clone https://github.com/CategoricalData/catdata_algs.git
+    cd catdata_algs/catdata_algs
+    mvn install
+
+Then, install `fql2` itself:
+
+    git clone https://github.com/CategoricalData/fql2.git
+    cd fql2/FQL_LIB/
+    mvn package
+
+License
+-------
+
+### FQL++ and FPQL
 
 FQL++ (BSD License)
-Copyright (c) Ryan Wisnesky and David Spivak 
+Copyright (c) Ryan Wisnesky and David Spivak
 
 FPQL (BSD License)
 Copyright (c) Ryan Wisnesky and David Spivak and Patrick Schultz
@@ -31,8 +59,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-------------------------------------------------------------------------------------------
-
 FQL++ and FPQL contain binary distributions of the following libraries:
 
 jparsec (Apache License)
@@ -43,9 +69,8 @@ JFlex (BSD License)
 
 Copyright statements for these projects are included below.
 
-------------------------------------------------------------------------------------------
+### JParsec (Apache 2.0 License)
 
-JParsec (Apache 2.0 License)
 Copyright The Codehaus
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,9 +85,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-------------------------------------------------------------------------------------------
 
-Apache Commons Collections Generics (Apache 2.0 License)
+### Apache Commons Collections Generics (Apache 2.0 License)
+
 Copyright The Apache Software Foundation
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,9 +102,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-------------------------------------------------------------------------------------------
 
-JUNG - Java Universal Network/Graph Framework (BSD License)
+### JUNG - Java Universal Network/Graph Framework (BSD License)
 Copyright (c) Joshua O'Madadhain, Danyel Fisher, and Scott White
 All rights reserved.
 
@@ -105,9 +129,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-------------------------------------------------------------------------------------------
 
-RSyntaxTextArea (BSD License)
+### RSyntaxTextArea (BSD License)
 Copyright (c) Robert Futrell
 All rights reserved.
 
@@ -133,9 +156,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-------------------------------------------------------------------------------------------
 
-JFlex (BSD License)
+### JFlex (BSD License)
 Copyright (C) Gerwin Klein, Steve Rowe, Regis Decamp
 All rights reserved.
 
@@ -161,12 +183,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-------------------------------------------------------------------------------------------
 
-JSONP 
-JSON Processing project is the open source reference implementation of JSR 353 - Java API for JSON Processing. 
+### JSONP
+JSON Processing project is the open source reference implementation of JSR 353 - Java API for JSON Processing.
 
-http://jsonp.java.net/license.html
-
-
-
+[JSONP license](http://jsonp.java.net/license.html)
