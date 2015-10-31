@@ -58,7 +58,7 @@ public class XJsonToFQL {
 		
 	}
 	
-	String help = "Transles Idea Flow JSON into an FPQL schema";
+	String help = "Translates Idea Flow JSON into an FPQL schema";
 
 	protected String kind() {
 		return "JSON";

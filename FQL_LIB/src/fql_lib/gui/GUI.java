@@ -235,6 +235,10 @@ public class GUI extends JPanel {
 		transMenu.add(jsonItem);
 		jsonItem.addActionListener(x -> { new XJsonToFQL(); });
 		
+		MenuItem neo4j = new MenuItem("Neo4j to FPQL");
+		transMenu.add(neo4j);
+		neo4j.addActionListener(x -> { new XNeo4jToFQL(); });
+		
 		MenuItem cfgItem = new MenuItem("CFG to OPL");
 		transMenu.add(cfgItem);
 		cfgItem.addActionListener(x -> { new CfgToOpl(); });

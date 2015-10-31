@@ -504,6 +504,7 @@ J = soed {
 	private static XSOED fromSoed(Object ooo) {
 		org.codehaus.jparsec.functors.Pair ooo1 = (org.codehaus.jparsec.functors.Pair) ooo;
 		
+		
 		Tuple4 a = (Tuple4) ooo1.a;
 		List<Triple<String, String, String>> es = new LinkedList<>();
 		List<FOED> as = new LinkedList<>();
