@@ -239,6 +239,10 @@ public class GUI extends JPanel {
 		transMenu.add(neo4j);
 		neo4j.addActionListener(x -> { new XNeo4jToFQL(); });
 		
+		MenuItem easik = new MenuItem("EASIK to FPQL");
+		transMenu.add(easik);
+		easik.addActionListener(x -> { new XEasikToFQL(); });
+		
 		MenuItem cfgItem = new MenuItem("CFG to OPL");
 		transMenu.add(cfgItem);
 		cfgItem.addActionListener(x -> { new CfgToOpl(); });
