@@ -52,9 +52,9 @@ public class Examples {
 	public static Example patrick29 = new Patrick29ExampleEpiMono();
 	public static Example patrick30 = new Patrick30ExampleSoed1();
 	
-	public static Example mod4 = new Mod4Example();
-	public static Example js = new JSExample();
-	public static Example sk = new SKExample();
+	public static Example mod4 = new OplMod4Example();
+	public static Example js = new OplJSExample();
+	public static Example sk = new OplSKExample();
 	public static Example oplDelta = new OplDeltaExample();
 	public static Example oplStack = new OplStackExample();
 	public static Example oplGroup = new OplGroupExample();

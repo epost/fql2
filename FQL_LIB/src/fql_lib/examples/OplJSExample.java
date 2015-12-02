@@ -1,6 +1,6 @@
 package fql_lib.examples;
 
-public class JSExample extends Example {
+public class OplJSExample extends Example {
 	
 	@Override
 	public String isPatrick() {
@@ -21,7 +21,7 @@ public class JSExample extends Example {
 			+ "\n	sorts "
 			+ "\n		Int, String;"
 			+ "\n	symbols "
-			+ "\n		zero : -> Int,"
+			+ "\n		zero : Int,"
 			+ "\n		succ : Int -> Int,"
 			+ "\n		pred : Int -> Int,"
 			+ "\n		length : String -> Int,"
@@ -29,9 +29,9 @@ public class JSExample extends Example {
 			+ "\n		append : String, String -> String,"
 			+ "\n		print : Int -> String;"
 			+ "\n	equations	"
-			+ "\n		forall x:Int. pred(succ(x)) = x,"
-			+ "\n		forall x:Int. succ(pred(x)) = x,"
-			+ "\n		forall x:String. length(x) = length(reverse(x));"
+			+ "\n		forall x. pred(succ(x)) = x,"
+			+ "\n		forall x. succ(pred(x)) = x,"
+			+ "\n		forall x. length(x) = length(reverse(x));"
 			+ "\n}"
 			+ "\n"
 			+ "\nM = javascript {"

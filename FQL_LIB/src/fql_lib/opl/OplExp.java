@@ -498,6 +498,7 @@ public abstract class OplExp implements OplObject {
 			return t.second;
 		}
 		
+		
 		@Override
 		public String toString() {
 			if (var != null) {
@@ -547,7 +548,11 @@ public abstract class OplExp implements OplObject {
 		public String toString() {
 			List<String> l = new LinkedList<>();
 			for (V k : vars0.keySet()) {
-				l.add(k + ":" + vars0.get(k));
+				if (vars0.get(k) != null) {
+					l.add(k + ":" + vars0.get(k));
+				} else {
+					l.add(k.toString());
+				}
 			}
 			return Util.sep(l, ", ");
 		}
@@ -588,6 +593,9 @@ public abstract class OplExp implements OplObject {
 		public void validate(OplSig<S,?,V> oplSig) {
 			for (V k : vars0.keySet()) {
 				S v = get(k);
+				if (v == null) {
+					throw new RuntimeException("Cannot infer type for " + k);
+				}
 				if (!oplSig.sorts.contains(v)) {
 					throw new DoNotIgnore("Context has bad sort " + v);
 				}
@@ -1107,7 +1115,9 @@ public abstract class OplExp implements OplObject {
 					}
 				}
 			}
-			for (Triple<OplCtx<S,V>, OplTerm<C,V>, OplTerm<C,V>> eq : equations) {
+			for (Triple<OplCtx<S,V>, OplTerm<C,V>, OplTerm<C,V>> eq0 : equations) {
+				Triple<OplCtx<S,V>, OplTerm<C,V>, OplTerm<C,V>> eq = new Triple<>(inf(eq0), eq0.second, eq0.third);
+				eq0.first = eq.first;
 				eq.first.validate(this);
 				S t1 = eq.second.type(this, eq.first);
 				S t2 = eq.third.type(this, eq.first);
@@ -1115,6 +1125,15 @@ public abstract class OplExp implements OplObject {
 					throw new DoNotIgnore("Domains do not agree in " + eq.second + " = " + eq.third + ", are " + t1 + " and " + t2);
 				}
 			}
+		}
+
+		private OplCtx<S,V> inf(Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq0) {
+			KBExp<C,V> lhs = OplToKB.convert(eq0.second);
+			KBExp<C,V> rhs = OplToKB.convert(eq0.third);
+			Map<V, S> m = new HashMap<>(eq0.first.vars0);
+			lhs.typeInf(symbols, m);
+			rhs.typeInf(symbols, m);
+			return new OplCtx<>(m);
 		}
 
 		@Override
@@ -1409,9 +1428,11 @@ public abstract class OplExp implements OplObject {
 					throw new RuntimeException("Extra symbol: " + k);
 				}
 				Pair<OplCtx<S2, V>, OplTerm<C2, V>> v = symbols.get(k);
+				v.second = replaceVarsByConsts(v.first, v.second);
+				v.first = inf(v);
 				S2 t = v.second.type(dst, v.first);
 				if (t == null) {
-					throw new RuntimeException("Cannot type " + v.second + " in context [" + v.first  + "]. Mostly likely, forgotten () in presentation of transform (parens cannot be inferred in trans pres)");
+					throw new RuntimeException("Cannot type " + v.second + " in context [" + v.first  + "]. ");
 				}
 			
 				if (!t.equals(sorts.get(src.symbols.get(k).second))) {
@@ -1436,6 +1457,27 @@ public abstract class OplExp implements OplObject {
 				}
 
 			} 
+		}
+		
+		private OplCtx<S2,V> inf(Pair<OplCtx<S2, V>, OplTerm<C2, V>> eq0) {
+			KBExp<C2,V> lhs = OplToKB.convert(eq0.second);
+			Map<V, S2> m = new HashMap<>(eq0.first.vars0);
+			lhs.typeInf(dst.symbols, m);
+			return new OplCtx<>(m);
+		}
+
+		
+		private OplTerm<C2, V> replaceVarsByConsts(OplCtx<S2, V> g, OplTerm<C2, V> e) {
+			if (e.var != null) {
+				if (dst.symbols.containsKey(e.var)) {
+					if (g.vars0.containsKey(e.var)) {
+						throw new RuntimeException("Attempt to shadow " + e.var);
+					}
+					return new OplTerm<C2, V>((C2) e.var, new LinkedList<>());
+				}
+				return e;
+			}
+			return new OplTerm<C2, V>(e.head, e.args.stream().map(x -> replaceVarsByConsts(g, x)).collect(Collectors.toList()));
 		}
 
 		public OplMapping(Map<S1, S2> sorts,

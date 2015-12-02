@@ -85,14 +85,28 @@ public class OplParser {
 		ref.set(a);
 		return a;
 	}
-	
-	public static final Parser<?> oplSequent() {
+
+	//TODO type inf
+/*	public static final Parser<?> oplSequent() {
 		Parser<?> p = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(","));
 		return Parsers.tuple(term("forall"), p, term("."), oplTerm());
-	}
+	} */
 	
+	public static final Parser<?> oplSequent() {
+		Parser<?> p1 = Parsers.tuple(ident(), term(":"), ident());
+		Parser<?> z = Parsers.longest(new Parser[] { p1, ident() });
+		Parser<?> p = z.sepBy(term(","));
+	//	Parser<?> q = Parsers.tuple(oplTerm(), term("="), oplTerm());
+		Parser a = Parsers.tuple(term("forall"), p, term("."));
+		Parser retX = Parsers.tuple(a.optional(), oplTerm());
+//		Parser ret2 = Parsers.tuple(Parsers.always(), Parsers.always(), Parsers.always(), q);
+		return retX;
+	}
+	 
 	public static final Parser<?> oplEq() {
-		Parser<?> p = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(","));
+		Parser<?> p1 = Parsers.tuple(ident(), term(":"), ident());
+		Parser<?> z = Parsers.longest(new Parser[] { p1, ident() });
+		Parser<?> p = z.sepBy(term(","));
 		Parser<?> q = Parsers.tuple(oplTerm(), term("="), oplTerm());
 		Parser a = Parsers.tuple(term("forall"), p, term("."));
 		Parser retX = Parsers.tuple(a.optional(), q);
@@ -152,8 +166,11 @@ public class OplParser {
 	
 	public static final Parser<?> theory() {
 		Parser<?> q = Parsers.tuple(ident(), Parsers.tuple(term("@"), NUMBER).optional());
-		Parser<?> p = Parsers.tuple(q, term(":"), ident().sepBy(term(",")), term("->"),
-				ident());
+		
+		Parser<?> z1 = Parsers.longer(Parsers.tuple(ident().sepBy(term(",")), term("->"),
+				ident()), ident());
+		
+		Parser<?> p = Parsers.tuple(q, term(":"), z1);
 		Parser<?> foo = Parsers.tuple(section("sorts", ident()), 
 				section("symbols", p),
 				section("equations", oplEq()));
@@ -284,12 +301,12 @@ public class OplParser {
 			throw new DoNotIgnore("Duplicate sort");
 		}
 		
-		List<Tuple5> symbols0 = (List<Tuple5>) b.b;
+		List<Tuple3> symbols0 = (List<Tuple3>) b.b;
 		List<org.codehaus.jparsec.functors.Pair> equations0 = (List<org.codehaus.jparsec.functors.Pair>) c.b;
 		
 		Map<String, Pair<List<String>, String>> symbols = new HashMap<>();
 		Map<String, Integer> prec = new HashMap<>();
-		for (Tuple5 x : symbols0) {
+		for (Tuple3 x : symbols0) {
 			org.codehaus.jparsec.functors.Pair name0 = (org.codehaus.jparsec.functors.Pair) x.a;
 			String name = (String) name0.a;
 			
@@ -299,8 +316,16 @@ public class OplParser {
 				prec.put(name, i);
 			}
 
-			List<String> args = (List<String>) x.c;
-			String dom = (String) x.e;
+			String dom;
+			List<String> args;
+			if (x.c instanceof Tuple3) {
+				Tuple3 zzz = (Tuple3) x.c;
+				args = (List<String>) zzz.a;
+				dom = (String) zzz.c;
+			} else {
+				dom = (String) x.c;
+				args = new LinkedList<>();
+			}
 			if (symbols.containsKey(name)) {
 				throw new DoNotIgnore("Duplicate symbol " + name);
 			}
@@ -445,7 +470,7 @@ public class OplParser {
 			} else if (consts == null || vars == null) {
 				return new OplTerm(a0);				
 			}
-			throw new DoNotIgnore(a + " is neither a bound variable nor a constant ");
+			throw new DoNotIgnore(a + " is neither a bound variable nor a (0-ary) constant " );
 		}
 		Tuple4 t = (Tuple4) a;
 		String f = (String) t.a;
@@ -459,8 +484,13 @@ public class OplParser {
 		if (fa == null) {
 			return new OplCtx<String, String>();			
 		}
-		for (Tuple3 t : fa) {
-			ret.add(new Pair<>(t.a.toString(), t.c.toString()));
+		for (Object tt : fa) {
+			if (tt instanceof Tuple3) {
+				Tuple3 t = (Tuple3) tt;
+				ret.add(new Pair<>(t.a.toString(), t.c.toString()));
+			} else {
+				ret.add(new Pair<>((String) tt, null));
+			}
 		}
 		return new OplCtx<String, String>(ret);
 	}
@@ -493,6 +523,7 @@ public class OplParser {
 			throw new RuntimeException(de.getMessage());
 		}
 		catch (Exception ee) {
+			//ee.printStackTrace();
 		}
 		
 		try {
@@ -574,7 +605,7 @@ public class OplParser {
 			de.printStackTrace();
 			throw new RuntimeException(de.getMessage());
 		}catch (Exception ee) {
-			//ee.printStackTrace();
+			ee.printStackTrace();
 		}
 		
 		
@@ -609,13 +640,21 @@ public class OplParser {
 			if (sorts0.containsKey(p)) {
 				throw new DoNotIgnore("Duplicate symbol: " + p);
 			}
-			Tuple4 q = (Tuple4) z.c;
-			List<Tuple3> ctx = (List<Tuple3>) q.b;
+			org.codehaus.jparsec.functors.Pair ppp = (org.codehaus.jparsec.functors.Pair) z.c;
+			Tuple3 q = (Tuple3) ppp.a;
+			List<Tuple3> ctx = q == null ? new LinkedList<>() : (List<Tuple3>) q.b;
 			List<Pair<String, String>> ctx0 = new LinkedList<>();
 			Set<String> seen = new HashSet<>();
-			for (Tuple3 u : ctx) {
-				String name = (String) u.a;
-				String type = (String) u.c;
+			for (Object uu : ctx) {
+				String name;
+				String type = null;
+				if (uu instanceof Tuple3) {
+					Tuple3 u = (Tuple3) uu;
+					name = (String) u.a;
+					type = (String) u.c;
+				} else {
+					name = (String) uu;
+				}
 				if (seen.contains(name)) {
 					throw new DoNotIgnore("Duplicate var: " + name);
 				}
@@ -623,7 +662,7 @@ public class OplParser {
 				ctx0.add(new Pair<>(name, type));
 			}
 			OplCtx ccc = new OplCtx<>(ctx0);
-			symbols0.put(p, new Pair<>(ccc, toTerm(ccc.names(), null, q.d)));
+			symbols0.put(p, new Pair<>(ccc, toTerm(ccc.names(), null, ppp.b)));
 		}
 		
 		Tuple4 x = (Tuple4) t.c;

@@ -1,6 +1,6 @@
 package fql_lib.examples;
 
-public class Mod4Example extends Example {
+public class OplMod4Example extends Example {
 
 	@Override
 	public String isPatrick() {
@@ -21,10 +21,10 @@ public class Mod4Example extends Example {
 			+ "\n	sorts "
 			+ "\n		Nat;"
 			+ "\n	symbols "
-			+ "\n		zero : -> Nat,"
+			+ "\n		zero : Nat,"
 			+ "\n		succ : Nat -> Nat;"
 			+ "\n	equations"
-			+ "\n		forall x:Nat. succ(succ(succ(succ(x)))) = x;"
+			+ "\n		forall x. succ(succ(succ(succ(x)))) = x;"
 			+ "\n}"
 			+ "\n"
 			+ "\nFour = model {"

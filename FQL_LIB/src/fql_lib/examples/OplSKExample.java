@@ -1,6 +1,6 @@
 package fql_lib.examples;
 
-public class SKExample extends Example {
+public class OplSKExample extends Example {
 
 	@Override
 	public String isPatrick() {
@@ -22,14 +22,14 @@ public class SKExample extends Example {
 			+ "\n		U;"
 			+ "\n	symbols "
 			+ "\n		o : U,U -> U,"
-			+ "\n		S : -> U,"
-			+ "\n		K : -> U,"
-			+ "\n		a : -> U,"
-			+ "\n		b : -> U,"
-			+ "\n		c : -> U;"
+			+ "\n		S : U,"
+			+ "\n		K : U,"
+			+ "\n		a : U,"
+			+ "\n		b : U,"
+			+ "\n		c : U;"
 			+ "\n	equations	"
-			+ "\n		forall x:U, y:U. o(o(K(), x), y) = x,"
-			+ "\n		forall x:U, y:U, z:U. o(o(o(S(), x), y), z) = o(o(x, z), o(y, z));"
+			+ "\n		forall x, y. o(o(K, x), y) = x,"
+			+ "\n		forall x, y, z. o(o(o(S, x), y), z) = o(o(x, z), o(y, z));"
 			+ "\n}"
 			+ "\n"
 			+ "\nM = javascript {"
