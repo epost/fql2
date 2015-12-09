@@ -534,6 +534,18 @@ public abstract class OplExp implements OplObject {
 			}
 			return new OplTerm<>(head, l);
 		}
+
+		public Set<C> symbols() {
+			if (var != null) {
+				return new HashSet<>();
+			}
+			Set<C> ret = new HashSet<>();
+			ret.add(head);
+			for (OplTerm<C,V> arg : args) {
+				ret.addAll(arg.symbols());
+			}
+			return ret;
+		}
 		
 	}
 	
@@ -796,7 +808,7 @@ public abstract class OplExp implements OplObject {
 			 return ret;
 		}
 		
-		public  <S,C,V,X> OplSetInst<S, C, KBExp<Chc<Chc<C, X>, JSWrapper>, V>> 
+		public static <S,C,V,X> OplSetInst<S, C, KBExp<Chc<Chc<C, X>, JSWrapper>, V>> 
 		saturate(OplJavaInst I0, OplPres<S,C,V,X> P0) {
 			OplSetInst<S, C, OplTerm<Chc<C,X>, V>> I = OplSat.saturate(P0);
 			OplSetInst<S, C, KBExp<Chc<Chc<C,X>, JSWrapper>, V>> J = inject(I, I0);
@@ -884,6 +896,43 @@ public abstract class OplExp implements OplObject {
 		//public OplToKB<S,C,V> getKB(OplJavaInst I) {
 		//	return new OplToKB<S,C, V>(fr, this, I);
 		//}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((equations == null) ? 0 : equations.hashCode());
+			result = prime * result + ((sorts == null) ? 0 : sorts.hashCode());
+			result = prime * result + ((symbols == null) ? 0 : symbols.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplSig other = (OplSig) obj;
+			if (equations == null) {
+				if (other.equations != null)
+					return false;
+			} else if (!equations.equals(other.equations))
+				return false;
+			if (sorts == null) {
+				if (other.sorts != null)
+					return false;
+			} else if (!sorts.equals(other.sorts))
+				return false;
+			if (symbols == null) {
+				if (other.symbols != null)
+					return false;
+			} else if (!symbols.equals(other.symbols))
+				return false;
+			return true;
+		}
 
 		public static <X,C,V> OplTerm<Chc<C,X>, V> inject(OplTerm<C,V> e) {
 			if (e.var != null) {
@@ -1180,6 +1229,8 @@ public abstract class OplExp implements OplObject {
 			return ret; 
 		}
 
+		
+		
 	}
 	
 	public static class OplPres<S,C,V,X> extends OplExp {
@@ -2348,7 +2399,377 @@ public abstract class OplExp implements OplObject {
 		
 	}
 		
-
+	public static class OplSchema<S, C, V> extends OplExp {
+		String sig0;
+		OplSig<S, C, V> sig;
+		Set<S> entities;
+		
+		public OplSchema(String sig0, Set<S> entities) {
+			this.sig0 = sig0;
+			this.entities = entities;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+	/*	@Override
+		public JComponent display() {
+			return sig.display();
+		} */
+		
+		public void validate(OplSig<S, C, V> sig) {
+			this.sig = sig;
+			for (S s : entities) {
+				if (!sig.sorts.contains(s)) {
+					throw new RuntimeException("Not a sort: " + s);
+				}
+			}
+			for (C f : sig.symbols.keySet()) {
+				Pair<List<S>, S> t = sig.symbols.get(f);
+				
+				if (t.first.size() == 1 && entities.contains(t.first.get(0)) && entities.contains(t.second)) {
+					continue; //is foreign key
+				}
+				if (t.first.size() == 1 && entities.contains(t.first.get(0)) && !entities.contains(t.second)) {
+					continue; //is attribute
+				}
+				boolean hitEntity = false;
+				for (S k : t.first) {
+					if (entities.contains(k)) {
+						hitEntity =  true;
+						break;
+					}
+				}
+				if (!hitEntity && !entities.contains(t.second)) {
+					continue; //is typeside function
+				}				
+				throw new RuntimeException("Does not pass entity/typeside check: " + f);
+			}
+		}
+		
+		OplSig<S, C, V> cache_E, cache_A, cache_T;
+		public OplSig<S, C, V> projE() {
+			if (cache_E != null) {
+				return cache_E;
+			}
+			Map<C, Pair<List<S>, S>> symbols = new HashMap<>();
+			for (C f : sig.symbols.keySet()) {
+				Pair<List<S>, S> t = sig.symbols.get(f);
+				
+				if (t.first.size() == 1 && entities.contains(t.first.get(0)) && entities.contains(t.second)) {
+					symbols.put(f, t);
+				}
+			}
+						
+			List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> equations = new LinkedList<>();
+			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : sig.equations) {
+				if (eq.first.vars0.size() != 1) {
+					continue;
+				}
+				if (!entities.contains(new LinkedList<>(eq.first.vars0.values()).get(0))) {
+					continue;
+				}
+				if (!symbols.keySet().containsAll(eq.second.symbols()) || !symbols.keySet().containsAll(eq.third.symbols())) {
+					continue;
+				}
+				equations.add(eq);
+			}
+			
+			cache_E = new OplSig<S,C,V>(sig.fr, sig.prec, new HashSet<>(entities), symbols, equations);
+			return cache_E;
+		}
+		
+		public OplSig<S, C, V> projT() {
+			if (cache_T != null) {
+				return cache_T;
+			}
+			Set<S> types = new HashSet<>(sig.sorts);
+			types.removeAll(entities);
+			
+			Map<C, Pair<List<S>, S>> symbols = new HashMap<>();
+			outer: for (C f : sig.symbols.keySet()) {
+				Pair<List<S>, S> t = sig.symbols.get(f);
+				
+				if (entities.contains(t.second)) {
+					continue;
+				}
+				for (S s : t.first) {
+					if (entities.contains(s)) {
+						continue outer;
+					}
+				}
+				
+				symbols.put(f, t);
+			}
+						
+			List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> equations = new LinkedList<>();
+			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : sig.equations) {
+				if (!types.containsAll(eq.first.vars0.values())) {
+					continue;
+				}
+				if (!symbols.keySet().containsAll(eq.second.symbols()) || !symbols.keySet().containsAll(eq.third.symbols())) {
+					continue;
+				}
+				equations.add(eq);
+			}
+			
+			cache_T = new OplSig<S,C,V>(sig.fr, sig.prec, types, symbols, equations);
+			return cache_T;
+		}
+		//TODO add projEA as keyword
+		
+		OplSig<S, C, V> cache_EA;
+		public OplSig<S, C, V> projEA() {
+			if (cache_EA != null) {
+				return cache_EA;
+			}
+			
+			Set<S> types = new HashSet<>();
+			types.addAll(projA().sorts);
+			Map<C, Pair<List<S>, S>> symbols = new HashMap<>();
+			symbols.putAll(projA().symbols);
+			symbols.putAll(projE().symbols);
+			List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> equations = new LinkedList<>();
+			equations.addAll(projA().equations);
+			equations.addAll(projE().equations);
+			cache_EA = new OplSig<S,C,V>(sig.fr, sig.prec, types, symbols, equations);
+			return cache_EA;
+		}
+		
+		public OplSig<S, C, V> projA() {
+			if (cache_A != null) {
+				return cache_A;
+			}
+			Map<C, Pair<List<S>, S>> symbols = new HashMap<>();
+			outer: for (C f : sig.symbols.keySet()) {
+				Pair<List<S>, S> t = sig.symbols.get(f);
+				
+				if (entities.contains(t.second)) {
+					continue;
+				}
+				if (t.first.size() != 1) {
+					continue;
+				}
+				if (!entities.contains(t.first.get(0))) {
+					continue;
+				}
+				
+				symbols.put(f, t);
+			}
+						
+			List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> equations = new LinkedList<>();
+			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : sig.equations) {
+				if (!symbols.keySet().containsAll(eq.second.symbols()) || !symbols.keySet().containsAll(eq.third.symbols())) {
+					continue;
+				}
+				equations.add(eq);
+			}
+			
+			cache_A = new OplSig<S,C,V>(sig.fr, sig.prec, new HashSet<>(sig.sorts), symbols, equations);
+			return cache_A;
+		}
+		
+		@Override 
+		public String toString() {
+			return "schema {\n entities\n  " + Util.sep(entities, ", ") + ";\n}";
+		}
+	}
+	
+	public static class OplSchemaProj<S, C, V> extends OplExp {
+		String which;
+		String sch0;
+		
+		public OplSchemaProj(String sch0, String which) {
+			this.sch0 = sch0;
+			this.which = which;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+		public OplSig<S, C, V> proj(OplSchema<S, C, V> sig) {
+			if (which.equals("E")) {
+				return sig.projE();
+			} else if (which.equals("A")) {
+				return sig.projA();
+			} else if (which.equals("T")) {
+				return sig.projT();
+			} else if (which.equals("EA")) {
+				return sig.projEA();
+			}
+			throw new RuntimeException();
+		}
+	}
+	
+	public static class OplInst<S,C,V,X> extends OplExp {
+		String P0, J0, S0;
+		OplPres<S,C,V,X> P;
+		OplJavaInst J;
+		OplSchema<S,C,V> S;
+		
+		public OplPres<S,C,V,X> projE() {
+			OplSig<S, C, V> sig = S.projE();
+			
+			Map<X, S> gens = new HashMap<>();
+			for (X x : P.gens.keySet()) {
+				S s = P.gens.get(x);
+				if (S.entities.contains(s)) {
+					gens.put(x, s);
+				}
+			}
+			
+			List<Triple<OplCtx<S, V>, OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>> equations = new LinkedList<>();
+			for (Triple<OplCtx<S, V>, OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>> eq : P.equations) {
+				if (!S.entities.containsAll(eq.first.vars0.values())) {
+					continue;
+				}
+				Set<Chc<C, X>> set = new HashSet<>();
+				set.addAll(eq.second.symbols());
+				set.addAll(eq.third.symbols());
+				
+				Set<C> set1 = new HashSet<>();
+				Set<X> set2 = new HashSet<>();
+				for (Chc<C, X> cx : set) {
+					if (cx.left) {
+						set1.add(cx.l);
+					} else {
+						set2.add(cx.r);
+					}
+				}
+				
+				if (!gens.keySet().containsAll(set2)) {
+					continue;
+				}
+				if (!S.projE().symbols.keySet().containsAll(set1)) {
+					continue;
+				}
+				equations.add(eq);
+			}
+			
+			return new OplPres<S,C,V,X>(P.prec, "?", sig, gens, equations);
+		}
+		
+		public OplInst(String S0, String P0, String J0) {
+			this.P0 = P0;
+			this.J0 = J0;
+			this.S0 = S0;
+		}
+		
+		void validate(OplSchema<S,C,V> S, OplPres<S,C,V,X> P, OplJavaInst J) {
+			if (!S.sig.equals(P.sig)) {
+				throw new RuntimeException("Presentation not on expected theory");
+			}
+			if (!J.sig0.equals(S.projT())) {
+				throw new RuntimeException("JS model not on expected theory");
+			}
+			
+			this.P = P;
+			this.J = J;
+			this.S = S;	
+		}
+		
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+		@Override
+		public String toString() {
+			return "instance " + S0 + " " + P0 + " " + J0 + "\n\n\n\nentities:\n\n" + projE();
+		}
+		
+		public JComponent display() {
+			return saturate(J, projE(), S, P).display(); 
+		}
+		
+		private static <S,C,V,X,Y> OplSetInst<S, C, KBExp<Chc<Chc<C,X>, JSWrapper>, V>> 
+		inject(OplSetInst<S, C, OplTerm<Chc<C,X>, V>> I, OplJavaInst I0, OplSchema<S,C,V> S, OplPres<S,C,V,X> P) {
+			Map<S, Set<KBExp<Chc<Chc<C, X>, JSWrapper>, V>>> sorts = new HashMap<>();
+			for (S s : I.sorts.keySet()) {
+				Set<KBExp<Chc<Chc<C,X>, JSWrapper>,V>> set = new HashSet<>();
+				for (OplTerm<Chc<C, X>, V> e : I.sorts.get(s)) {
+					OplTerm<Chc<Chc<C,X>, JSWrapper>,V> kkk = OplSig.inject(e);
+					KBExp<Chc<Chc<C,X>, JSWrapper>,V> jjj = OplToKB.convert(kkk);
+				//	KBExp<Chc<Chc<C,X>, JSWrapper>,V> z = OplToKB.redBy(I0, jjj); entities can't reduce
+					set.add(jjj);
+				}
+				sorts.put(s, set);
+			} 
+			for (S s : S.sig.sorts) {
+				if (!sorts.containsKey(s)) {
+					sorts.put(s, new HashSet<>());
+				}
+			}
+			
+			
+			Map<C, Map<List<KBExp<Chc<Chc<C, X>, JSWrapper>, V>>, KBExp<Chc<Chc<C, X>, JSWrapper>, V>>> symbols = new HashMap<>();
+			for (C c : S.projA().symbols.keySet()) {
+				Map<List<KBExp<Chc<Chc<C, X>, JSWrapper>, V>>, KBExp<Chc<Chc<C, X>, JSWrapper>, V>> n = new HashMap<>();
+				Pair<List<S>, S> t = S.sig.symbols.get(c);
+				S t0 = t.first.get(0);
+				Set<List<OplTerm<Chc<C, X>, V>>> dom = new HashSet<>();
+				for (OplTerm<Chc<C, X>, V> x : I.sorts.get(t0)) {
+					dom.add(Util.singList(x));
+				}
+				Map<List<OplTerm<Chc<C, X>, V>>, OplTerm<Chc<C, X>, V>> m = new HashMap<>(); 
+				for (List<OplTerm<Chc<C, X>, V>> x : dom) {
+					OplTerm<Chc<C, X>, V> y = new OplTerm<>(Chc.inLeft(c), x);
+					m.put(x, P.toSig().getKB().nf(y));
+				}
+				
+				for (List<OplTerm<Chc<C, X>, V>> a : m.keySet()) {
+					List<KBExp<Chc<Chc<C, X>, JSWrapper>, V>> l = new LinkedList<>();
+					for (OplTerm<Chc<C, X>, V> e : a) {
+						OplTerm<Chc<Chc<C,X>, JSWrapper>,V> kkk = OplSig.inject(e);
+						KBExp<Chc<Chc<C,X>, JSWrapper>,V> jjj = OplToKB.convert(kkk);
+						KBExp<Chc<Chc<C,X>, JSWrapper>,V> z = OplToKB.redBy(I0, jjj);
+						l.add(z);
+					}
+					OplTerm<Chc<Chc<C,X>, JSWrapper>,V> kkk = OplSig.inject(m.get(a));
+					KBExp<Chc<Chc<C,X>, JSWrapper>,V> jjj = OplToKB.convert(kkk);
+					KBExp<Chc<Chc<C,X>, JSWrapper>,V> z = OplToKB.redBy(I0, jjj);
+					n.put(l, z);
+					sorts.get(t.second).add(z); //added to build sets for types
+				}
+				symbols.put(c, n);
+			}
+			for (C c : S.projE().symbols.keySet()) {
+				Map<List<OplTerm<Chc<C, X>, V>>, OplTerm<Chc<C, X>, V>> m = I.symbols.get(c); 
+				Map<List<KBExp<Chc<Chc<C, X>, JSWrapper>, V>>, KBExp<Chc<Chc<C, X>, JSWrapper>, V>> n = new HashMap<>();
+				for (List<OplTerm<Chc<C, X>, V>> a : m.keySet()) {
+					List<KBExp<Chc<Chc<C, X>, JSWrapper>, V>> l = new LinkedList<>();
+					for (OplTerm<Chc<C, X>, V> e : a) {
+						OplTerm<Chc<Chc<C,X>, JSWrapper>,V> kkk = OplSig.inject(e);
+						KBExp<Chc<Chc<C,X>, JSWrapper>,V> jjj = OplToKB.convert(kkk);
+						KBExp<Chc<Chc<C,X>, JSWrapper>,V> z = OplToKB.redBy(I0, jjj);
+						l.add(z);
+					}
+					OplTerm<Chc<Chc<C,X>, JSWrapper>,V> kkk = OplSig.inject(m.get(a));
+					KBExp<Chc<Chc<C,X>, JSWrapper>,V> jjj = OplToKB.convert(kkk);
+					KBExp<Chc<Chc<C,X>, JSWrapper>,V> z = OplToKB.redBy(I0, jjj);
+					n.put(l, z);
+				}
+				symbols.put(c, n);
+			}
+			
+			 OplSetInst<S, C, KBExp<Chc<Chc<C,X>, JSWrapper>, V>> ret = new OplSetInst<S, C, KBExp<Chc<Chc<C,X>, JSWrapper>, V>>(sorts, symbols, "?");
+			 ret.validate(S.projEA()); 
+			 return ret;
+		}
+		
+		public static <S,C,V,X> OplSetInst<S, C, KBExp<Chc<Chc<C, X>, JSWrapper>, V>> 
+		saturate(OplJavaInst I0, OplPres<S,C,V,X> P0, OplSchema<S,C,V> S, OplPres<S,C,V,X> P) {
+			OplSetInst<S, C, OplTerm<Chc<C,X>, V>> I = OplSat.saturate(P0);
+			OplSetInst<S, C, KBExp<Chc<Chc<C,X>, JSWrapper>, V>> J = inject(I, I0, S, P);
+			
+			return J;
+		}
+		
+	}
 
 	public interface OplExpVisitor<R, E> {
 		public R visit (E env, OplSig e);
@@ -2367,6 +2788,9 @@ public abstract class OplExp implements OplObject {
 		public R visit (E env, OplSetTranGens e);	
 		public R visit (E env, OplUberSat e);
 		public R visit (E env, OplFlower e);
+		public R visit (E env, OplSchema e);
+		public R visit (E env, OplSchemaProj e);
+		public R visit (E env, OplInst e);
 	}
 
 	private static <X> List<List<X>> prod(List<Set<X>> in1) {

@@ -7,10 +7,13 @@ import fql_lib.opl.OplExp.OplDelta;
 import fql_lib.opl.OplExp.OplEval;
 import fql_lib.opl.OplExp.OplExpVisitor;
 import fql_lib.opl.OplExp.OplFlower;
+import fql_lib.opl.OplExp.OplInst;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
 import fql_lib.opl.OplExp.OplPres;
 import fql_lib.opl.OplExp.OplSat;
+import fql_lib.opl.OplExp.OplSchema;
+import fql_lib.opl.OplExp.OplSchemaProj;
 import fql_lib.opl.OplExp.OplSetInst;
 import fql_lib.opl.OplExp.OplSetTranGens;
 import fql_lib.opl.OplExp.OplSetTrans;
@@ -276,4 +279,55 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		throw new RuntimeException("Not a set model or transform: " + e.I0);
 	}
 
+	@Override
+	public OplObject visit(OplProgram env, OplSchema e) {
+		OplObject I0 = ENV.get(e.sig0);
+		if (I0 instanceof OplSig) {
+			OplSig I = (OplSig) I0;
+			e.validate(I);
+			return e;
+		}
+		throw new RuntimeException("Not a theory: " + e.sig0);
+	}
+	
+	@Override
+	public OplObject visit(OplProgram env, OplSchemaProj e) {
+		OplObject I0 = ENV.get(e.sch0);
+		if (I0 instanceof OplSchema) {
+			OplSchema I = (OplSchema) I0;
+			return e.proj(I);
+		}
+		throw new RuntimeException("Not a schema: " + e.sch0);
+	}
+	
+	@Override
+	public OplObject visit(OplProgram env, OplInst e) {
+		OplSchema S;
+		OplPres P;
+		OplJavaInst J;
+		
+		OplObject S0 = ENV.get(e.S0);
+		if (S0 instanceof OplSchema) {
+			S = (OplSchema) S0;
+		} else {
+			throw new RuntimeException("Not a schema: " + e.S0);
+		}
+
+		OplObject P0 = ENV.get(e.P0);
+		if (P0 instanceof OplPres) {
+			P = (OplPres) P0;
+		} else {
+			throw new RuntimeException("Not a presentation: " + e.P0);
+		}
+		
+		OplObject J0 = ENV.get(e.J0);
+		if (J0 instanceof OplJavaInst) {
+			J = (OplJavaInst) J0;
+		} else {
+			throw new RuntimeException("Not a JS model: " + e.J0);
+		}
+
+		e.validate(S, P, J);
+		return e;
+	}
 }

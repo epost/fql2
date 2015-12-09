@@ -26,9 +26,11 @@ import javax.swing.event.ListSelectionListener;
 
 import catdata.algs.Pair;
 import fql_lib.gui.FQLDisp;
+import fql_lib.opl.OplExp.OplInst;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
 import fql_lib.opl.OplExp.OplPres;
+import fql_lib.opl.OplExp.OplSchema;
 import fql_lib.opl.OplExp.OplSetInst;
 import fql_lib.opl.OplExp.OplSetTranGens;
 import fql_lib.opl.OplExp.OplSetTrans;
@@ -62,10 +64,17 @@ public class OplDisplay implements FQLDisp {
 		if (o instanceof OplPres) {
 			return "presentation " + c + " : " + ((OplPres)o).S;
  		}
+		if (o instanceof OplSchema) {
+			return "schema " + c + " : " + ((OplSchema)o).sig0;
+ 		}
 		if (o instanceof OplSetTranGens) {
 			OplSetTranGens x = (OplSetTranGens) o;
 			return "transpres " + c + " : " + x.src0 + " -> " + x.dst0;
 		}
+		if (o instanceof OplInst) {
+			OplInst oo = (OplInst) o;
+			return "instance " + c + "=" + oo.P0 + " : " + oo.S0 + "," + oo.J0;
+ 		}
 		return c;
 	}
 
