@@ -190,6 +190,7 @@ public class Util {
 		// p.setMaximumSize(new Dimension(200,200));
 		p.setBorder(BorderFactory.createTitledBorder(b, border));
 		return p;
+	
 	}
 
 	public static <K, V> FUNCTION<V, K> invget(Map<K, V> m) {

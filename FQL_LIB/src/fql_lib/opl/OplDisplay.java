@@ -26,6 +26,7 @@ import javax.swing.event.ListSelectionListener;
 
 import catdata.algs.Pair;
 import fql_lib.gui.FQLDisp;
+import fql_lib.gui.FQLTextPanel;
 import fql_lib.opl.OplExp.OplInst;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
@@ -84,7 +85,12 @@ public class OplDisplay implements FQLDisp {
 		for (String c : p.order) {
 			OplObject obj = env.get(c);
 			map.put(obj, c); 
-			frames.add(new Pair<>(doLookup(c, obj), obj.display()));
+			try {
+				frames.add(new Pair<>(doLookup(c, obj), obj.display()));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				frames.add(new Pair<>(doLookup(c, obj), new FQLTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
+			}
 		}
 		long end = System.currentTimeMillis();
 		int c1 = (int) ((middle - start) / (1000f));

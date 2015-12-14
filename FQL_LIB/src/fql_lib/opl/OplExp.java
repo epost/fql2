@@ -1,6 +1,9 @@
 package fql_lib.opl;
 
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,9 +26,19 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 
 import catdata.algs.Chc;
 import catdata.algs.Pair;
@@ -35,6 +48,7 @@ import fql_lib.DEBUG;
 import fql_lib.Util;
 import fql_lib.cat.categories.FinSet;
 import fql_lib.gui.FQLTextPanel;
+import fql_lib.gui.MyTableRowSorter;
 import fql_lib.opl.OplParser.DoNotIgnore;
 
 public abstract class OplExp implements OplObject {
@@ -326,7 +340,10 @@ public abstract class OplExp implements OplObject {
 		
 	public abstract <R, E> R accept(E env, OplExpVisitor<R, E> v);
 	
-	public static class OplTerm<C, V> {
+	public static class OplTerm<C, V>  {
+		
+	
+		
 		public V var;
 		
 		public C head;
@@ -1841,7 +1858,7 @@ public abstract class OplExp implements OplObject {
 			return jtp;
 		}
 		
-		private String strip(String s) {
+		private static String strip(String s) {
 			return s.replace("inl ", "").replace("inr ", "").replace("()", "");
 		}
 		
@@ -1879,19 +1896,19 @@ public abstract class OplExp implements OplObject {
 				
 				
 				for (X arg : sorts.get(n)) {
-					List<String> row = new LinkedList<>();
+					List<Object> row = new LinkedList<>();
 					cols = new LinkedList<>();
 					cols.add(n.toString());
-					row.add(strip(arg.toString()));
+					row.add(arg);
 					for (C f : set) {
-						row.add(strip(symbols.get(f).get(Collections.singletonList(arg)).toString()));
+						row.add(symbols.get(f).get(Collections.singletonList(arg)));
 						cols.add(f.toString());
 					}
 //					String[] row2 = new String[] { row };
 					rows.add(row.toArray(new Object[] { }));
 				}
-				all.put(n.toString(), Util.makeTable(BorderFactory.createEmptyBorder(), n + " (" + rows.size() + ")", 
-						rows.toArray(new Object[][] { }), cols.toArray(new Object[] { })));
+				all.put(n.toString(), makeTable2(BorderFactory.createEmptyBorder(), n + " (" + rows.size() + ")", 
+						rows.toArray(new Object[][] { }), cols.toArray(new String[] { })));
 			}
 			
 			for (C n : keys2) {
@@ -1899,16 +1916,16 @@ public abstract class OplExp implements OplObject {
 					continue;
 				}
 				Map<List<X>, X> f = symbols.get(n);
-				List<String[]> rows = new LinkedList<>();
+				List<Object[]> rows = new LinkedList<>();
 				for (List<X> arg : f.keySet()) {
-					List<String> argX = arg.stream().map(x -> strip(x.toString())).collect(Collectors.toList());
-					argX.add(strip(f.get(arg).toString()));
+					List<Object> argX = arg.stream().map(x -> x).collect(Collectors.toList());
+					argX.add(f.get(arg));
 					String[] row = argX.toArray(new String[] {});
 					rows.add(row);
 				}
-				List l = new LinkedList<>(sig0.symbols.get(n).first);
-				l.add(sig0.symbols.get(n).second);
-				all.put(n.toString(), Util.makeTable(BorderFactory.createEmptyBorder(), n + " (" + rows.size() + ")", rows.toArray(new Object[][] { }), l.toArray()));
+				List<String> l = new LinkedList<String>((List<String>)sig0.symbols.get(n).first);
+				l.add(sig0.symbols.get(n).second.toString());
+				all.put(n.toString(), makeTable2(BorderFactory.createEmptyBorder(), n + " (" + rows.size() + ")", rows.toArray(new Object[][] { }), l.toArray(new String[] {})));
 			}
 			List<String> xxx = new LinkedList<>(all.keySet());
 			xxx.sort(comp);
@@ -1918,7 +1935,191 @@ public abstract class OplExp implements OplObject {
 			return Util.makeGrid(list);			
 		}
 
+		static class NonEditableModel extends DefaultTableModel {
+
+		    NonEditableModel(Object[][] data, String[] columnNames) {
+		        super(data, columnNames);
+		    }
+
+		    @Override
+		    public boolean isCellEditable(int row, int column) {
+		        return false;
+		    }
+		}
+
+		public static JPanel makeTable2(Border b, String border,
+				Object[][] rowData, String[] colNames) {
+			
+
+			JTable t = new JTable() {
+				public Dimension getPreferredScrollableViewportSize() {
+					Dimension d = getPreferredSize();
+					return new Dimension(d.width, d.height);
+				}
+				public TableCellRenderer getCellRenderer( int row, int column ) {
+	                return new PlusMinusCellRenderer();
+	            }
+			};
+			//t.setDefaultEditor(JComponent.class, null);        // remove editor
 		
+			t.setModel(new NonEditableModel(rowData, colNames));
+			
+			JPanel p = new JPanel(new GridLayout(1, 1));
+			TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
+			if (colNames.length > 0) {
+				sorter.toggleSortOrder(0);
+			}
+			t.setRowSorter(sorter);
+			sorter.allRowsChanged();
+			p.add(new JScrollPane(t));
+			
+			for (int row = 0; row < t.getRowCount(); row++)
+		    {
+		        int rowHeight = t.getRowHeight();
+
+		        for (int column = 0; column < t.getColumnCount(); column++)
+		        {
+		            Component comp = t.prepareRenderer(t.getCellRenderer(row, column), row, column);
+		            rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
+		        }
+
+		        t.setRowHeight(row, rowHeight);
+		    }
+
+			// p.setMaximumSize(new Dimension(200,200));
+			p.setBorder(BorderFactory.createTitledBorder(b, border));
+			return p;
+			/*
+			 * 
+			 */
+		}
+		
+		 public class MultiLineTableCellRenderer extends JTextArea 
+		    implements TableCellRenderer {
+		    private List<List<Integer>> rowColHeight = new ArrayList<List<Integer>>();
+		   
+		    public MultiLineTableCellRenderer() {
+		      setLineWrap(true);
+		      setWrapStyleWord(true);
+		      setOpaque(true);
+		    }
+		   
+		    public Component getTableCellRendererComponent(
+		        JTable table, Object value, boolean isSelected, boolean hasFocus,
+		        int row, int column) {
+		      if (isSelected) {
+		        setForeground(table.getSelectionForeground());
+		        setBackground(table.getSelectionBackground());
+		      } else {
+		        setForeground(table.getForeground());
+		        setBackground(table.getBackground());
+		      }
+		      setFont(table.getFont());
+		      if (hasFocus) {
+		        setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
+		        if (table.isCellEditable(row, column)) {
+		          setForeground(UIManager.getColor("Table.focusCellForeground"));
+		          setBackground(UIManager.getColor("Table.focusCellBackground"));
+		        }
+		      } else {
+		        setBorder(new EmptyBorder(1, 2, 1, 2));
+		      }
+		      if (value != null) {
+		        setText(value.toString());
+		      } else {
+		        setText("");
+		      }
+		      adjustRowHeight(table, row, column);
+		      return this;
+		    }
+		   
+		    /**
+		     * Calculate the new preferred height for a given row, and sets the height on the table.
+		     */
+		    private void adjustRowHeight(JTable table, int row, int column) {
+		      //The trick to get this to work properly is to set the width of the column to the
+		      //textarea. The reason for this is that getPreferredSize(), without a width tries
+		      //to place all the text in one line. By setting the size with the with of the column,
+		      //getPreferredSize() returnes the proper height which the row should have in
+		      //order to make room for the text.
+		      int cWidth = table.getTableHeader().getColumnModel().getColumn(column).getWidth();
+		      setSize(new Dimension(cWidth, 1000));
+		      int prefH = getPreferredSize().height;
+		      while (rowColHeight.size() <= row) {
+		        rowColHeight.add(new ArrayList<Integer>(column));
+		      }
+		      List<Integer> colHeights = rowColHeight.get(row);
+		      while (colHeights.size() <= column) {
+		        colHeights.add(0);
+		      }
+		      colHeights.set(column, prefH);
+		      int maxH = prefH;
+		      for (Integer colHeight : colHeights) {
+		        if (colHeight > maxH) {
+		          maxH = colHeight;
+		        }
+		      }
+		      if (table.getRowHeight(row) != maxH) {
+		        table.setRowHeight(row, maxH);
+		      }
+		    }
+		  }
+		 
+		static class PlusMinusCellRenderer extends JPanel implements TableCellRenderer {
+		    private List<List<Integer>> rowColHeight = new ArrayList<List<Integer>>();
+			
+	        public Component getTableCellRendererComponent(
+	                            final JTable table, Object value,
+	                            boolean isSelected, boolean hasFocus,
+	                            int row, int column) {
+	        	if (value instanceof OplTerm) {
+	        		OplTerm t = (OplTerm) value;
+	        		if (t.args.size() == 0 && t.head instanceof Chc) {
+	        			if (!((Chc)t.head).left) {
+	        				JSWrapper w = (JSWrapper) ((Chc)t.head).r;
+		        			if (w.o instanceof JComponent) {
+		        				JComponent comp = (JComponent) w.o;
+		        				//adjustRowHeight(table, row, column);
+		        			    return comp;
+//		        			    this.
+	//	     	               return this; 
+		        			}
+	        			}	
+	        		}
+	        		
+	        	}
+	        
+	        	return new DefaultTableCellRenderer().getTableCellRendererComponent(table, strip(value.toString()), isSelected, hasFocus, row, column);
+	        	
+	        }
+	        private void adjustRowHeight(JTable table, int row, int column) {
+     		      //The trick to get this to work properly is to set the width of the column to the
+     		      //textarea. The reason for this is that getPreferredSize(), without a width tries
+     		      //to place all the text in one line. By setting the size with the with of the column,
+     		      //getPreferredSize() returnes the proper height which the row should have in
+     		      //order to make room for the text.
+     		      int cWidth = table.getTableHeader().getColumnModel().getColumn(column).getWidth();
+     		      setSize(new Dimension(cWidth, 1000));
+     		      int prefH = getPreferredSize().height;
+     		      while (rowColHeight.size() <= row) {
+     		        rowColHeight.add(new ArrayList<Integer>(column));
+     		      }
+     		      List<Integer> colHeights = rowColHeight.get(row);
+     		      while (colHeights.size() <= column) {
+     		        colHeights.add(0);
+     		      }
+     		      colHeights.set(column, prefH);
+     		      int maxH = prefH;
+     		      for (Integer colHeight : colHeights) {
+     		        if (colHeight > maxH) {
+     		          maxH = colHeight;
+     		        }
+     		      }
+     		      if (table.getRowHeight(row) != maxH) {
+     		        table.setRowHeight(row, maxH);
+     		      }
+     		    }
+	}
 	/*	private JComponent makeTables_old() {
 			List<JComponent> list = new LinkedList<>();
 			
@@ -2062,6 +2263,9 @@ public abstract class OplExp implements OplObject {
 		public void validate(OplSig sig) {
 			sig0 = sig;
 			for (String k : defs.keySet()) {
+				if (k.equals("_preamble")) {
+					continue;
+				}
 				if (!sig.symbols.containsKey(k)) {
 					throw new RuntimeException("Extra symbol " + k);
 				}				
@@ -2074,8 +2278,15 @@ public abstract class OplExp implements OplObject {
 			
 			engine = new ScriptEngineManager().getEngineByName("nashorn");
 			String ret = "";
-			for (String v : defs.values()) {
-				ret += v + "\n\n";
+			if (defs.containsKey("_preamble")) {
+				ret += defs.get("_preamble") + "\n\n";
+ 			}
+			for (String k : defs.keySet()) {
+				if (k.equals("_preamble")) {
+					continue;
+				}
+				String v = defs.get(k);
+				ret += "function " + k + "(input) { " + v + " }\n\n";
 			}
 			
 			try {
@@ -2686,16 +2897,16 @@ public abstract class OplExp implements OplObject {
 			return saturate(J, projE(), S, P).display(); 
 		}
 		
-		private static <S,C,V,X,Y> OplSetInst<S, C, KBExp<Chc<Chc<C,X>, JSWrapper>, V>> 
+		private static <S,C,V,X,Y> OplSetInst<S, C, OplTerm<Chc<Chc<C,X>, JSWrapper>, V>> 
 		inject(OplSetInst<S, C, OplTerm<Chc<C,X>, V>> I, OplJavaInst I0, OplSchema<S,C,V> S, OplPres<S,C,V,X> P) {
-			Map<S, Set<KBExp<Chc<Chc<C, X>, JSWrapper>, V>>> sorts = new HashMap<>();
+			Map<S, Set<OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>> sorts = new HashMap<>();
 			for (S s : I.sorts.keySet()) {
-				Set<KBExp<Chc<Chc<C,X>, JSWrapper>,V>> set = new HashSet<>();
+				Set<OplTerm<Chc<Chc<C,X>, JSWrapper>,V>> set = new HashSet<>();
 				for (OplTerm<Chc<C, X>, V> e : I.sorts.get(s)) {
 					OplTerm<Chc<Chc<C,X>, JSWrapper>,V> kkk = OplSig.inject(e);
-					KBExp<Chc<Chc<C,X>, JSWrapper>,V> jjj = OplToKB.convert(kkk);
+				//	KBExp<Chc<Chc<C,X>, JSWrapper>,V> jjj = OplToKB.convert(kkk);
 				//	KBExp<Chc<Chc<C,X>, JSWrapper>,V> z = OplToKB.redBy(I0, jjj); entities can't reduce
-					set.add(jjj);
+					set.add(kkk);
 				}
 				sorts.put(s, set);
 			} 
@@ -2706,9 +2917,9 @@ public abstract class OplExp implements OplObject {
 			}
 			
 			
-			Map<C, Map<List<KBExp<Chc<Chc<C, X>, JSWrapper>, V>>, KBExp<Chc<Chc<C, X>, JSWrapper>, V>>> symbols = new HashMap<>();
+			Map<C, Map<List<OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>> symbols = new HashMap<>();
 			for (C c : S.projA().symbols.keySet()) {
-				Map<List<KBExp<Chc<Chc<C, X>, JSWrapper>, V>>, KBExp<Chc<Chc<C, X>, JSWrapper>, V>> n = new HashMap<>();
+				Map<List<OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>> n = new HashMap<>();
 				Pair<List<S>, S> t = S.sig.symbols.get(c);
 				S t0 = t.first.get(0);
 				Set<List<OplTerm<Chc<C, X>, V>>> dom = new HashSet<>();
@@ -2722,49 +2933,49 @@ public abstract class OplExp implements OplObject {
 				}
 				
 				for (List<OplTerm<Chc<C, X>, V>> a : m.keySet()) {
-					List<KBExp<Chc<Chc<C, X>, JSWrapper>, V>> l = new LinkedList<>();
+					List<OplTerm<Chc<Chc<C, X>, JSWrapper>, V>> l = new LinkedList<>();
 					for (OplTerm<Chc<C, X>, V> e : a) {
 						OplTerm<Chc<Chc<C,X>, JSWrapper>,V> kkk = OplSig.inject(e);
 						KBExp<Chc<Chc<C,X>, JSWrapper>,V> jjj = OplToKB.convert(kkk);
 						KBExp<Chc<Chc<C,X>, JSWrapper>,V> z = OplToKB.redBy(I0, jjj);
-						l.add(z);
+						l.add(OplToKB.convert(z));
 					}
 					OplTerm<Chc<Chc<C,X>, JSWrapper>,V> kkk = OplSig.inject(m.get(a));
 					KBExp<Chc<Chc<C,X>, JSWrapper>,V> jjj = OplToKB.convert(kkk);
 					KBExp<Chc<Chc<C,X>, JSWrapper>,V> z = OplToKB.redBy(I0, jjj);
-					n.put(l, z);
-					sorts.get(t.second).add(z); //added to build sets for types
+					n.put(l, OplToKB.convert(z));
+					sorts.get(t.second).add(OplToKB.convert(z)); //added to build sets for types
 				}
 				symbols.put(c, n);
 			}
 			for (C c : S.projE().symbols.keySet()) {
 				Map<List<OplTerm<Chc<C, X>, V>>, OplTerm<Chc<C, X>, V>> m = I.symbols.get(c); 
-				Map<List<KBExp<Chc<Chc<C, X>, JSWrapper>, V>>, KBExp<Chc<Chc<C, X>, JSWrapper>, V>> n = new HashMap<>();
+				Map<List<OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>> n = new HashMap<>();
 				for (List<OplTerm<Chc<C, X>, V>> a : m.keySet()) {
-					List<KBExp<Chc<Chc<C, X>, JSWrapper>, V>> l = new LinkedList<>();
+					List<OplTerm<Chc<Chc<C, X>, JSWrapper>, V>> l = new LinkedList<>();
 					for (OplTerm<Chc<C, X>, V> e : a) {
 						OplTerm<Chc<Chc<C,X>, JSWrapper>,V> kkk = OplSig.inject(e);
 						KBExp<Chc<Chc<C,X>, JSWrapper>,V> jjj = OplToKB.convert(kkk);
 						KBExp<Chc<Chc<C,X>, JSWrapper>,V> z = OplToKB.redBy(I0, jjj);
-						l.add(z);
+						l.add(OplToKB.convert(z));
 					}
 					OplTerm<Chc<Chc<C,X>, JSWrapper>,V> kkk = OplSig.inject(m.get(a));
 					KBExp<Chc<Chc<C,X>, JSWrapper>,V> jjj = OplToKB.convert(kkk);
 					KBExp<Chc<Chc<C,X>, JSWrapper>,V> z = OplToKB.redBy(I0, jjj);
-					n.put(l, z);
+					n.put(l, OplToKB.convert(z));
 				}
 				symbols.put(c, n);
 			}
 			
-			 OplSetInst<S, C, KBExp<Chc<Chc<C,X>, JSWrapper>, V>> ret = new OplSetInst<S, C, KBExp<Chc<Chc<C,X>, JSWrapper>, V>>(sorts, symbols, "?");
+			 OplSetInst<S, C, OplTerm<Chc<Chc<C,X>, JSWrapper>, V>> ret = new OplSetInst<S, C, OplTerm<Chc<Chc<C,X>, JSWrapper>, V>>(sorts, symbols, "?");
 			 ret.validate(S.projEA()); 
 			 return ret;
 		}
 		
-		public static <S,C,V,X> OplSetInst<S, C, KBExp<Chc<Chc<C, X>, JSWrapper>, V>> 
+		public static <S,C,V,X> OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>> 
 		saturate(OplJavaInst I0, OplPres<S,C,V,X> P0, OplSchema<S,C,V> S, OplPres<S,C,V,X> P) {
 			OplSetInst<S, C, OplTerm<Chc<C,X>, V>> I = OplSat.saturate(P0);
-			OplSetInst<S, C, KBExp<Chc<Chc<C,X>, JSWrapper>, V>> J = inject(I, I0, S, P);
+			OplSetInst<S, C, OplTerm<Chc<Chc<C,X>, JSWrapper>, V>> J = inject(I, I0, S, P);
 			
 			return J;
 		}

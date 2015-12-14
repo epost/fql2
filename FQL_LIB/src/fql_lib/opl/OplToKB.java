@@ -368,13 +368,10 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 				return new KBApp<>(Chc.inRight(new JSWrapper(o)), new LinkedList<>());
 			} 
 			return new KBApp<>(e0.f, l);
-		} catch (ScriptException ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			throw new RuntimeException(ex.getMessage());
-		} catch (NoSuchMethodException ex) {
-			ex.printStackTrace();
-			throw new RuntimeException(ex.getMessage());
-		}
+		} 
 	} 
 
 	public Map<S, Set<OplTerm<C, V>>> doHoms() {
