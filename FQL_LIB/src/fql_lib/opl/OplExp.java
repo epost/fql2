@@ -723,7 +723,7 @@ public abstract class OplExp implements OplObject {
 		}
 		
 		//TODO to use with saturate_easy, should turn back into theory
-		public <S,C,V,X> OplPres<S,C,V,X> desaturate(String S, OplSetInst<S,C,X> I) {
+		public static <S,C,V,X> OplPres<S,C,V,X> desaturate(String S, OplSetInst<S,C,X> I) {
 			OplSig<S,C,V> sig = (OplSig<S, C, V>) I.sig0; //TODO
 			
 			Map<X, S> gens = new HashMap<>();
@@ -1257,7 +1257,7 @@ public abstract class OplExp implements OplObject {
 		public Map<X, S> gens;
 		public List<Triple<OplCtx<S,V>, OplTerm<Chc<C,X>,V>, OplTerm<Chc<C,X>,V>>> equations;
 		public OplSig<S,C,V> sig;
-		private OplSig<S,Chc<C,X>,V> toSig; 
+		public OplSig<S,Chc<C,X>,V> toSig; 
 		
 		/*public <Z> OplPres<S, Chc<C,Z>, V, X> inject() {
 			OplSig<S,Chc<C,Z>,V> S2 = sig.inject();
@@ -1852,7 +1852,7 @@ public abstract class OplExp implements OplObject {
 			JComponent text = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 			jtp.addTab("Text", text);
 			
-			JComponent tables = makeTables();
+			JComponent tables = makeTables(new HashSet());
 			jtp.addTab("Tables", tables);
 			
 			return jtp;
@@ -1862,7 +1862,7 @@ public abstract class OplExp implements OplObject {
 			return s.replace("inl ", "").replace("inr ", "").replace("()", "");
 		}
 		
-		private JComponent makeTables() {
+		public JComponent makeTables(Set skip) {
 			//System.out.println(this);
 			List<JComponent> list = new LinkedList<>();
 			
@@ -1930,6 +1930,9 @@ public abstract class OplExp implements OplObject {
 			List<String> xxx = new LinkedList<>(all.keySet());
 			xxx.sort(comp);
 			for (String n : xxx) {
+				if (skip.contains(n)) {
+					continue;
+				}
 				list.add(all.get(n));
 			}
 			return Util.makeGrid(list);			
@@ -1947,7 +1950,7 @@ public abstract class OplExp implements OplObject {
 		    }
 		}
 
-		public static JPanel makeTable2(Border b, String border,
+		private static JPanel makeTable2(Border b, String border,
 				Object[][] rowData, String[] colNames) {
 			
 
@@ -2065,6 +2068,18 @@ public abstract class OplExp implements OplObject {
 		    }
 		  }
 		 
+		 static Object stripChcs(Object o) {
+			 if (o instanceof Chc) {
+				 Chc c = (Chc) o;
+				 if (c.left) {
+					 return stripChcs(c.l);
+				 } else {
+					 return stripChcs(c.r);
+				 }
+			 }
+			 return o;
+		 }
+		 
 		static class PlusMinusCellRenderer extends JPanel implements TableCellRenderer {
 		    private List<List<Integer>> rowColHeight = new ArrayList<List<Integer>>();
 			
@@ -2074,17 +2089,25 @@ public abstract class OplExp implements OplObject {
 	                            int row, int column) {
 	        	if (value instanceof OplTerm) {
 	        		OplTerm t = (OplTerm) value;
-	        		if (t.args.size() == 0 && t.head instanceof Chc) {
-	        			if (!((Chc)t.head).left) {
-	        				JSWrapper w = (JSWrapper) ((Chc)t.head).r;
+	        		/* if (t.args.size() == 0 && t.head instanceof Chc) {
+	        			Chc c = (Chc)t.head;
+	        			if (!c.left && c.r instanceof JSWrapper) {
+	        				JSWrapper w = (JSWrapper) c.r;
 		        			if (w.o instanceof JComponent) {
 		        				JComponent comp = (JComponent) w.o;
-		        				//adjustRowHeight(table, row, column);
 		        			    return comp;
-//		        			    this.
-	//	     	               return this; 
 		        			}
 	        			}	
+	        		} */
+	        		if (t.args.size() == 0) {
+	        			Object o = stripChcs(t.head);
+	        			if (o instanceof JSWrapper) {
+	        				JSWrapper w = (JSWrapper) o;
+	        				if (w.o instanceof JComponent) {
+		        				JComponent comp = (JComponent) w.o;
+		        			    return comp;
+		        			}
+	        			}
 	        		}
 	        		
 	        	}
@@ -2872,9 +2895,9 @@ public abstract class OplExp implements OplObject {
 		
 		void validate(OplSchema<S,C,V> S, OplPres<S,C,V,X> P, OplJavaInst J) {
 			if (!S.sig.equals(P.sig)) {
-				throw new RuntimeException("Presentation not on expected theory");
+				throw new RuntimeException("Presentation not on expected theory.");
 			}
-			if (!J.sig0.equals(S.projT())) {
+			if (J != null && !J.sig0.equals(S.projT())) {
 				throw new RuntimeException("JS model not on expected theory");
 			}
 			
@@ -2890,11 +2913,19 @@ public abstract class OplExp implements OplObject {
 		
 		@Override
 		public String toString() {
-			return "instance " + S0 + " " + P0 + " " + J0 + "\n\n\n\nentities:\n\n" + projE();
+			return P.toString();
 		}
 		
 		public JComponent display() {
-			return saturate(J, projE(), S, P).display(); 
+			JTabbedPane ret = new JTabbedPane();
+			
+			FQLTextPanel p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
+			ret.add(p, "Presentation");
+			
+			ret.add(saturate(J, projE(), S, P).makeTables(S.projT().sorts), "Saturation");
+			
+			return ret;
+
 		}
 		
 		private static <S,C,V,X,Y> OplSetInst<S, C, OplTerm<Chc<Chc<C,X>, JSWrapper>, V>> 
@@ -2980,9 +3011,43 @@ public abstract class OplExp implements OplObject {
 			return J;
 		}
 		
+		
+		
+	}
+	
+	public static class OplApply extends OplExp {
+		String Q0, I0;
+		OplQuery Q;
+		OplInst I;
+		public OplApply(String Q0, String I0) {
+			this.Q0 = Q0;
+			this.I0 = I0;
+		}
+		void validate(OplQuery Q, OplInst I) {
+			this.Q = Q;
+			this.I = I;
+			//TODO
+		}
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
+	
+	public static class OplId extends OplExp {
+		String s;
+		public OplId(String s) {
+			this.s = s;
+		}
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
 	}
 
 	public interface OplExpVisitor<R, E> {
+		public R visit (E env, OplId e);
+		public R visit (E env, OplApply e);
 		public R visit (E env, OplSig e);
 		public R visit (E env, OplPres e);
 		public R visit (E env, OplSetInst e);
@@ -3002,6 +3067,7 @@ public abstract class OplExp implements OplObject {
 		public R visit (E env, OplSchema e);
 		public R visit (E env, OplSchemaProj e);
 		public R visit (E env, OplInst e);
+		public R visit (E env, OplQuery e);
 	}
 
 	private static <X> List<List<X>> prod(List<Set<X>> in1) {

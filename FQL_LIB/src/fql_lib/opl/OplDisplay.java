@@ -68,6 +68,10 @@ public class OplDisplay implements FQLDisp {
 		if (o instanceof OplSchema) {
 			return "schema " + c + " : " + ((OplSchema)o).sig0;
  		}
+		if (o instanceof OplQuery) {
+			OplQuery q = (OplQuery) o;
+			return "query " + c + " : " + q.src_e + " -> " + q.dst_e;
+ 		}
 		if (o instanceof OplSetTranGens) {
 			OplSetTranGens x = (OplSetTranGens) o;
 			return "transpres " + c + " : " + x.src0 + " -> " + x.dst0;

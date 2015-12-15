@@ -47,6 +47,23 @@ public class OplEmployeesExample extends Example {
 			+ "\nJ = saturate I"
 			+ "\nK = unsaturate J"
 			+ "\nL = saturate K"
+			+ "\n"
+			+ "\nC = schema {"
+			+ "\n	entities Employee, Department;"
+			+ "\n} : S"
+			+ "\n"
+			+ "\nQ = query {"
+			+ "\n	 qE = {for e:Employee; "
+			+ "\n	 	  where; "
+			+ "\n	 	  attributes first=first(e), last=last(e); "
+			+ "\n	 	  edges manager = {e=manager(e)} : qE, worksIn = {d=worksIn(e)} : qD;} : Employee,"
+			+ "\n	 qD = {for d:Department; "
+			+ "\n	 	  where; "
+			+ "\n	 	  attributes name=name(d); "
+			+ "\n	 	  edges secretary = {e=secretary(d)} : qE;} : Department"
+			+ "\n} : C -> C"
+			+ "\n"
+			+ "\nQ0 = id C"
 			+ "\n";
 
 

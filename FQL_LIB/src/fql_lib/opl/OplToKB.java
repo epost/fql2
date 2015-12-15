@@ -345,7 +345,11 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		return new KB(eqs, KBOrders.lpogt(gt), fr, DEBUG.debug.opl_unfailing, DEBUG.debug.opl_sort_cps, DEBUG.debug.opl_iterations, DEBUG.debug.opl_red_its);			
 	}
 
+	//ok to use null here
 	public static <C,X,V> KBExp<Chc<Chc<C,X>,JSWrapper>,V> redBy(OplJavaInst I, KBExp<Chc<Chc<C,X>,JSWrapper>,V> e) {				
+		if (I == null) {
+			return e;
+		}
 		try {
 			if (e.isVar) {
 				return e;

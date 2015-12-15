@@ -22,10 +22,12 @@ import org.codehaus.jparsec.functors.Tuple5;
 import catdata.algs.Pair;
 import catdata.algs.Triple;
 import fql_lib.X.XExp;
+import fql_lib.opl.OplExp.OplApply;
 import fql_lib.opl.OplExp.OplCtx;
 import fql_lib.opl.OplExp.OplDelta;
 import fql_lib.opl.OplExp.OplEval;
 import fql_lib.opl.OplExp.OplFlower;
+import fql_lib.opl.OplExp.OplId;
 import fql_lib.opl.OplExp.OplInst;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
@@ -39,6 +41,7 @@ import fql_lib.opl.OplExp.OplTerm;
 import fql_lib.opl.OplExp.OplUberSat;
 import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
+import fql_lib.opl.OplQuery.Block;
 
 public class OplParser {
 
@@ -53,7 +56,7 @@ public class OplParser {
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
-		"entitiesAndAttributes", "instance", "entities", "attributes", "types", "schema", "as", "where", "select", "from", "flower", "SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
+		"apply", "id", "query", "edges", "for", "entitiesAndAttributes", "instance", "entities", "attributes", "types", "schema", "as", "where", "select", "from", "flower", "SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -140,8 +143,11 @@ public class OplParser {
 		Parser<?> projT = Parsers.tuple(term("types"), ident());
 		Parser<?> projEA = Parsers.tuple(term("entitiesAndAttributes"), ident());
 		Parser<?> inst = Parsers.tuple(term("instance"), ident(), ident(), ident());
+		Parser<?> query = query();
+		Parser<?> idQ = Parsers.tuple(term("id"), ident());
+		Parser<?> apply = Parsers.tuple(term("apply"), ident(), ident());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { projEA, inst, schema, projE, projA, projT, flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
+		Parser<?> a = Parsers.or(new Parser<?>[] { apply, idQ, query, projEA, inst, schema, projE, projA, projT, flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
 		ref.set(a);
 
 		return a;
@@ -552,6 +558,8 @@ public class OplParser {
 				return new OplSchemaProj((String)p.b, "T");
 			} else if (p.a.toString().equals("entitiesAndAttributes")) {
 				return new OplSchemaProj((String)p.b, "EA");
+			} else if (p.a.toString().equals("id")) {
+				return new OplId((String)p.b);
 			}
 		}
 		
@@ -559,6 +567,8 @@ public class OplParser {
 			Tuple3 p = (Tuple3) c;
 			if (p.a.toString().equals("SATURATE")) {
 				return new OplUberSat((String)p.b, (String)p.c);
+			} else if (p.a.toString().equals("apply")) {
+				return new OplApply((String)p.b, (String)p.c);
 			} 
 		}
 		
@@ -667,7 +677,16 @@ public class OplParser {
 			de.printStackTrace();
 			throw new RuntimeException(de.getMessage());
 		} catch (Exception ee) {
-			ee.printStackTrace();
+			//ee.printStackTrace();
+		}
+		
+		try {
+			return toQuery((Tuple4)c);
+		} catch (DoNotIgnore de) {
+			de.printStackTrace();
+			throw new RuntimeException(de.getMessage());
+		} catch (Exception ee) {
+			//ee.printStackTrace();
 		}
 		
 		throw new RuntimeException("Report this error to Ryan.");
@@ -953,5 +972,93 @@ public class OplParser {
 	
 	 }
 	
+	
+		//TODO: inference
+		public static Block<String, String, String, String, String, String> fromBlock(Object o) {
+			Tuple4<List, List, List, List> t = (Tuple4<List, List, List, List>) o;
+			
+			Map<String, String> from = new HashMap<>();
+			Set<Pair<OplTerm<String, String>, OplTerm<String, String>>> where = new HashSet<>();
+			Map<String, OplTerm<String, String>> attrs = new HashMap<>();
+			Map<String, Pair<Object, Map<String, OplTerm<String, String>>>> edges = new HashMap<>();
+
+			
+			for (Object x : t.a) {
+				Tuple3 l = (Tuple3) x;
+				if (from.containsKey(l.a.toString())) {
+					throw new RuntimeException("Duplicate for: " + l.a);
+				}
+				from.put(l.a.toString(), l.c.toString());
+			}
+			
+			for (Object x : t.b) {
+				Tuple3 l = (Tuple3) x;
+				where.add(new Pair(toTerm(from.keySet(), null, l.a, true), toTerm(from.keySet(), null, l.c, true)));
+			}
+			
+			for (Object x : t.c) {
+				Tuple3 l = (Tuple3) x;
+				if (attrs.containsKey(l.a.toString())) {
+					throw new RuntimeException("Duplicate for: " + l.a);
+				}
+				attrs.put(l.a.toString(), toTerm(from.keySet(), null, l.c, true));
+			}
+			
+			for (Object x : t.d) {
+				Tuple5 l = (Tuple5) x;
+				if (from.containsKey(l.a.toString())) {
+					throw new RuntimeException("Duplicate for: " + l.a);
+				}
+				edges.put(l.a.toString(), new Pair(l.e.toString(), fromBlockHelper(from.keySet(), l.c)));
+			}
+
+			return new Block<String, String, String, String, String, String>(from, where, attrs, edges);
+		} 
+		
+		//{b2=a1.f, b3=a1.f}
+		public static Map<String, OplTerm<String,String>> fromBlockHelper(Set<String> vars, Object o) {
+			List<Tuple3> l = (List<Tuple3>) o;
+			Map<String, OplTerm<String,String>> ret = new HashMap<>();
+			for (Tuple3 t : l) {
+				if (ret.containsKey(t.a.toString())) {
+					throw new RuntimeException("Duplicate column: " + t.a);
+				}
+				ret.put(t.a.toString(), toTerm(vars, null, t.c, true));
+			}
+			return ret;
+		}
+		
+		public static Map<Object, Pair<String, Block<String, String, String, String, String, String>>> fromBlocks(List l) {
+			Map<Object, Pair<String, Block<String, String, String, String, String, String>>> ret = new HashMap<>();
+			for (Object o : l) {
+				Tuple5 t = (Tuple5) o;
+				Block<String, String, String, String, String, String> b = fromBlock(t.c);
+				ret.put(t.a.toString(), new Pair<>(t.e.toString(), b));
+			}
+			return ret;
+		} 
+		public static OplQuery<String,String,String,String,String, String> toQuery(Tuple4 o) {
+			Map<Object, Pair<String, Block<String, String, String, String, String, String>>> blocks = fromBlocks((List)o.a);
+			return new OplQuery<String,String,String,String,String,String>((String)o.b, (String)o.d, blocks);
+		}  
+	 
+		public static final Parser<?> block() {
+			Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(",")).between(term("for"), term(";"));
+			Parser p2 = Parsers.tuple(oplTerm(), term("="), oplTerm()).sepBy(term(",")).between(term("where"), term(";"));
+			Parser p3 = Parsers.tuple(ident(), term("="), oplTerm()).sepBy(term(",")).between(term("attributes"), term(";"));
+			
+			Parser q = Parsers.tuple(ident(), term("="), oplTerm()).sepBy(term(",")).between(term("{"), term("}"));
+			Parser a = Parsers.tuple(ident(), term("="), q, term(":"), ident());
+			Parser p4= a.sepBy(term(",")).between(term("edges"), term(";"));
+			
+			Parser p = Parsers.tuple(p1, p2, p3, p4);
+			return p.between(term("{"), term("}"));
+		}
+		
+		public static final Parser<?> query() {
+			Parser p = Parsers.tuple(ident(), term("="), block(), term(":"), ident());
+			Parser p2 = p.sepBy(term(",")).between(term("{"), term("}")).between(term("query"), term(":"));
+			return Parsers.tuple(p2, ident(), term("->"), ident());
+		}
 
 }

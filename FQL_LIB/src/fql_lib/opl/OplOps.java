@@ -2,11 +2,13 @@ package fql_lib.opl;
 
 import javax.script.Invocable;
 
+import fql_lib.opl.OplExp.OplApply;
 import fql_lib.opl.OplExp.OplCtx;
 import fql_lib.opl.OplExp.OplDelta;
 import fql_lib.opl.OplExp.OplEval;
 import fql_lib.opl.OplExp.OplExpVisitor;
 import fql_lib.opl.OplExp.OplFlower;
+import fql_lib.opl.OplExp.OplId;
 import fql_lib.opl.OplExp.OplInst;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
@@ -304,7 +306,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	public OplObject visit(OplProgram env, OplInst e) {
 		OplSchema S;
 		OplPres P;
-		OplJavaInst J;
+		OplJavaInst J = null;
 		
 		OplObject S0 = ENV.get(e.S0);
 		if (S0 instanceof OplSchema) {
@@ -320,14 +322,63 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			throw new RuntimeException("Not a presentation: " + e.P0);
 		}
 		
-		OplObject J0 = ENV.get(e.J0);
-		if (J0 instanceof OplJavaInst) {
-			J = (OplJavaInst) J0;
+		if (e.J0.equals("none")) {
+			
 		} else {
-			throw new RuntimeException("Not a JS model: " + e.J0);
+			OplObject J0 = ENV.get(e.J0);
+			if (J0 instanceof OplJavaInst) {
+				J = (OplJavaInst) J0;
+			} else {
+				throw new RuntimeException("Not a JS model: " + e.J0);
+			}
 		}
 
 		e.validate(S, P, J);
 		return e;
+	}
+
+	@Override
+	public OplObject visit(OplProgram env, OplQuery e) {
+		OplSchema I, J;
+
+		OplObject I0 = ENV.get(e.src_e);
+		if (I0 instanceof OplSchema) {
+			I = (OplSchema) I0;
+		} else {
+			throw new RuntimeException("Not a schema: " + e.src_e);
+		}
+		
+		OplObject J0 = ENV.get(e.dst_e);
+		if (J0 instanceof OplSchema) {
+			J = (OplSchema) J0;
+		} else {
+			throw new RuntimeException("Not a schema: " + e.dst_e);
+		}
+		
+		e.validate(I, J);
+		return e;
+	}
+
+	@Override
+	public OplObject visit(OplProgram env, OplId e) {
+		OplObject I0 = ENV.get(e.s);
+		if (I0 instanceof OplSchema) {
+			return OplQuery.id(e.s, (OplSchema)I0);
+		} 
+		throw new RuntimeException("Not a schema: " + e.s);
+	}
+	
+	@Override
+	public OplObject visit(OplProgram env, OplApply e) {
+		OplObject Q0 = ENV.get(e.Q0);
+		if (!(Q0 instanceof OplQuery)) {
+			throw new RuntimeException("Not a query: " + e.Q0);
+		} 
+		OplObject I0 = ENV.get(e.I0);
+		if (!(I0 instanceof OplInst)) {
+			throw new RuntimeException("Not an instance: " + e.I0);
+		} 
+		e.validate((OplQuery)Q0, (OplInst)I0);
+		return e.Q.eval(e.I);
 	}
 }
