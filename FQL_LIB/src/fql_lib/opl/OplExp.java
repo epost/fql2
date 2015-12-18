@@ -22,6 +22,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -30,11 +31,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.UIManager;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -322,6 +321,14 @@ public abstract class OplExp implements OplObject {
 		return ret;
 	}
 	
+	/*@Override 
+	   public Component getTableCellRendererComponent(
+               JTable table, Object color,
+               boolean isSelected, boolean hasFocus,
+               int row, int column) {
+		return display();
+	}
+	*/
 	public static class OplString extends OplExp {
 		String str;
 		public OplString(String str) {
@@ -522,7 +529,8 @@ public abstract class OplExp implements OplObject {
 				return var.toString();
 			}
 			List<String> x = args.stream().map(z -> z.toString()).collect(Collectors.toList());
-			return head + "(" + Util.sep(x, ", ") + ")";
+			String ret = head + "(" + Util.sep(x, ", ") + ")";
+			return strip(ret);
 		}
 
 		public <S> OplTerm<C,V> subst(OplCtx<S,V> G, List<OplTerm<C,V>> L) {
@@ -583,7 +591,8 @@ public abstract class OplExp implements OplObject {
 					l.add(k.toString());
 				}
 			}
-			return Util.sep(l, ", ");
+			String ret = Util.sep(l, ", ");
+			return strip(ret);
 		}
 		
 		public int indexOf(V var) {
@@ -723,6 +732,8 @@ public abstract class OplExp implements OplObject {
 		}
 		
 		//TODO to use with saturate_easy, should turn back into theory
+		//TODO this type signature is totally wrong, is not inverse of saturate_easy
+		//TODO not sure what this is, but can only desaturate things that were first saturted, not arbitrary models
 		public static <S,C,V,X> OplPres<S,C,V,X> desaturate(String S, OplSetInst<S,C,X> I) {
 			OplSig<S,C,V> sig = (OplSig<S, C, V>) I.sig0; //TODO
 			
@@ -1370,10 +1381,10 @@ public abstract class OplExp implements OplObject {
 			ret += "\tequations\n";
 			List<String> elist = new LinkedList<>();
 			for (Triple<OplCtx<S, V>, OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>> k : equations) {
-				String z = k.first.vars0.size() == 0 ? "" : "forall ";
-				String y = k.first.vars0.size() == 0 ? "" : ". ";
+				//String z = k.first.vars0.size() == 0 ? "" : "forall ";
+				//String y = k.first.vars0.size() == 0 ? "" : ". ";
 
-				String s = z + k.first + y + strip(k.second.toString()) + " = " + strip(k.third.toString());
+				String s = strip("forall" + k.first +  " . " + k.second + " = " + k.third);
 				elist.add(s);
 			}
 
@@ -1391,11 +1402,14 @@ public abstract class OplExp implements OplObject {
 	}
 
 	private static String strip(String s) {
+		if (!DEBUG.debug.opl_pretty) {
+			return s;
+		}
 		String ret = s.replace("inl ", "").replace("inr ", "").replace("()", "").replace("forall . ", "").trim();
 		if (ret.startsWith("|- ")) {
 			ret = ret.substring(3);
 		}
-		return ret;
+		return ret.replace("JS[", "").replace("]", "");
 	}
 	
 	public static class OplMapping<S1,C1,V,S2,C2> extends OplExp {
@@ -1457,7 +1471,7 @@ public abstract class OplExp implements OplObject {
 				Pair<OplCtx<S2, V>, OplTerm<C2, V>> v = symbols.get(k);
 				String z = v.first.vars0.size() == 0 ? "" : "forall ";
 				String y = v.first.vars0.size() == 0 ? "" : " . ";
-				symbolsX.add(strip(k.toString()) + " -> " + z + v.first + y + strip(v.second.toString()));
+				symbolsX.add(strip(k.toString()) + " -> " + z + v.first + y + v.second.toString());
 			}
 			ret += "\t\t" + Util.sep(symbolsX, ",\n\t\t") + ";\n";
 
@@ -1605,8 +1619,8 @@ public abstract class OplExp implements OplObject {
 		}
 		
 		public <X> OplPres<S2,C2,V,X> sigma(OplPres<S1,C1,V,X> I) {
-			if (!src0.equals(I.S)) {
-				throw new RuntimeException("Source of mapping " + src + " does not match " + I.S);
+			if (!src.equals(I.sig)) {
+				throw new RuntimeException("Source of mapping " + src0 + " does not match " + I.S);
 			}
 			
 			Map<X, S2> sym = new HashMap<>();
@@ -1815,7 +1829,15 @@ public abstract class OplExp implements OplObject {
 	}
 	
 	public static class OplSetInst<S, C, X> extends OplExp {
-		Map<S, Set<X>> sorts;
+		
+		public int size() {
+			int ret = 0;
+			for (S s : sorts.keySet()) {
+				ret += sorts.get(s).size();
+			}
+			return ret;
+		}
+		public Map<S, Set<X>> sorts;
 		String sig;
 		private Map<C, Map<List<X>, X>> symbols;
 		OplSig<S, C, ?> sig0;
@@ -1858,9 +1880,9 @@ public abstract class OplExp implements OplObject {
 			return jtp;
 		}
 		
-		private static String strip(String s) {
-			return s.replace("inl ", "").replace("inr ", "").replace("()", "");
-		}
+//		private static String strip(String s) {
+	//		return s.replace("inl ", "").replace("inr ", "").replace("()", "");
+//		}
 		
 		public JComponent makeTables(Set skip) {
 			//System.out.println(this);
@@ -1938,7 +1960,7 @@ public abstract class OplExp implements OplObject {
 			return Util.makeGrid(list);			
 		}
 
-		static class NonEditableModel extends DefaultTableModel {
+		 static class NonEditableModel extends DefaultTableModel {
 
 		    NonEditableModel(Object[][] data, String[] columnNames) {
 		        super(data, columnNames);
@@ -1946,10 +1968,10 @@ public abstract class OplExp implements OplObject {
 
 		    @Override
 		    public boolean isCellEditable(int row, int column) {
-		        return false;
+		        return true;
 		    }
-		}
-
+		} 
+		
 		private static JPanel makeTable2(Border b, String border,
 				Object[][] rowData, String[] colNames) {
 			
@@ -1959,13 +1981,13 @@ public abstract class OplExp implements OplObject {
 					Dimension d = getPreferredSize();
 					return new Dimension(d.width, d.height);
 				}
-				public TableCellRenderer getCellRenderer( int row, int column ) {
-	                return new PlusMinusCellRenderer();
-	            }
 			};
-			//t.setDefaultEditor(JComponent.class, null);        // remove editor
-		
+			PlusMinusCellRenderer r = new PlusMinusCellRenderer();
+			t.setDefaultRenderer(Object.class, r);
+			t.setDefaultEditor(Object.class, r);
 			t.setModel(new NonEditableModel(rowData, colNames));
+		//	ListSelectionModel.
+			t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); //(JTable.)
 			
 			JPanel p = new JPanel(new GridLayout(1, 1));
 			TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
@@ -1992,136 +2014,62 @@ public abstract class OplExp implements OplObject {
 			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(b, border));
 			return p;
-			/*
-			 * 
-			 */
+			
 		}
-		
-		 public class MultiLineTableCellRenderer extends JTextArea 
-		    implements TableCellRenderer {
-		    private List<List<Integer>> rowColHeight = new ArrayList<List<Integer>>();
-		   
-		    public MultiLineTableCellRenderer() {
-		      setLineWrap(true);
-		      setWrapStyleWord(true);
-		      setOpaque(true);
-		    }
-		   
-		    public Component getTableCellRendererComponent(
-		        JTable table, Object value, boolean isSelected, boolean hasFocus,
-		        int row, int column) {
-		      if (isSelected) {
-		        setForeground(table.getSelectionForeground());
-		        setBackground(table.getSelectionBackground());
-		      } else {
-		        setForeground(table.getForeground());
-		        setBackground(table.getBackground());
-		      }
-		      setFont(table.getFont());
-		      if (hasFocus) {
-		        setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-		        if (table.isCellEditable(row, column)) {
-		          setForeground(UIManager.getColor("Table.focusCellForeground"));
-		          setBackground(UIManager.getColor("Table.focusCellBackground"));
-		        }
-		      } else {
-		        setBorder(new EmptyBorder(1, 2, 1, 2));
-		      }
-		      if (value != null) {
-		        setText(value.toString());
-		      } else {
-		        setText("");
-		      }
-		      adjustRowHeight(table, row, column);
-		      return this;
-		    }
-		   
-		    /**
-		     * Calculate the new preferred height for a given row, and sets the height on the table.
-		     */
-		    private void adjustRowHeight(JTable table, int row, int column) {
-		      //The trick to get this to work properly is to set the width of the column to the
-		      //textarea. The reason for this is that getPreferredSize(), without a width tries
-		      //to place all the text in one line. By setting the size with the with of the column,
-		      //getPreferredSize() returnes the proper height which the row should have in
-		      //order to make room for the text.
-		      int cWidth = table.getTableHeader().getColumnModel().getColumn(column).getWidth();
-		      setSize(new Dimension(cWidth, 1000));
-		      int prefH = getPreferredSize().height;
-		      while (rowColHeight.size() <= row) {
-		        rowColHeight.add(new ArrayList<Integer>(column));
-		      }
-		      List<Integer> colHeights = rowColHeight.get(row);
-		      while (colHeights.size() <= column) {
-		        colHeights.add(0);
-		      }
-		      colHeights.set(column, prefH);
-		      int maxH = prefH;
-		      for (Integer colHeight : colHeights) {
-		        if (colHeight > maxH) {
-		          maxH = colHeight;
-		        }
-		      }
-		      if (table.getRowHeight(row) != maxH) {
-		        table.setRowHeight(row, maxH);
-		      }
-		    }
-		  }
-		 
-		 static Object stripChcs(Object o) {
-			 if (o instanceof Chc) {
-				 Chc c = (Chc) o;
-				 if (c.left) {
-					 return stripChcs(c.l);
-				 } else {
-					 return stripChcs(c.r);
-				 }
-			 }
-			 return o;
-		 }
-		 
-		static class PlusMinusCellRenderer extends JPanel implements TableCellRenderer {
+	
+		static class PlusMinusCellRenderer extends DefaultCellEditor implements TableCellRenderer {
 		    private List<List<Integer>> rowColHeight = new ArrayList<List<Integer>>();
 			
+		    public PlusMinusCellRenderer() {
+		    	super(new JTextField());
+		    }
+		    
+		    Map<Pair<Integer, Integer>, Component> cache = new HashMap<>();
 	        public Component getTableCellRendererComponent(
 	                            final JTable table, Object value,
 	                            boolean isSelected, boolean hasFocus,
 	                            int row, int column) {
-	        	if (value instanceof OplTerm) {
-	        		OplTerm t = (OplTerm) value;
-	        		/* if (t.args.size() == 0 && t.head instanceof Chc) {
-	        			Chc c = (Chc)t.head;
-	        			if (!c.left && c.r instanceof JSWrapper) {
-	        				JSWrapper w = (JSWrapper) c.r;
-		        			if (w.o instanceof JComponent) {
-		        				JComponent comp = (JComponent) w.o;
-		        			    return comp;
-		        			}
-	        			}	
-	        		} */
-	        		if (t.args.size() == 0) {
-	        			Object o = stripChcs(t.head);
-	        			if (o instanceof JSWrapper) {
-	        				JSWrapper w = (JSWrapper) o;
-	        				if (w.o instanceof JComponent) {
-		        				JComponent comp = (JComponent) w.o;
-		        			    return comp;
-		        			}
-	        			}
+	        	Pair<Integer, Integer> p = new Pair<>(row, column);
+	        	Component ret = cache.get(p);
+	        	if (ret != null) {
+	        		return ret;
+	        	}
+	        	if (ret == null) {
+	        		ret = extract(value);
+	        		if (ret != null) {
+	        			cache.put(p, ret);
+	        			return ret;
 	        		}
-	        		
 	        	}
 	        
-	        	return new DefaultTableCellRenderer().getTableCellRendererComponent(table, strip(value.toString()), isSelected, hasFocus, row, column);
-	        	
+	        	ret = new DefaultTableCellRenderer().getTableCellRendererComponent(table, strip(value.toString()), false, hasFocus, row, column);
+	        	//cache.put(p, ret);
+	        	return ret;
 	        }
-	        private void adjustRowHeight(JTable table, int row, int column) {
-     		      //The trick to get this to work properly is to set the width of the column to the
-     		      //textarea. The reason for this is that getPreferredSize(), without a width tries
-     		      //to place all the text in one line. By setting the size with the with of the column,
-     		      //getPreferredSize() returnes the proper height which the row should have in
-     		      //order to make room for the text.
-     		      int cWidth = table.getTableHeader().getColumnModel().getColumn(column).getWidth();
+	        
+	        @Override
+	        public Component getTableCellEditorComponent(JTable table, Object value,
+					boolean isSelected, int row, int column) {
+	        	
+	        	Pair<Integer, Integer> p = new Pair<>(row, column);
+	        	Component ret = cache.get(p);
+	        	if (ret != null) {
+	        		return ret;
+	        	}
+	        	if (ret == null) {
+	        		ret = extract(value);
+	        		if (ret != null) {
+	        			cache.put(p, ret);
+	        			return ret;
+	        		}
+	        	}
+	        	
+	        	return super.getTableCellEditorComponent(table, value, isSelected, row, column);
+		    }
+
+		
+	       /* private void adjustRowHeight(JTable table, int row, int column) {
+     		       int cWidth = table.getTableHeader().getColumnModel().getColumn(column).getWidth();
      		      setSize(new Dimension(cWidth, 1000));
      		      int prefH = getPreferredSize().height;
      		      while (rowColHeight.size() <= row) {
@@ -2141,55 +2089,9 @@ public abstract class OplExp implements OplObject {
      		      if (table.getRowHeight(row) != maxH) {
      		        table.setRowHeight(row, maxH);
      		      }
-     		    }
+     		    } */
 	}
-	/*	private JComponent makeTables_old() {
-			List<JComponent> list = new LinkedList<>();
-			
-			List<S> keys = new LinkedList<>(sorts.keySet());
-			keys.sort(new Comparator<S>() {
-				@Override
-				public int compare(S o1, S o2) {
-					return o1.toString().compareTo(o2.toString());
-				}
-			});
-			for (S n : keys) {
-				List<Object[]> rows = new LinkedList<>();
-				for (X arg : sorts.get(n)) {
-					String[] row = new String[] {strip(arg.toString())};
-					rows.add(row);
-				}
-				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), n + " (" + rows.size() + ")", 
-						rows.toArray(new Object[][] { }), new Object[] {n} ));
-			}
-			List<C> keys2 = new LinkedList<>(symbols.keySet());
-			keys2.sort(new Comparator<C>() {
-				@Override
-				public int compare(C o1, C o2) {
-					return o1.toString().compareTo(o2.toString());
-				}
-			});
-		
-			for (C n : keys2) {
-				if (sig0.symbols.get(n).first.size() == 0) {
-					continue;
-				}
-				Map<List<X>, X> f = symbols.get(n);
-				List<String[]> rows = new LinkedList<>();
-				for (List<X> arg : f.keySet()) {
-					List<String> argX = arg.stream().map(x -> strip(x.toString())).collect(Collectors.toList());
-					argX.add(strip(f.get(arg).toString()));
-					String[] row = argX.toArray(new String[] {});
-					rows.add(row);
-				}
-				List l = new LinkedList<>(sig0.symbols.get(n).first);
-				l.add(sig0.symbols.get(n).second);
-				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), n + " (" + rows.size() + ")", rows.toArray(new Object[][] { }), l.toArray()));
-			}
-			
-			return Util.makeGrid(list);			
-		} */
-
+	
 
 		public <V> void validate(OplSig<S,C,V> sig) {
 			for (S s : sig.sorts) {
@@ -2278,12 +2180,15 @@ public abstract class OplExp implements OplObject {
 		
 		OplSig sig0;
 		
+		OplEnvironment ENV;
+				
 		public OplJavaInst(Map<String, String> defs, String sig) {
 			this.defs = defs;
 			this.sig = sig;
 		}
 		
-		public void validate(OplSig sig) {
+		public void validate(OplSig sig, OplEnvironment ENV) {
+			this.ENV = ENV;
 			sig0 = sig;
 			for (String k : defs.keySet()) {
 				if (k.equals("_preamble")) {
@@ -2300,6 +2205,9 @@ public abstract class OplExp implements OplObject {
 			}
 			
 			engine = new ScriptEngineManager().getEngineByName("nashorn");
+			for (String key : ENV.keys()) {
+				engine.put(key, ENV.get(key));
+			}
 			String ret = "";
 			if (defs.containsKey("_preamble")) {
 				ret += defs.get("_preamble") + "\n\n";
@@ -2922,8 +2830,12 @@ public abstract class OplExp implements OplObject {
 			FQLTextPanel p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 			ret.add(p, "Presentation");
 			
-			ret.add(saturate(J, projE(), S, P).makeTables(S.projT().sorts), "Saturation");
-			
+			try {
+				ret.add(saturate(J, projE(), S, P).makeTables(S.projT().sorts), "Saturation");
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				ret.add(new FQLTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage()), "Saturation");
+			}
 			return ret;
 
 		}
@@ -3044,8 +2956,74 @@ public abstract class OplExp implements OplObject {
 			return v.visit(env, this);
 		}
 	}
+	
+	public static class OplTyMapping<S1,C1,V,S2,C2> extends OplExp {
+		String src0, dst0;
+		OplSchema<S1,C1,V> src;
+		OplSchema<S2,C2,V> dst;
+		OplMapping<S1,C1,V,S2,C2> m;
+		
+		public OplTyMapping(String src0, String dst0, OplSchema<S1, C1, V> src,
+				OplSchema<S2, C2, V> dst, OplMapping<S1, C1, V, S2, C2> m) {
+			this.src0 = src0;
+			this.dst0 = dst0;
+			this.src = src;
+			this.dst = dst;
+			this.m = m;
+			validate();
+		}
+		
+		private void validate() {
+			if (!src.projT().equals(dst.projT())) {
+				throw new RuntimeException("Differing type sides");
+			}
+			extend().validate(src.sig, dst.sig);
+		}
+		
+		private OplMapping<S1,C1,V,S2,C2> cache;
+		public OplMapping<S1,C1,V,S2,C2> extend() {
+			if (cache != null) {
+				return cache;
+			}
+			
+			Map<S1, S2> sorts = new HashMap<>(m.sorts);
+			Map<C1, Pair<OplCtx<S2, V>, OplTerm<C2, V>>> symbols = new HashMap<>(m.symbols);
+			
+			for (S1 s1 : src.projT().sorts) {
+				sorts.put(s1, (S2)s1);
+			}
+			
+			for (C1 c1 : src.projT().symbols.keySet()) {
+				Pair<List<S1>, S1> t = src.projT().symbols.get(c1);
+				List<Pair<V, S2>> l = new LinkedList<>();
+				List<OplTerm<C2,V>> vs = new LinkedList<>();
+				for (S1 s1 : t.first) {
+					V v = src.sig.fr.next();
+					vs.add(new OplTerm<>(v));
+					l.add(new Pair<>(v, (S2)s1));
+				}
+				OplCtx<S2, V> ctx = new OplCtx<>(l);
+				OplTerm<C2, V> value = new OplTerm<>((C2)c1, vs);
+				symbols.put(c1, new Pair<>(ctx, value));
+			}
+			
+			cache = new OplMapping<S1,C1,V,S2,C2>(sorts, symbols, "?", "?");
+			return cache;
+		}
+		
+		@Override
+		public JComponent display() {
+			return extend().display();
+		}
+		
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
 
 	public interface OplExpVisitor<R, E> {
+		public R visit (E env, OplTyMapping e);
 		public R visit (E env, OplId e);
 		public R visit (E env, OplApply e);
 		public R visit (E env, OplSig e);
@@ -3090,4 +3068,32 @@ public abstract class OplExp implements OplObject {
 		return y;
 	}
 	
+	public static JComponent extract(Object t0) {
+		if (t0 instanceof OplTerm) {
+	    	OplTerm t = (OplTerm) t0;
+			if (t.args.size() == 0) {
+	    		Object o = Util.stripChcs(t.head).second;
+	    		if (o instanceof JSWrapper) {
+	    			JSWrapper w = (JSWrapper) o;
+	    			if (w.o instanceof JComponent) {
+	    				return (JComponent) w.o;
+	    			} else if (w.o instanceof OplObject) {
+	    				return ((OplObject)w.o).display();
+	    			}
+	    		}
+	    	}
+		}
+		if (t0 instanceof JComponent) {
+			return (JComponent) t0;
+		}
+    	return null;
+	}
+    	
+/*	static class OplWrapper {
+		JComponent comp;
+		public OplWrapper(OplObject obj) {
+			comp = obj.display();
+		}
+	} */
+   
 }

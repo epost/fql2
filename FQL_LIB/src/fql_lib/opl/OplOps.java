@@ -23,6 +23,7 @@ import fql_lib.opl.OplExp.OplSig;
 import fql_lib.opl.OplExp.OplSigma;
 import fql_lib.opl.OplExp.OplString;
 import fql_lib.opl.OplExp.OplTransEval;
+import fql_lib.opl.OplExp.OplTyMapping;
 import fql_lib.opl.OplExp.OplUberSat;
 import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
@@ -109,7 +110,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			throw new RuntimeException("Not a signature: " + e.sig);
 		}
 		OplSig sig0 = (OplSig) sig;
-		e.validate(sig0);
+		e.validate(sig0, ENV);
 		return e;
 	}
 
@@ -117,16 +118,19 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	public OplObject visit(OplProgram env, OplMapping e) {
 		OplObject src = ENV.get(e.src0);
 		OplObject dst = ENV.get(e.dst0);
-		if (!(src instanceof OplSig)) {
-			throw new RuntimeException("Source is not a theory in " + e);
+		if (src instanceof OplSig && dst instanceof OplSig) {
+			OplSig src0 = (OplSig) src;
+			OplSig dst0 = (OplSig) dst;
+			e.validate(src0, dst0);
+			return e;
+		} else if (src instanceof OplSchema && dst instanceof OplSchema) {
+			OplSchema src0 = (OplSchema) src;
+			OplSchema dst0 = (OplSchema) dst;
+			//e.validate(src0.projEA(), dst0.projEA());
+			OplTyMapping ret = new OplTyMapping<>(e.src0, e.dst0, src0, dst0, e);
+			return ret;
 		}
-		if (!(dst instanceof OplSig)) {
-			throw new RuntimeException("Target is not a theory in " + e);
-		}
-		OplSig src0 = (OplSig) src;
-		OplSig dst0 = (OplSig) dst;
-		e.validate(src0, dst0);
-		return e;
+		throw new RuntimeException("Source or Target is not a theory/schema in " + e);
 	}
 
 	@Override
@@ -232,23 +236,33 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	
 	@Override
 	public OplObject visit(OplProgram env, OplSigma e) {
+		
 		OplObject F = ENV.get(e.F);
-		if (!(F instanceof OplMapping)) {
-			throw new RuntimeException("Not a mapping: " + e.F);
-		}
-		OplMapping F0 = (OplMapping) F;
-		
 		OplObject I = ENV.get(e.I);
-		if (I instanceof OplPres) {
-			OplPres I0 = (OplPres) I;
-			return F0.sigma(I0);			
+
+		if (F instanceof OplMapping) {
+			OplMapping F0 = (OplMapping) F;
+			if (I instanceof OplPres) {
+				OplPres I0 = (OplPres) I;
+				return F0.sigma(I0);			
+			} else if (I instanceof OplSetTranGens) {
+				OplSetTranGens h = (OplSetTranGens) I;
+				return F0.sigma(h);
+			}
+			throw new RuntimeException("Not a presentation of an instance or transform: " + e.I);
 		}
-		if (I instanceof OplSetTranGens) {
-			OplSetTranGens h = (OplSetTranGens) I;
-			return F0.sigma(h);
+		if (F instanceof OplTyMapping) {
+			OplTyMapping F0 = (OplTyMapping) F;
+			if (I instanceof OplInst) {
+				OplInst I0 = (OplInst) I;
+				OplInst ret = new OplInst<>(F0.dst.sig0, "?", I0.J0);
+				ret.validate(F0.dst, F0.extend().sigma(I0.P), I0.J);
+				return ret;
+			} 
+			throw new RuntimeException("Not an instance: " + e.I);
+
 		}
-		
-		throw new RuntimeException("Not a presentation of an instance or transform: " + e.I);
+		throw new RuntimeException("Not a mapping: " + e.F);		
 	}
 
 	@Override
@@ -381,4 +395,10 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		e.validate((OplQuery)Q0, (OplInst)I0);
 		return e.Q.eval(e.I);
 	}
+
+	@Override
+	public OplObject visit(OplProgram env, OplTyMapping e) {
+		return e;
+	}
+	
 }

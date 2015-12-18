@@ -2,12 +2,17 @@ package fql_lib.opl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class OplEnvironment {
 
 	private OplProgram prog;
 	private String str;
 	private Map<String, OplObject> objs;
+	
+	public Set<String> keys() {
+		return objs.keySet();
+	}
 	
 	public OplEnvironment(OplProgram prog, String str) {
 		this.prog = prog;

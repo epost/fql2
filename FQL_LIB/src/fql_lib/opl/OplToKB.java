@@ -346,7 +346,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	}
 
 	//ok to use null here
-	public static <C,X,V> KBExp<Chc<Chc<C,X>,JSWrapper>,V> redBy(OplJavaInst I, KBExp<Chc<Chc<C,X>,JSWrapper>,V> e) {				
+	/*public static <C,X,V> KBExp<Chc<Chc<C,X>,JSWrapper>,V> redBy(OplJavaInst I, KBExp<Chc<Chc<C,X>,JSWrapper>,V> e) {				
 		if (I == null) {
 			return e;
 		}
@@ -376,8 +376,43 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			ex.printStackTrace();
 			throw new RuntimeException(ex.getMessage());
 		} 
-	} 
+	} */
 
+	public static <Z,V> KBExp<Chc<Z,JSWrapper>,V> redBy(OplJavaInst I, KBExp<Chc<Z,JSWrapper>,V> e) {				
+		if (I == null) {
+			return e;
+		}
+		try {
+			if (e.isVar) {
+				return e;
+			}
+				
+			KBApp<Chc<Z,JSWrapper>,V> e0 = e.getApp();
+				
+			List<KBExp<Chc<Z,JSWrapper>,V>> l = new LinkedList<>();
+			List<Object> r = new LinkedList<>();
+			for (KBExp<Chc<Z, JSWrapper>, V> a : e0.args) {
+				KBExp<Chc<Z,JSWrapper>,V> b = redBy(I, a);
+				l.add(b);
+				if (!b.isVar && b.getApp().args.isEmpty() && !b.getApp().f.left) {
+					JSWrapper js = b.getApp().f.r;
+					r.add(js.o);
+				}	
+			}
+			if (l.size() == r.size() && e0.f.left) {
+				Pair<Function, Object> xxx = Util.stripChcs(e0.f.l);
+				if (I.defs.containsKey(xxx.second)) {
+					Object o = ((Invocable)I.engine).invokeFunction((String)xxx.second, r);
+					return new KBApp<>(Chc.inRight(new JSWrapper(o)), new LinkedList<>());
+				}
+			} 
+			return new KBApp<>(e0.f, l);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException(ex.getMessage());
+		} 
+	} 
+	
 	public Map<S, Set<OplTerm<C, V>>> doHoms() {
 		HashMap<S, Set<OplTerm<C, V>>> sorts = new HashMap<>();
 		Runnable r = new Runnable() {

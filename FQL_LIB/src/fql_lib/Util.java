@@ -25,6 +25,7 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.table.TableRowSorter;
 
+import catdata.algs.Chc;
 import catdata.algs.Pair;
 import fql_lib.gui.MyTableRowSorter;
 
@@ -350,5 +351,19 @@ public class Util {
 		ret += ")";
 		return ret;
 	}
+	
+	public static Pair<Function, Object> stripChcs(Object o) {
+		 if (o instanceof Chc) {
+			 Chc c = (Chc) o;
+			 if (c.left) {
+				 Pair<Function, Object> p = stripChcs(c.l);
+				 return new Pair<Function, Object>(x -> { return Chc.inLeft(p.first.apply(x)); }, p.second);
+			 } else {
+				 Pair<Function, Object> p = stripChcs(c.r);
+				 return new Pair<Function, Object>(x -> { return Chc.inRight(p.first.apply(x)); }, p.second);
+			 }
+		 }
+		 return new Pair<Function, Object>(x -> { return x; }, o);
+	 }
 
 }

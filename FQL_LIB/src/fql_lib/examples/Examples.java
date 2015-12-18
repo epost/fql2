@@ -66,8 +66,10 @@ public class Examples {
 	public static Example oplTypedEmployees = new OplTypedEmployeesExample();
 	public static Example oplPics = new OplPicsExample();
 	public static Example oplTyTest = new OplTyTestExample();
+	public static Example oplTyTest2 = new OplTyTest2Example();
+	public static Example oplNested = new OplNestedExample();
 	
-	public static Example[] examples = new Example[] {oplTyTest, oplPics, oplTypedEmployees, oplFlower, oplTyped, oplUnfailing, oplSigma, oplEmployees, oplGroup, patrick30, oplStack, oplDelta, sk, js, mod4, patrick29, patrick28, patrick27, patrick26, patrick25, patrick24, patrick23, /*patrick22, patrick21,*/ patrick20, patrick19, patrick18, patrick17, patrick16, patrick15, /* patrick14, */ patrick13, patrick12, patrick11, patrick10, patrick9, patrick8, patrick, patrick2, patrick3, patrick4, patrick5, patrick6, patrick7, all, vik,  /*nist2, */ nistExample, propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
+	public static Example[] examples = new Example[] {oplNested, oplTyTest2, /*oplTyTest,*/ oplPics, oplTypedEmployees, oplFlower, oplTyped, oplUnfailing, oplSigma, oplEmployees, oplGroup, patrick30, oplStack, oplDelta, sk, js, mod4, patrick29, patrick28, patrick27, patrick26, patrick25, patrick24, patrick23, /*patrick22, patrick21,*/ patrick20, patrick19, patrick18, patrick17, patrick16, patrick15, /* patrick14, */ patrick13, patrick12, patrick11, patrick10, patrick9, patrick8, patrick, patrick2, patrick3, patrick4, patrick5, patrick6, patrick7, all, vik,  /*nist2, */ nistExample, propExample, expExample, piExample, sigmaExample, deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
 		
 	//public static Example[] key_examples = examples; //new Example[] { deltaExample, integrationExample, coproductsExample, productsExample, employeeExample, setExample, catExample, monadExample };
 

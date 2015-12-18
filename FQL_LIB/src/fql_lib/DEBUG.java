@@ -235,6 +235,7 @@ public class DEBUG implements Serializable {
 	public int opl_hom_its = 5000;
 	public boolean opl_validate = true;
 	public boolean opl_david = false;
+	public boolean opl_pretty = true;
 	
 	public void showOptions() {
 
@@ -382,8 +383,11 @@ public class DEBUG implements Serializable {
 		opl2.add(opl_red_box);
 		opl1.add(opl_red_label);
 		
-		opl1.add(new JLabel());
-		opl2.add(new JLabel());
+		JCheckBox opl_pretty_box = new JCheckBox("", opl_pretty);
+		JLabel opl_pretty_label = new JLabel("Pretty Print OPL terms:");
+		opl2.add(opl_pretty_box);
+		opl1.add(opl_pretty_label);
+
 		opl1.add(new JLabel());
 		opl2.add(new JLabel());
 		
@@ -838,6 +842,7 @@ public class DEBUG implements Serializable {
 			//opl_alpha = opl_alpha_box.isSelected();
 			opl_validate = opl_validate_box.isSelected();
 			opl_david = opl_david_box.isSelected();
+			opl_pretty = opl_pretty_box.isSelected();
 			
 		//	limit_examples = limex.isSelected();
 			useLineage = (String) lineageBox.getSelectedItem();

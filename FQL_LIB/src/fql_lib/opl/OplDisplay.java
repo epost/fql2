@@ -36,6 +36,7 @@ import fql_lib.opl.OplExp.OplSetInst;
 import fql_lib.opl.OplExp.OplSetTranGens;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSig;
+import fql_lib.opl.OplExp.OplTyMapping;
 
 public class OplDisplay implements FQLDisp {
 
@@ -62,6 +63,10 @@ public class OplDisplay implements FQLDisp {
 			OplMapping x = (OplMapping) o;
 			return "mapping " + c + " : " + x.src0 + " -> " + x.dst0;
  		}
+		if (o instanceof OplTyMapping) {
+			OplTyMapping x = (OplTyMapping) o;
+			return "ty mapping " + c + " : " + x.src0 + " -> " + x.dst0;
+		}
 		if (o instanceof OplPres) {
 			return "presentation " + c + " : " + ((OplPres)o).S;
  		}
