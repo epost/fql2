@@ -14,25 +14,43 @@
     <docComments enabled="false" end="" start=""/>
   </comments>
   <keywords>
+    <keyword>apply</keyword>
+    <keyword>attributes</keyword>
     <keyword>delta</keyword>
+    <keyword>entities</keyword>
+    <keyword>entitiesAndAttributes</keyword>
     <keyword>eval</keyword>
+    <keyword>flower</keyword>
     <keyword>generators</keyword>
+    <keyword>id</keyword>
     <keyword>javascript</keyword>
     <keyword>mapping</keyword>
     <keyword>model</keyword>
     <keyword>presentation</keyword>
+    <keyword>query</keyword>
     <keyword>saturate</keyword>
+    <keyword>schema</keyword>
     <keyword>sigma</keyword>
     <keyword>theory</keyword>
     <keyword>transform</keyword>
     <keyword>transpres</keyword>
+    <keyword>types</keyword>
     <keyword>unsaturate</keyword>
   </keywords>
   <keywords2>
+    <keyword>as</keyword>
+    <keyword>attributes</keyword>
+    <keyword>edges</keyword>
+    <keyword>entities</keyword>
     <keyword>equations</keyword>
+    <keyword>for</keyword>
     <keyword>forall</keyword>
+    <keyword>from</keyword>
+    <keyword>generators</keyword>
+    <keyword>select</keyword>
     <keyword>sorts</keyword>
     <keyword>symbols</keyword>
+    <keyword>where</keyword>
   </keywords2>
   <dataTypes/>
   <functions/>
@@ -41,7 +59,7 @@
     <intLiteral>{Digit}+</intLiteral>
     <floatLiteral/>
   </numbers>
-  <stringLiterals enabled="true" multiLine="false"/>
+  <stringLiterals enabled="true" multiLine="true"/>
   <charLiterals enabled="false" multiLine="false"/>
   <backtickLiterals enabled="false"/>
   <operators>

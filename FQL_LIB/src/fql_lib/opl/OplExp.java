@@ -336,7 +336,7 @@ public abstract class OplExp implements OplObject {
 		}
 		@Override
 		public String toString() {
-			return str;
+			return strip(str);
 		}
 		@Override
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
@@ -1009,9 +1009,11 @@ public abstract class OplExp implements OplObject {
 			ret.add(p, "Text");
 			
 			try {
-				ret.add(makeTiny2(b), "KB");				
+				JPanel pp = makeTiny2(b);
+				ret.add(pp, "KB");				
 				try {
-					ret.add(makeTiny(), "Hom");				
+					JPanel qq = makeTiny();
+					ret.add(qq, "Hom");				
 				} catch (Exception ex) {
 					ex.printStackTrace();
 						p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "exception: " + ex.getMessage());
@@ -1019,6 +1021,7 @@ public abstract class OplExp implements OplObject {
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
+				System.out.println("made it");
 				p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "exception: " + ex.getMessage());
 				ret.add(p, "KB");
 			}
@@ -1161,7 +1164,13 @@ public abstract class OplExp implements OplObject {
 			List<String> slist = new LinkedList<>();
 			for (C k : symbols.keySet()) {
 				Pair<List<S>, S> v = symbols.get(k);
-				String s = strip(k.toString())+ " : " + Util.sep(v.first, ", ") + " -> " + v.second;
+				String s;
+				if (v.first.isEmpty()) {
+					s = strip(k.toString())+ " : " + v.second;
+								
+				} else {
+					s = strip(k.toString())+ " : " + Util.sep(v.first, ", ") + " -> " + v.second;
+				}
 				slist.add(s);
 			}
 			ret += "\t\t" + Util.sep(slist,",\n\t\t") + ";\n";
@@ -1216,12 +1225,27 @@ public abstract class OplExp implements OplObject {
 		}
 
 		private OplCtx<S,V> inf(Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq0) {
-			KBExp<C,V> lhs = OplToKB.convert(eq0.second);
-			KBExp<C,V> rhs = OplToKB.convert(eq0.third);
-			Map<V, S> m = new HashMap<>(eq0.first.vars0);
-			lhs.typeInf(symbols, m);
-			rhs.typeInf(symbols, m);
-			return new OplCtx<>(m);
+			try {
+				KBExp<C,V> lhs = OplToKB.convert(eq0.second);
+				KBExp<C,V> rhs = OplToKB.convert(eq0.third);
+				Map<V, S> m = new HashMap<>(eq0.first.vars0);
+				S l = lhs.typeInf(symbols, m);
+				S r = rhs.typeInf(symbols, m);
+				if (l == null && r == null) {
+					throw new DoNotIgnore("Cannot infer types for " + lhs + " and " + rhs);
+				}
+				if (l == null && lhs.isVar && rhs != null) {
+					m.put(lhs.getVar().var, r);
+				}
+				if (r == null && rhs.isVar && lhs != null) {
+					m.put(rhs.getVar().var, l);
+				}
+				return new OplCtx<>(m);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					throw new DoNotIgnore(ex.getMessage() + "\n\n in " + this);
+					
+			}
 		}
 
 		@Override

@@ -78,6 +78,7 @@ public class OplGroupExample extends Example {
 			+ "\n		plus@3 : N,N -> N,"
 			+ "\n		times@4 : N,N -> N;  "
 			+ "\n	equations"
+			+ "\n       forall x. plus(zero, x) = x,"
 			+ "\n		forall x, y. plus(succ(x),y) = succ(plus(x,y)),"
 			+ "\n		forall x, y. times(succ(x),y) = plus(x,times(x,y));"
 			+ "\n}"

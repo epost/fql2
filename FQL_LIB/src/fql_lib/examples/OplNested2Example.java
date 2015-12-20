@@ -60,7 +60,7 @@ public class OplNested2Example extends Example {
 			+ "\n"
 			+ "\nM = javascript {"
 			+ "\n	symbols"
-			+ "\n		Q -> \"return F.delta(input[0]);\","
+			+ "\n		Q -> \"return F.delta(input[0])\","
 			+ "\n		t2 -> \"return B\";			"
 			+ "\n} : T"
 			+ "\n"

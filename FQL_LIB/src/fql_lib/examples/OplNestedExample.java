@@ -56,7 +56,7 @@ public class OplNestedExample extends Example {
 			+ "\n"
 			+ "\nM = javascript {"
 			+ "\n	symbols"
-			+ "\n		size2 -> \"return input[0].size();\","
+			+ "\n		size2 -> \"return input[0].size()\","
 			+ "\n		m1 -> \"return A\","
 			+ "\n		m2 -> \"return B\";			"
 			+ "\n} : T"
