@@ -347,9 +347,7 @@ public abstract class OplExp implements OplObject {
 		
 	public abstract <R, E> R accept(E env, OplExpVisitor<R, E> v);
 	
-	public static class OplTerm<C, V>  {
-		
-	
+	public static class OplTerm<C, V> implements Comparable<OplTerm<C,V>>  {
 		
 		public V var;
 		
@@ -528,6 +526,13 @@ public abstract class OplExp implements OplObject {
 			if (var != null) {
 				return var.toString();
 			}
+			try {
+				int i = Util.termToNat(this);
+				return Integer.toString(i);
+			} catch (Exception ex) { 
+				//System.out.println("converting " + this);
+			//	ex.printStackTrace();
+			}
 			List<String> x = args.stream().map(z -> z.toString()).collect(Collectors.toList());
 			String ret = head + "(" + Util.sep(x, ", ") + ")";
 			return strip(ret);
@@ -570,6 +575,12 @@ public abstract class OplExp implements OplObject {
 				ret.addAll(arg.symbols());
 			}
 			return ret;
+		}
+
+		//needed for machine learning library for some reason
+		@Override
+		public int compareTo(OplTerm<C, V> o) {
+			return o.toString().compareTo(toString());
 		}
 		
 	}
@@ -1839,8 +1850,8 @@ public abstract class OplExp implements OplObject {
 		}
 		public Map<S, Set<X>> sorts;
 		String sig;
-		private Map<C, Map<List<X>, X>> symbols;
-		OplSig<S, C, ?> sig0;
+		public Map<C, Map<List<X>, X>> symbols;
+		public OplSig<S, C, ?> sig0;
 		
 		@Override
 		public String toString() {
@@ -2838,6 +2849,10 @@ public abstract class OplExp implements OplObject {
 			}
 			return ret;
 
+		}
+		
+		public OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>> saturate() {
+			return saturate(J, projE(), S, P);
 		}
 		
 		private static <S,C,V,X,Y> OplSetInst<S, C, OplTerm<Chc<Chc<C,X>, JSWrapper>, V>> 

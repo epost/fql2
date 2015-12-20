@@ -28,6 +28,7 @@ import javax.swing.table.TableRowSorter;
 import catdata.algs.Chc;
 import catdata.algs.Pair;
 import fql_lib.gui.MyTableRowSorter;
+import fql_lib.opl.OplExp.OplTerm;
 
 public class Util {
 	
@@ -366,4 +367,32 @@ public class Util {
 		 return new Pair<Function, Object>(x -> { return x; }, o);
 	 }
 
+	public static <V> double termToDouble(OplTerm<?,V> t) {
+		return termToNat(t);
+	}
+	public static <V> int termToNat(OplTerm<?,V> t) {
+		if (t.var != null) {
+			throw new RuntimeException("Encountered variable when converting " + t + " to a nat");
+		}
+		if (stripChcs(t.head).second.equals("zero")) { 
+			return 0;
+		} else if (stripChcs(t.head).second.equals("succ")) { 
+			if (t.args.size() != 1) {
+				throw new RuntimeException("Argument for " + t + " has arity != 1");
+			}
+			return 1 + termToNat(t.args.get(0));
+		} else {
+			throw new RuntimeException("Encountered head " + stripChcs(t.head).second + " , which is not zero or succ");
+		}
+	}
+	
+	public static <V> OplTerm<String, V> natToTerm(int i) {
+		if (i < 0) {
+			throw new RuntimeException("Cannot convert negative number to natural");
+		}
+		if (i == 0) {
+			return new OplTerm<>("zero", new LinkedList<>());
+		}
+		return new OplTerm<>("succ", Util.singList(natToTerm(i-1)));
+	}
 }

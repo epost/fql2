@@ -21,6 +21,7 @@ import org.codehaus.jparsec.functors.Tuple5;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
+import fql_lib.Util;
 import fql_lib.X.XExp;
 import fql_lib.opl.OplExp.OplApply;
 import fql_lib.opl.OplExp.OplCtx;
@@ -74,7 +75,9 @@ public class OplParser {
 	}
 
 	public static Parser<?> ident() {
-		return string(); //Terminals.Identifier.PARSER;
+		return Parsers.or(Terminals.StringLiteral.PARSER,
+				/*Terminals.IntegerLiteral.PARSER,*/ Terminals.Identifier.PARSER);
+	//	return string(); //Terminals.Identifier.PARSER;
 	}
 
 	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
@@ -85,8 +88,8 @@ public class OplParser {
 	
 	public static final Parser<?> oplTerm() {
 		Reference ref = Parser.newReference();
-		Parser<?> app = Parsers.tuple(ident(), term("("), ref.lazy().sepBy(term(",")), term(")"));
-		Parser<?> a = Parsers.or(new Parser<?>[] { app, ident()});
+		Parser<?> app = Parsers.tuple(string(), term("("), ref.lazy().sepBy(term(",")), term(")"));
+		Parser<?> a = Parsers.or(new Parser<?>[] { app, string()});
 		ref.set(a);
 		return a;
 	}
@@ -162,7 +165,7 @@ public class OplParser {
 	}
 	
 	public static final Parser<?> trans() {
-		Parser<?> q = Parsers.tuple(term("("), ident(), term(","), ident(), term(")")).sepBy(term(","));
+		Parser<?> q = Parsers.tuple(term("("), string(), term(","), string(), term(")")).sepBy(term(","));
 		Parser<?> p = Parsers.tuple(ident(), term("->"), term("{"), q, term("}"));
 		Parser<?> foo = section("sorts", p);
 		return Parsers.tuple(term("transform").followedBy(term("{")), foo, 
@@ -213,9 +216,9 @@ public class OplParser {
 	}
 
 	public static final Parser<?> model() {
-		Parser<?> p = Parsers.tuple(ident(), term("->"), Parsers.between(term("{"),ident().sepBy(term(",")), term("}")));
-		Parser<?> y = Parsers.between(term("("), ident().sepBy(term(",")), term(")"));
-		Parser<?> z = Parsers.tuple(term("("), y, term(","), ident(), term(")"));
+		Parser<?> p = Parsers.tuple(ident(), term("->"), Parsers.between(term("{"),string().sepBy(term(",")), term("}")));
+		Parser<?> y = Parsers.between(term("("), string().sepBy(term(",")), term(")"));
+		Parser<?> z = Parsers.tuple(term("("), y, term(","), string(), term(")"));
 		Parser<?> q = Parsers.tuple(ident(), term("->"), Parsers.between(term("{"), z.sepBy(term(",")), term("}")));
 		Parser<?> foo = Parsers.tuple(section("sorts", p), 
 				section("symbols", q));
@@ -505,6 +508,11 @@ public class OplParser {
 	private static OplTerm toTerm(Collection vars, Collection consts, Object a, boolean suppressError) {
 		if (a instanceof String) {
 			String a0 = (String) a;
+			try {
+				int i = Integer.parseInt(a0);
+				return Util.natToTerm(i);
+			} catch (Exception e) { }
+				
 			if (vars != null && vars.contains(a0)) {
 				return new OplTerm(a0);				
 			} else if (consts != null && consts.contains(a0)) {

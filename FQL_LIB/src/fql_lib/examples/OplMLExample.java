@@ -1,0 +1,68 @@
+package fql_lib.examples;
+
+public class OplMLExample extends Example {
+
+	@Override
+	public String isPatrick() {
+		return "OPL";
+	}
+	
+	@Override
+	public String getName() {
+		return "O ML";
+	}
+
+	@Override
+	public String getText() {
+		return s;
+	}
+
+	String s = "S0 = theory {"
+			+ "\n	sorts Person, Nat, String;"
+			+ "\n	symbols zero@0 : Nat, "
+			+ "\n		   succ@1 : Nat -> Nat,"
+			+ "\n		   old@2, young@3 : String,		   "
+			+ "\n		   classify@98 : Nat -> String,"
+			+ "\n   "
+			+ "\n		   age@99  : Person -> Nat,"
+			+ "\n		   inputClass@97 : Person -> String,"
+			+ "\n		   outputClass@100 : Person -> String;"
+			+ "\n	equations"
+			+ "\n		forall x. outputClass(x) = classify(age(x));"
+			+ "\n}"
+			+ "\n"
+			+ "\nS = schema {"
+			+ "\n	entities Person;"
+			+ "\n} : S0"
+			+ "\n"
+			+ "\nI0 = presentation {"
+			+ "\n	generators p0@5, p1@5, p2@5, p3@5, p4@5, p5@5, p6@5, p7@5 : Person;"
+			+ "\n	equations age(p0) = 0, age(p1) = 1, age(p2) = 2, age(p3) = 3, "
+			+ "\n	          age(p4) = 4, age(p5) = 5, age(p6) = 6, age(p7) = 7,"
+			+ "\n		     inputClass(p0) = young, inputClass(p1) = young, "
+			+ "\n		     inputClass(p6) = old, inputClass(p7) = old;"
+			+ "\n} : S0"
+			+ "\nI = instance S I0 none"
+			+ "\n"
+			+ "\nT = types S"
+			+ "\n"
+			+ "\n"
+			+ "\nML = javascript {"
+			+ "\n      symbols"
+			+ "\n		_preamble -> \"java.lang.Class.forName('fql_lib.opl.ml.MLUtil'); var MLUtils = Java.type('fql_lib.opl.ml.MLUtil'); var KNNClass = Java.type('net.sf.javaml.classification.KNearestNeighbors'); var data = MLUtils.toDataset(I, 'Person', ['age'], 'inputClass'); knn = new KNNClass(1); knn.buildClassifier(data); \","
+			+ "\n		zero -> \"return 0.0\","
+			+ "\n		succ -> \"return input[0]+1.0\","
+			+ "\n		old -> \"return \\\"old\\\"\","
+			+ "\n		young -> \"return \\\"young\\\"\","
+			+ "\n		classify -> \"return knn.classify(MLUtils.wrap(input))\";"
+			+ "\n} : T"
+			+ "\n"
+			+ "\nJ = instance S I0 ML"
+			+ "\n";
+
+
+
+
+
+
+}
