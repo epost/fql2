@@ -236,6 +236,7 @@ public class DEBUG implements Serializable {
 	public boolean opl_validate = true;
 	public boolean opl_david = false;
 	public boolean opl_pretty = true;
+	public boolean opl_reorder = true;
 	
 	public void showOptions() {
 
@@ -363,6 +364,11 @@ public class DEBUG implements Serializable {
 		opl2.add(opl_sort_box);
 		opl1.add(opl_sort_label);
 
+		JCheckBox opl_reorder_box = new JCheckBox("", opl_reorder);
+		JLabel opl_reorder_label = new JLabel("Reorder joins:");
+		opl2.add(opl_reorder_box);
+		opl1.add(opl_reorder_label);
+		
 //		JCheckBox opl_alpha_box = new JCheckBox("", opl_sort_cps);
 //		JLabel opl_alpha_label = new JLabel("Use alphabetical when precedence not total:");
 //		opl2.add(opl_alpha_box);
@@ -388,8 +394,8 @@ public class DEBUG implements Serializable {
 		opl2.add(opl_pretty_box);
 		opl1.add(opl_pretty_label);
 
-		opl1.add(new JLabel());
-		opl2.add(new JLabel());
+		//opl1.add(new JLabel());
+		//opl2.add(new JLabel());
 		
 		JCheckBox x_typing_box = new JCheckBox("", x_typing);
 		JLabel typing_label = new JLabel("Type check:"); //.add(x_typing_bix)
@@ -843,6 +849,7 @@ public class DEBUG implements Serializable {
 			opl_validate = opl_validate_box.isSelected();
 			opl_david = opl_david_box.isSelected();
 			opl_pretty = opl_pretty_box.isSelected();
+			opl_reorder = opl_reorder_box.isSelected();
 			
 		//	limit_examples = limex.isSelected();
 			useLineage = (String) lineageBox.getSelectedItem();

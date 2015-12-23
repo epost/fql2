@@ -17,7 +17,7 @@ import fql_lib.opl.OplExp.OplSat;
 import fql_lib.opl.OplExp.OplSchema;
 import fql_lib.opl.OplExp.OplSchemaProj;
 import fql_lib.opl.OplExp.OplSetInst;
-import fql_lib.opl.OplExp.OplSetTranGens;
+import fql_lib.opl.OplExp.OplPresTrans;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSig;
 import fql_lib.opl.OplExp.OplSigma;
@@ -245,8 +245,8 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			if (I instanceof OplPres) {
 				OplPres I0 = (OplPres) I;
 				return F0.sigma(I0);			
-			} else if (I instanceof OplSetTranGens) {
-				OplSetTranGens h = (OplSetTranGens) I;
+			} else if (I instanceof OplPresTrans) {
+				OplPresTrans h = (OplPresTrans) I;
 				return F0.sigma(h);
 			}
 			throw new RuntimeException("Not a presentation of an instance or transform: " + e.I);
@@ -266,7 +266,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplSetTranGens e) {
+	public OplObject visit(OplProgram env, OplPresTrans e) {
 		OplObject src = ENV.get(e.src0);
 		OplObject dst = ENV.get(e.dst0);
 		if (!(src instanceof OplPres)) {
@@ -277,7 +277,8 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		}
 		OplPres src0 = (OplPres) src;
 		OplPres dst0 = (OplPres) dst;
-		e.validate(src0, dst0);
+		e.validateNotReally(src0, dst0);
+		e.toMapping();
 		return e;
 	}
 

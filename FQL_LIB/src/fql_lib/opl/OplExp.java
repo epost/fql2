@@ -285,7 +285,11 @@ public abstract class OplExp implements OplObject {
 			this.o = o;
 		}
 		public String toString() {
-			return "JS[" + o + "]";
+			String s = "JS<" + o + ">";
+			if (!DEBUG.debug.opl_pretty) {
+				return s;
+			}
+			return o.toString();
 		}
 		@Override
 		public int hashCode() {
@@ -755,7 +759,7 @@ public abstract class OplExp implements OplObject {
 				}
 			}
 			
-			List<Triple<OplCtx<S, V>, OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>> equations = new LinkedList<>();
+			List<Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>> equations = new LinkedList<>();
 			for (C f : sig.symbols.keySet()) {
 				List<S> arg_ts = sig.symbols.get(f).first;
 				if (arg_ts.isEmpty()) {
@@ -777,7 +781,7 @@ public abstract class OplExp implements OplObject {
 					}
 					OplTerm<Chc<C,X>,V> termA = new OplTerm<>(Chc.inLeft(f), arg2);
 					OplTerm<Chc<C,X>,V> termB = new OplTerm<>(Chc.inRight(I.symbols.get(f).get(arg1)), new LinkedList<>());
-					equations.add(new Triple<>(new OplCtx<S,V>(), termA, termB));
+					equations.add(new Pair<>(termA, termB));
 				} 
 			}
 			
@@ -1204,7 +1208,7 @@ public abstract class OplExp implements OplObject {
 			for (C k : symbols.keySet()) {
 				Pair<List<S>, S> v = symbols.get(k);
 				if (!sorts.contains(v.second)) {
-					throw new DoNotIgnore("Bad codomain " + v.second + " for " + k);
+ 					throw new DoNotIgnore("Bad codomain " + v.second + " for " + k );
 				}
 				for (S a : v.first) {
 					if (!sorts.contains(a)) {
@@ -1301,33 +1305,9 @@ public abstract class OplExp implements OplObject {
 		public String S;
 		public Map<X, Integer> prec;
 		public Map<X, S> gens;
-		public List<Triple<OplCtx<S,V>, OplTerm<Chc<C,X>,V>, OplTerm<Chc<C,X>,V>>> equations;
+		public List<Pair<OplTerm<Chc<C,X>,V>, OplTerm<Chc<C,X>,V>>> equations;
 		public OplSig<S,C,V> sig;
 		public OplSig<S,Chc<C,X>,V> toSig; 
-		
-		/*public <Z> OplPres<S, Chc<C,Z>, V, X> inject() {
-			OplSig<S,Chc<C,Z>,V> S2 = sig.inject();
-			List<Triple<OplCtx<S, V>, OplTerm<Chc<Chc<C, Z>, X>, V>, OplTerm<Chc<Chc<C, Z>, X>, V>>>  
-			equations0 = new LinkedList<>();
-			for (Triple<OplCtx<S, V>, OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>> eq : equations) {
-				OplTerm<Chc<Chc<C, Z>, X>, V> a = inject(eq.second); 
-				OplTerm<Chc<Chc<C, Z>, X>, V> b = inject(eq.third);
-				equations0.add(new Triple<>(eq.first, a, b));
-			}
-			OplPres<S, Chc<C,Z>, V, X> ret = new OplPres<S, Chc<C,Z>, V, X>(prec, S, S2, gens, equations0);
-			return ret;
-		}
-		
-		private <Z> OplTerm<Chc<Chc<C, Z>, X>, V> inject(OplTerm<Chc<C, X>, V> e) {
-			if (e.var != null) {
-				return new OplTerm<>(e.var);
-			}
-			List<OplTerm<Chc<Chc<C, Z>, X>, V>> l = new LinkedList<>();
-			for (OplTerm<Chc<C, X>, V> arg : e.args) {
-				//l.add(Chc.ininject(arg));
-			}
-			return null;
-		}*/
 
 		private static <S,C,X,V> OplTerm<Chc<C,X>, V> conv(Map<X, S> gens, OplTerm<Object, V> e) {
 			if (e.var != null) {
@@ -1345,11 +1325,11 @@ public abstract class OplExp implements OplObject {
 		}
 		
 		public static <S,C,V,X> OplPres<S,C,V,X> OplPres(Map<X, Integer> prec, String S, OplSig<S,C,V> sig, Map<X, S> gens,
-				List<Triple<OplCtx<S,V>, OplTerm<Object,V>, OplTerm<Object,V>>> equations) {
+				List<Pair<OplTerm<Object,V>, OplTerm<Object,V>>> equations) {
 			
-			List<Triple<OplCtx<S,V>, OplTerm<Chc<C,X>,V>, OplTerm<Chc<C,X>,V>>> eqs = new LinkedList<>();
-			for (Triple<OplCtx<S, V>, OplTerm<Object, V>, OplTerm<Object, V>> eq : equations) {
-				eqs.add(new Triple<>(eq.first, conv(gens, eq.second), conv(gens, eq.third)));
+			List<Pair<OplTerm<Chc<C,X>,V>, OplTerm<Chc<C,X>,V>>> eqs = new LinkedList<>();
+			for (Pair<OplTerm<Object, V>, OplTerm<Object, V>> eq : equations) {
+				eqs.add(new Pair<>(conv(gens, eq.first), conv(gens, eq.second)));
 			}
 			
 			return new OplPres<>(prec, S, sig, gens, eqs);
@@ -1367,7 +1347,9 @@ public abstract class OplExp implements OplObject {
 			}
 
 			List<Triple<OplCtx<S,V>, OplTerm<Chc<C,X>,V>, OplTerm<Chc<C,X>,V>>> equations0 = new LinkedList<>(sig0.equations);
-			equations0.addAll(equations);
+			for (Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>> eq : equations) {
+				equations0.add(new Triple<>(new OplCtx<>(), eq.first, eq.second));
+			}
 			
 			Map<Chc<C,X>, Integer> m = new HashMap<>();
 			for (C c : sig.symbols.keySet()) {
@@ -1393,7 +1375,7 @@ public abstract class OplExp implements OplObject {
 		}
 		
 		public OplPres(Map<X, Integer> prec, String S, OplSig<S,C,V> sig, Map<X, S> gens,
-				List<Triple<OplCtx<S,V>, OplTerm<Chc<C,X>,V>, OplTerm<Chc<C,X>,V>>> equations) {
+				List<Pair<OplTerm<Chc<C,X>,V>, OplTerm<Chc<C,X>,V>>> equations) {
 			this.S = S;
 			this.gens = gens;
 			this.equations = equations;
@@ -1415,11 +1397,8 @@ public abstract class OplExp implements OplObject {
 			
 			ret += "\tequations\n";
 			List<String> elist = new LinkedList<>();
-			for (Triple<OplCtx<S, V>, OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>> k : equations) {
-				//String z = k.first.vars0.size() == 0 ? "" : "forall ";
-				//String y = k.first.vars0.size() == 0 ? "" : ". ";
-
-				String s = strip("forall" + k.first +  " . " + k.second + " = " + k.third);
+			for (Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>> k : equations) {
+				String s = strip(k.first + " = " + k.second);
 				elist.add(s);
 			}
 
@@ -1444,7 +1423,8 @@ public abstract class OplExp implements OplObject {
 		if (ret.startsWith("|- ")) {
 			ret = ret.substring(3);
 		}
-		return ret.replace("JS[", "").replace("]", "");
+		return ret;
+		//return ret.replace("JS[", "").replace("]", "");
 	}
 	
 	public static class OplMapping<S1,C1,V,S2,C2> extends OplExp {
@@ -1557,7 +1537,7 @@ public abstract class OplExp implements OplObject {
 				}
 				List<S2> trans_t = src.symbols.get(k).first.stream().map(x -> sorts.get(x)).collect(Collectors.toList());
 				if (!v.first.values().equals(trans_t)) {
-					throw new RuntimeException("Symbol " + k + " inputs a " + v.first.values() + " but transforms to " + trans_t);
+					throw new RuntimeException("Symbol " + k + " inputs a " + v.first.values() + " but transforms to " + trans_t + " in \n\n " + this);
 				}
 			}
 			
@@ -1605,7 +1585,7 @@ public abstract class OplExp implements OplObject {
 			this.dst0 = dst0;
 		}
 		
-		public <X,Y> OplSetTranGens<S2,C2,V,X,Y> sigma(OplSetTranGens<S1,C1,V,X,Y> h) {
+		public <X,Y> OplPresTrans<S2,C2,V,X,Y> sigma(OplPresTrans<S1,C1,V,X,Y> h) {
 			OplPres<S1,C1,V,X> I = h.src;
 			
 			OplPres<S2,C2,V,X> I0 = sigma(h.src);
@@ -1624,8 +1604,10 @@ public abstract class OplExp implements OplObject {
 					map.get(sorts.get(s)).put(x, sigma(h.map.get(s).get(x)));
 				}
 			}
-					
-			return new OplSetTranGens<S2,C2,V,X,Y>(map, "?", "?", I0, J0); 
+
+			//validates
+			OplPresTrans<S2,C2,V,X,Y> ret = new OplPresTrans<S2,C2,V,X,Y>(map, "?", "?", I0, J0);
+			return ret;
 		}
 		
 		public <X> OplSetTrans<S1,C1,X> delta(OplSetTrans<S2,C2,X> h) {
@@ -1664,9 +1646,9 @@ public abstract class OplExp implements OplObject {
 				sym.put(c, sorts.get(t));
 			}
 			
-			List<Triple<OplCtx<S2,V>, OplTerm<Chc<C2, X>, V>, OplTerm<Chc<C2, X>, V>>> eqs = new LinkedList<>();
-			for (Triple<OplCtx<S1,V>, OplTerm<Chc<C1, X>, V>, OplTerm<Chc<C1, X>, V>> eq : I.equations) {
-				eqs.add(new Triple<>(sigma(eq.first), sigma(eq.second), sigma(eq.third)));
+			List<Pair<OplTerm<Chc<C2, X>, V>, OplTerm<Chc<C2, X>, V>>> eqs = new LinkedList<>();
+			for (Pair<OplTerm<Chc<C1, X>, V>, OplTerm<Chc<C1, X>, V>> eq : I.equations) {
+				eqs.add(new Pair<>(sigma(eq.first), sigma(eq.second)));
 			}
 			
 			OplPres<S2,C2,V,X> ret = new OplPres<S2,C2,V,X>(I.prec, dst0, dst, sym, eqs);
@@ -1975,9 +1957,9 @@ public abstract class OplExp implements OplObject {
 				Map<List<X>, X> f = symbols.get(n);
 				List<Object[]> rows = new LinkedList<>();
 				for (List<X> arg : f.keySet()) {
-					List<Object> argX = arg.stream().map(x -> x).collect(Collectors.toList());
+					List<Object> argX = (List<Object>) arg; //arg.stream().map(x -> x).collect(Collectors.toList());
 					argX.add(f.get(arg));
-					String[] row = argX.toArray(new String[] {});
+					Object[] row = argX.toArray(new Object[] {});
 					rows.add(row);
 				}
 				List<String> l = new LinkedList<String>((List<String>)sig0.symbols.get(n).first);
@@ -1987,9 +1969,9 @@ public abstract class OplExp implements OplObject {
 			List<String> xxx = new LinkedList<>(all.keySet());
 			xxx.sort(comp);
 			for (String n : xxx) {
-				if (skip.contains(n)) {
-					continue;
-				}
+				//if (skip.contains(n)) {
+				//	continue;
+				//}
 				list.add(all.get(n));
 			}
 			return Util.makeGrid(list);			
@@ -2284,8 +2266,8 @@ public abstract class OplExp implements OplObject {
 
 	}
 
-	
-	public static class OplSetTranGens<S,C,V,X,Y> extends OplExp {
+	//TODO: pretty print
+	public static class OplPresTrans<S,C,V,X,Y> extends OplExp {
 		Map<S, Map<X, OplTerm<Chc<C,Y>, V>>> map = new HashMap<>();
 		Map<S, Map<X, OplTerm<Object, V>>> pre_map;
 		String src0, dst0;
@@ -2350,6 +2332,12 @@ public abstract class OplExp implements OplObject {
 			
 			for (X x : src.gens.keySet()) {
 				S s = src.gens.get(x);
+				if (!map.containsKey(s)) {
+					throw new RuntimeException(s + " not a key in " + map);
+				}
+				if (!map.get(s).containsKey(x)) {
+					throw new RuntimeException(x + " not a key in " + map.get(s));
+				}
 				OplTerm<Chc<C, Y>, V> y = map.get(s).get(x);
 				symbols.put(Chc.inRight(x), new Pair<>(new OplCtx<>(), y));
 			}
@@ -2359,7 +2347,7 @@ public abstract class OplExp implements OplObject {
 			return mapping;
 		}
 		
-		public void validate(OplPres<S,C,V,X> src, OplPres<S,C,V,Y> dst) {
+		public void validateNotReally(OplPres<S,C,V,X> src, OplPres<S,C,V,Y> dst) {
 			if (pre_map == null) {
 				return;
 			}
@@ -2426,22 +2414,23 @@ public abstract class OplExp implements OplObject {
 		}
 		
 		
-		public OplSetTranGens(Map<S, Map<X, OplTerm<Object, V>>> m, String src0, String dst0) {
+		public OplPresTrans(Map<S, Map<X, OplTerm<Object, V>>> m, String src0, String dst0) {
 			this.pre_map = m;
 			this.src0 = src0;
 			this.dst0 = dst0;
 		}
 
 		
-		
-		public OplSetTranGens(Map<S, Map<X, OplTerm<Chc<C, Y>, V>>> map, String src0, String dst0,
-				OplPres<S, C, V, X> src, OplPres<S, C, V, Y> dst) {
+		//validates
+		 public OplPresTrans(Map<S, Map<X, OplTerm<Chc<C, Y>, V>>> map, String src0, String dst0, 
+				 OplPres<S, C, V, X> src, OplPres<S, C, V, Y> dst ) {
 			this.map = map;
 			this.src0 = src0;
 			this.dst0 = dst0;
 			this.src = src;
 			this.dst = dst;
-		}
+			toMapping();
+		} 
 
 		@Override
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
@@ -2695,7 +2684,6 @@ public abstract class OplExp implements OplObject {
 			cache_T = new OplSig<S,C,V>(sig.fr, sig.prec, types, symbols, equations);
 			return cache_T;
 		}
-		//TODO add projEA as keyword
 		
 		OplSig<S, C, V> cache_EA;
 		public OplSig<S, C, V> projEA() {
@@ -2709,11 +2697,72 @@ public abstract class OplExp implements OplObject {
 			symbols.putAll(projA().symbols);
 			symbols.putAll(projE().symbols);
 			List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> equations = new LinkedList<>();
-			equations.addAll(projA().equations);
+			//don't want these, causes problems with uber flower eval?
+			//TODO
+				equations.addAll(projA().equations);
 			equations.addAll(projE().equations);
 			cache_EA = new OplSig<S,C,V>(sig.fr, sig.prec, types, symbols, equations);
 			return cache_EA;
 		}
+		
+		OplSig<S, C, V> cache_EdiscreteT;
+		public OplSig<S, C, V> projEdiscreteT() {
+			if (cache_EdiscreteT != null) {
+				return cache_EdiscreteT;
+			}
+			
+			Set<S> types = new HashSet<>();
+			types.addAll(projA().sorts);
+			types.addAll(projT().sorts);
+			Map<C, Pair<List<S>, S>> symbols = new HashMap<>();
+	//		symbols.putAll(projA().symbols);
+			symbols.putAll(projE().symbols);
+			for (C symbol : projT().symbols.keySet()) {
+				Pair<List<S>, S> t = projT().symbols.get(symbol);
+				if (t.first.isEmpty()) {
+					symbols.put(symbol, t);
+				}
+			}
+			List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> equations = new LinkedList<>();
+				equations.addAll(projA().equations);
+			equations.addAll(projE().equations);
+			cache_EdiscreteT = new OplSig<S,C,V>(sig.fr, sig.prec, types, symbols, equations);
+			//System.out.println(cache_EdiscreteT);
+			return cache_EdiscreteT;
+		}
+		
+		OplSig<S, C, V> cache_EAdiscreteT;
+		public OplSig<S, C, V> projEAdiscreteT() {
+			if (cache_EAdiscreteT != null) {
+				return cache_EAdiscreteT;
+			}
+			
+			Set<S> types = new HashSet<>();
+			types.addAll(projA().sorts);
+			types.addAll(projT().sorts);
+			Map<C, Pair<List<S>, S>> symbols = new HashMap<>();
+			symbols.putAll(projA().symbols);
+			symbols.putAll(projE().symbols);
+			for (C symbol : projT().symbols.keySet()) {
+				Pair<List<S>, S> t = projT().symbols.get(symbol);
+				if (t.first.isEmpty()) {
+					symbols.put(symbol, t);
+				}
+			}
+			List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> equations = new LinkedList<>();
+			equations.addAll(projA().equations);
+			equations.addAll(projE().equations);
+			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : projT().equations) {
+				if (symbols.keySet().containsAll(eq.second.symbols()) && symbols.keySet().containsAll(eq.third.symbols())) {
+					equations.add(eq);
+				}
+			}
+			
+			cache_EAdiscreteT = new OplSig<S,C,V>(sig.fr, sig.prec, types, symbols, equations);
+			//System.out.println(cache_EAdiscreteT);
+			return cache_EAdiscreteT;
+		}
+		
 		
 		public OplSig<S, C, V> projA() {
 			if (cache_A != null) {
@@ -2789,24 +2838,33 @@ public abstract class OplExp implements OplObject {
 		OplSchema<S,C,V> S;
 		
 		public OplPres<S,C,V,X> projE() {
-			OplSig<S, C, V> sig = S.projE();
+			return proj(S.projE());
+		}
+		public OplPres<S,C,V,X> projEA() {
+			return proj(S.projEA());
+		}
+		public OplPres<S,C,V,X> projEdiscreteT() {
+			return proj(S.projEdiscreteT());
+		}
+		public OplPres<S,C,V,X> projEAdiscreteT() {
+			return proj(S.projEAdiscreteT());
+		}
+		public OplPres<S,C,V,X> proj(OplSig<S, C, V> sig) {
+		//	OplSig<S, C, V> sig = S.projE();
 			
 			Map<X, S> gens = new HashMap<>();
 			for (X x : P.gens.keySet()) {
 				S s = P.gens.get(x);
-				if (S.entities.contains(s)) {
+				//if (S.entities.contains(s)) {
 					gens.put(x, s);
-				}
+				//}
 			}
 			
-			List<Triple<OplCtx<S, V>, OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>> equations = new LinkedList<>();
-			for (Triple<OplCtx<S, V>, OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>> eq : P.equations) {
-				if (!S.entities.containsAll(eq.first.vars0.values())) {
-					continue;
-				}
+			List<Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>> equations = new LinkedList<>();
+			for (Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>> eq : P.equations) {
 				Set<Chc<C, X>> set = new HashSet<>();
+				set.addAll(eq.first.symbols());
 				set.addAll(eq.second.symbols());
-				set.addAll(eq.third.symbols());
 				
 				Set<C> set1 = new HashSet<>();
 				Set<X> set2 = new HashSet<>();
@@ -2821,13 +2879,15 @@ public abstract class OplExp implements OplObject {
 				if (!gens.keySet().containsAll(set2)) {
 					continue;
 				}
-				if (!S.projE().symbols.keySet().containsAll(set1)) {
+				if (!sig.symbols.keySet().containsAll(set1)) {
 					continue;
 				}
 				equations.add(eq);
 			}
 			
-			return new OplPres<S,C,V,X>(P.prec, "?", sig, gens, equations);
+			OplPres<S,C,V,X> ret = new OplPres<>(P.prec, "?", sig, gens, equations);
+			
+			return ret;
 		}
 		
 		public OplInst(String S0, String P0, String J0) {
@@ -2865,8 +2925,12 @@ public abstract class OplExp implements OplObject {
 			FQLTextPanel p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 			ret.add(p, "Presentation");
 			
+//			FQLTextPanel q = new FQLTex/tPanel(BorderFactory.createEtchedBorder(), "",projEA().display();
+//			ret.add(OplSat.saturate(projEA()).display(), "Attribute Graph");
+			
 			try {
-				ret.add(saturate(J, projE(), S, P).makeTables(S.projT().sorts), "Saturation");
+				ret.add(saturate().makeTables(S.projT().sorts), "Saturation");
+//				ret.add(saturate(J, projE(), S, P).makeTables(S.projT().sorts), "Saturation");
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				ret.add(new FQLTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage()), "Saturation");
@@ -2876,8 +2940,11 @@ public abstract class OplExp implements OplObject {
 		}
 		
 		public OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>> saturate() {
-			return saturate(J, projE(), S, P);
+			return saturate(J, projEdiscreteT(), S, P);
 		}
+		
+		
+		
 		
 		private static <S,C,V,X,Y> OplSetInst<S, C, OplTerm<Chc<Chc<C,X>, JSWrapper>, V>> 
 		inject(OplSetInst<S, C, OplTerm<Chc<C,X>, V>> I, OplJavaInst I0, OplSchema<S,C,V> S, OplPres<S,C,V,X> P) {
@@ -2962,8 +3029,6 @@ public abstract class OplExp implements OplObject {
 			return J;
 		}
 		
-		
-		
 	}
 	
 	public static class OplApply extends OplExp {
@@ -2977,7 +3042,7 @@ public abstract class OplExp implements OplObject {
 		void validate(OplQuery Q, OplInst I) {
 			this.Q = Q;
 			this.I = I;
-			//TODO
+			//TODO 
 		}
 		@Override
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
@@ -3078,7 +3143,7 @@ public abstract class OplExp implements OplObject {
 		public R visit (E env, OplSigma e);
 		public R visit (E env, OplSat e);		
 		public R visit (E env, OplUnSat e);		
-		public R visit (E env, OplSetTranGens e);	
+		public R visit (E env, OplPresTrans e);	
 		public R visit (E env, OplUberSat e);
 		public R visit (E env, OplFlower e);
 		public R visit (E env, OplSchema e);

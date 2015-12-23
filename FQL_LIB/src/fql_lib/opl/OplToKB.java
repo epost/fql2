@@ -282,15 +282,12 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	}
 	
 	private KB<C, V> convert(OplSig<?,C,V> s) {
-		System.out.println("converting" + s);
-		System.out.println(s.prec);
 		if (s.prec.keySet().size() != new HashSet<>(s.prec.values()).size()) {
 			throw new RuntimeException("Cannot duplicate precedence");
 		}
 		Function<Pair<C, C>, Boolean> gt = x -> {
 			Integer l = s.prec.get(x.first);
 			Integer r = s.prec.get(x.second);
-		//	System.out.println("0" + x.first + " and " + x.second);
 			if (l != null && r != null) {
 				return l > r;				
 			}

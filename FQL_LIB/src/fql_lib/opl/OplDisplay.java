@@ -33,7 +33,7 @@ import fql_lib.opl.OplExp.OplMapping;
 import fql_lib.opl.OplExp.OplPres;
 import fql_lib.opl.OplExp.OplSchema;
 import fql_lib.opl.OplExp.OplSetInst;
-import fql_lib.opl.OplExp.OplSetTranGens;
+import fql_lib.opl.OplExp.OplPresTrans;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSig;
 import fql_lib.opl.OplExp.OplTyMapping;
@@ -77,8 +77,8 @@ public class OplDisplay implements FQLDisp {
 			OplQuery q = (OplQuery) o;
 			return "query " + c + " : " + q.src_e + " -> " + q.dst_e;
  		}
-		if (o instanceof OplSetTranGens) {
-			OplSetTranGens x = (OplSetTranGens) o;
+		if (o instanceof OplPresTrans) {
+			OplPresTrans x = (OplPresTrans) o;
 			return "transpres " + c + " : " + x.src0 + " -> " + x.dst0;
 		}
 		if (o instanceof OplInst) {

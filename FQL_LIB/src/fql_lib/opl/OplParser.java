@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
 
+import catdata.algs.Chc;
 import catdata.algs.Pair;
 import catdata.algs.Triple;
 import fql_lib.Util;
@@ -32,10 +34,10 @@ import fql_lib.opl.OplExp.OplId;
 import fql_lib.opl.OplExp.OplInst;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
+import fql_lib.opl.OplExp.OplPresTrans;
 import fql_lib.opl.OplExp.OplSat;
 import fql_lib.opl.OplExp.OplSchemaProj;
 import fql_lib.opl.OplExp.OplSetInst;
-import fql_lib.opl.OplExp.OplSetTranGens;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSigma;
 import fql_lib.opl.OplExp.OplTerm;
@@ -419,17 +421,20 @@ public class OplParser {
 			}
 		}
 		
-		List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> equations = new LinkedList<>();
+		List<Pair<OplTerm<Chc<String, String>, String>, OplTerm<Chc<String, String>, String>>> equations = new LinkedList<>();
 		for (org.codehaus.jparsec.functors.Pair<Tuple3,Tuple3> x : equations0) {
+			if (x.a != null) {
+				throw new DoNotIgnore("Cannot have universally quantified equations in presentations");
+			}
 			List<Tuple3> fa = x.a == null ? new LinkedList<>() : (List<Tuple3>) x.a.b;
 			OplCtx<String, String> ctx = toCtx(fa);
 			Tuple3 eq = (Tuple3) x.b;
 			OplTerm lhs = toTerm(ctx.names(), symbols.keySet(), eq.a, true);
 			OplTerm rhs = toTerm(ctx.names(), symbols.keySet(), eq.c, true);
-			equations.add(new Triple<>(ctx, lhs, rhs));
+			equations.add(new Pair<>(lhs, rhs));
 		}
 		
-		return new OplExp.OplPres(prec, yyy, null, symbols, equations);
+		return new OplExp.OplPres<String,String,String,String>(prec, yyy, null, symbols, equations);
 	}
 
 	private static OplExp toSchema(Object o) {
@@ -870,7 +875,7 @@ public class OplParser {
 		}
 		
 		Tuple4 tc = (Tuple4) t.c;		
-		return new OplSetTranGens(map , (String) tc.b, (String) tc.d);
+		return new OplPresTrans(map , (String) tc.b, (String) tc.d);
 	}
 	
 	
@@ -985,7 +990,7 @@ public class OplParser {
 		public static Block<String, String, String, String, String, String> fromBlock(Object o) {
 			Tuple4<List, List, List, List> t = (Tuple4<List, List, List, List>) o;
 			
-			Map<String, String> from = new HashMap<>();
+			LinkedHashMap<String, String> from = new LinkedHashMap<>();
 			Set<Pair<OplTerm<String, String>, OplTerm<String, String>>> where = new HashSet<>();
 			Map<String, OplTerm<String, String>> attrs = new HashMap<>();
 			Map<String, Pair<Object, Map<String, OplTerm<String, String>>>> edges = new HashMap<>();
@@ -1020,7 +1025,7 @@ public class OplParser {
 				edges.put(l.a.toString(), new Pair(l.e.toString(), fromBlockHelper(from.keySet(), l.c)));
 			}
 
-			return new Block<String, String, String, String, String, String>(from, where, attrs, edges);
+			return new Block<>(from, where, attrs, edges);
 		} 
 		
 		//{b2=a1.f, b3=a1.f}

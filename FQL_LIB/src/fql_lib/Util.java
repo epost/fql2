@@ -83,6 +83,23 @@ public class Util {
 		return x;
 	}
 	
+	public static <X,Y> Map<Y,X> rev0(Map<X, Y> m) {
+		return rev(m, new HashSet<>(m.values()));
+	}
+	
+	public static <X,Y> Map<Y,Set<X>> revS(Map<X, Y> m) {
+		Map<Y,Set<X>> ret = new HashMap<>();
+		for (X x : m.keySet()) {
+			Y y = m.get(x);
+			Set<X> s = ret.get(y);
+			if (s == null) {
+				s = new HashSet<>();
+				ret.put(y, s);
+			}
+			s.add(x);
+		}
+		return ret;
+	}
 	private static <X,Y> Map<Y,X> rev(Map<X, Y> m, Set<Y> Y) {
 		Map<Y,X> ret = new HashMap<>();
 		
@@ -332,6 +349,13 @@ public class Util {
 		return set.stream().map(f).collect(Collectors.toSet());
 	}
 
+	public static <X,Y> X anyKey(Map<X,Y> m) {
+		for (X x : m.keySet()) {
+			return x;
+		}
+		throw new RuntimeException();
+	}
+	
 	public static String printForPi(Map<?,?> x) {
 		if (x.size() == 0) {
 			return "";
