@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -25,9 +24,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import catdata.algs.kb.KBOptions;
 import fql_lib.cat.FDM;
-import fql_lib.examples.Example;
-import fql_lib.examples.Examples;
 import fql_lib.gui.GUI;
 
 /**
@@ -226,18 +224,21 @@ public class DEBUG implements Serializable {
 	public boolean x_elements = true;
 	public boolean x_json = true;
 		
-	public boolean opl_unfailing = true;
-	public int opl_iterations = 5000;
+	public boolean opl_unfailing = KBOptions.defaultOptions.unfailing;
+	public int opl_iterations = KBOptions.defaultOptions.iterations;
 	public boolean opl_require_const = false;
-	public boolean opl_sort_cps = true;
+	public boolean opl_sort_cps = KBOptions.defaultOptions.sort_cps;
+	public boolean opl_semantic_ac = KBOptions.defaultOptions.semantic_ac;
 	//public boolean opl_alpha = true;
-	public int opl_red_its = 32;
+	public int opl_red_its = KBOptions.defaultOptions.red_its;
 	public int opl_hom_its = 5000;
 	public boolean opl_validate = true;
 	public boolean opl_david = false;
 	public boolean opl_pretty = true;
 	public boolean opl_reorder = true;
-	
+	public boolean opl_suppress_dom = true; 
+	public boolean opl_horn = KBOptions.defaultOptions.horn;
+			
 	public void showOptions() {
 
 		JTabbedPane jtb = new JTabbedPane();
@@ -254,8 +255,8 @@ public class DEBUG implements Serializable {
 		JPanel x_1 = new JPanel(new GridLayout(9, 1));
 		JPanel x_2 = new JPanel(new GridLayout(9, 1));
 		
-		JPanel opl1 = new JPanel(new GridLayout(9, 1));
-		JPanel opl2 = new JPanel(new GridLayout(9, 1));
+		JPanel opl1 = new JPanel(new GridLayout(12, 1));
+		JPanel opl2 = new JPanel(new GridLayout(12, 1));
 
 		JCheckBox reorder_joins_box = new JCheckBox("", reorder_joins);
 		JLabel reorder_joins_label = new JLabel("Re-order FROM clauses:");
@@ -369,6 +370,11 @@ public class DEBUG implements Serializable {
 		opl2.add(opl_reorder_box);
 		opl1.add(opl_reorder_label);
 		
+		JCheckBox opl_semantic_ac_box = new JCheckBox("", opl_semantic_ac);
+		JLabel opl_semantic_ac_label = new JLabel("Enable Semantic AC optimization in Knuth-Bendix:");
+		opl2.add(opl_semantic_ac_box);
+		opl1.add(opl_semantic_ac_label);
+		
 //		JCheckBox opl_alpha_box = new JCheckBox("", opl_sort_cps);
 //		JLabel opl_alpha_label = new JLabel("Use alphabetical when precedence not total:");
 //		opl2.add(opl_alpha_box);
@@ -390,9 +396,19 @@ public class DEBUG implements Serializable {
 		opl1.add(opl_red_label);
 		
 		JCheckBox opl_pretty_box = new JCheckBox("", opl_pretty);
-		JLabel opl_pretty_label = new JLabel("Pretty Print OPL terms:");
+		JLabel opl_pretty_label = new JLabel("Pretty Print terms:");
 		opl2.add(opl_pretty_box);
 		opl1.add(opl_pretty_label);
+		
+		JCheckBox opl_suppress_box = new JCheckBox("", opl_suppress_dom);
+		JLabel opl_suppress_label = new JLabel("Supress instance domains:");
+		opl2.add(opl_suppress_box);
+		opl1.add(opl_suppress_label);
+		
+		JCheckBox opl_horn_box = new JCheckBox("", opl_horn);
+		JLabel opl_horn_label = new JLabel("Allow implications in theories (dangerous, also does *not* check mappings):");
+		opl2.add(opl_horn_box);
+		opl1.add(opl_horn_label);
 
 		//opl1.add(new JLabel());
 		//opl2.add(new JLabel());
@@ -850,6 +866,9 @@ public class DEBUG implements Serializable {
 			opl_david = opl_david_box.isSelected();
 			opl_pretty = opl_pretty_box.isSelected();
 			opl_reorder = opl_reorder_box.isSelected();
+			opl_suppress_dom = opl_suppress_box.isSelected();
+			opl_horn = opl_horn_box.isSelected();
+			opl_semantic_ac = opl_semantic_ac_box.isSelected();
 			
 		//	limit_examples = limex.isSelected();
 			useLineage = (String) lineageBox.getSelectedItem();

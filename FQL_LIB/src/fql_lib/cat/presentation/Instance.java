@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import catdata.algs.Unit;
+import catdata.algs.Utils;
 import fql_lib.FUNCTION;
 import fql_lib.Util;
 import fql_lib.cat.Functor;
@@ -194,7 +195,7 @@ public class Instance<O, A> implements Serializable{
 			if (cache.containsKey(px)) {
 				x = cache.get(px);
 			} else {
-				x = Util.compose0(x, em.get(e));
+				x = Utils.compose0(x, em.get(e));
 				cache.put(px, x);
 			}
 		}

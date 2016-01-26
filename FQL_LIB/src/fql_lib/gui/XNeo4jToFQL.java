@@ -34,7 +34,7 @@ import org.codehaus.jparsec.functors.Tuple5;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
-import catdata.algs.Util;
+import catdata.algs.Utils;
 import fql_lib.X.XExp;
 import fql_lib.X.XExp.XInst;
 import fql_lib.X.XExp.XSchema;
@@ -50,7 +50,7 @@ public class XNeo4jToFQL {
 		XSchema xxx = toSchema(pfl, sfe);
 		XInst yyy = toInst(properties, edges);
 				
-		return "dom : type\n" + Util.sep(adom(properties), " ") + " : dom\n\nS = " + xxx.toString() + "\n\nI = " + yyy.toString() + " : S\n"; 
+		return "dom : type\n" + Utils.sep(adom(properties), " ") + " : dom\n\nS = " + xxx.toString() + "\n\nI = " + yyy.toString() + " : S\n"; 
 	}
 	
 	static Map<String, String> labelForProperty(Map<String, Map<String, Object>> properties) {

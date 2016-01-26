@@ -1,4 +1,4 @@
-package fql_lib.opl;
+package fql_lib.A;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,6 +25,7 @@ import catdata.algs.Pair;
 import catdata.algs.Triple;
 import fql_lib.Util;
 import fql_lib.X.XExp;
+import fql_lib.opl.OplExp;
 import fql_lib.opl.OplExp.OplApply;
 import fql_lib.opl.OplExp.OplCtx;
 import fql_lib.opl.OplExp.OplDelta;
@@ -44,9 +45,12 @@ import fql_lib.opl.OplExp.OplTerm;
 import fql_lib.opl.OplExp.OplUberSat;
 import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
+import fql_lib.opl.OplParser.VIt;
+import fql_lib.opl.OplProgram;
+import fql_lib.opl.OplQuery;
 import fql_lib.opl.OplQuery.Block;
 
-public class OplParser {
+public class AParser {
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
@@ -91,8 +95,7 @@ public class OplParser {
 	public static final Parser<?> oplTerm() {
 		Reference ref = Parser.newReference();
 		Parser<?> app = Parsers.tuple(string(), term("("), ref.lazy().sepBy(term(",")), term(")"));
-		Parser<?> app2 = Parsers.tuple(term("("), ref.lazy(), string(), ref.lazy(), term(")"));
-		Parser<?> a = Parsers.or(new Parser<?>[] { app, app2, string()});
+		Parser<?> a = Parsers.or(new Parser<?>[] { app, string()});
 		ref.set(a);
 		return a;
 	}
@@ -295,8 +298,8 @@ public class OplParser {
 		return toTerm(null, consts(m), o, false);
 	} 
 	
-	public static final OplProgram program(String s) {
-		List<Triple<String, Integer, OplExp>> ret = new LinkedList<>();
+	public static final AProgram program(String s) {
+		/*List<Triple<String, Integer, OplExp>> ret = new LinkedList<>();
 		List decls = (List) program.parse(s);
 
 		for (Object d : decls) {
@@ -306,7 +309,8 @@ public class OplParser {
 			toProgHelper(pr.a.toString(), s, ret, decl);
 		}
 
-		return new OplProgram(ret); 
+		return new OplProgram(ret); */
+		throw new RuntimeException("Not implemented yet");
 	}
 	
 	private static void toProgHelper(String txt, String s, List<Triple<String, Integer, OplExp>> ret, Tuple3 decl) {
@@ -559,20 +563,11 @@ public class OplParser {
 			}
 			throw new DoNotIgnore(a + " is neither a bound variable nor a (0-ary) constant " );
 		}
-		if (a instanceof Tuple5) {
-			Tuple5 t = (Tuple5) a;
-			String f = (String) t.c;
-			List<OplTerm> l0 = new LinkedList<>();
-			l0.add(toTerm(vars, consts, t.b, suppressError));
-			l0.add(toTerm(vars, consts, t.d, suppressError));
-			return new OplTerm(f, l0);
-		}
-			Tuple4 t = (Tuple4) a;
-			String f = (String) t.a;
-			List<Object> l = (List<Object>) t.c;
-			List<OplTerm> l0 = l.stream().map(x -> toTerm(vars, consts, x, suppressError)).collect(Collectors.toList());
-			return new OplTerm(f, l0);
-		
+		Tuple4 t = (Tuple4) a;
+		String f = (String) t.a;
+		List<Object> l = (List<Object>) t.c;
+		List<OplTerm> l0 = l.stream().map(x -> toTerm(vars, consts, x, suppressError)).collect(Collectors.toList());
+		return new OplTerm(f, l0);
 	}
 
 	private static OplCtx<String, String> toCtx(List<Tuple3> fa) {

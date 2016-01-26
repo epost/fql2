@@ -40,6 +40,7 @@ import javax.swing.filechooser.FileFilter;
 
 import catdata.algs.Pair;
 import fql_lib.DEBUG;
+import fql_lib.A.ACodeEditor;
 import fql_lib.X.XJsonToFQL;
 import fql_lib.X.XRaToFpql;
 import fql_lib.X.XSqlToFql;
@@ -81,6 +82,8 @@ public class GUI extends JPanel {
 		MenuItem newItem = new MenuItem("New FQL++");
 		MenuItem newItem2 = new MenuItem("New FPQL");
 		MenuItem newItem3 = new MenuItem("New OPL");
+		MenuItem newItem4 = new MenuItem("New FPQL++");
+		
 		MenuItem openItem = new MenuItem("Open");
 //		MenuItem openItem2 = new MenuItem("Open GUI");
 		MenuItem saveItem = new MenuItem("Save");
@@ -90,6 +93,7 @@ public class GUI extends JPanel {
 		fileMenu.add(newItem);
 		fileMenu.add(newItem2);
 		fileMenu.add(newItem3);
+		fileMenu.add(newItem4);
 		fileMenu.add(openItem);
 		//fileMenu.add(openItem2);
 		fileMenu.add(saveItem);
@@ -279,7 +283,12 @@ public class GUI extends JPanel {
 		});
 		newItem3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				newAction(null, "", "opl");
+				newAction(null, "", "OPL");
+			}
+		});
+		newItem4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				newAction(null, "", "fpql++");
 			}
 		});
 		openItem.addActionListener(new ActionListener() {
@@ -393,14 +402,19 @@ public class GUI extends JPanel {
 		JComboBox oplBox = new JComboBox(Examples.oplOnly());
 		oplBox.setSelectedIndex(-1);
 		oplBox.addActionListener(x -> doExample((Example) oplBox.getSelectedItem()));
+		JComboBox fpqlppBox = new JComboBox(Examples.fpqlppOnly());
+		fpqlppBox.setSelectedIndex(-1);
+		fpqlppBox.addActionListener(x -> doExample((Example) fpqlppBox.getSelectedItem()));
 
+		
 		boxPanel.add(allBox, "All");
 		boxPanel.add(fqlppBox, "FQL++");
 		boxPanel.add(fpqlBox, "FPQL" );
 		boxPanel.add(oplBox, "OPL");
+		boxPanel.add(fpqlppBox, "FPQL++");
 		cl.show(boxPanel, "All");
 		
-		JComboBox<String> modeBox = new JComboBox<>(new String[] {"All", "FQL++", "FPQL", "OPL"});
+		JComboBox<String> modeBox = new JComboBox<>(new String[] {"All", "FQL++", "FPQL", "OPL", "FPQL++"});
 		modeBox.addActionListener(x -> {
 			cl.show(boxPanel, (String)modeBox.getSelectedItem());
 		});
@@ -584,12 +598,14 @@ public class GUI extends JPanel {
 		@Override
 		public boolean accept(File f) {
 			return f.getName().toLowerCase().endsWith(".fqlpp") || f.getName().toLowerCase().endsWith(".fpql")
+					|| f.getName().toLowerCase().endsWith(".fpqlpp")
+					|| f.getName().toLowerCase().endsWith(".opl")
 					|| f.isDirectory();
 		}
 
 		@Override
 		public String getDescription() {
-			return "FQL++ files (*.fqlpp) or FPQL files (*.fpql)";
+			return "All CatData Files";
 		}
 	}
 	
@@ -632,6 +648,18 @@ public class GUI extends JPanel {
 		}
 	}
 
+	public static class Filter6 extends FileFilter {
+		@Override
+		public boolean accept(File f) {
+			return f.getName().toLowerCase().endsWith(".fpqlpp")
+					|| f.isDirectory();
+		}
+
+		@Override
+		public String getDescription() {
+			return "FPQL++ files (*.fpqlpp)";
+		}
+	}
 
 	protected static void saveAsAction() {
 		delay();
@@ -643,8 +671,10 @@ public class GUI extends JPanel {
 			jfc.setFileFilter(new Filter3());
 		} else if (e.isPatrick().equals("false")) {
 			jfc.setFileFilter(new Filter());			
-		} else {
+		} else if (e.isPatrick().equals("OPL")){
 			jfc.setFileFilter(new Filter5());			
+		} else {
+			jfc.setFileFilter(new Filter6());
 		}
 		
 		
@@ -661,11 +691,15 @@ public class GUI extends JPanel {
 			if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlpp")) {
 				f = new File(jfc.getSelectedFile() + ".fqlpp");
 			}
-		} else {
+		} else if (e.isPatrick().equals("OPL")) {
 				if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".opl")) {
 					f = new File(jfc.getSelectedFile() + ".opl");
 				}
-		}
+		} else {
+			if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fpqlpp")) {
+				f = new File(jfc.getSelectedFile() + ".fpqlpp");
+			}
+	}
 
 		doSave(f, e.getText());
 		// change for david
@@ -705,10 +739,12 @@ public class GUI extends JPanel {
 		}
 		if (f.getAbsolutePath().endsWith(".fpql")) {
 			doOpen(f, "true");
-		} else if (f.getAbsolutePath().endsWith(".fql++")){
+		} else if (f.getAbsolutePath().endsWith(".fqlpp")){
 			doOpen(f, "false");
+		} else if (f.getAbsolutePath().endsWith(".opl")){
+			doOpen(f, "OPL");
 		} else {
-			doOpen(f, "opl");
+			doOpen(f, "fpqlpp");
 		}
 	}
 	
@@ -760,8 +796,10 @@ public class GUI extends JPanel {
 			c = new XCodeEditor(untitled_count, content);
 		} else if (isPatrick.equals("false")) {
 			c = new FQLCodeEditor(untitled_count, content);
-		} else {
+		} else if (isPatrick.equals("OPL")){
 			c = new OplCodeEditor(untitled_count, content);
+		} else {
+			c = new ACodeEditor(untitled_count, content);
 		}
 		int i = editors.getTabCount();
 		keys.put(untitled_count, c);

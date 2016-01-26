@@ -1,33 +1,33 @@
-package fql_lib.opl;
+package fql_lib.A;
 
 import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.templates.StaticCodeTemplate;
 
 import fql_lib.gui.CodeEditor;
+import fql_lib.opl.OplEnvironment;
 
 
 @SuppressWarnings("serial")
-public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDisplay> {
+public class ACodeEditor extends CodeEditor<AProgram, OplEnvironment, ADisplay> {
 
-	public OplCodeEditor(int untitled_count, String content) {
+	public ACodeEditor(int untitled_count, String content) {
 		super(untitled_count, content);
 	}
 
 	@Override
 	public String isPatrick() {
-		return "OPL";
+		return "FPQLPP";
 	}
 
 	@Override
 	protected String getATMFlhs() {
-		return "text/opl";
+		return "text/fpqpp";
 	}
 
 	@Override
 	protected String getATMFrhs() {
-		return "fql_lib.opl.OplTokenMaker";
+		return "fql_lib.A.ATokenMaker";
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 		CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
 		//ctm.
 		
-		StaticCodeTemplate ct = new StaticCodeTemplate("theory", "theory ",
+		/*StaticCodeTemplate ct = new StaticCodeTemplate("theory", "theory ",
 				"{\n\tsorts;\n\tsymbols;\n\tequations;\n}");
 		ctm.addTemplate(ct);
 
@@ -61,25 +61,25 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 		
 		ct = new StaticCodeTemplate("presentation", "presentation ",
 				"{\n\tgenerators;\n\tequations;\n}\n : ");
-		ctm.addTemplate(ct);
+		ctm.addTemplate(ct); */
 		
 	}
 
 	
 	
 	@Override
-	protected OplProgram parse(String program) throws ParserException {
-		return OplParser.program(program);
+	protected AProgram parse(String program) throws ParserException {
+		return AParser.program(program);
 	}
 
 	@Override
-	protected OplDisplay makeDisplay(String foo, OplProgram init, OplEnvironment env, long start, long middle) {
-		return new OplDisplay(foo, init, env, start, middle);
+	protected ADisplay makeDisplay(String foo, AProgram init, OplEnvironment env, long start, long middle) {
+		return new ADisplay(foo, init, env, start, middle);
 	}
 
 	@Override
-	protected OplEnvironment makeEnv(String str, OplProgram init) {
-		return OplDriver.makeEnv(str, init);
+	protected OplEnvironment makeEnv(String str, AProgram init) {
+		return ADriver.makeEnv(str, init);
 	}
 
 	@Override

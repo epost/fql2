@@ -4,7 +4,7 @@ public class OplSKExample extends Example {
 
 	@Override
 	public String isPatrick() {
-		return "opl";
+		return "OPL";
 	}
 	
 	@Override

@@ -1,5 +1,6 @@
 package fql_lib.opl;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,16 +15,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.script.Invocable;
-import javax.script.ScriptException;
 
 import catdata.algs.Chc;
 import catdata.algs.Pair;
 import catdata.algs.Triple;
+import catdata.algs.Unit;
 import catdata.algs.kb.KB;
 import catdata.algs.kb.KBExp;
-import catdata.algs.kb.KBOrders;
 import catdata.algs.kb.KBExp.KBApp;
 import catdata.algs.kb.KBExp.KBVar;
+import catdata.algs.kb.KBHorn;
+import catdata.algs.kb.KBOptions;
+import catdata.algs.kb.KBOrders;
 import fql_lib.DEBUG;
 import fql_lib.Util;
 import fql_lib.cat.categories.FinSet;
@@ -281,10 +284,23 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		return new OplTerm<>(t2.f, l);
 	}
 	
-	private KB<C, V> convert(OplSig<?,C,V> s) {
+	
+	private <S> KB<C, V> convert(OplSig<S,C,V> s) {
 		if (s.prec.keySet().size() != new HashSet<>(s.prec.values()).size()) {
 			throw new RuntimeException("Cannot duplicate precedence");
 		}
+		//if (!Collections.disjoint(Arrays.asList(KBHorn.reserved), s.symbols.keySet())) {
+		//	throw new RuntimeException("Theory contains reserved symbol, one of " + Arrays.toString(KBHorn.reserved));
+		//}
+		Map<C, Pair<List<S>, S>>  symbols = new HashMap<>(s.symbols);
+		List one = new LinkedList(); one.add(new Unit());
+		List two = new LinkedList(); two.add(new Unit()); two.add(new Unit());
+		symbols.put((C)KBHorn._eq, new Pair(two, new Unit()));
+		symbols.put((C)KBHorn._or, new Pair(two, new Unit()));
+		symbols.put((C)KBHorn._not, new Pair(one, new Unit()));
+		symbols.put((C)KBHorn._true, new Pair(new LinkedList(), new Unit()));
+		symbols.put((C)KBHorn._false, new Pair(new LinkedList(), new Unit()));
+		
 		Function<Pair<C, C>, Boolean> gt = x -> {
 			Integer l = s.prec.get(x.first);
 			Integer r = s.prec.get(x.second);
@@ -299,16 +315,17 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			}
 			String lx = x.first.toString();
 			String rx = x.second.toString();
-			//System.out.println("1" + x.first + " and " + x.second);
-			int la = s.symbols.get(x.first).first.size();
-			int ra = s.symbols.get(x.second).first.size();
+			if (!symbols.containsKey(x.first)) {
+				throw new RuntimeException("Missing: " + x.first);
+			}
+			int la = symbols.get(x.first).first.size();
+			int ra = symbols.get(x.second).first.size();
 			if (la == ra) {
 				if (lx.length() == rx.length()) {
 					return lx.compareTo(rx) < 0;
 				}
 				return lx.length() < rx.length();
 			}
-		//	System.out.println("2" + x.first + " > " + x.second);
 			if (la >= 3 && ra >= 3) {
 				return la > ra;
 			}
@@ -316,66 +333,53 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 				return false;
 			}
 			if (la == 1 && (ra == 0 || ra == 2)) {
-		//		System.out.println("true");
 				return true;
 			}
 			if (la == 1 && ra > 2) {
-		//		System.out.println("false");
 				return false;
 			}
 			if (la == 2 && ra == 0) {
-		//		System.out.println("true");
 				return true;
 			}
 			if (la == 2 && (ra == 1 || ra > 2)) {
-		//		System.out.println("false");
 				return false;
 			}
 			throw new RuntimeException("Bug in precedence, report to Ryan");
 			//function symbols: arity-0 < arity-2 < arity-1 < arity-3 < arity-4
-			
-			
 		};
 
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> eqs = new HashSet<>();
 		for (Triple<?, OplTerm<C, V>, OplTerm<C, V>> eq : s.equations) {
 			eqs.add(new Pair<>(convert(eq.second), convert(eq.third)));
 		}
-		return new KB(eqs, KBOrders.lpogt(gt), fr, DEBUG.debug.opl_unfailing, DEBUG.debug.opl_sort_cps, DEBUG.debug.opl_iterations, DEBUG.debug.opl_red_its);			
-	}
-
-	//ok to use null here
-	/*public static <C,X,V> KBExp<Chc<Chc<C,X>,JSWrapper>,V> redBy(OplJavaInst I, KBExp<Chc<Chc<C,X>,JSWrapper>,V> e) {				
-		if (I == null) {
-			return e;
+		
+		Set<Pair<KBExp<C, V>, KBExp<C, V>>> rs = new HashSet<>();
+		for (Triple<?, List<Pair<OplTerm<C, V>, OplTerm<C, V>>>, List<Pair<OplTerm<C, V>, OplTerm<C, V>>>> impl : s.implications) {
+			rs.addAll(convert(impl.second, impl.third));
 		}
-		try {
-			if (e.isVar) {
-				return e;
-			}
-				
-			KBApp<Chc<Chc<C,X>,JSWrapper>,V> e0 = e.getApp();
-				
-			List<KBExp<Chc<Chc<C,X>,JSWrapper>,V>> l = new LinkedList<>();
-			List<Object> r = new LinkedList<>();
-			for (KBExp<Chc<Chc<C, X>, JSWrapper>, V> a : e0.args) {
-				KBExp<Chc<Chc<C,X>,JSWrapper>,V> b = redBy(I, a);
-				l.add(b);
-				if (!b.isVar && b.getApp().args.isEmpty() && !b.getApp().f.left) {
-					JSWrapper js = b.getApp().f.r;
-					r.add(js.o);
-				}	
-			}
-			if (l.size() == r.size() && e0.f.left && e0.f.l.left) { 
-				Object o = ((Invocable)I.engine).invokeFunction((String)e0.f.l.l, r);
-				return new KBApp<>(Chc.inRight(new JSWrapper(o)), new LinkedList<>());
-			} 
-			return new KBApp<>(e0.f, l);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException(ex.getMessage());
-		} 
-	} */
+		
+		KBOptions options = new KBOptions(DEBUG.debug.opl_unfailing, DEBUG.debug.opl_sort_cps, DEBUG.debug.opl_horn && !s.implications.isEmpty(), DEBUG.debug.opl_semantic_ac, DEBUG.debug.opl_iterations, DEBUG.debug.opl_red_its);
+		return new KB(eqs, KBOrders.lpogt(gt), fr, rs, options);			
+	}
+	
+	public static <C,V> Set<Pair<KBExp<C, V>, KBExp<C, V>>> convert(List<Pair<OplTerm<C, V>, OplTerm<C, V>>> x, List<Pair<OplTerm<C, V>, OplTerm<C, V>>> y) {
+		Set<Pair<KBExp<C, V>, KBExp<C, V>>> rs = new HashSet<>();
+		KBExp<C, V> lhs = KBHorn.fals();
+		for (Pair<OplTerm<C, V>, OplTerm<C, V>> l : x) {
+			KBExp<C, V> e1 = convert(l.first);
+			KBExp<C, V> e2 = convert(l.second);
+			KBExp<C, V> eq = KBHorn.eq(e1, e2);
+			lhs = KBHorn.or(lhs, KBHorn.not(eq));
+		}
+		for (Pair<OplTerm<C, V>, OplTerm<C, V>> l : y) {
+			KBExp<C, V> e1 = convert(l.first);
+			KBExp<C, V> e2 = convert(l.second);
+			KBExp<C, V> eq = KBHorn.eq(e1, e2);				
+			KBExp<C, V> lhs0 = KBHorn.or(lhs, eq);
+			rs.add(new Pair<>(lhs0, KBHorn.tru()));
+		}
+		return rs;
+	}
 
 	public static <Z,V> KBExp<Chc<Z,JSWrapper>,V> redBy(OplJavaInst I, KBExp<Chc<Z,JSWrapper>,V> e) {				
 		if (I == null) {

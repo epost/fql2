@@ -4,7 +4,7 @@ public class OplMod4Example extends Example {
 
 	@Override
 	public String isPatrick() {
-		return "opl";
+		return "OPL";
 	}
 	
 	@Override
