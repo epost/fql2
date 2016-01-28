@@ -1,6 +1,14 @@
 package fql_lib.pp;
 
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
+
 import org.codehaus.jparsec.error.ParserException;
+import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.fife.ui.autocomplete.ShorthandCompletion;
 import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.templates.CodeTemplate;
@@ -32,28 +40,34 @@ public class FQLPPCodeEditor extends CodeEditor<FQLPPProgram, FQLPPEnvironment, 
 		return "fql_lib.pp.FqlPPTokenMaker";
 	}
 
-	@Override
 	protected void doTemplates() {
-		CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
-		CodeTemplate ct = new StaticCodeTemplate("set", "set ",
-				" = { }");
-		ctm.addTemplate(ct);
-
-		ct = new StaticCodeTemplate("function", "function ",
-				" = { } :  -> ");
-		ctm.addTemplate(ct);
+		  CompletionProvider provider = createCompletionProvider();
+		  AutoCompletion ac = new AutoCompletion(provider);
+		  KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, java.awt.event.InputEvent.META_DOWN_MASK
+                | java.awt.event.InputEvent.SHIFT_DOWN_MASK);
+		  ac.setTriggerKey(key);
+	      ac.install(this.topArea);
+	}
+	
+	  private CompletionProvider createCompletionProvider() {
+		   DefaultCompletionProvider provider = new DefaultCompletionProvider();
+	
+		   provider.addCompletion(new ShorthandCompletion(provider, "set",
+	            "set   = { }", ""));
 		
-		ct = new StaticCodeTemplate("category", "category ",
-				" = {\n\tobjects;\n\tarrows;\n\tequations;\n}");
-		ctm.addTemplate(ct);
-
-		ct = new StaticCodeTemplate("functor", "functor ",
-				" = {\n\tobjects;\n\tarrows;\n} :  -> ");
-		ctm.addTemplate(ct);
-
-		ct = new StaticCodeTemplate("transform", "transform ",
-				" = {\n\tobjects;\n} : ( :  -> ) -> ( :  -> ) "); 
-		ctm.addTemplate(ct);
+		   provider.addCompletion(new ShorthandCompletion(provider, "function",
+		            "function   = { } :  -> ", ""));
+				
+		   provider.addCompletion(new ShorthandCompletion(provider, "category",
+		            "category   = {\n\tobjects;\n\tarrows;\n\tequations;\n}", ""));
+		   
+		   provider.addCompletion(new ShorthandCompletion(provider, "functor",
+		            " functor   = {\n\tobjects;\n\tarrows;\n} :  -> ", ""));
+		
+		   provider.addCompletion(new ShorthandCompletion(provider, "transform",
+				   "transform   = {\n\tobjects;\n} : ( :  -> ) -> ( :  -> ) ", ""));
+		   
+		   return provider;
 	}
 
 	@Override

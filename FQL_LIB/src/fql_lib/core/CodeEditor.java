@@ -36,6 +36,7 @@ import javax.swing.text.DefaultEditorKit;
 import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
@@ -199,44 +200,18 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		
 		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory
 				.getDefaultInstance();
-		/*
-		atmf.putMapping("text/fql", "fql_lib.decl.FqlTokenMaker");
-		FoldParserManager.get().addFoldParserMapping("text/fql",
-				new CurlyFoldParser());
-				*/
-
+	
 		atmf.putMapping(getATMFlhs(), getATMFrhs());
 		FoldParserManager.get().addFoldParserMapping(getATMFlhs(),
 				new CurlyFoldParser());
 
 		// topArea.setAntiAliasingEnabled(true);
-		RSyntaxTextArea.setTemplatesEnabled(true);
+		//RSyntaxTextArea.setsetTemplatesEnabled(true);
 
-		/*
-		CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
-		CodeTemplate ct = new StaticCodeTemplate("set", "set ",
-				" = { }");
-		ctm.addTemplate(ct);
-
-		ct = new StaticCodeTemplate("function", "function ",
-				" = { } :  -> ");
-		ctm.addTemplate(ct);
 		
-		ct = new StaticCodeTemplate("category", "category ",
-				" = {\n\tobjects;\n\tarrows;\n\tequations;\n}");
-		ctm.addTemplate(ct);
-
-		ct = new StaticCodeTemplate("functor", "functor ",
-				" = {\n\tobjects;\n\tarrows;\n} :  -> ");
-		ctm.addTemplate(ct);
-
-		ct = new StaticCodeTemplate("transform", "transform ",
-				" = {\n\tobjects;\n} : ( :  -> ) -> ( :  -> ) "); 
-		ctm.addTemplate(ct); 
-		*/
-		doTemplates();
-
+		
 		topArea = new RSyntaxTextArea();
+
 //		topArea.setSyntaxEditingStyle("text/fql"); 
 		if (getATMFrhs() != null) {
 			topArea.setSyntaxEditingStyle(getATMFlhs()); 
@@ -302,6 +277,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		RTextScrollPane sp = new RTextScrollPane(topArea);
 		sp.setFoldIndicatorEnabled(true);
 
+	     
 		JSplitPane xx1 = new Split(.8, JSplitPane.VERTICAL_SPLIT);
 		xx1.add(sp);
 		xx1.setDividerSize(6);
@@ -359,6 +335,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		topArea.getActionMap().put("DecreaseFont", al);
 		inputMap.put(key, "DecreaseFont");
 		inputMap.put(key2, "DecreaseFont");
+		
+		doTemplates();
+
 	}
 	
 	public void setFontSize(int size) {

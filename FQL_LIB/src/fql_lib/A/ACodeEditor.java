@@ -1,8 +1,14 @@
 package fql_lib.A;
 
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
+
 import org.codehaus.jparsec.error.ParserException;
-import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.fife.ui.autocomplete.ShorthandCompletion;
 
 import fql_lib.core.CodeEditor;
 import fql_lib.core.Language;
@@ -33,7 +39,25 @@ public class ACodeEditor extends CodeEditor<AProgram, OplEnvironment, ADisplay> 
 
 	@Override
 	protected void doTemplates() {
-		CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
+		  CompletionProvider provider = createCompletionProvider();
+		  AutoCompletion ac = new AutoCompletion(provider);
+		  KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, java.awt.event.InputEvent.META_DOWN_MASK
+                  | java.awt.event.InputEvent.SHIFT_DOWN_MASK);
+		  ac.setTriggerKey(key);
+	      ac.install(this.topArea);
+	}
+	
+	  private CompletionProvider createCompletionProvider() {
+		   DefaultCompletionProvider provider = new DefaultCompletionProvider();
+	
+		   provider.addCompletion(new ShorthandCompletion(provider, "query",
+	            "newstuff1", "newstuff2"));
+
+		   return provider;
+
+	   }
+	      
+		//CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
 		//ctm.
 		
 		/*StaticCodeTemplate ct = new StaticCodeTemplate("theory", "theory ",
@@ -64,7 +88,7 @@ public class ACodeEditor extends CodeEditor<AProgram, OplEnvironment, ADisplay> 
 				"{\n\tgenerators;\n\tequations;\n}\n : ");
 		ctm.addTemplate(ct); */
 		
-	}
+	//}
 
 	
 	

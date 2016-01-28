@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import fql_lib.core.LineException;
 import fql_lib.opl.OplEnvironment;
 import fql_lib.opl.OplObject;
-import fql_lib.opl.OplOps;
 import fql_lib.opl.OplProgram;
 
 public class ADriver {

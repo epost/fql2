@@ -56,8 +56,8 @@ public enum Language {
 		case FPQL: return new XCodeEditor(untitled_count, content);
 		case FQLPP: return new FQLPPCodeEditor(untitled_count, content);
 		case OPL: return new OplCodeEditor(untitled_count, content);
-		case FPQLPP: new ACodeEditor(untitled_count, content);
+		case FPQLPP: return new ACodeEditor(untitled_count, content);
 		}
-		throw new RuntimeException();
+		throw new RuntimeException(this.toString());
 	}
 }

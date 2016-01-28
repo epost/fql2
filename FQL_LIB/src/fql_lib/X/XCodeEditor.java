@@ -1,9 +1,16 @@
 package fql_lib.X;
 
+import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.swing.KeyStroke;
+
 import org.codehaus.jparsec.error.ParserException;
+import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.fife.ui.autocomplete.ShorthandCompletion;
 import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.templates.CodeTemplate;
@@ -36,50 +43,42 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 		return "fql_lib.X.FpqlTokenMaker";
 	}
 
-	@Override
 	protected void doTemplates() {
-		CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
-		CodeTemplate ct = new StaticCodeTemplate("type", "type ",
-				" \"\"");
-		ctm.addTemplate(ct);
-		
-		ct = new StaticCodeTemplate("polynomial", "polynomial ",
-				"{\n\t q = {for v:t; where v=v; attributes l=v.l; edges f = {e=v.l} : q;} : t\n}\n : s -> s");
-		ctm.addTemplate(ct);
-		
-		ct = new StaticCodeTemplate("query", "query ",
-				"{\n\tpi;\n\tdelta;\n\tsigma;\n} ");
-		ctm.addTemplate(ct);
-		
-		ct = new StaticCodeTemplate("flower", "flower ",
-				"{\n\tselect;\n\tfrom;\n\twhere;\n} ");
-		ctm.addTemplate(ct);
-		
-		ct = new StaticCodeTemplate("FLOWER", "FLOWER ",
-				"{\n\tselect;\n\tfrom;\n\twhere;\n} ");
-		ctm.addTemplate(ct);
-		
-		ct = new StaticCodeTemplate("schema", "schema ",
-				"{\n\tnodes;\n\tedges;\n\tequations;\n}");
-		ctm.addTemplate(ct);
-
-		ct = new StaticCodeTemplate("mapping", "mapping ",
-				"{\n\tnodes;\n\tedges;\n}\n :  -> ");
-		ctm.addTemplate(ct);
-		
-		ct = new StaticCodeTemplate("instance", "instance ",
-				"{\n\tvariables;\n\tequations;\n}\n : ");
-		ctm.addTemplate(ct);
-		
-		ct = new StaticCodeTemplate("INSTANCE", "INSTANCE ",
-				"{\n\tvariables;\n\tequations;\n}\n : ");
-		ctm.addTemplate(ct);
-
-		ct = new StaticCodeTemplate("homomorphism", "homomorphism ",
-				"{\n\tvariables;\n}\n :  ->  "); 
-		ctm.addTemplate(ct);
+		  CompletionProvider provider = createCompletionProvider();
+		  AutoCompletion ac = new AutoCompletion(provider);
+		  KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, java.awt.event.InputEvent.META_DOWN_MASK
+              | java.awt.event.InputEvent.SHIFT_DOWN_MASK);
+		  ac.setTriggerKey(key);
+	      ac.install(this.topArea);
 	}
+	
+	  private CompletionProvider createCompletionProvider() {
+		   DefaultCompletionProvider provider = new DefaultCompletionProvider();
+	
+		   provider.addCompletion(new ShorthandCompletion(provider, "type",
+	            "type \"\"", ""));
 
+		provider.addCompletion(new ShorthandCompletion(provider, "polynomial", "polynomial {\n\t q = {for v:t; where v=v; attributes l=v.l; edges f = {e=v.l} : q;} : t\n}\n : s -> s", ""));
+		
+		provider.addCompletion(new ShorthandCompletion(provider, "query", "query {\n\tpi;\n\tdelta;\n\tsigma;\n} ", ""));
+		
+		provider.addCompletion(new ShorthandCompletion(provider, "flower", "flower {\n\tselect;\n\tfrom;\n\twhere;\n} ", ""));
+		
+		provider.addCompletion(new ShorthandCompletion(provider, "FLOWER", "FLOWER {\n\tselect;\n\tfrom;\n\twhere;\n} ", ""));
+		
+		provider.addCompletion(new ShorthandCompletion(provider, "schema", "schema {\n\tnodes;\n\tedges;\n\tequations;\n}", ""));
+
+		provider.addCompletion(new ShorthandCompletion(provider, "mapping", "mapping {\n\tnodes;\n\tedges;\n}\n :  -> ", ""));
+		
+		provider.addCompletion(new ShorthandCompletion(provider, "instance", "instance {\n\tvariables;\n\tequations;\n}\n : ", ""));
+		
+		provider.addCompletion(new ShorthandCompletion(provider, "INSTANCE", "INSTANCE {\n\tvariables;\n\tequations;\n}\n : ", ""));
+
+		provider.addCompletion(new ShorthandCompletion(provider, "homomorphism", "homomorphism {\n\tvariables;\n}\n :  ->  ", ""));
+		
+		return provider;
+		
+	  }
 	
 	
 	@Override

@@ -1,6 +1,14 @@
 package fql_lib.opl;
 
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
+
 import org.codehaus.jparsec.error.ParserException;
+import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.fife.ui.autocomplete.ShorthandCompletion;
 import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
 import org.fife.ui.rsyntaxtextarea.templates.StaticCodeTemplate;
 
@@ -30,37 +38,35 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 		return "fql_lib.opl.OplTokenMaker";
 	}
 
-	@Override
 	protected void doTemplates() {
+		  CompletionProvider provider = createCompletionProvider();
+		  AutoCompletion ac = new AutoCompletion(provider);
+		  KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, java.awt.event.InputEvent.META_DOWN_MASK
+            | java.awt.event.InputEvent.SHIFT_DOWN_MASK);
+		  ac.setTriggerKey(key);
+	      ac.install(this.topArea);
+	}
+	
+	  private CompletionProvider createCompletionProvider() {
+		   DefaultCompletionProvider provider = new DefaultCompletionProvider();
+	
 		CodeTemplateManager ctm = topArea.getCodeTemplateManager();
 		
-		StaticCodeTemplate ct = new StaticCodeTemplate("theory", "theory ",
-				"{\n\tsorts;\n\tsymbols;\n\tequations;\n}");
-		ctm.addTemplate(ct);
+		provider.addCompletion(new ShorthandCompletion(provider, "theory", "theory {\n\tsorts;\n\tsymbols;\n\tequations;\n}", ""));
 
-		ct = new StaticCodeTemplate("model", "model ",
-				"{\n\tsorts;\n\tsymbols;\n}\n : ");
-		ctm.addTemplate(ct);
+		provider.addCompletion(new ShorthandCompletion(provider, "model", "model {\n\tsorts;\n\tsymbols;\n}\n : ", ""));
 		
-		ct = new StaticCodeTemplate("javascript", "javascript ",
-				"{\n\tsymbols;\n}\n : ");
-		ctm.addTemplate(ct);
+		provider.addCompletion(new ShorthandCompletion(provider, "javascript", "javascript {\n\tsymbols;\n}\n : ", ""));
 
-		ct = new StaticCodeTemplate("mapping", "mapping ",
-				"{\n\tsorts;\n\tsymbols;\n}\n :  -> ");
-		ctm.addTemplate(ct);
+		provider.addCompletion(new ShorthandCompletion(provider, "mapping", "mapping {\n\tsorts;\n\tsymbols;\n}\n :  -> ", ""));
 				
-		ct = new StaticCodeTemplate("transform", "tranform ",
-				"{\n\tsorts;\n}\n :  ->  "); 
-		ctm.addTemplate(ct);
+		provider.addCompletion(new ShorthandCompletion(provider, "transform", "tranform {\n\tsorts;\n}\n :  ->  ", "")); 
 		
-		ct = new StaticCodeTemplate("transpres", "transpres ",
-				"{\n\tsorts;\n}\n :  ->  "); 
-		ctm.addTemplate(ct);
+		provider.addCompletion(new ShorthandCompletion(provider, "transpres", "transpres {\n\tsorts;\n}\n :  ->  ", "")); 
 		
-		ct = new StaticCodeTemplate("presentation", "presentation ",
-				"{\n\tgenerators;\n\tequations;\n}\n : ");
-		ctm.addTemplate(ct);
+		provider.addCompletion(new ShorthandCompletion(provider, "presentation", "presentation {\n\tgenerators;\n\tequations;\n}\n : ", ""));
+
+		return provider;
 		
 	}
 
