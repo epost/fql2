@@ -427,7 +427,6 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 					OplTerm<Chc<C1, X>, V1> r = eq.second.subst(tuple0);
 					OplTerm<Chc<C1, X>, V1> l0 = I0.P.toSig().getKB().nf(l);
 					OplTerm<Chc<C1, X>, V1> r0 = I0.P.toSig().getKB().nf(r);
-					
 					if (!l0.equals(r0)) {
 						if (I0.J == null) {						
 							continue outer;
@@ -533,7 +532,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, S2> gens = new HashMap<>();
 		List<Pair<OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2>, OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2>>> equations = new LinkedList<>();
 
-		OplSetInst<S1,C1,OplTerm<Chc<C1,X>,V1>> I = OplSat.saturate(I0.projEAdiscreteT());
+		OplSetInst<S1,C1,OplTerm<Chc<C1,X>,V1>> I = OplSat.saturate(I0.projEA());
 		Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, Integer> prec = new HashMap<>();
 
 		Set<OplTerm<Chc<C1, X>, V1>> allCopiedTerms = new HashSet<>();
@@ -556,7 +555,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		//added
 
 		for (Pair<OplTerm<Chc<C1, X>, V1>, OplTerm<Chc<C1, X>, V1>> eq : I0.P.equations) {
-			S1 t = eq.first.type(I0.P.toSig, new OplCtx<>());
+			S1 t = eq.first.type(I0.P.toSig(), new OplCtx<>());
 			if (src.projT().sorts.contains(t)) {
 //				System.out.println("Copying over " + eq);
 				equations.add(new Pair<>(conv2(I0, allCopiedTerms, eq.first), conv2(I0, allCopiedTerms, eq.second)));
@@ -582,6 +581,9 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				S1 s = block.from.get(v);
 				Set<OplTerm<Chc<C1, X>, V1>> dom = I.sorts.get(s);
 				tuples = extend(tuples, dom, v);
+				tuples = filter(tuples, where, I0);
+			}
+			if (block.from.keySet().isEmpty()) {
 				tuples = filter(tuples, where, I0);
 			}
 			

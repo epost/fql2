@@ -140,7 +140,7 @@ public class AParser {
 		Reference ref = Parser.newReference();
 
 		Parser<?> theory = theory();
-		Parser<?> model = model();
+/*		Parser<?> model = model();
 		Parser<?> trans = trans();
 		Parser<?> trans_pres = trans_pres();
 		Parser<?> eval = Parsers.tuple(term("eval"), ident(), oplTerm());
@@ -163,8 +163,10 @@ public class AParser {
 		Parser<?> query = query();
 		Parser<?> idQ = Parsers.tuple(term("id"), ident());
 		Parser<?> apply = Parsers.tuple(term("apply"), ident(), ident());
+		*/
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { apply, idQ, query, projEA, inst, schema, projE, projA, projT, flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
+		Parser<?> a = Parsers.or(new Parser<?>[] { /* apply, idQ, query, projEA, inst, schema, projE, projA, projT, flower, 
+				ubersat, sigma, sat, unsat, presentation, delta, mapping, */ theory /*, model, eval, trans, trans_pres, java */ });
 		ref.set(a);
 
 		return a;
@@ -278,9 +280,11 @@ public class AParser {
 	public static final Parser<?> decl() {
 	//	Parser e = Parsers.or(new Parser[] { exp()  });
 		
-		Parser p1 = Parsers.tuple(ident(), term("="), exp());
+	//	Parser p1 = Parsers.tuple(ident(), term("="), exp());
 		
-		return Parsers.or(new Parser[] { p1 });
+		return null;
+		
+//		return Parsers.or(new Parser[] { sorts, symbols, p1 });
 		
 //		return Parsers.tuple(ident(), Parsers.or(term("="), term(":")), e);
 	}

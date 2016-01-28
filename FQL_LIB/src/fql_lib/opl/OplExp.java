@@ -157,6 +157,9 @@ public abstract class OplExp implements OplObject {
 				tuples = extend(tuples, dom, v);
 				tuples = filter(tuples, where, I);
 			}
+			if (from.keySet().isEmpty()) {
+				tuples = filter(tuples, where, I);
+			}
 
 			Set<String> ret_sorts = new HashSet<>();
 			for (S c : sig.sorts) {
@@ -1245,7 +1248,7 @@ public abstract class OplExp implements OplObject {
 			for (C k : symbols.keySet()) {
 				Pair<List<S>, S> v = symbols.get(k);
 				if (!sorts.contains(v.second)) {
-					throw new DoNotIgnore("Bad codomain " + v.second + " for " + k);
+					throw new DoNotIgnore("Bad codomain " + v.second + " for " + k + " in " + this);
 				}
 				for (S a : v.first) {
 					if (!sorts.contains(a)) {
@@ -3073,8 +3076,10 @@ public abstract class OplExp implements OplObject {
 
 		}
 
+		//TODO : was projEdiscreteT --> projE
+		//TODO should also use equations from attributes
 		public OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>> saturate() {
-			return saturate(J, projEdiscreteT(), S, P);
+			return saturate(J, projEA(), S, P);
 		}
 
 		private static <S, C, V, X, Y> OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>> inject(
