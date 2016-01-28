@@ -37,13 +37,14 @@ import org.codehaus.jparsec.functors.Tuple5;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
-import fql_lib.Util;
 import fql_lib.X.XExp.XInst;
 import fql_lib.X.XExp.XMapConst;
 import fql_lib.X.XExp.XSchema;
 import fql_lib.X.XExp.XTransConst;
-import fql_lib.examples.Example;
-import fql_lib.gui.FQLTextPanel;
+import fql_lib.core.CodeTextPanel;
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+import fql_lib.core.Util;
 
 public class XRaToFpql {
 
@@ -283,6 +284,11 @@ public class XRaToFpql {
 	}
 	
 	static class SelectExample extends Example {
+		
+		@Override
+		public Language lang() {
+			throw new RuntimeException();
+		}
 
 		@Override
 		public String getName() {
@@ -323,6 +329,11 @@ public class XRaToFpql {
 	}
 
 	static class EDExample extends Example {
+		
+		@Override
+		public Language lang() {
+			throw new RuntimeException();
+		}
 
 		@Override
 		public String getName() {
@@ -342,6 +353,11 @@ public class XRaToFpql {
 	}
 
 	static class PeopleExample extends Example {
+		
+		@Override
+		public Language lang() {
+			throw new RuntimeException();
+		}
 		@Override
 		public String getName() {
 			return "People";
@@ -354,6 +370,10 @@ public class XRaToFpql {
 	}
 
 	static class NegExample extends Example {
+		@Override
+		public Language lang() {
+			throw new RuntimeException();
+		}
 		@Override
 		public String getName() {
 			return "Negation";
@@ -371,8 +391,8 @@ public class XRaToFpql {
 	}
 
 	public XRaToFpql() {
-		final FQLTextPanel input = new FQLTextPanel(BorderFactory.createEtchedBorder(), kind() + " Input", "");
-		final FQLTextPanel output = new FQLTextPanel(BorderFactory.createEtchedBorder(), "FPQL Output", "");
+		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind() + " Input", "");
+		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "FPQL Output", "");
 
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");

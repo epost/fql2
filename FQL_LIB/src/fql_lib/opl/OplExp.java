@@ -44,12 +44,12 @@ import catdata.algs.Pair;
 import catdata.algs.Triple;
 import catdata.algs.Utils;
 import catdata.algs.kb.KBExp;
-import fql_lib.DEBUG;
-import fql_lib.Util;
-import fql_lib.cat.categories.FinSet;
-import fql_lib.gui.FQLTextPanel;
-import fql_lib.gui.MyTableRowSorter;
+import fql_lib.core.CodeTextPanel;
+import fql_lib.core.DEBUG;
+import fql_lib.core.MyTableRowSorter;
+import fql_lib.core.Util;
 import fql_lib.opl.OplParser.DoNotIgnore;
+import fql_lib.pp.cat.FinSet;
 
 public abstract class OplExp implements OplObject {
 
@@ -312,7 +312,7 @@ public abstract class OplExp implements OplObject {
 
 	@Override
 	public JComponent display() {
-		FQLTextPanel p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
+		CodeTextPanel p = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 		JTabbedPane ret = new JTabbedPane();
 		ret.add(p, "Text");
 		return ret;
@@ -1003,7 +1003,7 @@ public abstract class OplExp implements OplObject {
 		public JComponent display(Boolean b) {
 			JTabbedPane ret = new JTabbedPane();
 
-			FQLTextPanel p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
+			CodeTextPanel p = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 			ret.add(p, "Text");
 
 			try {
@@ -1014,13 +1014,13 @@ public abstract class OplExp implements OplObject {
 					ret.add(qq, "Hom");
 				} catch (Exception ex) {
 					ex.printStackTrace();
-					p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "exception: "
+					p = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "exception: "
 							+ ex.getMessage());
 					ret.add(p, "Hom");
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();
-				p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "exception: "
+				p = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "exception: "
 						+ ex.getMessage());
 				ret.add(p, "KB");
 			}
@@ -1055,7 +1055,7 @@ public abstract class OplExp implements OplObject {
 			top.add(new JLabel("Result:"));
 			top.add(dst);
 
-			FQLTextPanel bot = new FQLTextPanel(BorderFactory.createEtchedBorder(),
+			CodeTextPanel bot = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 					"Re-write rules", strip(kb.printKB()));
 
 			pane.add(top);
@@ -1087,7 +1087,7 @@ public abstract class OplExp implements OplObject {
 			p2.add(new JLabel("target:"));
 			p2.add(dst);
 
-			FQLTextPanel bot = new FQLTextPanel(BorderFactory.createEtchedBorder(), "Result", "");
+			CodeTextPanel bot = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Result", "");
 
 			JButton go = new JButton("Compute hom set");
 			go.addActionListener(x -> {
@@ -1542,7 +1542,7 @@ public abstract class OplExp implements OplObject {
 		public JComponent display() {
 			JTabbedPane jtp = new JTabbedPane();
 
-			JComponent text = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
+			JComponent text = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 			jtp.addTab("Text", text);
 
 			JComponent tables = makeTables();
@@ -2021,7 +2021,7 @@ public abstract class OplExp implements OplObject {
 		public JComponent display() {
 			JTabbedPane jtp = new JTabbedPane();
 
-			JComponent text = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
+			JComponent text = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 			jtp.addTab("Text", text);
 
 			JComponent tables = makeTables(new HashSet());
@@ -2565,7 +2565,7 @@ public abstract class OplExp implements OplObject {
 		public JComponent display() {
 			JTabbedPane jtp = new JTabbedPane();
 
-			JComponent text = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
+			JComponent text = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 			jtp.addTab("Text", text);
 
 			JComponent tables = makeTables();
@@ -3055,7 +3055,7 @@ public abstract class OplExp implements OplObject {
 		public JComponent display() {
 			JTabbedPane ret = new JTabbedPane();
 
-			FQLTextPanel p = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString());
+			CodeTextPanel p = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 			ret.add(p, "Presentation");
 
 			// FQLTextPanel q = new
@@ -3069,7 +3069,7 @@ public abstract class OplExp implements OplObject {
 				// P).makeTables(S.projT().sorts), "Saturation");
 			} catch (Exception ex) {
 				ex.printStackTrace();
-				ret.add(new FQLTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex
+				ret.add(new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex
 						.getMessage()), "Saturation");
 			}
 			return ret;

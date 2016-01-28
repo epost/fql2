@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import fql_lib.DEBUG;
 import fql_lib.X.XExp.Flower;
-import fql_lib.decl.LineException;
+import fql_lib.core.DEBUG;
+import fql_lib.core.LineException;
 
 
 public class XDriver {

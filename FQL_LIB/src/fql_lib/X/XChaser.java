@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
-import fql_lib.Util;
 import fql_lib.X.XExp.XSuperED;
 import fql_lib.X.XExp.XSuperED.SuperFOED;
-import fql_lib.cat.categories.FinSet;
+import fql_lib.core.Util;
+import fql_lib.pp.cat.FinSet;
 
 public class XChaser {
 

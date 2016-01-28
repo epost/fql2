@@ -25,12 +25,12 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import catdata.algs.Pair;
-import fql_lib.gui.FQLDisp;
-import fql_lib.gui.FQLTextPanel;
+import fql_lib.core.CodeTextPanel;
+import fql_lib.core.Disp;
 import fql_lib.opl.OplEnvironment;
 import fql_lib.opl.OplObject;
 
-public class ADisplay implements FQLDisp {
+public class ADisplay implements Disp {
 
 	
 	@Override
@@ -90,7 +90,7 @@ public class ADisplay implements FQLDisp {
 				frames.add(new Pair<>(doLookup(c, obj), obj.display()));
 			} catch (Exception ex) {
 				ex.printStackTrace();
-				frames.add(new Pair<>(doLookup(c, obj), new FQLTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
+				frames.add(new Pair<>(doLookup(c, obj), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
 			}
 		}
 		long end = System.currentTimeMillis();

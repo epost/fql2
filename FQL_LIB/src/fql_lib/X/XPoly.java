@@ -18,9 +18,9 @@ import javax.swing.JTabbedPane;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
-import fql_lib.DEBUG;
-import fql_lib.Util;
-import fql_lib.gui.FQLTextPanel;
+import fql_lib.core.CodeTextPanel;
+import fql_lib.core.DEBUG;
+import fql_lib.core.Util;
 
 public class XPoly<C,D> extends XExp implements XObject {
 	
@@ -259,13 +259,13 @@ public class XPoly<C,D> extends XExp implements XObject {
 	public JComponent display() {
 		JTabbedPane ret = new JTabbedPane();
 		
-		ret.addTab("Text", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", toString()));
+		ret.addTab("Text", new CodeTextPanel(BorderFactory.createEtchedBorder(), "", toString()));
 
-		ret.addTab("Hat", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", hat().toString()));
+		ret.addTab("Hat", new CodeTextPanel(BorderFactory.createEtchedBorder(), "", hat().toString()));
 		
-		ret.addTab("GrothO", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", grotho().toString()));
+		ret.addTab("GrothO", new CodeTextPanel(BorderFactory.createEtchedBorder(), "", grotho().toString()));
 
-		ret.addTab("Tilde", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", tilde().toString()));
+		ret.addTab("Tilde", new CodeTextPanel(BorderFactory.createEtchedBorder(), "", tilde().toString()));
 		
 		return ret;
 	}

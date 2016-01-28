@@ -1,6 +1,15 @@
 package fql_lib.examples;
 
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+
 public class SetsExample extends Example {
+	
+	@Override
+	public Language lang() {
+		return Language.FQLPP;
+	}
+
 
 	@Override
 	public String getName() {

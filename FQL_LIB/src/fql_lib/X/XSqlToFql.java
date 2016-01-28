@@ -36,11 +36,12 @@ import org.codehaus.jparsec.functors.Tuple5;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
-import fql_lib.Util;
 import fql_lib.X.XExp.XInst;
 import fql_lib.X.XExp.XSchema;
-import fql_lib.examples.Example;
-import fql_lib.gui.FQLTextPanel;
+import fql_lib.core.CodeTextPanel;
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+import fql_lib.core.Util;
 
 /**
  * 
@@ -59,6 +60,12 @@ public class XSqlToFql {
 	}
 	
 	static class A extends Example {
+		
+		@Override
+		public Language lang() {
+			throw new RuntimeException();
+		}
+
 		@Override
 		public String getName() {
 			return "A";
@@ -71,6 +78,11 @@ public class XSqlToFql {
 	
 	static class B extends Example {
 		@Override
+		public Language lang() {
+			throw new RuntimeException();
+		}
+		
+		@Override
 		public String getName() {
 			return "B";
 		}
@@ -81,6 +93,12 @@ public class XSqlToFql {
 	}
 	
 	static class PeopleExample extends Example {
+		
+		@Override
+		public Language lang() {
+			throw new RuntimeException();
+		}
+		
 		@Override
 		public String getName() {
 			return "People";
@@ -98,8 +116,8 @@ public class XSqlToFql {
 	}
 
 	public XSqlToFql() {
-		final FQLTextPanel input = new FQLTextPanel(BorderFactory.createEtchedBorder(), kind() + " Input", "");
-		final FQLTextPanel output = new FQLTextPanel(BorderFactory.createEtchedBorder(), "FPQL Output", "");
+		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind() + " Input", "");
+		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "FPQL Output", "");
 
 		final JTextField depth = new JTextField("4");
 		

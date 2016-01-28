@@ -39,9 +39,10 @@ import org.codehaus.jparsec.functors.Tuple4;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
-import fql_lib.Util;
-import fql_lib.examples.Example;
-import fql_lib.gui.FQLTextPanel;
+import fql_lib.core.CodeTextPanel;
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+import fql_lib.core.Util;
 
 public class NraViewer {
 
@@ -54,6 +55,12 @@ public class NraViewer {
 	}
 
 	static class PeopleExample extends Example {
+		
+		@Override
+		public Language lang() {
+			throw new RuntimeException();
+		}
+
 		@Override
 		public String getName() {
 			return "People";
@@ -396,9 +403,9 @@ public class NraViewer {
 	}
 
 	public NraViewer() {
-		final FQLTextPanel input = new FQLTextPanel(BorderFactory.createEtchedBorder(),
+		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"Input schema and instance", "");
-		final FQLTextPanel output = new FQLTextPanel(BorderFactory.createEtchedBorder(),
+		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"Response", "");
 
 		// JButton jdbcButton = new JButton("Load using JDBC");

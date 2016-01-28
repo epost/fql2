@@ -1,15 +1,18 @@
 package fql_lib.examples;
 
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+
 public class OplMod4Example extends Example {
 
 	@Override
-	public String isPatrick() {
-		return "OPL";
-	}
+	public Language lang() {
+		return Language.OPL;
+	} 
 	
 	@Override
 	public String getName() {
-		return "O Mod4";
+		return "Mod4";
 	}
 
 	@Override

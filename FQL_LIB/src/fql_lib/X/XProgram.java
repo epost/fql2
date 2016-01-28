@@ -10,10 +10,10 @@ import java.util.Set;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
-import fql_lib.decl.FQLProg;
-import fql_lib.decl.LineException;
+import fql_lib.core.LineException;
+import fql_lib.core.Prog;
 
-public class XProgram implements FQLProg {
+public class XProgram implements Prog {
 	
 	public Map<String, String> kinds() {
 		Map<String, String> ret = new HashMap<>();

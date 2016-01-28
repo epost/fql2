@@ -31,9 +31,10 @@ import javax.swing.JTextArea;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
-import fql_lib.Util;
-import fql_lib.examples.Example;
-import fql_lib.gui.FQLTextPanel;
+import fql_lib.core.CodeTextPanel;
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+import fql_lib.core.Util;
 
 /**
  * 
@@ -45,6 +46,11 @@ public class XJsonToFQL {
 	protected Example[] examples = { new EmpEx() };
 
 	static class EmpEx extends Example {
+		
+		@Override
+		public Language lang() {
+			throw new RuntimeException();
+		}
 
 		@Override
 		public String getName() {
@@ -190,9 +196,9 @@ public class XJsonToFQL {
 	}
 
 	public XJsonToFQL() {
-		final FQLTextPanel input = new FQLTextPanel(BorderFactory.createEtchedBorder(), kind()
+		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind()
 				+ " Input", "");
-		final FQLTextPanel output = new FQLTextPanel(BorderFactory.createEtchedBorder(),
+		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"FPQL Output", "");
 
 		JButton transButton = new JButton("Translate");

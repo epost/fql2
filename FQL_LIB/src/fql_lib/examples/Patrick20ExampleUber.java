@@ -1,21 +1,21 @@
 package fql_lib.examples;
 
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+
 public class Patrick20ExampleUber extends Example {
 
-	/* public static void main(String[] args) {
-		for (int i = 1; i <= 128; i++) {
-			System.out.println("v" + i + ".l = u" + i + ", v" + i + ".r = u" + i +",");
-		}
-	} */
 	
-	@Override 
-	public String isPatrick() {
-		return "true";
+	
+	@Override
+	public Language lang() {
+		return Language.FPQL;
 	}
+
 	
 	@Override
 	public String getName() {
-		return "P Uber";
+		return "Uber";
 	}
 
 	@Override

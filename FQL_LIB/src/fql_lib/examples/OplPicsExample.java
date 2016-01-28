@@ -1,15 +1,18 @@
 package fql_lib.examples;
 
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+
 public class OplPicsExample extends Example {
 	
 	@Override
-	public String isPatrick() {
-		return "OPL";
+	public Language lang() {
+		return Language.OPL;
 	}
 
 	@Override
 	public String getName() {
-		return "O Team Pics";
+		return "Team Pics";
 	}
 
 	@Override

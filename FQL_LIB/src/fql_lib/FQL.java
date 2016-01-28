@@ -10,9 +10,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import catdata.algs.Pair;
-import fql_lib.examples.Examples;
-import fql_lib.gui.CodeEditor;
-import fql_lib.gui.GUI;
+import fql_lib.core.CodeEditor;
+import fql_lib.core.DEBUG;
+import fql_lib.core.Examples;
+import fql_lib.core.GUI;
 
 /**
  * 

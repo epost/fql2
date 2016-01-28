@@ -4,7 +4,8 @@ import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
-import fql_lib.gui.CodeEditor;
+import fql_lib.core.CodeEditor;
+import fql_lib.core.Language;
 import fql_lib.opl.OplEnvironment;
 
 
@@ -16,13 +17,13 @@ public class ACodeEditor extends CodeEditor<AProgram, OplEnvironment, ADisplay> 
 	}
 
 	@Override
-	public String isPatrick() {
-		return "FPQLPP";
+	public Language isPatrick() {
+		return Language.FPQLPP;
 	}
 
 	@Override
 	protected String getATMFlhs() {
-		return "text/fpqpp";
+		return "text/" + Language.FPQLPP.name();
 	}
 
 	@Override

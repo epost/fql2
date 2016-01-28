@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import catdata.algs.Pair;
 import catdata.algs.Triple;
 import catdata.algs.Unit;
-import fql_lib.DEBUG;
-import fql_lib.Util;
+import fql_lib.core.DEBUG;
+import fql_lib.core.Util;
 
 public abstract class XExp {
 	

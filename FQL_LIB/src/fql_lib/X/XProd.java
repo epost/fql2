@@ -14,11 +14,11 @@ import catdata.algs.Chc;
 import catdata.algs.Pair;
 import catdata.algs.Triple;
 import catdata.algs.Unit;
-import fql_lib.Util;
 import fql_lib.X.XExp.FLOWER2;
 import fql_lib.X.XExp.Flower;
 import fql_lib.X.XExp.XBool;
 import fql_lib.X.XPoly.Block;
+import fql_lib.core.Util;
 
 public class XProd {
 	

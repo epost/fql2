@@ -37,12 +37,12 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
-import fql_lib.DEBUG;
-import fql_lib.Util;
 import fql_lib.X.XExp.XMapConst;
 import fql_lib.X.XExp.XTransConst;
 import fql_lib.X.XPoly.Block;
-import fql_lib.gui.FQLTextPanel;
+import fql_lib.core.CodeTextPanel;
+import fql_lib.core.DEBUG;
+import fql_lib.core.Util;
 
 public class XMapping<C, D> implements XObject {
 	public Map<Pair<List<C>, List<C>>, String> unprovable = new HashMap<>();
@@ -184,7 +184,7 @@ public class XMapping<C, D> implements XObject {
 
 		if (DEBUG.debug.x_text) {
 			String ret = toString();
-			pane.addTab("Text", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", ret));
+			pane.addTab("Text", new CodeTextPanel(BorderFactory.createEtchedBorder(), "", ret));
 		}
 
 		if (src.schema != null) {
@@ -237,7 +237,7 @@ public class XMapping<C, D> implements XObject {
 					rowData.toArray(new Object[0][0]), colNames);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR:\n\n"
+			return new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR:\n\n"
 					+ e.getMessage());
 		}
 
@@ -276,7 +276,7 @@ public class XMapping<C, D> implements XObject {
 
 			return Util.makeGrid(grid);
 		} catch (Exception e) {
-			return new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR:\n\n"
+			return new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR:\n\n"
 					+ e.getMessage());
 		}
 	}

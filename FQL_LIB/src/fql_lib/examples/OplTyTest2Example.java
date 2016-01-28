@@ -1,15 +1,18 @@
 package fql_lib.examples;
 
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+
 public class OplTyTest2Example extends Example {
 
 	@Override
-	public String isPatrick() {
-		return "OPL";
+	public Language lang() {
+		return Language.OPL;
 	}
 	
 	@Override
 	public String getName() {
-		return "O Ty Test";
+		return "Ty Test";
 	}
 
 	@Override

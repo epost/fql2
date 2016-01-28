@@ -39,9 +39,10 @@ import fql_lib.X.XParser;
 import fql_lib.X.XPoly;
 import fql_lib.X.XPoly.Block;
 import fql_lib.X.XProgram;
-import fql_lib.decl.LineException;
-import fql_lib.examples.Example;
-import fql_lib.gui.FQLTextPanel;
+import fql_lib.core.CodeTextPanel;
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+import fql_lib.core.LineException;
 
 public class EnrichViewer {
 
@@ -54,6 +55,12 @@ public class EnrichViewer {
 	
 	class NistExample extends Example2 {
 
+		@Override
+		public Language lang() {
+			return Language.FPQL;
+		}
+
+		
 		@Override
 		public String left() {
 			return "l";
@@ -165,7 +172,7 @@ public class EnrichViewer {
 	}
 
 	
-	final FQLTextPanel topArea = new FQLTextPanel(BorderFactory.createEtchedBorder(),
+	final CodeTextPanel topArea = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 			"Input FQL", "//Schema, then isa");
 
 	public JTextField name = new JTextField("");
@@ -174,7 +181,7 @@ public class EnrichViewer {
 	public JTextField isaField= new JTextField("");
 	
 	public EnrichViewer() {
-		final FQLTextPanel output = new FQLTextPanel(BorderFactory.createEtchedBorder(),
+		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"Output FQL", "");
 
 		// JButton jdbcButton = new JButton("Load using JDBC");
@@ -592,6 +599,11 @@ public class EnrichViewer {
 	} */
 
 	class PeopleExample extends Example2 {
+
+		@Override
+		public Language lang() {
+			throw new RuntimeException();
+		}
 
 		@Override
 		public String att() {

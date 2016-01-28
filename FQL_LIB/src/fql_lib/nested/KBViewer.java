@@ -24,11 +24,12 @@ import javax.swing.JTextArea;
 
 import catdata.algs.Pair;
 import catdata.algs.kb.KB_Thue;
-import fql_lib.cat.presentation.Signature;
-import fql_lib.decl.CatExp;
-import fql_lib.decl.FQLParser;
-import fql_lib.examples.Example;
-import fql_lib.gui.FQLTextPanel;
+import fql_lib.core.CodeTextPanel;
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+import fql_lib.pp.CatExp;
+import fql_lib.pp.PPParser;
+import fql_lib.pp.cat.Signature;
 
 public class KBViewer {
 
@@ -41,6 +42,12 @@ public class KBViewer {
 	}
 
 	static class Cat extends Example {
+		
+		@Override
+		public Language lang() {
+			throw new RuntimeException();
+		}
+
 		@Override
 		public String getName() {
 			return "Category";
@@ -55,9 +62,9 @@ public class KBViewer {
 
 	
 	public KBViewer() {
-		final FQLTextPanel input = new FQLTextPanel(BorderFactory.createEtchedBorder(),
+		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"Input Category", "");
-		final FQLTextPanel output = new FQLTextPanel(BorderFactory.createEtchedBorder(),
+		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"Output Re-writes", "");
 
 		// JButton jdbcButton = new JButton("Load using JDBC");
@@ -155,8 +162,8 @@ public class KBViewer {
 	}
 	
 	private String translate(String s) {
-		Object o = FQLParser.catConst().from(FQLParser.TOKENIZER, FQLParser.IGNORED).parse(s);
-		CatExp.Const c = FQLParser.toCatConst(o);
+		Object o = PPParser.catConst().from(PPParser.TOKENIZER, PPParser.IGNORED).parse(s);
+		CatExp.Const c = PPParser.toCatConst(o);
 		Signature<String, String> sig = new Signature<>(c.nodes, c.arrows, c.eqs);
 		
 		Set<Pair<List<String>, List<String>>> rules = new HashSet<>();

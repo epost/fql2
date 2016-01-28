@@ -2,10 +2,10 @@ package fql_lib.opl;
 
 import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.templates.StaticCodeTemplate;
 
-import fql_lib.gui.CodeEditor;
+import fql_lib.core.CodeEditor;
+import fql_lib.core.Language;
 
 
 @SuppressWarnings("serial")
@@ -16,13 +16,13 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 	}
 
 	@Override
-	public String isPatrick() {
-		return "OPL";
+	public Language isPatrick() {
+		return Language.OPL;
 	}
 
 	@Override
 	protected String getATMFlhs() {
-		return "text/opl";
+		return "text/" + Language.OPL.name();
 	}
 
 	@Override
@@ -32,8 +32,7 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 
 	@Override
 	protected void doTemplates() {
-		CodeTemplateManager ctm = RSyntaxTextArea.getCodeTemplateManager();
-		//ctm.
+		CodeTemplateManager ctm = topArea.getCodeTemplateManager();
 		
 		StaticCodeTemplate ct = new StaticCodeTemplate("theory", "theory ",
 				"{\n\tsorts;\n\tsymbols;\n\tequations;\n}");

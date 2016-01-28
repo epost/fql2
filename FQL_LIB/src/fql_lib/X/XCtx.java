@@ -50,12 +50,12 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import edu.uci.ics.jung.visualization.transform.shape.GraphicsDecorator;
-import fql_lib.DEBUG;
-import fql_lib.Util;
 import fql_lib.X.XExp.XInst;
 import fql_lib.X.XExp.XSchema;
-import fql_lib.cat.Category;
-import fql_lib.gui.FQLTextPanel;
+import fql_lib.core.CodeTextPanel;
+import fql_lib.core.DEBUG;
+import fql_lib.core.Util;
+import fql_lib.pp.cat.Category;
 
 public class XCtx<C> implements XObject {
 	
@@ -500,7 +500,7 @@ public class XCtx<C> implements XObject {
 					ggg.setText(ex.getMessage());
 				}
 			});
-			JComponent kbc = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", kb_text);
+			JComponent kbc = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", kb_text);
 			pane.add(kbc);
 			pane.add(bot);
 			ret.addTab("Text", pane);
@@ -515,7 +515,7 @@ public class XCtx<C> implements XObject {
 				e.printStackTrace();
 				cat = "ERROR\n\n" + e.getMessage();
 			}
-			JComponent ctp = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", cat);
+			JComponent ctp = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", cat);
 			ret.addTab("Category", ctp);
 		}
 
@@ -524,7 +524,7 @@ public class XCtx<C> implements XObject {
 				// TODO: if category tab blew up, so should this
 				JComponent tables = null;
 				if (cat != null && cat.startsWith("ERROR")) {
-					tables = new FQLTextPanel(BorderFactory.createEtchedBorder(), "", cat);
+					tables = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", cat);
 				} else {
 					tables = makeTables(x -> cat().arrows(), new HashSet<>());
 				}
@@ -546,7 +546,7 @@ public class XCtx<C> implements XObject {
 		if (DEBUG.debug.x_json) {
 			String tj = toJSON();
 			if (tj != null) {
-				ret.addTab("JSON", new FQLTextPanel(BorderFactory.createEtchedBorder(), "", tj));
+				ret.addTab("JSON", new CodeTextPanel(BorderFactory.createEtchedBorder(), "", tj));
 			}
 		}
 
@@ -919,7 +919,7 @@ public class XCtx<C> implements XObject {
 			// text);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR: "
+			return new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR: "
 					+ e.getMessage());
 		}
 	}
@@ -1074,7 +1074,7 @@ public class XCtx<C> implements XObject {
 			return Util.makeGrid(grid);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR\n\n"
+			return new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR\n\n"
 					+ e.getMessage());
 		}
 	}
@@ -2215,7 +2215,7 @@ public class XCtx<C> implements XObject {
 		try {
 			ret.add(makeElems());
 		} catch (Exception e) {
-			ret.add(new FQLTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR\n\n" +  e.getMessage()));
+			ret.add(new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR\n\n" +  e.getMessage()));
 		}
 		return ret;
 	}

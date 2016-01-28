@@ -25,9 +25,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import catdata.algs.Pair;
-import fql_lib.gui.FQLDisp;
+import fql_lib.core.Disp;
 
-public class XDisplay implements FQLDisp {
+public class XDisplay implements Disp {
 	
 	private static String doLookup(String c, XObject obj, Map<Object, String> map, XProgram prog) {
 		String front = obj.kind() + " " + c;

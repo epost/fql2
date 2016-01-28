@@ -1,15 +1,19 @@
 package fql_lib.examples;
 
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+
 public class Patrick27ExampleIntegration extends Example {
 
 	@Override
-	public String isPatrick() {
-		return "true";
+	public Language lang() {
+		return Language.FPQL;
 	}
+
 	
 	@Override
 	public String getName() {
-		return "P Integration";
+		return "Integration";
 	}
 
 	@Override
@@ -18,7 +22,9 @@ public class Patrick27ExampleIntegration extends Example {
 	}
 	
 	String s ="//Example via Peter Gates"
-			+ "\n//Requires disabling type checking"
+			+ "\n/* **********************************************************"
+			+ "\nIMPORTANT IMPORTANT IMPORTANT : Requires disabling type checking to run"
+			+ "\n/********************************************************* */"
 			+ "\n//Types:"
 			+ "\ndom:type"
 			+ "\nxPeter xPaul xM xF xBloodPressure xBodyWeight xHeartRate xPete xJane  : dom"

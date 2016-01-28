@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Set;
 
 import catdata.algs.Triple;
-import fql_lib.decl.FQLProg;
-import fql_lib.decl.LineException;
+import fql_lib.core.LineException;
+import fql_lib.core.Prog;
 import fql_lib.opl.OplProgram;
 
 
-public class AProgram implements FQLProg {
+public class AProgram implements Prog {
 
 	
 	public List<String> order = new LinkedList<>();

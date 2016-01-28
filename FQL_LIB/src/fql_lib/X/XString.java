@@ -3,7 +3,7 @@ package fql_lib.X;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 
-import fql_lib.gui.FQLTextPanel;
+import fql_lib.core.CodeTextPanel;
 
 public class XString implements XObject {
 
@@ -19,7 +19,7 @@ public class XString implements XObject {
 	
 	@Override
 	public JComponent display() {
-		return new FQLTextPanel(BorderFactory.createEtchedBorder(), title, value);
+		return new CodeTextPanel(BorderFactory.createEtchedBorder(), title, value);
 	}
 
 

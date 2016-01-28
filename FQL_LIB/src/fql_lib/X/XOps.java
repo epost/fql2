@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
-import fql_lib.Util;
 import fql_lib.X.XExp.Apply;
 import fql_lib.X.XExp.Compose;
 import fql_lib.X.XExp.FLOWER2;
@@ -52,6 +51,7 @@ import fql_lib.X.XExp.XTy;
 import fql_lib.X.XExp.XUberPi;
 import fql_lib.X.XExp.XUnit;
 import fql_lib.X.XExp.XVoid;
+import fql_lib.core.Util;
 
 public class XOps implements XExpVisitor<XObject, XProgram> {
 	

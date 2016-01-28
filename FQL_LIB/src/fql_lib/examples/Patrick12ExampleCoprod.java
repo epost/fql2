@@ -1,15 +1,19 @@
 package fql_lib.examples;
 
+import fql_lib.core.Example;
+import fql_lib.core.Language;
+
 public class Patrick12ExampleCoprod extends Example {
 
 	@Override
-	public String isPatrick() {
-		return "true";
+	public Language lang() {
+		return Language.FPQL;
 	}
+
 	
 	@Override
 	public String getName() {
-		return "P Coprod";
+		return "Coprod";
 	}
 
 	@Override
