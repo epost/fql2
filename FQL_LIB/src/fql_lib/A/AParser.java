@@ -25,9 +25,9 @@ import catdata.algs.Pair;
 import catdata.algs.Triple;
 import fql_lib.X.XExp;
 import fql_lib.core.Util;
+import fql_lib.opl.OplCtx;
 import fql_lib.opl.OplExp;
 import fql_lib.opl.OplExp.OplApply;
-import fql_lib.opl.OplExp.OplCtx;
 import fql_lib.opl.OplExp.OplDelta;
 import fql_lib.opl.OplExp.OplEval;
 import fql_lib.opl.OplExp.OplFlower;
@@ -41,7 +41,6 @@ import fql_lib.opl.OplExp.OplSchemaProj;
 import fql_lib.opl.OplExp.OplSetInst;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSigma;
-import fql_lib.opl.OplExp.OplTerm;
 import fql_lib.opl.OplExp.OplUberSat;
 import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
@@ -49,6 +48,7 @@ import fql_lib.opl.OplParser.VIt;
 import fql_lib.opl.OplProgram;
 import fql_lib.opl.OplQuery;
 import fql_lib.opl.OplQuery.Block;
+import fql_lib.opl.OplTerm;
 
 public class AParser {
 

@@ -29,11 +29,8 @@ import catdata.algs.kb.KBOptions;
 import catdata.algs.kb.KBOrders;
 import fql_lib.core.DEBUG;
 import fql_lib.core.Util;
-import fql_lib.opl.OplExp.JSWrapper;
-import fql_lib.opl.OplExp.OplCtx;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplSig;
-import fql_lib.opl.OplExp.OplTerm;
 import fql_lib.opl.OplParser.DoNotIgnore;
 import fql_lib.pp.cat.FinSet;
 import fql_lib.pp.cat.Operad;
@@ -92,6 +89,10 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	private KB<C, V> KB;
 	private Iterator<V> fr;
 //	private OplJavaInst I;
+	
+	public boolean gt(OplTerm<C,V> e1, OplTerm<C,V> e2) {
+		return KB.gt.apply(new Pair<>(convert(e1), convert(e2)));
+	}
 	
 	public OplToKB(Iterator<V> fr, OplSig<S, C, V> sig) {
 		this.sig = sig;

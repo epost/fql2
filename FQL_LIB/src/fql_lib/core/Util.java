@@ -29,7 +29,7 @@ import catdata.algs.Chc;
 import catdata.algs.Pair;
 import catdata.algs.Utils;
 import fql_lib.FUNCTION;
-import fql_lib.opl.OplExp.OplTerm;
+import fql_lib.opl.OplTerm;
 
 public class Util {
 	
@@ -317,6 +317,7 @@ public class Util {
 		return ret;
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Pair<Function, Object> stripChcs(Object o) {
 		 if (o instanceof Chc) {
 			 Chc c = (Chc) o;
@@ -334,22 +335,26 @@ public class Util {
 	public static <V> double termToDouble(OplTerm<?,V> t) {
 		return termToNat(t);
 	}
-	public static <V> int termToNat(OplTerm<?,V> t) {
+	
+	public static <V> Integer termToNat(OplTerm<?,V> t) {
 		if (t.var != null) {
-			throw new RuntimeException("Encountered variable when converting " + t + " to a nat");
+			return null;
 		}
 		if (stripChcs(t.head).second.equals("zero")) { 
 			return 0;
 		} else if (stripChcs(t.head).second.equals("succ")) { 
 			if (t.args.size() != 1) {
-				throw new RuntimeException("Argument for " + t + " has arity != 1");
+				return null;
 			}
-			return 1 + termToNat(t.args.get(0));
-		} else {
-			throw new RuntimeException("Encountered head " + stripChcs(t.head).second + " , which is not zero or succ");
-		}
+			Integer j = termToNat(t.args.get(0));
+			if (j == null) {
+				return null;
+			}
+			return 1 + j;
+		} 
+		return null;
 	}
-	
+		
 	public static <V> OplTerm<String, V> natToTerm(int i) {
 		if (i < 0) {
 			throw new RuntimeException("Cannot convert negative number to natural");
@@ -358,5 +363,25 @@ public class Util {
 			return new OplTerm<>("zero", new LinkedList<>());
 		}
 		return new OplTerm<>("succ", Util.singList(natToTerm(i-1)));
+	}
+
+	public static <X> List<List<X>> prod(List<Set<X>> in1) {
+		List<List<X>> y = new LinkedList<>();
+		List<X> z = new LinkedList<>();
+		y.add(z);
+	
+		for (Set<X> X : in1) {
+			List<List<X>> y0 = new LinkedList<>();
+			for (List<X> a : y) {
+				for (X x : X) {
+					List<X> toadd = new LinkedList<>(a);
+					toadd.add(x);
+					y0.add(toadd);
+				}
+			}
+			y = y0;
+		}
+	
+		return y;
 	}
 }

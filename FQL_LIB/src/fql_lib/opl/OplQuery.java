@@ -16,7 +16,7 @@ import javax.swing.JTabbedPane;
 
 import catdata.algs.Chc;
 import catdata.algs.Pair;
-import catdata.algs.Triple;
+import catdata.algs.Quad;
 import catdata.algs.kb.KBExp;
 import fql_lib.core.CodeTextPanel;
 import fql_lib.core.DEBUG;
@@ -70,7 +70,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		fE = new HashMap<>();
 		for (Object l : blocks.keySet()) {
 			Block<S1, C1, V1, S2, C2, V2> block = blocks.get(l).second;
-			S2 s2 = blocks.get(l).first;
+			//S2 s2 = blocks.get(l).first;
 			for (C2 c2 : block.edges.keySet()) {
 				Pair<Object, Map<V1, OplTerm<C1, V1>>> l0f = block.edges.get(c2);
 
@@ -253,11 +253,6 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			this.where = where;
 			this.attrs = attrs;
 			this.edges = edges;
-			// TODO
-			/*
-			 * if (DEBUG.debug.reorder_joins) { this.from = sort(from); } else {
-			 * this.from = from; }
-			 */
 		}
 
 		@Override
@@ -365,18 +360,6 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 
 		ret.addTab("Text", new CodeTextPanel(BorderFactory.createEtchedBorder(), "", toString()));
 
-		// ret.addTab("Hat", new
-		// FQLTextPanel(BorderFactory.createEtchedBorder(), "",
-		// hat().toString()));
-
-		// ret.addTab("GrothO", new
-		// FQLTextPanel(BorderFactory.createEtchedBorder(), "",
-		// grotho().toString()));
-
-		// ret.addTab("Tilde", new
-		// FQLTextPanel(BorderFactory.createEtchedBorder(), "",
-		// tilde().toString()));
-
 		return ret;
 	}
 
@@ -385,6 +368,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		return v.visit(env, this);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <S, C, V> OplQuery<S, C, V, S, C, V> id(String str, OplSchema<S, C, V> S) {
 		Map<Object, Pair<S, Block<S, C, V, S, C, V>>> bs = new HashMap<>();
 		for (S x : S.projE().sorts) {
@@ -465,72 +449,35 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		return ret;
 	}
 
-	// TODO: also copy over equations
 
-	<X> OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2> conv2(
-			OplInst<S1, C1, V1, X> I0, Set<OplTerm<Chc<C1, X>, V1>> allCopiedTerms,
-			OplTerm<Chc<C1, X>, V1> term) {
-		if (term.var != null) {
+	public static <S1, S2, C1, C2, V1, V2, X> OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2>
+	              conv(OplInst<S1, C1, V1, X> i0, OplTerm<Chc<C1, OplTerm<Chc<C1, X>, V1>>, V1> e) {
+		if (e.var != null) {
 			throw new RuntimeException();
 		}
-		if (term.head.left) {
-			if (dst.projT().symbols.keySet().contains(term.head.l)) {
-				List<OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2>> args = new LinkedList<>();
-				for (OplTerm<Chc<C1, X>, V1> arg : term.args) {
-					args.add(conv2(I0, allCopiedTerms, arg));
-				}
-				return new OplTerm<>(Chc.inLeft((C2) (term.head.l)), args); // ?
-			} 
-		//	else { 
-			//	OplTerm<Chc<C1, X>, V1> nf = I0.projEAdiscreteT().toSig().getKB().nf(term);
-				
-		   // }
-		} // else {
-		OplTerm<Chc<C1, X>, V1> nf = I0.projEAdiscreteT().toSig().getKB().nf(term);
-		for (OplTerm<Chc<C1, X>, V1> cand : allCopiedTerms) {
-			if (nf.equals(cand)) {
-				return new OplTerm<>(Chc.inRight(Chc.inLeft(cand)), new LinkedList<>());
+		List<OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2>> l = new LinkedList<>();
+		for (OplTerm<Chc<C1, OplTerm<Chc<C1, X>, V1>>, V1> arg : e.args) {
+			l.add(conv(i0, arg));
+		}
+		
+		if (!e.head.left) {
+			if (!l.isEmpty()) {
+				throw new RuntimeException();
 			}
+			return new OplTerm<>(Chc.inRight(Chc.inLeft(e.head.r)), new LinkedList<>());
 		}
-		
-		if (nf.equals(term)) {
-			throw new RuntimeException("imossible 4 on " + term + " gens " + allCopiedTerms); 
+		C1 c1 = e.head.l;
+		if (i0.S.projT().symbols.keySet().contains(c1)) {
+			@SuppressWarnings("unchecked")
+			C2 c2 = (C2) c1; //is type symbol
+			return new OplTerm<>(Chc.inLeft(c2), l);
+		} else { //is attribute
+			throw new RuntimeException("New Impossible");
 		}
-		return conv2(I0, allCopiedTerms, nf);
-		
-//		throw new RuntimeException("Impossible3 on " + term + " gens " + allCopiedTerms + " nf "
-	//			+ nf);
 	}
 
-	/*
-	 * <X> OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1,
-	 * OplTerm<Chc<C1, X>, V1>>>>>, V2> conv(OplInst<S1,C1,V1,X> I0,
-	 * Set<OplTerm<Chc<C1, X>, V1>> allCopiedTerms, OplTerm<Chc<C1, X>, V1>
-	 * term) { if (term.var != null) { throw new RuntimeException(); } if
-	 * (allCopiedTerms.contains(term)) { return new
-	 * OplTerm<>(Chc.inRight(Chc.inLeft(term)), new LinkedList<>()); }
-	 * 
-	 * 
-	 * if (term.head.left) { if
-	 * (dst.projT().symbols.keySet().contains(term.head.l)) {
-	 * List<OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1,
-	 * OplTerm<Chc<C1, X>, V1>>>>>, V2>> args = new LinkedList<>(); for
-	 * (OplTerm<Chc<C1, X>, V1> arg : term.args) { args.add(conv(I0,
-	 * allCopiedTerms, arg)); } return new
-	 * OplTerm<>(Chc.inLeft((C2)(term.head.l)), args); } //added for
-	 * (OplTerm<Chc<C1, X>, V1> cand : allCopiedTerms) { if
-	 * (I0.P.toSig().getKB().nf(term).equals(I0.P.toSig().getKB().nf(cand))) {
-	 * return new OplTerm<>(Chc.inRight(Chc.inLeft(cand)), new LinkedList<>());
-	 * } } throw new RuntimeException("Impossible1 on " + term +
-	 * ", blackboxes are " + allCopiedTerms); // return new
-	 * OplTerm<>(Chc.inRight(Chc.inLeft(term)), new LinkedList<>()); }
-	 * 
-	 * throw new RuntimeException("Impossible2 on " + term + ", blackboxes are "
-	 * + allCopiedTerms); // return new OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>,
-	 * V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>,
-	 * V2>(Chc.inRight(Chc.inLeft(term.head.r)), args); }
-	 */
-
+	//TODO: deal with precedence somehow
+	static int symgen = 1000;
 	public <X> OplInst<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> eval(
 			OplInst<S1, C1, V1, X> I0) {
 		if (!I0.S.equals(src)) {
@@ -540,40 +487,20 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, S2> gens = new HashMap<>();
 		List<Pair<OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2>, OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2>>> equations = new LinkedList<>();
 
-		OplSetInst<S1, C1, OplTerm<Chc<C1, X>, V1>> I = OplSat.saturate(I0.projEA());
+		Quad<OplSetInst<S1, C1, OplTerm<Chc<C1, X>, V1>>, OplSetInst<S1, C1, OplTerm<Chc<Chc<C1, X>, JSWrapper>, V1>>, OplPres<S1, C1, V1, OplTerm<Chc<C1, X>, V1>>, OplSetInst<S1, C1, OplTerm<Chc<C1, X>, V1>>> yyy = I0.saturate();
+		
+		OplSetInst<S1, C1, OplTerm<Chc<C1, X>, V1>> I = yyy.fourth; //OplSat.saturate(I0.projEA());
 		Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, Integer> prec = new HashMap<>();
 
-		Set<OplTerm<Chc<C1, X>, V1>> allCopiedTerms = new HashSet<>();
-		int i = 10000;
-		for (S1 s1 : I0.S.projT().sorts) { // copies skolems
-			for (OplTerm<Chc<C1, X>, V1> x : I.sorts.get(s1)) {
-				gens.put(Chc.inLeft(x), (S2) s1);
-				allCopiedTerms.add(x);
-				prec.put(Chc.inLeft(x), i++);
-			}
-			// added
-			/*
-			 * for (Entry<X, S1> x : I0.P.gens.entrySet()) { if
-			 * (x.getValue().equals(s1)) { gens.put(Chc.inLeft(new
-			 * OplTerm<Chc<C1,X, V1>>(Chc.inRight(x.getKey()), new
-			 * LinkedList<>()), (S2)s1); allCopiedTerms.add(x);
-			 * prec.put(Chc.inLeft(x.getKey()), i++); } }
-			 */
+		for (OplTerm<Chc<C1, X>, V1> gen : yyy.third.gens.keySet()) {
+			@SuppressWarnings("unchecked")
+			S2 s2 = (S2) yyy.third.gens.get(gen);
+			gens.put(Chc.inLeft(gen), s2);
+			prec.put(Chc.inLeft(gen), yyy.third.prec.get(gen));
 		}
-		// added
-
-		for (Pair<OplTerm<Chc<C1, X>, V1>, OplTerm<Chc<C1, X>, V1>> eq : I0.P.equations) {
-			S1 t = eq.first.type(I0.P.toSig(), new OplCtx<>());
-			if (src.projT().sorts.contains(t)) {
-				// System.out.println("Copying over " + eq);
-				equations.add(new Pair<>(conv2(I0, allCopiedTerms, eq.first), conv2(I0,
-						allCopiedTerms, eq.second)));
-				// System.out.println("Added  " + new Pair<>(conv2(I0,
-				// allCopiedTerms, eq.first), conv2(I0, allCopiedTerms,
-				// eq.second)));
-			}
+		for (Pair<OplTerm<Chc<C1, OplTerm<Chc<C1, X>, V1>>, V1>, OplTerm<Chc<C1, OplTerm<Chc<C1, X>, V1>>, V1>> eq : yyy.third.equations) {
+			equations.add(new Pair<>(conv(I0, eq.first), conv(I0, eq.second)));
 		}
-
 		for (Object label : blocks.keySet()) {
 			Pair<S2, Block<S1, C1, V1, S2, C2, V2>> xxx = blocks.get(label);
 			S2 tgt = xxx.first;
@@ -588,7 +515,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			}
 
 			List<V1> ordered = order(block);
-			for (V1 v : block.from.keySet()) {
+			for (V1 v : ordered) {
 				S1 s = block.from.get(v);
 				Set<OplTerm<Chc<C1, X>, V1>> dom = I.sorts.get(s);
 				tuples = extend(tuples, dom, v);
@@ -600,7 +527,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 
 			for (Map<V1, OplTerm<Chc<C1, X>, V1>> tuple : tuples) {
 				gens.put(Chc.inRight(new Pair<>(label, tuple)), tgt);
-				prec.put(Chc.inRight(new Pair<>(label, tuple)), i++);
+				prec.put(Chc.inRight(new Pair<>(label, tuple)), symgen++);
 			}
 
 			for (C2 c2 : block.attrs.keySet()) {
@@ -612,9 +539,9 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 							Chc.inLeft(c2), Util.singList(new OplTerm<>(Chc.inRight(Chc
 									.inRight(new Pair<>(label, tuple))), new LinkedList<>())));
 
-					equations.add(new Pair<>(lhs, conv2(I0, allCopiedTerms, a)));
+					equations.add(new Pair<>(lhs, conv(I0, OplInst.conv(I0.S, a, I0.P))));
 				}
-			}
+			} 
 
 			for (C2 c2 : block.edges.keySet()) {
 				Object tgt_label = block.edges.get(c2).first;

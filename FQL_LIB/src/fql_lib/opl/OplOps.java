@@ -3,7 +3,6 @@ package fql_lib.opl;
 import javax.script.Invocable;
 
 import fql_lib.opl.OplExp.OplApply;
-import fql_lib.opl.OplExp.OplCtx;
 import fql_lib.opl.OplExp.OplDelta;
 import fql_lib.opl.OplExp.OplEval;
 import fql_lib.opl.OplExp.OplExpVisitor;
@@ -13,16 +12,14 @@ import fql_lib.opl.OplExp.OplInst;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
 import fql_lib.opl.OplExp.OplPres;
+import fql_lib.opl.OplExp.OplPresTrans;
 import fql_lib.opl.OplExp.OplSat;
 import fql_lib.opl.OplExp.OplSchema;
 import fql_lib.opl.OplExp.OplSchemaProj;
 import fql_lib.opl.OplExp.OplSetInst;
-import fql_lib.opl.OplExp.OplPresTrans;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSig;
 import fql_lib.opl.OplExp.OplSigma;
-import fql_lib.opl.OplExp.OplString;
-import fql_lib.opl.OplExp.OplTransEval;
 import fql_lib.opl.OplExp.OplTyMapping;
 import fql_lib.opl.OplExp.OplUberSat;
 import fql_lib.opl.OplExp.OplUnSat;
@@ -154,31 +151,6 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		throw new RuntimeException("Not a model or transform: " + e.I);
 	}
 
-	@Override
-	public OplObject visit(OplProgram env, OplTransEval e) {
-	/*	OplObject i = ENV.get(e.I);
-		OplObject F = ENV.get(e.F);
-		if (!(F instanceof OplMapping)) {
-			throw new RuntimeException("Not a mapping: " + e.F);
-		}
-		OplMapping F0 = (OplMapping) F;
-		e.e.type(F0.src, new OplCtx<>());
-		OplTerm t = F0.trans(new OplCtx<>(), e.e).second;
-				
-		if (i instanceof OplSetInst) {
-			return new OplString(t.eval(F0.dst, (OplSetInst)i, new OplCtx<String, String>()).toString());
-		}
-		if (i instanceof OplJavaInst) {
-			try {
-				return new OplString(t.eval0((Invocable)((OplJavaInst)i).engine));
-			} catch (Exception ee) {
-				ee.printStackTrace();
-				throw new RuntimeException(ee.getMessage());
-			}
-		}
-		throw new RuntimeException("Not a set/js model: " + e.I); */
-		throw new RuntimeException();
-	}
 
 	@Override
 	public OplObject visit(OplProgram env, OplPres e) {

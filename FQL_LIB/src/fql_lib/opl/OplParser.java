@@ -26,7 +26,6 @@ import catdata.algs.Triple;
 import fql_lib.X.XExp;
 import fql_lib.core.Util;
 import fql_lib.opl.OplExp.OplApply;
-import fql_lib.opl.OplExp.OplCtx;
 import fql_lib.opl.OplExp.OplDelta;
 import fql_lib.opl.OplExp.OplEval;
 import fql_lib.opl.OplExp.OplFlower;
@@ -40,7 +39,6 @@ import fql_lib.opl.OplExp.OplSchemaProj;
 import fql_lib.opl.OplExp.OplSetInst;
 import fql_lib.opl.OplExp.OplSetTrans;
 import fql_lib.opl.OplExp.OplSigma;
-import fql_lib.opl.OplExp.OplTerm;
 import fql_lib.opl.OplExp.OplUberSat;
 import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
@@ -78,8 +76,7 @@ public class OplParser {
 
 	public static Parser<?> ident() {
 		return Parsers.or(Terminals.StringLiteral.PARSER,
-				/*Terminals.IntegerLiteral.PARSER,*/ Terminals.Identifier.PARSER);
-	//	return string(); //Terminals.Identifier.PARSER;
+				Terminals.Identifier.PARSER);
 	}
 
 	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
@@ -88,6 +85,7 @@ public class OplParser {
 		return Parsers.tuple(decl().source().peek(), decl()).many();
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> oplTerm() {
 		Reference ref = Parser.newReference();
 		Parser<?> app = Parsers.tuple(string(), term("("), ref.lazy().sepBy(term(",")), term(")"));
@@ -97,12 +95,8 @@ public class OplParser {
 		return a;
 	}
 
-	//TODO type inf
-/*	public static final Parser<?> oplSequent() {
-		Parser<?> p = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(","));
-		return Parsers.tuple(term("forall"), p, term("."), oplTerm());
-	} */
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> oplSequent() {
 		Parser<?> p1 = Parsers.tuple(ident(), term(":"), ident());
 		Parser<?> z = Parsers.longest(new Parser[] { p1, ident() });
@@ -112,6 +106,7 @@ public class OplParser {
 		return retX;
 	}
 	 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> oplEq() {
 		Parser<?> p1 = Parsers.tuple(ident(), term(":"), ident());
 		Parser<?> z = Parsers.longest(new Parser[] { p1, ident() });
@@ -122,6 +117,7 @@ public class OplParser {
 		return retX;
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> oplImpl() {
 		Parser<?> p1 = Parsers.tuple(ident(), term(":"), ident());
 		Parser<?> z = Parsers.longest(new Parser[] { p1, ident() });
@@ -133,6 +129,7 @@ public class OplParser {
 		return retX;
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> exp() {
 		Reference ref = Parser.newReference();
 
@@ -145,7 +142,6 @@ public class OplParser {
 		Parser<?> mapping = mapping();
 		Parser<?> delta = Parsers.tuple(term("delta"), ident(), ident());
 		Parser<?> sigma = Parsers.tuple(term("sigma"), ident(), ident());
-		//Parser<?> evaltrans = Parsers.tuple(term("transeval"), ident(), ident(), oplTerm());
 		Parser<?> presentation = presentation();
 		Parser<?> sat = Parsers.tuple(term("saturate"), ident());
 		Parser<?> ubersat = Parsers.tuple(term("SATURATE"), ident(), ident());
@@ -237,7 +233,7 @@ public class OplParser {
 		return Parsers.tuple(term("model").followedBy(term("{")), foo, Parsers.tuple(term("}").followedBy(term(":")), ident()));
 	}
 	
-	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final XExp.XSchema toCatConst(Object y) {
 		List<String> nodes = new LinkedList<>();
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
@@ -271,15 +267,11 @@ public class OplParser {
 		return c;
 	}
 
-	
-	public static final Parser<?> decl() {
-	//	Parser e = Parsers.or(new Parser[] { exp()  });
-		
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static final Parser<?> decl() {		
 		Parser p1 = Parsers.tuple(ident(), term("="), exp());
 		
 		return Parsers.or(new Parser[] { p1 });
-		
-//		return Parsers.tuple(ident(), Parsers.or(term("="), term(":")), e);
 	}
 	
 	
@@ -289,12 +281,13 @@ public class OplParser {
 	}
 		
 	
-
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final OplTerm parse_term(Map m, String s) {
 		Object o = oplTerm().from(TOKENIZER, IGNORED).parse(s);
 		return toTerm(null, consts(m), o, false);
 	} 
 	
+	@SuppressWarnings({ "rawtypes" })
 	public static final OplProgram program(String s) {
 		List<Triple<String, Integer, OplExp>> ret = new LinkedList<>();
 		List decls = (List) program.parse(s);
@@ -309,7 +302,7 @@ public class OplParser {
 		return new OplProgram(ret); 
 	}
 	
-	private static void toProgHelper(String txt, String s, List<Triple<String, Integer, OplExp>> ret, Tuple3 decl) {
+	private static void toProgHelper(String txt, String s, List<Triple<String, Integer, OplExp>> ret, @SuppressWarnings("rawtypes") Tuple3 decl) {
 		int idx = s.indexOf(txt);
 		if (idx < 0) {
 			throw new RuntimeException();
@@ -319,6 +312,7 @@ public class OplParser {
 		ret.add(new Triple<>(name, idx, toExp(decl.c)));
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplExp toTheory(Object o) {
 		Tuple4 t = (Tuple4) o;
 		
@@ -326,15 +320,8 @@ public class OplParser {
 		Tuple3 b = (Tuple3) t.b;
 		Tuple3 c = (Tuple3) t.c;
 		Tuple3 d = (Tuple3) t.d;
-		
-	/*	if (!(a.a.toString().equals("sorts") && b.a.toString().equals("symbols") && c.a.toString().equals("equations"))) {
-			throw new RuntimeException();
-		} */
-		
+				
 		Set<String> sorts = a == null ? new HashSet<>() : new HashSet<>((List<String>) a.b);
-	/*	if (sorts.size() != ((List)a.b).size()) {
-			throw new DoNotIgnore("Duplicate sort");
-		} */
 		
 		List<Tuple3> symbols0 = b == null ? new LinkedList<>() : (List<Tuple3>) b.b;
 		List<org.codehaus.jparsec.functors.Pair> equations0 = c == null ? new LinkedList<>() : (List<org.codehaus.jparsec.functors.Pair>) c.b;
@@ -419,13 +406,11 @@ public class OplParser {
 		return ret;
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplExp toPresentation(Object o) {
 		Tuple4 t = (Tuple4) o;
 		
-		
-	//	Tuple3 a = (Tuple3) t.a; //presentation
 		org.codehaus.jparsec.functors.Pair e = (org.codehaus.jparsec.functors.Pair) t.b;
-	//	Tuple3 c = (Tuple3) t.c; // :
 		
 		String yyy = (String) t.d;
 		
@@ -473,6 +458,7 @@ public class OplParser {
 		return new OplExp.OplPres<String,String,String,String>(prec, yyy, null, symbols, equations);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplExp toSchema(Object o) {
 		Tuple4 t = (Tuple4) o;
 		
@@ -484,6 +470,8 @@ public class OplParser {
 		
 		return new OplExp.OplSchema<String,String,String>(yyy, new HashSet<>(symbols0));
 	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplExp toModel(Object o) {
 		Tuple3 t = (Tuple3) o;
 		
@@ -529,6 +517,7 @@ public class OplParser {
 		return new OplSetInst(sorts0 , symbols0 , c.b.toString());
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplTerm toTermNoVars(Object a) {
 		if (a instanceof String) {
 			return new OplTerm((String)a, new LinkedList<>()); 
@@ -540,6 +529,7 @@ public class OplParser {
 		return new OplTerm(f, l0);
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplTerm toTerm(Collection vars, Collection consts, Object a, boolean suppressError) {
 		if (a instanceof String) {
 			String a0 = (String) a;
@@ -550,7 +540,10 @@ public class OplParser {
 				
 			if (vars != null && vars.contains(a0)) {
 				return new OplTerm(a0);				
-			} else if (consts != null && consts.contains(a0)) {
+			} else if (vars != null && !vars.contains(a0)) {
+				return new OplTerm(a0, new LinkedList<>());		
+			}
+			else if (consts != null && consts.contains(a0)) {
 				return new OplTerm(a0, new LinkedList<>()); 
 			} else if (consts == null || vars == null) {
 				return new OplTerm(a0);				
@@ -575,6 +568,7 @@ public class OplParser {
 		
 	}
 
+	@SuppressWarnings({ "rawtypes" })
 	private static OplCtx<String, String> toCtx(List<Tuple3> fa) {
 		List<Pair<String, String>> ret = new LinkedList<>();
 		if (fa == null) {
@@ -591,6 +585,7 @@ public class OplParser {
 		return new OplCtx<String, String>(ret);
 	}
 
+	@SuppressWarnings({ "rawtypes" })
 	private static OplExp toExp(Object c) {
 		if (c instanceof String) {
 			return new OplVar((String) c);
@@ -601,7 +596,6 @@ public class OplParser {
 			if (p.a.toString().startsWith("instance")) {
 				return new OplInst((String)p.b, (String)p.c, (String)p.d);
 			} 
-			//System.out.println(p);
 		}
 		
 		if (c instanceof Tuple3) {
@@ -683,14 +677,6 @@ public class OplParser {
 		}catch (Exception ee) { 
 		}
 		
-/*		try {
-			return toTransEval(c);
-		} catch (DoNotIgnore de) {
-			de.printStackTrace();
-			throw new RuntimeException(de.getMessage());
-		}catch (Exception ee) { 
-		} */
-		
 		try {
 			return toFDM(c);
 		} catch (DoNotIgnore de) {
@@ -737,6 +723,7 @@ public class OplParser {
 		throw new RuntimeException("Report this error to Ryan.");
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplExp toMapping(Object c) {
 		Tuple3 t = (Tuple3) c;
 
@@ -818,6 +805,7 @@ public class OplParser {
 	
 	
 	public static class DoNotIgnore extends RuntimeException {
+		private static final long serialVersionUID = 1L;
 
 		public DoNotIgnore(String string) {
 			super(string);
@@ -825,8 +813,8 @@ public class OplParser {
 		
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static OplExp toJava(Object x) {
-	//	System.out.println(x);
 		Tuple3 t = (Tuple3) x;
 		
 		Tuple3 b = (Tuple3) t.b;
@@ -845,6 +833,7 @@ public class OplParser {
 		return new OplJavaInst(defs, (String) c.b);
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static OplExp toTrans(Object c) {
 		Tuple3 t = (Tuple3) c;
 		if (!t.a.toString().equals("transform")) {
@@ -877,6 +866,7 @@ public class OplParser {
 		return new OplSetTrans(map , (String) tc.b, (String) tc.d);
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static OplExp toTrans_2(Object c) {
 		Tuple3 t = (Tuple3) c;
 		if (!t.a.toString().equals("transpres")) {
@@ -910,7 +900,7 @@ public class OplParser {
 		return new OplPresTrans(map , (String) tc.b, (String) tc.d);
 	}
 	
-	
+	@SuppressWarnings({ "rawtypes"})
 	private static OplExp toEval(Object c) {
 		Tuple3 t = (Tuple3) c;
 		if (!t.a.toString().equals("eval")) {
@@ -920,19 +910,10 @@ public class OplParser {
 		OplTerm r = toTerm(null, null, t.c, false);
 		return new OplEval(i, r);
 	}
-	
-/*	private static OplExp toTransEval(Object c) {
-		Tuple4 t = (Tuple4) c;
-		if (!t.a.toString().equals("transeval")) {
-			throw new RuntimeException();
-		}
-		String f = (String) t.b;
-		OplTerm r = toTerm(t.d);
-		String i = (String) t.c;
-		return new OplTransEval(i, f, r);
-	} */
+
 	
 	private static OplExp toFDM(Object c) {
+		@SuppressWarnings("rawtypes")
 		Tuple3 t = (Tuple3) c;
 		String i = (String) t.b;
 		String r = (String) t.c;
@@ -955,6 +936,7 @@ public class OplParser {
 				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
 	} 
 	 
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 	 public static final Parser<?> flower() {
 			Parser<?> from0 = Parsers.tuple(ident(), term("as"), ident()).sepBy(term(","));
 			Parser<?> from = Parsers.tuple(term("from"), from0, term(";"));
@@ -971,6 +953,7 @@ public class OplParser {
 			return ret;
 		}
 	
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 	 private static OplFlower toFlower(Object c) {
 		 Tuple3 p = (Tuple3) c;
 		// if (p.a.toString().equals("flower")) {
@@ -986,9 +969,20 @@ public class OplParser {
 		 List<Pair<OplTerm<String, String>, OplTerm<String, String>>> where = new LinkedList<>();
 					
 		 Set<String> seen = new HashSet<>();
+		
+		 for (Object o : f) {
+			 Tuple3 t = (Tuple3) o;
+			 String lhs = t.a.toString();
+			 String rhs = t.c.toString();
+			 if (seen.contains(rhs)) {
+				 throw new DoNotIgnore("Duplicate AS name: " + rhs + " (note: AS names can't be used in the schema either)");
+			 }
+			 seen.add(rhs);
+			 from.put(rhs, lhs);
+		 }
 		 for (Object o : w) {
 			 Tuple3 t = (Tuple3) o;
-			 OplTerm lhs = toTerm(from.keySet(), null, t.a, false); //TODO
+			 OplTerm lhs = toTerm(from.keySet(), null, t.a, false); 
 			 OplTerm rhs = toTerm(from.keySet(), null, t.c, false);
 			 where.add(new Pair<>(rhs, lhs));
 		 }
@@ -1001,24 +995,12 @@ public class OplParser {
 			 }
 			 seen.add(rhs);	
 			 select.put(rhs, lhs);
-		 }
-		 for (Object o : f) {
-			 Tuple3 t = (Tuple3) o;
-			 String lhs = t.a.toString();
-			 String rhs = t.c.toString();
-			 if (seen.contains(rhs)) {
-				 throw new DoNotIgnore("Duplicate AS name: " + rhs + " (note: AS names can't be used in the schema either)");
-			 }
-			 seen.add(rhs);
-			 from.put(rhs, lhs);
-		 }
-					
+		 }		
 		 return new OplFlower<>(select, from, where, I);				
 	
 	 }
 	
-	
-		//TODO: inference
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public static Block<String, String, String, String, String, String> fromBlock(Object o) {
 			Tuple4<List, List, List, List> t = (Tuple4<List, List, List, List>) o;
 			
@@ -1061,6 +1043,7 @@ public class OplParser {
 		} 
 		
 		//{b2=a1.f, b3=a1.f}
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public static Map<String, OplTerm<String,String>> fromBlockHelper(Set<String> vars, Object o) {
 			List<Tuple3> l = (List<Tuple3>) o;
 			Map<String, OplTerm<String,String>> ret = new HashMap<>();
@@ -1073,6 +1056,7 @@ public class OplParser {
 			return ret;
 		}
 		
+		@SuppressWarnings({ "rawtypes" })
 		public static Map<Object, Pair<String, Block<String, String, String, String, String, String>>> fromBlocks(List l) {
 			Map<Object, Pair<String, Block<String, String, String, String, String, String>>> ret = new HashMap<>();
 			for (Object o : l) {
@@ -1082,11 +1066,14 @@ public class OplParser {
 			}
 			return ret;
 		} 
+		
+		@SuppressWarnings({ "rawtypes" })
 		public static OplQuery<String,String,String,String,String, String> toQuery(Tuple4 o) {
 			Map<Object, Pair<String, Block<String, String, String, String, String, String>>> blocks = fromBlocks((List)o.a);
 			return new OplQuery<String,String,String,String,String,String>((String)o.b, (String)o.d, blocks);
 		}  
 	 
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public static final Parser<?> block() {
 			Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(",")).between(term("for"), term(";"));
 			Parser p2 = Parsers.tuple(oplTerm(), term("="), oplTerm()).sepBy(term(",")).between(term("where"), term(";"));
@@ -1100,6 +1087,7 @@ public class OplParser {
 			return p.between(term("{"), term("}"));
 		}
 		
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public static final Parser<?> query() {
 			Parser p = Parsers.tuple(ident(), term("="), block(), term(":"), ident());
 			Parser p2 = p.sepBy(term(",")).between(term("{"), term("}")).between(term("query"), term(":"));

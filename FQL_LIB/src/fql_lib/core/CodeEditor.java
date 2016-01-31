@@ -36,7 +36,6 @@ import javax.swing.text.DefaultEditorKit;
 import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
@@ -44,7 +43,6 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 
-//import fql.parse.PrettyPrinter;
 
 /**
  * 
@@ -66,13 +64,14 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	CodeTextPanel respArea = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Compiler response", "");
 
-	final JTextField searchField = new JTextField();
+	final JTextField searchField = new JTextField();	
 	final JButton nextButton = new JButton("Find Next");
 	final JButton prevButton = new JButton("Find Previous");
 	final JCheckBox matchCaseCB = new JCheckBox("Match Case");
 	final JCheckBox replaceCB = new JCheckBox("Replace");
 	final JCheckBox wholeCB = new JCheckBox("Whole Word");
 	final JTextField replaceField = new JTextField();
+	
 
 	JFrame frame;
 
@@ -116,7 +115,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	}
 
 	protected void doFind(boolean b) {
-		// Create an object defining our search parameters.
 		SearchContext context = new SearchContext();
 		String text = searchField.getText();
 		if (text.length() == 0) {
@@ -124,7 +122,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 		context.setSearchFor(text);
 		context.setMatchCase(matchCaseCB.isSelected());
-		// context.setRegularExpression(regexCB.isSelected());
 		context.setSearchForward(b);
 		context.setWholeWord(wholeCB.isSelected());
 
@@ -135,6 +132,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			SearchEngine.find(topArea, context);
 		}
 	}
+	
 
 	public void setText(String s) {
 		topArea.setText(s);
@@ -186,7 +184,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 				frame.setVisible(true);
 			}
 		});
-	}
+	} 
 	
 	protected abstract String getATMFlhs();
 	protected abstract String getATMFrhs();
@@ -205,14 +203,11 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		FoldParserManager.get().addFoldParserMapping(getATMFlhs(),
 				new CurlyFoldParser());
 
-		// topArea.setAntiAliasingEnabled(true);
-		//RSyntaxTextArea.setsetTemplatesEnabled(true);
-
-		
-		
 		topArea = new RSyntaxTextArea();
 
-//		topArea.setSyntaxEditingStyle("text/fql"); 
+		//this is kind of neat
+		topArea.setMarkOccurrences(true);
+		
 		if (getATMFrhs() != null) {
 			topArea.setSyntaxEditingStyle(getATMFlhs()); 
 		}
@@ -276,8 +271,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		topArea.setCodeFoldingEnabled(true);
 		RTextScrollPane sp = new RTextScrollPane(topArea);
 		sp.setFoldIndicatorEnabled(true);
-
-	     
+     
 		JSplitPane xx1 = new Split(.8, JSplitPane.VERTICAL_SPLIT);
 		xx1.add(sp);
 		xx1.setDividerSize(6);
@@ -348,6 +342,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		topArea.setFont(font);
 	}
 
+		
 	protected void findAction() {
 		makeSearchVisible();
 	}
@@ -509,11 +504,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	protected abstract Progg parse(String program) throws ParserException;
 	
-//	@SuppressWarnings("deprecation")
 	private Progg tryParse(String program) {
 		try {
 			return parse(program);
-//			return FQLParser.program(program);
 		} catch (ParserException e) {
 			int col = e.getLocation().column;
 			int line = e.getLocation().line;
@@ -554,5 +547,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 		return true;
 	}
+	
 
 }
