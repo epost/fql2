@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 
 import javax.script.Invocable;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
-import catdata.algs.Triple;
-import catdata.algs.Unit;
+import catdata.Chc;
+import catdata.Pair;
+import catdata.Triple;
+import catdata.Unit;
 import catdata.algs.kb.KB;
 import catdata.algs.kb.KBExp;
 import catdata.algs.kb.KBExp.KBApp;
@@ -399,7 +399,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			List<KBExp<Chc<Z,JSWrapper>,V>> l = new LinkedList<>();
 			List<Object> r = new LinkedList<>();
 			for (KBExp<Chc<Z, JSWrapper>, V> a : e0.args) {
-				KBExp<Chc<Z,JSWrapper>,V> b = redBy(I, a);
+				KBExp<Chc<Z, JSWrapper>,V> b = redBy(I, a);
 				l.add(b);
 				if (!b.isVar && b.getApp().args.isEmpty() && !b.getApp().f.left) {
 					JSWrapper js = b.getApp().f.r;

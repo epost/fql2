@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import catdata.algs.Pair;
+import catdata.Pair;
 import catdata.ide.NEWDEBUG;
 import catdata.ide.Util;
 

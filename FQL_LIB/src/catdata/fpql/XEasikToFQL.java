@@ -29,8 +29,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import catdata.algs.Pair;
-import catdata.algs.Triple;
+import catdata.Pair;
+import catdata.Triple;
 import catdata.fpql.XExp.XSchema;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;

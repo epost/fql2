@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import catdata.algs.Pair;
+import catdata.Pair;
 import catdata.fqlpp.FnExp.Case;
 import catdata.fqlpp.FnExp.Chr;
 import catdata.fqlpp.FnExp.Comp;

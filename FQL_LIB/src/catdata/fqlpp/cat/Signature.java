@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import catdata.algs.Pair;
-import catdata.algs.Triple;
-import catdata.algs.Unit;
+import catdata.Pair;
+import catdata.Triple;
+import catdata.Unit;
 import catdata.algs.kb.KB_Thue;
 import catdata.fqlpp.FUNCTION;
 import catdata.ide.NEWDEBUG;

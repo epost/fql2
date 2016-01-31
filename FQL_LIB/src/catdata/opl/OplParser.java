@@ -20,9 +20,9 @@ import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
-import catdata.algs.Triple;
+import catdata.Chc;
+import catdata.Pair;
+import catdata.Triple;
 import catdata.fpql.XExp;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplApply;

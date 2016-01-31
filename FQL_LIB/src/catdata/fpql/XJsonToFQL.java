@@ -29,8 +29,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
-import catdata.algs.Pair;
-import catdata.algs.Triple;
+import catdata.Pair;
+import catdata.Triple;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
 import catdata.ide.Language;

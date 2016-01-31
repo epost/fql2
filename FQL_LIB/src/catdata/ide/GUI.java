@@ -2,7 +2,6 @@ package catdata.ide;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Menu;
 import java.awt.MenuBar;
@@ -25,26 +24,23 @@ import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 
-import catdata.algs.Pair;
+import catdata.Pair;
+import catdata.fpql.EnrichViewer;
 import catdata.fpql.XEasikToFQL;
 import catdata.fpql.XJsonToFQL;
 import catdata.fpql.XNeo4jToFQL;
 import catdata.fpql.XRaToFpql;
 import catdata.fpql.XSqlToFql;
-import catdata.nested.EnrichViewer;
-import catdata.nested.KBViewer;
+import catdata.fqlpp.KBViewer;
 import catdata.nested.NraViewer;
 import catdata.opl.CfgToOpl;
 
@@ -375,7 +371,7 @@ public class GUI extends JPanel {
 		CardLayout cl = new CardLayout();
 		JPanel boxPanel = new JPanel(cl);
 		@SuppressWarnings("rawtypes")
-		JComboBox allBox = new JComboBox<>(Examples.examples);
+		JComboBox allBox = new JComboBox<>(Examples.getAllExamples());
 		allBox.setSelectedIndex(-1);
 		allBox.addActionListener(x -> doExample((Example) allBox.getSelectedItem()));
 		for (Language l : Language.values()) {
@@ -493,7 +489,7 @@ public class GUI extends JPanel {
 		titles.remove(c.id);
 	}
 
-	static void helpAction() {
+/*	static void helpAction() {
 		JTextArea jta = new JTextArea(Examples.helpString);
 		jta.setWrapStyleWord(true);
 		// jta.setEditable(false);
@@ -512,7 +508,7 @@ public class GUI extends JPanel {
 
 		// JOptionPane.showMessageDialog(null, p, "Help",
 		// JOptionPane.PLAIN_MESSAGE, null);
-	}
+	} */
 
 	public static void exitAction() {
 		delay();

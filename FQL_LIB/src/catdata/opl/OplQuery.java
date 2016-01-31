@@ -14,9 +14,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
-import catdata.algs.Quad;
+import catdata.Chc;
+import catdata.Pair;
+import catdata.Quad;
 import catdata.algs.kb.KBExp;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.NEWDEBUG;

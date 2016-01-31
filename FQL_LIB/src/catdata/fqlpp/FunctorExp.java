@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
+import catdata.Chc;
+import catdata.Pair;
 
 
 @SuppressWarnings("serial")

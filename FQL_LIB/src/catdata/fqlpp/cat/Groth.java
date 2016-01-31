@@ -3,8 +3,8 @@ package catdata.fqlpp.cat;
 import java.util.HashSet;
 import java.util.Set;
 
-import catdata.algs.Pair;
-import catdata.algs.Triple;
+import catdata.Pair;
+import catdata.Triple;
 import catdata.fqlpp.cat.FinSet.Fn;
 
 public class Groth {

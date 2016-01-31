@@ -16,8 +16,8 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
-import catdata.algs.Pair;
-import catdata.algs.Unit;
+import catdata.Pair;
+import catdata.Unit;
 import catdata.fpql.XOptions;
 import catdata.fpqlpp.AOptions;
 import catdata.fqlpp.FqlppOptions;

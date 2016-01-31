@@ -12,7 +12,7 @@ import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
 
-import catdata.algs.Pair;
+import catdata.Pair;
 import catdata.ide.CodeEditor;
 import catdata.ide.Language;
 import catdata.ide.Util;

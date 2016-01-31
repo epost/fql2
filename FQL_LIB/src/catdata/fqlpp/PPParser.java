@@ -17,10 +17,10 @@ import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
-import catdata.algs.Triple;
-import catdata.algs.Unit;
+import catdata.Chc;
+import catdata.Pair;
+import catdata.Triple;
+import catdata.Unit;
 import catdata.fqlpp.FQLPPProgram.NewDecl;
 import catdata.fqlpp.FunctorExp.CatConst;
 import catdata.fqlpp.FunctorExp.FinalConst;

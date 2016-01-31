@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import catdata.algs.Utils;
+import catdata.Utils;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.ide.Util;

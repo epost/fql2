@@ -1,9 +1,18 @@
 package catdata.ide;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import catdata.fpql.XCodeEditor;
+import catdata.fpql.XExamples;
+import catdata.fpql.XOptions;
 import catdata.fpqlpp.ACodeEditor;
 import catdata.fqlpp.FQLPPCodeEditor;
+import catdata.fqlpp.FqlppExamples;
+import catdata.fqlpp.FqlppOptions;
 import catdata.opl.OplCodeEditor;
+import catdata.opl.OplExamples;
+import catdata.opl.OplOptions;
 
 public enum Language {
 
@@ -64,6 +73,24 @@ public enum Language {
 	}
 
 	public Options getOptions() {
-		return new GeneralOptions();
+		switch (this) {
+			case FPQL: return new XOptions();
+			case FQLPP: return new FqlppOptions();
+			case OPL: return new OplOptions();
+			case FPQLPP: throw new RuntimeException();
+			case FQL: throw new RuntimeException();
+		}
+		throw new RuntimeException(this.toString());
+	}
+	
+	public List<Example> getExamples() {
+		switch (this) {
+		case FPQL: return Examples.getExamples(XExamples.class);
+		case FQLPP: return Examples.getExamples(FqlppExamples.class);
+		case OPL: return Examples.getExamples(OplExamples.class);
+		case FPQLPP: return new LinkedList<>();
+		case FQL: return new LinkedList<>();
+		}
+		throw new RuntimeException(this.toString());
 	}
 }

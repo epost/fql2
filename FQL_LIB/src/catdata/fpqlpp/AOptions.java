@@ -7,8 +7,8 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-import catdata.algs.Pair;
-import catdata.algs.Unit;
+import catdata.Pair;
+import catdata.Unit;
 import catdata.ide.Language;
 import catdata.ide.Options;
 

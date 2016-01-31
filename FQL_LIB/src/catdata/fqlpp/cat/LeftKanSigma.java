@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import catdata.algs.Pair;
-import catdata.algs.Quad;
+import catdata.Pair;
+import catdata.Quad;
 import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.ide.Util;
 

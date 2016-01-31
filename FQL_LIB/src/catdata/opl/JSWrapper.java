@@ -19,7 +19,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
-import catdata.algs.Pair;
+import catdata.Pair;
 import catdata.ide.MyTableRowSorter;
 import catdata.ide.NEWDEBUG;
 import catdata.ide.Util;

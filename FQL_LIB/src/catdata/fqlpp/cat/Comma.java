@@ -3,8 +3,8 @@ package catdata.fqlpp.cat;
 import java.util.HashSet;
 import java.util.Set;
 
-import catdata.algs.Quad;
-import catdata.algs.Triple;
+import catdata.Quad;
+import catdata.Triple;
 
 //TODO in future, don't have arrows(); only have arrows(node, node)
 public class Comma {

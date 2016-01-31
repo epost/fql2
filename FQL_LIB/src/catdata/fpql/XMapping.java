@@ -25,9 +25,9 @@ import javax.swing.JTextArea;
 
 import org.apache.commons.collections15.Transformer;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
-import catdata.algs.Triple;
+import catdata.Chc;
+import catdata.Pair;
+import catdata.Triple;
 import catdata.fpql.XExp.XMapConst;
 import catdata.fpql.XExp.XTransConst;
 import catdata.fpql.XPoly.Block;

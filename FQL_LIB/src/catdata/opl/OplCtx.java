@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import catdata.algs.Pair;
+import catdata.Pair;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplParser.DoNotIgnore;

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import catdata.algs.Pair;
+import catdata.Pair;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.ide.NEWDEBUG;

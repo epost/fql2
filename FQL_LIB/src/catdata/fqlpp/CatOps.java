@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
-import catdata.algs.Triple;
+import catdata.Chc;
+import catdata.Pair;
+import catdata.Triple;
 import catdata.fqlpp.CatExp.CatExpVisitor;
 import catdata.fqlpp.CatExp.Cod;
 import catdata.fqlpp.CatExp.Const;
@@ -71,6 +71,7 @@ import catdata.fqlpp.cat.CoMonad;
 import catdata.fqlpp.cat.FDM;
 import catdata.fqlpp.cat.FinCat;
 import catdata.fqlpp.cat.FinSet;
+import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.fqlpp.cat.FiniteCategory;
 import catdata.fqlpp.cat.FunCat;
 import catdata.fqlpp.cat.Functor;
@@ -80,11 +81,10 @@ import catdata.fqlpp.cat.Instance;
 import catdata.fqlpp.cat.Mapping;
 import catdata.fqlpp.cat.Monad;
 import catdata.fqlpp.cat.Signature;
-import catdata.fqlpp.cat.Transform;
-import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.fqlpp.cat.Signature.Edge;
 import catdata.fqlpp.cat.Signature.Node;
 import catdata.fqlpp.cat.Signature.Path;
+import catdata.fqlpp.cat.Transform;
 
 @SuppressWarnings({ "unchecked", "rawtypes", "serial" })
 public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,

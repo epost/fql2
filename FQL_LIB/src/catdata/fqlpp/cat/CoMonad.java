@@ -3,7 +3,7 @@ package catdata.fqlpp.cat;
 import java.util.HashSet;
 import java.util.Set;
 
-import catdata.algs.Pair;
+import catdata.Pair;
 
 public class CoMonad<O,A> {
 	

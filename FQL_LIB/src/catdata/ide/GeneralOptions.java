@@ -19,8 +19,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import catdata.algs.Pair;
-import catdata.algs.Unit;
+import catdata.Pair;
+import catdata.Unit;
 
 
 public class GeneralOptions extends Options {

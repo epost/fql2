@@ -5,8 +5,8 @@ import java.util.function.Function;
 
 import javax.swing.JComponent;
 
-import catdata.algs.Pair;
-import catdata.algs.Unit;
+import catdata.Pair;
+import catdata.Unit;
 
 public abstract class Options implements Serializable {
 

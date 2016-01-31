@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 
-import catdata.algs.Pair;
+import catdata.Pair;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplSetInst;
 import catdata.opl.OplExp.OplSig;

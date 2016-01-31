@@ -27,11 +27,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
-import catdata.algs.Quad;
-import catdata.algs.Triple;
-import catdata.algs.Utils;
+import catdata.Chc;
+import catdata.Pair;
+import catdata.Quad;
+import catdata.Triple;
+import catdata.Utils;
 import catdata.algs.kb.KBExp;
 import catdata.fqlpp.cat.FinSet;
 import catdata.ide.CodeTextPanel;

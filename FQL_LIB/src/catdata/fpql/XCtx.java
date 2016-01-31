@@ -34,9 +34,9 @@ import javax.swing.JTextField;
 
 import org.apache.commons.collections15.Transformer;
 
-import catdata.algs.Pair;
-import catdata.algs.Triple;
-import catdata.algs.Unit;
+import catdata.Pair;
+import catdata.Triple;
+import catdata.Unit;
 import catdata.algs.kb.KB_Thue;
 import catdata.fpql.XExp.XInst;
 import catdata.fpql.XExp.XSchema;

@@ -37,8 +37,8 @@ import org.codehaus.jparsec.Terminals;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 
-import catdata.algs.Pair;
-import catdata.algs.Triple;
+import catdata.Pair;
+import catdata.Triple;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
 import catdata.ide.Language;
@@ -59,7 +59,7 @@ public class NraViewer {
 		
 		@Override
 		public Language lang() {
-			throw new RuntimeException();
+			return null;
 		}
 
 		@Override

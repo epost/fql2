@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import catdata.algs.Pair;
-import catdata.algs.Triple;
+import catdata.Pair;
+import catdata.Triple;
 import catdata.fpql.XExp.Apply;
 import catdata.fpql.XExp.Compose;
 import catdata.fpql.XExp.FLOWER2;
@@ -39,6 +39,7 @@ import catdata.fpql.XExp.XProj;
 import catdata.fpql.XExp.XPushout;
 import catdata.fpql.XExp.XRel;
 import catdata.fpql.XExp.XSOED;
+import catdata.fpql.XExp.XSOED.FOED;
 import catdata.fpql.XExp.XSchema;
 import catdata.fpql.XExp.XSigma;
 import catdata.fpql.XExp.XSuperED;
@@ -50,7 +51,6 @@ import catdata.fpql.XExp.XTy;
 import catdata.fpql.XExp.XUberPi;
 import catdata.fpql.XExp.XUnit;
 import catdata.fpql.XExp.XVoid;
-import catdata.fpql.XExp.XSOED.FOED;
 import catdata.ide.Util;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })

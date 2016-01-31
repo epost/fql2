@@ -11,9 +11,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
-import catdata.algs.Unit;
+import catdata.Chc;
+import catdata.Pair;
+import catdata.Unit;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.ide.Util;

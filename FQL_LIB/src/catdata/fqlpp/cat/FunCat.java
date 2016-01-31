@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
-import catdata.algs.Unit;
+import catdata.Chc;
+import catdata.Pair;
+import catdata.Unit;
 import catdata.fqlpp.FUNCTION;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "serial" })

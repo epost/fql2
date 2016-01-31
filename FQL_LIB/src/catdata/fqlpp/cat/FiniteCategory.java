@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import catdata.algs.Pair;
+import catdata.Pair;
 
 
 @SuppressWarnings("serial")

@@ -24,7 +24,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import catdata.algs.Pair;
+import catdata.Pair;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
 import catdata.opl.OplExp.OplInst;

@@ -19,7 +19,7 @@ public class OplString implements OplObject {
 
 	@Override
 	public JComponent display() {
-		return new CodeTextPanel(BorderFactory.createEmptyBorder(), "", str);
+		return new CodeTextPanel(BorderFactory.createEtchedBorder(), "", str);
 	}
 
 }

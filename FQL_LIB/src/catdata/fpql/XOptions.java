@@ -13,8 +13,8 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 
-import catdata.algs.Pair;
-import catdata.algs.Unit;
+import catdata.Pair;
+import catdata.Unit;
 import catdata.ide.Language;
 import catdata.ide.Options;
 

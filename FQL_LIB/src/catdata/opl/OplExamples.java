@@ -1,0 +1,49 @@
+package catdata.opl;
+
+import catdata.ide.Example;
+import catdata.opl.examples.OplDeltaExample;
+import catdata.opl.examples.OplEmployeesExample;
+import catdata.opl.examples.OplFlowerExamle;
+import catdata.opl.examples.OplGroupExample;
+import catdata.opl.examples.OplGroupingExample;
+import catdata.opl.examples.OplHornExample;
+import catdata.opl.examples.OplJSExample;
+import catdata.opl.examples.OplMLExample;
+import catdata.opl.examples.OplMod4Example;
+import catdata.opl.examples.OplNested2Example;
+import catdata.opl.examples.OplNestedExample;
+import catdata.opl.examples.OplPicsExample;
+import catdata.opl.examples.OplSKExample;
+import catdata.opl.examples.OplSigmaExample;
+import catdata.opl.examples.OplStackExample;
+import catdata.opl.examples.OplTyTest2Example;
+import catdata.opl.examples.OplTyTestExample;
+import catdata.opl.examples.OplTypedEmployeesExample;
+import catdata.opl.examples.OplUnfailingExample;
+
+public class OplExamples {
+
+	public static Example mod4 = new OplMod4Example();
+	public static Example js = new OplJSExample();
+	public static Example sk = new OplSKExample();
+	public static Example oplDelta = new OplDeltaExample();
+	public static Example oplStack = new OplStackExample();
+	public static Example oplGroup = new OplGroupExample();
+	public static Example oplEmployees = new OplEmployeesExample();
+	public static Example oplSigma = new OplSigmaExample();
+	public static Example oplUnfailing = new OplUnfailingExample();
+	//public static Example oplTyped = new OplTypedExample();
+	public static Example oplFlower = new OplFlowerExamle();
+	public static Example oplTypedEmployees = new OplTypedEmployeesExample();
+	public static Example oplPics = new OplPicsExample();
+	public static Example oplTyTest = new OplTyTestExample();
+	public static Example oplTyTest2 = new OplTyTest2Example();
+	public static Example oplNested = new OplNestedExample();
+	public static Example oplNested2 = new OplNested2Example();
+	public static Example oplML = new OplMLExample();
+	public static Example oplGrouping = new OplGroupingExample();
+	public static Example oplHorn = new OplHornExample();
+	
+	
+	
+}

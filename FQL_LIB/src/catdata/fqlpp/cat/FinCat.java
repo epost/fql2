@@ -10,9 +10,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
-import catdata.algs.Unit;
+import catdata.Chc;
+import catdata.Pair;
+import catdata.Unit;
 import catdata.fqlpp.FUNCTION;
 import catdata.ide.Util;
 

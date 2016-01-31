@@ -36,9 +36,9 @@ import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.collections15.Transformer;
 
-import catdata.algs.Pair;
-import catdata.algs.Quad;
-import catdata.algs.Triple;
+import catdata.Pair;
+import catdata.Quad;
+import catdata.Triple;
 import catdata.fqlpp.cat.Category;
 import catdata.fqlpp.cat.FinCat;
 import catdata.fqlpp.cat.FinSet;

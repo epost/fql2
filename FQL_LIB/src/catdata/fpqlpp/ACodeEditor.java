@@ -34,7 +34,7 @@ public class ACodeEditor extends CodeEditor<AProgram, OplEnvironment, ADisplay> 
 
 	@Override
 	protected String getATMFrhs() {
-		return "fql_lib.A.ATokenMaker";
+		return "catdata.fpqlpp.ATokenMaker";
 	}
 
 	@Override

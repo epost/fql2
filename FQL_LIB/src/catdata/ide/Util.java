@@ -25,9 +25,9 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.table.TableRowSorter;
 
-import catdata.algs.Chc;
-import catdata.algs.Pair;
-import catdata.algs.Utils;
+import catdata.Chc;
+import catdata.Pair;
+import catdata.Utils;
 import catdata.fqlpp.FUNCTION;
 import catdata.opl.OplTerm;
 

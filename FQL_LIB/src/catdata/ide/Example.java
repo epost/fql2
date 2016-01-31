@@ -10,7 +10,8 @@ public abstract class Example implements Comparable<Example> {
 
 	@Override 
 	public String toString() {
-		return lang().prefix() +" " + getName();
+		String pre = lang() == null ? "" : lang().prefix();
+		return (pre + "  " + getName()).trim();
 	}
 	
 	@Override 

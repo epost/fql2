@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import catdata.algs.Triple;
+import catdata.Triple;
 import catdata.ide.LineException;
 import catdata.ide.Prog;
 import catdata.opl.OplProgram;

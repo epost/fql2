@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import catdata.algs.Pair;
-import catdata.algs.Triple;
+import catdata.Pair;
+import catdata.Triple;
 import catdata.fpql.XExp.XSuperED;
 import catdata.fpql.XExp.XSuperED.SuperFOED;
 import catdata.fqlpp.cat.FinSet;

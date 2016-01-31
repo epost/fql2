@@ -1,7 +1,6 @@
 package catdata;
 
 import java.awt.MenuBar;
-import java.util.Arrays;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -9,9 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import catdata.algs.Pair;
 import catdata.ide.CodeEditor;
-import catdata.ide.Examples;
 import catdata.ide.GUI;
 import catdata.ide.NEWDEBUG;
 
@@ -28,8 +25,6 @@ public class IDE {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Arrays.sort(Examples.examples);
-
 					NEWDEBUG.load(true);
 					
 					UIManager.setLookAndFeel(NEWDEBUG.debug.general.look_and_feel);			

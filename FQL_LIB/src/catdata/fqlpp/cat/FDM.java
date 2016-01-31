@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import catdata.algs.Pair;
-import catdata.algs.Quad;
-import catdata.algs.Triple;
+import catdata.Pair;
+import catdata.Quad;
+import catdata.Triple;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
 

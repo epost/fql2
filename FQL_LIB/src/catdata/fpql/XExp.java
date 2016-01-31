@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import catdata.algs.Pair;
-import catdata.algs.Triple;
-import catdata.algs.Unit;
+import catdata.Pair;
+import catdata.Triple;
+import catdata.Unit;
 import catdata.ide.NEWDEBUG;
 import catdata.ide.Util;
 
