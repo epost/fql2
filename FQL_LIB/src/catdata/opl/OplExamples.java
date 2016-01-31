@@ -17,7 +17,6 @@ import catdata.opl.examples.OplSKExample;
 import catdata.opl.examples.OplSigmaExample;
 import catdata.opl.examples.OplStackExample;
 import catdata.opl.examples.OplTyTest2Example;
-import catdata.opl.examples.OplTyTestExample;
 import catdata.opl.examples.OplTypedEmployeesExample;
 import catdata.opl.examples.OplUnfailingExample;
 
@@ -36,7 +35,7 @@ public class OplExamples {
 	public static Example oplFlower = new OplFlowerExamle();
 	public static Example oplTypedEmployees = new OplTypedEmployeesExample();
 	public static Example oplPics = new OplPicsExample();
-	public static Example oplTyTest = new OplTyTestExample();
+	//public static Example oplTyTest = new OplTyTestExample();
 	public static Example oplTyTest2 = new OplTyTest2Example();
 	public static Example oplNested = new OplNestedExample();
 	public static Example oplNested2 = new OplNested2Example();

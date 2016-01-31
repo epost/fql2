@@ -1,10 +1,10 @@
-FQL2
+Categorical Data IDE
 ====
 
 About
 -----
 
-IDE and compiler for the next iteration of FQL, the functorial query language.
+An IDE for the functorial query languages developed at categoricaldata.net.
 
 Build
 -----
@@ -28,13 +28,10 @@ Then, install `fql2` itself:
 License
 -------
 
-### FQL++ and FPQL
+### Categorical Data IDE (BSD License)
 
-FQL++ (BSD License)
-Copyright (c) Ryan Wisnesky and David Spivak
 
-FPQL (BSD License)
-Copyright (c) Ryan Wisnesky and David Spivak and Patrick Schultz
+Copyright (c) 2012-2016 Ryan Wisnesky and David Spivak and Patrick Schultz.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -63,7 +60,7 @@ FQL++ and FPQL contain binary distributions of the following libraries:
 
 jparsec (Apache License)
 JUNG (BSD License)
-RSyntaxTextArea (BSD License)
+RSyntaxTextArea [+autocomplete] (BSD License)
 Commons Generics (Apache License)
 JFlex (BSD License)
 
@@ -130,7 +127,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-### RSyntaxTextArea (BSD License)
+### RSyntaxTextArea [and autocomplete library] (BSD License)
 Copyright (c) Robert Futrell
 All rights reserved.
 
