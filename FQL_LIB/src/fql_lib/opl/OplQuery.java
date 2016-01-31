@@ -1,5 +1,9 @@
 package fql_lib.opl;
 
+import fql_lib.ide.CodeTextPanel;
+import fql_lib.ide.NEWDEBUG;
+import fql_lib.ide.Util;
+
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,9 +22,6 @@ import catdata.algs.Chc;
 import catdata.algs.Pair;
 import catdata.algs.Quad;
 import catdata.algs.kb.KBExp;
-import fql_lib.core.CodeTextPanel;
-import fql_lib.core.NEWDEBUG;
-import fql_lib.core.Util;
 
 public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObject {
 

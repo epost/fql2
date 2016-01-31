@@ -1,9 +1,9 @@
 package fql_lib.opl;
 
+import fql_lib.ide.CodeTextPanel;
+
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
-
-import fql_lib.core.CodeTextPanel;
 
 public class OplString implements OplObject {
 	String str;

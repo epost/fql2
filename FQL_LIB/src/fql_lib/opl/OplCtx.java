@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import catdata.algs.Pair;
-import fql_lib.core.Util;
+import fql_lib.ide.Util;
 import fql_lib.opl.OplExp.OplSig;
 import fql_lib.opl.OplParser.DoNotIgnore;
 

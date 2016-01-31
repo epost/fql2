@@ -30,19 +30,19 @@ import org.codehaus.jparsec.error.ParserException;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
-import fql_lib.X.XCtx;
-import fql_lib.X.XDriver;
-import fql_lib.X.XEnvironment;
-import fql_lib.X.XExp;
-import fql_lib.X.XExp.XSchema;
-import fql_lib.X.XParser;
-import fql_lib.X.XPoly;
-import fql_lib.X.XPoly.Block;
-import fql_lib.X.XProgram;
-import fql_lib.core.CodeTextPanel;
-import fql_lib.core.Example;
-import fql_lib.core.Language;
-import fql_lib.core.LineException;
+import fql_lib.fpql.XCtx;
+import fql_lib.fpql.XDriver;
+import fql_lib.fpql.XEnvironment;
+import fql_lib.fpql.XExp;
+import fql_lib.fpql.XParser;
+import fql_lib.fpql.XPoly;
+import fql_lib.fpql.XProgram;
+import fql_lib.fpql.XExp.XSchema;
+import fql_lib.fpql.XPoly.Block;
+import fql_lib.ide.CodeTextPanel;
+import fql_lib.ide.Example;
+import fql_lib.ide.Language;
+import fql_lib.ide.LineException;
 
 public class EnrichViewer {
 

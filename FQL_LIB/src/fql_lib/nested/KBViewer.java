@@ -24,12 +24,12 @@ import javax.swing.JTextArea;
 
 import catdata.algs.Pair;
 import catdata.algs.kb.KB_Thue;
-import fql_lib.core.CodeTextPanel;
-import fql_lib.core.Example;
-import fql_lib.core.Language;
-import fql_lib.pp.CatExp;
-import fql_lib.pp.PPParser;
-import fql_lib.pp.cat.Signature;
+import fql_lib.fqlpp.CatExp;
+import fql_lib.fqlpp.PPParser;
+import fql_lib.fqlpp.cat.Signature;
+import fql_lib.ide.CodeTextPanel;
+import fql_lib.ide.Example;
+import fql_lib.ide.Language;
 
 public class KBViewer {
 

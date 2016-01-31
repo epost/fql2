@@ -20,9 +20,9 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
 import catdata.algs.Pair;
-import fql_lib.core.MyTableRowSorter;
-import fql_lib.core.NEWDEBUG;
-import fql_lib.core.Util;
+import fql_lib.ide.MyTableRowSorter;
+import fql_lib.ide.NEWDEBUG;
+import fql_lib.ide.Util;
 import fql_lib.opl.OplExp.NonEditableModel;
 
 public class JSWrapper {

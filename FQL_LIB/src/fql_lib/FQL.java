@@ -1,5 +1,10 @@
 package fql_lib;
 
+import fql_lib.ide.CodeEditor;
+import fql_lib.ide.Examples;
+import fql_lib.ide.GUI;
+import fql_lib.ide.NEWDEBUG;
+
 import java.awt.MenuBar;
 import java.util.Arrays;
 
@@ -10,10 +15,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import catdata.algs.Pair;
-import fql_lib.core.CodeEditor;
-import fql_lib.core.DEBUG;
-import fql_lib.core.Examples;
-import fql_lib.core.GUI;
 
 /**
  * 
@@ -33,10 +34,10 @@ public class FQL {
 					Arrays.sort(Examples.examples);
 				//	Arrays.sort(Examples.key_examples);
 
-					DEBUG.load(true);
+					NEWDEBUG.load(true);
 					//f = new JFrame("FQL IDE");
 					
-					UIManager.setLookAndFeel(DEBUG.debug.look_and_feel);			
+					UIManager.setLookAndFeel(NEWDEBUG.debug.general.look_and_feel);			
 
 					final JFrame f = new JFrame("Categorical Data IDE");
 					final Pair<JPanel, MenuBar> gui = GUI.makeGUI(f);

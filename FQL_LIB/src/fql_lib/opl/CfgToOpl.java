@@ -1,5 +1,10 @@
 package fql_lib.opl;
 
+import fql_lib.ide.CodeTextPanel;
+import fql_lib.ide.Example;
+import fql_lib.ide.Language;
+import fql_lib.ide.Util;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -29,10 +34,6 @@ import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Tuple3;
 
 import catdata.algs.Pair;
-import fql_lib.core.CodeTextPanel;
-import fql_lib.core.Example;
-import fql_lib.core.Language;
-import fql_lib.core.Util;
 
 
 public class CfgToOpl {

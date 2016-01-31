@@ -1,5 +1,10 @@
 package fql_lib.nested;
 
+import fql_lib.ide.CodeTextPanel;
+import fql_lib.ide.Example;
+import fql_lib.ide.Language;
+import fql_lib.ide.Util;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -39,10 +44,6 @@ import org.codehaus.jparsec.functors.Tuple4;
 
 import catdata.algs.Pair;
 import catdata.algs.Triple;
-import fql_lib.core.CodeTextPanel;
-import fql_lib.core.Example;
-import fql_lib.core.Language;
-import fql_lib.core.Util;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class NraViewer {

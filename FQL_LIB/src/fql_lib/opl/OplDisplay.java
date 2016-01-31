@@ -25,8 +25,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import catdata.algs.Pair;
-import fql_lib.core.CodeTextPanel;
-import fql_lib.core.Disp;
+import fql_lib.ide.CodeTextPanel;
+import fql_lib.ide.Disp;
 import fql_lib.opl.OplExp.OplInst;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;

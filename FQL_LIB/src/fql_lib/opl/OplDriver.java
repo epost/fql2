@@ -1,10 +1,10 @@
 package fql_lib.opl;
 
+import fql_lib.ide.LineException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import fql_lib.core.LineException;
 
 public class OplDriver {
 

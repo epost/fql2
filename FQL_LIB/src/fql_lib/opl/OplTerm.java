@@ -11,7 +11,7 @@ import javax.script.Invocable;
 import javax.script.ScriptException;
 
 import catdata.algs.Pair;
-import fql_lib.core.Util;
+import fql_lib.ide.Util;
 import fql_lib.opl.OplExp.OplSetInst;
 import fql_lib.opl.OplExp.OplSig;
 import fql_lib.opl.OplParser.DoNotIgnore;

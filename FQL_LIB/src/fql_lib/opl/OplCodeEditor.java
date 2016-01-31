@@ -1,5 +1,8 @@
 package fql_lib.opl;
 
+import fql_lib.ide.CodeEditor;
+import fql_lib.ide.Language;
+
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -9,9 +12,6 @@ import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
-
-import fql_lib.core.CodeEditor;
-import fql_lib.core.Language;
 
 
 @SuppressWarnings("serial")

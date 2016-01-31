@@ -1,5 +1,8 @@
 package fql_lib.opl;
 
+import fql_lib.ide.LineException;
+import fql_lib.ide.Prog;
+
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -7,8 +10,6 @@ import java.util.List;
 import java.util.Set;
 
 import catdata.algs.Triple;
-import fql_lib.core.LineException;
-import fql_lib.core.Prog;
 
 
 public class OplProgram implements Prog {

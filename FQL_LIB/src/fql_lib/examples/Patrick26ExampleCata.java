@@ -1,7 +1,7 @@
 package fql_lib.examples;
 
-import fql_lib.core.Example;
-import fql_lib.core.Language;
+import fql_lib.ide.Example;
+import fql_lib.ide.Language;
 
 public class Patrick26ExampleCata extends Example {
 

@@ -33,11 +33,11 @@ import catdata.algs.Quad;
 import catdata.algs.Triple;
 import catdata.algs.Utils;
 import catdata.algs.kb.KBExp;
-import fql_lib.core.CodeTextPanel;
-import fql_lib.core.NEWDEBUG;
-import fql_lib.core.Util;
+import fql_lib.fqlpp.cat.FinSet;
+import fql_lib.ide.CodeTextPanel;
+import fql_lib.ide.NEWDEBUG;
+import fql_lib.ide.Util;
 import fql_lib.opl.OplParser.DoNotIgnore;
-import fql_lib.pp.cat.FinSet;
 
 public abstract class OplExp implements OplObject {
 
