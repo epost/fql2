@@ -9,7 +9,7 @@ import catdata.algs.Pair;
 import catdata.algs.Unit;
 import fql_lib.FUNCTION;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Transform<O, A, Category, Functor>> {
 	// implements Products<Set, Fn>, Coproducts<Set, Fn>, Exponentials<Set, Fn>,
 	// Subobjects<Set, Fn>, Isomorphisms<Set, Fn> {

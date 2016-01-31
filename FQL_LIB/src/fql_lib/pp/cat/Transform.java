@@ -12,6 +12,7 @@ import fql_lib.core.DEBUG;
 import fql_lib.core.Util;
 import fql_lib.pp.cat.FinSet.Fn;
 
+@SuppressWarnings("serial")
 public class Transform<O1, A1, O2, A2> implements Serializable {
 	public Functor<O1, A1, O2, A2> source;
 	public Functor<O1, A1, O2, A2> target;

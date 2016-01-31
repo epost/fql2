@@ -47,7 +47,7 @@ import fql_lib.X.XExp.XVoid;
 public class XKind implements XExpVisitor<String, 	Map<String, XExp>> {
 
 	@Override
-	public String visit(Map<String, XExp> env, XPoly e) {
+	public String visit(Map<String, XExp> env, @SuppressWarnings("rawtypes") XPoly e) {
 		return "query";
 	}
 	

@@ -1352,7 +1352,7 @@ public class Display implements Disp {
 			map.get(t.source).add(t);
 		}
 
-		int x = (int) Math.ceil(Math.sqrt(sig.nodes.size()));
+//		int x = (int) Math.ceil(Math.sqrt(sig.nodes.size()));
 		List<JComponent> ret = new LinkedList<>();
 //		if (x == 0) {
 	//		return new Pair<>(new JPanel(), new HashMap<>());

@@ -196,12 +196,11 @@ public class CfgToOpl {
 		return Terminals.Identifier.PARSER;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static final Object program(String s) {
 		return toCfg( program.parse(s) );
-
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	static OplExp toCfg(Object o) {
 		HashMap<String, List<List<String>>> ret = new HashMap<String, List<List<String>>>();
 		
@@ -238,6 +237,7 @@ public class CfgToOpl {
 		return new OplExp.OplSig(null, new HashMap<>(), ret.keySet(), symbols, new LinkedList<>());
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	static Parser program() {
 		Parser q = string().many().sepBy(term("|"));
 		Parser p = Parsers.tuple(ident(), term("::="), q).sepBy(term(","));
@@ -245,6 +245,7 @@ public class CfgToOpl {
 	}
 	
 
+	@SuppressWarnings("unchecked")
 	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
 
 	

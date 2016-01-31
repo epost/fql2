@@ -220,7 +220,7 @@ public class XParser {
 
 	
 	public static final Parser<?> decl() {
-		Parser e = Parsers.or(new Parser[] { exp(), type(), fn(), constx(), assume() });
+		//Parser e = Parsers.or(new Parser[] { exp(), type(), fn(), constx(), assume() });
 		
 		Parser p0 = Parsers.tuple(Parsers.tuple(ident(), term(":"), ident()).between(term("("), term(")")), term("="), exp());
 		Parser p1 = Parsers.tuple(ident(), term("="), exp());

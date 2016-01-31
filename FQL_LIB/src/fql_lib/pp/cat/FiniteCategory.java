@@ -8,6 +8,7 @@ import java.util.Set;
 import catdata.algs.Pair;
 
 
+@SuppressWarnings("serial")
 public class FiniteCategory<O, A> extends Category<O, A> {
 
 	public Set<O> objects = new HashSet<>();

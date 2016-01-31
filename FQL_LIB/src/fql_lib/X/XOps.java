@@ -53,6 +53,8 @@ import fql_lib.X.XExp.XUnit;
 import fql_lib.X.XExp.XVoid;
 import fql_lib.core.Util;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
+
 public class XOps implements XExpVisitor<XObject, XProgram> {
 	
 	XEnvironment ENV;
@@ -107,7 +109,6 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		} 
 	}
 
-	
 	public XObject visit(XProgram env, XDelta e) {
 		XObject o = e.F.accept(env, this);
 		if (!(o instanceof XMapping<?,?>)) {
@@ -741,7 +742,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		if (!(src0 instanceof XSchema)) {
 			throw new RuntimeException("Not a schema: " + e.S);
 		}
-		XSchema src = (XSchema) src0; 
+		//XSchema src = (XSchema) src0; 
 		XCtx src1 = (XCtx) ENV.objs.get(e.S);
 		
 		XExp dst0 = env.exps.get(e.T);
@@ -751,7 +752,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		if (!(dst0 instanceof XSchema)) {
 			throw new RuntimeException("Not a schema: " + e.T);
 		}
-		XSchema dst = (XSchema) dst0; 
+		//XSchema dst = (XSchema) dst0; 
 		XCtx dst1 = (XCtx) ENV.objs.get(e.T);
 		
 		XObject I0 = ENV.objs.get(e.I);

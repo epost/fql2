@@ -83,6 +83,7 @@ public class ButtonTabComponent extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			int i = pane.indexOfTabComponent(ButtonTabComponent.this);
 			if (i != -1) {
+				@SuppressWarnings("rawtypes")
 				CodeEditor c = ((CodeEditor) pane.getComponentAt(i));
 				if (c.abortBecauseDirty()) {
 					return;

@@ -18,7 +18,7 @@ import fql_lib.FUNCTION;
 import fql_lib.core.Util;
 import fql_lib.pp.cat.FinSet.Fn;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"unchecked", "rawtypes", "serial"})
 public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A, Set, Fn>> {
 
 	@Override
@@ -381,7 +381,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 			data2.put(e, new Fn<>(data1.get(I.source.source(e)), data1.get(I.source.target(e)), d::get));
 		}
 
-		Functor<O,A,Set<Transform<O,A,Set,Fn>>,Fn<Transform<O,A,Set,Fn>,Transform<O,A,Set,Fn>>> IJ = new Functor<>(cat, FinSet.FinSet(), data1::get, data2::get);
+		Functor<O,A,Set<Transform<O,A,Set,Fn>>,Fn<Transform<O,A,Set,Fn>,Transform<O,A,Set,Fn>>> IJ = new Functor<>(cat, FinSet.FinSet0(), data1::get, data2::get);
 
 		return IJ;
 	} 
@@ -531,7 +531,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 			em.put(f, new Fn<>(nm.get(cat.source(f)), nm.get(cat.target(f)), map::get));
 		}
 		
-		prop = new Functor<O,A,Set<Functor<O, A, Set, Fn>>,Fn<Functor<O, A, Set, Fn>,Functor<O, A, Set, Fn>>>(cat, FinSet.FinSet(), nm::get, em::get);
+		prop = new Functor<O,A,Set<Functor<O, A, Set, Fn>>,Fn<Functor<O, A, Set, Fn>,Functor<O, A, Set, Fn>>>(cat, FinSet.FinSet0(), nm::get, em::get);
 		return prop;
 	}
 	

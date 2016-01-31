@@ -21,7 +21,7 @@ import fql_lib.core.DEBUG;
 import fql_lib.core.Util;
 import fql_lib.pp.cat.FinSet.Fn;
 
-@SuppressWarnings({ "rawtypes" })
+@SuppressWarnings({ "rawtypes", "serial" })
 public class FinSet extends Category<Set, Fn> {
 //implements Products<Set, Fn>, Coproducts<Set, Fn>, Exponentials<Set, Fn>, Subobjects<Set, Fn>, Isomorphisms<Set, Fn> {
 
@@ -149,7 +149,7 @@ public class FinSet extends Category<Set, Fn> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <X> Category<Set<X>, Fn<X,X>> FinSet() {
+	public static <X> Category<Set<X>, Fn<X,X>> FinSet0() {
 		return (Category<Set<X>, Fn<X,X>>) ((Object)FinSet);
 	}
 	

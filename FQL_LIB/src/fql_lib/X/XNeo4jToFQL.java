@@ -372,7 +372,7 @@ public class XNeo4jToFQL {
 				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({  "rawtypes" })
 	public static final Pair<Map<String, Map<String, Object>>, Map<String, Set<Pair<String, String>>>> program(String s) {
 		Tuple3 o = (Tuple3) program.parse(s);
 		
@@ -386,6 +386,7 @@ public class XNeo4jToFQL {
 		Parser<?> p = Parsers.tuple(n, term("-"), e, term("->"), n);
 		return Parsers.tuple(term("CREATE"), p.sepBy(term(","))); */
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static Map<String, Set<Pair<String, String>>> fromEdges(Object oo) {
 		Map<String, Set<Pair<String, String>>> ret = new HashMap<>();
 		
@@ -412,6 +413,7 @@ public class XNeo4jToFQL {
 		Parser<?> p = Parsers.tuple(ident(), term(":"), ident(), Parsers.tuple(term("{"), q.sepBy(term(",")), term("}")));
 		return Parsers.tuple(term("CREATE"), Parsers.tuple(term("("), p, term(")")).sepBy(term(",")));
 	*/
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static Map<String, Map<String, Object>> fromNodes(Object oo) {
 		Map<String, Map<String, Object>> ret = new HashMap<>();
 		

@@ -45,7 +45,7 @@ public class FQL {
 					f.setMenuBar(gui.second);
 					f.pack();
 					f.setSize(840, 630);
-					((CodeEditor) GUI.editors.getComponentAt(0)).topArea
+					((CodeEditor<?,?,?>) GUI.editors.getComponentAt(0)).topArea
 							.requestFocusInWindow();
 					f.setLocationRelativeTo(null);
 					f.setVisible(true);

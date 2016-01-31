@@ -261,7 +261,7 @@ public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>
 	}
 
 	@Override
-	public Pair<XExp, XExp> visit(Map<String, XExp> env, XPoly e) {
+	public Pair<XExp, XExp> visit(Map<String, XExp> env, @SuppressWarnings("rawtypes") XPoly e) {
 		return new Pair<>(e.src_e, e.dst_e);
 	}
 	

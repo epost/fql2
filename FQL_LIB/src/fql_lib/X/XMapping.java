@@ -47,6 +47,7 @@ import fql_lib.core.Util;
 public class XMapping<C, D> implements XObject {
 	public Map<Pair<List<C>, List<C>>, String> unprovable = new HashMap<>();
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public XMapping(XCtx C, String kind) {
 		this.kind = kind;
 		src = C;
@@ -165,12 +166,14 @@ public class XMapping<C, D> implements XObject {
 	}
 
 	// is identity on non-mapped elements
+	@SuppressWarnings({ "unchecked" })
 	public List<D> applyAlsoId(List<C> p) {
 		List<D> ret = p.stream().flatMap(x -> {
 			List<D> r = em.get(x);
 			if (r == null) {
 				r = new LinkedList<>();
-				r.add((D) x);
+				D ddd = (D) x;
+				r.add(ddd);
 			}
 			return r.stream();
 		}).collect(Collectors.toList());
@@ -243,6 +246,7 @@ public class XMapping<C, D> implements XObject {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private Component makeTables() {
 		try {
 			List<JComponent> grid = new LinkedList<>();
@@ -311,6 +315,7 @@ public class XMapping<C, D> implements XObject {
 	/**
 	 * Sigma
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public XCtx<D> apply0(XCtx<C> I) {
 		// XCtx<D> ret = dst.copy();
 		// ret.local = new HashSet<>(); //(Set<D>) I.local;
@@ -348,6 +353,7 @@ public class XMapping<C, D> implements XObject {
 		return new XCtx(new HashSet<>(), ret, eqs, I.global, dst, "instance");
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static XMapping<String, String> make(XEnvironment eNV, XCtx<String> src,
 			XCtx<String> dst, XMapConst m) {
 		Map<String, List<String>> ret = new HashMap<>();
@@ -428,6 +434,7 @@ public class XMapping<C, D> implements XObject {
 	}
 
 	// TODO
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static XMapping<String, String> make(XCtx<String> src, XCtx<String> dst, XTransConst e) {
 		if (src.schema == null) {
 			throw new RuntimeException("source is not an instance");
@@ -516,7 +523,9 @@ public class XMapping<C, D> implements XObject {
 			// continue;
 			// }
 			List<C> p = new LinkedList<>();
-			p.add((C) c);
+			@SuppressWarnings("unchecked")
+			C ccc = (C) c;
+			p.add(ccc);
 			List<C> k = t.applyAlsoId(p);
 			ret.put(c, applyAlsoId(k));
 		}
@@ -528,6 +537,7 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping<>(src0, dst0, ret, "homomorphism");
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public XMapping<Pair<Triple<D, D, List<D>>, C>, Pair<Triple<D, D, List<D>>, C>> deltaT(
 			XMapping<D, D> t) {
 		XCtx<Pair<Triple<D, D, List<D>>, C>> dsrc = delta(t.src);
@@ -570,6 +580,7 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping<>(dsrc, ddst, m, "homomorphism");
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public XMapping<C, Pair<Triple<D, D, List<D>>, C>> unit(XCtx<C> I) {
 		XCtx<D> FI = apply0(I);
 		XCtx<Pair<Triple<D, D, List<D>>, C>> FFI = delta(FI);
@@ -611,6 +622,7 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping<>(I, FFI, m, "homomorphism");
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public XMapping<Pair<Triple<D, D, List<D>>, C>, D> counit(XCtx<D> I) {
 		XCtx<Pair<Triple<D, D, List<D>>, C>> FI = delta(I);
 		XMapping<Pair<Triple<D, D, List<D>>, C>, Pair<Triple<D, D, List<D>>, C>> f = (XMapping<Pair<Triple<D, D, List<D>>, C>, Pair<Triple<D, D, List<D>>, C>>) this;
@@ -635,7 +647,8 @@ public class XMapping<C, D> implements XObject {
 
 		return new XMapping<>(FFI, I, m, "homomorphism");
 	}
-
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public XCtx<Pair<Triple<D, D, List<D>>, C>> delta(XCtx<D> I) {
 		Set<Pair<Triple<D, D, List<D>>, C>> ids = new HashSet<>();
 		Map<Pair<Triple<D, D, List<D>>, C>, Pair<Pair<Triple<D, D, List<D>>, C>, Pair<Triple<D, D, List<D>>, C>>> types = new HashMap<>();
@@ -716,6 +729,7 @@ public class XMapping<C, D> implements XObject {
 		return false;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Triple<C, C, List<C>> getWrapper(XCtx I,
 			Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
 			Pair<C, Triple<D, D, List<D>>> key) {
@@ -745,6 +759,7 @@ public class XMapping<C, D> implements XObject {
 		return newfound;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public XCtx<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> pi(XCtx<C> I) {
 		if (!DEBUG.debug.x_backtracking) {
 			return pi2(I);
@@ -864,6 +879,7 @@ public class XMapping<C, D> implements XObject {
 		return null;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public XMapping<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>, Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> piT(
 			XMapping<C, C> t) {
 		if (!DEBUG.debug.x_backtracking) {
@@ -917,6 +933,7 @@ public class XMapping<C, D> implements XObject {
 		return null;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	boolean fill(XCtx<C> I, Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
 			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
 			Pair<C, Triple<D, D, List<D>>> tag, Triple<C, C, List<C>> y) {
@@ -991,6 +1008,7 @@ public class XMapping<C, D> implements XObject {
 		}
 	}
 
+	@SuppressWarnings({ "unchecked" })
 	void try_branch(XCtx<C> I,
 			List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> thetas,
 			Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
@@ -1012,7 +1030,7 @@ public class XMapping<C, D> implements XObject {
 			Pair<C, Triple<D, D, List<D>>> c0f0 = next(theta, tag);
 			if (c0f0 != null) {
 				C c0 = c0f0.first;
-				Triple<D, D, List<D>> f0 = c0f0.second;
+				//Triple<D, D, List<D>> f0 = c0f0.second;
 				for (Triple<C, C, List<C>> x0 : I.cat().hom((C) "_1", c0)) {
 					try_branch(I, thetas, theta, theta2, c0f0, x0, bad_thetas);
 				}
@@ -1068,6 +1086,7 @@ public class XMapping<C, D> implements XObject {
 
 	// ////////////////////////////////////
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Pair<Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>>, Map<D, List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>>>> makeThetas2(
 			XCtx<C> I) {
 
@@ -1123,7 +1142,8 @@ public class XMapping<C, D> implements XObject {
 		
 		return new Pair<>(ret, ret2);
 	}
-
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public XMapping pi_unit(XCtx<D> J) {
 		if (!DEBUG.debug.x_backtracking) {
 			return pi_unit2(J);
@@ -1193,11 +1213,13 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping(J, pideltaI, m, "homomorphism");
 	}
 
+	@SuppressWarnings({ "rawtypes" })
 	private XMapping pi_unit2(XCtx<D> j) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public XMapping pi_counit(XCtx<C> I) {
 		if (!DEBUG.debug.x_backtracking) {
 			return pi_counit2(I);
@@ -1259,11 +1281,13 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping(deltapiI, I, m, "homomorphism");
 	}
 
+	@SuppressWarnings("rawtypes")
 	private XMapping pi_counit2(XCtx<C> i) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public XMapping<C, D> rel() {
 		Map m = new HashMap<>();
 
@@ -1346,6 +1370,7 @@ public class XMapping<C, D> implements XObject {
 	 * return new XMapping<>(src.rel(), dst.rel(), m, "homomorphism"); }
 	 */
 	
+	@SuppressWarnings("unchecked")
 	public XPoly<C, D> uber() {
 		Map<Object, Pair<D, Block<C, D>>> map = new HashMap<>();
 		Map<D, XCtx<Pair<Triple<D, D, List<D>>, C>>> dfys = new HashMap<>();
@@ -1374,6 +1399,7 @@ public class XMapping<C, D> implements XObject {
 			for (Pair<Triple<D, D, List<D>>, C> cf : dfy.terms()) {
 				from.put(cf, cf.second);
 			}
+			@SuppressWarnings("rawtypes")
 			Set where = new HashSet<>(dfy.eqs);
 			Map<D, Pair<Object, Map<Object, List<Object>>>> edges = new HashMap<>();
 			Map<D, List<Object>> attrs = new HashMap<>();
@@ -1395,6 +1421,7 @@ public class XMapping<C, D> implements XObject {
 					throw new RuntimeException();
 				}
 				if (dst.ids.contains(d0)) {
+					@SuppressWarnings("rawtypes")
 					Map edge_m = new HashMap<>();
 					dfy0.terms();
 					for (Pair<Triple<D, D, List<D>>, C> cf : dfy0.terms()) {
@@ -1403,6 +1430,7 @@ public class XMapping<C, D> implements XObject {
 					edges.put(e, new Pair<>("q" + d0, edge_m));
 				} else {
 					//System.out.println(d0 + " not in " + dst.ids);
+					@SuppressWarnings("rawtypes")
 					List lll = dfh.em.get(new Pair<>(new Triple<>((D)"_1", d0, Util.singList((D)"u_u")), (C)d0));
 					if (lll == null) {
 						throw new RuntimeException();
@@ -1528,6 +1556,7 @@ public class XMapping<C, D> implements XObject {
 			if (!(arg0 instanceof Chc)) {
 				return "";
 			}
+			@SuppressWarnings("rawtypes")
 			Chc xxx = (Chc) arg0;
 			if (xxx.left) {
 				return xxx.l.toString();

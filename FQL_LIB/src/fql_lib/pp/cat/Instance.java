@@ -13,6 +13,7 @@ import fql_lib.FUNCTION;
 import fql_lib.core.Util;
 import fql_lib.pp.cat.FinSet.Fn;
 
+@SuppressWarnings("serial")
 public class Instance<O, A> implements Serializable{
 
 	public Signature<O, A> thesig;

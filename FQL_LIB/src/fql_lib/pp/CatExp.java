@@ -8,6 +8,7 @@ import catdata.algs.Pair;
 import catdata.algs.Triple;
 
 
+@SuppressWarnings("serial")
 public abstract class CatExp implements Serializable {
 	
 	public static class Union extends CatExp {

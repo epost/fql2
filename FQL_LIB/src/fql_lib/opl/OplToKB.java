@@ -1,6 +1,5 @@
 package fql_lib.opl;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,7 +26,7 @@ import catdata.algs.kb.KBExp.KBVar;
 import catdata.algs.kb.KBHorn;
 import catdata.algs.kb.KBOptions;
 import catdata.algs.kb.KBOrders;
-import fql_lib.core.DEBUG;
+import fql_lib.core.NEWDEBUG;
 import fql_lib.core.Util;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplSig;
@@ -96,7 +95,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	
 	public OplToKB(Iterator<V> fr, OplSig<S, C, V> sig) {
 		this.sig = sig;
-		if (DEBUG.debug.opl_require_const) {
+		if (NEWDEBUG.debug.opl.opl_require_const) {
 			checkEmpty();
 		}
 		this.fr = fr;
@@ -157,13 +156,16 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			}	
 			ret = j.get(t).stream().map(g -> { return nice(ctx, g); }).collect(Collectors.toList());
 			//ret = new LinkedList<>(ret);
-			((List)ret).sort(Util.ToStringComparator);
+			@SuppressWarnings({ "rawtypes", "unchecked" })
+			List<Object> rret = (List) ret;
+			rret.sort(Util.ToStringComparator);
 			hom.put(new Pair<>(s,t), ret);
 		}
 		
 		return ret; 
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	Pair<OplCtx<S,V>, OplTerm<C,V>> nice(OplCtx<S,V> G, OplTerm<C,V> e) {
 		int i = 0;
 		Map m = new HashMap();
@@ -286,7 +288,8 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	}
 	
 	
-	private <S> KB<C, V> convert(OplSig<S,C,V> s) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private  KB<C, V> convert(OplSig<S,C,V> s) {
 		if (s.prec.keySet().size() != new HashSet<>(s.prec.values()).size()) {
 			throw new RuntimeException("Cannot duplicate precedence");
 		}
@@ -359,7 +362,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			rs.addAll(convert(impl.second, impl.third));
 		}
 		
-		KBOptions options = new KBOptions(DEBUG.debug.opl_unfailing, DEBUG.debug.opl_sort_cps, DEBUG.debug.opl_horn && !s.implications.isEmpty(), DEBUG.debug.opl_semantic_ac, DEBUG.debug.opl_iterations, DEBUG.debug.opl_red_its);
+		KBOptions options = new KBOptions(NEWDEBUG.debug.opl.opl_unfailing, NEWDEBUG.debug.opl.opl_sort_cps, NEWDEBUG.debug.opl.opl_horn && !s.implications.isEmpty(), NEWDEBUG.debug.opl.opl_semantic_ac, NEWDEBUG.debug.opl.opl_iterations, NEWDEBUG.debug.opl.opl_red_its);
 		return new KB(eqs, KBOrders.lpogt(gt), fr, rs, options);			
 	}
 	
@@ -404,6 +407,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 				}	
 			}
 			if (l.size() == r.size() && e0.f.left) {
+				@SuppressWarnings("rawtypes")
 				Pair<Function, Object> xxx = Util.stripChcs(e0.f.l);
 				if (I.defs.containsKey(xxx.second)) {
 					Object o = ((Invocable)I.engine).invokeFunction((String)xxx.second, r);
@@ -417,6 +421,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		} 
 	} 
 	
+	@SuppressWarnings("deprecation")
 	public Map<S, Set<OplTerm<C, V>>> doHoms() {
 		HashMap<S, Set<OplTerm<C, V>>> sorts = new HashMap<>();
 		Runnable r = new Runnable() {
@@ -435,7 +440,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		Thread t = new Thread(r);
 		t.start();
 		try {
-			t.join(DEBUG.debug.opl_hom_its);
+			t.join(NEWDEBUG.debug.opl.opl_hom_its);
 			t.stop();
 		} catch (Exception ex) {
 			ex.printStackTrace();

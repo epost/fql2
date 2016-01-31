@@ -60,8 +60,6 @@ public class GUI extends JPanel {
 	
 	public static JTabbedPane editors = new JTabbedPane();
 
-	//public static JComboBox<Example> box = null;
-
 	public static JFrame topFrame;
 	
 	public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
@@ -147,6 +145,7 @@ public class GUI extends JPanel {
 		KeyStroke commandR = KeyStroke.getKeyStroke(KeyEvent.VK_R,
 				InputEvent.META_MASK);
 		AbstractAction runAction = new AbstractAction() {
+			@SuppressWarnings("rawtypes")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 			((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
@@ -198,6 +197,7 @@ public class GUI extends JPanel {
 		MenuItem runItem = new MenuItem("Run");
 		toolsMenu.add(runItem);
 		runItem.addActionListener(new ActionListener() {
+			@SuppressWarnings("rawtypes")
 			@Override
 				public void actionPerformed(ActionEvent e) {
 				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
@@ -291,6 +291,7 @@ public class GUI extends JPanel {
 		});
 
 		findItem.addActionListener(new ActionListener() {
+			@SuppressWarnings("rawtypes")
 			public void actionPerformed(ActionEvent e) {
 				delay();
 				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
@@ -323,6 +324,7 @@ public class GUI extends JPanel {
 
 		JButton compileB = new JButton("Run");
 		compileB.addActionListener(new ActionListener() {
+			@SuppressWarnings("rawtypes")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
@@ -366,16 +368,18 @@ public class GUI extends JPanel {
 		JButton optionsb = new JButton("Options");
 		optionsb.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				DEBUG.debug.showOptions();
+				NEWDEBUG.debug.showOptions();
 			}
 		});
 
 		CardLayout cl = new CardLayout();
 		JPanel boxPanel = new JPanel(cl);
-		JComboBox allBox = allBox = new JComboBox<>(Examples.examples);
+		@SuppressWarnings("rawtypes")
+		JComboBox allBox = new JComboBox<>(Examples.examples);
 		allBox.setSelectedIndex(-1);
 		allBox.addActionListener(x -> doExample((Example) allBox.getSelectedItem()));
 		for (Language l : Language.values()) {
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			JComboBox box = new JComboBox(Examples.filterBy(l.toString()));
 			box.setSelectedIndex(-1);
 			box.addActionListener(x -> doExample((Example) box.getSelectedItem()));
@@ -463,6 +467,7 @@ public class GUI extends JPanel {
 
 	private static void abortAction() {
 		int i = editors.getSelectedIndex();
+		@SuppressWarnings("rawtypes")
 		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
 		if (c == null) {
 			return;
@@ -473,6 +478,7 @@ public class GUI extends JPanel {
 	private static void closeAction() {
 		delay();
 		int i = editors.getSelectedIndex();
+		@SuppressWarnings("rawtypes")
 		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
 		if (c == null) {
 			return;
@@ -534,6 +540,7 @@ public class GUI extends JPanel {
 	}
 
 	protected static void saveAction() {
+		@SuppressWarnings("rawtypes")
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
 				.getSelectedIndex());
 		File f = files.get(e.id);
@@ -601,6 +608,7 @@ public class GUI extends JPanel {
 	protected static void saveAsAction() {
 		delay();
 		JFileChooser jfc = new JFileChooser(DEBUG.debug.FILE_PATH);
+		@SuppressWarnings("rawtypes")
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
 				.getSelectedIndex());
 
@@ -674,12 +682,13 @@ public class GUI extends JPanel {
 	}
 
 	public static void setFontSize(int size) {
-		for (CodeEditor c : keys.values()) {
+		for (@SuppressWarnings("rawtypes") CodeEditor c : keys.values()) {
 			c.setFontSize(size);
 		}
 	}
 	
 	static Map<Integer, Boolean> dirty = new HashMap<>();
+	@SuppressWarnings("rawtypes")
 	static Map<Integer, CodeEditor> keys = new HashMap<>();
 	static Map<Integer, File> files = new HashMap<>();
 	static Map<Integer, String> titles = new HashMap<>();
@@ -692,6 +701,7 @@ public class GUI extends JPanel {
 
 	static Integer newAction(String title, String content, Language isPatrick) {
 		untitled_count++;
+		@SuppressWarnings("rawtypes")
 		CodeEditor c = isPatrick.createEditor(untitled_count, content);
 		int i = editors.getTabCount();
 		keys.put(untitled_count, c);

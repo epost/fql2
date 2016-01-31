@@ -1,6 +1,5 @@
 package fql_lib.pp.cat;
 
-import fql_lib.FUNCTION;
 import fql_lib.core.DEBUG;
 public class Adjunction<CO, CA, DO, DA> {
 

@@ -14,6 +14,7 @@ import fql_lib.pp.cat.Functor;
 import fql_lib.pp.cat.Transform;
 import fql_lib.pp.cat.FinSet.Fn;
 
+@SuppressWarnings("serial")
 public class FQLPPEnvironment implements Serializable {
 
 	public FQLPPProgram prog;

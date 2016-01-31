@@ -20,6 +20,7 @@ import fql_lib.X.XExp.XBool;
 import fql_lib.X.XPoly.Block;
 import fql_lib.core.Util;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class XProd {
 	
 	public static <X> XCtx<X> zero(XCtx<X> S) {
@@ -1126,7 +1127,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	public static <C, D> XMapping<Pair<Object, Map<Object, Triple<C, C, List<C>>>>, Pair<Object, Map<Object, Triple<C, C, List<C>>>>> uberflower(XPoly<C, D> poly, XMapping<C,C> h) {
 		//poly.initConjs(); works on full ubers
 		XCtx<Pair<Object, Map<Object, Triple<C, C, List<C>>>>> hsrc = uberflower(poly, h.src);
-		XCtx<Pair<Object, Map<Object, Triple<C, C, List<C>>>>> hdst = uberflower(poly, h.dst);
+		//XCtx<Pair<Object, Map<Object, Triple<C, C, List<C>>>>> hdst = uberflower(poly, h.dst);
 		Map em = new HashMap<>();
 		
 		for (Pair<Object, Map<Object, Triple<C, C, List<C>>>> k : hsrc.ids) {
@@ -1158,7 +1159,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		
 		for (Object flower_name : poly.blocks.keySet()) {
 			Pair<D, Block<C, D>> flowerX = poly.blocks.get(flower_name);
-			D flower_dst = flowerX.first;
+			//D flower_dst = flowerX.first;
 			Block<C, D> flower = flowerX.second;
 
 			Set<Map<Object, Triple<C, C, List<C>>>> ret = new HashSet<>();
@@ -1227,7 +1228,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 				}
 				
 				for (D edge : flower.edges.keySet()) {
-					D tgt = poly.dst.type(edge).second;
+			//		D tgt = poly.dst.type(edge).second;
 	
 					List lhs = new LinkedList();
 					lhs.add(new Pair<>(flower_name, k));

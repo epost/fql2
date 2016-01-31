@@ -540,7 +540,7 @@ public class XRaToFpql {
 		List<Pair<String, List<Pair<Object, Object>>>> iarrows = new LinkedList<>();
 		//String adom = "adom";
 		//nodes.add(adom);
-		List<Pair<Object, Object>> adomT = new LinkedList<>();
+	//	List<Pair<Object, Object>> adomT = new LinkedList<>();
 		//LinkedList<Pair<Object, Object>> attT = new LinkedList<>();
 		//inodes.add(new Pair<String, List<Pair<Object, Object>>>(adom, adomT));
 	//	iattrs.add(new Pair<String, List<Pair<Object, Object>>>("att", attT));
@@ -633,7 +633,7 @@ public class XRaToFpql {
 		String xxx = "\n\n";
 		Map<String, String> schemas = new HashMap<>();
 		Map<String, XSchema> schemas0 = new HashMap<>();
-		Map<String, Boolean> done = new HashMap<>();
+	//	Map<String, Boolean> done = new HashMap<>();
 		for (Pair<String, EExternal> gh0 : queries) {
 			String k = gh0.first;
 			EExternal gh = gh0.second;
@@ -1375,6 +1375,7 @@ public class XRaToFpql {
 		return new EInsertValues(target, values);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> ed() {
 		Parser tuple = Parsers.tuple(ident(), term("."), ident());
 
@@ -1390,6 +1391,7 @@ public class XRaToFpql {
 		return Parsers.tuple(from1, where, from2, where);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> flower() {
 		Parser tuple = Parsers.tuple(ident(), term("."), ident());
 

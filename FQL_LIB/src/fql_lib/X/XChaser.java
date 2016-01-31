@@ -16,6 +16,7 @@ import fql_lib.X.XExp.XSuperED.SuperFOED;
 import fql_lib.core.Util;
 import fql_lib.pp.cat.FinSet;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class XChaser {
 
 	public static void validate(XSuperED phi, XCtx<String> S, XCtx<String> T) {
@@ -160,8 +161,8 @@ public class XChaser {
 		for (SuperFOED ed : ED.as) {
 			List<LinkedHashMap<C, Triple<C,C,List<C>>>> vals = allVals((Map<C,C>)ed.a, I);
 			for (LinkedHashMap<C, Triple<C,C,List<C>>> val : vals) {
-				List<Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>> 
-				lhs_substed = substLhs(ed.lhs, val);
+			//	List<Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>> 
+			//	lhs_substed = substLhs(ed.lhs, val);
 			//	System.out.println("lhs: " + ed.lhs);
 			//	System.out.println("lhs_substed: " + lhs_substed);
 				for (Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>> rhs : ed.rhs) {

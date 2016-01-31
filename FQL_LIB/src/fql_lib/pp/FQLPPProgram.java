@@ -11,8 +11,8 @@ import fql_lib.core.LineException;
 import fql_lib.core.Prog;
 
 
+@SuppressWarnings("serial")
 public class FQLPPProgram implements Serializable, Prog {
-	
 
 	@Override
 	public boolean equals(Object o) {

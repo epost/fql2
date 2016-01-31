@@ -93,6 +93,8 @@ public class XProgram implements Prog {
 	}
 	
 	private Map<String, Pair<String, String>> tys = null;
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Pair getType(String s) {
 		if (tys == null) {
 			return new Pair("?", "?");

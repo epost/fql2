@@ -22,6 +22,7 @@ import fql_lib.core.CodeTextPanel;
 import fql_lib.core.DEBUG;
 import fql_lib.core.Util;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class XPoly<C,D> extends XExp implements XObject {
 	
 	public static <X> XPoly<X,X> id(XCtx<X> S) {
@@ -56,7 +57,6 @@ public class XPoly<C,D> extends XExp implements XObject {
 	}
 
 	
-	
 	public XPoly(XCtx src, XCtx dst, Map<Object, Pair<D, Block<C, D>>> blocks) {
 		this.src = src;
 		this.dst = dst;
@@ -69,7 +69,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 		this.dst_e = dst;
 		this.blocks = blocks;
 	}
-
+	
 	public static class Block<C, D> {
 
 		//should inherit from parent
@@ -278,7 +278,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		XPoly other = (XPoly) obj;
+		XPoly<?,?> other = (XPoly<?,?>) obj;
 		if (blocks == null) {
 			if (other.blocks != null)
 				return false;
@@ -376,7 +376,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			List<D> rhs = p.second;
 			Pair<D, D> t = dst.type(lhs);
 			D d = t.first;
-			D d0= t.second;
+			//D d0= t.second;
 			for (Object l : blocks.keySet()) {
 				if (!blocks.get(l).first.equals(d)) {
 					continue;
@@ -638,7 +638,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 	
 	
 	public void validate() {
-		Function<Pair<Object, List<D>>, XMapping<C,C>> f = freeze();
+/*		Function<Pair<Object, List<D>>, XMapping<C,C>> f = */ freeze();
 //		 for (Object l : blocks.keySet()) {
 //			D d = blocks.get(l).first;
 //			for (D d0 : dst.allIds()) {
@@ -689,11 +689,11 @@ public class XPoly<C,D> extends XExp implements XObject {
 		XCtx<C> dst0 = coapply(h.dst);
 		
 		Map<C, List<C>> em0 = new HashMap<>();
-		for (C c : src0.terms()) {
-			Triple t = (Triple) c;
+	//	for (C c : src0.terms()) {
+			//Triple t = (Triple) c;
 		
 			//Triple u = new Triple(t.first, h.ap)
-		}
+	//	}
 		
 		
 		for (C c : src0.allTerms()) {
@@ -922,26 +922,11 @@ public class XPoly<C,D> extends XExp implements XObject {
 				}
 			}
 			XCtx<D> inth = new XCtx<D>(new HashSet<>(), types, new_eqs, intQo.global, intQo, "instance");
-			XCtx<C> fr = Q.tilde().coapply(inth);
+			/*XCtx<C> fr = */ Q.tilde().coapply(inth);
 		}
 		
 		return (XPoly<C, E>) Q;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	

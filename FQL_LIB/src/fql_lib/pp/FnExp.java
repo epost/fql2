@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 import fql_lib.FUNCTION;
 
-public abstract class FnExp implements Serializable{
+@SuppressWarnings("serial")
+public abstract class FnExp implements Serializable {
 
 	
 	public static class ApplyTrans extends FnExp {

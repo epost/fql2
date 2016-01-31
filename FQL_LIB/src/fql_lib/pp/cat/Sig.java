@@ -3,6 +3,7 @@ package fql_lib.pp.cat;
 import java.util.Set;
 
 //TODO turns out this is useless because signatures *always* denote categories 
+@SuppressWarnings("serial")
 public class Sig extends Category<Signature<?, ?>, Mapping<?, ?, ?, ?>> {
 
 	private Sig() { }

@@ -6,6 +6,7 @@
 package fql_lib.A;
 
 import java.io.*;
+
 import javax.swing.text.Segment;
 
 import org.fife.ui.rsyntaxtextarea.*;
@@ -14,7 +15,7 @@ import org.fife.ui.rsyntaxtextarea.*;
 /**
  * 
  */
-
+@SuppressWarnings("unused")
 public class ATokenMaker extends AbstractJFlexCTokenMaker {
 
   /** This character denotes the end of file */
@@ -466,7 +467,7 @@ public class ATokenMaker extends AbstractJFlexCTokenMaker {
    * the number of characters from the last newline up to the start of the 
    * matched text
    */
-  private int yycolumn;
+private int yycolumn;
 
   /** 
    * zzAtBOL == true <=> the scanner is currently at the beginning of a line

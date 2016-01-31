@@ -45,6 +45,7 @@ public class OplDisplay implements Disp {
 	public void close() {
 	}
 	
+	@SuppressWarnings("rawtypes")
 	private static String doLookup(String c, OplObject o) {
 		if (o instanceof OplSig) {
 			return "theory " + c;

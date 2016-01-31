@@ -11,6 +11,7 @@ import fql_lib.FUNCTION;
 import fql_lib.core.Util;
 import fql_lib.pp.cat.FinSet.Fn;
 
+@SuppressWarnings("serial")
 public class FPTransform<O, A> implements Serializable {
 
 	public Instance<O, A> src, dst;

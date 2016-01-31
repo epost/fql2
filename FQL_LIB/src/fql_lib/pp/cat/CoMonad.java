@@ -18,6 +18,7 @@ public class CoMonad<O,A> {
 		validate();
 	}
 	
+	@SuppressWarnings("serial")
 	public Category<O,Pair<A,O>> cokleisli() {
 		return new Category<O, Pair<A,O>>() {
 

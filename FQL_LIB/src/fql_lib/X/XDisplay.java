@@ -29,6 +29,7 @@ import fql_lib.core.Disp;
 
 public class XDisplay implements Disp {
 	
+	@SuppressWarnings({ "rawtypes" })
 	private static String doLookup(String c, XObject obj, Map<Object, String> map, XProgram prog) {
 		String front = obj.kind() + " " + c;
 		if (obj instanceof XCtx) {

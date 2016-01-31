@@ -6,6 +6,7 @@
 package fql_lib.pp;
 
 import java.io.*;
+
 import javax.swing.text.Segment;
 
 import org.fife.ui.rsyntaxtextarea.*;
@@ -14,7 +15,7 @@ import org.fife.ui.rsyntaxtextarea.*;
 /**
  * 
  */
-
+@SuppressWarnings("unused")
 public class FqlPPTokenMaker extends AbstractJFlexCTokenMaker {
 
   /** This character denotes the end of file */

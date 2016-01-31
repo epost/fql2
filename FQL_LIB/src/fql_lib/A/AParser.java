@@ -20,36 +20,24 @@ import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
 
-import catdata.algs.Chc;
 import catdata.algs.Pair;
 import catdata.algs.Triple;
 import fql_lib.X.XExp;
 import fql_lib.core.Util;
 import fql_lib.opl.OplCtx;
 import fql_lib.opl.OplExp;
-import fql_lib.opl.OplExp.OplApply;
-import fql_lib.opl.OplExp.OplDelta;
 import fql_lib.opl.OplExp.OplEval;
 import fql_lib.opl.OplExp.OplFlower;
-import fql_lib.opl.OplExp.OplId;
-import fql_lib.opl.OplExp.OplInst;
 import fql_lib.opl.OplExp.OplJavaInst;
 import fql_lib.opl.OplExp.OplMapping;
 import fql_lib.opl.OplExp.OplPresTrans;
-import fql_lib.opl.OplExp.OplSat;
-import fql_lib.opl.OplExp.OplSchemaProj;
 import fql_lib.opl.OplExp.OplSetInst;
 import fql_lib.opl.OplExp.OplSetTrans;
-import fql_lib.opl.OplExp.OplSigma;
-import fql_lib.opl.OplExp.OplUberSat;
-import fql_lib.opl.OplExp.OplUnSat;
-import fql_lib.opl.OplExp.OplVar;
-import fql_lib.opl.OplParser.VIt;
-import fql_lib.opl.OplProgram;
 import fql_lib.opl.OplQuery;
 import fql_lib.opl.OplQuery.Block;
 import fql_lib.opl.OplTerm;
 
+@SuppressWarnings({"unchecked", "rawtypes", "unused"})
 public class AParser {
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
@@ -317,7 +305,7 @@ public class AParser {
 		throw new RuntimeException("Not implemented yet");
 	}
 	
-	private static void toProgHelper(String txt, String s, List<Triple<String, Integer, OplExp>> ret, Tuple3 decl) {
+/*	private static void toProgHelper(String txt, String s, List<Triple<String, Integer, OplExp>> ret, Tuple3 decl) {
 		int idx = s.indexOf(txt);
 		if (idx < 0) {
 			throw new RuntimeException();
@@ -325,8 +313,8 @@ public class AParser {
 
 		String name = decl.a.toString();
 		ret.add(new Triple<>(name, idx, toExp(decl.c)));
-	}
-
+	} */
+/*
 	private static OplExp toTheory(Object o) {
 		Tuple4 t = (Tuple4) o;
 		
@@ -335,14 +323,10 @@ public class AParser {
 		Tuple3 c = (Tuple3) t.c;
 		Tuple3 d = (Tuple3) t.d;
 		
-	/*	if (!(a.a.toString().equals("sorts") && b.a.toString().equals("symbols") && c.a.toString().equals("equations"))) {
-			throw new RuntimeException();
-		} */
+	
 		
 		Set<String> sorts = a == null ? new HashSet<>() : new HashSet<>((List<String>) a.b);
-	/*	if (sorts.size() != ((List)a.b).size()) {
-			throw new DoNotIgnore("Duplicate sort");
-		} */
+	
 		
 		List<Tuple3> symbols0 = b == null ? new LinkedList<>() : (List<Tuple3>) b.b;
 		List<org.codehaus.jparsec.functors.Pair> equations0 = c == null ? new LinkedList<>() : (List<org.codehaus.jparsec.functors.Pair>) c.b;
@@ -415,7 +399,7 @@ public class AParser {
 		
 		return new OplExp.OplSig<>(new VIt(), prec, sorts, symbols, equations, implications);
 	}
-
+*/
 	private static Collection<String> consts(Map<String, Pair<List<String>, String>> symbols) {
 		Set<String> ret = new HashSet<>();
 		for (String k : symbols.keySet()) {
@@ -427,7 +411,7 @@ public class AParser {
 		return ret;
 	}
 	
-	private static OplExp toPresentation(Object o) {
+/*	private static OplExp toPresentation(Object o) {
 		Tuple4 t = (Tuple4) o;
 		
 		
@@ -480,7 +464,7 @@ public class AParser {
 		
 		return new OplExp.OplPres<String,String,String,String>(prec, yyy, null, symbols, equations);
 	}
-
+ */
 	private static OplExp toSchema(Object o) {
 		Tuple4 t = (Tuple4) o;
 		
@@ -589,7 +573,7 @@ public class AParser {
 		}
 		return new OplCtx<String, String>(ret);
 	}
-
+/*
 	private static OplExp toExp(Object c) {
 		if (c instanceof String) {
 			return new OplVar((String) c);
@@ -682,14 +666,6 @@ public class AParser {
 		}catch (Exception ee) { 
 		}
 		
-/*		try {
-			return toTransEval(c);
-		} catch (DoNotIgnore de) {
-			de.printStackTrace();
-			throw new RuntimeException(de.getMessage());
-		}catch (Exception ee) { 
-		} */
-		
 		try {
 			return toFDM(c);
 		} catch (DoNotIgnore de) {
@@ -734,7 +710,7 @@ public class AParser {
 		}
 		
 		throw new RuntimeException("Report this error to Ryan.");
-	}
+	} */
 	
 	private static OplExp toMapping(Object c) {
 		Tuple3 t = (Tuple3) c;
@@ -816,6 +792,7 @@ public class AParser {
 	}
 	
 	
+	@SuppressWarnings("serial")
 	public static class DoNotIgnore extends RuntimeException {
 
 		public DoNotIgnore(String string) {
@@ -931,7 +908,7 @@ public class AParser {
 		return new OplTransEval(i, f, r);
 	} */
 	
-	private static OplExp toFDM(Object c) {
+	/*private static OplExp toFDM(Object c) {
 		Tuple3 t = (Tuple3) c;
 		String i = (String) t.b;
 		String r = (String) t.c;
@@ -943,7 +920,7 @@ public class AParser {
 		}
 		throw new RuntimeException();
 
-	}
+	}*/
 
 	public static Parser<?> section(String s, Parser<?> p) {
 		return Parsers.tuple(term(s), p.sepBy(term(",")), term(";"));

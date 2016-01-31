@@ -72,23 +72,22 @@ import fql_lib.pp.cat.CoMonad;
 import fql_lib.pp.cat.FDM;
 import fql_lib.pp.cat.FinCat;
 import fql_lib.pp.cat.FinSet;
+import fql_lib.pp.cat.FinSet.Fn;
 import fql_lib.pp.cat.FiniteCategory;
 import fql_lib.pp.cat.FunCat;
 import fql_lib.pp.cat.Functor;
 import fql_lib.pp.cat.Groth;
 import fql_lib.pp.cat.Inst;
 import fql_lib.pp.cat.Instance;
-import fql_lib.pp.cat.LeftKanSigma;
 import fql_lib.pp.cat.Mapping;
 import fql_lib.pp.cat.Monad;
 import fql_lib.pp.cat.Signature;
-import fql_lib.pp.cat.Transform;
-import fql_lib.pp.cat.FinSet.Fn;
 import fql_lib.pp.cat.Signature.Edge;
 import fql_lib.pp.cat.Signature.Node;
 import fql_lib.pp.cat.Signature.Path;
+import fql_lib.pp.cat.Transform;
 
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({ "unchecked", "rawtypes", "serial" })
 public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		FunctorExpVisitor<Functor, FQLPPProgram>, TransExpVisitor<Transform, FQLPPProgram> , Serializable {
 
@@ -1038,7 +1037,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		ret2_e.printStackTrace();
 		throw new RuntimeException("Cannot apply:\n\nmost probable cause: " + ret1_e.getMessage() + "\n\nless probable cause: " + ret2_e.getMessage());
 	}
-
+/*
 	private Functor fastSigma(FQLPPProgram env, Category C, Const src, Const dst, MapConst f, InstConst i) {
 		//System.out.println("Running fast sigma"); //TODO
 //		Signature s = new Signature(src.nodes, src.arrows, src.eqs);
@@ -1050,7 +1049,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		Instance J = (Instance<String,String>) LeftKanSigma.fullSigmaOnPresentation(F, I, null, null, 0).first;
 		//System.out.println("J " + J);
 		return toFunctor(C, J); // new InstConst(dst, J.nm, J.em); //.accept(env, v);
-	}
+	} */
 
 	@Override
 	public Transform visit(FQLPPProgram env, fql_lib.pp.TransExp.Apply e) {
@@ -1290,15 +1289,15 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			Object f = fp.first;
 			String p = fp.second;
 			Object a = D.source(f);
-			Object b = D.target(f);
-			String i = span.source(p);
+		//	Object b = D.target(f);
+			//String i = span.source(p);
 			String j = span.target(p);
-			Functor I = i == "A" ? l.source : i == "B" ? l.target : r.target;
+		//	Functor I = i == "A" ? l.source : i == "B" ? l.target : r.target;
 			Functor J = j == "A" ? l.source : j == "B" ? l.target : r.target;
-			Fn If = (Fn) I.applyA(f);
+			//Fn If = (Fn) I.applyA(f);
 			Fn Jf = (Fn) J.applyA(f);
 			Transform P = p == "f" ? l : p == "g" ? r : p == "a" ? Transform.id(l.source) : p == "b" ? Transform.id(l.target) : Transform.id(r.target);
-			Fn Pb = (Fn) P.apply(b);
+			//Fn Pb = (Fn) P.apply(b);
 			Fn Pa = (Fn) P.apply(a);
 			return Fn.compose(Pa, Jf);
 /*			if (p.second.equals("f")) {
@@ -1315,7 +1314,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 				throw new RuntimeException();
 			} */
 		};
-		Functor I = new Functor(Dspan, FinSet.FinSet(), o, x);
+		Functor I = new Functor(Dspan, FinSet.FinSet0(), o, x);
 		
 		return FDM.sigmaF(fst).applyO(I);		
 	}

@@ -24,7 +24,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import catdata.algs.kb.KBOptions;
 import fql_lib.pp.cat.FDM;
 
 /**
@@ -223,7 +222,7 @@ public class DEBUG implements Serializable {
 	public boolean x_elements = true;
 	public boolean x_json = true;
 		
-	public boolean opl_unfailing = KBOptions.defaultOptions.unfailing;
+/*	public boolean opl_unfailing = KBOptions.defaultOptions.unfailing;
 	public int opl_iterations = KBOptions.defaultOptions.iterations;
 	public boolean opl_require_const = false;
 	public boolean opl_sort_cps = KBOptions.defaultOptions.sort_cps;
@@ -236,8 +235,9 @@ public class DEBUG implements Serializable {
 	public boolean opl_pretty = true;
 	public boolean opl_reorder = true;
 	public boolean opl_suppress_dom = true; 
-	public boolean opl_horn = KBOptions.defaultOptions.horn;
+	public boolean opl_horn = KBOptions.defaultOptions.horn; */
 			
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void showOptions() {
 
 		JTabbedPane jtb = new JTabbedPane();
@@ -334,11 +334,12 @@ public class DEBUG implements Serializable {
 	//	x_1.add(direct_flower_label);
 	//	x_2.add(direct_flower_box);
 		
-		JCheckBox check_oriented_box = new JCheckBox("", check_oriented);
-		JLabel check_oriented_label = new JLabel("Validate orientation in Knuth-Bendix:");
+		//JCheckBox check_oriented_box = new JCheckBox("", check_oriented);
+		//JLabel check_oriented_label = new JLabel("Validate orientation in Knuth-Bendix:");
 	//	x_1.add(check_oriented_label);
 	//	x_2.add(check_oriented_box);
 
+		/*
 		JCheckBox opl_validate_box = new JCheckBox("", opl_validate);
 		JLabel opl_validate_label = new JLabel("Validate mappings:");
 		opl1.add(opl_validate_label);
@@ -408,7 +409,7 @@ public class DEBUG implements Serializable {
 		JLabel opl_horn_label = new JLabel("Allow implications in theories (dangerous, also does *not* check mappings):");
 		opl2.add(opl_horn_box);
 		opl1.add(opl_horn_label);
-
+*/
 		//opl1.add(new JLabel());
 		//opl2.add(new JLabel());
 		
@@ -830,9 +831,9 @@ public class DEBUG implements Serializable {
 			int f = FONT_SIZE;
 			int n = MAX_NODES;
 			int ee = MAX_EDGES;
-			int opl = opl_iterations;
-			int opl_h = opl_hom_its;
-			int opl_r = opl_red_its;
+	//		int opl = opl_iterations;
+		//	int opl_h = opl_hom_its;
+			//int opl_r = opl_red_its;
 			try {
 				a = Integer.parseInt(plen.getText());
 				b = Integer.parseInt(iter.getText());
@@ -840,34 +841,34 @@ public class DEBUG implements Serializable {
 				f = Integer.parseInt(font_field.getText());
 				n = Integer.parseInt(node_limit_field.getText());
 				ee = Integer.parseInt(edge_limit_field.getText());
-				opl = Integer.parseInt(opl_iterations_box.getText());
-				opl_h = Integer.parseInt(opl_homit_box.getText());
-				opl_r = Integer.parseInt(opl_red_box.getText());
+	//			opl = Integer.parseInt(opl_iterations_box.getText());
+		//		opl_h = Integer.parseInt(opl_homit_box.getText());
+			//	opl_r = Integer.parseInt(opl_red_box.getText());
 				if (f < 1) {
 					f = FONT_SIZE;
 				}
 			} catch (NumberFormatException nfe) {
 				return;
 			}
-			opl_iterations = opl;
-			opl_hom_its = opl_h;
-			opl_red_its = opl_r;
+//			opl_iterations = opl;
+	//		opl_hom_its = opl_h;
+		//	opl_red_its = opl_r;
 			MAX_NODES = n;
 			MAX_EDGES = ee;
 			ALL_GR_PATHS = gr.isSelected();
 			VALIDATE = jcb.isSelected();
 			MultiView = jcbM.isSelected();
-			opl_require_const = opl_const_box.isSelected();
-			opl_sort_cps = opl_sort_box.isSelected();
-			opl_unfailing = opl_unfailing_box.isSelected();
+//			opl_require_const = opl_const_box.isSelected();
+	//		opl_sort_cps = opl_sort_box.isSelected();
+		//	opl_unfailing = opl_unfailing_box.isSelected();
 			//opl_alpha = opl_alpha_box.isSelected();
-			opl_validate = opl_validate_box.isSelected();
-			opl_david = opl_david_box.isSelected();
-			opl_pretty = opl_pretty_box.isSelected();
-			opl_reorder = opl_reorder_box.isSelected();
-			opl_suppress_dom = opl_suppress_box.isSelected();
-			opl_horn = opl_horn_box.isSelected();
-			opl_semantic_ac = opl_semantic_ac_box.isSelected();
+//			opl_validate = opl_validate_box.isSelected();
+	//		opl_david = opl_david_box.isSelected();
+		//	opl_pretty = opl_pretty_box.isSelected();
+//			opl_reorder = opl_reorder_box.isSelected();
+	//		opl_suppress_dom = opl_suppress_box.isSelected();
+		//	opl_horn = opl_horn_box.isSelected();
+//			opl_semantic_ac = opl_semantic_ac_box.isSelected();
 			
 		//	limit_examples = limex.isSelected();
 			useLineage = (String) lineageBox.getSelectedItem();
@@ -889,7 +890,7 @@ public class DEBUG implements Serializable {
 			this.x_adom = x_adom_box.isSelected();
 			this.fast_amalgams = fast_amalgams_box.isSelected();
 			this.validate_amalgams = validate_amalgams_box.isSelected();
-			this.check_oriented = check_oriented_box.isSelected();
+		//	this.check_oriented = check_oriented_box.isSelected();
 			this.reorder_joins = reorder_joins_box.isSelected();
 			this.x_typing = x_typing_box.isSelected();
 			this.x_elements = x_elem_box.isSelected();

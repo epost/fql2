@@ -366,7 +366,9 @@ public class EnrichViewer {
 			return "Error: " + re.getLocalizedMessage();
 		}
 		
+		@SuppressWarnings("unchecked")
 		XCtx<String> isa0 = (XCtx<String>) env.objs.get(isaX);
+		@SuppressWarnings("unchecked")
 		XCtx<String> mat0 = (XCtx<String>) env.objs.get(matX);
 		
 		return go(isa, mat, isaX, matX, isa0, mat0, name.getText(), kid.getText(), instField.getText(), isaField.getText());
@@ -440,28 +442,28 @@ public class EnrichViewer {
 			for (Triple<String, String, List<String>> p : S0.cat().hom(X, mat)) {
 				String rp = m2.get(p);
 				from.put(rp, a);
-				List<String> lhs = new LinkedList<>();
-				List<String> rhs = new LinkedList<>();
+				List<Object> lhs = new LinkedList<>();
+				List<Object> rhs = new LinkedList<>();
 				lhs.add("x");
 				lhs.addAll(p.third);
 				lhs.add(name);
 				rhs.add(rp);
 				rhs.add(l);
 				rhs.add(n);
-				where.add(new Pair(lhs, rhs));
+				where.add(new Pair<>(lhs, rhs));
 			}
 			for (Triple<String, String, String> e : S.arrows) {
-				Map<String, List<String>> map = new HashMap<>();
+				Map<Object, List<Object>> map = new HashMap<>();
 				if (!e.second.equals(X)) {
 					continue;
 				}
 				if (S.nodes.contains(e.third)) {
-					List<String> xxx = new LinkedList<>();
+					List<Object> xxx = new LinkedList<>();
 					xxx.add("x");
 					xxx.add(e.first);
 					map.put("x", xxx);
 					for (Triple<String, String, List<String>> p0 : S0.cat().hom(e.third, mat)) {
-						String rep0 = vars2.get(e.third).get(p0);
+						Object rep0 = vars2.get(e.third).get(p0);
 						List<String> list = new LinkedList<>();
 						list.add(e.first);
 						list.addAll(p0.third);
@@ -473,10 +475,10 @@ public class EnrichViewer {
 						if (tgt == null) {
 							throw new RuntimeException("Cannot find " + ep0 + " in " + m2.keySet());
 						}
-						List<String> yyh = Collections.singletonList(tgt);
+						List<Object> yyh = Collections.singletonList(tgt);
 						map.put(rep0, yyh);
 					}
-					edges.put(e.first, new Pair("q" + e.third, map));
+					edges.put(e.first, new Pair<>("q" + e.third, map));
 				 //edge	
 				} else {
 					List<Object> list = new LinkedList<>();
@@ -575,7 +577,9 @@ public class EnrichViewer {
 					l.add("v");
 					l.add(arrow.first);
 					map.put("v", l);
-					edges.put(arrow.first, new Pair("q_" + arrow.third, map));
+					@SuppressWarnings({ "unchecked", "rawtypes" })
+					Pair<Object,Map<Object,List<Object>>> ppp = new Pair("q_" + arrow.third, map);
+					edges.put(arrow.first, ppp);
 				} else {
 					List<Object> l = new LinkedList<>();
 					l.add("v");

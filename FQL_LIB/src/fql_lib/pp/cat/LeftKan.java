@@ -15,6 +15,7 @@ import catdata.algs.Pair;
 import fql_lib.core.DEBUG;
 import fql_lib.core.Util;
 
+@SuppressWarnings("serial")
 public class LeftKan<O1, A1, O2, A2> implements Serializable {
 
 	private Signature<O1, A1> A;
@@ -490,6 +491,7 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 		}
 		Pair<Signature<O2, A2>.Edge, Object> first = it.next();
 		
+		@SuppressWarnings("unchecked")
 		Pair<Signature<O2, A2>.Node, Object> firstX = (Pair<Signature<O2, A2>.Node, Object>) first.second;
 		
 		String ret = "[" + firstX.first + ":" + firstX.second ;

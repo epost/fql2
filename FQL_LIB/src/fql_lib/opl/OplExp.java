@@ -34,7 +34,7 @@ import catdata.algs.Triple;
 import catdata.algs.Utils;
 import catdata.algs.kb.KBExp;
 import fql_lib.core.CodeTextPanel;
-import fql_lib.core.DEBUG;
+import fql_lib.core.NEWDEBUG;
 import fql_lib.core.Util;
 import fql_lib.opl.OplParser.DoNotIgnore;
 import fql_lib.pp.cat.FinSet;
@@ -624,7 +624,7 @@ public abstract class OplExp implements OplObject {
 
 		}
 
-		@SuppressWarnings({ "rawtypes", "deprecation" })
+		@SuppressWarnings({ "rawtypes", "deprecation", "unchecked" })
 		JPanel makeHomSet() {
 			OplToKB kb = getKB();
 			JPanel ret = new JPanel(new GridLayout(1, 1));
@@ -682,7 +682,7 @@ public abstract class OplExp implements OplObject {
 				Thread t = new Thread(runnable);
 				try {
 					t.start();
-					t.join(DEBUG.debug.opl_hom_its);
+					t.join(NEWDEBUG.debug.opl.opl_hom_its);
 
 					t.stop();
 					if (bot.getText().equals("")) {
@@ -793,7 +793,7 @@ public abstract class OplExp implements OplObject {
 		private Iterator<V> fr;
 
 		void validate() {
-			if (!DEBUG.debug.opl_horn && !implications.isEmpty()) {
+			if (!NEWDEBUG.debug.opl.opl_horn && !implications.isEmpty()) {
 				throw new DoNotIgnore("Implications in theories disabled in options menu.");
 			}
 			for (C k : symbols.keySet()) {
@@ -988,7 +988,7 @@ public abstract class OplExp implements OplObject {
 			}
 		}
 
-		public static <S, C, V, X> OplPres<S, C, V, X> OplPres(Map<X, Integer> prec, String S,
+		public static <S, C, V, X> OplPres<S, C, V, X> OplPres0(Map<X, Integer> prec, String S,
 				OplSig<S, C, V> sig, Map<X, S> gens,
 				List<Pair<OplTerm<Object, V>, OplTerm<Object, V>>> equations) {
 
@@ -1216,7 +1216,7 @@ public abstract class OplExp implements OplObject {
 			for (Triple<OplCtx<S1, V>, OplTerm<C1, V>, OplTerm<C1, V>> eq : src.equations) {
 				OplTerm<C2, V> l = subst(eq.second);
 				OplTerm<C2, V> r = subst(eq.second);
-				if (DEBUG.debug.opl_validate) {
+				if (NEWDEBUG.debug.opl.opl_validate) {
 					KBExp<C2, V> l0 = dst.getKB().nf(OplToKB.convert(l));
 					KBExp<C2, V> r0 = dst.getKB().nf(OplToKB.convert(r));
 					if (!l0.equals(r0)) {
@@ -1613,7 +1613,7 @@ public abstract class OplExp implements OplObject {
 			List<String> xxx = new LinkedList<>(all.keySet());
 			xxx.sort(comp);
 			for (String n : xxx) {
-				if (skip.contains(n) && DEBUG.debug.opl_suppress_dom) {
+				if (skip.contains(n) && NEWDEBUG.debug.opl.opl_suppress_dom) {
 					continue;
 				}
 				list.add(all.get(n));
@@ -2698,6 +2698,7 @@ public abstract class OplExp implements OplObject {
 		}
 	}
 
+	@SuppressWarnings({ "rawtypes" })
 	public static class OplApply extends OplExp {
 		String Q0, I0;
 		OplQuery Q;
@@ -2870,7 +2871,7 @@ public abstract class OplExp implements OplObject {
 
 
 	static String strip(String s) {
-		if (!DEBUG.debug.opl_pretty) {
+		if (!NEWDEBUG.debug.opl.opl_pretty) {
 			return s;
 		}
 		String ret = s.replace("inl ", "").replace("inr ", "").replace("()", "")

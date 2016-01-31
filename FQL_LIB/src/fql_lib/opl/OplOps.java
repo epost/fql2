@@ -25,6 +25,7 @@ import fql_lib.opl.OplExp.OplUberSat;
 import fql_lib.opl.OplExp.OplUnSat;
 import fql_lib.opl.OplExp.OplVar;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	
 	OplEnvironment ENV;
@@ -160,7 +161,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		}
 		OplSig S = (OplSig) i;
 		
-		OplPres ret = OplPres.OplPres(e.prec, e.S, S, e.gens, e.equations);
+		OplPres ret = OplPres.OplPres0(e.prec, e.S, S, e.gens, e.equations);
 		ret.toSig();
 		return ret;
 	}
@@ -170,7 +171,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		OplObject i = ENV.get(e.I);
 		if (i instanceof OplPres) {
 			OplPres S = (OplPres) i;
-			return e.saturate(S);
+			return OplSat.saturate(S);
 		}
 		if (i instanceof OplSig) {
 			OplSig S = (OplSig) i;
@@ -193,7 +194,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		}
 		OplJavaInst I = (OplJavaInst) i;
 		
-		return e.saturate(I, S);
+		return OplUberSat.saturate(I, S);
 	}
 	
 	@Override
@@ -203,7 +204,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			throw new RuntimeException("Not a model: " + e.I);
 		}
 		OplSetInst S = (OplSetInst) i;
-		return e.desaturate(S.sig, S);
+		return OplUnSat.desaturate(S.sig, S);
 	}
 	
 	@Override

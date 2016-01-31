@@ -11,8 +11,10 @@ import java.util.Set;
 
 
 
+
 import fql_lib.core.Util;
 
+@SuppressWarnings("serial")
 public abstract class SetExp implements Serializable{
 	
 	public static class Apply extends SetExp {

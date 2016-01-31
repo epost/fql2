@@ -39,7 +39,7 @@ public interface Operad<O,A> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Arrow other = (Arrow) obj;
+			Arrow<?,?> other = (Arrow<?,?>) obj;
 			if (a == null) {
 				if (other.a != null)
 					return false;

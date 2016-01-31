@@ -41,7 +41,7 @@ import fql_lib.pp.cat.Functor;
 import fql_lib.pp.cat.Transform;
 import fql_lib.pp.cat.FinSet.Fn;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "serial" })
 public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor<FinSet.Fn, FQLPPProgram> , Serializable {
 
 	private FQLPPEnvironment ENV;

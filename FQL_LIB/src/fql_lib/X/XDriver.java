@@ -11,6 +11,7 @@ import fql_lib.core.LineException;
 
 public class XDriver {
 
+	@SuppressWarnings({ "rawtypes" })
 	public static XEnvironment makeEnv(String str, XProgram init) {
 		if (DEBUG.debug.x_typing) {
 			init.doTypes();

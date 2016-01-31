@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({"unchecked", "rawtypes", "serial"})
 public class FPInst<O, A> extends Category<Instance<O, A>, FPTransform<O, A>> {
 
 	@Override

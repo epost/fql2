@@ -13,8 +13,11 @@ import fql_lib.pp.cat.FinSet.Fn;
 
 public class FDM {
 	
+	@SuppressWarnings("rawtypes")
 	private static Map<Functor, Functor> deltas = new HashMap<>();
+	@SuppressWarnings("rawtypes")
 	public static Map<Functor, Functor> sigmas = new HashMap<>();
+	@SuppressWarnings("rawtypes")
 	public static Map<Functor, Functor> pis = new HashMap<>();
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -36,7 +39,7 @@ public class FDM {
 		return deltas.get(F);
 	}
 
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O1, A1, O2, A2> Functor<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> sigmaF(
 			Functor<O1, A1, O2, A2> F) {
 		if (sigmas.containsKey(F)) {
@@ -67,7 +70,6 @@ public class FDM {
 	}
 
 	// TODO: lineage assumes all IDs in output of sigma are unique
-
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O1, A1, O2, A2> Adjunction<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> sigmaDelta(
 			Functor<O2, A2, O1, A1> F) {
@@ -107,7 +109,7 @@ public class FDM {
 		return new Adjunction<>(sigmaF(F), deltaF(F), f, g);
 	}
 	
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O1, A1, O2, A2> Functor<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> piF(
 			Functor<O1, A1, O2, A2> F) {
 		if (pis.containsKey(F)) {

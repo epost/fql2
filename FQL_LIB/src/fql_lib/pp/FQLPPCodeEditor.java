@@ -9,10 +9,6 @@ import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
-import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.templates.CodeTemplate;
-import org.fife.ui.rsyntaxtextarea.templates.StaticCodeTemplate;
 
 import fql_lib.core.CodeEditor;
 import fql_lib.core.Display;

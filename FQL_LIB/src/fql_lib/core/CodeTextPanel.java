@@ -14,7 +14,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 import javax.swing.event.UndoableEditEvent;
@@ -46,9 +45,6 @@ public class CodeTextPanel extends JPanel {
 		if (bb != null) {
 		Border b = BorderFactory.createTitledBorder(
 				bb, title);
-	//	Border b = BorderFactory.createTitledBorder(
-		//		BorderFactory.createEmptyBorder(), title);
-
 		setBorder(b);
 		}
 

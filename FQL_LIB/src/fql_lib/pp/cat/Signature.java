@@ -19,6 +19,7 @@ import fql_lib.core.DEBUG;
 import fql_lib.core.Util;
 
 //this requires finite denotations (paths always normalized)
+@SuppressWarnings("serial")
 public class Signature<O,A> implements Serializable {
 	
 	public class Node implements Serializable{
@@ -28,6 +29,7 @@ public class Signature<O,A> implements Serializable {
 			return name.toString();
 		}
 		
+		@SuppressWarnings("unused")
 		private Node() { }
 
 		public Node(O o) {

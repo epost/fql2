@@ -138,7 +138,7 @@ public class XCtx<C> implements XObject {
 		}
 		List<Object> r = l.stream().map(x -> {
 			if (x instanceof Pair) {
-				return ((Pair)x).first;
+				return ((Pair<?,?>)x).first;
 			}
 			return x;
 		}).collect(Collectors.toList());
@@ -195,7 +195,9 @@ public class XCtx<C> implements XObject {
 			if (!ids.contains(x) && !x.equals("DOM")) {
 				throw new RuntimeException("Bad entity: " + x);
 			}
-			return new Pair<>((C)"_1", x);
+			@SuppressWarnings("unchecked")
+			C ccc = (C) "_1";
+			return new Pair<>(ccc, x);
 		}		
 		Pair<C, C> ret = types.get(c);
 		if (ret != null) {
@@ -240,8 +242,10 @@ public class XCtx<C> implements XObject {
 		Set<C> i = new HashSet<>();
 		Map<C, Pair<C, C>> t = new HashMap<>();
 	
-		i.add((C)"_1");
-		t.put((C)"_1", new Pair("_1", "_1"));
+		@SuppressWarnings("unchecked")
+		C ccc = (C) "_1";
+		i.add(ccc);
+		t.put(ccc, new Pair<>(ccc, ccc));
 		
 		return new XCtx<C>(i, t, new HashSet<>(), null, null, "schema");		
 	}
@@ -283,6 +287,7 @@ public class XCtx<C> implements XObject {
 		return kb;
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void init() {
 		sane();
 		if (initialized) {
@@ -455,6 +460,7 @@ public class XCtx<C> implements XObject {
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked" })
 	public JComponent display() {
 		init();
 
@@ -492,7 +498,7 @@ public class XCtx<C> implements XObject {
 			pane.setResizeWeight(1);
 			but.addActionListener(x -> {
 				String s = fff.getText();
-				List l = XParser.path(s);
+				List<C> l = (List<C>) XParser.path(s);
 				try {
 					ggg.setText(Util.sep(getKB().normalize("", l), "."));
 				} catch (Exception ex) {
@@ -770,7 +776,7 @@ public class XCtx<C> implements XObject {
 		return newPaths;
 	}
 
-	private JComponent bar() {
+/*	private JComponent bar() {
 		try {
 			String text = "";
 			// List<Triple<C, C, List<C>>> consts = new LinkedList<>();
@@ -781,7 +787,9 @@ public class XCtx<C> implements XObject {
 				Set<List<C>> set = new HashSet<>();
 				int i = 1;
 				for (; i < DEBUG.debug.MAX_PATH_LENGTH; i++) {
-					Set<List<C>> cands = pathsUpTo(i, (C) "_1", c);
+					@SuppressWarnings("unchecked")
+					C ccc = (C) "_1";
+					Set<List<C>> cands = pathsUpTo(i, ccc, c);
 					Set<List<C>> toAdd = new HashSet<>();
 					for (List<C> cand : cands) {
 						List<C> reduced = find2(getKB(), cand, set);
@@ -923,15 +931,15 @@ public class XCtx<C> implements XObject {
 					+ e.getMessage());
 		}
 	}
-
-	private List<C> find2(KB_Thue<C> kb2, List<C> cand, Set<List<C>> set) {
+*/
+/*	private List<C> find2(KB_Thue<C> kb2, List<C> cand, Set<List<C>> set) {
 		for (List<C> l : set) {
 			if (kb2.equiv(cand, l)) {
 				return l;
 			}
 		}
 		return null;
-	}
+	}*/
 	
 	private JComponent clx;
 	private CardLayout cl;
@@ -949,6 +957,7 @@ public class XCtx<C> implements XObject {
 	
 
 	// TODO: have this suppress pair IDs when possible
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private JComponent makeTables(Function<Unit, Collection<Triple<C, C, List<C>>>> fn,
 			Set<C> ignore) {
 		cl = new CardLayout();
@@ -1081,7 +1090,7 @@ public class XCtx<C> implements XObject {
 
 	private Category<C, Triple<C, C, List<C>>> xcat;
 
-	private Category<C, Triple<C, C, List<C>>> small_cat;
+//	private Category<C, Triple<C, C, List<C>>> small_cat;
 
 	private static <C> Set<C> outEdges(Map<C, Pair<C, C>> t, C p) {
 		Set<C> ret = new HashSet<>();
@@ -1187,6 +1196,7 @@ public class XCtx<C> implements XObject {
 
 		Set<Triple<C, C, List<C>>> arrows = new HashSet<>(paths);
 
+		@SuppressWarnings("serial")
 		Category<C, Triple<C, C, List<C>>> xcat2 = new Category<C, Triple<C, C, List<C>>>() {
 
 			@Override
@@ -1258,7 +1268,9 @@ public class XCtx<C> implements XObject {
 					continue;
 				}
 				List<C> l = new LinkedList<>();
-				l.add((C) ("!_" + a));
+				@SuppressWarnings("unchecked")
+				C ccc = (C) ("!_" + a);
+				l.add(ccc);
 				l.add(v);
 				Triple<C, C, List<C>> arr = new Triple<>(a, b, l);
 				new_arrs.add(arr);
@@ -1271,6 +1283,7 @@ public class XCtx<C> implements XObject {
 
 		Map<Pair<Triple<C, C, List<C>>, Triple<C, C, List<C>>>, Triple<C, C, List<C>>> comp_cache = new HashMap<>();
 
+		@SuppressWarnings("serial")
 		Category<C, Triple<C, C, List<C>>> ret = new Category<C, Triple<C, C, List<C>>>() {
 			@Override
 			public Set<C> objects() {
@@ -1309,6 +1322,7 @@ public class XCtx<C> implements XObject {
 				return ret;
 			}
 
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			private Triple<C, C, List<C>> local_compose(Triple<C, C, List<C>> f,
 					Triple<C, C, List<C>> g) {
 				if (!arrows().contains(f)) {
@@ -1329,11 +1343,12 @@ public class XCtx<C> implements XObject {
 					Pair<C, C> gt = new Pair<>(g.first, g.second);
 					C a = ft.first;
 					C b = gt.first;
-					C v = f.third.get(1);
+			//		C v = f.third.get(1);
 					C v0 = g.third.get(1);
 					if (schema.allIds().contains(a) && !b.equals("_1")) {
 						List<C> l = new LinkedList<>();
-						l.add((C) ("!_" + a));
+						C ccc = (C) ("!_" + a);
+						l.add(ccc);
 						l.add(v0);
 						Triple<C, C, List<C>> ret = new Triple<>(a, type(v0).second, l);
 						if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
@@ -1355,7 +1370,7 @@ public class XCtx<C> implements XObject {
 						}
 						return f;
 					}
-					C b = g.first;
+					//C b = g.first;
 					C b0 = g.second;
 					C a = f.first;
 					C v = f.third.get(1);
@@ -1475,7 +1490,7 @@ public class XCtx<C> implements XObject {
 				}
 				if (sch.arrows().contains(f) && new_arrs.contains(g)) {
 					C a0 = f.first;
-					C a = f.second;
+					//C a = f.second;
 					C v = g.third.get(1);
 					List<C> l = new LinkedList<>();
 					l.add((C) ("!_" + a0));
@@ -1494,6 +1509,7 @@ public class XCtx<C> implements XObject {
 						+ sch.hom(f.first, f.second) + "\n" + sch.hom(g.first, g.second));
 			}
 
+			@SuppressWarnings("unchecked")
 			private Triple<C, C, List<C>> findEq(Triple<C, C, List<C>> sofar, C gn) {
 				if (sofar.third.size() != 1) {
 					throw new RuntimeException("sofar third not length 1 is " + sofar);
@@ -1529,6 +1545,7 @@ public class XCtx<C> implements XObject {
 				// if (found.equals("!__1")) {
 				// throw new RuntimeException("thing found is " + found);
 				// }
+				@SuppressWarnings("rawtypes")
 				List l = new LinkedList<>();
 
 				l.addAll(found);
@@ -1593,6 +1610,7 @@ public class XCtx<C> implements XObject {
 
 		Set<Triple<C, C, List<C>>> arrows = new HashSet<>(paths);
 
+		@SuppressWarnings("serial")
 		Category<C, Triple<C, C, List<C>>> xcat2 = new Category<C, Triple<C, C, List<C>>>() {
 
 			@Override
@@ -1677,6 +1695,7 @@ public class XCtx<C> implements XObject {
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static XCtx<String> make(XCtx<String> S, XInst I) {
 		// Set<String> seen = new HashSet<>();
 		Map t = new HashMap<>();
@@ -1759,11 +1778,13 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static String printDirty(List<List> xxx) {
 		List yyy = xxx.stream().map(x -> Util.sep(x, ".")).collect(Collectors.toList());
 		return Util.sep(yyy, ",");
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Set<List> expand(Set<List> sofar, List rest, XCtx s, XCtx I) {
 		if (rest.isEmpty()) {
 			return sofar;
@@ -1898,7 +1919,7 @@ public class XCtx<C> implements XObject {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		XCtx other = (XCtx) obj;
+		XCtx<?> other = (XCtx<?>) obj;
 		if (eqs == null) {
 			if (other.eqs != null)
 				return false;
@@ -1927,6 +1948,7 @@ public class XCtx<C> implements XObject {
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void simp() {
 		if (!initialized) {
 			throw new RuntimeException();
@@ -1949,7 +1971,7 @@ public class XCtx<C> implements XObject {
 	}
 
 	private boolean cleanup() {
-		Set<Pair<C, C>> substs = new HashSet<>();
+		//Set<Pair<C, C>> substs = new HashSet<>();
 
 		return true;
 	}
@@ -2024,6 +2046,7 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> obs(List<C> i) {
 		Function<C, Object> f = c -> {
 			if (schema.allTerms().contains(c)) {
@@ -2039,6 +2062,7 @@ public class XCtx<C> implements XObject {
 		return (List<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>>) ret;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public XCtx<C> rel() {
 		Set<Pair<List<C>, List<C>>> new_eqs = new HashSet<>();
 		if (schema == null) {
@@ -2046,7 +2070,7 @@ public class XCtx<C> implements XObject {
 		}
 		Map new_types = new HashMap<>();
 
-		Set<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> gens = new HashSet<>();
+		//Set<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> gens = new HashSet<>();
 		Map<Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>, Triple<C, C, List<C>>> genMap = new HashMap<>();
 		Map<Triple<C, C, List<C>>, Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>>> genMap2 = new HashMap<>();
 
@@ -2115,9 +2139,10 @@ public class XCtx<C> implements XObject {
 	
 	private Map<Pair<C,C>, XCtx<C>> y_cache = new HashMap<>();
 	
+	@SuppressWarnings("unchecked")
 	public XCtx<C> y(C name, C type) {
 		Pair<C,C> p = new Pair<>(name, type);
-		XCtx ret = y_cache.get(p);
+		XCtx<C> ret = y_cache.get(p);
 		if (ret != null) {
 			return ret;
 		}
@@ -2163,7 +2188,9 @@ public class XCtx<C> implements XObject {
 
 	private Graph<Triple<C,C,List<C>>, Pair<Integer, C>> elemGraph() {
 		Graph<Triple<C,C,List<C>>, Pair<Integer, C>> g = new DirectedSparseMultigraph<>();
-		for (Triple<C, C, List<C>> arr : cat().arrowsFrom((C)"_1")) {
+		@SuppressWarnings("unchecked")
+		C ccc = (C) "_1";
+		for (Triple<C, C, List<C>> arr : cat().arrowsFrom(ccc)) {
 			if (global.ids.contains(arr.second)) {
 				continue;
 			}
@@ -2173,7 +2200,7 @@ public class XCtx<C> implements XObject {
 			g.addVertex(arr);
 		}
 		int i = 0;
-		for (Triple<C, C, List<C>> arr : cat().arrowsFrom((C)"_1")) {
+		for (Triple<C, C, List<C>> arr : cat().arrowsFrom(ccc)) {
 			if (global.ids.contains(arr.second)) {
 				continue;
 			}
@@ -2301,6 +2328,7 @@ public class XCtx<C> implements XObject {
 					return;
 				}
 				vv.getPickedEdgeState().clear();
+				@SuppressWarnings("unchecked")
 				Triple<C, C, List<C>> arr = (Triple<C, C, List<C>>)e.getItem();
 				
 				//System.out.println("showing " + arr);
@@ -2392,8 +2420,8 @@ public class XCtx<C> implements XObject {
      }
      
      public String toJSONSchema() {
-    	 String ns = "";
-    	 String es = "";
+    	// String ns = "";
+    	// String es = "";
     	 
     	 Set<String> ns0 = new HashSet<>();
     	 Set<String> es0 = new HashSet<>();

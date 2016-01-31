@@ -15,6 +15,7 @@ import catdata.algs.Triple;
 import fql_lib.core.DEBUG;
 import fql_lib.pp.cat.FinSet.Fn;
 
+@SuppressWarnings("serial")
 public abstract class Category<O, A> implements Serializable {
 
 	public boolean isInfinite() {
@@ -89,12 +90,12 @@ public abstract class Category<O, A> implements Serializable {
 
 	public abstract A compose(A a1, A a2);
 
-	private boolean checkRet(String s) {
+/*	private boolean checkRet(String s) {
 		if (s.length() > 4096*8) {
 			return true;
 		}
 		return false;
-	}
+	} */
 
 	String toString_cache = null;
 
@@ -360,6 +361,7 @@ public abstract class Category<O, A> implements Serializable {
 		return i;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public Signature origin = null;
 
 	private Signature<O, A> sig;
@@ -382,12 +384,7 @@ public abstract class Category<O, A> implements Serializable {
 
 		for (A x : arrows()) {
 			if (isId(x)) {
-				continue; /*
-						 * List<A> l = new LinkedList<>(); l.add(x); List<A> r =
-						 * new LinkedList<>(); e.add(new Pair<>(new
-						 * Pair<>(source(x), l), new Pair<>(source(x), r)));
-						 */
-			}
+				continue; 			}
 			a.add(new Triple<>(x, source(x), target(x)));
 		}
 		for (A x : arrows()) {
@@ -407,16 +404,16 @@ public abstract class Category<O, A> implements Serializable {
 				if (!isId(z)) {
 					r.add(z);
 				}
-				Pair lhs = new Pair<>(source(x), l);
-				Pair rhs = new Pair<>(source(x), r);
-				Pair p = new Pair<>(lhs, rhs);
+				Pair<O, List<A>> lhs = new Pair<>(source(x), l);
+				Pair<O, List<A>> rhs = new Pair<>(source(x), r);
+				Pair<Pair<O, List<A>>, Pair<O, List<A>>> p = new Pair<>(lhs, rhs);
 				if (!lhs.equals(rhs) && !e.contains(new Pair<>(rhs, lhs))) {
 					e.add(p);
 				}
 			}
 		}
 
-		Signature ret = new Signature<>(objects(), a, e);
+		Signature<O,A> ret = new Signature<>(objects(), a, e);
 		// System.out.println("returning " + ret);
 		return ret;
 	}

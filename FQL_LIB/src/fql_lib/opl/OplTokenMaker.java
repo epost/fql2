@@ -6,6 +6,7 @@
 package fql_lib.opl;
 
 import java.io.*;
+
 import javax.swing.text.Segment;
 
 import org.fife.ui.rsyntaxtextarea.*;
@@ -14,14 +15,14 @@ import org.fife.ui.rsyntaxtextarea.*;
 /**
  * 
  */
-
+@SuppressWarnings("unused")
 public class OplTokenMaker extends AbstractJFlexCTokenMaker {
 
   /** This character denotes the end of file */
   public static final int YYEOF = -1;
 
   /** initial size of the lookahead buffer */
-  private static final int ZZ_BUFFERSIZE = 16384;
+private static final int ZZ_BUFFERSIZE = 16384;
 
   /** lexical states */
   public static final int EOL_COMMENT = 6;

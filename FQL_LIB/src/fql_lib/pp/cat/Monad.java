@@ -18,9 +18,9 @@ public class Monad<O,A> {
 		validate();
 	}
 	
+	@SuppressWarnings("serial")
 	public Category<O,Pair<A,O>> kleisli() {
-		return new Category<O, Pair<A,O>>() {
-			
+		return new Category<O, Pair<A,O>>() {		
 
 			@Override
 			public boolean isInfinite() {

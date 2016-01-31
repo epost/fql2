@@ -5,7 +5,6 @@ import java.util.Set;
 
 import catdata.algs.Quad;
 import catdata.algs.Triple;
-import fql_lib.FUNCTION;
 
 //TODO in future, don't have arrows(); only have arrows(node, node)
 public class Comma {
@@ -17,6 +16,7 @@ public class Comma {
 	comma(Category<OA, AA> A, Category<OB, AB> B, Category<OC, AC> C, 
 		   Functor<OA, AA, OC, AC> F, Functor<OB, AB, OC, AC> G) {
 		
+		@SuppressWarnings("serial")
 		Category<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>> cat = new Category<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>> () {
 
 			Set<Triple<OA, OB, AC>> objects;

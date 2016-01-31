@@ -1128,6 +1128,7 @@ public abstract class XExp {
 			return true;
 		}
 
+		@SuppressWarnings("unchecked")
 		public FLOWER2(Map<Object, List<Object>> select, Map<Object, Object> from,
 				XBool where, XExp src) {
 			super();
@@ -1159,6 +1160,7 @@ public abstract class XExp {
 			countX(b.rhs, counts);
 		}
 		
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void countX(List l, Map counts) {
 			for (Object s : l) {
 				Integer i = (Integer) counts.get(s);
@@ -1169,6 +1171,7 @@ public abstract class XExp {
 			}
 		}
 
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public Map sort(Map m) {
 			Map count = new HashMap<>();
 			for (Object s : m.keySet()) {
@@ -1253,6 +1256,7 @@ public abstract class XExp {
 			return true;
 		}
 
+		@SuppressWarnings("unchecked")
 		public Flower(Map<Object, List<Object>> select, Map<Object, Object> from,
 				List<Pair<List<Object>, List<Object>>> where, XExp src) {
 			super();
@@ -1266,6 +1270,7 @@ public abstract class XExp {
 			}
 		}
 		
+		@SuppressWarnings({ "rawtypes", "unchecked" })
 		private void count(List<Object> l, Map counts) {
 			for (Object s : l) {
 				Integer i = (Integer) counts.get(s);
@@ -1276,6 +1281,7 @@ public abstract class XExp {
 			}
 		}
 
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Map sort(Map<Object, Object> m) {
 			Map count = new HashMap<>();
 			for (Object s : m.keySet()) {
@@ -2213,7 +2219,7 @@ public abstract class XExp {
 		@Override
 		public String toString() {
 			String x = "\n variables\n";
-			boolean b = false;
+			//boolean b = false;
 			
 			List<String> nodes2 = nodes.stream().map(z -> "  " + z.first + ": " + z.second).collect(Collectors.toList());
 			x += Util.sep(nodes2, ",\n");
@@ -2743,7 +2749,7 @@ public abstract class XExp {
 		public R visit (E env, Iter e);
 		public R visit (E env, Id e);
 		public R visit (E env, Compose e);
-		public R visit (E env, XPoly e);
+		public R visit (E env, @SuppressWarnings("rawtypes") XPoly e);
 		public R visit (E env, XToQuery e);
 		public R visit (E env, XUberPi e);
 		public R visit (E env, XLabel e);

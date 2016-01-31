@@ -8,6 +8,7 @@ import catdata.algs.Chc;
 import catdata.algs.Pair;
 
 
+@SuppressWarnings("serial")
 public abstract class FunctorExp implements Serializable{
 
 	public abstract <R, E> R accept(E env, FunctorExpVisitor<R, E> v);

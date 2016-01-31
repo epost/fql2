@@ -5,8 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import fql_lib.FUNCTION;
-
+@SuppressWarnings("serial")
 public class Mapping<O1, A1, O2, A2> implements Serializable {
 
 	public Signature<O1, A1> source;

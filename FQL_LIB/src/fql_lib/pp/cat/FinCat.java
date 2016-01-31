@@ -16,6 +16,7 @@ import catdata.algs.Unit;
 import fql_lib.FUNCTION;
 import fql_lib.core.Util;
 
+@SuppressWarnings("serial")
 public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 
 	private FinCat() { }

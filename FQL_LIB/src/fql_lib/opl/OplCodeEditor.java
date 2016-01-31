@@ -9,8 +9,6 @@ import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
-import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
-import org.fife.ui.rsyntaxtextarea.templates.StaticCodeTemplate;
 
 import fql_lib.core.CodeEditor;
 import fql_lib.core.Language;
@@ -50,8 +48,6 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 	  private CompletionProvider createCompletionProvider() {
 		   DefaultCompletionProvider provider = new DefaultCompletionProvider();
 	
-		CodeTemplateManager ctm = topArea.getCodeTemplateManager();
-		
 		provider.addCompletion(new ShorthandCompletion(provider, "theory", "theory {\n\tsorts;\n\tsymbols;\n\tequations;\n}", ""));
 
 		provider.addCompletion(new ShorthandCompletion(provider, "model", "model {\n\tsorts;\n\tsymbols;\n}\n : ", ""));

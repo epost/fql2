@@ -18,6 +18,7 @@ public class Groth {
 depivot F = SIGMA F unit,
 where unit is the terminal instance on C.*/
 	
+	@SuppressWarnings("rawtypes")
 	public static <O1,A1,O2,A2> Functor <O2,A2,Set,Fn> unpivot(Functor<O1,A1,O2,A2> F) {
 		return LeftKanSigma.fullSigma(F, Inst.get(F.source).terminal(), null, null).first;
 	}
@@ -27,6 +28,7 @@ where unit is the terminal instance on C.*/
 		return new Functor<>(C, F.source, x -> x.first, x -> x.third);
 	}
 	
+	@SuppressWarnings("serial")
 	public static <O,A,X> Category<Pair<O,X>,Triple<Pair<O,X>,Pair<O,X>,A>> pivotX(Functor<O,A,Set<X>,Fn<X,X>> F) {
 		
 		Set<Pair<O, X>> objects = new HashSet<>();

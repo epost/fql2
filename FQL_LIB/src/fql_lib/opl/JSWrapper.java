@@ -20,8 +20,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
 import catdata.algs.Pair;
-import fql_lib.core.DEBUG;
 import fql_lib.core.MyTableRowSorter;
+import fql_lib.core.NEWDEBUG;
 import fql_lib.core.Util;
 import fql_lib.opl.OplExp.NonEditableModel;
 
@@ -34,7 +34,7 @@ public class JSWrapper {
 
 	public String toString() {
 		String s = "JS<" + o + ">";
-		if (!DEBUG.debug.opl_pretty) {
+		if (!NEWDEBUG.debug.opl.opl_pretty) {
 			return s;
 		}
 		return o.toString();

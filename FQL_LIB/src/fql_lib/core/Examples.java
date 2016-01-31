@@ -140,6 +140,7 @@ public class Examples {
 
 	public static final String helpString = ""; //TODO
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	static Vector filterBy(String string) {
 		Vector ret = new Vector();
 		for (Example e : examples) {

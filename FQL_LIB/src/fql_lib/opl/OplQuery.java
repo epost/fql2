@@ -19,7 +19,7 @@ import catdata.algs.Pair;
 import catdata.algs.Quad;
 import catdata.algs.kb.KBExp;
 import fql_lib.core.CodeTextPanel;
-import fql_lib.core.DEBUG;
+import fql_lib.core.NEWDEBUG;
 import fql_lib.core.Util;
 
 public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObject {
@@ -212,7 +212,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			counts.put(v1, 0);
 			ret.add(v1);
 		}
-		if (!DEBUG.debug.opl_reorder) {
+		if (!NEWDEBUG.debug.opl.opl_reorder) {
 			return ret;
 		}
 		for (Pair<OplTerm<C1, V1>, OplTerm<C1, V1>> eq : block.where) {

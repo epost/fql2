@@ -13,13 +13,18 @@ import fql_lib.core.DEBUG;
 import fql_lib.core.Util;
 import fql_lib.pp.cat.FinSet.Fn;
 
+
+@SuppressWarnings("serial")
 public class Functor<O1, A1, O2, A2> implements Serializable {
 	public Category<O1, A1> source;
 	public Category<O2, A2> target;
 	private FUNCTION<O1, O2> o;
 	private FUNCTION<A1, A2> a;
 
+	@SuppressWarnings("rawtypes")
 	private static Map<Category, Functor> ids = new HashMap<>();
+	
+	@SuppressWarnings("unchecked")
 	public static <O, A> Functor<O, A, O, A> identity(Category<O, A> o) {
 		if (ids.containsKey(o)) {
 			return ids.get(o);
@@ -28,7 +33,10 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 		return ids.get(o);
 	}
 
+	@SuppressWarnings("rawtypes")
 	static Map<Pair<Functor, Functor>, Functor> cache = new HashMap<>();
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O1, A1, O2, A2, O3, A3> Functor<O1, A1, O3, A3> compose(
 			Functor<O1, A1, O2, A2> a1, Functor<O2, A2, O3, A3> a2) {
 		Pair p = new Pair<>(a1, a2);
@@ -303,7 +311,7 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 		
 		for (Signature<O1, A1>.Edge a : src.edges) {
 			A2 b = applyA(a.name);
-			O2 s = target.source(b);
+		//	O2 s = target.source(b);
 		//	if (target.isId(b)) {
 		//		em.put(a, dst.path(s, new LinkedList<>())); //dst.new Node(s); //(path(s)); //dst.getEdge(applyA(a.name))));				
 		//	} else {
@@ -312,9 +320,14 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 				
 			//	aaa.stream().map(z -> dst.getEdge(applyA(z.name))).collect(Collectors.toList());
 				
+			@SuppressWarnings("unchecked")
 			Signature<O2, A2>.Path p = (Signature<O2, A2>.Path) b;
-			p.source = p.sig().new Node((O2) p.source);
-			p.target = p.sig().new Node((O2) p.target);
+			@SuppressWarnings("unchecked")
+			O2 p1 = (O2) p.source;
+			@SuppressWarnings("unchecked")
+			O2 p2 = (O2) p.target;
+			p.source = p.sig().new Node(p1);
+			p.target = p.sig().new Node(p2);
 			
 			em.put(a, p); // dst.path(dst.getEdge(applyA(a.name))));			/	
 			//}
@@ -346,7 +359,9 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 		return SubInstances.subInstances((Functor<O1,A1,Set,Fn>)this);
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public Instance instance0;
+	@SuppressWarnings("rawtypes")
 	public Mapping mapping0;
 
 }

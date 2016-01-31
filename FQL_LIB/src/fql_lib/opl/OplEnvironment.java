@@ -6,8 +6,8 @@ import java.util.Set;
 
 public class OplEnvironment {
 
-	private OplProgram prog;
-	private String str;
+//	private OplProgram prog;
+//	private String str;
 	private Map<String, OplObject> objs;
 	
 	public Set<String> keys() {
@@ -15,8 +15,8 @@ public class OplEnvironment {
 	}
 	
 	public OplEnvironment(OplProgram prog, String str) {
-		this.prog = prog;
-		this.str = str;	
+	//	this.prog = prog;
+	//	this.str = str;	
 		objs = new HashMap<>();
 	}
 	

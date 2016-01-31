@@ -44,6 +44,7 @@ import fql_lib.core.Example;
 import fql_lib.core.Language;
 import fql_lib.core.Util;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class NraViewer {
 
 	protected Example[] examples = { new PeopleExample() };
@@ -376,6 +377,7 @@ public class NraViewer {
 			r++;
 		}
 
+		@SuppressWarnings("serial")
 		JTable tbl = new JTable(rowData, colNames) {
 			public boolean isCellEditable(int row, int column) {                
 	                return false;               
@@ -563,7 +565,6 @@ public class NraViewer {
 		return Terminals.Identifier.PARSER;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static final Pair<NRel, Object> program(String s) {
 		Object o = program.parse(s);
 		return toProg(o);

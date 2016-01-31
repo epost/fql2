@@ -11,10 +11,6 @@ import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
-import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.templates.CodeTemplate;
-import org.fife.ui.rsyntaxtextarea.templates.StaticCodeTemplate;
 
 import catdata.algs.Pair;
 import fql_lib.core.CodeEditor;
@@ -101,6 +97,7 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 		String ret = "";
 		for (Entry<String, XObject> o : env.objs.entrySet()) {
 			if (o.getValue() instanceof XMapping) {
+				@SuppressWarnings("unchecked")
 				XMapping<String, String> m = (XMapping<String, String>) o.getValue();
 				for (Entry<Pair<List<String>, List<String>>, String> k : m.unprovable.entrySet()) {
 					if (!k.getValue().equals("true")) {
