@@ -1,7 +1,5 @@
 package catdata.opl;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.function.Function;
 
@@ -81,29 +79,20 @@ public class OplOptions extends Options {
 		opl2.add(opl_semantic_ac_box);
 		opl1.add(opl_semantic_ac_label);
 
-		GridBagConstraints c1 = new GridBagConstraints();
-		c1.weightx = 1.0;
-		c1.fill = GridBagConstraints.HORIZONTAL;
 
-		JPanel p1 = new JPanel(new GridBagLayout());
 		JTextField opl_iterations_box = new JTextField(Integer.toString(opl_iterations), 12);
 		JLabel opl_iterations_label = new JLabel("Knuth-Bendix timeout (ms)");
-		p1.add(opl_iterations_box, c1);
-		opl2.add(p1);;
+		opl2.add(wrap(opl_iterations_box));
 		opl1.add(opl_iterations_label);
 		
-		JPanel p2 = new JPanel(new GridBagLayout());
 		JTextField opl_homit_box = new JTextField(Integer.toString(opl_hom_its), 12);
 		JLabel opl_homit_label = new JLabel("Saturation timeout (ms)");
-		p2.add(opl_homit_box, c1);
-		opl2.add(p2);
+		opl2.add(wrap(opl_homit_box));
 		opl1.add(opl_homit_label);
 		
-		JPanel p3 = new JPanel(new GridBagLayout());
 		JTextField opl_red_box = new JTextField(Integer.toString(opl_red_its), 12);
 		JLabel opl_red_label = new JLabel("Reduction iterations maximum");
-		p3.add(opl_red_box, c1);
-		opl2.add(p3);
+		opl2.add(wrap(opl_red_box));
 		opl1.add(opl_red_label);
 		
 		JCheckBox opl_pretty_box = new JCheckBox("", opl_pretty);

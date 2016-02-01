@@ -66,8 +66,6 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 		
 	}
 
-	
-	
 	@Override
 	protected OplProgram parse(String program) throws ParserException {
 		return OplParser.program(program);

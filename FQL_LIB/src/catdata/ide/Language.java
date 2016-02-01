@@ -7,6 +7,9 @@ import catdata.fpql.XCodeEditor;
 import catdata.fpql.XExamples;
 import catdata.fpql.XOptions;
 import catdata.fpqlpp.ACodeEditor;
+import catdata.fql.FqlOptions;
+import catdata.fql.FqlExamples;
+import catdata.fql.gui.FqlCodeEditor;
 import catdata.fqlpp.FQLPPCodeEditor;
 import catdata.fqlpp.FqlppExamples;
 import catdata.fqlpp.FqlppOptions;
@@ -23,7 +26,7 @@ public enum Language {
 	OPL;
 	
 	public static Language getDefault() {
-		return FPQL;
+		return FQL;
 	}
 	
 	@Override
@@ -40,7 +43,7 @@ public enum Language {
 	
 	public String prefix() {
 		switch (this) {
-		case FQL: return "";
+		case FQL: return "-";
 		case FQLPP: return "+";
 		case FPQL: return "P";
 		case FPQLPP: return "A";
@@ -67,7 +70,7 @@ public enum Language {
 		case FQLPP: return new FQLPPCodeEditor(untitled_count, content);
 		case OPL: return new OplCodeEditor(untitled_count, content);
 		case FPQLPP: return new ACodeEditor(untitled_count, content);
-		case FQL:
+		case FQL: return new FqlCodeEditor(untitled_count, content);
 		}
 		throw new RuntimeException(this.toString());
 	}
@@ -78,7 +81,7 @@ public enum Language {
 			case FQLPP: return new FqlppOptions();
 			case OPL: return new OplOptions();
 			case FPQLPP: throw new RuntimeException();
-			case FQL: throw new RuntimeException();
+			case FQL: return new FqlOptions();
 		}
 		throw new RuntimeException(this.toString());
 	}
@@ -89,7 +92,7 @@ public enum Language {
 		case FQLPP: return Examples.getExamples(FqlppExamples.class);
 		case OPL: return Examples.getExamples(OplExamples.class);
 		case FPQLPP: return new LinkedList<>();
-		case FQL: return new LinkedList<>();
+		case FQL: return Examples.getExamples(FqlExamples.class);
 		}
 		throw new RuntimeException(this.toString());
 	}

@@ -40,6 +40,10 @@ public class CodeTextPanel extends JPanel {
 		return area.getText();
 	}
 
+	public CodeTextPanel(String title, String text) {
+		this(BorderFactory.createEtchedBorder(), title, text);
+	}
+	
 	public CodeTextPanel(Border bb, String title, String text) {
 		super(new GridLayout(1, 1));
 		if (bb != null) {

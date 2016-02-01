@@ -94,7 +94,8 @@ public class ACodeEditor extends CodeEditor<AProgram, OplEnvironment, ADisplay> 
 	
 	@Override
 	protected AProgram parse(String program) throws ParserException {
-		return AParser.program(program);
+		throw new RuntimeException("Coming soon");
+		//return AParser.program(program);
 	}
 
 	@Override

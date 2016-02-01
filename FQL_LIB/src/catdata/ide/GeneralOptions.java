@@ -81,23 +81,18 @@ public class GeneralOptions extends Options {
 		String[] items = new String[UIManager.getInstalledLookAndFeels().length];
 		int i = 0;
 		for (LookAndFeelInfo k : UIManager.getInstalledLookAndFeels()) {
-			items[i++] = k.getClassName();
+			items[i++] = k.getClassName(); 
 		}
 		JComboBox<String> lfb = new JComboBox<>(items);
 		lfb.setSelectedItem(look_and_feel);
 		general2.add(lfb);
 	
-		GridBagConstraints cx = new GridBagConstraints();
-		cx.weightx = 1.0;
-		cx.fill = GridBagConstraints.HORIZONTAL;
 		JTextField font_field = new JTextField(3);
 		font_field.setText(Integer.toString(font_size));
 		JLabel font_label = new JLabel("Editor font size:");
 		font_label.setToolTipText("Sets the size of the font used in all editors.");
 		general1.add(font_label);
-		JPanel w = new JPanel(new GridBagLayout());
-		w.add(font_field, cx);
-		general2.add(w);
+		general2.add(wrap(font_field));
 		
 		for (int j = 0; j < Options.biggestSize - size(); j++) {
 			general1.add(new JLabel());

@@ -54,7 +54,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	public abstract Language isPatrick();
 	
-	final Integer id;
+	protected final Integer id;
 
 	DDisp display; 
 
@@ -62,7 +62,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	public RSyntaxTextArea topArea;
 
-	CodeTextPanel respArea = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Compiler response", "");
+	protected CodeTextPanel respArea = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Compiler response", "");
 
 	final JTextField searchField = new JTextField();	
 	final JButton nextButton = new JButton("Find Next");
@@ -380,7 +380,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 	}
 
-	String toDisplay = null;
+	protected String toDisplay = null;
 	Thread thread, temp;
 
 	@SuppressWarnings("deprecation")
@@ -498,7 +498,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	protected abstract Progg parse(String program) throws ParserException;
 	
-	private Progg tryParse(String program) {
+	protected Progg tryParse(String program) {
 		try {
 			return parse(program);
 		} catch (ParserException e) {

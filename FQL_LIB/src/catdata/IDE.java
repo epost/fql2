@@ -1,6 +1,7 @@
 package catdata;
 
 import java.awt.MenuBar;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -8,6 +9,10 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import catdata.fql.decl.Driver;
+import catdata.fql.decl.FQLProgram;
+import catdata.fql.decl.FqlEnvironment;
+import catdata.fql.parse.FQLParser;
 import catdata.ide.CodeEditor;
 import catdata.ide.GUI;
 import catdata.ide.NEWDEBUG;
@@ -21,11 +26,28 @@ import catdata.ide.NEWDEBUG;
 public class IDE {
 	
 	public static void main(String[] args) {
+		if (args.length == 1) {
+			try {
+				FQLProgram init = FQLParser.program(args[0]);
+				Triple<FqlEnvironment, String, List<Throwable>> envX = Driver
+						.makeEnv(init);
+				if (envX.third.size() > 0) {
+					throw new RuntimeException("Errors: " + envX.third);
+				}
+				System.out.println("OK");
+				System.out.println(envX.second);
+				return;
+			} catch (Throwable err) {
+				err.printStackTrace(System.err);
+				System.out.println(err.getLocalizedMessage());
+				return;
+			}
+		} 
 		
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					NEWDEBUG.load(true);
+ 					NEWDEBUG.load(true);
 					
 					UIManager.setLookAndFeel(NEWDEBUG.debug.general.look_and_feel);			
 

@@ -40,10 +40,14 @@ import catdata.fpql.XJsonToFQL;
 import catdata.fpql.XNeo4jToFQL;
 import catdata.fpql.XRaToFpql;
 import catdata.fpql.XSqlToFql;
+import catdata.fql.gui.FqlCodeEditor;
+import catdata.fql.sql.Chase;
+import catdata.fql.sql.RaToFql;
+import catdata.fql.sql.RingToFql;
+import catdata.fql.sql.SqlToFql;
 import catdata.fqlpp.KBViewer;
 import catdata.nested.NraViewer;
 import catdata.opl.CfgToOpl;
-
 
 @SuppressWarnings("serial")
 /**
@@ -53,14 +57,14 @@ import catdata.opl.CfgToOpl;
  * Top level gui
  */
 public class GUI extends JPanel {
-	
+
 	public static JTabbedPane editors = new JTabbedPane();
 
 	public static JFrame topFrame;
-	
+
 	public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
 		topFrame = frame;
-		
+
 		JPanel pan = new JPanel();
 
 		MenuBar menuBar = new MenuBar();
@@ -68,14 +72,14 @@ public class GUI extends JPanel {
 		// MenuItem m = new MenuItem()
 
 		Menu fileMenu = new Menu("File");
-		
+
 		MenuItem openItem = new MenuItem("Open");
-//		MenuItem openItem2 = new MenuItem("Open GUI");
+		// MenuItem openItem2 = new MenuItem("Open GUI");
 		MenuItem saveItem = new MenuItem("Save");
 		MenuItem saveAsItem = new MenuItem("Save As");
 		MenuItem closeItem = new MenuItem("Close");
 		MenuItem exitItem = new MenuItem("Exit");
-		
+
 		Map<Language, MenuItem> newItems = new HashMap<>();
 		for (Language l : Language.values()) {
 			MenuItem newItem = new MenuItem("New " + l.toString());
@@ -87,9 +91,9 @@ public class GUI extends JPanel {
 				}
 			});
 		}
-		
+
 		fileMenu.add(openItem);
-		//fileMenu.add(openItem2);
+		// fileMenu.add(openItem2);
 		fileMenu.add(saveItem);
 		fileMenu.add(saveAsItem);
 		fileMenu.add(closeItem);
@@ -113,15 +117,12 @@ public class GUI extends JPanel {
 
 		// respArea.setWrapStyleWord();
 
-		KeyStroke ctrlS = KeyStroke.getKeyStroke(KeyEvent.VK_S,
-				InputEvent.CTRL_MASK);
+		KeyStroke ctrlS = KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK);
 		MenuShortcut s = new MenuShortcut(ctrlS.getKeyCode());
 		saveItem.setShortcut(s);
 
-		KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
-				InputEvent.CTRL_MASK);
-		KeyStroke commandW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
-				InputEvent.META_MASK);
+		KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK);
+		KeyStroke commandW = KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.META_MASK);
 		MenuShortcut c = new MenuShortcut(ctrlW.getKeyCode());
 		closeItem.setShortcut(c);
 
@@ -129,30 +130,26 @@ public class GUI extends JPanel {
 		// This one works well when the component is a container.
 		// InputMap inputMap =
 		// editors.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-		InputMap inputMap = editors
-				.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		InputMap inputMap = editors.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		// Add the key binding for the keystroke to the action name
 		inputMap.put(ctrlW, "closeTab");
 		inputMap.put(commandW, "closeTab");
 
-		KeyStroke ctrlR = KeyStroke.getKeyStroke(KeyEvent.VK_R,
-				InputEvent.CTRL_MASK);
-		KeyStroke commandR = KeyStroke.getKeyStroke(KeyEvent.VK_R,
-				InputEvent.META_MASK);
+		KeyStroke ctrlR = KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK);
+		KeyStroke commandR = KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.META_MASK);
 		AbstractAction runAction = new AbstractAction() {
 			@SuppressWarnings("rawtypes")
 			@Override
 			public void actionPerformed(ActionEvent e) {
-			((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
-					.runAction();
+				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex())).runAction();
 			}
 		};
-		
+
 		inputMap.put(ctrlR, "run");
 		inputMap.put(commandR, "run");
 		editors.getActionMap().put("run", runAction);
-		
+
 		// Now add a single binding for the action name to the anonymous action
 		AbstractAction closeTabAction = new AbstractAction() {
 			@Override
@@ -160,16 +157,13 @@ public class GUI extends JPanel {
 				closeAction();
 			}
 		};
-		
-		
+
 		editors.getActionMap().put("closeTab", closeTabAction);
 
-		KeyStroke ctrlN = KeyStroke.getKeyStroke(KeyEvent.VK_N,
-				InputEvent.CTRL_MASK);
+		KeyStroke ctrlN = KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK);
 		MenuShortcut n = new MenuShortcut(ctrlN.getKeyCode());
 		newItems.get(Language.getDefault()).setShortcut(n);
-		KeyStroke ctrlO = KeyStroke.getKeyStroke(KeyEvent.VK_O,
-				InputEvent.CTRL_MASK);
+		KeyStroke ctrlO = KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK);
 		MenuShortcut o = new MenuShortcut(ctrlO.getKeyCode());
 		openItem.setShortcut(o);
 
@@ -180,13 +174,11 @@ public class GUI extends JPanel {
 		MenuItem findItem = new MenuItem("Find");
 		editMenu.add(findItem);
 
-		KeyStroke ctrlF = KeyStroke.getKeyStroke(KeyEvent.VK_F,
-				InputEvent.CTRL_MASK);
+		KeyStroke ctrlF = KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK);
 		MenuShortcut f = new MenuShortcut(ctrlF.getKeyCode());
 		findItem.setShortcut(f);
 
-		KeyStroke ctrlQ = KeyStroke.getKeyStroke(KeyEvent.VK_Q,
-				InputEvent.CTRL_MASK);
+		KeyStroke ctrlQ = KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK);
 		MenuShortcut q = new MenuShortcut(ctrlQ.getKeyCode());
 		exitItem.setShortcut(q);
 
@@ -195,14 +187,13 @@ public class GUI extends JPanel {
 		runItem.addActionListener(new ActionListener() {
 			@SuppressWarnings("rawtypes")
 			@Override
-				public void actionPerformed(ActionEvent e) {
-				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
-						.runAction();
-				}
+			public void actionPerformed(ActionEvent e) {
+				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex())).runAction();
+			}
 		});
 		MenuShortcut q2 = new MenuShortcut(ctrlR.getKeyCode());
 		runItem.setShortcut(q2);
-		
+
 		MenuItem abortItem = new MenuItem("Abort");
 		toolsMenu.add(abortItem);
 		abortItem.addActionListener(new ActionListener() {
@@ -210,55 +201,113 @@ public class GUI extends JPanel {
 				abortAction();
 			}
 		});
-		
-		MenuItem shredItem = new MenuItem("Shred");
-		toolsMenu.add(shredItem);
-		shredItem.addActionListener(x -> { new NraViewer(); });
-		
-		MenuItem kbItem = new MenuItem("Knuth-Bendix");
-		toolsMenu.add(kbItem);
-		kbItem.addActionListener(x -> { new KBViewer(); });
 
-		MenuItem enrichItem = new MenuItem("Enrich");
+		MenuItem formatItem = new MenuItem("FQL Code Format");
+		editMenu.add(formatItem);
+		formatItem.addActionListener(x -> {
+			formatAction();
+		});
+
+		MenuItem visItem = new MenuItem("FQL Visual Edit");
+		editMenu.add(visItem);
+		visItem.addActionListener(x -> {
+			veditAction();
+		});
+
+		MenuItem chaseItem = new MenuItem("ED Chaser");
+		toolsMenu.add(chaseItem);
+		chaseItem.addActionListener(x -> {
+			Chase.dostuff();
+		});
+
+		MenuItem checkItem = new MenuItem("FQL Type Check");
+		toolsMenu.add(checkItem);
+		checkItem.addActionListener(x -> {
+			checkAction();
+		});
+
+		MenuItem raToFqlItem = new MenuItem("SPCU to FQL");
+		transMenu.add(raToFqlItem);
+		raToFqlItem.addActionListener(x -> {
+			new RaToFql();
+		});
+
+		MenuItem sqlToFqlItem = new MenuItem("SQL Schema to FQL");
+		transMenu.add(sqlToFqlItem);
+		sqlToFqlItem.addActionListener(x -> {
+			new SqlToFql();
+		});
+
+		MenuItem ringToFqlItem = new MenuItem("Polynomials to FQL");
+		transMenu.add(ringToFqlItem);
+		ringToFqlItem.addActionListener(x -> {
+			new RingToFql();
+		});
+
+		MenuItem shredItem = new MenuItem("NR Shredder");
+		toolsMenu.add(shredItem);
+		shredItem.addActionListener(x -> {
+			new NraViewer();
+		});
+
+		MenuItem kbItem = new MenuItem("FQL++ Knuth-Bendix");
+		toolsMenu.add(kbItem);
+		kbItem.addActionListener(x -> {
+			new KBViewer();
+		});
+
+		MenuItem enrichItem = new MenuItem("FPQL Enrich");
 		toolsMenu.add(enrichItem);
-		enrichItem.addActionListener(x -> { new EnrichViewer(); });
-	
+		enrichItem.addActionListener(x -> {
+			new EnrichViewer();
+		});
+
 		MenuItem raItem = new MenuItem("RA to FPQL");
 		transMenu.add(raItem);
-		raItem.addActionListener(x -> { new XRaToFpql(); });
-		
+		raItem.addActionListener(x -> {
+			new XRaToFpql();
+		});
+
 		MenuItem sqlItem = new MenuItem("SQL to FPQL");
 		transMenu.add(sqlItem);
-		sqlItem.addActionListener(x -> { new XSqlToFql(); });
-		
+		sqlItem.addActionListener(x -> {
+			new XSqlToFql();
+		});
+
 		MenuItem jsonItem = new MenuItem("JSON to FPQL");
 		transMenu.add(jsonItem);
-		jsonItem.addActionListener(x -> { new XJsonToFQL(); });
-		
+		jsonItem.addActionListener(x -> {
+			new XJsonToFQL();
+		});
+
 		MenuItem neo4j = new MenuItem("Neo4j to FPQL");
 		transMenu.add(neo4j);
-		neo4j.addActionListener(x -> { new XNeo4jToFQL(); });
-		
+		neo4j.addActionListener(x -> {
+			new XNeo4jToFQL();
+		});
+
 		MenuItem easik = new MenuItem("EASIK to FPQL");
 		transMenu.add(easik);
-		easik.addActionListener(x -> { new XEasikToFQL(); });
-		
+		easik.addActionListener(x -> {
+			new XEasikToFQL();
+		});
+
 		MenuItem cfgItem = new MenuItem("CFG to OPL");
 		transMenu.add(cfgItem);
-		cfgItem.addActionListener(x -> { new CfgToOpl(); });
-		
+		cfgItem.addActionListener(x -> {
+			new CfgToOpl();
+		});
 
 		Menu helpMenu = new Menu("About");
-		/*		MenuItem helpItem = new MenuItem("Help");
-		helpMenu.add(helpItem);
-		helpItem.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				helpAction();
-			} 
-
-		}); */
+		/*
+		 * MenuItem helpItem = new MenuItem("Help"); helpMenu.add(helpItem);
+		 * helpItem.addActionListener(new ActionListener() {
+		 * 
+		 * @Override public void actionPerformed(ActionEvent e) { helpAction();
+		 * }
+		 * 
+		 * });
+		 */
 		MenuItem aboutItem = new MenuItem("About");
 		helpMenu.add(aboutItem);
 		aboutItem.addActionListener(new ActionListener() {
@@ -267,8 +316,6 @@ public class GUI extends JPanel {
 			}
 		});
 
-		
-		
 		openItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				openAction();
@@ -290,13 +337,12 @@ public class GUI extends JPanel {
 			@SuppressWarnings("rawtypes")
 			public void actionPerformed(ActionEvent e) {
 				delay();
-				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
-						.findAction();
+				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex())).findAction();
 
 			}
 		});
-		
-		//openItem2.addActionListener(x -> openAction2());
+
+		// openItem2.addActionListener(x -> openAction2());
 
 		menuBar.add(fileMenu);
 		menuBar.add(editMenu);
@@ -323,19 +369,17 @@ public class GUI extends JPanel {
 			@SuppressWarnings("rawtypes")
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex()))
-						.runAction();
+				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex())).runAction();
 			}
 		});
 
-		/*JButton helpB = new JButton("Help");
-		helpB.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				helpAction();
-			}
-		}); */
+		/*
+		 * JButton helpB = new JButton("Help"); helpB.addActionListener(new
+		 * ActionListener() {
+		 * 
+		 * @Override public void actionPerformed(ActionEvent e) { helpAction();
+		 * } });
+		 */
 
 		JButton new_button = new JButton("New " + Language.getDefault());
 		new_button.addActionListener(new ActionListener() {
@@ -343,8 +387,6 @@ public class GUI extends JPanel {
 				newAction(null, "", Language.getDefault());
 			}
 		});
-		
-
 
 		JButton save_button = new JButton("Save");
 		save_button.addActionListener(new ActionListener() {
@@ -352,7 +394,6 @@ public class GUI extends JPanel {
 				saveAction();
 			}
 		});
-		
 
 		JButton open_button = new JButton("Open");
 		open_button.addActionListener(new ActionListener() {
@@ -381,10 +422,10 @@ public class GUI extends JPanel {
 			box.addActionListener(x -> doExample((Example) box.getSelectedItem()));
 			boxPanel.add(box, l.toString());
 		}
-		
+
 		boxPanel.add(allBox, "All");
 		cl.show(boxPanel, "All");
-		
+
 		Vector<String> vec = new Vector<>();
 		vec.add("All");
 		for (Language l : Language.values()) {
@@ -392,9 +433,9 @@ public class GUI extends JPanel {
 		}
 		JComboBox<String> modeBox = new JComboBox<>(vec);
 		modeBox.addActionListener(x -> {
-			cl.show(boxPanel, (String)modeBox.getSelectedItem());
+			cl.show(boxPanel, (String) modeBox.getSelectedItem());
 		});
-		
+
 		toolBar.add(compileB);
 		toolBar.add(new_button);
 		toolBar.add(open_button);
@@ -411,8 +452,6 @@ public class GUI extends JPanel {
 
 		return new Pair<>(pan, menuBar);
 	}
-	
-
 
 	protected static void doExample(Example e) {
 		// int i = untitled_count;
@@ -421,45 +460,29 @@ public class GUI extends JPanel {
 		}
 		newAction(e.toString(), e.getText(), e.lang());
 	}
-/*	
-	private static void formatAction() {
-		int i = editors.getSelectedIndex();
-		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
-		if (c == null) {
-			return;
-		}
-		c.format();
-	} */
-	/*
-	private static void vedit() {
-		int i = editors.getSelectedIndex();
-		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
-		if (c == null) {
-			return;
-		}
-		c.vedit();
-	} */
-/*
-	private static void checkAction() {
-		int i = editors.getSelectedIndex();
-		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
-		if (c == null) {
-			return;
-		}
-		c.check();
-	} */
-/*
-	private static void sqlToFqlAction() {
-		new SqlToFql();
-	}
-	
-	private static void ringToFqlAction() {
-		new RingToFql();
-	}
 
-	private static void raToFqlAction() {
-		new RaToFql();
-	} */
+	/*
+	 * private static void formatAction() { int i = editors.getSelectedIndex();
+	 * CodeEditor c = (CodeEditor) editors.getComponentAt(i); if (c == null) {
+	 * return; } c.format(); }
+	 */
+	/*
+	 * private static void vedit() { int i = editors.getSelectedIndex();
+	 * CodeEditor c = (CodeEditor) editors.getComponentAt(i); if (c == null) {
+	 * return; } c.vedit(); }
+	 */
+	/*
+	 * private static void checkAction() { int i = editors.getSelectedIndex();
+	 * CodeEditor c = (CodeEditor) editors.getComponentAt(i); if (c == null) {
+	 * return; } c.check(); }
+	 */
+	/*
+	 * private static void sqlToFqlAction() { new SqlToFql(); }
+	 * 
+	 * private static void ringToFqlAction() { new RingToFql(); }
+	 * 
+	 * private static void raToFqlAction() { new RaToFql(); }
+	 */
 
 	private static void abortAction() {
 		int i = editors.getSelectedIndex();
@@ -489,26 +512,21 @@ public class GUI extends JPanel {
 		titles.remove(c.id);
 	}
 
-/*	static void helpAction() {
-		JTextArea jta = new JTextArea(Examples.helpString);
-		jta.setWrapStyleWord(true);
-		// jta.setEditable(false);
-		jta.setLineWrap(true);
-		JScrollPane p = new JScrollPane(jta,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		p.setPreferredSize(new Dimension(650, 300));
-
-		JOptionPane pane = new JOptionPane(p);
-		// Configure via set methods
-		JDialog dialog = pane.createDialog(null, "Help");
-		dialog.setModal(false);
-		dialog.setVisible(true);
-		dialog.setResizable(true);
-
-		// JOptionPane.showMessageDialog(null, p, "Help",
-		// JOptionPane.PLAIN_MESSAGE, null);
-	} */
+	/*
+	 * static void helpAction() { JTextArea jta = new
+	 * JTextArea(Examples.helpString); jta.setWrapStyleWord(true); //
+	 * jta.setEditable(false); jta.setLineWrap(true); JScrollPane p = new
+	 * JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+	 * JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); p.setPreferredSize(new
+	 * Dimension(650, 300));
+	 * 
+	 * JOptionPane pane = new JOptionPane(p); // Configure via set methods
+	 * JDialog dialog = pane.createDialog(null, "Help"); dialog.setModal(false);
+	 * dialog.setVisible(true); dialog.setResizable(true);
+	 * 
+	 * // JOptionPane.showMessageDialog(null, p, "Help", //
+	 * JOptionPane.PLAIN_MESSAGE, null); }
+	 */
 
 	public static void exitAction() {
 		delay();
@@ -537,8 +555,7 @@ public class GUI extends JPanel {
 
 	protected static void saveAction() {
 		@SuppressWarnings("rawtypes")
-		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
-				.getSelectedIndex());
+		CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
 		File f = files.get(e.id);
 		if (f == null) {
 			saveAsAction();
@@ -561,16 +578,16 @@ public class GUI extends JPanel {
 	}
 
 	public static class Filter extends FileFilter {
-		
+
 		Language l;
-		
+
 		public Filter(Language l) {
 			this.l = l;
 		}
+
 		@Override
 		public boolean accept(File f) {
-			return f.getName().toLowerCase().endsWith("." + l.fileExtension())
-					|| f.isDirectory();
+			return f.getName().toLowerCase().endsWith("." + l.fileExtension()) || f.isDirectory();
 		}
 
 		@Override
@@ -578,7 +595,7 @@ public class GUI extends JPanel {
 			return l + " files (*." + l.fileExtension() + ")";
 		}
 	}
-	
+
 	public static class AllFilter extends FileFilter {
 		@Override
 		public boolean accept(File f) {
@@ -587,7 +604,7 @@ public class GUI extends JPanel {
 					return true;
 				}
 			}
-			
+
 			return f.isDirectory();
 		}
 
@@ -596,20 +613,15 @@ public class GUI extends JPanel {
 			return "All CatData Files";
 		}
 	}
-	
-	
-	
-	
 
 	protected static void saveAsAction() {
 		delay();
 		JFileChooser jfc = new JFileChooser(NEWDEBUG.debug.general.file_path);
 		@SuppressWarnings("rawtypes")
-		CodeEditor e = (CodeEditor) editors.getComponentAt(editors
-				.getSelectedIndex());
+		CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
 
 		jfc.setFileFilter(new Filter(e.isPatrick()));
-		
+
 		jfc.showSaveDialog(null);
 		File f = jfc.getSelectedFile();
 		if (f == null) {
@@ -618,7 +630,6 @@ public class GUI extends JPanel {
 		if (!jfc.getSelectedFile().getAbsolutePath().endsWith("." + e.isPatrick().fileExtension())) {
 			f = new File(jfc.getSelectedFile() + "." + e.isPatrick().fileExtension());
 		}
-		
 
 		doSave(f, e.getText());
 		// change for david
@@ -648,11 +659,10 @@ public class GUI extends JPanel {
 		for (Language l : Language.values()) {
 			if (f.getAbsolutePath().endsWith("." + l.fileExtension())) {
 				doOpen(f, l);
-			}			
+			}
 		}
 		throw new RuntimeException("Unknown file extension on " + f.getAbsolutePath());
 	}
-
 
 	static void setDirty(Integer i, boolean b) {
 		dirty.put(i, b);
@@ -667,11 +677,12 @@ public class GUI extends JPanel {
 	}
 
 	public static void setFontSize(int size) {
-		for (@SuppressWarnings("rawtypes") CodeEditor c : keys.values()) {
+		for (@SuppressWarnings("rawtypes")
+		CodeEditor c : keys.values()) {
 			c.setFontSize(size);
 		}
 	}
-	
+
 	static Map<Integer, Boolean> dirty = new HashMap<>();
 	@SuppressWarnings("rawtypes")
 	static Map<Integer, CodeEditor> keys = new HashMap<>();
@@ -738,30 +749,59 @@ public class GUI extends JPanel {
 		}
 	}
 
+	// TODO defunct from when tried to save serialized compilation results
+	/*
+	 * public static void save2(FQLPPEnvironment env) { delay(); JFileChooser
+	 * jfc = new JFileChooser(DEBUG.debug.FILE_PATH); jfc.setFileFilter(new
+	 * Filter2()); jfc.showSaveDialog(null); File f = jfc.getSelectedFile(); if
+	 * (f == null) { return; } if
+	 * (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlppo")) { f = new
+	 * File(jfc.getSelectedFile() + ".fqlppo"); } try { FileOutputStream fileOut
+	 * = new FileOutputStream(f); ObjectOutputStream out = new
+	 * ObjectOutputStream(fileOut); out.writeObject(env); out.close();
+	 * fileOut.close(); } catch (Exception i) { i.printStackTrace();
+	 * JOptionPane.showMessageDialog(null, i.getLocalizedMessage()); } }
+	 */
 
-	//TODO defunct from when tried to save serialized compilation results
-	/*public static void save2(FQLPPEnvironment env) {
-		delay();
-		JFileChooser jfc = new JFileChooser(DEBUG.debug.FILE_PATH);
-		jfc.setFileFilter(new Filter2());
-		jfc.showSaveDialog(null);
-		File f = jfc.getSelectedFile();
-		if (f == null) {
+	private static void formatAction() {
+		int i = editors.getSelectedIndex();
+		CodeEditor<?,?,?> c = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+		if (c == null) {
 			return;
 		}
-		if (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlppo")) {
-			f = new File(jfc.getSelectedFile() + ".fqlppo");
+		if (!c.isPatrick().equals(Language.FQL)) {
+			return;
 		}
-		try {
-			FileOutputStream fileOut = new FileOutputStream(f);
-			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(env);
-			out.close();
-			fileOut.close();
-		} catch (Exception i) {
-			i.printStackTrace();
-			JOptionPane.showMessageDialog(null, i.getLocalizedMessage());
+		FqlCodeEditor cc = (FqlCodeEditor) c;
+		cc.format();
+	}
+
+	private static void veditAction() {
+		int i = editors.getSelectedIndex();
+		CodeEditor<?,?,?> c = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+		if (c == null) {
+			return;
 		}
-	} */
+		if (!c.isPatrick().equals(Language.FQL)) {
+			return;
+		}
+		FqlCodeEditor cc = (FqlCodeEditor) c;
+		cc.format();
+		cc.vedit();
+	}
+
+	private static void checkAction() {
+		int i = editors.getSelectedIndex();
+		CodeEditor<?,?,?> c = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+		if (c == null) {
+			return;
+		}
+		if (!c.isPatrick().equals(Language.FQL)) {
+			return;
+		}
+		FqlCodeEditor cc = (FqlCodeEditor) c;
+		cc.format();
+		cc.check();
+	}
 
 }

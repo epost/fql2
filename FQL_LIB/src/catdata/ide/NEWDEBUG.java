@@ -20,6 +20,7 @@ import catdata.Pair;
 import catdata.Unit;
 import catdata.fpql.XOptions;
 import catdata.fpqlpp.AOptions;
+import catdata.fql.FqlOptions;
 import catdata.fqlpp.FqlppOptions;
 import catdata.opl.OplOptions;
 
@@ -42,13 +43,13 @@ public class NEWDEBUG implements Serializable {
 	static int selected_tab = 0;
 
 	public GeneralOptions general = new GeneralOptions(); 
-//	public GeneralOptions fql = new GeneralOptions(); 
+	public FqlOptions fql = new FqlOptions(); 
 	public FqlppOptions fqlpp = new FqlppOptions(); 
 	public XOptions fpql = new XOptions(); 
 	public AOptions fpqlpp = new AOptions(); 
 	public OplOptions opl = new OplOptions(); 
 	
-	private Options[] options = new Options[] { general, /* fql, */ fqlpp, fpql, fpqlpp, opl };
+	private Options[] options = new Options[] { general, fql, fqlpp, fpql, fpqlpp, opl };
 	
 	{
 		for (Options option : options) {
@@ -104,18 +105,6 @@ public class NEWDEBUG implements Serializable {
 		}
 		jtb.setSelectedIndex(selected_tab);
 		
-		/*jtb.addHierarchyListener(new HierarchyListener() {
-            public void hierarchyChanged(HierarchyEvent e) {
-                Window window = SwingUtilities.getWindowAncestor(jtb);
-                if (window instanceof Dialog) {
-                    Dialog dialog = (Dialog)window;
-                    if (!dialog.isResizable()) {
-                        dialog.setResizable(true);
-                    }
-                }
-            }
-        });*/
-	
 		JOptionPane pane = new JOptionPane(jtb, JOptionPane.PLAIN_MESSAGE,
 				JOptionPane.OK_CANCEL_OPTION, null,
 				new String[] { "OK", "Cancel", "Reset", "Save", "Load" }, "OK");
@@ -150,6 +139,7 @@ public class NEWDEBUG implements Serializable {
 		
 		});
 		
+		dialog.pack();
 		dialog.setVisible(true);
 		
 //		pane.getValue()

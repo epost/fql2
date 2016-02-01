@@ -1,8 +1,6 @@
 package catdata.fpql;
 
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.function.Function;
 
@@ -70,15 +68,10 @@ public class XOptions extends Options {
 		x_1.add(typing_label);
 		x_2.add(x_typing_box);
 		
-		GridBagConstraints c1 = new GridBagConstraints();
-		c1.weightx = 1.0;
-		c1.fill = GridBagConstraints.HORIZONTAL;
 
-		JPanel p1 = new JPanel(new GridBagLayout());
 		JTextField x_path_length_box = new JTextField(Integer.toString(MAX_PATH_LENGTH), 12);
 		JLabel x_path_length_label = new JLabel("Max path length:");
-		p1.add(x_path_length_box, c1);
-		x_2.add(p1);
+		x_2.add(wrap(x_path_length_box));
 		x_1.add(x_path_length_label);
 		
 		JPanel xArea = new JPanel(new FlowLayout(FlowLayout.LEFT));

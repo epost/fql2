@@ -270,7 +270,7 @@ public class AParser {
 		
 	//	Parser p1 = Parsers.tuple(ident(), term("="), exp());
 		
-		return null;
+		throw new RuntimeException("Coming soon");
 		
 //		return Parsers.or(new Parser[] { sorts, symbols, p1 });
 		

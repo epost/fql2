@@ -1,8 +1,6 @@
 package catdata.fqlpp;
 
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.function.Function;
 
@@ -85,23 +83,15 @@ public class FqlppOptions extends Options {
 		viewer1.add(label5);
 		viewer2.add(jcb); 
 
-		GridBagConstraints c1 = new GridBagConstraints();
-		c1.weightx = 1.0;
-		c1.fill = GridBagConstraints.HORIZONTAL;
-
-		JPanel p1 = new JPanel(new GridBagLayout());		
 		JTextField plen = new JTextField(Integer.toString(MAX_PATH_LENGTH));
 		JLabel label6 = new JLabel("Max path length:");
 		viewer1.add(label6);
-		p1.add(plen, c1);
-		viewer2.add(p1);
+		viewer2.add(wrap(plen));
 
-		JPanel p2 = new JPanel(new GridBagLayout());		
 		JTextField iter = new JTextField(Integer.toString(MAX_DENOTE_ITERATIONS));
-		JLabel label7 = new JLabel("Max iterations for left-kan computation:");
+		JLabel label7 = new JLabel("Max iterations for left-kan:");
 		viewer1.add(label7);
-		p2.add(iter, c1);
-		viewer2.add(p2);		
+		viewer2.add(wrap(iter));		
 		
 		JPanel setArea = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JCheckBox set_textual_box = new JCheckBox("Text", set_textual);
