@@ -539,6 +539,10 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 							Chc.inLeft(c2), Util.singList(new OplTerm<>(Chc.inRight(Chc
 									.inRight(new Pair<>(label, tuple))), new LinkedList<>())));
 
+					//System.out.println("--------------------------");
+					//System.out.println(a);
+					//System.out.println(OplInst.conv(I0.S, a, I0.P));
+					//System.out.println(conv(I0, OplInst.conv(I0.S, a, I0.P)));
 					equations.add(new Pair<>(lhs, conv(I0, OplInst.conv(I0.S, a, I0.P))));
 				}
 			} 

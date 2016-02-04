@@ -131,7 +131,7 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		List<S> actual = args.stream().map(x -> x.type(sig, ctx)).collect(Collectors.toList());
 		if (t.first.size() != actual.size()) {
 			throw new DoNotIgnore("Argument length mismatch for " + this + ", expected "
-					+ t.first.size() + " but given " + actual.size());
+					+ t.first.size() + " but given " + actual.size()) ;
 		}
 		for (int i = 0; i < actual.size(); i++) {
 			if (!t.first.get(i).equals(actual.get(i))) {

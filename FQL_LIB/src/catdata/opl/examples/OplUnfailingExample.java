@@ -30,7 +30,7 @@ public class OplUnfailingExample extends Example {
 			+ "\n		forall x, y. o(o(x,y),x) = x;"
 			+ "\n}"
 			+ "\n"
-			+ "\n//will fail"
+			+ "\n//will fail without semantic AC"
 			+ "\nAC = theory {"
 			+ "\n	sorts "
 			+ "\n		S;"

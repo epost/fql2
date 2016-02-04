@@ -20,7 +20,7 @@ public class OplStackExample extends Example {
 		return s;
 	}
 	
-	String s = "//requires disabling mapping check"
+	String s = "//******* IMPORTANT IMPORTANT requires disabling mapping check"
 			+ "\nC = theory {"
 			+ "\n 	sorts "
 			+ "\n		E;"

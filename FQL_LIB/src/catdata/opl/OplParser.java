@@ -31,8 +31,10 @@ import catdata.opl.OplExp.OplEval;
 import catdata.opl.OplExp.OplFlower;
 import catdata.opl.OplExp.OplId;
 import catdata.opl.OplExp.OplInst;
+import catdata.opl.OplExp.OplInst0;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplMapping;
+import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplPresTrans;
 import catdata.opl.OplExp.OplSat;
 import catdata.opl.OplExp.OplSchemaProj;
@@ -57,7 +59,7 @@ public class OplParser {
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
-		"implications", "apply", "id", "query", "edges", "for", "entitiesAndAttributes", "instance", "entities", "attributes", "types", "schema", "as", "where", "select", "from", "flower", "SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
+		"return", "keys", "INSTANCE", "SCHEMA", "obsEqualities", "pathEqualities", "implications", "apply", "id", "query", "edges", "for", "entitiesAndAttributes", "instance", "entities", "attributes", "types", "schema", "as", "where", "select", "from", "flower", "SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -90,7 +92,7 @@ public class OplParser {
 		Reference ref = Parser.newReference();
 		Parser<?> app = Parsers.tuple(string(), term("("), ref.lazy().sepBy(term(",")), term(")"));
 		Parser<?> app2 = Parsers.tuple(term("("), ref.lazy(), string(), ref.lazy(), term(")"));
-		Parser<?> a = Parsers.or(new Parser<?>[] { app, app2, string()});
+		Parser<?> a = Parsers.or(new Parser<?>[] { app, app2, string().sepBy1(term("."))});
 		ref.set(a);
 		return a;
 	}
@@ -156,8 +158,10 @@ public class OplParser {
 		Parser<?> query = query();
 		Parser<?> idQ = Parsers.tuple(term("id"), ident());
 		Parser<?> apply = Parsers.tuple(term("apply"), ident(), ident());
+		Parser<?> SCHEMA = SCHEMA();
+		Parser<?> INST = INSTANCE();
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { apply, idQ, query, projEA, inst, schema, projE, projA, projT, flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
+		Parser<?> a = Parsers.or(new Parser<?>[] { INST, SCHEMA, apply, idQ, query, projEA, inst, schema, projE, projA, projT, flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
 		ref.set(a);
 
 		return a;
@@ -201,6 +205,22 @@ public class OplParser {
 		return Parsers.tuple(Parsers.constant("theory"), Parsers.between(term("theory").followedBy(term("{")), foo, term("}")));
 	}
 	
+	public static final Parser<?> SCHEMA() {
+		Parser<?> q = Parsers.tuple(ident(), Parsers.tuple(term("@"), NUMBER).optional());
+		
+		Parser<?> z1 = Parsers.longer(Parsers.tuple(ident().sepBy(term(",")), term("->"),
+				ident()), ident());
+		
+		Parser<?> p = Parsers.tuple(q.sepBy1(term(",")), term(":"), z1);
+		Parser<?> foo = Parsers.tuple(section("entities", ident()), 
+				section("edges", p),
+				section("attributes", p),
+				section("pathEqualities", oplEq()),
+				section("obsEqualities", oplEq()));
+//		return Parsers.tuple(Parsers.constant("SCHEMA"), Parsers.between(term("SCHEMA").followedBy(term("{")), foo, term("}")));
+		return Parsers.tuple(term("SCHEMA").followedBy(term("{")), foo, term("}").followedBy(term(":")), ident());
+	}
+	
 	public static final Parser<?> presentation() {
 		Parser<?> q = Parsers.tuple(ident(), Parsers.tuple(term("@"), NUMBER).optional());
 		Parser<?> p = Parsers.tuple(q.sepBy1(term(",")), term(":"), ident());
@@ -208,6 +228,15 @@ public class OplParser {
 				section("generators", p),
 				section("equations", oplEq()));
 		return Parsers.tuple(term("presentation").followedBy(term("{")), foo, term("}").followedBy(term(":")), ident());
+	}
+	
+	public static final Parser<?> INSTANCE() {
+		Parser<?> q = Parsers.tuple(ident(), Parsers.tuple(term("@"), NUMBER).optional());
+		Parser<?> p = Parsers.tuple(q.sepBy1(term(",")), term(":"), ident());
+		Parser<?> foo = Parsers.tuple( 
+				section("generators", p),
+				section("equations", oplEq()));
+		return Parsers.tuple(term("INSTANCE").followedBy(term("{")), foo, term("}").followedBy(term(":")), ident());
 	}
 	
 	public static final Parser<?> schema() {
@@ -395,6 +424,115 @@ public class OplParser {
 		return new OplExp.OplSig<>(new VIt(), prec, sorts, symbols, equations, implications);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static OplExp toSCHEMA(Object ox) {
+		Tuple4 oy = (Tuple4) ox;
+		String ts = (String) oy.d;
+		
+		Tuple5 t = (Tuple5) oy.b;
+		
+		Tuple3 a = (Tuple3) t.a;
+		Tuple3 b = (Tuple3) t.b;
+		Tuple3 c = (Tuple3) t.c;
+		Tuple3 d = (Tuple3) t.d;
+		Tuple3 e = (Tuple3) t.e;
+				
+		Set<String> sorts = a == null ? new HashSet<>() : new HashSet<>((List<String>) a.b);
+		
+		List<Tuple3> symbolsE0 = b == null ? new LinkedList<>() : (List<Tuple3>) b.b;
+		List<Tuple3> symbolsA0 = c == null ? new LinkedList<>() : (List<Tuple3>) c.b;
+		
+		List<org.codehaus.jparsec.functors.Pair> equationsE0 = c == null ? new LinkedList<>() : (List<org.codehaus.jparsec.functors.Pair>) d.b;
+		List<org.codehaus.jparsec.functors.Pair> equationsA0 = c == null ? new LinkedList<>() : (List<org.codehaus.jparsec.functors.Pair>) e.b;
+		
+		Map<String, Pair<List<String>, String>> symbolsE = new HashMap<>();
+		Map<String, Pair<List<String>, String>> symbolsA = new HashMap<>();
+		Map<String, Pair<List<String>, String>> symbolsEA = new HashMap<>();
+		Map<String, Integer> prec = new HashMap<>();
+		for (Tuple3 x : symbolsE0) {
+			String dom;
+			List<String> args;
+			if (x.c instanceof Tuple3) {
+				Tuple3 zzz = (Tuple3) x.c;
+				args = (List<String>) zzz.a;
+				dom = (String) zzz.c;
+			} else {
+				dom = (String) x.c;
+				args = new LinkedList<>();
+			}
+			
+			List<org.codehaus.jparsec.functors.Pair> name0s = (List<org.codehaus.jparsec.functors.Pair>) x.a;
+			for (org.codehaus.jparsec.functors.Pair name0 : name0s) {
+			String name = (String) name0.a;
+			
+			if (name0.b != null) {
+				org.codehaus.jparsec.functors.Pair zzz = (org.codehaus.jparsec.functors.Pair) name0.b;
+				Integer i = (Integer) zzz.b;
+				prec.put(name, i);
+			}
+			
+			if (symbolsE.containsKey(name)) {
+				throw new DoNotIgnore("Duplicate symbol " + name);
+			}
+			symbolsE.put(name, new Pair<>(args, dom));
+			symbolsEA.put(name, new Pair<>(args, dom));
+			}		
+		}
+		for (Tuple3 x : symbolsA0) {
+			String dom;
+			List<String> args;
+			if (x.c instanceof Tuple3) {
+				Tuple3 zzz = (Tuple3) x.c;
+				args = (List<String>) zzz.a;
+				dom = (String) zzz.c;
+			} else {
+				dom = (String) x.c;
+				args = new LinkedList<>();
+			}
+			
+			List<org.codehaus.jparsec.functors.Pair> name0s = (List<org.codehaus.jparsec.functors.Pair>) x.a;
+			for (org.codehaus.jparsec.functors.Pair name0 : name0s) {
+			String name = (String) name0.a;
+			
+			if (name0.b != null) {
+				org.codehaus.jparsec.functors.Pair zzz = (org.codehaus.jparsec.functors.Pair) name0.b;
+				Integer i = (Integer) zzz.b;
+				prec.put(name, i);
+			}
+			
+			if (symbolsA.containsKey(name)) {
+				throw new DoNotIgnore("Duplicate symbol " + name);
+			}
+			symbolsA.put(name, new Pair<>(args, dom));
+			symbolsEA.put(name, new Pair<>(args, dom));
+			}		
+		}
+		
+		///////////////
+		
+		
+		List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> equationsE = new LinkedList<>();
+		List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> equationsA = new LinkedList<>();
+		for (org.codehaus.jparsec.functors.Pair<Tuple3, Tuple3> x : equationsE0) {
+			List<Tuple3> fa = x.a == null ? new LinkedList<>() : (List<Tuple3>) x.a.b;
+			OplCtx<String, String> ctx = toCtx(fa);
+			Tuple3 eq = (Tuple3) x.b;
+			OplTerm lhs = toTerm(ctx.names(), consts(symbolsEA), eq.a, false);
+			OplTerm rhs = toTerm(ctx.names(), consts(symbolsEA), eq.c, false);
+			equationsE.add(new Triple<>(ctx, lhs, rhs));
+		}
+		for (org.codehaus.jparsec.functors.Pair<Tuple3, Tuple3> x : equationsA0) {
+			List<Tuple3> fa = x.a == null ? new LinkedList<>() : (List<Tuple3>) x.a.b;
+			OplCtx<String, String> ctx = toCtx(fa);
+			Tuple3 eq = (Tuple3) x.b;
+			OplTerm lhs = toTerm(ctx.names(), consts(symbolsEA), eq.a, false);
+			OplTerm rhs = toTerm(ctx.names(), consts(symbolsEA), eq.c, false);
+			equationsA.add(new Triple<>(ctx, lhs, rhs));
+		}
+		
+		return new OplExp.OplSCHEMA0(prec, sorts, symbolsE, symbolsA, equationsE, equationsA, ts);
+	}
+
 	private static Collection<String> consts(Map<String, Pair<List<String>, String>> symbols) {
 		Set<String> ret = new HashSet<>();
 		for (String k : symbols.keySet()) {
@@ -407,7 +545,16 @@ public class OplParser {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static OplExp toPresentation(Object o) {
+	private static OplExp toINSTANCE(Object o) {
+		if (!o.toString().contains("INSTANCE")) {
+			throw new RuntimeException();
+		}
+		OplPres e = toPresentation(o);
+		return new OplInst0(e);
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static OplPres toPresentation(Object o) {
 		Tuple4 t = (Tuple4) o;
 		
 		org.codehaus.jparsec.functors.Pair e = (org.codehaus.jparsec.functors.Pair) t.b;
@@ -531,6 +678,18 @@ public class OplParser {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplTerm toTerm(Collection vars, Collection consts, Object a, boolean suppressError) {
+		if (a instanceof List) {
+			List<String> aa = (List<String>) a;
+			if (aa.isEmpty()) {
+				throw new RuntimeException();
+			}
+			OplTerm head = toTerm(vars, consts, aa.get(0), suppressError);
+			//List<String> bb = new LinkedList<>(aa); Collections.reverse(list)
+			for (int j = 1; j < aa.size() ; j++) {
+				head = new OplTerm(aa.get(j), Util.singList(head));
+			}
+			return head;
+		}
 		if (a instanceof String) {
 			String a0 = (String) a;
 			try {
@@ -560,6 +719,7 @@ public class OplParser {
 			l0.add(toTerm(vars, consts, t.d, suppressError));
 			return new OplTerm(f, l0);
 		}
+		
 			Tuple4 t = (Tuple4) a;
 			String f = (String) t.a;
 			List<Object> l = (List<Object>) t.c;
@@ -646,11 +806,28 @@ public class OplParser {
 		}
 		
 		try {
+			return toINSTANCE(c);
+		} catch (DoNotIgnore de) {
+			de.printStackTrace();
+			throw new RuntimeException(de.getMessage());
+		} catch (Exception ee) {
+		}
+		
+		try {
 			return toPresentation(c);
 		} catch (DoNotIgnore de) {
 			de.printStackTrace();
 			throw new RuntimeException(de.getMessage());
 		} catch (Exception ee) {
+		}
+		
+		try {
+			return toSCHEMA(c);
+		} catch (DoNotIgnore de) {
+			de.printStackTrace();
+			throw new RuntimeException(de.getMessage());
+		} catch (Exception ee) {
+	//		ee.printStackTrace();
 		}
 
 		try {
@@ -1077,11 +1254,11 @@ public class OplParser {
 		public static final Parser<?> block() {
 			Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(",")).between(term("for"), term(";"));
 			Parser p2 = Parsers.tuple(oplTerm(), term("="), oplTerm()).sepBy(term(",")).between(term("where"), term(";"));
-			Parser p3 = Parsers.tuple(ident(), term("="), oplTerm()).sepBy(term(",")).between(term("attributes"), term(";"));
+			Parser p3 = Parsers.tuple(ident(), term("="), oplTerm()).sepBy(term(",")).between(term("return"), term(";"));
 			
 			Parser q = Parsers.tuple(ident(), term("="), oplTerm()).sepBy(term(",")).between(term("{"), term("}"));
 			Parser a = Parsers.tuple(ident(), term("="), q, term(":"), ident());
-			Parser p4= a.sepBy(term(",")).between(term("edges"), term(";"));
+			Parser p4= a.sepBy(term(",")).between(term("keys"), term(";"));
 			
 			Parser p = Parsers.tuple(p1, p2, p3, p4);
 			return p.between(term("{"), term("}"));

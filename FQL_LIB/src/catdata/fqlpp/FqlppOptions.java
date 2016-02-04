@@ -23,7 +23,7 @@ public class FqlppOptions extends Options {
 
 	@Override
 	public String getName() {
-		return Language.FPQLPP.toString();
+		return Language.FQLPP.toString();
 	}
 	
 	public int MAX_NODES = 32;

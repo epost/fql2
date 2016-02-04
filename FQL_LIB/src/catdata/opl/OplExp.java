@@ -456,6 +456,95 @@ public abstract class OplExp implements OplObject {
 			return v.visit(env, this);
 		}
 	}
+	
+	public static class OplSCHEMA0<S, C, V> extends OplExp {
+		public Map<C, Integer> prec;
+		public Set<S> entities;
+		public Map<C, Pair<List<S>, S>> edges, attrs;
+		public List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> pathEqs, obsEqs;
+		public String typeSide;
+		
+		public OplSCHEMA0(Map<C, Integer> prec, Set<S> entities, Map<C, Pair<List<S>, S>> edges,
+				Map<C, Pair<List<S>, S>> attrs,
+				List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> pathEqs,
+				List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> obsEqs, String typeSide) {
+			super();
+			this.prec = prec;
+			this.entities = entities;
+			this.edges = edges;
+			this.attrs = attrs;
+			this.pathEqs = pathEqs;
+			this.obsEqs = obsEqs;
+			this.typeSide = typeSide;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((attrs == null) ? 0 : attrs.hashCode());
+			result = prime * result + ((edges == null) ? 0 : edges.hashCode());
+			result = prime * result + ((entities == null) ? 0 : entities.hashCode());
+			result = prime * result + ((obsEqs == null) ? 0 : obsEqs.hashCode());
+			result = prime * result + ((pathEqs == null) ? 0 : pathEqs.hashCode());
+			result = prime * result + ((prec == null) ? 0 : prec.hashCode());
+			result = prime * result + ((typeSide == null) ? 0 : typeSide.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplSCHEMA0<?,?,?> other = (OplSCHEMA0<?,?,?>) obj;
+			if (attrs == null) {
+				if (other.attrs != null)
+					return false;
+			} else if (!attrs.equals(other.attrs))
+				return false;
+			if (edges == null) {
+				if (other.edges != null)
+					return false;
+			} else if (!edges.equals(other.edges))
+				return false;
+			if (entities == null) {
+				if (other.entities != null)
+					return false;
+			} else if (!entities.equals(other.entities))
+				return false;
+			if (obsEqs == null) {
+				if (other.obsEqs != null)
+					return false;
+			} else if (!obsEqs.equals(other.obsEqs))
+				return false;
+			if (pathEqs == null) {
+				if (other.pathEqs != null)
+					return false;
+			} else if (!pathEqs.equals(other.pathEqs))
+				return false;
+			if (prec == null) {
+				if (other.prec != null)
+					return false;
+			} else if (!prec.equals(other.prec))
+				return false;
+			if (typeSide == null) {
+				if (other.typeSide != null)
+					return false;
+			} else if (!typeSide.equals(other.typeSide))
+				return false;
+			return true;
+		}
+
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+	}
 
 	public static class OplSig<S, C, V> extends OplExp {
 
@@ -467,7 +556,7 @@ public abstract class OplExp implements OplObject {
 			}
 			kb = new OplToKB<S, C, V>(fr, this);
 			return kb;
-		}
+		} 
 
 		@Override
 		public int hashCode() {
@@ -790,7 +879,7 @@ public abstract class OplExp implements OplObject {
 			validate();
 		}
 
-		private Iterator<V> fr;
+		public Iterator<V> fr;
 
 		void validate() {
 			if (!NEWDEBUG.debug.opl.opl_horn && !implications.isEmpty()) {
@@ -1193,8 +1282,11 @@ public abstract class OplExp implements OplObject {
 					throw new RuntimeException("Extra symbol: " + k);
 				}
 				Pair<OplCtx<S2, V>, OplTerm<C2, V>> v = symbols.get(k);
+				System.out.println("1 " + v);
 				v.second = replaceVarsByConsts(v.first, v.second);
+				System.out.println("2 " + v);
 				v.first = inf(v);
+				System.out.println(" 3 " + v);
 				S2 t = v.second.type(dst, v.first);
 				if (t == null) {
 					throw new RuntimeException("Cannot type " + v.second + " in context ["
@@ -1209,7 +1301,7 @@ public abstract class OplExp implements OplObject {
 						.collect(Collectors.toList());
 				if (!v.first.values().equals(trans_t)) {
 					throw new RuntimeException("Symbol " + k + " inputs a " + v.first.values()
-							+ " but transforms to " + trans_t + " in \n\n " + this);
+							+ " but transforms to " + trans_t + " in \n\n " + this + "\n\nvalidate ctx " + v.first + "\nvalidate values " + v.first.values());
 				}
 			}
 
@@ -1232,7 +1324,7 @@ public abstract class OplExp implements OplObject {
 
 		private OplCtx<S2, V> inf(Pair<OplCtx<S2, V>, OplTerm<C2, V>> eq0) {
 			KBExp<C2, V> lhs = OplToKB.convert(eq0.second);
-			Map<V, S2> m = new HashMap<>(eq0.first.vars0);
+			Map<V, S2> m = new LinkedHashMap<>(eq0.first.vars0);
 			lhs.typeInf(dst.symbols, m);
 			return new OplCtx<>(m);
 		}
@@ -2363,6 +2455,7 @@ public abstract class OplExp implements OplObject {
 			return cache_A;
 		}
 
+		//TODO: print more stuff?
 		@Override
 		public String toString() {
 			return "schema {\n entities\n  " + Util.sep(entities, ", ") + ";\n}";
@@ -2397,6 +2490,48 @@ public abstract class OplExp implements OplObject {
 		}
 	}
 
+	public static class OplInst0<S, C, V, X> extends OplExp {
+		
+		OplPres<S, C, V, X> P;
+		
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		public OplInst0(OplPres<S, C, V, X> p) {
+			super();
+			P = p;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((P == null) ? 0 : P.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplInst0<?,?,?,?> other = (OplInst0<?,?,?,?>) obj;
+			if (P == null) {
+				if (other.P != null)
+					return false;
+			} else if (!P.equals(other.P))
+				return false;
+			return true;
+		}
+		
+		
+	}
+	
 	public static class OplInst<S, C, V, X> extends OplExp {
 		String P0, J0, S0;
 		OplPres<S, C, V, X> P;
@@ -2468,7 +2603,7 @@ public abstract class OplExp implements OplObject {
 
 		void validate(OplSchema<S, C, V> S, OplPres<S, C, V, X> P, OplJavaInst J) {
 			if (!S.sig.equals(P.sig)) {
-				throw new RuntimeException("Presentation not on expected theory.");
+				throw new RuntimeException("Presentation not on expected theory: \n\nschema sig " + S.sig + "\n\npres sig " + P.sig);
 			}
 			if (J != null && !J.sig0.equals(S.projT())) {
 				throw new RuntimeException("JS model not on expected theory");
@@ -2738,7 +2873,7 @@ public abstract class OplExp implements OplObject {
 		String src0, dst0;
 		OplSchema<S1, C1, V> src;
 		OplSchema<S2, C2, V> dst;
-		OplMapping<S1, C1, V, S2, C2> m;
+		private OplMapping<S1, C1, V, S2, C2> m;
 
 		public OplTyMapping(String src0, String dst0, OplSchema<S1, C1, V> src,
 				OplSchema<S2, C2, V> dst, OplMapping<S1, C1, V, S2, C2> m) {
@@ -2784,14 +2919,19 @@ public abstract class OplExp implements OplObject {
 					S2 s2 = (S2) s1;
 					l.add(new Pair<>(v, s2));
 				}
+				System.out.println("--------------------------");
+				System.out.println("l " + l);
 				OplCtx<S2, V> ctx = new OplCtx<>(l);
+				System.out.println("CTX " + ctx);
+				System.out.println("vaues " + ctx.values());
 				@SuppressWarnings("unchecked")
 				C2 c2 = (C2) c1;
 				OplTerm<C2, V> value = new OplTerm<>(c2, vs);
 				symbols.put(c1, new Pair<>(ctx, value));
 			}
-
 			cache = new OplMapping<S1, C1, V, S2, C2>(sorts, symbols, "?", "?");
+			System.out.println("proposed mapping is " + cache);
+			
 			return cache;
 		}
 
@@ -2851,6 +2991,10 @@ public abstract class OplExp implements OplObject {
 		public R visit(E env, OplInst e);
 
 		public R visit(E env, OplQuery e);
+		
+		public R visit(E env, OplSCHEMA0 e);
+		
+		public R visit(E env, OplInst0 e);
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////////////////////////////////////

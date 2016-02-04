@@ -1,5 +1,12 @@
 package catdata.opl;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.script.Invocable;
 
 import catdata.opl.OplExp.OplApply;
@@ -9,10 +16,12 @@ import catdata.opl.OplExp.OplExpVisitor;
 import catdata.opl.OplExp.OplFlower;
 import catdata.opl.OplExp.OplId;
 import catdata.opl.OplExp.OplInst;
+import catdata.opl.OplExp.OplInst0;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplMapping;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplPresTrans;
+import catdata.opl.OplExp.OplSCHEMA0;
 import catdata.opl.OplExp.OplSat;
 import catdata.opl.OplExp.OplSchema;
 import catdata.opl.OplExp.OplSchemaProj;
@@ -38,6 +47,41 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	public OplObject visit(OplProgram env, OplSig e) {
 		e.validate(); 
 		return e;
+	}
+	
+	@Override
+	public OplObject visit(OplProgram env, OplSCHEMA0 e) {
+		OplObject t0 = ENV.get(e.typeSide);
+		if (!(t0 instanceof OplSig)) {
+			throw new RuntimeException("Not a theory: " + e.typeSide);
+		}
+		OplSig t = (OplSig) t0;
+		if (!t.implications.isEmpty()) {
+			throw new RuntimeException("Can't use implications with SCHEMA");
+		}
+		
+		OplSchema ret = new OplSchema("?", e.entities);
+		Map prec = new HashMap();
+		prec.putAll(t.prec);
+		prec.putAll(e.prec);
+		
+		Set sorts = new HashSet();
+		sorts.addAll(t.sorts);
+		sorts.addAll(e.entities);
+		
+		Map symbols = new HashMap();
+		symbols.putAll(t.symbols);
+		symbols.putAll(e.attrs);
+		symbols.putAll(e.edges);
+		
+		List equations = new LinkedList();
+		equations.addAll(t.equations);
+		equations.addAll(e.pathEqs);
+		equations.addAll(e.obsEqs);
+		
+		OplSig sig = new OplSig(t.fr, prec, sorts, symbols, equations);
+		ret.validate(sig);
+		return ret;
 	}
 
 	@Override
@@ -156,14 +200,19 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	@Override
 	public OplObject visit(OplProgram env, OplPres e) {
 		OplObject i = ENV.get(e.S);
-		if (!(i instanceof OplSig)) {
-			throw new RuntimeException("Not a theory: " + e.S);
+		if (i instanceof OplSig) {
+			OplSig S = (OplSig) i;
+			OplPres ret = OplPres.OplPres0(e.prec, e.S, S, e.gens, e.equations);
+			ret.toSig();
+			return ret;
+		} else if (i instanceof OplSchema) {
+			OplSchema S = (OplSchema) i;
+			OplPres ret = OplPres.OplPres0(e.prec, e.S, S.sig, e.gens, e.equations);
+			ret.toSig();
+			return ret;
+		} else {
+			throw new RuntimeException("Not a presentation or schema: " + e.S);
 		}
-		OplSig S = (OplSig) i;
-		
-		OplPres ret = OplPres.OplPres0(e.prec, e.S, S, e.gens, e.equations);
-		ret.toSig();
-		return ret;
 	}
 
 	@Override
@@ -373,6 +422,24 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	@Override
 	public OplObject visit(OplProgram env, OplTyMapping e) {
 		return e;
+	}
+
+	@Override
+	public OplObject visit(OplProgram env, OplInst0 e) {
+		OplObject zzz = ENV.get(e.P.S);
+		if (!(zzz instanceof OplSchema)) {
+			throw new RuntimeException("Not a SCHEMA: " + e.P.S);
+		}
+		OplPres P = (OplPres) visit(env, e.P);
+		OplInst ret = new OplInst(e.P.S, "?", "none");
+		OplObject S0 = ENV.get(e.P.S);
+		if (!(S0 instanceof OplSchema)) {
+			throw new RuntimeException("Not a schema: " + e.P.S);
+		}
+		OplSchema S = (OplSchema) S0;
+		
+		ret.validate(S, P, null);
+		return ret;
 	}
 	
 }
