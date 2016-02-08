@@ -243,7 +243,7 @@ public class OplParser {
 		Parser<?> foo = 
 				section("entities", ident());
 		return Parsers.tuple(term("schema").followedBy(term("{")), foo, term("}").followedBy(term(":")), ident());
-	}
+	} 
 	
 	public static final Parser<?> java() {
 		Parser<?> q = Parsers.tuple(ident(), term("->"), string());

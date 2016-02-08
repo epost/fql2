@@ -37,7 +37,7 @@ public class OplOptions extends Options {
 	public boolean opl_reorder = true;
 	public boolean opl_suppress_dom = true; 
 	public boolean opl_horn = KBOptions.defaultOptions.horn;
-
+	public boolean opl_query_check_eqs = true;
 	
 	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
@@ -109,6 +109,11 @@ public class OplOptions extends Options {
 		JLabel opl_horn_label = new JLabel("Allow implications in theories (dangerous, also can't check mappings):");
 		opl2.add(opl_horn_box);
 		opl1.add(opl_horn_label);
+		
+		JCheckBox opl_eqs_box = new JCheckBox("", opl_query_check_eqs);
+		JLabel opl_eqs_label = new JLabel("Check that queries preserve equalities:");
+		opl2.add(opl_eqs_box);
+		opl1.add(opl_eqs_label);
 
 		for (int i = 0; i < Options.biggestSize - size(); i++) {
 			opl1.add(new JLabel());
@@ -144,6 +149,7 @@ public class OplOptions extends Options {
 				opl_suppress_dom = opl_suppress_box.isSelected();
 				opl_horn = opl_horn_box.isSelected();
 				opl_semantic_ac = opl_semantic_ac_box.isSelected();
+				opl_query_check_eqs = opl_eqs_box.isSelected();
 			
 				return new Unit();
 			}
@@ -156,7 +162,7 @@ public class OplOptions extends Options {
 
 	@Override
 	public int size() {
-		return 12;
+		return 13;
 	} 
 
 }

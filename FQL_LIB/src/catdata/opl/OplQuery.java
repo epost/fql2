@@ -17,6 +17,7 @@ import javax.swing.JTabbedPane;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Quad;
+import catdata.Triple;
 import catdata.algs.kb.KBExp;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.NEWDEBUG;
@@ -202,7 +203,113 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		}
 
 		freeze();
-		// TODO ignores path equality checking
+		if (NEWDEBUG.debug.opl.opl_query_check_eqs) {
+			checkPaths();
+		}
+	}
+	
+	void checkPaths() {
+		for (Triple<OplCtx<S2, V2>, OplTerm<C2, V2>, OplTerm<C2, V2>> eq : dst.sig.equations) {
+			if (eq.first.vars0.size() != 1) {
+				continue;
+			}
+			Pair<V2, S2> aA = eq.first.values2().get(0);
+			S2 A = aA.second;
+//			V2 a = aA.first;
+			if (!dst.entities.contains(A)) {
+				continue;
+			} 
+			for (Object l2 : blocks.keySet()) {
+				Pair<S2, Block<S1, C1, V1, S2, C2, V2>> block20 = blocks.get(l2);
+				if (!block20.first.equals(A)) {
+					continue;
+				}
+
+				S2 B = eq.second.type(dst.sig, eq.first);
+				
+				if (dst.entities.contains(B)) {
+					for (Object l : blocks.keySet()) {
+						Pair<S2, Block<S1, C1, V1, S2, C2, V2>> block0 = blocks.get(l);
+						if (!block0.first.equals(B)) {
+							continue;
+						}
+					
+						for (V1 b : block0.second.from.keySet()) {
+							OplTerm<C1, V1> lhs = convPath(new OplTerm<C1, V1>(b), l2, eq.second);
+							OplTerm<C1, V1> rhs = convPath(new OplTerm<C1, V1>(b), l2, eq.third); 
+							OplTerm<Chc<C1, V1>, V1> lhs0 = fI.get(l2).toSig().getKB().nf(OplSig.inject(lhs));
+							OplTerm<Chc<C1, V1>, V1> rhs0 = fI.get(l2).toSig().getKB().nf(OplSig.inject(rhs));
+							if (!lhs0.equals(rhs0)) {
+								throw new RuntimeException("equality " + eq.second + " = " + eq.third + " not preserved; becomes " + lhs + " = " + rhs);
+							}
+						}
+					}
+				} else {
+					OplTerm<C1, V1> lhs = convTerm(l2, eq.second);
+					OplTerm<C1, V1> rhs = convTerm(l2, eq.third); 
+					OplTerm<Chc<C1, V1>, V1> lhs0 = fI.get(l2).toSig().getKB().nf(OplSig.inject(lhs));
+					OplTerm<Chc<C1, V1>, V1> rhs0 = fI.get(l2).toSig().getKB().nf(OplSig.inject(rhs));
+					if (!lhs0.equals(rhs0)) {
+						throw new RuntimeException("equality " + eq.second + " = " + eq.third + " not preserved; becomes " + lhs + " = " + rhs);
+					}
+					
+				}
+			}
+		}
+		
+	}
+
+	OplTerm<C1, V1> convTerm(Object l2, OplTerm<C2, V2> t) {
+		if (t.var != null) {
+			throw new RuntimeException();
+		}
+		if (dst.projA().symbols.containsKey(t.head)) {
+			return convPath(blocks.get(l2).second.attrs.get(t.head), l2, t.args.get(0));
+		}
+		List<OplTerm<C1, V1>> args0 = new LinkedList<>();
+		for (OplTerm<C2, V2> arg : t.args) {
+			args0.add(convTerm(l2, arg));
+		}
+		return new OplTerm<>((C1)t.head, args0);
+	}
+	
+	OplTerm<C1, V1> convPath(OplTerm<C1, V1> base, Object l2, OplTerm<C2, V2> eqs) {
+		return subst(base, Util.reverse(trace(l2, eqs)));
+	}
+	
+	static <X, Y> List<X> linearize(OplTerm<X, Y> t) {
+		if (t.var != null) {
+			return new LinkedList<>();
+		}
+		List<X> ret = new LinkedList<>(linearize(t.args.get(0)));
+		ret.add(t.head);
+		return ret;
+	}
+
+	List<Pair<C2, Object>> trace(Object l, OplTerm<C2, V2> t) {
+		List<Pair<C2, Object>> ret = new LinkedList<>();
+		List<C2> order = linearize(t);
+		
+		for (C2 c2 : order) {
+			ret.add(new Pair<>(c2, l));
+			Pair<S2, Block<S1, C1, V1, S2, C2, V2>> b = blocks.get(l);
+			l = b.second.edges.get(c2).first;
+		}
+		
+		return ret;
+	} 
+	
+	private OplTerm<C1, V1> subst(OplTerm<C1, V1> b, List<Pair<C2, Object>> ll) {
+
+		for (Pair<C2, Object> l : ll) {
+			Pair<Object, Map<V1, OplTerm<C1, V1>>> nb = blocks.get(l.second).second.edges.get(l.first);
+			if (nb == null) {
+				throw new RuntimeException("No " + l.first + " at " + l.second);
+			}
+			b = b.subst(nb.second);
+		}
+		
+		return b;
 	}
 
 	private List<V1> order(Block<S1, C1, V1, S2, C2, V2> block) {

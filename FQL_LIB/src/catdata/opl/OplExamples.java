@@ -9,6 +9,7 @@ import catdata.opl.examples.OplGroupingExample;
 import catdata.opl.examples.OplHornExample;
 import catdata.opl.examples.OplJSExample;
 import catdata.opl.examples.OplMLExample;
+import catdata.opl.examples.OplMatrixExample;
 import catdata.opl.examples.OplMod4Example;
 import catdata.opl.examples.OplNested2Example;
 import catdata.opl.examples.OplNestedExample;
@@ -44,6 +45,7 @@ public class OplExamples {
 	public static Example oplGrouping = new OplGroupingExample();
 	public static Example oplHorn = new OplHornExample();
 	public static Example oplPaper = new OplPaperExample();
+	public static Example oplMatrix = new OplMatrixExample();
 	
 	
 }

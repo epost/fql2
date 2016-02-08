@@ -478,6 +478,25 @@ public abstract class OplExp implements OplObject {
 			this.typeSide = typeSide;
 		}
 
+		public void validate(OplSig<S, C, V> sig) {
+			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : pathEqs) {
+					if (eq.first.vars0.keySet().size() != 1) {
+						throw new RuntimeException("Non-1 context size for " + eq);
+					}
+					if (!entities.contains(eq.first.values().get(0))) {
+						throw new RuntimeException("Non-entity in context for " + eq);		
+					}
+			}
+			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : obsEqs) {
+					if (eq.first.vars0.keySet().size() != 1) {
+						throw new RuntimeException("Non-1 context size for " + eq);
+					}
+					if (!entities.contains(eq.first.values().get(0))) {
+						throw new RuntimeException("Non-entity in context for " + eq);		
+					}
+			}
+		}
+		
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -1282,11 +1301,8 @@ public abstract class OplExp implements OplObject {
 					throw new RuntimeException("Extra symbol: " + k);
 				}
 				Pair<OplCtx<S2, V>, OplTerm<C2, V>> v = symbols.get(k);
-				System.out.println("1 " + v);
 				v.second = replaceVarsByConsts(v.first, v.second);
-				System.out.println("2 " + v);
 				v.first = inf(v);
-				System.out.println(" 3 " + v);
 				S2 t = v.second.type(dst, v.first);
 				if (t == null) {
 					throw new RuntimeException("Cannot type " + v.second + " in context ["
@@ -1738,12 +1754,6 @@ public abstract class OplExp implements OplObject {
 						throw new RuntimeException("Missing on argument " + arg + " in " + f);
 					}
 					if (!sorts.get(sig.symbols.get(f).second).contains(at)) {
-						System.out.println("claim: " + at + " not contained in "
-								+ sorts.get(sig.symbols.get(f).second));
-						for (Object o : sorts.get(sig.symbols.get(f).second)) {
-							System.out.println(o + " vs " + at + " result " + o.equals(at)
-									+ " and " + at.equals(o));
-						}
 						throw new RuntimeException("In " + f + ", return value " + at
 								+ " not in correct sort " + sorts.get(sig.symbols.get(f).second));
 					}
@@ -1878,7 +1888,7 @@ public abstract class OplExp implements OplObject {
 			this.ENV = ENV;
 			sig0 = sig;
 			for (String k : defs.keySet()) {
-				if (k.equals("_preamble")) {
+				if (k.equals("_preamble") || k.equals("_compose")) {
 					continue;
 				}
 				if (!sig.symbols.containsKey(k)) {
@@ -2278,6 +2288,17 @@ public abstract class OplExp implements OplObject {
 				}
 				throw new RuntimeException("Does not pass entity/typeside check: " + f);
 			}
+			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : sig.equations) {
+				for (S k : eq.first.values()) {
+					if (entities.contains(k)) {
+						if (eq.first.values().size() != 1) {
+							throw new RuntimeException(eq + " has ctx with > 1 variable");
+						}
+						break;
+					}
+				}
+			}
+			
 		}
 
 		OplSig<S, C, V> cache_E, cache_A, cache_T;
@@ -2290,7 +2311,7 @@ public abstract class OplExp implements OplObject {
 			for (C f : sig.symbols.keySet()) {
 				Pair<List<S>, S> t = sig.symbols.get(f);
 
-				if (t.first.size() == 1 && entities.contains(t.first.get(0))
+				if (entities.containsAll(t.first)
 						&& entities.contains(t.second)) {
 					symbols.put(f, t);
 				}
@@ -2374,51 +2395,7 @@ public abstract class OplExp implements OplObject {
 			return cache_EA;
 		}
 
-		/*
-		 * OplSig<S, C, V> cache_EdiscreteT;
-		 * 
-		 * public OplSig<S, C, V> projEdiscreteT() { if (cache_EdiscreteT !=
-		 * null) { return cache_EdiscreteT; }
-		 * 
-		 * Set<S> types = new HashSet<>(); types.addAll(projA().sorts);
-		 * types.addAll(projT().sorts); Map<C, Pair<List<S>, S>> symbols = new
-		 * HashMap<>(); // symbols.putAll(projA().symbols);
-		 * symbols.putAll(projE().symbols); for (C symbol :
-		 * projT().symbols.keySet()) { Pair<List<S>, S> t =
-		 * projT().symbols.get(symbol); if (t.first.isEmpty()) {
-		 * symbols.put(symbol, t); } } List<Triple<OplCtx<S, V>, OplTerm<C, V>,
-		 * OplTerm<C, V>>> equations = new LinkedList<>();
-		 * equations.addAll(projA().equations);
-		 * equations.addAll(projE().equations); cache_EdiscreteT = new OplSig<S,
-		 * C, V>(sig.fr, sig.prec, types, symbols, equations); //
-		 * System.out.println(cache_EdiscreteT); return cache_EdiscreteT; }
-		 * 
-		 * OplSig<S, C, V> cache_EAdiscreteT;
-		 */
-
-		/*
-		 * public OplSig<S, C, V> projEAdiscreteT() { if (cache_EAdiscreteT !=
-		 * null) { return cache_EAdiscreteT; }
-		 * 
-		 * Set<S> types = new HashSet<>(); types.addAll(projA().sorts);
-		 * types.addAll(projT().sorts); Map<C, Pair<List<S>, S>> symbols = new
-		 * HashMap<>(); symbols.putAll(projA().symbols);
-		 * symbols.putAll(projE().symbols); for (C symbol :
-		 * projT().symbols.keySet()) { Pair<List<S>, S> t =
-		 * projT().symbols.get(symbol); if (t.first.isEmpty()) {
-		 * symbols.put(symbol, t); } } List<Triple<OplCtx<S, V>, OplTerm<C, V>,
-		 * OplTerm<C, V>>> equations = new LinkedList<>();
-		 * equations.addAll(projA().equations);
-		 * equations.addAll(projE().equations); for (Triple<OplCtx<S, V>,
-		 * OplTerm<C, V>, OplTerm<C, V>> eq : projT().equations) { if
-		 * (symbols.keySet().containsAll(eq.second.symbols()) &&
-		 * symbols.keySet().containsAll(eq.third.symbols())) {
-		 * equations.add(eq); } }
-		 * 
-		 * cache_EAdiscreteT = new OplSig<S, C, V>(sig.fr, sig.prec, types,
-		 * symbols, equations); // System.out.println(cache_EAdiscreteT); return
-		 * cache_EAdiscreteT; }
-		 */
+		
 
 		public OplSig<S, C, V> projA() {
 			if (cache_A != null) {
@@ -2455,10 +2432,9 @@ public abstract class OplExp implements OplObject {
 			return cache_A;
 		}
 
-		//TODO: print more stuff?
 		@Override
 		public String toString() {
-			return "schema {\n entities\n  " + Util.sep(entities, ", ") + ";\n}";
+			return "schema {\n entities\n  " + Util.sep(entities, ", ") + ";\n}" + "\n\n + " + sig;
 		}
 	}
 
@@ -2919,18 +2895,13 @@ public abstract class OplExp implements OplObject {
 					S2 s2 = (S2) s1;
 					l.add(new Pair<>(v, s2));
 				}
-				System.out.println("--------------------------");
-				System.out.println("l " + l);
 				OplCtx<S2, V> ctx = new OplCtx<>(l);
-				System.out.println("CTX " + ctx);
-				System.out.println("vaues " + ctx.values());
 				@SuppressWarnings("unchecked")
 				C2 c2 = (C2) c1;
 				OplTerm<C2, V> value = new OplTerm<>(c2, vs);
 				symbols.put(c1, new Pair<>(ctx, value));
 			}
 			cache = new OplMapping<S1, C1, V, S2, C2>(sorts, symbols, "?", "?");
-			System.out.println("proposed mapping is " + cache);
 			
 			return cache;
 		}

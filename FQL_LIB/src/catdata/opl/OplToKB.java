@@ -410,8 +410,17 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 				@SuppressWarnings("rawtypes")
 				Pair<Function, Object> xxx = Util.stripChcs(e0.f.l);
 				if (I.defs.containsKey(xxx.second)) {
-					Object o = ((Invocable)I.engine).invokeFunction((String)xxx.second, r);
-					return new KBApp<>(Chc.inRight(new JSWrapper(o)), new LinkedList<>());
+					if (I.defs.containsKey("_compose") ) {
+						List<Object> rr = new LinkedList<>();
+						Object ff = I.engine.eval((String)xxx.second);
+						rr.add(ff);
+						rr.add(r);
+						Object o = ((Invocable)I.engine).invokeFunction("_compose", rr);
+						return new KBApp<>(Chc.inRight(new JSWrapper(o)), new LinkedList<>());
+					} else {
+						Object o = ((Invocable)I.engine).invokeFunction((String)xxx.second, r);
+						return new KBApp<>(Chc.inRight(new JSWrapper(o)), new LinkedList<>());
+					}
 				}
 			} 
 			return new KBApp<>(e0.f, l);

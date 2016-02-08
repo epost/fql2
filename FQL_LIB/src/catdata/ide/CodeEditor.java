@@ -532,13 +532,13 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			npe.printStackTrace();
 			return true;
 		}
-
-		int choice = JOptionPane.showConfirmDialog(null,
+		int choice = JOptionPane.showOptionDialog(null, 
 				"Unsaved Changes - Continue to close?", "Close?",
-				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Yes", "No"}, "No");
 		if (choice == JOptionPane.YES_OPTION) {
 			return false;
 		}
+		
 		return true;
 	}
 	

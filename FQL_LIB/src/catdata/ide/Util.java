@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +34,60 @@ import catdata.opl.OplTerm;
 
 public class Util {
 	
+	public static List<List<Integer>> multiply_many(List<List<Integer>> l, List<List<List<Integer>>> r) {
+		List<List<Integer>> ret = l;
+		for (List<List<Integer>> x : r) {
+			ret = mat_conv2(mult(mat_conv1(x), mat_conv1(l)));
+		}
+		return ret;
+	}
+	
+	public static List<List<Integer>> multiply(List<List<Integer>> l, List<List<Integer>> r) {
+		return mat_conv2(mult(mat_conv1(l), mat_conv1(r)));
+	}
+	
+	public static int[][] mat_conv1(List<List<Integer>> l) {
+		int[][] ret = new int[l.size()][];
+		int w = 0;
+		for (List<Integer> r : l) {
+			int[] q = new int[r.size()];
+			int cnt = 0;
+			for (int x : r) {
+				q[cnt++] = x;
+			}
+			ret[w++] = q;
+		}
+		return ret;
+	}
+	
+	public static List<List<Integer>> mat_conv2(int[][] l) {
+		List<List<Integer>> ret = new LinkedList<>();
+		for (int[] r : l) {
+			List<Integer> q = new LinkedList<>();
+			for (int x : r) {
+				q.add(x);
+			}
+			ret.add(q);
+		}
+		return ret;
+	}
+	
+	public static int[][] mult(int[][] A, int[][] B) {
+        int mA = A.length;
+        int nA = A[0].length;
+        int mB = B.length;
+        int nB = B[0].length;
+        if (nA != mB) throw new RuntimeException("Illegal matrix dimensions: " + mat_conv2(A) + " and " + mat_conv2(B));
+        int[][] C = new int[mA][nB];
+        for (int i = 0; i < mA; i++)
+            for (int j = 0; j < nB; j++)
+                for (int k = 0; k < nA; k++)
+                    C[i][j] += A[i][k] * B[k][j];
+        return C;
+    }
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	public static Comparator<Object> ToStringComparator = new Comparator<Object>() {
 		@Override
 		public int compare(Object o1, Object o2) {
@@ -44,10 +99,7 @@ public class Util {
 			return o1.toString().compareTo(o2.toString());
 		}
 	};
-	
-	
-
-	
+		
 	public static <X,Y> Map<Y,X> rev0(Map<X, Y> m) {
 		return Utils.rev(m, new HashSet<>(m.values()));
 	}
@@ -379,5 +431,11 @@ public class Util {
 		}
 	
 		return y;
+	}
+
+	public static <X> List<X> reverse(List<X> l) {
+		List<X> ret = new LinkedList<>(l);
+		Collections.reverse(ret);
+		return ret;
 	}
 }

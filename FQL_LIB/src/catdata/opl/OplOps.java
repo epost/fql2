@@ -81,6 +81,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		
 		OplSig sig = new OplSig(t.fr, prec, sorts, symbols, equations);
 		ret.validate(sig);
+		e.validate(sig);
 		return ret;
 	}
 
@@ -105,13 +106,15 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			e.e.type(s0, new OplCtx<String, String>());
 			return new OplString(e.e.eval(s0, i0, new OplCtx<String, String>()).toString());
 		}
+		
 		if (i instanceof OplJavaInst) {
 			OplJavaInst i0 = (OplJavaInst) i;
 			OplObject s = ENV.get(i0.sig);
 			OplSig s0 = (OplSig) s;		
 			e.e.type(s0, new OplCtx<String, String>());
 			try {
-				return new OplString(e.e.eval((Invocable)i0.engine).toString());
+				return new OplString(OplExp.strip(s0.getKB().redBy(i0, OplToKB.convert(s0.inject(e.e))).toString()));
+//				return new OplString(e.e.eval((Invocable)i0.engine).toString());
 			} catch (Exception ee) {
 				ee.printStackTrace();
 				throw new RuntimeException(ee.getMessage());

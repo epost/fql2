@@ -539,9 +539,9 @@ public class GUI extends JPanel {
 		if (i == 0) {
 			System.exit(0);
 		}
-		int choice = JOptionPane.showConfirmDialog(null, i
-				+ " documents have unsaved changes - continue?", "Exit?",
-				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+		int choice = JOptionPane.showOptionDialog(null, i
+				+ " documents have unsaved changes - exit?", "Exit?",
+				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Yes", "No"}, "No");
 		if (choice == JOptionPane.NO_OPTION) {
 			return;
 		}
