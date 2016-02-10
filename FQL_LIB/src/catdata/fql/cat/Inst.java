@@ -14,6 +14,7 @@ import java.util.Set;
 import catdata.Pair;
 import catdata.fql.FQLException;
 import catdata.fql.Fn;
+import catdata.fql.FqlUtil;
 import catdata.fql.decl.Attribute;
 import catdata.fql.decl.Edge;
 import catdata.fql.decl.Instance;
@@ -707,7 +708,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		}
 
 		// System.out.println(seq);
-		Collection<List<Integer>> xxx = new SetPermutations<Integer>()
+		Collection<List<Integer>> xxx = FqlUtil
 				.permute(seq);
 		// System.out.println(xxx);
 

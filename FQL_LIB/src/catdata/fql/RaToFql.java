@@ -1,4 +1,4 @@
-package catdata.fql.sql;
+package catdata.fql;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

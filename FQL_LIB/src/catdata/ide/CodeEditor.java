@@ -52,7 +52,7 @@ import org.fife.ui.rtextarea.SearchEngine;
  */
 public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> extends JPanel implements Runnable {
 
-	public abstract Language isPatrick();
+	public abstract Language lang();
 	
 	protected final Integer id;
 

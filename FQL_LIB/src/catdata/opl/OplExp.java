@@ -32,6 +32,7 @@ import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
 import catdata.Utils;
+import catdata.algs.kb.KB;
 import catdata.algs.kb.KBExp;
 import catdata.fqlpp.cat.FinSet;
 import catdata.ide.CodeTextPanel;
@@ -1165,6 +1166,7 @@ public abstract class OplExp implements OplObject {
 			this.equations = equations;
 			this.sig = sig;
 			this.prec = prec;
+			//toSig();
 		}
 
 		@Override
@@ -1293,7 +1295,7 @@ public abstract class OplExp implements OplObject {
 			}
 			for (C1 k : src.symbols.keySet()) {
 				if (!symbols.keySet().contains(k)) {
-					throw new RuntimeException("Extra symbol: " + k);
+					throw new RuntimeException("missing symbol: " + k);
 				}
 			}
 			for (C1 k : symbols.keySet()) {
@@ -1955,9 +1957,34 @@ public abstract class OplExp implements OplObject {
 		OplPres<S, C, V, X> src;
 		OplPres<S, C, V, Y> dst;
 
+		OplInst<S, C, V, X> src1;
+		OplInst<S, C, V, Y> dst1;
+		
+		public OplTerm<Chc<C, Y>, V> apply(OplTerm<Chc<C, X>, V> e) {
+			if (e.var != null) {
+				throw new RuntimeException();
+			}
+			List<OplTerm<Chc<C, Y>, V>> args0 = new LinkedList<>();
+			for (OplTerm<Chc<C, X>, V> arg : e.args) {
+				args0.add(apply(arg));
+			}
+			if (e.head.left) {
+				return new OplTerm<Chc<C, Y>, V>(Chc.inLeft(e.head.l), args0);
+			} else {
+				if (!e.args.isEmpty()) {
+					throw new RuntimeException();
+				}
+				OplTerm<Chc<C, Y>, V> e0 = map.get(e.type(src.toSig(), new OplCtx<>())).get(e.head.r);
+				if (e0 == null) {
+					throw new RuntimeException();
+				}
+				return e0;
+			}
+		}
+		
 		@Override
 		public String toString() {
-			return "OplSetTranGens [map=" + map + ", pre_map=" + pre_map + ", src0=" + src0
+			return "OplPresTranGens [map=" + map + ", pre_map=" + pre_map + ", src0=" + src0
 					+ ", dst0=" + dst0 + ", src=" + src + ", dst=" + dst + ", mapping=" + mapping
 					+ "]";
 		}
@@ -2030,6 +2057,29 @@ public abstract class OplExp implements OplObject {
 			return mapping;
 		}
 
+		public void validateNotReally(OplInst<S, C, V, X> src, OplInst<S, C, V, Y> dst) {
+			if (pre_map == null) {
+				return; //throw exn?
+			}
+			this.src1 = src;
+			this.dst1 = dst;
+			for (S s : src.P.sig.sorts) {
+				if (!pre_map.containsKey(s)) {
+					pre_map.put(s, new HashMap<>());
+				}
+			}
+			/*for (X c : src.P.gens.keySet()) {
+				S s = src.P.gens.get(c);
+				
+				if (pre_map.get(j.second).containsKey(c)) {
+					throw new RuntimeException("should not map " + c);
+				}
+				pre_map.get(j.second).put((X)c, new OplTerm(c, new LinkedList()));
+			}
+				*/		
+			validateNotReally(src.P, dst.P); 			
+		}
+		
 		public void validateNotReally(OplPres<S, C, V, X> src, OplPres<S, C, V, Y> dst) {
 			if (pre_map == null) {
 				return;
@@ -2041,7 +2091,7 @@ public abstract class OplExp implements OplObject {
 				throw new RuntimeException("Signatures do not match");
 			}
 
-			for (Object s : src.sig.sorts) {
+			for (S s : src.sig.sorts) {
 				if (!pre_map.containsKey(s)) {
 					throw new RuntimeException("Missing sort: " + s);
 				}
@@ -2068,22 +2118,7 @@ public abstract class OplExp implements OplObject {
 
 			toMapping();
 
-			// /////////
-			/*
-			 * 
-			 * for (Object s : src.sig.sorts) { Map<X, OplTerm<Chc<C, Y>, V>> h
-			 * = map.get(s); for (X x : h.keySet()) { if
-			 * (!src.gens.get(x).equals(s)) { throw new
-			 * RuntimeException("Value " + x + " not of sort " + s); }
-			 * OplTerm<Chc<C, Y>, V> y = h.get(x); if
-			 * (!s.equals(y.type(dst.toSig(), new OplCtx<>()))) { throw new
-			 * RuntimeException("Value " + y + " is not of sort " + s); } } }
-			 * //h : F => G //f : X -> Y //h_Y o F(f) = G(f) o h_X for (C f :
-			 * src.sig.symbols.keySet()) { //Pair<List<S>, S> t =
-			 * src.sig.symbols.get(f); //v : s in F //v : t2 //
-			 * 
-			 * }
-			 */
+			
 
 		}
 
@@ -2334,6 +2369,7 @@ public abstract class OplExp implements OplObject {
 
 			cache_E = new OplSig<S, C, V>(sig.fr, sig.prec, new HashSet<>(entities), symbols,
 					equations);
+			
 			return cache_E;
 		}
 
@@ -2588,6 +2624,7 @@ public abstract class OplExp implements OplObject {
 			this.P = P;
 			this.J = J;
 			this.S = S;
+			P.toSig();
 		}
 
 		@Override
@@ -2745,6 +2782,8 @@ public abstract class OplExp implements OplObject {
 			}
 
 			for (Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>> eq : P.equations) {
+				P.toSig();
+				S.projT();
 				if (!S.projT().sorts.contains(eq.first.type(P.toSig(), new OplCtx<>()))) {
 					continue; // only process equations at types
 				}
@@ -2752,17 +2791,22 @@ public abstract class OplExp implements OplObject {
 				eqs.add(new Pair<>(conv(S, eq.first, P0), conv(S, eq.second, P0)));
 			}
 
-			allgens.sort(new Comparator<OplTerm<Chc<C, X>, V>>() {
-				public int compare(OplTerm<Chc<C, X>, V> o1, OplTerm<Chc<C, X>, V> o2) {
-					if (o1.equals(o2)) {
+			if (P0.toSig.getKB().KB instanceof KB) {
+				allgens.sort(new Comparator<OplTerm<Chc<C, X>, V>>() {
+					public int compare(OplTerm<Chc<C, X>, V> o1, OplTerm<Chc<C, X>, V> o2) {
+						if (o1.equals(o2)) {
+							return 0;
+						}
+						KB<Chc<C,X>,V> kb = (KB<Chc<C,X>,V>) P0.toSig.getKB().KB;
+					//	KB.gt.apply(new Pair<>(convert(e1), convert(e2)));
+						if (kb.gt.apply(new Pair<>(OplToKB.convert(o1), OplToKB.convert(o2)))) {
+						//if (((KB<C,V>)P0.toSig().getKB()).gt(o1, o2)) {
+							return 1;
+						}
 						return 0;
 					}
-					if (P0.toSig().getKB().gt(o1, o2)) {
-						return 1;
-					}
-					return 0;
-				}
-			});
+				});
+			}
 			int j = S.projT().largestPrec();
 			Map<OplTerm<Chc<C, X>, V>, Integer> prec = new HashMap<>();
 			for (int i = 0; i < allgens.size(); i++) {
@@ -2774,6 +2818,7 @@ public abstract class OplExp implements OplObject {
 			return ret;
 		}
 
+		//TODO this is important and should be called out somehow
 		public static <S, C, V, X> OplTerm<Chc<C, OplTerm<Chc<C, X>, V>>, V> conv(
 				OplSchema<S, C, V> S, OplTerm<Chc<C, X>, V> e0, OplPres<S, C, V, X> P0) {
 			OplTerm<Chc<C, X>, V> e = P0.toSig().getKB().nf(e0);
@@ -2781,7 +2826,7 @@ public abstract class OplExp implements OplObject {
 				throw new RuntimeException();
 			}
 
-			Chc<C, X> h = e0.head;
+			Chc<C, X> h = e.head;
 			// base case, generator in instance, skolem term
 			if (!h.left) {
 				if (!e.args.isEmpty()) {
@@ -2813,18 +2858,18 @@ public abstract class OplExp implements OplObject {
 	public static class OplApply extends OplExp {
 		String Q0, I0;
 		OplQuery Q;
-		OplInst I;
+//		OplInst I;
 
 		public OplApply(String Q0, String I0) {
 			this.Q0 = Q0;
 			this.I0 = I0;
 		}
-
+/*
 		void validate(OplQuery Q, OplInst I) {
 			this.Q = Q;
 			this.I = I;
 			// TODO
-		}
+		} */
 
 		@Override
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {

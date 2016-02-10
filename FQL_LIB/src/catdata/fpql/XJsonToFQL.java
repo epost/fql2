@@ -49,7 +49,7 @@ public class XJsonToFQL {
 		
 		@Override
 		public Language lang() {
-			throw new RuntimeException();
+			return null;
 		}
 
 		@Override

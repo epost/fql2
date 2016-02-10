@@ -1,4 +1,4 @@
-package catdata.fql.sql;
+package catdata.fql;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -20,7 +20,6 @@ import javax.swing.JPanel;
 
 import catdata.Pair;
 import catdata.Triple;
-import catdata.fql.FQLException;
 import catdata.fql.decl.Attribute;
 import catdata.fql.decl.Edge;
 import catdata.fql.decl.Instance;
@@ -35,6 +34,9 @@ import catdata.fql.parse.Partial;
 import catdata.fql.parse.RyanParser;
 import catdata.fql.parse.StringParser;
 import catdata.fql.parse.Tokens;
+import catdata.fql.sql.ED;
+import catdata.fql.sql.EmbeddedDependency;
+import catdata.fql.sql.Flower;
 import catdata.ide.CodeTextPanel;
 
 /**
@@ -71,17 +73,8 @@ public class Chase {
 
 		JPanel inner = new JPanel(new GridLayout(3, 1));
 
-		// JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		// pane.add(p);
-		// pane.add(q);
-		// p.setPreferredSize(new Dimension(300,600));
-		// q.setPreferredSize(new Dimension(300,600));
-		// pane.setDividerLocation(0.5);
-
 		inner.add(eds);
 		inner.add(inst);
-		// ret.add(eds0);
-		// ret.add(eds1);
 		inner.add(res);
 
 		JPanel bar = new JPanel();
@@ -97,27 +90,23 @@ public class Chase {
 
 	}
 
-	static JComboBox<KIND> box = new JComboBox<>(new KIND[] { KIND.PARALLEL,
-			KIND.STANDARD, KIND.CORE, KIND.HYBRID });
-	static CodeTextPanel eds = new CodeTextPanel("EDs",
-			"forall x, S(x,x) -> exists y, T(y,y)");
+	static JComboBox<KIND> box = new JComboBox<>(new KIND[] { KIND.PARALLEL, KIND.STANDARD,
+			KIND.CORE, KIND.HYBRID });
+	static CodeTextPanel eds = new CodeTextPanel("EDs", "forall x, S(x,x) -> exists y, T(y,y)");
 	static CodeTextPanel eds0 = new CodeTextPanel("Simplified EDs", "");
 	static CodeTextPanel eds1 = new CodeTextPanel("Tuple EDs", "");
-	static CodeTextPanel inst = new CodeTextPanel("Instance",
-			"S -> {(a,a),(b,b)}, T -> {}");
+	static CodeTextPanel inst = new CodeTextPanel("Instance", "S -> {(a,a),(b,b)}, T -> {}");
 	static CodeTextPanel res = new CodeTextPanel("Result", "");
 
 	private static RyanParser<EmbeddedDependency> ed_p = make_ed_p();
 	private static RyanParser<Pair<String, List<Pair<String, String>>>> inst_p0 = make_inst_p0();
 
 	static RyanParser<List<EmbeddedDependency>> eds_p = ParserUtils.many(ed_p);
-	static RyanParser<List<Pair<String, List<Pair<String, String>>>>> inst_p = ParserUtils
-			.manySep(inst_p0, new KeywordParser(","));
+	static RyanParser<List<Pair<String, List<Pair<String, String>>>>> inst_p = ParserUtils.manySep(
+			inst_p0, new KeywordParser(","));
 
-	protected static Pair<String, String> run(String eds, String inst, KIND kind)
-			throws Exception {
-		Partial<List<EmbeddedDependency>> xxx = eds_p.parse(new FqlTokenizer(
-				eds));
+	protected static Pair<String, String> run(String eds, String inst, KIND kind) throws Exception {
+		Partial<List<EmbeddedDependency>> xxx = eds_p.parse(new FqlTokenizer(eds));
 		List<EmbeddedDependency> eds0 = xxx.value;
 
 		if (xxx.tokens.toString().trim().length() > 0) {
@@ -138,8 +127,7 @@ public class Chase {
 			return new Pair<>(printNicely3(zzz), "");
 		}
 
-		Map<String, Set<Pair<Object, Object>>> res = chase(
-				new HashSet<String>(), zzz, inst0, kind);
+		Map<String, Set<Pair<Object, Object>>> res = chase(new HashSet<String>(), zzz, inst0, kind);
 
 		return new Pair<>(printNicely3(zzz), printNicely(res));
 	}
@@ -157,14 +145,11 @@ public class Chase {
 	}
 
 	private static RyanParser<Pair<String, List<Pair<String, String>>>> make_inst_p0() {
-		return ParserUtils.inside(new StringParser(), new KeywordParser("->"),
-				ParserUtils.outside(new KeywordParser("{"), ParserUtils
-						.manySep(ParserUtils.outside(new KeywordParser("("),
-								ParserUtils.inside(new StringParser(),
-										new KeywordParser(","),
-										new StringParser()), new KeywordParser(
-										")")), new KeywordParser(",")),
-						new KeywordParser("}")));
+		return ParserUtils.inside(new StringParser(), new KeywordParser("->"), ParserUtils.outside(
+				new KeywordParser("{"), ParserUtils.manySep(ParserUtils.outside(new KeywordParser(
+						"("), ParserUtils.inside(new StringParser(), new KeywordParser(","),
+						new StringParser()), new KeywordParser(")")), new KeywordParser(",")),
+				new KeywordParser("}")));
 	}
 
 	private static RyanParser<EmbeddedDependency> make_ed_p() {
@@ -172,20 +157,19 @@ public class Chase {
 
 			@Override
 			public Partial<EmbeddedDependency> parse(Tokens s) throws BadSyntax {
-				RyanParser<List<String>> strings = ParserUtils
-						.many(new StringParser());
-				RyanParser<List<Triple<String, String, String>>> where1 = ParserUtils
-						.manySep(facts_p(), new KeywordParser("/\\"));
+				RyanParser<List<String>> strings = ParserUtils.many(new StringParser());
+				RyanParser<List<Triple<String, String, String>>> where1 = ParserUtils.manySep(
+						facts_p(), new KeywordParser("/\\"));
 
 				RyanParser<Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>> where2 = facts_p2();
 
 				RyanParser<Pair<List<String>, List<Triple<String, String, String>>>> p = ParserUtils
-						.seq(new KeywordParser("forall"), ParserUtils.inside(
-								strings, new KeywordParser(","), where1));
+						.seq(new KeywordParser("forall"),
+								ParserUtils.inside(strings, new KeywordParser(","), where1));
 
 				RyanParser<Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>> q = ParserUtils
-						.seq(new KeywordParser("exists"), ParserUtils.inside(
-								strings, new KeywordParser(","), where2));
+						.seq(new KeywordParser("exists"),
+								ParserUtils.inside(strings, new KeywordParser(","), where2));
 
 				RyanParser<Pair<Pair<List<String>, List<Triple<String, String, String>>>, Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>>> xxx = ParserUtils
 						.inside(p, new KeywordParser("->"), q);
@@ -195,16 +179,9 @@ public class Chase {
 				s = yyy.tokens;
 				Pair<Pair<List<String>, List<Triple<String, String, String>>>, Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>> t = yyy.value;
 
-				// RyanParser<List<String>> q = ParserUtils.outside(new
-				// KeywordParser("where"), strings, new KeywordParser("where"));
-
-				// List<Triple<String, String, String>> not = new
-				// LinkedList<>();
-
-				return new Partial<EmbeddedDependency>(s,
-						new EmbeddedDependency(t.first.first, t.second.first,
-								t.first.second, t.second.second.first,
-								t.second.second.second));
+				return new Partial<EmbeddedDependency>(s, new EmbeddedDependency(t.first.first,
+						t.second.first, t.first.second, t.second.second.first,
+						t.second.second.second));
 
 			}
 
@@ -220,8 +197,7 @@ public class Chase {
 					Tokens s) throws BadSyntax {
 
 				RyanParser<List<Object>> objs0 = ParserUtils.manySep(
-						ParserUtils.or(facts_p(), eq_p()), new KeywordParser(
-								"/\\"));
+						ParserUtils.or(facts_p(), eq_p()), new KeywordParser("/\\"));
 				Partial<List<Object>> par = objs0.parse(s);
 				List<Object> objs = par.value;
 				s = par.tokens;
@@ -244,16 +220,14 @@ public class Chase {
 	}
 
 	protected static RyanParser<Pair<String, String>> eq_p() {
-		return ParserUtils.inside(new StringParser(), new KeywordParser("="),
-				new StringParser());
+		return ParserUtils.inside(new StringParser(), new KeywordParser("="), new StringParser());
 	}
 
 	private static RyanParser<Triple<String, String, String>> facts_p() {
 		return new RyanParser<Triple<String, String, String>>() {
 
 			@Override
-			public Partial<Triple<String, String, String>> parse(Tokens s)
-					throws BadSyntax {
+			public Partial<Triple<String, String, String>> parse(Tokens s) throws BadSyntax {
 				StringParser p = new StringParser();
 
 				String b;
@@ -264,9 +238,8 @@ public class Chase {
 				s = x.tokens;
 				r = x.value;
 
-				RyanParser<Pair<String, String>> h = ParserUtils.outside(
-						new KeywordParser("("), ParserUtils.inside(
-								new StringParser(), new KeywordParser(","),
+				RyanParser<Pair<String, String>> h = ParserUtils.outside(new KeywordParser("("),
+						ParserUtils.inside(new StringParser(), new KeywordParser(","),
 								new StringParser()), new KeywordParser(")"));
 				Partial<Pair<String, String>> y = h.parse(s);
 				s = y.tokens;
@@ -324,9 +297,6 @@ public class Chase {
 				ret2.add(t);
 			}
 		}
-		// System.out.println(l);
-		// System.out.println(ret1);
-		// System.out.println(ret2);
 		return new Pair<>(ret1, ret2);
 	}
 
@@ -349,20 +319,16 @@ public class Chase {
 		int i = 0;
 		ruleNo = 0;
 		for (;;) {
-//			System.out.println("iteration " + i);
-	//		System.out.println("ret " + ret);
 			Map<String, Set<Pair<Object, Object>>> ret_old = new HashMap<>(ret);
 			switch (kind) {
 			case CORE:
 				boolean fired = false;
 				for (Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd : tgds) {
-					ret = union(ret,
-							chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
+					ret = union(ret, chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
 					fired = !ret.equals(ret_old);
 				}
 				for (Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd : egds) {
-					ret = apply(ret,
-							chaseEgd(ret_old, egd.first, egd.second, egd.third));
+					ret = apply(ret, chaseEgd(ret_old, egd.first, egd.second, egd.third));
 					fired = !ret.equals(ret_old);
 				}
 				ret = minimize(keys, ret, tgds, egds);
@@ -372,40 +338,27 @@ public class Chase {
 				break;
 			case PARALLEL:
 				for (Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd : tgds) {
-					ret = union(ret,
-							chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
+					ret = union(ret, chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
 				}
 				for (Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd : egds) {
-					ret = apply(ret,
-							chaseEgd(ret_old, egd.first, egd.second, egd.third));
+					ret = apply(ret, chaseEgd(ret_old, egd.first, egd.second, egd.third));
 				}
-				// System.out.println("comparing " + ret + " and " + ret_old);
 				if (ret.equals(ret_old)) {
 					return ret;
 				}
 				break;
 			case STANDARD:
 				fired = false;
-				// System.out.println("ruleNo " + ruleNo);
-				// System.out.println("tgd size " + tgds.size());
-				// System.out.println("egd size " + egds.size());
 				for (int x = 0; x < tgds.size() + egds.size(); x++) {
 					int pos = (ruleNo + x) % (tgds.size() + egds.size());
-					// System.out.println("x " + x + "\npos" + pos);
 					if (pos < egds.size()) {
 						Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd = egds
 								.get(pos);
-						ret = apply(
-								ret,
-								chaseEgd(ret_old, egd.first, egd.second,
-										egd.third));
+						ret = apply(ret, chaseEgd(ret_old, egd.first, egd.second, egd.third));
 					} else if (pos < tgds.size() + egds.size()) {
 						Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd = tgds
 								.get(pos - egds.size());
-						ret = union(
-								ret,
-								chaseTgd(ret_old, tgd.first, tgd.second,
-										tgd.third));
+						ret = union(ret, chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
 					}
 					if (!ret.equals(ret_old)) {
 						ruleNo++;
@@ -424,8 +377,7 @@ public class Chase {
 				fired = false;
 
 				for (Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd : egds) {
-					ret = apply(ret,
-							chaseEgd(ret_old, egd.first, egd.second, egd.third));
+					ret = apply(ret, chaseEgd(ret_old, egd.first, egd.second, egd.third));
 					if (!ret.equals(ret_old)) {
 						fired = true;
 						break;
@@ -435,15 +387,11 @@ public class Chase {
 					break;
 				}
 
-				// System.out.println("ruleNo " + ruleNo);
-				// System.out.println("tgd size " + tgds.size());
-				// System.out.println("egd size " + egds.size());
 				for (int x = 0; x < tgds.size(); x++) {
 					int pos = (ruleNo + x) % (tgds.size());
 					Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd = tgds
 							.get(pos);
-					ret = union(ret,
-							chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
+					ret = union(ret, chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
 
 					if (!ret.equals(ret_old)) {
 						ruleNo++;
@@ -458,20 +406,16 @@ public class Chase {
 				if (!fired) {
 					return ret;
 				}
-				// System.out.println("\n\n\n" + ret);
 			}
 
 			if (i++ > Chase.chase_limit) {
-				throw new RuntimeException("Chase exceeds " + Chase.chase_limit
-						+ " iterations");
+				throw new RuntimeException("Chase exceeds " + Chase.chase_limit + " iterations");
 			}
 		}
 
-		// return ret;
 	}
 
 	public static int chase_limit = 64;
- 
 
 	private static Map<String, Set<Pair<Object, Object>>> minimize(
 			Set<String> keys,
@@ -479,16 +423,10 @@ public class Chase {
 			List<Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>>> tgds,
 			List<Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>>> egds) {
 
-		// System.out.println("minimizing " + I);
-
 		Map<String, Set<Pair<Object, Object>>> sol = I;
-		for (Map<String, Set<Pair<Object, Object>>> I0 : smaller(keys, I, tgds,
-				egds)) {
-			// System.out.println("checking " + I0);
+		for (Map<String, Set<Pair<Object, Object>>> I0 : smaller(keys, I, tgds, egds)) {
 			if (hasHomo(keys, I0, I) && hasHomo(keys, I, I0)) {
-				// System.out.println("has homo ");
 				if (size(I0) < size(sol)) {
-					// System.out.println("smaller sized");
 					sol = I0;
 				}
 			}
@@ -561,8 +499,8 @@ public class Chase {
 		return ret;
 	}
 
-	private static Set<Pair<Object, Object>> remove(
-			Set<Pair<Object, Object>> set, Set<Object> subset) {
+	private static Set<Pair<Object, Object>> remove(Set<Pair<Object, Object>> set,
+			Set<Object> subset) {
 		Set<Pair<Object, Object>> ret = new HashSet<>();
 
 		for (Pair<Object, Object> p : set) {
@@ -575,12 +513,10 @@ public class Chase {
 		return ret;
 	}
 
-	private static boolean hasHomo(Set<String> keys,
-			Map<String, Set<Pair<Object, Object>>> i,
+	private static boolean hasHomo(Set<String> keys, Map<String, Set<Pair<Object, Object>>> i,
 			Map<String, Set<Pair<Object, Object>>> i0) {
 
-		List<List<Pair<Object, Object>>> homs = homomorphs(ids(keys, i),
-				ids(keys, i0));
+		List<List<Pair<Object, Object>>> homs = homomorphs(ids(keys, i), ids(keys, i0));
 		for (List<Pair<Object, Object>> hom : homs) {
 			Map<String, Set<Pair<Object, Object>>> applied = apply(i, hom);
 			if (subset(applied, i0)) {
@@ -602,8 +538,7 @@ public class Chase {
 		return true;
 	}
 
-	private static Set<Object> ids(Set<String> keys,
-			Map<String, Set<Pair<Object, Object>>> i) {
+	private static Set<Object> ids(Set<String> keys, Map<String, Set<Pair<Object, Object>>> i) {
 		Set<Object> ret = new HashSet<>();
 		// ignore keys
 		for (String k : i.keySet()) {
@@ -616,8 +551,7 @@ public class Chase {
 		return ret;
 	}
 
-	public static <X> List<List<Pair<X, X>>> homomorphs(Collection<X> A,
-			Collection<X> B) {
+	public static <X> List<List<Pair<X, X>>> homomorphs(Collection<X> A, Collection<X> B) {
 		List<List<Pair<X, X>>> ret = new LinkedList<>();
 
 		if (A.size() == 0) {
@@ -643,8 +577,7 @@ public class Chase {
 		return ret;
 	}
 
-	private static <X> List<Pair<X, X>> make2(int[] counters, List<X> A,
-			List<X> B) {
+	private static <X> List<Pair<X, X>> make2(int[] counters, List<X> A, List<X> B) {
 		List<Pair<X, X>> ret = new LinkedList<>();
 		int i = 0;
 		for (X x : A) {
@@ -674,8 +607,7 @@ public class Chase {
 	}
 
 	private static Map<String, Set<Pair<Object, Object>>> union(
-			Map<String, Set<Pair<Object, Object>>> a,
-			Map<String, Set<Pair<Object, Object>>> b) {
+			Map<String, Set<Pair<Object, Object>>> a, Map<String, Set<Pair<Object, Object>>> b) {
 		Map<String, Set<Pair<Object, Object>>> ret = new HashMap<>();
 
 		for (String k : a.keySet()) {
@@ -689,8 +621,7 @@ public class Chase {
 	}
 
 	private static Map<String, Set<Pair<Object, Object>>> apply(
-			Map<String, Set<Pair<Object, Object>>> I,
-			List<Pair<Object, Object>> subst) {
+			Map<String, Set<Pair<Object, Object>>> I, List<Pair<Object, Object>> subst) {
 
 		// System.out.println("Subst " + subst);
 		// System.out.println(I);
@@ -708,20 +639,17 @@ public class Chase {
 			subst0 = apply2(subst0, phi);
 		}
 
-		// System.out.println(ret);
-
 		return ret;
 	}
 
-	private static List<Pair<Object, Object>> apply2(
-			List<Pair<Object, Object>> l, Pair<Object, Object> phi) {
+	private static List<Pair<Object, Object>> apply2(List<Pair<Object, Object>> l,
+			Pair<Object, Object> phi) {
 
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 
 		for (Pair<Object, Object> p : l) {
-			ret.add(new Pair<>(
-					p.first.equals(phi.first) ? phi.second : p.first, p.second
-							.equals(phi.first) ? phi.second : p.second));
+			ret.add(new Pair<>(p.first.equals(phi.first) ? phi.second : p.first, p.second
+					.equals(phi.first) ? phi.second : p.second));
 		}
 
 		return ret;
@@ -740,14 +668,14 @@ public class Chase {
 		return ret;
 	}
 
-	private static Set<Pair<Object, Object>> apply1(
-			Set<Pair<Object, Object>> set, Pair<Object, Object> s) {
+	private static Set<Pair<Object, Object>> apply1(Set<Pair<Object, Object>> set,
+			Pair<Object, Object> s) {
 
 		Set<Pair<Object, Object>> ret = new HashSet<>();
 
 		for (Pair<Object, Object> p : set) {
-			ret.add(new Pair<>(p.first.equals(s.first) ? s.second : p.first,
-					p.second.equals(s.first) ? s.second : p.second));
+			ret.add(new Pair<>(p.first.equals(s.first) ? s.second : p.first, p.second
+					.equals(s.first) ? s.second : p.second));
 		}
 
 		return ret;
@@ -757,8 +685,7 @@ public class Chase {
 
 	private static Map<String, Set<Pair<Object, Object>>> chaseTgd(
 			Map<String, Set<Pair<Object, Object>>> i, List<String> forall,
-			List<Triple<String, String, String>> where,
-			List<Triple<String, String, String>> t) {
+			List<Triple<String, String, String>> where, List<Triple<String, String, String>> t) {
 
 		Map<String, Set<Pair<Object, Object>>> ret = new HashMap<>();
 		for (String k : i.keySet()) {
@@ -768,28 +695,19 @@ public class Chase {
 		EmbeddedDependency xxx0 = conv2(forall, where, t);
 		ED xxx = ED.from(xxx0);
 
-		// System.out.println("TGD " + xxx);
-
 		Flower front = xxx.front();
-		// System.out.println("Front " + front);
 
 		Flower back = xxx.back();
-		// System.out.println("Back " + back);
 
 		Set<Map<Object, Object>> frontX = front.eval(ED.conv(i));
-		// System.out.println("Front " + frontX);
 
 		Set<Map<Object, Object>> backX = back.eval(ED.conv(i));
-		// System.out.println("Back " + backX);
 
 		if (frontX.equals(backX)) {
 			return ret;
 		}
 
-//		System.out.println("Firing on " + xxx0);
-
 		for (Map<Object, Object> eq : frontX) {
-			// System.out.println("eq is " + eq);
 
 			Map<String, String> map = new HashMap<>();
 			for (String v : xxx0.exists) {
@@ -800,37 +718,26 @@ public class Chase {
 			for (Triple<String, String, String> fact : xxx0.tgd) {
 				Object a;
 				try {
-					a = eq.get("c"
-							+ getColNo(xxx0.forall, xxx0.where, fact.second));
+					a = eq.get("c" + getColNo(xxx0.forall, xxx0.where, fact.second));
 				} catch (Exception ee) {
 					a = map.get(fact.second);
 				}
 				Object b;
 				try {
-					b = eq.get("c"
-							+ getColNo(xxx0.forall, xxx0.where, fact.third));
+					b = eq.get("c" + getColNo(xxx0.forall, xxx0.where, fact.third));
 				} catch (Exception ee) {
 					b = map.get(fact.third);
 				}
 				ret.get(fact.first).add(new Pair<Object, Object>(a, b));
 			}
 
-			// Map<String, Object> n = new HashMap<>();
-			// System.out.println(a);
-			// System.out.println(b);
-			// for (Map<String, Object> row : frontX) {
-			// ret.add(new Pair<>(row.get("c" + a), row.get("c" + b)));
-			// }
 		}
-
-		// System.out.println("Add " + ret);
 
 		return ret;
 	}
 
-	private static List<Pair<Object, Object>> chaseEgd(
-			Map<String, Set<Pair<Object, Object>>> i, List<String> forall,
-			List<Triple<String, String, String>> where,
+	private static List<Pair<Object, Object>> chaseEgd(Map<String, Set<Pair<Object, Object>>> i,
+			List<String> forall, List<Triple<String, String, String>> where,
 			List<Pair<String, String>> t) {
 
 		List<Pair<Object, Object>> ret = new LinkedList<>();
@@ -838,48 +745,34 @@ public class Chase {
 		EmbeddedDependency xxx0 = conv(forall, where, t);
 		ED xxx = ED.from(xxx0);
 
-		// System.out.println("ED " + xxx);
-
 		Flower front = xxx.front();
-		// System.out.println("Front " + front);
 
 		Flower back = xxx.back();
-		// System.out.println("Back " + back);
 
 		Set<Map<Object, Object>> frontX = front.eval(ED.conv(i));
-		// System.out.println("Front " + frontX);
 
 		Set<Map<Object, Object>> backX = back.eval(ED.conv(i));
-		// System.out.println("Back " + backX);
 
 		if (frontX.equals(backX)) {
 			return ret;
 		}
 
-//		System.out.println("Firing on " + xxx0);
-
 		for (Pair<String, String> eq : t) {
-			// System.out.println("eq is " + eq);
 			int a = getColNo(xxx0.forall, xxx0.where, eq.first);
 			int b = getColNo(xxx0.forall, xxx0.where, eq.second);
-			// System.out.println(a);
-			// System.out.println(b);
 			for (Map<Object, Object> row : frontX) {
 				if (row.get("c" + a).toString().startsWith("_")) {
 					ret.add(new Pair<>(row.get("c" + a), row.get("c" + b)));
 				} else {
-					ret.add(new Pair<>(row.get("c" + b), row.get("c" + a)));					
+					ret.add(new Pair<>(row.get("c" + b), row.get("c" + a)));
 				}
 			}
 		}
 
-//		 System.out.println("Subst " + ret);
-
 		return ret;
 	}
 
-	private static int getColNo(List<String> f,
-			List<Triple<String, String, String>> s, String str) {
+	private static int getColNo(List<String> f, List<Triple<String, String, String>> s, String str) {
 		int i = 0;
 		for (Triple<String, String, String> k : s) {
 			if (str.equals(k.second)) {
@@ -893,11 +786,8 @@ public class Chase {
 		throw new RuntimeException("Canont find " + str + " in " + s);
 	}
 
-	private static EmbeddedDependency conv(List<String> f,
-			List<Triple<String, String, String>> s, List<Pair<String, String>> t) {
-
-		// System.out.println("Conv on " + f + " and " + s + " and " + t);
-
+	private static EmbeddedDependency conv(List<String> f, List<Triple<String, String, String>> s,
+			List<Pair<String, String>> t) {
 		Set<String> all = new HashSet<>(f);
 		for (Pair<String, String> p : t) {
 			all.add(p.first);
@@ -913,11 +803,8 @@ public class Chase {
 
 	}
 
-	private static EmbeddedDependency conv2(List<String> f,
-			List<Triple<String, String, String>> s,
+	private static EmbeddedDependency conv2(List<String> f, List<Triple<String, String, String>> s,
 			List<Triple<String, String, String>> t) {
-
-		// System.out.println("Conv on " + f + " and " + s + " and " + t);
 
 		Set<String> all = new HashSet<>(f);
 		for (Triple<String, String, String> p : t) {
@@ -938,108 +825,11 @@ public class Chase {
 
 	}
 
-	/*
-	 * public static Instance pi(Mapping m, Instance i) throws FQLException {
-	 * 
-	 * Signature cd = m.toEDs().third;
-	 * 
-	 * Map<String, Set<Pair<Object, Object>>> I = new HashMap<>(); for (Node n :
-	 * cd.nodes) { I.put(n.string, new HashSet<Pair<Object, Object>>()); } for
-	 * (Edge n : cd.edges) { I.put(n.name, new HashSet<Pair<Object, Object>>());
-	 * } for (String k : i.data.keySet()) { I.put("src_" + k, i.data.get(k)); }
-	 * 
-	 * List<EmbeddedDependency> eds0 = cd.toED("");
-	 * 
-	 * Pair<List<Triple<List<String>, List<Triple<String, String, String>>,
-	 * List<Triple<String, String, String>>>>, List<Triple<List<String>,
-	 * List<Triple<String, String, String>>, List<Pair<String, String>>>>> zzz =
-	 * split(eds0);
-	 * 
-	 * Set<String> keys = new HashSet<>(); for (Node n : m.target.nodes) {
-	 * keys.add("dst_" + n.string); } for (Edge n : m.target.edges) {
-	 * keys.add("dst_" + n.name); } Map<String, Set<Pair<Object, Object>>> res =
-	 * chase(keys, zzz, I, KIND.CORE); Map<String, Set<Pair<Object, Object>>>
-	 * res0 = new HashMap<>(); for (Node n : m.target.nodes) {
-	 * res0.put(n.string, res.get("dst_" + n.string)); } for (Edge n :
-	 * m.target.edges) { res0.put(n.name, res.get("dst_" + n.name)); }
-	 * 
-	 * Instance ret = new Instance("chased_" + i.name, m.target, res0);
-	 * 
-	 * return ret;
-	 * 
-	 * }
-	 */
-
-	/*
-	 * public static Instance sigmaDirect(KIND k, Mapping m, Instance i) throws
-	 * FQLException {
-	 * 
-	 * Map<String, Set<Pair<Object, Object>>> I = i.shred("src");
-	 * List<EmbeddedDependency> eds0 = new LinkedList<>();
-	 * eds0.addAll(m.source.toED("src_")); eds0.addAll(m.target.toED("dst_"));
-	 * eds0.addAll(toSigmaED(m, "src", "dst"));
-	 * 
-	 * //System.out.println("EDs are: " + eds0); Pair<List<Triple<List<String>,
-	 * List<Triple<String, String, String>>, List<Triple<String, String,
-	 * String>>>>, List<Triple<List<String>, List<Triple<String, String,
-	 * String>>, List<Pair<String, String>>>>> zzz = split(eds0);
-	 * 
-	 * Set<String> keys = new HashSet<>(); for (Node n : m.target.nodes) {
-	 * keys.add("dst_" + n.string); I.put("dst_" + n.string, new
-	 * HashSet<Pair<Object, Object>>()); } for (Edge n : m.target.edges) {
-	 * keys.add("dst_" + n.name); I.put("dst_" + n.name, new
-	 * HashSet<Pair<Object, Object>>()); } for (Attribute<Node> n :
-	 * m.target.attrs) { keys.add("dst_" + n.name); I.put("dst_" + n.name, new
-	 * HashSet<Pair<Object, Object>>()); }
-	 * 
-	 * Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I, k);
-	 * 
-	 * Map<String, Set<Pair<Object, Object>>> res0 = new HashMap<>(); for (Node
-	 * n : m.target.nodes) { res0.put(n.string, res.get("dst_" + n.string)); }
-	 * for (Edge n : m.target.edges) { res0.put(n.name, res.get("dst_" +
-	 * n.name)); } for (Attribute<Node> n : m.target.attrs) { res0.put(n.name,
-	 * res.get("dst_" + n.name)); }
-	 * 
-	 * Instance ret = new Instance(m.target, res0); return ret; }
-	 */
-
-	// requires input instance to have unique IDs. Does not generate
-	// unique IDs on output
-	/*
-	 * private static List<EmbeddedDependency> toSigmaED( Mapping m, String src,
-	 * String dst) throws FQLException { List<EmbeddedDependency> ret = new
-	 * LinkedList<>();
-	 * 
-	 * List<String> exists = new LinkedList<>(); List<Pair<String, String>> egd
-	 * = new LinkedList<>();
-	 * 
-	 * for (Node n : m.source.nodes) { List<String> forall = new LinkedList<>();
-	 * List<Triple<String, String, String>> where = new LinkedList<>();
-	 * List<Triple<String, String, String>> tgd = new LinkedList<>();
-	 * 
-	 * forall.add("x"); where.add(new Triple<>(src + "_" + n.string, "x", "x"));
-	 * tgd.add(new Triple<>(dst + "_" + n.string, "x", "x"));
-	 * 
-	 * ret.add(new EmbeddedDependency(forall, exists, where, tgd, egd)); } for
-	 * (Attribute<Node> n : m.source.attrs) { List<String> forall = new
-	 * LinkedList<>(); List<Triple<String, String, String>> where = new
-	 * LinkedList<>(); List<Triple<String, String, String>> tgd = new
-	 * LinkedList<>();
-	 * 
-	 * forall.add("x"); forall.add("y"); where.add(new Triple<>(src + "_" +
-	 * n.name, "x", "y")); tgd.add(new Triple<>(dst + "_" + n.name, "x", "y"));
-	 * 
-	 * ret.add(new EmbeddedDependency(forall, exists, where, tgd, egd)); }
-	 * 
-	 * for (Edge n : m.source.edges) { Path rhs = m.em.get(n); Path lhs = new
-	 * Path(m.source, n); ret.add(EmbeddedDependency.eq("src_", lhs, rhs)); }
-	 * 
-	 * return ret; }
-	 */
 	public static Instance sigma(Mapping m, Instance i) throws FQLException {
 
-		Triple<Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>> kkk = m.toEDs();
-		
+		Triple<Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>> kkk = m
+				.toEDs();
+
 		Signature cd = kkk.second.first;
 
 		Map<String, Set<Pair<Object, Object>>> I = new HashMap<>();
@@ -1057,40 +847,7 @@ public class Chase {
 		}
 
 		List<EmbeddedDependency> eds0 = Signature.toED("", kkk.second);
-	//	List<Pair<String, String>> egd = new LinkedList<>();
-	/*	for (Attribute<Node> a : m.source.attrs) {
-			List<String> forall = new LinkedList<>();
-			forall.add("x");
-			forall.add("y");
-			List<String> exists = new LinkedList<>();
-			exists.add("z");
-			List<Triple<String, String, String>> where = new LinkedList<>();
-			where.add(new Triple<>("src_" + a.name, "x", "y"));
-			List<Triple<String, String, String>> tgd = new LinkedList<>();
-			tgd.add(new Triple<>("l_src_" + a.source.string, "x", "z"));
-			tgd.add(new Triple<>("dst_" + m.am.get(a).name, "z", "y"));
-
-			EmbeddedDependency ed = new EmbeddedDependency(forall, exists,
-					where, tgd, egd);
-			eds0.add(ed);
-			// System.out.println("adding " + ed);
-
-			forall = new LinkedList<>();
-			forall.add("x");
-			forall.add("y");
-			forall.add("z");
-			where = new LinkedList<>();
-			where.add(new Triple<>("l_src_" + a.source.string, "x", "z"));
-			where.add(new Triple<>("dst_" + m.am.get(a).name, "z", "y"));
-			exists = new LinkedList<>();
-			tgd = new LinkedList<>();
-			tgd.add(new Triple<>("src_" + a.name, "x", "y"));
-
-			ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
-			eds0.add(ed);
-			// System.out.println("adding " + ed);
-		} */
-
+	
 		Pair<List<Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>>>, List<Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>>>> zzz = split(eds0);
 
 		Set<String> keys = new HashSet<>();
@@ -1103,11 +860,7 @@ public class Chase {
 		for (Attribute<Node> n : m.target.attrs) {
 			keys.add("dst_" + n.name);
 		}
-		Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I,
-				KIND.PARALLEL);
-//		Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I,
-//				KIND.CORE);
-	//	System.out.println(res);
+		Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I, KIND.PARALLEL);
 		Map<String, Set<Pair<Object, Object>>> res0 = new HashMap<>();
 		for (Node n : m.target.nodes) {
 			res0.put(n.string, res.get("dst_" + n.string));
@@ -1127,8 +880,9 @@ public class Chase {
 
 	public static Instance delta(Mapping m, Instance i) throws FQLException {
 
-		Triple<Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>> kkk = m.toEDs();
-		
+		Triple<Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>> kkk = m
+				.toEDs();
+
 		Signature cd = m.toEDs().first.first;
 
 		Map<String, Set<Pair<Object, Object>>> I = new HashMap<>();
@@ -1147,82 +901,7 @@ public class Chase {
 
 		List<EmbeddedDependency> eds0 = Signature.toED("", kkk.first);
 
-	//	List<Pair<String, String>> egd = new LinkedList<>();
-	/*	for (Attribute<Node> a : m.source.attrs) {
-			List<String> forall = new LinkedList<>();
-			forall.add("x");
-			forall.add("y");
-			List<String> exists = new LinkedList<>();
-			exists.add("z");
-			List<Triple<String, String, String>> where = new LinkedList<>();
-			where.add(new Triple<>("src_" + a.name, "x", "y"));
-			where.add(new Triple<>("src_" + a.source.string, "x", "x")); // added
-			List<Triple<String, String, String>> tgd = new LinkedList<>();
-			tgd.add(new Triple<>("l_src_" + a.source.string, "x", "z"));
-			tgd.add(new Triple<>("dst_" + m.am.get(a).name, "z", "y"));
-			tgd.add(new Triple<>("dst_" + m.am.get(a).source.string, "z", "z")); // added
-
-			EmbeddedDependency ed = new EmbeddedDependency(forall, exists,
-					where, tgd, egd);
-			eds0.add(ed);
-			// System.out.println("adding " + ed);
-
-			forall = new LinkedList<>();
-			forall.add("x");
-			forall.add("y");
-			forall.add("z");
-			where = new LinkedList<>();
-			where.add(new Triple<>("l_src_" + a.source.string, "x", "z"));
-			where.add(new Triple<>("dst_" + m.am.get(a).name, "z", "y"));
-			where.add(new Triple<>("dst_" + m.am.get(a).source.string, "z", "z")); // added
-			exists = new LinkedList<>();
-			tgd = new LinkedList<>();
-			tgd.add(new Triple<>("src_" + a.name, "x", "y"));
-			where.add(new Triple<>("src_" + a.source.string, "x", "x")); // added
-
-			ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
-			eds0.add(ed);
-			// System.out.println("adding " + ed);
-
-			//
-
-			forall = new LinkedList<>();
-			forall.add("x");
-			forall.add("y");
-			exists = new LinkedList<>();
-			exists.add("z");
-			where = new LinkedList<>();
-			where.add(new Triple<>("dst_" + m.am.get(a).name, "x", "y"));
-			where.add(new Triple<>("dst_" + m.am.get(a).source.string, "x", "x")); // added
-			tgd = new LinkedList<>();
-			tgd.add(new Triple<>("m_src_" + a.source.string, "x", "z"));
-			tgd.add(new Triple<>("src_" + a.name, "z", "y"));
-			tgd.add(new Triple<>("src_" + a.source.string, "z", "z")); // added
-
-			ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
-			eds0.add(ed);
-			// System.out.println("adding " + ed);
-
-			forall = new LinkedList<>();
-			forall.add("x");
-			forall.add("y");
-			forall.add("z");
-			where = new LinkedList<>();
-			where.add(new Triple<>("m_src_" + a.source.string, "x", "z"));
-			where.add(new Triple<>("src_" + a.name, "z", "y"));
-			where.add(new Triple<>("src_" + a.source.string, "z", "z")); // added
-			exists = new LinkedList<>();
-			tgd = new LinkedList<>();
-			tgd.add(new Triple<>("dst_" + m.am.get(a).name, "x", "y"));
-			where.add(new Triple<>("dst_" + m.am.get(a).source.string, "x", "x")); // added
-
-			ed = new EmbeddedDependency(forall, exists, where, tgd, egd);
-			eds0.add(ed);
-			// System.out.println("adding " + ed);
-		} */
-//		for (EmbeddedDependency ed : eds0) {
-	//		System.out.println(ed);
-	//	}
+	
 
 		Pair<List<Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>>>, List<Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>>>> zzz = split(eds0);
 
@@ -1236,12 +915,8 @@ public class Chase {
 		for (Attribute<Node> n : m.target.attrs) {
 			keys.add("src_" + n.name);
 		}
-//		Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I,
-	//			KIND.CORE); // changed
-
-		Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I,
-				KIND.HYBRID); // changed
-	//	System.out.println("res " + res);
+	
+		Map<String, Set<Pair<Object, Object>>> res = chase(keys, zzz, I, KIND.HYBRID); // changed
 		Map<String, Set<Pair<Object, Object>>> res0 = new HashMap<>();
 		for (Node n : m.source.nodes) {
 			res0.put(n.string, res.get("src_" + n.string));
@@ -1253,7 +928,6 @@ public class Chase {
 			res0.put(n.name, res.get("src_" + n.name));
 		}
 
-//		System.out.println("result: " + res0);
 		Instance ret = new Instance(m.source, res0);
 
 		return ret;

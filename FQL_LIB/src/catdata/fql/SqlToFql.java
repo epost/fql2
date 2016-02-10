@@ -1,4 +1,4 @@
-package catdata.fql.sql;
+package catdata.fql;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -66,10 +66,7 @@ public class SqlToFql {
 		public String getText() {
 			return SqlToFql.a_str;
 		}
-		@Override
-		public Language lang() {
-			return null;
-		}
+		
 	}
 	
 	static class B extends Example {
@@ -81,10 +78,7 @@ public class SqlToFql {
 		public String getText() {
 			return SqlToFql.b_str;
 		}
-		@Override
-		public Language lang() {
-			return null;
-		}
+		
 	}
 	
 	static class GlobalSpec extends Example {
@@ -96,10 +90,7 @@ public class SqlToFql {
 		public String getText() {
 			return SqlToFql.globalspec;
 		}
-		@Override
-		public Language lang() {
-			return null;
-		}
+		
 	}
 
 	static class Thomas extends Example {
@@ -111,10 +102,7 @@ public class SqlToFql {
 		public String getText() {
 			return SqlToFql.thomas;
 		}
-		@Override
-		public Language lang() {
-			return null;
-		}
+		
 	}
 	
 	static class PeopleExample extends Example {
@@ -127,10 +115,7 @@ public class SqlToFql {
 		public String getText() {
 			return extext1;
 		}
-		@Override
-		public Language lang() {
-			return null;
-		}
+		
 		
 	}
 
@@ -145,17 +130,9 @@ public class SqlToFql {
 
 		final JTextField depth = new JTextField("4");
 		
-		// JButton jdbcButton = new JButton("Load using JDBC");
-		// JButton runButton = new JButton("Run " + kind());
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");
-		// JButton runButton2 = new JButton("Run FQL");
-		// JCheckBox jdbcBox = new JCheckBox("Run using JDBC");
-		// JLabel lbl = new JLabel("Suffix (optional):", JLabel.RIGHT);
-		// lbl.setToolTipText("FQL will translate table T to T_suffix, and generate SQL to load T into T_suffix");
-		// final JTextField field = new JTextField(8);
-		// field.setText("fql");
-
+	
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
 		box.addActionListener(new ActionListener() {
@@ -184,13 +161,11 @@ public class SqlToFql {
 			public void actionPerformed(ActionEvent e) {
 				JTextArea jta = new JTextArea(help);
 				jta.setWrapStyleWord(true);
-				//jta.setEditable(false);
 				jta.setLineWrap(true);
 				JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 				p.setPreferredSize(new Dimension(300,200));
 
 				JOptionPane pane = new JOptionPane(p);
-				 // Configure via set methods
 				 JDialog dialog = pane.createDialog(null, "Help on SQL Schema to FQL");
 				 dialog.setModal(false);
 				 dialog.setVisible(true);
@@ -208,27 +183,15 @@ public class SqlToFql {
 		jsp.add(input);
 		jsp.add(output);
 
-		// JPanel bp = new JPanel(new GridLayout(1, 5));
 		JPanel tp = new JPanel(new GridLayout(1, 6));
-
-		// bp.add(field);
 
 		tp.add(transButton);
 		tp.add(helpButton);
-		// tp.add(jdbcButton);
-		// tp.add(helpButton);
 		tp.add(new JLabel("Self-loop depth", JLabel.RIGHT));
 		tp.add(depth);
 		tp.add(new JLabel("Load Example", JLabel.RIGHT));
 		tp.add(box);
 
-		// bp.add(runButton);
-		// bp.add(runButton2);
-		// bp.add(lbl);
-		// bp.add(field);
-		// bp.add(jdbcBox);
-
-		// p.add(bp, BorderLayout.SOUTH);
 		p.add(jsp, BorderLayout.CENTER);
 		p.add(tp, BorderLayout.NORTH);
 		JFrame f = new JFrame(kind() + " to FQL");
@@ -284,10 +247,7 @@ public class SqlToFql {
 						found = true;
 						continue;
 					}
-//					if (seen.contains(col.first)) {
-	//					throw new RuntimeException("Duplicate name: " + k.name);
-		//			}
-			//		seen.add(col.first);
+
 					String ref = lookup(col.first, k.fks);
 					if (ref == null) {
 						String col_t = col.second.equals("int") ? "int"
@@ -403,7 +363,6 @@ public class SqlToFql {
 			}
 		}
 		return null;
-		// throw new RuntimeException("Not found: " + target + " in " + inodes);
 	}
 
 	private static String lookup(String s, List<Pair<String, String>> fks) {
@@ -458,8 +417,6 @@ public class SqlToFql {
 
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|" };
-
-	// TODO keyword 1 vs keyword 2 highlight color
 
 	static String[] res = new String[] { "VARCHAR", "INT", "SELECT", "FROM",
 			"WHERE", "DISTINCT", "UNION", "ALL", "CREATE", "TABLE", "AS",
@@ -519,11 +476,7 @@ public class SqlToFql {
 				Tuple3 y = (Tuple3) x.b;
 				fks.add(new Pair<>(y.b.toString(), x.d.toString()));
 			} else {
-				//if (p.a.toString().toLowerCase().equals("id")) {
 				types.add(new Pair<>(p.a.toString(), p.b.toString()));
-				//} else {
-				//	types.add(new Pair<>(name + "_" + p.a.toString(), p.b.toString()));					
-				//}
 			}
 		}
 		return new ECreateTable(name, types, fks);
@@ -2940,10 +2893,6 @@ static String a_str = "CREATE TABLE unitcode ("
 		+ "\n(10,7,10),"
 		+ "\n(11,8,11);"
 		+ "\n";
-
-
-
-
 
 
 }

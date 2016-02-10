@@ -240,15 +240,6 @@ public class FinCat<Obj, Arrow> {
 			j++;
 		}
 
-		// System.out.println(objM);
-		// System.out.println(arrM);
-
-		// for (Arr<Obj, Arrow> a : this.arrows) {
-		// // System.out.println("arrow a is " + a);
-		//
-		// }
-
-		// System.out.println("arrows are " + arrows);
 		LinkedList<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
 		for (Pair<Arr<Obj, Arrow>, Arr<Obj, Arrow>> k : composition.keySet()) {
 			Arr<Obj, Arrow> v = composition.get(k);
@@ -277,40 +268,13 @@ public class FinCat<Obj, Arrow> {
 			}
 		}
 
-		// System.out.println("$$$$$$$$$$$$$$$$$$$$$");
-		// System.out.println(this);
-		// System.out.println(objM);
-		// System.out.println(objM2);
-		// System.out.println(arrM);
-		// System.out.println(arrM2);
-		// System.out.println(attM2);
-		// System.out.println(attM);
-		// System.out.println(eqs);
-		// System.out.println("$$$$$$$$$$$$$$$$$$$$$");
-
 		Signature ret2 = new Signature(types, objs, attrs0, arrs, eqs);
-
-		// System.out.println(ret2);
 
 		Quad<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>, Pair<Map<Attribute<Obj>, String>, Map<String, Attribute<Obj>>>> retret = new Quad<>(
 				ret2, new Pair<>(objM2, objM), new Pair<>(arrM2, arrM),
 				new Pair<>(attM, attM2));
 		return retret;
 	}
-
-	// private Set<Obj> isolated() {
-	// Set<Obj> ret = new HashSet<>(objects);
-	//
-	// for (Arr<Obj, Arrow> a : arrows) {
-	// if (isId(a)) {
-	// continue;
-	// }
-	// ret.remove(a.src);
-	// ret.remove(a.dst);
-	// }
-	//
-	// return ret;
-	// }
 
 	@Override
 	public String toString() {

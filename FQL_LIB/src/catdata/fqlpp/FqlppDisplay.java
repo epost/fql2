@@ -773,18 +773,6 @@ public class FqlppDisplay implements Disp {
 
 	}
 
-	public static class MutableInteger {
-		int i;
-
-		public MutableInteger(int i) {
-			this.i = i;
-		}
-
-		public String pp() {
-			return Integer.toString(i++);
-		}
-	}
-
 	public void close() {
 		if (frame == null) {
 			return;

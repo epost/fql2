@@ -1,4 +1,4 @@
-package catdata.fql.sql;
+package catdata.fql;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -45,10 +45,6 @@ public class RingToFql {
 	String help = "Polynomials written in fully explicit form (i.e., containing only additions of (\"1\" or multiplications of variables), can be treated as FQL queries.";
 	
 
-	// protected String kind() {
-	// return "Polynomial";
-	// }
-
 	static class PeopleExample extends Example {
 		@Override
 		public String getName() {
@@ -59,10 +55,7 @@ public class RingToFql {
 		public String getText() {
 			return extext1;
 		}
-		@Override
-		public Language lang() {
-			return null;
-		}
+	
 	}
 
 	String translate(String in) {
@@ -79,17 +72,9 @@ public class RingToFql {
 		final CodeTextPanel input = new CodeTextPanel("Input Polynomials", "");
 		final CodeTextPanel output = new CodeTextPanel("FQL Output", "");
 
-		// JButton jdbcButton = new JButton("Load using JDBC");
-		// JButton runButton = new JButton("Run " + kind());
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");
-		// JButton runButton2 = new JButton("Run FQL");
-		// JCheckBox jdbcBox = new JCheckBox("Run using JDBC");
-		// JLabel lbl = new JLabel("Suffix (optional):", JLabel.RIGHT);
-		// lbl.setToolTipText("FQL will translate table T to T_suffix, and generate SQL to load T into T_suffix");
-		// final JTextField field = new JTextField(8);
-		// field.setText("fql");
-
+	
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
 		box.addActionListener(new ActionListener() {
@@ -144,26 +129,14 @@ public class RingToFql {
 		jsp.add(input);
 		jsp.add(output);
 
-		// JPanel bp = new JPanel(new GridLayout(1, 5));
 		JPanel tp = new JPanel(new GridLayout(1, 5));
-
-		// bp.add(field);
 
 		tp.add(transButton);
 		tp.add(helpButton);
-		// tp.add(jdbcButton);
-		// tp.add(helpButton);
 		tp.add(new JLabel());
 		tp.add(new JLabel("Load Example", JLabel.RIGHT));
 		tp.add(box);
 
-		// bp.add(runButton);
-		// bp.add(runButton2);
-		// bp.add(lbl);
-		// bp.add(field);
-		// bp.add(jdbcBox);
-
-		// p.add(bp, BorderLayout.SOUTH);
 		p.add(jsp, BorderLayout.CENTER);
 		p.add(tp, BorderLayout.NORTH);
 		JFrame f = new JFrame("Polynomials to FQL");
@@ -291,63 +264,7 @@ public class RingToFql {
 		} catch (NumberFormatException e) {
 		}
 	}
-	/*
-	public static String translate(List<Pair<String, List<List<String>>>> in) {
-		List<String> polys = polys(in);
-
-		// Map<String, List<String>> varsByPoly = new HashMap<>();
-		Set<String> vars = new HashSet<>();
-
-		for (Pair<String, List<List<String>>> k : in) {
-			vars.addAll(vars(k.second));
-		}
-
-		String src = "schema src = {nodes "
-				+ PrettyPrinter.sep0(",", new LinkedList<>(vars))
-				+ "; attributes; arrows; equations;}\n";
-
-		String dst = "schema dst = {nodes " + PrettyPrinter.sep0(",", polys)
-				+ "; attributes; arrows; equations;}\n";
-
-		String x = "";
-		String y = "";
-
-		return src + "\n" + x + "\n" + y + "\n" + dst;
-	}
-
-	private static Set<String> vars(List<List<String>> l) {
-		Set<String> ret = new HashSet<>();
-
-		for (List<String> x : l) {
-			for (String o : x) {
-				if (o.equals("1")) {
-					continue;
-				}
-				try {
-					int z = Integer.parseInt(o);
-					throw new RuntimeException("Encountered non-1 numeral: " + z);
-				} catch (NumberFormatException e) {
-					ret.add(o);
-				}
-			}
-		}
-
-		return ret;
-	}
-
-	private static List<String> polys(List<Pair<String, List<List<String>>>> in) {
-		List<String> ret = new LinkedList<>();
-
-		for (Pair<String, List<List<String>>> k : in) {
-			if (ret.contains(k.first)) {
-				throw new RuntimeException("Duplicate polynomial: " + k.first);
-			}
-			ret.add(k.first);
-		}
-
-		return ret;
-	}
-*/
+	
 	RyanParser<List<List<String>>> tparser = ParserUtils.manySep(
 			ParserUtils.manySep(new StringParser(), new KeywordParser("*")),
 			new KeywordParser("+"));

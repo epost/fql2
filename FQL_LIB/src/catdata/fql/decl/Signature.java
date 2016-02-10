@@ -36,17 +36,18 @@ import javax.swing.UIManager;
 
 import org.apache.commons.collections15.Transformer;
 
-import catdata.fql.FqlOptions;
-import catdata.fql.FQLException;
-import catdata.fql.Fn;
 import catdata.Pair;
 import catdata.Triple;
+import catdata.fql.FQLException;
+import catdata.fql.Fn;
+import catdata.fql.FqlOptions;
 import catdata.fql.FqlUtil;
 import catdata.fql.cat.Arr;
 import catdata.fql.cat.FinCat;
 import catdata.fql.cat.Inst;
 import catdata.fql.cat.LeftKanCat;
 import catdata.fql.sql.EmbeddedDependency;
+import catdata.fql.sql.PSMGen;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.NEWDEBUG;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -1740,6 +1741,18 @@ public class Signature {
 		JScrollPane jsp = new JScrollPane(area);
 		p.add(jsp);
 		return p;
+	}
+
+	public JPanel chk() {
+		String ret = "";
+		for (Eq eq : eqs) {
+			ret += "To check if an instance Inst satisfies " + eq + ", check\n\n";
+			ret += PSMGen.compose("Inst", eq.lhs).toPSM();
+			ret += "\n = \n";
+			ret += PSMGen.compose("Inst", eq.rhs).toPSM();
+			ret += "\n\n------------------------------------------------------------------------- \n\n";
+		}
+		return new CodeTextPanel("", ret);
 	}
 	
 }

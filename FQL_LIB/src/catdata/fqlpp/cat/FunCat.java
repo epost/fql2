@@ -11,8 +11,6 @@ import catdata.fqlpp.FUNCTION;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Transform<O, A, Category, Functor>> {
-	// implements Products<Set, Fn>, Coproducts<Set, Fn>, Exponentials<Set, Fn>,
-	// Subobjects<Set, Fn>, Isomorphisms<Set, Fn> {
 
 	@Override
 	public boolean equals(Object o) {
@@ -140,7 +138,7 @@ public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Tra
 	public Transform<O, A, Category, Functor> pair(Transform<O, A, Category, Functor> f, Transform<O, A, Category, Functor> g) {
 		if (!f.source.equals(g.source)) {
 			throw new RuntimeException();
-		}
+		} 
 		FUNCTION<O, Functor> fn = o -> 
 		  new Functor<>(f.source.applyO(o), FinCat.FinCat.product(f.target.applyO(o), g.target.applyO(o)), 
 				  x -> new Pair<>(f.apply(o).applyO(x), g.apply(o).applyO(x)), 

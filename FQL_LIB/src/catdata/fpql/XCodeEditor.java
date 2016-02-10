@@ -25,7 +25,7 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 	}
 
 	@Override
-	public Language isPatrick() {
+	public Language lang() {
 		return Language.FPQL;
 	}
 

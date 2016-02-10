@@ -183,30 +183,7 @@ public class FDM {
 		return ret;
 	}
 	
-	public static <Obj,Arrow,X,Y> Inst<Obj, Arrow, X, Y> 
-	pi2(FinFunctor<Obj,Arrow,X,Y> F, Inst<Obj,Arrow,X,Y> inst)
-			throws FQLException {
-		
-//		Triple<Mapping, Triple<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>>, Triple<Signature, Pair<Map<X, String>, Map<String, X>>, Pair<Map<Arr<X, Y>, String>, Map<String, Arr<X, Y>>>>>
-//		tr = F.toMapping("F", "SRC", "DST");
-//		
-//		Instance inp = fromInst(inst);
-//		
-//		Mapping f1 = tr.first;
-//		Triple<Signature, Pair<Map<Obj, String>, Map<String, Obj>>, Pair<Map<Arr<Obj, Arrow>, String>, Map<String, Arr<Obj, Arrow>>>> f2 = tr.second;
-//		Triple<Signature, Pair<Map<X, String>, Map<String, X>>, Pair<Map<Arr<X, Y>, String>, Map<String, Arr<X, Y>>>> f3 = tr.third;
-//		
-//		Map<String, Set<Map<String, Object>>> state = shred(inp);
-//		
-//		List<PSM> l = PSMGen.pi(tr.first, "SRC", "DST");
-//		Map<String, Set<Map<String, Object>>> res = PSMInterp.interpX(l, state);
-//		
-//		List<Pair<String, List<Pair<Object, Object>>>> gr = Environment.gather("DST", tr.third.first, state);
-//		
-//		Inst<Node, Path, Object, Object> v = new Instance(null, tr.third.first, gr).toFunctor2();
-//	
-		return null;
-	}
+
 
 	/**
 	 * Pi 
@@ -314,21 +291,7 @@ public class FDM {
 	}
 
 
-	/**
-	 * The "subset portion" of pi
-	 */
-//	private static <ObjC, ObjD,Y, X> Set<Value<Y,X>[]> subset(
-//			FinCat<ObjD, Y> d,
-//			Arr<ObjD, Y> s,
-//			Map<ObjC, Integer> cnames2,
-//			Map<ObjC, Integer> cnames1, Set<Value<Y, X>[]> raw) {
-//		for (ObjC  x : cnames2.keySet()) {
-//			int i = cnames2.get(x);
-//			int j = cnames1.get(x);
-//			raw = select(raw, i + 1, j + 2 + cnames2.size());
-//		}
-//		return raw;
-//	}
+
 	
 	
 	private static <ObjC, ArrowC, ObjD, ArrowD, Y, X> Set<Value<Y,X>[]> subset2(

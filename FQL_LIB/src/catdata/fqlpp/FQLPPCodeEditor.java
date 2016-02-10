@@ -21,7 +21,7 @@ public class FQLPPCodeEditor extends CodeEditor<FQLPPProgram, FQLPPEnvironment, 
 	}
 
 	@Override
-	public Language isPatrick() {
+	public Language lang() {
 		return Language.FQLPP;
 	}
 

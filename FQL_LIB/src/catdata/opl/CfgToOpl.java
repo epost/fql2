@@ -31,7 +31,6 @@ import org.codehaus.jparsec.functors.Tuple3;
 import catdata.Pair;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
-import catdata.ide.Language;
 import catdata.ide.Util;
 
 
@@ -39,12 +38,6 @@ public class CfgToOpl {
 	
 	static class STLCExample extends Example {
 		
-		@Override
-		public Language lang() {
-			return Language.OPL; //ignored
-		}
-
-
 		@Override
 		public String getName() {
 			return "STLC";
@@ -61,10 +54,10 @@ public class CfgToOpl {
 		
 	}
 
-	protected Example[] examples = { new STLCExample() } ; //{ new PeopleExample() /* new GlobalSpec(), new Thomas() */, new A(), new B() };
-
-	String help = ""; //"SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
-
+	protected Example[] examples = { new STLCExample() } ;
+	
+	String help = ""; 
+	
 	protected String kind() {
 		return "CFG";
 	}

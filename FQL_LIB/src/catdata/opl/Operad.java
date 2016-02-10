@@ -1,4 +1,4 @@
-package catdata.fqlpp.cat;
+package catdata.opl;
 
 import java.util.List;
 import java.util.Set;

@@ -40,11 +40,11 @@ import catdata.fpql.XJsonToFQL;
 import catdata.fpql.XNeo4jToFQL;
 import catdata.fpql.XRaToFpql;
 import catdata.fpql.XSqlToFql;
+import catdata.fql.Chase;
+import catdata.fql.RaToFql;
+import catdata.fql.RingToFql;
+import catdata.fql.SqlToFql;
 import catdata.fql.gui.FqlCodeEditor;
-import catdata.fql.sql.Chase;
-import catdata.fql.sql.RaToFql;
-import catdata.fql.sql.RingToFql;
-import catdata.fql.sql.SqlToFql;
 import catdata.fqlpp.KBViewer;
 import catdata.nested.NraViewer;
 import catdata.opl.CfgToOpl;
@@ -620,22 +620,22 @@ public class GUI extends JPanel {
 		@SuppressWarnings("rawtypes")
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
 
-		jfc.setFileFilter(new Filter(e.isPatrick()));
+		jfc.setFileFilter(new Filter(e.lang()));
 
 		jfc.showSaveDialog(null);
 		File f = jfc.getSelectedFile();
 		if (f == null) {
 			return;
 		}
-		if (!jfc.getSelectedFile().getAbsolutePath().endsWith("." + e.isPatrick().fileExtension())) {
-			f = new File(jfc.getSelectedFile() + "." + e.isPatrick().fileExtension());
+		if (!jfc.getSelectedFile().getAbsolutePath().endsWith("." + e.lang().fileExtension())) {
+			f = new File(jfc.getSelectedFile() + "." + e.lang().fileExtension());
 		}
 
 		doSave(f, e.getText());
 		// change for david
 		dirty.put(e.id, false);
 		closeAction();
-		doOpen(f, e.isPatrick());
+		doOpen(f, e.lang());
 	}
 
 	static void doOpen(File f, Language isPatrick) {
@@ -769,7 +769,7 @@ public class GUI extends JPanel {
 		if (c == null) {
 			return;
 		}
-		if (!c.isPatrick().equals(Language.FQL)) {
+		if (!c.lang().equals(Language.FQL)) {
 			return;
 		}
 		FqlCodeEditor cc = (FqlCodeEditor) c;
@@ -782,7 +782,7 @@ public class GUI extends JPanel {
 		if (c == null) {
 			return;
 		}
-		if (!c.isPatrick().equals(Language.FQL)) {
+		if (!c.lang().equals(Language.FQL)) {
 			return;
 		}
 		FqlCodeEditor cc = (FqlCodeEditor) c;
@@ -796,7 +796,7 @@ public class GUI extends JPanel {
 		if (c == null) {
 			return;
 		}
-		if (!c.isPatrick().equals(Language.FQL)) {
+		if (!c.lang().equals(Language.FQL)) {
 			return;
 		}
 		FqlCodeEditor cc = (FqlCodeEditor) c;

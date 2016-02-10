@@ -33,19 +33,13 @@ public class KBViewer {
 
 	protected Example[] examples = { new Cat() };
 
-	String help = ""; // "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
-
+	String help = ""; 
 	protected String kind() {
 		return "Knuth Bendix";
 	}
 
 	static class Cat extends Example {
 		
-		@Override
-		public Language lang() {
-			return null;
-		}
-
 		@Override
 		public String getName() {
 			return "Category";
@@ -65,17 +59,9 @@ public class KBViewer {
 		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"Output Re-writes", "");
 
-		// JButton jdbcButton = new JButton("Load using JDBC");
-		// JButton runButton = new JButton("Run " + kind());
 		JButton transButton = new JButton("Complete");
 		JButton helpButton = new JButton("Help");
-		// JButton runButton2 = new JButton("Run FQL");
-		// JCheckBox jdbcBox = new JCheckBox("Run using JDBC");
-		// JLabel lbl = new JLabel("Suffix (optional):", JLabel.RIGHT);
-		// lbl.setToolTipText("FQL will translate table T to T_suffix, and generate SQL to load T into T_suffix");
-		// final JTextField field = new JTextField(8);
-		// field.setText("fql");
-
+	
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
 		box.addActionListener(new ActionListener() {
@@ -129,26 +115,14 @@ public class KBViewer {
 		jsp.add(input);
 		jsp.add(output);
 
-		// JPanel bp = new JPanel(new GridLayout(1, 5));
 		JPanel tp = new JPanel(new GridLayout(1, 5));
-
-		// bp.add(field);
 
 		tp.add(transButton);
 		tp.add(helpButton);
-		// tp.add(jdbcButton);
-		// tp.add(helpButton);
 		tp.add(new JLabel());
 		tp.add(new JLabel("Load Example", JLabel.RIGHT));
 		tp.add(box);
 
-		// bp.add(runButton);
-		// bp.add(runButton2);
-		// bp.add(lbl);
-		// bp.add(field);
-		// bp.add(jdbcBox);
-
-		// p.add(bp, BorderLayout.SOUTH);
 		p.add(jsp, BorderLayout.CENTER);
 		p.add(tp, BorderLayout.NORTH);
 		JFrame f = new JFrame("Knuth-Bendix Completion");

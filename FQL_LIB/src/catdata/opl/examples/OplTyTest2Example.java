@@ -72,7 +72,23 @@ public class OplTyTest2Example extends Example {
 			+ "\nI1 = instance C I M"
 			+ "\n"
 			+ "\nJ1 = apply Q I1"
+			+ "\n"
+			+ "\n//////////////////////////////////////////////////////////////////////////////////////////////////"
+			+ "\nK = presentation {"
+			+ "\n	generators undef2:Nat, billy, george, sue, alice : Person;"
+			+ "\n	equations ;"
+			+ "\n} : S"
+			+ "\nK0 = instance C K none"
+			+ "\n"
+			+ "\nh = transpres {"
+			+ "\n	sorts Nat -> {(undef,succ(billy.age))}, "
+			+ "\n		 Person -> {(bill,billy), (george,george.parent), (sue,sue), (william,billy), (alice,alice)};"
+			+ "\n} : I0 -> K0  "
+			+ "\n"
+			+ "\noplquh0 = apply Q h"
 			+ "\n";
+
+
 
 
 

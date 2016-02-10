@@ -22,7 +22,7 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 	}
 
 	@Override
-	public Language isPatrick() {
+	public Language lang() {
 		return Language.OPL;
 	}
 
@@ -50,17 +50,17 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 	
 		provider.addCompletion(new ShorthandCompletion(provider, "theory", "theory {\n\tsorts;\n\tsymbols;\n\tequations;\n}", ""));
 
-		provider.addCompletion(new ShorthandCompletion(provider, "model", "model {\n\tsorts;\n\tsymbols;\n}\n : ", ""));
+		provider.addCompletion(new ShorthandCompletion(provider, "model", "model {\n\tsorts;\n\tsymbols;\n} : ", ""));
 		
-		provider.addCompletion(new ShorthandCompletion(provider, "javascript", "javascript {\n\tsymbols;\n}\n : ", ""));
+		provider.addCompletion(new ShorthandCompletion(provider, "javascript", "javascript {\n\tsymbols;\n} : ", ""));
 
-		provider.addCompletion(new ShorthandCompletion(provider, "mapping", "mapping {\n\tsorts;\n\tsymbols;\n}\n :  -> ", ""));
+		provider.addCompletion(new ShorthandCompletion(provider, "mapping", "mapping {\n\tsorts;\n\tsymbols;\n} :  -> ", ""));
 				
-		provider.addCompletion(new ShorthandCompletion(provider, "transform", "tranform {\n\tsorts;\n}\n :  ->  ", "")); 
+		provider.addCompletion(new ShorthandCompletion(provider, "transform", "tranform {\n\tsorts;\n} :  ->  ", "")); 
 		
-		provider.addCompletion(new ShorthandCompletion(provider, "transpres", "transpres {\n\tsorts;\n}\n :  ->  ", "")); 
+		provider.addCompletion(new ShorthandCompletion(provider, "transpres", "transpres {\n\tsorts;\n} :  ->  ", "")); 
 		
-		provider.addCompletion(new ShorthandCompletion(provider, "presentation", "presentation {\n\tgenerators;\n\tequations;\n}\n : ", ""));
+		provider.addCompletion(new ShorthandCompletion(provider, "presentation", "presentation {\n\tgenerators;\n\tequations;\n} : ", ""));
 
 		return provider;
 		

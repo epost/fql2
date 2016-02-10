@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.script.Invocable;
-
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplDelta;
 import catdata.opl.OplExp.OplEval;
@@ -294,17 +292,20 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	public OplObject visit(OplProgram env, OplPresTrans e) {
 		OplObject src = ENV.get(e.src0);
 		OplObject dst = ENV.get(e.dst0);
-		if (!(src instanceof OplPres)) {
-			throw new RuntimeException("Source is not a presentation in " + e);
+		if (src instanceof OplPres && dst instanceof OplPres) {
+			OplPres src0 = (OplPres) src;
+			OplPres dst0 = (OplPres) dst;
+			e.validateNotReally(src0, dst0); //?
+			//e.toMapping(); redundant
+			return e;
+		} else if (src instanceof OplInst && dst instanceof OplInst) {
+			OplInst src0 = (OplInst) src;
+			OplInst dst0 = (OplInst) dst;
+			e.validateNotReally(src0, dst0); //?
+			//e.toMapping(); redundant
+			return e;
 		}
-		if (!(dst instanceof OplPres)) {
-			throw new RuntimeException("Target is not a presentation in " + e);
-		}
-		OplPres src0 = (OplPres) src;
-		OplPres dst0 = (OplPres) dst;
-		e.validateNotReally(src0, dst0);
-		e.toMapping();
-		return e;
+		throw new RuntimeException("Source or target is not a presentation or instance in " + e);
 	}
 
 	@Override
@@ -414,12 +415,16 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		if (!(Q0 instanceof OplQuery)) {
 			throw new RuntimeException("Not a query: " + e.Q0);
 		} 
+		OplQuery Q = (OplQuery) Q0;
 		OplObject I0 = ENV.get(e.I0);
-		if (!(I0 instanceof OplInst)) {
-			throw new RuntimeException("Not an instance: " + e.I0);
-		} 
-		e.validate((OplQuery)Q0, (OplInst)I0);
-		return e.Q.eval(e.I);
+		if (I0 instanceof OplInst) {
+			return Q.eval((OplInst)I0);
+		}
+		if (I0 instanceof OplPresTrans) {
+			return Q.eval((OplPresTrans)I0);
+		}
+		throw new RuntimeException("Not an instance or transform: " + e.I0);
+
 	}
 
 	@Override

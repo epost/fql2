@@ -52,20 +52,17 @@ public class JDBCBridge {
 			Statement Stmt, String k, TransExp v, PSMInterp interp,
 			Map<String, Set<Map<Object, Object>>> ret) throws SQLException {
 		List<PSM> psm = new LinkedList<PSM>();
-//		TransExp v = prog.transforms.get(k);
+
 		Pair<String, String> val = prog.transforms.get(k)
 				.type(prog);
 		InstExp i = prog.insts.get(val.first);
 		SigExp.Const ss = i.type(prog).toConst(prog);
 		Signature s = ss.toSig(prog);
 		psm.addAll(PSMGen.makeTables(k, s, false));
-	//	sqls.addAll(psm);
 		switch (NEWDEBUG.debug.fql.sqlKind) {
 		case NATIVE:
 			psm.addAll(v.accept(k, ops));
-			//System.out.println("beging exec " + psm);
 			interp.interpX(psm, ret);
-			//System.out.println("end exec " + ret.keySet());
 			break;
 		default:
 			if (v instanceof TransExp.External
@@ -76,16 +73,8 @@ public class JDBCBridge {
 			}
 			maybeExec(psm, Stmt, ret, interp, s);
 			if (v.gather()) {
-				// if (!(v instanceof TransExp.TransIso || v
-				// instanceof TransExp.FullSigma || v instanceof
-				// TransExp.TransCurry || v instanceof
-				// TransExp.TransEval || (v instanceof
-				// TransExp.Coreturn &&
-				// (prog.insts.get(((TransExp.Coreturn)v).inst))
-				// instanceof InstExp.FullSigma))) {
 				gatherTransform(prog, ret, Stmt, k, ss);
-				// TODO have non SQL transform output into temps, so
-				// can gather them like any other
+				// TODO have non SQL transform output into temps, so can gather them like any other
 			}
 			break;
 		}
@@ -96,7 +85,6 @@ public class JDBCBridge {
 			Statement Stmt, String k, InstExp v, PSMInterp interp,
 			Map<String, Set<Map<Object, Object>>> ret) throws SQLException {
 
-		// try {
 		List<PSM> psm = new LinkedList<PSM>();
 		psm.addAll(PSMGen.makeTables(k, v.type(prog).toSig(prog), false));
 		switch (NEWDEBUG.debug.fql.sqlKind) {
@@ -170,7 +158,6 @@ public class JDBCBridge {
 				psm.addAll(v.accept(k, ops).first);
 			}
 			for (PSM sql : psm) {
-				// System.out.println("exec " + sql.toPSM());
 				Stmt.execute(sql.toPSM());
 			}
 			if (!(v instanceof InstExp.FullSigma)
@@ -185,15 +172,10 @@ public class JDBCBridge {
 							v.type(prog).toConst(prog));
 					gatherTransform(prog, ret, Stmt, k + "_snd",
 							v.type(prog).toConst(prog));
-				//}
 				} else if (v instanceof InstExp.One) {
 					gatherSubstInv2(prog, ret, Stmt, k, v);
 				}
-				
-				//else if (v instanceof InstExp.Kernel) {
-				//	gatherTransform(prog, ret, Stmt, k + "_trans", v.type(prog).toConst(prog));
-				//}
-			
+							
 			break;
 		}
 		return psm;
@@ -263,57 +245,7 @@ public class JDBCBridge {
 					}
 				}
 			}
-/*			
-			for (String k : prog.insts.keySet()) {
-				InstExp v = prog.insts.get(k);
-				// TODO XXXXXXXXX
-				try {
-					
 
-				} catch (Throwable re) {
-					re.printStackTrace();
-					LineException exn = new LineException(
-							re.getLocalizedMessage(), k, "instance");
-					if (NEWDEBUG.debug.fql.continue_on_error) {
-						exns.add(exn);
-					} else {
-						if (NEWDEBUG.debug.fql.sqlKind == DEBUG.SQLKIND.JDBC) {
-							String[] prel0 = NEWDEBUG.debug.fql.afterlude.split(";");
-							for (String s : prel0) {
-								if (s.trim().length() > 0) {
-									Stmt.execute(s);
-								}
-							}
-						}
-						throw exn;
-					}
-				}
-			}
-
-			for (String k : prog.transforms.keySet()) {
-				try {
-					
-
-				} catch (Throwable re) {
-					re.printStackTrace();
-					LineException exn = new LineException(
-							re.getLocalizedMessage(), k, "transform");
-					if (NEWDEBUG.debug.fql.continue_on_error) {
-						exns.add(exn);
-					} else {
-						if (NEWDEBUG.debug.fql.sqlKind == DEBUG.SQLKIND.JDBC) {
-							String[] prel0 = NEWDEBUG.debug.fql.afterlude.split(";");
-							for (String s : prel0) {
-								if (s.trim().length() > 0) {
-									Stmt.execute(s);
-								}
-							}
-						}
-						throw exn;
-					}
-				}
-
-			} */
 			List<PSM> drops = Driver.computeDrops(prog);
 
 			if (NEWDEBUG.debug.fql.sqlKind == FqlOptions.SQLKIND.JDBC) {
@@ -347,7 +279,6 @@ public class JDBCBridge {
 				throw ((LineException) exception);
 			}
 			exception.printStackTrace();
-			// System.out.println(ret);
 			throw new RuntimeException(exception.getLocalizedMessage());
 		}
 	}
@@ -358,35 +289,15 @@ public class JDBCBridge {
 		for (PSM sql : sqls) {
 			String k = sql.isSql();
 			if (k == null) {
-				// if (!(sql instanceof FullSigmaTrans || sql instanceof
-				// FullSigmaCounit || sql instanceof PSMEval || sql instanceof
-				// PSMCurry || sql instanceof PSMIso)) {
 				stmt.execute(sql.toPSM());
 			} else {
 				sql.exec(interp, state);
-				/*
-				 * String k = null; if (sql instanceof FullSigmaTrans) { k =
-				 * ((FullSigmaTrans)sql).pre; } else if (sql instanceof
-				 * FullSigmaCounit) { k = ((FullSigmaCounit)sql).trans; } else
-				 * if (sql instanceof PSMEval) { k = ((PSMEval)sql).pre; } else
-				 * if (sql instanceof PSMCurry) { k = ((PSMCurry)sql).ret; }
-				 * else if (sql instanceof PSMIso) { k = ((PSMIso)sql).pre; }
-				 * else { throw new RuntimeException(); }
-				 */
-				// System.out.println("Making inserts for " + k);
 				List<PSM> yyy = makeInserts(k, state, s, null);
 				for (PSM y : yyy) {
 					stmt.execute(y.toPSM());
 				}
 			}
 		}
-		/*
-		 * if (b) {
-		 * 
-		 * gatherTransform(prog, state, stmt, k, v); } else {
-		 * 
-		 * }
-		 */
 	}
 
 	private static int getGuid(Statement stmt) throws SQLException {
@@ -428,7 +339,6 @@ public class JDBCBridge {
 				ret.add(new InsertValues(k + "_" + n.string + "_e", attrs, v));
 			}
 			Set<Map<Object, Object>> v = state.get(k + "_lineage");
-			// System.out.println("jdbc lineage input " + v);
 			Map<String, String> at = new LinkedHashMap<>();
 			at.put("c0", PSM.VARCHAR());
 			at.put("c1", PSM.VARCHAR());
@@ -436,10 +346,8 @@ public class JDBCBridge {
 			at.put("c3", PSM.VARCHAR());
 			ret.add(new CreateTable(k + "_lineage", at, false));
 			if (v.size() != 0) {
-				// for (Map<Object, Object> m : v) {
 				ret.add(new InsertValues(k + "_lineage", new LinkedList<>(at
 						.keySet()), v));
-				// }
 			}
 		}
 
@@ -471,8 +379,7 @@ public class JDBCBridge {
 	private static void gatherTransform(FQLProgram prog,
 			Map<String, Set<Map<Object, Object>>> ret, Statement Stmt,
 			String k, SigExp.Const t) throws SQLException {
-//		SigExp.Const t = prog.insts.get(v.type(prog).first).type(prog)
-	//			.toConst(prog);
+
 		for (String n : t.nodes) {
 			ResultSet RS = Stmt
 					.executeQuery("SELECT c0,c1 FROM " + k + "_" + n);
@@ -549,9 +456,6 @@ public class JDBCBridge {
 				Map<Object, Object> m = new HashMap<>();
 				m.put("c0", RS.getObject("c0"));
 				m.put("c1", RS.getObject("c1"));
-				// m.put("c0", Integer.parseInt(
-				// RS.getObject("c0").toString()));
-				// m.put("c1", Integer.parseInt(RS.getObject("c1").toString()));
 				ms.add(m);
 			}
 			RS.close();

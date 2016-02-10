@@ -106,27 +106,7 @@ public class Flower {
 		return ret;
 	}
 
-	// private Set<Map<Pair<String, String>, Object>> evalWhere(
-	// Set<Map<Pair<String, String>, Object>> tableau) {
-	// Set<Map<Pair<String, String>, Object>> ret = new HashSet<>();
-	// a: for (Map<Pair<String, String>, Object> row : tableau) {
-	// for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
-	// // System.out.println("****" + row);
-	// // System.out.println("condition " + eq);
-	// // System.out.println(row.get(eq.first));
-	// // System.out.println(row.get(eq.second));
-	// if (!row.get(eq.first).equals(row.get(eq.second))) {
-	// // System.out.println("failed");
-	// continue a;
-	// }
-	// }
-	// // System.out.println("added " + row);
-	// ret.add(row);
-	// }
-	// return ret;
-	// }
-
-	private Set<Map<Object, Object>> evalSelect(
+		private Set<Map<Object, Object>> evalSelect(
 			Set<Map<Pair<Object, Object>, Object>> filtered) {
 		Set<Map<Object, Object>> ret = new HashSet<>();
 		for (Map<Pair<Object, Object>, Object> row : filtered) {
@@ -157,18 +137,6 @@ public class Flower {
 	private Set<Map<Pair<Object, Object>, Object>> evalFrom(
 			final Map<Object, Set<Map<Object, Object>>> state) {
 		Set<Map<Pair<Object, Object>, Object>> ret = null; // ok
-
-		// int sz = 1;
-		// for (String k : from.keySet()) {
-		// System.out.println(state.get(from.get(k)).size());
-		// sz *= state.get(from.get(k)).size();
-		// }
-		// if (sz > DEBUG.MAX_JOIN_SIZE) {
-		// throw new RuntimeException("Maximum of " + sz +
-		// " tuples exceeds limit on " + this);
-		// }
-		
-	//	System.out.println("jjjjjjjj");
 		
 		List<String> ordered = new LinkedList<>(from.keySet());
 		Comparator<String> c = new Comparator<String>() {

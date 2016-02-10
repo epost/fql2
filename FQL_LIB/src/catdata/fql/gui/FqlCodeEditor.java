@@ -65,7 +65,7 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 	}
 
 	@Override
-	public Language isPatrick() {
+	public Language lang() {
 		return Language.FQL;
 	}
 
@@ -230,107 +230,7 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 		}
 
 	}
-/*
-		
-	@SuppressWarnings("deprecation")
-	public void run() {
-	
 
-		try {
-			// Driver.check(init);
-			Triple<Environment, String, List<Throwable>> envX = Driver
-					.makeEnv(init);
-			env = envX.first;
-			env2 = envX.second;
-			exns = envX.third;
-		} catch (LineException e) {
-			toDisplay = "Error in " + e.kind + " " + e.decl + ": "
-					+ e.getLocalizedMessage();
-			e.printStackTrace();
-			topArea.requestFocusInWindow();
-			Integer theLine = init.lines.get(e.decl);
-			topArea.setCaretPosition(theLine);
-			if (thread != null) {
-				thread.stop();
-			}
-			thread = null;
-			if (temp != null) {
-				temp.stop();
-			}
-			temp = null;
-			return;
-		} catch (Throwable re) {
-			// System.out.println("xxxxxxx");
-			toDisplay = re.getLocalizedMessage();
-			respArea.setText(re.getLocalizedMessage());
-			re.printStackTrace();
-			if (thread != null) {
-				thread.stop();
-			}
-			thread = null;
-			if (temp != null) {
-				temp.stop();
-			}
-			temp = null;
-			return;
-		}
-
-		try {
-			if (display != null && !DEBUG.debug.MultiView) {
-				display.close();
-			}
-			DateFormat format = DateFormat.getTimeInstance();
-			// try {
-			display = new FqlDisplay(init, env);
-			String foo = GUI.getTitle(id);
-			if (DEBUG.debug.MultiView) {
-				foo += " - "
-						+ format.format(new Date(System.currentTimeMillis()));
-			}
-			display.display(foo, init.order);
-
-			// String psm = PSMGen.compile(env, init);
-			// if (DEBUG.debug.continue_on_error) {
-			if (exns.size() > 0) {
-				// System.out.println("iiiiiiiiiii");
-				toDisplay = "";
-				for (Throwable ex : exns) {
-					if (ex instanceof LineException) {
-						toDisplay += "error on " + ((LineException) ex).kind
-								+ " " + ((LineException) ex).decl + ": ";
-					}
-					toDisplay += ex.getLocalizedMessage();
-					toDisplay += "\n\n---------------\n\n";
-				}
-				// }
-			} else {
-				toDisplay = env2;
-			}
-		} catch (Throwable ee) {
-			toDisplay = ee.toString();
-			ee.printStackTrace();
-			if (thread != null) {
-				thread.stop();
-			}
-			thread = null;
-			if (temp != null) {
-				temp.stop();
-			}
-			temp = null;
-			return;
-		}
-
-		if (thread != null) {
-			thread.stop();
-		}
-		thread = null;
-		if (temp != null) {
-			temp.stop();
-		}
-		temp = null;
-
-	}
-*/	
 	
 	public void format() {
 		String input = topArea.getText();

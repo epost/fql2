@@ -2,26 +2,16 @@ package catdata.fqlpp;
 
 import java.io.Serializable;
 import java.util.Set;
-//import fql.parse.PrettyPrinter;
 
 import catdata.ide.Util;
 
-
-
-
-
-
-
-
-
-
 @SuppressWarnings("serial")
-public abstract class SetExp implements Serializable{
-	
+public abstract class SetExp implements Serializable {
+
 	public static class Apply extends SetExp {
 		public String f;
 		public SetExp set;
-		
+
 		public Apply(String f, SetExp set) {
 			this.f = f;
 			this.set = set;
@@ -64,10 +54,10 @@ public abstract class SetExp implements Serializable{
 		}
 
 	}
-	
+
 	public static class Numeral extends SetExp {
 		public int i;
-		
+
 		@Override
 		public <R, E> R accept(E env, SetExpVisitor<R, E> v) {
 			return v.visit(env, this);
@@ -103,18 +93,18 @@ public abstract class SetExp implements Serializable{
 				return false;
 			return true;
 		}
-		
+
 	}
-		
+
 	public static class Const extends SetExp {
-		
+
 		@Override
 		public String toString() {
 			return Util.nice(s.toString());
 		}
-		
+
 		Set<?> s;
-		
+
 		public Const(Set<?> s) {
 			super();
 			this.s = s;
@@ -255,7 +245,7 @@ public abstract class SetExp implements Serializable{
 		}
 
 		public FnExp f;
-		
+
 		@Override
 		public String toString() {
 			return "dom " + f;
@@ -266,7 +256,7 @@ public abstract class SetExp implements Serializable{
 			return v.visit(env, this);
 		}
 	}
-	
+
 	public static class Cod extends SetExp {
 
 		public Cod(FnExp f) {
@@ -299,7 +289,7 @@ public abstract class SetExp implements Serializable{
 		}
 
 		public FnExp f;
-		
+
 		@Override
 		public String toString() {
 			return "cod " + f;
@@ -343,7 +333,7 @@ public abstract class SetExp implements Serializable{
 		}
 
 		public FnExp f;
-		
+
 		@Override
 		public String toString() {
 			return "range " + f;
@@ -354,7 +344,7 @@ public abstract class SetExp implements Serializable{
 			return v.visit(env, this);
 		}
 	}
-	
+
 	public static class One extends SetExp {
 
 		public One() {
@@ -380,7 +370,7 @@ public abstract class SetExp implements Serializable{
 			return v.visit(env, this);
 		}
 	}
-	
+
 	public static class Prop extends SetExp {
 
 		public Prop() {
@@ -406,7 +396,6 @@ public abstract class SetExp implements Serializable{
 			return v.visit(env, this);
 		}
 	}
-	
 
 	public static class Plus extends SetExp {
 		SetExp a, b;
@@ -569,21 +558,33 @@ public abstract class SetExp implements Serializable{
 
 	@Override
 	public abstract int hashCode();
-	
+
 	public interface SetExpVisitor<R, E> {
-		public R visit (E env, Zero e);
-		public R visit (E env, One e);
-		public R visit (E env, Prop e);
-		public R visit (E env, Plus e);
-		public R visit (E env, Times e);
-		public R visit (E env, Exp e);
-		public R visit (E env, Var e);
-		public R visit (E env, Dom e);
-		public R visit (E env, Cod e);
-		public R visit (E env, Range e);
-		public R visit (E env, Const e);
-		public R visit (E env, Numeral e);
-		public R visit (E env, Apply e);
+		public R visit(E env, Zero e);
+
+		public R visit(E env, One e);
+
+		public R visit(E env, Prop e);
+
+		public R visit(E env, Plus e);
+
+		public R visit(E env, Times e);
+
+		public R visit(E env, Exp e);
+
+		public R visit(E env, Var e);
+
+		public R visit(E env, Dom e);
+
+		public R visit(E env, Cod e);
+
+		public R visit(E env, Range e);
+
+		public R visit(E env, Const e);
+
+		public R visit(E env, Numeral e);
+
+		public R visit(E env, Apply e);
 	}
-	
+
 }

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import catdata.Pair;
 import catdata.Triple;
+import catdata.fql.Chase;
 import catdata.fql.FQLException;
 import catdata.fql.JDBCBridge;
 import catdata.fql.decl.FullQueryExp.Comp;
@@ -18,7 +19,6 @@ import catdata.fql.decl.FullQueryExp.Match;
 import catdata.fql.decl.FullQueryExp.Pi;
 import catdata.fql.decl.FullQueryExp.Sigma;
 import catdata.fql.decl.FullQueryExp.Var;
-import catdata.fql.sql.Chase;
 import catdata.fql.sql.PSM;
 import catdata.fql.sql.PSMGen;
 import catdata.ide.LineException;

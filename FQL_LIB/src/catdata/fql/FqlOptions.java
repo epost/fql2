@@ -82,7 +82,8 @@ public class FqlOptions extends Options {
 	public boolean schema_denotation = true;
 	public boolean schema_ed = true;
 	public boolean schema_dot = true;
-
+	public boolean schema_check = true;
+	
 	public boolean mapping_graphical = true;
 	public boolean mapping_tabular = true;
 	public boolean mapping_textual = true;
@@ -277,6 +278,7 @@ public class FqlOptions extends Options {
 				schema_denotation);
 		JCheckBox schema_rdf_box = new JCheckBox("OWL", schema_rdf);
 		JCheckBox schema_dot_box = new JCheckBox("Dot", schema_dot);
+		JCheckBox schema_chk_box = new JCheckBox("Check", schema_check);
 
 		// JPanel schemaTemp = new JPanel();
 		// schemaTemp.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -293,6 +295,7 @@ public class FqlOptions extends Options {
 		schemaArea.add(schema_ed_box);
 		schemaArea.add(schema_denotation_box);
 		schemaArea.add(schema_rdf_box);
+		schemaArea.add(schema_chk_box);
 		// schemaArea.add(schemaBox);
 		JLabel schema_label = new JLabel("Schema viewer panels:");
 		schema_label.setToolTipText("Sets which viewers to use for schemas.");
@@ -458,6 +461,7 @@ public class FqlOptions extends Options {
 			schema_textual = schema_textual_box.isSelected();
 			schema_rdf = schema_rdf_box.isSelected();
 			schema_dot = schema_dot_box.isSelected();
+			schema_check = schema_chk_box.isSelected();
 			
 			mapping_ed = mapping_ed_box.isSelected();
 			mapping_graphical = mapping_graphical_box.isSelected();

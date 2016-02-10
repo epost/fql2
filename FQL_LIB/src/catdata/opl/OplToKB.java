@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.script.Invocable;
 
 import catdata.Chc;
+import catdata.EqProver;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
@@ -27,7 +28,6 @@ import catdata.algs.kb.KBHorn;
 import catdata.algs.kb.KBOptions;
 import catdata.algs.kb.KBOrders;
 import catdata.fqlpp.cat.FinSet;
-import catdata.fqlpp.cat.Operad;
 import catdata.ide.NEWDEBUG;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplJavaInst;
@@ -85,13 +85,13 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	}
 	
 	private OplSig<S, C, V> sig;
-	private KB<C, V> KB;
+	public EqProver<C, V> KB;
 	private Iterator<V> fr;
 //	private OplJavaInst I;
 	
-	public boolean gt(OplTerm<C,V> e1, OplTerm<C,V> e2) {
+	/* public boolean gt(OplTerm<C,V> e1, OplTerm<C,V> e2) {
 		return KB.gt.apply(new Pair<>(convert(e1), convert(e2)));
-	}
+	} */
 	
 	public OplToKB(Iterator<V> fr, OplSig<S, C, V> sig) {
 		this.sig = sig;
@@ -99,8 +99,9 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			checkEmpty();
 		}
 		this.fr = fr;
-		KB = convert(this.sig);
-		KB.complete();
+		KB<C, V> KB0 = convert(this.sig);
+		KB0.complete();
+		KB = KB0;
 	}
 	
 	private void checkEmpty() {

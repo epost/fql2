@@ -23,7 +23,8 @@ public class CreateTable extends PSM {
 		this.suppress = suppress;
 		for (String k : attrs.values()) {
 			if (!(k.equals(PSM.VARCHAR()) || k.equals(PSM.INTEGER) || k.equals(PSM.FLOAT))) {
-				throw new RuntimeException("bad attribute in " + this + " are " + attrs.toString() + " problematic: " + k);
+				throw new RuntimeException("bad attribute in " + this + " are " + attrs.toString()
+						+ " problematic: " + k);
 			}
 		}
 	}
@@ -33,7 +34,6 @@ public class CreateTable extends PSM {
 	@Override
 	public String toPSM() {
 		if (suppress) {
-			// System.out.println(this);
 			return "";
 		}
 		String s = "";
@@ -52,8 +52,7 @@ public class CreateTable extends PSM {
 	@Override
 	public void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state) {
 		if (state.get(name) != null) {
-			throw new RuntimeException("table already exists: " + name + " in "
-					+ state);
+			throw new RuntimeException("table already exists: " + name + " in " + state);
 		}
 		state.put(name, new HashSet<Map<Object, Object>>());
 	}

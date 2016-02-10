@@ -6,7 +6,9 @@ public abstract class Example implements Comparable<Example> {
 	
 	public abstract String getText();
 	
-	public abstract Language lang();
+	public Language lang() {
+		return null;
+	}
 
 	@Override 
 	public String toString() {

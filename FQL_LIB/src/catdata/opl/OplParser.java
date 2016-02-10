@@ -664,17 +664,7 @@ public class OplParser {
 		return new OplSetInst(sorts0 , symbols0 , c.b.toString());
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static OplTerm toTermNoVars(Object a) {
-		if (a instanceof String) {
-			return new OplTerm((String)a, new LinkedList<>()); 
-		}
-		Tuple4 t = (Tuple4) a;
-		String f = (String) t.a;
-		List<Object> l = (List<Object>) t.c;
-		List<OplTerm> l0 = l.stream().map(x -> toTermNoVars(x)).collect(Collectors.toList());
-		return new OplTerm(f, l0);
-	}
+
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplTerm toTerm(Collection vars, Collection consts, Object a, boolean suppressError) {
@@ -834,7 +824,6 @@ public class OplParser {
 			return toTrans(c);
 		} catch (DoNotIgnore de) {
 			de.printStackTrace();
-			throw new RuntimeException(de.getMessage());
 		}catch (Exception ee) {
 		}
 		
@@ -844,6 +833,7 @@ public class OplParser {
 			de.printStackTrace();
 			throw new RuntimeException(de.getMessage());
 		}catch (Exception ee) {
+		//	ee.printStackTrace();
 		}
 		
 		try {
@@ -1061,7 +1051,8 @@ public class OplParser {
 			Map<String, OplTerm> m = new HashMap<>();
 			for (Tuple5 z : y) {
 				String xx = (String) z.b;
-				OplTerm yy = toTermNoVars(z.d);
+//				OplTerm yy = toTermNoVars(z.d);
+				OplTerm yy = toTerm(new HashSet<>(), new HashSet<>(), z.d, false);
 				if (m.containsKey(xx)) {
 					throw new DoNotIgnore("Duplicate argument: " + xx);
 				}

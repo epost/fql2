@@ -356,8 +356,9 @@ public class XRaToFpql {
 		
 		@Override
 		public Language lang() {
-			throw new RuntimeException();
+			return null;
 		}
+		
 		@Override
 		public String getName() {
 			return "People";

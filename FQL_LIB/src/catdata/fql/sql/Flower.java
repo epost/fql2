@@ -80,23 +80,9 @@ public class Flower extends SQL {
 	@Override
 	public Set<Map<Object, Object>> eval(
 			Map<String, Set<Map<Object, Object>>> state) {
-
-//		 System.out.println("********");
-//		 System.out.println("Evaluating " + this);
-//		 System.out.println("state " + state);
-//		
-
 		Set<Map<Pair<Object, Object>, Object>> tableau = evalFrom(state);
 
-		// System.out.println("tableau " + tableau);
-
-		// Set<Map<Pair<String, String>, Object>> filtered = evalWhere(tableau);
-
-		// System.out.println("tableau " + filtered);
-
 		Set<Map<Object, Object>> projected = evalSelect(tableau);
-
-		// System.out.println("tableau " + projected);
 
 		return projected;
 	}
@@ -106,45 +92,19 @@ public class Flower extends SQL {
 		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
 		a: for (Map<Pair<Object, Object>, Object> row : tableau) {
 			for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
-				// System.out.println("****" + row);
-				// System.out.println("condition " + eq);
-				// System.out.println(row.get(eq.first));
-				// System.out.println(row.get(eq.second));
 				if (row.get(eq.first) != null & row.get(eq.second) != null) {
 					if (!row.get(eq.first).equals(row.get(eq.second))) {
 						if (row.get(eq.first).getClass() != row.get(eq.second).getClass() ) {
 							throw new RuntimeException();
 						}
-						// System.out.println("failed");
 						continue a;
 					}
 				}
 			}
-			// System.out.println("added " + row);
 			ret.add(row);
 		}
 		return ret;
 	}
-
-	// private Set<Map<Pair<String, String>, Object>> evalWhere(
-	// Set<Map<Pair<String, String>, Object>> tableau) {
-	// Set<Map<Pair<String, String>, Object>> ret = new HashSet<>();
-	// a: for (Map<Pair<String, String>, Object> row : tableau) {
-	// for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
-	// // System.out.println("****" + row);
-	// // System.out.println("condition " + eq);
-	// // System.out.println(row.get(eq.first));
-	// // System.out.println(row.get(eq.second));
-	// if (!row.get(eq.first).equals(row.get(eq.second))) {
-	// // System.out.println("failed");
-	// continue a;
-	// }
-	// }
-	// // System.out.println("added " + row);
-	// ret.add(row);
-	// }
-	// return ret;
-	// }
 
 	private Set<Map<Object, Object>> evalSelect(
 			Set<Map<Pair<Object, Object>, Object>> filtered) {
@@ -178,18 +138,6 @@ public class Flower extends SQL {
 			final Map<String, Set<Map<Object, Object>>> state) {
 		Set<Map<Pair<Object, Object>, Object>> ret = null; // ok
 
-		// int sz = 1;
-		// for (String k : from.keySet()) {
-		// System.out.println(state.get(from.get(k)).size());
-		// sz *= state.get(from.get(k)).size();
-		// }
-		// if (sz > DEBUG.MAX_JOIN_SIZE) {
-		// throw new RuntimeException("Maximum of " + sz +
-		// " tuples exceeds limit on " + this);
-		// }
-		
-	//	System.out.println("jjjjjjjj");
-		
 		List<String> ordered = new LinkedList<>(from.keySet());
 		Comparator<String> c = new Comparator<String>() {
 			@Override
@@ -216,9 +164,7 @@ public class Flower extends SQL {
 		Collections.sort(ordered, c); 
 		
 		
-//		System.out.println("***");
 		for (String k : ordered) {
-	//		System.out.println(from.get(k) + " " + state.get(from.get(k)).size() + " " + state.get(from.get(k)).size());
 			if (ret == null) {
 				if (state.get(from.get(k)) == null) {
 					throw new RuntimeException("cannot find " + from.get(k)
@@ -234,8 +180,6 @@ public class Flower extends SQL {
 				
 				ret = cartProd(k, new HashSet<>(ret), state.get(from.get(k)),
 						from.get(k));
-				//System.gc();
-			//	ret = evalWhere2(ret);
 			}
 
 		}
@@ -249,8 +193,6 @@ public class Flower extends SQL {
 		Set<Map<Pair<Object, Object>, Object>> y = unit(k, y0, v);
 
 		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
-		// System.out.println("doing cartprod for " + x + " and " + y0 + " and "
-		// + v + " k " + k);
 		for (Map<Pair<Object, Object>, Object> row1 : x) {
 			a: for (Map<Pair<Object, Object>, Object> row2 : y) {
 				Map<Pair<Object, Object>, Object> row = new HashMap<>();
@@ -263,7 +205,6 @@ public class Flower extends SQL {
 				for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
 				if (row.get(eq.first) != null & row.get(eq.second) != null) {
 					if (!row.get(eq.first).equals(row.get(eq.second))) {
-						// System.out.println("failed");
 						continue a;
 					}
 				}
@@ -271,15 +212,12 @@ public class Flower extends SQL {
 				ret.add(row);
 			}
 		}
-		// System.out.println("result " + ret);
 		return ret;
 	}
 
 	private Set<Map<Pair<Object, Object>, Object>> unit(String k,
 			Set<Map<Object, Object>> set, String v) {
 		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
-		// System.out.println("doing unit for " + set + " and " + v + " and k "
-		// + k);
 		for (Map<Object, Object> row : set) {
 			Map<Pair<Object, Object>, Object> row0 = new HashMap<>();
 			for (Object attr : row.keySet()) {
@@ -287,7 +225,6 @@ public class Flower extends SQL {
 			}
 			ret.add(row0);
 		}
-		// System.out.println("result " + ret);
 		return ret;
 	}
 
