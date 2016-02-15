@@ -50,6 +50,8 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 	
 		provider.addCompletion(new ShorthandCompletion(provider, "theory", "theory {\n\tsorts;\n\tsymbols;\n\tequations;\n}", ""));
 
+		provider.addCompletion(new ShorthandCompletion(provider, "SCHEMA", "SCHEMA {\n\tentities;\n\tedges;\n\tattributes;\n\tpathEqualities;\n\tobsEqualities;\n} : ", ""));
+		
 		provider.addCompletion(new ShorthandCompletion(provider, "model", "model {\n\tsorts;\n\tsymbols;\n} : ", ""));
 		
 		provider.addCompletion(new ShorthandCompletion(provider, "javascript", "javascript {\n\tsymbols;\n} : ", ""));
@@ -62,6 +64,7 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 		
 		provider.addCompletion(new ShorthandCompletion(provider, "presentation", "presentation {\n\tgenerators;\n\tequations;\n} : ", ""));
 
+		provider.addCompletion(new ShorthandCompletion(provider, "INSTANCE", "INSTANCE {\n\tgenerators;\n\tequations;\n} : ", ""));
 		return provider;
 		
 	}

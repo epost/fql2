@@ -30,8 +30,10 @@ import catdata.ide.Disp;
 import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplMapping;
+import catdata.opl.OplExp.OplPivot;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplPresTrans;
+import catdata.opl.OplExp.OplPushout;
 import catdata.opl.OplExp.OplSchema;
 import catdata.opl.OplExp.OplSetInst;
 import catdata.opl.OplExp.OplSetTrans;
@@ -85,6 +87,14 @@ public class OplDisplay implements Disp {
 		if (o instanceof OplInst) {
 			OplInst oo = (OplInst) o;
 			return "instance " + c + "=" + oo.P0 + " : " + oo.S0 + "," + oo.J0;
+ 		}
+		if (o instanceof OplPushout) {
+			OplPushout oo = (OplPushout) o;
+			return "pushout " + c + " of " + oo.s1 + " , " + oo.s2;
+ 		}
+		if (o instanceof OplPivot) {
+			OplPivot oo = (OplPivot) o;
+			return "pivot " + c + " of " + oo.I0;
  		}
 		return c;
 	}

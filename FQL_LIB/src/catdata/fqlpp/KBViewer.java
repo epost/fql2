@@ -27,7 +27,6 @@ import catdata.algs.kb.KB_Thue;
 import catdata.fqlpp.cat.Signature;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
-import catdata.ide.Language;
 
 public class KBViewer {
 

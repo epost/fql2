@@ -27,6 +27,7 @@ import catdata.fpql.XExp;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplDelta;
+import catdata.opl.OplExp.OplDelta0;
 import catdata.opl.OplExp.OplEval;
 import catdata.opl.OplExp.OplFlower;
 import catdata.opl.OplExp.OplId;
@@ -34,8 +35,10 @@ import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplInst0;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplMapping;
+import catdata.opl.OplExp.OplPivot;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplPresTrans;
+import catdata.opl.OplExp.OplPushout;
 import catdata.opl.OplExp.OplSat;
 import catdata.opl.OplExp.OplSchemaProj;
 import catdata.opl.OplExp.OplSetInst;
@@ -59,7 +62,7 @@ public class OplParser {
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
-		"return", "keys", "INSTANCE", "SCHEMA", "obsEqualities", "pathEqualities", "implications", "apply", "id", "query", "edges", "for", "entitiesAndAttributes", "instance", "entities", "attributes", "types", "schema", "as", "where", "select", "from", "flower", "SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
+		"pivot", "DELTA", "return", "coreturn", "pushout", "return", "keys", "INSTANCE", "SCHEMA", "obsEqualities", "pathEqualities", "implications", "apply", "id", "query", "edges", "for", "entitiesAndAttributes", "instance", "entities", "attributes", "types", "schema", "as", "where", "select", "from", "flower", "SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -146,6 +149,7 @@ public class OplParser {
 		Parser<?> sigma = Parsers.tuple(term("sigma"), ident(), ident());
 		Parser<?> presentation = presentation();
 		Parser<?> sat = Parsers.tuple(term("saturate"), ident());
+		Parser<?> DELTA = Parsers.tuple(term("DELTA"), ident());
 		Parser<?> ubersat = Parsers.tuple(term("SATURATE"), ident(), ident());
 		Parser<?> unsat = Parsers.tuple(term("unsaturate"), ident());
 		Parser<?> flower = flower();
@@ -160,8 +164,10 @@ public class OplParser {
 		Parser<?> apply = Parsers.tuple(term("apply"), ident(), ident());
 		Parser<?> SCHEMA = SCHEMA();
 		Parser<?> INST = INSTANCE();
+		Parser<?> pushout = Parsers.tuple(term("pushout"), ident(), ident());
+		Parser<?> pivot = Parsers.tuple(term("pivot"), ident());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { INST, SCHEMA, apply, idQ, query, projEA, inst, schema, projE, projA, projT, flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
+		Parser<?> a = Parsers.or(new Parser<?>[] { pivot, DELTA, pushout, INST, SCHEMA, apply, idQ, query, projEA, inst, schema, projE, projA, projT, flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
 		ref.set(a);
 
 		return a;
@@ -754,6 +760,8 @@ public class OplParser {
 				return new OplUberSat((String)p.b, (String)p.c);
 			} else if (p.a.toString().equals("apply")) {
 				return new OplApply((String)p.b, (String)p.c);
+			} else if (p.a.toString().equals("pushout")) {
+				return new OplPushout((String)p.b, (String)p.c);
 			} 
 		}
 		
@@ -775,6 +783,10 @@ public class OplParser {
 				return new OplSchemaProj((String)p.b, "EA");
 			} else if (p.a.toString().equals("id")) {
 				return new OplId((String)p.b);
+			} else if (p.a.toString().equals("DELTA")) {
+				return new OplDelta0((String)p.b);
+			} else if (p.a.toString().equals("pivot")) {
+				return new OplPivot((String)p.b);
 			}
 		}
 			

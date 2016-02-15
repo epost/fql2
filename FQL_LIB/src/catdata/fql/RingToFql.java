@@ -21,8 +21,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
 import catdata.Pair;
-import catdata.ide.Example;
-import catdata.ide.Language;
 import catdata.fql.parse.FqlTokenizer;
 import catdata.fql.parse.KeywordParser;
 import catdata.fql.parse.ParserUtils;
@@ -31,6 +29,7 @@ import catdata.fql.parse.PrettyPrinter;
 import catdata.fql.parse.RyanParser;
 import catdata.fql.parse.StringParser;
 import catdata.ide.CodeTextPanel;
+import catdata.ide.Example;
 
 /**
  * 

@@ -9,6 +9,7 @@ import java.util.Set;
 
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplDelta;
+import catdata.opl.OplExp.OplDelta0;
 import catdata.opl.OplExp.OplEval;
 import catdata.opl.OplExp.OplExpVisitor;
 import catdata.opl.OplExp.OplFlower;
@@ -17,8 +18,10 @@ import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplInst0;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplMapping;
+import catdata.opl.OplExp.OplPivot;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplPresTrans;
+import catdata.opl.OplExp.OplPushout;
 import catdata.opl.OplExp.OplSCHEMA0;
 import catdata.opl.OplExp.OplSat;
 import catdata.opl.OplExp.OplSchema;
@@ -40,11 +43,33 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	public OplOps(OplEnvironment env) {
 		this.ENV = env;
 	}
+	
+	@Override
+	public OplObject visit(OplProgram env, OplPivot e) {
+		OplObject o = ENV.get(e.I0);
+		if (o instanceof OplInst) {
+			OplInst I = (OplInst) o;
+			e.validate(I);
+			return e;
+		}
+		throw new RuntimeException("Not an instnce: " + e.I0);
+	}
 
 	@Override
 	public OplObject visit(OplProgram env, OplSig e) {
 		e.validate(); 
 		return e;
+	}
+	
+	@Override
+	public OplObject visit(OplProgram Env, OplDelta0 e) {
+		OplObject o = ENV.get(e.F0);
+		if (o instanceof OplTyMapping) {
+			OplTyMapping F = (OplTyMapping) o;
+			e.validate(F);
+			return e.toQuery();
+		}
+		throw new RuntimeException("Not a typed mapping: " + e.F);
 	}
 	
 	@Override
@@ -111,7 +136,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			OplSig s0 = (OplSig) s;		
 			e.e.type(s0, new OplCtx<String, String>());
 			try {
-				return new OplString(OplExp.strip(s0.getKB().redBy(i0, OplToKB.convert(s0.inject(e.e))).toString()));
+				return new OplString(OplExp.strip(OplToKB.redBy(i0, OplToKB.convert(OplSig.inject(e.e))).toString()));
 //				return new OplString(e.e.eval((Invocable)i0.engine).toString());
 			} catch (Exception ee) {
 				ee.printStackTrace();
@@ -215,6 +240,20 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 			throw new RuntimeException("Not a presentation or schema: " + e.S);
 		}
 	}
+	
+	@Override
+	public OplObject visit(OplProgram env, OplPushout e) {
+		OplObject s1 = ENV.get(e.s1);
+		OplObject s2 = ENV.get(e.s2);		
+		if (!(s1 instanceof OplPresTrans)) {
+			throw new RuntimeException(e.s1 + " is not a transform");
+		}
+		if (!(s2 instanceof OplPresTrans)) {
+			throw new RuntimeException(e.s2 + " is not a transform");
+		}
+		e.validate((OplPresTrans)s1, (OplPresTrans)s2);
+		return e;
+	}
 
 	@Override
 	public OplObject visit(OplProgram env, OplSat e) {
@@ -281,7 +320,15 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 				OplInst ret = new OplInst<>(F0.dst.sig0, "?", I0.J0);
 				ret.validate(F0.dst, F0.extend().sigma(I0.P), I0.J);
 				return ret;
-			} 
+			} else if (I instanceof OplPresTrans) {
+				OplPresTrans h = (OplPresTrans) I;
+				OplPresTrans z = F0.extend().sigma(h);
+				z.src1 = new OplInst<>("?", "?", h.src1.J0);
+				z.dst1 = new OplInst<>("?", "?", h.src1.J0);
+				z.src1.validate(F0.dst, z.src, h.src1.J);
+				z.dst1.validate(F0.dst, z.dst, h.src1.J);
+				return z;
+			}
 			throw new RuntimeException("Not an instance: " + e.I);
 
 		}

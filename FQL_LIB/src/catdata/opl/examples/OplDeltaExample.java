@@ -89,8 +89,11 @@ public class OplDeltaExample extends Example {
 			+ "\n} : J -> J0"
 			+ "\n"
 			+ "\nh0 = delta F h"
+			+ "\n"
+			+ "\nQ = DELTA F"
+			+ "\n"
+			+ "\nK = apply Q J"
 			+ "\n";
-
 
 
 }

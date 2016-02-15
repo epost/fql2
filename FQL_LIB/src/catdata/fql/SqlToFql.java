@@ -37,9 +37,8 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.fql.decl.InstExp;
 import catdata.fql.decl.SigExp;
-import catdata.ide.Example;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.Language;
+import catdata.ide.Example;
 
 /**
  * 
