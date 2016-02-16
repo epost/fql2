@@ -9,7 +9,7 @@ An IDE for the functorial query languages developed at categoricaldata.net.
 Build
 -----
 
-Compilation note: FPQL requires the built-in Eclipse compiler that ships with the Eclipse IDE for java developers.  The Oracle JDK compiler will fail with type-inference errors.
+Compilation note: requires the built-in Eclipse compiler that ships with the Eclipse IDE for java developers.  The Oracle JDK compiler will fail with type-inference errors.
 
 ### Maven
 
@@ -56,15 +56,25 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-FQL++ and FPQL contain binary distributions of the following libraries:
+Contains binary distributions of the following libraries:
 
 jparsec (Apache License)
 JUNG (BSD License)
-RSyntaxTextArea [+autocomplete] (BSD License)
+RSyntaxTextArea [and autocomplete] (BSD License)
 Commons Generics (Apache License)
 JFlex (BSD License)
+H2 (Mozilla Public License or Eclipse Public License)
 
 Copyright statements for these projects are included below.
+
+### H2 (Mozilla Public License or Eclipse Public License)
+
+This software contains unmodified binary redistributions for
+H2 database engine (http://www.h2database.com/),
+which is dual licensed and available under the MPL 2.0
+(Mozilla Public License) or under the EPL 1.0 (Eclipse Public License).
+An original copy of the license agreement can be found at:
+http://www.h2database.com/html/license.html
 
 ### JParsec (Apache 2.0 License)
 
@@ -127,7 +137,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-### RSyntaxTextArea [and autocomplete library] (BSD License)
+### RSyntaxTextArea (and autocomplete library) (BSD License)
 Copyright (c) Robert Futrell
 All rights reserved.
 

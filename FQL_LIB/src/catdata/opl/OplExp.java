@@ -1213,7 +1213,7 @@ public abstract class OplExp implements OplObject {
 				ret += "\t\t" + Util.sep(elist, ",\n\t\t") + ";\n";
 			}
 
-			return "theory {\n" + ret + "}" + "\n\nprec: " + prec;
+			return "theory {\n" + ret + "}"; // + "\n\nprec: " + prec;
 		}
 
 		public OplSig(Iterator<V> fr, Map<C, Integer> prec, Set<S> sorts,
@@ -2938,7 +2938,7 @@ public abstract class OplExp implements OplObject {
 
 		@Override
 		public String toString() {
-			return "schema {\n entities\n  " + Util.sep(entities, ", ") + ";\n}" + "\n\n + " + sig;
+			return "schema {\n entities\n  " + Util.sep(entities, ", ") + ";\n} : " + sig0; // /+ "\n\n + " + sig;
 		}
 	}
 

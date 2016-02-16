@@ -41,12 +41,7 @@ public class XEasikToFQL {
 	protected Example[] examples = { new ContraintsEx(), new DemoEx() };
 
 	static class DemoEx extends Example {
-		
-		@Override
-		public Language lang() {
-			throw new RuntimeException();
-		}
-		
+			
 		@Override
 		public String getName() {
 			return "Demo";
@@ -59,12 +54,7 @@ public class XEasikToFQL {
 	}
 	
 	static class ContraintsEx extends Example {
-
-		@Override
-		public Language lang() {
-			return null;
-		}
-		
+	
 		@Override
 		public String getName() {
 			return "Constraints";
@@ -226,7 +216,7 @@ public class XEasikToFQL {
 
 				JOptionPane pane = new JOptionPane(p);
 				// Configure via set methods
-				JDialog dialog = pane.createDialog(null, "Help on Neo4j to FPQL");
+				JDialog dialog = pane.createDialog(null, "Help on EASIK to FPQL");
 				dialog.setModal(false);
 				dialog.setVisible(true);
 				dialog.setResizable(true);

@@ -229,6 +229,22 @@ public class Util {
 		return sep(c.iterator(), sep);
 	}
 
+	public static String sep(Map<?,?> m, String sep1, String sep2) {
+		String ret = "";
+		boolean b = false;
+		Iterator<?> c = m.keySet().iterator();
+		while (c.hasNext()) {
+			Object o = c.next();
+			if (b) {
+				ret += sep2;
+			}
+			b = true;
+
+			ret += o + sep1 + m.get(o);
+		}
+		return ret;
+	} 
+	
 	public static String sep(Iterator<?> c, String sep) {
 		String ret = "";
 		boolean b = false;

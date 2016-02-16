@@ -62,11 +62,6 @@ public class XSqlToFql {
 	static class A extends Example {
 		
 		@Override
-		public Language lang() {
-			throw new RuntimeException();
-		}
-
-		@Override
 		public String getName() {
 			return "A";
 		}
@@ -77,10 +72,6 @@ public class XSqlToFql {
 	}
 	
 	static class B extends Example {
-		@Override
-		public Language lang() {
-			throw new RuntimeException();
-		}
 		
 		@Override
 		public String getName() {
@@ -93,11 +84,6 @@ public class XSqlToFql {
 	}
 	
 	static class PeopleExample extends Example {
-		
-		@Override
-		public Language lang() {
-			return null;
-		}
 		
 		@Override
 		public String getName() {
@@ -121,16 +107,8 @@ public class XSqlToFql {
 
 		final JTextField depth = new JTextField("4");
 		
-		// JButton jdbcButton = new JButton("Load using JDBC");
-		// JButton runButton = new JButton("Run " + kind());
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");
-		// JButton runButton2 = new JButton("Run FQL");
-		// JCheckBox jdbcBox = new JCheckBox("Run using JDBC");
-		// JLabel lbl = new JLabel("Suffix (optional):", JLabel.RIGHT);
-		// lbl.setToolTipText("FQL will translate table T to T_suffix, and generate SQL to load T into T_suffix");
-		// final JTextField field = new JTextField(8);
-		// field.setText("fql");
 
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
@@ -197,12 +175,6 @@ public class XSqlToFql {
 		tp.add(depth);
 		tp.add(new JLabel("Load Example", JLabel.RIGHT));
 		tp.add(box);
-
-		// bp.add(runButton);
-		// bp.add(runButton2);
-		// bp.add(lbl);
-		// bp.add(field);
-		// bp.add(jdbcBox);
 
 		// p.add(bp, BorderLayout.SOUTH);
 		p.add(jsp, BorderLayout.CENTER);
