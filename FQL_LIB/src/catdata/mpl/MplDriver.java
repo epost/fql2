@@ -1,26 +1,28 @@
-package catdata.opl;
+package catdata.mpl;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import catdata.Unit;
 import catdata.ide.Environment;
 import catdata.ide.LineException;
 import catdata.ide.Program;
+import catdata.mpl.Mpl.MplExp;
 
-public class OplDriver {
+public class MplDriver {
 
-	public static Environment<OplObject> makeEnv(String str, Program<OplExp> init) {
-		Environment<OplObject> ret = new Environment<OplObject>();
+
+	
+	public static Environment<MplObject> makeEnv(String str, Program<MplExp<String,String>> init) {
+		Environment<MplObject> ret = new Environment<MplObject>();
 		Map<String, Integer> extra = new HashMap<>();
 		
-	//	int i = 0;
 		for (String k : init.order) {
-			OplExp se = init.exps.get(k);
+			MplExp se = init.exps.get(k);
 			try {
-				OplObject xxx = se.accept(init, new OplOps(ret));
+				MplObject xxx = (MplObject) se.accept(new Unit(), new MplOps(ret));
 				ret.put(k, xxx);
-			//	i++;
 			} catch (Throwable t) {
 				t.printStackTrace();
 				throw new LineException(t.getLocalizedMessage(), k, "");
@@ -33,7 +35,6 @@ public class OplDriver {
 			j++;
 		}
 		
-		//TODO: add to order
 		return ret;
 	}
 	

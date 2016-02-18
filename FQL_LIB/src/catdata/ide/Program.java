@@ -1,4 +1,4 @@
-package catdata.opl;
+package catdata.ide;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -7,20 +7,17 @@ import java.util.List;
 import java.util.Set;
 
 import catdata.Triple;
-import catdata.ide.LineException;
-import catdata.ide.Prog;
 
-
-public class OplProgram implements Prog {
+public class Program<X> implements Prog {
 
 	
 	public List<String> order = new LinkedList<>();
 	public LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();	
-	public LinkedHashMap<String, OplExp> exps = new LinkedHashMap<>();
+	public LinkedHashMap<String, X> exps = new LinkedHashMap<>();
 	
-	public OplProgram(List<Triple<String, Integer, OplExp>> decls) {
+	public Program(List<Triple<String, Integer, X>> decls) {
 			Set<String> seen = new HashSet<>();
-			for (Triple<String, Integer, OplExp> decl : decls) { 
+			for (Triple<String, Integer, X> decl : decls) { 
 				checkDup(seen, decl.first);
 				exps.put(decl.first, decl.third);
 				lines.put(decl.first, decl.second);

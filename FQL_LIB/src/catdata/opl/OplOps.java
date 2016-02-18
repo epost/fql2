@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.ide.Environment;
+import catdata.ide.Program;
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplDelta;
 import catdata.opl.OplExp.OplDelta0;
@@ -36,16 +38,16 @@ import catdata.opl.OplExp.OplUnSat;
 import catdata.opl.OplExp.OplVar;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
+public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 	
-	OplEnvironment ENV;
+	Environment<OplObject> ENV;
 
-	public OplOps(OplEnvironment env) {
+	public OplOps(Environment<OplObject> env) {
 		this.ENV = env;
 	}
 	
 	@Override
-	public OplObject visit(OplProgram env, OplPivot e) {
+	public OplObject visit(Program<OplExp> env, OplPivot e) {
 		OplObject o = ENV.get(e.I0);
 		if (o instanceof OplInst) {
 			OplInst I = (OplInst) o;
@@ -56,13 +58,13 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplSig e) {
+	public OplObject visit(Program<OplExp> env, OplSig e) {
 		e.validate(); 
 		return e;
 	}
 	
 	@Override
-	public OplObject visit(OplProgram Env, OplDelta0 e) {
+	public OplObject visit(Program<OplExp> Env, OplDelta0 e) {
 		OplObject o = ENV.get(e.F0);
 		if (o instanceof OplTyMapping) {
 			OplTyMapping F = (OplTyMapping) o;
@@ -73,7 +75,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 	
 	@Override
-	public OplObject visit(OplProgram env, OplSCHEMA0 e) {
+	public OplObject visit(Program<OplExp> env, OplSCHEMA0 e) {
 		OplObject t0 = ENV.get(e.typeSide);
 		if (!(t0 instanceof OplSig)) {
 			throw new RuntimeException("Not a theory: " + e.typeSide);
@@ -109,7 +111,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplSetInst e) {
+	public OplObject visit(Program<OplExp> env, OplSetInst e) {
 		OplObject o = ENV.get(e.sig);
 		if (!(o instanceof OplSig)) {
 			throw new RuntimeException("Not a theory: " + e.sig);
@@ -120,7 +122,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplEval e) {
+	public OplObject visit(Program<OplExp> env, OplEval e) {
 		OplObject i = ENV.get(e.I);
 		if (i instanceof OplSetInst) {
 			OplSetInst i0 = (OplSetInst) i;
@@ -147,12 +149,12 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplVar e) {
+	public OplObject visit(Program<OplExp> env, OplVar e) {
 		return ENV.get(e.name);
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplSetTrans e) {
+	public OplObject visit(Program<OplExp> env, OplSetTrans e) {
 		OplObject src = ENV.get(e.src);
 		OplObject dst = ENV.get(e.dst);
 		if (!(src instanceof OplSetInst)) {
@@ -172,7 +174,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplJavaInst e) {
+	public OplObject visit(Program<OplExp> env, OplJavaInst e) {
 		OplObject sig = ENV.get(e.sig);
 		if (!(sig instanceof OplSig)) {
 			throw new RuntimeException("Not a signature: " + e.sig);
@@ -181,9 +183,9 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 		e.validate(sig0, ENV);
 		return e;
 	}
-
+ 
 	@Override
-	public OplObject visit(OplProgram env, OplMapping e) {
+	public OplObject visit(Program<OplExp> env, OplMapping e) {
 		OplObject src = ENV.get(e.src0);
 		OplObject dst = ENV.get(e.dst0);
 		if (src instanceof OplSig && dst instanceof OplSig) {
@@ -202,7 +204,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplDelta e) {
+	public OplObject visit(Program<OplExp> env, OplDelta e) {
 		OplObject F = ENV.get(e.F);
 		if (!(F instanceof OplMapping)) {
 			throw new RuntimeException("Not a mapping: " + e.F);
@@ -224,7 +226,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 
 
 	@Override
-	public OplObject visit(OplProgram env, OplPres e) {
+	public OplObject visit(Program<OplExp> env, OplPres e) {
 		OplObject i = ENV.get(e.S);
 		if (i instanceof OplSig) {
 			OplSig S = (OplSig) i;
@@ -242,7 +244,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 	
 	@Override
-	public OplObject visit(OplProgram env, OplPushout e) {
+	public OplObject visit(Program<OplExp> env, OplPushout e) {
 		OplObject s1 = ENV.get(e.s1);
 		OplObject s2 = ENV.get(e.s2);		
 		if (!(s1 instanceof OplPresTrans)) {
@@ -256,7 +258,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplSat e) {
+	public OplObject visit(Program<OplExp> env, OplSat e) {
 		OplObject i = ENV.get(e.I);
 		if (i instanceof OplPres) {
 			OplPres S = (OplPres) i;
@@ -270,7 +272,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 	
 	@Override
-	public OplObject visit(OplProgram env, OplUberSat e) {
+	public OplObject visit(Program<OplExp> env, OplUberSat e) {
 		OplObject p = ENV.get(e.P);
 		if (!(p instanceof OplPres)) {
 			throw new RuntimeException("Not a presentation: " + e.P);
@@ -287,7 +289,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 	
 	@Override
-	public OplObject visit(OplProgram env, OplUnSat e) {
+	public OplObject visit(Program<OplExp> env, OplUnSat e) {
 		OplObject i = ENV.get(e.I);
 		if (!(i instanceof OplSetInst)) {
 			throw new RuntimeException("Not a model: " + e.I);
@@ -297,7 +299,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 	
 	@Override
-	public OplObject visit(OplProgram env, OplSigma e) {
+	public OplObject visit(Program<OplExp> env, OplSigma e) {
 		
 		OplObject F = ENV.get(e.F);
 		OplObject I = ENV.get(e.I);
@@ -336,7 +338,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplPresTrans e) {
+	public OplObject visit(Program<OplExp> env, OplPresTrans e) {
 		OplObject src = ENV.get(e.src0);
 		OplObject dst = ENV.get(e.dst0);
 		if (src instanceof OplPres && dst instanceof OplPres) {
@@ -356,7 +358,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplFlower e) {
+	public OplObject visit(Program<OplExp> env, OplFlower e) {
 		OplObject I0 = ENV.get(e.I0);
 		if (I0 instanceof OplSetInst) {
 			OplSetInst I = (OplSetInst) I0;
@@ -370,7 +372,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplSchema e) {
+	public OplObject visit(Program<OplExp> env, OplSchema e) {
 		OplObject I0 = ENV.get(e.sig0);
 		if (I0 instanceof OplSig) {
 			OplSig I = (OplSig) I0;
@@ -381,7 +383,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 	
 	@Override
-	public OplObject visit(OplProgram env, OplSchemaProj e) {
+	public OplObject visit(Program<OplExp> env, OplSchemaProj e) {
 		OplObject I0 = ENV.get(e.sch0);
 		if (I0 instanceof OplSchema) {
 			OplSchema I = (OplSchema) I0;
@@ -391,7 +393,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 	
 	@Override
-	public OplObject visit(OplProgram env, OplInst e) {
+	public OplObject visit(Program<OplExp> env, OplInst e) {
 		OplSchema S;
 		OplPres P;
 		OplJavaInst J = null;
@@ -426,7 +428,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplQuery e) {
+	public OplObject visit(Program<OplExp> env, OplQuery e) {
 		OplSchema I, J;
 
 		OplObject I0 = ENV.get(e.src_e);
@@ -448,7 +450,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplId e) {
+	public OplObject visit(Program<OplExp> env, OplId e) {
 		OplObject I0 = ENV.get(e.s);
 		if (I0 instanceof OplSchema) {
 			return OplQuery.id(e.s, (OplSchema)I0);
@@ -457,7 +459,7 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 	
 	@Override
-	public OplObject visit(OplProgram env, OplApply e) {
+	public OplObject visit(Program<OplExp> env, OplApply e) {
 		OplObject Q0 = ENV.get(e.Q0);
 		if (!(Q0 instanceof OplQuery)) {
 			throw new RuntimeException("Not a query: " + e.Q0);
@@ -475,12 +477,12 @@ public class OplOps implements OplExpVisitor<OplObject, OplProgram> {
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplTyMapping e) {
+	public OplObject visit(Program<OplExp> env, OplTyMapping e) {
 		return e;
 	}
 
 	@Override
-	public OplObject visit(OplProgram env, OplInst0 e) {
+	public OplObject visit(Program<OplExp> env, OplInst0 e) {
 		OplObject zzz = ENV.get(e.P.S);
 		if (!(zzz instanceof OplSchema)) {
 			throw new RuntimeException("Not a SCHEMA: " + e.P.S);

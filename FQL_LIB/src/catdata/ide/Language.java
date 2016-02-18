@@ -11,6 +11,8 @@ import catdata.fql.gui.FqlCodeEditor;
 import catdata.fqlpp.FQLPPCodeEditor;
 import catdata.fqlpp.FqlppExamples;
 import catdata.fqlpp.FqlppOptions;
+import catdata.mpl.MplCodeEditor;
+import catdata.mpl.MplExamples;
 import catdata.opl.OplCodeEditor;
 import catdata.opl.OplExamples;
 import catdata.opl.OplOptions;
@@ -20,7 +22,8 @@ public enum Language {
 	FQL,
 	FQLPP,
 	FPQL,
-	OPL;
+	OPL,
+	MPL;
 	
 	public static Language getDefault() {
 		return FQL;
@@ -33,6 +36,7 @@ public enum Language {
 		case FQLPP: return "FQL++";
 		case FPQL: return "FPQL";
 		case OPL: return "OPL";
+		case MPL: return "MPL";
 		}
 		throw new RuntimeException();
 	}
@@ -43,6 +47,7 @@ public enum Language {
 		case FQLPP: return "+";
 		case FPQL: return "P";
 		case OPL: return "O";
+		case MPL: return "M";
 		}
 		throw new RuntimeException();
 	}
@@ -53,6 +58,7 @@ public enum Language {
 		case FQLPP: return "fqlpp";
 		case FPQL: return "fpql";
 		case OPL: return "opl";
+		case MPL: return "mpl";
 		}
 		throw new RuntimeException();
 	}
@@ -64,6 +70,7 @@ public enum Language {
 		case FQLPP: return new FQLPPCodeEditor(untitled_count, content);
 		case OPL: return new OplCodeEditor(untitled_count, content);
 		case FQL: return new FqlCodeEditor(untitled_count, content);
+		case MPL: return new MplCodeEditor(untitled_count, content);
 		}
 		throw new RuntimeException(this.toString());
 	}
@@ -74,6 +81,7 @@ public enum Language {
 			case FQLPP: return new FqlppOptions();
 			case OPL: return new OplOptions();
 			case FQL: return new FqlOptions();
+			case MPL: return null;
 		}
 		throw new RuntimeException(this.toString());
 	}
@@ -84,6 +92,7 @@ public enum Language {
 		case FQLPP: return Examples.getExamples(FqlppExamples.class);
 		case OPL: return Examples.getExamples(OplExamples.class);
 		case FQL: return Examples.getExamples(FqlExamples.class);
+		case MPL: return Examples.getExamples(MplExamples.class);
 		}
 		throw new RuntimeException(this.toString());
 	}

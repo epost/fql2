@@ -24,6 +24,7 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.fpql.XExp;
+import catdata.ide.Program;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplDelta;
@@ -323,7 +324,7 @@ public class OplParser {
 	} 
 	
 	@SuppressWarnings({ "rawtypes" })
-	public static final OplProgram program(String s) {
+	public static final Program<OplExp> program(String s) {
 		List<Triple<String, Integer, OplExp>> ret = new LinkedList<>();
 		List decls = (List) program.parse(s);
 
@@ -334,7 +335,7 @@ public class OplParser {
 			toProgHelper(pr.a.toString(), s, ret, decl);
 		}
 
-		return new OplProgram(ret); 
+		return new Program<OplExp>(ret); 
 	}
 	
 	private static void toProgHelper(String txt, String s, List<Triple<String, Integer, OplExp>> ret, @SuppressWarnings("rawtypes") Tuple3 decl) {

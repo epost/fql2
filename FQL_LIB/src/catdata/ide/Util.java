@@ -229,6 +229,13 @@ public class Util {
 		return sep(c.iterator(), sep);
 	}
 
+	public static <X,Y> List<Y> proj2(List<Pair<X,Y>> l) {
+		return l.stream().map(x -> x.second).collect(Collectors.toList());
+	}
+	public static <X,Y> List<X> proj1(List<Pair<X,Y>> l) {
+		return l.stream().map(x -> x.first).collect(Collectors.toList());
+	}
+	
 	public static String sep(Map<?,?> m, String sep1, String sep2) {
 		String ret = "";
 		boolean b = false;
@@ -326,6 +333,19 @@ public class Util {
 		
 		for (Entry<X,Y> p : t.entrySet()) {
 			ret.add(new Pair<>(p.getKey(), p.getValue()));
+		}
+		
+		return ret;
+	}
+	
+	public static <X,Y> Map<Y,X> invMap(Map<X,Y> m) {
+		Map<Y,X> ret = new HashMap<>();
+		
+		for (Entry<X,Y> e : m.entrySet()) {
+			if (ret.containsKey(e.getValue())) {
+				throw new RuntimeException("Not injective");
+			}
+			ret.put(e.getValue(), e.getKey());
 		}
 		
 		return ret;

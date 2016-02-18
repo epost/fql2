@@ -1,4 +1,4 @@
-package catdata.opl;
+package catdata.mpl;
 
 import java.awt.CardLayout;
 import java.awt.GridLayout;
@@ -28,21 +28,8 @@ import catdata.Pair;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
 import catdata.ide.Environment;
-import catdata.ide.Program;
-import catdata.opl.OplExp.OplInst;
-import catdata.opl.OplExp.OplJavaInst;
-import catdata.opl.OplExp.OplMapping;
-import catdata.opl.OplExp.OplPivot;
-import catdata.opl.OplExp.OplPres;
-import catdata.opl.OplExp.OplPresTrans;
-import catdata.opl.OplExp.OplPushout;
-import catdata.opl.OplExp.OplSchema;
-import catdata.opl.OplExp.OplSetInst;
-import catdata.opl.OplExp.OplSetTrans;
-import catdata.opl.OplExp.OplSig;
-import catdata.opl.OplExp.OplTyMapping;
 
-public class OplDisplay implements Disp {
+public class MplDisplay implements Disp {
 
 	
 	@Override
@@ -50,62 +37,16 @@ public class OplDisplay implements Disp {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private static String doLookup(String c, OplObject o) {
-		if (o instanceof OplSig) {
-			return "theory " + c;
-		}
-		if (o instanceof OplSetInst) {
-			return "model " + c + " : " + ((OplSetInst)o).sig;
-		}
-		if (o instanceof OplJavaInst) {
-			return "javascript " + c + " : " + ((OplJavaInst)o).sig;
-		}
-		if (o instanceof OplSetTrans) {
-			OplSetTrans x = (OplSetTrans) o;
-			return "transform " + c + " : " + x.src + " -> " + x.dst;
-		}
-		if (o instanceof OplMapping) {
-			OplMapping x = (OplMapping) o;
-			return "mapping " + c + " : " + x.src0 + " -> " + x.dst0;
- 		}
-		if (o instanceof OplTyMapping) {
-			OplTyMapping x = (OplTyMapping) o;
-			return "ty mapping " + c + " : " + x.src0 + " -> " + x.dst0;
-		}
-		if (o instanceof OplPres) {
-			return "presentation " + c + " : " + ((OplPres)o).S;
- 		}
-		if (o instanceof OplSchema) {
-			return "schema " + c + " : " + ((OplSchema)o).sig0;
- 		}
-		if (o instanceof OplQuery) {
-			OplQuery q = (OplQuery) o;
-			return "query " + c + " : " + q.src_e + " -> " + q.dst_e;
- 		}
-		if (o instanceof OplPresTrans) {
-			OplPresTrans x = (OplPresTrans) o;
-			return "transpres " + c + " : " + x.src0 + " -> " + x.dst0;
-		}
-		if (o instanceof OplInst) {
-			OplInst oo = (OplInst) o;
-			return "instance " + c + "=" + oo.P0 + " : " + oo.S0 + "," + oo.J0;
- 		}
-		if (o instanceof OplPushout) {
-			OplPushout oo = (OplPushout) o;
-			return "pushout " + c + " of " + oo.s1 + " , " + oo.s2;
- 		}
-		if (o instanceof OplPivot) {
-			OplPivot oo = (OplPivot) o;
-			return "pivot " + c + " of " + oo.I0;
- 		}
+	private static String doLookup(String c, MplObject o) {
+		
 		return c;
 	}
 
 
-	public OplDisplay(String title, Program<OplExp> p, Environment<OplObject> env, long start, long middle) {
+	public MplDisplay(String title, Environment<MplObject> env, long start, long middle) {
 		Map<Object, String> map = new HashMap<>();
-		for (String c : p.order) {
-			OplObject obj = env.get(c);
+		for (String c : env.keys()) {
+			MplObject obj = env.get(c);
 			map.put(obj, c); 
 			try {
 				frames.add(new Pair<>(doLookup(c, obj), obj.display()));
@@ -117,7 +58,7 @@ public class OplDisplay implements Disp {
 		long end = System.currentTimeMillis();
 		int c1 = (int) ((middle - start) / (1000f));
 		int c2 = (int) ((end - middle) / (1000f));
-		display(title + " | (exec: " + c1 + "s)(gui: " + c2 + "s)", p.order);
+		display(title + " | (exec: " + c1 + "s)(gui: " + c2 + "s)", new LinkedList<>(env.keys()));
 	}
 	
 	JFrame frame = null;

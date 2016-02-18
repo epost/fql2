@@ -39,8 +39,8 @@ import catdata.Utils;
 import catdata.algs.kb.KB;
 import catdata.algs.kb.KBExp;
 import catdata.fqlpp.cat.FinSet;
-import catdata.fqlpp.cat.Signature;
 import catdata.ide.CodeTextPanel;
+import catdata.ide.Environment;
 import catdata.ide.NEWDEBUG;
 import catdata.ide.Util;
 import catdata.opl.OplParser.DoNotIgnore;
@@ -2331,14 +2331,14 @@ public abstract class OplExp implements OplObject {
 
 		OplSig<S,C,V> sig0;
 
-		OplEnvironment ENV;
+		Environment<OplObject> ENV;
 
 		public OplJavaInst(Map<C, String> defs, String sig) {
 			this.defs = defs;
 			this.sig = sig;
 		}
 
-		public void validate(OplSig<S,C,V> sig, OplEnvironment ENV) {
+		public void validate(OplSig<S,C,V> sig, Environment<OplObject> ENV) {
 			this.ENV = ENV;
 			sig0 = sig;
 			for (C k : defs.keySet()) {

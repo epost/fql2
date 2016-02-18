@@ -11,11 +11,13 @@ import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
 
 import catdata.ide.CodeEditor;
+import catdata.ide.Environment;
 import catdata.ide.Language;
+import catdata.ide.Program;
 
 
 @SuppressWarnings("serial")
-public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDisplay> {
+public class OplCodeEditor extends CodeEditor<Program<OplExp>, Environment<OplObject>, OplDisplay> {
 
 	public OplCodeEditor(int untitled_count, String content) {
 		super(untitled_count, content);
@@ -70,22 +72,23 @@ public class OplCodeEditor extends CodeEditor<OplProgram, OplEnvironment, OplDis
 	}
 
 	@Override
-	protected OplProgram parse(String program) throws ParserException {
+	protected Program<OplExp> parse(String program) throws ParserException {
 		return OplParser.program(program);
 	}
 
+	 
 	@Override
-	protected OplDisplay makeDisplay(String foo, OplProgram init, OplEnvironment env, long start, long middle) {
+	protected OplDisplay makeDisplay(String foo, Program<OplExp> init, Environment<OplObject> env, long start, long middle) {
 		return new OplDisplay(foo, init, env, start, middle);
 	}
 
 	@Override
-	protected OplEnvironment makeEnv(String str, OplProgram init) {
+	protected Environment<OplObject> makeEnv(String str, Program<OplExp> init) {
 		return OplDriver.makeEnv(str, init);
 	}
 
 	@Override
-	protected String textFor(OplEnvironment env) {
+	protected String textFor(Environment<OplObject> env) {
 		return "Done.";
 	} 
 
