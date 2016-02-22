@@ -24,6 +24,7 @@ import catdata.opl.OplExp.OplPivot;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplPresTrans;
 import catdata.opl.OplExp.OplPushout;
+import catdata.opl.OplExp.OplPushoutSch;
 import catdata.opl.OplExp.OplSCHEMA0;
 import catdata.opl.OplExp.OplSat;
 import catdata.opl.OplExp.OplSchema;
@@ -45,6 +46,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 	public OplOps(Environment<OplObject> env) {
 		this.ENV = env;
 	}
+	
 	
 	@Override
 	public OplObject visit(Program<OplExp> env, OplPivot e) {
@@ -138,7 +140,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			OplSig s0 = (OplSig) s;		
 			e.e.type(s0, new OplCtx<String, String>());
 			try {
-				return new OplString(OplExp.strip(OplToKB.redBy(i0, OplToKB.convert(OplSig.inject(e.e))).toString()));
+				return new OplString(OplExp.strip(OplToKB.redBy(i0, OplToKB.convert(e.e.inLeft())).toString()));
 //				return new OplString(e.e.eval((Invocable)i0.engine).toString());
 			} catch (Exception ee) {
 				ee.printStackTrace();
@@ -254,6 +256,20 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			throw new RuntimeException(e.s2 + " is not a transform");
 		}
 		e.validate((OplPresTrans)s1, (OplPresTrans)s2);
+		return e;
+	}
+	
+	@Override
+	public OplObject visit(Program<OplExp> env, OplPushoutSch e) {
+		OplObject s1 = ENV.get(e.s1);
+		OplObject s2 = ENV.get(e.s2);		
+		if (!(s1 instanceof OplTyMapping)) {
+			throw new RuntimeException(e.s1 + " is not a ty mapping");
+		}
+		if (!(s2 instanceof OplTyMapping)) {
+			throw new RuntimeException(e.s2 + " is not a ty mapping");
+		}
+		e.validate((OplTyMapping)s1, (OplTyMapping)s2);
 		return e;
 	}
 

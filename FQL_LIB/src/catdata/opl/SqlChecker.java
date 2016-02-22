@@ -43,6 +43,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -318,17 +319,37 @@ public class SqlChecker {
 		return fks.contains(conv(target, edge));
 	}
 
-	String translate(String in) {
-		try {
-			output.setText("");
-			Class.forName("org.h2.Driver");
-			Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+	String process(Connection conn, List<Pair<String, Pair<Triple<String, List<Pair<String, List<Pair<String, String>>>>, List<Pair<String, String>>>, Triple<String, List<Pair<String, List<Pair<String, String>>>>, List<Pair<String, String>>>>>> tocheck) throws SQLException {
+		List<Pair<String, JComponent>> frames = new LinkedList<>();
 
-			List<Pair<String, Pair<Triple<String, List<Pair<String, List<Pair<String, String>>>>, List<Pair<String, String>>>, 
-							       Triple<String, List<Pair<String, List<Pair<String, String>>>>, List<Pair<String, String>>>>>> tocheck = new LinkedList<>();
+		DBInfo info = new DBInfo(conn.getMetaData());
+		doChecks(conn, info, frames, tocheck);
+		Triple<Graph, Set, OplInst<String, String, String, String>> gr = build(info, tocheck, conn);			
+		frames.add(0, new Pair<>("schema", doSchemaView(Color.RED, gr.first, gr.second)));
+		new DisplayThingy(frames);
+		if (oplSchema.isSelected()) {
+			return "S0 = " + gr.third.S.sig + "\nS = " + gr.third.S + "\nI0 = " + gr.third.P + "\nI = instance S I0 none";
+		} else {
+			return "OK";
+		}
+
+	}
+	
+	List<Pair<String, Pair<Triple<String, List<Pair<String, List<Pair<String, String>>>>, List<Pair<String, String>>>, Triple<String, List<Pair<String, List<Pair<String, String>>>>, List<Pair<String, String>>>>>> translate(String in, Connection conn) throws SQLException  {
+	//	try {
+			
 			String[] strings = in.split(";");
+			
+			
+			List<Pair<String, Pair<Triple<String, List<Pair<String, List<Pair<String, String>>>>, List<Pair<String, String>>>, 
+		       Triple<String, List<Pair<String, List<Pair<String, String>>>>, List<Pair<String, String>>>>>> tocheck = new LinkedList<>();
+
+		
 			for (String string0 : strings) {
 				String string = string0.trim();
+				if (string.length() == 0) {
+					continue;
+				}
 				if (string.equals(";")) {
 					continue;
 				}
@@ -338,26 +359,14 @@ public class SqlChecker {
 				}
 				Statement stmt = conn.createStatement();
 				stmt.execute(string);
+				
 			}
-			List<Pair<String, JComponent>> frames = new LinkedList<>();
-
-			DBInfo info = new DBInfo(conn.getMetaData());
-			doChecks(conn, info, frames, tocheck);
-			Triple<Graph, Set, OplInst<String, String, String, String>> gr = build(info, tocheck, conn);			
-			frames.add(0, new Pair<>("schema", doSchemaView(Color.RED, gr.first, gr.second)));
-			new DisplayThingy(frames);
-			if (oplSchema.isSelected()) {
-				return "S0 = " + gr.third.S.sig + "\nS = " + gr.third.S + "\nI0 = " + gr.third.P + "\nI = instance S I0 none";
-			} else {
-				return "OK";
-			}
-		} catch (ClassNotFoundException cnfe) {
-			cnfe.printStackTrace();
-			return "H2 driver not found";
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-			return "JDBC error: " + ex.getMessage();
-		}
+			
+			return tocheck;
+	//	} catch (SQLException ex) {
+		//	ex.printStackTrace();
+	//		output.setText( "JDBC error: " + ex.getMessage() );
+	//	}
 
 	}
 	
@@ -566,6 +575,7 @@ public class SqlChecker {
 	public SqlChecker() {
 
 		JButton transButton = new JButton("Run");
+		JButton loadButton = new JButton("Load JDBC and Run");
 		JButton helpButton = new JButton("Help");
 
 		final JComboBox<Example> box = new JComboBox<>(examples);
@@ -581,7 +591,37 @@ public class SqlChecker {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					output.setText(translate(input.getText()));
+					Class.forName("org.h2.Driver");
+					Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+					output.setText("Started");
+					output.setText(process(conn, translate(input.getText(), conn)));
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					output.setText(ex.getLocalizedMessage());
+				}
+			}
+		});
+		
+		loadButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					JPanel pan = new JPanel(new GridLayout(2,2));
+					pan.add(new JLabel("JDBC Driver Class"));
+					JTextField f1 = new JTextField("com.mysql.jdbc.Driver");
+					pan.add(f1);
+					JTextField f2 = new JTextField("jdbc:mysql://localhost/buzzbuilder?user=root&password=whasabi");
+					pan.add(new JLabel("JDBC Connection String"));
+					pan.add(f2);
+					int i = JOptionPane.showConfirmDialog(null, pan);
+					if (i != JOptionPane.OK_OPTION) {
+						return;
+					}
+					
+					Class.forName(f1.getText().trim());
+					Connection conn = DriverManager.getConnection(f2.getText().trim());
+					output.setText("Started.");
+					output.setText(process(conn, translate(input.getText(), conn)));
 				} catch (Exception ex) {
 					ex.printStackTrace();
 					output.setText(ex.getLocalizedMessage());
@@ -622,7 +662,8 @@ public class SqlChecker {
 		JPanel tp = new JPanel(new GridLayout(2, 4));
 
 		tp.add(transButton);
-		tp.add(helpButton);
+		tp.add(loadButton);
+//		tp.add(helpButton);
 		tp.add(new JLabel("Load Example", JLabel.RIGHT));
 		tp.add(box);
 
@@ -661,8 +702,13 @@ public class SqlChecker {
 	}
 
 	JCheckBox oplSchema = new JCheckBox("Emit OPL Schema", true);
-	JCheckBox oplInstance = new JCheckBox("Emit OPL Instance", true);
+	JCheckBox oplInstance = new JCheckBox("Emit OPL Instance", false);
 	JCheckBox haltOnErrors = new JCheckBox("Require FK Decls", true);
+	
+	void doJdbc() {
+		
+	}
+	
 	
 	public JComponent doSchemaView(Color clr, Graph<String, Chc<Pair<String,String>, Pair<String, Pair>>> sgv, Set entities) {
 		if (sgv.getVertexCount() == 0) {

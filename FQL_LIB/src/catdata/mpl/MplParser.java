@@ -183,14 +183,16 @@ public class MplParser {
 			return new MplVar<>((String)o);
 		}
 		if (o instanceof Tuple3) {
-			return toTheory(o);
+			Tuple3 t = (Tuple3) o;
+			return new MplEval<>((String)t.b, toTerm(t.c));
 		}
 		if (o instanceof org.codehaus.jparsec.functors.Pair) {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
 			if (p.a.toString().equals("theory")) {
 				return toTheory(p.b);
 			}
-			return new MplEval<>(new MplVar<>((String)p.a), toTerm(p.b));
+			MplEval<String, String> ret = new MplEval<String, String>((String)p.a, toTerm(p.b));
+			return ret;
 		}
 			throw new RuntimeException();
 		//}

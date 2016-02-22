@@ -1,18 +1,26 @@
 package catdata.mpl;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import org.apache.commons.collections15.Transformer;
+
 import catdata.Pair;
+import catdata.Triple;
+import catdata.Unit;
 import catdata.ide.CodeTextPanel;
 import catdata.mpl.Mpl.MplExp.MplEval;
 import catdata.mpl.Mpl.MplExp.MplSch;
 import catdata.mpl.Mpl.MplExp.MplVar;
-import catdata.mpl.Mpl.MplTerm;
 import catdata.mpl.Mpl.MplTerm.MplAlpha;
 import catdata.mpl.Mpl.MplTerm.MplComp;
 import catdata.mpl.Mpl.MplTerm.MplConst;
@@ -24,6 +32,15 @@ import catdata.mpl.Mpl.MplTerm.MplTr;
 import catdata.mpl.Mpl.MplType.MplBase;
 import catdata.mpl.Mpl.MplType.MplProd;
 import catdata.mpl.Mpl.MplType.MplUnit;
+import catdata.mpl.MplStrict.Node;
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.graph.Graph;
+import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
+import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 public class Mpl implements MplObject {
 	
@@ -532,14 +549,19 @@ public class Mpl implements MplObject {
 		}
 		
 		static class MplEval<O,A> extends MplExp<O,A> {
-			MplExp<O,A> sch;
+			MplSch<O,A> sch;
 			MplTerm<O,A> a;
+			String sch0;
 			
-			public MplEval(MplExp<O, A> sch, MplTerm<O, A> a) {
-				super();
-				this.sch = sch;
+			public MplEval(String sch0, MplTerm<O, A> a) {
+				this.sch0 = sch0;
 				this.a = a;
 			}			
+			
+			public void validte(MplSch<O,A> sch) {
+				this.sch = sch;
+				a.type(sch);
+			}
 			
 			@Override
 			public <R, E> R accept(E env, MplExpVisitor<O, A, R, E> v) {
@@ -549,6 +571,18 @@ public class Mpl implements MplObject {
 			@Override
 			public String toString() {
 				return "eval " + sch + " " + a;
+			}
+			
+			public JComponent display() {
+				
+				JTabbedPane p = new JTabbedPane();
+				MplStrict<O, A> op = new MplStrict<O,A>(sch);
+				Triple<List<MplStrict.Node<O,A>>,List<MplStrict.Node<O,A>>,String> r = a.accept(new Unit(), op);
+				JComponent g = doTermView(Color.green, Color.red, op.g); 
+				p.addTab("Graph", g);
+				p.addTab("Dot", new CodeTextPanel("", "digraph foo { " +  r.third + " }"));
+				return p;
+				
 			}
 		}
 		
@@ -575,5 +609,38 @@ public class Mpl implements MplObject {
 		public R visit(E env, MplVar<O,A> e);
 		public R visit(E env, MplSch<O,A> e);
 		public R visit(E env, MplEval<O,A> e); 
+	}
+	
+	public static <O,A> JComponent doTermView(Color src, Color dst, Graph<Node<O,A>, Integer> sgv) {
+		if (sgv.getVertexCount() == 0) {
+			return new JPanel();
+		}
+		Layout layout = new FRLayout<>(sgv);
+		layout.setSize(new Dimension(600, 400));
+		VisualizationViewer vv = new VisualizationViewer<>(layout);
+		Transformer<Node<O,A>, Color> vertexPaint = x -> {
+			if (x.isInput) {
+				return src;
+			}
+			return dst;
+		};
+		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
+		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		vv.setGraphMouse(gm);
+		gm.setMode(Mode.PICKING);
+		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+
+		Transformer<Node<O,A>, String> ttt = arg0 -> {
+			String w = arg0.isInput ? "in" : "out";
+			return arg0.term + " #" + arg0.which + " " + w;
+		};
+		vv.getRenderContext().setVertexLabelTransformer(ttt);
+		vv.getRenderContext().setEdgeLabelTransformer(xx -> "");
+
+		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+		JPanel ret = new JPanel(new GridLayout(1, 1));
+		ret.add(zzz);
+		ret.setBorder(BorderFactory.createEtchedBorder());
+		return ret;
 	}
 }

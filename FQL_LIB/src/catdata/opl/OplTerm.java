@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.script.Invocable;
 import javax.script.ScriptException;
 
+import catdata.Chc;
 import catdata.Pair;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplSetInst;
@@ -199,11 +200,33 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		}
 		return ret;
 	}
+	
 
 	// needed for machine learning library for some reason
 	@Override
 	public int compareTo(OplTerm<C, V> o) {
 		return o.toString().compareTo(toString());
+	}
+	
+	public <X> OplTerm<Chc<C, X>, V> inLeft() {
+		if (var != null) {
+			return new OplTerm<>(var);
+		}
+		List<OplTerm<Chc<C, X>, V>> args0 = new LinkedList<>();
+		for (OplTerm<C, V> a : args) {
+			args0.add(a.inLeft());
+		}
+		return new OplTerm<Chc<C, X>, V>(Chc.inLeft(head), args0);
+	}
+	public <X> OplTerm<Chc<X, C>, V> inRight() {
+		if (var != null) {
+			return new OplTerm<>(var);
+		}
+		List<OplTerm<Chc<X, C>, V>> args0 = new LinkedList<>();
+		for (OplTerm<C, V> a : args) {
+			args0.add(a.inRight());
+		}
+		return new OplTerm<Chc<X, C>, V>(Chc.inRight(head), args0);
 	}
 
 }

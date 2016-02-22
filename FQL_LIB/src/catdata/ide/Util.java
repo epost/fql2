@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -118,8 +119,20 @@ public class Util {
 		return ret;
 	}
 	
+	public static <X, Y> LinkedHashMap<X, Y> singMap(X x, Y y) {
+		 LinkedHashMap<X, Y> ret = new LinkedHashMap<>();
+		 ret.put(x, y);
+		 return ret;
+	}
+	
 	public static <X> List<X> singList(X x) {
 		List<X> ret = new LinkedList<>();
+		ret.add(x);
+		return ret;
+	}
+	
+	public static <X> Set<X> singSet(X x) {
+		Set<X> ret = new HashSet<>();
 		ret.add(x);
 		return ret;
 	}

@@ -189,8 +189,8 @@ public abstract class OplExp implements OplObject {
 			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : I.S.projT().equations) {
 				List<Pair<V, Chc<S, OplTerm<Chc<C, X>, V>>>> m = new LinkedList<>();
 				OplCtx<Chc<S, OplTerm<Chc<C, X>, V>>, V> ctx = new OplCtx<>(m);
-				OplTerm<Chc<C, Triple<OplTerm<Chc<C, X>, V>, Chc<S, OplTerm<Chc<C, X>, V>>, C>>, V> l = OplSig.inject(eq.second);
-				OplTerm<Chc<C, Triple<OplTerm<Chc<C, X>, V>, Chc<S, OplTerm<Chc<C, X>, V>>, C>>, V> r = OplSig.inject(eq.third);
+				OplTerm<Chc<C, Triple<OplTerm<Chc<C, X>, V>, Chc<S, OplTerm<Chc<C, X>, V>>, C>>, V> l = eq.second.inLeft();
+				OplTerm<Chc<C, Triple<OplTerm<Chc<C, X>, V>, Chc<S, OplTerm<Chc<C, X>, V>>, C>>, V> r = eq.third.inLeft();
 				oldeqs.add(new Triple<> (ctx, l, r) );
 			}
 			
@@ -321,6 +321,318 @@ public abstract class OplExp implements OplObject {
 			}
 		} 
 	}
+	
+	//TODO like pivot, iso type side, needs to change
+	public static class OplPushoutSch<S,C,V,S1,C1,S2,C2> extends OplExp {
+		
+		String s1, s2;
+		OplTyMapping<S,C,V,S1,C1> F1;
+		OplTyMapping<S,C,V,S2,C2> F2;
+		
+		@Override
+		public JComponent display() {
+			return pushout().display();
+		}
+
+		public OplPushoutSch(String s1, String s2) {
+			this.s1 = s1;
+			this.s2 = s2;
+		}
+		
+		public void validate(OplTyMapping<S,C,V,S1,C1> F1, OplTyMapping<S,C,V,S2,C2> F2) {
+			this.F1 = F1;
+			this.F2 = F2;
+			if (!F1.src.equals(F2.src)) {
+				throw new RuntimeException("Sources do not match:\n\n" + F1.src + "\n\n---------\n\n" + F2.src);
+			}
+		}
+		
+		private Chc<S, Chc<S1, S2>> substSort(S2 s2, S1 s1, Chc<S, Chc<S1, S2>> chc) {
+			if (chc.left) {
+				return chc;
+			}
+			Chc<S1, S2> r = chc.r;
+			if (r.left) {
+				return chc;
+			}
+			if (r.r.equals(s2)) {
+				return Chc.inRight(Chc.inLeft(s1));
+			}
+			return chc;
+		}
+		
+		//TODO: enacapsulate Equation as own class 
+		private Set<Chc<S, Chc<S1, S2>>> entities = new HashSet<>();
+		private Set<Chc<S, Chc<S1, S2>>> sorts = new HashSet<>();
+		private Map<Chc<C, Chc<C1, C2>>, Pair<List<Chc<S, Chc<S1, S2>>>, Chc<S, Chc<S1, S2>>>> symbols = new HashMap<>();
+		private List<Triple<OplCtx<Chc<S, Chc<S1, S2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>>> equations = new LinkedList<>();
+		private Map<S1, Chc<S, Chc<S1, S2>>> sorts1 = new HashMap<>();
+		private Map<S2, Chc<S, Chc<S1, S2>>> sorts2 = new HashMap<>();
+		private Map<C1, Pair<OplCtx<Chc<S, Chc<S1, S2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>>> symbols1 = new HashMap<>();
+		private Map<C2, Pair<OplCtx<Chc<S, Chc<S1, S2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>>> symbols2 = new HashMap<>();
+
+
+		private void substEdge(C2 c2, Pair<OplCtx<S1, V>, OplTerm<C1, V>> p1) {
+			symbols.remove(Chc.inRight(Chc.inRight(c2)));
+			
+			OplCtx<Chc<S1, S2>, V> ctx0 = p1.first.inLeft();
+			OplCtx<Chc<S, Chc<S1, S2>>, V> ctx = ctx0.inRight();
+			
+			OplTerm<Chc<C1, C2>, V> e1 = p1.second.inLeft();
+			OplTerm<Chc<C, Chc<C1, C2>>, V> e = e1.inRight();
+			
+			List<Triple<OplCtx<Chc<S, Chc<S1, S2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>>> equations0 = equations;
+			equations = new LinkedList<>();
+			for (Triple<OplCtx<Chc<S, Chc<S1, S2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>> eq : equations0) {
+				equations.add(new Triple<>(eq.first, substTerm(c2, p1, eq.second), substTerm(c2, p1, eq.third)));
+			}
+			symbols2.put(c2, new Pair<>(inject1(p1.first), inject1(p1.second)));
+			
+		}
+
+
+		
+		private OplTerm<Chc<C, Chc<C1, C2>>, V> substTerm(C2 c2, Pair<OplCtx<S1, V>, OplTerm<C1, V>> pp,
+				OplTerm<Chc<C, Chc<C1, C2>>, V> term) {
+			if (term.var != null) {
+				return term;
+			}
+			List<OplTerm<Chc<C, Chc<C1, C2>>, V>> args = new LinkedList<>();
+			for (OplTerm<Chc<C, Chc<C1, C2>>, V> arg : term.args) {
+				args.add(substTerm(c2, pp, arg));
+			}
+			
+			if (term.head.left) {
+				return new OplTerm<>(Chc.inLeft(term.head.l), args);
+			}
+			if (term.head.r.left) {
+				return new OplTerm<>(Chc.inRight(Chc.inLeft(term.head.r.l)), args);
+			}
+			if (!term.head.r.r.equals(c2)) {
+				return new OplTerm<>(Chc.inRight(Chc.inRight(term.head.r.r)), args);				
+			}
+			Map<V, OplTerm<Chc<C, Chc<C1, C2>>, V>> map = new HashMap<>();
+			int i = 0;
+			for (Pair<V, S1> v : pp.first.values2()) {
+				map.put(v.first, args.get(i));
+				i++;
+			}
+			return inject1(pp.second).subst(map);
+		}
+
+		private OplCtx<Chc<S, Chc<S1, S2>>, V> substCtx(S2 s2, S1 s1, OplCtx<Chc<S, Chc<S1, S2>>, V> ctx) {
+			List<Pair<V, Chc<S, Chc<S1, S2>>>> ret = ctx.values2().stream().map(x -> {
+				return new Pair<>(x.first, substSort(s2, s1, x.second));
+			}).collect(Collectors.toList());
+			return new OplCtx<>(ret);
+		}
+		
+		
+		private void substSort(S2 s2, S1 s1) {
+			entities.remove(Chc.inRight(Chc.inRight(s2)));
+			sorts.remove(Chc.inRight(Chc.inRight(s2)));
+			Map<Chc<C, Chc<C1, C2>>, Pair<List<Chc<S, Chc<S1, S2>>>, Chc<S, Chc<S1, S2>>>> symbols0 = symbols;
+			symbols = new HashMap<>();
+			for (Chc<C, Chc<C1, C2>> c : symbols0.keySet()) {
+				Pair<List<Chc<S, Chc<S1, S2>>>, Chc<S, Chc<S1, S2>>> t = symbols0.get(c);
+				List<Chc<S, Chc<S1, S2>>> l = t.first.stream().map(x -> { return substSort(s2, s1, x); }).collect(Collectors.toList());
+				symbols.put(c, new Pair<>(l, substSort(s2, s1, t.second)));
+			}
+			List<Triple<OplCtx<Chc<S, Chc<S1, S2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>>> equations0 = equations;
+			equations = new LinkedList<>();
+			for (Triple<OplCtx<Chc<S, Chc<S1, S2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>> eq : equations0) {
+				equations.add(new Triple<>(substCtx(s2, s1, eq.first), eq.second, eq.third));
+			}
+			sorts2.put(s2, Chc.inRight(Chc.inLeft(s1)));
+			Map<C2, Pair<OplCtx<Chc<S, Chc<S1, S2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>>> symbols2x = symbols2;
+			symbols2 = new HashMap<>();
+			for (C2 c2 : symbols2x.keySet()) {
+				Pair<OplCtx<Chc<S, Chc<S1, S2>>, V>, OplTerm<Chc<C, Chc<C1, C2>>, V>> y = symbols2x.get(c2);
+				symbols2.put(c2, new Pair<>(substCtx(s2,s1,y.first), y.second));
+			}
+		}
+
+		//TODO the substituting is sensitive to the order, favoring left over right.
+		//really should make canonical things - sorts are equiv classes of sorts, have all edges
+		//then, provide separate step to simplify based on some policy, and get explicit map out
+		public OplSchema<Chc<S,Chc<S1,S2>>, Chc<C,Chc<C1,C2>>, V> pushout() {
+			for (S s : F1.src.projT().sorts) {
+				sorts.add(Chc.inLeft(s));
+			}
+			for (C c : F1.src.projT().symbols.keySet()) {
+				Pair<List<S>, S> t = F1.src.projT().symbols.get(c);
+				symbols.put(Chc.inLeft(c), new Pair<>(Chc.inLeft(t.first), Chc.inLeft(t.second)));
+			}
+			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : F1.src.projT().equations) {
+				equations.add(new Triple<>(eq.first.inLeft(), eq.second.inLeft(), eq.third.inLeft()));
+			}
+			for (S1 s1 : F1.dst.entities) {
+				entities.add(Chc.inRight(Chc.inLeft(s1)));
+				sorts.add(Chc.inRight(Chc.inLeft(s1)));
+				sorts1.put(s1, Chc.inRight(Chc.inLeft(s1)));
+			}
+			for (S2 s2 : F2.dst.entities) {
+				entities.add(Chc.inRight(Chc.inRight(s2)));
+				sorts.add(Chc.inRight(Chc.inRight(s2)));
+				sorts2.put(s2, Chc.inRight(Chc.inRight(s2)));
+			}
+			for (C1 c1 : F1.dst.projE().symbols.keySet()) {
+				Pair<List<S1>, S1> t =  F1.dst.projE().symbols.get(c1);
+				symbols.put(Chc.inRight(Chc.inLeft(c1)), new Pair<>(Chc.inRight(Chc.inLeft(t.first)), Chc.inRight(Chc.inLeft(t.second)))); 
+				
+				Pair<OplCtx<S1, V>, OplTerm<C1, V>> term = F1.dst.projEA().surround(c1);	
+				OplCtx<Chc<S1,S2>, V> ctx = term.first.inLeft();
+				OplTerm<Chc<C1,C2>, V> term2 = term.second.inLeft();
+				symbols1.put(c1, new Pair<>(ctx.inRight(), term2.inRight()));
+			}
+			for (C1 c1 : F1.dst.projA().symbols.keySet()) {
+				Pair<List<S1>, S1> t =  F1.dst.projA().symbols.get(c1);
+				symbols.put(Chc.inRight(Chc.inLeft(c1)), new Pair<>(Chc.inRight(Chc.inLeft(t.first)), Chc.inLeft((S)t.second))); 
+				
+				Pair<OplCtx<S1, V>, OplTerm<C1, V>> term = F1.dst.projA().surround(c1);	
+				OplCtx<Chc<S1,S2>, V> ctx = term.first.inLeft();
+				OplTerm<Chc<C1,C2>, V> term2 = term.second.inLeft();
+				symbols1.put(c1, new Pair<>(ctx.inRight(), term2.inRight()));
+			}
+			for (C2 c2 : F2.dst.projE().symbols.keySet()) {
+				Pair<List<S2>, S2> t =  F2.dst.projE().symbols.get(c2);
+				symbols.put(Chc.inRight(Chc.inRight(c2)), new Pair<>(Chc.inRight(Chc.inRight(t.first)), Chc.inRight(Chc.inRight(t.second)))); 
+
+				Pair<OplCtx<S2, V>, OplTerm<C2, V>> term = F2.dst.projEA().surround(c2);	
+				OplCtx<Chc<S1,S2>, V> ctx = term.first.inRight();
+				OplTerm<Chc<C1,C2>, V> term2 = term.second.inRight();
+				symbols2.put(c2, new Pair<>(ctx.inRight(), term2.inRight()));
+			}
+			for (C2 c2 : F2.dst.projA().symbols.keySet()) {
+				Pair<List<S2>, S2> t =  F2.dst.projA().symbols.get(c2);
+				symbols.put(Chc.inRight(Chc.inRight(c2)), new Pair<>(Chc.inRight(Chc.inRight(t.first)), Chc.inLeft((S)t.second))); 
+				
+				Pair<OplCtx<S2, V>, OplTerm<C2, V>> term = F2.dst.projA().surround(c2);	
+				OplCtx<Chc<S1,S2>, V> ctx = term.first.inRight();
+				OplTerm<Chc<C1,C2>, V> term2 = term.second.inRight();
+				symbols2.put(c2, new Pair<>(ctx.inRight(), term2.inRight()));
+			}
+			for (Triple<OplCtx<S1, V>, OplTerm<C1, V>, OplTerm<C1, V>> eq : F1.dst.projEA().equations) {
+				OplCtx<Chc<S, Chc<S1, S2>>, V> ctx = inject1(eq.first);
+				OplTerm<Chc<C, Chc<C1, C2>>, V> lhs = inject1(eq.second); 
+				OplTerm<Chc<C, Chc<C1, C2>>, V> rhs = inject1(eq.second); 
+				equations.add(new Triple<>(ctx, lhs, rhs));	
+			}
+			for (Triple<OplCtx<S2, V>, OplTerm<C2, V>, OplTerm<C2, V>> eq : F2.dst.projEA().equations) {
+				OplCtx<Chc<S, Chc<S1, S2>>, V> ctx = inject2(eq.first);
+				OplTerm<Chc<C, Chc<C1, C2>>, V> lhs = inject2(eq.second); 
+				OplTerm<Chc<C, Chc<C1, C2>>, V> rhs = inject2(eq.second); 
+				equations.add(new Triple<>(ctx, lhs, rhs));	
+			}
+
+			Map<S2, S1> substed = new HashMap<>();
+			for (S s : F1.src.entities) {
+				S1 s1 = F1.m.sorts.get(s);
+				S2 s2 = F2.m.sorts.get(s);
+				substSort(s2, s1);
+				substed.put(s2, s1);
+			}
+			for (C c : F1.src.projEA().symbols.keySet()) {
+				Pair<OplCtx<S1, V>, OplTerm<C1, V>> p1 = F1.m.symbols.get(c);
+				Pair<OplCtx<S2, V>, OplTerm<C2, V>> p2 = F2.m.symbols.get(c);
+				if (p1.first.values2().get(0).second.equals(substed.get(p2.first.values2().get(0).second))) {
+					if (p2.second.var != null) {
+						continue;
+					}
+					List<OplTerm<C2, V>> l = Util.singList(new OplTerm<>(p2.first.values2().get(0).first));
+					if (!p2.second.args.equals(l)) {
+						continue;
+					}
+					S1 t1 = p1.second.type(F1.dst.sig, p1.first);
+					S2 t2 = p2.second.type(F2.dst.sig, p2.first);
+					if (F1.src.projT().sorts.contains(t1) || t1.equals(substed.get(t2))) {
+						substEdge(p2.second.head, p1);
+					}
+				}
+			} 
+			
+			OplSchema<Chc<S,Chc<S1,S2>>, Chc<C,Chc<C1,C2>>, V> ret = new OplSchema<>("?", entities);
+			OplSig<Chc<S, Chc<S1, S2>>, Chc<C, Chc<C1, C2>>, V> sig = new OplSig<>(F1.src.sig.fr, new HashMap<>(), sorts, symbols, equations);
+			ret.validate(sig);
+
+			OplMapping<S1, C1, V, Chc<S, Chc<S1, S2>>, Chc<C, Chc<C1, C2>>> g1 = new OplMapping<S1, C1, V, Chc<S, Chc<S1, S2>>, Chc<C, Chc<C1, C2>>>(sorts1, symbols1, "?", "?");
+			OplMapping<S2, C2, V, Chc<S, Chc<S1, S2>>, Chc<C, Chc<C1, C2>>> g2 = new OplMapping<S2, C2, V, Chc<S, Chc<S1, S2>>, Chc<C, Chc<C1, C2>>>(sorts2, symbols2, "?", "?");
+
+//			OplTyMapping<S1,C1,V,Chc<S,Chc<S1,S2>>, Chc<C,Chc<C1,C2>>> G1 = new OplTyMapping<S1,C1,V,Chc<S,Chc<S1,S2>>, Chc<C,Chc<C1,C2>>>("?", "?", F1.dst, ret, g1);
+//			OplTyMapping<S2,C2,V,Chc<S,Chc<S1,S2>>, Chc<C,Chc<C1,C2>>> G2 = new OplTyMapping<S2,C2,V,Chc<S,Chc<S1,S2>>, Chc<C,Chc<C1,C2>>>("?", "?", F2.dst, ret, g2);
+			
+//			G1.validate();
+//			G2.validate();
+			
+			return ret;
+		}
+
+
+		private OplTerm<Chc<C, Chc<C1, C2>>, V> inject2(OplTerm<C2, V> term) {
+			if (term.var != null) {
+				return new OplTerm<>(term.var);
+			}
+			List<OplTerm<Chc<C, Chc<C1, C2>>, V>> args = new LinkedList<>();
+			for (OplTerm<C2, V> arg : term.args) {
+				args.add(inject2(arg));
+			}
+			
+			if (F1.src.projT().symbols.containsKey(term.head)) {
+				return new OplTerm<>(Chc.inLeft((C)term.head), args);
+			} else {
+				return new OplTerm<>(Chc.inRight(Chc.inRight(term.head)), args);
+			}
+		}
+
+		private OplTerm<Chc<C, Chc<C1, C2>>, V> inject1(OplTerm<C1, V> term) {
+			if (term.var != null) {
+				return new OplTerm<>(term.var);
+			}
+			List<OplTerm<Chc<C, Chc<C1, C2>>, V>> args = new LinkedList<>();
+			for (OplTerm<C1, V> arg : term.args) {
+				args.add(inject1(arg));
+			}
+			
+			if (F1.src.projT().symbols.containsKey(term.head)) {
+				return new OplTerm<>(Chc.inLeft((C)term.head), args);
+			} else {
+				return new OplTerm<>(Chc.inRight(Chc.inLeft(term.head)), args);
+			}
+		}
+
+		private OplCtx<Chc<S, Chc<S1, S2>>, V> inject2(OplCtx<S2, V> ctx) {
+			List<Pair<V, Chc<S, Chc<S1, S2>>>> ret = new LinkedList<>();
+			
+			for (Pair<V, S2> p : ctx.values2()) {
+				if (F1.src.projT().sorts.contains(p.second)) {
+					ret.add(new Pair<>(p.first, Chc.inLeft((S)p.second)));
+				}
+				ret.add(new Pair<>(p.first, Chc.inRight(Chc.inRight(p.second))));
+			}
+			
+			return new OplCtx<>(ret);
+		}
+
+		private OplCtx<Chc<S, Chc<S1, S2>>, V> inject1(OplCtx<S1, V> ctx) {
+			List<Pair<V, Chc<S, Chc<S1, S2>>>> ret = new LinkedList<>();
+			
+			for (Pair<V, S1> p : ctx.values2()) {
+				if (F1.src.projT().sorts.contains(p.second)) {
+					ret.add(new Pair<>(p.first, Chc.inLeft((S)p.second)));
+				}
+				ret.add(new Pair<>(p.first, Chc.inRight(Chc.inLeft(p.second))));
+			}
+			
+			return new OplCtx<>(ret);
+		}
+
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+	}
+	
 	
 	public static class OplPushout<S,C,V,X,Y,Z> extends OplExp {
 		
@@ -698,7 +1010,7 @@ public abstract class OplExp implements OplObject {
 			for (S s : I.sorts.keySet()) {
 				Set<KBExp<Chc<Chc<C, X>, JSWrapper>, V>> set = new HashSet<>();
 				for (OplTerm<Chc<C, X>, V> e : I.sorts.get(s)) {
-					OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = OplSig.inject(e);
+					OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = e.inLeft();
 					KBExp<Chc<Chc<C, X>, JSWrapper>, V> jjj = OplToKB.convert(kkk);
 					KBExp<Chc<Chc<C, X>, JSWrapper>, V> z = OplToKB.redBy(I0, jjj);
 					set.add(z);
@@ -713,12 +1025,12 @@ public abstract class OplExp implements OplObject {
 				for (List<OplTerm<Chc<C, X>, V>> a : m.keySet()) {
 					List<KBExp<Chc<Chc<C, X>, JSWrapper>, V>> l = new LinkedList<>();
 					for (OplTerm<Chc<C, X>, V> e : a) {
-						OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = OplSig.inject(e);
+						OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = e.inLeft();
 						KBExp<Chc<Chc<C, X>, JSWrapper>, V> jjj = OplToKB.convert(kkk);
 						KBExp<Chc<Chc<C, X>, JSWrapper>, V> z = OplToKB.redBy(I0, jjj);
 						l.add(z);
 					}
-					OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = OplSig.inject(m.get(a));
+					OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = m.get(a).inLeft();
 					KBExp<Chc<Chc<C, X>, JSWrapper>, V> jjj = OplToKB.convert(kkk);
 					KBExp<Chc<Chc<C, X>, JSWrapper>, V> z = OplToKB.redBy(I0, jjj);
 					n.put(l, z);
@@ -960,15 +1272,18 @@ public abstract class OplExp implements OplObject {
 			return true;
 		}
 
-		public static <X, C, V> OplTerm<Chc<C, X>, V> inject(OplTerm<C, V> e) {
-			if (e.var != null) {
-				return new OplTerm<>(e.var);
+		public Pair<OplCtx<S,V>, OplTerm<C,V>> surround(C c) {
+			List<S> argts = symbols.get(c).first;
+			List<Pair<V, S>> l = new LinkedList<>();
+			List<OplTerm<C, V>> args = new LinkedList<>();
+			for (S s : argts) {
+				V v = fr.next();
+				l.add(new Pair<>(v, s));
+				args.add(new OplTerm<>(v));
 			}
-			List<OplTerm<Chc<C, X>, V>> args0 = new LinkedList<>();
-			for (OplTerm<C, V> a : e.args) {
-				args0.add(inject(a));
-			}
-			return new OplTerm<Chc<C, X>, V>(Chc.inLeft(e.head), args0);
+			OplTerm<C, V> ret = new OplTerm<>(c, args);
+			OplCtx<S, V> ret2 = new OplCtx<>(l);
+			return new Pair<>(ret2, ret);
 		}
 
 		public <X> OplSig<S, Chc<C, X>, V> inject() {
@@ -979,17 +1294,17 @@ public abstract class OplExp implements OplObject {
 			}
 			List<Triple<OplCtx<S, V>, OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>> equations0 = new LinkedList<>();
 			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : equations) {
-				equations0.add(new Triple<>(eq.first, inject(eq.second), inject(eq.third)));
+				equations0.add(new Triple<>(eq.first, eq.second.inLeft(), eq.third.inLeft()));
 			}
 			List<Triple<OplCtx<S, V>, List<Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>>, List<Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>>>> implications0 = new LinkedList<>();
 			for (Triple<OplCtx<S, V>, List<Pair<OplTerm<C, V>, OplTerm<C, V>>>, List<Pair<OplTerm<C, V>, OplTerm<C, V>>>> impl : implications) {
 				List<Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>> lhs = new LinkedList<>();
 				List<Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>> rhs = new LinkedList<>();
 				for (Pair<OplTerm<C, V>, OplTerm<C, V>> l : impl.second) {
-					lhs.add(new Pair<>(inject(l.first), inject(l.second)));
+					lhs.add(new Pair<>(l.first.inLeft(), l.second.inLeft()));
 				}
 				for (Pair<OplTerm<C, V>, OplTerm<C, V>> r : impl.third) {
-					rhs.add(new Pair<>(inject(r.first), inject(r.second)));
+					rhs.add(new Pair<>(r.first.inLeft(), r.second.inLeft()));
 				}
 				implications0.add(new Triple<>(impl.first, lhs, rhs));
 			}
@@ -1408,6 +1723,7 @@ public abstract class OplExp implements OplObject {
 			}
 			return ret;
 		}
+
 
 	}
 
@@ -1828,13 +2144,8 @@ public abstract class OplExp implements OplObject {
 			return ret;
 		}
 
-		/*
-		 * private OplCtx<S2, V> sigma(OplCtx<S1, V> t) { List<Pair<V, S2>> l =
-		 * t.values2().stream().map(x -> { return new Pair<>(x.first,
-		 * sorts.get(x.second)); }).collect(Collectors.toList()); return new
-		 * OplCtx<>(l); }
-		 */
-
+		
+	
 		private OplTerm<C2, V> subst(OplTerm<C1, V> t) {
 			if (t.var != null) {
 				return new OplTerm<>(t.var);
@@ -1883,7 +2194,7 @@ public abstract class OplExp implements OplObject {
 					s.put(p.first, l.get(i++));
 				}
 
-				OplTerm<Chc<C2, X>, V> ret = OplSig.inject(h.second);
+				OplTerm<Chc<C2, X>, V> ret = h.second.inLeft();
 				return ret.subst(s);
 			}
 		}
@@ -2740,6 +3051,9 @@ public abstract class OplExp implements OplObject {
 
 			JComponent text = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 			jtp.addTab("Text", text);
+			
+			JComponent th = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", sig.toString());
+			jtp.addTab("Theory", th);
 
 			JComponent graph = doSchemaView(Color.RED, buildFromSig(projEA()), entities);
 			jtp.addTab("Graph", graph);
@@ -3165,7 +3479,7 @@ public abstract class OplExp implements OplObject {
 			for (S s : I.sorts.keySet()) {
 				Set<OplTerm<Chc<Chc<C, X>, JSWrapper>, V>> set = new HashSet<>();
 				for (OplTerm<Chc<C, X>, V> e : I.sorts.get(s)) {
-					OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = OplSig.inject(e);
+					OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = e.inLeft();
 					KBExp<Chc<Chc<C, X>, JSWrapper>, V> jjj = OplToKB.convert(kkk);
 					KBExp<Chc<Chc<C, X>, JSWrapper>, V> z = OplToKB.redBy(I0, jjj);
 					OplTerm<Chc<Chc<C, X>, JSWrapper>, V> ee = OplToKB.convert(z);
@@ -3180,14 +3494,14 @@ public abstract class OplExp implements OplObject {
 				for (List<OplTerm<Chc<C, X>, V>> args : I.symbols.get(c).keySet()) {
 					List<OplTerm<Chc<Chc<C, X>, JSWrapper>, V>> args0 = new LinkedList<>();
 					for (OplTerm<Chc<C, X>, V> arg : args) {
-						OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = OplSig.inject(arg);
+						OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = arg.inLeft();
 						KBExp<Chc<Chc<C, X>, JSWrapper>, V> jjj = OplToKB.convert(kkk);
 						KBExp<Chc<Chc<C, X>, JSWrapper>, V> z = OplToKB.redBy(I0, jjj);
 						OplTerm<Chc<Chc<C, X>, JSWrapper>, V> arg0 = OplToKB.convert(z);
 						args0.add(arg0);
 					}
-					OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = OplSig.inject(I.symbols.get(c).get(
-							args));
+					OplTerm<Chc<Chc<C, X>, JSWrapper>, V> kkk = I.symbols.get(c).get(
+							args).inLeft();
 					KBExp<Chc<Chc<C, X>, JSWrapper>, V> jjj = OplToKB.convert(kkk);
 					KBExp<Chc<Chc<C, X>, JSWrapper>, V> z = OplToKB.redBy(I0, jjj);
 					OplTerm<Chc<Chc<C, X>, JSWrapper>, V> ee = OplToKB.convert(z);
@@ -3481,6 +3795,8 @@ public abstract class OplExp implements OplObject {
 		public R visit(E env, OplInst0 e);
 		
 		public R visit(E env, OplPushout e);
+		
+		public R visit(E env, OplPushoutSch e);
 		
 		public R visit(E env, OplDelta0 e);
 		

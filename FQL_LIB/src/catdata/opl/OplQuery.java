@@ -237,8 +237,8 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 						for (V1 b : block0.second.from.keySet()) {
 							OplTerm<C1, V1> lhs = convPath(new OplTerm<C1, V1>(b), l2, eq.second);
 							OplTerm<C1, V1> rhs = convPath(new OplTerm<C1, V1>(b), l2, eq.third); 
-							OplTerm<Chc<C1, V1>, V1> lhs0 = fI.get(l2).toSig().getKB().nf(OplSig.inject(lhs));
-							OplTerm<Chc<C1, V1>, V1> rhs0 = fI.get(l2).toSig().getKB().nf(OplSig.inject(rhs));
+							OplTerm<Chc<C1, V1>, V1> lhs0 = fI.get(l2).toSig().getKB().nf(lhs.inLeft());
+							OplTerm<Chc<C1, V1>, V1> rhs0 = fI.get(l2).toSig().getKB().nf(rhs.inLeft());
 							if (!lhs0.equals(rhs0)) {
 								throw new RuntimeException("equality " + eq.second + " = " + eq.third + " not preserved; becomes " + lhs + " = " + rhs);
 							}
@@ -247,8 +247,8 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				} else {
 					OplTerm<C1, V1> lhs = convTerm(l2, eq.second);
 					OplTerm<C1, V1> rhs = convTerm(l2, eq.third); 
-					OplTerm<Chc<C1, V1>, V1> lhs0 = fI.get(l2).toSig().getKB().nf(OplSig.inject(lhs));
-					OplTerm<Chc<C1, V1>, V1> rhs0 = fI.get(l2).toSig().getKB().nf(OplSig.inject(rhs));
+					OplTerm<Chc<C1, V1>, V1> lhs0 = fI.get(l2).toSig().getKB().nf(lhs.inLeft());
+					OplTerm<Chc<C1, V1>, V1> rhs0 = fI.get(l2).toSig().getKB().nf(rhs.inLeft());
 					if (!lhs0.equals(rhs0)) {
 						throw new RuntimeException("equality " + eq.second + " = " + eq.third + " not preserved; becomes " + lhs + " = " + rhs);
 					}
@@ -526,8 +526,8 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 						if (I0.J == null) {
 							continue outer;
 						}
-						OplTerm<Chc<Chc<C1, X>, JSWrapper>, V1> l1 = OplSig.inject(l0);
-						OplTerm<Chc<Chc<C1, X>, JSWrapper>, V1> r1 = OplSig.inject(r0);
+						OplTerm<Chc<Chc<C1, X>, JSWrapper>, V1> l1 = l0.inLeft();
+						OplTerm<Chc<Chc<C1, X>, JSWrapper>, V1> r1 = r0.inLeft();
 						KBExp<Chc<Chc<C1, X>, JSWrapper>, V1> l2 = OplToKB.convert(l1);
 						KBExp<Chc<Chc<C1, X>, JSWrapper>, V1> r2 = OplToKB.convert(r1);
 						KBExp<Chc<Chc<C1, X>, JSWrapper>, V1> l3 = OplToKB.redBy(I0.J, l2);
@@ -625,7 +625,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 
 			Set<Pair<OplTerm<Chc<C1, X>, V1>, OplTerm<Chc<C1, X>, V1>>> where = new HashSet<>();
 			for (Pair<OplTerm<C1, V1>, OplTerm<C1, V1>> eq : block.where) {
-				where.add(new Pair<>(OplSig.inject(eq.first), OplSig.inject(eq.second)));
+				where.add(new Pair<>(eq.first.inLeft(), eq.second.inLeft()));
 			}
 
 			List<V1> ordered = order(block);
@@ -645,7 +645,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			}
 
 			for (C2 c2 : block.attrs.keySet()) {
-				OplTerm<Chc<C1, X>, V1> e = OplSig.inject(block.attrs.get(c2));
+				OplTerm<Chc<C1, X>, V1> e = block.attrs.get(c2).inLeft();
 				for (Map<V1, OplTerm<Chc<C1, X>, V1>> tuple : tuples) {
 					OplTerm<Chc<C1, X>, V1> a = e.subst(tuple); // I0.P.toSig().getKB().nf(e.subst(tuple));
 
@@ -666,7 +666,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				for (Map<V1, OplTerm<Chc<C1, X>, V1>> tuple : tuples) {
 					Map<V1, OplTerm<Chc<C1, X>, V1>> substed = new HashMap<>();
 					for (V1 v1 : tgt_ctx.keySet()) {
-						OplTerm<Chc<C1, X>, V1> uuu = OplSig.inject(tgt_ctx.get(v1));
+						OplTerm<Chc<C1, X>, V1> uuu = tgt_ctx.get(v1).inLeft();
 						OplTerm<Chc<C1, X>, V1> vvv = uuu.subst(tuple);
 						substed.put(v1, I0.P.toSig().getKB().nf(vvv)); //seems to be necessary
 					}

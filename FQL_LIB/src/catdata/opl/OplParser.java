@@ -40,6 +40,7 @@ import catdata.opl.OplExp.OplPivot;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplPresTrans;
 import catdata.opl.OplExp.OplPushout;
+import catdata.opl.OplExp.OplPushoutSch;
 import catdata.opl.OplExp.OplSat;
 import catdata.opl.OplExp.OplSchemaProj;
 import catdata.opl.OplExp.OplSetInst;
@@ -63,7 +64,7 @@ public class OplParser {
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
-		"pivot", "DELTA", "return", "coreturn", "pushout", "return", "keys", "INSTANCE", "SCHEMA", "obsEqualities", "pathEqualities", "implications", "apply", "id", "query", "edges", "for", "entitiesAndAttributes", "instance", "entities", "attributes", "types", "schema", "as", "where", "select", "from", "flower", "SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
+		"PUSHOUT", "pivot", "DELTA", "return", "coreturn", "pushout", "return", "keys", "INSTANCE", "SCHEMA", "obsEqualities", "pathEqualities", "implications", "apply", "id", "query", "edges", "for", "entitiesAndAttributes", "instance", "entities", "attributes", "types", "schema", "as", "where", "select", "from", "flower", "SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -166,9 +167,10 @@ public class OplParser {
 		Parser<?> SCHEMA = SCHEMA();
 		Parser<?> INST = INSTANCE();
 		Parser<?> pushout = Parsers.tuple(term("pushout"), ident(), ident());
+		Parser<?> pushoutSch = Parsers.tuple(term("PUSHOUT"), ident(), ident());
 		Parser<?> pivot = Parsers.tuple(term("pivot"), ident());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { pivot, DELTA, pushout, INST, SCHEMA, apply, idQ, query, projEA, inst, schema, projE, projA, projT, flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
+		Parser<?> a = Parsers.or(new Parser<?>[] { pushoutSch, pivot, DELTA, pushout, INST, SCHEMA, apply, idQ, query, projEA, inst, schema, projE, projA, projT, flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
 		ref.set(a);
 
 		return a;
@@ -763,6 +765,8 @@ public class OplParser {
 				return new OplApply((String)p.b, (String)p.c);
 			} else if (p.a.toString().equals("pushout")) {
 				return new OplPushout((String)p.b, (String)p.c);
+			} else if (p.a.toString().equals("PUSHOUT")) {
+				return new OplPushoutSch((String)p.b, (String)p.c);
 			} 
 		}
 		

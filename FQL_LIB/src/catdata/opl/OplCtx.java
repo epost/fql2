@@ -5,7 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import catdata.Chc;
 import catdata.Pair;
+import catdata.Triple;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplParser.DoNotIgnore;
@@ -132,6 +134,21 @@ public class OplCtx<S, V> {
 		} else if (!vars0.equals(other.vars0))
 			return false;
 		return true;
+	}
+	
+	public <X> OplCtx<Chc<S,X>, V> inLeft() {
+		List<Pair<V, Chc<S, X>>> l = new LinkedList<>();
+		for (Pair<V, S> p : values2()) {
+			l.add(new Pair<>(p.first, Chc.inLeft(p.second)));
+		}
+		return new OplCtx<>(l);
+	}
+	public <X> OplCtx<Chc<X,S>, V> inRight() {
+		List<Pair<V, Chc<X, S>>> l = new LinkedList<>();
+		for (Pair<V, S> p : values2()) {
+			l.add(new Pair<>(p.first, Chc.inRight(p.second)));
+		}
+		return new OplCtx<>(l);
 	}
 
 }
