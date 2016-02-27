@@ -7,11 +7,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.ide.Util;
+
 public class SqlTable {
 
 	public String name;
 	public List<SqlColumn> columns = new LinkedList<>();
 	public Set<SqlColumn> pk = new HashSet<>();
+	
+	public SqlColumn getCnfId() {
+		return Util.get0(pk);		
+	}
+		
+	public boolean isCnf() {
+		if (pk.size() != 1) {
+			return false;
+		}
+		return getCnfId().autoInc;
+	}
 	
 	public void validate() {
 		if (name == null) {

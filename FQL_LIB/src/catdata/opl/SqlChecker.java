@@ -58,6 +58,8 @@ import catdata.sql.SqlLoader;
 import catdata.sql.SqlSchema;
 import catdata.sql.SqlType;
 
+//TODO: sqlchecker should use fk names
+
 public class SqlChecker {
 
 	private static int count = 0;

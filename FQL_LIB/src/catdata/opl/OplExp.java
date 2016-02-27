@@ -57,7 +57,12 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 public abstract class OplExp implements OplObject {
 
-	
+	//TODO: have OplTerm have 4 subclasses, var, ty, sch, gen, and no more Chcs
+	//ty has N arg, gen has 0 args, sch has 1 arg
+	//could try to subclass them, ty > sch > gen - nah
+	//oplterms should have "object" (non constructor) for parser (can move succ/nat logic here too)
+	//move away from strings - include other exps, full recursive in oplops
+	//move nf out of kb
 	
 	@Override
 	public JComponent display() {
@@ -1842,7 +1847,7 @@ public abstract class OplExp implements OplObject {
 			ret += "\tequations\n";
 			List<String> elist = new LinkedList<>();
 			for (Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>> k : equations) {
-				String s = OplTerm.strip(k.first.toString())  + " = " + OplTerm.strip(k.second.toString());
+				String s = k.first.toString()  + " = " + k.second.toString();
 				elist.add(s);
 			}
 

@@ -5,6 +5,7 @@ public class SqlColumn {
 	public SqlTable table;
 	public String name; 
 	public SqlType type;
+	public boolean autoInc = false;
 	
 	public SqlColumn(SqlTable table, String name, SqlType type) {
 		if (table == null || name == null || type == null) {

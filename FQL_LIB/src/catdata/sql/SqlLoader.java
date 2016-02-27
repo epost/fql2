@@ -50,7 +50,7 @@ public class SqlLoader extends JPanel {
 	
 	private static String help = "";
 
-	public static Example[] examples = { new EmpExample(), new CompoundExample() };
+	public static Example[] examples = { new EmpExample(), new CompoundExample(), new EmpAutoExample() };
 
 	private String name;
 	
@@ -64,6 +64,7 @@ public class SqlLoader extends JPanel {
 		output.setText("Error in " + name + ": " + msg);
 	}
 	
+	//TODO: print OK only
 	private void populate() throws SQLException {
 		schema = new SqlSchema(conn.getMetaData());
 		output.setText(schema.toString());
@@ -227,6 +228,52 @@ public class SqlLoader extends JPanel {
 					+ "\n"
 					+ "\nALTER TABLE Department ADD CONSTRAINT d1"
 					+ "\n FOREIGN KEY (secretary) REFERENCES Employee (id);";
+
+		}
+
+	}
+	
+	static class EmpAutoExample extends Example {
+
+		@Override
+		public String getName() {
+			return "Employees CNF";
+		}
+
+		@Override
+		public String getText() {
+			return "CREATE TABLE Employee("
+					+ "\n id INT PRIMARY KEY AUTO_INCREMENT,"
+					+ "\n first VARCHAR(255),"
+					+ "\n last VARCHAR(255),"
+					+ "\n manager INT,"
+					+ "\n worksIn INT"
+					+ "\n);"
+					+ "\n"
+					+ "\nCREATE TABLE Department("
+					+ "\n id INT PRIMARY KEY AUTO_INCREMENT,"
+					+ "\n name VARCHAR(255),"
+					+ "\n secretary INT,"
+					+ "\n);"
+					+ "\n "
+					+ "\nINSERT INTO Employee VALUES "
+					+ "\n (101, 'Alan', 'Turing', 103, 10), "
+					+ "\n (102, 'Camille', 'Jordan', 102, 2), "
+					+ "\n (103, 'Andrey', 'Markov', 103, 10);"
+					+ "\n"
+					+ "\nINSERT INTO Department VALUES"
+					+ "\n (10, 'Applied Math', 101),"
+					+ "\n (2, 'Pure Math', 102);"
+					+ "\n"
+					+ "\nALTER TABLE Employee ADD CONSTRAINT e1"
+					+ "\n FOREIGN KEY (manager) REFERENCES Employee (id);"
+					+ "\n"
+					+ "\nALTER TABLE Employee ADD CONSTRAINT e2 "
+					+ "\n FOREIGN KEY (worksIn) REFERENCES Department (id);"
+					+ "\n"
+					+ "\nALTER TABLE Department ADD CONSTRAINT d1"
+					+ "\n FOREIGN KEY (secretary) REFERENCES Employee (id);"
+					+ "\n";
 
 		}
 

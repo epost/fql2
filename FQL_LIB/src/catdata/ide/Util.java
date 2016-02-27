@@ -36,6 +36,15 @@ import catdata.opl.OplTerm;
 
 public class Util {
 	
+	public static <X> X get0(Collection<X> c) {
+		if (c.size() != 1) {
+			throw new RuntimeException();
+		}
+		for (X x : c) {
+			return x;
+		}
+		throw new RuntimeException();
+	}
 	
 	static <X extends Comparable<X>,Y> String printNicely(Set<Map<X, Y>> map) {
 		List<String> l = map.stream().map(x -> printNicely(x)).collect(Collectors.toList());
@@ -66,7 +75,7 @@ public class Util {
 		}
 	}
 	public static String maybeQuote(String s) {
-		if (s.contains(" ") || s.contains(".") /* || isInt(s) */) {
+		if (s.contains(" ") || s.contains(".") || isInt(s) ) {
 			return "\"" + s + "\"";
 		} else {
 			return s;
