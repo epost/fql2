@@ -459,7 +459,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		if (sorts.keySet().size() == sig.sorts.size()) {
 			return sorts;
 		}
-		throw new RuntimeException("Timeout exceeded");
+		throw new RuntimeException("Timeout exceeded " + sorts);
 	}
 
 

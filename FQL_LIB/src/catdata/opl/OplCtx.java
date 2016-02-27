@@ -30,7 +30,7 @@ public class OplCtx<S, V> {
 			}
 		}
 		String ret = Util.sep(l, ", ");
-		return OplExp.strip(ret);
+		return OplTerm.strip(ret);
 	}
 
 	public int indexOf(V var) {

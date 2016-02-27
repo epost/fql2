@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -34,6 +35,53 @@ import catdata.fqlpp.FUNCTION;
 import catdata.opl.OplTerm;
 
 public class Util {
+	
+	
+	static <X extends Comparable<X>,Y> String printNicely(Set<Map<X, Y>> map) {
+		List<String> l = map.stream().map(x -> printNicely(x)).collect(Collectors.toList());
+		Collections.sort(l);
+		return Util.sep(l, "\n");
+	}
+	static <X extends Comparable<X>,Y> String printNicely(Map<X, Y> map) {
+		List<X> l = new LinkedList<>(map.keySet());
+		Collections.sort(l);
+		boolean first = true;
+		String ret = "";
+		for (X key : l) {
+			if (!first) {
+				ret += ", ";
+			}
+			ret += key + "=" + map.get(key);
+			first = false;
+		}
+		return ret;
+	}
+	
+	public static boolean isInt(String s) {
+		try {
+			Integer.parseInt(s);
+			return true;
+		} catch (Exception ex) {
+			return false;
+		}
+	}
+	public static String maybeQuote(String s) {
+		if (s.contains(" ") || s.contains(".") /* || isInt(s) */) {
+			return "\"" + s + "\"";
+		} else {
+			return s;
+		}
+	}
+	public static void show(JComponent p, int w, int h, String title) {
+		JFrame f = new JFrame(title);
+		f.setContentPane(p);
+		f.pack();
+		if (w > 0 && h > 0) {
+			f.setSize(new Dimension(w, h));
+		}
+		f.setLocationRelativeTo(null);
+		f.setVisible(true);
+	}
 	
 	public static List<List<Integer>> multiply_many(List<List<Integer>> l, List<List<List<Integer>>> r) {
 		List<List<Integer>> ret = l;

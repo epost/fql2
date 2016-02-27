@@ -57,6 +57,8 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 public abstract class OplExp implements OplObject {
 
+	
+	
 	@Override
 	public JComponent display() {
 		CodeTextPanel p = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", toString());
@@ -1374,7 +1376,7 @@ public abstract class OplExp implements OplObject {
 			top.add(dst);
 
 			CodeTextPanel bot = new CodeTextPanel(BorderFactory.createEtchedBorder(),
-					"Re-write rules", strip(kb.printKB()));
+					"Re-write rules", OplTerm.strip(kb.printKB()));
 
 			pane.add(top);
 			pane.add(bot);
@@ -1427,7 +1429,7 @@ public abstract class OplExp implements OplObject {
 							List<String> u = z
 									.stream()
 									.map(o -> {
-										return strip(o.first + " |- "
+										return OplTerm.strip(o.first + " |- "
 												+ OplToKB.convert(o.second).toString());
 									}).collect(Collectors.toList());
 							if (u.isEmpty()) {
@@ -1478,7 +1480,8 @@ public abstract class OplExp implements OplObject {
 		@Override
 		public String toString() {
 			String ret = "\tsorts\n";
-			ret += "\t\t" + Util.sep(sorts, ", ") + ";\n";
+			Set<String> sorts0 = sorts.stream().map(x -> { return Util.maybeQuote(OplTerm.strip(x.toString())); }).collect(Collectors.toSet());
+			ret += "\t\t" + Util.sep(sorts0, ", ") + ";\n";
 
 			ret += "\tsymbols\n";
 			List<String> slist = new LinkedList<>();
@@ -1486,10 +1489,10 @@ public abstract class OplExp implements OplObject {
 				Pair<List<S>, S> v = symbols.get(k);
 				String s;
 				if (v.first.isEmpty()) {
-					s = strip(k.toString()) + " : " + v.second;
-
+					s = Util.maybeQuote(OplTerm.strip(k.toString())) + " : " +  Util.maybeQuote(OplTerm.strip(v.second.toString()));
 				} else {
-					s = strip(k.toString()) + " : " + Util.sep(v.first, ", ") + " -> " + v.second;
+					List<String> f = v.first.stream().map(x -> { return Util.maybeQuote(OplTerm.strip(x.toString())); }).collect(Collectors.toList());
+					s =  Util.maybeQuote(OplTerm.strip(k.toString())) + " : " + Util.sep(f, ", ") + " -> " +  Util.maybeQuote(OplTerm.strip(v.second.toString()));
 				}
 				slist.add(s);
 			}
@@ -1500,8 +1503,8 @@ public abstract class OplExp implements OplObject {
 			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> k : equations) {
 				String z = k.first.vars0.size() == 0 ? "" : "forall ";
 				String y = k.first.vars0.size() == 0 ? "" : ". ";
-				String s = z + k.first + y + strip(k.second.toString()) + " = "
-						+ strip(k.third.toString());
+				String s = z + k.first + y + OplTerm.strip(k.second.toString()) + " = "
+						+ OplTerm.strip(k.third.toString());
 				elist.add(s);
 			}
 			ret += "\t\t" + Util.sep(elist, ",\n\t\t") + ";\n";
@@ -1521,8 +1524,8 @@ public abstract class OplExp implements OplObject {
 						yyy.add(xx.first + " = " + xx.second);
 					}
 
-					String s = z + k.first + y + strip(Util.sep(xxx, ", ").toString()) + " -> "
-							+ strip(Util.sep(yyy, ","));
+					String s = z + k.first + y + OplTerm.strip(Util.sep(xxx, ", ").toString()) + " -> "
+							+ OplTerm.strip(Util.sep(yyy, ","));
 					elist.add(s);
 				}
 				ret += "\t\t" + Util.sep(elist, ",\n\t\t") + ";\n";
@@ -1830,8 +1833,8 @@ public abstract class OplExp implements OplObject {
 			ret += "\tgenerators\n";
 			List<String> slist = new LinkedList<>();
 			for (X k : gens.keySet()) {
-				String v = gens.get(k).toString();
-				String s = strip(k.toString()) + " : " + v;
+				String v = Util.maybeQuote(OplTerm.strip(gens.get(k).toString()));
+				String s = Util.maybeQuote(OplTerm.strip(k.toString())) + " : " + v;
 				slist.add(s);
 			}
 			ret += "\t\t" + Util.sep(slist, ",\n\t\t") + ";\n";
@@ -1839,15 +1842,13 @@ public abstract class OplExp implements OplObject {
 			ret += "\tequations\n";
 			List<String> elist = new LinkedList<>();
 			for (Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>> k : equations) {
-				String s = strip(k.first + " = " + k.second);
+				String s = OplTerm.strip(k.first.toString())  + " = " + OplTerm.strip(k.second.toString());
 				elist.add(s);
 			}
 
 			ret += "\t\t" + Util.sep(elist, ",\n\t\t") + ";\n";
 
-			return "presentation {\n" + ret + "} : " + S; // + "\n\nprec: " +
-															// prec + "\n\n" +
-															// sig.prec;
+			return "presentation {\n" + ret + "} : " + S; 
 		}
 
 		@Override
@@ -1937,8 +1938,8 @@ public abstract class OplExp implements OplObject {
 			List<Object[]> rows = new LinkedList<>();
 			for (C1 n : symbols.keySet()) {
 				Pair<OplCtx<S2, V>, OplTerm<C2, V>> f = symbols.get(n);
-				Object[] row = new Object[] { strip(n.toString()),
-						strip("forall " + f.first + ". " + f.second) };
+				Object[] row = new Object[] { OplTerm.strip(n.toString()),
+						OplTerm.strip("forall " + f.first + ". " + f.second) };
 				rows.add(row);
 			}
 			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), "Symbols",
@@ -1964,7 +1965,7 @@ public abstract class OplExp implements OplObject {
 				Pair<OplCtx<S2, V>, OplTerm<C2, V>> v = symbols.get(k);
 				String z = v.first.vars0.size() == 0 ? "" : "forall ";
 				String y = v.first.vars0.size() == 0 ? "" : " . ";
-				symbolsX.add(strip(k.toString()) + " -> " + z + v.first + y + v.second.toString());
+				symbolsX.add(OplTerm.strip(k.toString()) + " -> " + z + v.first + y + v.second.toString());
 			}
 			ret += "\t\t" + Util.sep(symbolsX, ",\n\t\t") + ";\n";
 
@@ -2380,7 +2381,7 @@ public abstract class OplExp implements OplObject {
 				sortsX.add(k
 						+ " -> {"
 						+ Util.sep(
-								sorts.get(k).stream().map(x -> strip(x.toString()))
+								sorts.get(k).stream().map(x -> OplTerm.strip(x.toString()))
 										.collect(Collectors.toList()), ", ") + "}");
 			}
 			ret += "\t\t" + Util.sep(sortsX, ", ") + ";\n";
@@ -2394,9 +2395,9 @@ public abstract class OplExp implements OplObject {
 					X j = v.get(i);
 					u.add("(("
 							+ Util.sep(
-									i.stream().map(x -> strip(x.toString()))
+									i.stream().map(x -> OplTerm.strip(x.toString()))
 											.collect(Collectors.toList()), ",") + "), "
-							+ strip(j.toString()) + ")");
+							+ OplTerm.strip(j.toString()) + ")");
 				}
 				String s = k + " -> {" + Util.sep(u, ", ") + "}";
 				slist.add(s);
@@ -2451,16 +2452,16 @@ public abstract class OplExp implements OplObject {
 				for (X arg : sorts.get(n)) {
 					List<Object> row = new LinkedList<>();
 					cols = new LinkedList<>();
-					cols.add(strip(n.toString()));
+					cols.add(OplTerm.strip(n.toString()));
 					row.add(arg);
 					for (C f : set) {
 						row.add(symbols.get(f).get(Collections.singletonList(arg)));
-						cols.add(strip(f.toString()));
+						cols.add(OplTerm.strip(f.toString()));
 					}
 					rows.add(row.toArray(new Object[] {}));
 				}
 				all.put(n.toString(),
-						JSWrapper.makePrettyTables(BorderFactory.createEmptyBorder(), strip(n.toString()) + " (" + rows.size() + ")",
+						JSWrapper.makePrettyTables(BorderFactory.createEmptyBorder(), OplTerm.strip(n.toString()) + " (" + rows.size() + ")",
 								rows.toArray(new Object[][] {}), cols.toArray(new String[] {})));
 			}
 
@@ -2481,7 +2482,7 @@ public abstract class OplExp implements OplObject {
 				List<String> l = new LinkedList<String>((List<String>) sig0.symbols.get(n).first);
 				l.add(sig0.symbols.get(n).second.toString());
 				all.put(n.toString(),
-						JSWrapper.makePrettyTables(BorderFactory.createEmptyBorder(), strip(n.toString()) + " (" + rows.size() + ")",
+						JSWrapper.makePrettyTables(BorderFactory.createEmptyBorder(), OplTerm.strip(n.toString()) + " (" + rows.size() + ")",
 								rows.toArray(new Object[][] {}), l.toArray(new String[] {})));
 			}
 			List<String> xxx = new LinkedList<>(all.keySet());
@@ -3252,7 +3253,8 @@ public abstract class OplExp implements OplObject {
 
 		@Override
 		public String toString() {
-			return "schema {\n entities\n  " + Util.sep(entities, ", ") + ";\n} : " + sig0; // /+ "\n\n + " + sig;
+			List<String> l = entities.stream().map(x -> { return  Util.maybeQuote(OplTerm.strip(x.toString())); }).collect(Collectors.toList());
+			return "schema {\n entities\n  " + Util.sep(l, ", ") + ";\n} : " + sig0; // /+ "\n\n + " + sig;
 		}
 	}
 
@@ -3818,17 +3820,6 @@ public abstract class OplExp implements OplObject {
 		}
 	} 
 
-	static String strip(String s) {
-		if (!NEWDEBUG.debug.opl.opl_pretty) {
-			return s;
-		}
-		String ret = s.replace("inl ", "").replace("inr ", "").replace("()", "")
-				.replace("forall . ", "").trim();
-		if (ret.startsWith("|- ")) {
-			ret = ret.substring(3);
-		}
-		return ret;
-	}
 	
 	public  JComponent doSchemaView(Color clr, Graph sgv, Set entities) {
 		if (sgv.getVertexCount() == 0) {
@@ -3850,7 +3841,7 @@ public abstract class OplExp implements OplObject {
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer ttt = arg0 -> strip(arg0.toString());
+		Transformer ttt = arg0 -> OplTerm.strip(arg0.toString());
 		vv.getRenderContext().setVertexLabelTransformer(ttt);
 		vv.getRenderContext().setEdgeLabelTransformer(ttt);
 

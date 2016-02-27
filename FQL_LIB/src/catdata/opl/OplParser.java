@@ -325,17 +325,21 @@ public class OplParser {
 		return toTerm(null, consts(m), o, false);
 	} 
 	
+	static boolean sugarForNat = false;
+	
 	@SuppressWarnings({ "rawtypes" })
 	public static final Program<OplExp> program(String s) {
 		List<Triple<String, Integer, OplExp>> ret = new LinkedList<>();
 		List decls = (List) program.parse(s);
 
+		sugarForNat = false;
 		for (Object d : decls) {
 			org.codehaus.jparsec.functors.Pair pr = (org.codehaus.jparsec.functors.Pair) d;
 			Tuple3 decl = (Tuple3) pr.b;
 			
 			toProgHelper(pr.a.toString(), s, ret, decl);
 		}
+		sugarForNat = false;
 
 		return new Program<OplExp>(ret); 
 	}
@@ -358,7 +362,7 @@ public class OplParser {
 		Tuple3 b = (Tuple3) t.b;
 		Tuple3 c = (Tuple3) t.c;
 		Tuple3 d = (Tuple3) t.d;
-				
+						
 		Set<String> sorts = a == null ? new HashSet<>() : new HashSet<>((List<String>) a.b);
 		
 		List<Tuple3> symbols0 = b == null ? new LinkedList<>() : (List<Tuple3>) b.b;
@@ -398,6 +402,11 @@ public class OplParser {
 			symbols.put(name, new Pair<>(args, dom));
 			}		
 		}
+		
+		if (sorts.contains("Nat") && symbols.keySet().contains("zero") && symbols.keySet().contains("succ")) {
+			sugarForNat = true;
+		}
+		
 		List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> equations = new LinkedList<>();
 		for (org.codehaus.jparsec.functors.Pair<Tuple3, Tuple3> x : equations0) {
 			List<Tuple3> fa = x.a == null ? new LinkedList<>() : (List<Tuple3>) x.a.b;
@@ -693,7 +702,11 @@ public class OplParser {
 			String a0 = (String) a;
 			try {
 				int i = Integer.parseInt(a0);
-				return Util.natToTerm(i);
+				if (sugarForNat) {
+					return Util.natToTerm(i);
+				} else {
+					//return new OplTerm(a0);
+				}
 			} catch (Exception e) { }
 				
 			if (vars != null && vars.contains(a0)) {

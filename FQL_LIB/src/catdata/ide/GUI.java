@@ -49,6 +49,8 @@ import catdata.fqlpp.KBViewer;
 import catdata.nested.NraViewer;
 import catdata.opl.CfgToOpl;
 import catdata.opl.SqlChecker;
+import catdata.opl.SqlToOpl;
+import catdata.sql.SqlLoader;
 
 @SuppressWarnings("serial")
 /**
@@ -227,11 +229,23 @@ public class GUI extends JPanel {
 			checkAction();
 		});
 		
-		MenuItem sqlCheckItem = new MenuItem("SQL Checker / SQL to OPL");
+		MenuItem sqlLoaderItem = new MenuItem("SQL Loader");
+		toolsMenu.add(sqlLoaderItem);
+		sqlLoaderItem.addActionListener(x -> {
+			SqlLoader.showLoader();
+		});
+		
+		MenuItem sqlToOplItem = new MenuItem("SQL to OPL");
+		transMenu.add(sqlToOplItem);
+		sqlToOplItem.addActionListener(x -> {
+			SqlToOpl.showPanel();
+		});
+		
+		MenuItem sqlCheckItem = new MenuItem("SQL Checker");
 		toolsMenu.add(sqlCheckItem);
 		sqlCheckItem.addActionListener(x -> {
 			new SqlChecker();
-		});
+		}); 
 
 		MenuItem raToFqlItem = new MenuItem("SPCU to FQL");
 		transMenu.add(raToFqlItem);

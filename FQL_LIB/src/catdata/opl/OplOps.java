@@ -140,7 +140,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			OplSig s0 = (OplSig) s;		
 			e.e.type(s0, new OplCtx<String, String>());
 			try {
-				return new OplString(OplExp.strip(OplToKB.redBy(i0, OplToKB.convert(e.e.inLeft())).toString()));
+				return new OplString(OplTerm.strip(OplToKB.redBy(i0, OplToKB.convert(e.e.inLeft())).toString()));
 //				return new OplString(e.e.eval((Invocable)i0.engine).toString());
 			} catch (Exception ee) {
 				ee.printStackTrace();

@@ -151,7 +151,7 @@ public class JSWrapper {
 			}
 
 			ret = new DefaultTableCellRenderer().getTableCellRendererComponent(table,
-					OplExp.strip(value.toString()), false, hasFocus, row, column);
+					OplTerm.strip(value.toString()), false, hasFocus, row, column);
 			return ret;
 		}
 

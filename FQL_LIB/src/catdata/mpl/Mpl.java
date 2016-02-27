@@ -576,11 +576,20 @@ public class Mpl implements MplObject {
 			public JComponent display() {
 				
 				JTabbedPane p = new JTabbedPane();
+				
 				MplStrict<O, A> op = new MplStrict<O,A>(sch);
 				Triple<List<MplStrict.Node<O,A>>,List<MplStrict.Node<O,A>>,String> r = a.accept(new Unit(), op);
 				JComponent g = doTermView(Color.green, Color.red, op.g); 
-				p.addTab("Graph", g);
-				p.addTab("Dot", new CodeTextPanel("", "digraph foo { " +  r.third + " }"));
+				p.addTab("Graph1", g);
+				p.addTab("Dot1", new CodeTextPanel("", "digraph foo { " +  r.third + " }"));
+				
+			/*	MplStrict2<O, A> op2 = new MplStrict2<O,A>(sch);
+				Pair<MplStrict2.Node<O,A>,String> r2 = a.accept(new Unit(), op2);
+				JComponent g2 = doTermView2(Color.green, Color.red, op2.g); 
+				p.addTab("Graph2", g2);
+				p.addTab("Dot2", new CodeTextPanel("", "digraph foo { " +  r2.second + " }"));
+*/
+				
 				return p;
 				
 			}
@@ -635,6 +644,30 @@ public class Mpl implements MplObject {
 			return arg0.term + " #" + arg0.which + " " + w;
 		};
 		vv.getRenderContext().setVertexLabelTransformer(ttt);
+		vv.getRenderContext().setEdgeLabelTransformer(xx -> "");
+
+		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+		JPanel ret = new JPanel(new GridLayout(1, 1));
+		ret.add(zzz);
+		ret.setBorder(BorderFactory.createEtchedBorder());
+		return ret;
+	}
+	public static <O,A> JComponent doTermView2(Color src, Color dst, Graph<MplStrict2.Node<O,A>, Integer> sgv) {
+		if (sgv.getVertexCount() == 0) {
+			return new JPanel();
+		}
+		Layout layout = new FRLayout<>(sgv);
+		layout.setSize(new Dimension(600, 400));
+		VisualizationViewer vv = new VisualizationViewer<>(layout);
+		
+		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
+		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		vv.setGraphMouse(gm);
+		gm.setMode(Mode.PICKING);
+		//vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+
+		
+//		vv.getRenderContext().setVertexLabelTransformer(ttt);
 		vv.getRenderContext().setEdgeLabelTransformer(xx -> "");
 
 		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);

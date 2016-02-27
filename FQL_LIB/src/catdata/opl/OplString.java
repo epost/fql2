@@ -14,7 +14,7 @@ public class OplString implements OplObject {
 
 	@Override
 	public String toString() {
-		return OplExp.strip(str);
+		return OplTerm.strip(str);
 	}
 
 	@Override

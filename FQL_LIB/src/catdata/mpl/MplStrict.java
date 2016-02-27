@@ -3,7 +3,6 @@ package catdata.mpl;
 import java.util.LinkedList;
 import java.util.List;
 
-import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.ide.Util;

@@ -12,6 +12,7 @@ import javax.script.ScriptException;
 
 import catdata.Chc;
 import catdata.Pair;
+import catdata.ide.NEWDEBUG;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplSetInst;
 import catdata.opl.OplExp.OplSig;
@@ -157,8 +158,23 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 			return Integer.toString(i);
 		}
 		List<String> x = args.stream().map(z -> z.toString()).collect(Collectors.toList());
-		String ret = head + "(" + Util.sep(x, ", ") + ")";
-		return OplExp.strip(ret);
+		String ret =  Util.maybeQuote(strip(head.toString())) + "(" + Util.sep(x, ", ") + ")";
+		return ret;
+	}
+
+	public static String strip(String s) {
+		if (!NEWDEBUG.debug.opl.opl_pretty) {
+			return s;
+		}
+		String ret = s.replace("inl ", "").replace("inr ", "").replace("()", "")
+				.replace("forall . ", "").trim();
+		if (ret.startsWith("|- ")) {
+			ret = ret.substring(3);
+		}
+		if (ret.startsWith("\"") && ret.endsWith("\"")) {
+			ret = ret.substring(1, ret.length()-1);
+		}
+		return ret;
 	}
 
 	public <S> OplTerm<C, V> subst(OplCtx<S, V> G, List<OplTerm<C, V>> L) {

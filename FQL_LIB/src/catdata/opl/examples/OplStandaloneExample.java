@@ -91,7 +91,7 @@ public class OplStandaloneExample {
 		Map<String, String> sortsM = Util.singMap("A", "B");
 		
 		//the type OplMapping<S1,C1,V,S2,C2> is for mappings from OplSig<S1,C1,V> to OplSig<S2,C2,V>.
-		//it requires a map on sorts S1 -> C2, and a map from symbols C1 to terms-in-context, that is,
+		//it requires a map on sorts S1 -> S2, and a map from symbols C1 to terms-in-context, that is,
 		//a pair of a map V -> S2 and a term using those variables and symbols in C2
 		OplMapping<String,String,String,String,String> F = new OplMapping<>(sortsM, symbolsM, "S", "T"); //the "S" and "T" are for display purposes only
 		F.validate(S, T); // validate is where the source and target of F are set and it is checked that F is a functor
