@@ -146,6 +146,8 @@ public class OplIntegrationExample extends Example {
 			+ "\n		Type_att -> forall x. T_att2(x); 		"
 			+ "\n} : S2 -> T"
 			+ "\n"
+			+ "\n//this is the pushout schema, but it is easier to work with a schema written by hand (T)"
+			+ "\nZ = PUSHOUT F1 F2"
 			+ "\n///////////////////////////////////////////////////////////////////////////"
 			+ "\n"
 			+ "\nI1 = INSTANCE {"

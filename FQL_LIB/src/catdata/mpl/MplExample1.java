@@ -44,7 +44,20 @@ public class MplExample1 extends Example {
 			+ "\nidA = eval T id A"
 			+ "\nidAidA = eval T (id A ; id A)"
 			+ "\ntre = eval T tr e"
-			+ "\n";
+			+ "\n"
+	+ "\nS = theory {"
+	+ "\n	sorts"
+	+ "\n		X;"
+	+ "\n	symbols"
+	+ "\n		F : (X*X) -> (X*X),"
+	+ "\n		G : (X*X) -> (X*X);"
+	+ "\n	equations;"
+	+ "\n}"
+	+ "\n"
+	+ "\nf = eval S tr ((((F * id X) ; alpha1 X X X); (id X * G)) ; (alpha2 X X X ; (sym X X * id X)))"
+	+ "\n";
+
+
 
 
 

@@ -16,6 +16,7 @@ import catdata.mpl.Mpl.MplTerm.MplId;
 import catdata.mpl.Mpl.MplTerm.MplLambda;
 import catdata.mpl.Mpl.MplTerm.MplPair;
 import catdata.mpl.Mpl.MplTerm.MplRho;
+import catdata.mpl.Mpl.MplTerm.MplSym;
 import catdata.mpl.Mpl.MplTerm.MplTr;
 import catdata.mpl.Mpl.MplTermVisitor;
 import catdata.mpl.Mpl.MplType.MplBase;
@@ -202,6 +203,11 @@ public class MplStrict2<O,A> implements MplTypeVisitor<O, List<O>, Unit>,
 			ret += xs.first + " -> " + xs.first + ";";
 		
 		return new Pair<>(n, ret + " }");
+	}
+
+	@Override
+	public Pair<Node<O, A>, String> visit(Unit env, MplSym<O, A> e) {
+		throw new RuntimeException();
 	}
 	
 	///////////////

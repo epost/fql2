@@ -51,6 +51,7 @@ import catdata.opl.CfgToOpl;
 import catdata.opl.SqlChecker;
 import catdata.opl.SqlToOpl;
 import catdata.sql.SqlLoader;
+import catdata.sql.SqlMapper;
 
 @SuppressWarnings("serial")
 /**
@@ -235,6 +236,12 @@ public class GUI extends JPanel {
 			SqlLoader.showLoader();
 		});
 		
+		MenuItem sqlMapperItem = new MenuItem("SQL Mapper");
+		toolsMenu.add(sqlMapperItem);
+		sqlMapperItem.addActionListener(x -> {
+			SqlMapper.showGuesser();
+		});
+		
 		MenuItem sqlToOplItem = new MenuItem("SQL to OPL");
 		transMenu.add(sqlToOplItem);
 		sqlToOplItem.addActionListener(x -> {
@@ -320,15 +327,6 @@ public class GUI extends JPanel {
 		});
 
 		Menu helpMenu = new Menu("About");
-		/*
-		 * MenuItem helpItem = new MenuItem("Help"); helpMenu.add(helpItem);
-		 * helpItem.addActionListener(new ActionListener() {
-		 * 
-		 * @Override public void actionPerformed(ActionEvent e) { helpAction();
-		 * }
-		 * 
-		 * });
-		 */
 		MenuItem aboutItem = new MenuItem("About");
 		helpMenu.add(aboutItem);
 		aboutItem.addActionListener(new ActionListener() {
@@ -363,28 +361,19 @@ public class GUI extends JPanel {
 			}
 		});
 
-		// openItem2.addActionListener(x -> openAction2());
 
 		menuBar.add(fileMenu);
 		menuBar.add(editMenu);
 		menuBar.add(toolsMenu);
 		menuBar.add(transMenu);
-		// menuBar.add(optionsMenu);
 
-		// menuBar.add(webMenu);
 		menuBar.add(helpMenu);
 
-		// JSplitPane p = new FQLSplit(.8, JSplitPane.HORIZONTAL_SPLIT);
-		// topArea.setPreferredSize(new Dimension(600,600));
-		// p.add(topArea);
-		// p.add(bottomArea);
-		// p.setBorder(BorderFactory.createEmptyBorder());
-
+	
 		pan.setLayout(new BorderLayout());
 
 		JPanel toolBar = new JPanel(new GridLayout(1, 7));
-		// toolBar.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
+	
 		JButton compileB = new JButton("Run");
 		compileB.addActionListener(new ActionListener() {
 			@SuppressWarnings("rawtypes")
@@ -393,14 +382,6 @@ public class GUI extends JPanel {
 				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex())).runAction();
 			}
 		});
-
-		/*
-		 * JButton helpB = new JButton("Help"); helpB.addActionListener(new
-		 * ActionListener() {
-		 * 
-		 * @Override public void actionPerformed(ActionEvent e) { helpAction();
-		 * } });
-		 */
 
 		JButton new_button = new JButton("New " + Language.getDefault());
 		new_button.addActionListener(new ActionListener() {
@@ -482,28 +463,7 @@ public class GUI extends JPanel {
 		newAction(e.toString(), e.getText(), e.lang());
 	}
 
-	/*
-	 * private static void formatAction() { int i = editors.getSelectedIndex();
-	 * CodeEditor c = (CodeEditor) editors.getComponentAt(i); if (c == null) {
-	 * return; } c.format(); }
-	 */
-	/*
-	 * private static void vedit() { int i = editors.getSelectedIndex();
-	 * CodeEditor c = (CodeEditor) editors.getComponentAt(i); if (c == null) {
-	 * return; } c.vedit(); }
-	 */
-	/*
-	 * private static void checkAction() { int i = editors.getSelectedIndex();
-	 * CodeEditor c = (CodeEditor) editors.getComponentAt(i); if (c == null) {
-	 * return; } c.check(); }
-	 */
-	/*
-	 * private static void sqlToFqlAction() { new SqlToFql(); }
-	 * 
-	 * private static void ringToFqlAction() { new RingToFql(); }
-	 * 
-	 * private static void raToFqlAction() { new RaToFql(); }
-	 */
+
 
 	private static void abortAction() {
 		int i = editors.getSelectedIndex();
@@ -533,22 +493,7 @@ public class GUI extends JPanel {
 		titles.remove(c.id);
 	}
 
-	/*
-	 * static void helpAction() { JTextArea jta = new
-	 * JTextArea(Examples.helpString); jta.setWrapStyleWord(true); //
-	 * jta.setEditable(false); jta.setLineWrap(true); JScrollPane p = new
-	 * JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-	 * JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); p.setPreferredSize(new
-	 * Dimension(650, 300));
-	 * 
-	 * JOptionPane pane = new JOptionPane(p); // Configure via set methods
-	 * JDialog dialog = pane.createDialog(null, "Help"); dialog.setModal(false);
-	 * dialog.setVisible(true); dialog.setResizable(true);
-	 * 
-	 * // JOptionPane.showMessageDialog(null, p, "Help", //
-	 * JOptionPane.PLAIN_MESSAGE, null); }
-	 */
-
+	
 	public static void exitAction() {
 		delay();
 		int i = 0;
@@ -567,11 +512,6 @@ public class GUI extends JPanel {
 			return;
 		}
 		System.exit(0);
-
-		// if (abortBecauseDirty()) {
-		// return;
-		// }
-		// System.exit(0);
 	}
 
 	protected static void saveAction() {

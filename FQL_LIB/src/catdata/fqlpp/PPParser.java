@@ -49,7 +49,7 @@ public class PPParser {
 			"equations", "id", "delta", "sigma", "pi", "eval", "in", "path", "union",
 			"relationalize",  "fst", "forall", "exists", "tt", "ff", "APPLY",
 			"snd", "inl", "inr", "curry",  "void", "unit", "CURRY", "pivot", "unpivot",
-			"prop", "iso1", "iso2", "true", "false", "char", "kernel" };
+			"prop", "iso1", "iso2", "true", "false", "char", "kernel", "union", "intersect" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -157,6 +157,11 @@ public class PPParser {
 
 		Parser<?> app = Parsers.tuple(term("apply"), ident(), term("on"), term("object"), ref.lazy());
 		
+		Parser<?> union = Parsers.between(term("("),
+				Parsers.tuple(ref.lazy(), term("union"), ref.lazy()), term(")"));
+		Parser<?> isect = Parsers.between(term("("),
+				Parsers.tuple(ref.lazy(), term("intersect"), ref.lazy()), term(")"));
+		
 		Parser<?> plusTy = Parsers.between(term("("),
 				Parsers.tuple(ref.lazy(), term("+"), ref.lazy()), term(")"));
 		Parser<?> prodTy = Parsers.between(term("("),
@@ -166,7 +171,7 @@ public class PPParser {
 		Parser<?> k = Parsers.tuple(term("cod"), ident());
 		Parser<?> v = Parsers.tuple(term("dom"), ident());
 		Parser<?> u = Parsers.tuple(term("range"), ident());
-		Parser<?> a = Parsers.or(new Parser<?>[] { term("void"), term("unit"), term("prop"),
+		Parser<?> a = Parsers.or(new Parser<?>[] { union, isect, term("void"), term("unit"), term("prop"),
 				 plusTy, prodTy, expTy, k, v, u,
 				ident(), setConst(), Terminals.IntegerLiteral.PARSER, app  });
 
@@ -244,7 +249,13 @@ public class PPParser {
 				return new SetExp.Times(toSet(t.a), toSet(t.c));
 			} else if (y.equals("^")) {
 				return new SetExp.Exp(toSet(t.a), toSet(t.c));
-			} else if (t.a.toString().equals("{")) {
+			} else if (y.equals("union")) {
+				return new SetExp.Union(toSet(t.a), toSet(t.c));
+			} else if (y.equals("intersect")) {
+				return new SetExp.Intersect(toSet(t.a), toSet(t.c));
+			} 
+			
+			else if (t.a.toString().equals("{")) {
 				List tb = (List) t.b;
 				Set x = new HashSet();
 				for (Object uu : tb) {

@@ -7,6 +7,100 @@ import catdata.ide.Util;
 
 @SuppressWarnings("serial")
 public abstract class SetExp implements Serializable {
+	
+	public static class Intersect extends SetExp {
+		public SetExp set1, set;
+
+		@Override
+		public <R, E> R accept(E env, SetExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+		public Intersect(SetExp set1, SetExp set) {
+			super();
+			this.set1 = set1;
+			this.set = set;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((set == null) ? 0 : set.hashCode());
+			result = prime * result + ((set1 == null) ? 0 : set1.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Intersect other = (Intersect) obj;
+			if (set == null) {
+				if (other.set != null)
+					return false;
+			} else if (!set.equals(other.set))
+				return false;
+			if (set1 == null) {
+				if (other.set1 != null)
+					return false;
+			} else if (!set1.equals(other.set1))
+				return false;
+			return true;
+		}
+		
+	}
+	
+	public static class Union extends SetExp {
+		public SetExp set1, set;
+		
+		public Union(SetExp set1, SetExp set) {
+			super();
+			this.set1 = set1;
+			this.set = set;
+		}
+
+		@Override
+		public <R, E> R accept(E env, SetExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((set == null) ? 0 : set.hashCode());
+			result = prime * result + ((set1 == null) ? 0 : set1.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Union other = (Union) obj;
+			if (set == null) {
+				if (other.set != null)
+					return false;
+			} else if (!set.equals(other.set))
+				return false;
+			if (set1 == null) {
+				if (other.set1 != null)
+					return false;
+			} else if (!set1.equals(other.set1))
+				return false;
+			return true;
+		}
+		
+	}
 
 	public static class Apply extends SetExp {
 		public String f;
@@ -585,6 +679,11 @@ public abstract class SetExp implements Serializable {
 		public R visit(E env, Numeral e);
 
 		public R visit(E env, Apply e);
+		
+		public R visit(E env, Union e);
+		
+		public R visit(E env, Intersect e);
+		
 	}
 
 }

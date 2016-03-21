@@ -28,6 +28,7 @@ import catdata.fqlpp.FnExp.Var;
 import catdata.fqlpp.SetExp.Cod;
 import catdata.fqlpp.SetExp.Dom;
 import catdata.fqlpp.SetExp.Exp;
+import catdata.fqlpp.SetExp.Intersect;
 import catdata.fqlpp.SetExp.Numeral;
 import catdata.fqlpp.SetExp.One;
 import catdata.fqlpp.SetExp.Plus;
@@ -35,11 +36,12 @@ import catdata.fqlpp.SetExp.Prop;
 import catdata.fqlpp.SetExp.Range;
 import catdata.fqlpp.SetExp.SetExpVisitor;
 import catdata.fqlpp.SetExp.Times;
+import catdata.fqlpp.SetExp.Union;
 import catdata.fqlpp.SetExp.Zero;
 import catdata.fqlpp.cat.FinSet;
+import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.fqlpp.cat.Functor;
 import catdata.fqlpp.cat.Transform;
-import catdata.fqlpp.cat.FinSet.Fn;
 
 @SuppressWarnings({ "rawtypes", "serial" })
 public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor<FinSet.Fn, FQLPPProgram> , Serializable {
@@ -51,6 +53,31 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 	
 	@SuppressWarnings("unused")
 	private SetOps() { }
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Set visit(FQLPPProgram env, Union e) {
+		Set s = e.set.accept(env, this);
+		Set s1 = e.set1.accept(env, this);
+		Set ret = new HashSet<>();
+		ret.addAll(s);
+		ret.addAll(s1);
+		return ret;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Set visit(FQLPPProgram env, Intersect e) {
+		Set s = e.set.accept(env, this);
+		Set s1 = e.set1.accept(env, this);
+		Set ret = new HashSet<>();
+		for (Object x : s) {
+			if (s1.contains(x)) {
+				ret.add(x);
+			}
+		}
+		return ret;
+	}
 	
 	@Override
 	public Fn visit(FQLPPProgram env, Id e) {

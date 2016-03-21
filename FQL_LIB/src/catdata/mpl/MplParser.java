@@ -32,6 +32,7 @@ import catdata.mpl.Mpl.MplTerm.MplId;
 import catdata.mpl.Mpl.MplTerm.MplLambda;
 import catdata.mpl.Mpl.MplTerm.MplPair;
 import catdata.mpl.Mpl.MplTerm.MplRho;
+import catdata.mpl.Mpl.MplTerm.MplSym;
 import catdata.mpl.Mpl.MplTerm.MplTr;
 import catdata.mpl.Mpl.MplType;
 import catdata.mpl.Mpl.MplType.MplBase;
@@ -51,7 +52,7 @@ public class MplParser {
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
-		"tr", "id", "I", "theory", "eval", "sorts", "symbols", "equations", "lambda1", "lambda2", "rho1", "rho2", "alpha1", "alpha2"
+		"sym", "tr", "id", "I", "theory", "eval", "sorts", "symbols", "equations", "lambda1", "lambda2", "rho1", "rho2", "alpha1", "alpha2"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -116,10 +117,11 @@ public class MplParser {
 		Parser<?> rho2 = Parsers.tuple(term("rho2"), type() );
 		Parser<?> id = Parsers.tuple(term("id"), type());
 		Parser<?> tr = Parsers.tuple(term("tr"), ref.lazy());
+		Parser<?> sym = Parsers.tuple(term("sym"), type(), type() );
 
 		Parser<?> rho = Parsers.tuple(term("("), ref.lazy(), term("*"), ref.lazy(), term(")"));
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { tr, id, ident(), prod, comp, alpha1, alpha2, lambda1, lambda2, rho1, rho2 });
+		Parser<?> a = Parsers.or(new Parser<?>[] { sym, tr, id, ident(), prod, comp, alpha1, alpha2, lambda1, lambda2, rho1, rho2 });
 		
 		ref.set(a);
 
@@ -226,6 +228,12 @@ public class MplParser {
 			}
 			if (t.a.toString().equals("alpha2")) {
 				return new MplAlpha<>(toType(t.b), toType(t.c), toType(t.d), false);
+			}
+		}
+		if (o instanceof Tuple3) {
+			Tuple3 t = (Tuple3) o;
+			if (t.a.toString().equals("sym")) {
+				return new MplSym<>(toType(t.b), toType(t.c));
 			}
 		}
 		if (o instanceof org.codehaus.jparsec.functors.Pair) {

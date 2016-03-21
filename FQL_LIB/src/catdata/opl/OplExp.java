@@ -63,6 +63,8 @@ public abstract class OplExp implements OplObject {
 	//oplterms should have "object" (non constructor) for parser (can move succ/nat logic here too)
 	//move away from strings - include other exps, full recursive in oplops
 	//move nf out of kb
+	//do not need set valued models and presentations per se, can just use pieces of them return from saturation
+	//move to separate "compile" keyowrd J = compile C I where C is theory or javascript 
 	
 	@Override
 	public JComponent display() {
@@ -640,7 +642,98 @@ public abstract class OplExp implements OplObject {
 
 	}
 	
-	
+	public static class OplPushoutBen extends OplExp {
+		
+		String s1, s2;
+		OplMapping<String,String,String,String,String> F1;
+		OplMapping<String,String,String,String,String> F2;
+		
+		@Override
+		public JComponent display() {
+			return pushout().display();
+		}
+
+		public OplPushoutBen(String s1, String s2) {
+			this.s1 = s1;
+			this.s2 = s2;
+		}
+		
+		public void validate(OplMapping<String,String,String,String,String> F1, 
+							 OplMapping<String,String,String,String,String> F2) {
+			this.F1 = F1;
+			this.F2 = F2;
+			if (!F1.src.equals(F2.src)) {
+				throw new RuntimeException("Sources do not match:\n\n" + F1.src + "\n\n---------\n\n" + F2.src);
+			}
+			if (!Collections.disjoint(F1.dst.sorts, F2.dst.sorts)) {
+				throw new RuntimeException("Sorts not disjoint");
+			}
+			if (!Collections.disjoint(F1.dst.symbols.keySet(), F2.dst.symbols.keySet())) {
+				throw new RuntimeException("Symbols not disjoint");
+			}
+		}
+		
+		public OplSig<String, String, String> pushout() {
+			Set<String> sorts = new HashSet<>();
+			sorts.addAll(F1.dst.sorts);
+			sorts.addAll(F2.dst.sorts);
+			
+			Map<String, Pair<List<String>, String>> symbols = new HashMap<>();
+			symbols.putAll(F1.dst.symbols);
+			symbols.putAll(F2.dst.symbols);
+			
+			List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> equations = new LinkedList<>();
+			equations.addAll(F1.dst.equations);
+			equations.addAll(F2.dst.equations);
+			for (String e : F1.src.symbols.keySet()) {
+				Pair<OplCtx<String, String>, OplTerm<String, String>> x = F1.symbols.get(e);
+				Pair<OplCtx<String, String>, OplTerm<String, String>> y = F2.symbols.get(e);
+				
+				Map<String, OplTerm<String, String>> m = new HashMap<>();
+				int i = 0;
+				for (Pair<String, String> k : y.first.values2()) {
+					m.put(k.first, new OplTerm<>(x.first.values2().get(i++).first));
+				}
+				OplTerm<String, String> z = y.second.subst(m);
+				equations.add(new Triple<>(x.first, x.second, z));
+			}
+			
+			for (String s : F1.src.sorts) {
+				String s1 = F1.sorts.get(s);
+				String s2 = F2.sorts.get(s);
+				sorts.remove(s2);
+				Map<String, Pair<List<String>, String>> symbols0 = symbols;
+				symbols = new HashMap<>();
+				for (String c : symbols0.keySet()) {
+					Pair<List<String>, String> t = symbols0.get(c);
+					List<String> l = t.first.stream().map(x -> { return x.equals(s2) ? s1 : x; }).collect(Collectors.toList());
+					symbols.put(c, new Pair<>(l, t.second.equals(s2) ? s1 : t.second));
+				}
+				List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> equations0 = equations;
+				equations = new LinkedList<>();
+				for (Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>> eq : equations0) {
+					List<Pair<String, String>> l = new LinkedList<>();
+					for (Pair<String, String> p : eq.first.values2()) {
+						l.add(new Pair<>(p.first, p.second.equals(s2) ? s1 : p.second));
+					}
+					OplCtx<String, String> ctx2 = new OplCtx<>(l);
+					equations.add(new Triple<>(ctx2, eq.second, eq.third));
+				}
+			}			
+			
+			OplSig<String, String, String> ret = new OplSig<>(F1.src.fr, new HashMap<>(), sorts, symbols, equations);
+			ret.validate();
+			
+			return ret;
+		}
+
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+	}
+
 	public static class OplPushout<S,C,V,X,Y,Z> extends OplExp {
 		
 		String s1, s2;
@@ -1853,7 +1946,7 @@ public abstract class OplExp implements OplObject {
 
 			ret += "\t\t" + Util.sep(elist, ",\n\t\t") + ";\n";
 
-			return "presentation {\n" + ret + "} : " + S; 
+			return "presentation {\n" + ret + "} : " + S + "\n\n" + toSig(); 
 		}
 
 		@Override
@@ -3440,7 +3533,7 @@ public abstract class OplExp implements OplObject {
 			try {
 				Quad<OplSetInst<S, C, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>, OplPres<S, C, V, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<C, X>, V>>> xxx = saturate();
 				ret.add(new CodeTextPanel(BorderFactory.createEtchedBorder(), "", xxx.third
-						.toString()), "Type Algebra");
+						.toString() ), "Type Algebra");
 
 				ret.add(xxx.first.makeTables(S.projT().sorts), "Saturation");
 				ret.add(xxx.fourth.makeTables(S.projT().sorts), "Normalized");
@@ -3808,6 +3901,8 @@ public abstract class OplExp implements OplObject {
 		public R visit(E env, OplDelta0 e);
 		
 		public R visit(E env, OplPivot e);
+		
+		public R visit(E env, OplPushoutBen e);
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////////////////////////////////////

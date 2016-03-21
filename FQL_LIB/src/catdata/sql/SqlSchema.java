@@ -166,8 +166,20 @@ public class SqlSchema {
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	
+	private Set<SqlColumn> allColumns;
+	public Set<SqlColumn> cols() {
+		if (allColumns != null) {
+			return allColumns;
+		}
+		allColumns = new HashSet<>();
+		for (SqlTable t : tables) {
+			allColumns.addAll(t.columns);
+		}
+		return allColumns;
+	}
+	
 	private Map<String, SqlTable> tableMap = new HashMap<>();
-	public SqlTable getTable(String name) {
+	private SqlTable getTable0(String name) {
 		SqlTable t = tableMap.get(name.toUpperCase());
 		if (t != null) {
 			return t;
@@ -178,7 +190,72 @@ public class SqlSchema {
 				return table;
 			}
 		}
-		throw new RuntimeException("Not a table: " + name);
+		return null;
+	}
+	
+	public SqlTable getTable(String name) {
+		SqlTable ret = getTable0(name);
+		if (ret == null) {
+			throw new RuntimeException("Not a table: " + name);
+		}
+		return ret;
+	}
+	
+	public boolean isTable(String name) {
+		SqlTable ret = getTable0(name);
+		if (ret == null) {
+			return false;
+		}
+		return true;
+	}
+	
+	private Map<String, SqlColumn> colNames;
+	private SqlColumn getColumn0(String name) {
+		if (colNames != null) {
+			return colNames.get(name);
+		}
+		colNames = new HashMap<>();
+		for (SqlColumn c : cols()) {
+			colNames.put(c.table.name + c.name, c);
+		}
+		return colNames.get(name);
+	}
+	
+	public SqlColumn getColumn(String name) {
+		SqlColumn ret = getColumn0(name);
+		if (ret == null) {
+			throw new RuntimeException("Not a column: " + name);
+		}
+		return ret;
+	}
+	public boolean isColumn(String name) {
+		return getColumn0(name) != null;
+	}
+	
+	private Map<String, SqlForeignKey> fkNames;
+	private SqlForeignKey getForeignKey0(String name) {
+		if (fkNames != null) {
+			return fkNames.get(name);
+		}
+		fkNames = new HashMap<>(); 
+		for (SqlForeignKey c : fks) {
+			if (fkNames.containsKey(c.name)) {
+				throw new RuntimeException("Report to Ryan: non-unique FK name");
+			}
+			fkNames.put(c.name, c);
+		}
+		return fkNames.get(name);
+	}
+	
+	public SqlForeignKey getForeignKey(String name) {
+		SqlForeignKey ret = getForeignKey0(name);
+		if (ret == null) {
+			throw new RuntimeException("Not a foreign key: " + name);
+		}
+		return ret;
+	}
+	public boolean isForeignKey(String name) {
+		return getForeignKey0(name) != null;
 	}
 
 	private Map<String, Set<SqlForeignKey>> fksFrom0 = new HashMap<>();

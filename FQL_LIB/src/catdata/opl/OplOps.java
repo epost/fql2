@@ -24,6 +24,7 @@ import catdata.opl.OplExp.OplPivot;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplPresTrans;
 import catdata.opl.OplExp.OplPushout;
+import catdata.opl.OplExp.OplPushoutBen;
 import catdata.opl.OplExp.OplPushoutSch;
 import catdata.opl.OplExp.OplSCHEMA0;
 import catdata.opl.OplExp.OplSat;
@@ -270,7 +271,21 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			throw new RuntimeException(e.s2 + " is not a ty mapping");
 		}
 		e.validate((OplTyMapping)s1, (OplTyMapping)s2);
-		return e;
+		return e.pushout();
+	}
+	
+	@Override
+	public OplObject visit(Program<OplExp> env, OplPushoutBen e) {
+		OplObject s1 = ENV.get(e.s1);
+		OplObject s2 = ENV.get(e.s2);		
+		if (!(s1 instanceof OplMapping)) {
+			throw new RuntimeException(e.s1 + " is not a mapping");
+		}
+		if (!(s2 instanceof OplMapping)) {
+			throw new RuntimeException(e.s2 + " is not a mapping");
+		}
+		e.validate((OplMapping)s1, (OplMapping)s2);
+		return e.pushout();
 	}
 
 	@Override

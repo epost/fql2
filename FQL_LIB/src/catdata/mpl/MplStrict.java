@@ -15,6 +15,7 @@ import catdata.mpl.Mpl.MplTerm.MplId;
 import catdata.mpl.Mpl.MplTerm.MplLambda;
 import catdata.mpl.Mpl.MplTerm.MplPair;
 import catdata.mpl.Mpl.MplTerm.MplRho;
+import catdata.mpl.Mpl.MplTerm.MplSym;
 import catdata.mpl.Mpl.MplTerm.MplTr;
 import catdata.mpl.Mpl.MplTermVisitor;
 import catdata.mpl.Mpl.MplType.MplBase;
@@ -25,7 +26,7 @@ import catdata.mpl.MplStrict.Node;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 
-public class MplStrict<O,A> implements MplTypeVisitor<O, List<O>, Unit>,
+public class MplStrict<O,A> implements 
   MplTermVisitor<O, A, Triple<List<Node<O,A>>, List<Node<O,A>>, String>, Unit> {
 	
 	static class Node<O,A> {	
@@ -70,31 +71,14 @@ public class MplStrict<O,A> implements MplTypeVisitor<O, List<O>, Unit>,
 	
 	Graph<Node<O,A>, Integer> g = new DirectedSparseMultigraph<>();
 		
-	@Override
-	public List<O> visit(Unit env, MplBase<O> e) {
-		return Util.singList(e.o);
-	}
-
-	@Override
-	public List<O> visit(Unit env, MplProd<O> e) {
-		List<O> ret = new LinkedList<>();
-		ret.addAll(e.l.accept(env, this));
-		ret.addAll(e.r.accept(env, this));
-		return ret;
-	}
-	
-	@Override
-	public List<O> visit(Unit env, MplUnit<O> e) {
-		return new LinkedList<>();
-	}
 
 	////////////////
 
 
 	@Override
 	public Triple<List<Node<O, A>>, List<Node<O, A>>, String> visit(Unit env, MplConst<O, A> e) {
-		List<O> s = e.type(ctx).first.accept(env, this);
-		List<O> t = e.type(ctx).second.accept(env, this);
+		List<O> s = e.typeStrict(ctx).first;
+		List<O> t = e.typeStrict(ctx).second;
 		
 		List<Node<O,A>> ret1 = new LinkedList<>();
 		List<Node<O,A>> ret2 = new LinkedList<>();
@@ -130,9 +114,9 @@ public class MplStrict<O,A> implements MplTypeVisitor<O, List<O>, Unit>,
 
 	@Override
 	public Triple<List<Node<O, A>>, List<Node<O, A>>, String>visit(Unit env, MplComp<O, A> e) {
-		List<O> s = e.type(ctx).first.accept(env, this);
-		List<O> t = e.type(ctx).second.accept(env, this);
-		List<O> m = e.l.type(ctx).second.accept(env, this);
+		List<O> s = e.typeStrict(ctx).first;
+		List<O> t = e.typeStrict(ctx).second;
+		List<O> m = e.l.typeStrict(ctx).second;
 		
 		List<Node<O,A>> ret1 = new LinkedList<>();
 		List<Node<O,A>> ret2 = new LinkedList<>();
@@ -174,6 +158,47 @@ public class MplStrict<O,A> implements MplTypeVisitor<O, List<O>, Unit>,
 		return new Triple<>(ret1, ret2, ret + " }");
 	}
 
+	@Override
+	public Triple<List<Node<O, A>>, List<Node<O, A>>, String> visit(Unit env, MplSym<O, A> e) {
+		List<O> s = e.typeStrict(ctx).first;
+		List<O> t = e.typeStrict(ctx).second;
+		
+		List<Node<O,A>> ret1 = new LinkedList<>();
+		List<Node<O,A>> ret2 = new LinkedList<>();
+			
+		//l to r not relevant here
+		String ret = "subgraph cluster" + fresh() + "{ label=\"" + e + "\"; " ;
+
+			Node<O,A> n1 = new Node<>(e, true, 0, s.get(0));
+			g.addVertex(n1);
+			ret1.add(n1);
+			ret += n1.label();
+			
+			Node<O,A> n2 = new Node<>(e, true, 1, s.get(1));
+			g.addVertex(n2);
+			ret1.add(n2);
+			ret += n2.label();
+
+			Node<O,A> m1 = new Node<>(e, false, 0, t.get(0));
+			g.addVertex(m1);
+			ret2.add(m1);
+			ret += m1.label();
+
+			Node<O,A> m2 = new Node<>(e, false, 1, t.get(1));
+			g.addVertex(m2);
+			ret2.add(m2);
+			ret += m2.label();
+		
+				g.addEdge(fresh(), n1, m2);
+				ret += n1 + " -> " + m2 + " ;";
+				g.addEdge(fresh(), n2, m1);
+				ret += n2 + " -> " + m1 + " ;";
+
+		return new Triple<>(ret1, ret2, ret + " }");
+
+		
+	}
+	
 	@Override
 	public Triple<List<Node<O, A>>, List<Node<O, A>>, String> visit(Unit env, MplPair<O, A> e) {
 		List<Node<O,A>> ret1 = new LinkedList<>();
@@ -228,7 +253,7 @@ public class MplStrict<O,A> implements MplTypeVisitor<O, List<O>, Unit>,
 	}
 
 	public Triple<List<Node<O, A>>, List<Node<O, A>>, String> makeId(MplTerm<O, A> e) {
-		List<O> x = e.type(ctx).first.accept(new Unit(), this);
+		List<O> x = e.typeStrict(ctx).first;
 		
 		List<Node<O,A>> ret1 = new LinkedList<>();
 		List<Node<O,A>> ret2 = new LinkedList<>();
@@ -273,7 +298,7 @@ public class MplStrict<O,A> implements MplTypeVisitor<O, List<O>, Unit>,
 		Triple<List<Node<O, A>>, List<Node<O, A>>, String> xs = e.t.accept(env, this);
 		
 //		List<O> ft = e.t.type(ctx).first.accept(env, this);
-		List<O> et = e.type(ctx).first.accept(env, this);
+		List<O> et = e.typeStrict(ctx).first;
 		
 		List<Node<O,A>> ret1 = new LinkedList<>();
 		List<Node<O,A>> ret2 = new LinkedList<>();
