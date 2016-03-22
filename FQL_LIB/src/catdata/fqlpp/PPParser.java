@@ -43,7 +43,7 @@ public class PPParser {
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
 	static String[] res = new String[] {  "set", "function", "category", "functor", "range",
-		    "not", "and", "or", "implies", "return", "coreturn", "uncurry", "pushout",
+		    "colim", "not", "and", "or", "implies", "return", "coreturn", "uncurry", "pushout",
 			 "match",  "objects", "cod", "dom", "apply", "on", "object", "arrow", "left", "right", "whisker",
 			 "transform",  "arrows", "Set", "Cat", "kleisli", "cokleisli",
 			"equations", "id", "delta", "sigma", "pi", "eval", "in", "path", "union",
@@ -192,13 +192,14 @@ public class PPParser {
 		
 		Parser<?> k = Parsers.tuple(term("cod"), ident());
 		Parser<?> v = Parsers.tuple(term("dom"), ident());
+		Parser<?> colim = Parsers.tuple(term("colim"), ident());
 		
 		Parser<?> kleisli  = Parsers.tuple(term("kleisli"), ident(), ident(), ident());
 		Parser<?> cokleisli= Parsers.tuple(term("cokleisli"), ident(), ident(), ident());
 		
 		Parser<?> union = Parsers.tuple(term("union"), ref.lazy(), ref.lazy());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { term("void"), term("unit"), 
+		Parser<?> a = Parsers.or(new Parser<?>[] { colim, term("void"), term("unit"), 
 				 plusTy, prodTy, expTy, k, v,
 				ident() , catConst(), term("Cat"), term("Set"), kleisli, cokleisli, union });
 
@@ -366,7 +367,9 @@ public class PPParser {
 				return new CatExp.Dom(toFtr(p.b));
 			} else if (p.a.toString().equals("cod")) {
 				return new CatExp.Cod(toFtr(p.b));
-			} 
+			} else if (p.a.toString().equals("colim")) {
+				return new CatExp.Colim((String)p.b);
+			}
 		} catch (RuntimeException cce) {
 		}
 

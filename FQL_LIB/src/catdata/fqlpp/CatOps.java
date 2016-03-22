@@ -13,6 +13,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.fqlpp.CatExp.CatExpVisitor;
 import catdata.fqlpp.CatExp.Cod;
+import catdata.fqlpp.CatExp.Colim;
 import catdata.fqlpp.CatExp.Const;
 import catdata.fqlpp.CatExp.Dom;
 import catdata.fqlpp.CatExp.Exp;
@@ -1321,5 +1322,21 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	@Override
 	public Category visit(FQLPPProgram env, Union e) {
 		throw new RuntimeException("Union should have been eliminated by pre-processing.");
+	}
+
+	@Override
+	public Category visit(FQLPPProgram env, Colim e) {
+		FunctorExp f = ENV.prog.ftrs.get(e.F);
+		if (f == null) {
+			throw new RuntimeException("Undefined functor: "+ e.F);
+		}
+		if (!(f instanceof CatConst)) {
+			throw new RuntimeException("Not a literal: " + e.F + ", is " + f.getClass());
+		}
+		CatConst F = (CatConst) f;
+		
+		Const C = Ben.colim(env, F);
+		
+		return C.accept(env, this);
 	}
 }

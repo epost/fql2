@@ -1,6 +1,7 @@
 package catdata.fqlpp;
 
 import catdata.fqlpp.examples.AllSyntax;
+import catdata.fqlpp.examples.BenExample;
 import catdata.fqlpp.examples.CatExample;
 import catdata.fqlpp.examples.CoProductExample;
 import catdata.fqlpp.examples.DeltaExample;
@@ -35,5 +36,5 @@ public class FqlppExamples {
 	//public static Example nist2 = new Nist2(); 
 	public static Example vik = new VikExample();
 	public static Example all = new AllSyntax();
-	
+	public static Example ben = new BenExample();
 }

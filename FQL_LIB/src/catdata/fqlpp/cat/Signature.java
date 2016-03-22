@@ -733,14 +733,14 @@ public class Signature<O,A> implements Serializable {
 		for (Path path1 : paths) {
 			for (Path path2 : paths) {
 				if (path1.source.equals(path2.source) && path1.target.equals(path2.target)) {
-					System.out.println("Trying " + path1 + " and " + path2);
+			//		System.out.println("Trying " + path1 + " and " + path2);
 					boolean b1 = normalize(path1).equals(normalize(path2));
-					System.out.println("starting kb");
+				//	System.out.println("starting kb");
 					boolean b2 = kb.equiv(path1.path, path2.path);
 					if (b1 != b2) {
 						throw new RuntimeException("Mismatch on " + path1 + " and " + path2 + " b1 " + b1 + " b2 " + b2);
 					}
-					System.out.println("ok");
+			//		System.out.println("ok");
 				}
 			}
 		}

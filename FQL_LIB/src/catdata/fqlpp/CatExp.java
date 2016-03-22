@@ -11,6 +11,50 @@ import catdata.Triple;
 @SuppressWarnings("serial")
 public abstract class CatExp implements Serializable {
 	
+	public static class Colim extends CatExp {
+		String F;
+		
+		@Override
+		public <R, E> R accept(E env, CatExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Colim other = (Colim) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			return true;
+		}
+
+		public Colim(String f) {
+			F = f;
+		}
+		
+		@Override
+		public String toString() {
+			return "colim " + F;
+		}
+	}
+	
+	
 	public static class Union extends CatExp {
 		CatExp l, r;
 		
@@ -639,7 +683,7 @@ public abstract class CatExp implements Serializable {
 		public R visit (E env, Named e);	
 		public R visit (E env, Kleisli e);
 		public R visit (E env, Union e);
-
+		public R visit (E env, Colim e);
 	}
 	
 }

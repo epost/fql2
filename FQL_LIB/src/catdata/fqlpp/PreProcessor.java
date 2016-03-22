@@ -8,6 +8,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.fqlpp.CatExp.CatExpVisitor;
 import catdata.fqlpp.CatExp.Cod;
+import catdata.fqlpp.CatExp.Colim;
 import catdata.fqlpp.CatExp.Const;
 import catdata.fqlpp.CatExp.Dom;
 import catdata.fqlpp.CatExp.Exp;
@@ -102,6 +103,11 @@ public class PreProcessor implements CatExpVisitor<CatExp, FQLPPProgram> {
 		eqs.addAll(ly.eqs);
 		eqs.addAll(ry.eqs);
 		return new Const(nodes, arrows, eqs);
+	}
+
+	@Override
+	public CatExp visit(FQLPPProgram env, Colim e) {
+		return e;
 	}
 
 }
