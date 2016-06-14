@@ -38,6 +38,7 @@ public class OplOptions extends Options {
 	public boolean opl_suppress_dom = true; 
 	public boolean opl_horn = KBOptions.defaultOptions.horn;
 	public boolean opl_query_check_eqs = true;
+	public boolean opl_pushout_simpl = false;
 	
 	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
@@ -114,6 +115,11 @@ public class OplOptions extends Options {
 		JLabel opl_eqs_label = new JLabel("Check that queries preserve equalities:");
 		opl2.add(opl_eqs_box);
 		opl1.add(opl_eqs_label);
+		
+		JCheckBox opl_simpl_box = new JCheckBox("", opl_pushout_simpl);
+		JLabel opl_simpl_label = new JLabel("Simplify pushout schemas:");
+		opl2.add(opl_simpl_box);
+		opl1.add(opl_simpl_label);
 
 		for (int i = 0; i < Options.biggestSize - size(); i++) {
 			opl1.add(new JLabel());
@@ -150,6 +156,7 @@ public class OplOptions extends Options {
 				opl_horn = opl_horn_box.isSelected();
 				opl_semantic_ac = opl_semantic_ac_box.isSelected();
 				opl_query_check_eqs = opl_eqs_box.isSelected();
+				opl_pushout_simpl = opl_simpl_box.isSelected();
 			
 				return new Unit();
 			}
@@ -162,7 +169,7 @@ public class OplOptions extends Options {
 
 	@Override
 	public int size() {
-		return 13;
+		return 14;
 	} 
 
 }
