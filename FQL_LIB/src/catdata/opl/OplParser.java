@@ -49,6 +49,7 @@ import catdata.opl.OplExp.OplSetTrans;
 import catdata.opl.OplExp.OplSigma;
 import catdata.opl.OplExp.OplUberSat;
 import catdata.opl.OplExp.OplUnSat;
+import catdata.opl.OplExp.OplUnion;
 import catdata.opl.OplExp.OplVar;
 import catdata.opl.OplQuery.Block;
 
@@ -65,7 +66,7 @@ public class OplParser {
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
 	static String[] res = new String[] { 
-		"pushoutBen", "PUSHOUT", "pivot", "DELTA", "return", "coreturn", "pushout", "return", "keys", "INSTANCE", "SCHEMA", "obsEqualities", "pathEqualities", "implications", "apply", "id", "query", "edges", "for", "entitiesAndAttributes", "instance", "entities", "attributes", "types", "schema", "as", "where", "select", "from", "flower", "SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
+		"union", "pushoutBen", "PUSHOUT", "pivot", "DELTA", "return", "coreturn", "pushout", "return", "keys", "INSTANCE", "SCHEMA", "obsEqualities", "pathEqualities", "implications", "apply", "id", "query", "edges", "for", "entitiesAndAttributes", "instance", "entities", "attributes", "types", "schema", "as", "where", "select", "from", "flower", "SATURATE", "transpres", "unsaturate", "sigma", "saturate", "presentation", "generators", "mapping", "delta", "eval", "theory", "model", "sorts", "symbols", "equations", "forall", "transform", "javascript"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -171,8 +172,9 @@ public class OplParser {
 		Parser<?> pushoutSch = Parsers.tuple(term("PUSHOUT"), ident(), ident());
 		Parser<?> pushoutBen = Parsers.tuple(term("pushoutBen"), ident(), ident());
 		Parser<?> pivot = Parsers.tuple(term("pivot"), ident());
+		Parser<?> union = Parsers.tuple(term("union"), term("{"), ident().many1(), term("}"));		
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { pushoutBen, pushoutSch, pivot, DELTA, pushout, INST, SCHEMA, apply, idQ, query, projEA, inst, schema, projE, projA, projT, flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
+		Parser<?> a = Parsers.or(new Parser<?>[] { union, pushoutBen, pushoutSch, pivot, DELTA, pushout, INST, SCHEMA, apply, idQ, query, projEA, inst, schema, projE, projA, projT, flower, ubersat, sigma, sat, unsat, presentation, delta, mapping, theory, model, eval, trans, trans_pres, java });
 		ref.set(a);
 
 		return a;
@@ -640,6 +642,9 @@ public class OplParser {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplExp toModel(Object o) {
+		if (!o.toString().contains("model")) {
+			throw new RuntimeException();
+		}
 		Tuple3 t = (Tuple3) o;
 		
 		org.codehaus.jparsec.functors.Pair b = (org.codehaus.jparsec.functors.Pair) t.b;
@@ -769,7 +774,9 @@ public class OplParser {
 			Tuple4 p = (Tuple4) c;
 			if (p.a.toString().startsWith("instance")) {
 				return new OplInst((String)p.b, (String)p.c, (String)p.d);
-			} 
+			} else if (p.a.toString().startsWith("union")) {
+				return new OplUnion(new HashSet<>((List<String>) p.c));
+			}
 		}
 		
 		if (c instanceof Tuple3) {
@@ -920,10 +927,10 @@ public class OplParser {
 			de.printStackTrace();
 			throw new RuntimeException(de.getMessage());
 		} catch (Exception ee) {
-			//ee.printStackTrace();
+			ee.printStackTrace();
 		}
 		
-		throw new RuntimeException("Report this error to Ryan.");
+		throw new RuntimeException("Report this error to Ryan.  Details: " + c);
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1253,7 +1260,7 @@ public class OplParser {
 			Map<String, OplTerm<String,String>> ret = new HashMap<>();
 			for (Tuple3 t : l) {
 				if (ret.containsKey(t.a.toString())) {
-					throw new RuntimeException("Duplicate column: " + t.a);
+					throw new DoNotIgnore("Duplicate column: " + t.a + "\n in " + o);
 				}
 				ret.put(t.a.toString(), toTerm(vars, null, t.c, true));
 			}

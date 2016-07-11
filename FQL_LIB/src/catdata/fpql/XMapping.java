@@ -146,7 +146,7 @@ public class XMapping<C, D> implements XObject {
 				}
 				unprovable.put(eq, b ? "true" : "false");
 			} catch (Exception ex) {
-				throw new RuntimeException("cannot prove " + eq);
+				throw new RuntimeException("cannot prove " + eq + " in " + dst);
 	//			unprovable.put(eq, "unknown");
 			}
 		}

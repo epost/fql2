@@ -1245,6 +1245,11 @@ public abstract class OplExp implements OplObject {
 				if (!entities.contains(eq.first.values().get(0))) {
 					throw new RuntimeException("Non-entity in context for " + eq);
 				}
+				S lhs_t = eq.second.type(sig, eq.first);
+				S rhs_t = eq.third.type(sig, eq.first);
+				if (!entities.contains(lhs_t) || !entities.contains(rhs_t)) {
+					throw new RuntimeException("Path equalities must end at an entity and in " + eq + " ends at " + lhs_t + " " + rhs_t);
+				}
 			}
 			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : obsEqs) {
 				if (eq.first.vars0.keySet().size() != 1) {
@@ -1252,6 +1257,11 @@ public abstract class OplExp implements OplObject {
 				}
 				if (!entities.contains(eq.first.values().get(0))) {
 					throw new RuntimeException("Non-entity in context for " + eq);
+				}
+				S lhs_t = eq.second.type(sig, eq.first);
+				S rhs_t = eq.third.type(sig, eq.first);
+				if (entities.contains(lhs_t) || entities.contains(rhs_t)) {
+					throw new RuntimeException("Obs equalities must end at type and in " + eq + " ends at " + lhs_t + " " + rhs_t);
 				}
 			}
 		}
@@ -1395,9 +1405,13 @@ public abstract class OplExp implements OplObject {
 
 		public <X> OplSig<S, Chc<C, X>, V> inject() {
 			Map<Chc<C, X>, Pair<List<S>, S>> symbols0 = new HashMap<>();
+			Map<Chc<C,X>, Integer> prec0 = new HashMap<>();
 			for (C f : symbols.keySet()) {
 				Pair<List<S>, S> s = symbols.get(f);
 				symbols0.put(Chc.inLeft(f), s);
+				if (prec.containsKey(f)) {
+					prec0.put(Chc.inLeft(f), prec.get(f));
+				}
 			}
 			List<Triple<OplCtx<S, V>, OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>> equations0 = new LinkedList<>();
 			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq : equations) {
@@ -1415,7 +1429,7 @@ public abstract class OplExp implements OplObject {
 				}
 				implications0.add(new Triple<>(impl.first, lhs, rhs));
 			}
-			return new OplSig<S, Chc<C, X>, V>(fr, new HashMap<>(), sorts, symbols0, equations0, implications0);
+			return new OplSig<S, Chc<C, X>, V>(fr, prec0, sorts, symbols0, equations0, implications0);
 		}
 
 		@Override
@@ -1578,9 +1592,9 @@ public abstract class OplExp implements OplObject {
 		@Override
 		public String toString() {
 			String ret = "\tsorts\n";
-			Set<String> sorts0 = sorts.stream().map(x -> {
+			List<String> sorts0 = sorts.stream().map(x -> {
 				return Util.maybeQuote(OplTerm.strip(x.toString()));
-			}).collect(Collectors.toSet());
+			}).collect(Collectors.toList());
 			ret += "\t\t" + Util.sep(sorts0, ", ") + ";\n";
 
 			ret += "\tsymbols\n";
@@ -1598,6 +1612,14 @@ public abstract class OplExp implements OplObject {
 				}
 				slist.add(s);
 			}
+			slist.sort(new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+					int i = o1.indexOf(" : ");
+					int j = o2.indexOf(" : ");
+					return o1.substring(i).compareTo(o2.substring(j));
+				}
+			});
 			ret += "\t\t" + Util.sep(slist, ",\n\t\t") + ";\n";
 
 			ret += "\tequations\n";
@@ -1694,6 +1716,10 @@ public abstract class OplExp implements OplObject {
 					}
 				}
 			}
+			if (prec.keySet().size() != new HashSet<>(prec.values()).size()) {
+				throw new RuntimeException("Cannot duplicate precedence: " + prec);
+			}
+			//getKB(); don't usually want to do this, because a lot of sigs won't have precedences
 		}
 
 		private OplCtx<S, V> inf(Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> eq0) {
@@ -1806,6 +1832,9 @@ public abstract class OplExp implements OplObject {
 		public int largestPrec() {
 			int ret = 0;
 			for (Integer k : prec.values()) {
+				if (k == null) {
+					continue; //?
+				}
 				if (k.intValue() > ret) {
 					ret = k.intValue();
 				}
@@ -2094,7 +2123,7 @@ public abstract class OplExp implements OplObject {
 
 			for (Triple<OplCtx<S1, V>, OplTerm<C1, V>, OplTerm<C1, V>> eq : src.equations) {
 				OplTerm<C2, V> l = subst(eq.second);
-				OplTerm<C2, V> r = subst(eq.second);
+				OplTerm<C2, V> r = subst(eq.third);
 				if (NEWDEBUG.debug.opl.opl_validate) {
 					KBExp<C2, V> l0 = dst.getKB().nf(OplToKB.convert(l));
 					KBExp<C2, V> r0 = dst.getKB().nf(OplToKB.convert(r));
@@ -3108,6 +3137,7 @@ public abstract class OplExp implements OplObject {
 
 		public void validate(OplSig<S, C, V> sig) {
 			this.sig = sig;
+			sig.validate();
 			for (S s : entities) {
 				if (!sig.sorts.contains(s)) {
 					throw new RuntimeException("Not a sort: " + s);
@@ -3611,7 +3641,8 @@ public abstract class OplExp implements OplObject {
 				prec.put(allgens.get(i), j + 1 + i);
 			}
 			OplPres<S, C, V, OplTerm<Chc<C, X>, V>> ret = new OplPres<S, C, V, OplTerm<Chc<C, X>, V>>(prec, "?", S.projT(), gens, eqs);
-			ret.toSig();
+			
+			ret.toSig(); 
 			return ret;
 		}
 
@@ -3684,6 +3715,17 @@ public abstract class OplExp implements OplObject {
 		}
 	}
 
+	public static class OplUnion extends OplExp {
+		Set<String> names;
+		public OplUnion(Set<String> names) {
+			this.names = names;
+		}
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
+	
 	public static class OplTyMapping<S1, C1, V, S2, C2> extends OplExp {
 		String src0, dst0;
 		OplSchema<S1, C1, V> src;
@@ -3814,6 +3856,8 @@ public abstract class OplExp implements OplObject {
 		public R visit(E env, OplPivot e);
 
 		public R visit(E env, OplPushoutBen e);
+		
+		public R visit(E env, OplUnion e);
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////////////////////////////////////

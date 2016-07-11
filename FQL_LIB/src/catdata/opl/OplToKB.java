@@ -292,7 +292,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private  KB<C, V> convert(OplSig<S,C,V> s) {
 		if (s.prec.keySet().size() != new HashSet<>(s.prec.values()).size()) {
-			throw new RuntimeException("Cannot duplicate precedence");
+			throw new RuntimeException("Cannot duplicate precedence: " + s.prec);
 		}
 		//if (!Collections.disjoint(Arrays.asList(KBHorn.reserved), s.symbols.keySet())) {
 		//	throw new RuntimeException("Theory contains reserved symbol, one of " + Arrays.toString(KBHorn.reserved));

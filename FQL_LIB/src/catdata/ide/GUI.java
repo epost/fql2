@@ -620,6 +620,7 @@ public class GUI extends JPanel {
 		for (Language l : Language.values()) {
 			if (f.getAbsolutePath().endsWith("." + l.fileExtension())) {
 				doOpen(f, l);
+				return;
 			}
 		}
 		throw new RuntimeException("Unknown file extension on " + f.getAbsolutePath());

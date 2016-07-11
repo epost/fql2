@@ -70,7 +70,7 @@ public class OplDisplay implements Disp {
  		}
 		if (o instanceof OplTyMapping) {
 			OplTyMapping x = (OplTyMapping) o;
-			return "ty mapping " + c + " : " + x.src0 + " -> " + x.dst0;
+			return "mapping " + c + " : " + x.src0 + " -> " + x.dst0;
 		}
 		if (o instanceof OplPres) {
 			return "presentation " + c + " : " + ((OplPres)o).S;
@@ -88,7 +88,7 @@ public class OplDisplay implements Disp {
 		}
 		if (o instanceof OplInst) {
 			OplInst oo = (OplInst) o;
-			return "instance " + c + "=" + oo.P0 + " : " + oo.S0 + "," + oo.J0;
+			return "instance " + c + /* "=" + oo.P0 + */ " : " + oo.S0 /* + "," + oo.J0 */ ;
  		}
 		if (o instanceof OplPushout) {
 			OplPushout oo = (OplPushout) o;
@@ -108,7 +108,7 @@ public class OplDisplay implements Disp {
 			OplObject obj = env.get(c);
 			map.put(obj, c); 
 			try {
-				frames.add(new Pair<>(doLookup(c, obj), obj.display()));
+				frames.add(new Pair<>(doLookup(c, obj).replace(": ?", ""), obj.display()));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				frames.add(new Pair<>(doLookup(c, obj), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));

@@ -517,6 +517,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 		Map<Pair<Object, D>, XMapping<C,C>> transforms = new HashMap<>();
 		
 		for (Object k : blocks.keySet()) {
+			System.out.println("checking block " + k);
 			Pair<D, Block<C, D>> b = blocks.get(k);
 			XCtx<C> srcX = frozens.get(k);
 			
@@ -546,9 +547,14 @@ public class XPoly<C,D> extends XExp implements XObject {
 					}
 					em.put(o, Util.singList(o));
 				}
-				XMapping<C,C> mmm = new XMapping(dstX, srcX, em, "homomorphism");
-
-				transforms.put(new Pair<>(k,k2),mmm);
+				System.out.println("checking edge " + k2);
+				try {
+					XMapping<C,C> mmm = new XMapping(dstX, srcX, em, "homomorphism");
+					transforms.put(new Pair<>(k,k2),mmm);
+				} catch (RuntimeException rex) {
+					rex.printStackTrace();
+					throw new RuntimeException("Error in block " + k + " edge " + k2 + " is " + rex.getMessage());
+				}
 			}			
 			
 			for (D k2 : b.second.attrs.keySet()) {
@@ -677,7 +683,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 				XMapping<C, C> p3 = freeze().apply(new Pair<>(l, p));
 				XMapping<C, C> q3 = freeze().apply(new Pair<>(l, q));
 				if (!XMapping.transform_eq(p3, q3)) {
-					throw new RuntimeException("FR Not respected on " + eq);
+					throw new RuntimeException("on block " + l + " equation " + eq + " becomes \n\n" + p3 + " \n\n=\n\n " + q3 + " \n\nbut are not equal");
 				}
 			}
 		//	}

@@ -14,6 +14,9 @@
     <docComments enabled="false" end="" start=""/>
   </comments>
   <keywords>
+    <keyword>INSTANCE</keyword>
+    <keyword>PUSHOUT</keyword>
+    <keyword>SCHEMA</keyword>
     <keyword>apply</keyword>
     <keyword>attributes</keyword>
     <keyword>delta</keyword>
@@ -27,6 +30,7 @@
     <keyword>mapping</keyword>
     <keyword>model</keyword>
     <keyword>presentation</keyword>
+    <keyword>pushout</keyword>
     <keyword>query</keyword>
     <keyword>saturate</keyword>
     <keyword>schema</keyword>
@@ -35,6 +39,7 @@
     <keyword>transform</keyword>
     <keyword>transpres</keyword>
     <keyword>types</keyword>
+    <keyword>union</keyword>
     <keyword>unsaturate</keyword>
   </keywords>
   <keywords2>
@@ -47,6 +52,10 @@
     <keyword>forall</keyword>
     <keyword>from</keyword>
     <keyword>generators</keyword>
+    <keyword>keys</keyword>
+    <keyword>obsEqualities</keyword>
+    <keyword>pathEqualities</keyword>
+    <keyword>return</keyword>
     <keyword>select</keyword>
     <keyword>sorts</keyword>
     <keyword>symbols</keyword>
@@ -59,7 +68,7 @@
     <intLiteral>{Digit}+</intLiteral>
     <floatLiteral/>
   </numbers>
-  <stringLiterals enabled="true" multiLine="true"/>
+  <stringLiterals enabled="true" multiLine="false"/>
   <charLiterals enabled="false" multiLine="false"/>
   <backtickLiterals enabled="false"/>
   <operators>

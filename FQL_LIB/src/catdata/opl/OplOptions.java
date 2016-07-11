@@ -31,7 +31,7 @@ public class OplOptions extends Options {
 	public boolean opl_sort_cps = KBOptions.defaultOptions.sort_cps;
 	public boolean opl_semantic_ac = KBOptions.defaultOptions.semantic_ac;
 	public int opl_red_its = KBOptions.defaultOptions.red_its;
-	public int opl_hom_its = 5000;
+	public int opl_hom_its = 100000;
 	public boolean opl_validate = true;
 	public boolean opl_pretty = true;
 	public boolean opl_reorder = true;
@@ -169,7 +169,7 @@ public class OplOptions extends Options {
 
 	@Override
 	public int size() {
-		return 14;
+		return 15;
 	} 
 
 }

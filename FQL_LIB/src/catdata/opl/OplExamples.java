@@ -23,6 +23,7 @@ import catdata.opl.examples.OplStackExample;
 import catdata.opl.examples.OplTyTest2Example;
 import catdata.opl.examples.OplTypedEmployeesExample;
 import catdata.opl.examples.OplUnfailingExample;
+import catdata.opl.examples.OplUnionExample;
 
 public class OplExamples {
 
@@ -50,6 +51,7 @@ public class OplExamples {
 	public static Example oplMatrix = new OplMatrixExample();
 	public static Example oplIntegration = new OplIntegrationExample();
 	public static Example oplPivot = new OplPivotExample();
+	public static Example oplUnion = new OplUnionExample();
 	
 	
 }
