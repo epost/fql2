@@ -89,7 +89,7 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 
 	@Override
 	protected XEnvironment makeEnv(String str, XProgram init) {
-		return XDriver.makeEnv(str, init);
+		return XDriver.makeEnv(str, init, toUpdate);
 	}
 
 	@Override

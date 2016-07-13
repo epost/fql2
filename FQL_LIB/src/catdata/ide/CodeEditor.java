@@ -11,6 +11,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -380,6 +382,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 	}
 
+//	protected String forJosh = 
+	
+	protected String[] toUpdate = new String[] { null };
 	protected String toDisplay = null;
 	Thread thread, temp;
 
@@ -393,21 +398,35 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		if (thread != null) {
 			thread.stop();
 		}
-		thread = null;
+		//? thread = null;
 		thread = new Thread(this);
 		temp = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					respArea.setText("");
+					respArea.setText("Begin\n");
+					int count = 0;
 					for (;;) {
+						count++;
 						Thread.sleep(250);
 						if (toDisplay != null) {
 							respArea.setText(toDisplay);
 							//toDisplay = null;
 							return;
 						} else if (thread != null) {
-							respArea.setText(respArea.getText() + ".");
+							if (toUpdate[0] != null) {
+								if ((count % 8) == 0) {
+									respArea.setText(toUpdate[0] + "\n");
+								} else {
+									respArea.setText(respArea.getText() + ".");
+								}
+							} else {
+								if (respArea.getText().length() > 1024*16) {
+									respArea.setText("");
+								}
+								respArea.setText(respArea.getText() + ".");
+							}
+							
 						}
 					}
 				} catch (InterruptedException ie) {

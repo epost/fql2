@@ -120,6 +120,7 @@ public class OplStandaloneExample {
 		//When we saturate an instance presentation, we get a set-valued model where 
 		//the elements of the sets are OplTerm<S,Chc<C,X>,V>.  It is these sets that are usually
 		//inspected in the gui.
+
 		OplSetInst<String,String,OplTerm<Chc<String,String>,String>> I1 = OplSat.saturate(I);
 		OplSetInst<String,String,OplTerm<Chc<String,String>,String>> J1 = OplSat.saturate(J);
 

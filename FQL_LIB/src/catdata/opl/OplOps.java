@@ -303,11 +303,13 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		OplObject i = ENV.get(e.I);
 		if (i instanceof OplPres) {
 			OplPres S = (OplPres) i;
-			return OplSat.saturate(S);
+			OplObject ob = OplSat.saturate(S);
+			return ob;
 		}
 		if (i instanceof OplSig) {
 			OplSig S = (OplSig) i;
-			return S.saturate(e.I);
+			OplObject ob = S.saturate(e.I);
+			return ob;
 		}
 		throw new RuntimeException("Not a presentation or theory");
 	}
@@ -326,7 +328,8 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		}
 		OplJavaInst I = (OplJavaInst) i;
 
-		return OplUberSat.saturate(I, S);
+		OplObject ob = OplUberSat.saturate(I, S);
+		return ob;
 	}
 
 	@Override

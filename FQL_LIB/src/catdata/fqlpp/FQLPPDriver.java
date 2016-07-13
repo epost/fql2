@@ -13,7 +13,7 @@ import catdata.ide.LineException;
 
 public class FQLPPDriver {
 
-	public static FQLPPEnvironment makeEnv(String str, FQLPPProgram init) {
+	public static FQLPPEnvironment makeEnv(String str, FQLPPProgram init, String[] toUpdate) {
 	//	System.out.println("Driver input: " + init);
 		Map<String, Fn<?,?>> fns = new HashMap<>();
 		Map<String, Set<?>> sets = new HashMap<>();
@@ -40,6 +40,7 @@ public class FQLPPDriver {
 					t.printStackTrace();
 					throw new LineException(t.getLocalizedMessage(), k, "set");
 				}
+				toUpdate[0] = "Last Processed: " + k;
 			}
 			FnExp fe = init.fns.get(k);
 			if (fe != null) {
@@ -49,6 +50,7 @@ public class FQLPPDriver {
 						throw new RuntimeException("Does not evaluate to a function.");
 					}
 					fns.put(k, xxx);
+					toUpdate[0] = "Last Processed: " + k;
 				} catch (Throwable t) {
 					t.printStackTrace();
 					throw new LineException(t.getLocalizedMessage(), k, "function");
@@ -62,7 +64,8 @@ public class FQLPPDriver {
 					if (!(xxx instanceof Category)) {
 						throw new RuntimeException("Does not evaluate to a category.");
 					}
-					cats.put(k, xxx);	
+					cats.put(k, xxx);
+					toUpdate[0] = "Last Processed: " + k;
 				} catch (Throwable t) {
 					t.printStackTrace();
 					throw new LineException(t.getLocalizedMessage(), k, "category");
@@ -76,6 +79,7 @@ public class FQLPPDriver {
 						throw new RuntimeException("Does not evaluate to a functor, is " + xxx.getClass() + ": " + xxx);
 					}
 					ftrs.put(k, xxx);		
+					toUpdate[0] = "Last Processed: " + k;
 				} catch (Throwable t) {
 					t.printStackTrace();
 					throw new LineException(t.getLocalizedMessage(), k, "functor");
@@ -88,7 +92,8 @@ public class FQLPPDriver {
 					if (!(xxx instanceof Transform)) {
 						throw new RuntimeException("Does not evaluate to a transform.");
 					}
-					trans.put(k, xxx);		
+					trans.put(k, xxx);	
+					toUpdate[0] = "Last Processed: " + k;
 				} catch (Throwable t) {
 					t.printStackTrace();
 					throw new LineException(t.getLocalizedMessage(), k, "transform");

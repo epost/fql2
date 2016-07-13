@@ -4,6 +4,7 @@ import javax.swing.JComponent;
 
 public interface OplObject {
 
-	public JComponent display() ;
-
+	public JComponent display();
+	
+	
 }

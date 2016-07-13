@@ -44,7 +44,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	@Override
 	public Set<Arrow<S, Pair<OplCtx<S, V>, OplTerm<C, V>>>> hom(List<S> src, S dst) {
 		Set<Arrow<S, Pair<OplCtx<S, V>, OplTerm<C, V>>>> ret = new HashSet<>();
-		for (Pair<OplCtx<S, V>, OplTerm<C, V>> x : hom0(src, dst)) {
+		for (Pair<OplCtx<S, V>, OplTerm<C, V>> x : hom0(Thread.currentThread(), src, dst)) {
 			ret.add(new Arrow<>(src, dst, x));
 		}
 		return ret;
@@ -93,6 +93,8 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		return KB.gt.apply(new Pair<>(convert(e1), convert(e2)));
 	} */
 	
+	
+	
 	public OplToKB(Iterator<V> fr, OplSig<S, C, V> sig) {
 		this.sig = sig;
 		if (NEWDEBUG.debug.opl.opl_require_const) {
@@ -100,7 +102,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		}
 		this.fr = fr;
 		KB<C, V> KB0 = convert(this.sig);
-		KB0.complete();
+		KB0.complete(Thread.currentThread());
 		KB = KB0;
 	}
 	
@@ -119,7 +121,15 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	}
 	
 	private Map<Pair<List<S>, S>, Collection<Pair<OplCtx<S, V>, OplTerm<C, V>>>> hom = new HashMap<>();
-	public Collection<Pair<OplCtx<S,V>, OplTerm<C,V>>> hom0(List<S> s, S t) {
+	
+	private void checkParentDead(Thread cur) {
+		if (!cur.isAlive()) {
+			Thread.currentThread().stop();
+		}
+	}
+	
+	//cur is a 'parent' - if the parent isn't alive, then the current thread shouldn't be either (e.g., cancel)
+	public Collection<Pair<OplCtx<S,V>, OplTerm<C,V>>> hom0(Thread cur, List<S> s, S t) {
 		Collection<Pair<OplCtx<S,V>, OplTerm<C,V>>> ret = hom.get(new Pair<>(s, t));
 		if (!sig.sorts.contains(t)) {
 			throw new DoNotIgnore("Bad target sort " + t);
@@ -148,13 +158,20 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		//	int count = 0;
 			Map<S, Set<OplTerm<C, V>>> j = arity0(vars2);
 			for (;;) {
+//				System.out.println("pre-inc");
+				checkParentDead(cur);
 				Map<S, Set<OplTerm<C, V>>> k = inc(j);
+	//			System.out.println("pre-red");
+				checkParentDead(cur);
 				Map<S, Set<OplTerm<C, V>>> k2= red(k);
+				checkParentDead(cur);
+		//		System.out.println("pre-eq");
 				if (j.equals(k2)) {
 					break;
 				} 
-				j = k2;
+				j = k2;			
 			}	
+		//	System.out.println("done");
 			ret = j.get(t).stream().map(g -> { return nice(ctx, g); }).collect(Collectors.toList());
 			//ret = new LinkedList<>(ret);
 			@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -162,7 +179,6 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			rret.sort(Util.ToStringComparator);
 			hom.put(new Pair<>(s,t), ret);
 		}
-		
 		return ret; 
 	}
 	
@@ -201,6 +217,8 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	public KBExp<C,V> nf(KBExp<C,V> r) {
 		return KB.nf(r);
 	}
+
+	//already caches
 	public OplTerm<C,V> nf(OplTerm<C,V> r) {
 		return convert(KB.nf(convert(r)));
 	} 
@@ -363,7 +381,11 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			rs.addAll(convert(impl.second, impl.third));
 		}
 		
-		KBOptions options = new KBOptions(NEWDEBUG.debug.opl.opl_unfailing, NEWDEBUG.debug.opl.opl_sort_cps, NEWDEBUG.debug.opl.opl_horn && !s.implications.isEmpty(), NEWDEBUG.debug.opl.opl_semantic_ac, NEWDEBUG.debug.opl.opl_iterations, NEWDEBUG.debug.opl.opl_red_its);
+		KBOptions options = new KBOptions(NEWDEBUG.debug.opl.opl_unfailing, 
+				NEWDEBUG.debug.opl.opl_sort_cps, NEWDEBUG.debug.opl.opl_horn && !s.implications.isEmpty(), 
+				NEWDEBUG.debug.opl.opl_semantic_ac, NEWDEBUG.debug.opl.opl_iterations, 
+				NEWDEBUG.debug.opl.opl_red_its, NEWDEBUG.debug.opl.filter_subsumed_by_self,
+				/* NEWDEBUG.debug.opl.simplify, */ NEWDEBUG.debug.opl.compose);
 		return new KB(eqs, KBOrders.lpogt(gt), fr, rs, options);			
 	}
 	
@@ -430,16 +452,17 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			throw new RuntimeException(ex.getMessage());
 		} 
 	} 
-	
+		
 	@SuppressWarnings("deprecation")
 	public Map<S, Set<OplTerm<C, V>>> doHoms() {
 		HashMap<S, Set<OplTerm<C, V>>> sorts = new HashMap<>();
+		Thread cur = Thread.currentThread();
 		Runnable r = new Runnable() {
 			@Override
 			public void run() {
 				try {
 				for (S s : sig.sorts) {
-					sorts.put(s, hom0(new LinkedList<>(), s).stream().map(x -> x.second).collect(Collectors.toSet()));
+					sorts.put(s, hom0(cur, new LinkedList<>(), s).stream().map(x -> x.second).collect(Collectors.toSet()));
 				}
 				} catch (Exception ex) {
 					ex.printStackTrace();

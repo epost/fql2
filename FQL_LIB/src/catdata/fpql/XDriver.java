@@ -12,7 +12,7 @@ import catdata.ide.NEWDEBUG;
 public class XDriver {
 
 	@SuppressWarnings({ "rawtypes" })
-	public static XEnvironment makeEnv(String str, XProgram init) {
+	public static XEnvironment makeEnv(String str, XProgram init, String[] toUpdate) {
 		if (NEWDEBUG.debug.fpql.x_typing) {
 			init.doTypes();
 		}
@@ -42,6 +42,7 @@ public class XDriver {
 					throw new RuntimeException("Duplicate: " + k);
 				}
 				ret.objs.put(k, xxx);
+				toUpdate[0] = "Last Processed: " + k ;
 				i++;
 			} catch (Throwable t) {
 				t.printStackTrace();

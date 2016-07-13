@@ -30,7 +30,7 @@ public class IDE {
 			try {
 				FQLProgram init = FQLParser.program(args[0]);
 				Triple<FqlEnvironment, String, List<Throwable>> envX = Driver
-						.makeEnv(init);
+						.makeEnv(init, new String[0]);
 				if (envX.third.size() > 0) {
 					throw new RuntimeException("Errors: " + envX.third);
 				}

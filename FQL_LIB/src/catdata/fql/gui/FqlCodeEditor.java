@@ -126,7 +126,7 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 	@Override
 	protected FqlEnvironment makeEnv(String str, FQLProgram init) {
 		Triple<FqlEnvironment, String, List<Throwable>> envX = Driver
-				.makeEnv(init);
+				.makeEnv(init, toUpdate);
 		if (envX.third.isEmpty()) {
 			textForCache.put(envX.first, envX.second);
 			return envX.first;

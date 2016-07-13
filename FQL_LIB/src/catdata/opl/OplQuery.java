@@ -516,6 +516,51 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			}
 			return ret;
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((attrs == null) ? 0 : attrs.hashCode());
+			result = prime * result + ((edges == null) ? 0 : edges.hashCode());
+			result = prime * result + ((from == null) ? 0 : from.hashCode());
+			result = prime * result + ((where == null) ? 0 : where.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Block other = (Block) obj;
+			if (attrs == null) {
+				if (other.attrs != null)
+					return false;
+			} else if (!attrs.equals(other.attrs))
+				return false;
+			if (edges == null) {
+				if (other.edges != null)
+					return false;
+			} else if (!edges.equals(other.edges))
+				return false;
+			if (from == null) {
+				if (other.from != null)
+					return false;
+			} else if (!from.equals(other.from))
+				return false;
+			if (where == null) {
+				if (other.where != null)
+					return false;
+			} else if (!where.equals(other.where))
+				return false;
+			return true;
+		}
+		
+		
 	}
 
 	@Override
@@ -660,8 +705,20 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		}
 	}
 
-	//TODO: deal with precedence somehow
-	static int symgen = 1000;
+	public <X> int guessPrec(OplInst<S1, C1, V1, X> I0, int last, Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, Integer> prec) {
+		for (;;) {
+			last++;
+			if (prec.containsValue(last)) {
+				continue;
+			}
+			boolean inInst = I0.P.prec.containsValue(last);
+			boolean inSch = dst.sig.prec.containsValue(last);
+			if ((inInst && !inSch) || (!inInst && !inSch)) {
+				return last;
+			}
+		}
+	}
+	
 	public <X> OplInst<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> eval(
 			OplInst<S1, C1, V1, X> I0) {
 		if (!I0.S.equals(src)) {
@@ -676,10 +733,14 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		OplSetInst<S1, C1, OplTerm<Chc<C1, X>, V1>> I = yyy.fourth; //OplSat.saturate(I0.projEA());
 		Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, Integer> prec = new HashMap<>();
 
+		int guess = -1;
+
 		for (OplTerm<Chc<C1, X>, V1> gen : yyy.third.gens.keySet()) {
 			@SuppressWarnings("unchecked")
 			S2 s2 = (S2) yyy.third.gens.get(gen);
 			gens.put(Chc.inLeft(gen), s2);
+			guess = guessPrec(I0, guess, prec);
+			//prec.put(Chc.inLeft(gen), guess);
 			prec.put(Chc.inLeft(gen), yyy.third.prec.get(gen));
 		}
 		
@@ -716,7 +777,8 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 
 			for (Map<V1, OplTerm<Chc<C1, X>, V1>> tuple : tuples) {
 				gens.put(Chc.inRight(new Pair<>(label, tuple)), tgt);
-				prec.put(Chc.inRight(new Pair<>(label, tuple)), symgen++);
+				guess = guessPrec(I0, guess, prec); 
+				prec.put(Chc.inRight(new Pair<>(label, tuple)), guess);
 			}
 
 			for (C2 c2 : block.attrs.keySet()) {
@@ -769,6 +831,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				"?", "?", I0.J0);
 
 		retX.validate(dst, P, I0.J);
+		
 		return retX;
 	}
 	
@@ -830,6 +893,45 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		
 		return ret;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((blocks == null) ? 0 : blocks.hashCode());
+		result = prime * result + ((dst_e == null) ? 0 : dst_e.hashCode());
+		result = prime * result + ((src_e == null) ? 0 : src_e.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		OplQuery other = (OplQuery) obj;
+		if (blocks == null) {
+			if (other.blocks != null)
+				return false;
+		} else if (!blocks.equals(other.blocks))
+			return false;
+		if (dst_e == null) {
+			if (other.dst_e != null)
+				return false;
+		} else if (!dst_e.equals(other.dst_e))
+			return false;
+		if (src_e == null) {
+			if (other.src_e != null)
+				return false;
+		} else if (!src_e.equals(other.src_e))
+			return false;
+		return true;
+	}
+	
+	
 
 	// TODO knuth bendix precedence should favor rewriting into type side rather
 	// than entity side

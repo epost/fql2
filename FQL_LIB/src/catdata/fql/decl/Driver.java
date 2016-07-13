@@ -96,7 +96,7 @@ public class Driver {
 	}
 
 	public static Triple<FqlEnvironment, String, List<Throwable>> makeEnv(
-			FQLProgram prog) {
+			FQLProgram prog, String[] toUpdate) {
 
 		List<Throwable> exns = new LinkedList<>();
 
@@ -111,6 +111,7 @@ public class Driver {
 				SigExp v = prog.sigs.get(k);
 				v.typeOf(prog);
 				sigs.put(k, v.toSig(prog));
+				toUpdate[0] = "Last Processed: " + k ;
 			} catch (RuntimeException re) {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
@@ -129,6 +130,7 @@ public class Driver {
 				MapExp v = prog.maps.get(k);
 				v.type(prog);
 				maps.put(k, v.toMap(prog));
+				toUpdate[0] = "Last Processed: " + k ;
 			} catch (RuntimeException re) {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
@@ -146,6 +148,7 @@ public class Driver {
 				QueryExp v = prog.queries.get(k);
 				v.type(prog);
 				queries.put(k, Query.toQuery(prog, v));
+				toUpdate[0] = "Last Processed: " + k;
 			} catch (RuntimeException re) {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
@@ -162,6 +165,7 @@ public class Driver {
 				FullQueryExp v = prog.full_queries.get(k);
 				v.type(prog);
 				full_queries.put(k, FullQuery.toQuery(prog, v));
+				toUpdate[0] = "Last Processed: " + k ;
 			} catch (RuntimeException re) {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
@@ -177,6 +181,7 @@ public class Driver {
 			try {
 				InstExp v = prog.insts.get(k);
 				v.type(prog);
+				toUpdate[0] = "Last Processed: " + v + " (type-check only)" ;
 			} catch (RuntimeException re) {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
@@ -193,6 +198,7 @@ public class Driver {
 
 				TransExp v = prog.transforms.get(k);
 				v.type(prog);
+				toUpdate[0] = "Last Processed: " + v + " (type-check only)" ;
 			} catch (RuntimeException re) {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
@@ -208,9 +214,13 @@ public class Driver {
 //		System.out.println("before " + prog);
 		prog = rewriteQueries(prog);
 //		System.out.println("after " + prog);
-		
+
+		toUpdate[0] = "SQL generation complete, executing.";
+
 		Triple<Map<String, Set<Map<Object, Object>>>, String, List<Throwable>> res = JDBCBridge
 				.run(prog);
+		
+		toUpdate[0] = "SQL Execution Complete";
 
 		//System.out.println(res.first);
 		
@@ -221,9 +231,8 @@ public class Driver {
 				List<Pair<String, List<Pair<Object, Object>>>> b = PSMGen
 						.gather(k, s, res.first);
 				insts.put(k, new Instance(s, b));
+				toUpdate[0] = "Last Processed: " + k;
 			} catch (Exception re) {
-				System.out.println("key " + k + " exp " + prog.insts.get(k));
-				System.out.println(prog);
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "instance");
@@ -247,6 +256,7 @@ public class Driver {
 						k,
 						new Transform(insts.get(val.first), insts
 								.get(val.second), b));
+				toUpdate[0] = "Last Processed: " + k;
 			} catch (Exception re) {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
@@ -258,6 +268,8 @@ public class Driver {
 				}
 			}
 		}
+		
+		toUpdate[0] = "Load of SQL data into FQL complete.";
 		// check full sigmas with EDs
 		if (NEWDEBUG.debug.fql.VALIDATE_WITH_EDS) {
 			try {

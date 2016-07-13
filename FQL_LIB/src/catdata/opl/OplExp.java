@@ -58,17 +58,12 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 public abstract class OplExp implements OplObject {
 
-	// TODO: have OplTerm have 4 subclasses, var, ty, sch, gen, and no more Chcs
-	// ty has N arg, gen has 0 args, sch has 1 arg
-	// could try to subclass them, ty > sch > gen - nah
-	// oplterms should have "object" (non constructor) for parser (can move
-	// succ/nat logic here too)
-	// move away from strings - include other exps, full recursive in oplops
-	// move nf out of kb
-	// do not need set valued models and presentations per se, can just use
-	// pieces of them return from saturation
-	// move to separate "compile" keyowrd J = compile C I where C is theory or
-	// javascript
+	@Override
+	public abstract boolean equals(Object o);
+	
+	@Override
+	public abstract int hashCode();
+
 
 	@Override
 	public JComponent display() {
@@ -129,6 +124,33 @@ public abstract class OplExp implements OplObject {
 	public static class OplPivot<S, C, V, X> extends OplExp {
 		String I0;
 		OplInst<S, C, V, X> I;
+
+		
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I0 == null) ? 0 : I0.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplPivot other = (OplPivot) obj;
+			if (I0 == null) {
+				if (other.I0 != null)
+					return false;
+			} else if (!I0.equals(other.I0))
+				return false;
+			return true;
+		}
 
 		public OplPivot(String I0) {
 			this.I0 = I0;
@@ -327,6 +349,39 @@ public abstract class OplExp implements OplObject {
 
 	// TODO like pivot, iso type side, needs to change
 	public static class OplPushoutSch<S, C, V, S1, C1, S2, C2> extends OplExp {
+
+		
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((s1 == null) ? 0 : s1.hashCode());
+			result = prime * result + ((s2 == null) ? 0 : s2.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplPushoutSch other = (OplPushoutSch) obj;
+			if (s1 == null) {
+				if (other.s1 != null)
+					return false;
+			} else if (!s1.equals(other.s1))
+				return false;
+			if (s2 == null) {
+				if (other.s2 != null)
+					return false;
+			} else if (!s2.equals(other.s2))
+				return false;
+			return true;
+		}
 
 		String s1, s2;
 		OplTyMapping<S, C, V, S1, C1> F1;
@@ -669,6 +724,39 @@ public abstract class OplExp implements OplObject {
 
 	public static class OplPushoutBen extends OplExp {
 
+		
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((s1 == null) ? 0 : s1.hashCode());
+			result = prime * result + ((s2 == null) ? 0 : s2.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplPushoutBen other = (OplPushoutBen) obj;
+			if (s1 == null) {
+				if (other.s1 != null)
+					return false;
+			} else if (!s1.equals(other.s1))
+				return false;
+			if (s2 == null) {
+				if (other.s2 != null)
+					return false;
+			} else if (!s2.equals(other.s2))
+				return false;
+			return true;
+		}
+
 		String s1, s2;
 		OplMapping<String, String, String, String, String> F1;
 		OplMapping<String, String, String, String, String> F2;
@@ -761,6 +849,39 @@ public abstract class OplExp implements OplObject {
 	}
 
 	public static class OplPushout<S, C, V, X, Y, Z> extends OplExp {
+
+		
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((s1 == null) ? 0 : s1.hashCode());
+			result = prime * result + ((s2 == null) ? 0 : s2.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplPushout other = (OplPushout) obj;
+			if (s1 == null) {
+				if (other.s1 != null)
+					return false;
+			} else if (!s1.equals(other.s1))
+				return false;
+			if (s2 == null) {
+				if (other.s2 != null)
+					return false;
+			} else if (!s2.equals(other.s2))
+				return false;
+			return true;
+		}
 
 		String s1, s2;
 		OplPresTrans<S, C, V, X, Y> h1;
@@ -856,6 +977,50 @@ public abstract class OplExp implements OplObject {
 		List<Pair<OplTerm<C, V>, OplTerm<C, V>>> where;
 		OplSetInst<S, C, X> I;
 		String I0;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I0 == null) ? 0 : I0.hashCode());
+			result = prime * result + ((from == null) ? 0 : from.hashCode());
+			result = prime * result
+					+ ((select == null) ? 0 : select.hashCode());
+			result = prime * result + ((where == null) ? 0 : where.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplFlower other = (OplFlower) obj;
+			if (I0 == null) {
+				if (other.I0 != null)
+					return false;
+			} else if (!I0.equals(other.I0))
+				return false;
+			if (from == null) {
+				if (other.from != null)
+					return false;
+			} else if (!from.equals(other.from))
+				return false;
+			if (select == null) {
+				if (other.select != null)
+					return false;
+			} else if (!select.equals(other.select))
+				return false;
+			if (where == null) {
+				if (other.where != null)
+					return false;
+			} else if (!where.equals(other.where))
+				return false;
+			return true;
+		}
 
 		public OplFlower(Map<Z, OplTerm<C, V>> select, Map<V, S> from, List<Pair<OplTerm<C, V>, OplTerm<C, V>>> where, String i0) {
 			super();
@@ -1047,6 +1212,31 @@ public abstract class OplExp implements OplObject {
 
 	public static class OplUnSat extends OplExp {
 
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplUnSat other = (OplUnSat) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+
 		String I;
 
 		public OplUnSat(String I) {
@@ -1106,6 +1296,37 @@ public abstract class OplExp implements OplObject {
 	}
 
 	public static class OplUberSat extends OplExp {
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((P == null) ? 0 : P.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplUberSat other = (OplUberSat) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (P == null) {
+				if (other.P != null)
+					return false;
+			} else if (!P.equals(other.P))
+				return false;
+			return true;
+		}
 
 		String I, P;
 
@@ -1168,6 +1389,33 @@ public abstract class OplExp implements OplObject {
 
 	public static class OplSat extends OplExp {
 
+		
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplSat other = (OplSat) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+
 		String I;
 
 		public OplSat(String I) {
@@ -1175,10 +1423,10 @@ public abstract class OplExp implements OplObject {
 		}
 
 		// works fine
-		public static <S, C, V, X> OplSetInst<S, Chc<C, X>, OplTerm<Chc<C, X>, V>> saturateEasy(OplPres<S, C, V, X> P) {
-			OplSig<S, Chc<C, X>, V> sig = P.toSig();
-			return sig.saturate(P.S);
-		}
+		//public static <S, C, V, X> OplSetInst<S, Chc<C, X>, OplTerm<Chc<C, X>, V>> saturateEasy(Thread[] threads, OplPres<S, C, V, X> P) {
+		//	OplSig<S, Chc<C, X>, V> sig = P.toSig();
+		//	return sig.saturate(P.S);
+		//}
 
 		public static <S, C, V, X> OplSetInst<S, C, OplTerm<Chc<C, X>, V>> saturate(OplPres<S, C, V, X> P) {
 			OplSig<S, Chc<C, X>, V> sig = P.toSig();
@@ -1226,6 +1474,8 @@ public abstract class OplExp implements OplObject {
 		public List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> pathEqs, obsEqs;
 		public String typeSide;
 
+		public List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> pathEqsInit, obsEqsInit;
+		
 		public OplSCHEMA0(Map<C, Integer> prec, Set<S> entities, Map<C, Pair<List<S>, S>> edges, Map<C, Pair<List<S>, S>> attrs, List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> pathEqs, List<Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>>> obsEqs, String typeSide) {
 			super();
 			this.prec = prec;
@@ -1235,6 +1485,14 @@ public abstract class OplExp implements OplObject {
 			this.pathEqs = pathEqs;
 			this.obsEqs = obsEqs;
 			this.typeSide = typeSide;
+			this.pathEqsInit = new LinkedList<>();
+			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> x : pathEqs) {
+				pathEqsInit.add(new Triple<>(new OplCtx<>(x.first.vars0), x.second, x.third));
+			}
+			this.obsEqsInit = new LinkedList<>();
+			for (Triple<OplCtx<S, V>, OplTerm<C, V>, OplTerm<C, V>> x : obsEqs) {
+				obsEqsInit.add(new Triple<>(new OplCtx<>(x.first.vars0), x.second, x.third));
+			}
 		}
 
 		public void validate(OplSig<S, C, V> sig) {
@@ -1272,12 +1530,26 @@ public abstract class OplExp implements OplObject {
 			int result = 1;
 			result = prime * result + ((attrs == null) ? 0 : attrs.hashCode());
 			result = prime * result + ((edges == null) ? 0 : edges.hashCode());
-			result = prime * result + ((entities == null) ? 0 : entities.hashCode());
-			result = prime * result + ((obsEqs == null) ? 0 : obsEqs.hashCode());
-			result = prime * result + ((pathEqs == null) ? 0 : pathEqs.hashCode());
+			result = prime * result
+					+ ((entities == null) ? 0 : entities.hashCode());
+			result = prime * result
+					+ ((obsEqsInit == null) ? 0 : obsEqsInit.hashCode());
+			result = prime * result
+					+ ((pathEqsInit == null) ? 0 : pathEqsInit.hashCode());
 			result = prime * result + ((prec == null) ? 0 : prec.hashCode());
-			result = prime * result + ((typeSide == null) ? 0 : typeSide.hashCode());
+			result = prime * result
+					+ ((typeSide == null) ? 0 : typeSide.hashCode());
 			return result;
+		}
+
+		
+		
+		@Override
+		public String toString() {
+			return "OplSCHEMA0 [prec=" + prec + ", entities=" + entities
+					+ ", edges=" + edges + ", attrs=" + attrs + ", pathEqs="
+					+ pathEqs + ", obsEqs=" + obsEqs + ", typeSide=" + typeSide
+					+ "]";
 		}
 
 		@Override
@@ -1288,7 +1560,7 @@ public abstract class OplExp implements OplObject {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			OplSCHEMA0<?, ?, ?> other = (OplSCHEMA0<?, ?, ?>) obj;
+			OplSCHEMA0 other = (OplSCHEMA0) obj;
 			if (attrs == null) {
 				if (other.attrs != null)
 					return false;
@@ -1304,15 +1576,15 @@ public abstract class OplExp implements OplObject {
 					return false;
 			} else if (!entities.equals(other.entities))
 				return false;
-			if (obsEqs == null) {
-				if (other.obsEqs != null)
+			if (obsEqsInit == null) {
+				if (other.obsEqsInit != null)
 					return false;
-			} else if (!obsEqs.equals(other.obsEqs))
+			} else if (!obsEqsInit.equals(other.obsEqsInit))
 				return false;
-			if (pathEqs == null) {
-				if (other.pathEqs != null)
+			if (pathEqsInit == null) {
+				if (other.pathEqsInit != null)
 					return false;
-			} else if (!pathEqs.equals(other.pathEqs))
+			} else if (!pathEqsInit.equals(other.pathEqsInit))
 				return false;
 			if (prec == null) {
 				if (other.prec != null)
@@ -1540,7 +1812,7 @@ public abstract class OplExp implements OplObject {
 					public void run() {
 						try {
 
-							Collection<Pair<OplCtx<S, V>, OplTerm<C, V>>> z = kb.hom0(l0, r);
+							Collection<Pair<OplCtx<S, V>, OplTerm<C, V>>> z = kb.hom0(Thread.currentThread(), l0, r);
 							List<String> u = z.stream().map(o -> {
 								return OplTerm.strip(o.first + " |- " + OplToKB.convert(o.second).toString());
 							}).collect(Collectors.toList());
@@ -2012,10 +2284,57 @@ public abstract class OplExp implements OplObject {
 	public static class OplMapping<S1, C1, V, S2, C2> extends OplExp {
 		Map<S1, S2> sorts;
 		Map<C1, Pair<OplCtx<S2, V>, OplTerm<C2, V>>> symbols;
-
+		Map<C1, Pair<OplCtx<S2, V>, OplTerm<C2, V>>> symbolsInit;
+		
 		String src0, dst0;
 		OplSig<S1, C1, V> src;
 		OplSig<S2, C2, V> dst;
+		
+		
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dst0 == null) ? 0 : dst0.hashCode());
+			result = prime * result + ((sorts == null) ? 0 : sorts.hashCode());
+			result = prime * result + ((src0 == null) ? 0 : src0.hashCode());
+			result = prime * result
+					+ ((symbolsInit == null) ? 0 : symbolsInit.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplMapping other = (OplMapping) obj;
+			if (dst0 == null) {
+				if (other.dst0 != null)
+					return false;
+			} else if (!dst0.equals(other.dst0))
+				return false;
+			if (sorts == null) {
+				if (other.sorts != null)
+					return false;
+			} else if (!sorts.equals(other.sorts))
+				return false;
+			if (src0 == null) {
+				if (other.src0 != null)
+					return false;
+			} else if (!src0.equals(other.src0))
+				return false;
+			if (symbolsInit == null) {
+				if (other.symbolsInit != null)
+					return false;
+			} else if (!symbolsInit.equals(other.symbolsInit))
+				return false;
+			return true;
+		}
 
 		public JComponent display() {
 			JTabbedPane jtp = new JTabbedPane();
@@ -2072,6 +2391,8 @@ public abstract class OplExp implements OplObject {
 
 			return "mapping {\n" + ret + "} : " + src0 + " -> " + dst0;
 		}
+		
+		
 
 		@Override
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
@@ -2164,8 +2485,14 @@ public abstract class OplExp implements OplObject {
 			this.symbols = symbols;
 			this.src0 = src0;
 			this.dst0 = dst0;
+			this.symbolsInit = new HashMap<>();
+			for (C1 c1 : symbols.keySet()) {
+				symbolsInit.put(c1, new Pair<>(new OplCtx<>(symbols.get(c1).first.vars0), symbols.get(c1).second));
+			}
 		}
 
+		
+		
 		public <X, Y> OplPresTrans<S2, C2, V, X, Y> sigma(OplPresTrans<S1, C1, V, X, Y> h) {
 			OplPres<S1, C1, V, X> I = h.src;
 
@@ -2333,7 +2660,7 @@ public abstract class OplExp implements OplObject {
 
 		@Override
 		public String toString() {
-			return "DELTA " + F0;
+			return "OplDelta0 [F0=" + F0 + "]";
 		}
 
 		@Override
@@ -2390,6 +2717,35 @@ public abstract class OplExp implements OplObject {
 			Q.validate(F.dst, F.src);
 			return Q;
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F0 == null) ? 0 : F0.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplDelta0 other = (OplDelta0) obj;
+			if (F0 == null) {
+				if (other.F0 != null)
+					return false;
+			} else if (!F0.equals(other.F0))
+				return false;
+			return true;
+		}
+
+		
+		
+		
 	}
 
 	public static class OplDelta extends OplExp {
@@ -2409,6 +2765,39 @@ public abstract class OplExp implements OplObject {
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplDelta other = (OplDelta) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+		
+		
 	}
 
 	public static class OplSigma extends OplExp {
@@ -2428,6 +2817,39 @@ public abstract class OplExp implements OplObject {
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplSigma other = (OplSigma) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+		
+		
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -2443,6 +2865,37 @@ public abstract class OplExp implements OplObject {
 		@Override
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
 			return v.visit(env, this);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((e == null) ? 0 : e.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplEval other = (OplEval) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (e == null) {
+				if (other.e != null)
+					return false;
+			} else if (!e.equals(other.e))
+				return false;
+			return true;
 		}
 
 	}
@@ -2486,7 +2939,9 @@ public abstract class OplExp implements OplObject {
 			ret += "\t\t" + Util.sep(slist, ",\n\t\t") + ";\n";
 
 			return "model {\n" + ret + "} : " + sig;
-		}
+		} 
+		
+		
 
 		public JComponent display() {
 			JTabbedPane jtp = new JTabbedPane();
@@ -2500,7 +2955,9 @@ public abstract class OplExp implements OplObject {
 			return jtp;
 		}
 
+	
 		public JComponent makeTables(Set<S> skip0) {
+		//	System.out.println("before tables " + this);
 			Set<String> skip = skip0.stream().map(Object::toString).collect(Collectors.toSet());
 			List<JComponent> list = new LinkedList<>();
 
@@ -2543,7 +3000,7 @@ public abstract class OplExp implements OplObject {
 				}
 				all.put(n.toString(), JSWrapper.makePrettyTables(BorderFactory.createEmptyBorder(), OplTerm.strip(n.toString()) + " (" + rows.size() + ")", rows.toArray(new Object[][] {}), cols.toArray(new String[] {})));
 			}
-
+			//System.out.println("middle tables " + this);
 			for (C n : keys2) {
 				if (sig0.symbols.get(n).first.size() == 0) {
 					continue;
@@ -2552,7 +3009,7 @@ public abstract class OplExp implements OplObject {
 				List<Object[]> rows = new LinkedList<>();
 				for (List<X> arg : f.keySet()) {
 					@SuppressWarnings("unchecked")
-					List<Object> argX = (List<Object>) arg;
+					List<Object> argX = (List<Object>) new LinkedList<>(arg);
 					argX.add(f.get(arg));
 					Object[] row = argX.toArray(new Object[] {});
 					rows.add(row);
@@ -2570,10 +3027,12 @@ public abstract class OplExp implements OplObject {
 				}
 				list.add(all.get(n));
 			}
+			//System.out.println("after tables " + this);
 			return Util.makeGrid(list);
 		}
 
 		public <V> void validate(OplSig<S, C, V> sig) {
+			//System.out.println("before validate " + this);
 			for (S s : sig.sorts) {
 				if (!sorts.containsKey(s)) {
 					throw new RuntimeException("No data for " + s + " in " + this);
@@ -2648,6 +3107,7 @@ public abstract class OplExp implements OplObject {
 			}
 
 			sig0 = sig;
+			//System.out.println("after validate " + this);
 		}
 
 		public OplSetInst(Map<S, Set<X>> sorts, Map<C, Map<List<X>, X>> symbols, String sig) {
@@ -2779,12 +3239,38 @@ public abstract class OplExp implements OplObject {
 			return "javascript {\n" + ret + "} : " + sig;
 		}
 
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((defs == null) ? 0 : defs.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplJavaInst other = (OplJavaInst) obj;
+			if (defs == null) {
+				if (other.defs != null)
+					return false;
+			} else if (!defs.equals(other.defs))
+				return false;
+			return true;
+		}
+
+		
 	}
 
 	// TODO: pretty print
 	public static class OplPresTrans<S, C, V, X, Y> extends OplExp {
 		Map<S, Map<X, OplTerm<Chc<C, Y>, V>>> map = new HashMap<>();
-		Map<S, Map<X, OplTerm<Object, V>>> pre_map;
+		Map<S, Map<X, OplTerm<Object, V>>> pre_map, initMap;
 		String src0, dst0;
 
 		OplPres<S, C, V, X> src;
@@ -2792,6 +3278,46 @@ public abstract class OplExp implements OplObject {
 
 		OplInst<S, C, V, X> src1;
 		OplInst<S, C, V, Y> dst1;
+
+		
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dst0 == null) ? 0 : dst0.hashCode());
+			result = prime * result
+					+ ((initMap == null) ? 0 : initMap.hashCode());
+			result = prime * result + ((src0 == null) ? 0 : src0.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplPresTrans other = (OplPresTrans) obj;
+			if (dst0 == null) {
+				if (other.dst0 != null)
+					return false;
+			} else if (!dst0.equals(other.dst0))
+				return false;
+			if (initMap == null) {
+				if (other.initMap != null)
+					return false;
+			} else if (!initMap.equals(other.initMap))
+				return false;
+			if (src0 == null) {
+				if (other.src0 != null)
+					return false;
+			} else if (!src0.equals(other.src0))
+				return false;
+			return true;
+		}
 
 		public static <S, C, V, X, Y> OplTerm<Chc<C, Y>, V> apply(OplPres<S, C, V, X> src, Map<S, Map<X, OplTerm<Chc<C, Y>, V>>> map, OplTerm<Chc<C, X>, V> e) {
 			if (e.var != null) {
@@ -2903,14 +3429,7 @@ public abstract class OplExp implements OplObject {
 					pre_map.put(s, new HashMap<>());
 				}
 			}
-			/*
-			 * for (X c : src.P.gens.keySet()) { S s = src.P.gens.get(c);
-			 * 
-			 * if (pre_map.get(j.second).containsKey(c)) { throw new
-			 * RuntimeException("should not map " + c); }
-			 * pre_map.get(j.second).put((X)c, new OplTerm(c, new
-			 * LinkedList())); }
-			 */
+		
 			validateNotReally(src.P, dst.P);
 		}
 
@@ -2958,6 +3477,7 @@ public abstract class OplExp implements OplObject {
 			this.pre_map = m;
 			this.src0 = src0;
 			this.dst0 = dst0;
+			this.initMap = new HashMap<>(m);
 		}
 
 		// validates
@@ -2983,6 +3503,45 @@ public abstract class OplExp implements OplObject {
 
 		OplSig<S, C, ?> sig;
 		OplSetInst<S, C, X> src0, dst0;
+
+		
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+			result = prime * result + ((sorts == null) ? 0 : sorts.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplSetTrans other = (OplSetTrans) obj;
+			if (dst == null) {
+				if (other.dst != null)
+					return false;
+			} else if (!dst.equals(other.dst))
+				return false;
+			if (sorts == null) {
+				if (other.sorts != null)
+					return false;
+			} else if (!sorts.equals(other.sorts))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			return true;
+		}
 
 		public JComponent display() {
 			JTabbedPane jtp = new JTabbedPane();
@@ -3121,6 +3680,8 @@ public abstract class OplExp implements OplObject {
 			return jtp;
 		}
 
+		
+		
 		public OplSchema(String sig0, Set<S> entities) {
 			this.sig0 = sig0;
 			this.entities = entities;
@@ -3306,16 +3867,80 @@ public abstract class OplExp implements OplObject {
 			List<String> l = entities.stream().map(x -> {
 				return Util.maybeQuote(OplTerm.strip(x.toString()));
 			}).collect(Collectors.toList());
-			return "schema {\n entities\n  " + Util.sep(l, ", ") + ";\n} : " + sig0; // /+
-																						// "\n\n + "
-																						// +
-																						// sig;
+			return "schema {\n entities\n  " + Util.sep(l, ", ") + ";\n} : " + sig0; 
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((entities == null) ? 0 : entities.hashCode());
+			result = prime * result + ((sig0 == null) ? 0 : sig0.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplSchema other = (OplSchema) obj;
+			if (entities == null) {
+				if (other.entities != null)
+					return false;
+			} else if (!entities.equals(other.entities))
+				return false;
+			if (sig0 == null) {
+				if (other.sig0 != null)
+					return false;
+			} else if (!sig0.equals(other.sig0))
+				return false;
+			return true;
+		}
+		
+		
 	}
 
 	public static class OplSchemaProj<S, C, V> extends OplExp {
 		String which;
 		String sch0;
+
+		
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((sch0 == null) ? 0 : sch0.hashCode());
+			result = prime * result + ((which == null) ? 0 : which.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplSchemaProj other = (OplSchemaProj) obj;
+			if (sch0 == null) {
+				if (other.sch0 != null)
+					return false;
+			} else if (!sch0.equals(other.sch0))
+				return false;
+			if (which == null) {
+				if (other.which != null)
+					return false;
+			} else if (!which.equals(other.which))
+				return false;
+			return true;
+		}
 
 		public OplSchemaProj(String sch0, String which) {
 			this.sch0 = sch0;
@@ -3396,14 +4021,6 @@ public abstract class OplExp implements OplObject {
 			return proj(S.projEA());
 		}
 
-		// public OplPres<S, C, V, X> projEdiscreteT() {
-		// return proj(S.projEdiscreteT());
-		// }
-
-		// public OplPres<S, C, V, X> projEAdiscreteT() {
-		// return proj(S.projEAdiscreteT());
-		// }
-
 		public OplPres<S, C, V, X> proj(OplSig<S, C, V> sig) {
 			// OplSig<S, C, V> sig = S.projE();
 
@@ -3480,11 +4097,6 @@ public abstract class OplExp implements OplObject {
 
 			CodeTextPanel p = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", toString());
 			ret.add(p, "Presentation");
-
-			// FQLTextPanel q = new
-			// FQLTex/tPanel(BorderFactory.createEtchedBorder(),
-			// "",projEA().display();
-			// ret.add(OplSat.saturate(projEA()).display(), "Attribute Graph");
 
 			try {
 				Quad<OplSetInst<S, C, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>, OplPres<S, C, V, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<C, X>, V>>> xxx = saturate();
@@ -3677,6 +4289,45 @@ public abstract class OplExp implements OplObject {
 			}
 
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((J0 == null) ? 0 : J0.hashCode());
+			result = prime * result + ((P0 == null) ? 0 : P0.hashCode());
+			result = prime * result + ((S0 == null) ? 0 : S0.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplInst other = (OplInst) obj;
+			if (J0 == null) {
+				if (other.J0 != null)
+					return false;
+			} else if (!J0.equals(other.J0))
+				return false;
+			if (P0 == null) {
+				if (other.P0 != null)
+					return false;
+			} else if (!P0.equals(other.P0))
+				return false;
+			if (S0 == null) {
+				if (other.S0 != null)
+					return false;
+			} else if (!S0.equals(other.S0))
+				return false;
+			return true;
+		}
+		
+		
 	}
 
 	@SuppressWarnings({ "rawtypes" })
@@ -3684,22 +4335,54 @@ public abstract class OplExp implements OplObject {
 		String Q0, I0;
 		OplQuery Q;
 
-		// OplInst I;
-
 		public OplApply(String Q0, String I0) {
 			this.Q0 = Q0;
 			this.I0 = I0;
 		}
 
-		/*
-		 * void validate(OplQuery Q, OplInst I) { this.Q = Q; this.I = I; //
-		 * TODO }
-		 */
-
 		@Override
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I0 == null) ? 0 : I0.hashCode());
+			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
+			result = prime * result + ((Q0 == null) ? 0 : Q0.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplApply other = (OplApply) obj;
+			if (I0 == null) {
+				if (other.I0 != null)
+					return false;
+			} else if (!I0.equals(other.I0))
+				return false;
+			if (Q == null) {
+				if (other.Q != null)
+					return false;
+			} else if (!Q.equals(other.Q))
+				return false;
+			if (Q0 == null) {
+				if (other.Q0 != null)
+					return false;
+			} else if (!Q0.equals(other.Q0))
+				return false;
+			return true;
+		}
+		
+		
 	}
 
 	public static class OplId extends OplExp {
@@ -3713,6 +4396,33 @@ public abstract class OplExp implements OplObject {
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((s == null) ? 0 : s.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplId other = (OplId) obj;
+			if (s == null) {
+				if (other.s != null)
+					return false;
+			} else if (!s.equals(other.s))
+				return false;
+			return true;
+		}
+		
+		
 	}
 
 	public static class OplUnion extends OplExp {
@@ -3724,6 +4434,31 @@ public abstract class OplExp implements OplObject {
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((names == null) ? 0 : names.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplUnion other = (OplUnion) obj;
+			if (names == null) {
+				if (other.names != null)
+					return false;
+			} else if (!names.equals(other.names))
+				return false;
+			return true;
+		}
+		
+		
 	}
 	
 	public static class OplTyMapping<S1, C1, V, S2, C2> extends OplExp {
@@ -3732,6 +4467,8 @@ public abstract class OplExp implements OplObject {
 		OplSchema<S2, C2, V> dst;
 		private OplMapping<S1, C1, V, S2, C2> m;
 
+		
+		
 		public OplTyMapping(String src0, String dst0, OplSchema<S1, C1, V> src, OplSchema<S2, C2, V> dst, OplMapping<S1, C1, V, S2, C2> m) {
 			this.src0 = src0;
 			this.dst0 = dst0;
@@ -3781,7 +4518,7 @@ public abstract class OplExp implements OplObject {
 				OplTerm<C2, V> value = new OplTerm<>(c2, vs);
 				symbols.put(c1, new Pair<>(ctx, value));
 			}
-			cache = new OplMapping<S1, C1, V, S2, C2>(sorts, symbols, "?", "?");
+			cache = new OplMapping<S1, C1, V, S2, C2>(sorts, symbols, src0, dst0);
 
 			return cache;
 		}
@@ -3795,6 +4532,51 @@ public abstract class OplExp implements OplObject {
 		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((cache == null) ? 0 : cache.hashCode());
+			result = prime * result + ((dst0 == null) ? 0 : dst0.hashCode());
+			result = prime * result + ((m == null) ? 0 : m.hashCode());
+			result = prime * result + ((src0 == null) ? 0 : src0.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplTyMapping other = (OplTyMapping) obj;
+			if (cache == null) {
+				if (other.cache != null)
+					return false;
+			} else if (!cache.equals(other.cache))
+				return false;
+			if (dst0 == null) {
+				if (other.dst0 != null)
+					return false;
+			} else if (!dst0.equals(other.dst0))
+				return false;
+			if (m == null) {
+				if (other.m != null)
+					return false;
+			} else if (!m.equals(other.m))
+				return false;
+			if (src0 == null) {
+				if (other.src0 != null)
+					return false;
+			} else if (!src0.equals(other.src0))
+				return false;
+			return true;
+		}
+		
+		
 	}
 
 	@SuppressWarnings("rawtypes")

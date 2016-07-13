@@ -67,7 +67,7 @@ public class FQLPPCodeEditor extends CodeEditor<FQLPPProgram, FQLPPEnvironment, 
 
 	@Override
 	protected FQLPPEnvironment makeEnv(String program, FQLPPProgram init) {
-		return FQLPPDriver.makeEnv(program, init);
+		return FQLPPDriver.makeEnv(program, init, toUpdate);
 	}
 
 	@Override

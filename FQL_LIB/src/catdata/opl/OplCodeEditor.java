@@ -82,9 +82,16 @@ public class OplCodeEditor extends CodeEditor<Program<OplExp>, Environment<OplOb
 		return new OplDisplay(foo, init, env, start, middle);
 	}
 
+	String last_str;
+	Program<OplExp> last_prog;
+	Environment<OplObject> last_env;
+	
 	@Override
 	protected Environment<OplObject> makeEnv(String str, Program<OplExp> init) {
-		return OplDriver.makeEnv(str, init);
+		last_env = OplDriver.makeEnv(str, init, toUpdate, last_str, last_prog, last_env);
+		last_prog = init;
+		last_str = str;		
+		return last_env;
 	}
 
 	@Override

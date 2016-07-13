@@ -25,6 +25,10 @@ public class OplOptions extends Options {
 		return Language.OPL.toString();
 	}
 	
+	
+//	public boolean simplify = KBOptions.defaultOptions.simplify;
+	public boolean compose = KBOptions.defaultOptions.compose;
+	public boolean filter_subsumed_by_self = KBOptions.defaultOptions.filter_subsumed_by_self;
 	public boolean opl_unfailing = KBOptions.defaultOptions.unfailing;
 	public int opl_iterations = KBOptions.defaultOptions.iterations;
 	public boolean opl_require_const = false;
@@ -39,6 +43,8 @@ public class OplOptions extends Options {
 	public boolean opl_horn = KBOptions.defaultOptions.horn;
 	public boolean opl_query_check_eqs = true;
 	public boolean opl_pushout_simpl = false;
+	public boolean opl_lazy = false;
+	public boolean cache = false;
 	
 	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
@@ -64,11 +70,6 @@ public class OplOptions extends Options {
 		JLabel opl_const_label = new JLabel("Require a constant at each sort (false=dangerous):");
 		opl2.add(opl_const_box);
 		opl1.add(opl_const_label);
-		
-		JCheckBox opl_sort_box = new JCheckBox("", opl_sort_cps);
-		JLabel opl_sort_label = new JLabel("Sort orientable critical pairs by length:");
-		opl2.add(opl_sort_box);
-		opl1.add(opl_sort_label);
 
 		JCheckBox opl_reorder_box = new JCheckBox("", opl_reorder);
 		JLabel opl_reorder_label = new JLabel("Reorder joins:");
@@ -120,7 +121,37 @@ public class OplOptions extends Options {
 		JLabel opl_simpl_label = new JLabel("Simplify pushout schemas:");
 		opl2.add(opl_simpl_box);
 		opl1.add(opl_simpl_label);
-
+		
+		JCheckBox opl_lazy_box = new JCheckBox("", opl_lazy);
+		JLabel opl_lazy_label = new JLabel("Lazily compute gui:");
+		opl2.add(opl_lazy_box);
+		opl1.add(opl_lazy_label);
+		
+		JCheckBox opl_sort_box = new JCheckBox("", opl_sort_cps);
+		JLabel opl_sort_label = new JLabel("In prover, sort critical pairs by length:");
+		opl2.add(opl_sort_box);
+		opl1.add(opl_sort_label);
+		
+		JCheckBox opl_selfsub_box = new JCheckBox("", filter_subsumed_by_self);
+		JLabel opl_selfsub_label = new JLabel("In prover, filter self-subsumed equations:");
+		opl2.add(opl_selfsub_box);
+		opl1.add(opl_selfsub_label);
+		
+//		JCheckBox opl_simplify_box = new JCheckBox("", simplify);
+	//	JLabel opl_simplify_label = new JLabel("In prover, simplify equations:");
+	//	opl2.add(opl_simplify_box);
+	//	opl1.add(opl_simplify_label);
+		
+		JCheckBox opl_compose_box = new JCheckBox("", compose);
+		JLabel opl_compose_label = new JLabel("In prover, compose equations:");
+		opl2.add(opl_compose_box);
+		opl1.add(opl_compose_label);
+		
+		JCheckBox opl_cache_box = new JCheckBox("", cache);
+		JLabel opl_cache_label = new JLabel("Cache artifacts between runs:");
+		opl2.add(opl_cache_box);
+		opl1.add(opl_cache_label);
+		
 		for (int i = 0; i < Options.biggestSize - size(); i++) {
 			opl1.add(new JLabel());
 			opl2.add(new JLabel());
@@ -157,7 +188,12 @@ public class OplOptions extends Options {
 				opl_semantic_ac = opl_semantic_ac_box.isSelected();
 				opl_query_check_eqs = opl_eqs_box.isSelected();
 				opl_pushout_simpl = opl_simpl_box.isSelected();
-			
+				opl_lazy = opl_lazy_box.isSelected();
+				filter_subsumed_by_self = opl_selfsub_box.isSelected();
+				//simplify = opl_simplify_box.isSelected();
+				compose = opl_compose_box.isSelected();
+				cache = opl_cache_box.isSelected();
+				
 				return new Unit();
 			}
 			
@@ -169,7 +205,7 @@ public class OplOptions extends Options {
 
 	@Override
 	public int size() {
-		return 15;
+		return 18;
 	} 
 
 }

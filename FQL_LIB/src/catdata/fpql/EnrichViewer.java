@@ -346,7 +346,7 @@ public class EnrichViewer {
 
 		XEnvironment env; 
 		try {
-			env = XDriver.makeEnv(program, init);
+			env = XDriver.makeEnv(program, init, new String[0]);
 		} catch (LineException e) {
 			String toDisplay = "Error in " + e.kind + " " + e.decl + ": "
 					+ e.getLocalizedMessage();

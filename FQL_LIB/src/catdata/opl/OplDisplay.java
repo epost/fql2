@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -28,7 +29,9 @@ import catdata.Pair;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
 import catdata.ide.Environment;
+import catdata.ide.NEWDEBUG;
 import catdata.ide.Program;
+import catdata.ide.ProgressMonitorWrapper;
 import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplMapping;
@@ -41,6 +44,7 @@ import catdata.opl.OplExp.OplSetInst;
 import catdata.opl.OplExp.OplSetTrans;
 import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplExp.OplTyMapping;
+
 
 public class OplDisplay implements Disp {
 
@@ -100,6 +104,28 @@ public class OplDisplay implements Disp {
  		}
 		return c;
 	}
+	
+	JComponent wrapDisplay(String name, OplObject obj) {
+		if (!NEWDEBUG.debug.opl.opl_lazy) {
+			return obj.display();
+		}
+		JPanel ret = new JPanel(new GridLayout(1,1));
+		JPanel lazyPanel = new JPanel();
+		JButton button = new JButton("Show");
+
+		lazyPanel.add(button);
+		button.addActionListener(x -> {
+			JComponent[] comp = new JComponent[1];
+			new ProgressMonitorWrapper( "Making GUI for " + name, () -> {
+				comp[0] = obj.display();
+				ret.remove(lazyPanel);
+				ret.add(comp[0]);
+				ret.validate();
+			});
+		});
+		ret.add(lazyPanel);
+		return ret;
+	}
 
 
 	public OplDisplay(String title, Program<OplExp> p, Environment<OplObject> env, long start, long middle) {
@@ -108,7 +134,7 @@ public class OplDisplay implements Disp {
 			OplObject obj = env.get(c);
 			map.put(obj, c); 
 			try {
-				frames.add(new Pair<>(doLookup(c, obj).replace(": ?", ""), obj.display()));
+				frames.add(new Pair<>(doLookup(c, obj).replace(": ?", ""), wrapDisplay(c, obj)));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				frames.add(new Pair<>(doLookup(c, obj), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
