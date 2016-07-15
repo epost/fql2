@@ -97,7 +97,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	
 	public OplToKB(Iterator<V> fr, OplSig<S, C, V> sig) {
 		this.sig = sig;
-		if (NEWDEBUG.debug.opl.opl_require_const) {
+		if (NEWDEBUG.debug.opl.opl_prover_require_const) {
 			checkEmpty();
 		}
 		this.fr = fr;
@@ -381,11 +381,11 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			rs.addAll(convert(impl.second, impl.third));
 		}
 		
-		KBOptions options = new KBOptions(NEWDEBUG.debug.opl.opl_unfailing, 
-				NEWDEBUG.debug.opl.opl_sort_cps, NEWDEBUG.debug.opl.opl_horn && !s.implications.isEmpty(), 
-				NEWDEBUG.debug.opl.opl_semantic_ac, NEWDEBUG.debug.opl.opl_iterations, 
-				NEWDEBUG.debug.opl.opl_red_its, NEWDEBUG.debug.opl.filter_subsumed_by_self,
-				/* NEWDEBUG.debug.opl.simplify, */ NEWDEBUG.debug.opl.compose);
+		KBOptions options = new KBOptions(NEWDEBUG.debug.opl.opl_prover_unfailing, 
+				NEWDEBUG.debug.opl.opl_prover_sort, NEWDEBUG.debug.opl.opl_allow_horn && !s.implications.isEmpty(), 
+				NEWDEBUG.debug.opl.opl_prover_ac, NEWDEBUG.debug.opl.opl_prover_timeout, 
+				NEWDEBUG.debug.opl.opl_prover_reduction_limit, NEWDEBUG.debug.opl.opl_prover_filter_subsumed,
+				/* NEWDEBUG.debug.opl.simplify, */ NEWDEBUG.debug.opl.opl_prover_compose);
 		return new KB(eqs, KBOrders.lpogt(gt), fr, rs, options);			
 	}
 	
@@ -473,7 +473,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		Thread t = new Thread(r);
 		t.start();
 		try {
-			t.join(NEWDEBUG.debug.opl.opl_hom_its);
+			t.join(NEWDEBUG.debug.opl.opl_saturate_timeout);
 			t.stop();
 		} catch (Exception ex) {
 			ex.printStackTrace();

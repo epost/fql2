@@ -36,6 +36,7 @@ import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplMapping;
 import catdata.opl.OplExp.OplPivot;
+import catdata.opl.OplExp.OplPragma;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplPresTrans;
 import catdata.opl.OplExp.OplPushout;
@@ -106,14 +107,14 @@ public class OplDisplay implements Disp {
 	}
 	
 	JComponent wrapDisplay(String name, OplObject obj) {
-		if (!NEWDEBUG.debug.opl.opl_lazy) {
+		if (!NEWDEBUG.debug.opl.opl_lazy_gui) {
 			return obj.display();
 		}
 		JPanel ret = new JPanel(new GridLayout(1,1));
 		JPanel lazyPanel = new JPanel();
 		JButton button = new JButton("Show");
 
-		lazyPanel.add(button);
+		lazyPanel.add(button); 
 		button.addActionListener(x -> {
 			JComponent[] comp = new JComponent[1];
 			new ProgressMonitorWrapper( "Making GUI for " + name, () -> {
@@ -132,6 +133,9 @@ public class OplDisplay implements Disp {
 		Map<Object, String> map = new HashMap<>();
 		for (String c : p.order) {
 			OplObject obj = env.get(c);
+			if (obj instanceof OplPragma) {
+				continue;
+			}
 			map.put(obj, c); 
 			try {
 				frames.add(new Pair<>(doLookup(c, obj).replace(": ?", ""), wrapDisplay(c, obj)));
@@ -243,6 +247,7 @@ public class OplDisplay implements Disp {
 
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
+		
 
 	}
 

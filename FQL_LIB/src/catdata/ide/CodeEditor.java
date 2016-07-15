@@ -222,29 +222,37 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 		InputMap inputMap = topArea.getInputMap();
 
-		KeyStroke key2 = KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.CTRL_MASK);
-
+		KeyStroke key2;
+		if (System.getProperty("os.name").contains("Windows")) {
+			key2 = KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.META_MASK);
+		} else {
+			key2 = KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.CTRL_MASK);
+		}
 		inputMap.put(key2, DefaultEditorKit.beginLineAction);
-
+	
 		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_E, Event.META_MASK);
 		key2 = KeyStroke.getKeyStroke(KeyEvent.VK_E, Event.CTRL_MASK);
 
 		inputMap.put(key, DefaultEditorKit.endLineAction);
 		inputMap.put(key2, DefaultEditorKit.endLineAction);
 
-		Action alx = new AbstractAction() {
+/*		Action alx = new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				topArea.redoLastAction();
 			}
 		};
+		
+	//	if (System.getProperty("os.name").contains("Windows")) { 
 		key = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.SHIFT_MASK
 				| Event.CTRL_MASK);
 		inputMap.put(key, alx);
+		
 		key = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.SHIFT_MASK
 				| Event.META_MASK);
 		inputMap.put(key, alx);
+		*/
 
 		key = KeyStroke.getKeyStroke(KeyEvent.VK_K, Event.META_MASK);
 		key2 = KeyStroke.getKeyStroke(KeyEvent.VK_K, Event.CTRL_MASK);

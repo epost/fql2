@@ -163,7 +163,7 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 	}
 
 	public static String strip(String s) {
-		if (!NEWDEBUG.debug.opl.opl_pretty) {
+		if (!NEWDEBUG.debug.opl.opl_pretty_print) {
 			return s;
 		}
 		String ret = s.replace("inl ", "").replace("inr ", "").replace("()", "")

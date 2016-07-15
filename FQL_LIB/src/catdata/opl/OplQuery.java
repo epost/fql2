@@ -395,7 +395,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			counts.put(v1, 0);
 			ret.add(v1);
 		}
-		if (!NEWDEBUG.debug.opl.opl_reorder) {
+		if (!NEWDEBUG.debug.opl.opl_reorder_joins) {
 			return ret;
 		}
 		for (Pair<OplTerm<C1, V1>, OplTerm<C1, V1>> eq : block.where) {
@@ -734,15 +734,23 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, Integer> prec = new HashMap<>();
 
 		int guess = -1;
-
-		for (OplTerm<Chc<C1, X>, V1> gen : yyy.third.gens.keySet()) {
-			@SuppressWarnings("unchecked")
-			S2 s2 = (S2) yyy.third.gens.get(gen);
-			gens.put(Chc.inLeft(gen), s2);
-			guess = guessPrec(I0, guess, prec);
-			//prec.put(Chc.inLeft(gen), guess);
-			prec.put(Chc.inLeft(gen), yyy.third.prec.get(gen));
-		}
+		int newIdsStart = 0;
+		
+	/*	if (NEWDEBUG.debug.opl.opl_prover_force_prec) {
+			for (OplTerm<Chc<C1, X>, V1> gen : yyy.third.gens.keySet()) {
+				S2 s2 = (S2) yyy.third.gens.get(gen);
+				gens.put(Chc.inLeft(gen), s2);
+				guess = forceIdx++;
+				prec.put(Chc.inLeft(gen), guess);
+			}
+		} else { */
+			for (OplTerm<Chc<C1, X>, V1> gen : yyy.third.gens.keySet()) {
+				S2 s2 = (S2) yyy.third.gens.get(gen);
+				gens.put(Chc.inLeft(gen), s2);
+				guess = guessPrec(I0, guess, prec); //increment guess
+				prec.put(Chc.inLeft(gen), yyy.third.prec.get(gen));
+			}
+	//	}
 		
 		for (Pair<OplTerm<Chc<C1, OplTerm<Chc<C1, X>, V1>>, V1>, OplTerm<Chc<C1, OplTerm<Chc<C1, X>, V1>>, V1>> eq : yyy.third.equations) {
 			equations.add(new Pair<>(conv(I0, eq.first), conv(I0, eq.second)));
@@ -777,8 +785,13 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 
 			for (Map<V1, OplTerm<Chc<C1, X>, V1>> tuple : tuples) {
 				gens.put(Chc.inRight(new Pair<>(label, tuple)), tgt);
-				guess = guessPrec(I0, guess, prec); 
-				prec.put(Chc.inRight(new Pair<>(label, tuple)), guess);
+				if (NEWDEBUG.debug.opl.opl_prover_force_prec) {
+					newIdsStart++;
+					prec.put(Chc.inRight(new Pair<>(label, tuple)), newIdsStart);
+				} else {
+					guess = guessPrec(I0, guess, prec); 
+					prec.put(Chc.inRight(new Pair<>(label, tuple)), guess);
+				}
 			}
 
 			for (C2 c2 : block.attrs.keySet()) {

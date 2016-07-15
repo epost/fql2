@@ -74,6 +74,50 @@ public abstract class OplExp implements OplObject {
 	}
 
 	public abstract <R, E> R accept(E env, OplExpVisitor<R, E> v);
+	
+	public static class OplPragma extends OplExp {
+		Map<String, String> map;
+		
+		public OplPragma(Map<String, String> map) {
+			this.map = map;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public String toString() {
+			return map.toString();
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((map == null) ? 0 : map.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplPragma other = (OplPragma) obj;
+			if (map == null) {
+				if (other.map != null)
+					return false;
+			} else if (!map.equals(other.map))
+				return false;
+			return true;
+		}
+		
+	}
 
 	public static class OplVar extends OplExp {
 		String name;
@@ -848,6 +892,31 @@ public abstract class OplExp implements OplObject {
 
 	}
 
+	/*
+	public static class OplColimitSch extends OplExp {
+		
+		String s;
+		OplSchema sch;
+		@Override
+		public JComponent display() {
+			return pushout().first.display();
+		}
+
+		public OplPushout(String s1, String s2) {
+			this.s1 = s1;
+			this.s2 = s2;
+		}
+
+		public void validate(OplPresTrans<S, C, V, X, Y> h1, OplPresTrans<S, C, V, X, Z> h2) {
+			this.h1 = h1;
+			this.h2 = h2;
+			if (!h1.src.equals(h2.src)) {
+				throw new RuntimeException("Sources do not match:\n\n" + h1.src + "\n\n---------\n\n" + h2.src);
+			}
+		}
+		
+	} */
+	
 	public static class OplPushout<S, C, V, X, Y, Z> extends OplExp {
 
 		
@@ -905,6 +974,7 @@ public abstract class OplExp implements OplObject {
 			}
 		}
 
+		//TODO: in colimit, should do 0-based assignments
 		public Triple<OplInst<S, C, V, Chc<Y, Z>>, OplPresTrans<S, C, V, Y, Chc<Y, Z>>, OplPresTrans<S, C, V, Z, Chc<Y, Z>>> pushout() {
 			Map<Chc<Y, Z>, Integer> prec = new HashMap<>();
 			Map<Chc<Y, Z>, S> gens = new HashMap<>();
@@ -921,12 +991,16 @@ public abstract class OplExp implements OplObject {
 				ytm.put(s, new HashMap<>());
 				ztm.put(s, new HashMap<>());
 			}
+			int precIdx = 0;
 			for (Y y : h1.dst.gens.keySet()) {
 				S s = h1.dst.gens.get(y);
 				gens.put(Chc.inLeft(y), s);
 				OplTerm<Chc<C, Chc<Y, Z>>, V> term = new OplTerm<>(Chc.inRight(Chc.inLeft(y)), new LinkedList<>());
 				map1.get(s).put(y, term);
 				ytm.get(s).put(y, term);
+				if (NEWDEBUG.debug.opl.opl_prover_force_prec) {
+					prec.put(Chc.inLeft(y), precIdx++);
+				}
 			}
 			for (Z z : h2.dst.gens.keySet()) {
 				S s = h2.dst.gens.get(z);
@@ -1831,7 +1905,7 @@ public abstract class OplExp implements OplObject {
 				Thread t = new Thread(runnable);
 				try {
 					t.start();
-					t.join(NEWDEBUG.debug.opl.opl_hom_its);
+					t.join(NEWDEBUG.debug.opl.opl_saturate_timeout);
 
 					t.stop();
 					if (bot.getText().equals("")) {
@@ -1945,7 +2019,7 @@ public abstract class OplExp implements OplObject {
 		public Iterator<V> fr;
 
 		void validate() {
-			if (!NEWDEBUG.debug.opl.opl_horn && !implications.isEmpty()) {
+			if (!NEWDEBUG.debug.opl.opl_allow_horn && !implications.isEmpty()) {
 				throw new DoNotIgnore("Implications in theories disabled in options menu.");
 			}
 			for (C k : symbols.keySet()) {
@@ -4089,7 +4163,7 @@ public abstract class OplExp implements OplObject {
 
 		@Override
 		public String toString() {
-			return P.toString() + "\n\n" + S;
+			return P.toString() + "\n\n" + S + "\n\n" + P.prec;
 		}
 
 		public JComponent display() {
@@ -4640,6 +4714,8 @@ public abstract class OplExp implements OplObject {
 		public R visit(E env, OplPushoutBen e);
 		
 		public R visit(E env, OplUnion e);
+		
+		public R visit(E env, OplPragma e);
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -34,7 +34,7 @@ public class JSWrapper {
 
 	public String toString() {
 		String s = "JS<" + o + ">";
-		if (!NEWDEBUG.debug.opl.opl_pretty) {
+		if (!NEWDEBUG.debug.opl.opl_pretty_print) {
 			return s;
 		}
 		return o.toString();

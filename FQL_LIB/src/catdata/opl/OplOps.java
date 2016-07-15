@@ -11,6 +11,7 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.ide.Environment;
+import catdata.ide.NEWDEBUG;
 import catdata.ide.Program;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplApply;
@@ -25,6 +26,7 @@ import catdata.opl.OplExp.OplInst0;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplMapping;
 import catdata.opl.OplExp.OplPivot;
+import catdata.opl.OplExp.OplPragma;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplPresTrans;
 import catdata.opl.OplExp.OplPushout;
@@ -717,7 +719,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 	
 
 	
-	private  OplTerm<Chc<String, String>, String> prepend(String s, OplTerm<Chc<String, String>, String> first, String i, Set<String> gens) {
+	/* private  OplTerm<Chc<String, String>, String> prepend(String s, OplTerm<Chc<String, String>, String> first, String i, Set<String> gens) {
 		if (first.var != null) {
 			return first;
 		}
@@ -731,7 +733,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			return new OplTerm<>(Chc.inRight(i + "_" + first.head), args);						
 		}
 		
-	}
+	} */
 
 	
 	private OplTerm<String, String> prepend(String s, OplTerm<String, String> e) {
@@ -744,6 +746,16 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		}
 		
 		return new OplTerm<>(s + "_" + e.head, args);
+	}
+
+	@Override
+	public OplObject visit(Program<OplExp> env, OplPragma e) {
+		for (String k : e.map.keySet()) {
+			String v = e.map.get(k);
+			//System.out.println("setting " + k + " = " + v);
+			NEWDEBUG.debug.opl.set(k, v);
+		}
+		return e;
 	}
 
 }
