@@ -54,6 +54,7 @@ public class OplExamples {
 	public static Example oplUnion = new OplUnionExample();
 	public static Example oplUber = new OplUberExample();
 	public static Example oplStdLib = new OplStdLib();
+	public static Example oplJee1 = new OplJee1();
 	
 	
 }

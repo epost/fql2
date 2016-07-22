@@ -9,17 +9,9 @@ An IDE for the functorial query languages developed at categoricaldata.net.
 Build
 -----
 
-Compilation note: requires the built-in Eclipse compiler that ships with the Eclipse IDE for java developers.  The Oracle JDK compiler will fail with type-inference errors.
+Compilation note: requires the built-in Eclipse compiler that ships with the Eclipse IDE for java developers.  The Oracle JDK compiler will fail with type-inference errors.  The Maven build script is not updated very often.
 
 ### Maven
-
-First, install the `catdata-algs` dependency into your local Maven repository:
-
-    git clone https://github.com/CategoricalData/catdata_algs.git
-    cd catdata_algs/catdata_algs
-    mvn install
-
-Then, install `fql2` itself:
 
     git clone https://github.com/CategoricalData/fql2.git
     cd fql2/FQL_LIB/
