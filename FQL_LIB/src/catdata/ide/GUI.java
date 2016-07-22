@@ -475,10 +475,13 @@ public class GUI extends JPanel {
 		c.abortAction();
 	}
 
+	@SuppressWarnings("rawtypes")
 	private static void closeAction() {
 		delay();
 		int i = editors.getSelectedIndex();
-		@SuppressWarnings("rawtypes")
+		if (i < 1 || i >= editors.getTabCount()) {
+			return;
+		}
 		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
 		if (c == null) {
 			return;

@@ -52,6 +52,8 @@ public class OplExamples {
 	public static Example oplIntegration = new OplIntegrationExample();
 	public static Example oplPivot = new OplPivotExample();
 	public static Example oplUnion = new OplUnionExample();
+	public static Example oplUber = new OplUberExample();
+	public static Example oplStdLib = new OplStdLib();
 	
 	
 }

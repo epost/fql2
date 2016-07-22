@@ -47,7 +47,7 @@ public class IDE {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
- 					NEWDEBUG.load(true);
+ 					NEWDEBUG.load();
 					
 					UIManager.setLookAndFeel(NEWDEBUG.debug.general.look_and_feel);			
 

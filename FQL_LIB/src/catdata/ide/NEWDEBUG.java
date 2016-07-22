@@ -2,6 +2,7 @@ package catdata.ide;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
@@ -14,6 +15,7 @@ import java.util.function.Function;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
 import catdata.Pair;
@@ -47,19 +49,21 @@ public class NEWDEBUG implements Serializable {
 	public XOptions fpql = new XOptions(); 
 	public OplOptions opl = new OplOptions(); 
 	
-	private Options[] options = new Options[] { general, fql, fqlpp, fpql, opl };
+	private Options[] options() {
+		return new Options[] { general, fql, fqlpp, fpql, opl };
+	}
 	
 	{
-		for (Options option : options) {
+		for (Options option : options()) {
 			Options.biggestSize = Integer.max(Options.biggestSize, option.size());
 		}
 	}
 	
-	public void save() {
+	public static void save() {
 		try {
 			FileOutputStream fileOut = new FileOutputStream("cdide.ser");
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(this);
+			out.writeObject(debug);
 			out.close();
 			fileOut.close();
 		} catch (Exception i) {
@@ -67,45 +71,53 @@ public class NEWDEBUG implements Serializable {
 			JOptionPane.showMessageDialog(null, i.getLocalizedMessage());
 		}
 	}
+	
+	public static void delete() {
+		File f = new File("cdide.ser");
+		if (!f.exists()) {
+			return;
+		}
+		f.delete();
+	}
 
-	public static NEWDEBUG load(boolean silent) {
+	public static void load() {
 		try {
+			if (!new File("cdide.ser").exists()) {
+				return;
+			}
 			FileInputStream fileIn = new FileInputStream("cdide.ser");
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 			NEWDEBUG e = (NEWDEBUG) in.readObject();
-			if (e != null) {
-				if (silent) {
-					debug = e;
-				} else {
-					e.showOptions();
-				}
-			}
 			in.close();
 			fileIn.close();
+
+			if (e != null) {
+				debug = e;
+			} else {
+				throw new RuntimeException("Cannot restore options, file corrupt");
+			}
 		} catch (Exception i) {
-			if (!silent) {
 				i.printStackTrace();
 				JOptionPane.showMessageDialog(null, i.getLocalizedMessage());
-			}
 		}
-		return null;
+		return;
 	}
 
 				
-	public void showOptions() {
+	public static void showOptions() {
 		JTabbedPane jtb = new JTabbedPane();
 
 		List<Function<Unit, Unit>> callbacks = new LinkedList<>();
-		for (Options option : options) {
+		for (Options option : debug.options()) {
 			Pair<JComponent, Function<Unit, Unit>> x = option.display();
 			jtb.add(option.getName(), x.first);
 			callbacks.add(x.second);
 		}
 		jtb.setSelectedIndex(selected_tab);
 		
-		JOptionPane pane = new JOptionPane(jtb, JOptionPane.PLAIN_MESSAGE,
+		JOptionPane pane = new JOptionPane(new JScrollPane(jtb), JOptionPane.PLAIN_MESSAGE,
 				JOptionPane.OK_CANCEL_OPTION, null,
-				new String[] { "OK", "Cancel", "Reset", "Save", "Load" }, "OK");
+				new String[] { "OK", "Cancel", "Reset", "Save", "Load", "Delete" }, "OK");
 		
 		JDialog dialog = pane.createDialog(null, "Options");
 		dialog.setModal(false);
@@ -118,22 +130,33 @@ public class NEWDEBUG implements Serializable {
 				
 				selected_tab = jtb.getSelectedIndex();
 
-				if (ret == "OK" || ret == "Save") {
+				if (ret == "OK") {
 					for (Function<Unit, Unit> callback : callbacks) {
 						callback.apply(new Unit());
 					}
+				//	System.out.println("OPL options set to : " + debug.opl);
 				} else if (ret == "Reset") {
-					new NEWDEBUG().showOptions();
-				}
-				if (ret == "Save") { // save
+					debug = new NEWDEBUG();
+					showOptions();
+				} else if (ret == "Save") { // save
+					for (Function<Unit, Unit> callback : callbacks) {
+						callback.apply(new Unit());
+					}
 					save();
 					showOptions();
-				}
-
-				if (ret == "Load") { // load
-					load(false);
-				}  
+				} else if (ret == "Load") { // load
+					load();
+					showOptions();
+				} else if (ret == "Cancel") {
+					
+				} else if (ret == "Delete") {
+					delete();
+					showOptions();
+				} //else if (ret != null && ret != uninitializedValue") {
+				//	throw new RuntimeException("xx " + ret);
+				//}
 			}
+			
 		
 		});
 		

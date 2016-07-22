@@ -235,8 +235,10 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 		inputMap.put(key, DefaultEditorKit.endLineAction);
 		inputMap.put(key2, DefaultEditorKit.endLineAction);
+		
 
-/*		Action alx = new AbstractAction() {
+
+		Action alx = new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -244,15 +246,15 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			}
 		};
 		
-	//	if (System.getProperty("os.name").contains("Windows")) { 
-		key = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.SHIFT_MASK
-				| Event.CTRL_MASK);
-		inputMap.put(key, alx);
-		
-		key = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.SHIFT_MASK
-				| Event.META_MASK);
-		inputMap.put(key, alx);
-		*/
+		if (System.getProperty("os.name").contains("Windows")) { 
+			key = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.SHIFT_MASK
+					| Event.CTRL_MASK);
+			inputMap.put(key, alx);
+		} else {
+			key = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.SHIFT_MASK
+					| Event.META_MASK);
+			inputMap.put(key, alx);
+		}
 
 		key = KeyStroke.getKeyStroke(KeyEvent.VK_K, Event.META_MASK);
 		key2 = KeyStroke.getKeyStroke(KeyEvent.VK_K, Event.CTRL_MASK);

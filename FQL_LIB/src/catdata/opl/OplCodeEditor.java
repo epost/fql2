@@ -64,6 +64,15 @@ public class OplCodeEditor extends
 		provider.addCompletion(new ShorthandCompletion(provider, "model",
 				"model {\n\tsorts;\n\tsymbols;\n} : ", ""));
 
+		provider.addCompletion(new ShorthandCompletion(provider, "query",
+				"query {\n q1 = "
+				+ "\n {for a:b; "
+				+ "\n  where f(a)=f(b), f(b)=f(c); "
+				+ "\n  return att = at(a), att2 = at(a); "
+				+ "\n  keys fk1 = {a=f(b), b=f(g(a))} : q2,"
+				+ "\n  fk2 = {c=f(b)} : q3; "
+				+ " } : t \n/* , another block */ \n} : S -> T ", ""));
+		
 		provider.addCompletion(new ShorthandCompletion(provider, "javascript",
 				"javascript {\n\tsymbols;\n} : ", ""));
 
@@ -114,6 +123,7 @@ public class OplCodeEditor extends
 	protected Environment<OplObject> makeEnv(String str, Program<OplExp> init) {
 		last_options = (OplOptions) NEWDEBUG.debug.opl.clone();
 		try {
+			//System.out.println("executing in " + NEWDEBUG.debug.opl);
 			last_env = OplDriver.makeEnv(str, init, toUpdate, last_str,
 					last_prog, last_env);
 			last_prog = init;

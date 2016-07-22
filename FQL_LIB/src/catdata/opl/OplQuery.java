@@ -734,23 +734,24 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, Integer> prec = new HashMap<>();
 
 		int guess = -1;
-		int newIdsStart = 0;
+		int newIdsStart = 20000;
 		
-	/*	if (NEWDEBUG.debug.opl.opl_prover_force_prec) {
+		if (NEWDEBUG.debug.opl.opl_prover_force_prec) {
 			for (OplTerm<Chc<C1, X>, V1> gen : yyy.third.gens.keySet()) {
 				S2 s2 = (S2) yyy.third.gens.get(gen);
 				gens.put(Chc.inLeft(gen), s2);
-				guess = forceIdx++;
-				prec.put(Chc.inLeft(gen), guess);
+				prec.put(Chc.inLeft(gen), newIdsStart);
+				newIdsStart++;
 			}
-		} else { */
+		} else { 
 			for (OplTerm<Chc<C1, X>, V1> gen : yyy.third.gens.keySet()) {
 				S2 s2 = (S2) yyy.third.gens.get(gen);
 				gens.put(Chc.inLeft(gen), s2);
 				guess = guessPrec(I0, guess, prec); //increment guess
 				prec.put(Chc.inLeft(gen), yyy.third.prec.get(gen));
 			}
-	//	}
+		}
+		newIdsStart = 0;
 		
 		for (Pair<OplTerm<Chc<C1, OplTerm<Chc<C1, X>, V1>>, V1>, OplTerm<Chc<C1, OplTerm<Chc<C1, X>, V1>>, V1>> eq : yyy.third.equations) {
 			equations.add(new Pair<>(conv(I0, eq.first), conv(I0, eq.second)));
@@ -835,13 +836,15 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			
 		}
 
+//		System.out.println(dst.sig0);
+		
 		OplPres<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> P = new OplPres<>(
-				prec, dst.sig0, dst.sig, gens, equations);
+				prec, dst_e, dst.sig, gens, equations);
 		
 		P.toSig();
 
 		OplInst<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> retX = new OplInst<>(
-				"?", "?", I0.J0);
+				dst_e, "?", I0.J0);
 
 		retX.validate(dst, P, I0.J);
 		

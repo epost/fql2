@@ -162,12 +162,13 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		return ret;
 	}
 
+	//TODO: dup? In Util?
 	public static String strip(String s) {
 		if (!NEWDEBUG.debug.opl.opl_pretty_print) {
 			return s;
 		}
 		String ret = s.replace("inl ", "").replace("inr ", "").replace("()", "")
-				.replace("forall . ", "").trim();
+				.replace("forall . ", "");
 		if (ret.startsWith("|- ")) {
 			ret = ret.substring(3);
 		}
@@ -190,6 +191,29 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		return new OplTerm<>(head, args0);
 	}
 
+	public OplTerm<C, V> replace(OplTerm<C, V> toreplace, OplTerm<C, V> replacee) {
+		if (this.equals(toreplace)) {
+			return replacee;
+		}
+		List<OplTerm<C, V>> l = new LinkedList<>();
+		for (OplTerm<C, V> a : args) {
+			l.add(a.replace(toreplace, replacee));
+		}
+		return new OplTerm<>(head, l);
+	}
+	
+	public boolean contains(OplTerm<C, V> lookingfor) {
+		if (this.equals(lookingfor)) {
+			return true;
+		}
+		for (OplTerm<C, V> a : args) {
+			if (a.contains(lookingfor)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public OplTerm<C, V> subst(Map<V, OplTerm<C, V>> s) {
 		if (var != null) {
 			OplTerm<C, V> t = s.get(var);
@@ -243,6 +267,20 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 			args0.add(a.inRight());
 		}
 		return new OplTerm<Chc<X, C>, V>(Chc.inRight(head), args0);
+	}
+
+	public static <C, X, V> OplTerm<C, V> deLeft(OplTerm<Chc<C, X>, V> e) {
+		if (e.var != null) {
+			return new OplTerm<>(e.var);
+		}
+		if (!e.head.left) {
+			throw new RuntimeException("Cannot de-left " + e);
+		}
+		List<OplTerm<C, V>> args0 = new LinkedList<>();
+		for (OplTerm<Chc<C, X>, V> a : e.args) {
+			args0.add(deLeft(a));
+		}
+		return new OplTerm<>(e.head.l, args0);
 	}
 
 }

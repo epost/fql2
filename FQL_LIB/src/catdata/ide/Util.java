@@ -36,6 +36,28 @@ import catdata.opl.OplTerm;
 
 public class Util {
 	
+	public static void putAllSafely(Map m, Map m2) {
+		for (Object k : m2.keySet()) {
+			Object v2 = m2.get(k);
+			if (!m.containsKey(k)) {
+				m.put(k, v2);
+				continue;
+			}
+			Object v = m.get(k);
+			if (!v.equals(v2)) {
+				throw new RuntimeException("Collision on " + k + " was " + v + " becomes " + v2);
+			}
+		}
+		
+	}
+	
+	public static <X> X get0X(Collection<X> c) {
+		for (X x : c) {
+			return x;
+		}
+		throw new RuntimeException();
+	}
+	
 	public static <X> X get0(Collection<X> c) {
 		if (c.size() != 1) {
 			throw new RuntimeException();
@@ -45,7 +67,7 @@ public class Util {
 		}
 		throw new RuntimeException();
 	}
-	
+	 
 	static <X extends Comparable<X>,Y> String printNicely(Set<Map<X, Y>> map) {
 		List<String> l = map.stream().map(x -> printNicely(x)).collect(Collectors.toList());
 		Collections.sort(l);
@@ -75,12 +97,21 @@ public class Util {
 		}
 	}
 	public static String maybeQuote(String s) {
-		if (s.contains(" ") || s.contains(".") || isInt(s) ) {
+		if (s.trim().length() == 0) {
 			return "\"" + s + "\"";
-		} else {
-			return s;
 		}
+		Character x = s.charAt(0);
+		if (!Character.isLetter(x) && !x.equals('_')) {
+			return "\"" + s + "\"";
+		} 
+		for (Character c : s.toCharArray()) { 
+			if (!Character.isLetterOrDigit(c) && !c.equals('_')) {
+				return "\"" + s + "\"";
+			}
+		}
+		return s;
 	}
+	
 	public static void show(JComponent p, int w, int h, String title) {
 		JFrame f = new JFrame(title);
 		f.setContentPane(p);

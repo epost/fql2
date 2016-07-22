@@ -2,21 +2,26 @@ package catdata.opl;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
 import catdata.Pair;
@@ -86,7 +91,7 @@ public class JSWrapper {
 		return null;
 	}
 	
-	static JPanel makePrettyTables(Border b, String border, Object[][] rowData, String[] colNames) {
+	static JPanel makePrettyTables(Set<String> atts, Border b, String border, Object[][] rowData, String[] colNames) {
 
 		@SuppressWarnings("serial")
 		JTable t = new JTable() {
@@ -122,6 +127,13 @@ public class JSWrapper {
 		}
 
 		p.setBorder(BorderFactory.createTitledBorder(b, border));
+		//t.getTableHeader().set
+		for (int i = 0; i < t.getColumnModel().getColumnCount(); i++) {
+		 TableColumn col = t.getColumnModel().getColumn(i);
+		 
+		    col.setHeaderRenderer(new ColumnHeaderRenderer(atts, t.getTableHeader().getDefaultRenderer()));
+		}
+		
 		return p;
 
 	} 
@@ -175,5 +187,33 @@ public class JSWrapper {
 			return super.getTableCellEditorComponent(table, value, isSelected, row, column);
 		}
 	}
+	
+	public static class ColumnHeaderRenderer extends JLabel implements TableCellRenderer {
+		
+		Set<String> boldify;
+		Font normal = UIManager.getFont("TableHeader.font");
+		Font bold = normal.deriveFont(Font.BOLD);
+		TableCellRenderer r; // = new DefaultTableCellRenderer();
+		
+		public ColumnHeaderRenderer(Set<String> boldify, TableCellRenderer r) {
+			this.boldify = boldify;
+			this.r = r;
+		}
+
+
+		public Component getTableCellRendererComponent(JTable table, Object value,
+		        boolean isSelected, boolean hasFocus, int row, int column) {
+
+		  
+		   JLabel ret = (JLabel) r.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+		   if (boldify.contains(value)){
+		        ret.setFont(bold);
+		    } else {
+		        ret.setFont(normal);
+		    }
+		    return ret;
+		}
+
+		}
 
 }

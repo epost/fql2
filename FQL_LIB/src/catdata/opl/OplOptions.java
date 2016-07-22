@@ -24,6 +24,31 @@ public class OplOptions extends Options implements Cloneable {
 
 	private static final long serialVersionUID = 1L;
 	
+	@Override
+	public String toString() {
+		return "OplOptions [opl_prover_compose=" + opl_prover_compose
+				+ ", opl_prover_filter_subsumed=" + opl_prover_filter_subsumed
+				+ ", opl_prover_unfailing=" + opl_prover_unfailing
+				+ ", opl_prover_timeout=" + opl_prover_timeout
+				+ ", opl_prover_require_const=" + opl_prover_require_const
+				+ ", opl_prover_sort=" + opl_prover_sort + ", opl_prover_ac="
+				+ opl_prover_ac + ", opl_prover_reduction_limit="
+				+ opl_prover_reduction_limit + ", opl_saturate_timeout="
+				+ opl_saturate_timeout + ", opl_validate=" + opl_validate
+				+ ", opl_pretty_print=" + opl_pretty_print
+				+ ", opl_reorder_joins=" + opl_reorder_joins
+				+ ", opl_suppress_dom=" + opl_suppress_dom
+				+ ", opl_allow_horn=" + opl_allow_horn
+				+ ", opl_query_check_eqs=" + opl_query_check_eqs
+				+ ", opl_pushout_simpl=" + opl_pushout_simpl
+				+ ", opl_lazy_gui=" + opl_lazy_gui + ", opl_cache_gui="
+				+ opl_cache_gui + ", opl_prover_force_prec="
+				+ opl_prover_force_prec + ", opl_require_consistency="
+				+ opl_require_consistency + ", opl_desugar_nat="
+				+ opl_desugar_nat + ", opl_print_simplified_presentations="
+				+ opl_print_simplified_presentations + "]";
+	}
+
 	@Override 
 	public Object clone() {
 		try {
@@ -81,7 +106,7 @@ public class OplOptions extends Options implements Cloneable {
 		}
 	}
 
-	// put these names in tooltips
+	// TODO put these names in tooltips
 	public boolean opl_prover_compose = KBOptions.defaultOptions.compose;
 	public boolean opl_prover_filter_subsumed = KBOptions.defaultOptions.filter_subsumed_by_self;
 	public boolean opl_prover_unfailing = KBOptions.defaultOptions.unfailing;
@@ -101,7 +126,10 @@ public class OplOptions extends Options implements Cloneable {
 	public boolean opl_lazy_gui = false;
 	public boolean opl_cache_gui = false;
 	public boolean opl_prover_force_prec = false;
-
+	public boolean opl_require_consistency = false;
+	public boolean opl_desugar_nat = true;
+	public boolean opl_print_simplified_presentations = true;
+	
 	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
 		JPanel opl1 = new JPanel(new GridLayout(Options.biggestSize, 1));
@@ -220,9 +248,26 @@ public class OplOptions extends Options implements Cloneable {
 		opl1.add(opl_prec_label);
 
 		JCheckBox opl_cache_box = new JCheckBox("", opl_cache_gui);
-		JLabel opl_cache_label = new JLabel("Cache artifacts between runs:");
+		JLabel opl_cache_label = new JLabel("Cache artifacts between runs (true=not tested thoroughly):");
 		opl2.add(opl_cache_box);
 		opl1.add(opl_cache_label);
+		
+		JCheckBox opl_consistency_box = new JCheckBox("", opl_require_consistency);
+		JLabel opl_consistency_label = new JLabel("Ensure consistency by requiring free type algebras:");
+		opl2.add(opl_consistency_box);
+		opl1.add(opl_consistency_label);
+
+		
+		JCheckBox opl_nat_sugar_box = new JCheckBox("", opl_desugar_nat);
+		JLabel opl_nat_sugar_label = new JLabel("When possible desugar numerals into zero:Nat and succ:Nat->Nat:");
+		opl2.add(opl_nat_sugar_box);
+		opl1.add(opl_nat_sugar_label);
+
+		JCheckBox opl_print_simpl_pres_box = new JCheckBox("", opl_print_simplified_presentations);
+		JLabel opl_print_simpl_pres_label  = new JLabel("Print simplified presentations (true=not canonical):");
+		opl2.add(opl_print_simpl_pres_box);
+		opl1.add(opl_print_simpl_pres_label);
+		
 
 		for (int i = 0; i < Options.biggestSize - size(); i++) {
 			opl1.add(new JLabel());
@@ -266,7 +311,11 @@ public class OplOptions extends Options implements Cloneable {
 				opl_prover_compose = opl_compose_box.isSelected();
 				opl_cache_gui = opl_cache_box.isSelected();
 				opl_prover_force_prec = opl_prec_box.isSelected();
+				opl_require_consistency = opl_consistency_box.isSelected();
+				opl_desugar_nat = opl_nat_sugar_box.isSelected();
+				opl_print_simplified_presentations = opl_print_simpl_pres_box.isSelected();
 
+				//System.out.println("called, set to " + OplOptions.this);
 				return new Unit();
 			}
 
@@ -277,7 +326,7 @@ public class OplOptions extends Options implements Cloneable {
 
 	@Override
 	public int size() {
-		return this.getClass().getFields().length;
+		return this.getClass().getFields().length-1;
 	}
 
 }
