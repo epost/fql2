@@ -1166,11 +1166,11 @@ public abstract class OplExp implements OplObject {
 			}
 
 			OplPres<S, C, V, Chc<Y, Z>> P = new OplPres<S, C, V, Chc<Y, Z>>(
-					prec, "?", h1.src.sig, gens, eqs);
+					prec, h1.dst1.S0, h1.src.sig, gens, eqs);
 			OplInst<S, C, V, Chc<Y, Z>> ret = new OplInst<S, C, V, Chc<Y, Z>>(
-					"?", "?", "?");
-			System.out.println("h1=" + h1 + " and " + h1.src1);
-			System.out.println("h2=" + h2 + " and " + h1.src1);
+					h1.dst1.S0, "?", "?");
+			//System.out.println("h1=" + h1 + " and " + h1.src1);
+			//System.out.println("h2=" + h2 + " and " + h1.src1);
 			ret.validate(h1.src1.S, P, h1.src1.J);
 			OplPresTrans<S, C, V, Y, Chc<Y, Z>> yt = new OplPresTrans<S, C, V, Y, Chc<Y, Z>>(
 					ytm, "?", "?", h1.dst, P);
@@ -3597,6 +3597,33 @@ public abstract class OplExp implements OplObject {
 			return "model {\n" + ret + "} : " + sig;
 		}
 
+		public String toHtml(Set skip) {
+			Map<Object, Pair<List<String>, List<Object[]>>> xxx = makeTables(new HashSet<>()).second;
+			String ret = "<div>";
+			for (Object t : xxx.keySet()) {
+				if (skip.contains(t)) {
+					continue;
+				} 
+ 				ret += "<table style=\"float: left\" border=\"1\" cellpadding=\"3\" cellspacing=\"1\">";
+		
+				List<String> cols = xxx.get(t).first;
+				List<Object[]> rows = xxx.get(t).second;
+				ret += "<tr>";
+				for (String col : cols) {
+					ret += "<th>" + col + "</th>";
+				}
+				ret += "</tr>";
+				for (Object[] row : rows) {
+					ret += "<tr>";
+					for (Object col : row) {
+						ret += "<td>" + col + "</td>";
+					}
+					ret += "</tr>";
+				}
+				ret += "</table>";
+			}
+			return ret + "</div><br style=\"clear:both;\">";
+		}
 		public JComponent display() {
 			JTabbedPane jtp = new JTabbedPane();
 
@@ -3604,15 +3631,16 @@ public abstract class OplExp implements OplObject {
 					BorderFactory.createEtchedBorder(), "", toString());
 			jtp.addTab("Text", text);
 
-			JComponent tables = makeTables(new HashSet<>());
+			JComponent tables = makeTables(new HashSet<>()).first;
 			jtp.addTab("Tables", tables);
 
 			return jtp;
 		}
 
-		public JComponent makeTables(Set<S> types) {
+		public Pair<JComponent, Map<Object, Pair<List<String>, List<Object[]>>>> makeTables(Set<S> types) {
 			// System.out.println("before tables " + this);
 			
+			Map<Object, Pair<List<String>, List<Object[]>>> forHtml = new HashMap<>();
 			Set<String> atts = new HashSet<>();
 			for (C c : sig0.symbols.keySet()) {
 				Pair<List<S>, S> v = sig0.symbols.get(c);
@@ -3683,6 +3711,8 @@ public abstract class OplExp implements OplObject {
 										+ rows.size() + ")",
 								rows.toArray(new Object[][] {}),
 								cols.toArray(new String[] {})));
+				forHtml.put(n, new Pair<>(cols, rows));
+
 			}
 			// System.out.println("middle tables " + this);
 			for (C n : keys2) {
@@ -3702,6 +3732,7 @@ public abstract class OplExp implements OplObject {
 				List<String> l = new LinkedList<String>(
 						(List<String>) sig0.symbols.get(n).first);
 				l.add(sig0.symbols.get(n).second.toString());
+				
 				all.put(n.toString(),
 						JSWrapper.makePrettyTables(atts, 
 								BorderFactory.createEmptyBorder(),
@@ -3709,6 +3740,8 @@ public abstract class OplExp implements OplObject {
 										+ rows.size() + ")",
 								rows.toArray(new Object[][] {}),
 								l.toArray(new String[] {})));
+				forHtml.put(n, new Pair<>(l, rows));
+
 			}
 			List<String> xxx = new LinkedList<>(all.keySet());
 			xxx.sort(comp);
@@ -3719,7 +3752,7 @@ public abstract class OplExp implements OplObject {
 				list.add(all.get(n));
 			}
 			// System.out.println("after tables " + this);
-			return Util.makeGrid(list);
+			return new Pair<>(Util.makeGrid(list), forHtml);
 		}
 
 		public <V> void validate(OplSig<S, C, V> sig) {
@@ -4895,6 +4928,9 @@ public abstract class OplExp implements OplObject {
 		}
 
 		public OplInst(String S0, String P0, String J0) {
+			if (S0.contains("?")) {
+				throw new RuntimeException();
+			}
 			this.P0 = P0;
 			this.J0 = J0;
 			this.S0 = S0;
@@ -4934,7 +4970,7 @@ public abstract class OplExp implements OplObject {
 		
 		@Override
 		public String toHtml() {			
-			return saturate().fourth.toHtml();
+			return saturate().fourth.toHtml(S.projT().sorts);
 		}
 		
 
@@ -4953,10 +4989,10 @@ public abstract class OplExp implements OplObject {
 				ret.add(new CodeTextPanel(BorderFactory.createEtchedBorder(),
 						"", xxxthird), "Type Algebra");
 
-				ret.add(xxx.first.makeTables(S.projT().sorts), "Saturation");
-				ret.add(xxx.fourth.makeTables(S.projT().sorts), "Normalized");
+				ret.add(xxx.first.makeTables(S.projT().sorts).first, "Saturation");
+				ret.add(xxx.fourth.makeTables(S.projT().sorts).first, "Normalized");
 				if (xxx.second != null) {
-					ret.add(xxx.second.makeTables(S.projT().sorts), "Image");
+					ret.add(xxx.second.makeTables(S.projT().sorts).first, "Image");
 				}
 
 			} catch (Exception ex) {

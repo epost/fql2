@@ -1202,8 +1202,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			EDs.add((OplQuery)ed0);
 		}
 	
-		throw new RuntimeException("not implemented yet");
-//		return OplChase.chase(I, EDs, e.limit);
+		return OplChase.chase(I, EDs, e.limit);
 		
 		
 	}

@@ -283,4 +283,14 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		return new OplTerm<>(e.head.l, args0);
 	}
 
+	public V getHead() {
+		if (var != null) {
+			return var;
+		}
+		if (args.size() != 1) {
+			throw new RuntimeException("Report to Ryan " + this);
+		}
+		return args.get(0).getHead();		
+	}
+
 }

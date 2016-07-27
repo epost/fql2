@@ -107,7 +107,8 @@ public class OplChase {
 		Map<Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, S> 
 		Agens = new HashMap<>(), Egens = new HashMap<>();
 		
-		List<Pair<OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>, OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>>> 
+		List<Pair<OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>, 
+		          OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>>> 
 		 Aeqs = new LinkedList<>(), Eeqs = new LinkedList<>();
 		
 		//
@@ -133,13 +134,28 @@ public class OplChase {
 				Agens.put(new Pair<>(t, v), s);
 				AImap.get(s).put(new Pair<>(t, v), t.second.get(v));
 				
-				//TODO: equations, precedence
+				//TODO: precedence
+			}
+			for (Pair<OplTerm<Chc<C, V>, V>, OplTerm<Chc<C, V>, V>> eq : Q.fI.get("FORALL").equations) {
+				OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> 
+				 lhs = new Fun2<>(t).apply(eq.first);
+				OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> 
+				 rhs = new Fun2<>(t).apply(eq.second);
+				Aeqs.add(new Pair<>(lhs, rhs));
 			}
 			
 			for (V v : Q.fI.get("EXISTS").gens.keySet()) {
 				S s = Q.fI.get("EXISTS").gens.get(v);
 				Egens.put(new Pair<>(t, v), s);
-				//TODO: equations, precedence
+				//TODO: precedence
+			}
+			
+			for (Pair<OplTerm<Chc<C, V>, V>, OplTerm<Chc<C, V>, V>> eq : Q.fI.get("EXISTS").equations) {
+				OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> 
+				 lhs = new Fun2<>(t).apply(eq.first);
+				OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> 
+				 rhs = new Fun2<>(t).apply(eq.second);
+				Eeqs.add(new Pair<>(lhs, rhs));
 			}
 			
 			//have trigger in A, need to transform into trigger in E
@@ -149,30 +165,10 @@ public class OplChase {
 				S s = Q.fI.get("FORALL").gens.get(v);
 
 				OplTerm<Chc<C, X>, V> inDst = THERE.get(v).inLeft();
-				System.out.println("THERE.get(v)=" + THERE.get(v));
-			//	OplTerm<Chc<C, X>, V> t2x = inDst.subst(t.second);
-			//	System.out.println("t2x=" + t2x + "[subst=" + t.second + "]");
-				
-				Function<OplTerm<Chc<C, X>, V>,  OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>>
-				 fun = new Function<OplTerm<Chc<C, X>, V>,  OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>>() {
-
-					@Override
-					public OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> apply(
-							OplTerm<Chc<C, X>, V> term) {
-						
-						if (term.var != null) {
-							Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V> p = new Pair<>(t, term.var);
-							return new OplTerm<>(Chc.inRight(p), new LinkedList<>());
-						}
-						
-						throw new RuntimeException(); //TODO
-					}
-
-					
-				};
-				
+				System.out.println("THERE.get(v)=" + THERE.get(v));				
+								
 		        OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> 
-		        	toAdd = fun.apply(inDst);
+		        	toAdd = new Fun<>(t).apply(inDst);
 		        
 				AEmap.get(s).put(new Pair<>(t, v), toAdd); //TODO				
 			}
@@ -185,12 +181,12 @@ public class OplChase {
 		//
 		
 		OplPres<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>> 
-		A0 = new OplPres<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>(Aprec, "?" , Q.src.sig, Agens, Aeqs), 
-		E0 = new OplPres<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>(Eprec, "?" , Q.src.sig, Egens, Eeqs);
+		A0 = new OplPres<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>(Aprec, I.S0 , Q.src.sig, Agens, Aeqs), 
+		E0 = new OplPres<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>(Eprec, I.S0 , Q.src.sig, Egens, Eeqs);
 		A0.toSig(); E0.toSig();
 		
 		OplInst<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>
-		A = new OplInst<>("?", "?", "?"), E = new OplInst<>("?", "?", "?");
+		A = new OplInst<>(I.S0, "?", "?"), E = new OplInst<>(I.S0, "?", "?");
 		A.validate(Q.src, A0, null); E.validate(Q.src, E0, null);
 				
 		OplPresTrans<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X> AtoI 
@@ -212,5 +208,73 @@ public class OplChase {
 		p.validate(AtoI, AtoE);
 		return p.pushout().first;
 	}
+	
+	static class Fun <C,X,V> implements Function<OplTerm<Chc<C, X>, V>,  OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>> {
+	
+		Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> t;
+		
+		public Fun(Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> t) {
+			this.t = t;
+		}
+		
+		@Override
+		public OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> apply(
+				OplTerm<Chc<C, X>, V> term) {
+			
+			if (term.var != null) {
+				Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V> p = new Pair<>(t, term.var);
+				return new OplTerm<>(Chc.inRight(p), new LinkedList<>());
+			}
+			
+			List<OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>> ret = new LinkedList<>();
+			for (OplTerm<Chc<C, X>, V> arg : term.args) {
+				ret.add(apply(arg));
+			}
+			
+			if (term.head.left) {
+				C c = term.head.l;
+				return new OplTerm<>(Chc.inLeft(c), ret);
+			} else {
+				X x = term.head.r;
+				throw new RuntimeException("bad " + x + ", report to Ryan");
+			}
+		}
 
+		
+	};
+
+
+	static class Fun2 <C,X,V> implements Function<OplTerm<Chc<C, V>, V>,  OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>> {
+		
+		Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> t;
+		
+		public Fun2(Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> t) {
+			this.t = t;
+		}
+		
+		@Override
+		public OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> apply(
+				OplTerm<Chc<C, V>, V> term) {
+			
+			if (term.var != null) {
+				throw new RuntimeException("bad2 " + term.var + ", report to Ryan");
+			}
+			
+			List<OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>> ret = new LinkedList<>();
+			for (OplTerm<Chc<C, V>, V> arg : term.args) {
+				ret.add(apply(arg));
+			}
+			
+			if (term.head.left) {
+				C c = term.head.l;
+				return new OplTerm<>(Chc.inLeft(c), ret);
+			} else {
+				V x = term.head.r;
+				Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V> p = new Pair<>(t, x);
+				return new OplTerm<>(Chc.inRight(p), new LinkedList<>());
+			}
+		}
+
+		
+	};
 }
