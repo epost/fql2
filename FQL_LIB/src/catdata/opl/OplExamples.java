@@ -1,6 +1,7 @@
 package catdata.opl;
 
 import catdata.ide.Example;
+import catdata.opl.examples.OplChaseExample;
 import catdata.opl.examples.OplDeltaExample;
 import catdata.opl.examples.OplEmployeesExample;
 import catdata.opl.examples.OplFlowerExamle;
@@ -9,6 +10,7 @@ import catdata.opl.examples.OplGroupingExample;
 import catdata.opl.examples.OplHornExample;
 import catdata.opl.examples.OplIntegrationExample;
 import catdata.opl.examples.OplJSExample;
+import catdata.opl.examples.OplJee1;
 import catdata.opl.examples.OplMLExample;
 import catdata.opl.examples.OplMatrixExample;
 import catdata.opl.examples.OplMod4Example;
@@ -55,6 +57,7 @@ public class OplExamples {
 	public static Example oplUber = new OplUberExample();
 	public static Example oplStdLib = new OplStdLib();
 	public static Example oplJee1 = new OplJee1();
+	public static Example oplChase = new OplChaseExample();
 	
 	
 }

@@ -39,8 +39,8 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		this.blocks = blocks;
 	}
 
-	private Map<Object, OplPres<S1, C1, V1, V1>> fI;
-	private Map<Pair<Object, C2>, OplPresTrans<S1, C1, V1, V1, V1>> fE;
+	public Map<Object, OplPres<S1, C1, V1, V1>> fI;
+	public Map<Pair<Object, C2>, OplPresTrans<S1, C1, V1, V1, V1>> fE;
 
 	static <C, V> OplTerm<Chc<C, V>, V> freeze(OplTerm<C, V> t) {
 		if (t.var != null) {
@@ -719,12 +719,16 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		}
 	}
 	
-	public <X> OplInst<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> eval(
+	public <X> Pair<OplInst<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>,
+	Map<Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> eval(
 			OplInst<S1, C1, V1, X> I0) {
 		if (!I0.S.equals(src)) {
 			throw new RuntimeException("Instance not on correct schema");
 		}
 
+		Map<Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>> em = new HashMap<>();
+
+		
 		Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, S2> gens = new HashMap<>();
 		List<Pair<OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2>, OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2>>> equations = new LinkedList<>();
 
@@ -831,6 +835,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 									.inRight(new Pair<>(tgt_label, substed))), new LinkedList<>());
 					
 					equations.add(new Pair<>(lhs, rhs));
+					em.put(new Pair<>(label, tuple), new Pair<>(tgt_label, substed));
 				}
 			}
 			
@@ -848,13 +853,13 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 
 		retX.validate(dst, P, I0.J);
 		
-		return retX;
+		return new Pair<>(retX, em);
 	}
 	
 	public <X, Y> OplPresTrans<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, Chc<OplTerm<Chc<C1, Y>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, Y>, V1>>>>> eval(
 			OplPresTrans<S1, C1, V1, X, Y> h) {
-		OplExp.OplInst<S2,C2,V2,Chc<OplTerm<Chc<C1,X>,V1>,Pair<Object,Map<V1,OplTerm<Chc<C1,X>,V1>>>>> QI = eval(h.src1);
-		OplExp.OplInst<S2,C2,V2,Chc<OplTerm<Chc<C1,Y>,V1>,Pair<Object,Map<V1,OplTerm<Chc<C1,Y>,V1>>>>> QJ = eval(h.dst1);
+		OplExp.OplInst<S2,C2,V2,Chc<OplTerm<Chc<C1,X>,V1>,Pair<Object,Map<V1,OplTerm<Chc<C1,X>,V1>>>>> QI = eval(h.src1).first;
+		OplExp.OplInst<S2,C2,V2,Chc<OplTerm<Chc<C1,Y>,V1>,Pair<Object,Map<V1,OplTerm<Chc<C1,Y>,V1>>>>> QJ = eval(h.dst1).first;
 
 		Map<S2, Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, Y>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, Y>, V1>>>>>, V2>>> m = new HashMap<>();
 

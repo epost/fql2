@@ -17,6 +17,7 @@ import catdata.ide.NEWDEBUG;
 import catdata.ide.Program;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplApply;
+import catdata.opl.OplExp.OplChaseExp;
 import catdata.opl.OplExp.OplColim;
 import catdata.opl.OplExp.OplDelta;
 import catdata.opl.OplExp.OplDelta0;
@@ -616,7 +617,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		OplQuery Q = (OplQuery) Q0;
 		OplObject I0 = ENV.get(e.I0);
 		if (I0 instanceof OplInst) {
-			return Q.eval((OplInst) I0);
+			return (OplObject) Q.eval((OplInst) I0).first;
 		}
 		if (I0 instanceof OplPresTrans) {
 			return Q.eval((OplPresTrans) I0);
@@ -1162,7 +1163,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			}
 
 			
-			return e;
+			return colimInst;
 		} 
 		
 		throw new RuntimeException("Report to Ryan " + ENV.get(anEntity).getClass());
@@ -1184,4 +1185,28 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		}
 		return new OplTerm<>(repl, ret);
 	};
+	
+	public OplObject visit(Program<OplExp> env, OplChaseExp e) {
+		OplObject I0 = ENV.get(e.I);
+		List<OplQuery> EDs = new LinkedList<>();
+		if (!(I0 instanceof OplInst)) {
+			throw new RuntimeException("Not an instance: " + e.I);
+		}
+		OplInst I = (OplInst) I0;
+		
+		for (String ed : e.EDs) {
+			OplObject ed0 = ENV.get(ed);
+			if (!(ed0 instanceof OplQuery)) {
+				throw new RuntimeException("Not a query: " + ed0);
+			}
+			EDs.add((OplQuery)ed0);
+		}
+	
+		throw new RuntimeException("not implemented yet");
+//		return OplChase.chase(I, EDs, e.limit);
+		
+		
+	}
+	
+	
 }

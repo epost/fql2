@@ -28,6 +28,7 @@ import catdata.ide.NEWDEBUG;
 import catdata.ide.Program;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplApply;
+import catdata.opl.OplExp.OplChaseExp;
 import catdata.opl.OplExp.OplColim;
 import catdata.opl.OplExp.OplDelta;
 import catdata.opl.OplExp.OplDelta0;
@@ -68,7 +69,9 @@ public class OplParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
-	static String[] res = new String[] { "ID", "colimit" , "imports", "pragma", "options", "union",
+	static String[] res = new String[] { 
+			"chase", "with", "max", 
+			"ID", "colimit" , "imports", "pragma", "options", "union",
 			"pushoutBen", "PUSHOUT", "pivot", "DELTA", "return", "coreturn",
 			"pushout", "return", "keys", "INSTANCE", "SCHEMA", "obsEqualities",
 			"pathEqualities", "implications", "apply", "id", "query", "edges",
@@ -195,7 +198,9 @@ public class OplParser {
 		Parser<?> pragma = pragma();
 		Parser<?> colim = Parsers.tuple(term("colimit"), ident());
 
-		Parser<?> a = Parsers.or(new Parser<?>[] { ID, colim, pragma, union, pushoutBen,
+		Parser<?> chase = Parsers.tuple(term("chase"), ident(), Parsers.tuple(term("with"), term("{"), ident().sepBy(term(",")), term("}")), term("max"), Terminals.IntegerLiteral.PARSER);
+		
+		Parser<?> a = Parsers.or(new Parser<?>[] { chase, ID, colim, pragma, union, pushoutBen,
 				pushoutSch, pivot, DELTA, pushout, INST, SCHEMA, apply, idQ,
 				query, projEA, inst, schema, projE, projA, projT, flower,
 				ubersat, sigma, sat, unsat, presentation, delta, mapping,
@@ -866,11 +871,32 @@ public class OplParser {
 		return new OplCtx<String, String>(ret);
 	}
 
+	private static OplExp toChase(Tuple5 t) {
+		//		Parser<?> chase = Parsers.tuple(term("chase"), ident(), Parsers.tuple(term("with"), term("{"), ident().sepBy(term(","), term("}")), term("max"), ident()));
+		String I = (String) t.b;
+		//t.c is (with { ... })
+		Integer i0 = Integer.parseInt((String) t.e);
+		
+		Tuple4 x = (Tuple4) t.c;
+		
+		List<String> l = (List<String>) x.c;
+		
+		return new OplChaseExp(i0.intValue(), I, new LinkedList<>(l));		
+	}
+	
 	@SuppressWarnings({ "rawtypes" })
 	private static OplExp toExp(Object c) {
 		if (c instanceof String) {
 			return new OplVar((String) c);
 		}
+		
+		if (c instanceof Tuple5) {
+			Tuple5 p = (Tuple5) c;
+			if (p.a.toString().equals("chase")) {
+				return toChase(p);
+			}
+		}
+
 
 		if (c instanceof Tuple4) { 
 			Tuple4 p = (Tuple4) c;
@@ -897,6 +923,8 @@ public class OplParser {
 				return new OplPushoutBen((String) p.b, (String) p.c);
 			}
 		}
+
+	
 
 		if (c instanceof org.codehaus.jparsec.functors.Pair) {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) c;

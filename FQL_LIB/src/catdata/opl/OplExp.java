@@ -74,6 +74,65 @@ public abstract class OplExp implements OplObject {
 
 	public abstract <R, E> R accept(E env, OplExpVisitor<R, E> v);
 
+	public static class OplChaseExp extends OplExp {
+		int limit;
+		String I;
+		List<String> EDs;
+		
+		public OplChaseExp(int limit, String i, List<String> eDs) {
+			this.limit = limit;
+			I = i;
+			EDs = eDs;
+		}
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((EDs == null) ? 0 : EDs.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + limit;
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplChaseExp other = (OplChaseExp) obj;
+			if (EDs == null) {
+				if (other.EDs != null)
+					return false;
+			} else if (!EDs.equals(other.EDs))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (limit != other.limit)
+				return false;
+			return true;
+		}
+		
+
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+
+		@Override
+		public String toString() {
+			return "OplChase [limit=" + limit + ", I=" + I + ", EDs=" + EDs
+					+ "]";
+		}
+		
+		
+	}
+	
 	public static class OplPragma extends OplExp {
 		Map<String, String> map;
 
@@ -1110,6 +1169,8 @@ public abstract class OplExp implements OplObject {
 					prec, "?", h1.src.sig, gens, eqs);
 			OplInst<S, C, V, Chc<Y, Z>> ret = new OplInst<S, C, V, Chc<Y, Z>>(
 					"?", "?", "?");
+			System.out.println("h1=" + h1 + " and " + h1.src1);
+			System.out.println("h2=" + h2 + " and " + h1.src1);
 			ret.validate(h1.src1.S, P, h1.src1.J);
 			OplPresTrans<S, C, V, Y, Chc<Y, Z>> yt = new OplPresTrans<S, C, V, Y, Chc<Y, Z>>(
 					ytm, "?", "?", h1.dst, P);
@@ -4864,13 +4925,18 @@ public abstract class OplExp implements OplObject {
 		}
 
 		@Override
-		public String toString() {
-			
+		public String toString() {			
 			String x = NEWDEBUG.debug.opl.opl_print_simplified_presentations ? P.simplify().toString() : P.toString();
 			
 			int j = "presentation ".length();
 			return "INSTANCE " + x.substring(j);
 		}
+		
+		@Override
+		public String toHtml() {			
+			return saturate().fourth.toHtml();
+		}
+		
 
 		public JComponent display() {
 			JTabbedPane ret = new JTabbedPane();
@@ -4905,6 +4971,7 @@ public abstract class OplExp implements OplObject {
 		Quad<OplSetInst<S, C, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>, OplPres<S, C, V, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<C, X>, V>>> 
 		saturation = null;
 		public 
+		
 		Quad<OplSetInst<S, C, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>, OplPres<S, C, V, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<C, X>, V>>> 
 		saturate() {
 			if (saturation != null) {
@@ -4914,6 +4981,9 @@ public abstract class OplExp implements OplObject {
 			return saturation;
 		}
 
+		/**
+		 * saturate, js image, typeAlg, normalized 
+		 */
 		public static <S, C, V, X> Quad<OplSetInst<S, C, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>, OplPres<S, C, V, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<C, X>, V>>> saturate(
 				OplJavaInst I0, OplPres<S, C, V, X> P0, OplSchema<S, C, V> S,
 				OplPres<S, C, V, X> P) {
@@ -5529,6 +5599,8 @@ public abstract class OplExp implements OplObject {
 		public R visit(E env, OplPragma e);
 		
 		public R visit(E env, OplColim e);
+		
+		public R visit(E env, OplChaseExp e);
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////////////////////////////////////

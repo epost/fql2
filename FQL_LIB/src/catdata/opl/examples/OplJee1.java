@@ -1,4 +1,4 @@
-package catdata.opl;
+package catdata.opl.examples;
 
 import catdata.ide.Example;
 import catdata.ide.Language;

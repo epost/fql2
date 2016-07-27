@@ -24,6 +24,9 @@ public class OplDriver {
 	// each code editor's driver should copy over the safe definitions and start
 	// the driver
 	// at the appropriate spot
+	
+	
+	
 
 	public static Environment<OplObject> makeEnv(String str,
 			Program<OplExp> init, String[] toUpdate, String last_str,
@@ -84,7 +87,9 @@ public class OplDriver {
 			try {
 				OplObject xxx = se.accept(init, new OplOps(ret));
 				ret.put(k, xxx);
-				toUpdate[0] = "Last Processed: " + k;
+				if (toUpdate != null) {
+					toUpdate[0] = "Last Processed: " + k;
+				}
 				// i++;
 			} catch (Throwable t) {
 				t.printStackTrace();

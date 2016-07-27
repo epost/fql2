@@ -1,7 +1,9 @@
 package catdata;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Ryan Wisnesky
@@ -11,6 +13,34 @@ public class Chc<X,Y> {
 	
 	public X l;
 	public Y r;
+	
+	public static <X,Y> Set<X> projIfAllLeft(Set<Chc<X,Y>> set) {
+		Set<X> ret = new HashSet<>();
+		
+		for (Chc<X, Y> x : set) {
+			if (x.left) {
+				ret.add(x.l);
+			} else {
+				throw new RuntimeException("Cannot projLeft " + x);
+			}
+		}
+		
+		return ret;
+	}
+	
+	public static <X,Y> Set<Y> projIfAllRight(Set<Chc<X,Y>> set) {
+		Set<Y> ret = new HashSet<>();
+		
+		for (Chc<X, Y> x : set) {
+			if (!x.left) {
+				ret.add(x.r);
+			} else {
+				throw new RuntimeException("Cannot projRight " + x);
+			}
+		}
+		
+		return ret;
+	}
 	
 	public static <X,Y> List<Chc<X,Y>> inLeft(List<X> l) {
 		List<Chc<X,Y>> ret = new LinkedList<>();
