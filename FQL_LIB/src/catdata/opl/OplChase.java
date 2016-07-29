@@ -30,10 +30,12 @@ public class OplChase {
 					ret = ret2;
 					changed = true;
 				}
+				System.out.println(ret);
 			}
 			if (!changed) {
 				return ret;
 			}
+			System.out.println("---");
 		}
 		
 		throw new RuntimeException("Limit exceeded, last instance:\n\n" + ret);
@@ -91,11 +93,11 @@ public class OplChase {
 			}
 			QIm.put(back, front);
 		}
-		System.out.println("QIm=" + QIm);
+		//System.out.println("QIm=" + QIm);
 		
 		Set<Pair<Object,Map<V,OplTerm<Chc<C,X>,V>>>> T = new HashSet<>(QIA);
 		T.removeAll(QIm.values());
-		System.out.println("T=" + T);
+		//System.out.println("T=" + T);
 		
 		if (T.isEmpty()) {
 			return null;
@@ -128,7 +130,7 @@ public class OplChase {
 		//are generators at type being lost? if so must change type of Agens, etc
 		//should not use QIm here, should use frozen instance for m
 		for (Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> t : T) {
-			System.out.println("t=" + t);	
+			//System.out.println("t=" + t);	
 			for (V v : Q.fI.get("FORALL").gens.keySet()) {
 				S s = Q.fI.get("FORALL").gens.get(v);
 				Agens.put(new Pair<>(t, v), s);
@@ -161,11 +163,11 @@ public class OplChase {
 			//have trigger in A, need to transform into trigger in E
 			
 			for (V v : Q.fI.get("FORALL").gens.keySet()) {
-				System.out.println("v=" + v);
+			//	System.out.println("v=" + v);
 				S s = Q.fI.get("FORALL").gens.get(v);
 
 				OplTerm<Chc<C, X>, V> inDst = THERE.get(v).inLeft();
-				System.out.println("THERE.get(v)=" + THERE.get(v));				
+			//	System.out.println("THERE.get(v)=" + THERE.get(v));				
 								
 		        OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> 
 		        	toAdd = new Fun<>(t).apply(inDst);

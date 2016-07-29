@@ -156,6 +156,10 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 					throw new RuntimeException("In checking block " + b + ", " + e + " has type "
 							+ s1 + " but should be " + t.second);
 				}
+				if (!t.first.get(0).equals(s2)) {
+					throw new RuntimeException("In checking att " + a + " in block " + b
+							+ ", the att does not belong in the block ");
+				}
 			}
 			for (C2 a : dst.projA().symbols.keySet()) {
 				Pair<List<S2>, S2> t = dst.projA().symbols.get(a);
@@ -170,6 +174,18 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 							+ a);
 				}
 			}
+			for (C2 a : dst.projE().symbols.keySet()) {
+				Pair<List<S2>, S2> t = dst.projE().symbols.get(a);
+				if (t.first.size() != 1) {
+					throw new RuntimeException("Internal error, report to Ryan");
+				}
+				if (!t.first.get(0).equals(s2)) {
+					continue;
+				}
+				if (!block.edges.containsKey(a)) {
+					throw new RuntimeException("Missing edge: " + a);
+				}
+			}
 
 			for (C2 a : block.edges.keySet()) {
 				Pair<Object, Map<V1, OplTerm<C1, V1>>> e = block.edges.get(a);
@@ -178,6 +194,10 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 					throw new RuntimeException("Not a sub-query: " + e.first);
 				}
 				Pair<List<S2>, S2> t = dst.projE().symbols.get(a);
+				if (t == null) {
+					throw new RuntimeException("In checking block " + b + ", " + a
+							+ " is not an edge in " + dst_e);
+				}
 				if (!t.second.equals(tgt.first)) {
 					throw new RuntimeException("In checking edge " + a + " in block " + b
 							+ ", the target entity for label " + e.first + " is " + tgt.first
@@ -195,17 +215,10 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 							+ ", the ctx for target block is " + tgtCtx + " but for valuation is "
 							+ tgtCtx2);
 				}
-			}
-			for (C2 a : dst.projE().symbols.keySet()) {
-				Pair<List<S2>, S2> t = dst.projE().symbols.get(a);
-				if (t.first.size() != 1) {
-					throw new RuntimeException("Internal error, report to Ryan");
-				}
+				
 				if (!t.first.get(0).equals(s2)) {
-					continue;
-				}
-				if (!block.edges.containsKey(a)) {
-					throw new RuntimeException("Missing edge: " + a);
+					throw new RuntimeException("In checking edge " + a + " in block " + b
+							+ ", the edge does not belong in the block ");
 				}
 			}
 		}

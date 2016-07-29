@@ -482,7 +482,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		if (sorts.keySet().size() == sig.sorts.size()) {
 			return sorts;
 		}
-		throw new RuntimeException("Timeout (" + NEWDEBUG.debug.opl.opl_saturate_timeout + ") exceeded, sorts are " + sorts);
+		throw new RuntimeException("Timeout (" + NEWDEBUG.debug.opl.opl_saturate_timeout + ") exceeded, sorts are " + sorts + ".  Possible cause: infinite instance");
 	}
 
 

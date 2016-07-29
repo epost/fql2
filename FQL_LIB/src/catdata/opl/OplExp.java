@@ -1166,7 +1166,7 @@ public abstract class OplExp implements OplObject {
 			}
 
 			OplPres<S, C, V, Chc<Y, Z>> P = new OplPres<S, C, V, Chc<Y, Z>>(
-					prec, h1.dst1.S0, h1.src.sig, gens, eqs);
+					prec, h1.dst1.S0, h1.src.sig, gens, new LinkedList<>(new HashSet<>(eqs)));
 			OplInst<S, C, V, Chc<Y, Z>> ret = new OplInst<S, C, V, Chc<Y, Z>>(
 					h1.dst1.S0, "?", "?");
 			//System.out.println("h1=" + h1 + " and " + h1.src1);
@@ -4928,9 +4928,6 @@ public abstract class OplExp implements OplObject {
 		}
 
 		public OplInst(String S0, String P0, String J0) {
-			if (S0.contains("?")) {
-				throw new RuntimeException();
-			}
 			this.P0 = P0;
 			this.J0 = J0;
 			this.S0 = S0;
