@@ -177,13 +177,13 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			for (C2 a : dst.projE().symbols.keySet()) {
 				Pair<List<S2>, S2> t = dst.projE().symbols.get(a);
 				if (t.first.size() != 1) {
-					throw new RuntimeException("Internal error, report to Ryan");
+					throw new RuntimeException("In checking block " + b + ", Internal error, report to Ryan");
 				}
 				if (!t.first.get(0).equals(s2)) {
 					continue;
 				}
 				if (!block.edges.containsKey(a)) {
-					throw new RuntimeException("Missing edge: " + a);
+					throw new RuntimeException("In checking block " + b + ", Missing edge: " + a);
 				}
 			}
 
@@ -191,7 +191,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				Pair<Object, Map<V1, OplTerm<C1, V1>>> e = block.edges.get(a);
 				Pair<S2, Block<S1, C1, V1, S2, C2, V2>> tgt = blocks.get(e.first);
 				if (tgt == null) {
-					throw new RuntimeException("Not a sub-query: " + e.first);
+					throw new RuntimeException("In checking block " + b + ", Not a sub-query: " + e.first);
 				}
 				Pair<List<S2>, S2> t = dst.projE().symbols.get(a);
 				if (t == null) {

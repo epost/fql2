@@ -59,12 +59,12 @@ public class OplDriver {
 				String v = last_prog.order.get(i);
 				if (!v.equals(k)) {
 					break;
-				}
+				} 
 				OplExp a = init.exps.get(k);
 				OplExp b = last_prog.exps.get(k);
 				if (!a.equals(b)) {
-					// System.out.println("not eq: " + k + "\n" + a +
-					// "\n\n---------\n\n" + b + "\n\n---- " + a.getClass() );
+					 System.out.println("not eq: " + k + "\n" + a +
+					 "\n\n---------\n\n" + b + "\n\n---- " + a.getClass() );
 					break;
 				}
 				unchanged.add(k);

@@ -19,7 +19,6 @@ import catdata.Triple;
 import catdata.Utils;
 import catdata.algs.kb.KBExp.KBApp;
 import catdata.algs.kb.KBExp.KBVar;
-import catdata.ide.Util;
 
 /**
  * 
@@ -43,7 +42,7 @@ public class KB<C, V> extends EqProver<C, V> {
 	protected boolean isComplete = false;
 	protected boolean isCompleteGround = false;
 	
-	protected List<Pair<KBExp<C, V>, KBExp<C, V>>> R, E, G;
+	protected List<Pair<KBExp<C, V>, KBExp<C, V>>> R, E, G; //order matters
 	
 	protected Iterator<V> fresh;
 	
@@ -562,16 +561,16 @@ public class KB<C, V> extends EqProver<C, V> {
 		KBExp<C, V> orig = e;
 //		Collection<Pair<KBExp<C, V>, KBExp<C, V>>> Ey = new LinkedList<>(Ex);
 	//	Ey.addAll(G);
-		List<String> errs = new LinkedList<>();
+	//	List<String> errs = new LinkedList<>();
 		for (;;) {
 			i++;			
-			errs.add("iteration " + i + ", pre, e=" + e);
+	//		errs.add("iteration " + i + ", pre, e=" + e);
 
 			KBExp<C, V> e0 = step(cache, fresh, Ex, Ry, e);
 			if (e.equals(e0)) {
-				return e0;
+				return e0;  
 			}
-			errs.add("iteration " + i + ", post, e=" + e + " and e0= " + e0);
+		//	errs.add("iteration " + i + ", post, e=" + e + " and e0= " + e0);
 			if (i > options.red_its) {
 				throw new RuntimeException(
 						"Reduction taking too long (>" + options.red_its + "):" + orig + " goes to " + e0 + " under\n\neqs:" + Utils.sep(E,"\n") + "\n\nreds:"+ Utils.sep(R,"\n"));
@@ -603,11 +602,17 @@ public class KB<C, V> extends EqProver<C, V> {
 		Map<KBExp<C,V>, KBExp<C,V>> cache = new HashMap<>();  //helped 2x during tests
 
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> newE = new LinkedList<>();
+		Set<Pair<KBExp<C, V>, KBExp<C, V>>> newE2 = new HashSet<>(); //also helpful for performance
 		for (Pair<KBExp<C, V>, KBExp<C, V>> e : E) {
 			KBExp<C, V>	lhs_red = red(cache, new LinkedList<>(), R, e.first);
 			KBExp<C, V> rhs_red = red(cache, new LinkedList<>(), R, e.second);
 			if (!lhs_red.equals(rhs_red)) {
-				add(newE, new Pair<>(lhs_red, rhs_red));
+				Pair<KBExp<C, V>, KBExp<C, V>> p = new Pair<>(lhs_red, rhs_red);
+				if (!newE2.contains(p)) {
+					newE.add(p);
+					newE2.add(p);
+				}
+//				add(newE, p);
 			}
 		}
 		E = newE;
@@ -770,6 +775,8 @@ public class KB<C, V> extends EqProver<C, V> {
 		if (cache != null && cache.containsKey(e)) {
 			return cache.get(e);
 		}
+		//does not improve performance
+		//Map<Pair<KBExp<C, V>, KBExp<C, V>>, Map<V, KBExp<C, V>>> findSubstCache = new HashMap<>();
 		for (Pair<KBExp<C, V>, KBExp<C, V>> r0 : R) {
 			Pair<KBExp<C, V>, KBExp<C, V>> r = r0;
 			if (!Collections.disjoint(r.first.vars(), e.vars()) || !Collections.disjoint(r.second.vars(), e.vars())) {
@@ -778,7 +785,19 @@ public class KB<C, V> extends EqProver<C, V> {
 			
 			KBExp<C, V> lhs = r.first;
 			KBExp<C, V> rhs = r.second;
-			Map<V, KBExp<C, V>> s = KBUnifier.findSubst(lhs, e);
+			Map<V, KBExp<C, V>> s = null;
+		//	if (lhs.equals(e)) { doesn't seem to help
+			//	e = rhs;
+		//		continue;
+		//	} 
+		//	if (findSubstCache.containsKey(new Pair<>(lhs, e))) {
+				s = KBUnifier.findSubst(lhs, e);
+			//	if (s != null) {
+		//			findSubstCache.put(new Pair<>(lhs, e), s);
+		//		}
+		//	} else {
+			//	s = KBUnifier.findSubst(lhs, e);				
+		//	}
 			if (s == null) {
 				continue;
 			}
@@ -970,7 +989,7 @@ public class KB<C, V> extends EqProver<C, V> {
 			checkParentDead(parent); 
 		}
 		
-		//TODO: appear to need simplify for correctness
+		//TODO: appear to need simplify for correctness.  checked again: definitely need
 //		if (options.simplify) {
 			simplify(); //definitely needed... cuts down on number of iterations
 			//simplify2();	//TODO: add this in for efficiency sometime 

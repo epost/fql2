@@ -2894,6 +2894,7 @@ public abstract class OplExp implements OplObject {
 
 	public static class OplMapping<S1, C1, V, S2, C2> extends OplExp {
 		Map<S1, S2> sorts;
+		Map<S1, S2> sortsInit;
 		Map<C1, Pair<OplCtx<S2, V>, OplTerm<C2, V>>> symbols;
 		Map<C1, Pair<OplCtx<S2, V>, OplTerm<C2, V>>> symbolsInit;
 
@@ -2910,7 +2911,8 @@ public abstract class OplExp implements OplObject {
 			result = prime * result + ((dst0 == null) ? 0 : dst0.hashCode());
 			result = prime * result
 					+ ((imports == null) ? 0 : imports.hashCode());
-			result = prime * result + ((sorts == null) ? 0 : sorts.hashCode());
+			result = prime * result
+					+ ((sortsInit == null) ? 0 : sortsInit.hashCode());
 			result = prime * result + ((src0 == null) ? 0 : src0.hashCode());
 			result = prime * result
 					+ ((symbolsInit == null) ? 0 : symbolsInit.hashCode());
@@ -2936,10 +2938,10 @@ public abstract class OplExp implements OplObject {
 					return false;
 			} else if (!imports.equals(other.imports))
 				return false;
-			if (sorts == null) {
-				if (other.sorts != null)
+			if (sortsInit == null) {
+				if (other.sortsInit != null)
 					return false;
-			} else if (!sorts.equals(other.sorts))
+			} else if (!sortsInit.equals(other.sortsInit))
 				return false;
 			if (src0 == null) {
 				if (other.src0 != null)
@@ -3128,6 +3130,10 @@ public abstract class OplExp implements OplObject {
 			for (C1 c1 : symbols.keySet()) {
 				symbolsInit.put(c1, new Pair<>(new OplCtx<>(
 						symbols.get(c1).first.vars0), symbols.get(c1).second));
+			}
+			this.sortsInit = new HashMap<>();
+			for (S1 c1 : sorts.keySet()) {
+				sortsInit.put(c1, sorts.get(c1));
 			}
 		}
 
