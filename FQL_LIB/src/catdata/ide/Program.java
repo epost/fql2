@@ -15,6 +15,15 @@ public class Program<X> implements Prog {
 	public LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();	
 	public LinkedHashMap<String, X> exps = new LinkedHashMap<>();
 	
+	@Override
+	public String toString() {
+		String ret = "";
+		for (String s : order) {
+			ret += s + " = " + exps.get(s) + "\n\n";
+		}
+		return ret;
+	}
+	
 	public Program(List<Triple<String, Integer, X>> decls) {
 			Set<String> seen = new HashSet<>();
 			for (Triple<String, Integer, X> decl : decls) { 

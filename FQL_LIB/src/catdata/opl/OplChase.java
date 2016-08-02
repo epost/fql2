@@ -1,5 +1,6 @@
 package catdata.opl;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,6 +11,7 @@ import java.util.function.Function;
 
 import catdata.Chc;
 import catdata.Pair;
+import catdata.Triple;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplPres;
@@ -18,6 +20,29 @@ import catdata.opl.OplExp.OplPushout;
 import catdata.opl.OplQuery.Block;
 
 public class OplChase {
+	
+	static OplInst chaseParallel(OplInst I, List EDs, int limit) {
+
+		OplInst ret = I;
+		for (int i = 0; i < limit; i++) {
+			boolean changed = false;
+				OplInst ret2 = (OplInst) stepParallel(ret, EDs).pushout().first;
+				if (ret2 != null) {
+					ret = ret2;
+					changed = true;
+				}
+				System.out.println(ret);
+			if (!changed) {
+				return ret;
+			}
+			System.out.println("+++");
+		}
+		
+		throw new RuntimeException("Limit exceeded, last instance:\n\n" + ret);
+		
+	}
+	
+
 
 	static OplInst chase(OplInst I, List<OplQuery> EDs, int limit) {
 
@@ -25,7 +50,7 @@ public class OplChase {
 		for (int i = 0; i < limit; i++) {
 			boolean changed = false;
 			for (OplQuery ed : EDs) {
-				OplInst ret2 = step(ret, ed);
+				OplInst ret2 = (OplInst) step(ret, ed).pushout().first;
 				if (ret2 != null) {
 					ret = ret2;
 					changed = true;
@@ -42,10 +67,119 @@ public class OplChase {
 		
 	}
 	
+	static <S, C, V, X> OplTerm<Chc<C, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> 
+	inj(OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> term, OplQuery<S, C, V, String, String, V> Q) {
+		if (term.var != null) {
+			return new OplTerm<>(term.var);
+		}
+		List<OplTerm<Chc<C, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>> 
+		ret = new LinkedList<>();
+		for (OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> arg : term.args) {
+			ret.add(inj(arg, Q));
+		}
+		if (term.head.left) {
+			return new OplTerm<>(Chc.inLeft(term.head.l), ret);
+		}
+		Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V> r = term.head.r;
+		Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>> t = new Triple<>(Q, r.first.first, r.first.second);
+		Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V> x = new Pair<>(t, r.second); 
+		return new OplTerm<>(Chc.inRight(x), ret);
+	}
 	
-	//TODO this will fail because the schema will not have plain strings as entities, will be of the form Chc<S, String>
-	static <S, C, V, X, Z> OplInst<S, C, V, Chc<X, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>> step(OplInst<S, C, V, X> I,
-			OplQuery<S, C, V, String, String, V> Q) {
+	static <S, C, V, X, Z> 
+	OplPushout<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X, Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>  
+	stepParallel(OplInst<S, C, V, X> I, List<OplQuery<S, C, V, String, String, V>> Qs) {
+
+		Map<Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, Integer> 
+		Asprec = new HashMap<>(), Esprec = new HashMap<>();
+		Map<Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, S> 
+		Asgens = new HashMap<>(), Esgens = new HashMap<>();
+		
+		List<Pair<OplTerm<Chc<C, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>, 
+		          OplTerm<Chc<C, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>>> 
+		Aseqs = new LinkedList<>(), Eseqs = new LinkedList<>();
+		
+		//
+		
+		Map<S, Map<Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, OplTerm<Chc<C, X>, V>>> 
+		AsImap = new HashMap<>();
+		
+		Map<S, Map<Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, 
+		           OplTerm<Chc<C, Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>>> 
+		AsEsmap = new HashMap<>();
+		
+		for (S s : I.S.entities) {
+			AsImap.put(s, new HashMap<>());
+			AsEsmap.put(s, new HashMap<>());
+		}
+		
+		for (OplQuery<S, C, V, String, String, V> Q : Qs) {
+			OplPushout<S,C,V,Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>  p0 = step(I, Q);
+			if (p0 == null) {
+				continue;
+			}
+			for (Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V> gen : p0.h1.src.gens.keySet()) {
+				Asgens.put(new Pair<>(new Triple<>(Q, gen.first.first, gen.first.second), gen.second), p0.h1.src.gens.get(gen));
+				AsImap.get(p0.h1.src.gens.get(gen)).put(new Pair<>(new Triple<>(Q, gen.first.first, gen.first.second), gen.second), p0.h1.map.get(p0.h1.src.gens.get(gen)).get(gen));
+				AsEsmap.get(p0.h1.src.gens.get(gen)).put(new Pair<>(new Triple<>(Q, gen.first.first, gen.first.second), gen.second), inj(p0.h2.map.get(p0.h2.src.gens.get(gen)).get(gen), Q));
+				
+			}
+			for (Pair<OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>, OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>> eq : p0.h1.src.equations) {
+				Aseqs.add(new Pair<>(inj(eq.first, Q), inj(eq.second, Q)));
+			}
+			
+			for (Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V> gen : p0.h2.dst.gens.keySet()) {
+				Esgens.put(new Pair<>(new Triple<>(Q, gen.first.first, gen.first.second), gen.second), p0.h2.dst.gens.get(gen));
+
+			}
+			for (Pair<OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>, OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>> eq : p0.h2.dst.equations) {
+				Eseqs.add(new Pair<>(inj(eq.first, Q), inj(eq.second, Q)));
+			}
+			
+		
+		}
+
+		
+		OplPres<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>> 
+		A0 = new OplPres<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>(Asprec, I.S0 , I.S.sig, Asgens, Aseqs), 
+		E0 = new OplPres<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>(Esprec, I.S0 , I.S.sig, Esgens, Eseqs);
+		A0.toSig(); E0.toSig();
+		
+		OplInst<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>
+		As = new OplInst<>(I.S0, "?", "?"), Es = new OplInst<>(I.S0, "?", "?");
+		As.validate(I.S, A0, null); 
+		Es.validate(I.S, E0, null);
+				
+		
+		OplPresTrans<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X> AstoI 
+		= new OplExp.OplPresTrans<>(AsImap, "?", "?", As.P, I.P);
+		AstoI.validateNotReally(As, I);
+		AstoI.validateNotReally(As.P, I.P);
+		AstoI.src1 = As; AstoI.dst1 = I;
+		//
+		
+		OplPresTrans<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>> 
+		AstoEs = new OplPresTrans<>(AsEsmap, "?", "?", As.P, Es.P);	
+		AstoEs.validateNotReally(As, Es);
+		AstoEs.validateNotReally(As.P, Es.P);
+		AstoEs.src1 = As; AstoEs.dst1 = Es; //why must do this manually?
+		
+		OplPushout<S,C,V,Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>  
+			p = new OplPushout<>("?", "?");
+		
+		p.validate(AstoI, AstoEs);
+		
+		
+		return p;
+
+	}
+	
+	//TODO this will fail because the schema will not have plain strings as entities, will be of the form Chc<S, String>?
+	static <S, C, V, X, Z> 
+	OplPushout<S,C,V,Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>  
+	step(OplInst<S, C, V, X> I, OplQuery<S, C, V, String, String, V> Q) {
+		
+		
 		if (!Q.blocks.containsKey("EXISTS")) {
 			throw new RuntimeException("Need a block called EXISTS");
 		}
@@ -208,7 +342,9 @@ public class OplChase {
 		p = new OplPushout<>("?", "?");
 		
 		p.validate(AtoI, AtoE);
-		return p.pushout().first;
+		
+		
+		return p;
 	}
 	
 	static class Fun <C,X,V> implements Function<OplTerm<Chc<C, X>, V>,  OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>> {

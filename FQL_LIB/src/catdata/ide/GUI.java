@@ -48,10 +48,12 @@ import catdata.fql.gui.FqlCodeEditor;
 import catdata.fqlpp.KBViewer;
 import catdata.nested.NraViewer;
 import catdata.opl.CfgToOpl;
+import catdata.opl.OplWarehouse;
 import catdata.opl.SqlChecker;
 import catdata.opl.SqlToOpl;
 import catdata.sql.SqlLoader;
 import catdata.sql.SqlMapper;
+
 
 @SuppressWarnings("serial")
 /**
@@ -66,7 +68,8 @@ public class GUI extends JPanel {
 
 	public static JFrame topFrame;
 
-	public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
+	@SuppressWarnings("unchecked")
+public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
 		topFrame = frame;
 
 		JPanel pan = new JPanel();
@@ -253,6 +256,33 @@ public class GUI extends JPanel {
 		sqlCheckItem.addActionListener(x -> {
 			new SqlChecker();
 		}); 
+		
+		MenuItem wizardItem = new MenuItem("Warehouse Wizard");
+		toolsMenu.add(wizardItem);
+		
+		wizardItem.addActionListener(x -> {
+			new Wizard(new OplWarehouse(), y -> { 
+				Example ex = new Example() {
+
+					@Override
+					public Language lang() {
+						return Language.OPL;
+					}
+					
+					@Override
+					public String getName() {
+						return "Wizard";
+					}
+				
+					@Override
+					public String getText() {
+						return y.toString();
+					}
+					
+				}; 
+				doExample(ex);
+			}).startWizard(); }); 
+	
 
 		MenuItem raToFqlItem = new MenuItem("SPCU to FQL");
 		transMenu.add(raToFqlItem);

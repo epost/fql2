@@ -857,7 +857,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 	} */
 
 	
-	private OplTerm<String, String> prepend(String s, OplTerm<String, String> e) {
+	public static OplTerm<String, String> prepend(String s, OplTerm<String, String> e) {
 		if (e.var != null) {
 			return e;
 		}
@@ -907,7 +907,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		//Map<String, OplTyMapping<String, String, String, String, String>> map = new HashMap<>();
 		
 		if (shape.entities.isEmpty()) {
-			throw new RuntimeException("For simplicity colimits require a nonempty shape");
+			throw new RuntimeException("Ambiguous shape - is this a colimit for an instance or a schema?  Can't do empty colimits, for implementation simplicity. ");
 		}
 		String anEntity = Util.get0X(shape.entities);
 		if (shape.attrs.size() > 0) {
@@ -1203,6 +1203,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		}
 	
 		return OplChase.chase(I, EDs, e.limit);
+//		return OplChase.chaseParallel(I, EDs, e.limit);
 		
 		
 	}

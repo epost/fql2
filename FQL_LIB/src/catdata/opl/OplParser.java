@@ -103,7 +103,9 @@ public class OplParser {
 	}
 
 	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
+	public static final Parser<?> exp = exp().from(TOKENIZER, IGNORED);
 
+	
 	public static final Parser<?> program() {
 		return Parsers.tuple(decl().source().peek(), decl()).many();
 	}
@@ -392,6 +394,11 @@ public class OplParser {
 
 	static boolean sugarForNat = false;
 
+	public static final OplExp exp(String s) {
+		return toExp(exp.parse(s));
+	}
+
+		
 	@SuppressWarnings({ "rawtypes" })
 	public static final Program<OplExp> program(String s) {
 		List<Triple<String, Integer, OplExp>> ret = new LinkedList<>();
@@ -1133,9 +1140,10 @@ public class OplParser {
 		return ret;
 	}
 
+	//TODO: pull this up into util
 	public static class VIt implements Iterator<String> {
 
-		private VIt() {
+		VIt() {
 		}
 
 		public static VIt vit = new VIt();

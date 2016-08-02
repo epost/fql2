@@ -56,6 +56,8 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 public abstract class OplExp implements OplObject {
+	
+	
 
 	@Override
 	public abstract boolean equals(Object o);
@@ -74,6 +76,45 @@ public abstract class OplExp implements OplObject {
 
 	public abstract <R, E> R accept(E env, OplExpVisitor<R, E> v);
 
+	public static class OplString extends OplExp {
+		public String string;
+		public OplString(String string) {
+			this.string = string;
+		}
+		@Override
+		public String toString() {
+			return string;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplString other = (OplString) obj;
+			if (string == null) {
+				if (other.string != null)
+					return false;
+			} else if (!string.equals(other.string))
+				return false;
+			return true;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((string == null) ? 0 : string.hashCode());
+			return result;
+		}
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			throw new RuntimeException();
+		}
+	}
+	
 	public static class OplChaseExp extends OplExp {
 		int limit;
 		String I;
@@ -4108,7 +4149,21 @@ public abstract class OplExp implements OplObject {
 
 		@Override
 		public String toString() {
-			return toMapping().toString();
+			String ret = "";
+			List<String> sortsX = new LinkedList<>();
+			for (S s : map.keySet()) {
+				Map<X, OplTerm<Chc<C, Y>, V>> m = map.get(s);
+				
+				List<String> symbolsX = new LinkedList<>();
+				for (X k : m.keySet()) {
+					OplTerm<Chc<C, Y>, V> v = m.get(k);
+					symbolsX.add("(" + k + ", " + OplTerm.strip(v.toString()));
+				}
+				sortsX.add(s + " -> {" + Util.sep(symbolsX, ", ") + "}");
+			}
+			ret += "\t\t" + Util.sep(sortsX, ",\n\t\t") + ";\n";
+
+			return "transpres {\n sorts\n" + ret + "} : " + src0 + " -> " + dst0;
 		}
 
 		@Override
@@ -4870,7 +4925,9 @@ public abstract class OplExp implements OplObject {
 
 		@Override
 		public String toString() {
-			return "OplInst0 [P=" + P + "]";
+			String x = P.toString();
+			int j = "presentation ".length();
+			return "INSTANCE " + x.substring(j);
 		}
 
 		
