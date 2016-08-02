@@ -4151,13 +4151,23 @@ public abstract class OplExp implements OplObject {
 		public String toString() {
 			String ret = "";
 			List<String> sortsX = new LinkedList<>();
-			for (S s : map.keySet()) {
-				Map<X, OplTerm<Chc<C, Y>, V>> m = map.get(s);
+			
+			Map touse = null;
+			if (pre_map != null && (map == null || map.isEmpty())) {
+				touse = pre_map;
+			} else if (map != null && (pre_map == null || pre_map.isEmpty())) {
+				touse = map;
+			} else {
+				throw new RuntimeException("Report to Ryan");
+			}
+			
+			for (Object s : touse.keySet()) {
+				Map m = (Map) touse.get(s);
 				
 				List<String> symbolsX = new LinkedList<>();
-				for (X k : m.keySet()) {
-					OplTerm<Chc<C, Y>, V> v = m.get(k);
-					symbolsX.add("(" + k + ", " + OplTerm.strip(v.toString()));
+				for (Object k : m.keySet()) {
+					String v = m.get(k).toString();
+					symbolsX.add("(" + OplTerm.strip(k.toString()) + ", " + OplTerm.strip(v) + ")");
 				}
 				sortsX.add(s + " -> {" + Util.sep(symbolsX, ", ") + "}");
 			}
@@ -4467,6 +4477,7 @@ public abstract class OplExp implements OplObject {
 
 		@Override
 		public String toString() {
+		//	System.out.println(sorts);
 			String ret = "\tsorts\n";
 			List<String> sortsX = new LinkedList<>();
 			for (S k : sorts.keySet()) {

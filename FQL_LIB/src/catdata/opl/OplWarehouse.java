@@ -18,6 +18,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.ide.CodeTextPanel;
@@ -223,7 +224,26 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 				if (bindings.containsKey(MAPPING + "_" + ed)) {
 					continue;
 				}
-				bindings.put(MAPPING + "_" + ed, new OplMapping<String,String,String,String,String>(new HashMap<>(), new HashMap<>(), SCHEMA + "_" + shape.edges.get(ed).first.get(0), SCHEMA + "_" + shape.edges.get(ed).second));
+				String src = SCHEMA + "_" + shape.edges.get(ed).first.get(0);
+				//String dst = SCHEMA + "_" + shape.edges.get(ed).second;
+				OplSCHEMA0<String,String,String> src0 = (OplSCHEMA0<String,String,String>) bindings.get(src);
+				Map<String, String> sorts = new HashMap<>();
+				for (String x : src0.entities) {
+					sorts.put(x, "?");
+				}
+				Map<String, Pair<OplCtx<String, String>, OplTerm<String, String>>> symbols = new HashMap<>();
+				for (String g : src0.attrs.keySet()) {
+					OplCtx<String, String> ctx = new OplCtx<>(Util.singList(new Pair<>("x", "?")));
+					OplTerm<String, String> term = new OplTerm<>("?");
+					symbols.put(g, new Pair<>(ctx, term));					
+				}
+				for (String g : src0.edges.keySet()) {
+					OplCtx<String, String> ctx = new OplCtx<>(Util.singList(new Pair<>("t", "?")));
+					OplTerm<String, String> term = new OplTerm<>("?");
+					symbols.put(g, new Pair<>(ctx, term));					
+				}
+				
+				bindings.put(MAPPING + "_" + ed, new OplMapping<String,String,String,String,String>(sorts, symbols, src, SCHEMA + "_" + shape.edges.get(ed).second));
 			}
 		} else if (state.equals(MAPPING)) {
 			OplSCHEMA0<String, String, String> shape = (OplSCHEMA0<String, String, String>) bindings.get(SHAPE);
@@ -235,6 +255,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 				ed2.put(MAPPING + "_" + e, new Pair<>(l, SCHEMA + "_" + x.second));
 			}
 			OplSCHEMA0<String, String, String> shape2 = new OplSCHEMA0<String,String,String>(new HashMap<>(), en2, ed2, new HashMap<>(), new LinkedList<>(), new LinkedList<>(), THEORY);
+			//TODO: needs to compile to here
 			computeColimit(bindings, shape2);
 			
 			for (String en : shape.entities) {
@@ -252,8 +273,36 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 					continue;
 				}
 				String en = shape.edges.get(ed).first.get(0);
-				bindings.put(INSTANCE + "_" + ed + "_forward", new OplSigma(MAPPING + "_" + ed, INSTANCE + "_" + en));				
-				bindings.put(TRANSFORM + "_" + ed + "_forward", new OplPresTrans<>(new HashMap<>(), INSTANCE + "_" + ed + "_forward", INSTANCE + "_" + shape.edges.get(ed).second));
+				String en2 = shape.edges.get(ed).second;
+				
+				String src = INSTANCE + "_" + ed + "_forward";
+				bindings.put(src, new OplSigma(MAPPING + "_" + ed, INSTANCE + "_" + en));				
+				
+				OplMapping<String,String,String,String,String> mmm = (OplMapping<String,String,String,String,String>) bindings.get(MAPPING + "_" + ed);
+				//TODO: factor getting into separate method, or use compiler
+				OplInst0<String,String,String,String> src1 = (OplInst0<String,String,String,String>) bindings.get(INSTANCE + "_" + en);
+				
+				OplInst0<String,String,String,String> src0 = (OplInst0<String,String,String,String>) bindings.get(INSTANCE + "_" + en2);
+				OplSCHEMA0<String,String,String> src0_sch = (OplSCHEMA0<String,String,String>) bindings.get(src0.P.S);
+				OplSCHEMA0<String,String,String> src1_sch = (OplSCHEMA0<String,String,String>) bindings.get(src1.P.S);
+				
+				Map<String, Map<String, OplTerm<Object, String>>> sorts = new HashMap<>();
+				for (String x : src0_sch.entities) {
+					sorts.put(x, new HashMap<>());
+				}
+				for (String g : src1.P.gens.keySet()) {
+					String gty = src1.P.gens.get(g);
+					String s2 = mmm.sorts.get(gty);
+					if (s2 == null) {
+						continue;
+					}
+					Map<String, OplTerm<Object, String>> symbols = sorts.get(s2);
+					if (symbols != null) {
+						symbols.put(g, new OplTerm<>("?"));											
+					} 
+				}	
+				//System.out.println(sorts);
+				bindings.put(TRANSFORM + "_" + ed + "_forward", new OplPresTrans<String,String,String,String,String>(sorts, src, INSTANCE + "_" + shape.edges.get(ed).second));
 			}
 	
 		} else if (state.equals(TRANSFORM)) {
@@ -265,7 +314,8 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			for (String e : shape.edges.keySet()) {
 				Pair<List<String>, String> x = shape.edges.get(e);
 				List<String> l = Util.singList(INSTANCE + "_" + x.first.get(0) + "_colimit");
-				String en = x.first.get(0);
+				//String en = x.first.get(0);
+				String en = x.second;
 				bindings.put(TRANSFORM + "_" + e + "_colimit", new OplSigma(MAPPING + "_" + SCHEMA + "_" + en + "_colimit", TRANSFORM + "_" + e + "_forward"));
 				ed2.put(TRANSFORM + "_" + e + "_colimit", new Pair<>(l, INSTANCE + "_" + x.second +"_colimit"));
 			}
