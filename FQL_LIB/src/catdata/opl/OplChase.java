@@ -50,9 +50,11 @@ public class OplChase {
 		for (int i = 0; i < limit; i++) {
 			boolean changed = false;
 			for (OplQuery ed : EDs) {
-				OplInst ret2 = (OplInst) step(ret, ed).pushout().first;
+				
+				OplPushout ret2 = step(ret, ed);
+				
 				if (ret2 != null) {
-					ret = ret2;
+					ret = (OplInst) ret2.pushout().first;
 					changed = true;
 				}
 				System.out.println(ret);

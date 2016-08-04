@@ -7,7 +7,7 @@ import catdata.opl.OplExp.OplInst;
 public class OplInACan {
 
 	public static void main(String[] args) {
-		System.out.println(openCan(OplExamples.oplUber.getText()));
+		System.out.println(openCan(args[0]));
 	}
 	
 	public static String openCan(String can) {

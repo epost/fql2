@@ -212,7 +212,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				OplCtx<S1, V1> tgtCtx2 = new OplCtx<>(xxx);
 				if (!tgtCtx.equals(tgtCtx2)) {
 					throw new RuntimeException("In checking edge " + a + " in block " + b
-							+ ", the ctx for target block is " + tgtCtx + " but for valuation is "
+							+ ", the context for target block is " + tgtCtx + " but you provided bindings "
 							+ tgtCtx2);
 				}
 				

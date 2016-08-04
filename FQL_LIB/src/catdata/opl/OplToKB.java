@@ -367,7 +367,10 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			if (la == 2 && (ra == 1 || ra > 2)) {
 				return false;
 			}
-			throw new RuntimeException("Bug in precedence, report to Ryan");
+			if (la >= 3 || ra >= 3) {  //added Aug 3 16
+				return la > ra;
+			}
+			throw new RuntimeException("Bug in precedence, report to Ryan: la=" + la + ", ra=" + ra + ", l=" + l + ", r=" + r);
 			//function symbols: arity-0 < arity-2 < arity-1 < arity-3 < arity-4
 		};
 
