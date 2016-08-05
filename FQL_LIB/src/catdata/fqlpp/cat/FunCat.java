@@ -87,7 +87,7 @@ public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Tra
 	}
 
 	public Transform<O, A, Category, Functor> terminal(Functor<O, A, Category, Functor> o) {
-		FUNCTION<O, Functor> fn = x -> new Functor<>(o.applyO(x), FinCat.FinCat.terminal(), y -> new Unit(), y -> new Unit());
+		FUNCTION<O, Functor> fn = x -> new Functor(o.applyO(x), FinCat.FinCat.terminal(), y -> new Unit(), y -> new Unit());
 		return new Transform(o, terminal(), fn);
 	}
 	
@@ -113,24 +113,24 @@ public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Tra
 	}
 	
 	public Transform<O, A, Category, Functor> first(Functor<O, A, Category, Functor> o1, Functor<O, A, Category, Functor> o2) {
-		FUNCTION<O, Functor> f = o -> new Functor<>(FinCat.FinCat.product(o1.applyO(o),
-				o2.applyO(o)), o1.applyO(o), x -> x.first, x -> x.first);
+		FUNCTION<O, Functor> f = o -> new Functor(FinCat.FinCat.product(o1.applyO(o),
+				o2.applyO(o)), o1.applyO(o), x -> ((Pair)x).first, x -> ((Pair)x).first);
 		return new Transform(product(o1, o2), o1, f);
 	}
 	public Transform<O, A, Category, Functor> second(Functor<O, A, Category, Functor> o1, Functor<O, A, Category, Functor> o2) {
-		FUNCTION<O, Functor> f = o -> new Functor<>(FinCat.FinCat.product(o1.applyO(o),
-				o2.applyO(o)), o2.applyO(o), x -> x.second, x -> x.second);
+		FUNCTION<O, Functor> f = o -> new Functor(FinCat.FinCat.product(o1.applyO(o),
+				o2.applyO(o)), o2.applyO(o), x -> ((Pair)x).second, x -> ((Pair)x).second);
 		return new Transform(product(o1, o2), o2, f);
 	}
 	
 	public Transform<O, A, Category, Functor> inleft(Functor<O, A, Category, Functor> o1, Functor<O, A, Category, Functor> o2) {
-		FUNCTION<O, Functor> f = o -> new Functor<>(o1.applyO(o), FinCat.FinCat.coproduct(o1.applyO(o),
+		FUNCTION<O, Functor> f = o -> new Functor(o1.applyO(o), FinCat.FinCat.coproduct(o1.applyO(o),
 				o2.applyO(o)), x -> Chc.inLeft(x), x -> Chc.inLeft(x));
 		return new Transform(o1, coproduct(o1, o2), f);
 	}
 
 	public Transform<O, A, Category, Functor> inright(Functor<O, A, Category, Functor> o1, Functor<O, A, Category, Functor> o2) {
-		FUNCTION<O, Functor> f = o -> new Functor<>(o2.applyO(o), FinCat.FinCat.coproduct(o1.applyO(o),
+		FUNCTION<O, Functor> f = o -> new Functor(o2.applyO(o), FinCat.FinCat.coproduct(o1.applyO(o),
 				o2.applyO(o)), x -> Chc.inRight(x), x -> Chc.inRight(x));
 		return new Transform(o2, coproduct(o1, o2), f);
 	}
@@ -151,8 +151,8 @@ public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Tra
 		}
 		FUNCTION<O, Functor> fn = o -> new Functor<>(FinCat.FinCat.coproduct(f.source.applyO(o), g.source.applyO(o)), 
 				f.target.applyO(o), 
-				x -> x.left ? f.apply(o).applyO(x.l) : g.apply(o).applyO(x.r),
-				x -> x.left ? f.apply(o).applyA(x.l) : g.apply(o).applyA(x.r));
+				x -> ((Chc)x).left ? f.apply(o).applyO(((Chc)x).l) : g.apply(o).applyO(((Chc)x).r),
+				x -> ((Chc)x).left ? f.apply(o).applyA(((Chc)x).l) : g.apply(o).applyA(((Chc)x).r));
 		return new Transform(coproduct(f.source, g.source), f.target, fn);
 	}
 

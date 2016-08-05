@@ -399,7 +399,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	*/
 	
 	public static <C,D,E> List subst_new(List<D> eq, Map<E, Triple<C, C, List<C>>> tuple, Set<E> keys, Set xxx) {
-		List ret = eq.stream().flatMap(x -> { 
+		List ret = (List) eq.stream().flatMap(x -> { 
 			List l = new LinkedList<>();
 			if (tuple.containsKey(x)) {
 				l.add(tuple.get(x).first);
@@ -419,7 +419,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	} 
 	
 	 public static <C> List subst2(String yyy, List<String> eq, Map<String, Triple<C, C, List<C>>> tuple, Set<String> keys, Set xxx) {
-		List ret = eq.stream().flatMap(x -> { 
+		List ret = (List) eq.stream().flatMap(x -> { 
 			List l = new LinkedList<>();
 			if (x.equals("!__Q")) {
 				l.add(yyy);
@@ -444,7 +444,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	} 
 	
 	 public static <C> List subst(List<String> eq, Map<String, Triple<C, C, List<C>>> tuple) {
-		List ret = eq.stream().flatMap(x -> { 
+		List ret = (List) eq.stream().flatMap(x -> { 
 			List l = new LinkedList<>();
 			if (tuple.containsKey(x)) {
 				l.add("!__Q");

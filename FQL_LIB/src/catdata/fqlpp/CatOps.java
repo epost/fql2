@@ -419,7 +419,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			return fn;
 		};
 
-		return new Functor<>(cat, FinCat.FinCat, x -> nm.get(x), fff);
+		return new Functor(cat, FinCat.FinCat, x -> nm.get(x), fff);
 	}
 
 	@Override
@@ -464,7 +464,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			return fn;
 		};
 
-		return new Functor<>(cat, target, x -> nm.get(x), fff);
+		return new Functor(cat, target, x -> nm.get(x), fff);
 	}
 
 	@Override
