@@ -151,7 +151,13 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 					throw new RuntimeException("In checking block " + b + ", " + a
 							+ " is not an attribute in " + dst_e);
 				}
-				S1 s1 = e.type(src.sig, ctx);
+				S1 s1 = null;
+				try {
+					s1 = e.type(src.sig, ctx);
+				} catch (RuntimeException ex) {
+					ex.printStackTrace();
+					throw new RuntimeException("In checking block " + b + " and attr " + a + ", " + ex.getMessage());
+				}
 				if (!s1.equals(t.second)) {
 					throw new RuntimeException("In checking block " + b + ", " + e + " has type "
 							+ s1 + " but should be " + t.second);
@@ -189,7 +195,13 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 
 			for (C2 a : block.edges.keySet()) {
 				Pair<Object, Map<V1, OplTerm<C1, V1>>> e = block.edges.get(a);
+				
+				if (e.first == null) {
+					e.first = dst.sig.symbols.get(a).second;
+				}
+				
 				Pair<S2, Block<S1, C1, V1, S2, C2, V2>> tgt = blocks.get(e.first);
+				
 				if (tgt == null) {
 					throw new RuntimeException("In checking block " + b + ", Not a sub-query: " + e.first);
 				}
@@ -436,6 +448,8 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 
 	public static class Block<S1, C1, V1, S2, C2, V2> {
 
+		String orig;
+		
 		LinkedHashMap<V1, S1> from;
 		Set<Pair<OplTerm<C1, V1>, OplTerm<C1, V1>>> where;
 		Map<C2, OplTerm<C1, V1>> attrs;
@@ -449,6 +463,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			this.where = where;
 			this.attrs = attrs;
 			this.edges = edges;
+			orig = toString();
 		}
 
 		@Override
@@ -534,10 +549,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((attrs == null) ? 0 : attrs.hashCode());
-			result = prime * result + ((edges == null) ? 0 : edges.hashCode());
-			result = prime * result + ((from == null) ? 0 : from.hashCode());
-			result = prime * result + ((where == null) ? 0 : where.hashCode());
+			result = prime * result + ((orig == null) ? 0 : orig.hashCode());
 			return result;
 		}
 
@@ -550,25 +562,10 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			if (getClass() != obj.getClass())
 				return false;
 			Block other = (Block) obj;
-			if (attrs == null) {
-				if (other.attrs != null)
+			if (orig == null) {
+				if (other.orig != null)
 					return false;
-			} else if (!attrs.equals(other.attrs))
-				return false;
-			if (edges == null) {
-				if (other.edges != null)
-					return false;
-			} else if (!edges.equals(other.edges))
-				return false;
-			if (from == null) {
-				if (other.from != null)
-					return false;
-			} else if (!from.equals(other.from))
-				return false;
-			if (where == null) {
-				if (other.where != null)
-					return false;
-			} else if (!where.equals(other.where))
+			} else if (!orig.equals(other.orig))
 				return false;
 			return true;
 		}

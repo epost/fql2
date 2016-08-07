@@ -1,5 +1,6 @@
 package catdata.ide;
 
+import java.awt.Color;
 import java.awt.Event;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -11,8 +12,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -38,6 +37,8 @@ import javax.swing.text.DefaultEditorKit;
 import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
+import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
@@ -207,6 +208,10 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 		topArea = new RSyntaxTextArea();
 
+//		SyntaxScheme scheme = topArea.getSyntaxScheme();
+//		scheme.getStyle(Token.RESERVED_WORD_2).foreground = Color.CYAN;
+//		topArea.revalidate();
+		
 		//this is kind of neat
 		topArea.setMarkOccurrences(true);
 		

@@ -461,7 +461,7 @@ public abstract class KBExp<C, V> {
 			int i = 0;
 			for (KBExp<C, V> arg : args) {
 				if (i >= sorts.size()) {
-					throw new RuntimeException("On " + this + ", too many arguments");
+					throw new RuntimeException("On " + this + ", too many arguments: " + i + " >= " + sorts.size() );
 				}
 				S s = sorts.get(i);
 				if (arg.isVar) {		

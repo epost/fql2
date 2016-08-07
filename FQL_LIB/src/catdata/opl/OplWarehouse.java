@@ -56,7 +56,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 		instructions.put(MAPPING, "Enter the schema mappings, one per edge in the shape. " );
 		instructions.put(INSTANCE, "Enter the database instances, one per source schema. " );
 		instructions.put(TRANSFORM, "Enter the record linkages, one per schema mapping." );
-		instructions.put(FINISHED, "The result is an OPL file that will parse, but may not run." );
+		instructions.put(FINISHED, "Click 'Finish' to transfer the result to a new OPL file." );
 	}
 	
 	private String state = INITIAL;
@@ -325,7 +325,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			bindings.put(SCHEMA + "_for_result", shape2);
 			
 			bindings.put(FINISHED, new OplExp.OplString("colimit " + SCHEMA + "_for_result"));
-			bindings.put(FINISHED + " all", new OplExp.OplString(complete().toString()));
+//			bindings.put(FINISHED + " all", new OplExp.OplString(complete().toString()));
 		}
 		
 	}
@@ -362,7 +362,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 		}
 		
 
-			OplUnion u0 = new OplUnion(shape.entities);
+			OplUnion u0 = new OplUnion(new LinkedList<>(shape.entities), shape.typeSide);
 			OplObject u1 = union(env, u0);
 	
 			OplSCHEMA0<String, String, String> u = (OplSCHEMA0<String, String, String>) u1;

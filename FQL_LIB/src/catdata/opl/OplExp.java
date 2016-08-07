@@ -75,6 +75,140 @@ public abstract class OplExp implements OplObject {
 	}
 
 	public abstract <R, E> R accept(E env, OplExpVisitor<R, E> v);
+	
+	public static class OplGround extends OplExp {
+		Map<String, Set<String>> entities = new HashMap<>();
+		Map<String, Map<String, String>> symbols;
+		String sch;
+		
+		public OplGround(Map<String, List<String>> entities, Map<String, Map<String, String>> symbols, String sch) {
+			for (String k : entities.keySet()) {
+				this.entities.put(k, new HashSet<>(entities.get(k)));
+				if (this.entities.get(k).size() != entities.get(k).size()) {
+					throw new RuntimeException("Duplicate entity element in " + entities);
+				}
+			}
+			this.symbols = symbols;
+			this.sch = sch;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((entities == null) ? 0 : entities.hashCode());
+			result = prime * result + ((sch == null) ? 0 : sch.hashCode());
+			result = prime * result + ((symbols == null) ? 0 : symbols.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplGround other = (OplGround) obj;
+			if (entities == null) {
+				if (other.entities != null)
+					return false;
+			} else if (!entities.equals(other.entities))
+				return false;
+			if (sch == null) {
+				if (other.sch != null)
+					return false;
+			} else if (!sch.equals(other.sch))
+				return false;
+			if (symbols == null) {
+				if (other.symbols != null)
+					return false;
+			} else if (!symbols.equals(other.symbols))
+				return false;
+			return true;
+		}
+		
+		public OplInst0<String,String,String,String> validate(OplSchema<String, String, String> sch) {
+			Map<String, String> gens = new HashMap<>();
+			List<Pair<OplTerm<Chc<String, String>, String>, OplTerm<Chc<String, String>, String>>> equations = new LinkedList<>();
+			
+			for (String k : entities.keySet()) {
+				if (!sch.entities.contains(k)) {
+					throw new RuntimeException("Extra entity set for " + k);
+				}
+			}
+
+			for (String k : sch.entities) {
+				if (!entities.containsKey(k)) {
+					throw new RuntimeException("Missing entity set for " + k);
+				}
+				for (String gen : entities.get(k)) {
+					gens.put(gen, k);
+				}
+			}
+			
+			for (String f : symbols.keySet()) {
+				if (!sch.projEA().symbols.containsKey(f)) {
+					throw new RuntimeException("Extra edge/attr " + f);
+				}
+			}
+			
+			for (String f : sch.projEA().symbols.keySet()) {
+				Pair<List<String>, String> st = sch.projEA().symbols.get(f);
+				String s = st.first.get(0);
+				String t = st.second;
+				
+				Set<String> s0 = entities.get(s);
+				Set<String> t0 = entities.get(t);
+				
+				
+				Map<String, String> f0 = symbols.get(f); 
+				if (f0 == null) {
+					throw new RuntimeException("Missing edge/attr: " + f);
+				}
+				
+				for (String x : f0.keySet()) {
+					if (!s0.contains(x)) {
+						throw new RuntimeException("Error on " + f + ", " + x + " is not in " + s);
+					}
+					String y = f0.get(x);
+					if (y == null) {
+						throw new RuntimeException("Error on " + f + ", no action specified for " + x);
+					} 
+					if (t0 != null && !t0.contains(y)) {
+						throw new RuntimeException("Error on " + f + ", " + y + " is not in " + t);
+					}
+					/*
+					List<OplTerm<Chc<String, String>, String>> left_args = new LinkedList<>();
+					left_args.add(new OplTerm<>(Chc.inRight(x), new LinkedList<>()));
+					OplTerm<Chc<String, String>, String> left = new OplTerm<>(Chc.inLeft(f),left_args);
+					Chc<String, String> r = sch.projE().symbols.containsKey(f) ? Chc.inRight(y) : Chc.inLeft(y);
+					OplTerm<Chc<String, String>, String> right = new OplTerm<>(r, new LinkedList<>());
+	*/
+					List<OplTerm> left_args = new LinkedList<>();
+					left_args.add(new OplTerm<>(x, new LinkedList<>()));
+					OplTerm left = new OplTerm(f,left_args);
+				//	Chc<String, String> r = sch.projE().symbols.containsKey(f) ? Chc.inRight(y) : Chc.inLeft(y);
+					OplTerm right = new OplTerm(y, new LinkedList<>());
+
+					equations.add(new Pair<>(left, right));
+				}
+
+			}
+			
+			
+			OplPres<String, String, String, String> p = new OplPres<String, String, String, String>(new HashMap<>(), this.sch, sch.sig, gens, equations);
+			p.toSig();
+			OplInst0<String,String,String,String> ret = new OplInst0<String,String,String,String>(p);
+			return ret;
+		}
+
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
 
 	public static class OplString extends OplExp {
 		public String string;
@@ -1144,6 +1278,8 @@ public abstract class OplExp implements OplObject {
 						+ "\n\n---------\n\n" + h2.src);
 			}
 		}
+		
+		
 
 		// TODO: in colimit, should do 0-based assignments
 		public Triple<OplInst<S, C, V, Chc<Y, Z>>, OplPresTrans<S, C, V, Y, Chc<Y, Z>>, OplPresTrans<S, C, V, Z, Chc<Y, Z>>> pushout() {
@@ -1760,6 +1896,7 @@ public abstract class OplExp implements OplObject {
 	}
 
 	public static class OplColim extends OplExp {
+		boolean isInstance;
 		String name;
 		Map<String, OplObject> compiled = new HashMap<>();
 		
@@ -1768,14 +1905,16 @@ public abstract class OplExp implements OplObject {
 			return v.visit(env, this);
 		}
 		
-		public OplColim(String name) {
+		public OplColim(String name, boolean isInstance) {
 			this.name = name;
+			this.isInstance = isInstance;
 		}
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
+			result = prime * result + (isInstance ? 1231 : 1237);
 			result = prime * result + ((name == null) ? 0 : name.hashCode());
 			return result;
 		}
@@ -1789,6 +1928,8 @@ public abstract class OplExp implements OplObject {
 			if (getClass() != obj.getClass())
 				return false;
 			OplColim other = (OplColim) obj;
+			if (isInstance != other.isInstance)
+				return false;
 			if (name == null) {
 				if (other.name != null)
 					return false;
@@ -2691,6 +2832,7 @@ public abstract class OplExp implements OplObject {
 			return new OplPres<>(prec, S, sig, gens, eqs);
 		}
 
+		
 		public OplSig<S, Chc<C, X>, V> toSig() {
 			if (toSig != null) {
 				return toSig;
@@ -2746,6 +2888,7 @@ public abstract class OplExp implements OplObject {
 			return ret;
 		}
 
+		//TODO: this is broken.  the equations that go in expected too few chcs
 		public OplPres(
 				Map<X, Integer> prec,
 				String S,
@@ -3645,7 +3788,7 @@ public abstract class OplExp implements OplObject {
 		}
 
 		public String toHtml(Set skip) {
-			Map<Object, Pair<List<String>, List<Object[]>>> xxx = makeTables(new HashSet<>()).second;
+			Map<Object, Pair<List<String>, List<Object[]>>> xxx = makeTables(new HashSet<>(), true).second;
 			String ret = "<div>";
 			for (Object t : xxx.keySet()) {
 				if (skip.contains(t)) {
@@ -3678,13 +3821,13 @@ public abstract class OplExp implements OplObject {
 					BorderFactory.createEtchedBorder(), "", toString());
 			jtp.addTab("Text", text);
 
-			JComponent tables = makeTables(new HashSet<>()).first;
+			JComponent tables = makeTables(new HashSet<>(), false).first;
 			jtp.addTab("Tables", tables);
 
 			return jtp;
 		}
 
-		public Pair<JComponent, Map<Object, Pair<List<String>, List<Object[]>>>> makeTables(Set<S> types) {
+		public Pair<JComponent, Map<Object, Pair<List<String>, List<Object[]>>>> makeTables(Set<S> types, boolean skipGUI) {
 			// System.out.println("before tables " + this);
 			
 			Map<Object, Pair<List<String>, List<Object[]>>> forHtml = new HashMap<>();
@@ -3751,13 +3894,15 @@ public abstract class OplExp implements OplObject {
 					}
 					rows.add(row.toArray(new Object[] {}));
 				}
-				all.put(n.toString(),
+				if (!skipGUI) {
+					all.put(n.toString(),
 						JSWrapper.makePrettyTables(atts,
 								BorderFactory.createEmptyBorder(),
 								OplTerm.strip(n.toString()) + " ("
 										+ rows.size() + ")",
 								rows.toArray(new Object[][] {}),
 								cols.toArray(new String[] {})));
+				}
 				forHtml.put(n, new Pair<>(cols, rows));
 
 			}
@@ -3780,6 +3925,7 @@ public abstract class OplExp implements OplObject {
 						(List<String>) sig0.symbols.get(n).first);
 				l.add(sig0.symbols.get(n).second.toString());
 				
+				if (!skipGUI) {
 				all.put(n.toString(),
 						JSWrapper.makePrettyTables(atts, 
 								BorderFactory.createEmptyBorder(),
@@ -3787,6 +3933,7 @@ public abstract class OplExp implements OplObject {
 										+ rows.size() + ")",
 								rows.toArray(new Object[][] {}),
 								l.toArray(new String[] {})));
+			}
 				forHtml.put(n, new Pair<>(l, rows));
 
 			}
@@ -3796,10 +3943,12 @@ public abstract class OplExp implements OplObject {
 				if (skip.contains(n) && NEWDEBUG.debug.opl.opl_suppress_dom) {
 					continue;
 				}
+				if (!skipGUI) {
 				list.add(all.get(n));
+				}
 			}
 			// System.out.println("after tables " + this);
-			return new Pair<>(Util.makeGrid(list), forHtml);
+			return new Pair<>(skipGUI ? null : Util.makeGrid(list), forHtml);
 		}
 
 		public <V> void validate(OplSig<S, C, V> sig) {
@@ -5060,10 +5209,10 @@ public abstract class OplExp implements OplObject {
 				ret.add(new CodeTextPanel(BorderFactory.createEtchedBorder(),
 						"", xxxthird), "Type Algebra");
 
-				ret.add(xxx.first.makeTables(S.projT().sorts).first, "Saturation");
-				ret.add(xxx.fourth.makeTables(S.projT().sorts).first, "Normalized");
+				ret.add(xxx.first.makeTables(S.projT().sorts, false).first, "Saturation");
+				ret.add(xxx.fourth.makeTables(S.projT().sorts, false).first, "Normalized");
 				if (xxx.second != null) {
-					ret.add(xxx.second.makeTables(S.projT().sorts).first, "Image");
+					ret.add(xxx.second.makeTables(S.projT().sorts, false).first, "Image");
 				}
 
 			} catch (Exception ex) {
@@ -5445,9 +5594,14 @@ public abstract class OplExp implements OplObject {
 
 	public static class OplUnion extends OplExp {
 		Set<String> names;
-
-		public OplUnion(Set<String> names) {
-			this.names = names;
+		String base;
+		
+		public OplUnion(List<String> names, String base) {
+			this.names = new HashSet<>(names);
+			if (names.size() != this.names.size()) {
+				throw new RuntimeException("Error: duplicates in " + names);
+			}
+			this.base = base;
 		}
 
 		@Override
@@ -5459,6 +5613,7 @@ public abstract class OplExp implements OplObject {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
+			result = prime * result + ((base == null) ? 0 : base.hashCode());
 			result = prime * result + ((names == null) ? 0 : names.hashCode());
 			return result;
 		}
@@ -5472,6 +5627,11 @@ public abstract class OplExp implements OplObject {
 			if (getClass() != obj.getClass())
 				return false;
 			OplUnion other = (OplUnion) obj;
+			if (base == null) {
+				if (other.base != null)
+					return false;
+			} else if (!base.equals(other.base))
+				return false;
 			if (names == null) {
 				if (other.names != null)
 					return false;
@@ -5708,6 +5868,8 @@ public abstract class OplExp implements OplObject {
 		public R visit(E env, OplColim e);
 		
 		public R visit(E env, OplChaseExp e);
+		
+		public R visit(E env, OplGround e);
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////////////////////////////////////

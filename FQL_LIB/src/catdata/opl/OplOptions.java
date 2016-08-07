@@ -128,7 +128,7 @@ public class OplOptions extends Options implements Cloneable {
 	public boolean opl_prover_force_prec = false;
 	public boolean opl_require_consistency = false;
 	public boolean opl_desugar_nat = true;
-	public boolean opl_print_simplified_presentations = true;
+	public boolean opl_print_simplified_presentations = false;
 	
 	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {

@@ -34,6 +34,7 @@ import catdata.opl.OplExp.OplDelta;
 import catdata.opl.OplExp.OplDelta0;
 import catdata.opl.OplExp.OplEval;
 import catdata.opl.OplExp.OplFlower;
+import catdata.opl.OplExp.OplGround;
 import catdata.opl.OplExp.OplId;
 import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplInst0;
@@ -69,8 +70,8 @@ public class OplParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
-	static String[] res = new String[] { 
-			"chase", "with", "max", 
+	static String[] res = new String[] { "ed", "tables", "COLIMIT",
+			"chase", "with", "max", "insert", "into", "select", "and", "sql", 
 			"ID", "colimit" , "imports", "pragma", "options", "union",
 			"pushoutBen", "PUSHOUT", "pivot", "DELTA", "return", "coreturn",
 			"pushout", "return", "keys", "INSTANCE", "SCHEMA", "obsEqualities",
@@ -143,6 +144,13 @@ public class OplParser {
 		Parser retX = Parsers.tuple(a.optional(), q);
 		return retX;
 	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static final Parser<?> sql() {
+		Parser p = Parsers.tuple(term("insert"), term("into"), ident(), block2());
+		Parser p2 = p.sepBy(term(";"));
+		return Parsers.tuple(term("sql"), p2.between(term("{"), term("}")).followedBy(term(":")), ident(), term("->"), ident());
+	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> oplImpl() {
@@ -195,14 +203,16 @@ public class OplParser {
 		Parser<?> pushoutBen = Parsers.tuple(term("pushoutBen"), ident(),
 				ident());
 		Parser<?> pivot = Parsers.tuple(term("pivot"), ident());
-		Parser<?> union = Parsers.tuple(term("union"), term("{"), ident()
-				.many1(), term("}"));
+		Parser<?> union = Parsers.tuple(term("union"), ident(), term("{"), ident().many(), term("}"));
 		Parser<?> pragma = pragma();
 		Parser<?> colim = Parsers.tuple(term("colimit"), ident());
-
+		Parser<?> colim2 = Parsers.tuple(term("COLIMIT"), ident());
+		Parser<?> sql = sql();
+		Parser<?> model2 = model2();
+		
 		Parser<?> chase = Parsers.tuple(term("chase"), ident(), Parsers.tuple(term("with"), term("{"), ident().sepBy(term(",")), term("}")), term("max"), Terminals.IntegerLiteral.PARSER);
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { chase, ID, colim, pragma, union, pushoutBen,
+		Parser<?> a = Parsers.or(new Parser<?>[] { colim2, model2, sql, chase, ID, colim, pragma, union, pushoutBen,
 				pushoutSch, pivot, DELTA, pushout, INST, SCHEMA, apply, idQ,
 				query, projEA, inst, schema, projE, projA, projT, flower,
 				ubersat, sigma, sat, unsat, presentation, delta, mapping,
@@ -340,6 +350,23 @@ public class OplParser {
 		return Parsers.tuple(term("model").followedBy(term("{")), foo,
 				Parsers.tuple(term("}").followedBy(term(":")), ident()));
 	}
+	
+	public static final Parser<?> model2() {
+		Parser<?> p = Parsers.tuple(ident(), term("->"), Parsers.between(
+				term("{"), ident().sepBy(term(",")), term("}")));
+		
+		Parser<?> z = Parsers.tuple(term("("), ident(), term(","), ident(),
+				term(")"));
+
+		Parser<?> q = Parsers.tuple(ident(), term("->"), Parsers.between(
+				term("{"), z.sepBy(term(",")), term("}")));
+		
+		Parser<?> foo = Parsers.tuple(section("entities", p),
+				section("edges", q), section("attributes", q));
+		return Parsers.tuple(term("tables").followedBy(term("{")), foo,
+				Parsers.tuple(term("}").followedBy(term(":")), ident()));
+	}
+
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final XExp.XSchema toCatConst(Object y) {
@@ -800,6 +827,56 @@ public class OplParser {
 		}
 		return new OplSetInst(sorts0, symbols0, c.b.toString());
 	}
+	
+	private static OplExp toModel2(Object o) {
+		if (!o.toString().contains("tables")) {
+			throw new RuntimeException();
+		}
+		Tuple3 t = (Tuple3) o;
+
+		Tuple3 b = (Tuple3) t.b;
+		org.codehaus.jparsec.functors.Pair c = (org.codehaus.jparsec.functors.Pair) t.c;
+
+		Tuple3 y = (Tuple3) b.a;
+		List<Tuple3> sorts = (List<Tuple3>) y.b;
+		Map<String, List<String>> sorts0 = new HashMap<>();
+		for (Tuple3 x : sorts) {
+			String s = x.a.toString();
+			List<String> s0 = (List<String>) x.c;
+			if (sorts0.containsKey(s)) {
+				throw new DoNotIgnore("Duplicate sort: " + s);
+			}
+			sorts0.put(s, s0);
+		}
+
+		Map<String, Map<String, String>> symbols0 = new HashMap<>();
+		Tuple3 z = (Tuple3) b.b;
+		List<Tuple3> q = (List<Tuple3>) z.b;
+		
+		Tuple3 z0 = (Tuple3) b.c;
+		q.addAll((List<Tuple3>) z0.b);
+		
+		for (Tuple3 r : q) {
+			List<Tuple5> u = (List<Tuple5>) r.c;
+			String fname = (String) r.a;
+			if (symbols0.containsKey(fname)) {
+				throw new DoNotIgnore("Duplicate symbol " + fname);
+			}
+			Map<String, String> toadd = new HashMap<>();
+			for (Tuple5 e : u) {
+				String args = (String) e.b;
+				String ret = (String) e.d;
+				if (toadd.containsKey(args)) {
+					throw new DoNotIgnore("Duplicate argument at " + args);
+				}
+				toadd.put(args, ret);
+			}
+			symbols0.put(fname, toadd);
+		}
+//		System.out.println(sorts0);
+	//	System.out.println(symbols0);
+		return new OplGround(sorts0, symbols0, c.b.toString());
+	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplTerm toTerm(Collection vars, Collection consts, Object a,
@@ -901,7 +978,7 @@ public class OplParser {
 			Tuple5 p = (Tuple5) c;
 			if (p.a.toString().equals("chase")) {
 				return toChase(p);
-			}
+			} 
 		}
 
 
@@ -909,10 +986,10 @@ public class OplParser {
 			Tuple4 p = (Tuple4) c;
 			if (p.a.toString().startsWith("instance")) {
 				return new OplInst((String) p.b, (String) p.c, (String) p.d);
-			} else if (p.a.toString().startsWith("union")) {
-				return new OplUnion(new HashSet<>((List<String>) p.c));
-			} else if (p.a.toString().startsWith("pragma")) {
+			}  else if (p.a.toString().startsWith("pragma")) {
 				return toPragma(p.c);
+			} else if (p.a.toString().startsWith("union")) {
+				return new OplUnion((List<String>) p.d, (String)p.b);
 			}
 		}
 
@@ -956,8 +1033,11 @@ public class OplParser {
 			} else if (p.a.toString().equals("pivot")) {
 				return new OplPivot((String) p.b);
 			} else if (p.a.toString().equals("colimit")) {
-				return new OplColim((String) p.b);
-			} else if (p.a.toString().equals("ID")) {
+				return new OplColim((String) p.b, false);
+			} else if (p.a.toString().equals("COLIMIT")) {
+				return new OplColim((String) p.b, true);
+			}  
+			else if (p.a.toString().equals("ID")) {
 				return new OplId((String) p.b, "mapping");
 			}
 		}
@@ -976,6 +1056,15 @@ public class OplParser {
 			de.printStackTrace();
 			throw new RuntimeException(de.getMessage());
 		} catch (Exception ee) {
+		}
+		
+		try {
+			return toModel2(c);
+		} catch (DoNotIgnore de) {
+			de.printStackTrace();
+			throw new RuntimeException(de.getMessage());
+		} catch (Exception ee) {
+			//ee.printStackTrace();
 		}
 
 		try {
@@ -1063,6 +1152,15 @@ public class OplParser {
 
 		try {
 			return toQuery((Tuple4) c);
+		} catch (DoNotIgnore de) {
+			de.printStackTrace();
+			throw new RuntimeException(de.getMessage());
+		} catch (Exception ee) {
+			//ee.printStackTrace();
+		}
+		
+		try {
+			return toSql((Tuple5) c);
 		} catch (DoNotIgnore de) {
 			de.printStackTrace();
 			throw new RuntimeException(de.getMessage());
@@ -1392,6 +1490,69 @@ public class OplParser {
 		return new OplFlower<>(select, from, where, I);
 
 	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static Block<String, String, String, String, String, String> fromBlock2(
+			Object o) {
+		Tuple3<List, List, List> t = (Tuple3<List, List, List>) o;
+
+		LinkedHashMap<String, String> from = new LinkedHashMap<>();
+		Set<Pair<OplTerm<String, String>, OplTerm<String, String>>> where = new HashSet<>();
+		Map<String, OplTerm<String, String>> attrs = new HashMap<>();
+		Map<String, Pair<Object, Map<String, OplTerm<String, String>>>> edges = new HashMap<>();
+
+		//from
+		for (Object x : (List) ((org.codehaus.jparsec.functors.Pair)t.b).b) {
+			org.codehaus.jparsec.functors.Pair l = (org.codehaus.jparsec.functors.Pair) x;
+			String gen = null;
+			String ty = null;
+			if (l.b == null) {
+				gen = (String) l.a;
+				ty = (String) l.a;
+			} else {
+				org.codehaus.jparsec.functors.Pair g = (org.codehaus.jparsec.functors.Pair) l.b;
+				gen = (String) g.b;
+				ty = (String) l.a;
+			}
+			if (from.containsKey(gen)) {
+				throw new DoNotIgnore("In from clause, duplicate for: " + gen);
+			}
+			from.put(gen, ty);				
+		}
+
+		//where
+		//Object z = ((org.codehaus.jparsec.functors.Pair)t.c).b;
+		if (t.c != null) {
+			for (Object x : (List) ((org.codehaus.jparsec.functors.Pair)t.c).b) {
+				Tuple3 l = (Tuple3) x;
+				where.add(new Pair(toTerm(from.keySet(), null, l.a, true), toTerm(
+						from.keySet(), null, l.c, true)));
+			}
+		}
+		
+		//return
+		for (Object x :  (List) ((org.codehaus.jparsec.functors.Pair)t.a).b){
+			Tuple3 l = (Tuple3) x;
+			String dst = (String) l.c;
+			if (attrs.containsKey(dst) | edges.containsKey(dst)) {
+				throw new DoNotIgnore("In select clause, duplicate for: " + dst);
+			}
+			//System.out.println(l);
+			if (l.a instanceof Tuple3) {
+				edges.put(dst,
+						new Pair(null,
+								fromBlockHelper2(from.keySet(), l.a)));				
+
+			} else {
+				attrs.put(dst, toTerm(from.keySet(), null, l.a, true));				
+			}
+		}
+
+
+		Block bl = new Block<>(from, where, attrs, edges);
+		//System.out.println(bl);
+		return bl;
+	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Block<String, String, String, String, String, String> fromBlock(
@@ -1435,7 +1596,8 @@ public class OplParser {
 							fromBlockHelper(from.keySet(), l.c)));
 		}
 
-		return new Block<>(from, where, attrs, edges);
+		Block bl = new Block<>(from, where, attrs, edges);
+		return bl;
 	}
 
 	// {b2=a1.f, b3=a1.f}
@@ -1453,6 +1615,21 @@ public class OplParser {
 		return ret;
 	}
 
+	public static Map<String, OplTerm<String, String>> fromBlockHelper2(
+			Set<String> vars, Object o) {
+		Tuple3 tx = (Tuple3) o;
+		List<Tuple3> l = (List<Tuple3>) tx.b;
+		Map<String, OplTerm<String, String>> ret = new HashMap<>();
+		for (Tuple3 t : l) {
+			if (ret.containsKey(t.c.toString())) {
+				throw new DoNotIgnore("Duplicate column: " + t.c + "\n in " + o);
+			}
+			ret.put(t.c.toString(), toTerm(vars, null, t.a, true));
+		}
+		return ret;
+	}
+
+	
 	@SuppressWarnings({ "rawtypes" })
 	public static Map<Object, Pair<String, Block<String, String, String, String, String, String>>> fromBlocks(
 			List l) {
@@ -1464,6 +1641,18 @@ public class OplParser {
 		}
 		return ret;
 	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	public static Map<Object, Pair<String, Block<String, String, String, String, String, String>>> fromBlocks2(
+			List l) {
+		Map<Object, Pair<String, Block<String, String, String, String, String, String>>> ret = new HashMap<>();
+		for (Object o : l) {
+			Tuple4 t = (Tuple4) o;
+			Block<String, String, String, String, String, String> b = fromBlock2(t.d);
+			ret.put(t.c.toString(), new Pair<>(t.c.toString(), b));
+		}
+		return ret;
+	}
 
 	@SuppressWarnings({ "rawtypes" })
 	public static OplQuery<String, String, String, String, String, String> toQuery(
@@ -1472,7 +1661,44 @@ public class OplParser {
 		return new OplQuery<String, String, String, String, String, String>(
 				(String) o.b, (String) o.d, blocks);
 	}
+	
+	/*
+	public static final Parser<?> sql() {
+		Parser p = Parsers.tuple(term("insert"), term("into"), ident(), block2());
+		Parser p2 = p.sepBy(term(";"));
+		return Parsers.tuple(term("sql"), p2.between(term("{"), term("}")).followedBy(term(":")), ident(), term("->"), ident());
+	}
+	 */
+	@SuppressWarnings({ "rawtypes" })
+	public static OplQuery<String, String, String, String, String, String> toSql(
+			Tuple5 o) {
+		if (!o.a.toString().equals("sql")) {
+			throw new RuntimeException();
+		}
+		
+		Map<Object, Pair<String, Block<String, String, String, String, String, String>>> blocks = fromBlocks2((List) o.b);
+		return new OplQuery<String, String, String, String, String, String>(
+				(String) o.c, (String) o.e, blocks);
+	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static final Parser<?> block2() {
+		Parser<?> fromAs = Parsers.tuple(ident(), Parsers.tuple(term("as"), ident()).optional());
+		
+		Parser<?> from = Parsers.tuple(term("from"), fromAs.sepBy(term(",")));
+		
+		Parser<?> where = Parsers.tuple(term("where"), Parsers.tuple(oplTerm(), term("="), oplTerm()).sepBy(term("and")));
+		
+		Parser<?> xxx = Parsers.tuple(term("("), Parsers.tuple(oplTerm(), term("as"), ident()).sepBy(term(",")), term(")"));
+		
+		Parser<?> retAs = Parsers.tuple(Parsers.or(xxx, oplTerm()), term("as"), ident());
+		
+		Parser<?> ret = Parsers.tuple(term("select"), retAs.sepBy(term(",")));
+		
+		Parser p = Parsers.tuple(ret, from, where.optional());
+		return p;
+	}
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> block() {
 		Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(","))

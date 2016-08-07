@@ -14,27 +14,35 @@
     <docComments enabled="false" end="" start=""/>
   </comments>
   <keywords>
+    <keyword>ID</keyword>
     <keyword>INSTANCE</keyword>
     <keyword>PUSHOUT</keyword>
     <keyword>SCHEMA</keyword>
     <keyword>apply</keyword>
     <keyword>attributes</keyword>
+    <keyword>chase</keyword>
+    <keyword>colimit</keyword>
     <keyword>delta</keyword>
+    <keyword>ed</keyword>
     <keyword>entities</keyword>
     <keyword>entitiesAndAttributes</keyword>
     <keyword>eval</keyword>
     <keyword>flower</keyword>
-    <keyword>generators</keyword>
+    <keyword>graph</keyword>
     <keyword>id</keyword>
+    <keyword>instance</keyword>
     <keyword>javascript</keyword>
     <keyword>mapping</keyword>
     <keyword>model</keyword>
+    <keyword>pragma</keyword>
     <keyword>presentation</keyword>
     <keyword>pushout</keyword>
     <keyword>query</keyword>
     <keyword>saturate</keyword>
     <keyword>schema</keyword>
     <keyword>sigma</keyword>
+    <keyword>sql</keyword>
+    <keyword>tables</keyword>
     <keyword>theory</keyword>
     <keyword>transform</keyword>
     <keyword>transpres</keyword>
@@ -43,6 +51,7 @@
     <keyword>unsaturate</keyword>
   </keywords>
   <keywords2>
+    <keyword>and</keyword>
     <keyword>as</keyword>
     <keyword>attributes</keyword>
     <keyword>edges</keyword>
@@ -52,14 +61,20 @@
     <keyword>forall</keyword>
     <keyword>from</keyword>
     <keyword>generators</keyword>
+    <keyword>imports</keyword>
+    <keyword>insert</keyword>
+    <keyword>into</keyword>
     <keyword>keys</keyword>
+    <keyword>nodes</keyword>
     <keyword>obsEqualities</keyword>
+    <keyword>options</keyword>
     <keyword>pathEqualities</keyword>
     <keyword>return</keyword>
     <keyword>select</keyword>
     <keyword>sorts</keyword>
     <keyword>symbols</keyword>
     <keyword>where</keyword>
+    <keyword>with</keyword>
   </keywords2>
   <dataTypes/>
   <functions/>

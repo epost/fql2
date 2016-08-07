@@ -24,6 +24,7 @@ import catdata.opl.OplExp.OplDelta0;
 import catdata.opl.OplExp.OplEval;
 import catdata.opl.OplExp.OplExpVisitor;
 import catdata.opl.OplExp.OplFlower;
+import catdata.opl.OplExp.OplGround;
 import catdata.opl.OplExp.OplId;
 import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplInst0;
@@ -84,7 +85,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			e.equations.addAll(a.equations);
 			e.implications.addAll(a.implications);
 			e.prec.putAll(a.prec);
-//			Util.putAllSafely(e.prec, a.prec);
+			// Util.putAllSafely(e.prec, a.prec);
 		}
 		e.validate();
 		return e;
@@ -144,9 +145,9 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			equations.addAll(a.sig.equations);
 			e.entities.addAll(a.entities);
 			prec.putAll(a.sig.prec);
-//			Util.putAllSafely(prec, a.sig.prec);
+			// Util.putAllSafely(prec, a.sig.prec);
 		}
-		
+
 		OplSig sig = new OplSig(t.fr, prec, sorts, symbols, equations);
 		sig.validate();
 		ret.validate(sig);
@@ -158,8 +159,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 	public OplObject visit(Program<OplExp> env, OplSetInst e) {
 		OplObject o = ENV.get(e.sig);
 		if (!(o instanceof OplSig)) {
-			throw new RuntimeException("Not a theory: " + o + " . is "
-					+ o.getClass());
+			throw new RuntimeException("Not a theory: " + o + " . is " + o.getClass());
 		}
 		OplSig s = (OplSig) o;
 		e.validate(s);
@@ -174,8 +174,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			OplObject s = ENV.get(i0.sig);
 			OplSig s0 = (OplSig) s;
 			e.e.type(s0, new OplCtx<String, String>());
-			return new OplString(e.e.eval(s0, i0, new OplCtx<String, String>())
-					.toString());
+			return new OplString(e.e.eval(s0, i0, new OplCtx<String, String>()).toString());
 		}
 
 		if (i instanceof OplJavaInst) {
@@ -184,8 +183,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			OplSig s0 = (OplSig) s;
 			e.e.type(s0, new OplCtx<String, String>());
 			try {
-				return new OplString(OplTerm.strip(OplToKB.redBy(i0,
-						OplToKB.convert(e.e.inLeft())).toString()));
+				return new OplString(OplTerm.strip(OplToKB.redBy(i0, OplToKB.convert(e.e.inLeft())).toString()));
 				// return new
 				// OplString(e.e.eval((Invocable)i0.engine).toString());
 			} catch (Exception ee) {
@@ -214,8 +212,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		OplSetInst src0 = (OplSetInst) src;
 		OplSetInst dst0 = (OplSetInst) dst;
 		if (!src0.sig.equals(dst0.sig)) {
-			throw new RuntimeException(
-					"Theories of source and target do not match in " + e);
+			throw new RuntimeException("Theories of source and target do not match in " + e);
 		}
 		OplSig sig = (OplSig) ENV.get(src0.sig);
 		e.validate(sig, src0, dst0);
@@ -267,11 +264,10 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			}
 			// e.validate(src0.projEA(), dst0.projEA());
 			OplTyMapping ret = new OplTyMapping<>(e.src0, e.dst0, src0, dst0, e);
-			//System.out.println("created " + ret);
+			// System.out.println("created " + ret);
 			return ret;
 		}
-		throw new RuntimeException(
-				"Source or Target is not a theory/schema in " + e);
+		throw new RuntimeException("Source or Target is not a theory/schema in " + e);
 	}
 
 	@Override
@@ -305,8 +301,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			return ret;
 		} else if (i instanceof OplSchema) {
 			OplSchema S = (OplSchema) i;
-			OplPres ret = OplPres.OplPres0(e.prec, e.S, S.sig, e.gens,
-					e.equations);
+			OplPres ret = OplPres.OplPres0(e.prec, e.S, S.sig, e.gens, e.equations);
 			ret.toSig();
 			return ret;
 		} else {
@@ -415,8 +410,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				OplPresTrans h = (OplPresTrans) I;
 				return F0.sigma(h);
 			}
-			throw new RuntimeException(
-					"Not a presentation of an instance or transform: " + e.I);
+			throw new RuntimeException("Not a presentation of an instance or transform: " + e.I);
 		}
 		if (F instanceof OplTyMapping) {
 			OplTyMapping F0 = (OplTyMapping) F;
@@ -447,7 +441,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		if (src instanceof OplPres && dst instanceof OplPres) {
 			OplPres src0 = (OplPres) src;
 			OplPres dst0 = (OplPres) dst;
-			
+
 			for (Object k2 : e.imports) {
 				String k = (String) k2;
 				OplExp o = env.exps.get(k);
@@ -466,13 +460,13 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			}
 
 			e.validateNotReally(src0, dst0); // ?
-			
+
 			// e.toMapping(); redundant
 			return e;
 		} else if (src instanceof OplInst && dst instanceof OplInst) {
 			OplInst src0 = (OplInst) src;
 			OplInst dst0 = (OplInst) dst;
-			
+
 			for (Object k2 : e.imports) {
 				String k = (String) k2;
 				OplExp o = env.exps.get(k);
@@ -493,8 +487,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			// e.toMapping(); redundant
 			return e;
 		}
-		throw new RuntimeException(
-				"Source or target is not a presentation or instance in " + e);
+		throw new RuntimeException("Source or target is not a presentation or instance in " + e);
 	}
 
 	@Override
@@ -629,7 +622,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 	@Override
 	public OplObject visit(Program<OplExp> env, OplTyMapping e) {
 		throw new RuntimeException("Report to Ryan");
-//		return e;
+		// return e;
 	}
 
 	@Override
@@ -638,7 +631,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		if (!(zzz instanceof OplSchema)) {
 			throw new RuntimeException("Not a SCHEMA: " + e.P.S);
 		}
-		
+
 		for (Object k2 : e.imports) {
 			String k = (String) k2;
 			OplExp o = env.exps.get(k);
@@ -649,7 +642,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			Util.putAllSafely(e.P.gens, a.P.gens);
 			e.P.equations.addAll(a.P.equations);
 			e.P.prec.putAll(a.P.prec);
-//			Util.putAllSafely(e.P.prec, a.P.prec);
+			// Util.putAllSafely(e.P.prec, a.P.prec);
 		}
 
 		OplPres P = (OplPres) visit(env, e.P);
@@ -660,52 +653,43 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		}
 		OplSchema S = (OplSchema) S0;
 
-		
 		ret.validate(S, P, null);
 		return ret;
 	}
 
 	static int temp = 0;
-	
+
 	@Override
 	public OplObject visit(Program<OplExp> env, OplUnion e) {
-		boolean isSchema = false;
-		boolean isInstance = false;
-		String typeSide = null;
-
-		String s0 = null;
-		for (String zz : e.names) {
-			s0 = zz;
-			break; 
-		}
-		OplExp exp = env.exps.get(s0);
-		if (exp == null) {
-			throw new RuntimeException("Missing expression: " + s0);
-		}
-		if (exp instanceof OplSCHEMA0) {
-			isSchema = true;
-			OplSCHEMA0 toAdd = (OplSCHEMA0) exp;
-			typeSide = toAdd.typeSide;
-		} else if (exp instanceof OplInst0) {
-			isInstance = true;
-		} else {
-			throw new RuntimeException("Not a schema or instance: " + s0);
-		}
-		
+		String typeSide;
+		OplSchema schema = null;
 		Map<String, Integer> prec = new HashMap<>();
-		Set<String> entities = new HashSet<>();
-		Map<String, Pair<List<String>, String>> edges = new HashMap<>();
-		Map<String, Pair<List<String>, String>> attrs = new HashMap<>();
-		List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> pathEqs = new LinkedList<>();
-		List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> obsEqs = new LinkedList<>();
 		
-		Set<String> schs = new HashSet<>();
-		for (String s : e.names) {
-			exp = env.exps.get(s);
-			if (exp == null) {
-				throw new RuntimeException("Missing expression: " + s);
+		OplObject o = ENV.get(e.base);
+		if (o instanceof OplSchema) {
+			schema = (OplSchema) o;
+			typeSide = schema.forSchema0;
+			if (typeSide == null) {
+				throw new RuntimeException(e.base + " is not a SCHEMA literal");
 			}
-			if (isSchema) {
+		} else if (o instanceof OplSig) {
+			typeSide = e.base;
+		} else {
+			throw new RuntimeException("Report this program to Ryan");
+		}
+		
+		if (schema == null) {
+			Set<String> entities = new HashSet<>();
+			Map<String, Pair<List<String>, String>> edges = new HashMap<>();
+			Map<String, Pair<List<String>, String>> attrs = new HashMap<>();
+			List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> pathEqs = new LinkedList<>();
+			List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> obsEqs = new LinkedList<>();
+			
+			for (String s : e.names) {
+				OplExp exp = env.exps.get(s);
+				if (exp == null) {
+					throw new RuntimeException("Missing expression: " + s);
+				}
 				if (!(exp instanceof OplSCHEMA0)) {
 					throw new RuntimeException("Not a schema: " + s);
 				}
@@ -713,6 +697,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				if (!toAdd.typeSide.equals(typeSide)) {
 					throw new RuntimeException("not all equal typesides in " + e);
 				}
+
 				for (Object entity : toAdd.entities) {
 					String proposed = s + "_" + entity;
 					if (entities.contains(proposed)) {
@@ -758,39 +743,40 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 					obsEqs.add(new Triple<>(ctx, lhs1, rhs1));
 				}
 
-			} else if (isInstance) {
-				if (!(exp instanceof OplInst0)) {
+			} 
+			
+			return new OplSCHEMA0<>(prec, entities, edges, attrs, pathEqs, obsEqs, typeSide).accept(env, this);
+			
+		} else {
+			
+			for (String s : e.names) {
+				OplObject exp = ENV.get(s);
+				if (!(exp instanceof OplInst)) {
 					throw new RuntimeException("Not an instance: " + s);
 				}
-				exp = env.exps.get(s);
-				OplInst0 toAdd = (OplInst0) exp;
-				schs.add(toAdd.P.S);
+				OplInst<String, String, String, String> toAdd = (OplInst<String, String, String, String>) exp;
+				if (!toAdd.S.equals(schema)) {
+					throw new RuntimeException(s + " is not on schema " + schema);
+				}
 			}
-		}
-		
-		if (isSchema) {
-			if (typeSide == null) {
-				throw new RuntimeException("empty - cannot determine type side");
-			}
-			return new OplSCHEMA0<>(prec, entities, edges, attrs, pathEqs, obsEqs, typeSide).accept(env, this);
-		} else if (isInstance) {
-			OplSchema sch = (OplSchema) new OplUnion(schs).accept(env, this);
-			ENV.put("_temp" + temp, sch);
-			OplSig<String, String, String> sig = sch.sig;
+			
+
+
+			OplSig<String, String, String> sig = schema.sig;
 			Map<String, String> gens = new HashMap<>();
 			List<Pair<OplTerm<Object, String>, OplTerm<Object, String>>> equations1 = new LinkedList<>();
-			List<Pair<OplTerm<Chc<String,String>, String>, OplTerm<Chc<String,String>, String>>> equations2 = new LinkedList<>();
+//			List<Pair<OplTerm<Chc<String,String>, String>, OplTerm<Chc<String,String>, String>>> equations2 = new LinkedList<>();
 			for (String s : e.names) {
-				exp = env.exps.get(s);
+				OplExp exp = env.exps.get(s);
 				OplInst0<String, String, String, String> toAdd = (OplInst0<String, String, String, String>) exp;
 				for (Object gen : toAdd.P.gens.keySet()) {
 					Object ty = toAdd.P.gens.get(gen);
-					gens.put(s + "_" + gen, toAdd.P.S + "_" + ty);
+					gens.put(s + "_" + gen, /* toAdd.P.S + "_" + */ ty.toString());
 				}
 				for (Object gen : toAdd.P.prec.keySet()) {
 					if (toAdd.P.gens.keySet().contains(gen)) {
 						if (toAdd.P.prec.containsKey(gen)) {
-						prec.put(s + "_" + gen, toAdd.P.prec.get(gen));
+							prec.put(s + "_" + gen, toAdd.P.prec.get(gen));
 						}
 					} else {
 						if (toAdd.P.prec.containsKey(gen)) {
@@ -801,62 +787,59 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				//System.out.println("prec is " + prec + " and " + prec.keySet() + " and " + prec.values());
 				//System.out.println("was " + toAdd.P.prec + " and " + toAdd.P.prec.keySet() + " and " + prec.values());
 				for (Pair<OplTerm<Chc<String, String>, String>, OplTerm<Chc<String, String>, String>> tr : toAdd.P.equations) {
-					//System.out.println("processing " + tr);
+					System.out.println("processing " + tr);
 					//OplTerm<Chc<String,String>, String> lhs1 = prepend(toAdd.P.S, tr.first, s, toAdd.P.gens.keySet());
 					//OplTerm<Chc<String,String>, String> rhs1 = prepend(toAdd.P.S, tr.second, s, toAdd.P.gens.keySet());
-					OplTerm<Object, String> lhs1 = prepend2(toAdd.P.S, (OplTerm) tr.first, s, toAdd.P.gens.keySet());
-					OplTerm<Object, String> rhs1 = prepend2(toAdd.P.S, (OplTerm) tr.second, s, toAdd.P.gens.keySet());
+					OplTerm<Object, String> lhs1 = prepend2((OplTerm) tr.first,  s, toAdd.P.gens.keySet());
+					OplTerm<Object, String> rhs1 = prepend2((OplTerm) tr.second, s, toAdd.P.gens.keySet());
 					//equations2.add(new Pair<>(lhs1, rhs1));
 					equations1.add(new Pair<>(lhs1, rhs1));
 				}
 			}
 			
 			//OplPres<String, String, String, String> pres = new OplPres(prec, "_temp" + temp, sig, gens, equations2);
-			OplPres<String, String, String, String> pres = new OplPres(prec, "_temp" + temp, sig, gens, equations1);
+			
+			OplPres<String, String, String, String> pres = new OplPres(prec, e.base, sig, gens, equations1);
 			temp++;
-			return new OplInst0<String, String, String, String>(pres).accept(env, this); 
-		}  else {
-			throw new RuntimeException();
-		}
+//			System.out.println(pres);
+			OplInst0 ret = new OplInst0<String, String, String, String>(pres);
+	//		System.out.println(ret);
+			OplObject x = (OplObject) ret.accept(env, this);
+		//	System.out.println(x);
+			return x;
+		} 
 		
 	}
-	
-	private  OplTerm<Object, String> prepend2(String s, OplTerm<Object, String> first, String i, Set<String> gens) {
+
+	private OplTerm<Object, String> prepend2(OplTerm<Object, String> first, String i, Set<String> gens) {
 		if (first.var != null) {
 			return first;
 		}
 		List<OplTerm<Object, String>> args = new LinkedList<>();
 		for (OplTerm<Object, String> arg : first.args) {
-			args.add(prepend2(s, arg, i, gens));
+			args.add(prepend2(arg, i, gens));
 		}
 		if (gens.contains(first.head)) {
-			return new OplTerm<>(i + "_" + first.head, args);			
+			return new OplTerm<>(i + "_" + first.head, args);
 		} else {
-			return new OplTerm<>(s + "_" + first.head, args);						
+			return new OplTerm<>(first.head, args);
 		}
-		
+
 	}
-	
 
+	/*
+	 * private OplTerm<Chc<String, String>, String> prepend(String s,
+	 * OplTerm<Chc<String, String>, String> first, String i, Set<String> gens) {
+	 * if (first.var != null) { return first; } List<OplTerm<Chc<String,
+	 * String>, String>> args = new LinkedList<>(); for (OplTerm<Chc<String,
+	 * String>, String> arg : first.args) { args.add(prepend(s, arg, i, gens));
+	 * } if (first.head.left) { return new OplTerm<>(Chc.inLeft(s + "_" +
+	 * first.head), args); } else { return new OplTerm<>(Chc.inRight(i + "_" +
+	 * first.head), args); }
+	 * 
+	 * }
+	 */
 
-	
-	/* private  OplTerm<Chc<String, String>, String> prepend(String s, OplTerm<Chc<String, String>, String> first, String i, Set<String> gens) {
-		if (first.var != null) {
-			return first;
-		}
-		List<OplTerm<Chc<String, String>, String>> args = new LinkedList<>();
-		for (OplTerm<Chc<String, String>, String> arg : first.args) {
-			args.add(prepend(s, arg, i, gens));
-		}
-		if (first.head.left) {
-			return new OplTerm<>(Chc.inLeft(s + "_" + first.head), args);			
-		} else {
-			return new OplTerm<>(Chc.inRight(i + "_" + first.head), args);						
-		}
-		
-	} */
-
-	
 	public static OplTerm<String, String> prepend(String s, OplTerm<String, String> e) {
 		if (e.var != null) {
 			return e;
@@ -865,11 +848,11 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		for (OplTerm<String, String> arg : e.args) {
 			args.add(prepend(s, arg));
 		}
-		
+
 		return new OplTerm<>(s + "_" + e.head, args);
 	}
-	
-	private OplTerm<Chc<String,String>, String> prepend3(String s, OplTerm<Chc<String, String>, String> e) {
+
+	private OplTerm<Chc<String, String>, String> prepend3(String s, OplTerm<Chc<String, String>, String> e) {
 		if (e.var != null) {
 			return e;
 		}
@@ -888,7 +871,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 	public OplObject visit(Program<OplExp> env, OplPragma e) {
 		for (String k : e.map.keySet()) {
 			String v = e.map.get(k);
-			//System.out.println("setting " + k + " = " + v);
+			// System.out.println("setting " + k + " = " + v);
 			NEWDEBUG.debug.opl.set(k, v);
 		}
 		return e;
@@ -902,14 +885,11 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		}
 		if (!(o instanceof OplSCHEMA0)) {
 			throw new RuntimeException("Not a SCHEMA: " + e.name);
-		} 
-		OplSCHEMA0<String, String, String> shape = (OplSCHEMA0<String, String, String>) o;
-		//Map<String, OplTyMapping<String, String, String, String, String>> map = new HashMap<>();
-		
-		if (shape.entities.isEmpty()) {
-			throw new RuntimeException("Ambiguous shape - is this a colimit for an instance or a schema?  Can't do empty colimits, for implementation simplicity. ");
 		}
-		String anEntity = Util.get0X(shape.entities);
+		OplSCHEMA0<String, String, String> shape = (OplSCHEMA0<String, String, String>) o;
+		// Map<String, OplTyMapping<String, String, String, String, String>> map
+		// = new HashMap<>();
+
 		if (shape.attrs.size() > 0) {
 			throw new RuntimeException("Cannot have attributes in colimit shape schemas");
 		}
@@ -917,15 +897,28 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			throw new RuntimeException("Cannot have equations in colimit shape schemas");
 		}
 
-		if (ENV.get(anEntity) instanceof OplSchema) {
-			OplUnion u0 = new OplUnion(shape.entities);
+		boolean isSchema = false;
+		boolean isInstance = false;
+
+		if (shape.entities.size() > 0) {
+			isSchema = ENV.get(Util.get0X(shape.entities)) instanceof OplSchema;
+			isInstance = ENV.get(Util.get0X(shape.entities)) instanceof OplInst;
+		}
+
+		if (!isSchema && !isInstance) {
+			isInstance = e.isInstance;
+			isSchema = !isInstance;
+		}
+
+		if (isSchema) {
+			OplUnion u0 = new OplUnion(new LinkedList<>(shape.entities), shape.typeSide);
 			OplObject u1 = u0.accept(env, this);
-	
+
 			OplSchema<String, String, String> u = (OplSchema<String, String, String>) u1;
-		
+
 			Map<String, Set<String>> equivs = new HashMap<>();
 			Map<String, String> equivs0 = new HashMap<>();
-			
+
 			for (String schname : shape.entities) {
 				if (!(ENV.get(schname) instanceof OplSchema)) {
 					throw new RuntimeException("Not a schema: " + schname);
@@ -937,15 +930,16 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 					equivs.put(schname + "_" + ename, set);
 				}
 			}
-			
-			//TODO: type check colimit
+
+			// TODO: type check colimit
 			for (String mname : shape.edges.keySet()) {
 				Pair<List<String>, String> mt = shape.edges.get(mname);
 				String s = mt.first.get(0);
 				String t = mt.second;
-				
+
 				OplSchema<String, String, String> s0 = (OplSchema<String, String, String>) ENV.get(s);
-				OplTyMapping<String, String, String, String, String> m0 = (OplTyMapping<String, String, String, String, String>) ENV.get(mname);
+				OplTyMapping<String, String, String, String, String> m0 = (OplTyMapping<String, String, String, String, String>) ENV
+						.get(mname);
 
 				if (!m0.src0.equals(s)) {
 					throw new RuntimeException("Source of " + m0 + " is " + m0.src + " and not " + s + "as expected");
@@ -953,7 +947,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				if (!m0.dst0.equals(t)) {
 					throw new RuntimeException("Target of " + m0 + " is " + m0.dst + " and not " + t + "as expected");
 				}
-				
+
 				for (String ob : s0.entities) {
 					String ob0 = m0.m.sorts.get(ob);
 					Set<String> set1 = equivs.get(s + "_" + ob);
@@ -961,9 +955,9 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 					set1.addAll(set2);
 					equivs.put(s + "_" + ob, set1);
 					equivs.put(t + "_" + ob0, set1);
-				}				
+				}
 			}
-			
+
 			for (String k : equivs.keySet()) {
 				List<String> v = new LinkedList<>(equivs.get(k));
 				v.sort(String.CASE_INSENSITIVE_ORDER);
@@ -982,63 +976,76 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				}
 				return x;
 			};
-									
+
 			for (String edge : u.toSchema0().edges.keySet()) {
-				Pair<List<String>, String> ty = u.toSchema0().edges.get(edge);				
-				edges.put(edge, new Pair<>(ty.first.stream().map(fun).collect(Collectors.toList()), fun.apply(ty.second)));		
+				Pair<List<String>, String> ty = u.toSchema0().edges.get(edge);
+				edges.put(edge,
+						new Pair<>(ty.first.stream().map(fun).collect(Collectors.toList()), fun.apply(ty.second)));
 			}
 			for (String attr : u.toSchema0().attrs.keySet()) {
-				Pair<List<String>, String> ty = u.toSchema0().attrs.get(attr);				
-				attrs.put(attr, new Pair<>(ty.first.stream().map(fun).collect(Collectors.toList()), fun.apply(ty.second)));
+				Pair<List<String>, String> ty = u.toSchema0().attrs.get(attr);
+				attrs.put(attr,
+						new Pair<>(ty.first.stream().map(fun).collect(Collectors.toList()), fun.apply(ty.second)));
 			}
-			for (Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>> eq : u.toSchema0().pathEqs) {
-				OplCtx<String, String> ctx = new OplCtx<String, String>(eq.first.values2().stream().map(x -> { return new Pair<>(x.first, fun.apply(x.second)); }).collect(Collectors.toList()));
-				pathEqs.add(new Triple<>(ctx, fun2(equivs0,eq.second), fun2(equivs0,eq.third)));
+			for (Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>> eq : u
+					.toSchema0().pathEqs) {
+				OplCtx<String, String> ctx = new OplCtx<String, String>(eq.first.values2().stream().map(x -> {
+					return new Pair<>(x.first, fun.apply(x.second));
+				}).collect(Collectors.toList()));
+				pathEqs.add(new Triple<>(ctx, fun2(equivs0, eq.second), fun2(equivs0, eq.third)));
 			}
-			for (Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>> eq : u.toSchema0().obsEqs) {
-				OplCtx<String, String> ctx = new OplCtx<String, String>(eq.first.values2().stream().map(x -> { return new Pair<>(x.first, fun.apply(x.second)); }).collect(Collectors.toList()));
-				obsEqs.add(new Triple<>(ctx, fun2(equivs0,eq.second), fun2(equivs0,eq.third)));
+			for (Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>> eq : u
+					.toSchema0().obsEqs) {
+				OplCtx<String, String> ctx = new OplCtx<String, String>(eq.first.values2().stream().map(x -> {
+					return new Pair<>(x.first, fun.apply(x.second));
+				}).collect(Collectors.toList()));
+				obsEqs.add(new Triple<>(ctx, fun2(equivs0, eq.second), fun2(equivs0, eq.third)));
 			}
-			
+
 			for (String mname : shape.edges.keySet()) {
 				Pair<List<String>, String> mt = shape.edges.get(mname);
 				String s = mt.first.get(0);
 				String t = mt.second;
-				
+
 				OplSchema<String, String, String> s0 = (OplSchema<String, String, String>) ENV.get(s);
-				//OplSchema<String, String, String> t0 = (OplSchema<String, String, String>) ENV.get(t);
-				OplTyMapping<String, String, String, String, String> m0 = (OplTyMapping<String, String, String, String, String>) ENV.get(mname);
+				// OplSchema<String, String, String> t0 = (OplSchema<String,
+				// String, String>) ENV.get(t);
+				OplTyMapping<String, String, String, String, String> m0 = (OplTyMapping<String, String, String, String, String>) ENV
+						.get(mname);
 
 				for (String edge : s0.projE().symbols.keySet()) {
 					Pair<OplCtx<String, String>, OplTerm<String, String>> edge2 = m0.m.symbols.get(edge);
-					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(
-							x -> {
-								return new OplTerm(x);
-							}).collect(Collectors.toList());
+					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(x -> {
+						return new OplTerm(x);
+					}).collect(Collectors.toList());
 					OplTerm<String, String> lhs = fun2(equivs0, new OplTerm<>(s + "_" + edge, args));
-					OplCtx<String, String> ctx = new OplCtx<String, String>(edge2.first.values2().stream().map(x -> { return new Pair<>(x.first, fun.apply(s + "_" + x.second)); }).collect(Collectors.toList()));
-					OplTerm<String, String> rhs = fun2(equivs0, prepend(t, edge2.second));		
-					
+					OplCtx<String, String> ctx = new OplCtx<String, String>(edge2.first.values2().stream().map(x -> {
+						return new Pair<>(x.first, fun.apply(s + "_" + x.second));
+					}).collect(Collectors.toList()));
+					OplTerm<String, String> rhs = fun2(equivs0, prepend(t, edge2.second));
+
 					pathEqs.add(new Triple<>(ctx, lhs, rhs));
-				}	
+				}
 				for (String edge : s0.projA().symbols.keySet()) {
 					Pair<OplCtx<String, String>, OplTerm<String, String>> edge2 = m0.m.symbols.get(edge);
-					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(
-							x -> {
-								return new OplTerm(x);
-							}).collect(Collectors.toList());
+					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(x -> {
+						return new OplTerm(x);
+					}).collect(Collectors.toList());
 					OplTerm<String, String> lhs = fun2(equivs0, new OplTerm<>(s + "_" + edge, args));
-					OplCtx<String, String> ctx = new OplCtx<String, String>(edge2.first.values2().stream().map(x -> { return new Pair<>(x.first, fun.apply(s + "_" + x.second)); }).collect(Collectors.toList()));
-					OplTerm<String, String> rhs = fun2(equivs0, prepend(t, edge2.second));		
-					
+					OplCtx<String, String> ctx = new OplCtx<String, String>(edge2.first.values2().stream().map(x -> {
+						return new Pair<>(x.first, fun.apply(s + "_" + x.second));
+					}).collect(Collectors.toList()));
+					OplTerm<String, String> rhs = fun2(equivs0, prepend(t, edge2.second));
+
 					obsEqs.add(new Triple<>(ctx, lhs, rhs));
-				}	
-			} 
-		
-			OplSCHEMA0<String, String, String> ret = new OplSCHEMA0<>(new HashMap<>(), entities, edges, attrs, pathEqs, obsEqs, shape.typeSide);
+				}
+			}
+
+			OplSCHEMA0<String, String, String> ret = new OplSCHEMA0<>(new HashMap<>(), entities, edges, attrs, pathEqs,
+					obsEqs, shape.typeSide);
 			OplSchema retsch = (OplSchema) ret.accept(env, this);
 			e.compiled.put("Colimit", ret);
-			
+
 			for (String schname : shape.entities) {
 				OplSchema<String, String, String> sch = (OplSchema<String, String, String>) ENV.get(schname);
 
@@ -1061,31 +1068,36 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 					OplTerm<String, String> value = fun2(equivs0, new OplTerm<>(schname + "_" + c1, vs));
 					inj_symbols.put(c1, new Pair<>(ctx, value));
 				}
-				
-				OplMapping<String, String, String, String, String> mapping = new OplMapping<String, String, String, String, String>(inj_sorts, inj_symbols, schname, "Colimit");
-				
-				//TODO: name of colimit
-				OplTyMapping<String, String, String, String, String> tm 
-				= new OplTyMapping<String, String, String, String, String>(schname, "Colimit", sch, retsch, mapping);
+
+				OplMapping<String, String, String, String, String> mapping = new OplMapping<String, String, String, String, String>(
+						inj_sorts, inj_symbols, schname, "Colimit");
+
+				// TODO: name of colimit
+				OplTyMapping<String, String, String, String, String> tm = new OplTyMapping<String, String, String, String, String>(
+						schname, "Colimit", sch, retsch, mapping);
 				tm.extend().validate(sch.sig, retsch.sig);
 				e.compiled.put(schname + "To" + "Colimit", mapping);
 			}
-			
+
 			return e;
-		} else if (ENV.get(anEntity) instanceof OplInst) {
+		} else if (isInstance) {
+			if (shape.entities.isEmpty()) {
+				throw new RuntimeException("Cannot determine schema for colimit of instances");
+			}
+			String anEntity = Util.get0X(shape.entities);
 			OplInst xxx = (OplInst) ENV.get(anEntity);
 			OplSchema sch2 = xxx.S;
 			OplSCHEMA0 sch = sch2.toSchema0();
-	
+
 			List<Pair<OplTerm<Chc<String, String>, String>, OplTerm<Chc<String, String>, String>>> equations = new LinkedList<>();
 			List<Pair<OplTerm<Object, String>, OplTerm<Object, String>>> equations1 = new LinkedList<>();
-			
+
 			Map<String, String> gens = new HashMap<>();
 			Map<String, Integer> prec = new HashMap<>();
-			
+
 			for (String s : shape.entities) {
 				OplInst<String, String, String, String> toAdd = (OplInst<String, String, String, String>) ENV.get(s);
-				
+
 				for (Object gen : toAdd.P.gens.keySet()) {
 					Object ty = toAdd.P.gens.get(gen);
 					gens.put(s + "_" + gen, ty.toString());
@@ -1094,7 +1106,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				for (Object gen : toAdd.P.prec.keySet()) {
 					if (toAdd.P.gens.keySet().contains(gen)) {
 						if (toAdd.P.prec.containsKey(gen)) {
-						prec.put(s + "_" + gen, toAdd.P.prec.get(gen));
+							prec.put(s + "_" + gen, toAdd.P.prec.get(gen));
 						}
 					} else {
 						if (toAdd.P.prec.containsKey(gen)) {
@@ -1102,76 +1114,82 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 						}
 					}
 				}
-				
-				
-				//System.out.println("prec is " + prec + " and " + prec.keySet() + " and " + prec.values());
-				//System.out.println("was " + toAdd.P.prec + " and " + toAdd.P.prec.keySet() + " and " + prec.values());
+
+				// System.out.println("prec is " + prec + " and " +
+				// prec.keySet() + " and " + prec.values());
+				// System.out.println("was " + toAdd.P.prec + " and " +
+				// toAdd.P.prec.keySet() + " and " + prec.values());
 				for (Pair<OplTerm<Chc<String, String>, String>, OplTerm<Chc<String, String>, String>> tr : toAdd.P.equations) {
-					//System.out.println("processing " + tr);
-					//OplTerm<Chc<String,String>, String> lhs1 = prepend(toAdd.P.S, tr.first, s, toAdd.P.gens.keySet());
-					//OplTerm<Chc<String,String>, String> rhs1 = prepend(toAdd.P.S, tr.second, s, toAdd.P.gens.keySet());
+					// System.out.println("processing " + tr);
+					// OplTerm<Chc<String,String>, String> lhs1 =
+					// prepend(toAdd.P.S, tr.first, s, toAdd.P.gens.keySet());
+					// OplTerm<Chc<String,String>, String> rhs1 =
+					// prepend(toAdd.P.S, tr.second, s, toAdd.P.gens.keySet());
 					OplTerm lhs1 = prepend3(s, tr.first);
 					OplTerm rhs1 = prepend3(s, tr.second);
-					//equations2.add(new Pair<>(lhs1, rhs1));
+					// equations2.add(new Pair<>(lhs1, rhs1));
 					equations.add(new Pair<>(lhs1, rhs1));
 				}
-				
-				//TODO: add more
+
+				// TODO: add more
 			}
-			
+
 			for (String mname : shape.edges.keySet()) {
 				Pair<List<String>, String> mt = shape.edges.get(mname);
 				String s = mt.first.get(0);
 				String t = mt.second;
-				
+
 				OplInst<String, String, String, String> s0 = (OplInst<String, String, String, String>) ENV.get(s);
-				//OplSchema<String, String, String> t0 = (OplSchema<String, String, String>) ENV.get(t);
-				OplPresTrans<String, String, String, String, String> m0 = (OplPresTrans<String, String, String, String, String>) ENV.get(mname);
+				// OplSchema<String, String, String> t0 = (OplSchema<String,
+				// String, String>) ENV.get(t);
+				OplPresTrans<String, String, String, String, String> m0 = (OplPresTrans<String, String, String, String, String>) ENV
+						.get(mname);
 
 				for (String edge : s0.projE().gens.keySet()) {
-					Pair<OplCtx<String, String>, OplTerm<Chc<String, String>, String>> edge2 = m0.mapping.symbols.get(Chc.inRight(edge));
-					 OplTerm<Chc<String, String>, String> lhs 
-					 = new OplTerm<Chc<String, String>, String>(Chc.inRight(s + "_" + edge), new LinkedList<>());
+					Pair<OplCtx<String, String>, OplTerm<Chc<String, String>, String>> edge2 = m0.mapping.symbols
+							.get(Chc.inRight(edge));
+					OplTerm<Chc<String, String>, String> lhs = new OplTerm<Chc<String, String>, String>(
+							Chc.inRight(s + "_" + edge), new LinkedList<>());
 					equations.add(new Pair<>(lhs, prepend3(t, edge2.second)));
-				}	
+				}
 			}
-			//System.out.println("zzzzz " + sch2.sig);
+			// System.out.println("zzzzz " + sch2.sig);
 			OplPres<String, String, String, String> pres = new OplPres<>(prec, xxx.S0, sch2.sig, gens, equations);
-			OplInst<String,String,String,String> colimInst = new OplInst<>(xxx.S0, "?", null);
+			OplInst<String, String, String, String> colimInst = new OplInst<>(xxx.S0, "?", null);
 			colimInst.validate(sch2, pres, null);
 			e.compiled.put("ColimitInstance", colimInst);
-			
+
 			for (String s : shape.entities) {
 				OplInst<String, String, String, String> toAdd = (OplInst<String, String, String, String>) ENV.get(s);
-		
-				Map<String, Map<String, OplTerm<Chc<String, String>, String>>> inj_map = new HashMap<>();	
+
+				Map<String, Map<String, OplTerm<Chc<String, String>, String>>> inj_map = new HashMap<>();
 				for (String entity : toAdd.S.entities) {
 					inj_map.put(entity, new HashMap<>());
 				}
-				
+
 				for (Object gen : toAdd.P.gens.keySet()) {
 					Object ty = toAdd.P.gens.get(gen);
 					gens.put(s + "_" + gen, ty.toString());
 					Map<String, OplTerm<Chc<String, String>, String>> m = inj_map.get(ty);
-					OplTerm<Chc<String, String>, String> term = new OplTerm<>(Chc.inRight(s + "_" + gen), new LinkedList<>());
+					OplTerm<Chc<String, String>, String> term = new OplTerm<>(Chc.inRight(s + "_" + gen),
+							new LinkedList<>());
 					m.put((String) gen, term);
 				}
-				//OplPresTrans
-				OplPresTrans<String, String, String, String, String> inj = new OplPresTrans<>(inj_map, s, "ColimitInstance", toAdd.P, pres);
-				
+				// OplPresTrans
+				OplPresTrans<String, String, String, String, String> inj = new OplPresTrans<>(inj_map, s,
+						"ColimitInstance", toAdd.P, pres);
+
 				e.compiled.put(s + "ToColimitInstance", inj);
 			}
 
-			
 			return colimInst;
-		} 
-		
-		throw new RuntimeException("Report to Ryan " + ENV.get(anEntity).getClass());
-		
-		
+		}
+
+		throw new RuntimeException("Report your program to Ryan");
+
 	}
 
-	static OplTerm<String, String> fun2(Map<String, String> equivs, OplTerm<String, String> x)  {
+	static OplTerm<String, String> fun2(Map<String, String> equivs, OplTerm<String, String> x) {
 		if (x.var != null) {
 			return x;
 		}
@@ -1185,7 +1203,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		}
 		return new OplTerm<>(repl, ret);
 	};
-	
+
 	public OplObject visit(Program<OplExp> env, OplChaseExp e) {
 		OplObject I0 = ENV.get(e.I);
 		List<OplQuery> EDs = new LinkedList<>();
@@ -1193,20 +1211,27 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			throw new RuntimeException("Not an instance: " + e.I);
 		}
 		OplInst I = (OplInst) I0;
-		
+
 		for (String ed : e.EDs) {
 			OplObject ed0 = ENV.get(ed);
 			if (!(ed0 instanceof OplQuery)) {
 				throw new RuntimeException("Not a query: " + ed0);
 			}
-			EDs.add((OplQuery)ed0);
+			EDs.add((OplQuery) ed0);
 		}
-	
+
 		return OplChase.chase(I, EDs, e.limit);
-//		return OplChase.chaseParallel(I, EDs, e.limit);
-		
-		
+		// return OplChase.chaseParallel(I, EDs, e.limit);
+
 	}
-	
-	
+
+	public OplObject visit(Program<OplExp> env, OplGround e) {
+		OplObject o = ENV.get(e.sch);
+		if (!(o instanceof OplSchema)) {
+			throw new RuntimeException("Not a schema: " + e.sch);
+		}
+		OplSchema sch = (OplSchema) o;
+		return (OplObject) e.validate(sch).accept(env, this);
+	}
+
 }
