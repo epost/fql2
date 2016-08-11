@@ -856,6 +856,10 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		OplPres<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> P = new OplPres<>(
 				prec, dst_e, dst.sig, gens, equations);
 		
+		if (NEWDEBUG.debug.opl.opl_prover_simplify_instances) {
+			P = P.simplify();
+		}
+		
 		P.toSig();
 
 		OplInst<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> retX = new OplInst<>(

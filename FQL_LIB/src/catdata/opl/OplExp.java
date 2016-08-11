@@ -76,6 +76,170 @@ public abstract class OplExp implements OplObject {
 
 	public abstract <R, E> R accept(E env, OplExpVisitor<R, E> v);
 	
+	public static class OplDistinct<S,C,V,X> extends OplExp {
+		String str;
+		
+		public OplDistinct(String str) {
+			this.str = str;
+		}
+		
+		public OplInst<S,C,V,X> validate(OplInst<S,C,V,X> inst) {		
+			List<Pair<OplTerm<Chc<C, X>, V>, OplTerm<Chc<C, X>, V>>> eqs = new LinkedList<>(inst.P.equations);
+			
+			Quad<OplSetInst<S, C, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>, OplPres<S, C, V, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<C, X>, V>>> satX = inst.saturate();
+			OplSetInst<S, C, OplTerm<Chc<C, X>, V>> sat = satX.first;
+			
+			for (S s : inst.S.entities) {
+					Set<C> outEdges = inst.S.outEdges(s);
+				for (OplTerm<Chc<C, X>, V> term1 : sat.sorts.get(s)) {
+					
+					outer: for (OplTerm<Chc<C, X>, V> term2 : sat.sorts.get(s)) {
+						if (term1.equals(term2)) {
+							continue;
+						}
+						for (C c : outEdges) {
+							OplTerm<Chc<C,X>,V> lhs = new OplTerm<>(Chc.inLeft(c), Util.singList(term1)); //pres is broken
+							OplTerm<Chc<C,X>,V> rhs = new OplTerm<>(Chc.inLeft(c), Util.singList(term2));
+							if (!inst.P.toSig.getKB().nf(lhs).equals(inst.P.toSig.getKB().nf(rhs))) {
+								continue outer;
+							}
+						}
+						eqs.add(new Pair<>(term1, term2));
+					}
+				}
+			}
+			
+			OplPres<S, C, V, X> pres = new OplPres<S,C,V,X>(inst.P.prec, inst.S0, inst.S.sig, inst.P.gens, eqs);
+		
+			
+//			OplInst0<S,C,V,X> ret = new OplInst0<S,C,V,X>(pres);
+			
+			OplInst<S,C,V,X> ret2 = new OplInst<S,C,V,X>(inst.S0, "?", inst.P0);
+			ret2.validate(inst.S, pres, inst.J);
+			return ret2;
+		}
+		
+		
+		@Override
+		public String toString() {
+			return "distinct " + str;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((str == null) ? 0 : str.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplDistinct other = (OplDistinct) obj;
+			if (str == null) {
+				if (other.str != null)
+					return false;
+			} else if (!str.equals(other.str))
+				return false;
+			return true;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+	}
+	
+	public static class OplGraph<N,E> extends OplExp {
+		Set<N> nodes;
+		Map<E, Pair<N,N>> edges;
+		
+		public OplGraph(Set<N> nodes, Map<E, Pair<N,N>> edges) {
+			this.nodes = nodes;
+			this.edges = edges;
+			for (E e : edges.keySet()) {
+				if (!this.nodes.contains(edges.get(e).first)) {
+					throw new RuntimeException("Not a node: " + edges.get(e).first);
+				}
+				if (!this.nodes.contains(edges.get(e).second)) {
+					throw new RuntimeException("Not a node: " + edges.get(e).second);
+				}
+			}
+		}
+		
+		public OplGraph(List<N> nodes, List<Triple<E, N, N>> edges) {
+			this.nodes = new HashSet<>(nodes);
+			if (this.nodes.size() != nodes.size()) {
+				throw new RuntimeException("Duplicate element in " + nodes);
+			}
+			
+			this.edges = new HashMap<>();
+			for (Triple<E, N, N> e : edges) {
+				if (this.edges.containsKey(e.first)) {
+					throw new RuntimeException("Duplicate element: " + e.first);
+				}
+				if (!this.nodes.contains(e.second)) {
+					throw new RuntimeException("Not a node: " + e.second);
+				}
+				if (!this.nodes.contains(e.third)) {
+					throw new RuntimeException("Not a node: " + e.third);
+				}
+				this.edges.put(e.first, new Pair<>(e.second, e.third));
+			}
+		}
+		
+		@Override
+		public String toString() {
+			List<String> l = new LinkedList<>();
+			for (E e  : edges.keySet()) {
+				l.add(e + ": " + edges.get(e).first + " -> " + edges.get(e).second);
+			}
+			return "graph {\n\tnodes\n\t\t" + Util.sep(nodes, ",") + ";\n\tedges\n\t\t" + Util.sep(l, ",\n\t\t") + ";\n}";
+		}
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((edges == null) ? 0 : edges.hashCode());
+			result = prime * result + ((nodes == null) ? 0 : nodes.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			OplGraph other = (OplGraph) obj;
+			if (edges == null) {
+				if (other.edges != null)
+					return false;
+			} else if (!edges.equals(other.edges))
+				return false;
+			if (nodes == null) {
+				if (other.nodes != null)
+					return false;
+			} else if (!nodes.equals(other.nodes))
+				return false;
+			return true;
+		}
+		
+		@Override
+		public <R, E> R accept(E env, OplExpVisitor<R, E> v) {
+			return v.visit(env, this);
+		}
+		
+	}
+	
 	public static class OplGround extends OplExp {
 		Map<String, Set<String>> entities = new HashMap<>();
 		Map<String, Map<String, String>> symbols;
@@ -1896,8 +2060,8 @@ public abstract class OplExp implements OplObject {
 	}
 
 	public static class OplColim extends OplExp {
-		boolean isInstance;
 		String name;
+		String base;
 		Map<String, OplObject> compiled = new HashMap<>();
 		
 		@Override
@@ -1905,16 +2069,16 @@ public abstract class OplExp implements OplObject {
 			return v.visit(env, this);
 		}
 		
-		public OplColim(String name, boolean isInstance) {
+		public OplColim(String name, String base) {
 			this.name = name;
-			this.isInstance = isInstance;
+			this.base = base;
 		}
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + (isInstance ? 1231 : 1237);
+			result = prime * result + ((base == null) ? 0 : base.hashCode());
 			result = prime * result + ((name == null) ? 0 : name.hashCode());
 			return result;
 		}
@@ -1928,7 +2092,10 @@ public abstract class OplExp implements OplObject {
 			if (getClass() != obj.getClass())
 				return false;
 			OplColim other = (OplColim) obj;
-			if (isInstance != other.isInstance)
+			if (base == null) {
+				if (other.base != null)
+					return false;
+			} else if (!base.equals(other.base))
 				return false;
 			if (name == null) {
 				if (other.name != null)
@@ -2227,6 +2394,8 @@ public abstract class OplExp implements OplObject {
 			kb = new OplToKB<S, C, V>(fr, this);
 			return kb;
 		}
+
+		
 
 		@Override
 		public int hashCode() {
@@ -3826,6 +3995,58 @@ public abstract class OplExp implements OplObject {
 
 			return jtp;
 		}
+		
+		public OplSetInst<S,C,X> number(Set<S> types) {
+			Map<S, Set<X>> sorts2 = new HashMap<>();
+			Map<S, Map<X,X>> inj = new HashMap<>();
+			
+			int i = 0;
+			for (S s : sorts.keySet()){
+				if (types.contains(s)) {
+					sorts2.put(s, sorts.get(s));
+				} else {
+					Set<X> m = new HashSet<>();
+					Map<X,X> inj2 = new HashMap<>();
+					for (X x : sorts.get(s)) {
+						X j = (X) new Integer(i);
+						inj2.put(x, (X) j);
+						m.add(j);
+						i++;
+					}
+					inj.put(s, inj2);
+					sorts2.put(s, m);
+				}
+			}
+			
+			Map<C, Map<List<X>, X>> symbols2 = new HashMap<>();
+			for (C c : symbols.keySet()) {
+				Map<List<X>, X> x = symbols.get(c);
+				Map<List<X>, X> x2 = new HashMap<>();
+				for (List<X> args : x.keySet()) {
+					int col = 0;
+					List<X> newargs = new LinkedList<>();
+					for (X arg : args) {
+						S ty = sig0.symbols.get(c).first.get(col);
+						if (!types.contains(ty)) {
+							X newarg = inj.get(ty).get(arg);
+							newargs.add(newarg);
+						} 
+						col++;
+					}
+					X res = x.get(args);
+					S ty = sig0.symbols.get(c).second;
+					if (!types.contains(ty)) {
+						res = inj.get(ty).get(res);
+					}
+					x2.put(newargs, res);
+				}
+				symbols2.put(c, x2);
+			}
+//			System.out.println(symbols2);
+			OplSetInst<S,C,X> ret = new OplSetInst<S,C,X>(sorts2, symbols2 , sig);
+			ret.validate(sig0);
+			return ret;
+		}
 
 		public Pair<JComponent, Map<Object, Pair<List<String>, List<Object[]>>>> makeTables(Set<S> types, boolean skipGUI) {
 			// System.out.println("before tables " + this);
@@ -4678,6 +4899,17 @@ public abstract class OplExp implements OplObject {
 			return jtp;
 		}
 
+		public Set<C> outEdges(S s) {
+			Set<C> ret = new HashSet<>();
+			for (C c : projEA().symbols.keySet()) {
+				Pair<List<S>, S> t = projEA().symbols.get(c);
+				if (t.first.get(0).equals(s)) {
+					ret.add(c);
+				}
+			}
+			return ret;
+		}
+
 		public OplSchema(String sig0, Set<S> entities) {
 			/* if (sig0.equals("?")) {
 				throw new RuntimeException();
@@ -5210,7 +5442,12 @@ public abstract class OplExp implements OplObject {
 						"", xxxthird), "Type Algebra");
 
 				ret.add(xxx.first.makeTables(S.projT().sorts, false).first, "Saturation");
-				ret.add(xxx.fourth.makeTables(S.projT().sorts, false).first, "Normalized");
+				
+				if (NEWDEBUG.debug.opl.opl_display_fresh_ids) {
+					ret.add(xxx.fourth.number(S.projT().sorts).makeTables(S.projT().sorts, false).first, "Normalized");					
+				} else {
+					ret.add(xxx.fourth.makeTables(S.projT().sorts, false).first, "Normalized");
+				}
 				if (xxx.second != null) {
 					ret.add(xxx.second.makeTables(S.projT().sorts, false).first, "Image");
 				}
@@ -5870,6 +6107,10 @@ public abstract class OplExp implements OplObject {
 		public R visit(E env, OplChaseExp e);
 		
 		public R visit(E env, OplGround e);
+		
+		public R visit(E env, OplGraph e);
+		
+		public R visit(E env, OplDistinct e);
 	}
 
 	// /////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -12,19 +12,20 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Program;
 import catdata.ide.Util;
 import catdata.ide.WizardModel;
+import catdata.opl.OplExp.OplGraph;
 import catdata.opl.OplExp.OplInst0;
 import catdata.opl.OplExp.OplMapping;
 import catdata.opl.OplExp.OplPres;
@@ -35,6 +36,68 @@ import catdata.opl.OplExp.OplSigma;
 import catdata.opl.OplExp.OplUnion;
 
 public class OplWarehouse extends WizardModel<Program<OplExp>> {
+	
+	private static abstract class WarehouseExample {
+		public abstract String getName();
+		public abstract Map<String, OplExp> getBindings();
+	}
+	
+	static WarehouseExample[] examples = { new BlankExample(), new SimpleExample() };
+	
+	private static class BlankExample extends WarehouseExample {
+		public String getName() {
+			return "New Blank Warehouse";
+		}
+		public Map<String, OplExp> getBindings() {
+			Map<String, OplExp> ret = new HashMap<>();
+			
+			return ret;
+		}
+		public String toString() {
+			return getName();
+		}
+	}
+	
+	private static class SimpleExample extends WarehouseExample {
+		public String getName() {
+			return "A Simple Example";
+		}
+		public Map<String, OplExp> getBindings() {
+			Map<String, OplExp> ret = new LinkedHashMap<>();
+			
+			OplExp.OplString theory = new OplExp.OplString("theory {\n\tsorts\n\t\tString;\n\tsymbols\n\t\tfoo,bar:String;\n\tequations;\n}");
+			OplExp.OplString shape = new OplExp.OplString("graph {\n\tnodes\n\t\tA,B,C;\n\tedges\n\t\tf:A->B,\n\t\tg:A->C;\n}");
+			OplExp.OplString schA = new OplExp.OplString("SCHEMA {\n\tentities\n\t\ta;\n\tedges;\n\tattributes;\n\tpathEqualities;\n\tobsEqualities;\n} : " + THEORY);
+			OplExp.OplString schB = new OplExp.OplString("SCHEMA {\n\tentities\n\t\tb;\n\tedges;\n\tattributes;\n\tpathEqualities;\n\tobsEqualities;\n} : " + THEORY);
+			OplExp.OplString schC = new OplExp.OplString("SCHEMA {\n\tentities\n\t\tc;\n\tedges;\n\tattributes;\n\tpathEqualities;\n\tobsEqualities;\n} : " + THEORY);
+			OplExp.OplString mf = new OplExp.OplString("mapping {\n\tsorts\n\t\ta->b;\n\tsymbols;\n} : " + SCHEMA + "_A -> " + SCHEMA + "_B");
+			OplExp.OplString mg = new OplExp.OplString("mapping {\n\tsorts\n\t\ta->c;\n\tsymbols;\n} : " + SCHEMA + "_A -> " + SCHEMA + "_C");
+			OplExp.OplString instA = new OplExp.OplString("INSTANCE {\n\tgenerators\n\t\ta1:a;\n\tequations;\n} : " + SCHEMA + "_A");
+			OplExp.OplString instB = new OplExp.OplString("INSTANCE {\n\tgenerators\n\t\tb1:b;\n\tequations;\n} : " + SCHEMA + "_B");
+			OplExp.OplString instC = new OplExp.OplString("INSTANCE {\n\tgenerators\n\t\tc1:c;\n\tequations;\n} : " + SCHEMA + "_C");
+			OplExp.OplString tf = new OplExp.OplString("transpres {\n\tsorts\n\t\tb -> {(a1, b1)};\n} : " +INSTANCE + "_f_forward -> " + INSTANCE + "_B");
+			OplExp.OplString tg = new OplExp.OplString("transpres {\n\tsorts\n\t\tc -> {(a1, c1)};\n} : " +INSTANCE + "_g_forward -> " + INSTANCE + "_C");
+			
+			ret.put(THEORY, theory);
+			ret.put(SHAPE, shape);
+			ret.put(SCHEMA + "_A", schA);
+			ret.put(SCHEMA + "_B", schB);
+			ret.put(SCHEMA + "_C", schC);
+			ret.put(MAPPING + "_f", mf);
+			ret.put(MAPPING + "_g", mg);
+			ret.put(INSTANCE + "_A", instA);
+			ret.put(INSTANCE + "_B", instB);
+			ret.put(INSTANCE + "_C", instC);
+			ret.put(TRANSFORM + "_f_forward", tf);
+			ret.put(TRANSFORM + "_g_forward", tg);
+				
+			
+			return ret;
+		}
+		public String toString() {
+			return getName();
+		}
+	}
 	
 	private static String INITIAL = "Initial";
 	private static String THEORY = "Theory";
@@ -51,8 +114,8 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 	{
 		instructions.put(INITIAL, "Welcome to the OPL Data Warehousing Wizard.");
 		instructions.put(THEORY, "Enter the type side.");
-		instructions.put(SHAPE, "Enter the shape of the colimit as a schema with no attributes or equations.");
-		instructions.put(SCHEMA, "Enter the source schemas, one per entity in the shape.");
+		instructions.put(SHAPE, "Enter the shape of the colimit as a graph.");
+		instructions.put(SCHEMA, "Enter the source schemas, one per node in the shape.");
 		instructions.put(MAPPING, "Enter the schema mappings, one per edge in the shape. " );
 		instructions.put(INSTANCE, "Enter the database instances, one per source schema. " );
 		instructions.put(TRANSFORM, "Enter the record linkages, one per schema mapping." );
@@ -75,13 +138,39 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 	}
 	
 	private List<String> makeOrder() {
-		//TODO
-		return new LinkedList<>(bindings.keySet());
-/*		List<String> ret = new LinkedList<>();
-		for (String s : states) {
-			ret.addAll(orderedFor(s));
+		List<String> all = new LinkedList<>();
+		all.add(THEORY);
+		all.add(SHAPE);
+		OplObject shape0 = bindings.get(SHAPE);
+		if (shape0 != null) {
+			OplGraph<String, String> shape = (OplGraph<String,String>) shape0;
+			for (String node : shape.nodes) {
+				all.add(SCHEMA + "_" + node);
+			}
+			for (String edge : shape.edges.keySet()) {
+				all.add(MAPPING + "_" + edge);
+			}
+			all.add(SCHEMA + "_Colimit");
+			for (String node : shape.nodes) {
+				all.add(MAPPING + "_" + SCHEMA + "_" + node + "_colimit");
+				all.add(INSTANCE + "_" + node);				
+			}
+			for (String edge : shape.edges.keySet()) {
+				all.add(INSTANCE + "_" + edge + "_forward");
+			}
+			for (String node : shape.nodes) {
+				all.add(INSTANCE + "_" + node + "_colimit");				
+			}
+			for (String edge : shape.edges.keySet()) {
+				all.add(TRANSFORM + "_" + edge + "_forward");
+				all.add(TRANSFORM + "_" + edge + "_colimit");
+			}
+
+			all.add(SCHEMA + "_for_result");
+			all.add("Finished");
 		}
-		return ret; */
+
+		return all.stream().filter(x -> bindings.containsKey(x)).collect(Collectors.toList());
 	}
 	
 //	private List<String> order = new LinkedList<>();
@@ -110,6 +199,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 	
 	private class Page extends JPanel implements ChangeListener {
 		public String my_state;
+		public String my_err = "";
 		public Page(String string) {
 			my_state = string;
 			setLayout(new GridLayout(1,1));
@@ -122,6 +212,10 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			//System.out.println("state change, bindings are " + bindings);
 			JSplitPane p = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 			p.add(new CodeTextPanel("", instructions.get(my_state)));
+			
+			JSplitPane q = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			q.setResizeWeight(.9);
+			//all the tabs share the error pane
 			JTabbedPane pane = new JTabbedPane();
 			for (String name : orderedFor(my_state)) {
 					String text = bindings.containsKey(name) ? bindings.get(name).toString() : "";
@@ -129,9 +223,32 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 					map.put(name, ctp);
 					pane.add(name, ctp); 
 			}
+			if (my_state.equals(INITIAL)) {
+				JPanel component = new JPanel();
+				JComboBox<WarehouseExample> box = new JComboBox<>(examples);
+				component.add(box);
+				box.addActionListener(x -> {
+					WarehouseExample w = (WarehouseExample) box.getSelectedItem();
+					if (w == null) {
+						return;
+					}
+					bindings.clear();
+					bindings.putAll(w.getBindings());
+				});
+				pane.addTab("Choose", component);
+			} 
+			
 			removeAll();
-			p.add(pane);
-			add(p);
+			if (my_state.equals(INITIAL)) {
+				p.add(pane);
+				add(p);
+			} else {
+				p.add(pane);
+				q.add(p);
+				q.add(new CodeTextPanel("Error:", my_err));
+				add(q);				
+			}
+			
 			this.revalidate();
 		}
 		
@@ -139,14 +256,17 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 		public Map<String, String> transfer() {
 //			System.out.println("called txfer for " + my_state + " keys " + map.keySet());
 			Map<String, String> m = new HashMap<>();
+			my_err = "";
+
 			for (String name : map.keySet()) {
 				String str = map.get(name).getText();
 				try {
 					OplExp exp = OplParser.exp(str);
-					bindings.put(name, exp);					
+					bindings.put(name, exp);	
 				} catch (RuntimeException ex) {
-					bindings.put(name, str.trim().length() == 0 ? null : new OplExp.OplString(str + "\n\n" + ex.getMessage())); //will not remain on page otherwise
+					bindings.put(name, str.trim().length() == 0 ? null : new OplExp.OplString(str)); //will not remain on page otherwise
 					ex.printStackTrace();
+					my_err += "On " + name + ", error: " + ex.getMessage() + "\n\n";
 					m.put(name, ex.getMessage());
 				}
 			}
@@ -192,7 +312,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			addBlanks();		
 			state = proposedState;
 		} else {
-
+			//TODO change panes here?
 		}
 		
 	}
@@ -207,24 +327,24 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			}
 		} else if (state.equals(THEORY)) {	
 			if (!bindings.containsKey(SHAPE)) {
-				bindings.put(SHAPE, new OplSCHEMA0<String, String, String>(new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>(), new LinkedList<>(), new LinkedList<>(), THEORY));
+				bindings.put(SHAPE, new OplGraph<String, String>(new HashSet<>(), new HashMap<>()));
 			}
 		} else if (state.equals(SHAPE)) {
-			OplSCHEMA0<String, String, String> shape = (OplSCHEMA0<String, String, String>) bindings.get(SHAPE);
-			for (String en : shape.entities) {
+			OplGraph<String, String> shape = (OplGraph<String, String>) bindings.get(SHAPE);
+			for (String en : shape.nodes) {
 				if (bindings.containsKey(SCHEMA + "_" + en)) {  //TODO: false
 					continue;
 				}
 				bindings.put(SCHEMA + "_" + en, new OplSCHEMA0<String, String, String>(new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>(), new LinkedList<>(), new LinkedList<>(), THEORY));
 			}
 		} else if (state.equals(SCHEMA)) {
-			OplSCHEMA0<String, String, String> shape = (OplSCHEMA0<String, String, String>) bindings.get(SHAPE);
+			OplGraph<String, String> shape = (OplGraph<String, String>) bindings.get(SHAPE);
 			
 			for (String ed : shape.edges.keySet()) {
 				if (bindings.containsKey(MAPPING + "_" + ed)) {
 					continue;
 				}
-				String src = SCHEMA + "_" + shape.edges.get(ed).first.get(0);
+				String src = SCHEMA + "_" + shape.edges.get(ed).first;
 				//String dst = SCHEMA + "_" + shape.edges.get(ed).second;
 				OplSCHEMA0<String,String,String> src0 = (OplSCHEMA0<String,String,String>) bindings.get(src);
 				Map<String, String> sorts = new HashMap<>();
@@ -246,19 +366,19 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 				bindings.put(MAPPING + "_" + ed, new OplMapping<String,String,String,String,String>(sorts, symbols, src, SCHEMA + "_" + shape.edges.get(ed).second));
 			}
 		} else if (state.equals(MAPPING)) {
-			OplSCHEMA0<String, String, String> shape = (OplSCHEMA0<String, String, String>) bindings.get(SHAPE);
-			Set<String> en2 = shape.entities.stream().map(x -> { return SCHEMA + "_" + x; }).collect(Collectors.toSet());
-			Map<String, Pair<List<String>, String>> ed2 = new HashMap<>();
+			OplGraph<String, String> shape = (OplGraph<String, String>) bindings.get(SHAPE);
+			Set<String> en2 = shape.nodes.stream().map(x -> { return SCHEMA + "_" + x; }).collect(Collectors.toSet());
+			Map<String, Pair<String, String>> ed2 = new HashMap<>();
 			for (String e : shape.edges.keySet()) {
-				Pair<List<String>, String> x = shape.edges.get(e);
-				List<String> l = Util.singList(SCHEMA + "_" + x.first.get(0));
+				Pair<String, String> x = shape.edges.get(e);
+				String l = SCHEMA + "_" + x.first;
 				ed2.put(MAPPING + "_" + e, new Pair<>(l, SCHEMA + "_" + x.second));
 			}
-			OplSCHEMA0<String, String, String> shape2 = new OplSCHEMA0<String,String,String>(new HashMap<>(), en2, ed2, new HashMap<>(), new LinkedList<>(), new LinkedList<>(), THEORY);
+			OplGraph<String, String> shape2 = new OplGraph<String,String>(en2, ed2);
 			//TODO: needs to compile to here
-			computeColimit(bindings, shape2);
+			computeColimit(bindings, shape2, THEORY);
 			
-			for (String en : shape.entities) {
+			for (String en : shape.nodes) {
 				if (bindings.containsKey(INSTANCE + "_" + en)) {  //TODO: false
 					continue;
 				}
@@ -266,18 +386,19 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			}
 			
 		} else if (state.equals(INSTANCE)) {
-			OplSCHEMA0<String, String, String> shape = (OplSCHEMA0<String, String, String>) bindings.get(SHAPE);
+			OplGraph<String, String> shape = (OplGraph<String, String>) bindings.get(SHAPE);
 			
 			for (String ed : shape.edges.keySet()) {
-				if (bindings.containsKey(TRANSFORM + "_" + ed)) {
-					continue;
-				}
-				String en = shape.edges.get(ed).first.get(0);
+				String en = shape.edges.get(ed).first;
 				String en2 = shape.edges.get(ed).second;
 				
 				String src = INSTANCE + "_" + ed + "_forward";
 				bindings.put(src, new OplSigma(MAPPING + "_" + ed, INSTANCE + "_" + en));				
 				
+				if (bindings.containsKey(TRANSFORM + "_" + ed + "_forward")) {
+					continue;
+				}
+
 				OplMapping<String,String,String,String,String> mmm = (OplMapping<String,String,String,String,String>) bindings.get(MAPPING + "_" + ed);
 				//TODO: factor getting into separate method, or use compiler
 				OplInst0<String,String,String,String> src1 = (OplInst0<String,String,String,String>) bindings.get(INSTANCE + "_" + en);
@@ -306,25 +427,25 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			}
 	
 		} else if (state.equals(TRANSFORM)) {
-			OplSCHEMA0<String, String, String> shape = (OplSCHEMA0<String, String, String>) bindings.get(SHAPE);
-			for (String en : shape.entities) {
+			OplGraph<String, String> shape = (OplGraph<String, String>) bindings.get(SHAPE);
+			for (String en : shape.nodes) {
 				bindings.put(INSTANCE + "_" + en + "_colimit", new OplSigma(MAPPING + "_" + SCHEMA + "_" + en + "_colimit", INSTANCE + "_" + en  ));
 			}
-			Map<String, Pair<List<String>, String>> ed2 = new HashMap<>();
+			Map<String, Pair<String, String>> ed2 = new HashMap<>();
 			for (String e : shape.edges.keySet()) {
-				Pair<List<String>, String> x = shape.edges.get(e);
-				List<String> l = Util.singList(INSTANCE + "_" + x.first.get(0) + "_colimit");
+				Pair<String, String> x = shape.edges.get(e);
+				String l = INSTANCE + "_" + x.first + "_colimit";
 				//String en = x.first.get(0);
 				String en = x.second;
 				bindings.put(TRANSFORM + "_" + e + "_colimit", new OplSigma(MAPPING + "_" + SCHEMA + "_" + en + "_colimit", TRANSFORM + "_" + e + "_forward"));
 				ed2.put(TRANSFORM + "_" + e + "_colimit", new Pair<>(l, INSTANCE + "_" + x.second +"_colimit"));
 			}
-			Set<String> en2 = shape.entities.stream().map(x -> { return INSTANCE + "_" + x + "_colimit"; }).collect(Collectors.toSet());
+			Set<String> en2 = shape.nodes.stream().map(x -> { return INSTANCE + "_" + x + "_colimit"; }).collect(Collectors.toSet());
 			
-			OplSCHEMA0<String, String, String> shape2 = new OplSCHEMA0<String,String,String>(new HashMap<>(), en2, ed2, new HashMap<>(), new LinkedList<>(), new LinkedList<>(), THEORY);
+			OplGraph<String, String> shape2 = new OplGraph<String,String>(en2, ed2);
 			bindings.put(SCHEMA + "_for_result", shape2);
 			
-			bindings.put(FINISHED, new OplExp.OplString("colimit " + SCHEMA + "_for_result"));
+			bindings.put(FINISHED, new OplExp.OplString("colimit " + SCHEMA + "_Colimit" + " " + SCHEMA + "_for_result"));
 //			bindings.put(FINISHED + " all", new OplExp.OplString(complete().toString()));
 		}
 		
@@ -352,17 +473,10 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 	
 	///////////////////////////////////////////////////////////////////////////
 	
-	public static void computeColimit(Map<String, OplExp> env, OplSCHEMA0<String,String,String> shape) {
-		
-		if (shape.attrs.size() > 0) {
-			throw new RuntimeException("Cannot have attributes in colimit shape schemas");
-		}
-		if (shape.pathEqs.size() > 0 || shape.obsEqs.size() > 0) {
-			throw new RuntimeException("Cannot have equations in colimit shape schemas");
-		}
-		
+	public static void computeColimit(Map<String, OplExp> env, OplGraph<String,String> shape, String base) {
+				
 
-			OplUnion u0 = new OplUnion(new LinkedList<>(shape.entities), shape.typeSide);
+			OplUnion u0 = new OplUnion(new LinkedList<>(shape.nodes), base);
 			OplObject u1 = union(env, u0);
 	
 			OplSCHEMA0<String, String, String> u = (OplSCHEMA0<String, String, String>) u1;
@@ -370,7 +484,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			Map<String, Set<String>> equivs = new HashMap<>();
 			Map<String, String> equivs0 = new HashMap<>();
 			
-			for (String schname : shape.entities) {
+			for (String schname : shape.nodes) {
 				if (!(env.get(schname) instanceof OplSCHEMA0)) {
 					throw new RuntimeException("Not a SCHEMA: " + schname);
 				}
@@ -384,8 +498,8 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			
 			//TODO: type check colimit
 			for (String mname : shape.edges.keySet()) {
-				Pair<List<String>, String> mt = shape.edges.get(mname);
-				String s = mt.first.get(0);
+				Pair<String, String> mt = shape.edges.get(mname);
+				String s = mt.first;
 				String t = mt.second;
 				
 				OplSCHEMA0<String, String, String> s0 = (OplSCHEMA0<String, String, String>) env.get(s);
@@ -445,8 +559,8 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			}
 			
 			for (String mname : shape.edges.keySet()) {
-				Pair<List<String>, String> mt = shape.edges.get(mname);
-				String s = mt.first.get(0);
+				Pair<String, String> mt = shape.edges.get(mname);
+				String s = mt.first;
 				String t = mt.second;
 				
 				OplSCHEMA0<String, String, String> s0 = (OplSCHEMA0<String, String, String>) env.get(s);
@@ -479,12 +593,12 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 				}	
 			} 
 		
-			OplSCHEMA0<String, String, String> ret = new OplSCHEMA0<>(new HashMap<>(), entities, edges, attrs, pathEqs, obsEqs, shape.typeSide);
+			OplSCHEMA0<String, String, String> ret = new OplSCHEMA0<>(new HashMap<>(), entities, edges, attrs, pathEqs, obsEqs, base);
 			if (env.get(SCHEMA + "_Colimit") == null) {
 				env.put(SCHEMA + "_Colimit", ret);
 			}
 			
-			for (String schname : shape.entities) {
+			for (String schname : shape.nodes) {
 				OplSCHEMA0<String, String, String> sch = (OplSCHEMA0<String, String, String>) env.get(schname);
 
 				Map<String, String> inj_sorts = new HashMap<>();

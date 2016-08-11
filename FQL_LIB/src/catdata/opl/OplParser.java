@@ -32,8 +32,10 @@ import catdata.opl.OplExp.OplChaseExp;
 import catdata.opl.OplExp.OplColim;
 import catdata.opl.OplExp.OplDelta;
 import catdata.opl.OplExp.OplDelta0;
+import catdata.opl.OplExp.OplDistinct;
 import catdata.opl.OplExp.OplEval;
 import catdata.opl.OplExp.OplFlower;
+import catdata.opl.OplExp.OplGraph;
 import catdata.opl.OplExp.OplGround;
 import catdata.opl.OplExp.OplId;
 import catdata.opl.OplExp.OplInst;
@@ -70,7 +72,7 @@ public class OplParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
-	static String[] res = new String[] { "ed", "tables", "COLIMIT",
+	static String[] res = new String[] { "distinct", "graph", "nodes", "ed", "tables", 
 			"chase", "with", "max", "insert", "into", "select", "and", "sql", 
 			"ID", "colimit" , "imports", "pragma", "options", "union",
 			"pushoutBen", "PUSHOUT", "pivot", "DELTA", "return", "coreturn",
@@ -205,14 +207,14 @@ public class OplParser {
 		Parser<?> pivot = Parsers.tuple(term("pivot"), ident());
 		Parser<?> union = Parsers.tuple(term("union"), ident(), term("{"), ident().many(), term("}"));
 		Parser<?> pragma = pragma();
-		Parser<?> colim = Parsers.tuple(term("colimit"), ident());
-		Parser<?> colim2 = Parsers.tuple(term("COLIMIT"), ident());
+		Parser<?> colim = Parsers.tuple(term("colimit"), ident(), ident());
 		Parser<?> sql = sql();
 		Parser<?> model2 = model2();
-		
+		Parser<?> graph = graph();
+		Parser<?> distinct = Parsers.tuple(term("distinct"), ident());
 		Parser<?> chase = Parsers.tuple(term("chase"), ident(), Parsers.tuple(term("with"), term("{"), ident().sepBy(term(",")), term("}")), term("max"), Terminals.IntegerLiteral.PARSER);
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { colim2, model2, sql, chase, ID, colim, pragma, union, pushoutBen,
+		Parser<?> a = Parsers.or(new Parser<?>[] { distinct, graph, model2, sql, chase, ID, colim, pragma, union, pushoutBen,
 				pushoutSch, pivot, DELTA, pushout, INST, SCHEMA, apply, idQ,
 				query, projEA, inst, schema, projE, projA, projT, flower,
 				ubersat, sigma, sat, unsat, presentation, delta, mapping,
@@ -327,6 +329,13 @@ public class OplParser {
 		Parser<?> foo = section("entities", ident());
 		return Parsers.tuple(term("schema").followedBy(term("{")), foo,
 				term("}").followedBy(term(":")), ident());
+	}
+	
+	public static final Parser<?> graph() {
+		Parser<?> nodes = section("nodes", ident());
+		Parser<?> edges = section("edges", Parsers.tuple(ident(), term(":"), ident(), term("->"), ident()));
+		return Parsers.tuple(term("graph"), term("{"), nodes, edges,
+				term("}"));
 	}
 
 	public static final Parser<?> java() {
@@ -881,6 +890,7 @@ public class OplParser {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static OplTerm toTerm(Collection vars, Collection consts, Object a,
 			boolean suppressError) {
+		//System.out.println("trying to term on " + a + "vars=" + vars + " consts=" + consts);
 		if (a instanceof List) {
 			List<String> aa = (List<String>) a;
 			if (aa.isEmpty()) {
@@ -928,7 +938,7 @@ public class OplParser {
 			return new OplTerm(f, l0);
 		}
 
-		Tuple4 t = (Tuple4) a;
+		Tuple3 t = (Tuple3) a;
 		String f = (String) t.a;
 		List<Object> l = (List<Object>) t.c;
 		List<OplTerm> l0 = l.stream()
@@ -978,6 +988,8 @@ public class OplParser {
 			Tuple5 p = (Tuple5) c;
 			if (p.a.toString().equals("chase")) {
 				return toChase(p);
+			} else if (p.a.toString().equals("graph")) {
+				return toGraph((Tuple3) p.c, (Tuple3)p.d);
 			} 
 		}
 
@@ -1005,7 +1017,9 @@ public class OplParser {
 				return new OplPushoutSch((String) p.b, (String) p.c);
 			} else if (p.a.toString().equals("pushoutBen")) {
 				return new OplPushoutBen((String) p.b, (String) p.c);
-			}
+			} else if (p.a.toString().equals("colimit")) {
+				return new OplColim((String) p.c, (String) p.b);
+			} 
 		}
 
 	
@@ -1032,13 +1046,10 @@ public class OplParser {
 				return new OplDelta0((String) p.b);
 			} else if (p.a.toString().equals("pivot")) {
 				return new OplPivot((String) p.b);
-			} else if (p.a.toString().equals("colimit")) {
-				return new OplColim((String) p.b, false);
-			} else if (p.a.toString().equals("COLIMIT")) {
-				return new OplColim((String) p.b, true);
-			}  
-			else if (p.a.toString().equals("ID")) {
+			} else if (p.a.toString().equals("ID")) {
 				return new OplId((String) p.b, "mapping");
+			} else if (p.a.toString().equals("distinct")) {
+				return new OplDistinct((String) p.b);
 			}
 		}
 
@@ -1169,6 +1180,17 @@ public class OplParser {
 		}
 
 		throw new RuntimeException("Report this error to Ryan.  Details: " + c);
+	}
+
+	private static OplExp toGraph(Tuple3 yyy,  Tuple3 xxx) {
+		List<String> c = (List<String>) yyy.b;
+		List<Tuple5> d = (List<Tuple5>) xxx.b;
+		List<Triple<String, String, String>> l = new LinkedList<>();
+		for (Tuple5 t : d) {
+			l.add(new Triple<>((String)t.a, (String)t.c, (String)t.e));
+		}
+		
+		return new OplGraph<>(c, l);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1537,8 +1559,8 @@ public class OplParser {
 			if (attrs.containsKey(dst) | edges.containsKey(dst)) {
 				throw new DoNotIgnore("In select clause, duplicate for: " + dst);
 			}
-			//System.out.println(l);
-			if (l.a instanceof Tuple3) {
+		//	System.out.println(l);
+			if (l.a instanceof Tuple3 && ((Tuple3)l.a).a.toString().equals("(")) {
 				edges.put(dst,
 						new Pair(null,
 								fromBlockHelper2(from.keySet(), l.a)));				
@@ -1618,7 +1640,8 @@ public class OplParser {
 	public static Map<String, OplTerm<String, String>> fromBlockHelper2(
 			Set<String> vars, Object o) {
 		Tuple3 tx = (Tuple3) o;
-		List<Tuple3> l = (List<Tuple3>) tx.b;
+		//System.out.println(tx.b);
+		List<Tuple3> l = (List<Tuple3>) tx.b; //is token ( ?
 		Map<String, OplTerm<String, String>> ret = new HashMap<>();
 		for (Tuple3 t : l) {
 			if (ret.containsKey(t.c.toString())) {

@@ -31,11 +31,11 @@ public class OplChase {
 					ret = ret2;
 					changed = true;
 				}
-				System.out.println(ret);
+//				System.out.println(ret);
 			if (!changed) {
 				return ret;
 			}
-			System.out.println("+++");
+	//		System.out.println("+++");
 		}
 		
 		throw new RuntimeException("Limit exceeded, last instance:\n\n" + ret);
@@ -57,12 +57,12 @@ public class OplChase {
 					ret = (OplInst) ret2.pushout().first;
 					changed = true;
 				}
-				System.out.println(ret);
+				//System.out.println(ret);
 			}
 			if (!changed) {
 				return ret;
 			}
-			System.out.println("---");
+			//System.out.println("---");
 		}
 		
 		throw new RuntimeException("Limit exceeded, last instance:\n\n" + ret);

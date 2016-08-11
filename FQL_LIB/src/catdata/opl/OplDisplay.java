@@ -32,6 +32,7 @@ import catdata.ide.Environment;
 import catdata.ide.NEWDEBUG;
 import catdata.ide.Program;
 import catdata.ide.ProgressMonitorWrapper;
+import catdata.opl.OplExp.OplGraph;
 import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplMapping;
@@ -103,6 +104,11 @@ public class OplDisplay implements Disp {
 			OplPivot oo = (OplPivot) o;
 			return "pivot " + c + " of " + oo.I0;
  		}
+		if (o instanceof OplGraph) {
+			OplGraph oo = (OplGraph) o;
+			return "graph " + c;
+			
+		}
 		return c;
 	}
 	

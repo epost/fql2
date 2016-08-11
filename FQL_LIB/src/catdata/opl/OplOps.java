@@ -21,9 +21,11 @@ import catdata.opl.OplExp.OplChaseExp;
 import catdata.opl.OplExp.OplColim;
 import catdata.opl.OplExp.OplDelta;
 import catdata.opl.OplExp.OplDelta0;
+import catdata.opl.OplExp.OplDistinct;
 import catdata.opl.OplExp.OplEval;
 import catdata.opl.OplExp.OplExpVisitor;
 import catdata.opl.OplExp.OplFlower;
+import catdata.opl.OplExp.OplGraph;
 import catdata.opl.OplExp.OplGround;
 import catdata.opl.OplExp.OplId;
 import catdata.opl.OplExp.OplInst;
@@ -635,10 +637,14 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		for (Object k2 : e.imports) {
 			String k = (String) k2;
 			OplExp o = env.exps.get(k);
-			if (!(o instanceof OplInst0)) {
-				throw new RuntimeException("Not an INSTANCE: " + k);
+			OplInst0 a;
+			if (o instanceof OplInst0) {
+				a = (OplInst0) o;
+			} else if (o instanceof OplGround) {
+				a = ((OplGround)o).validate(((OplInst)ENV.get(k)).S);
+			} else {
+				throw new RuntimeException("Not an instance: " + k);
 			}
-			OplInst0 a = (OplInst0) o;
 			Util.putAllSafely(e.P.gens, a.P.gens);
 			e.P.equations.addAll(a.P.equations);
 			e.P.prec.putAll(a.P.prec);
@@ -800,6 +806,9 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			//OplPres<String, String, String, String> pres = new OplPres(prec, "_temp" + temp, sig, gens, equations2);
 			
 			OplPres<String, String, String, String> pres = new OplPres(prec, e.base, sig, gens, equations1);
+			if (NEWDEBUG.debug.opl.opl_prover_simplify_instances) {
+				pres = pres.simplify();
+			}
 			temp++;
 //			System.out.println(pres);
 			OplInst0 ret = new OplInst0<String, String, String, String>(pres);
@@ -879,39 +888,20 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 
 	@Override
 	public OplObject visit(Program<OplExp> env, OplColim e) {
-		OplObject o = env.exps.get(e.name);
-		if (o == null) {
-			throw new RuntimeException("Missing definition: " + e.name);
+		OplObject o = ENV.get(e.name);
+		if (!(o instanceof OplGraph)) {
+			throw new RuntimeException("Not a graph: " + e.name);
 		}
-		if (!(o instanceof OplSCHEMA0)) {
-			throw new RuntimeException("Not a SCHEMA: " + e.name);
-		}
-		OplSCHEMA0<String, String, String> shape = (OplSCHEMA0<String, String, String>) o;
+		OplGraph<String, String> shape = (OplGraph<String, String>) o;
 		// Map<String, OplTyMapping<String, String, String, String, String>> map
 		// = new HashMap<>();
 
-		if (shape.attrs.size() > 0) {
-			throw new RuntimeException("Cannot have attributes in colimit shape schemas");
-		}
-		if (shape.pathEqs.size() > 0 || shape.obsEqs.size() > 0) {
-			throw new RuntimeException("Cannot have equations in colimit shape schemas");
-		}
-
-		boolean isSchema = false;
-		boolean isInstance = false;
-
-		if (shape.entities.size() > 0) {
-			isSchema = ENV.get(Util.get0X(shape.entities)) instanceof OplSchema;
-			isInstance = ENV.get(Util.get0X(shape.entities)) instanceof OplInst;
-		}
-
-		if (!isSchema && !isInstance) {
-			isInstance = e.isInstance;
-			isSchema = !isInstance;
-		}
-
-		if (isSchema) {
-			OplUnion u0 = new OplUnion(new LinkedList<>(shape.entities), shape.typeSide);
+		OplObject base0 = ENV.get(e.base);
+		String typeSide;
+		if (base0 instanceof OplSig) {
+			typeSide = e.base;
+		
+			OplUnion u0 = new OplUnion(new LinkedList<>(shape.nodes), typeSide);
 			OplObject u1 = u0.accept(env, this);
 
 			OplSchema<String, String, String> u = (OplSchema<String, String, String>) u1;
@@ -919,10 +909,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			Map<String, Set<String>> equivs = new HashMap<>();
 			Map<String, String> equivs0 = new HashMap<>();
 
-			for (String schname : shape.entities) {
-				if (!(ENV.get(schname) instanceof OplSchema)) {
-					throw new RuntimeException("Not a schema: " + schname);
-				}
+			for (String schname : shape.nodes) {
 				OplSchema<String, String, String> sch = (OplSchema<String, String, String>) ENV.get(schname);
 				for (String ename : sch.entities) {
 					HashSet<String> set = new HashSet<>();
@@ -933,8 +920,8 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 
 			// TODO: type check colimit
 			for (String mname : shape.edges.keySet()) {
-				Pair<List<String>, String> mt = shape.edges.get(mname);
-				String s = mt.first.get(0);
+				Pair<String, String> mt = shape.edges.get(mname);
+				String s = mt.first;
 				String t = mt.second;
 
 				OplSchema<String, String, String> s0 = (OplSchema<String, String, String>) ENV.get(s);
@@ -1003,8 +990,8 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			}
 
 			for (String mname : shape.edges.keySet()) {
-				Pair<List<String>, String> mt = shape.edges.get(mname);
-				String s = mt.first.get(0);
+				Pair<String, String> mt = shape.edges.get(mname);
+				String s = mt.first;
 				String t = mt.second;
 
 				OplSchema<String, String, String> s0 = (OplSchema<String, String, String>) ENV.get(s);
@@ -1042,11 +1029,11 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			}
 
 			OplSCHEMA0<String, String, String> ret = new OplSCHEMA0<>(new HashMap<>(), entities, edges, attrs, pathEqs,
-					obsEqs, shape.typeSide);
+					obsEqs, typeSide);
 			OplSchema retsch = (OplSchema) ret.accept(env, this);
 			e.compiled.put("Colimit", ret);
 
-			for (String schname : shape.entities) {
+			for (String schname : shape.nodes) {
 				OplSchema<String, String, String> sch = (OplSchema<String, String, String>) ENV.get(schname);
 
 				Map<String, String> inj_sorts = new HashMap<>();
@@ -1080,13 +1067,8 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			}
 
 			return e;
-		} else if (isInstance) {
-			if (shape.entities.isEmpty()) {
-				throw new RuntimeException("Cannot determine schema for colimit of instances");
-			}
-			String anEntity = Util.get0X(shape.entities);
-			OplInst xxx = (OplInst) ENV.get(anEntity);
-			OplSchema sch2 = xxx.S;
+		} else if (base0 instanceof OplSchema) {
+			OplSchema sch2 = (OplSchema) base0;
 			OplSCHEMA0 sch = sch2.toSchema0();
 
 			List<Pair<OplTerm<Chc<String, String>, String>, OplTerm<Chc<String, String>, String>>> equations = new LinkedList<>();
@@ -1095,7 +1077,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			Map<String, String> gens = new HashMap<>();
 			Map<String, Integer> prec = new HashMap<>();
 
-			for (String s : shape.entities) {
+			for (String s : shape.nodes) {
 				OplInst<String, String, String, String> toAdd = (OplInst<String, String, String, String>) ENV.get(s);
 
 				for (Object gen : toAdd.P.gens.keySet()) {
@@ -1135,8 +1117,8 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			}
 
 			for (String mname : shape.edges.keySet()) {
-				Pair<List<String>, String> mt = shape.edges.get(mname);
-				String s = mt.first.get(0);
+				Pair<String, String> mt = shape.edges.get(mname);
+				String s = mt.first;
 				String t = mt.second;
 
 				OplInst<String, String, String, String> s0 = (OplInst<String, String, String, String>) ENV.get(s);
@@ -1154,12 +1136,12 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				}
 			}
 			// System.out.println("zzzzz " + sch2.sig);
-			OplPres<String, String, String, String> pres = new OplPres<>(prec, xxx.S0, sch2.sig, gens, equations);
-			OplInst<String, String, String, String> colimInst = new OplInst<>(xxx.S0, "?", null);
+			OplPres<String, String, String, String> pres = new OplPres<>(prec, e.base, sch2.sig, gens, equations);
+			OplInst<String, String, String, String> colimInst = new OplInst<>(e.base, "?", null);
 			colimInst.validate(sch2, pres, null);
 			e.compiled.put("ColimitInstance", colimInst);
 
-			for (String s : shape.entities) {
+			for (String s : shape.nodes) {
 				OplInst<String, String, String, String> toAdd = (OplInst<String, String, String, String>) ENV.get(s);
 
 				Map<String, Map<String, OplTerm<Chc<String, String>, String>>> inj_map = new HashMap<>();
@@ -1232,6 +1214,20 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		}
 		OplSchema sch = (OplSchema) o;
 		return (OplObject) e.validate(sch).accept(env, this);
+	}
+	
+	public OplObject visit(Program<OplExp> env, OplGraph e) {
+		return e;
+	}
+
+	@Override
+	public OplObject visit(Program<OplExp> env, OplDistinct e) {
+		OplObject o = ENV.get(e.str);
+		if (!(o instanceof OplInst)) {
+			throw new RuntimeException("Not an instance: " + e.str);
+		}
+		OplInst ret = (OplInst) o;
+		return (OplObject) e.validate(ret);
 	}
 
 }

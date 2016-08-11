@@ -24,30 +24,7 @@ public class OplOptions extends Options implements Cloneable {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Override
-	public String toString() {
-		return "OplOptions [opl_prover_compose=" + opl_prover_compose
-				+ ", opl_prover_filter_subsumed=" + opl_prover_filter_subsumed
-				+ ", opl_prover_unfailing=" + opl_prover_unfailing
-				+ ", opl_prover_timeout=" + opl_prover_timeout
-				+ ", opl_prover_require_const=" + opl_prover_require_const
-				+ ", opl_prover_sort=" + opl_prover_sort + ", opl_prover_ac="
-				+ opl_prover_ac + ", opl_prover_reduction_limit="
-				+ opl_prover_reduction_limit + ", opl_saturate_timeout="
-				+ opl_saturate_timeout + ", opl_validate=" + opl_validate
-				+ ", opl_pretty_print=" + opl_pretty_print
-				+ ", opl_reorder_joins=" + opl_reorder_joins
-				+ ", opl_suppress_dom=" + opl_suppress_dom
-				+ ", opl_allow_horn=" + opl_allow_horn
-				+ ", opl_query_check_eqs=" + opl_query_check_eqs
-				+ ", opl_pushout_simpl=" + opl_pushout_simpl
-				+ ", opl_lazy_gui=" + opl_lazy_gui + ", opl_cache_gui="
-				+ opl_cache_gui + ", opl_prover_force_prec="
-				+ opl_prover_force_prec + ", opl_require_consistency="
-				+ opl_require_consistency + ", opl_desugar_nat="
-				+ opl_desugar_nat + ", opl_print_simplified_presentations="
-				+ opl_print_simplified_presentations + "]";
-	}
+	
 
 	@Override 
 	public Object clone() {
@@ -129,6 +106,8 @@ public class OplOptions extends Options implements Cloneable {
 	public boolean opl_require_consistency = false;
 	public boolean opl_desugar_nat = true;
 	public boolean opl_print_simplified_presentations = false;
+	public boolean opl_display_fresh_ids = false;
+	public boolean opl_prover_simplify_instances = false;
 	
 	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
@@ -268,6 +247,16 @@ public class OplOptions extends Options implements Cloneable {
 		opl2.add(opl_print_simpl_pres_box);
 		opl1.add(opl_print_simpl_pres_label);
 		
+		JCheckBox opl_fresh_ids_box = new JCheckBox("", opl_display_fresh_ids);
+		JLabel opl_fresh_ids_label  = new JLabel("Display fresh IDs:");
+		opl2.add(opl_fresh_ids_box);
+		opl1.add(opl_fresh_ids_label);
+		
+		JCheckBox opl_simplify_box = new JCheckBox("", opl_prover_simplify_instances);
+		JLabel opl_simplify_label  = new JLabel("Simplify instances before doing theorem proving:");
+		opl2.add(opl_simplify_box);
+		opl1.add(opl_simplify_label);
+		
 
 		for (int i = 0; i < Options.biggestSize - size(); i++) {
 			opl1.add(new JLabel());
@@ -314,7 +303,8 @@ public class OplOptions extends Options implements Cloneable {
 				opl_require_consistency = opl_consistency_box.isSelected();
 				opl_desugar_nat = opl_nat_sugar_box.isSelected();
 				opl_print_simplified_presentations = opl_print_simpl_pres_box.isSelected();
-
+				opl_display_fresh_ids = opl_fresh_ids_box.isSelected();
+				opl_prover_simplify_instances = opl_simplify_box.isSelected();
 				//System.out.println("called, set to " + OplOptions.this);
 				return new Unit();
 			}

@@ -72,7 +72,16 @@ public class OplCodeEditor extends
 				+ "\n  keys fk1 = {a=f(b), b=f(g(a))} : q2,"
 				+ "\n  fk2 = {c=f(b)} : q3; "
 				+ " } : t \n/* , another block */ \n} : S -> T ", ""));
-		
+	
+		provider.addCompletion(new ShorthandCompletion(provider, "sql",
+				"sql {\n  "
+				+ "\n  insert into A "
+				+ "\n  select (f(a) as a, f(a) as b) as a,"
+				+ "\n         f(x) as x"
+				+ "\n  from A as a "
+				+ "\n  where f(a)=f(b) and f(b)=f(c) "
+				+ "\n  /* , another block */ \n} : S -> T ", ""));
+
 		provider.addCompletion(new ShorthandCompletion(provider, "javascript",
 				"javascript {\n\tsymbols;\n} : ", ""));
 
@@ -91,6 +100,15 @@ public class OplCodeEditor extends
 
 		provider.addCompletion(new ShorthandCompletion(provider, "INSTANCE",
 				"INSTANCE {\n\tgenerators;\n\tequations;\n} : ", ""));
+		
+		provider.addCompletion(new ShorthandCompletion(provider, "graph",
+				"graph {\n\tnodes;\n\tedges;\n} ", ""));
+		
+		provider.addCompletion(new ShorthandCompletion(provider, "tables",
+				"tables {\n\tentities;\n\tedges;\n\tattributes;} :  ", ""));
+		
+		provider.addCompletion(new ShorthandCompletion(provider, "colimit",
+				"colimit typeSideOrSchema graph ", ""));
 		return provider;
 
 	}
