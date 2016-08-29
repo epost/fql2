@@ -7,7 +7,6 @@ import java.util.Map;
 
 import catdata.Chc;
 import catdata.Pair;
-import catdata.Triple;
 import catdata.ide.Util;
 import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplParser.DoNotIgnore;

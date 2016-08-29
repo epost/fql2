@@ -1,6 +1,5 @@
 package catdata.ide;
 
-import java.awt.Color;
 import java.awt.Event;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -37,8 +36,6 @@ import javax.swing.text.DefaultEditorKit;
 import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
-import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;

@@ -25,6 +25,7 @@ public class MplOps<O,A> implements MplExpVisitor<O,A,MplObject,Unit> {
 		return e;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public MplObject visit(Unit env, MplEval<O, A> e) {
 		MplObject o = ENV.get(e.sch0);

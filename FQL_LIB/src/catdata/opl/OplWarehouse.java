@@ -35,6 +35,7 @@ import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplExp.OplSigma;
 import catdata.opl.OplExp.OplUnion;
 
+@SuppressWarnings({"unused","unchecked","rawtypes"})
 public class OplWarehouse extends WizardModel<Program<OplExp>> {
 	
 	private static abstract class WarehouseExample {
@@ -197,6 +198,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 		}
 	}
 	
+	@SuppressWarnings("serial")
 	private class Page extends JPanel implements ChangeListener {
 		public String my_state;
 		public String my_err = "";

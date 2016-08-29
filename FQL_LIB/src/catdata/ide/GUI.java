@@ -261,7 +261,7 @@ public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
 		toolsMenu.add(wizardItem);
 		
 		wizardItem.addActionListener(x -> {
-			new Wizard(new OplWarehouse(), y -> { 
+			new Wizard<>(new OplWarehouse(), y -> { 
 				Example ex = new Example() {
 
 					@Override
@@ -437,7 +437,7 @@ public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
 		JButton optionsb = new JButton("Options");
 		optionsb.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				NEWDEBUG.debug.showOptions();
+				NEWDEBUG.showOptions();
 			}
 		});
 
@@ -448,7 +448,7 @@ public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
 		allBox.setSelectedIndex(-1);
 		allBox.addActionListener(x -> doExample((Example) allBox.getSelectedItem()));
 		for (Language l : Language.values()) {
-			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@SuppressWarnings({  "rawtypes" })
 			JComboBox box = new JComboBox(Examples.filterBy(l.toString()));
 			box.setSelectedIndex(-1);
 			box.addActionListener(x -> doExample((Example) box.getSelectedItem()));

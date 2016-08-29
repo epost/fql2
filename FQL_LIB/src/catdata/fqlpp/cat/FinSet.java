@@ -179,7 +179,7 @@ public class FinSet extends Category<Set, Fn> {
 	@SuppressWarnings({ "unchecked" })
 	@Override
 	public Fn identity(Set o) {
-		return new Fn<>(o, o, x -> x);
+		return new Fn(o, o, x -> x);
 	}
 
 	@SuppressWarnings({ "unchecked",  })

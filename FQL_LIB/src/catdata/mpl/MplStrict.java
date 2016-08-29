@@ -5,7 +5,6 @@ import java.util.List;
 
 import catdata.Triple;
 import catdata.Unit;
-import catdata.ide.Util;
 import catdata.mpl.Mpl.MplExp.MplSch;
 import catdata.mpl.Mpl.MplTerm;
 import catdata.mpl.Mpl.MplTerm.MplAlpha;
@@ -18,10 +17,6 @@ import catdata.mpl.Mpl.MplTerm.MplRho;
 import catdata.mpl.Mpl.MplTerm.MplSym;
 import catdata.mpl.Mpl.MplTerm.MplTr;
 import catdata.mpl.Mpl.MplTermVisitor;
-import catdata.mpl.Mpl.MplType.MplBase;
-import catdata.mpl.Mpl.MplType.MplProd;
-import catdata.mpl.Mpl.MplType.MplUnit;
-import catdata.mpl.Mpl.MplTypeVisitor;
 import catdata.mpl.MplStrict.Node;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -149,7 +144,7 @@ public class MplStrict<O,A> implements
 		}
 		
 		i = 0;
-		for (O o : m) {
+		for (@SuppressWarnings("unused") O o : m) {
 			g.addEdge(fresh(), l.second.get(i), r.first.get(i));
 			ret += l.second.get(i) + " -> " + r.first.get(i) + ";";
 			i++;

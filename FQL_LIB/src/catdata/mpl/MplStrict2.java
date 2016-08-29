@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import catdata.Pair;
-import catdata.Triple;
 import catdata.Unit;
 import catdata.ide.Util;
 import catdata.mpl.Mpl.MplExp.MplSch;
@@ -184,7 +183,7 @@ public class MplStrict2<O,A> implements MplTypeVisitor<O, List<O>, Unit>,
 		Pair<Node<O, A>, String> xs = e.t.accept(env, this);
 		
 //		List<O> ft = e.t.type(ctx).first.accept(env, this);
-		List<O> et = e.type(ctx).first.accept(env, this);
+//		List<O> et = e.type(ctx).first.accept(env, this);
 		
 		
 		String ret = "subgraph cluster" + fresh() + "{ label=\"" + e + "\"; "   + xs.first ;

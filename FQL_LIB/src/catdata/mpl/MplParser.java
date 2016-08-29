@@ -38,7 +38,7 @@ import catdata.mpl.Mpl.MplType;
 import catdata.mpl.Mpl.MplType.MplBase;
 import catdata.mpl.Mpl.MplType.MplProd;
 import catdata.mpl.Mpl.MplType.MplUnit;
-
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class MplParser {
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
@@ -85,7 +85,6 @@ public class MplParser {
 
 
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> exp() {
 		Reference ref = Parser.newReference();
 
@@ -119,7 +118,7 @@ public class MplParser {
 		Parser<?> tr = Parsers.tuple(term("tr"), ref.lazy());
 		Parser<?> sym = Parsers.tuple(term("sym"), type(), type() );
 
-		Parser<?> rho = Parsers.tuple(term("("), ref.lazy(), term("*"), ref.lazy(), term(")"));
+//		Parser<?> rho = Parsers.tuple(term("("), ref.lazy(), term("*"), ref.lazy(), term(")"));
 		
 		Parser<?> a = Parsers.or(new Parser<?>[] { sym, tr, id, ident(), prod, comp, alpha1, alpha2, lambda1, lambda2, rho1, rho2 });
 		
@@ -152,7 +151,6 @@ public class MplParser {
 	}
 	
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> decl() {		
 		Parser p1 = Parsers.tuple(ident(), term("="), exp());
 		
@@ -165,7 +163,6 @@ public class MplParser {
 	}
 		
 	
-	@SuppressWarnings({ "rawtypes" })
 	public static final Program<MplExp<String, String>> program(String s) {
 		List<Triple<String, Integer, MplExp<String, String>>> ret = new LinkedList<>();
 		List decls = (List) program.parse(s);
@@ -333,10 +330,10 @@ public class MplParser {
 		return Parsers.tuple(term(s), p.sepBy(term(",")), term(";"));
 	}
 
-	 private static Parser<?> string() {
+	/* private static Parser<?> string() {
 		return Parsers.or(Terminals.StringLiteral.PARSER,
 				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
-	} 
+	}  */
 	 
 	
 

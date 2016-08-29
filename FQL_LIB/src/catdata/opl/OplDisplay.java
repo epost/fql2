@@ -105,7 +105,7 @@ public class OplDisplay implements Disp {
 			return "pivot " + c + " of " + oo.I0;
  		}
 		if (o instanceof OplGraph) {
-			OplGraph oo = (OplGraph) o;
+			//OplGraph oo = (OplGraph) o;
 			return "graph " + c;
 			
 		}

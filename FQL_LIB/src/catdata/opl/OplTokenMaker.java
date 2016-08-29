@@ -14,7 +14,7 @@ import org.fife.ui.rsyntaxtextarea.*;
 /**
  * 
  */
-
+@SuppressWarnings({"unused"})
 public class OplTokenMaker extends AbstractJFlexCTokenMaker {
 
   /** This character denotes the end of file */

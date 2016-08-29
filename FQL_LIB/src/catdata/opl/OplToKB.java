@@ -122,6 +122,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	
 	private Map<Pair<List<S>, S>, Collection<Pair<OplCtx<S, V>, OplTerm<C, V>>>> hom = new HashMap<>();
 	
+	@SuppressWarnings("deprecation")
 	private void checkParentDead(Thread cur) {
 		if (!cur.isAlive()) {
 			Thread.currentThread().stop();
@@ -411,6 +412,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		return rs;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static <Z,V> KBExp<Chc<Z,JSWrapper>,V> redBy(OplJavaInst I, KBExp<Chc<Z,JSWrapper>,V> e) {				
 		if (I == null) {
 			return e;
@@ -433,7 +435,6 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 				}	
 			}
 			if (l.size() == r.size() && e0.f.left) {
-				@SuppressWarnings("rawtypes")
 				Pair<Function, Object> xxx = Util.stripChcs(e0.f.l);
 				if (I.defs.containsKey(xxx.second)) {
 					if (I.defs.containsKey("_compose") ) {

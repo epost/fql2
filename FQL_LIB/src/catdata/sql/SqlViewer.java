@@ -161,6 +161,7 @@ public class SqlViewer extends JPanel {
 		}
 		
 		vv.getPickedVertexState().addItemListener(new ItemListener() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() != ItemEvent.SELECTED) {

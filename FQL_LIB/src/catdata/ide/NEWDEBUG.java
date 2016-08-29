@@ -20,6 +20,7 @@ import javax.swing.JTabbedPane;
 
 import catdata.Pair;
 import catdata.Unit;
+import catdata.aql.AqlOptions;
 import catdata.fpql.XOptions;
 import catdata.fql.FqlOptions;
 import catdata.fqlpp.FqlppOptions;
@@ -48,9 +49,10 @@ public class NEWDEBUG implements Serializable {
 	public FqlppOptions fqlpp = new FqlppOptions(); 
 	public XOptions fpql = new XOptions(); 
 	public OplOptions opl = new OplOptions(); 
+	public AqlOptions aql = new AqlOptions();
 	
 	private Options[] options() {
-		return new Options[] { general, fql, fqlpp, fpql, opl };
+		return new Options[] { general, fql, fqlpp, fpql, opl, aql };
 	}
 	
 	{

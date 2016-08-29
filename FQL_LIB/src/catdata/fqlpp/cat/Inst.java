@@ -110,7 +110,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 	public <X> Transform<O, A, Set, Fn> terminal(Functor<O, A, Set, Fn> o) {
 		Set<Unit> ret = new HashSet<>();
 		ret.add(new Unit());
-		FUNCTION<O, Fn> fn = x -> new Fn<>(o.applyO(x), ret, y -> new Unit());
+		FUNCTION<O, Fn> fn = x -> new Fn(o.applyO(x), ret, y -> new Unit());
 		return new Transform<>(o, terminal(), fn);
 	}
 

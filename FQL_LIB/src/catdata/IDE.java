@@ -52,6 +52,11 @@ public class IDE {
 					UIManager.setLookAndFeel(NEWDEBUG.debug.general.look_and_feel);			
 
 					final JFrame f = new JFrame("Categorical Data IDE");
+					
+					/* try {
+						f.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("ci.png")));
+					} catch (Exception ex) {
+					} */
 					final Pair<JPanel, MenuBar> gui = GUI.makeGUI(f);
 
 					f.setContentPane(gui.first);

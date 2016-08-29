@@ -2,20 +2,18 @@ package catdata.ide;
 
 import java.util.List;
 
+import catdata.aql.AqlCodeEditor;
+import catdata.aql.AqlExamples;
 import catdata.fpql.XCodeEditor;
 import catdata.fpql.XExamples;
-import catdata.fpql.XOptions;
 import catdata.fql.FqlExamples;
-import catdata.fql.FqlOptions;
 import catdata.fql.gui.FqlCodeEditor;
 import catdata.fqlpp.FQLPPCodeEditor;
 import catdata.fqlpp.FqlppExamples;
-import catdata.fqlpp.FqlppOptions;
 import catdata.mpl.MplCodeEditor;
 import catdata.mpl.MplExamples;
 import catdata.opl.OplCodeEditor;
 import catdata.opl.OplExamples;
-import catdata.opl.OplOptions;
 
 public enum Language {
 
@@ -23,7 +21,8 @@ public enum Language {
 	FQLPP,
 	FPQL,
 	OPL,
-	MPL;
+	MPL,
+	AQL;
 	
 	public static Language getDefault() {
 		return FQL;
@@ -37,6 +36,7 @@ public enum Language {
 		case FPQL: return "FPQL";
 		case OPL: return "OPL";
 		case MPL: return "MPL";
+		case AQL: return "AQL";
 		}
 		throw new RuntimeException();
 	}
@@ -48,6 +48,7 @@ public enum Language {
 		case FPQL: return "P";
 		case OPL: return "O";
 		case MPL: return "M";
+		case AQL: return "A";
 		}
 		throw new RuntimeException();
 	}
@@ -59,6 +60,7 @@ public enum Language {
 		case FPQL: return "fpql";
 		case OPL: return "opl";
 		case MPL: return "mpl";
+		case AQL: return "aql";
 		}
 		throw new RuntimeException();
 	}
@@ -71,20 +73,22 @@ public enum Language {
 		case OPL: return new OplCodeEditor(untitled_count, content);
 		case FQL: return new FqlCodeEditor(untitled_count, content);
 		case MPL: return new MplCodeEditor(untitled_count, content);
+		case AQL: return new AqlCodeEditor(untitled_count, content);
 		}
 		throw new RuntimeException(this.toString());
 	}
 
-	public Options getOptions() {
+/*	public Options getOptions() {
 		switch (this) {
 			case FPQL: return new XOptions();
 			case FQLPP: return new FqlppOptions();
 			case OPL: return new OplOptions();
 			case FQL: return new FqlOptions();
 			case MPL: return null;
+			case AQL: return new AqlOptions();
 		}
 		throw new RuntimeException(this.toString());
-	}
+	} */
 	
 	public List<Example> getExamples() {
 		switch (this) {
@@ -93,6 +97,7 @@ public enum Language {
 		case OPL: return Examples.getExamples(OplExamples.class);
 		case FQL: return Examples.getExamples(FqlExamples.class);
 		case MPL: return Examples.getExamples(MplExamples.class);
+		case AQL: return Examples.getExamples(AqlExamples.class);
 		}
 		throw new RuntimeException(this.toString());
 	}

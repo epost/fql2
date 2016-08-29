@@ -42,6 +42,7 @@ public class ProgressMonitorWrapper implements ActionListener {
 	}
 
 	class Update implements Runnable {
+		@SuppressWarnings("deprecation")
 		public void run() {
 			if (pbar.isCanceled()) {
 				try {

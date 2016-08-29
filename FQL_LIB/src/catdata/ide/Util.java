@@ -35,29 +35,52 @@ import catdata.fqlpp.FUNCTION;
 import catdata.opl.OplTerm;
 
 public class Util {
-	
-	public static void putAllSafely(Map m, Map m2) {
-		for (Object k : m2.keySet()) {
-			Object v2 = m2.get(k);
+
+	public static <K, V> LinkedHashMap<K, V> listToMap(List<Pair<K, V>> list) {
+		if (list == null) {
+			throw new RuntimeException("Attempt to create a map with a null list");
+		}
+		LinkedHashMap<K, V> map = new LinkedHashMap<>();
+		for (Pair<K, V> p : list) {
+			if (p == null) {
+				throw new RuntimeException("null pair in " + list);
+			}
+			if (p.first == null) {
+				throw new RuntimeException("null first of pair in " + list);
+			}
+			if (p.second == null) {
+				throw new RuntimeException("null second of pair in " + list);
+			}
+			if (map.containsKey(p.first)) {
+				throw new RuntimeException("Duplicate entry for " + p.first + " in " + list);
+			}
+			map.put(p.first, p.second);
+		}
+		return map;
+	}
+
+	public static <K,V> void putAllSafely(Map<K,V> m, Map<K,V> m2) {
+		for (K k : m2.keySet()) {
+			V v2 = m2.get(k);
 			if (!m.containsKey(k)) {
 				m.put(k, v2);
 				continue;
 			}
-			Object v = m.get(k);
+			V v = m.get(k);
 			if (!v.equals(v2)) {
 				throw new RuntimeException("Collision on " + k + " was " + v + " becomes " + v2);
 			}
 		}
-		
+
 	}
-	
+
 	public static <X> X get0X(Collection<X> c) {
 		for (X x : c) {
 			return x;
 		}
 		throw new RuntimeException();
 	}
-	
+
 	public static <X> X get0(Collection<X> c) {
 		if (c.size() != 1) {
 			throw new RuntimeException();
@@ -67,13 +90,14 @@ public class Util {
 		}
 		throw new RuntimeException();
 	}
-	 
-	static <X extends Comparable<X>,Y> String printNicely(Set<Map<X, Y>> map) {
+
+	static <X extends Comparable<X>, Y> String printNicely(Set<Map<X, Y>> map) {
 		List<String> l = map.stream().map(x -> printNicely(x)).collect(Collectors.toList());
 		Collections.sort(l);
 		return Util.sep(l, "\n");
 	}
-	static <X extends Comparable<X>,Y> String printNicely(Map<X, Y> map) {
+
+	static <X extends Comparable<X>, Y> String printNicely(Map<X, Y> map) {
 		List<X> l = new LinkedList<>(map.keySet());
 		Collections.sort(l);
 		boolean first = true;
@@ -87,7 +111,7 @@ public class Util {
 		}
 		return ret;
 	}
-	
+
 	public static boolean isInt(String s) {
 		try {
 			Integer.parseInt(s);
@@ -96,6 +120,7 @@ public class Util {
 			return false;
 		}
 	}
+
 	public static String maybeQuote(String s) {
 		if (s.trim().length() == 0) {
 			return "\"" + s + "\"";
@@ -103,15 +128,15 @@ public class Util {
 		Character x = s.charAt(0);
 		if (!Character.isLetter(x) && !x.equals('_')) {
 			return "\"" + s + "\"";
-		} 
-		for (Character c : s.toCharArray()) { 
+		}
+		for (Character c : s.toCharArray()) {
 			if (!Character.isLetterOrDigit(c) && !c.equals('_')) {
 				return "\"" + s + "\"";
 			}
 		}
 		return s;
 	}
-	
+
 	public static void show(JComponent p, int w, int h, String title) {
 		JFrame f = new JFrame(title);
 		f.setContentPane(p);
@@ -122,7 +147,7 @@ public class Util {
 		f.setLocationRelativeTo(null);
 		f.setVisible(true);
 	}
-	
+
 	public static List<List<Integer>> multiply_many(List<List<Integer>> l, List<List<List<Integer>>> r) {
 		List<List<Integer>> ret = l;
 		for (List<List<Integer>> x : r) {
@@ -130,11 +155,11 @@ public class Util {
 		}
 		return ret;
 	}
-	
+
 	public static List<List<Integer>> multiply(List<List<Integer>> l, List<List<Integer>> r) {
 		return mat_conv2(mult(mat_conv1(l), mat_conv1(r)));
 	}
-	
+
 	public static int[][] mat_conv1(List<List<Integer>> l) {
 		int[][] ret = new int[l.size()][];
 		int w = 0;
@@ -148,7 +173,7 @@ public class Util {
 		}
 		return ret;
 	}
-	
+
 	public static List<List<Integer>> mat_conv2(int[][] l) {
 		List<List<Integer>> ret = new LinkedList<>();
 		for (int[] r : l) {
@@ -160,23 +185,24 @@ public class Util {
 		}
 		return ret;
 	}
-	
+
 	public static int[][] mult(int[][] A, int[][] B) {
-        int mA = A.length;
-        int nA = A[0].length;
-        int mB = B.length;
-        int nB = B[0].length;
-        if (nA != mB) throw new RuntimeException("Illegal matrix dimensions: " + mat_conv2(A) + " and " + mat_conv2(B));
-        int[][] C = new int[mA][nB];
-        for (int i = 0; i < mA; i++)
-            for (int j = 0; j < nB; j++)
-                for (int k = 0; k < nA; k++)
-                    C[i][j] += A[i][k] * B[k][j];
-        return C;
-    }
-	
+		int mA = A.length;
+		int nA = A[0].length;
+		int mB = B.length;
+		int nB = B[0].length;
+		if (nA != mB)
+			throw new RuntimeException("Illegal matrix dimensions: " + mat_conv2(A) + " and " + mat_conv2(B));
+		int[][] C = new int[mA][nB];
+		for (int i = 0; i < mA; i++)
+			for (int j = 0; j < nB; j++)
+				for (int k = 0; k < nA; k++)
+					C[i][j] += A[i][k] * B[k][j];
+		return C;
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	public static Comparator<Object> ToStringComparator = new Comparator<Object>() {
 		@Override
 		public int compare(Object o1, Object o2) {
@@ -188,13 +214,13 @@ public class Util {
 			return o1.toString().compareTo(o2.toString());
 		}
 	};
-		
-	public static <X,Y> Map<Y,X> rev0(Map<X, Y> m) {
+
+	public static <X, Y> Map<Y, X> rev0(Map<X, Y> m) {
 		return Utils.rev(m, new HashSet<>(m.values()));
 	}
-	
-	public static <X,Y> Map<Y,Set<X>> revS(Map<X, Y> m) {
-		Map<Y,Set<X>> ret = new HashMap<>();
+
+	public static <X, Y> Map<Y, Set<X>> revS(Map<X, Y> m) {
+		Map<Y, Set<X>> ret = new HashMap<>();
 		for (X x : m.keySet()) {
 			Y y = m.get(x);
 			Set<X> s = ret.get(y);
@@ -206,25 +232,25 @@ public class Util {
 		}
 		return ret;
 	}
-	
+
 	public static <X, Y> LinkedHashMap<X, Y> singMap(X x, Y y) {
-		 LinkedHashMap<X, Y> ret = new LinkedHashMap<>();
-		 ret.put(x, y);
-		 return ret;
+		LinkedHashMap<X, Y> ret = new LinkedHashMap<>();
+		ret.put(x, y);
+		return ret;
 	}
-	
+
 	public static <X> List<X> singList(X x) {
 		List<X> ret = new LinkedList<>();
 		ret.add(x);
 		return ret;
 	}
-	
+
 	public static <X> Set<X> singSet(X x) {
 		Set<X> ret = new HashSet<>();
 		ret.add(x);
 		return ret;
 	}
-	
+
 	public static <X> String print(Collection<X[]> c) {
 		String ret = "";
 		for (X[] x : c) {
@@ -232,22 +258,22 @@ public class Util {
 		}
 		return ret;
 	}
-	
-	public static <X,Y> Map<X,Y> reify(Function<X,Y> f, Set<X> set) {
-		Map<X,Y> ret = new HashMap<>();
+
+	public static <X, Y> Map<X, Y> reify(Function<X, Y> f, Set<X> set) {
+		Map<X, Y> ret = new HashMap<>();
 		for (X x : set) {
 			ret.put(x, f.apply(x));
 		}
 		return ret;
 	}
-	
+
 	private static JPanel makeRowOrCol(List<JComponent> list, int orientation) {
 		if (list.size() == 0) {
 			JPanel ret = new JPanel();
 			ret.setBorder(BorderFactory.createEmptyBorder());
 			return ret;
 		}
-		JPanel ret = new JPanel(new GridLayout(1,1));
+		JPanel ret = new JPanel(new GridLayout(1, 1));
 		if (list.size() == 1) {
 			ret.add(list.get(0));
 			return ret;
@@ -268,26 +294,24 @@ public class Util {
 		ret.add(sofar);
 		return ret;
 	}
-	
+
 	public static JPanel makeGrid(List<JComponent> list) {
 		int n = (int) Math.ceil(Math.sqrt(list.size()));
 
 		List<JComponent> list2 = new LinkedList<>();
 		for (int i = 0; i < list.size(); i += n) {
-			int end = Math.min(list.size(), i+n); 
+			int end = Math.min(list.size(), i + n);
 			list2.add(makeRowOrCol(list.subList(i, end), JSplitPane.HORIZONTAL_SPLIT));
 		}
-		
+
 		JScrollPane jsp = new JScrollPane(makeRowOrCol(list2, JSplitPane.VERTICAL_SPLIT));
-		JPanel ret = new JPanel(new GridLayout(1,1));
+		JPanel ret = new JPanel(new GridLayout(1, 1));
 		ret.add(jsp);
 		return ret;
 	}
-	
 
 	@SuppressWarnings("serial")
-	public static JPanel makeTable(Border b, String border,
-			Object[][] rowData, Object[] colNames) {
+	public static JPanel makeTable(Border b, String border, Object[][] rowData, Object[] colNames) {
 		JTable t = new JTable(rowData, colNames) {
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
@@ -306,7 +330,7 @@ public class Util {
 		// p.setMaximumSize(new Dimension(200,200));
 		p.setBorder(BorderFactory.createTitledBorder(b, border));
 		return p;
-	
+
 	}
 
 	public static <K, V> FUNCTION<V, K> invget(Map<K, V> m) {
@@ -316,28 +340,28 @@ public class Util {
 					return e.getKey();
 				}
 			}
-			throw new RuntimeException("Cannot inverse lookup " + v + " in "
-					+ m);
+			throw new RuntimeException("Cannot inverse lookup " + v + " in " + m);
 		};
 	}
 
-	public static String nice(String s) { //TODO
+	public static String nice(String s) { // TODO
 		return s;
-//		return s.replace("[", "{").replace("]", "}");
-	}
+		// return s.replace("[", "{").replace("]", "}");
+	} 
 
 	public static String sep(Collection<?> c, String sep) {
 		return sep(c.iterator(), sep);
 	}
 
-	public static <X,Y> List<Y> proj2(List<Pair<X,Y>> l) {
+	public static <X, Y> List<Y> proj2(List<Pair<X, Y>> l) {
 		return l.stream().map(x -> x.second).collect(Collectors.toList());
 	}
-	public static <X,Y> List<X> proj1(List<Pair<X,Y>> l) {
+
+	public static <X, Y> List<X> proj1(List<Pair<X, Y>> l) {
 		return l.stream().map(x -> x.first).collect(Collectors.toList());
 	}
-	
-	public static String sep(Map<?,?> m, String sep1, String sep2) {
+
+	public static String sep(Map<?, ?> m, String sep1, String sep2) {
 		String ret = "";
 		boolean b = false;
 		Iterator<?> c = m.keySet().iterator();
@@ -351,8 +375,8 @@ public class Util {
 			ret += o + sep1 + m.get(o);
 		}
 		return ret;
-	} 
-	
+	}
+
 	public static String sep(Iterator<?> c, String sep) {
 		String ret = "";
 		boolean b = false;
@@ -366,15 +390,14 @@ public class Util {
 			ret += o;
 		}
 		return ret;
-	} 
+	}
 
 	public static String q(Object o) {
 		if (o == null) {
 			return "!!!NULL!!!";
 		}
 		String s = o.toString();
-		if ((s.contains("\t") || s.contains("\n") || s.contains("\r")
-				|| s.contains("-") || s.length() == 0)
+		if ((s.contains("\t") || s.contains("\n") || s.contains("\r") || s.contains("-") || s.length() == 0)
 				&& !s.contains("\"")) {
 			return "\"" + s + "\"";
 		}
@@ -387,14 +410,10 @@ public class Util {
 				return o.second;
 			}
 		}
-		throw new RuntimeException("Cannot find " + nice(x.toString()) + " in "
-				+ nice(s.toString()));
+		throw new RuntimeException("Cannot find " + nice(x.toString()) + " in " + nice(s.toString()));
 	}
 
-	
-	
-	public static <X, Y, Z> Set<Pair<X, Z>> compose(Set<Pair<X, Y>> x,
-			Set<Pair<Y, Z>> y) {
+	public static <X, Y, Z> Set<Pair<X, Z>> compose(Set<Pair<X, Y>> x, Set<Pair<Y, Z>> y) {
 		Set<Pair<X, Z>> ret = new HashSet<>();
 
 		for (Pair<X, Y> p1 : x) {
@@ -406,55 +425,55 @@ public class Util {
 			}
 		}
 		return ret;
-	} 
+	}
 
-	public static <X> Set<Pair<X,X>> refl(Set<X> set) {
-		Set<Pair<X,X>> ret = new HashSet<>();
+	public static <X> Set<Pair<X, X>> refl(Set<X> set) {
+		Set<Pair<X, X>> ret = new HashSet<>();
 		for (X x : set) {
-			ret.add(new Pair<>(x,x));
+			ret.add(new Pair<>(x, x));
 		}
 		return ret;
 	}
 
-	public static <X,Y> Map<X, Y> convert(Set<Pair<X, Y>> t) {
-		Map<X,Y> ret = new HashMap<>();
-		
-		for (Pair<X,Y> p : t) {
+	public static <X, Y> Map<X, Y> convert(Set<Pair<X, Y>> t) {
+		Map<X, Y> ret = new HashMap<>();
+
+		for (Pair<X, Y> p : t) {
 			if (ret.containsKey(p.first)) {
 				throw new RuntimeException("Cannot convert to map (not functional): " + t);
 			}
 			ret.put(p.first, p.second);
 		}
-		
+
 		return ret;
 	}
-	
-	public static <X,Y> Set<Pair<X, Y>> convert(Map<X, Y> t) {
-		Set<Pair<X,Y>> ret = new HashSet<>();
-		
-		for (Entry<X,Y> p : t.entrySet()) {
+
+	public static <X, Y> Set<Pair<X, Y>> convert(Map<X, Y> t) {
+		Set<Pair<X, Y>> ret = new HashSet<>();
+
+		for (Entry<X, Y> p : t.entrySet()) {
 			ret.add(new Pair<>(p.getKey(), p.getValue()));
 		}
-		
+
 		return ret;
 	}
-	
-	public static <X,Y> Map<Y,X> invMap(Map<X,Y> m) {
-		Map<Y,X> ret = new HashMap<>();
-		
-		for (Entry<X,Y> e : m.entrySet()) {
+
+	public static <X, Y> Map<Y, X> invMap(Map<X, Y> m) {
+		Map<Y, X> ret = new HashMap<>();
+
+		for (Entry<X, Y> e : m.entrySet()) {
 			if (ret.containsKey(e.getValue())) {
 				throw new RuntimeException("Not injective");
 			}
 			ret.put(e.getValue(), e.getKey());
 		}
-		
+
 		return ret;
 	}
 
-	public static <X,Y> Y revLookup(Map<Y,X> m, X x) {
+	public static <X, Y> Y revLookup(Map<Y, X> m, X x) {
 		Y ret = null;
-		for (Entry<Y,X> e : m.entrySet()) {
+		for (Entry<Y, X> e : m.entrySet()) {
 			if (e.getValue().equals(x)) {
 				if (ret != null && !ret.equals(e.getKey())) {
 					throw new RuntimeException("Inverse is not a function: " + m);
@@ -464,34 +483,34 @@ public class Util {
 		}
 		return ret;
 	}
-	
-	public static <X,Y> Function<Y,X> inverse(Function<X,Y> f, Set<X> s) {
-		Map<X,Y> m = reify(f, s);
+
+	public static <X, Y> Function<Y, X> inverse(Function<X, Y> f, Set<X> s) {
+		Map<X, Y> m = reify(f, s);
 		return y -> revLookup(m, y);
 	}
 
-	public static <X,Y> Set<Y> image(Set<X> set, Function<X,Y> f) {
+	public static <X, Y> Set<Y> image(Set<X> set, Function<X, Y> f) {
 		return set.stream().map(f).collect(Collectors.toSet());
 	}
 
-	public static <X,Y> X anyKey(Map<X,Y> m) {
+	public static <X, Y> X anyKey(Map<X, Y> m) {
 		for (X x : m.keySet()) {
 			return x;
 		}
 		throw new RuntimeException();
 	}
-	
-	public static String printForPi(Map<?,?> x) {
+
+	public static String printForPi(Map<?, ?> x) {
 		if (x.size() == 0) {
 			return "";
 		}
 		if (x.size() == 1) {
 			return x.get(0).toString();
 		}
-		
+
 		String ret = "(";
 		boolean first = true;
-		for (Entry<?,?> e : x.entrySet()) {
+		for (Entry<?, ?> e : x.entrySet()) {
 			if (!first) {
 				ret += ", ";
 			}
@@ -501,33 +520,39 @@ public class Util {
 		ret += ")";
 		return ret;
 	}
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Pair<Function, Object> stripChcs(Object o) {
-		 if (o instanceof Chc) {
-			 Chc c = (Chc) o;
-			 if (c.left) {
-				 Pair<Function, Object> p = stripChcs(c.l);
-				 return new Pair<Function, Object>(x -> { return Chc.inLeft(p.first.apply(x)); }, p.second);
-			 } else {
-				 Pair<Function, Object> p = stripChcs(c.r);
-				 return new Pair<Function, Object>(x -> { return Chc.inRight(p.first.apply(x)); }, p.second);
-			 }
-		 }
-		 return new Pair<Function, Object>(x -> { return x; }, o);
-	 }
+		if (o instanceof Chc) {
+			Chc c = (Chc) o;
+			if (c.left) {
+				Pair<Function, Object> p = stripChcs(c.l);
+				return new Pair<Function, Object>(x -> {
+					return Chc.inLeft(p.first.apply(x));
+				}, p.second);
+			} else {
+				Pair<Function, Object> p = stripChcs(c.r);
+				return new Pair<Function, Object>(x -> {
+					return Chc.inRight(p.first.apply(x));
+				}, p.second);
+			}
+		}
+		return new Pair<Function, Object>(x -> {
+			return x;
+		}, o);
+	}
 
-	public static <V> double termToDouble(OplTerm<?,V> t) {
+	public static <V> double termToDouble(OplTerm<?, V> t) {
 		return termToNat(t);
 	}
-	
-	public static <V> Integer termToNat(OplTerm<?,V> t) {
+
+	public static <V> Integer termToNat(OplTerm<?, V> t) {
 		if (t.var != null) {
 			return null;
 		}
-		if (stripChcs(t.head).second.equals("zero")) { 
+		if (stripChcs(t.head).second.equals("zero")) {
 			return 0;
-		} else if (stripChcs(t.head).second.equals("succ")) { 
+		} else if (stripChcs(t.head).second.equals("succ")) {
 			if (t.args.size() != 1) {
 				return null;
 			}
@@ -536,10 +561,10 @@ public class Util {
 				return null;
 			}
 			return 1 + j;
-		} 
+		}
 		return null;
 	}
-		
+
 	public static <V> OplTerm<String, V> natToTerm(int i) {
 		if (i < 0) {
 			throw new RuntimeException("Cannot convert negative number to natural");
@@ -547,14 +572,14 @@ public class Util {
 		if (i == 0) {
 			return new OplTerm<>("zero", new LinkedList<>());
 		}
-		return new OplTerm<>("succ", Util.singList(natToTerm(i-1)));
+		return new OplTerm<>("succ", Util.singList(natToTerm(i - 1)));
 	}
 
 	public static <X> List<List<X>> prod(List<Set<X>> in1) {
 		List<List<X>> y = new LinkedList<>();
 		List<X> z = new LinkedList<>();
 		y.add(z);
-	
+
 		for (Set<X> X : in1) {
 			List<List<X>> y0 = new LinkedList<>();
 			for (List<X> a : y) {
@@ -566,7 +591,7 @@ public class Util {
 			}
 			y = y0;
 		}
-	
+
 		return y;
 	}
 

@@ -23,6 +23,7 @@ import catdata.ide.CodeTextPanel;
 import catdata.ide.NEWDEBUG;
 import catdata.ide.Util;
 
+
 public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObject {
 
 	OplSchema<S1, C1, V1> src;
@@ -107,7 +108,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		this.dst = dst;
 
 		if (!src.projT().equals(dst.projT())) {
-			throw new RuntimeException("Different type sides");
+			throw new RuntimeException("Source and Target of query have Different type sides.\n\nsrc=" + src.projT() + "\n\ndst=" + dst.projT());
 		}
 
 		for (Object b : blocks.keySet()) {
@@ -561,7 +562,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Block other = (Block) obj;
+			Block<?,?,?,?,?,?> other = (Block<?,?,?,?,?,?>) obj;
 			if (orig == null) {
 				if (other.orig != null)
 					return false;
@@ -729,6 +730,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <X> Pair<OplInst<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>,
 	Map<Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> eval(
 			OplInst<S1, C1, V1, X> I0) {
@@ -947,7 +949,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		OplQuery other = (OplQuery) obj;
+		OplQuery<?,?,?,?,?,?> other = (OplQuery<?,?,?,?,?,?>) obj;
 		if (blocks == null) {
 			if (other.blocks != null)
 				return false;

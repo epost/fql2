@@ -1,5 +1,6 @@
 package catdata.opl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -124,11 +125,22 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		Set sorts = new HashSet();
 		sorts.addAll(t.sorts);
 		sorts.addAll(e.entities);
+		if (!Collections.disjoint(t.sorts, e.entities)) {
+			throw new RuntimeException("Schema has an entity that is also a type side sort");
+		}
+
 
 		Map symbols = new HashMap();
 		symbols.putAll(t.symbols);
 		symbols.putAll(e.attrs);
 		symbols.putAll(e.edges);
+		if (!Collections.disjoint(t.symbols.keySet(), e.attrs.keySet())) {
+			throw new RuntimeException("Schema has an attribute that is also a type side symbol");
+		}
+		if (!Collections.disjoint(t.symbols.keySet(), e.edges.keySet())) {
+			throw new RuntimeException("Schema has an attribute that is also a type side symbol");
+		}
+		
 
 		List equations = new LinkedList();
 		equations.addAll(t.equations);
@@ -1069,10 +1081,10 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			return e;
 		} else if (base0 instanceof OplSchema) {
 			OplSchema sch2 = (OplSchema) base0;
-			OplSCHEMA0 sch = sch2.toSchema0();
+			//OplSCHEMA0 sch = sch2.toSchema0();
 
 			List<Pair<OplTerm<Chc<String, String>, String>, OplTerm<Chc<String, String>, String>>> equations = new LinkedList<>();
-			List<Pair<OplTerm<Object, String>, OplTerm<Object, String>>> equations1 = new LinkedList<>();
+			//List<Pair<OplTerm<Object, String>, OplTerm<Object, String>>> equations1 = new LinkedList<>();
 
 			Map<String, String> gens = new HashMap<>();
 			Map<String, Integer> prec = new HashMap<>();

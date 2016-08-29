@@ -36,7 +36,6 @@ public class MplDisplay implements Disp {
 	public void close() {
 	}
 	
-	@SuppressWarnings("rawtypes")
 	private static String doLookup(String c, MplObject o) {
 		
 		return c;

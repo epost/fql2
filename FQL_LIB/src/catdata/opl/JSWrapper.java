@@ -188,6 +188,7 @@ public class JSWrapper {
 		}
 	}
 	
+	@SuppressWarnings("serial")
 	public static class ColumnHeaderRenderer extends JLabel implements TableCellRenderer {
 		
 		Set<String> boldify;

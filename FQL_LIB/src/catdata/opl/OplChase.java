@@ -1,6 +1,5 @@
 package catdata.opl;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,6 +18,7 @@ import catdata.opl.OplExp.OplPresTrans;
 import catdata.opl.OplExp.OplPushout;
 import catdata.opl.OplQuery.Block;
 
+@SuppressWarnings({"unchecked","rawtypes"})
 public class OplChase {
 	
 	static OplInst chaseParallel(OplInst I, List EDs, int limit) {
@@ -203,7 +203,7 @@ public class OplChase {
 		if (!Q.blocks.get("FORALL").first.equals("FORALL")) {
 			throw new RuntimeException("FORALL block must target FORALL entity");
 		}
-		Block<S, C, V, String, String, V> FORALL = Q.blocks.get("FORALL").second;
+//		Block<S, C, V, String, String, V> FORALL = Q.blocks.get("FORALL").second;
 
 		Pair<OplExp.OplInst<String,String,V,Chc<OplTerm<Chc<C,X>,V>,Pair<Object,Map<V,OplTerm<Chc<C,X>,V>>>>>,Map<Pair<Object,Map<V,OplTerm<Chc<C,X>,V>>>,Pair<Object,Map<V,OplTerm<Chc<C,X>,V>>>>>
 		temp2 = Q.eval(I);

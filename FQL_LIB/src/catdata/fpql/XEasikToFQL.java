@@ -34,7 +34,6 @@ import catdata.Triple;
 import catdata.fpql.XExp.XSchema;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
-import catdata.ide.Language;
 
 public class XEasikToFQL {
 

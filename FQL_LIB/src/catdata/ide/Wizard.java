@@ -126,6 +126,7 @@ public class Wizard<T> implements ActionListener, ChangeListener {
 		dialog.dispose();
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if (e instanceof WizardModelChangeEvent) {
@@ -145,6 +146,7 @@ public class Wizard<T> implements ActionListener, ChangeListener {
 
 
 
+	@SuppressWarnings("serial")
 	public static class WizardModelChangeEvent<T> extends ChangeEvent {
 		public final String newState;
 		public final String oldState;

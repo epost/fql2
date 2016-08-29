@@ -16,6 +16,7 @@ import catdata.opl.OplExp.OplPragma;
 import catdata.opl.OplExp.OplSCHEMA0;
 import catdata.opl.OplExp.OplSig;
 
+@SuppressWarnings({"unused","unchecked","rawtypes"})
 public class OplDriver {
 
 	// TODO: let x be the position of the first change between old and new

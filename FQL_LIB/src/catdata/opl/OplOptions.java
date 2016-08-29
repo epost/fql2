@@ -108,6 +108,7 @@ public class OplOptions extends Options implements Cloneable {
 	public boolean opl_print_simplified_presentations = false;
 	public boolean opl_display_fresh_ids = false;
 	public boolean opl_prover_simplify_instances = false;
+	public boolean opl_safe_java = true;
 	
 	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
@@ -257,6 +258,10 @@ public class OplOptions extends Options implements Cloneable {
 		opl2.add(opl_simplify_box);
 		opl1.add(opl_simplify_label);
 		
+		JCheckBox opl_safejava_box = new JCheckBox("", opl_safe_java);
+		JLabel opl_safejava_label  = new JLabel("Require use of java typesides to be complete (false=dangerous):");
+		opl2.add(opl_safejava_box);
+		opl1.add(opl_safejava_label);		
 
 		for (int i = 0; i < Options.biggestSize - size(); i++) {
 			opl1.add(new JLabel());
@@ -305,6 +310,7 @@ public class OplOptions extends Options implements Cloneable {
 				opl_print_simplified_presentations = opl_print_simpl_pres_box.isSelected();
 				opl_display_fresh_ids = opl_fresh_ids_box.isSelected();
 				opl_prover_simplify_instances = opl_simplify_box.isSelected();
+				opl_safe_java = opl_safejava_box.isSelected();
 				//System.out.println("called, set to " + OplOptions.this);
 				return new Unit();
 			}

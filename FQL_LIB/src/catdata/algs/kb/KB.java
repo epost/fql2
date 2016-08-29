@@ -273,6 +273,7 @@ public class KB<C, V> extends EqProver<C, V> {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void checkParentDead(Thread cur) {
 		if (!cur.isAlive()) {
 			Thread.currentThread().stop();
@@ -589,7 +590,7 @@ public class KB<C, V> extends EqProver<C, V> {
 			KBApp<C, V> e = ee.getApp();
 			List<KBExp<C, V>> args0 = new LinkedList<>();
 			for (KBExp<C, V> arg : e.args) {
-				args0.add(step(cache, fresh, E, R, arg));
+				args0.add(step(cache, fresh, E, R, arg)); //needs to be step for correctness
 			}
 			KBApp<C, V> ret = new KBApp<>(e.f, args0);
 			return step1(cache, fresh, E, R, ret);

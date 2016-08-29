@@ -830,6 +830,7 @@ public class Mpl implements MplObject {
 		public R visit(E env, MplEval<O,A> e); 
 	}
 	
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public static <O,A> JComponent doTermView(Color src, Color dst, Graph<Node<O,A>, Integer> sgv) {
 		if (sgv.getVertexCount() == 0) {
 			return new JPanel();
@@ -862,6 +863,7 @@ public class Mpl implements MplObject {
 		ret.setBorder(BorderFactory.createEtchedBorder());
 		return ret;
 	}
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public static <O,A> JComponent doTermView2(Color src, Color dst, Graph<MplStrict2.Node<O,A>, Integer> sgv) {
 		if (sgv.getVertexCount() == 0) {
 			return new JPanel();
