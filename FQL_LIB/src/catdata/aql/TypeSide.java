@@ -12,7 +12,7 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 
-public class TypeSide<Ty, Sym> {
+public final class TypeSide<Ty, Sym> {
 
 	public final Set<Ty> tys;
 	public final Map<Sym, Pair<Ty[], Ty>> syms;

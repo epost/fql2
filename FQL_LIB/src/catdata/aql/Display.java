@@ -29,15 +29,15 @@ import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
 import catdata.ide.Program;
 
-public class Display implements Disp {
+public final class Display implements Disp {
 
 	
 	@Override
 	public void close() {
 	}
 	
-	private static String doLookup(String c, Object o) {
-		return c;
+	private static String doLookup(String c, Object o, Kind k) {
+		return k + " " + c;
 	}
 	
 	JComponent wrapDisplay(Kind kind, Object obj) {
@@ -63,17 +63,17 @@ public class Display implements Disp {
 	}
 
 
-	public Display(String title, Program<Exp> p, Env env, long start, long middle) {
+	public Display(String title, Program<Exp<? extends Object>> p, Env env, long start, long middle) {
 		Map<Object, String> map = new HashMap<>();
 		for (String c : p.order) {
-			Exp exp = p.exps.get(c);
+			Exp<?> exp = p.exps.get(c);
 			Object obj = env.get(c, exp.kind());
 			map.put(obj, c); 
 			try {
-				frames.add(new Pair<>(doLookup(c, obj), wrapDisplay(exp.kind(), obj)));
+				frames.add(new Pair<>(doLookup(c, obj, exp.kind()), wrapDisplay(exp.kind(), obj)));
 			} catch (Exception ex) {
 				ex.printStackTrace();
-				frames.add(new Pair<>(doLookup(c, obj), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
+				frames.add(new Pair<>(doLookup(c, obj, exp.kind()), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
 			}
 		}
 		long end = System.currentTimeMillis();

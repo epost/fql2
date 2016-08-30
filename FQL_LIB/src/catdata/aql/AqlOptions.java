@@ -10,7 +10,7 @@ import catdata.ide.CodeTextPanel;
 import catdata.ide.Language;
 import catdata.ide.Options;
 
-public class AqlOptions extends Options {
+public final class AqlOptions extends Options {
 
 	private static final long serialVersionUID = 1L;
 

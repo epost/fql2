@@ -1,6 +1,6 @@
 package catdata.aql;
 
-public class DPStrategy {
+public final class DPStrategy {
 
 	public final DPName name;
 	public final Object object;

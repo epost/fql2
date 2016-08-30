@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("rawtypes")
-public class Env {
+public final class Env {
 
 	private Map<String, TypeSide> tys = new HashMap<>();
 	private Map<String, Schema> schs = new HashMap<>();
@@ -70,7 +70,7 @@ public class Env {
 		tys.put(k, v);
 	}
 	
-	public TypeSide getTypeSide(String k) {
+	public TypeSide<?, ?> getTypeSide(String k) {
 		TypeSide ret = tys.get(k);
 		if (ret == null) {
 			throw new RuntimeException("No top-level typeside definition for " + k);

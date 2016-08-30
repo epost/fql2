@@ -4,7 +4,7 @@ import javax.swing.JComponent;
 
 import catdata.ide.CodeTextPanel;
 
-public class Viewer {
+public final class Viewer {
 
 	public static String html(Object obj) {
 		return obj.toString().replace("\n", "<br>").replace("\t", "&nbsp;");

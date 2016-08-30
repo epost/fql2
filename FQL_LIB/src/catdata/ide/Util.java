@@ -36,6 +36,15 @@ import catdata.opl.OplTerm;
 
 public class Util {
 
+	@SafeVarargs
+	public static <X> List<X> list(X...xs) {
+		List<X> ret = new LinkedList<>();
+		for (X x : xs) {
+			ret.add(x);
+		}
+		return ret;
+	}
+	
 	public static <K, V> LinkedHashMap<K, V> listToMap(List<Pair<K, V>> list) {
 		if (list == null) {
 			throw new RuntimeException("Attempt to create a map with a null list");

@@ -8,11 +8,11 @@ import java.util.Map;
 import catdata.Chc;
 import catdata.Pair;
 
-public class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
+public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	private final DPStrategy strategy;
 
-	public Schema<Ty, En, Sym, Fk, Att> schema;
+	public final Schema<Ty, En, Sym, Fk, Att> schema;
 
 	public final Map<Gen, En> gens;
 	public final Map<Sk, Ty> sks;
@@ -156,7 +156,7 @@ public class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	@Override
 	public String toString() {
 		return "Instance [schema=" + schema + ", gens=" + gens + ", sks=" + sks + ", eqs=" + eqs + "]";
-	} //TODO
+	} 
 
 	
 	

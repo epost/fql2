@@ -8,7 +8,7 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.ide.Util;
 
-public class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
+public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	public final Var var;
 	public final Sym sym;

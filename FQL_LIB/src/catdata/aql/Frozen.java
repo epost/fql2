@@ -1,5 +1,5 @@
 package catdata.aql;
 
-public class Frozen {
+public final class Frozen {
 
 }

@@ -1,5 +1,9 @@
 package catdata.aql;
 
-public class AqlExamples {
+import catdata.aql.examples.AqlExampleDev1;
 
+public final class AqlExamples {
+
+	public static final AqlExample aqlDev1 = new AqlExampleDev1();
+	
 }

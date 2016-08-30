@@ -6,7 +6,7 @@ import java.util.Set;
 
 import catdata.Pair;
 
-public class Algebra<En,Ty,Sym,Fk,Att,Gen,Sk> {
+public final class Algebra<En,Ty,Sym,Fk,Att,Gen,Sk> {
 
 	public  Map<En,Set<Term<Void,En,Void,Fk,Void,Gen,Void>>> ens;
 	

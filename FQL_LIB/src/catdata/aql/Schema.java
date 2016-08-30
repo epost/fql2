@@ -11,7 +11,7 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 
-public class Schema<Ty,En,Sym,Fk,Att> {
+public final class Schema<Ty,En,Sym,Fk,Att> {
 	
 	public final TypeSide<Ty,Sym> typeSide;
 	

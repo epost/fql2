@@ -37,6 +37,7 @@ public class OplDriver {
 
 		boolean usesPragma = false;
 		for (String k : init.order) {
+			
 			OplExp se = init.exps.get(k);
 			if (se instanceof OplPragma) {
 				se.accept(init, new OplOps(ret));
@@ -57,6 +58,9 @@ public class OplDriver {
 		int i = 0;
 		if (last_str != null && NEWDEBUG.debug.opl.opl_cache_gui) {
 			for (String k : init.order) {
+				if (i >= last_prog.order.size()) {
+					break;
+				}
 				String v = last_prog.order.get(i);
 				if (!v.equals(k)) {
 					break;

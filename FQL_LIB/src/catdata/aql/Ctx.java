@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import catdata.Pair;
 import catdata.ide.Util;
 
-public class Ctx<K,V> {
+public final class Ctx<K,V> {
 
 	private final Map<K,V> map;
 	

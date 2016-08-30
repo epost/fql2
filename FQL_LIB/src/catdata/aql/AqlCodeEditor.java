@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -8,17 +9,22 @@ import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
+import org.fife.ui.rsyntaxtextarea.Token;
 
 import catdata.ide.CodeEditor;
 import catdata.ide.Language;
 import catdata.ide.Program;
 
 @SuppressWarnings("serial")
-public class AqlCodeEditor extends
-		CodeEditor<Program<Exp>, Env, Display> {
+public final class AqlCodeEditor extends
+		CodeEditor<Program<Exp<? extends Object>>, Env, Display> {
 
 	public AqlCodeEditor(int untitled_count, String content) {
 		super(untitled_count, content);
+		SyntaxScheme scheme = topArea.getSyntaxScheme();
+		scheme.getStyle(Token.RESERVED_WORD).foreground = Color.RED;
+		scheme.getStyle(Token.RESERVED_WORD_2).foreground = Color.BLUE;
 	}
 
 	@Override
@@ -33,7 +39,7 @@ public class AqlCodeEditor extends
 
 	@Override
 	protected String getATMFrhs() {
-		return "catdata.aql.AqlTokenMaker";
+		return "catdata.aql.AqlTokenMaker"; //TODO
 	}
 
 	protected void doTemplates() {
@@ -55,24 +61,23 @@ public class AqlCodeEditor extends
 	}
 
 	@Override
-	protected Program<Exp> parse(String program) throws ParserException {
-		//return OplParser.program(program);
-		throw new RuntimeException();
+	protected Program<Exp<? extends Object>> parse(String program) throws ParserException {
+		return AqlParser.parseProgram(program);
 	}
 
 	@Override
-	protected Display makeDisplay(String foo, Program<Exp> init,
+	protected Display makeDisplay(String foo, Program<Exp<? extends Object>> init,
 			Env env, long start, long middle) {
 			Display ret = new Display(foo, init, env, start, middle);
 			return ret;
 	}
 
 	String last_str;
-	Program<Exp> last_prog;
+	Program<Exp<? extends Object>> last_prog;
 	Env last_env;
 
 	@Override
-	protected Env makeEnv(String str, Program<Exp> init) {
+	protected Env makeEnv(String str, Program<Exp<? extends Object>> init) {
 			last_env = Driver.makeEnv(str, init, toUpdate, last_str,
 					last_prog, last_env);
 			last_prog = init;

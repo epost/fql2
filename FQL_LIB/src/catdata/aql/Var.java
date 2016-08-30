@@ -1,6 +1,6 @@
 package catdata.aql;
 
-public class Var {
+public final class Var {
 
 	public final String var;
 

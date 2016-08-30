@@ -1,13 +1,6 @@
 package catdata.aql;
 
 import catdata.Unit;
-import catdata.aql.Exp.InstExp;
-import catdata.aql.Exp.MapExp;
-import catdata.aql.Exp.PragmaExp;
-import catdata.aql.Exp.QueryExp;
-import catdata.aql.Exp.SchExp;
-import catdata.aql.Exp.TransExp;
-import catdata.aql.Exp.TyExp;
 
 public enum Kind {
 
@@ -18,6 +11,28 @@ public enum Kind {
 	TRANSFORM (Transform.class, TransExp.class, Unit.class),
 	QUERY (Query.class, QueryExp.class, Frozen.class), 
 	PRAGMA (Pragma.class, PragmaExp.class, Unit.class); 
+	
+	@Override
+	public String toString() {
+		switch (this) {
+		case INSTANCE:
+			return "instance";
+		case MAPPING:
+			return "mapping";
+		case PRAGMA:
+			return "pragma";
+		case QUERY:
+			return "query";
+		case SCHEMA:
+			return "schema";
+		case TRANSFORM:
+			return "transform";
+		case TYPESIDE:
+			return "typeside";
+		default:
+			throw new RuntimeException();
+		}
+	}
 	
 	public final Class<?> literal;
 	public final Class<?> exp;
