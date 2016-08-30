@@ -36,6 +36,23 @@ import catdata.opl.OplTerm;
 
 public class Util {
 
+	@SuppressWarnings("unchecked")
+	public static <X> X[] sing(X x) {
+		return (X[]) new Object[] { x };
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <X,Y> Y[] map(X[] xs, Function<X,Y> f) {
+		return (Y[]) Arrays.asList(xs).stream().map(f).collect(Collectors.toList()).toArray();
+	}
+	
+	public static <X,Y> Y fold(X[] xs, Y y, Function<Pair<X,Y>,Y> f) {
+		for (X x : xs) {
+			y = f.apply(new Pair<>(x, y));
+		}
+		return y;
+	}
+	
 	@SafeVarargs
 	public static <X> List<X> list(X...xs) {
 		List<X> ret = new LinkedList<>();

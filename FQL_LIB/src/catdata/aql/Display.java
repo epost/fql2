@@ -36,8 +36,9 @@ public final class Display implements Disp {
 	public void close() {
 	}
 	
-	private static String doLookup(String c, Object o, Kind k) {
-		return k + " " + c;
+	//TODO unresolve, should be controllable with option [since expensive]
+	private static String doLookup(String c, Object o, Exp<?> exp) {
+		return exp.kind() + " " + c + exp.meta();
 	}
 	
 	JComponent wrapDisplay(Kind kind, Object obj) {
@@ -70,10 +71,10 @@ public final class Display implements Disp {
 			Object obj = env.get(c, exp.kind());
 			map.put(obj, c); 
 			try {
-				frames.add(new Pair<>(doLookup(c, obj, exp.kind()), wrapDisplay(exp.kind(), obj)));
+				frames.add(new Pair<>(doLookup(c, obj, exp), wrapDisplay(exp.kind(), obj)));
 			} catch (Exception ex) {
 				ex.printStackTrace();
-				frames.add(new Pair<>(doLookup(c, obj, exp.kind()), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
+				frames.add(new Pair<>(doLookup(c, obj, exp), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
 			}
 		}
 		long end = System.currentTimeMillis();

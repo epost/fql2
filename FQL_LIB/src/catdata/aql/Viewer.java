@@ -1,6 +1,14 @@
 package catdata.aql;
 
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 
 import catdata.ide.CodeTextPanel;
 
@@ -11,7 +19,18 @@ public final class Viewer {
 	} 
 	
 	public static JComponent view(Kind kind, Object obj) {
-		return new CodeTextPanel("", obj.toString());
+		JTabbedPane ret = new JTabbedPane();
+		
+		ret.add(new CodeTextPanel("", obj.toString()), "Text");
+		
+		JEditorPane pane = new JEditorPane();
+		pane.setEditable(false);
+		pane.setEditorKit(new HTMLEditorKit());
+		pane.setText("<html><a href=\"http://categoricaldata.net/fql.html\">click me</a><br><br>" + html(obj) + "</html>");
+		pane.addHyperlinkListener(new Hyperactive());
+		ret.add(new JScrollPane(pane), "HTML");
+		
+		return ret;
 		
 		/* switch (kind) {
 		case INSTANCE:
@@ -33,6 +52,24 @@ public final class Viewer {
 		} */
 	}
 
-	
+	static class Hyperactive implements HyperlinkListener {
+		 
+        public void hyperlinkUpdate(HyperlinkEvent e) {
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                JEditorPane pane = (JEditorPane) e.getSource();
+                if (e instanceof HTMLFrameHyperlinkEvent) {
+                    HTMLFrameHyperlinkEvent  evt = (HTMLFrameHyperlinkEvent)e;
+                    HTMLDocument doc = (HTMLDocument)pane.getDocument();
+                    doc.processHTMLFrameHyperlinkEvent(evt);
+                } else {
+                    try {
+                        pane.setPage(e.getURL());
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
 	
 }

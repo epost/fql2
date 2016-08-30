@@ -1,17 +1,85 @@
 package catdata.aql;
 
-public abstract class MapExp extends Exp<Mapping> {
+public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp<Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2>> {
 	
 	public Kind kind() {
 		return Kind.MAPPING;
 	}
 	
-	
-	public static final class MapExpVar extends MapExp {
-		String var;
+/////////////////////////////////////////////////////////////////////
+
+	public static final class MapExpId<Ty,En,Sym,Fk,Att> extends MapExp<Ty,En,Sym,Fk,Att,En,Sym,Fk,Att> {
 		
+		public String meta() {
+			return " : " + sch + " -> " + sch;
+		}
+		
+		public final SchExp<Ty,En,Sym,Fk,Att> sch;
+
+		public MapExpId(SchExp<Ty, En, Sym, Fk, Att> sch) {
+			if (sch == null) {
+				throw new RuntimeException("Attempt to create MapExpId with null schema");
+			}
+			this.sch = sch;
+		}
+
 		@Override
-		public Mapping eval(Env env) {
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((sch == null) ? 0 : sch.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			MapExpId<?,?,?,?,?> other = (MapExpId<?,?,?,?,?>) obj;
+			if (sch == null) {
+				if (other.sch != null)
+					return false;
+			} else if (!sch.equals(other.sch))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "id " + sch;
+		}
+
+		@Override
+		public Mapping<Ty, En, Sym, Fk, Att, En, Sym, Fk, Att> eval(Env env) {
+			return Mapping.id(sch.eval(env));
+		}
+		
+	}
+	
+//////////////////////////////////////////////////////////////////
+	
+	public static final class MapExpVar<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
+		public final String var;
+		
+		public String meta() {
+			return "";
+		}
+
+		
+		public MapExpVar(String var) {
+			if (var == null) {
+				throw new RuntimeException("Attempt to create MapExpVar with null var");
+			}
+			this.var = var;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> eval(Env env) {
 			return env.getMapping(var);
 		}
 
@@ -31,7 +99,7 @@ public abstract class MapExp extends Exp<Mapping> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			MapExpVar other = (MapExpVar) obj;
+			MapExpVar<?,?,?,?,?,?,?,?,?> other = (MapExpVar<?,?,?,?,?,?,?,?,?>) obj;
 			if (var == null) {
 				if (other.var != null)
 					return false;
@@ -42,17 +110,17 @@ public abstract class MapExp extends Exp<Mapping> {
 
 		@Override
 		public String toString() {
-			return "MapExpVar [var=" + var + "]";
-		}
-		
-		
+			return var;
+		}	
 	}
 
-	public static final class MapExpLit extends MapExp {
+/////////////////////////////////////////////////////////////////////
+	
+	public static final class MapExpLit<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
 
-		public final Mapping map;
+		public final Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> map;
 		
-		public MapExpLit(Mapping map) {
+		public MapExpLit(Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> map) {
 			if (map == null) {
 				throw new RuntimeException("Attempt to create MapExpLit with null schema");
 			}
@@ -60,7 +128,7 @@ public abstract class MapExp extends Exp<Mapping> {
 		}
 
 		@Override
-		public Mapping eval(Env env) {
+		public Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> eval(Env env) {
 			return map;
 		}
 
@@ -80,7 +148,7 @@ public abstract class MapExp extends Exp<Mapping> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			MapExpLit other = (MapExpLit) obj;
+			MapExpLit<?,?,?,?,?,?,?,?,?> other = (MapExpLit<?,?,?,?,?,?,?,?,?>) obj;
 			if (map == null) {
 				if (other.map != null)
 					return false;
@@ -92,6 +160,11 @@ public abstract class MapExp extends Exp<Mapping> {
 		@Override
 		public String toString() {
 			return "MapExpLit [map=" + map + "]";
+		}
+
+		@Override
+		public String meta() {
+			return "";
 		}
 		
 		

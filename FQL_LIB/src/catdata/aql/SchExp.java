@@ -17,6 +17,11 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 	public static final class SchExpInst<Ty,En,Sym,Att,Fk> extends SchExp<Ty,En,Sym,Att,Fk> {
 		public final InstExp<Ty,En,Sym,Att,Fk,?,?> inst;
 
+		@Override
+		public String meta() {
+			return "";
+		}
+		
 		public SchExpInst(InstExp<Ty, En, Sym, Att, Fk, ?, ?> inst) {
 			if (inst == null) {
 				throw new RuntimeException("Attempt to get schema for null instance");
@@ -51,7 +56,7 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 
 		@Override
 		public String toString() {
-			return "SchExpInst [inst=" + inst + "]";
+			return "schemaOf " + inst + "]";
 		}
 
 		@Override
@@ -102,7 +107,7 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 
 		@Override
 		public String toString() {
-			return "SchExpEmpty [typeSide=" + typeSide + "]";
+			return "empty " + typeSide;
 		}
 
 		@Override
@@ -110,7 +115,10 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 			return Schema.terminal(typeSide.eval(env));
 		}
 		
-		
+		@Override
+		public String meta() {
+			return " : " + typeSide;
+		}
 		
 	}
 	
@@ -161,10 +169,13 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 
 		@Override
 		public String toString() {
-			return "SchExpVar [var=" + var + "]";
+			return var;
 		}
 		
-		
+		@Override
+		public String meta() {
+			return "";
+		}
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -215,7 +226,10 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 			return "SchExpLit [schema=" + schema + "]";
 		}
 		
-		
+		@Override
+		public String meta() {
+			return "";
+		}
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -281,11 +295,10 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 
 	@Override
 	public String toString() {
-		return "RawSchema [typeSide=" + typeSide + ", ens=" + ens + ", atts=" + atts + ", fks=" + fks + ", eqs=" + eqs + ", options=" + options + "]";
+		return "SchExpRaw [typeSide=" + typeSide + ", ens=" + ens + ", atts=" + atts + ", fks=" + fks + ", eqs=" + eqs + ", options=" + options + "]";
 	}
 
 	public SchExpRaw(TyExp<String, String> typeSide, List<String> ens, List<Triple<String, String, String>> atts, List<Triple<String, String, String>> fks, List<Triple<Pair<String, String>, RawTerm, RawTerm>> eqs, List<Pair<String, String>> options) {
-		super();
 		this.typeSide = typeSide;
 		this.ens = ens;
 		this.atts = atts;
@@ -294,8 +307,11 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 		this.options = options;
 	}
 
-
-
+	@Override
+	public String meta() {
+		return " : " + typeSide;
+	}
+	
 	public final TyExp<String,String> typeSide;
 	
 	public final List<String> ens;

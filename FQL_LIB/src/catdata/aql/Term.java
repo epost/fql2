@@ -12,7 +12,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	public final Var var;
 	public final Sym sym;
-	public final Fk[] fks;
+	public final Fk[] fks; //ok to be empty
 	public final Att att;
 	public final Gen gen;
 	public final Sk sk;
@@ -111,24 +111,24 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			}
 			ret =  Chc.inLeft(t.second);
 		} else if (fks != null) {
-			int i = 0;
-			En src = fks.get(this.fks[0]).first;
+			Chc<Ty, En> u = arg.type(ctxt, ctxe, tys, syms, java_tys, ens, atts, fks, gens, sks);
+			if (u.left) {
+				throw new RuntimeException("In " + this + ", " + arg + " has type " + u.toStringMash() + " which is not an entity");
+			}
+			En src = u.r;
 			En dst = src;
 			Fk last = this.fks[0];
-			do { 	
-				Fk fk = this.fks[i];
-				Pair<En, En> t = fks.get(this.fks[i]);
+			for (Fk fk : this.fks) {	
+				Pair<En, En> t = fks.get(fk);
 				if (t == null) {
-					throw new RuntimeException("In " + this + ", " + this.fks[i] + " is not a foreign key");
+					throw new RuntimeException("In " + this + ", " + fk + " is not a foreign key");
 				}
 				if (!t.first.equals(dst)) {
-					throw new RuntimeException("In " + this + ", " + "target of " + last + " (" + src + ") is not source of " + fk + " (" + dst  + ")");
+					throw new RuntimeException("In " + this + ", " + "target of " + last + " [" + src + "] is not source of " + fk + " [" + dst  + "]");
 				}
 				dst = t.second;
 				last = fk;
-			} while (++i < this.fks.length); 
-				
-			Chc<Ty, En> u = arg.type(ctxt, ctxe, tys, syms, java_tys, ens, atts, fks, gens, sks);
+			} 				
 			if (!Chc.inRight(src).equals(u)) {
 				throw new RuntimeException("In " + this + ", " + "argument " + arg + " has sort " + u.toStringMash() + " but requires " + src);
 			}
@@ -340,4 +340,36 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return true;
 	}
 
+	//returns null if no var
+	public Var getOnlyVar() {
+		if (var != null) {
+			return var;
+		} else if (sym != null) {
+			Var var = null;
+			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args) {
+				Var var2 = arg.getOnlyVar();
+				if (var2 == null) {
+					continue;
+				}
+				if (var == null) {
+					var = var2;
+					continue;
+				}
+				if (!var.equals(var2)) {
+					return null;
+				}
+			}
+			return var;
+		} else if (fks != null || att != null) {
+			return arg.getOnlyVar();
+		} else if (gen != null || sk != null || obj != null) {
+			return null;
+		}
+		throw new RuntimeException("getOnlyVar encountered ill-formed term.  Should be impossible, please report");
+	}
+
+	
+	
+	
+	
 }

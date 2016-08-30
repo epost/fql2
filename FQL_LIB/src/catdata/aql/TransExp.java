@@ -1,19 +1,83 @@
 package catdata.aql;
 
-public abstract class TransExp extends Exp<Transform> {
+public abstract class TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> extends Exp<Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2>> {
 	
 	
 	public Kind kind() {
 		return Kind.TRANSFORM;
 	}
 	
+///////////////////////////////////////////////////////////////////////////////////////
 	
-
-	public static final class TransExpVar extends TransExp {
-		String var;
+public static final class TransExpId<Ty,En,Sym,Fk,Att,Gen,Sk> extends TransExp<Ty,En,Sym,Fk,Att,Gen,Sk,Gen,Sk> {
 		
+		public String meta() {
+			return " : " + inst + " -> " + inst;
+		}
+		
+		public final InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> inst;
+
+		public TransExpId(InstExp<Ty, En, Sym, Fk, Att, Gen, Sk> inst) {
+			if (inst == null) {
+				throw new RuntimeException("Attempt to create TransExpId with null instance");
+			}
+			this.inst = inst;
+		}
+
 		@Override
-		public Transform eval(Env env) {
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TransExpId<?,?,?,?,?,?,?> other = (TransExpId<?,?,?,?,?,?,?>) obj;
+			if (inst == null) {
+				if (other.inst != null)
+					return false;
+			} else if (!inst.equals(other.inst))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "id " + inst;
+		}
+
+		@Override
+		public Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk> eval(Env env) {
+			return Transform.id(inst.eval(env));
+		}
+		
+	}
+	
+///////////////////////////////////////////////////////////////////////////////////////	
+
+	public static final class TransExpVar<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> extends TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> {
+		public final String var;
+		
+		public TransExpVar(String var) {
+			this.var = var;
+		}
+
+		@Override
+		public String meta() {
+			return "";
+		}
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		public Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> eval(Env env) {
 			return env.getTransform(var);
 		}
 
@@ -33,7 +97,7 @@ public abstract class TransExp extends Exp<Transform> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			TransExpVar other = (TransExpVar) obj;
+			TransExpVar<?,?,?,?,?,?,?,?,?> other = (TransExpVar<?,?,?,?,?,?,?,?,?>) obj;
 			if (var == null) {
 				if (other.var != null)
 					return false;
@@ -44,17 +108,23 @@ public abstract class TransExp extends Exp<Transform> {
 
 		@Override
 		public String toString() {
-			return "TransExpVar [var=" + var + "]";
-		}
-		
+			return var;
+		}	
 		
 	}
 	
-	public static final class TransExpLit extends TransExp {
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static final class TransExpLit<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> extends TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> {
 
-		public final Transform trans;
+		public final Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> trans;
 		
-		public TransExpLit(Transform trans) {
+		@Override
+		public String meta() {
+			return "";
+		}
+		
+		public TransExpLit(Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> trans) {
 			if (trans == null) {
 				throw new RuntimeException("Attempt to create TransExpLit with null schema");
 			}
@@ -62,7 +132,7 @@ public abstract class TransExp extends Exp<Transform> {
 		}
 
 		@Override
-		public Transform eval(Env env) {
+		public Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> eval(Env env) {
 			return trans;
 		}
 
@@ -82,7 +152,7 @@ public abstract class TransExp extends Exp<Transform> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			TransExpLit other = (TransExpLit) obj;
+			TransExpLit<?,?,?,?,?,?,?,?,?> other = (TransExpLit<?,?,?,?,?,?,?,?,?>) obj;
 			if (trans == null) {
 				if (other.trans != null)
 					return false;

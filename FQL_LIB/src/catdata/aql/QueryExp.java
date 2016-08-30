@@ -42,10 +42,13 @@ public abstract class QueryExp extends Exp<Query> {
 
 		@Override
 		public String toString() {
-			return "QueryExpVar [var=" + var + "]";
+			return var;
 		}
 		
-		
+		@Override
+		public String meta() {
+			return "";
+		}
 	}
 
 	//TODO: add imports
@@ -96,7 +99,10 @@ public abstract class QueryExp extends Exp<Query> {
 			return "QueryExpLit [q=" + q + "]";
 		}
 		
-		
+		@Override
+		public String meta() {
+			return "";
+		}
 	}
 
 }

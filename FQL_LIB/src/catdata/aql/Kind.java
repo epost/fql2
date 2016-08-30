@@ -7,7 +7,7 @@ public enum Kind {
 	TYPESIDE (TypeSide.class, TyExp.class, DP.class),
 	SCHEMA (Schema.class, SchExp.class, DP.class),
 	INSTANCE (Instance.class, InstExp.class, Algebra.class),
-	MAPPING (Instance.class, MapExp.class, Unit.class),
+	MAPPING (Mapping.class, MapExp.class, Unit.class),
 	TRANSFORM (Transform.class, TransExp.class, Unit.class),
 	QUERY (Query.class, QueryExp.class, Frozen.class), 
 	PRAGMA (Pragma.class, PragmaExp.class, Unit.class); 

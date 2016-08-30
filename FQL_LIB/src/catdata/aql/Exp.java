@@ -8,6 +8,8 @@ public abstract class Exp<X> {
 	
 	public abstract X eval(Env env);
 	
+	public abstract String meta();
+	
 	@Override
 	public abstract String toString();
 	

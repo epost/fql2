@@ -7,6 +7,11 @@ import catdata.Triple;
 
 public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 	
+	@Override
+	public String meta() {
+		return "";
+	}
+	
 	public Kind kind() {
 		return Kind.TYPESIDE;
 	}
@@ -77,7 +82,7 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 	
 		@Override
 		public String toString() {
-			return "TyExpEmpty []";
+			return "empty";
 		}
 	
 		@Override
@@ -301,7 +306,7 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 
 		@Override
 		public String toString() {
-			return "TyExpVar [var=" + var + "]";
+			return var;
 		}
 		
 	}

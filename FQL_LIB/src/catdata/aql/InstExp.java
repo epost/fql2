@@ -50,15 +50,18 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 
 		@Override
 		public String toString() {
-			return "InstExpEmpty [schema=" + schema + "]";
+			return "empty " + schema;
 		}
 
 		@Override
 		public Instance<Ty, Sym, En, Att, Fk, Void, Void> eval(Env env) {
 			return Instance.terminal(schema.eval(env));
 		}
-		
-		
+
+		@Override
+		public String meta() {
+			return " : " + schema;
+		}
 		
 	}
 
@@ -105,10 +108,13 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 
 		@Override
 		public String toString() {
-			return "InstExpVar [var=" + var + "]";
+			return var;
 		}
 		
-		
+		@Override
+		public String meta() {
+			return "";
+		}
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -159,7 +165,10 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 			return "InstExpLit [inst=" + inst + "]";
 		}
 		
-		
+		@Override
+		public String meta() {
+			return "";
+		}
 	}
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -174,14 +183,10 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 
 		public final List<Pair<RawTerm, RawTerm>> path_eqs, obs_eqs;
 
-	
-
 		@Override
 		public String toString() {
 			return "InstExpRaw [options=" + options + ", schema=" + schema + ", gens=" + gens + ", sk=" + sk + ", path_eqs=" + path_eqs + ", obs_eqs=" + obs_eqs + "]";
 		}
-
-
 
 		@Override
 		public int hashCode() {
@@ -195,8 +200,6 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 			result = prime * result + ((sk == null) ? 0 : sk.hashCode());
 			return result;
 		}
-
-
 
 		@Override
 		public boolean equals(Object obj) {
@@ -255,6 +258,10 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 			return null;
 		}
 		
+		@Override
+		public String meta() {
+			return " : " + schema;
+		}
 	}
 
 }
