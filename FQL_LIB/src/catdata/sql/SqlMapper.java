@@ -10,8 +10,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
+import catdata.Util;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.Util;
 
 public class SqlMapper extends JPanel {
 

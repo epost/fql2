@@ -173,31 +173,42 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	//TODO: fix types in raws
+	
 	public static final class InstExpRaw extends InstExp<String,String,String,String,String,String,String> {
-		public final List<Pair<String, String>> options;
 
-		public final SchExp<String, String, String, String, String> schema;
+		public final SchExp<?, ?, ?, ?, ?> schema;
+		
+		public final List<String> imports;
 
 		public final List<Pair<String, String>> gens;
-		public final List<Pair<String, String>> sk;
 
-		public final List<Pair<RawTerm, RawTerm>> path_eqs, obs_eqs;
+		public final List<Pair<RawTerm, RawTerm>> eqs;
+		
+		public final List<Pair<String, String>> options;
 
-		@Override
+		public InstExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<Pair<String, String>> gens, List<Pair<RawTerm, RawTerm>> eqs, List<Pair<String, String>> options) {
+			this.schema = schema;
+			this.imports = imports;
+			this.gens = gens;
+			this.eqs = eqs;
+			this.options = options;
+		}
+
+			@Override
 		public String toString() {
-			return "InstExpRaw [options=" + options + ", schema=" + schema + ", gens=" + gens + ", sk=" + sk + ", path_eqs=" + path_eqs + ", obs_eqs=" + obs_eqs + "]";
+			return "InstExpRaw [schema=" + schema + ", imports=" + imports + ", gens=" + gens + ", eqs=" + eqs + ", options=" + options + "]";
 		}
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
+			result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
 			result = prime * result + ((gens == null) ? 0 : gens.hashCode());
-			result = prime * result + ((obs_eqs == null) ? 0 : obs_eqs.hashCode());
+			result = prime * result + ((imports == null) ? 0 : imports.hashCode());
 			result = prime * result + ((options == null) ? 0 : options.hashCode());
-			result = prime * result + ((path_eqs == null) ? 0 : path_eqs.hashCode());
 			result = prime * result + ((schema == null) ? 0 : schema.hashCode());
-			result = prime * result + ((sk == null) ? 0 : sk.hashCode());
 			return result;
 		}
 
@@ -210,46 +221,32 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 			if (getClass() != obj.getClass())
 				return false;
 			InstExpRaw other = (InstExpRaw) obj;
+			if (eqs == null) {
+				if (other.eqs != null)
+					return false;
+			} else if (!eqs.equals(other.eqs))
+				return false;
 			if (gens == null) {
 				if (other.gens != null)
 					return false;
 			} else if (!gens.equals(other.gens))
 				return false;
-			if (obs_eqs == null) {
-				if (other.obs_eqs != null)
+			if (imports == null) {
+				if (other.imports != null)
 					return false;
-			} else if (!obs_eqs.equals(other.obs_eqs))
+			} else if (!imports.equals(other.imports))
 				return false;
 			if (options == null) {
 				if (other.options != null)
 					return false;
 			} else if (!options.equals(other.options))
 				return false;
-			if (path_eqs == null) {
-				if (other.path_eqs != null)
-					return false;
-			} else if (!path_eqs.equals(other.path_eqs))
-				return false;
 			if (schema == null) {
 				if (other.schema != null)
 					return false;
 			} else if (!schema.equals(other.schema))
 				return false;
-			if (sk == null) {
-				if (other.sk != null)
-					return false;
-			} else if (!sk.equals(other.sk))
-				return false;
 			return true;
-		}
-
-		public InstExpRaw(List<Pair<String, String>> options, SchExp<String, String, String, String, String> schema, List<Pair<String, String>> gens, List<Pair<String, String>> sk, List<Pair<RawTerm, RawTerm>> path_eqs, List<Pair<RawTerm, RawTerm>> obs_eqs) {
-			this.options = options;
-			this.schema = schema;
-			this.gens = gens;
-			this.sk = sk;
-			this.path_eqs = path_eqs;
-			this.obs_eqs = obs_eqs;
 		}
 
 		@Override
@@ -262,6 +259,10 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 		public String meta() {
 			return " : " + schema;
 		}
+
+		
+		
+		
 	}
 
 }

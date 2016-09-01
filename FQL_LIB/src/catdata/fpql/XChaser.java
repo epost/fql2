@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Util;
 import catdata.fpql.XExp.XSuperED;
 import catdata.fpql.XExp.XSuperED.SuperFOED;
 import catdata.fqlpp.cat.FinSet;
-import catdata.ide.Util;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class XChaser {

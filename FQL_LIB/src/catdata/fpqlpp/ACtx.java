@@ -7,7 +7,7 @@ import java.util.Map;
 
 import catdata.Chc;
 import catdata.Pair;
-import catdata.ide.Util;
+import catdata.Util;
 import catdata.opl.OplParser.DoNotIgnore;
 
 public class ACtx<T,E,V> {

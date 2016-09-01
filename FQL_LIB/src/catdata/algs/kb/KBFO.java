@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import catdata.Pair;
-import catdata.Utils;
+import catdata.Util;
 
 public abstract class KBFO<S,C,V> {
 	
@@ -96,7 +96,7 @@ public abstract class KBFO<S,C,V> {
 			if (es.isEmpty() && !isAnd) {
 				return "false";
 			}
-			return "(" + Utils.sep(es, sep) + ")";
+			return "(" + Util.sep(es, sep) + ")";
 		}
 	}
 	
@@ -324,7 +324,7 @@ public abstract class KBFO<S,C,V> {
 		public String toString() {
 			List<String> vars0 = vars.stream().map(x -> x.first + ":" + x.second).collect(Collectors.toList());
 			String pre = isForall ? "forall " : "exists ";
-			return pre + Utils.sep(vars0, ", ") + " . " + e;
+			return pre + Util.sep(vars0, ", ") + " . " + e;
 		}
 	}
 	

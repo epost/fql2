@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
+import catdata.Util;
 import catdata.algs.kb.KB_Thue;
 import catdata.fqlpp.FUNCTION;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Util;
 
 //this requires finite denotations (paths always normalized)
 @SuppressWarnings("serial")

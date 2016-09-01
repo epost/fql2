@@ -3,6 +3,7 @@ package catdata.aql;
 import java.util.List;
 
 import catdata.Pair;
+import catdata.Quad;
 import catdata.Triple;
 
 public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
@@ -103,20 +104,20 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 
 		public final List<String> imports;
 		public final List<String> types;
-		public final List<Pair<String, String>> constants;
 		public final List<Triple<String, List<String>, String>> functions;
 		public final List<Triple<List<Pair<String, String>>, RawTerm, RawTerm>> eqs;
 
 		public final List<Pair<String, String>> java_tys_string;
 		public final List<Pair<String, String>> java_parser_string;
-		public final List<Pair<String, String>> java_fns_string;
+		public final List<Quad<String, List<String>, String, String>> java_fns_string;
 		
 		public final List<Pair<String, String>> options;
-		
-		public TyExpRaw(List<String> imports, List<String> types, List<Pair<String, String>> constants, List<Triple<String, List<String>, String>> functions, List<Triple<List<Pair<String, String>>, RawTerm, RawTerm>> eqs, List<Pair<String, String>> java_tys_string, List<Pair<String, String>> java_parser_string, List<Pair<String, String>> java_fns_string, List<Pair<String, String>> options) {
+
+		/*
+	                    List<String>,         List<String>,       List<Triple<String, List<String>, String>>,           List<Triple<String,List<String>,String>>, List<Triple<List<Pair<String,String>>,RawTerm,RawTerm>>, List<Pair<String,String>>, List<Pair<String,String>>, List<Quad<String,List<String>,String,String>>) is undefined	 */
+		public TyExpRaw(List<String> imports, List<String> types, List<Triple<String, List<String>, String>> functions, List<Triple<List<Pair<String, String>>, RawTerm, RawTerm>> eqs, List<Pair<String, String>> java_tys_string, List<Pair<String, String>> java_parser_string, List<Quad<String, List<String>, String, String>> java_fns_string, List<Pair<String, String>> options) {
 			this.imports = imports;
 			this.types = types;
-			this.constants = constants;
 			this.functions = functions;
 			this.eqs = eqs;
 			this.java_tys_string = java_tys_string;
@@ -129,7 +130,6 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((constants == null) ? 0 : constants.hashCode());
 			result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
 			result = prime * result + ((functions == null) ? 0 : functions.hashCode());
 			result = prime * result + ((imports == null) ? 0 : imports.hashCode());
@@ -149,11 +149,6 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 			if (getClass() != obj.getClass())
 				return false;
 			TyExpRaw other = (TyExpRaw) obj;
-			if (constants == null) {
-				if (other.constants != null)
-					return false;
-			} else if (!constants.equals(other.constants))
-				return false;
 			if (eqs == null) {
 				if (other.eqs != null)
 					return false;
@@ -198,7 +193,7 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 		}
 		@Override
 		public String toString() {
-			return "RawTypeSide [imports=" + imports + ", types=" + types + ", constants=" + constants + ", functions=" + functions + ", eqs=" + eqs + ", java_tys_string=" + java_tys_string + ", java_parser_string=" + java_parser_string + ", java_fns_string=" + java_fns_string + ", options=" + options + "]";
+			return "RawTypeSide [imports=" + imports + ", types=" + types + ", functions=" + functions + ", eqs=" + eqs + ", java_tys_string=" + java_tys_string + ", java_parser_string=" + java_parser_string + ", java_fns_string=" + java_fns_string + ", options=" + options + "]";
 		}
 		
 		

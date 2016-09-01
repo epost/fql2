@@ -13,10 +13,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import catdata.EqProver;
 import catdata.Pair;
 import catdata.Triple;
-import catdata.Utils;
+import catdata.Util;
 import catdata.algs.kb.KBExp.KBApp;
 import catdata.algs.kb.KBExp.KBVar;
 
@@ -331,7 +330,7 @@ public class KB<C, V> extends EqProver<C, V> {
 			ret.put(v, ee.var);
 		}
 		
-		return Utils.isBijection(ret, ret.keySet(), new HashSet<>(ret.values()));
+		return Util.isBijection(ret, ret.keySet(), new HashSet<>(ret.values()));
 		
 	} */
 	
@@ -416,7 +415,7 @@ public class KB<C, V> extends EqProver<C, V> {
 			for (Pair<KBExp<C, V>, KBExp<C, V>> r : R) {
 				Set<Pair<KBExp<C, V>, KBExp<C, V>>> R0 = new HashSet<>(R);
 				R0.remove(r);
-				KBExp<C, V> new_rhs = red(null, Utils.append(E,G), R0, r.second);
+				KBExp<C, V> new_rhs = red(null, Util.append(E,G), R0, r.second);
 				if (!new_rhs.equals(r.second)) {
 					to_remove = r;
 					to_add = new Pair<>(r.first, new_rhs);
@@ -453,12 +452,12 @@ public class KB<C, V> extends EqProver<C, V> {
 			if (!isCompleteGround) {
 				throw new RuntimeException("Cannot find ground normal form for ground incomplete system.");
 			}
-			return red(null, Utils.append(E,G), R, e);
+			return red(null, Util.append(E,G), R, e);
 		}
 		if (!isComplete) {
 			throw new RuntimeException("Cannot find normal form for incomplete system.\n\n" + this);
 		}
-		return red(null, Utils.append(E,G), R, e);
+		return red(null, Util.append(E,G), R, e);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -544,7 +543,7 @@ public class KB<C, V> extends EqProver<C, V> {
 			}
 		});
 				
-		return (Utils.sep(R0, "\n\n") + "\n\nE--\n\n" + Utils.sep(E0, "\n\n") + "\n\nG--\n\n" + Utils.sep(G0, "\n\n")).trim();
+		return (Util.sep(R0, "\n\n") + "\n\nE--\n\n" + Util.sep(E0, "\n\n") + "\n\nG--\n\n" + Util.sep(G0, "\n\n")).trim();
 	}
 	
 	protected static String stripOuter(String s) {
@@ -574,7 +573,7 @@ public class KB<C, V> extends EqProver<C, V> {
 		//	errs.add("iteration " + i + ", post, e=" + e + " and e0= " + e0);
 			if (i > options.red_its) {
 				throw new RuntimeException(
-						"Reduction taking too long (>" + options.red_its + "):" + orig + " goes to " + e0 + " under\n\neqs:" + Utils.sep(E,"\n") + "\n\nreds:"+ Utils.sep(R,"\n"));
+						"Reduction taking too long (>" + options.red_its + "):" + orig + " goes to " + e0 + " under\n\neqs:" + Util.sep(E,"\n") + "\n\nreds:"+ Util.sep(R,"\n"));
 					//	+ "\n\n and \ne=" + e + " and \ne0=" + e0 + " and \ne=e0=" + e.equals(e0) + " and \ne0=e=" + e0.equals(e) + " e=e0asptr=" + (e == e0) + 
 						//"\nehash=" + e.hashCode() + "\ne0hash=" + e0.hashCode() + "\n" + Util.sep(errs, "\n"));
 			}
@@ -849,8 +848,8 @@ public class KB<C, V> extends EqProver<C, V> {
 			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> set) {
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> p = new HashSet<>();
 		for (Pair<KBExp<C, V>, KBExp<C, V>> e : set) {
-			KBExp<C, V> lhs = red(new HashMap<>(), Utils.append(E,G), R, e.first);
-			KBExp<C, V> rhs = red(new HashMap<>(), Utils.append(E,G), R, e.second);
+			KBExp<C, V> lhs = red(new HashMap<>(), Util.append(E,G), R, e.first);
+			KBExp<C, V> rhs = red(new HashMap<>(), Util.append(E,G), R, e.second);
 			if (lhs.equals(rhs)) {
 				continue;
 			}
@@ -1147,8 +1146,8 @@ public class KB<C, V> extends EqProver<C, V> {
 
 	protected boolean allCpsConfluent(boolean print, boolean ground, String s, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> set) {
 		outer: for (Pair<KBExp<C, V>, KBExp<C, V>> e : set) {
-			KBExp<C, V> lhs = red(new HashMap<>(), Utils.append(E,G), R, e.first);
-			KBExp<C, V> rhs = red(new HashMap<>(), Utils.append(E,G), R, e.second);
+			KBExp<C, V> lhs = red(new HashMap<>(), Util.append(E,G), R, e.first);
+			KBExp<C, V> rhs = red(new HashMap<>(), Util.append(E,G), R, e.second);
 			if (!lhs.equals(rhs)) {
 				if (!ground) {
 					System.out.println("regular badness on " + s + " e= " + e + " | lhs=" + lhs + " | rhs=" + rhs);
@@ -1179,7 +1178,7 @@ public class KB<C, V> extends EqProver<C, V> {
 		List<String> a = E.stream().map(x -> x.first + " = " + x.second).collect(Collectors.toList());
 		List<String> b = R.stream().map(x -> x.first + " -> " + x.second).collect(Collectors.toList());
 		
-		return (Utils.sep(a, "\n") + "\n" + Utils.sep(b, "\n")).trim();
+		return (Util.sep(a, "\n") + "\n" + Util.sep(b, "\n")).trim();
 	} 
 	
 	private static Comparator<Object> ToStringComparator = new Comparator<Object>() {

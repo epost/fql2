@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import catdata.ide.Util;
+import catdata.Util;
 
 public class SqlTable {
 

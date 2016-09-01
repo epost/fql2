@@ -29,9 +29,9 @@ import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Tuple3;
 
 import catdata.Pair;
+import catdata.Util;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
-import catdata.ide.Util;
 
 
 public class CfgToOpl {

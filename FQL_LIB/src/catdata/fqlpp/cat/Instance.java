@@ -8,10 +8,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import catdata.Unit;
-import catdata.Utils;
+import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
-import catdata.ide.Util;
 
 @SuppressWarnings("serial")
 public class Instance<O, A> implements Serializable{
@@ -194,7 +193,7 @@ public class Instance<O, A> implements Serializable{
 			if (cache.containsKey(px)) {
 				x = cache.get(px);
 			} else {
-				x = Utils.compose0(x, em.get(e));
+				x = Util.compose0(x, em.get(e));
 				cache.put(px, x);
 			}
 		}

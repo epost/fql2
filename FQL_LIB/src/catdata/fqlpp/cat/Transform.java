@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.Set;
 
 import catdata.Pair;
+import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Util;
 
 @SuppressWarnings("serial")
 public class Transform<O1, A1, O2, A2> implements Serializable {

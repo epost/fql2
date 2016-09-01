@@ -13,8 +13,8 @@ import java.util.function.Function;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Unit;
+import catdata.Util;
 import catdata.fqlpp.FUNCTION;
-import catdata.ide.Util;
 
 @SuppressWarnings("serial")
 public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {

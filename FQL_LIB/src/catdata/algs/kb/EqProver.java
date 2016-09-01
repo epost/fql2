@@ -1,9 +1,7 @@
-package catdata;
+package catdata.algs.kb;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import catdata.algs.kb.KBExp;
 
 public abstract class EqProver<C,V> {
 	

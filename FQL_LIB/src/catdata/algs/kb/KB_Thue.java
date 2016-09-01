@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Quad;
-import catdata.Utils;
+import catdata.Util;
 
 /**
  * @author Ryan Wisnesky
@@ -379,14 +379,14 @@ public class KB_Thue<Y> {
 	@Override
 	public String toString() {
 		Set<String> ret = rules.stream().map(x -> {
-			String s1 = Utils.sep(x.first, ".");
-			String s2 = Utils.sep(x.second, ".");
+			String s1 = Util.sep(x.first, ".");
+			String s2 = Util.sep(x.second, ".");
 			if (x.first.size() == x.second.size()) {
 				return "  " + s1 + " = " + s2;
 			}
 			return "  " + s1 + " -> " + s2;
 		}).collect(Collectors.toSet());
-		return Utils.sep(ret, "\n");
+		return Util.sep(ret, "\n");
 	}
 
 }

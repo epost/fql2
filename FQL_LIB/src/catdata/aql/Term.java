@@ -6,7 +6,7 @@ import java.util.Set;
 
 import catdata.Chc;
 import catdata.Pair;
-import catdata.ide.Util;
+import catdata.Util;
 
 public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 

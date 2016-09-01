@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import catdata.ide.Util;
+import catdata.Util;
 
 //TODO: can store these not as sets, but as maps from primary key
 public class SqlInstance {

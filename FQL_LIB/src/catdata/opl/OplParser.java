@@ -23,10 +23,10 @@ import org.codehaus.jparsec.functors.Tuple5;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Util;
 import catdata.fpql.XExp;
 import catdata.ide.NEWDEBUG;
 import catdata.ide.Program;
-import catdata.ide.Util;
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplChaseExp;
 import catdata.opl.OplExp.OplColim;
@@ -894,7 +894,7 @@ public class OplParser {
 			try {
 				int i = Integer.parseInt(a0);
 				if (sugarForNat) {
-					return Util.natToTerm(i);
+					return Util.natToTerm(i); 
 				} else {
 					// return new OplTerm(a0);
 				}
@@ -1722,9 +1722,9 @@ public class OplParser {
 		
 		Parser<?> where = Parsers.tuple(term("where"), Parsers.tuple(oplTerm(), term("="), oplTerm()).sepBy(term("and")));
 		
-		Parser<?> xxx = Parsers.tuple(term("("), Parsers.tuple(oplTerm(), term("as"), ident()).sepBy(term(",")), term(")"));
+		Parser<?> zzz = Parsers.tuple(term("("), Parsers.tuple(oplTerm(), term("as"), ident()).sepBy(term(",")), term(")"));
 		
-		Parser<?> retAs = Parsers.tuple(Parsers.or(xxx, oplTerm()), term("as"), ident());
+		Parser<?> retAs = Parsers.tuple(Parsers.or(zzz, oplTerm()), term("as"), ident());
 		
 		Parser<?> ret = Parsers.tuple(term("select"), retAs.sepBy(term(",")));
 		
@@ -1732,17 +1732,20 @@ public class OplParser {
 		return p;
 	}
 	
+	//static Parser eee = Parsers.or(term("="), Parsers.tuple(term(":"), term("=")));
+	
 	public static final Parser<?> block() {
+		Parser eee = Parsers.or(term("="), Parsers.tuple(term(":"), term("=")));
 		Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(","))
 				.between(term("for"), term(";"));
 		Parser p2 = Parsers.tuple(oplTerm(), term("="), oplTerm())
 				.sepBy(term(",")).between(term("where"), term(";"));
-		Parser p3 = Parsers.tuple(ident(), term("="), oplTerm())
+		Parser p3 = Parsers.tuple(ident(), eee, oplTerm())
 				.sepBy(term(",")).between(term("return"), term(";"));
 
-		Parser q = Parsers.tuple(ident(), term("="), oplTerm())
+		Parser q = Parsers.tuple(ident(), eee, oplTerm())
 				.sepBy(term(",")).between(term("{"), term("}"));
-		Parser a = Parsers.tuple(ident(), term("="), q, term(":"), ident());
+		Parser a = Parsers.tuple(ident(), eee, q, term(":"), ident());
 		Parser p4 = a.sepBy(term(",")).between(term("keys"), term(";"));
 
 		Parser p = Parsers.tuple(p1, p2, p3, p4);
@@ -1750,7 +1753,8 @@ public class OplParser {
 	}
 
 	public static final Parser<?> query() {
-		Parser p = Parsers.tuple(ident(), term("="), block(), term(":"),
+		Parser eee = Parsers.or(term("="), Parsers.tuple(term(":"), term("=")));
+		Parser p = Parsers.tuple(ident(), eee, block(), term(":"),
 				ident());
 		Parser p2 = p.sepBy(term(",")).between(term("{"), term("}"))
 				.between(term("query"), term(":"));

@@ -12,8 +12,8 @@ import javax.script.ScriptException;
 
 import catdata.Chc;
 import catdata.Pair;
+import catdata.Util;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Util;
 import catdata.opl.OplExp.OplSetInst;
 import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplParser.DoNotIgnore;

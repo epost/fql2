@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Util;
 import catdata.fpql.XExp.Apply;
 import catdata.fpql.XExp.Compose;
 import catdata.fpql.XExp.FLOWER2;
@@ -51,7 +52,6 @@ import catdata.fpql.XExp.XTy;
 import catdata.fpql.XExp.XUberPi;
 import catdata.fpql.XExp.XUnit;
 import catdata.fpql.XExp.XVoid;
-import catdata.ide.Util;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 

@@ -13,9 +13,9 @@ import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
 
 import catdata.Pair;
+import catdata.Util;
 import catdata.ide.CodeEditor;
 import catdata.ide.Language;
-import catdata.ide.Util;
 
 @SuppressWarnings("serial")
 public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {

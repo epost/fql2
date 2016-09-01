@@ -36,11 +36,11 @@ import org.codehaus.jparsec.functors.Tuple5;
 
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Util;
 import catdata.fpql.XExp.XInst;
 import catdata.fpql.XExp.XSchema;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
-import catdata.ide.Util;
 
 /**
  * 

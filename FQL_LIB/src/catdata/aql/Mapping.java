@@ -7,8 +7,7 @@ import java.util.Map;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Unit;
-import catdata.Utils;
-import catdata.ide.Util;
+import catdata.Util;
 
 public final class Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
 	
@@ -25,7 +24,7 @@ public final class Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
 		if (s == null) {
 			throw new RuntimeException("Attempt to create identity mapping with null schema");
 		}
-		Map<En, En> ens = Utils.id(s.ens);
+		Map<En, En> ens = Util.id(s.ens);
 		Map<Fk,  Fk[]> fks = new HashMap<>();
 		for (Fk fk : s.fks.keySet()) {
 			fks.put(fk, Util.sing(fk));

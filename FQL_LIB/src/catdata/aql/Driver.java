@@ -18,7 +18,7 @@ public final class Driver {
 	
 	
 
-	public static  Env makeEnv(String str,
+	public static Env makeEnv(String str,
 			Program<Exp<? extends Object>> init, String[] toUpdate, String last_str,
 			Program<Exp<? extends Object>> last_prog, Env last_env) {
 		Env env = new Env();
@@ -75,6 +75,9 @@ public final class Driver {
 			}
 			try {
 				Object val = exp.eval(env);
+				if (val == null) {
+					throw new RuntimeException("null result on " + exp);
+				}
 				env.put(n, k, val);
 				if (toUpdate != null) {
 					toUpdate[0] = "Last Processed: " + k;

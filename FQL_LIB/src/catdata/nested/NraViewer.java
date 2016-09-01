@@ -39,10 +39,10 @@ import org.codehaus.jparsec.functors.Tuple4;
 
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Util;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
 import catdata.ide.Language;
-import catdata.ide.Util;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class NraViewer {

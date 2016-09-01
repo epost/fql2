@@ -10,7 +10,7 @@ import java.util.Set;
 
 import catdata.Pair;
 import catdata.Triple;
-import catdata.Utils;
+import catdata.Util;
 
 /**
  * 
@@ -286,9 +286,9 @@ public abstract class KBExp<C, V> {
 				return "(" + args.get(0) + " " + f + " " + args.get(1) + ")";
 			}
 			if (args.size() == 1 && !args.get(0).isVar && args.get(0).getApp().args.size() == 2) {
-				return f + Utils.sep(args, ",");
+				return f + Util.sep(args, ",");
 			}
-			return f + "(" + Utils.sep(args, ",") + ")";
+			return f + "(" + Util.sep(args, ",") + ")";
 		}
 
 		@Override

@@ -36,14 +36,13 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
-import catdata.Utils;
+import catdata.Util;
 import catdata.algs.kb.KB;
 import catdata.algs.kb.KBExp;
 import catdata.fqlpp.cat.FinSet;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Environment;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Util;
 import catdata.opl.OplParser.DoNotIgnore;
 import catdata.opl.OplQuery.Block;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
@@ -4573,7 +4572,7 @@ public abstract class OplExp implements OplObject {
 			if (mapping != null) {
 				return mapping;
 			}
-			Map<S, S> sorts = Utils.id(src.sig.sorts);
+			Map<S, S> sorts = Util.id(src.sig.sorts);
 
 			Map<Chc<C, X>, Pair<OplCtx<S, V>, OplTerm<Chc<C, Y>, V>>> symbols = new HashMap<>();
 			for (C c : src.sig.symbols.keySet()) {

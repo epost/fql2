@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Triple;
-import catdata.ide.Util;
+import catdata.Util;
 
 public class SqlSchema {
 	

@@ -14,11 +14,11 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
+import catdata.Util;
 import catdata.fpql.XExp.FLOWER2;
 import catdata.fpql.XExp.Flower;
 import catdata.fpql.XExp.XBool;
 import catdata.fpql.XPoly.Block;
-import catdata.ide.Util;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class XProd {

@@ -12,8 +12,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Pair;
+import catdata.Util;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Util;
 
 @SuppressWarnings("serial")
 public class LeftKan<O1, A1, O2, A2> implements Serializable {

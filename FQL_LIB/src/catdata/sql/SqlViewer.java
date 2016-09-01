@@ -20,7 +20,7 @@ import javax.swing.UIManager;
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Chc;
-import catdata.ide.Util;
+import catdata.Util;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;

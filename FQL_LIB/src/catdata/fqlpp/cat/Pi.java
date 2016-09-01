@@ -13,10 +13,10 @@ import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
 import catdata.Unit;
+import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Util;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class Pi {

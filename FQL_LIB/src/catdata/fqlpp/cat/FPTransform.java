@@ -6,10 +6,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import catdata.Utils;
+import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
-import catdata.ide.Util;
 
 @SuppressWarnings("serial")
 public class FPTransform<O, A> implements Serializable {
@@ -114,9 +113,9 @@ public class FPTransform<O, A> implements Serializable {
 			}
 		}
 		for (Signature<O, A>.Edge f : src.thesig.edges) {
-			Map<Object, Object> lhs = Utils.compose0(data.get(f.source),
+			Map<Object, Object> lhs = Util.compose0(data.get(f.source),
 					dst.em.get(f));
-			Map<Object, Object> rhs = Utils.compose0(src.em.get(f),
+			Map<Object, Object> rhs = Util.compose0(src.em.get(f),
 					data.get(f.target));
 
 			if (!lhs.equals(rhs)) {
@@ -145,7 +144,7 @@ public class FPTransform<O, A> implements Serializable {
 		}
 		Map<Signature<O,A>.Node, Map<Object,Object>> m = new HashMap<>();
 		for (Signature<O,A>.Node k : f.src.thesig.nodes) {
-			m.put(k, Utils.compose0(f.data.get(k), g.data.get(k)));
+			m.put(k, Util.compose0(f.data.get(k), g.data.get(k)));
 		}
 		return new FPTransform<>(f.src, g.dst, m);
 	}

@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
+import catdata.Util;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Util;
 
 public abstract class XExp {
 	

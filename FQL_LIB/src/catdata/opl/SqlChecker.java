@@ -49,9 +49,9 @@ import org.codehaus.jparsec.functors.Tuple4;
 
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Util;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
-import catdata.ide.Util;
 import catdata.sql.SqlColumn;
 import catdata.sql.SqlForeignKey;
 import catdata.sql.SqlLoader;

@@ -22,9 +22,9 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import catdata.Util;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
-import catdata.ide.Util;
 
 public class SqlLoader extends JPanel {
 

@@ -18,9 +18,9 @@ import javax.swing.JTabbedPane;
 
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Util;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Util;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class XPoly<C,D> extends XExp implements XObject {

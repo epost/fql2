@@ -3,7 +3,7 @@ package catdata.fqlpp;
 import java.io.Serializable;
 import java.util.Set;
 
-import catdata.ide.Util;
+import catdata.Util;
 
 @SuppressWarnings("serial")
 public abstract class SetExp implements Serializable {

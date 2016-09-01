@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Unit;
+import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
-import catdata.ide.Util;
 
 @SuppressWarnings({"unchecked", "rawtypes", "serial"})
 public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A, Set, Fn>> {

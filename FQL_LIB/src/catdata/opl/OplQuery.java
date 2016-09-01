@@ -18,10 +18,10 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
+import catdata.Util;
 import catdata.algs.kb.KBExp;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Util;
 
 
 public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObject {

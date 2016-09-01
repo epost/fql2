@@ -1,4 +1,4 @@
-package catdata.ide;
+package catdata;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -28,14 +28,114 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.table.TableRowSorter;
 
-import catdata.Chc;
-import catdata.Pair;
-import catdata.Utils;
 import catdata.fqlpp.FUNCTION;
+import catdata.ide.MyTableRowSorter;
 import catdata.opl.OplTerm;
 
 public class Util {
 
+	public static <X> List<X> newIfNull(List<X> l) {
+		return l == null ? new LinkedList<>() : l;
+	}
+	
+	public static String sep(Collection<?> c, String sep) {
+		return sep(c.iterator(), sep);
+	}
+
+	public static String sep(Iterator<?> c, String sep) {
+		String ret = "";
+		boolean b = false;
+		while (c.hasNext()) {
+			Object o = c.next();
+			if (b) {
+				ret += sep;
+			}
+			b = true;
+
+			ret += o;
+		}
+		return ret;
+	} 
+	
+	public static <X,Y> boolean isBijection(Map<X, Y> m, Set<X> X, Set<Y> Y) {
+		if (!m.keySet().equals(X)) {
+			return false;
+		}
+		if (!new HashSet<>(m.values()).equals(Y)) {
+			return false;
+		}
+		Map<Y,X> n = rev(m, Y);
+		if (n == null) {
+			return false;
+		}
+		
+		Map<X,X> a = compose0(m, n);
+		Map<Y,Y> b = compose0(n, m);
+		
+		if (!a.equals(id(X))) {
+			return false;
+		}
+		if (!b.equals(id(Y))) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
+	
+	public static <X> Map<X, X> id(Collection<X> X) {
+		Map<X, X> ret = new HashMap<>();
+		for (X x : X) {
+			ret.put(x, x);
+		}
+		return ret;
+	}
+	
+	public static <X,Y> X rev(Map<X, Y> m, Y y) {
+		X x = null;
+		for (X x0 : m.keySet()) {
+			Y y0 = m.get(x0);
+			if (y0.equals(y)) {
+				if (x != null) {
+					return null;
+				}
+				x = x0;
+			}
+		}
+		return x;
+	}
+
+	public static <A, B, C> Map<A, C> compose0(Map<A, B> x, Map<B, C> y) {
+		Map<A, C> ret = new HashMap<>();
+
+		for (Entry<A,B> a : x.entrySet()) {
+			ret.put(a.getKey(), y.get(a.getValue()));
+		}
+		
+		return ret;
+	}
+	
+	public static <X,Y> Map<Y,X> rev(Map<X, Y> m, Set<Y> Y) {
+		Map<Y,X> ret = new HashMap<>();
+		
+		for (Y y : Y) {
+			X x = rev(m, y);
+			if (x == null) {
+				return null;
+			}
+			ret.put(y, x);
+		}
+		
+		return ret;
+	}
+	
+	public static <X> List<X> append(List<X> x, List<X> y) {
+		List<X> ret = new LinkedList<>(x);
+		ret.addAll(y);
+		return ret;
+	}	
+	
 	@SuppressWarnings("unchecked")
 	public static <X> X[] sing(X x) {
 		return (X[]) new Object[] { x };
@@ -242,7 +342,7 @@ public class Util {
 	};
 
 	public static <X, Y> Map<Y, X> rev0(Map<X, Y> m) {
-		return Utils.rev(m, new HashSet<>(m.values()));
+		return Util.rev(m, new HashSet<>(m.values()));
 	}
 
 	public static <X, Y> Map<Y, Set<X>> revS(Map<X, Y> m) {
@@ -375,9 +475,7 @@ public class Util {
 		// return s.replace("[", "{").replace("]", "}");
 	} 
 
-	public static String sep(Collection<?> c, String sep) {
-		return sep(c.iterator(), sep);
-	}
+	
 
 	public static <X, Y> List<Y> proj2(List<Pair<X, Y>> l) {
 		return l.stream().map(x -> x.second).collect(Collectors.toList());
@@ -403,20 +501,7 @@ public class Util {
 		return ret;
 	}
 
-	public static String sep(Iterator<?> c, String sep) {
-		String ret = "";
-		boolean b = false;
-		while (c.hasNext()) {
-			Object o = c.next();
-			if (b) {
-				ret += sep;
-			}
-			b = true;
-
-			ret += o;
-		}
-		return ret;
-	}
+	
 
 	public static String q(Object o) {
 		if (o == null) {

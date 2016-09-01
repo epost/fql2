@@ -5,7 +5,7 @@ import java.util.List;
 
 import catdata.Pair;
 import catdata.Unit;
-import catdata.ide.Util;
+import catdata.Util;
 import catdata.mpl.Mpl.MplExp.MplSch;
 import catdata.mpl.Mpl.MplTerm;
 import catdata.mpl.Mpl.MplTerm.MplAlpha;

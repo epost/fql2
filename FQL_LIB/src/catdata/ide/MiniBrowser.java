@@ -9,6 +9,7 @@ import javax.swing.event.*;
 import javax.swing.text.html.*;
 
 // The Simple Web Browser.
+@SuppressWarnings({ "rawtypes", "serial" })
 public class MiniBrowser extends JFrame implements HyperlinkListener {
 	// These are the buttons for iterating through the page list.
 	private JButton backButton, forwardButton;
@@ -155,6 +156,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 	/*
 	 * Show the specified page and add it to the page list if specified.
 	 */
+	@SuppressWarnings("unchecked")
 	private void showPage(URL pageUrl, boolean addToList) {
 		// Show hour glass cursor while crawling is under way.
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -230,6 +232,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 	}
 
 	// Run the Mini Browser.
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args)  {
 		MiniBrowser browser = new MiniBrowser();
 		browser.show();

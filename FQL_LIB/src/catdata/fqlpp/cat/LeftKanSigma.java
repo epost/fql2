@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Quad;
+import catdata.Util;
 import catdata.fqlpp.cat.FinSet.Fn;
-import catdata.ide.Util;
 
 public class LeftKanSigma {
 	/*

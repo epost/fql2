@@ -15,10 +15,10 @@ import javax.swing.JTextField;
 
 import catdata.Pair;
 import catdata.Unit;
+import catdata.Util;
 import catdata.algs.kb.KBOptions;
 import catdata.ide.Language;
 import catdata.ide.Options;
-import catdata.ide.Util;
 
 public class OplOptions extends Options implements Cloneable {
 

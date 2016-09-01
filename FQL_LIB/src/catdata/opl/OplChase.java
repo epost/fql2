@@ -11,7 +11,7 @@ import java.util.function.Function;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
-import catdata.ide.Util;
+import catdata.Util;
 import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplPresTrans;

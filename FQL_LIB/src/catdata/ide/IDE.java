@@ -1,4 +1,4 @@
-package catdata;
+package catdata.ide;
 
 import java.awt.MenuBar;
 import java.util.List;
@@ -9,13 +9,12 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import catdata.Pair;
+import catdata.Triple;
 import catdata.fql.decl.Driver;
 import catdata.fql.decl.FQLProgram;
 import catdata.fql.decl.FqlEnvironment;
 import catdata.fql.parse.FQLParser;
-import catdata.ide.CodeEditor;
-import catdata.ide.GUI;
-import catdata.ide.NEWDEBUG;
 
 /**
  * 

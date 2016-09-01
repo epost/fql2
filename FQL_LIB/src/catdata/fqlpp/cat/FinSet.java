@@ -16,10 +16,10 @@ import java.util.Set;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Unit;
+import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Util;
 
 @SuppressWarnings({ "rawtypes", "serial" })
 public class FinSet extends Category<Set, Fn> {

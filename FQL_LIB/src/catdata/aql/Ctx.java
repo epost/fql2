@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Pair;
-import catdata.ide.Util;
+import catdata.Util;
 
 public final class Ctx<K,V> {
 
