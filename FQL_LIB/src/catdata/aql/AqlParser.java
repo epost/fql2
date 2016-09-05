@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,20 +19,15 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.InstExp.InstExpEmpty;
-import catdata.aql.InstExp.InstExpRaw;
 import catdata.aql.InstExp.InstExpVar;
 import catdata.aql.MapExp.MapExpId;
-import catdata.aql.MapExp.MapExpRaw;
 import catdata.aql.MapExp.MapExpVar;
 import catdata.aql.SchExp.SchExpEmpty;
 import catdata.aql.SchExp.SchExpInst;
-import catdata.aql.SchExp.SchExpRaw;
 import catdata.aql.SchExp.SchExpVar;
 import catdata.aql.TransExp.TransExpId;
-import catdata.aql.TransExp.TransExpRaw;
 import catdata.aql.TransExp.TransExpVar;
 import catdata.aql.TyExp.TyExpEmpty;
-import catdata.aql.TyExp.TyExpRaw;
 import catdata.aql.TyExp.TyExpSch;
 import catdata.aql.TyExp.TyExpVar;
 import catdata.ide.Program;
@@ -255,22 +251,22 @@ public class AqlParser {
 	private  static final Parser<TyExpRaw> tyExpRaw() {
 		Parser<List<String>> types = Parsers.tuple(token("types"), ident.many()).map(x -> x.b);
 		Parser<Pair<Token, List<Tuple3<List<String>, Token, String>>>> consts = Parsers.tuple(token("constants"), Parsers.tuple(ident.many1(), token(":"), ident).many());
-		Parser<List<Triple<String, List<String>, String>>> consts0 = consts.map(x -> {
-			List<Triple<String,List<String>,String>> ret = new LinkedList<>();
+		Parser<List<catdata.Pair<String, catdata.Pair<List<String>, String>>>> consts0 = consts.map(x -> {
+			List<catdata.Pair<String, catdata.Pair<List<String>, String>>> ret = new LinkedList<>();
 			for (Tuple3<List<String>, Token, String> a : x.b) {
 				for (String b : a.a) {
-					ret.add(new Triple<>(b, new LinkedList<>(), a.c));					
+					ret.add(new catdata.Pair<>(b, new catdata.Pair<>(Collections.emptyList(), a.c)));					
 				}
 			}
 			return ret;
 		});
 		
 		Parser<Pair<Token, List<Tuple5<List<String>, Token, List<String>, Token, String>>>> fns = Parsers.tuple(token("functions"), Parsers.tuple(ident.many1(), token(":"), ident.sepBy(token(",")), token("->"), ident).many());
-		Parser<List<Triple<String,List<String>, String>>> fns0 = fns.map(x -> {
-			List<Triple<String,List<String>,String>> ret = new LinkedList<>();
+		Parser<List<catdata.Pair<String,catdata.Pair<List<String>,String>>>> fns0 = fns.map(x -> {
+			   List<catdata.Pair<String,catdata.Pair<List<String>,String>>> ret = new LinkedList<>();
 			for (Tuple5<List<String>, Token, List<String>, Token, String> a : x.b) {
 				for (String b : a.a) {
-					ret.add(new Triple<>(b, a.c, a.e));					
+					ret.add(new catdata.Pair<>(b, new catdata.Pair<>(a.c, a.e)));					
 				}
 			}
 			return ret;
@@ -308,21 +304,21 @@ public class AqlParser {
 		});
 		
 		Parser<Pair<Token, List<Tuple5<String, List<String>, String, Token, String>>>> java_fns = Parsers.tuple(token("java_functions"), Parsers.tuple(ident.followedBy(token(":")), ident.sepBy(token(",")).followedBy(token("->")), ident, token("="), ident).many());
-		Parser<List<Quad<String, List<String>, String, String>>> java_fns0 = java_fns.map(x -> {
-			List<Quad<String, List<String>, String, String>> ret = new LinkedList<>();
+		Parser<List<catdata.Pair<String, Triple<List<String>, String, String>>>> java_fns0 = java_fns.map(x -> {
+			   List<catdata.Pair<String, Triple<List<String>, String, String>>> ret = new LinkedList<>();
 			for (Tuple5<String, List<String>, String, Token, String> p : x.b) {
-				ret.add(new Quad<>(p.a, p.b, p.c, p.e));
+				ret.add(new catdata.Pair<>(p.a, new Triple<>(p.b, p.c, p.e)));
 			}
 			return ret;
 		});
 		
-		Parser<Tuple5<List<String>, List<String>, List<Triple<String, List<String>, String>>, List<Triple<String, List<String>, String>>, List<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>>>> 
+		Parser<Tuple5<List<String>, List<String>, List<catdata.Pair<String, catdata.Pair<List<String>, String>>>, List<catdata.Pair<String, catdata.Pair<List<String>, String>>>, List<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>>>> 
 		pa = Parsers.tuple(imports, types.optional(), consts0.optional(), fns0.optional(), eqs0.optional());
-		Parser<Tuple4<List<catdata.Pair<String, String>>, List<catdata.Pair<String, String>>, List<Quad<String, List<String>, String, String>>, List<catdata.Pair<String, String>>>> 
+		Parser<Tuple4<List<catdata.Pair<String, String>>, List<catdata.Pair<String, String>>, List<catdata.Pair<String, Triple<List<String>, String, String>>>, List<catdata.Pair<String, String>>>> 
 		pb = Parsers.tuple(java_typs0.optional(), java_consts0.optional(), java_fns0.optional(), options);
 		
 		Parser<TyExpRaw> ret = Parsers.tuple(pa, pb).map(x -> {
-			List<Triple<String, List<String>, String>> l = new LinkedList<>();
+			List<catdata.Pair<String, catdata.Pair<List<String>, String>>> l = new LinkedList<>();
 			if (x.a.c != null) {
 				l.addAll(x.a.c);
 			} 
@@ -339,22 +335,22 @@ public class AqlParser {
 		Parser<List<String>> entities = Parsers.tuple(token("entities"), ident.many()).map(x -> x.b);
 		
 		Parser<Pair<Token, List<Tuple5<List<String>, Token, String, Token, String>>>> fks = Parsers.tuple(token("foreign_keys"), Parsers.tuple(ident.many1(), token(":"), ident, token("->"), ident).many());
-		Parser<List<Triple<String,String, String>>> fks0 = fks.map(x -> {
-			List<Triple<String,String,String>> ret = new LinkedList<>();
+		Parser<List<catdata.Pair<String,catdata.Pair<String, String>>>> fks0 = fks.map(x -> {
+			List<catdata.Pair<String,catdata.Pair<String,String>>> ret = new LinkedList<>();
 			for (Tuple5<List<String>, Token, String, Token, String> a : x.b) {
 				for (String b : a.a) {
-					ret.add(new Triple<>(b, a.c, a.e));					
+					ret.add(new catdata.Pair<>(b, new catdata.Pair<>(a.c, a.e)));					
 				}
 			}
 			return ret;
 		});
 		
 		Parser<Pair<Token, List<Tuple5<List<String>, Token, String, Token, String>>>> atts = Parsers.tuple(token("attributes"), Parsers.tuple(ident.many1(), token(":"), ident, token("->"), ident).many());
-		Parser<List<Triple<String,String, String>>> atts0 = atts.map(x -> {
-			List<Triple<String,String,String>> ret = new LinkedList<>();
+		Parser<List<catdata.Pair<String,catdata.Pair<String, String>>>> atts0 = atts.map(x -> {
+			List<catdata.Pair<String,catdata.Pair<String,String>>> ret = new LinkedList<>();
 			for (Tuple5<List<String>, Token, String, Token, String> a : x.b) {
 				for (String b : a.a) {
-					ret.add(new Triple<>(b, a.c, a.e));					
+					ret.add(new catdata.Pair<>(b, new catdata.Pair<>(a.c, a.e)));					
 				}
 			}
 			return ret;
@@ -375,9 +371,9 @@ public class AqlParser {
 		Parser<List<Quad<String, String, RawTerm, RawTerm>>> o_eqs0 = o_eqs.map(x -> x.b);
 		
 		
-		Parser<Tuple4<List<String>, List<String>, List<Triple<String, String, String>>, List<catdata.Pair<List<String>, List<String>>>>> 
+		Parser<Tuple4<List<String>, List<String>, List<catdata.Pair<String, catdata.Pair<String, String>>>, List<catdata.Pair<List<String>, List<String>>>>> 
 		pa = Parsers.tuple(imports, entities.optional(), fks0.optional(), p_eqs0.optional());
-		Parser<Tuple3<List<Triple<String, String, String>>, List<Quad<String, String, RawTerm, RawTerm>>, List<catdata.Pair<String, String>>>> 
+		Parser<Tuple3<List<catdata.Pair<String, catdata.Pair<String, String>>>, List<Quad<String, String, RawTerm, RawTerm>>, List<catdata.Pair<String, String>>>> 
 		pb = Parsers.tuple(atts0.optional(), o_eqs0.optional(), options);
 		
 		Parser<Tuple4<Token, Token, TyExp<?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"), ty_ref.lazy(), token("{")); //.map(x -> x.c);
@@ -426,30 +422,29 @@ public class AqlParser {
 		return Parsers.fail("pragma parser not implemented yet"); //TODO
 	} */
 /*	
-	public static final Parser<TransExp> transExp() {
-		return Parsers.fail("transform parser not implemented yet"); //TODO
-	}
-	
 	public static final Parser<QueryExp> queryExp() {
 		return Parsers.fail("query parser not implemented yet"); //TODO
 	} */
 	
+	 //TODO: reverse order on arguments env
 	public static final Parser<MapExpRaw> mapExpRaw() {
 		Parser<List<catdata.Pair<String, String>>> ens = Parsers.tuple(token("entities"), env(ident, "->")).map(x -> x.b);
 		
-		Parser<List<catdata.Pair<String, List<String>>>> fks = Parsers.tuple(token("foreign_keys"), env(ident.sepBy(token(".")),"->")).map(x -> x.b);
+		Parser<List<catdata.Pair<String, List<String>>>> fks = Parsers.tuple(token("foreign_keys"), env(ident.sepBy1(token(".")),"->")).map(x -> x.b);
 		
-		Parser<List<catdata.Pair<String, catdata.Pair<String, RawTerm>>>> atts = Parsers.tuple(token("attributes"), env(Parsers.tuple(token("lambda"), ident, token("."), term()).map(x -> new catdata.Pair<>(x.b, x.d)),"->")).map(x -> x.b);
+		Parser<List<catdata.Pair<String, Triple<String, String, RawTerm>>>> envp = env(Parsers.tuple(token("lambda"), ident, Parsers.tuple(token(":"), ident).optional(), token("."), term()).map(x -> new Triple<>(x.b, x.c == null ? null : x.c.b, x.e)),"->");
+
+		Parser<List<catdata.Pair<String, Triple<String, String, RawTerm>>>> atts = Parsers.tuple(token("attributes"), envp).map(x -> x.b);
 		
 				
-		Parser<Tuple5<List<String>, List<catdata.Pair<String, String>>, List<catdata.Pair<String, List<String>>>, List<catdata.Pair<String, catdata.Pair<String, RawTerm>>>, List<catdata.Pair<String, String>>>> 
+		Parser<Tuple5<List<String>, List<catdata.Pair<String, String>>, List<catdata.Pair<String, List<String>>>, List<catdata.Pair<String, Triple<String, String, RawTerm>>>, List<catdata.Pair<String, String>>>> 
 		pa = Parsers.tuple(imports, ens.optional(), fks.optional(), atts.optional(), options);
 		
 		Parser<Tuple5<Token, Token, SchExp<?, ?, ?, ?, ?>, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"), sch_ref.lazy().followedBy(token("->")), sch_ref.lazy(), token("{")); //.map(x -> x.c);
 					
 		Parser<MapExpRaw> ret = Parsers.tuple(l, pa, token("}")).map(x -> {
 			return new MapExpRaw(x.a.c, x.a.d, 
-								  x.b.a,
+								  x.b.a, 
 						 		  Util.newIfNull(x.b.b), 
 						 	      Util.newIfNull(x.b.c), 
 						 	      Util.newIfNull(x.b.d),
@@ -477,8 +472,7 @@ public class AqlParser {
 			
 		return ret;	
 	}
-	
-	//TODO make sure entity can be used in lists of fks in raw
+
 	
 /*	public static final Parser<?> pragma() {
 		Parser<?> p = Parsers.tuple(Terminals.StringLiteral.PARSER, token("="),

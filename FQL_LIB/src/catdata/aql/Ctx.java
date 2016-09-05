@@ -7,12 +7,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
 
 public final class Ctx<K,V> {
 
 	private final Map<K,V> map;
+	
+	public <X> Ctx<K,Chc<V,X>> inLeft() {
+		LinkedHashMap<K,Chc<V,X>> ret = new LinkedHashMap<>();
+		for (K k : map.keySet()) {
+			ret.put(k, Chc.inLeft(map.get(k)));
+		}
+		return new Ctx<>(ret);
+	}
 	
 	public boolean containsKey(K k) {
 		return map.containsKey(k);
@@ -87,6 +96,27 @@ public final class Ctx<K,V> {
 			throw new RuntimeException(k + " cannot be found in context " + map);
 		}
 		return ret;
+	}
+
+	public static <K,V> String toString(List<Pair<K, V>> ctx) {
+		return Util.sep(ctx.stream().map(z -> z.first + (z.second != null ? (":" + z.second) : "")).collect(Collectors.toList()), ",");
+	}
+
+	public void put(K k, V v) {
+		if (map.containsKey(k)) {
+			throw new RuntimeException(this + " alredy contains " + k);
+		}
+		map.put(k, v);
+	}
+
+	public String toString(Term<?, ?, ?, ?, ?, ?, ?> l, Term<?, ?, ?, ?, ?, ?, ?> r) {
+		String pre = map.isEmpty() ? "" : "forall " + Util.sep(map, ": ", ", ") + " . ";
+ 		
+		return pre + l + " = " + r;
+	}
+
+	public int size() {
+		return map.size();
 	}
 	
 }

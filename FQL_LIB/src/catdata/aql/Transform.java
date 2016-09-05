@@ -3,7 +3,9 @@ package catdata.aql;
 import java.util.HashMap;
 import java.util.Map;
 
+import catdata.Chc;
 import catdata.Unit;
+import catdata.Util;
 
 public final class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> {
 
@@ -49,9 +51,42 @@ public final class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> {
 	}
 
 	public void validate() {
-		
+		//for each (k,v) in gens/fks, k must be in src and dst must be in target 
+			for (Gen1 gen1 : src.gens.keySet()) {
+				En en1 = src.gens.get(gen1);
+				Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> gen2 = gens.get(gen1);
+				if (gen2 == null) {
+					throw new RuntimeException("source generator " + gen1 + " has no transform");
+				}
+				Chc<Ty, En> en2 = dst.type(gen2);
+				if (!en2.equals(Chc.inRight(en1))) {
+					throw new RuntimeException("source generator " + gen1 + " transforms to " + gen2 + ", which has sort " + en2.toStringMash() + ", not " + en1 + " as expected");
+				}	
+			}
+			for (Sk1 sk1 : src.sks.keySet()) {
+				Ty ty1 = src.sks.get(sk1);
+				Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> sk2 = sks.get(sk1);
+				if (sk2 == null) {
+					throw new RuntimeException("source labelled null " + sk1 + " has no transform");
+				}
+				Chc<Ty, En> ty2 = dst.type(sk2);
+				if (!ty2.equals(Chc.inLeft(ty1))) {
+					throw new RuntimeException("source labelled null " + sk1 + " transforms to " + sk2 + ", which has sort " + ty2.toStringMash() + ", not " + ty1 + " as expected");
+				}	
+			}
+			for (Gen1 gen1 : gens.keySet()) {
+				if (!src.gens.containsKey(gen1)) {
+					throw new RuntimeException("there is a transform for " + gen1 + " which is not a source generator");
+				}
+			}
+			for (Sk1 sk1 : sks.keySet()) {
+				if (!src.sks.containsKey(sk1)) {
+					throw new RuntimeException("there is a transform for " + sk1 + " which is not a source labelled null");
+				}
+			}
+				
+				//TODO: proving
 	}
-
 
 	@Override
 	public int hashCode() {
@@ -63,8 +98,6 @@ public final class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> {
 		result = prime * result + ((src == null) ? 0 : src.hashCode());
 		return result;
 	}
-
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -100,9 +133,20 @@ public final class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> {
 
 
 
+	private String toString = null;
 	@Override
 	public String toString() {
-		return "Transform [gens=" + gens + ", sks=" + sks + ", src=" + src + ", dst=" + dst + "]";
+		if (toString != null) {
+			return toString;
+		}
+	
+		toString = "generators";
+		toString += "\n\t" + Util.sep(gens, " -> ", "\n\t");
+
+		toString += "\nlabelled nulls";
+		toString += "\n\t" + Util.sep(sks, " -> ", "\n\t");
+		
+		return toString;
 	}
 
 	public Unit semantics() {

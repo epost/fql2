@@ -22,6 +22,7 @@ import catdata.Util;
 import catdata.algs.kb.KBExp;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.NEWDEBUG;
+import catdata.opl.OplParser.DoNotIgnore;
 
 
 public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObject {
@@ -146,21 +147,40 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			}
 
 			for (C2 a : block.attrs.keySet()) {
-				OplTerm<C1, V1> e = block.attrs.get(a);
 				Pair<List<S2>, S2> t = dst.projA().symbols.get(a);
 				if (t == null) {
 					throw new RuntimeException("In checking block " + b + ", " + a
 							+ " is not an attribute in " + dst_e);
 				}
+				Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>> ee = block.attrs.get(a); //TODO
 				S1 s1 = null;
 				try {
-					s1 = e.type(src.sig, ctx);
+					if (ee.left) {
+						ee.l.validate();
+						s1 = ee.l.type(src.sig, ctx);
+						Pair<List<S1>, S1> zero_t = src.sig.getSymbol(ee.l.zero);
+						Pair<List<S1>, S1> plus_t = src.sig.getSymbol(ee.l.plus);
+						if (zero_t.first.size() != 0) {
+							throw new RuntimeException(ee.l.zero + " is not zero-ary");
+						}
+						if (plus_t.first.size() != 2) {
+							throw new RuntimeException(ee.l.plus + " is not binary");
+						}
+						if (!zero_t.second.equals(s1)) {
+							throw new RuntimeException("type of " + ee.l.zero + " is " + zero_t.first.get(0) + " but " + ee.l.att + " has type " + s1);
+						}
+						if (!plus_t.first.get(0).equals(s1) || !plus_t.first.get(1).equals(s1) || !plus_t.second.equals(s1)) {
+							throw new RuntimeException("type of " + ee.l.plus + " is " + plus_t + " but " + ee.l.att + " has type " + s1);
+						}
+					} else {
+						s1 = ee.r.type(src.sig, ctx);
+					}
 				} catch (RuntimeException ex) {
 					ex.printStackTrace();
 					throw new RuntimeException("In checking block " + b + " and attr " + a + ", " + ex.getMessage());
 				}
 				if (!s1.equals(t.second)) {
-					throw new RuntimeException("In checking block " + b + ", " + e + " has type "
+					throw new RuntimeException("In checking block " + b + ", " + ee.toStringMash() + " has type "
 							+ s1 + " but should be " + t.second);
 				}
 				if (!t.first.get(0).equals(s2)) {
@@ -347,7 +367,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				if (ret != null) {
 					throw new RuntimeException("Cannot check path equalities for non-conjunctive queries. (Disable option to proceed)");
 				} else {
-					ret = blocks.get(l).second.attrs.get(att);
+					ret = blocks.get(l).second.attrs.get(att).r; //TODO
 				}
 
 			}
@@ -447,19 +467,112 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		}
 	}
 
+	public static class Agg<S1, C1, V1, S2, C2, V2> {
+		String orig;
+
+		C1 zero, plus;
+		LinkedHashMap<V1, S1> from;
+		Set<Pair<OplTerm<C1, V1>, OplTerm<C1, V1>>> where;
+		OplTerm<C1, V1> att;
+		
+		public Agg(C1 zero, C1 plus, LinkedHashMap<V1, S1> from, Set<Pair<OplTerm<C1, V1>, OplTerm<C1, V1>>> where, OplTerm<C1, V1> att) {
+			this.zero = zero;
+			this.plus = plus;
+			this.from = from;
+			this.where = where;
+			this.att = att;
+			orig = toString();
+		}
+		
+		public void validate() {
+			if (!NEWDEBUG.debug.opl.opl_secret_agg) {
+				throw new DoNotIgnore("To use ad-hoc aggregation, enable opl_secret_agg");
+			}
+		}
+
+		public S1 type(OplSig<S1, C1, V1> sig, OplCtx<S1, V1> ctx) {
+			LinkedHashMap<V1, S1> map = new LinkedHashMap<>(ctx.vars0);
+			map.putAll(from);
+			OplCtx<S1, V1> ctx2 = new OplCtx<>(map);
+			return att.type(sig, ctx2);
+		}
+
+		@Override
+		public String toString() {
+			return "Agg [orig=" + orig + ", zero=" + zero + ", plus=" + plus + ", from=" + from + ", where=" + where + ", att=" + att + "]";
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((att == null) ? 0 : att.hashCode());
+			result = prime * result + ((from == null) ? 0 : from.hashCode());
+			result = prime * result + ((orig == null) ? 0 : orig.hashCode());
+			result = prime * result + ((plus == null) ? 0 : plus.hashCode());
+			result = prime * result + ((where == null) ? 0 : where.hashCode());
+			result = prime * result + ((zero == null) ? 0 : zero.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Agg<?,?,?,?,?,?> other = (Agg<?,?,?,?,?,?>) obj;
+			if (att == null) {
+				if (other.att != null)
+					return false;
+			} else if (!att.equals(other.att))
+				return false;
+			if (from == null) {
+				if (other.from != null)
+					return false;
+			} else if (!from.equals(other.from))
+				return false;
+			if (orig == null) {
+				if (other.orig != null)
+					return false;
+			} else if (!orig.equals(other.orig))
+				return false;
+			if (plus == null) {
+				if (other.plus != null)
+					return false;
+			} else if (!plus.equals(other.plus))
+				return false;
+			if (where == null) {
+				if (other.where != null)
+					return false;
+			} else if (!where.equals(other.where))
+				return false;
+			if (zero == null) {
+				if (other.zero != null)
+					return false;
+			} else if (!zero.equals(other.zero))
+				return false;
+			return true;
+		}
+		
+		
+		
+	}
+	
 	public static class Block<S1, C1, V1, S2, C2, V2> {
 
 		String orig;
 		
 		LinkedHashMap<V1, S1> from;
 		Set<Pair<OplTerm<C1, V1>, OplTerm<C1, V1>>> where;
-		Map<C2, OplTerm<C1, V1>> attrs;
+		Map<C2, Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>>> attrs;
 		Map<C2, Pair<Object, Map<V1, OplTerm<C1, V1>>>> edges;
 
 		public Block(LinkedHashMap<V1, S1> from, Set<Pair<OplTerm<C1, V1>, OplTerm<C1, V1>>> where,
-				Map<C2, OplTerm<C1, V1>> attrs,
+				Map<C2, Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>>> attrs,
 				Map<C2, Pair<Object, Map<V1, OplTerm<C1, V1>>>> edges) {
-			super();
 			this.from = from;
 			this.where = where;
 			this.attrs = attrs;
@@ -474,8 +587,8 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			String attr_str = printAttrs();
 			String edges_str = printEdges();
 
-			return "{for " + for_str + "; where " + where_str + "; attributes " + attr_str
-					+ "; edges " + edges_str + ";}";
+			return "{for " + for_str + "; where " + where_str + "; return " + attr_str
+					+ "; keys " + edges_str + ";}";
 		}
 
 		private String printEdges() {
@@ -509,12 +622,12 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		private String printAttrs() {
 			boolean first = false;
 			String ret = "";
-			for (Entry<C2, OplTerm<C1, V1>> k : attrs.entrySet()) {
+			for (Entry<C2, Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>>> k : attrs.entrySet()) {
 				if (first) {
 					ret += ", ";
 				}
 				first = true;
-				ret += k.getKey() + " = " + k.getValue();
+				ret += k.getKey() + " = " + k.getValue().toStringMash(); 
 			}
 			return ret;
 
@@ -612,7 +725,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		Map<Object, Pair<S, Block<S, C, V, S, C, V>>> bs = new HashMap<>();
 		for (S x : S.projE().sorts) {
 			LinkedHashMap<V, S> from = new LinkedHashMap<>();
-			Map<C, OplTerm<C, V>> attrs = new HashMap<>();
+			Map<C, Chc<Agg<S, C, V, S, C, V>, OplTerm<C, V>>> attrs = new HashMap<>();
 			Map<C, Pair<Object, Map<V, OplTerm<C, V>>>> edges = new HashMap<>();
 			from.put((V) "q_v", x);
 			for (C term : S.projEA().symbols.keySet()) {
@@ -628,7 +741,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 					m.put((V) "q_v", l);
 					edges.put(term, new Pair<>((V) ("q" + t.second), m));
 				} else {
-					attrs.put(term, l);
+					attrs.put(term, Chc.inRight(l));
 				}
 			}
 			Block<S, C, V, S, C, V> b = new Block<>(from, new HashSet<>(), attrs, edges);
@@ -812,9 +925,38 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			}
 
 			for (C2 c2 : block.attrs.keySet()) {
-				OplTerm<Chc<C1, X>, V1> e = block.attrs.get(c2).inLeft();
+				Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>> ee = block.attrs.get(c2); //.r.inLeft(); //TODO
+				
 				for (Map<V1, OplTerm<Chc<C1, X>, V1>> tuple : tuples) {
-					OplTerm<Chc<C1, X>, V1> a = e.subst(tuple); // I0.P.toSig().getKB().nf(e.subst(tuple));
+					OplTerm<Chc<C1, X>, V1> a;
+
+					if (ee.left) {
+						Agg<S1, C1, V1, S2, C2, V2> agg = ee.l;
+						Set<Pair<OplTerm<Chc<C1, X>, V1>, OplTerm<Chc<C1, X>, V1>>> whereX = new HashSet<>();
+						for (Pair<OplTerm<C1, V1>, OplTerm<C1, V1>> eq : agg.where) {
+							whereX.add(new Pair<>(eq.first.inLeft(), eq.second.inLeft()));
+						}
+						Set<Map<V1, OplTerm<Chc<C1, X>, V1>>> tuplesX = new HashSet<>();
+						tuplesX.add(tuple);
+						for (V1 v : agg.from.keySet()) {
+							S1 s = agg.from.get(v);
+							Set<OplTerm<Chc<C1, X>, V1>> dom = I.sorts.get(s);
+							tuplesX = extend(tuplesX, dom, v);
+							tuplesX = filter(tuplesX, whereX, I0);
+						}
+						if (agg.from.keySet().isEmpty()) {
+							tuplesX = filter(tuplesX, whereX, I0);
+						}
+						a = new OplTerm<>(Chc.inLeft(agg.zero), new LinkedList<>());
+						for (Map<V1, OplTerm<Chc<C1, X>, V1>> tupleX : tuplesX) {
+							OplTerm<Chc<C1, X>, V1> e = agg.att.inLeft();
+							a = new OplTerm<>(Chc.inLeft(agg.plus), Util.list(a, e.subst(tupleX)));
+						}
+						//a = term.subst(tuple);
+					} else {
+						OplTerm<Chc<C1, X>, V1> e = ee.r.inLeft();
+						a = e.subst(tuple);
+					}
 
 					OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2> lhs = new OplTerm<>(
 							Chc.inLeft(c2), Util.singList(new OplTerm<>(Chc.inRight(Chc

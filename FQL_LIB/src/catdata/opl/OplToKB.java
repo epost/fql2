@@ -177,7 +177,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			//ret = new LinkedList<>(ret);
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			List<Object> rret = (List) ret;
-			rret.sort(Util.ToStringComparator);
+			rret.sort(Util.LengthComparator);
 			hom.put(new Pair<>(s,t), ret);
 		}
 		return ret; 

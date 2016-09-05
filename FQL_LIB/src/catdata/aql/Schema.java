@@ -1,28 +1,32 @@
 package catdata.aql;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Util;
 
-public final class Schema<Ty,En,Sym,Fk,Att> {
+public final class Schema<Ty, En, Sym, Fk, Att> {
 	
-	public final TypeSide<Ty,Sym> typeSide;
+	public final TypeSide<Ty, Sym> typeSide;
 	
 	public final Set<En> ens;
 	public final Map<Att, Pair<En, Ty>> atts;
 	public final Map<Fk,  Pair<En, En>> fks;
 		
-	public final List<Triple<Pair<Var, En>, Term<Ty,En,Sym,Fk,Att,?,?>, Term<Ty,En,Sym,Fk,Att,?,?>>> eqs;
+	public final Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs;
 	
 	private final DPStrategy strategy; 
-	
+
+	//TODO: who is calling isTypeSide and isSchema?
+
 	public void validate() {
 		//check that each att/fk is in tys/ens
 		for (Att att : atts.keySet()) {
@@ -41,7 +45,7 @@ public final class Schema<Ty,En,Sym,Fk,Att> {
 				throw new RuntimeException("On foreign key " + fk + ", the source entity " + ty.first + " is not declared.");
 			}
 		}
-		for (Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, ?, ?>, Term<Ty, En, Sym, Fk, Att, ?, ?>> eq : eqs) {
+		for (Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : eqs) {
 			//check that the context is valid for each eq
 			if (!ens.contains(eq.first.second)) {
 				throw new RuntimeException("In schema equation " + toString(eq) + ", context sort " + eq.first.second + " is not a declared entity.");
@@ -52,13 +56,17 @@ public final class Schema<Ty,En,Sym,Fk,Att> {
 			if (!lhs.equals(rhs)) {
 				throw new RuntimeException("In schema equation " + toString(eq) + ", lhs sort is " + lhs.toStringMash() + " but rhs sort is " + rhs.toStringMash());
 			}
-		}				
+			if (lhs.left && typeSide.java_tys.containsKey(lhs.l)) {
+				throw new RuntimeException("In schema equation " + toString(eq) + ", the return type is " + lhs.l + " which is a java type ");
+			}
+			typeSide.assertNoJava(eq.second);
+			typeSide.assertNoJava(eq.third);
+		}		
 	}
 	
-	private String toString(Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, ?, ?>, Term<Ty, En, Sym, Fk, Att, ?, ?>> eq) {
-		return "forall " + eq.first.first + ":" + eq.first.second + ", " + eq.first + " = " + eq.second;
-	}
-	
+	private String toString(Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq) {
+		return "forall " + eq.first.first + ":" + eq.first.second + ", " + eq.second + " = " + eq.third;
+	}	
 	
 	public Chc<Ty,En> type(Pair<Var, En> p, Term<Ty, En, Sym, Fk, Att, ?, ?> term) {
 		if (!term.isSchema()) {
@@ -67,13 +75,13 @@ public final class Schema<Ty,En,Sym,Fk,Att> {
 		return term.type(new Ctx<>(), new Ctx<>(p), typeSide.tys, typeSide.syms, typeSide.java_tys, ens, atts, fks, new HashMap<>(), new HashMap<>());
 	}
 	
-	public static <Ty,En,Sym,Fk,Att> Schema<Ty,Void,Sym,Void,Void> terminal(TypeSide<Ty,Sym> t) {
-		return new Schema<>(t, new HashSet<>(), new HashMap<>(), new HashMap<>(), new LinkedList<>(), new DPStrategy(DPName.PRECOMPUTED, t.semantics()));
+	public static <Ty,Sym> Schema<Ty,Void,Sym,Void,Void> terminal(TypeSide<Ty, Sym> t) {
+		return new Schema<>(t, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new DPStrategy(DPName.PRECOMPUTED, t.semantics()));
 	}
 	
-	public Schema(TypeSide<Ty,Sym> typeSide, Set<En> ens,
+	public Schema(TypeSide<Ty, Sym> typeSide, Set<En> ens,
 			Map<Att, Pair<En, Ty>> atts, Map<Fk, Pair<En, En>> fks,
-			List<Triple<Pair<Var, En>, Term<Ty,En, Sym, Fk, Att, ?, ?>, Term<Ty, En, Sym, Fk, Att, ?, ?>>> eqs,
+			Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs,
 			DPStrategy strategy) {
 		if (typeSide == null) {
 			throw new RuntimeException("Attempt to construct schema with null type side");
@@ -179,11 +187,37 @@ public final class Schema<Ty,En,Sym,Fk,Att> {
 		return true;
 	}
 
+	private String toString = null;
 	@Override
 	public String toString() {
-		return "Schema [ens=" + ens + ", atts=" + atts + ", fks=" + fks + ", eqs=" + eqs + "]";
-	} //TODO
-	
+		if (toString != null) {
+			return toString;
+		}
+		List<En> ens0 = Util.alphabetical(ens);
+		List<String> eqs0 = eqs.stream().map(x -> "forall " + x.first.first + ":" + x.first.second + ". " + x.second + " = " + x.third).collect(Collectors.toList());
+		List<String> fks0 = new LinkedList<>();
+		for (Fk fk : fks.keySet()) {
+			fks0.add(fk + " : " + fks.get(fk).first + " -> " + fks.get(fk).second); 
+		}
+		List<String> atts0 = new LinkedList<>();
+		for (Att att : atts.keySet()) {
+			atts0.add(att + " : " + atts.get(att).first + " -> " + atts.get(att).second); 
+		}
+		toString = "entities";
+		toString += "\n\t" + Util.sep(ens0, " ");
+		
+		toString += "\nforeign_keys";
+		toString += "\n\t" + Util.sep(fks0, "\n\t");
+		
+		toString += "\nattributes";
+		toString += "\n\t" + Util.sep(atts0, "\n\t");
+		
+		toString += "\nequations";
+		toString += "\n\t" + Util.sep(eqs0, "\n\t");
+		
+		return toString;
+	} 
+	//TODO alphabetical?
 	
 	
 }

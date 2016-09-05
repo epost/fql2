@@ -44,6 +44,7 @@ import catdata.ide.CodeTextPanel;
 import catdata.ide.Environment;
 import catdata.ide.NEWDEBUG;
 import catdata.opl.OplParser.DoNotIgnore;
+import catdata.opl.OplQuery.Agg;
 import catdata.opl.OplQuery.Block;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -3690,14 +3691,14 @@ public abstract class OplExp implements OplObject {
 				LinkedHashMap<V, S2> from = new LinkedHashMap<>();
 				from.put(vars.get(s1), F.m.sorts.get(s1));
 
-				Map<C1, OplTerm<C2, V>> attrs = new HashMap<>();
+				Map<C1, Chc<Agg<S2, C2, V, S1, C1, V>,OplTerm<C2, V>>> attrs = new HashMap<>();
 				for (C1 c1 : F.src.projA().symbols.keySet()) {
 					if (!F.src.projA().symbols.get(c1).first.get(0).equals(s1)) {
 						continue;
 					}
 					OplTerm<C2, V> t = F.m.subst(new OplTerm<>(c1, Util
 							.singList(new OplTerm<>(vars.get(s1)))));
-					attrs.put(c1, t);
+					attrs.put(c1, Chc.inRight(t)); //TODO
 				}
 
 				Map<C1, Pair<Object, Map<V, OplTerm<C2, V>>>> edges = new HashMap<>();

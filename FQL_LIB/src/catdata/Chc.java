@@ -129,5 +129,11 @@ public class Chc<X,Y> {
 			return false;
 		return true;
 	}
+
+	public void assertNeitherNull() {
+		if (l == null && r == null) {
+			throw new RuntimeException("Assertion failed: Chc containing both null");
+		}
+	}
 	
 }

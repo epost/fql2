@@ -1,6 +1,6 @@
 package catdata.aql;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,15 +12,16 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	public final Var var;
 	public final Sym sym;
-	public final Fk[] fks; //ok to be empty
+	public final Fk fk; 
 	public final Att att;
 	public final Gen gen;
 	public final Sk sk;
-	public final Term<Ty, En, Sym, Fk, Att, Gen, Sk>[] args;
+	public final List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args;
 	public final Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg;
 	public final Object obj;
 	public final Ty ty;
 
+	//these do not care about java
 	public boolean isTypeSide() {
 		if (var != null) {
 			return true;
@@ -40,7 +41,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	public boolean isSchema() {
 		if (isTypeSide()) {
 			return true;
-		} else if (fks != null) {
+		} else if (fk != null) {
 			return arg.isSchema();
 		} else if (att != null) {
 			return arg.isSchema();
@@ -65,7 +66,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 	}
 
-	public Chc<Ty, En> type(Ctx<Var, Ty> ctxt, Ctx<Var, En> ctxe, Set<Ty> tys, Map<Sym, Pair<Ty[], Ty>> syms, Map<Ty, Class<?>> java_tys, Set<En> ens, Map<Att, Pair<En, Ty>> atts, Map<Fk, Pair<En, En>> fks, Map<Gen, En> gens, Map<Sk, Ty> sks) {
+	public Chc<Ty, En> type(Ctx<Var, Ty> ctxt, Ctx<Var, En> ctxe, Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Map<Ty, String> java_tys_string, Set<En> ens, Map<Att, Pair<En, Ty>> atts, Map<Fk, Pair<En, En>> fks, Map<Gen, En> gens, Map<Sk, Ty> sks) {
 		Chc<Ty, En> ret = null;
 		if (var != null) {
 			if (ctxt.containsKey(var) && ctxe.containsKey(var)) {
@@ -79,24 +80,24 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				throw new RuntimeException("In " + this + ", " + "neither " + ctxt + " nor " + ctxe + " contain " + var);
 			}
 		} else if (obj != null) {
-			Class<?> c = java_tys.get(ty);
+			Class<?> c = AqlJs.load(java_tys_string.get(ty));
 			if (c == null) {
-				throw new RuntimeException("In " + this + ", " + ty + " is not a java type");
+				throw new RuntimeException("In " + this + ", " + ty + " is not a java type. ");
 			} else if (!c.isInstance(obj)) {
-				throw new RuntimeException("In " + this + ", " + "primitive " + obj + " is given type " + ty + " but is not an instanceof " + c);
+				throw new RuntimeException("In " + this + ", " + "primitive " + obj + " is given type " + ty + " but is not an instance of " + c + ", is an instance of " + obj.getClass());
 			}
 			ret =  Chc.inLeft(ty);
 		} else if (sym != null) {
-			Pair<Ty[], Ty> t = syms.get(sym);
+			Pair<List<Ty>, Ty> t = syms.get(sym);
 			if (t == null) {
 				throw new RuntimeException("In " + this + ", " + sym + " is not a typeside symbol");
-			} else if (t.first.length != args.length) {
-				throw new RuntimeException("In " + this + ", " + sym + " given " + args.length + "arguments but requires " + t.first.length);
+			} else if (t.first.size() != args.size()) {
+				throw new RuntimeException("In " + this + ", " + sym + " given " + args.size() + "arguments but requires " + t.first.size());
 			}
-			for (int i = 0; i < t.first.length; i++) {
-				Chc<Ty, En> u = args[i].type(ctxt, ctxe, tys, syms, java_tys, ens, atts, fks, gens, sks);
-				if (!Chc.inLeft(t.first[i]).equals(u)) {
-					throw new RuntimeException("In " + this + ", " + "Argument " + args[i] + " has sort " + u.toStringMash() + " but requires " + t.first[i]);
+			for (int i = 0; i < t.first.size(); i++) {
+				Chc<Ty, En> u = args.get(i).type(ctxt, ctxe, tys, syms, java_tys_string, ens, atts, fks, gens, sks);
+				if (!Chc.inLeft(t.first.get(i)).equals(u)) {
+					throw new RuntimeException("In " + this + ", " + "Argument " + args.get(i) + " has sort " + u.toStringMash() + " but requires " + t.first.get(i));
 				}
 			}
 			ret =  Chc.inLeft(t.second);
@@ -105,34 +106,24 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			if (t == null) {
 				throw new RuntimeException("In " + this + ", " + att + " is not an attribute");
 			} 
-			Chc<Ty, En> u = arg.type(ctxt, ctxe, tys, syms, java_tys, ens, atts, fks, gens, sks);
+			Chc<Ty, En> u = arg.type(ctxt, ctxe, tys, syms, java_tys_string, ens, atts, fks, gens, sks);
 			if (!Chc.inRight(t.first).equals(u)) {
 				throw new RuntimeException("In " + this + ", " + "argument " + arg + " has sort " + u.toStringMash() + " but requires " + t.first);
 			}
 			ret =  Chc.inLeft(t.second);
-		} else if (fks != null) {
-			Chc<Ty, En> u = arg.type(ctxt, ctxe, tys, syms, java_tys, ens, atts, fks, gens, sks);
+		} else if (fk != null) {
+			Chc<Ty, En> u = arg.type(ctxt, ctxe, tys, syms, java_tys_string, ens, atts, fks, gens, sks);
 			if (u.left) {
 				throw new RuntimeException("In " + this + ", " + arg + " has type " + u.toStringMash() + " which is not an entity");
 			}
-			En src = u.r;
-			En dst = src;
-			Fk last = this.fks[0];
-			for (Fk fk : this.fks) {	
-				Pair<En, En> t = fks.get(fk);
-				if (t == null) {
-					throw new RuntimeException("In " + this + ", " + fk + " is not a foreign key");
-				}
-				if (!t.first.equals(dst)) {
-					throw new RuntimeException("In " + this + ", " + "target of " + last + " [" + src + "] is not source of " + fk + " [" + dst  + "]");
-				}
-				dst = t.second;
-				last = fk;
-			} 				
-			if (!Chc.inRight(src).equals(u)) {
-				throw new RuntimeException("In " + this + ", " + "argument " + arg + " has sort " + u.toStringMash() + " but requires " + src);
+			Pair<En, En> t = fks.get(fk);
+			if (t == null) {
+				throw new RuntimeException("In " + this + ", " + fk + " is not a foreign key");
+			}		
+			if (!Chc.inRight(t.first).equals(u)) {
+				throw new RuntimeException("In " + this + ", " + "argument " + arg + " has sort " + u.toStringMash() + " but requires " + t.first);
 			}
-			ret = Chc.inRight(dst);
+			ret = Chc.inRight(t.second);
 		} else if (gen != null) {
 			En en = gens.get(gen);
 			if (en == null) {
@@ -156,10 +147,10 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return ret;
 	}
 
-	private Term(Var var, Sym sym, Fk[] fks, Att att, Gen gen, Sk sk, Term<Ty, En, Sym, Fk, Att, Gen, Sk>[] args, Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg, Object obj, Ty ty) {
+	private Term(Var var, Sym sym, Fk fks, Att att, Gen gen, Sk sk, List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args, Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg, Object obj, Ty ty) {
 		this.var = var;
 		this.sym = sym;
-		this.fks = fks;
+		this.fk = fks;
 		this.att = att;
 		this.gen = gen;
 		this.sk = sk;
@@ -174,25 +165,25 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		if (var != null) {
 			return var.toString();
 		} else if (sym != null) {
-			if (args.length == 0) {
+			if (args.size() == 0) {
 				return sym.toString();
-			} else if (args.length == 1) {
-				return args[0] + "." + sym;
-			} else if (args.length == 2) {
-				return "(" + args[0] + " " + sym + " " + args[1] + ")";
+			} else if (args.size() == 1) {
+				return args.get(0) + "." + sym;
+			} else if (args.size() == 2) {
+				return "(" + args.get(0) + " " + sym + " " + args.get(1) + ")";
 			} else {
-				return sym + "(" + Util.sep(Arrays.asList(args), ", ") + ")";
+				return sym + "(" + Util.sep(args, ", ") + ")";
 			}
 		} else if (att != null) {
 			return arg + "." + att;
-		} else if (fks != null) {
-			return arg + "." + Util.sep(Arrays.asList(fks), ".");
+		} else if (fk != null) {
+			return arg + "." + fk;
 		} else if (gen != null) {
 			return gen.toString();
 		} else if (sk != null) {
 			return sk.toString();
 		} else if (obj != null) {
-			return obj.toString(); // TODO:choice, print type?
+			return obj.toString() + "@" + ty;
 		}
 		throw new RuntimeException("Encountered an empty term");
 	}
@@ -204,7 +195,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return new Term<>(var, null, null, null, null, null, null, null, null, null);
 	}
 
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> Sym(Sym sym, Term<Ty, En, Sym, Fk, Att, Gen, Sk>[] args) {
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> Sym(Sym sym, List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args) {
 		if (sym == null) {
 			throw new RuntimeException("Attempt to create a term with a null symbol");
 		}
@@ -224,17 +215,27 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return new Term<>(null, null, null, att, null, null, null, arg, null, null);
 	}
 
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> Fks(Fk[] fks, Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg) {
-		if (fks == null) {
-			throw new RuntimeException("Attempt to create a term with a null foreign keys");
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> Fk(Fk fk, Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg) {
+		if (fk == null) {
+			throw new RuntimeException("Attempt to create a term with a null foreign key");
 		}
 		if (arg == null) {
 			throw new RuntimeException("Attempt to create a term with null foreign keys argument");
 		}
-		if (fks.length == 0) {
-			throw new RuntimeException("Attempt to create a 0-ary list of foreign keys");
+		return new Term<>(null, null, fk, null, null, null, null, arg, null, null);
+	}
+	
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> Fks(List<Fk> fks, Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg) {
+		if (fks == null) {
+			throw new RuntimeException("Attempt to create a term with null foreign keys");
 		}
-		return new Term<>(null, null, fks, null, null, null, null, arg, null, null);
+		if (arg == null) {
+			throw new RuntimeException("Attempt to create a term with null foreign keys argument");
+		}
+		for (Fk fk : fks) {
+			arg = Term.Fk(fk, arg);
+		}
+		return arg;
 	}
 
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> Gen(Gen gen) {
@@ -268,7 +269,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		result = prime * result + ((arg == null) ? 0 : arg.hashCode());
 		result = prime * result + ((args == null) ? 0 : args.hashCode());
 		result = prime * result + ((att == null) ? 0 : att.hashCode());
-		result = prime * result + ((fks == null) ? 0 : fks.hashCode());
+		result = prime * result + ((fk == null) ? 0 : fk.hashCode());
 		result = prime * result + ((gen == null) ? 0 : gen.hashCode());
 		result = prime * result + ((obj == null) ? 0 : obj.hashCode());
 		result = prime * result + ((sk == null) ? 0 : sk.hashCode());
@@ -302,10 +303,10 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				return false;
 		} else if (!att.equals(other.att))
 			return false;
-		if (fks == null) {
-			if (other.fks != null)
+		if (fk == null) {
+			if (other.fk != null)
 				return false;
-		} else if (!fks.equals(other.fks))
+		} else if (!fk.equals(other.fk))
 			return false;
 		if (gen == null) {
 			if (other.gen != null)
@@ -360,16 +361,12 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				}
 			}
 			return var;
-		} else if (fks != null || att != null) {
+		} else if (fk != null || att != null) {
 			return arg.getOnlyVar();
 		} else if (gen != null || sk != null || obj != null) {
 			return null;
 		}
 		throw new RuntimeException("getOnlyVar encountered ill-formed term.  Should be impossible, please report");
 	}
-
-	
-	
-	
 	
 }

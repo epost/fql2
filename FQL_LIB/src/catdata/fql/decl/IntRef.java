@@ -5,4 +5,9 @@ public class IntRef {
 	public IntRef(int i) {
 		this.i = i;
 	}
+	@Override
+	public String toString() {
+		return "?" + i;
+	}
+	
 }

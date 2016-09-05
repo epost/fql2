@@ -1,9 +1,5 @@
 package catdata.aql;
 
-import java.util.List;
-
-import catdata.Pair;
-
 public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,Sym,En,Att,Fk,Gen,Sk>> {
 	
 	public Kind kind() {
@@ -65,7 +61,7 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 		
 	}
 
-	public static final class InstExpVar<Ty,Sym,En,Att,Fk,Gen,Sk> extends InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> {
+	public static final class InstExpVar extends InstExp<Object, Object, Object, Object, Object, Object, Object> {
 		public final String var;
 		
 		public InstExpVar(String var) {
@@ -75,9 +71,8 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 			this.var = var;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		public Instance<Ty,Sym,En,Att,Fk,Gen,Sk> eval(Env env) {
+		public Instance<Object, Object, Object, Object, Object, Object, Object> eval(Env env) {
 			return env.getInstance(var);
 		}
 
@@ -97,7 +92,7 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			InstExpVar<?,?,?,?,?,?,?> other = (InstExpVar<?,?,?,?,?,?,?>) obj;
+			InstExpVar other = (InstExpVar) obj;
 			if (var == null) {
 				if (other.var != null)
 					return false;
@@ -174,95 +169,6 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//TODO: fix types in raws
-	
-	public static final class InstExpRaw extends InstExp<String,String,String,String,String,String,String> {
 
-		public final SchExp<?, ?, ?, ?, ?> schema;
-		
-		public final List<String> imports;
-
-		public final List<Pair<String, String>> gens;
-
-		public final List<Pair<RawTerm, RawTerm>> eqs;
-		
-		public final List<Pair<String, String>> options;
-
-		public InstExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<Pair<String, String>> gens, List<Pair<RawTerm, RawTerm>> eqs, List<Pair<String, String>> options) {
-			this.schema = schema;
-			this.imports = imports;
-			this.gens = gens;
-			this.eqs = eqs;
-			this.options = options;
-		}
-
-			@Override
-		public String toString() {
-			return "InstExpRaw [schema=" + schema + ", imports=" + imports + ", gens=" + gens + ", eqs=" + eqs + ", options=" + options + "]";
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
-			result = prime * result + ((gens == null) ? 0 : gens.hashCode());
-			result = prime * result + ((imports == null) ? 0 : imports.hashCode());
-			result = prime * result + ((options == null) ? 0 : options.hashCode());
-			result = prime * result + ((schema == null) ? 0 : schema.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			InstExpRaw other = (InstExpRaw) obj;
-			if (eqs == null) {
-				if (other.eqs != null)
-					return false;
-			} else if (!eqs.equals(other.eqs))
-				return false;
-			if (gens == null) {
-				if (other.gens != null)
-					return false;
-			} else if (!gens.equals(other.gens))
-				return false;
-			if (imports == null) {
-				if (other.imports != null)
-					return false;
-			} else if (!imports.equals(other.imports))
-				return false;
-			if (options == null) {
-				if (other.options != null)
-					return false;
-			} else if (!options.equals(other.options))
-				return false;
-			if (schema == null) {
-				if (other.schema != null)
-					return false;
-			} else if (!schema.equals(other.schema))
-				return false;
-			return true;
-		}
-
-		@Override
-		public Instance<String, String, String, String, String, String, String> eval(Env env) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
-		@Override
-		public String meta() {
-			return " : " + schema;
-		}
-
-		
-		
-		
-	}
 
 }

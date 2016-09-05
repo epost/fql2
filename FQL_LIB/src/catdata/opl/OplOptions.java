@@ -109,6 +109,7 @@ public class OplOptions extends Options implements Cloneable {
 	public boolean opl_display_fresh_ids = false;
 	public boolean opl_prover_simplify_instances = false;
 	public boolean opl_safe_java = true;
+	public boolean opl_secret_agg = false;
 	
 	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
@@ -261,7 +262,12 @@ public class OplOptions extends Options implements Cloneable {
 		JCheckBox opl_safejava_box = new JCheckBox("", opl_safe_java);
 		JLabel opl_safejava_label  = new JLabel("Require use of java typesides to be complete (false=dangerous):");
 		opl2.add(opl_safejava_box);
-		opl1.add(opl_safejava_label);		
+		opl1.add(opl_safejava_label);	
+		
+		JCheckBox opl_agg_box = new JCheckBox("", opl_secret_agg);
+		JLabel opl_agg_label  = new JLabel("Allow ad-hoc aggregation (true=dangerous):");
+		opl2.add(opl_agg_box);
+		opl1.add(opl_agg_label);
 
 		for (int i = 0; i < Options.biggestSize - size(); i++) {
 			opl1.add(new JLabel());
@@ -311,6 +317,7 @@ public class OplOptions extends Options implements Cloneable {
 				opl_display_fresh_ids = opl_fresh_ids_box.isSelected();
 				opl_prover_simplify_instances = opl_simplify_box.isSelected();
 				opl_safe_java = opl_safejava_box.isSelected();
+				opl_secret_agg = opl_agg_box.isSelected();
 				//System.out.println("called, set to " + OplOptions.this);
 				return new Unit();
 			}

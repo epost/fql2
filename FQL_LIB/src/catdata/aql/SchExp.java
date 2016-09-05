@@ -1,11 +1,5 @@
 package catdata.aql;
 
-import java.util.List;
-
-import catdata.Pair;
-import catdata.Quad;
-import catdata.Triple;
-
 public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,Fk>> {	
 	
 	@Override
@@ -125,8 +119,7 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@SuppressWarnings("rawtypes")
-	public static final class SchExpVar<Ty,Sym,En,Att,Fk> extends SchExp<Ty,Sym,En,Att,Fk> {
+	public static final class SchExpVar extends SchExp<Object, Object, Object, Object, Object> {
 		
 		public final String var;
 		
@@ -137,9 +130,8 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 			this.var = var;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		public Schema<Ty,Sym,En,Att,Fk> eval(Env env) {
+		public Schema<Object, Object, Object, Object, Object> eval(Env env) {
 			return env.getSchema(var);
 		}
 
@@ -235,125 +227,4 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final class SchExpRaw extends SchExp<String,String,String,String,String>  {
-
-	
-	@Override
-	public String meta() {
-		return " : " + typeSide;
-	}
-	
-	public final TyExp<?,?> typeSide;
-	
-	public final List<String> imports;
-	
-	public final List<String> ens;
-
-	public final List<Triple<String, String, String>> fks;		
-	public final List<Pair<List<String>, List<String>>> p_eqs;
-
-	public final List<Triple<String, String, String>> atts; 
-	public final List<Quad<String, String, RawTerm, RawTerm>> t_eqs;
-	
-	public final List<Pair<String, String>> options;
-
-	/*
-	 * The constructor SchExp.SchExpRaw(TyExp<capture#104-of ?,capture#105-of ?>, List<String>, List<String>, List<Triple<String,String,String>>, List<Triple<String,String,String>>, List<Pair<List<String>,List<String>>>, List<Quad<String,String,RawTerm,RawTerm>>, List<Pair<String,String>>) is undefined
-	 */
-	
-	
-
-	@Override
-	public Schema<String, String, String, String, String> eval(Env env) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String toString() {
-		return "SchExpRaw [typeSide=" + typeSide + ", imports=" + imports + ", ens=" + ens + ", fks=" + fks + ", p_eqs=" + p_eqs + ", atts=" + atts + ", t_eqs=" + t_eqs + ", options=" + options + "]";
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((atts == null) ? 0 : atts.hashCode());
-		result = prime * result + ((ens == null) ? 0 : ens.hashCode());
-		result = prime * result + ((fks == null) ? 0 : fks.hashCode());
-		result = prime * result + ((imports == null) ? 0 : imports.hashCode());
-		result = prime * result + ((options == null) ? 0 : options.hashCode());
-		result = prime * result + ((p_eqs == null) ? 0 : p_eqs.hashCode());
-		result = prime * result + ((t_eqs == null) ? 0 : t_eqs.hashCode());
-		result = prime * result + ((typeSide == null) ? 0 : typeSide.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SchExpRaw other = (SchExpRaw) obj;
-		if (atts == null) {
-			if (other.atts != null)
-				return false;
-		} else if (!atts.equals(other.atts))
-			return false;
-		if (ens == null) {
-			if (other.ens != null)
-				return false;
-		} else if (!ens.equals(other.ens))
-			return false;
-		if (fks == null) {
-			if (other.fks != null)
-				return false;
-		} else if (!fks.equals(other.fks))
-			return false;
-		if (imports == null) {
-			if (other.imports != null)
-				return false;
-		} else if (!imports.equals(other.imports))
-			return false;
-		if (options == null) {
-			if (other.options != null)
-				return false;
-		} else if (!options.equals(other.options))
-			return false;
-		if (p_eqs == null) {
-			if (other.p_eqs != null)
-				return false;
-		} else if (!p_eqs.equals(other.p_eqs))
-			return false;
-		if (t_eqs == null) {
-			if (other.t_eqs != null)
-				return false;
-		} else if (!t_eqs.equals(other.t_eqs))
-			return false;
-		if (typeSide == null) {
-			if (other.typeSide != null)
-				return false;
-		} else if (!typeSide.equals(other.typeSide))
-			return false;
-		return true;
-	}
-
-	public SchExpRaw(TyExp<?, ?> typeSide, List<String> imports, List<String> ens, List<Triple<String, String, String>> fks, List<Pair<List<String>, List<String>>> p_eqs, List<Triple<String, String, String>> atts, List<Quad<String, String, RawTerm, RawTerm>> t_eqs, List<Pair<String, String>> options) {
-		this.typeSide = typeSide;
-		this.imports = imports;
-		this.ens = ens;
-		this.fks = fks;
-		this.p_eqs = p_eqs;
-		this.atts = atts;
-		this.t_eqs = t_eqs;
-		this.options = options;
-	} 
-	
-	
-	
-
-}
 }

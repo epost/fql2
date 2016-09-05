@@ -3,14 +3,13 @@ package catdata.aql;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("rawtypes")
 public final class Env {
 
-	private Map<String, TypeSide> tys = new HashMap<>();
-	private Map<String, Schema> schs = new HashMap<>();
-	private Map<String, Instance> insts = new HashMap<>();
-	private Map<String, Transform> trans = new HashMap<>();
-	private Map<String, Mapping> maps = new HashMap<>();
+	private Map<String, TypeSide<Object, Object>> tys = new HashMap<>();
+	private Map<String, Schema<Object, Object, Object, Object, Object>> schs = new HashMap<>();
+	private Map<String, Instance<Object, Object, Object, Object, Object, Object, Object>> insts = new HashMap<>();
+	private Map<String, Transform<Object, Object, Object, Object, Object,Object, Object, Object, Object>> trans = new HashMap<>();
+	private Map<String, Mapping<Object, Object, Object, Object, Object,Object, Object, Object, Object>> maps = new HashMap<>();
 	private Map<String, Query> qs = new HashMap<>();
 	private Map<String, Pragma> ps = new HashMap<>();
 	
@@ -35,23 +34,24 @@ public final class Env {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void put(String k, Kind kind, Object o) {
 		kind.checkLiteral(k, o);
 		switch (kind) {
 		case INSTANCE:
-			put(k, (Instance)o);
+			put(k, (Instance<Object, Object, Object, Object, Object, Object, Object>)o);
 			break;
 		case MAPPING:
-			put(k, (Mapping)o);
+			put(k, (Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object>)o);
 			break;
 		case SCHEMA:
-			put(k, (Schema)o);
+			put(k, (Schema<Object, Object, Object, Object, Object>)o);
 			break;
 		case TRANSFORM:
-			put(k, (Transform)o);
+			put(k, (Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object>)o);
 			break;
 		case TYPESIDE:
-			put(k, (TypeSide)o);
+			put(k, (TypeSide<Object, Object>)o);
 			break;
 		case QUERY:
 			put(k, (Query)o);
@@ -63,75 +63,75 @@ public final class Env {
 		}
 	}
 	
-	public void put(String k, TypeSide v) {
+	public void put(String k, TypeSide<Object, Object> v) {
 		if (tys.containsKey(k)) {
 			throw new RuntimeException("Already a top-level typeside definition for " + k);
 		}
 		tys.put(k, v);
 	}
 	
-	public TypeSide<?, ?> getTypeSide(String k) {
-		TypeSide ret = tys.get(k);
+	public TypeSide<Object,Object> getTypeSide(String k) {
+		TypeSide<Object,Object> ret = tys.get(k);
 		if (ret == null) {
 			throw new RuntimeException("No top-level typeside definition for " + k);
 		}
 		return ret;
 	}
 	
-	public void put(String k, Schema v) {
+	public void put(String k, Schema<Object, Object, Object, Object, Object> v) {
 		if (schs.containsKey(k)) {
 			throw new RuntimeException("Already a top-level schema definition for " + k);
 		}
 		schs.put(k, v);
 	}
 	
-	public Schema getSchema(String k) {
-		Schema ret = schs.get(k);
+	public Schema<Object, Object, Object, Object, Object> getSchema(String k) {
+		Schema<Object, Object, Object, Object, Object> ret = schs.get(k);
 		if (ret == null) {
 			throw new RuntimeException("No top-level schema definition for " + k);
 		}
 		return ret;
 	}
 	
-	public void put(String k, Instance v) {
+	public void put(String k, Instance<Object, Object, Object, Object, Object, Object, Object> v) {
 		if (insts.containsKey(k)) {
 			throw new RuntimeException("Already a top-level instance definition for " + k);
 		}
 		insts.put(k, v);
 	}
 	
-	public Instance getInstance(String k) {
-		Instance ret = insts.get(k);
+	public Instance<Object, Object, Object, Object, Object, Object, Object> getInstance(String k) {
+		Instance<Object, Object, Object, Object, Object, Object, Object> ret = insts.get(k);
 		if (ret == null) {
 			throw new RuntimeException("No top-level instance definition for " + k);
 		}
 		return ret;
 	}
 	
-	public void put(String k, Transform v) {
+	public void put(String k, Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object> v) {
 		if (trans.containsKey(k)) {
 			throw new RuntimeException("Already a top-level transform definition for " + k);
 		}
 		trans.put(k, v);
 	}
 	
-	public Transform getTransform(String k) {
-		Transform ret = trans.get(k);
+	public Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object> getTransform(String k) {
+		Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = trans.get(k);
 		if (ret == null) {
 			throw new RuntimeException("No top-level transform definition for " + k);
 		}
 		return ret;
 	}
 	
-	public void put(String k, Mapping v) {
+	public void put(String k, Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> v) {
 		if (maps.containsKey(k)) {
 			throw new RuntimeException("Already a top-level mapping definition for " + k);
 		}
 		maps.put(k, v);
 	}
 	
-	public Mapping getMapping(String k) {
-		Mapping ret = maps.get(k);
+	public Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> getMapping(String k) {
+		Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = maps.get(k);
 		if (ret == null) {
 			throw new RuntimeException("No top-level mapping definition for " + k);
 		}

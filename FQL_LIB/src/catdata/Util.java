@@ -33,6 +33,13 @@ import catdata.ide.MyTableRowSorter;
 import catdata.opl.OplTerm;
 
 public class Util {
+	
+	public static <X> X abort(Void v) {
+		if (v == null) {
+			throw new RuntimeException("Anomaly: please report");
+		}
+		throw new RuntimeException("Called on non-null void");
+	}
 
 	public static <X> List<X> newIfNull(List<X> l) {
 		return l == null ? new LinkedList<>() : l;
@@ -329,7 +336,7 @@ public class Util {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Comparator<Object> ToStringComparator = new Comparator<Object>() {
+	public static Comparator<Object> LengthComparator = new Comparator<Object>() {
 		@Override
 		public int compare(Object o1, Object o2) {
 			if (o1.toString().length() > o2.toString().length()) {
@@ -340,6 +347,14 @@ public class Util {
 			return o1.toString().compareTo(o2.toString());
 		}
 	};
+	
+	public static Comparator<Object> AlphabeticalComparator = new Comparator<Object>() {
+		@Override
+		public int compare(Object o1, Object o2) {
+			return o1.toString().compareTo(o2.toString());
+		}
+	};
+	
 
 	public static <X, Y> Map<Y, X> rev0(Map<X, Y> m) {
 		return Util.rev(m, new HashSet<>(m.values()));
@@ -484,21 +499,28 @@ public class Util {
 	public static <X, Y> List<X> proj1(List<Pair<X, Y>> l) {
 		return l.stream().map(x -> x.first).collect(Collectors.toList());
 	}
-
-	public static String sep(Map<?, ?> m, String sep1, String sep2) {
+	
+	public static String sep(Collection<?> order, Map<?, ?> m, String sep1, String sep2, boolean skip) {
 		String ret = "";
 		boolean b = false;
-		Iterator<?> c = m.keySet().iterator();
+		Iterator<?> c = order.iterator();
 		while (c.hasNext()) {
 			Object o = c.next();
+			Object z = m.get(o);
+			if (z == null && skip) {
+				continue;
+			}
 			if (b) {
 				ret += sep2;
 			}
-			b = true;
-
+			b = true;	
 			ret += o + sep1 + m.get(o);
 		}
 		return ret;
+	}
+
+	public static String sep(Map<?, ?> m, String sep1, String sep2) {
+		return sep(m.keySet(), m, sep1, sep2, false);
 	}
 
 	
@@ -558,6 +580,24 @@ public class Util {
 
 		return ret;
 	}
+	
+	public static <X, Y> void putSafely(Map<X, Y> ret, X k, Y v) {
+		if (ret.containsKey(k) && !ret.get(k).equals(v)) {
+			throw new RuntimeException("Two distinct bindings for " + k + ": " + v + " and " + ret.get(k));
+		}
+		ret.put(k, v);
+	}
+	
+	public static <X, Y> Map<X, Y> toMapSafely(Collection<Pair<X, Y>> t) {
+		Map<X, Y> ret = new HashMap<>();
+
+		for (Pair<X, Y> p : t) {
+			putSafely(ret, p.first, p.second);
+		}
+
+		return ret;
+	}
+
 
 	public static <X, Y> Set<Pair<X, Y>> convert(Map<X, Y> t) {
 		Set<Pair<X, Y>> ret = new HashSet<>();
@@ -709,6 +749,34 @@ public class Util {
 	public static <X> List<X> reverse(List<X> l) {
 		List<X> ret = new LinkedList<>(l);
 		Collections.reverse(ret);
+		return ret;
+	}
+
+	public static <T> void assertNoDups(Collection<T> list) {
+
+	    Set<T> duplicates = new HashSet<>();
+	    Set<T> uniques = new HashSet<>();
+
+	    for(T t : list) {
+	        if(!uniques.add(t)) {
+	            duplicates.add(t);
+	        }
+	    }
+
+	    if (!duplicates.isEmpty()) {
+	    	throw new RuntimeException("List contains duplicates, namely " + duplicates);
+	    }
+	}
+
+	public static <Ty> List<Ty> alphabetical(Set<Ty> tys) {
+		List<Ty> ret = new LinkedList<>(tys);
+		ret.sort(LengthComparator);
+		return ret;
+	}
+
+	public static <X> List<String> shortest(Collection<X> set) {
+		List<String> ret = set.stream().map(Object::toString).collect(Collectors.toList());
+		ret.sort(LengthComparator);
 		return ret;
 	}
 }

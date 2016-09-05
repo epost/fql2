@@ -1,12 +1,6 @@
 package catdata.aql;
 
-import java.util.List;
-
-import catdata.Pair;
-import catdata.Quad;
-import catdata.Triple;
-
-public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
+public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	
 	@Override
 	public String meta() {
@@ -19,9 +13,9 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final class TyExpSch<Ty,Sym> extends TyExp<Ty,Sym> {
+	public static final class TyExpSch<Ty, Sym> extends TyExp<Ty, Sym> {
 		
-		public final SchExp<Ty,?,Sym,?,?> schema;
+		public final SchExp<Ty, ?, Sym, ?, ?> schema;
 
 		public TyExpSch(SchExp<Ty, ?, Sym, ?, ?> schema) {
 			if (schema == null) {
@@ -77,7 +71,7 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 		}
 		
 		@Override
-		public TypeSide<Void, Void> eval(Env env) {
+		public TypeSide<Void,Void> eval(Env env) {
 			return TypeSide.terminal();
 		}
 	
@@ -99,119 +93,11 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 	}
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	public static final class TyExpRaw extends TyExp<String, String> {
 
-		public final List<String> imports;
-		public final List<String> types;
-		public final List<Triple<String, List<String>, String>> functions;
-		public final List<Triple<List<Pair<String, String>>, RawTerm, RawTerm>> eqs;
-
-		public final List<Pair<String, String>> java_tys_string;
-		public final List<Pair<String, String>> java_parser_string;
-		public final List<Quad<String, List<String>, String, String>> java_fns_string;
+	public static final class TyExpLit<Ty, Sym> extends TyExp<Ty, Sym> {
+		public final TypeSide<Ty, Sym> typeSide;
 		
-		public final List<Pair<String, String>> options;
-
-		/*
-	                    List<String>,         List<String>,       List<Triple<String, List<String>, String>>,           List<Triple<String,List<String>,String>>, List<Triple<List<Pair<String,String>>,RawTerm,RawTerm>>, List<Pair<String,String>>, List<Pair<String,String>>, List<Quad<String,List<String>,String,String>>) is undefined	 */
-		public TyExpRaw(List<String> imports, List<String> types, List<Triple<String, List<String>, String>> functions, List<Triple<List<Pair<String, String>>, RawTerm, RawTerm>> eqs, List<Pair<String, String>> java_tys_string, List<Pair<String, String>> java_parser_string, List<Quad<String, List<String>, String, String>> java_fns_string, List<Pair<String, String>> options) {
-			this.imports = imports;
-			this.types = types;
-			this.functions = functions;
-			this.eqs = eqs;
-			this.java_tys_string = java_tys_string;
-			this.java_parser_string = java_parser_string;
-			this.java_fns_string = java_fns_string;
-			this.options = options;
-		}
-		
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
-			result = prime * result + ((functions == null) ? 0 : functions.hashCode());
-			result = prime * result + ((imports == null) ? 0 : imports.hashCode());
-			result = prime * result + ((java_fns_string == null) ? 0 : java_fns_string.hashCode());
-			result = prime * result + ((java_parser_string == null) ? 0 : java_parser_string.hashCode());
-			result = prime * result + ((java_tys_string == null) ? 0 : java_tys_string.hashCode());
-			result = prime * result + ((options == null) ? 0 : options.hashCode());
-			result = prime * result + ((types == null) ? 0 : types.hashCode());
-			return result;
-		}
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			TyExpRaw other = (TyExpRaw) obj;
-			if (eqs == null) {
-				if (other.eqs != null)
-					return false;
-			} else if (!eqs.equals(other.eqs))
-				return false;
-			if (functions == null) {
-				if (other.functions != null)
-					return false;
-			} else if (!functions.equals(other.functions))
-				return false;
-			if (imports == null) {
-				if (other.imports != null)
-					return false;
-			} else if (!imports.equals(other.imports))
-				return false;
-			if (java_fns_string == null) {
-				if (other.java_fns_string != null)
-					return false;
-			} else if (!java_fns_string.equals(other.java_fns_string))
-				return false;
-			if (java_parser_string == null) {
-				if (other.java_parser_string != null)
-					return false;
-			} else if (!java_parser_string.equals(other.java_parser_string))
-				return false;
-			if (java_tys_string == null) {
-				if (other.java_tys_string != null)
-					return false;
-			} else if (!java_tys_string.equals(other.java_tys_string))
-				return false;
-			if (options == null) {
-				if (other.options != null)
-					return false;
-			} else if (!options.equals(other.options))
-				return false;
-			if (types == null) {
-				if (other.types != null)
-					return false;
-			} else if (!types.equals(other.types))
-				return false;
-			return true;
-		}
-		@Override
-		public String toString() {
-			return "RawTypeSide [imports=" + imports + ", types=" + types + ", functions=" + functions + ", eqs=" + eqs + ", java_tys_string=" + java_tys_string + ", java_parser_string=" + java_parser_string + ", java_fns_string=" + java_fns_string + ", options=" + options + "]";
-		}
-		
-		
-		
-		@Override
-		public TypeSide<String, String> eval(Env env) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
-	}
-	
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final class TyExpLit<Ty,Sym> extends TyExp<Ty,Sym> {
-		public final TypeSide<Ty,Sym> typeSide;
-		
-		public TyExpLit(TypeSide<Ty,Sym> typeSide) {
+		public TyExpLit(TypeSide<Ty, Sym> typeSide) {
 			if (typeSide == null) {
 				throw new RuntimeException("Attempt to create TyExpLit with null type side");
 			}
@@ -219,7 +105,7 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 		}
 
 		@Override
-		public TypeSide<Ty,Sym> eval(Env env) {
+		public TypeSide<Ty, Sym> eval(Env env) {
 			return typeSide;
 		}
 
@@ -258,7 +144,7 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public static final class TyExpVar<Ty,Sym> extends TyExp<Ty,Sym> {
+	public static final class TyExpVar extends TyExp<Object, Object> {
 		public final String var;
 		
 		public TyExpVar(String var) {
@@ -268,10 +154,9 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 			this.var = var;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		public TypeSide<Ty,Sym> eval(Env env) {
-			return (TypeSide<Ty, Sym>) env.getTypeSide(var);
+		public TypeSide <Object, Object> eval(Env env) {
+			return env.getTypeSide(var);
 		}
 
 		@Override
@@ -290,7 +175,7 @@ public abstract class TyExp<Ty,Sym> extends Exp<TypeSide<Ty,Sym>> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			TyExpVar<?,?> other = (TyExpVar<?,?>) obj;
+			TyExpVar other = (TyExpVar) obj;
 			if (var == null) {
 				if (other.var != null)
 					return false;

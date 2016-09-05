@@ -1,16 +1,11 @@
 package catdata.aql;
 
 import javax.swing.JComponent;
-import javax.swing.JEditorPane;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
-import javax.swing.text.html.HTMLDocument;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.HTMLFrameHyperlinkEvent;
 
 import catdata.ide.CodeTextPanel;
+
+//TODO: quoting
 
 public final class Viewer {
 
@@ -23,12 +18,13 @@ public final class Viewer {
 		
 		ret.add(new CodeTextPanel("", obj.toString()), "Text");
 		
-		JEditorPane pane = new JEditorPane();
-		pane.setEditable(false);
-		pane.setEditorKit(new HTMLEditorKit());
-		pane.setText("<html><a href=\"http://categoricaldata.net/fql.html\">click me</a><br><br>" + html(obj) + "</html>");
-		pane.addHyperlinkListener(new Hyperactive());
-		ret.add(new JScrollPane(pane), "HTML");
+	//	JEditorPane pane = new JEditorPane();
+	//	pane.setEditable(false);
+	//	pane.setEditorKit(new HTMLEditorKit());
+	//	pane.setText("<html><a href=\"http://categoricaldata.net/fql.html\">click me</a><br><br>" + html(obj) + "</html>");
+	//	pane.addHyperlinkListener(new Hyperactive());
+	
+		//ret.add(new JScrollPane(pane), "HTML");
 		
 		return ret;
 		
@@ -51,7 +47,7 @@ public final class Viewer {
 			throw new RuntimeException();			
 		} */
 	}
-
+/*
 	static class Hyperactive implements HyperlinkListener {
 		 
         public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -70,6 +66,6 @@ public final class Viewer {
                 }
             }
         }
-    }
+    } */
 	
 }

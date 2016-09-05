@@ -1,12 +1,14 @@
 package catdata.aql;
 
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Pair;
+import catdata.Util;
 
 public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
@@ -17,17 +19,17 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	public final Map<Gen, En> gens;
 	public final Map<Sk, Ty> sks;
 
-	public final List<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs;
+	public final Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs;
 
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Instance<Ty, En, Sym, Fk, Att, Void, Void> terminal(Schema<Ty, En, Sym, Fk, Att> t) {
-		return new Instance<>(t, new HashMap<>(), new HashMap<>(), new LinkedList<>(), new DPStrategy(DPName.PRECOMPUTED, t.semantics()));
+	public static <Ty, En, Sym, Fk, Att> Instance<Ty, En, Sym, Fk, Att, Void, Void> terminal(Schema<Ty, En, Sym, Fk, Att> t) {
+		return new Instance<>(t, Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new DPStrategy(DPName.PRECOMPUTED, t.semantics()));
 	}
 
 	public Chc<Ty,En> type(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {		
 		return term.type(new Ctx<>(), new Ctx<>(), schema.typeSide.tys, schema.typeSide.syms, schema.typeSide.java_tys, schema.ens, schema.atts, schema.fks, gens, sks);
 	}
 	
-	public Instance(Schema<Ty, En, Sym, Fk, Att> schema, Map<Gen, En> gens, Map<Sk, Ty> sks, List<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs, DPStrategy strategy) {
+	public Instance(Schema<Ty, En, Sym, Fk, Att> schema, Map<Gen, En> gens, Map<Sk, Ty> sks, Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs, DPStrategy strategy) {
 		if (schema == null) {
 			throw new RuntimeException("Attempt to construct instance with null schema");
 		} else if (gens == null) {
@@ -72,6 +74,8 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 					throw new RuntimeException("In instance equation " + toString(eq) + ", lhs sort is " + lhs.toStringMash() + " but rhs sort is " + rhs.toStringMash());
 				}
 			}				
+			
+			//TODO: check freeness on java (or freeness on type side, if option enabled).  need to do so in collage
 		}	
 	
 	private String toString(Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq) {
@@ -153,9 +157,21 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return true;
 	}
 
+	private String toString = null;
 	@Override
 	public String toString() {
-		return "Instance [schema=" + schema + ", gens=" + gens + ", sks=" + sks + ", eqs=" + eqs + "]";
+		if (toString != null) {
+			return toString;
+		}
+		List<String> eqs0 = eqs.stream().map(x -> x.first + " = " + x.second).collect(Collectors.toList());
+		toString = "generating entities";
+		toString += "\n\t" + Util.sep(gens, " : ", "\n\t");
+		toString += "\ngenerating labelled nulls";
+		toString += "\n\t" + Util.sep(sks, " : " , "\n\t");			
+		toString += "\nequations";
+		toString += "\n\t" + Util.sep(eqs0, "\n\t");
+		
+		return toString;
 	} 
 
 	

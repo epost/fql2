@@ -1,32 +1,35 @@
 package catdata.aql;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Util;
 
 public final class TypeSide<Ty, Sym> {
-
+	
 	public final Set<Ty> tys;
-	public final Map<Sym, Pair<Ty[], Ty>> syms;
-	public final List<Triple<Ctx<Var, Ty>, Term<Ty, ?, Sym, ?, ?, ?, ?>, Term<Ty, ?, Sym, ?, ?, ?, ?>>> eqs;
+	public final Map<Sym, Pair<List<Ty>, Ty>> syms;
+	public final Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs;
 
-	public final Map<Ty, String> java_tys_string;
-	public final Map<Ty, String> java_parser_string;
-	public final Map<Sym, String> java_fns_string;
+	public final Map<Ty, String> java_tys;
+	public final Map<Ty, String> java_parsers;
+	public final Map<Sym, String> java_fns;
 
-	public final Map<Ty, Class<?>> java_tys;
-	public final Map<Sym, Function<Object[], Object>> java_fns;
+//	public final Map<Ty, Class<?>> java_tys;
+//	public final Map<Sym, Function<List<Object>, Object>> java_fns;
 
 	private final DPStrategy strategy;
 
+	
 	public Ty type(Ctx<Var,Ty> ctx, Term<Ty, ?, Sym, ?, ?, ?, ?> term) {
 		if (!term.isTypeSide()) {
 			throw new RuntimeException(term + " is not a typeside term");
@@ -38,7 +41,7 @@ public final class TypeSide<Ty, Sym> {
 		return t.l;
 	}
 
-	public TypeSide(Set<Ty> tys, Map<Sym, Pair<Ty[], Ty>> syms, List<Triple<Ctx<Var, Ty>, Term<Ty, ?, Sym, ?, ?, ?, ?>, Term<Ty, ?, Sym, ?, ?, ?, ?>>> eqs, Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string, DPStrategy strategy) {
+	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string, DPStrategy strategy) {
 		if (tys == null) {
 			throw new RuntimeException("Null types in typeside");
 		} else if (syms == null) {
@@ -57,19 +60,26 @@ public final class TypeSide<Ty, Sym> {
 		this.tys = tys;
 		this.syms = syms;
 		this.eqs = eqs;
-		this.java_tys_string = java_tys_string;
-		this.java_parser_string = java_parser_string;
-		this.java_fns_string = java_fns_string;
+		this.java_tys = java_tys_string;
+		this.java_parsers = java_parser_string;
+		this.java_fns = java_fns_string;
 		this.strategy = strategy;
-		this.java_tys = new HashMap<>(); // TODO 
-		this.java_fns = new HashMap<>();
+		for (Ty ty : java_tys_string.keySet()) {
+			String parser = java_parser_string.get(ty);
+			if (parser == null) {
+				throw new RuntimeException("No constant parser for " + ty);
+			}
+			String clazz = java_tys_string.get(ty);
+			AqlJs.load(clazz);
+			AqlJs.compile(parser);
+		}
 		validate();
 	}
 
 	public void validate() {
 		//check that each sym is in tys
 		for (Sym sym : syms.keySet()) {
-			Pair<Ty[], Ty> ty = syms.get(sym);
+			Pair<List<Ty>, Ty> ty = syms.get(sym);
 			if (!tys.contains(ty.second)) {
 				throw new RuntimeException("On typeside symbol " + sym + ", the return type " + ty.second + " is not declared.");
 			}
@@ -80,7 +90,7 @@ public final class TypeSide<Ty, Sym> {
 			}
 			
 		}
-		for (Triple<Ctx<Var, Ty>, Term<Ty, ?, Sym, ?, ?, ?, ?>, Term<Ty, ?, Sym, ?, ?, ?, ?>> eq : eqs) {
+		for (Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq : eqs) {
 			//check that the context is valid for each eq
 			Set<Ty> used_tys = new HashSet<>(eq.first.values());
 			used_tys.removeAll(tys);
@@ -93,18 +103,92 @@ public final class TypeSide<Ty, Sym> {
 			if (!lhs.equals(rhs)) {
 				throw new RuntimeException("In typeside equation " + toString(eq) + ", lhs type is " + lhs + " but rhs type is " + rhs);
 			}
+			if (java_tys.containsKey(lhs)) {
+				throw new RuntimeException("In typeside equation " + toString(eq) + ", the return type is " + lhs + " which is a java type ");
+			}
+			if (!Collections.disjoint(java_tys.keySet(), eq.first.values())) {
+				throw new RuntimeException("In typeside equation " + toString(eq) + ", the context variable(s) bind java type(s)");
+			}
+			assertNoJava(eq.second);
+			assertNoJava(eq.third);
 		}				
+		for (Sym sym : java_fns.keySet()) {
+			if (!syms.containsKey(sym)) {
+				throw new RuntimeException("The java function " + sym + " is not a declared function");
+			}
+		}
+		for (Sym sym : syms.keySet()) {
+			Pair<List<Ty>, Ty> t = syms.get(sym);
+			if (allJava(t) || noJava(t)) {
+				
+			} else {
+				throw new RuntimeException("In symbol " + sym + ", functions must not mix java and non-java types");
+			}
+		}
 		
-		//TODO java validate
 	}
 	
-	public String toString(Triple<Ctx<Var, Ty>, Term<Ty, ?, Sym, ?, ?, ?, ?>, Term<Ty, ?, Sym, ?, ?, ?, ?>> eq) {
+	private boolean noJava(Pair<List<Ty>, Ty> t) {
+		List<Ty> l = new LinkedList<>(t.first);
+		l.add(t.second);
+		
+		for (Ty ty : l) {
+			if (java_tys.containsKey(ty)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+	private boolean allJava(Pair<List<Ty>, Ty> t) {
+		List<Ty> l = new LinkedList<>(t.first);
+		l.add(t.second);
+		
+		for (Ty ty : l) {
+			if (!java_tys.containsKey(ty)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+	public void assertNoJava(Term<Ty, ?, Sym, ?, ?, Void, Void> t) {
+		if (t.var != null) {
+			return;
+		} else if (t.fk != null) {
+			assertNoJava(t.arg);
+			return;
+		} else if (t.att != null) {
+			assertNoJava(t.arg);
+			//does not test for attribute ending at java type, but that should ruled out previously
+			return;
+		} else if (t.sym != null) {
+			Pair<List<Ty>, Ty> x = syms.get(t.sym);
+			if (!Collections.disjoint(x.first, java_tys.keySet())) {
+				throw new RuntimeException("In " + t + ", functions with java types are not allowed ");
+			} else if (java_tys.keySet().contains(x.second)) {
+				throw new RuntimeException("In " + t + ", functions with java types are not allowed");
+			} 
+			for (Term<Ty, ?, Sym, ?, ?, Void, Void> arg : t.args) {
+				assertNoJava(arg);
+			}
+			return;
+		} else if (t.obj != null) {
+			throw new RuntimeException("In " + t + ", java constants are not allowed ");
+		}
+		
+		throw new RuntimeException("Anomaly: please report."); //else if (t.g)
+	}
+	
+	public String toString(Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq) {
 		String pre = eq.first.isEmpty() ? "" : "forall ";
 		return pre + eq.first + ", " + eq.first + " = " + eq.second;
 	}
 
-	public static TypeSide<Void, Void> terminal() {
-		return new TypeSide<Void, Void>(new HashSet<>(), new HashMap<>(), new LinkedList<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new DPStrategy(DPName.PRECOMPUTED, DP.terminal));
+	public static TypeSide<Void,Void> terminal() {
+		return new TypeSide<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new DPStrategy(DPName.PRECOMPUTED, DP.terminal));
 	}
 
 	private DP<Ty, Void, Sym, Void, Void, Void, Void> semantics;
@@ -144,9 +228,9 @@ public final class TypeSide<Ty, Sym> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
-		result = prime * result + ((java_fns_string == null) ? 0 : java_fns_string.hashCode());
-		result = prime * result + ((java_parser_string == null) ? 0 : java_parser_string.hashCode());
-		result = prime * result + ((java_tys_string == null) ? 0 : java_tys_string.hashCode());
+		result = prime * result + ((java_fns == null) ? 0 : java_fns.hashCode());
+		result = prime * result + ((java_parsers == null) ? 0 : java_parsers.hashCode());
+		result = prime * result + ((java_tys == null) ? 0 : java_tys.hashCode());
 		result = prime * result + ((syms == null) ? 0 : syms.hashCode());
 		result = prime * result + ((tys == null) ? 0 : tys.hashCode());
 		return result;
@@ -160,26 +244,26 @@ public final class TypeSide<Ty, Sym> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		TypeSide<?, ?> other = (TypeSide<?, ?>) obj;
+		TypeSide<?,?> other = (TypeSide<?,?>) obj;
 		if (eqs == null) {
 			if (other.eqs != null)
 				return false;
 		} else if (!eqs.equals(other.eqs))
 			return false;
-		if (java_fns_string == null) {
-			if (other.java_fns_string != null)
+		if (java_fns == null) {
+			if (other.java_fns != null)
 				return false;
-		} else if (!java_fns_string.equals(other.java_fns_string))
+		} else if (!java_fns.equals(other.java_fns))
 			return false;
-		if (java_parser_string == null) {
-			if (other.java_parser_string != null)
+		if (java_parsers == null) {
+			if (other.java_parsers != null)
 				return false;
-		} else if (!java_parser_string.equals(other.java_parser_string))
+		} else if (!java_parsers.equals(other.java_parsers))
 			return false;
-		if (java_tys_string == null) {
-			if (other.java_tys_string != null)
+		if (java_tys == null) {
+			if (other.java_tys != null)
 				return false;
-		} else if (!java_tys_string.equals(other.java_tys_string))
+		} else if (!java_tys.equals(other.java_tys))
 			return false;
 		if (syms == null) {
 			if (other.syms != null)
@@ -194,9 +278,40 @@ public final class TypeSide<Ty, Sym> {
 		return true;
 	}
 
+	private String toString;
+	
 	@Override
 	public String toString() {
-		return "TypeSide [tys=" + tys + ", syms=" + syms + ", eqs=" + eqs + ", java_tys_string=" + java_tys_string + ", java_parser_string=" + java_parser_string + ", java_fns_string=" + java_fns_string + "]";
-	} // TODO
+		if (toString != null) {
+			return toString;
+		}
+		List<Ty> tys0 = Util.alphabetical(tys);
+		List<Sym> syms0 = Util.alphabetical(syms.keySet());
+		List<String> eqs1 = eqs.stream().map(x -> x.first.toString(x.second, x.third)).collect(Collectors.toList());
+		List<String> eqs0 = Util.shortest(eqs1);
+		
+		toString = "types";
+		toString += "\n\t" + Util.sep(tys0, " ");
+		toString += "\nfunctions";
+		List<String> temp = new LinkedList<>();
+		for (Sym sym : syms0) {
+			Pair<List<Ty>, Ty> t = syms.get(sym);
+			temp.add(sym + " : " + Util.sep(t.first, ", ") + " -> " + t.second);
+		}
+		toString += "\n\t" + Util.sep(temp, "\n\t");
+		
+		toString += "\nequations";
+		toString += "\n\t" + Util.sep(eqs0, "\n\t");
+		
+		toString += "\njava_types";
+		toString += "\n\t" + Util.sep(tys0, java_tys, " = " , "\n\t", true);
+		
+		toString += "\njava_constants";
+		toString += "\n\t" + Util.sep(tys0, java_parsers, " = " , "\n\t", true);
+
+		toString += "\njava_functions";
+		toString += "\n\t" + Util.sep(syms0, java_fns, " = " , "\n\t", true);
+		return toString;
+	} 
 
 }

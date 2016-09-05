@@ -1,9 +1,5 @@
 package catdata.aql;
 
-import java.util.List;
-
-import catdata.Pair;
-
 public abstract class TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> extends Exp<Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2>> {
 	
 	
@@ -13,90 +9,7 @@ public abstract class TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> extends Exp<T
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-	public static final class TransExpRaw extends TransExp<String,String,String,String,String,String,String,String,String> {
-		
-		public final InstExp<?,?,?,?,?,?,?> src, dst;
-		
-		public final List<String> imports;
-		
-		public final List<Pair<String, RawTerm>> gens;		
-		
-		public final List<Pair<String, String>> options;
-		
-		@Override
-		public String meta() {
-			return " : " + src + " -> " + dst;
-		}
-
-		@Override
-		public String toString() {
-			return "TransExpRaw [src=" + src + ", dst=" + dst + ", imports=" + imports + ", gens=" + gens + ", options=" + options + "]";
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
-			result = prime * result + ((gens == null) ? 0 : gens.hashCode());
-			result = prime * result + ((imports == null) ? 0 : imports.hashCode());
-			result = prime * result + ((options == null) ? 0 : options.hashCode());
-			result = prime * result + ((src == null) ? 0 : src.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			TransExpRaw other = (TransExpRaw) obj;
-			if (dst == null) {
-				if (other.dst != null)
-					return false;
-			} else if (!dst.equals(other.dst))
-				return false;
-			if (gens == null) {
-				if (other.gens != null)
-					return false;
-			} else if (!gens.equals(other.gens))
-				return false;
-			if (imports == null) {
-				if (other.imports != null)
-					return false;
-			} else if (!imports.equals(other.imports))
-				return false;
-			if (options == null) {
-				if (other.options != null)
-					return false;
-			} else if (!options.equals(other.options))
-				return false;
-			if (src == null) {
-				if (other.src != null)
-					return false;
-			} else if (!src.equals(other.src))
-				return false;
-			return true;
-		}
-
-		public TransExpRaw(InstExp<?, ?, ?, ?, ?, ?, ?> src, InstExp<?, ?, ?, ?, ?, ?, ?> dst, List<String> imports, List<Pair<String, RawTerm>> gens, List<Pair<String, String>> options) {
-			this.src = src;
-			this.dst = dst;
-			this.imports = imports;
-			this.gens = gens;
-			this.options = options;
-		}
-
-		@Override
-		public Transform<String, String, String, String, String, String, String, String, String> eval(Env env) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
-	}
+	
 	
 ///////////////////////////////////////////////////////////////////////////////////////
 	
@@ -155,7 +68,7 @@ public static final class TransExpId<Ty,En,Sym,Fk,Att,Gen,Sk> extends TransExp<T
 	
 ///////////////////////////////////////////////////////////////////////////////////////	
 
-	public static final class TransExpVar<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> extends TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> {
+	public static final class TransExpVar extends TransExp<Object, Object, Object, Object, Object, Object, Object, Object, Object> {
 		public final String var;
 		
 		public TransExpVar(String var) {
@@ -167,9 +80,8 @@ public static final class TransExpId<Ty,En,Sym,Fk,Att,Gen,Sk> extends TransExp<T
 			return "";
 		}
 		
-		@SuppressWarnings("unchecked")
 		@Override
-		public Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> eval(Env env) {
+		public Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(Env env) {
 			return env.getTransform(var);
 		}
 
@@ -189,7 +101,7 @@ public static final class TransExpId<Ty,En,Sym,Fk,Att,Gen,Sk> extends TransExp<T
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			TransExpVar<?,?,?,?,?,?,?,?,?> other = (TransExpVar<?,?,?,?,?,?,?,?,?>) obj;
+			TransExpVar other = (TransExpVar) obj;
 			if (var == null) {
 				if (other.var != null)
 					return false;

@@ -59,6 +59,7 @@ import catdata.opl.OplExp.OplUberSat;
 import catdata.opl.OplExp.OplUnSat;
 import catdata.opl.OplExp.OplUnion;
 import catdata.opl.OplExp.OplVar;
+import catdata.opl.OplQuery.Agg;
 import catdata.opl.OplQuery.Block;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -74,7 +75,7 @@ public class OplParser {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
-	static String[] res = new String[] { "arith", "distinct", "graph", "nodes", "ed", "tables", 
+	static String[] res = new String[] { "agg", "arith", "distinct", "graph", "nodes", "ed", "tables", 
 			"chase", "with", "max", "insert", "into", "select", "and", "sql", 
 			"ID", "colimit" , "imports", "pragma", "options", "union",
 			"pushoutBen", "PUSHOUT", "pivot", "DELTA", "return", "coreturn",
@@ -1538,7 +1539,7 @@ public class OplParser {
 
 		LinkedHashMap<String, String> from = new LinkedHashMap<>();
 		Set<Pair<OplTerm<String, String>, OplTerm<String, String>>> where = new HashSet<>();
-		Map<String, OplTerm<String, String>> attrs = new HashMap<>();
+		Map<String, Chc<Agg<String, String, String, String, String, String>, OplTerm<String, String>>> attrs = new HashMap<>();
 		Map<String, Pair<Object, Map<String, OplTerm<String, String>>>> edges = new HashMap<>();
 
 		//from
@@ -1574,7 +1575,7 @@ public class OplParser {
 		for (Object x :  (List) ((org.codehaus.jparsec.functors.Pair)t.a).b){
 			Tuple3 l = (Tuple3) x;
 			String dst = (String) l.c;
-			if (attrs.containsKey(dst) | edges.containsKey(dst)) {
+			if (attrs.containsKey(dst) || edges.containsKey(dst)) {
 				throw new DoNotIgnore("In select clause, duplicate for: " + dst);
 			}
 		//	System.out.println(l);
@@ -1584,7 +1585,7 @@ public class OplParser {
 								fromBlockHelper2(from.keySet(), l.a)));				
 
 			} else {
-				attrs.put(dst, toTerm(from.keySet(), null, l.a, true));				
+				attrs.put(dst, Chc.inRight(toTerm(from.keySet(), null, l.a, true)));				
 			}
 		}
 
@@ -1594,13 +1595,43 @@ public class OplParser {
 		return bl;
 	}
 
+	private static Agg<String, String, String, String, String, String> fromAgg(Collection vars, Collection consts, Object o,
+			boolean suppressError) {
+		
+		Tuple5<Tuple4<?,String,String,?>, List<Tuple3<String,?,String>>, List<Tuple3<?,?,?>>, org.codehaus.jparsec.functors.Pair<?,?>,?> t = (Tuple5<Tuple4<?, String, String, ?>, List<Tuple3<String, ?, String>>, List<Tuple3<?, ?, ?>>, org.codehaus.jparsec.functors.Pair<?, ?>, ?>) o;
+
+		LinkedHashMap<String, String> from = new LinkedHashMap<>();
+		Set<Pair<OplTerm<String, String>, OplTerm<String, String>>> where = new HashSet<>();
+
+		for (Object x : t.b) {
+			Tuple3 l = (Tuple3) x;
+			if (from.containsKey(l.a.toString())) {
+				throw new RuntimeException("Duplicate for: " + l.a);
+			}
+			from.put(l.a.toString(), l.c.toString());
+		}
+		Set<String> allVars = new HashSet<>();
+		allVars.addAll(vars);
+		allVars.addAll(from.keySet());
+		
+		for (Object x : t.c) {
+			Tuple3 l = (Tuple3) x;
+			where.add(new Pair(toTerm(allVars, null, l.a, true), toTerm(
+					allVars, null, l.c, true)));
+		}
+		
+		OplTerm<String, String> att = toTerm(allVars, null, t.d.b, true); //TODO
+			
+		return new Agg<>(t.a.b.toString(), t.a.c.toString(), from, where, att);
+	}
+	
 	public static Block<String, String, String, String, String, String> fromBlock(
 			Object o) {
 		Tuple4<List, List, List, List> t = (Tuple4<List, List, List, List>) o;
 
 		LinkedHashMap<String, String> from = new LinkedHashMap<>();
 		Set<Pair<OplTerm<String, String>, OplTerm<String, String>>> where = new HashSet<>();
-		Map<String, OplTerm<String, String>> attrs = new HashMap<>();
+		Map<String, Chc<Agg<String, String, String, String, String, String>,OplTerm<String, String>>> attrs = new HashMap<>();
 		Map<String, Pair<Object, Map<String, OplTerm<String, String>>>> edges = new HashMap<>();
 
 		for (Object x : t.a) {
@@ -1619,10 +1650,15 @@ public class OplParser {
 
 		for (Object x : t.c) {
 			Tuple3 l = (Tuple3) x;
-			if (attrs.containsKey(l.a.toString())) {
+			if (attrs.containsKey(l.a.toString())) { 
 				throw new RuntimeException("Duplicate for: " + l.a);
 			}
-			attrs.put(l.a.toString(), toTerm(from.keySet(), null, l.c, true));
+//			System.out.println(l.c);
+			if (l.c.toString().contains("agg") && l.c.toString().contains("{") && l.c.toString().contains("return") && l.c.toString().contains("}")) {
+				attrs.put(l.a.toString(), Chc.inLeft(fromAgg(from.keySet(), null, l.c, true))); //TODO				
+			} else {
+				attrs.put(l.a.toString(), Chc.inRight(toTerm(from.keySet(), null, l.c, true))); //TODO
+			}
 		}
 
 		for (Object x : t.d) {
@@ -1635,7 +1671,7 @@ public class OplParser {
 							fromBlockHelper(from.keySet(), l.c)));
 		}
 
-		Block bl = new Block<>(from, where, attrs, edges);
+		Block bl = new OplQuery.Block<>(from, where, attrs, edges);
 		return bl;
 	}
 
@@ -1734,13 +1770,26 @@ public class OplParser {
 	
 	//static Parser eee = Parsers.or(term("="), Parsers.tuple(term(":"), term("=")));
 	
+	public static final Parser<?> agg() {
+		Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(","))
+				.between(term("for"), term(";"));
+		Parser p2 = Parsers.tuple(oplTerm(), term("="), oplTerm())
+				.sepBy(term(",")).between(term("where"), term(";"));
+		Parser p3 = Parsers.tuple(term("return"),oplTerm());
+	
+		Parser p0 = Parsers.tuple(term("agg"), ident(), ident(), term("{"));
+		
+		Parser p = Parsers.tuple(p0, p1, p2, p3, term("}"));
+		return p;		
+	}
+	
 	public static final Parser<?> block() {
 		Parser eee = Parsers.or(term("="), Parsers.tuple(term(":"), term("=")));
 		Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(","))
 				.between(term("for"), term(";"));
 		Parser p2 = Parsers.tuple(oplTerm(), term("="), oplTerm())
 				.sepBy(term(",")).between(term("where"), term(";"));
-		Parser p3 = Parsers.tuple(ident(), eee, oplTerm())
+		Parser p3 = Parsers.tuple(ident(), eee, Parsers.or(agg(), oplTerm()))
 				.sepBy(term(",")).between(term("return"), term(";"));
 
 		Parser q = Parsers.tuple(ident(), eee, oplTerm())
