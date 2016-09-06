@@ -9,6 +9,7 @@ import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.fife.ui.autocomplete.ShorthandCompletion;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.Token;
 
@@ -55,7 +56,28 @@ public final class AqlCodeEditor extends
 	private CompletionProvider createCompletionProvider() {
 		DefaultCompletionProvider provider = new DefaultCompletionProvider();
 
+		provider.addCompletion(new ShorthandCompletion(provider, "typeside",
+				"typeside ? = literal {\n\timports\n\ttypes\n\tconstants\n\tfunctions\n\tequations\n\tjava_types\n\tjava_constants\n\tjava_functions\n\toptions\n} ", ""));
+
+		provider.addCompletion(new ShorthandCompletion(
+				provider,
+				"schema",
+				"schema ? = literal : ? {\n\timports\n\tforeign_keys\n\tpath_equations\n\tattributes\n\tobservation_equations\n\toptions\n} ",
+				""));
 		
+		provider.addCompletion(new ShorthandCompletion(
+				provider,
+				"instance",
+				"instance ? = literal : ? {\n\timports\n\tgenerators\n\tequations\n\toptions\n} ",
+				""));
+
+		provider.addCompletion(new ShorthandCompletion(provider, "mapping",
+				"mapping ? = literal : ? -> ? {\n\timports\n\tentities\n\tforeign_keys\n\tattributes\n\toptions\n} ", ""));
+
+		provider.addCompletion(new ShorthandCompletion(provider, "transform",
+				"transform ? = literal : ? -> ? {\n\timports\n\tgenerators\n\toptions\n} ", ""));
+
+			
 		return provider;
 
 	}

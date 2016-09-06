@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +33,35 @@ public final class RawTerm {
 	
 	//TODO inefficient bitwise operations
 
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk>
+	infer0(Map<String, Chc<Ty,En>> ctx0, RawTerm lhs, Chc<Ty,En> expected, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, String pre) {
+ 
+		Map<String, Chc<Ty,En>> ctx = new HashMap<>(ctx0);		
+		String fresh = "expected sort of " + lhs.toString();
+		ctx.put(fresh, expected);
+
+		try {
+		
+			Triple<Ctx<String, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> ret = infer1(ctx, new RawTerm(fresh, Collections.emptyList()), lhs, col);
+			
+			Chc<Ty, En> actual = ctx.get(fresh);
+			actual.assertNeitherNull();
+			expected.assertNeitherNull();
+			
+			if (!actual.equals(expected)) {
+				throw new RuntimeException("in " + lhs + ", infered sort is " + actual.toStringMash() + " which is not the expected sort " + expected.toStringMash());												
+			} 
+		
+			return ret.third;
+
+		} catch (RuntimeException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException(pre + ex.getMessage());
+		}
+			
+		
+	}
+	
 	//it is misleading to return a context, because strings for primitives can come out
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Triple<Ctx<String, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
 	infer1(Map<String, Chc<Ty,En>> ctx, RawTerm lhs, RawTerm rhs, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
@@ -50,6 +80,7 @@ public final class RawTerm {
 		Ref<Chc<Ty,En>> lhs_t = lhs.infer(vars, ctx0, col);
 		Ref<Chc<Ty,En>> rhs_t = rhs.infer(vars, ctx0, col);
 		if (lhs_t.x == null && rhs_t.x == null) {
+			System.out.println(ctx0);
 			throw new RuntimeException("Ambiguous result type (cannot infer) for " + lhs + " = " + rhs);
 		} else if (lhs_t.x == null && rhs_t.x != null) {
 			lhs_t.set(rhs_t);
@@ -57,7 +88,7 @@ public final class RawTerm {
 			rhs_t.set(lhs_t);
 		} 
 		if (!lhs_t.x.equals(rhs_t.x)) {
-			throw new RuntimeException(lhs + " has type " + lhs_t.x.toStringMash() + " but " + rhs + " has type " + rhs_t.x.toStringMash());
+			throw new RuntimeException(lhs + " has sort " + lhs_t.x.toStringMash() + " but " + rhs + " actually has sort " + rhs_t.x.toStringMash());
 		}
 		Ctx<String, Chc<Ty,En>> ret = new Ctx<>();
 		for (String var : ctx0.keySet()) {
@@ -181,7 +212,7 @@ public final class RawTerm {
 			Ref<Chc<Ty,En>> arg_t = args.get(0).infer(vars, ctx, col);
 			En ty = atts_t == null ? fks_t.first : atts_t.first;
 			if (arg_t.x != null && !Chc.inRight(ty).equals(arg_t.x)) {
-					throw new RuntimeException("In " + this + ", the head " + head + " is an attribute/foreign key expecting argument type " + atts_t + " but its argument has actual type " + arg_t.x.toStringMash());					
+					throw new RuntimeException("In " + this + ", the head " + head + " is an attribute/foreign key expecting argument type " + atts_t.first + " but its argument has actual type " + arg_t.x.toStringMash());					
 			}
 			arg_t.set(Chc.inRight(ty)); //redundant sometimes
 
@@ -198,13 +229,13 @@ public final class RawTerm {
 			for (RawTerm arg : args) {
 				Ref<Chc<Ty,En>> arg_t = arg.infer(vars, ctx, col);
 				if (arg_t.x != null && !Chc.inLeft(syms_t.first.get(i)).equals(arg_t.x)) {
-					throw new RuntimeException("In " + this + ", the head " + head + " at position " + i + " is expecting argument type " + atts_t + " but its argument has actual type " + arg_t.x.toStringMash());					
+					throw new RuntimeException("In " + this + ", the head " + head + " at position " + i + " is expecting argument type " + syms_t.first.get(i) + " but its argument has actual type " + arg_t.x.toStringMash());					
 				}
 				arg_t.set(Chc.inLeft(syms_t.first.get(i))); //redundant sometimes
 				i++;
 			}
 			return new Ref<>(Chc.inLeft(syms_t.second));
-		} else if (isVar && ctx.containsKey(head)) {
+		} else if (ctx.containsKey(head)) {
 			return ctx.get(head);
 		} else {
 			Ref<Chc<Ty,En>> ref = new Ref<>();

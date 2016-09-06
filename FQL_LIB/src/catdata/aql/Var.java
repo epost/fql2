@@ -2,9 +2,13 @@ package catdata.aql;
 
 public final class Var {
 
+	
 	public final String var;
 
 	public Var(String var) {
+		if (var == null) {
+			throw new RuntimeException("Attempt to create null variable");
+		} 
 		this.var = var;
 	}
 	

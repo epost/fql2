@@ -18,7 +18,6 @@
     <keyword>instance</keyword>
     <keyword>mapping</keyword>
     <keyword>pragma</keyword>
-    <keyword>pragma</keyword>
     <keyword>query</keyword>
     <keyword>schema</keyword>
     <keyword>transform</keyword>
@@ -26,7 +25,6 @@
   </keywords>
   <keywords2>
     <keyword>and</keyword>
-    <keyword>as</keyword>
     <keyword>as</keyword>
     <keyword>attributes</keyword>
     <keyword>chase</keyword>
@@ -38,14 +36,12 @@
     <keyword>delta</keyword>
     <keyword>ed</keyword>
     <keyword>edges</keyword>
-    <keyword>edges</keyword>
     <keyword>empty</keyword>
     <keyword>entities</keyword>
     <keyword>equations</keyword>
     <keyword>eval</keyword>
-    <keyword>for</keyword>
-    <keyword>for</keyword>
     <keyword>forall</keyword>
+    <keyword>foreign_keys</keyword>
     <keyword>from</keyword>
     <keyword>functions</keyword>
     <keyword>generators</keyword>
@@ -54,29 +50,25 @@
     <keyword>insert</keyword>
     <keyword>into</keyword>
     <keyword>java</keyword>
-    <keyword>keys</keyword>
-    <keyword>labelled</keyword>
+    <keyword>java_constants</keyword>
+    <keyword>java_functions</keyword>
+    <keyword>java_types</keyword>
     <keyword>lambda</keyword>
     <keyword>literal</keyword>
     <keyword>nodes</keyword>
-    <keyword>nodes</keyword>
-    <keyword>nulls</keyword>
-    <keyword>observation</keyword>
+    <keyword>observation_equations</keyword>
     <keyword>options</keyword>
-    <keyword>path</keyword>
+    <keyword>path_equations</keyword>
     <keyword>pi</keyword>
     <keyword>pivot</keyword>
     <keyword>return</keyword>
     <keyword>schemaOf</keyword>
     <keyword>select</keyword>
-    <keyword>select</keyword>
     <keyword>sigma</keyword>
     <keyword>sorts</keyword>
-    <keyword>symbols</keyword>
     <keyword>types</keyword>
     <keyword>typesideOf</keyword>
     <keyword>unit</keyword>
-    <keyword>where</keyword>
     <keyword>where</keyword>
     <keyword>with</keyword>
   </keywords2>

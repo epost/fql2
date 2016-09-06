@@ -7,7 +7,6 @@ import java.util.Map;
 
 import catdata.Chc;
 import catdata.Pair;
-import catdata.Ref;
 import catdata.Triple;
 import catdata.Util;
 
@@ -130,28 +129,28 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		List<Pair<Object, Pair<Object, List<Object>>>> fksX = new LinkedList<>();
 		for (Pair<Object, List<Object>> p : fks) {
 			Object start_en = null;
-			if (dst0.ens.contains(p.second.get(0))) {
-				if (fks0.containsKey(p.second.get(0))) {
-					throw new RuntimeException("in foreign key mapping " + p.first + " -> " + Util.sep(p.second, ".") + ", " + p.second.get(0) + " is both a target foreign key and a target entity, so the path is ambiguous");
-				}
-				start_en = p.second.get(0);
-			} else {
-				Pair<Object, Object> j = dst0.fks.get(p.second.get(0));
-				if (j == null) {
-					throw new RuntimeException("in foreign key mapping " + p.first + " -> " + Util.sep(p.second, ".") + ", " + p.second.get(0) + " is not a foreign key in the target");
-				}
-				start_en = j.first;
-			}
-			//get first object.  if entity and not fk, use entity else error.  if fk, lookup source
 			List<Object> r = new LinkedList<>();
 			for (Object o : p.second) {
 				if (ens0.containsKey(o)) {
 					if (fks0.containsKey(o)) {
 						throw new RuntimeException("in foreign key mapping " + p.first + " -> " + Util.sep(p.second, ".") + ", " + o + " is both a target foreign key and a target entity, so the path is ambiguous");
 					}
+					if (start_en == null) {
+						start_en = p.second.get(0);
+					}
 				} else {
+					if (start_en == null) {
+						Pair<Object, Object> j = dst0.fks.get(o);
+						if (j == null) {
+							throw new RuntimeException("in foreign key mapping " + p.first + " -> " + Util.sep(p.second, ".") + ", " + p.second.get(0) + " is not a foreign key in the target");
+						}
+						start_en = j.first;
+					}
 					r.add(o);
 				}
+			}
+			if (start_en == null) {
+				throw new RuntimeException("Anomaly: please report");
 			}
 			fksX.add(new Pair<>(p.first, new Pair<>(start_en, r)));
 		}
@@ -159,38 +158,27 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		
 		for (Pair<Object, Triple<String, Object, RawTerm>> att : atts) {
 			String var = att.second.first;
-			Object proposed_en = att.second.second;
+			Object var_en = att.second.second;
 			RawTerm term = att.second.third;
 
-			if (proposed_en != null && !dst0.ens.contains(proposed_en)) {
-				throw new RuntimeException("in " + term + ", the proposed sort " + proposed_en + " is not a target entity");
+			Pair<Object, Object> p = src0.atts.get(att.first);
+			if (p == null) {
+				throw new RuntimeException(att.first + " is not a source attribute ");
+			} else if (var_en != null && !var_en.equals(p.first)) {
+				throw new RuntimeException("in mapping for " + att.first + ", the given source sort " + var_en + " is not the expected entity " + p.first);
 			}
 			
-			Map<String, Ref<Chc<Object, Object>>> ctx = Util.singMap(var, proposed_en == null ? new Ref<>() : new Ref<>(Chc.inRight(proposed_en)));
-				
-			Ref<Chc<Object,Object>> ref = term.infer(Util.singSet(var), ctx, dcol);
-			if (ref.x != null) {
-				ref.x.assertNeitherNull();
+			Chc<Object, Object> var_en2 = Chc.inRight(p.first);
+			Map<String, Chc<Object, Object>> ctx = Util.singMap(var, var_en2);
+							
+			Object proposed_ty = p.second;
+			if (!dst0.typeSide.tys.contains(proposed_ty)) {
+				throw new RuntimeException("type " + p.second + " does not exist in target");
 			}
+			Chc<Object,Object> proposed_ty2 = Chc.inLeft(proposed_ty);	
+			Term<Object, Object, Object, Object, Object, Void, Void> term0 = RawTerm.infer0(ctx, term, proposed_ty2, dcol, "In checking mapping for attribute " + att.first);
 
-			String msg = proposed_en == null ? "Possible fixes: add a type annotation to the lambda, or add a type annotation to a java constant" : "";
-			Ref<Chc<Object, Object>> actual_en = ctx.get(var);
-
-			if (ref.x == null) {
-				throw new RuntimeException("in " + term + ", cannot infer sort for " + term + ".  " + msg);
-			} else if (actual_en.x == null) {
-				throw new RuntimeException("in " + term + ", cannot infer sort for " + var + ".  " + msg);				
-			} else if (actual_en.x.left) {
-				throw new RuntimeException("in " + term + ", infered sort for " + var + " is " + actual_en.x.l + " which is not an entity");								
-			} else if (proposed_en != null && !actual_en.x.r.equals(proposed_en)) {
-				throw new RuntimeException("in " + term + ", infered entity for " + var + " is " + actual_en.x.r + " which is not the proposed entity of " + proposed_en);												
-			} else if (proposed_en == null) {
-				proposed_en = actual_en.x.r;							
-			} 
-					
-			Term<Object, Object, Object, Object, Object, Void, Void> term0 = term.trans(Util.singSet(var), ctx, dcol);
-					
-			Util.putSafely(atts0, att.first, new Triple<>(new Var(var), proposed_en, term0));
+			Util.putSafely(atts0, att.first, new Triple<>(new Var(var), p.first, term0));
 		}
 		
 		Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = new Mapping<>(ens0, atts0, fks0, src0, dst0);
