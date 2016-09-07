@@ -45,7 +45,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>fql_lib.FQL</mainClass>
+              <mainClass>catdata.ide.IDE</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -69,10 +69,11 @@
 
 
   <dependencies>
+    <!-- https://mvnrepository.com/artifact/com.fifesoft/autocomplete -->
     <dependency>
-        <groupId>net.categoricaldata</groupId>
-        <artifactId>catdata-algs</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <groupId>com.fifesoft</groupId>
+        <artifactId>autocomplete</artifactId>
+        <version>r239</version>
     </dependency>
     <dependency>
         <groupId>net.sourceforge.collections</groupId>
