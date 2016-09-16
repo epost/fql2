@@ -10,6 +10,7 @@ import java.util.Set;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Unit;
 import catdata.Util;
 
 public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object,Object,Object> {
@@ -124,7 +125,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 				(eq0.second, eq0.third));
 		}
 		
-		Instance<Object, Object, Object, Object, Object, Object, Object> ret = new Instance<>(sch, col.gens, col.sks, eqs0, new DPStrategy(DPName.FAIL, null));
+		Instance<Object, Object, Object, Object, Object, Object, Object> ret = new Instance<>(sch, col.gens, col.sks, eqs0, new AqlOptions(DPName.FAIL, new Unit()));
 		return ret; 
 	}
 	

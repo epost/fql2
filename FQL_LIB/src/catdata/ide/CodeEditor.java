@@ -468,25 +468,12 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 		long start = 0;
 		long middle = 0;
+		
 		try {
 			start = System.currentTimeMillis();
 			env = makeEnv(program, init);
 			middle = System.currentTimeMillis();
-		} catch (LineException e) {
-			toDisplay = "Error in " + e.kind + " " + e.decl + ": "
-					+ e.getLocalizedMessage();
-			e.printStackTrace();
-			topArea.requestFocusInWindow();
-			Integer theLine = init.getLine(e.decl);
-			topArea.setCaretPosition(theLine);
-			return;
-		} catch (Throwable re) {
-			toDisplay = "Error: " + re.getLocalizedMessage();
-			re.printStackTrace();
-			return;
-		}
-
-		try {
+			
 			toDisplay = "Computation finished, creating viewer...";
 
 			DateFormat format = DateFormat.getTimeInstance();
@@ -496,18 +483,16 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			toDisplay = textFor(env); //"Done";
 			respArea.setText(textFor(env)); //"Done");
 
-		} catch (Throwable ee) {
-			toDisplay = ee.toString();
-			ee.printStackTrace();
-			if (thread != null) {
-				thread.stop();
-			}
-			thread = null;
-			if (temp != null) {
-				temp.stop();
-			}
-			temp = null;
-			return;
+		} catch (LineException e) {
+			toDisplay = "Error in " + e.kind + " " + e.decl + ": "
+					+ e.getLocalizedMessage();
+			e.printStackTrace();
+			topArea.requestFocusInWindow();
+			Integer theLine = init.getLine(e.decl);
+			topArea.setCaretPosition(theLine);
+		} catch (Throwable re) {
+			toDisplay = "Error: " + re.getLocalizedMessage();
+			re.printStackTrace();
 		}
 
 		if (thread != null) {

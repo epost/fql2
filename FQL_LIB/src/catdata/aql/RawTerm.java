@@ -2,6 +2,7 @@ package catdata.aql;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +63,7 @@ public final class RawTerm {
 		
 	}
 	
-	//it is misleading to return a context, because strings for primitives can come out
+	//TODO it is misleading to return a context, because strings for primitives can come out
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Triple<Ctx<String, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
 	infer1(Map<String, Chc<Ty,En>> ctx, RawTerm lhs, RawTerm rhs, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 			
@@ -80,7 +81,6 @@ public final class RawTerm {
 		Ref<Chc<Ty,En>> lhs_t = lhs.infer(vars, ctx0, col);
 		Ref<Chc<Ty,En>> rhs_t = rhs.infer(vars, ctx0, col);
 		if (lhs_t.x == null && rhs_t.x == null) {
-			System.out.println(ctx0);
 			throw new RuntimeException("Ambiguous result type (cannot infer) for " + lhs + " = " + rhs);
 		} else if (lhs_t.x == null && rhs_t.x != null) {
 			lhs_t.set(rhs_t);
@@ -102,7 +102,7 @@ public final class RawTerm {
 		return new Triple<>(ret, lhs.trans(vars, ctx0, col), rhs.trans(vars, ctx0, col));
 	}
 	
-	//staticall typesafe coerce
+	//TODO staticall typesafe coerce
 	private <K,V> K find(Map<K,V> m, String k) {
 		for (K k0 : m.keySet()) {
 			if (k.equals(k0)) {
@@ -112,9 +112,39 @@ public final class RawTerm {
 		throw new RuntimeException("Anomaly, please report");
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Head<Ty, En, Sym, Fk, Att, Gen, Sk> toHeadNoPrim(String head, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+		int n = boolToInt(col.syms.containsKey(head)) + boolToInt(col.atts.containsKey(head)) + boolToInt(col.fks.containsKey(head)) +  boolToInt(col.gens.containsKey(head)) + boolToInt(col.sks.containsKey(head));
+		if (n == 0) {
+			throw new RuntimeException(head + " is not a (non-java) symbol");						
+		} else if (n > 1) {
+			throw new RuntimeException(head + " is ambiguous");			
+		}
+		if (col.syms.containsKey(head)) {
+			return Head.Sym((Sym)head);
+		} else if (col.atts.containsKey(head)) {
+			return Head.Att((Att)head);
+		} else if (col.fks.containsKey(head)) {
+			return Head.Fk((Fk)head);
+		} else if (col.gens.containsKey(head)) {
+			return Head.Gen((Gen)head);
+		} if (col.sks.containsKey(head)) {
+			return Head.Sk((Sk)head);
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
+	
+	
+	
+	
 	public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> trans(Set<String> vars, Map<String, Ref<Chc<Ty, En>>> ctx0, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args0 = args.stream().map(x -> x.trans(vars, ctx0, col)).collect(Collectors.toList());
 			
+		int n = boolToInt(vars.contains(head)) + boolToInt(col.syms.containsKey(head)) + boolToInt(col.atts.containsKey(head)) + boolToInt(col.atts.containsKey(head)) + boolToInt(col.fks.containsKey(head)) + boolToInt(col.gens.containsKey(head)) + boolToInt(col.sks.containsKey(head));
+		if (n > 1) {
+			throw new RuntimeException(head + " is ambiguous");			
+		}
+		
 		if (vars.contains(head)) {
 			if (annotation != null) {
 				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
@@ -161,7 +191,7 @@ public final class RawTerm {
 			}
 			String code = col.java_parsers.get(ty);
 			if (code == null) {
-				throw new RuntimeException("No java constant parser defined for java type " + ctx0.get(head).x.l);
+				throw new RuntimeException(this + " is not a symbol or variable or of an inferred type (" + ty + ") with a java parser");
 			}
 			Function<List<Object>, Object> f = AqlJs.compile(code);
 			
@@ -173,6 +203,10 @@ public final class RawTerm {
 	}
 
 	
+	private static int boolToInt(boolean b) {
+		return b ? 1 : 0;
+	}
+
 	public <Ty, En, Sym, Fk, Att, Gen, Sk> Ref<Chc<Ty,En>> infer(Set<String> vars, Map<String, Ref<Chc<Ty,En>>> ctx, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		boolean isSym, isAtt, isFk, isGen, isSk, isVar, isObj ;
 				
@@ -212,7 +246,7 @@ public final class RawTerm {
 			Ref<Chc<Ty,En>> arg_t = args.get(0).infer(vars, ctx, col);
 			En ty = atts_t == null ? fks_t.first : atts_t.first;
 			if (arg_t.x != null && !Chc.inRight(ty).equals(arg_t.x)) {
-					throw new RuntimeException("In " + this + ", the head " + head + " is an attribute/foreign key expecting argument type " + atts_t.first + " but its argument has actual type " + arg_t.x.toStringMash());					
+					throw new RuntimeException("In " + this + ", the head " + head + " is an attribute/foreign key expecting argument type " + ty + " but its argument has actual type " + arg_t.x.toStringMash());					
 			}
 			arg_t.set(Chc.inRight(ty)); //redundant sometimes
 
@@ -318,6 +352,49 @@ public final class RawTerm {
 		return ret;
 	}
 	
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Triple<Ctx<Var, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> infer2(List<Pair<String, String>> l, RawTerm a, RawTerm b, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+		Map<String, Chc<Ty, En>> ctx = new HashMap<>();
+		for (Pair<String, ?> p : l) {
+			if (ctx.containsKey(p.first)) {
+				throw new RuntimeException("Duplicate variable " + p.first + " in context " + Ctx.toString(l));
+			}
+			if (p.second != null) {
+				if (col.tys.contains(p.second) && col.ens.contains(p.second)) {
+					throw new RuntimeException("Ambiguous: " + p.second + " is an entity and a type");
+				} else if (col.tys.contains(p.second)) {
+					@SuppressWarnings("unchecked")
+					Ty tt = (Ty) p.second;
+					ctx.put(p.first, Chc.inLeft(tt));		//TODO remove for loops for other ones	
+				} else if (col.ens.contains(p.second)) {
+					@SuppressWarnings("unchecked")
+					En tt = (En) p.second;
+					ctx.put(p.first, Chc.inRight(tt));										
+				} else {
+					throw new RuntimeException(p.second + " is neither a type nor entity");
+				}
+			} else {
+				ctx.put(p.first, null);
+			}
+		}
+		Triple<Ctx<String,Chc<Ty,En>>,Term<Ty, En, Sym, Fk, Att, Gen, Sk>,Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
+		eq0 = RawTerm.infer1(ctx, a, b, col);
+
+		LinkedHashMap<Var, Chc<Ty,En>> map = new LinkedHashMap<>();
+		for (String k : ctx.keySet()) {
+			Chc<Ty, En> v = eq0.first.get(k);
+			map.put(new Var(k), v);
+		}
+		/*for (String k : eq0.first.keys()) {
+			if (!ctx.keySet().contains(k)) {
+				throw new RuntimeException("In " + eq.second + " = " + eq.third + ", not a variable or symbol: " + k + " . (Note: java not allowed in typeside equations)");
+			}
+		}	*/
+		Ctx<Var, Chc<Ty,En>> ctx2 = new Ctx<>(map);
+		
+		Triple<Ctx<Var, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
+		 tr = new Triple<>(ctx2, eq0.second, eq0.third);
+		return tr;
+	}
 	
 	
 }

@@ -12,7 +12,7 @@ import catdata.Util;
 
 public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
-	private final DPStrategy strategy;
+	private final AqlOptions strategy;
 
 	public final Schema<Ty, En, Sym, Fk, Att> schema;
 
@@ -22,14 +22,14 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	public final Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs;
 
 	public static <Ty, En, Sym, Fk, Att> Instance<Ty, En, Sym, Fk, Att, Void, Void> terminal(Schema<Ty, En, Sym, Fk, Att> t) {
-		return new Instance<>(t, Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new DPStrategy(DPName.PRECOMPUTED, t.semantics()));
+		return new Instance<>(t, Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new AqlOptions(DPName.PRECOMPUTED, t.semantics()));
 	}
 
 	public Chc<Ty,En> type(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {		
 		return term.type(new Ctx<>(), new Ctx<>(), schema.typeSide.tys, schema.typeSide.syms, schema.typeSide.java_tys, schema.ens, schema.atts, schema.fks, gens, sks);
 	}
 	
-	public Instance(Schema<Ty, En, Sym, Fk, Att> schema, Map<Gen, En> gens, Map<Sk, Ty> sks, Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs, DPStrategy strategy) {
+	public Instance(Schema<Ty, En, Sym, Fk, Att> schema, Map<Gen, En> gens, Map<Sk, Ty> sks, Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs, AqlOptions strategy) {
 		if (schema == null) {
 			throw new RuntimeException("Attempt to construct instance with null schema");
 		} else if (gens == null) {
@@ -75,45 +75,39 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				}
 			}				
 			
-			//TODO: check freeness on java (or freeness on type side, if option enabled).  need to do so in collage
+			//if not 'precomputed', then
+			//TODO: entity_theory = restrict to entities ; collage  
+			//create type algebra
+			//check freeness on java, and freeness if option enabled.  
+			//create dp for type algebra by DP in collage
+			//
 		}	
 	
 	private String toString(Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq) {
 		return eq.first + " = " + eq.second;
 	}
 	
-	private Algebra<Ty, En, Sym, Fk, Att, Gen, Sk> semantics;
+	//TODO
+	private DP<Ty,En,Sym,Fk,Att,Gen,Sk> semantics;
 	
-	@SuppressWarnings("unchecked")
-	public Algebra<Ty, En, Sym, Fk, Att, Gen, Sk> semantics() {
+	//this could take a while, so make sure two threads don't accidentally do it at the same time
+	public synchronized DP<Ty,En,Sym,Fk,Att,Gen,Sk> semantics() {
 		if (semantics != null) {
 			return semantics;
 		} 
-		switch (strategy.name) {
-		case ALLJAVA:
-			break;
-		case COMPLETION:
-			break;
-		case CONGRUENCE:
-			break;
-		case FAIL:
-			throw new RuntimeException("semantics called for typeside " + this + ", but theorem proving strategy is to fail");
-		case FINITE:
-			break;
-		case PRECOMPUTED:
-			semantics = (Algebra<Ty, En, Sym, Fk, Att, Gen, Sk>) strategy.object;
-			return semantics;
-		case PROGRAM:
-			break;
-		case UNARY:
-			break;
-		default:
-			throw new RuntimeException();
-		}
-		
-		throw new RuntimeException();
+		semantics = ProverFactory.create(strategy, collage());
+		return semantics;
 	}
 
+	private Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage;
+	public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
+		if (collage != null) {
+			return collage;
+		}
+		collage = new Collage<>(this);
+		return collage;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

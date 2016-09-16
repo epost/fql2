@@ -5,7 +5,7 @@ package catdata;
  */
 public class Pair<T1, T2> implements Comparable<Pair<T1, T2>> {
 
-	public T1 first;
+	public T1 first; //TODO make these final.  Same for Triple
 	public T2 second;
 
 	public Pair(T1 value, T2 value2) {

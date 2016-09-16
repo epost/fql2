@@ -23,7 +23,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		
 	public final Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs;
 	
-	private final DPStrategy strategy; 
+	private final AqlOptions strategy; 
 
 	//TODO: who is calling isTypeSide and isSchema?
 
@@ -56,11 +56,14 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 			if (!lhs.equals(rhs)) {
 				throw new RuntimeException("In schema equation " + toString(eq) + ", lhs sort is " + lhs.toStringMash() + " but rhs sort is " + rhs.toStringMash());
 			}
-			if (lhs.left && typeSide.java_tys.containsKey(lhs.l)) {
-				throw new RuntimeException("In schema equation " + toString(eq) + ", the return type is " + lhs.l + " which is a java type ");
+			
+			if (!(Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
+				if (lhs.left && typeSide.java_tys.containsKey(lhs.l)) {
+					throw new RuntimeException("In schema equation " + toString(eq) + ", the return type is " + lhs.l + " which is a java type ");
+				}
+				typeSide.assertNoJava(eq.second);
+				typeSide.assertNoJava(eq.third);
 			}
-			typeSide.assertNoJava(eq.second);
-			typeSide.assertNoJava(eq.third);
 		}		
 	}
 	
@@ -76,13 +79,13 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 	}
 	
 	public static <Ty,Sym> Schema<Ty,Void,Sym,Void,Void> terminal(TypeSide<Ty, Sym> t) {
-		return new Schema<>(t, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new DPStrategy(DPName.PRECOMPUTED, t.semantics()));
+		return new Schema<>(t, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new AqlOptions(DPName.PRECOMPUTED, t.semantics()));
 	}
 	
 	public Schema(TypeSide<Ty, Sym> typeSide, Set<En> ens,
 			Map<Att, Pair<En, Ty>> atts, Map<Fk, Pair<En, En>> fks,
 			Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs,
-			DPStrategy strategy) {
+			AqlOptions strategy) {
 		if (typeSide == null) {
 			throw new RuntimeException("Attempt to construct schema with null type side");
 		} else if (ens == null) {
@@ -108,35 +111,24 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 
 	private DP<Ty,En,Sym,Fk,Att,Void,Void> semantics;
 	
-	@SuppressWarnings("unchecked")
-	public DP<Ty,En,Sym,Fk,Att,Void,Void> semantics() {
+	//this could take a while, so make sure two threads don't accidentally do it at the same time
+	public synchronized DP<Ty,En,Sym,Fk,Att,Void,Void> semantics() {
 		if (semantics != null) {
 			return semantics;
 		} 
-		switch (strategy.name) {
-		case ALLJAVA:
-			break;
-		case COMPLETION:
-			break;
-		case CONGRUENCE:
-			break;
-		case FAIL:
-			throw new RuntimeException("semantics called for typeside " + this + ", but theorem proving strategy is to fail");
-		case FINITE:
-			break;
-		case PRECOMPUTED:
-			semantics = (DP<Ty,En,Sym,Fk,Att,Void,Void>) strategy.object;
-			return semantics;
-		case PROGRAM:
-			break;
-		case UNARY:
-			break;
-		default:
-			throw new RuntimeException();
-		}
-		
-		throw new RuntimeException();
+		semantics = ProverFactory.create(strategy, collage());
+		return semantics;
 	}
+		
+	private Collage<Ty, En, Sym, Fk, Att, Void, Void> collage;
+	public Collage<Ty, En, Sym, Fk, Att, Void, Void> collage() {
+		if (collage != null) {
+			return collage;
+		}
+		collage = new Collage<>(this);
+		return collage;
+	}
+	
 
 	@Override
 	public int hashCode() {

@@ -34,6 +34,20 @@ import catdata.opl.OplTerm;
 
 public class Util {
 	
+	public static <X,Y,Z> Pair<LinkedHashMap<X,Y>, LinkedHashMap<X,Z>> split(Map<X, Chc<Y, Z>> map) {
+		LinkedHashMap<X,Y> m1 = new LinkedHashMap<>();
+		LinkedHashMap<X,Z> m2 = new LinkedHashMap<>();
+		for (X x : map.keySet()) {
+			Chc<Y, Z> e = map.get(x);
+			if (e.left) {
+				m1.put(x, e.l);
+			} else {
+				m2.put(x, e.r);
+			}
+		}
+		return new Pair<>(m1, m2);
+	}
+	
 	public static <X> X abort(Void v) {
 		if (v == null) {
 			throw new RuntimeException("Anomaly: please report");
@@ -777,6 +791,14 @@ public class Util {
 	public static <X> List<String> shortest(Collection<X> set) {
 		List<String> ret = set.stream().map(Object::toString).collect(Collectors.toList());
 		ret.sort(LengthComparator);
+		return ret;
+	}
+
+	public static <X,Y,Z> Map<X, Map<Y, Z>> newMapsFor(Collection<X> xs) {
+		Map<X, Map<Y, Z>> ret = new HashMap<>();
+		for (X x : xs) {
+			ret.put(x, new HashMap<>());
+		}
 		return ret;
 	}
 }

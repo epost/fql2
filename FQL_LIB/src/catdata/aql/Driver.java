@@ -16,7 +16,7 @@ public final class Driver {
 	// the driver
 	// at the appropriate spot
 	
-	
+	//TODO: in multithreaded engine, make sure no two threads can conflict on semantics
 
 	public static Env makeEnv(String str,
 			Program<Exp<? extends Object>> init, String[] toUpdate, String last_str,

@@ -25,13 +25,13 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import catdata.Pair;
-import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
+import catdata.ide.LineException;
 import catdata.ide.Program;
 
 public final class Display implements Disp {
 
-	
+	 
 	@Override
 	public void close() {
 	}
@@ -72,9 +72,10 @@ public final class Display implements Disp {
 			map.put(obj, c); 
 			try {
 				frames.add(new Pair<>(doLookup(c, obj, exp), wrapDisplay(exp.kind(), obj)));
-			} catch (Exception ex) {
+			} catch (RuntimeException ex) {
 				ex.printStackTrace();
-				frames.add(new Pair<>(doLookup(c, obj, exp), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
+				throw new LineException(ex.getMessage(), c, exp.kind().toString());
+	//			frames.add(new Pair<>(doLookup(c, obj, exp), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
 			}
 		}
 		long end = System.currentTimeMillis();

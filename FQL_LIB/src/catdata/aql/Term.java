@@ -1,8 +1,12 @@
 package catdata.aql;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Pair;
@@ -66,6 +70,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 	}
 
+	
 	public Chc<Ty, En> type(Ctx<Var, Ty> ctxt, Ctx<Var, En> ctxe, Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Map<Ty, String> java_tys_string, Set<En> ens, Map<Att, Pair<En, Ty>> atts, Map<Fk, Pair<En, En>> fks, Map<Gen, En> gens, Map<Sk, Ty> sks) {
 		Chc<Ty, En> ret = null;
 		if (var != null) {
@@ -185,9 +190,37 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (obj != null) {
 			return obj.toString() + "@" + ty;
 		}
-		throw new RuntimeException("Encountered an empty term");
+		throw new RuntimeException("Anomaly: please report");
 	}
 
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> Head(Head<Ty, En, Sym, Fk, Att, Gen, Sk> head, List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args) {
+		if (head == null) {
+			throw new RuntimeException("Attempt to create term from null head");
+		} else if (args == null) {
+			throw new RuntimeException("Attempt to create term from null args to head");
+		}
+		if (head.gen != null) {
+			return Gen(head.gen);
+		} else if (head.sk != null) {
+			return Sk(head.sk);
+		} else if (head.obj != null) {
+			return Obj(head.obj, head.ty);
+		} else if (head.att != null) {
+			if (args.size() != 1) {
+				throw new RuntimeException("Attempt to create term from attribute head " + head.att + " with args " + args);
+			}
+			return Att(head.att, args.get(0));
+		} else if (head.fk != null) {
+			if (args.size() != 1) {
+				throw new RuntimeException("Attempt to create term from foreign key head " + head.fk + " with args " + args);
+			}
+			return Fk(head.fk, args.get(0));
+		} else if (head.sym != null) {
+			return Sym(head.sym, args);
+		}
+		throw new RuntimeException("Anomaly: please report: " + head + "(" + args + ")");
+	}
+	
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> Var(Var var) {
 		if (var == null) {
 			throw new RuntimeException("Attempt to create a term with a null variable");
@@ -366,7 +399,161 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (gen != null || sk != null || obj != null) {
 			return null;
 		}
-		throw new RuntimeException("getOnlyVar encountered ill-formed term.  Should be impossible, please report");
+		throw new RuntimeException("Anomaly: please report");
 	}
+
+	public boolean containsProper(Head<Ty, En, Sym, Fk, Att, Gen, Sk> head) {
+		return !head.equals(new Head<>(this)) && this.contains(head);
+	}
+	public boolean contains(Head<Ty, En, Sym, Fk, Att, Gen, Sk> head) {
+		if (new Head<>(this).equals(head)) {
+			return true;
+		}
+		for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
+			if (arg.contains(head)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	/*
+	public boolean containsGenProper(Gen gen) {
+		return !gen.equals(this.gen) && this.containsGen(gen);
+	}
+	private boolean containsGen(Gen gen) {
+		return gen.equals(this.gen);
+	}
+
+	public boolean containsSkProper(Sk sk) {
+		return !sk.equals(this.sk) && this.containsSk(sk);
+	}
+	private boolean containsSk(Sk sk) {
+		return sk.equals(this.sk);
+	}
+
+	public boolean containsAttProper(Att att) {
+		return !att.equals(this.att) && this.containsAtt(att);
+	}
+	private boolean containsAtt(Att att) {
+		if (att.equals(this.att)) {
+			return true; 
+		} else if (arg != null) {
+			return arg.containsAtt(att);
+		} else if (args != null) {
+			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args) {
+				if (arg.containsAtt(att)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
+	}
+
+	public boolean containsFkProper(Fk fk) {
+		return !fk.equals(this.fk) && this.containsFk(fk);
+	}
+	private boolean containsFk(Fk fk) {
+		if (fk.equals(this.fk)) {
+			return true; 
+		} else if (arg != null) {
+			return arg.containsFk(fk);
+		} else if (args != null) {
+			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args) {
+				if (arg.containsFk(fk)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
+	}
+
+	public boolean containsSymProper(Sym sym) {
+		return !sym.equals(this.sym) && this.containsSym(sym);
+	}
+
+	private boolean containsSym(Sym sym) {
+		if (sym.equals(this.sym)) {
+			return true; 
+		} else if (arg != null) {
+			return arg.containsSym(sym);
+		} else if (args != null) {
+			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args) {
+				if (arg.containsSym(sym)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
+	} */
+
+	public List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args() {
+		if (args != null) {
+			return args;
+		} else if (arg != null) {
+			return Util.singList(arg);
+		} 
+		return Collections.emptyList();
+	}
+	/*
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replaceGen(Gen gen, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+		return replaceHead(Head.Gen(gen), Collections.emptyList(), term);
+	}
+
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replaceSk(Sk sk, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+		return replaceHead(Head.Sk(sk), Collections.emptyList(), term);
+	}
+
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replaceAtt(Att att, Var var, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+		return replaceHead(Head.Att(att), Collections.singletonList(var), term);
+	}
+
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replaceFk(Fk fk, Var var, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+		return replaceHead(Head.Fk(fk), Collections.singletonList(var), term);
+	}
+
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replaceSym(Sym sym, List<Var> args, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+		return replaceHead(Head.Sym(sym), args, term);
+	}
+*/
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replaceHead(Head<Ty, En, Sym, Fk, Att, Gen, Sk> replacee, List<Var> vars, Term<Ty, En, Sym, Fk, Att, Gen, Sk> replacer) {
+		if (var != null) {
+			return this;
+		}
+		
+		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args = new LinkedList<>();
+		for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
+			args.add(arg.replaceHead(replacee, vars, replacer));
+		}
+
+		Head<Ty, En, Sym, Fk, Att, Gen, Sk> head = new Head<>(this);
+		if (!head.equals(replacee)) {
+			return Term.Head(head, args);
+		}
+		
+		Map<Var, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> map = new HashMap<>();
+		int i = 0;
+		for (Var var : vars) {
+			map.put(var, args.get(i++));
+		}
+		return replacer.subst(map);
+				
+	}
+
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> subst(Map<Var, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> map) {
+		if (var != null) {
+			if (map.containsKey(var)) {
+				return map.get(var);
+			}
+			return this;
+		} 
+		Head<Ty, En, Sym, Fk, Att, Gen, Sk> head = new Head<>(this);
+		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args = args().stream().map(x -> x.subst(map)).collect(Collectors.toList());
+		return Term.Head(head, args);		
+	}
+
+	
 	
 }

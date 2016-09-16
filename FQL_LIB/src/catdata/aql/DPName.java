@@ -2,6 +2,7 @@ package catdata.aql;
 
 public enum DPName {
 
+	SATURATED,
 	FINITE,
 	UNARY,
 	PROGRAM,
@@ -9,9 +10,8 @@ public enum DPName {
 	CONGRUENCE,
 	ALLJAVA,
 	FAIL,
+	FREE,
 	PRECOMPUTED;
 	
-	public boolean requiresParam() {
-		return this == COMPLETION || this == PRECOMPUTED || this == PROGRAM;
-	}
+	
 }

@@ -24,11 +24,7 @@ public final class TypeSide<Ty, Sym> {
 	public final Map<Ty, String> java_parsers;
 	public final Map<Sym, String> java_fns;
 
-//	public final Map<Ty, Class<?>> java_tys;
-//	public final Map<Sym, Function<List<Object>, Object>> java_fns;
-
-	private final DPStrategy strategy;
-
+	private final AqlOptions strategy;
 	
 	public Ty type(Ctx<Var,Ty> ctx, Term<Ty, ?, Sym, ?, ?, ?, ?> term) {
 		if (!term.isTypeSide()) {
@@ -41,7 +37,7 @@ public final class TypeSide<Ty, Sym> {
 		return t.l;
 	}
 
-	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string, DPStrategy strategy) {
+	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string, AqlOptions strategy) {
 		if (tys == null) {
 			throw new RuntimeException("Null types in typeside");
 		} else if (syms == null) {
@@ -103,6 +99,20 @@ public final class TypeSide<Ty, Sym> {
 			if (!lhs.equals(rhs)) {
 				throw new RuntimeException("In typeside equation " + toString(eq) + ", lhs type is " + lhs + " but rhs type is " + rhs);
 			}
+			
+		}
+		
+		validateJava(); 
+		
+	}
+
+	private void validateJava() {
+		if ((Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
+			return;
+		}
+		for (Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq : eqs) {
+			Ty lhs = type(eq.first, eq.second);
+			
 			if (java_tys.containsKey(lhs)) {
 				throw new RuntimeException("In typeside equation " + toString(eq) + ", the return type is " + lhs + " which is a java type ");
 			}
@@ -111,7 +121,8 @@ public final class TypeSide<Ty, Sym> {
 			}
 			assertNoJava(eq.second);
 			assertNoJava(eq.third);
-		}				
+		}
+		
 		for (Sym sym : java_fns.keySet()) {
 			if (!syms.containsKey(sym)) {
 				throw new RuntimeException("The java function " + sym + " is not a declared function");
@@ -125,7 +136,6 @@ public final class TypeSide<Ty, Sym> {
 				throw new RuntimeException("In symbol " + sym + ", functions must not mix java and non-java types");
 			}
 		}
-		
 	}
 	
 	private boolean noJava(Pair<List<Ty>, Ty> t) {
@@ -141,6 +151,7 @@ public final class TypeSide<Ty, Sym> {
 		return true;
 	}
 
+	//TODO move to collage?
 	private boolean allJava(Pair<List<Ty>, Ty> t) {
 		List<Ty> l = new LinkedList<>(t.first);
 		l.add(t.second);
@@ -154,6 +165,7 @@ public final class TypeSide<Ty, Sym> {
 		return true;
 	}
 
+	
 	public void assertNoJava(Term<Ty, ?, Sym, ?, ?, Void, Void> t) {
 		if (t.var != null) {
 			return;
@@ -180,7 +192,7 @@ public final class TypeSide<Ty, Sym> {
 		}
 		
 		throw new RuntimeException("Anomaly: please report."); //else if (t.g)
-	}
+	} 
 	
 	public String toString(Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq) {
 		String pre = eq.first.isEmpty() ? "" : "forall ";
@@ -188,39 +200,27 @@ public final class TypeSide<Ty, Sym> {
 	}
 
 	public static TypeSide<Void,Void> terminal() {
-		return new TypeSide<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new DPStrategy(DPName.PRECOMPUTED, DP.terminal));
+		return new TypeSide<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new AqlOptions(DPName.PRECOMPUTED, DP.terminal));
 	}
 
 	private DP<Ty, Void, Sym, Void, Void, Void, Void> semantics;
 
-	@SuppressWarnings("unchecked")
-	public DP<Ty, Void, Sym, Void, Void, Void, Void> semantics() {
+	//this could take a while, so make sure two threads don't accidentally do it at the same time
+	public synchronized DP<Ty, Void, Sym, Void, Void, Void, Void> semantics() {
 		if (semantics != null) {
 			return semantics;
 		}
-		switch (strategy.name) {
-		case ALLJAVA:
-			break;
-		case COMPLETION:
-			break;
-		case CONGRUENCE:
-			break;
-		case FAIL:
-			throw new RuntimeException("semantics called for typeside " + this + ", but theorem proving strategy is to fail");
-		case FINITE:
-			break;
-		case PRECOMPUTED:
-			semantics = (DP<Ty, Void, Sym, Void, Void, Void, Void>) strategy.object;
-			return semantics;
-		case PROGRAM:
-			break;
-		case UNARY:
-			break;
-		default:
-			throw new RuntimeException();
+		semantics = ProverFactory.create(strategy, collage());
+		return semantics;
+	}
+	
+	private Collage<Ty, Void, Sym, Void, Void, Void, Void> collage;
+	public Collage<Ty, Void, Sym, Void, Void, Void, Void> collage() {
+		if (collage != null) {
+			return collage;
 		}
-
-		throw new RuntimeException();
+		collage = new Collage<>(this);
+		return collage;
 	}
 
 	@Override

@@ -13,7 +13,7 @@ import catdata.Util;
 
 public final class Ctx<K,V> {
 
-	private final Map<K,V> map;
+	public final Map<K,V> map;
 	
 	public <X> Ctx<K,Chc<V,X>> inLeft() {
 		LinkedHashMap<K,Chc<V,X>> ret = new LinkedHashMap<>();

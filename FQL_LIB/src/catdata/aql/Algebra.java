@@ -1,13 +1,10 @@
 package catdata.aql;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+public interface Algebra<En,Ty,Sym,Fk,Att,Gen,Sk> {
 
-import catdata.Pair;
+//	public  DP<Ty,En,Sym,Void,Void,Void,Term<Void,En,Void,Fk,Att,Gen,Sk>> DP_temp();
 
-public final class Algebra<En,Ty,Sym,Fk,Att,Gen,Sk> {
-
+/*
 	public  Map<En,Set<Term<Void,En,Void,Fk,Void,Gen,Void>>> ens;
 	
 	public  Map<Term<Void,En,Void,Fk,Att,Gen,Sk>, Ty> sks;
@@ -19,5 +16,5 @@ public final class Algebra<En,Ty,Sym,Fk,Att,Gen,Sk> {
 	public  DP<Ty,En,Sym,Void,Void,Void,Term<Void,En,Void,Fk,Att,Gen,Sk>> talg_eq;
 
 	public  NF<Ty,En,Sym,Void,Void,Void,Term<Void,En,Void,Fk,Att,Gen,Sk>> ens_nf; 
-		
+		*/
 }

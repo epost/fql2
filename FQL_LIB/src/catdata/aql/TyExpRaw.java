@@ -140,43 +140,52 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 			}
 
 			for (Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq : eqs) {
-					Map<String, Chc<Object, Void>> ctx = new HashMap<>();
-					for (Pair<String, Object> p : eq.first) {
-						if (ctx.containsKey(p.first)) {
-							throw new RuntimeException("Duplicate variable " + p.first + " in context " + Ctx.toString(eq.first));
-						}
-						if (p.second != null) {
-							ctx.put(p.first, Chc.inLeft(p.second));
-						} else {
-							ctx.put(p.first, null);
-						}
-					}
-					Triple<Ctx<String,Chc<Object,Void>>,Term<Object,Void,Object,Void,Void,Void,Void>,Term<Object,Void,Object,Void,Void,Void,Void>>
-					eq0 = RawTerm.infer1(ctx, eq.second, eq.third, col);
-				
-					LinkedHashMap<Var, Object> map = new LinkedHashMap<>();
-					for (String k : ctx.keySet()) {
-						Chc<Object, Void> v = eq0.first.get(k);
-						if (!v.left) {
-							throw new RuntimeException("Anomaly: please report");
-						}
-						map.put(new Var(k), v.l);
-					}
-					for (String k : eq0.first.keys()) {
-						if (!ctx.keySet().contains(k)) {
-							throw new RuntimeException("In " + eq.second + " = " + eq.third + ", not a variable or symbol: " + k + " . (Note: java not allowed in typeside equations)");
-						}
-					}	
-					Ctx<Var, Object> ctx2 = new Ctx<>(map);
-					Term<Object, Void, Object, Void, Void, Void, Void> lhs = eq0.second;
-					Term<Object, Void, Object, Void, Void, Void, Void> rhs = eq0.third;
-					
-					eqs0.add(new Triple<>(ctx2, lhs, rhs));
+					Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> tr = inferEq(col, eq);
+					eqs0.add(tr);
 			}
 			
-			TypeSide<Object, Object> ret = new TypeSide<>(col.tys, col.syms, eqs0, col.java_tys, col.java_parsers, col.java_fns, new DPStrategy(DPName.FAIL, null));
+			AqlOptions strat = new AqlOptions(Util.toMapSafely(options), col); 
+			
+			TypeSide<Object, Object> ret = new TypeSide<>(col.tys, col.syms, eqs0, col.java_tys, col.java_parsers, col.java_fns, strat);
 	
 			return ret;
+		}
+
+		private static Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> inferEq(Collage<Object, Void, Object, Void, Void, Void, Void> col, Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq) {
+			Map<String, Chc<Object, Void>> ctx = new HashMap<>();
+			for (Pair<String, Object> p : eq.first) {
+				if (ctx.containsKey(p.first)) {
+					throw new RuntimeException("Duplicate variable " + p.first + " in context " + Ctx.toString(eq.first));
+				}
+				if (p.second != null) {
+					ctx.put(p.first, Chc.inLeft(p.second));
+				} else {
+					ctx.put(p.first, null);
+				}
+			}
+			Triple<Ctx<String,Chc<Object,Void>>,Term<Object,Void,Object,Void,Void,Void,Void>,Term<Object,Void,Object,Void,Void,Void,Void>>
+			eq0 = RawTerm.infer1(ctx, eq.second, eq.third, col);
+
+			LinkedHashMap<Var, Object> map = new LinkedHashMap<>();
+			for (String k : ctx.keySet()) {
+				Chc<Object, Void> v = eq0.first.get(k);
+				if (!v.left) {
+					throw new RuntimeException("Anomaly: please report");
+				}
+				map.put(new Var(k), v.l);
+			}
+/*			for (String k : eq0.first.keys()) {
+				if (!ctx.keySet().contains(k)) {
+					throw new RuntimeException("In " + eq.second + " = " + eq.third + ", not a variable or symbol: " + k + " . (Note: java not allowed in typeside equations)");
+				}
+			}	*/
+			Ctx<Var, Object> ctx2 = new Ctx<>(map);
+			Term<Object, Void, Object, Void, Void, Void, Void> lhs = eq0.second;
+			Term<Object, Void, Object, Void, Void, Void, Void> rhs = eq0.third;
+			
+			Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>>
+			 tr = new Triple<>(ctx2, lhs, rhs);
+			return tr;
 		}
 		
 	}

@@ -82,7 +82,9 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 			(new Pair<>(var, t), eq0.second, eq0.third));
 	}
 		
-		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts, col.fks, eqs0, new DPStrategy(DPName.FAIL, null));
+		AqlOptions strat = new AqlOptions(Util.toMapSafely(options), col);
+		
+		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts, col.fks, eqs0, strat);
 		return ret; 
 		
 	}

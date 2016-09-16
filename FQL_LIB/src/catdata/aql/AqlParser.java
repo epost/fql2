@@ -119,7 +119,7 @@ public class AqlParser {
 
 	
 	
-	public static final Parser<RawTerm> term() {
+	private static final Parser<RawTerm> term() {
 		Reference<RawTerm> ref = Parser.newReference();
 		
 		Parser<RawTerm> ann = Parsers.tuple(ident, token("@"), ident).map(x -> new RawTerm(x.a, x.c));
@@ -272,15 +272,15 @@ public class AqlParser {
 			return ret;
 		});
 		
-		Parser<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>> eq1 = Parsers.tuple(token("forall"), ctx.followedBy(token(".")), term(), token("="), term()).map(x -> {
-			return new Triple<>(x.b, x.c, x.e);
-		});
+//		Parser<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>> eq1 = Parsers.tuple(token("forall"), ctx.followedBy(token(".")), term(), token("="), term()).map(x -> {
+//			return new Triple<>(x.b, x.c, x.e);
+//		});
 //		Parser<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>> eq1 = Parsers.tuple(token("forall"), ctx2, term(), token("="), term()).map(x -> {
 	//		return new Triple<>(x.b, x.c, x.e);
 	//	});
-		Parser<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>> eq2 = Parsers.tuple(term(), token("="), term()).map(x -> {
-			return new Triple<>(new LinkedList<>(), x.a, x.c);
-		});
+//		Parser<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>> eq2 = Parsers.tuple(term(), token("="), term()).map(x -> {
+//			return new Triple<>(new LinkedList<>(), x.a, x.c);
+//		});
 
 		Parser<Pair<Token, List<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>>>> eqs = Parsers.tuple(token("equations"), Parsers.or(eq1,eq2).many());
 		Parser<List<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>>> eqs0 = eqs.map(x -> x.b);
@@ -427,7 +427,7 @@ public class AqlParser {
 	} */
 	
 	 //TODO: reverse order on arguments env
-	public static final Parser<MapExpRaw> mapExpRaw() {
+	private static final Parser<MapExpRaw> mapExpRaw() {
 		Parser<List<catdata.Pair<String, String>>> ens = Parsers.tuple(token("entities"), env(ident, "->")).map(x -> x.b);
 		
 		Parser<List<catdata.Pair<String, List<String>>>> fks = Parsers.tuple(token("foreign_keys"), env(ident.sepBy1(token(".")),"->")).map(x -> x.b);
@@ -454,7 +454,7 @@ public class AqlParser {
 		return ret;	
 	}
 	
-	public static final Parser<TransExpRaw> transExpRaw() {
+	private static final Parser<TransExpRaw> transExpRaw() {
 		Parser<List<catdata.Pair<String, RawTerm>>> gens = Parsers.tuple(token("generators"), env(term(), "->")).map(x -> x.b);
 		
 				
@@ -499,7 +499,7 @@ public class AqlParser {
 	private static final Reference<MapExp<?,?,?,?,?,?,?,?,?>> map_ref = Parser.newReference();
 	private static final Reference<TransExp<?,?,?,?,?,?,?,?,?>> trans_ref = Parser.newReference();
 	
-	public static Parser<Program<Exp<?>>> program() { //TODO: should create single instance of this rather than fn
+	private static Parser<Program<Exp<?>>> program() { //TODO: should create single instance of this rather than fn
 		tyExp();
 		schExp();
 		instExp();
@@ -530,6 +530,40 @@ public class AqlParser {
 	public static final Program<Exp<?>> parseProgram(String s) {
 		return AqlParser.program().from(TOKENIZER, IGNORED).parse(s);
 	}
+
+	public static final List<String> parseManyIdent(String s) {
+		return ident.many().from(TOKENIZER, IGNORED).parse(s);
+	}
+
+	
+	public static final Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm> parseEq(String s) {
+		return Parsers.or(eq1, eq2).from(TOKENIZER, IGNORED).parse(s);
+	}
+	
+	public static final catdata.Pair<List<catdata.Pair<String, String>>, RawTerm> parseTerm(String s) {
+		return Parsers.or(term1, term2).from(TOKENIZER, IGNORED).parse(s);
+	}
+	
+	private static final 
+	Parser<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>> eq1 = Parsers.tuple(token("forall"), ctx.followedBy(token(".")), term(), token("="), term()).map(x -> {
+		return new Triple<>(x.b, x.c, x.e);
+	});
+	
+	private static final
+	Parser<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>> eq2 = Parsers.tuple(term(), token("="), term()).map(x -> {
+		return new Triple<>(new LinkedList<>(), x.a, x.c);
+	});
+	
+	private static final 
+	Parser<catdata.Pair<List<catdata.Pair<String, String>>, RawTerm>> term1 = Parsers.tuple(token("lambda"), ctx.followedBy(token(".")), term()).map(x -> {
+		return new catdata.Pair<>(x.b, x.c);
+	});
+	
+	private static final 
+	Parser<catdata.Pair<List<catdata.Pair<String, String>>, RawTerm>> term2 = term().map(x -> {
+		return new catdata.Pair<>(new LinkedList<>(), x);
+	});
+	
 	
 	//TODO: visitor for aql exps?
 
