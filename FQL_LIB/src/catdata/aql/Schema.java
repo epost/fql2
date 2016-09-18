@@ -79,7 +79,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 	}
 	
 	public static <Ty,Sym> Schema<Ty,Void,Sym,Void,Void> terminal(TypeSide<Ty, Sym> t) {
-		return new Schema<>(t, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new AqlOptions(DPName.PRECOMPUTED, t.semantics()));
+		return new Schema<>(t, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new AqlOptions(ProverName.precomputed, t.semantics()));
 	}
 	
 	public Schema(TypeSide<Ty, Sym> typeSide, Set<En> ens,
@@ -116,7 +116,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		if (semantics != null) {
 			return semantics;
 		} 
-		semantics = ProverFactory.create(strategy, collage());
+		semantics = AqlProver.create(strategy, collage());
 		return semantics;
 	}
 		

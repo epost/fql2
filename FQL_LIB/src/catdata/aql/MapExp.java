@@ -58,7 +58,7 @@ public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp
 		}
 
 		@Override
-		public Mapping<Ty, En, Sym, Fk, Att, En, Sym, Fk, Att> eval(Env env) {
+		public Mapping<Ty, En, Sym, Fk, Att, En, Sym, Fk, Att> eval(AqlEnv env) {
 			return Mapping.id(sch.eval(env));
 		}
 		
@@ -82,7 +82,7 @@ public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp
 		}
 
 		@Override
-		public Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(Env env) {
+		public Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
 			return env.getMapping(var);
 		}
 
@@ -131,7 +131,7 @@ public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp
 		}
 
 		@Override
-		public Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> eval(Env env) {
+		public Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> eval(AqlEnv env) {
 			return map;
 		}
 

@@ -113,7 +113,7 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 		}
 		
 		@Override
-		public TypeSide<Object, Object> eval(Env env) {
+		public TypeSide<Object, Object> eval(AqlEnv env) {
 			Collage<Object, Void, Object, Void, Void, Void, Void> col = new Collage<>();
 			
 			col.tys.addAll(types);

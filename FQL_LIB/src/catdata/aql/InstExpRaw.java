@@ -10,7 +10,6 @@ import java.util.Set;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
-import catdata.Unit;
 import catdata.Util;
 
 public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object,Object,Object> {
@@ -90,7 +89,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	}
 
 	@Override
-	public Instance<Object,Object,Object,Object,Object,Object,Object> eval(Env env) {
+	public Instance<Object,Object,Object,Object,Object,Object,Object> eval(AqlEnv env) {
 		Schema<Object, Object, Object, Object, Object> sch = schema.eval(env);
 		Collage<Object, Object, Object, Object, Object, Object, Object> col = new Collage<>(sch);
 		
@@ -125,7 +124,10 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 				(eq0.second, eq0.third));
 		}
 		
-		Instance<Object, Object, Object, Object, Object, Object, Object> ret = new Instance<>(sch, col.gens, col.sks, eqs0, new AqlOptions(DPName.FAIL, new Unit()));
+
+		AqlOptions strat = new AqlOptions(Util.toMapSafely(options), col);
+		
+		Instance<Object, Object, Object, Object, Object, Object, Object> ret = new Instance<>(sch, col.gens, col.sks, eqs0, strat);
 		return ret; 
 	}
 	

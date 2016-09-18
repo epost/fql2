@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,6 +21,7 @@ import catdata.Util;
 // when an instance creates a collage, check that type algebra is free
 // prover factory can't check freeness of type algebra, will have to trust; prover assumes java defs are consistent with eqs
 // syms can go back to Chc from Chc3, but att still needs Chc3
+import catdata.algs.kb.KBExp;
 
 //TODO: validate?
 public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
@@ -236,7 +238,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	
 	private synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>,Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify(boolean veto) {
 	
-		System.out.println("Start simplification");
+//		System.out.println("Start simplification");
 		
 		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified = new Collage<>(this);
 		List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list = new LinkedList<>();
@@ -257,18 +259,19 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return term;
 		};
 		
-		System.out.println("End simplification");
-		System.out.println(simplified);
+	//	System.out.println("End simplification");
+	//	System.out.println(simplified);
 		
 		return new Pair<>(simplified, translator);
 	}
 
+	//TODO remove veto
 	private boolean simplify1(List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list, boolean veto) {	
 		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {			
-			System.out.println(eq);
-			System.out.println(veto);
-			System.out.println(oriented(eq.third, eq.second));
-			System.out.println(simplify2(eq.first, eq.third, eq.second, list));
+			//System.out.println(eq);
+			//System.out.println(veto);
+			//System.out.println(oriented(eq.third, eq.second));
+			//System.out.println(simplify2(eq.first, eq.third, eq.second, list));
 			
 			if ((!veto || oriented(eq.second, eq.third)) && simplify2(eq.first, eq.second, eq.third, list)) {
 				return true;
@@ -336,7 +339,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	private List<Var> getVarArgsUnique(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		List<Var> ret = new LinkedList<>();
-		for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : term.args) {
+		for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : term.args()) {
 			if (arg.var == null) {
 				return null;
 			} else if (ret.contains(arg.var)) {
@@ -419,7 +422,43 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return ret;
 	}
 	
+	private Pair<List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>>,
+	Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>>>  toKB = null;
 	
-	
+	public Pair<List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>>,
+	Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>>> toKB() {
+		if (toKB != null) {
+			return toKB;
+		}
+		List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>> theory = new LinkedList<>();
+		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {
+			theory.add(new Triple<>(eq.first.map, eq.second.toKB(), eq.third.toKB()));
+		}
+		
+		Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>> signature = new HashMap<>();
+		for (Sym sym : syms.keySet()) {
+			List<Chc<Ty, En>> l = Chc.inLeft(syms.get(sym).first);
+			signature.put(Head.Sym(sym), new Pair<>(l, Chc.inLeft(syms.get(sym).second)));
+		}
+		for (Fk fk : fks.keySet()) {
+			List<Chc<Ty, En>> l = Util.singList(Chc.inRight(fks.get(fk).first));
+			signature.put(Head.Fk(fk), new Pair<>(l, Chc.inRight(fks.get(fk).second)));
+		}
+		for (Att att : atts.keySet()) {
+			List<Chc<Ty, En>> l = Util.singList(Chc.inRight(atts.get(att).first));
+			signature.put(Head.Att(att), new Pair<>(l, Chc.inLeft(atts.get(att).second)));
+		}
+		for (Gen gen : gens.keySet()) {
+			List<Chc<Ty, En>> l = Collections.emptyList();
+			signature.put(Head.Gen(gen), new Pair<>(l, Chc.inRight(gens.get(gen))));
+		}
+		for (Sk sk : sks.keySet()) {
+			List<Chc<Ty, En>> l = Collections.emptyList();
+			signature.put(Head.Sk(sk), new Pair<>(l, Chc.inLeft(sks.get(sk))));
+		}
+		
+		toKB = new Pair<>(theory, signature);
+		return toKB;
+	}
 
 }

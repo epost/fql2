@@ -3,7 +3,7 @@ package catdata.aql;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class Env {
+public final class AqlEnv {
 
 	private Map<String, TypeSide<Object, Object>> tys = new HashMap<>();
 	private Map<String, Schema<Object, Object, Object, Object, Object>> schs = new HashMap<>();

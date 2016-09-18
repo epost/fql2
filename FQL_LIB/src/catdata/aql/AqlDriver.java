@@ -7,7 +7,7 @@ import catdata.ide.LineException;
 import catdata.ide.Program;
 
 
-public final class Driver {
+public final class AqlDriver {
 
 	// TODO: let x be the position of the first change between old and new
 	// program.
@@ -18,10 +18,10 @@ public final class Driver {
 	
 	//TODO: in multithreaded engine, make sure no two threads can conflict on semantics
 
-	public static Env makeEnv(String str,
+	public static AqlEnv makeEnv(String str,
 			Program<Exp<? extends Object>> init, String[] toUpdate, String last_str,
-			Program<Exp<? extends Object>> last_prog, Env last_env) {
-		Env env = new Env();
+			Program<Exp<? extends Object>> last_prog, AqlEnv last_env) {
+		AqlEnv env = new AqlEnv();
 
 /*		boolean usesPragma = false;
 		for (String k : init.order) {

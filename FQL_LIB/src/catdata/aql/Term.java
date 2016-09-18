@@ -11,6 +11,9 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
+import catdata.algs.kb.KBExp;
+import catdata.algs.kb.KBExp.KBApp;
+import catdata.algs.kb.KBExp.KBVar;
 
 public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
@@ -552,6 +555,20 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		Head<Ty, En, Sym, Fk, Att, Gen, Sk> head = new Head<>(this);
 		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args = args().stream().map(x -> x.subst(map)).collect(Collectors.toList());
 		return Term.Head(head, args);		
+	}
+
+	public KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> toKB() {
+		if (var != null) {
+			return new KBVar<>(var);
+		}
+		return new KBApp<>(new Head<>(this), args().stream().map(Term::toKB).collect(Collectors.toList()));	
+	}
+
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> fromKB(KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> e) {
+		if (e.isVar) {
+			return Term.Var(e.getVar().var);
+		}
+		return Term.Head(e.getApp().f, e.getApp().args.stream().map(Term::fromKB).collect(Collectors.toList()));
 	}
 
 	

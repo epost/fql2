@@ -29,7 +29,7 @@ import catdata.ide.Disp;
 import catdata.ide.LineException;
 import catdata.ide.Program;
 
-public final class Display implements Disp {
+public final class AqlDisplay implements Disp {
 
 	 
 	@Override
@@ -64,7 +64,7 @@ public final class Display implements Disp {
 	}
 
 
-	public Display(String title, Program<Exp<? extends Object>> p, Env env, long start, long middle) {
+	public AqlDisplay(String title, Program<Exp<? extends Object>> p, AqlEnv env, long start, long middle) {
 		Map<Object, String> map = new HashMap<>();
 		for (String c : p.order) {
 			Exp<?> exp = p.exps.get(c);

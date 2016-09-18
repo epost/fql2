@@ -140,9 +140,9 @@ public final class RawTerm {
 	public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> trans(Set<String> vars, Map<String, Ref<Chc<Ty, En>>> ctx0, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args0 = args.stream().map(x -> x.trans(vars, ctx0, col)).collect(Collectors.toList());
 			
-		int n = boolToInt(vars.contains(head)) + boolToInt(col.syms.containsKey(head)) + boolToInt(col.atts.containsKey(head)) + boolToInt(col.atts.containsKey(head)) + boolToInt(col.fks.containsKey(head)) + boolToInt(col.gens.containsKey(head)) + boolToInt(col.sks.containsKey(head));
+		int n = boolToInt(vars.contains(head)) + boolToInt(col.syms.containsKey(head)) + boolToInt(col.atts.containsKey(head)) + boolToInt(col.fks.containsKey(head)) + boolToInt(col.gens.containsKey(head)) + boolToInt(col.sks.containsKey(head));
 		if (n > 1) {
-			throw new RuntimeException(head + " is ambiguous");			
+			throw new RuntimeException(head + " is ambiguously a variable/function/attribute/foreign key/generator/lablled null");			
 		}
 		
 		if (vars.contains(head)) {

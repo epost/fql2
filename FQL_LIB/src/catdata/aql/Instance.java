@@ -22,7 +22,7 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	public final Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs;
 
 	public static <Ty, En, Sym, Fk, Att> Instance<Ty, En, Sym, Fk, Att, Void, Void> terminal(Schema<Ty, En, Sym, Fk, Att> t) {
-		return new Instance<>(t, Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new AqlOptions(DPName.PRECOMPUTED, t.semantics()));
+		return new Instance<>(t, Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new AqlOptions(ProverName.precomputed, t.semantics()));
 	}
 
 	public Chc<Ty,En> type(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {		
@@ -95,7 +95,7 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		if (semantics != null) {
 			return semantics;
 		} 
-		semantics = ProverFactory.create(strategy, collage());
+		semantics = AqlProver.create(strategy, collage());
 		return semantics;
 	}
 

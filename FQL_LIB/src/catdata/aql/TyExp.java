@@ -55,7 +55,7 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		}
 
 		@Override
-		public TypeSide<Ty, Sym> eval(Env env) {
+		public TypeSide<Ty, Sym> eval(AqlEnv env) {
 			return schema.eval(env).typeSide;
 		}
 		
@@ -71,7 +71,7 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		}
 		
 		@Override
-		public TypeSide<Void,Void> eval(Env env) {
+		public TypeSide<Void,Void> eval(AqlEnv env) {
 			return TypeSide.terminal();
 		}
 	
@@ -105,7 +105,7 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		}
 
 		@Override
-		public TypeSide<Ty, Sym> eval(Env env) {
+		public TypeSide<Ty, Sym> eval(AqlEnv env) {
 			return typeSide;
 		}
 
@@ -155,7 +155,7 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		}
 
 		@Override
-		public TypeSide <Object, Object> eval(Env env) {
+		public TypeSide <Object, Object> eval(AqlEnv env) {
 			return env.getTypeSide(var);
 		}
 
@@ -194,7 +194,7 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	public static final class TyExpTerminal extends TyExp<Void,Void> {
 
 		@Override
-		public TypeSide<Void,Void> eval(Env env) {
+		public TypeSide<Void,Void> eval(AqlEnv env) {
 			return TypeSide.terminal();
 		}
 

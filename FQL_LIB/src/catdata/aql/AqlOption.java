@@ -48,8 +48,8 @@ public enum AqlOption {
 		return AqlParser.parseManyIdent(getString(map)).stream().map(x -> RawTerm.toHeadNoPrim(x, col)).collect(Collectors.toList());		
 	}
 	
-	public DPName getDPName(Map<String, String> map) {
-		return DPName.valueOf(getString(map));
+	public ProverName getDPName(Map<String, String> map) {
+		return ProverName.valueOf(getString(map));
 	}
 	
 	

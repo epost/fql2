@@ -34,6 +34,12 @@ import catdata.opl.OplTerm;
 
 public class Util {
 	
+	public static void assertNotNull(Object o) {
+		if (o == null) {
+			throw new RuntimeException("Anomaly: please report ");
+		}
+	}
+	
 	public static <X,Y,Z> Pair<LinkedHashMap<X,Y>, LinkedHashMap<X,Z>> split(Map<X, Chc<Y, Z>> map) {
 		LinkedHashMap<X,Y> m1 = new LinkedHashMap<>();
 		LinkedHashMap<X,Z> m2 = new LinkedHashMap<>();

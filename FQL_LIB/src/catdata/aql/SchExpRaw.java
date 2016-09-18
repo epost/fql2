@@ -17,7 +17,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 	//TODO: printing of contexts broken when conitain choices
 	
 	@Override
-	public Schema<Object, Object, Object, Object, Object> eval(Env env) {
+	public Schema<Object, Object, Object, Object, Object> eval(AqlEnv env) {
 		TypeSide<Object, Object> ts = typeSide.eval(env);
 		Collage<Object, Object, Object, Object, Object, Void, Void> col = new Collage<>(ts);
 		

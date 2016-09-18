@@ -50,7 +50,7 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 		}
 
 		@Override
-		public Instance<Ty, Sym, En, Att, Fk, Void, Void> eval(Env env) {
+		public Instance<Ty, Sym, En, Att, Fk, Void, Void> eval(AqlEnv env) {
 			return Instance.terminal(schema.eval(env));
 		}
 
@@ -72,7 +72,7 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 		}
 
 		@Override
-		public Instance<Object, Object, Object, Object, Object, Object, Object> eval(Env env) {
+		public Instance<Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
 			return env.getInstance(var);
 		}
 
@@ -126,7 +126,7 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 		}
 
 		@Override
-		public Instance<Ty,Sym,En,Att,Fk,Gen,Sk> eval(Env env) {
+		public Instance<Ty,Sym,En,Att,Fk,Gen,Sk> eval(AqlEnv env) {
 			return inst;
 		}
 

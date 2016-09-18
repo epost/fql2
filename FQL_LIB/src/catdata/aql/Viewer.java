@@ -70,9 +70,9 @@ public final class Viewer {
 
 		JButton eq = new JButton("Decide Equation-in-ctx");
 		JButton nf = new JButton("Normalize Term-in-ctx");
-		if (!dp.hasNFs()) {
+		/* if (!dp.hasNFs()) {
 			nf.setEnabled(false);
-		}
+		} */
 		JButton print = new JButton("Show Info");
 		JPanel buttonPanel = new JPanel(new GridLayout(1, 3));
 		buttonPanel.add(eq); buttonPanel.add(nf); buttonPanel.add(print);

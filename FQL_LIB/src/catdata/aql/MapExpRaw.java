@@ -109,7 +109,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 	//TODO: create similar inference functionality that takes into account expected return types?
 	
 	@Override
-	public Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(Env env) {
+	public Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
 		Schema<Object, Object, Object, Object, Object> src0 = src.eval(env);
 		Schema<Object, Object, Object, Object, Object> dst0 = dst.eval(env);
 		//Collage<Object, Object, Object, Object, Object, Void, Void> scol = new Collage<>(src0);

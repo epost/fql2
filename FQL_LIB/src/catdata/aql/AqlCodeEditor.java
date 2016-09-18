@@ -19,7 +19,7 @@ import catdata.ide.Program;
 
 @SuppressWarnings("serial")
 public final class AqlCodeEditor extends
-		CodeEditor<Program<Exp<? extends Object>>, Env, Display> {
+		CodeEditor<Program<Exp<? extends Object>>, AqlEnv, AqlDisplay> {
 
 	public AqlCodeEditor(int untitled_count, String content) {
 		super(untitled_count, content);
@@ -88,19 +88,19 @@ public final class AqlCodeEditor extends
 	}
 
 	@Override
-	protected Display makeDisplay(String foo, Program<Exp<? extends Object>> init,
-			Env env, long start, long middle) {
-			Display ret = new Display(foo, init, env, start, middle);
+	protected AqlDisplay makeDisplay(String foo, Program<Exp<? extends Object>> init,
+			AqlEnv env, long start, long middle) {
+			AqlDisplay ret = new AqlDisplay(foo, init, env, start, middle);
 			return ret;
 	}
 
 	String last_str;
 	Program<Exp<? extends Object>> last_prog;
-	Env last_env;
+	AqlEnv last_env;
 
 	@Override
-	protected Env makeEnv(String str, Program<Exp<? extends Object>> init) {
-			last_env = Driver.makeEnv(str, init, toUpdate, last_str,
+	protected AqlEnv makeEnv(String str, Program<Exp<? extends Object>> init) {
+			last_env = AqlDriver.makeEnv(str, init, toUpdate, last_str,
 					last_prog, last_env);
 			last_prog = init;
 			last_str = str;
@@ -110,7 +110,7 @@ public final class AqlCodeEditor extends
 
 
 	@Override
-	protected String textFor(Env env) {
+	protected String textFor(AqlEnv env) {
 		return "Done.";
 	}
 

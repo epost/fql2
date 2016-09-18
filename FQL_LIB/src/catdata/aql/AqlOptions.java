@@ -9,7 +9,7 @@ public final class AqlOptions {
 	
 	public final Map<AqlOption, Object> options; 
 
-	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(DPName name, Object ob) {
+	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(ProverName name, Object ob) {
 		options = new HashMap<>();
 		options.put(AqlOption.prover, name);
 		options.put(AqlOption.precomputed, ob);

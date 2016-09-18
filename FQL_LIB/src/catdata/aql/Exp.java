@@ -6,7 +6,7 @@ public abstract class Exp<X> {
 	
 	public abstract Kind kind();
 	
-	public abstract X eval(Env env);
+	public abstract X eval(AqlEnv env);
 	
 	public abstract String meta();
 	

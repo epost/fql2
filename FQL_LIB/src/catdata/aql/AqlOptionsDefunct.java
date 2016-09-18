@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.Arrays;
 import java.util.function.Function;
 
 import javax.swing.JComponent;
@@ -19,11 +20,9 @@ public final class AqlOptionsDefunct extends Options {
 		return Language.AQL.toString();
 	}
 
-	// TODO
-
 	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
-		return new Pair<>(new CodeTextPanel("", "Aql options are specified as pragmas in each Aql file.  Here are the default options:\n\n(None yet)"), x -> x);
+		return new Pair<>(new CodeTextPanel("", "Aql options are specified as pragmas in each Aql file.  Here are the available options: " + Arrays.toString(AqlOption.values())), x -> x);
 	}
 
 	@Override

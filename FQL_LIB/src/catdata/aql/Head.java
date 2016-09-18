@@ -135,7 +135,20 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	@Override
 	public String toString() {
-		return "Head [sym=" + sym + ", fk=" + fk + ", att=" + att + ", gen=" + gen + ", sk=" + sk + ", obj=" + obj + ", ty=" + ty + "]";
+		if (att != null) {
+			return att.toString();
+		} else if (fk != null) {
+			return fk.toString();
+		} else if (sym != null) {
+			return sym.toString();
+		} else if (gen != null) {
+			return gen.toString();
+		} else if (sk != null) {
+			return sk.toString();
+		} else if (obj != null) {
+			return obj + "@" + ty;
+		}
+		throw new RuntimeException("Anomaly: please report");
 	}
 	
 	

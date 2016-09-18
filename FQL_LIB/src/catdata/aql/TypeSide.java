@@ -200,7 +200,7 @@ public final class TypeSide<Ty, Sym> {
 	}
 
 	public static TypeSide<Void,Void> terminal() {
-		return new TypeSide<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new AqlOptions(DPName.PRECOMPUTED, DP.terminal));
+		return new TypeSide<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new AqlOptions(ProverName.precomputed, DP.terminal));
 	}
 
 	private DP<Ty, Void, Sym, Void, Void, Void, Void> semantics;
@@ -210,7 +210,7 @@ public final class TypeSide<Ty, Sym> {
 		if (semantics != null) {
 			return semantics;
 		}
-		semantics = ProverFactory.create(strategy, collage());
+		semantics = AqlProver.create(strategy, collage());
 		return semantics;
 	}
 	

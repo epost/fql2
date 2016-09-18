@@ -11,7 +11,7 @@ public abstract class QueryExp extends Exp<Query> {
 		String var;
 		
 		@Override
-		public Query eval(Env env) {
+		public Query eval(AqlEnv env) {
 			return env.getQuery(var);
 		}
 
@@ -65,7 +65,7 @@ public abstract class QueryExp extends Exp<Query> {
 		}
 
 		@Override
-		public Query eval(Env env) {
+		public Query eval(AqlEnv env) {
 			throw new RuntimeException(); //TODO
 		}
 
