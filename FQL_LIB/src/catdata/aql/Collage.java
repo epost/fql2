@@ -26,31 +26,32 @@ import catdata.algs.kb.KBExp;
 //TODO: validate?
 public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
-	//TODO: keep equations segregated?
-	
-	//TODO: make this an interface implemented by TypeSide, Schema, Instance?
-	
-	//TODO: hang onto the typesides, schemas, instances where came from? factor (split into 3 parts) method?
-	
+	// TODO: keep equations segregated?
+
+	// TODO: make this an interface implemented by TypeSide, Schema, Instance?
+
+	// TODO: hang onto the typesides, schemas, instances where came from? factor
+	// (split into 3 parts) method?
+
 	public final Set<Ty> tys = new HashSet<>();
 	public final Map<Sym, Pair<List<Ty>, Ty>> syms = new HashMap<>();
 	public final Map<Ty, String> java_tys = new HashMap<>();
 	public final Map<Ty, String> java_parsers = new HashMap<>();
 	public final Map<Sym, String> java_fns = new HashMap<>();
-	
+
 	public final Set<En> ens = new HashSet<>();
 	public final Map<Att, Pair<En, Ty>> atts = new HashMap<>();
-	public final Map<Fk,  Pair<En, En>> fks = new HashMap<>();
-		
+	public final Map<Fk, Pair<En, En>> fks = new HashMap<>();
+
 	public final Map<Gen, En> gens = new HashMap<>();
 	public final Map<Sk, Ty> sks = new HashMap<>();
 
-	public final Set<Triple<Ctx<Var, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs = new HashSet<>();
+	public final Set<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs = new HashSet<>();
 
 	public Collage() {
-		//TODO add validator in constructor
+		// TODO add validator in constructor
 	}
-	
+
 	public Collage(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		this.tys.addAll(col.tys);
 		this.syms.putAll(col.syms);
@@ -63,42 +64,44 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		this.gens.putAll(col.gens);
 		this.sks.putAll(col.sks);
 		this.eqs.addAll(col.eqs);
-		//assertFreeOnJava(); causes infinite loop
+		// assertFreeOnJava(); causes infinite loop
 	}
-	
-	//TODO validate - free on java
-	public Collage(TypeSide<Ty,Sym> typeSide) {
+
+	// TODO: free on java should be checked in typeside but this is defensive
+	// programming
+	public Collage(TypeSide<Ty, Sym> typeSide) {
 		this.tys.addAll(typeSide.tys);
 		this.syms.putAll(typeSide.syms);
 		this.java_tys.putAll(typeSide.java_tys);
 		this.java_parsers.putAll(typeSide.java_parsers);
 		this.java_fns.putAll(typeSide.java_fns);
-		this.eqs.addAll(typeSide.eqs.stream().map(x -> new Triple<Ctx<Var, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>(x.first.inLeft(), upgradeTypeSide(x.second), upgradeTypeSide(x.third))).collect(Collectors.toSet()));
+		this.eqs.addAll(typeSide.eqs.stream().map(x -> new Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>(x.first.inLeft(), upgradeTypeSide(x.second), upgradeTypeSide(x.third))).collect(Collectors.toSet()));
 		assertFreeOnJava();
 	}
-	
-	public Collage(Schema<Ty,En,Sym,Fk,Att> schema) {
+
+	public Collage(Schema<Ty, En, Sym, Fk, Att> schema) {
 		this(schema.typeSide);
 		this.ens.addAll(schema.ens);
 		this.atts.putAll(schema.atts);
 		this.fks.putAll(schema.fks);
-		this.eqs.addAll(schema.eqs.stream().map(x -> new Triple<Ctx<Var, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>(new Ctx<>(new Pair<>(x.first.first, Chc.inRight(x.first.second))), upgradeSchema(x.second), upgradeSchema(x.third))).collect(Collectors.toSet()));
-		assertFreeOnJava();
+		this.eqs.addAll(schema.eqs.stream().map(x -> new Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>(new Ctx<>(new Pair<>(x.first.first, Chc.inRight(x.first.second))), upgradeSchema(x.second), upgradeSchema(x.third))).collect(Collectors.toSet()));
+		assertFreeOnJava(); // TODO should be checked in schema, and also too
+							// strong - want free of each representable
+							// instances type algebra
 	}
-	
-	public Collage(Instance<Ty,En,Sym,Fk,Att,Gen,Sk> instance) {
+
+	public Collage(Instance<Ty, En, Sym, Fk, Att, Gen, Sk> instance) {
 		this(instance.schema);
 		this.gens.putAll(instance.gens);
 		this.sks.putAll(instance.sks);
-		this.eqs.addAll(instance.eqs.stream().map(x -> new Triple<Ctx<Var, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>(new Ctx<>(), x.first, x.second)).collect(Collectors.toSet()));
-		assertFreeOnJava();
+		this.eqs.addAll(instance.eqs.stream().map(x -> new Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>(new Ctx<>(), x.first, x.second)).collect(Collectors.toSet()));
 	}
 
 	@SuppressWarnings("unchecked")
 	private Term<Ty, En, Sym, Fk, Att, Gen, Sk> upgradeTypeSide(Term<Ty, Void, Sym, Void, Void, Void, Void> term) {
 		return (Term<Ty, En, Sym, Fk, Att, Gen, Sk>) term;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private Term<Ty, En, Sym, Fk, Att, Gen, Sk> upgradeSchema(Term<Ty, En, Sym, Fk, Att, Void, Void> term) {
 		return (Term<Ty, En, Sym, Fk, Att, Gen, Sk>) term;
@@ -119,7 +122,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		result = prime * result + ((syms == null) ? 0 : syms.hashCode());
 		result = prime * result + ((tys == null) ? 0 : tys.hashCode());
 		return result;
-	} 
+	}
 
 	@Override
 	public boolean equals(Object obj) {
@@ -129,7 +132,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Collage<?,?,?,?,?,?,?> other = (Collage<?,?,?,?,?,?,?>) obj;
+		Collage<?, ?, ?, ?, ?, ?, ?> other = (Collage<?, ?, ?, ?, ?, ?, ?>) obj;
 		if (atts == null) {
 			if (other.atts != null)
 				return false;
@@ -193,96 +196,91 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			temp.add(sym + " : " + Util.sep(t.first, ", ") + " -> " + t.second);
 		}
 		toString += "\n\t" + Util.sep(temp, "\n\t");
-		
+
 		List<String> fks0 = new LinkedList<>();
 		for (Fk fk : fks.keySet()) {
-			fks0.add(fk + " : " + fks.get(fk).first + " -> " + fks.get(fk).second); 
+			fks0.add(fk + " : " + fks.get(fk).first + " -> " + fks.get(fk).second);
 		}
 		List<String> atts0 = new LinkedList<>();
 		for (Att att : atts.keySet()) {
-			atts0.add(att + " : " + atts.get(att).first + " -> " + atts.get(att).second); 
+			atts0.add(att + " : " + atts.get(att).first + " -> " + atts.get(att).second);
 		}
-		
+
 		toString += "\nforeign keys";
 		toString += "\n\t" + Util.sep(fks0, "\n\t");
-		
+
 		toString += "\nattributes";
 		toString += "\n\t" + Util.sep(atts0, "\n\t");
-	
+
 		toString += "\ngenerating entities";
 		toString += "\n\t" + Util.sep(gens, " : ", "\n\t");
-	
+
 		toString += "\ngenerating nulls";
-		toString += "\n\t" + Util.sep(sks, " : " , "\n\t");			
-	
+		toString += "\n\t" + Util.sep(sks, " : ", "\n\t");
+
 		List<String> eqs0 = new LinkedList<>();
 		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {
 			eqs0.add(eq.first.toString(eq.second, eq.third));
 		}
 		toString += "\nequations";
 		toString += "\n\t" + Util.sep(eqs0, "\n\t");
-		
+
 		return toString;
 	}
 
+	
+	
+	
 	private Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplified_pair;
 
-	public synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>,Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify() {
+	public synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify() {
 		if (simplified_pair != null) {
 			return simplified_pair;
 		}
-		
-		simplified_pair = simplify(false); 
+
+		simplified_pair = simplify(false);
 		return simplified_pair;
 	}
 	
-	private synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>,Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify(boolean veto) {
 	
-//		System.out.println("Start simplification");
-		
-		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified = new Collage<>(this);
+
+	private synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify(boolean veto) {
+	Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified = new Collage<>(this);
 		List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list = new LinkedList<>();
 		while (simplified.simplify1(list, veto));
-		
+
 		Iterator<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> it = simplified.eqs.iterator();
 		while (it.hasNext()) {
 			Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq = it.next();
 			if (eq.second.equals(eq.third)) {
-				it.remove(); 
+				it.remove();
 			}
 		}
-		
+
 		Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> translator = term -> {
 			for (Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> t : list) {
 				term = term.replaceHead(t.first, t.second, t.third);
 			}
 			return term;
 		};
-		
-	//	System.out.println("End simplification");
-	//	System.out.println(simplified);
-		
+
+		simplified.simplified_pair = new Pair<>(simplified, x -> x);
+
 		return new Pair<>(simplified, translator);
 	}
 
-	//TODO remove veto
-	private boolean simplify1(List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list, boolean veto) {	
-		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {			
-			//System.out.println(eq);
-			//System.out.println(veto);
-			//System.out.println(oriented(eq.third, eq.second));
-			//System.out.println(simplify2(eq.first, eq.third, eq.second, list));
-			
-			if ((!veto || oriented(eq.second, eq.third)) && simplify2(eq.first, eq.second, eq.third, list)) {
+	private boolean simplify1(List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list, boolean veto) {
+		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {
+			if (simplify2(eq.first, eq.second, eq.third, list)) {
 				return true;
-			} else if ((!veto || oriented(eq.third, eq.second)) && simplify2(eq.first, eq.third, eq.second, list)) {
+			} else if (simplify2(eq.first, eq.third, eq.second, list)) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	private boolean oriented(Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs, Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs) {
+
+/*	private boolean oriented(Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs, Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs) {
 		return !hasJava(lhs);
 	}
 
@@ -296,18 +294,17 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			}
 		}
 		return term.obj != null || java_fns.containsKey(term.sym);
-	}
-	
-	
+	} */
+
 	private boolean simplify2(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs, Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs, List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list) {
 		if (lhs.var != null || lhs.obj != null) {
 			return false;
-		}  
+		}
 		Head<Ty, En, Sym, Fk, Att, Gen, Sk> head = new Head<>(lhs);
 		List<Var> vars = getVarArgsUnique(lhs);
-		
+
 		Set<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> neweqs = new HashSet<>();
-		
+
 		if (vars != null && !rhs.contains(head)) {
 			for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {
 				list.add(new Triple<>(head, vars, rhs));
@@ -351,10 +348,10 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 
 	public void assertFreeOnJava() {
-		//each symbol must be of the form
-		//f : s_1 , ... , s_n -> s
-		//where isJava(s) implies all( isJava(s_i)) or all(!isJava(s_i))
-		//     !isJava(s) implies all(!isJava(s_i)) 
+		// each symbol must be of the form
+		// f : s_1 , ... , s_n -> s
+		// where isJava(s) implies all( isJava(s_i)) or all(!isJava(s_i))
+		// !isJava(s) implies all(!isJava(s_i))
 		for (Sym sym : syms.keySet()) {
 			Pair<List<Ty>, Ty> t = syms.get(sym);
 			if (java_tys.containsKey(t.second)) {
@@ -363,10 +360,10 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 					if (java_tys.containsKey(ty)) {
 						numJava++;
 					}
-				} 
+				}
 				if (!(numJava == 0 || numJava == t.first.size())) {
 					throw new RuntimeException("In symbol " + sym + ", target sort is java but source sorts mix java and non-java sorts");
-				}				
+				}
 			} else {
 				for (Ty ty : t.first) {
 					if (java_tys.containsKey(ty)) {
@@ -374,42 +371,36 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 					}
 				}
 			}
-		}	
-		
-		List<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> 
-		x = removeNonJavaTypedEqs(simplify().first.eqs);
-		if (!x.isEmpty()) {
-			throw new RuntimeException("Not free on java: left over eqs are\n" + Util.sep(x.stream().map(q -> q.first.toString(q.second, q.third)).collect(Collectors.toList()), "\n"));
 		}
-		
-		//TODO what here? can't simplify and then check, see email 
+
 	}
-	
+
 	public Chc<Ty, En> type(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		Pair<LinkedHashMap<Var, Ty>, LinkedHashMap<Var, En>> m = Util.split(ctx.map);
 		Ctx<Var, Ty> ctxt = new Ctx<>(m.first);
 		Ctx<Var, En> ctxe = new Ctx<>(m.second);
 		return term.type(ctxt, ctxe, tys, syms, java_tys, ens, atts, fks, gens, sks);
 	}
-	
 
-	private List<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> removeNonJavaTypedEqs(Set<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs) {
-		List<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> ret = new LinkedList<>();
-		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {
-			Chc<Ty, En> type = type(eq.first, eq.second);
-			if (type.left && java_tys.containsKey(type.l)) {
-				ret.add(eq);
-			}
-		}
-		return ret;
-	}
+	/*
+	 * private List<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att,
+	 * Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>>
+	 * removeNonJavaTypedEqs(Set<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym,
+	 * Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs) {
+	 * List<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>,
+	 * Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> ret = new LinkedList<>(); for
+	 * (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>,
+	 * Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) { Chc<Ty, En> type =
+	 * type(eq.first, eq.second); if (type.left && java_tys.containsKey(type.l))
+	 * { ret.add(eq); } } return ret; }
+	 */
 
-	//conservative
-	//public boolean isFree() {
-	//	return simplify().first.eqs.isEmpty(); 
-	//}
-	
-	//TODO consistent extension
+	// conservative
+	// public boolean isFree() {
+	// return simplify().first.eqs.isEmpty();
+	// }
+
+	// TODO consistent extension
 
 	public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> reduce() {
 		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> ret = new Collage<>(this);
@@ -421,21 +412,26 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		return ret;
 	}
-	
-	private Pair<List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>>,
-	Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>>>  toKB = null;
-	
-	public Pair<List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>>,
-	Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>>> toKB() {
+
+	private Triple<List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>>, Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>>, Set<Chc<Ty, En>>> toKB = null;
+
+	public Triple<List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>>, Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>>, Set<Chc<Ty, En>>> toKB() {
 		if (toKB != null) {
 			return toKB;
 		}
 		List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>> theory = new LinkedList<>();
+		Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>> signature = new HashMap<>();
+
 		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {
 			theory.add(new Triple<>(eq.first.map, eq.second.toKB(), eq.third.toKB()));
+			Set<Pair<Object, Ty>> objs = new HashSet<>();
+			eq.second.objs(objs);
+			eq.third.objs(objs);
+			for (Pair<Object, Ty> p : objs) {
+				signature.put(Head.Obj(p.first, p.second), new Pair<>(Collections.emptyList(), Chc.inLeft(p.second)));
+			}
 		}
-		
-		Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>> signature = new HashMap<>();
+
 		for (Sym sym : syms.keySet()) {
 			List<Chc<Ty, En>> l = Chc.inLeft(syms.get(sym).first);
 			signature.put(Head.Sym(sym), new Pair<>(l, Chc.inLeft(syms.get(sym).second)));
@@ -456,9 +452,49 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			List<Chc<Ty, En>> l = Collections.emptyList();
 			signature.put(Head.Sk(sk), new Pair<>(l, Chc.inLeft(sks.get(sk))));
 		}
-		
-		toKB = new Pair<>(theory, signature);
+		Set<Chc<Ty, En>> sorts = new HashSet<>();
+		sorts.addAll(Chc.inLeft(new LinkedList<>(tys)));
+		sorts.addAll(Chc.inRight(new LinkedList<>(ens))); // TODO
+
+		toKB = new Triple<>(theory, signature, sorts);
 		return toKB;
+	}
+
+	public boolean isGround() {
+		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {
+			if (!eq.first.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean isMonoidal() {
+		for (Sym sym : syms.keySet()) {
+			if (syms.get(sym).first.size() > 1) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public void assertNoEmptySorts(boolean emptySortsOk) {
+		if (emptySortsOk) {
+			return;
+		}
+
+		HashSet<Chc<Ty, En>> m = new HashSet<>(toKB().third);
+		for (Head<Ty, En, Sym, Fk, Att, Gen, Sk> f : toKB().second.keySet()) {
+			Pair<List<Chc<Ty, En>>, Chc<Ty, En>> a = toKB().second.get(f);
+			if (a.first.isEmpty()) {
+				m.remove(a.second);
+			}
+		}
+
+		if (!m.isEmpty()) {
+			List<String> l = m.stream().map(Chc::toStringMash).collect(Collectors.toList());
+			throw new RuntimeException("Sorts " + Util.sep(l, ", ") + " have no 0-ary constants");
+		}
 	}
 
 }

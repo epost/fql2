@@ -3,7 +3,7 @@ package catdata.algs.kb;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class EqProver<C,V> {
+public abstract class EqProverDefunct<C,V> {
 	
 	public abstract boolean eq(KBExp<C,V> e1, KBExp<C,V> e2);
 

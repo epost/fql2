@@ -28,7 +28,7 @@ import catdata.Util;
  * 
  * @param <Y> the alphabet
  */
-public class KB_Thue<Y> {
+public class SemiThue<Y> {
 
 	private Set<Pair<List<Y>, List<Y>>> rules;
 	private boolean finished = false;
@@ -37,10 +37,10 @@ public class KB_Thue<Y> {
 	private int iteration = 0;
 	
 	/**
-	 * @param rules to be completed. DOE NOTE copy, and MUTATES IN PLACE the pairs inside of rules 
+	 * @param rules to be completed. DOES NOT copy, and MUTATES IN PLACE the pairs inside of rules 
 	 * @param max_iterations to run
 	 */
-	public KB_Thue(Set<Pair<List<Y>, List<Y>>> rules, int max_iterations) {
+	public SemiThue(Set<Pair<List<Y>, List<Y>>> rules, int max_iterations) {
 		this.rules = rules;
 		this.max_iterations = max_iterations;
 		orient(this.rules);

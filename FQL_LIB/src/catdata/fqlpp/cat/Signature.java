@@ -14,7 +14,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
-import catdata.algs.kb.KB_Thue;
+import catdata.algs.kb.SemiThue;
 import catdata.fqlpp.FUNCTION;
 import catdata.ide.NEWDEBUG;
 
@@ -729,7 +729,7 @@ public class Signature<O,A> implements Serializable {
 		for (Eq eq : eqs) {
 			rules.add(new Pair<>(eq.lhs.path, eq.rhs.path));
 		}
-		KB_Thue<Edge> kb = new KB_Thue<>(rules, 100);
+		SemiThue<Edge> kb = new SemiThue<>(rules, 100);
 		for (Path path1 : paths) {
 			for (Path path2 : paths) {
 				if (path1.source.equals(path2.source) && path1.target.equals(path2.target)) {

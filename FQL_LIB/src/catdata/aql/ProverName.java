@@ -2,6 +2,7 @@ package catdata.aql;
 
 public enum ProverName {
 
+	auto,
 	saturated,
 	monoidal,
 	program,

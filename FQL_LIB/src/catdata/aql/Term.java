@@ -44,7 +44,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		return false;
 	}
-
+/* wrong
 	public boolean isSchema() {
 		if (isTypeSide()) {
 			return true;
@@ -54,7 +54,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return arg.isSchema();
 		}
 		return false;
-	}
+	} */
 
 	public boolean isGround() {
 		if (var != null) {
@@ -409,7 +409,9 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return !head.equals(new Head<>(this)) && this.contains(head);
 	}
 	public boolean contains(Head<Ty, En, Sym, Fk, Att, Gen, Sk> head) {
-		if (new Head<>(this).equals(head)) {
+		if (this.var != null) {
+			return false;
+		} else if (new Head<>(this).equals(head)) {
 			return true;
 		}
 		for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
@@ -569,6 +571,18 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return Term.Var(e.getVar().var);
 		}
 		return Term.Head(e.getApp().f, e.getApp().args.stream().map(Term::fromKB).collect(Collectors.toList()));
+	}
+
+	public void objs(Set<Pair<Object, Ty>> objs) {
+		if (var != null) {
+			return;
+		} else if (obj != null) {
+			objs.add(new Pair<>(obj, ty));
+		} else {
+			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
+				arg.objs(objs);
+			}
+		} 
 	}
 
 	

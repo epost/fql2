@@ -153,13 +153,46 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		if (var != null) {
 			return var.toString();
 		}
-		Integer i = Util.termToNat(this);
+		Integer i = termToNat(this);
 		if (i != null) {
 			return Integer.toString(i);
 		}
 		List<String> x = args.stream().map(z -> z.toString()).collect(Collectors.toList());
 		String ret =  Util.maybeQuote(strip(head.toString())) + "(" + Util.sep(x, ", ") + ")";
 		return ret;
+	}
+	
+	public static <V> double termToDouble(OplTerm<?, V> t) {
+		return termToNat(t);
+	}
+
+	public static <V> Integer termToNat(OplTerm<?, V> t) {
+		if (t.var != null) {
+			return null;
+		}
+		if (Util.stripChcs(t.head).second.equals("zero")) {
+			return 0;
+		} else if (Util.stripChcs(t.head).second.equals("succ")) {
+			if (t.args.size() != 1) {
+				return null;
+			}
+			Integer j = termToNat(t.args.get(0));
+			if (j == null) {
+				return null;
+			}
+			return 1 + j;
+		}
+		return null;
+	}
+
+	public static <V> OplTerm<String, V> natToTerm(int i) {
+		if (i < 0) {
+			throw new RuntimeException("Cannot convert negative number to natural");
+		}
+		if (i == 0) {
+			return new OplTerm<>("zero", new LinkedList<>());
+		}
+		return new OplTerm<>("succ", Util.singList(natToTerm(i - 1)));
 	}
 
 	//TODO: dup? In Util?

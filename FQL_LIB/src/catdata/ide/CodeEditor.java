@@ -393,8 +393,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			respArea.setText(e.getLocalizedMessage());
 		}
 	}
-
-//	protected String forJosh = 
 	
 	protected String[] toUpdate = new String[] { null };
 	protected String toDisplay = null;
@@ -486,12 +484,14 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		} catch (LineException e) {
 			toDisplay = "Error in " + e.kind + " " + e.decl + ": "
 					+ e.getLocalizedMessage();
+			respArea.setText(toDisplay);
 			e.printStackTrace();
 			topArea.requestFocusInWindow();
 			Integer theLine = init.getLine(e.decl);
 			topArea.setCaretPosition(theLine);
 		} catch (Throwable re) {
 			toDisplay = "Error: " + re.getLocalizedMessage();
+			respArea.setText(toDisplay);
 			re.printStackTrace();
 		}
 

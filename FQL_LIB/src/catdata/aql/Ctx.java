@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,14 @@ public final class Ctx<K,V> {
 	
 	public boolean containsKey(K k) {
 		return map.containsKey(k);
+	}
+	
+	public static <K,V> Pair<K,V> getOnly(Map<K,V> map) {
+		if (map.size() != 1) {
+			throw new RuntimeException("Anomaly: please report");
+		}
+		Entry<K,V> e = map.entrySet().iterator().next();
+		return new Pair<>(e.getKey(), e.getValue());
 	}
 	
 	public Set<K> keys() {

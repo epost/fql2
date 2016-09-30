@@ -895,7 +895,7 @@ public class OplParser {
 			try {
 				int i = Integer.parseInt(a0);
 				if (sugarForNat) {
-					return Util.natToTerm(i); 
+					return OplTerm.natToTerm(i); 
 				} else {
 					// return new OplTerm(a0);
 				}

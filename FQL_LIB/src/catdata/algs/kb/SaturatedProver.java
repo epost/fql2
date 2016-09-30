@@ -15,14 +15,13 @@ import catdata.algs.kb.DPKB;
 import catdata.algs.kb.KBExp;
 import catdata.algs.kb.KBExp.KBApp;
 
-//assume no eq for f(a,b)=c means f(a,b) nfs to f(a,b)
 
 public class SaturatedProver<T, C, V> extends DPKB<T, C, V> {
 
 	public final Map<C, Map<List<C>, C>> map = new HashMap<>();
 
-	public SaturatedProver(Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
-		super(Collections.emptyMap(), sig, eqs);
+	public SaturatedProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
+		super(sorts, sig, eqs);
 
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : theory) {
 			if (!eq.first.isEmpty()) { // do this in check method?
@@ -46,9 +45,6 @@ public class SaturatedProver<T, C, V> extends DPKB<T, C, V> {
 				}
 				args.add(arg.getApp().f);
 			}
-		//	System.out.println(lhs);
-		//	System.out.println(map);
-		//	System.out.println(lhs.f);
 			if (!map.containsKey(lhs.f)) {
 				map.put(lhs.f, new HashMap<>());
 			}
@@ -61,6 +57,9 @@ public class SaturatedProver<T, C, V> extends DPKB<T, C, V> {
 	
 	@Override
 	public boolean eq(Map<V, T> ctx, KBExp<C, V> lhs, KBExp<C, V> rhs) {
+		if (!ctx.isEmpty()) {
+			throw new RuntimeException("Saturated prover only works on ground equations");
+		}
 		return nf(ctx, lhs).equals(nf(ctx, rhs));
 	}
 
@@ -96,7 +95,7 @@ public class SaturatedProver<T, C, V> extends DPKB<T, C, V> {
 
 	@Override
 	public String toString() {
-		return "Saturated decision procedure";
+		return "Saturated prover";
 	}
 
 

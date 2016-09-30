@@ -254,12 +254,12 @@ public class LeftKanSigma {
 		} );
 	
 		//use third
-		Transform<O2,A2,Set,Fn> thr = null;
+		Transform<O2,A2,Set,Fn> thr = null; 
 		if (t != null) { 
-			thr = new Transform<>(f3, JJJ, x -> new Fn<>(f3.applyO(x), JJJ.applyO(x), q.third.get(G.target.new Node(x))::get));
+			thr = new Transform<>(f3, JJJ, x -> new Fn(f3.applyO(x), JJJ.applyO(x), q.third.get(G.target.new Node(x))::get));
 		}
 		 
-		Transform<O1,A1,Set,Fn> et = new Transform<>(I, Functor.compose(F,f3), x -> new Fn<>(I.applyO(x), Functor.compose(F,f3).applyO(x), q.second.get(G.source.new Node(x))::get));
+		Transform<O1,A1,Set,Fn> et = new Transform<>(I, Functor.compose(F,f3), x -> new Fn(I.applyO(x), Functor.compose(F,f3).applyO(x), q.second.get(G.source.new Node(x))::get));
 		
 		Map<Object, List<Pair<A2, Object>>> nq = new HashMap<>();
 		

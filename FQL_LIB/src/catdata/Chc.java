@@ -64,6 +64,9 @@ public class Chc<X,Y> {
 
 	
 	public static <X,Y> Chc<X,Y> inLeft(X l) {
+		/* if (l == null) {
+			throw new RuntimeException();
+		} */
 		Chc<X,Y> ret = new Chc<>();
 		ret.left = true;
 		ret.l = l;
@@ -71,6 +74,9 @@ public class Chc<X,Y> {
 	}
 	
 	public static <X,Y> Chc<X,Y> inRight(Y r) {
+		/* if (r == null) {
+			throw new RuntimeException();
+		} */
 		Chc<X,Y> ret = new Chc<>();
 		ret.left = false;
 		ret.r = r;

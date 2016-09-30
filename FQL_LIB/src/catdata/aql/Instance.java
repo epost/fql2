@@ -1,6 +1,7 @@
 package catdata.aql;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -88,15 +89,41 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 	
 	//TODO
-	private DP<Ty,En,Sym,Fk,Att,Gen,Sk> semantics;
+	private Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?> semantics;
 	
 	//this could take a while, so make sure two threads don't accidentally do it at the same time
-	public synchronized DP<Ty,En,Sym,Fk,Att,Gen,Sk> semantics() {
+	public synchronized Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?> semantics() {
 		if (semantics != null) {
 			return semantics;
-		} 
-		semantics = AqlProver.create(strategy, collage());
+		}
+		ProverName name = (ProverName) strategy.getOrDefault(AqlOption.prover);
+
+		switch (name) {
+		case precomputed:
+			@SuppressWarnings("unchecked")
+			Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?> semantics2 = (Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, ?>) strategy.get(AqlOption.precomputed);
+			semantics = semantics2;
+			return semantics;
+		default:
+		}
+		semantics = new AqlSaturator<>(strategy, this, new It());
 		return semantics;
+	}
+	
+	static class It implements Iterator<String> {
+
+		int next = 0;
+		
+		@Override
+		public boolean hasNext() {
+			return true;
+		}
+
+		@Override
+		public String next() {
+			return "_id" + next++;
+		}
+
 	}
 
 	private Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage;
@@ -160,9 +187,9 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		List<String> eqs0 = eqs.stream().map(x -> x.first + " = " + x.second).collect(Collectors.toList());
 		toString = "generating entities";
 		toString += "\n\t" + Util.sep(gens, " : ", "\n\t");
-		toString += "\ngenerating labelled nulls";
+		toString += "\n\ngenerating labelled nulls";
 		toString += "\n\t" + Util.sep(sks, " : " , "\n\t");			
-		toString += "\nequations";
+		toString += "\n\nequations";
 		toString += "\n\t" + Util.sep(eqs0, "\n\t");
 		
 		return toString;

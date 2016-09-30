@@ -36,7 +36,7 @@ import catdata.algs.kb.KBExp.KBVar;
  * @param <C> the type of functions/constants
  * @param <V> the type of variables
  */
-public class KB<C, V> extends EqProver<C, V> {
+public class KB<C, V> extends EqProverDefunct<C, V> {
 	 
 	protected boolean isComplete = false;
 	protected boolean isCompleteGround = false;
@@ -309,7 +309,7 @@ public class KB<C, V> extends EqProver<C, V> {
 		if (!isCompleteGround) {
 			System.out.println("---------------");
 			//allCpsConfluent(true, true);
-			throw new RuntimeException("Not ground complete after iteration timeout.  Last state:\n\n" + printKB());
+			throw new RuntimeException("Not ground complete after iteration timeout.  Last state:\n\n" + toString());
 		} 
 	}
 	
@@ -727,7 +727,7 @@ public class KB<C, V> extends EqProver<C, V> {
 		for (Pair<KBExp<C, V>, KBExp<C, V>> gd : R) {
 			Set<Pair<KBExp<C, V>, KBExp<C, V>>> s;
 			if (!seen.contains(new Pair<>(ab, gd))) {
-				s = cp( ab, gd);
+				s = cp(ab, gd);
 				ret.addAll(s);
 				seen.add(new Pair<>(ab, gd));
 			}
@@ -1150,7 +1150,7 @@ public class KB<C, V> extends EqProver<C, V> {
 			KBExp<C, V> rhs = red(new HashMap<>(), Util.append(E,G), R, e.second);
 			if (!lhs.equals(rhs)) {
 				if (!ground) {
-					System.out.println("regular badness on " + s + " e= " + e + " | lhs=" + lhs + " | rhs=" + rhs);
+//					System.out.println("regular badness on " + s + " e= " + e + " | lhs=" + lhs + " | rhs=" + rhs);
 					return false;
 				} else {
 					for (Pair<KBExp<C, V>, KBExp<C, V>> ex : G) {
@@ -1162,8 +1162,8 @@ public class KB<C, V> extends EqProver<C, V> {
 					//TODO
 					if (options.semantic_ac) {
 						if (!lhs.sort(AC_symbols.keySet()).equals(rhs.sort(AC_symbols.keySet()))) {
-							System.out.println("ground badness on " + s + "e= " + e + " | lhs=" + lhs + " | rhs=" + rhs + " | sorts to " 
-						+ lhs.sort(AC_symbols.keySet()) + " and " + rhs.sort(AC_symbols.keySet()));
+			//				System.out.println("ground badness on " + s + "e= " + e + " | lhs=" + lhs + " | rhs=" + rhs + " | sorts to " 
+				//		+ lhs.sort(AC_symbols.keySet()) + " and " + rhs.sort(AC_symbols.keySet()));
 							return false;
 						}  
 					}

@@ -1,5 +1,7 @@
 package catdata.aql;
 
+import java.util.Iterator;
+
 public final class Var {
 
 	
@@ -20,8 +22,22 @@ public final class Var {
 	private static int index = 0;
 	
 	public static Var fresh() {
-		return new Var("" + index++);
+		return new Var("v" + index++);
 	}
+	
+	public final static Iterator<Var> it = new Iterator<Var>() {
+
+		@Override
+		public boolean hasNext() {
+			return true;
+		}
+
+		@Override
+		public Var next() {
+			return fresh();
+		}
+		
+	};
 	
 	@Override
 	public int hashCode() {

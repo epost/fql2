@@ -191,7 +191,7 @@ public final class RawTerm {
 			}
 			String code = col.java_parsers.get(ty);
 			if (code == null) {
-				throw new RuntimeException(this + " is not a symbol or variable or of an inferred type (" + ty + ") with a java parser");
+				throw new RuntimeException("head of " + this + " is not a symbol or variable or of an inferred type (" + ty + ") with a java parser");
 			}
 			Function<List<Object>, Object> f = AqlJs.compile(code);
 			
@@ -271,10 +271,14 @@ public final class RawTerm {
 			return new Ref<>(Chc.inLeft(syms_t.second));
 		} else if (ctx.containsKey(head)) {
 			return ctx.get(head);
-		} else {
+		} else if (head != null && args.isEmpty()) { 
 			Ref<Chc<Ty,En>> ref = new Ref<>();
 			ctx.put(head, ref);
 			return ref; 
+		} else if (head != null && !args.isEmpty()) {
+			throw new RuntimeException("In " + this + ", the head " + head + " is not a function symbol");
+		} else {
+			throw new RuntimeException("Anomaly: please report");
 		}
 		
 	}

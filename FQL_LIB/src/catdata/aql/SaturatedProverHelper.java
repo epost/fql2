@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -14,9 +15,8 @@ import catdata.algs.kb.SaturatedProver;
 
 public class SaturatedProverHelper {
 
-
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> create(AqlOptions ops, Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>> signature, List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>> theory, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
-		SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> ret = new SaturatedProver<>(signature, theory);
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> create(AqlOptions ops, Collection<Chc<Ty, En>> sorts, Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>> signature, List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>> theory, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+		SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> ret = new SaturatedProver<>(sorts, signature, theory);
 		
 		if ((Boolean) ops.getOrDefault(AqlOption.dont_verify_is_appropriate_for_prover_unsafe)) {
 			return ret;

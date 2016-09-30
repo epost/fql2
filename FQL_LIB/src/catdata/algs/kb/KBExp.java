@@ -1,6 +1,7 @@
 package catdata.algs.kb;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -46,7 +47,7 @@ public abstract class KBExp<C, V> {
 
 	public abstract KBExp<C, V> subst(Map<V, KBExp<C, V>> sigma);
 
-	protected abstract void vars(Set<V> vars);
+	protected abstract void vars(Collection<V> vars);
 	
 	protected abstract void symbols(Map<C, Integer> symbols);
 
@@ -195,7 +196,7 @@ public abstract class KBExp<C, V> {
 		}
 
 		@Override
-		public void vars(Set<V> vars) {
+		public void vars(Collection<V> vars) {
 			vars.add(var);
 		}
 		
@@ -232,6 +233,20 @@ public abstract class KBExp<C, V> {
 		protected KBExp<C, V> sort1(Collection<C> acs) {
 			return this;
 		}
+/*
+		@Override
+		public void allSubExps(Set<KBExp<C, V>> set) {
+			set.add(this);
+		} */
+		
+		public boolean allSubExps(Map<KBExp<C, V>, Set<KBExp<C, V>>> pred) {
+			if (!pred.containsKey(this)) {
+				pred.put(this, Collections.emptySet());
+				return true;
+			}
+			return false;
+		}
+
 	}
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -316,7 +331,7 @@ public abstract class KBExp<C, V> {
 		}
 
 		@Override
-		public void vars(Set<V> vars) {
+		public void vars(Collection<V> vars) {
 			for (KBExp<C, V> e : args) {
 				e.vars(vars);
 			}
@@ -533,7 +548,31 @@ public abstract class KBExp<C, V> {
 				return new KBApp<>(f, l);
 			}
 		}
+
+/*		@Override
+		public void allSubExps(Set<KBExp<C, V>> set) {
+			for (KBExp<C, V> arg : args) {
+				arg.allSubExps(set);
+			}
+			set.add(this);
+		} */
 		
+		public boolean allSubExps(Map<KBExp<C, V>, Set<KBExp<C, V>>> pred) {
+			boolean ret = false;
+			if (!pred.containsKey(this)) {
+				pred.put(this, new HashSet<>());
+				ret = true;
+			}
+			for (KBExp<C, V> arg : args) {
+				ret = ret | arg.allSubExps(pred);
+				ret = ret | pred.get(arg).add(this);
+			}
+			return ret;
+		}
 	}
+
+	//public abstract void allSubExps(Set<KBExp<C, V>> set);
+
+	public abstract boolean allSubExps(Map<KBExp<C, V>, Set<KBExp<C, V>>> pred);
 
 }

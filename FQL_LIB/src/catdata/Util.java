@@ -13,8 +13,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,12 +28,14 @@ import javax.swing.JTable;
 import javax.swing.border.Border;
 import javax.swing.table.TableRowSorter;
 
-import catdata.fqlpp.FUNCTION;
+//import catdata.fqlpp.FUNCTION;
 import catdata.ide.MyTableRowSorter;
-import catdata.opl.OplTerm;
+//import catdata.opl.OplTerm;
 
 public class Util {
 	
+	
+
 	public static void assertNotNull(Object o) {
 		if (o == null) {
 			throw new RuntimeException("Anomaly: please report ");
@@ -494,16 +496,7 @@ public class Util {
 
 	}
 
-	public static <K, V> FUNCTION<V, K> invget(Map<K, V> m) {
-		return v -> {
-			for (Entry<K, V> e : m.entrySet()) {
-				if (e.getValue().equals(v)) {
-					return e.getKey();
-				}
-			}
-			throw new RuntimeException("Cannot inverse lookup " + v + " in " + m);
-		};
-	}
+	
 
 	public static String nice(String s) { // TODO
 		return s;
@@ -713,38 +706,7 @@ public class Util {
 		}, o);
 	}
 
-	public static <V> double termToDouble(OplTerm<?, V> t) {
-		return termToNat(t);
-	}
 
-	public static <V> Integer termToNat(OplTerm<?, V> t) {
-		if (t.var != null) {
-			return null;
-		}
-		if (stripChcs(t.head).second.equals("zero")) {
-			return 0;
-		} else if (stripChcs(t.head).second.equals("succ")) {
-			if (t.args.size() != 1) {
-				return null;
-			}
-			Integer j = termToNat(t.args.get(0));
-			if (j == null) {
-				return null;
-			}
-			return 1 + j;
-		}
-		return null;
-	}
-
-	public static <V> OplTerm<String, V> natToTerm(int i) {
-		if (i < 0) {
-			throw new RuntimeException("Cannot convert negative number to natural");
-		}
-		if (i == 0) {
-			return new OplTerm<>("zero", new LinkedList<>());
-		}
-		return new OplTerm<>("succ", Util.singList(natToTerm(i - 1)));
-	}
 
 	public static <X> List<List<X>> prod(List<Set<X>> in1) {
 		List<List<X>> y = new LinkedList<>();
@@ -806,5 +768,27 @@ public class Util {
 			ret.put(x, new HashMap<>());
 		}
 		return ret;
+	}
+
+	public static <X,Y> Map<X, Set<Y>> newSetsFor(Collection<X> xs) {
+		Map<X, Set<Y>> ret = new HashMap<>();
+		for (X x : xs) {
+			ret.put(x, new HashSet<>());
+		}
+		return ret;
+	}
+	
+	public static <X,Y> Map<X, Y> constMap(Collection<X> xs, Y y) {
+		Map<X,Y> ret = new HashMap<>();
+		for (X x : xs) {
+			ret.put(x, y);
+		}
+		return ret;
+	}
+
+	public static <X> Set<X> union(Set<X> x, Set<X> y) {
+		Set<X> ret = new HashSet<>(x);
+		ret.addAll(y);
+		return y;
 	}
 }

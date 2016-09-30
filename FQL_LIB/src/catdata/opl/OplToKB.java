@@ -20,7 +20,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
-import catdata.algs.kb.EqProver;
+import catdata.algs.kb.EqProverDefunct;
 import catdata.algs.kb.KB;
 import catdata.algs.kb.KBExp;
 import catdata.algs.kb.KBExp.KBApp;
@@ -85,7 +85,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	}
 	
 	private OplSig<S, C, V> sig;
-	public EqProver<C, V> KB;
+	public EqProverDefunct<C, V> KB;
 	private Iterator<V> fr;
 //	private OplJavaInst I;
 	

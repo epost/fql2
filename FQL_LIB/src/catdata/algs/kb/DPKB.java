@@ -1,33 +1,36 @@
 package catdata.algs.kb;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-import catdata.algs.kb.KBExp;
 
 public abstract class DPKB<T,C,V> {
 
-		protected final Map<String, Object> options;
 		protected final Collection<Triple<Map<V,T>, KBExp<C,V>, KBExp<C,V>>> theory;
 		protected final Map<C,Pair<List<T>,T>> signature;
+		protected final Collection<T> sorts;
+	//	protected final boolean emptySortsOk;
 		
 		protected DPKB() { 
-			options = null;
+			sorts = null;
 			theory = null;
 			signature = null;
+	//		emptySortsOk = false;
 		}
 		
-		protected DPKB(Map<String, Object> options, Map<C,Pair<List<T>,T>> signature, Collection<Triple<Map<V,T>, KBExp<C,V>, KBExp<C,V>>> theory) {
-			Util.assertNotNull(options);
+		protected DPKB(Collection<T> sorts, Map<C,Pair<List<T>,T>> signature, Collection<Triple<Map<V,T>, KBExp<C,V>, KBExp<C,V>>> theory) {
+			Util.assertNotNull(sorts);
 			Util.assertNotNull(theory);
 			Util.assertNotNull(signature);
-			this.options = options;
+			this.sorts = sorts;
 			this.signature = signature;
-			this.theory = theory;
+			this.theory = theory;		
 		}
 	
 			

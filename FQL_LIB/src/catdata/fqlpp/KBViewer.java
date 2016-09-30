@@ -23,7 +23,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
 import catdata.Pair;
-import catdata.algs.kb.KB_Thue;
+import catdata.algs.kb.SemiThue;
 import catdata.fqlpp.cat.Signature;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
@@ -142,7 +142,7 @@ public class KBViewer {
 			rules.add(new Pair<>(eq.lhs.path.stream().map(x -> x.name).collect(Collectors.toList()), 
 					             eq.rhs.path.stream().map(x -> x.name).collect(Collectors.toList())));
 		}
-		KB_Thue<String> kb = new KB_Thue<>(rules, 16);
+		SemiThue<String> kb = new SemiThue<>(rules, 16);
 		kb.complete();
 		return kb.toString();
 	}

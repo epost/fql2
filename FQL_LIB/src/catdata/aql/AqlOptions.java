@@ -20,18 +20,26 @@ public final class AqlOptions {
 		switch (option) {
 		case allow_java_eqs_unsafe:
 			return false;
-		case precedence:
-			throw new RuntimeException("No default precedence");
+		case completion_precedence:
+			return null;
 		case precomputed:
-			throw new RuntimeException("No default precomputed");
+			throw new RuntimeException("Anomaly: please report");
 		case prover:
-			throw new RuntimeException("No default prover");
+			return ProverName.auto;
 		case require_consistency:
 			return false;
 		case timeout:
 			return 5000;
 		case dont_verify_is_appropriate_for_prover_unsafe:
 			return false;
+		case allow_empty_sorts_unsafe:
+			return false;
+		case completion_compose:
+			return true;
+		case completion_filter_subsumed:
+			return true;
+		case completion_sort:
+			return true;
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
@@ -45,8 +53,8 @@ public final class AqlOptions {
 			case allow_java_eqs_unsafe:
 				ob = op.getBoolean(map);
 				break;
-			case precedence:
-				ob = op.getPrec(map, col);
+			case completion_precedence:
+				ob = AqlOption.getPrec(map.get(op.toString()), col);
 				break;
 			case prover:
 				ob = op.getDPName(map);
@@ -61,9 +69,21 @@ public final class AqlOptions {
 				ob = op.getBoolean(map);
 				break;
 			case precomputed:
-				throw new RuntimeException(op + " option is reserved for AQL compiler");	
+				throw new RuntimeException(op + " option is reserved for AQL compiler");
+			case allow_empty_sorts_unsafe:
+				ob = op.getBoolean(map);
+				break;	
+			case completion_compose:
+				ob = op.getBoolean(map);
+				break;
+			case completion_filter_subsumed:
+				ob = op.getBoolean(map);
+				break;
+			case completion_sort:
+				ob = op.getBoolean(map);
+				break;
 			default:
-				throw new RuntimeException("Anomaly: please report");
+				break;	
 			}
 			options.put(op, ob);
 		}

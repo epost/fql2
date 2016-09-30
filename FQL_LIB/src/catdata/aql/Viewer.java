@@ -31,9 +31,11 @@ public final class Viewer {
 				
 		switch (kind) {
 		case INSTANCE:
-			Instance<Object,Object,Object,Object,Object,Object,Object> instance = (Instance<Object,Object,Object,Object,Object,Object,Object>) obj;
-			viewDP(instance.semantics(), instance.collage(), ret);
-
+			@SuppressWarnings("unchecked") Instance<Object,Object,Object,Object,Object,Object,Object> instance = (Instance<Object,Object,Object,Object,Object,Object,Object>) obj;
+			viewDP(instance.semantics().dp(), instance.collage(), ret);
+		//	ret.add(new CodeTextPanel("", instance.semantics().talgToString()), "Type Algebra");
+			ret.add(new CodeTextPanel("", instance.semantics().toString()), "Semantics");
+			//TODO: add tables
 			break;
 		case MAPPING:
 		//	viewMapping(obj, ret);

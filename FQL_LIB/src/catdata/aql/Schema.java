@@ -57,14 +57,24 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 				throw new RuntimeException("In schema equation " + toString(eq) + ", lhs sort is " + lhs.toStringMash() + " but rhs sort is " + rhs.toStringMash());
 			}
 			
+		}		
+		
+		if (typeSide.java_tys.isEmpty()) {
+			return;
+		}
+		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : collage().simplify().first.eqs) {
 			if (!(Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
+				Chc<Ty, En> lhs = collage().simplify().first.type(eq.first, eq.second);
+			//Chc<Ty, En> rhs = collage().simplify().first.type(eq.first, eq.third);
+			
 				if (lhs.left && typeSide.java_tys.containsKey(lhs.l)) {
-					throw new RuntimeException("In schema equation " + toString(eq) + ", the return type is " + lhs.l + " which is a java type ");
+					throw new RuntimeException("In schema equation " + eq.second + " = " + eq.third + ", the return type is " + lhs.l + " which is a java type ");
 				}
 				typeSide.assertNoJava(eq.second);
 				typeSide.assertNoJava(eq.third);
-			}
-		}		
+			} 
+		}
+		
 	}
 	
 	private String toString(Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq) {
@@ -72,9 +82,6 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 	}	
 	
 	public Chc<Ty,En> type(Pair<Var, En> p, Term<Ty, En, Sym, Fk, Att, ?, ?> term) {
-		if (!term.isSchema()) {
-			throw new RuntimeException(term + " is not a schema term");
-		} 
 		return term.type(new Ctx<>(), new Ctx<>(p), typeSide.tys, typeSide.syms, typeSide.java_tys, ens, atts, fks, new HashMap<>(), new HashMap<>());
 	}
 	

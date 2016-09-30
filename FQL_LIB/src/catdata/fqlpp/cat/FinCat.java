@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -13,7 +14,6 @@ import java.util.function.Function;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Unit;
-import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 
 @SuppressWarnings("serial")
@@ -429,7 +429,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 					for (LinkedHashMap<A1, A2> em : k) {
 						try {
 							Function<A1, A2> m1 = em::get;
-							Function<A2, A1> m2 = Util.invget(em);
+							Function<A2, A1> m2 = invget(em);
 							map1.put(new Pair<>(o1, o2), m1);
 							map2.put(new Pair<>(nm.get(o1), nm.get(o2)), m2);
 							continue inner;
@@ -447,7 +447,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 			}
 			Functor<O1, A1, O2, A2> f1 = new Functor<>(exp, base, nm::get, a -> map1.get(
 					new Pair<>(exp.source(a), exp.target(a))).apply(a));
-			Functor<O2, A2, O1, A1> f2 = new Functor<>(base, exp, Util.invget(nm), a -> {
+			Functor<O2, A2, O1, A1> f2 = new Functor<>(base, exp, invget(nm), a -> {
 				// System.out.println("input " + a);
 					A1 ret = map2.get(
 							new Pair<>(base.source(a), base.target(a)))
@@ -459,6 +459,17 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		}
 
 		return Optional.empty();
+	}
+	
+	public static <K, V> FUNCTION<V, K> invget(Map<K, V> m) {
+		return v -> {
+			for (Entry<K, V> e : m.entrySet()) {
+				if (e.getValue().equals(v)) {
+					return e.getKey();
+				}
+			}
+			throw new RuntimeException("Cannot inverse lookup " + v + " in " + m);
+		};
 	}
 	
 	public <O1,O2,O3,O4,A1,A2,A3,A4> Functor<Pair<O1,O3>,Pair<A1,A3>,Pair<O2,O4>,Pair<A2,A4>> pairF(Functor<O1,A1,O2,A2> a1, Functor<O3,A3,O4,A4> a2) {
