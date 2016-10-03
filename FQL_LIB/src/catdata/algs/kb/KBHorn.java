@@ -49,6 +49,7 @@ public class KBHorn {
 	}
 
 	public static <C,V> boolean isAtom(KBExp<C,V> e) {
+		
 		if (e.isVar) {
 			return false;
 		}

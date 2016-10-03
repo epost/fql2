@@ -37,7 +37,7 @@ public class CompletionProver<T, C, V> extends DPKB<T, C, V> {
 			}
 			return i > j;
 		};
-		kb = new KB<>(eqs.stream().map(x -> new Pair<>(x.second, x.third)).collect(Collectors.toSet()), KBOrders.lpogt(gt), fresh, Collections.emptySet(), op);
+		kb = new KB<>(eqs.stream().map(x -> new Pair<>(x.second, x.third)).collect(Collectors.toSet()), KBOrders.lpogt(false, gt), fresh, Collections.emptySet(), op);
 		kb.complete(Thread.currentThread());
 	}
 	

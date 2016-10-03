@@ -75,14 +75,19 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			E.add(freshen(fresh, e));
 		}
 		this.G = new LinkedList<>();
-		initAC();
+		try {
+			initAC();
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+			throw new RuntimeException("Interrupted " + e1.getMessage());
+		}
 //		System.out.println("AC symbols: " + AC_symbols);
 		initHorn();
 	}
 	
 	
 	
-	private void initAC() {
+	private void initAC() throws InterruptedException {
 		if (!options.semantic_ac) {
 			return;
 		}
@@ -273,10 +278,13 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	}
 	
 	@SuppressWarnings("deprecation")
-	private void checkParentDead(Thread cur) {
+	private void checkParentDead(Thread cur) throws InterruptedException {
 		if (!cur.isAlive()) {
 			Thread.currentThread().stop();
 		} 
+		if (Thread.currentThread().isInterrupted()) {
+			throw new InterruptedException();
+		}
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -304,7 +312,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			throw new RuntimeException(ex.getMessage());
 		}
 		if (arr[0] != null) {
-			throw new RuntimeException(arr[0] + "\n\nLast state:\n\n" + printKB());			
+			throw new RuntimeException(arr[0] + "\n\nLast state:\n\n" + toString());			
 		}
 		if (!isCompleteGround) {
 			System.out.println("---------------");
@@ -314,7 +322,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	}
 	
 	protected static <C, V> boolean subsumes(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> cand,
-			Pair<KBExp<C, V>, KBExp<C, V>> other) {
+			Pair<KBExp<C, V>, KBExp<C, V>> other) throws InterruptedException {
 		return (subsumes0(fresh, cand, other) != null);
 	}
 	
@@ -336,7 +344,10 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	
 	@SuppressWarnings("unchecked")
 	protected static <C, V> Map<V, KBExp<C, V>> subsumes0(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> cand,
-			Pair<KBExp<C, V>, KBExp<C, V>> other) {
+			Pair<KBExp<C, V>, KBExp<C, V>> other) throws InterruptedException {
+		if (Thread.interrupted()) {
+			throw new InterruptedException();
+		}
 		Pair<KBExp<C, V>, KBExp<C, V>> candX = cand; 
 		
 		if (!Collections.disjoint(candX.first.vars(), other.first.vars()) ||
@@ -357,7 +368,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	}
 	
 	protected List<Pair<KBExp<C, V>, KBExp<C, V>>> filterSubsumed(
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> CPX) {
+			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> CPX) throws InterruptedException {
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> CP = new LinkedList<>();
 		outer: for (Pair<KBExp<C, V>, KBExp<C, V>> cand : CPX) {
 			for (Pair<KBExp<C, V>, KBExp<C, V>> e : E) {
@@ -372,7 +383,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 
 	//TODO: also useful in regular completion?
 	protected List<Pair<KBExp<C, V>, KBExp<C, V>>> filterSubsumedBySelf(
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> CPX) {
+			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> CPX) throws InterruptedException {
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> CP = new LinkedList<>(CPX);
 		
 		Iterator<Pair<KBExp<C, V>, KBExp<C, V>>> it = CP.iterator();
@@ -406,7 +417,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	
 	//is also compose2
 	//simplify RHS of a rule
-	protected void compose() {
+	protected void compose() throws InterruptedException {
 		Pair<KBExp<C, V>, KBExp<C, V>> to_remove = null;
 		Pair<KBExp<C, V>, KBExp<C, V>> to_add = null;
 		do {
@@ -442,12 +453,19 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			return false;
 		}
 
-		step(Thread.currentThread());
+		try {
+			step(Thread.currentThread());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Interrupted " + e.getMessage());
+		}
 		return eq(lhs, rhs);
 	} 
 	
 	@Override
 	public KBExp<C, V> nf(KBExp<C, V> e) {
+		try {
+
 		if (e.vars().isEmpty()) {
 			if (!isCompleteGround) {
 				throw new RuntimeException("Cannot find ground normal form for ground incomplete system.");
@@ -458,6 +476,10 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			throw new RuntimeException("Cannot find normal form for incomplete system.\n\n" + this);
 		}
 		return red(null, Util.append(E,G), R, e);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+			throw new RuntimeException("Interrupted: " + e1.getMessage());
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -556,7 +578,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	protected KBExp<C, V> red(Map<KBExp<C,V>, KBExp<C,V>> cache, 
 			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> Ex,
 			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> Ry,
-			KBExp<C, V> e) {
+			KBExp<C, V> e) throws InterruptedException {
 		int i = 0;
 		KBExp<C, V> orig = e;
 //		Collection<Pair<KBExp<C, V>, KBExp<C, V>>> Ey = new LinkedList<>(Ex);
@@ -582,7 +604,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	}
 	
 	protected KBExp<C, V> step(Map<KBExp<C,V>, KBExp<C,V>> cache, Iterator<V> fresh,
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> ee) {
+			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> ee) throws InterruptedException {
 		if (ee.isVar) {
 			return step1(cache, fresh, E, R, ee); 
 		} else {
@@ -598,7 +620,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	
 	//simplifies equations
 	//can also use E U G with extra checking
-	protected void simplify() {
+	protected void simplify() throws InterruptedException {
 		Map<KBExp<C,V>, KBExp<C,V>> cache = new HashMap<>();  //helped 2x during tests
 
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> newE = new LinkedList<>();
@@ -620,7 +642,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 
 	//is not collapse2
 	//can also use E U G here
-	protected void collapseBy(Pair<KBExp<C, V>, KBExp<C, V>> ab) {
+	protected void collapseBy(Pair<KBExp<C, V>, KBExp<C, V>> ab) throws InterruptedException {
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> AB = Collections.singleton(ab);
 		Iterator<Pair<KBExp<C, V>, KBExp<C, V>>> it = R.iterator();
 		while (it.hasNext()) {
@@ -638,7 +660,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 
 	protected Set<Pair<KBExp<C, V>, KBExp<C, V>>> allcps2(
 			Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen,
-			Pair<KBExp<C, V>, KBExp<C, V>> ab) {
+			Pair<KBExp<C, V>, KBExp<C, V>> ab) throws InterruptedException {
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> ret = new HashSet<>();
 
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> E0 = new HashSet<>(E);
@@ -646,6 +668,9 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		E0.add(ab.reverse());
 		Pair<KBExp<C, V>, KBExp<C, V>> ba = ab.reverse();
 		for (Pair<KBExp<C, V>, KBExp<C, V>> gd : E0) {
+			if (Thread.currentThread().isInterrupted()) {
+				throw new InterruptedException();
+			}
 			Set<Pair<KBExp<C, V>, KBExp<C, V>>> s;
 			Pair<KBExp<C, V>, KBExp<C, V>> dg = gd.reverse();
 
@@ -722,9 +747,12 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 
 	protected Set<Pair<KBExp<C, V>, KBExp<C, V>>> allcps(
 			Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen,
-			Pair<KBExp<C, V>, KBExp<C, V>> ab) {
+			Pair<KBExp<C, V>, KBExp<C, V>> ab) throws InterruptedException {
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> ret = new HashSet<>();
 		for (Pair<KBExp<C, V>, KBExp<C, V>> gd : R) {
+			if (Thread.currentThread().isInterrupted()) {
+				throw new InterruptedException();
+			}
 			Set<Pair<KBExp<C, V>, KBExp<C, V>>> s;
 			if (!seen.contains(new Pair<>(ab, gd))) {
 				s = cp(ab, gd);
@@ -741,7 +769,10 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return ret;
 	}
 
-	protected  Set<Pair<KBExp<C, V>, KBExp<C, V>>> cp(Pair<KBExp<C, V>, KBExp<C, V>> gd0, Pair<KBExp<C, V>, KBExp<C, V>> ab0) {
+	protected  Set<Pair<KBExp<C, V>, KBExp<C, V>>> cp(Pair<KBExp<C, V>, KBExp<C, V>> gd0, Pair<KBExp<C, V>, KBExp<C, V>> ab0) throws InterruptedException {
+		if (Thread.currentThread().isInterrupted()) {
+			throw new InterruptedException();
+		}
 		Pair<KBExp<C, V>, KBExp<C, V>> ab = freshen(fresh, ab0);
 		Pair<KBExp<C, V>, KBExp<C, V>> gd = freshen(fresh, gd0);
 		
@@ -770,7 +801,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	}
 
 	protected KBExp<C, V> step1(Map<KBExp<C,V>, KBExp<C,V>> cache, Iterator<V> fresh,
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> e0) {
+			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> e0) throws InterruptedException {
 		KBExp<C, V> e = e0;
 		if (cache != null && cache.containsKey(e)) {
 			return cache.get(e);
@@ -778,6 +809,9 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		//does not improve performance
 		//Map<Pair<KBExp<C, V>, KBExp<C, V>>, Map<V, KBExp<C, V>>> findSubstCache = new HashMap<>();
 		for (Pair<KBExp<C, V>, KBExp<C, V>> r0 : R) {
+			if (Thread.currentThread().isInterrupted()) {
+				throw new InterruptedException();
+			}
 			Pair<KBExp<C, V>, KBExp<C, V>> r = r0;
 			if (!Collections.disjoint(r.first.vars(), e.vars()) || !Collections.disjoint(r.second.vars(), e.vars())) {
 				r = freshen(fresh, r0);
@@ -810,7 +844,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return e;
 	}
 	
-	protected KBExp<C, V> step1Es(Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, KBExp<C, V> e) {
+	protected KBExp<C, V> step1Es(Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, KBExp<C, V> e) throws InterruptedException {
 		if (options.unfailing) {
 			for (Pair<KBExp<C, V>, KBExp<C, V>> r0 : E) {
 				e = step1EsX(r0, e);
@@ -820,7 +854,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return e;
 	}
 
-	private KBExp<C, V> step1EsX(Pair<KBExp<C, V>, KBExp<C, V>> r0, KBExp<C, V> e) {
+	private KBExp<C, V> step1EsX(Pair<KBExp<C, V>, KBExp<C, V>> r0, KBExp<C, V> e) throws InterruptedException {
 		Pair<KBExp<C, V>, KBExp<C, V>> r = r0;
 		if (!Collections.disjoint(r.first.vars(), e.vars())
 				|| !Collections.disjoint(r.second.vars(), e.vars())) {
@@ -845,7 +879,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 
 	
 	protected Collection<Pair<KBExp<C, V>, KBExp<C, V>>> reduce(
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> set) {
+			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> set) throws InterruptedException {
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> p = new HashSet<>();
 		for (Pair<KBExp<C, V>, KBExp<C, V>> e : set) {
 			KBExp<C, V> lhs = red(new HashMap<>(), Util.append(E,G), R, e.first);
@@ -871,7 +905,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return ret;
 	}
 	
-	protected boolean strongGroundJoinable(KBExp<C, V> s, KBExp<C, V> t) {
+	protected boolean strongGroundJoinable(KBExp<C, V> s, KBExp<C, V> t) throws InterruptedException {
 		//System.out.println("-----------");
 		//System.out.println(s + " = " + t);
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> R0 = new LinkedList<>();
@@ -924,7 +958,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	}
 	
 	//TODO: when filtering for subsumed, can also take G into account
-	protected boolean step(Thread parent) {
+	protected boolean step(Thread parent) throws InterruptedException {
 //		System.out.println("\n\niteration " + count);
 	//	System.out.println(this);
 		count++;
@@ -1009,7 +1043,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return false;	
 	}
 	
-	void filterStrongGroundJoinable() {
+	void filterStrongGroundJoinable() throws InterruptedException {
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> newE = new LinkedList<>(E);
 		for (Pair<KBExp<C, V>, KBExp<C, V>> st : newE) {
 			if (strongGroundJoinable(st.first, st.second)) {
@@ -1066,7 +1100,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	}
 	
 	//TODO: add ground-completeness check sometime
-	protected boolean checkEmpty() {
+	protected boolean checkEmpty() throws InterruptedException {
 		if (E.isEmpty()) {
 			isComplete = true;
 			isCompleteGround = true;
@@ -1125,7 +1159,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return true;
 	}
 
-	protected boolean allCpsConfluent(boolean print, boolean ground) {
+	protected boolean allCpsConfluent(boolean print, boolean ground) throws InterruptedException {
 		for (Pair<KBExp<C, V>, KBExp<C, V>> e : E) {
 			List<Pair<KBExp<C, V>, KBExp<C, V>>> set = filterSubsumed(reduce(allcps2(
 					new HashSet<>(), e)));
@@ -1144,7 +1178,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	
 	
 
-	protected boolean allCpsConfluent(boolean print, boolean ground, String s, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> set) {
+	protected boolean allCpsConfluent(boolean print, boolean ground, String s, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> set) throws InterruptedException {
 		outer: for (Pair<KBExp<C, V>, KBExp<C, V>> e : set) {
 			KBExp<C, V> lhs = red(new HashMap<>(), Util.append(E,G), R, e.first);
 			KBExp<C, V> rhs = red(new HashMap<>(), Util.append(E,G), R, e.second);

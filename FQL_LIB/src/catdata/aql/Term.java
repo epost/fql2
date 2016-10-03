@@ -135,13 +135,13 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (gen != null) {
 			En en = gens.get(gen);
 			if (en == null) {
-				throw new RuntimeException("In " + this + ", " + "generator " + gen + " has no defined entity");	
+				throw new RuntimeException("In " + this + ", " + "the entity for generator " + gen + " is not defined");	
 			}
 			ret = Chc.inRight(en);
 		} else if (sk != null) {
 			Ty ty = sks.get(sk);
 			if (ty == null) {
-				throw new RuntimeException("In " + this + ", " + "labelled null " + sk + " has no defined type");	
+				throw new RuntimeException("In " + this + ", " + "the type for labelled null " + sk + " is not defined");	
 			}
 			ret = Chc.inLeft(ty);
 		}
@@ -585,6 +585,9 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} 
 	}
 
-	
+	@SuppressWarnings({ "hiding", "unchecked" })
+	public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> convert() {
+		return (Term<Ty, En, Sym, Fk, Att, Gen, Sk>) this;
+	}
 	
 }

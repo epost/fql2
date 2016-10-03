@@ -20,10 +20,13 @@ public class SaturatedProver<T, C, V> extends DPKB<T, C, V> {
 
 	public final Map<C, Map<List<C>, C>> map = new HashMap<>();
 
-	public SaturatedProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
+	public SaturatedProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) throws InterruptedException {
 		super(sorts, sig, eqs);
 
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : theory) {
+			if (Thread.currentThread().isInterrupted()) {
+				throw new InterruptedException();
+			}
 			if (!eq.first.isEmpty()) { // do this in check method?
 				throw new RuntimeException("Saturated method can not work with universal quantification"); 
 			}

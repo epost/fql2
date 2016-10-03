@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -64,8 +65,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		}
 		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : collage().simplify().first.eqs) {
 			if (!(Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
-				Chc<Ty, En> lhs = collage().simplify().first.type(eq.first, eq.second);
-			//Chc<Ty, En> rhs = collage().simplify().first.type(eq.first, eq.third);
+				Chc<Ty, En> lhs = collage().simplify().first.type(eq.first, eq.second); //TODO why simplify
 			
 				if (lhs.left && typeSide.java_tys.containsKey(lhs.l)) {
 					throw new RuntimeException("In schema equation " + eq.second + " = " + eq.third + ", the return type is " + lhs.l + " which is a java type ");
@@ -114,6 +114,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		this.ens = ens;
 		this.strategy = strategy;
 		validate();
+//		semantics();
 	}
 
 	private DP<Ty,En,Sym,Fk,Att,Void,Void> semantics;
@@ -217,6 +218,21 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		return toString;
 	} 
 	//TODO alphabetical?
+
+	public Collection<Att> attsFrom(En en) {
+		return atts.keySet().stream().filter(att -> atts.get(att).first.equals(en)).collect(Collectors.toList());
+	}
 	
+	public Collection<Fk> fksFrom(En en) {
+		return fks.keySet().stream().filter(fk -> fks.get(fk).first.equals(en)).collect(Collectors.toList());
+	}
+	
+	public Term<Ty, En, Sym, Fk, Att, Void, Void> fold(List<Fk> fks, Term<Ty, En, Sym, Fk, Att, Void, Void> head) {
+		Term<Ty, En, Sym, Fk, Att, Void, Void> ret = head;
+		for (Fk fk : fks) {
+			ret = Term.Fk(fk, ret);
+		}
+		return ret;
+	}
 	
 }

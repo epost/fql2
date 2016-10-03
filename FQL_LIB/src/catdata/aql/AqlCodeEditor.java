@@ -57,7 +57,7 @@ public final class AqlCodeEditor extends
 		DefaultCompletionProvider provider = new DefaultCompletionProvider();
 
 		provider.addCompletion(new ShorthandCompletion(provider, "typeside",
-				"typeside ? = literal {\n\timports\n\ttypes\n\tconstants\n\tfunctions\n\tequations\n\tjava_types\n\tjava_constants\n\tjava_functions\n\toptions\n} ", ""));
+				"typeside ? = literal {\n\timports\n\ttypes\n\tsconstants\n\tfunctions\n\tequations\n\tjava_types\n\tjava_constants\n\tjava_functions\n\toptions\n} ", ""));
 
 		provider.addCompletion(new ShorthandCompletion(
 				provider,

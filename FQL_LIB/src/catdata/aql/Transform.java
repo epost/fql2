@@ -2,9 +2,10 @@ package catdata.aql;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import catdata.Chc;
-import catdata.Unit;
+import catdata.Pair;
 import catdata.Util;
 
 public final class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> {
@@ -148,9 +149,55 @@ public final class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2> {
 		
 		return toString;
 	}
+	
+	//TODO push into Morphism?
+	private Morphism<Ty,En,Sym,Fk,Att,Gen1,Sk1,En,Sym,Fk,Att,Gen2,Sk2> semantics;
+	public Morphism<Ty,En,Sym,Fk,Att,Gen1,Sk1,En,Sym,Fk,Att,Gen2,Sk2> semantics() {
+		if (semantics != null) {
+			return semantics;
+		}
+		for (Pair<Term<Ty, En, Sym, Fk, Att, Gen1, Sk1>, Term<Ty, En, Sym, Fk, Att, Gen1, Sk1>> eq : src.eqs) {
+			Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> lhs = trans(eq.first), rhs = trans(eq.second);
+			boolean ok = dst.semantics().eq(new Ctx<>(), lhs, rhs);
+			if (!ok) {
+				throw new RuntimeException("Equation " + eq.first + " = " + eq.second + " translates to " + lhs + " = " + rhs + ", which is not provable");
+			}
+		}
+		semantics = new Morphism<Ty,En,Sym,Fk,Att,Gen1,Sk1,En,Sym,Fk,Att,Gen2,Sk2>() {
 
-	public Unit semantics() {
-		return new Unit();
+			@Override
+			public Pair<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen2, Sk2>> translate(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen1, Sk1> term) {
+				return new Pair<>(ctx, trans(term));
+			}
+
+			@Override
+			public Collage<Ty, En, Sym, Fk, Att, Gen1, Sk1> src() {
+				return src.collage();
+			}
+
+			@Override
+			public Collage<Ty, En, Sym, Fk, Att, Gen2, Sk2> dst() {
+				return dst.collage();
+			}
+			
+		};
+		return semantics;
 	}
 
+	public Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> trans(Term<Ty, En, Sym, Fk, Att, Gen1, Sk1> term) {
+		if (term.var != null || term.obj != null) {
+			return term.convert();
+		} else if (term.fk != null) {
+			return Term.Fk(term.fk, trans(term.arg));
+		} else if (term.att != null) {
+			return Term.Att(term.att, trans(term.arg));
+		} else if (term.sym != null) {
+			return Term.Sym(term.sym, term.args.stream().map(this::trans).collect(Collectors.toList()));
+		} else if (term.gen != null) {
+			return gens.get(term.gen);
+		} else if (term.sk != null) {
+			return sks.get(term.sk);
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
 }

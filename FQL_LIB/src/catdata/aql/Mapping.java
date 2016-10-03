@@ -1,29 +1,99 @@
 package catdata.aql;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
-import catdata.Unit;
 import catdata.Util;
 
 //apparently iteration of a set is not deterministic, use linkedhashset if need deterministic order
-public final class Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
+public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	
+	//TODO: push this into Morphism class?
+	private Morphism<Ty,En1,Sym,Fk1,Att1,Void,Void,En2,Sym,Fk2,Att2,Void,Void> semantics;
+	public Morphism<Ty,En1,Sym,Fk1,Att1,Void,Void,En2,Sym,Fk2,Att2,Void,Void> semantics() {
+		if (semantics != null) {
+			return semantics;
+		}
+		
+		for (Triple<Pair<Var, En1>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>> eq : src.eqs) {
+			Pair<Var, Chc<Ty,En2>> ctx = new Pair<>(eq.first.first, Chc.inRight(ens.get(eq.first.second)));
+			Term<Ty, En2, Sym, Fk2, Att2, Void, Void> lhs = trans(eq.second), rhs = trans(eq.third);
+			boolean ok = dst.semantics().eq(new Ctx<>(ctx), lhs, rhs);
+			if (!ok) {
+				throw new RuntimeException("Equation " + eq.second + " = " + eq.third + " translates to " + lhs + " = " + rhs + ", which is not provable");
+			}
+		}
+		semantics = new Morphism<Ty,En1,Sym,Fk1,Att1,Void,Void,En2,Sym,Fk2,Att2,Void,Void>() {
+
+			@Override
+			public Collage<Ty, En1, Sym, Fk1, Att1, Void, Void> src() {
+				return src.collage();
+			}
+
+			@Override
+			public Collage<Ty, En2, Sym, Fk2, Att2, Void, Void> dst() {
+				return dst.collage();
+			}
+
+			@Override
+			public Pair<Ctx<Var, Chc<Ty, En2>>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>> translate(Ctx<Var, Chc<Ty, En1>> ctx, Term<Ty, En1, Sym, Fk1, Att1, Void, Void> term) {
+				LinkedHashMap<Var, Chc<Ty, En2>> map = new LinkedHashMap<>();
+				for (Var var : ctx.keys()) {
+					if (ctx.get(var).left) {
+						map.put(var, Chc.inLeft(ctx.get(var).l));
+					} else {
+						map.put(var, Chc.inRight(ens.get(ctx.get(var))));
+					}
+				}
+				Ctx<Var, Chc<Ty, En2>> ret = new Ctx<>(map);
+				return new Pair<>(ret, trans(term));
+			}
+			
+		};
+		return semantics;
+	}
+	
+	
+	
+	public <Gen,Sk> Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> trans(Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk> term) {
+		if (term.var != null || term.obj != null || term.gen != null || term.sk != null) {
+			return term.convert();
+		} else if (term.fk != null) {
+			Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> ret = trans(term.arg);
+			for (Fk2 fk : fks.get(term.fk).second) {
+				ret = Term.Fk(fk, ret);
+			}
+			return ret;
+		} else if (term.att != null) {
+			Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> ret = trans(term.arg);
+			Map<Var, Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> map = new HashMap<>();
+			map.put(atts.get(term.att).first, ret);
+			Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> conv = atts.get(term.att).third.convert();
+			return conv.subst(map);
+		} else if (term.sym != null) {
+			return Term.Sym(term.sym, term.args.stream().map(this::trans).collect(Collectors.toList()));
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
+
+
 	public final Map<En1, En2> ens;
-	public final Map<Att1, Triple<Var,En2,Term<Ty,En2,Sym2,Fk2,Att2,Void,Void>>> atts;
+	public final Map<Att1, Triple<Var,En2,Term<Ty,En2,Sym,Fk2,Att2,Void,Void>>> atts;
 	public final Map<Fk1,  Pair<En2, List<Fk2>>> fks;
 		
-	public final Schema<Ty,En1,Sym1,Fk1,Att1> src;
-	public final Schema<Ty,En2,Sym2,Fk2,Att2> dst;
+	public final Schema<Ty,En1,Sym,Fk1,Att1> src;
+	public final Schema<Ty,En2,Sym,Fk2,Att2> dst;
 
 	//TODO compose
 	
-	public static <Ty,En,Sym,Fk,Att> Mapping<Ty,En,Sym,Fk,Att,En,Sym,Fk,Att> id(Schema<Ty,En,Sym,Fk,Att> s) {
+	public static <Ty,En,Sym,Fk,Att> Mapping<Ty,En,Sym,Fk,Att,En,Fk,Att> id(Schema<Ty,En,Sym,Fk,Att> s) {
 		if (s == null) {
 			throw new RuntimeException("Attempt to create identity mapping with null schema");
 		}
@@ -39,7 +109,7 @@ public final class Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
 		return new Mapping<>(ens, atts, fks, s, s);
 	}
 	
-	public Mapping(Map<En1, En2> ens, Map<Att1, Triple<Var,En2,Term<Ty, En2, Sym2, Fk2, Att2, Void, Void>>> atts, Map<Fk1, Pair<En2, List<Fk2>>> fks, Schema<Ty, En1, Sym1, Fk1, Att1> src, Schema<Ty, En2, Sym2, Fk2, Att2> dst) {
+	public Mapping(Map<En1, En2> ens, Map<Att1, Triple<Var,En2,Term<Ty, En2, Sym, Fk2, Att2, Void, Void>>> atts, Map<Fk1, Pair<En2, List<Fk2>>> fks, Schema<Ty, En1, Sym, Fk1, Att1> src, Schema<Ty, En2, Sym, Fk2, Att2> dst) {
 		if (ens == null) {
 			throw new RuntimeException("Attempt to create mapping with null entity map");
 		} else if (atts == null) {
@@ -71,7 +141,7 @@ public final class Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
 			}	
 		}
 		for (Att1 att1 : src.atts.keySet()) {
-			Triple<Var, En2, Term<Ty, En2, Sym2, Fk2, Att2, Void, Void>> att2 = atts.get(att1);
+			Triple<Var, En2, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>> att2 = atts.get(att1);
 			if (att2 == null) {
 				throw new RuntimeException("source attribute " + att1 + " has no mapping");
 			}
@@ -80,7 +150,7 @@ public final class Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
 			if (proposed_en == null) {
 				throw new RuntimeException("in mapping for attribute " + att1 + ", not given a sort for " + v);
 			}
-			Term<Ty, En2, Sym2, Fk2, Att2, Void, Void> term = att2.third;
+			Term<Ty, En2, Sym, Fk2, Att2, ?, ?> term = att2.third;
 			
 			En1 en1 = src.atts.get(att1).first;
 			Ty ty1 = src.atts.get(att1).second;
@@ -106,7 +176,7 @@ public final class Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
 				throw new RuntimeException("proposed source of foreign key mapping for " + fk1 + " is " + p.first + " and not " + en2_s + " as expected");
 			}
 			Var v = new Var("v");
-			Term<Ty, En2, Sym2, Fk2, Att2, ?, ?> fk2 = Term.Fks(p.second, Term.Var(v));
+			Term<Ty, En2, Sym, Fk2, Att2, ?, ?> fk2 = Term.Fks(p.second, Term.Var(v));
 			Chc<Ty, En2> en2_t_actual = dst.type(new Pair<>(v, en2_s), fk2);
 			if (!en2_t_actual.equals(Chc.inRight(en2_t))) {
 				throw new RuntimeException("source foreign key " + fk1 + " maps to target path " + Util.sep(p.second, ".") + ", which has target entity " + en2_t_actual.toStringMash() + ", not " + en2_t + " as expected");
@@ -128,12 +198,9 @@ public final class Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
 			}
 		}
 		
-		//TODO proving
 	}
 	
-	public Unit semantics() {
-		return new Unit();
-	}
+	
 
 	@Override
 	public int hashCode() {
@@ -155,7 +222,7 @@ public final class Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Mapping<?,?,?,?,?,?,?,?,?> other = (Mapping<?,?,?,?,?,?,?,?,?> ) obj;
+		Mapping<?,?,?,?,?,?,?,?> other = (Mapping<?,?,?,?,?,?,?,?>) obj;
 		if (atts == null) {
 			if (other.atts != null)
 				return false;

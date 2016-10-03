@@ -22,8 +22,23 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	public final Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs;
 
+	private static class  VoidIter implements Iterator<Void> {
+
+		@Override
+		public boolean hasNext() {
+				return false;
+		}
+
+		@Override
+		public Void next() {
+			throw new RuntimeException("Anomaly: please report");
+		}
+		
+	}
+	
 	public static <Ty, En, Sym, Fk, Att> Instance<Ty, En, Sym, Fk, Att, Void, Void> terminal(Schema<Ty, En, Sym, Fk, Att> t) {
-		return new Instance<>(t, Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new AqlOptions(ProverName.precomputed, t.semantics()));
+		return new Instance<>(t, Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), 
+				new AqlOptions(ProverName.precomputed, new AqlSaturator<>(new AqlOptions(ProverName.precomputed, t.semantics()), t, t.collage(), new VoidIter())));
 	}
 
 	public Chc<Ty,En> type(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {		
@@ -42,14 +57,13 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (strategy == null) {
 			throw new RuntimeException("Attempt to construct instance with null theorem proving strategy");
 		}
-
 		this.schema = schema;
 		this.gens = gens;
 		this.sks = sks;
 		this.eqs = eqs;
 		this.strategy = strategy;
-
 		validate();
+//		semantics();
 	}
 
 	public void validate() {
@@ -106,7 +120,7 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return semantics;
 		default:
 		}
-		semantics = new AqlSaturator<>(strategy, this, new It());
+		semantics = new AqlSaturator<>(strategy, schema, collage(), new It());
 		return semantics;
 	}
 	

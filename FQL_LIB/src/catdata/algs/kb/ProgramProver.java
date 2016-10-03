@@ -17,7 +17,7 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 
 	private final Iterator<V> fresh;
 	
-	public ProgramProver(boolean check, Iterator<V> fresh, Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
+	public ProgramProver(boolean check, Iterator<V> fresh, Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) throws InterruptedException {
 		super(sorts, sig, eqs);
 
 		this.fresh = fresh;
@@ -41,6 +41,9 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 				
 					Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cps = gd.first.cp(new LinkedList<>(), ab.first, ab.second, gd.first, gd.second);
 					for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>> cp : cps) {
+						if (Thread.currentThread().isInterrupted()) {
+							throw new InterruptedException();
+						}
 						if (!cp.first.equals(cp.second)) {
 							throw new RuntimeException("Equation " + ab0.second + " = " + ab0.third + " overlaps with " + gd0.second + " = " + gd0.third + ", the critical pair is " + cp.first + " and " + cp.second);
 						}

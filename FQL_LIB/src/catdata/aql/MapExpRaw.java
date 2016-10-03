@@ -10,7 +10,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 
-public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,Object,Object,Object,Object> {
+public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,Object,Object,Object> {
 	
 	public final SchExp<Object,Object,Object,Object,Object> src, dst;
 	
@@ -109,7 +109,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 	//TODO: create similar inference functionality that takes into account expected return types?
 	
 	@Override
-	public Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
+	public Mapping<Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
 		Schema<Object, Object, Object, Object, Object> src0 = src.eval(env);
 		Schema<Object, Object, Object, Object, Object> dst0 = dst.eval(env);
 		//Collage<Object, Object, Object, Object, Object, Void, Void> scol = new Collage<>(src0);
@@ -119,7 +119,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		Map<Object, Pair<Object, List<Object>>> fks0 = new HashMap<>();
 		Map<Object, Triple<Var, Object, Term<Object, Object, Object, Object, Object, Void, Void>>> atts0 = new HashMap<>();
 		for (String k : imports) {
-			Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> v = env.getMapping(k);
+			Mapping< Object, Object, Object, Object, Object, Object, Object, Object> v = env.getMapping(k);
 			Util.putAllSafely(ens0, v.ens);
 			Util.putAllSafely(fks0, v.fks);
 			Util.putAllSafely(atts0, v.atts);
@@ -179,9 +179,9 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			Term<Object, Object, Object, Object, Object, Void, Void> term0 = RawTerm.infer0(ctx, term, proposed_ty2, dcol, "In checking mapping for attribute " + att.first);
 
 			Util.putSafely(atts0, att.first, new Triple<>(new Var(var), p.first, term0));
-		}
+		} 
 		
-		Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = new Mapping<>(ens0, atts0, fks0, src0, dst0);
+		Mapping<Object, Object, Object, Object, Object, Object, Object, Object> ret = new Mapping<>(ens0, atts0, fks0, src0, dst0);
 		return ret; 
 	}
 }

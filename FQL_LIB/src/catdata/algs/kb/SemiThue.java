@@ -46,8 +46,13 @@ public class SemiThue<Y> {
 		orient(this.rules);
 	}
 
-	public void complete() {
-		go(rules, iteration, max_iterations);
+	public void complete() { 
+		try {
+			go(rules, iteration, max_iterations);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Interrupted: " + e.getMessage());
+		}
 		finished = true;
 	}
 
@@ -105,10 +110,13 @@ public class SemiThue<Y> {
 		}
 	}
 
-	private <X> void go(Set<Pair<List<X>, List<X>>> t, int iteration, int max_iterations) {
+	private <X> void go(Set<Pair<List<X>, List<X>>> t, int iteration, int max_iterations) throws InterruptedException {
 		while (!step(t)) {
 			if (iteration++ > max_iterations) {
 				throw new RuntimeException("Max iterations exceeded: " + max_iterations);
+			}
+			if (Thread.currentThread().isInterrupted()) {
+				throw new InterruptedException();
 			}
 		}
 	}

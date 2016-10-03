@@ -1,10 +1,13 @@
 package catdata.aql;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import catdata.Util;
 
+//TODO why showing viewer so long - change
 public final class AqlOptions {
 	
 	public final Map<AqlOption, Object> options; 
@@ -15,8 +18,16 @@ public final class AqlOptions {
 		options.put(AqlOption.precomputed, ob);
 	}
 	
+	public static String printDefault() {
+		List<String> l = new LinkedList<>();
+		for (AqlOption option : AqlOption.values()) {
+			l.add(option + " = " + getDefault(option));
+		}
+		return Util.sep(l, "\n\t");
+	}
+	
 	//anything 'unsafe' should default to false
-	private Object getDefault(AqlOption option) {
+	private static Object getDefault(AqlOption option) {
 		switch (option) {
 		case allow_java_eqs_unsafe:
 			return false;
@@ -29,7 +40,7 @@ public final class AqlOptions {
 		case require_consistency:
 			return false;
 		case timeout:
-			return 5000;
+			return 5;
 		case dont_verify_is_appropriate_for_prover_unsafe:
 			return false;
 		case allow_empty_sorts_unsafe:

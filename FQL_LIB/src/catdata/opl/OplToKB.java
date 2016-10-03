@@ -390,7 +390,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 				NEWDEBUG.debug.opl.opl_prover_ac, NEWDEBUG.debug.opl.opl_prover_timeout, 
 				NEWDEBUG.debug.opl.opl_prover_reduction_limit, NEWDEBUG.debug.opl.opl_prover_filter_subsumed,
 				/* NEWDEBUG.debug.opl.simplify, */ NEWDEBUG.debug.opl.opl_prover_compose);
-		return new KB(eqs, KBOrders.lpogt(gt), fr, rs, options);			
+		return new KB(eqs, KBOrders.lpogt(NEWDEBUG.debug.opl.opl_allow_horn && !s.implications.isEmpty(), gt), fr, rs, options);			
 	}
 	
 	public static <C,V> Set<Pair<KBExp<C, V>, KBExp<C, V>>> convert(List<Pair<OplTerm<C, V>, OplTerm<C, V>>> x, List<Pair<OplTerm<C, V>, OplTerm<C, V>>> y) {

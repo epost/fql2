@@ -238,13 +238,18 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return simplified_pair;
 		}
 
-		simplified_pair = simplify(false);
+		try {
+			simplified_pair = simplify(false);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Interrupted during simplification " + e.getMessage());
+		}
 		return simplified_pair;
 	}
 	
 	
 
-	private synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify(boolean veto) {
+	private synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify(boolean veto) throws InterruptedException {
 	Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified = new Collage<>(this);
 		List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list = new LinkedList<>();
 		while (simplified.simplify1(list, veto));
@@ -252,6 +257,9 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		Iterator<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> it = simplified.eqs.iterator();
 		while (it.hasNext()) {
 			Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq = it.next();
+			if (Thread.currentThread().isInterrupted()) {
+				throw new InterruptedException();
+			}
 			if (eq.second.equals(eq.third)) {
 				it.remove();
 			}
@@ -495,6 +503,19 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			List<String> l = m.stream().map(Chc::toStringMash).collect(Collectors.toList());
 			throw new RuntimeException("Sorts " + Util.sep(l, ", ") + " have no 0-ary constants");
 		}
+	}
+
+	public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> entities_only() {
+		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> ret = new Collage<>();
+		ret.ens.addAll(ens);
+		ret.fks.putAll(fks);
+		ret.gens.putAll(gens);
+		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {
+			if (!type(eq.first, eq.second).left) {
+				ret.eqs.add(eq);
+			}
+		}
+		return ret;
 	}
 
 }

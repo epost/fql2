@@ -35,7 +35,7 @@ public class CompletionProverHelper {
 		if (!prec.isEmpty() && !(prec.get(0) instanceof Head)) {
 			throw new RuntimeException("Anomaly: please report");
 		}
-		KBOptions options = new KBOptions(true, sort, false, true, 200000, 256, filter_subsumed, compose);
+		KBOptions options = new KBOptions(true, sort, false, false, Integer.MAX_VALUE, Integer.MAX_VALUE, filter_subsumed, compose); //TODO make relly unbounded
 		
 		return new CompletionProver<>(options, prec, Var.it, sorts, signature, theory);	
 	}

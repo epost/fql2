@@ -43,7 +43,7 @@ public final class AqlDisplay implements Disp {
 	
 	JComponent wrapDisplay(Kind kind, Object obj) {
 	//	if (!NEWDEBUG.debug.opl.opl_lazy_gui) {
-			return Viewer.view(kind, obj);
+			return AqlViewer.view(kind, obj);
 	/*	}
 		JPanel ret = new JPanel(new GridLayout(1,1));
 		JPanel lazyPanel = new JPanel();

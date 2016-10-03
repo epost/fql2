@@ -15,7 +15,7 @@ public class KBOrders {
 	
 	
 	
-	public static <C, V> Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> lpogt(
+	public static <C, V> Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> lpogt(boolean horn,
 			Function<Pair<C, C>, Boolean> gt) {
 		return new Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean>() {
 			@Override
@@ -25,14 +25,16 @@ public class KBOrders {
 				KBExp<C, V> t = xxx.second;
 
 				//for horn clauses
-				if (KBHorn.isAtom(s) && !KBHorn.isAtom(t)) {
-					return true;
-				}
-				if (s.equals(KBHorn.fals()) && t.equals(KBHorn.tru())) {
-					return true;
-				}
-				if (t.equals(KBHorn.fals())) {
-					return true;
+				if (horn) {
+					if (KBHorn.isAtom(s) && !KBHorn.isAtom(t)) {
+						return true;
+					}
+					if (s.equals(KBHorn.fals()) && t.equals(KBHorn.tru())) {
+						return true;
+					}
+					if (t.equals(KBHorn.fals())) {
+						return true;
+					}
 				}
 				
 				//http://resources.mpi-inf.mpg.de/departments/rg1/teaching/autrea-ss10/script/lecture20.pdf

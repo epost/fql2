@@ -34,7 +34,10 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 	}
 
 	//extends congruence
-	private void merge1(KBExp<C, V> u, KBExp<C, V> v) {
+	private void merge1(KBExp<C, V> u, KBExp<C, V> v) throws InterruptedException {
+		if (Thread.currentThread().isInterrupted()) {
+			throw new InterruptedException();
+		}
 		if (uf.connected(u, v)) {
 //			System.out.println("connected so ok");
 			return;
@@ -78,7 +81,7 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 
 	private final Map<KBExp<C, V>, Set<KBExp<C, V>>> pred;
 
-	public CongruenceProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
+	public CongruenceProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) throws InterruptedException {
 		super(sorts, sig, eqs);
 
 		// Set<KBExp<C,V>> exps = new HashSet<>();

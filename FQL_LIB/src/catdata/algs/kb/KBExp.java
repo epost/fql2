@@ -323,6 +323,9 @@ public abstract class KBExp<C, V> {
 
 		@Override
 		public KBExp<C, V> subst(Map<V, KBExp<C, V>> sigma) {
+			if (Thread.currentThread().isInterrupted()) {
+				throw new RuntimeException("Interrupted");
+			}
 			List<KBExp<C, V>> n = new LinkedList<>();
 			for (KBExp<C, V> arg : args) {
 				n.add(arg.subst(sigma));
@@ -355,6 +358,8 @@ public abstract class KBExp<C, V> {
 		@Override
 		public Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cp(List<Integer> p,
 				KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d) {
+			try {
+				
 			Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> ret = new HashSet<>();
 			int q = 0;
 			for (KBExp<C, V> arg : args) {
@@ -363,13 +368,19 @@ public abstract class KBExp<C, V> {
 				ret.addAll(arg.cp(p0, a, b, g, d));
 			}
 
-			Map<V, KBExp<C, V>> s = KBUnifier.unify0(this, a);
+			Map<V, KBExp<C, V>> s;
+				s = KBUnifier.unify0(this, a);
 			if (s != null) {
 				Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>> toadd = new Triple<>(
 						d.subst(s), g.replace(p, b).subst(s), s);
 				ret.add(toadd);
 			}
 			return ret;
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				throw new RuntimeException("Interrupted " + e.getMessage());
+			}
+		
 		}
 
 		@Override

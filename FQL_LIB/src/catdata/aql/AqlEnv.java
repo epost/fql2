@@ -9,7 +9,7 @@ public final class AqlEnv {
 	private Map<String, Schema<Object, Object, Object, Object, Object>> schs = new HashMap<>();
 	private Map<String, Instance<Object, Object, Object, Object, Object, Object, Object>> insts = new HashMap<>();
 	private Map<String, Transform<Object, Object, Object, Object, Object,Object, Object, Object, Object>> trans = new HashMap<>();
-	private Map<String, Mapping<Object, Object, Object, Object, Object,Object, Object, Object, Object>> maps = new HashMap<>();
+	private Map<String, Mapping<Object, Object, Object, Object,Object, Object, Object, Object>> maps = new HashMap<>();
 	private Map<String, Query> qs = new HashMap<>();
 	private Map<String, Pragma> ps = new HashMap<>();
 	
@@ -42,7 +42,7 @@ public final class AqlEnv {
 			put(k, (Instance<Object, Object, Object, Object, Object, Object, Object>)o);
 			break;
 		case MAPPING:
-			put(k, (Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object>)o);
+			put(k, (Mapping<Object, Object, Object, Object, Object, Object, Object, Object>)o);
 			break;
 		case SCHEMA:
 			put(k, (Schema<Object, Object, Object, Object, Object>)o);
@@ -123,15 +123,15 @@ public final class AqlEnv {
 		return ret;
 	}
 	
-	public void put(String k, Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> v) {
+	public void put(String k, Mapping<Object, Object, Object, Object, Object, Object, Object, Object> v) {
 		if (maps.containsKey(k)) {
 			throw new RuntimeException("Already a top-level mapping definition for " + k);
 		}
 		maps.put(k, v);
 	}
 	
-	public Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> getMapping(String k) {
-		Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = maps.get(k);
+	public Mapping<Object, Object, Object, Object, Object, Object, Object, Object> getMapping(String k) {
+		Mapping<Object, Object, Object, Object, Object, Object, Object, Object> ret = maps.get(k);
 		if (ret == null) {
 			throw new RuntimeException("No top-level mapping definition for " + k);
 		}
@@ -166,6 +166,33 @@ public final class AqlEnv {
 			throw new RuntimeException("No top-level pragma definition for " + k);
 		}
 		return ret;
+	}
+
+	//TODO: maybe make everything have a semantics() method?
+	public void semantics(String n, Kind k) {
+		switch (k) {
+		case INSTANCE:
+			getInstance(n).semantics();
+			break;
+		case MAPPING:
+			getMapping(n).semantics();
+			break;
+		case PRAGMA:
+			break;
+		case QUERY:
+			break;
+		case SCHEMA:
+			getSchema(n).semantics();
+			break;
+		case TRANSFORM:
+			getTransform(n).semantics();
+			break;
+		case TYPESIDE:
+			getTypeSide(n).semantics();
+			break;
+		default:
+			throw new RuntimeException("Anomaly: please report");
+		}
 	}
 	
 }

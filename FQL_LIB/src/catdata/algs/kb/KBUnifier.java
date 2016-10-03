@@ -16,12 +16,14 @@ import catdata.algs.kb.KBExp.KBApp;
  */
 public class KBUnifier<C, V> {
 
-	public static <C, V> Map<V, KBExp<C, V>> findSubst(KBExp<C, V> s, KBExp<C, V> t) {
+	public static <C, V> Map<V, KBExp<C, V>> findSubst(KBExp<C, V> s, KBExp<C, V> t)  {
 		// if (!Collections.disjoint(s.vars_fast(), t.vars_fast())) {
 		// throw new RuntimeException("not disjoint in findsubst");
 		// }
-		Map<V, KBExp<C, V>> m = unify0(s, t.freeze());
-		if (m == null) {
+		Map<V, KBExp<C, V>> m;
+		try {
+			m = unify0(s, t.freeze());
+			if (m == null) {
 			return null;
 		}
 		Map<V, KBExp<C, V>> ret = new HashMap<>();
@@ -29,9 +31,17 @@ public class KBUnifier<C, V> {
 			ret.put(v, m.get(v).unfreeze());
 		}
 		return ret;
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Interrupted " + e.getMessage());
+		}
+	
 	}
 
-	public static <C, V> Map<V, KBExp<C, V>> unify0(KBExp<C, V> s, KBExp<C, V> t) {
+	public static <C, V> Map<V, KBExp<C, V>> unify0(KBExp<C, V> s, KBExp<C, V> t) throws InterruptedException {
+		if (Thread.currentThread().isInterrupted()) {
+			throw new InterruptedException();
+		}
 		if (s.isVar) {
 			V v = s.getVar().var;
 			if (!t.isVar && t.vars().contains(v)) {

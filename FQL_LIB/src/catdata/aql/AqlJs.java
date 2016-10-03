@@ -65,7 +65,7 @@ public class AqlJs {
 		
 	}
 
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> reduce(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> reduce(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term, Collage<Ty, ?, Sym, ?, ?, ?, ?> col) {
 		for (;;) {
 			Term<Ty, En, Sym, Fk, Att, Gen, Sk> next = reduce1(term, col);
 			if (next.equals(term)) {
@@ -75,7 +75,8 @@ public class AqlJs {
 		}
 	}
 	
-	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> reduce1(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+	//TODO don't need all of collage, just java part
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> reduce1(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term,  Collage<Ty, ?, Sym, ?, ?, ?, ?> col) {
 		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args = null; 
 		Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg = null; 
 

@@ -1,6 +1,6 @@
 package catdata.aql;
 
-public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp<Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2>> {
+public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2>> {
 	
 	public Kind kind() {
 		return Kind.MAPPING;
@@ -12,7 +12,7 @@ public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp
 	
 /////////////////////////////////////////////////////////////////////
 
-	public static final class MapExpId<Ty,En,Sym,Fk,Att> extends MapExp<Ty,En,Sym,Fk,Att,En,Sym,Fk,Att> {
+	public static final class MapExpId<Ty,En,Sym,Fk,Att> extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att> {
 		
 		public String meta() {
 			return " : " + sch + " -> " + sch;
@@ -58,7 +58,7 @@ public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp
 		}
 
 		@Override
-		public Mapping<Ty, En, Sym, Fk, Att, En, Sym, Fk, Att> eval(AqlEnv env) {
+		public Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> eval(AqlEnv env) {
 			return Mapping.id(sch.eval(env));
 		}
 		
@@ -66,7 +66,7 @@ public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp
 	
 //////////////////////////////////////////////////////////////////
 	
-	public static final class MapExpVar extends MapExp<Object, Object, Object, Object, Object, Object, Object, Object, Object> {
+	public static final class MapExpVar extends MapExp<Object, Object, Object, Object, Object, Object, Object, Object> {
 		public final String var;
 		
 		public String meta() {
@@ -82,7 +82,7 @@ public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp
 		}
 
 		@Override
-		public Mapping<Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
+		public Mapping<Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
 			return env.getMapping(var);
 		}
 
@@ -119,11 +119,11 @@ public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp
 
 /////////////////////////////////////////////////////////////////////
 	
-	public static final class MapExpLit<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> {
+	public static final class MapExpLit<Ty,En1,Sym1,Fk1,Att1,En2,Fk2,Att2> extends MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Fk2,Att2> {
 
-		public final Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> map;
+		public final Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Fk2,Att2> map;
 		
-		public MapExpLit(Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> map) {
+		public MapExpLit(Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Fk2,Att2> map) {
 			if (map == null) {
 				throw new RuntimeException("Attempt to create MapExpLit with null schema");
 			}
@@ -131,7 +131,7 @@ public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp
 		}
 
 		@Override
-		public Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> eval(AqlEnv env) {
+		public Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Fk2,Att2> eval(AqlEnv env) {
 			return map;
 		}
 
@@ -151,7 +151,7 @@ public abstract class MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Sym2,Fk2,Att2> extends Exp
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			MapExpLit<?,?,?,?,?,?,?,?,?> other = (MapExpLit<?,?,?,?,?,?,?,?,?>) obj;
+			MapExpLit<?,?,?,?,?,?,?,?> other = (MapExpLit<?,?,?,?,?,?,?,?>) obj;
 			if (map == null) {
 				if (other.map != null)
 					return false;

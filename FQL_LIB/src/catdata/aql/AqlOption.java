@@ -17,8 +17,8 @@ public enum AqlOption {
 	allow_empty_sorts_unsafe,
 	precomputed,
 	allow_java_eqs_unsafe,
-	require_consistency,
-	timeout,
+	require_consistency, //TODO: enforce
+	timeout, //TODO: enforce
 	dont_verify_is_appropriate_for_prover_unsafe,
 	prover;
 	

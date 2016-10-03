@@ -61,15 +61,12 @@ public final class AqlDriver {
 			}
 		}
 
+		//TODO: separate into two loops - first, validate.  then, call semantics
 		for (String n : init.order) {
 			Exp<? extends Object> exp = init.exps.get(n);
 			Kind k = exp.kind();
 
-			/* if (se instanceof OplPragma) {
-				continue;
-			} */
-
-			if (unchanged.contains(n)) {
+				if (unchanged.contains(n)) {
 				env.put(n, k, last_env.get(n, k));
 				continue;
 			}
@@ -80,7 +77,22 @@ public final class AqlDriver {
 				}
 				env.put(n, k, val);
 				if (toUpdate != null) {
-					toUpdate[0] = "Last Processed: " + k;
+					toUpdate[0] = "Last type-checked: " + k;
+				}
+			} catch (Throwable t) {
+				t.printStackTrace();
+				throw new LineException(t.getMessage(), n, "");
+			}
+		}
+		
+		for (String n : init.order) {
+			Exp<? extends Object> exp = init.exps.get(n);
+			Kind k = exp.kind();
+			try {
+				env.semantics(n, k);
+				
+				if (toUpdate != null) {
+					toUpdate[0] = "Last Computed: " + k;
 				}
 			} catch (Throwable t) {
 				t.printStackTrace();

@@ -70,6 +70,7 @@ public final class TypeSide<Ty, Sym> {
 			AqlJs.compile(parser);
 		}
 		validate();
+//		semantics();
 	}
 
 	public void validate() {

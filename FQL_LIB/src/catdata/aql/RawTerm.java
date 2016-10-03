@@ -116,7 +116,7 @@ public final class RawTerm {
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Head<Ty, En, Sym, Fk, Att, Gen, Sk> toHeadNoPrim(String head, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		int n = boolToInt(col.syms.containsKey(head)) + boolToInt(col.atts.containsKey(head)) + boolToInt(col.fks.containsKey(head)) +  boolToInt(col.gens.containsKey(head)) + boolToInt(col.sks.containsKey(head));
 		if (n == 0) {
-			throw new RuntimeException(head + " is not a (non-java) symbol");						
+			throw new RuntimeException(head + " is not a symbol");						
 		} else if (n > 1) {
 			throw new RuntimeException(head + " is ambiguous");			
 		}

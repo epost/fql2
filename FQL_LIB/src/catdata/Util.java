@@ -778,6 +778,14 @@ public class Util {
 		return ret;
 	}
 	
+	public static <X,Y> Map<X, List<Y>> newListsFor(Collection<X> xs) {
+		Map<X, List<Y>> ret = new HashMap<>();
+		for (X x : xs) {
+			ret.put(x, new LinkedList<>());
+		}
+		return ret;
+	}
+	
 	public static <X,Y> Map<X, Y> constMap(Collection<X> xs, Y y) {
 		Map<X,Y> ret = new HashMap<>();
 		for (X x : xs) {
@@ -790,5 +798,9 @@ public class Util {
 		Set<X> ret = new HashSet<>(x);
 		ret.addAll(y);
 		return y;
+	}
+
+	public static <X> List<String> toString(List<X> list) {
+		return list.stream().map(Object::toString).collect(Collectors.toList());
 	}
 }
