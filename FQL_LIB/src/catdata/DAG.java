@@ -192,7 +192,7 @@ public final class DAG {
 
 	private boolean hasPath(Object start, Object end) {
 		// break condition
-		if (start == end)
+		if (start.equals(end))
 			return true;
 
 		Set children= fOut.get(start);

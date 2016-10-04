@@ -61,13 +61,16 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		DAG dag = new DAG();
 		for (String n : prog.order) {
 			for (String d : prog.exps.get(n).deps()) {
-				boolean ok = dag.addEdge(n, d);
+				if (!prog.order.contains(d)) {
+					throw new LineException("Undefined dependency: " + d, n, prog.exps.get(n).kind().toString());
+				}
+				boolean ok = dag.addEdge(n, d);			
 				if (!ok) {
-					throw new RuntimeException("Acyclic dependency graph: " + dag);
+					throw new LineException("Adding dependency on " + d + " causes circularity", n, prog.exps.get(n).kind().toString());
 				}
 			}
 		}
-
+		System.out.println(dag);
 	}
 
 	List<Future<Unit>> threads = new LinkedList<>();
@@ -140,7 +143,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				return true;
 			}
 		}
-		boolean b = prev.equals(prog.exps.get(n));
+		boolean b = !prev.equals(prog.exps.get(n));
 		changed.put(n, b);
 		return b;
 	}
