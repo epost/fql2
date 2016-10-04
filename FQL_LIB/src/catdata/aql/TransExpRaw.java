@@ -1,9 +1,12 @@
 package catdata.aql;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import catdata.Chc;
 import catdata.Pair;
@@ -11,6 +14,14 @@ import catdata.Util;
 
 public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Object,Object,Object,Object,Object> {
 	
+	@Override
+	public Collection<String> deps() {
+		Set<String> ret = new HashSet<>();
+		ret.addAll(src.deps());
+		ret.addAll(dst.deps());
+		ret.addAll(imports);
+		return ret;
+	}
 	public final InstExp<Object,Object,Object,Object,Object,Object,Object> src, dst;
 	
 	public final List<String> imports;

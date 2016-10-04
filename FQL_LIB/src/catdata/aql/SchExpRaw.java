@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +15,14 @@ import catdata.Util;
 
 public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object>  {
 	
+	@Override
+	public Collection<String> deps() {
+		Set<String> ret = new HashSet<>();
+		ret.addAll(imports);
+		ret.addAll(typeSide.deps());
+		return ret;
+	}
+
 	//TODO: printing of contexts broken when conitain choices
 	
 	@Override

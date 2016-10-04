@@ -498,10 +498,13 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				m.remove(a.second);
 			}
 		}
+		
+		 //TODO: weaker condition: ok if for all sorts s and s', that s' is non-empty in context with s
 
+		//TODO: are empty sorts ok for program?
 		if (!m.isEmpty()) {
 			List<String> l = m.stream().map(Chc::toStringMash).collect(Collectors.toList());
-			throw new RuntimeException("Sorts " + Util.sep(l, ", ") + " have no 0-ary constants");
+			throw new RuntimeException("Sorts " + Util.sep(l, ", ") + " have no 0-ary constants.  (Perhaps you meant to set allow_empty_sorts_unsafe=true?)");
 		}
 	}
 

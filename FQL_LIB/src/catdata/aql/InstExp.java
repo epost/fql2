@@ -1,5 +1,10 @@
 package catdata.aql;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import catdata.Util;
+
 public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,Sym,En,Att,Fk,Gen,Sk>> {
 	
 	public Kind kind() {
@@ -12,6 +17,10 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 		
 		public final SchExp<Ty,Sym,En,Att,Fk> schema;
 
+		@Override
+		public Collection<String> deps() {
+			return schema.deps();
+		}
 		public InstExpEmpty(SchExp<Ty, Sym, En, Att, Fk> schema) {
 			if (schema == null) {
 				throw new RuntimeException("Attempt to create InstExpEmpty with null schema");
@@ -63,6 +72,11 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 
 	public static final class InstExpVar extends InstExp<Object, Object, Object, Object, Object, Object, Object> {
 		public final String var;
+		
+		@Override
+		public Collection<String> deps() {
+			return Util.singList(var);
+		}
 		
 		public InstExpVar(String var) {
 			if (var == null) {
@@ -117,6 +131,11 @@ public abstract class InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> extends Exp<Instance<Ty,S
 	public static final class InstExpLit<Ty,Sym,En,Att,Fk,Gen,Sk> extends InstExp<Ty,Sym,En,Att,Fk,Gen,Sk> {
 
 		public final Instance<Ty,Sym,En,Att,Fk,Gen,Sk> inst;
+		
+		@Override
+		public Collection<String> deps() {
+			return Collections.emptyList();
+		}
 		
 		public InstExpLit(Instance<Ty,Sym,En,Att,Fk,Gen,Sk> inst) {
 			if (inst == null) {

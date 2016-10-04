@@ -100,11 +100,12 @@ public final class AqlCodeEditor extends
 
 	@Override
 	protected AqlEnv makeEnv(String str, Program<Exp<? extends Object>> init) {
-			last_env = AqlDriver.makeEnv(str, init, toUpdate, last_str,
-					last_prog, last_env);
-			last_prog = init;
-			last_str = str;
-			return last_env;
+		last_env = new AqlMultiDriver(init, toUpdate, last_prog, last_env).env; //constructor blocks
+				//AqlDriver.makeEnv(str, init, toUpdate, last_str,last_prog, last_env);
+		
+		last_prog = init;
+		last_str = str;
+		return last_env;
 	}
 
 

@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,6 +14,14 @@ import catdata.Triple;
 import catdata.Util;
 
 public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object,Object,Object> {
+
+	@Override
+	public Collection<String> deps() {
+		Set<String> ret = new HashSet<>();
+		ret.addAll(schema.deps());
+		ret.addAll(imports);
+		return ret;
+	}
 
 	public final SchExp<Object,Object,Object,Object,Object> schema;
 	

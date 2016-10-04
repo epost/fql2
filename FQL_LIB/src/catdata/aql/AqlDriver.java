@@ -76,23 +76,9 @@ public final class AqlDriver {
 					throw new RuntimeException("null result on " + exp);
 				}
 				env.put(n, k, val);
-				if (toUpdate != null) {
-					toUpdate[0] = "Last type-checked: " + k;
-				}
-			} catch (Throwable t) {
-				t.printStackTrace();
-				throw new LineException(t.getMessage(), n, "");
-			}
-		}
-		
-		for (String n : init.order) {
-			Exp<? extends Object> exp = init.exps.get(n);
-			Kind k = exp.kind();
-			try {
 				env.semantics(n, k);
-				
 				if (toUpdate != null) {
-					toUpdate[0] = "Last Computed: " + k;
+					toUpdate[0] = "Last processed: " + k;
 				}
 			} catch (Throwable t) {
 				t.printStackTrace();

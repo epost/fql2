@@ -63,7 +63,7 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		this.eqs = eqs;
 		this.strategy = strategy;
 		validate();
-//		semantics();
+		semantics();
 	}
 
 	public void validate() {

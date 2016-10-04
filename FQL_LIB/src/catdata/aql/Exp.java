@@ -1,5 +1,7 @@
 package catdata.aql;
 
+import java.util.Collection;
+
 public abstract class Exp<X> {
 	
 	//TODO: dom, cod, id, comp, +, 0
@@ -18,4 +20,6 @@ public abstract class Exp<X> {
 
 	@Override
 	public abstract boolean equals(Object o);
+
+	public abstract Collection<String> deps();
 }

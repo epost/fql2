@@ -26,7 +26,7 @@ public final class AqlOptions {
 		return Util.sep(l, "\n\t");
 	}
 	
-	//anything 'unsafe' should default to false
+	//TODO anything 'unsafe' should default to false, but need empty sorts for now
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
 		case allow_java_eqs_unsafe:
@@ -37,14 +37,14 @@ public final class AqlOptions {
 			throw new RuntimeException("Anomaly: please report");
 		case prover:
 			return ProverName.auto;
-		case require_consistency:
+		case require_consistency: //TODO: require consistency check
 			return false;
 		case timeout:
 			return 5;
 		case dont_verify_is_appropriate_for_prover_unsafe:
 			return false;
 		case allow_empty_sorts_unsafe:
-			return false;
+			return true; //TODO set to false eventually
 		case completion_compose:
 			return true;
 		case completion_filter_subsumed:

@@ -1,5 +1,10 @@
 package catdata.aql;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import catdata.Util;
+
 public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	
 	@Override
@@ -58,8 +63,11 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		public TypeSide<Ty, Sym> eval(AqlEnv env) {
 			return schema.eval(env).typeSide;
 		}
-		
-		
+
+		@Override
+		public Collection<String> deps() {
+			return schema.deps();
+		}
 		
 	}
 	
@@ -67,6 +75,11 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 
 	public static final class TyExpEmpty extends TyExp<Void,Void> {
 
+		@Override
+		public Collection<String> deps() {
+			return Collections.emptyList();
+		}
+		
 		public TyExpEmpty() { 
 		}
 		
@@ -96,6 +109,11 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 
 	public static final class TyExpLit<Ty, Sym> extends TyExp<Ty, Sym> {
 		public final TypeSide<Ty, Sym> typeSide;
+		
+		@Override
+		public Collection<String> deps() {
+			return Collections.emptyList();
+		}
 		
 		public TyExpLit(TypeSide<Ty, Sym> typeSide) {
 			if (typeSide == null) {
@@ -147,6 +165,11 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	public static final class TyExpVar extends TyExp<Object, Object> {
 		public final String var;
 		
+		@Override
+		public Collection<String> deps() {
+			return Util.singList(var);
+		}
+		
 		public TyExpVar(String var) {
 			if (var == null) {
 				throw new RuntimeException("Attempt to create TyExpVar will null var");
@@ -191,30 +214,6 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		
 	}
 	
-	public static final class TyExpTerminal extends TyExp<Void,Void> {
-
-		@Override
-		public TypeSide<Void,Void> eval(AqlEnv env) {
-			return TypeSide.terminal();
-		}
-
-		@Override
-		public int hashCode() {
-			return 0;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			return (o instanceof TyExpTerminal);
-		}
-
-		@Override
-		public String toString() {
-			return "TyExpTerminal []"; 
-		}
-		
-		
-		
-	}
+	
 	
 }

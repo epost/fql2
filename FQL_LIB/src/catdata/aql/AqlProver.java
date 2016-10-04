@@ -26,7 +26,7 @@ import catdata.algs.kb.ProgramProver;
 
 //TODO: could herbrandize here
 
-//TODO: make program safe so that auto is safe!
+//TODO: redo program/monoidal/completion to work with empty sorts
 
 //TODO: better guessing of precedences (fk, att, etc)
 
@@ -96,18 +96,18 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		   		return future.get(timeout, TimeUnit.SECONDS);
 		   	} 
 	    } catch (TimeoutException e) {
-	    	   e.printStackTrace();
+//	    	   e.printStackTrace();
 	    	   future.cancel(true);
 	    	   throw new RuntimeException("Timeout (" + timeout + "s) during decision procedure construction");
 	       } catch (InterruptedException e) {
-	    	   e.printStackTrace();
+//	    	   e.printStackTrace();
 	    	   future.cancel(true);
 	    	   throw new RuntimeException("Interruption (" + timeout + "s) during decision procedure construction");
-	       } catch (ExecutionException e) {
-	    	   e.printStackTrace();
+	       } catch (Throwable e) {
+	//    	   e.printStackTrace();
 	    	   throw new RuntimeException("Error during during decision procedure construction: " + e.getMessage());
 	       }
-		
+
 	}
 
 	private static <Sk, En, Fk, Ty, Att, Sym, Gen> ProverName auto(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
@@ -115,18 +115,18 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return ProverName.free;
 		} else if (col.isGround()) {
 			return ProverName.congruence;
-		} else if (col.isMonoidal()) {
-			if (!ops.options.containsKey(AqlOption.allow_empty_sorts_unsafe)) {
-				ops.options.put(AqlOption.allow_empty_sorts_unsafe, true);
-			}
-			return ProverName.monoidal;
 		} else if (ProgramProver.isProgram(Var.it, col.toKB().first)) {
-			if (!ops.options.containsKey(AqlOption.allow_empty_sorts_unsafe)) {
+/*			if (!ops.options.containsKey(AqlOption.allow_empty_sorts_unsafe)) {
 				ops.options.put(AqlOption.allow_empty_sorts_unsafe, true);
-			}
+			} */
 			return ProverName.program;
-		} 
-		throw new RuntimeException("Cannot automatically chose prover: is not free, ground, unary, or program.  You will need to use completion with an explicit precedence");
+		} else if (col.isMonoidal()) {
+			/*			if (!ops.options.containsKey(AqlOption.allow_empty_sorts_unsafe)) {
+			ops.options.put(AqlOption.allow_empty_sorts_unsafe, true);
+		} */
+		return ProverName.monoidal;
+	}
+		throw new RuntimeException("Cannot automatically chose prover: theory is not free, ground, unary, or program.  You must use completion with an explicit precedence.");
 	}
 
 	private static <Sk, En, Fk, Ty, Att, Sym, Gen> DP<Ty, En, Sym, Fk, Att, Gen, Sk> wrap(Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> simp, DPKB<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> dpkb) {

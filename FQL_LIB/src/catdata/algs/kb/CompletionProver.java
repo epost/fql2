@@ -18,7 +18,7 @@ public class CompletionProver<T, C, V> extends DPKB<T, C, V> {
 
 	private KB<C, V> kb;
 	
-	public CompletionProver(KBOptions op, List<C> prec, Iterator<V> fresh, Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
+	public CompletionProver(KBOptions op, List<C> prec, Iterator<V> fresh, Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) throws InterruptedException {
 		super(sorts, sig, eqs);
 		
 		Util.assertNoDups(prec);
@@ -38,7 +38,7 @@ public class CompletionProver<T, C, V> extends DPKB<T, C, V> {
 			return i > j;
 		};
 		kb = new KB<>(eqs.stream().map(x -> new Pair<>(x.second, x.third)).collect(Collectors.toSet()), KBOrders.lpogt(false, gt), fresh, Collections.emptySet(), op);
-		kb.complete(Thread.currentThread());
+		kb.complete();
 	}
 	
 	@Override

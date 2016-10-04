@@ -114,7 +114,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		this.ens = ens;
 		this.strategy = strategy;
 		validate();
-//		semantics();
+		semantics();
 	}
 
 	private DP<Ty,En,Sym,Fk,Att,Void,Void> semantics;

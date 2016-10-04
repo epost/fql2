@@ -279,13 +279,22 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	
 	@SuppressWarnings("deprecation")
 	private void checkParentDead(Thread cur) throws InterruptedException {
-		if (!cur.isAlive()) {
-			Thread.currentThread().stop();
-		} 
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InterruptedException();
 		}
+		if (cur != null && !cur.isAlive()) {
+			Thread.currentThread().stop();
+		} 
+		
 	}
+	
+	public void complete() throws InterruptedException {
+			while (!step(null));
+		if (!isCompleteGround) {
+			throw new RuntimeException("Not ground complete after iteration timeout.  Last state:\n\n" + toString());
+		} 
+	}
+	
 	
 	@SuppressWarnings("deprecation")
 	//if the parent dies, the current thread will too
@@ -308,14 +317,14 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			t.join(options.iterations);
 			t.stop();
 		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException(ex.getMessage());
+			//ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 		if (arr[0] != null) {
 			throw new RuntimeException(arr[0] + "\n\nLast state:\n\n" + toString());			
 		}
 		if (!isCompleteGround) {
-			System.out.println("---------------");
+		//	System.out.println("---------------");
 			//allCpsConfluent(true, true);
 			throw new RuntimeException("Not ground complete after iteration timeout.  Last state:\n\n" + toString());
 		} 
@@ -802,6 +811,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 
 	protected KBExp<C, V> step1(Map<KBExp<C,V>, KBExp<C,V>> cache, Iterator<V> fresh,
 			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> e0) throws InterruptedException {
+		//System.out.println(Thread.currentThread().toString());
 		KBExp<C, V> e = e0;
 		if (cache != null && cache.containsKey(e)) {
 			return cache.get(e);

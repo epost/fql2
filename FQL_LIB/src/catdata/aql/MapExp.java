@@ -1,5 +1,10 @@
 package catdata.aql;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import catdata.Util;
+
 public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2>> {
 	
 	public Kind kind() {
@@ -13,6 +18,11 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 /////////////////////////////////////////////////////////////////////
 
 	public static final class MapExpId<Ty,En,Sym,Fk,Att> extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att> {
+		
+		@Override
+		public Collection<String> deps() {
+			return sch.deps();
+		}
 		
 		public String meta() {
 			return " : " + sch + " -> " + sch;
@@ -69,6 +79,10 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 	public static final class MapExpVar extends MapExp<Object, Object, Object, Object, Object, Object, Object, Object> {
 		public final String var;
 		
+		@Override
+		public Collection<String> deps() {
+			return Util.singList(var);
+		}
 		public String meta() {
 			return "";
 		}
@@ -121,6 +135,11 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 	
 	public static final class MapExpLit<Ty,En1,Sym1,Fk1,Att1,En2,Fk2,Att2> extends MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Fk2,Att2> {
 
+		@Override
+		public Collection<String> deps() {
+			return Collections.emptyList();
+		}
+		
 		public final Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Fk2,Att2> map;
 		
 		public MapExpLit(Mapping<Ty,En1,Sym1,Fk1,Att1,En2,Fk2,Att2> map) {

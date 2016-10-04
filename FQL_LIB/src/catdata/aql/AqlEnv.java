@@ -1,7 +1,9 @@
 package catdata.aql;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public final class AqlEnv {
 
@@ -193,6 +195,18 @@ public final class AqlEnv {
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		}
+	}
+
+	public Set<String> keySet() {
+		Set<String> ret = new HashSet<>();
+		ret.addAll(insts.keySet());
+		ret.addAll(maps.keySet());
+		ret.addAll(ps.keySet());
+		ret.addAll(qs.keySet());
+		ret.addAll(schs.keySet());
+		ret.addAll(trans.keySet());
+		ret.addAll(tys.keySet());
+		return ret;
 	}
 	
 }

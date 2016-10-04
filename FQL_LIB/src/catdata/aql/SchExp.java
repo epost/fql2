@@ -1,5 +1,10 @@
 package catdata.aql;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import catdata.Util;
+
 public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,Fk>> {	
 	
 	@Override
@@ -12,6 +17,11 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 	public static final class SchExpInst<Ty,En,Sym,Att,Fk> extends SchExp<Ty,En,Sym,Att,Fk> {
 		public final InstExp<Ty,En,Sym,Att,Fk,?,?> inst;
 
+		@Override
+		public Collection<String> deps() {
+			return inst.deps();
+		}
+		
 		@Override
 		public String meta() {
 			return "";
@@ -67,6 +77,11 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 	public static final class SchExpEmpty<Ty,Sym> extends SchExp<Ty,Void,Sym,Void,Void> {
 		
 		public final TyExp<Ty,Sym> typeSide;
+		
+		@Override
+		public Collection<String> deps() {
+			return typeSide.deps();
+		}
 
 		public SchExpEmpty(TyExp<Ty, Sym> typeSide) {
 			if (typeSide == null) {
@@ -123,6 +138,11 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 		
 		public final String var;
 		
+		@Override
+		public Collection<String> deps() {
+			return Util.singList(var);
+		}
+		
 		public SchExpVar(String var) {
 			if (var == null) {
 				throw new RuntimeException("Attempt to create SchExpVar will null var");
@@ -175,6 +195,11 @@ public abstract class SchExp<Ty,En,Sym,Att,Fk> extends Exp<Schema<Ty,En,Sym,Att,
 
 	public static final class SchExpLit<Ty,Sym,En,Att,Fk> extends SchExp<Ty,Sym,En,Att,Fk> {
 
+		@Override
+		public Collection<String> deps() {
+			return Collections.emptyList();
+		}
+		
 		public final Schema<Ty,Sym,En,Att,Fk> schema;
 		
 		public SchExpLit(Schema<Ty,Sym,En,Att,Fk> schema) {

@@ -1,5 +1,10 @@
 package catdata.aql;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import catdata.Util;
+
 public abstract class QueryExp extends Exp<Query> {
 	
 	public Kind kind() {
@@ -9,6 +14,11 @@ public abstract class QueryExp extends Exp<Query> {
 	
 	public static final class QueryExpVar extends QueryExp {
 		String var;
+		
+		@Override
+		public Collection<String> deps() {
+			return Util.singList(var);
+		}
 		
 		@Override
 		public Query eval(AqlEnv env) {
@@ -57,6 +67,10 @@ public abstract class QueryExp extends Exp<Query> {
 
 		public final Query q;
 		
+		@Override
+		public Collection<String> deps() {
+			return Collections.emptyList();
+		}
 		public QueryExpLit(Query q) {
 			if (q == null) {
 				throw new RuntimeException("Attempt to create MapExpLit with null schema");
