@@ -115,7 +115,7 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 	@Override
 	public KBExp<C, V> nf(Map<V, T> ctx, KBExp<C, V> term) {
 		throw new RuntimeException("Cannot NF in monoidal prover");
-		//return trans(ctx, kb.normalize("", trans(ctx, term)));
+		//return trans(ctx, kb.normalize("", trans(ctx, term))); hard to do
 	}
 
 	@Override

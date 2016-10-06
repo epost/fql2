@@ -17,13 +17,40 @@ import java.util.Set;
 * Contributors:
 *     IBM Corporation - initial API and implementation
 *******************************************************************************/
-@SuppressWarnings({"rawtypes", "unchecked"})
-public final class DAG {
+
+public final class DAG<N> {
 	/**
 	 * Multimap, supports <code>null key, but not null values.
 	 */
-	private static final class MultiMap {
-		private final Map fMap= new LinkedHashMap();
+	private static final class MultiMap<K,V> {
+		
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((fMap == null) ? 0 : fMap.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			MultiMap<?,?> other = (MultiMap<?,?>) obj;
+			if (fMap == null) {
+				if (other.fMap != null)
+					return false;
+			} else if (!fMap.equals(other.fMap))
+				return false;
+			return true;
+		}
+
+		private final Map<K, Set<V>> fMap= new LinkedHashMap<>();
 
 		/**
 		 * Adds <code>val to the values mapped to by key. If
@@ -33,14 +60,15 @@ public final class DAG {
 		 * @param key the key
 		 * @param val the value
 		 */
-		public void put(Object key, Object val) {
-			Set values= (Set) fMap.get(key);
+		public void put(K key, V val) {
+			Set<V> values = fMap.get(key);
 			if (values == null) {
-				values= new LinkedHashSet();
+				values = new LinkedHashSet<>();
 				fMap.put(key, values);
 			}
-			if (val != null)
+			if (val != null) {
 				values.add(val);
+			}
 		}
 
 		/**
@@ -49,12 +77,12 @@ public final class DAG {
 		 * @param key the key
 		 * @return the mappings for <code>key
 		 */
-		public Set get(Object key) {
-			Set values= (Set) fMap.get(key);
-			return values == null ? Collections.EMPTY_SET : values;
+		public Set<V> get(K key) {
+			Set<V> values = fMap.get(key);
+			return values == null ? Collections.emptySet() : values;
 		}
 
-		public Set keySet() {
+		public Set<K> keySet() {
 			return fMap.keySet();
 		}
 
@@ -65,9 +93,9 @@ public final class DAG {
 		 * @param key the key to remove
 		 * @return the removed mappings
 		 */
-		public Set removeAll(Object key) {
-			Set values= (Set) fMap.remove(key);
-			return values == null ? Collections.EMPTY_SET : values;
+		public Set<V> removeAll(K key) {
+			Set<V> values = fMap.remove(key);
+			return values == null ? Collections.emptySet() : values;
 		}
 
 		/**
@@ -77,22 +105,20 @@ public final class DAG {
 		 * @param key the key
 		 * @param val the value
 		 */
-		public void remove(Object key, Object val) {
-			Set values= (Set) fMap.get(key);
-			if (values != null)
+		public void remove(K key, V val) {
+			Set<V> values= fMap.get(key);
+			if (values != null) {
 				values.remove(val);
+			}
 		}
 		
-		/*
-		 * @see java.lang.Object#toString()
-		 */
 		public String toString() {
 			return fMap.toString();
 		}
 	}
 
-	private final MultiMap fOut= new MultiMap();
-	private final MultiMap fIn= new MultiMap();
+	private final MultiMap<N,N> fOut= new MultiMap<>();
+	private final MultiMap<N,N> fIn= new MultiMap<>();
 
 	/**
 	 * Adds a directed edge from <code>origin to target. The vertices are not
@@ -105,7 +131,7 @@ public final class DAG {
 	 *         edge was not added because it would have violated the acyclic nature of the
 	 *         receiver.
 	 */
-	public boolean addEdge(Object origin, Object target) {
+	public boolean addEdge(N origin, N target) {
 		if (origin == null || target == null) {
 			throw new RuntimeException("Anomaly: please report");
 		}
@@ -127,7 +153,7 @@ public final class DAG {
 	 * 
 	 * @param vertex the new vertex
 	 */
-	public void addVertex(Object vertex) {
+	public void addVertex(N vertex) {
 		if (vertex == null) {
 			throw new RuntimeException("Anomaly: please report");
 		}
@@ -140,13 +166,15 @@ public final class DAG {
 	 *
 	 * @param vertex the vertex to remove
 	 */
-	public void removeVertex(Object vertex) {
-		Set targets= fOut.removeAll(vertex);
-		for (Iterator it= targets.iterator(); it.hasNext();)
+	public void removeVertex(N vertex) {
+		Set<N> targets = fOut.removeAll(vertex);
+		for (Iterator<N> it = targets.iterator(); it.hasNext();) {
 			fIn.remove(it.next(), vertex);
-		Set origins= fIn.removeAll(vertex);
-		for (Iterator it= origins.iterator(); it.hasNext();)
+		}
+		Set<N> origins = fIn.removeAll(vertex);
+		for (Iterator<N> it = origins.iterator(); it.hasNext();) {
 			fOut.remove(it.next(), vertex);
+		}
 	}
 
 	/**
@@ -155,7 +183,7 @@ public final class DAG {
 	 * 
 	 * @return the sources of the receiver
 	 */
-	public Set getSources() {
+	public Set<N> getSources() {
 		return computeZeroEdgeVertices(fIn);
 	}
 
@@ -165,17 +193,18 @@ public final class DAG {
 	 * 
 	 * @return the sinks of the receiver
 	 */
-	public Set getSinks() {
+	public Set<N> getSinks() {
 		return computeZeroEdgeVertices(fOut);
 	}
 
-	private Set computeZeroEdgeVertices(MultiMap map) {
-		Set candidates= map.keySet();
-		Set roots= new LinkedHashSet(candidates.size());
-		for (Iterator it= candidates.iterator(); it.hasNext();) {
-			Object candidate= it.next();
-			if (map.get(candidate).isEmpty())
+	private Set<N> computeZeroEdgeVertices(MultiMap<N,N> map) {
+		Set<N> candidates = map.keySet();
+		Set<N> roots = new LinkedHashSet<>(candidates.size());
+		for (Iterator<N> it = candidates.iterator(); it.hasNext();) {
+			N candidate= it.next();
+			if (map.get(candidate).isEmpty()) {
 				roots.add(candidate);
+			}
 		}
 		return roots;
 	}
@@ -186,28 +215,58 @@ public final class DAG {
 	 * @param vertex the parent vertex
 	 * @return the direct children of <code>vertex
 	 */
-	public Set getChildren(Object vertex) {
+	public Set<N> getChildren(N vertex) {
 		return Collections.unmodifiableSet(fOut.get(vertex));
 	}
 
-	private boolean hasPath(Object start, Object end) {
-		// break condition
-		if (start.equals(end))
+	public boolean hasPath(N start, N end) {
+		if (start.equals(end)) {
 			return true;
+		}
 
-		Set children= fOut.get(start);
-		for (Iterator it= children.iterator(); it.hasNext();)
-			// recursion
-			if (hasPath(it.next(), end))
+		Set<N> children = fOut.get(start);
+		for (Iterator<N> it= children.iterator(); it.hasNext();) {
+			if (hasPath(it.next(), end)){
 				return true;
+			}
+		}
 		return false;
 	}
 	
-	/*
-	 * @see java.lang.Object#toString()
-	 * @since 3.3
-	 */
 	public String toString() {
-		return "Out: " + fOut.toString() + " In: " + fIn.toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		return "Out edges: " + fOut.toString() + " In edges: " + fIn.toString(); 
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fIn == null) ? 0 : fIn.hashCode());
+		result = prime * result + ((fOut == null) ? 0 : fOut.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DAG<?> other = (DAG<?>) obj;
+		if (fIn == null) {
+			if (other.fIn != null)
+				return false;
+		} else if (!fIn.equals(other.fIn))
+			return false;
+		if (fOut == null) {
+			if (other.fOut != null)
+				return false;
+		} else if (!fOut.equals(other.fOut))
+			return false;
+		return true;
+	}
+	
+	
 }

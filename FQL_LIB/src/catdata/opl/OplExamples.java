@@ -60,5 +60,6 @@ public class OplExamples {
 	public static Example oplChase = new OplChaseExample();
 	public static Example oplDouble = new OplDoubleExample();
 	public static Example oplAgg = new OplAggExample();
+	public static Example oplOuter = new OplOuterExample();
 	
 }

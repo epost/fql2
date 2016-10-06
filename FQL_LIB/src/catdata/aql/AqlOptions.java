@@ -21,6 +21,9 @@ public final class AqlOptions {
 	public static String printDefault() {
 		List<String> l = new LinkedList<>();
 		for (AqlOption option : AqlOption.values()) {
+			if (option.equals(AqlOption.precomputed)) {
+				continue;
+			}
 			l.add(option + " = " + getDefault(option));
 		}
 		return Util.sep(l, "\n\t");

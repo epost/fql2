@@ -1,7 +1,6 @@
 package catdata.aql;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -76,11 +75,8 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				case completion: 
 					emptySortsOk = (Boolean) ops.getOrDefault(AqlOption.allow_empty_sorts_unsafe);
 					col1.assertNoEmptySorts(emptySortsOk);
-					return wrap(col1.simplify().second, CompletionProverHelper.create(col1.toKB().second.keySet(), ops, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first, col1.simplify().first)); //use simplified  	
+					return wrap(col1.simplify().second, new CompletionProverHelper<>(col1.toKB().second.keySet(), ops, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first, col1.simplify().first)); //use simplified  	
 				case monoidal:	
-					emptySortsOk = (Boolean) ops.getOrDefault(AqlOption.allow_empty_sorts_unsafe);
-					col1.assertNoEmptySorts(emptySortsOk);
-					emptySortsOk = (Boolean) ops.getOrDefault(AqlOption.allow_empty_sorts_unsafe);
 					return wrap(col1.simplify().second, new MonoidalProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); //use simplified
 				}
 				
@@ -105,7 +101,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	    	   throw new RuntimeException("Interruption (" + timeout + "s) during decision procedure construction");
 	       } catch (Throwable e) {
 	//    	   e.printStackTrace();
-	    	   throw new RuntimeException("Error during during decision procedure construction: " + e.getMessage());
+	    	   throw new RuntimeException(e);
 	       }
 
 	}

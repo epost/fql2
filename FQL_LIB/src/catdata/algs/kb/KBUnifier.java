@@ -85,7 +85,7 @@ public class KBUnifier<C, V> {
 		return ret;
 	}
 
-	private static <C, V> Map<V, KBExp<C, V>> andThen(Map<V, KBExp<C, V>> s, Map<V, KBExp<C, V>> t) {
+	public static <C, V> Map<V, KBExp<C, V>> andThen(Map<V, KBExp<C, V>> s, Map<V, KBExp<C, V>> t) {
 		Map<V, KBExp<C, V>> ret = new HashMap<>();
 
 		for (V k : s.keySet()) {

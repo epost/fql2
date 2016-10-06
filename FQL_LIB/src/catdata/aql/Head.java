@@ -46,6 +46,12 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		return new Head<>(null, null, null, null, null, obj, ty);
 	}
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Head<Ty, En, Sym, Fk, Att, Gen, Sk> ObjAqlInternal(Object obj) {
+		if (obj == null) {
+			throw new RuntimeException("Anomaly, please report");
+		}
+		return new Head<>(null, null, null, null, null, obj, null);
+	}
 	
 	public Head(Sym sym, Fk fk, Att att, Gen gen, Sk sk, Object obj, Ty ty) {
 		this.sym = sym;

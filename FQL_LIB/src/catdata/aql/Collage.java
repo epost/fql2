@@ -239,7 +239,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 
 		try {
-			simplified_pair = simplify(false);
+			simplified_pair = simplify0();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Interrupted during simplification " + e.getMessage());
@@ -249,10 +249,10 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	
 	
 
-	private synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify(boolean veto) throws InterruptedException {
+	private synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify0() throws InterruptedException {
 	Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified = new Collage<>(this);
 		List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list = new LinkedList<>();
-		while (simplified.simplify1(list, veto));
+		while (simplified.simplify1(list));
 
 		Iterator<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> it = simplified.eqs.iterator();
 		while (it.hasNext()) {
@@ -277,7 +277,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return new Pair<>(simplified, translator);
 	}
 
-	private boolean simplify1(List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list, boolean veto) {
+	private boolean simplify1(List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list) {
 		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {
 			if (simplify2(eq.first, eq.second, eq.third, list)) {
 				return true;
@@ -309,11 +309,17 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return false;
 		}
 		Head<Ty, En, Sym, Fk, Att, Gen, Sk> head = new Head<>(lhs);
-		List<Var> vars = getVarArgsUnique(lhs);
+		List<Var> vars = getVarArgsUnique(lhs); 
+		if (vars == null) {
+			return false; //f(x,x) kind of thing
+		}
+		if (!new HashSet<>(vars).equals(ctx.keys())) {
+			return false; //forall x, y. f(y) = ... kind of thing
+		}
 
 		Set<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> neweqs = new HashSet<>();
 
-		if (vars != null && !rhs.contains(head)) {
+		if (!rhs.contains(head)) {
 			for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {
 				list.add(new Triple<>(head, vars, rhs));
 				neweqs.add(new Triple<>(eq.first, eq.second.replaceHead(head, vars, rhs), eq.third.replaceHead(head, vars, rhs)));

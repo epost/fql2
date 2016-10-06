@@ -191,7 +191,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (sk != null) {
 			return sk.toString();
 		} else if (obj != null) {
-			return obj.toString() + "@" + ty;
+			return obj.toString(); // + "@" + ty;
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
@@ -297,7 +297,14 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		return new Term<>(null, null, null, null, null, null, null, null, obj, ty);
 	}
-
+/*
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> ObjAqlInternal(Object obj) {
+		if (obj == null) {
+			throw new RuntimeException("Attempt to create a primitive with null object");
+		}
+		return new Term<>(null, null, null, null, null, null, null, null, obj, null);
+	}
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;

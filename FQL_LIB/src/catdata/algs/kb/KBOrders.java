@@ -3,8 +3,8 @@ package catdata.algs.kb;
 import java.util.function.Function;
 
 import catdata.Pair;
+import catdata.algs.kb.KB.NewConst;
 import catdata.algs.kb.KBExp.KBApp;
-import catdata.algs.kb.KBHorn;
 /**
  * 
  * @author Ryan Wisnesky
@@ -13,11 +13,13 @@ import catdata.algs.kb.KBHorn;
  */
 public class KBOrders {
 	
-	
-	
+		
 	public static <C, V> Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> lpogt(boolean horn,
 			Function<Pair<C, C>, Boolean> gt) {
-		return new Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean>() {
+		
+		LPO<C,V> check = new LPO<>(gt);
+		
+		Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> ret = new Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean>() {
 			@Override
 			public Boolean apply(Pair<KBExp<C, V>, KBExp<C, V>> xxx) {
 				
@@ -37,6 +39,14 @@ public class KBOrders {
 					}
 				}
 				
+				if (!s.isVar && s.getApp().f.equals(new NewConst()) && !t.isVar && t.getApp().f.equals(new NewConst())) {
+					return false;
+				} else if (!s.isVar && s.getApp().f.equals(new NewConst())) {
+					return false;
+				} else if (!t.isVar && t.getApp().f.equals(new NewConst())) {
+					return true;
+				}
+				
 				//http://resources.mpi-inf.mpg.de/departments/rg1/teaching/autrea-ss10/script/lecture20.pdf
 				
 				//LPO1
@@ -52,6 +62,7 @@ public class KBOrders {
 					//}
 					return false;
 				} 
+			
 
 				//LPO2
 				KBApp<C, V> s0 = s.getApp();
@@ -104,6 +115,18 @@ public class KBOrders {
 				return false;
 			}
 		};
+		
+		
+		
+		return x -> {
+			Boolean b1 = ret.apply(x);
+		//	Boolean b2 = check.gt_lpo(x.first, x.second); not NewConst aware
+			/* if (!b1.equals(b2)) {
+				throw new RuntimeException("Internal consistency error, report to Ryan: On " + x + " orig " + b1 + " but now " + b2);
+			}  */
+			return b1;
+		};
+		
 	}
 
 	

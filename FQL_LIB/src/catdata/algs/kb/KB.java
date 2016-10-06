@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Unit;
 import catdata.Util;
 import catdata.algs.kb.KBExp.KBApp;
 import catdata.algs.kb.KBExp.KBVar;
@@ -32,6 +33,11 @@ import catdata.algs.kb.KBExp.KBVar;
  * 
  * Update Jan 16: add special support for associative and commutative theories as described in
  * "On Using Ground Joinable Equations in Equational Theorem Proving"
+ * 
+ * Update Oct 16: change E-reduction to instantiate free variables with a minimal constant,
+ *  as described in 'Decision Problems in Ordered Rewriting'.  This is necessary to use only-ground complete
+ *  systems as decision procedures.  This means E-reduction is LPO specific.  Also, the AQL wrapper for this 
+ *  now herbrandizes, meaning that only-ground complete systems can decide universally quantified equations.
  *
  * @param <C> the type of functions/constants
  * @param <V> the type of variables
@@ -590,6 +596,9 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			KBExp<C, V> e) throws InterruptedException {
 		int i = 0;
 		KBExp<C, V> orig = e;
+		
+//		System.out.println("reducing " + e);
+		
 //		Collection<Pair<KBExp<C, V>, KBExp<C, V>>> Ey = new LinkedList<>(Ex);
 	//	Ey.addAll(G);
 	//	List<String> errs = new LinkedList<>();
@@ -854,11 +863,81 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return e;
 	}
 	
+	//TODO I think this is not complete - 
+	/*
+	 *  l = r
+	 *  
+	 *  can apply if there exists any substitution s st
+	 *  
+	 *  sl > sr
+	 *  
+	 *  including substitutions besides the mgu of a term with l or r.  So if r has vars that l doesn't, that's a problem.
+	 *  
+	 *  So, for LPO, only apply step1Es on ground terms, and use a minimal constant to handle extra variables that pop up.
+	 *  when extend to empty sorts, this constant will have to come from the original signature union any skolemized consts.
+	 *  for now can just adjoin one freely wlog
+	 *  
+	 */
+	
+	public static class NewConst {
+		
+		private Unit u = new Unit();
+
+		
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((u == null) ? 0 : u.hashCode());
+			return result;
+		}
+
+
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			NewConst other = (NewConst) obj;
+			if (u == null) {
+				if (other.u != null)
+					return false;
+			} else if (!u.equals(other.u))
+				return false;
+			return true;
+		}
+
+
+
+		@Override
+		public String toString() {
+			return "(FRESH)";
+		}
+		
+		
+
+	}
+	
 	protected KBExp<C, V> step1Es(Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, KBExp<C, V> e) throws InterruptedException {
-		if (options.unfailing) {
+		if (options.unfailing  && e.vars().isEmpty() ) {
+		//	System.out.println("reducing " + e);
 			for (Pair<KBExp<C, V>, KBExp<C, V>> r0 : E) {
-				e = step1EsX(r0, e);
-				e = step1EsX(new Pair<>(r0.second, r0.first), e);
+			//	System.out.println("on rule " + r0);
+				KBExp<C, V> a = step1EsX(r0, e);
+				if (a != null) {
+			//		System.out.println("l -> r " + a);
+					e = a;
+				}
+				KBExp<C, V> b = step1EsX(new Pair<>(r0.second, r0.first), e);
+				if (b != null) {
+			//		System.out.println("r -> l " + b);
+					e = b;
+				}
 			}
 		}
 		return e;
@@ -873,18 +952,32 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 
 		KBExp<C, V> lhs = r.first;
 		KBExp<C, V> rhs = r.second;
-		Map<V, KBExp<C, V>> s = KBUnifier.findSubst(lhs, e);
-		if (s == null) {
-			return e;
+		Map<V, KBExp<C, V>> s0 = KBUnifier.findSubst(lhs, e);
+		if (s0 == null) {
+			return null;
 		}
+		Map<V, KBExp<C, V>> s = new HashMap<>(s0);
+		
 
 		KBExp<C, V> lhs0 = lhs.subst(s);
 		KBExp<C, V> rhs0 = rhs.subst(s);
-		if (!gt.apply(new Pair<>(lhs0, rhs0))) {
-			return e;
+		
+		Set<V> newvars = new HashSet<>();
+		newvars.addAll(lhs0.vars());
+		newvars.addAll(rhs0.vars());
+		Map<V, KBExp<C, V>> t = new HashMap<>();
+ 		for (V v : newvars) {
+			t.put(v, new KBApp<>((C)new NewConst(), Collections.emptyList())); 
 		}
+ 		lhs0 = lhs0.subst(t);
+ 		rhs0 = rhs0.subst(t);
+ 		
+//		System.out.println(lhs0 + ">" + rhs0 + " = " + gt.apply(new Pair<>(lhs0, rhs0)));
 
-		return rhs0;
+		if (gt.apply(new Pair<>(lhs0, rhs0))) {
+			return rhs0;
+		} 
+		return null;
 	}
 
 	
