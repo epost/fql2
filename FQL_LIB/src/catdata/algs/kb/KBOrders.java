@@ -17,7 +17,7 @@ public class KBOrders {
 	public static <C, V> Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> lpogt(boolean horn,
 			Function<Pair<C, C>, Boolean> gt) {
 		
-		LPO<C,V> check = new LPO<>(gt);
+	//	LPO<C,V> check = new LPO<>(gt);
 		
 		Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> ret = new Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean>() {
 			@Override

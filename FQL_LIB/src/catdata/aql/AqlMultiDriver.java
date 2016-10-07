@@ -57,7 +57,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	}
 
 	private void checkAcyclic() {
-		DAG dag = new DAG();
+		DAG<String> dag = new DAG<>();
 		for (String n : prog.order) {
 			for (String d : prog.exps.get(n).deps()) {
 				if (!prog.order.contains(d)) {

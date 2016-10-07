@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -245,6 +246,16 @@ public abstract class KBExp<C, V> {
 				return true;
 			}
 			return false;
+		}
+
+		@Override
+		public KBExp<Chc<V, C>, V> inject() {
+			return new KBVar<>(var);			
+		}
+		
+		@Override
+		public KBExp<Chc<V, C>, V> skolemize() {
+			return new KBApp<>(Chc.inLeft(var), Collections.emptyList()); 			
 		}
 
 	}
@@ -580,10 +591,32 @@ public abstract class KBExp<C, V> {
 			}
 			return ret;
 		}
+
+		@Override
+		public KBExp<Chc<V, C>, V> inject() {
+			List<KBExp<Chc<V, C>, V>> new_args = new LinkedList<>();
+			for (KBExp<C, V> arg : args) {
+				new_args.add(arg.inject());
+			}
+			return new KBApp<>(Chc.inRight(f), new_args);
+		}
+
+		@Override
+		public KBExp<Chc<V, C>, V> skolemize() {
+			List<KBExp<Chc<V, C>, V>> new_args = new LinkedList<>();
+			for (KBExp<C, V> arg : args) {
+				new_args.add(arg.skolemize());
+			}
+			return new KBApp<>(Chc.inRight(f), new_args);
+		}
 	}
 
 	//public abstract void allSubExps(Set<KBExp<C, V>> set);
 
 	public abstract boolean allSubExps(Map<KBExp<C, V>, Set<KBExp<C, V>>> pred);
+
+	public abstract KBExp<Chc<V,C>, V> inject();
+	
+	public abstract KBExp<Chc<V,C>, V> skolemize();
 
 }

@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 import catdata.Chc;
+import catdata.algs.kb.CompletionProver;
 import catdata.algs.kb.CongruenceProver;
 import catdata.algs.kb.DPKB;
 import catdata.algs.kb.FailProver;
@@ -75,7 +76,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				case completion: 
 					emptySortsOk = (Boolean) ops.getOrDefault(AqlOption.allow_empty_sorts_unsafe);
 					col1.assertNoEmptySorts(emptySortsOk);
-					return wrap(col1.simplify().second, new CompletionProverHelper<>(col1.toKB().second.keySet(), ops, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first, col1.simplify().first)); //use simplified  	
+					return wrap(col1.simplify().second, new CompletionProver<>(col1.toKB().second.keySet(), ops, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first, col1.simplify().first)); //use simplified  	
 				case monoidal:	
 					return wrap(col1.simplify().second, new MonoidalProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); //use simplified
 				}

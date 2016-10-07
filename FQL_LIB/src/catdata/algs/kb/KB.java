@@ -943,6 +943,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return e;
 	}
 
+	@SuppressWarnings("unchecked")
 	private KBExp<C, V> step1EsX(Pair<KBExp<C, V>, KBExp<C, V>> r0, KBExp<C, V> e) throws InterruptedException {
 		Pair<KBExp<C, V>, KBExp<C, V>> r = r0;
 		if (!Collections.disjoint(r.first.vars(), e.vars())
@@ -994,7 +995,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		}
 		return p;
 	}
-
+/*
 	protected List<Pair<KBExp<C, V>, KBExp<C, V>>> removeOrientable(List<Pair<KBExp<C, V>, KBExp<C, V>>> l) {
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> ret = new LinkedList<>();
 		Iterator<Pair<KBExp<C, V>, KBExp<C, V>>> it = l.iterator();
@@ -1006,7 +1007,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			}
 		}
 		return ret;
-	}
+	} */
 	
 	protected boolean strongGroundJoinable(KBExp<C, V> s, KBExp<C, V> t) throws InterruptedException {
 		//System.out.println("-----------");

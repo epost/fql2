@@ -13,6 +13,14 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.algs.kb.KBExp.KBApp;
 
+//TODO
+/*Loosen requirement for program in MVP that are of form
+
+l -> r
+
+in worst case, must try all combinations of orientations, but maybe can do better.
+*/
+//TODO merge constants and functions in typeside
 public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 
 	private final Iterator<V> fresh;

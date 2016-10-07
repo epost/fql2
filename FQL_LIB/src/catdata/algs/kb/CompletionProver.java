@@ -2,51 +2,81 @@ package catdata.algs.kb;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Util;
+import catdata.aql.AqlOption;
+import catdata.aql.AqlOptions;
+import catdata.aql.Collage;
+import catdata.aql.Head;
+import catdata.aql.Var;
 
-//herbrandization should morally be handled here.  but it's easier to do it in the helper 
-public class CompletionProver<T, C, V> extends DPKB<T, C, V> {
-
-	public KB<C, V> kb;
+public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty,En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> {
 	
-	public CompletionProver(Function<Pair<C,C>, Boolean> gt, KBOptions op,Iterator<V> fresh, Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) throws InterruptedException {
-		super(sorts, sig, eqs);
+	final private LPOUKB<Chc<Ty,En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> cp;
+	
+	public CompletionProver(Collection<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> init, AqlOptions ops, Collection<Chc<Ty, En>> sorts, Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>> signature, List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>> theory, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) throws InterruptedException {
+		boolean sort = (Boolean) ops.getOrDefault(AqlOption.completion_sort);
+		boolean filter_subsumed = (Boolean) ops.getOrDefault(AqlOption.completion_filter_subsumed);
+		boolean compose = (Boolean) ops.getOrDefault(AqlOption.completion_compose);
 		
-		kb = new KB<>(eqs.stream().map(x -> new Pair<>(x.second, x.third)).collect(Collectors.toSet()), KBOrders.lpogt(false, gt), fresh, Collections.emptySet(), op);
-		kb.complete();
-	}
-	
-	@Override
-	public boolean eq(Map<V, T> ctx, KBExp<C, V> lhs, KBExp<C, V> rhs) {
-		if (!ctx.isEmpty() && !hasNFs()) {
-			throw new RuntimeException("Cannot find normal forms for non-ground terms using system that is only ground complete.");
+		@SuppressWarnings("unchecked")
+		List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> prec2 = (List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>>) ops.getOrDefault(AqlOption.completion_precedence);
+		if (prec2 == null) {
+			throw new RuntimeException("No completion_precedence given");			
 		}
-		return nf(ctx, lhs).equals(nf(ctx, rhs));
+		List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> prec = new LinkedList<>(prec2);
+		for (Head<Ty, En, Sym, Fk, Att, Gen, Sk> c : init) {
+			if (!signature.containsKey(c)) {
+				prec.remove(c); //simplfied away TODO kind of weird
+			}
+		}		
+		
+		if (!prec.isEmpty() && !(prec.get(0) instanceof Head)) {
+			throw new RuntimeException("Anomaly: please report");
+		}
+		KBOptions options = new KBOptions(true, sort, false, true, Integer.MAX_VALUE, Integer.MAX_VALUE, filter_subsumed, compose); 
+		
+		Util.assertNoDups(prec);
+		if (!new HashSet<>(prec).equals(signature.keySet())) {
+			Set<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> precMinusSig = new HashSet<>(prec);
+			precMinusSig.removeAll(signature.keySet());
+			Set<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> sigMinusPrec = new HashSet<>(signature.keySet());
+			sigMinusPrec.removeAll(prec);
+			throw new RuntimeException("Incorrect precedence. Symbols in precedence but not signature: " + precMinusSig + " and symbols in signature but not precedence: " + sigMinusPrec);
+		}		
+		
+		cp = new LPOUKB<>(theory.stream().map(x -> new Pair<>(x.second, x.third)).collect(Collectors.toSet()), Var.it, Collections.emptySet(), options, prec);	
+		
+	}
+
+	@Override
+	public boolean eq(Map<Var, Chc<Ty, En>> ctx, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> lhs, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> rhs) {
+		return cp.eq(ctx, lhs, rhs);
 	}
 
 	@Override
 	public boolean hasNFs() {
-		if (kb.isComplete) {
-			return true;
-		}
-		return false;
+		return cp.hasNFs();
 	}
 
 	@Override
-	public KBExp<C, V> nf(Map<V, T> ctx, KBExp<C, V> term) {
-		return kb.nf(term);
+	public KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> nf(Map<Var, Chc<Ty, En>> ctx, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> term) {
+		return cp.nf(ctx, term);
 	}
 	
 	@Override
 	public String toString() {
-		return kb.toString();
+		return cp.toString();
 	}
+
 
 }
