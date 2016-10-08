@@ -26,7 +26,6 @@ import javax.swing.table.TableRowSorter;
 
 import catdata.Pair;
 import catdata.Util;
-import catdata.ide.MyTableRowSorter;
 import catdata.ide.NEWDEBUG;
 import catdata.opl.OplExp.NonEditableModel;
 
@@ -107,7 +106,7 @@ public class JSWrapper {
 		t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		JPanel p = new JPanel(new GridLayout(1, 1));
-		TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
+		TableRowSorter<?> sorter = new Util.MyTableRowSorter(t.getModel());
 		if (colNames.length > 0) {
 			sorter.toggleSortOrder(0);
 		}

@@ -1,9 +1,12 @@
 package catdata;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,6 +54,16 @@ public final class DAG<N> {
 		}
 
 		private final Map<K, Set<V>> fMap= new LinkedHashMap<>();
+		
+		public MultiMap() {
+			
+		}
+		
+		public MultiMap(MultiMap<K,V> x) {
+			for (K k : x.keySet()) {
+				fMap.put(k, new HashSet<>(x.get(k)));
+			}
+		}
 
 		/**
 		 * Adds <code>val to the values mapped to by key. If
@@ -117,9 +130,8 @@ public final class DAG<N> {
 		}
 	}
 
-	private final MultiMap<N,N> fOut= new MultiMap<>();
-	private final MultiMap<N,N> fIn= new MultiMap<>();
-
+	public final MultiMap<N,N> fOut, fIn; 
+	
 	/**
 	 * Adds a directed edge from <code>origin to target. The vertices are not
 	 * required to exist prior to this call - if they are not currently contained by the graph, they are
@@ -234,7 +246,7 @@ public final class DAG<N> {
 	}
 	
 	public String toString() {
-		return "Out edges: " + fOut.toString() + " In edges: " + fIn.toString(); 
+		return "Out edges: " + fOut.toString(); // + " In edges: " + fIn.toString(); 
 	}
 
 	@Override
@@ -267,6 +279,33 @@ public final class DAG<N> {
 			return false;
 		return true;
 	}
+	
+	public Set<N> vertices() {
+		return fIn.keySet();
+	}
+	
+	public DAG() {
+		fOut= new MultiMap<N,N>();
+		fIn= new MultiMap<N,N>();
+	}
+	
+	public DAG(DAG<N> g) {
+		fIn = new MultiMap<>(g.fIn);
+		fOut = new MultiMap<>(g.fOut);
+	}
+
+	public List<N> topologicalSort() {
+		DAG<N> g = new DAG<>(this);
+		List<N> ret = new LinkedList<>();
+		
+		while (!g.vertices().isEmpty()) {
+			N n = Util.get0X(g.getSources());
+			g.removeVertex(n);
+			ret.add(n);
+		} 
+		return ret;
+	}
+
 	
 	
 }

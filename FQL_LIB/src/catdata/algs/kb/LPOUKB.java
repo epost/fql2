@@ -10,17 +10,42 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.DAG;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.algs.kb.KBExp.KBApp;
 import catdata.algs.kb.KBExp.KBVar;
 
-public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
+/**
+ * 
+ * @author Ryan Wisnesky
+ *
+ * Implements "unfailing" aka "ordered" Knuth-Bendix completion.
+ * 
+ * Note: terminates when the system is complete, not when the system is ground complete.
+ * Note: eq is not a true semi-decision procedure for systems that are only ground complete, because eq does not skolemize.
+ * Note: printKB assumes <C> and <V> is String
+ * Note: will not orient var = const
+ * 
+ * Update Jan 16: add special support for associative and commutative theories as described in
+ * "On Using Ground Joinable Equations in Equational Theorem Proving"
+ * 
+ * Update Oct 16: change E-reduction to instantiate free variables with a minimal constant,
+ *  as described in 'Decision Problems in Ordered Rewriting'.  This is necessary to use only-ground complete
+ *  systems as decision procedures.  This means E-reduction is LPO specific.  Also, the AQL wrapper for this 
+ *  now herbrandizes, meaning that only-ground complete systems can decide universally quantified equations.
+ *
+ * @param <C> the type of functions/constants
+ * @param <V> the type of variables
+ */
+public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
+	
 	private List<C> prec;
 
 	private boolean isComplete = false;
@@ -225,7 +250,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	private void checkParentDead() throws InterruptedException {
 		if (Thread.currentThread().isInterrupted()) {
-			throw new InterruptedException();
+			throw new InterruptedException("Precedence tried: " + prec);
 		}
 	}
 
@@ -743,7 +768,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			checkParentDead();
 		}
 
-		System.out.println(this);
+//		System.out.println(this);
 		
 		return false;
 	}
@@ -860,28 +885,60 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			return o1.toString().compareTo(o2.toString());
 		}
 	};
+	
+
+	@Override
+	public boolean eq(Map<V, T> ctx, KBExp<C, V> lhs, KBExp<C, V> rhs) {
+		return qnf(lhs).equals(qnf(rhs));
+	}
+
+	@Override
+	public boolean hasNFs() {
+		return isComplete;
+	}
+
+	private KBExp<Chc<V, C>, V> qnf(KBExp<C, V> e) {
+		try {
+			if (isComplete) {
+				return red(null, Util.append(E, G), R, e.inject());
+			} else if (isCompleteGround) {
+				return red(null, Util.append(E, G), R, e.skolemize());
+			}
+			throw new RuntimeException("Anomaly: please report");
+		} catch (InterruptedException e1) {
+			throw new RuntimeException(e1);
+		}
+	}
+
+	@Override
+	public KBExp<C, V> nf(Map<V, T> ctx, KBExp<C, V> e) {
+		return deject(qnf(e));
+	}
+
+	private KBExp<C, V> deject(KBExp<Chc<V, C>, V> e) {
+		if (e.isVar) {
+			return new KBVar<>(e.getVar().var);
+		}
+		if (e.getApp().f.left) {
+			throw new RuntimeException("Anomaly: skolem term " + e.getApp().f.l + " is escaping in " + e);
+		}
+		return new KBApp<>(e.getApp().f.r, e.getApp().args.stream().map(this::deject).collect(Collectors.toList()));
+	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private boolean gt(Chc<V, C> lhs, Chc<V, C> rhs) {
 		if (lhs.equals(rhs)) {
 			return false;
-		}
-		if (min.equals(lhs)) {
+		} else if (min.equals(lhs)) {
 			return false;
-		}
-		if (min.equals(rhs)) {
+		} else if (min.equals(rhs)) {
 			return true;
-		}
-
-		if (lhs.left && rhs.left) {
-		//	throw new RuntimeException();
+		} else if (lhs.left && rhs.left) {
 			return lhs.l.toString().compareTo(rhs.l.toString()) > 0;
 		} else if (lhs.left) {
-		//	throw new RuntimeException();
 			return true;
 		} else if (rhs.left) {
-		//	throw new RuntimeException();
 			return false;
 		}
 
@@ -892,7 +949,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		}
 		return i > j;
 	};
-
+	
 	public boolean gt_lpo(KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t) {
 		return gt_lpo1(s, t) || gt_lpo2(s, t);
 	}
@@ -944,43 +1001,219 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		}
 		return gt_lpo_lex(ss.subList(1, ss.size()), tt.subList(1, tt.size()));
 	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// Constraint satisfaction problem for LPO orientability, used to infer precedences
+	// http://www.jaist.ac.jp/~hirokawa/publications/03rta.pdf
+	// "Tsukuba Termination Tool" Nao Hirokawa and Aart Middeldorp
 
-	@Override
-	public boolean eq(Map<V, T> ctx, KBExp<C, V> lhs, KBExp<C, V> rhs) {
-		return qnf(lhs).equals(qnf(rhs));
+	private static <X> Set<DAG<X>> tru() {
+		return Util.singSet(new DAG<>());
 	}
-
-	@Override
-	public boolean hasNFs() {
-		return isComplete;
+	
+	private static <X> Set<DAG<X>> fals() {
+		return Collections.emptySet();
 	}
-
-	private KBExp<Chc<V, C>, V> qnf(KBExp<C, V> e) {
-		try {
-			if (isComplete) {
-				return red(null, Util.append(E, G), R, e.inject());
-			} else if (isCompleteGround) {
-				return red(null, Util.append(E, G), R, e.skolemize());
+	
+	private static <X> Set<DAG<X>> and(Set<DAG<X>> a, Set<DAG<X>> b) {
+		Set<DAG<X>> ret = new HashSet<>();
+		for (DAG<X> x : a) {
+			for (DAG<X> y : b) {
+				DAG<X> xy = union(x, y);
+				if (xy != null) {
+					ret.add(xy);
+				}
 			}
+		}
+//		System.out.println("and " + a + " and " + b + " ret " + ret + "");
+
+		return min(ret);
+	}
+	
+
+	private static <X> DAG<X> union(DAG<X> a, DAG<X> b) {
+		DAG<X> ret = new DAG<>();
+		Set<X> xs = Util.union(a.vertices(), b.vertices());
+		for (X x1 : xs) {
+			for (X x2 : xs) {
+				if (x1.equals(x2)) {
+					continue;
+				}
+				if (a.hasPath(x1, x2) || b.hasPath(x1, x2)) {
+					boolean added = ret.addEdge(x1, x2);
+					if (!added) {
+						return null;
+					}
+				}
+			}
+		}
+//		System.out.println("union " + a + " and " + b + " ret " + ret + "");
+
+		return ret;
+	}
+	
+	private static <X> Set<DAG<X>> or(Set<DAG<X>> a, Set<DAG<X>> b) {
+		return min(Util.union(a, b));
+	}
+	
+	private static <X> Set<DAG<X>> min(Set<DAG<X>> a) { //TODO: add this in
+		Set<DAG<X>> ret = new HashSet<>();
+		for (DAG<X> x : a) {
+			if (minimal(x, a)) {
+				ret.add(x);
+			}
+		}
+		return ret;
+	}
+	
+	
+	private static <X> boolean minimal(DAG<X> x, Set<DAG<X>> a) {
+		//System.out.println("is " + x + " minimal against " + a + "?");
+		for (DAG<X> aa : a) {
+			if (lessThanOrEqual(aa, x) && !x.equals(aa)) {
+				//System.out.println("no");
+				return false;
+			}
+		}
+		//System.out.println("yes");
+		return true;
+	}
+
+	private static <X> boolean lessThanOrEqual(DAG<X> a, DAG<X> b) {
+		//System.out.println("is " + a + " lessThanOrEqual " + b + "?");
+		Set<X> xs = Util.union(a.vertices(), b.vertices());
+		for (X x1 : xs) {
+			for (X x2 : xs) {
+				if (a.hasPath(x1, x2) && !b.hasPath(x1, x2)) {
+					//System.out.println("no");
+					return false;
+				}
+			}
+		}
+		//System.out.println("yes");
+		return true;
+	}
+
+	 private static <X,V> Set<DAG<X>> eq(KBExp<X, V> s, KBExp<X, V> t) {
+		if (s.equals(t)) {
+//			System.out.println("eq " + s + " = " + t + " ret " + tru() + "");
+			return tru();
+		}
+	//	System.out.println("eq " + s + " = " + t + " ret " + fals() + "");
+		return fals();
+	} 
+	
+	private static <X> Set<DAG<X>> gtInfer(X lhs, X rhs) {
+		if (lhs.equals(rhs)) {
 			throw new RuntimeException("Anomaly: please report");
-		} catch (InterruptedException e1) {
-			throw new RuntimeException(e1);
 		}
+		DAG<X> d = new DAG<>();
+		d.addEdge(lhs, rhs);
+//		System.out.println(" " + lhs + " > " + rhs + " ret " + d + "");
+		return Util.singSet(d);
+	} 
+
+	public static <X,V> Set<DAG<X>> gt_lpoInfer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
+		return or(gt_lpo1Infer(s, t), gt_lpo2Infer(s, t)); //TODO: remove non-minimal elements everywhere
+	} 
+
+	public static <X,V> Set<DAG<X>> gt_lpo1Infer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
+	//	System.out.println("1 start on " + s + " -> " + t);
+		if (s.isVar) {
+	//		System.out.println("1 end on " + s + " -> " + t + " ret " + fals() + "");
+			return fals();
+		} else {
+			Set<DAG<X>> ret = fals();
+			for (KBExp<X, V> si : s.getApp().args) {
+				ret = or(ret, eq(si, t));
+				ret = or(ret, gt_lpoInfer(si, t));
+			}
+	//		System.out.println("1 end on " + s + " -> " + t + " ret " + ret + "");
+
+			return ret;
+		}
+	} 
+
+	public static <X,V> Set<DAG<X>> gt_lpo2Infer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
+	//	System.out.println("2 start on " + s + " -> " + t);
+
+		if (s.isVar || t.isVar) {
+//			System.out.println("2 end on " + s + " -> " + t + " ret " + fals() + "");			
+			return fals();
+		}
+		KBApp<X, V> S = s.getApp();
+		KBApp<X, V> T = t.getApp();
+	
+		Set<DAG<X>> ret = tru();
+		for (KBExp<X, V> ti : T.args) {
+			ret = and(ret, gt_lpoInfer(S, ti));
+		}
+		
+		Set<DAG<X>> zz = null;
+		if (S.f.equals(T.f)) {
+			zz = and(ret, gt_lpo_lexInfer(S.args, T.args));
+	//		System.out.println("2 end on " + s + " -> " + t + " ret " + zz);
+		} else {
+			zz = and(ret, gtInfer(S.f, T.f));
+	//		System.out.println("2 end on " + s + " -> " + t + " ret " + zz);
+		}
+		return zz;
 	}
 
-	@Override
-	public KBExp<C, V> nf(Map<V, T> ctx, KBExp<C, V> e) {
-		return deject(qnf(e));
+	public static <X,V> Set<DAG<X>> gt_lpo_lexInfer(List<KBExp<X, V>> ss, List<KBExp<X, V>> tt) throws InterruptedException {
+		if (Thread.currentThread().isInterrupted()) {
+			throw new InterruptedException();
+		}
+		if (ss.size() != tt.size()) {
+			throw new RuntimeException("Anomaly: please report");
+		}
+		if (ss.isEmpty()) {
+			return fals();
+		}
+		KBExp<X, V> s0 = ss.get(0), t0 = tt.get(0);	
+		return or(gt_lpoInfer(s0, t0), and(eq(s0,t0), gt_lpo_lexInfer(ss.subList(1, ss.size()), tt.subList(1, tt.size()))));	
+	}
+	
+	public static <C,V> List<C> inferPrec(Map<C, Integer> symbols, Set<Pair<KBExp<C, V>, KBExp<C, V>>> R0) throws InterruptedException {
+		Set<DAG<C>> ret = tru();
+		for (Pair<KBExp<C, V>, KBExp<C, V>> R : R0) {
+			ret = and(ret, gt_lpoInfer(R.first, R.second));
+		}
+		if (ret.isEmpty()) {
+			throw new RuntimeException("There is no LPO precedence that can orient all rules from left to right.  (Unfailing) completion can still be used, but you will have to specify a precedence manually.");
+		}
+//		System.out.println("zz " + ret.stream().map(x -> toPrec(symbols, x)).collect(Collectors.toList()));
+		DAG<C> g = Util.get0X(ret);
+		return toPrec(symbols, g); //TODO: just pick one randomly and make it total randomly.   
+
 	}
 
-	private KBExp<C, V> deject(KBExp<Chc<V, C>, V> e) {
-		if (e.isVar) {
-			return new KBVar<>(e.getVar().var);
-		}
-		if (e.getApp().f.left) {
-			throw new RuntimeException("Anomaly: skolem term " + e.getApp().f.l + " is escaping in " + e);
-		}
-		return new KBApp<>(e.getApp().f.r, e.getApp().args.stream().map(this::deject).collect(Collectors.toList()));
+	//arity-0 < arity-2 < arity-1 < arity-3 < arity-4
+	private static <C> List<C> toPrec(Map<C, Integer> cs, DAG<C> g) {
+//		System.out.println("init " + g.topologicalSort());
+		List<C> ret = new LinkedList<>(g.topologicalSort()); //biggest first
+		
+		List<C> extra = new LinkedList<>(cs.keySet()); //bigest first
+		extra.removeAll(g.vertices());
+		Function<Integer, Integer> f = x -> {
+			if (x == 2) {
+				return 1;
+			} else if (x == 1) {
+				return 2;
+			}
+			return x;
+		};
+		extra.sort((x,y) -> {
+			int x0 = cs.get(x);
+			int y0 = cs.get(y);
+			return Integer.compare(f.apply(x0), f.apply(y0));
+		});
+		ret.addAll(0, extra);
+//		System.out.println("final " + ret);
+		return Util.reverse(ret);
 	}
 
+
+	
+	
 }

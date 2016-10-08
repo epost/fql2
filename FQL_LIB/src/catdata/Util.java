@@ -26,14 +26,38 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.border.Border;
+import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-//import catdata.fqlpp.FUNCTION;
-import catdata.ide.MyTableRowSorter;
-//import catdata.opl.OplTerm;
+
 
 public class Util {
 	
+
+public static class MyTableRowSorter extends TableRowSorter<TableModel> {
+
+	public MyTableRowSorter(TableModel model) {
+		super(model);
+	}
+
+	@Override
+	protected boolean useToString(int c) {
+		return false;
+	}
+	
+	@Override 
+	public Comparator<?> getComparator(int c) {
+		return new Comparator<Object>() {
+			@Override
+			public int compare(Object o1, Object o2) {
+				if (o1 instanceof Integer && o2 instanceof Integer) {
+					return ((Integer)o1).compareTo((Integer)o2);
+				}
+				return o1.toString().compareTo(o2.toString());
+			}
+		};
+	}
+}
 	
 
 	public static void assertNotNull(Object o) {
@@ -797,7 +821,7 @@ public class Util {
 	public static <X> Set<X> union(Set<X> x, Set<X> y) {
 		Set<X> ret = new HashSet<>(x);
 		ret.addAll(y);
-		return y;
+		return ret;
 	}
 
 	public static <X> List<String> toString(List<X> list) {

@@ -2,6 +2,7 @@ package catdata.algs.kb;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,10 +29,15 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 		boolean filter_subsumed = (Boolean) ops.getOrDefault(AqlOption.completion_filter_subsumed);
 		boolean compose = (Boolean) ops.getOrDefault(AqlOption.completion_compose);
 		
+		Set<Pair<KBExp<Head<Ty,En,Sym,Fk,Att,Gen,Sk>,Var>,KBExp<Head<Ty,En,Sym,Fk,Att,Gen,Sk>,Var>>> E0 = theory.stream().map(x -> new Pair<>(x.second, x.third)).collect(Collectors.toSet());
 		@SuppressWarnings("unchecked")
 		List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> prec2 = (List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>>) ops.getOrDefault(AqlOption.completion_precedence);
 		if (prec2 == null) {
-			throw new RuntimeException("No completion_precedence given");			
+			Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Integer> m = new HashMap<>();
+			for (Head<Ty, En, Sym, Fk, Att, Gen, Sk> c : signature.keySet()) {
+				m.put(c, signature.get(c).first.size());
+			}
+			prec2 = LPOUKB.inferPrec(m, E0); 
 		}
 		List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> prec = new LinkedList<>(prec2);
 		for (Head<Ty, En, Sym, Fk, Att, Gen, Sk> c : init) {
@@ -43,7 +49,7 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 		if (!prec.isEmpty() && !(prec.get(0) instanceof Head)) {
 			throw new RuntimeException("Anomaly: please report");
 		}
-		KBOptions options = new KBOptions(true, sort, false, true, Integer.MAX_VALUE, Integer.MAX_VALUE, filter_subsumed, compose); 
+		KBOptions options = new KBOptions(true, sort, false, true, Integer.MAX_VALUE, Integer.MAX_VALUE, filter_subsumed, compose); //this ignores all but 4 options, see LPOUKB
 		
 		Util.assertNoDups(prec);
 		if (!new HashSet<>(prec).equals(signature.keySet())) {
@@ -54,7 +60,7 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 			throw new RuntimeException("Incorrect precedence. Symbols in precedence but not signature: " + precMinusSig + " and symbols in signature but not precedence: " + sigMinusPrec);
 		}		
 		
-		cp = new LPOUKB<>(theory.stream().map(x -> new Pair<>(x.second, x.third)).collect(Collectors.toSet()), Var.it, Collections.emptySet(), options, prec);	
+		cp = new LPOUKB<>(E0, Var.it, Collections.emptySet(), options, prec);	
 		
 	}
 

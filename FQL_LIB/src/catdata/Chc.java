@@ -9,10 +9,10 @@ import java.util.Set;
  * @author Ryan Wisnesky
  */
 public class Chc<X,Y> {
-	public Boolean left;
+	public final boolean left;
 	
-	public X l;
-	public Y r;
+	public final X l;
+	public final Y r;
 	
 	public static <X,Y> Set<X> projIfAllLeft(Set<Chc<X,Y>> set) {
 		Set<X> ret = new HashSet<>();
@@ -63,13 +63,18 @@ public class Chc<X,Y> {
 	}
 
 	
+	
+	private Chc(Boolean left, X l, Y r) {
+		this.left = left;
+		this.l = l;
+		this.r = r;
+	}
+
 	public static <X,Y> Chc<X,Y> inLeft(X l) {
 		/* if (l == null) {
 			throw new RuntimeException();
 		} */
-		Chc<X,Y> ret = new Chc<>();
-		ret.left = true;
-		ret.l = l;
+		Chc<X,Y> ret = new Chc<>(true, l, null);
 		return ret;
 	}
 	
@@ -77,9 +82,7 @@ public class Chc<X,Y> {
 		/* if (r == null) {
 			throw new RuntimeException();
 		} */
-		Chc<X,Y> ret = new Chc<>();
-		ret.left = false;
-		ret.r = r;
+		Chc<X,Y> ret = new Chc<>(false, null, r);
 		return ret;
 	}
 
@@ -99,16 +102,18 @@ public class Chc<X,Y> {
 		}
 	}
 	
+	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((l == null) ? 0 : l.hashCode());
-		result = prime * result + ((left == null) ? 0 : left.hashCode());
+		result = prime * result + (left ? 1231 : 1237);
 		result = prime * result + ((r == null) ? 0 : r.hashCode());
 		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -118,22 +123,13 @@ public class Chc<X,Y> {
 		if (getClass() != obj.getClass())
 			return false;
 		Chc<?,?> other = (Chc<?,?>) obj;
-		if (l == null) {
-			if (other.l != null)
-				return false;
-		} else if (!l.equals(other.l))
+		if (left != other.left)
 			return false;
-		if (left == null) {
-			if (other.left != null)
-				return false;
-		} else if (!left.equals(other.left))
-			return false;
-		if (r == null) {
-			if (other.r != null)
-				return false;
-		} else if (!r.equals(other.r))
-			return false;
-		return true;
+		if (left) {
+			return l.equals(other.l);
+		}
+		return r.equals(other.r);
+		
 	}
 
 	public void assertNeitherNull() {

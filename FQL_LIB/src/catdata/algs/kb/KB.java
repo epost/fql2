@@ -22,25 +22,7 @@ import catdata.algs.kb.KBExp.KBVar;
 
 /**
  * 
- * @author Ryan Wisnesky
- *
- * Implements "unfailing" aka "ordered" Knuth-Bendix completion.
- * 
- * Note: terminates when the system is complete, not when the system is ground complete.
- * Note: eq is not a true semi-decision procedure for systems that are only ground complete, because eq does not skolemize.
- * Note: printKB assumes <C> and <V> is String
- * Note: will not orient var = const
- * 
- * Update Jan 16: add special support for associative and commutative theories as described in
- * "On Using Ground Joinable Equations in Equational Theorem Proving"
- * 
- * Update Oct 16: change E-reduction to instantiate free variables with a minimal constant,
- *  as described in 'Decision Problems in Ordered Rewriting'.  This is necessary to use only-ground complete
- *  systems as decision procedures.  This means E-reduction is LPO specific.  Also, the AQL wrapper for this 
- *  now herbrandizes, meaning that only-ground complete systems can decide universally quantified equations.
- *
- * @param <C> the type of functions/constants
- * @param <V> the type of variables
+ * Do not use - replaced by LPOUKB.
  */
 public class KB<C, V> extends EqProverDefunct<C, V> {
 	 
@@ -87,12 +69,11 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			e1.printStackTrace();
 			throw new RuntimeException("Interrupted " + e1.getMessage());
 		}
-//		System.out.println("AC symbols: " + AC_symbols);
 		initHorn();
+		//adding a check to abort if program doesn't increase speed
+		
 	}
-	
-	
-	
+		
 	private void initAC() throws InterruptedException {
 		if (!options.semantic_ac) {
 			return;

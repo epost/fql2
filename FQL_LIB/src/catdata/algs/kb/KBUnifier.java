@@ -3,6 +3,7 @@ package catdata.algs.kb;
 import java.util.HashMap;
 import java.util.Map;
 
+import catdata.Chc;
 import catdata.algs.kb.KBExp.KBApp;
 
 /**
@@ -20,15 +21,15 @@ public class KBUnifier<C, V> {
 		// if (!Collections.disjoint(s.vars_fast(), t.vars_fast())) {
 		// throw new RuntimeException("not disjoint in findsubst");
 		// }
-		Map<V, KBExp<C, V>> m;
+		Map<V, KBExp<Chc<V,C>, V>> m;
 		try {
-			m = unify0(s, t.freeze());
+			m = unify0(s.inject(), t.skolemize());
 			if (m == null) {
 			return null;
 		}
 		Map<V, KBExp<C, V>> ret = new HashMap<>();
 		for (V v : m.keySet()) {
-			ret.put(v, m.get(v).unfreeze());
+			ret.put(v, KBExp.unskolemize(m.get(v)));
 		}
 		return ret;
 		} catch (InterruptedException e) {

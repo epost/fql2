@@ -1,5 +1,6 @@
 package catdata.algs.kb;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,11 +57,11 @@ public abstract class KBExp<C, V> {
 			KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d);
 
 	public abstract KBExp<C, V> replace(List<Integer> p, KBExp<C, V> r);
-
+/*
 	public abstract KBExp<C, V> freeze();
 
 	public abstract KBExp<C, V> unfreeze();
-
+*/
 	public boolean isVar;
 
 	public abstract KBVar<C, V> getVar();
@@ -175,6 +176,7 @@ public abstract class KBExp<C, V> {
 			throw new RuntimeException("Cannot replace");
 		}
 
+		/*
 		KBExp<C, V> frozen = null;
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -191,6 +193,7 @@ public abstract class KBExp<C, V> {
 			throw new RuntimeException();
 		}
 
+*/
 		@Override
 		public boolean hasAsSubterm(KBExp<C, V> sub) {
 			return this.equals(sub);
@@ -410,7 +413,7 @@ public abstract class KBExp<C, V> {
 			}
 			return new KBApp<>(f, new_args);
 		}
-
+/*
 		KBExp<C, V> freeze = null;
 
 		@Override
@@ -443,7 +446,7 @@ public abstract class KBExp<C, V> {
 			}
 			return unfreeze;
 		}
-
+*/
 		@Override
 		public boolean hasAsSubterm(KBExp<C, V> sub) {
 			if (this.equals(sub)) {
@@ -592,22 +595,32 @@ public abstract class KBExp<C, V> {
 			return ret;
 		}
 
+		private KBExp<Chc<V, C>, V> inject = null;
 		@Override
 		public KBExp<Chc<V, C>, V> inject() {
-			List<KBExp<Chc<V, C>, V>> new_args = new LinkedList<>();
+			if (inject != null) {
+				return inject;
+			}
+			List<KBExp<Chc<V, C>, V>> new_args = new ArrayList<>(args.size());
 			for (KBExp<C, V> arg : args) {
 				new_args.add(arg.inject());
 			}
-			return new KBApp<>(Chc.inRight(f), new_args);
+			inject = new KBApp<>(Chc.inRight(f), new_args);
+			return inject;
 		}
 
+		private KBExp<Chc<V, C>, V> skolemize = null;
 		@Override
 		public KBExp<Chc<V, C>, V> skolemize() {
-			List<KBExp<Chc<V, C>, V>> new_args = new LinkedList<>();
+			if (skolemize != null) {
+				return skolemize;
+			}
+			List<KBExp<Chc<V, C>, V>> new_args = new ArrayList<>(args.size());
 			for (KBExp<C, V> arg : args) {
 				new_args.add(arg.skolemize());
 			}
-			return new KBApp<>(Chc.inRight(f), new_args);
+			skolemize = new KBApp<>(Chc.inRight(f), new_args);
+			return skolemize;
 		}
 	}
 
@@ -618,5 +631,23 @@ public abstract class KBExp<C, V> {
 	public abstract KBExp<Chc<V,C>, V> inject();
 	
 	public abstract KBExp<Chc<V,C>, V> skolemize();
+	
+	public static <C,V> KBExp<C, V> unskolemize(KBExp<Chc<V,C>, V> e) {
+		if (e.isVar) {
+			throw new RuntimeException("Anomaly: please report");
+		}
+		if (e.getApp().f.left) {
+			if (!e.getApp().args.isEmpty()) {
+				throw new RuntimeException("Anomaly: please report");
+			}
+			return new KBVar<>(e.getApp().f.l);
+		} else {
+			List<KBExp<C, V>> l = new ArrayList<>(e.getApp().args.size());
+			for (KBExp<Chc<V,C>, V> arg : e.getApp().args) {
+				l.add(unskolemize(arg));
+			}
+			return new KBApp<>(e.getApp().f.r, l);
+		}
+	}
 
 }

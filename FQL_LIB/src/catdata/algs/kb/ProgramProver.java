@@ -32,43 +32,22 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 		
 		if (check) {
 			//TODO: freshen the rules?
-	
-			
-			for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : theory) {
-				List<V> vars = new LinkedList<>();
-				eq.second.vars(vars);
-				if (vars.size() != eq.second.vars().size()) {
-					throw new RuntimeException("Not left linear (cotains duplicated variable on lhs): " + eq.second + " = " + eq.third);
-				}			
-			}
-			
-			for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> ab0 : theory) {
-				for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> gd0 : theory) {
-					Pair<KBExp<C, V>, KBExp<C, V>> ab = KB.freshen(fresh, new Pair<>(ab0.second, ab0.third));
-					Pair<KBExp<C, V>, KBExp<C, V>> gd = KB.freshen(fresh, new Pair<>(gd0.second, gd0.third));
-				
-					Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cps = gd.first.cp(new LinkedList<>(), ab.first, ab.second, gd.first, gd.second);
-					for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>> cp : cps) {
-						if (Thread.currentThread().isInterrupted()) {
-							throw new InterruptedException();
-						}
-						if (!cp.first.equals(cp.second)) {
-							throw new RuntimeException("Equation " + ab0.second + " = " + ab0.third + " overlaps with " + gd0.second + " = " + gd0.third + ", the critical pair is " + cp.first + " and " + cp.second);
-						}
-					}
-				}			
-			}
+			isProgram(fresh, theory, true);
 		}
 		
 	}
 
-	//TODO: merge with above
-	public static <T,C,V> boolean isProgram(Iterator<V> fresh, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> theory) {
+	//TODO: find some way to cache the fact that something has been proved to be a program
+	public static <T,C,V> boolean isProgram(Iterator<V> fresh, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> theory, boolean throwerror) {
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : theory) {
 			List<V> vars = new LinkedList<>();
 			eq.second.vars(vars);
 			if (vars.size() != eq.second.vars().size()) {
-				return false;
+				if (throwerror) {
+					throw new RuntimeException("Not left linear (cotains duplicated variable on lhs): " + eq.second + " = " + eq.third);
+				} else {
+					return false;
+				}
 			}			
 		}
 		
@@ -80,7 +59,11 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 				Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cps = gd.first.cp(new LinkedList<>(), ab.first, ab.second, gd.first, gd.second);
 				for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>> cp : cps) {
 					if (!cp.first.equals(cp.second)) {
-						return false;
+						if (throwerror) {
+							throw new RuntimeException("Equation " + ab0.second + " = " + ab0.third + " overlaps with " + gd0.second + " = " + gd0.third + ", the critical pair is " + cp.first + " and " + cp.second);			
+						} else {
+							return false;
+						}
 					}
 				}
 			}			

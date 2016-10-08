@@ -95,11 +95,11 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	    } catch (TimeoutException e) {
 //	    	   e.printStackTrace();
 	    	   future.cancel(true);
-	    	   throw new RuntimeException("Timeout (" + timeout + "s) during decision procedure construction");
+	    	   throw new RuntimeException("Timeout (" + timeout + "s) during decision procedure construction.  If using completion, you might try a different completion_precedence.");
 	       } catch (InterruptedException e) {
 //	    	   e.printStackTrace();
 	    	   future.cancel(true);
-	    	   throw new RuntimeException("Interruption (" + timeout + "s) during decision procedure construction");
+	    	   throw new RuntimeException("Interruption (" + timeout + "s) during decision procedure construction.");
 	       } catch (Throwable e) {
 	//    	   e.printStackTrace();
 	    	   throw new RuntimeException(e);
@@ -112,7 +112,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return ProverName.free;
 		} else if (col.isGround()) {
 			return ProverName.congruence;
-		} else if (ProgramProver.isProgram(Var.it, col.toKB().first)) {
+		} else if (ProgramProver.isProgram(Var.it, col.toKB().first, false)) {
 /*			if (!ops.options.containsKey(AqlOption.allow_empty_sorts_unsafe)) {
 				ops.options.put(AqlOption.allow_empty_sorts_unsafe, true);
 			} */
