@@ -56,9 +56,11 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 	}
 
 	private void freeze() {
+		System.out.println("starting " + this);
 		fI = new HashMap<>();
 		for (Object l : blocks.keySet()) {
 			Block<S1, C1, V1, S2, C2, V2> block = blocks.get(l).second;
+			System.out.println("------- " + l);
 
 			List<Pair<OplTerm<Chc<C1, V1>, V1>, OplTerm<Chc<C1, V1>, V1>>> eqs = new LinkedList<>();
 			for (Pair<OplTerm<C1, V1>, OplTerm<C1, V1>> eq : block.where) {

@@ -818,7 +818,7 @@ public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 		return ret;
 	}
 
-	public static <X> Set<X> union(Set<X> x, Set<X> y) {
+	public static <X> Set<X> union(Collection<X> x, Collection<X> y) {
 		Set<X> ret = new HashSet<>(x);
 		ret.addAll(y);
 		return ret;

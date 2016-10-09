@@ -70,10 +70,46 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			throw new RuntimeException("Interrupted " + e1.getMessage());
 		}
 		initHorn();
-		//adding a check to abort if program doesn't increase speed
-		
+		/* if (isProgram()) {
+//			System.out.println("Is program");
+			R.addAll(E);
+			E.clear();
+			isCompleteGround = true;
+			isComplete = true;
+		}   //doesnt seem to help*/
 	}
+	/*
+	private boolean isProgram() {
+		Set<Pair<KBExp<C, V>, KBExp<C, V>>> all = new HashSet<>(R);
+		all.addAll(E);
+		for (Pair<KBExp<C, V>, KBExp<C, V>> eq : all) {
+			List<V> vars = new LinkedList<>();
+			eq.second.vars(vars);
+			if (vars.size() != eq.second.vars().size()) {
+				System.out.println("breakvar on " + eq);
+				return false;
+			}			
+		}
 		
+		for (Pair<KBExp<C, V>, KBExp<C, V>> ab0 : all) {
+			for (Pair<KBExp<C, V>, KBExp<C, V>> gd0 : all) {
+				Pair<KBExp<C, V>, KBExp<C, V>> ab = KB.freshen(fresh, new Pair<>(ab0.first, ab0.second));
+				Pair<KBExp<C, V>, KBExp<C, V>> gd = KB.freshen(fresh, new Pair<>(gd0.first, gd0.second));
+			
+				Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cps = gd.first.cp(new LinkedList<>(), ab.first, ab.second, gd.first, gd.second);
+				for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>> cp : cps) {
+					if (!cp.first.equals(cp.second)) {
+						System.out.println("break on " + ab0 + " and " + gd0 + " cp is " + E);
+						return false;
+					}
+				}
+			}			
+		}
+		return true;
+	}  */
+	
+	
+	@SuppressWarnings("deprecation")
 	private void initAC() throws InterruptedException {
 		if (!options.semantic_ac) {
 			return;

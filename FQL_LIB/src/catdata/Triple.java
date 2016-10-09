@@ -75,4 +75,8 @@ public class Triple<S1, S2, S3> implements Comparable<Triple<S1, S2, S3>> {
 			return c;
 		}
 	}
+
+	public Triple<S2, S1, S3> reverse12() {
+		return new Triple<>(second, first, third);
+	}
 }

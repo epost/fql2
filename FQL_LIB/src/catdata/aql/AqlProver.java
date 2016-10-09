@@ -20,16 +20,11 @@ import catdata.algs.kb.ProgramProver;
 
 //TODO SQL strategy
 
-//TODO: set infinite defaults for underlying provers
-
 //TODO: cache hashcode for term?
 
-//TODO: could herbrandize here
+//TODO: redo program/completion to work with empty sorts
 
-//TODO: redo program/monoidal/completion to work with empty sorts
-
-//TODO: better guessing of precedences (fk, att, etc)
-
+//TODO: maybe easier to check queries by translation into mappings
 
 
 //no java here!
@@ -107,6 +102,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	}
 
+	//TODO maybe monoidal is better than program!!
 	private static <Sk, En, Fk, Ty, Att, Sym, Gen> ProverName auto(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		if (col.eqs.isEmpty()) {
 			return ProverName.free;

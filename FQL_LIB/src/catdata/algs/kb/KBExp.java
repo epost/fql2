@@ -51,6 +51,7 @@ public abstract class KBExp<C, V> {
 
 	protected abstract void vars(Collection<V> vars);
 	
+	@Deprecated 
 	protected abstract void symbols(Map<C, Integer> symbols);
 
 	public abstract Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cp(List<Integer> l,
@@ -413,40 +414,7 @@ public abstract class KBExp<C, V> {
 			}
 			return new KBApp<>(f, new_args);
 		}
-/*
-		KBExp<C, V> freeze = null;
-
-		@Override
-		public KBExp<C, V> freeze() {
-			if (freeze == null) {
-				List<KBExp<C, V>> new_args = new LinkedList<>();
-				for (KBExp<C, V> arg : args) {
-					new_args.add(arg.freeze());
-				}
-				freeze = new KBApp<>(f, new_args);
-			}
-			return freeze;
-		}
-
-		KBExp<C, V> unfreeze = null;
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public KBExp<C, V> unfreeze() {
-			if (unfreeze == null) {
-				if (f instanceof KBVar) {
-					unfreeze = (KBVar<C, V>) f;
-				} else {
-					List<KBExp<C, V>> new_args = new LinkedList<>();
-					for (KBExp<C, V> arg : args) {
-						new_args.add(arg.unfreeze());
-					}
-					unfreeze = new KBApp<C, V>(f, new_args);
-				}
-			}
-			return unfreeze;
-		}
-*/
+		
 		@Override
 		public boolean hasAsSubterm(KBExp<C, V> sub) {
 			if (this.equals(sub)) {
@@ -574,14 +542,6 @@ public abstract class KBExp<C, V> {
 			}
 		}
 
-/*		@Override
-		public void allSubExps(Set<KBExp<C, V>> set) {
-			for (KBExp<C, V> arg : args) {
-				arg.allSubExps(set);
-			}
-			set.add(this);
-		} */
-		
 		public boolean allSubExps(Map<KBExp<C, V>, Set<KBExp<C, V>>> pred) {
 			boolean ret = false;
 			if (!pred.containsKey(this)) {

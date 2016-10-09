@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.DAG;
 import catdata.Pair;
+import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.algs.kb.KBExp.KBApp;
@@ -26,11 +27,8 @@ import catdata.algs.kb.KBExp.KBVar;
  * 
  * @author Ryan Wisnesky
  *
- * Implements "unfailing" aka "ordered" Knuth-Bendix completion.
+ * Implements "unfailing" aka "ordered" Knuth-Bendix completion.  Handles empty sorts correctly.
  * 
- * Note: terminates when the system is complete, not when the system is ground complete.
- * Note: eq is not a true semi-decision procedure for systems that are only ground complete, because eq does not skolemize.
- * Note: printKB assumes <C> and <V> is String
  * Note: will not orient var = const
  * 
  * Update Jan 16: add special support for associative and commutative theories as described in
@@ -38,13 +36,32 @@ import catdata.algs.kb.KBExp.KBVar;
  * 
  * Update Oct 16: change E-reduction to instantiate free variables with a minimal constant,
  *  as described in 'Decision Problems in Ordered Rewriting'.  This is necessary to use only-ground complete
- *  systems as decision procedures.  This means E-reduction is LPO specific.  Also, the AQL wrapper for this 
- *  now herbrandizes, meaning that only-ground complete systems can decide universally quantified equations.
+ *  systems as decision procedures via herbrandization.  This means E-reduction is LPO specific. 
  *
  * @param <C> the type of functions/constants
  * @param <V> the type of variables
+ * @param <T> the type of types
  */
 public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
+	
+	private void inhabGen(Set<T> inhabited) {
+		while (inhabGen1(inhabited));
+	}
+	
+	private boolean inhabGen1(Set<T> ret) {
+		boolean changed = false;
+		for (C c : sig.keySet()) {
+			for (T t : sig.get(c).first) {
+				if (!ret.contains(t)) {
+					continue;
+				}
+			}
+			changed = changed | ret.add(sig.get(c).second);
+		}
+		return changed;
+	}
+	
+	private Set<T> groundInhabited = new HashSet<>();
 	
 	private List<C> prec;
 
@@ -52,80 +69,89 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	private boolean isCompleteGround = false;
 
 	//order matters
-	private List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> R, E, G; 
+	private List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R, E, G; 
 
 	private Iterator<V> fresh;
 
-	private Set<Pair<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>>> seen = new HashSet<>();
+	private Set<Pair<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>>> seen = new HashSet<>();
 
-	private Map<Chc<V, C>, List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>>> AC_symbols;
+	private Map<Chc<V, C>, List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>>> AC_symbols;
 
 	private KBOptions options;
 
-	private Chc<V, C> min;
-
-	public LPOUKB(Set<Pair<KBExp<C, V>, KBExp<C, V>>> E0, Iterator<V> fresh, Set<Pair<KBExp<C, V>, KBExp<C, V>>> R0, KBOptions options, List<C> prec) throws InterruptedException {
+	private Map<T, Chc<V, C>> min = new HashMap<>();
+	
+	private Map<C, Pair<List<T>, T>> sig;
+	
+	public LPOUKB(Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>>> E0, Iterator<V> fresh, Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>>> R0, KBOptions options, List<C> prec, Map<C, Pair<List<T>, T>> sig, Set<T> tys) throws InterruptedException {
 		this.options = options;
 		this.prec = prec;
 		this.R = new LinkedList<>();
-		for (Pair<KBExp<C, V>, KBExp<C, V>> r : R0) {
-			R.add(freshen(fresh, new Pair<>(r.first.inject(), r.second.inject())));
+		this.sig = sig;
+		for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>> r : R0) {
+			R.add(freshen(fresh, new Triple<>(r.first.inject(), r.second.inject(), r.third)));
 		}
 		this.fresh = fresh;
 		this.E = new LinkedList<>();
-		for (Pair<KBExp<C, V>, KBExp<C, V>> e : E0) {
-			E.add(freshen(fresh, new Pair<>(e.first.inject(), e.second.inject())));
+		for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>> e : E0) {
+			E.add(freshen(fresh, new Triple<>(e.first.inject(), e.second.inject(), e.third)));
 		}
 		this.G = new LinkedList<>();
 		initAC();
-		min = Chc.inLeft(fresh.next());
+		for (T t : tys) {
+			V v = fresh.next();
+			min.put(t, Chc.inLeft(v));
+		}
+		inhabGen(groundInhabited);
 		complete();
 	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private void initAC() throws InterruptedException {
 		if (!options.semantic_ac) {
 			return;
 		}
-		Map<Chc<V, C>, Integer> symbols = new HashMap<>();
 		AC_symbols = new HashMap<>();
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> e : E) {
-			e.first.symbols(symbols);
-			e.second.symbols(symbols);
-		}
-		outer: for (Chc<V, C> f : symbols.keySet()) {
-			Integer i = symbols.get(f);
-			if (i.intValue() != 2) {
+		outer: for (C f : sig.keySet()) {
+			if (sig.get(f).first.size() != 2) {
+				continue;
+			}
+			T t1 = sig.get(f).first.get(0);
+			T t2 = sig.get(f).first.get(1);
+			T t3 = sig.get(f).second;
+			if (!(t1.equals(t2) && t2.equals(t3))) {
 				continue;
 			}
 			boolean cand1_found = false;
 			boolean cand2_found = false;
-			List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> cands = AC_E(f);
-			Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cand1 = cands.get(0);
-			Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cand2 = cands.get(1);
-			for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> other : E) {
-				if (subsumes(fresh, cand1, other)) {
+			List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> cands = AC_E(f);
+			Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> cand1 = cands.get(0);
+			Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> cand2 = cands.get(1);
+			for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> other : E) {
+				if (subsumes(cand1, other)) {
 					cand1_found = true;
-				} else if (subsumes(fresh, cand1, other.reverse())) {
+				} else if (subsumes(cand1, other.reverse12())) {
 					cand1_found = true;
 				}
-				if (subsumes(fresh, cand2, other)) {
+				if (subsumes(cand2, other)) {
 					cand2_found = true;
-				} else if (subsumes(fresh, cand2, other.reverse())) {
+				} else if (subsumes(cand2, other.reverse12())) {
 					cand2_found = true;
 				}
 				if (cand1_found && cand2_found) {
-					List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> l = new LinkedList<>();
+					List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> l = new LinkedList<>();
 					l.add(AC_E(f).get(1)); // assoc rewrite rule
 					l.add(AC_E(f).get(0)); // comm eq
 					l.addAll(AC_E0(f)); // perm eqs
-					AC_symbols.put(f, l);
+					AC_symbols.put(Chc.inRight(f), l);
 					continue outer;
 				}
 			}
 		}
 	}
 
-	private KBExp<Chc<V, C>, V> achelper(Chc<V, C> f, V xx, V yy, V zz) {
+	private KBExp<Chc<V, C>, V> achelper(C f, V xx, V yy, V zz) {
 		KBExp<Chc<V, C>, V> x = new KBVar<>(xx);
 		KBExp<Chc<V, C>, V> y = new KBVar<>(yy);
 		KBExp<Chc<V, C>, V> z = new KBVar<>(zz);
@@ -134,38 +160,52 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		yz.add(z);
 		List<KBExp<Chc<V, C>, V>> xfyz = new LinkedList<>();
 		xfyz.add(x);
-		xfyz.add(new KBApp<>(f, yz));
-		return new KBApp<>(f, xfyz);
+		xfyz.add(new KBApp<>(Chc.inRight(f), yz));
+		return new KBApp<>(Chc.inRight(f), xfyz);
 	}
 
-	private List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> AC_E0(Chc<V, C> f) {
-		List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> ret = new LinkedList<>();
+	private List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> AC_E0(C f) {
+		List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> ret = new LinkedList<>();
 		V x = fresh.next();
 		V y = fresh.next();
 		V z = fresh.next();
+		Map<V, T> ctx = new HashMap<>();
+		T t = sig.get(f).second;
+		ctx.put(x, t);
+		ctx.put(y, t);
+		ctx.put(z, t);
 
-		ret.add(freshen(fresh, new Pair<>(achelper(f, x, y, z), achelper(f, y, x, z))));
-		ret.add(freshen(fresh, new Pair<>(achelper(f, x, y, z), achelper(f, z, y, x))));
-		ret.add(freshen(fresh, new Pair<>(achelper(f, x, y, z), achelper(f, y, z, x))));
+		ret.add(freshen(fresh, new Triple<>(achelper(f, x, y, z), achelper(f, y, x, z), ctx)));
+		ret.add(freshen(fresh, new Triple<>(achelper(f, x, y, z), achelper(f, z, y, x), ctx)));
+		ret.add(freshen(fresh, new Triple<>(achelper(f, x, y, z), achelper(f, y, z, x), ctx)));
 
 		return ret;
 	}
 
-	private List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> AC_E(Chc<V, C> f) {
-		List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> ret = new LinkedList<>();
-		KBExp<Chc<V, C>, V> x = new KBVar<>(fresh.next());
-		KBExp<Chc<V, C>, V> y = new KBVar<>(fresh.next());
+	private List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> AC_E(C f) {
+		List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> ret = new LinkedList<>();
+		V v1 = fresh.next();
+		V v2 = fresh.next();
+		KBExp<Chc<V, C>, V> x = new KBVar<>(v1);
+		KBExp<Chc<V, C>, V> y = new KBVar<>(v2);
 		List<KBExp<Chc<V, C>, V>> xy = new LinkedList<>();
 		xy.add(x);
 		xy.add(y);
 		List<KBExp<Chc<V, C>, V>> yx = new LinkedList<>();
 		yx.add(y);
 		yx.add(x);
-		ret.add(new Pair<>(new KBApp<>(f, xy), new KBApp<>(f, yx)));
+		Map<V, T> ctx = new HashMap<>();
+		T t = sig.get(f).second;
+		ctx.put(v1, t);
+		ctx.put(v2, t);
+		ret.add(new Triple<>(new KBApp<>(Chc.inRight(f), xy), new KBApp<>(Chc.inRight(f), yx), ctx));
 
-		x = new KBVar<>(fresh.next());
-		y = new KBVar<>(fresh.next());
-		KBExp<Chc<V, C>, V> z = new KBVar<>(fresh.next());
+		v1 = fresh.next();
+		v2 = fresh.next();
+		x = new KBVar<>(v1);
+		y = new KBVar<>(v2);
+		V v3 = fresh.next();
+		KBExp<Chc<V, C>, V> z = new KBVar<>(v3);
 		List<KBExp<Chc<V, C>, V>> yz = new LinkedList<>();
 		yz.add(y);
 		yz.add(z);
@@ -174,23 +214,43 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		xy.add(y);
 		List<KBExp<Chc<V, C>, V>> xfyz = new LinkedList<>();
 		xfyz.add(x);
-		xfyz.add(new KBApp<>(f, yz));
+		xfyz.add(new KBApp<>(Chc.inRight(f), yz));
 		List<KBExp<Chc<V, C>, V>> fxyz = new LinkedList<>();
-		fxyz.add(new KBApp<>(f, xy));
+		fxyz.add(new KBApp<>(Chc.inRight(f), xy));
 		fxyz.add(z);
-		ret.add(new Pair<>(new KBApp<>(f, fxyz), new KBApp<>(f, xfyz)));
+		ctx = new HashMap<>();
+		ctx.put(v1, t);
+		ctx.put(v2, t);
+		ctx.put(v3, t);
+		ret.add(new Triple<>(new KBApp<>(Chc.inRight(f), fxyz), new KBApp<>(Chc.inRight(f), xfyz), ctx));
 
 		return ret;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static <C, V> Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> freshen(Iterator<V> fresh, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> eq) {
-		Map<V, KBExp<Chc<V, C>, V>> subst = freshenMap(fresh, eq).first;
-		return new Pair<>(eq.first.subst(subst), eq.second.subst(subst));
+	private static <C, V, T> Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> freshen(Iterator<V> fresh, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> eq) {
+		Quad<Map<V, KBExp<Chc<V, C>, V>>, Map<V, KBExp<Chc<V, C>, V>>, Map<V,V>, Map<V,V>> xxx = freshenMap(fresh, eq);
+		Map<V, KBExp<Chc<V, C>, V>> subst = xxx.first;
+		return new Triple<>(eq.first.subst(subst), eq.second.subst(subst), subst(eq.third, xxx.third));
 	}
 
-	private static <C, V> Pair<Map<V, KBExp<Chc<V, C>, V>>, Map<V, KBExp<Chc<V, C>, V>>> freshenMap(Iterator<V> fresh, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> eq) {
+	private static <V,T> Map<V, T> subst(Map<V, T> m, Map<V, V> subst) {
+		Map<V, T> ret = new HashMap<>();
+		
+		for (V v : m.keySet()) {
+			V vv = subst.get(v);
+			if (vv == null) {
+				ret.put(v, m.get(v));
+			} else {
+				ret.put(vv, m.get(v));
+			}
+		}
+		
+		return ret;
+	}
+	
+	private static <C, V, T> Quad<Map<V, KBExp<Chc<V, C>, V>>, Map<V, KBExp<Chc<V, C>, V>>, Map<V,V>, Map<V,V>> freshenMap(Iterator<V> fresh, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> eq) {
 		Set<V> vars = new HashSet<>();
 		KBExp<Chc<V, C>, V> lhs = eq.first;
 		KBExp<Chc<V, C>, V> rhs = eq.second;
@@ -198,13 +258,19 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		vars.addAll(rhs.vars());
 		Map<V, KBExp<Chc<V, C>, V>> subst = new HashMap<>();
 		Map<V, KBExp<Chc<V, C>, V>> subst_inv = new HashMap<>();
+		Map<V, V> subst1 = new HashMap<>();
+		Map<V, V> subst_inv1 = new HashMap<>();
 		for (V v : vars) {
 			V fr = fresh.next();
 			subst.put(v, new KBVar<>(fr));
 			subst_inv.put(fr, new KBVar<>(v));
+			subst1.put(v, fr);
+			subst_inv1.put(fr, v);
 		}
-		return new Pair<>(subst, subst_inv);
+		return new Quad<>(subst, subst_inv, subst1, subst_inv1);
 	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static <X> void remove(Collection<X> X, X x) {
 		while (X.remove(x));
@@ -228,13 +294,13 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		}
 	}
 
-	private void sortByStrLen(List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> l) {
+	private void sortByStrLen(List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> l) {
 		if (!options.unfailing) {
 			l.sort(ToStringComparator);
 		} else {
-			List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> unorientable = new LinkedList<>();
-			List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> orientable = new LinkedList<>();
-			for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> k : l) {
+			List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> unorientable = new LinkedList<>();
+			List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> orientable = new LinkedList<>();
+			for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> k : l) {
 				if (orientable(k)) {
 					orientable.add(k);
 				} else {
@@ -254,6 +320,8 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		}
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private void complete() throws InterruptedException {
 		while (!step());
 		
@@ -262,15 +330,15 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		}
 	}
 
-	private static <C, V> boolean subsumes(Iterator<V> fresh, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cand, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> other) throws InterruptedException {
-		return (subsumes0(fresh, cand, other) != null);
+	private boolean subsumes(Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> cand, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> other) throws InterruptedException {
+		return (subsumes0(cand, other) != null);
 	}
 
-	private static <C, V> Map<V, KBExp<Chc<V, C>, V>> subsumes0(Iterator<V> fresh, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cand, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> other) throws InterruptedException {
+	private Map<V, KBExp<Chc<V, C>, V>> subsumes0(Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> cand, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> other) throws InterruptedException {
 		if (Thread.interrupted()) {
 			throw new InterruptedException();
 		}
-		Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> candX = cand;
+		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> candX = cand;
 
 		if (!Collections.disjoint(candX.first.vars(), other.first.vars()) || !Collections.disjoint(candX.first.vars(), other.second.vars()) || !Collections.disjoint(candX.second.vars(), other.first.vars()) || !Collections.disjoint(candX.second.vars(), other.second.vars())) {
 			candX = freshen(fresh, cand);
@@ -287,15 +355,15 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		r.add(other.second);
 		KBApp<Chc<V, C>, V> other0 = new KBApp<>(xxx, r);
 
-		Map<V, KBExp<Chc<V, C>, V>> subst = KBUnifier.findSubst(other0, cand0);
+		Map<V, KBExp<Chc<V, C>, V>> subst = findSubst(other0, cand0, other.third, Util.union(groundInhabited, cand.third.values()));
 		return subst;
 	}
 
-	private List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> filterSubsumed(Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> CPX) throws InterruptedException {
-		List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> CP = new LinkedList<>();
-		outer: for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cand : CPX) {
-			for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> e : E) {
-				if (subsumes(fresh, cand, e)) {
+	private List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> filterSubsumed(Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> CPX) throws InterruptedException {
+		List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> CP = new LinkedList<>();
+		outer: for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> cand : CPX) {
+			for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : E) {
+				if (subsumes(cand, e)) {
 					continue outer;
 				}
 			}
@@ -304,30 +372,30 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return CP;
 	}
 
-	private List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> filterSubsumedBySelf(Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> CPX) throws InterruptedException {
-		List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> CP = new LinkedList<>(CPX);
+	private List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> filterSubsumedBySelf(Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> CPX) throws InterruptedException {
+		List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> CP = new LinkedList<>(CPX);
 
-		Iterator<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> it = CP.iterator();
+		Iterator<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> it = CP.iterator();
 		while (it.hasNext()) {
-			Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cand = it.next();
-			for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> e : CP) {
+			Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> cand = it.next();
+			for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : CP) {
 				if (cand.equals(e)) {
 					continue;
 				}
-				if (subsumes(fresh, cand, e)) {
+				if (subsumes(cand, e)) {
 					it.remove();
 					break;
 				}
-				if (subsumes(fresh, cand.reverse(), e)) {
+				if (subsumes(cand.reverse12(), e)) {
 					it.remove();
 					break;
 				}
-				if (subsumes(fresh, cand, e.reverse())) {
+				if (subsumes(cand, e.reverse12())) {
 					it.remove();
 					break;
 				}
 				// TODO: this one redundant?
-				if (subsumes(fresh, cand.reverse(), e.reverse())) {
+				if (subsumes(cand.reverse12(), e.reverse12())) {
 					it.remove();
 					break;
 				}
@@ -339,18 +407,18 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	// is also compose2
 	// simplify RHS of a rule
 	private void compose() throws InterruptedException {
-		Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> to_remove = null;
-		Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> to_add = null;
+		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> to_remove = null;
+		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> to_add = null;
 		do {
 			to_remove = null;
 			to_add = null;
-			for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> r : R) {
-				Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> R0 = new HashSet<>(R);
+			for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> r : R) {
+				Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R0 = new HashSet<>(R);
 				R0.remove(r);
-				KBExp<Chc<V, C>, V> new_rhs = red(null, Util.append(E, G), R0, r.second);
+				KBExp<Chc<V, C>, V> new_rhs = red(null, Util.append(E, G), R0, r.second, r.third, Collections.emptyMap());
 				if (!new_rhs.equals(r.second)) {
 					to_remove = r;
-					to_add = new Pair<>(r.first, new_rhs);
+					to_add = new Triple<>(r.first, new_rhs, r.third);
 					break;
 				}
 			}
@@ -361,82 +429,179 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		} while (to_remove != null);
 	}
 
-	private KBExp<Chc<V, C>, V> red(Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache, Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> Ex, Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> Ry, KBExp<Chc<V, C>, V> e) throws InterruptedException {
+	//TODO: caching might be unsound here - look into and reactivate if possible
+	private KBExp<Chc<V, C>, V> red(Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> Ex, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> Ry, KBExp<Chc<V, C>, V> e, Map<V,T> ctx, Map<V,T> sks) throws InterruptedException {
+		Set<T> inhab = new HashSet<>(groundInhabited);
+		inhab.addAll(ctx.values());
+		inhab.addAll(sks.values());
+		inhabGen(inhab);
+
 		for (;;) {
-			KBExp<Chc<V, C>, V> e0 = step(cache, fresh, Ex, Ry, e);
+			KBExp<Chc<V, C>, V> e0 = step(null, Ex, Ry, e, inhab);
 			if (e.equals(e0)) {
+				if (cache != null) {
+					cache.put(e0, e);
+				}
 				return e0;
 			}
 			e = e0;
 		}
 	}
 
-	private KBExp<Chc<V, C>, V> step(Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache, Iterator<V> fresh, Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> E, Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> R, KBExp<Chc<V, C>, V> ee) throws InterruptedException {
+	private KBExp<Chc<V, C>, V> step(Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R, KBExp<Chc<V, C>, V> ee, Set<T> inhab) throws InterruptedException {
 		if (ee.isVar) {
-			return step1(cache, fresh, E, R, ee);
+			return step1(cache, E, R, ee, inhab);
 		} else {
 			KBApp<Chc<V, C>, V> e = ee.getApp();
 			List<KBExp<Chc<V, C>, V>> args0 = new LinkedList<>();
 			for (KBExp<Chc<V, C>, V> arg : e.args) {
-				args0.add(step(cache, fresh, E, R, arg)); //must be step
+				args0.add(step(cache, E, R, arg, inhab)); //must be step
 			}
 			KBApp<Chc<V, C>, V> ret = new KBApp<>(e.f, args0);
-			return step1(cache, fresh, E, R, ret);
+			return step1(cache, E, R, ret, inhab);
 		}
 	}
+	
 
-	// simplifies equations
-	// can also use E U G with extra checking
-	private void simplify() throws InterruptedException {
-		Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache = new HashMap<>(); 
+	 private Map<V, KBExp<Chc<V, C>, V>> findSubst(KBExp<Chc<V, C>, V> lhs, KBExp<Chc<V, C>, V> e, Map<V,T> lhsCtx, Set<T> allinhab) {
+		Map<V, KBExp<Chc<V, C>, V>> s = KBUnifier.findSubst(lhs, e);
+		if (s == null || !applies(lhsCtx, s, allinhab)) {
+			return null;
+		}	
+		return s;
+	 }
+	 
+	private KBExp<Chc<V, C>, V> step1(Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R, KBExp<Chc<V, C>, V> e0, Set<T> inhab) throws InterruptedException {
+		KBExp<Chc<V, C>, V> e = e0;
+		if (cache != null && cache.containsKey(e)) {
+			return cache.get(e);
+		}
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> r0 : R) {
+			checkParentDead();
+			Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> r = r0;
+			if (!Collections.disjoint(r.first.vars(), e.vars()) || !Collections.disjoint(r.second.vars(), e.vars())) {
+				r = freshen(fresh, r0);
+			}
 
-		List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> newE = new LinkedList<>();
-		Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> newE2 = new HashSet<>(); 
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> e : E) {
-			KBExp<Chc<V, C>, V> lhs_red = red(cache, new LinkedList<>(), R, e.first);
-			KBExp<Chc<V, C>, V> rhs_red = red(cache, new LinkedList<>(), R, e.second);
-			if (!lhs_red.equals(rhs_red)) {
-				Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> p = new Pair<>(lhs_red, rhs_red);
-				if (!newE2.contains(p)) {
-					newE.add(p);
-					newE2.add(p);
+			KBExp<Chc<V, C>, V> lhs = r.first;
+			KBExp<Chc<V, C>, V> rhs = r.second;
+			Map<V, KBExp<Chc<V, C>, V>> s = null;
+
+			s = findSubst(lhs, e, r.third, inhab);
+//			System.out.println("looking for subst from " + lhs + " to " + e + "under inhab " + inhab + " needed ctx " + r.third);
+
+			if (s == null) {
+//				System.out.println("none");
+				continue;
+			}
+			
+			e = rhs.subst(s);
+//			System.out.println("after " + e);
+		}
+		e = step1Es(E, e, inhab);
+		
+		return e;
+	}
+
+	/*
+	 * 
+		rule 
+		
+		v1:t1, ..., vN:tN . ... -> ...
+		
+		term
+		
+		v'1:t'1 ..., v'N:t'N . ...
+		
+		have partial assignment from rule to term
+		
+		v1 -> e1
+		...
+		
+		consider union of all types for variables that are not assigned.  call this needButDontHave
+		
+		rule only applies if every such type is inhabited given the terms context and its skolem vars
+	 */
+	private boolean applies(Map<V, T> ruleCtx, Map<V, KBExp<Chc<V, C>, V>> subst, Set<T> inhab) {
+		Set<T> need = new HashSet<>();
+		for (V ruleVar : ruleCtx.keySet()) {
+			if (!subst.containsKey(ruleVar)) {
+				need.add(ruleCtx.get(ruleVar));
+			}
+		}
+		return inhab.containsAll(need);
+	}
+
+	private KBExp<Chc<V, C>, V> step1Es(Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E, KBExp<Chc<V, C>, V> e, Set<T> inhab) throws InterruptedException {
+		if (options.unfailing && e.vars().isEmpty()) {
+			for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> r0 : E) {
+				KBExp<Chc<V, C>, V> a = step1EsX(r0, e, inhab);
+				if (a != null) {
+					e = a;
+				}
+				KBExp<Chc<V, C>, V> b = step1EsX(r0.reverse12(), e, inhab);
+				if (b != null) {
+					e = b;
 				}
 			}
 		}
-		E = newE;
+		return e;
 	}
 
-	// is not collapse2
-	// can also use E U G here
-	private void collapseBy(Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> ab) throws InterruptedException {
-		Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> AB = Collections.singleton(ab);
-		Iterator<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> it = R.iterator();
-		while (it.hasNext()) {
-			Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> r = it.next();
-			if (r.equals(ab)) {
-				continue;
-			}
-			KBExp<Chc<V, C>, V> lhs = red(null, new LinkedList<>(), AB, r.first);
-			if (!r.first.equals(lhs)) {
-				addFront(E, new Pair<>(lhs, r.second));
-				it.remove();
-			}
+	private KBExp<Chc<V, C>, V> step1EsX(Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> r0, KBExp<Chc<V, C>, V> e, Set<T> inhab) throws InterruptedException {
+		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> r = r0;
+		if (!Collections.disjoint(r.first.vars(), e.vars()) || !Collections.disjoint(r.second.vars(), e.vars())) {
+			r = freshen(fresh, r0);
 		}
+
+		KBExp<Chc<V, C>, V> lhs = r.first;
+		KBExp<Chc<V, C>, V> rhs = r.second;
+
+		Map<V, KBExp<Chc<V, C>, V>> s0 = findSubst(lhs, e, r.third, inhab);
+		if (s0 == null) {
+			return null;
+		}
+		Map<V, KBExp<Chc<V, C>, V>> s = new HashMap<>(s0);
+
+		KBExp<Chc<V, C>, V> lhs0 = lhs.subst(s);
+		KBExp<Chc<V, C>, V> rhs0 = rhs.subst(s);
+
+		Set<V> newvars = new HashSet<>();
+		newvars.addAll(lhs0.vars());
+		newvars.addAll(rhs0.vars());
+		Map<V, KBExp<Chc<V, C>, V>> t = new HashMap<>();
+		for (V v : newvars) {
+			T ty = r.third.get(v);
+			if (ty == null || min.get(ty) == null) {
+				throw new RuntimeException("Anomaly, please report");
+			}
+			t.put(v, new KBApp<>(min.get(ty), Collections.emptyList()));
+		}
+		lhs0 = lhs0.subst(t);
+		rhs0 = rhs0.subst(t);
+
+		if (gt_lpo(lhs0, rhs0)) {
+			return rhs0;
+		} //TODO go other way here?
+		return null;
 	}
 
-	private Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> allcps2(Set<Pair<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>>> seen, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> ab) throws InterruptedException {
-		Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> ret = new HashSet<>();
+	//////////////////////////////////////////////////////////////////////////////////////////////
 
-		Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> E0 = new HashSet<>(E);
+
+	private Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> allcps2(Set<Pair<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>>> seen, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ab) throws InterruptedException {
+		Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> ret = new HashSet<>();
+
+		Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E0 = new HashSet<>(E);
 		E0.add(ab);
-		E0.add(ab.reverse());
-		Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> ba = ab.reverse();
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> gd : E0) {
+		E0.add(ab.reverse12());
+		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ba = ab.reverse12();
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> gd : E0) {
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InterruptedException();
 			}
-			Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> s;
-			Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> dg = gd.reverse();
+			Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> s;
+			Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> dg = gd.reverse12();
 
 			if (!seen.contains(new Pair<>(ab, gd))) {
 				s = cp(ab, gd);
@@ -481,8 +646,8 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			}
 		}
 
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> gd : R) {
-			Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> s;
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> gd : R) {
+			Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> s;
 
 			if (!seen.contains(new Pair<>(ab, gd))) {
 				s = cp(ab, gd);
@@ -509,13 +674,11 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return ret;
 	}
 
-	private Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> allcps(Set<Pair<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>>> seen, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> ab) throws InterruptedException {
-		Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> ret = new HashSet<>();
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> gd : R) {
-			if (Thread.currentThread().isInterrupted()) {
-				throw new InterruptedException();
-			}
-			Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> s;
+	private Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> allcps(Set<Pair<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>>> seen, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ab) throws InterruptedException {
+		Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> ret = new HashSet<>();
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> gd : R) {
+			checkParentDead();
+			Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> s;
 			if (!seen.contains(new Pair<>(ab, gd))) {
 				s = cp(ab, gd);
 				ret.addAll(s);
@@ -531,16 +694,16 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return ret;
 	}
 
-	private Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> cp(Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> gd0, Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> ab0) throws InterruptedException {
+	private Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> cp(Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> gd0, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ab0) throws InterruptedException {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InterruptedException();
 		}
-		Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> ab = freshen(fresh, ab0);
-		Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> gd = freshen(fresh, gd0);
+		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ab = freshen(fresh, ab0);
+		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> gd = freshen(fresh, gd0);
 
 		Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, KBExp<Chc<V, C>, V>>>> retX = gd.first.cp(new LinkedList<>(), ab.first, ab.second, gd.first, gd.second);
 
-		Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> ret = new HashSet<>();
+		Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> ret = new HashSet<>();
 		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, KBExp<Chc<V, C>, V>>> c : retX) {
 			// ds !>= gs
 			KBExp<Chc<V, C>, V> gs = gd.first.subst(c.third);
@@ -554,132 +717,79 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			if ((gt_lpo(bs, as)) || as.equals(bs)) {
 				continue;
 			}
-			Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> toAdd = new Pair<>(c.first, c.second);
+			Map<V,T> newCtx = new HashMap<>();
+			Util.putAllSafely(newCtx, ab.third);
+			Util.putAllSafely(newCtx, gd.third); 
+			min(newCtx, c.first, c.second);
+			Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> toAdd = new Triple<>(c.first, c.second, newCtx);
 			ret.add(toAdd);
 		}
 
 		return ret;
 	}
 
-	private KBExp<Chc<V, C>, V> step1(Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache, Iterator<V> fresh, Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> E, Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> R, KBExp<Chc<V, C>, V> e0) throws InterruptedException {
-		KBExp<Chc<V, C>, V> e = e0;
-		if (cache != null && cache.containsKey(e)) {
-			return cache.get(e);
-		}
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> r0 : R) {
-			if (Thread.currentThread().isInterrupted()) {
-				throw new InterruptedException();
-			}
-			Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> r = r0;
-			if (!Collections.disjoint(r.first.vars(), e.vars()) || !Collections.disjoint(r.second.vars(), e.vars())) {
-				r = freshen(fresh, r0);
-			}
-
-			KBExp<Chc<V, C>, V> lhs = r.first;
-			KBExp<Chc<V, C>, V> rhs = r.second;
-			Map<V, KBExp<Chc<V, C>, V>> s = null;
-
-			s = KBUnifier.findSubst(lhs, e);
-
-			if (s == null) {
+	////////////////////////////////////////////////////////////////////////////
+	
+	private void min(Map<V, T> ctx, KBExp<Chc<V, C>, V> lhs, KBExp<Chc<V, C>, V> rhs) {
+		Iterator<V> it = ctx.keySet().iterator();
+		while (it.hasNext()) {
+			V v = it.next();
+			if (lhs.vars().contains(v) || rhs.vars().contains(v)) {
 				continue;
 			}
-			e = rhs.subst(s);
+			if (groundInhabited.contains(ctx.get(v))) {
+				it.remove();
+			}
 		}
-		e = step1Es(E, e);
-		if (cache != null) {
-			cache.put(e0, e);
-		}
-		return e;
+		
 	}
 
-	private KBExp<Chc<V, C>, V> step1Es(Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> E, KBExp<Chc<V, C>, V> e) throws InterruptedException {
-		if (options.unfailing && e.vars().isEmpty()) {
-			for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> r0 : E) {
-				KBExp<Chc<V, C>, V> a = step1EsX(r0, e);
-				if (a != null) {
-					e = a;
-				}
-				KBExp<Chc<V, C>, V> b = step1EsX(new Pair<>(r0.second, r0.first), e);
-				if (b != null) {
-					e = b;
+	// simplifies equations
+	// can also use E U G with extra checking
+	private void simplify() throws InterruptedException {
+		Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache = new HashMap<>(); 
+
+		List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> newE = new LinkedList<>();
+		Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> newE2 = new HashSet<>(); 
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : E) {
+			KBExp<Chc<V, C>, V> lhs_red = red(cache, new LinkedList<>(), R, e.first, e.third, Collections.emptyMap());
+			KBExp<Chc<V, C>, V> rhs_red = red(cache, new LinkedList<>(), R, e.second, e.third, Collections.emptyMap());
+			if (!lhs_red.equals(rhs_red)) {
+				Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> p = new Triple<>(lhs_red, rhs_red, e.third);
+				if (!newE2.contains(p)) {
+					newE.add(p);
+					newE2.add(p);
 				}
 			}
 		}
-		return e;
+		E = newE;
 	}
 
-	private KBExp<Chc<V, C>, V> step1EsX(Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> r0, KBExp<Chc<V, C>, V> e) throws InterruptedException {
-		Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> r = r0;
-		if (!Collections.disjoint(r.first.vars(), e.vars()) || !Collections.disjoint(r.second.vars(), e.vars())) {
-			r = freshen(fresh, r0);
-		}
-
-		KBExp<Chc<V, C>, V> lhs = r.first;
-		KBExp<Chc<V, C>, V> rhs = r.second;
-		Map<V, KBExp<Chc<V, C>, V>> s0 = KBUnifier.findSubst(lhs, e);
-		if (s0 == null) {
-			return null;
-		}
-		Map<V, KBExp<Chc<V, C>, V>> s = new HashMap<>(s0);
-
-		KBExp<Chc<V, C>, V> lhs0 = lhs.subst(s);
-		KBExp<Chc<V, C>, V> rhs0 = rhs.subst(s);
-
-		Set<V> newvars = new HashSet<>();
-		newvars.addAll(lhs0.vars());
-		newvars.addAll(rhs0.vars());
-		Map<V, KBExp<Chc<V, C>, V>> t = new HashMap<>();
-		for (V v : newvars) {
-			t.put(v, new KBApp<>(min, Collections.emptyList()));
-		}
-		lhs0 = lhs0.subst(t);
-		rhs0 = rhs0.subst(t);
-
-		if (gt_lpo(lhs0, rhs0)) {
-			return rhs0;
-		}
-		return null;
-	}
-
-	private Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> reduce(Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> set) throws InterruptedException {
-		Set<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> p = new HashSet<>();
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> e : set) {
-			KBExp<Chc<V, C>, V> lhs = red(new HashMap<>(), Util.append(E, G), R, e.first);
-			KBExp<Chc<V, C>, V> rhs = red(new HashMap<>(), Util.append(E, G), R, e.second);
-			if (lhs.equals(rhs)) {
-				continue;
-			}
-			p.add(new Pair<>(lhs, rhs));
-		}
-		return p;
-	}
-
-	private boolean strongGroundJoinable(KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t) throws InterruptedException {
-		List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> R0 = new LinkedList<>();
-		List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> E0 = new LinkedList<>();
+	private boolean strongGroundJoinable(KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t, Map<V,T> ctx) throws InterruptedException {
+		List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R0 = new LinkedList<>();
+		List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E0 = new LinkedList<>();
 		for (Chc<V, C> f : AC_symbols.keySet()) {
-			List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> lx = AC_symbols.get(f);
+			List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> lx = AC_symbols.get(f);
 			R0.add(lx.get(0));
 			E0.addAll(lx.subList(1, 5));
 		}
 
-		if (!s.equals(red(null, new LinkedList<>(), R0, s))) {
+		if (!s.equals(red(null, new LinkedList<>(), R0, s, ctx, Collections.emptyMap()))) {
 			return false;
 		}
-		if (!t.equals(red(null, new LinkedList<>(), R0, t))) {
+		if (!t.equals(red(null, new LinkedList<>(), R0, t, ctx, Collections.emptyMap()))) {
 			return false;
 		}
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> e : E0) {
-			Map<V, KBExp<Chc<V, C>, V>> m = subsumes0(fresh, new Pair<>(s, t), e);
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : E0) {
+			Map<V, KBExp<Chc<V, C>, V>> m = subsumes0(new Triple<>(s, t, ctx), e);
 			if (m == null) {
-				m = subsumes0(fresh, new Pair<>(t, s), e);
+				m = subsumes0(new Triple<>(t, s, ctx), e);
 			}
 			if (m == null) {
-				m = subsumes0(fresh, new Pair<>(s, t), e.reverse());
+				m = subsumes0(new Triple<>(s, t, ctx), e.reverse12());
 			}
 			if (m == null) {
-				m = subsumes0(fresh, new Pair<>(s, t), e.reverse());
+				m = subsumes0(new Triple<>(s, t, ctx), e.reverse12());
 			}
 			if (m == null) {
 				continue;
@@ -694,6 +804,37 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	}
 
+	// is not collapse2
+	// can also use E U G here
+	private void collapseBy(Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ab) throws InterruptedException {
+		Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> AB = Collections.singleton(ab);
+		Iterator<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> it = R.iterator();
+		while (it.hasNext()) {
+			Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> r = it.next();
+			if (r.equals(ab)) {
+				continue;
+			}
+			KBExp<Chc<V, C>, V> lhs = red(null, new LinkedList<>(), AB, r.first, r.third, Collections.emptyMap());
+			if (!r.first.equals(lhs)) {
+				addFront(E, new Triple<>(lhs, r.second, r.third));
+				it.remove();
+			}
+		}
+	}
+
+	private Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> reduce(Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> set) throws InterruptedException {
+		Set<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> p = new HashSet<>();
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : set) {
+			KBExp<Chc<V, C>, V> lhs = red(new HashMap<>(), Util.append(E, G), R, e.first, e.third, Collections.emptyMap());
+			KBExp<Chc<V, C>, V> rhs = red(new HashMap<>(), Util.append(E, G), R, e.second, e.third, Collections.emptyMap());
+			if (lhs.equals(rhs)) {
+				continue;
+			}
+			p.add(new Triple<>(lhs, rhs, e.third));
+		}
+		return p;
+	}
+
 	// TODO: when filtering for subsumed, can also take G into account
 	private boolean step() throws InterruptedException {
 		checkParentDead();
@@ -706,7 +847,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			filterStrongGroundJoinable();
 		}
 
-		Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> st = pick(E);
+		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> st = pick(E);
 
 		KBExp<Chc<V, C>, V> s0 = st.first;
 		KBExp<Chc<V, C>, V> t0 = st.second;
@@ -733,18 +874,18 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 				throw new RuntimeException("Unorientable: " + st.first + " = " + st.second);
 			}
 		}
-		Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> ab = new Pair<>(a, b);
+		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ab = new Triple<>(a, b, st.third);
 		if (oriented) {
 			R.add(ab);
-			List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> CP = filterSubsumed(allcps(seen, ab));
+			List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> CP = filterSubsumed(allcps(seen, ab));
 			addAll(E, CP);
 			remove(E, st);
 			collapseBy(ab);
 		} else {
-			List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> CP = filterSubsumed(allcps(seen, ab));
-			CP.addAll(filterSubsumed(allcps(seen, ab.reverse())));
+			List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> CP = filterSubsumed(allcps(seen, ab));
+			CP.addAll(filterSubsumed(allcps(seen, ab.reverse12())));
 			CP.addAll(filterSubsumed(allcps2(seen, ab)));
-			CP.addAll(filterSubsumed(allcps2(seen, ab.reverse())));
+			CP.addAll(filterSubsumed(allcps2(seen, ab.reverse12())));
 			addAll(E, CP);
 		}
 
@@ -768,15 +909,13 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			checkParentDead();
 		}
 
-//		System.out.println(this);
-		
 		return false;
 	}
 
-	void filterStrongGroundJoinable() throws InterruptedException {
-		List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> newE = new LinkedList<>(E);
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> st : newE) {
-			if (strongGroundJoinable(st.first, st.second)) {
+	private void filterStrongGroundJoinable() throws InterruptedException {
+		List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> newE = new LinkedList<>(E);
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> st : newE) {
+			if (strongGroundJoinable(st.first, st.second, st.third)) {
 				remove(E, st);
 				add(G, st);
 			}
@@ -784,9 +923,9 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		G = filterSubsumedBySelf(G);
 	}
 
-	private Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> pick(List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> l) {
+	private Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> pick(List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> l) {
 		for (int i = 0; i < l.size(); i++) {
-			Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> x = l.get(i);
+			Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> x = l.get(i);
 			if (orientable(x)) {
 				return l.get(i);
 			}
@@ -794,11 +933,10 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return l.get(0);
 	}
 
-	boolean orientable(Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> e) {
+	boolean orientable(Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e) {
 		return (gt_lpo(e.first, e.second) || gt_lpo(e.second, e.first));
 	}
 
-	// TODO: add ground-completeness check sometime
 	private boolean checkEmpty() throws InterruptedException {
 		if (E.isEmpty()) {
 			isComplete = true;
@@ -818,7 +956,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	}
 
 	private boolean allUnorientable() {
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> e : E) {
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : E) {
 			if (orientable(e)) {
 				return false;
 			}
@@ -827,14 +965,14 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	}
 
 	private boolean allCpsConfluent(boolean print, boolean ground) throws InterruptedException {
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> e : E) {
-			List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> set = filterSubsumed(reduce(allcps2(new HashSet<>(), e)));
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : E) {
+			List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> set = filterSubsumed(reduce(allcps2(new HashSet<>(), e)));
 			if (!allCpsConfluent(print, ground, "equation " + e, set)) {
 				return false;
 			}
 		}
-		for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> e : R) {
-			List<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> set = filterSubsumed(reduce(allcps(new HashSet<>(), e)));
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : R) {
+			List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> set = filterSubsumed(reduce(allcps(new HashSet<>(), e)));
 			if (!allCpsConfluent(print, ground, "rule" + e, set)) {
 				return false;
 			}
@@ -842,16 +980,16 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return true;
 	}
 
-	private boolean allCpsConfluent(boolean print, boolean ground, String s, Collection<Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>>> set) throws InterruptedException {
-		outer: for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> e : set) {
-			KBExp<Chc<V, C>, V> lhs = red(new HashMap<>(), Util.append(E, G), R, e.first);
-			KBExp<Chc<V, C>, V> rhs = red(new HashMap<>(), Util.append(E, G), R, e.second);
+	private boolean allCpsConfluent(boolean print, boolean ground, String s, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> set) throws InterruptedException {
+		outer: for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : set) {
+			KBExp<Chc<V, C>, V> lhs = red(new HashMap<>(), Util.append(E, G), R, e.first, e.third, Collections.emptyMap());
+			KBExp<Chc<V, C>, V> rhs = red(new HashMap<>(), Util.append(E, G), R, e.second, e.third, Collections.emptyMap());
 			if (!lhs.equals(rhs)) {
 				if (!ground) {
 					return false;
 				} else {
-					for (Pair<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> ex : G) {
-						if (subsumes(fresh, new Pair<>(lhs, rhs), ex) || subsumes(fresh, new Pair<>(rhs, lhs), ex)) {
+					for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ex : G) {
+						if (subsumes(new Triple<>(lhs, rhs, e.third), ex) || subsumes(new Triple<>(rhs, lhs, e.third), ex)) {
 							continue outer;
 						}
 					}
@@ -867,9 +1005,9 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	}
 
 	@Override
-	public String toString() {
-		List<String> a = E.stream().map(x -> x.first + " = " + x.second).collect(Collectors.toList());
-		List<String> b = R.stream().map(x -> x.first + " -> " + x.second).collect(Collectors.toList());
+	public String toString() { 
+		List<String> a = E.stream().map(x -> Util.sep(x.third, ":", " ") + " " + x.first + " = " + x.second).collect(Collectors.toList());
+		List<String> b = R.stream().map(x -> Util.sep(x.third, ":", " ") + " " + x.first + " -> " + x.second).collect(Collectors.toList());
 
 		return (Util.sep(a, "\n") + "\n" + Util.sep(b, "\n")).trim();
 	}
@@ -889,7 +1027,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	@Override
 	public boolean eq(Map<V, T> ctx, KBExp<C, V> lhs, KBExp<C, V> rhs) {
-		return qnf(lhs).equals(qnf(rhs));
+		return qnf(lhs, ctx).equals(qnf(rhs, ctx));
 	}
 
 	@Override
@@ -897,12 +1035,12 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return isComplete;
 	}
 
-	private KBExp<Chc<V, C>, V> qnf(KBExp<C, V> e) {
+	private KBExp<Chc<V, C>, V> qnf(KBExp<C, V> e, Map<V,T> ctx) {
 		try {
 			if (isComplete) {
-				return red(null, Util.append(E, G), R, e.inject());
+				return red(null, Util.append(E, G), R, e.inject(), ctx, Collections.emptyMap());
 			} else if (isCompleteGround) {
-				return red(null, Util.append(E, G), R, e.skolemize());
+				return red(null, Util.append(E, G), R, e.skolemize(), Collections.emptyMap(), ctx);
 			}
 			throw new RuntimeException("Anomaly: please report");
 		} catch (InterruptedException e1) {
@@ -912,7 +1050,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	@Override
 	public KBExp<C, V> nf(Map<V, T> ctx, KBExp<C, V> e) {
-		return deject(qnf(e));
+		return deject(qnf(e, ctx));
 	}
 
 	private KBExp<C, V> deject(KBExp<Chc<V, C>, V> e) {
@@ -927,21 +1065,37 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 
+	//In entropic, if ((a o b) o (c o d)) rewrites to ((a o b) o d), the bug is probably here 
 	private boolean gt(Chc<V, C> lhs, Chc<V, C> rhs) {
 		if (lhs.equals(rhs)) {
 			return false;
-		} else if (min.equals(lhs)) {
-			return false;
-		} else if (min.equals(rhs)) {
-			return true;
-		} else if (lhs.left && rhs.left) {
-			return lhs.l.toString().compareTo(rhs.l.toString()) > 0;
-		} else if (lhs.left) {
-			return true;
-		} else if (rhs.left) {
-			return false;
-		}
+		} 
+		if (lhs.left && rhs.left) {
+			if (min.containsValue(lhs) && min.containsValue(rhs)) { //both minimal
+				return lhs.l.toString().compareTo(rhs.l.toString()) > 0;
+			} else if (!min.containsValue(lhs) && !min.containsValue(rhs)) { //both maximal
+				return lhs.l.toString().compareTo(rhs.l.toString()) > 0;
+			} else if (min.containsValue(lhs) && !min.containsValue(rhs)) { //lhs minimal, rhs maximal
+				return false;
+			} else if (!min.containsValue(lhs) && min.containsValue(rhs)) { //lhs maximal, rhs minimal
+				return true;
+			}
+			throw new RuntimeException("Anomaly: please report");
+		} else if (lhs.left && !rhs.left) { 
+			if (min.containsValue(lhs)) { //lhs minimal
+				return false;
+			} else { //lhs maximal
+				return true;
+			}
+		} else if (!lhs.left && rhs.left) { 
+			if (min.containsValue(rhs)) { //rhs minimal
+				return true;
+			} else { //rhs maximal
+				return false;
+			}
+		} 
 
+		//both right
 		int i = prec.indexOf(lhs.r);
 		int j = prec.indexOf(rhs.r);
 		if (i == -1 || j == -1) {
@@ -1025,7 +1179,6 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 				}
 			}
 		}
-//		System.out.println("and " + a + " and " + b + " ret " + ret + "");
 
 		return min(ret);
 	}
@@ -1047,8 +1200,6 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 				}
 			}
 		}
-//		System.out.println("union " + a + " and " + b + " ret " + ret + "");
-
 		return ret;
 	}
 	
@@ -1056,7 +1207,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return min(Util.union(a, b));
 	}
 	
-	private static <X> Set<DAG<X>> min(Set<DAG<X>> a) { //TODO: add this in
+	private static <X> Set<DAG<X>> min(Set<DAG<X>> a) { 
 		Set<DAG<X>> ret = new HashSet<>();
 		for (DAG<X> x : a) {
 			if (minimal(x, a)) {
@@ -1065,41 +1216,32 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		}
 		return ret;
 	}
-	
-	
+		
 	private static <X> boolean minimal(DAG<X> x, Set<DAG<X>> a) {
-		//System.out.println("is " + x + " minimal against " + a + "?");
 		for (DAG<X> aa : a) {
 			if (lessThanOrEqual(aa, x) && !x.equals(aa)) {
-				//System.out.println("no");
 				return false;
 			}
 		}
-		//System.out.println("yes");
 		return true;
 	}
 
 	private static <X> boolean lessThanOrEqual(DAG<X> a, DAG<X> b) {
-		//System.out.println("is " + a + " lessThanOrEqual " + b + "?");
 		Set<X> xs = Util.union(a.vertices(), b.vertices());
 		for (X x1 : xs) {
 			for (X x2 : xs) {
 				if (a.hasPath(x1, x2) && !b.hasPath(x1, x2)) {
-					//System.out.println("no");
 					return false;
 				}
 			}
 		}
-		//System.out.println("yes");
 		return true;
 	}
 
 	 private static <X,V> Set<DAG<X>> eq(KBExp<X, V> s, KBExp<X, V> t) {
 		if (s.equals(t)) {
-//			System.out.println("eq " + s + " = " + t + " ret " + tru() + "");
 			return tru();
 		}
-	//	System.out.println("eq " + s + " = " + t + " ret " + fals() + "");
 		return fals();
 	} 
 	
@@ -1109,18 +1251,15 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		}
 		DAG<X> d = new DAG<>();
 		d.addEdge(lhs, rhs);
-//		System.out.println(" " + lhs + " > " + rhs + " ret " + d + "");
 		return Util.singSet(d);
 	} 
 
 	public static <X,V> Set<DAG<X>> gt_lpoInfer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
-		return or(gt_lpo1Infer(s, t), gt_lpo2Infer(s, t)); //TODO: remove non-minimal elements everywhere
+		return or(gt_lpo1Infer(s, t), gt_lpo2Infer(s, t)); 
 	} 
 
 	public static <X,V> Set<DAG<X>> gt_lpo1Infer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
-	//	System.out.println("1 start on " + s + " -> " + t);
 		if (s.isVar) {
-	//		System.out.println("1 end on " + s + " -> " + t + " ret " + fals() + "");
 			return fals();
 		} else {
 			Set<DAG<X>> ret = fals();
@@ -1128,17 +1267,12 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 				ret = or(ret, eq(si, t));
 				ret = or(ret, gt_lpoInfer(si, t));
 			}
-	//		System.out.println("1 end on " + s + " -> " + t + " ret " + ret + "");
-
 			return ret;
 		}
 	} 
 
 	public static <X,V> Set<DAG<X>> gt_lpo2Infer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
-	//	System.out.println("2 start on " + s + " -> " + t);
-
 		if (s.isVar || t.isVar) {
-//			System.out.println("2 end on " + s + " -> " + t + " ret " + fals() + "");			
 			return fals();
 		}
 		KBApp<X, V> S = s.getApp();
@@ -1152,10 +1286,8 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		Set<DAG<X>> zz = null;
 		if (S.f.equals(T.f)) {
 			zz = and(ret, gt_lpo_lexInfer(S.args, T.args));
-	//		System.out.println("2 end on " + s + " -> " + t + " ret " + zz);
 		} else {
 			zz = and(ret, gtInfer(S.f, T.f));
-	//		System.out.println("2 end on " + s + " -> " + t + " ret " + zz);
 		}
 		return zz;
 	}
@@ -1174,15 +1306,14 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return or(gt_lpoInfer(s0, t0), and(eq(s0,t0), gt_lpo_lexInfer(ss.subList(1, ss.size()), tt.subList(1, tt.size()))));	
 	}
 	
-	public static <C,V> List<C> inferPrec(Map<C, Integer> symbols, Set<Pair<KBExp<C, V>, KBExp<C, V>>> R0) throws InterruptedException {
+	public static <C,V,T> List<C> inferPrec(Map<C, Integer> symbols, Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V,T>>> R0) throws InterruptedException {
 		Set<DAG<C>> ret = tru();
-		for (Pair<KBExp<C, V>, KBExp<C, V>> R : R0) {
+		for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>> R : R0) {
 			ret = and(ret, gt_lpoInfer(R.first, R.second));
 		}
 		if (ret.isEmpty()) {
 			throw new RuntimeException("There is no LPO precedence that can orient all rules from left to right.  (Unfailing) completion can still be used, but you will have to specify a precedence manually.");
 		}
-//		System.out.println("zz " + ret.stream().map(x -> toPrec(symbols, x)).collect(Collectors.toList()));
 		DAG<C> g = Util.get0X(ret);
 		return toPrec(symbols, g); //TODO: just pick one randomly and make it total randomly.   
 
@@ -1190,10 +1321,9 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	//arity-0 < arity-2 < arity-1 < arity-3 < arity-4
 	private static <C> List<C> toPrec(Map<C, Integer> cs, DAG<C> g) {
-//		System.out.println("init " + g.topologicalSort());
 		List<C> ret = new LinkedList<>(g.topologicalSort()); //biggest first
 		
-		List<C> extra = new LinkedList<>(cs.keySet()); //bigest first
+		List<C> extra = new LinkedList<>(cs.keySet()); //biggest first
 		extra.removeAll(g.vertices());
 		Function<Integer, Integer> f = x -> {
 			if (x == 2) {
@@ -1209,11 +1339,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			return Integer.compare(f.apply(x0), f.apply(y0));
 		});
 		ret.addAll(0, extra);
-//		System.out.println("final " + ret);
 		return Util.reverse(ret);
 	}
-
-
-	
 	
 }
