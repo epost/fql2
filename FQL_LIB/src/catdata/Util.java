@@ -2,6 +2,7 @@ package catdata;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,8 +14,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -529,11 +530,11 @@ public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 
 	
 
-	public static <X, Y> List<Y> proj2(List<Pair<X, Y>> l) {
+	public static <X, Y> List<Y> proj2(Collection<Pair<X, Y>> l) {
 		return l.stream().map(x -> x.second).collect(Collectors.toList());
 	}
 
-	public static <X, Y> List<X> proj1(List<Pair<X, Y>> l) {
+	public static <X, Y> List<X> proj1(Collection<Pair<X, Y>> l) {
 		return l.stream().map(x -> x.first).collect(Collectors.toList());
 	}
 	
@@ -826,5 +827,24 @@ public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 
 	public static <X> List<String> toString(List<X> list) {
 		return list.stream().map(Object::toString).collect(Collectors.toList());
+	}
+	
+	public static <T> Set<Set<T>> powerSet(Collection<T> originalSet) {
+	    Set<Set<T>> sets = new HashSet<Set<T>>();
+	    if (originalSet.isEmpty()) {
+	    	sets.add(new HashSet<>());
+	    	return sets;
+	    }
+	    List<T> list = new ArrayList<T>(originalSet);
+	    T head = list.get(0);
+	    Set<T> rest = new HashSet<T>(list.subList(1, list.size())); 
+	    for (Set<T> set : powerSet(rest)) {
+	    	Set<T> newSet = new HashSet<>();
+	    	newSet.add(head);
+	    	newSet.addAll(set);
+	    	sets.add(newSet);
+	    	sets.add(set);
+	    }		
+	    return sets;
 	}
 }

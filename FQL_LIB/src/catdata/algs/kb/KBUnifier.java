@@ -1,5 +1,6 @@
 package catdata.algs.kb;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,9 +19,9 @@ import catdata.algs.kb.KBExp.KBApp;
 public class KBUnifier<C, V> {
 
 	public static <C, V> Map<V, KBExp<C, V>> findSubst(KBExp<C, V> s, KBExp<C, V> t)  {
-		// if (!Collections.disjoint(s.vars_fast(), t.vars_fast())) {
-		// throw new RuntimeException("not disjoint in findsubst");
-		// }
+		 if (!Collections.disjoint(s.vars(), t.vars())) {
+		  throw new RuntimeException("not disjoint in findsubst");
+		 }
 		Map<V, KBExp<Chc<V,C>, V>> m;
 		try {
 			m = unify0(s.inject(), t.skolemize());

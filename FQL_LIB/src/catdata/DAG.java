@@ -266,17 +266,21 @@ public final class DAG<N> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DAG<?> other = (DAG<?>) obj;
-		if (fIn == null) {
-			if (other.fIn != null)
-				return false;
-		} else if (!fIn.equals(other.fIn))
+		@SuppressWarnings("unchecked")
+		DAG<N> other = (DAG<N>) obj;
+		if (!other.vertices().equals(vertices())) {
 			return false;
-		if (fOut == null) {
-			if (other.fOut != null)
-				return false;
-		} else if (!fOut.equals(other.fOut))
-			return false;
+		}
+		for (N n : vertices()) {
+			for (N m : vertices()) {
+				if (other.hasPath(n, m) && !hasPath(n, m)) {
+					return false;
+				}
+				if (!other.hasPath(n, m) && hasPath(n, m)) {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 	

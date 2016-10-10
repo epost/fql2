@@ -11,13 +11,14 @@ public class KBOptions {
 	public int red_its = 32;
 //	public boolean simplify = true;
 	public boolean compose = true;
+	public boolean syntactic_ac = true;
 	
 	public KBOptions() {	
 	}
 	public static KBOptions defaultOptions = new KBOptions();
 	
 	public KBOptions(boolean xunfailing, boolean xsort_cps, boolean xhorn, boolean xsemantic_ac,
-			int xiterations, int xred_its, boolean xfilter_subsumed_by_self,/* boolean simplify, */boolean xcompose) {
+			int xiterations, int xred_its, boolean xfilter_subsumed_by_self,/* boolean simplify, */boolean xcompose, boolean xsyntactic_ac) {
 		this.unfailing = xunfailing;
 		this.sort_cps = xsort_cps;
 		this.horn = xhorn;
@@ -27,6 +28,7 @@ public class KBOptions {
 		this.filter_subsumed_by_self = xfilter_subsumed_by_self;
 	//	this.simplify = simplify;
 		this.compose = xcompose;
+		this.syntactic_ac = xsyntactic_ac;
 	}
 	
 }

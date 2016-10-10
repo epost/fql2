@@ -26,6 +26,7 @@ import catdata.algs.kb.ProgramProver;
 
 //TODO: maybe easier to check queries by translation into mappings
 
+//TODO: add abort functionality
 
 //no java here!
 public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {

@@ -49,7 +49,7 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 		if (!prec.isEmpty() && !(prec.get(0) instanceof Head)) {
 			throw new RuntimeException("Anomaly: please report");
 		}
-		KBOptions options = new KBOptions(true, sort, false, true, Integer.MAX_VALUE, Integer.MAX_VALUE, filter_subsumed, compose); //this ignores all but 4 options, see LPOUKB
+		KBOptions options = new KBOptions(true, sort, false, true, Integer.MAX_VALUE, Integer.MAX_VALUE, filter_subsumed, compose, true); //this ignores all but 4 options, see LPOUKB
 		
 		Util.assertNoDups(prec);
 		if (!new HashSet<>(prec).equals(signature.keySet())) {

@@ -590,6 +590,22 @@ public abstract class KBExp<C, V> {
 
 	public abstract KBExp<Chc<V,C>, V> inject();
 	
+	public static <C,V> KBExp<C, V> unject(KBExp<Chc<V,C>, V> e) {
+		if (e.isVar) {
+			return new KBVar<>(e.getVar().var);
+		}
+		if (e.getApp().f.left) {
+			throw new RuntimeException("Anomaly: please report");
+		} else {
+			List<KBExp<C, V>> l = new ArrayList<>(e.getApp().args.size());
+			for (KBExp<Chc<V,C>, V> arg : e.getApp().args) {
+				l.add(unject(arg));
+			}
+			return new KBApp<>(e.getApp().f.r, l);
+		}
+	}
+
+	
 	public abstract KBExp<Chc<V,C>, V> skolemize();
 	
 	public static <C,V> KBExp<C, V> unskolemize(KBExp<Chc<V,C>, V> e) {

@@ -389,7 +389,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 				NEWDEBUG.debug.opl.opl_prover_sort, NEWDEBUG.debug.opl.opl_allow_horn && !s.implications.isEmpty(), 
 				NEWDEBUG.debug.opl.opl_prover_ac, NEWDEBUG.debug.opl.opl_prover_timeout, 
 				NEWDEBUG.debug.opl.opl_prover_reduction_limit, NEWDEBUG.debug.opl.opl_prover_filter_subsumed,
-				/* NEWDEBUG.debug.opl.simplify, */ NEWDEBUG.debug.opl.opl_prover_compose);
+				/* NEWDEBUG.debug.opl.simplify, */ NEWDEBUG.debug.opl.opl_prover_compose, false);
 		return new KB(eqs, KBOrders.lpogt(NEWDEBUG.debug.opl.opl_allow_horn && !s.implications.isEmpty(), gt), fr, rs, options);			
 	}
 	
