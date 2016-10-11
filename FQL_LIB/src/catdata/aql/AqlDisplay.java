@@ -31,6 +31,11 @@ import catdata.ide.Program;
 
 public final class AqlDisplay implements Disp {
 
+	private Throwable exn;
+	
+	public Throwable exn() {
+		return exn;
+	}
 	 
 	@Override
 	public void close() {
@@ -66,9 +71,16 @@ public final class AqlDisplay implements Disp {
 
 	public AqlDisplay(String title, Program<Exp<? extends Object>> p, AqlEnv env, long start, long middle) {
 		Map<Object, String> map = new HashMap<>();
+		this.exn = env.exn;
 		for (String c : p.order) {
 			Exp<?> exp = p.exps.get(c);
+			if (!env.keySet().contains(c)) {
+				continue;
+			}
 			Object obj = env.get(c, exp.kind());
+			if (obj == null) {
+				continue;
+			}
 			map.put(obj, c); 
 			try {
 				frames.add(new Pair<>(doLookup(c, obj, exp), wrapDisplay(exp.kind(), obj)));
@@ -81,7 +93,8 @@ public final class AqlDisplay implements Disp {
 		long end = System.currentTimeMillis();
 		int c1 = (int) ((middle - start) / (1000f));
 		int c2 = (int) ((end - middle) / (1000f));
-		display(title + " | (exec: " + c1 + "s)(gui: " + c2 + "s)", p.order);
+		String pre = exn == null ? "" : "(ERROR, PARTIAL RESULT) | ";
+		display(pre + title + " | (exec: " + c1 + "s)(gui: " + c2 + "s)", p.order);
 	}
 	
 	JFrame frame = null;

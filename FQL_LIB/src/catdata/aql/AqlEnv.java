@@ -15,6 +15,8 @@ public final class AqlEnv {
 	private Map<String, Query> qs = new HashMap<>();
 	private Map<String, Pragma> ps = new HashMap<>();
 	
+	public Throwable exn = null;
+	
 	public Object get(String k, Kind kind) {
 		switch (kind) {
 		case INSTANCE:

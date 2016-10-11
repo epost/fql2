@@ -83,20 +83,22 @@ public class OplOptions extends Options implements Cloneable {
 		}
 	}
 
-	// TODO put these names in tooltips
 	public boolean opl_prover_compose = KBOptions.defaultOptions.compose;
 	public boolean opl_prover_filter_subsumed = KBOptions.defaultOptions.filter_subsumed_by_self;
 	public boolean opl_prover_unfailing = KBOptions.defaultOptions.unfailing;
+	@SuppressWarnings("deprecation")
 	public int opl_prover_timeout = KBOptions.defaultOptions.iterations;
 	public boolean opl_prover_require_const = false;
 	public boolean opl_prover_sort = KBOptions.defaultOptions.sort_cps;
 	public boolean opl_prover_ac = KBOptions.defaultOptions.semantic_ac;
+	@SuppressWarnings("deprecation")
 	public int opl_prover_reduction_limit = KBOptions.defaultOptions.red_its;
 	public int opl_saturate_timeout = 100000;
 	public boolean opl_validate = true;
 	public boolean opl_pretty_print = true;
 	public boolean opl_reorder_joins = true;
 	public boolean opl_suppress_dom = true;
+	@SuppressWarnings("deprecation")
 	public boolean opl_allow_horn = KBOptions.defaultOptions.horn;
 	public boolean opl_query_check_eqs = true;
 	public boolean opl_pushout_simpl = false;

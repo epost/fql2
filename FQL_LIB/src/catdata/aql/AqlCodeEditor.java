@@ -40,7 +40,7 @@ public final class AqlCodeEditor extends
 
 	@Override
 	protected String getATMFrhs() {
-		return "catdata.aql.AqlTokenMaker"; //TODO
+		return "catdata.aql.AqlTokenMaker"; 
 	}
 
 	protected void doTemplates() {

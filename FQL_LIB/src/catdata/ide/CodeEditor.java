@@ -478,9 +478,12 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			String foo = GUI.getTitle(id);
 				foo += " - " + format.format(new Date(start));
 			display = makeDisplay(foo, init, env, start, middle); 
-			toDisplay = textFor(env); //"Done";
-			respArea.setText(textFor(env)); //"Done");
-
+			if (display.exn() == null) {
+				toDisplay = textFor(env); //"Done";
+				respArea.setText(textFor(env)); //"Done");
+			} else {
+				throw display.exn();
+			}
 		} catch (LineException e) {
 			toDisplay = "Error in " + e.kind + " " + e.decl + ": "
 					+ e.getLocalizedMessage();

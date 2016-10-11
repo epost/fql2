@@ -7,7 +7,6 @@ import java.util.Map;
 
 import catdata.Util;
 
-//TODO why showing viewer so long - change
 public final class AqlOptions {
 	
 	public final Map<AqlOption, Object> options; 
@@ -29,7 +28,7 @@ public final class AqlOptions {
 		return Util.sep(l, "\n\t");
 	}
 	
-	//TODO anything 'unsafe' should default to false, but need empty sorts for now
+	//anything 'unsafe' should default to false
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
 		case allow_java_eqs_unsafe:
@@ -40,20 +39,20 @@ public final class AqlOptions {
 			throw new RuntimeException("Anomaly: please report");
 		case prover:
 			return ProverName.auto;
-		case require_consistency: //TODO: require consistency check
+		case require_consistency: 
 			return false;
 		case timeout:
 			return 5;
 		case dont_verify_is_appropriate_for_prover_unsafe:
 			return false;
-		case allow_empty_sorts_unsafe:
-			return true; //TODO set to false eventually
 		case completion_compose:
 			return true;
 		case completion_filter_subsumed:
 			return true;
 		case completion_sort:
 			return true;
+		case completion_syntactic_ac:
+			return false;
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
@@ -84,9 +83,6 @@ public final class AqlOptions {
 				break;
 			case precomputed:
 				throw new RuntimeException(op + " option is reserved for AQL compiler");
-			case allow_empty_sorts_unsafe:
-				ob = op.getBoolean(map);
-				break;	
 			case completion_compose:
 				ob = op.getBoolean(map);
 				break;
@@ -96,8 +92,9 @@ public final class AqlOptions {
 			case completion_sort:
 				ob = op.getBoolean(map);
 				break;
-			default:
-				break;	
+			case completion_syntactic_ac:
+				ob = op.getBoolean(map);
+				break;
 			}
 			options.put(op, ob);
 		}

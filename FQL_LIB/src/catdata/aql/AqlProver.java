@@ -65,13 +65,9 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				case congruence: 
 					return wrap(col1.simplify().second, new CongruenceProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
 				case program:  
-					boolean emptySortsOk = (Boolean) ops.getOrDefault(AqlOption.allow_empty_sorts_unsafe);
 					boolean check = ! (Boolean) ops.getOrDefault(AqlOption.dont_verify_is_appropriate_for_prover_unsafe);
-					col1.assertNoEmptySorts(emptySortsOk);
 					return wrap(col1.simplify().second, new ProgramProver<>(check, Var.it, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); //use simplified
 				case completion: 
-					emptySortsOk = (Boolean) ops.getOrDefault(AqlOption.allow_empty_sorts_unsafe);
-					col1.assertNoEmptySorts(emptySortsOk);
 					return wrap(col1.simplify().second, new CompletionProver<>(col1.toKB().second.keySet(), ops, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first, col1.simplify().first)); //use simplified  	
 				case monoidal:	
 					return wrap(col1.simplify().second, new MonoidalProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); //use simplified

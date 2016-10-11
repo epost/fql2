@@ -14,11 +14,11 @@ public enum AqlOption {
 	completion_sort,
 	completion_compose,
 	completion_filter_subsumed,
-	allow_empty_sorts_unsafe,
+	completion_syntactic_ac,
 	precomputed,
 	allow_java_eqs_unsafe,
 	require_consistency, //TODO: enforce
-	timeout, //TODO: enforce
+	timeout, 
 	dont_verify_is_appropriate_for_prover_unsafe,
 	prover;
 	

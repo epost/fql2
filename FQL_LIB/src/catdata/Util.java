@@ -847,4 +847,16 @@ public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 	    }		
 	    return sets;
 	}
+
+	public static Comparator<Object> ToStringComparator = new Comparator<Object>() {
+		@Override
+		public int compare(Object o1, Object o2) {
+			if (o1.toString().length() > o2.toString().length()) {
+				return 1;
+			} else if (o1.toString().length() < o2.toString().length()) {
+				return -1;
+			}
+			return o1.toString().compareTo(o2.toString());
+		}
+	};
 }

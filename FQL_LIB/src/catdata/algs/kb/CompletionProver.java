@@ -28,6 +28,7 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 		boolean sort = (Boolean) ops.getOrDefault(AqlOption.completion_sort);
 		boolean filter_subsumed = (Boolean) ops.getOrDefault(AqlOption.completion_filter_subsumed);
 		boolean compose = (Boolean) ops.getOrDefault(AqlOption.completion_compose);
+		boolean syntactic_ac = (Boolean) ops.getOrDefault(AqlOption.completion_syntactic_ac);
 		
 		Set<Triple<KBExp<Head<Ty,En,Sym,Fk,Att,Gen,Sk>,Var>, KBExp<Head<Ty,En,Sym,Fk,Att,Gen,Sk>,Var>, Map<Var, Chc<Ty,En>>>> E0 = theory.stream().map(x -> new Triple<>(x.second, x.third, x.first)).collect(Collectors.toSet());
 		@SuppressWarnings("unchecked")
@@ -49,7 +50,7 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 		if (!prec.isEmpty() && !(prec.get(0) instanceof Head)) {
 			throw new RuntimeException("Anomaly: please report");
 		}
-		KBOptions options = new KBOptions(true, sort, false, true, Integer.MAX_VALUE, Integer.MAX_VALUE, filter_subsumed, compose, true); //this ignores all but 4 options, see LPOUKB
+		KBOptions options = new KBOptions(true, sort, false, true, Integer.MAX_VALUE, Integer.MAX_VALUE, filter_subsumed, compose, syntactic_ac); //this ignores all but 4 options, see LPOUKB
 		
 		Util.assertNoDups(prec);
 		if (!new HashSet<>(prec).equals(signature.keySet())) {

@@ -5,13 +5,18 @@ public class KBOptions {
 	public boolean filter_subsumed_by_self = true;
 	public boolean unfailing = true;
 	public boolean sort_cps = true;
-	public boolean horn = false;
 	public boolean semantic_ac = true;
-	public int iterations = 200000;
-	public int red_its = 32;
-//	public boolean simplify = true;
 	public boolean compose = true;
 	public boolean syntactic_ac = true;
+
+	@Deprecated
+	public boolean horn = false;
+
+	@Deprecated
+	public int iterations = 200000;
+	
+	@Deprecated
+	public int red_its = 32;
 	
 	public KBOptions() {	
 	}

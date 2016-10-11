@@ -16,43 +16,42 @@ import catdata.Util;
 import catdata.ide.LineException;
 import catdata.ide.Program;
 
-
 public final class AqlMultiDriver implements Callable<Unit> {
 
-	// n is unchanged if it is equal to old(n) and for every dependency d, unchanged(d)
-	// this means that expressions such as 'load from disk' will need to be careful about equality
+	// n is unchanged if it is equal to old(n) and for every dependency d,
+	// unchanged(d)
+	// this means that expressions such as 'load from disk' will need to be
+	// careful about equality
 
-	@Override 
+	@Override
 	public String toString() {
-		return "Completed: " + Util.sep(completed, " ") 
-		   + "\nProcessing: " + Util.sep(processing, " ")
-		   + "\nTodo: " + Util.sep(todo, " ");
+		return "Completed: " + Util.sep(completed, " ") + "\nProcessing: " + Util.sep(processing, " ") + "\nTodo: " + Util.sep(todo, " ");
 	}
-	
+
 	public final AqlEnv env = new AqlEnv();
-	
+
 	public final List<String> todo = new LinkedList<>();
 	public final List<String> processing = new LinkedList<>();
 	public final List<String> completed = new LinkedList<>();
-	
+
 	public final Program<Exp<?>> prog;
 	public final String[] toUpdate;
 	public final Program<Exp<?>> last_prog;
 	public final AqlEnv last_env;
-	
-	private LineException exn;
+
+	private LineException exn; //TODO make this all the errors, not just the first error
 	boolean stop = false;
-	
+
 	public AqlMultiDriver(Program<Exp<?>> prog, String[] toUpdate, Program<Exp<?>> last_prog, AqlEnv last_env) {
 		this.prog = prog;
 		this.toUpdate = toUpdate;
 		this.last_prog = last_prog;
 		this.last_env = last_env;
-		
+
 		checkAcyclic();
 		init();
 		toUpdate[0] = toString();
-		//System.out.println(this);
+		// System.out.println(this);
 		process();
 	}
 
@@ -63,7 +62,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				if (!prog.order.contains(d)) {
 					throw new LineException("Undefined dependency: " + d, n, prog.exps.get(n).kind().toString());
 				}
-				boolean ok = dag.addEdge(n, d);			
+				boolean ok = dag.addEdge(n, d);
 				if (!ok) {
 					throw new LineException("Adding dependency on " + d + " causes circularity", n, prog.exps.get(n).kind().toString());
 				}
@@ -72,41 +71,43 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	}
 
 	List<Future<Unit>> threads = new LinkedList<>();
+
 	private void cancel() {
 		for (Future<Unit> thread : threads) {
 			if (!thread.isDone() && !thread.isCancelled()) {
 				try {
 					thread.cancel(true);
-				} catch (CancellationException ex) { }
+				} catch (CancellationException ex) {
+				}
 			}
 		}
 	}
+
 	private void process() {
-		
-			for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
-				ExecutorService executor = Executors.newSingleThreadExecutor();
-			    Future<Unit> future = executor.submit(this);
-			    threads.add(future);
-			}
-			for (Future<Unit> thread : threads) {
-				if (!thread.isDone() && !thread.isCancelled()) {
-					try {
-						thread.get();
-					} catch (Throwable ex) { 
-						stop = true;
-						cancel();
-					}
+		for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
+			ExecutorService executor = Executors.newSingleThreadExecutor();
+			Future<Unit> future = executor.submit(this);
+			threads.add(future);
+		}
+		for (Future<Unit> thread : threads) {
+			if (!thread.isDone() && !thread.isCancelled()) {
+				try {
+					thread.get();
+				} catch (Throwable ex) {
+					stop = true;
+					cancel();
 				}
 			}
-		
-		
+		}
+
 		if (exn != null) {
-			throw exn;
+			env.exn = exn;
+			//throw exn; TODO: configure behavior, stop on error or not?
 		}
-		
-		if (!todo.isEmpty()) {
+
+	/*	if (!todo.isEmpty()) {
 			throw new RuntimeException("Anomaly, please report: " + todo + " " + this);
-		}
+		} */
 	}
 
 	private Map<String, Boolean> changed = new HashMap<>();
@@ -121,11 +122,12 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				todo.add(n);
 			} else {
 				Kind k = prog.exps.get(n).kind();
-				env.put(n,k, last_env.get(n, k));
+				env.put(n, k, last_env.get(n, k));
+				completed.add(n);
 			}
-		}		
+		}
 	}
-	
+
 	private boolean changed(String n) {
 		if (changed.containsKey(n)) {
 			return changed.get(n);
@@ -151,14 +153,14 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		String k2 = "";
 		String n = "";
 
-		//System.out.println(Thread.currentThread()+ " start "+ toString());
+		// System.out.println(Thread.currentThread()+ " start "+ toString());
 		try {
 			for (;;) {
 				n = null;
 				if (Thread.currentThread().isInterrupted() || stop == true) {
 					return new Unit();
 				}
-			
+
 				synchronized (this) {
 					if (todo.isEmpty()) {
 						break;
@@ -167,7 +169,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 					if (n == null) {
 						wait();
 						continue;
-					} 
+					}
 					processing.add(n);
 					todo.remove(n);
 					toUpdate[0] = toString();
@@ -179,7 +181,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				if (val == null) {
 					throw new RuntimeException("null result on " + exp);
 				}
-				synchronized(this) {
+				synchronized (this) {
 					env.put(n, k, val);
 					env.semantics(n, k);
 					processing.remove(n);
@@ -193,7 +195,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			exn = new LineException(thr.getMessage(), n, k2);
 			throw exn;
 		}
-			
+
 		return new Unit();
 	}
 
@@ -209,8 +211,4 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		return null;
 	}
 
-	
-	
-	
-	
 }

@@ -19,15 +19,18 @@ import catdata.Util;
  * 
  * @author Ryan Wisnesky
  *
- * First-order terms with constants/functions, and variables.
+ *         First-order terms with constants/functions, and variables.
  *
- * @param <C> type of constant/function symbols
- * @param <V> type of variables
+ * @param <C>
+ *            type of constant/function symbols
+ * @param <V>
+ *            type of variables
  */
 public abstract class KBExp<C, V> {
-	
+
 	public static interface KBExpVisitor<C, V, R, E> {
 		public R visit(E env, KBVar<C, V> e);
+
 		public R visit(E env, KBApp<C, V> e);
 	}
 
@@ -38,9 +41,9 @@ public abstract class KBExp<C, V> {
 	public abstract int hashCode();
 
 	public abstract <R, E> R accept(E env, KBExpVisitor<C, V, R, E> e);
-	
+
 	public abstract <S> S type(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur);
-	
+
 	public abstract <S> S typeInf(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur);
 
 	public abstract boolean hasAsSubterm(KBExp<C, V> sub);
@@ -50,19 +53,14 @@ public abstract class KBExp<C, V> {
 	public abstract KBExp<C, V> subst(Map<V, KBExp<C, V>> sigma);
 
 	protected abstract void vars(Collection<V> vars);
-	
-	@Deprecated 
+
+	@Deprecated
 	protected abstract void symbols(Map<C, Integer> symbols);
 
-	public abstract Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cp(List<Integer> l,
-			KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d);
+	public abstract Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cp(List<Integer> l, KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d);
 
 	public abstract KBExp<C, V> replace(List<Integer> p, KBExp<C, V> r);
-/*
-	public abstract KBExp<C, V> freeze();
 
-	public abstract KBExp<C, V> unfreeze();
-*/
 	public boolean isVar;
 
 	public abstract KBVar<C, V> getVar();
@@ -78,9 +76,9 @@ public abstract class KBExp<C, V> {
 		}
 		return vars;
 	}
-	
+
 	private Map<C, Integer> symbols = null;
-	
+
 	public Map<C, Integer> symbols() {
 		if (symbols == null) {
 			symbols = new HashMap<>();
@@ -89,10 +87,13 @@ public abstract class KBExp<C, V> {
 		return symbols;
 	}
 
+	@Deprecated
 	protected abstract KBExp<C, V> sort0(Collection<C> acs);
+
+	@Deprecated
 	protected abstract KBExp<C, V> sort1(Collection<C> acs);
-	
-	//TODO: clone, then sort in place
+
+	@Deprecated
 	public KBExp<C, V> sort(Collection<C> acs) {
 		KBExp<C, V> ret = this;
 		for (;;) {
@@ -103,7 +104,7 @@ public abstract class KBExp<C, V> {
 			ret = next;
 		}
 	}
-	
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static class KBVar<C, V> extends KBExp<C, V> {
@@ -164,8 +165,7 @@ public abstract class KBExp<C, V> {
 		}
 
 		@Override
-		public Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cp(List<Integer> l,
-				KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d) {
+		public Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cp(List<Integer> l, KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d) {
 			return new HashSet<>();
 		}
 
@@ -178,23 +178,18 @@ public abstract class KBExp<C, V> {
 		}
 
 		/*
-		KBExp<C, V> frozen = null;
-
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		@Override
-		public KBExp<C, V> freeze() {
-			if (frozen == null) {
-				frozen = new KBApp(this, new LinkedList<>()); // type-safety violation
-			}
-			return frozen;
-		}
-
-		@Override
-		public KBExp<C, V> unfreeze() {
-			throw new RuntimeException();
-		}
-
-*/
+		 * KBExp<C, V> frozen = null;
+		 * 
+		 * @SuppressWarnings({ "unchecked", "rawtypes" })
+		 * 
+		 * @Override public KBExp<C, V> freeze() { if (frozen == null) { frozen
+		 * = new KBApp(this, new LinkedList<>()); // type-safety violation }
+		 * return frozen; }
+		 * 
+		 * @Override public KBExp<C, V> unfreeze() { throw new
+		 * RuntimeException(); }
+		 * 
+		 */
 		@Override
 		public boolean hasAsSubterm(KBExp<C, V> sub) {
 			return this.equals(sub);
@@ -204,10 +199,10 @@ public abstract class KBExp<C, V> {
 		public void vars(Collection<V> vars) {
 			vars.add(var);
 		}
-		
+
 		@Override
 		public void symbols(Map<C, Integer> symbols) {
-			
+
 		}
 
 		@Override
@@ -224,7 +219,7 @@ public abstract class KBExp<C, V> {
 		public <S> S typeInf(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur) {
 			return cur.get(var);
 		}
-		
+
 		@Override
 		public <S> S type(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur) {
 			return cur.get(var);
@@ -234,16 +229,16 @@ public abstract class KBExp<C, V> {
 		protected KBExp<C, V> sort0(Collection<C> acs) {
 			return this;
 		}
+
 		@Override
 		protected KBExp<C, V> sort1(Collection<C> acs) {
 			return this;
 		}
-/*
-		@Override
-		public void allSubExps(Set<KBExp<C, V>> set) {
-			set.add(this);
-		} */
-		
+		/*
+		 * @Override public void allSubExps(Set<KBExp<C, V>> set) {
+		 * set.add(this); }
+		 */
+
 		public boolean allSubExps(Map<KBExp<C, V>, Set<KBExp<C, V>>> pred) {
 			if (!pred.containsKey(this)) {
 				pred.put(this, Collections.emptySet());
@@ -254,14 +249,13 @@ public abstract class KBExp<C, V> {
 
 		@Override
 		public KBExp<Chc<V, C>, V> inject() {
-			return new KBVar<>(var);			
-		}
-		
-		@Override
-		public KBExp<Chc<V, C>, V> skolemize() {
-			return new KBApp<>(Chc.inLeft(var), Collections.emptyList()); 			
+			return new KBVar<>(var);
 		}
 
+		@Override
+		public KBExp<Chc<V, C>, V> skolemize() {
+			return new KBApp<>(Chc.inLeft(var), Collections.emptyList());
+		}
 	}
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -354,7 +348,7 @@ public abstract class KBExp<C, V> {
 				e.vars(vars);
 			}
 		}
-		
+
 		@Override
 		public void symbols(Map<C, Integer> symbols) {
 			for (KBExp<C, V> e : args) {
@@ -371,31 +365,29 @@ public abstract class KBExp<C, V> {
 		}
 
 		@Override
-		public Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cp(List<Integer> p,
-				KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d) {
+		public Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cp(List<Integer> p, KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d) {
 			try {
-				
-			Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> ret = new HashSet<>();
-			int q = 0;
-			for (KBExp<C, V> arg : args) {
-				List<Integer> p0 = new LinkedList<>(p);
-				p0.add(q++);
-				ret.addAll(arg.cp(p0, a, b, g, d));
-			}
 
-			Map<V, KBExp<C, V>> s;
+				Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> ret = new HashSet<>();
+				int q = 0;
+				for (KBExp<C, V> arg : args) {
+					List<Integer> p0 = new LinkedList<>(p);
+					p0.add(q++);
+					ret.addAll(arg.cp(p0, a, b, g, d));
+				}
+
+				Map<V, KBExp<C, V>> s;
 				s = KBUnifier.unify0(this, a);
-			if (s != null) {
-				Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>> toadd = new Triple<>(
-						d.subst(s), g.replace(p, b).subst(s), s);
-				ret.add(toadd);
-			}
-			return ret;
+				if (s != null) {
+					Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>> toadd = new Triple<>(d.subst(s), g.replace(p, b).subst(s), s);
+					ret.add(toadd);
+				}
+				return ret;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				throw new RuntimeException("Interrupted " + e.getMessage());
 			}
-		
+
 		}
 
 		@Override
@@ -414,7 +406,7 @@ public abstract class KBExp<C, V> {
 			}
 			return new KBApp<>(f, new_args);
 		}
-		
+
 		@Override
 		public boolean hasAsSubterm(KBExp<C, V> sub) {
 			if (this.equals(sub)) {
@@ -437,7 +429,7 @@ public abstract class KBExp<C, V> {
 		public KBApp<C, V> getApp() {
 			return this;
 		}
-		
+
 		@Override
 		public <S> S type(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur) {
 			Pair<List<S>, S> p = ctx.get(f);
@@ -454,10 +446,9 @@ public abstract class KBExp<C, V> {
 				}
 				i++;
 			}
-			
+
 			return p.second;
 		}
-
 
 		@Override
 		public <S> S typeInf(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur) {
@@ -469,17 +460,17 @@ public abstract class KBExp<C, V> {
 			int i = 0;
 			for (KBExp<C, V> arg : args) {
 				if (i >= sorts.size()) {
-					throw new RuntimeException("On " + this + ", too many arguments: " + i + " >= " + sorts.size() );
+					throw new RuntimeException("On " + this + ", too many arguments: " + i + " >= " + sorts.size());
 				}
 				S s = sorts.get(i);
-				if (arg.isVar) {		
+				if (arg.isVar) {
 					V v = arg.getVar().var;
 					S s0 = cur.get(v);
 					if (s0 == null) {
 						cur.put(v, s);
 					} else if (!s.equals(s0)) {
 						throw new RuntimeException("Variable " + arg + " requires two different sorts, " + s + " and " + s0);
-					} 
+					}
 				} else {
 					S s0 = arg.typeInf(ctx, cur);
 					if (!s.equals(s0)) {
@@ -488,50 +479,53 @@ public abstract class KBExp<C, V> {
 				}
 				i++;
 			}
-			
+
 			return p.second;
 		}
 
 		@Override
 		protected KBExp<C, V> sort0(Collection<C> acs) {
-			List<KBExp<C,V>> args0 = new LinkedList<>();
-			for (KBExp<C,V> arg : args) {
+			List<KBExp<C, V>> args0 = new LinkedList<>();
+			for (KBExp<C, V> arg : args) {
 				args0.add(arg.sort(acs));
 			}
 			if (!acs.contains(f)) {
 				return new KBApp<>(f, args0);
 			}
-			KBExp<C,V> a1 = args0.get(0);
-			KBExp<C,V> a2 = args0.get(1);
-			List<KBExp<C,V>> l = new LinkedList<>();
+			KBExp<C, V> a1 = args0.get(0);
+			KBExp<C, V> a2 = args0.get(1);
+			List<KBExp<C, V>> l = new LinkedList<>();
 			if (a1.toString().compareTo(a2.toString()) >= 0) {
+				// if (Integer.compare(a1.hashCode(), a2.hashCode()) >= 0) {
 				l.add(a1);
 				l.add(a2);
 			} else {
 				l.add(a2);
 				l.add(a1);
 			}
-			return new KBApp<>(f, l);			
+			return new KBApp<>(f, l);
 		}
+
 		protected KBExp<C, V> sort1(Collection<C> acs) {
-			List<KBExp<C,V>> args0 = new LinkedList<>();
-			for (KBExp<C,V> arg : args) {
+			List<KBExp<C, V>> args0 = new LinkedList<>();
+			for (KBExp<C, V> arg : args) {
 				args0.add(arg.sort1(acs));
 			}
 			if (!acs.contains(f)) {
 				return new KBApp<>(f, args0);
 			}
-			KBExp<C,V> a1 = args0.get(0);
-			KBExp<C,V> a2x = args0.get(1);
+			KBExp<C, V> a1 = args0.get(0);
+			KBExp<C, V> a2x = args0.get(1);
 			if (a2x.isVar || !a2x.getApp().f.equals(f)) {
-				return new KBApp<>(f, args0);			
+				return new KBApp<>(f, args0);
 			}
 
-			KBExp<C,V> a2 = a2x.getApp().args.get(0);
-			KBExp<C,V> a3 = a2x.getApp().args.get(1);
-			List<KBExp<C,V>> l = new LinkedList<>();
-			List<KBExp<C,V>> r = new LinkedList<>();
+			KBExp<C, V> a2 = a2x.getApp().args.get(0);
+			KBExp<C, V> a3 = a2x.getApp().args.get(1);
+			List<KBExp<C, V>> l = new LinkedList<>();
+			List<KBExp<C, V>> r = new LinkedList<>();
 			if (a1.toString().compareTo(a2.toString()) >= 0) {
+				// if (Integer.compare(a1.hashCode(), a2.hashCode()) >= 0) {
 				return new KBApp<>(f, args0);
 			} else {
 				l.add(a2);
@@ -556,6 +550,7 @@ public abstract class KBExp<C, V> {
 		}
 
 		private KBExp<Chc<V, C>, V> inject = null;
+
 		@Override
 		public KBExp<Chc<V, C>, V> inject() {
 			if (inject != null) {
@@ -570,6 +565,7 @@ public abstract class KBExp<C, V> {
 		}
 
 		private KBExp<Chc<V, C>, V> skolemize = null;
+
 		@Override
 		public KBExp<Chc<V, C>, V> skolemize() {
 			if (skolemize != null) {
@@ -584,13 +580,13 @@ public abstract class KBExp<C, V> {
 		}
 	}
 
-	//public abstract void allSubExps(Set<KBExp<C, V>> set);
+	// public abstract void allSubExps(Set<KBExp<C, V>> set);
 
 	public abstract boolean allSubExps(Map<KBExp<C, V>, Set<KBExp<C, V>>> pred);
 
-	public abstract KBExp<Chc<V,C>, V> inject();
-	
-	public static <C,V> KBExp<C, V> unject(KBExp<Chc<V,C>, V> e) {
+	public abstract KBExp<Chc<V, C>, V> inject();
+
+	public static <C, V> KBExp<C, V> unject(KBExp<Chc<V, C>, V> e) {
 		if (e.isVar) {
 			return new KBVar<>(e.getVar().var);
 		}
@@ -598,17 +594,16 @@ public abstract class KBExp<C, V> {
 			throw new RuntimeException("Anomaly: please report");
 		} else {
 			List<KBExp<C, V>> l = new ArrayList<>(e.getApp().args.size());
-			for (KBExp<Chc<V,C>, V> arg : e.getApp().args) {
+			for (KBExp<Chc<V, C>, V> arg : e.getApp().args) {
 				l.add(unject(arg));
 			}
 			return new KBApp<>(e.getApp().f.r, l);
 		}
 	}
 
-	
-	public abstract KBExp<Chc<V,C>, V> skolemize();
-	
-	public static <C,V> KBExp<C, V> unskolemize(KBExp<Chc<V,C>, V> e) {
+	public abstract KBExp<Chc<V, C>, V> skolemize();
+
+	public static <C, V> KBExp<C, V> unskolemize(KBExp<Chc<V, C>, V> e) {
 		if (e.isVar) {
 			throw new RuntimeException("Anomaly: please report");
 		}
@@ -619,7 +614,7 @@ public abstract class KBExp<C, V> {
 			return new KBVar<>(e.getApp().f.l);
 		} else {
 			List<KBExp<C, V>> l = new ArrayList<>(e.getApp().args.size());
-			for (KBExp<Chc<V,C>, V> arg : e.getApp().args) {
+			for (KBExp<Chc<V, C>, V> arg : e.getApp().args) {
 				l.add(unskolemize(arg));
 			}
 			return new KBApp<>(e.getApp().f.r, l);

@@ -24,6 +24,7 @@ import catdata.algs.kb.KBExp.KBVar;
  * 
  * Do not use - replaced by LPOUKB.
  */
+@SuppressWarnings("deprecation")
 public class KB<C, V> extends EqProverDefunct<C, V> {
 	 
 	protected boolean isComplete = false;
@@ -109,7 +110,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	}  */
 	
 	
-	@SuppressWarnings("deprecation")
 	private void initAC() throws InterruptedException {
 		if (!options.semantic_ac) {
 			return;
@@ -282,7 +282,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 
 	protected void sortByStrLen(List<Pair<KBExp<C,V>, KBExp<C,V>>> l) {
 		if (!options.unfailing) {
-			l.sort(ToStringComparator);
+			l.sort(Util.ToStringComparator);
 		} else {
 			List<Pair<KBExp<C,V>, KBExp<C,V>>> unorientable = new LinkedList<>();
 			List<Pair<KBExp<C,V>, KBExp<C,V>>> orientable = new LinkedList<>();
@@ -293,14 +293,13 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 					unorientable.add(k);
 				}
 			}
-			orientable.sort(ToStringComparator);
+			orientable.sort(Util.ToStringComparator);
 			l.clear();
 			l.addAll(orientable);
 			l.addAll(unorientable);
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	private void checkParentDead(Thread cur) throws InterruptedException {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InterruptedException();
@@ -319,7 +318,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	}
 	
 	
-	@SuppressWarnings("deprecation")
 	//if the parent dies, the current thread will too
 	public void complete(Thread parent) {
 		final String[] arr = new String[] { null };
@@ -413,7 +411,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return CP;
 	}
 
-	//TODO: also useful in regular completion?
 	protected List<Pair<KBExp<C, V>, KBExp<C, V>>> filterSubsumedBySelf(
 			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> CPX) throws InterruptedException {
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> CP = new LinkedList<>(CPX);
@@ -1336,17 +1333,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return (Util.sep(a, "\n") + "\n" + Util.sep(b, "\n")).trim();
 	} 
 	
-	private static Comparator<Object> ToStringComparator = new Comparator<Object>() {
-		@Override
-		public int compare(Object o1, Object o2) {
-			if (o1.toString().length() > o2.toString().length()) {
-				return 1;
-			} else if (o1.toString().length() < o2.toString().length()) {
-				return -1;
-			}
-			return o1.toString().compareTo(o2.toString());
-		}
-	};
 	
 	
 
