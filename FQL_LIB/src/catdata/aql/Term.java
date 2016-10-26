@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -168,8 +169,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		this.ty = ty;
 	}
 
-	@Override
-	public String toString() {
+	public String toString(Function<Sk, String> sk_printer) {
 		if (var != null) {
 			return var.toString();
 		} else if (sym != null) {
@@ -189,11 +189,16 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (gen != null) {
 			return gen.toString();
 		} else if (sk != null) {
-			return sk.toString();
+			return sk_printer.apply(sk);
 		} else if (obj != null) {
 			return obj.toString(); // + "@" + ty;
 		}
 		throw new RuntimeException("Anomaly: please report");
+	}
+	
+	@Override
+	public String toString() {
+		return toString(x -> x.toString());
 	}
 
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> Head(Head<Ty, En, Sym, Fk, Att, Gen, Sk> head, List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args) {

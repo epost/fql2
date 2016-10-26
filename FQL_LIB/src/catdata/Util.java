@@ -420,6 +420,12 @@ public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 		}
 		return ret;
 	}
+	
+	public static <X, Y> Map<X, Y> singMapM(X x, Y y) {
+		Map<X, Y> ret = new HashMap<>();
+		ret.put(x, y);
+		return ret;
+	}
 
 	public static <X, Y> LinkedHashMap<X, Y> singMap(X x, Y y) {
 		LinkedHashMap<X, Y> ret = new LinkedHashMap<>();

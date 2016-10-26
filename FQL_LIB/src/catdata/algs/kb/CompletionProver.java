@@ -14,7 +14,7 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-import catdata.aql.AqlOption;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
 import catdata.aql.Head;

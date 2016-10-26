@@ -1,7 +1,5 @@
 package catdata.aql.examples;
 
-import catdata.aql.AqlExample;
-
 public class AqlExampleDev1 extends AqlExample {
 
 	@Override

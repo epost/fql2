@@ -13,6 +13,8 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.AqlProver.ProverName;
 
 public final class Schema<Ty, En, Sym, Fk, Att> {
 	
@@ -219,20 +221,21 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 	} 
 	//TODO alphabetical?
 
+	//TODO: aql cache;
 	public Collection<Att> attsFrom(En en) {
 		return atts.keySet().stream().filter(att -> atts.get(att).first.equals(en)).collect(Collectors.toList());
 	}
 	
+	//TODO: aql cache
 	public Collection<Fk> fksFrom(En en) {
 		return fks.keySet().stream().filter(fk -> fks.get(fk).first.equals(en)).collect(Collectors.toList());
 	}
 	
-	public Term<Ty, En, Sym, Fk, Att, Void, Void> fold(List<Fk> fks, Term<Ty, En, Sym, Fk, Att, Void, Void> head) {
-		Term<Ty, En, Sym, Fk, Att, Void, Void> ret = head;
+	public <Gen,Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> fold(List<Fk> fks, Term<Ty, En, Sym, Fk, Att, Gen, Sk> head) {
 		for (Fk fk : fks) {
-			ret = Term.Fk(fk, ret);
+			head = Term.Fk(fk, head);
 		}
-		return ret;
+		return head;
 	}
 	
 }

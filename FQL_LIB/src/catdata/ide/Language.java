@@ -2,8 +2,8 @@ package catdata.ide;
 
 import java.util.List;
 
-import catdata.aql.AqlCodeEditor;
-import catdata.aql.AqlExamples;
+import catdata.aql.gui.AqlCodeEditor;
+import catdata.aql.examples.AqlExamples;
 import catdata.fpql.XCodeEditor;
 import catdata.fpql.XExamples;
 import catdata.fql.FqlExamples;
@@ -62,7 +62,7 @@ public enum Language {
 		case MPL: return "mpl";
 		case AQL: return "aql";
 		}
-		throw new RuntimeException();
+		throw new RuntimeException(); 
 	}
 	
 	@SuppressWarnings("rawtypes")

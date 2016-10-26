@@ -10,10 +10,12 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.AqlProver.ProverName;
 
 public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
-	private final AqlOptions strategy;
+	private final AqlOptions strategy; //TODO semantics should not have strategies in them - should be taken care of in exp on cretion
 
 	public final Schema<Ty, En, Sym, Fk, Att> schema;
 
@@ -22,7 +24,7 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	public final Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs;
 
-	private static class  VoidIter implements Iterator<Void> {
+	private static class  VoidIter implements Iterator<Void> { //TODO aql
 
 		@Override
 		public boolean hasNext() {
@@ -34,7 +36,7 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			throw new RuntimeException("Anomaly: please report");
 		}
 		
-	}
+	} 
 	
 	public static <Ty, En, Sym, Fk, Att> Instance<Ty, En, Sym, Fk, Att, Void, Void> terminal(Schema<Ty, En, Sym, Fk, Att> t) {
 		return new Instance<>(t, Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), 
@@ -103,10 +105,10 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 	
 	//TODO
-	private Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?> semantics;
+	private Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?,?> semantics;
 	
 	//this could take a while, so make sure two threads don't accidentally do it at the same time
-	public synchronized Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?> semantics() {
+	public synchronized Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?,?> semantics() {
 		if (semantics != null) {
 			return semantics;
 		}
@@ -115,7 +117,7 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		switch (name) {
 		case precomputed:
 			@SuppressWarnings("unchecked")
-			Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?> semantics2 = (Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, ?>) strategy.get(AqlOption.precomputed);
+			Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?,?> semantics2 = (Algebra<Ty, En, Sym, Fk, Att, Gen, Sk,?,?>) strategy.get(AqlOption.precomputed);
 			semantics = semantics2;
 			return semantics;
 		default:
@@ -124,7 +126,7 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return semantics;
 	}
 	
-	static class It implements Iterator<String> {
+	static class It implements Iterator<String> { //TODO aql 
 
 		int next = 0;
 		

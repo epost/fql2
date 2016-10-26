@@ -60,8 +60,27 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		return semantics;
 	}
 	
-	
-	
+	public Ctx<Var, Chc<Ty,En2>> trans(Ctx<Var, Chc<Ty,En1>> ctx) {
+		Ctx<Var, Chc<Ty,En2>> ret = new Ctx<>();
+		for (Var v : ctx.keys()) {
+			Chc<Ty, En1> c = ctx.get(v);
+			if (c.left) {
+				ret.put(v, Chc.inLeft(c.l));
+			} else {
+				ret.put(v, Chc.inRight(ens.get(ctx.get(v))));
+			}
+		}
+		return ret;
+	}
+		
+	public List<Fk2> trans(List<Fk1> fks1) {
+		List<Fk2> ret = new LinkedList<>();
+		for (Fk1 fk1 : fks1) {
+			ret.addAll(fks.get(fk1).second);
+		}
+		return ret;
+	}
+		
 	public <Gen,Sk> Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> trans(Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk> term) {
 		if (term.var != null || term.obj != null || term.gen != null || term.sk != null) {
 			return term.convert();
@@ -156,7 +175,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			Ty ty1 = src.atts.get(att1).second;
 			En2 en2 = ens.get(en1);
 			if (!proposed_en.equals(en2)) {
-				throw new RuntimeException("in mapping for attribute + " + att1 + " the given sort for " + v + " is " + proposed_en + " but it is expected to be " + en2);
+				throw new RuntimeException("in mapping for attribute " + att1 + " the given sort for " + v + " is " + proposed_en + " but it is expected to be " + en2);
 			}
 			Chc<Ty, En2> ty2 = dst.type(new Pair<>(v, en2), term);
 			if (!ty2.equals(Chc.inLeft(ty1))) {

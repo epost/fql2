@@ -13,6 +13,8 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.AqlProver.ProverName;
 
 public final class TypeSide<Ty, Sym> {
 	
