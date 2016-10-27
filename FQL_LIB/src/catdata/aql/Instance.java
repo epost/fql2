@@ -203,7 +203,7 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		List<String> eqs0 = eqs.stream().map(x -> x.first + " = " + x.second).collect(Collectors.toList());
 		toString = "generating entities";
 		toString += "\n\t" + Util.sep(gens, " : ", "\n\t");
-		toString += "\n\ngenerating labelled nulls";
+		toString += "\n\ngenerating nulls";
 		toString += "\n\t" + Util.sep(sks, " : " , "\n\t");			
 		toString += "\n\nequations";
 		toString += "\n\t" + Util.sep(eqs0, "\n\t");

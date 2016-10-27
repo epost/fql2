@@ -106,6 +106,81 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 		
 	}
 	
+	public static final class InstExpDelta<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk>
+	extends InstExp<Ty,En1,Sym,Fk1,Att1,Object,Object> {
+
+		public final InstExp<Ty,En2,Sym,Fk2,Att2,Gen,Sk> I;
+		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
+		
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(I.deps(), F.deps());
+		}
+
+		public InstExpDelta(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk> i) {
+			I = i;
+			F = f;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+				return result;
+		}
+
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpDelta<?,?,?,?,?,?,?,?,?,?> other = (InstExpDelta<?,?,?,?,?,?,?,?,?,?>) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+
+		@Override
+		public SchExp<Ty, En1, Sym, Fk1, Att1> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx) {		
+			SchExp<Ty, En2, Sym, Fk2, Att2> t0 = I.type(ctx0, ctx);
+			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(ctx0);
+			
+			if (!t1.second.equals(t0)) { //TODO type equality
+				throw new RuntimeException("Type error: In " + this + " codomain of mapping is " + t1.first + " but instance has schema " + t0);
+			} 
+			
+			return t1.first;
+		}
+
+		@Override
+		public String toString() {
+			return "delta " + F + " " + I;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Instance<Ty, En1, Sym, Fk1, Att1, Object, Object> eval(AqlEnv env) {
+			Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f = F.eval(env);
+			Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk> i = I.eval(env);		
+			return (Instance<Ty, En1, Sym, Fk1, Att1, Object, Object>) AqlFdm.delta(f, i);
+		}
+		
+	}
+	
 	public static final class InstExpEmpty<Ty,Sym,En,Fk,Att> extends InstExp<Ty,En,Sym,Fk,Att,Void,Void> {
 		
 		public final SchExp<Ty,En,Sym,Fk,Att> schema;

@@ -433,8 +433,8 @@ public class AqlSaturator<Ty, En, Sym, Fk, Att, Gen, Sk, X> extends Algebra<Ty, 
 		return reprT(Chc.inRight(new Pair<>(x, att)));
 	}
 
-//	@Override
-	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> reprT(Chc<Sk, Pair<X, Att>> y) {
+	@Override
+	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> reprT(Chc<Sk, Pair<X, Att>> y) {
 		if (schema().typeSide.java_tys.isEmpty()) {
 			return simpl(Term.Sk(y));
 		} else {
@@ -448,7 +448,7 @@ public class AqlSaturator<Ty, En, Sym, Fk, Att, Gen, Sk, X> extends Algebra<Ty, 
 	}
 	
 	@Override
-	public String print(Chc<Sk, Pair<X, Att>> y) {
+	public String printSk(Chc<Sk, Pair<X, Att>> y) {
 		return unflatten(Term.Sk(y)).toString();
 	}
 	
@@ -482,6 +482,11 @@ public class AqlSaturator<Ty, En, Sym, Fk, Att, Gen, Sk, X> extends Algebra<Ty, 
 			return fk(term.fk, nf(term.arg));
 		}
 		throw new RuntimeException("Anomaly: please report");
+	}
+
+	@Override
+	public String toStringProver() {
+		return dp.toString();
 	}
 
 }

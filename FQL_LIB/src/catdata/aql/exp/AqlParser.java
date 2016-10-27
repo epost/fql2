@@ -19,6 +19,7 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.RawTerm;
+import catdata.aql.exp.InstExp.InstExpDelta;
 import catdata.aql.exp.InstExp.InstExpEmpty;
 import catdata.aql.exp.InstExp.InstExpSigma;
 import catdata.aql.exp.InstExp.InstExpVar;
@@ -183,8 +184,9 @@ public class AqlParser {
 			empty = Parsers.tuple(token("empty"), sch_ref.get()).map(x -> new InstExpEmpty<>(x.b)),
 			sigma = Parsers.tuple(token("sigma"), map_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional())
 			.map(x -> new InstExpSigma(x.b, x.c, x.d == null ? new LinkedList<>() : x.d)),
-			
-			ret = Parsers.or(empty,instExpRaw(),var,sigma);
+			delta = Parsers.tuple(token("delta"), map_ref.lazy(), inst_ref.lazy())
+					.map(x -> new InstExpDelta(x.b, x.c)),			
+			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta);
 		
 		inst_ref.set(ret);
 	}

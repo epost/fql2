@@ -34,6 +34,12 @@ import javax.swing.table.TableRowSorter;
 
 public class Util {
 	
+	public static <X> Function<Void,X> voidFn() {
+		return v -> {
+			throw new RuntimeException("Anomaly: please report");
+		};
+	}
+
 
 public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 

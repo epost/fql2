@@ -33,11 +33,16 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> implements DP<Ty,En,S
 	public abstract X nf(Term<Void, En, Void, Fk, Void, Gen, Void> term); 
 
 	public abstract Term<Void, En, Void, Fk, Void, Gen, Void> repr(X x);
-		
-//	public abstract Term<Ty, Void, Sym, Void, Void, Void, Y> reprT(Y y);
 	
-	public String print(Y y) {
+	public abstract String toStringProver();
+		
+	public abstract Term<Ty, Void, Sym, Void, Void, Void, Y> reprT(Y y); //TODO aql
+	
+	public String printSk(Y y) {
 		return y.toString();
+	}
+	public String printGen(Gen x) {
+		return x.toString();
 	}
 	
 	/**
@@ -173,6 +178,9 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> implements DP<Ty,En,S
 		
 		ret += "\n\ntype algebra\n\n";
 		ret += talg().toString();
+		
+		ret += "\n\nprover\n\n";
+		ret += toStringProver();
 		
 		return ret;
 	}

@@ -176,28 +176,27 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 
 			Pair<Object, Object> p = src0.atts.get(att.first);
 			if (p == null) {
-				throw new RuntimeException(att.first + " is not a source attribute ");
-			} else if (var_en != null && !var_en.equals(p.first)) {
-				throw new RuntimeException("in mapping for " + att.first + ", the given source sort " + var_en + " is not the expected entity " + p.first);
+				throw new RuntimeException("in mapping for " + att.first + ", " + att.first + " is not a source attribute.");
+			} 
+			Object src_att_dom_en = p.first;
+			Object dst_att_dom_en = ens0.get(src_att_dom_en);
+			
+			if (var_en != null && !var_en.equals(dst_att_dom_en)) {
+				throw new RuntimeException("in mapping for " + att.first + ", the given source entity for the variable, " + var_en + ", is not " + p.first + " as expected.");
 			}
 										
-			Object proposed_ty = p.second;
-			if (!dst0.typeSide.tys.contains(proposed_ty)) {
-				throw new RuntimeException("type " + p.second + " does not exist in target");
+			Object src_att_cod_ty = p.second;
+			if (!dst0.typeSide.tys.contains(src_att_cod_ty)) {
+				throw new RuntimeException("in mapping for " + att.first + ", type " + p.second + " does not exist in target typeside.");
 			}
-			Chc<Object,Object> proposed_ty2 = Chc.inLeft(proposed_ty);	
+			Chc<Object,Object> proposed_ty2 = Chc.inLeft(src_att_cod_ty);	
 			
-			if (p.first == null) {
-				throw new RuntimeException("Anomaly: please report");
-			}
-			Object q = ens0.get(p.first);
-			Chc<Object, Object> var_en2 = Chc.inRight(q);
+			Chc<Object, Object> var_en2 = Chc.inRight(dst_att_dom_en);
 			Map<String, Chc<Object, Object>> ctx = Util.singMap(var, var_en2);
-
-			
+	
 			Term<Object, Object, Object, Object, Object, Void, Void> term0 = RawTerm.infer0(ctx, term, proposed_ty2, dcol, "In checking mapping for attribute " + att.first + ", ");
 
-			Util.putSafely(atts0, att.first, new Triple<>(new Var(var), q, term0));
+			Util.putSafely(atts0, att.first, new Triple<>(new Var(var), dst_att_dom_en, term0));
 		} 
 		
 		Mapping<Object, Object, Object, Object, Object, Object, Object, Object> ret = new Mapping<>(ens0, atts0, fks0, src0, dst0);

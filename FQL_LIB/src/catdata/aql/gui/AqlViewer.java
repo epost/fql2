@@ -164,12 +164,12 @@ public final class AqlViewer {
 			int i = 0;
 			for (Term<Void, En, Void, Fk, Void, Gen, Void> x : alphabetical(alg.getTables().carriers.get(en))) {
 				List<String> row = new LinkedList<>();
-				row.add(x.toString());
+				row.add(x.toString(Util.voidFn(), alg::printGen));
 				for (Att att0 : atts) {
-					row.add(alg.getTables().atts.get(att0).get(x).toString(alg::print)); 
+					row.add(alg.getTables().atts.get(att0).get(x).toString(alg::printSk, Util.voidFn())); 
 				}
 				for (Fk fk0 : fks) {
-					row.add(alg.getTables().fks.get(fk0).get(x).toString());
+					row.add(alg.getTables().fks.get(fk0).get(x).toString(Util.voidFn(), alg::printGen));
 				}
 				data[i] = row.toArray();
 				i++;

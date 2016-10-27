@@ -195,6 +195,9 @@ public final class AqlDisplay implements Disp {
 				JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		frame.setLocationRelativeTo(null);
+		if (exn != null) {
+			frame.setLocation(frame.getLocation().x + 400, frame.getLocation().y - 400);
+		}
 		frame.setVisible(true);
 		
 

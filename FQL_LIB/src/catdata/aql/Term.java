@@ -169,7 +169,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		this.ty = ty;
 	}
 
-	public String toString(Function<Sk, String> sk_printer) {
+	public String toString(Function<Sk, String> sk_printer, Function<Gen, String> gen_printer) {
 		if (var != null) {
 			return var.toString();
 		} else if (sym != null) {
@@ -187,7 +187,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (fk != null) {
 			return arg + "." + fk;
 		} else if (gen != null) {
-			return gen.toString();
+			return gen_printer.apply(gen); 
 		} else if (sk != null) {
 			return sk_printer.apply(sk);
 		} else if (obj != null) {
@@ -198,7 +198,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	
 	@Override
 	public String toString() {
-		return toString(x -> x.toString());
+		return toString(x -> x.toString(), x -> x.toString());
 	}
 
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> Head(Head<Ty, En, Sym, Fk, Att, Gen, Sk> head, List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args) {
