@@ -98,7 +98,7 @@ public class AqlJs {
 		} else if (term.att != null) {
 			return Term.Att(term.att, arg);
 		} else if (term.sym != null) {
-			String java = col.java_fns.get(term.sym);
+			String java = col.java_fns.map.get(term.sym); //ok to be null here
 			if (java == null) {
 				return Term.Sym(term.sym, args);
 			}

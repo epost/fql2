@@ -18,8 +18,9 @@ import catdata.aql.Instance;
 import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.Transform;
+import catdata.aql.TransformLiteral;
 
-public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Object,Object,Object,Object,Object> {
+public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object> {
 	
 	@Override
 	public Collection<Pair<String, Kind>> deps() {
@@ -29,14 +30,14 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 		ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.TRANSFORM)).collect(Collectors.toList()));
 		return ret;
 	}
-	public final InstExp<Object,Object,Object,Object,Object,Object,Object> src, dst;
+	public final InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object> src, dst;
 	
 	public final List<String> imports;
 	
 	public final List<Pair<Object, RawTerm>> gens;		
 	
 	public final List<Pair<String, String>> options;
-	
+	 
 	@Override
 	public String toString() {
 		return "TransExpRaw [src=" + src + ", dst=" + dst + ", imports=" + imports + ", gens=" + gens + ", options=" + options + "]";
@@ -91,27 +92,27 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 		return true;
 	}
 
-	//typeside by covariance of read only collections
+	//typeside by covariance of read only collections TODO
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public TransExpRaw(InstExp<?, ?, ?, ?, ?, ?, ?> src, InstExp<?, ?, ?, ?, ?, ?, ?> dst, List<String> imports, List<Pair<String, RawTerm>> gens, List<Pair<String, String>> options) {
-		this.src = (InstExp<Object, Object, Object, Object, Object, Object, Object>) src;
-		this.dst = (InstExp<Object, Object, Object, Object, Object, Object, Object>) dst;
+	public TransExpRaw(InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?> src, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?> dst, List<String> imports, List<Pair<String, RawTerm>> gens, List<Pair<String, String>> options) {
+		this.src = (InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>) src;
+		this.dst = (InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>) dst;
 		this.imports = imports;
 		this.gens = new LinkedList(gens);
 		this.options = options;
 	}
 
 	@Override
-	public Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
-		Instance<Object, Object, Object, Object, Object, Object, Object> src0 = src.eval(env), dst0 = dst.eval(env);
+	public TransformLiteral<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
+		Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> src0 = src.eval(env), dst0 = dst.eval(env);
 		//Collage<Object, Object, Object, Object, Object, Void, Void> scol = new Collage<>(src0);
-		Collage<Object, Object, Object, Object, Object, Object, Object> dcol = new Collage<>(dst0);
+		Collage<Object, Object, Object, Object, Object, Object, Object> dcol = dst0.collage(); //new Collage<>(dst0);
 		
 		Map<Object, Term<Object,Object,Object,Object,Object,Object,Object>> gens0 = new HashMap<>(), sks0 = new HashMap<>();
 		for (String k : imports) {
-			Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object> v = env.getTransform(k);
-			Util.putAllSafely(gens0, v.gens);
-			Util.putAllSafely(sks0, v.sks);
+			Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> v = env.getTransform(k);
+			Util.putAllSafely(gens0, v.gens().map);
+			Util.putAllSafely(sks0, v.sks().map);
 		}
 		
 		for (Pair<Object, RawTerm> gen : gens) {
@@ -119,12 +120,12 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 			Map<String, Chc<Object, Object>> ctx = new HashMap<>();
 				
 			Chc<Object,Object> required = null;
-			if (src0.gens.containsKey(gen.first) && src0.sks.containsKey(gen.first)) {
+			if (src0.gens().containsKey(gen.first) && src0.sks().containsKey(gen.first)) {
 				throw new RuntimeException("in transform for " + gen.first + ", " + gen.first + " is ambiguously an entity generator and labelled null");
-			} else if (src0.gens.containsKey(gen.first)) {
-				required = Chc.inRight(src0.gens.get(gen.first));
-			} else if (src0.sks.containsKey(gen.first)){
-				required = Chc.inLeft(src0.sks.get(gen.first));				
+			} else if (src0.gens().containsKey(gen.first)) {
+				required = Chc.inRight(src0.gens().get(gen.first));
+			} else if (src0.sks().containsKey(gen.first)){
+				required = Chc.inLeft(src0.sks().get(gen.first));				
 			} else {
 				throw new RuntimeException("in transform for " + gen.first + ", " + gen.first + " is not a source generator/labelled null");
 			}
@@ -138,13 +139,13 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 			}
 		}
 		
-		Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = new Transform<>(gens0, sks0, src0, dst0);
+		TransformLiteral<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = new TransformLiteral<>(gens0, sks0, src0, dst0);
 		return ret; 
 	}
 
 	@Override
-	public Pair<InstExp<Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
-			Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
+	public Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
+			Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
 		return new Pair<>(src, dst);
 	}
 	

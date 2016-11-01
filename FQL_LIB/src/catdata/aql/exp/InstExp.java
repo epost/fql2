@@ -4,15 +4,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.AqlFdm;
 import catdata.aql.Ctx;
+import catdata.aql.DeltaInstance;
 import catdata.aql.Instance;
 import catdata.aql.Mapping;
+import catdata.aql.SigmaInstance;
+import catdata.aql.TerminalInstance;
 import catdata.aql.exp.SchExp.SchExpLit;
 
-public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,En,Sym,Fk,Att,Gen,Sk>> {
+public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>> {
 	
 	public Kind kind() {
 		return Kind.INSTANCE;
@@ -24,10 +27,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////	
 
-	public static final class InstExpSigma<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk> 
-	extends InstExp<Ty,En2,Sym,Fk2,Att2,Gen,Sk> {
+	public static final class InstExpSigma<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
+	extends InstExp<Ty,En2,Sym,Fk2,Att2,Gen,Sk,GUID,Chc<Sk,Pair<GUID, Att2>>> {
 
-		public final InstExp<Ty,En1,Sym,Fk1,Att1,Gen,Sk> I;
+		public final InstExp<Ty,En1,Sym,Fk1,Att1,Gen,Sk,X,Y> I;
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
 		public final List<Pair<String, String>> options;
 		
@@ -36,7 +39,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 			return Util.union(I.deps(), F.deps());
 		}
 
-		public InstExpSigma(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk> i, List<Pair<String, String>> options) {
+		public InstExpSigma(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, List<Pair<String, String>> options) {
 			I = i;
 			F = f;
 			this.options = options;
@@ -61,7 +64,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			InstExpSigma<?,?,?,?,?,?,?,?,?,?> other = (InstExpSigma<?,?,?,?,?,?,?,?,?,?>) obj;
+			InstExpSigma<?,?,?,?,?,?,?,?,?,?,?,?> other = (InstExpSigma<?,?,?,?,?,?,?,?,?,?,?,?>) obj;
 			if (F == null) {
 				if (other.F != null)
 					return false;
@@ -98,18 +101,18 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 		}
 
 		@Override
-		public Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk> eval(AqlEnv env) {
+		public SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> eval(AqlEnv env) {
 			Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f = F.eval(env);
-			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk> i = I.eval(env);		
-			return AqlFdm.sigma(f, i, options);
+			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i = I.eval(env);		
+			return new SigmaInstance<>(f, i, options);
 		}
 		
 	}
 	
-	public static final class InstExpDelta<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk>
-	extends InstExp<Ty,En1,Sym,Fk1,Att1,Object,Object> {
+	public static final class InstExpDelta<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk,X,Y>
+	extends InstExp<Ty,En1,Sym,Fk1,Att1,Pair<En1,X>,Y,Pair<En1,X>,Y> {
 
-		public final InstExp<Ty,En2,Sym,Fk2,Att2,Gen,Sk> I;
+		public final InstExp<Ty,En2,Sym,Fk2,Att2,Gen,Sk,X,Y> I;
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
 		
 		@Override
@@ -117,9 +120,9 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 			return Util.union(I.deps(), F.deps());
 		}
 
-		public InstExpDelta(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk> i) {
+		public InstExpDelta(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> i) {
 			I = i;
-			F = f;
+			F = f; 
 		}
 
 		@Override
@@ -140,7 +143,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			InstExpDelta<?,?,?,?,?,?,?,?,?,?> other = (InstExpDelta<?,?,?,?,?,?,?,?,?,?>) obj;
+			InstExpDelta<?,?,?,?,?,?,?,?,?,?,?,?> other = (InstExpDelta<?,?,?,?,?,?,?,?,?,?,?,?>) obj;
 			if (F == null) {
 				if (other.F != null)
 					return false;
@@ -171,17 +174,16 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 			return "delta " + F + " " + I;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
-		public Instance<Ty, En1, Sym, Fk1, Att1, Object, Object> eval(AqlEnv env) {
+		public Instance<Ty,En1,Sym,Fk1,Att1,Pair<En1,X>,Y,Pair<En1,X>,Y> eval(AqlEnv env) {
 			Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f = F.eval(env);
-			Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk> i = I.eval(env);		
-			return (Instance<Ty, En1, Sym, Fk1, Att1, Object, Object>) AqlFdm.delta(f, i);
+			Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> i = I.eval(env);		
+			return new DeltaInstance<>(f, i);
 		}
 		
 	}
 	
-	public static final class InstExpEmpty<Ty,Sym,En,Fk,Att> extends InstExp<Ty,En,Sym,Fk,Att,Void,Void> {
+	public static final class InstExpEmpty<Ty,Sym,En,Fk,Att> extends InstExp<Ty,En,Sym,Fk,Att,Void,Void,Void,Void> {
 		
 		public final SchExp<Ty,En,Sym,Fk,Att> schema;
 
@@ -228,8 +230,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 		}
 
 		@Override
-		public Instance<Ty, En, Sym, Fk, Att, Void, Void> eval(AqlEnv env) {
-			return Instance.terminal(schema.eval(env));
+		public TerminalInstance<Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+			return new TerminalInstance<>(schema.eval(env)); 
 		}
 
 		@Override
@@ -239,7 +241,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 		
 	}
 
-	public static final class InstExpVar extends InstExp<Object, Object, Object, Object, Object, Object, Object> {
+	public static final class InstExpVar extends InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object> {
 		public final String var;
 		
 		@Override
@@ -255,7 +257,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 		}
 
 		@Override
-		public Instance<Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
+		public Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
 			return env.getInstance(var);
 		}
 
@@ -299,16 +301,16 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final class InstExpLit<Ty,En,Sym,Fk,Att,Gen,Sk> extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> {
+	public static final class InstExpLit<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> {
 
-		public final Instance<Ty,En,Sym,Fk,Att,Gen,Sk> inst;
+		public final Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> inst;
 		
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Collections.emptyList();
 		}
 		
-		public InstExpLit(Instance<Ty,En,Sym,Fk,Att,Gen,Sk> inst) {
+		public InstExpLit(Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> inst) {
 			if (inst == null) {
 				throw new RuntimeException("Attempt to create InstExpLit with null schema");
 			}
@@ -316,7 +318,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 		}
 
 		@Override
-		public Instance<Ty,En,Sym,Fk,Att,Gen,Sk> eval(AqlEnv env) {
+		public Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> eval(AqlEnv env) {
 			return inst;
 		}
 
@@ -336,7 +338,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			InstExpLit<?,?,?,?,?,?,?> other = (InstExpLit<?,?,?,?,?,?,?>) obj;
+			InstExpLit<?,?,?,?,?,?,?,?,?> other = (InstExpLit<?,?,?,?,?,?,?,?,?>) obj;
 			if (inst == null) {
 				if (other.inst != null)
 					return false;
@@ -352,7 +354,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk> extends Exp<Instance<Ty,E
 		
 		@Override
 		public SchExp<Ty, En, Sym, Fk, Att> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>, SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx) {
-			return new SchExpLit<>(inst.schema);
+			return new SchExpLit<>(inst.schema());
 		}
 	}
 	

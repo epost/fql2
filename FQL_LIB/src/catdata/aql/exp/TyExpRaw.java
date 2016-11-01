@@ -139,8 +139,8 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 		col.java_parsers.putAll(Util.toMapSafely(java_parser_string));
 
 		for (Entry<Object, Triple<List<Object>, Object, String>> kv : Util.toMapSafely(java_fns_string).entrySet()) {
-			Util.putSafely(col.syms, kv.getKey(), new Pair<>(kv.getValue().first, kv.getValue().second));
-			Util.putSafely(col.java_fns, kv.getKey(), kv.getValue().third);
+			col.syms.put(kv.getKey(), new Pair<>(kv.getValue().first, kv.getValue().second));
+			col.java_fns.put(kv.getKey(), kv.getValue().third);
 		}
 
 		Set<Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>>> eqs0 = new HashSet<>();
@@ -148,11 +148,11 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 		for (String k : imports) {
 			TypeSide<Object, Object> v = env.getTypeSide(k);
 			col.tys.addAll(v.tys);
-			Util.putAllSafely(col.syms, v.syms);
+			col.syms.putAll(v.syms.map);
 			eqs0.addAll(v.eqs);
-			Util.putAllSafely(col.java_tys, v.java_tys);
-			Util.putAllSafely(col.java_fns, v.java_fns);
-			Util.putAllSafely(col.java_parsers, v.java_parsers);
+			col.java_tys.putAll(v.java_tys.map);
+			col.java_fns.putAll(v.java_fns.map);
+			col.java_parsers.putAll(v.java_parsers.map);
 		}
 
 		for (Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq : eqs) {
@@ -162,7 +162,7 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 
 		AqlOptions strat = new AqlOptions(Util.toMapSafely(options), col);
 
-		TypeSide<Object, Object> ret = new TypeSide<>(col.tys, col.syms, eqs0, col.java_tys, col.java_parsers, col.java_fns, strat);
+		TypeSide<Object, Object> ret = new TypeSide<>(col.tys, col.syms.map, eqs0, col.java_tys.map, col.java_parsers.map, col.java_fns.map, strat);
 
 		return ret;
 	}

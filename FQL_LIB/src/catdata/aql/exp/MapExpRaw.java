@@ -126,16 +126,16 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		Schema<Object, Object, Object, Object, Object> src0 = src.eval(env);
 		Schema<Object, Object, Object, Object, Object> dst0 = dst.eval(env);
 		//Collage<Object, Object, Object, Object, Object, Void, Void> scol = new Collage<>(src0);
-		Collage<Object, Object, Object, Object, Object, Void, Void> dcol = new Collage<>(dst0);
+		Collage<Object, Object, Object, Object, Object, Void, Void> dcol = dst0.collage();
 		
 		Map<Object, Object> ens0 = new HashMap<>();
 		Map<Object, Pair<Object, List<Object>>> fks0 = new HashMap<>();
 		Map<Object, Triple<Var, Object, Term<Object, Object, Object, Object, Object, Void, Void>>> atts0 = new HashMap<>();
 		for (String k : imports) {
 			Mapping< Object, Object, Object, Object, Object, Object, Object, Object> v = env.getMapping(k);
-			Util.putAllSafely(ens0, v.ens);
-			Util.putAllSafely(fks0, v.fks);
-			Util.putAllSafely(atts0, v.atts);
+			Util.putAllSafely(ens0, v.ens.map);
+			Util.putAllSafely(fks0, v.fks.map);
+			Util.putAllSafely(atts0, v.atts.map);
 		}
 		
 		Util.putAllSafely(ens0, Util.toMapSafely(ens));

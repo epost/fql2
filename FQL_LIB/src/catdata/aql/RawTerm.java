@@ -112,23 +112,27 @@ public final class RawTerm {
 		throw new RuntimeException("Anomaly, please report");
 	}
 	
+	private static <X> X resolve(String name) {
+		return (X) name; //TODO aql make this smarter
+ 	}
+	
 	@SuppressWarnings("unchecked")
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Head<Ty, En, Sym, Fk, Att, Gen, Sk> toHeadNoPrim(String head, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
-		int n = boolToInt(col.syms.containsKey(head)) + boolToInt(col.atts.containsKey(head)) + boolToInt(col.fks.containsKey(head)) +  boolToInt(col.gens.containsKey(head)) + boolToInt(col.sks.containsKey(head));
+		int n = boolToInt(col.syms.containsKey(resolve(head))) + boolToInt(col.atts.containsKey(resolve(head))) + boolToInt(col.fks.containsKey(resolve(head))) +  boolToInt(col.gens.containsKey(resolve(head))) + boolToInt(col.sks.containsKey(resolve(head)));
 		if (n == 0) {
 			throw new RuntimeException(head + " is not a symbol");						
 		} else if (n > 1) {
 			throw new RuntimeException(head + " is ambiguous");			
 		}
-		if (col.syms.containsKey(head)) {
+		if (col.syms.containsKey(resolve(head))) {
 			return Head.Sym((Sym)head);
-		} else if (col.atts.containsKey(head)) {
+		} else if (col.atts.containsKey(resolve(head))) {
 			return Head.Att((Att)head);
-		} else if (col.fks.containsKey(head)) {
+		} else if (col.fks.containsKey(resolve(head))) {
 			return Head.Fk((Fk)head);
-		} else if (col.gens.containsKey(head)) {
+		} else if (col.gens.containsKey(resolve(head))) {
 			return Head.Gen((Gen)head);
-		} if (col.sks.containsKey(head)) {
+		} if (col.sks.containsKey(resolve(head))) {
 			return Head.Sk((Sk)head);
 		}
 		throw new RuntimeException("Anomaly: please report");
@@ -140,7 +144,7 @@ public final class RawTerm {
 	public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> trans(Set<String> vars, Map<String, Ref<Chc<Ty, En>>> ctx0, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args0 = args.stream().map(x -> x.trans(vars, ctx0, col)).collect(Collectors.toList());
 			
-		int n = boolToInt(vars.contains(head)) + boolToInt(col.syms.containsKey(head)) + boolToInt(col.atts.containsKey(head)) + boolToInt(col.fks.containsKey(head)) + boolToInt(col.gens.containsKey(head)) + boolToInt(col.sks.containsKey(head));
+		int n = boolToInt(vars.contains(head)) + boolToInt(col.syms.containsKey(resolve(head))) + boolToInt(col.atts.containsKey(resolve(head))) + boolToInt(col.fks.containsKey(resolve(head))) + boolToInt(col.gens.containsKey(resolve(head))) + boolToInt(col.sks.containsKey(resolve(head)));
 		if (n > 1) {
 			throw new RuntimeException(head + " is ambiguously a variable/function/attribute/foreign key/generator/lablled null");			
 		}
@@ -150,31 +154,31 @@ public final class RawTerm {
 				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
 			}
 			return Term.Var(new Var(head));
-		} else if (col.syms.containsKey(head)) {
+		} else if (col.syms.containsKey(resolve(head))) {
 			if (annotation != null) {
 				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
 			}
-			return Term.Sym(find(col.syms, head), args0);
-		} else if (col.atts.containsKey(head)) {
+			return Term.Sym(find(col.syms.map, resolve(head)), args0);
+		} else if (col.atts.containsKey(resolve(head))) {
 			if (annotation != null) {
 				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
 			}
-			return Term.Att(find(col.atts, head), args0.get(0));
-		} else if (col.fks.containsKey(head)) {
+			return Term.Att(find(col.atts.map, resolve(head)), args0.get(0));
+		} else if (col.fks.containsKey(resolve(head))) {
 			if (annotation != null) {
 				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
 			}
-			return Term.Fk(find(col.fks, head), args0.get(0)); 
-		} else if (col.gens.containsKey(head)) {
+			return Term.Fk(find(col.fks.map, resolve(head)), args0.get(0)); 
+		} else if (col.gens.containsKey(resolve(head))) {
 			if (annotation != null) {
 				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
 			}
-			return Term.Gen(find(col.gens, head));
-		} else if (col.sks.containsKey(head)) {
+			return Term.Gen(find(col.gens.map, resolve(head)));
+		} else if (col.sks.containsKey(resolve(head))) {
 			if (annotation != null) {
 				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
 			}
-			return Term.Sk(find(col.sks, head));
+			return Term.Sk(find(col.sks.map, head));
 		} else if (annotation != null || (ctx0.containsKey(head) && ctx0.get(head).x.left)) {
 			Ty ty = null; 
 			if (annotation != null) {
@@ -189,7 +193,7 @@ public final class RawTerm {
 			if (ty == null) {
 				throw new RuntimeException("Anomaly: please report");
 			}
-			String code = col.java_parsers.get(ty);
+			String code = col.java_parsers.map.get(ty);
 			if (code == null) {
 				throw new RuntimeException("head of " + this + " is not a symbol or variable or of an inferred type (" + ty + ") with a java parser");
 			}
@@ -210,18 +214,18 @@ public final class RawTerm {
 	public <Ty, En, Sym, Fk, Att, Gen, Sk> Ref<Chc<Ty,En>> infer(Set<String> vars, Map<String, Ref<Chc<Ty,En>>> ctx, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		boolean isSym, isAtt, isFk, isGen, isSk, isVar, isObj ;
 				
-		Pair<List<Ty>, Ty> syms_t = col.syms.get(head);
+		Pair<List<Ty>, Ty> syms_t = col.syms.map.get(resolve(head)); //actually want possible null here
 		isSym = syms_t != null;
-		Pair<En, Ty> atts_t = col.atts.get(head);
+		Pair<En, Ty> atts_t = col.atts.map.get(resolve(head));
 		isAtt = atts_t != null;
-		Pair<En, En> fks_t = col.fks.get(head);
+		Pair<En, En> fks_t = col.fks.map.get(resolve(head));
 		isFk = fks_t != null;
-		En gens_t = col.gens.get(head);
+		En gens_t = col.gens.map.get(resolve(head));
 		isGen = gens_t != null;
-		Ty sks_t = col.sks.get(head);
+		Ty sks_t = col.sks.map.get(resolve(head));
 		isSk = sks_t != null;
 		isObj = annotation != null;
-		isVar = vars.contains(new Var(head));
+		isVar = vars.contains(new Var(resolve(head)));
 			
 		int sum = Util.list(isSym, isAtt, isFk, isGen, isSk, isVar, isObj).stream().filter(x -> x.equals(Boolean.TRUE)).collect(Collectors.toList()).size();
 		if (sum > 2) {

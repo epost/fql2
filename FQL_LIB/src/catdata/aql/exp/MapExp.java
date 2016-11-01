@@ -9,6 +9,7 @@ import catdata.aql.Ctx;
 import catdata.aql.Mapping;
 import catdata.aql.exp.SchExp.SchExpLit;
 
+//TODO aql move back to presentation / tables distinction?
 public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2>> {
 	
 	public Kind kind() {

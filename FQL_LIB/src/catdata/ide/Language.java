@@ -2,8 +2,8 @@ package catdata.ide;
 
 import java.util.List;
 
-import catdata.aql.gui.AqlCodeEditor;
 import catdata.aql.examples.AqlExamples;
+import catdata.aql.gui.AqlCodeEditor;
 import catdata.fpql.XCodeEditor;
 import catdata.fpql.XExamples;
 import catdata.fql.FqlExamples;
@@ -73,7 +73,7 @@ public enum Language {
 		case OPL: return new OplCodeEditor(untitled_count, content);
 		case FQL: return new FqlCodeEditor(untitled_count, content);
 		case MPL: return new MplCodeEditor(untitled_count, content);
-		case AQL: return new AqlCodeEditor(untitled_count, content);
+		case AQL: return new AqlCodeEditor(untitled_count, content); 
 		}
 		throw new RuntimeException(this.toString());
 	}

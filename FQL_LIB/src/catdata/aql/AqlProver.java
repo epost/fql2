@@ -72,7 +72,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 					name = auto(ops, col1.simplify().first);
 				}
 				
-				col1.simplify();
+				//col1.simplify();
 		
 				switch (name) {
 				case auto: 
@@ -82,20 +82,20 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 					DP<Ty, En, Sym, Fk, Att, Gen, Sk> ret = (DP<Ty, En, Sym, Fk, Att, Gen, Sk>) ops.get(AqlOption.precomputed);
 					return ret;
 				case fail: 
-					return wrap(x -> { throw new RuntimeException(); }, new FailProver<>());
+					return wrap(col1, x -> { throw new RuntimeException(); }, new FailProver<>());
 				case free: 
-					return wrap(col1.simplify().second, new FreeProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
+					return wrap(col1, col1.simplify().second, new FreeProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
 				case saturated: 
-					return wrap(x -> x, saturatedProverHelper(ops, col1.toKB().third, col1.toKB().second, col1.toKB().first, col1));
+					return wrap(col1, x -> x, saturatedProverHelper(ops, col1.toKB().third, col1.toKB().second, col1.toKB().first, col1));
 				case congruence: 
-					return wrap(col1.simplify().second, new CongruenceProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
+					return wrap(col1, col1.simplify().second, new CongruenceProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
 				case program:  
 					boolean check = ! (Boolean) ops.getOrDefault(AqlOption.dont_verify_is_appropriate_for_prover_unsafe);
-					return wrap(col1.simplify().second, new ProgramProver<>(check, Var.it, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); //use simplified
+					return wrap(col1, col1.simplify().second, new ProgramProver<>(check, Var.it, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); //use simplified
 				case completion: 
-					return wrap(col1.simplify().second, new CompletionProver<>(col1.toKB().second.keySet(), ops, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first, col1.simplify().first)); //use simplified  	
+					return wrap(col1, col1.simplify().second, new CompletionProver<>(col1.toKB().second.keySet(), ops, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first, col1.simplify().first)); //use simplified  	
 				case monoidal:	
-					return wrap(col1.simplify().second, new MonoidalProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); //use simplified
+					return wrap(col1, col1.simplify().second, new MonoidalProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); //use simplified
 				}
 				
 				throw new RuntimeException("Anomaly: please report");
@@ -118,7 +118,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	    	   future.cancel(true);
 	    	   throw new RuntimeException("Interruption (" + timeout + "s) during decision procedure construction.");
 	       } catch (Throwable e) {
-	//    	   e.printStackTrace();
+	    	   e.printStackTrace();
 	    	   throw new RuntimeException(e);
 	       }
 
@@ -144,9 +144,10 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		throw new RuntimeException("Cannot automatically chose prover: theory is not free, ground, unary, or program.  You must use completion with an explicit precedence.");
 	}
 
-	private static <Sk, En, Fk, Ty, Att, Sym, Gen> DP<Ty, En, Sym, Fk, Att, Gen, Sk> wrap(Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> simp, DPKB<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> dpkb) {
+	private static <Sk, En, Fk, Ty, Att, Sym, Gen> DP<Ty, En, Sym, Fk, Att, Gen, Sk> wrap(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> simp, DPKB<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> dpkb) {
 	
 		return new DP<Ty, En, Sym, Fk, Att, Gen, Sk>() {
+			
 			@Override
 			public boolean eq(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs, Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs) {
 				if (lhs.equals(rhs)) {
@@ -169,6 +170,11 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			public String toString() {
 				return "Definitional simplification and reflexivity wrapping of\n\n" + dpkb;
 			}
+/*
+			@Override
+			public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
+				return col;
+			}*/
 			
 		};
 	}

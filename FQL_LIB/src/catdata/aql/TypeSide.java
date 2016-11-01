@@ -13,66 +13,57 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.AqlProver.ProverName;
 
 public final class TypeSide<Ty, Sym> {
 	
 	public final Set<Ty> tys;
-	public final Map<Sym, Pair<List<Ty>, Ty>> syms;
+	public final Ctx<Sym, Pair<List<Ty>, Ty>> syms;
 	public final Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs;
 
-	public final Map<Ty, String> java_tys;
-	public final Map<Ty, String> java_parsers;
-	public final Map<Sym, String> java_fns;
+	public final Ctx<Ty, String> java_tys;
+	public final Ctx<Ty, String> java_parsers;
+	public final Ctx<Sym, String> java_fns;
 
-	private final AqlOptions strategy;
-	
-	public Ty type(Ctx<Var,Ty> ctx, Term<Ty, ?, Sym, ?, ?, ?, ?> term) {
+	public <En,Fk,Att,Gen,Sk> Ty type(Ctx<Var,Ty> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		if (!term.isTypeSide()) {
 			throw new RuntimeException(term + " is not a typeside term");
 		} 
-		Chc<Ty, ?> t = term.type(ctx, new Ctx<>(), tys, syms, java_tys, new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+		Chc<Ty, En> t = term.type(ctx, new Ctx<>(), tys, syms.map, java_tys.map, new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
 		if (!t.left) {
 			throw new RuntimeException(term + " has type " + t.l + " which is not in the typeside.  (This should be impossible, report to Ryan)");
 		}
 		return t.l;
 	}
 
+	
+	private static <Ty, Sym> Collage<Ty, Void, Sym, Void, Void, Void, Void> col(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, Map<Ty, String> java_tys, Map<Ty, String> java_parsers, Map<Sym, String> java_fns) {
+		Collage<Ty, Void, Sym, Void, Void, Void, Void> col = new Collage<>();
+		col.tys.addAll(tys);
+		col.syms.putAll(syms);
+		col.java_tys.putAll(java_tys);
+		col.java_parsers.putAll(java_parsers);
+		col.java_fns.putAll(java_fns);
+		for (Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq : eqs) {
+			col.eqs.add(new Eq<>(eq.first.inLeft(), eq.second, eq.third));
+		}
+		return col;
+	}
+	
 	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string, AqlOptions strategy) {
-		if (tys == null) {
-			throw new RuntimeException("Null types in typeside");
-		} else if (syms == null) {
-			throw new RuntimeException("Null symbols in typeside");
-		} else if (eqs == null) {
-			throw new RuntimeException("Null equations in typeside");
-		} else if (java_tys_string == null) {
-			throw new RuntimeException("Null java types in typeside");
-		} else if (java_parser_string == null) {
-			throw new RuntimeException("Null java constants in typeside");
-		} else if (java_fns_string == null) {
-			throw new RuntimeException("Null java functions in typeside");
-		} else if (strategy == null) {
-			throw new RuntimeException("Null theorem proving strategy in typeside");
-		}
+		this(tys, syms, eqs, java_tys_string, java_parser_string, java_fns_string, AqlProver.create(strategy, col(tys, syms, eqs, java_tys_string, java_parser_string, java_fns_string)));
+	}
+
+	
+	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string, DP<Ty, Void, Sym, Void, Void, Void, Void> semantics) {
+		Util.assertNotNull(tys, syms, eqs, java_tys_string, java_fns_string, semantics);
 		this.tys = tys;
-		this.syms = syms;
+		this.syms = new Ctx<>(syms);
 		this.eqs = eqs;
-		this.java_tys = java_tys_string;
-		this.java_parsers = java_parser_string;
-		this.java_fns = java_fns_string;
-		this.strategy = strategy;
-		for (Ty ty : java_tys_string.keySet()) {
-			String parser = java_parser_string.get(ty);
-			if (parser == null) {
-				throw new RuntimeException("No constant parser for " + ty);
-			}
-			String clazz = java_tys_string.get(ty);
-			AqlJs.load(clazz);
-			AqlJs.compile(parser);
-		}
+		this.java_tys = new Ctx<>(java_tys_string);
+		this.java_parsers = new Ctx<>(java_parser_string);
+		this.java_fns = new Ctx<>(java_fns_string);
+		this.semantics = semantics;		
 		validate();
-		semantics();
 	}
 
 	public void validate() {
@@ -105,13 +96,21 @@ public final class TypeSide<Ty, Sym> {
 			
 		}
 		
-		validateJava(); 
 		
+//		if ((Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
+			validateJava(); 
+//		}
 	}
 
 	private void validateJava() {
-		if ((Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
-			return;
+		for (Ty ty : java_tys.keySet()) {
+			String parser = java_parsers.get(ty);
+			if (parser == null) {
+				throw new RuntimeException("No constant parser for " + ty);
+			}
+			String clazz = java_tys.get(ty);
+			AqlJs.load(clazz);
+			AqlJs.compile(parser);
 		}
 		for (Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq : eqs) {
 			Ty lhs = type(eq.first, eq.second);
@@ -169,7 +168,7 @@ public final class TypeSide<Ty, Sym> {
 	}
 
 	
-	public void assertNoJava(Term<Ty, ?, Sym, ?, ?, Void, Void> t) {
+	public <En,Fk,Att,Gen,Sk> void assertNoJava(Term<Ty, En, Sym, Fk, Att, Gen, Sk> t) {
 		if (t.var != null) {
 			return;
 		} else if (t.fk != null) {
@@ -186,7 +185,7 @@ public final class TypeSide<Ty, Sym> {
 			} else if (java_tys.keySet().contains(x.second)) {
 				throw new RuntimeException("In " + t + ", functions with java types are not allowed");
 			} 
-			for (Term<Ty, ?, Sym, ?, ?, Void, Void> arg : t.args) {
+			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : t.args) {
 				assertNoJava(arg);
 			}
 			return;
@@ -203,27 +202,30 @@ public final class TypeSide<Ty, Sym> {
 	}
 
 	public static TypeSide<Void,Void> terminal() {
-		return new TypeSide<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new AqlOptions(ProverName.precomputed, DP.terminal));
+		return new TypeSide<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), DP.terminal);
 	}
 
-	private DP<Ty, Void, Sym, Void, Void, Void, Void> semantics;
+	public final DP<Ty, Void, Sym, Void, Void, Void, Void> semantics;
 
-	//this could take a while, so make sure two threads don't accidentally do it at the same time
-	public synchronized DP<Ty, Void, Sym, Void, Void, Void, Void> semantics() {
+	/*
+	public DP<Ty, Void, Sym, Void, Void, Void, Void> semantics() {
 		if (semantics != null) {
 			return semantics;
 		}
 		semantics = AqlProver.create(strategy, collage());
 		return semantics;
-	}
+	} */
 	
 	private Collage<Ty, Void, Sym, Void, Void, Void, Void> collage;
-	public Collage<Ty, Void, Sym, Void, Void, Void, Void> collage() {
+	public <En,Fk,Att,Gen,Sk> Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
 		if (collage != null) {
-			return collage;
+			if (!collage.atts.isEmpty() || !collage.fks.isEmpty() || !collage.gens.isEmpty()|| !collage.sks.isEmpty()) {
+				throw new RuntimeException("Anomaly: please report"); 
+			}
+			return (Collage<Ty, En, Sym, Fk, Att, Gen, Sk>) collage;
 		}
-		collage = new Collage<>(this);
-		return collage;
+		collage = col(tys, syms.map, eqs, java_tys.map, java_parsers.map, java_fns.map);
+		return (Collage<Ty, En, Sym, Fk, Att, Gen, Sk>) collage;
 	}
 
 	@Override
@@ -307,13 +309,13 @@ public final class TypeSide<Ty, Sym> {
 		toString += "\n\t" + Util.sep(eqs0, "\n\t");
 		
 		toString += "\njava_types";
-		toString += "\n\t" + Util.sep(tys0, java_tys, " = " , "\n\t", true);
+		toString += "\n\t" + Util.sep(tys0, java_tys.map, " = " , "\n\t", true);
 		
 		toString += "\njava_constants";
-		toString += "\n\t" + Util.sep(tys0, java_parsers, " = " , "\n\t", true);
+		toString += "\n\t" + Util.sep(tys0, java_parsers.map, " = " , "\n\t", true);
 
 		toString += "\njava_functions";
-		toString += "\n\t" + Util.sep(syms0, java_fns, " = " , "\n\t", true);
+		toString += "\n\t" + Util.sep(syms0, java_fns.map, " = " , "\n\t", true);
 		return toString;
 	} 
 

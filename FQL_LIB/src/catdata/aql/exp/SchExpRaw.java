@@ -14,6 +14,7 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
+import catdata.aql.AqlProver;
 import catdata.aql.Collage;
 import catdata.aql.Ctx;
 import catdata.aql.RawTerm;
@@ -37,22 +38,22 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 	@Override
 	public Schema<Object, Object, Object, Object, Object> eval(AqlEnv env) {
 		TypeSide<Object, Object> ts = typeSide.eval(env);
-		Collage<Object, Object, Object, Object, Object, Void, Void> col = new Collage<>(ts);
+		Collage<Object, Object, Object, Object, Object, Void, Void> col = new Collage<>(ts.collage());
 		
 		Set<Triple<Pair<Var, Object>, Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>>> eqs0 = new HashSet<>();
 
 		for (String k : imports) {
 			Schema<Object, Object, Object, Object, Object> v = env.getSchema(k);
 			col.ens.addAll(v.ens);
-			Util.putAllSafely(col.fks, v.fks);
-			Util.putAllSafely(col.atts, v.atts);
+			col.fks.putAll(v.fks.map);
+			col.atts.putAll(v.atts.map);
 			eqs0.addAll(v.eqs);
 		}
 		
 		col.ens.addAll(ens);
 		
-		Util.putAllSafely(col.fks, Util.toMapSafely(fks));
-		Util.putAllSafely(col.atts, Util.toMapSafely(atts));
+		col.fks.putAll(Util.toMapSafely(fks));
+		col.atts.putAll(Util.toMapSafely(atts));
 	
 		for (Quad<String, Object, RawTerm, RawTerm> eq : t_eqs) {
 				Map<String, Chc<Object, Object>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inLeft(eq.second));
@@ -102,7 +103,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		
 		AqlOptions strat = new AqlOptions(Util.toMapSafely(options), col);
 		
-		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts, col.fks, eqs0, strat);
+		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col));
 		return ret; 
 		
 	}

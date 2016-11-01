@@ -1,24 +1,15 @@
 package catdata.aql;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import catdata.Chc;
-import catdata.Pair;
-import catdata.Triple;
 import catdata.Util;
-import catdata.aql.AqlProver.ProverName;
 
-//TODO: java stuff here
-public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> implements DP<Ty,En,Sym,Fk,Att,Gen,Sk> {
+
+public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,En,Sym,Fk,Att,Gen,Sk> */ {
 	
-	public boolean hasFreeTypeAlgebra() {
-		return talg().simplify().first.eqs.isEmpty();
-	}
+	//TODO aql add final eq method here
 	
 	public abstract Schema<Ty,En,Sym,Fk,Att> schema();
 	
@@ -34,152 +25,114 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> implements DP<Ty,En,S
 
 	public abstract Term<Void, En, Void, Fk, Void, Gen, Void> repr(X x);
 	
-	public abstract String toStringProver();
-		
-	public abstract Term<Ty, Void, Sym, Void, Void, Void, Y> reprT(Y y); //TODO aql
-	
-	public String printSk(Y y) {
-		return y.toString();
-	}
-	public String printGen(Gen x) {
-		return x.toString();
-	}
+	//public abstract DP<Ty,En,Sym,Fk,Att,Gen,Sk> dp();
 	
 	/**
 	 * @return only equations for instance part (no typeside, no schema)
 	 */
 	public abstract Collage<Ty, Void, Sym, Void, Void, Void, Y> talg();
+
+	/**
+	 * @param y obtained from a call to att or sk only! TODO is this really needed anymore?
+	 * @return not a true normal form, but a 'simplified' term for e.g., display purposes
+	 */
+	public abstract Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT(Term<Ty, Void, Sym, Void, Void, Void, Y> y);
 	
-	//TODO aql typesafe convert from Void for Term 
-	private Instance<Ty,En,Sym,Fk,Att,X,Y> instance;
-	public Instance<Ty,En,Sym,Fk,Att,X,Y> toInstance() {
-		if (instance != null) {
-			return instance;
-		}
-		Set<Pair<Term<Ty, En, Sym, Fk, Att, X, Y>, Term<Ty, En, Sym, Fk, Att, X, Y>>> eqs = new HashSet<>();
-		Map<X, En> gens = new HashMap<>();
-		for (En en : schema().ens) {
-			for (X x : en(en)) {
-				Util.putSafely(gens, x, en);
-				for (Att att : schema().attsFrom(en)) {
-					Term<Ty, En, Sym, Fk, Att, X, Y> lhs = Term.Att(att, repr(x).convert());
-					Term<Ty, En, Sym, Fk, Att, X, Y> rhs = att(att, x).convert();
-					eqs.add(new Pair<>(lhs,rhs));
-				}
-				for (Fk fk : schema().fksFrom(en)) {
-					Term<Ty, En, Sym, Fk, Att, X, Y> lhs = Term.Fk(fk, repr(x).convert());
-					Term<Ty, En, Sym, Fk, Att, X, Y> rhs = repr(fk(fk, x)).convert();
-					eqs.add(new Pair<>(lhs,rhs));		
-				}
+	/**
+	 * @param term of type sort
+	 */
+	public Term<Ty, Void, Sym, Void, Void, Void, Y> intoY(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+			if (term.obj != null) {
+				return Term.Obj(term.obj, term.ty);
+			} else if (term.sym != null) {
+				return Term.Sym(term.sym, term.args().stream().map(x -> intoY(x)).collect(Collectors.toList()));
+			} else if (term.sk != null) {
+				return sk(term.sk);
+			} else if (term.att != null) {
+				return att(term.att, intoX(term.arg.convert()));
 			}
-		}
-		Map<Y, Ty> sks = new HashMap<>(talg().sks);
-		for (Triple<Ctx<Var, Chc<Ty, Void>>, Term<Ty, Void, Sym, Void, Void, Void, Y>, Term<Ty, Void, Sym, Void, Void, Void, Y>> eq : talg().eqs) {
-			if (!eq.first.isEmpty()) {
-				throw new RuntimeException("Anomaly: please report");
-			}
-			eqs.add(new Pair<>(eq.second.convert(), eq.third.convert()));
-		}
-		
-		AqlOptions strat = new AqlOptions(ProverName.precomputed, this);
-		
-		instance = new Instance<Ty,En,Sym,Fk,Att,X,Y>(schema(), gens, sks, eqs, strat);
-		
-		return instance;
-	}
-	
-	//public abstract Collage<Void, En, Void, Fk, Void, X, Void> ealg();
-	
-	public static class Tables<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> {
-		public Map<En, Collection<Term<Void, En, Void, Fk, Void, Gen, Void>>> carriers = new HashMap<>();
-		public Map<Fk, Map<Term<Void, En, Void, Fk, Void, Gen, Void>, Term<Void, En, Void, Fk, Void, Gen, Void>>> fks = new HashMap<>();
-		public Map<Att, Map<Term<Void, En, Void, Fk, Void, Gen, Void>, Term<Ty, Void, Sym, Void, Void, Void, Y>>> atts = new HashMap<>();
-	}
-	
-	
-	private Tables<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> tables;
-	public Tables<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> getTables() {
-		if (tables != null) {
-			return tables;
-		}
-		tables = new Tables<>();
-		
-		for (En en : schema().ens) {
-			tables.carriers.put(en, en(en).stream().map(this::repr).collect(Collectors.toList()));
+			throw new RuntimeException("Anomaly: please report");
 		}
 
-		for (Fk fk : schema().fks.keySet()) {
-			Map<Term<Void, En, Void, Fk, Void, Gen, Void>, Term<Void, En, Void, Fk, Void, Gen, Void>> m = new HashMap<>();
-			for (X x : en(schema().fks.get(fk).first)) {
-				m.put(repr(x), repr(fk(fk, x)));
+	/**
+	 * @param term term of type entity
+	 */
+		public X intoX(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+			if (term.gen != null) {
+				return nf(term.convert());
+			} else if (term.fk != null) {
+				return fk(term.fk, nf(term.arg.convert()));
 			}
-			tables.fks.put(fk, m);
-		}
-		
-		for (Att att : schema().atts.keySet()) {
-			Map<Term<Void, En, Void, Fk, Void, Gen, Void>, Term<Ty, Void, Sym, Void, Void, Void, Y>> m = new HashMap<>();
-			for (X x : en(schema().atts.get(att).first)) {
-				m.put(repr(x), att(att, x));
-			}
-			tables.atts.put(att, m);
+			throw new RuntimeException("Anomaly: please report");
 		}
 
-		return tables;
+	
+	
+	public abstract String toStringProver();
+		
+	public String printSk(Sk y) { //TODO aql
+		return y.toString();
+	} 
+	public String printGen(Gen x) {
+		return x.toString();
+	} 
+	public String printX(X x) { 
+		return x.toString();
+	} 
+	public String printY(Y y) {
+		return y.toString();
+	}
+	
+	public boolean hasFreeTypeAlgebra() {
+		return talg().simplify().first.eqs.isEmpty();
 	}
 	
 
-//	public abstract Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> trans(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term);
-	
-//	public String toString(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
-//		return term.toString();
-//	}
-		/*if (term.sk != null) {
-			if (term.sk.left) {
-				return term.sk.l.toString();
-			} else {
-				return repr(term.sk.r.first) + "." + term.sk.r.second;
-			}
-		} else if (term.sym != null) {
-			if (term.args.size() == 0) {
-				return term.sym.toString();
-			} else if (term.args.size() == 1) {
-				return toString(term.args.get(0)) + "." + term.sym;
-			} else if (term.args.size() == 2) {
-				return toString(term.args.get(0)) + " " + term.sym + " " + toString(term.args.get(1));
-			} else {
-				return term.sym + "(" + Util.sep(term.args.stream().map(x -> toString(x)).collect(Collectors.toList()), ", ") + ")";
-			}
+	//TODO aql visitor cleanup
+	public Term<Ty, En, Sym, Fk, Att, X, Y> trans(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+		if (term.var != null) {
+			return Term.Var(term.var);
 		} else if (term.obj != null) {
-			return term.obj.toString(); 
+			return Term.Obj(term.obj, term.ty);
+		} else if (term.sym != null) {
+			return Term.Sym(term.sym, term.args.stream().map(this::trans).collect(Collectors.toList()));
+		} else if (term.att != null) {
+			return Term.Att(term.att, trans(term.arg));
+		} else if (term.fk != null) {
+			return Term.Fk(term.fk, trans(term.arg));
+		} else if (term.gen != null) {
+			return Term.Gen(nf(Term.Gen(term.gen)));
+		} else if (term.sk != null) {
+			return sk(term.sk).map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
 		}
-		throw new RuntimeException("Anomaly: please report: " + term);
+		throw new RuntimeException("Anomaly: please report");
 	}
-	*/
+	
 	
 	//TODO: have simplified collages also print out their definitions
 	
 	
 	@Override
 	public String toString() {
-		getTables();
+		String ret = "----- entity algebra\n\n";
 
-		String ret = "carriers\n\t";
-		ret += Util.sep(schema().ens.stream().map(x -> x + " -> {" + Util.sep(tables.carriers.get(x), ", ") + "}").collect(Collectors.toList()), "\n\t");
+		ret = "carriers\n\t";
+		ret += Util.sep(schema().ens.stream().map(x -> x + " -> {" + Util.sep(en(x), ", ") + "}").collect(Collectors.toList()), "\n\t");
 	
 		ret += "\n\nforeign keys";
 		for (Fk fk : schema().fks.keySet()) {
-			ret += "\n\t" + fk + " -> {" + Util.sep(tables.fks.get(fk).keySet().stream().map(x -> "(" + x + ", " + tables.fks.get(fk).get(x) + ")").collect(Collectors.toList()), ", ") + "}";
+			ret += "\n\t" + fk + " -> {" + Util.sep(en(schema().fks.get(fk).first).stream().map(x -> "(" + x + ", " + fk(fk, x) + ")").collect(Collectors.toList()), ", ") + "}";
 		}
 		
 		ret += "\n\nattributes";
 		for (Att att : schema().atts.keySet()) {
-			ret += "\n\t" + att + " -> {" + Util.sep(tables.atts.get(att).keySet().stream().map(x -> "(" + x + ", " + tables.atts.get(att).get(x) + ")").collect(Collectors.toList()), ", ") + "}";
+			ret += "\n\t" + att + " -> {" + Util.sep(en(schema().atts.get(att).first).stream().map(x -> "(" + x + ", " + att(att, x) + ")").collect(Collectors.toList()), ", ") + "}";
 		}
 		
-		ret += "\n\ntype algebra\n\n";
+		ret += "\n\n----- type algebra\n\n";
 		ret += talg().toString();
 		
-		ret += "\n\nprover\n\n";
+		ret += "\n\n----- prover\n\n";
 		ret += toStringProver();
 		
 		return ret;

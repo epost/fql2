@@ -20,12 +20,12 @@ public final class AqlEnv {
 
 	public Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> mtys = new Ctx<>();
 	public Ctx<String, SchExp<Object,Object,Object,Object,Object>> itys = new Ctx<>();
-	public Ctx<String, Pair<InstExp<Object,Object,Object,Object,Object,Object,Object>,  InstExp<Object,Object,Object,Object,Object,Object,Object>>> ttys = new Ctx<>();
+	public Ctx<String, Pair<InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>,  InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>>> ttys = new Ctx<>();
 
 	private Map<String, TypeSide<Object, Object>> tys = new HashMap<>();
 	private Map<String, Schema<Object, Object, Object, Object, Object>> schs = new HashMap<>();
-	private Map<String, Instance<Object, Object, Object, Object, Object, Object, Object>> insts = new HashMap<>();
-	private Map<String, Transform<Object, Object, Object, Object, Object,Object, Object, Object, Object>> trans = new HashMap<>();
+	private Map<String, Instance<Object,Object,Object, Object, Object, Object, Object, Object, Object>> insts = new HashMap<>();
+	private Map<String, Transform<Object,Object,Object,Object,Object, Object, Object, Object, Object,Object, Object, Object, Object>> trans = new HashMap<>();
 	private Map<String, Mapping<Object, Object, Object, Object,Object, Object, Object, Object>> maps = new HashMap<>();
 	private Map<String, Query> qs = new HashMap<>();
 	private Map<String, Pragma> ps = new HashMap<>();
@@ -58,7 +58,7 @@ public final class AqlEnv {
 		kind.checkLiteral(k, o);
 		switch (kind) {
 		case INSTANCE:
-			put(k, (Instance<Object, Object, Object, Object, Object, Object, Object>)o);
+			put(k, (Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object>)o);
 			break;
 		case MAPPING:
 			put(k, (Mapping<Object, Object, Object, Object, Object, Object, Object, Object>)o);
@@ -67,7 +67,7 @@ public final class AqlEnv {
 			put(k, (Schema<Object, Object, Object, Object, Object>)o);
 			break;
 		case TRANSFORM:
-			put(k, (Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object>)o);
+			put(k, (Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>)o);
 			break;
 		case TYPESIDE:
 			put(k, (TypeSide<Object, Object>)o);
@@ -112,30 +112,30 @@ public final class AqlEnv {
 		return ret;
 	}
 	
-	public void put(String k, Instance<Object, Object, Object, Object, Object, Object, Object> v) {
+	public void put(String k, Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> v) {
 		if (insts.containsKey(k)) {
 			throw new RuntimeException("Already a top-level instance definition for " + k);
 		}
 		insts.put(k, v);
 	}
 	
-	public Instance<Object, Object, Object, Object, Object, Object, Object> getInstance(String k) {
-		Instance<Object, Object, Object, Object, Object, Object, Object> ret = insts.get(k);
+	public Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> getInstance(String k) {
+		Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = insts.get(k);
 		if (ret == null) {
 			throw new RuntimeException("No top-level instance definition for " + k);
 		}
 		return ret;
 	}
 	
-	public void put(String k, Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object> v) {
+	public void put(String k, Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> v) {
 		if (trans.containsKey(k)) {
 			throw new RuntimeException("Already a top-level transform definition for " + k);
 		}
 		trans.put(k, v);
 	}
 	
-	public Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object> getTransform(String k) {
-		Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = trans.get(k);
+	public Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> getTransform(String k) {
+		Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = trans.get(k);
 		if (ret == null) {
 			throw new RuntimeException("No top-level transform definition for " + k);
 		}
@@ -187,32 +187,7 @@ public final class AqlEnv {
 		return ret;
 	}
 
-	//TODO: maybe make everything have a semantics() method?
-	public void semantics(String n, Kind k) {
-		switch (k) {
-		case INSTANCE:
-			getInstance(n).semantics();
-			break;
-		case MAPPING:
-			getMapping(n).semantics();
-			break;
-		case PRAGMA:
-			break;
-		case QUERY:
-			break;
-		case SCHEMA:
-			getSchema(n).semantics();
-			break;
-		case TRANSFORM:
-			getTransform(n).semantics();
-			break;
-		case TYPESIDE:
-			getTypeSide(n).semantics();
-			break;
-		default:
-			throw new RuntimeException("Anomaly: please report");
-		}
-	}
+	
 
 	public Set<String> keySet() {
 		Set<String> ret = new HashSet<>();

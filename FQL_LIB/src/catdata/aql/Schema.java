@@ -3,34 +3,32 @@ package catdata.aql;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.AqlProver.ProverName;
 
 public final class Schema<Ty, En, Sym, Fk, Att> {
 	
 	public final TypeSide<Ty, Sym> typeSide;
 	
 	public final Set<En> ens;
-	public final Map<Att, Pair<En, Ty>> atts;
-	public final Map<Fk,  Pair<En, En>> fks;
+	public final Ctx<Att, Pair<En, Ty>> atts;
+	public final Ctx<Fk,  Pair<En, En>> fks;
 		
 	public final Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs;
 	
-	private final AqlOptions strategy; 
-
 	//TODO: who is calling isTypeSide and isSchema?
 
-	public void validate() {
+	public final void validate() {
 		//check that each att/fk is in tys/ens
 		for (Att att : atts.keySet()) {
 			Pair<En, Ty> ty = atts.get(att);
@@ -65,16 +63,16 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		if (typeSide.java_tys.isEmpty()) {
 			return;
 		}
-		for (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : collage().simplify().first.eqs) {
-			if (!(Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
-				Chc<Ty, En> lhs = collage().simplify().first.type(eq.first, eq.second); //TODO why simplify
+		for (Eq<Ty, En, Sym, Fk, Att, Object, Object> eq : collage().simplify().first.eqs) {
+		//	if (!(Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
+				Chc<Ty, En> lhs = collage().type(eq.ctx, eq.lhs); 
 			
 				if (lhs.left && typeSide.java_tys.containsKey(lhs.l)) {
-					throw new RuntimeException("In schema equation " + eq.second + " = " + eq.third + ", the return type is " + lhs.l + " which is a java type ");
+					throw new RuntimeException("In schema equation " + eq + ", the return type is " + lhs.l + " which is a java type ");
 				}
-				typeSide.assertNoJava(eq.second);
-				typeSide.assertNoJava(eq.third);
-			} 
+				typeSide.assertNoJava(eq.lhs);
+				typeSide.assertNoJava(eq.rhs);
+		//	} 
 		}
 		
 	}
@@ -83,65 +81,59 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		return "forall " + eq.first.first + ":" + eq.first.second + ", " + eq.second + " = " + eq.third;
 	}	
 	
-	public Chc<Ty,En> type(Pair<Var, En> p, Term<Ty, En, Sym, Fk, Att, ?, ?> term) {
-		return term.type(new Ctx<>(), new Ctx<>(p), typeSide.tys, typeSide.syms, typeSide.java_tys, ens, atts, fks, new HashMap<>(), new HashMap<>());
+	public final Chc<Ty,En> type(Pair<Var, En> p, Term<Ty, En, Sym, Fk, Att, ?, ?> term) {
+		return term.type(new Ctx<>(), new Ctx<>(p), typeSide.tys, typeSide.syms.map, typeSide.java_tys.map, ens, atts.map, fks.map, new HashMap<>(), new HashMap<>());
 	}
 	
-	public static <Ty,Sym> Schema<Ty,Void,Sym,Void,Void> terminal(TypeSide<Ty, Sym> t) {
-		return new Schema<>(t, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), new AqlOptions(ProverName.precomputed, t.semantics()));
+	public final static <Ty,Sym> Schema<Ty,Void,Sym,Void,Void> terminal(TypeSide<Ty, Sym> t) {
+		return new Schema<>(t, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), t.semantics);
 	}
 	
 	public Schema(TypeSide<Ty, Sym> typeSide, Set<En> ens,
 			Map<Att, Pair<En, Ty>> atts, Map<Fk, Pair<En, En>> fks,
 			Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs,
-			AqlOptions strategy) {
-		if (typeSide == null) {
-			throw new RuntimeException("Attempt to construct schema with null type side");
-		} else if (ens == null) {
-			throw new RuntimeException("Attemp to construct schema with null entities");
-		} else if (fks == null) {
-			throw new RuntimeException("Attempt to construct schema with null foreign keys");
-		} else if (atts == null) {
-			throw new RuntimeException("Attempt to construct schema with null attributes");			
-		} else if (eqs == null) {
-			throw new RuntimeException("Attempt to construct schema with null equalities");
-		} else if (strategy == null) {
-			throw new RuntimeException("Attempt to construct schema with null theorem proving strategy");
-		}
-
+			DP<Ty,En,Sym,Fk,Att,Void,Void> semantics) {
+		Util.assertNotNull(typeSide, ens, fks, atts, eqs, semantics);
 		this.typeSide = typeSide;
-		this.atts = atts;
-		this.fks = fks;
-		this.eqs = eqs;
-		this.ens = ens;
-		this.strategy = strategy;
+		this.atts = new Ctx<>(atts);
+		this.fks = new Ctx<>(fks);
+		this.eqs = new HashSet<>(eqs);
+		this.ens = new HashSet<>(ens); //TODO aql arraylist
+		this.dp = semantics;
 		validate();
-		semantics();
 	}
 
-	private DP<Ty,En,Sym,Fk,Att,Void,Void> semantics;
+	public final DP<Ty,En,Sym,Fk,Att,Void,Void> dp;
 	
 	//this could take a while, so make sure two threads don't accidentally do it at the same time
-	public synchronized DP<Ty,En,Sym,Fk,Att,Void,Void> semantics() {
-		if (semantics != null) {
-			return semantics;
-		} 
-		semantics = AqlProver.create(strategy, collage());
-		return semantics;
+	public <Gen,Sk> DP<Ty,En,Sym,Fk,Att,Gen,Sk> dp() {
+		return (DP<Ty, En, Sym, Fk, Att, Gen, Sk>) dp;
 	}
 		
 	private Collage<Ty, En, Sym, Fk, Att, Void, Void> collage;
-	public Collage<Ty, En, Sym, Fk, Att, Void, Void> collage() {
+	public final <Gen, Sk> Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
 		if (collage != null) {
-			return collage;
+			if (!collage.gens.isEmpty()|| !collage.sks.isEmpty()) {
+				throw new RuntimeException("Anomaly: please report"); 
+			}
+			return (Collage<Ty, En, Sym, Fk, Att, Gen, Sk>) collage; //TODO aql typesafety
 		}
-		collage = new Collage<>(this);
-		return collage;
+		collage = new Collage<>(typeSide.collage());
+		collage.ens.addAll(ens); 
+		collage.atts.putAll(atts.map);
+		collage.fks.putAll(fks.map);
+		for (Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> x : eqs) {
+			collage.eqs.add(new Eq<>(new Ctx<>(x.first.first, Chc.inRight(x.first.second)), upgrade(x.second), upgrade(x.third)));
+		}
+		return (Collage<Ty, En, Sym, Fk, Att, Gen, Sk>) collage; 
 	}
 	
+	public final <Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> upgrade(Term<Ty, En, Sym, Fk, Att, Void, Void> term) {
+		return term.map(Function.identity(), Function.identity(), Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn());
+	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((atts == null) ? 0 : atts.hashCode());
@@ -153,7 +145,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -191,7 +183,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 
 	private String toString = null;
 	@Override
-	public String toString() {
+	public final String toString() {
 		if (toString != null) {
 			return toString;
 		}
@@ -222,16 +214,16 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 	//TODO alphabetical?
 
 	//TODO: aql cache;
-	public Collection<Att> attsFrom(En en) {
+	public final Collection<Att> attsFrom(En en) {
 		return atts.keySet().stream().filter(att -> atts.get(att).first.equals(en)).collect(Collectors.toList());
 	}
 	
 	//TODO: aql cache
-	public Collection<Fk> fksFrom(En en) {
+	public final Collection<Fk> fksFrom(En en) {
 		return fks.keySet().stream().filter(fk -> fks.get(fk).first.equals(en)).collect(Collectors.toList());
 	}
 	
-	public <Gen,Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> fold(List<Fk> fks, Term<Ty, En, Sym, Fk, Att, Gen, Sk> head) {
+	public final static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> fold(List<Fk> fks, Term<Ty, En, Sym, Fk, Att, Gen, Sk> head) {
 		for (Fk fk : fks) {
 			head = Term.Fk(fk, head);
 		}

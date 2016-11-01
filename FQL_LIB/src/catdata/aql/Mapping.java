@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -25,7 +26,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		for (Triple<Pair<Var, En1>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>> eq : src.eqs) {
 			Pair<Var, Chc<Ty,En2>> ctx = new Pair<>(eq.first.first, Chc.inRight(ens.get(eq.first.second)));
 			Term<Ty, En2, Sym, Fk2, Att2, Void, Void> lhs = trans(eq.second), rhs = trans(eq.third);
-			boolean ok = dst.semantics().eq(new Ctx<>(ctx), lhs, rhs);
+			boolean ok = dst.dp.eq(new Ctx<>(ctx), lhs, rhs);
 			if (!ok) {
 				throw new RuntimeException("Equation " + eq.second + " = " + eq.third + " translates to " + lhs + " = " + rhs + ", which is not provable");
 			}
@@ -45,11 +46,11 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			@Override
 			public Pair<Ctx<Var, Chc<Ty, En2>>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>> translate(Ctx<Var, Chc<Ty, En1>> ctx, Term<Ty, En1, Sym, Fk1, Att1, Void, Void> term) {
 				LinkedHashMap<Var, Chc<Ty, En2>> map = new LinkedHashMap<>();
-				for (Var var : ctx.keys()) {
+				for (Var var : ctx.keySet()) {
 					if (ctx.get(var).left) {
 						map.put(var, Chc.inLeft(ctx.get(var).l));
 					} else {
-						map.put(var, Chc.inRight(ens.get(ctx.get(var))));
+						map.put(var, Chc.inRight(ens.get(ctx.get(var).r)));
 					}
 				}
 				Ctx<Var, Chc<Ty, En2>> ret = new Ctx<>(map);
@@ -62,12 +63,12 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	
 	public Ctx<Var, Chc<Ty,En2>> trans(Ctx<Var, Chc<Ty,En1>> ctx) {
 		Ctx<Var, Chc<Ty,En2>> ret = new Ctx<>();
-		for (Var v : ctx.keys()) {
+		for (Var v : ctx.keySet()) {
 			Chc<Ty, En1> c = ctx.get(v);
 			if (c.left) {
 				ret.put(v, Chc.inLeft(c.l));
 			} else {
-				ret.put(v, Chc.inRight(ens.get(ctx.get(v))));
+				ret.put(v, Chc.inRight(ens.get(c.r)));
 			}
 		}
 		return ret;
@@ -82,8 +83,14 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	}
 		
 	public <Gen,Sk> Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> trans(Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk> term) {
-		if (term.var != null || term.obj != null || term.gen != null || term.sk != null) {
-			return term.convert();
+		if (term.var != null) {
+			return Term.Var(term.var);
+		} else if (term.obj != null) {
+			return Term.Obj(term.obj, term.ty);
+		} else if (term.gen != null) {
+			return Term.Gen(term.gen);
+		} else if (term.sk != null) {
+			return Term.Sk(term.sk);
 		} else if (term.fk != null) {
 			Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> ret = trans(term.arg);
 			for (Fk2 fk : fks.get(term.fk).second) {
@@ -94,7 +101,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> ret = trans(term.arg);
 			Map<Var, Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> map = new HashMap<>();
 			map.put(atts.get(term.att).first, ret);
-			Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> conv = atts.get(term.att).third.convert();
+			Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> conv = atts.get(term.att).third.map(Function.identity(),Function.identity(),Function.identity(),Function.identity(),Util.voidFn(), Util.voidFn());
 			return conv.subst(map);
 		} else if (term.sym != null) {
 			return Term.Sym(term.sym, term.args.stream().map(this::trans).collect(Collectors.toList()));
@@ -103,9 +110,14 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	}
 
 
-	public final Map<En1, En2> ens;
-	public final Map<Att1, Triple<Var,En2,Term<Ty,En2,Sym,Fk2,Att2,Void,Void>>> atts;
-	public final Map<Fk1,  Pair<En2, List<Fk2>>> fks;
+	public final Ctx<En1, En2> ens;
+	public final Ctx<Att1, Triple<Var,En2,Term<Ty,En2,Sym,Fk2,Att2,Void,Void>>> atts; //TODO aql polymorphic get instead of Void,Void doesn't seem to work
+
+	//public final <Gen,Sk> Map<Att1, Triple<Var,En2,Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>> atts() {
+	//	return (Map<Att1, Triple<Var,En2,Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>>) ((Object)atts); 
+	//}
+	
+	public final Ctx<Fk1,  Pair<En2, List<Fk2>>> fks;
 		
 	public final Schema<Ty,En1,Sym,Fk1,Att1> src;
 	public final Schema<Ty,En2,Sym,Fk2,Att2> dst;
@@ -140,12 +152,13 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		} else if (dst == null) {
 			throw new RuntimeException("Attempt to create mapping with null target");
 		}
-		this.ens = ens;
-		this.atts = atts;
-		this.fks = fks;
+		this.ens = new Ctx<>(ens);
+		this.atts = new Ctx<>(atts);
+		this.fks = new Ctx<>(fks);
 		this.src = src;
 		this.dst = dst;
 		validate();
+		semantics();
 	}
 
 	public void validate() {
@@ -285,7 +298,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			atts0.add(att + " -> lambda " + atts.get(att).first + ":" + atts.get(att).second  + ". " + atts.get(att).third); 
 		}
 		toString = "entities";
-		toString += "\n\t" + Util.sep(ens, " -> ", "\n\t");
+		toString += "\n\t" + Util.sep(ens.map, " -> ", "\n\t");
 		
 		toString += "\nforeign_keys";
 		toString += "\n\t" + Util.sep(fks0, "\n\t");

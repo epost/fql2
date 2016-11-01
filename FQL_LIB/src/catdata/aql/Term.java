@@ -1,11 +1,13 @@
 package catdata.aql;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,6 +19,41 @@ import catdata.algs.kb.KBExp.KBApp;
 import catdata.algs.kb.KBExp.KBVar;
 
 public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
+	
+	
+	public <X> X visit(Function<Var,X> varf, BiFunction<Object,Ty, X> tyf, BiFunction<Sym,List<X>, X> symf, BiFunction<Fk, X, X> fkf, BiFunction<Att, X, X> attf, Function<Gen, X> genf, Function<Sk, X> skf) {
+		if (var != null) {
+			return varf.apply(var);
+		} else if (obj != null) {
+			return tyf.apply(obj, ty);
+		} else if (fk != null) {
+			return fkf.apply(fk, arg.visit(varf, tyf, symf, fkf, attf, genf, skf));
+		} else if (att != null) {
+			return attf.apply(att, arg.visit(varf, tyf, symf, fkf, attf, genf, skf));
+		} else if (gen != null) {
+			return genf.apply(gen);
+		} else if (sk != null) {
+			return skf.apply(sk);
+		} else if (sym != null) {
+			List<X> l = new ArrayList<>(args.size());
+			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> x : args) {
+				l.add(x.visit(varf, tyf, symf, fkf, attf, genf, skf));
+			}
+			return symf.apply(sym, l);
+		} 
+		throw new RuntimeException("Anomaly: please report");
+	}
+	
+	
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk,Ty2, En2, Sym2, Fk2, Att2, Gen2, Sk2> Term<Ty2, En2, Sym2, Fk2, Att2, Gen2, Sk2>
+	map(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term, Function<Ty,Ty2> tyf, Function<Sym, Sym2> symf, Function<Fk, Fk2> fkf, Function<Att, Att2> attf, Function<Gen, Gen2> genf, Function<Sk, Sk2> skf) {
+		return term.visit(Term::Var, (obj,ty) -> Term.Obj(obj, tyf.apply(ty)), (sym,args) -> Term.Sym(symf.apply(sym), args), (fk,arg) -> Term.Fk(fkf.apply(fk),arg), (att,arg) -> Term.Att(attf.apply(att),arg), gen -> Term.Gen(genf.apply(gen)), sk -> Term.Sk(skf.apply(sk))); 
+	}
+	
+	public <Ty2, En2, Sym2, Fk2, Att2, Gen2, Sk2> Term<Ty2, En2, Sym2, Fk2, Att2, Gen2, Sk2>
+	map(Function<Ty,Ty2> tyf, Function<Sym, Sym2> symf, Function<Fk, Fk2> fkf, Function<Att, Att2> attf, Function<Gen, Gen2> genf, Function<Sk, Sk2> skf) {
+		return Term.map(this, tyf, symf, fkf, attf, genf, skf);
+	}
 
 	public final Var var;
 	public final Sym sym;
@@ -598,8 +635,9 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 
 	@SuppressWarnings({ "hiding", "unchecked" })
-	public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> convert() {
+	@Deprecated
+	 public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> convert() {
 		return (Term<Ty, En, Sym, Fk, Att, Gen, Sk>) this;
-	}
+	} 
 	
 }

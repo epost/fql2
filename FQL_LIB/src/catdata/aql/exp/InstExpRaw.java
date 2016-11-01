@@ -15,13 +15,16 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
+import catdata.aql.LiteralInstance;
 import catdata.aql.Ctx;
+import catdata.aql.Eq;
+import catdata.aql.InitialAlgebra;
 import catdata.aql.Instance;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 
-public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object,Object,Object> {
+public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object,Object,Object,GUID,Chc<Object,Pair<GUID,Object>>> {
 
 	@Override
 	public Collection<Pair<String, Kind>> deps() {
@@ -106,26 +109,26 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	}
 
 	@Override
-	public Instance<Object,Object,Object,Object,Object,Object,Object> eval(AqlEnv env) {
+	public Instance<Object, Object, Object, Object, Object, Object, Object, GUID, Chc<Object, Pair<GUID, Object>>> eval(AqlEnv env) {
 		Schema<Object, Object, Object, Object, Object> sch = schema.eval(env);
-		Collage<Object, Object, Object, Object, Object, Object, Object> col = new Collage<>(sch);
+		Collage<Object, Object, Object, Object, Object, Object, Object> col = new Collage<>(sch.collage());
 		
 		Set<Pair<Term<Object, Object, Object, Object, Object, Object, Object>, Term<Object, Object, Object, Object, Object, Object, Object>>> eqs0 = new HashSet<>();
 
 		for (String k : imports) {
-			Instance<Object, Object, Object, Object, Object, Object, Object> v = env.getInstance(k);
-			Util.putAllSafely(col.gens, v.gens);
-			Util.putAllSafely(col.sks, v.sks);
-			eqs0.addAll(v.eqs);
+			Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> v = env.getInstance(k);
+			col.gens.putAll(v.gens().map);
+			col.sks.putAll(v.sks().map);
+			eqs0.addAll(v.eqs());
 		}
 		
 		for (Pair<Object, Object> p : gens) {
 			Object gen = p.first;
 			Object ty = p.second;
 			if (col.ens.contains(ty)) {
-				Util.putSafely(col.gens, gen, ty);
+				col.gens.put(gen, ty);
 			} else if (col.tys.contains(ty)) {
-				Util.putSafely(col.sks, gen, ty);
+				col.sks.put(gen, ty);
 			} else {
 				throw new RuntimeException("The sort for " + gen + ", namely, " + ty + " is not declared as a type or entity");
 			}
@@ -137,15 +140,16 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 				Triple<Ctx<String,Chc<Object,Object>>,Term<Object,Object,Object,Object,Object,Object,Object>,Term<Object,Object,Object,Object,Object,Object,Object>>
 				eq0 = RawTerm.infer1(ctx, eq.first, eq.second, col);
 						
-				eqs0.add(new Pair<Term<Object, Object, Object, Object, Object, Object, Object>, Term<Object, Object, Object, Object, Object, Object, Object>>
-				(eq0.second, eq0.third));
+				eqs0.add(new Pair<>(eq0.second, eq0.third));
+				col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));
 		}
-		
 
 		AqlOptions strat = new AqlOptions(Util.toMapSafely(options), col);
 		
-		Instance<Object, Object, Object, Object, Object, Object, Object> ret = new Instance<>(sch, col.gens, col.sks, eqs0, strat);
-		return ret; 
+		InitialAlgebra<Object, Object, Object, Object, Object, Object, Object, GUID> 
+		initial = new InitialAlgebra<>(strat, sch, col, new GUID.It());
+				
+		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial); 
 	}
 	
 	@Override

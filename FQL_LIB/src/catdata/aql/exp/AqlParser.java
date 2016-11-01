@@ -28,6 +28,7 @@ import catdata.aql.exp.MapExp.MapExpVar;
 import catdata.aql.exp.SchExp.SchExpEmpty;
 import catdata.aql.exp.SchExp.SchExpInst;
 import catdata.aql.exp.SchExp.SchExpVar;
+import catdata.aql.exp.TransExp.TransExpDelta;
 import catdata.aql.exp.TransExp.TransExpId;
 import catdata.aql.exp.TransExp.TransExpSigma;
 import catdata.aql.exp.TransExp.TransExpVar;
@@ -152,7 +153,7 @@ public class AqlParser {
 		Parser<RawTerm> sing = ident.map(x -> new RawTerm(x, new LinkedList<>()));				
 		
 		Parser<RawTerm> ret = Parsers.or(ann, app, app2, dot, /*appH,*/ sing);
-		
+ 		
 		ref.set(ret);
 		return ret;
 	}
@@ -172,14 +173,14 @@ public class AqlParser {
 			var = ident.map(SchExpVar::new),
 			empty = Parsers.tuple(token("empty"), ty_ref.get()).map(x -> new SchExpEmpty<>(x.b)),
 			inst = Parsers.tuple(token("schemaOf"), inst_ref.lazy()).map(x -> new SchExpInst<>(x.b)),
-			ret = Parsers.or(inst, empty, schExpRaw(), var);
+			ret = Parsers.or(inst, empty, schExpRaw(), var); 
 		
 		sch_ref.set(ret);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private static final void instExp() {
-		Parser<InstExp<?,?,?,?,?,?,?>> 
+		Parser<InstExp<?,?,?,?,?,?,?,?,?>> 
 			var = ident.map(InstExpVar::new),
 			empty = Parsers.tuple(token("empty"), sch_ref.get()).map(x -> new InstExpEmpty<>(x.b)),
 			sigma = Parsers.tuple(token("sigma"), map_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional())
@@ -202,13 +203,13 @@ public class AqlParser {
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private static final void transExp() {
-		Parser<TransExp<?,?,?,?,?,?,?,?,?>>  
+		Parser<TransExp<?,?,?,?,?,?,?,?,?,?,?,?,?>>  
 			var = ident.map(TransExpVar::new),
 			id = Parsers.tuple(token("id"), inst_ref.lazy()).map(x -> new TransExpId<>(x.b)),
 			sigma = Parsers.tuple(token("sigma"), map_ref.lazy(), trans_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
 			.map(x -> new TransExpSigma(x.b, x.c, x.d == null ? new LinkedList<>() : x.d, x.e == null ? new LinkedList<>() : x.e)),
-			
-			ret = Parsers.or(id, transExpRaw(), var, sigma);
+			delta = Parsers.tuple(token("delta"), map_ref.lazy(), trans_ref.lazy()).map(x -> new TransExpDelta(x.b, x.c)),
+			ret = Parsers.or(id, transExpRaw(), var, sigma, delta);
 		
 		trans_ref.set(ret);
 	}
@@ -536,7 +537,7 @@ public class AqlParser {
 		Parser<Tuple3<List<String>, List<catdata.Pair<String, RawTerm>>, List<catdata.Pair<String, String>>>> 
 		pa = Parsers.tuple(imports, gens.optional(), options);
 		
-		Parser<Tuple5<Token, Token, InstExp<?, ?, ?, ?, ?, ?, ?>, InstExp<?, ?, ?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"), inst_ref.lazy().followedBy(token("->")), inst_ref.lazy(), token("{")); //.map(x -> x.c);
+		Parser<Tuple5<Token, Token, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"), inst_ref.lazy().followedBy(token("->")), inst_ref.lazy(), token("{")); //.map(x -> x.c);
 					
 		Parser<TransExpRaw> ret = Parsers.tuple(l, pa, token("}")).map(x -> {
 			return new TransExpRaw(x.a.c, x.a.d, 
@@ -570,9 +571,9 @@ public class AqlParser {
 	
 	private static final Reference<TyExp<?, ?>> ty_ref = Parser.newReference();
 	private static final Reference<SchExp<?,?,?,?,?>> sch_ref = Parser.newReference();
-	private static final Reference<InstExp<?, ?, ?,?,?,?,?>> inst_ref = Parser.newReference();
+	private static final Reference<InstExp<?, ?, ?,?,?,?,?,?,?>> inst_ref = Parser.newReference();
 	private static final Reference<MapExp<?,?,?,?,?,?,?,?>> map_ref = Parser.newReference();
-	private static final Reference<TransExp<?,?,?,?,?,?,?,?,?>> trans_ref = Parser.newReference();
+	private static final Reference<TransExp<?,?,?,?,?,?,?,?,?,?,?,?,?>> trans_ref = Parser.newReference();
 	
 	private static Parser<Program<Exp<?>>> program() { //TODO: should create single instance of this rather than fn
 		tyExp();

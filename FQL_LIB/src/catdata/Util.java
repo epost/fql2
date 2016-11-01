@@ -41,7 +41,21 @@ public class Util {
 	}
 
 
-public static class MyTableRowSorter extends TableRowSorter<TableModel> {
+	public static class VoidIter implements Iterator<Void> { 
+
+		@Override
+		public boolean hasNext() {
+				return false;
+		}
+
+		@Override
+		public Void next() {
+			throw new RuntimeException("Anomaly: please report");
+		}
+		
+	} 
+	
+	public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 
 	public MyTableRowSorter(TableModel model) {
 		super(model);
@@ -67,9 +81,11 @@ public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 }
 	
 
-	public static void assertNotNull(Object o) {
-		if (o == null) {
-			throw new RuntimeException("Anomaly: please report ");
+	public static void assertNotNull(Object... O) {
+		for (Object o : O) {
+			if (o == null) {
+				throw new RuntimeException("Anomaly: please report ");
+			}
 		}
 	}
 	
@@ -787,9 +803,12 @@ public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 	    }
 	}
 
-	public static <Ty> List<Ty> alphabetical(Set<Ty> tys) {
+	/**
+	 * @return
+	 */
+	public static <Ty> List<Ty> alphabetical(Collection<Ty> tys) {
 		List<Ty> ret = new LinkedList<>(tys);
-		ret.sort(LengthComparator);
+		ret.sort(AlphabeticalComparator);
 		return ret;
 	}
 
@@ -871,4 +890,9 @@ public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 			return o1.toString().compareTo(o2.toString());
 		}
 	};
+
+
+	public static void anomaly() {
+		throw new RuntimeException("Anomaly: please report");
+	}
 }

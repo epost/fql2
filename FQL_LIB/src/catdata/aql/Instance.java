@@ -1,89 +1,45 @@
 package catdata.aql;
 
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Pair;
-import catdata.Util;
-import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.AqlProver.ProverName;
+import catdata.Util;  
 
-public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
+public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
 
-	private final AqlOptions strategy; //TODO semantics should not have strategies in them - should be taken care of in exp on cretion
-
-	public final Schema<Ty, En, Sym, Fk, Att> schema;
-
-	public final Map<Gen, En> gens;
-	public final Map<Sk, Ty> sks;
-
-	public final Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs;
-
-	private static class  VoidIter implements Iterator<Void> { //TODO aql
-
-		@Override
-		public boolean hasNext() {
-				return false;
-		}
-
-		@Override
-		public Void next() {
-			throw new RuntimeException("Anomaly: please report");
-		}
-		
-	} 
+	public abstract Schema<Ty, En, Sym, Fk, Att> schema();
 	
-	public static <Ty, En, Sym, Fk, Att> Instance<Ty, En, Sym, Fk, Att, Void, Void> terminal(Schema<Ty, En, Sym, Fk, Att> t) {
-		return new Instance<>(t, Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), 
-				new AqlOptions(ProverName.precomputed, new AqlSaturator<>(new AqlOptions(ProverName.precomputed, t.semantics()), t, t.collage(), new VoidIter())));
-	}
+	public abstract Ctx<Gen, En> gens(); 
+	public abstract Ctx<Sk, Ty> sks();
 
-	public Chc<Ty,En> type(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {		
-		return term.type(new Ctx<>(), new Ctx<>(), schema.typeSide.tys, schema.typeSide.syms, schema.typeSide.java_tys, schema.ens, schema.atts, schema.fks, gens, sks);
-	}
+	public abstract Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs();
+
+	public abstract DP<Ty,En,Sym,Fk,Att,Gen,Sk> dp();
 	
-	public Instance(Schema<Ty, En, Sym, Fk, Att> schema, Map<Gen, En> gens, Map<Sk, Ty> sks, Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs, AqlOptions strategy) {
-		if (schema == null) {
-			throw new RuntimeException("Attempt to construct instance with null schema");
-		} else if (gens == null) {
-			throw new RuntimeException("Attempt to construct instance with null generators");
-		} else if (sks == null) {
-			throw new RuntimeException("Attempt to construct instance with null skolem variables");
-		} else if (eqs == null) {
-			throw new RuntimeException("Attempt to construct instance with null equalities");
-		} else if (strategy == null) {
-			throw new RuntimeException("Attempt to construct instance with null theorem proving strategy");
-		}
-		this.schema = schema;
-		this.gens = gens;
-		this.sks = sks;
-		this.eqs = eqs;
-		this.strategy = strategy;
-		validate();
-		semantics();
+	
+	public final Chc<Ty,En> type(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {		
+		return term.type(new Ctx<>(), new Ctx<>(), schema().typeSide.tys, schema().typeSide.syms.map, schema().typeSide.java_tys.map, schema().ens, schema().atts.map, schema().fks.map, gens().map, sks().map);
 	}
 
-	public void validate() {
+	public final void validate() {		
 			//check that each gen/sk is in tys/ens
-			for (Gen gen : gens.keySet()) {
-				En en = gens.get(gen);
-				if (!schema.ens.contains(en)) {
+			for (Gen gen : gens().keySet()) {
+				En en = gens().get(gen);
+				if (!schema().ens.contains(en)) {
 					throw new RuntimeException("On generator " + gen + ", the entity " + en + " is not declared.");
 				}
 			}
-			for (Sk sk : sks.keySet()) {
-				Ty ty = sks.get(sk);
-				if (!schema.typeSide.tys.contains(ty)) {
+			for (Sk sk : sks().keySet()) {
+				Ty ty = sks().get(sk);
+				if (!schema().typeSide.tys.contains(ty)) {
 					throw new RuntimeException("On labelled null " + sk + ", the type " + ty + " is not declared.");
 				}
 			}
 			
-			for (Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) {
+			for (Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs()) {
 				//check lhs and rhs types match in all eqs
 				Chc<Ty, En> lhs = type(eq.first);
 				Chc<Ty, En> rhs = type(eq.second);
@@ -92,119 +48,79 @@ public final class Instance<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				}
 			}				
 			
-			//if not 'precomputed', then
-			//TODO: entity_theory = restrict to entities ; collage  
-			//create type algebra
-			//check freeness on java, and freeness if option enabled.  
-			//create dp for type algebra by DP in collage
-			//
+			
 		}	
 	
 	private String toString(Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq) {
 		return eq.first + " = " + eq.second;
 	}
 	
-	//TODO
-	private Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?,?> semantics;
-	
-	//this could take a while, so make sure two threads don't accidentally do it at the same time
-	public synchronized Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?,?> semantics() {
-		if (semantics != null) {
-			return semantics;
-		}
-		ProverName name = (ProverName) strategy.getOrDefault(AqlOption.prover);
-
-		switch (name) {
-		case precomputed:
-			@SuppressWarnings("unchecked")
-			Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,?,?> semantics2 = (Algebra<Ty, En, Sym, Fk, Att, Gen, Sk,?,?>) strategy.get(AqlOption.precomputed);
-			semantics = semantics2;
-			return semantics;
-		default:
-		}
-		semantics = new AqlSaturator<>(strategy, schema, collage(), new It());
-		return semantics;
-	}
-	
-	static class It implements Iterator<String> { //TODO aql 
-
-		int next = 0;
-		
-		@Override
-		public boolean hasNext() {
-			return true;
-		}
-
-		@Override
-		public String next() {
-			return "_id" + next++;
-		}
-
-	}
+	public abstract Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> algebra();
 
 	private Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage;
-	public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
+	public final Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
 		if (collage != null) {
 			return collage;
 		}
-		collage = new Collage<>(this);
+		collage = new Collage<>(schema().collage());
+		collage.gens.putAll(gens().map);
+		collage.sks.putAll(sks().map);
+		collage.eqs.addAll(eqs().stream().map(x -> new Eq<>(new Ctx<>(), x.first, x.second)).collect(Collectors.toSet()));
 		return collage;
 	}
 	
+	
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
-		result = prime * result + ((gens == null) ? 0 : gens.hashCode());
-		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
-		result = prime * result + ((sks == null) ? 0 : sks.hashCode());
+		result = prime * result + ((eqs() == null) ? 0 : eqs().hashCode());
+		result = prime * result + ((gens() == null) ? 0 : gens().hashCode());
+		result = prime * result + ((schema() == null) ? 0 : schema().hashCode());
+		result = prime * result + ((sks() == null) ? 0 : sks().hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Instance<?,?,?,?,?,?,?> other = (Instance<?,?,?,?,?,?,?>) obj;
-		if (eqs == null) {
-			if (other.eqs != null)
+		Instance<?,?,?,?,?,?,?,?,?> other = (Instance<?,?,?,?,?,?,?,?,?>) obj;
+		if (eqs() == null) {
+			if (other.eqs() != null)
 				return false;
-		} else if (!eqs.equals(other.eqs))
+		} else if (!eqs().equals(other.eqs()))
 			return false;
-		if (gens == null) {
-			if (other.gens != null)
+		if (gens() == null) {
+			if (other.gens() != null)
 				return false;
-		} else if (!gens.equals(other.gens))
+		} else if (!gens().equals(other.gens()))
 			return false;
-		if (schema == null) {
-			if (other.schema != null)
+		if (schema() == null) {
+			if (other.schema() != null)
 				return false;
-		} else if (!schema.equals(other.schema))
+		} else if (!schema().equals(other.schema()))
 			return false;
-		if (sks == null) {
-			if (other.sks != null)
+		if (sks() == null) {
+			if (other.sks() != null)
 				return false;
-		} else if (!sks.equals(other.sks))
+		} else if (!sks().equals(other.sks()))
 			return false;
 		return true;
 	}
 
-	private String toString = null;
 	@Override
-	public String toString() {
-		if (toString != null) {
-			return toString;
-		}
-		List<String> eqs0 = eqs.stream().map(x -> x.first + " = " + x.second).collect(Collectors.toList());
+	public final String toString() {
+		String toString = "";
+		List<String> eqs0 = eqs().stream().map(x -> x.first + " = " + x.second).collect(Collectors.toList());
 		toString = "generating entities";
-		toString += "\n\t" + Util.sep(gens, " : ", "\n\t");
+		toString += "\n\t" + Util.sep(gens().map, " : ", "\n\t");
 		toString += "\n\ngenerating nulls";
-		toString += "\n\t" + Util.sep(sks, " : " , "\n\t");			
+		toString += "\n\t" + Util.sep(sks().map, " : " , "\n\t");			
 		toString += "\n\nequations";
 		toString += "\n\t" + Util.sep(eqs0, "\n\t");
 		

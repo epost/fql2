@@ -186,7 +186,6 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				}
 				synchronized (this) {
 					env.put(n, k, val);
-					env.semantics(n, k);
 					processing.remove(n);
 					completed.add(n);
 					toUpdate[0] = toString();

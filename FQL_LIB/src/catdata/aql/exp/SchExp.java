@@ -17,14 +17,14 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final class SchExpInst<Ty,En,Sym,Fk,Att> extends SchExp<Ty,En,Sym,Fk,Att> {
-		public final InstExp<Ty,En,Sym,Fk,Att,?,?> inst;
+		public final InstExp<Ty,En,Sym,Fk,Att,?,?,?,?> inst;
 
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return inst.deps();
 		}
 			
-		public SchExpInst(InstExp<Ty, En, Sym, Fk, Att, ?, ?> inst) {
+		public SchExpInst(InstExp<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> inst) {
 			if (inst == null) {
 				throw new RuntimeException("Attempt to get schema for null instance");
 			}
@@ -63,7 +63,7 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 
 		@Override
 		public Schema<Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
-			return inst.eval(env).schema;
+			return inst.eval(env).schema();
 		}
 		
 		
