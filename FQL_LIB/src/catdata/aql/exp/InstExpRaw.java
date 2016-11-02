@@ -15,16 +15,19 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
-import catdata.aql.LiteralInstance;
 import catdata.aql.Ctx;
 import catdata.aql.Eq;
 import catdata.aql.InitialAlgebra;
 import catdata.aql.Instance;
+import catdata.aql.LiteralInstance;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.exp.It.ID;
+import catdata.aql.exp.It;
 
-public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object,Object,Object,GUID,Chc<Object,Pair<GUID,Object>>> {
+
+public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object,Object,Object,ID,Chc<Object,Pair<ID,Object>>> {
 
 	@Override
 	public Collection<Pair<String, Kind>> deps() {
@@ -33,7 +36,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 		ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.SCHEMA)).collect(Collectors.toList()));
 		return ret;
 	}
-
+ 
 	public final SchExp<Object,Object,Object,Object,Object> schema;
 	
 	public final List<String> imports;
@@ -110,7 +113,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	}
 
 	@Override
-	public Instance<Object, Object, Object, Object, Object, Object, Object, GUID, Chc<Object, Pair<GUID, Object>>> eval(AqlEnv env) {
+	public Instance<Object, Object, Object, Object, Object, Object, Object, ID, Chc<Object, Pair<ID, Object>>> eval(AqlEnv env) {
 		Schema<Object, Object, Object, Object, Object> sch = schema.eval(env);
 		Collage<Object, Object, Object, Object, Object, Object, Object> col = new Collage<>(sch.collage());
 		
@@ -147,9 +150,9 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 
 		AqlOptions strat = new AqlOptions(options, col);
 		
-		InitialAlgebra<Object, Object, Object, Object, Object, Object, Object, GUID> 
-		initial = new InitialAlgebra<>(strat, sch, col, new GUID.It(), x -> x.toString(), x -> x.toString());
-				
+		InitialAlgebra<Object, Object, Object, Object, Object, Object, Object, ID> 
+		initial = new InitialAlgebra<>(strat, sch, col, new It(), x -> x.toString(), x -> x.toString());
+				 
 		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial); 
 	}
 	

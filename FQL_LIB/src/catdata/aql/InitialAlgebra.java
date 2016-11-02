@@ -31,6 +31,9 @@ public class InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, X>
 extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
+	
+	
+	
 	@Override
 	public String printX(X x) {
 		return "[" + repr(x).toString(Util.voidFn(), g -> printGen.apply(g)) + "]";
@@ -41,7 +44,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		if (y.left) {
 			return "[" + printSk.apply(y.l) + "]";
 		} else {
-			return "[" +  repr(y.r.first).toString(Util.voidFn(), g -> printGen.apply(g)) + "." + y.r.second + "]";
+			return "[" + printX(y.r.first) + "." + y.r.second + "]";
 		}
 	}
 	
@@ -248,7 +251,11 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 			if (schema().type(eq.first, eq.second).left) { //type
 				for (X x : ens.get(eq.first.second)) {
 					Map<Var, Term<Ty, En, Sym, Fk, Att, Void, Void>> map = new HashMap<>();
-					map.put(eq.first.first, repr(x).convert());
+					Term<Ty, En, Sym, Fk, Att, Void, Void> q = 
+							repr(x).convert(); //map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Function.identity());
+									
+						//			Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity(), Function.identity(), Function.identity());
+					map.put(eq.first.first, q);
 					talg.eqs.add(new Eq<>(new Ctx<>(), transX(eq.second.subst(map).convert()), transX(eq.third.subst(map).convert())));
 				}
 			} 
@@ -418,7 +425,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		} else if (term.sk != null) {
 			return Term.Sk(Chc.inLeft(term.sk));
 		} else if (term.att != null) {
-			return Term.Sk(Chc.inRight(new Pair<>(trans1X(term.arg.convert()), term.att)));
+			return Term.Sk(Chc.inRight(new Pair<>(trans1X(term.arg.asArgForAtt()), term.att)));
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}

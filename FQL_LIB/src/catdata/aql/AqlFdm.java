@@ -4,7 +4,7 @@ import java.util.List;
 
 import catdata.Chc;
 import catdata.Pair;
-import catdata.aql.exp.GUID;
+import catdata.aql.exp.It.ID;
 
 //TODO aql check java computation etc through delta
 public class AqlFdm { //TODO aql kill this file
@@ -82,11 +82,11 @@ public class AqlFdm { //TODO aql kill this file
 		
 		return null; //Instance.saturate(F.dst, col.gens.map, col.sks.map, eqs, strategy, new GUID.It());
 		
-	}*/
+	}*/ 
 
 	//TODO: aql this recomputes src and dst
 	public static <Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> 
-	Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, GUID, Chc<Sk1, Pair<GUID, Att2>>, GUID, Chc<Sk2, Pair<GUID, Att2>>> 
+	Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, ID, Chc<Sk1, Pair<ID, Att2>>, ID, Chc<Sk2, Pair<ID, Att2>>> 
 	sigma(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h,  List<Pair<String, String>> options1,  List<Pair<String, String>> options2) {
 	/*
 		Instance<Ty,En2,Sym,Fk2,Att2,Gen1,Sk1,GUID, Chc<Sk1, Pair<GUID, Att2>>> src = sigma(f, h.src, options1);

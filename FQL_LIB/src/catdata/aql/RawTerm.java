@@ -112,6 +112,7 @@ public final class RawTerm {
 		throw new RuntimeException("Anomaly, please report");
 	}
 	
+	@SuppressWarnings("unchecked")
 	private static <X> X resolve(String name) {
 		return (X) name; //TODO aql make this smarter
  	}

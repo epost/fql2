@@ -110,7 +110,8 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 		//Collage<Object, Object, Object, Object, Object, Void, Void> scol = new Collage<>(src0);
 		Collage<Object, Object, Object, Object, Object, Object, Object> dcol = dst0.collage(); //new Collage<>(dst0);
 		
-		Map<Object, Term<Object,Object,Object,Object,Object,Object,Object>> gens0 = new HashMap<>(), sks0 = new HashMap<>();
+		Map<Object, Term<Void,Object,Void,Object,Void,Object,Void>> gens0 = new HashMap<>();
+		Map<Object, Term<Object,Object,Object,Object,Object,Object,Object>> sks0 = new HashMap<>();
 		for (String k : imports) {
 			Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> v = env.getTransform(k);
 			Util.putAllSafely(gens0, v.gens().map);
@@ -137,7 +138,7 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 			if (required.left) {
 				Util.putSafely(sks0, gen.first, term0);				
 			} else {
-				Util.putSafely(gens0, gen.first, term0);
+				Util.putSafely(gens0, gen.first, term0.convert());
 			}
 		}
 		

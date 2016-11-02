@@ -14,6 +14,7 @@ import catdata.aql.Mapping;
 import catdata.aql.SigmaInstance;
 import catdata.aql.TerminalInstance;
 import catdata.aql.exp.SchExp.SchExpLit;
+import catdata.aql.exp.It.ID;
 
 public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>> {
 	
@@ -28,7 +29,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 ////////////////////////////////////////////////////////////////////////////////////////////////////	
 
 	public static final class InstExpSigma<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
-	extends InstExp<Ty,En2,Sym,Fk2,Att2,Gen,Sk,GUID,Chc<Sk,Pair<GUID, Att2>>> {
+	extends InstExp<Ty,En2,Sym,Fk2,Att2,Gen,Sk,ID,Chc<Sk,Pair<ID, Att2>>> {
 
 		public final InstExp<Ty,En1,Sym,Fk1,Att1,Gen,Sk,X,Y> I;
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;

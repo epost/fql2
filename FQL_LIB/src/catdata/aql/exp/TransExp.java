@@ -10,8 +10,6 @@ import catdata.Util;
 import catdata.aql.Ctx;
 import catdata.aql.DeltaTransform;
 import catdata.aql.IdentityTransform;
-import catdata.aql.Instance;
-import catdata.aql.Mapping;
 import catdata.aql.SigmaDeltaCounitTransform;
 import catdata.aql.SigmaDeltaUnitTransform;
 import catdata.aql.SigmaTransform;
@@ -19,6 +17,8 @@ import catdata.aql.Transform;
 import catdata.aql.exp.InstExp.InstExpDelta;
 import catdata.aql.exp.InstExp.InstExpLit;
 import catdata.aql.exp.InstExp.InstExpSigma;
+import catdata.aql.exp.It.ID;
+
 
 public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends Exp<Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2>> {
 
@@ -34,7 +34,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 	///////////////////////////////////////////////////////////////////////////////////////
 	
 	public static class TransExpSigmaDeltaCounit<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
-	extends TransExp<Ty, En2, Sym, Fk2, Att2, Pair<En1, X>, Y, Gen, Sk, GUID, Chc<Y, Pair<GUID, Att2>>, X, Y> {
+	extends TransExp<Ty, En2, Sym, Fk2, Att2, Pair<En1, X>, Y, Gen, Sk, ID, Chc<Y, Pair<ID, Att2>>, X, Y> {
 
 		public final MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F; 
 		public final InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> I;
@@ -100,7 +100,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		}
 
 		@Override
-		public Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Pair<En1, X>, Y, GUID, Chc<Y, Pair<GUID, Att2>>>, 
+		public Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Pair<En1, X>, Y, ID, Chc<Y, Pair<ID, Att2>>>, 
 		            InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
 				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
 			SchExp<Ty, En2, Sym, Fk2, Att2> x = I.type(ctx0, ctx);
@@ -116,7 +116,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 	///////////////////////////////////////////////////////////////////////////////////////
 	
 	public static final class TransExpSigmaDeltaUnit<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen, Sk, X, Y> 
-	extends TransExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, Pair<En1, GUID>, Chc<Sk,Pair<GUID,Att2>>, X, Y, Pair<En1, GUID>, Chc<Sk,Pair<GUID,Att2>>> { 
+	extends TransExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, Pair<En1, ID>, Chc<Sk,Pair<ID,Att2>>, X, Y, Pair<En1, ID>, Chc<Sk,Pair<ID,Att2>>> { 
 		
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
 		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
@@ -169,7 +169,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		
 		@Override
 		public Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y>, 
-		InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, GUID>, Chc<Sk, Pair<GUID, Att2>>, Pair<En1, GUID>, Chc<Sk, Pair<GUID, Att2>>>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
+		InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
 				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
 			SchExp<Ty, En1, Sym, Fk1, Att1> x = I.type(ctx0, ctx);
 			//TODO aql schema equality
@@ -200,7 +200,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 	///////////////////////////////////////////////////////////////////////////////////////
 	
 	public static final class TransExpSigma<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> 
-	extends TransExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, GUID, Chc<Sk1,Pair<GUID,Att2>>, GUID, Chc<Sk2,Pair<GUID,Att2>>> { 
+	extends TransExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, ID, Chc<Sk1,Pair<ID,Att2>>, ID, Chc<Sk2,Pair<ID,Att2>>> { 
 		
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
 		public final TransExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
@@ -259,18 +259,18 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 
 		@Override
-		public Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, GUID,Chc<Sk1,Pair<GUID,Att2>>>, 
-		            InstExp<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2, GUID,Chc<Sk2,Pair<GUID,Att2>>>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
+		public Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, ID,Chc<Sk1,Pair<ID,Att2>>>, 
+		            InstExp<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2, ID,Chc<Sk2,Pair<ID,Att2>>>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
 				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
 			Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, X1, Y1>, InstExp<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, X2, Y2>> x = t.type(ctx0, ctx, ctx1);
 			//TODO aql schema equality
 			if (!x.first.type(ctx0, ctx).equals(F.type(ctx0).first)) {
 				throw new RuntimeException("In " + this + ", mapping domain is " + F.type(ctx0).first + " but transform domain schema is " + x.first.type(ctx0, ctx));
 			}
-			InstExp<Ty,En2,Sym,Fk2,Att2,Gen1,Sk1,GUID,Chc<Sk1,Pair<GUID,Att2>>> a = new InstExpSigma<>(F, x.first, options1);
-			InstExp<Ty,En2,Sym,Fk2,Att2,Gen2,Sk2,GUID,Chc<Sk2,Pair<GUID,Att2>>> b = new InstExpSigma<>(F, x.second, options2);
+			InstExp<Ty,En2,Sym,Fk2,Att2,Gen1,Sk1,ID,Chc<Sk1,Pair<ID,Att2>>> a = new InstExpSigma<>(F, x.first, options1);
+			InstExp<Ty,En2,Sym,Fk2,Att2,Gen2,Sk2,ID,Chc<Sk2,Pair<ID,Att2>>> b = new InstExpSigma<>(F, x.second, options2);
 			return new Pair<>(a,b);
-		}
+		} 
 
 		@Override
 		public SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> eval(AqlEnv env) {

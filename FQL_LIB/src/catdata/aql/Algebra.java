@@ -50,7 +50,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 			} else if (term.sk != null) {
 				return sk(term.sk);
 			} else if (term.att != null) {
-				return att(term.att, intoX(term.arg.convert()));
+				return att(term.att, intoX(term.arg));
 			}
 			throw new RuntimeException("Anomaly: please report");
 		}
@@ -60,9 +60,9 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	 */
 		public X intoX(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 			if (term.gen != null) {
-				return nf(term.convert());
+				return nf(term.asGen());
 			} else if (term.fk != null) {
-				return fk(term.fk, nf(term.arg.convert()));
+				return fk(term.fk, nf(term.fkArg()));
 			}
 			throw new RuntimeException("Anomaly: please report");
 		}

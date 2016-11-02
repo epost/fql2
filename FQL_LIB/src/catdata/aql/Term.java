@@ -65,6 +65,57 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	public final Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg;
 	public final Object obj;
 	public final Ty ty;
+	
+	public Term<Void, En, Void, Fk, Void, Gen, Void> asArgForAtt() {
+		if (gen != null) {
+			return asGen();
+		} else if (var != null) {
+			return asVar();
+		} else if (fk != null) {
+			return fkArg();
+		}
+		throw new RuntimeException("Anomaly: please report " + this);
+	}
+	
+	public Term<Void, En, Void, Fk, Void, Gen, Void> fkArg() {
+		if (fk != null) {
+			return Term.Fk(fk, arg.fkArg());
+		} else if (gen != null) {
+			return asGen();
+		} else if (var != null) {
+			return Term.Var(var);
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
+	
+	@SuppressWarnings("hiding")
+	public <Ty, En, Sym, Fk, Att, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> asGen() {
+		if (gen != null) {
+			return Term.Gen(gen);
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
+	@SuppressWarnings("hiding")
+	public <Ty, En, Sym, Fk, Att, Gen> Term<Ty, En, Sym, Fk, Att, Gen, Sk> asSk() {
+		if (sk != null) {
+			return Term.Sk(sk);
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
+	@SuppressWarnings("hiding")
+	public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> asVar() {
+		if (var != null) {
+			return Term.Var(var);
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
+	@SuppressWarnings("hiding")
+	public <En, Sym, Fk, Att, Gen> Term<Ty, En, Sym, Fk, Att, Gen, Sk> asObj() {
+		if (obj != null) {
+			return Term.Obj(obj, ty);
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
 
 	//these do not care about java
 	public boolean isTypeSide() {
@@ -213,16 +264,16 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			if (args.size() == 0) {
 				return sym.toString();
 			} else if (args.size() == 1) {
-				return args.get(0) + "." + sym;
+				return args.get(0).toString(sk_printer, gen_printer) + "." + sym;
 			} else if (args.size() == 2) {
-				return "(" + args.get(0) + " " + sym + " " + args.get(1) + ")";
+				return "(" + args.get(0).toString(sk_printer, gen_printer) + " " + sym + " " + args.get(1).toString(sk_printer, gen_printer) + ")";
 			} else {
 				return sym + "(" + Util.sep(args, ", ") + ")";
 			}
 		} else if (att != null) {
-			return arg + "." + att;
+			return arg.toString(sk_printer, gen_printer) + "." + att;
 		} else if (fk != null) {
-			return arg + "." + fk;
+			return arg.toString(sk_printer, gen_printer) + "." + fk;
 		} else if (gen != null) {
 			return gen_printer.apply(gen); 
 		} else if (sk != null) {

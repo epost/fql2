@@ -8,14 +8,15 @@ import java.util.function.Function;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.exp.GUID;
+import catdata.aql.exp.It.ID;
+import catdata.aql.exp.It;
 
 public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
- extends Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, GUID, Chc<Sk, Pair<GUID, Att2>>> {
+ extends Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID, Chc<Sk, Pair<ID, Att2>>> {
 	
 	public final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F; 
 	public final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
-	private final LiteralInstance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, GUID, Chc<Sk, Pair<GUID, Att2>>> J;
+	private final LiteralInstance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID, Chc<Sk, Pair<ID, Att2>>> J;
 
 	//options has to come in as a list, because conversion to AqlOptions requires the sigma'd collage
 	public SigmaInstance(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
@@ -37,12 +38,12 @@ public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, 
 			eqs.add(new Pair<>(F.trans(eq.first), F.trans(eq.second)));
 			col.eqs.add(new Eq<>(new Ctx<>(), F.trans(eq.first), F.trans(eq.second)));
 		}
-		AqlOptions strat = new AqlOptions(options, col); 
+		AqlOptions strat = new AqlOptions(options, col);  
 				
 		Function<Gen,String> printGen = x -> I.algebra().printX(I.algebra().nf(Term.Gen(x)));
 		Function<Sk, String> printSk = x -> I.algebra().sk(x).toString(I.algebra()::printY, Util.voidFn());
-		InitialAlgebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, GUID> initial 
-		= new InitialAlgebra<>(strat, schema(), col, new GUID.It(), printGen, printSk);
+		InitialAlgebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID> initial 
+		= new InitialAlgebra<>(strat, schema(), col, new It(), printGen, printSk);
 				
 		J = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, initial.dp(), initial); 
 	}
@@ -73,7 +74,7 @@ public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, 
 	}
 	
 	@Override
-	public Algebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, GUID, Chc<Sk, Pair<GUID, Att2>>> algebra() {
+	public Algebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID, Chc<Sk, Pair<ID, Att2>>> algebra() {
 		return J.algebra();
 	}
 	

@@ -14,7 +14,7 @@ extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<En1, X1>, Y1, Pair<En1, X2>, Y2,
 	public final DeltaInstance<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, X1, Y1> src; 
 	public final DeltaInstance<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, En2, Fk2, Att2, X2, Y2> dst; 
 
-	private final Ctx<Pair<En1, X1>, Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, X2>, Y2>> gens = new Ctx<>();
+	private final Ctx<Pair<En1, X1>, Term<Void, En1, Void, Fk1, Void, Pair<En1, X2>, Void>> gens = new Ctx<>();
 	private final Ctx<Y1, Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, X2>, Y2>> sks = new Ctx<>();
 	
 	public DeltaTransform(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h) {
@@ -57,7 +57,7 @@ extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<En1, X1>, Y1, Pair<En1, X2>, Y2,
 	}*/
 	
 	@Override
-	public Ctx<Pair<En1, X1>, Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, X2>, Y2>> gens() {
+	public Ctx<Pair<En1, X1>, Term<Void, En1, Void, Fk1, Void, Pair<En1, X2>, Void>> gens() {
 		return gens;
 	}
 	

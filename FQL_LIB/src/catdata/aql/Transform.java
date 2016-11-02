@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -8,7 +9,7 @@ import catdata.Util;
 
 public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> {
 
-	public abstract Ctx<Gen1, Term<Ty,En,Sym,Fk,Att,Gen2,Sk2>> gens();
+	public abstract Ctx<Gen1, Term<Void,En,Void,Fk,Void,Gen2,Void>> gens();
 	public abstract Ctx<Sk1, Term<Ty,En,Sym,Fk,Att,Gen2,Sk2>> sks();
 			
 	public abstract Instance<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src();
@@ -24,11 +25,11 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 		//for each (k,v) in gens/fks, k must be in src and dst must be in target 
 			for (Gen1 gen1 : src().gens().keySet()) {
 				En en1 = src().gens().get(gen1);
-				Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> gen2 = gens().get(gen1);
+				Term<Void, En, Void, Fk, Void, Gen2, Void> gen2 = gens().get(gen1).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn());
 				if (gen2 == null) {
 					throw new RuntimeException("source generator " + gen1 + " has no transform");
 				}
-				Chc<Ty, En> en2 = dst().type(gen2);
+				Chc<Ty, En> en2 = dst().type(gen2.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn()));
 				if (!en2.equals(Chc.inRight(en1))) {
 					throw new RuntimeException("source generator " + gen1 + " transforms to " + gen2 + ", which has sort " + en2.toStringMash() + ", not " + en1 + " as expected");
 				}	
@@ -172,7 +173,7 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 		} else if (term.sym != null) {
 			return Term.Sym(term.sym, term.args.stream().map(this::trans).collect(Collectors.toList()));
 		} else if (term.gen != null) {
-			return gens().get(term.gen);
+			return gens().get(term.gen).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn());
 		} else if (term.sk != null) {
 			return sks().get(term.sk);
 		}

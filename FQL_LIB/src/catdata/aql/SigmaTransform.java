@@ -1,12 +1,15 @@
 package catdata.aql;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import catdata.Chc;
 import catdata.Pair;
-import catdata.aql.exp.GUID;
+import catdata.Util;
+import catdata.aql.exp.It.ID;
 
-public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> extends Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, GUID, Chc<Sk1, Pair<GUID, Att2>>, GUID, Chc<Sk2, Pair<GUID, Att2>>>  {
+
+public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> extends Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, ID, Chc<Sk1, Pair<ID, Att2>>, ID, Chc<Sk2, Pair<ID, Att2>>>  {
 
 	public final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
 	public final Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
@@ -14,7 +17,7 @@ public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, 
 	public final SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, X1, Y1> src; 
 	public final SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, En2, Fk2, Att2, X2, Y2> dst; 
 
-	private final Ctx<Gen1, Term<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2>> gens = new Ctx<>();
+	private final Ctx<Gen1, Term<Void, En2, Void, Fk2, Void, Gen2, Void>> gens = new Ctx<>();
 	private final Ctx<Sk1, Term<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2>> sks = new Ctx<>();
 	
 	//TODO: this recomputes the instances
@@ -27,7 +30,7 @@ public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, 
 		src = new SigmaInstance<>(f, h.src(), options1);
 		dst = new SigmaInstance<>(f, h.dst(), options2);
 		for (Gen1 gen1 : src.gens().keySet()) {
-			gens.put(gen1, f.trans(h.gens().get(gen1)));
+			gens.put(gen1, f.trans(h.gens().get(gen1).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn())).convert());
 		}
 		for (Sk1 sk1 : src.sks().keySet()) {
 			sks.put(sk1, f.trans(h.sks().get(sk1)));
@@ -36,7 +39,7 @@ public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, 
 	}
 	
 	@Override
-	public Ctx<Gen1, Term<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2>> gens() {
+	public Ctx<Gen1, Term<Void, En2, Void, Fk2, Void, Gen2, Void>> gens() {
 		return gens;
 	}
 
@@ -46,12 +49,12 @@ public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, 
 	}
 
 	@Override
-	public Instance<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, GUID, Chc<Sk1, Pair<GUID, Att2>>> src() {
+	public Instance<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, ID, Chc<Sk1, Pair<ID, Att2>>> src() {
 		return src;
 	}
 
 	@Override
-	public Instance<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2, GUID, Chc<Sk2, Pair<GUID, Att2>>> dst() {
+	public Instance<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2, ID, Chc<Sk2, Pair<ID, Att2>>> dst() {
 		return dst;
 	}
 

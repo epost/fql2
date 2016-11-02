@@ -204,7 +204,8 @@ public class AqlParser {
 		map_ref.set(ret);
 	}
 
-//	@SuppressWarnings({"rawtypes", "unchecked"})
+	//TODO aql revisit parser type safety
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private static final void transExp() {
 		Parser<TransExp<?,?,?,?,?,?,?,?,?,?,?,?,?>>  
 			var = ident.map(TransExpVar::new),

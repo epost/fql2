@@ -106,11 +106,13 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 	public final DP<Ty,En,Sym,Fk,Att,Void,Void> dp;
 	
 	//this could take a while, so make sure two threads don't accidentally do it at the same time
+	@SuppressWarnings("unchecked")
 	public <Gen,Sk> DP<Ty,En,Sym,Fk,Att,Gen,Sk> dp() {
 		return (DP<Ty, En, Sym, Fk, Att, Gen, Sk>) dp;
 	}
 		
 	private Collage<Ty, En, Sym, Fk, Att, Void, Void> collage;
+	@SuppressWarnings("unchecked")
 	public final <Gen, Sk> Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
 		if (collage != null) {
 			if (!collage.gens.isEmpty()|| !collage.sks.isEmpty()) {

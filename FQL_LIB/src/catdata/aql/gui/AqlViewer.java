@@ -70,32 +70,30 @@ public final class AqlViewer {
 		case TYPESIDE:
 			@SuppressWarnings("unchecked")
 			TypeSide<Object, Object> typeSide = (TypeSide<Object, Object>) obj;
-			viewDP(typeSide.semantics, typeSide.collage(), ret);
+			ret.add(viewDP(typeSide.semantics, typeSide.collage()), "DP");
 			break;
 		case SCHEMA:
 			@SuppressWarnings("unchecked")
 			Schema<Object, Object, Object, Object, Object> schema = (Schema<Object, Object, Object, Object, Object>) obj;
-			viewDP(schema.dp(), schema.collage(), ret);
 			ret.add(viewSchema(schema), "Graph");
+			ret.add(viewDP(schema.dp(), schema.collage()), "DP");
 			break;
 		case INSTANCE:
 			@SuppressWarnings("unchecked")
 			Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> instance = (Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object>) obj;
-			viewDP(instance.dp(), instance.collage(), ret);
 			ret.add(viewAlgebra(instance.algebra()), "Tables");
 			ret.add(new CodeTextPanel("", instance.algebra().toString()), "Algebra");
+			ret.add(viewDP(instance.dp(), instance.collage()), "DP");
 			break;
 		case MAPPING:
 			@SuppressWarnings("unchecked")
 			Mapping<Object, Object, Object, Object, Object, Object, Object, Object> mapping = (Mapping<Object, Object, Object, Object, Object, Object, Object, Object>) obj;
-			viewMorphism(mapping.semantics(), ret);
+			ret.add(viewMorphism(mapping.semantics()), "Translate");
 			break;
 		case TRANSFORM:
 			@SuppressWarnings("unchecked")
 			Transform  <Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> transform = (Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>) obj;
-		//	TablesTrans<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> tablesTrans = new TablesTrans<>(transform);
-			ret.add(viewTransformAlgebra(transform), "Algebra");
-//			ret.add(new CodeTextPanel("", tablesTrans.toString()), "Algebra");
+			ret.add(viewTransform(transform), "Algebra");
 
 			break;
 		case PRAGMA:
@@ -112,7 +110,7 @@ public final class AqlViewer {
 
 	}
 
-	private static <Ty, En1, Sym1, Fk1, Att1, Gen1, Sk1, En2, Sym2, Fk2, Att2, Gen2, Sk2> void viewMorphism(Morphism<Ty, En1, Sym1, Fk1, Att1, Gen1, Sk1, En2, Sym2, Fk2, Att2, Gen2, Sk2> m, JTabbedPane ret) {
+	public static <Ty, En1, Sym1, Fk1, Att1, Gen1, Sk1, En2, Sym2, Fk2, Att2, Gen2, Sk2> JComponent viewMorphism(Morphism<Ty, En1, Sym1, Fk1, Att1, Gen1, Sk1, En2, Sym2, Fk2, Att2, Gen2, Sk2> m) {
 		CodeTextPanel input = new CodeTextPanel("Input", "");
 		CodeTextPanel output = new CodeTextPanel("Output", "");
 
@@ -140,10 +138,10 @@ public final class AqlViewer {
 			}
 		});
 
-		ret.addTab("Trans", main);
+		return main;
 	}
 	
-	private static <Ty, En, Sym, Fk, Att> Component viewSchema(Schema<Ty, En, Sym, Fk, Att> schema) {
+	public static <Ty, En, Sym, Fk, Att> JComponent viewSchema(Schema<Ty, En, Sym, Fk, Att> schema) {
 		Graph<Chc<Ty, En>, Chc<Fk, Att>> sgv = new DirectedSparseMultigraph<>();
 
 		for (En en : schema.ens) {
@@ -184,7 +182,7 @@ public final class AqlViewer {
 		return ret;
 	}	
 
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> void viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, JTabbedPane ret) {
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> JComponent viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		CodeTextPanel input = new CodeTextPanel("Input", "");
 		CodeTextPanel output = new CodeTextPanel("Output", "");
 
@@ -233,11 +231,11 @@ public final class AqlViewer {
 			}
 		});
 
-		ret.addTab("DP", main);
+		return main;
 	}
 	
 	
-		public static <Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> Component viewTransformAlgebra(Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
+		public static <Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> JComponent viewTransform(Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
 			List<JComponent> list = new LinkedList<>();
 
 			List<En> ens = Util.alphabetical(t.src().schema().ens);
@@ -352,60 +350,5 @@ public final class AqlViewer {
 		return Util.makeGrid(list);
 	}
 
-/*
-	public static <Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> Component viewTransform(Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
-		List<JComponent> list = new LinkedList<>();
-
-		List<En> ens = Util.alphabetical(t.src().schema().ens);
-		List<Ty> tys = Util.alphabetical(t.src().schema().typeSide.tys);
-		
-		 Map<En,Set<Gen1>> m = Util.revS(t.src().gens().map); 
-		
-		for (En en : ens) {
-			if (!m.containsKey(en)) {
-				continue;
-			}
-			List<String> header = new LinkedList<>();
-			header.add("Input");
-			header.add("Output");
-			int n = m.get(en).size();
-			Object[][] data = new Object[n][2];
-			int i = 0;
-			for (Gen1 gen1 : Util.alphabetical(m.get(en)))) {
-				Object[] row = new Object[2];
-				row[0] = t.src().algebra().printX(x1);
-				X2 x2 = t.repr(x1);
-				row[1] = t.dst().algebra().printX(x2); 
-				data[i] = row;
-				i++;
-			}
-			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), en + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
-		}
-		Map<Ty,Set<Y1>> z = Util.revS(t.src().algebra().talg().sks.map);
-		for (Ty ty : tys) {
-			List<String> header = new LinkedList<>();
-			header.add("Input");
-			header.add("Output");
-			if (!z.containsKey(ty)) {
-				continue;
-			}
-			int n = z.get(ty).size();
-			Object[][] data = new Object[n][2];
-			int i = 0;
-			for (Y1 y1 : z.get(ty)) {
-				Object[] row = new Object[2];
-				row[0] = t.src().algebra().printY(y1); 
-				Term<Ty, Void, Sym, Void, Void, Void, Y2> y0 = t.dst().algebra().intoY(t.reprT(y1));
-				row[1] = y0.toString(t.dst().algebra()::printY, Util.voidFn());
-				data[i] = row;
-				i++;
-			}
-			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
-		}
-
-		return Util.makeGrid(list);
-	}
-*/
-	
 
 }

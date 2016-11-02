@@ -1,12 +1,5 @@
 package catdata.aql.examples;
 
-import java.util.HashMap;
-
-import org.codehaus.jparsec.Parsers;
-
-import catdata.Util;
-import catdata.aql.exp.TransExp.TransExpSigmaDeltaUnit;
-
 public class AqlDeltaExample extends AqlExample {
 
 	@Override

@@ -116,7 +116,7 @@ extends Algebra<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> {
 
 	private Term<Ty, Void, Sym, Void, Void, Void, Y> attY(Term<Ty, En2, Sym, Fk2, Att2, Void, Void> term, Pair<En1, X> x) {
 		if (term.att != null) {
-			return alg.att(term.att, attX(term.arg.convert(), x.second)); //TODO need getArgOfAtt() : Term<Void,Void...
+			return alg.att(term.att, attX(term.arg.asArgForAtt().map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn()), x.second)); //TODO need getArgOfAtt() : Term<Void,Void...
 		} else if (term.sym != null) {
 			return Term.Sym(term.sym, term.args.stream().map(q -> attY(q, x)).collect(Collectors.toList()));
 		} 

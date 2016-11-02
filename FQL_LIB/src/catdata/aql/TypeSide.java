@@ -217,6 +217,7 @@ public final class TypeSide<Ty, Sym> {
 	} */
 	
 	private Collage<Ty, Void, Sym, Void, Void, Void, Void> collage;
+	@SuppressWarnings("unchecked")
 	public <En,Fk,Att,Gen,Sk> Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
 		if (collage != null) {
 			if (!collage.atts.isEmpty() || !collage.fks.isEmpty() || !collage.gens.isEmpty()|| !collage.sks.isEmpty()) {
