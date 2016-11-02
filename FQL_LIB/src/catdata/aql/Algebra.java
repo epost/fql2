@@ -8,6 +8,7 @@ import catdata.Util;
 
 
 public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,En,Sym,Fk,Att,Gen,Sk> */ {
+	//TODO aql generic map method like printX
 	
 	//TODO aql add final eq method here
 	
@@ -69,7 +70,15 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	
 	
 	public abstract String toStringProver();
-		
+		/*
+	public abstract String printSk(Sk y);
+	public abstract String printGen(Gen x);
+	*/
+	public abstract String printX(X x);
+	public abstract String printY(Y y);
+	
+	/*
+	 * 	
 	public String printSk(Sk y) { //TODO aql
 		return y.toString();
 	} 
@@ -82,7 +91,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	public String printY(Y y) {
 		return y.toString();
 	}
-	
+	 */
 	public boolean hasFreeTypeAlgebra() {
 		return talg().simplify().first.eqs.isEmpty();
 	}
@@ -117,16 +126,16 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 		String ret = "----- entity algebra\n\n";
 
 		ret = "carriers\n\t";
-		ret += Util.sep(schema().ens.stream().map(x -> x + " -> {" + Util.sep(en(x), ", ") + "}").collect(Collectors.toList()), "\n\t");
+		ret += Util.sep(schema().ens.stream().map(x -> x + " -> {" + Util.sep(en(x).stream().map(this::printX).collect(Collectors.toList()), ", ") + "}").collect(Collectors.toList()), "\n\t");
 	
 		ret += "\n\nforeign keys";
 		for (Fk fk : schema().fks.keySet()) {
-			ret += "\n\t" + fk + " -> {" + Util.sep(en(schema().fks.get(fk).first).stream().map(x -> "(" + x + ", " + fk(fk, x) + ")").collect(Collectors.toList()), ", ") + "}";
+			ret += "\n\t" + fk + " -> {" + Util.sep(en(schema().fks.get(fk).first).stream().map(x -> "(" + x + ", " + printX(fk(fk, x)) + ")").collect(Collectors.toList()), ", ") + "}";
 		}
 		
 		ret += "\n\nattributes";
 		for (Att att : schema().atts.keySet()) {
-			ret += "\n\t" + att + " -> {" + Util.sep(en(schema().atts.get(att).first).stream().map(x -> "(" + x + ", " + att(att, x) + ")").collect(Collectors.toList()), ", ") + "}";
+			ret += "\n\t" + att + " -> {" + Util.sep(en(schema().atts.get(att).first).stream().map(x -> "(" + x + ", " + att(att, x).toString(this::printY, Util.voidFn()) + ")").collect(Collectors.toList()), ", ") + "}";
 		}
 		
 		ret += "\n\n----- type algebra\n\n";

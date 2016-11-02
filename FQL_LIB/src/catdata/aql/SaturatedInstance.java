@@ -85,6 +85,16 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 	private class InnerAlgebra extends Algebra<Ty,En,Sym,Fk,Att,X,Y,X,Y> {
 		
 		@Override
+		public String printX(X x) {
+			return alg.printX(x);
+		}
+
+		@Override
+		public String printY(Y y) {
+			return alg.printY(y);
+		}
+		
+		@Override
 		public Collection<X> en(En en) {
 			return alg.en(en);
 		}

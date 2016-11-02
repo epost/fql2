@@ -1,8 +1,9 @@
 package catdata.aql;
 
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import catdata.Chc;
 import catdata.Pair;
@@ -15,8 +16,9 @@ public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, 
 	public final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F; 
 	public final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
 	private final LiteralInstance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, GUID, Chc<Sk, Pair<GUID, Att2>>> J;
-	
-	public SigmaInstance(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, List<Pair<String, String>> options) {
+
+	//options has to come in as a list, because conversion to AqlOptions requires the sigma'd collage
+	public SigmaInstance(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
 		if (!f.src.equals(i.schema())) {
 			throw new RuntimeException("In sigma instance, source of mapping is " + f.src + ", but instance has type " + i.schema());
 		}
@@ -35,9 +37,12 @@ public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, 
 			eqs.add(new Pair<>(F.trans(eq.first), F.trans(eq.second)));
 			col.eqs.add(new Eq<>(new Ctx<>(), F.trans(eq.first), F.trans(eq.second)));
 		}
-		AqlOptions strat = new AqlOptions(Util.toMapSafely(options), col); 
+		AqlOptions strat = new AqlOptions(options, col); 
 				
-		InitialAlgebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, GUID> initial = new InitialAlgebra<>(strat, schema(), col, new GUID.It());
+		Function<Gen,String> printGen = x -> I.algebra().printX(I.algebra().nf(Term.Gen(x)));
+		Function<Sk, String> printSk = x -> I.algebra().sk(x).toString(I.algebra()::printY, Util.voidFn());
+		InitialAlgebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, GUID> initial 
+		= new InitialAlgebra<>(strat, schema(), col, new GUID.It(), printGen, printSk);
 				
 		J = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, initial.dp(), initial); 
 	}

@@ -42,16 +42,17 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 
 	public final List<Pair<RawTerm, RawTerm>> eqs;
 	
-	public final List<Pair<String, String>> options;
+	public final Map<String, String> options;
 
 	//typesafe by covariance of read-only collections
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public InstExpRaw(SchExp<?,?,?,?,?> schema, List<String> imports, List<Pair<String, String>> gens, List<Pair<RawTerm, RawTerm>> eqs, List<Pair<String, String>> options) {
+	public InstExpRaw(SchExp<?,?,?,?,?> schema, List<String> imports, List<Pair<String, String>> gens, List<Pair<RawTerm, RawTerm>> eqs, Map<String, String> options) {
 		this.schema = (SchExp<Object, Object, Object, Object, Object>) schema;
 		this.imports = imports;
 		this.gens = new LinkedList(gens);
 		this.eqs = eqs;
 		this.options = options;
+		Util.toMapSafely(gens); //do this here rather than wait until 
 	}
 
 		@Override
@@ -144,10 +145,10 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 				col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));
 		}
 
-		AqlOptions strat = new AqlOptions(Util.toMapSafely(options), col);
+		AqlOptions strat = new AqlOptions(options, col);
 		
 		InitialAlgebra<Object, Object, Object, Object, Object, Object, Object, GUID> 
-		initial = new InitialAlgebra<>(strat, sch, col, new GUID.It());
+		initial = new InitialAlgebra<>(strat, sch, col, new GUID.It(), x -> x.toString(), x -> x.toString());
 				
 		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial); 
 	}

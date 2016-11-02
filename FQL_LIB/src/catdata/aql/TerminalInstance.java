@@ -49,6 +49,16 @@ public class TerminalInstance<Ty, En, Sym, Fk, Att> extends Instance<Ty, En, Sym
 	private class EmptyAlgebra extends Algebra<Ty, En, Sym, Fk, Att, Void, Void, Void, Void>  {
 
 		@Override
+		public String printX(Void x) {
+			return Util.abort(x);
+		}
+
+		@Override
+		public String printY(Void y) {
+			return Util.abort(y);
+		}
+		
+		@Override
 		public Schema<Ty, En, Sym, Fk, Att> schema() {
 			return schema;
 		}

@@ -1,6 +1,7 @@
 package catdata.aql;
 
 import catdata.Chc;
+import catdata.Triple;
 import catdata.Util;
 
 public class Eq<Ty, En, Sym, Fk, Att, Gen, Sk> {
@@ -57,5 +58,8 @@ public class Eq<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return ctx.toString(lhs, rhs);
 	}
 	
+	public final Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> toTriple() {
+		return new Triple<>(ctx, lhs, rhs);
+	}
 	
 }

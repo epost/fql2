@@ -101,7 +101,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 			(new Pair<>(var, t), eq0.second, eq0.third));
 	}
 		
-		AqlOptions strat = new AqlOptions(Util.toMapSafely(options), col);
+		AqlOptions strat = new AqlOptions(options, col);
 		
 		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col));
 		return ret; 
@@ -123,7 +123,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 	public final List<Pair<Object, Pair<Object, Object>>> atts; 
 	public final List<Quad<String, Object, RawTerm, RawTerm>> t_eqs;
 	
-	public final List<Pair<String, String>> options;
+	public final Map<String, String> options;
 
 	@Override
 	public String toString() {
@@ -207,7 +207,9 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		this.p_eqs = new LinkedList(p_eqs);
 		this.atts = new LinkedList(atts);
 		this.t_eqs = new LinkedList(t_eqs);
-		this.options = options;
+		this.options = Util.toMapSafely(options);
+		Util.toMapSafely(fks); //check no dups here rather than wait until eval
+		Util.toMapSafely(atts);	
 	} 
 	
 	

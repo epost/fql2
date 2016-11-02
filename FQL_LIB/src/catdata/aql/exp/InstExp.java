@@ -2,7 +2,7 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 
 import catdata.Chc;
 import catdata.Pair;
@@ -32,14 +32,14 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		public final InstExp<Ty,En1,Sym,Fk1,Att1,Gen,Sk,X,Y> I;
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
-		public final List<Pair<String, String>> options;
+		public final Map<String, String> options;
 		
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Util.union(I.deps(), F.deps());
 		}
 
-		public InstExpSigma(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, List<Pair<String, String>> options) {
+		public InstExpSigma(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
 			I = i;
 			F = f;
 			this.options = options;

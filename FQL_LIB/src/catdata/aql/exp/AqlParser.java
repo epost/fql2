@@ -1,6 +1,7 @@
 package catdata.aql.exp;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +32,8 @@ import catdata.aql.exp.SchExp.SchExpVar;
 import catdata.aql.exp.TransExp.TransExpDelta;
 import catdata.aql.exp.TransExp.TransExpId;
 import catdata.aql.exp.TransExp.TransExpSigma;
+import catdata.aql.exp.TransExp.TransExpSigmaDeltaCounit;
+import catdata.aql.exp.TransExp.TransExpSigmaDeltaUnit;
 import catdata.aql.exp.TransExp.TransExpVar;
 import catdata.aql.exp.TyExp.TyExpEmpty;
 import catdata.aql.exp.TyExp.TyExpSch;
@@ -184,7 +187,7 @@ public class AqlParser {
 			var = ident.map(InstExpVar::new),
 			empty = Parsers.tuple(token("empty"), sch_ref.get()).map(x -> new InstExpEmpty<>(x.b)),
 			sigma = Parsers.tuple(token("sigma"), map_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional())
-			.map(x -> new InstExpSigma(x.b, x.c, x.d == null ? new LinkedList<>() : x.d)),
+			.map(x -> new InstExpSigma(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 			delta = Parsers.tuple(token("delta"), map_ref.lazy(), inst_ref.lazy())
 					.map(x -> new InstExpDelta(x.b, x.c)),			
 			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta);
@@ -201,15 +204,20 @@ public class AqlParser {
 		map_ref.set(ret);
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+//	@SuppressWarnings({"rawtypes", "unchecked"})
 	private static final void transExp() {
 		Parser<TransExp<?,?,?,?,?,?,?,?,?,?,?,?,?>>  
 			var = ident.map(TransExpVar::new),
 			id = Parsers.tuple(token("id"), inst_ref.lazy()).map(x -> new TransExpId<>(x.b)),
 			sigma = Parsers.tuple(token("sigma"), map_ref.lazy(), trans_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
-			.map(x -> new TransExpSigma(x.b, x.c, x.d == null ? new LinkedList<>() : x.d, x.e == null ? new LinkedList<>() : x.e)),
+					.map(x -> new TransExpSigma(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d), x.e == null ? new HashMap<>() : Util.toMapSafely(x.e))),
 			delta = Parsers.tuple(token("delta"), map_ref.lazy(), trans_ref.lazy()).map(x -> new TransExpDelta(x.b, x.c)),
-			ret = Parsers.or(id, transExpRaw(), var, sigma, delta);
+			unit = Parsers.tuple(token("unit"), map_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
+					.map(x -> new TransExpSigmaDeltaUnit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
+			counit = Parsers.tuple(token("counit"), map_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
+					.map(x -> new TransExpSigmaDeltaCounit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
+					
+			ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit);
 		
 		trans_ref.set(ret);
 	}
@@ -488,7 +496,7 @@ public class AqlParser {
 							 		  Util.newIfNull(x.b.a), 
 							 	      Util.newIfNull(x.b.b), 
 							 	      Util.newIfNull(x.b.c),
-						              x.b.d);
+						              Util.toMapSafely(x.b.d));
 			});
 				
 			return ret;	

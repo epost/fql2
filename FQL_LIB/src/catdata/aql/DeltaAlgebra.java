@@ -139,24 +139,16 @@ extends Algebra<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> {
 		return Term.Sk(sk);
 	}
 
-	@Override
-	public String printGen(Pair<En1,X> x) {
-		return printX(x);
-	}
 	
-	@Override
-	public String printSk(Y y) {
-		return printY(y);
-	}
 	
 	@Override
 	public String printY(Y y) {
-		return "[" + alg.reprT(Term.Sk(y)) + "]";
+		return "<" + alg.printY(y) + ">";
 	}
 	
 	@Override
 	public String printX(Pair<En1,X> p) {
-		return "[" + alg.repr(p.second) + "]";
+		return "<" + p.first + " " + alg.printX(p.second) + ">"; // "<" + alg.repr(p.second) + ">";
 	} 
 
 	@Override

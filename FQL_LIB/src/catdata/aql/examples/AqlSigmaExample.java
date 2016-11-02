@@ -83,7 +83,6 @@ public class AqlSigmaExample extends AqlExample {
 			+ "\n"
 			+ "\ninstance J = sigma F I"
 			+ "\n"
-			+ "\n"
 			+ "\ninstance I1 = literal : C {"
 			+ "\n	generators "
 			+ "\n		xa1 : Amphibian"
@@ -110,6 +109,10 @@ public class AqlSigmaExample extends AqlExample {
 			+ "\n} "
 			+ "\n"
 			+ "\ntransform u = sigma F t"
+			+ "\n"
+			+ "\ninstance K = delta F J"
+			+ "\n"
+			+ "\ntransform v = unit F I"
 			+ "\n";
 
 

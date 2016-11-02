@@ -1,6 +1,6 @@
 package catdata.aql;
 
-import java.util.List;
+import java.util.Map;
 
 import catdata.Chc;
 import catdata.Pair;
@@ -18,7 +18,7 @@ public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, 
 	private final Ctx<Sk1, Term<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2>> sks = new Ctx<>();
 	
 	//TODO: this recomputes the instances
-	public SigmaTransform(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h,  List<Pair<String, String>> options1,  List<Pair<String, String>> options2) {
+	public SigmaTransform(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h,  Map<String, String> options1,  Map<String, String> options2) {
 		if (!h.src().schema().equals(f.src)) {
 			throw new RuntimeException("Source of mapping is " + f.src + " but instances are on " + h.src().schema());
 		}

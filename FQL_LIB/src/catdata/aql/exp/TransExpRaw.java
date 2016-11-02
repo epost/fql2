@@ -20,6 +20,7 @@ import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.TransformLiteral;
 
+//TODO aql grobner basis prover
 public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object> {
 	
 	@Override
@@ -36,7 +37,7 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 	
 	public final List<Pair<Object, RawTerm>> gens;		
 	
-	public final List<Pair<String, String>> options;
+	public final Map<String, String> options;
 	 
 	@Override
 	public String toString() {
@@ -92,14 +93,15 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 		return true;
 	}
 
-	//typeside by covariance of read only collections TODO
+	//typeside by covariance of read only collections TODO aql
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public TransExpRaw(InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?> src, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?> dst, List<String> imports, List<Pair<String, RawTerm>> gens, List<Pair<String, String>> options) {
 		this.src = (InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>) src;
 		this.dst = (InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>) dst;
 		this.imports = imports;
 		this.gens = new LinkedList(gens);
-		this.options = options;
+		Util.toMapSafely(this.gens); //do here rather than wait
+		this.options = Util.toMapSafely(options);
 	}
 
 	@Override

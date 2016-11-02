@@ -39,7 +39,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 	public final List<Pair<Object, List<Object>>> fks;
 	public final List<Pair<Object, Triple<String, Object, RawTerm>>> atts;
 	
-	public final List<Pair<String, String>> options;
+	public final Map<String, String> options; //TODO aql do mapexps really need options?
 	
 	//typesafe by covariance of read only collections
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -50,7 +50,10 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		this.ens = new LinkedList(ens);
 		this.fks = new LinkedList(fks);
 		this.atts = new LinkedList(atts);
-		this.options = options;
+		this.options = Util.toMapSafely(options);
+		Util.toMapSafely(this.ens);
+		Util.toMapSafely(this.fks);
+		Util.toMapSafely(this.atts); //do here rather than wait
 	}
 
 	@Override

@@ -31,6 +31,20 @@ public class InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, X>
 extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
+	@Override
+	public String printX(X x) {
+		return "[" + repr(x).toString(Util.voidFn(), g -> printGen.apply(g)) + "]";
+	}
+
+	@Override
+	public String printY(Chc<Sk, Pair<X, Att>> y) {
+		if (y.left) {
+			return "[" + printSk.apply(y.l) + "]";
+		} else {
+			return "[" +  repr(y.r.first).toString(Util.voidFn(), g -> printGen.apply(g)) + "." + y.r.second + "]";
+		}
+	}
+	
 	private final DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp; //may just be on entity side, if java
 	
 	private final Map<En, Set<X>> ens;
@@ -42,11 +56,16 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	private final Schema<Ty, En, Sym, Fk, Att> schema;
 	private final Iterator<X> fresh;
 	
-	public InitialAlgebra(AqlOptions ops, Schema<Ty, En, Sym, Fk, Att> schema, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, Iterator<X> fresh) {
+	public final Function<Gen, String> printGen;
+	public final Function<Sk, String> printSk;
+	
+	public InitialAlgebra(AqlOptions ops, Schema<Ty, En, Sym, Fk, Att> schema, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, Iterator<X> fresh, Function<Gen, String> printGen, Function<Sk, String> printSk) {
 		ens = Util.newSetsFor(schema.ens);
 		this.col = col;
 		this.schema = schema;
 		this.fresh = fresh;
+		this.printGen = printGen;
+		this.printSk = printSk;
 		
 		if (schema.typeSide.java_tys.isEmpty()) {
 			dp = AqlProver.create(ops, col);
@@ -420,19 +439,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	}
 	
 	
-	@Override
-	public String printX(X x) {
-		return repr(x).toString();
-	}
 	
-	@Override
-	public String printY(Chc<Sk, Pair<X, Att>> y) {
-		if (y.left) {
-			return y.l.toString();
-		} else {
-			return printX(y.r.first) + "." + y.r.second;
-		}
-	}
 
 	/*@Override
 	public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {

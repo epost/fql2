@@ -17,13 +17,14 @@ import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
 import catdata.aql.Ctx;
+import catdata.aql.Eq;
 import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
 
 //TODO: add shortcuts to editor
-//TODO: syntax coloring
+
 //TODO quoting (reuse example maker?)
 public final class TyExpRaw extends TyExp<Object, Object> {
 
@@ -41,7 +42,11 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 	public final Set<Pair<Object, String>> java_parser_string;
 	public final Set<Pair<Object, Triple<List<Object>, Object, String>>> java_fns_string;
 
-	public final Set<Pair<String, String>> options;
+	public final Map<String, String> options;
+	private AqlOptions strat;
+	
+	private Set<Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>>> eqs0 = new HashSet<>();
+
 
 	// typesafe by covariance of read-only collections
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -53,7 +58,27 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 		this.java_tys_string = new HashSet(java_tys_string);
 		this.java_parser_string = new HashSet(java_parser_string);
 		this.java_fns_string = new HashSet(java_fns_string);
-		this.options = new HashSet<>(options);
+		this.options = Util.toMapSafely(options);
+		
+		col.tys.addAll(types);
+		col.syms.putAll(Util.toMapSafely(this.functions));
+		col.java_tys.putAll(Util.toMapSafely(this.java_tys_string));
+		col.tys.addAll(col.java_tys.keySet());
+		col.java_parsers.putAll(Util.toMapSafely(this.java_parser_string));
+		
+		for (Entry<Object, Triple<List<Object>, Object, String>> kv : Util.toMapSafely(this.java_fns_string).entrySet()) {
+			col.syms.put(kv.getKey(), new Pair<>(kv.getValue().first, kv.getValue().second));
+			col.java_fns.put(kv.getKey(), kv.getValue().third);
+		}
+
+		for (Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq : this.eqs) {
+			Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> tr = inferEq(col, eq);
+			col.eqs.add(new Eq<>(tr.first.inLeft(), tr.second, tr.third));
+			eqs0.add(tr);
+		}
+
+		strat = new AqlOptions(Util.toMapSafely(options), col);
+
 	}
 
 	@Override
@@ -127,41 +152,22 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 	public String toString() {
 		return "RawTypeSide [imports=" + imports + ", types=" + types + ", functions=" + functions + ", eqs=" + eqs + ", java_tys_string=" + java_tys_string + ", java_parser_string=" + java_parser_string + ", java_fns_string=" + java_fns_string + ", options=" + options + "]";
 	}
+	
+	private final Collage<Object, Void, Object, Void, Void, Void, Void> col = new Collage<>();
 
 	@Override
 	public TypeSide<Object, Object> eval(AqlEnv env) {
-		Collage<Object, Void, Object, Void, Void, Void, Void> col = new Collage<>();
-
-		col.tys.addAll(types);
-		col.syms.putAll(Util.toMapSafely(functions));
-		col.java_tys.putAll(Util.toMapSafely(java_tys_string));
-		col.tys.addAll(col.java_tys.keySet());
-		col.java_parsers.putAll(Util.toMapSafely(java_parser_string));
-
-		for (Entry<Object, Triple<List<Object>, Object, String>> kv : Util.toMapSafely(java_fns_string).entrySet()) {
-			col.syms.put(kv.getKey(), new Pair<>(kv.getValue().first, kv.getValue().second));
-			col.java_fns.put(kv.getKey(), kv.getValue().third);
-		}
-
-		Set<Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>>> eqs0 = new HashSet<>();
-
 		for (String k : imports) {
 			TypeSide<Object, Object> v = env.getTypeSide(k);
 			col.tys.addAll(v.tys);
 			col.syms.putAll(v.syms.map);
-			eqs0.addAll(v.eqs);
+			col.addEqs(v.eqs);
 			col.java_tys.putAll(v.java_tys.map);
 			col.java_fns.putAll(v.java_fns.map);
 			col.java_parsers.putAll(v.java_parsers.map);
+			eqs0.addAll(v.eqs);
 		}
-
-		for (Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq : eqs) {
-			Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> tr = inferEq(col, eq);
-			eqs0.add(tr);
-		}
-
-		AqlOptions strat = new AqlOptions(Util.toMapSafely(options), col);
-
+		
 		TypeSide<Object, Object> ret = new TypeSide<>(col.tys, col.syms.map, eqs0, col.java_tys.map, col.java_parsers.map, col.java_fns.map, strat);
 
 		return ret;

@@ -6,14 +6,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -57,7 +53,7 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 //TODO: quoting
 
-//TODO random intances
+//TODO random instances
 
 public final class AqlViewer {
 
@@ -86,9 +82,8 @@ public final class AqlViewer {
 			@SuppressWarnings("unchecked")
 			Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> instance = (Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object>) obj;
 			viewDP(instance.dp(), instance.collage(), ret);
-			Tables<Object, Object, Object, Object, Object, Object, Object> tables = new Tables<>(instance.algebra());
-			ret.add(tables.makeGui(), "Tables");
-			ret.add(new CodeTextPanel("", tables.toString()), "Algebra");
+			ret.add(viewAlgebra(instance.algebra()), "Tables");
+			ret.add(new CodeTextPanel("", instance.algebra().toString()), "Algebra");
 			break;
 		case MAPPING:
 			@SuppressWarnings("unchecked")
@@ -98,8 +93,8 @@ public final class AqlViewer {
 		case TRANSFORM:
 			@SuppressWarnings("unchecked")
 			Transform  <Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> transform = (Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>) obj;
-			TablesTrans<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> tablesTrans = new TablesTrans<>(transform);
-			ret.add(tablesTrans.makeGui(), "Tables");
+		//	TablesTrans<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> tablesTrans = new TablesTrans<>(transform);
+			ret.add(viewTransformAlgebra(transform), "Algebra");
 //			ret.add(new CodeTextPanel("", tablesTrans.toString()), "Algebra");
 
 			break;
@@ -189,7 +184,7 @@ public final class AqlViewer {
 		return ret;
 	}	
 
-	private static <Ty, En, Sym, Fk, Att, Gen, Sk> void viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, JTabbedPane ret) {
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> void viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, JTabbedPane ret) {
 		CodeTextPanel input = new CodeTextPanel("Input", "");
 		CodeTextPanel output = new CodeTextPanel("Output", "");
 
@@ -241,37 +236,25 @@ public final class AqlViewer {
 		ret.addTab("DP", main);
 	}
 	
-	public static class TablesTrans<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> {
 	
-		public final Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
-		
-		public Tables<Ty, En, Sym, Fk, Att, Gen1, Sk1> src; 
-		public Tables<Ty, En, Sym, Fk, Att, Gen2, Sk2> dst;
-		
-		public TablesTrans(Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
-			this.t = t;
-			src = new Tables<>(t.src().algebra());
-			dst = new Tables<>(t.dst().algebra()); //TODO aql recomputes
-		}
-	
-		public Component makeGui() {
+		public static <Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> Component viewTransformAlgebra(Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
 			List<JComponent> list = new LinkedList<>();
 
-			List<En> ens = Util.alphabetical(src.carriers.keySet());
-			List<Ty> tys = Util.alphabetical(src.alg.schema().typeSide.tys);
+			List<En> ens = Util.alphabetical(t.src().schema().ens);
+			List<Ty> tys = Util.alphabetical(t.src().schema().typeSide.tys);
 			
 			for (En en : ens) {
 				List<String> header = new LinkedList<>();
 				header.add("Input");
 				header.add("Output");
-				int n = src.carriers.get(en).size();
+				int n = t.src().algebra().en(en).size();
 				Object[][] data = new Object[n][2];
 				int i = 0;
-				for (Term<Void, En, Void, Fk, Void, Gen1, Void> x : Util.alphabetical(src.carriers.get(en))) {
+				for (X1 x1 : Util.alphabetical(t.src().algebra().en(en))) {
 					Object[] row = new Object[2];
-					row[0] = x.toString(Util.voidFn(), src.alg::printGen);
-					Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> y = t.trans(x.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn()));
-					row[1] = y.toString(dst.alg::printSk, dst.alg::printGen);
+					row[0] = t.src().algebra().printX(x1);
+					X2 x2 = t.repr(x1);
+					row[1] = t.dst().algebra().printX(x2); 
 					data[i] = row;
 					i++;
 				}
@@ -288,12 +271,11 @@ public final class AqlViewer {
 				int n = z.get(ty).size();
 				Object[][] data = new Object[n][2];
 				int i = 0;
-				for (Y1 sk : z.get(ty)) {
-					Term<Ty, En, Sym, Fk, Att, Gen1, Sk1> x = t.src().algebra().reprT(Term.Sk(sk));
+				for (Y1 y1 : z.get(ty)) {
 					Object[] row = new Object[2];
-					row[0] = x.toString(src.alg::printSk, src.alg::printGen);
-					Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> y = t.trans(x); 
-					row[1] = y.toString(dst.alg::printSk, dst.alg::printGen);
+					row[0] = t.src().algebra().printY(y1); 
+					Term<Ty, Void, Sym, Void, Void, Void, Y2> y0 = t.dst().algebra().intoY(t.reprT(y1));
+					row[1] = y0.toString(t.dst().algebra()::printY, Util.voidFn());
 					data[i] = row;
 					i++;
 				}
@@ -302,7 +284,7 @@ public final class AqlViewer {
 
 			return Util.makeGrid(list);
 		}
-	}
+	
 	
 	
 
@@ -319,93 +301,111 @@ public final class AqlViewer {
 	 * } } } }
 	 */
 
-	public static class Tables<Ty, En, Sym, Fk, Att, Gen, Sk> {
-		public Map<En, Collection<Term<Void, En, Void, Fk, Void, Gen, Void>>> carriers = new HashMap<>();
-		public Map<Fk, Map<Term<Void, En, Void, Fk, Void, Gen, Void>, Term<Void, En, Void, Fk, Void, Gen, Void>>> fks = new HashMap<>();
-		public Map<Att, Map<Term<Void, En, Void, Fk, Void, Gen, Void>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> atts = new HashMap<>();
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Component viewAlgebra(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+		List<JComponent> list = new LinkedList<>();
 
-		public Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, ?, ?> alg;
+		List<En> ens = Util.alphabetical(alg.schema().ens);
+		List<Ty> tys = Util.alphabetical(alg.schema().typeSide.tys);
 
-		public <X, Y> Tables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
-			this.alg = alg;
-			for (En en : alg.schema().ens) {
-				carriers.put(en, alg.en(en).stream().map(alg::repr).collect(Collectors.toList()));
-			}
+		for (En en : ens) {
+			List<Att> atts0 = Util.alphabetical(alg.schema().attsFrom(en));
+			List<Fk> fks0 = Util.alphabetical(alg.schema().fksFrom(en));
 
-			for (Fk fk : alg.schema().fks.keySet()) {
-				Map<Term<Void, En, Void, Fk, Void, Gen, Void>, Term<Void, En, Void, Fk, Void, Gen, Void>> m = new HashMap<>();
-				for (X x : alg.en(alg.schema().fks.get(fk).first)) {
-					m.put(alg.repr(x), alg.repr(alg.fk(fk, x)));
+			List<String> header = Util.append(Util.toString(atts0), Util.toString(fks0));
+			header.add(0, "ID");
+			int n = alg.en(en).size();
+			Object[][] data = new Object[n][];
+			int i = 0;
+			for (X x : Util.alphabetical(alg.en(en))) {
+				List<String> row = new LinkedList<>();
+				row.add(alg.printX(x));
+				for (Att att0 : atts0) {
+					row.add(alg.att(att0, x).toString(alg::printY, Util.voidFn()));
 				}
-				fks.put(fk, m);
-			}
-
-			for (Att att : alg.schema().atts.keySet()) {
-				Map<Term<Void, En, Void, Fk, Void, Gen, Void>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> m = new HashMap<>();
-				for (X x : alg.en(alg.schema().atts.get(att).first)) {
-					m.put(alg.repr(x), alg.reprT(alg.att(att, x)));
+				for (Fk fk0 : fks0) {
+					row.add(alg.printX(alg.fk(fk0, x)));
 				}
-				atts.put(att, m);
+				data[i] = row.toArray();
+				i++;
 			}
+			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), en + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
+		}
+		Map<Ty, Set<Y>> m = Util.revS(alg.talg().sks.map);
+		for (Ty ty : tys) {
+			if (!m.containsKey(ty)) {
+				continue;
+			}
+			List<String> header = Util.singList("ID");
+			int n = m.get(ty).size();
+			Object[][] data = new Object[n][1];
+			int i = 0;
+			for (Y x : Util.alphabetical(m.get(ty))) {
+				Object[] row = new Object[1];
+				row[0] = alg.printY(x);				
+				data[i] = row;
+				i++;
+			}
+			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
+	
 		}
 
-		@Override
-		public String toString() {
-			String ret = "----- entity algebra\n\n";
-
-			ret = "carriers\n\t";
-			ret += Util.sep(alg.schema().ens.stream().map(x -> x + " -> {" + Util.sep(carriers.get(x), ", ") + "}").collect(Collectors.toList()), "\n\t");
-
-			ret += "\n\nforeign keys";
-			for (Fk fk : alg.schema().fks.keySet()) {
-				ret += "\n\t" + fk + " -> {" + Util.sep(fks.get(fk).keySet().stream().map(x -> "(" + x + ", " + fks.get(fk).get(x) + ")").collect(Collectors.toList()), ", ") + "}";
-			}
-
-			ret += "\n\nattributes";
-			for (Att att : alg.schema().atts.keySet()) {
-				ret += "\n\t" + att + " -> {" + Util.sep(atts.get(att).keySet().stream().map(x -> "(" + x + ", " + atts.get(att).get(x) + ")").collect(Collectors.toList()), ", ") + "}";
-			}
-
-			ret += "\n\n----- type algebra\n\n";
-			ret += alg.talg().toString();
-
-			ret += "\n\n----- prover\n\n";
-			ret += alg.toStringProver();
-
-			return ret;
-		}
-
-		public Component makeGui() {
-			List<JComponent> list = new LinkedList<>();
-
-			List<En> ens = Util.alphabetical(carriers.keySet());
-
-			for (En en : ens) {
-				List<Att> atts0 = Util.alphabetical(alg.schema().attsFrom(en));
-				List<Fk> fks0 = Util.alphabetical(alg.schema().fksFrom(en));
-
-				List<String> header = Util.append(Util.toString(atts0), Util.toString(fks0));
-				header.add(0, "ID");
-				int n = carriers.get(en).size();
-				Object[][] data = new Object[n][];
-				int i = 0;
-				for (Term<Void, En, Void, Fk, Void, Gen, Void> x : Util.alphabetical(carriers.get(en))) {
-					List<String> row = new LinkedList<>();
-					row.add(x.toString(Util.voidFn(), alg::printGen));
-					for (Att att0 : atts0) {
-						row.add(atts.get(att0).get(x).toString(alg::printSk, alg::printGen));
-					}
-					for (Fk fk0 : fks0) {
-						row.add(fks.get(fk0).get(x).toString(Util.voidFn(), alg::printGen));
-					}
-					data[i] = row.toArray();
-					i++;
-				}
-				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), en + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
-			}
-
-			return Util.makeGrid(list);
-		}
+		return Util.makeGrid(list);
 	}
+
+/*
+	public static <Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> Component viewTransform(Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
+		List<JComponent> list = new LinkedList<>();
+
+		List<En> ens = Util.alphabetical(t.src().schema().ens);
+		List<Ty> tys = Util.alphabetical(t.src().schema().typeSide.tys);
+		
+		 Map<En,Set<Gen1>> m = Util.revS(t.src().gens().map); 
+		
+		for (En en : ens) {
+			if (!m.containsKey(en)) {
+				continue;
+			}
+			List<String> header = new LinkedList<>();
+			header.add("Input");
+			header.add("Output");
+			int n = m.get(en).size();
+			Object[][] data = new Object[n][2];
+			int i = 0;
+			for (Gen1 gen1 : Util.alphabetical(m.get(en)))) {
+				Object[] row = new Object[2];
+				row[0] = t.src().algebra().printX(x1);
+				X2 x2 = t.repr(x1);
+				row[1] = t.dst().algebra().printX(x2); 
+				data[i] = row;
+				i++;
+			}
+			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), en + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
+		}
+		Map<Ty,Set<Y1>> z = Util.revS(t.src().algebra().talg().sks.map);
+		for (Ty ty : tys) {
+			List<String> header = new LinkedList<>();
+			header.add("Input");
+			header.add("Output");
+			if (!z.containsKey(ty)) {
+				continue;
+			}
+			int n = z.get(ty).size();
+			Object[][] data = new Object[n][2];
+			int i = 0;
+			for (Y1 y1 : z.get(ty)) {
+				Object[] row = new Object[2];
+				row[0] = t.src().algebra().printY(y1); 
+				Term<Ty, Void, Sym, Void, Void, Void, Y2> y0 = t.dst().algebra().intoY(t.reprT(y1));
+				row[1] = y0.toString(t.dst().algebra()::printY, Util.voidFn());
+				data[i] = row;
+				i++;
+			}
+			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
+		}
+
+		return Util.makeGrid(list);
+	}
+*/
+	
 
 }

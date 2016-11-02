@@ -2,7 +2,7 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 
 import catdata.Chc;
 import catdata.Pair;
@@ -10,11 +10,15 @@ import catdata.Util;
 import catdata.aql.Ctx;
 import catdata.aql.DeltaTransform;
 import catdata.aql.IdentityTransform;
+import catdata.aql.Instance;
+import catdata.aql.Mapping;
+import catdata.aql.SigmaDeltaCounitTransform;
+import catdata.aql.SigmaDeltaUnitTransform;
 import catdata.aql.SigmaTransform;
 import catdata.aql.Transform;
+import catdata.aql.exp.InstExp.InstExpDelta;
 import catdata.aql.exp.InstExp.InstExpLit;
 import catdata.aql.exp.InstExp.InstExpSigma;
-import catdata.aql.exp.InstExp.InstExpDelta;
 
 public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends Exp<Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2>> {
 
@@ -27,6 +31,171 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 	     Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx, 
 	     Ctx<String, Pair<InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>,  InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>>> ctx1);
 
+	///////////////////////////////////////////////////////////////////////////////////////
+	
+	public static class TransExpSigmaDeltaCounit<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
+	extends TransExp<Ty, En2, Sym, Fk2, Att2, Pair<En1, X>, Y, Gen, Sk, GUID, Chc<Y, Pair<GUID, Att2>>, X, Y> {
+
+		public final MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F; 
+		public final InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> I;
+		public final Map<String, String> options;
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			return result;
+		}
+		
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TransExpSigmaDeltaCounit<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpSigmaDeltaCounit<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			return true;
+		}
+
+		public TransExpSigmaDeltaCounit(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> i, Map<String, String> options) {
+			F = f;
+			I = i;
+			this.options = options;
+		}
+
+		@Override
+		public SigmaDeltaCounitTransform<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> eval(AqlEnv env) {
+			return new SigmaDeltaCounitTransform<>(F.eval(env), I.eval(env), options);
+		}
+
+		@Override
+		public String toString() {
+			return "counit " + F + " " + I;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(F.deps(), I.deps());
+		}
+
+		@Override
+		public Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Pair<En1, X>, Y, GUID, Chc<Y, Pair<GUID, Att2>>>, 
+		            InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
+				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
+			SchExp<Ty, En2, Sym, Fk2, Att2> x = I.type(ctx0, ctx);
+			//TODO aql schema equality
+			if (!x.equals(F.type(ctx0).second)) {
+				throw new RuntimeException("In " + this + ", mapping codomain is " + F.type(ctx0).second + " but instance schema is " + x);
+			}
+			return new Pair<>(new InstExpSigma<>(F, new InstExpDelta<>(F, I), options), I);
+		}
+		
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////
+	
+	public static final class TransExpSigmaDeltaUnit<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen, Sk, X, Y> 
+	extends TransExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, Pair<En1, GUID>, Chc<Sk,Pair<GUID,Att2>>, X, Y, Pair<En1, GUID>, Chc<Sk,Pair<GUID,Att2>>> { 
+		
+		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
+		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
+
+		public final Map<String, String> options;
+
+		public TransExpSigmaDeltaUnit(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
+			F = f;
+			I = i;
+			this.options = options;
+		}
+		
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TransExpSigmaDeltaUnit<?,?,?,?,?,?,?,?,?,?,?,?,?,?> other = (TransExpSigmaDeltaUnit<?,?,?,?,?,?,?,?,?,?,?,?,?,?>) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			return true;
+		}	
+		
+		@Override
+		public Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y>, 
+		InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, GUID>, Chc<Sk, Pair<GUID, Att2>>, Pair<En1, GUID>, Chc<Sk, Pair<GUID, Att2>>>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
+				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
+			SchExp<Ty, En1, Sym, Fk1, Att1> x = I.type(ctx0, ctx);
+			//TODO aql schema equality
+			if (!x.equals(F.type(ctx0).first)) {
+				throw new RuntimeException("In " + this + ", mapping domain is " + F.type(ctx0).first + " but instance schema is " + x);
+			}
+			return new Pair<>(I,new InstExpDelta<>(F, new InstExpSigma<>(F, I, options)));
+		}
+
+		@Override
+		public SigmaDeltaUnitTransform<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> eval(AqlEnv env) {
+			return new SigmaDeltaUnitTransform<>(F.eval(env), I.eval(env), options);
+		}
+
+		@Override
+		public String toString() {
+			return "unit " + F + " " + I;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(F.deps(), I.deps());
+		}
+			
+	}
+
 
 	///////////////////////////////////////////////////////////////////////////////////////
 	
@@ -36,9 +205,9 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
 		public final TransExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
 
-		public final List<Pair<String, String>> options1, options2;		
+		public final Map<String, String> options1, options2;		
 		
-		public TransExpSigma(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F, TransExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t, List<Pair<String, String>> options1, List<Pair<String, String>> options2) {
+		public TransExpSigma(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F, TransExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t, Map<String, String> options1, Map<String, String> options2) {
 			this.F = F;
 			this.t = t;
 			this.options1 = options1;
@@ -94,7 +263,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		            InstExp<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2, GUID,Chc<Sk2,Pair<GUID,Att2>>>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
 				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
 			Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, X1, Y1>, InstExp<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, X2, Y2>> x = t.type(ctx0, ctx, ctx1);
-			//TODO schema equality
+			//TODO aql schema equality
 			if (!x.first.type(ctx0, ctx).equals(F.type(ctx0).first)) {
 				throw new RuntimeException("In " + this + ", mapping domain is " + F.type(ctx0).first + " but transform domain schema is " + x.first.type(ctx0, ctx));
 			}
@@ -167,7 +336,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, X1>, Y1, Pair<En1, X1>, Y1>, InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, X2>, Y2, Pair<En1, X2>, Y2>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
 				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
 			Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, X1, Y1>, InstExp<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2, X2, Y2>> x = t.type(ctx0, ctx, ctx1);
-			//TODO schema equality
+			//TODO aql schema equality
 			if (!x.first.type(ctx0, ctx).equals(F.type(ctx0).second)) {
 				throw new RuntimeException("In " + this + ", mapping codomain is " + F.type(ctx0).second + " but transform domain schema is " + x.first.type(ctx0, ctx));
 			}

@@ -1,5 +1,12 @@
 package catdata.aql.examples;
 
+import java.util.HashMap;
+
+import org.codehaus.jparsec.Parsers;
+
+import catdata.Util;
+import catdata.aql.exp.TransExp.TransExpSigmaDeltaUnit;
+
 public class AqlDeltaExample extends AqlExample {
 
 	@Override
@@ -83,6 +90,10 @@ public class AqlDeltaExample extends AqlExample {
 			+ "\n}"
 			+ "\n"
 			+ "\ntransform h0 = delta F h"
+			+ "\n"
+			+ "\ninstance sigmadeltaFJ = sigma F deltaFJ"
+			+ "\n"
+			+ "\ntransform u = counit F J"
 			+ "\n";
 
 

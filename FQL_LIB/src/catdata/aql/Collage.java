@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,14 +24,14 @@ import catdata.Util;
 // syms can go back to Chc from Chc3, but att still needs Chc3
 import catdata.algs.kb.KBExp;
 
-//TODO: validate?
+//TODO: aql validate collage
 public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
-	// TODO: keep equations segregated?
+	// TODO: aql eep equations segregated?
 
-	// TODO: make this an interface implemented by TypeSide, Schema, Instance?
+	// TODO: aql make this an interface implemented by TypeSide, Schema, Instance?
 
-	// TODO: hang onto the typesides, schemas, instances where came from? factor
+	// TODO: aql hang onto the typesides, schemas, instances where came from? factor
 	// (split into 3 parts) method?
 
 	public final Set<Ty> tys = new HashSet<>();
@@ -48,6 +49,15 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	public final Set<Eq<Ty, En, Sym, Fk, Att, Gen, Sk>> eqs = new HashSet<>();
 
+	public void addEqs(Collection<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> set) {
+		for (Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq : set) {
+			eqs.add(new Eq<>(eq.first.inLeft(), upgradeTypeSide(eq.second), upgradeTypeSide(eq.third)));
+		}
+	}
+	public Set<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqsAsTriples() {
+		return eqs.stream().map(Eq::toTriple).collect(Collectors.toSet());
+	}
+	
 	public Collage() {
 		// TODO add validator in constructor
 	}
@@ -97,17 +107,17 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		this.sks.putAll(instance.sks);
 		this.eqs.addAll(instance.eqs.stream().map(x -> new Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>(new Ctx<>(), x.first, x.second)).collect(Collectors.toSet()));
 	}
-
+*/
 	@SuppressWarnings("unchecked")
 	private Term<Ty, En, Sym, Fk, Att, Gen, Sk> upgradeTypeSide(Term<Ty, Void, Sym, Void, Void, Void, Void> term) {
 		return (Term<Ty, En, Sym, Fk, Att, Gen, Sk>) term;
 	}
-
+/*
 	@SuppressWarnings("unchecked")
 	private Term<Ty, En, Sym, Fk, Att, Gen, Sk> upgradeSchema(Term<Ty, En, Sym, Fk, Att, Void, Void> term) {
 		return (Term<Ty, En, Sym, Fk, Att, Gen, Sk>) term;
 	}
-*/
+	*/
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -229,9 +239,6 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return toString;
 	}
 
-	
-	
-	
 	private Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplified_pair;
 
 	public synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify() {
@@ -247,8 +254,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		return simplified_pair;
 	}
-	
-	
+
 
 	private synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify0() throws InterruptedException {
 	Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified = new Collage<>(this);
@@ -415,7 +421,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	// return simplify().first.eqs.isEmpty();
 	// }
 
-	// TODO consistent extension
+	// TODO aql consistent extension
 
 	public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> reduce() {
 		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> ret = new Collage<>(this);
@@ -469,7 +475,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		Set<Chc<Ty, En>> sorts = new HashSet<>();
 		sorts.addAll(Chc.inLeft(new LinkedList<>(tys)));
-		sorts.addAll(Chc.inRight(new LinkedList<>(ens))); // TODO
+		sorts.addAll(Chc.inRight(new LinkedList<>(ens))); // TODO aql
 
 		toKB = new Triple<>(theory, signature, sorts);
 		return toKB;
@@ -506,9 +512,6 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			}
 		}
 		
-		 //TODO: weaker condition: ok if for all sorts s and s', that s' is non-empty in context with s
-
-		//TODO: are empty sorts ok for program?
 		if (!m.isEmpty()) {
 			List<String> l = m.stream().map(Chc::toStringMash).collect(Collectors.toList());
 			throw new RuntimeException("Sorts " + Util.sep(l, ", ") + " have no 0-ary constants.  (Perhaps you meant to set allow_empty_sorts_unsafe=true?)");
