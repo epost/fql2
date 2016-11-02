@@ -236,6 +236,11 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		toString += "\nequations";
 		toString += "\n\t" + Util.sep(eqs0, "\n\t");
 
+/*		if (list != null) {
+			toString += "\ndefinitions";
+			toString += "\n\t" + Util.sep(list, ",");	
+		} */
+		
 		return toString;
 	}
 
@@ -256,10 +261,12 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 
 
+	private List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list;
+	
 	private synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify0() throws InterruptedException {
-	Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified = new Collage<>(this);
-		List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list = new LinkedList<>();
-		while (simplified.simplify1(list));
+		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified = new Collage<>(this);
+		list = new LinkedList<>();
+		while (simplify1(simplified, list));
 
 		Iterator<Eq<Ty, En, Sym, Fk, Att, Gen, Sk>> it = simplified.eqs.iterator();
 		while (it.hasNext()) {
@@ -271,7 +278,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				it.remove();
 			}
 		}
-
+		
 		Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> translator = term -> {
 			for (Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> t : list) {
 				term = term.replaceHead(t.first, t.second, t.third);
@@ -280,15 +287,14 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		};
 
 		simplified.simplified_pair = new Pair<>(simplified, x -> x);
-
 		return new Pair<>(simplified, translator);
 	}
 
-	private boolean simplify1(List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list) {
-		for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : eqs) {
-			if (simplify2(eq.ctx, eq.lhs, eq.rhs, list)) {
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk> boolean simplify1(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified, List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list) {
+		for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : simplified.eqs) {
+			if (simplify2(simplified, eq.ctx, eq.lhs, eq.rhs, list)) {
 				return true;
-			} else if (simplify2(eq.ctx, eq.lhs, eq.rhs, list)) {
+			} else if (simplify2(simplified, eq.ctx, eq.rhs, eq.lhs, list)) {
 				return true;
 			}
 		}
@@ -311,7 +317,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return term.obj != null || java_fns.containsKey(term.sym);
 	} */
 
-	private boolean simplify2(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs, Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs, List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list) {
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk> boolean simplify2(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified, Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs, Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs, List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list) {
 		if (lhs.var != null || lhs.obj != null) {
 			return false;
 		}
@@ -327,13 +333,13 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		Set<Eq<Ty, En, Sym, Fk, Att, Gen, Sk>> neweqs = new HashSet<>();
 
 		if (!rhs.contains(head)) {
-			remove(head);
-			for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : eqs) {
-				list.add(new Triple<>(head, vars, rhs));
+			simplified.remove(head);
+			list.add(new Triple<>(head, vars, rhs));
+			for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : simplified.eqs) {
 				neweqs.add(new Eq<>(eq.ctx, eq.lhs.replaceHead(head, vars, rhs), eq.rhs.replaceHead(head, vars, rhs)));
 			}
-			eqs.clear();
-			eqs.addAll(neweqs);
+			simplified.eqs.clear();
+			simplified.eqs.addAll(neweqs);
 			return true;
 		}
 		return false;
@@ -355,7 +361,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 	}
 
-	private List<Var> getVarArgsUnique(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk> List<Var> getVarArgsUnique(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		List<Var> ret = new LinkedList<>();
 		for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : term.args()) {
 			if (arg.var == null) {

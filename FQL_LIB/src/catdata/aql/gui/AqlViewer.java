@@ -77,6 +77,7 @@ public final class AqlViewer {
 			Schema<Object, Object, Object, Object, Object> schema = (Schema<Object, Object, Object, Object, Object>) obj;
 			ret.add(viewSchema(schema), "Graph");
 			ret.add(viewDP(schema.dp(), schema.collage()), "DP");
+		//	ret.add(new CodeTextPanel("", schema.collage().toString()), "Temp");
 			break;
 		case INSTANCE:
 			@SuppressWarnings("unchecked")

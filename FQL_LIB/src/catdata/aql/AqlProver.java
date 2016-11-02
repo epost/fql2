@@ -42,7 +42,6 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	
 	
 	public static enum ProverName {
-	
 		auto,
 		saturated,
 		monoidal,
@@ -51,9 +50,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		congruence,
 		fail,
 		free,
-		precomputed;
-		
-		
+		precomputed;		
 	}
 	
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> DP<Ty, En, Sym, Fk, Att, Gen, Sk> 
@@ -79,7 +76,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 					throw new RuntimeException("Anomaly: please report");
 				case precomputed:
 					@SuppressWarnings("unchecked")
-					DP<Ty, En, Sym, Fk, Att, Gen, Sk> ret = (DP<Ty, En, Sym, Fk, Att, Gen, Sk>) ops.get(AqlOption.precomputed);
+					DP<Ty, En, Sym, Fk, Att, Gen, Sk> ret = (DP<Ty, En, Sym, Fk, Att, Gen, Sk>) ops.get(AqlOption.precomputed); //TODO aql remove precomputed
 					return ret;
 				case fail: 
 					return wrap(col1, x -> { throw new RuntimeException(); }, new FailProver<>());
@@ -131,14 +128,8 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (col.isGround()) {
 			return ProverName.congruence;
 		} else if (ProgramProver.isProgram(Var.it, col.toKB().first, false)) {
-/*			if (!ops.options.containsKey(AqlOption.allow_empty_sorts_unsafe)) {
-				ops.options.put(AqlOption.allow_empty_sorts_unsafe, true);
-			} */
 			return ProverName.program;
 		} else if (col.isMonoidal()) {
-			/*			if (!ops.options.containsKey(AqlOption.allow_empty_sorts_unsafe)) {
-			ops.options.put(AqlOption.allow_empty_sorts_unsafe, true);
-		} */
 		return ProverName.monoidal;
 	}
 		throw new RuntimeException("Cannot automatically chose prover: theory is not free, ground, unary, or program.  You must use completion with an explicit precedence.");

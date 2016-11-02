@@ -17,6 +17,7 @@ import catdata.aql.AqlOptions;
 import catdata.aql.AqlProver;
 import catdata.aql.Collage;
 import catdata.aql.Ctx;
+import catdata.aql.Eq;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
@@ -97,9 +98,11 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 				throw new RuntimeException("In " + Util.sep(eq.first, ".") + " = " + Util.sep(eq.second, ".") + ", java constants cannot be used ");
 			}
 
-			eqs0.add(new Triple<Pair<Var, Object>, Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>>
-			(new Pair<>(var, t), eq0.second, eq0.third));
-	}
+			eqs0.add(new Triple<>(new Pair<>(var, t), eq0.second, eq0.third));
+		}
+		for (Triple<Pair<Var, Object>, Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>> eq : eqs0) {
+			col.eqs.add(new Eq<>(new Ctx<>(eq.first).inLeft(), eq.second, eq.third));
+		}
 		
 		AqlOptions strat = new AqlOptions(options, col);
 		

@@ -63,7 +63,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		if (typeSide.java_tys.isEmpty()) {
 			return;
 		}
-		for (Eq<Ty, En, Sym, Fk, Att, Object, Object> eq : collage().simplify().first.eqs) {
+		for (Eq<Ty, En, Sym, Fk, Att, Object, Object> eq : collage().simplify().first.eqs) { 
 		//	if (!(Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
 				Chc<Ty, En> lhs = collage().type(eq.ctx, eq.lhs); 
 			

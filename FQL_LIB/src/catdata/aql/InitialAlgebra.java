@@ -26,7 +26,11 @@ import catdata.Unit;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
 
-//TODO: merge constants and functions in typesides
+//TODO: aql merge constants and functions in typesides
+
+//TODO: special saturator - rather than use java for typeside, use another prover such as grobner basis
+//Ty = (Nat,0,1,+,*) S = (EqP, EqO) I + EqP decidable implies I decidable 
+//works for any  commutative ring. problem: Eq0 not decidable by grobner
 public class InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, X> 
 extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
