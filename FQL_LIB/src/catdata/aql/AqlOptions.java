@@ -23,20 +23,21 @@ public final class AqlOptions {
 
 	public static enum AqlOption {
 	
-		//TODO number of cores
+		//TODO aql number of cores
 		
-		//TODO: each typeside/instance/etc should make sure only appropriate options are given to it
+		//TODO: aql each typeside/instance/etc should make sure only appropriate options are given to it
 		
 		completion_precedence,
 		completion_sort,
 		completion_compose,
 		completion_filter_subsumed,
 		completion_syntactic_ac,
-		precomputed,
-		allow_java_eqs_unsafe,
-		require_consistency, //TODO: enforce
+//		precomputed,
+		allow_java_eqs_unsafe, //TODO aql enforce
+		require_consistency, //TODO: aql enforce require_consistency
 		timeout, 
 		dont_verify_is_appropriate_for_prover_unsafe,
+		dont_validate_unsafe,
 		prover;
 		
 			
@@ -86,15 +87,15 @@ public final class AqlOptions {
 	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(ProverName name, Object ob) {
 		options = new HashMap<>();
 		options.put(AqlOption.prover, name);
-		options.put(AqlOption.precomputed, ob);
+//		options.put(AqlOption.precomputed, ob);
 	}
 	
 	public static String printDefault() {
 		List<String> l = new LinkedList<>();
 		for (AqlOption option : AqlOption.values()) {
-			if (option.equals(AqlOption.precomputed)) {
-				continue;
-			}
+			//if (option.equals(AqlOption.precomputed)) {
+			//	continue;
+			//}
 			l.add(option + " = " + getDefault(option));
 		}
 		return Util.sep(l, "\n\t");
@@ -107,10 +108,12 @@ public final class AqlOptions {
 			return false;
 		case completion_precedence:
 			return null;
-		case precomputed:
-			throw new RuntimeException("Anomaly: please report");
+		//case precomputed:
+			//throw new RuntimeException("Anomaly: please report");
 		case prover:
 			return ProverName.auto;
+		case dont_validate_unsafe:
+			return false;
 		case require_consistency: 
 			return false;
 		case timeout:
@@ -130,48 +133,48 @@ public final class AqlOptions {
 	}
 	
 	//TODO aql
+	/**
+	 * 
+	 * @param map
+	 * @param col possibly null
+	 */ 
 	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(Map<String, String> map, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col) {
 		options = new HashMap<>();
 		for (String key : map.keySet()) {
 			AqlOption op = AqlOption.valueOf(key);
-			Object ob = null;
-			switch (op) {
-			case allow_java_eqs_unsafe:
-				ob = op.getBoolean(map);
-				break;
-			case completion_precedence:
-				ob = AqlOption.getPrec(map.get(op.toString()), col);
-				break;
-			case prover:
-				ob = op.getDPName(map);
-				break;
-			case require_consistency:
-				ob = op.getBoolean(map);
-				break;
-			case timeout:
-				ob = op.getNat(map);
-				break;
-			case dont_verify_is_appropriate_for_prover_unsafe:
-				ob = op.getBoolean(map);
-				break;
-			case precomputed:
-				throw new RuntimeException(op + " option is reserved for AQL compiler");
-			case completion_compose:
-				ob = op.getBoolean(map);
-				break;
-			case completion_filter_subsumed:
-				ob = op.getBoolean(map);
-				break;
-			case completion_sort:
-				ob = op.getBoolean(map);
-				break;
-			case completion_syntactic_ac:
-				ob = op.getBoolean(map);
-				break;
-			}
+			Object ob = getFromMap(map, col, op);
 			options.put(op, ob);
+		}		
+	} 
+
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
+		switch (op) {
+		case allow_java_eqs_unsafe:
+			return op.getBoolean(map);
+		case completion_precedence:
+			return AqlOption.getPrec(map.get(op.toString()), col);
+		case prover:
+			return op.getDPName(map);
+		case require_consistency:
+			return op.getBoolean(map);
+		case timeout:
+			return op.getNat(map);
+		case dont_verify_is_appropriate_for_prover_unsafe:
+			return op.getBoolean(map);
+		case completion_compose:
+			return op.getBoolean(map);
+		case completion_filter_subsumed:
+			return op.getBoolean(map);
+		case completion_sort:
+			return op.getBoolean(map);
+		case completion_syntactic_ac:
+			return op.getBoolean(map);
+		case dont_validate_unsafe:
+			return op.getBoolean(map);
+		default:
+			break;
 		}
-		
+		throw new RuntimeException("Anomaly: please report");
 	}
 
 	/*

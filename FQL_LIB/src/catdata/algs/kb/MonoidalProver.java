@@ -43,7 +43,7 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 			rules.add(new Pair<>(trans(eq.first, eq.second), trans(eq.first, eq.third)));
 		}
 //		System.out.println(rules);
-		kb = new SemiThue<>(rules, 8000); //TODO
+		kb = new SemiThue<>(rules, -1); 
 		kb.complete();
 	//	System.out.println(kb);
 	}

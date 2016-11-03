@@ -23,14 +23,6 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			return semantics;
 		}
 		
-		for (Triple<Pair<Var, En1>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>> eq : src.eqs) {
-			Pair<Var, Chc<Ty,En2>> ctx = new Pair<>(eq.first.first, Chc.inRight(ens.get(eq.first.second)));
-			Term<Ty, En2, Sym, Fk2, Att2, Void, Void> lhs = trans(eq.second), rhs = trans(eq.third);
-			boolean ok = dst.dp.eq(new Ctx<>(ctx), lhs, rhs);
-			if (!ok) {
-				throw new RuntimeException("Equation " + eq.second + " = " + eq.third + " translates to " + lhs + " = " + rhs + ", which is not provable");
-			}
-		}
 		semantics = new Morphism<Ty,En1,Sym,Fk1,Att1,Void,Void,En2,Sym,Fk2,Att2,Void,Void>() {
 
 			@Override
@@ -137,34 +129,24 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		for (Att att : s.atts.keySet()) {
 			atts.put(att, new Triple<>(new Var("v"), s.atts.get(att).first, Term.Att(att, Term.Var(new Var("v")))));
 		}
-		return new Mapping<>(ens, atts, fks, s, s);
+		return new Mapping<>(ens, atts, fks, s, s, false); //TODO aql dont check eqs in id mapping
 	}
 	
-	public Mapping(Map<En1, En2> ens, Map<Att1, Triple<Var,En2,Term<Ty, En2, Sym, Fk2, Att2, Void, Void>>> atts, Map<Fk1, Pair<En2, List<Fk2>>> fks, Schema<Ty, En1, Sym, Fk1, Att1> src, Schema<Ty, En2, Sym, Fk2, Att2> dst) {
-		if (ens == null) {
-			throw new RuntimeException("Attempt to create mapping with null entity map");
-		} else if (atts == null) {
-			throw new RuntimeException("Attempt to create mapping with null attribute map");
-		} else if (fks == null) {
-			throw new RuntimeException("Attempt to create mapping with null foreign key map");
-		} else if (src == null) {
-			throw new RuntimeException("Attempt to create mapping with null source");
-		} else if (dst == null) {
-			throw new RuntimeException("Attempt to create mapping with null target");
-		}
+	public Mapping(Map<En1, En2> ens, Map<Att1, Triple<Var,En2,Term<Ty, En2, Sym, Fk2, Att2, Void, Void>>> atts, Map<Fk1, Pair<En2, List<Fk2>>> fks, Schema<Ty, En1, Sym, Fk1, Att1> src, Schema<Ty, En2, Sym, Fk2, Att2> dst, boolean doNotCheckEquations) {
+		Util.assertNotNull(ens, atts, fks, src, dst);
 		this.ens = new Ctx<>(ens);
 		this.atts = new Ctx<>(atts);
 		this.fks = new Ctx<>(fks);
 		this.src = src;
 		this.dst = dst;
-		validate();
+		validate(doNotCheckEquations);
 		semantics();
 	}
 
-	public void validate() {
+	public void validate(boolean doNotCheckEquations) {
 		//for each (k,v) in ens/atts/fks, k must be in src and dst must be in target 
 		for (En1 en1 : src.ens) {
-			En2 en2 = ens.get(en1);
+			En2 en2 = ens.map.get(en1);
 			if (en2 == null) {
 				throw new RuntimeException("source entity " + en1 + " has no mapping");
 			}
@@ -173,7 +155,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			}	
 		}
 		for (Att1 att1 : src.atts.keySet()) {
-			Triple<Var, En2, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>> att2 = atts.get(att1);
+			Triple<Var, En2, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>> att2 = atts.map.get(att1);
 			if (att2 == null) {
 				throw new RuntimeException("source attribute " + att1 + " has no mapping");
 			}
@@ -196,7 +178,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			}
 		}
 		for (Fk1 fk1 : src.fks.keySet()) {
-			Pair<En2, List<Fk2>> p = fks.get(fk1);
+			Pair<En2, List<Fk2>> p = fks.map.get(fk1);
 			if (p == null) {
 				throw new RuntimeException("source foreign key " + fk1 + " has no mapping");
 			}
@@ -227,6 +209,17 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		for (Fk1 fk1 : fks.keySet()) {
 			if (!src.fks.containsKey(fk1)) {
 				throw new RuntimeException("there is a mapping for " + fk1 + " which is not a source foreign key");
+			}
+		}
+		
+		if (!doNotCheckEquations) {
+			for (Triple<Pair<Var, En1>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>> eq : src.eqs) {
+				Pair<Var, Chc<Ty,En2>> ctx = new Pair<>(eq.first.first, Chc.inRight(ens.get(eq.first.second)));
+				Term<Ty, En2, Sym, Fk2, Att2, Void, Void> lhs = trans(eq.second), rhs = trans(eq.third);
+				boolean ok = dst.dp.eq(new Ctx<>(ctx), lhs, rhs);
+				if (!ok) {
+					throw new RuntimeException("Equation " + eq.second + " = " + eq.third + " translates to " + lhs + " = " + rhs + ", which is not provable");
+				}
 			}
 		}
 		

@@ -8,16 +8,16 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Ctx;
-import catdata.aql.DeltaTransform;
-import catdata.aql.IdentityTransform;
-import catdata.aql.SigmaDeltaCounitTransform;
-import catdata.aql.SigmaDeltaUnitTransform;
-import catdata.aql.SigmaTransform;
 import catdata.aql.Transform;
+import catdata.aql.It.ID;
 import catdata.aql.exp.InstExp.InstExpDelta;
 import catdata.aql.exp.InstExp.InstExpLit;
 import catdata.aql.exp.InstExp.InstExpSigma;
-import catdata.aql.exp.It.ID;
+import catdata.aql.fdm.DeltaTransform;
+import catdata.aql.fdm.IdentityTransform;
+import catdata.aql.fdm.SigmaDeltaCounitTransform;
+import catdata.aql.fdm.SigmaDeltaUnitTransform;
+import catdata.aql.fdm.SigmaTransform;
 
 
 public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends Exp<Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2>> {

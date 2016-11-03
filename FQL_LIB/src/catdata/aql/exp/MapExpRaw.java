@@ -13,6 +13,8 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
 import catdata.aql.Ctx;
 import catdata.aql.Mapping;
@@ -202,7 +204,9 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			Util.putSafely(atts0, att.first, new Triple<>(new Var(var), dst_att_dom_en, term0));
 		} 
 		
-		Mapping<Object, Object, Object, Object, Object, Object, Object, Object> ret = new Mapping<>(ens0, atts0, fks0, src0, dst0);
+		AqlOptions ops = new AqlOptions(options, null);
+		
+		Mapping<Object, Object, Object, Object, Object, Object, Object, Object> ret = new Mapping<>(ens0, atts0, fks0, src0, dst0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
 		return ret; 
 	}
 

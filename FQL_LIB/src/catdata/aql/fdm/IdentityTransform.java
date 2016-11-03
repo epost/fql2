@@ -1,6 +1,10 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import catdata.Util;
+import catdata.aql.Ctx;
+import catdata.aql.Instance;
+import catdata.aql.Term;
+import catdata.aql.Transform;
 
 public class IdentityTransform<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y> {
 

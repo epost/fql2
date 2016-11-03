@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -6,7 +6,12 @@ import java.util.function.Function;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.exp.It.ID;
+import catdata.aql.Ctx;
+import catdata.aql.Instance;
+import catdata.aql.Mapping;
+import catdata.aql.Term;
+import catdata.aql.Transform;
+import catdata.aql.It.ID;
 
 
 public class SigmaDeltaCounitTransform<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 

@@ -105,7 +105,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 		if (exn != null) {
 			env.exn = exn;
-			//throw exn; TODO: configure behavior, stop on error or not?
+			//throw exn; TODO aql configure behavior, stop on error or not?
 		}
 
 	/*	if (!todo.isEmpty()) {

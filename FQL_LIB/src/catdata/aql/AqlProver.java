@@ -27,6 +27,7 @@ import catdata.algs.kb.MonoidalProver;
 import catdata.algs.kb.ProgramProver;
 import catdata.algs.kb.SaturatedProver;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.InvisibleException;
 
 
 //TODO SQL strategy
@@ -50,7 +51,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		congruence,
 		fail,
 		free,
-		precomputed;		
+//		precomputed;		
 	}
 	
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> DP<Ty, En, Sym, Fk, Att, Gen, Sk> 
@@ -68,16 +69,16 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				if (name.equals(ProverName.auto)) {
 					name = auto(ops, col1.simplify().first);
 				}
-				
+				 
 				//col1.simplify();
 		
 				switch (name) {
 				case auto: 
 					throw new RuntimeException("Anomaly: please report");
-				case precomputed:
-					@SuppressWarnings("unchecked")
-					DP<Ty, En, Sym, Fk, Att, Gen, Sk> ret = (DP<Ty, En, Sym, Fk, Att, Gen, Sk>) ops.get(AqlOption.precomputed); //TODO aql remove precomputed
-					return ret;
+		//		case precomputed:
+		//			@SuppressWarnings("unchecked")
+		//			DP<Ty, En, Sym, Fk, Att, Gen, Sk> ret = (DP<Ty, En, Sym, Fk, Att, Gen, Sk>) ops.get(AqlOption.precomputed); //TODO aql remove precomputed
+		//			return ret;
 				case fail: 
 					return wrap(col1, x -> { throw new RuntimeException(); }, new FailProver<>());
 				case free: 
@@ -113,7 +114,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	       } catch (InterruptedException e) {
 //	    	   e.printStackTrace();
 	    	   future.cancel(true);
-	    	   throw new RuntimeException("Interruption (" + timeout + "s) during decision procedure construction.");
+	    	   throw new InvisibleException("Interruption during decision procedure construction.");
 	       } catch (Throwable e) {
 	    	   e.printStackTrace();
 	    	   throw new RuntimeException(e);
@@ -121,17 +122,18 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	}
 
-	//TODO maybe monoidal is better than program!!
+	//TODO aql add timeout to eq
+	
 	private static <Sk, En, Fk, Ty, Att, Sym, Gen> ProverName auto(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		if (col.eqs.isEmpty()) {
 			return ProverName.free;
 		} else if (col.isGround()) {
 			return ProverName.congruence;
-		} else if (ProgramProver.isProgram(Var.it, col.toKB().first, false)) {
-			return ProverName.program;
 		} else if (col.isMonoidal()) {
-		return ProverName.monoidal;
-	}
+			return ProverName.monoidal;
+		} else if (ProgramProver.isProgram(Var.it, col.toKB().first, false)) {
+			return ProverName.program; //TODO aql perhaps prover should not be enabled as auto choosable because eq can hang for bad systems
+		} 
 		throw new RuntimeException("Cannot automatically chose prover: theory is not free, ground, unary, or program.  You must use completion with an explicit precedence.");
 	}
 

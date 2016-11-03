@@ -17,14 +17,14 @@ import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
 import catdata.aql.Ctx;
 import catdata.aql.Eq;
-import catdata.aql.InitialAlgebra;
 import catdata.aql.Instance;
-import catdata.aql.LiteralInstance;
+import catdata.aql.It;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
-import catdata.aql.exp.It.ID;
-import catdata.aql.exp.It;
+import catdata.aql.It.ID;
+import catdata.aql.fdm.InitialAlgebra;
+import catdata.aql.fdm.LiteralInstance;
 
 
 public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object,Object,Object,ID,Chc<Object,Pair<ID,Object>>> {
@@ -134,7 +134,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 			} else if (col.tys.contains(ty)) {
 				col.sks.put(gen, ty);
 			} else {
-				throw new RuntimeException("The sort for " + gen + ", namely, " + ty + " is not declared as a type or entity");
+				throw new RuntimeException("The sort for " + gen + ", namely " + ty + ", is not declared as a type or entity");
 			}
 		}
 	

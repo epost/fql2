@@ -69,7 +69,7 @@ public class GUI extends JPanel {
 	public static JFrame topFrame;
 
 	@SuppressWarnings("unchecked")
-public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
+	public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
 		topFrame = frame;
 
 		JPanel pan = new JPanel();

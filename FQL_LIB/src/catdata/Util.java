@@ -34,6 +34,26 @@ import javax.swing.table.TableRowSorter;
 
 public class Util {
 	
+	public static <X> List<X> concat(List<List<X>> l) {
+		List<X> ret = new LinkedList<>();
+		for (List<X> x : l) {
+			ret.addAll(x);
+		}
+		return ret;
+	}
+	
+	public static <X> List<X> diff(Collection<X> l, Collection<?> r) {
+		List<X> ret = new LinkedList<>(l);
+		ret.removeAll(r);
+		return ret;
+	}
+	
+	public static <X,Y> Map<X, Y> diff(Map<X, Y> l, Map<?, ?> r) {
+		Map<X, Y> ret = new HashMap<>(l);
+		ret.keySet().removeAll(r.keySet());
+		return ret;
+	}
+	
 	public static <X> Function<Void,X> voidFn() {
 		return v -> {
 			throw new RuntimeException("Anomaly: please report");

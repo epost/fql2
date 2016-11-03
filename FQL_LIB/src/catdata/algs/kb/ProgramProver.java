@@ -12,6 +12,7 @@ import java.util.Set;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.algs.kb.KBExp.KBApp;
+import catdata.InvisibleException;
 
 //TODO
 /*Loosen requirement for program in MVP that are of form
@@ -85,6 +86,9 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 	}
 	
 	protected KBExp<C, V> step(KBExp<C, V> ee) {
+		if (Thread.currentThread().isInterrupted()) {
+			throw new InvisibleException("interrupted in program prover step");
+		}
 		if (ee.isVar) {
 			return step1(ee); 
 		} else {

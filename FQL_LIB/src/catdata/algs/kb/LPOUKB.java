@@ -23,6 +23,7 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.algs.kb.KBExp.KBApp;
 import catdata.algs.kb.KBExp.KBVar;
+import catdata.InvisibleException;
 
 /**
  * 
@@ -339,8 +340,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private void complete() throws InterruptedException {
-		while (!step())
-			;
+		while (!step());
 
 		if (!isCompleteGround) {
 			throw new RuntimeException("Not ground complete after iteration timeout.  Last state:\n\n" + toString());
@@ -1125,7 +1125,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			}
 			throw new RuntimeException("Anomaly: please report");
 		} catch (InterruptedException e1) {
-			throw new RuntimeException(e1);
+			throw new InvisibleException(e1);
 		}
 	}
 

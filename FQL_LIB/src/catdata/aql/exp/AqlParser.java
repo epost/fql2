@@ -67,6 +67,7 @@ public class AqlParser {
 			"equations",
 			"forall", 		
 			"java_types",
+			"multi_equations", //TODO aql colorize multi equations
 			"java_constants",
 			"java_functions",
 			"options",
@@ -487,8 +488,19 @@ public class AqlParser {
 
 			Parser<List<catdata.Pair<RawTerm, RawTerm>>> eqs = Parsers.tuple(token("equations"), eq.many()).map(x -> x.b);
 					
-			Parser<Tuple4<List<String>, List<catdata.Pair<String, String>>, List<catdata.Pair<RawTerm, RawTerm>>, List<catdata.Pair<String, String>>>> 
-			pa = Parsers.tuple(imports, generators.optional(), eqs.optional(), options);
+			Parser<List<catdata.Pair<RawTerm, RawTerm>>> table = Parsers.tuple(ident, token("->"), token("{"), Parsers.tuple(term(), term()).sepBy(token(",")), token("}")).
+					map(x -> {
+						List<catdata.Pair<RawTerm, RawTerm>> ret = new LinkedList<>();
+						for (Pair<RawTerm, RawTerm> y : x.d) {
+							ret.add(new catdata.Pair<>(new RawTerm(x.a, Util.singList(y.a)), y.b));
+						}
+						return ret;
+					});
+			Parser<List<catdata.Pair<RawTerm, RawTerm>>> tables = Parsers.tuple(token("multi_equations"), table.many())
+					.map(x -> Util.concat(x.b));
+			
+			Parser<Tuple5<List<String>, List<catdata.Pair<String, String>>, List<catdata.Pair<RawTerm, RawTerm>>, List<catdata.Pair<RawTerm, RawTerm>>, List<catdata.Pair<String, String>>>> 
+			pa = Parsers.tuple(imports, generators.optional(), eqs.optional(), tables.optional(), options);
 			
 			Parser<Tuple4<Token, Token, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"), sch_ref.lazy(), token("{")); //.map(x -> x.c);
 						
@@ -496,19 +508,21 @@ public class AqlParser {
 				return new InstExpRaw(x.a.c,
 							 		  Util.newIfNull(x.b.a), 
 							 	      Util.newIfNull(x.b.b), 
-							 	      Util.newIfNull(x.b.c),
-						              Util.toMapSafely(x.b.d));
+							 	      new LinkedList<>(Util.union(Util.newIfNull(x.b.c), Util.newIfNull(x.b.d))),
+						              Util.toMapSafely(x.b.e));
 			});
 				
 			return ret;	
 	}
+	 
+	 //TODO aql add example illustrating multiquestions
 
 /*	private static final Parser<PragmaExp> pragmaExp() {
-		return Parsers.fail("pragma parser not implemented yet"); //TODO
+		return Parsers.fail("pragma parser not implemented yet"); //TODO aql pragma
 	} */
 /*	
 	public static final Parser<QueryExp> queryExp() {
-		return Parsers.fail("query parser not implemented yet"); //TODO
+		return Parsers.fail("query parser not implemented yet"); //TODO aql query
 	} */
 	
 	 //TODO: reverse order on arguments env

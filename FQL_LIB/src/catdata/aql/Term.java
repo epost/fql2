@@ -72,20 +72,20 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (var != null) {
 			return asVar();
 		} else if (fk != null) {
-			return fkArg();
+			return asArgForFk();
 		}
 		throw new RuntimeException("Anomaly: please report " + this);
 	}
 	
-	public Term<Void, En, Void, Fk, Void, Gen, Void> fkArg() {
+	public Term<Void, En, Void, Fk, Void, Gen, Void> asArgForFk() {
 		if (fk != null) {
-			return Term.Fk(fk, arg.fkArg());
+			return Term.Fk(fk, arg.asArgForFk());
 		} else if (gen != null) {
 			return asGen();
 		} else if (var != null) {
 			return Term.Var(var);
 		}
-		throw new RuntimeException("Anomaly: please report");
+		throw new RuntimeException("Anomaly: please report " + this);
 	}
 	
 	@SuppressWarnings("hiding")
@@ -174,7 +174,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			} else if (ctxt.containsKey(var)) {
 				ret = Chc.inLeft(ctxt.get(var));
 			} else {
-				throw new RuntimeException("In " + this + ", " + "neither " + ctxt + " nor " + ctxe + " contain " + var);
+				throw new RuntimeException("In " + this + ", " + var + " is not a variable in context [" + ctxt + "] and [" + ctxe + "]");
 			}
 		} else if (obj != null) {
 			Class<?> c = AqlJs.load(java_tys_string.get(ty));

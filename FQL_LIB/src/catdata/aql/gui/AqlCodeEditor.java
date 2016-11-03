@@ -18,6 +18,7 @@ import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.AqlMultiDriver;
 import catdata.aql.exp.AqlParser;
 import catdata.ide.CodeEditor;
+import catdata.ide.GUI;
 import catdata.ide.Language;
 import catdata.ide.Program;
 
@@ -95,6 +96,11 @@ public final class AqlCodeEditor extends
 	protected AqlDisplay makeDisplay(String foo, Program<Exp<? extends Object>> init,
 			AqlEnv env, long start, long middle) {
 			AqlDisplay ret = new AqlDisplay(foo, init, env, start, middle);
+			if (env.exn != null) {
+				GUI.topFrame.toFront();
+//				topArea.requestFocus();
+		//		this.topArea.ge
+			}
 			return ret;
 	}
 

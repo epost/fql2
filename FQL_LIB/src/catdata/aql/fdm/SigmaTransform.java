@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -6,7 +6,12 @@ import java.util.function.Function;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.exp.It.ID;
+import catdata.aql.Ctx;
+import catdata.aql.Instance;
+import catdata.aql.Mapping;
+import catdata.aql.Term;
+import catdata.aql.Transform;
+import catdata.aql.It.ID;
 
 
 public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> extends Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, ID, Chc<Sk1, Pair<ID, Att2>>, ID, Chc<Sk2, Pair<ID, Att2>>>  {
@@ -35,7 +40,7 @@ public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, 
 		for (Sk1 sk1 : src.sks().keySet()) {
 			sks.put(sk1, f.trans(h.sks().get(sk1)));
 		}
-		validate();//TODO aql how to force validation without onerous constructor shenanigans
+		validate(false);//TODO aql how to force validation without onerous constructor shenanigans
 	}
 	
 	@Override

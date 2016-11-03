@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -7,6 +7,13 @@ import java.util.function.Function;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Algebra;
+import catdata.aql.Collage;
+import catdata.aql.Ctx;
+import catdata.aql.DP;
+import catdata.aql.Instance;
+import catdata.aql.Schema;
+import catdata.aql.Term;
 
 public class TerminalInstance<Ty, En, Sym, Fk, Att> extends Instance<Ty, En, Sym, Fk, Att,Void,Void,Void,Void> {
 

@@ -18,14 +18,14 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 	//TODO compose
 	//TODO terminal
 
-	public void validate() {
+	public void validate(boolean dontValidateEqs) {
 		if (!src().schema().equals(dst().schema())) {
 			throw new RuntimeException("Differing instance schemas\n\nsrc " + src().schema() + "\n\ndst " + dst().schema());
 		}
 		//for each (k,v) in gens/fks, k must be in src and dst must be in target 
 			for (Gen1 gen1 : src().gens().keySet()) {
 				En en1 = src().gens().get(gen1);
-				Term<Void, En, Void, Fk, Void, Gen2, Void> gen2 = gens().get(gen1).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn());
+				Term<Void, En, Void, Fk, Void, Gen2, Void> gen2 = gens().map.get(gen1).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn());
 				if (gen2 == null) {
 					throw new RuntimeException("source generator " + gen1 + " has no transform");
 				}
@@ -36,7 +36,7 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 			}
 			for (Sk1 sk1 : src().sks().keySet()) {
 				Ty ty1 = src().sks().get(sk1);
-				Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> sk2 = sks().get(sk1);
+				Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> sk2 = sks().map.get(sk1);
 				if (sk2 == null) {
 					throw new RuntimeException("source labelled null " + sk1 + " has no transform");
 				}
@@ -55,14 +55,16 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 					throw new RuntimeException("there is a transform for " + sk1 + " which is not a source labelled null");
 				}
 			}
-			for (Pair<Term<Ty, En, Sym, Fk, Att, Gen1, Sk1>, Term<Ty, En, Sym, Fk, Att, Gen1, Sk1>> eq : src().eqs()) {
-				Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> lhs = trans(eq.first), rhs = trans(eq.second);
-				boolean ok = dst().dp().eq(new Ctx<>(), lhs, rhs);
-				if (!ok) {
-					throw new RuntimeException("Equation " + eq.first + " = " + eq.second + " translates to " + lhs + " = " + rhs + ", which is not provable");
+			
+			if (!dontValidateEqs) { 
+				for (Pair<Term<Ty, En, Sym, Fk, Att, Gen1, Sk1>, Term<Ty, En, Sym, Fk, Att, Gen1, Sk1>> eq : src().eqs()) {
+					Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> lhs = trans(eq.first), rhs = trans(eq.second);
+					boolean ok = dst().dp().eq(new Ctx<>(), lhs, rhs);
+					if (!ok) {
+						throw new RuntimeException("Equation " + eq.first + " = " + eq.second + " translates to " + lhs + " = " + rhs + ", which is not provable");
+					}
 				}
 			}
-			
 				
 	}
 

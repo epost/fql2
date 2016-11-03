@@ -199,21 +199,25 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	@Override
 	public String toString() {
+		return toString(new Collage<>());
+	}
+
+	public <Ty1, En1, Sym1, Fk1, Att1, Gen1, Sk1> String toString(Collage<Ty1, En1, Sym1, Fk1, Att1, Gen1, Sk1> skip) {
 		String toString = "";
 		toString += "\nfunctions";
 		List<String> temp = new LinkedList<>();
-		for (Sym sym : syms.keySet()) {
+		for (Sym sym : Util.diff(syms.keySet(), skip.syms.keySet())) {
 			Pair<List<Ty>, Ty> t = syms.get(sym);
 			temp.add(sym + " : " + Util.sep(t.first, ", ") + " -> " + t.second);
 		}
 		toString += "\n\t" + Util.sep(temp, "\n\t");
 
 		List<String> fks0 = new LinkedList<>();
-		for (Fk fk : fks.keySet()) {
+		for (Fk fk : Util.diff(fks.keySet(), skip.fks.keySet())) {
 			fks0.add(fk + " : " + fks.get(fk).first + " -> " + fks.get(fk).second);
 		}
 		List<String> atts0 = new LinkedList<>();
-		for (Att att : atts.keySet()) {
+		for (Att att : Util.diff(atts.keySet(), skip.atts.keySet())) {
 			atts0.add(att + " : " + atts.get(att).first + " -> " + atts.get(att).second);
 		}
 
@@ -224,13 +228,13 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		toString += "\n\t" + Util.sep(atts0, "\n\t");
 
 		toString += "\ngenerating entities";
-		toString += "\n\t" + Util.sep(gens.map, " : ", "\n\t");
+		toString += "\n\t" + Util.sep(Util.diff(gens.map, skip.gens.map), " : ", "\n\t");
 
 		toString += "\ngenerating nulls";
-		toString += "\n\t" + Util.sep(sks.map, " : ", "\n\t");
+		toString += "\n\t" + Util.sep(Util.diff(sks.map, skip.sks.map), " : ", "\n\t");
 
 		List<String> eqs0 = new LinkedList<>();
-		for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : eqs) {
+		for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : Util.diff(eqs, skip.eqs)) {
 			eqs0.add(eq.ctx.toString(eq.lhs, eq.rhs));
 		}
 		toString += "\nequations";
@@ -243,7 +247,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		
 		return toString;
 	}
-
+	
 	private Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplified_pair;
 
 	public synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify() {

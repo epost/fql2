@@ -1,9 +1,14 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import java.util.function.Function;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Ctx;
+import catdata.aql.Instance;
+import catdata.aql.Mapping;
+import catdata.aql.Term;
+import catdata.aql.Transform;
 
 public class DeltaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2>
 extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<En1, X1>, Y1, Pair<En1, X2>, Y2, Pair<En1, X1>, Y1, Pair<En1, X2>, Y2> {
@@ -33,7 +38,7 @@ extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<En1, X1>, Y1, Pair<En1, X2>, Y2,
 			sks.put(sk1, h.dst().algebra().intoY(h.reprT(sk1)).map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity()));
 		}
 		
-		validate();
+		validate(false); //TODO aql allow not to validte transform
 	}
 	
 	/* private Term<Ty, Void, Sym, Void, Void, Void, Y2> trans0(Term<Ty, Void, Sym, Void, Void, Void, Y1> term) {

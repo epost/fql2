@@ -62,7 +62,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 			if (term.gen != null) {
 				return nf(term.asGen());
 			} else if (term.fk != null) {
-				return fk(term.fk, nf(term.fkArg()));
+				return fk(term.fk, nf(term.arg.asArgForFk()));
 			}
 			throw new RuntimeException("Anomaly: please report");
 		}
@@ -89,13 +89,11 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 		return x.toString();
 	} 
 	public String printY(Y y) {
-		return y.toString();
+		return y.toString(); 
 	}
 	 */
-	public boolean hasFreeTypeAlgebra() {
-		return talg().simplify().first.eqs.isEmpty();
-	}
 	
+
 
 	//TODO aql visitor cleanup
 	public Term<Ty, En, Sym, Fk, Att, X, Y> trans(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {

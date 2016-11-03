@@ -8,13 +8,13 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Ctx;
-import catdata.aql.DeltaInstance;
 import catdata.aql.Instance;
 import catdata.aql.Mapping;
-import catdata.aql.SigmaInstance;
-import catdata.aql.TerminalInstance;
+import catdata.aql.It.ID;
 import catdata.aql.exp.SchExp.SchExpLit;
-import catdata.aql.exp.It.ID;
+import catdata.aql.fdm.DeltaInstance;
+import catdata.aql.fdm.SigmaInstance;
+import catdata.aql.fdm.TerminalInstance;
 
 public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>> {
 	

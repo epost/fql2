@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -8,8 +8,18 @@ import java.util.function.Function;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.exp.It.ID;
-import catdata.aql.exp.It;
+import catdata.aql.Algebra;
+import catdata.aql.AqlOptions;
+import catdata.aql.Collage;
+import catdata.aql.Ctx;
+import catdata.aql.DP;
+import catdata.aql.Eq;
+import catdata.aql.Instance;
+import catdata.aql.It;
+import catdata.aql.Mapping;
+import catdata.aql.Schema;
+import catdata.aql.Term;
+import catdata.aql.It.ID;
 
 public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
  extends Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID, Chc<Sk, Pair<ID, Att2>>> {

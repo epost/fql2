@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -9,6 +9,15 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Algebra;
+import catdata.aql.Collage;
+import catdata.aql.Ctx;
+import catdata.aql.DP;
+import catdata.aql.Eq;
+import catdata.aql.Instance;
+import catdata.aql.Schema;
+import catdata.aql.Term;
+import catdata.aql.Var;
 
 public class SaturatedInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> 
 extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {

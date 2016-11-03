@@ -12,13 +12,15 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
 import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.Transform;
-import catdata.aql.TransformLiteral;
+import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.fdm.TransformLiteral;
 
 //TODO aql grobner basis prover
 public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object> {
@@ -142,7 +144,10 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 			}
 		}
 		
-		TransformLiteral<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = new TransformLiteral<>(gens0, sks0, src0, dst0);
+		AqlOptions ops = new AqlOptions(options, null);
+		
+		
+		TransformLiteral<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = new TransformLiteral<>(gens0, sks0, src0, dst0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe) );
 		return ret; 
 	}
 

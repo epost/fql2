@@ -38,7 +38,7 @@ public class SemiThue<Y> {
 	
 	/**
 	 * @param rules to be completed. DOES NOT copy, and MUTATES IN PLACE the pairs inside of rules 
-	 * @param max_iterations to run
+	 * @param max_iterations to run (-1 for infinity)
 	 */
 	public SemiThue(Set<Pair<List<Y>, List<Y>>> rules, int max_iterations) {
 		this.rules = rules;
@@ -48,10 +48,9 @@ public class SemiThue<Y> {
 
 	public void complete() { 
 		try {
-			go(rules, iteration, max_iterations);
+			go(rules);
 		} catch (InterruptedException e) {
-			e.printStackTrace();
-			throw new RuntimeException("Interrupted: " + e.getMessage());
+			throw new RuntimeException(e);
 		}
 		finished = true;
 	}
@@ -85,10 +84,7 @@ public class SemiThue<Y> {
 			equivs.put(pair, true);
 			return true;
 		}
-		iteration++;
-		if (iteration > max_iterations) {
-			throw new RuntimeException("Max iterations exceeded: " + max_iterations);
-		}
+		
 		finished = step(rules);
 		return equiv(a, b);
 	}
@@ -110,18 +106,14 @@ public class SemiThue<Y> {
 		}
 	}
 
-	private <X> void go(Set<Pair<List<X>, List<X>>> t, int iteration, int max_iterations) throws InterruptedException {
-		while (!step(t)) {
-			if (iteration++ > max_iterations) {
-				throw new RuntimeException("Max iterations exceeded: " + max_iterations);
-			}
-			if (Thread.currentThread().isInterrupted()) {
-				throw new InterruptedException();
-			}
-		}
+	private <X> void go(Set<Pair<List<X>, List<X>>> t) throws InterruptedException {
+		while (!step(t)); 
 	}
 
 	private <X> boolean step(Set<Pair<List<X>, List<X>>> t) {
+		if (iteration++ > max_iterations && max_iterations != -1) {
+			throw new RuntimeException("Max iterations exceeded: " + max_iterations);
+		}
 		orient(t);
 		normalize(t);
 		Set<Pair<List<X>, List<X>>> ce = cp(t);

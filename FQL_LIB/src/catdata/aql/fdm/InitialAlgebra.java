@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,18 +24,46 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
+import catdata.aql.Algebra;
+import catdata.aql.AqlJs;
+import catdata.aql.AqlOptions;
+import catdata.aql.AqlProver;
+import catdata.aql.Collage;
+import catdata.aql.Ctx;
+import catdata.aql.DP;
+import catdata.aql.Eq;
+import catdata.aql.Head;
+import catdata.aql.Schema;
+import catdata.aql.Term;
+import catdata.aql.TypeSide;
+import catdata.aql.Var;
 import catdata.aql.AqlOptions.AqlOption;
 
 //TODO: aql merge constants and functions in typesides
+//TODO: aql add example that illustrates consistency
+//TODO: aql add example that illustrates novalidate
 
-//TODO: special saturator - rather than use java for typeside, use another prover such as grobner basis
+//TODO aql check java computation etc through delta
+
+//TODO: aql special saturator - rather than use java for typeside, use another prover such as grobner basis
 //Ty = (Nat,0,1,+,*) S = (EqP, EqO) I + EqP decidable implies I decidable 
 //works for any  commutative ring. problem: Eq0 not decidable by grobner
 public class InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, X> 
 extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
+	public boolean hasFreeTypeAlgebra(TypeSide<Ty,Sym> ty) {
+		return talg().eqs.isEmpty();
+	}
 	
+/*
+	private <Y> Collage<Ty, Void, Sym, Void, Void, Void, Y> addTy(TypeSide<Ty, Sym> ty, Collage<Ty, Void, Sym, Void, Void, Void, Y> talg) {
+		Collage<Ty, Void, Sym, Void, Void, Void, Y> ret = new Collage<>(talg);
+		ret.tys.addAll(ty.tys);
+		ret.syms.putAll(ty.syms.map);
+		ret.addEqs(ty.eqs);
+		return ret;
+	} */
 	
 	
 	@Override
@@ -108,14 +136,13 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	       }
 			//TODO figure out how to do this only once but without concurrent modification exception
 			
-		if ((Boolean) ops.getOrDefault(AqlOption.require_consistency) && !hasFreeTypeAlgebra()) {
-			throw new RuntimeException("Not necessarily consistent; simplified type algebra is\n\n" + talg().simplify());
+		if ((Boolean) ops.getOrDefault(AqlOption.require_consistency) && !hasFreeTypeAlgebra(schema.typeSide)) {
+			throw new RuntimeException("Not necessarily consistent; type algebra is\n\n" + talg().toString());
 		}
 		
-		//TODO aql
 		//System.out.println("********* full " + talg_full());
 		//System.out.println("********* simpld " + talg());
-		new SaturatedInstance<>(this, this); //TODO aql is debug option
+		new SaturatedInstance<>(this, this); //TODO aql remove 
 	}
 
 	//TODO is it really safe to do depth first saturation?
@@ -223,7 +250,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	}
 
 	private Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> talg_full() {
-		Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> talg = new Collage<>(schema.typeSide.collage());
+		Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> talg = new Collage<>();
 		for (Sk sk : col.sks.keySet()) {
 			talg.sks.put(Chc.inLeft(sk), col.sks.get(sk));
 		}
@@ -360,9 +387,9 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 			if (eq.lhs.equals(eq.rhs)) {
 				it.remove();
 			}
-		}
+		} 
 
-		talg = new Collage<>(schema().typeSide.collage());
+		talg = new Collage<>();
 		for (Chc<Sk, Pair<X, Att>> sk : sks) {
 			talg.sks.put(sk, talg_full().sks.get(sk));
 		}

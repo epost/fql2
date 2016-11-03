@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,6 +9,11 @@ import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Algebra;
+import catdata.aql.Collage;
+import catdata.aql.Mapping;
+import catdata.aql.Schema;
+import catdata.aql.Term;
 
 public class DeltaAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
 extends Algebra<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> {

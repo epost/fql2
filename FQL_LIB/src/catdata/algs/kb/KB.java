@@ -19,6 +19,7 @@ import catdata.Unit;
 import catdata.Util;
 import catdata.algs.kb.KBExp.KBApp;
 import catdata.algs.kb.KBExp.KBVar;
+import catdata.InvisibleException;
 
 /**
  * 
@@ -67,8 +68,9 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		try {
 			initAC();
 		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-			throw new RuntimeException("Interrupted " + e1.getMessage());
+			throw new InvisibleException(e1);
+//			e1.printStackTrace();
+//			throw new RuntimeException("Interrupted " + e1.getMessage());
 		}
 		initHorn();
 		/* if (isProgram()) {
@@ -310,8 +312,12 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		
 	}
 	
-	public void complete() throws InterruptedException {
+	public void complete() {
+		try {
 			while (!step(null));
+		} catch (InterruptedException ex) {
+			throw new InvisibleException(ex);
+		}
 		if (!isCompleteGround) {
 			throw new RuntimeException("Not ground complete after iteration timeout.  Last state:\n\n" + toString());
 		} 

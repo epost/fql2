@@ -1,8 +1,8 @@
-package catdata.aql.exp;
+package catdata.aql;
 
 import java.util.Iterator;
 
-import catdata.aql.exp.It.ID;
+import catdata.aql.It.ID;
 
 public class It implements Iterator<ID> { 
 	

@@ -47,8 +47,6 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
 					throw new RuntimeException("In instance equation " + toString(eq) + ", lhs sort is " + lhs.toStringMash() + " but rhs sort is " + rhs.toStringMash());
 				}
 			}				
-			
-			
 		}	
 	
 	private String toString(Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq) {

@@ -1,9 +1,17 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import java.util.Set;
 
 import catdata.Chc;
 import catdata.Pair;
+import catdata.aql.Algebra;
+import catdata.aql.Ctx;
+import catdata.aql.DP;
+import catdata.aql.Instance;
+import catdata.aql.Mapping;
+import catdata.aql.Schema;
+import catdata.aql.Term;
+import catdata.aql.Var;
 
 public class DeltaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
 extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y>  
