@@ -293,7 +293,7 @@ public class Relationalizer {
 		ret.add(new InsertSQL2(out + "_" + n.string + "_squash", k,
 				new LinkedList<>(k.select.keySet())));
 
-		// TODO drops for observables
+		//  drops for observables
 		// ret.add(new DropTable(n.string + "_observables"));
 		// ret.add(new DropTable(n.string + "_observables_guid"));
 		// ret.add(new DropTable(n.string + "_observables_proj"));

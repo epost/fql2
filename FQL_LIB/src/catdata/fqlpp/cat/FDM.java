@@ -46,7 +46,6 @@ public class FDM {
 			return sigmas.get(F);
 		}
 		
-		//TODO: add more caching?
 		Map<Functor<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>> cache = new HashMap<>();
 
 		Category<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> src = Inst.get(F.source);
@@ -69,7 +68,7 @@ public class FDM {
 		return sigmas.get(F);
 	}
 
-	// TODO: lineage assumes all IDs in output of sigma are unique
+	// : lineage assumes all IDs in output of sigma are unique
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O1, A1, O2, A2> Adjunction<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> sigmaDelta(
 			Functor<O2, A2, O1, A1> F) {

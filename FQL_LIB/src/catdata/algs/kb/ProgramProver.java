@@ -14,14 +14,14 @@ import catdata.Triple;
 import catdata.algs.kb.KBExp.KBApp;
 import catdata.InvisibleException;
 
-//TODO
+//TODO aql
 /*Loosen requirement for program in MVP that are of form
 
 l -> r
 
 in worst case, must try all combinations of orientations, but maybe can do better.
 */
-//TODO merge constants and functions in typeside
+//TODO aql merge constants and functions in typeside
 public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 
 	private final Iterator<V> fresh;
@@ -32,13 +32,13 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 		this.fresh = fresh;
 		
 		if (check) {
-			//TODO: freshen the rules?
+			//TODO: aql freshen the rules?
 			isProgram(fresh, theory, true);
 		}
 		
 	}
 
-	//TODO: find some way to cache the fact that something has been proved to be a program
+	//TODO: aql find some way to cache the fact that something has been proved to be a program
 	public static <T,C,V> boolean isProgram(Iterator<V> fresh, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> theory, boolean throwerror) {
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : theory) {
 			List<V> vars = new LinkedList<>();

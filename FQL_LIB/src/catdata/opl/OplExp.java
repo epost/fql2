@@ -619,7 +619,7 @@ public abstract class OplExp implements OplObject {
 			return ret;
 		}
 
-		// TODO: I pivots to a schema with a type side isomorphic but not equal
+		// : I pivots to a schema with a type side isomorphic but not equal
 		// to I's type side.
 		// schemas should be presentations on signatures, not signatures with a
 		// set of entities.
@@ -815,7 +815,7 @@ public abstract class OplExp implements OplObject {
 		}
 	}
 
-	// TODO like pivot, iso type side, needs to change
+	//  like pivot, iso type side, needs to change
 	public static class OplPushoutSch<S, C, V, S1, C1, S2, C2> extends OplExp {
 
 		@Override
@@ -888,7 +888,6 @@ public abstract class OplExp implements OplObject {
 			return chc;
 		}
 
-		// TODO: enacapsulate Equation as own class
 		private Set<Chc<S, Chc<S1, S2>>> entities = new HashSet<>();
 		private Set<Chc<S, Chc<S1, S2>>> sorts = new HashSet<>();
 		private Map<Chc<C, Chc<C1, C2>>, Pair<List<Chc<S, Chc<S1, S2>>>, Chc<S, Chc<S1, S2>>>> symbols = new HashMap<>();
@@ -989,7 +988,7 @@ public abstract class OplExp implements OplObject {
 			}
 		}
 
-		// TODO the substituting is sensitive to the order, favoring left over
+		//  the substituting is sensitive to the order, favoring left over
 		// right.
 		// really should make canonical things - sorts are equiv classes of
 		// sorts, have all edges
@@ -1447,7 +1446,7 @@ public abstract class OplExp implements OplObject {
 		
 		
 
-		// TODO: in colimit, should do 0-based assignments
+		// : in colimit, should do 0-based assignments
 		public Triple<OplInst<S, C, V, Chc<Y, Z>>, OplPresTrans<S, C, V, Y, Chc<Y, Z>>, OplPresTrans<S, C, V, Z, Chc<Y, Z>>> pushout() {
 			Map<Chc<Y, Z>, Integer> prec = new HashMap<>();
 			Map<Chc<Y, Z>, S> gens = new HashMap<>();
@@ -1811,14 +1810,14 @@ public abstract class OplExp implements OplObject {
 			this.I = I;
 		}
 
-		// TODO to use with saturate_easy, should turn back into theory
-		// TODO this type signature is totally wrong, is not inverse of
+		//  to use with saturate_easy, should turn back into theory
+		//  this type signature is totally wrong, is not inverse of
 		// saturate_easy
-		// TODO not sure what this is, but can only desaturate things that were
+		//  not sure what this is, but can only desaturate things that were
 		// first saturted, not arbitrary models
 		public static <S, C, V, X> OplPres<S, C, V, X> desaturate(String S,
 				OplSetInst<S, C, X> I) {
-			OplSig<S, C, V> sig = (OplSig<S, C, V>) I.sig0; // TODO
+			OplSig<S, C, V> sig = (OplSig<S, C, V>) I.sig0; 
 
 			Map<X, S> gens = new HashMap<>();
 			for (S s : sig.sorts) {
@@ -2763,7 +2762,7 @@ public abstract class OplExp implements OplObject {
 			this.prec = prec;
 			this.fr = fr;
 			this.implications = implications;
-			// validate(); TODO breaks imports
+			// validate();  breaks imports
 		}
 
 		public Iterator<V> fr;
@@ -3056,7 +3055,7 @@ public abstract class OplExp implements OplObject {
 			return ret;
 		}
 
-		//TODO: this is broken.  the equations that go in expected too few chcs
+		//: this is broken.  the equations that go in expected too few chcs
 		public OplPres(
 				Map<X, Integer> prec,
 				String S,
@@ -3442,7 +3441,7 @@ public abstract class OplExp implements OplObject {
 				}
 			}
 
-			// TODO: cannot actually check mapping validity for horn clauses
+			// : cannot actually check mapping validity for horn clauses
 
 		}
 
@@ -3698,7 +3697,7 @@ public abstract class OplExp implements OplObject {
 					}
 					OplTerm<C2, V> t = F.m.subst(new OplTerm<>(c1, Util
 							.singList(new OplTerm<>(vars.get(s1)))));
-					attrs.put(c1, Chc.inRight(t)); //TODO
+					attrs.put(c1, Chc.inRight(t)); 
 				}
 
 				Map<C1, Pair<Object, Map<V, OplTerm<C2, V>>>> edges = new HashMap<>();
@@ -4426,7 +4425,7 @@ public abstract class OplExp implements OplObject {
 
 	}
 
-	// TODO: pretty print
+	// : pretty print
 	public static class OplPresTrans<S, C, V, X, Y> extends OplExp {
 		Map<S, Map<X, OplTerm<Chc<C, Y>, V>>> map = new HashMap<>();
 		Map<S, Map<X, OplTerm<Object, V>>> pre_map;
@@ -5664,7 +5663,7 @@ public abstract class OplExp implements OplObject {
 			return ret;
 		}
 
-		// TODO this is important and should be called out somehow
+		//  this is important and should be called out somehow
 		public static <S, C, V, X> OplTerm<Chc<C, OplTerm<Chc<C, X>, V>>, V> conv(
 				OplSchema<S, C, V> S, OplTerm<Chc<C, X>, V> e0,
 				OplPres<S, C, V, X> P0) {

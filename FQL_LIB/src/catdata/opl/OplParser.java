@@ -1287,7 +1287,7 @@ public class OplParser {
 		return ret;
 	}
 
-	//TODO: pull this up into util
+	//: pull this up into util
 	public static class VIt implements Iterator<String> {
 
 		VIt() {
@@ -1620,7 +1620,7 @@ public class OplParser {
 					allVars, null, l.c, true)));
 		}
 		
-		OplTerm<String, String> att = toTerm(allVars, null, t.d.b, true); //TODO
+		OplTerm<String, String> att = toTerm(allVars, null, t.d.b, true); 
 			
 		return new Agg<>(t.a.b.toString(), t.a.c.toString(), from, where, att);
 	}
@@ -1655,9 +1655,9 @@ public class OplParser {
 			}
 //			System.out.println(l.c);
 			if (l.c.toString().contains("agg") && l.c.toString().contains("{") && l.c.toString().contains("return") && l.c.toString().contains("}")) {
-				attrs.put(l.a.toString(), Chc.inLeft(fromAgg(from.keySet(), null, l.c, true))); //TODO				
+				attrs.put(l.a.toString(), Chc.inLeft(fromAgg(from.keySet(), null, l.c, true))); 				
 			} else {
-				attrs.put(l.a.toString(), Chc.inRight(toTerm(from.keySet(), null, l.c, true))); //TODO
+				attrs.put(l.a.toString(), Chc.inRight(toTerm(from.keySet(), null, l.c, true))); 
 			}
 		}
 

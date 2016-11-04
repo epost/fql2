@@ -930,7 +930,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				}
 			}
 
-			// TODO: type check colimit
+			// : type check colimit
 			for (String mname : shape.edges.keySet()) {
 				Pair<String, String> mt = shape.edges.get(mname);
 				String s = mt.first;
@@ -1071,7 +1071,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				OplMapping<String, String, String, String, String> mapping = new OplMapping<String, String, String, String, String>(
 						inj_sorts, inj_symbols, schname, "Colimit");
 
-				// TODO: name of colimit
+				// : name of colimit
 				OplTyMapping<String, String, String, String, String> tm = new OplTyMapping<String, String, String, String, String>(
 						schname, "Colimit", sch, retsch, mapping);
 				tm.extend().validate(sch.sig, retsch.sig);
@@ -1125,7 +1125,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 					equations.add(new Pair<>(lhs1, rhs1));
 				}
 
-				// TODO: add more
+				
 			}
 
 			for (String mname : shape.edges.keySet()) {

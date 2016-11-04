@@ -444,7 +444,7 @@ public class Transform {
 	 * src.thesig.nodes.size();
 	 * 
 	 * // JPanel pan = new JPanel(new GridLayout(1, size + 1)); // for (Node n :
-	 * src.thesig.nodes) { //TODO // JLabel l = new JLabel(n.string); //
+	 * src.thesig.nodes) {  // JLabel l = new JLabel(n.string); //
 	 * l.setOpaque(true); // l.setHorizontalAlignment(SwingConstants.CENTER); //
 	 * l.setBackground(sColor); // pan.add(l); // }
 	 * 
@@ -694,7 +694,7 @@ public class Transform {
 	 * (vertex.fourth) { shape = new Rectangle((int) center.getX() - 10, (int)
 	 * center.getY() - 10, 20, 20); } else { shape = new
 	 * Ellipse2D.Double(center.getX() - 10, center.getY() - 10, 20, 20); } //
-	 * graphicsContext.setPaint(color); TODO // graphicsContext.
+	 * graphicsContext.setPaint(color); 
 	 * graphicsContext.fill(shape); } }
 	 */
 

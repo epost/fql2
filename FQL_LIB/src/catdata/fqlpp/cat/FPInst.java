@@ -83,6 +83,6 @@ public class FPInst<O, A> extends Category<Instance<O, A>, FPTransform<O, A>> {
 		return FPTransform.compose(f, g);
 	}
 
-	//TODO products, exponentials for FPInst
+	// products, exponentials for FPInst
 
 }

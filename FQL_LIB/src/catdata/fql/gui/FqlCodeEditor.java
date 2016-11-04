@@ -62,6 +62,8 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 			}
 		});
 		topArea.getPopupMenu().add(visualEdit, 0);
+		
+		
 	}
 
 	@Override

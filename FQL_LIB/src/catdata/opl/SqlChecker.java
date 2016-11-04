@@ -58,7 +58,7 @@ import catdata.sql.SqlLoader;
 import catdata.sql.SqlSchema;
 import catdata.sql.SqlType;
 
-//TODO: sqlchecker should use fk names
+// aql sqlchecker should use fk names
 
 public class SqlChecker {
 
@@ -181,7 +181,7 @@ public class SqlChecker {
 				select.add(v + "." + col.name  + " AS " + "O_" + col.name);
 			}
 		}
-		//TODO: must check end is the same in path eq too
+		//TODO: aql must check end is the same in path eq too
 		
 		String str = "SELECT DISTINCT " + Util.sep(select, ", ") + "\nFROM " + Util.sep(from, ", ") 
 			+ (where.isEmpty() ? "" : "\nWHERE " + Util.sep(where, " AND "));
@@ -425,7 +425,7 @@ public class SqlChecker {
 			List<Pair<String, Pair<Triple<String, List<Pair<String, List<Pair<String, String>>>>, List<Pair<String, String>>>, 
 		       Triple<String, List<Pair<String, List<Pair<String, String>>>>, List<Pair<String, String>>>>>> tocheck = new LinkedList<>();
 		
-			//TODO: move this into the parser
+			//TODO: aql move this into the parser
 			for (String string0 : strings) {
 				String string = string0.trim();
 				if (string.length() == 0) {

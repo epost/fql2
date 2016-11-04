@@ -332,7 +332,7 @@ public class XCtx<C> implements XObject {
 			l.add(id);
 			rules.add(new Pair<>(l, new LinkedList<>()));
 		}
-		kb = new SemiThue<C>(rules, 32); // TODO
+		kb = new SemiThue<C>(rules, 32); 
 	}
 
 	private void validate(boolean initial) {
@@ -527,7 +527,7 @@ public class XCtx<C> implements XObject {
 
 		if (schema != null) {
 			if (NEWDEBUG.debug.fpql.x_tables) {
-				// TODO: if category tab blew up, so should this
+				// if category tab blew up, so should this
 				JComponent tables = null;
 				if (cat != null && cat.startsWith("ERROR")) {
 					tables = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", cat);
@@ -956,7 +956,7 @@ public class XCtx<C> implements XObject {
 //	}
 	
 
-	// TODO: have this suppress pair IDs when possible
+	//  have this suppress pair IDs when possible
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private JComponent makeTables(Function<Unit, Collection<Triple<C, C, List<C>>>> fn,
 			Set<C> ignore) {
@@ -1053,8 +1053,7 @@ public class XCtx<C> implements XObject {
 					for (C col : cols) {
 						List<C> r = new LinkedList<>(l);
 						r.add(col);
-						for (Triple<C, C, List<C>> cand : cat) { // TODO sort by
-																	// hom
+						for (Triple<C, C, List<C>> cand : cat) { 
 							if (!cand.first.equals("_1")) {
 								continue;
 							}
@@ -1117,7 +1116,7 @@ public class XCtx<C> implements XObject {
 		return found;
 	}
 
-	// TODO: test for inconsistency here?
+	// test for inconsistency here?
 	public static <D> Triple<D, D, List<D>> find_old(SemiThue<D> kb, Triple<D, D, List<D>> tofind,
 			Collection<Triple<D, D, List<D>>> cat) {
 		Set<Triple<D, D, List<D>>> ret = new HashSet<>();
@@ -1519,7 +1518,6 @@ public class XCtx<C> implements XObject {
 				tofind.add(v);
 				tofind.add(gn);
 				List<C> found = eqm.get(new Pair<>(v, gn));
-				// TODO
 				// Pair<List<C>, List<C>> xxx = null;
 				for (Pair<List<C>, List<C>> eq : eqs) {
 					if (found != null) {
@@ -1558,14 +1556,14 @@ public class XCtx<C> implements XObject {
 			}
 
 		};
-		// TODO: cache the composition table
+		// cache the composition table
 		if (NEWDEBUG.debug.fpql.validate_amalgams) {
-			ret.validate(); // TODO
+			ret.validate(); 
 		}
 		return ret;
 	}
 
-	// TODO: cache these?
+	// : cache these?
 	public Category<C, Triple<C, C, List<C>>> small_cat() {
 		Set<C> localIds = new HashSet<>(ids);
 		List<Triple<C, C, List<C>>> paths = new LinkedList<>();
@@ -1671,10 +1669,7 @@ public class XCtx<C> implements XObject {
 					p0.add(e);
 
 					Triple<C, C, List<C>> toAdd = new Triple<>(p.first, t.get(e).second, p0);
-					Triple<C, C, List<C>> found = find_old(kb, toAdd, paths); // TODO:
-																				// sort
-																				// into
-																				// hom
+					Triple<C, C, List<C>> found = find_old(kb, toAdd, paths); 
 
 					if (found == null) {
 						found = find_old(kb, toAdd, newPaths);
@@ -1725,8 +1720,8 @@ public class XCtx<C> implements XObject {
 		XCtx tmp = new XCtx(new HashSet<>(), t, e, S.global, S, "instance");
 
 		for (Pair<List<String>, List<String>> k : I.eqs) {
-			// TODO: must expand paths
-			// TODO: supress variable check for now
+			// : must expand paths
+			// : supress variable check for now
 			List l = new LinkedList<>();
 			Set s = new HashSet<>();
 			s.add(l);

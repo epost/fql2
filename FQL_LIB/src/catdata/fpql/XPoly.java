@@ -341,7 +341,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 				List<Object> p = block.attrs.get(e);
 				attrs.put((D)new Pair(l, e), p);
 			}
-			Object ooo = "!__1"; //TODO using toString for ! is very bad
+			Object ooo = "!__1"; // using toString for ! is very bad
 			attrs.put((D)new Pair(l, "!_" + d), Util.singList(ooo));
 			
 			Block<C, D> newblock = new Block<C, D>(block.from, block.where, attrs, edges);

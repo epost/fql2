@@ -264,7 +264,7 @@ public abstract class InstExp {
 
 	}
 
-	// TODO Const equality for instances
+	//  Const equality for instances
 	public static class Const extends InstExp {
 		// pubic List
 		// public List<Pair<String, List<Pair<Object, Object>>>> data;

@@ -167,7 +167,7 @@ public class SemiThue<Y> {
 				t.add(l0r0);
 				marked.add(l0r0);
 			}
-			marked.add(lr); // TODO added, only in paper in some examples
+			marked.add(lr); // TODO aql added, only in paper in some examples
 		}
 	}
 

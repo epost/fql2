@@ -176,7 +176,7 @@ public class OplChase {
 
 	}
 	
-	//TODO this will fail because the schema will not have plain strings as entities, will be of the form Chc<S, String>?
+	// this will fail because the schema will not have plain strings as entities, will be of the form Chc<S, String>?
 	static <S, C, V, X, Z> 
 	OplPushout<S,C,V,Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>  
 	step(OplInst<S, C, V, X> I, OplQuery<S, C, V, String, String, V> Q) {
@@ -272,7 +272,7 @@ public class OplChase {
 				Agens.put(new Pair<>(t, v), s);
 				AImap.get(s).put(new Pair<>(t, v), t.second.get(v));
 				
-				//TODO: precedence
+				//: precedence
 			}
 			for (Pair<OplTerm<Chc<C, V>, V>, OplTerm<Chc<C, V>, V>> eq : Q.fI.get("FORALL").equations) {
 				OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> 
@@ -285,7 +285,7 @@ public class OplChase {
 			for (V v : Q.fI.get("EXISTS").gens.keySet()) {
 				S s = Q.fI.get("EXISTS").gens.get(v);
 				Egens.put(new Pair<>(t, v), s);
-				//TODO: precedence
+				//: precedence
 			}
 			
 			for (Pair<OplTerm<Chc<C, V>, V>, OplTerm<Chc<C, V>, V>> eq : Q.fI.get("EXISTS").equations) {
@@ -308,7 +308,7 @@ public class OplChase {
 		        OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> 
 		        	toAdd = new Fun<>(t).apply(inDst);
 		        
-				AEmap.get(s).put(new Pair<>(t, v), toAdd); //TODO				
+				AEmap.get(s).put(new Pair<>(t, v), toAdd); 				
 			}
 
 			

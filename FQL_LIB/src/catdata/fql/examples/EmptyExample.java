@@ -115,8 +115,8 @@ public class EmptyExample extends Example {
 
 ;
 	
-	//TODO typed exponentials
-	//TODO isos for instances
+	// typed exponentials
+	// isos for instances
 					
 
 

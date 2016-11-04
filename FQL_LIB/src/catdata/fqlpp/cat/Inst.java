@@ -310,7 +310,6 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 		return new Functor<O,A,Set,Fn>(I.source, FinSet.FinSet, f, g);
 	}
 	
-	//TODO: exponentials for C-Cat
 
 	@Override
 	public Set<Transform<O,A,Set,Fn>> hom(Functor<O,A,Set,Fn> exp, Functor<O,A,Set,Fn> base) {

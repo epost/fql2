@@ -782,7 +782,7 @@ public class PPParser {
 		throw new RuntimeException(); 
 	}
 	
-	//TODO: ** notation
+	//: ** notation
 	
 	public static final TransExp toTrans(Object o) { 
 		try {

@@ -26,7 +26,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		
 	public final Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs;
 	
-	//TODO: who is calling isTypeSide and isSchema?
+	//TODO: aql who is calling isTypeSide and isSchema?
 
 	public final void validate() {
 		//check that each att/fk is in tys/ens
@@ -213,7 +213,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		
 		return toString;
 	} 
-	//TODO alphabetical?
+	//TODO aql alphabetical?
 
 	//TODO: aql cache;
 	public final Collection<Att> attsFrom(En en) {

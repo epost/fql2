@@ -441,7 +441,7 @@ public class RaToFql {
 			}
 		});
 
-		// TODO shred and unshred queries
+		//  shred and unshred queries
 
 		transButton.addActionListener(new ActionListener() {
 			@Override
@@ -1482,8 +1482,7 @@ public class RaToFql {
 		Parser<?> from = Parsers.tuple(term("FROM"), from0);
 
 		Parser<?> where0 = Parsers.tuple(tuple, term("="), tuple).sepBy(term("AND"));
-		Parser<?> where = Parsers.tuple(term("WHERE"), where0); // TODO
-																// .optional();
+		Parser<?> where = Parsers.tuple(term("WHERE"), where0); 
 
 		Parser<?> select0 = Parsers.tuple(tuple, term("AS"), ident()).sepBy1(term(","));
 		Parser<?> select = Parsers.tuple(term("SELECT"), term("DISTINCT").optional(), select0);

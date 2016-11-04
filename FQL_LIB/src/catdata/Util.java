@@ -573,7 +573,7 @@ public class Util {
 
 	
 
-	public static String nice(String s) { // TODO
+	public static String nice(String s) { 
 		return s;
 		// return s.replace("[", "{").replace("]", "}");
 	} 

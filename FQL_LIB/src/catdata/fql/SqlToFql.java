@@ -294,7 +294,7 @@ public class SqlToFql {
 				cols.put(k.name, lcols);
 
 			}
-			// TODO add inst_ prefix below
+			//  add inst_ prefix below
 			if (k0 instanceof EInsertValues) {
 				EInsertValues k = (EInsertValues) k0;
 				List<String> lcols = cols.get(k.target);

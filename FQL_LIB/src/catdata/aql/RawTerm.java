@@ -32,7 +32,7 @@ public final class RawTerm {
 		return head + "(" + Util.sep(args, ",") + ")" + str;
 	}
 	
-	//TODO inefficient bitwise operations
+	//TODO aql inefficient bitwise operations
 
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk>
 	infer0(Map<String, Chc<Ty,En>> ctx0, RawTerm lhs, Chc<Ty,En> expected, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, String pre) {
@@ -63,7 +63,10 @@ public final class RawTerm {
 		
 	}
 	
-	//TODO it is misleading to return a context, because strings for primitives can come out
+	/**
+	 * 
+	 * @return it is misleading to return a context, because strings for primitives can come out
+	 */
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Triple<Ctx<String, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
 	infer1(Map<String, Chc<Ty,En>> ctx, RawTerm lhs, RawTerm rhs, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 			
@@ -102,7 +105,7 @@ public final class RawTerm {
 		return new Triple<>(ret, lhs.trans(vars, ctx0, col), rhs.trans(vars, ctx0, col));
 	}
 	
-	//TODO staticall typesafe coerce
+	//TODO aql statically typesafe coerce
 	private <K,V> K find(Map<K,V> m, String k) {
 		for (K k0 : m.keySet()) {
 			if (k.equals(k0)) {
@@ -346,7 +349,7 @@ public final class RawTerm {
 		this(head, args, null);
 	}
 
-	//TODO: use of toString here is ugly
+	//TODO: aql use of toString here is ugly
 	public static RawTerm fold (Set<Object> fks, Set<Object> entities, List<Object> l, String v) {
 		RawTerm ret = new RawTerm(v, (String) null);
 		for (Object o : l) {
@@ -373,7 +376,7 @@ public final class RawTerm {
 				} else if (col.tys.contains(p.second)) {
 					@SuppressWarnings("unchecked")
 					Ty tt = (Ty) p.second;
-					ctx.put(p.first, Chc.inLeft(tt));		//TODO remove for loops for other ones	
+					ctx.put(p.first, Chc.inLeft(tt));		//TODO aql remove for loops for other ones	
 				} else if (col.ens.contains(p.second)) {
 					@SuppressWarnings("unchecked")
 					En tt = (En) p.second;

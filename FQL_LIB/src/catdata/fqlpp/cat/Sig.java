@@ -2,7 +2,7 @@ package catdata.fqlpp.cat;
 
 import java.util.Set;
 
-//TODO turns out this is useless because signatures *always* denote categories 
+// turns out this is useless because signatures *always* denote categories 
 @SuppressWarnings("serial")
 public class Sig extends Category<Signature<?, ?>, Mapping<?, ?, ?, ?>> {
 
@@ -68,6 +68,5 @@ public class Sig extends Category<Signature<?, ?>, Mapping<?, ?, ?, ?>> {
 
 	// /////
 
-	//TODO: products, co-products for signatures
-
+	
 }

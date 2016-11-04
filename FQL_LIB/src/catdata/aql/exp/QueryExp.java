@@ -60,9 +60,10 @@ public abstract class QueryExp extends Exp<Query> {
 		
 	}
 
-	//TODO: add imports
-
+	
 	public static final class QueryExpLit extends QueryExp {
+
+		//TODO: aql add imports
 
 		public final Query q;
 		
@@ -79,7 +80,7 @@ public abstract class QueryExp extends Exp<Query> {
 
 		@Override
 		public Query eval(AqlEnv env) {
-			throw new RuntimeException(); //TODO
+			throw new RuntimeException(); 
 		}
 
 		@Override

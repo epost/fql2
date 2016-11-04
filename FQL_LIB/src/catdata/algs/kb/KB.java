@@ -440,7 +440,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 					it.remove();
 					break;
 				}
-				//TODO: this one redundant?
+				//: this one redundant?
 				if (subsumes(fresh, cand.reverse(), e.reverse())) {
 					it.remove();
 					break;
@@ -475,7 +475,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		} while (to_remove != null);
 	}
 	
-	// TODO For this to be a true semi-decision procedure, open terms should first be skolemized
+	//  For this to be a true semi-decision procedure, open terms should first be skolemized
 	@Override
 	public boolean eq(KBExp<C, V> lhs, KBExp<C, V> rhs) {
 		KBExp<C, V> lhs0 = nf(lhs);
@@ -883,21 +883,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return e;
 	}
 	
-	//TODO I think this is not complete - 
-	/*
-	 *  l = r
-	 *  
-	 *  can apply if there exists any substitution s st
-	 *  
-	 *  sl > sr
-	 *  
-	 *  including substitutions besides the mgu of a term with l or r.  So if r has vars that l doesn't, that's a problem.
-	 *  
-	 *  So, for LPO, only apply step1Es on ground terms, and use a minimal constant to handle extra variables that pop up.
-	 *  when extend to empty sorts, this constant will have to come from the original signature union any skolemized consts.
-	 *  for now can just adjoin one freely wlog
-	 *  
-	 */
+	
 	
 	public static class NewConst {
 		
@@ -1048,7 +1034,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		//	System.out.println("2");
 			return false;
 		}
-		//TODO
+		
 		for (Pair<KBExp<C, V>, KBExp<C, V>> e : E0) {
 			Map<V, KBExp<C,V>> m = subsumes0(fresh, new Pair<>(s,t), e);
 			if (m == null) {
@@ -1081,7 +1067,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 //		return false;
 	}
 	
-	//TODO: when filtering for subsumed, can also take G into account
+	//: when filtering for subsumed, can also take G into account
 	protected boolean step(Thread parent) throws InterruptedException {
 //		System.out.println("\n\niteration " + count);
 	//	System.out.println(this);
@@ -1147,10 +1133,10 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			checkParentDead(parent); 
 		}
 		
-		//TODO: appear to need simplify for correctness.  checked again: definitely need
+		//: appear to need simplify for correctness.  checked again: definitely need
 //		if (options.simplify) {
 			simplify(); //definitely needed... cuts down on number of iterations
-			//simplify2();	//TODO: add this in for efficiency sometime 
+			//simplify2();	//: add this in for efficiency sometime 
 			checkParentDead(parent); 
 	//	}
 		
@@ -1223,7 +1209,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return false;
 	}
 	
-	//TODO: add ground-completeness check sometime
+	//: add ground-completeness check sometime
 	protected boolean checkEmpty() throws InterruptedException {
 		if (E.isEmpty()) {
 			isComplete = true;
@@ -1317,7 +1303,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 							continue outer;
 						}
 					}
-					//TODO
 					if (options.semantic_ac) {
 						if (!lhs.sort(AC_symbols.keySet()).equals(rhs.sort(AC_symbols.keySet()))) {
 			//				System.out.println("ground badness on " + s + "e= " + e + " | lhs=" + lhs + " | rhs=" + rhs + " | sorts to " 

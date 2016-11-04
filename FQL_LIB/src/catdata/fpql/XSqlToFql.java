@@ -285,7 +285,7 @@ public class XSqlToFql {
 				cols.put(k.name, lcols);
 
 			}
-			// TODO add inst_ prefix below
+			//  add inst_ prefix below
 			if (k0 instanceof EInsertValues) {
 				EInsertValues k = (EInsertValues) k0;
 				List<String> lcols = cols.get(k.target);
@@ -422,8 +422,7 @@ public class XSqlToFql {
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|" };
 
-	// TODO keyword 1 vs keyword 2 highlight color
-
+	
 	static String[] res = new String[] { "VARCHAR", "INT", "SELECT", "FROM",
 			"WHERE", "DISTINCT", "UNION", "ALL", "CREATE", "TABLE", "AS",
 			"PRIMARY", "KEY", "FOREIGN", "REFERENCES", "id", "AND", "OR",

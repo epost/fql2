@@ -19,7 +19,7 @@ import catdata.opl.OplExp.OplSig;
 @SuppressWarnings({"unused","unchecked","rawtypes"})
 public class OplDriver {
 
-	// TODO: let x be the position of the first change between old and new
+	// : let x be the position of the first change between old and new
 	// program.
 	// a definition y is 'safe' if definition y+1 begins before x.
 	// each code editor's driver should copy over the safe definitions and start
@@ -102,14 +102,13 @@ public class OplDriver {
 			}
 		}
 
-		// TODO: what is this?
 		int j = 0;
 		for (Entry<String, Integer> e : extra.entrySet()) {
 			init.order.add(e.getValue() + j, e.getKey());
 			j++;
 		}
 
-		// TODO: add to order
+		// : add to order
 
 		return ret;
 

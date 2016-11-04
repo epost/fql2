@@ -518,7 +518,7 @@ public abstract class FunctorExp implements Serializable{
 
 	}
 	
-	//TODO toString for exps
+	// toString for exps
 	
 	public static class InstConst extends FunctorExp {
 		

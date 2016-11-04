@@ -441,7 +441,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 		return XProd.uberflower((XPoly)f, (XMapping)i);
 	}
-	//TODO: coapply on transforms, unit,counit for apply/coapply
+	//: coapply on transforms, unit,counit for apply/coapply
 	@Override
 	public XObject visit(XProgram env, XCoApply e) {
 		XObject f = e.f.accept(env, this);

@@ -34,7 +34,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	public abstract Collage<Ty, Void, Sym, Void, Void, Void, Y> talg();
 
 	/**
-	 * @param y obtained from a call to att or sk only! TODO is this really needed anymore?
+	 * @param the T of Y must be obtained from a call to att or sk only! 
 	 * @return not a true normal form, but a 'simplified' term for e.g., display purposes
 	 */
 	public abstract Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT(Term<Ty, Void, Sym, Void, Void, Void, Y> y);
@@ -116,7 +116,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	}
 	
 	
-	//TODO: have simplified collages also print out their definitions
+	//TODO: aql have simplified collages also print out their definitions
 	
 	
 	@Override

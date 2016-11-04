@@ -102,7 +102,7 @@ public class SqlToOpl extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	//TODO: happy medium between CNF and non-CNF? ignore as many columns as possible?
+	//: happy medium between CNF and non-CNF? ignore as many columns as possible?
 	
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -206,7 +206,7 @@ public class SqlToOpl extends JPanel {
 
 	}
 
-	// TODO: code formatter should not wrap lines ever
+	// : code formatter should not wrap lines ever
 	public static Pair<OplSchema<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>, OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String>> convertCnf(SqlSchema info, SqlInstance inst, String S0, String I0) {
 		if (!info.isCnf()) {
 			throw new RuntimeException("Schema not in categorical normal form");

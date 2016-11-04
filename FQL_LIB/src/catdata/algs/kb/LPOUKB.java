@@ -411,7 +411,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 					it.remove();
 					break;
 				}
-				// TODO: this one redundant?
+				// TODO: aql this one redundant?
 				if (subsumes(cand.reverse12(), e.reverse12())) {
 					it.remove();
 					break;
@@ -446,8 +446,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		} while (to_remove != null);
 	}
 
-	// TODO: caching might be unsound here - look into and reactivate if
-	// possible
+	// TODO: aql caching might be unsound here - reactivate if possible
 	private KBExp<Chc<V, C>, V> red(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> Ex, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> Ry, KBExp<Chc<V, C>, V> e, Collection<T> inhab0) throws InterruptedException {
 		Set<T> inhab = Util.union(inhab0, groundInhabited);
 		inhabGen(inhab);
@@ -764,8 +763,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	private boolean strongGroundJoinableSyntactic(KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t, Map<V, T> ctx) throws InterruptedException {
 		outer: for (List<V> vars : allSubsetsOrderedBySize(ctx.keySet())) {
-			if (vars.size() > 3) { // TODO just use up to 3 vars for now. 4
-									// takes almost 5 seconds to compute
+			if (vars.size() > 3) { // TODO aql just use up to 3 vars for now. 4 takes almost 5 seconds to compute
 				continue;
 			}
 			Collection<PreOrder<V>> cands = PreOrder.allTotal(vars);
@@ -877,14 +875,14 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return p;
 	}
 
-	// TODO: when filtering for subsumed, can also take G into account
+	// TODO: aql when filtering for subsumed, can also take G into account
 	private boolean step() throws InterruptedException {
 		checkParentDead();
 		// System.out.println("-----------");
 		// System.out.println(this);
 
 		/*
-		 * if (options.semantic_ac) { //TODO not really sure why these were here
+		 * if (options.semantic_ac) { //TODO aql not really sure why these were here
 		 * filterStrongGroundJoinable(); checkParentDead(); }
 		 * 
 		 * if (options.syntactic_ac) { filterStrongGroundJoinableSyntactic();
@@ -1079,7 +1077,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 				if (!ground) {
 					return false;
 				} else {
-					for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ex : G) { //TODO this is weird, what is it?
+					for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ex : G) { 
 						if (subsumes(new Triple<>(lhs, rhs, e.third), ex) || subsumes(new Triple<>(rhs, lhs, e.third), ex)) {
 							continue outer;
 						}
@@ -1405,8 +1403,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			throw new RuntimeException("There is no LPO precedence that can orient all rules from left to right.  (Unfailing) completion can still be used, but you will have to specify a precedence manually.");
 		}
 		DAG<C> g = Util.get0X(ret);
-		return toPrec(symbols, g); // TODO: just pick one randomly and make it
-									// total randomly.
+		return toPrec(symbols, g); // TODO: aql just pick one randomly and make it total randomly.
 
 	}
 

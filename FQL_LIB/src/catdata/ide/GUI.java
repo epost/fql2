@@ -220,6 +220,17 @@ public class GUI extends JPanel {
 		visItem.addActionListener(x -> {
 			veditAction();
 		});
+		
+		MenuItem rtf = new MenuItem("Copy as RTF");
+		editMenu.add(rtf);
+		rtf.addActionListener(x -> {
+			int i = editors.getSelectedIndex();
+			CodeEditor<?,?,?> ed = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+			if (ed == null) {
+				return;
+			}
+			ed.copyAsRtf();
+		});
 
 		MenuItem chaseItem = new MenuItem("ED Chaser");
 		toolsMenu.add(chaseItem);
@@ -744,19 +755,7 @@ public class GUI extends JPanel {
 		}
 	}
 
-	// TODO defunct from when tried to save serialized compilation results
-	/*
-	 * public static void save2(FQLPPEnvironment env) { delay(); JFileChooser
-	 * jfc = new JFileChooser(DEBUG.debug.FILE_PATH); jfc.setFileFilter(new
-	 * Filter2()); jfc.showSaveDialog(null); File f = jfc.getSelectedFile(); if
-	 * (f == null) { return; } if
-	 * (!jfc.getSelectedFile().getAbsolutePath().endsWith(".fqlppo")) { f = new
-	 * File(jfc.getSelectedFile() + ".fqlppo"); } try { FileOutputStream fileOut
-	 * = new FileOutputStream(f); ObjectOutputStream out = new
-	 * ObjectOutputStream(fileOut); out.writeObject(env); out.close();
-	 * fileOut.close(); } catch (Exception i) { i.printStackTrace();
-	 * JOptionPane.showMessageDialog(null, i.getLocalizedMessage()); } }
-	 */
+	
 
 	private static void formatAction() {
 		int i = editors.getSelectedIndex();

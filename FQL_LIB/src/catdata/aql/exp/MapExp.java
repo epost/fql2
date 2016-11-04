@@ -23,14 +23,10 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 	public static final class MapExpId<Ty,En,Sym,Fk,Att> extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att> {
 		
 		@Override
-		public Collection<Pair<String, Kind>> deps() { //TODO: String, kind
+		public Collection<Pair<String, Kind>> deps() { 
 			return sch.deps();
 		}
-		
-		public String meta() {
-			return " : " + sch + " -> " + sch; //TODO: kill meta
-		}
-		
+				
 		public final SchExp<Ty,En,Sym,Fk,Att> sch;
 
 		public MapExpId(SchExp<Ty, En, Sym, Fk, Att> sch) {

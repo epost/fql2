@@ -21,6 +21,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -52,6 +53,10 @@ import org.fife.ui.rtextarea.SearchEngine;
  */
 public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> extends JPanel implements Runnable {
 
+	public void copyAsRtf() {
+		topArea.copyAsRtf();
+	}
+	
 	public abstract Language lang();
 	
 	protected final Integer id;
@@ -345,6 +350,10 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		inputMap.put(key2, "DecreaseFont");
 		
 		doTemplates();
+		
+		JMenuItem rtf = new JMenuItem("Copy as RTF");
+		rtf.addActionListener(x -> topArea.copyAsRtf());
+		topArea.getPopupMenu().add(rtf, 0);
 
 	}
 	

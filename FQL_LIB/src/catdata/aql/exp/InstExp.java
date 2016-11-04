@@ -89,7 +89,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			SchExp<Ty, En1, Sym, Fk1, Att1> t0 = I.type(ctx0, ctx);
 			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(ctx0);
 			
-			if (!t1.first.equals(t0)) { //TODO type equality
+			if (!t1.first.equals(t0)) { //TODO aql type equality
 				throw new RuntimeException("Type error: In " + this + " domain of mapping is " + t1.first + " but instance has schema " + t0);
 			} 
 			
@@ -163,7 +163,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			SchExp<Ty, En2, Sym, Fk2, Att2> t0 = I.type(ctx0, ctx);
 			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(ctx0);
 			
-			if (!t1.second.equals(t0)) { //TODO type equality
+			if (!t1.second.equals(t0)) { //TODO aql type equality
 				throw new RuntimeException("Type error: In " + this + " codomain of mapping is " + t1.first + " but instance has schema " + t0);
 			} 
 			
@@ -360,8 +360,6 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	}
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	//TODO: fix types in raws
 
 
 }

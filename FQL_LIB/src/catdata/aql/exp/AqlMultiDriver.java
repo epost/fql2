@@ -17,7 +17,7 @@ import catdata.Util;
 import catdata.ide.LineException;
 import catdata.ide.Program;
 
-//TODO: does assume unique names
+//TODO: aql does assume unique names
 public final class AqlMultiDriver implements Callable<Unit> {
 
 	// n is unchanged if it is equal to old(n) and for every dependency d,
@@ -41,7 +41,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	public final Program<Exp<?>> last_prog;
 	public final AqlEnv last_env;
 
-	private LineException exn; //TODO make this all the errors, not just the first error
+	private LineException exn; //TODO aql make this all the errors, not just the first error
 	boolean stop = false;
 
 	public AqlMultiDriver(Program<Exp<?>> prog, String[] toUpdate, Program<Exp<?>> last_prog, AqlEnv last_env) {
@@ -230,7 +230,7 @@ public static AqlEnv makeEnv(String str,
 
 	Set<String> unchanged = new HashSet<>();
 	int i = 0;
-	if (last_str != null) { //TODO
+	if (last_str != null) { 
 		for (String k : init.order) {
 			if (i >= last_prog.order.size()) {
 				break;
@@ -251,7 +251,7 @@ public static AqlEnv makeEnv(String str,
 		}
 	}
 
-	// TODO: separate into two loops - first, validate. then, call semantics
+	// 
 	for (String n : init.order) {
 		Exp<? extends Object> exp = init.exps.get(n);
 		Kind k = exp.kind();

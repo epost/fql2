@@ -253,7 +253,6 @@ public abstract class Category<O, A> implements Serializable {
 		}
 	}
 
-	// TODO Set, Cat, etc can override this
 	Map<Pair<O, O>, Set<A>> cached = new HashMap<>();
 
 	public Set<A> hom(O A, O B) {

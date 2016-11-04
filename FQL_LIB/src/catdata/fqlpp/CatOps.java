@@ -364,7 +364,6 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		return new Triple<>(srcX, dstX, I);
 	}
 	
-	//TODO
 	@Override
 	public Functor visit(FQLPPProgram env, MapConst ic) {
 		Triple<Category, Category, Mapping<String, String, String, String>> xxx = toMapping(env, ic);
@@ -576,7 +575,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			if (!l.source.equals(r.source)) {
 				throw new RuntimeException("Source categories do not match");
 			}
-			throw new RuntimeException("Not implemented yet"); //TODO
+			throw new RuntimeException("Not implemented yet"); 
 //			return FunCat.get(l.source).product(l, r);
 		}
 		throw new RuntimeException("Cannot exponentiate " + l + " and " + r);
@@ -791,8 +790,6 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			return m.kleisli();
 		}
 	}
-
-	// TODO for these, if target is Cat, use ToCat instead of Inst.
 
 	@Override
 	public Transform visit(FQLPPProgram env, Proj e) {
@@ -1039,7 +1036,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	}
 /*
 	private Functor fastSigma(FQLPPProgram env, Category C, Const src, Const dst, MapConst f, InstConst i) {
-		//System.out.println("Running fast sigma"); //TODO
+		//System.out.println("Running fast sigma"); 
 //		Signature s = new Signature(src.nodes, src.arrows, src.eqs);
 	//	Signature t = new Signature(dst.nodes, dst.arrows, dst.eqs);
 		Mapping F = toMapping(env, f).third; 

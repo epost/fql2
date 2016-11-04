@@ -715,7 +715,7 @@ public class FDM {
 			}
 			int i = 0;
 			boolean flag = true;
-			//TODO DEFER add check if it ever finds two on FDM monad unit
+			// add check if it ever finds two on FDM monad unit
 			for (Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> o : B.objects) {
 				if (o.second.equals(C) && F.dstCat.isId(o.third)) {
 					Map<Value<Y,X>, Value<Y,X>> xxx = project(r, 0, i + 1);

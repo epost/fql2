@@ -107,7 +107,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		} else {
 			dp = AqlProver.create(ops, col.entities_only());
 		}
-		schema.typeSide.collage(); //TODO aql remove
+		//schema.typeSide.collage(); //sanity check remove
 		Integer timeout = (Integer) ops.getOrDefault(AqlOption.timeout);
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 	    Future<Unit> future = executor.submit(new Callable<Unit>() {
@@ -134,18 +134,16 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	    	   e.printStackTrace();
 	    	   throw new RuntimeException("Error during saturation: " + e.getMessage());
 	       }
-			//TODO figure out how to do this only once but without concurrent modification exception
+			//TODO aql figure out how to do this only once but without concurrent modification exception
 			
 		if ((Boolean) ops.getOrDefault(AqlOption.require_consistency) && !hasFreeTypeAlgebra(schema.typeSide)) {
 			throw new RuntimeException("Not necessarily consistent; type algebra is\n\n" + talg().toString());
 		}
 		
-		//System.out.println("********* full " + talg_full());
-		//System.out.println("********* simpld " + talg());
-		new SaturatedInstance<>(this, this); //TODO aql remove 
+		//new SaturatedInstance<>(this, this); // sanity check remove 
 	}
 
-	//TODO is it really safe to do depth first saturation?
+	//TODO aql is it really safe to do depth first saturation?
 	private boolean add(Term<Void, En, Void, Fk, Void, Gen, Void> term) throws InterruptedException {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InterruptedException();
@@ -176,7 +174,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	}
 	
 	private boolean saturate1() throws InterruptedException {
-		schema.typeSide.collage(); //TODO aql remove
+		//schema.typeSide.collage(); sanity check
 
 		boolean changed = false;
 		for (Gen gen : col.gens.keySet()) {
@@ -196,7 +194,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
 	@Override
 	public Schema<Ty, En, Sym, Fk, Att> schema() {
-		schema.typeSide.collage(); //TODO aql remove
+		//schema.typeSide.collage(); //sanity check
 		return schema;
 	}
 
@@ -315,6 +313,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	}
 
 	@Override
+	//TODO aql nf for initial algebra
 	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> nf(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		/*if (col.type(ctx, term).left) { //type
 			if (schema.typeSide.java_tys.isEmpty()) {
@@ -356,7 +355,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 			Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> replacer = null;
 			for (Eq<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> eq : eqs) {
 				if (!eq.ctx.isEmpty()) {
-					continue; //TODO or unsafe
+					continue; //TODO aql or unsafe
 				}
 				if (eq.lhs.equals(eq.rhs)) {
 					continue;
@@ -364,7 +363,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 				if (eq.lhs.equals(Term.Sk(sk)) && !eq.rhs.containsProper(new Head<>(Term.Sk(sk)))) {
 					replacer = eq.rhs;
 					break;
-				} else if (eq.rhs.equals(Term.Sk(sk)) && !eq.lhs.containsProper(new Head<>(Term.Sk(sk))))  { //TODO - use provable eq here?
+				} else if (eq.rhs.equals(Term.Sk(sk)) && !eq.lhs.containsProper(new Head<>(Term.Sk(sk))))  { //TODO aql use provable eq here?
 					replacer = eq.lhs;
 					break;
 				}
@@ -416,7 +415,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	}
 	
 
-	//TODO: move definitions functionality into Collage
+	//TODO: aql move definitions functionality into Collage
 	
 	
 	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> att(Att att, X x) {
@@ -439,7 +438,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		} else {
 			return unflatten(AqlJs.reduce(simpl(y), col));
 		}
-	} //
+	} 
 
 	@Override
 	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> sk(Sk sk) {
@@ -476,13 +475,6 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		return dp.toString();
 	}
 	
-	
-	
-
-	/*@Override
-	public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
-		return col;
-	}*/
 
 //	@Override
 	public DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp() {

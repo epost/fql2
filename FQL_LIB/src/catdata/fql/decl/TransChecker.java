@@ -676,6 +676,6 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		return new Pair<>(e.a, trans.first); 
 	}
 	
-	//TODO check circularity
+	// check circularity
 
 }

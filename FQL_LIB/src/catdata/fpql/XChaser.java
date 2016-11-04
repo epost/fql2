@@ -194,7 +194,7 @@ public class XChaser {
 //							if (rhs.first.first != null && rhs.second.first != null) {
 								
 	//						}
-							//TODO: equate in gens map
+							//: equate in gens map
 						}
 				}
 				

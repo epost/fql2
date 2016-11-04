@@ -111,7 +111,7 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 			filter(set, y);
 		}
 
-		lineage.remove(y); //TODO
+		lineage.remove(y); 
 /*		for (Object k : lineage.keySet()) {
 			List<Pair<Signature<O2, A2>.Edge, Object>> v = lineage.get(k);
 			for (Pair<Signature<O2, A2>.Edge, Object> p : v) {
@@ -342,7 +342,7 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 		/* if (l.size() > 0) {
 			l.add(new Pair<>(col, null));
 		} */ //else {
-			l.add(new Pair<>(col, old)); //TODO
+			l.add(new Pair<>(col, old)); //
 		//}
 		lineage.put(nw, l);
 	}
@@ -383,7 +383,7 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 			Set<Pair<Integer, Integer>> i = Pb.get(F.nm.get(n));
 			Set<Object> k = X.nm.get(n);
 			for (Object v : k) {
-				// TODO be careful: in fql++ input IDs are not unique.
+				//  be careful: in fql++ input IDs are not unique.
 				// if (rank.contains(v)) {
 				// throw new RuntimeException("Contains non-unique ID " + v +
 				// ": " + x);
@@ -459,7 +459,7 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 				utables2.put(k.getKey(), ret);
 			}
 			for (Entry<Object, List<Pair<Signature<O2, A2>.Edge, Object>>> k : lineage.entrySet()) {
-				//TODO: recursive this
+				//: recursive this
 				 /* List<Pair<Signature<O2, A2>.Edge, Object>> z = new LinkedList<>();
 				boolean first = true;
 				for (Pair<Signature<O2, A2>.Edge, Object> p : k.getValue()) {

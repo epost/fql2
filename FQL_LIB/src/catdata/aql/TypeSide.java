@@ -153,7 +153,7 @@ public final class TypeSide<Ty, Sym> {
 		return true;
 	}
 
-	//TODO move to collage?
+	//TODO aql move to collage?
 	private boolean allJava(Pair<List<Ty>, Ty> t) {
 		List<Ty> l = new LinkedList<>(t.first);
 		l.add(t.second);

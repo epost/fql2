@@ -195,7 +195,7 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		return new OplTerm<>("succ", Util.singList(natToTerm(i - 1)));
 	}
 
-	//TODO: dup? In Util?
+	//: dup? In Util?
 	public static String strip(String s) {
 		if (!NEWDEBUG.debug.opl.opl_pretty_print) {
 			return s;

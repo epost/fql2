@@ -71,7 +71,7 @@ public class Ben {
 		//the equations of the colimit in the form (objectname, arrow1, arrow2, ...) = (objectname, arrow1, ...)
 		Set<Pair<Pair<String, List<String>>, Pair<String, List<String>>>> eqs = new HashSet<>();
 
-		//TODO: implement colimit here
+		//: implement colimit here
 		
 		System.out.println("hello world");
 		return new Const(objects, arrows, eqs);

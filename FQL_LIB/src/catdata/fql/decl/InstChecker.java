@@ -135,7 +135,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	}
 
 	@Override
-	// TODO check disc op fib
+	//  check disc op fib
 	public SigExp visit(FQLProgram env, Sigma e) {
 		InstExp xxx = env.insts.get(e.I);
 		if (xxx == null) {
@@ -154,7 +154,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	}
 
 	@Override
-	// TODO check bijection
+	// check bijection
 	public SigExp visit(FQLProgram env, Pi e) {
 		InstExp xxx = env.insts.get(e.I);
 		if (xxx == null) {

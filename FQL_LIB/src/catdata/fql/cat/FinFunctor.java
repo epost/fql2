@@ -67,7 +67,7 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 		}
 	}
 
-	//TODO sort data in instances, transforms
+	// sort data in instances, transforms
 	
 	/**
 	 * Constructs a singleton functor

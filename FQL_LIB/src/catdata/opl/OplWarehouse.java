@@ -254,7 +254,6 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			this.revalidate();
 		}
 		
-		//TODO
 		public Map<String, String> transfer() {
 //			System.out.println("called txfer for " + my_state + " keys " + map.keySet());
 			Map<String, String> m = new HashMap<>();
@@ -297,7 +296,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 		return new Program<>(decls);
 	}
 	
-	//TODO: maintain compiling program?
+	//TODO: AQL maintain compiling program?
 
 	@Override
 	public Map<String, Page> getAllPages() {
@@ -314,14 +313,14 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			addBlanks();		
 			state = proposedState;
 		} else {
-			//TODO change panes here?
+			//TODO aql change panes here?
 		}
 		
 	}
 	
-	//TODO: alphabetize tabs
+	//TODO aql alphabetize tabs
 	
-	//TODO heuristic: if something already there, leave it.  otherwise, create new
+	//TODO aql  heuristic: if something already there, leave it.  otherwise, create new
 	void addBlanks() {
 		if (state.equals(INITIAL)) {
 			if (!bindings.containsKey(THEORY)) {  
@@ -334,7 +333,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 		} else if (state.equals(SHAPE)) {
 			OplGraph<String, String> shape = (OplGraph<String, String>) bindings.get(SHAPE);
 			for (String en : shape.nodes) {
-				if (bindings.containsKey(SCHEMA + "_" + en)) {  //TODO: false
+				if (bindings.containsKey(SCHEMA + "_" + en)) {  //TODO: aql false
 					continue;
 				}
 				bindings.put(SCHEMA + "_" + en, new OplSCHEMA0<String, String, String>(new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>(), new LinkedList<>(), new LinkedList<>(), THEORY));
@@ -377,11 +376,11 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 				ed2.put(MAPPING + "_" + e, new Pair<>(l, SCHEMA + "_" + x.second));
 			}
 			OplGraph<String, String> shape2 = new OplGraph<String,String>(en2, ed2);
-			//TODO: needs to compile to here
+			//TODO: aql needs to compile to here
 			computeColimit(bindings, shape2, THEORY);
 			
 			for (String en : shape.nodes) {
-				if (bindings.containsKey(INSTANCE + "_" + en)) {  //TODO: false
+				if (bindings.containsKey(INSTANCE + "_" + en)) {  //TODO aql false
 					continue;
 				}
 				bindings.put(INSTANCE + "_" + en, new OplInst0<>(new OplPres<>(new HashMap<>(), SCHEMA + "_" + en, null, new HashMap<>(), new LinkedList<>())));
@@ -402,7 +401,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 				}
 
 				OplMapping<String,String,String,String,String> mmm = (OplMapping<String,String,String,String,String>) bindings.get(MAPPING + "_" + ed);
-				//TODO: factor getting into separate method, or use compiler
+				//TODO: aql factor getting into separate method, or use compiler
 				OplInst0<String,String,String,String> src1 = (OplInst0<String,String,String,String>) bindings.get(INSTANCE + "_" + en);
 				
 				OplInst0<String,String,String,String> src0 = (OplInst0<String,String,String,String>) bindings.get(INSTANCE + "_" + en2);
@@ -498,7 +497,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 				}
 			}
 			
-			//TODO: type check colimit
+			//TODO: aql type check colimit
 			for (String mname : shape.edges.keySet()) {
 				Pair<String, String> mt = shape.edges.get(mname);
 				String s = mt.first;

@@ -14,7 +14,7 @@ import java.util.Set;
 
 import catdata.Util;
 
-//TODO: can store these not as sets, but as maps from primary key
+//TODO: aql can store these not as sets, but as maps from primary key
 public class SqlInstance {
 
 	private Map<SqlTable, Set<Map<SqlColumn, Optional<Object>>>> db = new HashMap<>();

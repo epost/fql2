@@ -13,7 +13,7 @@ import catdata.Util;
 
 public class AqlJs {
 
-	//TODO: do not store classes, functions, etc in typesides 
+	//TODO: aql do not store classes, functions, etc in typesides 
 	//users of js like saturate and query eval can cache local copies of compiled code
 	
 	//private Map<String, Function<List<Object>, Object>> compiled = new HashMap<>();
@@ -75,7 +75,7 @@ public class AqlJs {
 		}
 	}
 	
-	//TODO don't need all of collage, just java part
+	//TODO aql don't need all of collage, just java part
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> reduce1(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term,  Collage<Ty, ?, Sym, ?, ?, ?, ?> col) {
 		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args = null; 
 		Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg = null; 
@@ -114,7 +114,7 @@ public class AqlJs {
 			Function<List<Object>, Object> fn = compile(java);
 			Object result = fn.apply(unwrapped_args);
 			if (result == null) {
-				//TODO: too restrictive?
+				//TODO: aql too restrictive?
 				throw new RuntimeException("Java applying " + term.sym + " to " + Util.sep(unwrapped_args, ", ") + " gives a null result");
 			}
 			Ty ty = col.syms.get(term.sym).second;

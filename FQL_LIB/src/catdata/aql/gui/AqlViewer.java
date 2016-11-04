@@ -42,6 +42,7 @@ import catdata.aql.exp.Kind;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Split;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.KKLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -50,10 +51,13 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
+import edu.uci.ics.jung.visualization.decorators.AbstractEdgeShapeTransformer;
 
-//TODO: quoting
+//TODO: aql quoting
 
-//TODO random instances
+//TODO aql random instances
+
+//TODO aql replace literal by constant
 
 public final class AqlViewer {
 
@@ -76,6 +80,7 @@ public final class AqlViewer {
 			@SuppressWarnings("unchecked")
 			Schema<Object, Object, Object, Object, Object> schema = (Schema<Object, Object, Object, Object, Object>) obj;
 			ret.add(viewSchema(schema), "Graph");
+//			ret.add(viewSchema2(schema), "Graph2");
 			ret.add(viewDP(schema.dp(), schema.collage()), "DP");
 		//	ret.add(new CodeTextPanel("", schema.collage().toString()), "Temp");
 			break;
@@ -161,10 +166,12 @@ public final class AqlViewer {
 		if (sgv.getVertexCount() == 0) {
 			return new JPanel();
 		}
+		//Layout<Chc<Ty, En>, Chc<Fk, Att>> layout = new KKLayout<>(sgv);
 		Layout<Chc<Ty, En>, Chc<Fk, Att>> layout = new FRLayout<>(sgv);
+		
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Chc<Ty, En>, Chc<Fk, Att>> vv = new VisualizationViewer<>(layout);
-		Transformer<Chc<Ty, En>, Paint> vertexPaint = x -> x.left ? null : Color.black;
+		Transformer<Chc<Ty, En>, Paint> vertexPaint = x -> x.left ? Color.gray : Color.black;
 		DefaultModalGraphMouse<Chc<Ty, En>, Chc<Fk, Att>> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -180,9 +187,75 @@ public final class AqlViewer {
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 		ret.add(zzz);
 		ret.setBorder(BorderFactory.createEtchedBorder());
+		
+		vv.getRenderContext().setLabelOffset(16);
+		//vv.getRenderContext().set
+		vv.setBackground(Color.white);
+		
+		//vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
+		
+		//AbstractEdgeShapeTransformer aesf = (AbstractEdgeShapeTransformer)
+			//	vv.getRenderContext().getEdgeShapeTransformer();
+			//	aesf.		
+		//		aesf.setControlOffsetIncrement(0);
+		
 		return ret;
 	}	
+	/*
+	public static <Ty, En, Sym, Fk, Att> JComponent viewSchema2(Schema<Ty, En, Sym, Fk, Att> schema) {
+		Graph<Chc<Ty, En>, Chc<Fk, Att>> sgv = new DirectedSparseMultigraph<>();
 
+		for (En en : schema.ens) {
+			sgv.addVertex(Chc.inRight(en));
+		}
+		for (Ty ty : schema.typeSide.tys) {
+			sgv.addVertex(Chc.inLeft(ty));
+		}
+		for (Att att : schema.atts.keySet()) {
+			sgv.addEdge(Chc.inRight(att), Chc.inRight(schema.atts.get(att).first), Chc.inLeft(schema.atts.get(att).second));
+		}
+		for (Fk fk : schema.fks.keySet()) {
+			sgv.addEdge(Chc.inLeft(fk), Chc.inRight(schema.fks.get(fk).first), Chc.inRight(schema.fks.get(fk).second));
+		}
+
+		if (sgv.getVertexCount() == 0) {
+			return new JPanel();
+		}
+		Layout<Chc<Ty, En>, Chc<Fk, Att>> layout = new KKLayout<>(sgv);
+		//Layout<Chc<Ty, En>, Chc<Fk, Att>> layout = new FRLayout<>(sgv);
+		
+		layout.setSize(new Dimension(600, 400));
+		VisualizationViewer<Chc<Ty, En>, Chc<Fk, Att>> vv = new VisualizationViewer<>(layout);
+		Transformer<Chc<Ty, En>, Paint> vertexPaint = x -> x.left ? Color.gray : Color.black;
+		DefaultModalGraphMouse<Chc<Ty, En>, Chc<Fk, Att>> gm = new DefaultModalGraphMouse<>();
+		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		vv.setGraphMouse(gm);
+		gm.setMode(Mode.PICKING);
+		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+
+		Transformer<Chc<Fk, Att>, String> et = x -> "";
+		Transformer<Chc<Ty, En>, String> vt = x -> x.toStringMash();
+		vv.getRenderContext().setEdgeLabelTransformer(et);
+		vv.getRenderContext().setVertexLabelTransformer(vt);
+
+		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+		JPanel ret = new JPanel(new GridLayout(1, 1));
+		ret.add(zzz);
+		ret.setBorder(BorderFactory.createEtchedBorder());
+		
+		vv.getRenderContext().setLabelOffset(16);
+		//vv.getRenderContext().set
+		vv.setBackground(Color.white);
+		
+		//vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
+		
+		AbstractEdgeShapeTransformer aesf = (AbstractEdgeShapeTransformer)
+				vv.getRenderContext().getEdgeShapeTransformer();
+				aesf.setControlOffsetIncrement(50);
+		
+		return ret;
+	}	
+*/
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> JComponent viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		CodeTextPanel input = new CodeTextPanel("Input", "");
 		CodeTextPanel output = new CodeTextPanel("Output", "");

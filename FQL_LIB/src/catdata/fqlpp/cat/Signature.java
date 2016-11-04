@@ -705,7 +705,7 @@ public class Signature<O,A> implements Serializable {
 
 		// System.out.println(r1);
 		
-		//TODO KB stuff
+		
 		
 		return new Pair<>(r1, r2);
 	}

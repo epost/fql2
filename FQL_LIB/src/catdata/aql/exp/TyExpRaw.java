@@ -23,9 +23,9 @@ import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
 
-//TODO: add shortcuts to editor
+//TODO: aql add shortcuts to editor
 
-//TODO quoting (reuse example maker?)
+//TODO aql quoting (reuse example maker?)
 public final class TyExpRaw extends TyExp<Object, Object> {
 
 	@Override

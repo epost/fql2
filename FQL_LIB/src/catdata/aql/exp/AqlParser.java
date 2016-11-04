@@ -272,7 +272,7 @@ public class AqlParser {
 		);
 	}  */
 	
-	//TODO why ambiguous?
+	// why ambiguous?
 	/*
 	private  static final Parser<TyExpRaw> tyExpRaw() {
 		Parser<List<String>> types = Parsers.tuple(token("types"), ident.many()).map(x -> x.b);
@@ -515,17 +515,17 @@ public class AqlParser {
 			return ret;	
 	}
 	 
-	 //TODO aql add example illustrating multiquestions
+	 //TODO aql add example illustrating multi equations
 
 /*	private static final Parser<PragmaExp> pragmaExp() {
 		return Parsers.fail("pragma parser not implemented yet"); //TODO aql pragma
 	} */
 /*	
 	public static final Parser<QueryExp> queryExp() {
-		return Parsers.fail("query parser not implemented yet"); //TODO aql query
+		return Parsers.fail("query parser not implemented yet"); 
 	} */
 	
-	 //TODO: reverse order on arguments env
+	 //TODO: aql reverse order on arguments env
 	private static final Parser<MapExpRaw> mapExpRaw() {
 		Parser<List<catdata.Pair<String, String>>> ens = Parsers.tuple(token("entities"), env(ident, "->")).map(x -> x.b);
 		
@@ -598,7 +598,7 @@ public class AqlParser {
 	private static final Reference<MapExp<?,?,?,?,?,?,?,?>> map_ref = Parser.newReference();
 	private static final Reference<TransExp<?,?,?,?,?,?,?,?,?,?,?,?,?>> trans_ref = Parser.newReference();
 	
-	private static Parser<Program<Exp<?>>> program() { //TODO: should create single instance of this rather than fn
+	private static Parser<Program<Exp<?>>> program() { //TODO: aql should create single instance of this rather than fn
 		tyExp();
 		schExp();
 		instExp();
@@ -664,8 +664,6 @@ public class AqlParser {
 	});
 	
 	
-	//TODO: visitor for aql exps?
-
-	//TODO: OPL to AQL translator?
+	//TODO: aql visitor for aql exps?
 
 }

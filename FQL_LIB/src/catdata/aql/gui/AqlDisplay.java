@@ -31,7 +31,7 @@ import catdata.ide.Disp;
 import catdata.ide.LineException;
 import catdata.ide.Program;
 
-//TODO suppress instance equations - do not compute/display if not required - maybe make instance an interface
+//TODO aql suppress instance equations - do not compute/display if not required - maybe make instance an interface
 public final class AqlDisplay implements Disp {
 
 	private Throwable exn;
@@ -44,7 +44,7 @@ public final class AqlDisplay implements Disp {
 	public void close() {
 	}
 	
-	//TODO unresolve, should be controllable with option [since expensive]
+	//TODO aql unresolve, should be controllable with option [since expensive]
 	private static String doLookup(String c, Object o, Exp<?> exp, AqlEnv env) {
 		switch (exp.kind()) {
 		case INSTANCE:

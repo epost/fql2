@@ -92,7 +92,6 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 		return r.accept(env, this);
 	}
 
-	//TODO this when sigops ready
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			FQLProgram env, Const e) {

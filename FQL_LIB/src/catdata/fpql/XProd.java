@@ -460,7 +460,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return ret;
 	} 
 
-	 //TODO: empty FROM
+	 //: empty FROM
 	 //FROM schema, SELECT schema, 
 /*	public static <C> XCtx fast_flower(Flower flower, XCtx<C> I, XCtx<C> S, XCtx<C> Z) {
 		Set<C> ids = new HashSet<>();
@@ -699,7 +699,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			ret.type((List)v);
 		}
 				
-		//TODO: typecheck edges?
+		//: typecheck edges?
 		
 		return ret;
 	}
@@ -762,7 +762,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		Map<Object, Triple<C, C, List<C>>> m = new HashMap<>();
 		ret.add(m);
 		
-		//TODO: check from vars do not occur in I
+		//: check from vars do not occur in I
 		if (!Collections.disjoint(flower.from.keySet(), I.allTerms())) {
 			throw new RuntimeException("FROM variable is also in instance");
 		}
@@ -1147,10 +1147,10 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return new XMapping<Pair<Object, Map<Object, Triple<C, C, List<C>>>>, Pair<Object, Map<Object, Triple<C, C, List<C>>>>>(uberflower(poly, h.src), uberflower(poly, h.dst), em, "homomorphism");
 	}
 	
-	//TODO: make sure this is conjunctive otherwise throw an error //duplicate for later
-	//TODO: on saturated with discrete op will be saturated
-	//TODO: must add (not query label) (TARGET NODE) EVEN FOR THE CONJUNCTIVE CASE //add label here
-	//TODO: do pre-filtering based on lhs = const (ground) here //won't help
+	//: make sure this is conjunctive otherwise throw an error //duplicate for later
+	//: on saturated with discrete op will be saturated
+	//: must add (not query label) (TARGET NODE) EVEN FOR THE CONJUNCTIVE CASE //add label here
+	//: do pre-filtering based on lhs = const (ground) here //won't help
 	public static <C,D> XCtx<Pair<Object, Map<Object, Triple<C, C, List<C>>>>> uberflower(XPoly<C,D> poly, XCtx<C> I) {
 		//XCtx c = frozen(flower, I.schema); 
 		
@@ -1305,7 +1305,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return J;
 	}
 	
-	//TODO: check that INSTANCEs are saturated?
+	//: check that INSTANCEs are saturated?
 	
 	static <C,D> void checkEdges(XPoly<C,D> poly, Map<Object, XCtx> frozens) {
 		for (Object k : poly.blocks.keySet()) {

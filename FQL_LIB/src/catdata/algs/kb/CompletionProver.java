@@ -43,7 +43,7 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 		List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> prec = new LinkedList<>(prec2);
 		for (Head<Ty, En, Sym, Fk, Att, Gen, Sk> c : init) {
 			if (!signature.containsKey(c)) {
-				prec.remove(c); //simplfied away TODO kind of weird
+				prec.remove(c); //simplfied away TODO aql kind of weird
 			}
 		}		
 		

@@ -99,7 +99,7 @@ public class XMapping<C, D> implements XObject {
 		validate();
 	}
 
-	// TODO: make sure this is the identity for global and schema
+	// : make sure this is the identity for global and schema
 	public void validate() {
 		// System.out.println("Validating " + this);
 		unprovable = new HashMap<>();
@@ -433,7 +433,6 @@ public class XMapping<C, D> implements XObject {
 		return new XMapping<>(src, dst, ret, "mapping");
 	}
 
-	// TODO
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static XMapping<String, String> make(XCtx<String> src, XCtx<String> dst, XTransConst e) {
 		if (src.schema == null) {
@@ -446,7 +445,7 @@ public class XMapping<C, D> implements XObject {
 			throw new RuntimeException("not on same schema");
 		}
 
-		Map ret = new HashMap<>(); // TODO
+		Map ret = new HashMap<>(); 
 		for (String c : src.schema.allTerms()) {
 			List<String> l = new LinkedList<>();
 			l.add(c);
@@ -725,7 +724,7 @@ public class XMapping<C, D> implements XObject {
 		 * f.first)) { Triple<D, D, List<D>> ff = new Triple<>((D)"_1",
 		 * f.second, f.third.subList(1, f.third.size())); if
 		 * (src.global.cat().arrows().contains(ff)) { return true; } } }
-		 */// TODO faster?
+		 */// 
 		return false;
 	}
 
@@ -980,7 +979,7 @@ public class XMapping<C, D> implements XObject {
 		return true;
 	}
 
-	// TODO: check on cleanup
+	// 
 	void cleanup(Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
 			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
 			Pair<C, Triple<D, D, List<D>>> tag, Triple<C, C, List<C>> y) {

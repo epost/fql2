@@ -38,7 +38,7 @@ import catdata.fql.sql.SimpleCreateTable;
 import catdata.ide.LineException;
 import catdata.ide.NEWDEBUG;
 
-//TODO always execute postlude
+//todo always execute postlude
 
 /**
  * 
@@ -53,8 +53,7 @@ public class JDBCBridge {
 			Map<String, Set<Map<Object, Object>>> ret) throws SQLException {
 		List<PSM> psm = new LinkedList<PSM>();
 
-		Pair<String, String> val = prog.transforms.get(k)
-				.type(prog);
+		Pair<String, String> val = prog.transforms.get(k).type(prog);
 		InstExp i = prog.insts.get(val.first);
 		SigExp.Const ss = i.type(prog).toConst(prog);
 		Signature s = ss.toSig(prog);
@@ -74,7 +73,7 @@ public class JDBCBridge {
 			maybeExec(psm, Stmt, ret, interp, s);
 			if (v.gather()) {
 				gatherTransform(prog, ret, Stmt, k, ss);
-				// TODO have non SQL transform output into temps, so can gather them like any other
+				//  have non SQL transform output into temps, so can gather them like any other
 			}
 			break;
 		}

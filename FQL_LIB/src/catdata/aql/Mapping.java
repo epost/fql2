@@ -16,7 +16,7 @@ import catdata.Util;
 //apparently iteration of a set is not deterministic, use linkedhashset if need deterministic order
 public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	
-	//TODO: push this into Morphism class?
+	//TODO: aql push this into Morphism class?
 	private Morphism<Ty,En1,Sym,Fk1,Att1,Void,Void,En2,Sym,Fk2,Att2,Void,Void> semantics;
 	public Morphism<Ty,En1,Sym,Fk1,Att1,Void,Void,En2,Sym,Fk2,Att2,Void,Void> semantics() {
 		if (semantics != null) {
@@ -114,7 +114,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	public final Schema<Ty,En1,Sym,Fk1,Att1> src;
 	public final Schema<Ty,En2,Sym,Fk2,Att2> dst;
 
-	//TODO compose
+	//TODO aql mapping compose
 	
 	public static <Ty,En,Sym,Fk,Att> Mapping<Ty,En,Sym,Fk,Att,En,Fk,Att> id(Schema<Ty,En,Sym,Fk,Att> s) {
 		if (s == null) {
@@ -301,7 +301,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		
 		return toString;
 	} 
-	//TODO alphabetical?
+	//TODO aql alphabetical?
 	
 	
 }

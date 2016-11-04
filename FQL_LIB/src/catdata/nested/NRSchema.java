@@ -18,13 +18,13 @@ public abstract class NRSchema {
 
 		@Override
 		public NRel visit(Object env, Dom e) {
-			// TODO Auto-generated method stub
+			//  Auto-generated method stub
 			return null;
 		}
 
 		@Override
 		public NRel visit(Object env, Rcd e) {
-			// TODO Auto-generated method stub
+			//  Auto-generated method stub
 			return null;
 		}
 
@@ -50,7 +50,7 @@ public abstract class NRSchema {
 				throw new RuntimeException();
 			}
 			
-			// TODO Auto-generated method stub
+			//  Auto-generated method stub
 			return null;
 		}
 		

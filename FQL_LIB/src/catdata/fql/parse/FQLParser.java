@@ -154,7 +154,7 @@ public class FQLParser {
 		return ret;
 	}
 
-	// TODO add identity query
+	// add identity query
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final Parser<?> fullQuery() {
@@ -628,7 +628,7 @@ public class FQLParser {
 			objs.add(new Pair<>(p, q));
 		}
 
-		//TODO
+		
 		if (b.b.toString().equals("ASWRITTEN")) {
 			for (Pair<String, String> k : objs) {
 				attrs.add(new Pair<>(k.first + "_att", k.second + "_att"));

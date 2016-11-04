@@ -12,7 +12,7 @@ import catdata.aql.Instance;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 
-//TODO rename to literal
+//TODO aql rename to constant?
 public class LiteralInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
 
 	private final Schema<Ty, En, Sym, Fk, Att> schema;

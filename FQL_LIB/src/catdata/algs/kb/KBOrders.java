@@ -54,7 +54,7 @@ public class KBOrders {
 					return !t.equals(s) && s.vars().contains(t.getVar().var);
 				}
 				if (s.isVar) {
-					//TODO: KB will fail on var = const
+					//: KB will fail on var = const
 					//if (DEBUG.debug.opl_david) {
 						//if (t.vars().isEmpty()) {
 							//return true;

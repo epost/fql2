@@ -409,7 +409,7 @@ public class XRaToFpql {
 			}
 		});
 
-		// TODO shred and unshred queries
+		//  shred and unshred queries
 
 		transButton.addActionListener(new ActionListener() {
 			@Override
@@ -777,7 +777,7 @@ public class XRaToFpql {
 			nodes.add(new Pair<>(v, t));
 		}
 
-		//TODO: no constants for now
+		//: no constants for now
 		for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
 			String v1 = eq.first.first;
 			String t1 = from.get(v1);
@@ -931,7 +931,7 @@ public class XRaToFpql {
 			if (x.second.second != null) {
 				continue;
 			}
-			String c = x.second.first; //TODO: add to global consts
+			String c = x.second.first; //: add to global consts
 			enums.add(c);
 			Triple<String, String, String> found = null;
 			Triple<String, String, String> tofind = new Triple<>(x.first.first + "_" + fl.from.get(x.first.first) + "_" + x.first.second, "guid", "adom");
@@ -1400,8 +1400,7 @@ public class XRaToFpql {
 		Parser<?> from = Parsers.tuple(term("FROM"), from0);
 
 		Parser<?> where0 = Parsers.tuple(tuple, term("="), tuple.or(string())).sepBy(term("AND"));
-		Parser<?> where = Parsers.tuple(term("WHERE"), where0); // TODO
-																// .optional();
+		Parser<?> where = Parsers.tuple(term("WHERE"), where0); 
 
 		Parser<?> select0 = Parsers.tuple(tuple, term("AS"), ident()).sepBy1(term(","));
 		Parser<?> select = Parsers.tuple(term("SELECT"), term("DISTINCT").optional(), select0);

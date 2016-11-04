@@ -746,7 +746,7 @@ public class Signature {
 		return ret;
 	}
 
-	// TODO dangerous
+	//  dangerous
 	Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> cached = null;
 
 	private void doInfiniteCheck() {
@@ -1309,7 +1309,7 @@ public class Signature {
 
 		}
 
-		// TODO EDs for transforms
+		//  EDs for transforms
 
 		for (Attribute<Node> e : sig.attrs) {
 			List<String> forall = new LinkedList<>();

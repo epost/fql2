@@ -11,7 +11,7 @@ import catdata.algs.strings.EditDistance;
 
 public class SqlMapping {
 
-	//TODO give fks deterministic names based on table names, col names, etc 
+	//TODO aql give fks deterministic names based on table names, col names, etc 
 	
 	public SqlSchema source, target;
 	

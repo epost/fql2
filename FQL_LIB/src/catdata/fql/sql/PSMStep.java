@@ -59,7 +59,7 @@ public class PSMStep extends PSM {
 Sigma_m(*_W)-->*_R.
 Then apply Sigma_n to both sides. */
 		
-		// TODO Auto-generated method stub
+		//  Auto-generated method stub
 		throw new FQLException("sd");
 		} catch (FQLException fe) {
 			fe.printStackTrace();

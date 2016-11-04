@@ -233,7 +233,7 @@ public class LeftKanSigma {
 				throw new RuntimeException(
 						"Cannot create nulls for any type but string");
 			}
-			return "NULL" + newkey; // TODO null hack
+			return "NULL" + newkey; //  null hack
 		}
 		throw new RuntimeException();
 	}

@@ -15,8 +15,8 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 	public abstract Instance<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src();
 	public abstract Instance<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst();
 	
-	//TODO compose
-	//TODO terminal
+	//TODO aql transform compose
+	//TODO aql transform initial
 
 	public void validate(boolean dontValidateEqs) {
 		if (!src().schema().equals(dst().schema())) {
@@ -129,7 +129,6 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 		return toString;
 	}
 	
-	//TODO transform semantics should be morphism of underlying algebras
 	//private Morphism<Ty,En,Sym,Fk,Att,Gen1,Sk1,En,Sym,Fk,Att,Gen2,Sk2> semantics;
 	/* public final Morphism<Ty,En,Sym,Fk,Att,Gen1,Sk1,En,Sym,Fk,Att,Gen2,Sk2> semantics() {
 		if (semantics != null) {

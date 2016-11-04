@@ -606,7 +606,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		List<LinkedHashMap<X, Y>> ret = new LinkedList<>();
 
 		if (L.isEmpty()) {
-			ret.add(new LinkedHashMap<X,Y>()); //TODO
+			ret.add(new LinkedHashMap<X,Y>()); 
 			return ret;
 		}
 		for (Entry<X, List<Y>> k : L.entrySet()) {

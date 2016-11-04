@@ -117,7 +117,7 @@ public class LeftKan {
 			filter(set, y);
 		}
 	
-		//TODO: not needed?
+		//: not needed?
 		lineage.remove(y);
 /*		for (Object k : lineage.keySet()) {
 			List<Pair<String, Object>> v = lineage.get(k);

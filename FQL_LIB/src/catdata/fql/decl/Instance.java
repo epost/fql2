@@ -80,7 +80,7 @@ public class Instance {
 		return ret;
 	}
 
-	// TODO better drop handling, by kind, visitor
+	//  better drop handling, by kind, visitor
 
 	public void conformsTo(Signature s) throws FQLException {
 
@@ -2116,7 +2116,7 @@ public class Instance {
 	 * Object>>> obsbar = I.thesig.obsbar(); for (Node n : I.thesig.nodes) {
 	 * System.out.println("nnnnn " + n); for (LinkedHashMap<Pair<Arr<Node,
 	 * Path>, Attribute<Node>>, Object> w : obsbar.get(n)) { Instance Iw =
-	 * I.omega(n, w, idx); //TODO remove System.out.println(Iw); } }
+	 * I.omega(n, w, idx);  } }
 	 */
 
 	public static Quad<Instance, Map<Pair<Node, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>, Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>>>, Map<Node, Map<Object, Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>>>, Map<Node, Map<Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>, Object>>> exp2(
@@ -2206,7 +2206,6 @@ public class Instance {
 		if (!J.thesig.equals(I.thesig)) {
 			throw new RuntimeException();
 		}
-//		System.out.println("on " + J + " ^ " + I + " yields " + exp2(idx, J, I).first); //TODO remove
 		
 		Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> xxx = I.thesig
 				.repX(idx);

@@ -34,7 +34,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		return ret;
 	}
 
-	//TODO: printing of contexts broken when conitain choices
+	//TODO: aql printing of contexts broken when conitain choices
 	
 	@Override
 	public Schema<Object, Object, Object, Object, Object> eval(AqlEnv env) {

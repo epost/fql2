@@ -320,22 +320,22 @@ public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>
 	
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, XSOED e) {
-		return null; //TODO return new Pair<>(new Var(e.src), new Var(e.dst));
+		return null; 
 	}
 	
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, XSuperED e) {
-		return null; //TODO return new Pair<>(new Var(e.src), new Var(e.dst));
+		return null; 
 	}
 
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, Flower e) {
-		return null; //TODO
+		return null; 
 	}
 
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, FLOWER2 e) {
-		return null; //TODO
+		return null; 
 	}
 	
 	//////////////////////////////////////////////

@@ -64,7 +64,7 @@ public class SqlLoader extends JPanel {
 		output.setText("Error in " + name + ": " + msg);
 	}
 	
-	//TODO: print OK only
+	//TODO: aql print OK only
 	private void populate() throws SQLException {
 		schema = new SqlSchema(conn.getMetaData());
 		output.setText(schema.toString());

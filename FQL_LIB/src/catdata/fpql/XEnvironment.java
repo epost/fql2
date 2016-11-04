@@ -62,7 +62,7 @@ public class XEnvironment {
 				}
 				fns.put(k.getKey(), new Pair<>("_1", ((XExp.XConst) e).dst));
 			}
-			//TODO: check these here?
+			//: check these here?
 			if (e instanceof XExp.XEq) {
 				eqs.add(new Pair<>(((XExp.XEq) e).lhs, ((XExp.XEq) e).rhs));
 			}

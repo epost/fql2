@@ -450,7 +450,7 @@ public class Driver {
 				Signature s = i.type(prog).toSig(prog);
 				drops.addAll(PSMGen.dropTables(k, s));
 
-				// TODO add other drops
+				// add other drops
 				if (i instanceof InstExp.Const || i instanceof InstExp.Plus
 						|| i instanceof InstExp.Times) {
 					drops.addAll(PSMGen.dropTables(k + "_subst", s));

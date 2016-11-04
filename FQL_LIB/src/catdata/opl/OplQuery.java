@@ -154,7 +154,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 					throw new RuntimeException("In checking block " + b + ", " + a
 							+ " is not an attribute in " + dst_e);
 				}
-				Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>> ee = block.attrs.get(a); //TODO
+				Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>> ee = block.attrs.get(a); 
 				S1 s1 = null;
 				try {
 					if (ee.left) {
@@ -369,7 +369,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				if (ret != null) {
 					throw new RuntimeException("Cannot check path equalities for non-conjunctive queries. (Disable option to proceed)");
 				} else {
-					ret = blocks.get(l).second.attrs.get(att).r; //TODO
+					ret = blocks.get(l).second.attrs.get(att).r; 
 				}
 
 			}
@@ -927,7 +927,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			}
 
 			for (C2 c2 : block.attrs.keySet()) {
-				Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>> ee = block.attrs.get(c2); //.r.inLeft(); //TODO
+				Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>> ee = block.attrs.get(c2); //.r.inLeft(); 
 				
 				for (Map<V1, OplTerm<Chc<C1, X>, V1>> tuple : tuples) {
 					OplTerm<Chc<C1, X>, V1> a;
@@ -1114,10 +1114,10 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 	
 	
 
-	// TODO knuth bendix precedence should favor rewriting into type side rather
+	// knuth bendix precedence should favor rewriting into type side rather
 	// than entity side
 
-	// TODO using a separate type for generators was sound. However, in a typed
+	// using a separate type for generators was sound. However, in a typed
 	// setting, there should be two kinds of
 	// generators, so that the types for generators at type can be preserved
 	// across queries, and let the types at

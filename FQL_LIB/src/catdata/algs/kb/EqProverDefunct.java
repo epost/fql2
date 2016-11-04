@@ -7,7 +7,7 @@ public abstract class EqProverDefunct<C,V> {
 	
 	public abstract boolean eq(KBExp<C,V> e1, KBExp<C,V> e2);
 
-	//TODO: arrange by types
+	//: arrange by types
 	public KBExp<C,V> nf(KBExp<C,V> e) {
 		for (KBExp<C,V> e0 : nfs) {
 			if (eq(e, e0)) {

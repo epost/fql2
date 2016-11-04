@@ -24,7 +24,7 @@ public class LeftKanSigma {
 			  Functor<Signature<O1,A1>.Node,Signature<O1,A1>.Path,Set,Fn> I, 
 			  Transform<Signature<O1,A1>.Node,Signature<O1,A1>.Path,Set,Fn> t, 
 			  Functor<Signature<O2,A2>.Node,Signature<O2,A2>.Path,Set,Fn> JJJ)  {
-		//TODO: factor out injection
+		//: factor out injection
 		//Mapping<Signature<O1, A1>.Node, Signature<O1, A1>.Path, Signature<O2, A2>.Node, Signature<O2, A2>.Path> G = F.toMappingX(F.source.origin, F.target.origin);
 		Mapping<Signature<O1, A1>.Node, Signature<O1, A1>.Path, Signature<O2, A2>.Node, Signature<O2, A2>.Path> G = F.toMappingZ(F.source.origin.inject(), F.target.origin.inject());
 
@@ -145,7 +145,7 @@ public class LeftKanSigma {
 				if (fst.first == null) {
 					rt.add(new Pair<>(null, ((Pair)fst.second).second)); //because no guids, have pairs as first
 				} else {
-					rt.add(new Pair<>(fst.first.name, fst.second )); //TODO
+					rt.add(new Pair<>(fst.first.name, fst.second )); //
 				}
 			}
 			nq.put(o.getKey(), rt);
@@ -194,7 +194,7 @@ public class LeftKanSigma {
 				if (fst.first == null) {
 					rt.add(new Pair<>(null, ((Pair)fst.second).second)); //because no guids, have pairs as first
 				} else {
-					rt.add(new Pair<>(fst.first.name, fst.second )); //TODO
+					rt.add(new Pair<>(fst.first.name, fst.second )); //
 				}
 			}
 			nq.put(o.getKey(), rt);
@@ -276,7 +276,7 @@ public class LeftKanSigma {
 				if (fst.first == null) {
 					rt.add(new Pair<>(null, ((Pair)fst.second).second)); //because no guids, have pairs as first
 				} else {
-					rt.add(new Pair<>(fst.first.name, fst.second )); //TODO
+					rt.add(new Pair<>(fst.first.name, fst.second )); //
 				}
 			}
 			nq.put(o.getKey(), rt);

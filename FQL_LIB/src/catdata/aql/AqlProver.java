@@ -30,13 +30,11 @@ import catdata.aql.AqlOptions.AqlOption;
 import catdata.InvisibleException;
 
 
-//TODO SQL strategy
+//TODO: aql cache hashcode for term?
 
-//TODO: cache hashcode for term?
+//TODO: aql maybe easier to check queries by translation into mappings?
 
-//TODO: maybe easier to check queries by translation into mappings?
-
-//TODO: add abort functionality
+//TODO: aql add abort functionality
 
 //no java here!
 public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
@@ -51,7 +49,6 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		congruence,
 		fail,
 		free,
-//		precomputed;		
 	}
 	
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> DP<Ty, En, Sym, Fk, Att, Gen, Sk> 
@@ -75,10 +72,6 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				switch (name) {
 				case auto: 
 					throw new RuntimeException("Anomaly: please report");
-		//		case precomputed:
-		//			@SuppressWarnings("unchecked")
-		//			DP<Ty, En, Sym, Fk, Att, Gen, Sk> ret = (DP<Ty, En, Sym, Fk, Att, Gen, Sk>) ops.get(AqlOption.precomputed); //TODO aql remove precomputed
-		//			return ret;
 				case fail: 
 					return wrap(col1, x -> { throw new RuntimeException(); }, new FailProver<>());
 				case free: 

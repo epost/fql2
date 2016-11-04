@@ -17,11 +17,8 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-//TODO restore comment out sections
-// cant allow equations involving typeside java symbols [allows inconsistency] also in schemas , but symbols ok
-// when an instance creates a collage, check that type algebra is free
-// prover factory can't check freeness of type algebra, will have to trust; prover assumes java defs are consistent with eqs
-// syms can go back to Chc from Chc3, but att still needs Chc3
+
+
 import catdata.algs.kb.KBExp;
 
 //TODO: aql validate collage
@@ -59,7 +56,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 	
 	public Collage() {
-		// TODO add validator in constructor
+		// TODO aql add validator in constructor
 	}
 
 	public Collage(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
@@ -77,8 +74,6 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		// assertFreeOnJava(); causes infinite loop
 	}
 
-	// TODO: free on java should be checked in typeside but this is defensive
-	// programming
 	/*
 	public Collage(TypeSide<Ty, Sym> typeSide) {
 		this.tys.addAll(typeSide.tys);
@@ -96,9 +91,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		this.atts.putAll(schema.atts);
 		this.fks.putAll(schema.fks);
 		this.eqs.addAll(schema.eqs.stream().map(x -> new Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>(new Ctx<>(new Pair<>(x.first.first, Chc.inRight(x.first.second))), upgradeSchema(x.second), upgradeSchema(x.third))).collect(Collectors.toSet()));
-		assertFreeOnJava(); // TODO should be checked in schema, and also too
-							// strong - want free of each representable
-							// instances type algebra
+		assertFreeOnJava(); 
 	}
 
 	public <X,Y> Collage(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> instance) {
@@ -431,8 +424,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	// return simplify().first.eqs.isEmpty();
 	// }
 
-	// TODO aql consistent extension
-
+	
 	public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> reduce() {
 		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> ret = new Collage<>(this);
 		ret.eqs.clear();

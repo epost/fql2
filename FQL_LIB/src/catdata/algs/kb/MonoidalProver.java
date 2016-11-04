@@ -22,7 +22,7 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 	public MonoidalProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
 		super(sorts, sig, eqs);
 		
-		//!_1 =  (might be superflous) TODO
+		//!_1 =  (might be superflous) TODO aql
 		rules.add(new Pair<>(Util.singList(Chc.inLeft(Chc.inLeft(new Unit()))) , Collections.emptyList()));
 		
 		//e : t -> 1 = !_1 - don't have any

@@ -406,8 +406,6 @@ public class InstOps implements
 		return ret;
 	}
 
-	// TODO remove comma seps in FQL 4 for tuples
-
 	@Override
 	public List<PSM> visit(String dst, catdata.fql.decl.TransExp.Sigma e) {
 		List<PSM> ret = new LinkedList<>();
@@ -502,7 +500,7 @@ public class InstOps implements
 					i++;
 				}
 				// here a is unused because attributes will be in this order
-				// TODO check
+				//  check
 				for (@SuppressWarnings("unused")
 				Attribute<Node> a : sig2.attrsFor(n)) {
 					where.add(new Pair<>(new Pair<>("limit1", "c" + i),
@@ -784,7 +782,7 @@ public class InstOps implements
 					sql = new Flower(select0, from0, where0);
 					ret.add(new InsertSQL(dst + "_" + a.name, sql, "c0", "c1"));
 				}
-			//	ret.add(new DropTable(dst + "_prod_temp_" + n)); TODO !!!!!!
+			//	ret.add(new DropTable(dst + "_prod_temp_" + n)); 
 
 			}
 
@@ -1007,7 +1005,7 @@ public class InstOps implements
 		List<PSM> ret = new LinkedList<>();
 
 		try {
-			q.join.okForPi(); // TODO maybe redundant?
+			q.join.okForPi(); //  maybe redundant?
 			q.union.okForSigma();
 
 			// ret.addAll(PSMGen.makeTables(next, q.project.target, false));
@@ -1607,7 +1605,7 @@ public class InstOps implements
 		prog.insts.remove("sigma_n_star_r");		
 		prog.transforms.remove("sigma_n_sigma_m_star_w_sigma_n_star_r");
 		*/
-		//TODO: drops
+		//: drops
 		
 		return new Pair<>(ret, new Object());		
 	}

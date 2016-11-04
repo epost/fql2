@@ -25,7 +25,7 @@ public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, 
 	private final Ctx<Gen1, Term<Void, En2, Void, Fk2, Void, Gen2, Void>> gens = new Ctx<>();
 	private final Ctx<Sk1, Term<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2>> sks = new Ctx<>();
 	
-	//TODO: this recomputes the instances
+	//TODO: aql this recomputes the instances
 	public SigmaTransform(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h,  Map<String, String> options1,  Map<String, String> options2) {
 		if (!h.src().schema().equals(f.src)) {
 			throw new RuntimeException("Source of mapping is " + f.src + " but instances are on " + h.src().schema());

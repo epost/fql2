@@ -6,7 +6,7 @@ import java.util.Set;
 import catdata.Quad;
 import catdata.Triple;
 
-//TODO in future, don't have arrows(); only have arrows(node, node)
+// in future, don't have arrows(); only have arrows(node, node)
 public class Comma {
 
 	public static <OA, AA, OB, AB, OC, AC> Triple<

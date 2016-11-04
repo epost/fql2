@@ -66,7 +66,7 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 		// System.out.println(pu + " and " + pv);
 		uf.union(u, v);
 		pred.get(uf.find(u)).addAll(pu);
-		pred.get(uf.find(v)).addAll(pv); //one of these will be redundant TODO check that find never changes
+		pred.get(uf.find(v)).addAll(pv); //one of these will be redundant TODO aql check that find never changes
 
 		for (KBExp<C, V> x : pu) {
 			for (KBExp<C, V> y : pv) {

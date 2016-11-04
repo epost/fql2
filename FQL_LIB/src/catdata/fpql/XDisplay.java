@@ -94,9 +94,8 @@ public class XDisplay implements Disp {
 				continue;
 			}
 			if (obj instanceof XPoly) {
-				//TODO
 //				((XPoly)obj).validate();
-			continue;
+				continue;
 			}
 			frames.add(new Pair<>(doLookup(c, obj, map, p), obj.display()));
 		}

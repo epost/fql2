@@ -682,7 +682,7 @@ public class FqlDisplay implements Disp {
 
 			@Override
 			public Object visit(Unit env, Step e) {
-				return null; // TODO: (Step) this should return a pair
+				return null; // (Step) this should return a pair
 			}
 
 		});

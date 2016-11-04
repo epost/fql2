@@ -29,7 +29,7 @@ public class SubInstances {
 		return ret;
 	}
 	
-	//TODO: change subinstances_fast to use maps rather than sets
+	//: change subinstances_fast to use maps rather than sets
 	private static <O,A> Set<Map<Chc<O,A>, Set<Pair<Object, Object>>>> subInstances_fast0(
 			Category<O,A> sig, List<O> list,
 			Map<Chc<O,A>, Set<Pair<Object, Object>>> inst) {
