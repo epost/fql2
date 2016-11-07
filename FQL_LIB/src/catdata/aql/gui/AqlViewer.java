@@ -21,6 +21,7 @@ import javax.swing.JTabbedPane;
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Chc;
+import catdata.DMG;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -106,6 +107,11 @@ public final class AqlViewer {
 		case QUERY:
 			// viewQuery(obj, ret);
 			break;
+			
+		case GRAPH:
+			@SuppressWarnings("unchecked") DMG<Object, Object> dmg = (DMG<Object, Object>) obj;
+			ret.add(viewGraph(dmg), "Graph");
+			break;
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		}
@@ -144,6 +150,47 @@ public final class AqlViewer {
 
 		return main;
 	}
+	
+	public static <N,E> JComponent viewGraph(DMG<N,E> g) {
+		Graph<N, E> sgv = new DirectedSparseMultigraph<>();
+
+		for (N n : g.nodes) {
+			sgv.addVertex(n);
+		}
+		for (E e : g.edges.keySet()) {
+			sgv.addEdge(e, g.edges.get(e).first, g.edges.get(e).second);
+		}
+		
+		if (sgv.getVertexCount() == 0) {
+			return new JPanel();
+		}
+		Layout<N,E> layout = new FRLayout<>(sgv);
+		
+		layout.setSize(new Dimension(600, 400));
+		VisualizationViewer<N, E> vv = new VisualizationViewer<>(layout);
+		Transformer<N, Paint> vertexPaint = x -> Color.black;
+		DefaultModalGraphMouse<N, E> gm = new DefaultModalGraphMouse<>();
+		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		vv.setGraphMouse(gm);
+		gm.setMode(Mode.PICKING);
+		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+
+		Transformer<E, String> et = x -> x.toString();
+		Transformer<N, String> vt = x -> x.toString();
+		vv.getRenderContext().setEdgeLabelTransformer(et);
+		vv.getRenderContext().setVertexLabelTransformer(vt);
+
+		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+		JPanel ret = new JPanel(new GridLayout(1, 1));
+		ret.add(zzz);
+		ret.setBorder(BorderFactory.createEtchedBorder());
+		
+		vv.getRenderContext().setLabelOffset(16);
+		vv.setBackground(Color.white);
+		
+		return ret;
+	}	
+
 	
 	public static <Ty, En, Sym, Fk, Att> JComponent viewSchema(Schema<Ty, En, Sym, Fk, Att> schema) {
 		Graph<Chc<Ty, En>, Chc<Fk, Att>> sgv = new DirectedSparseMultigraph<>();

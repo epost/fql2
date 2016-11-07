@@ -124,13 +124,8 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 		}
 
 		@Override
-		public X nf(Term<Void, En, Void, Fk, Void, X, Void> term) {
-			if (term.gen != null) {
-				return term.gen;
-			} else if (term.fk != null) {
-				return alg.fk(term.fk, nf(term.arg));
-			}
-			throw new RuntimeException("Anomaly: please report");
+		public X gen(X x) {
+			return x;
 		}
 
 		@Override

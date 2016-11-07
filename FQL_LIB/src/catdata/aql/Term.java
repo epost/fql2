@@ -110,7 +110,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		throw new RuntimeException("Anomaly: please report");
 	}
 	@SuppressWarnings("hiding")
-	public <En, Sym, Fk, Att, Gen> Term<Ty, En, Sym, Fk, Att, Gen, Sk> asObj() {
+	public <En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> asObj() {
 		if (obj != null) {
 			return Term.Obj(obj, ty);
 		}

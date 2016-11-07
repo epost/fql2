@@ -76,6 +76,12 @@ public final class AqlCodeEditor extends
 				"instance ? = literal : ? {\n\timports\n\tgenerators\n\tequations\n\toptions\n} ",
 				""));
 
+		provider.addCompletion(new ShorthandCompletion(
+				provider,
+				"graph",
+				"graph ? = literal : ? {\n\timports\n\tnodes\n\tedges\n} ",
+				""));
+
 		provider.addCompletion(new ShorthandCompletion(provider, "mapping",
 				"mapping ? = literal : ? -> ? {\n\timports\n\tentities\n\tforeign_keys\n\tattributes\n\toptions\n} ", ""));
 

@@ -56,17 +56,27 @@ extends Algebra<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> {
 		}
 		throw new RuntimeException("Anomaly: please report: " + e);	
 	}
-	
+	/*
 	 private Term<Void,En2,Void,Fk2,Void,Gen,Void> translateE(Term<Void, En1, Void, Fk1, Void, Pair<En1, X>, Void> e) {
 		return translate(e.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn())).convert();		
 	} 
-	 
+	 */
 	@Override
-	public Pair<En1, X> nf(Term<Void, En1, Void, Fk1, Void, Pair<En1, X>, Void> term) {
-		 Term<Void,En2,Void,Fk2,Void,Gen,Void> term2 = translateE(term);
+	public Pair<En1, X> gen(Pair<En1, X> gen) {
+		return gen;
+		 /* Term<Void,En2,Void,Fk2,Void,Gen,Void> term2 = translateE(term);
 		 X x = alg.nf(term2);
 		 En1 en1 = type(term.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn()));
-		 return new Pair<>(en1, x);	
+		 return new Pair<>(en1, x);
+		 */
+		  	//TODO aql 
+		/*if (term.gen != null) {
+			return term.gen;
+		} else if (term.fk != null) {
+			return fk(term.fk, nf(term.arg));
+		}
+		throw new RuntimeException("Anomaly: please report");
+		*/
 	}
 
 
@@ -99,7 +109,7 @@ extends Algebra<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> {
 	public Collage<Ty, Void, Sym, Void, Void, Void, Y> talg() {
 		return alg.talg();
 	}
-
+/*
 	private En1 type(Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Sk> e) {
 		if (e.gen != null) {
 			return e.gen.first;
@@ -107,7 +117,7 @@ extends Algebra<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> {
 			return F.src.fks.get(e.fk).second; //no need to recurse, only use outer one
 		}
 		throw new RuntimeException("Anomaly: please report");
-	}
+	}*/
 	
 	@Override
 	public Term<Void, En1, Void, Fk1, Void, Pair<En1, X>, Void> repr(Pair<En1, X> x) {

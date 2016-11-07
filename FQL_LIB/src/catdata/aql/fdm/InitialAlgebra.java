@@ -114,6 +114,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	    	@Override
 			public Unit call() throws Exception {
 				while (saturate1()); 
+				talg();
 				return new Unit();
 			}
 	    });
@@ -237,7 +238,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		}
 		return null;
 	}
-
+/*
 	@Override
 	public X nf(Term<Void, En, Void, Fk, Void, Gen, Void> term) {
 		X x = nf0(term);
@@ -246,7 +247,17 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		}
 		return x;
 	}
-
+*/
+	@Override
+	public X gen(Gen gen) {
+		X x = nf0(Term.Gen(gen));
+		if (x == null) {
+			throw new RuntimeException("Anomaly: please report");
+		}
+		return x;
+	}
+	
+	
 	private Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> talg_full() {
 		Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> talg = new Collage<>();
 		for (Sk sk : col.sks.keySet()) {
@@ -332,7 +343,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	
 	private List<Pair<Chc<Sk, Pair<X, Att>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X,Att>>>>> list = new LinkedList<>();
 	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X,Att>>> simpl(Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X,Att>>> term) {
-		talg(); //apparently trans can be called before talg()
+		 //apparently trans can be called before talg()
 		for (Pair<Chc<Sk, Pair<X, Att>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>>> t : list) {
 			term = term.replaceHead(new Head<>(Term.Sk(t.first)), Collections.emptyList(), t.second);
 		}

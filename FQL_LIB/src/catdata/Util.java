@@ -40,6 +40,17 @@ import javax.swing.table.TableRowSorter;
 
 public class Util {
 	
+	public static <X> Set<X> toSetSafely(List<X> set) {
+		Set<X> ret = new HashSet<>();
+		for (X x : set) {
+			if (ret.contains(x)) {
+				throw new RuntimeException("Duplicate elmement " + x);
+			}
+			ret.add(x);
+		}
+		return ret;
+	}
+	
 	public static <X> List<X> concat(List<List<X>> l) {
 		List<X> ret = new LinkedList<>();
 		for (List<X> x : l) {

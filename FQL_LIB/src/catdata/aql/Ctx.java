@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -93,7 +94,11 @@ public final class Ctx<K,V> {
 	
 	@Override
 	public String toString() {
-		return Util.sep(map.entrySet().stream().map(z -> z.getKey() + ":" + z.getValue()).collect(Collectors.toList()), ",");
+		return toString(x -> x.toString());
+	}
+	
+	public String toString(Function<V,String> fn) {
+		return Util.sep(map.entrySet().stream().map(z -> z.getKey() + ":" + fn.apply(z.getValue())).collect(Collectors.toList()), ",");
 	}
 
 	@Override

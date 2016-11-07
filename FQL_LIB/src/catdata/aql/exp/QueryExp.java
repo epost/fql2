@@ -7,14 +7,14 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Query;
 
-public abstract class QueryExp extends Exp<Query> {
+public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2>> {
 	
 	public Kind kind() {
 		return Kind.QUERY;
 	}
 	
 	
-	public static final class QueryExpVar extends QueryExp {
+	public static final class QueryExpVar extends QueryExp<Object,Object,Object,Object,Object,Object,Object,Object> {
 		String var;
 		
 		@Override
@@ -23,7 +23,7 @@ public abstract class QueryExp extends Exp<Query> {
 		}
 		
 		@Override
-		public Query eval(AqlEnv env) {
+		public Query<Object,Object,Object,Object,Object,Object,Object,Object> eval(AqlEnv env) {
 			return env.getQuery(var);
 		}
 
@@ -61,17 +61,17 @@ public abstract class QueryExp extends Exp<Query> {
 	}
 
 	
-	public static final class QueryExpLit extends QueryExp {
+	public static final class QueryExpLit<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 
 		//TODO: aql add imports
 
-		public final Query q;
+		public final Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> q;
 		
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Collections.emptyList();
 		}
-		public QueryExpLit(Query q) {
+		public QueryExpLit(Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> q) {
 			if (q == null) {
 				throw new RuntimeException("Attempt to create MapExpLit with null schema");
 			}
@@ -79,8 +79,8 @@ public abstract class QueryExp extends Exp<Query> {
 		}
 
 		@Override
-		public Query eval(AqlEnv env) {
-			throw new RuntimeException(); 
+		public Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> eval(AqlEnv env) {
+			throw new RuntimeException("todo"); 
 		}
 
 		@Override
@@ -99,7 +99,7 @@ public abstract class QueryExp extends Exp<Query> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			QueryExpLit other = (QueryExpLit) obj;
+			QueryExpLit<?,?,?,?,?,?,?,?> other = (QueryExpLit<?,?,?,?,?,?,?,?>) obj;
 			if (q == null) {
 				if (other.q != null)
 					return false;

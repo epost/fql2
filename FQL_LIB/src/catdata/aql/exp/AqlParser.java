@@ -20,6 +20,8 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.RawTerm;
+import catdata.aql.exp.GraphExp.GraphExpRaw;
+import catdata.aql.exp.GraphExp.GraphExpVar;
 import catdata.aql.exp.InstExp.InstExpDelta;
 import catdata.aql.exp.InstExp.InstExpDistinct;
 import catdata.aql.exp.InstExp.InstExpEmpty;
@@ -200,6 +202,16 @@ public class AqlParser {
 		inst_ref.set(ret);
 	}
 	
+	//@SuppressWarnings({"unchecked"})
+	private static final void graphExp() {
+		Parser<GraphExp<?,?>> 
+			var = ident.map(GraphExpVar::new),
+		
+			ret = Parsers.or(var, graphExpRaw());
+		
+		graph_ref.set(ret);
+	}
+	
 	private static final void mapExp() {
 		Parser<MapExp<?,?,?,?,?,?,?,?>> 
 			var = ident.map(MapExpVar::new),
@@ -348,6 +360,30 @@ public class AqlParser {
 		return ret.between(token("literal").followedBy(token("{")), token("}")); 
 	}
 	*/
+
+	private static final Parser<GraphExpRaw> graphExpRaw() {
+		Parser<List<String>> nodes = Parsers.tuple(token("nodes"), ident.many()).map(x -> x.b);
+		
+		Parser<Pair<Token, List<Tuple5<List<String>, Token, String, Token, String>>>> edges = Parsers.tuple(token("edges"), Parsers.tuple(ident.many1(), token(":"), ident, token("->"), ident).many());
+		Parser<List<catdata.Pair<String,catdata.Pair<String, String>>>> edges0 = edges.map(x -> {
+			List<catdata.Pair<String,catdata.Pair<String,String>>> ret = new LinkedList<>();
+			for (Tuple5<List<String>, Token, String, Token, String> a : x.b) {
+				for (String b : a.a) {
+					ret.add(new catdata.Pair<>(b, new catdata.Pair<>(a.c, a.e)));					
+				}
+			}
+			return ret;
+		});
+		
+		Parser<Tuple3<List<String>, List<String>, List<catdata.Pair<String, catdata.Pair<String, String>>>>> 
+		pa = Parsers.tuple(imports, nodes.optional(), edges0.optional());
+		
+		Parser<GraphExpRaw> ret = pa.map(x -> {
+			return new GraphExpRaw(x.b, x.c, x.a);
+		});
+		return ret.between(token("literal").followedBy(token("{")), token("}")); 
+		
+	}
 	
 	private  static final Parser<TyExpRaw> tyExpRaw() {
 		Parser<List<String>> types = Parsers.tuple(token("types"), ident.many()).map(x -> x.b);
@@ -597,6 +633,7 @@ public class AqlParser {
 		return Parsers.tuple(token(s), ident, Parsers.INDEX, token("="), p).map(x -> new Triple<>(x.b, x.c, x.e));
 	}
 	
+	private static final Reference<GraphExp<?, ?>> graph_ref = Parser.newReference();
 	private static final Reference<TyExp<?, ?>> ty_ref = Parser.newReference();
 	private static final Reference<SchExp<?,?,?,?,?>> sch_ref = Parser.newReference();
 	private static final Reference<InstExp<?, ?, ?,?,?,?,?,?,?>> inst_ref = Parser.newReference();
@@ -609,13 +646,15 @@ public class AqlParser {
 		instExp();
 		mapExp();
 		transExp();
+		graphExp();
 		
 		Parser<Triple<String, Integer, ? extends Exp<?>>> p 
 		= Parsers.or(decl("typeside", ty_ref.get()),
 					 decl("schema", sch_ref.get()), 
 					 decl("instance", inst_ref.get()),
 					 decl("mapping", map_ref.get()),
-					 decl("transform", trans_ref.get())
+					 decl("transform", trans_ref.get()),
+					 decl("graph", graph_ref.get())
 					 //decl("query", queryExp()),
 					 //decl("pragma", pragmaExp())
 					 );

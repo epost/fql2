@@ -111,13 +111,8 @@ public class TerminalInstance<Ty, En, Sym, Fk, Att> extends Instance<Ty, En, Sym
 		}
 
 		@Override
-		public Void nf(Term<Void, En, Void, Fk, Void, Void, Void> term) {
-			if (term.gen != null) {
-				Util.abort(term.gen);
-			} else if (term.fk != null) {
-				return nf(term.arg);
-			}
-			throw new RuntimeException("anomaly: please report");
+		public Void gen(Void gen) {
+			return Util.abort(gen);
 		}
 		
 	}

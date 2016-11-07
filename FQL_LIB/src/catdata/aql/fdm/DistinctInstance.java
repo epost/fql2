@@ -118,8 +118,8 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 		}
 
 		@Override
-		public X nf(Term<Void, En, Void, Fk, Void, Gen, Void> term) {
-			return conv(I.algebra().nf(term));
+		public X gen(Gen gen) {
+			return conv(I.algebra().gen(gen));
 		}
 
 		@Override

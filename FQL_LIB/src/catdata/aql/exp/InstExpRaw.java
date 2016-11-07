@@ -41,7 +41,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	
 	public final List<String> imports;
 
-	public final List<Pair<Object, Object>> gens;
+	public final List<Pair<Object, Object>> gens; //TODO aql why is this object and not gens
 
 	public final List<Pair<RawTerm, RawTerm>> eqs;
 	

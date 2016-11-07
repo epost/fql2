@@ -61,6 +61,8 @@ public final class AqlDisplay implements Disp {
 			return exp.kind() + " " + c + " : " + env.ttys.get(c).first + " -> " + env.ttys.get(c).second;
 		case TYPESIDE:
 			return exp.kind() + " " + c;
+		case GRAPH:
+			return exp.kind() + " " + c;
 		} 
 		throw new RuntimeException("Anomaly: please report");
 	}
@@ -93,12 +95,12 @@ public final class AqlDisplay implements Disp {
 		this.exn = env.exn;
 		for (String c : p.order) {
 			Exp<?> exp = p.exps.get(c);
-			if (!env.keySet().contains(c)) {
+			/* if (!env.keySet().contains(c)) {
 				continue;
-			}
+			} */
 			Object obj = env.get(c, exp.kind());
 			if (obj == null) {
-				continue;
+				throw new RuntimeException("No def for " + c);
 			}
 			map.put(obj, c); 
 			try {

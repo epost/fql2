@@ -21,13 +21,22 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	 */
 	public abstract Collection<X> en(En en);
 
+	public abstract X gen(Gen gen);
+	
 	public abstract X fk(Fk fk, X x);
 	
 	public abstract Term<Ty, Void, Sym, Void, Void, Void, Y> att(Att att, X x);
 	
 	public abstract Term<Ty, Void, Sym, Void, Void, Void, Y> sk(Sk sk);
 
-	public abstract X nf(Term<Void, En, Void, Fk, Void, Gen, Void> term); 
+	public final X nf(Term<Void, En, Void, Fk, Void, Gen, Void> term) {
+		if (term.gen != null) {
+			return gen(term.gen);
+		} else if (term.fk != null) {
+			return fk(term.fk, nf(term.arg)); 
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
 
 	public abstract Term<Void, En, Void, Fk, Void, Gen, Void> repr(X x);
 	

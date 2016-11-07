@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.DMG;
 import catdata.Pair;
 import catdata.aql.Ctx;
 import catdata.aql.Instance;
@@ -15,6 +16,7 @@ import catdata.aql.Schema;
 import catdata.aql.Transform;
 import catdata.aql.TypeSide;
 import catdata.ide.Program;
+import edu.uci.ics.jung.graph.Graph;
 
 public final class AqlEnv {
 
@@ -22,12 +24,14 @@ public final class AqlEnv {
 	public Ctx<String, SchExp<Object,Object,Object,Object,Object>> itys = new Ctx<>();
 	public Ctx<String, Pair<InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>,  InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>>> ttys = new Ctx<>();
 
+	//TODO AqlEnv move to vtx
+	private Map<String, DMG<Object, Object>> gs = new HashMap<>();
 	private Map<String, TypeSide<Object, Object>> tys = new HashMap<>();
 	private Map<String, Schema<Object, Object, Object, Object, Object>> schs = new HashMap<>();
 	private Map<String, Instance<Object,Object,Object, Object, Object, Object, Object, Object, Object>> insts = new HashMap<>();
 	private Map<String, Transform<Object,Object,Object,Object,Object, Object, Object, Object, Object,Object, Object, Object, Object>> trans = new HashMap<>();
 	private Map<String, Mapping<Object, Object, Object, Object,Object, Object, Object, Object>> maps = new HashMap<>();
-	private Map<String, Query> qs = new HashMap<>();
+	private Map<String, Query<Object, Object, Object, Object, Object, Object, Object, Object>> qs = new HashMap<>();
 	private Map<String, Pragma> ps = new HashMap<>();
 	
 	public Throwable exn = null;
@@ -48,9 +52,10 @@ public final class AqlEnv {
 			return getQuery(k);
 		case PRAGMA:
 			return getPragma(k);
-		default:
-			throw new RuntimeException();
+		case GRAPH:
+			return getGraph(k);
 		}
+		throw new RuntimeException();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -73,10 +78,14 @@ public final class AqlEnv {
 			put(k, (TypeSide<Object, Object>)o);
 			break;
 		case QUERY:
-			put(k, (Query)o);
+			put(k, (Query<Object, Object, Object, Object, Object, Object, Object, Object>)o);
 			break;
 		case PRAGMA:
 			put(k, (Pragma)o);
+			break;
+		case GRAPH:
+			put(k, (DMG<Object,Object>) o);
+			break;
 		default:
 			throw new RuntimeException();
 		}
@@ -157,17 +166,32 @@ public final class AqlEnv {
 		return ret;
 	}
 	
-	public void put(String k, Query v) {
+	public void put(String k, Query<Object, Object, Object, Object, Object, Object, Object, Object> v) {
 		if (qs.containsKey(k)) {
 			throw new RuntimeException("Already a top-level query definition for " + k);
 		}
 		qs.put(k, v);
 	}
 	
-	public Query getQuery(String k) {
-		Query ret = qs.get(k);
+	public Query<Object, Object, Object, Object, Object, Object, Object, Object> getQuery(String k) {
+		Query<Object, Object, Object, Object, Object, Object, Object, Object> ret = qs.get(k);
 		if (ret == null) {
 			throw new RuntimeException("No top-level query definition for " + k);
+		}
+		return ret;
+	}
+	
+	public void put(String k, DMG<Object, Object> v) {
+		if (gs.containsKey(k)) {
+			throw new RuntimeException("Already a top-level graph definition for " + k);
+		}
+		gs.put(k, v);
+	}
+	
+	public DMG<Object, Object> getGraph(String k) {
+		DMG<Object, Object> ret = gs.get(k);
+		if (ret == null) {
+			throw new RuntimeException("No top-level graph definition for " + k);
 		}
 		return ret;
 	}
@@ -198,6 +222,7 @@ public final class AqlEnv {
 		ret.addAll(schs.keySet());
 		ret.addAll(trans.keySet());
 		ret.addAll(tys.keySet());
+		ret.addAll(qs.keySet()); 
 		return ret;
 	}
 
@@ -222,6 +247,8 @@ public final class AqlEnv {
 				ttys.put(s, ((TransExp)e).type(mtys, itys, ttys));
 				continue;
 			case TYPESIDE:
+				continue;
+			case GRAPH:
 				continue;
 			}
 			throw new RuntimeException("Anomaly: please report");

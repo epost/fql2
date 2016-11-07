@@ -13,7 +13,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 
-//apparently iteration of a set is not deterministic, use linkedhashset if need deterministic order
+//apparently iteration of a set is not deterministic between calls, use linkedhashset if need deterministic order
 public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	
 	//TODO: aql push this into Morphism class?
@@ -105,10 +105,6 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	public final Ctx<En1, En2> ens;
 	public final Ctx<Att1, Triple<Var,En2,Term<Ty,En2,Sym,Fk2,Att2,Void,Void>>> atts; //TODO aql polymorphic get instead of Void,Void doesn't seem to work
 
-	//public final <Gen,Sk> Map<Att1, Triple<Var,En2,Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>> atts() {
-	//	return (Map<Att1, Triple<Var,En2,Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>>) ((Object)atts); 
-	//}
-	
 	public final Ctx<Fk1,  Pair<En2, List<Fk2>>> fks;
 		
 	public final Schema<Ty,En1,Sym,Fk1,Att1> src;

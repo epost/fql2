@@ -1,5 +1,6 @@
 package catdata.aql.exp;
 
+import catdata.DMG;
 import catdata.aql.Instance;
 import catdata.aql.Mapping;
 import catdata.aql.Pragma;
@@ -16,7 +17,8 @@ public enum Kind {
 	MAPPING (Mapping.class, MapExp.class),
 	TRANSFORM (Transform.class, TransExp.class),
 	QUERY (Query.class, QueryExp.class), 
-	PRAGMA (Pragma.class, PragmaExp.class); 
+	PRAGMA (Pragma.class, PragmaExp.class), 
+	GRAPH (DMG.class, GraphExp.class); //
 	
 	@Override
 	public String toString() {
@@ -35,9 +37,11 @@ public enum Kind {
 			return "transform";
 		case TYPESIDE:
 			return "typeside";
-		default:
-			throw new RuntimeException();
+		case GRAPH:
+			return "graph";
 		}
+		throw new RuntimeException();
+		
 	}
 	
 	public final Class<?> literal;
