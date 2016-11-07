@@ -1,4 +1,4 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,14 +16,15 @@ import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.DAG;
+import catdata.InvisibleException;
 import catdata.Pair;
 import catdata.PreOrder;
 import catdata.Quad;
 import catdata.Triple;
+import catdata.UnionFind;
 import catdata.Util;
-import catdata.algs.kb.KBExp.KBApp;
-import catdata.algs.kb.KBExp.KBVar;
-import catdata.InvisibleException;
+import catdata.provers.KBExp.KBApp;
+import catdata.provers.KBExp.KBVar;
 
 /**
  * 
@@ -878,9 +879,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	// TODO: aql when filtering for subsumed, can also take G into account
 	private boolean step() throws InterruptedException {
 		checkParentDead();
-		// System.out.println("-----------");
-		// System.out.println(this);
-
+	
 		/*
 		 * if (options.semantic_ac) { //TODO aql not really sure why these were here
 		 * filterStrongGroundJoinable(); checkParentDead(); }

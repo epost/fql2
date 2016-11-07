@@ -663,51 +663,13 @@ public class Transform {
 		}
 	}
 
-	/*
-	 * @SuppressWarnings("serial") class MyLabel extends JPanel {
-	 * 
-	 * @Override public void paintComponent(Graphics g) {
-	 * super.paintComponent(g); Graphics2D g2d = (Graphics2D) g; Shape shape =
-	 * new Ellipse2D.Double(0, 0, 10, 10); g2d.setColor(Color.black);
-	 * g2d.setPaint(Color.black); // g2d.draw(shape); g2d.fill(shape); } }
-	 */
-	/*
-	 * @SuppressWarnings("serial") class MyLabel2 extends JPanel {
-	 * 
-	 * @Override public void paintComponent(Graphics g) {
-	 * super.paintComponent(g); Graphics2D g2d = (Graphics2D) g; Shape shape =
-	 * new Rectangle(0, 0, 26, 26); g2d.setColor(Color.black);
-	 * g2d.setPaint(Color.black); // g2d.draw(shape); g2d.fill(shape); } }
-	 */
-	/*
-	 * // Quad<Node, Object, String, Boolean> class MyRenderer implements
-	 * Renderer.Vertex<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>>
-	 * {
-	 * 
-	 * @Override public void paintVertex( RenderContext<Quad<Node, Object,
-	 * String, Boolean>, Pair<Path, Integer>> rc, Layout<Quad<Node, Object,
-	 * String, Boolean>, Pair<Path, Integer>> layout, Quad<Node, Object, String,
-	 * Boolean> vertex) { GraphicsDecorator graphicsContext =
-	 * rc.getGraphicsContext(); Point2D center = layout.transform(vertex); Shape
-	 * shape = null; // src.thesig.colors.get(n.string) //Color color =
-	 * src.thesig.colors.get(vertex.first.string); // Shape shape2 = null; if
-	 * (vertex.fourth) { shape = new Rectangle((int) center.getX() - 10, (int)
-	 * center.getY() - 10, 20, 20); } else { shape = new
-	 * Ellipse2D.Double(center.getX() - 10, center.getY() - 10, 20, 20); } //
-	 * graphicsContext.setPaint(color); 
-	 * graphicsContext.fill(shape); } }
-	 */
-
+	
 	public static Transform prod(
 			Instance I,
 			Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> IHc,
 			Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> IHd,
 			Transform h0) {
 		List<Pair<String, List<Pair<Object, Object>>>> d = new LinkedList<>();
-
-		// System.out.println("h " + h0);
-		// System.out.println("Hc " + IHc);
-		// System.out.println("Hd " + IHd);
 
 		for (Node n : IHc.first.thesig.nodes) {
 			Set<Pair<Object, Object>> v = IHc.first.data.get(n.string);
@@ -725,9 +687,6 @@ public class Transform {
 	}
 
 	public Instance preimage(Instance a) throws FQLException {
-		// System.out.println("Doing preimage");
-		// System.out.println("Transform " + this);
-		// System.out.println("a " + a);
 		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
 
 		for (Node n : src.thesig.nodes) {
@@ -764,7 +723,6 @@ public class Transform {
 		}
 
 		Instance ret = new Instance(src.thesig, map);
-		// System.out.println("result " + ret);
 		return ret;
 	}
 

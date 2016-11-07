@@ -384,19 +384,7 @@ public class EnrichViewer {
 		ret += "inc2_q = " + merged.second + "\n\n";
 		ret += "inst_inc = apply inc1_q " + isa_inst + "\n\n";
 		ret += "isa_inc = apply inc2_q " + inst + "\n\n";
-		ret += "merged_inst = (isa_inc + inst_inc)\n\n";
-		/* System.out.println("schemaName = " + schemaName);
-		System.out.println("isaSchName = " + isaSchemaName);
-		System.out.println("node = " + node);
-		System.out.println("kid = " + kid);
-		System.out.println("inst = " + inst);
-		System.out.println("isainst = " + isa_inst); 
-		System.out.println("node = " + node);
-		System.out.println("parent = " + r);
-		System.out.println("n = " + n);
-		System.out.println("a = " + a);
-		System.out.println("att = " + att); */		
-		
+		ret += "merged_inst = (isa_inc + inst_inc)\n\n";		
 		ret += "enrich = " + enrich(mat0, mat, "merged", schemaName, node, att, a, kid, r, n) + "\n\n";
 		ret += "enriched = apply enrich merged_inst\n\n";
 		

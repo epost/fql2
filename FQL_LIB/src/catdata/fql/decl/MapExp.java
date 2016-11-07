@@ -363,7 +363,6 @@ public abstract class MapExp {
  			
 			Collections.sort(this.objs);
 			Collections.sort(this.attrs);
-		//	System.out.println(arrows);
 			Collections.sort(this.arrows);
 		}
 

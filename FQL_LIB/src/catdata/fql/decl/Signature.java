@@ -219,116 +219,13 @@ public class Signature {
 		Collections.sort(nodes);
 		Collections.sort(attrs);
 
-		// System.out.println(this);
 		if (!NEWDEBUG.debug.fql.ALLOW_INFINITES) {
-			// try {
 			toCategory2();
-			// } catch (FQLException fe) {
-			/*
-			 * try { JPanel p = denotation(); JFrame fr = new
-			 * JFrame("Category Denotation Debugger"); fr.setContentPane(p);
-			 * fr.pack(); fr.setSize(600, 400); fr.setVisible(true); } catch
-			 * (Throwable fex) { fex.printStackTrace(); }
-			 */
-			// throw fe;
-			// }
 		}
 //		doColors();
 	}
 
-	/*
-	 * public Signature(String n, List<Triple<String, String, String>> arrows,
-	 * List<Pair<List<String>, List<String>>> equivs) throws FQLException {
-	 * Set<Node> nodesA = new HashSet<>(); Set<Edge> edgesA = new HashSet<>();
-	 * Set<Attribute<Node>> attrsA = new HashSet<>(); name0 = n;
-	 * 
-	 * Set<String> seen = new HashSet<String>(); for (Triple<String, String,
-	 * String> arrow : arrows) { String name = arrow.first; String source =
-	 * arrow.second; String target = arrow.third;
-	 * 
-	 * if (seen.contains(name)) { throw new FQLException("Duplicate name: " +
-	 * name); } seen.add(name);
-	 * 
-	 * // isolated node if (source == null) { Node nd = new Node(name);
-	 * nodesA.add(nd); continue; }
-	 * 
-	 * Node source_node = lookup(source, nodesA); if (source_node == null) {
-	 * source_node = new Node(source); } nodesA.add(source_node);
-	 * 
-	 * Type t; if ((t = tryParseType(target)) != null) { Attribute<Node> a = new
-	 * Attribute<>(name, source_node, t); attrsA.add(a); } else { Node
-	 * target_node = lookup(target, nodesA); if (target_node == null) {
-	 * target_node = new Node(target); } nodesA.add(target_node);
-	 * 
-	 * Edge e = new Edge(name, source_node, target_node); edgesA.add(e); } }
-	 * 
-	 * nodes = new LinkedList<>(nodesA); edges = new LinkedList<>(edgesA); attrs
-	 * = new LinkedList<>(attrsA);
-	 * 
-	 * eqs = new HashSet<Eq>(); for (Pair<List<String>, List<String>> equiv :
-	 * equivs) { Path lhs = new Path(this, equiv.first); Path rhs = new
-	 * Path(this, equiv.second); if (!lhs.source.equals(rhs.source)) { throw new
-	 * FQLException("source object mismatch " + lhs + " and " + rhs); } if
-	 * (!lhs.target.equals(rhs.target)) { throw new
-	 * FQLException("target object mismatch " + lhs + " and " + rhs); } Eq eq =
-	 * new Eq(lhs, rhs); eqs.add(eq); } if (!DEBUG.ALLOW_INFINITES) {
-	 * toCategory2(); } }
-	 */
-	/*
-	 * private Type tryParseType(String s) { if (s.equals("string")) { return
-	 * new Varchar(); } else if (s.equals("int")) { return new Int(); } else {
-	 * return new Type. } return null; }
-	 */
-	/*
-	 * // for json public Signature( List<String> obs, List<Pair<Pair<String,
-	 * String>, String>> arrows, List<Pair<List<Pair<Pair<String, String>,
-	 * String>>, List<Pair<Pair<String, String>, String>>>> equivs) throws
-	 * FQLException { Set<Node> nodesA = new HashSet<Node>(); Set<Edge> edgesA =
-	 * new HashSet<Edge>(); attrs = new LinkedList<>();
-	 * 
-	 * // name0 = n;
-	 * 
-	 * Set<String> seen_obs = new HashSet<String>(); for (String o : obs) { if
-	 * (seen_obs.contains(o)) { throw new FQLException("Duplicate object : " +
-	 * o); } seen_obs.add(o); nodesA.add(new Node(o)); }
-	 * 
-	 * Set<String> seen = new HashSet<>(); for (Pair<Pair<String, String>,
-	 * String> arrow : arrows) { String name = arrow.second; String source =
-	 * arrow.first.first; String target = arrow.first.second;
-	 * 
-	 * if (seen.contains(name)) { throw new FQLException("Duplicate edge: " +
-	 * name); } seen.add(name);
-	 * 
-	 * Node source_node = lookup(source, nodesA); // if (source_node == null) {
-	 * // throw new FQLException("Missing node " + source_node + " in " + //
-	 * name0); // } Node target_node = lookup(target, nodesA); // if
-	 * (target_node == null) { // throw new FQLException("Missing node " +
-	 * target_node + " in " + // name0); // }
-	 * 
-	 * Edge e = new Edge(name, source_node, target_node); edgesA.add(e); }
-	 * 
-	 * nodes = new LinkedList<Node>(nodesA); edges = new
-	 * LinkedList<Edge>(edgesA);
-	 * 
-	 * eqs = new HashSet<Eq>(); for (Pair<List<Pair<Pair<String, String>,
-	 * String>>, List<Pair<Pair<String, String>, String>>> equiv : equivs) { if
-	 * (equiv.first.size() == 0 && equiv.second.size() == 0) { throw new
-	 * FQLException("empty eq " + equiv); } Path lhs, rhs; List<String> temp =
-	 * new LinkedList<>(); if (equiv.first.size() == 0) { rhs = new Path(new
-	 * Unit(), this, equiv.second); temp.add(rhs.source.string); lhs = new
-	 * Path(this, temp); } else if (equiv.second.size() == 0) { lhs = new
-	 * Path(new Unit(), this, equiv.first); temp.add(lhs.source.string); rhs =
-	 * new Path(this, temp); } else { lhs = new Path(new Unit(), this,
-	 * equiv.first); rhs = new Path(new Unit(), this, equiv.second); }
-	 * 
-	 * if (!lhs.source.equals(rhs.source)) { throw new
-	 * FQLException("source object mismatch " + lhs + " and " + rhs); } if
-	 * (!lhs.target.equals(rhs.target)) { throw new
-	 * FQLException("target object mismatch " + lhs + " and " + rhs); } Eq eq =
-	 * new Eq(lhs, rhs); eqs.add(eq); }
-	 * 
-	 * }
-	 */
+	
 	public Signature(List<Node> n, List<Edge> e, List<Attribute<Node>> a,
 			Set<Eq> ee) {
 		// name0 = s;
@@ -336,7 +233,6 @@ public class Signature {
 		edges = e;
 		eqs = ee;
 		attrs = a;
-		// System.out.println("yyyyyy " + edges);
 	}
 
 	private Signature() {
@@ -389,7 +285,6 @@ public class Signature {
 	}
 
 	private Node lookup(String string, Collection<Node> nodes) {
-		// System.out.println("Looking up " + string + " in " + nodes);
 		for (Node node : nodes) {
 			if (node.string.equals(string)) {
 				return node;
@@ -437,17 +332,8 @@ public class Signature {
 				return new Dimension(d.width, d.height);
 			}
 		};
-		// MouseListener[] listeners = eqsComponent.getMouseListeners();
-		// for (MouseListener l : listeners) {
-		// eqsComponent.removeMouseListener(l);
-		// }
-		// eqsComponent.setRowSelectionAllowed(false);
-		// eqsComponent.setColumnSelectionAllowed(false);
 
 		List<JComponent> p = new LinkedList<>();
-//		JPanel p = new JPanel(new GridLayout(2, 2));
-//		p.setBorder(BorderFactory.createEtchedBorder());
-		// p.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
 		JPanel eqsTemp = new JPanel(new GridLayout(1, 1));
 
@@ -476,13 +362,7 @@ public class Signature {
 		nodesTemp.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Nodes (" + nodes.size() + ")"));
 		nodesTemp.add(new JScrollPane(nodesComponent));
-		// nodesComponent.setRowSelectionAllowed(false);
-		// nodesComponent.setColumnSelectionAllowed(false);
-		// listeners = nodesComponent.getMouseListeners();
-		// for (MouseListener l : listeners) {
-		// nodesComponent.removeMouseListener(l);
-		// }
-
+	
 		Object[][] es = new String[edges.size()][3];
 		int jj = 0;
 		for (Edge eq : edges) {
@@ -507,13 +387,6 @@ public class Signature {
 		edgesTemp.add(new JScrollPane(esC));
 		edgesTemp.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Arrows (" + edges.size() + ")"));
-
-		// esC.setRowSelectionAllowed(false);
-		// esC.setColumnSelectionAllowed(false);
-		// listeners = esC.getMouseListeners();
-		// for (MouseListener l : listeners) {
-		// esC.removeMouseListener(l);
-		// }
 
 		Object[][] as = new String[attrs.size()][3];
 		jj = 0;
@@ -540,12 +413,6 @@ public class Signature {
 		attrsTemp.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Attributes (" + attrs.size() + ")"));
 
-		// esC.setRowSelectionAllowed(false);
-		// esC.setColumnSelectionAllowed(false);
-		// listeners = esC.getMouseListeners();
-		// for (MouseListener l : listeners) {
-		// esC.removeMouseListener(l);
-		// }
 		p.add(nodesTemp);
 		p.add(edgesTemp);
 		p.add(attrsTemp);
@@ -634,37 +501,9 @@ public class Signature {
 		return "{\n " + x + ";\n}";
 	}
 
-	// private boolean disconnected(Node n) {
-	// for (Edge e : edges) {
-	// if (e.source.equals(n) || e.target.equals(n)) {
-	// return false;
-	// }
-	// }
-	// for (Attribute a : attrs) {
-	// if (a.source.equals(n)) {
-	// return false;
-	// }
-	// }
-	// return true;
-	// }
-
 	public JPanel text() {
-		// String s = toString().replace(";", "\n\n;\n\n");
-		// String[] t = s.split(",");
-		// String ret = "";
-		// for (String a : t) {
-		// ret += (a.trim() + ",\n\n");
-		// }
-		// ret = ret.trim();
-		// if (ret.endsWith(",")) {
-		// ret = ret.substring(0, ret.length() - 1);
-		// }
-
 		JTextArea ta = new JTextArea(toString());
 		JPanel tap = new JPanel(new GridLayout(1, 1));
-		// ta.setBorder(BorderFactory.createEmptyBorder());
-		//
-		// tap.setBorder(BorderFactory.createEtchedBorder());
 		ta.setWrapStyleWord(true);
 		ta.setLineWrap(true);
 		JScrollPane xxx = new JScrollPane(ta);
@@ -676,9 +515,6 @@ public class Signature {
 	}
 
 	public Pair<String, String> getColumnNames(String s) throws FQLException {
-		// if (s.contains(" ")) {
-		// return new Pair<>("ID", "string");
-		// }
 		if (nodes.contains(new Node(s))) {
 			return new Pair<String, String>("ID", "ID");
 		}
@@ -718,13 +554,7 @@ public class Signature {
 		return all().contains(s);
 	}
 
-	/**
-	 * Converts a signature to a category.
-	 * 
-	 * @return the category, and some isomorphisms
-	 * @throws FQLException
-	 */
-
+	
 	public List<Path> pathsLessThan(int i) throws FQLException {
 		List<List<String>> paths = new LinkedList<>();
 
@@ -732,10 +562,7 @@ public class Signature {
 			LinkedList<String> l = new LinkedList<String>();
 			l.add(n.string);
 			paths.add(l);
-			// List<List<String>> ret0 = bfs(l, n);
 			List<List<String>> ret0 = bfs(l, n, 0, i);
-			// System.out.println("ret0 " + ret0);
-			// System.out.println("ret1 " + ret1);
 			paths.addAll(ret0);
 		}
 
@@ -840,32 +667,23 @@ public class Signature {
 	@SuppressWarnings("unchecked")
 	public JComponent doView(final Color clr,
 	/* final Environment env, */Graph<String, String> sgv) {
-		// Layout<V, E>, BasicVisualizationServer<V,E>
-		// Layout<String, String> layout = new FRLayout(sgv);
-
+	
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix
 					+ NEWDEBUG.debug.fql.schema_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
 			Layout<String, String> layout = (Layout<String, String>) x
 					.newInstance(sgv);
-			// Layout<String, String> layout = new ISOMLayout<String,
-			// String>(sgv);
-
-			// Layout<String, String> layout = new CircleLayout(sgv);
+	
 			layout.setSize(new Dimension(600, 400));
-			// BasicVisualizationServer<String, String> vv = new
-			// BasicVisualizationServer<String, String>(
-			// layout);
+	
 			VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
 					layout);
-			// vv.setPreferredSize(new Dimension(600, 400));
-			// Setup up a new vertex to paint transformer...
+	
 			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 				public Paint transform(String i) {
 					if (isAttribute(i)) {
 						return UIManager.getColor("Panel.background");
-						// return env.colors.get(name0);
 					} else {
 						return clr;
 					}
@@ -875,17 +693,10 @@ public class Signature {
 			gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
-			// Set up a new stroke Transformer for the edges
 			float dash[] = { 1.0f };
 			final Stroke edgeStroke = new BasicStroke(0.5f,
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
-			// Transformer<String, Stroke> edgeStrokeTransformer = new
-			// Transformer<String, Stroke>() {
-			// public Stroke transform(String s) {
-			// return edgeStroke;
-			// }
-			// };
 			final Stroke bs = new BasicStroke();
 			Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
 				public Stroke transform(String s) {
@@ -902,11 +713,7 @@ public class Signature {
 					new ToStringLabeller<String>());
 			vv.getRenderContext().setEdgeLabelTransformer(
 					new ToStringLabeller<String>());
-			// new ToStringLabeller<String>());
-			// vv.getRenderer().getVertexRenderer().
-			// vv.getRenderContext().setLabelOffset(20);
-			// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
-
+		
 			vv.getRenderContext().setVertexLabelTransformer(
 					new ToStringLabeller<String>() {
 
@@ -954,9 +761,6 @@ public class Signature {
 		return makeViewer(clr);
 	}
 
-	// public String type() {
-	// return "schema";
-	// }
 
 	@Override
 	public int hashCode() {
@@ -1001,33 +805,11 @@ public class Signature {
 		return true;
 	}
 
-	/*
-	 * public String tojson() { String ns = PrettyPrinter.sep(",", "[", "]",
-	 * nodes); String es = PrettyPrinter.sep(",\n", "[", "]", edges); String rs
-	 * = PrettyPrinter.sep(",", "[", "]", new LinkedList<>(eqs)); String ret =
-	 * "{\n\"objects\": " + ns + " , \n\"arrows\": " + es +
-	 * " ,\n\"relations\": " + rs + "\n}";
-	 * 
-	 * // try { // Partial<Signature> out = new //
-	 * JSONParsers.JSONSigParser(true).parse(new Tokens(ret)); //
-	 * System.out.println(out.value); // } catch(Exception e) { //
-	 * e.printStackTrace(); // }
-	 * 
-	 * return ret; }
-	 */
-
 	public Instance terminal(String g) throws FQLException {
 		return Instance.terminal(this, g);
 	}
 
-	/*
-	 * @Override public JPanel json() { JTextArea q = new JTextArea(tojson());
-	 * // q.setWrapStyleWord(true); // q.setLineWrap(true); JPanel p = new
-	 * JPanel(new GridLayout(1, 1)); JScrollPane jsc = new JScrollPane(q); //
-	 * jsc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-	 * p.add(jsc); return p; }
-	 */
-
+	
 	JPanel den = null;
 
 	public JPanel denotation() {
@@ -1140,7 +922,6 @@ public class Signature {
 			}			
 		};
 		Collections.sort(ret, c);
-	//	System.out.println("order " + ret);
 		return ret;
 	}
 	
@@ -1175,16 +956,6 @@ public class Signature {
 		edgesTo_cache.put(n, a);
 		return a;
 	}
-	/*
-	 * public JPanel initial() throws FQLException { List<Pair<String,
-	 * List<Pair<Object, Object>>>> b = new LinkedList<>(); for (Node n : nodes)
-	 * { List<Pair<Object, Object>> x = new LinkedList<>(); b.add(new
-	 * Pair<>(n.string, x)); } for (Attribute<Node> n : attrs) {
-	 * List<Pair<Object, Object>> x = new LinkedList<>(); b.add(new
-	 * Pair<>(n.name, x)); } for (Edge n : edges) { List<Pair<Object, Object>> x
-	 * = new LinkedList<>(); b.add(new Pair<>(n.name, x)); } Instance i = new
-	 * Instance("", this, b); return i.join(); }
-	 */
 
 	public JPanel constraint() {
 		List<EmbeddedDependency> l = toED("");
@@ -1240,13 +1011,6 @@ public class Signature {
 			forall.add(w);
 			where.add(new Triple<>(pre + n.string, u, w));
 			egd.add(new Pair<>(u, w));
-
-			// for (Node m : nodes) {
-			// if (n.equals(m)) {
-			// continue;
-			// }
-			// not.add(new Triple<>(name0 + "." + m.string, u, w));
-			// }
 
 			EmbeddedDependency ed = new EmbeddedDependency(forall, exists,
 					where, tgd, egd);
@@ -1539,14 +1303,12 @@ public class Signature {
 						.getValue())));
 			}
 			data.put(e.name, t);
-
 		}
 
 		return new Triple<>(new Instance(this, data), m1, m2);
 	}
 	
 	public Pair<Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>, Pair<Instance, Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>>>> omega(IntRef ref) throws FQLException {
-		//System.out.println("Starting omega");
 		IntRef ix = new IntRef(0);
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
 		Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>> m = new HashMap<>();
@@ -1572,22 +1334,15 @@ public class Signature {
 		for (Edge e : edges) {
 			Set<Pair<Object, Object>> set = new HashSet<>();
 			for (Pair<Object, Object> j : data.get(e.source.string)) {
-			//	System.out.println("j " + j);
 				Instance u = m.get(e.source).first.get(j.first);
-			//	System.out.println("u " + u);
-			//	System.out.println("trans " + rx.second.get(e));
 				Instance v = rx.second.get(e).preimage(u);
-			//	System.out.println("v " + v); 
 				Object o = m.get(e.target).second.get(v);
-			//	System.out.println("mgetarget " + m.get(e.target).second);
-			//	System.out.println("o " + o);
 				set.add(new Pair<>(j.first, o));
 			}			
 			data.put(e.name, set);
 		}
 		
 		Instance omega = new Instance(this, data);
-		//System.out.println("End omega");
 		return new Pair<>(rx, new Pair<>(omega, m));
 	}
 	
@@ -1612,8 +1367,6 @@ public class Signature {
 				List<Pair<Object, Object>> set = new LinkedList<>();
 				for (Pair<Object, Object> id : t.first.data.get(n.string)) {
 					Arr<Node, Path> uuu = cached.second.of(Path.append(this, new Path(this, e), t.second.get(id.first)));
-				//	System.out.println("uuu " + uuu);
-				//	System.out.println("st" + s.third);
 					set.add(new Pair<>(id.first, s.third.get(uuu.arr)));
 				}
 				d.add(new Pair<>(n.string, set));
@@ -1625,10 +1378,6 @@ public class Signature {
 
 	private Pair<Map<Node, Set<Path>>, Map<Edge, Map<Path, Path>>> rep0(Node c)
 			throws FQLException {
-		// Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx =
-		// toCategory2();
-		// FinCat<Node, Path> cat = xxx.first;
-		// Fn<Path, Arr<Node, Path>> fn = xxx.second;
 
 		Map<Node, Set<Path>> m1 = new HashMap<>();
 		Map<Edge, Map<Path, Path>> m2 = new HashMap<>();
@@ -1711,22 +1460,14 @@ public class Signature {
 	
 	public JPanel dot(String name) {
 		String str = "";		
-	//	int i = 0;
-//		Map<Pair<Node, Object>, Integer> map = new HashMap<>();
 		for (Node p : nodes) {
-			String s = p.toString();// + attrsFor(p); //map0.get(p);
-		//	s.replace("\"", "\\\"");
-		//	map.put(p, i); //a [label="Foo"];
-			str += s + " [shape=box];\n"; // + " [label=\"" + s + "\"];\n";
-//			i++;
+			String s = p.toString();
+			str += s + " [shape=box];\n"; 
 		}
 
 		for (Attribute<Node> a : attrs) {
-			String s = a.name;// + attrsFor(p); //map0.get(p);
-			//s.replace("\"", "\\\"");
-		//	map.put(p, i); //a [label="Foo"];
-			str += s + ";\n"; // + " [label=\"" + s + "\"];\n";
-		//	i++;
+			String s = a.name;
+			str += s + ";\n"; 
 			str += a.source + " -> " + s + " [dir=none];\n";
 		}
 		

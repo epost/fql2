@@ -622,10 +622,6 @@ public class Chase {
 
 	private static Map<String, Set<Pair<Object, Object>>> apply(
 			Map<String, Set<Pair<Object, Object>>> I, List<Pair<Object, Object>> subst) {
-
-		// System.out.println("Subst " + subst);
-		// System.out.println(I);
-
 		Map<String, Set<Pair<Object, Object>>> ret = new HashMap<>(I);
 
 		List<Pair<Object, Object>> subst0 = new LinkedList<>(subst);

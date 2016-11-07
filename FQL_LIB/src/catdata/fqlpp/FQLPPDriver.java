@@ -14,7 +14,6 @@ import catdata.ide.LineException;
 public class FQLPPDriver {
 
 	public static FQLPPEnvironment makeEnv(String str, FQLPPProgram init, String[] toUpdate) {
-	//	System.out.println("Driver input: " + init);
 		Map<String, Fn<?,?>> fns = new HashMap<>();
 		Map<String, Set<?>> sets = new HashMap<>();
 		Map<String, Category<?,?>> cats = new HashMap<>();
@@ -101,7 +100,6 @@ public class FQLPPDriver {
 			}
 		}
 		
-		//System.out.println("Driver output: " + ret);
 		return ret;
 	}
 

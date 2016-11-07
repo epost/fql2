@@ -17,9 +17,7 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-
-
-import catdata.algs.kb.KBExp;
+import catdata.provers.KBExp;
 
 //TODO: aql validate collage
 public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {

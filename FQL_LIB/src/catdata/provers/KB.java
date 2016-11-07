@@ -1,4 +1,4 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -17,8 +17,8 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
-import catdata.algs.kb.KBExp.KBApp;
-import catdata.algs.kb.KBExp.KBVar;
+import catdata.provers.KBExp.KBApp;
+import catdata.provers.KBExp.KBVar;
 import catdata.InvisibleException;
 
 /**
@@ -74,7 +74,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		}
 		initHorn();
 		/* if (isProgram()) {
-//			System.out.println("Is program");
 			R.addAll(E);
 			E.clear();
 			isCompleteGround = true;
@@ -89,7 +88,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			List<V> vars = new LinkedList<>();
 			eq.second.vars(vars);
 			if (vars.size() != eq.second.vars().size()) {
-				System.out.println("breakvar on " + eq);
 				return false;
 			}			
 		}
@@ -102,7 +100,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 				Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cps = gd.first.cp(new LinkedList<>(), ab.first, ab.second, gd.first, gd.second);
 				for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>> cp : cps) {
 					if (!cp.first.equals(cp.second)) {
-						System.out.println("break on " + ab0 + " and " + gd0 + " cp is " + E);
 						return false;
 					}
 				}
@@ -351,7 +348,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			throw new RuntimeException(arr[0] + "\n\nLast state:\n\n" + toString());			
 		}
 		if (!isCompleteGround) {
-		//	System.out.println("---------------");
 			//allCpsConfluent(true, true);
 			throw new RuntimeException("Not ground complete after iteration timeout.  Last state:\n\n" + toString());
 		} 
@@ -616,26 +612,19 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			KBExp<C, V> e) throws InterruptedException {
 		int i = 0;
 		KBExp<C, V> orig = e;
-		
-//		System.out.println("reducing " + e);
-		
+				
 //		Collection<Pair<KBExp<C, V>, KBExp<C, V>>> Ey = new LinkedList<>(Ex);
 	//	Ey.addAll(G);
-	//	List<String> errs = new LinkedList<>();
 		for (;;) {
 			i++;			
-	//		errs.add("iteration " + i + ", pre, e=" + e);
-
+	
 			KBExp<C, V> e0 = step(cache, fresh, Ex, Ry, e);
 			if (e.equals(e0)) {
 				return e0;  
 			}
-		//	errs.add("iteration " + i + ", post, e=" + e + " and e0= " + e0);
 			if (i > options.red_its) {
 				throw new RuntimeException(
 						"Reduction taking too long (>" + options.red_its + "):" + orig + " goes to " + e0 + " under\n\neqs:" + Util.sep(E,"\n") + "\n\nreds:"+ Util.sep(R,"\n"));
-					//	+ "\n\n and \ne=" + e + " and \ne0=" + e0 + " and \ne=e0=" + e.equals(e0) + " and \ne0=e=" + e0.equals(e) + " e=e0asptr=" + (e == e0) + 
-						//"\nehash=" + e.hashCode() + "\ne0hash=" + e0.hashCode() + "\n" + Util.sep(errs, "\n"));
 			}
 			e = e0;
 		}
@@ -840,7 +829,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 
 	protected KBExp<C, V> step1(Map<KBExp<C,V>, KBExp<C,V>> cache, Iterator<V> fresh,
 			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> e0) throws InterruptedException {
-		//System.out.println(Thread.currentThread().toString());
 		KBExp<C, V> e = e0;
 		if (cache != null && cache.containsKey(e)) {
 			return cache.get(e);
@@ -931,17 +919,13 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	
 	protected KBExp<C, V> step1Es(Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, KBExp<C, V> e) throws InterruptedException {
 		if (options.unfailing  && e.vars().isEmpty() ) {
-		//	System.out.println("reducing " + e);
 			for (Pair<KBExp<C, V>, KBExp<C, V>> r0 : E) {
-			//	System.out.println("on rule " + r0);
 				KBExp<C, V> a = step1EsX(r0, e);
 				if (a != null) {
-			//		System.out.println("l -> r " + a);
 					e = a;
 				}
 				KBExp<C, V> b = step1EsX(new Pair<>(r0.second, r0.first), e);
 				if (b != null) {
-			//		System.out.println("r -> l " + b);
 					e = b;
 				}
 			}
@@ -978,9 +962,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		}
  		lhs0 = lhs0.subst(t);
  		rhs0 = rhs0.subst(t);
- 		
-//		System.out.println(lhs0 + ">" + rhs0 + " = " + gt.apply(new Pair<>(lhs0, rhs0)));
-
+ 	
 		if (gt.apply(new Pair<>(lhs0, rhs0))) {
 			return rhs0;
 		} 
@@ -1016,9 +998,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	} */
 	
 	protected boolean strongGroundJoinable(KBExp<C, V> s, KBExp<C, V> t) throws InterruptedException {
-		//System.out.println("-----------");
-		//System.out.println(s + " = " + t);
-		List<Pair<KBExp<C, V>, KBExp<C, V>>> R0 = new LinkedList<>();
+	List<Pair<KBExp<C, V>, KBExp<C, V>>> R0 = new LinkedList<>();
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> E0 = new LinkedList<>();
 		for (C f : AC_symbols.keySet()) {
 			List<Pair<KBExp<C, V>, KBExp<C, V>>> lx = AC_symbols.get(f);
@@ -1027,11 +1007,9 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		}
 			
 		if (!s.equals(red(null, new LinkedList<>(), R0, s))) {
-	//		System.out.println("1");
 			return false;
 		}
 		if (!t.equals(red(null, new LinkedList<>(), R0, t))) {
-		//	System.out.println("2");
 			return false;
 		}
 		
@@ -1051,7 +1029,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			}
 			//return false;
 			//if (bijection(m)) {
-				//System.out.println("bij with " + e);
 				//continue;
 			//} 
 			return false;
@@ -1059,18 +1036,13 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			
 		KBExp<C, V> s0 = s.sort(AC_symbols.keySet());
 		KBExp<C, V> t0 = t.sort(AC_symbols.keySet());
-	//	System.out.println(s + " sorts to " + s0);
-	//	System.out.println(t + " sorts to " + t0);
 		
 		return s0.equals(t0);
 		
-//		return false;
 	}
 	
 	//: when filtering for subsumed, can also take G into account
 	protected boolean step(Thread parent) throws InterruptedException {
-//		System.out.println("\n\niteration " + count);
-	//	System.out.println(this);
 		count++;
 
 		checkParentDead(parent); 
@@ -1157,12 +1129,9 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> newE = new LinkedList<>(E);
 		for (Pair<KBExp<C, V>, KBExp<C, V>> st : newE) {
 			if (strongGroundJoinable(st.first, st.second)) {
-				//System.out.println("removing " + st);
 				remove(E, st);
 				add(G, st);
-			} else {
-				//System.out.println("not removing " + st);
-			}
+			} 
 		}
 		G = filterSubsumedBySelf(G);
 	}
@@ -1217,7 +1186,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			return true;
 		}
 		if (!noEqsBetweenAtoms() || !noNonReflRewrites() || !allUnorientable()) {
-		//	System.out.println("!!!");
 			return false;
 		}
 		if (allCpsConfluent(false, false) || (options.semantic_ac && allCpsConfluent(false, true))) {
@@ -1235,7 +1203,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		}
 		for (Pair<KBExp<C, V>, KBExp<C, V>> e : E) {
 			if (KBHorn.isAtom(e.first) || KBHorn.isAtom(e.second)) {
-				//System.out.println("busted1 " + e);
 				return false;
 			}
 		}
@@ -1251,7 +1218,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 				KBApp<C,V> a = e.first.getApp();
 				if (a.f.equals(KBHorn._eq)) {
 					if (!a.args.get(0).equals(a.args.get(1))) {
-						//System.out.println("busted2 " + e);
 						return false;
 					}
 				}
@@ -1294,7 +1260,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 			KBExp<C, V> rhs = red(new HashMap<>(), Util.append(E,G), R, e.second);
 			if (!lhs.equals(rhs)) {
 				if (!ground) {
-//					System.out.println("regular badness on " + s + " e= " + e + " | lhs=" + lhs + " | rhs=" + rhs);
 					return false;
 				} else {
 					for (Pair<KBExp<C, V>, KBExp<C, V>> ex : G) {
@@ -1305,8 +1270,6 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 					}
 					if (options.semantic_ac) {
 						if (!lhs.sort(AC_symbols.keySet()).equals(rhs.sort(AC_symbols.keySet()))) {
-			//				System.out.println("ground badness on " + s + "e= " + e + " | lhs=" + lhs + " | rhs=" + rhs + " | sorts to " 
-				//		+ lhs.sort(AC_symbols.keySet()) + " and " + rhs.sort(AC_symbols.keySet()));
 							return false;
 						}  
 					}

@@ -1,4 +1,4 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.Collection;
 import java.util.Collections;

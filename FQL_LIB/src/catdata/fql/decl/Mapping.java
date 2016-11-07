@@ -345,7 +345,6 @@ public class Mapping {
 			throw new FQLException("In mapping " + this
 					+ ", bad path mapping: " + e.toString());
 		}
-		// System.out.println("INIT \n" + this);
 		for (Pair<String, String> a : attrs) {
 			Attribute<Node> a1 = source.getAttr(a.first);
 			Attribute<Node> a2 = target.getAttr(a.second);
@@ -497,22 +496,10 @@ public class Mapping {
 		return FqlUtil.makeGrid(p);
 	}
 
-	/*
-	 * static String printNicely(Map<String, RA> r) { String s = ""; for (String
-	 * k : r.keySet()) { RA e = r.get(k); s += (k + " = " + e + "\n\n"); }
-	 * return s; }
-	 */
-
 	/**
 	 * Text view for mappings.
 	 */
 	public JPanel text() {
-
-		// String[] t = toString().split(";");
-		// String ret = "";
-		// for (String a : t) {
-		// ret += (a.trim());
-		// }
 
 		List<JComponent> tap = new LinkedList<>();
 	//	JPanel tap = new JPanel(new GridLayout(2, 2));
@@ -523,10 +510,7 @@ public class Mapping {
 		JScrollPane xxx = new JScrollPane(ta);
 		JPanel p = new JPanel(new GridLayout(1, 1));
 		p.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(), "Mapping" /*
-															 * + " : " + source
-															 * + " -> " + target
-															 */));
+				BorderFactory.createEmptyBorder(), "Mapping" ));
 		p.add(xxx);
 		tap.add(p);
 
@@ -557,12 +541,7 @@ public class Mapping {
 		JScrollPane xxx2 = new JScrollPane(ta2);
 		JPanel p2 = new JPanel(new GridLayout(1, 1));
 		p2.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(), "Delta" /*
-															 * + " : " +
-															 * target.name0 +
-															 * " -> " +
-															 * source.name0
-															 */));
+				BorderFactory.createEmptyBorder(), "Delta" ));
 		p2.add(xxx2);
 		tap.add(p2);
 
@@ -572,11 +551,7 @@ public class Mapping {
 		JScrollPane xxx3 = new JScrollPane(ta3);
 		JPanel p3 = new JPanel(new GridLayout(1, 1));
 		p3.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(), "Pi" /*
-														 * + " : " +
-														 * source.name0 + " -> "
-														 * + target.name0
-														 */));
+				BorderFactory.createEmptyBorder(), "Pi" ));
 		p3.add(xxx3);
 		tap.add(p3);
 
@@ -586,12 +561,7 @@ public class Mapping {
 		JScrollPane xxx4 = new JScrollPane(ta4);
 		JPanel p4 = new JPanel(new GridLayout(1, 1));
 		p4.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createEmptyBorder(), "Sigma" /*
-															 * + " : " +
-															 * source.name0 +
-															 * " -> " +
-															 * target.name0
-															 */));
+				BorderFactory.createEmptyBorder(), "Sigma" ));
 		p4.add(xxx4);
 		tap.add(p4);
 		//tap.setBorder(BorderFactory.createEtchedBorder());
@@ -662,22 +632,6 @@ public class Mapping {
 		return ret;
 	}
 
-	/**
-	 * Applies to a path
-	 */
-	/* public Path appy(Signature val, Path path) {
-		List<Edge> r = new LinkedList<Edge>();
-		for (Edge e : path.path) {
-			Path p = em.get(e);
-			if (p == null) {
-				throw new RuntimeException("No mapping for " + e + " in " + this);
-			}
-			r.addAll(p.path);
-			new Path(nm.get(path.source), nm.get(path.target), r);
-		}
-
-		return new Path(nm.get(path.source), nm.get(path.target), r);
-	} */
 	public Path appy(Signature val, Path path) {
 		try {
 		Node s = nm.get(path.source);
@@ -703,51 +657,7 @@ public class Mapping {
 
 	}
 
-	/**
-	 * Converts a mapping to a functor.
-	 * 
-	 * @return the functor, and some isomorphisms
-	 */
-	// public Triple<FinFunctor<String, List<List<String>>, String,
-	// List<List<String>>>, Pair<FinCat<String, List<List<String>>>,
-	// Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String,
-	// Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>,
-	// String>>>>, Pair<FinCat<String, List<List<String>>>,
-	// Pair<Pair<Map<String, String>, Map<String, String>>, Pair<Map<String,
-	// Arr<String, List<List<String>>>>, Map<Arr<String, List<List<String>>>,
-	// String>>>>> toFunctor() throws FQLException {
-	// HashMap<String, String> objMapping = new HashMap<String, String>();
-	// HashMap<Arr<String,List<List<String>>>, Arr<String,List<List<String>>>>
-	// arrowMapping = new HashMap<>();
-	//
-	// for (Entry<Node, Node> e : nm.entrySet()) {
-	// objMapping.put(e.getKey().string, e.getValue().string);
-	// }
-	//
-	// Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>,
-	// Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>,
-	// Map<Arr<String, List<List<String>>>, String>>>> srcCat0 =
-	// source.toCategory();
-	// Pair<FinCat<String, List<List<String>>>, Pair<Pair<Map<String, String>,
-	// Map<String, String>>, Pair<Map<String, Arr<String, List<List<String>>>>,
-	// Map<Arr<String, List<List<String>>>, String>>>> dstCat0 =
-	// target.toCategory();
-	//
-	// FinCat<String, List<List<String>>> srcCat = srcCat0.first;
-	// FinCat<String, List<List<String>>> dstCat = dstCat0.first;
-	//
-	// for (Arr<String, List<List<String>>> arroweqc : srcCat.arrows) {
-	// List<String> arrow = arroweqc.arr.get(0);
-	//
-	// List<String> mapped = apply(arrow);
-	// Arr<String, List<List<String>>> mappedeqc = findeqc(dstCat, mapped);
-	// arrowMapping.put(arroweqc, mappedeqc);
-	// }
-	//
-	// return new Triple<>(new FinFunctor<>(objMapping, arrowMapping, srcCat,
-	// dstCat), srcCat0, dstCat0);
-	// }
-
+	
 	public Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> toFunctor2()
 			throws FQLException {
 		HashMap<Node, Node> objMapping = new HashMap<>();
@@ -769,18 +679,10 @@ public class Mapping {
 			Path arrow = arroweqc.arr;
 
 
-		//	System.out.println("mapped " + mapped);
-			//try {
 				Path mapped = appy(target, arrow);
 				mapped.validate(target);
-			arrowMapping.put(new Arr<>(arrow, arrow.source, arrow.target),
+				arrowMapping.put(new Arr<>(arrow, arrow.source, arrow.target),
 					dstCat0.second.of(mapped));
-		//	} catch (RuntimeException fe) {
-		//		fe.printStackTrace();
-		//		throw new FQLException("Path " + arroweqc.arr.toLong() + " gets mapped to a bad path: " + mapped.toLong());
-		//	}
-
-			//System.out.println("ok");
 		}
 
 		FinFunctor<Node, Path, Node, Path> F = new FinFunctor<>(objMapping,
@@ -790,72 +692,6 @@ public class Mapping {
 
 		return new Triple<>(F, srcCat0, dstCat0);
 	}
-
-	// private Arr<String, List<List<String>>> findeqc(
-	// FinCat<String, List<List<String>>> cat, List<String> path) {
-	// for (Arr<String, List<List<String>>> eqc : cat.arrows) {
-	// if (eqc.arr.contains(path)) {
-	// return eqc;
-	// }
-	// }
-	// throw new RuntimeException("No equivalence class for " + path + " in " +
-	// cat);
-	// }
-
-	// private List<String> apply(List<String> arrow) {
-	// List<String> ret = new LinkedList<String>();
-	// for (Entry<Node, Node> e : nm.entrySet()) {
-	// if (e.getKey().string.equals(arrow.get(0))) {
-	// ret.add(e.getValue().string);
-	// break;
-	// }
-	// }
-	//
-	// for (int i = 1; i < arrow.size(); i++) {
-	// String s = arrow.get(i);
-	// for (Entry<Edge, Path> e : em.entrySet()) {
-	// if (e.getKey().name.equals(s)) {
-	// List<String> x = e.getValue().asList();
-	// x.remove(0);
-	// ret.addAll(x);
-	// }
-	// }
-	// }
-	// return ret;
-	// }
-	/*
-	 * public Map<String, Set<Pair<Object, Object>>> evalDelta(Instance
-	 * theinstance) throws FQLException {
-	 * 
-	 * // System.out.println(FDM.delta(this.toFunctor(), //
-	 * theinstance.toFunctor()));
-	 * 
-	 * Map<String, RA> x = RA.delta(this); Map<String, Set<Object[]>> i0 =
-	 * Query.convert0(theinstance); Map<String, Set<Object[]>> i1 = RA.eval0(x,
-	 * i0); return Query.convert(i1); }
-	 * 
-	 * public Map<String, Set<Pair<Object, Object>>> evalSigma(Instance
-	 * theinstance) throws FQLException { Map<String, RA> x = RA.sigma(this);
-	 * Map<String, Set<Object[]>> i0 = Query.convert0(theinstance); Map<String,
-	 * Set<Object[]>> i1 = RA.eval0(x, i0);
-	 * 
-	 * // System.out.println(FDM.sigma(this.toFunctor(), //
-	 * theinstance.toFunctor()));
-	 * 
-	 * return Query.convert(i1); }
-	 * 
-	 * public Map<String, Set<Pair<Object, Object>>> evalPi(Instance
-	 * theinstance) throws FQLException {
-	 * 
-	 * Map<String, RA> x = RA.pi(this); Map<String, Set<Object[]>> i0 =
-	 * Query.convert0(theinstance); Map<String, Set<Object[]>> i1 = RA.eval0(x,
-	 * i0);
-	 * 
-	 * // System.out.println(FDM.grothendieck(FDM.pi(this.toFunctor().first, //
-	 * theinstance.toFunctor())));
-	 * 
-	 * return Query.convert(i1); }
-	 */
 
 	public JPanel pretty(final Color scolor, final Color tcolor, final FqlEnvironment env) throws FQLException {
 		Graph<String, String> g = build();
@@ -910,27 +746,6 @@ public class Mapping {
 		return g2;
 	}
 
-	// Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>()
-	// {
-	// public Paint transform(String i) {
-	// return which(i);
-	// }
-	//
-	// private Color which(String t) {
-	// int i = t.indexOf(".");
-	// String j = t.substring(i+1);
-	// String p = t.substring(0, i);
-	// System.out.println("%%%%%%%%%%%%%%%%%% " + j);
-	// if (source.isAttribute(j) || target.isAttribute(j)) {
-	// return null;
-	// }
-	// if (p.equals("@source")) {
-	// return Environment.colors.get(source.name0);
-	// }
-	// return Environment.colors.get(target.name0);
-	// }
-	// };
-
 	@SuppressWarnings("unchecked")
 	public JPanel doView(final Color scolor, final Color tcolor, final FqlEnvironment env, Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
@@ -939,12 +754,7 @@ public class Mapping {
 			Constructor<?> x = c.getConstructor(Graph.class);
 			Layout<String, String> layout = (Layout<String, String>) x.newInstance(sgv);
 
-//		Layout<String, String> layout = new FRLayout<>(sgv);
-		// Layout<String, String> layout = new KKLayout(sgv);
-
-		// Layout<String, String> layout = new ISOMLayout<String,String>(sgv);
-		// Layout<String, String> layout = new CircleLayout(sgv);
-		layout.setSize(new Dimension(600, 400));
+			layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
 				layout);
 		// vv.setPreferredSize(new Dimension(600, 400));
@@ -963,12 +773,8 @@ public class Mapping {
 				}
 				if (p.equals("@source")) {
 					return scolor;
-					//return Color.RED;
-					// return source.colors.get(j);
 				}
-				// return target.colors.get(j);
 				return tcolor;
-				// return env.colors.get(target.name0);
 			}
 		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
@@ -1000,28 +806,9 @@ public class Mapping {
 						String j = t.substring(i + 1);
 						// String p = t.substring(0, i);
 						return j;
-						/*
-						 * if (p.equals("@source")) { j = source.name0 + "." +
-						 * j; } else { j = target.name0 + "." + j; } return j;
-						 */
 					}
 				});
-		// vv.getRenderContext().setEdgeLabelTransformer(
-		// new ToStringLabeller<String>() {
-		//
-		// @Override
-		// public String transform(String t) {
-		// if (t.contains(" ")) {
-		// return "";
-		// }
-		// return t;
-		// // return "";
-		// }
-		// });
-		// vv.getRenderer().getVertexRenderer();
-		// vv.getRenderContext().setLabelOffset(20);
-		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
-
+	
 		JPanel p = new JPanel(new GridLayout(1, 1));
 		p.setBorder(BorderFactory.createEtchedBorder());
 		p.add(new GraphZoomScrollPane(vv));
@@ -1093,14 +880,11 @@ public class Mapping {
 	public void okForSigma() throws FQLException {
 		for (Node n : source.nodes) {
 			List<Attribute<Node>> nattrs = source.attrsFor(n);
-
 			List<Attribute<Node>> mattrs = target.attrsFor(nm.get(n));
-
 			if (!isBijection(nattrs, mattrs, am)) {
 				throw new FQLException("Not union compatible " + this);
 			}
 		}
-
 	}
 
 	private <X> boolean isBijection(List<X> l, List<X> r, Map<X, X> f) {
@@ -1151,14 +935,12 @@ public class Mapping {
 		return ret;
 	}
 
-	//Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>
 	
 	//does not add equations for attrs
 	public Triple<Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, 
 				  Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, 
 				  Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>> toEDs() throws FQLException {
-		// List<EmbeddedDependency> l = new //toED();
-
+	
 		Signature sigma = Signature.sum("src", "dst", source, target);
 		Signature pi = Signature.sum("src", "dst", source, target);
 		Signature delta = Signature.sum("src", "dst", source, target);

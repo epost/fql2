@@ -16,14 +16,13 @@ import javax.swing.JTextField;
 import catdata.Pair;
 import catdata.Unit;
 import catdata.Util;
-import catdata.algs.kb.KBOptions;
 import catdata.ide.Language;
 import catdata.ide.Options;
+import catdata.provers.KBOptions;
 
 public class OplOptions extends Options implements Cloneable {
 
-	private static final long serialVersionUID = 1L;
-	
+	private static final long serialVersionUID = 1L;	
 	
 
 	@Override 
@@ -213,12 +212,6 @@ public class OplOptions extends Options implements Cloneable {
 		opl2.add(opl_selfsub_box);
 		opl1.add(opl_selfsub_label);
 
-		// JCheckBox opl_simplify_box = new JCheckBox("", simplify);
-		// JLabel opl_simplify_label = new
-		// JLabel("In prover, simplify equations:");
-		// opl2.add(opl_simplify_box);
-		// opl1.add(opl_simplify_label);
-
 		JCheckBox opl_compose_box = new JCheckBox("", opl_prover_compose);
 		JLabel opl_compose_label = new JLabel("In prover, compose equations:");
 		opl2.add(opl_compose_box);
@@ -320,7 +313,6 @@ public class OplOptions extends Options implements Cloneable {
 				opl_prover_simplify_instances = opl_simplify_box.isSelected();
 				opl_safe_java = opl_safejava_box.isSelected();
 				opl_secret_agg = opl_agg_box.isSelected();
-				//System.out.println("called, set to " + OplOptions.this);
 				return new Unit();
 			}
 

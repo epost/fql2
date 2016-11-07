@@ -1,4 +1,4 @@
-package catdata.algs.strings;
+package catdata.strings;
 
 public class EditDistance {
 

@@ -818,9 +818,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 				} else {
 					rhsX.add(rhs);
 				}
-			//	System.out.println("adding 1: " + new Pair(lhs, rhsX));
-				eqs.add(new Pair(lhs, rhsX));
-				
+				eqs.add(new Pair(lhs, rhsX));			
 			}
 		} 
 		
@@ -853,8 +851,6 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					} else {
 						rhs.add(rhsX);
 					}
-					//System.out.println("adding 2: " + new Pair(lhs, rhs));
-					
 					eqs.add(new Pair<>(lhs, rhs));
 				}
 			}
@@ -920,9 +916,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		List ll = new LinkedList<>();
 		ll.add("_Q");
 		em2.put("_Q", ll);
-//		System.out.println("C is " + c);
 		for (Entry o : e.select.entrySet()) {
-			//System.out.println("trying " + o.getValue());
 			Object tgt = c.type((List)o.getValue()).second;
 			types2.put(o.getKey(), new Pair<>("_Q", tgt));
 			if (!I.global.allTerms().contains(tgt)) {
@@ -1113,11 +1107,8 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		} else {
 			J = m.pi(I);			
 		}
-//		System.out.println(J);
 		XCtx K = m2.delta(J);
-	//	System.out.println(K);
 		XCtx L = m3.apply0(K);
-	//	System.out.println(L);
 		
 		return L.rel();
 	}
@@ -1293,8 +1284,6 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					} else {
 						rhs.add(rhsX);
 					}
-					//System.out.println("adding 2: " + new Pair(lhs, rhs));
-					
 					eqs.add(new Pair<>(lhs, rhs));
 				}
 			}

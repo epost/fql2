@@ -137,7 +137,6 @@ public class NEWDEBUG implements Serializable {
 					for (Function<Unit, Unit> callback : callbacks) {
 						callback.apply(new Unit());
 					}
-				//	System.out.println("OPL options set to : " + debug.opl);
 				} else if (ret == "Reset") {
 					debug = new NEWDEBUG();
 					showOptions();
@@ -155,9 +154,7 @@ public class NEWDEBUG implements Serializable {
 				} else if (ret == "Delete") {
 					delete();
 					showOptions();
-				} //else if (ret != null && ret != uninitializedValue") {
-				//	throw new RuntimeException("xx " + ret);
-				//}
+				} 
 			}
 			
 		
@@ -165,30 +162,6 @@ public class NEWDEBUG implements Serializable {
 		
 		dialog.pack();
 		dialog.setVisible(true);
-		
-//		pane.getValue()
-		
-/*		int ret = JOptionPane.showOptionDialog(null, jtb, "Options",
-				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
-				new String[] { "OK", "Cancel", "Reset", "Save", "Load" }, "OK");
-
-		selected_tab = jtb.getSelectedIndex();
-
-		if (ret == 0 || ret == 3) {
-			for (Function<Unit, Unit> callback : callbacks) {
-				callback.apply(new Unit());
-			}
-		} else if (ret == 2) {
-			new DEBUG().showOptions();
-		}
-		if (ret == 3) { // save
-			save();
-			showOptions();
-		}
-
-		if (ret == 4) { // load
-			load(false);
-		}  */
 	
 	}
 	
@@ -198,7 +171,7 @@ public class NEWDEBUG implements Serializable {
 				JOptionPane.PLAIN_MESSAGE, null);
 	}
 
-	static String about = "Categorical Data IDE Copyright (C) 2012-2016 Patrick Schultz, David Spivak, and Ryan Wisnesky"
+	static String about = "Categorical Data IDE Copyright (C) 2012-2017 Patrick Schultz, David Spivak, and Ryan Wisnesky"
 			+ "\n\nplease see categoricaldata.net for more information";
 
 }

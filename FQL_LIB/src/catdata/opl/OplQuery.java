@@ -19,10 +19,10 @@ import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
-import catdata.algs.kb.KBExp;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.NEWDEBUG;
 import catdata.opl.OplParser.DoNotIgnore;
+import catdata.provers.KBExp;
 
 
 public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObject {
@@ -55,13 +55,11 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		return new OplTerm<>(Chc.inLeft(t.head), args);
 	}
 
-	private void freeze() {
-		System.out.println("starting " + this);
+	private void freeze() { 
 		fI = new HashMap<>();
 		for (Object l : blocks.keySet()) {
 			Block<S1, C1, V1, S2, C2, V2> block = blocks.get(l).second;
-			System.out.println("------- " + l);
-
+			
 			List<Pair<OplTerm<Chc<C1, V1>, V1>, OplTerm<Chc<C1, V1>, V1>>> eqs = new LinkedList<>();
 			for (Pair<OplTerm<C1, V1>, OplTerm<C1, V1>> eq : block.where) {
 				eqs.add(new Pair<>(freeze(eq.first), freeze(eq.second)));
@@ -88,12 +86,11 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 						m = new HashMap<>();
 						map.put(s1, m);
 					}
-						m.put(v1, freeze(t));
+					m.put(v1, freeze(t));
 				
 				}
 				// validates
 				try {
-
 					OplPresTrans<S1, C1, V1, V1, V1> xx = new OplPresTrans<S1, C1, V1, V1, V1>(map,
 						"?", "?", fI.get(l0f.first), fI.get(l));
 			
@@ -266,7 +263,6 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 	
 	void checkPaths() {
 		for (Triple<OplCtx<S2, V2>, OplTerm<C2, V2>, OplTerm<C2, V2>> eq : dst.sig.equations) {
-		//	System.out.println("checking " + eq);
 			if (eq.first.vars0.size() != 1) {
 				continue;
 			}
@@ -307,11 +303,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 						}
 					}
 				} else {
-//					System.out.println("l2 is " + l2);
-	//				System.out.println("dst.entities does not contain " + B);
-		//			System.out.println("trying to convTerm on " + eq.second);
 					OplTerm<C1, V1> lhs = convTerm(l2, eq.second);
-			//		System.out.println("trying to convTerm on " + eq.third);
 					OplTerm<C1, V1> rhs = convTerm(l2, eq.third); 
 					
 					OplTerm<Chc<C1, V1>, V1> lhs0 = fI.get(l2).toSig().getKB().nf(squish(lhs.inLeft()));
@@ -320,8 +312,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 					if (!lhs0.equals(rhs0)) {
 						throw new RuntimeException("on label " + l2 + " tgt equality " + eq.second + " = " + eq.third + 
 								" not preserved; becomes " + lhs0 + " = " + rhs0 + " and eqs are " + fI.get(l2).toSig().getKB().printKB());
-					}
-					
+					}				
 				}
 			}
 		}
@@ -338,30 +329,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		}
 		return new OplTerm<>(t.head, ret);
 	}
-	
-/*
-	S2 typeOfAttr(OplTerm<C2, V2> t) {
-		if (t.var != null) {
-			throw new RuntimeException();
-		}
-		if (dst.projA().symbols.containsKey(t.head)) {
-			return dst.projA().symbols.get(t.head).first.get(0);
-		}
 
-		S2 ret = null;
-		for (OplTerm<C2, V2> arg : t.args) {
-			S2 s2 = typeOfHead(arg); 
-			if (!ret.equals(s2)) {
-				throw new RuntimeException("Report to Ryan");
-			}
-		}
-		if (ret == null) {
-			throw new RuntimeException ("Report to Ryan");
-		}
-		return ret;
-	}
-	*/
-	
 	OplTerm<C1, V1> findBlock(C2 att) {
 		OplTerm<C1, V1> ret = null;
 		for (Object l : blocks.keySet()) {
@@ -996,9 +964,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			}
 			
 		}
-
-//		System.out.println(dst.sig0);
-		
+	
 		OplPres<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> P = new OplPres<>(
 				prec, dst_e, dst.sig, gens, equations);
 		
@@ -1030,30 +996,8 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			S2 s2 = QI.P.gens.get(gen);
 			OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, Y>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, Y>, V1>>>>>, V2> value;
 			
-			/*Function<OplTerm<Chc<C1, X>, V1>,OplTerm<Chc<C1, Y>, V1>> F = new Function<OplTerm<Chc<C1, X>, V1>,OplTerm<Chc<C1, Y>, V1>>() {
-				public OplTerm<Chc<C1, Y>, V1> apply(OplTerm<Chc<C1, X>, V1> term) {
-					if (term.var != null) {
-						throw new RuntimeException();
-					}
-					List<OplTerm<Chc<C1, Y>, V1>> args0 = new LinkedList<>();
-					for (OplTerm<Chc<C1, X>, V1> arg : term.args) {
-						args0.add(apply(arg));
-					}
-					if (term.head.left) {
-						return new OplTerm<>(Chc.inLeft(term.head.l), args0);
-					} else {
-						OplTerm<Chc<C1, Y>, V1> y = h.map.get(h.src.gens.get(term.head.r)).get(term.head.r);
-						if (!args0.isEmpty()) {
-							throw new RuntimeException();
-						}
-						return y; 
-					}
-				}
-			}; */
-			
 			if (gen.left) { //skolem
 				OplTerm<Chc<C1, Y>, V1> y = h.apply(gen.l); 
-				//OplSig.
 				OplTerm<Chc<C1,OplTerm<Chc<C1,Y>,V1>>,V1> x = OplInst.conv(h.dst1.S, y, h.dst);
 				value = conv(h.dst1, x);
 			} else {
@@ -1065,7 +1009,6 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			}
 			m.get(s2).put(gen, value);
 		}
-		//System.out.println("map is " + m);
 		OplPresTrans<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, Chc<OplTerm<Chc<C1, Y>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, Y>, V1>>>>> 
 		  ret = new OplPresTrans<>(m, "?", "?", QI.P, QJ.P);
 		

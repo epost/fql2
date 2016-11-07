@@ -64,18 +64,13 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Exp e) {
-	//	System.out.println("unresolving " + e);
 		SigExp t = new SigExp.Exp(e.a.accept(env, this), e.b.accept(env, this));
-	//	System.out.println(t);
 		for (String k : env.keySet()) {
 			SigExp e0 = env.get(k);
-	//		System.out.println("k " + e0);
 			if (e0.equals(t)) {
-	//			System.out.println("returning " + k);
 				return new SigExp.Var(k);
 			}
 		}
-	//	System.out.println("nope");
 		return t;
 	}
 

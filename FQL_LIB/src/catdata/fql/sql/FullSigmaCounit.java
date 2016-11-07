@@ -29,47 +29,31 @@ public class FullSigmaCounit extends PSM {
 	public void exec(PSMInterp interp,
 			Map<String, Set<Map<Object, Object>>> state) {
 		Set<Map<Object, Object>> lineage = state.get(i3 + "_lineage");
-		//System.out.println(lineage);
 		
 		for (Node n : F.target.nodes) {
-		//	System.out.println("n is " + n);
 			Set<Map<Object, Object>> i3i = state.get(i3 + "_" + n);
 			Set<Map<Object, Object>> m = new HashSet<>();
 			for (Map<Object, Object> row : i3i) {
 				Object id = row.get("c0").toString();
-			//	System.out.println("id is " + id);
 				for (Map<Object, Object> v : lineage) {
 					Object id0 = v.get("c0").toString();
-				//	System.out.println("checking " + id0);
 					if (id.equals(id0)) {
 						String node = v.get("c1").toString();
 						String idX = v.get("c2").toString();
 						String[] cols = v.get("c3").toString().split("\\s+");
 						
-					//	System.out.println("initial " + node + " idX " + idX + " cols " + Arrays.toString(cols));
-						
 						Set<Map<Object, Object>> subst_inv = state.get(i2 + "_" + node + "_subst_inv");
-					//	System.out.println("i2 is " + i2);
-					//	System.out.println("node is " + node);
-					//	System.out.println("Fn " + F.nm.get(n));
-					//	System.out.println("Fnode " + F.nm.get(node));
-					//	System.out.println(state.keySet());
-					//	System.out.println("subst_inv: " + subst_inv);
 						for (Map<Object, Object> y : subst_inv) {
 							if (y.get("c0").toString().equals(idX)) {
 								String ret = y.get("c1").toString();
-				//				System.out.println("ret " + ret);
 								for (String col : cols) {
 									if (col.trim().length() == 0) {
 										continue;
 									}
-					//				System.out.println("looking for " + i1 + "_" + col);
 									Set<Map<Object, Object>> u = state.get(i1 + "_" + col);
 									for (Map<Object, Object> e : u) {
-						//				System.out.println("checking " + e);
 										if (e.get("c0").toString().equals(ret)) {
 											ret = e.get("c1").toString();
-							//				System.out.println("updated ret " + ret);
 										}
 									}
 								}
@@ -82,7 +66,6 @@ public class FullSigmaCounit extends PSM {
 					}
 				}
 			}
-		//	System.out.println("Putting " + n + ":" + m);
 			state.put(trans + "_" + n, m);			
 		}
 		

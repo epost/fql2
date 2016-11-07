@@ -9,10 +9,11 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Ctx;
 import catdata.aql.Instance;
-import catdata.aql.Mapping;
 import catdata.aql.It.ID;
+import catdata.aql.Mapping;
 import catdata.aql.exp.SchExp.SchExpLit;
 import catdata.aql.fdm.DeltaInstance;
+import catdata.aql.fdm.DistinctInstance;
 import catdata.aql.fdm.SigmaInstance;
 import catdata.aql.fdm.TerminalInstance;
 
@@ -361,5 +362,61 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static final class InstExpDistinct<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
+
+		public final InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
+		
+		public InstExpDistinct(InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i) {
+			I = i;
+		}
+		
+		
+
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx) {
+			return I.type(ctx0, ctx);
+		}
+	
+		@Override
+		public Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> eval(AqlEnv env) {
+			return new DistinctInstance<>(I.eval(env));
+		}
+	
+		@Override
+		public String toString() {
+			return "distinct " + I;
+		}
+	
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+	
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpDistinct<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpDistinct<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+	
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return I.deps();
+		}
+		
+	}
 
 }

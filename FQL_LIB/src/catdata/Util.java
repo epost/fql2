@@ -1,6 +1,8 @@
 package catdata;
 
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,11 +24,15 @@ import java.util.stream.Collectors;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -100,6 +106,34 @@ public class Util {
 	}
 }
 	
+
+	@SuppressWarnings("serial")
+	public static class BoldifyingColumnHeaderRenderer extends JLabel implements TableCellRenderer {
+		
+		Collection<?> boldify;
+		Font normal = UIManager.getFont("TableHeader.font");
+		Font bold = normal.deriveFont(Font.BOLD);
+		TableCellRenderer r; // = new DefaultTableCellRenderer();
+		
+		public BoldifyingColumnHeaderRenderer(Collection<?> boldify, TableCellRenderer r) {
+			this.boldify = boldify;
+			this.r = r;
+		}
+	
+	
+		public Component getTableCellRendererComponent(JTable table, Object value,
+		        boolean isSelected, boolean hasFocus, int row, int column) {
+			JLabel ret = (JLabel) r.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			if (boldify.contains(value)){
+		        ret.setFont(bold);
+		    } else {
+		        ret.setFont(normal);
+		    }
+		    return ret;
+		}
+	
+		}
+
 
 	public static void assertNotNull(Object... O) {
 		for (Object o : O) {
@@ -571,6 +605,53 @@ public class Util {
 
 	}
 
+
+	@SuppressWarnings("serial")
+	public static JPanel makeBoldHeaderTable(Collection<String> atts, Border b, String border, Object[][] rowData, String[] colNames) {
+		JTable t = new JTable(rowData, colNames) {
+			public Dimension getPreferredScrollableViewportSize() {
+				Dimension d = getPreferredSize();
+				return new Dimension(d.width, d.height);
+			}
+		};
+	//	PlusMinusCellRenderer r = new PlusMinusCellRenderer();
+	//	t.setDefaultRenderer(Object.class, r);
+	//	t.setDefaultEditor(Object.class, r);
+	//	t.setModel(new NonEditableModel(rowData, colNames));
+//		t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+		JPanel p = new JPanel(new GridLayout(1, 1));
+		TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
+		if (colNames.length > 0) {
+			sorter.toggleSortOrder(0);
+		}
+		t.setRowSorter(sorter);
+		sorter.allRowsChanged();
+		p.add(new JScrollPane(t));
+
+		/*
+		for (int row = 0; row < t.getRowCount(); row++) {
+			int rowHeight = t.getRowHeight();
+
+			for (int column = 0; column < t.getColumnCount(); column++) {
+				Component comp = t.prepareRenderer(t.getCellRenderer(row, column), row, column);
+				rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
+			}
+
+			t.setRowHeight(row, rowHeight);
+		} */
+
+		p.setBorder(BorderFactory.createTitledBorder(b, border));
+		//t.getTableHeader().set
+		for (int i = 0; i < t.getColumnModel().getColumnCount(); i++) {
+		 TableColumn col = t.getColumnModel().getColumn(i);
+		 
+		    col.setHeaderRenderer(new Util.BoldifyingColumnHeaderRenderer(atts, t.getTableHeader().getDefaultRenderer()));
+		}
+		
+		return p;
+
+	} 
 	
 
 	public static String nice(String s) { 

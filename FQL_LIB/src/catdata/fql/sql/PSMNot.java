@@ -47,10 +47,7 @@ public class PSMNot extends PSM {
 					.get(prop);
 			Pair<Instance, Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>>> H2 = interp.prop2
 					.get(prop);
-			//Instance old = H2.first;
-			//System.out.println(H1);
-			//System.out.println(H2);
-
+		
 			Instance prp = new Instance(sig, PSMGen.gather(prop, sig, state));
 
 			Map<Node, Map<Object, Pair<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>>> I1 = interp.prop3
@@ -64,21 +61,16 @@ public class PSMNot extends PSM {
 				List<Pair<Object, Object>> data0 = new LinkedList<>();
 				Triple<Instance, Map<Object, Path>, Map<Path, Object>> Hc = H1.first.get(c);
 				
-			//	System.out.println("HC for " + c + " is " + Hc);
 				for (Object id : prp.getNode(c)) {
 					Pair<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>> id0 = I1.get(c).get(id);
 					Instance A = H2.second.get(c).first.get(id0.first);
-					//System.out.println("A " + A);
 					Instance notA = calcSub(sig0, /*H1, */ Hc, A);
-					//System.out.println("not A" + notA);
 					Object notId = H2.second.get(c).second.get(notA);
-		//			System.out.println("notID " + notId);
 			
 					Object x = I2.get(c).get(new Pair<>(notId, id0.second));
 					data0.add(new Pair<>(id, x));
 					
 				}
-				//System.out.println(data0);
 				data.add(new Pair<>(c.string, data0));
 			}
 			
@@ -92,36 +84,25 @@ public class PSMNot extends PSM {
 
 	private Instance calcSub(
 			Signature sig0,
-		    /* Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> H1 , */
 			Triple<Instance, Map<Object, Path>, Map<Path, Object>> Hc, Instance A)
 			throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> notA_data = new HashMap<>();
 		for (Node d : sig.nodes) {
-			//System.out.println("doing d= " + d);
 			Set<Pair<Object,Object>> dd = new HashSet<>();
 			xxx : for (Object f : Hc.first.getNode(d)) {
 				Path ff = Hc.second.get(f);
-				//System.out.println("doing f=" + ff.toLong());
 				//boolean b = true;
 				for (Node d0 : sig.nodes) {
 					for (Arr<Node, Path> g : sig.toCategory2().first.hom(d, d0)) {
-					//	System.out.println("checking g= " + g.arr.toLong());
 						Arr<Node, Path> fg = sig.toCategory2().first.compose(sig.toCategory2().second.of(ff), g);
 					
 						Object xxx = Hc.third.get(fg.arr);
-						//System.out.println(Hc.third);
-					//	System.out.println("fg = " + fg + " is " + xxx);
-						
-					//	System.out.println("A(" + d0 + ") is " + A.getNode(d0));
 						if (xxx == null) {
 							throw new RuntimeException();
 						}
-//						if (!A.getNode(d0).contains(xxx)) {
 						if (!A.getNode(d0).contains(xxx)) {
-				//			System.out.println("adding " + f);
 						} else {
 							continue xxx;
-//							System.out.println("not adding");
 						}
 					}
 				}
@@ -131,7 +112,6 @@ public class PSMNot extends PSM {
 			
 			notA_data.put(d.string, dd);
 		}
-		//System.out.println("data part " + notA_data);
 		
 		for (Edge h : sig.edges) {
 			Set<Pair<Object,Object>> dd = new HashSet<>();

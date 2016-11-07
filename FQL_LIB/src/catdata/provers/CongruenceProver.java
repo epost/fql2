@@ -1,4 +1,4 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,6 +9,7 @@ import java.util.Set;
 
 import catdata.Pair;
 import catdata.Triple;
+import catdata.UnionFind;
 
 //Congruence closure a la Nelson Oppen
 public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
@@ -39,13 +40,12 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 			throw new InterruptedException();
 		}
 		if (uf.connected(u, v)) {
-//			System.out.println("connected so ok");
 			return;
 		}
 
 		Set<KBExp<C, V>> pu = new HashSet<>(pred.get(uf.find(u)));
 		Set<KBExp<C, V>> pv = new HashSet<>(pred.get(uf.find(v)));
-		// System.out.println(pu + " and " + pv);
+
 		uf.union(u, v);
 		pred.get(uf.find(u)).addAll(pu);
 		pred.get(uf.find(v)).addAll(pv); //one of these will be redundant
@@ -63,16 +63,14 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 	private void merge2(KBExp<C, V> u, KBExp<C, V> v) {
 		Set<KBExp<C, V>> pu = new HashSet<>(pred.get(uf.find(u)));
 		Set<KBExp<C, V>> pv = new HashSet<>(pred.get(uf.find(v)));
-		// System.out.println(pu + " and " + pv);
+		
 		uf.union(u, v);
 		pred.get(uf.find(u)).addAll(pu);
 		pred.get(uf.find(v)).addAll(pv); //one of these will be redundant TODO aql check that find never changes
 
 		for (KBExp<C, V> x : pu) {
 			for (KBExp<C, V> y : pv) {
-				// System.out.println("consider " + x + " and " + y);
 				if (!uf.connected(x, y) && congruent(x, y)) {
-					// System.out.println("hit");
 					merge2(x, y);
 				}
 			}

@@ -81,7 +81,6 @@ public class FDM {
 					.fullSigma(F, deltad, null, null);
 			Functor<O1, A1, Set, Fn> sigmad = q.first;
 			Map<Object, List<Pair<A1, Object>>> lineage = q.fourth;
-			// System.out.println("lineage " + lineage);
 			return new Transform<>(sigmad, I, n -> {
 				FUNCTION<Object, Object> h = i -> {
 					List<Pair<A1, Object>> l = lineage.get(i);

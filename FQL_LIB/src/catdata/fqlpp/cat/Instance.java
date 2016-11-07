@@ -150,8 +150,6 @@ public class Instance<O, A> implements Serializable{
 			}
 
 			if (!nm.get(e.target).containsAll(i.values())) {
-			//	System.out.println("i values " +  i.values());
-			//	System.out.println("nmget " + nm.get(e.target));
 				throw new RuntimeException("Codomain of " + e.name
 						+ " has non foreign key in " + this);
 			}

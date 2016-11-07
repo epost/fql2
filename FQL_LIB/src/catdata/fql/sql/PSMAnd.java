@@ -100,12 +100,10 @@ public class PSMAnd extends PSM {
 					data0.add(new Pair<>(idp, x));
 					
 				}
-				//System.out.println(data0);
 				data.add(new Pair<>(c.string, data0));
 			}
 			
 			Transform ret = new Transform(prd, prp, data);
-		//	System.out.println("transform " + ret);
 			PSMGen.shred(pre, ret, state);
 		} catch (FQLException fe) {
 			fe.printStackTrace();

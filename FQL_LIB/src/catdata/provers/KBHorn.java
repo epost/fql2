@@ -1,9 +1,9 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import catdata.algs.kb.KBExp.KBApp;
+import catdata.provers.KBExp.KBApp;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class KBHorn {

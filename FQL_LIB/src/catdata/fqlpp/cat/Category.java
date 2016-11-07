@@ -90,13 +90,6 @@ public abstract class Category<O, A> implements Serializable {
 
 	public abstract A compose(A a1, A a2);
 
-/*	private boolean checkRet(String s) {
-		if (s.length() > 4096*8) {
-			return true;
-		}
-		return false;
-	} */
-
 	String toString_cache = null;
 
 	@Override
@@ -111,10 +104,6 @@ public abstract class Category<O, A> implements Serializable {
 		if (objects().size() < 2048) {
 			for (O oo : objects()) {
 				o += "\t" + oo + "\n";
-//				if (checkRet(o)) {
-//					toString_cache = "too long";
-//					return "too long";
-//				}
 			}
 		} else {
 			o = "too many to print";
@@ -124,10 +113,6 @@ public abstract class Category<O, A> implements Serializable {
 		if (arrows().size() < 2048) {
 			for (A aa : arrows()) {
 				a += "\t" + aa + " : " + source(aa) + " -> " + target(aa) + "\n";
-//				if (checkRet(a)) {
-//					toString_cache = "too long";
-//					return "too long";
-//				}
 			}
 		} else {
 			a += "too many to print";
@@ -149,11 +134,6 @@ public abstract class Category<O, A> implements Serializable {
 					count = -1;
 					break outer;
 				}
-//				if (checkRet(c)) {
-//					toString_cache = "too long";
-//					return "too long";
-//				}
-
 			}
 		}
 
@@ -161,10 +141,6 @@ public abstract class Category<O, A> implements Serializable {
 		if (objects().size() < 2048) {
 			for (O oo : objects()) {
 				j += "\t" + "id " + oo + " = " + identity(oo) + "\n";
-//				if (checkRet(j)) {
-//					toString_cache = "too long";
-//					return "too long";
-//				}
 			}
 		} else {
 			j = "too many to print";
@@ -413,7 +389,6 @@ public abstract class Category<O, A> implements Serializable {
 		}
 
 		Signature<O,A> ret = new Signature<>(objects(), a, e);
-		// System.out.println("returning " + ret);
 		return ret;
 	}
 

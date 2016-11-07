@@ -556,8 +556,6 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 		List where = new LinkedList<>();
 
-	//	System.out.println("m1 : " + m1);
-		
 		Function f = x -> {
 			Object j = m2.get(x);
 			if (j == null) {
@@ -574,7 +572,6 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		}
 		
 		Flower iii= new Flower(new HashMap<>(), from, where, e.applyTo);
-	//	System.out.println(iii);
 		return iii.accept(env, this);		
 	}
 

@@ -48,8 +48,6 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 	}
 
 	private void gamma1(Signature<O2, A2>.Node b1, Pair<Integer, Integer> xy) {
-		// System.out.println("remove " + xy);
-		// System.out.println("before " + this);
 		if (xy.first.equals(xy.second)) {
 			Sb.get(b1).remove(xy);
 			return;
@@ -112,16 +110,6 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 		}
 
 		lineage.remove(y); 
-/*		for (Object k : lineage.keySet()) {
-			List<Pair<Signature<O2, A2>.Edge, Object>> v = lineage.get(k);
-			for (Pair<Signature<O2, A2>.Edge, Object> p : v) {
-				if (p.second.equals(y)) {
-					// System.out.println("replace " + uv);
-					p.second = x;
-				}
-			}
-		} */
-		// System.out.println("after " + this);
 	}
 
 	private void replace(Integer x, Integer y) {
@@ -173,12 +161,6 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 				substLineage();
 				return true;
 			}
-			/* System.out.println("iteration " + i);
-			System.out.println("fresh " + fresh);
-			System.out.println("this: " + this);
-			for (Entry<Signature<O2, A2>.Node, Set<Pair<Integer, Integer>>> e : Pb.entrySet()) {
-				System.out.println(e.getValue().size());
-			} */
 		}
 		return false;
 	}
@@ -190,15 +172,11 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 
 		for (Signature<O1, A1>.Edge e : A.edges) {
 			Signature<O2, A2>.Path g = F.apply(A.path(e));
-			// Set<Pair<Object, Integer>> lhs = compose(X.evaluate(A.new
-			// Path(e)), ua.get(e.target));
 			if (X.em.get(e) == null) {
 				throw new RuntimeException("can't find " + e + " in " + X.nm);
 			}
 			Set<Pair<Object, Integer>> lhs = Util.compose(Util.convert(X.em.get(e)),
 					ua.get(e.target));
-			// Set<Pair<Object, Integer>> lhs =
-			// Util.compose(Util.refl(X.m.get(e)), ua.get(e.target));
 			Set<Pair<Object, Integer>> rhs = Util.compose(ua.get(e.source), eval(g));
 			Signature<O2, A2>.Node n = g.target;
 			ret = ret || addCoincidences(lhs, rhs, n);
@@ -208,7 +186,6 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 	}
 
 	private boolean beta1() {
-		// System.out.println("start beta: " + this);
 		boolean ret = false;
 		for (Signature<O2, A2>.Eq eq : B.eqs) {
 			Set<Pair<Integer, Integer>> lhs = eval(eq.lhs);
@@ -216,7 +193,6 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 			Signature<O2, A2>.Node n = eq.lhs.target;
 			ret = ret || addCoincidences(lhs, rhs, n);
 		}
-		// System.out.println("end beta: " + this);
 		return ret;
 	}
 
@@ -231,8 +207,6 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 				if (l.second.equals(r.second)) {
 					continue;
 				}
-				// System.out.println("coincidence: " + l.second + " and " +
-				// r.second);
 				ret = Sb.get(n).add(new Pair<>(l.second, r.second)) || ret;
 				ret = Sb.get(n).add(new Pair<>(r.second, l.second)) || ret;
 			}
@@ -300,8 +274,6 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 			utables.get(p.second.target).put(y, xxx);
 		}
 
-		// System.out.println("add " + y + " for " + p);
-
 		return true;
 	}
 
@@ -323,8 +295,6 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 					// if (z.second.equals(y)) {
 					ret = true;
 					it.remove();
-					// System.out.println("non-determinism: " + x.first +
-					// " mapsto " + y + " and " + z.second);
 					Sb.get(g.target).add(new Pair<>(y, z.second));
 					Sb.get(g.target).add(new Pair<>(z.second, y));
 					// }
@@ -339,9 +309,7 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 			lineage.put(old, new LinkedList<Pair<Signature<O2, A2>.Edge, Object>>());
 		}
 		List<Pair<Signature<O2, A2>.Edge, Object>> l = new LinkedList<>(lineage.get(old));
-		/* if (l.size() > 0) {
-			l.add(new Pair<>(col, null));
-		} */ //else {
+	 //else {
 			l.add(new Pair<>(col, old)); //
 		//}
 		lineage.put(nw, l);
@@ -376,18 +344,14 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 		for (Signature<O2, A2>.Edge e : B.edges) {
 			Pg.put(e, new HashSet<Pair<Integer, Integer>>());
 		}
-		// Set<Object> rank = new HashSet<>();
-
+		
 		for (Signature<O1, A1>.Node n : A.nodes) {
 			Set<Pair<Object, Integer>> j = new HashSet<>();
 			Set<Pair<Integer, Integer>> i = Pb.get(F.nm.get(n));
 			Set<Object> k = X.nm.get(n);
 			for (Object v : k) {
 				//  be careful: in fql++ input IDs are not unique.
-				// if (rank.contains(v)) {
-				// throw new RuntimeException("Contains non-unique ID " + v +
-				// ": " + x);
-				// }
+				
 				int id = fresh();
 				// rank.add(v);
 				j.add(new Pair<>(v, id));
@@ -404,16 +368,7 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 			}
 			ua.put(n, j);
 		}
-		// System.out.println("initial: " + this);
 	}
-
-	/*
-	 * private Object lookup(Set<Pair<Object, Object>> set, Object i) { if (i ==
-	 * null) { throw new RuntimeException(); } if (set == null) { throw new
-	 * RuntimeException(); } for (Pair<Object, Object> k : set) { if
-	 * (k.first.equals(i.toString())) { return k.second; } } throw new
-	 * RuntimeException("Cannot find " + i + " in " + set); }
-	 */
 
 	@Override
 	public String toString() {
@@ -422,7 +377,6 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 
 	@SuppressWarnings("unchecked")
 	private void substLineage() {
-		//System.out.println(lineage);
 		//could make getLineage aware of Fresh, but this avoids copying
 		if (NEWDEBUG.debug.fqlpp.useLineage.equals("Fresh IDs")) {
 			Pb2 = (Map<Signature<O2, A2>.Node, Set<Pair<Object, Object>>>) ((Object) Pb);
@@ -459,19 +413,6 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 				utables2.put(k.getKey(), ret);
 			}
 			for (Entry<Object, List<Pair<Signature<O2, A2>.Edge, Object>>> k : lineage.entrySet()) {
-				//: recursive this
-				 /* List<Pair<Signature<O2, A2>.Edge, Object>> z = new LinkedList<>();
-				boolean first = true;
-				for (Pair<Signature<O2, A2>.Edge, Object> p : k.getValue()) {
-					Object o = lineage.get(p.second);
-					System.out.println("Looking for " + p.second + " in " + lineage);
-					if (o != null && !first) {
-						z.add(new Pair<>(p.first, getLineage(p.second)));
-					} else {
-						z.add(p);
-					}
-					first = false;
-				} */
 				lineage2.put(getLineage(k.getKey()), k.getValue());
 			}
 		} 
@@ -498,8 +439,7 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 		
 		while (it.hasNext()) {
 			first = it.next();
-//			firstX = (Pair<Signature<O2, A2>.Node, Object>) first.second;
-			ret += ", " + first.first.name /* + ":" + first.second */;
+			ret += ", " + first.first.name;
 		}
 		
 		

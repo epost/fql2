@@ -181,15 +181,6 @@ public class FqlppDisplay implements Disp {
 			px.add("Text", gp);
 		}
 		
-		/*
-		if (!view.isInfinite()) {
-			FQLTextPanel gp = new FQLTextPanel(BorderFactory.createEtchedBorder(),null,
-					view.repX().toString());
-			px.add("Representables", gp);
-		}
-		*/
-		
-
 		JPanel top = new JPanel(new GridLayout(1, 1));
 		top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 		top.add(px);
@@ -475,13 +466,7 @@ public class FqlppDisplay implements Disp {
 					Util.nice(view.toString()));
 			px.add("Text", gp);
 		}
-		/*
-		if (!view.source.isInfinite() && view.target.equals(FinSet.FinSet)) {
-			FQLTextPanel gp = new FQLTextPanel(BorderFactory.createEtchedBorder(), "",
-					view.subInstances().toString());
-			px.add("Subinstances", gp);
-		} */
-
+		
 
 		JPanel top = new JPanel(new GridLayout(1, 1));
 		top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -516,17 +501,7 @@ public class FqlppDisplay implements Disp {
 				src_sig = new Signature(sig0.nodes, sig0.arrows, sig0.eqs);
 			}
 		}
-	//	String dst_key = unr(env.cats, view.source.target, null);
-	//	if (dst_key == null) {
-	//		dst_key = unr(env.cats, view.target.target, null);
-	//	}
-	/*	if (dst_key != null) {
-			CatExp r = CatOps.resolve(prog, prog.cats.get(dst_key));
-			if (r instanceof CatExp.Const) {
-				CatExp.Const sig0 = (CatExp.Const) r;
-				dst_sig = new Signature(sig0.nodes, sig0.arrows, sig0.eqs);
-			}
-		} */
+	
 
 		if (src_sig != null && FinSet.FinSet.equals(view.target.target)) {
 		//	JPanel vwr = new JPanel(new GridLayout(1, 1));
@@ -682,7 +657,6 @@ public class FqlppDisplay implements Disp {
 	final Map<String, String> indices = new HashMap<>();
 
 	public void display(String s, List<String> order) {
-		// System.out.println(order);
 		frame = new JFrame();
 		this.name = s;
 
@@ -702,8 +676,6 @@ public class FqlppDisplay implements Disp {
 				"Select:"));
 		JScrollPane yyy1 = new JScrollPane(yyy);
 		temp1.add(yyy1);
-	//	temp1.setMinimumSize(new Dimension(200, 600));
-	//	yyy.setPreferredSize(new Dimension(200, 600));
 		yyy.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		yyy.addListSelectionListener(new ListSelectionListener() {
@@ -721,14 +693,9 @@ public class FqlppDisplay implements Disp {
 		});
 
 		JPanel north = new JPanel(new GridLayout(1, 1));
-	//	JButton saveButton = new JButton("Save GUI");
-	//	north.add(saveButton);
-	//	saveButton.setMinimumSize(new Dimension(10,10));
-	//	saveButton.addActionListener(x -> GUI.save2(env));
-		JSplitPane px = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+			JSplitPane px = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		//px.setResizeWeight(.8);
 		px.setDividerLocation(200);
-//		FQLSplit px = new FQLSplit(.5, JSplitPane.HORIZONTAL_SPLIT);
 		px.setDividerSize(4);
 		frame = new JFrame(/* "Viewer for " + */s);
 
@@ -743,10 +710,6 @@ public class FqlppDisplay implements Disp {
 		px.add(temp2);
 
 		px.add(x);
-
-		// JPanel bd = new JPanel(new BorderLayout());
-		// bd.add(px, BorderLayout.CENTER);
-		// bd.add(north, BorderLayout.NORTH);
 
 		// frame.setContentPane(bd);
 		frame.setContentPane(px);
@@ -1342,10 +1305,6 @@ public class FqlppDisplay implements Disp {
 
 //		int x = (int) Math.ceil(Math.sqrt(sig.nodes.size()));
 		List<JComponent> ret = new LinkedList<>();
-//		if (x == 0) {
-	//		return new Pair<>(new JPanel(), new HashMap<>());
-	//	}
-	//	JPanel ret = new JPanel(new GridLayout(x, x));
 
 		for (Signature.Node n : sig.nodes) {
 			List<Signature<String, String>.Edge> cols = map.get(n);

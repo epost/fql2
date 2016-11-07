@@ -90,7 +90,6 @@ public class FullSigma extends PSM {
 				m.put("c3", rest);
 				l.add(m);
 			}
-			//System.out.println("lineage " + l);
 			state.put(pre + "_lineage", l);
 						
 		} catch (Throwable e) {

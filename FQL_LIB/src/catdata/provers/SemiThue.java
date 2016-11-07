@@ -1,4 +1,4 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -281,7 +281,6 @@ public class SemiThue<Y> {
 	}
 
 	private <X> Set<Pair<List<X>, List<X>>> cp(Set<Pair<List<X>, List<X>>> t) {
-		// System.out.println("cp " + t);
 		Set<Pair<List<X>, List<X>>> ret = new HashSet<>();
 		for (Pair<List<X>, List<X>> rule1 : t) {
 			for (Pair<List<X>, List<X>> rule2 : t) {

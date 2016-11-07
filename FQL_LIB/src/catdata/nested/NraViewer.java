@@ -265,7 +265,6 @@ public class NraViewer {
 		
 		int[] ref = new int[] { 0 };
 		for (;;) {
-		//	System.out.println("Starting: " + ret);
 			Map<NRel, Set<Map>> ret2 = new HashMap<>();
 			for (Entry<NRel, Set<Map>> e : ret.entrySet()) {
 				ret2.putAll(unnest(e.getKey(), e.getValue(), ref));
@@ -274,7 +273,6 @@ public class NraViewer {
 				return ret2;
 			}
 			ret = ret2;
-		//	System.out.println("------");
 		}
 	}
 	
@@ -292,7 +290,6 @@ public class NraViewer {
 	
 	
 	public Map<NRel, Set<Map>> unnest(NRel t, Set<Map> s, int[] ref) {
-	//	System.out.println("Unnesting " + s + " at type " + t);
 		Set<Map> ret = new HashSet<>();
 		Map<NRel, Map<Integer, Set<Map>>> temp = new HashMap<>();
 		Map<String, Optional<NRel>> nw = new HashMap<>();
@@ -319,8 +316,6 @@ public class NraViewer {
 			ret.add(n);
 		}	
 		
-//		System.out.println("temp " + temp);
-		
 		Map<NRel, Set<Pair<Integer, Map>>> temp2 = new HashMap<>();
 		for (Entry<NRel, Map<Integer, Set<Map>>> k : temp.entrySet()) {
 			Set<Pair<Integer, Map>> w = unnest1(k.getValue());
@@ -335,7 +330,6 @@ public class NraViewer {
 			retX.put(new NRel(vvv), conv1(e.getValue()));
 		}
 		
-//		System.out.println("Result: " + retX);
 		return retX;
 	}
 	

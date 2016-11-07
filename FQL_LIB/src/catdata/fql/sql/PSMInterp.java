@@ -58,10 +58,7 @@ public class PSMInterp {
 					throw t;
 				}
 			}
-		//	System.out.println("After " + cmd);
-		//	System.out.println(state);
 		}
-//		 PrettyPrinter.printDB(state);
 		return new Pair<>(state, ret);
 	}
 	

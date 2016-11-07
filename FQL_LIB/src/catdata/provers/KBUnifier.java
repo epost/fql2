@@ -1,11 +1,11 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import catdata.Chc;
-import catdata.algs.kb.KBExp.KBApp;
+import catdata.provers.KBExp.KBApp;
 
 /**
  * 

@@ -14,9 +14,9 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
-import catdata.algs.kb.SemiThue;
 import catdata.fqlpp.FUNCTION;
 import catdata.ide.NEWDEBUG;
+import catdata.provers.SemiThue;
 
 //this requires finite denotations (paths always normalized)
 @SuppressWarnings("serial")
@@ -43,7 +43,6 @@ public class Signature<O,A> implements Serializable {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-		//	result = prime * result + getOuterType().hashCode();
 			result = prime * result + ((name == null) ? 0 : name.hashCode());
 			return result;
 		}
@@ -120,8 +119,6 @@ public class Signature<O,A> implements Serializable {
 				return false;
 			return true;
 		}
-
-		
 	}
 	
 	public class Path implements Serializable {
@@ -159,13 +156,7 @@ public class Signature<O,A> implements Serializable {
 		public Path head() {
 			return new Path(source, new LinkedList<Edge>());
 		}
-		
-		/* private Path append(Edge e) {
-			List<Edge> p = new LinkedList<>(path);
-			p.add(e);
-			return new Path(source, p);
-		} */
-		
+			
 		private Path(Path p1, Path p2) {
 			this.source = p1.source;
 			this.path = new LinkedList<>();
@@ -227,12 +218,6 @@ public class Signature<O,A> implements Serializable {
 		
 		@Override
 		 public String toString() {
-			/* if (cat == null) {
-				Pair<Category<Signature<O, A>.Node, Signature<O, A>.Path>, Function<Signature<O, A>.Path, Signature<O, A>.Path>> xxx = Signature.this.toCategory();
-				cat = xxx.first;
-				fn = xxx.second;
-			}
-			return fn.apply(this).toStringStrict(); */
 			return toStringStrict();
 		} 
 		
@@ -247,12 +232,6 @@ public class Signature<O,A> implements Serializable {
 		@SuppressWarnings("unchecked")
 		@Override
 		public boolean equals(Object o) {
-			/* if (cat == null) {
-				Pair<Category<Signature<O, A>.Node, Signature<O, A>.Path>, Function<Signature<O, A>.Path, Signature<O, A>.Path>> xxx = LeftKanCat.toCategory(Signature.this);
-				cat = xxx.first;
-				fn = xxx.second;
-			}
-			return fn.apply((Path)o).strict_equals(fn.apply(this)); */
 			return strict_equals((Path)o);
 		}
 		
@@ -510,8 +489,7 @@ public class Signature<O,A> implements Serializable {
 			Set<Signature<O, A>.Edge> edges, Set<Signature<O, A>.Eq> eqs, Unit i) {
 		this.nodes = nodes;
 		this.edges = edges;
-		this.eqs = eqs;
-		
+		this.eqs = eqs;	
 	}
 
 	public Pair<Signature<O, A>, Mapping<O, A, O, A>> onlyObjects() {
@@ -565,7 +543,6 @@ public class Signature<O,A> implements Serializable {
 
 	private Pair<Category<Signature<O, A>.Node, Signature<O, A>.Path>, FUNCTION<Signature<O, A>.Path, Signature<O, A>.Path>> helper(
 			LeftKan<O, A, O, A> lk) {
-		// System.out.println("doing " + B);
 		Set<Signature<O, A>.Node> objects = nodes;
 
 		Set<Signature<O, A>.Path> arrows = new HashSet<>();
@@ -632,25 +609,6 @@ public class Signature<O,A> implements Serializable {
 			}
 			return fn2.get(fn.apply(x));
 		};
-
-/*		Map<Pair<Signature<O, A>.Path, Signature<O, A>.Path>, Signature<O, A>.Path> composition = new HashMap<>();
-		for (Signature<O, A>.Path x : arrows) {
-			for (Signature<O, A>.Path y : arrows) {
-				if (x.target.equals(y.source)) {
-					composition.put(new Pair<>(x, y),
-							r2.apply(B.new Path(x, y)));
-				}
-			}
-		} */
-
-		/* Map<Signature<O, A>.Path, Signature<O, A>.Node> sources = new HashMap<>();
-		Map<Signature<O, A>.Path, Signature<O, A>.Node> targets = new HashMap<>();
-		for (Signature<O, A>.Path p : arrows) {
-			sources.put(p, p.source);
-			targets.put(p, p.target);
-		} */
-
-//		Signature<Signature<O, A>.Node, Signature<O, A>.Path> injected = inject();
 		
 		Category<Signature<O, A>.Node, Signature<O, A>.Path> r1 = new Category<Signature<O, A>.Node, Signature<O, A>.Path>() {
 			
@@ -690,23 +648,11 @@ public class Signature<O,A> implements Serializable {
 				Signature<O, A>.Path y = r2.apply(a2);
 				return r2.apply(new Path(x, y));
 			}
-			
-//			@Override
-//			public Signature<Signature<O, A>.Node, Signature<O, A>.Path> toSig() {
-//				return injected;
-//			}
-			
+
 		};
 		
 		r1.origin = this;
-		
-//		FiniteCategory<Signature<O, A>.Node, Signature<O, A>.Path> r1 = new FiniteCategory<Signature<O, A>.Node, Signature<O, A>.Path>(
-	//			objects, arrows, sources, targets, composition, identities);
-
-		// System.out.println(r1);
-		
-		
-		
+	
 		return new Pair<>(r1, r2);
 	}
 	
@@ -733,18 +679,14 @@ public class Signature<O,A> implements Serializable {
 		for (Path path1 : paths) {
 			for (Path path2 : paths) {
 				if (path1.source.equals(path2.source) && path1.target.equals(path2.target)) {
-			//		System.out.println("Trying " + path1 + " and " + path2);
 					boolean b1 = normalize(path1).equals(normalize(path2));
-				//	System.out.println("starting kb");
 					boolean b2 = kb.equiv(path1.path, path2.path);
 					if (b1 != b2) {
 						throw new RuntimeException("Mismatch on " + path1 + " and " + path2 + " b1 " + b1 + " b2 " + b2);
 					}
-			//		System.out.println("ok");
 				}
 			}
 		}
-
 	}
 	
 	
@@ -796,22 +738,4 @@ public class Signature<O,A> implements Serializable {
 		};
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }

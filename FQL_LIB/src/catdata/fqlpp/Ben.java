@@ -73,7 +73,6 @@ public class Ben {
 
 		//: implement colimit here
 		
-		System.out.println("hello world");
 		return new Const(objects, arrows, eqs);
 	}
 	

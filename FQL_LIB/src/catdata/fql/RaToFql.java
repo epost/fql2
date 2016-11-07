@@ -336,12 +336,6 @@ public class RaToFql {
 		ret += "\n\ninstance " + out + "_w2= pi " + k + "_GG " + out + "_w1";
 		ret += "\n\ninstance " + out + "_w3= SIGMA " + k + "_HH " + out + "_w2";
 		ret += "\n\ninstance " + out + "_rel= delta " + k + "_II " + out + "_w3";
-		/*
-		 * instance Y3=delta F3 X3 instance Z3=sigma G3 Y3
-		 * 
-		 * instance W1=delta F Z3 instance W2=pi G W1 instance W3=SIGMA H W2
-		 * instance RelationImage=delta I W3
-		 */
 		return ret;
 	}
 
@@ -419,17 +413,9 @@ public class RaToFql {
 		final CodeTextPanel input = new CodeTextPanel(kind() + " Input", "");
 		final CodeTextPanel output = new CodeTextPanel("FQL Output", "");
 
-		// JButton jdbcButton = new JButton("Load using JDBC");
-		// JButton runButton = new JButton("Run " + kind());
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");
-		// JButton runButton2 = new JButton("Run FQL");
-		// JCheckBox jdbcBox = new JCheckBox("Run using JDBC");
-		// JLabel lbl = new JLabel("Suffix:", JLabel.RIGHT);
-		// lbl.setToolTipText("FQL will translate table T to T_suffix, and generate SQL to load T into T_suffix");
-		// final JTextField field = new JTextField(8);
-		// field.setText("fql");
-
+		
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
 		box.addActionListener(new ActionListener() {
@@ -500,12 +486,6 @@ public class RaToFql {
 		// tp.add(field);
 		tp.add(new JLabel("Load Example", JLabel.RIGHT));
 		tp.add(box);
-
-		// bp.add(runButton);
-		// bp.add(runButton2);
-		// bp.add(lbl);
-		// bp.add(field);
-		// bp.add(jdbcBox);
 
 		// p.add(bp, BorderLayout.SOUTH);
 		p.add(jsp, BorderLayout.CENTER);
@@ -701,15 +681,11 @@ public class RaToFql {
 				String f2x = ((EDiff) gh).r;
 
 				String s1 = schemas.get(f1x);
-				// System.out.println("s1 is " + s1);
-				// System.out.println("schemas0 " + schemas0);
-				// System.out.println("scheas " + schemas);
 				Const s1x = schemas0.get(f1x);
 				schemas.put(k, s1);
 
 				String f1y = doAdom(s1x, s1);
-				// String f2y = doAdom(f2x, s1x);
-
+	
 				if (!done.containsKey(s1)) {
 					xxx += "\n\n" + f1y;
 					done.put(s1, true);
@@ -722,10 +698,6 @@ public class RaToFql {
 				String f2 = k + "_r" + "_rel";
 
 				xxx += longSlash + "\n/* Translation of " + k + "  */\n" + longSlash;
-
-				// Boolean done0 = done.get(s1);
-
-				// xxx += "\n\n" + f2y;
 
 				xxx += "\n\ninstance " + k + "prp = prop " + s1;
 				xxx += "\n\ninstance " + k + "one = unit " + s1;
@@ -752,17 +724,10 @@ public class RaToFql {
 				EED c = (EED) gh;
 				catdata.fql.decl.MapExp.Const f = doED(cols, c.from1, c.where1, exp);
 				SigExp.Const src = (SigExp.Const) f.src;
-				System.out.println(f.src);
-				System.out.println(f.dst);
-				System.out.println(f);
-
+		
 				c.from2.putAll(c.from1);
 				c.where2.addAll(c.where1);
 				catdata.fql.decl.MapExp.Const g = doED(cols, c.from2, c.where2, exp);
-				System.out.println("===");
-				System.out.println(g.src);
-				System.out.println(g.dst);
-				System.out.println(g);
 				
 				List<Pair<String, String>> l = new LinkedList<>();
 				for (String x : src.nodes) {
@@ -777,10 +742,7 @@ public class RaToFql {
 				}
 				
 				catdata.fql.decl.MapExp.Const i = new MapExp.Const(l, new LinkedList<Pair<String,String>>(), em , f.src, g.src);
-				System.out.println("^^^");
-				System.out.println(i); 
-				
-
+			
 				xxx += longSlash + "\n/* Translation of " + k + " */\n" + longSlash;
 				 xxx += "\n\nschema " + k + "A = " + f.src;
 				xxx += "\n\nschema " + k + "E = " + g.src;
@@ -794,8 +756,6 @@ public class RaToFql {
 			}
 		}
 
-		// FQLProgram ret = new FQLProgram();
-		// ret.sigs.put("S", exp);
 		String enum0 = "";
 		boolean b = false;
 		for (Object o : enums) {
@@ -810,18 +770,9 @@ public class RaToFql {
 		return comment + preS + "\n\nschema S = " + exp + "\n\ninstance I = " + inst + " : S" + xxx;
 	}
 
-	/* private static String lookup(List<Pair<String, String>> l, String ret) {
-		for (Pair<String, String> x : l) {
-			if (x.first.equals(ret)) {
-				return x.second;
-			}
-		}
-		return ret;
-	} */
 	
 	private static catdata.fql.decl.MapExp.Const doED(HashMap<String, List<String>> cols, Map<String, String> from,
-			List<Pair<Pair<String, String>, Pair<String, String>>> where, SigExp.Const target 
-			/*, List<Pair<String, String>> pres, Map<String, Triple<String,String,String>> arr  */) {
+			List<Pair<Pair<String, String>, Pair<String, String>>> where, SigExp.Const target ) {
 
 		Set<Triple<String, String, Map<String, String>>> s = new HashSet<>();
 		Set<Pair<String, String>> e = new HashSet<>(); // can process some
@@ -853,10 +804,8 @@ public class RaToFql {
 		
 		Set<Pair<String, Pair<String, String>>> sx = new HashSet<>();
 		for (Triple<String, String, Map<String, String>> x : s) { // table name, fresh, map
-			// sx.add(new Pair<>(x.first, new Pair<>(x.second, x.second)));
 			for (Entry<String, String> y : x.third.entrySet()) {
 				sx.add(new Pair<>(x.first, new Pair<>(x.second, y.getValue())));
-				// sx.add(new Pair<>("att", new Pair<>(y.getValue(), y.getValue())));
 			}
 		}
 		
@@ -877,7 +826,6 @@ public class RaToFql {
 			Triple<String,String,String> t = new Triple<>(x.first + "_" + x.second.first + "_" + x.second.second,
 					x.second.first, x.second.second);
 			if (!wa.contains(t)) {
-			//	arr.put(x.first + "_" + x.second.first + "_" + x.second.second, new Triple<>(x.first, x.second.first, x.second.second));
 				wa.add(t);
 			}
 		}
@@ -978,28 +926,21 @@ public class RaToFql {
 
 		List<List<Triple<String, String, String>>> eqcs = merge(edges2, fl);
 
-		// System.out.println("eqcs " + eqcs);
-		// System.out.println("edges2 " + edges2);
 		Iterator<Triple<String, String, String>> it = edges2.iterator();
 		while (it.hasNext()) {
 			Triple<String, String, String> k = it.next();
 			for (List<Triple<String, String, String>> v : eqcs) {
 				if (v.contains(k) && !v.get(0).equals(k)) {
-					// System.out.println("hit: " + k + " and " + v);
 					it.remove();
 					continue;
 				}
 			}
 		}
-		// System.out.println("x edges2 " + edges2);
-
+		
 		for (Pair<String, List<String>> kk : iedges2) {
-			// System.out.println("trying edge map " + kk);
 			Triple<String, String, String> k = new Triple<>(kk.second.get(1), "guid", "adom");
-			// System.out.println("k is " + k);
 			for (List<Triple<String, String, String>> v : eqcs) {
 				if (v.contains(k) && !v.get(0).equals(k)) {
-					// System.out.println("HIT");
 					List<String> xxx = new LinkedList<>();
 					xxx.add("guid");
 					xxx.add(v.get(0).first);
@@ -1011,31 +952,21 @@ public class RaToFql {
 
 		nodes3.add("guid");
 		inodes3.add(new Pair<>("guid", "guid"));
-		// List<String> ll = new LinkedList<>();
-		// ll.add("guid");
-		// iedges3.add(new Pair<>("adom", ll));
-
-		// System.out.println("eqcs " + eqcs);
 		for (String k : fl.select.keySet()) {
 			Pair<String, String> v = fl.select.get(k);
 			edges3.add(new Triple<>(k, "guid", "adom"));
 			Triple<String, String, String> t = new Triple<>(v.first + "_" + fl.from.get(v.first)
 					+ "_" + v.second, "guid", "adom");
-			// System.out.println("t " + t);
 			if (fl.from.get(v.first) == null) {
 				throw new RuntimeException(v.first + " is not selectable in " + fl);
 			}
 			for (List<Triple<String, String, String>> eqc : eqcs) {
-				// System.out.println("eqc " + eqc);
 				if (eqc.contains(t)) {
 					List<String> li = new LinkedList<>();
 					li.add("guid");
 					li.add(eqc.get(0).first);
 					iedges3.add(new Pair<>(k, li));
-					// System.out.println("added " + new Pair<>(k, li));
-				} else {
-					// System.out.println("not added");
-				}
+				} 
 			}
 		}
 
@@ -1046,9 +977,6 @@ public class RaToFql {
 		MapExp.Const map1 = new MapExp.Const(inodes1, iattrs, iedges1, sig1, new SigExp.Var("S"));
 		MapExp.Const map2 = new MapExp.Const(inodes2, iattrs, iedges2, src, sig2);
 		MapExp.Const map3 = new MapExp.Const(inodes3, iattrs, iedges3, sig3, sig2);
-
-		// return new Triple<>(new Pair<>(sig1, map1), new Pair<>(sig2, map2),
-		// new Pair<>(sig3, map3));
 
 		String xxx = "";
 		xxx += "\n\nschema " + pre + "fromSchema = " + sig1.toString();
@@ -1082,7 +1010,6 @@ public class RaToFql {
 
 	private static List<List<Triple<String, String, String>>> merge(
 			List<Triple<String, String, String>> edges2,
-			// List<Pair<String, List<String>>> iedges2,
 			EFlower ef) {
 
 		List<List<Triple<String, String, String>>> eqcs = new LinkedList<>();
@@ -1095,22 +1022,16 @@ public class RaToFql {
 			mergeEqc(eqcs, k.first, k.second, ef.from);
 		}
 
-		// System.out.println("xxx eqcs are " + eqcs);
 		return eqcs;
 	}
 
 	private static void mergeEqc(List<List<Triple<String, String, String>>> eqcs,
 			Pair<String, String> l, Pair<String, String> r, Map<String, String> from) {
-		// System.out.println("merge eqc on " + eqcs);
-		// System.out.println("l is " + l);
-		// System.out.println("r is " + r);
 		Triple<String, String, String> l0 = new Triple<>(l.first + "_" + from.get(l.first) + "_"
 				+ l.second, "guid", "adom");
 		Triple<String, String, String> r0 = new Triple<>(r.first + "_" + from.get(r.first) + "_"
 				+ r.second, "guid", "adom");
-		// System.out.println("l0 is " + l0);
-		// System.out.println("r0 is " + r0);
-
+	
 		List<Triple<String, String, String>> lx = null, rx = null;
 		lbl: for (List<Triple<String, String, String>> k : eqcs) {
 			if (!k.contains(l0)) {
@@ -1121,7 +1042,6 @@ public class RaToFql {
 					continue;
 				}
 				if (v.contains(r0)) {
-					// System.out.println("hit");
 					lx = k;
 					rx = v;
 					break lbl;
@@ -1158,15 +1078,9 @@ public class RaToFql {
 			}
 		}
 		return null;
-		// throw new RuntimeException("Not found: " + target + " in " + inodes);
 	}
 
-	/*
-	 * private static String lookup(String s, List<Pair<String, String>> fks) {
-	 * for (Pair<String, String> k : fks) { if (k.first.equals(s)) { return
-	 * k.second; } } return null; }
-	 */
-
+	
 	public static class EInsertValues extends EExternal {
 		String target;
 		List<List<String>> values;
@@ -1220,10 +1134,8 @@ public class RaToFql {
 				String p = from1.get(k);
 				x += p + " AS " + k;
 			}
-			// if (where1.size() > 0) {
 			x += "\nWHERE ";
-			// }
-
+		
 			b = false;
 			for (Pair<Pair<String, String>, Pair<String, String>> k : where1) {
 				if (b) {
@@ -1244,10 +1156,8 @@ public class RaToFql {
 				String p = from2.get(k);
 				x += p + " AS " + k;
 			}
-			// if (where1.size() > 0) {
 			x += "\nWHERE ";
-			// }
-
+		
 			b = false;
 			for (Pair<Pair<String, String>, Pair<String, String>> k : where2) {
 				if (b) {
@@ -1509,9 +1419,6 @@ public class RaToFql {
 			from1.put(k.c.toString(), k.a.toString());
 		}
 
-		// if (where0 == null) {
-		//
-		// } else {
 		List<Tuple3> where10x = (List<Tuple3>) where10.b;
 		for (Tuple3 k : where10x) {
 			Tuple3 l = (Tuple3) k.a;
@@ -1519,16 +1426,12 @@ public class RaToFql {
 			where1.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r.a
 					.toString(), r.c.toString())));
 		}
-		// }
-
+		
 		List<Tuple3> from11x = (List<Tuple3>) from11.b;
 		for (Tuple3 k : from11x) {
 			from2.put(k.c.toString(), k.a.toString());
 		}
 
-		// if (where0 == null) {
-		//
-		// } else {
 		List<Tuple3> where11x = (List<Tuple3>) where11.b;
 		for (Tuple3 k : where11x) {
 			Tuple3 l = (Tuple3) k.a;
@@ -1536,8 +1439,7 @@ public class RaToFql {
 			where2.add(new Pair<>(new Pair<>(l.a.toString(), l.c.toString()), new Pair<>(r.a
 					.toString(), r.c.toString())));
 		}
-		// }
-
+	
 		return new EED(from1, from2, where1, where2);
 	}
 
@@ -1600,12 +1502,10 @@ public class RaToFql {
 	}
 
 	public static final Parser<?> union() {
-		// Parser<?> p = flower().between(term("("), term(")"));
 		return Parsers.tuple(ident(), term("UNION"), term("ALL").optional(), ident());
 	}
 
 	public static final Parser<?> diff() {
-		// Parser<?> p = flower().between(term("("), term(")"));
 		return Parsers.tuple(ident(), term("EXCEPT"), term("ALL").optional(), ident());
 	}
 

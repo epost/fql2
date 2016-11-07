@@ -17,16 +17,16 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-import catdata.algs.kb.CompletionProver;
-import catdata.algs.kb.CongruenceProver;
-import catdata.algs.kb.DPKB;
-import catdata.algs.kb.FailProver;
-import catdata.algs.kb.FreeProver;
-import catdata.algs.kb.KBExp;
-import catdata.algs.kb.MonoidalProver;
-import catdata.algs.kb.ProgramProver;
-import catdata.algs.kb.SaturatedProver;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.provers.CompletionProver;
+import catdata.provers.CongruenceProver;
+import catdata.provers.DPKB;
+import catdata.provers.FailProver;
+import catdata.provers.FreeProver;
+import catdata.provers.KBExp;
+import catdata.provers.MonoidalProver;
+import catdata.provers.ProgramProver;
+import catdata.provers.SaturatedProver;
 import catdata.InvisibleException;
 
 
@@ -173,8 +173,6 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		if ((Boolean) ops.getOrDefault(AqlOption.dont_verify_is_appropriate_for_prover_unsafe)) {
 			return ret;
 		}
-	//	System.out.println("col is " + col);
-	//	System.out.println("map is " + ret.map);
 		for (Fk fk : col.fks.keySet()) {
 			for (Gen gen : col.gens.keySet()) {
 				if (!col.fks.get(fk).first.equals(col.gens.get(gen))) {

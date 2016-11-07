@@ -91,9 +91,6 @@ public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, XDelta e) {
 		Pair<XExp, XExp> FT = e.F.accept(env, this);
 		Pair<XExp, XExp> IT = e.I.accept(env, this);
-	//	System.out.println("doing " + e);
-	//	System.out.println(FT);
-	//	System.out.println(IT);
 		if (e.I.kind(env).equals("functor")) {
 			if (!IT.first.equals(FT.second)) {
 				throw new RuntimeException("In " + e + ", instance type " + IT.first + " but functor cod " + FT.second);

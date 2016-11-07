@@ -1,4 +1,4 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-import catdata.algs.kb.DPKB;
-import catdata.algs.kb.KBExp;
-import catdata.algs.kb.KBExp.KBApp;
+import catdata.provers.DPKB;
+import catdata.provers.KBExp;
+import catdata.provers.KBExp.KBApp;
 
 
 public class SaturatedProver<T, C, V> extends DPKB<T, C, V> {

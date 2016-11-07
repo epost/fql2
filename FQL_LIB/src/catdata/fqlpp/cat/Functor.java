@@ -90,23 +90,19 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 		this.target = target;
 		this.o = o;
 		this.a = a;
-		// System.out.println("validating " + this);
 		validate();
 	}
 
 	@Override
 	public String toString() {
 		try {
-			// String l = source.toString();
-			// String r = target.toString();
 			String z1 = Util.sep(source.objects().stream().map(x -> x + " -> " + o.apply(x))
 					.iterator(), "\n\t");
 			String z2 = Util.sep(source.arrows().stream().map(x -> x + " -> " + a.apply(x))
 					.iterator(), "\n\t");
 			String a1 = "On objects:\n\t " + z1 + "\n\n";
 			String a2 = "On arrows:\n\t " + z2 + "\n";
-			return a1 + a2; // + "Source    :\n" + l + "\n" +
-							// "Target    :\n" + r;
+			return a1 + a2; 
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "(Cannot print functor)";
@@ -175,16 +171,10 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 		if (source.isInfinite()) {
 			return;
 		}
-		//System.out.println("Validating ---------------- ");
 		for (O1 x : source.objects()) {
 			if (!target.isObject(o.apply(x))) {
 				throw new RuntimeException(x + " mapped to " + o.apply(x) + " not in " + target);
 			}
-		//	System.out.println("checking " + x);
-		//	System.out.println(source.identity(x));
-		//	System.out.println(o.apply(x));
-		//	System.out.println(a.apply(source.identity(x)));
-		//	System.out.println(target.identity(o.apply(x)));
 			if (!a.apply(source.identity(x)).equals(target.identity(o.apply(x)))) {
 				throw new RuntimeException("Does not preserve identity on " + x + ": lhs is "
 						+ a.apply(source.identity(x)) + " rhs is " + target.identity(o.apply(x)));
@@ -194,10 +184,6 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 			if (!target.isArrow(a.apply(x))) {
 				throw new RuntimeException(x + " mapped to " + a.apply(x) + " not in " + target);
 			}
-			//System.out.println("On arrow: " + x + ", source is " + source.source(x) + " (transforms to " + o.apply(source.source(x)) + 
-				//	") and target is " + source.target(x) +
-				//	" (transforms to " + o.apply(source.target(x)) + "). The arrow itself transforms to " + a.apply(x) + " with source " +
-				//	target.source(a.apply(x)) + " and target " + target.target(a.apply(x)));
 			if (!target.source(a.apply(x)).equals(o.apply(source.source(x)))) {
 				throw new RuntimeException(x + " mapped to " + a.apply(x)
 						+ " does not preserve source.");
@@ -217,7 +203,6 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 				}
 			}
 		}
-		//System.out.println("done");
 	}
 	
 	private Instance<O1,A1> instance;
@@ -248,10 +233,6 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 				Fn f = (Fn) applyA(a.name);
 				em.put(a, Util.reify(f::apply, f.source));
 		}
-		//for (A1 a : source.arrows()) {
-		//	Fn f = (Fn) applyA(a);
-		//	em.put(src.getEdge(a), Util.reify(f::apply, f.source));
-		//}
 		
 		return new Instance<>(nm, em, src);
 	}
@@ -285,7 +266,7 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 			A2 b = applyA(a.name);
 			O2 s = target.source(b);
 			if (target.isId(b)) {
-				em.put(a, dst.path(s, new LinkedList<>())); //dst.new Node(s); //(path(s)); //dst.getEdge(applyA(a.name))));				
+				em.put(a, dst.path(s, new LinkedList<>())); 
 			} else {
 				em.put(a, dst.path(dst.getEdge(applyA(a.name))));				
 			}
@@ -299,9 +280,6 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 			throw new RuntimeException("Cannot create mapping from " + this);
 		}
 
-//		Signature<O1,A1> src = source.toSig();
-	//	Signature<O2,A2> dst = target.toSig();
-
 		Map<Signature<O1,A1>.Node, Signature<O2,A2>.Node> nm = new HashMap<>();
 		Map<Signature<O1,A1>.Edge, Signature<O2,A2>.Path> em = new HashMap<>();
 		
@@ -311,14 +289,6 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 		
 		for (Signature<O1, A1>.Edge a : src.edges) {
 			A2 b = applyA(a.name);
-		//	O2 s = target.source(b);
-		//	if (target.isId(b)) {
-		//		em.put(a, dst.path(s, new LinkedList<>())); //dst.new Node(s); //(path(s)); //dst.getEdge(applyA(a.name))));				
-		//	} else {
-				
-			//	List<Signature<O1, A1>.Edge> aaa = (List<Signature<O1, A1>.Edge>) a.name;
-				
-			//	aaa.stream().map(z -> dst.getEdge(applyA(z.name))).collect(Collectors.toList());
 				
 			@SuppressWarnings("unchecked")
 			Signature<O2, A2>.Path p = (Signature<O2, A2>.Path) b;
@@ -329,23 +299,8 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 			p.source = p.sig().new Node(p1);
 			p.target = p.sig().new Node(p2);
 			
-			em.put(a, p); // dst.path(dst.getEdge(applyA(a.name))));			/	
-			//}
+			em.put(a, p); 
 		}
-		
-/*
-		for (A1 a : source.arrows()) {
-			boolean found = false;
-			for (Signature<O1, A1>.Edge a2 : src.edges) {
-				if (a2.name.equals(a) && !source.isId(a)) {
-					found = true;
-				}
-			}
-			if (found) {
-				em.put(src.getEdge(a), dst.path(dst.getEdge(applyA(a))));
-			}
-		} */
-
 		
 		return new Mapping<>(nm, em, src, dst);
 	}

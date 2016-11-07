@@ -250,17 +250,9 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		return ret;
 	}
 
-//	@SuppressWarnings({ "unchecked" })
 	public <O1, A1, O2, A2> Category<Functor<O1, A1, O2, A2>, Transform<O1, A1, O2, A2>> exp(
 			Category<O2, A2> base, Category<O1, A1> exp) {
-		
-/*		if (FinSet.FinSet.equals(base)) {
-			return (Category<Functor<O1, A1, O2, A2>, Transform<O1, A1, O2, A2>>) ((Object)Inst.get(exp));
-		}
-		if (FinCat.equals(base)) {
-			return (Category<Functor<O1, A1, O2, A2>, Transform<O1, A1, O2, A2>>) ((Object)FunCat.get(exp));
-		} */
-		
+	
 		Set<Functor<O1, A1, O2, A2>> mappings = new HashSet<>();
 		Set<Transform<O1, A1, O2, A2>> arrows = new HashSet<>();
 		Map<Transform<O1, A1, O2, A2>, Functor<O1, A1, O2, A2>> src = new HashMap<>();
@@ -316,12 +308,6 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 				comp.put(new Pair<>(s, t), Transform.compose(s, t));
 			}
 		}
-		/*
-		 * System.out.println("xxx"); System.out.println(mappings);
-		 * System.out.println(arrows); System.out.println(src);
-		 * System.out.println(dst); System.out.println(comp);
-		 * System.out.println(id);
-		 */
 		return new FiniteCategory<>(mappings, arrows, src, dst, comp, id);
 	}
 
@@ -448,11 +434,9 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 			Functor<O1, A1, O2, A2> f1 = new Functor<>(exp, base, nm::get, a -> map1.get(
 					new Pair<>(exp.source(a), exp.target(a))).apply(a));
 			Functor<O2, A2, O1, A1> f2 = new Functor<>(base, exp, invget(nm), a -> {
-				// System.out.println("input " + a);
 					A1 ret = map2.get(
 							new Pair<>(base.source(a), base.target(a)))
 							.apply(a);
-					// System.out.println("ret " + ret);
 					return ret;
 				});
 			return Optional.of(new Pair<>(f1, f2));

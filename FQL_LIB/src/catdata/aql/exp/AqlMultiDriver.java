@@ -54,7 +54,6 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		env.type(prog);
 		init();
 		toUpdate[0] = toString();
-		// System.out.println(this);
 		process();
 	}
 
@@ -156,7 +155,6 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		String k2 = "";
 		String n = "";
 
-		// System.out.println(Thread.currentThread()+ " start "+ toString());
 		try {
 			for (;;) {
 				n = null;
@@ -242,8 +240,6 @@ public static AqlEnv makeEnv(String str,
 			Exp<? extends Object> a = init.exps.get(k);
 			Exp<? extends Object> b = last_prog.exps.get(k);
 			if (!a.equals(b)) {
-				 System.out.println("not eq: " + k + "\n" + a +
-				 "\n\n---------\n\n" + b + "\n\n---- " + a.getClass() );
 				break;
 			}
 			unchanged.add(k);

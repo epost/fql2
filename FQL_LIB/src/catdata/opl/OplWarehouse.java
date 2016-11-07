@@ -211,7 +211,6 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 		public Map<String, CodeTextPanel> map = new HashMap<>();
 		@Override
 		public void stateChanged(ChangeEvent e) {
-			//System.out.println("state change, bindings are " + bindings);
 			JSplitPane p = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 			p.add(new CodeTextPanel("", instructions.get(my_state)));
 			
@@ -255,7 +254,6 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 		}
 		
 		public Map<String, String> transfer() {
-//			System.out.println("called txfer for " + my_state + " keys " + map.keySet());
 			Map<String, String> m = new HashMap<>();
 			my_err = "";
 
@@ -271,8 +269,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 					m.put(name, ex.getMessage());
 				}
 			}
-		//	System.out.println("after trxfer, bindings are " + bindings);
-
+		
 			return m;
 		}
 	}
@@ -423,7 +420,6 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 						symbols.put(g, new OplTerm<>("?"));											
 					} 
 				}	
-				//System.out.println(sorts);
 				bindings.put(TRANSFORM + "_" + ed + "_forward", new OplPresTrans<String,String,String,String,String>(sorts, src, INSTANCE + "_" + shape.edges.get(ed).second));
 			}
 	

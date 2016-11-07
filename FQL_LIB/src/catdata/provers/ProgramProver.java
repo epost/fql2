@@ -1,4 +1,4 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import java.util.Set;
 
 import catdata.Pair;
 import catdata.Triple;
-import catdata.algs.kb.KBExp.KBApp;
+import catdata.provers.KBExp.KBApp;
 import catdata.InvisibleException;
 
 //TODO aql

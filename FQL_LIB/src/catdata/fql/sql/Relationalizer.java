@@ -93,8 +93,6 @@ public class Relationalizer {
 					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id = m1.get(a.source).get(k.first);
 					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id0 = PropPSM.truncate2(sig, new_id, new Arr<>(new Path(sig, a), a.source, a.target), obs.get(a.target));
 				//	LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id0 = PropPSM.truncate(sig, new_id, a, m.get(a.target));
-				//	System.out.println("new " + new_id1);
-				//	System.out.println("old " + new_id0);
 					Object o = m2.get(a.target).get(new_id0);
 					set.add(new Pair<>(k.first, o));
 				}
@@ -104,7 +102,6 @@ public class Relationalizer {
 			InstExp.Const retX = new InstExp.Const(nodes, attrs, arrows, sig.toConst());
 			Triple<Const, Map<Node, Map<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>>, Map<Node, Map<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Object>>> ret = new Triple<>(retX, m1, m2);
 
-			// System.out.println(ret);
 			cache.put(new Pair<>(prog, sig0), ret);
 			return ret;
 		} catch (FQLException fe) {
@@ -113,9 +110,6 @@ public class Relationalizer {
 	}
 
 	
-
-	
-
 	public static Pair<Map<Node, List<Pair<Path, Attribute<Node>>>>, List<PSM>> observations(
 			Signature sig, String out, String in, boolean relationalize)
 			throws FQLException {
@@ -173,8 +167,7 @@ public class Relationalizer {
 				}
 				alltypes.add(types);
 				Flower g = new Flower(select, from, where);
-				// System.out.println("&&&Flower is " + g);
-
+			
 				ret.add(new CreateTable(out + "_" + n.string + "temp" + count,
 						types, false));
 				ret.add(new InsertSQL2(out + "_" + n.string + "temp" + count,
@@ -207,9 +200,7 @@ public class Relationalizer {
 			}
 			if (select.size() == 0) {
 				throw new RuntimeException("No observable for " + n.string);
-			}// } else if (select.size() == 0 && suppress) {
-				// continue;
-				// }
+			}
 			Flower j = new Flower(select, from, where);
 			ret.add(new CreateTable(out + "_" + n.string + "_observables", ty,
 					false));
@@ -267,11 +258,6 @@ public class Relationalizer {
 				"id", out + "_" + n.string + "_observables_proj",
 				new LinkedList<>(ty0.keySet())));
 
-		// if (ty.keySet().size() == 0) {
-		// throw new RuntimeException("Cannot compute observables for " + n +
-		// ": no attributes");
-		// }
-
 		select = new LinkedHashMap<>();
 		where = new LinkedList<>();
 		from = new HashMap<>();
@@ -293,14 +279,7 @@ public class Relationalizer {
 		ret.add(new InsertSQL2(out + "_" + n.string + "_squash", k,
 				new LinkedList<>(k.select.keySet())));
 
-		//  drops for observables
-		// ret.add(new DropTable(n.string + "_observables"));
-		// ret.add(new DropTable(n.string + "_observables_guid"));
-		// ret.add(new DropTable(n.string + "_observables_proj"));
-
 		ret.addAll(applySubst(sig, n, out));
-
-		// ret.add(new DropTable(out + "_" +n.string + "_squash"));
 
 		return ret;
 	}

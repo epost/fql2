@@ -48,14 +48,6 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC>
 		this.F = F;
 		this.G = G;
 
-		// System.out.println("*****************************");
-		// System.out.println("Creating comma category");
-		// System.out.println("A is " + A);
-		// System.out.println("B is " + B);
-		// System.out.println("C is " + C);
-		// System.out.println("F is " + F);
-		// System.out.println("G is " + G);
-		//
 		objects = new LinkedList<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>>();
 		for (ObjA objA : A.objects) {
 			for (ObjB objB : B.objects) {
@@ -69,9 +61,6 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC>
 			}
 		}
 
-		// System.out.println("objects are " + objects);
-
-		// arrows = new LinkedList<Pair<Arr<ObjA,ArrowA>, Arr<ObjB,ArrowB>>>();
 		for (Triple<ObjA, ObjB, Arr<ObjC, ArrowC>> obj1 : objects) {
 			for (Triple<ObjA, ObjB, Arr<ObjC, ArrowC>> obj2 : objects) {
 				ObjA a1 = obj1.first;
@@ -106,8 +95,6 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC>
 				}
 			}
 		}
-		// System.out.println("arrows are " + arrows);
-
 		for (Triple<ObjA, ObjB, Arr<ObjC, ArrowC>> obj : objects) {
 			identities.put(obj,
 					new Arr<>(new Pair<>(A.identities.get(obj.first),
@@ -124,7 +111,6 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC>
 							arrow1.src, arrow2.dst));
 				}
 			}
-			;
 		}
 
 		projA();
@@ -133,8 +119,6 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC>
 		if (NEWDEBUG.debug.fql.VALIDATE) {
 			validate();
 		}
-		// System.out.println("result is " + this);
-		// System.out.println("***********************");
 	}
 
 	private void projA() {

@@ -86,21 +86,15 @@ public class Flower {
 		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
 		a: for (Map<Pair<Object, Object>, Object> row : tableau) {
 			for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
-				// System.out.println("****" + row);
-				// System.out.println("condition " + eq);
-				// System.out.println(row.get(eq.first));
-				// System.out.println(row.get(eq.second));
 				if (row.get(eq.first) != null & row.get(eq.second) != null) {
 					if (!row.get(eq.first).equals(row.get(eq.second))) {
 						if (row.get(eq.first).getClass() != row.get(eq.second).getClass() ) {
 							throw new RuntimeException();
 						}
-						// System.out.println("failed");
 						continue a;
 					}
 				}
 			}
-			// System.out.println("added " + row);
 			ret.add(row);
 		}
 		return ret;
@@ -146,11 +140,9 @@ public class Flower {
 				int xxx2 = timesInWhere(o2);
 				if (xxx1 == xxx2) {
 					if (from.get(o1) == null || state.get(from.get(o1)) == null) {
-						System.out.println(state.keySet());
 						throw new RuntimeException("Missing: " + o1);
 					}
 					if (from.get(o2) == null || state.get(from.get(o2)) == null) {
-						System.out.println(state.keySet());
 						throw new RuntimeException("Missing: " + o2);
 					}
 				return Integer.compare(state.get(from.get(o1)).size(), state.get(from.get(o2)).size()); 
@@ -164,9 +156,7 @@ public class Flower {
 		Collections.sort(ordered, c); 
 		
 		
-//		System.out.println("***");
 		for (String k : ordered) {
-	//		System.out.println(from.get(k) + " " + state.get(from.get(k)).size() + " " + state.get(from.get(k)).size());
 			if (ret == null) {
 				if (state.get(from.get(k)) == null) {
 					throw new RuntimeException("cannot find " + from.get(k)
@@ -182,8 +172,6 @@ public class Flower {
 				
 				ret = cartProd(k, new HashSet<>(ret), state.get(from.get(k)),
 						from.get(k));
-				//System.gc();
-			//	ret = evalWhere2(ret);
 			}
 
 		}
@@ -197,8 +185,6 @@ public class Flower {
 		Set<Map<Pair<Object, Object>, Object>> y = unit(k, y0, object);
 
 		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
-		// System.out.println("doing cartprod for " + x + " and " + y0 + " and "
-		// + v + " k " + k);
 		for (Map<Pair<Object, Object>, Object> row1 : x) {
 			a: for (Map<Pair<Object, Object>, Object> row2 : y) {
 				Map<Pair<Object, Object>, Object> row = new HashMap<>();
@@ -211,7 +197,6 @@ public class Flower {
 				for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
 				if (row.get(eq.first) != null & row.get(eq.second) != null) {
 					if (!row.get(eq.first).equals(row.get(eq.second))) {
-						// System.out.println("failed");
 						continue a;
 					}
 				}
@@ -219,15 +204,12 @@ public class Flower {
 				ret.add(row);
 			}
 		}
-		// System.out.println("result " + ret);
 		return ret;
 	}
 
 	private Set<Map<Pair<Object, Object>, Object>> unit(String k,
 			Set<Map<Object, Object>> set, Object object) {
 		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
-		// System.out.println("doing unit for " + set + " and " + v + " and k "
-		// + k);
 		for (Map<Object, Object> row : set) {
 			Map<Pair<Object, Object>, Object> row0 = new HashMap<>();
 			for (Object attr : row.keySet()) {
@@ -235,8 +217,7 @@ public class Flower {
 			}
 			ret.add(row0);
 		}
-		// System.out.println("result " + ret);
-		return ret;
+	return ret;
 	}
 
 }

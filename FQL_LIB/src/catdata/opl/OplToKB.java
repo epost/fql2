@@ -20,19 +20,19 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
-import catdata.algs.kb.EqProverDefunct;
-import catdata.algs.kb.KB;
-import catdata.algs.kb.KBExp;
-import catdata.algs.kb.KBExp.KBApp;
-import catdata.algs.kb.KBExp.KBVar;
-import catdata.algs.kb.KBHorn;
-import catdata.algs.kb.KBOptions;
-import catdata.algs.kb.KBOrders;
 import catdata.fqlpp.cat.FinSet;
 import catdata.ide.NEWDEBUG;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplParser.DoNotIgnore;
+import catdata.provers.EqProverDefunct;
+import catdata.provers.KB;
+import catdata.provers.KBExp;
+import catdata.provers.KBHorn;
+import catdata.provers.KBOptions;
+import catdata.provers.KBOrders;
+import catdata.provers.KBExp.KBApp;
+import catdata.provers.KBExp.KBVar;
 
 public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>> {
 	
@@ -88,11 +88,6 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	public EqProverDefunct<C, V> KB;
 	private Iterator<V> fr;
 //	private OplJavaInst I;
-	
-	/* public boolean gt(OplTerm<C,V> e1, OplTerm<C,V> e2) {
-		return KB.gt.apply(new Pair<>(convert(e1), convert(e2)));
-	} */
-	
 	
 	
 	public OplToKB(Iterator<V> fr, OplSig<S, C, V> sig) {
@@ -159,20 +154,16 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		//	int count = 0;
 			Map<S, Set<OplTerm<C, V>>> j = arity0(vars2);
 			for (;;) {
-//				System.out.println("pre-inc");
 				checkParentDead(cur);
 				Map<S, Set<OplTerm<C, V>>> k = inc(j);
-	//			System.out.println("pre-red");
 				checkParentDead(cur);
 				Map<S, Set<OplTerm<C, V>>> k2= red(k);
 				checkParentDead(cur);
-		//		System.out.println("pre-eq");
 				if (j.equals(k2)) {
 					break;
 				} 
 				j = k2;			
 			}	
-		//	System.out.println("done");
 			ret = j.get(t).stream().map(g -> { return nice(ctx, g); }).collect(Collectors.toList());
 			//ret = new LinkedList<>(ret);
 			@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -224,16 +215,6 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		return convert(KB.nf(convert(r)));
 	} 
 	
-	
-	/*
-	Map<String, Set<OplTerm>> upto(Map<String, Set<String>> vars, int n) {
-		Map<String, Set<OplTerm>> m = arity0(vars);
-		for (int i = 0; i < n; i++) {
-			m = inc(m);
-		}
-		return m;
-	}
-	*/
 	private Map<S, Set<OplTerm<C,V>>> arity0(Map<S, Set<V>> vars) {
 		Map<S, Set<OplTerm<C,V>>> m = new HashMap<>();
 		for (S s : sig.sorts) {
@@ -489,7 +470,4 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		throw new RuntimeException("Timeout (" + NEWDEBUG.debug.opl.opl_saturate_timeout + ") exceeded, sorts are " + sorts + ".  Possible cause: infinite instance");
 	}
 
-
-	
-	
 }

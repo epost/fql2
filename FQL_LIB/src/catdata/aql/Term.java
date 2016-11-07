@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
-import catdata.algs.kb.KBExp;
-import catdata.algs.kb.KBExp.KBApp;
-import catdata.algs.kb.KBExp.KBVar;
+import catdata.provers.KBExp;
+import catdata.provers.KBExp.KBApp;
+import catdata.provers.KBExp.KBVar;
 
 public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	

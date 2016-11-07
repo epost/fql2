@@ -21,6 +21,7 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.aql.RawTerm;
 import catdata.aql.exp.InstExp.InstExpDelta;
+import catdata.aql.exp.InstExp.InstExpDistinct;
 import catdata.aql.exp.InstExp.InstExpEmpty;
 import catdata.aql.exp.InstExp.InstExpSigma;
 import catdata.aql.exp.InstExp.InstExpVar;
@@ -30,6 +31,7 @@ import catdata.aql.exp.SchExp.SchExpEmpty;
 import catdata.aql.exp.SchExp.SchExpInst;
 import catdata.aql.exp.SchExp.SchExpVar;
 import catdata.aql.exp.TransExp.TransExpDelta;
+import catdata.aql.exp.TransExp.TransExpDistinct;
 import catdata.aql.exp.TransExp.TransExpId;
 import catdata.aql.exp.TransExp.TransExpSigma;
 import catdata.aql.exp.TransExp.TransExpSigmaDeltaCounit;
@@ -96,7 +98,8 @@ public class AqlParser {
 			"nodes",
 			"edges",
 			"typesideOf",
-			"schemaOf"
+			"schemaOf",
+			"distinct"
 			};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -190,8 +193,9 @@ public class AqlParser {
 			sigma = Parsers.tuple(token("sigma"), map_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional())
 			.map(x -> new InstExpSigma(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 			delta = Parsers.tuple(token("delta"), map_ref.lazy(), inst_ref.lazy())
-					.map(x -> new InstExpDelta(x.b, x.c)),			
-			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta);
+					.map(x -> new InstExpDelta(x.b, x.c)),	
+			distinct = Parsers.tuple(token("distinct"), inst_ref.lazy()).map(x -> new InstExpDistinct(x.b)),		
+			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta,distinct);
 		
 		inst_ref.set(ret);
 	}
@@ -218,8 +222,9 @@ public class AqlParser {
 					.map(x -> new TransExpSigmaDeltaUnit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 			counit = Parsers.tuple(token("counit"), map_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
 					.map(x -> new TransExpSigmaDeltaCounit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
+					distinct = Parsers.tuple(token("distinct"), trans_ref.lazy()).map(x -> new TransExpDistinct(x.b)),		
 					
-			ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit);
+			ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct);
 		
 		trans_ref.set(ret);
 	}

@@ -870,14 +870,11 @@ public class OplParser {
 			}
 			symbols0.put(fname, toadd);
 		}
-//		System.out.println(sorts0);
-	//	System.out.println(symbols0);
 		return new OplGround(sorts0, symbols0, c.b.toString());
 	}
 
 	private static OplTerm toTerm(Collection vars, Collection consts, Object a,
 			boolean suppressError) {
-		//System.out.println("trying to term on " + a + "vars=" + vars + " consts=" + consts);
 		if (a instanceof List) {
 			List<String> aa = (List<String>) a;
 			if (aa.isEmpty()) {
@@ -1578,7 +1575,6 @@ public class OplParser {
 			if (attrs.containsKey(dst) || edges.containsKey(dst)) {
 				throw new DoNotIgnore("In select clause, duplicate for: " + dst);
 			}
-		//	System.out.println(l);
 			if (l.a instanceof Tuple3 && ((Tuple3)l.a).a.toString().equals("(")) {
 				edges.put(dst,
 						new Pair(null,
@@ -1591,7 +1587,6 @@ public class OplParser {
 
 
 		Block bl = new Block<>(from, where, attrs, edges);
-		//System.out.println(bl);
 		return bl;
 	}
 
@@ -1653,7 +1648,6 @@ public class OplParser {
 			if (attrs.containsKey(l.a.toString())) { 
 				throw new RuntimeException("Duplicate for: " + l.a);
 			}
-//			System.out.println(l.c);
 			if (l.c.toString().contains("agg") && l.c.toString().contains("{") && l.c.toString().contains("return") && l.c.toString().contains("}")) {
 				attrs.put(l.a.toString(), Chc.inLeft(fromAgg(from.keySet(), null, l.c, true))); 				
 			} else {
@@ -1692,7 +1686,6 @@ public class OplParser {
 	public static Map<String, OplTerm<String, String>> fromBlockHelper2(
 			Set<String> vars, Object o) {
 		Tuple3 tx = (Tuple3) o;
-		//System.out.println(tx.b);
 		List<Tuple3> l = (List<Tuple3>) tx.b; //is token ( ?
 		Map<String, OplTerm<String, String>> ret = new HashMap<>();
 		for (Tuple3 t : l) {
@@ -1734,13 +1727,6 @@ public class OplParser {
 				(String) o.b, (String) o.d, blocks);
 	}
 	
-	/*
-	public static final Parser<?> sql() {
-		Parser p = Parsers.tuple(term("insert"), term("into"), ident(), block2());
-		Parser p2 = p.sepBy(term(";"));
-		return Parsers.tuple(term("sql"), p2.between(term("{"), term("}")).followedBy(term(":")), ident(), term("->"), ident());
-	}
-	 */
 	public static OplQuery<String, String, String, String, String, String> toSql(
 			Tuple5 o) {
 		if (!o.a.toString().equals("sql")) {
@@ -1768,7 +1754,6 @@ public class OplParser {
 		return p;
 	}
 	
-	//static Parser eee = Parsers.or(term("="), Parsers.tuple(term(":"), term("=")));
 	
 	public static final Parser<?> agg() {
 		Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(","))

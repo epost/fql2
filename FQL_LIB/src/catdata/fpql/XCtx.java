@@ -38,12 +38,12 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
-import catdata.algs.kb.SemiThue;
 import catdata.fpql.XExp.XInst;
 import catdata.fpql.XExp.XSchema;
 import catdata.fqlpp.cat.Category;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.NEWDEBUG;
+import catdata.provers.SemiThue;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -59,42 +59,7 @@ import edu.uci.ics.jung.visualization.transform.shape.GraphicsDecorator;
 
 public class XCtx<C> implements XObject {
 	
-/*	public void equalCheck(XCtx other) {
-		sane();
-		other.sane();
-		
-		System.out.println("ids " + ids.equals(other.ids));
-		System.out.println("eqs " + eqs.equals(other.eqs));
-		System.out.println(other.eqs);
-		for (Object eq : eqs) {
-			System.out.println(eq);
-			System.out.println(other.eqs.contains(eq));
-			if (!other.eqs.contains(eq)) {
-				for (Object eq2 : other.eqs) {
-					System.out.println("comparing against " + eq2);
-					System.out.println(eq.equals(eq2));
-					System.out.println(eq2.equals(eq));
-					System.out.println(eq.hashCode());
-					System.out.println(eq2.hashCode());
-					System.out.println(other.eqs.contains(eq));
-					System.out.println(other.eqs.contains(eq2));
-					System.out.println(eqs.contains(eq));
-					System.out.println(eqs.contains(eq2));
-				}
-			}
-		}
-//		System.out.println("types " + types.equals(other.types));
-	}
-	public void equalCheck0(XCtx other) {
-		System.out.println("local");
-		equalCheck(other);
-//		System.out.println("schema");
-	//	schema.equalCheck(other.schema);
-//		System.out.println("schema");
-	//	global.equalCheck(other.global);
-	}
-	
-	*/
+
 	
 	public String toStringX() {
 		String rec1 = schema == null ? "null" : schema.toStringX();
@@ -392,13 +357,6 @@ public class XCtx<C> implements XObject {
 		} */
 	}
 	
-/*	private static tryFind(Object o, List l) {
-		for (Object o2 : l) {
-			if (o.equals(o2)) {
-				System.out.println("found: " + )
-			}
-		}
-	} */
 
 	public Pair<C, C> type(List<C> first) {
 		if (first.size() == 0) {
@@ -600,13 +558,11 @@ public class XCtx<C> implements XObject {
 					return;
 				}
 				vv.getPickedEdgeState().clear();
-				Object str = e.getItem();
+				//Object str = e.getItem();
 				if (cl == null) {
-					//System.out.println("return");
 					return;
 				}
-//				System.out.println("showing " + str + " at " + xgrid.get(str) );
-				cl.show(clx, xgrid.get(str));
+//				cl.show(clx, xgrid.get(str));
 			}
 		});
 
@@ -973,8 +929,7 @@ public class XCtx<C> implements XObject {
 			// Category<C, Triple<C, C, List<C>>> cat = cat();
 			List<JComponent> grid = new LinkedList<>();
 			Collection<Triple<C, C, List<C>>> cat = fn.apply(new Unit());
-			// System.out.println(eqm);
-
+		
 			// Map<C, Set<List<C>>> entities = new HashMap<>();
 			Map entities = new HashMap<>();
 			Map<C, Set<C>> m = new HashMap<>();
@@ -990,8 +945,6 @@ public class XCtx<C> implements XObject {
 					set.add(k.third);
 				}
 			}
-
-			// System.out.println(entities);
 
 			for (C c : allTerms()) {
 				Pair<C, C> t = type(c);
@@ -1017,11 +970,9 @@ public class XCtx<C> implements XObject {
 				Pair<C, C> t = type(c);
 				Set<List<C>> src = (Set<List<C>>) entities.get(t.first);
 				List<C> cols = new LinkedList<>(m.get(c));
-				// System.out.println("cols before " + cols);
 				cols = cols.stream().filter(x -> !x.toString().startsWith("!"))
 						.collect(Collectors.toList());
-				// System.out.println("cols after " + cols);
-
+	
 				Object[][] rowData = new Object[src.size()][cols.size()];
 				int idx = cols.indexOf(c);
 				if (idx != -1) {
@@ -1035,11 +986,7 @@ public class XCtx<C> implements XObject {
 						cols = colsX;
 					}
 				}
-				// } else {
-				// cols.sort(null);
-				// }
-				// System.out.println("order " + cols);
-
+		
 				List<String> colNames3 = cols
 						.stream()
 						.map(x -> type(x).second.equals(x) ? x.toString() : x + " ("
@@ -1428,14 +1375,10 @@ public class XCtx<C> implements XObject {
 					vl.add(v);
 					Triple<C, C, List<C>> sofar = new Triple<>(type(v).first, type(v).second, vl);
 
-					// System.out.println("want to compose " + f + " and " + g);
-					// System.out.println("starting at " + sofar);
 					List gnX = new LinkedList<>(g.third);
 					for (C gn : g.third) {
 						gnX.remove(0);
-						// System.out.println("doing edge " + gn);
 						sofar = findEq(sofar, gn);
-						// System.out.println("result " + sofar);
 						if (sch.arrows().contains(sofar)) {
 							List hhh = new LinkedList();
 							hhh.add((C) ("!_" + a));
@@ -1454,17 +1397,13 @@ public class XCtx<C> implements XObject {
 								throw new RuntimeException();
 							}
 							return ret;
-						} else {
-							// System.out.println("Did not fire on " + sofar);
-						}
+						} 
 					}
 
 					List<C> retl = new LinkedList<>();
 					retl.add((C) ("!_" + a));
 					retl.addAll(sofar.third);
 					Triple<C, C, List<C>> ret = new Triple<>(f.first, g.second, retl);
-
-					// System.out.println("want to return " + ret);
 
 					if (a.equals("_1") && global.allIds().contains(sofar.second)
 							&& global.cat().hom((C) "_1", sofar.second).contains(sofar)) {
@@ -1535,23 +1474,14 @@ public class XCtx<C> implements XObject {
 					}
 				}
 				eqm.put(new Pair<>(v, gn), found);
-				// System.out.println("returning eqation " + new Pair<>(v, gn) +
-				// " and " + found + "\n\noriginal " + xxx);
 				if (found == null) {
 					throw new RuntimeException("sofar " + sofar + " gn " + gn + "\n\n" + allEqs());
 				}
-				// if (found.equals("!__1")) {
-				// throw new RuntimeException("thing found is " + found);
-				// }
 				@SuppressWarnings("rawtypes")
 				List l = new LinkedList<>();
 
 				l.addAll(found);
 				Triple<C, C, List<C>> ret = new Triple<>(type(found).first, type(found).second, l);
-				// if (!arrows().contains(ret)) {
-				// throw new RuntimeException("Want to construct " + ret +
-				// " but not in arrows " + arrows());
-				// }
 				return ret;
 			}
 
@@ -2326,7 +2256,6 @@ public class XCtx<C> implements XObject {
 				@SuppressWarnings("unchecked")
 				Triple<C, C, List<C>> arr = (Triple<C, C, List<C>>)e.getItem();
 				
-				//System.out.println("showing " + arr);
 		//		cl.show(clx, xgrid.get(str));
 				JPanel foo = attPanels.get(arr);
 				if (foo == null) {
@@ -2374,20 +2303,13 @@ public class XCtx<C> implements XObject {
         static final long serialVersionUID = 420000L;
         @Override
         public void paintVertex(RenderContext<C, C> rc,
-                                Layout<C, C> layout, C vertex)
-        {
-            try
-            {
-                GraphicsDecorator graphicsContext = rc.getGraphicsContext();
+                                Layout<C, C> layout, C vertex) {
+              GraphicsDecorator graphicsContext = rc.getGraphicsContext();
                 Point2D center = layout.transform(vertex);
                 Dimension size = new Dimension(100, 80);
 
-             //   System.out.printf("Vertex[%d] X = %d Y = %d: Running paintVertex()\n", vertex, (int)center.getX(), (int)center.getY());
-
-                JPanel sv = new JPanel(new GridLayout(1,1));
+                  JPanel sv = new JPanel(new GridLayout(1,1));
                 sv.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-//                sv.setBackground(Color.GREEN);
-  //              sv.setPreferredSize(size);
                 JTextArea area = new JTextArea(vertex.toString());
                 area.setLineWrap(true);
                 area.setWrapStyleWord(true);
@@ -2395,12 +2317,7 @@ public class XCtx<C> implements XObject {
                 //OK
                 graphicsContext.draw(sv, rc.getRendererPane(), (int)center.getX(), 
                                      (int)center.getY(), (int)size.getWidth(), (int)size.getHeight(), true);
-            }
-            catch (Exception e)
-            {
-                System.err.println("Failed to render images!\n");
-                System.err.println("Caught Exception: " + e.getMessage());
-            }
+            
         }
     }
 

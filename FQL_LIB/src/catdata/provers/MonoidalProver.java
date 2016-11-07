@@ -1,4 +1,4 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -38,14 +38,11 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 			List<Chc<Chc<Unit,T>,C>> rhs = Util.singList(Chc.inLeft(t));
 			rules.add(new Pair<>(lhs, rhs));
 		} 
-//		System.out.println(eqs);
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : eqs) {
 			rules.add(new Pair<>(trans(eq.first, eq.second), trans(eq.first, eq.third)));
 		}
-//		System.out.println(rules);
 		kb = new SemiThue<>(rules, -1); 
 		kb.complete();
-	//	System.out.println(kb);
 	}
 	
 	private List<Chc<Chc<Unit,T>,C>> trans(Map<V, T> ctx, KBExp<C, V> term) {

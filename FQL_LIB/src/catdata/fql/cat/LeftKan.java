@@ -54,8 +54,6 @@ public class LeftKan {
 	}
 	
 	private void gamma1(Node b1, Pair<Integer, Integer> xy) {
-		//System.out.println("remove " + xy);
-		//System.out.println("before " + this);
 		if (xy.first.equals(xy.second)) {
 			Sb.get(b1).remove(xy);
 			return;
@@ -119,16 +117,6 @@ public class LeftKan {
 	
 		//: not needed?
 		lineage.remove(y);
-/*		for (Object k : lineage.keySet()) {
-			List<Pair<String, Object>> v = lineage.get(k);
-			for (Pair<String, Object> p : v) {
-				if (p.second.equals(y)) {
-					// System.out.println("replace " + uv);
-					p.second = x;
-				}
-			}
-		} */
-//		System.out.println("after " + this);
 	}
 
 	private void replace(Integer x, Integer y) {
@@ -176,9 +164,7 @@ public class LeftKan {
 	//true = success
 	public boolean compute() {
 		for (int i = 0; i < NEWDEBUG.debug.fql.MAX_DENOTE_ITERATIONS; i++) {
-			//System.out.println(this);
 			if (!step()) {
-//				System.out.println("done");
 				return true;
 			}
 		}
@@ -206,7 +192,6 @@ public class LeftKan {
 	}
 	
 	private boolean beta1() {
-		//System.out.println("start beta: " + this);
 		boolean ret = false;
 		for (Eq eq : B.eqs) {
 			Set<Pair<Integer, Integer>> lhs = eval(eq.lhs);
@@ -214,7 +199,6 @@ public class LeftKan {
 			Node n = eq.lhs.target;
 			ret = ret || addCoincidences(lhs, rhs, n);
 		}		
-//		System.out.println("end beta: " + this);
 		return ret;
 	}
 	
@@ -230,7 +214,6 @@ public class LeftKan {
 				if (l.second.equals(r.second)) {
 					continue;
 				}
-//				System.out.println("coincidence: " + l.second + " and " + r.second);
 				ret = Sb.get(n).add(new Pair<>(l.second, r.second)) || ret;
 				ret = Sb.get(n).add(new Pair<>(r.second, l.second)) || ret;
 			}
@@ -244,8 +227,6 @@ public class LeftKan {
 		for (Edge e : p.path) {
 			ret = Instance.compose3(ret, Pg.get(e));
 		}
-//		System.out.println("eval " + p + " result: " + ret);
-
 		return ret;
 	}
 	
@@ -292,10 +273,7 @@ public class LeftKan {
 			Object xxx = lookup(J.data.get(p.second.name),
 				utables.get(p.second.source).get(p.first));
 			utables.get(p.second.target).put(y, xxx);
-		}
-		
-//		System.out.println("add " + y + " for " + p);
-		
+		}		
 		return true;
 	}
 	
@@ -317,7 +295,6 @@ public class LeftKan {
 //					if (z.second.equals(y)) {
 						ret = true;
 						it.remove();
-//						System.out.println("non-determinism: " + x.first + " mapsto " + y + " and " + z.second);
 						Sb.get(g.target).add(new Pair<>(y, z.second));
 						Sb.get(g.target).add(new Pair<>(z.second, y));
 	//				}
@@ -388,7 +365,6 @@ public class LeftKan {
 			}
 			ua.put(n, j);
 		}
-//		System.out.println("initial: " + this);
 	}
 	
 	private Object lookup(Set<Pair<Object, Object>> set, Object i) {

@@ -347,7 +347,6 @@ public class XPoly<C,D> extends XExp implements XObject {
 			Block<C, D> newblock = new Block<C, D>(block.from, block.where, attrs, edges);
 			bs.put(l, new Pair(new Pair(l, d), newblock));
 		}
-	//	System.out.println(bs);
 		return new XPoly<C,D>(src, grotho(), bs);
 	}
 	
@@ -399,7 +398,6 @@ public class XPoly<C,D> extends XExp implements XObject {
 							if (l0 == null) {
 								throw new RuntimeException();
 							}
-				//			System.out.println("looking for " + y + " in " + blocks.get(l0).second.edges.keySet());
 							ret.add(new Pair(l0, y));
 							if (dst.ids.contains(y)) {
 							} else {
@@ -517,7 +515,6 @@ public class XPoly<C,D> extends XExp implements XObject {
 		Map<Pair<Object, D>, XMapping<C,C>> transforms = new HashMap<>();
 		
 		for (Object k : blocks.keySet()) {
-			System.out.println("checking block " + k);
 			Pair<D, Block<C, D>> b = blocks.get(k);
 			XCtx<C> srcX = frozens.get(k);
 			
@@ -547,7 +544,6 @@ public class XPoly<C,D> extends XExp implements XObject {
 					}
 					em.put(o, Util.singList(o));
 				}
-				System.out.println("checking edge " + k2);
 				try {
 					XMapping<C,C> mmm = new XMapping(dstX, srcX, em, "homomorphism");
 					transforms.put(new Pair<>(k,k2),mmm);
@@ -574,8 +570,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			}	
 			
 			D k2 = (D) ("!_" + b.first);
-			//List v2 = Collections.singletonList(k2); //b.second.attrs.get(k2);
-			List v2 = Util.singList("_1"); //b.second.attrs.get(k2);
+			List v2 = Util.singList("_1"); 
 			XCtx<C> dstX = frozens.get(dst.type(k2).second);
 			Map em = new HashMap<>();
 			em.put("y_a", v2);
@@ -588,9 +583,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			XMapping<C,C> m = new XMapping(dstX, srcX, em, "homomorphism");
 			transforms.put(new Pair<>(k, k2), m);
 			XMapping mmm = new XMapping<>(srcX, "homomorphism");
-			
-			transforms.put(new Pair<>(k, b.first), mmm);			
-			
+			transforms.put(new Pair<>(k, b.first), mmm);				
 		}
 
 		Map<Pair<Object, List<D>>, XMapping<C,C>> frozen_cache = new HashMap<>();
@@ -608,7 +601,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 				}
 			}
 
-			for (D eX : p.second.subList(1, p.second.size()) /*.stream().filter(z -> dst.ids.contains(z)).collect(Collectors.toList()) */ ) {
+			for (D eX : p.second.subList(1, p.second.size())) {
 				XMapping<C, C> hX = null;
 				if (transforms2.containsKey(eX)) {
 					l = null;
@@ -641,31 +634,14 @@ public class XPoly<C,D> extends XExp implements XObject {
 		return frozen;
 	}
 	
-	
-	
 	public void validate() {
-/*		Function<Pair<Object, List<D>>, XMapping<C,C>> f = */ freeze();
-//		 for (Object l : blocks.keySet()) {
-//			D d = blocks.get(l).first;
-//			for (D d0 : dst.allIds()) {
-//				for (Triple<D, D, List<D>> p : dst.cat().hom(d, d0)) {
-//					List<D> p0 = new LinkedList<>();
-//					p0.add(p.first);
-//					p0.addAll(p.third);
-//					f.apply(new Pair<>(l, p0));
-//					System.out.println(p);
-//				}			
-//			}
-//		}  
+		freeze();
 		for (Pair<List<D>, List<D>> eq : dst.allEqs()) {
 			List<D> p = eq.first;
 			List<D> q = eq.second;
 			Pair<D,D> t = dst.type(p);
 			D d = t.first;
 			D d0= t.second;
-		//	if (dst.global.allIds().contains(d0)) {
-				
-		//	} else {
 			for (Object l : blocks.keySet()) {
 				Pair<D, Block<C, D>> block = blocks.get(l);
 				if (!block.first.equals(d)) {
@@ -679,14 +655,12 @@ public class XPoly<C,D> extends XExp implements XObject {
 				if (!dst.global.allIds().contains(d0) && !o().getKB().equiv(p2, q2)) {
 					throw new RuntimeException("Not respected on " + eq + " in " + o());
 				}
-//				System.out.println("checking " + p + " = " + q);
 				XMapping<C, C> p3 = freeze().apply(new Pair<>(l, p));
 				XMapping<C, C> q3 = freeze().apply(new Pair<>(l, q));
 				if (!XMapping.transform_eq(p3, q3)) {
 					throw new RuntimeException("on block " + l + " equation " + eq + " becomes \n\n" + p3 + " \n\n=\n\n " + q3 + " \n\nbut are not equal");
 				}
 			}
-		//	}
 		} 
 	}
 	
@@ -695,12 +669,6 @@ public class XPoly<C,D> extends XExp implements XObject {
 		XCtx<C> dst0 = coapply(h.dst);
 		
 		Map<C, List<C>> em0 = new HashMap<>();
-	//	for (C c : src0.terms()) {
-			//Triple t = (Triple) c;
-		
-			//Triple u = new Triple(t.first, h.ap)
-	//	}
-		
 		
 		for (C c : src0.allTerms()) {
 			if (em0.containsKey(c)) {
@@ -748,8 +716,6 @@ public class XPoly<C,D> extends XExp implements XObject {
 					}
 					List<C> lhs = (List<C>) eq.first.stream().map(prepend).collect(Collectors.toList());
 					List<C> rhs = (List<C>) eq.second.stream().map(prepend).collect(Collectors.toList());
-				//	System.out.println("processing " + eq);
-				//	System.out.println("adding 1 " + new Pair(lhs, rhs));
 					eqs.add(new Pair(lhs, rhs));
 				}
 			}
@@ -773,13 +739,10 @@ public class XPoly<C,D> extends XExp implements XObject {
 				List newlhs = null;
 				List newrhs = null;
 				if (lhs.first == null) {
-		//			System.out.println("fireA");
 					newlhs = eq.first;
 				} else if (a1x.first == null) {
-			//		System.out.println("fireB");
 					newlhs = a1;
 				} else {
-			//		System.out.println("fireC");
 					newlhs = new LinkedList();
 					newlhs.add(new Triple(d1, lhs.first, a1x.first));
 					newlhs.addAll(a1x.second);
@@ -793,7 +756,6 @@ public class XPoly<C,D> extends XExp implements XObject {
 					newrhs.add(new Triple(d2, rhs.first, a2x.first));
 					newrhs.addAll(a2x.second);
 				}
-			//	System.out.println("adding2 " + new Pair(newlhs, newrhs));
 				eqs.add(new Pair(newlhs, newrhs));
 			}
 		}

@@ -243,34 +243,10 @@ public class TransformEditor {
 				Object id2 = row.get(1);
 				ids.add(new Pair<Object, Object>(id, id2));
 
-/*				for (int col = 1; col < cols; col++) {
-					String colname = m.getColumnName(col);
-					Object val = row.get(col);
-					if (!map.containsKey(colname)) {
-						map.put(colname, new LinkedList<Pair<Object, Object>>());
-					}
-					List<Pair<Object, Object>> attr = map.get(colname);
-					attr.add(new Pair<Object, Object>(id, val));
-				} */
 			}
 			nodes.add(new Pair<>(n.string, ids));
 		}
 
-/*		List<Pair<String, List<Pair<Object, Object>>>> attrs = new LinkedList<>();
-		List<Pair<String, List<Pair<Object, Object>>>> arrows = new LinkedList<>();
-
-		for (Edge e : thesig.edges) {
-			List<Pair<Object, Object>> g = map.get(e.name);
-			arrows.add(new Pair<>(e.name, g));
-		}
-		for (Attribute<Node> e : thesig.attrs) {
-			List<Pair<Object, Object>> g = map.get(e.name);
-			attrs.add(new Pair<>(e.name, g));
-		} */
-
-//		System.out.println(nodes);
-	//	System.out.println(attrs);
-//		System.out.println(arrows);
 		return new TransExp.Const(nodes, trans.src, trans.dst);
 	}
 
@@ -294,7 +270,6 @@ public class TransformEditor {
 					} else {
 						return clr;
 					}
-					// return color;
 				}
 			};
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
@@ -423,8 +398,6 @@ public class TransformEditor {
 											+ " rows)"));
 				}
 			});
-			// xxx.setMaximumSize(new Dimension(400,400));
-			// return xxx;
 			return newthing;
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -498,41 +471,28 @@ public class TransformEditor {
 		};
 //		Map<String, JTable> ret = new HashMap<>();
 		for (String name : names) {
-			// System.out.println("Name " + name);
 			Map<String, Set<Pair<Object, Object>>> m = joined.get(name);
-			// System.out.println("m " + m);
 			Set<Pair<Object, Object>> ids = nd.get(name);
-			// System.out.println("ids " + ids);
 			Object[][] arr = new Object[ids.size()][m.size() + 1];
 			Set<String> cols = m.keySet();
-			// System.out.println("cols " + cols);
 			List<String> cols2 = new LinkedList<>(cols);
 			Collections.sort(cols2, strcmp);
 			cols2.add(0, "ID");
-			// System.out.println("cols2 " + cols2);
 			Object[] cols3 = cols2.toArray();
-			// System.out.println("cols3 " + cols3);
-
+			
 			int i = 0;
 			for (Pair<Object, Object> id : ids) {
-				// System.out.println("id " + id);
 				arr[i][0] = id.first;
-				// System.out.println(" i " + i + " j " + 0 + " val " +
-				// arr[i][0]);
-
+			
 				int j = 1;
 				for (String col : cols2) {
 					if (col.equals("ID")) {
 						continue;
 					}
-					// System.out.println("col " + col);
 					Set<Pair<Object, Object>> coldata = m.get(col);
 					for (Pair<Object, Object> p : coldata) {
-						// System.out.println("p " + p);
 						if (p.first.equals(id.first)) {
 							arr[i][j] = p.second;
-							// System.out.println(" i " + i + " j " + j +
-							// " val " + arr[i][j]);
 							break;
 						}
 					}
@@ -541,24 +501,7 @@ public class TransformEditor {
 				i++;
 			}
 
-			// Arrays.sort(arr, new Comparator<Object[]>() {
-			//
-			// @Override
-			// public int compare(Object[] o1, Object[] o2) {
-			// return o1[0].toString().compareTo(o2[0].toString());
-			// }
-			//
-			// });
-
-			// JTable t = new JTable(arr, cols3) {
-			// public Dimension getPreferredScrollableViewportSize() {
-			// Dimension d = getPreferredSize();
-			// return new Dimension(d.width, d.height);
-			// }
-			// };
-
-			// cards.(name, t);
-
+		
 			// foo and t are for the graph and tabular pane, resp
 			DefaultTableModel dtm = new DefaultTableModel(arr, cols3);
 			JTable foo = new JTable(dtm) {
@@ -583,12 +526,7 @@ public class TransformEditor {
 			p.setBorder(BorderFactory.createTitledBorder(
 					BorderFactory.createEmptyBorder(), pre + "." + name + " (" + ids.size()
 							+ " rows)"));
-			//vwr.add(p, name);
-			//pans.put(name, p);
-			// foo.setMaximumSize(new Dimension(600,200));
-			//JScrollPane jsp = new JScrollPane(foo);
-			//JPanel bar = new JPanel(new GridLayout(1,1));
-			//bar.add(jsp);
+		
 			pans.put(name, p);
 		}
 

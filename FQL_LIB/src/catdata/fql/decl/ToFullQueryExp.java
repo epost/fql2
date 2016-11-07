@@ -143,29 +143,22 @@ public class ToFullQueryExp implements
 					inj1Arrows, s, x);
 			MapExp.Const inj2 = new MapExp.Const(inj2Node, inj2Attrs,
 					inj2Arrows, t, x);
-			// System.out.println("X X X" + x);
-			// System.out.println("inj1" + inj1);
-			// System.out.println("inj2" + inj2);
-
+	
 			if (e.kind.equals("delta sigma forward")) {
 				FullQueryExp q = new FullQueryExp.Comp(new FullQueryExp.Sigma(
 						inj2), new FullQueryExp.Delta(inj1));
-				// System.out.println(q);
 				return q;
 			} else if (e.kind.equals("delta pi forward")) {
 				FullQueryExp q = new FullQueryExp.Comp(
 						new FullQueryExp.Pi(inj2), new FullQueryExp.Delta(inj1));
-				// System.out.println(q);
 				return q;
 			} else if (e.kind.equals("delta sigma backward")) {
 				FullQueryExp q = new FullQueryExp.Comp(new FullQueryExp.Sigma(
 						inj1), new FullQueryExp.Delta(inj2));
-				// System.out.println(q);
 				return q;
 			} else if (e.kind.equals("delta pi backward")) {
 				FullQueryExp q = new FullQueryExp.Comp(
 						new FullQueryExp.Pi(inj1), new FullQueryExp.Delta(inj2));
-				// System.out.println(q);
 				return q;
 			}
 			throw new RuntimeException("Unknown kind: " + e.kind);
@@ -200,15 +193,9 @@ public class ToFullQueryExp implements
 			nodeEqcs.add(yyy);
 		}
 
-//		System.out.println("before merge");
-		//System.out.println(nodeEqcs);
-		//System.out.println(attEqcs);
 		mergeEqcs(nodeEqcs);
 		mergeEqcs(attEqcs);
-	//	System.out.println("after merge");
-		//System.out.println(nodeEqcs);
-		//System.out.println(attEqcs);
-
+	
 		int count = 0;
 		for (Set<Pair<String, String>> k : nodeEqcs) {
 			node_map.put(k, "match_node" + count++);
@@ -232,7 +219,6 @@ public class ToFullQueryExp implements
 						continue;
 					}
 					if (haveCommon(k, v)) {
-						//System.out.println("Common " + k + " and " + v);
 						x = k;
 						y = v;
 						break lbl;
@@ -243,7 +229,6 @@ public class ToFullQueryExp implements
 			if (x == null && y == null) {
 				return;
 			}
-			//System.out.println("adding all " + y + " to " + x);
 			x.addAll(y);
 			nodeEqcs.remove(y);
 			x = null;
@@ -286,13 +271,11 @@ public class ToFullQueryExp implements
 
 	private String lookupNode(String pre, String n,
 			Map<Set<Pair<String, String>>, String> node_map) {
-	//	System.out.println("looking up " + n + " in " + node_map);
 		for (Set<Pair<String, String>> k : node_map.keySet()) {
 			if (k.contains(new Pair<>(pre, n))) {
 				return node_map.get(k);
 			}
 		}
-		//System.out.println("no hit");
 		return pre + "_" + n;
 	}
 

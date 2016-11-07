@@ -1,6 +1,8 @@
 package catdata.aql;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,9 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	
 	public abstract Schema<Ty,En,Sym,Fk,Att> schema();
 	
+	/**
+	 * The Xs need be to be unique across ens
+	 */
 	public abstract Collection<X> en(En en);
 
 	public abstract X fk(Fk fk, X x);
@@ -26,7 +31,13 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 
 	public abstract Term<Void, En, Void, Fk, Void, Gen, Void> repr(X x);
 	
-	//public abstract DP<Ty,En,Sym,Fk,Att,Gen,Sk> dp();
+	public Collection<X> allXs() {
+		Set<X> ret = new HashSet<>();
+		for (En en : schema().ens) {
+			ret.addAll(en(en));
+		}
+		return ret;
+	}
 	
 	/**
 	 * @return only equations for instance part (no typeside, no schema)

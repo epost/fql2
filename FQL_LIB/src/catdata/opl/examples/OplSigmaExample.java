@@ -99,8 +99,7 @@ public class OplSigmaExample extends Example {
 					+ "\n	generators "
 					+ "\n		xa1 : Amphibian,"
 					+ "\n		xl1, xl2, xl3, xl4 : LandAnimal,"
-					+ "\n		xw1, xw2, xw3: WaterAnimal,"
-					+ "\n		gecko, frog, human, cow, horse, dolphin, fish : String;"
+					+ "\n		xw1, xw2, xw3: WaterAnimal;"
 					+ "\n	equations"
 					+ "\n		attL(xl1) = gecko, attL(xl2) = frog, "
 					+ "\n		attL(xl3) = human, attL(xl4) = cow, "
@@ -111,8 +110,6 @@ public class OplSigmaExample extends Example {
 					+ "\n"
 					+ "\nt = transpres {"
 					+ "\n	sorts "
-					+ "\n		String -> {(gecko,gecko),(frog,frog),(human,human),(cow,cow),"
-					+ "\n				 (horse,horse),(dolphin,dolphin),(fish,fish)},"
 					+ "\n		Amphibian -> {(xa1,a1)},"
 					+ "\n		LandAnimal -> {(xl1,l1),(xl2,l2),(xl3,l3),(xl4,l4)},"
 					+ "\n		WaterAnimal -> {(xw1,w1),(xw2,w2),(xw3,w3)};"
@@ -122,6 +119,8 @@ public class OplSigmaExample extends Example {
 					+ "\n"
 					+ "\nQ = DELTA F"
 					+ "\n";
+
+
 
 
 

@@ -8,12 +8,14 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Ctx;
-import catdata.aql.Transform;
 import catdata.aql.It.ID;
+import catdata.aql.Transform;
 import catdata.aql.exp.InstExp.InstExpDelta;
+import catdata.aql.exp.InstExp.InstExpDistinct;
 import catdata.aql.exp.InstExp.InstExpLit;
 import catdata.aql.exp.InstExp.InstExpSigma;
 import catdata.aql.fdm.DeltaTransform;
+import catdata.aql.fdm.DistinctTransform;
 import catdata.aql.fdm.IdentityTransform;
 import catdata.aql.fdm.SigmaDeltaCounitTransform;
 import catdata.aql.fdm.SigmaDeltaUnitTransform;
@@ -537,5 +539,67 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 			return new Pair<>(new InstExpLit<>(trans.src()), new InstExpLit<>(trans.dst()));
 		}
 
+	}
+	
+	///////////////////////////////////////////////////////////////////////////
+	
+	public static final class TransExpDistinct<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2>
+	extends TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> {
+		
+		public final TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
+
+		public TransExpDistinct(TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
+			this.t = t;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((t == null) ? 0 : t.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TransExpDistinct<?,?,?,?,?,?,?,?,?,?,?,?,?> other = (TransExpDistinct<?,?,?,?,?,?,?,?,?,?,?,?,?>) obj;
+			if (t == null) {
+				if (other.t != null)
+					return false;
+			} else if (!t.equals(other.t))
+				return false;
+			return true;
+		}
+
+		@Override
+		public Pair<InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1>, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
+				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
+			return new Pair<>(new InstExpDistinct<>(t.type(ctx0, ctx, ctx1).first), new InstExpDistinct<>(t.type(ctx0, ctx, ctx1).second));
+		}
+
+		@Override
+		public Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> eval(AqlEnv env) {
+			return new DistinctTransform<>(t.eval(env));
+		}
+
+		@Override
+		public String toString() {
+			return "distinct " + t;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return t.deps();
+		}
+		
+		
+		
+		
 	}
 }

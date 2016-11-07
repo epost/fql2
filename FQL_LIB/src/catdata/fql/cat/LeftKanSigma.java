@@ -29,12 +29,8 @@ public class LeftKanSigma {
 			PSMInterp inter, Mapping f, Instance i, Transform t, Instance JJJ,
 			Integer xxx) throws FQLException {
 
-		// System.out.println("Called with " + f + " on instance " + i);
 		Mapping F = deAttr(f);
-		// System.out.println("de-attred " + F);
-		Pair<Instance, Map<Attribute<Node>, Map<Object, Object>>> I = deAttr(
-				inter, i, F.source);
-		// System.out.println("deat2 " + I);
+		Pair<Instance, Map<Attribute<Node>, Map<Object, Object>>> I = deAttr(inter, i, F.source);
 		Integer kkk = inter.guid;
 		Instance JJJ0 = null;
 		Transform ttt = null;
@@ -45,10 +41,6 @@ public class LeftKanSigma {
 			Pair<Instance, Map<Attribute<Node>, Map<Object, Object>>> JJJ0X = deAttr(
 					inter, JJJ, F.target);
 
-			// Pair<Instance, Map<Attribute<Node>, Map<Object, Object>>> qqq =
-			// deAttr(
-			// inter, t.dst, F.source);
-
 			Pair<Instance, Map<Attribute<Node>, Map<Object, Object>>> qqq = delta(
 					f, F, JJJ0X);
 
@@ -58,10 +50,6 @@ public class LeftKanSigma {
 			inter.guid = kkk;
 		}
 
-	//	System.out.println("I.first " + I.first);
-	//	System.out.println("ttt " + ttt);
-	//	System.out.println("JJJ0 " + JJJ0);
-	//	System.out.println("guid " + inter.guid);
 		LeftKan D = new LeftKan(inter.guid, F, I.first, ttt, JJJ0);
 
 		Pair<Instance, Map<Object, List<Pair<String, Object>>>> hhh = sigma(D);
@@ -70,9 +58,7 @@ public class LeftKanSigma {
 		Map<Node, Map<Object, Integer>> etables = makeE(D.ua);
 		
 		Instance j = hhh.first;
-		// System.out.println("j " + j);
 		Instance ret = reAttr(etables, f.target, j, I.second);
-		// System.out.println(" J " + J);
 		return new Quad<>(ret, etables, D.utables, hhh.second);
 	}
 	
@@ -121,7 +107,6 @@ public class LeftKanSigma {
 		List<Pair<String, List<Pair<Object, Object>>>> data = new LinkedList<>(
 				trans.data());
 
-		// System.out.println("src " + src);
 		for (Attribute<Node> k : sig.attrs) {
 			List<Pair<Object, Object>> list = new LinkedList<>();
 			// Node n = k.source;
@@ -146,13 +131,6 @@ public class LeftKanSigma {
 
 		return new Transform(src.first, dst.first, data);
 	}
-
-	/*
-	 * private static Object revLookup(Set<Pair<Object, Object>> map, Object x)
-	 * { if (x == null) { throw new RuntimeException(); } for (Pair<Object,
-	 * Object> k : map) { if (k.second.equals(x)) { return (Integer) k.first; }
-	 * } throw new RuntimeException(); }
-	 */
 
 	private static Instance reAttr(Map<Node, Map<Object, Integer>> D, Signature thesig, Instance i,
 			Map<Attribute<Node>, Map<Object, Object>> map0) throws FQLException {
@@ -179,14 +157,8 @@ public class LeftKanSigma {
 		for (Attribute<Node> k : thesig.attrs) {
 			Set<Pair<Object, Object>> t = new HashSet<>();
 			for (Pair<Object, Object> v : i.data.get(k.name + "_edge")) {
-				// Integer v0 = (Integer) v.second;
-				// System.out.println("etables is " + D.etables);
-				// System.out.println("looking for " + k.name);
-				// System.out.println("Map is " + map);
-				// System.out.println("want " + k);
 				Object v1 = getFrom(k, D, map /* ().get(k) */,
 						v.second.toString());
-				// System.out.println("v1 is " + v1);
 				t.add(new Pair<Object, Object>(v.first, v1));
 			}
 			d.put(k.name, t);
@@ -209,7 +181,6 @@ public class LeftKanSigma {
 				}
 			}
 		}
-		// System.out.println("preimage " + pre);
 		if (pre.size() == 0) {
 			if (!NEWDEBUG.debug.fql.ALLOW_NULLS) {
 				throw new RuntimeException(

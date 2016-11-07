@@ -1,4 +1,4 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -421,7 +421,7 @@ public abstract class KBExp<C, V> {
 		}
 
 		@Override
-		public catdata.algs.kb.KBExp.KBVar<C, V> getVar() {
+		public catdata.provers.KBExp.KBVar<C, V> getVar() {
 			throw new RuntimeException();
 		}
 

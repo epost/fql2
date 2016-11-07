@@ -216,14 +216,6 @@ public class Instance {
 		return ret;
 	}
 
-	/*
-	 * private void validateUsingEDs() throws FQLException {
-	 * //System.out.println("Validating " + this); for (EmbeddedDependency ed :
-	 * thesig.toED("")) { if (!ED.from(ed).holds(data)) { throw new
-	 * FQLException("ED constraint violation in " + this + ": " + ed + "\n" +
-	 * ED.from(ed) + "\n" + ED.conv(data)); } } }
-	 */
-
 	public Object follow(Path p, Object id) {
 		for (Edge e : p.path) {
 			id = PropPSM.lookup(data.get(e.name), id);
@@ -440,79 +432,7 @@ public class Instance {
 		throw new FQLException("cannot find " + n + " in " + data2);
 	}
 
-	// public Instance(String name, Query thequery, Instance theinstance)
-	// throws FQLException {
-	// if (!thequery.getSource().equals(theinstance.thesig)) {
-	// throw new FQLException("Incompatible types. Expected "
-	// + thequery.getSource() + " received " + theinstance.thesig);
-	// }
-	// thesig = thequery.getTarget();
-	// data = thequery.eval(theinstance);
-	// conformsTo(thesig);
-	//
-	// }
-	//
-	// public Instance(String name, Mapping m, Instance i, String type)
-	// throws FQLException {
-	// if (type.equals("delta")) {
-	// if (!m.target.equals(i.thesig)) {
-	// throw new FQLException("Incompatible types. Expected "
-	// + m.target + " received " + i.thesig);
-	// }
-	// thesig = m.source;
-	// data = m.evalDelta(i);
-	// conformsTo(thesig);
-	//
-	// } else if (type.equals("sigma")) {
-	// if (!m.source.equals(i.thesig)) {
-	// throw new FQLException("Incompatible types. Expected "
-	// + m.source + " received " + i.thesig);
-	// }
-	// thesig = m.target;
-	// data = m.evalSigma(i);
-	//
-	// conformsTo(thesig);
-	//
-	// } else if (type.equals("pi")) {
-	// if (!m.source.equals(i.thesig)) {
-	// throw new FQLException("Incompatible types. Expected "
-	// + m.source + " received " + i.thesig);
-	// }
-	// thesig = m.target;
-	// data = m.evalPi(i);
-	// conformsTo(thesig);
-	//
-	// } else {
-	// throw new FQLException("Unknown type " + type);
-	// }
-	// toFunctor().morphs(toFunctor(), toFunctor());
-	// }
-
-	// this is the json one
-	/*
-	 * public Instance( Signature sig, List<Pair<String, List<Object>>> ob,
-	 * List<Pair<Pair<Pair<Object, Object>, String>, List<Pair<Object,
-	 * Object>>>> mo) throws FQLException {
-	 * 
-	 * this(null, sig, jsonmap(ob, mo)); }
-	 */
-	/*
-	 * private static Map<String, Set<Pair<Object, Object>>> jsonmap(
-	 * List<Pair<String, List<Object>>> ob, List<Pair<Pair<Pair<Object, Object>,
-	 * String>, List<Pair<Object, Object>>>> mo) { Map<String, Set<Pair<Object,
-	 * Object>>> map = new HashMap<>(); for (Pair<String, List<Object>> o : ob)
-	 * { map.put(o.first, dupl(o.second)); } for (Pair<Pair<Pair<Object,
-	 * Object>, String>, List<Pair<Object, Object>>> o : mo) { String arr =
-	 * o.first.second; Set<Pair<Object, Object>> set = map.get(arr); if (set ==
-	 * null) { set = new HashSet<>(); map.put(arr, set); } for (Pair<Object,
-	 * Object> oo : o.second) { set.add(oo); } } return map; }
-	 */
-	/*
-	 * private static <X> Set<Pair<X, X>> dupl(List<X> x) { Set<Pair<X, X>> ret
-	 * = new HashSet<>(); for (X s : x) { ret.add(new Pair<>(s, s)); } return
-	 * ret; }
-	 */
-
+	
 	private boolean typeCheck(Signature thesig2) {
 		for (String s : data.keySet()) {
 			if (!thesig2.contains(s) && !s.contains(" ")) {
@@ -641,15 +561,7 @@ public class Instance {
 		for (String k : sorted) {
 			Set<Pair<Object, Object>> xxx = data.get(k);
 			List<Pair<Object, Object>> table = new LinkedList<>(xxx);
-			// Collections.sort(table, new Comparator<Pair<Object, Object>>()
-			// {
-			// public int compare(Pair<Object,Object> f1, Pair<Object,Object>
-			// f2)
-			// {
-			// return f1.first.toString().compareTo(f2.first.toString());
-			// }
-			// });
-
+	
 			Object[][] arr = new Object[table.size()][2];
 			int i = 0;
 			for (Pair<Object, Object> p : table) {
@@ -665,60 +577,27 @@ public class Instance {
 					return new Dimension(d.width, d.height);
 				}
 			};
-			// //t.setRowSelectionAllowed(false);
-			// t.setColumnSelectionAllowed(false);
-			// MouseListener[] listeners = t.getMouseListeners();
-			// for (MouseListener l : listeners) {
-			// t.removeMouseListener(l);
-			// }
 			TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
 
 			t.setRowSorter(sorter);
 			sorter.allRowsChanged();
 			sorter.toggleSortOrder(0);
 			t.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-//			t.setS
 			JPanel p = new JPanel(new GridLayout(1, 1));
 			p.add(new JScrollPane(t));
 			p.setBorder(BorderFactory.createTitledBorder(
 					BorderFactory.createEmptyBorder(2, 2, 2, 2), k + "   ("
 							+ xxx.size() + " rows)"));
 			panels.add(p);
-//			p.setPreferredSize(new Dimension(60, 60));
 		}
 
-	//	int x = (int) Math.ceil(Math.sqrt(panels.size()));
-	//	if (x == 0) {
-	//		return new JPanel();
-	//	}
-		//List<JComponent> panel = new LinkedList<>();
-	//	JPanel panel = new JPanel(new GridLayout(x, x));
-	//	for (JPanel p : panels) {
-		//	panel.add(p);
-		//}
-//		panel.setBorder(BorderFactory.createEtchedBorder());
 		return FqlUtil.makeGrid((List<JComponent>)((Object)panels));
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public JPanel join() throws FQLException {
-		// Map<String, Set<Pair<String,String>>> data;
-
 		prejoin();
-
 		List pans = makePanels();
-
-		/*int x = (int) Math.ceil(Math.sqrt(pans.size()));
-		JPanel panel;
-		if (x == 0) {
-			panel = new JPanel();
-		} else {
-			panel = new JPanel(new GridLayout(x, x));
-		}
-		for (JPanel p : pans) {
-			panel.add(p);
-		}
-		panel.setBorder(BorderFactory.createEtchedBorder()); */
 		return FqlUtil.makeGrid(pans);
 	}
 
@@ -737,9 +616,7 @@ public class Instance {
 		for (String name : xxx) {
 			JTable t = joined.get(name);
 			JPanel p = new JPanel(new GridLayout(1, 1));
-			// p.add(t);
 			p.add(new JScrollPane(t));
-			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(
 					BorderFactory.createEmptyBorder(), name + "   ("
 							+ data.get(name).size() + " rows)"));
@@ -809,11 +686,9 @@ public class Instance {
 			sorter.allRowsChanged();
 			p.add(new JScrollPane(t));
 
-			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(
 					BorderFactory.createEmptyBorder(),
 					name + " (" + data.get(name).size() + " rows)"));
-			// System.out.println("adding " + name );
 			vwr.add(p, name);
 		}
 
@@ -841,11 +716,9 @@ public class Instance {
 			sorter.allRowsChanged();
 			p.add(new JScrollPane(t));
 
-			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(
 					BorderFactory.createEmptyBorder(),
 					name + " (" + data.get(name).size() + " rows)"));
-			// System.out.println("adding " + name );
 			vwr.add(p, name);
 		}
 
@@ -871,11 +744,9 @@ public class Instance {
 			sorter.allRowsChanged();
 			p.add(new JScrollPane(t));
 
-			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(
 					BorderFactory.createEmptyBorder(), "domain of " + name
 							+ " (" + data.get(name).size() + " rows)"));
-			// System.out.println("adding " + name );
 			vwr.add(p, "domain of " + name);
 		}
 
@@ -892,41 +763,28 @@ public class Instance {
 		};
 		Map<String, JTable> ret = new HashMap<>();
 		for (String name : names) {
-			// System.out.println("Name " + name);
 			Map<String, Set<Pair<Object, Object>>> m = joined.get(name);
-			// System.out.println("m " + m);
 			Set<Pair<Object, Object>> ids = nd.get(name);
-			// System.out.println("ids " + ids);
 			Object[][] arr = new Object[ids.size()][m.size() + 1];
 			Set<String> cols = m.keySet();
-			// System.out.println("cols " + cols);
 			List<String> cols2 = new LinkedList<>(cols);
 			Collections.sort(cols2, strcmp);
 			cols2.add(0, "ID");
-			// System.out.println("cols2 " + cols2);
 			Object[] cols3 = cols2.toArray();
-			// System.out.println("cols3 " + cols3);
-
+		
 			int i = 0;
 			for (Pair<Object, Object> id : ids) {
-				// System.out.println("id " + id);
 				arr[i][0] = id.first;
-				// System.out.println(" i " + i + " j " + 0 + " val " +
-				// arr[i][0]);
-
+		
 				int j = 1;
 				for (String col : cols2) {
 					if (col.equals("ID")) {
 						continue;
 					}
-					// System.out.println("col " + col);
 					Set<Pair<Object, Object>> coldata = m.get(col);
 					for (Pair<Object, Object> p : coldata) {
-						// System.out.println("p " + p);
 						if (p.first.equals(id.first)) {
 							arr[i][j] = p.second;
-							// System.out.println(" i " + i + " j " + j +
-							// " val " + arr[i][j]);
 							break;
 						}
 					}
@@ -935,23 +793,12 @@ public class Instance {
 				i++;
 			}
 
-			// Arrays.sort(arr, new Comparator<Object[]>() {
-			//
-			// @Override
-			// public int compare(Object[] o1, Object[] o2) {
-			// return o1[0].toString().compareTo(o2[0].toString());
-			// }
-			//
-			// });
-
 			JTable t = new JTable(arr, cols3) {
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
 					return new Dimension(d.width, d.height);
 				}
 			};
-
-			// cards.(name, t);
 
 			// foo and t are for the graph and tabular pane, resp
 			JTable foo = new JTable(t.getModel()) {
@@ -972,17 +819,12 @@ public class Instance {
 			sorter2.toggleSortOrder(0);
 			foo.setRowSorter(sorter2);
 			sorter2.allRowsChanged();
-			// foo.set
-			// foo.setAutoCreateRowSorter(true);
 			p.add(new JScrollPane(foo));
 
-			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(
 					BorderFactory.createEmptyBorder(), name + " (" + ids.size()
 							+ " rows)"));
 			vwr.add(p, name);
-
-			// foo.setMaximumSize(new Dimension(600,200));
 
 			ret.put(name, t);
 		}
@@ -994,25 +836,14 @@ public class Instance {
 		JTextArea ta = new JTextArea(toString());
 		JPanel tap = new JPanel(new GridLayout(1, 1));
 		ta.setBorder(BorderFactory.createEmptyBorder());
-		//
 		tap.setBorder(BorderFactory.createEmptyBorder());
 		ta.setWrapStyleWord(true);
 		ta.setLineWrap(true);
 		JScrollPane xxx = new JScrollPane(ta);
-		// xxx.setBorder(BorderFactory.createEmptyBorder());
-		//
 		tap.add(xxx);
-		// tap.setSize(600, 600);
-
 		return tap;
 	}
 
-	/*
-	 * <rdfs:Class rdf:ID="staffMember"> <rdfs:comment>The class of staff
-	 * members </rdfs:comment> </rdfs:Class> <rdf:Property rdf:ID="isTaughtBy">
-	 * <rdfs:domain rdf:resource="#course"/> <rdfs:range
-	 * rdf:resource="#lecturer"/> </rdf:Property>
-	 */
 	public String rdfX(String name) {
 		String xxx = "";
 		String prefix = "fql://entity/"; // + name + "/";
@@ -1024,10 +855,6 @@ public class Instance {
 				xxx += "<rdf:Description rdf:about=\"" + prefix + id + "\">\n";
 				xxx += "    <rdf:type rdf:resource=\"fql://node/" + n.string
 						+ "\"/>\n"; // +
-				// "/fql://node/Department"/>
-				// xxx += "    <node:" + n.string + "/>\n";
-
-				// xxx += "    <node:node>" + n.string + "</node:node>\n";
 				for (Attribute<Node> a : thesig.attrsFor(n)) {
 					xxx += "    <attribute:" + a.name + ">"
 							+ lookupX(data.get(a.name), id) + "</attribute:"
@@ -1037,16 +864,12 @@ public class Instance {
 					if (!a.source.equals(n)) {
 						continue;
 					}
-					// xxx += "    <arrow:value rdf:resource=\""+ prefix +
-					// a.name +"\">" + lookupX(data.get(a.name), id) +
-					// "</arrow:value>\n";
-
+			
 					xxx += "    <arrow:" + a.name + " rdf:resource=\"" + prefix
 							+ lookupX(data.get(a.name), id) + "\"/>\n";
 				}
 				xxx += "</rdf:Description>\n\n";
 			}
-			// xxx += "\n";
 		}
 
 		String ret = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -1056,99 +879,8 @@ public class Instance {
 				+ "\n    xmlns:arrow=\"fql://arrow/\""
 				+ "\n    xmlns:attribute=\"fql://attribute/\">\n\n" + xxx
 				+ "</rdf:RDF>";
-		/*
-		 * <rdf:Description rdf:about="http://en.wikipedia.org/wiki/Oxford">
-		 * <dc:title>Oxford</dc:title> <dc:coverage>Oxfordshire</dc:coverage>
-		 * <dc:publisher>Wikipedia</dc:publisher>
-		 * <region:population>10000</region:population> <region:principaltown
-		 * rdf:resource="http://www.country-regions.fake/oxford"/>
-		 * </rdf:Description>
-		 * 
-		 * </rdf:RDF>
-		 */
 		return ret;
 	}
-
-	/*
-	 * public String rdfX(String name) { String xxx = ""; String prefix =
-	 * "fql://entity/"; // + name + "/";
-	 * 
-	 * for (Node n : thesig.nodes) { Set<Pair<Object, Object>> ids =
-	 * data.get(n.string); for (Pair<Object, Object> idX : ids) { Object id =
-	 * idX.first; xxx += "<rdf:Description rdf:about=\"" + prefix + id +
-	 * "\">\n"; xxx += "    <node:" + n.string + "/>\n";
-	 * 
-	 * // xxx += "    <node:node>" + n.string + "</node:node>\n"; for
-	 * (Attribute<Node> a : thesig.attrsFor(n)) { xxx += "    <attribute:" +
-	 * a.name +">" + lookupX(data.get(a.name), id) + "</attribute:" + a.name +
-	 * ">\n"; } for (Edge a : thesig.edges) { if (!a.source.equals(n)) {
-	 * continue; } // xxx += "    <arrow:value rdf:resource=\""+ prefix + a.name
-	 * +"\">" + lookupX(data.get(a.name), id) + "</arrow:value>\n";
-	 * 
-	 * xxx += "    <arrow:" + a.name + " rdf:resource=\"" + prefix +
-	 * lookupX(data.get(a.name), id) + "\"/>\n"; } xxx +=
-	 * "</rdf:Description>\n\n"; } xxx += "\n"; }
-	 * 
-	 * String ret = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-	 * "\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
-	 * "\n    xmlns:node=\"fql://node/\"" + "\n    xmlns:arrow=\"fql://arrow/\""
-	 * + "\n    xmlns:attribute=\"fql://attribute/\">\n\n" + xxx + "</rdf:RDF>";
-	 * /* <rdf:Description rdf:about="http://en.wikipedia.org/wiki/Oxford">
-	 * <dc:title>Oxford</dc:title> <dc:coverage>Oxfordshire</dc:coverage>
-	 * <dc:publisher>Wikipedia</dc:publisher>
-	 * <region:population>10000</region:population> <region:principaltown
-	 * rdf:resource="http://www.country-regions.fake/oxford"/>
-	 * </rdf:Description>
-	 * 
-	 * </rdf:RDF> return ret; }
-	 */
-
-	/*
-	 * public String rdfY(String name) { String xxx = ""; String prefix =
-	 * "http://categoricaldata.net/fql/ref/" + name + "/";
-	 * 
-	 * for (Node n : thesig.nodes) { xxx += "<rdf:Description rdf:about=\"" +
-	 * prefix + n.string + "\">\n"; xxx += "    <node:name>" + n.string +
-	 * "</node:name>\n"; xxx += "</rdf:Description>\n"; xxx += "\n"; } xxx +=
-	 * "\n"; for (Attribute<Node> a : thesig.attrs) { xxx +=
-	 * "<rdf:Description rdf:about=\"" + prefix + a.name + "\">\n"; xxx +=
-	 * "    <attribute:name>" + a.name + "</attribute:name>\n"; xxx +=
-	 * "    <attribute:source rdf:resource=\"" + prefix + a.source.string +
-	 * "\"/>\n"; xxx += "    <attribute:type>" + a.target.toString() +
-	 * "</attribute:type>\n"; xxx += "</rdf:Description>\n"; xxx += "\n"; } xxx
-	 * += "\n"; for (Edge a : thesig.edges) { xxx +=
-	 * "<rdf:Description rdf:about=\"" + prefix + a.name + "\">\n"; xxx +=
-	 * "    <arrow:name>" + a.name + "</arrow:name>\n"; xxx +=
-	 * "    <arrow:source rdf:resource=\"" + prefix + a.source.string +
-	 * "\"/>\n"; xxx += "    <arrow:target rdf:resource=\"" + prefix +
-	 * a.target.string + "\"/>\n"; xxx += "</rdf:Description>\n"; xxx += "\n"; }
-	 * xxx += "\n"; for (Node n : thesig.nodes) { Set<Pair<Object, Object>> ids
-	 * = data.get(n.string); for (Pair<Object, Object> idX : ids) { Object id =
-	 * idX.first; xxx += "<rdf:Description rdf:about=\"" + prefix + id +
-	 * "\">\n"; xxx += "    <node:value rdf:resource=\"" + prefix + n.string +
-	 * "\"/>\n"; for (Attribute<Node> a : thesig.attrsFor(n)) { xxx +=
-	 * "    <attribute:value rdf:resource=\""+ prefix + a.name +"\">" +
-	 * lookupX(data.get(a.name), id) + "</attribute:value>\n"; } for (Edge a :
-	 * thesig.edges) { if (!a.source.equals(n)) { continue; } xxx +=
-	 * "    <arrow:value rdf:resource=\""+ prefix + a.name +"\">" +
-	 * lookupX(data.get(a.name), id) + "</arrow:value>\n"; } xxx +=
-	 * "</rdf:Description>\n\n"; } xxx += "\n"; }
-	 * 
-	 * String ret = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-	 * "\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"" +
-	 * "\n    xmlns:node=\"http://categoricaldata.net/fql/node\"" +
-	 * "\n    xmlns:arrow=\"http://categoricaldata.net/fql/arrow\"" +
-	 * "\n    xmlns:attribute=\"http://categoricaldata.net/fql/attribute\">\n\n"
-	 * + xxx + "</rdf:RDF>"; /* <rdf:Description
-	 * rdf:about="http://en.wikipedia.org/wiki/Oxford">
-	 * <dc:title>Oxford</dc:title> <dc:coverage>Oxfordshire</dc:coverage>
-	 * <dc:publisher>Wikipedia</dc:publisher>
-	 * <region:population>10000</region:population> <region:principaltown
-	 * rdf:resource="http://www.country-regions.fake/oxford"/>
-	 * </rdf:Description>
-	 * 
-	 * </rdf:RDF> return ret; }
-	 */
 
 	private static Object lookupX(Set<Pair<Object, Object>> set, Object id) {
 		for (Pair<Object, Object> k : set) {
@@ -1163,16 +895,9 @@ public class Instance {
 		JTextArea ta = new JTextArea(rdfX(name));
 		JPanel tap = new JPanel(new GridLayout(1, 1));
 		ta.setBorder(BorderFactory.createEmptyBorder());
-		//
 		tap.setBorder(BorderFactory.createEmptyBorder());
-		// ta.setWrapStyleWord(true);
-		// ta.setLineWrap(true);
 		JScrollPane xxx = new JScrollPane(ta);
-		// xxx.setBorder(BorderFactory.createEmptyBorder());
-		//
 		tap.add(xxx);
-		// tap.setSize(600, 600);
-
 		return tap;
 	}
 
@@ -1265,14 +990,6 @@ public class Instance {
 
 			return s;
 		}
-	}
-
-	public static void printnice(int[] x) {
-		for (int i = 0; i < x.length; i++) {
-			System.out.print(x[i]);
-			System.out.print(" ");
-		}
-		System.out.println();
 	}
 
 	private static int[] makeSizes(List<String> keys,
@@ -1400,10 +1117,6 @@ public class Instance {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JPanel doView(
 	 final Color clr, Graph<String, String> sgv) {
-		// Layout<V, E>, BasicVisualizationServer<V,E>
-		// Layout<String, String> layout = new KKLayout(sgv);
-
-		// Layout<String, String> layout = new FRLayout(sgv);
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix
 					+ NEWDEBUG.debug.fql.inst_graph);
@@ -1411,15 +1124,8 @@ public class Instance {
 			final Layout<String, String> layout = (Layout<String, String>) x
 					.newInstance(sgv);
 
-			// Layout<String, String> layout = new ISOMLayout<String,
-			// String>(sgv);
-			// Layout<String, String> layout = new CircleLayout<>(sgv);
-			//layout.setSize(new Dimension(600, 400));
 			final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
 					layout);
-			//vv.setPreferredSize(new Dimension(600, 400));
-			// vv.getRenderContext().setEdgeLabelRerderer(new MyEdgeT());
-			// Setup up a new vertex to paint transformer...
 			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
 				public Paint transform(String i) {
 					if (thesig.isAttribute(i)) {
@@ -1427,33 +1133,12 @@ public class Instance {
 					} else {
 						return clr;
 					}
-					// return color;
 				}
 			};
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-			// gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
-			// gm.add(new AnnotatingGraphMousePlugin(vv.getRenderContext()) {
-			//
-			//
-			//
-			// }.);
-
-			// Set up a new stroke Transformer for the edges
-			// float dash[] = { 10.0f };
-			// final Stroke edgeStroke = new BasicStroke(1.0f,
-			// BasicStroke.CAP_BUTT,
-			// BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
-			// Transformer<String, Stroke> edgeStrokeTransformer = new
-			// Transformer<String, Stroke>() {
-			// public Stroke transform(String s) {
-			// return edgeStroke;
-			// }
-			// };
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-			// vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
-			// vv.getRenderContext().setVertexLabelRenderer(new MyVertexT());
 			vv.getRenderContext().setVertexLabelTransformer(new Transformer() {
 
 				@Override
@@ -1484,7 +1169,6 @@ public class Instance {
 						cards.show(vwr, "domain of " + str);
 
 					}
-					// yyy.setSelectedValue(indices.get(str), true);
 				}
 
 			});
@@ -1498,19 +1182,10 @@ public class Instance {
 					vv.getPickedVertexState().clear();
 					String str = ((String) e.getItem());
 					prejoin();
-					// System.out.println("trying to show " + str);
 					cards.show(vwr, str);
-					// yyy.setSelectedValue(indices.get(str), true);
 				}
 
 			});
-			// new MyEdgeT()); // {
-
-			// vv.getRenderContext().setEdgeLabelTransformer(new
-			// MyEdgeT2(vv.getPickedEdgeState()));
-			// vv.getRenderContext().setVertexLabelTransformer(new
-			// MyVertexT(vv.getPickedVertexState()));
-			// vv.getRenderer().getVertexRenderer().
 			vv.getRenderContext().setLabelOffset(20);
 			vv.getRenderContext().setEdgeLabelTransformer(new Transformer() {
 
@@ -1524,19 +1199,11 @@ public class Instance {
 				}
 
 			});
-			// vv.getRenderContext().getEdgeLabelRenderer().
-			// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
-
+		
 			float dash[] = { 1.0f };
 			final Stroke edgeStroke = new BasicStroke(0.5f,
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
-			// Transformer<String, Stroke> edgeStrokeTransformer = new
-			// Transformer<String, Stroke>() {
-			// public Stroke transform(String s) {
-			// return edgeStroke;
-			// }
-			// };
 			final Stroke bs = new BasicStroke();
 			Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
 				public Stroke transform(String s) {
@@ -1547,38 +1214,20 @@ public class Instance {
 				}
 			};
 
-			// vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 			vv.getRenderContext().setEdgeStrokeTransformer(
 					edgeStrokeTransformer);
 			vv.getRenderContext().setVertexLabelTransformer(
 					new ToStringLabeller<String>());
 
 			final GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
-			// JPanel ret = new JPanel(new GridLayout(1,1));
-			// ret.add(zzz);
-			// ret.setBorder(BorderFactory.createEtchedBorder());
-
+		
 			JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-			newthing.setResizeWeight(.8d); // setDividerLocation(.9d);
+			newthing.setResizeWeight(.8d); 
 			newthing.add(zzz);
 			newthing.add(vwr);
 			final JPanel xxx = new JPanel(new GridLayout(1, 1));
 			xxx.add(newthing);
-		/*	zzz.addComponentListener(new ComponentListener() {
-			    public void componentResized(ComponentEvent e) {
-			    	Dimension d = (Dimension) zzz.getSize();
-			    	d.setSize(d.width - 100, d.height - 100);
-			            layout.setSize(d);
-			    }
-				@Override
-				public void componentMoved(ComponentEvent e) { }
-				@Override
-				public void componentShown(ComponentEvent e) { }
-				@Override
-				public void componentHidden(ComponentEvent e) { }
-			}); */
-	            layout.setSize(new Dimension(400,400));
-			// xxx.setMaximumSize(new Dimension(400,400));
+		    layout.setSize(new Dimension(400,400));
 			return xxx;
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -1586,147 +1235,6 @@ public class Instance {
 		}
 	}
 
-	/*
-	 * private class MyVertexT implements VertexLabelRenderer {
-	 * 
-	 * public MyVertexT() { }
-	 * 
-	 * @Override public <T> Component getVertexLabelRendererComponent(JComponent
-	 * arg0, Object arg1, Font arg2, boolean arg3, T arg4) { if (arg3) {
-	 * prejoin();
-	 * 
-	 * cards.show(vwr, (String) arg4);
-	 * 
-	 * String s = (String) arg4; if (thesig.isAttribute(s)) { s =
-	 * thesig.getTypeLabel(s); } return new JLabel(s);
-	 * 
-	 * // JTable t = joined.get(arg4); // // JPanel p = new JPanel(new
-	 * GridLayout(1,1)); // //p.add(t); // p.add(new JScrollPane(t)); // //
-	 * p.setMaximumSize(new Dimension(200,200)); //
-	 * p.setBorder(BorderFactory.createTitledBorder
-	 * (BorderFactory.createEmptyBorder(), // (String)arg4)); // // // // JPanel
-	 * p = new JPanel(new GridLayout(1,1)); // // p.add(new
-	 * JScrollPane(joined.get(arg4))); // // p.setMaximumSize(new
-	 * Dimension(100,100)); // // p.setPreferredSize(new Dimension(100,100)); //
-	 * // p.setSize(new Dimension(100,100)); // return p; } else { String s =
-	 * (String) arg4; if (thesig.isAttribute(s)) { s = thesig.getTypeLabel(s); }
-	 * return new JLabel(s); } } }
-	 */
-
-	// private class MyEdgeT extends DefaultEdgeLabelRenderer {
-	// // private final PickedInfo<String> pi;
-	//
-	// public MyEdgeT(){
-	// super(Color.GRAY, false);
-	// // this.pi = pi;
-	// }
-	//
-	// @Override
-	// public <T> Component getEdgeLabelRendererComponent(
-	// JComponent arg0, Object arg1, Font arg2, boolean arg3,
-	// T arg4) {
-	// // if (true) throw new RuntimeException();
-	// if (arg3) {
-	// // if (pi.isPicked((String) arg4)) {
-	// Vector<String> ld = new Vector<>();
-	//
-	// Set<Pair<String, String>> table = data.get(arg4);
-	//
-	//
-	// String s = (String) arg4;
-	// boolean b = false;
-	// s += " = ";
-	// for (Pair<String, String> x : table) {
-	// if (b) {
-	// s += ", ";
-	// }
-	// b = true;
-	// s += x.first;
-	// ld.add(x.first);
-	// }
-	// JList<String> jl = new JList<>(ld);
-	// JPanel p = new JPanel(new GridLayout(1,1));
-	// p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(),
-	// (String) arg4));
-	// p.add(new JScrollPane(jl));
-	// // p.add(jl);
-	//
-	// // JLabel x = new JLabel(s);
-	// // x.setFont(new Font("Arial", 8, Font.PLAIN));
-	// // return x;
-	// // return new JTextArea(s);
-	// // return p;
-	// return new JLabel("ZZZZ");
-	// }
-	// else {
-	// return new JLabel("HHHH");
-	// // return new JLabel("ZZZZZ" + (String)arg4);
-	// }
-	// }
-	//
-	// boolean b = false;
-	// @Override
-	// public boolean isRotateEdgeLabels() {
-	// return b;
-	// }
-	//
-	// @Override
-	// public void setRotateEdgeLabels(boolean arg0) {
-	// this.b = arg0;
-	// }
-	// }
-	//
-	// private class MyEdgeT2 implements Transformer<String,String>{
-	// private final PickedInfo<String> pi;
-	//
-	// public MyEdgeT2( PickedInfo<String> pi ){
-	// this.pi = pi;
-	// }
-	//
-	// @Override
-	// public String transform(String t) {
-	// if (pi.isPicked(t)) {
-	// Set<Pair<String, String>> table = data.get(t);
-	//
-	// String s = t;
-	// boolean b = false;
-	// s += " = ";
-	// for (Pair<String, String> x : table) {
-	// if (b) {
-	// s += ", ";
-	// }
-	// b = true;
-	// s += x.first;
-	// s += " -> ";
-	// s += x.second;
-	// }
-	// // JLabel x = new JLabel(s);
-	// // x.setFont(new Font("Arial", 8, Font.PLAIN));
-	// // return x;
-	// return s;
-	//
-	// }
-	// else {
-	// return t;
-	// }
-	// }
-	// }
-
-	// private static List<Pair<String,String>> dupl(Map<String, String> map) {
-	// List<Pair<String,String>> ret = new LinkedList<Pair<String,String>>();
-	// for (String k : map.keySet()) {
-	// ret.add(new Pair<>(k,map.get(k)));
-	// }
-	// return ret;
-	// }
-	//
-	// private static List<Pair<String,String>> dupl(Set<String> set) {
-	// List<Pair<String,String>> ret = new LinkedList<Pair<String,String>>();
-	// for (String s : set) {
-	// ret.add(new Pair<>(s,s));
-	// }
-	// return ret;
-	// }
 
 	public static Instance terminal(Signature s, String init)
 			throws FQLException {
@@ -1736,8 +1244,6 @@ public class Instance {
 		String g = init;
 		Map<Node, String> map = new HashMap<>();
 		for (Node node : s.nodes) {
-			// System.out.println("i is" + i);
-			// System.out.println("g is" + g);
 			List<Pair<Object, Object>> tuples = new LinkedList<>();
 
 			if (init == null) {
@@ -1757,7 +1263,6 @@ public class Instance {
 			ret.add(new Pair<>(e.name, tuples));
 		}
 
-		// return null;
 		return new Instance(s, ret);
 	}
 
@@ -1788,33 +1293,6 @@ public class Instance {
 
 		return new Inst<Node, Path, Object, Object>(objM, arrM, cat);
 	}
-
-	// public Inst<String, List<List<String>>, String, String> toFunctor()
-	// throws FQLException {
-	// FinCat<String, List<List<String>>> cat = thesig.toCategory().first;
-	//
-	// Map<String, Set<Value<String, String>>> objM = new HashMap<>();
-	// for (String obj : cat.objects) {
-	// objM.put(obj, conv(data.get(obj)));
-	// }
-	//
-	// Map<Arr<String, List<List<String>>>, Map<Value<String, String>,
-	// Value<String, String>>> arrM = new HashMap<>();
-	// for (Arr<String, List<List<String>>> arr : cat.arrows) {
-	// List<String> es = arr.arr.get(0);
-	//
-	// String h = es.get(0);
-	// Set<Pair<String, String>> h0 = data.get(h);
-	// for (int i = 1; i < es.size(); i++) {
-	// h0 = compose(h0, data.get(es.get(i)));
-	// }
-	// Map<Value<String, String>, Value<String, String>> xxx = FDM.degraph(h0);
-	// arrM.put(arr, xxx);
-	// }
-	//
-	// return new Inst<String, List<List<String>>, String, String>(objM, arrM,
-	// cat);
-	// }
 
 	private Set<Value<Object, Object>> conv(Set<Pair<Object, Object>> set) {
 		Set<Value<Object, Object>> ret = new HashSet<>();
@@ -1977,77 +1455,7 @@ public class Instance {
 		return ret;
 	}
 
-	/*
-	 * public JPanel observables() {
-	 * 
-	 * JTabbedPane t = new JTabbedPane();
-	 * 
-	 * String name = "obsinput"; // dont use 'input' here - it conflicts
-	 * Map<String, Set<Map<Object, Object>>> state = shred(name); //
-	 * System.out.println(state); try { if (thesig.attrs.size() == 0) { throw
-	 * new FQLException( "Cannot generate observables - no attributes"); }
-	 * 
-	 * List<PSM> prog = (PSMGen.makeTables("output", thesig, false));
-	 * 
-	 * Pair<Map<Node, List<String>>, List<PSM>> xxx = Relationalizer
-	 * .compile(thesig, "output", name); prog.addAll(xxx.second); Map<String,
-	 * Set<Map<Object, Object>>> res = new PSMInterp() .interpX(prog, state);
-	 * 
-	 * for (Node n : thesig.nodes) { t.addTab(n.string,
-	 * makePanel(xxx.first.get(n), res, n)); } JPanel ret = new JPanel(new
-	 * GridLayout(1, 1)); ret.add(t);
-	 * ret.setBorder(BorderFactory.createEtchedBorder()); return ret;
-	 * 
-	 * } catch (Throwable e) { JPanel ret = new JPanel(new GridLayout(1, 1));
-	 * JTextArea a = new JTextArea(e.getMessage()); ret.add(new JScrollPane(a));
-	 * return ret; } // } catch (Throwable tt) { //
-	 * JOptionPane.showMessageDialog(null, tt.getLocalizedMessage()); // JPanel
-	 * ret = new JPanel(new GridLayout(1,1)); // JTextArea a = new
-	 * JTextArea(tt.getMessage()); // ret.add(new JScrollPane(a)); // return
-	 * ret; // } }
-	 * 
-	 * private JPanel makePanel(List<String> attrs, Map<String, Set<Map<Object,
-	 * Object>>> res, Node n) { try { // System.out.println("********"); //
-	 * System.out.println(res); // JPanel ret = new JPanel(new GridLayout(1,
-	 * 1)); Object[] colNames = new Object[attrs.size() + 1]; int x = 1;
-	 * colNames[0] = "ID"; for (String s : attrs) { colNames[x++] = s; }
-	 * Object[][] rows = new Object[data.get(n.string).size()][attrs .size() +
-	 * 1];
-	 * 
-	 * int j = 0; for (Map<Object, Object> row : res.get("output_" + n.string +
-	 * "_observables")) { for (int i = 0; i < attrs.size(); i++) { rows[j][i +
-	 * 1] = row.get("c" + i); } rows[j][0] = row.get("id"); j++; }
-	 * 
-	 * JTable table = new JTable(rows, colNames); TableRowSorter<?> sorter = new
-	 * MyTableRowSorter(table.getModel());
-	 * 
-	 * table.setRowSorter(sorter); sorter.allRowsChanged();
-	 * sorter.toggleSortOrder(0);
-	 * 
-	 * ret.add(new JScrollPane(table));
-	 * 
-	 * String str = data.get(n.string).size() + " IDs, " + res.get("output_" +
-	 * n.string + "_observables_proj") .size() +
-	 * " unique attribute combinations";
-	 * ret.setBorder(BorderFactory.createTitledBorder(
-	 * BorderFactory.createEmptyBorder(), str));
-	 * 
-	 * return ret;
-	 * 
-	 * } catch (Throwable e) { e.printStackTrace(); return new JPanel(); }
-	 * 
-	 * }
-	 * 
-	 * private Map<String, Set<Map<Object, Object>>> shred(String pre) {
-	 * Map<String, Set<Map<Object, Object>>> ret = new HashMap<>(); for (String
-	 * k : data.keySet()) { ret.put(pre + "_" + k, shred0(data.get(k))); }
-	 * return ret; }
-	 * 
-	 * private Set<Map<Object, Object>> shred0(Set<Pair<Object, Object>> set) {
-	 * Set<Map<Object, Object>> ret = new HashSet<>(); for (Pair<Object, Object>
-	 * p : set) { Map<Object, Object> m = new HashMap<>(); m.put("c0", p.first);
-	 * m.put("c1", p.second); ret.add(m); } return ret; }
-	 */
+	
 	/**
 	 * Quickly compares two instances by checking the counts of tuples in all
 	 * the rows.
@@ -2068,7 +1476,6 @@ public class Instance {
 			}
 		}
 		return true;
-		// return l;
 	}
 
 	public static Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> prod(
@@ -2103,21 +1510,9 @@ public class Instance {
 			}
 			d.put(e.name, s);
 		}
-		// System.out.println("d" + d);
 		Instance K = new Instance(I.thesig, d);
 		return new Triple<>(K, m1, m2);
 	}
-
-	/*
-	 * Signature untyped_sig = new Signature(I.thesig.nodes, I.thesig.edges, new
-	 * LinkedList<Attribute<Node>>(), I.thesig.eqs);
-	 * 
-	 * Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>,
-	 * Object>>> obsbar = I.thesig.obsbar(); for (Node n : I.thesig.nodes) {
-	 * System.out.println("nnnnn " + n); for (LinkedHashMap<Pair<Arr<Node,
-	 * Path>, Attribute<Node>>, Object> w : obsbar.get(n)) { Instance Iw =
-	 * I.omega(n, w, idx);  } }
-	 */
 
 	public static Quad<Instance, Map<Pair<Node, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>, Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>>>, Map<Node, Map<Object, Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>>>, Map<Node, Map<Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>, Object>>> exp2(
 			IntRef idx, Instance J, Instance I) throws FQLException {
@@ -2185,10 +1580,6 @@ public class Instance {
 				}
 				Transform f = new Transform(Iw0.first, Iw.first, tbd);
 			
-				// (- o f) : I_wf -> I_w
-				// k0.second : I_w -> J
-				// need t : I_wf -> J
-				// 
 				Transform t = Transform.composeX(f, k0.second);
 				Object u = map2.get(e.target).get(new Pair<>(w0, t));
 				d.add(new Pair<>(k.first, u));
@@ -2202,7 +1593,6 @@ public class Instance {
 	// untyped
 	public static Quad<Instance, Map<Node, Map<Object, Transform>>, Map<Node, Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>>>, Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>> exp(
 			IntRef idx, Instance J, Instance I) throws FQLException {
-		// System.out.println("*** " + Inst.hom(I, J).size());
 		if (!J.thesig.equals(I.thesig)) {
 			throw new RuntimeException();
 		}
@@ -2267,10 +1657,7 @@ public class Instance {
 		List<Instance> ret = new LinkedList<>();
 
 		List<Pair<Object, Object>> ids = ids();
-		// List<Boolean> tf = new LinkedList<>();
-		// tf.add(true);
-		// tf.add(false);
-
+	
 		List<LinkedHashMap<Pair<Object, Object>, Boolean>> subsets = Inst
 				.homomorphs(ids, tf);
 		for (LinkedHashMap<Pair<Object, Object>, Boolean> subset : subsets) {
@@ -2279,12 +1666,6 @@ public class Instance {
 			} catch (FQLException fe) {
 			}
 		}
-		// System.out.println("tf " + tf);
-		// System.out.println("subinstances for " + this);
-		// System.out.println("Correct answer: " + ret.size());
-		// System.out.println("Correct answer: " + ret);
-		// List<Instance> uuu = subInstances_fast();
-		// System.out.println("New answer: " + uuu);
 		return ret;
 	}
 
@@ -2293,21 +1674,16 @@ public class Instance {
 	public static Set<Map<String, Set<Pair<Object, Object>>>> subInstances_fast0(
 			Signature sig, List<Node> list,
 			Map<String, Set<Pair<Object, Object>>> inst) {
-		// System.out.println("Called on " + list + " and " + inst);
 		Set<Map<String, Set<Pair<Object, Object>>>> ret = new HashSet<>();
 		if (list.size() == 0) {
 			ret.add(inst);
-			// System.out.println("bottom out with " + inst);
 			return ret;
 		}
 		List<Node> rest = new LinkedList<>(list);
 		Node n = rest.remove(0);
 		List<LinkedHashMap<Object, Boolean>> subsets = Inst.homomorphs(
 				toList(inst.get(n.string)), tf);
-		// Map<LinkedHashMap<Object, Boolean>, Map<String, Set<Pair<Object,
-		// Object>>>> cur = new HashMap<>();
 		for (LinkedHashMap<Object, Boolean> subset : subsets) {
-			// System.out.println("doing subset " + subset);
 			Map<String, Set<Pair<Object, Object>>> j = recDel(sig, n, inst,
 					subset);
 			if (rest.size() == 0) {
@@ -2318,9 +1694,7 @@ public class Instance {
 				ret.addAll(h);
 			}
 		}
-		// System.out.println("returning " + ret);
-		// System.out.println("New answer: " + ret.size());
-
+	
 		return ret;
 	}
 
@@ -2360,13 +1734,7 @@ public class Instance {
 				it.remove();
 			}
 		}
-	} /*
-	 * private static Set<Object> clear(Set<Pair<Object, Object>> set, Object o)
-	 * { Iterator<Pair<Object, Object>> it = set.iterator(); Set<Object> ret =
-	 * new HashSet<>(); while (it.hasNext()) { Pair<Object, Object> kkk =
-	 * it.next(); if (kkk.first.equals(o)) { it.remove(); ret.add(kkk.second); }
-	 * } return ret; }
-	 */
+	} 
 
 	private static Set<Object> clearX(Set<Pair<Object, Object>> set, Object o) {
 		Iterator<Pair<Object, Object>> it = set.iterator();
@@ -2384,8 +1752,6 @@ public class Instance {
 	private static Map<String, Set<Pair<Object, Object>>> recDel(Signature sig,
 			Node init, Map<String, Set<Pair<Object, Object>>> inst,
 			LinkedHashMap<Object, Boolean> del0) {
-		// System.out.println("recursive delete on " + init + " with " + del0 +
-		// " against " + inst);
 		Map<String, Set<Pair<Object, Object>>> ret = copyMap(inst);
 		Map<Node, Set<Object>> del = new HashMap<>();
 		for (Node node : sig.nodes) {
@@ -2401,36 +1767,21 @@ public class Instance {
 		for (;;) {
 			Pair<Node, Object> toDel = pick(del); // removes in place
 			if (toDel == null) {
-				// System.out.println("del fin " + ret);
 				return ret;
 			}
 			Node n = toDel.first;
 			Object kill = toDel.second;
-			// System.out.println("killing ID " + kill + " on table " + n);
 			// delete from n, and clear attrs
 			remove(ret.get(n.string), kill);
 			for (Attribute<Node> a : sig.attrsFor(n)) {
 				remove(ret.get(a.name), kill);
 			}
-			// System.out.println("after remove from node and attrs " + ret);
 			for (Edge e : sig.edgesFrom(n)) {
 				remove(ret.get(e.name), kill);
-				// Set<Object> cleared = clear(ret.get(e.name), kill); //returns
-				// elements that deleted mapped to
-				// del.get(e.target).addAll(cleared);
-				// System.out.println("cleared from " + e + " now " + ret +
-				// ", toDel now " + del);
 			}
 			for (Edge e : sig.edgesTo(n)) {
-				Set<Object> cleared = clearX(ret.get(e.name), kill); // returns
-																		// elements
-																		// that
-																		// deleted
-																		// mapped
-																		// to
+				Set<Object> cleared = clearX(ret.get(e.name), kill); 
 				del.get(e.source).addAll(cleared);
-				// System.out.println("cleared from " + e + " now " + ret +
-				// ", toDel now " + del);
 			}
 		}
 	}
@@ -2503,12 +1854,6 @@ public class Instance {
 		return ret;
 	}
 
-	/*
-	 * J^I(c) = Union_{w in barObs(c)} Hom(I_w,J) where I_w(d)=Union_{p:c -> d}
-	 * {y in I(d) | forall a in Obs(d) w(p.a)=y(a)}.
-	 * 
-	 * I_w(d)=Union_{p:c -> d} {y in I(d) | truncate(w,p) = flag(y) }.
-	 */
 	// must also return map, take in intref
 	public Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>> omega(Node c,
 			LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> w,

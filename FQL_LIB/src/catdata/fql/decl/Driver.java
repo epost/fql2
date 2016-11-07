@@ -211,9 +211,7 @@ public class Driver {
 			}
 		}
 
-//		System.out.println("before " + prog);
 		prog = rewriteQueries(prog);
-//		System.out.println("after " + prog);
 
 		toUpdate[0] = "SQL generation complete, executing.";
 
@@ -221,9 +219,7 @@ public class Driver {
 				.run(prog);
 		
 		toUpdate[0] = "SQL Execution Complete";
-
-		//System.out.println(res.first);
-		
+	
 		exns.addAll(res.third);
 		for (String k : prog.insts.keySet()) {
 			try {
@@ -411,7 +407,6 @@ public class Driver {
 			if (v instanceof InstExp.FullSigma) {
 				InstExp.FullSigma v0 = (InstExp.FullSigma) v;
 				Instance x = Chase.sigma(v0.F.toMap(prog), insts.get(v0.I));
-				//System.out.println(x);
 				if (!Instance.quickCompare(x, insts.get(k))) {
 					throw new RuntimeException(
 							"Bad sigma ED compare: ED gives\n\n" + x
@@ -430,9 +425,6 @@ public class Driver {
 			if (v instanceof InstExp.Delta) {
 				InstExp.Delta v0 = (InstExp.Delta) v;
 				Instance x = Chase.delta(v0.F.toMap(prog), insts.get(v0.I));
-			//	System.out.println(x);
-				// Instance x = Chase.sigmaDirect(KIND.STANDARD,
-				// v0.F.toMap(prog), insts.get(v0.I));
 				if (!Instance.quickCompare(x, insts.get(k))) {
 					throw new RuntimeException(
 							"Bad sigma ED compare: ED gives\n\n" + x

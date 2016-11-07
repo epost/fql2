@@ -279,10 +279,6 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		Const fst = new MapExp.Const(a_objs, a_attrs, a_edges, sig, a);
 		Const snd = new MapExp.Const(b_objs, b_attrs, b_edges, sig, b);
 
-		// System.out.println(sig);
-		// System.out.println("fst" + fst);
-		// System.out.println("snd" + snd);
-
 		Fn<Triple<SigExp.Const, MapExp.Const, MapExp.Const>, MapExp.Const> pair = new Fn<Triple<SigExp.Const, MapExp.Const, MapExp.Const>, MapExp.Const>() {
 			@Override
 			public Const of(Triple<catdata.fql.decl.SigExp.Const, Const, Const> x) {
@@ -324,33 +320,23 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 					String gcN = gc.get(0);
 					String node_start = node_map.get(new Pair<>(fcN, gcN));
 					ret.add(node_start);
-					// System.out.println("edge map 1 is " + edge_map_1);
-					// System.out.println("edge map 2 is " + edge_map_2);
 					for (int i = 1; i < fc.size(); i++) {
 						String fcE = fc.get(i);
 						Pair<String, String> p = new Pair<>(fcE, gcN);
-						// System.out.println("trying " + p);
 						String v = edge_map_1.get(p);
-						// System.out.println("result " + v);
 						ret.add(v);
 					}
 					node_start = lookup(edge_c.third, f.objs);
 
-					// System.out.println("last is " + node_start);
-					// String last = node_map.get(lookup3(fc.get(fc.size() - 1),
-					// a.arrows).third);
-					for (int i = 1; i < gc.size(); i++) {
+						for (int i = 1; i < gc.size(); i++) {
 						String gcE = gc.get(i);
 						Pair<String, String> p = new Pair<>(gcE, node_start);
-						// System.out.println("xtrying " + p);
 						String v = edge_map_2.get(p);
-						// System.out.println("xresult " + v);
 						ret.add(v);
 					}
 					arrows.add(new Pair<>(edge_c.first, ret));
 				}
 				Const ret = new Const(objs, attrs, arrows, c, sig);
-				// System.out.println("retconst " + ret);
 				return ret;
 			}
 		};
@@ -525,12 +511,6 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		}
 		throw new RuntimeException();
 	}
-
-	/*
-	 * private static <A, B, C> Triple<A,B,C> lookup3(A a, List<Triple<A, B, C>>
-	 * l) { for (Triple<A, B, C> k : l) { if (k.first.equals(a)) { return k; } }
-	 * throw new RuntimeException("Cannot find " + a + " in " + l); }
-	 */
 
 	// /////////////////////////////////////
 
@@ -725,18 +705,13 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 				Node n0 = f.nm.get(new Node(n2));
 				nm.add(new Pair<>(n, n0.string));
 			}
-			// System.out.println(nm);
-
+		
 			List<Pair<String, List<String>>> arrows = new LinkedList<>();
 
 			// Map<String, Path> pm = new HashMap<>();
 			for (Triple<String, String, String> n : AeBtB.arrows) {
-				// System.out.println("arrow is " + n);
 				List<String> n1 = lookup(n.first, AeBtB_stuff.second.arrows);
 				List<String> n2 = lookup(n.first, AeBtB_stuff.third.arrows);
-
-				// System.out.println("n1 " + n1);
-				// System.out.println("n2 " + n1);
 
 				// the path n1 corresponds to a morphism in the fincat
 				Mapping init = AeB_stuff.second.second.get(n1.get(0));
@@ -745,16 +720,12 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 					String s = n1.get(i);
 					nt = cat.compose(nt, AeB_stuff.third.second.get(s)); // nt
 				}
-				// System.out.println("nt " + nt);
 
 				Path j = nt.dst.appy(Asig, new Path(Bsig, n2));
-				// System.out.println("j " + j.toLong());
 
 				Path y = nt.arr.get(new Node(n2.get(0)));
-				// System.out.println("y " + y.toLong());
 
 				Path o = Path.append(Asig, y, j);
-				// System.out.println("o " + o);
 
 				arrows.add(new Pair<>(n.first, o.asList()));
 			}
@@ -829,15 +800,11 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 				List<String> l = new LinkedList<>();
 				l.add(CB_stuff.second.first.get(s));
 				Arr<Mapping, Map<Node, Path>> arr = new Arr<>(nt, s, t);
-				//System.out.println("looking for " + arr + " in " + CB_stuff.third.first);
 				if (null != CB_stuff.third.first.get(arr)) {
 					l.add(CB_stuff.third.first.get(arr));
 				}
 				amret.add(new Pair<>(a.first, l));
 			}
-
-			
-			//System.out.println(nmret);
 
 			List<Pair<String, String>> attrs = new LinkedList<>();
 			// A*B -> C
@@ -869,15 +836,10 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 			nm.add(new Pair<>(b, lookup(ab, F.objs)));
 		}
 		for (Triple<String, String, String> b : B.arrows) {
-		//	System.out.println(maps.fourth);
-		//	System.out.println(a);
-		//	System.out.println(b.first);
 			String i = maps.fourth.get(new Pair<>(b.first, a));
 			List<String> j = lookup(i, F.arrows);
 			em.add(new Pair<>(b.first, j));
 		}
-//	System.out.println(nm);
-//	System.out.println(em);
 		Mapping m = new Mapping(Bsig, Csig, nm, am, em);
 		return m;
 	}

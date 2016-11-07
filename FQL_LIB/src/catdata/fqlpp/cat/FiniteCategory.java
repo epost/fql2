@@ -33,7 +33,6 @@ public class FiniteCategory<O, A> extends Category<O, A> {
 		this.targets = targets;
 		this.composition = composition;
 		this.identities = identities;
-		//System.out.println(this);
 		validate();
 	}
 

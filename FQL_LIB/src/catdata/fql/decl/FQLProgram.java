@@ -70,7 +70,6 @@ public class FQLProgram implements Prog {
 		}
 		build = build();
 		build2 = build2();
-		//System.out.println("smap " + smap);
 	}
 	
 	public Map<String, Paint> colorMap2 = new HashMap<>();

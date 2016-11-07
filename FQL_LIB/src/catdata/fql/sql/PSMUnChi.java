@@ -66,7 +66,6 @@ public class PSMUnChi extends PSM {
 				data.put(d.string, dta);
 				data2.add(new Pair<>(d.string, dta2));
 			}
-//			System.out.println(data);
 			for (Edge e : sig.edges) {
 				Set<Pair<Object, Object>> dta = new HashSet<>();
 				for (Pair<Object, Object> k : data.get(e.source.string)) {
@@ -90,8 +89,6 @@ public class PSMUnChi extends PSM {
 			Transform T = new Transform(A, B, data2);
 			PSMGen.shred(pre, A, state);
 			PSMGen.shred(pre + "_trans", T, state);
-		//	System.out.println("shredded " + pre + "_trans");
-			//System.out.println("shredded inst " + A);
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getMessage());

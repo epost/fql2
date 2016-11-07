@@ -52,7 +52,6 @@ public class Pi {
 		}
 		throw new RuntimeException("No col " + q2cols[i] + " in " + q1cols);
 	}
-	//System.out.println("where is " + ret);
 	return raw;
 	}
 
@@ -130,14 +129,9 @@ public class Pi {
 
 		Map<O2, Triple<O2,O1,A2>[]> nodecats = new HashMap<>();
 		Map<O2, Set<Map>> nodetables = new HashMap<>();
-		//System.out.println("************");
 		for (O2 d0 : D.objects()) {
 			Triple<Category<Triple<O2,O1,A2>,Quad<A2,A1,A2,A2>>,Functor<Triple<O2,O1,A2>,Quad<A2,A1,A2,A2>,O2,A2>,Functor<Triple<O2,O1,A2>,Quad<A2,A1,A2,A2>,O1,A1>> B = doComma2(D,C, F, d0);
-			//System.out.println("d0 " + d0);
-			//System.out.println("B " + B);
-//			Set<Map> r = lim(Functor.compose(B.third, inst));
 			Set<Map> r = lim2(Functor.compose(B.third, inst));
-			//System.out.println(Util.print(r));
 			if (r == null) {
 			//	throw new RuntimeException();
 			} else {
@@ -146,9 +140,7 @@ public class Pi {
 			}
 			nodecats.put(d0, cnames(B.first));
 		}
-		//System.out.println("onto arrows");
 		for (A2 s : D.arrows()) {
-		//	System.out.println(s);
 			O2 dA = D.source(s);
 			
 			Set<Map> q1 = nodetables.get(dA);
@@ -167,10 +159,7 @@ public class Pi {
 		}
 
 		Functor<O2,A2,Set,Fn> ret = new Functor<>(F.target, FinSet.FinSet, ret1::get, a -> new Fn<>(ret1.get(F.target.source(a)), ret1.get(F.target.target(a)), ret2.get(a)::get));
-	//	return null;
-		//return new Inst<>(ret1, ret2, D);
 		Triple xxx = new Triple<>(ret, nodetables, nodecats);
-		System.out.println(ret);
 		
 		return xxx;
 	}
@@ -178,10 +167,6 @@ public class Pi {
 	private static  Map project(Set<Map> x, int i, int j) {
 		Map ret = new HashMap();
 		for (Map s : x) {
-/*			if (ret.containsKey(s.get()[i]) && !ret.get(s[i]).equals(s[j])) {
-				throw new RuntimeException("Is not map : " + x + " on " + i
-						+ " and " + j);
-			} */
 			ret.put(s.get(i), s.get(j));
 		}
 		return ret;
@@ -201,28 +186,7 @@ public class Pi {
 	
 	}
 	
-	/* used for naive
-	private static <OA,AA,OB,AB,OC,AC> Set<Map> productN(Functor<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>, Set, Fn> I) {
-		Set<Map> ret = null;
-	//	System.out.println("number of source objects: " + I.source.objects());
-		int x = 0;
-		for (Triple<OA, OB, AC> o : I.source.objects()) {
-		//	System.out.println(x);
-			if (ret == null) {
-				//System.out.println("N2");
-				ret = up(I.applyO(o));
-				continue;
-			}
-//			System.out.println("N3");
-			ret = product(ret, up(I.applyO(o)));
-			x++;
-		}
-		if (ret == null) {
-			throw new RuntimeException("No nodes in N+1ary product " + I
-					+ " and  + objs");
-		}
-		return ret;
-	} */
+	
 	
 	private static Set<Map> product(Set<Map> A, Set<Map> B) {
 		Set<Map> ret = new HashSet<>();
@@ -242,16 +206,7 @@ public class Pi {
 		return ret;
 	}
 
-	/* used for naive
-	private static <Y,X> Set<Map> up(Set<Object> set) {
-		Set<Map> ret = new HashSet<>();
-		for (Object s : set) {
-			Map m = new HashMap();
-			m.put(0, s);
-			ret.add(m);
-		}
-		return ret;
-	} */
+	
 
 	private static <A,B,C,Y> Triple<A,B,C>[] cnames(Category<Triple<A,B,C>,Y> cat) {
 		int m = cat.objects().size();
@@ -275,7 +230,6 @@ public class Pi {
 			m.put(0, new Unit());
 			ret.add(m);
 			return ret;
-			//return null;
 		}
 		
 		Triple<OA, OB, AC>[] cnames = cnames(I.source);
@@ -311,9 +265,7 @@ public class Pi {
 		}
 
 		Flower f = new Flower(select, from, where);
-	//	System.out.println("Flower: " + f);	
 		Set<Map<Object, Object>> uuu = f.eval(state);
-		//System.out.println("result: " + uuu);
 		Set<Map> x0 = unshred(B.objects().size(), uuu);
 		
 		x0 = keygen(x0);
@@ -358,42 +310,7 @@ public class Pi {
 		return ret;
 	}
 
-	//
-	/* naive
-	private static <OA, AA, OB, AB, OC, AC> Set<Map> lim
-	(Functor<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>, Set, Fn> I) {
 	
-		Category<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>> B = I.source;
-		
-		if (B.objects().size() == 0) {
-			return null;
-		}
-		Set<Map> x0 = productN(I);
-		Triple<OA, OB, AC>[] cnames = cnames(I.source);
-
-		for (Quad<AA, AB, AC, AC> e : B.arrows()) {
-			x0 = product(x0, graph(I.applyA(e)));
-			x0 = select(x0, B.objects().size(),     cnamelkp(cnames, B.source(e)));
-			x0 = select(x0, B.objects().size() + 1, cnamelkp(cnames, B.target(e)));
-			x0 = projN (x0, B.objects().size());
-		}
-		
-		//System.out.println("&& " + Util.print(x0));
-		x0 = keygen(x0);
-		return x0;
-	} 
-	
-	private static Set<Map> graph(Fn f) {
-	//	System.out.println(f);
-		Set<Map> ret = new HashSet<>();
-		for (Object o : f.source) {
-			Map m = new HashMap();
-			m.put(0, o);
-			m.put(1, f.apply(o));
-			ret.add(m);
-		}
-		return ret;
-	} */
 	
 	private static <Obj> int cnamelkp(Obj[] cnames, Obj s) {
 		for (int i = 0; i < cnames.length; i++) {
@@ -415,19 +332,7 @@ public class Pi {
 		return ret;
 	}
 	
-	//only keeps first size columns (projection)
-	/* used for naive
-	private static Set<Map> projN(Set<Map> X, int size) {
-		Set<Map> ret = new HashSet<>();
-		for (Map x : X) {
-			Map g =  new HashMap();
-			for (int i = 0; i < size; i++) {
-				g.put(i, x.get(i));
-			}
-			ret.add(g);
-		}
-		return ret;
-	} */
+	
 	
 	//adds ID column
 	private static Set<Map> keygen(Set<Map> x0) {

@@ -74,12 +74,6 @@ public class FullSigmaTrans extends PSM {
 		List<Pair<String, List<Pair<Object, Object>>>> H0 = PSMGen.gather(h, C,
 				state);
 
-	//	System.out.println("trans is " + this);
-	//	System.out.println("H0 is " + H0);
-	//	System.out.println("state is " + state);
-		
-		// List<Pair<String, List<Pair<Object, Object>>>> I0X =
-		// PSMGen.gather(src, D, state);
 		List<Pair<String, List<Pair<Object, Object>>>> J0X = PSMGen.gather(dst,
 				D, state);
 
@@ -111,14 +105,10 @@ public class FullSigmaTrans extends PSM {
 	//		Instance IX = new Instance(D, I0X);
 			Instance JX = new Instance(D, J0X);
 
-		//	Instance temp = new Instance(D, tempI);
-		//	Transform etaJ = new Transform(JX, temp, tempH);
-
-			Instance temp = new Instance(C, tempI);
+		Instance temp = new Instance(C, tempI);
 			Transform etaJ = new Transform(J, temp, tempH);
 
-			Transform HX = Transform.composeX(H, etaJ);
-			
+			Transform HX = Transform.composeX(H, etaJ);		
 
 			//should pass H, but compute etaJ after de-attr.
 			//that way, HX.dst and delta JX have attr IDs in common
@@ -130,8 +120,6 @@ public class FullSigmaTrans extends PSM {
 					.fullSigmaWithAttrs(interp, f, I, HX, JX,
 							interp.sigmas2.get(src));
 			interp.guid = current;
-
-			// System.out.println("state " + state);
 
 			for (Node n : D.nodes) {
 				state.put(pre + "_" + n.string, conv0(xxx.third.get(n)));

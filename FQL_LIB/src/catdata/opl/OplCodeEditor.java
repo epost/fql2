@@ -141,7 +141,6 @@ public class OplCodeEditor extends
 	protected Environment<OplObject> makeEnv(String str, Program<OplExp> init) {
 		last_options = (OplOptions) NEWDEBUG.debug.opl.clone();
 		try {
-			//System.out.println("executing in " + NEWDEBUG.debug.opl);
 			last_env = OplDriver.makeEnv(str, init, toUpdate, last_str,
 					last_prog, last_env);
 			last_prog = init;

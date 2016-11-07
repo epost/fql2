@@ -18,9 +18,7 @@ import catdata.fql.decl.Path;
 import catdata.fql.decl.Signature;
 import catdata.ide.NEWDEBUG;
 
-public class LeftKanCat {
-	
-	
+public class LeftKanCat {	
 
 	private static Mapping subset(Signature a, Signature b) throws FQLException {
 		List<Pair<String, String>> obm = new LinkedList<>();
@@ -38,7 +36,6 @@ public class LeftKanCat {
 		Signature A = sig.onlyObjects();
 		Instance X = A.terminal(null);
 		Mapping F = subset(A, sig);
-//		System.out.println("starting " + sig);
 		LeftKan lk = new LeftKan(0, F, X);
 		if (!lk.compute()) {
 			throw new FQLException(
@@ -50,7 +47,6 @@ public class LeftKanCat {
 
 	private static Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> helper(
 			LeftKan lk, Signature B) throws FQLException {
-//		System.out.println("doing " + B);
 		List<Node> objects = B.nodes;
 
 		Set<Arr<Node, Path>> arrows = new HashSet<>();
@@ -133,8 +129,6 @@ public class LeftKanCat {
 
 		FinCat<Node, Path> r1 = new FinCat<Node, Path>(objects,
 				new LinkedList<>(arrows), composition, identities);
-	//	r1.sig = B;
-//		System.out.println(r1);
 		
 		return new Pair<>(r1, r2);
 	}

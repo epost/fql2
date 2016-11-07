@@ -38,7 +38,6 @@ public class Mapping<O1, A1, O2, A2> implements Serializable {
 	}
 
 	private void validate() {
-//		System.out.println("Validating " + this);
 		for (Signature<O1, A1>.Node n : nm.keySet()) {
 			if (!source.nodes.contains(n)) {
 				throw new RuntimeException("Mapping contains object, " + n + " that is not in source schema " + source);

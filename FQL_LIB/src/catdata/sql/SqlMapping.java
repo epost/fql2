@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import catdata.Pair;
-import catdata.algs.strings.EditDistance;
+import catdata.strings.EditDistance;
 
 public class SqlMapping {
 

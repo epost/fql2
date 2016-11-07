@@ -29,7 +29,6 @@ public class SimpleCreateTable extends PSM {
 	@Override
 	public String toPSM() {
 		if (suppress) {
-			// System.out.println(this);
 			return "";
 		}
 

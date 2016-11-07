@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Triple;
-import catdata.Util;
 import catdata.fpql.XExp.XSuperED;
 import catdata.fpql.XExp.XSuperED.SuperFOED;
 import catdata.fqlpp.cat.FinSet;
@@ -63,7 +62,6 @@ public class XChaser {
 				if (!lt.first.equals("_1")) {
 					throw new RuntimeException("Does not start at 1: " + eq.first);
 				}
-				System.out.println("checking " + lt.second);
 				if (S.ids.contains(lt.second)) {
 					throw new RuntimeException("RHS of -> contains an equality of source entity " + lt);
 				}	
@@ -147,8 +145,6 @@ public class XChaser {
 				typs.put(new Pair(f, gen), new Pair("_1",t));
 			}
 		}
-		System.out.println("gens are " + Util.sep(typs.keySet(), "\n"));
-		System.out.println("eqs are " + Util.sep(eqs, "\n"));
 		return new XCtx(new HashSet<>(), typs , eqs, T.global, T, "instance");
 		
 	}
@@ -163,19 +159,13 @@ public class XChaser {
 			for (LinkedHashMap<C, Triple<C,C,List<C>>> val : vals) {
 			//	List<Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>> 
 			//	lhs_substed = substLhs(ed.lhs, val);
-			//	System.out.println("lhs: " + ed.lhs);
-			//	System.out.println("lhs_substed: " + lhs_substed);
 				for (Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>> rhs : ed.rhs) {
 					Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>
 					rhs_substed = new Pair<>(substLhs0(rhs.first, val), substLhs0(rhs.second, val));
-				//	System.out.println("rhs: " + rhs);
-			//		System.out.println("rhs_substed: " + rhs_substed);
 			
 						if (!triggers(ed.lhs, rhs, val, I, gens, dom)) {
-							System.out.println("NO trigger");
 							continue;
 						} else {
-							System.out.println("YES trigger");
 							if (rhs.first.first != null) {
 								Set<List<Triple<C, C, List<C>>>> set = dom.get(rhs.first.first);
 								List<List<C>> toadd = (List<List<C>>) ((Object)rhs_substed.first.second);

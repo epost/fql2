@@ -76,21 +76,12 @@ public class FDM {
 		
 		for (Arr<Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>, Pair<Arr<ObjD, ArrowD>, Arr<ObjC, ArrowC>>> e : B.arrows) {
 			x0 = product(x0, graph(I.applyA(e)));
-			// System.out.println("after prod " + pn(x0));
-			// System.out.println("selecting col " + m + " and " +
-			// cnames.get(B.src(e)));
 			x0 = select(x0, m, cnamelkp(cnames, e.src));
-			// System.out.println("after select1 " + pn(x0));
 			x0 = select(x0, m + 1, cnamelkp(cnames, e.dst));
-			// System.out.println("after select2 " + pn(x0));
 			x0 = firstM(x0, B.objects.size());
-			// System.out.println("after firstM " + pn(x0));
-
 		}
-		// System.out.println("after arrow processing " + pn(x0));
-
+		
 		x0 = keygen(x0);
-//		 System.out.println("after keygen " + pn(x0));
 		return x0;
 	}
 
@@ -111,7 +102,6 @@ public class FDM {
 		Set<X[]> ret = new HashSet<>();
 		for (X[] tuple : i) {
 			if (tuple[m] instanceof Value) {
-			//	System.out.println("here");
 				if (((Value)(tuple[m])).which != ((Value)(tuple[n])).which) {
 					throw new RuntimeException();
 				}
@@ -194,16 +184,7 @@ public class FDM {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <ObjC, ArrowC, ObjD, ArrowD, Y, X> Inst<ObjD, ArrowD, Y, X> 
-	pi(
-			FinFunctor<ObjC, ArrowC, ObjD, ArrowD> F, Inst<ObjC, ArrowC, Y, X> inst)
-			throws FQLException {
-		
-//		System.out.println("problematic pi");
-//		System.out.println("src cat " + F.srcCat);
-//		System.out.println("src cat " + F.dstCat);
-//		System.out.println(F);
-//		System.out.println(inst);
-//		
+	pi(FinFunctor<ObjC, ArrowC, ObjD, ArrowD> F, Inst<ObjC, ArrowC, Y, X> inst) throws FQLException {
 		FinCat<ObjD, ArrowD> D = F.dstCat;
 		FinCat<ObjC, ArrowC> C = F.srcCat;
 
@@ -214,26 +195,12 @@ public class FDM {
 		Map<ObjD, Set<Value<Y, X>[]>> nodetables = new HashMap<>();
 
 		for (ObjD d0 : D.objects) {
-			CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> B = doComma2(D,
-					C, F, d0);
+			CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> B = doComma2(D, C, F, d0);
 			
-
-			//Inst<Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>, Pair<Arr<ObjD, ArrowD>, Arr<ObjC, ArrowC>>, Y, X> s = delta(B.projB, inst);
 			Set<Value<Y, X>[]> r = lim2(B, delta(B.projB, inst));
 
 			if (r == null) {
 				throw new RuntimeException();
-//				Set<Value<Y,X>> xxx = new HashSet<>();
-//				Value<Y,X> arr = (Value<Y, X>) new Value<>("*");
-//				
-//				Value<Y,X>[] arr0 = new Value[1];
-//				arr0[0] = arr;
-//				Set<Value<Y,X>[]> yyy = new HashSet<>();
-//				yyy.add(arr0);
-//				xxx.add(arr);
-//				ret1.put(d0, xxx);
-//				nodetables.put(d0, yyy);
-				
 			} else {
 				ret1.put(d0, squish(r));
 				nodetables.put(d0, r);
@@ -272,21 +239,13 @@ public class FDM {
 			}
 
 			Set<Value<Y, X>[]> raw = product(q2, q1);
-		//	System.out.println("raw is " + raw);
 			Set<Value<Y, X>[]> rax = subset2(D, s, cnames2, cnames1, raw);
-		//	System.out.println("rax is " + rax);
 			Map<Value<Y, X>, Value<Y, X>> ray = project(rax, cnames2.length + 1, 0);
 
 			ret2.put(s, ray);
 			
-		//	List<Pair<Pair<String, String>, Pair<String, String>>> where = subset(
-			//		D, kkk.second.of(new Path(D0, s)), dst, q2cols, q1cols, q2,
-			//		q1);
 		}
 		
-		//System.out.println("ret1 " + ret1);
-		//System.out.println("ret2 " + ret2);
-
 		return new Inst<>(ret1, ret2, D);
 	}
 
@@ -299,11 +258,6 @@ public class FDM {
 			Arr<ObjD, ArrowD> e,
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>[] q2cols,
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>[] q1cols, Set<Value<Y, X>[]> raw) {
-//	 System.out.println("trying subset " + print(q1cols) + " in " +
-//	 print(q2cols));
-	//List<Pair<Pair<String, String>, Pair<String, String>>> ret = new LinkedList<>();
-	//System.out.println("Arr" + e);
-	//System.out.println("Cat" + cat);
 	// turn e into arrow e', compute e' ; q2col, look for that
 	
 	a: for (int i = 0; i < q2cols.length; i++) {
@@ -311,26 +265,8 @@ public class FDM {
 		for (int j = 0; j < q1cols.length; j++) {
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> q2c = q2cols[i];
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> q1c = q1cols[j];
-//			System.out.println("^^^" + q1c);
-//			System.out.println("^^^" + q2c);
-//			System.out.println("compose " + cat.compose(e, q2c.third));
-//			System.out.println("compose " + cat.compose(q2c.third, e));
-//			System.out.println("compose " + cat.compose(e, q1c.third));
-//			System.out.println("compose " + cat.compose(q1c.third, e));
-////			// if (q1c.equals(q2c)) {
-			if (q1c.third.equals(cat.compose(e, q2c.third)) && q2c.second.equals(q1c.second)) {
-	//			System.out.println("hit on " + q2c.third);
-//				Pair<Pair<String, String>, Pair<String, String>> retadd = new Pair<>(new Pair<>(
-//						pre + "_" + q1name + "_limit", "c" + j),
-//						new Pair<String, String>(pre + "_" + q2name + "_limit", "c" + i));
-//			//	ret.add(retadd);
-			//	System.out.println("raw is " + printSetOfArrays(raw));
-				//1,2
-		//		System.out.println(" colums " + (j + 1) + " and " + (i + 2 + q1cols.length));
-				
+			if (q1c.third.equals(cat.compose(e, q2c.third)) && q2c.second.equals(q1c.second)) {				
 				raw = select(raw, i + 1, j + 2 + q2cols.length);
-				//System.out.println("raw now " + printSetOfArrays(raw));
-				//System.out.println("added to where: " +  retadd);
 				if (b) {
 					throw new RuntimeException();
 				}
@@ -342,11 +278,9 @@ public class FDM {
 		for (Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> yyy : q1cols) {
 			xxx += ", " + yyy;
 		}
-		throw new RuntimeException("No col " + q2cols[i] + " in " + xxx
-				);
+		throw new RuntimeException("No col " + q2cols[i] + " in " + xxx);
 
 	}
-	//System.out.println("where is " + ret);
 	return raw;
 	}
 	
@@ -432,8 +366,6 @@ public class FDM {
 			List<C> C, Map<A, C> f, Map<B, C> g) {
 		List<Triple<A, B, C>> ret = new LinkedList<>();
 
-		// System.out.println("taking fp of\n" + A + "\n" + B + "\n" + C + "\n"
-		// + f + "\n" + g);
 		for (A a : A) {
 			for (B b : B) {
 				for (C c : C) {
@@ -600,10 +532,6 @@ public class FDM {
 		for (Arr<Pair<Obj, Value<Y,X>>, Arr<Obj, Arrow>> a : c1.arrows) {
 			arrM.put(a, new Arr<>(a.arr, objM.get(a.src), objM.get(a.dst)));
 		}
-//		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-//		System.out.println("c1 is " +  c1);
-//		System.out.println("c2 is " +  c2);
-//		System.out.println("objM " + objM);
 		
 		return new FinFunctor<>(objM, arrM, c1, c2);
 	}
@@ -699,10 +627,6 @@ public class FDM {
 			FinFunctor<ObjC, ArrowC, ObjD, ArrowD> F, Inst<ObjC, ArrowC, Y, X> res,
 			Inst<ObjC, ArrowC, Y, X> I) throws FQLException {
 
-//		System.out.println("Computing epsilon");
-//		System.out.println("F " + F);
-//		System.out.println("res " + res);
-//		System.out.println("I " + I);
 		Map<ObjC, Map<Value<Y, X>, Value<Y, X>>> map = new HashMap<>();
 
 		for (ObjC C : F.srcCat.objects) {

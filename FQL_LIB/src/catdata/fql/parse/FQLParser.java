@@ -542,8 +542,6 @@ public class FQLParser {
 			return new TransExp.Var(o.toString());
 		}
 
-		// System.out.println(o.getClass());
-		// System.out.println(o);
 		throw new RuntimeException();
 	}
 
@@ -591,18 +589,11 @@ public class FQLParser {
 		Parser<?> node = Parsers.tuple(ident(), term("->"), ident());
 		Parser<?> arrow = Parsers.tuple(ident(), term("->"), path());
 
-//		Parser<?> xxx = Parsers.tuple(section("nodes", node),
-	//			section("attributes", node), section("arrows", arrow));
 
 		Parser<?> xxx = Parsers.tuple(section("nodes", node),
 				Parsers.or((Parser<?>)section("attributes", node), (Parser<?>)Parsers.tuple(term("attributes"),
 						term("ASWRITTEN"), term(";"))), section("arrows", arrow));
 
-		/*Parser<?> foo = Parsers.tuple(section("nodes", p1), Parsers.or(
-				(Parser<?>) section("attributes", p2),
-				(Parser<?>) Parsers.tuple(term("attributes"),
-						term("ASWRITTEN"), term(";"))), section("arrows", pX),
-				section("equations", p3));*/
 		
 		Parser<?> p1 = Parsers.between(term("{"), xxx, term("}"));
 
@@ -661,29 +652,6 @@ public class FQLParser {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static final MapExp toMapping(Object o) {
-	/*	try {
-			Tuple4 p = (Tuple4) o;
-			String p1 = p.a.toString();
-			Object p2 = p.b;
-			Object p3 = p.c;
-			Object p4 = p.d;
-			if (p1.equals("dst1")) {
-				return new MapExp.Dist1(toSchema(p2), toSchema(p3),
-						toSchema(p4));
-			} else if (p1.equals("dist2")) {
-				return new MapExp.Dist2(toSchema(p2), toSchema(p3),
-						toSchema(p4)); 
-			} else  if (p1.equals("inl")) {
-				return new MapExp.Inl(toSchema(p2), toSchema(p3));
-			} else if (p1.equals("inr")) {
-				return new MapExp.Inr(toSchema(p2), toSchema(p3));
-			} else if (p1.equals("eval")) {
-				return new MapExp.Apply(toSchema(p2), toSchema(p3));
-			}
-		} catch (RuntimeException re) {
-
-		}
-*/
 		try {
 			Tuple3 p = (Tuple3) o;
 
@@ -730,9 +698,7 @@ public class FQLParser {
 			Object o1 = p.a;
 			return toMapConst(o1, toSchema(p2), toSchema(p3));
 		}
-	//	} catch (RuntimeException re) {
-	//	}
-
+	
 		try {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
 			String p1 = p.a.toString();
@@ -1039,18 +1005,12 @@ public class FQLParser {
 			}
 
 			if (decl instanceof org.codehaus.jparsec.functors.Pair) {
-				// System.out.println("a");
 				org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) decl;
 				if (p.a.toString().equals("drop")) {
-					// System.out.println("b");
 					ret.add(NewDecl.dropDecl((List<String>) p.b));
 					continue;
-					// System.out.println("c");
-				} else {
 				}
 			}
-			// System.out.println("whasabi  " + s.indexOf(txt));
-			// s.indexOf(txt);
 			Tuple3 t = (Tuple3) decl;
 			String kind = ((Token) t.a).toString();
 			switch (kind) {

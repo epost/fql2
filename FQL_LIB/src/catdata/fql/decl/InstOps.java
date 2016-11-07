@@ -232,7 +232,6 @@ public class InstOps implements
 						"t1_obs", "id")));
 				where.add(new Pair<>(new Pair<>("t2", "c0"), new Pair<>(
 						"t2_obs", "id")));
-				// System.out.println("77777" + cols);
 				for (int i = 0; i < cols.size(); i++) {
 					where.add(new Pair<>(new Pair<>("t1_obs", "c" + i),
 							new Pair<>("t2_obs", "c" + i)));
@@ -510,11 +509,8 @@ public class InstOps implements
 				select.put("c0", new Pair<>("limit1", "guid"));
 				select.put("c1", new Pair<>("limit2", "guid"));
 				Flower f = new Flower(select, from, where);
-				// System.out.println("flower " + f);
 				ret.add(new InsertSQL(dst + "_" + n.string, f, "c0", "c1"));
 			}
-			// ret.addAll(PSMGen.dropTables(xxx, sig2));
-			// ret.addAll(PSMGen.dropTables(next, sig));
 			return ret;
 		} catch (FQLException fe) {
 			fe.printStackTrace();
@@ -529,21 +525,14 @@ public class InstOps implements
 		Pair<String, String> ht = e.h.type(prog);
 		Signature sig = prog.insts.get(ht.first).type(prog).toSig(prog);
 
-		// Signature sig = prog.insts.get(e.src).type(prog).toSig(prog);
-
-		// Mapping F = ((Relationalize)prog.insts.get(e.src)).F.toMap(prog);
-
 		String next = next();
 		ret.addAll(PSMGen.makeTables(next, sig, false));
 		ret.addAll(e.h.accept(next, this));
 
-		// Signature sig2 = prog.insts.get(e.src).type(prog).toSig(prog);
 		Map<String, String> attrs = new HashMap<>();
 		attrs.put("c0", PSM.VARCHAR());
 		attrs.put("c1", PSM.VARCHAR());
 		for (Node n : sig.nodes) {
-			// String fc = F.nm.get(n).string;
-
 			ret.add(new CreateTable(n.string + "xxx_temp", attrs, false));
 			ret.add(new CreateTable(n.string + "yyy_temp", attrs, false));
 
@@ -586,10 +575,8 @@ public class InstOps implements
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, Two e) {
-		List<PSM> ret = new LinkedList<>();
-		
-		ret.add(new PropPSM(dst, e.sig.toSig(prog)));
-		
+		List<PSM> ret = new LinkedList<>();	
+		ret.add(new PropPSM(dst, e.sig.toSig(prog)));	
 		return new Pair<>(ret, new Object());
 	}
 
@@ -630,11 +617,9 @@ public class InstOps implements
 
 			for (Node n : s.nodes) {
 				SQL f = PSMGen.compose(new String[] {
-				/* dst + "_" + n.string + "_subst_inv", */
 				e.a + "_" + n.string, dst + "_" + n.string + "_subst" });
 				ret.add(new InsertSQL(dst + "_inl_" + n.string, f, "c0", "c1"));
 				SQL f0 = PSMGen.compose(new String[] {
-				/* dst + "_" + n.string + "_subst_inv", */
 				e.b + "_" + n.string, dst + "_" + n.string + "_subst" });
 				ret.add(new InsertSQL(dst + "_inr_" + n.string, f0, "c0", "c1"));
 			}
@@ -653,16 +638,10 @@ public class InstOps implements
 					for (Node n : s.nodes) {
 						Flower sql1 = PSMGen.compose(new String[] {
 								dst + "_" + n.string + "_subst_inv",
-								f + "_" + n.string /*
-													 * , dst + "_" + n.string +
-													 * "_subst"
-													 */});
+								f + "_" + n.string });
 						Flower sql2 = PSMGen.compose(new String[] {
 								dst + "_" + n.string + "_subst_inv",
-								g + "_" + n.string /*
-													 * , dst + "_" + n.string +
-													 * "_subst"
-													 */});
+								g + "_" + n.string });
 						List<Flower> flowers = new LinkedList<>();
 						flowers.add(sql1);
 						flowers.add(sql2);
@@ -722,12 +701,6 @@ public class InstOps implements
 				int idx = 0;
 				for (Pair<Path, Attribute<Node>> aa : lats) {
 					Attribute<Node> a = aa.second;
-					//from.put("lft_" + a.name, e.a + "_" + a.name);
-					//from.put("rght_" + a.name, e.b + "_" + a.name);
-					//where.add(new Pair<>(new Pair<>("lft_" + a.name, "c0"),
-						//	new Pair<>("lft", "c0")));
-					//where.add(new Pair<>(new Pair<>("rght_" + a.name, "c0"),
-						//	new Pair<>("rght", "c0")));
 					where.add(new Pair<>(new Pair<>("lft", "c" + idx),
 						                 new Pair<>("rght", "c" + idx)));
 					select.put("c" + idx,new Pair<>("lft", "c" + idx));
@@ -857,10 +830,6 @@ public class InstOps implements
 		return new Pair<>(ret, new Object());
 	}
 
-	/*
-	 * @Override public List<PSM> visit(String dst, fql.decl.InstExp.Var e) {
-	 * return prog.insts.get(e.toString()).accept(dst, this); }
-	 */
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, catdata.fql.decl.InstExp.Const e) {
 		try {
@@ -1034,21 +1003,6 @@ public class InstOps implements
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String env, FullEval e) {
-		/*
-		 * List<PSM> ret = new LinkedList<>(); Pair<List<PSM>, String> l =
-		 * e.q.toFullQuery(prog).accept(e.e, this); ret.addAll(l.first);
-		 * 
-		 * Const sig = e.q.type(prog).second.toConst(prog); for (String n :
-		 * sig.nodes) { ret.add(new InsertSQL(env + "_" + n, new
-		 * CopyFlower(l.second + "_" + n, "c0", "c1"), "c0", "c1")); } for
-		 * (Triple<String, String, String> n : sig.attrs) { ret.add(new
-		 * InsertSQL(env + "_" + n.first, new CopyFlower(l.second + "_" +
-		 * n.first, "c0", "c1"), "c0", "c1")); } for (Triple<String, String,
-		 * String> n : sig.arrows) { ret.add(new InsertSQL(env + "_" + n.first,
-		 * new CopyFlower(l.second + "_" + n.first, "c0", "c1"), "c0", "c1")); }
-		 * 
-		 * return new Pair<>(ret, new Object());
-		 */
 		throw new RuntimeException();
 	}
 
@@ -1127,12 +1081,7 @@ public class InstOps implements
 
 		InstExp s = prog.insts.get(e.src);
 		Signature ty = s.type(prog).toSig(prog);
-		// if (!(s instanceof fql.decl.InstExp.Relationalize)) {
-		// throw new RuntimeException("Not a relationalize: " + e);
-		// }
-		// fql.decl.InstExp.Relationalize xxx = (fql.decl.InstExp.Relationalize)
-		// s;
-
+	
 		for (Node n : ty.nodes) {
 			ret.add(new InsertSQL(dst + "_" + n.string, PSMGen
 					.compose(new String[] { e.src + "_" + n.string + "_squash",
@@ -1205,7 +1154,6 @@ public class InstOps implements
 
 						Triple<Node, Node, Arr<Node, Path>>[] col = colmap
 								.get(n.string);
-					//	System.out.println("for node " + n + ", map is " + Arrays.toString(col));
 						
 						if (col.length == 0) {
 							LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
@@ -1219,9 +1167,6 @@ public class InstOps implements
 							ret.add(new InsertSQL(env + "_" + n.string, flower, "c0", "c1"));
 							return ret;
 						}
-//						System.out.println("n " + n);
-						// System.out.println("m " + m);
-	//					System.out.println(Arrays.toString(col));
 
 						LinkedHashMap<String, String> attrs = new LinkedHashMap<>();
 						attrs.put("guid", PSM.VARCHAR());
@@ -1230,16 +1175,13 @@ public class InstOps implements
 						from.put("lim", e.inst + "_" + n.string + "_limit");
 						List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 						int i = 0;
-						for (Triple<Node, Node, Arr<Node, Path>> col0 : col) {
-						
+						for (Triple<Node, Node, Arr<Node, Path>> col0 : col) {				
 							from.put("c" + i + "_subst_inv", middle + "_"
 									+ col0.second.string + "_subst_inv");
 							where.add(new Pair<>(new Pair<>("lim", "c" + i),
 									new Pair<>("c" + i + "_subst_inv", "c0")));
-							attrs.put("c" + i, PSM.VARCHAR());
-							
-							i++;
-							
+							attrs.put("c" + i, PSM.VARCHAR());					
+							i++;					
 						}
 
 				//		if (col.length > 1) {
@@ -1264,7 +1206,6 @@ public class InstOps implements
 						fe.printStackTrace();
 						throw new RuntimeException(fe.getMessage());
 					}
-
 				}
 			} else {
 				throw new RuntimeException();
@@ -1286,11 +1227,8 @@ public class InstOps implements
 			InstExp i2 = prog.insts.get(middle); // can't be null
 			Mapping f = ((InstExp.Sigma) i1).F.toMap(prog);
 			if (i2 instanceof InstExp.Delta) {
-			//	InstExp.Delta input0 = ((InstExp.Delta) i2);
-				//String input = input0.I;
-				for (Node n : f.target.nodes) {
-
-					List<Flower> u = new LinkedList<Flower>();
+			for (Node n : f.target.nodes) {
+			List<Flower> u = new LinkedList<Flower>();
 					for (Node m : f.source.nodes) {
 						if (!f.nm.get(m).equals(n)) {
 							continue;
@@ -1307,11 +1245,6 @@ public class InstOps implements
 									xxx, }), "c0", "c1"));
 
 					ret.add(new DropTable(xxx));
-
-					// ret.add(new InsertSQL(env + "_" + n.string,
-					// PSMGen.compose(new String[] { input + "_" + n.string,
-					// middle + "_" + f.nm.get(n) + "_subst",
-					// e.inst + "_" + n.string + "_subst" }), "c0", "c1"));
 				}
 			}
 		} else if (i1 instanceof InstExp.FullSigma) {
@@ -1337,10 +1270,7 @@ public class InstOps implements
 						Node n = f.nm.get(m);
 						Triple<Node, Node, Arr<Node, Path>>[] col = colmap
 								.get(n.string);
-						// System.out.println("n " + n);
-						// System.out.println("m " + m);
-						// System.out.println(Arrays.toString(col));
-
+		
 						Triple<Node, Node, Arr<Node, Path>> toFind = new Triple<>(
 								n, m, new Arr<Node, Path>(
 										new Path(f.target, n), n, n));
@@ -1469,8 +1399,6 @@ public class InstOps implements
 		Signature sig = prog.insts.get(e.a).type(prog).toSig(prog);
 		
 		for (Node n : sig.nodes) {
-//			ret.addAll(PSMGen.makeTables(env, sig, false));
-	//		System.out.println("adding insert sql " + env + "_" + n.string);
 			ret.add(new InsertSQL(env + "_" + n.string, new CopyFlower(e.a + "_trans_" + n, "c0", "c1"), "c0", "c1"));
 		}
 		
@@ -1539,72 +1467,14 @@ public class InstOps implements
 
 		return ret;
 	}
-/*
- * Signature w = m.source;
-		Signature r = n.source;
-		Instance star_w = Instance.terminal(w, "0"); 
-		Instance star_r = Instance.terminal(r, "0"); 
-		
-		Quad<Instance, Map<Node, Map<Object, Integer>>, Map<Node, Map<Integer, Object>>, Map<Object, List<Pair<String, Object>>>> sigma_m_star_w_0 = LeftKanSigma.fullSigmaWithAttrs(interp, m, star_w, null, null, null);
-		Instance sigma_m_star_w = sigma_m_star_w_0.first;
-		List<Pair<String, List<Pair<Object, Object>>>> l = new LinkedList<>();
-		for (Node o : sigma_m_star_w.thesig.nodes) {
-			List<Pair<Object, Object>> x = new LinkedList<>();
-			for (Pair<Object, Object> k : sigma_m_star_w.data.get(o.string)) {
-				x.add(new Pair<Object, Object>(k.first, "0"));
-			}
-			l.add(new Pair<>(o.string, x));
-		}
-		Transform h = new Transform(sigma_m_star_w, star_r, l );(non-Javadoc)
- * @see fql.decl.InstExp.InstExpVisitor#visit(java.lang.Object, fql.decl.InstExp.Step)
- */
+
 	@Override
 	public Pair<List<PSM>, Object> visit(String env, Step e) {
 		List<PSM> ret = new LinkedList<>();
 		
 		ret.add(new PSMStep(env, e.I, e.m.toMap(prog), e.n.toMap(prog)));
 
-/*		Mapping m = e.m.toMap(prog);
-		Mapping n = e.n.toMap(prog);
-		Signature r = n.source;
-		Signature w = m.source;
-		
-		InstExp star_w = new InstExp.One(w.toConst());
-		prog.insts.put("star_w", star_w);
-		ret.addAll(star_w.accept("star_w", this).first);
-		
-		InstExp star_r = new InstExp.One(r.toConst());
-		prog.insts.put("star_r", star_r);
-		ret.addAll(star_r.accept("star_r", this).first);
-		
-		InstExp sigma_m_star_w = new InstExp.FullSigma(m.toConst(), "star_w");
-		prog.insts.put("sigma_m_star_w", sigma_m_star_w);
-		ret.addAll(sigma_m_star_w.accept("sigma_m_star_w", this).first);
-		
-		TransExp sigma_m_star_w_star_r = new TransExp.TT("star_r", "sigma_m_star_w");
-		prog.transforms.put("sigma_m_star_w_star_r", sigma_m_star_w_star_r);
-		ret.addAll(sigma_m_star_w_star_r.accept("sigma_m_star_w_star_r", this));
-		
-		InstExp sigma_n_sigma_m_star_w = new InstExp.FullSigma(n.toConst(), "sigma_m_star_w");
-		prog.insts.put("sigma_n_sigma_m_star_w", sigma_n_sigma_m_star_w);
-		ret.addAll(sigma_n_sigma_m_star_w.accept("sigma_n_sigma_m_star_w", this).first);
-		
-		InstExp sigma_n_star_r = new InstExp.FullSigma(n.toConst(), "star_r");
-		prog.insts.put("sigma_n_star_r", sigma_n_star_r);
-		ret.addAll(sigma_n_star_r.accept("sigma_n_star_r", this).first);
-		
-		TransExp sigma_n_sigma_m_star_w_sigma_n_star_r = new TransExp.FullSigma("sigma_m_star_w_star_r", "sigma_n_sigma_m_star_w", "sigma_n_star_r");
-		prog.transforms.put("sigma_n_sigma_m_star_w_sigma_n_star_r", sigma_n_sigma_m_star_w_sigma_n_star_r);
-		ret.addAll(sigma_n_sigma_m_star_w_sigma_n_star_r.accept("sigma_n_sigma_m_star_w_sigma_n_star_r", this));
-		
-		prog.insts.remove("star_w");
-		prog.insts.remove("star_r");
-		prog.insts.remove("sigma_m_star_w");
-		prog.transforms.remove("sigma_m_star_w_star_r");
-		prog.insts.remove("sigma_n_sigma_m_star_w");
-		prog.insts.remove("sigma_n_star_r");		
-		prog.transforms.remove("sigma_n_sigma_m_star_w_sigma_n_star_r");
-		*/
+
 		//: drops
 		
 		return new Pair<>(ret, new Object());		

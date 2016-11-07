@@ -12,14 +12,7 @@ import java.util.stream.Collectors;
 
 public class PreOrder<X> {
 	
-	
-	public static void main(String[] args) {
-		List<Integer> l = Util.list(1, 2, 3, 4);
-		System.out.println(allTotal(l).size());
-		System.out.println(allTotal(l).size());
-		System.out.println(allTotal(l).size());
-		System.out.println(allTotal(l).size());
-	}
+
 
 	private static Map<Integer, Set<PreOrder<Integer>>> totals = new HashMap<>();
 	public static <X> Collection<PreOrder<X>> allTotal(List<X> xs) {

@@ -37,13 +37,11 @@ public class OplImage implements OplObject {
 	
 	@Override
 	public boolean equals(Object o) {
-		//System.out.println("OPLIMAGE comparing " + this + " against " + o);
 		if (!(o instanceof OplImage)) {
 			return false;
 		}
 		OplImage other = (OplImage) o;
 		boolean ret = (other.url.equals(url));
-		//System.out.println("result: " + ret);
 		return ret; 
 	}
 	

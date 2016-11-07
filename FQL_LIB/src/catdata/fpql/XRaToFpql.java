@@ -661,66 +661,15 @@ public class XRaToFpql {
 				}
 				xxx += "\n\n";
 
-			} /*
-			 * else if (gh instanceof EDiff) { String f1x = ((EDiff) gh).l;
-			 * String f2x = ((EDiff) gh).r;
-			 * 
-			 * String s1 = schemas.get(f1x); // System.out.println("s1 is " +
-			 * s1); // System.out.println("schemas0 " + schemas0); //
-			 * System.out.println("scheas " + schemas); XSchema s1x =
-			 * schemas0.get(f1x); schemas.put(k, s1);
-			 * 
-			 * String f1y = doAdom(s1x, s1); // String f2y = doAdom(f2x, s1x);
-			 * 
-			 * if (!done.containsKey(s1)) { xxx += "\n\n" + f1y; done.put(s1,
-			 * true); }
-			 * 
-			 * xxx += doAdom2(s1, f1x, k + "_l"); xxx += doAdom2(s1, f2x, k +
-			 * "_r");
-			 * 
-			 * String f1 = k + "_l" + "_rel"; String f2 = k + "_r" + "_rel";
-			 */
-			// xxx += longSlash + "\n/* Translation of " + k + "  */\n" +
-			// longSlash;
-			/*
-			 * // Boolean done0 = done.get(s1);
-			 * 
-			 * // xxx += "\n\n" + f2y;
-			 * 
-			 * xxx += "\n\ninstance " + k + "prp = prop " + s1; xxx +=
-			 * "\n\ninstance " + k + "one = unit " + s1; xxx += "\n\ninstance "
-			 * + k + "prp2 = (" + k + "prp * " + k + "prp)"; xxx +=
-			 * "\n\ntransform " + k + f1 + "t = " + k + "one.unit " + f1; xxx +=
-			 * "\n\ntransform " + k + f2 + "t = " + k + "one.unit " + f2; xxx +=
-			 * "\n\ntransform " + k + f1 + "tchi = " + k + "prp.char " + k + f1
-			 * + "t"; xxx += "\n\ntransform " + k + f2 + "tchi = " + k +
-			 * "prp.char " + k + f2 + "t"; xxx += "\n\ntransform " + k + "n = ("
-			 * + k + f2 + "tchi then " + k + "prp.not)"; xxx += "\n\ntransform "
-			 * + k + "j1 = " + k + "prp2.(" + k + f1 + "tchi * " + k + "n)"; xxx
-			 * += "\n\ntransform " + k + "j2 = (" + k + "j1 then " + k +
-			 * "prp2.and)";
-			 * 
-			 * if (((EDiff) gh).distinct) { xxx += "\n\ninstance " + k +
-			 * "temp = kernel " + k + "j2"; xxx += "\n\ninstance " + k +
-			 * " = relationalize " + k + "temp"; } else { xxx += "\n\ninstance "
-			 * + k + " = kernel " + k + "j2"; } xxx += "\n\n";
-			 */
+			} 
 			else if (gh instanceof EED) {
 				EED c = (EED) gh;
 				XInst f = doED(/*cols, */ c.from1, c.where1, exp);
-		//		XSchema src = (XSchema) f.src;
-			//	System.out.println(f.src);
-			//	System.out.println(f.dst);
-			//	System.out.println(f);
-
+		
 				c.from2.putAll(c.from1);
 				c.where2.addAll(c.where1);
 				XInst g = doED(/* cols, */ c.from2, c.where2, exp);
-			//	System.out.println("===");
-			//	System.out.println(g.src);
-			//	System.out.println(g.dst);
-			//	System.out.println(g);
-
+		
 				List<Pair<Pair<String, String>, List<String>>> vm = new LinkedList<>();
 				for (Pair<String, String> x : f.nodes) {
 					List<String> l = new LinkedList<>();
@@ -729,43 +678,22 @@ public class XRaToFpql {
 				}
 				
 				XTransConst i = new XTransConst(f, g, vm);
-				// System.out.println("^^^");
-				// System.out.println(i);
-
+			
 				xxx += longSlash + "\n/* Translation of " + k + " */\n" + longSlash;
 				xxx += "\n\n" + k + "A = " + f + " : S";
 				xxx += "\n\n" + k + "E = " + g + " : S";
 				xxx += "\n\n" + k + "I = " + i + " : " + k + "A -> " + k + "E";
-			//	xxx += "\n\n" + k + " = " + g + " : " + k + "E -> S";
 				xxx += "\n\n";
-
 			} else {
 				throw new RuntimeException();
 			}
 		}
 
-		// FQLProgram ret = new FQLProgram();
-		// ret.sigs.put("S", exp);
-	//	String enum0 = "";
-	//	boolean b = false;
-	//	for (Object o : enums) {
-		//	if (b) {
-		//		enum0 += ", ";
-		//	}
-		//	b = true;
-		//	enum0 += "\"" + o + "\"";
-		//}
 		String comment = "//schema S and instance I represent the entire input database.\n\n";
 		String preS = "adom : type\n"; 
 		String senums0 = preS + Util.sep(enums.stream().map(x -> x + " : adom").collect(Collectors.toList()), "\n");
 		return comment + senums0 + "\n\nS = " + exp + "\n\nI = " + inst + " : S" + xxx;
 	}
-
-	/*
-	 * private static String lookup(List<Pair<String, String>> l, String ret) {
-	 * for (Pair<String, String> x : l) { if (x.first.equals(ret)) { return
-	 * x.second; } } return ret; }
-	 */
 
 	private static XInst doED(/* HashMap<String, List<String>> cols, */Map<String, String> from,
 			List<Pair<Pair<String, String>, Pair<String, String>>> where, XSchema S) {
@@ -862,28 +790,21 @@ public class XRaToFpql {
 		
 		//for each p.q = 3, add (eqc_for(p.q).get(0) = 3) to some list
 
-		// System.out.println("eqcs " + eqcs);
-		// System.out.println("edges2 " + edges2);
 		Iterator<Triple<String, String, String>> it = edges2.iterator();
 		while (it.hasNext()) {
 			Triple<String, String, String> k = it.next();
 			for (List<Triple<String, String, String>> v : eqcs) {
 				if (v.contains(k) && !v.get(0).equals(k)) {
-					// System.out.println("hit: " + k + " and " + v);
 					it.remove();
 					continue;
 				}
 			}
 		}
-		// System.out.println("x edges2 " + edges2);
-
+	
 		for (Pair<String, List<String>> kk : iedges2) {
-			// System.out.println("trying edge map " + kk);
 			Triple<String, String, String> k = new Triple<>(kk.second.get(1), "guid", "adom");
-			// System.out.println("k is " + k);
 			for (List<Triple<String, String, String>> v : eqcs) {
 				if (v.contains(k) && !v.get(0).equals(k)) {
-					// System.out.println("HIT");
 					List<String> xxx = new LinkedList<>();
 					xxx.add("guid");
 					xxx.add(v.get(0).first);
@@ -899,27 +820,21 @@ public class XRaToFpql {
 		// ll.add("guid");
 		// iedges3.add(new Pair<>("adom", ll));
 
-		// System.out.println("eqcs " + eqcs);
 		for (String k : fl.select.keySet()) {
 			Pair<String, String> v = fl.select.get(k);
 			edges3.add(new Triple<>(k, "guid", "adom"));
 			Triple<String, String, String> t = new Triple<>(v.first + "_" + fl.from.get(v.first)
 					+ "_" + v.second, "guid", "adom");
-			// System.out.println("t " + t);
 			if (fl.from.get(v.first) == null) {
 				throw new RuntimeException(v.first + " is not selectable in " + fl);
 			}
 			for (List<Triple<String, String, String>> eqc : eqcs) {
-				// System.out.println("eqc " + eqc);
 				if (eqc.contains(t)) {
 					List<String> li = new LinkedList<>();
 					li.add("guid");
 					li.add(eqc.get(0).first);
 					iedges3.add(new Pair<>(k, li));
-					// System.out.println("added " + new Pair<>(k, li));
-				} else {
-					// System.out.println("not added");
-				}
+				} 
 			}
 		}
 
@@ -957,9 +872,6 @@ public class XRaToFpql {
 		XMapConst map1 = doMapping(inodes1, /* iattrs, */ iedges1, sig1, new XExp.Var("S"));
 		XMapConst map2 = doMapping(inodes2, /* iattrs, */ iedges2, src, sig2);
 		XMapConst map3 = doMapping(inodes3, /* iattrs, */ iedges3, sig3, sig2);
-
-		// return new Triple<>(new Pair<>(sig1, map1), new Pair<>(sig2, map2),
-		// new Pair<>(sig3, map3));
 
 		String xxx = "";
 		xxx += "\n\n" + pre + "fromSchema = " + sig1.toString();
@@ -1009,22 +921,16 @@ public class XRaToFpql {
 			mergeEqc(eqcs, k.first, k.second, ef.from);
 		}
 
-		// System.out.println("xxx eqcs are " + eqcs);
 		return eqcs;
 	}
 
 	private static void mergeEqc(List<List<Triple<String, String, String>>> eqcs,
 			Pair<String, String> l, Pair<String, String> r, Map<String, String> from) {
-		// System.out.println("merge eqc on " + eqcs);
-		// System.out.println("l is " + l);
-		// System.out.println("r is " + r);
 		Triple<String, String, String> l0 = new Triple<>(l.first + "_" + from.get(l.first) + "_"
 				+ l.second, "guid", "adom");
 		Triple<String, String, String> r0 = new Triple<>(r.first + "_" + from.get(r.first) + "_"
 				+ r.second, "guid", "adom");
-		// System.out.println("l0 is " + l0);
-		// System.out.println("r0 is " + r0);
-
+	
 		List<Triple<String, String, String>> lx = null, rx = null;
 		lbl: for (List<Triple<String, String, String>> k : eqcs) {
 			if (!k.contains(l0)) {
@@ -1035,7 +941,6 @@ public class XRaToFpql {
 					continue;
 				}
 				if (v.contains(r0)) {
-					// System.out.println("hit");
 					lx = k;
 					rx = v;
 					break lbl;
@@ -1074,12 +979,6 @@ public class XRaToFpql {
 		return null;
 		// throw new RuntimeException("Not found: " + target + " in " + inodes);
 	}
-
-	/*
-	 * private static String lookup(String s, List<Pair<String, String>> fks) {
-	 * for (Pair<String, String> k : fks) { if (k.first.equals(s)) { return
-	 * k.second; } } return null; }
-	 */
 
 	public static class EInsertValues extends EExternal {
 		String target;

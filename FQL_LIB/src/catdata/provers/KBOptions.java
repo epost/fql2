@@ -1,4 +1,4 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 public class KBOptions {
 

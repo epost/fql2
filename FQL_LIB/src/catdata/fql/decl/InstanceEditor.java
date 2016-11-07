@@ -209,9 +209,6 @@ public class InstanceEditor {
 			attrs.add(new Pair<>(e.name, g));
 		}
 
-//		System.out.println(nodes);
-	//	System.out.println(attrs);
-//		System.out.println(arrows);
 		return new Const(nodes, attrs, arrows, inst.sig);
 	}
 
@@ -430,41 +427,28 @@ public class InstanceEditor {
 		};
 		Map<String, JTable> ret = new HashMap<>();
 		for (String name : names) {
-			// System.out.println("Name " + name);
 			Map<String, Set<Pair<Object, Object>>> m = joined.get(name);
-			// System.out.println("m " + m);
 			Set<Pair<Object, Object>> ids = nd.get(name);
-			// System.out.println("ids " + ids);
 			Object[][] arr = new Object[ids.size()][m.size() + 1];
 			Set<String> cols = m.keySet();
-			// System.out.println("cols " + cols);
 			List<String> cols2 = new LinkedList<>(cols);
 			Collections.sort(cols2, strcmp);
 			cols2.add(0, "ID");
-			// System.out.println("cols2 " + cols2);
 			Object[] cols3 = cols2.toArray();
-			// System.out.println("cols3 " + cols3);
 
 			int i = 0;
 			for (Pair<Object, Object> id : ids) {
-				// System.out.println("id " + id);
 				arr[i][0] = id.first;
-				// System.out.println(" i " + i + " j " + 0 + " val " +
-				// arr[i][0]);
-
+		
 				int j = 1;
 				for (String col : cols2) {
 					if (col.equals("ID")) {
 						continue;
 					}
-					// System.out.println("col " + col);
 					Set<Pair<Object, Object>> coldata = m.get(col);
 					for (Pair<Object, Object> p : coldata) {
-						// System.out.println("p " + p);
 						if (p.first.equals(id.first)) {
 							arr[i][j] = p.second;
-							// System.out.println(" i " + i + " j " + j +
-							// " val " + arr[i][j]);
 							break;
 						}
 					}
@@ -472,24 +456,6 @@ public class InstanceEditor {
 				}
 				i++;
 			}
-
-			// Arrays.sort(arr, new Comparator<Object[]>() {
-			//
-			// @Override
-			// public int compare(Object[] o1, Object[] o2) {
-			// return o1[0].toString().compareTo(o2[0].toString());
-			// }
-			//
-			// });
-
-			// JTable t = new JTable(arr, cols3) {
-			// public Dimension getPreferredScrollableViewportSize() {
-			// Dimension d = getPreferredSize();
-			// return new Dimension(d.width, d.height);
-			// }
-			// };
-
-			// cards.(name, t);
 
 			// foo and t are for the graph and tabular pane, resp
 			DefaultTableModel dtm = new DefaultTableModel(arr, cols3);
@@ -500,25 +466,20 @@ public class InstanceEditor {
 				}
 			};
 			JPanel p = new JPanel(new GridLayout(1, 1));
-			// p.add(t);
-
+		
 			TableRowSorter<?> sorter2 = new MyTableRowSorter(foo.getModel());
 
 			sorter2.toggleSortOrder(0);
 			foo.setRowSorter(sorter2);
 			sorter2.allRowsChanged();
-			// foo.set
-			// foo.setAutoCreateRowSorter(true);
 			p.add(new JScrollPane(foo));
 
-			// p.setMaximumSize(new Dimension(200,200));
 			p.setBorder(BorderFactory.createTitledBorder(
 					BorderFactory.createEmptyBorder(), name + " (" + ids.size()
 							+ " rows)"));
 			vwr.add(p, name);
 			joined2.put(name, p);
-			// foo.setMaximumSize(new Dimension(600,200));
-
+		
 			ret.put(name, foo);
 		}
 

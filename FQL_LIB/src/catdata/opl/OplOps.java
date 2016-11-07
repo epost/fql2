@@ -278,7 +278,6 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			}
 			// e.validate(src0.projEA(), dst0.projEA());
 			OplTyMapping ret = new OplTyMapping<>(e.src0, e.dst0, src0, dst0, e);
-			// System.out.println("created " + ret);
 			return ret;
 		}
 		throw new RuntimeException("Source or Target is not a theory/schema in " + e);
@@ -802,15 +801,9 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 						}
 					}
 				}
-				//System.out.println("prec is " + prec + " and " + prec.keySet() + " and " + prec.values());
-				//System.out.println("was " + toAdd.P.prec + " and " + toAdd.P.prec.keySet() + " and " + prec.values());
 				for (Pair<OplTerm<Chc<String, String>, String>, OplTerm<Chc<String, String>, String>> tr : toAdd.P.equations) {
-					System.out.println("processing " + tr);
-					//OplTerm<Chc<String,String>, String> lhs1 = prepend(toAdd.P.S, tr.first, s, toAdd.P.gens.keySet());
-					//OplTerm<Chc<String,String>, String> rhs1 = prepend(toAdd.P.S, tr.second, s, toAdd.P.gens.keySet());
 					OplTerm<Object, String> lhs1 = prepend2((OplTerm) tr.first,  s, toAdd.P.gens.keySet());
 					OplTerm<Object, String> rhs1 = prepend2((OplTerm) tr.second, s, toAdd.P.gens.keySet());
-					//equations2.add(new Pair<>(lhs1, rhs1));
 					equations1.add(new Pair<>(lhs1, rhs1));
 				}
 			}
@@ -822,11 +815,8 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				pres = pres.simplify();
 			}
 			temp++;
-//			System.out.println(pres);
 			OplInst0 ret = new OplInst0<String, String, String, String>(pres);
-	//		System.out.println(ret);
 			OplObject x = (OplObject) ret.accept(env, this);
-		//	System.out.println(x);
 			return x;
 		} 
 		
@@ -848,19 +838,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 
 	}
 
-	/*
-	 * private OplTerm<Chc<String, String>, String> prepend(String s,
-	 * OplTerm<Chc<String, String>, String> first, String i, Set<String> gens) {
-	 * if (first.var != null) { return first; } List<OplTerm<Chc<String,
-	 * String>, String>> args = new LinkedList<>(); for (OplTerm<Chc<String,
-	 * String>, String> arg : first.args) { args.add(prepend(s, arg, i, gens));
-	 * } if (first.head.left) { return new OplTerm<>(Chc.inLeft(s + "_" +
-	 * first.head), args); } else { return new OplTerm<>(Chc.inRight(i + "_" +
-	 * first.head), args); }
-	 * 
-	 * }
-	 */
-
+	
 	public static OplTerm<String, String> prepend(String s, OplTerm<String, String> e) {
 		if (e.var != null) {
 			return e;
@@ -892,7 +870,6 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 	public OplObject visit(Program<OplExp> env, OplPragma e) {
 		for (String k : e.map.keySet()) {
 			String v = e.map.get(k);
-			// System.out.println("setting " + k + " = " + v);
 			NEWDEBUG.debug.opl.set(k, v);
 		}
 		return e;
@@ -905,9 +882,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			throw new RuntimeException("Not a graph: " + e.name);
 		}
 		OplGraph<String, String> shape = (OplGraph<String, String>) o;
-		// Map<String, OplTyMapping<String, String, String, String, String>> map
-		// = new HashMap<>();
-
+	
 		OplObject base0 = ENV.get(e.base);
 		String typeSide;
 		if (base0 instanceof OplSig) {
@@ -1109,19 +1084,9 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 					}
 				}
 
-				// System.out.println("prec is " + prec + " and " +
-				// prec.keySet() + " and " + prec.values());
-				// System.out.println("was " + toAdd.P.prec + " and " +
-				// toAdd.P.prec.keySet() + " and " + prec.values());
 				for (Pair<OplTerm<Chc<String, String>, String>, OplTerm<Chc<String, String>, String>> tr : toAdd.P.equations) {
-					// System.out.println("processing " + tr);
-					// OplTerm<Chc<String,String>, String> lhs1 =
-					// prepend(toAdd.P.S, tr.first, s, toAdd.P.gens.keySet());
-					// OplTerm<Chc<String,String>, String> rhs1 =
-					// prepend(toAdd.P.S, tr.second, s, toAdd.P.gens.keySet());
 					OplTerm lhs1 = prepend3(s, tr.first);
 					OplTerm rhs1 = prepend3(s, tr.second);
-					// equations2.add(new Pair<>(lhs1, rhs1));
 					equations.add(new Pair<>(lhs1, rhs1));
 				}
 
@@ -1147,7 +1112,6 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 					equations.add(new Pair<>(lhs, prepend3(t, edge2.second)));
 				}
 			}
-			// System.out.println("zzzzz " + sch2.sig);
 			OplPres<String, String, String, String> pres = new OplPres<>(prec, e.base, sch2.sig, gens, equations);
 			OplInst<String, String, String, String> colimInst = new OplInst<>(e.base, "?", null);
 			colimInst.validate(sch2, pres, null);
@@ -1215,8 +1179,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 		}
 
 		return OplChase.chase(I, EDs, e.limit);
-		// return OplChase.chaseParallel(I, EDs, e.limit);
-
+	
 	}
 
 	public OplObject visit(Program<OplExp> env, OplGround e) {

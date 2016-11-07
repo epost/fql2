@@ -252,54 +252,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	
 	@Override
 	public Functor visit(FQLPPProgram env, InstConst ic) {
-	/*	CatExp e = resolve(env, ic.sig);
-		if (!(e instanceof Const)) {
-			throw new RuntimeException(
-					"Can only create instances for finitely-presented categories.");
-		}
-		Const c = (Const) e;
-
-		Category src = c.accept(env, this);
-		Signature<String, String> sig = new Signature<>(c.nodes, c.arrows, c.eqs);
-
-		Map<Node, Set> nm = new HashMap<>();
-		for (Node n : sig.nodes) {
-			SetExp kkk = ic.nm.get(n.name);
-			if (kkk == null) {
-				throw new RuntimeException("Missing node mapping from " + n);
-			}
-			nm.put(n, kkk.accept(env, new SetOps(ENV)));
-		}
-		Map<Edge, Map> em = new HashMap<>();
-		for (Edge n : sig.edges) {
-			Chc<FnExp, SetExp> chc = ic.em.get(n.name);
-			if (chc == null) {
-				throw new RuntimeException("Missing edge mapping from " + n);
-			}
-			if (chc.left) {
-				FnExp kkk = chc.l;
-				em.put(n, kkk.accept(env, new SetOps(ENV)).toMap());
-			} else {
-				SetExp sss = chc.r;
-				Set vvv = sss.accept(env, new SetOps(ENV));
-				Map<Object, Object> uuu = new HashMap<>();
-				for (Object o : vvv) {
-					if (!(o instanceof Pair)) {
-						throw new RuntimeException("Not a pair: " + o);
-					}
-					Pair oo = (Pair) o;
-					if (uuu.containsKey(oo.first)) {
-						throw new RuntimeException("Duplicate domain entry: " + o + " in " + ic);
-					}
-					uuu.put(oo.first, oo.second);
-				}
-				FnExp kkk = new FnExp.Const(uuu::get, ic.nm.get(n.source.name),
-						ic.nm.get(n.target.name));
-				em.put(n, kkk.accept(env, new SetOps(ENV)).toMap());
-			}
-		} */
-
-		Pair<Category, Instance<String,String>> xxx = toInstance(env, ic); //new Instance(nm, em, sig);
+			Pair<Category, Instance<String,String>> xxx = toInstance(env, ic); //new Instance(nm, em, sig);
 		Functor ret = toFunctor(xxx.first, xxx.second);
 		ret.instance0 = xxx.second;
 		return ret;
@@ -956,46 +909,6 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 
 	@Override
 	public Functor visit(FQLPPProgram env, Apply e) {
-		//This breaks Peter's example
-	/*	if (DEBUG.debug.use_fast_sigma) {
-		
-		 if (e.F instanceof FunctorExp.Migrate) {
-			FunctorExp.Migrate M = (FunctorExp.Migrate) e.F;
-			if (M.which.equals("sigma") && M.F instanceof FunctorExp.Var) {
-				FunctorExp.Var v = (FunctorExp.Var) M.F;
-				FunctorExp v2 = env.ftrs.get(v.v);
-				if (v2 == null) {
-					throw new RuntimeException("Missing functor: " + v);
-				}
-				if (v2 instanceof FunctorExp.MapConst) {
-					FunctorExp.MapConst f = (FunctorExp.MapConst) v2;
-					CatExp src1 = resolve(env, f.src);
-					CatExp dst1 = resolve(env, f.dst);
-					if (src1 instanceof CatExp.Const && dst1 instanceof CatExp.Const) {
-						CatExp.Const src = (CatExp.Const) src1;
-						CatExp.Const dst = (CatExp.Const) dst1;
-						if (e.I instanceof FunctorExp.Var) {
-							FunctorExp.Var iv = (FunctorExp.Var) e.I;
-							FunctorExp iv2 = env.ftrs.get(iv.v);
-							if (iv2 == null) {
-								throw new RuntimeException("Missing functor: " + iv);
-							}
-							if (iv2 instanceof FunctorExp.InstConst) {
-								FunctorExp.InstConst i = (FunctorExp.InstConst) iv2;
-								
-								if (f.dst instanceof CatExp.Var) {			
-									Category cat = ENV.cats.get(((CatExp.Var)f.dst).v);
-									return fastSigma(env, cat, src, dst, f, i);
-								}
-							}
-						}
-					}
-
-				}
-			} 
-		 }
-		} */
-		
 		Functor ret1 = null;
 		Exception ret1_e = null;
 		
@@ -1034,19 +947,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		ret2_e.printStackTrace();
 		throw new RuntimeException("Cannot apply:\n\nmost probable cause: " + ret1_e.getMessage() + "\n\nless probable cause: " + ret2_e.getMessage());
 	}
-/*
-	private Functor fastSigma(FQLPPProgram env, Category C, Const src, Const dst, MapConst f, InstConst i) {
-		//System.out.println("Running fast sigma"); 
-//		Signature s = new Signature(src.nodes, src.arrows, src.eqs);
-	//	Signature t = new Signature(dst.nodes, dst.arrows, dst.eqs);
-		Mapping F = toMapping(env, f).third; 
-		Instance I = toInstance(env, i).second;
-		//System.out.println("F " + F);
-		//System.out.println("I " + I);
-		Instance J = (Instance<String,String>) LeftKanSigma.fullSigmaOnPresentation(F, I, null, null, 0).first;
-		//System.out.println("J " + J);
-		return toFunctor(C, J); // new InstConst(dst, J.nm, J.em); //.accept(env, v);
-	} */
+
 
 	@Override
 	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.Apply e) {
@@ -1297,19 +1198,6 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			//Fn Pb = (Fn) P.apply(b);
 			Fn Pa = (Fn) P.apply(a);
 			return Fn.compose(Pa, Jf);
-/*			if (p.second.equals("f")) {
-				return (Fn) l.apply(p.first);
-			} else if (p.second.equals("g")) {
-				return (Fn) r.apply(p.first);
-			} else if (p.second.equals("a")) {
-				return (Fn) l.source.applyA(p.first); //Fn.id(o.apply(new Pair<>(p.first, "A")));
-			} else if (p.second.equals("b")) {
-				return (Fn) l.target.applyA(p.first); //Fn.id(o.apply(new Pair<>(p.first, "B")));
-			} else if (p.second.equals("c")) {
-				return (Fn) r.target.applyA(p.first); //Fn.id(o.apply(new Pair<>(p.first, "C")));
-			} else {
-				throw new RuntimeException();
-			} */
 		};
 		Functor I = new Functor(Dspan, FinSet.FinSet0(), o, x);
 		

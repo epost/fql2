@@ -393,9 +393,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 			talg.sks.put(sk, talg_full().sks.get(sk));
 		}
 		talg.eqs.addAll(eqs);
-		//System.out.println(list);
 		return talg;
-		
 	}
 	
 	

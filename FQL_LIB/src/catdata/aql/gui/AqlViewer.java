@@ -42,7 +42,6 @@ import catdata.aql.exp.Kind;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Split;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
-import edu.uci.ics.jung.algorithms.layout.KKLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -51,7 +50,6 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
-import edu.uci.ics.jung.visualization.decorators.AbstractEdgeShapeTransformer;
 
 //TODO: aql quoting
 
@@ -80,7 +78,7 @@ public final class AqlViewer {
 			@SuppressWarnings("unchecked")
 			Schema<Object, Object, Object, Object, Object> schema = (Schema<Object, Object, Object, Object, Object>) obj;
 			ret.add(viewSchema(schema), "Graph");
-//			ret.add(viewSchema2(schema), "Graph2");
+	//		ret.add(viewSchema2(schema), "Graph2");
 			ret.add(viewDP(schema.dp(), schema.collage()), "DP");
 		//	ret.add(new CodeTextPanel("", schema.collage().toString()), "Temp");
 			break;
@@ -201,61 +199,38 @@ public final class AqlViewer {
 		
 		return ret;
 	}	
-	/*
-	public static <Ty, En, Sym, Fk, Att> JComponent viewSchema2(Schema<Ty, En, Sym, Fk, Att> schema) {
-		Graph<Chc<Ty, En>, Chc<Fk, Att>> sgv = new DirectedSparseMultigraph<>();
+	
+	/*public static <Ty, En, Sym, Fk, Att> JComponent viewSchema2(Schema<Ty, En, Sym, Fk, Att> schema) {
+		mxGraph graph = new mxGraph();
+		Object parent = graph.getDefaultParent();
 
+		Ctx<Chc<En,Ty>, Object> nodes = new Ctx<>();
 		for (En en : schema.ens) {
-			sgv.addVertex(Chc.inRight(en));
+			Object v1 = graph.insertVertex(parent, null, en.toString(), 20, 20, 80, 30);
+			nodes.put(Chc.inLeft(en), v1);
 		}
 		for (Ty ty : schema.typeSide.tys) {
-			sgv.addVertex(Chc.inLeft(ty));
+			Object v1 = graph.insertVertex(parent, null, ty.toString(), 20, 20, 80, 30);
+			nodes.put(Chc.inRight(ty), v1);
 		}
 		for (Att att : schema.atts.keySet()) {
-			sgv.addEdge(Chc.inRight(att), Chc.inRight(schema.atts.get(att).first), Chc.inLeft(schema.atts.get(att).second));
+			graph.insertEdge(parent, null, att.toString(), nodes.get(Chc.inLeft(schema.atts.get(att).first)), nodes.get(Chc.inRight(schema.atts.get(att).second)));
 		}
 		for (Fk fk : schema.fks.keySet()) {
-			sgv.addEdge(Chc.inLeft(fk), Chc.inRight(schema.fks.get(fk).first), Chc.inRight(schema.fks.get(fk).second));
+			graph.insertEdge(parent, null, fk.toString(), nodes.get(Chc.inLeft(schema.fks.get(fk).first)), nodes.get(Chc.inLeft(schema.fks.get(fk).second)));
 		}
+		mxGraphLayout layout = new mxOrganicLayout(graph); // or whatever layouting algorithm
+		layout.execute(parent);
+		
+		mxGraphComponent graphComponent = new mxGraphComponent(graph);
+		
+		//  Map<String, Object> style = graph.getStylesheet().getDefaultEdgeStyle();
+		 // style.put(mxConstants.STYLE_ROUNDED, true);
+		//  style.put(mxConstants.STYLE_EDGE, mxConstants.EDGESTYLE_ENTITY_RELATION);
+		
+		return graphComponent;
+	}	*/
 
-		if (sgv.getVertexCount() == 0) {
-			return new JPanel();
-		}
-		Layout<Chc<Ty, En>, Chc<Fk, Att>> layout = new KKLayout<>(sgv);
-		//Layout<Chc<Ty, En>, Chc<Fk, Att>> layout = new FRLayout<>(sgv);
-		
-		layout.setSize(new Dimension(600, 400));
-		VisualizationViewer<Chc<Ty, En>, Chc<Fk, Att>> vv = new VisualizationViewer<>(layout);
-		Transformer<Chc<Ty, En>, Paint> vertexPaint = x -> x.left ? Color.gray : Color.black;
-		DefaultModalGraphMouse<Chc<Ty, En>, Chc<Fk, Att>> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
-		vv.setGraphMouse(gm);
-		gm.setMode(Mode.PICKING);
-		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-
-		Transformer<Chc<Fk, Att>, String> et = x -> "";
-		Transformer<Chc<Ty, En>, String> vt = x -> x.toStringMash();
-		vv.getRenderContext().setEdgeLabelTransformer(et);
-		vv.getRenderContext().setVertexLabelTransformer(vt);
-
-		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
-		JPanel ret = new JPanel(new GridLayout(1, 1));
-		ret.add(zzz);
-		ret.setBorder(BorderFactory.createEtchedBorder());
-		
-		vv.getRenderContext().setLabelOffset(16);
-		//vv.getRenderContext().set
-		vv.setBackground(Color.white);
-		
-		//vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
-		
-		AbstractEdgeShapeTransformer aesf = (AbstractEdgeShapeTransformer)
-				vv.getRenderContext().getEdgeShapeTransformer();
-				aesf.setControlOffsetIncrement(50);
-		
-		return ret;
-	}	
-*/
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> JComponent viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		CodeTextPanel input = new CodeTextPanel("Input", "");
 		CodeTextPanel output = new CodeTextPanel("Output", "");
@@ -389,7 +364,7 @@ public final class AqlViewer {
 			Object[][] data = new Object[n][];
 			int i = 0;
 			for (X x : Util.alphabetical(alg.en(en))) {
-				List<String> row = new LinkedList<>();
+				List<Object> row = new LinkedList<>();
 				row.add(alg.printX(x));
 				for (Att att0 : atts0) {
 					row.add(alg.att(att0, x).toString(alg::printY, Util.voidFn()));
@@ -400,8 +375,15 @@ public final class AqlViewer {
 				data[i] = row.toArray();
 				i++;
 			}
-			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), en + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
+		
+				
+			JPanel p = Util.makeBoldHeaderTable(Util.toString(atts0), BorderFactory.createEmptyBorder(), en + " (" + n + ") rows", data, header.toArray(new String[header.size()]));
+			list.add(p);
 		}
+				
+		
+			
+		
 		Map<Ty, Set<Y>> m = Util.revS(alg.talg().sks.map);
 		for (Ty ty : tys) {
 			if (!m.containsKey(ty)) {
@@ -418,7 +400,6 @@ public final class AqlViewer {
 				i++;
 			}
 			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
-	
 		}
 
 		return Util.makeGrid(list);

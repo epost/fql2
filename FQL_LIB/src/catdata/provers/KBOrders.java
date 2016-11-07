@@ -1,10 +1,10 @@
-package catdata.algs.kb;
+package catdata.provers;
 
 import java.util.function.Function;
 
 import catdata.Pair;
-import catdata.algs.kb.KB.NewConst;
-import catdata.algs.kb.KBExp.KBApp;
+import catdata.provers.KB.NewConst;
+import catdata.provers.KBExp.KBApp;
 /**
  * 
  * @author Ryan Wisnesky

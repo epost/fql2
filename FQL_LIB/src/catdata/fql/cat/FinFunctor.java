@@ -84,7 +84,6 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 	}
 
 	public void validate() {
-		//System.out.println("Validating " + this);
 		for (ObjA o : srcCat.objects) {
 			if (!objMapping.containsKey(o)) {
 				throw new RuntimeException("Functor does not map " + o + this);
@@ -123,12 +122,6 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 							+ "\ncomp is " + dstCat.compose(a0, b0)
 							+ "\nsrcCat:\n" + srcCat + "\ndstcat:\n" + dstCat);
 				}
-			
-//			if (!applyA(srcCat.compose(a, b)).equals(dstCat.compose(applyA(a), applyA(b)))) {
-//				throw new RuntimeException("Composition not preserved on" + a + " and " + b
-//						+ ":\nLHS =\n" + applyA(srcCat.compose(a, b)) + "\nand RHS=\n"
-//						+ dstCat.compose(applyA(a), applyA(b)));
-//			}
 			}
 		}
 		
@@ -144,8 +137,6 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 	public boolean equals(Object obj) {
 		throw new RuntimeException("Cannot equate functors");
 	}
-
-	// static int nameIdx = 0;
 
 	/**
 	 * Converts a functor to a mapping by converting the source and target
@@ -178,19 +169,6 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 		Map<ObjB, String> dstM2 = dst.second.first;
 		Map<Attribute<ObjB>, String> dstMA = dst.fourth.first;
 		
-		
-
-//		 System.out.println("&&&&&&&&&&&&&&&&&&&&&&&");
-//		
-//		 System.out.println(srcSig);
-//		 System.out.println(dstSig);
-//		 System.out.println(srcM2);
-//		 System.out.println(dstM2);
-//		 System.out.println(srcMA);
-		// srcCat.validate();
-//		 System.out.println(srcCat.arrows);
-		// System.out.println("&&&&&&&&&&&&&&&&&&&&&&&");
-
 		List<Pair<String, String>> nm = new LinkedList<>();
 		List<Pair<String, List<String>>> em = new LinkedList<>();
 		for (Arr<ObjA, ArrowA> a : srcCat.arrows) {
@@ -214,9 +192,6 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 			am0.add(new Pair<>(srcMA.get(k), dstMA.get(am.get(k))));
 		}
 		
-//		System.out.println("am0 is " + am0);
-//		System.out.println("srcSig is " + srcSig);
-//		System.out.println("dstSig is " + dstSig);
 		Mapping m = new Mapping(/*n,*/ srcSig, dstSig, nm, am0, em);
 		return new Triple<>(m, src, dst);
 	}

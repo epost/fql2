@@ -84,66 +84,24 @@ public class Query {
 		union.okForSigma();
 	}
 
-	// public Query(String name, QueryExp d) throws FQLException {
-	// this.name = name;
-	// switch (d.kind) {
-	// case COMPOSE :
-	/*
-	 * isId = false; Query m1 = env.getQuery(d.q1); Query m2 =
-	 * env.getQuery(d.q2); // System.out.println("composing " + m1 + " and " +
-	 * m2); // System.out.println("m1src " + m1.getSource() + " and " +
-	 * m2.getTarget()); //
-	 * System.out.println(m2.getTarget().equals(m1.getSource())); if
-	 * (!m2.getTarget().equals(m1.getSource())) { throw new
-	 * FQLException("Ill-typed: " + d.name); } Query q = Query.compose(env,
-	 * name, m1, m2); // System.out.println("result " + q);
-	 * 
-	 * if (!q.getSource().equals(m2.getSource())) { throw new
-	 * FQLException("Ill-typed: " + d.name + " " + q.getSource() + " and " +
-	 * m2.getSource()); } if (!q.getTarget().equals(m1.getTarget())) { throw new
-	 * FQLException("Ill-typed: " + d.name + " " + q.getTarget() + " and " +
-	 * m1.getTarget()); } this.project = q.project; this.join = q.join;
-	 * this.union = q.union; this.name = q.name; join.okForPi();
-	 * union.okForSigma(); break; // throw new RuntimeException(); case ID :
-	 * isId = true; Signature s = env.getSchema(d.schema); project = new
-	 * Mapping(env, s); join = new Mapping(env, s); union = new Mapping(env, s);
-	 * break;
-	 * 
-	 * case QUERY : // // F : S' -> S // G : S' -> S'' // H : S'' -> T isId =
-	 * false; project = env.getMapping(d.project); join =
-	 * env.getMapping(d.join); union = env.getMapping(d.union); join.okForPi();
-	 * union.okForSigma(); if (!project.source.equals(join.source) ||
-	 * !join.target.equals(union.source)) { throw new FQLException("Ill-typed: "
-	 * + d); } break;
-	 * 
-	 * default: throw new RuntimeException("d.kind"); } }
-	 */
-
-	// boolean isId;
-
+	
 	public JPanel view() throws FQLException {
 		JPanel p = new JPanel(new GridLayout(3, 1));
 		p.setBorder(BorderFactory.createEmptyBorder());
 		JPanel q = project.view();
 		q.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createLineBorder(Color.BLACK), "Delta"));
-		// + project.name + " : " + project.target.name0 + " -> "
-		// + project.source.name0));
 		p.add(q);
 
 		q = join.view();
 		q.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createLineBorder(Color.BLACK), "Pi")); // +
 																		// join.name
-		// + " : " + join.source.name0 + " -> "
-		// + join.target.name0));
 		p.add(q);
 
 		q = union.view();
 		q.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createLineBorder(Color.BLACK), "Sigma"));
-		// + union.name + " : " + union.source.name0 + " -> "
-		// + union.target.name0));
 		p.add(q);
 
 		return p;
@@ -151,13 +109,7 @@ public class Query {
 
 	@Override
 	public String toString() {
-		// String s = "query " + name + " : " + getSource().name0 + " -> " +
-		// getTarget().name0 + " = ";
-		// if (isId) {
-		// return s + "id " + getSource().name0;
-		// }
 		throw new RuntimeException();
-		// return "delta " + project + " pi " + join + " sigma " + union;
 	}
 
 	public static Map<String, Set<Object[]>> convert0(Instance theinstance) {
@@ -197,42 +149,15 @@ public class Query {
 
 	public Graph<String, String> legend() {
 		Graph<String, String> ret = new DirectedSparseMultigraph<String, String>();
-
-		/*
-		 * ret.addVertex(getSource().name0); ret.addVertex(getTarget().name0);
-		 * ret.addVertex(join.source.name0); ret.addVertex(union.source.name0);
-		 * 
-		 * ret.addEdge(project.name, join.source.name0, getSource().name0);
-		 * ret.addEdge(join.name, join.source.name0, join.target.name0);
-		 * ret.addEdge(union.name, join.target.name0, union.target.name0);
-		 */
 		return ret;
 	}
 
 	public JPanel lowerComp2(final FqlEnvironment env) {
-		// Layout<V, E>, BasicVisualizationServer<V,E>
-		// Layout<String, String> layout = new FRLayout<>(sgv);
-		// Layout<String, String> layout = new KKLayout(sgv);
-		// Layout<String, String> layout = new SpringLayout(sgv);
-
 		Layout<String, String> layout = new ISOMLayout<String, String>(legend());
-		// Layout<String, String> layout = new CircleLayout(sgv);
 		layout.setSize(new Dimension(500, 100));
-		// layout.setLocation(getSource().name0, new Point2D(0,0));
 		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
 				layout);
 		vv.setPreferredSize(new Dimension(500, 100));
-		// Setup up a new vertex to paint transformer...
-		// Transformer<String, Paint> vertexPaint = new Transformer<String,
-		// Paint>() {
-		// public Paint transform(String i) {
-		// return which(i);
-		// }
-		//
-		// private Color which(String t) {
-		// return env.colors.get(t);
-		// }
-		// };
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -243,61 +168,24 @@ public class Query {
 		vv.getRenderContext().setVertexLabelTransformer(
 				new ToStringLabeller<String>());
 
-		// vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-		// vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
-
-		// vv.getRenderer().getVertexRenderer().
-		// vv.getRenderContext().setLabelOffset(20);
-		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
-
 		return vv;
 	}
 
 	public JPanel lowerComp(final FqlEnvironment env) {
 		JPanel pan = new JPanel(new GridLayout(1, 4));
-		/*
-		 * JLabel l1 = new JLabel(getSource().name0 + "    <-----");
-		 * l1.setBackground(env.colors.get(getSource().name0));
-		 * l1.setOpaque(true); l1.setHorizontalAlignment(SwingConstants.CENTER);
-		 * pan.add(l1);
-		 * 
-		 * 
-		 * l1 = new JLabel(join.source.name0+ "    ----->");
-		 * l1.setBackground(env.colors.get(join.source.name0));
-		 * l1.setOpaque(true); l1.setHorizontalAlignment(SwingConstants.CENTER);
-		 * pan.add(l1);
-		 * 
-		 * l1 = new JLabel(union.source.name0+ "    ----->");
-		 * l1.setBackground(env.colors.get(union.source.name0));
-		 * l1.setOpaque(true); l1.setHorizontalAlignment(SwingConstants.CENTER);
-		 * pan.add(l1);
-		 * 
-		 * l1 = new JLabel(getTarget().name0);
-		 * l1.setBackground(env.colors.get(getTarget().name0));
-		 * l1.setOpaque(true); l1.setHorizontalAlignment(SwingConstants.CENTER);
-		 * pan.add(l1);
-		 * 
-		 * // pan.setMa`
-		 */
 		return pan;
 	}
 
 	/**
 	 * Implements composition at the semantic level
 	 */
-	public static <ObjS, ArrowS, ObjB, ArrowB, ObjA, ArrowA, ObjT, ArrowT, ObjD, ArrowD, ObjC, ArrowC, ObjU, ArrowU> SemQuery<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, ObjS, ArrowS, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjU, ArrowU> doComposition(/*
-																																																																																																																																																																																																		 * Environment
-																																																																																																																																																																																																		 * env
-																																																																																																																																																																																																		 * ,
-																																																																																																																																																																																																		 */
+	public static <ObjS, ArrowS, ObjB, ArrowB, ObjA, ArrowA, ObjT, ArrowT, ObjD, ArrowD, ObjC, ArrowC, ObjU, ArrowU> SemQuery<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, ObjS, ArrowS, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjU, ArrowU> doComposition(
 	FinFunctor<ObjB, ArrowB, ObjS, ArrowS> s,
 			FinFunctor<ObjB, ArrowB, ObjA, ArrowA> f,
 			FinFunctor<ObjA, ArrowA, ObjT, ArrowT> t,
 			FinFunctor<ObjD, ArrowD, ObjT, ArrowT> u,
 			FinFunctor<ObjD, ArrowD, ObjC, ArrowC> g,
 			FinFunctor<ObjC, ArrowC, ObjU, ArrowU> v) throws FQLException {
-
-		// name = name;
 
 		// FinCat<ObjS, ArrowS> S = s.dstCat;
 		FinCat<ObjB, ArrowB> B = s.srcCat;
@@ -397,22 +285,6 @@ public class Query {
 
 		SetFunTrans<ObjD, ArrowD, Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>> epsilonresult = FDM
 				.epsilon(g, deltaresult, du);
-
-		// System.out.println("--------------------------");
-		// System.out.println("k' src is");
-		// System.out.println(k.srcCat);
-		// System.out.println("integraldu's srcCat is");
-		// FinFunctor<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>,
-		// Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>, ObjD, ArrowD> kkk = one.third;
-		// FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA,
-		// ObjD, ObjT>>>, Arr<ObjD, ArrowD>, ObjD, ArrowD> xxx =
-		// FDM.grothendieck(du);
-		// System.out.println(xxx.srcCat);
-		// System.out.println("deltapiu is");
-		// System.out.println(deltaresult);
-		// System.out.println("epsilon is");
-		// System.out.println(epsilonresult);
-		// System.out.println("--------------------------");
 
 		FinFunctor<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>> e0 = FDM
 				.grothendieck(epsilonresult);
@@ -525,14 +397,6 @@ public class Query {
 		SemQuery<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, ObjS, ArrowS, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjU, ArrowU> ret = new SemQuery<>(
 				project, join, union);
 
-		// if (DEBUG.INTERMEDIATE == Intermediate.ALL) {
-		// env.signatures.put("Aprime", Aprime.toSig("Aprime").first);
-		// env.signatures.put("Bprime", Bprime.toSig("Bprime").first);
-		// env.signatures.put("N", N.toSig("Nprime").first);
-		// env.signatures.put("Dprime", Dprime.toSig("Dprime").first);
-		// env.signatures.put("M", M.toSig("MMM").first);
-		// }
-
 		return ret;
 	}
 
@@ -559,8 +423,6 @@ public class Query {
 		Mapping g0 = q2.join;
 		Mapping v0 = q2.union;
 
-		// System.out.println("name is " + name);
-
 		Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> isoS = s0
 				.toFunctor2();
 		Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> isoT = v0
@@ -579,11 +441,7 @@ public class Query {
 				.toMapping(types);
 		Triple<Mapping, Quad<Signature, Pair<Map<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, String>, Map<String, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>, Pair<Map<Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>, String>, Map<String, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, Pair<Map<Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>, String>, Map<String, Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>>>, Quad<Signature, Pair<Map<Node, String>, Map<String, Node>>, Pair<Map<Arr<Node, Path>, String>, Map<String, Arr<Node, Path>>>, Pair<Map<Attribute<Node>, String>, Map<String, Attribute<Node>>>>> union1 = ret.union
 				.toMapping(types);
-		/*
-		 * env.signatures.put(name + "_B", proj1.second.first);
-		 * env.signatures.put(name + "_A", join1.third.first);
-		 * env.mappings.put(name + "_pi", join1.first);
-		 */
+	
 		Map<String, Node> map1 = proj1.third.second.second;
 		List<Pair<String, String>> xxx = new LinkedList<>();
 		List<Pair<String, List<String>>> yyy = new LinkedList<>();
@@ -608,32 +466,19 @@ public class Query {
 		for (Edge e : proj1.first.target.edges) {
 			Arr<Node, Path> x1 = mapA.get(e.name);
 			Arr<Node, Path> x2 = mapB.of(x1.arr);
-			// List<String> yyy2 = new LinkedList<>();
-			// yyy2.add(x1.src);
-			// if (!isoS.second.first.isId(x1)) {
-			// yyy2.addAll(x2.arr.path);
-			// }
 			yyy.add(new Pair<>(e.name, x2.arr.asList()));
 		}
 
-		// System.out.println(xxx);
-		// System.out.println(yyy);
-		// System.out.println(proj1.first.target);
-		// System.out.println(q1.getSource());
 		Mapping xyz = new Mapping(/* name + "iso1", */proj1.first.target,
 				q1.getSource(), xxx, zzz, yyy);
 
-		// System.out.println("qdelta from " + proj1.first + "\nand\n" + xyz);
 		Mapping newproj = Mapping.compose(/* name + "_delta", */proj1.first, xyz);
-		// env.mappings.put(name + "_delta", newproj);
-
+	
 		map1 = union1.third.second.second;
-		// Fn<Path, Arr<Node, Path>> map2 = isoT.third.second;
 		xxx = new LinkedList<>();
 		yyy = new LinkedList<>();
 		for (Node n : union1.first.target.nodes) {
 			Node x1 = map1.get(n.string);
-			// String x2 = map2.of(x1);
 			xxx.add(new Pair<>(n.string, x1.string));
 		}
 		map0 = union1.third.fourth.second;
@@ -648,11 +493,6 @@ public class Query {
 		for (Edge e : union1.first.target.edges) {
 			Arr<Node, Path> x1 = mapA.get(e.name);
 			Arr<Node, Path> x2 = mapB.of(x1.arr);
-			// List<String> yyy2 = new LinkedList<>();
-			// yyy2.add(x1.src);
-			// if (!isoS.second.first.isId(x1)) {
-			// yyy2.add(x2);
-			// }
 			yyy.add(new Pair<>(e.name, x2.arr.asList()));
 		}
 		xyz = new Mapping(/* name + "iso2", */union1.first.target,
@@ -660,8 +500,7 @@ public class Query {
 
 		Mapping newunion = Mapping.compose(/* name + "_sigma", */union1.first,
 				xyz);
-		// env.mappings.put(name + "_sigma", newunion);
-
+	
 		return new Query(newproj, join1.first, newunion);
 
 	}
