@@ -5,13 +5,18 @@ import java.util.Collections;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Ctx;
 import catdata.aql.Query;
+import catdata.aql.exp.SchExp.SchExpLit;
 
 public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2>> {
 	
 	public Kind kind() {
 		return Kind.QUERY;
 	}
+	
+	public abstract Pair<SchExp<Ty,En1,Sym,Fk1,Att1>, SchExp<Ty,En2,Sym,Fk2,Att2>> 
+	type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>, SchExp<Object,Object,Object,Object,Object>>> ctx);
 	
 	
 	public static final class QueryExpVar extends QueryExp<Object,Object,Object,Object,Object,Object,Object,Object> {
@@ -56,7 +61,15 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 		public String toString() {
 			return var;
 		}
-		
+	
+		@Override
+		public Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx) {
+			return ctx.get(var);
+		}
+
+		public QueryExpVar(String var) {
+			this.var = var;
+		}	
 		
 	}
 
@@ -113,7 +126,10 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 			return "QueryExpLit [q=" + q + "]";
 		}
 		
-		
+		@Override
+		public Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>, SchExp<Object,Object,Object,Object,Object>>> ctx) {
+			return new Pair<>(new SchExpLit<>(q.src), new SchExpLit<>(q.dst));
+		}
 	}
 
 }

@@ -102,10 +102,8 @@ public final class AqlCodeEditor extends
 	protected AqlDisplay makeDisplay(String foo, Program<Exp<? extends Object>> init,
 			AqlEnv env, long start, long middle) {
 			AqlDisplay ret = new AqlDisplay(foo, init, env, start, middle);
-			if (env.exn != null) {
+			if (env.exn != null && !env.keySet().isEmpty()) {
 				GUI.topFrame.toFront();
-//				topArea.requestFocus();
-		//		this.topArea.ge
 			}
 			return ret;
 	}

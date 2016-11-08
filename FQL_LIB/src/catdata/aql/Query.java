@@ -16,10 +16,11 @@ import catdata.aql.fdm.TransformLiteral; //TODO aql why depend fdm
 public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 
 	public final Ctx<En2, Frozen<Ty,En1,Sym,Fk1,Att1>> ens = new Ctx<>();
-	public final Ctx<Att2, Term<Ty,En1,Sym,Fk1,Att1,Var,Void>> atts = new Ctx<>(); 
+	public final Ctx<Att2, Term<Ty,En1,Sym,Fk1,Att1,Var,Void>> atts; 
 	
 	public final Ctx<Fk2, Transform<Ty,En1,Sym,Fk1,Att1,Var,Void,Var,Void,Void,Void,Void,Void>> fks = new Ctx<>();
-		
+	public final Ctx<Fk2, Boolean> doNotValidate = new Ctx<>();
+	
 	public final Schema<Ty,En1,Sym,Fk1,Att1> src;
 	public final Schema<Ty,En2,Sym,Fk2,Att2> dst;
 
@@ -38,7 +39,9 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		}
 		for (Fk2 fk2 : fks.keySet()) {
 			this.fks.put(fk2, new TransformLiteral<>(fks.get(fk2).first.map, new HashMap<>(), this.ens.get(dst.fks.get(fk2).second), this.ens.get(dst.fks.get(fk2).first), fks.get(fk2).second));
+			this.doNotValidate.put(fk2, fks.get(fk2).second);
 		}
+		this.atts = new Ctx<>(atts.map);
 		if (!doNotCheckPathEqs) {
 			validate();
 		}
@@ -114,11 +117,13 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		public final Collection<Eq<Ty,En1,Sym,Fk1,Att1,Var,Void>> eqs;
 		public final Schema<Ty, En1, Sym, Fk1, Att1> schema;
 		private final DP<Ty, En1, Sym, Fk1, Att1, Var, Void> dp;
+		public final Map<String, String> options;
 		
 		public Frozen(Ctx<Var, En1> gens, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs, Schema<Ty, En1, Sym, Fk1, Att1> schema, Map<String, String> options) {
 			this.gens = gens;
 			this.eqs = eqs;
 			this.schema = schema;
+			this.options = options;
 			dp = AqlProver.create(new AqlOptions(options, collage()), collage());			
 			validate();
 		}
@@ -155,5 +160,18 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		
 	}
 	
+	@Override
+	public final String toString() {
+		String ret = "";
+		
+		ret += "---- entities ---------------------------\n\n";
+		ret += Util.sep(ens.map, "\n\n", "\n----\n\n");
+		ret += "\n\n---- foreign keys------------------------\n\n";
+		ret += Util.sep(fks.map, "\n\n", "\n----\n\n");
+		ret += "\n\n---- attributes---------------------\n\n";
+		ret += Util.sep(atts.map, "\n\n", "\n----\n\n");
+		
+		return ret;
+	}
 	
 }

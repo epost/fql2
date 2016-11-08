@@ -131,7 +131,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		Schema<Object, Object, Object, Object, Object> src0 = src.eval(env);
 		Schema<Object, Object, Object, Object, Object> dst0 = dst.eval(env);
 		//Collage<Object, Object, Object, Object, Object, Void, Void> scol = new Collage<>(src0);
-		Collage<Object, Object, Object, Object, Object, Void, Void> dcol = dst0.collage();
+		Collage<Object, Object, Object, Object, Object, Void, Void> dcol = new Collage<>(dst0.collage());
 		
 		Map<Object, Object> ens0 = new HashMap<>();
 		Map<Object, Pair<Object, List<Object>>> fks0 = new HashMap<>();

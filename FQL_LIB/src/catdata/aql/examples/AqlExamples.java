@@ -8,6 +8,7 @@ public final class AqlExamples {
 									aqlKb = new AqlKBExample(),
 									aqlJee = new AqlJeeExample(),
 									aqlSigma = new AqlSigmaExample(),
+									aqlQuery = new AqlQueryExample(),
 									aqlDelta = new AqlDeltaExample();
 	
 }

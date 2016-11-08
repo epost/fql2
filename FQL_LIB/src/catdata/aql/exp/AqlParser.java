@@ -25,10 +25,14 @@ import catdata.aql.exp.GraphExp.GraphExpVar;
 import catdata.aql.exp.InstExp.InstExpDelta;
 import catdata.aql.exp.InstExp.InstExpDistinct;
 import catdata.aql.exp.InstExp.InstExpEmpty;
+import catdata.aql.exp.InstExp.InstExpEval;
 import catdata.aql.exp.InstExp.InstExpSigma;
 import catdata.aql.exp.InstExp.InstExpVar;
 import catdata.aql.exp.MapExp.MapExpId;
 import catdata.aql.exp.MapExp.MapExpVar;
+import catdata.aql.exp.QueryExp.QueryExpVar;
+import catdata.aql.exp.QueryExpRaw.Block;
+import catdata.aql.exp.QueryExpRaw.Trans;
 import catdata.aql.exp.SchExp.SchExpEmpty;
 import catdata.aql.exp.SchExp.SchExpInst;
 import catdata.aql.exp.SchExp.SchExpVar;
@@ -91,7 +95,7 @@ public class AqlParser {
 			"coeval",
 			"ed",
 			"chase",
-			"for",
+			"from",
 			"where",
 			"return",
 			"pivot",
@@ -196,8 +200,9 @@ public class AqlParser {
 			.map(x -> new InstExpSigma(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 			delta = Parsers.tuple(token("delta"), map_ref.lazy(), inst_ref.lazy())
 					.map(x -> new InstExpDelta(x.b, x.c)),	
-			distinct = Parsers.tuple(token("distinct"), inst_ref.lazy()).map(x -> new InstExpDistinct(x.b)),		
-			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta,distinct);
+			distinct = Parsers.tuple(token("distinct"), inst_ref.lazy()).map(x -> new InstExpDistinct(x.b)),
+			eval = Parsers.tuple(token("eval"), query_ref.lazy(), inst_ref.lazy()).map(x -> new InstExpEval(x.b, x.c)),
+			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta,distinct,eval);
 		
 		inst_ref.set(ret);
 	}
@@ -556,17 +561,74 @@ public class AqlParser {
 			return ret;	
 	}
 	 
+	 private static Parser<catdata.Pair<Block<String, String>, List<catdata.Pair<String, RawTerm>>>> block() {
+		 Parser<List<catdata.Pair<String, String>>> generators 
+			= Parsers.tuple(token("from"), env(ident, ":")).map(x -> x.b);
+			
+			Parser<catdata.Pair<RawTerm, RawTerm>> eq = Parsers.tuple(term(), token("="), term()).map(x -> {
+				return new catdata.Pair<>(x.a, x.c);
+			});
+
+			Parser<List<catdata.Pair<RawTerm, RawTerm>>> eqs = Parsers.tuple(token("where"), eq.many()).map(x -> x.b);
+					
+			Parser<List<catdata.Pair<String, RawTerm>>> 
+			atts = Parsers.tuple(token("return"), Parsers.tuple(ident, token("->"), term()).map(x -> new catdata.Pair<>(x.a, x.c)).many()).map(x -> x.b);
+			
+			Parser<Tuple4<List<catdata.Pair<String, String>>, List<catdata.Pair<RawTerm, RawTerm>>, List<catdata.Pair<String, RawTerm>>, List<catdata.Pair<String, String>>>> 
+			pa = Parsers.tuple(generators.optional(), eqs.optional(), atts.optional(), options);
+							
+			Parser<catdata.Pair<Block<String, String>, List<catdata.Pair<String, RawTerm>>>>
+			ret = Parsers.tuple(token("{"), pa, token("}")).map(x -> {
+				Block<String, String> b = new Block<>(x.b.a, 
+							 		  Util.newIfNull(x.b.b), 
+							 	      x.b.d);
+				return new catdata.Pair<>(b, Util.newIfNull(x.b.c));
+			});
+				
+			return ret;	
+	}
+	 
 	 //TODO aql add example illustrating multi equations
 
 /*	private static final Parser<PragmaExp> pragmaExp() {
 		return Parsers.fail("pragma parser not implemented yet"); //TODO aql pragma
 	} */
-/*	
-	public static final Parser<QueryExp> queryExp() {
-		return Parsers.fail("query parser not implemented yet"); 
-	} */
+
+	public static final void queryExp() {
+		Parser<QueryExp<?,?,?,?,?,?,?,?>> 
+		var = ident.map(QueryExpVar::new),
+		//id = Parsers.tuple(token("id"), sch_ref.lazy()).map(x -> new MapExpId<>(x.b)),
+		ret = Parsers.or(/*id,*/ queryExpRaw(), var);
 	
-	 //TODO: aql reverse order on arguments env
+		query_ref.set(ret);	
+	} 
+	
+	
+	
+	 private static Parser<QueryExpRaw<String,String,String,String,String,String,String,String>> queryExpRaw() {
+		 	Parser<List<catdata.Pair<String, catdata.Pair<Block<String, String>, List<catdata.Pair<String, RawTerm>>>>>> 
+		 	ens = Parsers.tuple(token("entities"), env(block(), "->")).map(x -> x.b);
+			
+		 	Parser<List<catdata.Pair<String, Trans>>> trans = Parsers.tuple(token("foreign_keys"), env(trans(), "->")).map(x -> x.b);
+		 	
+			Parser<Tuple4<List<String>, List<catdata.Pair<String, catdata.Pair<Block<String, String>, List<catdata.Pair<String, RawTerm>>>>>, List<catdata.Pair<String, Trans>>, List<catdata.Pair<String, String>>>> 
+			pa = Parsers.tuple(imports, ens.optional(), trans.optional(), options);
+			
+			Parser<Tuple5<Token, Token, SchExp<?, ?, ?, ?, ?>, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"), sch_ref.lazy().followedBy(token("->")), sch_ref.lazy(), token("{")); //.map(x -> x.c);
+						
+			Parser<QueryExpRaw<String,String,String,String,String,String,String,String>> ret = Parsers.tuple(l, pa, token("}")).map(x -> {
+				
+			return new QueryExpRaw(x.a.c, x.a.d, 
+									x.b.a, 
+							 		 Util.newIfNull(x.b.b), 
+							 	     Util.newIfNull(x.b.c), 
+						              x.b.d);
+			});
+				
+			return ret;	
+	}
+
+	//TODO: aql reverse order on arguments env
 	private static final Parser<MapExpRaw> mapExpRaw() {
 		Parser<List<catdata.Pair<String, String>>> ens = Parsers.tuple(token("entities"), env(ident, "->")).map(x -> x.b);
 		
@@ -613,6 +675,20 @@ public class AqlParser {
 		return ret;	
 	}
 
+	private static final Parser<Trans> trans() {
+		Parser<List<catdata.Pair<String, RawTerm>>> gens = env(term(), "->");
+		
+				
+		Parser<Pair<List<catdata.Pair<String, RawTerm>>, List<catdata.Pair<String, String>>>> 
+		pa = Parsers.tuple(gens.optional(), options);
+		
+					
+		Parser<Trans> ret = Parsers.tuple(token("{"), pa, token("}")).map(x -> {
+			return new Trans(Util.newIfNull(x.b.a), x.b.b);
+		});
+			
+		return ret;	
+	}
 	
 /*	public static final Parser<?> pragma() {
 		Parser<?> p = Parsers.tuple(Terminals.StringLiteral.PARSER, token("="),
@@ -639,6 +715,7 @@ public class AqlParser {
 	private static final Reference<InstExp<?, ?, ?,?,?,?,?,?,?>> inst_ref = Parser.newReference();
 	private static final Reference<MapExp<?,?,?,?,?,?,?,?>> map_ref = Parser.newReference();
 	private static final Reference<TransExp<?,?,?,?,?,?,?,?,?,?,?,?,?>> trans_ref = Parser.newReference();
+	private static final Reference<QueryExp<?,?,?,?,?,?,?,?>> query_ref = Parser.newReference();
 	
 	private static Parser<Program<Exp<?>>> program() { //TODO: aql should create single instance of this rather than fn
 		tyExp();
@@ -647,6 +724,7 @@ public class AqlParser {
 		mapExp();
 		transExp();
 		graphExp();
+		queryExp();
 		
 		Parser<Triple<String, Integer, ? extends Exp<?>>> p 
 		= Parsers.or(decl("typeside", ty_ref.get()),
@@ -654,8 +732,8 @@ public class AqlParser {
 					 decl("instance", inst_ref.get()),
 					 decl("mapping", map_ref.get()),
 					 decl("transform", trans_ref.get()),
-					 decl("graph", graph_ref.get())
-					 //decl("query", queryExp()),
+					 decl("graph", graph_ref.get()),
+					 decl("query", query_ref.get())
 					 //decl("pragma", pragmaExp())
 					 );
 		

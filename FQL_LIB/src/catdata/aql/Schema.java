@@ -152,7 +152,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (getClass() != obj.getClass()) //TODO aql equality for semantic objects should not pointer eq getClass
 			return false;
 		Schema<?,?,?,?,?> other = (Schema<?,?,?,?,?>) obj;
 		if (atts == null) {

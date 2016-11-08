@@ -14,6 +14,8 @@ import catdata.aql.Mapping;
 import catdata.aql.exp.SchExp.SchExpLit;
 import catdata.aql.fdm.DeltaInstance;
 import catdata.aql.fdm.DistinctInstance;
+import catdata.aql.fdm.EvalAlgebra.Row;
+import catdata.aql.fdm.EvalInstance;
 import catdata.aql.fdm.SigmaInstance;
 import catdata.aql.fdm.TerminalInstance;
 
@@ -25,7 +27,78 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	
 	public abstract SchExp<Ty,En,Sym,Fk,Att>  
 	type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0,
-	     Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx);
+	     Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx,
+	     Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs);
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final class InstExpEval<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
+	extends InstExp<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
+		
+		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
+		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y>  I;
+		
+		public InstExpEval(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i) {
+			Q = q;
+			I = i;
+		}
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpEval other = (InstExpEval) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (Q == null) {
+				if (other.Q != null)
+					return false;
+			} else if (!Q.equals(other.Q))
+				return false;
+			return true;
+		}
+		@Override
+		public String toString() {
+			return "eval " + Q + " " + I;
+		}
+
+		@Override
+		public SchExp<Ty, En2, Sym, Fk2, Att2> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
+			if (!I.type(ctx0, ctx, qs).equals(Q.type(qs).first)) { //TODO aql schema equality
+				throw new RuntimeException("Schema of instance is " + I.type(ctx0, ctx, qs) + " but source of query is " + Q.type(qs).first);
+			}
+			return Q.type(qs).second;
+		}
+
+		@Override
+		public Instance<Ty, En2, Sym, Fk2, Att2, Row<En2, X>, Y, Row<En2, X>, Y> eval(AqlEnv env) {
+			return new EvalInstance<>(Q.eval(env), I.eval(env));
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(I.deps(), Q.deps());
+		}
+		
+		
+
+	}
+	
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////	
 
@@ -86,8 +159,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		@Override
-		public SchExp<Ty, En2, Sym, Fk2, Att2> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx) {		
-			SchExp<Ty, En1, Sym, Fk1, Att1> t0 = I.type(ctx0, ctx);
+		public SchExp<Ty, En2, Sym, Fk2, Att2> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx,Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {		
+			SchExp<Ty, En1, Sym, Fk1, Att1> t0 = I.type(ctx0, ctx, qs);
 			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(ctx0);
 			
 			if (!t1.first.equals(t0)) { //TODO aql type equality
@@ -160,8 +233,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		@Override
-		public SchExp<Ty, En1, Sym, Fk1, Att1> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx) {		
-			SchExp<Ty, En2, Sym, Fk2, Att2> t0 = I.type(ctx0, ctx);
+		public SchExp<Ty, En1, Sym, Fk1, Att1> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {		
+			SchExp<Ty, En2, Sym, Fk2, Att2> t0 = I.type(ctx0, ctx, qs);
 			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(ctx0);
 			
 			if (!t1.second.equals(t0)) { //TODO aql type equality
@@ -237,7 +310,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		@Override
-		public SchExp<Ty, En, Sym, Fk, Att> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>, SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx) {
+		public SchExp<Ty, En, Sym, Fk, Att> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>, SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
 			return schema;
 		}
 		
@@ -294,7 +367,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 		
 		@Override
-		public SchExp<Object, Object, Object, Object, Object> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx) {
+		public SchExp<Object, Object, Object, Object, Object> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
 			return ctx.get(var);
 		}
 
@@ -355,7 +428,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 		
 		@Override
-		public SchExp<Ty, En, Sym, Fk, Att> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>, SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx) {
+		public SchExp<Ty, En, Sym, Fk, Att> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>, SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
 			return new SchExpLit<>(inst.schema());
 		}
 	}
@@ -373,8 +446,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		
 
 		@Override
-		public SchExp<Ty, En, Sym, Fk, Att> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx) {
-			return I.type(ctx0, ctx);
+		public SchExp<Ty, En, Sym, Fk, Att> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
+			return I.type(ctx0, ctx, qs);
 		}
 	
 		@Override

@@ -157,7 +157,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	}
 	
 	@Override
-	public SchExp<Object, Object, Object, Object, Object> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx) {
+	public SchExp<Object, Object, Object, Object, Object> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
 		return schema;
 	}
 	

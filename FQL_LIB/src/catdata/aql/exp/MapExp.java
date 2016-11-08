@@ -87,14 +87,9 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 		public Collection<Pair<String, Kind>> deps() {
 			return Util.singList(new Pair<>(var, Kind.MAPPING));
 		}
-		public String meta() {
-			return "";
-		}
 	
 		public MapExpVar(String var) {
-			if (var == null) {
-				throw new RuntimeException("Attempt to create MapExpVar with null var");
-			}
+			Util.assertNotNull(var);
 			this.var = var;
 		}
 

@@ -241,7 +241,7 @@ public abstract class KBExp<C, V> {
 
 		public boolean allSubExps(Map<KBExp<C, V>, Set<KBExp<C, V>>> pred) {
 			if (!pred.containsKey(this)) {
-				pred.put(this, Collections.emptySet());
+				pred.put(this, new HashSet<>());
 				return true;
 			}
 			return false;

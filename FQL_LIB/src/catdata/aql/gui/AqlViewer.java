@@ -352,7 +352,7 @@ public final class AqlViewer {
 					data[i] = row;
 					i++;
 				}
-				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), en + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
+				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), en + " (" + n + ")", data, header.toArray())); // TODO: aql boldify attributes
 			}
 			Map<Ty,Set<Y1>> z = Util.revS(t.src().algebra().talg().sks.map);
 			for (Ty ty : tys) {
@@ -373,7 +373,7 @@ public final class AqlViewer {
 					data[i] = row;
 					i++;
 				}
-				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
+				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + n + ")", data, header.toArray())); // TODO: aql boldify attributes
 			}
 
 			return Util.makeGrid(list);
@@ -424,7 +424,7 @@ public final class AqlViewer {
 			}
 		
 				
-			JPanel p = Util.makeBoldHeaderTable(Util.toString(atts0), BorderFactory.createEmptyBorder(), en + " (" + n + ") rows", data, header.toArray(new String[header.size()]));
+			JPanel p = Util.makeBoldHeaderTable(Util.toString(atts0), BorderFactory.createEmptyBorder(), en + " (" + n + ")", data, header.toArray(new String[header.size()]));
 			list.add(p);
 		}
 				
@@ -446,7 +446,7 @@ public final class AqlViewer {
 				data[i] = row;
 				i++;
 			}
-			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + n + ") rows", data, header.toArray())); // TODO: aql boldify attributes
+			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + n + ")", data, header.toArray())); // TODO: aql boldify attributes
 		}
 
 		return Util.makeGrid(list);

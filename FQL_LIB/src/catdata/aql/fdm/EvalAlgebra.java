@@ -114,7 +114,7 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 		
 	private X trans2(Row<En2, X> row, Term<Void, En1, Void, Fk1, Void, Var, Void> term) {
 		if (term.gen != null) {
-			return row.get(term.var);
+			return row.get(term.gen);
 		} else if (term.fk != null) {
 			return I.algebra().fk(term.fk, trans2(row, term.arg));
 		}
@@ -192,7 +192,7 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 	private Collection<Row<En2, X>> eval(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q) {
 		Collection<Row<En2, X>> ret = new LinkedList<>();
 		ret.add(new Row<>(new Ctx<>(), en2));
-		for (Var v : q.gens.keySet()) {
+		for (Var v : q.order()) { 
 			Collection<X> dom = I.algebra().en(q.gens.get(v));
 			ret = Row.extend(ret, dom, v, en2);
 			ret = filter(ret, q);
@@ -202,7 +202,11 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 	
 	private Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> trans1(Row<En2, X> row, Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term) {
 		if (term.gen != null) {
-			return Optional.of(I.algebra().repr(row.get(term.gen)).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn()));
+			if (row.ctx.containsKey(term.gen)) {
+				return Optional.of(I.algebra().repr(row.get(term.gen)).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn()));
+			} else {
+				return Optional.empty();
+			}
 		} else if (term.obj != null) {
 			return Optional.of(term.asObj());
 		} else if (term.fk != null) {
@@ -246,6 +250,7 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 					continue outer;
 				}
 			}
+			ret.add(row);
 		}
 		
 		return ret;

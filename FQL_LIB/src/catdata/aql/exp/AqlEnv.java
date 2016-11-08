@@ -7,6 +7,7 @@ import java.util.Set;
 
 import catdata.DMG;
 import catdata.Pair;
+import catdata.Util;
 import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.Mapping;
@@ -16,15 +17,15 @@ import catdata.aql.Schema;
 import catdata.aql.Transform;
 import catdata.aql.TypeSide;
 import catdata.ide.Program;
-import edu.uci.ics.jung.graph.Graph;
 
 public final class AqlEnv {
 
 	public Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> mtys = new Ctx<>();
+	public Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qtys = new Ctx<>();
 	public Ctx<String, SchExp<Object,Object,Object,Object,Object>> itys = new Ctx<>();
 	public Ctx<String, Pair<InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>,  InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>>> ttys = new Ctx<>();
 
-	//TODO AqlEnv move to vtx
+	//TODO AqlEnv move to ctx
 	private Map<String, DMG<Object, Object>> gs = new HashMap<>();
 	private Map<String, TypeSide<Object, Object>> tys = new HashMap<>();
 	private Map<String, Schema<Object, Object, Object, Object, Object>> schs = new HashMap<>();
@@ -92,6 +93,7 @@ public final class AqlEnv {
 	}
 	
 	public void put(String k, TypeSide<Object, Object> v) {
+		Util.assertNotNull(v);
 		if (tys.containsKey(k)) {
 			throw new RuntimeException("Already a top-level typeside definition for " + k);
 		}
@@ -107,6 +109,7 @@ public final class AqlEnv {
 	}
 	
 	public void put(String k, Schema<Object, Object, Object, Object, Object> v) {
+		Util.assertNotNull(v);
 		if (schs.containsKey(k)) {
 			throw new RuntimeException("Already a top-level schema definition for " + k);
 		}
@@ -122,6 +125,7 @@ public final class AqlEnv {
 	}
 	
 	public void put(String k, Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> v) {
+		Util.assertNotNull(v);
 		if (insts.containsKey(k)) {
 			throw new RuntimeException("Already a top-level instance definition for " + k);
 		}
@@ -137,6 +141,7 @@ public final class AqlEnv {
 	}
 	
 	public void put(String k, Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> v) {
+		Util.assertNotNull(v);
 		if (trans.containsKey(k)) {
 			throw new RuntimeException("Already a top-level transform definition for " + k);
 		}
@@ -152,6 +157,7 @@ public final class AqlEnv {
 	}
 	
 	public void put(String k, Mapping<Object, Object, Object, Object, Object, Object, Object, Object> v) {
+		Util.assertNotNull(v);
 		if (maps.containsKey(k)) {
 			throw new RuntimeException("Already a top-level mapping definition for " + k);
 		}
@@ -167,6 +173,7 @@ public final class AqlEnv {
 	}
 	
 	public void put(String k, Query<Object, Object, Object, Object, Object, Object, Object, Object> v) {
+		Util.assertNotNull(v);
 		if (qs.containsKey(k)) {
 			throw new RuntimeException("Already a top-level query definition for " + k);
 		}
@@ -232,7 +239,7 @@ public final class AqlEnv {
 			Exp<?> e = prog.exps.get(s);
 			switch (e.kind()) {
 			case INSTANCE:
-				itys.put(s, ((InstExp)e).type(mtys, itys));
+				itys.put(s, ((InstExp)e).type(mtys, itys, qtys));
 				continue;
 			case MAPPING:
 				mtys.put(s, ((MapExp)e).type(mtys));
@@ -240,11 +247,12 @@ public final class AqlEnv {
 			case PRAGMA:
 				continue;
 			case QUERY:
+				qtys.put(s, ((QueryExp)e).type(qtys));
 				continue;
 			case SCHEMA:
 				continue;
 			case TRANSFORM:
-				ttys.put(s, ((TransExp)e).type(mtys, itys, ttys));
+				ttys.put(s, ((TransExp)e).type(mtys, itys, ttys, qtys));
 				continue;
 			case TYPESIDE:
 				continue;

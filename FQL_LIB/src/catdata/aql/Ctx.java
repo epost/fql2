@@ -1,6 +1,7 @@
 package catdata.aql;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,11 +75,12 @@ public final class Ctx<K,V> {
 		map.remove(k);
 	}
 	
+	
 	public Ctx(Map<K,V> map) {
 		if (map == null) {
 			throw new RuntimeException("Attempt to create a Ctx with null map");
 		}
-		this.map = map;
+		this.map = new LinkedHashMap<>(map);
 	}
 	/*
 	public Ctx(LinkedHashMap<K,V> map) {
@@ -156,6 +158,14 @@ public final class Ctx<K,V> {
 
 	public int size() {
 		return map.size();
+	}
+
+	public <X> Ctx<K,Chc<X,V>> inRight() {
+		LinkedHashMap<K,Chc<X,V>> ret = new LinkedHashMap<>();
+		for (K k : map.keySet()) {
+			ret.put(k, Chc.inRight(map.get(k)));
+		}
+		return new Ctx<>(ret);
 	}
 	
 }

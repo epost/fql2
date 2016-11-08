@@ -31,7 +31,8 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 	public abstract Pair<InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1>, InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2>> 
 	type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0,
 	     Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx, 
-	     Ctx<String, Pair<InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>,  InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>>> ctx1);
+	     Ctx<String, Pair<InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>,  InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object>>> ctx1,
+	     Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs);
 
 	///////////////////////////////////////////////////////////////////////////////////////
 	
@@ -104,8 +105,8 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		@Override
 		public Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Pair<En1, X>, Y, ID, Chc<Y, Pair<ID, Att2>>>, 
 		            InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
-				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
-			SchExp<Ty, En2, Sym, Fk2, Att2> x = I.type(ctx0, ctx);
+				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
+			SchExp<Ty, En2, Sym, Fk2, Att2> x = I.type(ctx0, ctx, qs);
 			//TODO aql schema equality
 			if (!x.equals(F.type(ctx0).second)) {
 				throw new RuntimeException("In " + this + ", mapping codomain is " + F.type(ctx0).second + " but instance schema is " + x);
@@ -172,8 +173,8 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		@Override
 		public Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y>, 
 		InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
-				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
-			SchExp<Ty, En1, Sym, Fk1, Att1> x = I.type(ctx0, ctx);
+				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
+			SchExp<Ty, En1, Sym, Fk1, Att1> x = I.type(ctx0, ctx, qs);
 			//TODO aql schema equality
 			if (!x.equals(F.type(ctx0).first)) {
 				throw new RuntimeException("In " + this + ", mapping domain is " + F.type(ctx0).first + " but instance schema is " + x);
@@ -263,11 +264,11 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		@Override
 		public Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, ID,Chc<Sk1,Pair<ID,Att2>>>, 
 		            InstExp<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2, ID,Chc<Sk2,Pair<ID,Att2>>>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
-				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
-			Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, X1, Y1>, InstExp<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, X2, Y2>> x = t.type(ctx0, ctx, ctx1);
+				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
+			Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, X1, Y1>, InstExp<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, X2, Y2>> x = t.type(ctx0, ctx, ctx1, qs);
 			//TODO aql schema equality
-			if (!x.first.type(ctx0, ctx).equals(F.type(ctx0).first)) {
-				throw new RuntimeException("In " + this + ", mapping domain is " + F.type(ctx0).first + " but transform domain schema is " + x.first.type(ctx0, ctx));
+			if (!x.first.type(ctx0, ctx, qs).equals(F.type(ctx0).first)) {
+				throw new RuntimeException("In " + this + ", mapping domain is " + F.type(ctx0).first + " but transform domain schema is " + x.first.type(ctx0, ctx, qs));
 			}
 			InstExp<Ty,En2,Sym,Fk2,Att2,Gen1,Sk1,ID,Chc<Sk1,Pair<ID,Att2>>> a = new InstExpSigma<>(F, x.first, options1);
 			InstExp<Ty,En2,Sym,Fk2,Att2,Gen2,Sk2,ID,Chc<Sk2,Pair<ID,Att2>>> b = new InstExpSigma<>(F, x.second, options2);
@@ -336,11 +337,11 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, X1>, Y1, Pair<En1, X1>, Y1>, InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, X2>, Y2, Pair<En1, X2>, Y2>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
-				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
-			Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, X1, Y1>, InstExp<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2, X2, Y2>> x = t.type(ctx0, ctx, ctx1);
+				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
+			Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, X1, Y1>, InstExp<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2, X2, Y2>> x = t.type(ctx0, ctx, ctx1, qs);
 			//TODO aql schema equality
-			if (!x.first.type(ctx0, ctx).equals(F.type(ctx0).second)) {
-				throw new RuntimeException("In " + this + ", mapping codomain is " + F.type(ctx0).second + " but transform domain schema is " + x.first.type(ctx0, ctx));
+			if (!x.first.type(ctx0, ctx, qs).equals(F.type(ctx0).second)) {
+				throw new RuntimeException("In " + this + ", mapping codomain is " + F.type(ctx0).second + " but transform domain schema is " + x.first.type(ctx0, ctx, qs));
 			}
 			InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, X1>, Y1, Pair<En1, X1>, Y1> a = new InstExpDelta<>(F, x.first);
 			InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, X2>, Y2, Pair<En1, X2>, Y2> b = new InstExpDelta<>(F, x.second);
@@ -417,7 +418,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public Pair<InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
-				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
+				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
 			return new Pair<>(inst, inst);
 		}
 
@@ -475,7 +476,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
-				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
+				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
 			return ctx1.get(var);
 		}
 
@@ -535,7 +536,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public Pair<InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1>, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
-				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
+				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
 			return new Pair<>(new InstExpLit<>(trans.src()), new InstExpLit<>(trans.dst()));
 		}
 
@@ -579,8 +580,8 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public Pair<InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1>, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
-				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1) {
-			return new Pair<>(new InstExpDistinct<>(t.type(ctx0, ctx, ctx1).first), new InstExpDistinct<>(t.type(ctx0, ctx, ctx1).second));
+				Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
+			return new Pair<>(new InstExpDistinct<>(t.type(ctx0, ctx, ctx1, qs).first), new InstExpDistinct<>(t.type(ctx0, ctx, ctx1, qs).second));
 		}
 
 		@Override

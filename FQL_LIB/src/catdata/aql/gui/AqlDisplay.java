@@ -54,7 +54,7 @@ public final class AqlDisplay implements Disp {
 		case PRAGMA:
 			return exp.kind() + " " + c;
 		case QUERY:
-			return exp.kind() + " " + c;
+			return exp.kind() + " " + c + " : " + env.qtys.get(c).first + " -> " + env.qtys.get(c).second;
 		case SCHEMA:
 			return exp.kind() + " " + c;
 		case TRANSFORM:
@@ -95,20 +95,16 @@ public final class AqlDisplay implements Disp {
 		this.exn = env.exn;
 		for (String c : p.order) {
 			Exp<?> exp = p.exps.get(c);
-			/* if (!env.keySet().contains(c)) {
-				continue;
-			} */
-			Object obj = env.get(c, exp.kind());
-			if (obj == null) {
-				throw new RuntimeException("No def for " + c);
-			}
-			map.put(obj, c); 
-			try {
-				frames.add(new Pair<>(doLookup(c, obj, exp, env), wrapDisplay(exp.kind(), obj)));
-			} catch (RuntimeException ex) {
-				ex.printStackTrace();
-				throw new LineException(ex.getMessage(), c, exp.kind().toString());
-	//			frames.add(new Pair<>(doLookup(c, obj, exp), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
+			if (env.keySet().contains(c)) {
+				Object obj = env.get(c, exp.kind());
+				map.put(obj, c); 
+				try {
+					frames.add(new Pair<>(doLookup(c, obj, exp, env), wrapDisplay(exp.kind(), obj)));
+				} catch (RuntimeException ex) {
+					ex.printStackTrace();
+					throw new LineException(ex.getMessage(), c, exp.kind().toString());
+		//			frames.add(new Pair<>(doLookup(c, obj, exp), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
+				}
 			}
 		}
 		long end = System.currentTimeMillis();

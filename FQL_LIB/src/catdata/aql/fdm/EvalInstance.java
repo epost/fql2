@@ -15,7 +15,7 @@ import catdata.aql.Var;
 import catdata.aql.fdm.EvalAlgebra.Row;
 
 //TODO aql instance DPs only have to extend schema DP to ground terms in instance 
-public class EvalInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y, V> 
+public class EvalInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
 extends Instance<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y>  
  implements DP<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y>  {	
 	
@@ -25,7 +25,7 @@ extends Instance<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y>
 	private final SaturatedInstance<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> J;
 	
 	public EvalInstance(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i) {
-		if (!q.dst.equals(i.schema())) {
+		if (!q.src.equals(i.schema())) {
 			throw new RuntimeException("In eval instance, source of query is " + q.src + ", but instance has type " + i.schema());
 		}
 
