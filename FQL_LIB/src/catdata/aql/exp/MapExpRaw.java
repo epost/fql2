@@ -16,7 +16,6 @@ import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.Mapping;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
@@ -137,7 +136,8 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		Map<Object, Pair<Object, List<Object>>> fks0 = new HashMap<>();
 		Map<Object, Triple<Var, Object, Term<Object, Object, Object, Object, Object, Void, Void>>> atts0 = new HashMap<>();
 		for (String k : imports) {
-			Mapping< Object, Object, Object, Object, Object, Object, Object, Object> v = env.getMapping(k);
+			@SuppressWarnings("unchecked")
+			Mapping< Object, Object, Object, Object, Object, Object, Object, Object> v = env.defs.maps.get(k);
 			Util.putAllSafely(ens0, v.ens.map);
 			Util.putAllSafely(fks0, v.fks.map);
 			Util.putAllSafely(atts0, v.atts.map);
@@ -211,7 +211,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 	}
 
 	@Override
-	public Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx) {
+	public Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>> type(AqlTyping G) {
 		return new Pair<>(src, dst);
 	}
 }

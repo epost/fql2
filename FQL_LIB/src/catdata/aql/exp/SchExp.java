@@ -142,9 +142,10 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			this.var = var;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public Schema<Object, Object, Object, Object, Object> eval(AqlEnv env) {
-			return env.getSchema(var);
+			return env.defs.schs.get(var);
 		}
 
 		@Override

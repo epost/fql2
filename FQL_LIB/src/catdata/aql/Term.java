@@ -686,8 +686,8 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 
 	@SuppressWarnings({ "hiding", "unchecked" })
-	@Deprecated
-	 public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> convert() {
+	//@Deprecated
+	public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> convert() {
 		return (Term<Ty, En, Sym, Fk, Att, Gen, Sk>) this;
 	}
 

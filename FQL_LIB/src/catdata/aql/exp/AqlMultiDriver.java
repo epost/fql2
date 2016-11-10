@@ -43,7 +43,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	private LineException exn; //TODO aql make this all the errors, not just the first error
 	boolean stop = false;
-
+	
 	public AqlMultiDriver(Program<Exp<?>> prog, String[] toUpdate, Program<Exp<?>> last_prog, AqlEnv last_env) {
 		this.prog = prog;
 		this.toUpdate = toUpdate;
@@ -51,7 +51,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		this.last_env = last_env;
 
 		checkAcyclic();
-		env.type(prog);
+		env.typing = new AqlTyping(prog);
 		init();
 		toUpdate[0] = toString();
 		process();
@@ -120,11 +120,11 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			return;
 		}
 		for (String n : prog.order) {
-			if (changed(n) || !last_env.keySet().contains(n)) {
+			if (changed(n) || !last_env.defs.keySet().contains(n)) {
 				todo.add(n);
 			} else {
 				Kind k = prog.exps.get(n).kind();
-				env.put(n, k, last_env.get(n, k));
+				env.defs.put(n, k, last_env.defs.get(n, k));
 				completed.add(n);
 			}
 		}
@@ -183,7 +183,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 					throw new RuntimeException("null result on " + exp);
 				}
 				synchronized (this) {
-					env.put(n, k, val);
+					env.defs.put(n, k, val);
 					processing.remove(n);
 					completed.add(n);
 					toUpdate[0] = toString();

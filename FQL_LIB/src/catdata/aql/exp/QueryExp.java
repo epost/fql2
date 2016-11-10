@@ -5,7 +5,6 @@ import java.util.Collections;
 
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.Ctx;
 import catdata.aql.Query;
 import catdata.aql.exp.SchExp.SchExpLit;
 
@@ -15,8 +14,7 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 		return Kind.QUERY;
 	}
 	
-	public abstract Pair<SchExp<Ty,En1,Sym,Fk1,Att1>, SchExp<Ty,En2,Sym,Fk2,Att2>> 
-	type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>, SchExp<Object,Object,Object,Object,Object>>> ctx);
+	public abstract Pair<SchExp<Ty,En1,Sym,Fk1,Att1>, SchExp<Ty,En2,Sym,Fk2,Att2>> type(AqlTyping G);
 	
 	
 	public static final class QueryExpVar extends QueryExp<Object,Object,Object,Object,Object,Object,Object,Object> {
@@ -27,9 +25,10 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 			return Util.singList(new Pair<>(var, Kind.QUERY));
 		}
 		
+		@SuppressWarnings("unchecked")
 		@Override
 		public Query<Object,Object,Object,Object,Object,Object,Object,Object> eval(AqlEnv env) {
-			return env.getQuery(var);
+			return env.defs.qs.get(var);
 		}
 
 		@Override
@@ -62,9 +61,10 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 			return var;
 		}
 	
+		@SuppressWarnings("unchecked")
 		@Override
-		public Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx) {
-			return ctx.get(var);
+		public Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>> type(AqlTyping G) {
+			return (Pair<SchExp<Object, Object, Object, Object, Object>,SchExp<Object, Object, Object, Object, Object>>) ((Object)G.defs.qs.get(var));
 		}
 
 		public QueryExpVar(String var) {
@@ -127,7 +127,7 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 		}
 		
 		@Override
-		public Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>, SchExp<Object,Object,Object,Object,Object>>> ctx) {
+		public Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> type(AqlTyping G) {
 			return new Pair<>(new SchExpLit<>(q.src), new SchExpLit<>(q.dst));
 		}
 	}

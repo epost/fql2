@@ -48,17 +48,17 @@ public final class AqlDisplay implements Disp {
 	private static String doLookup(String c, Object o, Exp<?> exp, AqlEnv env) {
 		switch (exp.kind()) {
 		case INSTANCE:
-			return exp.kind() + " " + c + " : " + env.itys.get(c);
+			return exp.kind() + " " + c + " : " + env.typing.defs.insts.get(c);
 		case MAPPING:
-			return exp.kind() + " " + c + " : " + env.mtys.get(c).first + " -> " + env.mtys.get(c).second;
+			return exp.kind() + " " + c + " : " + env.typing.defs.maps.get(c).first + " -> " + env.typing.defs.maps.get(c).second;
 		case PRAGMA:
 			return exp.kind() + " " + c;
 		case QUERY:
-			return exp.kind() + " " + c + " : " + env.qtys.get(c).first + " -> " + env.qtys.get(c).second;
+			return exp.kind() + " " + c + " : " + env.typing.defs.qs.get(c).first + " -> " + env.typing.defs.qs.get(c).second;
 		case SCHEMA:
 			return exp.kind() + " " + c;
 		case TRANSFORM:
-			return exp.kind() + " " + c + " : " + env.ttys.get(c).first + " -> " + env.ttys.get(c).second;
+			return exp.kind() + " " + c + " : " + env.typing.defs.trans.get(c).first + " -> " + env.typing.defs.trans.get(c).second;
 		case TYPESIDE:
 			return exp.kind() + " " + c;
 		case GRAPH:
@@ -95,8 +95,8 @@ public final class AqlDisplay implements Disp {
 		this.exn = env.exn;
 		for (String c : p.order) {
 			Exp<?> exp = p.exps.get(c);
-			if (env.keySet().contains(c)) {
-				Object obj = env.get(c, exp.kind());
+			if (env.defs.keySet().contains(c)) {
+				Object obj = env.defs.get(c, exp.kind());
 				map.put(obj, c); 
 				try {
 					frames.add(new Pair<>(doLookup(c, obj, exp, env), wrapDisplay(exp.kind(), obj)));

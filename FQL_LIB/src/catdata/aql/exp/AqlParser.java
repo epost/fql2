@@ -38,6 +38,7 @@ import catdata.aql.exp.SchExp.SchExpInst;
 import catdata.aql.exp.SchExp.SchExpVar;
 import catdata.aql.exp.TransExp.TransExpDelta;
 import catdata.aql.exp.TransExp.TransExpDistinct;
+import catdata.aql.exp.TransExp.TransExpEval;
 import catdata.aql.exp.TransExp.TransExpId;
 import catdata.aql.exp.TransExp.TransExpSigma;
 import catdata.aql.exp.TransExp.TransExpSigmaDeltaCounit;
@@ -240,8 +241,8 @@ public class AqlParser {
 			counit = Parsers.tuple(token("counit"), map_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
 					.map(x -> new TransExpSigmaDeltaCounit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 					distinct = Parsers.tuple(token("distinct"), trans_ref.lazy()).map(x -> new TransExpDistinct(x.b)),		
-					
-			ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct);
+			eval = Parsers.tuple(token("eval"), query_ref.lazy(), trans_ref.lazy()).map(x -> new TransExpEval(x.b, x.c)),		
+			ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct, eval);
 		
 		trans_ref.set(ret);
 	}
@@ -605,7 +606,8 @@ public class AqlParser {
 	
 	
 	
-	 private static Parser<QueryExpRaw<String,String,String,String,String,String,String,String>> queryExpRaw() {
+	 @SuppressWarnings({ "rawtypes", "unchecked" })
+	private static Parser<QueryExpRaw<String,String,String,String,String,String,String,String>> queryExpRaw() {
 		 	Parser<List<catdata.Pair<String, catdata.Pair<Block<String, String>, List<catdata.Pair<String, RawTerm>>>>>> 
 		 	ens = Parsers.tuple(token("entities"), env(block(), "->")).map(x -> x.b);
 			

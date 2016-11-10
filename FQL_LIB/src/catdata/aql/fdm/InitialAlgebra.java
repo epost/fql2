@@ -167,7 +167,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 				continue;
 			}
 			add(Term.Fk(fk, term));
-			map.put(fk, nf(Term.Fk(fk, term)));
+			map.put(fk, nf0(Term.Fk(fk, term)));
 		}
 		fks.put(x, map);
 		
@@ -206,6 +206,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
 	@Override
 	public X fk(Fk fk, X x) {
+		Util.assertNotNull(x);
 		X r = fks.get(x).get(fk);
 		if (r == null) {
 			throw new RuntimeException("Anomaly, please report: " + fk + "(" + x + ") is not in " + fks.get(x));
@@ -291,11 +292,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 			if (schema().type(eq.first, eq.second).left) { //type
 				for (X x : ens.get(eq.first.second)) {
 					Map<Var, Term<Ty, En, Sym, Fk, Att, Void, Void>> map = new HashMap<>();
-					Term<Ty, En, Sym, Fk, Att, Void, Void> q = 
-							repr(x).convert(); //map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Function.identity());
-									
-						//			Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity(), Function.identity(), Function.identity());
-					map.put(eq.first.first, q);
+					Term<Ty, En, Sym, Fk, Att, Void, Void> q = repr(x).convert(); map.put(eq.first.first, q);
 					talg.eqs.add(new Eq<>(new Ctx<>(), transX(eq.second.subst(map).convert()), transX(eq.third.subst(map).convert())));
 				}
 			} 

@@ -44,7 +44,8 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		Set<Triple<Pair<Var, Object>, Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>>> eqs0 = new HashSet<>();
 
 		for (String k : imports) {
-			Schema<Object, Object, Object, Object, Object> v = env.getSchema(k);
+			@SuppressWarnings("unchecked")
+			Schema<Object, Object, Object, Object, Object> v = env.defs.schs.get(k);
 			col.ens.addAll(v.ens);
 			col.fks.putAll(v.fks.map);
 			col.atts.putAll(v.atts.map);

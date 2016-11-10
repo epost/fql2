@@ -79,7 +79,27 @@ public class AqlQueryExample extends AqlExample {
 			+ "\n} "
 			+ "\n"
 			+ "\ninstance J = eval Q I"
+			+ "\n"
+			+ "instance I0 = literal : Source {"
+			+ "\n	generators"
+			+ "\n		a0 d0 e0 : Woman"
+			+ "\n		b0 c0 f0 : Man"
+			+ "\n	multi_equations"
+			+ "\n		paying -> {b0 true, c0 false, f0 true}"
+			+ "\n		name_m -> {b0 bob, c0 charlie, f0 frank}"
+			+ "\n		name_w -> {a0 alice, d0 doris, e0 ellie}"
+			+ "\n		fav_book_m -> {b0 book1, c0 book1, f0 book2}"
+			+ "\n		fav_book_w -> {a0 book1, d0 book2, e0 book2}		"
+			+ "\n} "
+			+ "\n"
+			+ "\ntransform h = literal : I0 -> I {"
+			+ "\n	generators"
+			+ "\n		a0 -> a d0 -> d e0 -> e b0 -> b c0 -> c f0 -> f"
+			+ "\n} "
+			+ "\n"
+			+ "\ntransform k = eval Q h"
 			+ "\n";
+
 
 
 

@@ -58,7 +58,7 @@ public enum Kind {
 		}
 	}
 	
-	public void checkLiteral(String k, Object o) {
+	public <X> void checkLiteral(X k, Object o) {
 		if (!literal.isInstance(o)) {
 			throw new RuntimeException(k + " is not a " + this + " literal, is a " + o.getClass());
 		}

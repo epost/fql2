@@ -177,9 +177,10 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 			this.var = var;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
-		public TypeSide <Object, Object> eval(AqlEnv env) {
-			return env.getTypeSide(var);
+		public TypeSide<Object, Object> eval(AqlEnv env) {
+			return env.defs.tys.get(var);
 		}
 
 		@Override

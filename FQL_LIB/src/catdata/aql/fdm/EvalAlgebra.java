@@ -27,6 +27,10 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
  
 	public static class Row<En2,X> {
 		
+		public <Z> Row<En2,Z> map(Function<X,Z> f) {
+			return new Row<>(ctx.map(f), en2);
+		}
+		
 		public final Ctx<Var,X> ctx;
 		public final En2 en2; 
 		

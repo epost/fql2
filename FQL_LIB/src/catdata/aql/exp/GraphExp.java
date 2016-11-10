@@ -73,11 +73,12 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 			return true;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public DMG<Object, Object> eval(AqlEnv env) {
 			for (String s : imports) {
-				nodes.addAll(env.getGraph(s).nodes);
-				edges.putAll(env.getGraph(s).edges);
+				nodes.addAll(env.defs.gs.get(s).nodes);
+				edges.putAll(env.defs.gs.get(s).edges);
 			}
 			return new DMG<>(nodes, edges);
 		}
@@ -162,9 +163,10 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 			this.var = var;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public DMG<Object, Object> eval(AqlEnv env) {
-			return env.getGraph(var);
+			return (DMG<Object, Object>) env.defs.gs.get(var);
 		}
 
 		@Override

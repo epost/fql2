@@ -120,7 +120,8 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 		Set<Pair<Term<Object, Object, Object, Object, Object, Object, Object>, Term<Object, Object, Object, Object, Object, Object, Object>>> eqs0 = new HashSet<>();
 
 		for (String k : imports) {
-			Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> v = env.getInstance(k);
+			@SuppressWarnings("unchecked")
+			Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> v = env.defs.insts.get(k);
 			col.gens.putAll(v.gens().map);
 			col.sks.putAll(v.sks().map);
 			eqs0.addAll(v.eqs());
@@ -157,7 +158,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	}
 	
 	@Override
-	public SchExp<Object, Object, Object, Object, Object> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
+	public SchExp<Object, Object, Object, Object, Object> type(AqlTyping G) {
 		return schema;
 	}
 	

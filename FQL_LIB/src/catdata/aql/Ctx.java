@@ -1,7 +1,6 @@
 package catdata.aql;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,6 +165,14 @@ public final class Ctx<K,V> {
 			ret.put(k, Chc.inRight(map.get(k)));
 		}
 		return new Ctx<>(ret);
+	}
+
+	public <Z> Ctx<K,Z> map(Function<V, Z> f) {
+		Ctx<K,Z> ret = new Ctx<>();
+		for (K k : map.keySet()) {
+			ret.put(k, f.apply(get(k)));			
+		}
+		return ret;
 	}
 	
 }

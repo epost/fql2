@@ -7,7 +7,6 @@ import java.util.Map;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.It.ID;
 import catdata.aql.Mapping;
@@ -25,10 +24,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		return Kind.INSTANCE;
 	}
 	
-	public abstract SchExp<Ty,En,Sym,Fk,Att>  
-	type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0,
-	     Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx,
-	     Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs);
+	public abstract SchExp<Ty,En,Sym,Fk,Att>  type(AqlTyping G);
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -59,7 +55,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			InstExpEval other = (InstExpEval) obj;
+			InstExpEval<?,?,?,?,?,?,?,?,?,?,?,?> other = (InstExpEval<?,?,?,?,?,?,?,?,?,?,?,?>) obj;
 			if (I == null) {
 				if (other.I != null)
 					return false;
@@ -78,11 +74,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		@Override
-		public SchExp<Ty, En2, Sym, Fk2, Att2> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
-			if (!I.type(ctx0, ctx, qs).equals(Q.type(qs).first)) { //TODO aql schema equality
-				throw new RuntimeException("Schema of instance is " + I.type(ctx0, ctx, qs) + " but source of query is " + Q.type(qs).first);
+		public SchExp<Ty, En2, Sym, Fk2, Att2> type(AqlTyping G) {
+			if (!I.type(G).equals(Q.type(G).first)) { //TODO aql schema equality
+				throw new RuntimeException("Schema of instance is " + I.type(G) + " but source of query is " + Q.type(G).first);
 			}
-			return Q.type(qs).second;
+			return Q.type(G).second;
 		}
 
 		@Override
@@ -95,8 +91,6 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return Util.union(I.deps(), Q.deps());
 		}
 		
-		
-
 	}
 	
 	
@@ -159,9 +153,9 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		@Override
-		public SchExp<Ty, En2, Sym, Fk2, Att2> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx,Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {		
-			SchExp<Ty, En1, Sym, Fk1, Att1> t0 = I.type(ctx0, ctx, qs);
-			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(ctx0);
+		public SchExp<Ty, En2, Sym, Fk2, Att2> type(AqlTyping G) {
+			SchExp<Ty, En1, Sym, Fk1, Att1> t0 = I.type(G);
+			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(G);
 			
 			if (!t1.first.equals(t0)) { //TODO aql type equality
 				throw new RuntimeException("Type error: In " + this + " domain of mapping is " + t1.first + " but instance has schema " + t0);
@@ -233,9 +227,9 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		@Override
-		public SchExp<Ty, En1, Sym, Fk1, Att1> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {		
-			SchExp<Ty, En2, Sym, Fk2, Att2> t0 = I.type(ctx0, ctx, qs);
-			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(ctx0);
+		public SchExp<Ty, En1, Sym, Fk1, Att1> type(AqlTyping G) {
+			SchExp<Ty, En2, Sym, Fk2, Att2> t0 = I.type(G);
+			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(G);
 			
 			if (!t1.second.equals(t0)) { //TODO aql type equality
 				throw new RuntimeException("Type error: In " + this + " codomain of mapping is " + t1.first + " but instance has schema " + t0);
@@ -310,7 +304,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		@Override
-		public SchExp<Ty, En, Sym, Fk, Att> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>, SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
+		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 			return schema;
 		}
 		
@@ -331,9 +325,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			this.var = var;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
-			return env.getInstance(var);
+			return env.defs.insts.get(var);
 		}
 
 		@Override
@@ -366,9 +361,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return var;
 		}
 		
+		@SuppressWarnings("unchecked")
 		@Override
-		public SchExp<Object, Object, Object, Object, Object> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
-			return ctx.get(var);
+		public SchExp<Object, Object, Object, Object, Object> type(AqlTyping G) {
+			return (SchExp<Object, Object, Object, Object, Object>) G.defs.insts.get(var);
 		}
 
 		
@@ -428,7 +424,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 		
 		@Override
-		public SchExp<Ty, En, Sym, Fk, Att> type(Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>, SchExp<Object,Object,Object,Object,Object>>> ctx0, Ctx<String, SchExp<Object,Object,Object,Object,Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
+		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 			return new SchExpLit<>(inst.schema());
 		}
 	}
@@ -443,11 +439,9 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			I = i;
 		}
 		
-		
-
 		@Override
-		public SchExp<Ty, En, Sym, Fk, Att> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
-			return I.type(ctx0, ctx, qs);
+		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+			return I.type(G);
 		}
 	
 		@Override

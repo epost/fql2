@@ -240,7 +240,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	}
 
 	@Override
-	public Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx) {
+	public Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> type(AqlTyping G) {
 		return new Pair<>(src, dst);
 	}
 
@@ -256,7 +256,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
-			Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> v = (Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>) env.getQuery(k);
+			Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> v = (Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>) env.defs.qs.get(k);
 			for (En2 en2 : v.ens.keySet()) {
 				ens0.put(en2, new Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, Map<String, String>>(v.ens.get(en2).gens, v.ens.get(en2).eqs, v.ens.get(en2).options));
 			}

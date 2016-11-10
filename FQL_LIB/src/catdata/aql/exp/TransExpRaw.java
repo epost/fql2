@@ -13,13 +13,12 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.Transform;
-import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.fdm.TransformLiteral;
 
 //TODO aql grobner basis prover
@@ -115,7 +114,8 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 		Map<Object, Term<Void,Object,Void,Object,Void,Object,Void>> gens0 = new HashMap<>();
 		Map<Object, Term<Object,Object,Object,Object,Object,Object,Object>> sks0 = new HashMap<>();
 		for (String k : imports) {
-			Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> v = env.getTransform(k);
+			@SuppressWarnings("unchecked")
+			Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> v = env.defs.trans.get(k);
 			Util.putAllSafely(gens0, v.gens().map);
 			Util.putAllSafely(sks0, v.sks().map);
 		}
@@ -152,8 +152,7 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 	}
 
 	@Override
-	public Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>> type(Ctx<String, Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>> ctx0, Ctx<String, SchExp<Object, Object, Object, Object, Object>> ctx,
-			Ctx<String, Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>> ctx1, Ctx<String, Pair<SchExp<Object,Object,Object,Object,Object>,  SchExp<Object,Object,Object,Object,Object>>> qs) {
+	public Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>> type(AqlTyping G) {
 		return new Pair<>(src, dst);
 	}
 	

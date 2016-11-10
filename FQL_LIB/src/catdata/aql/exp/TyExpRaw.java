@@ -158,7 +158,8 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 	@Override
 	public TypeSide<Object, Object> eval(AqlEnv env) {
 		for (String k : imports) {
-			TypeSide<Object, Object> v = env.getTypeSide(k);
+			@SuppressWarnings("unchecked")
+			TypeSide<Object, Object> v = env.defs.tys.get(k);
 			col.tys.addAll(v.tys);
 			col.syms.putAll(v.syms.map);
 			col.addEqs(v.eqs);

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -81,9 +82,28 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	}
 	
 	public void validate() {
-		//TODO aql validate query
+		for (Triple<Pair<Var, En2>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>> eq : dst.eqs) {
+			Chc<Ty, En2> ty = dst.type(eq.first, eq.second);
+			Frozen<Ty, En1, Sym, Fk1, Att1> I = ens.get(eq.first.second);
+			if (!ty.left) { //entity
+				for (Var u : ens.get(ty.r).gens.keySet()) {
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> lhs = transP(eq.second, Term.Gen(u));
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> rhs = transP(eq.third, Term.Gen(u));
+					if (!I.dp.eq(new Ctx<>(), lhs, rhs)) {
+						throw new RuntimeException("Target equation " + eq.second + " = " + eq.third + " not respected: transforms to " + lhs + " = " + rhs + ", which is not provable in the sub-query for " + eq.first.second);
+					}
+				}
+			} else {
+				Term<Ty, En1, Sym, Fk1, Att1, Var, Void> lhs = transT(eq.second);
+				Term<Ty, En1, Sym, Fk1, Att1, Var, Void> rhs = transT(eq.third);
+				if (!I.dp.eq(new Ctx<>(), lhs, rhs)) {
+					throw new RuntimeException("Target equation " + eq.second + " = " + eq.third + " not respected: transforms to " + lhs + " = " + rhs + ", which is not provable in the sub-query for " + eq.first.second);
+				}
+			}
+		}
 	}
 	
+	//TODO aql pass just for better error messages in uber flowers
 	public static class Frozen<Ty,En1,Sym,Fk1,Att1> extends Instance<Ty,En1,Sym,Fk1,Att1,Var,Void,Void,Void> {
 
 		public List<Var> order() {
@@ -173,5 +193,26 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		
 		return ret;
 	}
+	
+	private Term<Ty,En1,Sym,Fk1,Att1,Var,Void> transT(Term<Ty,En2,Sym,Fk2,Att2,Void,Void> term) {
+		if (term.obj != null) {
+			return term.asObj();
+		} else if (term.sym != null) {
+			return Term.Sym(term.sym, term.args.stream().map(this::transT).collect(Collectors.toList()));
+		} else if (term.att != null) {
+			return transP(term.arg, atts.get(term.att));
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
+	
+	private Term<Ty,En1,Sym,Fk1,Att1,Var,Void> transP(Term<Ty,En2,Sym,Fk2,Att2,Void,Void> term, Term<Ty,En1,Sym,Fk1,Att1,Var,Void> u) {
+		if (term.var != null) {
+			return u;
+		} else if (term.fk != null) {
+			return fks.get(term.fk).trans(transP(term.arg, u));
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
+	
 	
 }

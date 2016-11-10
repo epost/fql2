@@ -88,6 +88,22 @@ public final class AqlCodeEditor extends
 		provider.addCompletion(new ShorthandCompletion(provider, "transform",
 				"transform ? = literal : ? -> ? {\n\timports\n\tgenerators\n\toptions\n} ", ""));
 
+		provider.addCompletion(new ShorthandCompletion(provider, "query",
+				"query ? = literal : ? -> ? {\n"
+				+ "\n entities"
+				+ "\n  e -> {for x:X y:Y "
+				+ "\n        where f(x)=f(x) g(y)=f(y) "
+				+ "\n        return att -> at(a) att2 -> at(a) "
+				+ "\n        options"
+				+ "\n  }"
+				+ "\n"
+				+ "\n foreign_keys"
+				+ "\n  f -> {x -> a.g y -> f(y) "
+				+ "\n        options"
+				+ "\n  }"
+				+ "\n options"
+				+ "\n}", ""));
+	
 			
 		return provider;
 
@@ -102,7 +118,7 @@ public final class AqlCodeEditor extends
 	protected AqlDisplay makeDisplay(String foo, Program<Exp<? extends Object>> init,
 			AqlEnv env, long start, long middle) {
 			AqlDisplay ret = new AqlDisplay(foo, init, env, start, middle);
-			if (env.exn != null && !env.keySet().isEmpty()) {
+			if (env.exn != null) {
 				GUI.topFrame.toFront();
 			}
 			return ret;
@@ -115,10 +131,11 @@ public final class AqlCodeEditor extends
 	@Override
 	protected AqlEnv makeEnv(String str, Program<Exp<? extends Object>> init) {
 		last_env = new AqlMultiDriver(init, toUpdate, last_prog, last_env).env; //constructor blocks
-				//AqlDriver.makeEnv(str, init, toUpdate, last_str,last_prog, last_env);
-		
 		last_prog = init;
 		last_str = str;
+		if (last_env.exn != null && last_env.defs.keySet().isEmpty()) {
+			throw last_env.exn;
+		}
 		return last_env;
 	}
 
