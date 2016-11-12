@@ -80,7 +80,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			TransExpEval other = (TransExpEval) obj;
+			TransExpEval<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpEval<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
 			if (Q == null) {
 				if (other.Q != null)
 					return false;

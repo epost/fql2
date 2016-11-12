@@ -22,6 +22,7 @@ import catdata.Util;
 import catdata.aql.RawTerm;
 import catdata.aql.exp.GraphExp.GraphExpRaw;
 import catdata.aql.exp.GraphExp.GraphExpVar;
+import catdata.aql.exp.InstExp.InstExpColim;
 import catdata.aql.exp.InstExp.InstExpDelta;
 import catdata.aql.exp.InstExp.InstExpDistinct;
 import catdata.aql.exp.InstExp.InstExpEmpty;
@@ -203,7 +204,7 @@ public class AqlParser {
 					.map(x -> new InstExpDelta(x.b, x.c)),	
 			distinct = Parsers.tuple(token("distinct"), inst_ref.lazy()).map(x -> new InstExpDistinct(x.b)),
 			eval = Parsers.tuple(token("eval"), query_ref.lazy(), inst_ref.lazy()).map(x -> new InstExpEval(x.b, x.c)),
-			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta,distinct,eval);
+			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp());
 		
 		inst_ref.set(ret);
 	}
@@ -604,6 +605,33 @@ public class AqlParser {
 		query_ref.set(ret);	
 	} 
 	
+	private static Parser<InstExpColim<String, String, String, String,String,String,String,String,String,String,String>> colimInstExp() {
+	 Parser<List<catdata.Pair<String, InstExp<?,?,?,?,?,?,?,?,?>>>>
+	 	nodes = Parsers.tuple(token("nodes"), env(inst_ref.lazy(), "->")).map(x -> x.b);
+	
+	 Parser<List<catdata.Pair<String, TransExp<?,?,?,?,?,?,?,?,?,?,?,?,?>>>>
+	 	edges = Parsers.tuple(token("edges"), env(trans_ref.lazy(), "->")).map(x -> x.b);
+	 	
+		Parser<Tuple4<List<String>, List<catdata.Pair<String, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>>>, List<catdata.Pair<String, TransExp<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>>>, List<catdata.Pair<String, String>>>> 
+		pa = Parsers.tuple(imports, nodes.optional(), edges.optional(), options);
+		
+		Parser<Tuple4<Token, GraphExp<?, ?>, SchExp<?, ?, ?, ?, ?>, Token>> 
+		l = Parsers.tuple(token("colimit"), graph_ref.lazy(), sch_ref.lazy(), token("{")); //.map(x -> x.c);
+					
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		Parser<InstExpColim<String, String, String, String,String,String,String,String,String,String,String>> 
+		ret = Parsers.tuple(l, pa, token("}")).map(x -> {
+			
+			//schema graph nodes edges options imports
+		return new InstExpColim(x.a.b, x.a.c, 
+								x.b.a, 
+						 		 Util.newIfNull(x.b.b), 
+						 	     Util.newIfNull(x.b.c), 
+					              x.b.d);
+		});
+			
+		return ret;	
+	}
 	
 	
 	 @SuppressWarnings({ "rawtypes", "unchecked" })

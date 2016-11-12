@@ -11,13 +11,22 @@ import java.util.stream.Collectors;
 import catdata.DMG;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.exp.InstExp.InstExpVar;
 
 public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 
 	@Override
 	public Kind kind() {
 		return Kind.GRAPH;
+	}
+	
+	public abstract DMG<N,E> eval(AqlTyping G);
+	
+	public DMG<N,E> eval(AqlEnv env) { 
+		DMG<N,E> ret = eval(env.typing);
+		if (ret == null) {
+			throw new RuntimeException("Anomaly: please report");
+		}
+		return ret;
 	}
 
 	////////////////////////////
@@ -73,12 +82,12 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 			return true;
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
-		public DMG<Object, Object> eval(AqlEnv env) {
+		public DMG<Object, Object> eval(AqlTyping G) {
 			for (String s : imports) {
-				nodes.addAll(env.defs.gs.get(s).nodes);
-				edges.putAll(env.defs.gs.get(s).edges);
+				nodes.addAll(G.defs.gs.get(s).nodes);
+				edges.putAll((Map)G.defs.gs.get(s).edges);
 			}
 			return new DMG<>(nodes, edges);
 		}
@@ -103,11 +112,12 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 		public final DMG<N, E> graph;
 		
 		public GraphExpLiteral(DMG<N, E> graph) {
+			Util.assertNotNull(graph);
 			this.graph = graph;
 		}
 
 		@Override
-		public DMG<N, E> eval(AqlEnv env) {
+		public DMG<N, E> eval(AqlTyping env) {
 			return graph;
 		}
 
@@ -165,7 +175,7 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public DMG<Object, Object> eval(AqlEnv env) {
+		public DMG<Object, Object> eval(AqlTyping env) {
 			return (DMG<Object, Object>) env.defs.gs.get(var);
 		}
 
@@ -185,7 +195,7 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			InstExpVar other = (InstExpVar) obj;
+			GraphExpVar other = (GraphExpVar) obj;
 			if (var == null) {
 				if (other.var != null)
 					return false;

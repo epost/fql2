@@ -144,7 +144,7 @@ public final class Ctx<K,V> {
 
 	public void put(K k, V v) {
 		if (map.containsKey(k)) {
-			throw new RuntimeException(this + " alredy contains " + k);
+			throw new RuntimeException(" already contains " + k + "\n\n" + this);
 		}
 		map.put(k, v);
 	}

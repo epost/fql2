@@ -71,17 +71,17 @@ public class Chc<X,Y> {
 	}
 
 	public static <X,Y> Chc<X,Y> inLeft(X l) {
-		/* if (l == null) {
+		 if (l == null) {
 			throw new RuntimeException();
-		} */
+		} 
 		Chc<X,Y> ret = new Chc<>(true, l, null);
 		return ret;
 	}
 	
 	public static <X,Y> Chc<X,Y> inRight(Y r) {
-		/* if (r == null) {
+		 if (r == null) {
 			throw new RuntimeException();
-		} */
+		} 
 		Chc<X,Y> ret = new Chc<>(false, null, r);
 		return ret;
 	}

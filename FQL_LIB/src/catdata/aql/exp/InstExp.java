@@ -2,14 +2,23 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.DMG;
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.AqlOptions;
+import catdata.aql.ColimitInstance;
+import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.It.ID;
 import catdata.aql.Mapping;
+import catdata.aql.Transform;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.exp.SchExp.SchExpLit;
 import catdata.aql.fdm.DeltaInstance;
 import catdata.aql.fdm.DistinctInstance;
@@ -25,6 +34,162 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	}
 	
 	public abstract SchExp<Ty,En,Sym,Fk,Att>  type(AqlTyping G);
+	
+//////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static class InstExpColim<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> 
+	 extends InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> {
+		
+		public final SchExp<Ty, En, Sym, Fk, Att> schema;
+		
+		public final GraphExp<N, E> shape;
+		
+		public final Ctx<N, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> nodes;
+		public final Ctx<E, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges;
+
+		public final Map<String, String> options;
+		
+		public final List<String> imports;
+
+		public InstExpColim(GraphExp<N, E> shape, SchExp<Ty, En, Sym, Fk, Att> schema, List<String> imports, List<Pair<N, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> nodes, List<Pair<E, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>>> edges, List<Pair<String, String>> options) {
+			this.schema = schema;
+			this.shape = shape;
+			this.nodes = new Ctx<>(nodes);
+			this.edges = new Ctx<>(edges);
+			this.options = Util.toMapSafely(options);
+			this.imports = imports;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((edges == null) ? 0 : edges.hashCode());
+			result = prime * result + ((imports == null) ? 0 : imports.hashCode());
+			result = prime * result + ((nodes == null) ? 0 : nodes.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+			result = prime * result + ((shape == null) ? 0 : shape.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpColim<?,?,?,?,?,?,?,?,?,?,?> other = (InstExpColim<?,?,?,?,?,?,?,?,?,?,?>) obj;
+			if (edges == null) {
+				if (other.edges != null)
+					return false;
+			} else if (!edges.equals(other.edges))
+				return false;
+			if (imports == null) {
+				if (other.imports != null)
+					return false;
+			} else if (!imports.equals(other.imports))
+				return false;
+			if (nodes == null) {
+				if (other.nodes != null)
+					return false;
+			} else if (!nodes.equals(other.nodes))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			if (schema == null) {
+				if (other.schema != null)
+					return false;
+			} else if (!schema.equals(other.schema))
+				return false;
+			if (shape == null) {
+				if (other.shape != null)
+					return false;
+			} else if (!shape.equals(other.shape))
+				return false;
+			return true;
+		}
+		
+		@Override
+		public String toString() {
+			String ret = "colim " + shape + " " + schema + "\n\n";
+			ret += "nodes";
+			ret += Util.sep(nodes.map, "\n", " -> ");
+			ret += "\n\nedges";			
+			ret += Util.sep(edges.map, "\n", " -> ");
+			return ret;					
+		}
+		
+		@Override
+		public Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> eval(AqlEnv env) {
+			Ctx<N, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> nodes0 = new Ctx<>();
+			Ctx<E, Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges0 = new Ctx<>();
+			
+			//TODO aql imports for colimit
+			
+			for (N n : nodes.keySet()) {
+				nodes0.put(n, nodes.get(n).eval(env));
+			}
+			for (E e : edges.keySet()) {
+				edges0.put(e, edges.get(e).eval(env));
+			}
+
+			return new ColimitInstance<>(schema.eval(env), shape.eval(env), nodes0, edges0, options);
+		}
+
+	
+
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+			for (N n : nodes.keySet()) {
+				if (!nodes.get(n).type(G).equals(schema)) { //TODO aql schema equality
+					throw new RuntimeException("The instance for " + n + " has schema " + nodes.get(n).type(G) + ", not " + schema + " as expected");
+				}
+			}
+			if (!(Boolean)new AqlOptions(options, null).getOrDefault(AqlOption.static_typing)) {
+				return schema;
+			}
+			DMG<N,E> g = shape.eval(G);
+			
+			for (E e : g.edges.keySet()) {
+				InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> reqdSrc = nodes.get(g.edges.get(e).first);
+				InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> reqdDst = nodes.get(g.edges.get(e).second);
+				
+				InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> givenSrc = edges.get(e).type(G).first,
+				 givenDst = edges.get(e).type(G).second;
+				
+				if (!reqdSrc.equals(givenSrc)) {
+					throw new RuntimeException("On " + e + ", its source is " + givenSrc + " but should be " + reqdSrc);
+				} else if (!reqdDst.equals(givenDst)) {
+					throw new RuntimeException("On " + e + ", its target is " + givenDst + " but should be " + reqdDst);
+				}
+			}
+			
+			return schema;		
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			Collection<Pair<String, Kind>> ret = new HashSet<>();
+			ret.addAll(schema.deps());
+			ret.addAll(shape.deps());
+			ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.INSTANCE)).collect(Collectors.toList()));
+			for (InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> p : nodes.values()) {
+				ret.addAll(p.deps());
+			}
+			for (TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y> p : edges.values()) {
+				ret.addAll(p.deps());
+			}
+			return ret;
+		}
+		
+	}
+	
 	
 /////////////////////////////////////////////////////////////////////////////////////////////////
 

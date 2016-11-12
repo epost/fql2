@@ -38,6 +38,7 @@ public final class AqlOptions {
 		timeout, 
 		dont_verify_is_appropriate_for_prover_unsafe,
 		dont_validate_unsafe,
+		static_typing,
 		prover;
 		
 			
@@ -128,6 +129,10 @@ public final class AqlOptions {
 			return true;
 		case completion_syntactic_ac:
 			return false;
+		case static_typing:
+			return false;
+		default:
+			break;
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
@@ -171,8 +176,8 @@ public final class AqlOptions {
 			return op.getBoolean(map);
 		case dont_validate_unsafe:
 			return op.getBoolean(map);
-		default:
-			break;
+		case static_typing:
+			return op.getBoolean(map);
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}

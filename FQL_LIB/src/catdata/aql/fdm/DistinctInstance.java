@@ -32,7 +32,7 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 		uf = new UnionFind<>(I.algebra().allXs());
 		for (En en : schema().ens) {
 			for (X x : I.algebra().en(en)) {
-				for (X y : I.algebra().allXs()) {
+				for (X y : I.algebra().en(en)) {
 					if (obsEq(en,x,y) && !x.equals(y)) {
 						uf.union(x, y);	
 						eqs.add(new Pair<>(I.algebra().repr(x).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn()), I.algebra().repr(y).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn())));

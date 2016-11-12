@@ -89,8 +89,5 @@ public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, 
 	}
 	
 	
-	
-//	List<Pair<String, String>> options) {
-		
 
 }

@@ -185,6 +185,9 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			} 
 			Object src_att_dom_en = p.first;
 			Object dst_att_dom_en = ens0.get(src_att_dom_en);
+			if (dst_att_dom_en == null) {
+				throw new RuntimeException("in mapping for " + att.first + ", no entity mapping for " + src_att_dom_en + " , required for domain for " + att.first);
+			}
 			
 			if (var_en != null && !var_en.equals(dst_att_dom_en)) {
 				throw new RuntimeException("in mapping for " + att.first + ", the given source entity for the variable, " + var_en + ", is not " + p.first + " as expected.");
@@ -197,6 +200,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			Chc<Object,Object> proposed_ty2 = Chc.inLeft(src_att_cod_ty);	
 			
 			Chc<Object, Object> var_en2 = Chc.inRight(dst_att_dom_en);
+			
 			Map<String, Chc<Object, Object>> ctx = Util.singMap(var, var_en2);
 	
 			Term<Object, Object, Object, Object, Object, Void, Void> term0 = RawTerm.infer0(ctx, term, proposed_ty2, dcol, "In checking mapping for attribute " + att.first + ", ");

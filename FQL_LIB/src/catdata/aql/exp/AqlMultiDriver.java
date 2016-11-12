@@ -51,7 +51,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		this.last_env = last_env;
 
 		checkAcyclic();
-		env.typing = new AqlTyping(prog);
+		env.typing = new AqlTyping(prog);  //TODO aql line exceptions in typing
 		init();
 		toUpdate[0] = toString();
 		process();
@@ -180,7 +180,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				k2 = k.toString();
 				Object val = exp.eval(env);
 				if (val == null) {
-					throw new RuntimeException("null result on " + exp);
+					throw new RuntimeException("anomaly, please report: null result on " + exp);
 				}
 				synchronized (this) {
 					env.defs.put(n, k, val);

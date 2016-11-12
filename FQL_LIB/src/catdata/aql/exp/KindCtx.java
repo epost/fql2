@@ -71,7 +71,7 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P> {
 	}
 
 	
-	public Set<V> keySet() {
+	public Set<V> keySet() { //TODO AQL do this by case on Kind to prevent forgetting
 		Set<V> ret = new HashSet<>();
 		ret.addAll(insts.keySet());
 		ret.addAll(maps.keySet());
@@ -81,6 +81,7 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P> {
 		ret.addAll(trans.keySet());
 		ret.addAll(tys.keySet());
 		ret.addAll(qs.keySet()); 
+		ret.addAll(gs.keySet());
 		return ret;
 	}
 }
