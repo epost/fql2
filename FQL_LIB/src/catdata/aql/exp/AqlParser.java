@@ -22,9 +22,11 @@ import catdata.Util;
 import catdata.aql.RawTerm;
 import catdata.aql.exp.GraphExp.GraphExpRaw;
 import catdata.aql.exp.GraphExp.GraphExpVar;
+import catdata.aql.exp.InstExp.InstExpCod;
 import catdata.aql.exp.InstExp.InstExpColim;
 import catdata.aql.exp.InstExp.InstExpDelta;
 import catdata.aql.exp.InstExp.InstExpDistinct;
+import catdata.aql.exp.InstExp.InstExpDom;
 import catdata.aql.exp.InstExp.InstExpEmpty;
 import catdata.aql.exp.InstExp.InstExpEval;
 import catdata.aql.exp.InstExp.InstExpSigma;
@@ -82,6 +84,8 @@ public class AqlParser {
 			"java_functions",
 			"options",
 			"entities",
+			"src",
+			"dst",
 			"path_equations",
 			"observation_equations",
 			"generators",
@@ -204,7 +208,10 @@ public class AqlParser {
 					.map(x -> new InstExpDelta(x.b, x.c)),	
 			distinct = Parsers.tuple(token("distinct"), inst_ref.lazy()).map(x -> new InstExpDistinct(x.b)),
 			eval = Parsers.tuple(token("eval"), query_ref.lazy(), inst_ref.lazy()).map(x -> new InstExpEval(x.b, x.c)),
-			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp());
+			dom = Parsers.tuple(token("src"), trans_ref.lazy()).map(x -> new InstExpDom(x.b)),
+			cod = Parsers.tuple(token("dst"), trans_ref.lazy()).map(x -> new InstExpCod(x.b)),
+			
+			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod);
 		
 		inst_ref.set(ret);
 	}
@@ -613,7 +620,7 @@ public class AqlParser {
 	 	edges = Parsers.tuple(token("edges"), env(trans_ref.lazy(), "->")).map(x -> x.b);
 	 	
 		Parser<Tuple4<List<String>, List<catdata.Pair<String, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>>>, List<catdata.Pair<String, TransExp<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>>>, List<catdata.Pair<String, String>>>> 
-		pa = Parsers.tuple(imports, nodes.optional(), edges.optional(), options);
+		pa = Parsers.tuple(Parsers.always(), nodes.optional(), edges.optional(), options);
 		
 		Parser<Tuple4<Token, GraphExp<?, ?>, SchExp<?, ?, ?, ?, ?>, Token>> 
 		l = Parsers.tuple(token("colimit"), graph_ref.lazy(), sch_ref.lazy(), token("{")); //.map(x -> x.c);

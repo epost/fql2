@@ -228,7 +228,7 @@ public class Util {
 	
 	
 	public static <X> Map<X, X> id(Collection<X> X) {
-		Map<X, X> ret = new HashMap<>();
+		Map<X, X> ret = new LinkedHashMap<>();
 		for (X x : X) {
 			ret.put(x, x);
 		}

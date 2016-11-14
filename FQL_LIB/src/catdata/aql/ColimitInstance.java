@@ -9,7 +9,6 @@ import catdata.Chc;
 import catdata.DMG;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.It.ID;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;

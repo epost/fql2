@@ -197,14 +197,12 @@ public class AqlPeterExample extends AqlExample {
 			+ "\n"
 			+ "\ninstance answer = colimit Span T {"
 			+ "\n	nodes"
-			+ "\n		A -> sigma G1 sigma F1 I"
-			+ "\n		B -> sigma G1 I1"
-			+ "\n		C -> sigma G2 I2 "
+			+ "\n		A -> src b1"
+			+ "\n		B -> dst b1"
+			+ "\n		C -> dst b2"
 			+ "\n	edges"
 			+ "\n		f -> b1"
 			+ "\n		g -> b2"
-			+ "\n	options"
-			+ "\n		prover = monoidal //needed for now due to prover bug	" //TODO aql
 			+ "\n}"
 			+ "\n";
 

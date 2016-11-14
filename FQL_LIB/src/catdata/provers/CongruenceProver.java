@@ -1,17 +1,21 @@
 package catdata.provers;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.InvisibleException;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.UnionFind;
+import catdata.provers.KBExp.KBApp;
 
 //Congruence closure a la Nelson Oppen
+//TODO aql better incremental computation for congruence closure
 public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 
 	@Override
@@ -19,7 +23,7 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 		return "CongruenceProver [uf=" + uf + ", pred=" + pred + "]";
 	}
 
-	private final UnionFind<KBExp<C, V>> uf;
+	private UnionFind<KBExp<C, V>> uf;
 
 	// in paper this doesn't check label - appears to be typo (!)
 	private boolean congruent(KBExp<C, V> u, KBExp<C, V> v) {
@@ -34,22 +38,30 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 		return true;
 	}
 
-	//extends congruence
-	private void merge1(KBExp<C, V> u, KBExp<C, V> v) throws InterruptedException {
+	private void merge1(KBExp<C, V> u, KBExp<C, V> v)  {
 		if (Thread.currentThread().isInterrupted()) {
-			throw new InterruptedException();
+			throw new InvisibleException("Interrupted");
 		}
 		if (uf.connected(u, v)) {
 			return;
+		} 
+
+		Set<KBExp<C, V>> pu = new HashSet<>(); 
+		for (KBExp<C, V> exp : pred.keySet()) {
+			if (uf.connected(u, exp)) {
+				pu.addAll(pred.get(exp));
+			}
 		}
-
-		Set<KBExp<C, V>> pu = new HashSet<>(pred.get(uf.find(u)));
-		Set<KBExp<C, V>> pv = new HashSet<>(pred.get(uf.find(v)));
-
+		
+		Set<KBExp<C, V>> pv = new HashSet<>(); 
+		for (KBExp<C, V> exp : pred.keySet()) {
+			if (uf.connected(v, exp)) {
+				pv.addAll(pred.get(exp));
+			}
+		}
+		
 		uf.union(u, v);
-		pred.get(uf.find(u)).addAll(pu);
-		pred.get(uf.find(v)).addAll(pv); //one of these will be redundant
-
+		
 		for (KBExp<C, V> x : pu) {
 			for (KBExp<C, V> y : pv) {
 				if (!uf.connected(x, y) && congruent(x, y)) {
@@ -59,45 +71,32 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 		}
 	}
 
-	//for use when adding new terms - establishes congruence
-	private void merge2(KBExp<C, V> u, KBExp<C, V> v) {
-		Set<KBExp<C, V>> pu = new HashSet<>(pred.get(uf.find(u)));
-		Set<KBExp<C, V>> pv = new HashSet<>(pred.get(uf.find(v)));
-		
-		uf.union(u, v);
-		pred.get(uf.find(u)).addAll(pu);
-		pred.get(uf.find(v)).addAll(pv); //one of these will be redundant TODO aql check that find never changes
-
-		for (KBExp<C, V> x : pu) {
-			for (KBExp<C, V> y : pv) {
-				if (!uf.connected(x, y) && congruent(x, y)) {
-					merge2(x, y);
-				}
-			}
-		}
-	}
-
-	private final Map<KBExp<C, V>, Set<KBExp<C, V>>> pred;
+	private Map<KBExp<C, V>, Set<KBExp<C, V>>> pred;
 
 	public CongruenceProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) throws InterruptedException {
 		super(sorts, sig, eqs);
-
-		// Set<KBExp<C,V>> exps = new HashSet<>();
 		pred = new HashMap<>();
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : theory) {
 			if (!eq.first.isEmpty()) {
 				throw new RuntimeException("Congruence method can not work with universal quantification");
 			}
-			// eq.second.allSubExps(exps);
-			// eq.third.allSubExps(exps);
 			eq.second.allSubExps(pred);
 			eq.third.allSubExps(pred);
 		}
+		for (C c : sig.keySet()) {
+			(new KBApp<C,V>(c, Collections.emptyList())).allSubExps(pred);
+		}
+		doCong();
+	}
+	
+	private void doCong() {
 		uf = new UnionFind<>(pred.keySet());
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : theory) {
 			merge1(eq.second, eq.third);
 		}
 	}
+	
+	
 
 	@Override
 	public boolean eq(Map<V, T> ctx, KBExp<C, V> lhs, KBExp<C, V> rhs) {
@@ -106,9 +105,7 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 		}
 		boolean changed = lhs.allSubExps(pred) | rhs.allSubExps(pred);
 		if (changed) {
-			for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : theory) {
-				merge2(eq.second, eq.third);
-			}
+			doCong();
 		}
 		return uf.connected(lhs, rhs);
 	}

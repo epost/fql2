@@ -5,20 +5,19 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.DMG;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.ColimitInstance;
 import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.It.ID;
 import catdata.aql.Mapping;
 import catdata.aql.Transform;
-import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.exp.SchExp.SchExpLit;
 import catdata.aql.fdm.DeltaInstance;
 import catdata.aql.fdm.DistinctInstance;
@@ -29,13 +28,128 @@ import catdata.aql.fdm.TerminalInstance;
 
 public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>> {
 	
+	@Override
 	public Kind kind() {
 		return Kind.INSTANCE;
 	}
 	
 	public abstract SchExp<Ty,En,Sym,Fk,Att>  type(AqlTyping G);
 	
-//////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////
+	
+	public static class InstExpDom<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> {
+		
+		public final TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
+
+		public InstExpDom(TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
+			this.t = t;
+		}
+
+		@Override
+		public String toString() {
+			return "src " + t;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((t == null) ? 0 : t.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpDom<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpDom<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (t == null) {
+				if (other.t != null)
+					return false;
+			} else if (!t.equals(other.t))
+				return false;
+			return true;
+		}
+
+		@Override
+		public Instance<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> eval(AqlEnv env) {
+			return t.eval(env).src();
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return t.deps();
+		}
+
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+			return t.type(G).first.type(G);
+		}
+		
+	}
+	
+	public static class InstExpCod<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> {
+		
+		public final TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
+
+		public InstExpCod(TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
+			this.t = t;
+		}
+
+		@Override
+		public String toString() {
+			return "dst " + t;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((t == null) ? 0 : t.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpCod<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpCod<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (t == null) {
+				if (other.t != null)
+					return false;
+			} else if (!t.equals(other.t))
+				return false;
+			return true;
+		}
+
+		@Override
+		public Instance<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> eval(AqlEnv env) {
+			return t.eval(env).dst();
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return t.deps();
+		}
+
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+			return t.type(G).first.type(G);
+		}
+		
+		
+		
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	public static class InstExpColim<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> 
 	 extends InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> {
@@ -48,16 +162,13 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final Ctx<E, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges;
 
 		public final Map<String, String> options;
-		
-		public final List<String> imports;
-
+	
 		public InstExpColim(GraphExp<N, E> shape, SchExp<Ty, En, Sym, Fk, Att> schema, List<String> imports, List<Pair<N, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> nodes, List<Pair<E, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>>> edges, List<Pair<String, String>> options) {
 			this.schema = schema;
 			this.shape = shape;
 			this.nodes = new Ctx<>(nodes);
 			this.edges = new Ctx<>(edges);
 			this.options = Util.toMapSafely(options);
-			this.imports = imports;
 		}
 
 		@Override
@@ -65,7 +176,6 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((edges == null) ? 0 : edges.hashCode());
-			result = prime * result + ((imports == null) ? 0 : imports.hashCode());
 			result = prime * result + ((nodes == null) ? 0 : nodes.hashCode());
 			result = prime * result + ((options == null) ? 0 : options.hashCode());
 			result = prime * result + ((schema == null) ? 0 : schema.hashCode());
@@ -86,11 +196,6 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 				if (other.edges != null)
 					return false;
 			} else if (!edges.equals(other.edges))
-				return false;
-			if (imports == null) {
-				if (other.imports != null)
-					return false;
-			} else if (!imports.equals(other.imports))
 				return false;
 			if (nodes == null) {
 				if (other.nodes != null)
@@ -129,8 +234,6 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> eval(AqlEnv env) {
 			Ctx<N, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> nodes0 = new Ctx<>();
 			Ctx<E, Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges0 = new Ctx<>();
-			
-			//TODO aql imports for colimit
 			
 			for (N n : nodes.keySet()) {
 				nodes0.put(n, nodes.get(n).eval(env));
@@ -178,7 +281,6 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			Collection<Pair<String, Kind>> ret = new HashSet<>();
 			ret.addAll(schema.deps());
 			ret.addAll(shape.deps());
-			ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.INSTANCE)).collect(Collectors.toList()));
 			for (InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> p : nodes.values()) {
 				ret.addAll(p.deps());
 			}

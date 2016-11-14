@@ -24,17 +24,14 @@
     <keyword>typeside</keyword>
   </keywords>
   <keywords2>
-    <keyword>and</keyword>
-    <keyword>as</keyword>
     <keyword>attributes</keyword>
-    <keyword>chase</keyword>
     <keyword>coeval</keyword>
     <keyword>colimit</keyword>
     <keyword>constants</keyword>
-    <keyword>copivot</keyword>
     <keyword>counit</keyword>
     <keyword>delta</keyword>
-    <keyword>ed</keyword>
+    <keyword>distinct</keyword>
+    <keyword>dst</keyword>
     <keyword>edges</keyword>
     <keyword>empty</keyword>
     <keyword>entities</keyword>
@@ -48,28 +45,25 @@
     <keyword>id</keyword>
     <keyword>imports</keyword>
     <keyword>insert</keyword>
-    <keyword>into</keyword>
     <keyword>java</keyword>
     <keyword>java_constants</keyword>
     <keyword>java_functions</keyword>
     <keyword>java_types</keyword>
     <keyword>lambda</keyword>
     <keyword>literal</keyword>
+    <keyword>multi_equations</keyword>
     <keyword>nodes</keyword>
     <keyword>observation_equations</keyword>
     <keyword>options</keyword>
     <keyword>path_equations</keyword>
-    <keyword>pi</keyword>
-    <keyword>pivot</keyword>
     <keyword>return</keyword>
     <keyword>schemaOf</keyword>
-    <keyword>select</keyword>
     <keyword>sigma</keyword>
+    <keyword>src</keyword>
     <keyword>types</keyword>
     <keyword>typesideOf</keyword>
     <keyword>unit</keyword>
     <keyword>where</keyword>
-    <keyword>with</keyword>
   </keywords2>
   <dataTypes/>
   <functions/>
