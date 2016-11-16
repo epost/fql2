@@ -63,10 +63,14 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	 * @param term of type sort
 	 */
 	public Term<Ty, Void, Sym, Void, Void, Void, Y> intoY(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+		return intoY0(reprT(intoY0(term)));
+	}
+		
+	private Term<Ty, Void, Sym, Void, Void, Void, Y> intoY0(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 			if (term.obj != null) {
 				return Term.Obj(term.obj, term.ty);
 			} else if (term.sym != null) {
-				return Term.Sym(term.sym, term.args().stream().map(x -> intoY(x)).collect(Collectors.toList()));
+				return Term.Sym(term.sym, term.args().stream().map(x -> intoY0(x)).collect(Collectors.toList()));
 			} else if (term.sk != null) {
 				return sk(term.sk);
 			} else if (term.att != null) {

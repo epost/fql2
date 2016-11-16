@@ -428,9 +428,6 @@ public final class AqlViewer {
 			list.add(p);
 		}
 				
-		
-			
-		
 		Map<Ty, Set<Y>> m = Util.revS(alg.talg().sks.map);
 		for (Ty ty : tys) {
 			if (!m.containsKey(ty)) {

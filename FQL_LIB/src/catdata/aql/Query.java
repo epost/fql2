@@ -1,6 +1,7 @@
 package catdata.aql;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,7 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.fdm.IdentityTransform;
 import catdata.aql.fdm.TransformLiteral; //TODO aql why depend fdm
 
 public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
@@ -61,12 +63,12 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		}
 		for (Att2 att2 : dst.atts.keySet()) {
 			if (!atts.containsKey(att2)) {
-				throw new RuntimeException("no term for attribute " + att2);
+				throw new RuntimeException("no return clause for attribute " + att2);
 			}
 		}
 		for (Att2 att2 : atts.keySet()) {
 			if (!dst.atts.containsKey(att2)) {
-				throw new RuntimeException("there is a term for " + att2 + ", which is not an attribute in the target");
+				throw new RuntimeException("there is a return clause for " + att2 + ", which is not an attribute in the target");
 			}
 		}
 		for (Fk2 fk2 : dst.fks.keySet()) {
@@ -87,8 +89,8 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			Frozen<Ty, En1, Sym, Fk1, Att1> I = ens.get(eq.first.second);
 			if (!ty.left) { //entity
 				for (Var u : ens.get(ty.r).gens.keySet()) {
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> lhs = transP(eq.second, Term.Gen(u));
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> rhs = transP(eq.third, Term.Gen(u));
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> lhs = transP(eq.second, Term.Gen(u), ty.r);
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> rhs = transP(eq.third, Term.Gen(u), ty.r);
 					if (!I.dp.eq(new Ctx<>(), lhs, rhs)) {
 						throw new RuntimeException("Target equation " + eq.second + " = " + eq.third + " not respected: transforms to " + lhs + " = " + rhs + ", which is not provable in the sub-query for " + eq.first.second);
 					}
@@ -200,18 +202,34 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		} else if (term.sym != null) {
 			return Term.Sym(term.sym, term.args.stream().map(this::transT).collect(Collectors.toList()));
 		} else if (term.att != null) {
-			return transP(term.arg, atts.get(term.att));
+			return transP(term.arg, atts.get(term.att), dst.atts.get(term.att).first);
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
 	
-	private Term<Ty,En1,Sym,Fk1,Att1,Var,Void> transP(Term<Ty,En2,Sym,Fk2,Att2,Void,Void> term, Term<Ty,En1,Sym,Fk1,Att1,Var,Void> u) {
+	private List<Fk2> transP(Term<Ty,En2,Sym,Fk2,Att2,Void,Void> term) {
 		if (term.var != null) {
-			return u;
+			return Collections.emptyList();
 		} else if (term.fk != null) {
-			return fks.get(term.fk).trans(transP(term.arg, u));
+			return Util.append(Util.singList(term.fk), transP(term.arg));
 		}
 		throw new RuntimeException("Anomaly: please report");
+	}
+	
+	private Transform<Ty,En1,Sym,Fk1,Att1,Var,Void,Var,Void,Void,Void,Void,Void> compose(List<Fk2> l, En2 en2) {
+		if (l.isEmpty()) {
+			return new IdentityTransform<>(ens.get(en2));
+		} else {
+			Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, Void, Void, Void, Void> t = fks.get(l.get(0));
+			Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, Void, Void, Void, Void> u = compose(l.subList(1, l.size()), dst.fks.get(l.get(0)).first);
+			return new ComposeTransform<>(t, u);
+		}
+	}
+	
+	private Term<Ty,En1,Sym,Fk1,Att1,Var,Void> transP(Term<Ty,En2,Sym,Fk2,Att2,Void,Void> term, Term<Ty,En1,Sym,Fk1,Att1,Var,Void> u, En2 en2) {
+		List<Fk2> l = transP(term);
+		Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, Void, Void, Void, Void> t = compose(l, en2);
+		return t.trans(u);
 	}
 	
 	
