@@ -33,7 +33,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	public Collection<Pair<String, Kind>> deps() {
 		Set<Pair<String, Kind>> ret = new HashSet<>();
 		ret.addAll(schema.deps());
-		ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.SCHEMA)).collect(Collectors.toList()));
+		ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.INSTANCE)).collect(Collectors.toList()));
 		return ret;
 	}
  

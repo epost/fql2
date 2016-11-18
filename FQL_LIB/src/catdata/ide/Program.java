@@ -1,10 +1,8 @@
 package catdata.ide;
 
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import catdata.Triple;
 
@@ -25,21 +23,22 @@ public class Program<X> implements Prog {
 	}
 	
 	public Program(List<Triple<String, Integer, X>> decls) {
-			Set<String> seen = new HashSet<>();
+			List<Triple<String, Integer, X>> seen = new LinkedList<>();
 			for (Triple<String, Integer, X> decl : decls) { 
-				checkDup(seen, decl.first);
+				checkDup(seen, decl);
 				exps.put(decl.first, decl.third);
 				lines.put(decl.first, decl.second);
 				order.add(decl.first);				
 			}
 	}
 
-	private void checkDup(Set<String> seen, String name)
-			throws LineException {
-		if (seen.contains(name)) {
-			throw new RuntimeException("Duplicate name: " + name);
+	private void checkDup(List<Triple<String, Integer, X>> seen, Triple<String, Integer, X> toAdd) {
+		for (Triple<String, Integer, X> other : seen) {
+			if (other.first.equals(toAdd.first)) {
+				throw new RuntimeException("Duplicate name: " + toAdd.first + " on line " + other.second + " and " + toAdd.second);
+			}
 		}
-		seen.add(name);
+		seen.add(toAdd);
 	}
 
 	@Override

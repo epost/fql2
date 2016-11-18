@@ -204,8 +204,11 @@ public final class RawTerm {
 			Function<List<Object>, Object> f = AqlJs.compile(code);
 			
 			return Term.Obj(f.apply(Util.singList(head)), ty);
+		} else if (ctx0.containsKey(head) && ctx0.get(head).x.left) {
+			return Term.Obj(head, ctx0.get(head).x.l);
 		} else if (ctx0.containsKey(head) && !ctx0.get(head).x.left) {
-			return Term.Var(new Var(head));
+			//this must be a generator - but why isn't it in gens?
+			throw new RuntimeException("Anomaly, please report : " + this + " inferred as generator.  Common cause: a foreign key column references a non-defined generator in CSV import - check for extra whitespace.  Available gens: " + col.gens.keySet());
 		}
 		throw new RuntimeException("Anomaly, please report: " + this);
 	}

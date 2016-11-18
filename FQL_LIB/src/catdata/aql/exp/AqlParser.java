@@ -111,7 +111,11 @@ public class AqlParser {
 			"edges",
 			"typesideOf",
 			"schemaOf",
-			"distinct"
+			"distinct",
+			"import_csv",
+			"import_jdbc",
+			"export_csv",
+			"export_jdbc",
 			};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -143,7 +147,7 @@ public class AqlParser {
 
 	
 	
-	private static final Parser<RawTerm> term() {
+	public static final Parser<RawTerm> term() {
 		Reference<RawTerm> ref = Parser.newReference();
 		
 		Parser<RawTerm> ann = Parsers.tuple(ident, token("@"), ident).map(x -> new RawTerm(x.a, x.c));
@@ -210,8 +214,8 @@ public class AqlParser {
 			eval = Parsers.tuple(token("eval"), query_ref.lazy(), inst_ref.lazy()).map(x -> new InstExpEval(x.b, x.c)),
 			dom = Parsers.tuple(token("src"), trans_ref.lazy()).map(x -> new InstExpDom(x.b)),
 			cod = Parsers.tuple(token("dst"), trans_ref.lazy()).map(x -> new InstExpCod(x.b)),
-			
-			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod);
+	
+			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv());
 		
 		inst_ref.set(ret);
 	}
@@ -250,7 +254,7 @@ public class AqlParser {
 					.map(x -> new TransExpSigmaDeltaCounit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 					distinct = Parsers.tuple(token("distinct"), trans_ref.lazy()).map(x -> new TransExpDistinct(x.b)),		
 			eval = Parsers.tuple(token("eval"), query_ref.lazy(), trans_ref.lazy()).map(x -> new TransExpEval(x.b, x.c)),		
-			ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct, eval);
+			ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct, eval, transExpCsv());
 		
 		trans_ref.set(ret);
 	}
@@ -397,6 +401,27 @@ public class AqlParser {
 		});
 		return ret.between(token("literal").followedBy(token("{")), token("}")); 
 		
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static final Parser<InstExpCsv> instExpCsv() {
+		Parser<Pair<List<String>, List<catdata.Pair<String, String>>>> 
+		pa = Parsers.tuple(imports, options).between(token("{"), token("}"));
+		
+		return Parsers.tuple(token("import_csv"), ident, token(":"), sch_ref.lazy(),  pa.optional()).
+				map(x -> new InstExpCsv(x.d, x.b, x.e != null ? x.e.a : new LinkedList<>(), x.e != null ? x.e.b : new LinkedList<>() ));
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static final Parser<TransExpCsv> transExpCsv() {
+		Parser<Pair<List<String>, List<catdata.Pair<String, String>>>> 
+		pa = Parsers.tuple(imports, options).between(token("{"), token("}"));
+		
+		Parser<Pair<InstExp, InstExp>> st = Parsers.tuple(inst_ref.lazy(), token("->"), inst_ref.lazy())
+				.map(x -> new Pair<>(x.a, x.c));
+		
+		return Parsers.tuple(token("import_csv"), ident, token(":"), st, pa.optional()).
+				map(x -> new TransExpCsv(x.d.a, x.d.b, x.b, x.e != null ? x.e.a : new LinkedList<>(), x.e != null ? x.e.b : new LinkedList<>() ));
 	}
 	
 	private  static final Parser<TyExpRaw> tyExpRaw() {
@@ -798,8 +823,12 @@ public class AqlParser {
 		return Parsers.or(eq1, eq2).from(TOKENIZER, IGNORED).parse(s);
 	}
 	
-	public static final catdata.Pair<List<catdata.Pair<String, String>>, RawTerm> parseTerm(String s) {
+	public static final catdata.Pair<List<catdata.Pair<String, String>>, RawTerm> parseTermInCtx(String s) {
 		return Parsers.or(term1, term2).from(TOKENIZER, IGNORED).parse(s);
+	}
+	
+	public static final RawTerm parseTermNoCtx(String s) {
+		return term().from(TOKENIZER, IGNORED).parse(s);
 	}
 	
 	private static final 

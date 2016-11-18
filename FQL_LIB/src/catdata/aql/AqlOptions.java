@@ -20,19 +20,25 @@ import catdata.ide.Options;
 
 public final class AqlOptions {
 	
+	//TODO aql number of cores
+	
+	//TODO: aql each typeside/instance/etc should make sure only appropriate options are given to it
 
 	public static enum AqlOption {
-	
-		//TODO aql number of cores
-		
-		//TODO: aql each typeside/instance/etc should make sure only appropriate options are given to it
-		
+		csv_charset,
+		csv_line_delim_string,
+		csv_field_delim_char,
+		csv_escape_char,
+		csv_quote_char,
+		csv_format,
+		csv_id_column_name,
+		csv_always_reload,
+				
 		completion_precedence,
 		completion_sort,
 		completion_compose,
 		completion_filter_subsumed,
 		completion_syntactic_ac,
-//		precomputed,
 		allow_java_eqs_unsafe, //TODO aql enforce
 		require_consistency, //TODO: aql enforce require_consistency
 		timeout, 
@@ -53,6 +59,14 @@ public final class AqlOptions {
 		
 		public Boolean getBoolean(Map<String, String> map) {
 			return Boolean.parseBoolean(getString(map));
+		}
+		
+		public Character getChar(Map<String, String> map) {
+			String s = getString(map);
+			if (s.length() != 1) {
+				throw new RuntimeException("Expected a character, instead received "+ s);
+			}
+			return Character.valueOf(s.charAt(0));
 		}
 		
 		public Integer getInteger(Map<String, String> map) {
@@ -79,7 +93,6 @@ public final class AqlOptions {
 		}
 		
 		
-		
 	}
 
 	
@@ -88,15 +101,11 @@ public final class AqlOptions {
 	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(ProverName name, Object ob) {
 		options = new HashMap<>();
 		options.put(AqlOption.prover, name);
-//		options.put(AqlOption.precomputed, ob);
 	}
 	
 	public static String printDefault() {
 		List<String> l = new LinkedList<>();
 		for (AqlOption option : AqlOption.values()) {
-			//if (option.equals(AqlOption.precomputed)) {
-			//	continue;
-			//}
 			l.add(option + " = " + getDefault(option));
 		}
 		return Util.sep(l, "\n\t");
@@ -109,8 +118,6 @@ public final class AqlOptions {
 			return false;
 		case completion_precedence:
 			return null;
-		//case precomputed:
-			//throw new RuntimeException("Anomaly: please report");
 		case prover:
 			return ProverName.auto;
 		case dont_validate_unsafe:
@@ -131,10 +138,24 @@ public final class AqlOptions {
 			return false;
 		case static_typing:
 			return false;
-		default:
-			break;
+		case csv_always_reload:
+			return false;
+		case csv_charset:
+			return "UTF-8";
+		case csv_escape_char:
+			return '\\';
+		case csv_field_delim_char:
+			return ',';
+		case csv_format:
+			return "Default";
+		case csv_id_column_name:
+			return "id";
+		case csv_line_delim_string:
+			return "\n";
+		case csv_quote_char:
+			return '\"';
 		}
-		throw new RuntimeException("Anomaly: please report");
+		throw new RuntimeException("Anomaly: please report: "+ option);
 	}
 	
 	//TODO aql
@@ -178,6 +199,22 @@ public final class AqlOptions {
 			return op.getBoolean(map);
 		case static_typing:
 			return op.getBoolean(map);
+		case csv_always_reload:
+			return op.getBoolean(map);
+		case csv_charset:
+			return op.getString(map);
+		case csv_escape_char:
+			return op.getChar(map);
+		case csv_field_delim_char:
+			return op.getString(map);
+		case csv_format:
+			return op.getString(map);
+		case csv_id_column_name:
+			return op.getString(map);
+		case csv_line_delim_string:
+			return op.getChar(map);
+		case csv_quote_char:
+			return op.getChar(map);
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}

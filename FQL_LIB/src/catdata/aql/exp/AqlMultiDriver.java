@@ -1,5 +1,6 @@
 package catdata.aql.exp;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import catdata.DAG;
+import catdata.InvisibleException;
 import catdata.Pair;
 import catdata.Unit;
 import catdata.Util;
@@ -41,7 +43,8 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	public final Program<Exp<?>> last_prog;
 	public final AqlEnv last_env;
 
-	private LineException exn; //TODO aql make this all the errors, not just the first error
+	private List<RuntimeException> exn = Collections.synchronizedList(new LinkedList<>()); 
+	
 	boolean stop = false;
 	
 	public AqlMultiDriver(Program<Exp<?>> prog, String[] toUpdate, Program<Exp<?>> last_prog, AqlEnv last_env) {
@@ -92,19 +95,27 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			threads.add(future);
 		}
 		for (Future<Unit> thread : threads) {
-			if (!thread.isDone() && !thread.isCancelled()) {
+			//if (!thread.isDone() && !thread.isCancelled()) {
 				try {
 					thread.get();
 				} catch (Throwable ex) {
 					stop = true;
 					cancel();
 				}
-			}
+			//}
 		}
 
-		if (exn != null) {
-			env.exn = exn;
-			//throw exn; TODO aql configure behavior, stop on error or not?
+		//all thread must be dead here
+		if (!exn.isEmpty()) { 
+			for (RuntimeException t : exn) {
+				if (!(t instanceof InvisibleException)) {
+					env.exn = t;
+				}
+			}
+			if (env.exn == null) {
+				env.exn = new RuntimeException("Anomaly: please report");
+			}
+			throw env.exn; //TODO aql configure behavior, stop on error or not?
 		}
 
 	/*	if (!todo.isEmpty()) {
@@ -190,15 +201,15 @@ public final class AqlMultiDriver implements Callable<Unit> {
 					notifyAll();
 				}
 			}
-		} catch (Throwable thr) {
-			if (!(thr instanceof InterruptedException)) {
-				thr.printStackTrace();
-				exn = new LineException(thr.getMessage(), n, k2);
-				stop = true;
-				cancel();
-				throw exn;				
-			}
+		} catch (InterruptedException exp) {
+			exn.add(new InvisibleException(exp));			 
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			exn.add(new LineException(e.getMessage(), n, k2));
+			stop = true;
+			cancel();
 		}
+		
 
 		return new Unit();
 	}

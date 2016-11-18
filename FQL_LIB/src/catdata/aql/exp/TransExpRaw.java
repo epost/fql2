@@ -19,7 +19,7 @@ import catdata.aql.Instance;
 import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.Transform;
-import catdata.aql.fdm.TransformLiteral;
+import catdata.aql.fdm.LiteralTransform;
 
 //TODO aql grobner basis prover
 public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object> {
@@ -106,7 +106,7 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 	}
 
 	@Override
-	public TransformLiteral<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
+	public LiteralTransform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
 		Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> src0 = src.eval(env), dst0 = dst.eval(env);
 		//Collage<Object, Object, Object, Object, Object, Void, Void> scol = new Collage<>(src0);
 		Collage<Object, Object, Object, Object, Object, Object, Object> dcol = dst0.collage(); //new Collage<>(dst0);
@@ -147,7 +147,7 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 		AqlOptions ops = new AqlOptions(options, null);
 		
 		
-		TransformLiteral<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = new TransformLiteral<>(gens0, sks0, src0, dst0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe) );
+		LiteralTransform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = new LiteralTransform<>(gens0, sks0, src0, dst0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe) );
 		return ret; 
 	}
 

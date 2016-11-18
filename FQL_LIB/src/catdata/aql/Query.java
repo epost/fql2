@@ -14,7 +14,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.fdm.IdentityTransform;
-import catdata.aql.fdm.TransformLiteral; //TODO aql why depend fdm
+import catdata.aql.fdm.LiteralTransform; //TODO aql why depend fdm
 
 public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 
@@ -41,7 +41,7 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			this.ens.put(en2, new Frozen<>(ens.get(en2).first, ens.get(en2).second, src, ens.get(en2).third));
 		}
 		for (Fk2 fk2 : fks.keySet()) {
-			this.fks.put(fk2, new TransformLiteral<>(fks.get(fk2).first.map, new HashMap<>(), this.ens.get(dst.fks.get(fk2).second), this.ens.get(dst.fks.get(fk2).first), fks.get(fk2).second));
+			this.fks.put(fk2, new LiteralTransform<>(fks.get(fk2).first.map, new HashMap<>(), this.ens.get(dst.fks.get(fk2).second), this.ens.get(dst.fks.get(fk2).first), fks.get(fk2).second));
 			this.doNotValidate.put(fk2, fks.get(fk2).second);
 		}
 		this.atts = new Ctx<>(atts.map);

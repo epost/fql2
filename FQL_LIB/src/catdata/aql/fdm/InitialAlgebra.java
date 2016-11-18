@@ -463,7 +463,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		} else if (term.att != null) {
 			return Term.Sk(Chc.inRight(new Pair<>(trans1X(term.arg.asArgForAtt()), term.att)));
 		}
-		throw new RuntimeException("Anomaly: please report");
+		throw new RuntimeException("Anomaly: please report: " + term + ", gen " + term.gen + " fk " + term.fk + ", var " + term.var);
 	}
 
 	private X trans1X(Term<Void, En, Void, Fk, Void, Gen, Void> term) {
