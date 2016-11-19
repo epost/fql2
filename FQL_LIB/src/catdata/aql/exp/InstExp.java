@@ -18,7 +18,9 @@ import catdata.aql.Instance;
 import catdata.aql.It.ID;
 import catdata.aql.Mapping;
 import catdata.aql.Transform;
+import catdata.aql.Var;
 import catdata.aql.exp.SchExp.SchExpLit;
+import catdata.aql.fdm.CoEvalInstance;
 import catdata.aql.fdm.DeltaInstance;
 import catdata.aql.fdm.DistinctInstance;
 import catdata.aql.fdm.EvalAlgebra.Row;
@@ -288,6 +290,83 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 				ret.addAll(p.deps());
 			}
 			return ret;
+		}
+		
+	}
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static final class InstExpCoEval<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
+	extends InstExp<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, Att1>>> {
+		
+		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
+		public final InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y>  J;
+		public final Map<String, String> options;
+		
+		public InstExpCoEval(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> j, List<Pair<String, String>> options) {
+			Q = q;
+			J = j;
+			this.options = Util.toMapSafely(options);
+		}
+		
+		@Override
+		public String toString() {
+			return "coeval " + Q + " " + J;
+		}
+
+		@Override
+		public SchExp<Ty, En1, Sym, Fk1, Att1> type(AqlTyping G) {
+			if (!J.type(G).equals(Q.type(G).second)) { //TODO aql schema equality
+				throw new RuntimeException("Schema of instance is " + J.type(G) + " but target of query is " + Q.type(G).second);
+			}
+			return Q.type(G).first;
+		}
+
+		@Override
+		public Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var, X>, Y, ID, Chc<Y, Pair<ID, Att1>>> eval(AqlEnv env) {
+			return new CoEvalInstance<>(Q.eval(env), J.eval(env), options);
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(J.deps(), Q.deps());
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((J == null) ? 0 : J.hashCode());
+			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpCoEval<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpCoEval<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (J == null) {
+				if (other.J != null)
+					return false;
+			} else if (!J.equals(other.J))
+				return false;
+			if (Q == null) {
+				if (other.Q != null)
+					return false;
+			} else if (!Q.equals(other.Q))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			return true;
 		}
 		
 	}

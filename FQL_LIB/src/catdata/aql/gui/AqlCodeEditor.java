@@ -104,6 +104,11 @@ public final class AqlCodeEditor extends
 				+ "\n options"
 				+ "\n}", ""));
 	
+		provider.addCompletion(new ShorthandCompletion(provider, "import_csv",
+				"instance (resp. transform) ? = import_csv \"path\" : ? (resp. -> ?) {imports options} ", ""));
+
+		provider.addCompletion(new ShorthandCompletion(provider, "export_csv",
+				"pragma ? = export_csv_instance (resp. export_csv_transform) ? {options} ", ""));
 			
 		return provider;
 

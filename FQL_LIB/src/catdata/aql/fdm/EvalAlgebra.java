@@ -46,7 +46,7 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 
 		@Override
 		public String toString() {
-			return "Row [ctx=" + ctx + ", en2=" + en2 + "]";
+			return en2 + " " + ctx.toString(x -> x.toString());
 		}
 
 		@Override

@@ -98,6 +98,8 @@ public class AqlQueryExample extends AqlExample {
 			+ "\n} "
 			+ "\n"
 			+ "\ntransform k = eval Q h"
+			+ "\n"
+			+ "\ntransform kk = coeval Q k"
 			+ "\n";
 
 

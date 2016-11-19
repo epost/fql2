@@ -54,6 +54,14 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	map(Function<Ty,Ty2> tyf, Function<Sym, Sym2> symf, Function<Fk, Fk2> fkf, Function<Att, Att2> attf, Function<Gen, Gen2> genf, Function<Sk, Sk2> skf) {
 		return Term.map(this, tyf, symf, fkf, attf, genf, skf);
 	}
+	
+	public <Gen2> Term<Ty, En, Sym, Fk, Att, Gen2, Sk> mapGen(Function<Gen, Gen2> genf) {
+		return Term.map(this, Function.identity(), Function.identity(), Function.identity(), Function.identity(), genf, Function.identity());
+	}
+	
+	public <Gen2,Sk2> Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> mapGenSk(Function<Gen, Gen2> genf, Function<Sk, Sk2> skf) {
+		return Term.map(this, Function.identity(), Function.identity(), Function.identity(), Function.identity(), genf, skf);
+	}
 
 	public final Var var;
 	public final Sym sym;
@@ -696,4 +704,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return toKB().vars();
 	} 
 	
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> upTalg(Term<Ty, Void, Sym, Void, Void, Void, Sk> term) {
+		return term.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity()); 
+	}
 }

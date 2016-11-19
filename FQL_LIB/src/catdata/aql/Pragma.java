@@ -1,5 +1,10 @@
 package catdata.aql;
 
-public final class Pragma {
+public abstract class Pragma {
 
+	public abstract void execute();
+
+	
+	
+	
 }

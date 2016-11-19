@@ -2,6 +2,7 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import catdata.Chc;
@@ -9,11 +10,14 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.It.ID;
 import catdata.aql.Transform;
+import catdata.aql.Var;
+import catdata.aql.exp.InstExp.InstExpCoEval;
 import catdata.aql.exp.InstExp.InstExpDelta;
 import catdata.aql.exp.InstExp.InstExpDistinct;
 import catdata.aql.exp.InstExp.InstExpEval;
 import catdata.aql.exp.InstExp.InstExpLit;
 import catdata.aql.exp.InstExp.InstExpSigma;
+import catdata.aql.fdm.CoEvalTransform;
 import catdata.aql.fdm.DeltaTransform;
 import catdata.aql.fdm.DistinctTransform;
 import catdata.aql.fdm.EvalAlgebra.Row;
@@ -32,6 +36,81 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 	
 	public abstract Pair<InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1>, InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2>> type(AqlTyping G);
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static class TransExpCoEval<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> 
+	extends TransExp<Ty, En1, Sym, Fk1, Att1, Pair<Var,X1>, Y1, Pair<Var,X2>, Y2, ID, Chc<Y1, Pair<ID, Att1>>, ID, Chc<Y2, Pair<ID, Att1>>> {
+
+		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
+		public final TransExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
+		private final Map<String,String> options1, options2;
+		private final List<Pair<String, String>> o1, o2;
+		 
+		public TransExpCoEval(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, TransExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t, List<Pair<String, String>> o1, List<Pair<String, String>> o2) {
+			this.t = t;
+			Q = q;
+			options1 = Util.toMapSafely(o1);
+			options2 = Util.toMapSafely(o2);
+			this.o1 = o1;
+			this.o2 = o2;
+		}
+
+		@Override
+		public Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Pair<Var, X1>, Y1, ID, Chc<Y1, Pair<ID, Att1>>>, InstExp<Ty, En1, Sym, Fk1, Att1, Pair<Var, X2>, Y2, ID, Chc<Y2, Pair<ID, Att1>>>> type(AqlTyping G) {
+			if (!t.type(G).first.type(G).equals(Q.type(G).second)) {
+				throw new RuntimeException("Target of query is " + t.type(G).second.type(G) + " but transform is on " + t.type(G).first);
+			}
+			return new Pair<>(new InstExpCoEval<>(Q, t.type(G).first, o1), new InstExpCoEval<>(Q, t.type(G).second, o2));
+		}
+
+		@Override
+		public Transform<Ty, En1, Sym, Fk1, Att1, Pair<Var, X1>, Y1, Pair<Var, X2>, Y2, ID, Chc<Y1, Pair<ID, Att1>>, ID, Chc<Y2, Pair<ID, Att1>>> eval(AqlEnv env) {
+			return new CoEvalTransform<>(Q.eval(env), t.eval(env), options1, options2);
+		}
+
+		@Override
+		public String toString() {
+			return "coeval " + Q + " " + t;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
+			result = prime * result + ((t == null) ? 0 : t.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TransExpCoEval<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpCoEval<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (Q == null) {
+				if (other.Q != null)
+					return false;
+			} else if (!Q.equals(other.Q))
+				return false;
+			if (t == null) {
+				if (other.t != null)
+					return false;
+			} else if (!t.equals(other.t))
+				return false;
+			return true;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(Q.deps(), t.deps());
+		}
+
+	}
+	
 	///////////////////////////////////////////////////////////////////////////////////////
 	
 	public static class TransExpEval<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> 

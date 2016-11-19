@@ -97,12 +97,15 @@ public final class AqlViewer {
 			break;
 		case TRANSFORM:
 			@SuppressWarnings("unchecked")
-			Transform  <Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> transform = (Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>) obj;
+			Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> transform = (Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>) obj;
 			ret.add(viewTransform(transform), "Algebra");
-
-			break;
+		break;
 		case PRAGMA:
-			// viewPragma(obj, ret);
+			/* Pragma pragma = (Pragma) obj;
+			Optional<JComponent> comp = viewPragma(pragma);
+			if (comp.isPresent()) {
+				ret.add(comp.get(), "Graphical");
+			} */
 			break;
 		case QUERY:
 			// viewQuery(obj, ret);
@@ -150,6 +153,20 @@ public final class AqlViewer {
 
 		return main;
 	}
+	/*
+	public static Optional<JComponent> viewPragma(Pragma p) {
+		if (p instanceof ToCsvPragmaTransform) {
+			return Optional.empty();
+		} else if (p instanceof ToCsvPragmaInstance) {
+			return Optional.of(viewPragmaToCsvInstance((ToCsvPragmaInstance)p));
+		}
+		throw new RuntimeException("Anomaly: please report");
+	} 
+	
+	private static JComponent viewPragmaToCsvInstance(ToCsvPragmaInstance p) {
+		return new JPanel();
+	} */
+
 	
 	public static <N,E> JComponent viewGraph(DMG<N,E> g) {
 		Graph<N, E> sgv = new DirectedSparseMultigraph<>();

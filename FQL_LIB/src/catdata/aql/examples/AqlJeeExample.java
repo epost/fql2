@@ -1211,7 +1211,10 @@ public class AqlJeeExample extends AqlExample {
 			+ "\ninstance OutputCyc = eval ETL_Cyc Output "
 			+ "\n "
 			+ "\ninstance OutputCycDistinct = distinct OutputCyc"
-			+ "\n";
+			+ "\n"
+			+ "\n//pragma emit1 = export_csv_instance OutputCycDistinct \"/Users/ryan/Desktop/OutputCycDistinct/\"" 
+			+ "\n//pragma emit2 = export_csv_transform RefTransLinkageToTransOnColimit \"/Users/ryan/Desktop/RefTransLinkageToTransOnColimit.csv\"" 
+			;
 
 
 }

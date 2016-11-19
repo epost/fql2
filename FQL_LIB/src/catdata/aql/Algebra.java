@@ -48,6 +48,8 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 		return ret;
 	}
 	
+	
+	
 	/**
 	 * @return only equations for instance part (no typeside, no schema)
 	 */

@@ -153,47 +153,32 @@ public final class RawTerm {
 			throw new RuntimeException(head + " is ambiguously a variable/function/attribute/foreign key/generator/lablled null");			
 		}
 		
-		if (vars.contains(head)) {
-			if (annotation != null) {
-				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
+		if (annotation != null) {
+			@SuppressWarnings("unchecked")
+			Ty ty = (Ty) annotation; 
+			String code = col.java_parsers.map.get(ty);
+			if (code == null) {
+				throw new RuntimeException("head of " + this + " is not a symbol or variable or of an inferred type (" + ty + ") with a java parser");
 			}
+			Function<List<Object>, Object> f = AqlJs.compile(code);
+			return Term.Obj(f.apply(Util.singList(head)), ty);
+		} else if (vars.contains(head)) {
 			return Term.Var(new Var(head));
 		} else if (col.syms.containsKey(resolve(head))) {
-			if (annotation != null) {
-				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
-			}
 			return Term.Sym(find(col.syms.map, resolve(head)), args0);
 		} else if (col.atts.containsKey(resolve(head))) {
-			if (annotation != null) {
-				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
-			}
 			return Term.Att(find(col.atts.map, resolve(head)), args0.get(0));
 		} else if (col.fks.containsKey(resolve(head))) {
-			if (annotation != null) {
-				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
-			}
 			return Term.Fk(find(col.fks.map, resolve(head)), args0.get(0)); 
 		} else if (col.gens.containsKey(resolve(head))) {
-			if (annotation != null) {
-				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
-			}
 			return Term.Gen(find(col.gens.map, resolve(head)));
 		} else if (col.sks.containsKey(resolve(head))) {
-			if (annotation != null) {
-				throw new RuntimeException(this + " is annotated but is also a variable or symbol");
-			}
 			return Term.Sk(find(col.sks.map, head));
-		} else if (annotation != null || (ctx0.containsKey(head) && ctx0.get(head).x.left)) {
-			Ty ty = null; 
-			if (annotation != null) {
-				for (Ty tyX : col.tys) {
-					if (annotation.equals(tyX)) {
-						ty = tyX;
-					}
-				}
-			} else if (ctx0.containsKey(head)) {
-				ty = ctx0.get(head).x.l;
-			}	
+		} else if (ctx0.containsKey(head) && !ctx0.get(head).x.left) {
+			//this must be a generator - but why isn't it in gens?
+			throw new RuntimeException("Error: " + this + " inferred as a generator, but available generators at this location are: " + col.gens.keySet());
+		} else if (ctx0.containsKey(head) && ctx0.get(head).x.left) {
+			Ty ty = ctx0.get(head).x.l;
 			if (ty == null) {
 				throw new RuntimeException("Anomaly: please report");
 			}
@@ -202,14 +187,9 @@ public final class RawTerm {
 				throw new RuntimeException("head of " + this + " is not a symbol or variable or of an inferred type (" + ty + ") with a java parser");
 			}
 			Function<List<Object>, Object> f = AqlJs.compile(code);
-			
+	
 			return Term.Obj(f.apply(Util.singList(head)), ty);
-		} else if (ctx0.containsKey(head) && ctx0.get(head).x.left) {
-			return Term.Obj(head, ctx0.get(head).x.l);
-		} else if (ctx0.containsKey(head) && !ctx0.get(head).x.left) {
-			//this must be a generator - but why isn't it in gens?
-			throw new RuntimeException("Anomaly, please report : " + this + " inferred as generator.  Common cause: a foreign key column references a non-defined generator in CSV import - check for extra whitespace.  Available gens: " + col.gens.keySet());
-		}
+		} 
 		throw new RuntimeException("Anomaly, please report: " + this);
 	}
 
@@ -221,18 +201,20 @@ public final class RawTerm {
 	public <Ty, En, Sym, Fk, Att, Gen, Sk> Ref<Chc<Ty,En>> infer(Set<String> vars, Map<String, Ref<Chc<Ty,En>>> ctx, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		boolean isSym, isAtt, isFk, isGen, isSk, isVar, isObj ;
 				
+		isObj = (annotation != null);
+		
 		Pair<List<Ty>, Ty> syms_t = col.syms.map.get(resolve(head)); //actually want possible null here
-		isSym = syms_t != null;
+		isSym = syms_t != null && !isObj;
 		Pair<En, Ty> atts_t = col.atts.map.get(resolve(head));
-		isAtt = atts_t != null;
+		isAtt = atts_t != null && !isObj;
 		Pair<En, En> fks_t = col.fks.map.get(resolve(head));
-		isFk = fks_t != null;
+		isFk = fks_t != null && !isObj;
 		En gens_t = col.gens.map.get(resolve(head));
-		isGen = gens_t != null;
+		isGen = gens_t != null && !isObj;
 		Ty sks_t = col.sks.map.get(resolve(head));
-		isSk = sks_t != null;
-		isObj = annotation != null;
-		isVar = vars.contains(new Var(resolve(head)));
+		isSk = sks_t != null && !isObj;
+		
+		isVar = vars.contains(new Var(resolve(head))) && !isObj;
 			
 		int sum = Util.list(isSym, isAtt, isFk, isGen, isSk, isVar, isObj).stream().filter(x -> x.equals(Boolean.TRUE)).collect(Collectors.toList()).size();
 		if (sum > 2) {
