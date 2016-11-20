@@ -39,6 +39,7 @@ import org.apache.commons.collections15.Transformer;
 import catdata.fql.FqlOptions;
 import catdata.fql.FQLException;
 import catdata.fql.Fn;
+import catdata.IntRef;
 import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;

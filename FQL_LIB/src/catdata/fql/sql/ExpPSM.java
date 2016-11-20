@@ -5,13 +5,13 @@ import java.util.Map;
 import java.util.Set;
 
 import catdata.fql.FQLException;
+import catdata.IntRef;
 import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
 import catdata.fql.cat.Arr;
 import catdata.fql.decl.Attribute;
 import catdata.fql.decl.Instance;
-import catdata.fql.decl.IntRef;
 import catdata.fql.decl.Node;
 import catdata.fql.decl.Path;
 import catdata.fql.decl.Signature;

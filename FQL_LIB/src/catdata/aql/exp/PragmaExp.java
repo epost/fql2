@@ -1,6 +1,8 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -9,14 +11,110 @@ import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Pragma;
-import catdata.aql.ToCsvPragmaInstance;
-import catdata.aql.ToCsvPragmaTransform;
+import catdata.aql.fdm.JdbcPragma;
+import catdata.aql.fdm.ToCsvPragmaInstance;
+import catdata.aql.fdm.ToCsvPragmaTransform;
 
 public abstract class PragmaExp extends Exp<Pragma> {
 	
 	public Kind kind() {
 		return Kind.PRAGMA;
 	}
+	
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static final class PragmaExpSql extends PragmaExp {
+		private final List<String> sqls;
+		
+		private final String jdbcString;
+	
+		private final String clazz;
+		
+		private final Map<String, String> options; //TODO aql autoreload
+		
+		public PragmaExpSql(String clazz, String jdbcString, List<String> sqls, List<Pair<String, String>> options) {
+			this.clazz = clazz;
+			this.jdbcString = jdbcString;
+			this.options = Util.toMapSafely(options);
+			this.sqls = new LinkedList<>(sqls);
+			try {
+				Class.forName(clazz);
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
+			result = prime * result + ((jdbcString == null) ? 0 : jdbcString.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((sqls == null) ? 0 : sqls.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			PragmaExpSql other = (PragmaExpSql) obj;
+			
+			AqlOptions op = new AqlOptions(options, null);
+			Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
+			if (reload) {
+				return false;
+			}
+			
+			if (clazz == null) {
+				if (other.clazz != null)
+					return false;
+			} else if (!clazz.equals(other.clazz))
+				return false;
+			if (jdbcString == null) {
+				if (other.jdbcString != null)
+					return false;
+			} else if (!jdbcString.equals(other.jdbcString))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			if (sqls == null) {
+				if (other.sqls != null)
+					return false;
+			} else if (!sqls.equals(other.sqls))
+				return false;
+			return true;
+		}
+
+		@Override
+		public Pragma eval(AqlEnv env) {
+			return new JdbcPragma(clazz, jdbcString, sqls, options);
+		}
+
+		@Override
+		public String toString() {
+			return "sql " + Util.sep(sqls, "\n");
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Collections.emptyList();
+		}	
+		
+		
+		
+	}
+	
+	
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	

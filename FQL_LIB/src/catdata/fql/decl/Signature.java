@@ -36,6 +36,7 @@ import javax.swing.UIManager;
 
 import org.apache.commons.collections15.Transformer;
 
+import catdata.IntRef;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.fql.FQLException;

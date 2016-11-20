@@ -34,7 +34,7 @@ import catdata.aql.Term;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 
-//TODO aql arbitrary sql queries for jdbc import
+
 public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk> 
 	extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> {
 
@@ -237,7 +237,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 		
 		InstExpCsv<?, ?, ?, ?, ?, ?, ?> other = (InstExpCsv<?, ?, ?, ?, ?, ?, ?>) obj;
 		AqlOptions op = new AqlOptions(options, null);
-		Boolean reload = (Boolean) op.getOrDefault(AqlOption.csv_always_reload);
+		Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
 		if (reload) {
 			return false;
 		}

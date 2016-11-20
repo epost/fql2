@@ -80,7 +80,9 @@ public class AqlPushoutExample extends AqlExample {
 			+ "\n} "
 			+ "\n"
 			+ "\ninstance I = coeval pushout J"
-			+ "\n";
+			+ "\n"
+			+ "\ntransform t = unit_query pushout J"
+			;
 
 
 

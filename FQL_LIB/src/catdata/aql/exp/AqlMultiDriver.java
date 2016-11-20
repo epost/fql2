@@ -1,7 +1,9 @@
 package catdata.aql.exp;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -12,18 +14,36 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import catdata.DAG;
+import catdata.IntRef;
 import catdata.InvisibleException;
 import catdata.Pair;
 import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Pragma;
-import catdata.fql.decl.IntRef;
 import catdata.ide.LineException;
 import catdata.ide.Program;
 
 //TODO: aql does assume unique names
 public final class AqlMultiDriver implements Callable<Unit> {
 
+	public static <X> Collection<Pair<String, Kind>> wrapDeps(String s, Exp<X> exp, Program<Exp<?>> prog) {
+		Collection<Pair<String, Kind>> ret = new HashSet<>(exp.deps());
+		for (String s0 : prog.order) {
+			if (s.equals(s0)) {
+				break;
+			}
+			//each expression depends on all the pragmas before it
+			if (prog.exps.get(s0).kind().equals(Kind.PRAGMA)) {
+				ret.add(new Pair<>(s0, Kind.PRAGMA));
+			}
+			//each pragma depends on all expressions before it
+			if (exp.kind().equals(Kind.PRAGMA)) {
+				ret.add(new Pair<>(s0, Kind.PRAGMA));
+			}
+		}
+		return ret;
+	}
+	
 	// n is unchanged if it is equal to old(n) and for every dependency d,
 	// unchanged(d)
 	// this means that expressions such as 'load from disk' will need to be
@@ -65,7 +85,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	private void checkAcyclic() {
 		DAG<String> dag = new DAG<>();
 		for (String n : prog.order) {
-			for (Pair<String, Kind> d : prog.exps.get(n).deps()) {
+			for (Pair<String, Kind> d : wrapDeps(n, prog.exps.get(n), prog)) {
 				if (!prog.order.contains(d.first)) {
 					throw new LineException("Undefined dependency: " + d, n, prog.exps.get(n).kind().toString());
 				}
@@ -162,7 +182,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			changed.put(n, true);
 			return true;
 		}
-		for (Pair<String, Kind> d : prev.deps()) {
+		for (Pair<String, Kind> d : wrapDeps(n, prev, last_prog)) {
 			if (changed(d.first)) {
 				changed.put(n, true);
 				return true;
@@ -235,7 +255,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	private String nextAvailable() {
 		outer: for (String s : todo) {
-			for (Pair<String, Kind> d : prog.exps.get(s).deps()) {
+			for (Pair<String, Kind> d : wrapDeps(s, prog.exps.get(s), prog)) {
 				if (!completed.contains(d.first)) {
 					continue outer;
 				}

@@ -17,6 +17,8 @@ import catdata.aql.exp.InstExp.InstExpDistinct;
 import catdata.aql.exp.InstExp.InstExpEval;
 import catdata.aql.exp.InstExp.InstExpLit;
 import catdata.aql.exp.InstExp.InstExpSigma;
+import catdata.aql.fdm.CoEvalEvalCoUnitTransform;
+import catdata.aql.fdm.CoEvalEvalUnitTransform;
 import catdata.aql.fdm.CoEvalTransform;
 import catdata.aql.fdm.DeltaTransform;
 import catdata.aql.fdm.DistinctTransform;
@@ -36,6 +38,163 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 	
 	public abstract Pair<InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1>, InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2>> type(AqlTyping G);
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static class TransExpCoEvalEvalCoUnit<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>  
+	extends TransExp<Ty, En1, Sym, Fk1, Att1, Pair<Var,Row<En2,X>>, Y, Gen, Sk, ID, Chc<Y, Pair<ID, Att1>>, X, Y> {
+
+		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q; 
+		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
+		public final Map<String,String> options;
+		
+		public TransExpCoEvalEvalCoUnit(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
+			Q = q;
+			I = i;
+			this.options = options;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TransExpCoEvalEvalCoUnit<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpCoEvalEvalCoUnit<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (Q == null) {
+				if (other.Q != null)
+					return false;
+			} else if (!Q.equals(other.Q))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "counit_query " + Q + " " + I;
+		}
+
+		@Override
+		public Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Pair<Var, Row<En2, X>>, Y, ID, Chc<Y, Pair<ID, Att1>>>, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y>> type(AqlTyping G) {
+			if (!Q.type(G).first.equals(I.type(G))) {
+				throw new RuntimeException("Q has src schema " + Q.type(G).first + " but instance has schema " + I.type(G));
+			}
+			return new Pair<>(new InstExpCoEval<>(Q,new InstExpEval<>(Q, I), Util.toList(options)),I);
+		}
+
+		@Override
+		public Transform<Ty, En1, Sym, Fk1, Att1, Pair<Var, Row<En2, X>>, Y, Gen, Sk, ID, Chc<Y, Pair<ID, Att1>>, X, Y> eval(AqlEnv env) {
+			return new CoEvalEvalCoUnitTransform<>(Q.eval(env), I.eval(env), options);
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(Q.deps(), I.deps());
+		}
+		
+		
+	}
+
+	
+	////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static class TransExpCoEvalEvalUnit<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>  
+	extends TransExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Row<En2,ID>, Chc<Y, Pair<ID, Att1>>, X, Y, Row<En2,ID>, Chc<Y, Pair<ID, Att1>>> {
+		//TODO aql recomputes
+		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q; 
+		public final InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> I;
+		public Map<String, String> options;
+		
+		public TransExpCoEvalEvalUnit(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> i, Map<String, String> options) {
+			Q = q;
+			I = i;
+			this.options = options;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TransExpCoEvalEvalUnit<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpCoEvalEvalUnit<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (Q == null) {
+				if (other.Q != null)
+					return false;
+			} else if (!Q.equals(other.Q))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "unit_query " + Q + " " + I;
+		}
+
+		@Override
+		public Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y>, InstExp<Ty, En2, Sym, Fk2, Att2, Row<En2, ID>, Chc<Y, Pair<ID, Att1>>, Row<En2, ID>, Chc<Y, Pair<ID, Att1>>>> type(AqlTyping G) {
+			if (!Q.type(G).second.equals(I.type(G))) {
+				throw new RuntimeException("Q has dst schema " + Q.type(G).second + " but instance has schema " + I.type(G));
+			}
+			return new Pair<>(I, new InstExpEval<>(Q,new InstExpCoEval<>(Q, I, Util.toList(options))));
+		}
+
+		@Override
+		public Transform<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Row<En2, ID>, Chc<Y, Pair<ID, Att1>>, X, Y, Row<En2, ID>, Chc<Y, Pair<ID, Att1>>> eval(AqlEnv env) {
+			return new CoEvalEvalUnitTransform<>(Q.eval(env), I.eval(env), options);
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(Q.deps(), I.deps());
+		}
+		
+	}
+	
+	
 	////////////////////////////////////////////////////////////////////////////////////////
 	
 	public static class TransExpCoEval<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> 

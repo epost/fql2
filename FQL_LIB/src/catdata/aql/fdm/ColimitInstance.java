@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -9,9 +9,18 @@ import catdata.Chc;
 import catdata.DMG;
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Algebra;
+import catdata.aql.AqlOptions;
+import catdata.aql.Collage;
+import catdata.aql.Ctx;
+import catdata.aql.DP;
+import catdata.aql.Eq;
+import catdata.aql.Instance;
+import catdata.aql.It;
+import catdata.aql.Schema;
+import catdata.aql.Term;
+import catdata.aql.Transform;
 import catdata.aql.It.ID;
-import catdata.aql.fdm.InitialAlgebra;
-import catdata.aql.fdm.LiteralInstance;
 
 //has to be gen rather than (N,gen) in order to use explicit prover
 public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> 

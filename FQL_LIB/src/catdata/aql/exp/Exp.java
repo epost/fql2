@@ -18,6 +18,9 @@ public abstract class Exp<X> {
 
 	@Override
 	public abstract boolean equals(Object o);
-
+	/**
+	 * This will not capture global order constraints; for example,
+	 * that pragmas form barriers.
+	 */
 	public abstract Collection<Pair<String, Kind>> deps();
 }

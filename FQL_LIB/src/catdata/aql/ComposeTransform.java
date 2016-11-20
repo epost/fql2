@@ -1,5 +1,9 @@
 package catdata.aql;
 
+//TODO aql id transform
+//TODO aql compose transform to parser
+//TODO aql id query
+//TODO aql compose query
 public class ComposeTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2,Gen3,Sk3,X3,Y3> 
 	extends Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen3,Sk3,X1,Y1,X3,Y3> {
 	

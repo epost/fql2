@@ -180,7 +180,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 		
 		TransExpCsv<?,?,?,?,?,?,?, ?, ?, ?, ?, ?, ?> other = (TransExpCsv<?,?,?,?,?,?,?, ?, ?, ?, ?, ?, ?>) obj;
 		AqlOptions op = new AqlOptions(options, null);
-		Boolean reload = (Boolean) op.getOrDefault(AqlOption.csv_always_reload);
+		Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
 		if (reload) {
 			return false;
 		}

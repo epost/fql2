@@ -12,6 +12,7 @@ public final class AqlExamples {
 									aqlQuery = new AqlQueryExample(),
 									aqlPushout = new AqlPushoutExample(),
 									aqlPullback = new AqlPullbackExample(),
+									aqlJdbc = new AqlJdbcExample(),
 									aqlDelta = new AqlDeltaExample();
 	
 }

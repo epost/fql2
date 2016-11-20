@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parser.Reference;
@@ -34,6 +35,7 @@ import catdata.aql.exp.InstExp.InstExpSigma;
 import catdata.aql.exp.InstExp.InstExpVar;
 import catdata.aql.exp.MapExp.MapExpId;
 import catdata.aql.exp.MapExp.MapExpVar;
+import catdata.aql.exp.PragmaExp.PragmaExpSql;
 import catdata.aql.exp.PragmaExp.PragmaExpToCsvInst;
 import catdata.aql.exp.PragmaExp.PragmaExpToCsvTrans;
 import catdata.aql.exp.PragmaExp.PragmaExpToCsvTrans.PragmaExpVar;
@@ -44,6 +46,8 @@ import catdata.aql.exp.SchExp.SchExpEmpty;
 import catdata.aql.exp.SchExp.SchExpInst;
 import catdata.aql.exp.SchExp.SchExpVar;
 import catdata.aql.exp.TransExp.TransExpCoEval;
+import catdata.aql.exp.TransExp.TransExpCoEvalEvalCoUnit;
+import catdata.aql.exp.TransExp.TransExpCoEvalEvalUnit;
 import catdata.aql.exp.TransExp.TransExpDelta;
 import catdata.aql.exp.TransExp.TransExpDistinct;
 import catdata.aql.exp.TransExp.TransExpEval;
@@ -72,7 +76,7 @@ public class AqlParser {
 	
 	static String[] res = new String[] {
 			"typeside", "schema", "mapping", "instance", "transform", "query", "pragma", "graph",
-			
+			"exec_jdbc",
 			"literal",
 			"id",
 			"attributes",
@@ -121,7 +125,11 @@ public class AqlParser {
 			"import_jdbc",
 			"export_csv_instance",
 			"export_csv_transform",
+			"import_jdbc_instance,", 
+			"export_jdbc_transform",
 			"export_jdbc",
+			"unit_query",
+			"counit_query"
 			};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -209,6 +217,8 @@ public class AqlParser {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static final void pragmaExp() {		
+		Parser<Pair<List<String>, List<catdata.Pair<String, String>>>> p = Parsers.tuple(ident.many(), options).between(token("{"),token("}"));
+		
 		Parser<PragmaExp> 
 			var = ident.map(PragmaExpVar::new),
 			csvInst = Parsers.tuple(token("export_csv_instance"), inst_ref.lazy(), ident, options.between(token("{"), token("}")).optional())
@@ -217,7 +227,10 @@ public class AqlParser {
 			csvTrans = Parsers.tuple(token("export_csv_transform"), trans_ref.lazy(), ident, options.between(token("{"), token("}")).optional())
 			.map(x -> new PragmaExpToCsvTrans(x.b,x.c, x.d == null ? new LinkedList<>() : x.d)),
 			
-			ret = Parsers.or(csvInst, csvTrans, var); 
+			sql = Parsers.tuple(token("exec_jdbc"), ident, ident, p).
+			map(x -> new PragmaExpSql(x.b, x.c, x.d.a, x.d.b)),
+			
+			ret = Parsers.or(csvInst, csvTrans, var, sql); 
 		
 		pragma_ref.set(ret);
 	}
@@ -237,7 +250,7 @@ public class AqlParser {
 			cod = Parsers.tuple(token("dst"), trans_ref.lazy()).map(x -> new InstExpCod(x.b)),
 			coeval = Parsers.tuple(token("coeval"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new InstExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d)),
 					
-			ret = Parsers.or(empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval);
+			ret = Parsers.or(instExpJdbc(),empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval);
 		
 		inst_ref.set(ret);
 	}
@@ -274,14 +287,18 @@ public class AqlParser {
 					.map(x -> new TransExpSigmaDeltaUnit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 			counit = Parsers.tuple(token("counit"), map_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
 					.map(x -> new TransExpSigmaDeltaCounit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
-					distinct = Parsers.tuple(token("distinct"), trans_ref.lazy()).map(x -> new TransExpDistinct(x.b)),		
+			distinct = Parsers.tuple(token("distinct"), trans_ref.lazy()).map(x -> new TransExpDistinct(x.b)),		
 			eval = Parsers.tuple(token("eval"), query_ref.lazy(), trans_ref.lazy()).map(x -> new TransExpEval(x.b, x.c)),		
 		
 			coeval = Parsers.tuple(token("coeval"), query_ref.lazy(), trans_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
 					.map(x -> new TransExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d, x.e == null ? new LinkedList<>() : x.e)),
 		
-			
-			ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct, eval, coeval, transExpCsv());
+			unitq = Parsers.tuple(token("unit_query"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
+					.map(x -> new TransExpCoEvalEvalUnit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
+			counitq = Parsers.tuple(token("counit_query"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
+					.map(x -> new TransExpCoEvalEvalCoUnit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
+		
+			ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct, eval, coeval, transExpCsv(), unitq, counitq);
 		
 		trans_ref.set(ret);
 	}
@@ -717,6 +734,17 @@ public class AqlParser {
 			return ret;	
 	}
 
+	@SuppressWarnings("rawtypes")
+	private static final Parser<InstExpJdbc> instExpJdbc() {
+		Parser<Tuple3<List<catdata.Pair<String, String>>, List<String>, List<catdata.Pair<String, String>>>> qs = Parsers.tuple(env(ident, "->"), imports, options).between(token("{"), token("}"));
+	//public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema, List<String> imports, Map<String, String> options, String clazz, String jdbcString, Map<String, String> map) {
+		
+		@SuppressWarnings("unchecked")
+		Parser<InstExpJdbc> ret = Parsers.tuple(token("import_jdbc"), ident, ident.followedBy(token(":")), sch_ref.lazy(), qs)
+				.map(x -> new InstExpJdbc(x.d, x.e.b, x.e.c, x.b, x.c, x.e.a));
+		return ret; 
+	}
+	
 	//TODO: aql reverse order on arguments env
 	private static final Parser<MapExpRaw> mapExpRaw() {
 		Parser<List<catdata.Pair<String, String>>> ens = Parsers.tuple(token("entities"), env(ident, "->")).map(x -> x.b);

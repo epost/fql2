@@ -40,6 +40,14 @@ import javax.swing.table.TableRowSorter;
 
 public class Util {
 	
+	public static <X,Y> List<Pair<X,Y>> toList(Map<X,Y> map) {
+		List<Pair<X,Y>> ret = new LinkedList<>();
+		for (Entry<X, Y> e : map.entrySet()) {
+			ret.add(new Pair<>(e.getKey(),e.getValue()));
+		}
+		return ret;
+	}
+	
 	public static <X> Set<X> toSetSafely(List<X> set) {
 		Set<X> ret = new HashSet<>();
 		for (X x : set) {

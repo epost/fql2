@@ -89,7 +89,9 @@ public class AqlPullbackExample extends AqlExample {
 			+ "\n}"
 			+ "\n"
 			+ "\ninstance J = eval pullback I"
-			+ "\n";
+			+ "\n"
+			+ "\ntransform t = counit_query pullback I"
+			;
 
 
 

@@ -78,7 +78,7 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		}
 		for (Fk2 fk2 : fks2.keySet()) {
 			if (!dst.fks.containsKey(fk2)) {
-				throw new RuntimeException("there is a transform for " + fk2 + ", which is not a foreign kety in the target");
+				throw new RuntimeException("there is a transform for " + fk2 + ", which is not a foreign key in the target");
 			}
 		}
 	}

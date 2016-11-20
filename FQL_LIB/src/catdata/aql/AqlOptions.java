@@ -32,7 +32,7 @@ public final class AqlOptions {
 		csv_quote_char,
 		csv_format,
 		csv_id_column_name,
-		csv_always_reload,
+		always_reload,
 				
 		completion_precedence,
 		completion_sort,
@@ -138,7 +138,7 @@ public final class AqlOptions {
 			return false;
 		case static_typing:
 			return false;
-		case csv_always_reload:
+		case always_reload:
 			return false;
 		case csv_charset:
 			return "UTF-8";
@@ -199,7 +199,7 @@ public final class AqlOptions {
 			return op.getBoolean(map);
 		case static_typing:
 			return op.getBoolean(map);
-		case csv_always_reload:
+		case always_reload:
 			return op.getBoolean(map);
 		case csv_charset:
 			return op.getString(map);

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.IntRef;
 import catdata.Pair;
 import catdata.Unit;
 import catdata.fql.decl.InstExp.Const;
@@ -31,7 +32,6 @@ import catdata.fql.decl.InstExp.Times;
 import catdata.fql.decl.InstExp.Two;
 import catdata.fql.decl.InstExp.Zero;
 import catdata.ide.LineException;
-import catdata.ide.MutableInteger;
 import catdata.ide.Prog;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -107,7 +107,7 @@ public class FQLProgram implements Prog {
 		// Graph<V, E> where V is the type of the vertices
 
 		final Graph<String, Object> g2 = new DirectedSparseMultigraph<>();
-		final MutableInteger guid = new MutableInteger(0);
+		final IntRef guid = new IntRef(0);
 
 		for (final String k : insts.keySet()) {
 			InstExp i = insts.get(k);

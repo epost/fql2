@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata.aql.fdm;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -8,6 +8,9 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+
+import catdata.aql.Pragma;
+import catdata.aql.Transform;
 
 public class ToCsvPragmaTransform<Ty,En,Sym,Att,Fk> extends Pragma {
 	
