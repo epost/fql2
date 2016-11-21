@@ -25,12 +25,12 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import catdata.Environment;
 import catdata.Pair;
+import catdata.Program;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
-import catdata.ide.Environment;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Program;
 import catdata.ide.ProgressMonitorWrapper;
 import catdata.opl.OplExp.OplGraph;
 import catdata.opl.OplExp.OplInst;

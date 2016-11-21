@@ -16,6 +16,7 @@ import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
 
+import catdata.Program;
 import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
@@ -39,7 +40,9 @@ import catdata.aql.exp.PragmaExp.PragmaExpProc;
 import catdata.aql.exp.PragmaExp.PragmaExpSql;
 import catdata.aql.exp.PragmaExp.PragmaExpToCsvInst;
 import catdata.aql.exp.PragmaExp.PragmaExpToCsvTrans;
-import catdata.aql.exp.PragmaExp.PragmaExpToCsvTrans.PragmaExpVar;
+import catdata.aql.exp.PragmaExp.PragmaExpToJdbcInst;
+import catdata.aql.exp.PragmaExp.PragmaExpToJdbcTrans;
+import catdata.aql.exp.PragmaExp.PragmaExpVar;
 import catdata.aql.exp.QueryExp.QueryExpVar;
 import catdata.aql.exp.QueryExpRaw.Block;
 import catdata.aql.exp.QueryExpRaw.Trans;
@@ -60,7 +63,6 @@ import catdata.aql.exp.TransExp.TransExpVar;
 import catdata.aql.exp.TyExp.TyExpEmpty;
 import catdata.aql.exp.TyExp.TyExpSch;
 import catdata.aql.exp.TyExp.TyExpVar;
-import catdata.ide.Program;
 
 public class AqlParser {
 
@@ -125,12 +127,11 @@ public class AqlParser {
 			"schemaOf",
 			"distinct",
 			"import_csv",
-			"import_jdbc",
 			"export_csv_instance",
 			"export_csv_transform",
-			"import_jdbc_instance,", 
+			"import_jdbc",
 			"export_jdbc_transform",
-			"export_jdbc",
+			"export_jdbc_instance",
 			"unit_query",
 			"counit_query"
 			};
@@ -234,9 +235,15 @@ public class AqlParser {
 			js = Parsers.tuple(token("exec_js"), p).map(x -> new PragmaExpJs(x.b.a, x.b.b)),		
 			proc = Parsers.tuple(token("exec_cmdline"), p).map(x -> new PragmaExpProc(x.b.a, x.b.b)),
 			
-			ret = Parsers.or(csvInst, csvTrans, var, sql, js, proc); 
+			jdbcInst = Parsers.tuple(Parsers.tuple(token("export_jdbc_instance"), inst_ref.lazy()), ident, ident, ident, options.between(token("{"), token("}")).optional())
+			.map(x -> new PragmaExpToJdbcInst(x.a.b, x.b,x.c,x.d, x.e == null ? new LinkedList<>() : x.e)),
+	
+			jdbcTrans = Parsers.tuple(Parsers.tuple(token("export_jdbc_transform"), trans_ref.lazy()), ident, ident, ident, options.between(token("{"), token("}")).optional())
+			.map(x -> new PragmaExpToJdbcTrans(x.a.b, x.b,x.c,x.d, x.e == null ? new LinkedList<>() : x.e)),
+	
+			ret = Parsers.or(csvInst, csvTrans, var, sql, js, proc, jdbcInst, jdbcTrans); 
 		
-		pragma_ref.set(ret);
+			pragma_ref.set(ret);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -302,7 +309,7 @@ public class AqlParser {
 			counitq = Parsers.tuple(token("counit_query"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
 					.map(x -> new TransExpCoEvalEvalCoUnit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 		
-			ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct, eval, coeval, transExpCsv(), unitq, counitq);
+			ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct, eval, coeval, transExpCsv(), unitq, counitq, transExpJdbc());
 		
 		trans_ref.set(ret);
 	}
@@ -470,6 +477,20 @@ public class AqlParser {
 		
 		return Parsers.tuple(token("import_csv"), ident, token(":"), st, pa.optional()).
 				map(x -> new TransExpCsv(x.d.a, x.d.b, x.b, x.e != null ? x.e.a : new LinkedList<>(), x.e != null ? x.e.b : new LinkedList<>() ));
+	}
+	//public TransExpJdbc(InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst, List<String> imports, List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<String, String>> map) {
+	
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static final Parser<TransExpJdbc> transExpJdbc() {
+		Parser<Pair<InstExp, InstExp>> st = Parsers.tuple(inst_ref.lazy(), token("->"), inst_ref.lazy())
+				.map(x -> new Pair<>(x.a, x.c));
+	
+		Parser<Tuple3<List<catdata.Pair<String, String>>, List<String>, List<catdata.Pair<String, String>>>> qs = Parsers.tuple(env(ident, "->"), imports, options).between(token("{"), token("}"));
+		
+		Parser<TransExpJdbc> ret = Parsers.tuple(token("import_jdbc"), ident, ident.followedBy(token(":")), st, qs)
+				.map(x -> new TransExpJdbc(x.d.a, x.d.b, x.e.b, x.e.c, x.b, x.c, x.e.a));
+		return ret; 
 	}
 	
 	private  static final Parser<TyExpRaw> tyExpRaw() {
@@ -741,7 +762,6 @@ public class AqlParser {
 	@SuppressWarnings("rawtypes")
 	private static final Parser<InstExpJdbc> instExpJdbc() {
 		Parser<Tuple3<List<catdata.Pair<String, String>>, List<String>, List<catdata.Pair<String, String>>>> qs = Parsers.tuple(env(ident, "->"), imports, options).between(token("{"), token("}"));
-	//public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema, List<String> imports, Map<String, String> options, String clazz, String jdbcString, Map<String, String> map) {
 		
 		@SuppressWarnings("unchecked")
 		Parser<InstExpJdbc> ret = Parsers.tuple(token("import_jdbc"), ident, ident.followedBy(token(":")), sch_ref.lazy(), qs)
@@ -799,32 +819,17 @@ public class AqlParser {
 	private static final Parser<Trans> trans() {
 		Parser<List<catdata.Pair<String, RawTerm>>> gens = env(term(), "->");
 		
-				
 		Parser<Pair<List<catdata.Pair<String, RawTerm>>, List<catdata.Pair<String, String>>>> 
 		pa = Parsers.tuple(gens.optional(), options);
-		
-					
+	
 		Parser<Trans> ret = Parsers.tuple(token("{"), pa, token("}")).map(x -> {
 			return new Trans(Util.newIfNull(x.b.a), x.b.b);
 		});
 			
 		return ret;	
 	}
-	
-/*	public static final Parser<?> pragma() {
-		Parser<?> p = Parsers.tuple(Terminals.StringLiteral.PARSER, token("="),
-				Terminals.StringLiteral.PARSER);
-		Parser<?> foo = section("options", p);
-		return Parsers.tuple(token("pragma"), token("{"), foo, (token("}")));
-	} */
 
 
-
-
-/*	private static <X> Parser<List<X>> section(String s, Parser<X> p) {
-		Parser<Tuple3<Token,List<X>,Token>> ret = Parsers.tuple(token(s), p.sepBy(token(",")), token(";"));
-		return ret.map(x -> x.b);
-	} */
 	
 	private static final <Y>  Parser<Triple<String, Integer, Y>> decl(String s, Parser<Y> p) {
 		return Parsers.tuple(token(s), ident, Parsers.INDEX, token("="), p).map(x -> new Triple<>(x.b, x.c, x.e));

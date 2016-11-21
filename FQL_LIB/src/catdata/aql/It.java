@@ -1,10 +1,12 @@
 package catdata.aql;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import catdata.aql.It.ID;
 
-public class It implements Iterator<ID> { 
+@SuppressWarnings("serial")
+public class It implements Iterator<ID>, Serializable { 
 	
 	private int next = 0;
 		
@@ -18,7 +20,7 @@ public class It implements Iterator<ID> {
 		return new ID("id" + next++);
 	}
 	
-	public class ID {  
+	public class ID implements Serializable {  
 		
 		public final String str;
 		

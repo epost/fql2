@@ -1,9 +1,12 @@
 package catdata;
 
+import java.io.Serializable;
+
 /**
  * @author Ryan Wisnesky
  */
-public class Pair<T1, T2> implements Comparable<Pair<T1, T2>> {
+@SuppressWarnings("serial")
+public class Pair<T1, T2> implements Comparable<Pair<T1, T2>>, Serializable {
 
 	public T1 first; //TODO aql make these final.  Same for Triple
 	public T2 second;

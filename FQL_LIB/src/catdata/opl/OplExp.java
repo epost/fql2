@@ -33,13 +33,13 @@ import javax.swing.table.DefaultTableModel;
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Chc;
+import catdata.Environment;
 import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.fqlpp.cat.FinSet;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.Environment;
 import catdata.ide.NEWDEBUG;
 import catdata.opl.OplParser.DoNotIgnore;
 import catdata.opl.OplQuery.Agg;

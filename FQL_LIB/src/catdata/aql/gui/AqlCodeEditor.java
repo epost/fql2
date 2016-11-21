@@ -14,13 +14,13 @@ import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.Token;
 
 import catdata.aql.exp.Exp;
+import catdata.Program;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.AqlMultiDriver;
 import catdata.aql.exp.AqlParser;
 import catdata.ide.CodeEditor;
 import catdata.ide.GUI;
 import catdata.ide.Language;
-import catdata.ide.Program;
 
 @SuppressWarnings("serial")
 public final class AqlCodeEditor extends
@@ -74,7 +74,7 @@ public final class AqlCodeEditor extends
 				provider,
 				"instance",
 				"instance ? = literal : ? {\n\timports\n\tgenerators\n\tequations\n\toptions\n} ",
-				""));
+				"")); 
 
 		provider.addCompletion(new ShorthandCompletion(
 				provider,
@@ -105,11 +105,17 @@ public final class AqlCodeEditor extends
 				+ "\n}", ""));
 	
 		provider.addCompletion(new ShorthandCompletion(provider, "import_csv",
-				"instance (resp. transform) ? = import_csv \"path\" : ? (resp. -> ?) {imports options} ", ""));
+				"import_csv path : schema (resp. inst -> inst) {imports options} ", ""));
 
 		provider.addCompletion(new ShorthandCompletion(provider, "export_csv",
-				"pragma ? = export_csv_instance (resp. export_csv_transform) ? {options} ", ""));
+				"export_csv_instance (resp. export_csv_transform) inst (resp. trans) path {options} ", ""));
 			
+		provider.addCompletion(new ShorthandCompletion(provider, "import_csv",
+				"import_jdbc classname url prefix : schema (resp. inst -> inst) {\nen -> sql ty -> sql (resp + att -> sql fk -> sql) ...}", ""));
+
+		provider.addCompletion(new ShorthandCompletion(provider, "export_csv",
+				"export_jdbc_instance (resp export_jdbc_transform) classname url prefix {options} ", ""));
+	
 		return provider;
 
 	}

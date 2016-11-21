@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,10 +14,9 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
 
-public final class Ctx<K,V> {
+@SuppressWarnings("serial")
+public final class Ctx<K,V> implements Serializable {
 	
-	
-
 	public final Map<K,V> map;
 	
 	public <X> Ctx<K,Chc<V,X>> inLeft() {

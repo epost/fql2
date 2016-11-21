@@ -1,5 +1,5 @@
 
-package catdata.ide;
+package catdata;
 
 @SuppressWarnings("serial")
 public class LineException extends RuntimeException {

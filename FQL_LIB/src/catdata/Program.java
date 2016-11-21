@@ -1,10 +1,8 @@
-package catdata.ide;
+package catdata;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-
-import catdata.Triple;
 
 public class Program<X> implements Prog {
 

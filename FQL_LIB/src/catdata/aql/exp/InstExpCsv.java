@@ -102,7 +102,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 		AqlOptions op = new AqlOptions(options, null);
 		String charset0 = (String) op.getOrDefault(AqlOption.csv_charset);
 		Charset charset = Charset.forName(charset0);
-		String idCol = (String) op.getOrDefault(AqlOption.csv_id_column_name);
+		String idCol = (String) op.getOrDefault(AqlOption.id_column_name);
 		CSVFormat format = getFormat(op);
 		format = format.withFirstRecordAsHeader();
 

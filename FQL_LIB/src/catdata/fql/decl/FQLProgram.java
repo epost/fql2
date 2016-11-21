@@ -11,7 +11,9 @@ import java.util.Map;
 import java.util.Set;
 
 import catdata.IntRef;
+import catdata.LineException;
 import catdata.Pair;
+import catdata.Prog;
 import catdata.Unit;
 import catdata.fql.decl.InstExp.Const;
 import catdata.fql.decl.InstExp.Delta;
@@ -31,8 +33,6 @@ import catdata.fql.decl.InstExp.Step;
 import catdata.fql.decl.InstExp.Times;
 import catdata.fql.decl.InstExp.Two;
 import catdata.fql.decl.InstExp.Zero;
-import catdata.ide.LineException;
-import catdata.ide.Prog;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 

@@ -18,12 +18,7 @@ import catdata.aql.Pragma;
 public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 	
 	public final String fil;
-	
-	//public final Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I;
-	
-	//public final CSVFormat format;
-	//public final String idCol;
-	
+		
 	public Map<En, String> ens = new HashMap<>();
 	public Map<Ty, String> tys = new HashMap<>();
 
@@ -32,9 +27,6 @@ public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 			s = s + "/";
 		}
 		this.fil = s;
-	//	this.format = format;
-	//	this.I = I;
-	//	this.idCol = idCol;
 	
 		try {
 			for (En en : I.schema().ens) {
@@ -112,13 +104,9 @@ public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 					throw new RuntimeException("Cannot delete directory: " + f);
 				}
 			}
-		}
-		
-		
+		}	
 	}
 
-	
-	
 	@Override
 	public void execute() {
 		delete();

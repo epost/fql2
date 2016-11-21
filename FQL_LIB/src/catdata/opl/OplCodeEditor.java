@@ -10,11 +10,11 @@ import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
 
+import catdata.Environment;
+import catdata.Program;
 import catdata.ide.CodeEditor;
-import catdata.ide.Environment;
 import catdata.ide.Language;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Program;
 
 @SuppressWarnings("serial")
 public class OplCodeEditor extends

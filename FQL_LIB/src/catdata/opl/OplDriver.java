@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import catdata.Environment;
+import catdata.LineException;
 import catdata.Pair;
-import catdata.ide.Environment;
-import catdata.ide.LineException;
+import catdata.Program;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Program;
 import catdata.opl.OplExp.OplInst0;
 import catdata.opl.OplExp.OplPragma;
 import catdata.opl.OplExp.OplSCHEMA0;

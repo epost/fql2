@@ -1,4 +1,4 @@
-package catdata.ide;
+package catdata;
 
 public interface Prog {
 

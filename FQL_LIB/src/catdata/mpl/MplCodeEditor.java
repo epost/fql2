@@ -9,10 +9,10 @@ import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 
+import catdata.Environment;
+import catdata.Program;
 import catdata.ide.CodeEditor;
-import catdata.ide.Environment;
 import catdata.ide.Language;
-import catdata.ide.Program;
 import catdata.mpl.Mpl.MplExp;
 
 

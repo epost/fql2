@@ -44,6 +44,9 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 
+import catdata.LineException;
+import catdata.Prog;
+
 
 /**
  * 

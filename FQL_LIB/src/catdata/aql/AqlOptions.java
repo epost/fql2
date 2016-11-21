@@ -31,8 +31,9 @@ public final class AqlOptions {
 		csv_escape_char,
 		csv_quote_char,
 		csv_format,
-		csv_id_column_name,
+		id_column_name,
 		always_reload,
+		varchar_length,
 				
 		completion_precedence,
 		completion_sort,
@@ -148,12 +149,14 @@ public final class AqlOptions {
 			return ',';
 		case csv_format:
 			return "Default";
-		case csv_id_column_name:
+		case id_column_name:
 			return "id";
 		case csv_line_delim_string:
 			return "\n";
 		case csv_quote_char:
 			return '\"';
+		case varchar_length:
+			return 64;
 		}
 		throw new RuntimeException("Anomaly: please report: "+ option);
 	}
@@ -209,12 +212,14 @@ public final class AqlOptions {
 			return op.getString(map);
 		case csv_format:
 			return op.getString(map);
-		case csv_id_column_name:
+		case id_column_name:
 			return op.getString(map);
 		case csv_line_delim_string:
 			return op.getChar(map);
 		case csv_quote_char:
 			return op.getChar(map);
+		case varchar_length:
+			return op.getInteger(map);
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}

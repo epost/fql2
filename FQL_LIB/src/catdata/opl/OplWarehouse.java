@@ -20,10 +20,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import catdata.Pair;
+import catdata.Program;
 import catdata.Triple;
 import catdata.Util;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.Program;
 import catdata.ide.WizardModel;
 import catdata.opl.OplExp.OplGraph;
 import catdata.opl.OplExp.OplInst0;

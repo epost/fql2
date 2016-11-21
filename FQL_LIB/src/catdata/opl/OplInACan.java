@@ -1,7 +1,7 @@
 package catdata.opl;
 
-import catdata.ide.Environment;
-import catdata.ide.Program;
+import catdata.Environment;
+import catdata.Program;
 import catdata.opl.OplExp.OplInst;
 
 public class OplInACan {

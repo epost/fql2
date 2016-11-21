@@ -11,12 +11,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Environment;
 import catdata.Pair;
+import catdata.Program;
 import catdata.Triple;
 import catdata.Util;
-import catdata.ide.Environment;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Program;
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplChaseExp;
 import catdata.opl.OplExp.OplColim;

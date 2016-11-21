@@ -18,8 +18,8 @@ import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
 
 import catdata.Pair;
+import catdata.Program;
 import catdata.Triple;
-import catdata.ide.Program;
 import catdata.mpl.Mpl.MplExp;
 import catdata.mpl.Mpl.MplExp.MplEval;
 import catdata.mpl.Mpl.MplExp.MplSch;

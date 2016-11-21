@@ -5,11 +5,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import catdata.LineException;
 import catdata.fqlpp.cat.Category;
 import catdata.fqlpp.cat.Functor;
 import catdata.fqlpp.cat.Transform;
 import catdata.fqlpp.cat.FinSet.Fn;
-import catdata.ide.LineException;
 
 public class FQLPPDriver {
 

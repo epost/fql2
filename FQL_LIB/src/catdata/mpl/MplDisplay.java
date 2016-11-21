@@ -24,10 +24,10 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import catdata.Environment;
 import catdata.Pair;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
-import catdata.ide.Environment;
 
 public class MplDisplay implements Disp {
 

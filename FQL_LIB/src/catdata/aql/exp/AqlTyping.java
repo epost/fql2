@@ -2,7 +2,7 @@ package catdata.aql.exp;
 
 import catdata.DMG;
 import catdata.Pair;
-import catdata.ide.Program;
+import catdata.Program;
 
 public class AqlTyping {
 	

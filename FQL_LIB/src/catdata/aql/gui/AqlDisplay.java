@@ -23,13 +23,13 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import catdata.LineException;
 import catdata.Pair;
+import catdata.Program;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.Exp;
 import catdata.aql.exp.Kind;
 import catdata.ide.Disp;
-import catdata.ide.LineException;
-import catdata.ide.Program;
 
 //TODO aql suppress instance equations - do not compute/display if not required - maybe make instance an interface
 public final class AqlDisplay implements Disp {

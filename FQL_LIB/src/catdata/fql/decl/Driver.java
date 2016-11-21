@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.LineException;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.fql.Chase;
@@ -21,7 +22,6 @@ import catdata.fql.decl.FullQueryExp.Sigma;
 import catdata.fql.decl.FullQueryExp.Var;
 import catdata.fql.sql.PSM;
 import catdata.fql.sql.PSMGen;
-import catdata.ide.LineException;
 import catdata.ide.NEWDEBUG;
 
 public class Driver {

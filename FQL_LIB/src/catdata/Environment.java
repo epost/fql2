@@ -1,4 +1,4 @@
-package catdata.ide;
+package catdata;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

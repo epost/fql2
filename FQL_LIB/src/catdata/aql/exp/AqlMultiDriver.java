@@ -16,12 +16,12 @@ import java.util.concurrent.Future;
 import catdata.DAG;
 import catdata.IntRef;
 import catdata.InvisibleException;
+import catdata.LineException;
 import catdata.Pair;
+import catdata.Program;
 import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Pragma;
-import catdata.ide.LineException;
-import catdata.ide.Program;
 
 //TODO: aql does assume unique names
 public final class AqlMultiDriver implements Callable<Unit> {

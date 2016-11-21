@@ -29,6 +29,7 @@
     <keyword>colimit</keyword>
     <keyword>constants</keyword>
     <keyword>counit</keyword>
+    <keyword>counit_query</keyword>
     <keyword>delta</keyword>
     <keyword>distinct</keyword>
     <keyword>dst</keyword>
@@ -37,12 +38,21 @@
     <keyword>entities</keyword>
     <keyword>equations</keyword>
     <keyword>eval</keyword>
+    <keyword>exec_cmdline</keyword>
+    <keyword>exec_jdbc</keyword>
+    <keyword>exec_js</keyword>
+    <keyword>export_csv_instance</keyword>
+    <keyword>export_csv_transform</keyword>
+    <keyword>export_jdbc_instance</keyword>
+    <keyword>export_jdbc_transform</keyword>
     <keyword>forall</keyword>
     <keyword>foreign_keys</keyword>
     <keyword>from</keyword>
     <keyword>functions</keyword>
     <keyword>generators</keyword>
     <keyword>id</keyword>
+    <keyword>import_csv</keyword>
+    <keyword>import_jdbc</keyword>
     <keyword>imports</keyword>
     <keyword>insert</keyword>
     <keyword>java</keyword>
@@ -63,6 +73,7 @@
     <keyword>types</keyword>
     <keyword>typesideOf</keyword>
     <keyword>unit</keyword>
+    <keyword>unit_query</keyword>
     <keyword>where</keyword>
   </keywords2>
   <dataTypes/>
@@ -72,7 +83,7 @@
     <intLiteral>{Digit}+</intLiteral>
     <floatLiteral/>
   </numbers>
-  <stringLiterals enabled="true" multiLine="false"/>
+  <stringLiterals enabled="true" multiLine="true"/>
   <charLiterals enabled="false" multiLine="false"/>
   <backtickLiterals enabled="false"/>
   <operators>

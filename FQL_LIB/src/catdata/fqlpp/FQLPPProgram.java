@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import catdata.ide.LineException;
-import catdata.ide.Prog;
+import catdata.LineException;
+import catdata.Prog;
 
 
 @SuppressWarnings("serial")

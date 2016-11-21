@@ -1,7 +1,7 @@
 package catdata.mpl;
 
+import catdata.Environment;
 import catdata.Unit;
-import catdata.ide.Environment;
 import catdata.mpl.Mpl.MplExp.MplEval;
 import catdata.mpl.Mpl.MplExp.MplSch;
 import catdata.mpl.Mpl.MplExp.MplVar;

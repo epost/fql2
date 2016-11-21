@@ -141,7 +141,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 
 	@Override
 	public String toString() {
-		return "import_csv " + file;
+		return "import_csv " + file + " : " + src + " -> " + dst;
 	}
 
 

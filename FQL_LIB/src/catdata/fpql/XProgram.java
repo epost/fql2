@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.LineException;
 import catdata.Pair;
+import catdata.Prog;
 import catdata.Triple;
-import catdata.ide.LineException;
-import catdata.ide.Prog;
 
 public class XProgram implements Prog {
 	

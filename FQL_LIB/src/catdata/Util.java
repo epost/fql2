@@ -36,6 +36,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.apache.commons.collections15.CollectionUtils;
+
 
 
 public class Util {
@@ -336,6 +338,11 @@ public class Util {
 		return map;
 	}
 
+	/**
+	 * 
+	 * @param m target
+	 * @param m2 source
+	 */
 	public static <K,V> void putAllSafely(Map<K,V> m, Map<K,V> m2) {
 		for (K k : m2.keySet()) {
 			V v2 = m2.get(k);
@@ -1016,5 +1023,9 @@ public class Util {
 
 	public static void anomaly() {
 		throw new RuntimeException("Anomaly: please report");
+	}
+
+	public static <X,Y> Collection<Object> isect(Collection<X> xs, Collection<Y> ys) {
+		return CollectionUtils.intersection(xs, ys);
 	}
 }

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.LineException;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.fql.decl.Attribute;
@@ -35,7 +36,6 @@ import catdata.fql.sql.PSMInterp;
 import catdata.fql.sql.PSMUnChi;
 import catdata.fql.sql.PropPSM;
 import catdata.fql.sql.SimpleCreateTable;
-import catdata.ide.LineException;
 import catdata.ide.NEWDEBUG;
 
 //todo always execute postlude

@@ -28,6 +28,7 @@ import javax.swing.JTextField;
 
 import org.codehaus.jparsec.error.ParserException;
 
+import catdata.LineException;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.fpql.XExp.XSchema;
@@ -35,7 +36,6 @@ import catdata.fpql.XPoly.Block;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
 import catdata.ide.Language;
-import catdata.ide.LineException;
 
 public class EnrichViewer {
 

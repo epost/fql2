@@ -44,8 +44,6 @@ public class InstExpJdbc<Ty,En,Sym,Fk,Att,Gen,Sk>
 	
 	public final Map<String, String> map;
 
-	
-	
 	public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema, List<String> imports, List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<String, String>> map) {
 		this.schema = schema;
 		this.imports = imports;
@@ -368,6 +366,7 @@ public class InstExpJdbc<Ty,En,Sym,Fk,Att,Gen,Sk>
 		int result = 1;
 		result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
 		result = prime * result + ((map == null) ? 0 : map.hashCode());
+		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
 		result = prime * result + ((imports == null) ? 0 : imports.hashCode());
 		result = prime * result + ((jdbcString == null) ? 0 : jdbcString.hashCode());
 		result = prime * result + ((options == null) ? 0 : options.hashCode());

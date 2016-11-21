@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import catdata.Environment;
+import catdata.LineException;
+import catdata.Program;
 import catdata.Unit;
-import catdata.ide.Environment;
-import catdata.ide.LineException;
-import catdata.ide.Program;
 import catdata.mpl.Mpl.MplExp;
 
 public class MplDriver {

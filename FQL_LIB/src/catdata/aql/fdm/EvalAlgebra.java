@@ -1,5 +1,6 @@
 package catdata.aql.fdm;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -26,7 +27,8 @@ import catdata.aql.fdm.EvalAlgebra.Row;
 public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
 extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
  
-	public static class Row<En2,X> {
+	@SuppressWarnings("serial")
+	public static class Row<En2,X> implements Serializable {
 		
 		public <Z> Row<En2,Z> map(Function<X,Z> f) {
 			return new Row<>(ctx.map(f), en2);

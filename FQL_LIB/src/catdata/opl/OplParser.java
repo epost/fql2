@@ -22,11 +22,11 @@ import org.codehaus.jparsec.functors.Tuple5;
 
 import catdata.Chc;
 import catdata.Pair;
+import catdata.Program;
 import catdata.Triple;
 import catdata.Util;
 import catdata.fpql.XExp;
 import catdata.ide.NEWDEBUG;
-import catdata.ide.Program;
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplChaseExp;
 import catdata.opl.OplExp.OplColim;

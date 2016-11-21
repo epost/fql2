@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import catdata.LineException;
 import catdata.fpql.XExp.Flower;
-import catdata.ide.LineException;
 import catdata.ide.NEWDEBUG;
 
 

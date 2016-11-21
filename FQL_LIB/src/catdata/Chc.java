@@ -1,5 +1,6 @@
 package catdata;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,7 +9,8 @@ import java.util.Set;
 /**
  * @author Ryan Wisnesky
  */
-public class Chc<X,Y> {
+@SuppressWarnings("serial")
+public class Chc<X,Y> implements Serializable {
 	public final boolean left;
 	
 	public final X l;
