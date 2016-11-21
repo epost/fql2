@@ -34,6 +34,8 @@ import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 
 import catdata.Pair;
+import catdata.aql.exp.Kind;
+import catdata.aql.gui.AqlCodeEditor;
 import catdata.fpql.EnrichViewer;
 import catdata.fpql.XEasikToFQL;
 import catdata.fpql.XJsonToFQL;
@@ -180,6 +182,10 @@ public class GUI extends JPanel {
 		final Menu editMenu = new Menu("Edit");
 		MenuItem findItem = new MenuItem("Find");
 		editMenu.add(findItem);
+		
+		Menu aqlMenu = new Menu("AQL");
+		populateAql(aqlMenu);
+		
 
 		KeyStroke ctrlF = KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK);
 		MenuShortcut f = new MenuShortcut(ctrlF.getKeyCode());
@@ -407,6 +413,7 @@ public class GUI extends JPanel {
 		menuBar.add(editMenu);
 		menuBar.add(toolsMenu);
 		menuBar.add(transMenu);
+		menuBar.add(aqlMenu);
 
 		menuBar.add(helpMenu);
 
@@ -494,6 +501,26 @@ public class GUI extends JPanel {
 		newAction(null, "", Language.getDefault());
 
 		return new Pair<>(pan, menuBar);
+	}
+
+	private static void infer(Kind k) {
+		int i = editors.getSelectedIndex();
+		Object o = editors.getComponentAt(i);
+		if (o instanceof AqlCodeEditor) {
+			AqlCodeEditor a = (AqlCodeEditor) o;
+			a.infer(k);
+		}
+	}
+	private static void populateAql(Menu menu) {
+		MenuItem im = new MenuItem("Infer Mapping (using last compiled state)");
+		im.addActionListener(x -> infer(Kind.MAPPING));
+		menu.add(im);
+		MenuItem iq = new MenuItem("Infer Query (using last compiled state)");
+		iq.addActionListener(x -> infer(Kind.QUERY));
+		menu.add(iq);
+		MenuItem it = new MenuItem("Infer Transform (using last compiled state)");
+		it.addActionListener(x -> infer(Kind.TRANSFORM));
+		menu.add(it);
 	}
 
 	protected static void doExample(Example e) {

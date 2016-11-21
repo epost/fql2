@@ -64,7 +64,7 @@ public final class AqlCodeEditor extends
 			Pair<String, String> s = AqlParser.parseInfer(in);
 			String a = s.first;
 			String b = s.second;
-			String repl = in + " {\n";
+			String repl = " {\n";
 			if (k.equals(Kind.MAPPING)) {
 				repl += inferMapping(last_env.defs.schs.map.get(a), last_env.defs.schs.map.get(b));
 			} else if (k.equals(Kind.QUERY)) {
@@ -73,7 +73,8 @@ public final class AqlCodeEditor extends
 				repl += inferTransform(last_env.defs.insts.map.get(a), last_env.defs.insts.map.get(b));
 			} 
 			repl += "\n}";
-			topArea.replaceSelection(repl);
+			topArea.insert(repl, topArea.getSelectionEnd());
+			//topArea.replaceSelection(repl);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			respArea.setText("Error in inference: " + e.getMessage());
@@ -146,6 +147,7 @@ public final class AqlCodeEditor extends
 		return a.ens.stream().map(x -> "v_" + en + "_" + x).collect(Collectors.toList());
 	}
 	
+	@SuppressWarnings("unchecked")
 	private <Ty, En, Sym, Fk, Att,Ty0, En0, Sym0, Fk0, Att0> String inferTrans(Fk0 fk, Schema<Ty, En, Sym, Fk, Att> a, Schema<Ty0, En0, Sym0, Fk0, Att0> b) {
 		List<String> dom = vars(b.fks.get(fk).second, a, b);
 		List<String> cod = varsColon(b.fks.get(fk).first, a, b);
@@ -158,6 +160,7 @@ public final class AqlCodeEditor extends
 	}
 		
 	
+	@SuppressWarnings("unchecked")
 	private <Ty, En, Sym, Fk, Att,Ty0, En0, Sym0, Fk0, Att0> String inferBlock(En0 en, Schema<Ty, En, Sym, Fk, Att> a, Schema<Ty0, En0, Sym0, Fk0, Att0> b) {
 		String s = "some type side symbols [" + pr(b.typeSide.syms.keySet()) + "] applied to Attributes [" + pr(b.atts.keySet()) + "] applied to paths of foreign keys [" + pr(a.fks.keySet()) + "] ending on variables [" + pr(vars(en, a, b)) + "]";
 		
