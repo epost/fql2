@@ -979,8 +979,8 @@ public class Util {
 		return ret;
 	}
 
-	public static <X> Set<X> union(Collection<X> x, Collection<X> y) {
-		Set<X> ret = new HashSet<>(x);
+	public static <X extends Z,Y extends Z,Z>  Set<Z> union(Collection<X> x, Collection<Y> y) {
+		Set<Z> ret = new HashSet<>(x);
 		ret.addAll(y);
 		return ret;
 	}

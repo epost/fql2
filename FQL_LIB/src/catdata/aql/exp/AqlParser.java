@@ -889,6 +889,12 @@ public class AqlParser {
 		return Parsers.or(eq1, eq2).from(TOKENIZER, IGNORED).parse(s);
 	}
 	
+	public static final catdata.Pair<String, String> parseInfer(String s) {
+		Parser<catdata.Pair<String, String>> p = Parsers.tuple(token("literal").followedBy(token(":")), ident.followedBy(token("->")), ident)
+				.map(x -> new catdata.Pair<>(x.b, x.c));		
+		return p.from(TOKENIZER, IGNORED).parse(s);
+	}
+	
 	public static final catdata.Pair<List<catdata.Pair<String, String>>, RawTerm> parseTermInCtx(String s) {
 		return Parsers.or(term1, term2).from(TOKENIZER, IGNORED).parse(s);
 	}
