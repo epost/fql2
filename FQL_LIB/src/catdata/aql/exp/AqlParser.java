@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parser.Reference;
@@ -35,6 +34,8 @@ import catdata.aql.exp.InstExp.InstExpSigma;
 import catdata.aql.exp.InstExp.InstExpVar;
 import catdata.aql.exp.MapExp.MapExpId;
 import catdata.aql.exp.MapExp.MapExpVar;
+import catdata.aql.exp.PragmaExp.PragmaExpJs;
+import catdata.aql.exp.PragmaExp.PragmaExpProc;
 import catdata.aql.exp.PragmaExp.PragmaExpSql;
 import catdata.aql.exp.PragmaExp.PragmaExpToCsvInst;
 import catdata.aql.exp.PragmaExp.PragmaExpToCsvTrans;
@@ -77,6 +78,8 @@ public class AqlParser {
 	static String[] res = new String[] {
 			"typeside", "schema", "mapping", "instance", "transform", "query", "pragma", "graph",
 			"exec_jdbc",
+			"exec_js",
+			"exec_cmdline",
 			"literal",
 			"id",
 			"attributes",
@@ -227,10 +230,11 @@ public class AqlParser {
 			csvTrans = Parsers.tuple(token("export_csv_transform"), trans_ref.lazy(), ident, options.between(token("{"), token("}")).optional())
 			.map(x -> new PragmaExpToCsvTrans(x.b,x.c, x.d == null ? new LinkedList<>() : x.d)),
 			
-			sql = Parsers.tuple(token("exec_jdbc"), ident, ident, p).
-			map(x -> new PragmaExpSql(x.b, x.c, x.d.a, x.d.b)),
+			sql = Parsers.tuple(token("exec_jdbc"), ident, ident, p).map(x -> new PragmaExpSql(x.b, x.c, x.d.a, x.d.b)),	
+			js = Parsers.tuple(token("exec_js"), p).map(x -> new PragmaExpJs(x.b.a, x.b.b)),		
+			proc = Parsers.tuple(token("exec_cmdline"), p).map(x -> new PragmaExpProc(x.b.a, x.b.b)),
 			
-			ret = Parsers.or(csvInst, csvTrans, var, sql); 
+			ret = Parsers.or(csvInst, csvTrans, var, sql, js, proc); 
 		
 		pragma_ref.set(ret);
 	}

@@ -50,11 +50,9 @@ public class AqlJs {
 		};
 		
 		return fun;
-		
-		
-	
 	}
 
+	//TODO aql move to util and point all places that load classes to it
 	public static Class<?> load(String clazz) {
 		try {
 			return Class.forName(clazz);
@@ -134,4 +132,13 @@ public class AqlJs {
 		throw new RuntimeException();
 	}
 	
+	public static Object exec(String s) {
+		ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");	
+		try {
+			return engine.eval(s);
+		} catch (ScriptException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Error executing " + s + ": " + e.getMessage());
+		}	
+	}
 }

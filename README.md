@@ -55,6 +55,7 @@ JUNG (BSD License)
 RSyntaxTextArea [and autocomplete] (BSD License)
 Commons Generics (Apache License)
 Commons CSV (Apache License)
+Commons Exec (Apache License)
 JFlex (BSD License)
 H2 (Mozilla Public License or Eclipse Public License)
 
@@ -86,7 +87,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 
-### Apache Commons Collections Generics and CSV (Apache 2.0 License)
+### Apache Commons Collections Generics and CSV and Exec (Apache 2.0 License)
 
 Copyright The Apache Software Foundation
 

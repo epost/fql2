@@ -12,6 +12,8 @@ import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Pragma;
 import catdata.aql.fdm.JdbcPragma;
+import catdata.aql.fdm.JsPragma;
+import catdata.aql.fdm.ProcPragma;
 import catdata.aql.fdm.ToCsvPragmaInstance;
 import catdata.aql.fdm.ToCsvPragmaTransform;
 
@@ -110,11 +112,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			return Collections.emptyList();
 		}	
 		
-		
-		
 	}
-	
-	
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -306,11 +304,142 @@ public abstract class PragmaExp extends Exp<Pragma> {
 				return var;
 			}
 			
-			
-			
 		}
-}
+	}
 	
+	/////////////////////////////////////////////////////////////////////////////////////////
 	
+	public static final class PragmaExpJs extends PragmaExp {
+		private final List<String> jss;
+		
 	
+		private final Map<String, String> options; //TODO aql autoreload
+		
+		public PragmaExpJs(List<String> jss, List<Pair<String, String>> options) {
+			this.options = Util.toMapSafely(options);
+			this.jss = new LinkedList<>(jss);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((jss == null) ? 0 : jss.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			PragmaExpJs other = (PragmaExpJs) obj;
+			
+			AqlOptions op = new AqlOptions(options, null);
+			Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
+			if (reload) {
+				return false;
+			}
+			
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			if (jss == null) {
+				if (other.jss != null)
+					return false;
+			} else if (!jss.equals(other.jss))
+				return false;
+			return true;
+		}
+
+		@Override
+		public Pragma eval(AqlEnv env) {
+			return new JsPragma(jss, options);
+		}
+
+		@Override
+		public String toString() {
+			return "exec_js " + Util.sep(jss, "\n");
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Collections.emptyList();
+		}	
+			
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static final class PragmaExpProc extends PragmaExp {
+		private final List<String> cmds;
+		
+	
+		private final Map<String, String> options; //TODO aql autoreload
+		
+		public PragmaExpProc(List<String> cmds, List<Pair<String, String>> options) {
+			this.options = Util.toMapSafely(options);
+			this.cmds = new LinkedList<>(cmds);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((cmds == null) ? 0 : cmds.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			PragmaExpProc other = (PragmaExpProc) obj;
+			
+			AqlOptions op = new AqlOptions(options, null);
+			Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
+			if (reload) {
+				return false;
+			}
+			
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			if (cmds == null) {
+				if (other.cmds != null)
+					return false;
+			} else if (!cmds.equals(other.cmds))
+				return false;
+			return true;
+		}
+
+		@Override
+		public Pragma eval(AqlEnv env) {
+			return new ProcPragma(cmds, options);
+		}
+
+		@Override
+		public String toString() {
+			return "exec_cmdline " + Util.sep(cmds, "\n");
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Collections.emptyList();
+		}	
+			
+	}
 }
