@@ -6,7 +6,6 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +21,6 @@ import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Instance;
-import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.fdm.LiteralTransform;
@@ -68,6 +66,11 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 	private Sk1 stringToSk1(String s) {
 		return (Sk1) s;
 	}
+	@SuppressWarnings("unchecked")
+	private Gen2 stringToGen2(String gen) {
+		return (Gen2) gen;
+	}
+	
 	
 	
 	@Override
@@ -101,11 +104,8 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 			for (CSVRecord row : parser) {
 				String gen = row.get(0);
 				
-				RawTerm term = new RawTerm(row.get(1), new LinkedList<>());
-
-				Map<String, Chc<Ty, En>> ctx = new HashMap<>();
-				
 				Chc<Ty,En> required = null;
+				
 				if (s.gens().map.containsKey(gen) && s.sks().map.containsKey(gen)) {
 					throw new RuntimeException("in transform for " + gen + ", " + gen + " is ambiguously an entity generator and labelled null");
 				} else if (s.gens().map.containsKey(gen)) {
@@ -116,13 +116,13 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 					throw new RuntimeException("in transform for " + gen + ", " + gen + " is not a source generator/labelled null");
 				}
 				
-				Term<Ty,En,Sym,Fk,Att,Gen2,Sk2> term0 = RawTerm.infer0(ctx, term, required, t.collage(), "in transform for " + gen + ", ", s.schema().typeSide.js);
-							
+				String gen2 = row.get(1);
+				
 				if (required.left) {
-					Util.putSafely(sks, stringToSk1(gen), term0);				
+					Util.putSafely(sks, stringToSk1(gen), InstExpCsv.stringToSk(t.sks().keySet(), required.l, s.schema(), gen2));				
 				} else {
-					Util.putSafely(gens, stringToGen1(gen), term0.convert());
-				}
+					Util.putSafely(gens, stringToGen1(gen), Term.Gen(stringToGen2(gen)));
+				} 
 			
 			}
 		} catch (IOException exn) {

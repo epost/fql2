@@ -4,7 +4,8 @@ Categorical Data IDE
 About
 -----
 
-An IDE for the functorial query languages developed at categoricaldata.net.
+An IDE for the functorial query languages developed at categoricaldata.net/fql.html.  
+Binaries are available there.
 
 Build
 -----
@@ -13,8 +14,8 @@ Compilation note: requires the built-in Eclipse compiler that ships with the Ecl
 
 ### Maven
 
-    git clone https://github.com/CategoricalData/fql2.git
-    cd fql2/FQL_LIB/
+    git clone https://github.com/CategoricalData/fql.git
+    cd fql
     mvn package
 
 License

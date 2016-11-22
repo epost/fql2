@@ -133,7 +133,7 @@ public final class Ctx<K,V> implements Serializable {
 		}
 		V ret = map.get(k);
 		if (ret == null) {
-			throw new RuntimeException(k + " cannot be found in context " + map);
+			throw new RuntimeException(k + " cannot be found in context with keys " + map.keySet());
 		}
 		return ret;
 	}

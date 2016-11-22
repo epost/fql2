@@ -263,6 +263,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		this.ty = ty;
 	}
 
+	//TODO: eventually, will want to quote, escape, etc
 	public String toString(Function<Sk, String> sk_printer, Function<Gen, String> gen_printer) {
 		if (var != null) {
 			return var.toString();

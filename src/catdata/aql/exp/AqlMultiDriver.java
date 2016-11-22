@@ -101,12 +101,10 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	private void cancel() {
 		for (Future<Unit> thread : threads) {
-			if (!thread.isDone() && !thread.isCancelled()) {
 				try {
 					thread.cancel(true);
 				} catch (CancellationException ex) {
 				}
-			}
 		}
 	}
 
@@ -202,6 +200,10 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			for (;;) {
 				n = null;
 				if (Thread.currentThread().isInterrupted() || stop == true) {
+					synchronized (ended) {
+						ended.i++;
+						ended.notifyAll();
+					}
 					return new Unit();
 				}
 
@@ -242,13 +244,17 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		} catch (Throwable e) {
 			e.printStackTrace();
 			exn.add(new LineException(e.getMessage(), n, k2));
-			stop = true;
+			synchronized (this) {
+				stop = true;
+				notifyAll();
+			}
 			cancel();
 		}
 		
+		
 		synchronized (ended) {
 			ended.i++;
-			ended.notify();
+			ended.notifyAll();
 		}
 		return new Unit();
 	}

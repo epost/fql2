@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>net.categoricaldata</groupId>
-  <artifactId>fql2</artifactId>
+  <artifactId>fql</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Functorial Query Language++</name>
-  <url>https://github.com/epost/fql2</url>
+  <name>Categorical Data IDE</name>
+  <url>https://github.com/epost/fql</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +18,6 @@ import org.apache.commons.csv.CSVRecord;
 
 import catdata.Chc;
 import catdata.Pair;
-import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
@@ -28,7 +27,6 @@ import catdata.aql.Eq;
 import catdata.aql.Instance;
 import catdata.aql.It;
 import catdata.aql.It.ID;
-import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.fdm.InitialAlgebra;
@@ -73,11 +71,52 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 	}
 	@SuppressWarnings("unchecked")
 	private Gen stringToGen(String gen) {
+		if (gen == null) {
+			throw new RuntimeException("Error: generators cannot be null");
+		}
 		return (Gen) gen;
 	}
+	
 	@SuppressWarnings("unchecked")
-	private Sk stringToSk(String s) {
+	private Sk stringToSk0(String s) {
+		if (s == null) {
+			throw new RuntimeException("Error: enountered a null labelled null (how ironic)");
+		}
 		return (Sk) s;
+	}
+		
+	
+	@SuppressWarnings({ "unchecked" })
+	public static <Ty,En,Sym,Fk,Att,Gen,Sk> Term<Ty,En,Sym,Fk,Att,Gen,Sk> stringToSk(Collection<Sk> sks, Ty t, Schema<Ty,En,Sym,Fk,Att> sch, String s) {
+		int i = 0;
+		Sym sym = null;
+		if (sch.typeSide.syms.map.containsKey(s) && sch.typeSide.syms.map.get(s).first.isEmpty() && sch.typeSide.syms.map.get(s).second.equals(t)) {
+			sym = (Sym) s;
+			i++;
+		}
+		Sk sk = null;
+		if (sks.contains(s)) {
+			sk = (Sk) s; 
+			i++;
+		}
+		Object o = null;
+		if (sch.typeSide.js.java_tys.containsKey(t)) {
+			o = s;
+			i++;
+		}
+		if (i < 1) {
+			throw new RuntimeException("Not a labelled null, java object, or constant symbol: " + s);
+		} else if (i > 1) {
+			throw new RuntimeException("Ambiguously a labelled null, java object, or constant symbol: " + s);			
+		}
+		if (sym != null) {
+			return Term.Sym(sym, Collections.emptyList());
+		} else if (sk != null) {
+			return Term.Sk(sk);
+		} else if (o != null) {
+			return Term.Obj(sch.typeSide.js.parse(t, s), t);
+		}
+		throw new RuntimeException("Anomaly: please report");
 	}
 	
 	
@@ -130,39 +169,29 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 				if (file.exists()) {
 					CSVParser parser = CSVParser.parse(file, charset, format);
 					for (CSVRecord row : parser) {
-						col.sks.put(stringToSk(row.get(idCol)), ty);
+						col.sks.put(stringToSk0(row.get(idCol)), ty);
 					}
 				}
 			}
 			
 			for (En en : sch.ens) {
 				for (CSVRecord row : map.get(en)) {
-					RawTerm l0 = new RawTerm(row.get(idCol), new LinkedList<>());
+					Term<Ty,En,Sym,Fk,Att,Gen,Sk> l0 = Term.Gen(stringToGen(row.get(idCol)));
 					for (Fk fk : sch.fksFrom(en)) {
-						RawTerm l = new RawTerm(fkToString(fk), Util.singList(l0));
-						RawTerm r = AqlParser.parseTermNoCtx(row.get(fkToString(fk)));
-						Triple<Ctx<String,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>> 
-						eq0 = RawTerm.infer1(new HashMap<>(), l, r, col, sch.typeSide.js);
-	
-						eqs0.add(new Pair<>(eq0.second, eq0.third));
-						col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));
+						Term<Ty,En,Sym,Fk,Att,Gen,Sk> l = Term.Fk(fk,  l0);
+						Term<Ty,En,Sym,Fk,Att,Gen,Sk> r = Term.Gen(stringToGen(row.get(fkToString(fk))));	
+						eqs0.add(new Pair<>(l, r));
+						col.eqs.add(new Eq<>(new Ctx<>(), l, r));
 					}
 					for (Att att : sch.attsFrom(en)) {
-						RawTerm l = new RawTerm(attToString(att), Util.singList(l0));
-
-						try {
-							
-						RawTerm r = AqlParser.parseTermNoCtx(row.get(attToString(att)));
-						Triple<Ctx<String,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>> 
-						eq0 = RawTerm.infer1(new HashMap<>(), l, r, col, sch.typeSide.js);
-	
-						eqs0.add(new Pair<>(eq0.second, eq0.third));
-						col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));
-						} catch (Throwable thr) {
-							throw new RuntimeException("Error in attribute " + att + " of entity " + sch.atts.get(att).first + " of row " + row + ": " + thr.getMessage());
+						Term<Ty,En,Sym,Fk,Att,Gen,Sk> l = Term.Att(att, l0);
+						if (row.get(attToString(att)) == null) {
+							continue;
 						}
+						Term<Ty,En,Sym,Fk,Att,Gen,Sk> r = stringToSk(col.sks.keySet(), sch.atts.get(att).second, sch, row.get(attToString(att)));	
+						eqs0.add(new Pair<>(l,r));
+						col.eqs.add(new Eq<>(new Ctx<>(), l, r));
 					}
-					
 				}
 			}
 		} catch (IOException exn) {
@@ -198,6 +227,9 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 		//escape isn't enabled by default
 		format = format.withEscape((Character) op.getOrDefault(AqlOption.csv_escape_char));
 
+		if (op.options.containsKey(AqlOption.csv_null_string)) {
+			format = format.withNullString( (String) op.getOrDefault(AqlOption.csv_null_string) );
+		}
 		return format;
 	}
 

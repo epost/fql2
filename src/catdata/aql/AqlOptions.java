@@ -31,6 +31,7 @@ public final class AqlOptions {
 		csv_escape_char,
 		csv_quote_char,
 		csv_format,
+		csv_null_string,
 		id_column_name,
 		always_reload,
 		varchar_length,
@@ -61,7 +62,14 @@ public final class AqlOptions {
 		public Boolean getBoolean(Map<String, String> map) {
 			return Boolean.parseBoolean(getString(map));
 		}
-		
+		/*
+		public String getMaybeString(Map<String, String> map) {
+			if (map.containsKey(this.toString())) {
+				return getString(map);
+			}
+			return null;
+		}
+		*/
 		public Character getChar(Map<String, String> map) {
 			String s = getString(map);
 			if (s.length() != 1) {
@@ -157,6 +165,8 @@ public final class AqlOptions {
 			return '\"';
 		case varchar_length:
 			return 64;
+		case csv_null_string:
+			return null;
 		}
 		throw new RuntimeException("Anomaly: please report: "+ option);
 	}
@@ -220,6 +230,8 @@ public final class AqlOptions {
 			return op.getChar(map);
 		case varchar_length:
 			return op.getInteger(map);
+		case csv_null_string:
+			return op.getString(map);
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}

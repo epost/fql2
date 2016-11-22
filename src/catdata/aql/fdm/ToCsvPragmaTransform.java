@@ -34,7 +34,7 @@ public class ToCsvPragmaTransform<Ty,En,Sym,Att,Fk> extends Pragma {
 			for (Y1 y1 : h.src().algebra().talg().sks.keySet()) {
 				List<String> row = new LinkedList<>();
 				row.add(y1.toString());
-				row.add(h.reprT(y1).toString());
+				row.add(ToCsvPragmaInstance.print(h.dst().algebra().intoY(h.reprT(y1)), format.getNullString() != null));
 				printer.printRecord(row);		
 			}
 			str = sb.toString();

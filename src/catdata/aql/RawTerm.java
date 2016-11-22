@@ -323,6 +323,10 @@ public final class RawTerm {
 	public RawTerm(String head, List<RawTerm> args) {
 		this(head, args, null);
 	}
+	
+	public RawTerm(String head) {
+		this(head, Collections.emptyList(), null);
+	}
 
 	//TODO: aql use of toString here is ugly
 	public static RawTerm fold (Set<Object> fks, Set<Object> entities, List<Object> l, String v) {

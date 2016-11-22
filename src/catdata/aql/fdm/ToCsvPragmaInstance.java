@@ -14,6 +14,7 @@ import org.apache.commons.csv.CSVPrinter;
 import catdata.Util;
 import catdata.aql.Instance;
 import catdata.aql.Pragma;
+import catdata.aql.Term;
 
 public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 	
@@ -46,7 +47,7 @@ public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 					List<String> row = new LinkedList<>();
 					row.add(x.toString());
 					for (Att att : I.schema().attsFrom(en)) {
-						row.add(I.algebra().att(att, x).toString());
+						row.add(print(I.algebra().att(att, x), format.getNullString() != null));
 					}
 					for (Fk fk : I.schema().fksFrom(en)) {
 						row.add(I.algebra().fk(fk, x).toString());
@@ -74,6 +75,23 @@ public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 			throw new RuntimeException(e);
 		} 			
 	}
+	
+	public static <Ty, Sym, Y> String print(Term<Ty, Void, Sym, Void, Void, Void, Y> term, Boolean nullSet) {
+		if (term.obj != null) {
+			return term.obj.toString();
+		} else if (term.sym != null && term.args.isEmpty()) {
+			return term.sym.toString();
+		} else if (term.sym != null && !term.args.isEmpty()) {
+			if (nullSet) {
+				return null;
+			} 
+			throw new RuntimeException(term + " exports as NULL, but csv_null_string is not set");
+		} else if (term.sk != null) {
+			return term.sk.toString(); 
+		}
+		throw new RuntimeException("anomaly: please report");
+	}
+
 	
 	private void delete() {
 		File file = new File(fil);
