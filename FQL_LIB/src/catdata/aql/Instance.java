@@ -21,7 +21,7 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
 	
 	
 	public final Chc<Ty,En> type(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {		
-		return term.type(new Ctx<>(), new Ctx<>(), schema().typeSide.tys, schema().typeSide.syms.map, schema().typeSide.java_tys.map, schema().ens, schema().atts.map, schema().fks.map, gens().map, sks().map);
+		return term.type(new Ctx<>(), new Ctx<>(), schema().typeSide.tys, schema().typeSide.syms.map, schema().typeSide.js.java_tys.map, schema().ens, schema().atts.map, schema().fks.map, gens().map, sks().map);
 	}
 
 	public final void validate() {		

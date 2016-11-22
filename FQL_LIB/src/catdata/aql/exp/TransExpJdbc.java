@@ -196,7 +196,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 							 throw new RuntimeException("Encountered a NULL labelled null (how ironic) (cod)");
 						 }
 						 Term<Ty,En,Sym,Fk,Att,Gen2,Sk2> rhs0 = null;
-						 if (sch.typeSide.java_tys.containsKey(ty)) {
+						 if (sch.typeSide.js.java_tys.containsKey(ty)) {
 							rhs0 = Term.Obj(rhs, ty);
 						 } else if (dst0.sks().map.containsKey(rhs)) {
 							 rhs0 = Term.Sk(objectToSk2(rhs));

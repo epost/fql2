@@ -139,7 +139,7 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 		}
 
 		@Override
-		public Term<Ty, En, Sym, Fk, Att, X, Y> reprT(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
+		public Term<Ty, En, Sym, Fk, Att, X, Y> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
 			return term.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
 		}
 		

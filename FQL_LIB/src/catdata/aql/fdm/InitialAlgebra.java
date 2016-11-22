@@ -25,8 +25,8 @@ import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Algebra;
-import catdata.aql.AqlJs;
 import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.AqlProver;
 import catdata.aql.Collage;
 import catdata.aql.Ctx;
@@ -37,7 +37,6 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
-import catdata.aql.AqlOptions.AqlOption;
 
 //TODO: aql merge constants and functions in typesides
 //TODO: aql add example that illustrates consistency
@@ -102,7 +101,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		this.printGen = printGen;
 		this.printSk = printSk;
 		
-		if (schema.typeSide.java_tys.isEmpty()) {
+		if (schema.typeSide.js.java_tys.isEmpty()) {
 			dp = AqlProver.create(ops, col);
 		} else {
 			dp = AqlProver.create(ops, col.entities_only());
@@ -304,11 +303,11 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
 	@Override
 	public boolean eq(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs, Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs) {
-		if (schema.typeSide.java_tys.isEmpty()) {
+		if (schema.typeSide.js.java_tys.isEmpty()) {
 			return dp.eq(ctx, lhs, rhs);
 		} else {
 			if (col.type(ctx, lhs).left) { //type
-				return intoY(AqlJs.reduce(lhs, col)).equals(intoY(AqlJs.reduce(rhs, col))); //in this case, dp is only dp for entity side
+				return intoY(schema.typeSide.js.reduce(lhs)).equals(intoY(schema.typeSide.js.reduce(rhs))); //in this case, dp is only dp for entity side
 			} else {
 				return dp.eq(ctx, lhs, rhs);
 			}
@@ -430,19 +429,19 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
 	
 	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> reprT0(Chc<Sk, Pair<X, Att>> y) {
-		if (schema().typeSide.java_tys.isEmpty()) {
+		if (schema().typeSide.js.java_tys.isEmpty()) {
 			return simpl(Term.Sk(y));
 		} else {
-			return AqlJs.reduce(simpl(Term.Sk(y)), col);
+			return schema.typeSide.js.reduce(simpl(Term.Sk(y)));
 		}
 	} 
 	
 	
-	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> reprT(Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> y) {
-		if (schema().typeSide.java_tys.isEmpty()) {
+	protected Term<Ty, En, Sym, Fk, Att, Gen, Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> y) {
+		if (schema().typeSide.js.java_tys.isEmpty()) {
 			return unflatten(simpl(y));
 		} else {
-			return unflatten(AqlJs.reduce(simpl(y), col));
+			return unflatten(schema.typeSide.js.reduce(simpl(y)));
 		}
 	} 
 

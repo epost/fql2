@@ -424,16 +424,16 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	// }
 
 	
-	public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> reduce() {
+	public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> reduce(AqlJs<Ty,Sym> js) {
 		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> ret = new Collage<>(this);
 		ret.eqs.clear();
 		for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : eqs) {
-			Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs = AqlJs.reduce(eq.lhs, this);
-			Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs = AqlJs.reduce(eq.rhs, this);
+			Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs = js.reduce(eq.lhs);
+			Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs = js.reduce(eq.rhs);
 			ret.eqs.add(new Eq<>(eq.ctx, lhs, rhs));
 		}
 		return ret;
-	}
+	} 
 
 	private Triple<List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>>, Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>>, Set<Chc<Ty, En>>> toKB = null;
 

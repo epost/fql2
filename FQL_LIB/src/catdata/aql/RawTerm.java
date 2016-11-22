@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -35,7 +34,7 @@ public final class RawTerm {
 	//TODO aql inefficient bitwise operations
 
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk>
-	infer0(Map<String, Chc<Ty,En>> ctx0, RawTerm lhs, Chc<Ty,En> expected, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, String pre) {
+	infer0(Map<String, Chc<Ty,En>> ctx0, RawTerm lhs, Chc<Ty,En> expected, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, String pre, AqlJs<Ty,Sym> js) {
  
 		Map<String, Chc<Ty,En>> ctx = new HashMap<>(ctx0);		
 		String fresh = "expected sort of " + lhs.toString();
@@ -43,7 +42,7 @@ public final class RawTerm {
 
 		try {
 		
-			Triple<Ctx<String, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> ret = infer1(ctx, new RawTerm(fresh, Collections.emptyList()), lhs, col);
+			Triple<Ctx<String, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> ret = infer1(ctx, new RawTerm(fresh, Collections.emptyList()), lhs, col, js);
 			
 			Chc<Ty, En> actual = ctx.get(fresh);
 			actual.assertNeitherNull();
@@ -68,7 +67,7 @@ public final class RawTerm {
 	 * @return it is misleading to return a context, because strings for primitives can come out
 	 */
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Triple<Ctx<String, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
-	infer1(Map<String, Chc<Ty,En>> ctx, RawTerm lhs, RawTerm rhs, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+	infer1(Map<String, Chc<Ty,En>> ctx, RawTerm lhs, RawTerm rhs, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty,Sym> js) {
 			
 		Map<String, Ref<Chc<Ty,En>>> ctx0 = new HashMap<>();
 		Set<String> vars = ctx.keySet();
@@ -102,7 +101,7 @@ public final class RawTerm {
 			ref.x.assertNeitherNull();
 			ret.put(var, ref.x);
 		}
-		return new Triple<>(ret, lhs.trans(vars, ctx0, col), rhs.trans(vars, ctx0, col));
+		return new Triple<>(ret, lhs.trans(vars, ctx0, col, js), rhs.trans(vars, ctx0, col, js));
 	}
 	
 	//TODO aql statically typesafe coerce
@@ -145,8 +144,8 @@ public final class RawTerm {
 	
 	
 	
-	public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> trans(Set<String> vars, Map<String, Ref<Chc<Ty, En>>> ctx0, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
-		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args0 = args.stream().map(x -> x.trans(vars, ctx0, col)).collect(Collectors.toList());
+	public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> trans(Set<String> vars, Map<String, Ref<Chc<Ty, En>>> ctx0, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty,Sym> js) {
+		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args0 = args.stream().map(x -> x.trans(vars, ctx0, col, js)).collect(Collectors.toList());
 			
 		int n = boolToInt(vars.contains(head)) + boolToInt(col.syms.containsKey(resolve(head))) + boolToInt(col.atts.containsKey(resolve(head))) + boolToInt(col.fks.containsKey(resolve(head))) + boolToInt(col.gens.containsKey(resolve(head))) + boolToInt(col.sks.containsKey(resolve(head)));
 		if (n > 1) {
@@ -156,12 +155,8 @@ public final class RawTerm {
 		if (annotation != null) {
 			@SuppressWarnings("unchecked")
 			Ty ty = (Ty) annotation; 
-			String code = col.java_parsers.map.get(ty);
-			if (code == null) {
-				throw new RuntimeException("head of " + this + " is not a symbol or variable or of an inferred type (" + ty + ") with a java parser");
-			}
-			Function<List<Object>, Object> f = AqlJs.compile(code);
-			return Term.Obj(f.apply(Util.singList(head)), ty);
+			Object o = js.parse(ty, head); //compile(code);
+			return Term.Obj(o, ty);
 		} else if (vars.contains(head)) {
 			return Term.Var(new Var(head));
 		} else if (col.syms.containsKey(resolve(head))) {
@@ -182,13 +177,8 @@ public final class RawTerm {
 			if (ty == null) {
 				throw new RuntimeException("Anomaly: please report");
 			}
-			String code = col.java_parsers.map.get(ty);
-			if (code == null) {
-				throw new RuntimeException("head of " + this + " is not a symbol or variable or of an inferred type (" + ty + ") with a java parser");
-			}
-			Function<List<Object>, Object> f = AqlJs.compile(code);
-	
-			return Term.Obj(f.apply(Util.singList(head)), ty);
+			Object o = js.parse(ty, head);
+			return Term.Obj(o, ty);
 		} 
 		throw new RuntimeException("Anomaly, please report: " + this);
 	}
@@ -349,7 +339,7 @@ public final class RawTerm {
 		return ret;
 	}
 	
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Triple<Ctx<Var, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> infer2(List<Pair<String, String>> l, RawTerm a, RawTerm b, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Triple<Ctx<Var, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> infer2(List<Pair<String, String>> l, RawTerm a, RawTerm b, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty,Sym> js) {
 		Map<String, Chc<Ty, En>> ctx = new HashMap<>();
 		for (Pair<String, ?> p : l) {
 			if (ctx.containsKey(p.first)) {
@@ -374,7 +364,7 @@ public final class RawTerm {
 			}
 		}
 		Triple<Ctx<String,Chc<Ty,En>>,Term<Ty, En, Sym, Fk, Att, Gen, Sk>,Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
-		eq0 = RawTerm.infer1(ctx, a, b, col);
+		eq0 = RawTerm.infer1(ctx, a, b, col, js);
 
 		LinkedHashMap<Var, Chc<Ty,En>> map = new LinkedHashMap<>();
 		for (String k : ctx.keySet()) {

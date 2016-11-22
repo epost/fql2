@@ -270,7 +270,7 @@ public class InstExpJdbc<Ty,En,Sym,Fk,Att,Gen,Sk>
 							 continue; 
 						 }
 						 Term<Ty,En,Sym,Fk,Att,Gen,Sk> rhs0 = null;
-						 if (sch.typeSide.java_tys.containsKey(ty)) {
+						 if (sch.typeSide.js.java_tys.containsKey(ty)) {
 							rhs0 = Term.Obj(rhs, ty);
 						 } else if (col.sks.map.containsKey(rhs)) {
 							 rhs0 = Term.Sk(objectToSk(rhs));

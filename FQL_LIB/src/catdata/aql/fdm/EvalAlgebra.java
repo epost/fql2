@@ -11,7 +11,6 @@ import java.util.function.Function;
 
 import catdata.Util;
 import catdata.aql.Algebra;
-import catdata.aql.AqlJs;
 import catdata.aql.Collage;
 import catdata.aql.Ctx;
 import catdata.aql.Eq;
@@ -160,9 +159,9 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 	}
 
 	@Override
-	public Term<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y> reprT(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
+	protected Term<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
 		Term<Ty, Void, Sym, Void, Void, Void, Y> t = I.algebra().intoY(I.algebra().reprT(term));
-		Term<Ty, Void, Sym, Void, Void, Void, Y> u = AqlJs.reduce(t, I.collage());
+		Term<Ty, Void, Sym, Void, Void, Void, Y> u = I.schema().typeSide.js.reduce(t);
 		return u.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
 	}
 

@@ -143,7 +143,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 				Map<String, Chc<Object, Object>> ctx = Collections.emptyMap();
 				
 				Triple<Ctx<String,Chc<Object,Object>>,Term<Object,Object,Object,Object,Object,Object,Object>,Term<Object,Object,Object,Object,Object,Object,Object>>
-				eq0 = RawTerm.infer1(ctx, eq.first, eq.second, col);
+				eq0 = RawTerm.infer1(ctx, eq.first, eq.second, col, sch.typeSide.js);
 						
 				eqs0.add(new Pair<>(eq0.second, eq0.third));
 				col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));

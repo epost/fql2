@@ -61,7 +61,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 				Map<String, Chc<Object, Object>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inLeft(eq.second));
 				
 				Triple<Ctx<String,Chc<Object,Object>>,Term<Object,Object,Object,Object,Object,Void,Void>,Term<Object,Object,Object,Object,Object,Void,Void>>
-				eq0 = RawTerm.infer1(ctx, eq.third, eq.fourth, col);
+				eq0 = RawTerm.infer1(ctx, eq.third, eq.fourth, col, ts.js);
 				
 				if (eq0.first.size() != 1) {
 					throw new RuntimeException("In " + eq.third + " = " + eq.fourth + ", there are either unbound variables or java primitives (without annotations), neither of which are not allowed"); 
@@ -87,7 +87,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 			RawTerm rhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.second,vv);
 			
 			Triple<Ctx<String,Chc<Object,Object>>,Term<Object,Object,Object,Object,Object,Void,Void>,Term<Object,Object,Object,Object,Object,Void,Void>>
-			eq0 = RawTerm.infer1(ctx, lhs, rhs, col);
+			eq0 = RawTerm.infer1(ctx, lhs, rhs, col, ts.js);
 		
 			Chc<Object, Object> v = eq0.first.get(vv);
 			if (v.left) {

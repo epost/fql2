@@ -185,10 +185,8 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				throw new RuntimeException("In " + this + ", " + var + " is not a variable in context [" + ctxt + "] and [" + ctxe + "]");
 			}
 		} else if (obj != null) {
-			Class<?> c = AqlJs.load(java_tys_string.get(ty));
-			if (c == null) {
-				throw new RuntimeException("In " + this + ", " + ty + " is not a java type. ");
-			} else if (!c.isInstance(obj)) {
+			Class<?> c = Util.load(java_tys_string.get(ty));
+			if (!c.isInstance(obj)) {
 				throw new RuntimeException("In " + this + ", " + "primitive " + obj + " is given type " + ty + " but is not an instance of " + c + ", is an instance of " + obj.getClass());
 			}
 			ret =  Chc.inLeft(ty);

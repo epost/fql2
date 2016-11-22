@@ -1,7 +1,9 @@
 package catdata.aql;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -59,13 +61,32 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	 * @param the T of Y must be obtained from a call to att or sk only! 
 	 * @return not a true normal form, but a 'simplified' term for e.g., display purposes
 	 */
-	public abstract Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT(Term<Ty, Void, Sym, Void, Void, Void, Y> y);
+	public final Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT(Term<Ty, Void, Sym, Void, Void, Void, Y> y) {
+		Term<Ty,En,Sym,Fk,Att,Gen,Sk> ret = reprT_cache.get(y);
+		if (ret != null) {
+			return ret;
+		}
+		ret = reprT_protected(y);
+		reprT_cache.put(y, ret);
+		return ret;
+	}
+	
+	private Map<Term<Ty, Void, Sym, Void, Void, Void, Y>, Term<Ty,En,Sym,Fk,Att,Gen,Sk>> reprT_cache = new HashMap<>();
+	protected abstract Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> y);
 	
 	/**
 	 * @param term of type sort
 	 */
+	private Map<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, Void, Sym, Void, Void, Void, Y>> 
+	intoY_cache = new HashMap<>();
 	public Term<Ty, Void, Sym, Void, Void, Void, Y> intoY(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
-		return intoY0(reprT(intoY0(term)));
+		Term<Ty, Void, Sym, Void, Void, Void, Y> ret = intoY_cache.get(term);
+		if (ret != null) {
+			return ret;
+		}
+		ret = intoY0(reprT(intoY0(term)));
+		intoY_cache.put(term, ret);
+		return ret;
 	}
 		
 	private Term<Ty, Void, Sym, Void, Void, Void, Y> intoY0(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {

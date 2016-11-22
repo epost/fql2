@@ -116,7 +116,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 					throw new RuntimeException("in transform for " + gen + ", " + gen + " is not a source generator/labelled null");
 				}
 				
-				Term<Ty,En,Sym,Fk,Att,Gen2,Sk2> term0 = RawTerm.infer0(ctx, term, required, t.collage(), "in transform for " + gen + ", ");
+				Term<Ty,En,Sym,Fk,Att,Gen2,Sk2> term0 = RawTerm.infer0(ctx, term, required, t.collage(), "in transform for " + gen + ", ", s.schema().typeSide.js);
 							
 				if (required.left) {
 					Util.putSafely(sks, stringToSk1(gen), term0);				

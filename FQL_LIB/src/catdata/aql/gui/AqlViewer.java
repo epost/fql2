@@ -26,6 +26,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.Algebra;
+import catdata.aql.AqlJs;
 import catdata.aql.Collage;
 import catdata.aql.Ctx;
 import catdata.aql.DP;
@@ -73,14 +74,14 @@ public final class AqlViewer {
 		case TYPESIDE:
 			@SuppressWarnings("unchecked")
 			TypeSide<Object, Object> typeSide = (TypeSide<Object, Object>) obj;
-			ret.add(viewDP(typeSide.semantics, typeSide.collage()), "DP");
+			ret.add(viewDP(typeSide.semantics, typeSide.collage(), typeSide.js), "DP");
 			break;
 		case SCHEMA:
 			@SuppressWarnings("unchecked")
 			Schema<Object, Object, Object, Object, Object> schema = (Schema<Object, Object, Object, Object, Object>) obj;
 			ret.add(viewSchema(schema), "Graph");
 	//		ret.add(viewSchema2(schema), "Graph2");
-			ret.add(viewDP(schema.dp(), schema.collage()), "DP");
+			ret.add(viewDP(schema.dp(), schema.collage(), schema.typeSide.js), "DP");
 		//	ret.add(new CodeTextPanel("", schema.collage().toString()), "Temp");
 			break;
 		case INSTANCE:
@@ -88,12 +89,12 @@ public final class AqlViewer {
 			Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> instance = (Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object>) obj;
 			ret.add(viewAlgebra(instance.algebra()), "Tables");
 			ret.add(new CodeTextPanel("", instance.algebra().toString()), "Algebra");
-			ret.add(viewDP(instance.dp(), instance.collage()), "DP");
+			ret.add(viewDP(instance.dp(), instance.collage(), instance.schema().typeSide.js), "DP");
 			break;
 		case MAPPING:
 			@SuppressWarnings("unchecked")
 			Mapping<Object, Object, Object, Object, Object, Object, Object, Object> mapping = (Mapping<Object, Object, Object, Object, Object, Object, Object, Object>) obj;
-			ret.add(viewMorphism(mapping.semantics()), "Translate");
+			ret.add(viewMorphism(mapping.semantics(), mapping.src.typeSide.js), "Translate");
 			break;
 		case TRANSFORM:
 			@SuppressWarnings("unchecked")
@@ -123,7 +124,7 @@ public final class AqlViewer {
 
 	}
 
-	public static <Ty, En1, Sym1, Fk1, Att1, Gen1, Sk1, En2, Sym2, Fk2, Att2, Gen2, Sk2> JComponent viewMorphism(Morphism<Ty, En1, Sym1, Fk1, Att1, Gen1, Sk1, En2, Sym2, Fk2, Att2, Gen2, Sk2> m) {
+	public static <Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2> JComponent viewMorphism(Morphism<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Sym, Fk2, Att2, Gen2, Sk2> m, AqlJs<Ty,Sym> js) {
 		CodeTextPanel input = new CodeTextPanel("Input", "");
 		CodeTextPanel output = new CodeTextPanel("Output", "");
 
@@ -142,8 +143,8 @@ public final class AqlViewer {
 		nf.addActionListener(x -> {
 			try {
 				Pair<List<Pair<String, String>>, RawTerm> y = AqlParser.parseTermInCtx(input.getText());
-				Triple<Ctx<Var, Chc<Ty, En1>>, Term<Ty, En1, Sym1, Fk1, Att1, Gen1, Sk1>, Term<Ty, En1, Sym1, Fk1, Att1, Gen1, Sk1>> z = RawTerm.infer2(y.first, y.second, y.second, m.src());
-				Pair<Ctx<Var, Chc<Ty, En2>>, Term<Ty, En2, Sym2, Fk2, Att2, Gen2, Sk2>> a = m.translate(z.first, z.second);
+				Triple<Ctx<Var, Chc<Ty, En1>>, Term<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1>, Term<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1>> z = RawTerm.infer2(y.first, y.second, y.second, m.src(), js);
+				Pair<Ctx<Var, Chc<Ty, En2>>, Term<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2>> a = m.translate(z.first, z.second);
 				output.setText(a.first.toString() + a.second);
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
@@ -295,7 +296,7 @@ public final class AqlViewer {
 		return graphComponent;
 	}	*/
 
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> JComponent viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> JComponent viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty,Sym> js) {
 		CodeTextPanel input = new CodeTextPanel("Input", "");
 		CodeTextPanel output = new CodeTextPanel("Output", "");
 
@@ -324,7 +325,7 @@ public final class AqlViewer {
 		eq.addActionListener(x -> {
 			try {
 				Triple<List<Pair<String, String>>, RawTerm, RawTerm> y = AqlParser.parseEq(input.getText());
-				Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> z = RawTerm.infer2(y.first, y.second, y.third, col);
+				Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> z = RawTerm.infer2(y.first, y.second, y.third, col, js);
 				boolean isEq = dp.eq(z.first, z.second, z.third);
 				output.setText(Boolean.toString(isEq));
 			} catch (RuntimeException ex) {
@@ -335,7 +336,7 @@ public final class AqlViewer {
 		nf.addActionListener(x -> {
 			try {
 				Pair<List<Pair<String, String>>, RawTerm> y = AqlParser.parseTermInCtx(input.getText());
-				Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> z = RawTerm.infer2(y.first, y.second, y.second, col);
+				Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> z = RawTerm.infer2(y.first, y.second, y.second, col, js);
 				Term<Ty, En, Sym, Fk, Att, Gen, Sk> w = dp.nf(z.first, z.second);
 				output.setText(w.toString());
 			} catch (RuntimeException ex) {

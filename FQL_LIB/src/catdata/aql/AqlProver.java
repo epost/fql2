@@ -1,6 +1,7 @@
 package catdata.aql;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.InvisibleException;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -27,7 +29,6 @@ import catdata.provers.KBExp;
 import catdata.provers.MonoidalProver;
 import catdata.provers.ProgramProver;
 import catdata.provers.SaturatedProver;
-import catdata.InvisibleException;
 
 
 //TODO: aql cache hashcode for term?
@@ -134,12 +135,21 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	
 		return new DP<Ty, En, Sym, Fk, Att, Gen, Sk>() {
 			
+			private Map<Eq<Ty, En, Sym, Fk, Att, Gen, Sk>, Boolean> cache = new HashMap<>();
+			
 			@Override
 			public boolean eq(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs, Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs) {
 				if (lhs.equals(rhs)) {
 					return true;
 				}
-				return dpkb.eq(ctx.map, simp.apply(lhs).toKB(), simp.apply(rhs).toKB());
+				Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq = new Eq<>(ctx, lhs, rhs);
+				Boolean b = cache.get(eq);
+				if (b != null) {
+					return b;
+				}
+				b = dpkb.eq(ctx.map, simp.apply(lhs).toKB(), simp.apply(rhs).toKB());
+				cache.put(eq, b);
+				return b;
 			}
 
 			@Override
@@ -154,13 +164,9 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			
 			@Override
 			public String toString() {
-				return "Definitional simplification and reflexivity wrapping of\n\n" + dpkb;
+				return "Caching definitional simplification and reflexivity wrapping of\n\n" + dpkb;
 			}
-/*
-			@Override
-			public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
-				return col;
-			}*/
+
 			
 		};
 	}

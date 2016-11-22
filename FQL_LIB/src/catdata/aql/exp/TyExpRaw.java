@@ -14,6 +14,7 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.AqlJs;
 import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
 import catdata.aql.Ctx;
@@ -70,9 +71,9 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 			col.syms.put(kv.getKey(), new Pair<>(kv.getValue().first, kv.getValue().second));
 			col.java_fns.put(kv.getKey(), kv.getValue().third);
 		}
-
+		AqlJs<Object,Object> js = new AqlJs<>(col.syms, col.java_fns, col.java_tys, col.java_parsers);
 		for (Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq : this.eqs) {
-			Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> tr = inferEq(col, eq);
+			Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> tr = inferEq(col, eq, js);
 			col.eqs.add(new Eq<>(tr.first.inLeft(), tr.second, tr.third));
 			eqs0.add(tr);
 		}
@@ -163,9 +164,9 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 			col.tys.addAll(v.tys);
 			col.syms.putAll(v.syms.map);
 			col.addEqs(v.eqs);
-			col.java_tys.putAll(v.java_tys.map);
-			col.java_fns.putAll(v.java_fns.map);
-			col.java_parsers.putAll(v.java_parsers.map);
+			col.java_tys.putAll(v.js.java_tys.map);
+			col.java_fns.putAll(v.js.java_fns.map);
+			col.java_parsers.putAll(v.js.java_parsers.map);
 			eqs0.addAll(v.eqs);
 		}
 		
@@ -174,7 +175,7 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 		return ret;
 	}
 
-	private static Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> inferEq(Collage<Object, Void, Object, Void, Void, Void, Void> col, Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq) {
+	private static Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> inferEq(Collage<Object, Void, Object, Void, Void, Void, Void> col, Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq, AqlJs<Object,Object> js) {
 		Map<String, Chc<Object, Void>> ctx = new HashMap<>();
 		for (Pair<String, Object> p : eq.first) {
 			if (ctx.containsKey(p.first)) {
@@ -186,7 +187,7 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 				ctx.put(p.first, null);
 			}
 		}
-		Triple<Ctx<String, Chc<Object, Void>>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> eq0 = RawTerm.infer1(ctx, eq.second, eq.third, col);
+		Triple<Ctx<String, Chc<Object, Void>>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> eq0 = RawTerm.infer1(ctx, eq.second, eq.third, col, js);
 
 		LinkedHashMap<Var, Object> map = new LinkedHashMap<>();
 		for (String k : ctx.keySet()) {

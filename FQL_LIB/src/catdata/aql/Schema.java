@@ -60,14 +60,14 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 			
 		}		
 		
-		if (typeSide.java_tys.isEmpty()) {
+		if (typeSide.js.java_tys.isEmpty()) {
 			return;
 		}
 		for (Eq<Ty, En, Sym, Fk, Att, Object, Object> eq : collage().simplify().first.eqs) { 
 		//	if (!(Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
 				Chc<Ty, En> lhs = collage().type(eq.ctx, eq.lhs); 
 			
-				if (lhs.left && typeSide.java_tys.containsKey(lhs.l)) {
+				if (lhs.left && typeSide.js.java_tys.containsKey(lhs.l)) {
 					throw new RuntimeException("In schema equation " + eq + ", the return type is " + lhs.l + " which is a java type ");
 				}
 				typeSide.assertNoJava(eq.lhs);
@@ -82,7 +82,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 	}	
 	
 	public final Chc<Ty,En> type(Pair<Var, En> p, Term<Ty, En, Sym, Fk, Att, ?, ?> term) {
-		return term.type(new Ctx<>(), new Ctx<>(p), typeSide.tys, typeSide.syms.map, typeSide.java_tys.map, ens, atts.map, fks.map, new HashMap<>(), new HashMap<>());
+		return term.type(new Ctx<>(), new Ctx<>(p), typeSide.tys, typeSide.syms.map, typeSide.js.java_tys.map, ens, atts.map, fks.map, new HashMap<>(), new HashMap<>());
 	}
 	
 	public final static <Ty,Sym> Schema<Ty,Void,Sym,Void,Void> terminal(TypeSide<Ty, Sym> t) {

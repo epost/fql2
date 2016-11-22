@@ -203,7 +203,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			
 			Map<String, Chc<Object, Object>> ctx = Util.singMap(var, var_en2);
 	
-			Term<Object, Object, Object, Object, Object, Void, Void> term0 = RawTerm.infer0(ctx, term, proposed_ty2, dcol, "In checking mapping for attribute " + att.first + ", ");
+			Term<Object, Object, Object, Object, Object, Void, Void> term0 = RawTerm.infer0(ctx, term, proposed_ty2, dcol, "In checking mapping for attribute " + att.first + ", ", src0.typeSide.js);
 
 			Util.putSafely(atts0, att.first, new Triple<>(new Var(var), dst_att_dom_en, term0));
 		} 

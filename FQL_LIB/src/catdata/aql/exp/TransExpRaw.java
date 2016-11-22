@@ -135,7 +135,7 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 				throw new RuntimeException("in transform for " + gen.first + ", " + gen.first + " is not a source generator/labelled null");
 			}
 			
-			Term<Object, Object, Object, Object, Object, Object, Object> term0 = RawTerm.infer0(ctx, term, required, dcol, "in transform for " + gen.first + ", ");
+			Term<Object, Object, Object, Object, Object, Object, Object> term0 = RawTerm.infer0(ctx, term, required, dcol, "in transform for " + gen.first + ", ", src0.schema().typeSide.js);
 						
 			if (required.left) {
 				Util.putSafely(sks0, gen.first, term0);				

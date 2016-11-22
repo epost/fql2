@@ -19,16 +19,18 @@ public final class TypeSide<Ty, Sym> {
 	public final Set<Ty> tys;
 	public final Ctx<Sym, Pair<List<Ty>, Ty>> syms;
 	public final Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs;
-
+/*
 	public final Ctx<Ty, String> java_tys;
 	public final Ctx<Ty, String> java_parsers;
-	public final Ctx<Sym, String> java_fns;
+	public final Ctx<Sym, String> java_fns; */
 
+	public final AqlJs<Ty, Sym> js;
+	
 	public <En,Fk,Att,Gen,Sk> Ty type(Ctx<Var,Ty> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		if (!term.isTypeSide()) {
 			throw new RuntimeException(term + " is not a typeside term");
 		} 
-		Chc<Ty, En> t = term.type(ctx, new Ctx<>(), tys, syms.map, java_tys.map, new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+		Chc<Ty, En> t = term.type(ctx, new Ctx<>(), tys, syms.map, js.java_tys.map, new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
 		if (!t.left) {
 			throw new RuntimeException(term + " has type " + t.l + " which is not in the typeside.  (This should be impossible, report to Ryan)");
 		}
@@ -50,20 +52,20 @@ public final class TypeSide<Ty, Sym> {
 	}
 	
 	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string, AqlOptions strategy) {
-		this(tys, syms, eqs, java_tys_string, java_parser_string, java_fns_string, AqlProver.create(strategy, col(tys, syms, eqs, java_tys_string, java_parser_string, java_fns_string)));
+		this(tys, syms, eqs, new AqlJs<>(new Ctx<>(syms), new Ctx<>(java_tys_string), new Ctx<>(java_parser_string), new Ctx<>(java_fns_string)), AqlProver.create(strategy, col(tys, syms, eqs, java_tys_string, java_parser_string, java_fns_string)));
 	}
 
 	
-	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string, DP<Ty, Void, Sym, Void, Void, Void, Void> semantics) {
-		Util.assertNotNull(tys, syms, eqs, java_tys_string, java_fns_string, semantics);
+	
+	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, /*Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string,*/ AqlJs<Ty,Sym> js, DP<Ty, Void, Sym, Void, Void, Void, Void> semantics) {
+		Util.assertNotNull(tys, syms, eqs, js, semantics);
 		this.tys = tys;
 		this.syms = new Ctx<>(syms);
 		this.eqs = eqs;
-		this.java_tys = new Ctx<>(java_tys_string);
-		this.java_parsers = new Ctx<>(java_parser_string);
-		this.java_fns = new Ctx<>(java_fns_string);
 		this.semantics = semantics;		
+		this.js = js;
 		validate();
+		validateJava();
 	}
 
 	public void validate() {
@@ -96,36 +98,32 @@ public final class TypeSide<Ty, Sym> {
 			
 		}
 		
-		
-//		if ((Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
-			validateJava(); 
-//		}
+		validateJava(); 
 	}
 
 	private void validateJava() {
-		for (Ty ty : java_tys.keySet()) {
-			String parser = java_parsers.get(ty);
+		for (Ty ty : js.java_tys.keySet()) {
+			String parser = js.java_parsers.get(ty);
 			if (parser == null) {
 				throw new RuntimeException("No constant parser for " + ty);
 			}
-			String clazz = java_tys.get(ty);
-			AqlJs.load(clazz);
-			AqlJs.compile(parser);
+			String clazz = js.java_tys.get(ty);
+			Util.load(clazz);
 		}
 		for (Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq : eqs) {
 			Ty lhs = type(eq.first, eq.second);
 			
-			if (java_tys.containsKey(lhs)) {
+			if (js.java_tys.containsKey(lhs)) {
 				throw new RuntimeException("In typeside equation " + toString(eq) + ", the return type is " + lhs + " which is a java type ");
 			}
-			if (!Collections.disjoint(java_tys.keySet(), eq.first.values())) {
+			if (!Collections.disjoint(js.java_tys.keySet(), eq.first.values())) {
 				throw new RuntimeException("In typeside equation " + toString(eq) + ", the context variable(s) bind java type(s)");
 			}
 			assertNoJava(eq.second);
 			assertNoJava(eq.third);
 		}
 		
-		for (Sym sym : java_fns.keySet()) {
+		for (Sym sym : js.java_fns.keySet()) {
 			if (!syms.containsKey(sym)) {
 				throw new RuntimeException("The java function " + sym + " is not a declared function");
 			}
@@ -145,7 +143,7 @@ public final class TypeSide<Ty, Sym> {
 		l.add(t.second);
 		
 		for (Ty ty : l) {
-			if (java_tys.containsKey(ty)) {
+			if (js.java_tys.containsKey(ty)) {
 				return false;
 			}
 		}
@@ -159,7 +157,7 @@ public final class TypeSide<Ty, Sym> {
 		l.add(t.second);
 		
 		for (Ty ty : l) {
-			if (!java_tys.containsKey(ty)) {
+			if (!js.java_tys.containsKey(ty)) {
 				return false;
 			}
 		}
@@ -180,9 +178,9 @@ public final class TypeSide<Ty, Sym> {
 			return;
 		} else if (t.sym != null) {
 			Pair<List<Ty>, Ty> x = syms.get(t.sym);
-			if (!Collections.disjoint(x.first, java_tys.keySet())) {
+			if (!Collections.disjoint(x.first, js.java_tys.keySet())) {
 				throw new RuntimeException("In " + t + ", functions with java types are not allowed ");
-			} else if (java_tys.keySet().contains(x.second)) {
+			} else if (js.java_tys.keySet().contains(x.second)) {
 				throw new RuntimeException("In " + t + ", functions with java types are not allowed");
 			} 
 			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : t.args) {
@@ -202,7 +200,7 @@ public final class TypeSide<Ty, Sym> {
 	}
 
 	public static TypeSide<Void,Void> terminal() {
-		return new TypeSide<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(), DP.terminal);
+		return new TypeSide<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), new AqlJs<>(new Ctx<>(), new Ctx<>(), new Ctx<>(), new Ctx<>()), DP.terminal);
 	}
 
 	public final DP<Ty, Void, Sym, Void, Void, Void, Void> semantics;
@@ -225,7 +223,7 @@ public final class TypeSide<Ty, Sym> {
 			}
 			return (Collage<Ty, En, Sym, Fk, Att, Gen, Sk>) collage;
 		}
-		collage = col(tys, syms.map, eqs, java_tys.map, java_parsers.map, java_fns.map);
+		collage = col(tys, syms.map, eqs, js.java_tys.map, js.java_parsers.map, js.java_fns.map);
 		return (Collage<Ty, En, Sym, Fk, Att, Gen, Sk>) collage;
 	}
 
@@ -234,9 +232,9 @@ public final class TypeSide<Ty, Sym> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
-		result = prime * result + ((java_fns == null) ? 0 : java_fns.hashCode());
-		result = prime * result + ((java_parsers == null) ? 0 : java_parsers.hashCode());
-		result = prime * result + ((java_tys == null) ? 0 : java_tys.hashCode());
+	//	result = prime * result + ((java_fns == null) ? 0 : java_fns.hashCode());
+	//	result = prime * result + ((java_parsers == null) ? 0 : java_parsers.hashCode());
+		result = prime * result + ((js == null) ? 0 : js.hashCode());
 		result = prime * result + ((syms == null) ? 0 : syms.hashCode());
 		result = prime * result + ((tys == null) ? 0 : tys.hashCode());
 		return result;
@@ -256,7 +254,7 @@ public final class TypeSide<Ty, Sym> {
 				return false;
 		} else if (!eqs.equals(other.eqs))
 			return false;
-		if (java_fns == null) {
+	/*	if (java_fns == null) {
 			if (other.java_fns != null)
 				return false;
 		} else if (!java_fns.equals(other.java_fns))
@@ -265,11 +263,11 @@ public final class TypeSide<Ty, Sym> {
 			if (other.java_parsers != null)
 				return false;
 		} else if (!java_parsers.equals(other.java_parsers))
-			return false;
-		if (java_tys == null) {
-			if (other.java_tys != null)
+			return false;*/
+		if (js == null) {
+			if (other.js != null)
 				return false;
-		} else if (!java_tys.equals(other.java_tys))
+		} else if (!js.equals(other.js))
 			return false;
 		if (syms == null) {
 			if (other.syms != null)
@@ -310,13 +308,13 @@ public final class TypeSide<Ty, Sym> {
 		toString += "\n\t" + Util.sep(eqs0, "\n\t");
 		
 		toString += "\njava_types";
-		toString += "\n\t" + Util.sep(tys0, java_tys.map, " = " , "\n\t", true);
+		toString += "\n\t" + Util.sep(tys0, js.java_tys.map, " = " , "\n\t", true);
 		
 		toString += "\njava_constants";
-		toString += "\n\t" + Util.sep(tys0, java_parsers.map, " = " , "\n\t", true);
+		toString += "\n\t" + Util.sep(tys0, js.java_parsers.map, " = " , "\n\t", true);
 
 		toString += "\njava_functions";
-		toString += "\n\t" + Util.sep(syms0, java_fns.map, " = " , "\n\t", true);
+		toString += "\n\t" + Util.sep(syms0, js.java_fns.map, " = " , "\n\t", true);
 		return toString;
 	} 
 

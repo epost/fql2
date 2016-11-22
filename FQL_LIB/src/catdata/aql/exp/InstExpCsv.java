@@ -142,7 +142,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 						RawTerm l = new RawTerm(fkToString(fk), Util.singList(l0));
 						RawTerm r = AqlParser.parseTermNoCtx(row.get(fkToString(fk)));
 						Triple<Ctx<String,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>> 
-						eq0 = RawTerm.infer1(new HashMap<>(), l, r, col);
+						eq0 = RawTerm.infer1(new HashMap<>(), l, r, col, sch.typeSide.js);
 	
 						eqs0.add(new Pair<>(eq0.second, eq0.third));
 						col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));
@@ -154,7 +154,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 							
 						RawTerm r = AqlParser.parseTermNoCtx(row.get(attToString(att)));
 						Triple<Ctx<String,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>> 
-						eq0 = RawTerm.infer1(new HashMap<>(), l, r, col);
+						eq0 = RawTerm.infer1(new HashMap<>(), l, r, col, sch.typeSide.js);
 	
 						eqs0.add(new Pair<>(eq0.second, eq0.third));
 						col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));

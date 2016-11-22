@@ -93,14 +93,32 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(Object o) {
+		if (this == o)
 			return true;
-		if (obj == null)
+		if (o == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (getClass() != o.getClass())
 			return false;
-		Head<?,?,?,?,?,?,?> other = (Head<?,?,?,?,?,?,?>) obj;
+		Head<?,?,?,?,?,?,?> other = (Head<?,?,?,?,?,?,?>) o;
+		
+		if (att != null) {
+			return att.equals(other.att);
+		} else if (fk != null) {
+			return fk.equals(other.fk);
+		} else if (gen != null) {
+			return gen.equals(other.gen);
+		} else if (sk != null) {
+			return sk.equals(other.sk);
+		} else if (obj != null) {
+			return obj.equals(other.obj) && ty.equals(other.ty);
+		} else if (sym != null) {
+			return sym.equals(other.sym);
+		} 
+		
+		throw new RuntimeException("Anomaly: please report");
+		
+		/*
 		if (att == null) {
 			if (other.att != null)
 				return false;
@@ -136,7 +154,7 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				return false;
 		} else if (!ty.equals(other.ty))
 			return false;
-		return true;
+		return true; */
 	}
 
 	@Override

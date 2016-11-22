@@ -42,6 +42,15 @@ import org.apache.commons.collections15.CollectionUtils;
 
 public class Util {
 	
+	public static Class<?> load(String clazz) {
+		try {
+			return Class.forName(clazz);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			throw new RuntimeException(clazz + " is not on the java classpath");
+		}		
+	}
+	
 	public static <X,Y> List<Pair<X,Y>> toList(Map<X,Y> map) {
 		List<Pair<X,Y>> ret = new LinkedList<>();
 		for (Entry<X, Y> e : map.entrySet()) {

@@ -3,9 +3,7 @@ package catdata.aql;
 import catdata.Chc;
 
 public interface DP<Ty,En,Sym,Fk,Att,Gen,Sk> {
-	
-	//public abstract Collage<Ty,En,Sym,Fk,Att,Gen,Sk> collage();
-
+		
 	public boolean eq(Ctx<Var, Chc<Ty,En>> ctx, Term<Ty,En,Sym,Fk,Att,Gen,Sk> lhs, Term<Ty,En,Sym,Fk,Att,Gen,Sk> rhs);
 	
 	public default boolean hasNFs() {
@@ -31,11 +29,7 @@ public interface DP<Ty,En,Sym,Fk,Att,Gen,Sk> {
 		public Term<Void, Void, Void, Void, Void, Void, Void> nf(Ctx<Var, Chc<Void, Void>> ctx, Term<Void, Void, Void, Void, Void, Void, Void> term) {
 			throw new RuntimeException();
 		}
-/*
-		@Override
-		public Collage<Void, Void, Void, Void, Void, Void, Void> collage() {
-			return new Collage<>();
-		}	*/
+
 	};
 	
 	

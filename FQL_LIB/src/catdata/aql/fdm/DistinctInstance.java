@@ -33,7 +33,7 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 		for (En en : schema().ens) {
 			for (X x : I.algebra().en(en)) {
 				for (X y : I.algebra().en(en)) {
-					if (obsEq(en,x,y) && !x.equals(y)) {
+					if (!x.equals(y) && obsEq(en,x,y)) {
 						uf.union(x, y);	
 						eqs.add(new Pair<>(I.algebra().repr(x).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn()), I.algebra().repr(y).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn())));
 					}
@@ -133,7 +133,7 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 		}
 
 		@Override
-		public Term<Ty, En, Sym, Fk, Att, Gen, Sk> reprT(Term<Ty, Void, Sym, Void, Void, Void, Y> y) {
+		protected Term<Ty, En, Sym, Fk, Att, Gen, Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> y) {
 			return I.algebra().reprT(y);
 		}
 

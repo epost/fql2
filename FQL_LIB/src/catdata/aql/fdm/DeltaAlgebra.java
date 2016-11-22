@@ -167,7 +167,7 @@ extends Algebra<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> {
 	} 
 
 	@Override
-	public Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y> reprT(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
+	protected Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
 		Term<Ty, Void, Sym, Void, Void, Void, Y> t = alg.intoY(alg.reprT(term));
 		return t.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
 	}
