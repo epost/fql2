@@ -50,13 +50,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Contains binary distributions of the following libraries:
 
-jparsec (Apache License)
-JUNG (BSD License)
-RSyntaxTextArea [and autocomplete] (BSD License)
-Commons Generics (Apache License)
-Commons CSV (Apache License)
-Commons Exec (Apache License)
-JFlex (BSD License)
+jparsec (Apache License),
+JUNG (BSD License),
+RSyntaxTextArea and autocomplete (BSD License),
+Commons Generics, CSV, and Exec (Apache License),
+JFlex (BSD License),
 H2 (Mozilla Public License or Eclipse Public License)
 
 Copyright statements for these projects are included below.
