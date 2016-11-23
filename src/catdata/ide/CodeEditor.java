@@ -436,19 +436,20 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 							//toDisplay = null;
 							return;
 						} else if (thread != null) {
-							if (toUpdate[0] != null) {
-								if ((count % 8) == 0) {
-									respArea.setText(toUpdate[0] + "\n");
+							synchronized (toUpdate) {
+								if (toUpdate[0] != null) {
+									if ((count % 8) == 0) {
+										respArea.setText(toUpdate[0] + "\n");
+									} else {
+										respArea.setText(respArea.getText() + ".");
+									}
 								} else {
+									if (respArea.getText().length() > 1024*16) {
+										respArea.setText("");
+									}
 									respArea.setText(respArea.getText() + ".");
 								}
-							} else {
-								if (respArea.getText().length() > 1024*16) {
-									respArea.setText("");
-								}
-								respArea.setText(respArea.getText() + ".");
-							}
-							
+							}							
 						}
 					}
 				} catch (InterruptedException ie) {

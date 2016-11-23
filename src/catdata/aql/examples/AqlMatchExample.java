@@ -140,7 +140,31 @@ public class AqlMatchExample extends AqlExample {
 			+ "\npragma pi_BA_naive = match \"naive\" : pi_B -> pi_A	"
 			+ "\npragma pi_AB_sf = match \"sf\" : pi_A -> pi_B   	"
 			+ "\npragma pi_BA_sf = match \"sf\" : pi_B -> pi_A"
+			+ "\n"
+			+ "\n////////////////////////////////////////////////////////////////////"
+			+ "\n"
+			+ "\ngraph one = literal {"
+			+ "\n	nodes"
+			+ "\n		A B"
+			+ "\n	edges"
+			+ "\n		f : A -> B	"
+			+ "\n}"
+			+ "\n"
+			+ "\ngraph three = literal {"
+			+ "\n	nodes"
+			+ "\n		A X B"
+			+ "\n	edges"
+			+ "\n		f : A -> X"
+			+ "\n		g : X -> B	"
+			+ "\n}"
+			+ "\n"
+			+ "\npragma intoPath_naive = match \"naive\" : one -> three"
+			+ "\npragma outOfPath_naive= match \"naive\" : three -> one"
+			+ "\npragma intoPath_sf = match \"sf\" : one -> three"
+			+ "\npragma outOfPath_sf= match \"sf\" : three -> one"
 			+ "\n";
+
+
 
 
 }

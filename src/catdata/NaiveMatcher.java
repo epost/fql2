@@ -1,6 +1,7 @@
 package catdata;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -10,7 +11,7 @@ import java.util.function.BiFunction;
  * 
  * @author ryan
  */
-public class NaiveMatcher<N1,N2,E1,E2> extends Matcher<N1,E1,N2,E2,BiFunction<String,String,Double>> {
+public class NaiveMatcher<N1,N2,E1,E2> extends Matcher<N1,E1,N2,E2,BiFunction<String,String,Integer>> {
 	
 	public NaiveMatcher(DMG<N1, E1> src, DMG<N2, E2> dst, Map<String, String> options) {
 		super(src, dst, options);
@@ -22,46 +23,60 @@ public class NaiveMatcher<N1,N2,E1,E2> extends Matcher<N1,E1,N2,E2,BiFunction<St
 		Map<E1, List<E2>> edges = new HashMap<>();
 		
 		for (N1 s : src.nodes) {
-			double max_d = -1;
-			N2 max_t = null;
+			int min_d = Integer.MAX_VALUE;
+			N2 min_t = null;
 			for (N2 t : dst.nodes) {
-				double cur_d = params.apply(s.toString(), t.toString());
-				if (cur_d > max_d) {
-					max_d = cur_d;
-					max_t = t;
+				int cur_d = params.apply(s.toString(), t.toString());
+				if (cur_d < min_d) {
+					min_d = cur_d;
+					min_t = t;
 				}
 			}
-			if (max_t == null) {
+			if (min_t == null) {
 				throw new RuntimeException("No match from " + s);
 			}
-			nodes.put(s, max_t);
+			nodes.put(s, min_t);
 		}
 			
 		for (E1 c : src.edges.keySet()) {
-			double max_d = -1;
-			E2 max_c = null;
-			for (E2 d : dst.edges(nodes.get(src.edges.get(c).first), nodes.get(src.edges.get(c).second))) {
-				double cur_d = params.apply(c.toString(), d.toString());
-				if (cur_d > max_d) {
-					max_d = cur_d;
-					max_c = d;
+			int min_d = Integer.MAX_VALUE;
+			E2 min_c = null;
+			N2 n2_s = nodes.get(src.edges.get(c).first);
+			N2 n2_t = nodes.get(src.edges.get(c).second);
+			for (E2 d : dst.edges(n2_s, n2_t)) {
+				int cur_d = params.apply(c.toString(), d.toString());
+				if (cur_d < min_d) {
+					min_d = cur_d;
+					min_c = d;
 				}
 			}
-			if (max_c == null) {
-				throw new RuntimeException("No match from " + c + " under node mapping\n\n" + Util.sep(nodes, " -> ", "\n") );
+			if (min_c != null) {
+				edges.put(c, Util.singList(min_c));
+			} else if (n2_s.equals(n2_t)) {
+				edges.put(c, new LinkedList<>());
+			} else {
+				ShortestPath<N2,E2> sp = new ShortestPath<>(this.dst, n2_s);
+				if (sp.hasPathTo(n2_t)) {
+					edges.put(c, sp.pathTo(n2_t));
+				} else {
+					throw new RuntimeException("No match from " + c + " under node mapping\n\n" + Util.sep(nodes, " -> ", "\n") );
+				}
 			}
-			edges.put(c, Util.singList(max_c));
 		}
 		
 		return new Match<>(src, dst, nodes, edges);
 	}
 
+	
+
 	@Override
-	public BiFunction<String, String, Double> createParams(Map<String, String> options) {
+	public BiFunction<String, String, Integer> createParams(Map<String, String> options) {
 		if (!options.isEmpty()) {
 			throw new RuntimeException("No options allowed for naive matching");
 		}
-		return EditDistance::similarity;
+		return EditDistance::editDistance;
 	}
+	
+	//TODO: explore all node matchings in order, veto-ing ones that cause edge mappings to fail
 
 }

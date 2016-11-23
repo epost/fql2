@@ -1,17 +1,12 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import catdata.DAG;
 import catdata.IntRef;
@@ -50,7 +45,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	// careful about equality
 
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		return "Completed: " + Util.sep(completed, " ") + "\nProcessing: " + Util.sep(processing, " ") + "\nTodo: " + Util.sep(todo, " ");
 	}
 
@@ -65,7 +60,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	public final Program<Exp<?>> last_prog;
 	public final AqlEnv last_env;
 
-	private List<RuntimeException> exn = Collections.synchronizedList(new LinkedList<>()); 
+	private List<RuntimeException> exn = new LinkedList<>(); 
 	
 	boolean stop = false;
 	
@@ -78,14 +73,14 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		checkAcyclic();
 		env.typing = new AqlTyping(prog);  //TODO aql line exceptions in typing
 		init();
-		toUpdate[0] = toString();
+		update();
 		process();
 	}
 
 	private void checkAcyclic() {
 		DAG<String> dag = new DAG<>();
 		for (String n : prog.order) {
-			for (Pair<String, Kind> d : wrapDeps(n, prog.exps.get(n), prog)) {
+			for (Pair<String, Kind> d : /*wrapDeps(n,*/ prog.exps.get(n).deps() /*, prog) */) { //crushes performance
 				if (!prog.order.contains(d.first)) {
 					throw new LineException("Undefined dependency: " + d, n, prog.exps.get(n).kind().toString());
 				}
@@ -96,47 +91,41 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			}
 		}
 	}
-
-	List<Future<Unit>> threads = new LinkedList<>();
-
-	private void cancel() {
-		for (Future<Unit> thread : threads) {
-				try {
-					thread.cancel(true);
-				} catch (CancellationException ex) {
-				}
+	
+	private boolean isEnded() {
+		synchronized (ended) {
+			return ended.i == Runtime.getRuntime().availableProcessors();
 		}
 	}
-
-	private IntRef ended = new IntRef(0);
-	
-	private void process() {
-		for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) {
-			ExecutorService executor = Executors.newSingleThreadExecutor();
-			Future<Unit> future = executor.submit(this);
-			threads.add(future);
-		}
-		for (Future<Unit> thread : threads) {
-				try {
-					thread.get();
-				} catch (Throwable ex) {
-					stop = true;
-					cancel();
-				}
-		}
-		
-		synchronized (ended) {
-			while (ended.i < Runtime.getRuntime().availableProcessors()) {
+	private void barrier() {
+		while (!isEnded()) {
+			synchronized (ended) {
 				try {
 					ended.wait();
 				} catch (InterruptedException e) {
 					throw new RuntimeException("Please report: driver interrupted while waiting");
 				}
 			}
-		}
+		}		
+	}
+	
+	private void update() {
+		String s = toString();
+		synchronized(toUpdate) {
+			toUpdate[0] = s;
+		}		
+	}
+
+	private IntRef ended = new IntRef(0);
+	
+	private void process() {
+		int numProcs = Runtime.getRuntime().availableProcessors();
 		
-		//TODO: aql form a barrier
-		//all thread must be dead here
+		for (int i = 0; i < numProcs; i++) {
+			new Thread(() -> call()).start();
+		}
+		barrier();
+		
 		if (!exn.isEmpty()) { 
 			for (RuntimeException t : exn) {
 				if (!(t instanceof InvisibleException)) {
@@ -148,9 +137,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			}
 			//when uncommented, partial results will not appear
 			//throw env.exn; //TODO aql configure behavior, stop on error or not?
-		}
-
-	
+		}	
 	}
 
 	private Map<String, Boolean> changed = new HashMap<>();
@@ -161,7 +148,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			return;
 		}
 		for (String n : prog.order) {
-			if (changed(n) || !last_env.defs.keySet().contains(n)) {
+			if (!last_env.defs.keySet().contains(n) || changed(n)) {
 				todo.add(n);
 			} else {
 				Kind k = prog.exps.get(n).kind();
@@ -191,34 +178,39 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		return b;
 	}
 
+	private Unit notifyOfDeath() {
+		synchronized (ended) {
+			ended.i++;
+			ended.notifyAll();
+		}
+		synchronized (this) { //just in case
+			notifyAll();
+		}
+		return new Unit();
+	}
+	
 	@Override
-	public Unit call() throws Exception {
+	public Unit call() {
 		String k2 = "";
 		String n = "";
 
 		try {
 			for (;;) {
 				n = null;
-				if (Thread.currentThread().isInterrupted() || stop == true) {
-					synchronized (ended) {
-						ended.i++;
-						ended.notifyAll();
-					}
-					return new Unit();
-				}
-
+				
 				synchronized (this) {
-					if (todo.isEmpty()) {
+					if (stop == true || todo.isEmpty() || Thread.currentThread().isInterrupted()) {
 						break;
-					}
+					} 
 					n = nextAvailable();
 					if (n == null) {
+						update();
 						wait();
 						continue;
 					}
 					processing.add(n);
 					todo.remove(n);
-					toUpdate[0] = toString();
+					update();
 				}
 				Exp<?> exp = prog.exps.get(n);
 				Kind k = exp.kind();
@@ -233,7 +225,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 					env.defs.put(n, k, val);
 					processing.remove(n);
 					completed.add(n);
-					toUpdate[0] = toString();
+					update();
 					notifyAll();
 				}
 			}
@@ -243,20 +235,15 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			exn.add(exp);
 		} catch (Throwable e) {
 			e.printStackTrace();
-			exn.add(new LineException(e.getMessage(), n, k2));
-			synchronized (this) {
+			synchronized (this)  {
 				stop = true;
+				exn.add(new LineException(e.getMessage(), n, k2));
 				notifyAll();
 			}
-			cancel();
 		}
 		
-		
-		synchronized (ended) {
-			ended.i++;
-			ended.notifyAll();
-		}
-		return new Unit();
+		update();
+		return notifyOfDeath();
 	}
 
 	private String nextAvailable() {

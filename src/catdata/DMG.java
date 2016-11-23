@@ -54,7 +54,7 @@ public class DMG<N,E> {
 			if (!edges.containsKey(e)) {
 				throw new RuntimeException("Not an edge: " + e);
 			}
-			if (!src.equals(edges.get(e).first)) {
+			if (!dst.equals(edges.get(e).first)) {
 				throw new RuntimeException("Ill-typed: " + path + ", edge " + e + " has source " + edges.get(e).first + " but is applied to " + src);
 			}
 			dst = edges.get(e).second;

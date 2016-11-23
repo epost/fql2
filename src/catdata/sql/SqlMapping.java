@@ -68,7 +68,7 @@ public class SqlMapping {
 			double max_d = -1;
 			SqlTable max_t = null;
 			for (SqlTable t : target.tables) {
-				double cur_d = EditDistance.similarity(s.name, t.name);
+				double cur_d = EditDistance.similarity(s.name, t.name); //TODO aql similarity is broken
 				if (cur_d > max_d) {
 					max_d = cur_d;
 					max_t = t;
@@ -86,7 +86,7 @@ public class SqlMapping {
 					if (!c.type.equals(d.type)) {
 						continue;
 					}
-					double cur_d = EditDistance.similarity(c.name, d.name);
+					double cur_d = EditDistance.similarity(c.name, d.name); //TODO aql similarity is broken
 					if (cur_d > max_d) {
 						max_d = cur_d;
 						max_c = d;
