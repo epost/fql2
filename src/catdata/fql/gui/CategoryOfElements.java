@@ -31,7 +31,7 @@ import catdata.fql.decl.Attribute;
 import catdata.fql.decl.Instance;
 import catdata.fql.decl.Node;
 import catdata.fql.decl.Path;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -82,7 +82,7 @@ public class CategoryOfElements {
 					if (c.isId(arr)) {
 						continue;
 					}
-					if (!NEWDEBUG.debug.fql.ALL_GR_PATHS && arr.arr.path.size() != 1) {
+					if (!GlobalOptions.debug.fql.ALL_GR_PATHS && arr.arr.path.size() != 1) {
 						continue;
 					}
 					if (doLookup(i, arr.arr, x.second, y.second)) {

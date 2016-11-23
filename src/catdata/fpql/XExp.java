@@ -12,7 +12,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 public abstract class XExp {
 	
@@ -1136,7 +1136,7 @@ public abstract class XExp {
 			this.from = from;
 			this.where = where;
 			this.src = src;
-			if (NEWDEBUG.debug.fpql.reorder_joins) {
+			if (GlobalOptions.debug.fpql.reorder_joins) {
 				this.from = sort(from);
 			} else {
 				this.from = from;
@@ -1263,7 +1263,7 @@ public abstract class XExp {
 			this.select = select;
 			this.where = where;
 			this.src = src;
-			if (NEWDEBUG.debug.fpql.reorder_joins) {
+			if (GlobalOptions.debug.fpql.reorder_joins) {
 				this.from = sort(from);
 			} else {
 				this.from = from;

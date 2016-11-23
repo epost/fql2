@@ -378,7 +378,7 @@ public class GUI extends JPanel {
 		helpMenu.add(aboutItem);
 		aboutItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				NEWDEBUG.showAbout();
+				GlobalOptions.showAbout();
 			}
 		});
 
@@ -455,7 +455,7 @@ public class GUI extends JPanel {
 		JButton optionsb = new JButton("Options");
 		optionsb.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				NEWDEBUG.showOptions();
+				GlobalOptions.showOptions();
 			}
 		});
 
@@ -648,7 +648,7 @@ public class GUI extends JPanel {
 
 	protected static void saveAsAction() {
 		delay();
-		JFileChooser jfc = new JFileChooser(NEWDEBUG.debug.general.file_path);
+		JFileChooser jfc = new JFileChooser(GlobalOptions.debug.general.file_path);
 		@SuppressWarnings("rawtypes")
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
 
@@ -681,7 +681,7 @@ public class GUI extends JPanel {
 
 	static protected void openAction() {
 		delay();
-		JFileChooser jfc = new JFileChooser(NEWDEBUG.debug.general.file_path);
+		JFileChooser jfc = new JFileChooser(GlobalOptions.debug.general.file_path);
 		jfc.setFileFilter(new AllFilter());
 		jfc.showOpenDialog(null);
 		File f = jfc.getSelectedFile();

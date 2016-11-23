@@ -16,7 +16,7 @@ import catdata.Unit;
 import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class Pi {
@@ -340,9 +340,9 @@ public class Pi {
 		Set<Map> ret = new HashSet<>();
 		for (Map x : x0) {
 			Map y =  new HashMap();
-			if (NEWDEBUG.debug.fqlpp.piLineage.equals("Fresh IDs")) {
+			if (GlobalOptions.debug.fqlpp.piLineage.equals("Fresh IDs")) {
 				y.put(0, id++);
-			} else if (NEWDEBUG.debug.fqlpp.piLineage.equals("Lineage as ID")) {
+			} else if (GlobalOptions.debug.fqlpp.piLineage.equals("Lineage as ID")) {
 				y.put(0, x);
 			} else {
 				y.put(0, Util.printForPi(x));

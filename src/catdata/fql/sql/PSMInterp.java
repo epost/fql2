@@ -17,7 +17,7 @@ import catdata.fql.decl.Instance;
 import catdata.fql.decl.Node;
 import catdata.fql.decl.Path;
 import catdata.fql.decl.Transform;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 /**
  * 
@@ -52,7 +52,7 @@ public class PSMInterp {
 				cmd.exec(this, state);
 				//check(cmd, state);
 			} catch (Throwable t) {
-				if (NEWDEBUG.debug.fql.continue_on_error) {
+				if (GlobalOptions.debug.fql.continue_on_error) {
 					ret.add(t);
 				} else {
 					throw t;

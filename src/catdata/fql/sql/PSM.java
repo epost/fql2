@@ -3,7 +3,7 @@ package catdata.fql.sql;
 import java.util.Map;
 import java.util.Set;
 
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 /**
  * 
@@ -18,7 +18,7 @@ public abstract class PSM {
 	public final static String INTEGER = "INTEGER";
 	public static final String FLOAT = "FLOAT";
 	public final static String VARCHAR() {
-		return "VARCHAR(" + NEWDEBUG.debug.fql.varlen + ")";
+		return "VARCHAR(" + GlobalOptions.debug.fql.varlen + ")";
 	}
 
 	public  abstract void exec(PSMInterp interp, Map<String, Set<Map<Object, Object>>> state);

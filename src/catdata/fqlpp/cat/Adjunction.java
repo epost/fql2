@@ -1,6 +1,6 @@
 package catdata.fqlpp.cat;
 
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 public class Adjunction<CO, CA, DO, DA> {
 
 	public Functor<DO, DA, CO, CA> F;
@@ -18,7 +18,7 @@ public class Adjunction<CO, CA, DO, DA> {
 	}
 
 	public void validate() {
-		if (!NEWDEBUG.debug.fqlpp.VALIDATE) {
+		if (!GlobalOptions.debug.fqlpp.VALIDATE) {
 			return;
 		}
 

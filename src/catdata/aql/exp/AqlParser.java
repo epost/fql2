@@ -36,6 +36,7 @@ import catdata.aql.exp.InstExp.InstExpVar;
 import catdata.aql.exp.MapExp.MapExpId;
 import catdata.aql.exp.MapExp.MapExpVar;
 import catdata.aql.exp.PragmaExp.PragmaExpJs;
+import catdata.aql.exp.PragmaExp.PragmaExpMatch;
 import catdata.aql.exp.PragmaExp.PragmaExpProc;
 import catdata.aql.exp.PragmaExp.PragmaExpSql;
 import catdata.aql.exp.PragmaExp.PragmaExpToCsvInst;
@@ -84,6 +85,7 @@ public class AqlParser {
 			"exec_cmdline",
 			"literal",
 			"id",
+			"match",
 			"attributes",
 			"empty",
 			"imports",
@@ -241,7 +243,10 @@ public class AqlParser {
 			jdbcTrans = Parsers.tuple(Parsers.tuple(token("export_jdbc_transform"), trans_ref.lazy()), ident, ident, ident, options.between(token("{"), token("}")).optional())
 			.map(x -> new PragmaExpToJdbcTrans(x.a.b, x.b,x.c,x.d, x.e == null ? new LinkedList<>() : x.e)),
 	
-			ret = Parsers.or(csvInst, csvTrans, var, sql, js, proc, jdbcInst, jdbcTrans); 
+			match = Parsers.tuple(token("match"), ident.followedBy(token(":")), graph_ref.lazy().followedBy(token("->")), graph_ref.lazy(), options.between(token("{"), token("}")).optional())
+			.map(x -> new PragmaExpMatch(x.b, x.c, x.d, x.e == null ? new LinkedList<>() : x.e)),
+			
+			ret = Parsers.or(csvInst, csvTrans, var, sql, js, proc, jdbcInst, jdbcTrans, match); 
 		
 			pragma_ref.set(ret);
 	}

@@ -6,7 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import catdata.DMG;
+import catdata.Matcher;
+import catdata.NaiveMatcher;
 import catdata.Pair;
+import catdata.SimilarityFloodingMatcher;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
@@ -25,9 +29,118 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		return Kind.PRAGMA;
 	}
 	
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final class PragmaExpMatch<N1,E1,N2,E2> extends PragmaExp {
+		public final String which;
+		public final Map<String, String> options; 
+		
+		public final GraphExp<N1,E1> src;
+		public final GraphExp<N2,E2> dst;
+		
+		public PragmaExpMatch(String which, GraphExp<N1, E1> src, GraphExp<N2, E2> dst, List<Pair<String, String>> options) {
+			this.which = which;
+			this.options = Util.toMapSafely(options);
+			this.src = src;
+			this.dst = dst;
+		}
+		
+		@Override
+		public Pragma eval(AqlEnv env) {
+			DMG<N1, E1> src0 = src.eval(env);
+			DMG<N2, E2> dst0 = dst.eval(env);
+			
+			return new Pragma() {
+				
+				String s;
+				
+				@Override 
+				public void execute() {	
+					toString();
+				}
+				@Override
+				public String toString() {
+					if (s != null) {
+						return s;
+					}
+					//TODO aql eventually, this should not catch the exception
+					Matcher<N1,E1,N2,E2,?> ret0 = null;
+					try {
+						if (which.equals("naive")) {
+							ret0 = new NaiveMatcher<>(src0, dst0, options);
+						} else if (which.equals("sf")) {
+							ret0 = new SimilarityFloodingMatcher<>(src0, dst0, options);
+						} else {
+							throw new RuntimeException("Please use naive or sf for which match desired, not " + which);
+						}
+						s = ret0.bestMatch.toString();
+					} catch (Throwable e) {
+						e.printStackTrace();
+						s = e.getMessage();
+					}
+					return s;
+				}
+			};			
+		}
+		@Override
+		public String toString() {
+			return "match " + which + " : " + src + " -> " + dst;
+		}
+	
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(src.deps(), dst.deps());
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((src == null) ? 0 : src.hashCode());
+			result = prime * result + ((which == null) ? 0 : which.hashCode());
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			PragmaExpMatch<?,?,?,?> other = (PragmaExpMatch<?,?,?,?>) obj;
+			if (dst == null) {
+				if (other.dst != null)
+					return false;
+			} else if (!dst.equals(other.dst))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			if (src == null) {
+				if (other.src != null)
+					return false;
+			} else if (!src.equals(other.src))
+				return false;
+			if (which == null) {
+				if (other.which != null)
+					return false;
+			} else if (!which.equals(other.which))
+				return false;
+			return true;
+		} 
+		
+		
+		
+	}
+	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	
+	//TODO aql: kind of weird that there are pragmas for these but not the importers? 
 	public static final class PragmaExpSql extends PragmaExp {
 		private final List<String> sqls;
 		

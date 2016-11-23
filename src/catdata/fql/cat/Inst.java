@@ -23,7 +23,7 @@ import catdata.fql.decl.Node;
 import catdata.fql.decl.Path;
 import catdata.fql.decl.Signature;
 import catdata.fql.decl.Transform;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 /**
  * 
@@ -686,7 +686,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		this.objM = objM;
 		this.arrM = arrM;
 		this.cat = cat;
-		if (NEWDEBUG.debug.fql.VALIDATE) {
+		if (GlobalOptions.debug.fql.VALIDATE) {
 			validate();
 		}
 	}

@@ -42,7 +42,7 @@ import catdata.fpql.XExp.XInst;
 import catdata.fpql.XExp.XSchema;
 import catdata.fqlpp.cat.Category;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import catdata.provers.SemiThue;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -424,7 +424,7 @@ public class XCtx<C> implements XObject {
 
 		JTabbedPane ret = new JTabbedPane();
 
-		if (NEWDEBUG.debug.fpql.x_text) {
+		if (GlobalOptions.debug.fpql.x_text) {
 			String kb_text = "types:\n  " + Util.sep(allIds(), ",\n  ");
 			List<String> tms = allTerms().stream()
 					.map(x -> x + " : " + type(x).first + " -> " + type(x).second)
@@ -471,7 +471,7 @@ public class XCtx<C> implements XObject {
 		}
 
 		String cat = null;
-		if (NEWDEBUG.debug.fpql.x_cat) {
+		if (GlobalOptions.debug.fpql.x_cat) {
 			cat = "";
 			try {
 				cat = cat().toString();
@@ -484,7 +484,7 @@ public class XCtx<C> implements XObject {
 		}
 
 		if (schema != null) {
-			if (NEWDEBUG.debug.fpql.x_tables) {
+			if (GlobalOptions.debug.fpql.x_tables) {
 				// if category tab blew up, so should this
 				JComponent tables = null;
 				if (cat != null && cat.startsWith("ERROR")) {
@@ -494,20 +494,20 @@ public class XCtx<C> implements XObject {
 				}
 				ret.addTab("Full Tables", tables);
 			}
-			if (NEWDEBUG.debug.fpql.x_adom) {
+			if (GlobalOptions.debug.fpql.x_adom) {
 				ret.addTab("Adom Tables", makeTables(z -> foo(), global.ids));
 			}
 		}
 		
-		if (NEWDEBUG.debug.fpql.x_graph) {
+		if (GlobalOptions.debug.fpql.x_graph) {
 			ret.addTab("Graph", makeGraph(schema != null));
 		}
 		
-		if (NEWDEBUG.debug.fpql.x_graph && (schema != null)) {
+		if (GlobalOptions.debug.fpql.x_graph && (schema != null)) {
 			ret.addTab("Elements", elements());
 		}
 		
-		if (NEWDEBUG.debug.fpql.x_json) {
+		if (GlobalOptions.debug.fpql.x_json) {
 			String tj = toJSON();
 			if (tj != null) {
 				ret.addTab("JSON", new CodeTextPanel(BorderFactory.createEtchedBorder(), "", tj));
@@ -571,7 +571,7 @@ public class XCtx<C> implements XObject {
 		ret.add(zzz);
 		ret.setBorder(BorderFactory.createEtchedBorder());
 		
-		if (isInstance && NEWDEBUG.debug.fpql.x_tables && xcat != null) {
+		if (isInstance && GlobalOptions.debug.fpql.x_tables && xcat != null) {
 			JSplitPane jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 			jsp.setResizeWeight(.8d); // setDividerLocation(.9d);
 			jsp.setDividerSize(2);
@@ -682,7 +682,7 @@ public class XCtx<C> implements XObject {
 		}
 
 		int iter = 0;
-		for (; iter < NEWDEBUG.debug.fpql.MAX_PATH_LENGTH; iter++) {
+		for (; iter < GlobalOptions.debug.fpql.MAX_PATH_LENGTH; iter++) {
 			Set<Triple<C, C, List<C>>> newPaths1 = extend2(paths, global.types, consts);
 			paths.addAll(newPaths1);
 			Set<Triple<C, C, List<C>>> newPaths2 = extend2(paths, schema.types, consts);
@@ -698,7 +698,7 @@ public class XCtx<C> implements XObject {
 			}
 			paths.addAll(newPaths3);
 		}
-		if (iter == NEWDEBUG.debug.fpql.MAX_PATH_LENGTH) {
+		if (iter == GlobalOptions.debug.fpql.MAX_PATH_LENGTH) {
 			throw new RuntimeException("Exceeded maximum path length");
 		}
 
@@ -1099,7 +1099,7 @@ public class XCtx<C> implements XObject {
 			return xcat;
 		}
 
-		if (saturated && NEWDEBUG.debug.fpql.fast_amalgams) {
+		if (saturated && GlobalOptions.debug.fpql.fast_amalgams) {
 			xcat = satcat();
 			return xcat;
 		}
@@ -1191,7 +1191,7 @@ public class XCtx<C> implements XObject {
 			Map<Pair<Triple<C, C, List<C>>, Triple<C, C, List<C>>>, Triple<C, C, List<C>>> cache = new HashMap<>();
 		};
 
-		if (NEWDEBUG.debug.fpql.validate_amalgams) {
+		if (GlobalOptions.debug.fpql.validate_amalgams) {
 			xcat2.validate();
 		}
 		xcat = xcat2;
@@ -1487,7 +1487,7 @@ public class XCtx<C> implements XObject {
 
 		};
 		// cache the composition table
-		if (NEWDEBUG.debug.fpql.validate_amalgams) {
+		if (GlobalOptions.debug.fpql.validate_amalgams) {
 			ret.validate(); 
 		}
 		return ret;
@@ -1591,7 +1591,7 @@ public class XCtx<C> implements XObject {
 	public static <C> void extend(SemiThue<C> kb, Collection<Triple<C, C, List<C>>> paths,
 			Map<C, Pair<C, C>> t, Collection<Triple<C, C, List<C>>> consts) {
 		int iter = 0;
-		for (; iter < NEWDEBUG.debug.fpql.MAX_PATH_LENGTH; iter++) {
+		for (; iter < GlobalOptions.debug.fpql.MAX_PATH_LENGTH; iter++) {
 			Set<Triple<C, C, List<C>>> newPaths = new HashSet<>();
 			for (Triple<C, C, List<C>> p : paths) {
 				for (C e : outEdges(t, p.second)) {
@@ -1615,7 +1615,7 @@ public class XCtx<C> implements XObject {
 			}
 			paths.addAll(newPaths);
 		}
-		if (iter == NEWDEBUG.debug.fpql.MAX_PATH_LENGTH) {
+		if (iter == GlobalOptions.debug.fpql.MAX_PATH_LENGTH) {
 			throw new RuntimeException("Exceeded maximum path length");
 		}
 	}

@@ -13,7 +13,7 @@ import javax.script.ScriptException;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import catdata.opl.OplExp.OplSetInst;
 import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplParser.DoNotIgnore;
@@ -197,7 +197,7 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 
 	//: dup? In Util?
 	public static String strip(String s) {
-		if (!NEWDEBUG.debug.opl.opl_pretty_print) {
+		if (!GlobalOptions.debug.opl.opl_pretty_print) {
 			return s;
 		}
 		String ret = s.replace("inl ", "").replace("inr ", "").replace("()", "")

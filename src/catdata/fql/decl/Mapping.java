@@ -40,7 +40,7 @@ import catdata.fql.parse.PrettyPrinter;
 import catdata.fql.sql.EmbeddedDependency;
 import catdata.fql.sql.PSM;
 import catdata.fql.sql.PSMGen;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -125,7 +125,7 @@ public class Mapping {
 
 		// should be checked by knuth-bendix
 
-		if (!NEWDEBUG.debug.fql.ALLOW_INFINITES && !flag) {
+		if (!GlobalOptions.debug.fql.ALLOW_INFINITES && !flag) {
 
 			Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> zzz = toFunctor2();
 
@@ -750,7 +750,7 @@ public class Mapping {
 	public JPanel doView(final Color scolor, final Color tcolor, final FqlEnvironment env, Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		try {
-			Class<?> c = Class.forName(FqlOptions.layout_prefix + NEWDEBUG.debug.fql.mapping_graph);
+			Class<?> c = Class.forName(FqlOptions.layout_prefix + GlobalOptions.debug.fql.mapping_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
 			Layout<String, String> layout = (Layout<String, String>) x.newInstance(sgv);
 
@@ -853,7 +853,7 @@ public class Mapping {
 			for (Attribute<Node> a : source.attrs) {
 				Attribute<Node> c = am.get(a);
 				if (c.equals(n)) {
-					if (!NEWDEBUG.debug.fql.allow_surjective) {
+					if (!GlobalOptions.debug.fql.allow_surjective) {
 					if (found) {
 						throw new FQLException("Not attribute bijection "
 								+ this);

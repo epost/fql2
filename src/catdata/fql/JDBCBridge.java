@@ -36,7 +36,7 @@ import catdata.fql.sql.PSMInterp;
 import catdata.fql.sql.PSMUnChi;
 import catdata.fql.sql.PropPSM;
 import catdata.fql.sql.SimpleCreateTable;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 //todo always execute postlude
 
@@ -58,14 +58,14 @@ public class JDBCBridge {
 		SigExp.Const ss = i.type(prog).toConst(prog);
 		Signature s = ss.toSig(prog);
 		psm.addAll(PSMGen.makeTables(k, s, false));
-		switch (NEWDEBUG.debug.fql.sqlKind) {
+		switch (GlobalOptions.debug.fql.sqlKind) {
 		case NATIVE:
 			psm.addAll(v.accept(k, ops));
 			interp.interpX(psm, ret);
 			break;
 		default:
 			if (v instanceof TransExp.External
-					&& NEWDEBUG.debug.fql.sqlKind == FqlOptions.SQLKIND.H2) {
+					&& GlobalOptions.debug.fql.sqlKind == FqlOptions.SQLKIND.H2) {
 
 			} else {
 				psm.addAll(v.accept(k, ops));
@@ -86,7 +86,7 @@ public class JDBCBridge {
 
 		List<PSM> psm = new LinkedList<PSM>();
 		psm.addAll(PSMGen.makeTables(k, v.type(prog).toSig(prog), false));
-		switch (NEWDEBUG.debug.fql.sqlKind) {
+		switch (GlobalOptions.debug.fql.sqlKind) {
 		case NATIVE:
 			psm.addAll(v.accept(k, ops).first);
 			interp.interpX(psm, ret);
@@ -152,7 +152,7 @@ public class JDBCBridge {
 			}
 
 			else if (v instanceof InstExp.External
-					&& NEWDEBUG.debug.fql.sqlKind == FqlOptions.SQLKIND.H2) {
+					&& GlobalOptions.debug.fql.sqlKind == FqlOptions.SQLKIND.H2) {
 			} else {
 				psm.addAll(v.accept(k, ops).first);
 			}
@@ -190,7 +190,7 @@ public class JDBCBridge {
 		Statement Stmt = null;
 		List<PSM> sqls = new LinkedList<PSM>();
 		try {
-			switch (NEWDEBUG.debug.fql.sqlKind) {
+			switch (GlobalOptions.debug.fql.sqlKind) {
 			case H2:
 				Class.forName("org.h2.Driver");
 				Conn = DriverManager.getConnection("jdbc:h2:mem:");
@@ -198,10 +198,10 @@ public class JDBCBridge {
 				Stmt.execute("SET @GUID = 0");
 				break;
 			case JDBC:
-				Class.forName(NEWDEBUG.debug.fql.jdbcClass);
-				Conn = DriverManager.getConnection(NEWDEBUG.debug.fql.jdbcUrl);
+				Class.forName(GlobalOptions.debug.fql.jdbcClass);
+				Conn = DriverManager.getConnection(GlobalOptions.debug.fql.jdbcUrl);
 				Stmt = Conn.createStatement();
-				String[] prel = NEWDEBUG.debug.fql.prelude.split(";");
+				String[] prel = GlobalOptions.debug.fql.prelude.split(";");
 				for (String s : prel) {
 					Stmt.execute(s);
 				}
@@ -229,11 +229,11 @@ public class JDBCBridge {
 					re.printStackTrace();
 					LineException exn = new LineException(
 							re.getLocalizedMessage(), k, thing);
-					if (NEWDEBUG.debug.fql.continue_on_error) {
+					if (GlobalOptions.debug.fql.continue_on_error) {
 						exns.add(exn);
 					} else {
-						if (NEWDEBUG.debug.fql.sqlKind == FqlOptions.SQLKIND.JDBC) {
-							String[] prel0 = NEWDEBUG.debug.fql.afterlude.split(";");
+						if (GlobalOptions.debug.fql.sqlKind == FqlOptions.SQLKIND.JDBC) {
+							String[] prel0 = GlobalOptions.debug.fql.afterlude.split(";");
 							for (String s : prel0) {
 								if (s.trim().length() > 0) {
 									Stmt.execute(s);
@@ -247,12 +247,12 @@ public class JDBCBridge {
 
 			List<PSM> drops = Driver.computeDrops(prog);
 
-			if (NEWDEBUG.debug.fql.sqlKind == FqlOptions.SQLKIND.JDBC) {
+			if (GlobalOptions.debug.fql.sqlKind == FqlOptions.SQLKIND.JDBC) {
 				for (PSM dr : drops) {
 					Stmt.execute(dr.toPSM());
 				}
 
-				String[] prel0 = NEWDEBUG.debug.fql.afterlude.split(";");
+				String[] prel0 = GlobalOptions.debug.fql.afterlude.split(";");
 				for (String s : prel0) {
 					if (s.trim().length() > 0) {
 						Stmt.execute(s);
@@ -262,12 +262,12 @@ public class JDBCBridge {
 
 			String str = "";
 			try {
-				str = NEWDEBUG.debug.fql.prelude
+				str = GlobalOptions.debug.fql.prelude
 						+ "\n\n"
 						+ PSMGen.prettyPrint(sqls)
 						+ "\n\n"
 						+ (drops.size() == 0 ? "" : PSMGen.prettyPrint(drops)
-								+ "\n\n") + NEWDEBUG.debug.fql.afterlude + "\n\n";
+								+ "\n\n") + GlobalOptions.debug.fql.afterlude + "\n\n";
 			} catch (RuntimeException re) {
 				str = re.getLocalizedMessage();
 			}

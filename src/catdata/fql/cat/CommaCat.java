@@ -6,7 +6,7 @@ import java.util.Map;
 
 import catdata.Pair;
 import catdata.Triple;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 /**
  * 
@@ -116,7 +116,7 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC>
 		projA();
 		projB();
 
-		if (NEWDEBUG.debug.fql.VALIDATE) {
+		if (GlobalOptions.debug.fql.VALIDATE) {
 			validate();
 		}
 	}

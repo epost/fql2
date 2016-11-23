@@ -22,7 +22,7 @@ import catdata.fql.decl.FullQueryExp.Sigma;
 import catdata.fql.decl.FullQueryExp.Var;
 import catdata.fql.sql.PSM;
 import catdata.fql.sql.PSMGen;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 public class Driver {
 
@@ -116,7 +116,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "schema");
-				if (NEWDEBUG.debug.fql.continue_on_error) {
+				if (GlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -135,7 +135,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "mapping");
-				if (NEWDEBUG.debug.fql.continue_on_error) {
+				if (GlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -153,7 +153,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "query");
-				if (NEWDEBUG.debug.fql.continue_on_error) {
+				if (GlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -170,7 +170,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "QUERY");
-				if (NEWDEBUG.debug.fql.continue_on_error) {
+				if (GlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -186,7 +186,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "instance");
-				if (NEWDEBUG.debug.fql.continue_on_error) {
+				if (GlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -203,7 +203,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "transform");
-				if (NEWDEBUG.debug.fql.continue_on_error) {
+				if (GlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -232,7 +232,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "instance");
-				if (NEWDEBUG.debug.fql.continue_on_error) {
+				if (GlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -257,7 +257,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "transform");
-				if (NEWDEBUG.debug.fql.continue_on_error) {
+				if (GlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -267,7 +267,7 @@ public class Driver {
 		
 		toUpdate[0] = "Load of SQL data into FQL complete.";
 		// check full sigmas with EDs
-		if (NEWDEBUG.debug.fql.VALIDATE_WITH_EDS) {
+		if (GlobalOptions.debug.fql.VALIDATE_WITH_EDS) {
 			try {
 				validateWithEds(prog, insts);
 			} catch (FQLException fe) {

@@ -20,7 +20,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class XPoly<C,D> extends XExp implements XObject {
@@ -96,7 +96,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			this.where = where;
 			this.attrs = attrs;
 			this.edges = edges;
-			if (NEWDEBUG.debug.fpql.reorder_joins) {
+			if (GlobalOptions.debug.fpql.reorder_joins) {
 				this.from = sort(from);
 			} else {
 				this.from = from;

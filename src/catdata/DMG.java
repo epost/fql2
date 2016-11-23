@@ -8,6 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Directed labelled multi-graphs.  
+ * 
+ * @author ryan
+ *
+ * @param <N> type of nodes
+ * @param <E> type of edges
+ */
 public class DMG<N,E> {
 	public final Collection<N> nodes;
 	public final Map<E, Pair<N,N>> edges;
@@ -15,6 +23,10 @@ public class DMG<N,E> {
 	public DMG(Collection<N> nodes, Map<E, Pair<N,N>> edges) {
 		this.nodes = nodes;
 		this.edges = edges;
+		validate();
+	}
+	
+	public void validate() {
 		for (E e : edges.keySet()) {
 			if (!this.nodes.contains(edges.get(e).first)) {
 				throw new RuntimeException("Not a node: " + edges.get(e).first);
@@ -25,6 +37,31 @@ public class DMG<N,E> {
 		}
 	}
 	
+	public Collection<E> edges(N src, N dst) {
+		List<E> ret = new LinkedList<>();
+		for (E e : edges.keySet()) {
+			if (edges.get(e).first.equals(src) && edges.get(e).second.equals(dst)) {
+				ret.add(e);
+			}
+		}
+		return ret;
+	}
+	
+	public Pair<N,N> type(N src, List<E> path) {
+		Util.assertNotNull(src, path);
+		N dst = src;
+		for (E e : path) {
+			if (!edges.containsKey(e)) {
+				throw new RuntimeException("Not an edge: " + e);
+			}
+			if (!src.equals(edges.get(e).first)) {
+				throw new RuntimeException("Ill-typed: " + path + ", edge " + e + " has source " + edges.get(e).first + " but is applied to " + src);
+			}
+			dst = edges.get(e).second;
+		}		
+		return new Pair<>(src, dst);
+	}
+	
 	public DMG(Collection<N> nodes, Set<Triple<E, N, N>> edges) {
 		this.nodes = new HashSet<>(nodes);	
 		this.edges = new HashMap<>();
@@ -32,23 +69,18 @@ public class DMG<N,E> {
 			if (this.edges.containsKey(e.first)) {
 				throw new RuntimeException("Duplicate element: " + e.first);
 			}
-			if (!this.nodes.contains(e.second)) {
-				throw new RuntimeException("Not a node: " + e.second);
-			}
-			if (!this.nodes.contains(e.third)) {
-				throw new RuntimeException("Not a node: " + e.third);
-			}
 			this.edges.put(e.first, new Pair<>(e.second, e.third));
 		}
+		validate();
 	}
 	
 	@Override
 	public String toString() {
 		List<String> l = new LinkedList<>();
 		for (E e  : edges.keySet()) {
-			l.add(e + ": " + edges.get(e).first + " -> " + edges.get(e).second);
+			l.add("\t" + e + ": " + edges.get(e).first + " -> " + edges.get(e).second);
 		}
-		return "nodes\n\t" + Util.sep(nodes, " ") + "\nedges\n\t" + Util.sep(l, "\n\t");
+		return "nodes\n\t" + Util.sep(nodes, "\n\t") + "\nedges\n\n" + Util.sep(l, "\n");
 	}
 	
 	@Override

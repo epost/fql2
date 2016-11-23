@@ -30,7 +30,7 @@ import catdata.Pair;
 import catdata.Program;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import catdata.ide.ProgressMonitorWrapper;
 import catdata.opl.OplExp.OplGraph;
 import catdata.opl.OplExp.OplInst;
@@ -113,7 +113,7 @@ public class OplDisplay implements Disp {
 	}
 	
 	JComponent wrapDisplay(String name, OplObject obj) {
-		if (!NEWDEBUG.debug.opl.opl_lazy_gui) {
+		if (!GlobalOptions.debug.opl.opl_lazy_gui) {
 			return obj.display();
 		}
 		JPanel ret = new JPanel(new GridLayout(1,1));

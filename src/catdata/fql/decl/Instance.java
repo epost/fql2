@@ -53,7 +53,7 @@ import catdata.fql.gui.CategoryOfElements;
 import catdata.fql.parse.PrettyPrinter;
 import catdata.fql.sql.PropPSM;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -1120,7 +1120,7 @@ public class Instance {
 	 final Color clr, Graph<String, String> sgv) {
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix
-					+ NEWDEBUG.debug.fql.inst_graph);
+					+ GlobalOptions.debug.fql.inst_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
 			final Layout<String, String> layout = (Layout<String, String>) x
 					.newInstance(sgv);

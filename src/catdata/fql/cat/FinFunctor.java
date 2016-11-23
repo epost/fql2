@@ -13,7 +13,7 @@ import catdata.fql.decl.Attribute;
 import catdata.fql.decl.Mapping;
 import catdata.fql.decl.Signature;
 import catdata.fql.decl.Type;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 /**
  * 
@@ -62,7 +62,7 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 		this.arrowMapping = arrowMapping;
 		this.srcCat = srcCat;
 		this.dstCat = dstCat;
-		if (NEWDEBUG.debug.fql.VALIDATE) {
+		if (GlobalOptions.debug.fql.VALIDATE) {
 			validate();
 		}
 	}

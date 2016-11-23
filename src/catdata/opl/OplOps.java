@@ -16,7 +16,7 @@ import catdata.Pair;
 import catdata.Program;
 import catdata.Triple;
 import catdata.Util;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplChaseExp;
 import catdata.opl.OplExp.OplColim;
@@ -811,7 +811,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 			//OplPres<String, String, String, String> pres = new OplPres(prec, "_temp" + temp, sig, gens, equations2);
 			
 			OplPres<String, String, String, String> pres = new OplPres(prec, e.base, sig, gens, equations1);
-			if (NEWDEBUG.debug.opl.opl_prover_simplify_instances) {
+			if (GlobalOptions.debug.opl.opl_prover_simplify_instances) {
 				pres = pres.simplify();
 			}
 			temp++;
@@ -870,7 +870,7 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 	public OplObject visit(Program<OplExp> env, OplPragma e) {
 		for (String k : e.map.keySet()) {
 			String v = e.map.get(k);
-			NEWDEBUG.debug.opl.set(k, v);
+			GlobalOptions.debug.opl.set(k, v);
 		}
 		return e;
 	}

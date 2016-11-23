@@ -20,7 +20,7 @@ import org.apache.commons.collections15.Transformer;
 
 import catdata.Pair;
 import catdata.fql.FqlOptions;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -101,7 +101,7 @@ public abstract class FullQuery {
 			/* final Environment env, */Graph<Pair<FullQuery, Integer>, Integer> sgv) {
 
 		try {
-		Class<?> c = Class.forName(FqlOptions.layout_prefix + NEWDEBUG.debug.fql.inst_graph);
+		Class<?> c = Class.forName(FqlOptions.layout_prefix + GlobalOptions.debug.fql.inst_graph);
 		Constructor<?> x = c.getConstructor(Graph.class);
 		Layout<Pair<FullQuery, Integer>, Integer> layout = (Layout<Pair<FullQuery, Integer>, Integer>) x.newInstance(sgv);
 

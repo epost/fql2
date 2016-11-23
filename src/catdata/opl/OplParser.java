@@ -26,7 +26,7 @@ import catdata.Program;
 import catdata.Triple;
 import catdata.Util;
 import catdata.fpql.XExp;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplChaseExp;
 import catdata.opl.OplExp.OplColim;
@@ -512,7 +512,7 @@ public class OplParser {
 		}
 
 		if (sorts.contains("Nat") && symbols.keySet().contains("zero")
-				&& symbols.keySet().contains("succ") && NEWDEBUG.debug.opl.opl_desugar_nat) {
+				&& symbols.keySet().contains("succ") && GlobalOptions.debug.opl.opl_desugar_nat) {
 			sugarForNat = true;
 		}
 

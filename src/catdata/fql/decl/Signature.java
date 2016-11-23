@@ -50,7 +50,7 @@ import catdata.fql.cat.LeftKanCat;
 import catdata.fql.sql.EmbeddedDependency;
 import catdata.fql.sql.PSMGen;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -220,7 +220,7 @@ public class Signature {
 		Collections.sort(nodes);
 		Collections.sort(attrs);
 
-		if (!NEWDEBUG.debug.fql.ALLOW_INFINITES) {
+		if (!GlobalOptions.debug.fql.ALLOW_INFINITES) {
 			toCategory2();
 		}
 //		doColors();
@@ -671,7 +671,7 @@ public class Signature {
 	
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix
-					+ NEWDEBUG.debug.fql.schema_graph);
+					+ GlobalOptions.debug.fql.schema_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
 			Layout<String, String> layout = (Layout<String, String>) x
 					.newInstance(sgv);

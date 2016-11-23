@@ -19,7 +19,7 @@ import catdata.fql.decl.Node;
 import catdata.fql.decl.Path;
 import catdata.fql.decl.Signature;
 import catdata.fql.decl.Transform;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 public class LeftKan {
 
@@ -163,7 +163,7 @@ public class LeftKan {
 	
 	//true = success
 	public boolean compute() {
-		for (int i = 0; i < NEWDEBUG.debug.fql.MAX_DENOTE_ITERATIONS; i++) {
+		for (int i = 0; i < GlobalOptions.debug.fql.MAX_DENOTE_ITERATIONS; i++) {
 			if (!step()) {
 				return true;
 			}

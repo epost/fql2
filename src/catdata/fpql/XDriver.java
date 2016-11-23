@@ -6,14 +6,14 @@ import java.util.Map.Entry;
 
 import catdata.LineException;
 import catdata.fpql.XExp.Flower;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 
 public class XDriver {
 
 	@SuppressWarnings({ "rawtypes" })
 	public static XEnvironment makeEnv(String str, XProgram init, String[] toUpdate) {
-		if (NEWDEBUG.debug.fpql.x_typing) {
+		if (GlobalOptions.debug.fpql.x_typing) {
 			init.doTypes();
 		}
 		XEnvironment ret = new XEnvironment(init, str);

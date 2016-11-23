@@ -52,7 +52,7 @@ import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
 import catdata.ide.GUI;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 //import org.apache.commons.collections15.Transformer;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -105,12 +105,12 @@ public class FqlppDisplay implements Disp {
 	public JPanel showSet(Set<?> view, Color c) {
 		JTabbedPane px = new JTabbedPane();
 
-		if (NEWDEBUG.debug.fqlpp.set_graph) {
+		if (GlobalOptions.debug.fqlpp.set_graph) {
 			JComponent gp = makeCatViewer(Category.fromSet(view), c);
 			px.add("Graph", gp);
 		}
 
-		if (NEWDEBUG.debug.fqlpp.set_tabular) {
+		if (GlobalOptions.debug.fqlpp.set_tabular) {
 			Object[][] rowData = new Object[view.size()][1];
 			int i = 0;
 			for (Object o : view) {
@@ -122,7 +122,7 @@ public class FqlppDisplay implements Disp {
 			px.add("Table", gp);
 		}
 
-		if (NEWDEBUG.debug.fqlpp.set_textual) {
+		if (GlobalOptions.debug.fqlpp.set_textual) {
 			CodeTextPanel gp = new CodeTextPanel(BorderFactory.createEtchedBorder(), view.size()
 					+ " elements", Util.nice(view.toString()));
 			px.add("Text", gp);
@@ -147,15 +147,15 @@ public class FqlppDisplay implements Disp {
 			}
 		}
 		if (sig != null && !view.isInfinite()) {
-			if (NEWDEBUG.debug.fqlpp.cat_schema) {
+			if (GlobalOptions.debug.fqlpp.cat_schema) {
 				Graph g = buildFromSig(sig);
 				if (g.getVertexCount() == 0) {
 					px.add("Schema", new JPanel());
-				} else if (g.getVertexCount() > NEWDEBUG.debug.fqlpp.MAX_NODES) {
-					CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_NODES);
+				} else if (g.getVertexCount() > GlobalOptions.debug.fqlpp.MAX_NODES) {
+					CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_NODES);
 					px.add("Schema", xxx);
-				} else if (g.getEdgeCount() > NEWDEBUG.debug.fqlpp.MAX_EDGES) {
-					CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_EDGES);
+				} else if (g.getEdgeCount() > GlobalOptions.debug.fqlpp.MAX_EDGES) {
+					CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_EDGES);
 					px.add("Schema", xxx);
 				}
 				else {
@@ -165,17 +165,17 @@ public class FqlppDisplay implements Disp {
 			}
 		}
 		
-		if (NEWDEBUG.debug.fqlpp.cat_graph && !view.isInfinite()) {
+		if (GlobalOptions.debug.fqlpp.cat_graph && !view.isInfinite()) {
 			JComponent gp = makeCatViewer(view, c);
 			px.add("Graph", gp);
 		}
 
-		if (NEWDEBUG.debug.fqlpp.cat_tabular && !view.isInfinite()) {
+		if (GlobalOptions.debug.fqlpp.cat_tabular && !view.isInfinite()) {
 			JPanel gp = catTable(view);
 			px.add("Table", gp);
 		}
 
-		if (NEWDEBUG.debug.fqlpp.cat_textual) {
+		if (GlobalOptions.debug.fqlpp.cat_textual) {
 			CodeTextPanel gp = new CodeTextPanel(BorderFactory.createEtchedBorder(),null,
 					Util.nice(view.toString()));
 			px.add("Text", gp);
@@ -276,12 +276,12 @@ public class FqlppDisplay implements Disp {
 	public JPanel showFn(Fn view, Color src, Color dst) {
 		JTabbedPane px = new JTabbedPane();
 
-		if (NEWDEBUG.debug.fqlpp.fn_graph) {
+		if (GlobalOptions.debug.fqlpp.fn_graph) {
 			JComponent gp = makeFnViewer(view, src, dst);
 			px.add("Graph", gp);
 		}
 
-		if (NEWDEBUG.debug.fqlpp.fn_tabular) {
+		if (GlobalOptions.debug.fqlpp.fn_tabular) {
 			Object[][] rowData = new Object[view.source.size()][2];
 			int i = 0;
 			for (Object o : view.source) {
@@ -297,7 +297,7 @@ public class FqlppDisplay implements Disp {
 			px.add("Table", gp);
 		}
 
-		if (NEWDEBUG.debug.fqlpp.fn_textual) {
+		if (GlobalOptions.debug.fqlpp.fn_textual) {
 			CodeTextPanel gp = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 					view.source.size() + " elements in domain, " + view.target.size()
 							+ " elements in codomain", Util.nice(view.toStringLong()));
@@ -343,7 +343,7 @@ public class FqlppDisplay implements Disp {
 			}
 		}
 		if (src_sig != null && FinSet.FinSet.equals(view.target)) {
-			if (NEWDEBUG.debug.fqlpp.ftr_instance) {
+			if (GlobalOptions.debug.fqlpp.ftr_instance) {
 			JPanel vwr = new JPanel(new GridLayout(1, 1));
 			if (view.source.objects().size() == 0) {
 				px.add("Instance", vwr);
@@ -359,19 +359,19 @@ public class FqlppDisplay implements Disp {
 			}
 			}
 
-			if (NEWDEBUG.debug.fqlpp.ftr_joined) {
+			if (GlobalOptions.debug.fqlpp.ftr_joined) {
 			px.add("Joined", (JPanel) makeJoined(src_sig, view).first); //cast needed for javac for some reason
 			}
 
-			if (NEWDEBUG.debug.fqlpp.ftr_elements) {
+			if (GlobalOptions.debug.fqlpp.ftr_elements) {
 			Graph g = buildElements(src_sig, view);
 			if (g.getVertexCount() == 0) {
 				px.add("Elements", new JPanel());
-			} else if (g.getVertexCount() > NEWDEBUG.debug.fqlpp.MAX_NODES) {
-				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_NODES);
+			} else if (g.getVertexCount() > GlobalOptions.debug.fqlpp.MAX_NODES) {
+				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_NODES);
 				px.add("Elements", xxx);
-			} else if (g.getEdgeCount() > NEWDEBUG.debug.fqlpp.MAX_EDGES) {
-				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_EDGES);
+			} else if (g.getEdgeCount() > GlobalOptions.debug.fqlpp.MAX_EDGES) {
+				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_EDGES);
 				px.add("Elements", xxx);
 			} 
 			else {
@@ -382,15 +382,15 @@ public class FqlppDisplay implements Disp {
 		}
 		if (src_sig != null && dst_sig != null && !view.source.isInfinite() && !view.target.isInfinite()) {
 			//JPanel vwr = new JPanel(new GridLayout(1, 1));
-			if (NEWDEBUG.debug.fqlpp.ftr_mapping) {
+			if (GlobalOptions.debug.fqlpp.ftr_mapping) {
 			Graph g = buildMapping(src_sig, dst_sig, view);
 			if (g.getVertexCount() == 0) {
 				px.add("Mapping", new JPanel());
-			} else if (g.getVertexCount() > NEWDEBUG.debug.fqlpp.MAX_NODES) {
-				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_NODES);
+			} else if (g.getVertexCount() > GlobalOptions.debug.fqlpp.MAX_NODES) {
+				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_NODES);
 				px.add("Mapping", xxx);
-			} else if (g.getEdgeCount() > NEWDEBUG.debug.fqlpp.MAX_EDGES) {
-				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_EDGES);
+			} else if (g.getEdgeCount() > GlobalOptions.debug.fqlpp.MAX_EDGES) {
+				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_EDGES);
 				px.add("Mapping", xxx);
 			}else {
 				JComponent zzz = doMappingView(c, getColor(view.target), g);
@@ -401,16 +401,16 @@ public class FqlppDisplay implements Disp {
 			}
 		}
 
-		if (NEWDEBUG.debug.fqlpp.ftr_graph) {
+		if (GlobalOptions.debug.fqlpp.ftr_graph) {
 			JPanel vwr = new JPanel(new GridLayout(1, 1));
 			Graph g = buildFromCat(view.source);
 			if (view.source.objects().size() == 0) {
 				px.add("Graph", vwr);
-			} else if (g.getVertexCount() > NEWDEBUG.debug.fqlpp.MAX_NODES) {
-				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_NODES);
+			} else if (g.getVertexCount() > GlobalOptions.debug.fqlpp.MAX_NODES) {
+				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_NODES);
 				px.add("Graph", xxx);
-			} else if (g.getEdgeCount() > NEWDEBUG.debug.fqlpp.MAX_EDGES) {
-				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_EDGES);
+			} else if (g.getEdgeCount() > GlobalOptions.debug.fqlpp.MAX_EDGES) {
+				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_EDGES);
 				px.add("Graph", xxx);
 			} else {
 				JComponent zzz = doFNView(view, vwr, c, g);
@@ -424,7 +424,7 @@ public class FqlppDisplay implements Disp {
 			}
 		}
 
-		if (NEWDEBUG.debug.fqlpp.ftr_tabular) {
+		if (GlobalOptions.debug.fqlpp.ftr_tabular) {
 			List<JComponent> gp = new LinkedList<>();
 			//JPanel gp = new JPanel(new GridLayout(2, 1));
 
@@ -461,7 +461,7 @@ public class FqlppDisplay implements Disp {
 			px.add("Table", Util.makeGrid(gp));
 		}
 
-		if (NEWDEBUG.debug.fqlpp.ftr_textual) {
+		if (GlobalOptions.debug.fqlpp.ftr_textual) {
 			CodeTextPanel gp = new CodeTextPanel(BorderFactory.createEtchedBorder(), "",
 					Util.nice(view.toString()));
 			px.add("Text", gp);
@@ -505,15 +505,15 @@ public class FqlppDisplay implements Disp {
 
 		if (src_sig != null && FinSet.FinSet.equals(view.target.target)) {
 		//	JPanel vwr = new JPanel(new GridLayout(1, 1));
-			if (NEWDEBUG.debug.fqlpp.trans_elements) {
+			if (GlobalOptions.debug.fqlpp.trans_elements) {
 			Graph g = build2Elements(src_sig, view);
 			if (g.getVertexCount() == 0) {
 				px.add("Elements", new JPanel());
-			} else if (g.getVertexCount() > NEWDEBUG.debug.fqlpp.MAX_NODES) {
-				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_NODES);
+			} else if (g.getVertexCount() > GlobalOptions.debug.fqlpp.MAX_NODES) {
+				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_NODES);
 				px.add("Elements", xxx);
-			} else if (g.getEdgeCount() > NEWDEBUG.debug.fqlpp.MAX_EDGES) {
-				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_EDGES);
+			} else if (g.getEdgeCount() > GlobalOptions.debug.fqlpp.MAX_EDGES) {
+				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_EDGES);
 				px.add("Elements", xxx);
 			}else {
 				JComponent zzz = doElements2View(c, g);
@@ -524,7 +524,7 @@ public class FqlppDisplay implements Disp {
 			}
 		}
 
-		if (NEWDEBUG.debug.fqlpp.trans_graph) {
+		if (GlobalOptions.debug.fqlpp.trans_graph) {
 			JPanel vwr = new JPanel(new GridLayout(1, 1));
 			if (view.source.source.objects().size() == 0) {
 				px.add("Graph", vwr);
@@ -541,7 +541,7 @@ public class FqlppDisplay implements Disp {
 			}
 		}
 
-		if (NEWDEBUG.debug.fqlpp.trans_tabular) {
+		if (GlobalOptions.debug.fqlpp.trans_tabular) {
 			JPanel gp = new JPanel(new GridLayout(1, 1));
 
 			Object[][] rowData = new Object[view.source.source.objects().size()][2];
@@ -560,7 +560,7 @@ public class FqlppDisplay implements Disp {
 			px.add("Table", gp);
 		}
 
-		if (NEWDEBUG.debug.fqlpp.trans_textual) {
+		if (GlobalOptions.debug.fqlpp.trans_textual) {
 			CodeTextPanel gp = new CodeTextPanel(BorderFactory.createEtchedBorder(), "",
 					Util.nice(view.toString()));
 			px.add("Text", gp);
@@ -901,13 +901,13 @@ public class FqlppDisplay implements Disp {
 		Graph<X, Y> g = buildFromCat(cat);
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
-		} else if (g.getVertexCount() > NEWDEBUG.debug.fqlpp.MAX_NODES) {
-			CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_NODES);
+		} else if (g.getVertexCount() > GlobalOptions.debug.fqlpp.MAX_NODES) {
+			CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_NODES);
 			JPanel ret = new JPanel(new GridLayout(1,1));
 			ret.add(xxx);
 			return ret;
-		} else if (g.getEdgeCount() > NEWDEBUG.debug.fqlpp.MAX_EDGES) {
-			CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_EDGES);
+		} else if (g.getEdgeCount() > GlobalOptions.debug.fqlpp.MAX_EDGES) {
+			CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_EDGES);
 			JPanel ret = new JPanel(new GridLayout(1,1));
 			ret.add(xxx);
 			return ret;
@@ -919,13 +919,13 @@ public class FqlppDisplay implements Disp {
 		Graph<Pair<String, Color>, Integer> g = buildFromFn(cat, src, dst);
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
-		} else if (g.getVertexCount() > NEWDEBUG.debug.fqlpp.MAX_NODES) {
-			CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_NODES);
+		} else if (g.getVertexCount() > GlobalOptions.debug.fqlpp.MAX_NODES) {
+			CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_NODES);
 			JPanel ret = new JPanel(new GridLayout(1,1));
 			ret.add(xxx);
 			return ret;
-		}else if (g.getEdgeCount() > NEWDEBUG.debug.fqlpp.MAX_EDGES) {
-			CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + NEWDEBUG.debug.fqlpp.MAX_EDGES);
+		}else if (g.getEdgeCount() > GlobalOptions.debug.fqlpp.MAX_EDGES) {
+			CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_EDGES);
 			JPanel ret = new JPanel(new GridLayout(1,1));
 			ret.add(xxx);
 			return ret;

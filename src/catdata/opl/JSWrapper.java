@@ -23,7 +23,7 @@ import javax.swing.table.TableRowSorter;
 
 import catdata.Pair;
 import catdata.Util;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import catdata.opl.OplExp.NonEditableModel;
 
 public class JSWrapper {
@@ -35,7 +35,7 @@ public class JSWrapper {
 
 	public String toString() {
 		String s = "JS<" + o + ">";
-		if (!NEWDEBUG.debug.opl.opl_pretty_print) {
+		if (!GlobalOptions.debug.opl.opl_pretty_print) {
 			return s;
 		}
 		return o.toString();

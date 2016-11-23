@@ -20,7 +20,7 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import catdata.opl.OplParser.DoNotIgnore;
 import catdata.provers.KBExp;
 
@@ -256,7 +256,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		}
 
 		freeze();
-		if (NEWDEBUG.debug.opl.opl_query_check_eqs) {
+		if (GlobalOptions.debug.opl.opl_query_check_eqs) {
 			checkPaths();
 		}
 	}
@@ -411,7 +411,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			counts.put(v1, 0);
 			ret.add(v1);
 		}
-		if (!NEWDEBUG.debug.opl.opl_reorder_joins) {
+		if (!GlobalOptions.debug.opl.opl_reorder_joins) {
 			return ret;
 		}
 		for (Pair<OplTerm<C1, V1>, OplTerm<C1, V1>> eq : block.where) {
@@ -455,7 +455,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		}
 		
 		public void validate() {
-			if (!NEWDEBUG.debug.opl.opl_secret_agg) {
+			if (!GlobalOptions.debug.opl.opl_secret_agg) {
 				throw new DoNotIgnore("To use ad-hoc aggregation, enable opl_secret_agg");
 			}
 		}
@@ -835,7 +835,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		int guess = -1;
 		int newIdsStart = 20000;
 		
-		if (NEWDEBUG.debug.opl.opl_prover_force_prec) {
+		if (GlobalOptions.debug.opl.opl_prover_force_prec) {
 			for (OplTerm<Chc<C1, X>, V1> gen : yyy.third.gens.keySet()) {
 				S2 s2 = (S2) yyy.third.gens.get(gen);
 				gens.put(Chc.inLeft(gen), s2);
@@ -885,7 +885,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 
 			for (Map<V1, OplTerm<Chc<C1, X>, V1>> tuple : tuples) {
 				gens.put(Chc.inRight(new Pair<>(label, tuple)), tgt);
-				if (NEWDEBUG.debug.opl.opl_prover_force_prec) {
+				if (GlobalOptions.debug.opl.opl_prover_force_prec) {
 					newIdsStart++;
 					prec.put(Chc.inRight(new Pair<>(label, tuple)), newIdsStart);
 				} else {
@@ -968,7 +968,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		OplPres<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> P = new OplPres<>(
 				prec, dst_e, dst.sig, gens, equations);
 		
-		if (NEWDEBUG.debug.opl.opl_prover_simplify_instances) {
+		if (GlobalOptions.debug.opl.opl_prover_simplify_instances) {
 			P = P.simplify();
 		}
 		

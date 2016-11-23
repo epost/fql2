@@ -40,7 +40,7 @@ import org.apache.commons.collections15.Transformer;
 
 import catdata.fql.FqlOptions;
 import catdata.fql.FQLException;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 import catdata.Pair;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -255,7 +255,7 @@ public class TransformEditor {
 	/* final Environment env , *//* final Color color */Graph<String, String> sgv) {
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix
-					+ NEWDEBUG.debug.fql.inst_graph);
+					+ GlobalOptions.debug.fql.inst_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
 			Layout<String, String> layout = (Layout<String, String>) x
 					.newInstance(sgv);

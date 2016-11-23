@@ -13,7 +13,7 @@ import java.util.Set;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.fqlpp.cat.FinSet.Fn;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 @SuppressWarnings("serial")
 public abstract class Category<O, A> implements Serializable {
@@ -154,7 +154,7 @@ public abstract class Category<O, A> implements Serializable {
 	}
 
 	public void validate() {
-		if (!NEWDEBUG.debug.fqlpp.VALIDATE) {
+		if (!GlobalOptions.debug.fqlpp.VALIDATE) {
 			return;
 		}
 		if (isInfinite()) {

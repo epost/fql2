@@ -33,14 +33,14 @@ import catdata.opl.OplOptions;
  * 
  *         Contains global constants for debugging.
  */
-public class NEWDEBUG implements Serializable {
+public class GlobalOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static NEWDEBUG debug = new NEWDEBUG();
+	public static GlobalOptions debug = new GlobalOptions();
 	
 	public void clear() {
-		debug = new NEWDEBUG();
+		debug = new GlobalOptions();
 	}
 
 	static int selected_tab = 0;
@@ -90,7 +90,7 @@ public class NEWDEBUG implements Serializable {
 			}
 			FileInputStream fileIn = new FileInputStream("cdide.ser");
 			ObjectInputStream in = new ObjectInputStream(fileIn);
-			NEWDEBUG e = (NEWDEBUG) in.readObject();
+			GlobalOptions e = (GlobalOptions) in.readObject();
 			in.close();
 			fileIn.close();
 
@@ -138,7 +138,7 @@ public class NEWDEBUG implements Serializable {
 						callback.apply(new Unit());
 					}
 				} else if (ret == "Reset") {
-					debug = new NEWDEBUG();
+					debug = new GlobalOptions();
 					showOptions();
 				} else if (ret == "Save") { // save
 					for (Function<Unit, Unit> callback : callbacks) {

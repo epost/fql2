@@ -227,7 +227,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		topArea.setCaretPosition(0);
 		topArea.setAutoscrolls(true);
 		
-		Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), NEWDEBUG.debug.general.font_size);
+		Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), GlobalOptions.debug.general.font_size);
 		topArea.setFont(font);
 
 		InputMap inputMap = topArea.getInputMap();
@@ -325,8 +325,8 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			private static final long serialVersionUID = 1L;
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				NEWDEBUG.debug.general.font_size++;
-				GUI.setFontSize(NEWDEBUG.debug.general.font_size);
+				GlobalOptions.debug.general.font_size++;
+				GUI.setFontSize(GlobalOptions.debug.general.font_size);
 			}
 		};
 		topArea.getActionMap().put("IncreaseFont", al);
@@ -344,8 +344,8 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 				if (topArea.getFont().getSize() == 1) {
 					return;
 				}
-				NEWDEBUG.debug.general.font_size--;
-				GUI.setFontSize(NEWDEBUG.debug.general.font_size);
+				GlobalOptions.debug.general.font_size--;
+				GUI.setFontSize(GlobalOptions.debug.general.font_size);
 			}
 		};
 		topArea.getActionMap().put("DecreaseFont", al);

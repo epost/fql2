@@ -46,9 +46,9 @@ public class IDE {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				try {
- 					NEWDEBUG.load();
+ 					GlobalOptions.load();
 					
-					UIManager.setLookAndFeel(NEWDEBUG.debug.general.look_and_feel);			
+					UIManager.setLookAndFeel(GlobalOptions.debug.general.look_and_feel);			
 
 					final JFrame f = new JFrame("Categorical Data IDE");
 					

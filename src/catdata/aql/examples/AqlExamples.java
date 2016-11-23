@@ -10,6 +10,7 @@ public final class AqlExamples {
 									aqlPeter = new AqlPeterExample(),
 									aqlSigma = new AqlSigmaExample(),
 									aqlQuery = new AqlQueryExample(),
+									aqlMatch = new AqlMatchExample(),
 									aqlPushout = new AqlPushoutExample(),
 									aqlPullback = new AqlPullbackExample(),
 									aqlJdbc = new AqlJdbcExample(),

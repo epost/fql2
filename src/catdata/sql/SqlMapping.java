@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import catdata.EditDistance;
 import catdata.Pair;
-import catdata.strings.EditDistance;
 
 public class SqlMapping {
 

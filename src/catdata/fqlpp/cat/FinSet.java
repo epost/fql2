@@ -19,7 +19,7 @@ import catdata.Unit;
 import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
-import catdata.ide.NEWDEBUG;
+import catdata.ide.GlobalOptions;
 
 @SuppressWarnings({ "rawtypes", "serial" })
 public class FinSet extends Category<Set, Fn> {
@@ -46,7 +46,7 @@ public class FinSet extends Category<Set, Fn> {
 		private FUNCTION<X,Y> function;
 		
 		public Y apply(X o) {
-			if (NEWDEBUG.debug.fqlpp.VALIDATE) {
+			if (GlobalOptions.debug.fqlpp.VALIDATE) {
 				if (!source.contains(o)) {
 					throw new RuntimeException("Cannot apply " + this + " to " + o);
 				}
@@ -63,7 +63,7 @@ public class FinSet extends Category<Set, Fn> {
 		}
 		
 		public void validate() {
-			if (!NEWDEBUG.debug.fqlpp.VALIDATE) {
+			if (!GlobalOptions.debug.fqlpp.VALIDATE) {
 				return;
 			}
 			if (source == null) {
