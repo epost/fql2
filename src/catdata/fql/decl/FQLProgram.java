@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import catdata.IntRef;
+import catdata.Ref;
 import catdata.LineException;
 import catdata.Pair;
 import catdata.Prog;
@@ -107,7 +107,7 @@ public class FQLProgram implements Prog {
 		// Graph<V, E> where V is the type of the vertices
 
 		final Graph<String, Object> g2 = new DirectedSparseMultigraph<>();
-		final IntRef guid = new IntRef(0);
+		final Ref<Integer> guid = new Ref<Integer>(0);
 
 		for (final String k : insts.keySet()) {
 			InstExp i = insts.get(k);
@@ -128,20 +128,20 @@ public class FQLProgram implements Prog {
 				}
 
 				public Unit visit(Unit env, Plus e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.a, k);
-					g2.addEdge(new Pair<>(guid.pp(), e), e.b, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.a, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.b, k);
 					return null;
 				}
 
 				public Unit visit(Unit env, Times e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.a, k);
-					g2.addEdge(new Pair<>(guid.pp(), e), e.b, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.a, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.b, k);
 					return null;
 				}
 
 				public Unit visit(Unit env, Exp e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.a, k);
-					g2.addEdge(new Pair<>(guid.pp(), e), e.b, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.a, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.b, k);
 					return null;
 				}
 
@@ -150,27 +150,27 @@ public class FQLProgram implements Prog {
 				}
 
 				public Unit visit(Unit env, Delta e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.I, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.I, k);
 					return null;
 				}
 
 				public Unit visit(Unit env, Sigma e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.I, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.I, k);
 					return null;
 				}
 
 				public Unit visit(Unit env, Pi e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.I, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.I, k);
 					return null;
 				}
 
 				public Unit visit(Unit env, FullSigma e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.I, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.I, k);
 					return null;
 				}
 
 				public Unit visit(Unit env, Relationalize e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.I, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.I, k);
 					return null;
 				}
 
@@ -179,12 +179,12 @@ public class FQLProgram implements Prog {
 				}
 
 				public Unit visit(Unit env, Eval e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.e, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.e, k);
 					return null;
 				}
 
 				public Unit visit(Unit env, FullEval e) {
-					g2.addEdge(new Pair<>(guid.pp(), e), e.e, k);
+					g2.addEdge(new Pair<>(pp(guid), e), e.e, k);
 					return null;
 				}
 
@@ -192,9 +192,15 @@ public class FQLProgram implements Prog {
 				public Unit visit(Unit env, Kernel e) {
 					TransExp t = transforms.get(e.trans);
 					Pair<String, String> p = t.type(FQLProgram.this);
-					g2.addEdge(new Pair<>(guid.pp(), e), p.first, k);
-					g2.addEdge(new Pair<>(guid.pp(), e), p.second, k);
+					g2.addEdge(new Pair<>(pp(guid), e), p.first, k);
+					g2.addEdge(new Pair<>(pp(guid), e), p.second, k);
 					return null;
+				}
+
+				private Integer pp(Ref<Integer> ref) {
+					int ret = ref.x;
+					ref.x = ret + 1;
+					return ref.x;
 				}
 
 				@Override

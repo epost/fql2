@@ -3,7 +3,7 @@ package catdata.provers;
 import java.util.function.Function;
 
 import catdata.Pair;
-import catdata.provers.KB.NewConst;
+import catdata.opl.OplKB.NewConst;
 import catdata.provers.KBExp.KBApp;
 /**
  * 

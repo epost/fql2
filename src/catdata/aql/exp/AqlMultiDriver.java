@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import catdata.DAG;
 import catdata.IntRef;
 import catdata.InvisibleException;
 import catdata.LineException;
@@ -17,6 +16,7 @@ import catdata.Program;
 import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Pragma;
+import catdata.graph.DAG;
 
 //TODO: aql does assume unique names
 public final class AqlMultiDriver implements Callable<Unit> {
@@ -260,63 +260,5 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 }
 
-/* subsumed by multi driver
 
-public static AqlEnv makeEnv(String str,
-		Program<Exp<?>> init, String[] toUpdate, String last_str,
-		Program<Exp<?>> last_prog, AqlEnv last_env) {
-	AqlEnv env = new AqlEnv();
-	
-	env.type(init);
-
-	Set<String> unchanged = new HashSet<>();
-	int i = 0;
-	if (last_str != null) { 
-		for (String k : init.order) {
-			if (i >= last_prog.order.size()) {
-				break;
-			}
-			String v = last_prog.order.get(i);
-			if (!v.equals(k)) {
-				break;
-			} 
-			Exp<? extends Object> a = init.exps.get(k);
-			Exp<? extends Object> b = last_prog.exps.get(k);
-			if (!a.equals(b)) {
-				break;
-			}
-			unchanged.add(k);
-			i++;
-		}
-	}
-
-	// 
-	for (String n : init.order) {
-		Exp<? extends Object> exp = init.exps.get(n);
-		Kind k = exp.kind();
-
-		if (unchanged.contains(n)) {
-			env.put(n, k, last_env.get(n, k));
-			continue;
-		}
-		try {
-			Object val = exp.eval(env);
-			if (val == null) {
-				throw new RuntimeException("null result on " + exp);
-			}
-			env.put(n, k, val);
-			env.semantics(n, k);
-			if (toUpdate != null) {
-				toUpdate[0] = "Last processed: " + k;
-			}
-		} catch (Throwable t) {
-			t.printStackTrace();
-			throw new LineException(t.getMessage(), n, "");
-		}
-	}
-
-	return env;
-}
-
-*/
 

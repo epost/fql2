@@ -1,4 +1,4 @@
-package catdata;
+package catdata.graph;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,10 +10,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import catdata.Pair;
+import catdata.Util;
+
 public class PreOrder<X> {
 	
-
-
 	private static Map<Integer, Set<PreOrder<Integer>>> totals = new HashMap<>();
 	public static <X> Collection<PreOrder<X>> allTotal(List<X> xs) {
 		Set<PreOrder<Integer>> set = null;

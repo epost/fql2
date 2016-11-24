@@ -1,4 +1,4 @@
-package catdata.provers;
+package catdata.opl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -17,6 +17,10 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
+import catdata.provers.KBExp;
+import catdata.provers.KBHorn;
+import catdata.provers.KBOptions;
+import catdata.provers.KBUnifier;
 import catdata.provers.KBExp.KBApp;
 import catdata.provers.KBExp.KBVar;
 import catdata.InvisibleException;
@@ -26,7 +30,7 @@ import catdata.InvisibleException;
  * Do not use - replaced by LPOUKB.
  */
 @SuppressWarnings("deprecation")
-public class KB<C, V> extends EqProverDefunct<C, V> {
+public class OplKB<C, V>  {
 	 
 	protected boolean isComplete = false;
 	protected boolean isCompleteGround = false;
@@ -50,7 +54,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	 * @param gt0 ordering
 	 * @param fresh fresh variable generator
 	 */
-	public KB(Set<Pair<KBExp<C, V>, KBExp<C, V>>> E0, Function<Pair<KBExp<C, V>, 
+	public OplKB(Set<Pair<KBExp<C, V>, KBExp<C, V>>> E0, Function<Pair<KBExp<C, V>, 
 			KBExp<C, V>>, Boolean> gt0, Iterator<V> fresh,
 			Set<Pair<KBExp<C, V>, KBExp<C, V>>> R0, KBOptions options) {
 		this.options = options;
@@ -472,7 +476,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	}
 	
 	//  For this to be a true semi-decision procedure, open terms should first be skolemized
-	@Override
+	//@Override
 	public boolean eq(KBExp<C, V> lhs, KBExp<C, V> rhs) {
 		KBExp<C, V> lhs0 = nf(lhs);
 		KBExp<C, V> rhs0 = nf(rhs);
@@ -493,7 +497,7 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 		return eq(lhs, rhs);
 	} 
 	
-	@Override
+	//@Override
 	public KBExp<C, V> nf(KBExp<C, V> e) {
 		try {
 
@@ -519,9 +523,8 @@ public class KB<C, V> extends EqProverDefunct<C, V> {
 	 * 
 	 * @return A nicer printout of the rules
 	 */
-	@Override
 	public String printKB() {
-		KB<String, String> kb = (KB<String, String>) this; //dangerous
+		OplKB<String, String> kb = (OplKB<String, String>) this; //dangerous
 		
 	//	List<Pair<KBExp<String, String>, KBExp<String, String>>> EE = new LinkedList<>(kb.E);
 	//	EE.addAll(kb.G);

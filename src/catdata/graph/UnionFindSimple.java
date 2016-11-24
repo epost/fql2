@@ -1,8 +1,9 @@
-package catdata;
+package catdata.graph;
 
 import java.util.Collection;
 import java.util.Set;
 
+import catdata.Util;
 import catdata.aql.Ctx;
 
 public class UnionFindSimple<X> {

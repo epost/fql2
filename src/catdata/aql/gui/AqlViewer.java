@@ -21,7 +21,6 @@ import javax.swing.JTabbedPane;
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Chc;
-import catdata.DMG;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -41,6 +40,7 @@ import catdata.aql.TypeSide;
 import catdata.aql.Var;
 import catdata.aql.exp.AqlParser;
 import catdata.aql.exp.Kind;
+import catdata.graph.DMG;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Split;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;

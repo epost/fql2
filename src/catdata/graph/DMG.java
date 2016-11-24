@@ -1,4 +1,4 @@
-package catdata;
+package catdata.graph;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,6 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import catdata.Pair;
+import catdata.Triple;
+import catdata.Util;
 
 /**
  * Directed labelled multi-graphs.  

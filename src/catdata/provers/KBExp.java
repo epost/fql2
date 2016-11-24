@@ -55,7 +55,7 @@ public abstract class KBExp<C, V> {
 	protected abstract void vars(Collection<V> vars);
 
 	@Deprecated
-	protected abstract void symbols(Map<C, Integer> symbols);
+	public abstract void symbols(Map<C, Integer> symbols);
 
 	public abstract Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cp(List<Integer> l, KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d);
 

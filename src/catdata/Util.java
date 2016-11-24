@@ -1037,4 +1037,46 @@ public class Util {
 	public static <X,Y> Collection<Object> isect(Collection<X> xs, Collection<Y> ys) {
 		return CollectionUtils.intersection(xs, ys);
 	}
+
+	/**
+	   * Levenshtein Edit Distance
+	   * http://rosettacode.org/wiki/Levenshtein_distance#Java
+	   * @param s1
+	   * @param s2
+	   * @return
+	   */
+	  public static int editDistance(String s1, String s2) {
+	    s1 = s1.toLowerCase();
+	    s2 = s2.toLowerCase();
+	
+	    int[] costs = new int[s2.length() + 1];
+	    for (int i = 0; i <= s1.length(); i++) {
+	      int lastValue = i;
+	      for (int j = 0; j <= s2.length(); j++) {
+	        if (i == 0)
+	          costs[j] = j;
+	        else {
+	          if (j > 0) {
+	            int newValue = costs[j - 1];
+	            if (s1.charAt(i - 1) != s2.charAt(j - 1))
+	              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+	            costs[j - 1] = lastValue;
+	            lastValue = newValue;
+	          }
+	        }
+	      }
+	      if (i > 0)
+	        costs[s2.length()] = lastValue;
+	    }
+	    return costs[s2.length()];
+	  }
+
+	/**
+	   * Calculates a similarity (a number within 0 and 1) between two strings
+	   * as 1 / 1 + editDistance
+	   * 
+	   */
+	  public static double similarity(String s1, String s2) { //TODO aql
+			return ((double)1) / ((double)1+editDistance(s1, s2));
+	  }
 }

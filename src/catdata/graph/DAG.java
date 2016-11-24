@@ -1,4 +1,4 @@
-package catdata;
+package catdata.graph;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import catdata.Util;
 
 /********************************************************************************
 * Copyright (c) 2006 IBM Corporation and others.

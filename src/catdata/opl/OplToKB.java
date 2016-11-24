@@ -25,14 +25,12 @@ import catdata.ide.GlobalOptions;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplParser.DoNotIgnore;
-import catdata.provers.EqProverDefunct;
-import catdata.provers.KB;
 import catdata.provers.KBExp;
+import catdata.provers.KBExp.KBApp;
+import catdata.provers.KBExp.KBVar;
 import catdata.provers.KBHorn;
 import catdata.provers.KBOptions;
 import catdata.provers.KBOrders;
-import catdata.provers.KBExp.KBApp;
-import catdata.provers.KBExp.KBVar;
 
 public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>> {
 	
@@ -85,7 +83,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	}
 	
 	private OplSig<S, C, V> sig;
-	public EqProverDefunct<C, V> KB;
+	public OplKB<C, V> KB;
 	private Iterator<V> fr;
 //	private OplJavaInst I;
 	
@@ -96,7 +94,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			checkEmpty();
 		}
 		this.fr = fr;
-		KB<C, V> KB0 = convert(this.sig);
+		OplKB<C, V> KB0 = convert(this.sig);
 		KB0.complete(Thread.currentThread());
 		KB = KB0;
 	}
@@ -290,7 +288,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private  KB<C, V> convert(OplSig<S,C,V> s) {
+	private  OplKB<C, V> convert(OplSig<S,C,V> s) {
 		if (s.prec.keySet().size() != new HashSet<>(s.prec.values()).size()) {
 			throw new RuntimeException("Cannot duplicate precedence: " + s.prec);
 		}
@@ -371,7 +369,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 				GlobalOptions.debug.opl.opl_prover_ac, GlobalOptions.debug.opl.opl_prover_timeout, 
 				GlobalOptions.debug.opl.opl_prover_reduction_limit, GlobalOptions.debug.opl.opl_prover_filter_subsumed,
 				/* NEWDEBUG.debug.opl.simplify, */ GlobalOptions.debug.opl.opl_prover_compose, false);
-		return new KB(eqs, KBOrders.lpogt(GlobalOptions.debug.opl.opl_allow_horn && !s.implications.isEmpty(), gt), fr, rs, options);			
+		return new OplKB(eqs, KBOrders.lpogt(GlobalOptions.debug.opl.opl_allow_horn && !s.implications.isEmpty(), gt), fr, rs, options);			
 	}
 	
 	public static <C,V> Set<Pair<KBExp<C, V>, KBExp<C, V>>> convert(List<Pair<OplTerm<C, V>, OplTerm<C, V>>> x, List<Pair<OplTerm<C, V>, OplTerm<C, V>>> y) {

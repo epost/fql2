@@ -7,7 +7,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Pair;
-import catdata.UnionFind;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.Collage;
@@ -16,6 +15,7 @@ import catdata.aql.DP;
 import catdata.aql.Instance;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.graph.UnionFind;
 
 //TODO aql example of distinct
 public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {

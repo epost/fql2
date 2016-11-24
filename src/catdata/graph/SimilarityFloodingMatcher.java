@@ -1,9 +1,10 @@
-package catdata;
+package catdata.graph;
 
 import java.util.Map;
 import java.util.function.BiFunction;
 
-import catdata.SimilarityFloodingMatcher.SimilarityFloodingParams;
+import catdata.Util;
+import catdata.graph.SimilarityFloodingMatcher.SimilarityFloodingParams;
 
 /**
  * @author ryan, serena
@@ -51,12 +52,13 @@ public class SimilarityFloodingMatcher<N1,N2,E1,E2> extends Matcher<N1,E1,N2,E2,
 	@Override
 	//TODO note to Serena: eventually, this is where we will convert options entered into the IDE
 	//into parameters such as the cutoff, etc.  For the initial version, these will be
-	//defaulted to the parameters defined here.
+	//defaulted to the parameters defined here.  Note that similarity is of the form 1/n, so cutoff
+	//must be small
 	public SimilarityFloodingParams<N1, N2, E1, E2> createParams(Map<String, String> options) {
 		if (!options.isEmpty()) {
 			throw new RuntimeException("No options allowed for similarity flooding matching - yet");
 		}
-		return new SimilarityFloodingParams<>((x,y) -> EditDistance.similarity(x.toString(),y.toString()), .51, Sigma.Basic);
+		return new SimilarityFloodingParams<>((x,y) -> Util.similarity(x.toString(),y.toString()), .25, Sigma.Basic);
 	}
 
 	//////////////////////////////////////////////////////////////////

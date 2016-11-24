@@ -1,6 +1,5 @@
 package catdata.aql.exp;
 
-import catdata.DMG;
 import catdata.aql.Instance;
 import catdata.aql.Mapping;
 import catdata.aql.Pragma;
@@ -8,6 +7,7 @@ import catdata.aql.Query;
 import catdata.aql.Schema;
 import catdata.aql.Transform;
 import catdata.aql.TypeSide;
+import catdata.graph.DMG;
 
 public final class AqlEnv {
 

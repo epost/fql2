@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import catdata.Chc;
-import catdata.DMG;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
@@ -24,6 +23,7 @@ import catdata.aql.fdm.ColimitInstance;
 import catdata.aql.fdm.DeltaInstance;
 import catdata.aql.fdm.DistinctInstance;
 import catdata.aql.fdm.EvalAlgebra.Row;
+import catdata.graph.DMG;
 import catdata.aql.fdm.EvalInstance;
 import catdata.aql.fdm.SigmaInstance;
 import catdata.aql.fdm.TerminalInstance;

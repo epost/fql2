@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.InvisibleException;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.provers.KBExp.KBApp;
-import catdata.InvisibleException;
 
 //TODO aql
 /*Loosen requirement for program in MVP that are of form
@@ -54,8 +54,8 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 		
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> ab0 : theory) {
 			for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> gd0 : theory) {
-				Pair<KBExp<C, V>, KBExp<C, V>> ab = KB.freshen(fresh, new Pair<>(ab0.second, ab0.third));
-				Pair<KBExp<C, V>, KBExp<C, V>> gd = KB.freshen(fresh, new Pair<>(gd0.second, gd0.third));
+				Pair<KBExp<C, V>, KBExp<C, V>> ab = LPOUKB.freshen(fresh, new Pair<>(ab0.second, ab0.third));
+				Pair<KBExp<C, V>, KBExp<C, V>> gd = LPOUKB.freshen(fresh, new Pair<>(gd0.second, gd0.third));
 			
 				Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cps = gd.first.cp(new LinkedList<>(), ab.first, ab.second, gd.first, gd.second);
 				for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>> cp : cps) {
@@ -110,7 +110,7 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> r0 : theory) {
 			Pair<KBExp<C, V>, KBExp<C, V>> r = new Pair<>(r0.second, r0.third);
 			if (!Collections.disjoint(r.first.vars(), e.vars()) || !Collections.disjoint(r.second.vars(), e.vars())) {
-				r = KB.freshen(fresh, r);
+				r = LPOUKB.freshen(fresh, r);
 			}
 			
 			KBExp<C, V> lhs = r.first;

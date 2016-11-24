@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import catdata.Chc;
-import catdata.DMG;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Algebra;
@@ -21,6 +20,7 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.It.ID;
+import catdata.graph.DMG;
 
 //has to be gen rather than (N,gen) in order to use explicit prover
 public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> 

@@ -69,35 +69,7 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 		
 		return Util.reverse(ret);
 	}
-	/*
-	 * the reverse is tricky, and not needed
-	 *
-	private KBExp<C, V> trans(Map<V, T> ctx, List<Chc<Chc<Unit,T>,C>> list) {
-		
-		KBExp<C, V> ret;
-		
-		if (ctx.isEmpty() && list.isEmpty()) {
-			throw new RuntimeException("Anomaly: please report");
-		} else if (ctx.isEmpty() && !list.isEmpty()) {
-			Chc<Chc<Unit,T>,C>
-		}
-		
-		for (Chc<Chc<Unit,T>,C> c : list) {
-			if (c.left) {
-				Chc<Unit,T> b = c.l;
-				if (b.left) {
-					
-				} else {
-					
-				}
-			} else {
-				C b = c.r;
-				ret = new KBApp<>(b, Util.singList(ret));
-			}
-		}
-		
-	}
-	*/
+	
 	
 	@Override
 	public boolean eq(Map<V, T> ctx, KBExp<C, V> lhs, KBExp<C, V> rhs) {
@@ -112,7 +84,6 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 	@Override
 	public KBExp<C, V> nf(Map<V, T> ctx, KBExp<C, V> term) {
 		throw new RuntimeException("Cannot NF in monoidal prover");
-		//return trans(ctx, kb.normalize("", trans(ctx, term))); hard to do
 	}
 
 	@Override

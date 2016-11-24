@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import catdata.DMG;
 import catdata.Pair;
 import catdata.Util;
+import catdata.graph.DMG;
 
 public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 

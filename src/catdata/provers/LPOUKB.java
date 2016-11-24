@@ -15,14 +15,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
-import catdata.DAG;
 import catdata.InvisibleException;
 import catdata.Pair;
-import catdata.PreOrder;
 import catdata.Quad;
 import catdata.Triple;
-import catdata.UnionFind;
 import catdata.Util;
+import catdata.graph.DAG;
+import catdata.graph.PreOrder;
+import catdata.graph.UnionFind;
 import catdata.provers.KBExp.KBApp;
 import catdata.provers.KBExp.KBVar;
 
@@ -54,6 +54,28 @@ import catdata.provers.KBExp.KBVar;
  */
 public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
+	protected static <C, V> Pair<KBExp<C, V>, KBExp<C, V>> freshen(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> eq) {
+		Map<V, KBExp<C, V>> subst = freshenMap(fresh, eq).first;
+		return new Pair<>(eq.first.subst(subst), eq.second.subst(subst));
+	}
+	
+	protected static <C,V> Pair<Map<V, KBExp<C, V>>, Map<V, KBExp<C, V>>> freshenMap(
+			Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> eq) {
+		Set<V> vars = new HashSet<>();
+		KBExp<C, V> lhs = eq.first;
+		KBExp<C, V> rhs = eq.second;
+		vars.addAll(lhs.vars());
+		vars.addAll(rhs.vars());
+		Map<V, KBExp<C, V>> subst = new HashMap<>();
+		Map<V, KBExp<C, V>> subst_inv = new HashMap<>();
+		for (V v : vars) {
+			V fr = fresh.next();
+			subst.put(v, new KBVar<>(fr));
+			subst_inv.put(fr, new KBVar<>(v));
+		}
+		return new Pair<>(subst, subst_inv);
+	}
+	
 	private void inhabGen(Set<T> inhabited) {
 		while (inhabGen1(inhabited))
 			;

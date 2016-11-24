@@ -6,11 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import catdata.DMG;
-import catdata.Matcher;
-import catdata.NaiveMatcher;
 import catdata.Pair;
-import catdata.SimilarityFloodingMatcher;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
@@ -22,6 +18,10 @@ import catdata.aql.fdm.ToCsvPragmaInstance;
 import catdata.aql.fdm.ToCsvPragmaTransform;
 import catdata.aql.fdm.ToJdbcPragmaInstance;
 import catdata.aql.fdm.ToJdbcPragmaTransform;
+import catdata.graph.DMG;
+import catdata.graph.Matcher;
+import catdata.graph.NaiveMatcher;
+import catdata.graph.SimilarityFloodingMatcher;
 
 public abstract class PragmaExp extends Exp<Pragma> {
 	

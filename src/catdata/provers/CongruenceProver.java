@@ -11,7 +11,7 @@ import java.util.Set;
 import catdata.InvisibleException;
 import catdata.Pair;
 import catdata.Triple;
-import catdata.UnionFind;
+import catdata.graph.UnionFind;
 import catdata.provers.KBExp.KBApp;
 
 //Congruence closure a la Nelson Oppen

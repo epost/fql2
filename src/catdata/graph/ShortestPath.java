@@ -1,4 +1,4 @@
-package catdata;
+package catdata.graph;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Stack;
+
+import catdata.Util;
 
 /* Dijkstra's algorith a la Sedgewick and Wayne
  */

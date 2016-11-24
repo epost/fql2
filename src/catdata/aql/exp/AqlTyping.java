@@ -1,8 +1,8 @@
 package catdata.aql.exp;
 
-import catdata.DMG;
 import catdata.Pair;
 import catdata.Program;
+import catdata.graph.DMG;
 
 public class AqlTyping {
 	

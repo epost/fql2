@@ -1,6 +1,8 @@
-package catdata;
+package catdata.graph;
 
 import java.util.Map;
+
+import catdata.Util;
 
 /**
  * Class for matching graphs.

@@ -1,7 +1,9 @@
-package catdata;
+package catdata.graph;
 
 import java.util.Collection;
 import java.util.Map;
+
+import catdata.Util;
 
 //WeightedQuickUnionPathCompressionUF a la Robert Sedgewick and Kevin Wayne
 public class UnionFind<X>  {

@@ -1,10 +1,12 @@
-package catdata;
+package catdata.graph;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+
+import catdata.Util;
 
 /**
  * Naive (edge to edge) graph matching based on string distance .
@@ -74,7 +76,7 @@ public class NaiveMatcher<N1,N2,E1,E2> extends Matcher<N1,E1,N2,E2,BiFunction<St
 		if (!options.isEmpty()) {
 			throw new RuntimeException("No options allowed for naive matching");
 		}
-		return EditDistance::editDistance;
+		return Util::editDistance;
 	}
 	
 	//TODO: explore all node matchings in order, veto-ing ones that cause edge mappings to fail

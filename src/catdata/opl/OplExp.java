@@ -44,7 +44,6 @@ import catdata.ide.GlobalOptions;
 import catdata.opl.OplParser.DoNotIgnore;
 import catdata.opl.OplQuery.Agg;
 import catdata.opl.OplQuery.Block;
-import catdata.provers.KB;
 import catdata.provers.KBExp;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -5527,14 +5526,14 @@ public abstract class OplExp implements OplObject {
 						conv(S, eq.second, P0)));
 			}
 
-			if (P0.toSig.getKB().KB instanceof KB) {
+			if (P0.toSig.getKB().KB instanceof OplKB) {
 				allgens.sort(new Comparator<OplTerm<Chc<C, X>, V>>() {
 					public int compare(OplTerm<Chc<C, X>, V> o1,
 							OplTerm<Chc<C, X>, V> o2) {
 						if (o1.equals(o2)) {
 							return 0;
 						}
-						KB<Chc<C, X>, V> kb = (KB<Chc<C, X>, V>) P0.toSig
+						OplKB<Chc<C, X>, V> kb = (OplKB<Chc<C, X>, V>) P0.toSig
 								.getKB().KB;
 						// KB.gt.apply(new Pair<>(convert(e1), convert(e2)));
 						if (kb.gt.apply(new Pair<>(OplToKB.convert(o1), OplToKB

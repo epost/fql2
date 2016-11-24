@@ -13,6 +13,7 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.fdm.ComposeTransform;
 import catdata.aql.fdm.IdentityTransform;
 import catdata.aql.fdm.LiteralTransform; //TODO aql why depend fdm
 

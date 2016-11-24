@@ -1,4 +1,9 @@
-package catdata.aql;
+package catdata.aql.fdm;
+
+import catdata.aql.Ctx;
+import catdata.aql.Instance;
+import catdata.aql.Term;
+import catdata.aql.Transform;
 
 //TODO aql id transform
 //TODO aql compose transform to parser

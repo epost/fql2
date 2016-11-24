@@ -4,9 +4,9 @@ public class Ref<X> {
 
 	public X x;
 
-	public int var;
+	private int var; //needed to make sure refs don't compare to equal just because their referents are equal.  could have not used value eauality, but var aso useful for printing
 	
-	public static int count = 0;
+	private static int count = 0;
 	
 	public Ref() {
 		var = count++;
@@ -16,9 +16,6 @@ public class Ref<X> {
 		if (x == null) {
 			throw new RuntimeException("Anomaly, please report");
 		}
-//		if (x instanceof Chc) {
-//			((Chc) x).assertNeitherNull();
-//		}
 		this.x = x;
 	}
 	
@@ -29,9 +26,6 @@ public class Ref<X> {
 		if (this.x == null) {
 			this.x = x;
 			var = -1;
-		//	if (x instanceof Chc) {
-			//	((Chc) x).assertNeitherNull();
-			//}
 		} else if (this.x.equals(x)) {
 			return;
 		} else {
