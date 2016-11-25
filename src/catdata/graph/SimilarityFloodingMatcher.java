@@ -53,7 +53,7 @@ public class SimilarityFloodingMatcher<N1,N2,E1,E2> extends Matcher<N1,E1,N2,E2,
 	//TODO note to Serena: eventually, this is where we will convert options entered into the IDE
 	//into parameters such as the cutoff, etc.  For the initial version, these will be
 	//defaulted to the parameters defined here.  Note that similarity is of the form 1/n, so cutoff
-	//must be small
+	//must be small 
 	public SimilarityFloodingParams<N1, N2, E1, E2> createParams(Map<String, String> options) {
 		if (!options.isEmpty()) {
 			throw new RuntimeException("No options allowed for similarity flooding matching - yet");
@@ -65,7 +65,7 @@ public class SimilarityFloodingMatcher<N1,N2,E1,E2> extends Matcher<N1,E1,N2,E2,
 	  
 	@Override
 	public Match<N1, E1, N2, E2> bestMatch() {
-		//this is a test
+		//this is a test.  yes, yes it is
 		
 		throw new RuntimeException("TODO - serena"); //TODO: serena
 	}
