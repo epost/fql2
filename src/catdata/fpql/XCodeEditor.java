@@ -20,8 +20,8 @@ import catdata.ide.Language;
 @SuppressWarnings("serial")
 public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 
-	public XCodeEditor(int untitled_count, String content) {
-		super(untitled_count, content);
+	public XCodeEditor(String title, int id, String content) {
+		super(title, id, content);
 	}
 
 	@Override

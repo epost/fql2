@@ -39,6 +39,7 @@ import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
+import org.fife.ui.rsyntaxtextarea.folding.Fold;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
@@ -46,6 +47,7 @@ import org.fife.ui.rtextarea.SearchEngine;
 
 import catdata.LineException;
 import catdata.Prog;
+import catdata.Util;
 
 
 /**
@@ -63,7 +65,8 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	public abstract Language lang();
 	
 	protected final Integer id;
-
+	protected final String title;
+	
 	DDisp display; 
 
 	private static final long serialVersionUID = 1L;
@@ -198,10 +201,11 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	protected abstract String getATMFrhs();
 	protected abstract void doTemplates();
 	
-	protected CodeEditor(Integer id, String content) {
+	protected CodeEditor(String title, Integer id, String content) {
 		super(new GridLayout(1, 1));
-
 		this.id = id;
+		this.title = title;
+		Util.assertNotNull(id);
 		respArea.setWordWrap(true);
 		
 		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory
@@ -212,10 +216,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 				new CurlyFoldParser());
 
 		topArea = new RSyntaxTextArea();
-
-//		SyntaxScheme scheme = topArea.getSyntaxScheme();
-//		scheme.getStyle(Token.RESERVED_WORD_2).foreground = Color.CYAN;
-//		topArea.revalidate();
 		
 		//this is kind of neat
 		topArea.setMarkOccurrences(true);
@@ -246,8 +246,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		inputMap.put(key, DefaultEditorKit.endLineAction);
 		inputMap.put(key2, DefaultEditorKit.endLineAction);
 		
-
-
 		Action alx = new AbstractAction() {
 			private static final long serialVersionUID = 1L;
 			@Override
@@ -358,7 +356,24 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		rtf.addActionListener(x -> topArea.copyAsRtf());
 		topArea.getPopupMenu().add(rtf, 0);
 
+		JMenuItem foldall = new JMenuItem("Fold All");
+		foldall.addActionListener(x -> foldAll(true));
+		topArea.getPopupMenu().add(foldall, 0);
+		
+		JMenuItem unfoldall = new JMenuItem("UnFold All");
+		unfoldall.addActionListener(x -> foldAll(false));
+		topArea.getPopupMenu().add(unfoldall, 0);
 	}
+	
+	public void foldAll(boolean b) {
+		int i = topArea.getFoldManager().getFoldCount();
+		for (int j = 0; j < i; j++) {
+			Fold fold = topArea.getFoldManager().getFold(j);
+			fold.setCollapsed(b);
+		}
+	}
+	
+	
 	
 	public void setFontSize(int size) {
 		if (size < 1) {
@@ -488,7 +503,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			toDisplay = "Computation finished, creating viewer...";
 
 			DateFormat format = DateFormat.getTimeInstance();
-			String foo = GUI.getTitle(id);
+			String foo = title;
 				foo += " - " + format.format(new Date(start));
 			display = makeDisplay(foo, init, env, start, middle); 
 			if (display.exn() == null) {
@@ -502,9 +517,8 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 					+ e.getLocalizedMessage();
 			respArea.setText(toDisplay);
 			e.printStackTrace();
-			topArea.requestFocusInWindow();
 			Integer theLine = init.getLine(e.decl);
-			topArea.setCaretPosition(theLine);
+			setCaretPos(theLine);
 		} catch (Throwable re) {
 			toDisplay = "Error: " + re.getLocalizedMessage();
 			respArea.setText(toDisplay);
@@ -530,17 +544,27 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	protected abstract Progg parse(String program) throws ParserException;
 	
+	public void setCaretPos(int p) {
+		topArea.requestFocusInWindow();
+		topArea.setCaretPosition(p);
+	}
+	
+	private void moveTo(int col, int line) {
+		topArea.requestFocusInWindow();
+		topArea.setCaretPosition(topArea.getDocument()
+				.getDefaultRootElement().getElement(line - 1)
+				.getStartOffset()
+				+ (col - 1));
+	}
+	
 	protected Progg tryParse(String program) {
 		try {
 			return parse(program);
 		} catch (ParserException e) {
 			int col = e.getLocation().column;
 			int line = e.getLocation().line;
-			topArea.requestFocusInWindow();
-			topArea.setCaretPosition(topArea.getDocument()
-					.getDefaultRootElement().getElement(line - 1)
-					.getStartOffset()
-					+ (col - 1));
+			moveTo(col, line);
+			
 			String s = e.getMessage();
 			String t = s.substring(s.indexOf(" "));
 			t.split("\\s+");

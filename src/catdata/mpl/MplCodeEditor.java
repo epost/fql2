@@ -19,8 +19,8 @@ import catdata.mpl.Mpl.MplExp;
 @SuppressWarnings("serial")
 public class MplCodeEditor extends CodeEditor<Program<MplExp<String,String>>, Environment<MplObject>, MplDisplay> {
 
-	public MplCodeEditor(int untitled_count, String content) {
-		super(untitled_count, content);
+	public MplCodeEditor(String title, int id, String content) {
+		super(title, id, content);
 	}
 
 	@Override

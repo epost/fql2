@@ -20,8 +20,8 @@ import catdata.ide.GlobalOptions;
 public class OplCodeEditor extends
 		CodeEditor<Program<OplExp>, Environment<OplObject>, OplDisplay> {
 
-	public OplCodeEditor(int untitled_count, String content) {
-		super(untitled_count, content);
+	public OplCodeEditor(String title, int id, String content) {
+		super(title, id, content);
 	}
 
 	@Override

@@ -66,14 +66,14 @@ public enum Language {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public CodeEditor createEditor(int untitled_count, String content) {
+	public CodeEditor createEditor(String title, int id, String content) {
 		switch (this) {
-		case FPQL: return new XCodeEditor(untitled_count, content);
-		case FQLPP: return new FQLPPCodeEditor(untitled_count, content);
-		case OPL: return new OplCodeEditor(untitled_count, content);
-		case FQL: return new FqlCodeEditor(untitled_count, content);
-		case MPL: return new MplCodeEditor(untitled_count, content);
-		case AQL: return new AqlCodeEditor(untitled_count, content); 
+		case FPQL: return new XCodeEditor(title, id, content);
+		case FQLPP: return new FQLPPCodeEditor(title, id, content);
+		case OPL: return new OplCodeEditor(title, id, content);
+		case FQL: return new FqlCodeEditor(title,id, content);
+		case MPL: return new MplCodeEditor(title, id, content);
+		case AQL: return new AqlCodeEditor(title, id, content); 
 		}
 		throw new RuntimeException(this.toString());
 	}

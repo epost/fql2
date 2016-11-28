@@ -16,8 +16,8 @@ import catdata.ide.Language;
 @SuppressWarnings("serial")
 public class FQLPPCodeEditor extends CodeEditor<FQLPPProgram, FQLPPEnvironment, FqlppDisplay> {
 
-	public FQLPPCodeEditor(int untitled_count, String content) {
-		super(untitled_count, content);
+	public FQLPPCodeEditor(String title, int id, String content) {
+		super(title, id, content);
 	}
 
 	@Override

@@ -900,6 +900,12 @@ public class AqlParser {
 		return p.from(TOKENIZER, IGNORED).parse(s);
 	}
 	
+	public static final String parseInfer1(String s) {
+		Parser<String> p = Parsers.tuple(token("literal"), token(":"), ident)
+				.map(x -> x.c);		
+		return p.from(TOKENIZER, IGNORED).parse(s);
+	}
+	
 	public static final catdata.Pair<List<catdata.Pair<String, String>>, RawTerm> parseTermInCtx(String s) {
 		return Parsers.or(term1, term2).from(TOKENIZER, IGNORED).parse(s);
 	}

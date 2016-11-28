@@ -51,8 +51,8 @@ import catdata.ide.Language;
 public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDisplay> implements Runnable {
 	
 	
-	public FqlCodeEditor(int untitled_count, String content) {
-		super(untitled_count, content);
+	public FqlCodeEditor(String title, int id, String content) {
+		super(title, id, content);
 		
 		JMenuItem visualEdit = new JMenuItem("Visual Edit");
 		visualEdit.addActionListener(new ActionListener() {
@@ -348,7 +348,7 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 
 		DateFormat format = DateFormat.getTimeInstance();
 		String time = format.format(new Date(System.currentTimeMillis()));
-		String foo = catdata.ide.GUI.getTitle(id);
+		String foo = title;
 
 		JTextArea jta = new JTextArea(xxx);
 		jta.setWrapStyleWord(true);

@@ -237,6 +237,28 @@ public class GUI extends JPanel {
 			}
 			ed.copyAsRtf();
 		});
+		
+		MenuItem fall = new MenuItem("Fold All");
+		editMenu.add(fall);
+		rtf.addActionListener(x -> {
+			int i = editors.getSelectedIndex();
+			CodeEditor<?,?,?> ed = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+			if (ed == null) {
+				return;
+			}
+			ed.foldAll(true);
+		});
+		
+		MenuItem uall = new MenuItem("Unfold All");
+		editMenu.add(uall);
+		rtf.addActionListener(x -> {
+			int i = editors.getSelectedIndex();
+			CodeEditor<?,?,?> ed = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+			if (ed == null) {
+				return;
+			}
+			ed.foldAll(false);
+		});
 
 		MenuItem chaseItem = new MenuItem("ED Chaser");
 		toolsMenu.add(chaseItem);
@@ -512,6 +534,17 @@ public class GUI extends JPanel {
 		}
 	}
 	private static void populateAql(Menu menu) {
+		MenuItem m = new MenuItem("Outline (using last compiled state)");
+		m.addActionListener(x -> {
+			int i = editors.getSelectedIndex();
+			Object o = editors.getComponentAt(i);
+			if (o instanceof AqlCodeEditor) {
+				AqlCodeEditor a = (AqlCodeEditor) o;
+				a.showOutline();
+			}
+		});
+		menu.add(m);
+		
 		MenuItem im = new MenuItem("Infer Mapping (using last compiled state)");
 		im.addActionListener(x -> infer(Kind.MAPPING));
 		menu.add(im);
@@ -521,9 +554,12 @@ public class GUI extends JPanel {
 		MenuItem it = new MenuItem("Infer Transform (using last compiled state)");
 		it.addActionListener(x -> infer(Kind.TRANSFORM));
 		menu.add(it);
+		MenuItem ii = new MenuItem("Infer Instance (using last compiled state)");
+		it.addActionListener(x -> infer(Kind.INSTANCE));
+		menu.add(ii);
 	}
 
-	protected static void doExample(Example e) {
+	private static void doExample(Example e) {
 		// int i = untitled_count;
 		if (e == null) {
 			return;
@@ -585,7 +621,7 @@ public class GUI extends JPanel {
 		System.exit(0);
 	}
 
-	protected static void saveAction() {
+	private static void saveAction() {
 		@SuppressWarnings("rawtypes")
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
 		File f = files.get(e.id);
@@ -598,8 +634,9 @@ public class GUI extends JPanel {
 		}
 	}
 
-	static void doSave(File f, String s) {
+	private static void doSave(File f, String s) {
 		try {
+			s = s.replace("\r", "");
 			FileWriter fw = new FileWriter(f);
 			fw.write(s);
 			fw.close();
@@ -670,16 +707,17 @@ public class GUI extends JPanel {
 		doOpen(f, e.lang());
 	}
 
-	static void doOpen(File f, Language isPatrick) {
+	private static void doOpen(File f, Language lang) {
 		String s = readFile(f.getAbsolutePath());
 		if (s == null) {
 			return;
 		}
-		Integer i = newAction(f.getName(), s, isPatrick);
+		s = s.replace("\r", "");
+		Integer i = newAction(f.getName(), s, lang);
 		files.put(i, f);
 	}
 
-	static protected void openAction() {
+	private static void openAction() {
 		delay();
 		JFileChooser jfc = new JFileChooser(GlobalOptions.debug.general.file_path);
 		jfc.setFileFilter(new AllFilter());
@@ -697,11 +735,11 @@ public class GUI extends JPanel {
 		throw new RuntimeException("Unknown file extension on " + f.getAbsolutePath());
 	}
 
-	static void setDirty(Integer i, boolean b) {
+	public static void setDirty(Integer i, boolean b) {
 		dirty.put(i, b);
 	}
 
-	static Boolean getDirty(Integer i) {
+	public static Boolean getDirty(Integer i) {
 		Boolean ret = dirty.get(i);
 		if (ret == null) {
 			throw new RuntimeException();
@@ -724,29 +762,25 @@ public class GUI extends JPanel {
 	// static Map<Integer, Integer> position = new HashMap<>();
 	static int untitled_count = 0;
 
-	public static String getTitle(Integer i) {
+/*	public static String getTitle(Integer i) {
 		return titles.get(i);
-	}
+	} */
 
-	static Integer newAction(String title, String content, Language isPatrick) {
+	static Integer newAction(String title, String content, Language lang) {
 		untitled_count++;
-		@SuppressWarnings("rawtypes")
-		CodeEditor c = isPatrick.createEditor(untitled_count, content);
-		int i = editors.getTabCount();
-		keys.put(untitled_count, c);
-		dirty.put(untitled_count, false);
-		// position.put(untitled_count, i);
-
 		if (title == null) {
 			title = "Untitled " + untitled_count;
 		}
+		CodeEditor<?,?,?> c = lang.createEditor(title, untitled_count, content);
+		int i = editors.getTabCount();
+		keys.put(untitled_count, c);
+		dirty.put(untitled_count, false);
+		
+		
 		titles.put(c.id, title);
 		editors.addTab(title, c);
 		editors.setTabComponentAt(i, new ButtonTabComponent(editors));
 		editors.setSelectedIndex(i);
-		// editors.requestFocus();
-		// editors.requestFocus(false); //requestDefaultFocus();
-		// c.dis
 		return c.id;
 
 	}
