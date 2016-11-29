@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.AqlOptions;
 import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.It.ID;
@@ -14,6 +15,7 @@ import catdata.aql.Query;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.Var;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.fdm.EvalAlgebra.Row;
 
 public class CoEvalEvalUnitTransform<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>  
@@ -53,6 +55,7 @@ extends Transform<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Row<En2,ID>, Chc<Y, Pair<ID,
 			Term<Ty, En2, Sym, Fk2, Att2, Row<En2, ID>, Chc<Y, Pair<ID, Att1>>> w = y2.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
 			sks.put(sk, w);
 		}	
+		validate((Boolean) AqlOptions.getOrDefault(options, AqlOption.dont_validate_unsafe));
 	}
 	
 	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Pair<ID, Att1>>> trans0(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {

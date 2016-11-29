@@ -6,11 +6,13 @@ import java.util.function.Function;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.AqlOptions;
 import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.Mapping;
 import catdata.aql.Term;
 import catdata.aql.Transform;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.It.ID;
 
 
@@ -39,7 +41,8 @@ extends Transform<Ty, En1, Sym, Fk1, Att1, Gen, Sk, Pair<En1, ID>, Chc<Sk, Pair<
 			Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>> term = J.algebra().intoY(F.trans(Term.Sk(sk))).map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
 			sks.put(sk, term);
 		}
-				
+		validate((Boolean) AqlOptions.getOrDefault(options, AqlOption.dont_validate_unsafe));
+
 	}
 
 	@Override

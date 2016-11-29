@@ -4,6 +4,8 @@ import java.util.Map;
 
 import catdata.Chc;
 import catdata.Pair;
+import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.Query;
@@ -38,6 +40,7 @@ extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<Var,Row<En2,X>>, Y, Gen, Sk, ID,
 		for (Y y : src().sks().keySet()) {
 			sks.put(y, I.algebra().reprT(Term.Sk(y)));
 		}		
+		validate((Boolean) AqlOptions.getOrDefault(options, AqlOption.dont_validate_unsafe));
 	}
 	
 	@Override

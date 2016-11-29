@@ -21,22 +21,15 @@ import catdata.graph.DAG;
 //TODO: aql does assume unique names
 public final class AqlMultiDriver implements Callable<Unit> {
 
-	@SuppressWarnings("deprecation")
 	public void abort() {
-		interruptAll();
-		try {
-			Thread.sleep(1000);
-		} catch (Throwable thr) { }
-		for (Thread t : threads) {
-			try {
-				t.stop();
-			} catch (Throwable e) {
-			}
-		}
+		interruptAll();		
 		exn.add(new RuntimeException("Manual abort"));
 	}
 	
 	private void interruptAll() {
+		synchronized(this) {
+			stop = true;
+		}
 		for (Thread t : threads) {
 			t.interrupt();
 		}
@@ -123,8 +116,8 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	}
 
 	private void barrier() {
-		while (!isEnded()) {
-			synchronized (ended) {
+		synchronized (ended) {
+			while (!isEnded()) {
 				try {
 					ended.wait();
 				} catch (InterruptedException e) {
@@ -147,7 +140,6 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	private void process() {
 		int numProcs = Runtime.getRuntime().availableProcessors();
-
 		for (int i = 0; i < numProcs; i++) {
 			Thread thr = new Thread(() -> {
 			try {
@@ -217,7 +209,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			ended.i++;
 			ended.notifyAll();
 		}
-		synchronized (this) { // just in case
+		synchronized (this) { 
 			notifyAll();
 		}
 		return new Unit();
@@ -239,7 +231,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 					n = nextAvailable();
 					if (n == null) {
 						update();
-						wait();
+						wait(5000); //just in case
 						continue;
 					}
 					processing.add(n);
