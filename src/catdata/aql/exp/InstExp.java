@@ -91,6 +91,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 			return t.type(G).first.type(G);
 		}
+
+		@Override
+		public long timeout() {
+			return t.timeout();
+		}
 		
 	}
 	
@@ -146,6 +151,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 			return t.type(G).first.type(G);
 		}
+
+		@Override
+		public long timeout() {
+			return t.timeout();
+		}
 		
 		
 		
@@ -164,6 +174,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final Ctx<E, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges;
 
 		public final Map<String, String> options;
+		
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}	
 	
 		public InstExpColim(GraphExp<N, E> shape, SchExp<Ty, En, Sym, Fk, Att> schema, List<String> imports, List<Pair<N, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> nodes, List<Pair<E, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>>> edges, List<Pair<String, String>> options) {
 			this.schema = schema;
@@ -303,6 +318,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y>  J;
 		public final Map<String, String> options;
 		
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}	
+		
 		public InstExpCoEval(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> j, List<Pair<String, String>> options) {
 			Q = q;
 			J = j;
@@ -380,6 +400,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
 		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y>  I;
 		
+		@Override
+		public long timeout() {
+			return Q.timeout() + I.timeout();
+		}
+		
 		public InstExpEval(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i) {
 			Q = q;
 			I = i;
@@ -393,6 +418,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
 			return result;
 		}
+		
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -450,6 +476,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final Map<String, String> options;
 		
 		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}	
+		
+		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Util.union(I.deps(), F.deps());
 		}
@@ -503,7 +534,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			SchExp<Ty, En1, Sym, Fk1, Att1> t0 = I.type(G);
 			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(G);
 			
-			if (!t1.first.equals(t0)) { //TODO aql type equality
+			if (!t1.first.equals(t0)) { //TODO aql schema equality
 				throw new RuntimeException("Type error: In " + this + " domain of mapping is " + t1.first + " but instance has schema " + t0);
 			} 
 			
@@ -595,6 +626,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> i = I.eval(env);		
 			return new DeltaInstance<>(f, i);
 		}
+
+		@Override
+		public long timeout() {
+			return I.timeout() + F.timeout();
+		}
 		
 	}
 	
@@ -652,6 +688,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		@Override
 		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 			return schema;
+		}
+
+		@Override
+		public long timeout() {
+			return schema.timeout();
 		}
 		
 	}
@@ -711,6 +752,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		@Override
 		public SchExp<Object, Object, Object, Object, Object> type(AqlTyping G) {
 			return (SchExp<Object, Object, Object, Object, Object>) G.defs.insts.get(var);
+		}
+
+		@Override
+		public long timeout() {
+			return 0;
 		}
 
 		
@@ -773,6 +819,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 			return new SchExpLit<>(inst.schema());
 		}
+
+		@Override
+		public long timeout() {
+			return 0;
+		}
 	}
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -828,6 +879,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return I.deps();
+		}
+
+		@Override
+		public long timeout() {
+			return I.timeout();
 		}
 		
 	}

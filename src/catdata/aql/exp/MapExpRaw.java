@@ -42,6 +42,11 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 	
 	public final Map<String, String> options; //TODO aql do mapexps really need options?
 	
+	@Override
+	public long timeout() {
+		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	}	
+	
 	//typesafe by covariance of read only collections
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public MapExpRaw(SchExp<?, ?, ?, ?, ?> src, SchExp<?, ?, ?, ?, ?> dst, List<String> imports, List<Pair<String, String>> ens, List<Pair<String, List<String>>> fks, List<Pair<String, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {

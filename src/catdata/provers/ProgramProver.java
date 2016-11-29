@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import catdata.InvisibleException;
+import catdata.RuntimeInterruptedException;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.provers.KBExp.KBApp;
@@ -87,7 +87,7 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 	
 	protected KBExp<C, V> step(KBExp<C, V> ee) {
 		if (Thread.currentThread().isInterrupted()) {
-			throw new InvisibleException("interrupted in program prover step");
+			throw new RuntimeInterruptedException(new InterruptedException());
 		}
 		if (ee.isVar) {
 			return step1(ee); 

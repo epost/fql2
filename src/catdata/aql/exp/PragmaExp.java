@@ -38,6 +38,11 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public final GraphExp<N1,E1> src;
 		public final GraphExp<N2,E2> dst;
 		
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}		
+		
 		public PragmaExpMatch(String which, GraphExp<N1, E1> src, GraphExp<N2, E2> dst, List<Pair<String, String>> options) {
 			this.which = which;
 			this.options = Util.toMapSafely(options);
@@ -140,7 +145,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	//TODO aql: kind of weird that there are pragmas for these but not the importers? 
+	 
 	public static final class PragmaExpSql extends PragmaExp {
 		private final List<String> sqls;
 		
@@ -148,7 +153,12 @@ public abstract class PragmaExp extends Exp<Pragma> {
 	
 		private final String clazz;
 		
-		private final Map<String, String> options; //TODO aql autoreload
+		private final Map<String, String> options; 
+		
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}	
 		
 		public PragmaExpSql(String clazz, String jdbcString, List<String> sqls, List<Pair<String, String>> options) {
 			this.clazz = clazz;
@@ -239,6 +249,11 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		public final InstExp<Ty,En,Sym,Att,Fk,Gen,Sk,X,Y> inst;
 		
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}
+		
 		public PragmaExpToCsvInst(InstExp<Ty, En, Sym, Att, Fk, Gen, Sk, X, Y> inst, String file, List<Pair<String, String>> options) {
 			Util.assertNotNull(file, options, inst);
 			this.file = file;
@@ -319,6 +334,11 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		public final TransExp<Ty,En,Sym,Att,Fk,Gen1,Sk1,X1,Y1,Gen2,Sk2,X2,Y2> trans;
 
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}	
+		
 		public PragmaExpToCsvTrans(TransExp<Ty, En, Sym, Att, Fk, Gen1, Sk1, X1, Y1, Gen2, Sk2, X2, Y2> trans, String file, List<Pair<String, String>> options) {
 			this.file = file;
 			this.options = Util.toMapSafely(options);
@@ -392,6 +412,11 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			public final String var;
 			
 			@Override
+			public long timeout() {
+				return 0;
+			}	
+			
+			@Override
 			public Collection<Pair<String, Kind>> deps() {
 				return Util.singList(new Pair<>(var, Kind.PRAGMA));
 			}
@@ -443,9 +468,13 @@ public abstract class PragmaExp extends Exp<Pragma> {
 	
 	public static final class PragmaExpJs extends PragmaExp {
 		private final List<String> jss;
-		
 	
-		private final Map<String, String> options; //TODO aql autoreload
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}	
+	
+		private final Map<String, String> options; 
 		
 		public PragmaExpJs(List<String> jss, List<Pair<String, String>> options) {
 			this.options = Util.toMapSafely(options);
@@ -512,8 +541,12 @@ public abstract class PragmaExp extends Exp<Pragma> {
 	public static final class PragmaExpProc extends PragmaExp {
 		private final List<String> cmds;
 		
-	
-		private final Map<String, String> options; //TODO aql autoreload
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}	
+		
+		private final Map<String, String> options; 
 		
 		public PragmaExpProc(List<String> cmds, List<Pair<String, String>> options) {
 			this.options = Util.toMapSafely(options);
@@ -587,6 +620,11 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			public final Map<String, String> options;
 
 			public final InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
+			
+			@Override
+			public long timeout() {
+				return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+			}	
 			
 			public PragmaExpToJdbcInst(InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i, String clazz, String jdbcString, String prefix, List<Pair<String, String>> options) {
 				this.jdbcString = jdbcString;
@@ -685,6 +723,11 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public final Map<String, String> options;
 
 		public final TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h;
+		
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}	
 		
 		public PragmaExpToJdbcTrans(TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h, String clazz, String jdbcString, String prefix, List<Pair<String, String>> options) {
 			this.jdbcString = jdbcString;

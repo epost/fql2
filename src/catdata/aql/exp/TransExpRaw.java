@@ -39,6 +39,11 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 	public final List<Pair<Object, RawTerm>> gens;		
 	
 	public final Map<String, String> options;
+	
+	@Override
+	public long timeout() {
+		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	}	
 	 
 	@Override
 	public String toString() {

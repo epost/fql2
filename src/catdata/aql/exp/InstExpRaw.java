@@ -22,6 +22,7 @@ import catdata.aql.It;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.It.ID;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
@@ -46,6 +47,11 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	public final List<Pair<RawTerm, RawTerm>> eqs;
 	
 	public final Map<String, String> options;
+	
+	@Override
+	public long timeout() {
+		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	}	
 
 	//typesafe by covariance of read-only collections
 	@SuppressWarnings({ "rawtypes", "unchecked" })

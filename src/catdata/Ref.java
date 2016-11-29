@@ -11,6 +11,10 @@ public class Ref<X> {
 	public Ref() {
 		var = count++;
 	}
+	
+	public boolean isSet() {
+		return x != null;
+	}
 
 	public Ref(X x) {
 		if (x == null) {

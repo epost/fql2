@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import catdata.InvisibleException;
+import catdata.RuntimeInterruptedException;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.graph.UnionFind;
@@ -40,7 +40,11 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 
 	private void merge1(KBExp<C, V> u, KBExp<C, V> v)  {
 		if (Thread.currentThread().isInterrupted()) {
-			throw new InvisibleException("Interrupted");
+			try {
+				throw new InterruptedException();
+			} catch (InterruptedException ex) {
+				throw new RuntimeInterruptedException(ex);
+			}
 		}
 		if (uf.connected(u, v)) {
 			return;

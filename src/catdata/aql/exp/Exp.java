@@ -6,6 +6,8 @@ import catdata.Pair;
 
 public abstract class Exp<X> {
 	
+	public abstract long timeout();
+	
 	public abstract Kind kind();
 	
 	public abstract X eval(AqlEnv env);
@@ -18,6 +20,7 @@ public abstract class Exp<X> {
 
 	@Override
 	public abstract boolean equals(Object o);
+	
 	/**
 	 * This will not capture global order constraints; for example,
 	 * that pragmas form barriers.

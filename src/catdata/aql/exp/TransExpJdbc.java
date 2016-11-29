@@ -37,6 +37,11 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 	public final String jdbcString;
 
 	public final Map<String, String> map;
+	
+	@Override
+	public long timeout() {
+		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	}	
 
 	public TransExpJdbc(InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst, List<String> imports, List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<String, String>> map) {
 		this.src = src;

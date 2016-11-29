@@ -67,13 +67,21 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 			return schema.deps();
 		}
 
-		
+		@Override
+		public long timeout() {
+			return schema.timeout();
+		}		
 		
 	}
 	 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final class TyExpEmpty extends TyExp<Void,Void> {
+		
+		@Override
+		public long timeout() {
+			return 0;
+		}
 
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
@@ -100,7 +108,7 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	
 		@Override
 		public boolean equals(Object o) {
-			return (o instanceof TyExpEmpty);
+			return (o != null && o instanceof TyExpEmpty);
 		}
 		
 	}
@@ -109,6 +117,11 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 
 	public static final class TyExpLit<Ty, Sym> extends TyExp<Ty, Sym> {
 		public final TypeSide<Ty, Sym> typeSide;
+		
+		@Override
+		public long timeout() {
+			return 0;
+		}
 		
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
@@ -164,6 +177,11 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	
 	public static final class TyExpVar extends TyExp<Object, Object> {
 		public final String var;
+		
+		@Override
+		public long timeout() {
+			return 0;
+		}
 		
 		@Override
 		public Collection<Pair<String, Kind>> deps() {

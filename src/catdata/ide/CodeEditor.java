@@ -404,21 +404,25 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	}
 
 	@SuppressWarnings("deprecation")
-	void abortAction() {
-		if (thread != null && thread.isAlive()) {
-			thread.stop();
-			thread = null;
-		}
-		if (temp != null && temp.isAlive()) {
-			temp.stop();
-			temp = null;
-		}
+	public void abortAction() {
 		try {
-			toDisplay = "Aborted";
-			respArea.setText("Aborted");
-		} catch (Exception e) {
-			respArea.setText(e.getLocalizedMessage());
+			if (thread != null && thread.isAlive()) {
+				thread.stop();			
+			}
+		} catch (Throwable e) {
+			//respArea.setText(e.getLocalizedMessage());
 		}
+		thread = null;
+		try {
+			if (temp != null && temp.isAlive()) {
+				temp.stop();			
+			}
+		} catch (Throwable e) {
+			//respArea.setText(e.getLocalizedMessage());
+		}
+		temp = null;
+		toDisplay = "Aborted";
+		respArea.setText("Aborted");
 	}
 	
 	protected String[] toUpdate = new String[] { null };
@@ -469,10 +473,10 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 					}
 				} catch (InterruptedException ie) {
 					ie.printStackTrace();
-				} catch (Throwable tt) {
+				} catch (Exception tt) {
 					tt.printStackTrace();
 					respArea.setText(tt.getMessage());
-				}
+				} catch (ThreadDeath d) { }
 			}
 		});
 		temp.setPriority(Thread.MIN_PRIORITY);
@@ -519,20 +523,27 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			e.printStackTrace();
 			Integer theLine = init.getLine(e.decl);
 			setCaretPos(theLine);
+		} catch (ThreadDeath d)  {
+			
 		} catch (Throwable re) {
-			toDisplay = "Error: " + re.getLocalizedMessage();
-			respArea.setText(toDisplay);
-			re.printStackTrace();
-		}
+				toDisplay = "Error: " + re.getLocalizedMessage();
+				respArea.setText(toDisplay);
+				re.printStackTrace();
+			} 
 
-		if (thread != null) {
-			thread.stop();
-		}
+		try {
+			if (thread != null) {
+				thread.stop();
+			} 	
+		} catch (ThreadDeath d) { }
 		thread = null;
-		if (temp != null) {
-			temp.stop();
-		}
+		try {
+			if (temp != null) {
+				temp.stop();
+			}
+		} catch (ThreadDeath d) { }
 		temp = null;
+	
 
 	}
 	

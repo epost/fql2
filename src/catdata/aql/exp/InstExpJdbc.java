@@ -43,6 +43,11 @@ public class InstExpJdbc<Ty,En,Sym,Fk,Att,Gen,Sk>
 	public final String jdbcString;
 	
 	public final Map<String, String> map;
+	
+	@Override
+	public long timeout() {
+		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	}	
 
 	public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema, List<String> imports, List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<String, String>> map) {
 		this.schema = schema;

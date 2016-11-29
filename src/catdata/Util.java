@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -38,9 +39,58 @@ import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.CollectionUtils;
 
-
-
 public class Util {
+	
+	@SuppressWarnings("deprecation")
+	public static <X> X timeout(Callable<X> c, long timeout) { 
+		try {
+			final Object lock = new Object();
+			final Ref<X> ret = new Ref<>();
+			final Ref<Throwable> thr = new Ref<>();
+			Thread t = new Thread(() -> {
+				try {
+					X x = c.call();
+					synchronized (lock) {
+						ret.set(x);
+					}
+				} catch (Throwable exn) {
+					exn.printStackTrace();
+					synchronized (lock) {
+						thr.set(exn);		
+					}
+				}
+			});
+			t.start();
+			
+			try {
+				t.join(timeout);
+			} catch (InterruptedException e) {
+				try {
+					t.stop();
+				} catch (ThreadDeath dt) {
+					throw new RuntimeInterruptedException(dt);	
+				}
+				
+			}
+			
+			synchronized (lock) { 	
+				if (!ret.isSet() && !thr.isSet()) {
+					t.stop();
+					throw new RuntimeException("Timout after " + timeout + " ms.");
+				} else if (ret.isSet() && !thr.isSet()) {
+					//t should be dying
+					return ret.x;
+				} else if (!ret.isSet() && thr.isSet()) {
+					//t should be dying
+					throw new RuntimeException(thr.x.getMessage() + "\n\nMessage: ");
+				} else {
+					throw new RuntimeException("Anomaly: please report");
+				}
+			}
+		} catch (ThreadDeath d) { 
+			throw new RuntimeInterruptedException(d);		
+		}
+	}
 	
 	public static Class<?> load(String clazz) {
 		try {
@@ -994,7 +1044,7 @@ public class Util {
 		return ret;
 	}
 
-	public static <X> List<String> toString(List<X> list) {
+	public static <X> List<String> toString(Collection<X> list) {
 		return list.stream().map(Object::toString).collect(Collectors.toList());
 	}
 	

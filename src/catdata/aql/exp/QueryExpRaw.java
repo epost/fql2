@@ -40,6 +40,11 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	
 	public final List<Pair<Att2, RawTerm>> atts;
 	
+	@Override
+	public long timeout() {
+		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	}	
+	
 	public static class Trans {
 		public final List<Pair<Var, RawTerm>> gens; 
 

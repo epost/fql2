@@ -28,10 +28,17 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 		}
 		return ret;
 	}
+	
+	@Override
+	public long timeout() {
+		return 0;
+	}
 
 	////////////////////////////
 
 	public static class GraphExpRaw extends GraphExp<Object,Object> {
+		
+		
 
 		public Set<Object> nodes;
 		public Map<Object,Pair<Object,Object>> edges;

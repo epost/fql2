@@ -23,6 +23,7 @@ import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
+import catdata.aql.AqlOptions.AqlOption;
 
 //TODO: aql add shortcuts to editor
 
@@ -45,6 +46,11 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 
 	public final Map<String, String> options;
 	private AqlOptions strat;
+	
+	@Override
+	public long timeout() {
+		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	}	
 	
 	private Set<Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>>> eqs0 = new HashSet<>();
 

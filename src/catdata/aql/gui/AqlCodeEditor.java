@@ -44,6 +44,15 @@ public final class AqlCodeEditor extends
 
 	private Outline outline;
 	
+	
+	public void abortAction() {
+		super.abortAction();
+		if (driver != null) {
+			driver.abort();
+		}
+		
+	}
+	
 	private class Outline extends JFrame {
 		
 		private JPanel p = new JPanel(new GridLayout(1,1));;
@@ -232,10 +241,13 @@ public final class AqlCodeEditor extends
 	String last_str;
 	Program<Exp<? extends Object>> last_prog;
 	AqlEnv last_env;
-
+	AqlMultiDriver driver;
+	
 	@Override
 	protected AqlEnv makeEnv(String str, Program<Exp<? extends Object>> init) {
-		last_env = new AqlMultiDriver(init, toUpdate, last_prog, last_env).env; //constructor blocks
+		driver = new AqlMultiDriver(init, toUpdate, last_prog, last_env);
+		driver.start();
+		last_env = driver.env; //constructor blocks
 		last_prog = init;
 		last_str = str;
 		outline.build();

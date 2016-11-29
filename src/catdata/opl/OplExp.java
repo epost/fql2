@@ -58,8 +58,6 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 @SuppressWarnings({"unchecked", "rawtypes", "unused"})
 public abstract class OplExp implements OplObject {
 	
-	
-
 	@Override
 	public abstract boolean equals(Object o);
 

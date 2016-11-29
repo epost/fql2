@@ -69,6 +69,11 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 
 		public QueryExpVar(String var) {
 			this.var = var;
+		}
+
+		@Override
+		public long timeout() {
+			return 0;
 		}	
 		
 	}
@@ -129,6 +134,10 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 		@Override
 		public Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> type(AqlTyping G) {
 			return new Pair<>(new SchExpLit<>(q.src), new SchExpLit<>(q.dst));
+		}
+		@Override
+		public long timeout() {
+			return 0;
 		}
 	}
 

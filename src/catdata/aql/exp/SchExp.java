@@ -65,6 +65,11 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 		public Schema<Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
 			return inst.eval(env).schema();
 		}
+
+		@Override
+		public long timeout() {
+			return inst.timeout();
+		}
 		
 		
 	}
@@ -120,6 +125,11 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 		@Override
 		public Schema<Ty, Void, Sym, Void, Void> eval(AqlEnv env) {
 			return Schema.terminal(typeSide.eval(env));
+		}
+
+		@Override
+		public long timeout() {
+			return typeSide.timeout();
 		}
 		
 	}
@@ -177,6 +187,11 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 		public String toString() {
 			return var;
 		}
+
+		@Override
+		public long timeout() {
+			return 0;
+		}
 		
 		
 	}
@@ -232,6 +247,11 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 		@Override
 		public String toString() {
 			return "SchExpLit [schema=" + schema + "]";
+		}
+
+		@Override
+		public long timeout() {
+			return 0;
 		}
 		
 	

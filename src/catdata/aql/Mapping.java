@@ -125,7 +125,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		for (Att att : s.atts.keySet()) {
 			atts.put(att, new Triple<>(new Var("v"), s.atts.get(att).first, Term.Att(att, Term.Var(new Var("v")))));
 		}
-		return new Mapping<>(ens, atts, fks, s, s, false); //TODO aql dont check eqs in id mapping
+		return new Mapping<>(ens, atts, fks, s, s, true); 
 	}
 	
 	public Mapping(Map<En1, En2> ens, Map<Att1, Triple<Var,En2,Term<Ty, En2, Sym, Fk2, Att2, Void, Void>>> atts, Map<Fk1, Pair<En2, List<Fk2>>> fks, Schema<Ty, En1, Sym, Fk1, Att1> src, Schema<Ty, En2, Sym, Fk2, Att2> dst, boolean doNotCheckEquations) {

@@ -25,7 +25,6 @@ import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.fdm.LiteralTransform;
 
-//TODO aql arbitrary sql queries for jdbc import
 public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 	extends TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> {
 
@@ -37,6 +36,11 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 	public final Map<String, String> options;
 	
 	public final String file;
+	
+	@Override
+	public long timeout() {
+		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	}	
 
 	public TransExpCsv(InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src, InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst, String file, List<String> imports, List<Pair<String, String>> options) {
 		Util.assertNotNull(src, dst, imports, options, file);

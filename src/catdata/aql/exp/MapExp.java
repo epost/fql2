@@ -73,6 +73,11 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 		public Pair<SchExp<Ty, En, Sym, Fk, Att>, SchExp<Ty, En, Sym, Fk, Att>> type(AqlTyping G) {
 			return new Pair<>(sch, sch);
 		}
+
+		@Override
+		public long timeout() {
+			return 0;
+		}
 		
 	}
 	
@@ -130,6 +135,11 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 		@Override
 		public Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>> type(AqlTyping G) {		
 			return (Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>) ((Object)G.defs.maps.get(var));
+		}
+
+		@Override
+		public long timeout() {
+			return 0;
 		}	
 	}
 
@@ -189,6 +199,11 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 		@Override
 		public Pair<SchExp<Ty, En1, Sym1, Fk1, Att1>, SchExp<Ty, En2, Sym1, Fk2, Att2>> type(AqlTyping G) {
 			return new Pair<>(new SchExpLit<>(map.src), new SchExpLit<>(map.dst));
+		}
+
+		@Override
+		public long timeout() {
+			return 0;
 		}
 		
 		

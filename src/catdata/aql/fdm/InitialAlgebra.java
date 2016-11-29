@@ -9,20 +9,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.RuntimeInterruptedException;
 import catdata.Pair;
 import catdata.Triple;
-import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.AqlOptions;
@@ -107,34 +100,14 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 			dp = AqlProver.create(ops, col.entities_only());
 		}
 		//schema.typeSide.collage(); //sanity check remove
-		Integer timeout = (Integer) ops.getOrDefault(AqlOption.timeout);
-		ExecutorService executor = Executors.newSingleThreadExecutor();
-	    Future<Unit> future = executor.submit(new Callable<Unit>() {
-	    	@Override
-			public Unit call() throws Exception {
-				while (saturate1()); 
-				talg();
-				return new Unit();
-			}
-	    });
-	    		
-	       try {
-	    	   	if (timeout < 0) {
-	    	   		future.get();
-	    	   	} else {
-	    	   		future.get(timeout, TimeUnit.SECONDS);
-	    	   	}
-	       } catch (TimeoutException e) {
-	    	   e.printStackTrace();
-	    	   future.cancel(true);
-	    	   throw new RuntimeException("Timeout (" + timeout + "s) during saturation");
-	       } catch (InterruptedException e) {
-	    	   return;
-	       } catch (ExecutionException e) {
-	    	   e.printStackTrace();
-	    	   throw new RuntimeException("Error during saturation: " + e.getMessage());
-	       }
-			//TODO aql figure out how to do this only once but without concurrent modification exception
+		try {
+			while (saturate1()); 
+		} catch (InterruptedException exn) {
+			throw new RuntimeInterruptedException(exn);
+		}
+		talg();
+				
+		//TODO aql figure out how to do this only once but without concurrent modification exception
 			
 		if ((Boolean) ops.getOrDefault(AqlOption.require_consistency) && !hasFreeTypeAlgebra(schema.typeSide)) {
 			throw new RuntimeException("Not necessarily consistent; type algebra is\n\n" + talg().toString());

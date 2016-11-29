@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
-import catdata.InvisibleException;
+import catdata.RuntimeInterruptedException;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -251,7 +251,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			simplified_pair = simplify0();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-			throw new InvisibleException("Interrupted during simplification " + e.getMessage());
+			throw new RuntimeInterruptedException(e);
 		}
 		return simplified_pair;
 	}

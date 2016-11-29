@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -400,68 +401,84 @@ public final class AqlViewer {
 	
 	
 
-	/*
-	 * static class Hyperactive implements HyperlinkListener {
-	 * 
-	 * public void hyperlinkUpdate(HyperlinkEvent e) { if (e.getEventType() ==
-	 * HyperlinkEvent.EventType.ACTIVATED) { JEditorPane pane = (JEditorPane)
-	 * e.getSource(); if (e instanceof HTMLFrameHyperlinkEvent) {
-	 * HTMLFrameHyperlinkEvent evt = (HTMLFrameHyperlinkEvent)e; HTMLDocument
-	 * doc = (HTMLDocument)pane.getDocument();
-	 * doc.processHTMLFrameHyperlinkEvent(evt); } else { try {
-	 * pane.setPage(e.getURL()); } catch (Throwable t) { t.printStackTrace(); }
-	 * } } } }
-	 */
+		public static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Map<Ty, Object[][]> makeTyTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+			Map<Ty, Object[][]> ret = new LinkedHashMap<>();
 
+			List<Ty> tys = Util.alphabetical(alg.schema().typeSide.tys);
+
+			Map<Ty, Set<Y>> m = Util.revS(alg.talg().sks.map);
+			for (Ty ty : tys) {
+				if (!m.containsKey(ty)) {
+					continue;
+				}
+				int n = m.get(ty).size();
+				Object[][] data = new Object[n][1];
+				int i = 0;
+				for (Y x : Util.alphabetical(m.get(ty))) {
+					Object[] row = new Object[1];
+					row[0] = alg.printY(x);				
+					data[i] = row;
+					i++;
+				}
+				ret.put(ty,  data);
+			}
+			return ret;
+		}
+
+		public static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Map<En, Pair<List<String>, Object[][]>> makeEnTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+			Map<En, Pair<List<String>, Object[][]>> ret = new LinkedHashMap<>();
+
+			List<En> ens = Util.alphabetical(alg.schema().ens);
+		
+			for (En en : ens) {
+				List<Att> atts0 = Util.alphabetical(alg.schema().attsFrom(en));
+				List<Fk> fks0 = Util.alphabetical(alg.schema().fksFrom(en));
+
+				List<String> header = Util.append(Util.toString(atts0), Util.toString(fks0));
+				header.add(0, "ID");
+				int n = alg.en(en).size();
+				Object[][] data = new Object[n][];
+				int i = 0;
+				for (X x : Util.alphabetical(alg.en(en))) {
+					List<Object> row = new LinkedList<>();
+					row.add(alg.printX(x));
+					for (Att att0 : atts0) {
+						row.add(alg.att(att0, x).toString(alg::printY, Util.voidFn()));
+					}
+					for (Fk fk0 : fks0) {
+						row.add(alg.printX(alg.fk(fk0, x)));
+					}
+					data[i] = row.toArray();
+					i++;
+				}
+			
+				ret.put(en, new Pair<>(header, data));
+			}
+					
+			return ret;
+		}
+		
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Component viewAlgebra(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
 		List<JComponent> list = new LinkedList<>();
 
-		List<En> ens = Util.alphabetical(alg.schema().ens);
-		List<Ty> tys = Util.alphabetical(alg.schema().typeSide.tys);
-
-		for (En en : ens) {
-			List<Att> atts0 = Util.alphabetical(alg.schema().attsFrom(en));
-			List<Fk> fks0 = Util.alphabetical(alg.schema().fksFrom(en));
-
-			List<String> header = Util.append(Util.toString(atts0), Util.toString(fks0));
-			header.add(0, "ID");
-			int n = alg.en(en).size();
-			Object[][] data = new Object[n][];
-			int i = 0;
-			for (X x : Util.alphabetical(alg.en(en))) {
-				List<Object> row = new LinkedList<>();
-				row.add(alg.printX(x));
-				for (Att att0 : atts0) {
-					row.add(alg.att(att0, x).toString(alg::printY, Util.voidFn()));
-				}
-				for (Fk fk0 : fks0) {
-					row.add(alg.printX(alg.fk(fk0, x)));
-				}
-				data[i] = row.toArray();
-				i++;
-			}
+		Map<En,Pair<List<String>,Object[][]>> entables = makeEnTables(alg);
+		Map<Ty,Object[][]> tytables = makeTyTables(alg);
 		
-				
-			JPanel p = Util.makeBoldHeaderTable(Util.toString(atts0), BorderFactory.createEmptyBorder(), en + " (" + n + ")", data, header.toArray(new String[header.size()]));
+		for (En en : entables.keySet()) {
+			Pair<List<String>,Object[][]> x = entables.get(en);
+			JPanel p = Util.makeBoldHeaderTable(Util.toString(alg.schema().attsFrom(en)), BorderFactory.createEmptyBorder(), en + " (" + x.second.length + ")", x.second, x.first.toArray(new String[x.first.size()]));
 			list.add(p);
 		}
-				
+		
+		List<String> header = Util.singList("ID")	;	
 		Map<Ty, Set<Y>> m = Util.revS(alg.talg().sks.map);
-		for (Ty ty : tys) {
+		for (Ty ty : tytables.keySet()) {
 			if (!m.containsKey(ty)) {
 				continue;
 			}
-			List<String> header = Util.singList("ID");
-			int n = m.get(ty).size();
-			Object[][] data = new Object[n][1];
-			int i = 0;
-			for (Y x : Util.alphabetical(m.get(ty))) {
-				Object[] row = new Object[1];
-				row[0] = alg.printY(x);				
-				data[i] = row;
-				i++;
-			}
-			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + n + ")", data, header.toArray())); // TODO: aql boldify attributes
+			Object[][] arr = tytables.get(ty);
+			
+			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + arr.length + ")", arr, header.toArray())); // TODO: aql boldify attributes
 		}
 
 		return Util.makeGrid(list);

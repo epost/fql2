@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import catdata.IntRef;
-import catdata.InvisibleException;
 import catdata.LineException;
 import catdata.Pair;
 import catdata.Program;
+import catdata.RuntimeInterruptedException;
 import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Pragma;
@@ -21,24 +21,45 @@ import catdata.graph.DAG;
 //TODO: aql does assume unique names
 public final class AqlMultiDriver implements Callable<Unit> {
 
+	@SuppressWarnings("deprecation")
+	public void abort() {
+		interruptAll();
+		try {
+			Thread.sleep(1000);
+		} catch (Throwable thr) { }
+		for (Thread t : threads) {
+			try {
+				t.stop();
+			} catch (Throwable e) {
+			}
+		}
+		exn.add(new RuntimeException("Manual abort"));
+	}
+	
+	private void interruptAll() {
+		for (Thread t : threads) {
+			t.interrupt();
+		}
+	}
+
 	public static <X> Collection<Pair<String, Kind>> wrapDeps(String s, Exp<X> exp, Program<Exp<?>> prog) {
 		Collection<Pair<String, Kind>> ret = new HashSet<>(exp.deps());
 		for (String s0 : prog.order) {
 			if (s.equals(s0)) {
 				break;
 			}
-			//each expression depends on all the pragmas before it
+			// each expression depends on all the pragmas before it
 			if (prog.exps.get(s0).kind().equals(Kind.PRAGMA)) {
 				ret.add(new Pair<>(s0, Kind.PRAGMA));
 			}
-			//each pragma depends on all expressions before it
+			// each pragma depends on all expressions before it
 			if (exp.kind().equals(Kind.PRAGMA)) {
 				ret.add(new Pair<>(s0, Kind.PRAGMA));
 			}
 		}
 		return ret;
 	}
-	
+
 	// n is unchanged if it is equal to old(n) and for every dependency d,
 	// unchanged(d)
 	// this means that expressions such as 'load from disk' will need to be
@@ -60,18 +81,20 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	public final Program<Exp<?>> last_prog;
 	public final AqlEnv last_env;
 
-	private List<RuntimeException> exn = new LinkedList<>(); 
-	
+	private List<RuntimeException> exn = new LinkedList<>();
+
 	boolean stop = false;
-	
+
 	public AqlMultiDriver(Program<Exp<?>> prog, String[] toUpdate, Program<Exp<?>> last_prog, AqlEnv last_env) {
 		this.prog = prog;
 		this.toUpdate = toUpdate;
 		this.last_prog = last_prog;
 		this.last_env = last_env;
-
+	}
+	
+	public void start() {
 		checkAcyclic();
-		env.typing = new AqlTyping(prog);  //TODO aql line exceptions in typing
+		env.typing = new AqlTyping(prog); // TODO aql line exceptions in typing
 		init();
 		update();
 		process();
@@ -80,7 +103,8 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	private void checkAcyclic() {
 		DAG<String> dag = new DAG<>();
 		for (String n : prog.order) {
-			for (Pair<String, Kind> d : /*wrapDeps(n,*/ prog.exps.get(n).deps() /*, prog) */) { //crushes performance
+			for (Pair<String, Kind> d : /* wrapDeps(n, */ prog.exps.get(n).deps() /* , prog) */) { // crushes
+																									// performance
 				if (!prog.order.contains(d.first)) {
 					throw new LineException("Undefined dependency: " + d, n, prog.exps.get(n).kind().toString());
 				}
@@ -91,58 +115,68 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			}
 		}
 	}
-	
+
 	private boolean isEnded() {
 		synchronized (ended) {
 			return ended.i == Runtime.getRuntime().availableProcessors();
 		}
 	}
+
 	private void barrier() {
 		while (!isEnded()) {
 			synchronized (ended) {
 				try {
 					ended.wait();
 				} catch (InterruptedException e) {
-					throw new RuntimeException("Please report: driver interrupted while waiting");
+					abort();
+					throw new RuntimeException("Driver interrupted while waiting.  If execution was not aborted manually, please report.");
 				}
 			}
-		}		
+		}
 	}
-	
+
 	private void update() {
 		String s = toString();
-		synchronized(toUpdate) {
+		synchronized (toUpdate) {
 			toUpdate[0] = s;
-		}		
+		}
 	}
 
 	private IntRef ended = new IntRef(0);
-	
+	private List<Thread> threads = new LinkedList<>();
+
 	private void process() {
 		int numProcs = Runtime.getRuntime().availableProcessors();
-		
+
 		for (int i = 0; i < numProcs; i++) {
-			new Thread(() -> call()).start();
+			Thread thr = new Thread(() -> {
+			try {
+				call();
+			} catch (ThreadDeath d) { }
+			});
+			threads.add(thr);
+			thr.start();
 		}
 		barrier();
-		
-		if (!exn.isEmpty()) { 
+
+		if (!exn.isEmpty()) {
 			for (RuntimeException t : exn) {
-				if (!(t instanceof InvisibleException)) {
+				if (!(t instanceof RuntimeInterruptedException)) {
 					env.exn = t;
 				}
 			}
 			if (env.exn == null) {
 				env.exn = new RuntimeException("Anomaly: please report");
 			}
-			//when uncommented, partial results will not appear
-			//throw env.exn; //TODO aql configure behavior, stop on error or not?
-		}	
+			// when uncommented, partial results will not appear
+			// throw env.exn; //TODO aql configure behavior, stop on error or
+			// not?
+		}
 	}
 
 	private Map<String, Boolean> changed = new HashMap<>();
 
-	private void init() {		
+	private void init() {
 		if (last_prog == null) {
 			todo.addAll(prog.order);
 			return;
@@ -183,12 +217,12 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			ended.i++;
 			ended.notifyAll();
 		}
-		synchronized (this) { //just in case
+		synchronized (this) { // just in case
 			notifyAll();
 		}
 		return new Unit();
 	}
-	
+
 	@Override
 	public Unit call() {
 		String k2 = "";
@@ -197,11 +231,11 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		try {
 			for (;;) {
 				n = null;
-				
+
 				synchronized (this) {
 					if (stop == true || todo.isEmpty() || Thread.currentThread().isInterrupted()) {
 						break;
-					} 
+					}
 					n = nextAvailable();
 					if (n == null) {
 						update();
@@ -215,7 +249,8 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				Exp<?> exp = prog.exps.get(n);
 				Kind k = exp.kind();
 				k2 = k.toString();
-				Object val = exp.eval(env);
+				Object val = Util.timeout(() -> exp.eval(env), exp.timeout() * 1000);
+				// Object val = exp.eval(env);
 				if (val == null) {
 					throw new RuntimeException("anomaly, please report: null result on " + exp);
 				} else if (k.equals(Kind.PRAGMA)) {
@@ -230,18 +265,21 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				}
 			}
 		} catch (InterruptedException exp) {
-			exn.add(new InvisibleException(exp));			 
-		} catch (InvisibleException exp) {
+			exn.add(new RuntimeInterruptedException(exp));
+		} catch (RuntimeInterruptedException exp) {
 			exn.add(exp);
-		} catch (Throwable e) {
+		} catch (ThreadDeath d) { 
+			exn.add(new RuntimeInterruptedException(d));
+		} catch (Exception e) {
 			e.printStackTrace();
-			synchronized (this)  {
+			synchronized (this) {
 				stop = true;
 				exn.add(new LineException(e.getMessage(), n, k2));
 				notifyAll();
+				interruptAll();
 			}
 		}
-		
+
 		update();
 		return notifyOfDeath();
 	}
@@ -259,6 +297,3 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	}
 
 }
-
-
-

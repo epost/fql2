@@ -82,6 +82,10 @@ public final class AqlOptions {
 			return Integer.parseInt(getString(map));
 		}
 		
+		public Long getLong(Map<String, String> map) {
+			return Long.parseLong(getString(map));
+		}
+		
 		public Integer getNat(Map<String, String> map) {
 			Integer ret = getInteger(map);
 			if (ret < 0) {
@@ -134,7 +138,7 @@ public final class AqlOptions {
 		case require_consistency: 
 			return false;
 		case timeout:
-			return 5;
+			return new Long(5);
 		case dont_verify_is_appropriate_for_prover_unsafe:
 			return false;
 		case completion_compose:
@@ -171,9 +175,15 @@ public final class AqlOptions {
 		throw new RuntimeException("Anomaly: please report: "+ option);
 	}
 	
-	//TODO aql
+	public static Object getOrDefault(Map<String, String> map, AqlOption op) {
+		if (map.containsKey(op.toString())) {
+			return getFromMap(map, null, op);
+		} else {
+			return getDefault(op);
+		}
+	}
+	
 	/**
-	 * 
 	 * @param map
 	 * @param col possibly null
 	 */ 
@@ -197,7 +207,7 @@ public final class AqlOptions {
 		case require_consistency:
 			return op.getBoolean(map);
 		case timeout:
-			return op.getNat(map);
+			return op.getLong(map);
 		case dont_verify_is_appropriate_for_prover_unsafe:
 			return op.getBoolean(map);
 		case completion_compose:

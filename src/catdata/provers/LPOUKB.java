@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
-import catdata.InvisibleException;
+import catdata.RuntimeInterruptedException;
 import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
@@ -1144,7 +1144,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			}
 			throw new RuntimeException("Anomaly: please report");
 		} catch (InterruptedException e1) {
-			throw new InvisibleException(e1);
+			throw new RuntimeInterruptedException(e1);
 		}
 	}
 

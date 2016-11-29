@@ -23,6 +23,7 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
+import catdata.aql.AqlOptions.AqlOption;
 
 public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object>  {
 	
@@ -128,6 +129,11 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 	public final List<Quad<String, Object, RawTerm, RawTerm>> t_eqs;
 	
 	public final Map<String, String> options;
+	
+	@Override
+	public long timeout() {
+		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	}	
 
 	@Override
 	public String toString() {

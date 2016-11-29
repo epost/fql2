@@ -23,7 +23,7 @@ import catdata.provers.KBOptions;
 import catdata.provers.KBUnifier;
 import catdata.provers.KBExp.KBApp;
 import catdata.provers.KBExp.KBVar;
-import catdata.InvisibleException;
+import catdata.RuntimeInterruptedException;
 
 /**
  * 
@@ -72,7 +72,7 @@ public class OplKB<C, V>  {
 		try {
 			initAC();
 		} catch (InterruptedException e1) {
-			throw new InvisibleException(e1);
+			throw new RuntimeInterruptedException(e1);
 //			e1.printStackTrace();
 //			throw new RuntimeException("Interrupted " + e1.getMessage());
 		}
@@ -317,7 +317,7 @@ public class OplKB<C, V>  {
 		try {
 			while (!step(null));
 		} catch (InterruptedException ex) {
-			throw new InvisibleException(ex);
+			throw new RuntimeInterruptedException(ex);
 		}
 		if (!isCompleteGround) {
 			throw new RuntimeException("Not ground complete after iteration timeout.  Last state:\n\n" + toString());

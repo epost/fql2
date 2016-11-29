@@ -9,8 +9,10 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.It.ID;
+import catdata.aql.AqlOptions;
 import catdata.aql.Transform;
 import catdata.aql.Var;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.exp.InstExp.InstExpCoEval;
 import catdata.aql.exp.InstExp.InstExpDelta;
 import catdata.aql.exp.InstExp.InstExpDistinct;
@@ -46,6 +48,11 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q; 
 		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
 		public final Map<String,String> options;
+		
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}	
 		
 		public TransExpCoEvalEvalCoUnit(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
 			Q = q;
@@ -126,6 +133,11 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public final InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> I;
 		public Map<String, String> options;
 		
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}	
+		
 		public TransExpCoEvalEvalUnit(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> i, Map<String, String> options) {
 			Q = q;
 			I = i;
@@ -204,6 +216,13 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public final TransExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
 		private final Map<String,String> options1, options2;
 		private final List<Pair<String, String>> o1, o2;
+		
+		@Override
+		public long timeout() {
+			long l1 = (Long) AqlOptions.getOrDefault(options1, AqlOption.timeout);;
+			long l2 = (Long) AqlOptions.getOrDefault(options2, AqlOption.timeout);
+			return l1 + l2 + Q.timeout() + t.timeout();
+		}	
 		 
 		public TransExpCoEval(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, TransExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t, List<Pair<String, String>> o1, List<Pair<String, String>> o2) {
 			this.t = t;
@@ -278,6 +297,10 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public final QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> Q;
 		public final TransExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
 		
+		@Override
+		public long timeout() {
+			return Q.timeout() + t.timeout();
+		}	
 		public TransExpEval(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q,TransExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
 			this.t = t;
 			Q = q;
@@ -347,6 +370,11 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public final MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F; 
 		public final InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> I;
 		public final Map<String, String> options;
+		
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout) + F.timeout() + I.timeout();
+		}	
 		
 		@Override
 		public int hashCode() {
@@ -429,6 +457,11 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
 
 		public final Map<String, String> options;
+		
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout) + F.timeout() + I.timeout();
+		}	
 
 		public TransExpSigmaDeltaUnit(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
 			F = f;
@@ -510,7 +543,13 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
 		public final TransExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
 
-		public final Map<String, String> options1, options2;		
+		public final Map<String, String> options1, options2;	
+		
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options1, AqlOption.timeout) +
+					 (Long) AqlOptions.getOrDefault(options2, AqlOption.timeout) + F.timeout() + t.timeout();
+		}	
 		
 		public TransExpSigma(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F, TransExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t, Map<String, String> options1, Map<String, String> options2) {
 			this.F = F;
@@ -598,6 +637,11 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
 		public final TransExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
+		
+		@Override
+		public long timeout() {
+			return F.timeout() + t.timeout();
+		}	
 		
 		public TransExpDelta(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F, TransExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
 			this.F = F;
@@ -720,6 +764,11 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public Pair<InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> type(AqlTyping G) {
 			return new Pair<>(inst, inst);
 		}
+		
+		@Override
+		public long timeout() {
+			return 0;
+		}	
 
 	}
 
@@ -779,6 +828,11 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>> type(AqlTyping G) {
 			return (Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>,InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>) ((Object)G.defs.trans.get(var));
 		}
+		
+		@Override
+		public long timeout() {
+			return 0;
+		}	
 
 	}
 
@@ -839,6 +893,10 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 			return new Pair<>(new InstExpLit<>(trans.src()), new InstExpLit<>(trans.dst()));
 		}
 
+		@Override
+		public long timeout() {
+			return 0;
+		}	
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -897,7 +955,10 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 			return t.deps();
 		}
 		
-		
+		@Override
+		public long timeout() {
+			return t.timeout();
+		}	
 		
 		
 	}

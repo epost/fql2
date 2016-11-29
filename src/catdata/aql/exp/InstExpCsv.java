@@ -43,6 +43,11 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 	public final Map<String, String> options;
 	
 	public final String file;
+	
+	@Override
+	public long timeout() {
+		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	}	
 
 	public InstExpCsv(SchExp<Ty, En, Sym, Fk, Att> schema, String file, List<String> imports, List<Pair<String, String>> options) {
 		Util.assertNotNull(schema, imports, options, file);
