@@ -38,12 +38,22 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		this.src = src;
 		this.dst = dst;
 		totalityCheck(ens, atts, fks);
+		
 		for (En2 en2 : ens.keySet()) {
-			this.ens.put(en2, new Frozen<>(ens.get(en2).first, ens.get(en2).second, src, ens.get(en2).third));
+			try {
+				this.ens.put(en2, new Frozen<>(ens.get(en2).first, ens.get(en2).second, src, ens.get(en2).third));
+			} catch (Throwable thr) {
+				throw new RuntimeException("In block for entity " + en2 + ", " + thr.getMessage());
+			}
 		}
+		
 		for (Fk2 fk2 : fks.keySet()) {
-			this.fks.put(fk2, new LiteralTransform<>(fks.get(fk2).first.map, new HashMap<>(), this.ens.get(dst.fks.get(fk2).second), this.ens.get(dst.fks.get(fk2).first), fks.get(fk2).second));
-			this.doNotValidate.put(fk2, fks.get(fk2).second);
+			try {
+				this.fks.put(fk2, new LiteralTransform<>(fks.get(fk2).first.map, new HashMap<>(), this.ens.get(dst.fks.get(fk2).second), this.ens.get(dst.fks.get(fk2).first), fks.get(fk2).second));
+				this.doNotValidate.put(fk2, fks.get(fk2).second);
+			} catch (Throwable thr) {
+				throw new RuntimeException("In transform for foreign key " + fk2 + ", " + thr.getMessage());
+			}
 		}
 		this.atts = new Ctx<>(atts.map);
 		if (!doNotCheckPathEqs) {

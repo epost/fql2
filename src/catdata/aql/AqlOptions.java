@@ -138,7 +138,7 @@ public final class AqlOptions {
 		case require_consistency: 
 			return false;
 		case timeout:
-			return new Long(5);
+			return new Long(10);
 		case dont_verify_is_appropriate_for_prover_unsafe:
 			return false;
 		case completion_compose:

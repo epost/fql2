@@ -2,9 +2,9 @@ package catdata;
 
 public class Ref<X> {
 
-	public X x;
+	public volatile X x;
 
-	private int var; //needed to make sure refs don't compare to equal just because their referents are equal.  could have not used value eauality, but var aso useful for printing
+	private volatile int var; //needed to make sure refs don't compare to equal just because their referents are equal.  could have not used value eauality, but var aso useful for printing
 	
 	private static int count = 0;
 	

@@ -371,9 +371,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			Fold fold = topArea.getFoldManager().getFold(j);
 			fold.setCollapsed(b);
 		}
-	}
-	
-	
+	}	
 	
 	public void setFontSize(int size) {
 		if (size < 1) {
@@ -403,25 +401,8 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		display = null;
 	}
 
-	@SuppressWarnings("deprecation")
 	public void abortAction() {
-		try {
-			if (thread != null && thread.isAlive()) {
-				thread.stop();			
-			}
-		} catch (Throwable e) {
-			//respArea.setText(e.getLocalizedMessage());
-		}
-		thread = null;
-		try {
-			if (temp != null && temp.isAlive()) {
-				temp.stop();			
-			}
-		} catch (Throwable e) {
-			//respArea.setText(e.getLocalizedMessage());
-		}
-		temp = null;
-		toDisplay = "Aborted";
+		interruptAndNullify();
 		respArea.setText("Aborted");
 	}
 	
@@ -429,17 +410,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	protected String toDisplay = null;
 	Thread thread, temp;
 
-	@SuppressWarnings("deprecation")
 	public void runAction() {
 		toDisplay = null;
-		if (temp != null) {
-			temp.stop();
-		}
-		temp = null;
-		if (thread != null) {
-			thread.stop();
-		}
-		//? thread = null;
+		interruptAndNullify();
 		thread = new Thread(this);
 		temp = new Thread(new Runnable() {
 			@Override
@@ -447,12 +420,11 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 				try {
 					respArea.setText("Begin\n");
 					int count = 0;
-					for (;;) {
+					while (!Thread.currentThread().isInterrupted()) {
 						count++;
 						Thread.sleep(250);
 						if (toDisplay != null) {
 							respArea.setText(toDisplay);
-							//toDisplay = null;
 							return;
 						} else if (thread != null) {
 							synchronized (toUpdate) {
@@ -472,11 +444,10 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 						}
 					}
 				} catch (InterruptedException ie) {
-					ie.printStackTrace();
 				} catch (Exception tt) {
 					tt.printStackTrace();
 					respArea.setText(tt.getMessage());
-				} catch (ThreadDeath d) { }
+				} 
 			}
 		});
 		temp.setPriority(Thread.MIN_PRIORITY);
@@ -485,7 +456,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		thread.start();
 	}
 
-	@SuppressWarnings("deprecation")
 	public void run() {
 		String program = topArea.getText();
 
@@ -523,28 +493,23 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			e.printStackTrace();
 			Integer theLine = init.getLine(e.decl);
 			setCaretPos(theLine);
-		} catch (ThreadDeath d)  {
-			
 		} catch (Throwable re) {
 				toDisplay = "Error: " + re.getLocalizedMessage();
 				respArea.setText(toDisplay);
 				re.printStackTrace();
-			} 
+		} 
+		interruptAndNullify();
+	}
 
-		try {
-			if (thread != null) {
-				thread.stop();
-			} 	
-		} catch (ThreadDeath d) { }
+	private void interruptAndNullify() {
+		if (thread != null) {
+			thread.interrupt();
+		} 	
 		thread = null;
-		try {
-			if (temp != null) {
-				temp.stop();
-			}
-		} catch (ThreadDeath d) { }
+		if (temp != null) {
+			temp.interrupt();
+		}
 		temp = null;
-	
-
 	}
 	
 	protected abstract String textFor(Env env);
@@ -595,7 +560,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			if (!GUI.getDirty(id)) {
 				return false;
 			}
-		} catch (NullPointerException npe) {
+		} catch (NullPointerException npe) { //TODO aql weird
 			npe.printStackTrace();
 			return true;
 		}

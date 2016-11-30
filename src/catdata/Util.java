@@ -43,20 +43,23 @@ public class Util {
 	
 	@SuppressWarnings("deprecation")
 	public static <X> X timeout(Callable<X> c, long timeout) { 
-		try {
-			final Object lock = new Object();
+			//final Object lock = new Object();
 			final Ref<X> ret = new Ref<>();
 			final Ref<Throwable> thr = new Ref<>();
 			Thread t = new Thread(() -> {
 				try {
 					X x = c.call();
-					synchronized (lock) {
+					synchronized (ret) {
 						ret.set(x);
 					}
-				} catch (Throwable exn) {
+				} catch (Exception exn) {
 					exn.printStackTrace();
-					synchronized (lock) {
+					synchronized (thr) {
 						thr.set(exn);		
+					}
+				} catch (ThreadDeath d) {
+					synchronized (thr) {
+						thr.set(new RuntimeInterruptedException(d));
 					}
 				}
 			});
@@ -65,15 +68,12 @@ public class Util {
 			try {
 				t.join(timeout);
 			} catch (InterruptedException e) {
-				try {
-					t.stop();
-				} catch (ThreadDeath dt) {
-					throw new RuntimeInterruptedException(dt);	
-				}
-				
+				t.stop();			
+				throw new RuntimeInterruptedException(e);
 			}
 			
-			synchronized (lock) { 	
+			synchronized (thr) { 
+			synchronized (ret) {	
 				if (!ret.isSet() && !thr.isSet()) {
 					t.stop();
 					throw new RuntimeException("Timout after " + timeout + " ms.");
@@ -82,14 +82,12 @@ public class Util {
 					return ret.x;
 				} else if (!ret.isSet() && thr.isSet()) {
 					//t should be dying
-					throw new RuntimeException(thr.x.getMessage() + "\n\nMessage: ");
+					throw new RuntimeException(thr.x.getMessage());
 				} else {
 					throw new RuntimeException("Anomaly: please report");
 				}
-			}
-		} catch (ThreadDeath d) { 
-			throw new RuntimeInterruptedException(d);		
-		}
+			}}
+		
 	}
 	
 	public static Class<?> load(String clazz) {

@@ -1,6 +1,7 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -18,7 +19,8 @@ import catdata.Util;
 import catdata.aql.Pragma;
 import catdata.graph.DAG;
 
-//TODO: aql does assume unique names
+//TODO aql does assume unique names
+//TODO aql make sure transforms validate
 public final class AqlMultiDriver implements Callable<Unit> {
 
 	public void abort() {
@@ -27,9 +29,9 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	}
 	
 	private void interruptAll() {
-		synchronized(this) {
-			stop = true;
-		}
+		//synchronized(this) {
+		//	stop = true;
+		//}
 		for (Thread t : threads) {
 			t.interrupt();
 		}
@@ -65,18 +67,18 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	public final AqlEnv env = new AqlEnv();
 
-	public final List<String> todo = new LinkedList<>();
-	public final List<String> processing = new LinkedList<>();
-	public final List<String> completed = new LinkedList<>();
+	public final List<String> todo = Collections.synchronizedList(new LinkedList<>());
+	public final List<String> processing = Collections.synchronizedList(new LinkedList<>());
+	public final List<String> completed =Collections.synchronizedList(new LinkedList<>());
 
 	public final Program<Exp<?>> prog;
 	public final String[] toUpdate;
 	public final Program<Exp<?>> last_prog;
 	public final AqlEnv last_env;
 
-	private List<RuntimeException> exn = new LinkedList<>();
+	private List<RuntimeException> exn = Collections.synchronizedList(new LinkedList<>());
 
-	boolean stop = false;
+//	boolean stop = false;
 
 	public AqlMultiDriver(Program<Exp<?>> prog, String[] toUpdate, Program<Exp<?>> last_prog, AqlEnv last_env) {
 		this.prog = prog;
@@ -122,7 +124,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 					ended.wait();
 				} catch (InterruptedException e) {
 					abort();
-					throw new RuntimeException("Driver interrupted while waiting.  If execution was not aborted manually, please report.");
+					exn.add(new RuntimeException("Execution interrupted while waiting.  If execution was not aborted manually, please report."));
 				}
 			}
 		}
@@ -141,12 +143,8 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	private void process() {
 		int numProcs = Runtime.getRuntime().availableProcessors();
 		for (int i = 0; i < numProcs; i++) {
-			Thread thr = new Thread(() -> {
-			try {
-				call();
-			} catch (ThreadDeath d) { }
-			});
-			threads.add(thr);
+			Thread thr = new Thread(() -> call());
+			threads.add(thr);			
 			thr.start();
 		}
 		barrier();
@@ -225,7 +223,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				n = null;
 
 				synchronized (this) {
-					if (stop == true || todo.isEmpty() || Thread.currentThread().isInterrupted()) {
+					if (/*stop == true ||*/ todo.isEmpty() || Thread.currentThread().isInterrupted()) {
 						break;
 					}
 					n = nextAvailable();
@@ -260,12 +258,10 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			exn.add(new RuntimeInterruptedException(exp));
 		} catch (RuntimeInterruptedException exp) {
 			exn.add(exp);
-		} catch (ThreadDeath d) { 
-			exn.add(new RuntimeInterruptedException(d));
 		} catch (Exception e) {
 			e.printStackTrace();
 			synchronized (this) {
-				stop = true;
+				//stop = true;
 				exn.add(new LineException(e.getMessage(), n, k2));
 				notifyAll();
 				interruptAll();
