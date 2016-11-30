@@ -34,6 +34,7 @@ import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 
 import catdata.Pair;
+import catdata.Util;
 import catdata.aql.exp.Kind;
 import catdata.aql.gui.AqlCodeEditor;
 import catdata.fpql.EnrichViewer;
@@ -56,13 +57,12 @@ import catdata.opl.SqlToOpl;
 import catdata.sql.SqlLoader;
 import catdata.sql.SqlMapper;
 
-
 @SuppressWarnings("serial")
 /**
  * 
  * @author ryan
  *
- * Top level gui
+ *         Top level gui
  */
 public class GUI extends JPanel {
 
@@ -182,10 +182,9 @@ public class GUI extends JPanel {
 		final Menu editMenu = new Menu("Edit");
 		MenuItem findItem = new MenuItem("Find");
 		editMenu.add(findItem);
-		
+
 		Menu aqlMenu = new Menu("AQL");
 		populateAql(aqlMenu);
-		
 
 		KeyStroke ctrlF = KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK);
 		MenuShortcut f = new MenuShortcut(ctrlF.getKeyCode());
@@ -226,34 +225,34 @@ public class GUI extends JPanel {
 		visItem.addActionListener(x -> {
 			veditAction();
 		});
-		
+
 		MenuItem rtf = new MenuItem("Copy as RTF");
 		editMenu.add(rtf);
 		rtf.addActionListener(x -> {
 			int i = editors.getSelectedIndex();
-			CodeEditor<?,?,?> ed = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+			CodeEditor<?, ?, ?> ed = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
 			if (ed == null) {
 				return;
 			}
 			ed.copyAsRtf();
 		});
-		
+
 		MenuItem fall = new MenuItem("Fold All");
 		editMenu.add(fall);
 		rtf.addActionListener(x -> {
 			int i = editors.getSelectedIndex();
-			CodeEditor<?,?,?> ed = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+			CodeEditor<?, ?, ?> ed = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
 			if (ed == null) {
 				return;
 			}
 			ed.foldAll(true);
 		});
-		
+
 		MenuItem uall = new MenuItem("Unfold All");
 		editMenu.add(uall);
 		rtf.addActionListener(x -> {
 			int i = editors.getSelectedIndex();
-			CodeEditor<?,?,?> ed = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+			CodeEditor<?, ?, ?> ed = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
 			if (ed == null) {
 				return;
 			}
@@ -271,57 +270,57 @@ public class GUI extends JPanel {
 		checkItem.addActionListener(x -> {
 			checkAction();
 		});
-		
+
 		MenuItem sqlLoaderItem = new MenuItem("SQL Loader");
 		toolsMenu.add(sqlLoaderItem);
 		sqlLoaderItem.addActionListener(x -> {
 			SqlLoader.showLoader();
 		});
-		
+
 		MenuItem sqlMapperItem = new MenuItem("SQL Mapper");
 		toolsMenu.add(sqlMapperItem);
 		sqlMapperItem.addActionListener(x -> {
 			SqlMapper.showGuesser();
 		});
-		
+
 		MenuItem sqlToOplItem = new MenuItem("SQL to OPL");
 		transMenu.add(sqlToOplItem);
 		sqlToOplItem.addActionListener(x -> {
 			SqlToOpl.showPanel();
 		});
-		
+
 		MenuItem sqlCheckItem = new MenuItem("SQL Checker");
 		toolsMenu.add(sqlCheckItem);
 		sqlCheckItem.addActionListener(x -> {
 			new SqlChecker();
-		}); 
-		
+		});
+
 		MenuItem wizardItem = new MenuItem("Warehouse Wizard");
 		toolsMenu.add(wizardItem);
-		
+
 		wizardItem.addActionListener(x -> {
-			new Wizard<>(new OplWarehouse(), y -> { 
+			new Wizard<>(new OplWarehouse(), y -> {
 				Example ex = new Example() {
 
 					@Override
 					public Language lang() {
 						return Language.OPL;
 					}
-					
+
 					@Override
 					public String getName() {
 						return "Wizard";
 					}
-				
+
 					@Override
 					public String getText() {
 						return y.toString();
 					}
-					
-				}; 
+
+				};
 				doExample(ex);
-			}).startWizard(); }); 
-	
+			}).startWizard();
+		});
 
 		MenuItem raToFqlItem = new MenuItem("SPCU to FQL");
 		transMenu.add(raToFqlItem);
@@ -430,7 +429,6 @@ public class GUI extends JPanel {
 			}
 		});
 
-
 		menuBar.add(fileMenu);
 		menuBar.add(editMenu);
 		menuBar.add(toolsMenu);
@@ -439,11 +437,10 @@ public class GUI extends JPanel {
 
 		menuBar.add(helpMenu);
 
-	
 		pan.setLayout(new BorderLayout());
 
 		JPanel toolBar = new JPanel(new GridLayout(1, 7));
-	
+
 		JButton compileB = new JButton("Run");
 		compileB.addActionListener(new ActionListener() {
 			@SuppressWarnings("rawtypes")
@@ -488,7 +485,7 @@ public class GUI extends JPanel {
 		allBox.setSelectedIndex(-1);
 		allBox.addActionListener(x -> doExample((Example) allBox.getSelectedItem()));
 		for (Language l : Language.values()) {
-			@SuppressWarnings({  "rawtypes" })
+			@SuppressWarnings({ "rawtypes" })
 			JComboBox box = new JComboBox(Examples.filterBy(l.toString()));
 			box.setSelectedIndex(-1);
 			box.addActionListener(x -> doExample((Example) box.getSelectedItem()));
@@ -533,6 +530,7 @@ public class GUI extends JPanel {
 			a.infer(k);
 		}
 	}
+
 	private static void populateAql(Menu menu) {
 		MenuItem m = new MenuItem("Outline (using last compiled state)");
 		m.addActionListener(x -> {
@@ -544,7 +542,7 @@ public class GUI extends JPanel {
 			}
 		});
 		menu.add(m);
-		
+
 		MenuItem im = new MenuItem("Infer Mapping (using last compiled state)");
 		im.addActionListener(x -> infer(Kind.MAPPING));
 		menu.add(im);
@@ -566,8 +564,6 @@ public class GUI extends JPanel {
 		}
 		newAction(e.toString(), e.getText(), e.lang());
 	}
-
-
 
 	private static void abortAction() {
 		int i = editors.getSelectedIndex();
@@ -600,7 +596,6 @@ public class GUI extends JPanel {
 		titles.remove(c.id);
 	}
 
-	
 	public static void exitAction() {
 		delay();
 		int i = 0;
@@ -612,9 +607,7 @@ public class GUI extends JPanel {
 		if (i == 0) {
 			System.exit(0);
 		}
-		int choice = JOptionPane.showOptionDialog(null, i
-				+ " documents have unsaved changes - exit?", "Exit?",
-				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Yes", "No"}, "No");
+		int choice = JOptionPane.showOptionDialog(null, i + " documents have unsaved changes - exit?", "Exit?", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] { "Yes", "No" }, "No");
 		if (choice == JOptionPane.NO_OPTION) {
 			return;
 		}
@@ -648,20 +641,21 @@ public class GUI extends JPanel {
 
 	public static class Filter extends FileFilter {
 
-		Language l;
+		final Language l;
 
 		public Filter(Language l) {
+			Util.assertNotNull(l);
 			this.l = l;
 		}
 
 		@Override
 		public boolean accept(File f) {
-			return f.getName().toLowerCase().endsWith("." + l.fileExtension()) || f.isDirectory();
+			return f.getName().endsWith("." + this.l.fileExtension()) || f.isDirectory();
 		}
 
 		@Override
 		public String getDescription() {
-			return l + " files (*." + l.fileExtension() + ")";
+			return l + " files (*." + this.l.fileExtension() + ")";
 		}
 	}
 
@@ -669,7 +663,7 @@ public class GUI extends JPanel {
 		@Override
 		public boolean accept(File f) {
 			for (Language l : Language.values()) {
-				if (f.getName().toLowerCase().endsWith("." + l.fileExtension())) {
+				if (f.getName().endsWith("." + l.fileExtension())) {
 					return true;
 				}
 			}
@@ -683,25 +677,51 @@ public class GUI extends JPanel {
 		}
 	}
 
+	//TODO aql file chooser does not bold the selectable files on mac see http://stackoverflow.com/questions/15016176/jfilechooser-showsavedialog-all-files-greyed-out
 	protected static void saveAsAction() {
 		delay();
-		JFileChooser jfc = new JFileChooser(GlobalOptions.debug.general.file_path);
 		@SuppressWarnings("rawtypes")
 		CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
 
-		jfc.setFileFilter(new Filter(e.lang()));
+		JFileChooser jfc = new JFileChooser(GlobalOptions.debug.general.file_path) {
+			@Override
+			public void approveSelection() {
+				File selectedFile = getSelectedFile();
+				if (selectedFile == null) {
+					return;
+				}
+				if (!new Filter(e.lang()).accept(getSelectedFile())) {
+					return;
+				}
+				if (selectedFile.exists()) {
+					int response = JOptionPane.showOptionDialog(this, "The file " + selectedFile.getName() + " already exists. Replace?", "Ovewrite file", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] { "Yes", "No" }, "No");
+					if (response == JOptionPane.NO_OPTION) {
+						return;
+					}
+				}
 
-		jfc.showSaveDialog(null);
+				super.approveSelection();
+
+			}
+		};
+		jfc.setAcceptAllFileFilterUsed(false);
+
+		jfc.addChoosableFileFilter(new Filter(e.lang()));
+
+		int j = jfc.showSaveDialog(null);
+		if (j == JFileChooser.CANCEL_OPTION) {
+			return;
+		}
 		File f = jfc.getSelectedFile();
 		if (f == null) {
 			return;
 		}
-		if (!jfc.getSelectedFile().getAbsolutePath().endsWith("." + e.lang().fileExtension())) {
-			f = new File(jfc.getSelectedFile() + "." + e.lang().fileExtension());
-		}
+		// if (!jfc.getSelectedFile().getAbsolutePath().endsWith("." +
+		// e.lang().fileExtension())) {
+		// f = new File(jfc.getSelectedFile() + "." + e.lang().fileExtension());
+		// }
 
 		doSave(f, e.getText());
-		// change for david
 		dirty.put(e.id, false);
 		closeAction();
 		doOpen(f, e.lang());
@@ -719,9 +739,20 @@ public class GUI extends JPanel {
 
 	private static void openAction() {
 		delay();
-		JFileChooser jfc = new JFileChooser(GlobalOptions.debug.general.file_path);
-		jfc.setFileFilter(new AllFilter());
-		jfc.showOpenDialog(null);
+		JFileChooser jfc = new JFileChooser(GlobalOptions.debug.general.file_path) {
+			public void approveSelection() {
+				if (new AllFilter().accept(getSelectedFile())) {
+					super.approveSelection();
+				}
+
+			}
+		};
+		jfc.setAcceptAllFileFilterUsed(false);
+		jfc.addChoosableFileFilter(new AllFilter());
+		int j = jfc.showOpenDialog(null);
+		if (j == JFileChooser.CANCEL_OPTION) {
+			return;
+		}
 		File f = jfc.getSelectedFile();
 		if (f == null) {
 			return;
@@ -762,21 +793,20 @@ public class GUI extends JPanel {
 	// static Map<Integer, Integer> position = new HashMap<>();
 	static int untitled_count = 0;
 
-/*	public static String getTitle(Integer i) {
-		return titles.get(i);
-	} */
+	/*
+	 * public static String getTitle(Integer i) { return titles.get(i); }
+	 */
 
 	static Integer newAction(String title, String content, Language lang) {
 		untitled_count++;
 		if (title == null) {
 			title = "Untitled " + untitled_count;
 		}
-		CodeEditor<?,?,?> c = lang.createEditor(title, untitled_count, content);
+		CodeEditor<?, ?, ?> c = lang.createEditor(title, untitled_count, content);
 		int i = editors.getTabCount();
 		keys.put(untitled_count, c);
 		dirty.put(untitled_count, false);
-		
-		
+
 		titles.put(c.id, title);
 		editors.addTab(title, c);
 		editors.setTabComponentAt(i, new ButtonTabComponent(editors));
@@ -816,11 +846,9 @@ public class GUI extends JPanel {
 		}
 	}
 
-	
-
 	private static void formatAction() {
 		int i = editors.getSelectedIndex();
-		CodeEditor<?,?,?> c = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+		CodeEditor<?, ?, ?> c = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
 		if (c == null) {
 			return;
 		}
@@ -833,7 +861,7 @@ public class GUI extends JPanel {
 
 	private static void veditAction() {
 		int i = editors.getSelectedIndex();
-		CodeEditor<?,?,?> c = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+		CodeEditor<?, ?, ?> c = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
 		if (c == null) {
 			return;
 		}
@@ -847,7 +875,7 @@ public class GUI extends JPanel {
 
 	private static void checkAction() {
 		int i = editors.getSelectedIndex();
-		CodeEditor<?,?,?> c = (CodeEditor<?,?,?>) editors.getComponentAt(i);
+		CodeEditor<?, ?, ?> c = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
 		if (c == null) {
 			return;
 		}
