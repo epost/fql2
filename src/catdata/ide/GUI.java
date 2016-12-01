@@ -749,21 +749,21 @@ public class GUI extends JPanel {
 		};
 		jfc.setAcceptAllFileFilterUsed(false);
 		jfc.addChoosableFileFilter(new AllFilter());
+		jfc.setMultiSelectionEnabled(true);
 		int j = jfc.showOpenDialog(null);
 		if (j == JFileChooser.CANCEL_OPTION) {
 			return;
 		}
-		File f = jfc.getSelectedFile();
-		if (f == null) {
-			return;
-		}
-		for (Language l : Language.values()) {
-			if (f.getAbsolutePath().endsWith("." + l.fileExtension())) {
-				doOpen(f, l);
+		for (File f : jfc.getSelectedFiles()) {
+			if (f == null) {
 				return;
 			}
+			for (Language l : Language.values()) {
+				if (f.getAbsolutePath().endsWith("." + l.fileExtension())) {
+					doOpen(f, l);
+				} 
+			}
 		}
-		throw new RuntimeException("Unknown file extension on " + f.getAbsolutePath());
 	}
 
 	public static void setDirty(Integer i, boolean b) {

@@ -12,6 +12,7 @@ import catdata.aql.gui.AqlViewer;
 import catdata.ide.Example;
 import catdata.ide.Examples;
 
+//TODO: have this execute pragmas?
 public class AqlInACan {
 
 	protected static String quote(String s) {
@@ -25,6 +26,8 @@ public class AqlInACan {
 	private static String makeHtml() {
 		String s = "";
 		String t = "";
+		//TODO aql skip any example containing text 'jdbc' or 'csv' or 'pragma'
+		//TODO aql alphabetize
 		for (Example ex : Examples.getExamples(AqlExamples.class)) {
 			s += "\nif (v == \"" + ex.getName() + "\") { document.getElementById('code').innerHTML = \"" + quote(ex.getText()) + "\" }"; 
 			t += "\n<option value = \"" + ex.getName() + "\">" + ex.getName() + "</option>";
