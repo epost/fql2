@@ -18,7 +18,7 @@ public class Patrick23Example extends Example {
 
 	@Override
 	public String getText() {
-		return s;
+		return s + s2 + s3 + s4;
 	}
 	
 	String s = "old : type"
@@ -380,8 +380,9 @@ public class Patrick23Example extends Example {
 			+ "\n	v28.l= vPolyester, v28.r = vThermoPlastic,"
 			+ "\n	v29.l= vMaterial, v29.r = vMaterial;"
 			+ "\n} : isa_schema"
-			+ "\n"
-			+ "\nisa_schema_small = schema {"
+			+ "\n";
+        String s2 = 
+			 "isa_schema_small = schema {"
 			+ "\n	nodes A;"
 			+ "\n	edges l : A -> old, r : A -> old;"
 			+ "\n	equations;"
@@ -853,8 +854,9 @@ public class Patrick23Example extends Example {
 			+ "\n//done = delta M_new enrich_with"
 			+ "\n"
 			+ "\n/////////////////////////////////////////////////////////////////////////////////////////"
-			+ "\n"
-			+ "\nS = schema {"
+			+ "\n";
+        String s3 =
+			 "\nS = schema {"
 			+ "\n nodes"
 			+ "\n  unitcode,"
 			+ "\n  productorservicecategory,"
@@ -1879,8 +1881,9 @@ public class Patrick23Example extends Example {
 			+ "\n  v10.capability_Tolerance = \"NULL\","
 			+ "\n  v11.capability_Tolerance = \"NULL\";"
 			+ "\n} : S"
-			+ "\n"
-			+ "\n///////////////////////////////////////////////////////////////////////////////////////"
+			+ "\n";
+        String s4=
+			 "\n///////////////////////////////////////////////////////////////////////////////////////"
 			+ "\n"
 			+ "\nmerged = schema {"
 			+ "\n nodes"

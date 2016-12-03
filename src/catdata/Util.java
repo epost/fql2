@@ -172,18 +172,14 @@ public class Util {
 	
 	@Override 
 	public Comparator<?> getComparator(int c) {
-		return new Comparator<Object>() {
-			@Override
-			public int compare(Object o1, Object o2) {
-				if (o1 instanceof Integer && o2 instanceof Integer) {
-					return ((Integer)o1).compareTo((Integer)o2);
-				}
-				return o1.toString().compareTo(o2.toString());
-			}
-		};
-	}
-}
-	
+		return (o1, o2) -> { 
+                        if (o1 instanceof Integer && o2 instanceof Integer) {
+                            return ((Integer)o1).compareTo((Integer)o2);
+                        } 
+                        return o1.toString().compareTo(o2.toString());
+                };
+        }
+    }
 
 	@SuppressWarnings("serial")
 	public static class BoldifyingColumnHeaderRenderer extends JLabel implements TableCellRenderer {
@@ -556,12 +552,8 @@ public class Util {
 		}
 	};
 	
-	public static Comparator<Object> AlphabeticalComparator = new Comparator<Object>() {
-		@Override
-		public int compare(Object o1, Object o2) {
-			return o1.toString().compareTo(o2.toString());
-		}
-	};
+	public static Comparator<Object> AlphabeticalComparator = 
+                (o1, o2) -> o1.toString().compareTo(o2.toString());
 	
 
 	public static <X, Y> Map<Y, X> rev0(Map<X, Y> m) {
@@ -1127,4 +1119,5 @@ public class Util {
 	  public static double similarity(String s1, String s2) { //TODO aql
 			return ((double)1) / ((double)1+editDistance(s1, s2));
 	  }
-}
+     }
+

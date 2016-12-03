@@ -110,7 +110,7 @@ public class FQLParser {
 
 		Parser<?> op = Parsers.tuple(term("opposite"), ref.lazy());
 
-		Parser<?> a = Parsers.or(new Parser<?>[] { term("void"),
+		Parser<?> a = Parsers.or(new Parser[] { term("void"),
 				Parsers.tuple(term("unit"), xxx), plusTy, prodTy, expTy,
 				unionTy, ident(), schemaConst(), op, term("?") });
 

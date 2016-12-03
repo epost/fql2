@@ -122,14 +122,14 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 	
 
 	public Transform<O, A, Set, Fn> first(Functor<O, A, Set, Fn> o1, Functor<O, A, Set, Fn> o2) {
-		FUNCTION<O, Fn> f = o -> new Fn<Pair, Object>(FinSet.FinSet.product(o1.applyO(o),
-				o2.applyO(o)), o1.applyO(o), x -> x.first);
+		FUNCTION<O, Fn> f = (O o) -> new Fn(FinSet.FinSet.product(o1.applyO(o),
+				o2.applyO(o)), o1.applyO(o), x -> ((Pair)x).first);
 		return new Transform<>(product(o1, o2), o1, f);
 	}
 
 	public Transform<O, A, Set, Fn> second(Functor<O, A, Set, Fn> o1, Functor<O, A, Set, Fn> o2) {
-		FUNCTION<O, Fn> f = o -> new Fn<Pair, Object>(FinSet.FinSet.product(o1.applyO(o),
-				o2.applyO(o)), o2.applyO(o), x -> x.second);
+		FUNCTION<O, Fn> f = (O o) -> new Fn(FinSet.FinSet.product(o1.applyO(o),
+				o2.applyO(o)), o2.applyO(o), x -> ((Pair)x).second);
 		return new Transform<>(product(o1, o2), o2, f);
 	}
 
@@ -164,13 +164,13 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 	}
 
 	public Transform<O, A, Set, Fn> inleft(Functor<O, A, Set, Fn> o1, Functor<O, A, Set, Fn> o2) {
-		FUNCTION<O, Fn<?, Chc>> f = o -> new Fn<Object, Chc>(o1.applyO(o), FinSet.FinSet.coproduct(o1.applyO(o),
+		FUNCTION<O, Fn<?, Chc>> f = (O o) -> new Fn(o1.applyO(o), FinSet.FinSet.coproduct(o1.applyO(o),
 				o2.applyO(o)), x -> Chc.inLeft(x));
 		return new Transform(o1, coproduct(o1, o2), f);
 	}
 
 	public Transform<O, A, Set, Fn> inright(Functor<O, A, Set, Fn> o1, Functor<O, A, Set, Fn> o2) {
-		FUNCTION<O, Fn<?, Chc>> f = o -> new Fn<Object, Chc>(o2.applyO(o), FinSet.FinSet.coproduct(o1.applyO(o),
+		FUNCTION<O, Fn<?, Chc>> f = (O o) -> new Fn(o2.applyO(o), FinSet.FinSet.coproduct(o1.applyO(o),
 				o2.applyO(o)), x -> Chc.inRight(x));
 		return new Transform(o2, coproduct(o1, o2), f);
 	}
@@ -179,8 +179,8 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 		if (!f.target.equals(g.target)) {
 			throw new RuntimeException();
 		}
-		FUNCTION<O, Fn<Chc, ?>> fn = o -> new Fn<Chc, Object>(FinSet.FinSet.coproduct(f.source.applyO(o), g.source.applyO(o)), 
-				f.target.applyO(o), x -> x.left ? f.apply(o).apply(x.l) : g.apply(o).apply(x.r));
+		FUNCTION<O, Fn<Chc, ?>> fn = (O o) -> new Fn(FinSet.FinSet.coproduct(f.source.applyO(o), g.source.applyO(o)), 
+				f.target.applyO(o), x -> ((Chc)x).left ? f.apply(o).apply(((Chc)x).l) : g.apply(o).apply(((Chc)x).r));
 		return new Transform(coproduct(f.source, g.source), f.target, fn);
 	}
 	

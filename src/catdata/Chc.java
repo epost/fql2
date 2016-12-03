@@ -114,25 +114,25 @@ public class Chc<X,Y> implements Serializable {
 		result = prime * result + (left ? 1231 : 1237);
 		result = prime * result + ((r == null) ? 0 : r.hashCode());
 		return result;
-	}
+	} 
+	
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Chc<?,?> other = (Chc<?,?>) obj;
-		if (left != other.left)
-			return false;
-		if (left) {
-			return l.equals(other.l);
-		}
-		return r.equals(other.r);
-		
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Chc<?,?> other = (Chc<?,?>) obj;
+        if (left != other.left)
+            return false;
+        if (left) {
+            return l.equals(other.l);
+        }
+        return r.equals(other.r);
+    }
 
 	public void assertNeitherNull() {
 		if (l == null && r == null) {

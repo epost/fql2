@@ -35,7 +35,7 @@ import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplExp.OplSigma;
 import catdata.opl.OplExp.OplUnion;
 
-@SuppressWarnings({"unused","unchecked","rawtypes"})
+@SuppressWarnings({"unused","unchecked"})
 public class OplWarehouse extends WizardModel<Program<OplExp>> {
 	
 	private static abstract class WarehouseExample {
@@ -567,9 +567,9 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 				for (String edge : s0.edges.keySet()) {
 					Pair<OplCtx<String, String>, OplTerm<String, String>> edge2 = m0.symbols.get(edge);
 					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(
-							x -> {
-								return new OplTerm(x);
-							}).collect(Collectors.toList());
+							x -> 
+							 new OplTerm<String, String>(x)
+							).collect(Collectors.toList());
 					OplTerm<String, String> lhs = OplOps.fun2(equivs0, new OplTerm<>(s + "_" + edge, args));
 					OplCtx<String, String> ctx = new OplCtx<String, String>(edge2.first.values2().stream().map(x -> { return new Pair<>(x.first, fun.apply(s + "_" + x.second)); }).collect(Collectors.toList()));
 					OplTerm<String, String> rhs = OplOps.fun2(equivs0, OplOps.prepend(t, edge2.second));		
@@ -579,9 +579,9 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 				for (String edge : s0.attrs.keySet()) {
 					Pair<OplCtx<String, String>, OplTerm<String, String>> edge2 = m0.symbols.get(edge);
 					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(
-							x -> {
-								return new OplTerm(x);
-							}).collect(Collectors.toList());
+							x -> 
+							 new OplTerm<String, String>(x)
+							).collect(Collectors.toList());
 					OplTerm<String, String> lhs = OplOps.fun2(equivs0, new OplTerm<>(s + "_" + edge, args));
 					OplCtx<String, String> ctx = new OplCtx<String, String>(edge2.first.values2().stream().map(x -> { return new Pair<>(x.first, fun.apply(s + "_" + x.second)); }).collect(Collectors.toList()));
 					OplTerm<String, String> rhs = OplOps.fun2(equivs0, OplOps.prepend(t, edge2.second));		

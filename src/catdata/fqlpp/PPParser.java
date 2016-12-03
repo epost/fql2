@@ -145,7 +145,7 @@ public class PPParser {
 		
 //		Parser<?> op = Parsers.tuple(term("opposite"), ref.lazy());
 
-		Parser<?> a = Parsers.or(new Parser<?>[] { string(), p1, p2, p3, p4, p5, p6, p8, p7 });
+		Parser<?> a = Parsers.or(new Parser[] { string(), p1, p2, p3, p4, p5, p6, p8, p7 });
 
 		ref.set(a);
 
@@ -171,7 +171,7 @@ public class PPParser {
 		Parser<?> k = Parsers.tuple(term("cod"), ident());
 		Parser<?> v = Parsers.tuple(term("dom"), ident());
 		Parser<?> u = Parsers.tuple(term("range"), ident());
-		Parser<?> a = Parsers.or(new Parser<?>[] { union, isect, term("void"), term("unit"), term("prop"),
+		Parser<?> a = Parsers.or(new Parser[] { union, isect, term("void"), term("unit"), term("prop"),
 				 plusTy, prodTy, expTy, k, v, u,
 				ident(), setConst(), Terminals.IntegerLiteral.PARSER, app  });
 
@@ -199,7 +199,7 @@ public class PPParser {
 		
 		Parser<?> union = Parsers.tuple(term("union"), ref.lazy(), ref.lazy());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { colim, term("void"), term("unit"), 
+		Parser<?> a = Parsers.or(new Parser[] { colim, term("void"), term("unit"), 
 				 plusTy, prodTy, expTy, k, v,
 				ident() , catConst(), term("Cat"), term("Set"), kleisli, cokleisli, union });
 

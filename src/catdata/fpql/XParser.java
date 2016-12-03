@@ -116,7 +116,7 @@ public class XParser {
 		Parser<?> soed = soed();
 		Parser<?> supersoed = superSoed();
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { supersoed, soed, pushout, coapply, glabels, idpoly, labels, uberpi, hom, poly(ref), id1, id2, comp, apply, iter, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> a = Parsers.or(new Parser[] { supersoed, soed, pushout, coapply, glabels, idpoly, labels, uberpi, hom, poly(ref), id1, id2, comp, apply, iter, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
 
 		ref.set(a);
 

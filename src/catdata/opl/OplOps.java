@@ -989,22 +989,22 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 
 				for (String edge : s0.projE().symbols.keySet()) {
 					Pair<OplCtx<String, String>, OplTerm<String, String>> edge2 = m0.m.symbols.get(edge);
-					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(x -> {
-						return new OplTerm(x);
-					}).collect(Collectors.toList());
-					OplTerm<String, String> lhs = fun2(equivs0, new OplTerm<>(s + "_" + edge, args));
-					OplCtx<String, String> ctx = new OplCtx<String, String>(edge2.first.values2().stream().map(x -> {
-						return new Pair<>(x.first, fun.apply(s + "_" + x.second));
-					}).collect(Collectors.toList()));
+					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(x -> 
+						 new OplTerm<String,String>(x)
+					).collect(Collectors.toList());
+					OplTerm<String, String> lhs = fun2(equivs0, new OplTerm<String,String>(s + "_" + edge, args));
+					OplCtx<String, String> ctx = new OplCtx<>(edge2.first.values2().stream().map(x -> 
+						 new Pair<>(x.first, fun.apply(s + "_" + x.second))
+					).collect(Collectors.toList()));
 					OplTerm<String, String> rhs = fun2(equivs0, prepend(t, edge2.second));
 
 					pathEqs.add(new Triple<>(ctx, lhs, rhs));
 				}
 				for (String edge : s0.projA().symbols.keySet()) {
 					Pair<OplCtx<String, String>, OplTerm<String, String>> edge2 = m0.m.symbols.get(edge);
-					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(x -> {
-						return new OplTerm(x);
-					}).collect(Collectors.toList());
+					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(x -> 
+						 new OplTerm<String, String>(x)
+					).collect(Collectors.toList());
 					OplTerm<String, String> lhs = fun2(equivs0, new OplTerm<>(s + "_" + edge, args));
 					OplCtx<String, String> ctx = new OplCtx<String, String>(edge2.first.values2().stream().map(x -> {
 						return new Pair<>(x.first, fun.apply(s + "_" + x.second));

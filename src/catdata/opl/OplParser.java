@@ -122,7 +122,7 @@ public class OplParser {
 				ref.lazy().sepBy(term(",")), term(")"));
 		Parser<?> app2 = Parsers.tuple(term("("), ref.lazy(), string(),
 				ref.lazy(), term(")"));
-		Parser<?> a = Parsers.or(new Parser<?>[] { app, app2,
+		Parser<?> a = Parsers.or(new Parser[] { app, app2,
 				string().sepBy1(term(".")) });
 		ref.set(a);
 		return a;
@@ -212,7 +212,7 @@ public class OplParser {
 		Parser<?> chase = Parsers.tuple(term("chase"), ident(), Parsers.tuple(term("with"), term("{"), ident().sepBy(term(",")), term("}")), term("max"), Terminals.IntegerLiteral.PARSER);
 		Parser<?> arith = Parsers.tuple(term("arith"), NUMBER);
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { arith, distinct, graph, model2, sql, chase, ID, colim, pragma, union, pushoutBen,
+		Parser<?> a = Parsers.or(new Parser[] { arith, distinct, graph, model2, sql, chase, ID, colim, pragma, union, pushoutBen,
 				pushoutSch, pivot, DELTA, pushout, INST, SCHEMA, apply, idQ,
 				query, projEA, inst, schema, projE, projA, projT, flower,
 				ubersat, sigma, sat, unsat, presentation, delta, mapping,

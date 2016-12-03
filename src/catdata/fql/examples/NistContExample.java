@@ -17,7 +17,7 @@ public class NistContExample extends Example {
 
 	@Override
 	public String getText() {
-		return s;
+		return s + s2;
 		
 	}
 	
@@ -108,8 +108,9 @@ String s = "schema D = {"
 		+ "\n} : D"
 		+ "\n"
 		+ "\n/////////////"
-		+ "\n"
-		+ "\nschema A = {"
+		+ "\n";
+String s2 =
+		 "\nschema A = {"
 		+ "\n	nodes CM, M, C;"
 		+ "\n	attributes M_name : M -> string, C_name : C -> string;"
 		+ "\n	arrows g : CM -> C, f : CM -> M;"

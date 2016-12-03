@@ -90,7 +90,7 @@ public class MplParser {
 
 		Parser<?> eval = Parsers.tuple(term("eval"), ident(), term());
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { theory(), eval });
+		Parser<?> a = Parsers.or(new Parser[] { theory(), eval });
 		
 		ref.set(a);
 
@@ -120,7 +120,7 @@ public class MplParser {
 
 //		Parser<?> rho = Parsers.tuple(term("("), ref.lazy(), term("*"), ref.lazy(), term(")"));
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { sym, tr, id, ident(), prod, comp, alpha1, alpha2, lambda1, lambda2, rho1, rho2 });
+		Parser<?> a = Parsers.or(new Parser[] { sym, tr, id, ident(), prod, comp, alpha1, alpha2, lambda1, lambda2, rho1, rho2 });
 		
 		ref.set(a);
 
@@ -133,7 +133,7 @@ public class MplParser {
 
 		Parser<?> prod = Parsers.tuple(term("("), ref.lazy(), term("*"), ref.lazy(), term(")"));
 		
-		Parser<?> a = Parsers.or(new Parser<?>[] { term("I"), ident(), prod });
+		Parser<?> a = Parsers.or(new Parser[] { term("I"), ident(), prod });
 		
 		ref.set(a);
 

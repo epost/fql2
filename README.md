@@ -7,10 +7,8 @@ About
 An IDE for the functorial query languages developed at categoricaldata.net/fql.html.  
 Binaries are available there.
 
-Build
+Build 
 -----
-
-Compilation note: requires the built-in Eclipse compiler that ships with the Eclipse IDE for java developers.  The Oracle JDK compiler will fail with type-inference errors.  The Maven build script is not updated very often.
 
 ### Maven
 
@@ -24,7 +22,7 @@ License
 ### Categorical Data IDE (BSD License)
 
 
-Copyright (c) 2012-2016 Ryan Wisnesky and David Spivak and Patrick Schultz.
+Copyright (c) 2012-2017 Ryan Wisnesky and David Spivak and Patrick Schultz.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
