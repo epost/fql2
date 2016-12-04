@@ -55,8 +55,8 @@ public class Quad<A,B,C,D> {
 	
 	@Override
 	public String toString() {
-		return "Quad [first=" + first + ", second=" + second + ", third="
-				+ third + ", fourth=" + fourth + "]";
+		return "(" + first + ", " + second + ", "
+				+ third + ", " + fourth + ")";
 	}
 	
 	public Quad(A first, B second, C third, D fourth) {
