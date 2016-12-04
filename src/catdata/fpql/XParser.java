@@ -32,6 +32,7 @@ public class XParser {
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
+				@Override
 				public Integer map(String s) {
 					return Integer.valueOf(s);
 				}
@@ -249,7 +250,7 @@ public class XParser {
 		Parser<?> p3 = Parsers.tuple(path(), term("="), path());
 		Parser<?> xxx = Parsers.tuple(section("variables", node), 
 				section("equations", p3));
-		Parser kkk = ((Parser)term("INSTANCE")).or((Parser) term("instance"));
+		Parser kkk = ((Parser)term("INSTANCE")).or(term("instance"));
 		Parser<?> constant = Parsers
 				.tuple(kkk, xxx.between(term("{"), term("}")), term(":"),
 						ref.lazy());
@@ -891,7 +892,7 @@ J = soed {
 			Tuple3 u = (Tuple3) o;
 			List<String> n = (List<String>) u.a;
 			List<String> m = (List<String>) u.c;
-			eqsX.add(new Pair<>((List<String>) n, (List<String>) m));
+			eqsX.add(new Pair<>(n, m));
 		 }
 		XInst ret = new XInst(toExp(y.d), nodesX, eqsX);
 		if (y.a.toString().equals("INSTANCE")) {
@@ -923,7 +924,7 @@ J = soed {
 			Tuple3 u = (Tuple3) o;
 			String n = (String) u.a;
 			List<String> m = (List<String>) u.c;
-			eqsX.add(new Pair<>(n, (List<String>) m));
+			eqsX.add(new Pair<>(n, m));
 		 }
 		XExp.XMapConst ret = new XExp.XMapConst(toExp(y.c), toExp(y.e), nodesX, eqsX);
 		return ret;
@@ -946,10 +947,10 @@ J = soed {
 
 			if (u.a instanceof Tuple3) {
 				Tuple3 n = (Tuple3) u.a;
-				eqsX.add(new Pair<>(new Pair<>(n.a.toString(), n.c.toString()), (List<String>) m));
+				eqsX.add(new Pair<>(new Pair<>(n.a.toString(), n.c.toString()), m));
 			} else {
 				String n = (String) u.a;
-				eqsX.add(new Pair<>(new Pair<>(n, null), (List<String>) m));
+				eqsX.add(new Pair<>(new Pair<>(n, null), m));
 			}
 
 		 }
@@ -1076,7 +1077,7 @@ J = soed {
 		
 		for (Object x : t.b) {
 			Tuple3 l = (Tuple3) x;
-			where.add(new Pair((List<String>)l.a, (List<String>)l.c));
+			where.add(new Pair(l.a, l.c));
 		}
 		
 		for (Object x : t.c) {
@@ -1095,7 +1096,7 @@ J = soed {
 			edges.put(l.a.toString(), new Pair(l.e.toString(), fromBlockHelper(l.c)));
 		}
 
-		return new Block<String, String>(from, where, attrs, edges);
+		return new Block<>(from, where, attrs, edges);
 	}
 	
 	//{b2=a1.f, b3=a1.f}
@@ -1122,7 +1123,7 @@ J = soed {
 	}
 	public static XPoly<String, String> fromPoly(Tuple4 o) {
 		Map<Object, Pair<String, Block<String, String>>> blocks = fromBlocks((List)o.a);
-		return new XPoly<String, String>(toExp(o.b), toExp(o.d), blocks);
+		return new XPoly<>(toExp(o.b), toExp(o.d), blocks);
 	}
 	public static final Parser<?> poly(Reference ref) {
 		Parser p = Parsers.tuple(ident(), term("="), block(), term(":"), ident());

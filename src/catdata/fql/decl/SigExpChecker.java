@@ -77,6 +77,7 @@ public class SigExpChecker implements SigExpVisitor<SigExp, FQLProgram>{
 		return r.accept(env, this);
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public SigExp visit(FQLProgram env, Const e) {
 		try {

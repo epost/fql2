@@ -57,6 +57,7 @@ public class FqlppOptions extends Options {
 	public boolean ftr_mapping = true;
 	public boolean trans_elements =  true;
 	
+	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
 		JPanel viewer1 = new JPanel(new GridLayout(Options.biggestSize, 1));
 		JPanel viewer2 = new JPanel(new GridLayout(Options.biggestSize, 1));

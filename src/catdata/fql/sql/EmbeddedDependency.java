@@ -171,7 +171,7 @@ public class EmbeddedDependency {
 
 	}
 
-	private List<Pair<String, String>> subst2(List<Pair<String, String>> l,
+	private static List<Pair<String, String>> subst2(List<Pair<String, String>> l,
 			String e, String a) {
 		List<Pair<String, String>> x = new LinkedList<>();
 
@@ -183,7 +183,7 @@ public class EmbeddedDependency {
 		return x;
 	}
 
-	private List<Triple<String, String, String>> subst1(
+	private static List<Triple<String, String, String>> subst1(
 			List<Triple<String, String, String>> l, String e, String a) {
 		List<Triple<String, String, String>> x = new LinkedList<>();
 
@@ -195,7 +195,7 @@ public class EmbeddedDependency {
 		return x;
 	}
 
-	private boolean equiv(Set<Set<String>> eqcs, String e, String a) {
+	private static boolean equiv(Set<Set<String>> eqcs, String e, String a) {
 		for (Set<String> eqc : eqcs) {
 			if (eqc.contains(e)) {
 				return eqc.contains(a);
@@ -281,6 +281,7 @@ public class EmbeddedDependency {
 		return ret;
 	}
 
+	@Override
 	public String toString() {
 		String ret = "";
 

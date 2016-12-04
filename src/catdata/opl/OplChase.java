@@ -81,7 +81,7 @@ public class OplChase {
 		return new OplTerm<>(Chc.inRight(x), ret);
 	}
 	
-	static <S, C, V, X, Z> 
+	static <S, C, V, X> 
 	OplPushout<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X, Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>  
 	stepParallel(OplInst<S, C, V, X> I, List<OplQuery<S, C, V, String, String, V>> Qs) {
 
@@ -131,8 +131,8 @@ public class OplChase {
 		}
 		
 		OplPres<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>> 
-		A0 = new OplPres<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>(Asprec, I.S0 , I.S.sig, Asgens, Aseqs), 
-		E0 = new OplPres<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>(Esprec, I.S0 , I.S.sig, Esgens, Eseqs);
+		A0 = new OplPres<>(Asprec, I.S0 , I.S.sig, Asgens, Aseqs), 
+		E0 = new OplPres<>(Esprec, I.S0 , I.S.sig, Esgens, Eseqs);
 		A0.toSig(); E0.toSig();
 		
 		OplInst<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>
@@ -162,7 +162,7 @@ public class OplChase {
 	}
 	
 	// this will fail because the schema will not have plain strings as entities, will be of the form Chc<S, String>?
-	static <S, C, V, X, Z> 
+	static <S, C, V, X> 
 	OplPushout<S,C,V,Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>  
 	step(OplInst<S, C, V, X> I, OplQuery<S, C, V, String, String, V> Q) {
 		if (!Q.blocks.containsKey("EXISTS")) {
@@ -289,8 +289,8 @@ public class OplChase {
 		//
 		
 		OplPres<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>> 
-		A0 = new OplPres<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>(Aprec, I.S0 , Q.src.sig, Agens, Aeqs), 
-		E0 = new OplPres<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>(Eprec, I.S0 , Q.src.sig, Egens, Eeqs);
+		A0 = new OplPres<>(Aprec, I.S0 , Q.src.sig, Agens, Aeqs), 
+		E0 = new OplPres<>(Eprec, I.S0 , Q.src.sig, Egens, Eeqs);
 		A0.toSig(); E0.toSig();
 		
 		OplInst<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>
@@ -348,7 +348,7 @@ public class OplChase {
 				throw new RuntimeException("bad " + x + ", report to Ryan");
 			}
 		}	
-	};
+	}
 
 
 	static class Fun2 <C,X,V> implements Function<OplTerm<Chc<C, V>, V>,  OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>> {
@@ -382,5 +382,5 @@ public class OplChase {
 			}
 		}
 		
-	};
+	}
 }

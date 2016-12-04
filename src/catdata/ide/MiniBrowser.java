@@ -33,6 +33,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 
 		// Handle closing events.
 		addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(WindowEvent e) {
 				actionExit();
 			}
@@ -43,11 +44,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 		JMenu fileMenu = new JMenu("File");
 		fileMenu.setMnemonic(KeyEvent.VK_F);
 		JMenuItem fileExitMenuItem = new JMenuItem("Close", KeyEvent.VK_X);
-		fileExitMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				actionExit();
-			}
-		});
+		fileExitMenuItem.addActionListener(e -> actionExit());
 		fileMenu.add(fileExitMenuItem);
 		menuBar.add(fileMenu);
 		setJMenuBar(menuBar);
@@ -55,23 +52,16 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 		// Set up button panel.
 		JPanel buttonPanel = new JPanel();
 		backButton = new JButton("< Back");
-		backButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				actionBack();
-			}
-		});
+		backButton.addActionListener(e -> actionBack());
 		backButton.setEnabled(false);
 		buttonPanel.add(backButton);
 		forwardButton = new JButton("Forward >");
-		forwardButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				actionForward();
-			}
-		});
+		forwardButton.addActionListener(e -> actionForward());
 		forwardButton.setEnabled(false);
 		buttonPanel.add(forwardButton);
 		locationTextField = new JTextField(35);
 		locationTextField.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					actionGo();
@@ -80,11 +70,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 		});
 		buttonPanel.add(locationTextField);
 		JButton goButton = new JButton("GO");
-		goButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				actionGo();
-			}
-		});
+		goButton.addActionListener(e -> actionGo());
 		buttonPanel.add(goButton);
 
 		// Set up page display.
@@ -137,7 +123,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 	}
 
 	// Verify URL format.
-	private URL verifyUrl(String url) {
+	private static URL verifyUrl(String url) {
 		// Only allow HTTP URLs.
 		if (!url.toLowerCase().startsWith("http://"))
 			return null;
@@ -218,6 +204,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 	}
 
 	// Handle hyperlink's being clicked.
+	@Override
 	public void hyperlinkUpdate(HyperlinkEvent event) {
 		HyperlinkEvent.EventType eventType = event.getEventType();
 		if (eventType == HyperlinkEvent.EventType.ACTIVATED) {
@@ -239,7 +226,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 	}
 	
 	// Exit this program.
-		private void actionExit() {
+		private static void actionExit() {
 			System.exit(1);
 		}
 }

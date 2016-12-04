@@ -262,7 +262,7 @@ public class OplKB<C, V>  {
 	
 
 	protected static <X> void remove(Collection<X> X, X x) {
-		while (X.remove(x));
+		while (X.remove(x)){}
 	}
 	
 	protected static <X> void add(Collection<X> X, X x) {
@@ -303,7 +303,7 @@ public class OplKB<C, V>  {
 		}
 	}
 	
-	private void checkParentDead(Thread cur) throws InterruptedException {
+	private static void checkParentDead(Thread cur) throws InterruptedException {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InterruptedException();
 		}
@@ -315,7 +315,7 @@ public class OplKB<C, V>  {
 	
 	public void complete() {
 		try {
-			while (!step(null));
+			while (!step(null)){}
 		} catch (InterruptedException ex) {
 			throw new RuntimeInterruptedException(ex);
 		}
@@ -332,7 +332,7 @@ public class OplKB<C, V>  {
 			@Override
 			public void run() {
 				try {
-					while (!step(parent));
+					while (!step(parent)){}
 				} catch (Exception ex) {
 					ex.printStackTrace();
 					arr[0] = ex.getMessage();
@@ -394,10 +394,10 @@ public class OplKB<C, V>  {
 		}
 		 
 		List<KBExp<C, V>> l = new LinkedList<>(); l.add(candX.first); l.add(candX.second);
-		KBApp<C, V> cand0 = new KBApp<C, V>((C) "", l);
+		KBApp<C, V> cand0 = new KBApp<>((C) "", l);
 
 		List<KBExp<C, V>> r = new LinkedList<>(); r.add(other.first); r.add(other.second);
-		KBApp<C, V> other0 = new KBApp<C, V>((C) "", r);
+		KBApp<C, V> other0 = new KBApp<>((C) "", r);
 		
 		Map<V, KBExp<C, V>> subst = KBUnifier.findSubst(other0, cand0);
 		return subst;
@@ -920,7 +920,7 @@ public class OplKB<C, V>  {
 
 	}
 	
-	protected KBExp<C, V> step1Es(Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, KBExp<C, V> e) throws InterruptedException {
+	protected KBExp<C, V> step1Es(Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, KBExp<C, V> e) {
 		if (options.unfailing  && e.vars().isEmpty() ) {
 			for (Pair<KBExp<C, V>, KBExp<C, V>> r0 : E) {
 				KBExp<C, V> a = step1EsX(r0, e);
@@ -937,7 +937,7 @@ public class OplKB<C, V>  {
 	}
 
 	@SuppressWarnings("unchecked")
-	private KBExp<C, V> step1EsX(Pair<KBExp<C, V>, KBExp<C, V>> r0, KBExp<C, V> e) throws InterruptedException {
+	private KBExp<C, V> step1EsX(Pair<KBExp<C, V>, KBExp<C, V>> r0, KBExp<C, V> e) {
 		Pair<KBExp<C, V>, KBExp<C, V>> r = r0;
 		if (!Collections.disjoint(r.first.vars(), e.vars())
 				|| !Collections.disjoint(r.second.vars(), e.vars())) {
@@ -1257,6 +1257,7 @@ public class OplKB<C, V>  {
 	
 	
 
+	@SuppressWarnings("unused")
 	protected boolean allCpsConfluent(boolean print, boolean ground, String s, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> set) throws InterruptedException {
 		outer: for (Pair<KBExp<C, V>, KBExp<C, V>> e : set) {
 			KBExp<C, V> lhs = red(new HashMap<>(), Util.append(E,G), R, e.first);

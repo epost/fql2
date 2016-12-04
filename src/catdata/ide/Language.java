@@ -37,6 +37,8 @@ public enum Language {
 		case OPL: return "OPL";
 		case MPL: return "MPL";
 		case AQL: return "AQL";
+		default:
+			break;
 		}
 		throw new RuntimeException();
 	}
@@ -49,6 +51,8 @@ public enum Language {
 		case OPL: return "O";
 		case MPL: return "M";
 		case AQL: return "A";
+		default:
+			break;
 		}
 		throw new RuntimeException();
 	}
@@ -61,8 +65,10 @@ public enum Language {
 		case OPL: return "opl";
 		case MPL: return "mpl";
 		case AQL: return "aql";
+		default:
+			throw new RuntimeException(); 
 		}
-		throw new RuntimeException(); 
+		
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -73,9 +79,11 @@ public enum Language {
 		case OPL: return new OplCodeEditor(title, id, content);
 		case FQL: return new FqlCodeEditor(title,id, content);
 		case MPL: return new MplCodeEditor(title, id, content);
-		case AQL: return new AqlCodeEditor(title, id, content); 
+		case AQL: return new AqlCodeEditor(title, id, content);
+		default:
+			throw new RuntimeException(this.toString());
 		}
-		throw new RuntimeException(this.toString());
+		
 	}
 
 /*	public Options getOptions() {
@@ -98,7 +106,9 @@ public enum Language {
 		case FQL: return Examples.getExamples(FqlExamples.class);
 		case MPL: return Examples.getExamples(MplExamples.class);
 		case AQL: return Examples.getExamples(AqlExamples.class);
+		default:
+			throw new RuntimeException(this.toString());
 		}
-		throw new RuntimeException(this.toString());
+		
 	}
 }

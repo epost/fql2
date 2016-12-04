@@ -67,7 +67,7 @@ public class GraphExample extends Example {
 + "\n//gives the transform including the subgraph of instances into the original graph."
 + "\ntransform u = J.coreturn";
 
-;
+
 
 
 }

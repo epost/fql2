@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -26,7 +27,7 @@ import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
-import org.fife.ui.rsyntaxtextarea.Token;
+import org.fife.ui.rsyntaxtextarea.TokenTypes;
 
 import catdata.Program;
 import catdata.aql.exp.AqlEnv;
@@ -42,9 +43,10 @@ import catdata.ide.Language;
 public final class AqlCodeEditor extends
 		CodeEditor<Program<Exp<? extends Object>>, AqlEnv, AqlDisplay> {
 
-	private Outline outline;
+	private final Outline outline;
 	
 	
+        @Override
 	public void abortAction() {
 		super.abortAction();
 		if (driver != null) {
@@ -53,9 +55,9 @@ public final class AqlCodeEditor extends
 		
 	}
 	
-	private class Outline extends JFrame {
+	private final class Outline extends JFrame {
 		
-		private JPanel p = new JPanel(new GridLayout(1,1));;
+		private JPanel p = new JPanel(new GridLayout(1,1));
 		JList<String> list = new JList<>(); 
 		
 		public void build() {
@@ -66,7 +68,7 @@ public final class AqlCodeEditor extends
 			Set<String> set = last_prog.exps.keySet();		
 			Vector<String> listData = new Vector<>();
 			for (String s : set) {
-				listData.add(s);
+                            listData.add(s);
 			}
 			list.setListData(listData);
 			this.revalidate();
@@ -87,13 +89,15 @@ public final class AqlCodeEditor extends
 					Integer line = last_prog.lines.get(s);
 					if (line == null) {
 						toDisplay = "Cannot fine line for " + s + " - try recompiling. ";
+						line = 0;
 					}
 					setCaretPos(line);
 				}			
 			});
-			setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+			setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 			 ComponentListener listener = new ComponentAdapter() {
-			      public void componentShown(ComponentEvent evt) {
+			      @Override
+				public void componentShown(ComponentEvent evt) {
 			    	  build();
 			      }
 			 };
@@ -102,14 +106,14 @@ public final class AqlCodeEditor extends
 			this.setLocationRelativeTo(null);
 		}
 	
-	};
+	}
 	
 	
 	public AqlCodeEditor(String title, int id, String content) {
 		super(title, id, content);
 		SyntaxScheme scheme = topArea.getSyntaxScheme();
-		scheme.getStyle(Token.RESERVED_WORD).foreground = Color.RED;
-		scheme.getStyle(Token.RESERVED_WORD_2).foreground = Color.BLUE;
+		scheme.getStyle(TokenTypes.RESERVED_WORD).foreground = Color.RED;
+		scheme.getStyle(TokenTypes.RESERVED_WORD_2).foreground = Color.BLUE;
 		
 		JMenuItem im = new JMenuItem("Infer Mapping (using last compiled state)");
 		im.addActionListener(x -> infer(Kind.MAPPING));
@@ -151,6 +155,7 @@ public final class AqlCodeEditor extends
 		return "catdata.aql.gui.AqlTokenMaker"; 
 	}
 
+	@Override
 	protected void doTemplates() {
 		CompletionProvider provider = createCompletionProvider();
 		AutoCompletion ac = new AutoCompletion(provider);
@@ -161,7 +166,7 @@ public final class AqlCodeEditor extends
 		ac.install(this.topArea);
 	}
 
-	private CompletionProvider createCompletionProvider() {
+	private static CompletionProvider createCompletionProvider() {
 		DefaultCompletionProvider provider = new DefaultCompletionProvider();
 
 		provider.addCompletion(new ShorthandCompletion(provider, "typeside",

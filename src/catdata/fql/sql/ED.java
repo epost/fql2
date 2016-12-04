@@ -33,7 +33,7 @@ public class ED {
 
 	}
 
-	private List<Pair<Integer, Integer>> dedup(List<Pair<Integer, Integer>> l) {
+	private static List<Pair<Integer, Integer>> dedup(List<Pair<Integer, Integer>> l) {
 		List<Pair<Integer, Integer>> ret = new LinkedList<>();
 
 		for (int i = 0; i < l.size(); i++) {
@@ -162,7 +162,7 @@ public class ED {
 		return false;
 	}
 
-	private Flower make(int max, List<String> frm, List<Pair<Integer, Integer>> whr) {
+	private static Flower make(int max, List<String> frm, List<Pair<Integer, Integer>> whr) {
 
 		LinkedHashMap<String, String> f = new LinkedHashMap<>();
 		int i = 0;

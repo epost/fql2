@@ -30,7 +30,7 @@ public class Pi {
 	}
 	
 	
-	private static <ObjC, ArrowC, ObjD, ArrowD> Set<Map> subset2(
+	private static <ObjC, ObjD, ArrowD> Set<Map> subset2(
 			Category<ObjD, ArrowD> cat,
 			ArrowD e,
 			Triple<ObjD, ObjC, ArrowD>[] q2cols,
@@ -219,7 +219,7 @@ public class Pi {
 		return cnames;
 	}
 	
-	private static <OA, AA, OB, AB, OC, AC> Set<Map> lim2
+	private static <OA, AA, OB, AB, AC> Set<Map> lim2
 	(Functor<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>, Set, Fn> I) {
 	
 		Category<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>> B = I.source;

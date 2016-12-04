@@ -47,11 +47,7 @@ public class SemiThue<Y> {
 	}
 
 	public void complete() { 
-		try {
-			go(rules);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
+		go(rules);
 		finished = true;
 	}
 
@@ -106,8 +102,8 @@ public class SemiThue<Y> {
 		}
 	}
 
-	private <X> void go(Set<Pair<List<X>, List<X>>> t) throws InterruptedException {
-		while (!step(t)); 
+	private <X> void go(Set<Pair<List<X>, List<X>>> t) {
+		while (!step(t)){} 
 	}
 
 	private <X> boolean step(Set<Pair<List<X>, List<X>>> t) {
@@ -200,7 +196,7 @@ public class SemiThue<Y> {
 		return ret;
 	}
 
-	private <X> List<X> apply(List<X> e, Pair<List<X>, List<X>> rule) {
+	private static <X> List<X> apply(List<X> e, Pair<List<X>, List<X>> rule) {
 		List<X> ret = new LinkedList<>(e);
 		int i = occurs(ret, rule.first);
 		if (i == -1) {
@@ -223,7 +219,7 @@ public class SemiThue<Y> {
 		}
 	}
 
-	private <X> int occurs(List<X> l, List<X> find) {
+	private static <X> int occurs(List<X> l, List<X> find) {
 		for (int i = 0; i <= l.size() - find.size(); i++) {
 			if (occursAt(l, find, i)) {
 				return i;
@@ -250,7 +246,7 @@ public class SemiThue<Y> {
 		return e0_closed.contains(f0);
 	}
 
-	private <X> Set<List<X>> close(List<X> e, Set<Pair<List<X>, List<X>>> t) {
+	private static <X> Set<List<X>> close(List<X> e, Set<Pair<List<X>, List<X>>> t) {
 		Set<List<X>> init = new HashSet<>();
 		init.add(e);
 
@@ -263,7 +259,7 @@ public class SemiThue<Y> {
 		}
 	}
 
-	private <X> Set<List<X>> close1(Set<List<X>> set, Set<Pair<List<X>, List<X>>> t) {
+	private static <X> Set<List<X>> close1(Set<List<X>> set, Set<Pair<List<X>, List<X>>> t) {
 		Set<List<X>> ret = new HashSet<>(set);
 
 		for (List<X> e : set) {

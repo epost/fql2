@@ -27,7 +27,7 @@ public class KBHorn {
 		if (trueAtom != null) {
 			return trueAtom;
 		}
-		trueAtom = new KBApp((C)_true, new LinkedList<>());
+		trueAtom = new KBApp<>((C)_true, new LinkedList<>());
 		return trueAtom;
 	}
 	public static <C,V> KBExp<C,V> not(KBExp<C,V> e) {

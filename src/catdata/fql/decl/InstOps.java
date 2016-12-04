@@ -177,7 +177,7 @@ public class InstOps implements
 		return ret;
 	}
 
-	private List<Pair<Object, Object>> lookup(String string,
+	private static List<Pair<Object, Object>> lookup(String string,
 			List<Pair<String, List<Pair<Object, Object>>>> objs) {
 		for (Pair<String, List<Pair<Object, Object>>> k : objs) {
 			if (k.first.equals(string)) {
@@ -187,7 +187,7 @@ public class InstOps implements
 		throw new RuntimeException(string + " not found in " + objs);
 	}
 
-	private Set<Map<Object, Object>> convert(List<Pair<Object, Object>> list) {
+	private static Set<Map<Object, Object>> convert(List<Pair<Object, Object>> list) {
 		Set<Map<Object, Object>> ret = new HashSet<>();
 
 		for (Pair<Object, Object> k : list) {
@@ -563,7 +563,7 @@ public class InstOps implements
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, catdata.fql.decl.InstExp.Zero e) {
-		return new Pair<List<PSM>, Object>(new LinkedList<PSM>(), new Object());
+		return new Pair<>(new LinkedList<PSM>(), new Object());
 	}
 
 	@Override
@@ -583,79 +583,75 @@ public class InstOps implements
 	@Override
 	public Pair<List<PSM>, Object> visit(final String dst,
 			final catdata.fql.decl.InstExp.Plus e) {
-		try {
-			SigExp k = e.type(prog);
-			final Signature s = k.toSig(prog);
-			List<PSM> ret = new LinkedList<>();
+		SigExp k = e.type(prog);
+		final Signature s = k.toSig(prog);
+		List<PSM> ret = new LinkedList<>();
 
-			for (Node n : s.nodes) {
-				List<Flower> l = new LinkedList<>();
-				l.add(new CopyFlower(e.a + "_" + n.string, "c0", "c1"));
-				l.add(new CopyFlower(e.b + "_" + n.string, "c0", "c1"));
-				ret.add(new InsertSQL(dst + "_" + n.string, new Union(l), "c0",
-						"c1"));
-			}
-			for (Attribute<Node> n : s.attrs) {
-				List<Flower> l = new LinkedList<>();
-				l.add(new CopyFlower(e.a + "_" + n.name, "c0", "c1"));
-				l.add(new CopyFlower(e.b + "_" + n.name, "c0", "c1"));
-				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l), "c0",
-						"c1"));
-			}
-			for (Edge n : s.edges) {
-				List<Flower> l = new LinkedList<>();
-				l.add(new CopyFlower(e.a + "_" + n.name, "c0", "c1"));
-				l.add(new CopyFlower(e.b + "_" + n.name, "c0", "c1"));
-				ret.add(new InsertSQL(dst + "_" + n.name, new Union(l), "c0",
-						"c1"));
-			}
-
-			ret.addAll(PSMGen.guidify(dst, s, true));
-
-			ret.addAll(PSMGen.makeTables(dst + "_inl", s, false));
-			ret.addAll(PSMGen.makeTables(dst + "_inr", s, false));
-
-			for (Node n : s.nodes) {
-				SQL f = PSMGen.compose(new String[] {
-				e.a + "_" + n.string, dst + "_" + n.string + "_subst" });
-				ret.add(new InsertSQL(dst + "_inl_" + n.string, f, "c0", "c1"));
-				SQL f0 = PSMGen.compose(new String[] {
-				e.b + "_" + n.string, dst + "_" + n.string + "_subst" });
-				ret.add(new InsertSQL(dst + "_inr_" + n.string, f0, "c0", "c1"));
-			}
-			// (f+g) : A+B -> C f : A -> C g : B -> C
-			Fn<Quad<String, String, String, String>, List<PSM>> fn = new Fn<Quad<String, String, String, String>, List<PSM>>() {
-				@Override
-				public List<PSM> of(Quad<String, String, String, String> x) {
-					String f = x.first; // e.a -> x.third
-					String g = x.second; // e.b -> x.third
-					// String C = x.third;
-					String dst0 = x.fourth;
-
-					// must be a map dst -> x.third
-
-					List<PSM> ret = new LinkedList<>();
-					for (Node n : s.nodes) {
-						Flower sql1 = PSMGen.compose(new String[] {
-								dst + "_" + n.string + "_subst_inv",
-								f + "_" + n.string });
-						Flower sql2 = PSMGen.compose(new String[] {
-								dst + "_" + n.string + "_subst_inv",
-								g + "_" + n.string });
-						List<Flower> flowers = new LinkedList<>();
-						flowers.add(sql1);
-						flowers.add(sql2);
-						ret.add(new InsertSQL(dst0 + "_" + n.string, new Union(
-								flowers), "c0", "c1"));
-					}
-
-					return ret;
-				}
-			};
-			return new Pair<List<PSM>, Object>(ret, fn);
-		} catch (FQLException fe) {
-			throw new RuntimeException(fe.getLocalizedMessage());
+		for (Node n : s.nodes) {
+			List<Flower> l = new LinkedList<>();
+			l.add(new CopyFlower(e.a + "_" + n.string, "c0", "c1"));
+			l.add(new CopyFlower(e.b + "_" + n.string, "c0", "c1"));
+			ret.add(new InsertSQL(dst + "_" + n.string, new Union(l), "c0",
+					"c1"));
 		}
+		for (Attribute<Node> n : s.attrs) {
+			List<Flower> l = new LinkedList<>();
+			l.add(new CopyFlower(e.a + "_" + n.name, "c0", "c1"));
+			l.add(new CopyFlower(e.b + "_" + n.name, "c0", "c1"));
+			ret.add(new InsertSQL(dst + "_" + n.name, new Union(l), "c0",
+					"c1"));
+		}
+		for (Edge n : s.edges) {
+			List<Flower> l = new LinkedList<>();
+			l.add(new CopyFlower(e.a + "_" + n.name, "c0", "c1"));
+			l.add(new CopyFlower(e.b + "_" + n.name, "c0", "c1"));
+			ret.add(new InsertSQL(dst + "_" + n.name, new Union(l), "c0",
+					"c1"));
+		}
+
+		ret.addAll(PSMGen.guidify(dst, s, true));
+
+		ret.addAll(PSMGen.makeTables(dst + "_inl", s, false));
+		ret.addAll(PSMGen.makeTables(dst + "_inr", s, false));
+
+		for (Node n : s.nodes) {
+			SQL f = PSMGen.compose(new String[] {
+			e.a + "_" + n.string, dst + "_" + n.string + "_subst" });
+			ret.add(new InsertSQL(dst + "_inl_" + n.string, f, "c0", "c1"));
+			SQL f0 = PSMGen.compose(new String[] {
+			e.b + "_" + n.string, dst + "_" + n.string + "_subst" });
+			ret.add(new InsertSQL(dst + "_inr_" + n.string, f0, "c0", "c1"));
+		}
+		// (f+g) : A+B -> C f : A -> C g : B -> C
+		Fn<Quad<String, String, String, String>, List<PSM>> fn = new Fn<Quad<String, String, String, String>, List<PSM>>() {
+			@Override
+			public List<PSM> of(Quad<String, String, String, String> x) {
+				String f = x.first; // e.a -> x.third
+				String g = x.second; // e.b -> x.third
+				// String C = x.third;
+				String dst0 = x.fourth;
+
+				// must be a map dst -> x.third
+
+				List<PSM> ret = new LinkedList<>();
+				for (Node n : s.nodes) {
+					Flower sql1 = PSMGen.compose(new String[] {
+							dst + "_" + n.string + "_subst_inv",
+							f + "_" + n.string });
+					Flower sql2 = PSMGen.compose(new String[] {
+							dst + "_" + n.string + "_subst_inv",
+							g + "_" + n.string });
+					List<Flower> flowers = new LinkedList<>();
+					flowers.add(sql1);
+					flowers.add(sql2);
+					ret.add(new InsertSQL(dst0 + "_" + n.string, new Union(
+							flowers), "c0", "c1"));
+				}
+
+				return ret;
+			}
+		};
+		return new Pair<>(ret, fn);
 	}
 
 	@Override
@@ -815,7 +811,7 @@ public class InstOps implements
 					return ret;
 				}
 			};
-			return new Pair<List<PSM>, Object>(ret, fn);
+			return new Pair<>(ret, fn);
 		} catch (FQLException fe) {
 			throw new RuntimeException(fe.getLocalizedMessage());
 		}
@@ -832,16 +828,11 @@ public class InstOps implements
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, catdata.fql.decl.InstExp.Const e) {
-		try {
-			List<PSM> ret = new LinkedList<>();
-			Signature sig = e.sig.toSig(prog);
-			ret.addAll(PSMGen.doConst(dst, sig, e.data));
-			ret.addAll(PSMGen.guidify(dst, sig, true));
-			return new Pair<>(ret, new Object());
-		} catch (FQLException fe) {
-			fe.printStackTrace();
-			throw new RuntimeException(fe.getLocalizedMessage());
-		}
+		List<PSM> ret = new LinkedList<>();
+		Signature sig = e.sig.toSig(prog);
+		ret.addAll(PSMGen.doConst(dst, sig, e.data));
+		ret.addAll(PSMGen.guidify(dst, sig, true));
+		return new Pair<>(ret, new Object());
 	}
 
 	@Override
@@ -850,31 +841,20 @@ public class InstOps implements
 		List<PSM> ret = new LinkedList<>();
 		Mapping F0 = e.F.toMap(prog);
 
-		// ret.addAll(PSMGen.makeTables(next, F0.target, false));
-		// ret.addAll(e.I.accept(next, this));
 		ret.addAll(PSMGen.delta(F0, e.I, dst));
-		// ret.addAll(PSMGen.dropTables(next, F0.target));
-		try {
-			ret.addAll(PSMGen.guidify(dst, F0.source, true));
-			return new Pair<>(ret, new Object());
-		} catch (FQLException fe) {
-			throw new RuntimeException(fe.getLocalizedMessage());
-		}
+		ret.addAll(PSMGen.guidify(dst, F0.source, true));
+		return new Pair<>(ret, new Object());
 	}
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, Sigma e) {
-		// String next = next();
 		List<PSM> ret = new LinkedList<>();
 		Mapping F0 = e.F.toMap(prog);
 
 		try {
 			F0.okForSigma();
-			// ret.addAll(PSMGen.makeTables(next, F0.source, false));
-			// ret.addAll(e.I.accept(next, this));
 			ret.addAll(PSMGen.sigma(F0, dst, e.I)); // yes, sigma is
 													// backwards
-			// ret.addAll(PSMGen.dropTables(next, F0.source));
 			ret.addAll(PSMGen.guidify(dst, F0.target, true));
 			return new Pair<>(ret, new Object());
 		} catch (FQLException fe) {
@@ -885,21 +865,15 @@ public class InstOps implements
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, Pi e) {
-		// String next = next();
 		List<PSM> ret = new LinkedList<>();
 		Mapping F0 = e.F.toMap(prog);
 
 		try {
 			F0.okForPi();
-			// ret.addAll(PSMGen.makeTables(next, F0.source, false));
-			// ret.addAll(e.I.accept(next, this));
 			Pair<List<PSM>, Map<String, Triple<Node, Node, Arr<Node, Path>>[]>> xxx = PSMGen
 					.pi(F0, e.I, dst);
 			ret.addAll(xxx.first);
-			// ret.addAll(PSMGen.dropTables(next, F0.source));
-			// ret.addAll(PSMGen.guidify(dst, F0.target)); //not necessary,
-			// pi creates all new guids
-			return new Pair<>(ret, (Object) xxx.second);
+			return new Pair<>(ret, xxx.second);
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getLocalizedMessage());
@@ -909,39 +883,24 @@ public class InstOps implements
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, FullSigma e) {
-		// String next = next();
 		List<PSM> ret = new LinkedList<>();
 		Mapping F0 = e.F.toMap(prog);
 
-		// ret.addAll(PSMGen.makeTables(next, F0.source, false));
-		// ret.addAll(e.I.accept(next, this));
-		try {
-			ret.addAll(PSMGen.SIGMA(F0, dst, e.I)); // yes, backwards
-			// ret.addAll(PSMGen.dropTables(next, F0.source));
-			// ret.addAll(PSMGen.guidify(dst, F0.target));
-			return new Pair<>(ret, new Object());
-		} catch (FQLException fe) {
-			fe.printStackTrace();
-			throw new RuntimeException(fe.getLocalizedMessage());
-		}
-
+		ret.addAll(PSMGen.SIGMA(F0, dst, e.I)); // yes, backwards
+		return new Pair<>(ret, new Object());
 	}
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, Relationalize e) { // out
 																		// then
 																		// in
-		// String next = next();
 		List<PSM> ret = new LinkedList<>();
 		Signature sig = prog.insts.get(e.I).type(prog).toSig(prog);
 
 		try {
-			// ret.addAll(PSMGen.makeTables(next, sig, false)); //output
 			// mktable done by relationalizer
-			// ret.addAll(e.I.accept(next, this));
 			ret.addAll(Relationalizer.compile(sig, dst, e.I).second);
 			ret.addAll(PSMGen.guidify(dst, sig, true));
-			// ret.addAll(PSMGen.dropTables(next, sig));
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getLocalizedMessage());
@@ -951,16 +910,11 @@ public class InstOps implements
 
 	@Override
 	public Pair<List<PSM>, Object> visit(String dst, External e) {
-		try {
-			List<PSM> ret = new LinkedList<>();
-			Signature sig = e.sig.toSig(prog);
-			ret.addAll(PSMGen.doExternal(sig, e.name, dst));
-			ret.addAll(PSMGen.guidify(dst, sig, true));
-			return new Pair<>(ret, new Object());
-		} catch (FQLException fe) {
-			fe.printStackTrace();
-			throw new RuntimeException(fe.getLocalizedMessage());
-		}
+		List<PSM> ret = new LinkedList<>();
+		Signature sig = e.sig.toSig(prog);
+		ret.addAll(PSMGen.doExternal(sig, e.name, dst));
+		ret.addAll(PSMGen.guidify(dst, sig, true));
+		return new Pair<>(ret, new Object());
 	}
 
 	@Override
@@ -1025,35 +979,26 @@ public class InstOps implements
 
 		ret.addAll(PSMGen.makeTables(dst, F0.source, false));
 		ret.addAll(PSMGen.delta(F0, src, dst));
-		// ret.addAll(PSMGen.dropTables(next, F0.target));
-		try {
-			ret.addAll(PSMGen.guidify(dst, F0.source));
-			return new Pair<>(ret, dst);
-		} catch (FQLException fe) {
-			throw new RuntimeException(fe.getLocalizedMessage());
-		}
+		ret.addAll(PSMGen.guidify(dst, F0.source));
+		return new Pair<>(ret, dst);
 	}
 
 	@Override
 	public Pair<List<PSM>, String> visit(String src, catdata.fql.decl.FullQuery.Sigma e) {
-		try {
-			String dst = next();
-			List<PSM> ret = new LinkedList<>();
-			Mapping F0 = e.F;
+		String dst = next();
+		List<PSM> ret = new LinkedList<>();
+		Mapping F0 = e.F;
 
-			ret.addAll(PSMGen.makeTables(dst, F0.target, false));
-			try {
-				ret.addAll(PSMGen.sigma(F0, dst, src));
-			} catch (Exception ex) {
-				// ex.printStackTrace();
-				ret.addAll(PSMGen.SIGMA(F0, dst, src));
-			}
-			// ret.addAll(PSMGen.dropTables(next, F0.target));
-			ret.addAll(PSMGen.guidify(dst, F0.target));
-			return new Pair<>(ret, dst);
-		} catch (FQLException fe) {
-			throw new RuntimeException(fe.getLocalizedMessage());
+		ret.addAll(PSMGen.makeTables(dst, F0.target, false));
+		try {
+			ret.addAll(PSMGen.sigma(F0, dst, src));
+		} catch (Exception ex) {
+			// ex.printStackTrace();
+			ret.addAll(PSMGen.SIGMA(F0, dst, src));
 		}
+		// ret.addAll(PSMGen.dropTables(next, F0.target));
+		ret.addAll(PSMGen.guidify(dst, F0.target));
+		return new Pair<>(ret, dst);
 	}
 
 	@Override
@@ -1228,7 +1173,7 @@ public class InstOps implements
 			Mapping f = ((InstExp.Sigma) i1).F.toMap(prog);
 			if (i2 instanceof InstExp.Delta) {
 			for (Node n : f.target.nodes) {
-			List<Flower> u = new LinkedList<Flower>();
+			List<Flower> u = new LinkedList<>();
 					for (Node m : f.source.nodes) {
 						if (!f.nm.get(m).equals(n)) {
 							continue;
@@ -1272,7 +1217,7 @@ public class InstOps implements
 								.get(n.string);
 		
 						Triple<Node, Node, Arr<Node, Path>> toFind = new Triple<>(
-								n, m, new Arr<Node, Path>(
+								n, m, new Arr<>(
 										new Path(f.target, n), n, n));
 						int i = 0;
 						boolean found = false;

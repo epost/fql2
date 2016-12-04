@@ -26,6 +26,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
@@ -279,7 +281,7 @@ public class XRaToFpql {
 
 	String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries *of base relations* are supported, using DISTINCT and ALL for set semantics.  (The translated FQL will not compile if not translating unions of conjunctive queries of base relations).  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.  SQL keywords MUST be capitalized.  The observables viewer pane is useful for visualizing instances.";
 
-	protected String kind() {
+	protected static String kind() {
 		return "SPCU";
 	}
 	
@@ -386,7 +388,7 @@ public class XRaToFpql {
 		}
 	}
 
-	String translate(String in) {
+	static String translate(String in) {
 		List<Pair<String, EExternal>> list = program(in);
 		return transSQLSchema(list);
 	}
@@ -431,8 +433,8 @@ public class XRaToFpql {
 				jta.setWrapStyleWord(true);
 				// jta.setEditable(false);
 				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 				p.setPreferredSize(new Dimension(300, 200));
 
 				JOptionPane pane = new JOptionPane(p);
@@ -466,7 +468,7 @@ public class XRaToFpql {
 		tp.add(new JLabel());
 		// tp.add(lbl);
 		// tp.add(field);
-		tp.add(new JLabel("Load Example", JLabel.RIGHT));
+		tp.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		tp.add(box);
 
 		// p.add(bp, BorderLayout.SOUTH);
@@ -554,7 +556,7 @@ public class XRaToFpql {
 
 		int count = 0;
 		Set<String> seen = new HashSet<>();
-		HashMap<String, List<String>> cols = new HashMap<String, List<String>>();
+		HashMap<String, List<String>> cols = new HashMap<>();
 		for (Pair<String, EExternal> kk0 : in) {
 			EExternal k0 = kk0.second;
 			// String key = kk0.first;
@@ -998,9 +1000,9 @@ public class XRaToFpql {
 	public static class EED extends EExternal {
 
 		public static <T> Set<T> diff(final Set<? extends T> s1, final Set<? extends T> s2) {
-			Set<T> symmetricDiff = new HashSet<T>(s1);
+			Set<T> symmetricDiff = new HashSet<>(s1);
 			symmetricDiff.addAll(s2);
-			Set<T> tmp = new HashSet<T>(s1);
+			Set<T> tmp = new HashSet<>(s1);
 			tmp.retainAll(s2);
 			symmetricDiff.removeAll(tmp);
 			return symmetricDiff;
@@ -1022,6 +1024,7 @@ public class XRaToFpql {
 		Map<String, String> from1, from2;
 		List<Pair<Pair<String, String>, Pair<String, String>>> where1, where2;
 
+		@Override
 		public String toString() {
 			String x = "FORALL ";
 			boolean b = false;
@@ -1188,6 +1191,7 @@ public class XRaToFpql {
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
+				@Override
 				public Integer map(String s) {
 					return Integer.valueOf(s);
 				}
@@ -1309,8 +1313,8 @@ public class XRaToFpql {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static EED toEd(Object decl) {
-		Map<String, String> from1 = new LinkedHashMap<String, String>();
-		Map<String, String> from2 = new LinkedHashMap<String, String>();
+		Map<String, String> from1 = new LinkedHashMap<>();
+		Map<String, String> from2 = new LinkedHashMap<>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where1 = new LinkedList<>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where2 = new LinkedList<>();
 
@@ -1370,8 +1374,8 @@ public class XRaToFpql {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static EFlower toFlower(Object decl) {
-		Map<String, Pair<String, String>> select = new LinkedHashMap<String, Pair<String, String>>();
-		Map<String, String> from = new LinkedHashMap<String, String>();
+		Map<String, Pair<String, String>> select = new LinkedHashMap<>();
+		Map<String, String> from = new LinkedHashMap<>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
 
 		Tuple3 o = (Tuple3) decl;

@@ -33,7 +33,7 @@ public class Path  {
 	}
 
 	public List<String> asList() {
-		List<String> ret = new LinkedList<String>();
+		List<String> ret = new LinkedList<>();
 		ret.add(source.string);
 		for (Edge e : path) {
 			ret.add(e.name);
@@ -41,6 +41,7 @@ public class Path  {
 		return ret;
 	}
 	
+	@SuppressWarnings("unused")
 	public void validate(Signature s) throws FQLException {
 		new Path(s, asList());
 	}
@@ -50,7 +51,7 @@ public class Path  {
 			throw new RuntimeException("Empty path");
 		}
 
-		path = new LinkedList<Edge>();
+		path = new LinkedList<>();
 
 		String head = strings.get(0);
 		source = schema.getNode(head);
@@ -87,14 +88,14 @@ public class Path  {
 		this(s, doStuff(s, e));
 	}
 
-	public Path(Unit n, Signature schema,
+	public Path(@SuppressWarnings("unused") Unit n, Signature schema,
 			List<Pair<Pair<String, String>, String>> strings)
 			throws FQLException {
 		if (strings.isEmpty()) {
 			throw new FQLException("Empty path");
 		}
 
-		path = new LinkedList<Edge>();
+		path = new LinkedList<>();
 
 		source = schema.getNode(strings.get(0).first.first);
 
@@ -110,7 +111,7 @@ public class Path  {
 	public Path(Signature schema,
 			List<Pair<Pair<String, String>, String>> strings, Node node)
 			throws FQLException {
-		path = new LinkedList<Edge>();
+		path = new LinkedList<>();
 
 		if (node == null) {
 			throw new RuntimeException();
@@ -172,17 +173,8 @@ public class Path  {
 		}
 	}
 	
-	public static Path append2(Signature s, Path arr2, Path arr)
-			throws FQLException {
+	public static Path append2(Signature s, Path arr2, Path arr) {
 		return append(s, arr, arr2);
-/*		if (!arr.target.equals(arr2.source)) {
-			throw new RuntimeException("bad path append");
-		}
-		List<String> x = new LinkedList<>(arr.asList());
-		List<String> y = new LinkedList<>(arr2.asList());
-		y.remove(0);
-		x.addAll(y);
-		return new Path(s, x); */
 	} 
 
 	private static List<String> foo(Node a) {
@@ -191,8 +183,8 @@ public class Path  {
 		return ret;
 	}
 
-	private static List<String> doStuff(Signature s, Edge e) {
-		List<String> ret = new LinkedList<String>();
+	private static List<String> doStuff(@SuppressWarnings("unused") Signature s, Edge e) {
+		List<String> ret = new LinkedList<>();
 		ret.add(e.source.string);
 		ret.add(e.name);
 		return ret;

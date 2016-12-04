@@ -48,7 +48,7 @@ import catdata.fql.decl.SigExp.Zero;
 public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		MapExpVisitor<Const, FQLProgram> {
 
-	public FinCat<Mapping, Map<Node, Path>> exp(FQLProgram env,
+	public static FinCat<Mapping, Map<Node, Path>> exp(@SuppressWarnings("unused") FQLProgram env,
 			final Signature base, final Signature exp) {
 		try {
 			return Inst.stuff(base, exp);
@@ -58,7 +58,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		}
 	}
 
-	public Pair<SigExp.Const, Fn<SigExp.Const, MapExp.Const>> one(
+	public static Pair<SigExp.Const, Fn<SigExp.Const, MapExp.Const>> one(
 			final Set<String> at) {
 		List<String> nodes = new LinkedList<>();
 		nodes.add("node0");
@@ -104,7 +104,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		return new Pair<>(sig, fn);
 	}
 
-	public Pair<SigExp.Const, Fn<SigExp.Const, MapExp.Const>> zero() {
+	public static Pair<SigExp.Const, Fn<SigExp.Const, MapExp.Const>> zero() {
 		final SigExp.Const sig = new SigExp.Const(new LinkedList<String>(),
 				new LinkedList<Triple<String, String, String>>(),
 				new LinkedList<Triple<String, String, String>>(),
@@ -122,7 +122,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		return new Pair<>(sig, fn);
 	}
 
-	public Pair<Quad<catdata.fql.decl.SigExp.Const, Const, Const, Fn<Triple<catdata.fql.decl.SigExp.Const, Const, Const>, Const>>, Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>>> prod(
+	public static Pair<Quad<catdata.fql.decl.SigExp.Const, Const, Const, Fn<Triple<catdata.fql.decl.SigExp.Const, Const, Const>, Const>>, Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>>> prod(
 			final SigExp.Const a, final SigExp.Const b) {
 		int node_count = 0;
 		final Map<Pair<String, String>, String> node_map = new LinkedHashMap<>();
@@ -345,7 +345,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 				attr_map, edge_map_1, edge_map_2));
 	}
 
-	public Quad<SigExp.Const, Const, Const, Fn<Triple<SigExp.Const, Const, Const>, Const>> plus(
+	public static Quad<SigExp.Const, Const, Const, Fn<Triple<SigExp.Const, Const, Const>, Const>> plus(
 			final SigExp.Const a, final SigExp.Const b) {
 		int node_count = 0;
 		final Map<String, String> node_map_1 = new LinkedHashMap<>();
@@ -820,7 +820,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		}
 	}
 
-	private Mapping curry_helper(
+	private static Mapping curry_helper(
 			MapExp.Const F,
 			Signature Csig,
 			SigExp.Const B,
@@ -958,7 +958,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 				r.attrs), arrows, eqs);
 	}
 
-	private String lookup(List<Triple<String, String, String>> arrows,
+	private static String lookup(List<Triple<String, String, String>> arrows,
 			String string) {
 		for (Triple<String, String, String> k : arrows) {
 			if (k.first.equals(string)) {

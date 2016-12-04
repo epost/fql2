@@ -25,7 +25,7 @@ import catdata.opl.OplParser.DoNotIgnore;
 import catdata.provers.KBExp;
 
 
-public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObject {
+public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 
 	OplSchema<S1, C1, V1> src;
 	OplSchema<S2, C2, V2> dst;
@@ -46,7 +46,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 
 	static <C, V> OplTerm<Chc<C, V>, V> freeze(OplTerm<C, V> t) {
 		if (t.var != null) {
-			return new OplTerm<Chc<C, V>, V>(Chc.inRight(t.var), new LinkedList<>());
+			return new OplTerm<>(Chc.inRight(t.var), new LinkedList<>());
 		}
 		List<OplTerm<Chc<C, V>, V>> args = new LinkedList<>();
 		for (OplTerm<C, V> arg : t.args) {
@@ -65,7 +65,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				eqs.add(new Pair<>(freeze(eq.first), freeze(eq.second)));
 			}
 
-			OplPres<S1, C1, V1, V1> xx = new OplPres<S1, C1, V1, V1>(new HashMap<>(), "?", src.sig,
+			OplPres<S1, C1, V1, V1> xx = new OplPres<>(new HashMap<>(), "?", src.sig,
 					new HashMap<>(block.from), eqs);
 			xx.toSig(); // validates
 			fI.put(l, xx);
@@ -91,7 +91,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				}
 				// validates
 				try {
-					OplPresTrans<S1, C1, V1, V1, V1> xx = new OplPresTrans<S1, C1, V1, V1, V1>(map,
+					OplPresTrans<S1, C1, V1, V1, V1> xx = new OplPresTrans<>(map,
 						"?", "?", fI.get(l0f.first), fI.get(l));
 			
 					fE.put(new Pair<>(l, c2), xx);
@@ -437,6 +437,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public static class Agg<S1, C1, V1, S2, C2, V2> {
 		String orig;
 
@@ -454,6 +455,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			orig = toString();
 		}
 		
+		@SuppressWarnings("static-method")
 		public void validate() {
 			if (!GlobalOptions.debug.opl.opl_secret_agg) {
 				throw new DoNotIgnore("To use ad-hoc aggregation, enable opl_secret_agg");
@@ -575,7 +577,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			return ret;
 		}
 
-		private <C, D> String printSub(Map<V1, OplTerm<C1, V1>> second) {
+		private String printSub(Map<V1, OplTerm<C1, V1>> second) {
 			boolean first = false;
 			String ret = "";
 			for (Entry<V1, OplTerm<C1, V1>> k : second.entrySet()) {
@@ -704,12 +706,12 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 				if (!t.first.equals(x)) {
 					continue;
 				}
-				OplTerm<C, V> l = new OplTerm<C, V>(term,
+				OplTerm<C, V> l = new OplTerm<>(term,
 						Util.singList(new OplTerm<C, V>((V) "q_v")));
 				if (S.projE().symbols.containsKey(term)) {
 					Map<V, OplTerm<C, V>> m = new HashMap<>();
 					m.put((V) "q_v", l);
-					edges.put(term, new Pair<>((V) ("q" + t.second), m));
+					edges.put(term, new Pair<>("q" + t.second, m));
 				} else {
 					attrs.put(term, Chc.inRight(l));
 				}
@@ -718,7 +720,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 			bs.put("q" + x, new Pair<>(x, b));
 		}
 
-		OplQuery<S, C, V, S, C, V> ret = new OplQuery<S, C, V, S, C, V>(str, str, bs);
+		OplQuery<S, C, V, S, C, V> ret = new OplQuery<>(str, str, bs);
 		ret.validate(S, S);
 		return ret;
 	}
@@ -772,7 +774,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp implements OplObjec
 	}
 
 
-	public static <S1, S2, C1, C2, V1, V2, X> 
+	public static <S1, C1, C2, V1, V2, X> 
 	OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2>
 	              conv(OplInst<S1, C1, V1, X> i0, OplTerm<Chc<C1, OplTerm<Chc<C1, X>, V1>>, V1> e) {
 		if (e.var != null) {

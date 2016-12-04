@@ -62,7 +62,7 @@ public class TypedCompositionExample extends Example {
 			+ "\ninstance q2q1I=eval q2 q1I"
 			+ "\ninstance qI= eval q I";
 
-;
+
 
 
 }

@@ -74,7 +74,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 				}
 				Object t = v.r;
 			
-				eqs0.add(new Triple<Pair<Var, Object>, Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>>
+				eqs0.add(new Triple<>
 				(new Pair<>(new Var(eq.first), t), eq0.second, eq0.third));
 		}
 		

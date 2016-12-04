@@ -45,7 +45,7 @@ public class Inferrer {
 	
 	
 
-	private static <Ty, En, Sym, Fk, Att, Gen, Sk> String inferInstance(Schema<Ty, En, Sym, Fk, Att> a) {
+	private static <Ty, En, Sym, Fk, Att> String inferInstance(Schema<Ty, En, Sym, Fk, Att> a) {
 		if (a == null) {
 			throw new RuntimeException("Compiled schema not found - try compiling before using inference.");
 		}
@@ -145,10 +145,10 @@ public class Inferrer {
 
 	}
 	
-	private static <Ty, En, Sym, Fk, Att,Ty0, En0, Sym0, Fk0, Att0> List<String> varsColon2(En0 en, Schema<Ty, En, Sym, Fk, Att> a, Schema<Ty0, En0, Sym0, Fk0, Att0> b) {
+	private static <Ty, En, Sym, Fk, Att,Ty0, En0, Sym0, Fk0, Att0> List<String> varsColon2(En0 en, Schema<Ty, En, Sym, Fk, Att> a, @SuppressWarnings("unused") Schema<Ty0, En0, Sym0, Fk0, Att0> b) {
 		return a.ens.stream().map(x -> "v_" + en + "_" + x + "/*:" + x + "*/").collect(Collectors.toList());
 	}
-	private static <Ty, En, Sym, Fk, Att,Ty0, En0, Sym0, Fk0, Att0> List<String> varsColon(En0 en, Schema<Ty, En, Sym, Fk, Att> a, Schema<Ty0, En0, Sym0, Fk0, Att0> b) {
+	private static <Ty, En, Sym, Fk, Att,Ty0, En0, Sym0, Fk0, Att0> List<String> varsColon(En0 en, Schema<Ty, En, Sym, Fk, Att> a, @SuppressWarnings("unused") Schema<Ty0, En0, Sym0, Fk0, Att0> b) {
 		return a.ens.stream().map(x -> "v_" + en + "_" + x + ":" + x).collect(Collectors.toList());
 	}/*
 	private static <Ty, En, Sym, Fk, Att,Ty0, En0, Sym0, Fk0, Att0> List<String> vars(En0 en, Schema<Ty, En, Sym, Fk, Att> a, Schema<Ty0, En0, Sym0, Fk0, Att0> b) {

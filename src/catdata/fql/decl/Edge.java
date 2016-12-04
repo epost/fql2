@@ -9,6 +9,7 @@ package catdata.fql.decl;
  */
 public class Edge {
 
+	@Override
 	public String toString() {
 		return name + " : " + source + " -> " + target;
 	}

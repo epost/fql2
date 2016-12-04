@@ -9,16 +9,10 @@ public class RuntimeInterruptedException extends RuntimeException {
 		ex = ie;
 	}
 	
-	public RuntimeInterruptedException(ThreadDeath ie) {
+	public RuntimeInterruptedException(@SuppressWarnings("unused") ThreadDeath ie) {
 		ex = new RuntimeException("Thread death");
 	}
-	/*public RuntimeInterruptedException(Exception ex) {
-		this.ex = ex;
-	}
 	
-	public RuntimeInterruptedException(String msg) {
-		this.ex = new RuntimeException(msg);
-	} */
 
 	@Override
 	public String toString() {

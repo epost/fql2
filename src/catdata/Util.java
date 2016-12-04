@@ -195,6 +195,7 @@ public class Util {
 		}
 	
 	
+		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value,
 		        boolean isSelected, boolean hasFocus, int row, int column) {
 			JLabel ret = (JLabel) r.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -660,6 +661,7 @@ public class Util {
 	@SuppressWarnings("serial")
 	public static JPanel makeTable(Border b, String border, Object[][] rowData, Object[] colNames) {
 		JTable t = new JTable(rowData, colNames) {
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -684,6 +686,7 @@ public class Util {
 	@SuppressWarnings("serial")
 	public static JPanel makeBoldHeaderTable(Collection<String> atts, Border b, String border, Object[][] rowData, String[] colNames) {
 		JTable t = new JTable(rowData, colNames) {
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -922,17 +925,17 @@ public class Util {
 			Chc c = (Chc) o;
 			if (c.left) {
 				Pair<Function, Object> p = stripChcs(c.l);
-				return new Pair<Function, Object>(x -> {
+				return new Pair<>(x -> {
 					return Chc.inLeft(p.first.apply(x));
 				}, p.second);
 			} else {
 				Pair<Function, Object> p = stripChcs(c.r);
-				return new Pair<Function, Object>(x -> {
+				return new Pair<>(x -> {
 					return Chc.inRight(p.first.apply(x));
 				}, p.second);
 			}
 		}
-		return new Pair<Function, Object>(x -> {
+		return new Pair<>(x -> {
 			return x;
 		}, o);
 	}
@@ -1039,14 +1042,14 @@ public class Util {
 	}
 	
 	public static <T> Set<Set<T>> powerSet(Collection<T> originalSet) {
-	    Set<Set<T>> sets = new HashSet<Set<T>>();
+	    Set<Set<T>> sets = new HashSet<>();
 	    if (originalSet.isEmpty()) {
 	    	sets.add(new HashSet<>());
 	    	return sets;
 	    }
-	    List<T> list = new ArrayList<T>(originalSet);
+	    List<T> list = new ArrayList<>(originalSet);
 	    T head = list.get(0);
-	    Set<T> rest = new HashSet<T>(list.subList(1, list.size())); 
+	    Set<T> rest = new HashSet<>(list.subList(1, list.size())); 
 	    for (Set<T> set : powerSet(rest)) {
 	    	Set<T> newSet = new HashSet<>();
 	    	newSet.add(head);
@@ -1117,7 +1120,7 @@ public class Util {
 	   * 
 	   */
 	  public static double similarity(String s1, String s2) { //TODO aql
-			return ((double)1) / ((double)1+editDistance(s1, s2));
+			return (1) / ((double)1+editDistance(s1, s2));
 	  }
      }
 

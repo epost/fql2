@@ -49,7 +49,7 @@ public abstract class Type {
 			return true;
 		}
 		
-		public Object q(Object o) {
+		public static Object q(Object o) {
 			String s = o.toString();
 			if ((s.contains(" ") || s.contains("-") || s.length() == 0) && !s.contains("\"")) {
 				return "\"" + s + "\"";

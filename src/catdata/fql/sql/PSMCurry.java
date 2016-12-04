@@ -99,7 +99,7 @@ public class PSMCurry extends PSM {
 	}
 	
 
-	private Object find(Node d, Transform fst, Transform snd, Object a, Object b) {
+	private static Object find(Node d, Transform fst, Transform snd, Object a, Object b) {
 		for (Pair<Object, Object> o : fst.data.get(d.string)) {
 			Object j = lookup(fst.data.get(d.string), o.first);
 			Object k = lookup(snd.data.get(d.string), o.first);
@@ -110,7 +110,7 @@ public class PSMCurry extends PSM {
 		throw new RuntimeException("Cannot find (" + a + "," + b + ") in " + fst + " and " + snd);
 	}
 
-	private Object lookup(Set<Pair<Object, Object>> s, Object t) {
+	private static Object lookup(Set<Pair<Object, Object>> s, Object t) {
 		for (Pair<Object, Object> k : s) {
 			if (k.first.equals(t)) {
 				return k.second;

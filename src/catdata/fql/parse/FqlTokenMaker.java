@@ -635,6 +635,7 @@ public class FqlTokenMaker extends AbstractJFlexCTokenMaker {
 	 *        occurs.
 	 * @param hyperlink Whether this token is a hyperlink.
 	 */
+	@Override
 	public void addToken(char[] array, int start, int end, int tokenType,
 						int startOffset, boolean hyperlink) {
 		super.addToken(array, start,end, tokenType, startOffset, hyperlink);
@@ -649,7 +650,7 @@ public class FqlTokenMaker extends AbstractJFlexCTokenMaker {
 	 * @return The start and end strings to add to a line to "comment"
 	 *         it out.
 	 */
-	public String[] getLineCommentStartAndEnd() {
+	public static String[] getLineCommentStartAndEnd() {
 		return new String[] { "//", null };
 	}
 
@@ -666,22 +667,23 @@ public class FqlTokenMaker extends AbstractJFlexCTokenMaker {
 	 * @return The first <code>Token</code> in a linked list representing
 	 *         the syntax highlighted text.
 	 */
+	@Override
 	public Token getTokenList(Segment text, int initialTokenType, int startOffset) {
 
 		resetTokenList();
 		this.offsetShift = -text.offset + startOffset;
 
 		// Start off in the proper state.
-		int state = Token.NULL;
+		int state = TokenTypes.NULL;
 		switch (initialTokenType) {
-						case Token.COMMENT_MULTILINE:
+						case TokenTypes.COMMENT_MULTILINE:
 				state = MLC;
 				start = text.offset;
 				break;
 
 			/* No documentation comments */
 			default:
-				state = Token.NULL;
+				state = TokenTypes.NULL;
 		}
 
 		s = text;
@@ -796,7 +798,8 @@ public class FqlTokenMaker extends AbstractJFlexCTokenMaker {
    *
    * @param newState the new lexical state
    */
-  public final void yybegin(int newState) {
+  @Override
+public final void yybegin(int newState) {
     zzLexicalState = newState;
   }
 
@@ -847,7 +850,7 @@ public class FqlTokenMaker extends AbstractJFlexCTokenMaker {
    *
    * @param   errorCode  the code of the errormessage to display
    */
-  private void zzScanError(int errorCode) {
+  private static void zzScanError(int errorCode) {
     String message;
     try {
       message = ZZ_ERROR_MSG[errorCode];
@@ -883,7 +886,8 @@ public class FqlTokenMaker extends AbstractJFlexCTokenMaker {
    * @return      the next token
    * @exception   java.io.IOException  if any I/O-Error occurs
    */
-  public org.fife.ui.rsyntaxtextarea.Token yylex() throws java.io.IOException {
+  @SuppressWarnings("static-access")
+public org.fife.ui.rsyntaxtextarea.Token yylex() throws java.io.IOException {
     int zzInput;
     int zzAction;
 

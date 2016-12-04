@@ -111,7 +111,7 @@ public final class AqlOptions {
 	
 	public final Map<AqlOption, Object> options; 
 
-	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(ProverName name, Object ob) {
+	public AqlOptions(ProverName name) {
 		options = new HashMap<>();
 		options.put(AqlOption.prover, name);
 	}
@@ -171,16 +171,17 @@ public final class AqlOptions {
 			return 64;
 		case csv_null_string:
 			return null;
+		default:
+			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
-		throw new RuntimeException("Anomaly: please report: "+ option);
+		
 	}
 	
 	public static Object getOrDefault(Map<String, String> map, AqlOption op) {
 		if (map.containsKey(op.toString())) {
 			return getFromMap(map, null, op);
-		} else {
-			return getDefault(op);
 		}
+			return getDefault(op);
 	}
 	
 	/**
@@ -242,8 +243,10 @@ public final class AqlOptions {
 			return op.getInteger(map);
 		case csv_null_string:
 			return op.getString(map);
+		default:
+			throw new RuntimeException("Anomaly: please report");
 		}
-		throw new RuntimeException("Anomaly: please report");
+		
 	}
 
 	/*

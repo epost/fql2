@@ -25,6 +25,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import org.codehaus.jparsec.error.ParserException;
 
@@ -160,7 +162,7 @@ public class EnrichViewer {
 
 	String help = "Schema, then Is_a"; // "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
 
-	protected String kind() {
+	protected static String kind() {
 		return "Enrich";
 	}
 
@@ -222,8 +224,8 @@ public class EnrichViewer {
 				jta.setWrapStyleWord(true);
 				// jta.setEditable(false);
 				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 				p.setPreferredSize(new Dimension(300, 200));
 
 				JOptionPane pane = new JOptionPane(p);
@@ -258,16 +260,16 @@ public class EnrichViewer {
 		tp.add(new JLabel());		
 		tp.add(new JLabel());		
 		tp.add(new JLabel());		
-		tp.add(new JLabel("Load Example", JLabel.RIGHT));
+		tp.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		tp.add(box);
 		
-		tp.add(new JLabel("Attr:", JLabel.RIGHT));
+		tp.add(new JLabel("Attr:", SwingConstants.RIGHT));
 		tp.add(name);
-		tp.add(new JLabel("Kid:", JLabel.RIGHT));
+		tp.add(new JLabel("Kid:", SwingConstants.RIGHT));
 		tp.add(kid);
-		tp.add(new JLabel("Inst:", JLabel.RIGHT));
+		tp.add(new JLabel("Inst:", SwingConstants.RIGHT));
 		tp.add(instField);
-		tp.add(new JLabel("Isa:", JLabel.RIGHT));
+		tp.add(new JLabel("Isa:", SwingConstants.RIGHT));
 		tp.add(isaField);
 
 
@@ -369,7 +371,7 @@ public class EnrichViewer {
 	}
 
 	private static String go(XSchema mat, XSchema isa, String schemaName, String isaSchemaName, XCtx<String> mat0,
-			XCtx<String> isa0, String att, String kid, String inst, String isa_inst) {
+			@SuppressWarnings("unused") XCtx<String> isa0, String att, String kid, String inst, String isa_inst) {
 		String node = nodeForAtt(mat, att);
 		String r = otherEdge(isa, kid);
 		String n = onlyAtt(isa);
@@ -476,11 +478,11 @@ public class EnrichViewer {
 				 //att	
 				}
 			}
-			Block<String, String> block = new Block<String, String>(from, where, attrs, edges);
+			Block<String, String> block = new Block<>(from, where, attrs, edges);
 			blocks.put("q" + X, new Pair<>(X, block));
 		}
 
-		XPoly<String, String> poly = new XPoly<String, String>(new XExp.Var(s), new XExp.Var(T), blocks);
+		XPoly<String, String> poly = new XPoly<>(new XExp.Var(s), new XExp.Var(T), blocks);
 		return poly;
 	}
 
@@ -569,10 +571,10 @@ public class EnrichViewer {
 				}
 			}
 			
-			Block<String, String> block = new Block<String, String>(from, where, attrs, edges);
+			Block<String, String> block = new Block<>(from, where, attrs, edges);
 			blocks.put("q_" + node, new Pair<>(node, block));
 		}
-		return new XPoly<String, String>(new XExp.Var(isa0), new XExp.Var(merged), blocks);
+		return new XPoly<>(new XExp.Var(isa0), new XExp.Var(merged), blocks);
 	}
 	
 	/* @SuppressWarnings({ "unchecked", "rawtypes" })

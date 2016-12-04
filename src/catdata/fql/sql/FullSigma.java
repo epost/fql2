@@ -99,7 +99,7 @@ public class FullSigma extends PSM {
 		
 	}
 
-	private Set<Map<Object, Object>> conv2(Map<Object, Integer> map) {
+	private static Set<Map<Object, Object>> conv2(Map<Object, Integer> map) {
 		Set<Map<Object, Object>> ret = new HashSet<>();
 		
 		for (Object k : map.keySet()) {

@@ -20,7 +20,7 @@ public class FullQueryExpChecker implements
 
 	@Override
 	public Pair<SigExp, SigExp> visit(FQLProgram env, Comp e) {
-		List<String> x = new LinkedList<String>(seen);
+		List<String> x = new LinkedList<>(seen);
 		Pair<SigExp, SigExp> lt = e.l.accept(env, this);
 		seen = x;
 		Pair<SigExp, SigExp> rt = e.r.accept(env, this);
@@ -47,7 +47,7 @@ public class FullQueryExpChecker implements
 
 	@Override
 	public Pair<SigExp, SigExp> visit(FQLProgram env, Match e) {
-		List<String> x = new LinkedList<String>(seen);
+		List<String> x = new LinkedList<>(seen);
 		SigExp.Const s = e.src.typeOf(env).toConst(env);
 		seen = x;
 		SigExp.Const t = e.dst.typeOf(env).toConst(env);
@@ -61,19 +61,19 @@ public class FullQueryExpChecker implements
 			}
 		}
 		if (e.kind.equals("delta sigma forward")) {
-			return new Pair<SigExp, SigExp>(t,s);
+			return new Pair<>(t,s);
 		} else if (e.kind.equals("delta pi forward")) {
-			return new Pair<SigExp, SigExp>(t,s);			
+			return new Pair<>(t,s);			
 		} else if (e.kind.equals("delta sigma backward")) {
-			return new Pair<SigExp, SigExp>(s,t);						
+			return new Pair<>(s,t);						
 		} else if (e.kind.equals("delta pi backward")) {
-			return new Pair<SigExp, SigExp>(s,t);			
+			return new Pair<>(s,t);			
 		} else {
 			throw new RuntimeException("Unknown kind: " + e.kind);
 		}
 	}
 
-	private boolean contains(List<Triple<String, String, String>> attrs,
+	private static boolean contains(List<Triple<String, String, String>> attrs,
 			String s) {
 		for (Triple<String, String, String> a : attrs) {
 			if (a.first.equals(s)) {

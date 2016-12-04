@@ -69,6 +69,7 @@ public class AqlParser {
 
 	 static final Parser<String> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new org.codehaus.jparsec.functors.Map<String, String>() {
+				@Override
 				public String map(String s) {
 					Integer.valueOf(s);
 					return s;
@@ -874,7 +875,7 @@ public class AqlParser {
 		return p.many().map(x -> new Program<>(conv(x)));
 	}
 	
-	private static <X > List<Triple<String, Integer,Exp<?>>> conv(List<Triple<String, Integer, ? extends Exp<?>>> l) {
+	private static List<Triple<String, Integer,Exp<?>>> conv(List<Triple<String, Integer, ? extends Exp<?>>> l) {
 		List<Triple<String, Integer,Exp<?>>> ret = new LinkedList<>();
 		for (Triple<String, Integer, ?extends Exp<?>> k : l) {	
 			ret.add(new Triple<>(k.first, k.second, k.third));

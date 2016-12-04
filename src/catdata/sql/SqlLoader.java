@@ -21,6 +21,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import catdata.Util;
 import catdata.ide.CodeTextPanel;
@@ -154,7 +156,7 @@ public class SqlLoader extends JPanel {
 
 		tp.add(transButton);
 		tp.add(loadButton);
-		tp.add(new JLabel("Load Example", JLabel.RIGHT));
+		tp.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		tp.add(box);
 
 		tp.add(helpButton);
@@ -169,12 +171,12 @@ public class SqlLoader extends JPanel {
 	}
 	
 
-	public void doHelp() {
+	public static void doHelp() {
 		JTextArea jta = new JTextArea(help);
 		jta.setWrapStyleWord(true);
 		jta.setLineWrap(true);
-		JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		p.setPreferredSize(new Dimension(300, 200));
 
 		JOptionPane pane = new JOptionPane(p);

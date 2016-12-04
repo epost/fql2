@@ -13,6 +13,7 @@ import catdata.fqlpp.cat.FinSet.Fn;
 
 public class FQLPPDriver {
 
+	@SuppressWarnings("cast")
 	public static FQLPPEnvironment makeEnv(String str, FQLPPProgram init, String[] toUpdate) {
 		Map<String, Fn<?,?>> fns = new HashMap<>();
 		Map<String, Set<?>> sets = new HashMap<>();
@@ -31,9 +32,6 @@ public class FQLPPDriver {
 			if (se != null) {
 				try {
 					Set<?> xxx = se.accept(init, new SetOps(ret));
-					if (!(xxx instanceof Set)) {
-						throw new RuntimeException("Does not evaluate to a set.");
-					}
 					sets.put(k, xxx);
 				} catch (Throwable t) {
 					t.printStackTrace();
@@ -45,9 +43,6 @@ public class FQLPPDriver {
 			if (fe != null) {
 				try {
 					Fn<?,?> xxx = fe.accept(init, new SetOps(ret));
-					if (!(xxx instanceof Fn)) {
-						throw new RuntimeException("Does not evaluate to a function.");
-					}
 					fns.put(k, xxx);
 					toUpdate[0] = "Last Processed: " + k;
 				} catch (Throwable t) {
@@ -60,9 +55,6 @@ public class FQLPPDriver {
 			if (ce != null) {
 				try {
 					Category<?,?> xxx = ce.accept(init, new CatOps(ret));
-					if (!(xxx instanceof Category)) {
-						throw new RuntimeException("Does not evaluate to a category.");
-					}
 					cats.put(k, xxx);
 					toUpdate[0] = "Last Processed: " + k;
 				} catch (Throwable t) {
@@ -74,10 +66,7 @@ public class FQLPPDriver {
 			if (FE != null) {
 				try {
 					Functor<?,?,?,?> xxx = FE.accept(init, new CatOps(ret));
-					if (!(xxx instanceof Functor)) {
-						throw new RuntimeException("Does not evaluate to a functor, is " + xxx.getClass() + ": " + xxx);
-					}
-					ftrs.put(k, xxx);		
+						ftrs.put(k, xxx);		
 					toUpdate[0] = "Last Processed: " + k;
 				} catch (Throwable t) {
 					t.printStackTrace();
@@ -88,9 +77,6 @@ public class FQLPPDriver {
 			if (te != null) {
 				try {
 					Transform<?,?,?,?> xxx = te.accept(init, new CatOps(ret));
-					if (!(xxx instanceof Transform)) {
-						throw new RuntimeException("Does not evaluate to a transform.");
-					}
 					trans.put(k, xxx);	
 					toUpdate[0] = "Last Processed: " + k;
 				} catch (Throwable t) {

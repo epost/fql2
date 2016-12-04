@@ -144,10 +144,10 @@ public class SqlToOpl extends JPanel {
 
 		OplSchema<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sch = new OplSchema<>(S0, entities);
 
-		OplSig<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sig = new OplSig<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>(OplParser.VIt.vit, new HashMap<>(), sorts, symbols, equations);
+		OplSig<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sig = new OplSig<>(OplParser.VIt.vit, new HashMap<>(), sorts, symbols, equations);
 		sch.validate(sig);
 
-		OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String> I = new OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String>(S0, I0, "none");
+		OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String> I = new OplInst<>(S0, I0, "none");
 
 		Map<String, Chc<SqlType, SqlTable>> gens = new HashMap<>();
 		List<Pair<OplTerm<Chc<Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>, String>, OplTerm<Chc<Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>, String>>> eqs = new LinkedList<>();
@@ -197,7 +197,7 @@ public class SqlToOpl extends JPanel {
 			}
 		}
 
-		OplPres<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String> P = new OplPres<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String>(new HashMap<>(), S0, sig, gens, eqs);
+		OplPres<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String> P = new OplPres<>(new HashMap<>(), S0, sig, gens, eqs);
 
 		P.toSig();
 		I.validate(sch, P, null);
@@ -241,10 +241,10 @@ public class SqlToOpl extends JPanel {
 
 		OplSchema<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sch = new OplSchema<>(S0, entities);
 
-		OplSig<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sig = new OplSig<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>(OplParser.VIt.vit, new HashMap<>(), sorts, symbols, equations);
+		OplSig<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sig = new OplSig<>(OplParser.VIt.vit, new HashMap<>(), sorts, symbols, equations);
 		sch.validate(sig);
 
-		OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String> I = new OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String>(S0, I0, "none");
+		OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String> I = new OplInst<>(S0, I0, "none");
 
 		Map<String, Chc<SqlType, SqlTable>> gens = new HashMap<>();
 		List<Pair<OplTerm<Chc<Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>, String>, OplTerm<Chc<Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>, String>>> eqs = new LinkedList<>();
@@ -300,7 +300,7 @@ public class SqlToOpl extends JPanel {
 
 		}
 
-		OplPres<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String> P = new OplPres<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String>(new HashMap<>(), S0, sig, gens, eqs);
+		OplPres<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String> P = new OplPres<>(new HashMap<>(), S0, sig, gens, eqs);
 
 		P.toSig();
 		I.validate(sch, P, null);

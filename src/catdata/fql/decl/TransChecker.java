@@ -83,6 +83,7 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		return env.transforms.get(e.v).accept(env, this);
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public Pair<String, String> visit(FQLProgram env, Const e) {
 		InstExp src = env.insts.get(e.src);
@@ -631,10 +632,12 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		return new Pair<>(e.prop, v0.a);
 	}
 	
+	@Override
 	public Pair<String, String> visit(FQLProgram env, Or e) {
 		return new And(e.prop).accept(env, this);
 	}
 	
+	@Override
 	public Pair<String, String> visit(FQLProgram env, Implies e) {
 		return new And(e.prop).accept(env, this);
 	}

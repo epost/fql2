@@ -127,6 +127,7 @@ public final class DAG<N> {
 			}
 		}
 		
+		@Override
 		public String toString() {
 			return fMap.toString();
 		}
@@ -247,6 +248,7 @@ public final class DAG<N> {
 		return false;
 	}
 	
+	@Override
 	public String toString() {
 		return "Out edges: " + fOut.toString(); // + " In edges: " + fIn.toString(); 
 	}
@@ -291,8 +293,8 @@ public final class DAG<N> {
 	}
 	
 	public DAG() {
-		fOut= new MultiMap<N,N>();
-		fIn= new MultiMap<N,N>();
+		fOut= new MultiMap<>();
+		fIn= new MultiMap<>();
 	}
 	
 	public DAG(DAG<N> g) {

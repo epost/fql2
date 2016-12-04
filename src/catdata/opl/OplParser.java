@@ -67,6 +67,7 @@ public class OplParser {
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
+				@Override
 				public Integer map(String s) {
 					return Integer.valueOf(s);
 				}
@@ -443,7 +444,7 @@ public class OplParser {
 		}
 		sugarForNat = false;
 
-		return new Program<OplExp>(ret);
+		return new Program<>(ret);
 	}
 
 	private static void toProgHelper(String txt, String s,
@@ -521,7 +522,7 @@ public class OplParser {
 			List<Tuple3> fa = x.a == null ? new LinkedList<>()
 					: (List<Tuple3>) x.a.b;
 			OplCtx<String, String> ctx = toCtx(fa);
-			Tuple3 eq = (Tuple3) x.b;
+			Tuple3 eq = x.b;
 			OplTerm lhs = toTerm(ctx.names(), consts(symbols), eq.a, false);
 			OplTerm rhs = toTerm(ctx.names(), consts(symbols), eq.c, false);
 			equations.add(new Triple<>(ctx, lhs, rhs));
@@ -532,7 +533,7 @@ public class OplParser {
 			List<Tuple3> fa = x.a == null ? new LinkedList<>()
 					: (List<Tuple3>) x.a.b;
 			OplCtx<String, String> ctx = toCtx(fa);
-			Tuple3 eq = (Tuple3) x.b;
+			Tuple3 eq = x.b;
 			List<Tuple3> lhs0 = (List<Tuple3>) eq.a;
 			List<Tuple3> rhs0 = (List<Tuple3>) eq.c;
 			List<Pair<OplTerm<String, String>, OplTerm<String, String>>> lhs = new LinkedList<>();
@@ -662,7 +663,7 @@ public class OplParser {
 			List<Tuple3> fa = x.a == null ? new LinkedList<>()
 					: (List<Tuple3>) x.a.b;
 			OplCtx<String, String> ctx = toCtx(fa);
-			Tuple3 eq = (Tuple3) x.b;
+			Tuple3 eq = x.b;
 			OplTerm lhs = toTerm(ctx.names(), consts(symbolsEA), eq.a, false);
 			OplTerm rhs = toTerm(ctx.names(), consts(symbolsEA), eq.c, false);
 			equationsE.add(new Triple<>(ctx, lhs, rhs));
@@ -671,7 +672,7 @@ public class OplParser {
 			List<Tuple3> fa = x.a == null ? new LinkedList<>()
 					: (List<Tuple3>) x.a.b;
 			OplCtx<String, String> ctx = toCtx(fa);
-			Tuple3 eq = (Tuple3) x.b;
+			Tuple3 eq = x.b;
 			OplTerm lhs = toTerm(ctx.names(), consts(symbolsEA), eq.a, false);
 			OplTerm rhs = toTerm(ctx.names(), consts(symbolsEA), eq.c, false);
 			equationsA.add(new Triple<>(ctx, lhs, rhs));
@@ -753,13 +754,13 @@ public class OplParser {
 			List<Tuple3> fa = x.a == null ? new LinkedList<>()
 					: (List<Tuple3>) x.a.b;
 			OplCtx<String, String> ctx = toCtx(fa);
-			Tuple3 eq = (Tuple3) x.b;
+			Tuple3 eq = x.b;
 			OplTerm lhs = toTerm(ctx.names(), symbols.keySet(), eq.a, true);
 			OplTerm rhs = toTerm(ctx.names(), symbols.keySet(), eq.c, true);
 			equations.add(new Pair<>(lhs, rhs));
 		}
 
-		OplExp.OplPres ret = new OplExp.OplPres<String, String, String, String>(prec, yyy,
+		OplExp.OplPres ret = new OplExp.OplPres<>(prec, yyy,
 				null, symbols, equations);
 		return ret;
 	}
@@ -935,7 +936,7 @@ public class OplParser {
 	private static OplCtx<String, String> toCtx(List<Tuple3> fa) {
 		List<Pair<String, String>> ret = new LinkedList<>();
 		if (fa == null) {
-			return new OplCtx<String, String>();
+			return new OplCtx<>();
 		}
 		for (Object tt : fa) {
 			if (tt instanceof Tuple3) {
@@ -945,7 +946,7 @@ public class OplParser {
 				ret.add(new Pair<>((String) tt, null));
 			}
 		}
-		return new OplCtx<String, String>(ret);
+		return new OplCtx<>(ret);
 	}
 
 	private static OplExp toChase(Tuple5 t) {
@@ -1204,7 +1205,7 @@ public class OplParser {
 		symbols.put("+", new Pair<>(l, "Nat"));
 		symbols.put("*", new Pair<>(l, "Nat"));
 
-		return new OplSig<String,String,String>(new VIt(), new HashMap<>(), Util.singSet("Nat"), symbols, equations);
+		return new OplSig<>(new VIt(), new HashMap<>(), Util.singSet("Nat"), symbols, equations);
 	}
 	
 	private static OplExp toGraph(Tuple3 yyy,  Tuple3 xxx) {
@@ -1590,6 +1591,7 @@ public class OplParser {
 		return bl;
 	}
 
+	@SuppressWarnings("unused")
 	private static Agg<String, String, String, String, String, String> fromAgg(Collection vars, Collection consts, Object o,
 			boolean suppressError) {
 		
@@ -1723,7 +1725,7 @@ public class OplParser {
 	public static OplQuery<String, String, String, String, String, String> toQuery(
 			Tuple4 o) {
 		Map<Object, Pair<String, Block<String, String, String, String, String, String>>> blocks = fromBlocks((List) o.a);
-		return new OplQuery<String, String, String, String, String, String>(
+		return new OplQuery<>(
 				(String) o.b, (String) o.d, blocks);
 	}
 	
@@ -1734,7 +1736,7 @@ public class OplParser {
 		}
 		
 		Map<Object, Pair<String, Block<String, String, String, String, String, String>>> blocks = fromBlocks2((List) o.b);
-		return new OplQuery<String, String, String, String, String, String>(
+		return new OplQuery<>(
 				(String) o.c, (String) o.e, blocks);
 	}
 	public static final Parser<?> block2() {

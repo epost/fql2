@@ -34,6 +34,7 @@ public class PPParser {
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
+				@Override
 				public Integer map(String s) {
 					return Integer.valueOf(s);
 				}

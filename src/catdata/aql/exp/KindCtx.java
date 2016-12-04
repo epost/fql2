@@ -34,8 +34,9 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P> {
 			return ps.get(k);
 		case GRAPH:
 			return gs.get(k);
+		default:
+			throw new RuntimeException();
 		}
-		throw new RuntimeException();
 	}
 	
 	@SuppressWarnings("unchecked")

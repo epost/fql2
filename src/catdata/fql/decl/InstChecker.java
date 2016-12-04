@@ -104,6 +104,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	 * i.accept(env, this); }
 	 */
 
+	@SuppressWarnings("unused")
 	@Override
 	public SigExp visit(FQLProgram env, Const e) {
 		SigExp k = e.sig.typeOf(env);

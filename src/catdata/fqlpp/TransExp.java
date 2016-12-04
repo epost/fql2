@@ -13,8 +13,10 @@ public abstract class TransExp implements Serializable{
 
 	public abstract <R, E> R accept(E env, TransExpVisitor<R, E> v);
 
+	@Override
 	public abstract boolean equals(Object o);
 
+	@Override
 	public abstract int hashCode();
 	
 	public static class PeterApply extends TransExp {
@@ -1285,6 +1287,7 @@ public abstract class TransExp implements Serializable{
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " ; " + r + ")";
 		}

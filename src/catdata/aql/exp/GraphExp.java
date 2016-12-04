@@ -21,6 +21,7 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 	
 	public abstract DMG<N,E> eval(AqlTyping G);
 	
+	@Override
 	public DMG<N,E> eval(AqlEnv env) { 
 		DMG<N,E> ret = eval(env.typing);
 		if (ret == null) {

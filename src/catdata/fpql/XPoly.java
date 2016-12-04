@@ -48,11 +48,11 @@ public class XPoly<C,D> extends XExp implements XObject {
 					attrs.put(term, l);
 				}
 			}
-			Block<X,X> b = new Block<X,X>(from, new HashSet<>(), attrs, edges);
+			Block<X,X> b = new Block<>(from, new HashSet<>(), attrs, edges);
 			bs.put("q" + x, new Pair<>(x, b));
 		}
 		
-		XPoly<X,X> ret = new XPoly<X,X>(S, S, bs);
+		XPoly<X,X> ret = new XPoly<>(S, S, bs);
 		return ret;
 	}
 
@@ -103,7 +103,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			}
 		}
 		
-		private void count(List<Object> first, Map counts) {
+		private static void count(List<Object> first, Map counts) {
 			for (Object s : first) {
 				Integer i = (Integer) counts.get(s);
 				if (i == null) {
@@ -344,10 +344,10 @@ public class XPoly<C,D> extends XExp implements XObject {
 			Object ooo = "!__1"; // using toString for ! is very bad
 			attrs.put((D)new Pair(l, "!_" + d), Util.singList(ooo));
 			
-			Block<C, D> newblock = new Block<C, D>(block.from, block.where, attrs, edges);
+			Block<C, D> newblock = new Block<>(block.from, block.where, attrs, edges);
 			bs.put(l, new Pair(new Pair(l, d), newblock));
 		}
-		return new XPoly<C,D>(src, grotho(), bs);
+		return new XPoly<>(src, grotho(), bs);
 	}
 	
 	public XCtx<D> grotho() {
@@ -359,11 +359,11 @@ public class XPoly<C,D> extends XExp implements XObject {
 		}
 		for (Object l : blocks.keySet()) {
 			for (D e : blocks.get(l).second.edges.keySet()) {
-				Pair<D,D> t = dst.type((D)e);
+				Pair<D,D> t = dst.type(e);
 				new_types.put(new Pair(l, e), new Pair(new Pair(l, t.first), new Pair(blocks.get(l).second.edges.get(e).first, t.second)));				
 			}
 			for (D e : blocks.get(l).second.attrs.keySet()) {
-				Pair<D,D> t = dst.type((D)e);
+				Pair<D,D> t = dst.type(e);
 				new_types.put(new Pair(l, e), new Pair(new Pair(l, t.first), t.second));				
 			}
 			//necessary
@@ -439,7 +439,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			}
 		}
 		
-		o_cache = new XCtx<D>(new HashSet<>(), types, eqs, XCtx.empty_global(), dst.hat(), "instance");
+		o_cache = new XCtx<>(new HashSet<>(), types, eqs, XCtx.empty_global(), dst.hat(), "instance");
 		return o_cache;
 	}
 
@@ -676,7 +676,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			}
 			em0.put(c, Util.singList(c));
 		}
-		return new XMapping<C, C>(src0, dst0, em0 , "homomorphism");
+		return new XMapping<>(src0, dst0, em0 , "homomorphism");
 	}
 	
 	XCtx<C> coapply(XCtx<D> I) {
@@ -814,14 +814,14 @@ public class XPoly<C,D> extends XExp implements XObject {
 				}
 				edges.put(fr.getKey(), new Pair<>(fr.getValue().first, xxx));
 			}
-			Block<C, D> b2 = new Block<C, D>(from, where, new HashMap<>(), edges);
+			Block<C, D> b2 = new Block<>(from, where, new HashMap<>(), edges);
 			bs.put(l, new Pair<>(b.first, b2));
 		}
 		
-		return new XPoly<C, D>(src.hat(), dst.hat(), bs);
+		return new XPoly<>(src.hat(), dst.hat(), bs);
 	}
 	
-	private static <C,D> boolean containsType(Map<Object, C> F, XCtx<C> S, List<Object> p) {
+	private static <C> boolean containsType(Map<Object, C> F, XCtx<C> S, List<Object> p) {
 		for (Object o : p) {
 			if (F.containsKey(o)) {
 				C c = F.get(o);
@@ -866,7 +866,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 				}
 				map.put((D)o, Util.singList((D)o));
 			}
-			XMapping<D,D> h = new XMapping<D, D>(frc, Qo, map, "homomorphism");
+			XMapping<D,D> h = new XMapping<>(frc, Qo, map, "homomorphism");
 		
 			XCtx<D> intQo = Q.grotho();
 			Map<D, Pair<D, D>> types = new HashMap<>();
@@ -876,9 +876,9 @@ public class XPoly<C,D> extends XExp implements XObject {
 				if (hgen.size() != 2) {
 					throw new RuntimeException(gen + " mapsto " + hgen);
 				}
-				types.put(gen, new Pair((D)"_1", new Pair(hgen.get(1), ty)));
+				types.put(gen, new Pair("_1", new Pair(hgen.get(1), ty)));
 			}
-			XCtx<D> inth_pre = new XCtx<D>(new HashSet<>(), types, new HashSet<>(), intQo.global, intQo, "instance");
+			XCtx<D> inth_pre = new XCtx<>(new HashSet<>(), types, new HashSet<>(), intQo.global, intQo, "instance");
 			Set<Pair<List<D>, List<D>>> new_eqs = new HashSet<>();
 			for (Pair<List<D>, List<D>> eq : h.src.eqs) {
 				try { //morally should transform !, but can't so hack
@@ -889,7 +889,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 					continue;
 				}
 			}
-			XCtx<D> inth = new XCtx<D>(new HashSet<>(), types, new_eqs, intQo.global, intQo, "instance");
+			XCtx<D> inth = new XCtx<>(new HashSet<>(), types, new_eqs, intQo.global, intQo, "instance");
 			/*XCtx<C> fr = */ Q.tilde().coapply(inth);
 		}
 		

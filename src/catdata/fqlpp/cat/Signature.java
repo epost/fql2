@@ -25,6 +25,7 @@ public class Signature<O,A> implements Serializable {
 	public class Node implements Serializable{
 		public O name;
 		
+		@Override
 		public String toString() {
 			return name.toString();
 		}
@@ -68,6 +69,7 @@ public class Signature<O,A> implements Serializable {
 		public Node source;
 		public Node target;
 		
+		@Override
 		public String toString() {
 			return name.toString() + " : " + source + " -> " + target;
 		}
@@ -240,7 +242,7 @@ public class Signature<O,A> implements Serializable {
 				return true;
 			if (obj == null)
 				return false;
-			Path other = (Path) obj;
+			Path other = obj;
 			
 			if (path == null) {
 				if (other.path != null)
@@ -376,7 +378,7 @@ public class Signature<O,A> implements Serializable {
 			Set<Triple<A, O, O>> arrows,
 			Set<Pair<Pair<O,List<A>>, Pair<O,List<A>>>> equivs)  {
 
-		Set<A> as = new HashSet<A>();
+		Set<A> as = new HashSet<>();
 		
 		for (O s : nodes_str) {
 			Node n = new Node(s);
@@ -486,7 +488,7 @@ public class Signature<O,A> implements Serializable {
 	
 	//need to be careful, since the enclosed instance of the nodes and edges will not be this
 	private Signature(Set<Signature<O, A>.Node> nodes,
-			Set<Signature<O, A>.Edge> edges, Set<Signature<O, A>.Eq> eqs, Unit i) {
+			Set<Signature<O, A>.Edge> edges, Set<Signature<O, A>.Eq> eqs, @SuppressWarnings("unused") Unit i) {
 		this.nodes = nodes;
 		this.edges = edges;
 		this.eqs = eqs;	
@@ -499,12 +501,12 @@ public class Signature<O,A> implements Serializable {
 			nm.put(k, k);
 		}
 		Map<Signature<O, A>.Edge, Signature<O, A>.Path> em = new HashMap<>();
-		Mapping<O,A,O,A> m = new Mapping<O,A,O,A>(nm, em, x, this);
+		Mapping<O,A,O,A> m = new Mapping<>(nm, em, x, this);
 		return new Pair<>(x, m);
 	}
 
 	public Set<Edge> outEdges(Node n) {
-		Set<Edge> ret = new HashSet<Edge>();
+		Set<Edge> ret = new HashSet<>();
 		for (Edge e : edges) {
 			if (e.source.equals(n)) {
 				ret.add(e);

@@ -29,6 +29,7 @@ public abstract class MapExp {
 
 	public abstract <R, E> R accept(E env, MapExpVisitor<R, E> v);
 
+	@Override
 	public abstract boolean equals(Object o);
 
 	public final Pair<SigExp, SigExp> type(FQLProgram env) {
@@ -896,6 +897,7 @@ public abstract class MapExp {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "curry " + f;
 		}
@@ -946,6 +948,7 @@ public abstract class MapExp {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " * " + r + ")";
 		}
@@ -996,6 +999,7 @@ public abstract class MapExp {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " then " + r + ")";
 		}
@@ -1046,6 +1050,7 @@ public abstract class MapExp {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " + " + r + ")";
 		}
@@ -1085,6 +1090,7 @@ public abstract class MapExp {
 			return true;
 		}
 		
+		@Override
 		public String toString() {
 			return "opposite " + e;
 		}
@@ -1101,6 +1107,7 @@ public abstract class MapExp {
 
 	}
 
+	@Override
 	public abstract int hashCode();
 
 	public interface MapExpVisitor<R, E> {

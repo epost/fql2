@@ -61,6 +61,7 @@ public class SetFunTrans<Obj, Arrow, Y, X> {
 		return ret;
 	}
 
+	@SuppressWarnings("static-method")
 	public boolean equals() {
 		throw new RuntimeException("Equality of FinTrans");
 	}

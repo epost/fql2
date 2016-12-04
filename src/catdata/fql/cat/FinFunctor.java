@@ -178,7 +178,7 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 				nm.add(new Pair<>(srcM2.get(o), dstM2.get(u)));
 			} else {
 				Arr<ObjB, ArrowB> u = arrowMapping.get(a);
-				List<String> t = new LinkedList<String>();
+				List<String> t = new LinkedList<>();
 				t.add(dstM2.get(u.src));
 				if (!dstCat.isId(u)) {
 					t.add(dstM.get(u));
@@ -194,6 +194,11 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 		
 		Mapping m = new Mapping(/*n,*/ srcSig, dstSig, nm, am0, em);
 		return new Triple<>(m, src, dst);
+	}
+
+	@Override
+	public int hashCode() {
+		throw new RuntimeException("Cannot has functors");
 	}
 
 	/**

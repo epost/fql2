@@ -64,7 +64,7 @@ public class Transform {
 
 		for (String k : data.keySet()) {
 			ret.add(new Pair<String, List<Pair<Object, Object>>>(k,
-					new LinkedList<Pair<Object, Object>>(data.get(k))));
+					new LinkedList<>(data.get(k))));
 		}
 
 		return ret;
@@ -224,16 +224,16 @@ public class Transform {
 		return ret;
 	}
 
-	public JPanel graphical(Color scolor, Color tcolor, String src, String dst) {
-		return makePanel(scolor, tcolor, src, dst);
+	public JPanel graphical(Color scolor, Color tcolor, String srcZ, String dstZ) {
+		return makePanel(scolor, tcolor, srcZ, dstZ);
 	}
 
 	@SuppressWarnings("unchecked")
-	public JPanel view(String src_n, String dst_n) throws FQLException {
-		List<JPanel> panels = new LinkedList<JPanel>();
-		// Map<String, Set<Pair<String,String>>> data;
-		LinkedList<String> sorted = new LinkedList<String>(data.keySet());
+	public JPanel view(String src_n, String dst_n) {
+		List<JPanel> panels = new LinkedList<>();
+		LinkedList<String> sorted = new LinkedList<>(data.keySet());
 		Collections.sort(sorted, new Comparator<String>() {
+			@Override
 			public int compare(String f1, String f2) {
 				return f1.toString().compareTo(f2.toString());
 			}
@@ -241,15 +241,7 @@ public class Transform {
 		for (String k : sorted) {
 			Set<Pair<Object, Object>> xxx = data.get(k);
 			List<Pair<Object, Object>> table = new LinkedList<>(xxx);
-			// Collections.sort(table, new Comparator<Pair<Object, Object>>()
-			// {
-			// public int compare(Pair<Object,Object> f1, Pair<Object,Object>
-			// f2)
-			// {
-			// return f1.first.toString().compareTo(f2.first.toString());
-			// }
-			// });
-
+		
 			Object[][] arr = new Object[table.size()][2];
 			int i = 0;
 			for (Pair<Object, Object> p : table) {
@@ -257,9 +249,9 @@ public class Transform {
 				arr[i][1] = p.second;
 				i++;
 			}
-			// Pair<String, String> cns = src.thesig.getColumnNames(k);
 			@SuppressWarnings("serial")
 			JTable t = new JTable(arr, new Object[] { src_n, dst_n })  {
+				@Override
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
 					return new Dimension(d.width, d.height);
@@ -462,12 +454,11 @@ public class Transform {
 	 */
 
 	@SuppressWarnings("unchecked")
-	public JPanel doView(final Color scolor, final Color tcolor,
-			final String src_n,
-			final String dst_n,
+	public static JPanel doView(final Color scolor, final Color tcolor,
+			@SuppressWarnings("unused") final String src_n,
+			@SuppressWarnings("unused") final String dst_n,
 			Graph<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> first,
-			HashMap<Quad<Node, Object, String, Boolean>, Map<Attribute<Node>, Object>> second)
-			throws FQLException {
+			HashMap<Quad<Node, Object, String, Boolean>, Map<Attribute<Node>, Object>> second) {
 
 		// HashMap<Pair<Node, Object>,String> map = new HashMap<>();
 		JPanel cards = new JPanel(new CardLayout());
@@ -479,23 +470,12 @@ public class Transform {
 			Layout<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> layout = (Layout<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>>) x
 					.newInstance(first);
 
-			// Layout<V, E>, BasicVisualizationServer<V,E>
-			// Layout<Triple<Node, Object, String>, Pair<Path, Integer>> layout
-			// = new FRLayout<>(
-			// first);
-			// Layout<Pair<Node, Object>, Pair<Path, Integer>> layout = new
-			// ISOMLayout<>(sgv);
-			// Layout<String, String> layout = new CircleLayout(sgv);
 			layout.setSize(new Dimension(600, 350));
-			// BasicVisualizationServer<String, String> vv = new
-			// BasicVisualizationServer<String, String>(
-			// layout);
 			VisualizationViewer<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> vv = new VisualizationViewer<>(
 					layout);
-			// vv.setPreferredSize(new Dimension(600, 350));
-			// Setup up a new vertex to paint transformer...
-
+	
 			Transformer<Quad<Node, Object, String, Boolean>, Paint> vertexPaint = new Transformer<Quad<Node, Object, String, Boolean>, Paint>() {
+				@Override
 				public Paint transform(Quad<Node, Object, String, Boolean> i) {
 					if (i.fourth) {
 						return scolor;
@@ -523,6 +503,7 @@ public class Transform {
 			vv.getRenderContext().setVertexLabelRenderer(new MyVertexT(cards));
 			final Stroke bs = new BasicStroke();
 			Transformer<Pair<Path, Integer>, Stroke> edgeStrokeTransformer = new Transformer<Pair<Path, Integer>, Stroke>() {
+				@Override
 				public Stroke transform(Pair<Path, Integer> s) {
 					if (s.first == null) {
 						return edgeStroke;
@@ -588,6 +569,7 @@ public class Transform {
 				JPanel p = new JPanel(new GridLayout(1, 1));
 				@SuppressWarnings("serial")
 				JTable table = new JTable(rowData, columnNames)  {
+					@Override
 					public Dimension getPreferredScrollableViewportSize() {
 						Dimension d = getPreferredSize();
 						return new Dimension(d.width, d.height);
@@ -665,7 +647,7 @@ public class Transform {
 
 	
 	public static Transform prod(
-			Instance I,
+			@SuppressWarnings("unused") Instance I,
 			Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> IHc,
 			Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> IHd,
 			Transform h0) {
@@ -726,7 +708,7 @@ public class Transform {
 		return ret;
 	}
 
-	public Instance apply(Instance a) throws FQLException {
+	public Instance apply(Instance a) throws FQLException { //TODO !!!
 		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
 
 		for (Node n : src.thesig.nodes) {

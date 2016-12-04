@@ -39,7 +39,7 @@ public abstract class WizardModel<T> {
     	 String newstate = getState();
     	 
     	 for (ChangeListener l : listeners) {
-    		 l.stateChanged(new Wizard.WizardModelChangeEvent<T>(this, newstate, oldstate));
+    		 l.stateChanged(new Wizard.WizardModelChangeEvent<>(this, newstate, oldstate));
     	 }
     	 
     	 return newstate;
@@ -57,7 +57,7 @@ public abstract class WizardModel<T> {
     	 String newstate = getState();
     	 
     	 for (ChangeListener l : listeners) {
-    		 l.stateChanged(new Wizard.WizardModelChangeEvent<T>(this, newstate, oldstate));
+    		 l.stateChanged(new Wizard.WizardModelChangeEvent<>(this, newstate, oldstate));
     	 }
     	 
     	 return newstate;

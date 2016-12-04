@@ -423,7 +423,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@SuppressWarnings("hiding") Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -489,8 +489,9 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		if (var != null) {
 			return var;
 		} else if (sym != null) {
+			@SuppressWarnings("hiding")
 			Var var = null;
-			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args) {
+			for (@SuppressWarnings("hiding") Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args) {
 				Var var2 = arg.getOnlyVar();
 				if (var2 == null) {
 					continue;
@@ -521,7 +522,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (new Head<>(this).equals(head)) {
 			return true;
 		}
-		for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
+		for (@SuppressWarnings("hiding") Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
 			if (arg.contains(head)) {
 				return true;
 			}
@@ -630,6 +631,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return replaceHead(Head.Sym(sym), args, term);
 	}
 */
+	@SuppressWarnings("hiding")
 	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replaceHead(Head<Ty, En, Sym, Fk, Att, Gen, Sk> replacee, List<Var> vars, Term<Ty, En, Sym, Fk, Att, Gen, Sk> replacer) {
 		if (var != null) {
 			return this;
@@ -662,6 +664,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return this;
 		} 
 		Head<Ty, En, Sym, Fk, Att, Gen, Sk> head = new Head<>(this);
+		@SuppressWarnings("hiding")
 		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args = args().stream().map(x -> x.subst(map)).collect(Collectors.toList());
 		return Term.Head(head, args);		
 	}
@@ -686,7 +689,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (obj != null) {
 			objs.add(new Pair<>(obj, ty));
 		} else {
-			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
+			for (@SuppressWarnings("hiding") Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
 				arg.objs(objs);
 			}
 		} 

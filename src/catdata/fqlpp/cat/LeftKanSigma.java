@@ -114,7 +114,7 @@ public class LeftKanSigma {
 		}
 		for (Signature<O2,A2>.Edge e : lk.Pg2.keySet()) {
 			Set<Pair<Object, Object>> t = lk.Pg2.get(e);
-			Map<Object, Object> m = (Map<Object,Object>) ((Object)Util.convert(t));
+			Map<Object, Object> m = (Util.convert(t));
 			em.put(e, m);
 		}
 

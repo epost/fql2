@@ -139,7 +139,7 @@ public class FullSigmaTrans extends PSM {
 		}
 	}
 
-	private Set<Map<Object, Object>> eval(
+	private static Set<Map<Object, Object>> eval(
 			Map<String, Set<Map<Object, Object>>> state, String i, Path path) {
 
 		Set<Map<Object, Object>> k = state.get(i + "_" + path.source.string);
@@ -151,7 +151,7 @@ public class FullSigmaTrans extends PSM {
 		return k;
 	}
 
-	private Set<Map<Object, Object>> compose(Set<Map<Object, Object>> l,
+	private static Set<Map<Object, Object>> compose(Set<Map<Object, Object>> l,
 			Set<Map<Object, Object>> r) {
 		Set<Map<Object, Object>> ret = new HashSet<>();
 		
@@ -169,7 +169,7 @@ public class FullSigmaTrans extends PSM {
 		return ret;
 	}
 
-	private Set<Map<Object, Object>> conv0(Map<Integer, Object> map) {
+	private static Set<Map<Object, Object>> conv0(Map<Integer, Object> map) {
 		Set<Map<Object, Object>> ret = new HashSet<>();
 		for (Integer k : map.keySet()) {
 			Map<Object, Object> m = new HashMap<>();
@@ -180,7 +180,7 @@ public class FullSigmaTrans extends PSM {
 		return ret;
 	}
 
-	private List<Pair<Object, Object>> conv(Set<Map<Object, Object>> x2) {
+	private static List<Pair<Object, Object>> conv(Set<Map<Object, Object>> x2) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 		for (Map<Object, Object> k : x2) {
 			ret.add(new Pair<>(k.get("c0"), k.get("c1")));
@@ -189,7 +189,7 @@ public class FullSigmaTrans extends PSM {
 		return ret;
 	}
 	
-	private List<Pair<Object, Object>> convX(Set<Map<Object, Object>> x2) {
+	private static List<Pair<Object, Object>> convX(Set<Map<Object, Object>> x2) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 		for (Map<Object, Object> k : x2) {
 			ret.add(new Pair<Object, Object>(k.get("c0").toString(), k.get("c1").toString()));

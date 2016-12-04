@@ -293,7 +293,7 @@ public abstract class FullQueryExp {
 					+ kind + "\"";
 		}
 
-		private String print(Set<Pair<String, String>> rel2) {
+		private static String print(Set<Pair<String, String>> rel2) {
 			String ret = "";
 			boolean b = false;
 			for (Pair<String, String> k : rel2) {
@@ -362,6 +362,7 @@ public abstract class FullQueryExp {
 			this.r = r;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " then " + r + ")";
 		}

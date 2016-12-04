@@ -99,6 +99,7 @@ public abstract class QueryExp {
 			this.r = r;
 		}
 		
+		@Override
 		public String toString() {
 			return "(" + l + " then " + r + ")";
 		}

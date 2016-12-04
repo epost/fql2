@@ -68,7 +68,7 @@ public class XEnvironment {
 			}
 		}
 		
-		global = new XCtx<String>(types, fns, eqs, null, null, "global");		
+		global = new XCtx<>(types, fns, eqs, null, null, "global");		
 	}
 
 	@Override

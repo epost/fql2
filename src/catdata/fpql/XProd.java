@@ -24,7 +24,7 @@ import catdata.fpql.XPoly.Block;
 public class XProd {
 	
 	public static <X> XCtx<X> zero(XCtx<X> S) {
-		return new XCtx<X>(new HashSet<>(), new HashMap<>(), new HashSet<>(), S.global, S, "instance");
+		return new XCtx<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), S.global, S, "instance");
 	}
 	
 	public static <X> XCtx<X> one(XCtx<X> S) {
@@ -51,7 +51,7 @@ public class XProd {
 			}
 		}
 		
-		return new XCtx<X>(new HashSet<>(), tys, eqs, S.global, S, "instance");
+		return new XCtx<>(new HashSet<>(), tys, eqs, S.global, S, "instance");
 	}
 	
 	public static <X> XMapping<X,X> tt(XCtx<X> I) {
@@ -288,7 +288,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return ret;
 	}
 	
-	public static <X,Y> XMapping fst(XCtx<X> I, XCtx<X> J) {
+	public static <X> XMapping fst(XCtx<X> I, XCtx<X> J) {
 		XCtx<Pair<Triple<X,X,List<X>>,Triple<X,X,List<X>>>> IJ = prod(I,J);
 		Map em = new HashMap<>();
 		
@@ -311,7 +311,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return new XMapping<>(IJ, I, em, "homomorphism");
 	}
 	
-	public static <X,Y> XMapping snd(XCtx<X> I, XCtx<X> J) {
+	public static <X> XMapping snd(XCtx<X> I, XCtx<X> J) {
 		XCtx<Pair<Triple<X,X,List<X>>,Triple<X,X,List<X>>>> IJ = prod(I,J);
 		Map em = new HashMap<>();
 		
@@ -334,7 +334,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return new XMapping<>(IJ, J, em, "homomorphism");
 	}
 	
-	public static <A,B,C> XMapping<A, ?> pair(XMapping<A, A> l, XMapping<A, A> r) {
+	public static <A> XMapping<A, ?> pair(XMapping<A, A> l, XMapping<A, A> r) {
 		if (!l.src.equals(r.src)) {
 			throw new RuntimeException();
 		}
@@ -343,10 +343,10 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		Map em = new HashMap<>();
 		for (A x : l.src.terms()) {
 			List<A> x1 = l.em.get(x);
-			Triple t1 = l.dst.find_fast(new Triple<A,A,List<A>>((A)"_1", l.dst.type(x1).second, x1));
+			Triple t1 = l.dst.find_fast(new Triple<>((A)"_1", l.dst.type(x1).second, x1));
 
 			List<A> x2 = r.em.get(x);
-			Triple t2 = r.dst.find_fast(new Triple<A,A,List<A>>((A)"_1", r.dst.type(x2).second, x2));
+			Triple t2 = r.dst.find_fast(new Triple<>((A)"_1", r.dst.type(x2).second, x2));
 
 			List xl = new LinkedList();
 			xl.add(new Pair<>(t1, t2));
@@ -807,7 +807,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 				lhs.add(edge);
 				//must normalize in I
 				List<C> rhs0 = subst_new(flower.select.get(edge), k, new HashSet(), new HashSet());
-				Triple<C,C,List<C>> rhs = I.find_fast(new Triple((C)"_1", (C)tgt, rhs0));
+				Triple<C,C,List<C>> rhs = I.find_fast(new Triple("_1", tgt, rhs0));
 				List rhsX = new LinkedList();
 				if (I.schema.cat().hom((C)"_1", (C)tgt).contains(rhs)) {
 					if (rhs.third.isEmpty()) {
@@ -842,7 +842,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					rhs0.add(e.getKey());
 					Triple<C,C,List<C>> rhsX = I.find_fast(new Triple<>((C)"_1", e.getValue().second, rhs0));
 					List rhs = new LinkedList();
-					if (I.schema.cat().hom((C)"_1", (C)e.getValue().second).contains(rhsX)) {
+					if (I.schema.cat().hom((C)"_1", e.getValue().second).contains(rhsX)) {
 						if (rhsX.third.isEmpty()) {
 							rhs.add(rhsX.first);
 						} else {
@@ -1160,7 +1160,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 				C node = flower.from.get(var);
 				Set<Map<Object, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
 				for (Map<Object, Triple<C, C, List<C>>> tuple : ret) {
-					outer: for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", (C)node)) {
+					outer: for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", node)) {
 						Map<Object, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
 						merged.put(var, t);
 						String result = eval(convert2(flower.where), merged, flower.from.keySet(), I);
@@ -1204,7 +1204,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					lhs.add(edge);
 					//must normalize in I
 					List<C> rhs0 = subst_new(flower.attrs.get(edge), k, new HashSet(), new HashSet());
-					Triple<C,C,List<C>> rhs = I.find_fast(new Triple((C)"_1", (C)tgt, rhs0));
+					Triple<C,C,List<C>> rhs = I.find_fast(new Triple("_1", tgt, rhs0));
 					List rhsX = new LinkedList();
 					if (I.schema.cat().hom((C)"_1", (C)tgt).contains(rhs)) {
 						if (rhs.third.isEmpty()) {
@@ -1275,7 +1275,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 					rhs0.add(e.getKey());
 					Triple<C,C,List<C>> rhsX = I.find_fast(new Triple<>((C)"_1", e.getValue().second, rhs0));
 					List rhs = new LinkedList();
-					if (I.schema.cat().hom((C)"_1", (C)e.getValue().second).contains(rhsX)) {
+					if (I.schema.cat().hom((C)"_1", e.getValue().second).contains(rhsX)) {
 						if (rhsX.third.isEmpty()) {
 							rhs.add(rhsX.first);
 						} else {
@@ -1296,6 +1296,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	
 	//: check that INSTANCEs are saturated?
 	
+	@SuppressWarnings("unused")
 	static <C,D> void checkEdges(XPoly<C,D> poly, Map<Object, XCtx> frozens) {
 		for (Object k : poly.blocks.keySet()) {
 			Pair<D, Block<C, D>> b = poly.blocks.get(k);
@@ -1377,7 +1378,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			eqs.add(new Pair<>(inj1fgen, inj2ggen));
 		}
 		
-		XCtx<Chc<A,B>> ret = new XCtx<Chc<A,B>>(I.ids, I.types, eqs , (XCtx)I.global, (XCtx)I.schema, "instance");
+		XCtx<Chc<A,B>> ret = new XCtx<>(I.ids, I.types, eqs , I.global, I.schema, "instance");
 		ret.saturated = false;
 		//	ret.saturated = f.dst.saturated && g..saturated;
 		return ret;

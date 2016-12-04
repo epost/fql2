@@ -65,10 +65,11 @@ public class JdbcPragma extends Pragma {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} 
+	
 		
 	}
 	
-	private String print(ResultSet rs) throws SQLException {		
+	private static String print(ResultSet rs) throws SQLException {		
 		 ResultSetMetaData rsmd = rs.getMetaData();
 		 int columnsNumber = rsmd.getColumnCount();
 		 List<String> x = new LinkedList<>();

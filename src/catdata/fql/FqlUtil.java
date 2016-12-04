@@ -16,18 +16,18 @@ import javax.swing.JSplitPane;
 public class FqlUtil {
 	
 	public static <T> Collection<List<T>> permute(Collection<T> input) {
-		Collection<List<T>> output = new ArrayList<List<T>>();
+		Collection<List<T>> output = new ArrayList<>();
 		if (input.isEmpty()) {
 			output.add(new ArrayList<T>());
 			return output;
 		}
-		List<T> list = new ArrayList<T>(input);
+		List<T> list = new ArrayList<>(input);
 		T head = list.get(0);
 		List<T> rest = list.subList(1, list.size());
 		for (List<T> permutations : permute(rest)) {
-			List<List<T>> subLists = new ArrayList<List<T>>();
+			List<List<T>> subLists = new ArrayList<>();
 			for (int i = 0; i <= permutations.size(); i++) {
-				List<T> subList = new ArrayList<T>();
+				List<T> subList = new ArrayList<>();
 				subList.addAll(permutations);
 				subList.add(i, head);
 				subLists.add(subList);

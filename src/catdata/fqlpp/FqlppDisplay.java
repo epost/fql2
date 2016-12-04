@@ -102,7 +102,7 @@ public class FqlppDisplay implements Disp {
 
 	List<Pair<String, JComponent>> frames = new LinkedList<>();
 
-	public JPanel showSet(Set<?> view, Color c) {
+	public static JPanel showSet(Set<?> view, Color c) {
 		JTabbedPane px = new JTabbedPane();
 
 		if (GlobalOptions.debug.fqlpp.set_graph) {
@@ -157,10 +157,8 @@ public class FqlppDisplay implements Disp {
 				} else if (g.getEdgeCount() > GlobalOptions.debug.fqlpp.MAX_EDGES) {
 					CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_EDGES);
 					px.add("Schema", xxx);
-				}
-				else {
-					JComponent yyy = doSchemaView(c, g);
-					px.add("Schema", yyy);
+				} else {
+					px.add("Schema", doSchemaView(c, g));
 				}	
 			}
 		}
@@ -188,8 +186,7 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	private JPanel catTable(Category view) {
-//		JPanel gp = new JPanel(new GridLayout(2, 3));
+	private static JPanel catTable(Category view) {
 		List<JComponent> gp = new LinkedList<>();
 
 		Object[][] rowData1 = new Object[view.objects().size()][1];
@@ -311,7 +308,7 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public JPanel showFtr(Functor view, Color c, FunctorExp e) {
+	public JPanel showFtr(Functor view, Color c, @SuppressWarnings("unused") FunctorExp e) {
 		JTabbedPane px = new JTabbedPane();
 
 		if (view.source.isInfinite()) {
@@ -373,10 +370,8 @@ public class FqlppDisplay implements Disp {
 			} else if (g.getEdgeCount() > GlobalOptions.debug.fqlpp.MAX_EDGES) {
 				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getEdgeCount() + " edges, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_EDGES);
 				px.add("Elements", xxx);
-			} 
-			else {
-				JComponent yyy = doElementsView(c, g);
-				px.add("Elements", yyy);
+			} else {
+				px.add("Elements", doElementsView(c, g));
 			}
 			}
 		}
@@ -736,6 +731,7 @@ public class FqlppDisplay implements Disp {
 
 	}
 
+	@Override
 	public void close() {
 		if (frame == null) {
 			return;
@@ -987,16 +983,16 @@ public class FqlppDisplay implements Disp {
 		Layout<X, Y> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<X, Y> vv = new VisualizationViewer<>(layout);
-		Transformer<X, Paint> vertexPaint = x -> clr;
+		Transformer<X, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer ttt = arg0 -> Util.nice(arg0.toString());
-		vv.getRenderContext().setVertexLabelTransformer(ttt);
-		vv.getRenderContext().setEdgeLabelTransformer(ttt);
+		Transformer fff = arg0 -> Util.nice(arg0.toString());
+		vv.getRenderContext().setVertexLabelTransformer(fff);
+		vv.getRenderContext().setEdgeLabelTransformer(fff);
 
 		vv.getPickedVertexState().addItemListener(new ItemListener() {
 			@Override
@@ -1066,12 +1062,12 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <X, Y> JComponent doFNView2(Functor fn, JPanel p, final Color clr, Graph<X, Y> sgv,
+	public static <X, Y> JComponent doFNView2(Functor fn, JPanel p, final Color clr, Graph<X, Y> sgv,
 			Signature sig) {
 		Layout<X, Y> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<X, Y> vv = new VisualizationViewer<>(layout);
-		Transformer<X, Paint> vertexPaint = x -> clr;
+		Transformer<X, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -1121,7 +1117,7 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public  JComponent doSchemaView(Color clr, Graph sgv) {
+	public static  JComponent doSchemaView(Color clr, Graph sgv) {
 		Layout layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer vv = new VisualizationViewer<>(layout);
@@ -1144,11 +1140,11 @@ public class FqlppDisplay implements Disp {
 	}
 
 
-	public JComponent doElementsView(Color clr, Graph<Pair, Triple> sgv) {
+	public static JComponent doElementsView(Color clr, Graph<Pair, Triple> sgv) {
 		Layout<Pair, Triple> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Pair, Triple> vv = new VisualizationViewer<>(layout);
-		Transformer<Pair, Paint> vertexPaint = x -> clr;
+		Transformer<Pair, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -1168,7 +1164,7 @@ public class FqlppDisplay implements Disp {
 		return ret;
 	}
 	
-	public JComponent doMappingView(Color clr1, Color clr2, Graph<Pair, Quad> sgv) {
+	public static JComponent doMappingView(Color clr1, Color clr2, Graph<Pair, Quad> sgv) {
 		Layout<Pair, Quad> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Pair, Quad> vv = new VisualizationViewer<>(layout);
@@ -1201,7 +1197,7 @@ public class FqlppDisplay implements Disp {
 		return ret;
 	}
 
-	public JComponent doElements2View(Color clr, Graph<Triple, Quad> sgv) {
+	public static JComponent doElements2View(Color clr, Graph<Triple, Quad> sgv) {
 		Layout<Triple, Quad> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Triple, Quad> vv = new VisualizationViewer<>(layout);
@@ -1243,16 +1239,16 @@ public class FqlppDisplay implements Disp {
 		Layout<X, Y> layout = new FRLayout(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<X, Y> vv = new VisualizationViewer<>(layout);
-		Transformer<X, Paint> vertexPaint = x -> clr;
+		Transformer<X, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer ttt = arg0 -> Util.nice(arg0.toString());
-		vv.getRenderContext().setVertexLabelTransformer(ttt);
-		vv.getRenderContext().setEdgeLabelTransformer(ttt);
+		Transformer www = arg0 -> Util.nice(arg0.toString());
+		vv.getRenderContext().setVertexLabelTransformer(www);
+		vv.getRenderContext().setEdgeLabelTransformer(www);
 
 		vv.getPickedVertexState().addItemListener(new ItemListener() {
 			@Override
@@ -1292,6 +1288,7 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
+	static
 	Pair<JPanel, Map<Object, JPanel>> makeJoined(Signature<String, String> sig,
 			Functor<Object, Object, Set, Fn<Object, Object>> F) {
 		Map<Signature.Node, List<Signature<String, String>.Edge>> map = new HashMap<>();

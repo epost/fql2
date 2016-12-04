@@ -179,7 +179,7 @@ public class Chase {
 				s = yyy.tokens;
 				Pair<Pair<List<String>, List<Triple<String, String, String>>>, Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>> t = yyy.value;
 
-				return new Partial<EmbeddedDependency>(s, new EmbeddedDependency(t.first.first,
+				return new Partial<>(s, new EmbeddedDependency(t.first.first,
 						t.second.first, t.first.second, t.second.second.first,
 						t.second.second.second));
 
@@ -246,8 +246,8 @@ public class Chase {
 				a = y.value.first;
 				b = y.value.second;
 
-				return new Partial<Triple<String, String, String>>(s,
-						new Triple<String, String, String>(r, a, b));
+				return new Partial<>(s,
+						new Triple<>(r, a, b));
 			}
 
 		};
@@ -304,7 +304,7 @@ public class Chase {
 
 	public static enum KIND {
 		PARALLEL, STANDARD, CORE, HYBRID
-	};
+	}
 
 	private static Map<String, Set<Pair<Object, Object>>> chase(
 			Set<String> keys,
@@ -406,6 +406,8 @@ public class Chase {
 				if (!fired) {
 					return ret;
 				}
+			default:
+				break;
 			}
 
 			if (i++ > Chase.chase_limit) {
@@ -538,7 +540,7 @@ public class Chase {
 		return true;
 	}
 
-	private static Set<Object> ids(Set<String> keys, Map<String, Set<Pair<Object, Object>>> i) {
+	private static Set<Object> ids(@SuppressWarnings("unused") Set<String> keys, Map<String, Set<Pair<Object, Object>>> i) {
 		Set<Object> ret = new HashSet<>();
 		// ignore keys
 		for (String k : i.keySet()) {
@@ -724,7 +726,7 @@ public class Chase {
 				} catch (Exception ee) {
 					b = map.get(fact.third);
 				}
-				ret.get(fact.first).add(new Pair<Object, Object>(a, b));
+				ret.get(fact.first).add(new Pair<>(a, b));
 			}
 
 		}
@@ -768,7 +770,7 @@ public class Chase {
 		return ret;
 	}
 
-	private static int getColNo(List<String> f, List<Triple<String, String, String>> s, String str) {
+	private static int getColNo(@SuppressWarnings("unused") List<String> f, List<Triple<String, String, String>> s, String str) {
 		int i = 0;
 		for (Triple<String, String, String> k : s) {
 			if (str.equals(k.second)) {
@@ -931,16 +933,16 @@ public class Chase {
 	}
 
 	public static <T> Set<Set<T>> pow(Set<T> originalSet) {
-		Set<Set<T>> sets = new HashSet<Set<T>>();
+		Set<Set<T>> sets = new HashSet<>();
 		if (originalSet.isEmpty()) {
 			sets.add(new HashSet<T>());
 			return sets;
 		}
-		List<T> list = new ArrayList<T>(originalSet);
+		List<T> list = new ArrayList<>(originalSet);
 		T head = list.get(0);
-		Set<T> rest = new HashSet<T>(list.subList(1, list.size()));
+		Set<T> rest = new HashSet<>(list.subList(1, list.size()));
 		for (Set<T> set : pow(rest)) {
-			Set<T> newSet = new HashSet<T>();
+			Set<T> newSet = new HashSet<>();
 			newSet.add(head);
 			newSet.addAll(set);
 			sets.add(newSet);

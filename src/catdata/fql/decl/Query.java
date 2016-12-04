@@ -85,7 +85,7 @@ public class Query {
 	}
 
 	
-	public JPanel view() throws FQLException {
+	public JPanel view() {
 		JPanel p = new JPanel(new GridLayout(3, 1));
 		p.setBorder(BorderFactory.createEmptyBorder());
 		JPanel q = project.view();
@@ -113,7 +113,7 @@ public class Query {
 	}
 
 	public static Map<String, Set<Object[]>> convert0(Instance theinstance) {
-		Map<String, Set<Object[]>> ret = new HashMap<String, Set<Object[]>>();
+		Map<String, Set<Object[]>> ret = new HashMap<>();
 		for (Entry<String, Set<Pair<Object, Object>>> k : theinstance.data
 				.entrySet()) {
 			ret.put(k.getKey(), conv(k.getValue()));
@@ -122,7 +122,7 @@ public class Query {
 	}
 
 	private static Set<Object[]> conv(Set<Pair<Object, Object>> set) {
-		Set<Object[]> ret = new HashSet<Object[]>();
+		Set<Object[]> ret = new HashSet<>();
 		for (Pair<Object, Object> p : set) {
 			Object[] s = new Object[] { p.first, p.second };
 			ret.add(s);
@@ -147,15 +147,15 @@ public class Query {
 		return ret;
 	}
 
-	public Graph<String, String> legend() {
-		Graph<String, String> ret = new DirectedSparseMultigraph<String, String>();
+	public static Graph<String, String> legend() {
+		Graph<String, String> ret = new DirectedSparseMultigraph<>();
 		return ret;
 	}
 
-	public JPanel lowerComp2(final FqlEnvironment env) {
-		Layout<String, String> layout = new ISOMLayout<String, String>(legend());
+	public static JPanel lowerComp2(@SuppressWarnings("unused") final FqlEnvironment env) {
+		Layout<String, String> layout = new ISOMLayout<>(legend());
 		layout.setSize(new Dimension(500, 100));
-		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
+		VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 				layout);
 		vv.setPreferredSize(new Dimension(500, 100));
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
@@ -171,7 +171,7 @@ public class Query {
 		return vv;
 	}
 
-	public JPanel lowerComp(final FqlEnvironment env) {
+	public static JPanel lowerComp(@SuppressWarnings("unused") final FqlEnvironment env) {
 		JPanel pan = new JPanel(new GridLayout(1, 4));
 		return pan;
 	}
@@ -549,7 +549,7 @@ public class Query {
 			return x.accept(env, this);
 		}
 
-		public JPanel text(FQLProgram p) {
+		public static JPanel text(FQLProgram p) {
 			JTextArea ta = new JTextArea(p.toString());
 			JPanel tap = new JPanel(new GridLayout(1, 1));
 			ta.setBorder(BorderFactory.createEmptyBorder());

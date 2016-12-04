@@ -23,10 +23,10 @@ import catdata.aql.fdm.ColimitInstance;
 import catdata.aql.fdm.DeltaInstance;
 import catdata.aql.fdm.DistinctInstance;
 import catdata.aql.fdm.EvalAlgebra.Row;
-import catdata.graph.DMG;
 import catdata.aql.fdm.EvalInstance;
 import catdata.aql.fdm.SigmaInstance;
 import catdata.aql.fdm.TerminalInstance;
+import catdata.graph.DMG;
 
 public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>> {
 	
@@ -180,7 +180,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
 		}	
 	
-		public InstExpColim(GraphExp<N, E> shape, SchExp<Ty, En, Sym, Fk, Att> schema, List<String> imports, List<Pair<N, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> nodes, List<Pair<E, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>>> edges, List<Pair<String, String>> options) {
+		//TODO AQL imports for colimit
+		public InstExpColim(GraphExp<N, E> shape, SchExp<Ty, En, Sym, Fk, Att> schema, @SuppressWarnings("unused") List<String> imports, List<Pair<N, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> nodes, List<Pair<E, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>>> edges, List<Pair<String, String>> options) {
 			this.schema = schema;
 			this.shape = shape;
 			this.nodes = new Ctx<>(nodes);

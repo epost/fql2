@@ -16,7 +16,7 @@ public class FQLPPProgram implements Serializable, Prog {
 
 	@Override
 	public boolean equals(Object o) {
-		return (this == o);
+		return super.equals(o);
 	}
 
 	public static class NewDecl {
@@ -119,7 +119,7 @@ public class FQLPPProgram implements Serializable, Prog {
 	}
 
 
-	private void checkDup(Set<String> seen, String name, String s)
+	private static void checkDup(Set<String> seen, String name, @SuppressWarnings("unused") String s)
 			throws LineException {
 		if (seen.contains(name)) {
 			throw new RuntimeException("Duplicate name: " + name);
@@ -130,6 +130,11 @@ public class FQLPPProgram implements Serializable, Prog {
 	@Override
 	public Integer getLine(String s) {
 		return lines.get(s);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 
 }

@@ -123,7 +123,7 @@ public class PreOrder<X> {
 		g.add(new Pair<>(rhs, rhs));
 		g.add(new Pair<>(lhs, rhs));
 		
-		while (trans());
+		while (trans()){}
 	}
 	
 	public boolean gte(X lhs, X rhs) {

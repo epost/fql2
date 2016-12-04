@@ -43,7 +43,7 @@ public class LeftKan {
 		}	
 	}
 	
-	private void filter(Set<Pair<Integer, Integer>> set, Integer d) {
+	private static void filter(Set<Pair<Integer, Integer>> set, Integer d) {
 		Iterator<Pair<Integer, Integer>> it = set.iterator();
 		while (it.hasNext()) {
 			Pair<Integer, Integer> p = it.next();
@@ -367,7 +367,7 @@ public class LeftKan {
 		}
 	}
 	
-	private Object lookup(Set<Pair<Object, Object>> set, Object i) {
+	private static Object lookup(Set<Pair<Object, Object>> set, Object i) {
 		if (i == null) {
 			throw new RuntimeException();
 		}

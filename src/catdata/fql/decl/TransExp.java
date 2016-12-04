@@ -411,6 +411,7 @@ public static class UnChi extends TransExp {
 			return v.visit(env, this);
 		}
 		
+		@Override
 		public String toString() {
 			if (lToR) {
 				return "iso1 " + l + " " + r;
@@ -464,6 +465,7 @@ public static class UnChi extends TransExp {
 			this.inst = inst;
 			this.trans = trans;
 		}
+		@Override
 		public String toString() {
 			return inst + ".curry " + trans;
 		}
@@ -1091,6 +1093,7 @@ public static class UnChi extends TransExp {
 
 	public abstract <R, E> R accept(E env, TransExpVisitor<R, E> v);
 
+	@Override
 	public abstract boolean equals(Object o);
 /*
 	public final Pair<SigExp, SigExp> type(Map<String, SigExp> env,
@@ -1860,6 +1863,7 @@ public static class UnChi extends TransExp {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return obj + ".(" + l + " * " + r + ")";
 		}
@@ -1916,6 +1920,7 @@ public static class UnChi extends TransExp {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " then " + r + ")";
 		}
@@ -1980,6 +1985,7 @@ public static class UnChi extends TransExp {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return obj + ".(" + l + " + " + r + ")";
 		}
@@ -1997,6 +2003,7 @@ public static class UnChi extends TransExp {
 
 	}
 
+	@Override
 	public abstract int hashCode();
 
 	public interface TransExpVisitor<R, E> {

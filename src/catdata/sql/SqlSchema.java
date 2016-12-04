@@ -60,6 +60,7 @@ public class SqlSchema {
 				table.columns.add(col);
 				types.add(resolvedType);
 			}
+			cols.close();
 			
 			ResultSet pks = meta.getPrimaryKeys(null, null, table.name);
 			while (pks.next()) {
@@ -69,6 +70,7 @@ public class SqlSchema {
 			if (table.pk.isEmpty()) {
 				table.pk = new HashSet<>(table.columns);
 			}	
+			pks.close();
 		}
 		
 		result = meta.getTables(null, null, null, new String[] { "TABLE" });

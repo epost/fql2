@@ -332,7 +332,7 @@ public class XMapping<C, D> implements XObject {
 			if (lhs.size() != 1 || rhs.size() != 1) {
 				throw new RuntimeException();
 			}
-			ret.put((D) c, new Pair<>((D) lhs.get(0), (D) rhs.get(0)));
+			ret.put((D) c, new Pair<>(lhs.get(0), rhs.get(0)));
 		}
 
 		for (Pair<List<C>, List<C>> eq : I.eqs) {
@@ -348,7 +348,7 @@ public class XMapping<C, D> implements XObject {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static XMapping<String, String> make(XEnvironment eNV, XCtx<String> src,
+	public static XMapping<String, String> make(@SuppressWarnings("unused") XEnvironment eNV, XCtx<String> src,
 			XCtx<String> dst, XMapConst m) {
 		Map<String, List<String>> ret = new HashMap<>();
 		List<String> one = new LinkedList<>();
@@ -701,22 +701,15 @@ public class XMapping<C, D> implements XObject {
 			}
 		}
 
-		XCtx ret = new XCtx<Pair<Triple<D, D, List<D>>, C>>(ids, types, eqs,
+		XCtx ret = new XCtx<>(ids, types, eqs,
 				(XCtx<Pair<Triple<D, D, List<D>>, C>>) src.global,
 				(XCtx<Pair<Triple<D, D, List<D>>, C>>) src, "instance");
 		ret.saturated = true; // I.saturated;
 		return ret;
 	}
 
+	@SuppressWarnings("unused")
 	private boolean isSkipKey(C c, Triple<D, D, List<D>> f) {
-		/*
-		 * if (f.first.equals("_1")) { //added if
-		 * (src.global.cat().arrows().contains(f)) { return true; } } else { if
-		 * (f.third.isEmpty()) { } else if (f.third.get(0).equals("!_" +
-		 * f.first)) { Triple<D, D, List<D>> ff = new Triple<>((D)"_1",
-		 * f.second, f.third.subList(1, f.third.size())); if
-		 * (src.global.cat().arrows().contains(ff)) { return true; } } }
-		 */// 
 		return false;
 	}
 
@@ -818,7 +811,7 @@ public class XMapping<C, D> implements XObject {
 						if (((List) val.third).isEmpty()) {
 							lll.add(val.first);
 						} else {
-							lll.addAll(((List) val.third)); 
+							lll.addAll((val.third)); 
 						}
 						eqs.add(new Pair(lhs, lll));
 					} else {
@@ -946,7 +939,7 @@ public class XMapping<C, D> implements XObject {
 	// 
 	void cleanup(Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
 			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
-			Pair<C, Triple<D, D, List<D>>> tag, Triple<C, C, List<C>> y) {
+			Pair<C, Triple<D, D, List<D>>> tag, @SuppressWarnings("unused") Triple<C, C, List<C>> y) {
 		for (Pair<C, Triple<D, D, List<D>>> k : theta.keySet()) {
 			Pair<C, Triple<D, D, List<D>>> v = theta2.get(k);
 			if (v == null) {
@@ -1352,16 +1345,16 @@ public class XMapping<C, D> implements XObject {
 				}
 			}
 			
-			Block<C, D> block = new Block<C, D>(from, where, attrs, edges);
+			Block<C, D> block = new Block<>(from, where, attrs, edges);
 			map.put("q" + d, new Pair<>(d, block));
 		}
 		
-		XPoly<C, D> ret = new XPoly<C, D>(src, dst, map);
+		XPoly<C, D> ret = new XPoly<>(src, dst, map);
 		return ret;
 	}
 
 	//must reverse
-	public static <C, D> XMapping<D, D> uber_sub(D d, D d0, D e, XCtx<D> I, XCtx<D> J) {
+	public static <D> XMapping<D, D> uber_sub(D d, D d0, D e, XCtx<D> I, XCtx<D> J) {
 		Map<D, List<D>> m = new HashMap<>();
 		List<D> l = new LinkedList<>();
 		l.add(d0);
@@ -1372,7 +1365,7 @@ public class XMapping<C, D> implements XObject {
 				m.put(x, Util.singList(x));
 			}
 		}
-		return new XMapping<D, D>(J, I, m, "homomorphism");
+		return new XMapping<>(J, I, m, "homomorphism");
 	}
 
 	public static <X> boolean transform_eq(XMapping<X,X> h1, XMapping<X,X> h2) {
@@ -1483,6 +1476,7 @@ public class XMapping<C, D> implements XObject {
 		final Stroke bs = new BasicStroke();
 
 		Transformer<Object, Stroke> edgeStrokeTransformer = new Transformer<Object, Stroke>() {
+			@Override
 			public Stroke transform(Object s) {
 				if (!(s instanceof Chc)) {
 					return edgeStroke;

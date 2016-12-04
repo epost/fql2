@@ -132,7 +132,7 @@ public class InstExpJdbc<Ty,En,Sym,Fk,Att,Gen,Sk>
 		Map<Fk, String> fks = new HashMap<>();
 		
 		for (String o : map.keySet()) {
-			assertUnambig(o, sch, ens, tys, atts, fks);
+			assertUnambig(o, sch);
 			String q = map.get(o);
 			
 			if (sch.typeSide.tys.contains(o)) {
@@ -330,7 +330,7 @@ public class InstExpJdbc<Ty,En,Sym,Fk,Att,Gen,Sk>
 	}
 
 
-	private void assertUnambig(Object o, Schema<Ty,En,Sym,Fk,Att> sch, Map<En, String> ens, Map<Ty, String> tys, Map<Att, String> atts, Map<Fk, String> fks) {
+	private void assertUnambig(Object o, Schema<Ty,En,Sym,Fk,Att> sch) {
 		int i = 0;
 		if (sch.typeSide.tys.contains(o)) {
 			i++;

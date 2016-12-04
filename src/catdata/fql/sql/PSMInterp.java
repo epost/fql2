@@ -63,7 +63,7 @@ public class PSMInterp {
 	}
 	
 	@SuppressWarnings("unused")
-	private void check(PSM p, Map<String, Set<Map<Object, Object>>> state) {
+	private static void check(PSM p, Map<String, Set<Map<Object, Object>>> state) {
 		for (String k : state.keySet()) {
 			for (Map<Object, Object> v : state.get(k)) {
 				if (v.get("c0") != null && v.get("c0") instanceof Integer && !k.contains("lineage")) {

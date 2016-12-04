@@ -44,7 +44,7 @@ public class FDM {
 
 	@SuppressWarnings("unchecked")
 	private static <Y,X> Set<Value<Y,X>[]> up(Set<Value<Y,X>> set) {
-		Set<Value<Y,X>[]> ret = new HashSet<Value<Y,X>[]>();
+		Set<Value<Y,X>[]> ret = new HashSet<>();
 		for (Value<Y,X> s : set) {
 			ret.add(new Value[] { s });
 		}
@@ -253,7 +253,7 @@ public class FDM {
 
 	
 	
-	private static <ObjC, ArrowC, ObjD, ArrowD, Y, X> Set<Value<Y,X>[]> subset2(
+	private static <ObjC, ObjD, ArrowD, Y, X> Set<Value<Y,X>[]> subset2(
 			FinCat<ObjD, ArrowD> cat,
 			Arr<ObjD, ArrowD> e,
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>[] q2cols,
@@ -299,7 +299,7 @@ public class FDM {
 	 * Projection on two columns
 	 */
 	private static <X> Map<X, X> project(Set<X[]> x, int i, int j) {
-		Map<X, X> ret = new HashMap<X, X>();
+		Map<X, X> ret = new HashMap<>();
 		for (X[] s : x) {
 			if (ret.containsKey(s[i]) && !ret.get(s[i]).equals(s[j])) {
 				throw new RuntimeException("Is not map : " + pn(x) + " on " + i
@@ -314,7 +314,7 @@ public class FDM {
 	 * Just takes the zero-th ID column of a relation
 	 */
 	private static <X> Set<X> squish(Set<X[]> r) {
-		Set<X> ret = new HashSet<X>();
+		Set<X> ret = new HashSet<>();
 		for (X[] x : r) {
 			ret.add(x[0]);
 		}
@@ -353,7 +353,7 @@ public class FDM {
 
 		FinFunctor<ObjD, ArrowD, ObjD, ArrowD> d = FinFunctor.singleton(D, d0,
 				D.id(d0));
-		CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> B = new CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD>(
+		CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> B = new CommaCat<>(
 				d.srcCat, C, D, d, F);
 
 		return B;
@@ -692,7 +692,7 @@ public class FDM {
 		
 	
 
-		return new FinFunctor<Pair<ObjB, Value<Y,X>>, Arr<ObjB,ArrowB>, Pair<ObjA, Value<Y,X>>, Arr<ObjA,ArrowA>>(objM, arrM, B, A);
+		return new FinFunctor<>(objM, arrM, B, A);
 	}
 
 	/**
@@ -766,7 +766,7 @@ public class FDM {
 			Set<Pair<Value<Y,X>, Value<Y,X>>> table = tn.get(i);
 			Pair<Y, Y> tag = tags.get(i);
 			for (Pair<Value<Y,X>, Value<Y,X>> p : table) {
-				ret.add(new Pair<>(new Value<Y,X>(tag.first, p.first), new Value<Y,X>(tag.second, p.second)));
+				ret.add(new Pair<>(new Value<>(tag.first, p.first), new Value<>(tag.second, p.second)));
 			}
 		}
 		return ret;

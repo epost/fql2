@@ -35,13 +35,11 @@ import catdata.fql.decl.Transform;
  */
 public class PSMGen {
 
-	public static List<PSM> guidify(String pre0, Signature sig)
-			throws FQLException {
+	public static List<PSM> guidify(String pre0, Signature sig) {
 		return guidify(pre0, sig, false);
 	}
 
-	public static List<PSM> guidify(String pre0, Signature sig, boolean remember)
-			throws FQLException {
+	public static List<PSM> guidify(String pre0, Signature sig, boolean remember) {
 		List<PSM> ret = new LinkedList<>();
 
 		Map<String, String> guid_attrs = new HashMap<>();
@@ -240,8 +238,7 @@ public class PSMGen {
 	}
 
 	public static List<PSM> doConst(String dst, Signature sig,
-			List<Pair<String, List<Pair<Object, Object>>>> data)
-			throws FQLException {
+			List<Pair<String, List<Pair<Object, Object>>>> data) {
 		List<PSM> ret = new LinkedList<>();
 
 		for (Node n : sig.nodes) {
@@ -276,8 +273,7 @@ public class PSMGen {
 		throw new RuntimeException();
 	}
 
-	public static List<PSM> doExternal(Signature sig, String in, String out)
-			throws FQLException {
+	public static List<PSM> doExternal(Signature sig, String in, String out) {
 		List<PSM> ret = new LinkedList<>();
 
 		ret.addAll(makeTables(in, sig, true));
@@ -400,8 +396,7 @@ public class PSMGen {
 		return new Flower(select, from, where);
 	}
 
-	public static List<PSM> SIGMA(Mapping F, String pre, String inst)
-			throws FQLException {
+	public static List<PSM> SIGMA(Mapping F, String pre, String inst) {
 		List<PSM> ret = new LinkedList<>();
 
 		ret.add(new FullSigma(F, pre, inst));
@@ -600,7 +595,7 @@ public class PSMGen {
 
 			ret.add(new CreateTable(dst + "_" + d0.string + "_limnoguid",
 					attrs1, false));
-			ret.add(new InsertSQL2(dst + "_" + d0.string + "_limnoguid", r, new LinkedList<String>(r.select.keySet())));
+			ret.add(new InsertSQL2(dst + "_" + d0.string + "_limnoguid", r, new LinkedList<>(r.select.keySet())));
 
 			ret.add(new CreateTable(dst + "_" + d0.string + "_limit", attrs2,
 					false));
@@ -708,7 +703,7 @@ public class PSMGen {
 			FinCat<Node, Path> cat, Arr<Node, Path> e, String pre,
 			Triple<Node, Node, Arr<Node, Path>>[] q2cols,
 			Triple<Node, Node, Arr<Node, Path>>[] q1cols, String q2name,
-			String q1name) throws FQLException {
+			String q1name) {
 		List<Pair<Pair<String, String>, Pair<String, String>>> ret = new LinkedList<>();
 		// turn e into arrow e', compute e' ; q2col, look for that
 		/* a: */for (int i = 0; i < q2cols.length; i++) {
@@ -721,7 +716,7 @@ public class PSMGen {
 						&& q1c.second.equals(q2c.second)) {
 					Pair<Pair<String, String>, Pair<String, String>> retadd = new Pair<>(
 							new Pair<>(pre + "_" + q1name + "_limit_1", "c" + j),
-							new Pair<String, String>(pre + "_" + q2name
+							new Pair<>(pre + "_" + q2name
 									+ "_limit_2", "c" + i));
 					ret.add(retadd);
 					b = true;
@@ -742,8 +737,7 @@ public class PSMGen {
 
 	private static CommaCat<Node, Path, Node, Path, Node, Path> doComma(
 			FinCat<Node, Path> d2, FinCat<Node, Path> c,
-			FinFunctor<Node, Path, Node, Path> f, Node d0, Signature S)
-			throws FQLException {
+			FinFunctor<Node, Path, Node, Path> f, Node d0, @SuppressWarnings("unused") Signature S) {
 		FinFunctor<Node, Path, Node, Path> d = FinFunctor.singleton(d2, d0,
 				new Arr<>(d2.identities.get(d0).arr, d0, d0));
 		CommaCat<Node, Path, Node, Path, Node, Path> B = new CommaCat<>(
@@ -756,7 +750,7 @@ public class PSMGen {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <Arrow> Triple<Flower, Triple<Node, Node, Arr<Node, Path>>[], Attribute<Node>[]> lim(
+	public static Triple<Flower, Triple<Node, Node, Arr<Node, Path>>[], Attribute<Node>[]> lim(
 			String pre, Signature sig, FinCat<Node, Path> cat,
 			CommaCat<Node, Path, Node, Path, Node, Path> b,
 			Map<Triple<Node, Node, Arr<Node, Path>>, String> map,

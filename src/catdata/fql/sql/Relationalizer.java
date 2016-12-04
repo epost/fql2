@@ -75,7 +75,7 @@ public class Relationalizer {
 					Object o = Integer.toString(++i);
 					map1.put(o, i2);
 					map2.put(i2, o);
-					set.add(new Pair<Object, Object>(o, o));
+					set.add(new Pair<>(o, o));
 				}
 				nodes.add(new Pair<>(n.string, set));
 			}
@@ -83,7 +83,7 @@ public class Relationalizer {
 				List<Pair<Object, Object>> set = new LinkedList<>();
 				for (Pair<Object, Object> k : PropPSM.lookup(nodes, a.source.string)) {
 					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id = m1.get(a.source).get(k.first);
-					set.add(new Pair<Object, Object>(k.first, new_id.get(new Pair<>(map.of(new Path(sig, a.source)), a))));
+					set.add(new Pair<>(k.first, new_id.get(new Pair<>(map.of(new Path(sig, a.source)), a))));
 				}
 				attrs.add(new Pair<>(a.name, set));
 			}
@@ -237,7 +237,7 @@ public class Relationalizer {
 			Map<String, String> from,
 			List<Pair<Pair<String, String>, Pair<String, String>>> where,
 			Signature sig, String out, Map<String, String> ty, Node n, int u,
-			Map<String, String> edge_types) throws FQLException {
+			Map<String, String> edge_types) {
 		List<PSM> ret = new LinkedList<>();
 
 		LinkedHashMap<String, Pair<String, String>> select0 = new LinkedHashMap<>(

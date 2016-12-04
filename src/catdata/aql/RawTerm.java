@@ -105,7 +105,7 @@ public final class RawTerm {
 	}
 	
 	//TODO aql statically typesafe coerce
-	private <K,V> K find(Map<K,V> m, String k) {
+	private static <K,V> K find(Map<K,V> m, String k) {
 		for (K k0 : m.keySet()) {
 			if (k.equals(k0)) {
 				return k0;

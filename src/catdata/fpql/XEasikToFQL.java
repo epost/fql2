@@ -22,6 +22,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -68,7 +70,7 @@ public class XEasikToFQL {
 
 	String help = "Translates EASIK XML into FPQL.  Ignore constraints besides path equalities.";
 
-	protected String kind() {
+	protected static String kind() {
 		return "EASIK";
 	}
 
@@ -209,8 +211,8 @@ public class XEasikToFQL {
 				jta.setWrapStyleWord(true);
 				// jta.setEditable(false);
 				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 				p.setPreferredSize(new Dimension(300, 200));
 
 				JOptionPane pane = new JOptionPane(p);
@@ -235,7 +237,7 @@ public class XEasikToFQL {
 
 		tp.add(transButton);
 		tp.add(helpButton);
-		tp.add(new JLabel("Load Example", JLabel.RIGHT));
+		tp.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		tp.add(box);
 
 		p.add(jsp, BorderLayout.CENTER);

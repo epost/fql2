@@ -391,7 +391,7 @@ public class Driver {
 	}
 
 	private static <X> List<X> dedup(List<X> l) {
-		List<X> ret = new LinkedList<X>();
+		List<X> ret = new LinkedList<>();
 		for (X x : l) {
 			if (!ret.contains(x)) {
 				ret.add(x);

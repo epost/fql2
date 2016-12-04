@@ -12,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -62,7 +63,7 @@ public class Wizard<T> implements ActionListener, ChangeListener {
 		nextButton.addActionListener(this);
 
 		//dialog.setModal(true);
-		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		this.completionCallback = completionCallback;
 	}
@@ -82,6 +83,8 @@ public class Wizard<T> implements ActionListener, ChangeListener {
 		case "Finish":
 			complete();
 			break;
+		default:
+			throw new RuntimeException();
 		}
 	}
 

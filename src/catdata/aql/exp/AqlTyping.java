@@ -33,7 +33,9 @@ public class AqlTyping {
 				continue;
 			case GRAPH:
 				defs.gs.put(s, ((GraphExp<?,?>)e).eval(this));
-		continue;
+				continue;
+			default:
+				break;
 			}
 			throw new RuntimeException("Anomaly: please report");
 		}

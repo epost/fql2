@@ -102,6 +102,7 @@ public abstract class FnExp implements Serializable {
 
 	public abstract <R, E> R accept(E env, FnExpVisitor<R, E> v);
 
+	@Override
 	public abstract boolean equals(Object o);
 /*
 	public final Pair<SetExp, SetExp> type(FQLProgram env) {
@@ -805,6 +806,7 @@ public abstract class FnExp implements Serializable {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "curry " + f;
 		}
@@ -855,6 +857,7 @@ public abstract class FnExp implements Serializable {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " * " + r + ")";
 		}
@@ -905,6 +908,7 @@ public abstract class FnExp implements Serializable {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " ; " + r + ")";
 		}
@@ -955,6 +959,7 @@ public abstract class FnExp implements Serializable {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " + " + r + ")";
 		}
@@ -966,6 +971,7 @@ public abstract class FnExp implements Serializable {
 
 	}
 	
+	@Override
 	public abstract int hashCode();
 
 	public interface FnExpVisitor<R, E> {

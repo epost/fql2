@@ -37,7 +37,7 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 		}
 	}
 
-	private void filter(Set<Pair<Integer, Integer>> set, Integer d) {
+	private static void filter(Set<Pair<Integer, Integer>> set, Integer d) {
 		Iterator<Pair<Integer, Integer>> it = set.iterator();
 		while (it.hasNext()) {
 			Pair<Integer, Integer> p = it.next();
@@ -383,26 +383,26 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 			Pg2 = (Map<Signature<O2, A2>.Edge, Set<Pair<Object, Object>>>) ((Object) Pg);
 			ua2 = (Map<Signature<O1, A1>.Node, Set<Pair<Object, Object>>>) ((Object) ua);
 			utables2 = (Map<Signature<O2, A2>.Node, Map<Object, Object>>) ((Object) utables);
-			lineage2 = (Map<Object, List<Pair<Signature<O2, A2>.Edge, Object>>>) ((Object) lineage);
+			lineage2 = (lineage);
 		} else {
 			for (Entry<Signature<O2, A2>.Node, Set<Pair<Integer, Integer>>> k : Pb.entrySet()) {
 				Pb2.put(k.getKey(),
 						k.getValue()
 								.stream()
-								.map(x -> new Pair<Object, Object>(getLineage(x.first), getLineage
+								.map(x -> new Pair<>(getLineage(x.first), getLineage
 										(x.second))).collect(Collectors.toSet()));
 			}
 			for (Entry<Signature<O2, A2>.Edge, Set<Pair<Integer, Integer>>> k : Pg.entrySet()) {
 				Pg2.put(k.getKey(),
 						k.getValue()
 								.stream()
-								.map(x -> new Pair<Object, Object>(getLineage(x.first), getLineage
+								.map(x -> new Pair<>(getLineage(x.first), getLineage
 										(x.second))).collect(Collectors.toSet()));
 			}
 			for (Entry<Signature<O1, A1>.Node, Set<Pair<Object, Integer>>> k : ua.entrySet()) {
 				ua2.put(k.getKey(),
 						k.getValue().stream()
-								.map(x -> new Pair<Object, Object>(x.first, getLineage(x.second)))
+								.map(x -> new Pair<>(x.first, getLineage(x.second)))
 								.collect(Collectors.toSet()));
 			}
 			for (Entry<Signature<O2, A2>.Node, Map<Integer, Object>> k : utables.entrySet()) {

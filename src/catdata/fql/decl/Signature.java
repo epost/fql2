@@ -115,6 +115,7 @@ public class Signature {
 		}
 	} */
 
+	@Override
 	public Signature clone() {
 		Signature s = new Signature();
 		s.nodes = new LinkedList<>(nodes);
@@ -141,7 +142,7 @@ public class Signature {
 
 		Collections.sort(arrows);
 
-		Set<String> seen = new HashSet<String>();
+		Set<String> seen = new HashSet<>();
 		for (String s : nodes_str) {
 			if (seen.contains(s.toLowerCase())) {
 				throw new FQLException("Duplicate name: " + s);
@@ -201,7 +202,7 @@ public class Signature {
 		edges = new LinkedList<>(edgesA);
 		attrs = new LinkedList<>(attrsA);
 
-		eqs = new HashSet<Eq>();
+		eqs = new HashSet<>();
 		for (Pair<List<String>, List<String>> equiv : equivs) {
 			Path lhs = new Path(this, equiv.first);
 			Path rhs = new Path(this, equiv.second);
@@ -251,7 +252,7 @@ public class Signature {
 	}
 
 	private Set<Node> reachable1(Node n) {
-		Set<Node> ret = new HashSet<Node>();
+		Set<Node> ret = new HashSet<>();
 		for (Edge e : edges) {
 			if (e.source.equals(n)) {
 				ret.add(e.target);
@@ -261,7 +262,7 @@ public class Signature {
 	}
 
 	private Set<Node> reachableS1(Set<Node> nodes) {
-		Set<Node> ret = new HashSet<Node>();
+		Set<Node> ret = new HashSet<>();
 		for (Node node : nodes) {
 			ret.addAll(reachable1(node));
 		}
@@ -269,7 +270,7 @@ public class Signature {
 	}
 
 	private Set<Node> reachableFix(Set<Node> nodes) {
-		Set<Node> x = new HashSet<Node>(nodes);
+		Set<Node> x = new HashSet<>(nodes);
 		for (;;) {
 			int i = x.size();
 			x.addAll(reachableS1(nodes));
@@ -285,7 +286,7 @@ public class Signature {
 		return cl;
 	}
 
-	private Node lookup(String string, Collection<Node> nodes) {
+	private static Node lookup(String string, Collection<Node> nodes) {
 		for (Node node : nodes) {
 			if (node.string.equals(string)) {
 				return node;
@@ -322,12 +323,14 @@ public class Signature {
 			i++;
 		}
 		Arrays.sort(arr, new Comparator<Object[]>() {
+			@Override
 			public int compare(Object[] f1, Object[] f2) {
 				return f1[0].toString().compareTo(f2[0].toString());
 			}
 		});
 
 		JTable eqsComponent = new JTable(arr, new Object[] { "lhs", "rhs" })  {
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -348,12 +351,14 @@ public class Signature {
 			sn[ii++][0] = n.string;
 		}
 		Arrays.sort(sn, new Comparator<Object[]>() {
+			@Override
 			public int compare(Object[] f1, Object[] f2) {
 				return f1[0].toString().compareTo(f2[0].toString());
 			}
 		});
 
 		JTable nodesComponent = new JTable(sn, new String[] { "Name" }) {
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -373,12 +378,14 @@ public class Signature {
 			jj++;
 		}
 		Arrays.sort(es, new Comparator<Object[]>() {
+			@Override
 			public int compare(Object[] f1, Object[] f2) {
 				return f1[0].toString().compareTo(f2[0].toString());
 			}
 		});
 
 		JTable esC = new JTable(es, new String[] { "Name", "Source", "Target" }) {
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -398,12 +405,14 @@ public class Signature {
 			jj++;
 		}
 		Arrays.sort(as, new Comparator<Object[]>() {
+			@Override
 			public int compare(Object[] f1, Object[] f2) {
 				return f1[0].toString().compareTo(f2[0].toString());
 			}
 		});
 
 		JTable asC = new JTable(as, new String[] { "Name", "Source", "Type" }) {
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -517,15 +526,15 @@ public class Signature {
 
 	public Pair<String, String> getColumnNames(String s) throws FQLException {
 		if (nodes.contains(new Node(s))) {
-			return new Pair<String, String>("ID", "ID");
+			return new Pair<>("ID", "ID");
 		}
 		Attribute<Node> a = getAttr(s);
 		if (a != null) {
-			return new Pair<String, String>(a.source.string,
+			return new Pair<>(a.source.string,
 					a.target.toString());
 		}
 		Edge e = getEdge(s);
-		return new Pair<String, String>(e.source.string, e.target.string);
+		return new Pair<>(e.source.string, e.target.string);
 	}
 
 	public Attribute<Node> getAttr(String s) {
@@ -538,7 +547,7 @@ public class Signature {
 	}
 
 	public Set<String> all() {
-		Set<String> ret = new HashSet<String>();
+		Set<String> ret = new HashSet<>();
 		for (Node n : nodes) {
 			ret.add(n.string);
 		}
@@ -560,7 +569,7 @@ public class Signature {
 		List<List<String>> paths = new LinkedList<>();
 
 		for (Node n : nodes) {
-			LinkedList<String> l = new LinkedList<String>();
+			LinkedList<String> l = new LinkedList<>();
 			l.add(n.string);
 			paths.add(l);
 			List<List<String>> ret0 = bfs(l, n, 0, i);
@@ -603,7 +612,7 @@ public class Signature {
 	}
 
 	public static List<String> pathToList(Path p) {
-		List<String> ret = new LinkedList<String>();
+		List<String> ret = new LinkedList<>();
 		ret.add(p.source.string);
 		for (Edge e : p.path) {
 			ret.add(e.name);
@@ -613,22 +622,22 @@ public class Signature {
 
 	private List<List<String>> bfs(LinkedList<String> l, Node n, int i, int stop) {
 		Set<Edge> outs = outEdges(n);
-		List<List<String>> ret = new LinkedList<List<String>>();
+		List<List<String>> ret = new LinkedList<>();
 
 		if (i == stop) {
 			return ret;
 		}
 		for (Edge e : outs) {
-			LinkedList<String> r = new LinkedList<String>(l);
+			LinkedList<String> r = new LinkedList<>(l);
 			r.add(e.name);
 			ret.add(r);
-			ret.addAll(bfs(new LinkedList<String>(r), e.target, i + 1, stop));
+			ret.addAll(bfs(new LinkedList<>(r), e.target, i + 1, stop));
 		}
 		return ret;
 	}
 
 	public Set<Edge> outEdges(Node n) {
-		Set<Edge> ret = new HashSet<Edge>();
+		Set<Edge> ret = new HashSet<>();
 		for (Edge e : edges) {
 			if (e.source.equals(n)) {
 				ret.add(e);
@@ -640,7 +649,7 @@ public class Signature {
 	public Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
-		Graph<String, String> g2 = new DirectedSparseMultigraph<String, String>();
+		Graph<String, String> g2 = new DirectedSparseMultigraph<>();
 		for (Node n : nodes) {
 			g2.addVertex(n.string);
 		}
@@ -678,10 +687,11 @@ public class Signature {
 	
 			layout.setSize(new Dimension(600, 400));
 	
-			VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
+			VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
 	
 			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+				@Override
 				public Paint transform(String i) {
 					if (isAttribute(i)) {
 						return UIManager.getColor("Panel.background");
@@ -700,6 +710,7 @@ public class Signature {
 					10.0f);
 			final Stroke bs = new BasicStroke();
 			Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
+				@Override
 				public Stroke transform(String s) {
 					if (isAttribute(s)) {
 						return edgeStroke;
@@ -758,7 +769,7 @@ public class Signature {
 		return false;
 	}
 
-	public JComponent pretty(Color clr) throws FQLException {
+	public JComponent pretty(Color clr) {
 		return makeViewer(clr);
 	}
 
@@ -867,6 +878,7 @@ public class Signature {
 
 		JButton b = new JButton("Normalize");
 		b.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				String s = p1.getText();
 				try {
@@ -1300,7 +1312,7 @@ public class Signature {
 			Map<Path, Path> s = em.get(e);
 			Set<Pair<Object, Object>> t = new HashSet<>();
 			for (Entry<Path, Path> p : s.entrySet()) {
-				t.add(new Pair<Object, Object>(m2.get(p.getKey()), m2.get(p
+				t.add(new Pair<>(m2.get(p.getKey()), m2.get(p
 						.getValue())));
 			}
 			data.put(e.name, t);

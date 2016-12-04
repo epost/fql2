@@ -24,6 +24,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
@@ -54,7 +56,7 @@ public class XSqlToFql {
 
 	String help = "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
 
-	protected String kind() {
+	protected static String kind() {
 		return "SQL Schema";
 	}
 	
@@ -95,7 +97,7 @@ public class XSqlToFql {
 		}
 	}
 
-	String translate(String in, String depth) {
+	static String translate(String in, String depth) {
 		List<EExternal> list = program(in);
 		return transSQLSchema(list, Integer.parseInt(depth));
 	}
@@ -139,7 +141,7 @@ public class XSqlToFql {
 				jta.setWrapStyleWord(true);
 				//jta.setEditable(false);
 				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 				p.setPreferredSize(new Dimension(300,200));
 
 				JOptionPane pane = new JOptionPane(p);
@@ -170,9 +172,9 @@ public class XSqlToFql {
 		tp.add(helpButton);
 		// tp.add(jdbcButton);
 		// tp.add(helpButton);
-		tp.add(new JLabel("Self-loop depth", JLabel.RIGHT));
+		tp.add(new JLabel("Self-loop depth", SwingConstants.RIGHT));
 		tp.add(depth);
-		tp.add(new JLabel("Load Example", JLabel.RIGHT));
+		tp.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		tp.add(box);
 
 		// p.add(bp, BorderLayout.SOUTH);
@@ -212,7 +214,7 @@ public class XSqlToFql {
 		List<Pair<String, List<Pair<Object, Object>>>> iarrows = new LinkedList<>();
 
 		Set<String> seen = new HashSet<>();
-		HashMap<String, List<String>> cols = new HashMap<String, List<String>>();
+		HashMap<String, List<String>> cols = new HashMap<>();
 		
 		Set<String> atoms = new HashSet<>();
 		
@@ -414,6 +416,7 @@ public class XSqlToFql {
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new Map<String, Integer>() {
+				@Override
 				public Integer map(String s) {
 					return Integer.valueOf(s);
 				}

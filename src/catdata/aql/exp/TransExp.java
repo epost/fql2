@@ -34,6 +34,7 @@ import catdata.aql.fdm.SigmaTransform;
 
 public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends Exp<Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2>> {
 
+	@Override
 	public Kind kind() {
 		return Kind.TRANSFORM;
 	}
@@ -219,7 +220,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		
 		@Override
 		public long timeout() {
-			long l1 = (Long) AqlOptions.getOrDefault(options1, AqlOption.timeout);;
+			long l1 = (Long) AqlOptions.getOrDefault(options1, AqlOption.timeout);
 			long l2 = (Long) AqlOptions.getOrDefault(options2, AqlOption.timeout);
 			return l1 + l2 + Q.timeout() + t.timeout();
 		}	
@@ -450,7 +451,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 	
 	///////////////////////////////////////////////////////////////////////////////////////
 	
-	public static final class TransExpSigmaDeltaUnit<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen, Sk, X, Y> 
+	public static final class TransExpSigmaDeltaUnit<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> 
 	extends TransExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, Pair<En1, ID>, Chc<Sk,Pair<ID,Att2>>, X, Y, Pair<En1, ID>, Chc<Sk,Pair<ID,Att2>>> { 
 		
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
@@ -488,7 +489,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			TransExpSigmaDeltaUnit<?,?,?,?,?,?,?,?,?,?,?,?,?,?> other = (TransExpSigmaDeltaUnit<?,?,?,?,?,?,?,?,?,?,?,?,?,?>) obj;
+			TransExpSigmaDeltaUnit<?,?,?,?,?,?,?,?,?,?,?,?> other = (TransExpSigmaDeltaUnit<?,?,?,?,?,?,?,?,?,?,?,?>) obj;
 			if (F == null) {
 				if (other.F != null)
 					return false;

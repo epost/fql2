@@ -9,6 +9,7 @@ import catdata.aql.TypeSide;
 
 public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	
+	@Override
 	public Kind kind() {
 		return Kind.TYPESIDE;
 	}

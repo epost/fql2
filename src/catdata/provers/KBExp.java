@@ -239,6 +239,7 @@ public abstract class KBExp<C, V> {
 		 * set.add(this); }
 		 */
 
+		@Override
 		public boolean allSubExps(Map<KBExp<C, V>, Set<KBExp<C, V>>> pred) {
 			if (!pred.containsKey(this)) {
 				pred.put(this, new HashSet<>());
@@ -506,6 +507,7 @@ public abstract class KBExp<C, V> {
 			return new KBApp<>(f, l);
 		}
 
+		@Override
 		protected KBExp<C, V> sort1(Collection<C> acs) {
 			List<KBExp<C, V>> args0 = new LinkedList<>();
 			for (KBExp<C, V> arg : args) {
@@ -536,6 +538,7 @@ public abstract class KBExp<C, V> {
 			}
 		}
 
+		@Override
 		public boolean allSubExps(Map<KBExp<C, V>, Set<KBExp<C, V>>> pred) {
 			boolean ret = false;
 			if (!pred.containsKey(this)) {

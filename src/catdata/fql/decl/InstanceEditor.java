@@ -106,7 +106,7 @@ public class InstanceEditor {
 		}
 	}
 
-	public List<Pair<Object, Object>> proj1(List<Pair<Object, Object>> x) {
+	public static List<Pair<Object, Object>> proj1(List<Pair<Object, Object>> x) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 
 		for (Pair<Object, Object> k : x) {
@@ -116,7 +116,7 @@ public class InstanceEditor {
 		return ret;
 	}
 
-	public List<Pair<Object, Object>> proj2(List<Pair<Object, Object>> x) {
+	public static List<Pair<Object, Object>> proj2(List<Pair<Object, Object>> x) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 
 		for (Pair<Object, Object> k : x) {
@@ -129,7 +129,7 @@ public class InstanceEditor {
 	public Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
-		Graph<String, String> g2 = new DirectedSparseMultigraph<String, String>();
+		Graph<String, String> g2 = new DirectedSparseMultigraph<>();
 		for (Node n : thesig.nodes) {
 			g2.addVertex(n.string);
 		}
@@ -182,7 +182,7 @@ public class InstanceEditor {
 			List<Pair<Object, Object>> ids = new LinkedList<>();
 			for (Vector row : rows) {
 				Object id = row.get(0);
-				ids.add(new Pair<Object, Object>(id, id));
+				ids.add(new Pair<>(id, id));
 
 				for (int col = 1; col < cols; col++) {
 					String colname = m.getColumnName(col);
@@ -191,7 +191,7 @@ public class InstanceEditor {
 						map.put(colname, new LinkedList<Pair<Object, Object>>());
 					}
 					List<Pair<Object, Object>> attr = map.get(colname);
-					attr.add(new Pair<Object, Object>(id, val));
+					attr.add(new Pair<>(id, val));
 				}
 			}
 			nodes.add(new Pair<>(n.string, ids));
@@ -223,9 +223,10 @@ public class InstanceEditor {
 					.newInstance(sgv);
 
 			layout.setSize(new Dimension(500, 340));
-			final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
+			final VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
 			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+				@Override
 				public Paint transform(String i) {
 					if (thesig.isAttribute(i)) {
 						return UIManager.getColor("Panel.background");
@@ -290,6 +291,7 @@ public class InstanceEditor {
 					10.0f);
 			final Stroke bs = new BasicStroke();
 			Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
+				@Override
 				public Stroke transform(String s) {
 					if (thesig.isAttribute(s)) {
 						return edgeStroke;
@@ -407,6 +409,7 @@ public class InstanceEditor {
 		}
 
 		Comparator<String> strcmp = new Comparator<String>() {
+			@Override
 			public int compare(String f1, String f2) {
 				return f1.compareTo(f2);
 			}
@@ -421,6 +424,7 @@ public class InstanceEditor {
 			Map<String, Map<String, Set<Pair<Object, Object>>>> joined,
 			Map<String, Set<Pair<Object, Object>>> nd, List<String> names) {
 		Comparator<String> strcmp = new Comparator<String>() {
+			@Override
 			public int compare(String f1, String f2) {
 				return f1.compareTo(f2);
 			}
@@ -460,6 +464,7 @@ public class InstanceEditor {
 			// foo and t are for the graph and tabular pane, resp
 			DefaultTableModel dtm = new DefaultTableModel(arr, cols3);
 			JTable foo = new JTable(dtm) {
+				@Override
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
 					return new Dimension(d.width, d.height);

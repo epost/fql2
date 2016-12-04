@@ -74,7 +74,7 @@ public class PSMEval extends PSM {
 		}
 	}
 
-	private Object lookup(Set<Pair<Object, Object>> data, Object first) {
+	private static Object lookup(Set<Pair<Object, Object>> data, Object first) {
 		for (Pair<Object, Object> k : data) {
 			if (k.first.equals(first)) {
 				return k.second;

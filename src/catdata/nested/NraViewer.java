@@ -26,6 +26,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
@@ -51,7 +53,7 @@ public class NraViewer {
 
 	String help = ""; // "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
 
-	protected String kind() {
+	protected static String kind() {
 		return "NR Schema";
 	}
 
@@ -182,6 +184,7 @@ public class NraViewer {
 	} */
 
 	static TableCellRenderer jTableCellRenderer = new TableCellRenderer() {
+		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value,
 				boolean isSelected, boolean hasFocus, int row, int column) {
 			Component c = (Component) value;
@@ -223,7 +226,7 @@ public class NraViewer {
 	}
 
 	
-	private Component disp(Map<NRel, Set<Map>> O){
+	private static Component disp(Map<NRel, Set<Map>> O){
 		int n = (int) Math.ceil(Math.sqrt(O.size()));
 		
 		JPanel ret = new JPanel(new GridLayout(n,n));
@@ -244,7 +247,7 @@ public class NraViewer {
 				col = 0;
 				for (Entry<String, Optional<NRel>> k : t.t.entrySet()) {
 					if (!k.getValue().isPresent()) {
-						rowData[r][col++] = (String)o.get(k.getKey());
+						rowData[r][col++] = o.get(k.getKey());
 					} else {
 						throw new RuntimeException("Not totally shredded");
 					}
@@ -259,7 +262,7 @@ public class NraViewer {
 	}
 
 
-	public Map<NRel, Set<Map>> shred(NRel t, Set<Map> s) {
+	public static Map<NRel, Set<Map>> shred(NRel t, Set<Map> s) {
 		Map<NRel, Set<Map>> ret = new HashMap<>();
 		ret.put(t, s);
 		
@@ -276,7 +279,7 @@ public class NraViewer {
 		}
 	}
 	
-	public <X,Y> Set<Pair<X, Y>> unnest1(Map<X, Set<Y>> s) {
+	public static <X,Y> Set<Pair<X, Y>> unnest1(Map<X, Set<Y>> s) {
 		Set<Pair<X, Y>> ret = new HashSet<>();
 		
 		for (Entry<X, Set<Y>> x : s.entrySet()) {
@@ -289,7 +292,7 @@ public class NraViewer {
 	}
 	
 	
-	public Map<NRel, Set<Map>> unnest(NRel t, Set<Map> s, int[] ref) {
+	public static Map<NRel, Set<Map>> unnest(NRel t, Set<Map> s, int[] ref) {
 		Set<Map> ret = new HashSet<>();
 		Map<NRel, Map<Integer, Set<Map>>> temp = new HashMap<>();
 		Map<String, Optional<NRel>> nw = new HashMap<>();
@@ -335,7 +338,7 @@ public class NraViewer {
 	
 	
 	
-	private Set<Map> conv1(Set<Pair<Integer, Map>> set) {
+	private static Set<Map> conv1(Set<Pair<Integer, Map>> set) {
 		Set<Map> ret = new HashSet<>();
 		for (Pair<Integer, Map> e : set) {
 			Map n = new HashMap<>();
@@ -373,10 +376,12 @@ public class NraViewer {
 
 		@SuppressWarnings("serial")
 		JTable tbl = new JTable(rowData, colNames) {
+			@Override
 			public boolean isCellEditable(int row, int column) {                
 	                return false;               
-	        };
-	        public Dimension getPreferredScrollableViewportSize() {
+	        }
+	        @Override
+			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
 			}
@@ -464,8 +469,8 @@ public class NraViewer {
 				jta.setWrapStyleWord(true);
 				// jta.setEditable(false);
 				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 				p.setPreferredSize(new Dimension(300, 200));
 
 				JOptionPane pane = new JOptionPane(p);
@@ -497,7 +502,7 @@ public class NraViewer {
 		// tp.add(jdbcButton);
 		// tp.add(helpButton);
 		tp.add(new JLabel());
-		tp.add(new JLabel("Load Example", JLabel.RIGHT));
+		tp.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		tp.add(box);
 
 		// bp.add(runButton);
@@ -531,6 +536,7 @@ public class NraViewer {
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
+				@Override
 				public Integer map(String s) {
 					return Integer.valueOf(s);
 				}

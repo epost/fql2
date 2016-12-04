@@ -116,7 +116,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	private Map<Pair<List<S>, S>, Collection<Pair<OplCtx<S, V>, OplTerm<C, V>>>> hom = new HashMap<>();
 	
 	@SuppressWarnings("deprecation")
-	private void checkParentDead(Thread cur) {
+	private static void checkParentDead(Thread cur) {
 		if (!cur.isAlive()) {
 			Thread.currentThread().stop();
 		}

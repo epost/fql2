@@ -25,6 +25,7 @@ import catdata.graph.SimilarityFloodingMatcher;
 
 public abstract class PragmaExp extends Exp<Pragma> {
 	
+	@Override
 	public Kind kind() {
 		return Kind.PRAGMA;
 	}

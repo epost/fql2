@@ -46,23 +46,28 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 	static WarehouseExample[] examples = { new BlankExample(), new SimpleExample() };
 	
 	private static class BlankExample extends WarehouseExample {
+		@Override
 		public String getName() {
 			return "New Blank Warehouse";
 		}
+		@Override
 		public Map<String, OplExp> getBindings() {
 			Map<String, OplExp> ret = new HashMap<>();
 			
 			return ret;
 		}
+		@Override
 		public String toString() {
 			return getName();
 		}
 	}
 	
 	private static class SimpleExample extends WarehouseExample {
+		@Override
 		public String getName() {
 			return "A Simple Example";
 		}
+		@Override
 		public Map<String, OplExp> getBindings() {
 			Map<String, OplExp> ret = new LinkedHashMap<>();
 			
@@ -95,6 +100,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			
 			return ret;
 		}
+		@Override
 		public String toString() {
 			return getName();
 		}
@@ -609,7 +615,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 					List<Pair<String, String>> l = new LinkedList<>();
 					List<OplTerm<String, String>> vs = new LinkedList<>();
 					for (String s1 : t.first) {
-						String v = (String) new OplParser.VIt().next();
+						String v = new OplParser.VIt().next();
 						vs.add(new OplTerm<>(v));
 						l.add(new Pair<>(v, fun.apply(schname + "_" + s1)));
 					}
@@ -622,7 +628,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 					List<Pair<String, String>> l = new LinkedList<>();
 					List<OplTerm<String, String>> vs = new LinkedList<>();
 					for (String s1 : t.first) {
-						String v = (String) new OplParser.VIt().next();
+						String v = new OplParser.VIt().next();
 						vs.add(new OplTerm<>(v));
 						l.add(new Pair<>(v, fun.apply(schname + "_" + s1)));
 					}

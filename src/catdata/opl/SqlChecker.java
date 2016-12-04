@@ -37,6 +37,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -201,7 +202,8 @@ public class SqlChecker {
 		return ret; 
 	}
 	
-	private boolean targetIsPK(String source, String target, Pair<String, List<Pair<String, String>>> edge) {
+	//TODO aql sql checker
+	private boolean targetIsPK(@SuppressWarnings("unused") String source, String target, Pair<String, List<Pair<String, String>>> edge) {
 		Set<String> cand = new HashSet<>();
 		for (Pair<String, String> p : edge.second) {
 			cand.add(p.second);
@@ -245,7 +247,7 @@ public class SqlChecker {
 		}
 	}
 
-	private Map<String, String> endType(SqlSchema info, String target, List<Pair<String, String>> proj) {
+	private static Map<String, String> endType(SqlSchema info, String target, List<Pair<String, String>> proj) {
 		Map<String, String> ret = new HashMap<>();
 		if (proj == null) {
 			return info.getTable(target).typeMap();
@@ -304,7 +306,7 @@ public class SqlChecker {
 		return xxx;
 	}
 	
-	private Map<String, String> matchRow(Map<String, String> row, Set<Map<String, String>> rows,
+	private static Map<String, String> matchRow(Map<String, String> row, Set<Map<String, String>> rows,
 			List<String> cols) {
 		outer: for (Map<String, String> row0 : rows) {
 			for (String col : cols) {
@@ -381,7 +383,7 @@ public class SqlChecker {
 
 		tp.add(transButton);
 		tp.add(haltOnErrors);
-		tp.add(new JLabel("Load Example", JLabel.RIGHT));
+		tp.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		tp.add(box);
 			
 		p.add(jsp, BorderLayout.CENTER);
@@ -408,6 +410,7 @@ public class SqlChecker {
 		f.setVisible(true);
 	}
 
+	@SuppressWarnings("unused")
 	private void check() {
 		if (loader.schema == null) {
 			output.setText("Please Run or Load first");
@@ -549,6 +552,7 @@ public class SqlChecker {
 	
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
+				@Override
 				public Integer map(String s) {
 					return Integer.valueOf(s);
 				}

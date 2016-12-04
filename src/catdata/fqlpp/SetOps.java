@@ -110,34 +110,34 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 	@Override
 	public Fn visit(FQLPPProgram env, TT e) {
 		Set<?> s = e.t.accept(env, this);
-		return FinSet.FinSet.terminal(s);
+		return FinSet.terminal(s);
 	}
 
 	@Override
 	public Fn visit(FQLPPProgram env, FF e) {
 		Set<?> s = e.t.accept(env, this);
-		return FinSet.FinSet.initial(s);
+		return FinSet.initial(s);
 	}
 
 	@Override
 	public Fn visit(FQLPPProgram env, Fst e) {
 		Set<?> s = e.s.accept(env, this);
 		Set<?> t = e.t.accept(env, this);
-		return FinSet.FinSet.first(s, t);
+		return FinSet.first(s, t);
 	}
 
 	@Override
 	public Fn visit(FQLPPProgram env, Snd e) {
 		Set<?> s = e.s.accept(env, this);
 		Set<?> t = e.t.accept(env, this);
-		return FinSet.FinSet.second(s, t);
+		return FinSet.second(s, t);
 	}
 
 	@Override
 	public Fn visit(FQLPPProgram env, Inl e) {
 		Set<?> s = e.s.accept(env, this);
 		Set<?> t = e.t.accept(env, this);
-		return FinSet.FinSet.inleft(s, t);
+		return FinSet.inleft(s, t);
 
 	}
 
@@ -145,7 +145,7 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 	public Fn visit(FQLPPProgram env, Inr e) {
 		Set<?> s = e.s.accept(env, this);
 		Set<?> t = e.t.accept(env, this);
-		return FinSet.FinSet.inright(s, t);
+		return FinSet.inright(s, t);
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 	public Fn visit(FQLPPProgram env, Case e) {
 		Fn s = e.l.accept(env, this);
 		Fn t = e.r.accept(env, this);
-		return FinSet.FinSet.match(s, t);
+		return FinSet.match(s, t);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -175,7 +175,7 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 	public Fn visit(FQLPPProgram env, Prod e) {
 		Fn s = e.l.accept(env, this);
 		Fn t = e.r.accept(env, this);
-		return FinSet.FinSet.pair(s, t);
+		return FinSet.pair(s, t);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -183,7 +183,7 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 	public Fn visit(FQLPPProgram env, Iso e) {
 		Set l = e.l.accept(env, this);
 		Set r = e.r.accept(env, this);
-		Optional<Pair<Fn, Fn>> k = FinSet.FinSet.iso(l, r);
+		Optional<Pair<Fn, Fn>> k = FinSet.iso(l, r);
 		if (!k.isPresent()) {
 			throw new RuntimeException("Not isomorphic: " + l + " and " + r);
 		}
@@ -198,43 +198,43 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 	@Override
 	public Fn visit(FQLPPProgram env, Chr e) {
 		Fn f = e.f.accept(env, this);
-		return FinSet.FinSet.chr(f);
+		return FinSet.chr(f);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public Fn visit(FQLPPProgram env, Krnl e) {
 		Fn f = e.f.accept(env, this);
-		return FinSet.FinSet.kernel(f);
+		return FinSet.kernel(f);
 	}
 
 	@Override
 	public Set<?> visit(FQLPPProgram env, Zero e) {
-		return FinSet.FinSet.initial();
+		return FinSet.initial();
 	}
 
 	@Override
 	public Set<?> visit(FQLPPProgram env, One e) {
-		return FinSet.FinSet.terminal();
+		return FinSet.terminal();
 	}
 
 	@Override
 	public Set<?> visit(FQLPPProgram env, Prop e) {
-		return FinSet.FinSet.prop();
+		return FinSet.prop();
 	}
 
 	@Override
 	public Set<?> visit(FQLPPProgram env, Plus e) {
 		Set<?> a = e.a.accept(env, this);
 		Set<?> b = e.b.accept(env, this);
-		return FinSet.FinSet.coproduct(a, b);
+		return FinSet.coproduct(a, b);
 	}
 
 	@Override
 	public Set<?> visit(FQLPPProgram env, Times e) {
 		Set<?> a = e.a.accept(env, this);
 		Set<?> b = e.b.accept(env, this);
-		return FinSet.FinSet.product(a, b);
+		return FinSet.product(a, b);
 	}
 
 	@Override
@@ -284,17 +284,17 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 	@Override
 	public Fn visit(FQLPPProgram env, Tru e) {
 		if (e.str.equals("true")) {
-			return FinSet.FinSet.tru();
+			return FinSet.tru();
 		} else if (e.str.equals("false")) {
-			return FinSet.FinSet.fals();
+			return FinSet.fals();
 		} else if (e.str.equals("and")) {
-			return FinSet.FinSet.and();
+			return FinSet.and();
 		} else if (e.str.equals("or")) {
-			return FinSet.FinSet.or();
+			return FinSet.or();
 		} else if (e.str.equals("not")) {
-			return FinSet.FinSet.not();
+			return FinSet.not();
 		} else if (e.str.equals("implies")) {
-			return FinSet.FinSet.implies();
+			return FinSet.implies();
 		} else {
 			throw new RuntimeException();
 		}

@@ -97,6 +97,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	public static class Block<En1, Att2> {
 		public final List<Pair<Var, En1>> gens; 
 
@@ -261,9 +262,9 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
-			Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> v = (Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>) env.defs.qs.get(k);
+			Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> v = env.defs.qs.get(k);
 			for (En2 en2 : v.ens.keySet()) {
-				ens0.put(en2, new Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, Map<String, String>>(v.ens.get(en2).gens, v.ens.get(en2).eqs, v.ens.get(en2).options));
+				ens0.put(en2, new Triple<>(v.ens.get(en2).gens, v.ens.get(en2).eqs, v.ens.get(en2).options));
 			}
 			for (Att2 att2 : v.atts.keySet()) {
 				atts0.put(att2, v.atts.get(att2));
@@ -313,7 +314,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		
 		boolean doNotCheckEqs = (Boolean) new AqlOptions(options, null).getOrDefault(AqlOption.dont_validate_unsafe); 
 		
-		return new Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>(ens0, atts0, fks0, src0, dst0, doNotCheckEqs );
+		return new Query<>(ens0, atts0, fks0, src0, dst0, doNotCheckEqs );
 	}
 
 	private Term<Ty, En1, Sym, Fk1, Att1, Var, Void> freeze(Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term) {
@@ -324,7 +325,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		return term.subst(m);
 	}
 
-	private <X> Ctx<String, X> unVar(Ctx<Var, X> ctx) {
+	private static <X> Ctx<String, X> unVar(Ctx<Var, X> ctx) {
 		Ctx<String, X> ret = new Ctx<>();
 		for (Var v : ctx.keySet()) {
 			ret.put(v.var, ctx.get(v));

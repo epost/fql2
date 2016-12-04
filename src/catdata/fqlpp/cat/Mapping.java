@@ -112,6 +112,7 @@ public class Mapping<O1, A1, O2, A2> implements Serializable {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		String nm = "\n objects\n";
 		boolean b = false;

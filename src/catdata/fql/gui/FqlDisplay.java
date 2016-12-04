@@ -95,7 +95,7 @@ public class FqlDisplay implements Disp {
 
 	List<Pair<String, JComponent>> frames = new LinkedList<>();
 
-	public JPanel showInst(String c, Color clr, Instance view) throws FQLException {
+	public static JPanel showInst(String c, Color clr, Instance view) throws FQLException {
 		JTabbedPane px = new JTabbedPane();
 
 		if (GlobalOptions.debug.fql.inst_graphical) {
@@ -151,8 +151,7 @@ public class FqlDisplay implements Disp {
 
 	}
 
-	public JPanel showMapping(FqlEnvironment environment, Color scolor, Color tcolor, Mapping view)
-			throws FQLException {
+	public static JPanel showMapping(FqlEnvironment environment, Color scolor, Color tcolor, Mapping view) {
 
 		JTabbedPane px = new JTabbedPane();
 
@@ -182,8 +181,8 @@ public class FqlDisplay implements Disp {
 		return top;
 	}
 
-	public JPanel showTransform(Color scolor, Color tcolor, FqlEnvironment environment,
-			String src_n, String dst_n, Transform view) throws FQLException {
+	public static JPanel showTransform(Color scolor, Color tcolor, @SuppressWarnings("unused") FqlEnvironment environment,
+			String src_n, String dst_n, Transform view)  {
 		JTabbedPane px = new JTabbedPane();
 
 		if (GlobalOptions.debug.fql.transform_graphical) {
@@ -207,8 +206,8 @@ public class FqlDisplay implements Disp {
 		return top;
 	}
 
-	public JPanel showSchema(String name, FqlEnvironment environment, Color clr, Signature view)
-			throws FQLException {
+	public static JPanel showSchema(String name, @SuppressWarnings("unused") FqlEnvironment environment, Color clr, Signature view)
+			 {
 		JTabbedPane px = new JTabbedPane();
 
 		if (GlobalOptions.debug.fql.schema_graphical) {
@@ -257,8 +256,7 @@ public class FqlDisplay implements Disp {
 		return top;
 	}
 
-	public JPanel showFullQuery(FQLProgram p, FqlEnvironment env, FullQuery view, FullQueryExp x)
-			throws FQLException {
+	public static JPanel showFullQuery(FQLProgram p, @SuppressWarnings("unused") FqlEnvironment env, FullQuery view, FullQueryExp x) {
 		JTabbedPane px = new JTabbedPane();
 
 		JTextArea area = new JTextArea(x.printNicely(p));
@@ -276,12 +274,8 @@ public class FqlDisplay implements Disp {
 		return top;
 	}
 
-	public JPanel showQuery(FQLProgram prog, FqlEnvironment environment /*
-																		 * ,
-																		 * String
-																		 * c
-																		 */, Query view)
-			throws FQLException {
+	public static JPanel showQuery(FQLProgram prog, FqlEnvironment environment , Query view)
+		 {
 		JTabbedPane px = new JTabbedPane();
 
 		Mapping d = view.project;
@@ -427,12 +421,14 @@ public class FqlDisplay implements Disp {
 
 		north.add(instanceFlowButton);
 		instanceFlowButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				showInstanceFlow(prog);
 			}
 		});
 		north.add(schemaFlowButton);
 		schemaFlowButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				showSchemaFlow();
 			}
@@ -551,6 +547,7 @@ public class FqlDisplay implements Disp {
 			layout.setSize(new Dimension(600, 540));
 			final VisualizationViewer<String, Object> vv = new VisualizationViewer<>(layout);
 			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+				@Override
 				public Paint transform(String i) {
 					return prog.nmap.get(i);
 				}
@@ -611,66 +608,81 @@ public class FqlDisplay implements Disp {
 	}
 
 	Set<String> extraInsts = new HashSet<>();
-
 	private void handleInstanceFlowEdge(Object o) {
 		InstExp i = (InstExp) o;
-		Object f = i.accept(new Unit(), new InstExpVisitor<Object, Unit>() {
+		Object f = i.accept(new Unit(), 	
+		 new InstExpVisitor<Object, Unit>() {
+			@Override
 			public MapExp visit(Unit env, Zero e) {
 				return null;
 			}
 
+			@Override
 			public MapExp visit(Unit env, One e) {
 				return null;
 			}
 
+			@Override
 			public MapExp visit(Unit env, Two e) {
 				throw new RuntimeException();
 			}
 
+			@Override
 			public MapExp visit(Unit env, Plus e) {
 				return null;
 			}
 
+			@Override
 			public MapExp visit(Unit env, Times e) {
 				return null;
 			}
 
+			@Override
 			public MapExp visit(Unit env, Exp e) {
 				throw new RuntimeException();
 			}
 
+			@Override
 			public MapExp visit(Unit env, Const e) {
 				return null;
 			}
 
+			@Override
 			public MapExp visit(Unit env, Delta e) {
 				return e.F;
 			}
 
+			@Override
 			public MapExp visit(Unit env, Sigma e) {
 				return e.F;
 			}
 
+			@Override
 			public MapExp visit(Unit env, Pi e) {
 				return e.F;
 			}
 
+			@Override
 			public MapExp visit(Unit env, FullSigma e) {
 				return e.F;
 			}
 
+			@Override
 			public Unit visit(Unit env, Relationalize e) {
 				return null;
 			}
 
+			@Override
 			public Unit visit(Unit env, External e) {
 				return null;
 			}
 
+			@Override
 			public Object visit(Unit env, Eval e) {
 				return e.q;
 			}
 
+			@Override
 			public Object visit(Unit env, FullEval e) {
 				return e.q;
 			}
@@ -705,17 +717,9 @@ public class FqlDisplay implements Disp {
 			String str = q.toString();
 			if (!extraInsts.contains(str)) {
 				Query view = q.toQuery(prog);
-				try {
-					JPanel p = showQuery(prog, env, view);
-					x.add(p, str);
-					extraInsts.add(str);
-				} catch (FQLException fe) {
-					fe.printStackTrace();
-					JPanel p = new JPanel(new GridLayout(1, 1));
-					JTextArea a = new JTextArea(fe.getLocalizedMessage());
-					p.add(a);
-					x.add(p, str);
-				}
+				JPanel p = showQuery(prog, env, view);
+				x.add(p, str);
+				extraInsts.add(str);
 			}
 			yyy.clearSelection();
 			cl.show(x, str);
@@ -735,17 +739,9 @@ public class FqlDisplay implements Disp {
 			String str = q.toString();
 			if (!extraInsts.contains(str)) {
 				FullQuery view = q.toFullQuery(prog);
-				try {
-					JPanel p = showFullQuery(prog, env, view, q);
-					x.add(p, str);
-					extraInsts.add(str);
-				} catch (FQLException fe) {
-					fe.printStackTrace();
-					JPanel p = new JPanel(new GridLayout(1, 1));
-					JTextArea a = new JTextArea(fe.getLocalizedMessage());
-					p.add(a);
-					x.add(p, str);
-				}
+				JPanel p = showFullQuery(prog, env, view, q);
+				x.add(p, str);
+				extraInsts.add(str);
 			}
 			yyy.clearSelection();
 			cl.show(x, str);
@@ -765,18 +761,10 @@ public class FqlDisplay implements Disp {
 			String str = q.toString();
 			if (!extraInsts.contains(str)) {
 				Mapping view = q.toMap(prog);
-				try {
 					JPanel p = showMapping(env, prog.smap(view.source.toConst()),
-							prog.smap(view.target.toConst()), view);
+					prog.smap(view.target.toConst()), view);
 					x.add(p, str);
 					extraInsts.add(str);
-				} catch (FQLException fe) {
-					fe.printStackTrace();
-					JPanel p = new JPanel(new GridLayout(1, 1));
-					JTextArea a = new JTextArea(fe.getLocalizedMessage());
-					p.add(a);
-					x.add(p, str);
-				}
 			}
 			yyy.clearSelection();
 			cl.show(x, str);
@@ -795,6 +783,7 @@ public class FqlDisplay implements Disp {
 			layout.setSize(new Dimension(600, 540));
 			final VisualizationViewer<String, Object> vv = new VisualizationViewer<>(layout);
 			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+				@Override
 				public Paint transform(String i) {
 					return prog.smap(new SigExp.Var(i));
 				}
@@ -805,7 +794,7 @@ public class FqlDisplay implements Disp {
 			gm.setMode(Mode.PICKING);
 		
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-			vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<Object>());
+			vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<>());
 			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<String>());
 		
 			vv.getPickedVertexState().addItemListener(new ItemListener() {
@@ -851,6 +840,7 @@ public class FqlDisplay implements Disp {
 
 	}
 
+	@Override
 	public void close() {
 		if (frame == null) {
 			return;

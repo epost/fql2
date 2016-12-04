@@ -113,7 +113,7 @@ public class CategoryOfElements {
 		return false;
 	}
 
-	public static JPanel dot(String name, final Instance inst,
+	public static JPanel dot(String name, @SuppressWarnings("unused") final Instance inst,
 			Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv,
 			HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
 
@@ -144,7 +144,7 @@ public class CategoryOfElements {
 		return p;
 	}
 
-	public static JPanel doView(final Color clr, final Instance inst,
+	public static JPanel doView(final Color clr, @SuppressWarnings("unused") final Instance inst,
 			Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv,
 			HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
 		JPanel cards = new JPanel(new CardLayout());
@@ -154,6 +154,7 @@ public class CategoryOfElements {
 		VisualizationViewer<Pair<Node, Object>, Pair<Path, Integer>> vv = new VisualizationViewer<>(
 				layout);
 		Transformer<Pair<Node, Object>, Paint> vertexPaint = new Transformer<Pair<Node, Object>, Paint>() {
+			@Override
 			public Paint transform(Pair<Node, Object> i) {
 				return clr;
 			}
@@ -217,8 +218,7 @@ public class CategoryOfElements {
 		return ret;
 	}
 
-	public static Pair<JPanel, JPanel> makePanel(String name, Instance i, Color c)
-			throws FQLException {
+	public static Pair<JPanel, JPanel> makePanel(String name, Instance i, Color c) {
 		try {
 			JPanel ret;
 			JPanel ret2;

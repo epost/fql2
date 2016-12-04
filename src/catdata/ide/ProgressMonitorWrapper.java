@@ -37,11 +37,13 @@ public class ProgressMonitorWrapper implements ActionListener {
 		new ProgressMonitorWrapper("test", r);
 	} */
 
+	@Override
 	public void actionPerformed(ActionEvent e) {
 		SwingUtilities.invokeLater(new Update());
 	}
 
 	class Update implements Runnable {
+		@Override
 		@SuppressWarnings("deprecation")
 		public void run() {
 			if (pbar.isCanceled()) {

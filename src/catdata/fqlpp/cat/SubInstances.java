@@ -138,7 +138,7 @@ public class SubInstances {
 		for (Map<Chc<O,A>, Set<Pair<Object, Object>>> k : subInstances_fast0(
 				I.source, I.source.order(), toData(I))) {
 			try {
-				ret.add(new Functor<O,A,Set,Fn>(I.source, FinSet.FinSet, o -> down1(k.get(Chc.inLeft(o))), aa -> new Fn<Object,Object>(down1(k.get(Chc.inLeft(I.source.source(aa)))), down1(k.get(Chc.inLeft(I.source.target(aa)))), down2(k.get(Chc.inRight(aa))))));
+				ret.add(new Functor<>(I.source, FinSet.FinSet, o -> down1(k.get(Chc.inLeft(o))), aa -> new Fn<>(down1(k.get(Chc.inLeft(I.source.source(aa)))), down1(k.get(Chc.inLeft(I.source.target(aa)))), down2(k.get(Chc.inRight(aa))))));
 			} catch (Exception e) {
 			}
 		}

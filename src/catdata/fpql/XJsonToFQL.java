@@ -28,6 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -66,11 +68,11 @@ public class XJsonToFQL {
 	
 	String help = "Translates Idea Flow JSON into an FPQL schema";
 
-	protected String kind() {
+	protected static String kind() {
 		return "JSON";
 	}
 
-	String translate(String in) {
+	static String translate(String in) {
 		try {
 			JsonReader rdr = Json.createReader(new StringReader(in));
 			JsonObject obj = rdr.readObject();
@@ -233,8 +235,8 @@ public class XJsonToFQL {
 				jta.setWrapStyleWord(true);
 				// jta.setEditable(false);
 				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 				p.setPreferredSize(new Dimension(300, 200));
 
 				JOptionPane pane = new JOptionPane(p);
@@ -264,7 +266,7 @@ public class XJsonToFQL {
 		tp.add(helpButton);
 		// tp.add(jdbcButton);
 		// tp.add(helpButton);
-		tp.add(new JLabel("Load Example", JLabel.RIGHT));
+		tp.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		tp.add(box);
 
 		// bp.add(runButton);

@@ -39,7 +39,7 @@ public class GlobalOptions implements Serializable {
 	
 	public static GlobalOptions debug = new GlobalOptions();
 	
-	public void clear() {
+	public static void clear() {
 		debug = new GlobalOptions();
 	}
 
@@ -171,7 +171,7 @@ public class GlobalOptions implements Serializable {
 				JOptionPane.PLAIN_MESSAGE, null);
 	}
 
-	static String about = "Categorical Data IDE Copyright (C) 2012-2017 Patrick Schultz, David Spivak, and Ryan Wisnesky"
-			+ "\n\nplease see categoricaldata.net for more information";
+	static String about = "Categorical Data IDE Copyright Patrick Schultz, David Spivak, and Ryan Wisnesky"
+			+ "\n\nplease see categoricaldata.net/fql.html for more information";
 
 }

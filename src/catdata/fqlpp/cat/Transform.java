@@ -79,6 +79,7 @@ public class Transform<O1, A1, O2, A2> implements Serializable {
 		}
 	}
 
+	@Override
 	public String toString() {
 		try {
 			String z1 = Util.sep(
@@ -202,14 +203,14 @@ public class Transform<O1, A1, O2, A2> implements Serializable {
 		Functor<DO, DA, EO, EA> A = e.source;
 		Functor<DO, DA, EO, EA> B = e.target;
 		
-		return new Transform<CO,CA,EO,EA>(Functor.compose(t, A), Functor.compose(t, B), c -> e.apply(t.applyO(c)));
+		return new Transform<>(Functor.compose(t, A), Functor.compose(t, B), c -> e.apply(t.applyO(c)));
 	}
 	
 	public static <CO,CA,DO,DA,EO,EA> Transform<CO,CA,EO,EA> rightWhisker(Functor<DO,DA,EO,EA> t, Transform<CO,CA,DO,DA> e) {
 		Functor<CO, CA, DO, DA> A = e.source;
 		Functor<CO, CA, DO, DA> B = e.target;
 
-		return new Transform<CO,CA,EO,EA>(Functor.compose(A, t), Functor.compose(B, t), c -> t.applyA(e.apply(c)));
+		return new Transform<>(Functor.compose(A, t), Functor.compose(B, t), c -> t.applyA(e.apply(c)));
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })

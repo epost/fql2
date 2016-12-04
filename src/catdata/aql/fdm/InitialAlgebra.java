@@ -13,8 +13,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
-import catdata.RuntimeInterruptedException;
 import catdata.Pair;
+import catdata.RuntimeInterruptedException;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.Algebra;
@@ -28,7 +28,6 @@ import catdata.aql.Eq;
 import catdata.aql.Head;
 import catdata.aql.Schema;
 import catdata.aql.Term;
-import catdata.aql.TypeSide;
 import catdata.aql.Var;
 
 //TODO: aql merge constants and functions in typesides
@@ -44,7 +43,7 @@ public class InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, X>
 extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
-	public boolean hasFreeTypeAlgebra(TypeSide<Ty,Sym> ty) {
+	public boolean hasFreeTypeAlgebra() {
 		return talg().eqs.isEmpty();
 	}
 	
@@ -101,7 +100,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		}
 		//schema.typeSide.collage(); //sanity check remove
 		try {
-			while (saturate1()); 
+			while (saturate1()) {} 
 		} catch (InterruptedException exn) {
 			throw new RuntimeInterruptedException(exn);
 		}
@@ -109,7 +108,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 				
 		//TODO aql figure out how to do this only once but without concurrent modification exception
 			
-		if ((Boolean) ops.getOrDefault(AqlOption.require_consistency) && !hasFreeTypeAlgebra(schema.typeSide)) {
+		if ((Boolean) ops.getOrDefault(AqlOption.require_consistency) && !hasFreeTypeAlgebra()) {
 			throw new RuntimeException("Not necessarily consistent; type algebra is\n\n" + talg().toString());
 		}
 		
@@ -321,6 +320,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	
 	//this is not simplfy from collage - this is how we get 'reduction' to happen, by processing the talg.
 	private Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> talg;
+	@Override
 	public Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> talg() {
 		if (talg != null) {
 			return talg;
@@ -396,6 +396,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	//TODO: aql move definitions functionality into Collage
 	
 	
+	@Override
 	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> att(Att att, X x) {
 		return reprT0(Chc.inRight(new Pair<>(x, att)));
 	}
@@ -410,6 +411,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	} 
 	
 	
+	@Override
 	protected Term<Ty, En, Sym, Fk, Att, Gen, Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> y) {
 		if (schema().typeSide.js.java_tys.isEmpty()) {
 			return unflatten(simpl(y));

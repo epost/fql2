@@ -19,7 +19,7 @@ public class SqlMapping {
 	private Map<SqlColumn, Pair<SqlPath, SqlColumn>> am;
 	private Map<SqlForeignKey, SqlPath> em;
 	
-	private void fromPath(SqlPath path, String[] arr) {
+	private static void fromPath(SqlPath path, String[] arr) {
 		arr[1] = path.source.name;
 		int i = 0;
 		for (SqlForeignKey edge : path.edges) {

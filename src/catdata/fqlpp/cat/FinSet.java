@@ -32,12 +32,12 @@ public class FinSet extends Category<Set, Fn> {
 	
 	@Override
 	public boolean isObject(Set o) {
-		return (o instanceof Set);
+		return true;
 	}
 	
 	@Override
 	public boolean isArrow(Fn a) {
-		return (a instanceof Fn);
+		return true;
 	}
 
 	public static class Fn<X,Y> implements Serializable {
@@ -262,7 +262,7 @@ public class FinSet extends Category<Set, Fn> {
 		}
 
 		if (A.size() == 0) {
-			return new LinkedHashMap<X, Y>();
+			return new LinkedHashMap<>();
 		}
 
 		List<Integer> seq = new LinkedList<>();
@@ -348,7 +348,7 @@ public class FinSet extends Category<Set, Fn> {
 		return ret;
 	}
 
-	private static <X, Y> void inc3(int[] counters, int[] lengths) {
+	private static void inc3(int[] counters, int[] lengths) {
 		counters[0]++;
 		for (int i = 0; i < counters.length - 1; i++) {
 			if (counters[i] == lengths[i]) {
@@ -359,18 +359,18 @@ public class FinSet extends Category<Set, Fn> {
 	}
 
 	public static <T> Collection<List<T>> permute(Collection<T> input) {
-		Collection<List<T>> output = new ArrayList<List<T>>();
+		Collection<List<T>> output = new ArrayList<>();
 		if (input.isEmpty()) {
 			output.add(new ArrayList<T>());
 			return output;
 		}
-		List<T> list = new ArrayList<T>(input);
+		List<T> list = new ArrayList<>(input);
 		T head = list.get(0);
 		List<T> rest = list.subList(1, list.size());
 		for (List<T> permutations : permute(rest)) {
-			List<List<T>> subLists = new ArrayList<List<T>>();
+			List<List<T>> subLists = new ArrayList<>();
 			for (int i = 0; i <= permutations.size(); i++) {
-				List<T> subList = new ArrayList<T>();
+				List<T> subList = new ArrayList<>();
 				subList.addAll(permutations);
 				subList.add(i, head);
 				subLists.add(subList);
@@ -380,17 +380,17 @@ public class FinSet extends Category<Set, Fn> {
 		return output;
 	}
 
-	public Set<Unit> terminal() {
+	public static Set<Unit> terminal() {
 		Set<Unit> ret = new HashSet<>();
 		ret.add(new Unit());
 		return ret;
 	}
 
-	public <X> Fn<X,Unit> terminal(Set<X> o) {
+	public static <X> Fn<X,Unit> terminal(Set<X> o) {
 		return new Fn<>(o, terminal(), x -> new Unit());
 	}
 
-	public <X,Y> Set<Pair<X,Y>> product(Set<X> o1, Set<Y> o2) {
+	public static <X,Y> Set<Pair<X,Y>> product(Set<X> o1, Set<Y> o2) {
 		Set<Pair<X,Y>> ret = new HashSet<>();
 		for (X x : o1) {
 			for (Y y : o2) {
@@ -400,23 +400,23 @@ public class FinSet extends Category<Set, Fn> {
 		return ret;
 	}
 
-	public <X,Y> Fn<Pair<X,Y>, X> first(Set<X> o1, Set<Y> o2) {
+	public static <X,Y> Fn<Pair<X,Y>, X> first(Set<X> o1, Set<Y> o2) {
 		return new Fn<>(product(o1, o2), o1, x -> x.first);
 	}
 
-	public<X,Y>  Fn<Pair<X,Y>, Y> second(Set<X> o1, Set<Y> o2) {
+	public static <X,Y>  Fn<Pair<X,Y>, Y> second(Set<X> o1, Set<Y> o2) {
 		return new Fn<>(product(o1, o2), o2, x -> x.second);
 	}
 
-	public <A,B,C,D> Fn<Pair<A,C>,Pair<B,D>> pairF(Fn<A,B> a1, Fn<C,D> a2) {
+	public static <A,B,C,D> Fn<Pair<A,C>,Pair<B,D>> pairF(Fn<A,B> a1, Fn<C,D> a2) {
 		return pair(Fn.compose(first (a1.source, a2.source), a1), Fn.compose(second(a1.source, a2.source), a2));
 	}
 	
-	public <A,B,C,D> Fn<Chc<A,C>,Chc<B,D>> matchF(Fn<A,B> a1, Fn<C,D> a2) {
+	public static <A,B,C,D> Fn<Chc<A,C>,Chc<B,D>> matchF(Fn<A,B> a1, Fn<C,D> a2) {
 		return match(Fn.compose(a1, inleft (a1.target, a2.target)), Fn.compose(a2, inright(a1.target, a2.target)));
 	}
 
-	public <X,Y,Z> Fn<X,Pair<Y,Z>> pair(Fn<X,Y> a1, Fn<X,Z> a2) {
+	public static <X,Y,Z> Fn<X,Pair<Y,Z>> pair(Fn<X,Y> a1, Fn<X,Z> a2) {
 		if (!a1.source.equals(a2.source)) {
 			throw new RuntimeException();
 		}
@@ -424,15 +424,15 @@ public class FinSet extends Category<Set, Fn> {
 				x -> new Pair<>(a1.function.apply(x), a2.function.apply(x)));
 	}
 
-	public Set<Void> initial() {
+	public static Set<Void> initial() {
 		return new HashSet<>();
 	}
 
-	public <X> Fn<Void, X> initial(Set<X> o) {
-		return new Fn<Void, X>(initial(), o, x -> { throw new RuntimeException(); });
+	public static <X> Fn<Void, X> initial(Set<X> o) {
+		return new Fn<>(initial(), o, x -> { throw new RuntimeException(); });
 	}
 
-	public <X,Y> Set<Chc<X,Y>> coproduct(Set<X> o1, Set<Y> o2) {
+	public static <X,Y> Set<Chc<X,Y>> coproduct(Set<X> o1, Set<Y> o2) {
 		Set<Chc<X,Y>> ret = new HashSet<>();
 		for (X o : o1) {
 			ret.add(Chc.inLeft(o));
@@ -443,27 +443,27 @@ public class FinSet extends Category<Set, Fn> {
 		return ret;
 	}
 
-	public <X,Y> Fn<X,Chc<X,Y>> inleft(Set<X> o1, Set<Y> o2) {
+	public static <X,Y> Fn<X,Chc<X,Y>> inleft(Set<X> o1, Set<Y> o2) {
 		return new Fn<>(o1, coproduct(o1, o2), x -> Chc.inLeft(x));
 	}
 
-	public <X,Y> Fn<Y,Chc<X,Y>> inright(Set<X> o1, Set<Y> o2) {
+	public static <X,Y> Fn<Y,Chc<X,Y>> inright(Set<X> o1, Set<Y> o2) {
 		return new Fn<>(o2, coproduct(o1, o2), x -> Chc.inRight(x));
 	}
 
-	public <X,Y,Z> Fn<Chc<X,Y>,Z> match(Fn<X,Z> a1, Fn<Y,Z> a2) {
+	public static <X,Y,Z> Fn<Chc<X,Y>,Z> match(Fn<X,Z> a1, Fn<Y,Z> a2) {
 		if (!a1.target.equals(a2.target)) {
 			throw new RuntimeException();
 		}
 		return new Fn<>(coproduct(a1.source, a2.source), a1.target, x -> {
 			if (x.left) {
 				return a1.function.apply(x.l);
-			} else {
-				return a2.function.apply(x.r);
-			}
+			} 
+			return a2.function.apply(x.r);
 		});
 	}
 	
+	@SuppressWarnings("hiding")
 	Map<Pair<Set,Set>, Set<Fn>> cached = new HashMap<>();
 	
 	@SuppressWarnings({ "unchecked" })
@@ -511,18 +511,18 @@ public class FinSet extends Category<Set, Fn> {
 		});
 	}
 
-	public Set<Boolean> prop() {
+	public static Set<Boolean> prop() {
 		Set<Boolean> ret = new HashSet<>();
 		ret.add(true);
 		ret.add(false);
 		return ret;
 	}
 
-	public Fn<Unit, Boolean> tru() {
+	public static Fn<Unit, Boolean> tru() {
 		return new Fn<>(terminal(), prop(), x -> true);
 	}
 
-	public <A,B> Fn<B,Boolean> chr(Fn<A,B> f) {
+	public static <A,B> Fn<B,Boolean> chr(Fn<A,B> f) {
 		Set<B> s = new HashSet<>();
 		for (A a : f.source) {
 			s.add(f.function.apply(a));
@@ -530,10 +530,10 @@ public class FinSet extends Category<Set, Fn> {
 		return new Fn<>(f.target, prop(), x -> s.contains(x));
 	}
 
-	public <B> Fn<B,B> kernel(Fn<B,Boolean> f) {
+	public static <B> Fn<B,B> kernel(Fn<B,Boolean> f) {
 		Set<B> s = new HashSet<>();
 		for (B k : f.source) {
-			Boolean b = (Boolean) f.function.apply(k);
+			Boolean b = f.function.apply(k);
 			if (b) {
 				s.add(k);
 			}
@@ -548,27 +548,27 @@ public class FinSet extends Category<Set, Fn> {
 	
 	private FinSet() { }
 
-	public Fn<Unit,Boolean> fals() {
+	public static Fn<Unit,Boolean> fals() {
 		return new Fn<>(terminal(), prop(), x -> false);
 	}
 	
-	public Fn<Boolean,Boolean> not() {
+	public static Fn<Boolean,Boolean> not() {
 		return new Fn<>(prop(), prop(), x -> !x);
 	}
 	
-	public Fn<Pair<Boolean,Boolean>,Boolean> and() {
+	public static Fn<Pair<Boolean,Boolean>,Boolean> and() {
 		return new Fn<>(product(prop(),prop()), prop(), x -> x.first && x.second);
 	}
 	
-	public Fn<Pair<Boolean,Boolean>,Boolean> or() {
+	public static Fn<Pair<Boolean,Boolean>,Boolean> or() {
 		return new Fn<>(product(prop(),prop()), prop(), x -> x.first || x.second);
 	}
 	
-	public Fn<Pair<Boolean,Boolean>,Boolean> implies() {
+	public static Fn<Pair<Boolean,Boolean>,Boolean> implies() {
 		return new Fn<>(product(prop(),prop()), prop(), x -> !x.first || x.second);
 	}
 
-	public <X,Y> Optional<Pair<Fn<X,Y>, Fn<Y,X>>> iso(Set<X> o1, Set<Y> o2) {
+	public static <X,Y> Optional<Pair<Fn<X,Y>, Fn<Y,X>>> iso(Set<X> o1, Set<Y> o2) {
 		LinkedHashMap<X,Y> k = fast_iso(new LinkedList<>(o1), new LinkedList<>(o2));
 		if (k == null) {
 			return Optional.empty();

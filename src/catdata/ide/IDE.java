@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -44,6 +45,7 @@ public class IDE {
 		} 
 		
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
  					GlobalOptions.load();
@@ -67,7 +69,7 @@ public class IDE {
 					f.setLocationRelativeTo(null);
 					f.setVisible(true);
 
-					f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+					f.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 					f.addWindowListener(new java.awt.event.WindowAdapter() {
 						@Override
 						public void windowClosing(

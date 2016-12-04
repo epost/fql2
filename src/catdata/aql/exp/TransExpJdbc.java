@@ -115,7 +115,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 		Map<Ty, String> tys = new HashMap<>();
 		
 		for (String o : map.keySet()) {
-			assertUnambig(o, sch, ens, tys);
+			assertUnambig(o, sch);
 			String q = map.get(o);
 			if (sch.typeSide.tys.contains(o)) {
 				tys.put(stringToTy(o), q);
@@ -238,7 +238,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 		return (Ty) o;
 	}
 
-	private void assertUnambig(Object o, Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, Map<Ty, String> tys) {
+	private void assertUnambig(Object o, Schema<Ty, En, Sym, Fk, Att> sch) {
 		int i = 0;
 		if (sch.typeSide.tys.contains(o)) {
 			i++;
@@ -340,6 +340,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 		return true;
 	}
 	
+	@Override
 	public Pair<InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1>, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2>> type(AqlTyping G) {
 		SchExp<Ty, En, Sym, Fk, Att> s = src.type(G);
 		SchExp<Ty, En, Sym, Fk, Att> t = dst.type(G);

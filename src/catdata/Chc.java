@@ -88,6 +88,7 @@ public class Chc<X,Y> implements Serializable {
 		return ret;
 	}
 
+	@Override
 	public String toString() {
 		if (left) {
 			return "inl " + l;

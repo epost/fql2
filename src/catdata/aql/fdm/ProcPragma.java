@@ -63,7 +63,7 @@ public class ProcPragma extends Pragma {
 		}
 		
 		@Override
-		public void setProcessErrorStream(InputStream arg0) throws IOException {
+		public void setProcessErrorStream(InputStream arg0) {
 			errs = arg0;
 			err = new Thread(make(arg0, "stderr:"));
 		}
@@ -89,13 +89,13 @@ public class ProcPragma extends Pragma {
 		}
 
 		@Override
-		public void setProcessOutputStream(InputStream arg0) throws IOException {
+		public void setProcessOutputStream(InputStream arg0) {
 			outs = arg0;
 			out = new Thread(make(arg0, "stdout:"));
 		}
 	
 		@Override
-		public void start() throws IOException {
+		public void start() {
 			out.start();
 			err.start();
 		}
@@ -108,7 +108,7 @@ public class ProcPragma extends Pragma {
 		}
 
 		@Override
-		public void setProcessInputStream(OutputStream arg0) throws IOException {
+		public void setProcessInputStream(OutputStream arg0) {
 		}
 	
 	 }

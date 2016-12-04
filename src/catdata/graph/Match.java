@@ -100,6 +100,7 @@ public final class Match<N1,E1,N2,E2> {
 		return true;
 	}
 	
+	@Override
 	public String toString() {
 		List<String> nodesStr = nodes.keySet().stream().map(x -> x + " -> " + nodes.get(x)).collect(Collectors.toList());
 		List<String> edgesStr = edges.keySet().stream().map(x -> x + " -> " + Util.sep(edges.get(x), ".")).collect(Collectors.toList());

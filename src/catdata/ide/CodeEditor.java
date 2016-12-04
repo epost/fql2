@@ -108,6 +108,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		});
 		toolBar.add(prevButton);
 		searchField.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				nextButton.doClick(0);
 			}
@@ -167,7 +168,8 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 					frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 					frame.setLocationRelativeTo(null);
 					frame.addWindowListener(new WindowAdapter() {
-			            public void windowClosing(WindowEvent evt) {
+			            @Override
+						public void windowClosing(WindowEvent evt) {
 							SearchContext context = new SearchContext();
 							SearchEngine.markAll(topArea, context);
 				        }
@@ -456,6 +458,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		thread.start();
 	}
 
+	@Override
 	public void run() {
 		String program = topArea.getText();
 

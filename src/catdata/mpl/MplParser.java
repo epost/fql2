@@ -43,6 +43,7 @@ public class MplParser {
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
 			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
+				@Override
 				public Integer map(String s) {
 					return Integer.valueOf(s);
 				}
@@ -174,7 +175,7 @@ public class MplParser {
 			toProgHelper(pr.a.toString(), s, ret, decl);
 		}
 
-		return new Program<MplExp<String,String>>(ret);  
+		return new Program<>(ret);  
 	}
 	
 	static MplExp<String,String> toExp(Object o) {
@@ -190,7 +191,7 @@ public class MplParser {
 			if (p.a.toString().equals("theory")) {
 				return toTheory(p.b);
 			}
-			MplEval<String, String> ret = new MplEval<String, String>((String)p.a, toTerm(p.b));
+			MplEval<String, String> ret = new MplEval<>((String)p.a, toTerm(p.b));
 			return ret;
 		}
 			throw new RuntimeException();
@@ -251,11 +252,11 @@ public class MplParser {
 				return new MplRho<>(toType(p.b), false);
 			}
 			if (p.a.toString().equals("tr")) {
-				return new MplTr<String, String>(toTerm(p.b));
+				return new MplTr<>(toTerm(p.b));
 			}
 		}
 		if (o instanceof String) {
-			return new MplConst<String,String>((String)o);
+			return new MplConst<>((String)o);
 		}
 		
 		throw new RuntimeException(o.toString());
@@ -310,7 +311,7 @@ public class MplParser {
 		}
 		
 		
-		return new MplSch<String, String>(sorts, symbols, equations);
+		return new MplSch<>(sorts, symbols, equations);
 	}
 
 	

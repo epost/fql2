@@ -46,12 +46,13 @@ public abstract class FullQuery {
 		int count = 0;
 		int edge_count = 0;
 
+		@SuppressWarnings("cast")
 		@Override
 		public Integer visit(Graph<Pair<FullQuery, Integer>, Integer> env,
 				Comp e) {
 			Integer l = e.l.accept(env, this);
 			Integer r = e.r.accept(env, this);
-			env.addVertex(new Pair<>((FullQuery) e, count));
+			env.addVertex(new Pair<>(e, count));
 			env.addEdge(edge_count++, new Pair<>((FullQuery) e, count),
 					new Pair<>(e.l, l));
 			env.addEdge(edge_count++, new Pair<>((FullQuery) e, count),
@@ -59,6 +60,7 @@ public abstract class FullQuery {
 			return count++;
 		}
 
+		@SuppressWarnings("cast")
 		@Override
 		public Integer visit(Graph<Pair<FullQuery, Integer>, Integer> env,
 				Delta e) {
@@ -67,6 +69,7 @@ public abstract class FullQuery {
 			return count++;
 		}
 
+		@SuppressWarnings("cast")
 		@Override
 		public Integer visit(Graph<Pair<FullQuery, Integer>, Integer> env,
 				Sigma e) {
@@ -74,6 +77,7 @@ public abstract class FullQuery {
 			return count++;
 		}
 
+		@SuppressWarnings("cast")
 		@Override
 		public Integer visit(Graph<Pair<FullQuery, Integer>, Integer> env, Pi e) {
 			env.addVertex(new Pair<>((FullQuery) e, count));
@@ -119,6 +123,7 @@ public abstract class FullQuery {
 		// vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
 		Transformer<Pair<FullQuery, Integer>, Paint> vertexPaint = new Transformer<Pair<FullQuery, Integer>, Paint>() {
+			@Override
 			public Paint transform(Pair<FullQuery, Integer> i) {
 				return i.first.color();
 			}

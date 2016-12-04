@@ -107,7 +107,7 @@ public class FQLProgram implements Prog {
 		// Graph<V, E> where V is the type of the vertices
 
 		final Graph<String, Object> g2 = new DirectedSparseMultigraph<>();
-		final Ref<Integer> guid = new Ref<Integer>(0);
+		final Ref<Integer> guid = new Ref<>(0);
 
 		for (final String k : insts.keySet()) {
 			InstExp i = insts.get(k);
@@ -115,74 +115,89 @@ public class FQLProgram implements Prog {
 			g2.addVertex(k);
 
 			i.accept(new Unit(), new InstExpVisitor<Unit, Unit>() {
+				@Override
 				public Unit visit(Unit env, Zero e) {
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, One e) {
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, Two e) {
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, Plus e) {
 					g2.addEdge(new Pair<>(pp(guid), e), e.a, k);
 					g2.addEdge(new Pair<>(pp(guid), e), e.b, k);
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, Times e) {
 					g2.addEdge(new Pair<>(pp(guid), e), e.a, k);
 					g2.addEdge(new Pair<>(pp(guid), e), e.b, k);
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, Exp e) {
 					g2.addEdge(new Pair<>(pp(guid), e), e.a, k);
 					g2.addEdge(new Pair<>(pp(guid), e), e.b, k);
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, Const e) {
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, Delta e) {
 					g2.addEdge(new Pair<>(pp(guid), e), e.I, k);
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, Sigma e) {
 					g2.addEdge(new Pair<>(pp(guid), e), e.I, k);
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, Pi e) {
 					g2.addEdge(new Pair<>(pp(guid), e), e.I, k);
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, FullSigma e) {
 					g2.addEdge(new Pair<>(pp(guid), e), e.I, k);
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, Relationalize e) {
 					g2.addEdge(new Pair<>(pp(guid), e), e.I, k);
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, External e) {
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, Eval e) {
 					g2.addEdge(new Pair<>(pp(guid), e), e.e, k);
 					return null;
 				}
 
+				@Override
 				public Unit visit(Unit env, FullEval e) {
 					g2.addEdge(new Pair<>(pp(guid), e), e.e, k);
 					return null;
@@ -229,7 +244,7 @@ public class FQLProgram implements Prog {
 
 	@Override
 	public boolean equals(Object o) {
-		return (this == o);
+		return super.equals(o);
 	}
 
 	public FQLProgram(LinkedHashMap<String, Type> enums,
@@ -353,7 +368,7 @@ public class FQLProgram implements Prog {
 			if (decl.enums != null) {
 				checkDup(seen, decl.name, "enum");
 				enums.put(decl.name, new Type.Enum(decl.name,
-						new HashSet<String>(decl.enums)));
+						new HashSet<>(decl.enums)));
 				lines.put(decl.name, decl.line);
 			} else if (decl.sig != null) {
 				checkDup(seen, decl.name, "signature");
@@ -403,7 +418,12 @@ public class FQLProgram implements Prog {
 				+ "]";
 	}
 
-	private void checkDup(Set<String> seen, String name, String s)
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
+	private static void checkDup(Set<String> seen, String name, String s)
 			throws LineException {
 		if (seen.contains(name.toUpperCase())) {
 			// throw new LineException("Duplicate " + s + " " +, name, s);

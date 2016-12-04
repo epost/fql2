@@ -49,6 +49,7 @@ public class FinTrans<Obj1, Arrow1, Obj2, Arrow2> {
 
 	}
 
+	@SuppressWarnings("static-method")
 	public boolean equals() {
 		throw new RuntimeException("Equality of FinTrans");
 	}

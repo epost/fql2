@@ -33,6 +33,7 @@ public class JSWrapper {
 		this.o = o;
 	}
 
+	@Override
 	public String toString() {
 		String s = "JS<" + o + ">";
 		if (!GlobalOptions.debug.opl.opl_pretty_print) {
@@ -91,6 +92,7 @@ public class JSWrapper {
 
 		@SuppressWarnings("serial")
 		JTable t = new JTable() {
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -143,6 +145,7 @@ public class JSWrapper {
 
 		Map<Pair<Integer, Integer>, Component> cache = new HashMap<>();
 
+		@Override
 		public Component getTableCellRendererComponent(final JTable table, Object value,
 				boolean isSelected, boolean hasFocus, int row, int column) {
 			Pair<Integer, Integer> p = new Pair<>(row, column);
@@ -150,13 +153,12 @@ public class JSWrapper {
 			if (ret != null) {
 				return ret;
 			}
-			if (ret == null) {
-				ret = JSWrapper.extract(value);
-				if (ret != null) {
-					cache.put(p, ret);
-					return ret;
-				}
+			ret = JSWrapper.extract(value);
+			if (ret != null) {
+				cache.put(p, ret);
+				return ret;
 			}
+			
 
 			ret = new DefaultTableCellRenderer().getTableCellRendererComponent(table,
 					OplTerm.strip(value.toString()), false, hasFocus, row, column);
@@ -172,13 +174,12 @@ public class JSWrapper {
 			if (ret != null) {
 				return ret;
 			}
-			if (ret == null) {
-				ret = JSWrapper.extract(value);
-				if (ret != null) {
-					cache.put(p, ret);
-					return ret;
-				}
+			ret = JSWrapper.extract(value);
+			if (ret != null) {
+				cache.put(p, ret);
+				return ret;
 			}
+			
 
 			return super.getTableCellEditorComponent(table, value, isSelected, row, column);
 		}

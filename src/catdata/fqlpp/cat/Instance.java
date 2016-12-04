@@ -215,7 +215,7 @@ public class Instance<O, A> implements Serializable{
 			arrs.put(k, t);
 		}
 		
-		return new Instance<X,Y>(objs, arrs, sig);
+		return new Instance<>(objs, arrs, sig);
 	}
 	@SuppressWarnings({ "rawtypes" })
 	Functor<Signature<O,A>.Node,Signature<O,A>.Path,Set,Fn> functor;

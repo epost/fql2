@@ -303,7 +303,7 @@ public class Instance {
 		return ret;
 	} 
 
-	private boolean contained(Object second, Set<Pair<Object, Object>> set) {
+	private static boolean contained(Object second, Set<Pair<Object, Object>> set) {
 		for (Pair<Object, Object> p : set) {
 			if (p.first.equals(second) && p.second.equals(second)) {
 				return true;
@@ -402,7 +402,7 @@ public class Instance {
 
 	}
 
-	private Set<Pair<Object, Object>> makeFirst(String string,
+	private static Set<Pair<Object, Object>> makeFirst(String string,
 			List<Pair<String, List<Pair<Object, Object>>>> data2) {
 		for (Pair<String, List<Pair<Object, Object>>> p : data2) {
 			if (string.equals(p.first)) {
@@ -414,7 +414,7 @@ public class Instance {
 		// + " in " + data2);
 	}
 
-	private Set<Pair<Object, Object>> secol(List<Pair<Object, Object>> second) {
+	private static Set<Pair<Object, Object>> secol(List<Pair<Object, Object>> second) {
 		Set<Pair<Object, Object>> ret = new HashSet<>();
 		for (Pair<Object, Object> p : second) {
 			ret.add(new Pair<>(p.first, p.first));
@@ -422,7 +422,7 @@ public class Instance {
 		return ret;
 	}
 
-	private Set<Pair<Object, Object>> lookup(String n,
+	private static Set<Pair<Object, Object>> lookup(String n,
 			List<Pair<String, List<Pair<Object, Object>>>> data2)
 			throws FQLException {
 		for (Pair<String, List<Pair<Object, Object>>> p : data2) {
@@ -551,14 +551,10 @@ public class Instance {
 	
 	@SuppressWarnings("unchecked")
 	public JPanel view() throws FQLException {
-		List<JPanel> panels = new LinkedList<JPanel>();
+		List<JPanel> panels = new LinkedList<>();
 		// Map<String, Set<Pair<String,String>>> data;
-		LinkedList<String> sorted = new LinkedList<String>(data.keySet());
-		Collections.sort(sorted, new Comparator<String>() {
-			public int compare(String f1, String f2) {
-				return f1.toString().compareTo(f2.toString());
-			}
-		});
+		LinkedList<String> sorted = new LinkedList<>(data.keySet());
+		Collections.sort(sorted, (f1, f2) -> f1.toString().compareTo(f2.toString()));
 		for (String k : sorted) {
 			Set<Pair<Object, Object>> xxx = data.get(k);
 			List<Pair<Object, Object>> table = new LinkedList<>(xxx);
@@ -573,6 +569,7 @@ public class Instance {
 			Pair<String, String> cns = thesig.getColumnNames(k);
 			@SuppressWarnings("serial")
 			JTable t = new JTable(arr, new Object[] { cns.first, cns.second })  {
+				@Override
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
 					return new Dimension(d.width, d.height);
@@ -596,7 +593,7 @@ public class Instance {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public JPanel join() throws FQLException {
+	public JPanel join() {
 		prejoin();
 		List pans = makePanels();
 		return FqlUtil.makeGrid(pans);
@@ -605,11 +602,7 @@ public class Instance {
 	private List<JPanel> makePanels() {
 		List<JPanel> ret = new LinkedList<>();
 
-		Comparator<String> strcmp = new Comparator<String>() {
-			public int compare(String f1, String f2) {
-				return f1.compareTo(f2);
-			}
-		};
+		Comparator<String> strcmp = (f1, f2) -> f1.compareTo(f2);
 
 		List<String> xxx = new LinkedList<>(joined.keySet());
 		Collections.sort(xxx, strcmp);
@@ -656,11 +649,7 @@ public class Instance {
 			// names.add(a.name);
 		}
 
-		Comparator<String> strcmp = new Comparator<String>() {
-			public int compare(String f1, String f2) {
-				return f1.compareTo(f2);
-			}
-		};
+		Comparator<String> strcmp = (f1, f2) -> f1.compareTo(f2);
 		Collections.sort(names, strcmp);
 		joined = makejoined(jnd, nd, names);
 
@@ -675,6 +664,7 @@ public class Instance {
 			}
 			Object[] colNames = new Object[] { e.source.string, e.target.string };
 			JTable t = new JTable(rowData, colNames) {
+				@Override
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
 					return new Dimension(d.width, d.height);
@@ -705,6 +695,7 @@ public class Instance {
 			Object[] colNames = new Object[] { e.source.string,
 					e.target.toString() };
 			JTable t = new JTable(rowData, colNames) {
+				@Override
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
 					return new Dimension(d.width, d.height);
@@ -733,6 +724,7 @@ public class Instance {
 			}
 			Object[] colNames = new Object[] { e.target.toString() };
 			JTable t = new JTable(rowData, colNames) {
+				@Override
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
 					return new Dimension(d.width, d.height);
@@ -757,11 +749,7 @@ public class Instance {
 	private Map<String, JTable> makejoined(
 			Map<String, Map<String, Set<Pair<Object, Object>>>> joined,
 			Map<String, Set<Pair<Object, Object>>> nd, List<String> names) {
-		Comparator<String> strcmp = new Comparator<String>() {
-			public int compare(String f1, String f2) {
-				return f1.compareTo(f2);
-			}
-		};
+		Comparator<String> strcmp = (f1, f2) -> f1.compareTo(f2);
 		Map<String, JTable> ret = new HashMap<>();
 		for (String name : names) {
 			Map<String, Set<Pair<Object, Object>>> m = joined.get(name);
@@ -795,6 +783,7 @@ public class Instance {
 			}
 
 			JTable t = new JTable(arr, cols3) {
+				@Override
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
 					return new Dimension(d.width, d.height);
@@ -803,6 +792,7 @@ public class Instance {
 
 			// foo and t are for the graph and tabular pane, resp
 			JTable foo = new JTable(t.getModel()) {
+				@Override
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
 					return new Dimension(d.width, d.height);
@@ -845,7 +835,7 @@ public class Instance {
 		return tap;
 	}
 
-	public String rdfX(String name) {
+	public String rdfX(@SuppressWarnings("unused") String name) {
 		String xxx = "";
 		String prefix = "fql://entity/"; // + name + "/";
 
@@ -1083,14 +1073,14 @@ public class Instance {
 		}
 	}
 
-	public JPanel pretty(Color c) throws FQLException {
+	public JPanel pretty(Color c) {
 		return makeViewer(c);
 	}
 
 	public Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
-		Graph<String, String> g2 = new DirectedSparseMultigraph<String, String>();
+		Graph<String, String> g2 = new DirectedSparseMultigraph<>();
 		for (Node n : thesig.nodes) {
 			g2.addVertex(n.string);
 		}
@@ -1125,9 +1115,10 @@ public class Instance {
 			final Layout<String, String> layout = (Layout<String, String>) x
 					.newInstance(sgv);
 
-			final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
+			final VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
 			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+				@Override
 				public Paint transform(String i) {
 					if (thesig.isAttribute(i)) {
 						return UIManager.getColor("Panel.background");
@@ -1206,13 +1197,11 @@ public class Instance {
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
 			final Stroke bs = new BasicStroke();
-			Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
-				public Stroke transform(String s) {
-					if (thesig.isAttribute(s)) {
-						return edgeStroke;
-					}
-					return bs;
+			Transformer<String, Stroke> edgeStrokeTransformer = s -> {
+				if (thesig.isAttribute(s)) {
+					return edgeStroke;
 				}
+				return bs;
 			};
 
 			vv.getRenderContext().setEdgeStrokeTransformer(
@@ -1292,13 +1281,13 @@ public class Instance {
 			arrM.put(arr, xxx);
 		}
 
-		return new Inst<Node, Path, Object, Object>(objM, arrM, cat);
+		return new Inst<>(objM, arrM, cat);
 	}
 
-	private Set<Value<Object, Object>> conv(Set<Pair<Object, Object>> set) {
+	private static Set<Value<Object, Object>> conv(Set<Pair<Object, Object>> set) {
 		Set<Value<Object, Object>> ret = new HashSet<>();
 		for (Pair<Object, Object> p : set) {
-			ret.add(new Value<Object, Object>(p.first));
+			ret.add(new Value<>(p.first));
 		}
 		return ret;
 	}
@@ -1307,11 +1296,11 @@ public class Instance {
 	CardLayout cards = new CardLayout();
 	Map<String, JTable> joined;
 
-	public Pair<JPanel, JPanel> groth(String name, Color c) throws FQLException {
+	public Pair<JPanel, JPanel> groth(String name, Color c) {
 		return CategoryOfElements.makePanel(name, this, c);
 	}
 
-	private JPanel makePanel2(Pair<Object[], Object[][]> res) {
+	private static JPanel makePanel2(Pair<Object[], Object[][]> res) {
 		Object[] colnames = res.first;
 		Object[][] rows = res.second;
 
@@ -1319,6 +1308,7 @@ public class Instance {
 
 		@SuppressWarnings("serial")
 		JTable table = new JTable(rows, colnames)  {
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -1461,8 +1451,7 @@ public class Instance {
 	 * Quickly compares two instances by checking the counts of tuples in all
 	 * the rows.
 	 */
-	public static boolean quickCompare(Instance i, Instance j)
-			throws FQLException {
+	public static boolean quickCompare(Instance i, Instance j) {
 		List<String> l = new LinkedList<>();
 		if (!i.data.keySet().equals(j.data.keySet())) {
 			throw new RuntimeException(i.data.keySet() + "\n\n"

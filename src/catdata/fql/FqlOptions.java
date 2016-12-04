@@ -37,7 +37,7 @@ public class FqlOptions extends Options {
 	
 	public static enum SQLKIND {
 		H2, NATIVE, JDBC
-	};
+	}
 
 	public String instFlow_graph = "ISOMLayout";
 	public String schFlow_graph = "ISOMLayout";
@@ -135,6 +135,7 @@ public class FqlOptions extends Options {
 			"" +
 			"</html>";
 	
+	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
 		JPanel general1 = new JPanel(new GridLayout(22, 1));
 		JPanel general2 = new JPanel(new GridLayout(22, 1));

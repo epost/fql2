@@ -34,6 +34,7 @@ public class PropPSM extends PSM {
 		return pre;
 	}
 
+	@Override
 	public void exec(PSMInterp interp,
 			Map<String, Set<Map<Object, Object>>> state) {
 		try {
@@ -66,7 +67,7 @@ public class PropPSM extends PSM {
 							Object o = Integer.toString(++ref.i);
 							map1.put(o, new Pair<>(i1.first, i2));
 							map2.put(new Pair<>(i1.first, i2), o);
-							set.add(new Pair<Object, Object>(o, o));
+							set.add(new Pair<>(o, o));
 					}
 				}
 				data.put(n.string, set);
@@ -77,7 +78,7 @@ public class PropPSM extends PSM {
 					Pair<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>> kk = m1.get(a.source).get(k.first);
 					//Object old_id = kk.first;
 					LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> new_id = kk.second;
-					set.add(new Pair<Object, Object>(k.first, new_id.get(new Pair<>(new Arr<>(new Path(sig, a.source), a.source, a.source), a))));
+					set.add(new Pair<>(k.first, new_id.get(new Pair<>(new Arr<>(new Path(sig, a.source), a.source, a.source), a))));
 				}
 				data.put(a.name, set);
 			}

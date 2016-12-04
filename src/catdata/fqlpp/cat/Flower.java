@@ -207,13 +207,13 @@ public class Flower {
 		return ret;
 	}
 
-	private Set<Map<Pair<Object, Object>, Object>> unit(String k,
-			Set<Map<Object, Object>> set, Object object) {
+	private static Set<Map<Pair<Object, Object>, Object>> unit(String k,
+			Set<Map<Object, Object>> set, @SuppressWarnings("unused") Object object) {
 		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
 		for (Map<Object, Object> row : set) {
 			Map<Pair<Object, Object>, Object> row0 = new HashMap<>();
 			for (Object attr : row.keySet()) {
-				row0.put(new Pair<>((Object)k, attr), row.get(attr));
+				row0.put(new Pair<>(k, attr), row.get(attr));
 			}
 			ret.add(row0);
 		}

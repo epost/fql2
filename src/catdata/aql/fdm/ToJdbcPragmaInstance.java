@@ -47,7 +47,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		this.options = options;
 		this.clazz = clazz;
 		idCol = (String) new AqlOptions(options, null).getOrDefault(AqlOption.id_column_name);
-		colTy = "VARCHAR(" + (Integer) new AqlOptions(options, null).getOrDefault(AqlOption.varchar_length) + ")";
+		colTy = "VARCHAR(" + new AqlOptions(options, null).getOrDefault(AqlOption.varchar_length) + ")";
 		colTy0 = java.sql.Types.VARCHAR;
 		assertDisjoint(idCol);
 	}

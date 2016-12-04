@@ -213,13 +213,13 @@ public class Flower extends SQL {
 		return ret;
 	}
 
-	private Set<Map<Pair<Object, Object>, Object>> unit(String k,
-			Set<Map<Object, Object>> set, String v) {
+	private static Set<Map<Pair<Object, Object>, Object>> unit(String k,
+			Set<Map<Object, Object>> set, @SuppressWarnings("unused") String v) {
 		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
 		for (Map<Object, Object> row : set) {
 			Map<Pair<Object, Object>, Object> row0 = new HashMap<>();
 			for (Object attr : row.keySet()) {
-				row0.put(new Pair<>((Object)k, attr), row.get(attr));
+				row0.put(new Pair<>(k, attr), row.get(attr));
 			}
 			ret.add(row0);
 		}

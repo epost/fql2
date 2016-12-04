@@ -101,26 +101,26 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	
 	@Override
 	public Category visit(FQLPPProgram env, Zero e) {
-		return FinCat.FinCat.initial();
+		return FinCat.initial();
 	}
 
 	@Override
 	public Category visit(FQLPPProgram env, One e) {
-		return FinCat.FinCat.terminal();
+		return FinCat.terminal();
 	}
 
 	@Override
 	public Category visit(FQLPPProgram env, Plus e) {
 		Category<?, ?> a = e.a.accept(env, this);
 		Category<?, ?> b = e.b.accept(env, this);
-		return FinCat.FinCat.coproduct(a, b);
+		return FinCat.coproduct(a, b);
 	}
 
 	@Override
 	public Category visit(FQLPPProgram env, Times e) {
 		Category<?, ?> a = e.a.accept(env, this);
 		Category<?, ?> b = e.b.accept(env, this);
-		return FinCat.FinCat.product(a, b);
+		return FinCat.product(a, b);
 	}
 
 	@Override
@@ -128,7 +128,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		Category<?, ?> a = e.a.accept(env, this);
 		Category<?, ?> b = e.b.accept(env, this);
 		if (!a.isInfinite() && !b.isInfinite()) {
-			return FinCat.FinCat.exp(a, b);
+			return FinCat.exp(a, b);
 		} else if (!b.isInfinite() && a.equals(FinSet.FinSet)) {
 			return Inst.get(b);
 		} else if (!b.isInfinite() && a.equals(FinCat.FinCat)) {
@@ -258,7 +258,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		return ret;
 	}
 	
-	private Functor toFunctor(Category C, Instance<String, String> I) {
+	private static Functor toFunctor(Category C, Instance<String, String> I) {
 		FUNCTION f = p0 -> {
 			Path p = (Path) p0;
 			return new Fn(I.nm.get(p.source), I.nm.get(p.target), x -> I.evaluate(p).get(x));
@@ -422,48 +422,48 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	@Override
 	public Functor visit(FQLPPProgram env, TT e) {
 		Category<?, ?> c = e.t.accept(env, this);
-		return FinCat.FinCat.terminal(c);
+		return FinCat.terminal(c);
 	}
 
 	@Override
 	public Functor visit(FQLPPProgram env, FF e) {
 		Category<?, ?> c = e.t.accept(env, this);
-		return FinCat.FinCat.initial(c);
+		return FinCat.initial(c);
 	}
 
 	@Override
 	public Functor visit(FQLPPProgram env, Fst e) {
 		Category<?, ?> s = e.s.accept(env, this);
 		Category<?, ?> t = e.t.accept(env, this);
-		return FinCat.FinCat.first(s, t);
+		return FinCat.first(s, t);
 	}
 
 	@Override
 	public Functor visit(FQLPPProgram env, Snd e) {
 		Category<?, ?> s = e.s.accept(env, this);
 		Category<?, ?> t = e.t.accept(env, this);
-		return FinCat.FinCat.second(s, t);
+		return FinCat.second(s, t);
 	}
 
 	@Override
 	public Functor visit(FQLPPProgram env, Inl e) {
 		Category<?, ?> s = e.s.accept(env, this);
 		Category<?, ?> t = e.t.accept(env, this);
-		return FinCat.FinCat.inleft(s, t);
+		return FinCat.inleft(s, t);
 	}
 
 	@Override
 	public Functor visit(FQLPPProgram env, Inr e) {
 		Category<?, ?> s = e.s.accept(env, this);
 		Category<?, ?> t = e.t.accept(env, this);
-		return FinCat.FinCat.inright(s, t);
+		return FinCat.inright(s, t);
 	}
 
 	@Override
 	public Functor visit(FQLPPProgram env, Eval e) {
 		Category<?, ?> s = e.s.accept(env, this);
 		Category<?, ?> t = e.t.accept(env, this);
-		return FinCat.FinCat.eval(s, t);
+		return FinCat.eval(s, t);
 	}
 
 	@Override
@@ -472,7 +472,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		if (!f.source.isInfinite() && f.target.equals(FinSet.FinSet)) {
 			return Inst.CURRY(f); 
 		}
-		return FinCat.FinCat.curry(f);
+		return FinCat.curry(f);
 	}
 
 	@Override
@@ -492,7 +492,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			return FunCat.get(l.source).coproduct(l, r);
 		}
 
-		return FinCat.FinCat.match(l, r);
+		return FinCat.match(l, r);
 	}
  
 	@Override
@@ -511,7 +511,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			}
 			return FunCat.get(l.source).product(l, r);
 		}
-		return FinCat.FinCat.pair(l, r);
+		return FinCat.pair(l, r);
 	}
 	
 	@Override
@@ -534,10 +534,11 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		throw new RuntimeException("Cannot exponentiate " + l + " and " + r);
 	}
 
+	@Override
 	public Functor visit(FQLPPProgram env, Iso e) {
 		Category l = e.l.accept(env, this);
 		Category r = e.r.accept(env, this);
-		Optional<Pair<Functor, Functor>> k = FinCat.FinCat.iso(l, r);
+		Optional<Pair<Functor, Functor>> k = FinCat.iso(l, r);
 		if (!k.isPresent()) {
 			throw new RuntimeException("Not isomorphic: " + e.l + " and " + e.r);
 		}
@@ -640,7 +641,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		CatExp.Const tcon = (CatExp.Const) tcat;
 
 		// Signature ssig = new Signature(scon.nodes, scon.arrows, scon.eqs);
-		Signature<String, String> tsig = new Signature<String, String>(tcon.nodes, tcon.arrows,
+		Signature<String, String> tsig = new Signature<>(tcon.nodes, tcon.arrows,
 				tcon.eqs);
 
 		FUNCTION o = x -> {
@@ -943,7 +944,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			return ret2;
 		}
 		
-		ret1_e.printStackTrace();
+		ret1_e.printStackTrace(); // TODO !!!
 		ret2_e.printStackTrace();
 		throw new RuntimeException("Cannot apply:\n\nmost probable cause: " + ret1_e.getMessage() + "\n\nless probable cause: " + ret2_e.getMessage());
 	}
@@ -1168,8 +1169,8 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		identities.put("C", "c");
 		Category<String,String> span = new FiniteCategory<>(objects, arrows, sources, targets, composition, identities);
 		
-		Category<Pair<Object, String>,Pair<Object,String>> Dspan = FinCat.FinCat.product(D, span);
-		Functor<Pair<Object,String>,Pair<Object,String>,Object,Object> fst = FinCat.FinCat.first(D, span);
+		Category<Pair<Object, String>,Pair<Object,String>> Dspan = FinCat.product(D, span);
+		Functor<Pair<Object,String>,Pair<Object,String>,Object,Object> fst = FinCat.first(D, span);
 		
 		
 		FUNCTION<Pair<Object,String>,Set> o = p -> {

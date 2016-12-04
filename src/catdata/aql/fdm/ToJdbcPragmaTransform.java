@@ -43,9 +43,9 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 		this.options = options;
 		this.clazz = clazz;
 		idCol = (String) new AqlOptions(options, null).getOrDefault(AqlOption.id_column_name);
-		colTy = "VARCHAR(" + (Integer) new AqlOptions(options, null).getOrDefault(AqlOption.varchar_length) + ")";
+		colTy = "VARCHAR(" + new AqlOptions(options, null).getOrDefault(AqlOption.varchar_length) + ")";
 		colTy0 = java.sql.Types.VARCHAR;
-		assertDisjoint(idCol);
+		assertDisjoint();
 	}
 
 	private void deleteThenCreate(Connection conn) throws SQLException {
@@ -92,11 +92,12 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 		}
 	}
 
-	private void assertDisjoint(String idCol) {
+	private void assertDisjoint() {
 		Collection<Object> entys = Util.isect(h.src().schema().ens, h.src().schema().typeSide.tys);
 		if (!entys.isEmpty()) {
-			throw new RuntimeException("Cannot JDBC export: entities and types share names: " + Util.sep(entys, ","));
+			throw new RuntimeException("Cannot JDBC export: entities and types and idcol share names: " + Util.sep(entys, ","));
 		}
+		
 	}
 
 	private String enToString(En en) {

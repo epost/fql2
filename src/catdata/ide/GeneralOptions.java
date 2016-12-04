@@ -37,6 +37,7 @@ public class GeneralOptions extends Options {
 	public int font_size = 12;
 
 	//@Override
+	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
 		JPanel general1 = new JPanel(new GridLayout(Options.biggestSize, 1));
 		JPanel general2 = new JPanel(new GridLayout(Options.biggestSize, 1));

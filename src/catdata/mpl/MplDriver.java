@@ -15,8 +15,8 @@ public class MplDriver {
 
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static Environment<MplObject> makeEnv(String str, Program<MplExp<String,String>> init) {
-		Environment<MplObject> ret = new Environment<MplObject>();
+	public static Environment<MplObject> makeEnv(@SuppressWarnings("unused") String str, Program<MplExp<String,String>> init) {
+		Environment<MplObject> ret = new Environment<>();
 		Map<String, Integer> extra = new HashMap<>();
 		
 		for (String k : init.order) {

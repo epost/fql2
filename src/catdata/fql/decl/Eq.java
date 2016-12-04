@@ -17,6 +17,7 @@ public class Eq  {
 		this.rhs = rhs;
 	}
 
+	@Override
 	public String toString() {
 		return lhs + " = " + rhs;
 	}

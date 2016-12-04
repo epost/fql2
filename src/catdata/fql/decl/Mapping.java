@@ -321,11 +321,11 @@ public class Mapping {
 	/**
 	 * Does most of the work of the constructor.
 	 */
-	private void initialize(Signature source, Signature target,
+	private void initialize(Signature sourceX, Signature targetX,
 			List<Pair<String, String>> objs, List<Pair<String, String>> attrs,
 			List<Pair<String, List<String>>> arrows) throws FQLException {
-		this.source = source;
-		this.target = target;
+		this.source = sourceX;
+		this.target = targetX;
 
 		Pair<List<Pair<String, String>>, List<Pair<String, String>>> s = filter(objs);
 		objs = s.first;
@@ -386,7 +386,7 @@ public class Mapping {
 	/**
 	 * Constructs an identity mapping
 	 */
-	private void identity(FqlEnvironment env, Signature s) throws FQLException {
+	private void identity(@SuppressWarnings("unused") FqlEnvironment env, Signature s) throws FQLException {
 		for (Node n : s.nodes) {
 			nm.put(n, n);
 		}
@@ -414,6 +414,7 @@ public class Mapping {
 			i++;
 		}
 		Arrays.sort(arr, new Comparator<Object[]>() {
+			@Override
 			public int compare(Object[] f1, Object[] f2) {
 				return f1[0].toString().compareTo(f2[0].toString());
 			}
@@ -421,6 +422,7 @@ public class Mapping {
 
 		JTable nmC = new JTable(arr, new Object[] { "Source node",
 				"Target node" }){
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -435,6 +437,7 @@ public class Mapping {
 			i2++;
 		}
 		Arrays.sort(arr2, new Comparator<Object[]>() {
+			@Override
 			public int compare(Object[] f1, Object[] f2) {
 				return f1[0].toString().compareTo(f2[0].toString());
 			}
@@ -442,6 +445,7 @@ public class Mapping {
 
 		JTable emC = new JTable(arr2, new Object[] { "Source edge" ,
 				"Target path" }){
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -456,12 +460,14 @@ public class Mapping {
 			i3++;
 		}
 		Arrays.sort(arr3, new Comparator<Object[]>() {
+			@Override
 			public int compare(Object[] f1, Object[] f2) {
 				return f1[0].toString().compareTo(f2[0].toString());
 			}
 		});
 		JTable amC = new JTable(arr3, new Object[] { "Source attribute" ,
 				"Target attribute"}){
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -693,7 +699,7 @@ public class Mapping {
 		return new Triple<>(F, srcCat0, dstCat0);
 	}
 
-	public JPanel pretty(final Color scolor, final Color tcolor, final FqlEnvironment env) throws FQLException {
+	public JPanel pretty(final Color scolor, final Color tcolor, final FqlEnvironment env) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
@@ -704,7 +710,7 @@ public class Mapping {
 	public Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
-		Graph<String, String> g2 = new DirectedSparseMultigraph<String, String>();
+		Graph<String, String> g2 = new DirectedSparseMultigraph<>();
 		for (Node n : source.nodes) {
 			g2.addVertex("@source" + "." + n.string);
 		}
@@ -747,7 +753,7 @@ public class Mapping {
 	}
 
 	@SuppressWarnings("unchecked")
-	public JPanel doView(final Color scolor, final Color tcolor, final FqlEnvironment env, Graph<String, String> sgv) {
+	public JPanel doView(final Color scolor, final Color tcolor, @SuppressWarnings("unused") final FqlEnvironment env, Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix + GlobalOptions.debug.fql.mapping_graph);
@@ -755,11 +761,12 @@ public class Mapping {
 			Layout<String, String> layout = (Layout<String, String>) x.newInstance(sgv);
 
 			layout.setSize(new Dimension(600, 400));
-		VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
+		VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 				layout);
 		// vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
 		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+			@Override
 			public Paint transform(String i) {
 				return which(i);
 			}
@@ -789,6 +796,7 @@ public class Mapping {
 		final Stroke bs = new BasicStroke();
 
 		Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
+			@Override
 			public Stroke transform(String s) {
 				if (s.contains(" ")) {
 					return edgeStroke;
@@ -887,7 +895,7 @@ public class Mapping {
 		}
 	}
 
-	private <X> boolean isBijection(List<X> l, List<X> r, Map<X, X> f) {
+	private static <X> boolean isBijection(List<X> l, List<X> r, Map<X, X> f) {
 
 		for (X x : l) {
 			if (f.get(x) == null) {
@@ -1015,8 +1023,8 @@ public class Mapping {
 		List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>> piZZ = new LinkedList<>();
 
 		for (Attribute<Node> a : source.attrs) {
-			Attribute<Node> a0 = new Attribute<Node>("src_" + a.name, new Node("src_" + a.source.string), a.target);
-			Attribute<Node> b0 = new Attribute<Node>("dst_" + am.get(a).name, new Node("dst_" + am.get(a).source.string), a.target);
+			Attribute<Node> a0 = new Attribute<>("src_" + a.name, new Node("src_" + a.source.string), a.target);
+			Attribute<Node> b0 = new Attribute<>("dst_" + am.get(a).name, new Node("dst_" + am.get(a).source.string), a.target);
 			
 			sigmaYY.add(new Pair<>(a0, new Pair<>(l_map.get(a.source), b0)));
 			deltaXX.add(new Pair<>(a0, new Pair<>(l_map.get(a.source), b0)));
@@ -1032,7 +1040,7 @@ public class Mapping {
 	}
 
 
-	private JComponent quickView(Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>> second) {
+	private static JComponent quickView(Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>> second) {
 		JTabbedPane ret = new JTabbedPane();
 
 		ret.addTab("Signature", new JScrollPane(new JTextArea(Signature.toString(second))));
@@ -1042,7 +1050,7 @@ public class Mapping {
 		return ret;
 	}
 
-	private String quickConv(List<EmbeddedDependency> ed) {
+	private static String quickConv(List<EmbeddedDependency> ed) {
 		String ret = "";
 		for (EmbeddedDependency d : ed) {
 			ret += d.toString();

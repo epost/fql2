@@ -63,7 +63,7 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 			for (X j : J.algebra().en(t)) {
 				for (Var v : Q.ens.get(t).gens.keySet()) {
 					En1 s = Q.ens.get(t).gens.get(v);
-					col.gens.put(new Pair<Var,X>(v, j), s);
+					col.gens.put(new Pair<>(v, j), s);
 				}
 				for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : Q.ens.get(t).eqs) {
 					if (!eq.ctx.isEmpty()) {

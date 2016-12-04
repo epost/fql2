@@ -77,8 +77,8 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	}
 	
 	private void inhabGen(Set<T> inhabited) {
-		while (inhabGen1(inhabited))
-			;
+		while (inhabGen1(inhabited)) {}
+			
 	}
 
 	private boolean inhabGen1(Set<T> ret) {
@@ -312,8 +312,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static <X> void remove(Collection<X> X, X x) {
-		while (X.remove(x))
-			;
+		while (X.remove(x)) {}
 	}
 
 	private static <X> void add(Collection<X> X, X x) {
@@ -363,7 +362,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private void complete() throws InterruptedException {
-		while (!step());
+		while (!step()){}
 
 		if (!isCompleteGround) {
 			throw new RuntimeException("Not ground complete after iteration timeout.  Last state:\n\n" + toString());
@@ -508,7 +507,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return s;
 	}
 
-	private KBExp<Chc<V, C>, V> step1(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R, KBExp<Chc<V, C>, V> e0, Set<T> inhab) throws InterruptedException {
+	private KBExp<Chc<V, C>, V> step1(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, @SuppressWarnings("unused") Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache, @SuppressWarnings("hiding") Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R, KBExp<Chc<V, C>, V> e0, Set<T> inhab) throws InterruptedException {
 		KBExp<Chc<V, C>, V> e = e0;
 		/*
 		 * if (cache != null && cache.containsKey(e)) { return cache.get(e); }
@@ -547,7 +546,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return inhab.containsAll(need);
 	}
 
-	private KBExp<Chc<V, C>, V> step1Es(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E, KBExp<Chc<V, C>, V> e, Collection<T> inhab) throws InterruptedException {
+	private KBExp<Chc<V, C>, V> step1Es(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E, KBExp<Chc<V, C>, V> e, Collection<T> inhab) {
 		if (options.unfailing && e.vars().isEmpty()) {
 			for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> r0 : E) {
 				KBExp<Chc<V, C>, V> a = step1EsX(gt, r0, e, inhab);
@@ -563,7 +562,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return e;
 	}
 
-	private KBExp<Chc<V, C>, V> step1EsX(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> r0, KBExp<Chc<V, C>, V> e, Collection<T> inhab) throws InterruptedException {
+	private KBExp<Chc<V, C>, V> step1EsX(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> r0, KBExp<Chc<V, C>, V> e, Collection<T> inhab) {
 		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> r = r0;
 		if (!Collections.disjoint(r.first.vars(), e.vars()) || !Collections.disjoint(r.second.vars(), e.vars())) {
 			r = freshen(fresh, r0);
@@ -779,7 +778,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	}
 
 	private static <X> List<List<X>> allSubsetsOrderedBySize(Set<X> set) {
-		List<List<X>> ret = new LinkedList<List<X>>(Util.powerSet(set).stream().map(x -> new ArrayList<>(x)).collect(Collectors.toList()));
+		List<List<X>> ret = new LinkedList<>(Util.powerSet(set).stream().map(x -> new ArrayList<>(x)).collect(Collectors.toList()));
 		ret.sort((x, y) -> x.size() > y.size() ? 1 : x.size() == y.size() ? 0 : -1);
 		return ret;
 	}
@@ -1089,7 +1088,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return s0.equals(t0);
 	}
 
-	private boolean allCpsConfluent(boolean print, boolean ground, String s, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> set) throws InterruptedException {
+	private boolean allCpsConfluent(@SuppressWarnings("unused") boolean print, boolean ground, @SuppressWarnings("unused") String s, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> set) throws InterruptedException {
 		outer: for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : set) {
 			KBExp<Chc<V, C>, V> lhs = red(this::gtX, new HashMap<>(), Util.append(E, G), R, e.first, e.third.values());
 			KBExp<Chc<V, C>, V> rhs = red(this::gtX, new HashMap<>(), Util.append(E, G), R, e.second, e.third.values());
@@ -1097,20 +1096,19 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			if (!lhs.equals(rhs)) {
 				if (!ground) {
 					return false;
-				} else {
-					for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ex : G) { 
-						if (subsumes(new Triple<>(lhs, rhs, e.third), ex) || subsumes(new Triple<>(rhs, lhs, e.third), ex)) {
-							continue outer;
-						}
-					}
-					if (options.semantic_ac && eqUpToSorting(e.first, e.second, e.third.values())) {
-						continue;
-					}
-					if (options.syntactic_ac && strongGroundJoinableSyntactic(e.first, e.second, e.third)) {
-						continue;
-					}
-					return false;
 				}
+				for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> ex : G) { 
+					if (subsumes(new Triple<>(lhs, rhs, e.third), ex) || subsumes(new Triple<>(rhs, lhs, e.third), ex)) {
+						continue outer;
+					}
+				}
+				if (options.semantic_ac && eqUpToSorting(e.first, e.second, e.third.values())) {
+					continue;
+				}
+				if (options.syntactic_ac && strongGroundJoinableSyntactic(e.first, e.second, e.third)) {
+					continue;
+				}
+				return false;
 			}
 
 		}
@@ -1194,15 +1192,13 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			} else if (lhs.left && !rhs.left) {
 				if (min.contains(lhs)) { // lhs minimal
 					return false;
-				} else { // lhs maximal
-					return true;
 				}
+				return true;
 			} else if (!lhs.left && rhs.left) {
 				if (min.contains(rhs)) { // rhs minimal
 					return true;
-				} else { // rhs maximal
-					return false;
 				}
+				return false;
 			}
 			return gt.apply(lhs.r, rhs.r);
 		};
@@ -1210,7 +1206,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	private boolean gtX(Chc<V, C> lhs, Chc<V, C> rhs) {
 		return wrapMinSk(min.values(), lift(prec)).apply(lhs, rhs);
-	};
+	}
 
 	/////
 
@@ -1221,14 +1217,13 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	public static <V, C> boolean gt_lpo1(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t) {
 		if (s.isVar) {
 			return false;
-		} else {
-			for (KBExp<Chc<V, C>, V> si : s.getApp().args) {
-				if (si.equals(t) || gt_lpo(gt, si, t)) {
-					return true;
-				}
-			}
-			return false;
 		}
+		for (KBExp<Chc<V, C>, V> si : s.getApp().args) {
+			if (si.equals(t) || gt_lpo(gt, si, t)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static <V, C> boolean gt_lpo2(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t) {
@@ -1244,9 +1239,8 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		}
 		if (S.f.equals(T.f)) {
 			return gt_lpo_lex(gt, S.args, T.args);
-		} else {
-			return gt.apply(S.f, T.f);
 		}
+		return gt.apply(S.f, T.f);
 	}
 
 	public static <V, C> boolean gt_lpo_lex(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, List<KBExp<Chc<V, C>, V>> ss, List<KBExp<Chc<V, C>, V>> tt) {
@@ -1370,14 +1364,13 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	public static <X, V> Set<DAG<X>> gt_lpo1Infer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
 		if (s.isVar) {
 			return fals();
-		} else {
-			Set<DAG<X>> ret = fals();
-			for (KBExp<X, V> si : s.getApp().args) {
-				ret = or(ret, eq(si, t));
-				ret = or(ret, gt_lpoInfer(si, t));
-			}
-			return ret;
 		}
+		Set<DAG<X>> ret = fals();
+		for (KBExp<X, V> si : s.getApp().args) {
+			ret = or(ret, eq(si, t));
+			ret = or(ret, gt_lpoInfer(si, t));
+		}
+		return ret;
 	}
 
 	public static <X, V> Set<DAG<X>> gt_lpo2Infer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {

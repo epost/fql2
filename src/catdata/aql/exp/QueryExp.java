@@ -10,6 +10,7 @@ import catdata.aql.exp.SchExp.SchExpLit;
 
 public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2>> {
 	
+	@Override
 	public Kind kind() {
 		return Kind.QUERY;
 	}

@@ -36,6 +36,7 @@ public final class AqlDisplay implements Disp {
 
 	private Throwable exn;
 	
+	@Override
 	public Throwable exn() {
 		return exn;
 	}
@@ -45,7 +46,7 @@ public final class AqlDisplay implements Disp {
 	}
 	
 	//TODO aql unresolve, should be controllable with option [since expensive]
-	private static String doLookup(String c, Object o, Exp<?> exp, AqlEnv env) {
+	private static String doLookup(String c, Exp<?> exp, AqlEnv env) {
 		switch (exp.kind()) {
 		case INSTANCE:
 			return exp.kind() + " " + c + " : " + env.typing.defs.insts.get(c);
@@ -63,11 +64,13 @@ public final class AqlDisplay implements Disp {
 			return exp.kind() + " " + c;
 		case GRAPH:
 			return exp.kind() + " " + c;
+		default:
+			throw new RuntimeException("Anomaly: please report");
 		} 
-		throw new RuntimeException("Anomaly: please report");
+		
 	}
 	
-	JComponent wrapDisplay(Kind kind, Object obj) {
+	static JComponent wrapDisplay(Kind kind, Object obj) {
 	//	if (!NEWDEBUG.debug.opl.opl_lazy_gui) {
 			return AqlViewer.view(kind, obj);
 	/*	}
@@ -99,7 +102,7 @@ public final class AqlDisplay implements Disp {
 				Object obj = env.defs.get(c, exp.kind());
 				map.put(obj, c); 
 				try {
-					frames.add(new Pair<>(doLookup(c, obj, exp, env), wrapDisplay(exp.kind(), obj)));
+					frames.add(new Pair<>(doLookup(c, exp, env), wrapDisplay(exp.kind(), obj)));
 				} catch (RuntimeException ex) {
 					ex.printStackTrace();
 					throw new LineException(ex.getMessage(), c, exp.kind().toString());

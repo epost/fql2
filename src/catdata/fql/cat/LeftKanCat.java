@@ -127,7 +127,7 @@ public class LeftKanCat {
 			}
 		}
 
-		FinCat<Node, Path> r1 = new FinCat<Node, Path>(objects,
+		FinCat<Node, Path> r1 = new FinCat<>(objects,
 				new LinkedList<>(arrows), composition, identities);
 		
 		return new Pair<>(r1, r2);

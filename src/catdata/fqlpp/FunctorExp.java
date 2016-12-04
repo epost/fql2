@@ -13,6 +13,7 @@ public abstract class FunctorExp implements Serializable{
 
 	public abstract <R, E> R accept(E env, FunctorExpVisitor<R, E> v);
 
+	@Override
 	public abstract boolean equals(Object o);
 	
 	public static class Pushout extends FunctorExp {
@@ -1265,6 +1266,7 @@ public abstract class FunctorExp implements Serializable{
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "curry " + f;
 		}
@@ -1315,6 +1317,7 @@ public abstract class FunctorExp implements Serializable{
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " * " + r + ")";
 		}
@@ -1365,6 +1368,7 @@ public abstract class FunctorExp implements Serializable{
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " ^ " + r + ")";
 		}
@@ -1417,6 +1421,7 @@ public abstract class FunctorExp implements Serializable{
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " ; " + r + ")";
 		}
@@ -1467,6 +1472,7 @@ public abstract class FunctorExp implements Serializable{
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "(" + l + " + " + r + ")";
 		}
@@ -1478,6 +1484,7 @@ public abstract class FunctorExp implements Serializable{
 
 	}
 	
+	@Override
 	public abstract int hashCode();
 
 	public interface FunctorExpVisitor<R, E> {

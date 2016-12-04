@@ -372,6 +372,7 @@ public abstract class KBFO<S,C,V> {
 			return v.visit(env, this);
 		}
 		
+		@Override
 		public void type(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur) {
 			S s0 = l.type(ctx, cur);
 			S s1 = r.type(ctx, cur);
@@ -380,6 +381,7 @@ public abstract class KBFO<S,C,V> {
 			}
 		}
 		
+		@Override
 		public void typeInf(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur) {
 			S s0 = l.typeInf(ctx, cur);
 			S s1 = r.typeInf(ctx, cur);

@@ -53,7 +53,7 @@ public class SqlInstance {
 		return db.get(t);
 	}
 	
-	public SqlInstance(SqlSchema schema, Connection conn) throws SQLException {;
+	public SqlInstance(SqlSchema schema, Connection conn) throws SQLException {
 		if (schema == null || conn == null) {
 			throw new RuntimeException();
 		}

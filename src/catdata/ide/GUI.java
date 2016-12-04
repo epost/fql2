@@ -31,6 +31,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 
 import catdata.Pair;
@@ -70,7 +71,7 @@ public class GUI extends JPanel {
 
 	public static JFrame topFrame;
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
 		topFrame = frame;
 
@@ -95,6 +96,7 @@ public class GUI extends JPanel {
 			fileMenu.add(newItem);
 			newItems.put(l, newItem);
 			newItem.addActionListener(new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					newAction(null, "", l);
 				}
@@ -209,6 +211,7 @@ public class GUI extends JPanel {
 		MenuItem abortItem = new MenuItem("Abort");
 		toolsMenu.add(abortItem);
 		abortItem.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				abortAction();
 			}
@@ -398,29 +401,34 @@ public class GUI extends JPanel {
 		MenuItem aboutItem = new MenuItem("About");
 		helpMenu.add(aboutItem);
 		aboutItem.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				GlobalOptions.showAbout();
 			}
 		});
 
 		openItem.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				openAction();
 			}
 		});
 		saveItem.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				saveAction();
 			}
 		});
 
 		exitItem.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				exitAction();
 			}
 		});
 
 		findItem.addActionListener(new ActionListener() {
+			@Override
 			@SuppressWarnings("rawtypes")
 			public void actionPerformed(ActionEvent e) {
 				delay();
@@ -452,6 +460,7 @@ public class GUI extends JPanel {
 
 		JButton new_button = new JButton("New " + Language.getDefault());
 		new_button.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				newAction(null, "", Language.getDefault());
 			}
@@ -459,6 +468,7 @@ public class GUI extends JPanel {
 
 		JButton save_button = new JButton("Save");
 		save_button.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				saveAction();
 			}
@@ -466,6 +476,7 @@ public class GUI extends JPanel {
 
 		JButton open_button = new JButton("Open");
 		open_button.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				openAction();
 			}
@@ -473,6 +484,7 @@ public class GUI extends JPanel {
 
 		JButton optionsb = new JButton("Options");
 		optionsb.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				GlobalOptions.showOptions();
 			}
@@ -510,7 +522,7 @@ public class GUI extends JPanel {
 		toolBar.add(open_button);
 		toolBar.add(save_button);
 		toolBar.add(optionsb);
-		toolBar.add(new JLabel("Load Example:", JLabel.RIGHT));
+		toolBar.add(new JLabel("Load Example:", SwingConstants.RIGHT));
 		toolBar.add(modeBox);
 		toolBar.add(boxPanel);
 
@@ -740,6 +752,7 @@ public class GUI extends JPanel {
 	private static void openAction() {
 		delay();
 		JFileChooser jfc = new JFileChooser(GlobalOptions.debug.general.file_path) {
+			@Override
 			public void approveSelection() {
 				if (new AllFilter().accept(getSelectedFile())) {
 					super.approveSelection();

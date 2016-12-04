@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
 
 import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.autocomplete.AutoCompletion;
@@ -48,7 +49,7 @@ import catdata.ide.Language;
  *         The FQL code editor
  */
 @SuppressWarnings("serial")
-public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDisplay> implements Runnable {
+public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDisplay> {
 	
 	
 	public FqlCodeEditor(String title, int id, String content) {
@@ -81,6 +82,7 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 		return "catdata.fql.parse.FqlTokenMaker";
 	}
 
+	@Override
 	protected void doTemplates() {
 		  CompletionProvider provider = createCompletionProvider();
 		  AutoCompletion ac = new AutoCompletion(provider);
@@ -90,7 +92,7 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 	      ac.install(this.topArea);
 	}
 	
-	  private CompletionProvider createCompletionProvider() {
+	  private static CompletionProvider createCompletionProvider() {
 		   DefaultCompletionProvider provider = new DefaultCompletionProvider();
 	
 		provider.addCompletion(new ShorthandCompletion(provider,  "schema",
@@ -281,7 +283,7 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 	}
 	
 
-	private Pair<String, Object> get(FQLProgram p, String k) {
+	private static Pair<String, Object> get(FQLProgram p, String k) {
 		Object o = null;
 		
 		o = p.full_queries.get(k);
@@ -354,8 +356,8 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 		jta.setWrapStyleWord(true);
 		jta.setLineWrap(true);
 		JScrollPane p = new JScrollPane(jta,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		p.setPreferredSize(new Dimension(650, 300));
 
 		JOptionPane pane = new JOptionPane(p);

@@ -31,23 +31,13 @@ import catdata.provers.SaturatedProver;
 //TODO: aql add abort functionality
 
 //no java here!
-public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
+public class AqlProver {
 
 	public static enum ProverName {
 		auto, saturated, monoidal, program, completion, congruence, fail, free,
 	}
 
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> DP<Ty, En, Sym, Fk, Att, Gen, Sk> create(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col1) {
-		/*
-		 * Integer timeout = (Integer) ops.getOrDefault(AqlOption.timeout);
-		 * ExecutorService executor = Executors.newSingleThreadExecutor();
-		 * 
-		 * Future<DP<Ty, En, Sym, Fk, Att, Gen, Sk>> future =
-		 * executor.submit(new Callable<DP<Ty, En, Sym, Fk, Att, Gen, Sk>>() {
-		 * 
-		 * @Override public DP<Ty, En, Sym, Fk, Att, Gen, Sk> call() throws
-		 * Exception {
-		 */
 		ProverName name = (ProverName) ops.getOrDefault(AqlOption.prover);
 
 		if (name.equals(ProverName.auto)) {
@@ -61,24 +51,24 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			case auto:
 				throw new RuntimeException("Anomaly: please report");
 			case fail:
-				return wrap(col1, x -> {
+				return wrap(x -> {
 					throw new RuntimeException();
 				}, new FailProver<>());
 			case free:
-				return wrap(col1, col1.simplify().second, new FreeProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
+				return wrap(col1.simplify().second, new FreeProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
 			case saturated:
-				return wrap(col1, x -> x, saturatedProverHelper(ops, col1.toKB().third, col1.toKB().second, col1.toKB().first, col1));
+				return wrap(x -> x, saturatedProverHelper(ops, col1.toKB().third, col1.toKB().second, col1.toKB().first, col1));
 			case congruence:
-				return wrap(col1, col1.simplify().second, new CongruenceProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
+				return wrap(col1.simplify().second, new CongruenceProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
 			case program:
 				boolean check = !(Boolean) ops.getOrDefault(AqlOption.dont_verify_is_appropriate_for_prover_unsafe);
-				return wrap(col1, col1.simplify().second, new ProgramProver<>(check, Var.it, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); // use
+				return wrap(col1.simplify().second, new ProgramProver<>(check, Var.it, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); // use
 																																																			// simplified
 			case completion:
-				return wrap(col1, col1.simplify().second, new CompletionProver<>(col1.toKB().second.keySet(), ops, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first, col1.simplify().first)); // use
+				return wrap(col1.simplify().second, new CompletionProver<>(col1.toKB().second.keySet(), ops, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first, col1.simplify().first)); // use
 																																																															// simplified
 			case monoidal:
-				return wrap(col1, col1.simplify().second, new MonoidalProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); // use
+				return wrap(col1.simplify().second, new MonoidalProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); // use
 																																																// simplified
 			default:
 				throw new RuntimeException("Anomaly: please report");
@@ -102,7 +92,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	 * RuntimeException(e); }
 	 */
 
-	private static <Sk, En, Fk, Ty, Att, Sym, Gen> ProverName auto(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+	private static <Sk, En, Fk, Ty, Att, Sym, Gen> ProverName auto(@SuppressWarnings("unused") AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		if (col.eqs.isEmpty()) {
 			return ProverName.free;
 		} else if (col.isGround()) {
@@ -117,7 +107,7 @@ public class AqlProver<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		throw new RuntimeException("Cannot automatically chose prover: theory is not free, ground, unary, or program.  You must use completion with an explicit precedence.");
 	}
 
-	private static <Sk, En, Fk, Ty, Att, Sym, Gen> DP<Ty, En, Sym, Fk, Att, Gen, Sk> wrap(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> simp, DPKB<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> dpkb) {
+	private static <Sk, En, Fk, Ty, Att, Sym, Gen> DP<Ty, En, Sym, Fk, Att, Gen, Sk> wrap(Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> simp, DPKB<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> dpkb) {
 
 		return new DP<Ty, En, Sym, Fk, Att, Gen, Sk>() {
 

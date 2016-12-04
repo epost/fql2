@@ -33,19 +33,13 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 
 	@Override
 	public boolean isObject(Category<?,?> o) {
-		if (o instanceof Category) {
-			return !((Category<?,?>)o).isInfinite();
-		}
-		return false;
+		return !((Category<?,?>)o).isInfinite();
 	}
 
 	@Override
 	public boolean isArrow(Functor<?,?,?,?> a) {
-		if (a instanceof Functor) {
-			Functor<?,?,?,?> f = (Functor<?,?,?,?>) a;
+			Functor<?,?,?,?> f = a;
 			return isObject(f.source) && isObject(f.target);
-		}
-		return false;
 	}
 
 	public static FinCat FinCat = new FinCat();
@@ -88,15 +82,15 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 
 	// /////
 
-	public Category<Unit, Unit> terminal() {
+	public static Category<Unit, Unit> terminal() {
 		return new FiniteCategory<>(new Unit(), new Unit());
 	}
 
-	public <X, Y> Functor<X, Y, Unit, Unit> terminal(Category<X, Y> o) {
+	public static <X, Y> Functor<X, Y, Unit, Unit> terminal(Category<X, Y> o) {
 		return new Functor<>(o, terminal(), x -> new Unit(), x -> new Unit());
 	}
 
-	public <O1, A1, O2, A2> Category<Pair<O1, O2>, Pair<A1, A2>> product(
+	public static <O1, A1, O2, A2> Category<Pair<O1, O2>, Pair<A1, A2>> product(
 			Category<O1, A1> o1, Category<O2, A2> o2) {
 		Set<Pair<O1, O2>> os = new HashSet<>();
 		Set<Pair<A1, A2>> as = new HashSet<>();
@@ -134,17 +128,17 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		return new FiniteCategory<>(os, as, srcs, dsts, comp, ids);
 	}
 
-	public <O1, A1, O2, A2> Functor<Pair<O1, O2>, Pair<A1, A2>, O1, A1> first(
+	public static <O1, A1, O2, A2> Functor<Pair<O1, O2>, Pair<A1, A2>, O1, A1> first(
 			Category<O1, A1> o1, Category<O2, A2> o2) {
 		return new Functor<>(product(o1, o2), o1, x -> x.first, x -> x.first);
 	}
 
-	public <O1, A1, O2, A2> Functor<Pair<O1, O2>, Pair<A1, A2>, O2, A2> second(
+	public static <O1, A1, O2, A2> Functor<Pair<O1, O2>, Pair<A1, A2>, O2, A2> second(
 			Category<O1, A1> o1, Category<O2, A2> o2) {
 		return new Functor<>(product(o1, o2), o2, x -> x.second, x -> x.second);
 	}
 
-	public <O, A, O1, A1, O2, A2> Functor<O, A, Pair<O1, O2>, Pair<A1, A2>> pair(
+	public static <O, A, O1, A1, O2, A2> Functor<O, A, Pair<O1, O2>, Pair<A1, A2>> pair(
 			Functor<O, A, O1, A1> a1, Functor<O, A, O2, A2> a2) {
 		if (!a1.source.equals(a2.source)) {
 			throw new RuntimeException();
@@ -154,11 +148,11 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 						a1.applyA(x), a2.applyA(x)));
 	}
 
-	public Category<Void, Void> initial() {
+	public static Category<Void, Void> initial() {
 		return new FiniteCategory<>();
 	}
 
-	public <O, A> Functor<Void, Void, O, A> initial(Category<O, A> o) {
+	public static <O, A> Functor<Void, Void, O, A> initial(Category<O, A> o) {
 		return new Functor<>(initial(), o, x -> {
 			throw new RuntimeException();
 		}, x -> {
@@ -166,7 +160,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		});
 	}
 
-	public <O1, A1, O2, A2> Category<Chc<O1, O2>, Chc<A1, A2>> coproduct(
+	public static <O1, A1, O2, A2> Category<Chc<O1, O2>, Chc<A1, A2>> coproduct(
 			Category<O1, A1> o1, Category<O2, A2> o2) {
 		Set<Chc<O1, O2>> os = new HashSet<>();
 		Set<Chc<A1, A2>> as = new HashSet<>();
@@ -208,19 +202,19 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		return new FiniteCategory<>(os, as, src, dst, comp, id);
 	}
 
-	public <O1, A1, O2, A2> Functor<O1, A1, Chc<O1, O2>, Chc<A1, A2>> inleft(
+	public static <O1, A1, O2, A2> Functor<O1, A1, Chc<O1, O2>, Chc<A1, A2>> inleft(
 			Category<O1, A1> o1, Category<O2, A2> o2) {
 		return new Functor<>(o1, coproduct(o1, o2), x -> Chc.inLeft(x),
 				x -> Chc.inLeft(x));
 	}
 
-	public <O1, A1, O2, A2> Functor<O2, A2, Chc<O1, O2>, Chc<A1, A2>> inright(
+	public static <O1, A1, O2, A2> Functor<O2, A2, Chc<O1, O2>, Chc<A1, A2>> inright(
 			Category<O1, A1> o1, Category<O2, A2> o2) {
 		return new Functor<>(o2, coproduct(o1, o2), x -> Chc.inRight(x),
 				x -> Chc.inRight(x));
 	}
 
-	public <O, A, O1, A1, O2, A2> Functor<Chc<O1, O2>, Chc<A1, A2>, O, A> match(
+	public static <O, A, O1, A1, O2, A2> Functor<Chc<O1, O2>, Chc<A1, A2>, O, A> match(
 			Functor<O1, A1, O, A> a1, Functor<O2, A2, O, A> a2) {
 		if (!a1.target.equals(a2.target)) {
 			throw new RuntimeException();
@@ -232,6 +226,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		return new Functor<>(coproduct(a1.source, a2.source), a1.target, o, a);
 	}
 
+	@SuppressWarnings("hiding")
 	private Map<Pair<Category<Object, Object>, Category<Object, Object>>, Set<Functor<Object, Object, Object, Object>>> cached = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
@@ -250,7 +245,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		return ret;
 	}
 
-	public <O1, A1, O2, A2> Category<Functor<O1, A1, O2, A2>, Transform<O1, A1, O2, A2>> exp(
+	public static <O1, A1, O2, A2> Category<Functor<O1, A1, O2, A2>, Transform<O1, A1, O2, A2>> exp(
 			Category<O2, A2> base, Category<O1, A1> exp) {
 	
 		Set<Functor<O1, A1, O2, A2>> mappings = new HashSet<>();
@@ -312,7 +307,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 	}
 
 	// A^B * B -> A
-	public <AO, AA, BO, BA> Functor<Pair<Functor<BO, BA, AO, AA>, BO>, Pair<Transform<BO, BA, AO, AA>, BA>, AO, AA> eval(
+	public static <AO, AA, BO, BA> Functor<Pair<Functor<BO, BA, AO, AA>, BO>, Pair<Transform<BO, BA, AO, AA>, BA>, AO, AA> eval(
 			Category<AO, AA> A, Category<BO, BA> B) {
 		FUNCTION<Pair<Functor<BO, BA, AO, AA>, BO>, AO> f = x -> {
 			AO ret = x.first.applyO(x.second);
@@ -327,7 +322,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 	}
 
 	// A*B -> C --> A -> C^B
-	public <AO, AA, BO, BA, CO, CA> Functor<AO, AA, Functor<BO, BA, CO, CA>, Transform<BO, BA, CO, CA>> curry(
+	public static <AO, AA, BO, BA, CO, CA> Functor<AO, AA, Functor<BO, BA, CO, CA>, Transform<BO, BA, CO, CA>> curry(
 			Functor<Pair<AO, BO>, Pair<AA, BA>, CO, CA> F) {
 		Pair<Category<AO, AA>, Category<BO, BA>> w = split(F.source);
 		Category<AO, AA> A = w.first;
@@ -345,7 +340,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		return new Functor<>(A, exp(C, B), p, q);
 	}
 
-	public <O1, A1, O2, A2> Pair<Category<O1, A1>, Category<O2, A2>> split(
+	public static <O1, A1, O2, A2> Pair<Category<O1, A1>, Category<O2, A2>> split(
 			Category<Pair<O1, O2>, Pair<A1, A2>> ab) {
 		Set<O1> ao = new HashSet<>();
 		Set<A1> aa = new HashSet<>();
@@ -387,7 +382,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		return new Pair<>(a, b);
 	}
 
-	public <O1, A1, O2, A2> Optional<Pair<Functor<O1, A1, O2, A2>, Functor<O2, A2, O1, A1>>> iso(
+	public static <O1, A1, O2, A2> Optional<Pair<Functor<O1, A1, O2, A2>, Functor<O2, A2, O1, A1>>> iso(
 			Category<O1, A1> exp, Category<O2, A2> base) {
 
 		if (base.objects().size() != exp.objects().size()) {
@@ -456,11 +451,11 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		};
 	}
 	
-	public <O1,O2,O3,O4,A1,A2,A3,A4> Functor<Pair<O1,O3>,Pair<A1,A3>,Pair<O2,O4>,Pair<A2,A4>> pairF(Functor<O1,A1,O2,A2> a1, Functor<O3,A3,O4,A4> a2) {
+	public static <O1,O2,O3,O4,A1,A2,A3,A4> Functor<Pair<O1,O3>,Pair<A1,A3>,Pair<O2,O4>,Pair<A2,A4>> pairF(Functor<O1,A1,O2,A2> a1, Functor<O3,A3,O4,A4> a2) {
 		return pair(Functor.compose(first (a1.source, a2.source), a1), Functor.compose(second(a1.source, a2.source), a2));
 	}
 	
-	public <O1,O2,O3,O4,A1,A2,A3,A4> Functor<Chc<O1,O3>,Chc<A1,A3>,Chc<O2,O4>,Chc<A2,A4>> matchF(Functor<O1,A1,O2,A2> a1, Functor<O3,A3,O4,A4> a2) {
+	public static <O1,O2,O3,O4,A1,A2,A3,A4> Functor<Chc<O1,O3>,Chc<A1,A3>,Chc<O2,O4>,Chc<A2,A4>> matchF(Functor<O1,A1,O2,A2> a1, Functor<O3,A3,O4,A4> a2) {
 		return match(Functor.compose(a1, inleft (a1.target, a2.target)), Functor.compose(a2, inright(a1.target, a2.target)));
 	}
 

@@ -334,7 +334,7 @@ public abstract class SigExp {
 
 		}
 		
-		private String printOneEq(List<String> l) {
+		private static String printOneEq(List<String> l) {
 			String ret = "";
 			boolean b = false;
 			for (String a : l) {

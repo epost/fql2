@@ -39,8 +39,10 @@ public enum Kind {
 			return "typeside";
 		case GRAPH:
 			return "graph";
+		default:
+			throw new RuntimeException();
 		}
-		throw new RuntimeException();
+		
 		
 	}
 	

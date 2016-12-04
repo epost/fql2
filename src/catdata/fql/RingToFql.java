@@ -19,6 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import catdata.Pair;
 import catdata.fql.parse.FqlTokenizer;
@@ -104,8 +106,8 @@ public class RingToFql {
 				// jta.setEditable(false);
 				jta.setLineWrap(true);
 				JScrollPane p = new JScrollPane(jta,
-						JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+						ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 				p.setPreferredSize(new Dimension(300, 200));
 
 				JOptionPane pane = new JOptionPane(p);
@@ -133,7 +135,7 @@ public class RingToFql {
 		tp.add(transButton);
 		tp.add(helpButton);
 		tp.add(new JLabel());
-		tp.add(new JLabel("Load Example", JLabel.RIGHT));
+		tp.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		tp.add(box);
 
 		p.add(jsp, BorderLayout.CENTER);

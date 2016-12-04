@@ -44,6 +44,7 @@ public class ShortestPath<N, E> {
 			this.e = e;
 		}
 
+		@Override
 		public String toString() {
 			return e + ": " + from + "->" + to + " " + String.format("%5.2f", weight);
 		}
@@ -111,7 +112,7 @@ public class ShortestPath<N, E> {
 		distTo.put(s, 0.0);
 
 		// relax vertices in order of distance from s
-		pq = new Wrapper<N,Double>(G.nodes);
+		pq = new Wrapper<>(G.nodes);
 		pq.insert(s, distTo.get(s));
 		while (!pq.isEmpty()) {
 			N v = pq.delMin();
@@ -213,7 +214,7 @@ public class ShortestPath<N, E> {
 				iso2.put(i, n);
 				i++;
 			}
-			x = new IndexMinPQ<Key>(nodes.size());
+			x = new IndexMinPQ<>(nodes.size());
 		}
 
 		public void decreaseKey(N w, Key d) {
@@ -398,7 +399,8 @@ public class ShortestPath<N, E> {
 	    }
 
 
-	   public Iterator<Integer> iterator() { return new HeapIterator(); }
+	   @Override
+	public Iterator<Integer> iterator() { return new HeapIterator(); }
 
 	    private class HeapIterator implements Iterator<Integer> {
 	        // create a new pq
@@ -407,15 +409,18 @@ public class ShortestPath<N, E> {
 	        // add all elements to copy of heap
 	        // takes linear time since already in heap order so no keys move
 	        public HeapIterator() {
-	            copy = new IndexMinPQ<Key>(pq.length - 1);
+	            copy = new IndexMinPQ<>(pq.length - 1);
 	            for (int i = 1; i <= n; i++)
 	                copy.insert(pq[i], keys[pq[i]]);
 	        }
 
-	        public boolean hasNext()  { return !copy.isEmpty();                     }
-	        public void remove()      { throw new UnsupportedOperationException();  }
+	        @Override
+			public boolean hasNext()  { return !copy.isEmpty();                     }
+	        @Override
+			public void remove()      { throw new UnsupportedOperationException();  }
 
-	        public Integer next() {
+	        @Override
+			public Integer next() {
 	            if (!hasNext()) throw new NoSuchElementException();
 	            return copy.delMin();
 	        }

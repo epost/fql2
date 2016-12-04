@@ -38,6 +38,7 @@ public class MplCodeEditor extends CodeEditor<Program<MplExp<String,String>>, En
 		return null; // "catdata.mpl.MplTokenMaker";
 	}
 
+	@Override
 	protected void doTemplates() {
 		  CompletionProvider provider = createCompletionProvider();
 		  AutoCompletion ac = new AutoCompletion(provider);
@@ -47,7 +48,7 @@ public class MplCodeEditor extends CodeEditor<Program<MplExp<String,String>>, En
 	      ac.install(this.topArea);
 	}
 	
-	  private CompletionProvider createCompletionProvider() {
+	  private static CompletionProvider createCompletionProvider() {
 		   DefaultCompletionProvider provider = new DefaultCompletionProvider();
 	
 	//	provider.addCompletion(new ShorthandCompletion(provider, "theory", "theory {\n\tsorts;\n\tsymbols;\n\tequations;\n}", ""));

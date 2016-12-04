@@ -289,7 +289,7 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		for (OplTerm<C, V> a : args) {
 			args0.add(a.inLeft());
 		}
-		return new OplTerm<Chc<C, X>, V>(Chc.inLeft(head), args0);
+		return new OplTerm<>(Chc.inLeft(head), args0);
 	}
 	public <X> OplTerm<Chc<X, C>, V> inRight() {
 		if (var != null) {
@@ -299,7 +299,7 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		for (OplTerm<C, V> a : args) {
 			args0.add(a.inRight());
 		}
-		return new OplTerm<Chc<X, C>, V>(Chc.inRight(head), args0);
+		return new OplTerm<>(Chc.inRight(head), args0);
 	}
 
 	public static <C, X, V> OplTerm<C, V> deLeft(OplTerm<Chc<C, X>, V> e) {

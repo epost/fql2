@@ -32,7 +32,7 @@ public class FqlTokenizer implements Tokens {
 	private String linefeed = "\n";
 	private String carriagereturn = "\r";
 
-	private FqlTokenizer(List<String> s, List<String> t) {
+	private FqlTokenizer(List<String> s, @SuppressWarnings("unused") List<String> t) {
 		words = s; //lines = t;
 	}
 
@@ -62,7 +62,7 @@ public class FqlTokenizer implements Tokens {
 
 	private static enum State {
 		IN_QUOTE, IN_COMMENT, NORMAL
-	};
+	}
 
 	private Pair<List<String>, List<String>> tokenize(String input) throws BadSyntax {
 		List<String> ret = new LinkedList<>();
@@ -87,6 +87,8 @@ public class FqlTokenizer implements Tokens {
 				case IN_COMMENT:
 					throw new BadSyntax(this, "Unfinished comment: "
 							+ comment_state);
+				default:
+					break;
 				}
 			}
 			if (input.startsWith(comment_start)) {
@@ -104,6 +106,8 @@ public class FqlTokenizer implements Tokens {
 				case IN_COMMENT:
 					comment_state += comment_start;
 					break;
+				default:
+					break;
 				}
 				input = input.substring(comment_start.length());
 				continue;
@@ -119,6 +123,8 @@ public class FqlTokenizer implements Tokens {
 				case IN_COMMENT:
 					comment_state = "";
 					state = State.NORMAL;
+					break;
+				default:
 					break;
 				}
 				input = input.substring(comment_end.length());
@@ -141,6 +147,8 @@ public class FqlTokenizer implements Tokens {
 				case IN_COMMENT:
 					comment_state += quote;
 					break;
+				default:
+					break;
 				}
 				ret.add(quote);
 				input = input.substring(1);
@@ -162,6 +170,8 @@ public class FqlTokenizer implements Tokens {
 				case IN_QUOTE:
 					quote_state += input.substring(0, 1);
 					break;
+				default:
+					break;
 				}
 				input = input.substring(1);
 				continue;
@@ -178,6 +188,8 @@ public class FqlTokenizer implements Tokens {
 					break;
 				case IN_QUOTE:
 					quote_state += input.substring(0, 1);
+					break;
+				default:
 					break;
 				}
 				input = input.substring(1);
@@ -198,6 +210,8 @@ public class FqlTokenizer implements Tokens {
 			case IN_QUOTE:
 				quote_state += matched;
 				break;
+			default:
+				break;
 			}
 			input = input.substring(matched.length());
 
@@ -214,6 +228,7 @@ public class FqlTokenizer implements Tokens {
 	}
 
 
+	@Override
 	public String head() throws BadSyntax {
 		try {
 			return words.get(0);
@@ -222,6 +237,7 @@ public class FqlTokenizer implements Tokens {
 		}
 	}
 
+	@Override
 	public String peek(int n) {
 		try {
 			return words.get(n);
@@ -230,6 +246,7 @@ public class FqlTokenizer implements Tokens {
 		}
 	}
 
+	@Override
 	public Tokens pop() throws BadSyntax {
 		List<String> ret = new LinkedList<>(words);
 		List<String> ret2 = new LinkedList<>();
@@ -242,6 +259,7 @@ public class FqlTokenizer implements Tokens {
 		return new FqlTokenizer(ret, ret2);
 	}
 
+	@Override
 	public String toString() {
 		// int i = 0;
 		String s = "";
@@ -251,6 +269,7 @@ public class FqlTokenizer implements Tokens {
 		return (s + "\n");
 	}
 
+	@Override
 	public String toString2() {
 		int i = 0;
 		String s = "";

@@ -76,8 +76,8 @@ public class FinCat<Obj, Arrow> {
 		}
 	}
 
-	private <X> void noDupes(List<X> X) {
-		Set<X> x = new HashSet<X>(X);
+	private static <X> void noDupes(List<X> X) {
+		Set<X> x = new HashSet<>(X);
 		if (x.size() != X.size()) {
 			throw new RuntimeException("duplicates " + X);
 		}

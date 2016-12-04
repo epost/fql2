@@ -90,7 +90,10 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 		return new InnerAlgebra();
 	}
 
-	private class InnerAlgebra extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
+	private final class InnerAlgebra extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
+
+		protected InnerAlgebra() {
+		}
 
 		@Override
 		public Schema<Ty, En, Sym, Fk, Att> schema() {

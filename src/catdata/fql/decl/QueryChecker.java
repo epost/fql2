@@ -34,7 +34,7 @@ public class QueryChecker implements
 
 	@Override
 	public Pair<SigExp, SigExp> visit(FQLProgram env, Comp e) {
-		List<String> x = new LinkedList<String>(seen);
+		List<String> x = new LinkedList<>(seen);
 		Pair<SigExp, SigExp> lt = e.l.accept(env, this);
 		seen = x;
 		Pair<SigExp, SigExp> rt = e.r.accept(env, this);

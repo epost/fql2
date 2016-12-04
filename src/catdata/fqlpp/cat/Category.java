@@ -18,6 +18,7 @@ import catdata.ide.GlobalOptions;
 @SuppressWarnings("serial")
 public abstract class Category<O, A> implements Serializable {
 
+	@SuppressWarnings("static-method")
 	public boolean isInfinite() {
 		return false;
 	}

@@ -262,7 +262,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	private synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify0() throws InterruptedException {
 		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified = new Collage<>(this);
 		list = new LinkedList<>();
-		while (simplify1(simplified, list));
+		while (simplify1(simplified, list)) {}
 
 		Iterator<Eq<Ty, En, Sym, Fk, Att, Gen, Sk>> it = simplified.eqs.iterator();
 		while (it.hasNext()) {

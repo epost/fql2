@@ -39,6 +39,7 @@ public class XOptions extends Options {
 	public int MAX_PATH_LENGTH = 8;
 
 	//@Override
+	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
 		JSplitPane generalsplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		

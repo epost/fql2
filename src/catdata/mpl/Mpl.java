@@ -101,6 +101,7 @@ public class Mpl implements MplObject {
 				return true;
 			}
 			
+			@Override
 			public void type(MplSch<O, ?> ctx) {
 				 if (!ctx.sorts.contains(o)) {
 					 throw new RuntimeException("Undefined sort: " + o);
@@ -541,6 +542,7 @@ public class Mpl implements MplObject {
 			}
 
 			
+			@Override
 			public Pair<MplType<O>, MplType<O>> type(MplSch<O, A> ctx) {
 				a.type(ctx);
 				b.type(ctx);
@@ -549,6 +551,7 @@ public class Mpl implements MplObject {
 				return new Pair<>(l, r);
 			}
 			
+			@Override
 			public Pair<List<O>, List<O>> typeStrict(MplSch<O, A> ctx) {
 				List<O> a0 = a.typeStrict(ctx);
 				List<O> b0 = b.typeStrict(ctx);
@@ -590,6 +593,7 @@ public class Mpl implements MplObject {
 				this.leftToRight = leftToRight;
 			}
 			
+			@Override
 			public Pair<MplType<O>, MplType<O>> type(MplSch<O, A> ctx) {
 				a.type(ctx);
 				MplType<O> l = new MplProd<>(a, new MplUnit<>());
@@ -643,6 +647,7 @@ public class Mpl implements MplObject {
 				this.leftToRight = leftToRight;
 			}
 			
+			@Override
 			public Pair<MplType<O>, MplType<O>> type(MplSch<O, A> ctx) {
 				a.type(ctx);
 				MplType<O> l = new MplProd<>(new MplUnit<>(), a);
@@ -782,11 +787,12 @@ public class Mpl implements MplObject {
 				return "eval " + sch + " " + a;
 			}
 			
+			@Override
 			public JComponent display() {
 				
 				JTabbedPane p = new JTabbedPane();
 				
-				MplStrict<O, A> op = new MplStrict<O,A>(sch);
+				MplStrict<O, A> op = new MplStrict<>(sch);
 				Triple<List<MplStrict.Node<O,A>>,List<MplStrict.Node<O,A>>,String> r = a.forget().accept(new Unit(), op);
 				JComponent g = doTermView(Color.green, Color.red, op.g); 
 				p.addTab("Graph1", g);
@@ -864,7 +870,7 @@ public class Mpl implements MplObject {
 		return ret;
 	}
 	@SuppressWarnings({"unchecked","rawtypes"})
-	public static <O,A> JComponent doTermView2(Color src, Color dst, Graph<MplStrict2.Node<O,A>, Integer> sgv) {
+	public static <O,A> JComponent doTermView2(Graph<MplStrict2.Node<O,A>, Integer> sgv) {
 		if (sgv.getVertexCount() == 0) {
 			return new JPanel();
 		}

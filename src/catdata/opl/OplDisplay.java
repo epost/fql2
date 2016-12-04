@@ -112,7 +112,8 @@ public class OplDisplay implements Disp {
 		return c;
 	}
 	
-	JComponent wrapDisplay(String name, OplObject obj) {
+	@SuppressWarnings("unused")
+	private static JComponent wrapDisplay(String name, OplObject obj) {
 		if (!GlobalOptions.debug.opl.opl_lazy_gui) {
 			return obj.display();
 		}
@@ -121,7 +122,7 @@ public class OplDisplay implements Disp {
 		JButton button = new JButton("Show");
 
 		lazyPanel.add(button); 
-		button.addActionListener(x -> {
+		button.addActionListener(z -> {
 			JComponent[] comp = new JComponent[1];
 			new ProgressMonitorWrapper( "Making GUI for " + name, () -> {
 				comp[0] = obj.display();

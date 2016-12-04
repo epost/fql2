@@ -57,9 +57,8 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import edu.uci.ics.jung.visualization.transform.shape.GraphicsDecorator;
 
-public class XCtx<C> implements XObject {
-	
 
+public class XCtx<C> implements XObject {
 	
 	public String toStringX() {
 		String rec1 = schema == null ? "null" : schema.toStringX();
@@ -212,11 +211,11 @@ public class XCtx<C> implements XObject {
 		i.add(ccc);
 		t.put(ccc, new Pair<>(ccc, ccc));
 		
-		return new XCtx<C>(i, t, new HashSet<>(), null, null, "schema");		
+		return new XCtx<>(i, t, new HashSet<>(), null, null, "schema");		
 	}
 	
 	public static <C> XCtx<C> empty_schema() {
-		return new XCtx<C>(new HashSet<>(), new HashMap<>(), new HashSet<>(), empty_global(), null, "schema");
+		return new XCtx<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), empty_global(), null, "schema");
 
 	}
 
@@ -297,7 +296,7 @@ public class XCtx<C> implements XObject {
 			l.add(id);
 			rules.add(new Pair<>(l, new LinkedList<>()));
 		}
-		kb = new SemiThue<C>(rules, 32); 
+		kb = new SemiThue<>(rules, 32); 
 	}
 
 	private void validate(boolean initial) {
@@ -456,7 +455,7 @@ public class XCtx<C> implements XObject {
 			pane.setResizeWeight(1);
 			but.addActionListener(x -> {
 				String s = fff.getText();
-				List<C> l = (List<C>) XParser.path(s);
+				List<C> l = XParser.path(s);
 				try {
 					ggg.setText(Util.sep(getKB().normalize("", l), "."));
 				} catch (Exception ex) {
@@ -1268,7 +1267,7 @@ public class XCtx<C> implements XObject {
 				return ret;
 			}
 
-			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@SuppressWarnings({"rawtypes", "unchecked", "cast" })
 			private Triple<C, C, List<C>> local_compose(Triple<C, C, List<C>> f,
 					Triple<C, C, List<C>> g) {
 				if (!arrows().contains(f)) {
@@ -1447,7 +1446,7 @@ public class XCtx<C> implements XObject {
 						+ sch.hom(f.first, f.second) + "\n" + sch.hom(g.first, g.second));
 			}
 
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "unchecked" })
 			private Triple<C, C, List<C>> findEq(Triple<C, C, List<C>> sofar, C gn) {
 				if (sofar.third.size() != 1) {
 					throw new RuntimeException("sofar third not length 1 is " + sofar);
@@ -1895,9 +1894,7 @@ public class XCtx<C> implements XObject {
 		kb();
 	}
 
-	private boolean cleanup() {
-		//Set<Pair<C, C>> substs = new HashSet<>();
-
+	private static boolean cleanup() {
 		return true;
 	}
 
@@ -2076,7 +2073,7 @@ public class XCtx<C> implements XObject {
 		
 		types0.put(name, new Pair<>((C)"_1", type));
 		
-		ret = new XCtx<C>(new HashSet<>(), types0, new HashSet<>(), global, this, "instance");
+		ret = new XCtx<>(new HashSet<>(), types0, new HashSet<>(), global, this, "instance");
 		y_cache.put(p, ret);
 		return ret;
 	}
@@ -2098,7 +2095,7 @@ public class XCtx<C> implements XObject {
 			new_eqs.add(p);
 		}
 		
-		return new XCtx<C>(ids, new_types, new_eqs, XCtx.empty_global(), null, "schema");
+		return new XCtx<>(ids, new_types, new_eqs, XCtx.empty_global(), null, "schema");
 	}
 	
 	private boolean containsType(List<C> l) {

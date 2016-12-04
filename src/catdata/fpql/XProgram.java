@@ -79,7 +79,7 @@ public class XProgram implements Prog {
 			}
 	}
 
-	private void checkDup(Set<String> seen, String name)
+	private static void checkDup(Set<String> seen, String name)
 			throws LineException {
 		if (seen.contains(name)) {
 			throw new RuntimeException("Duplicate name: " + name);

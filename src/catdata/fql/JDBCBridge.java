@@ -51,7 +51,7 @@ public class JDBCBridge {
 	private static List<PSM> maybeExecTransform(InstOps ops, FQLProgram prog,
 			Statement Stmt, String k, TransExp v, PSMInterp interp,
 			Map<String, Set<Map<Object, Object>>> ret) throws SQLException {
-		List<PSM> psm = new LinkedList<PSM>();
+		List<PSM> psm = new LinkedList<>();
 
 		Pair<String, String> val = prog.transforms.get(k).type(prog);
 		InstExp i = prog.insts.get(val.first);
@@ -63,6 +63,8 @@ public class JDBCBridge {
 			psm.addAll(v.accept(k, ops));
 			interp.interpX(psm, ret);
 			break;
+		case H2:
+		case JDBC:
 		default:
 			if (v instanceof TransExp.External
 					&& GlobalOptions.debug.fql.sqlKind == FqlOptions.SQLKIND.H2) {
@@ -84,13 +86,15 @@ public class JDBCBridge {
 			Statement Stmt, String k, InstExp v, PSMInterp interp,
 			Map<String, Set<Map<Object, Object>>> ret) throws SQLException {
 
-		List<PSM> psm = new LinkedList<PSM>();
+		List<PSM> psm = new LinkedList<>();
 		psm.addAll(PSMGen.makeTables(k, v.type(prog).toSig(prog), false));
 		switch (GlobalOptions.debug.fql.sqlKind) {
 		case NATIVE:
 			psm.addAll(v.accept(k, ops).first);
 			interp.interpX(psm, ret);
 			break;
+		case H2:
+		case JDBC:
 		default:
 			if (v instanceof InstExp.FullSigma) {
 				List<PSM> xxx = v.accept(k, ops).first;
@@ -188,7 +192,7 @@ public class JDBCBridge {
 		PSMInterp interp = new PSMInterp();
 		Connection Conn = null;
 		Statement Stmt = null;
-		List<PSM> sqls = new LinkedList<PSM>();
+		List<PSM> sqls = new LinkedList<>();
 		try {
 			switch (GlobalOptions.debug.fql.sqlKind) {
 			case H2:
@@ -236,7 +240,7 @@ public class JDBCBridge {
 							String[] prel0 = GlobalOptions.debug.fql.afterlude.split(";");
 							for (String s : prel0) {
 								if (s.trim().length() > 0) {
-									Stmt.execute(s);
+									Stmt.execute(s); //TODO !!!
 								}
 							}
 						}
@@ -249,13 +253,13 @@ public class JDBCBridge {
 
 			if (GlobalOptions.debug.fql.sqlKind == FqlOptions.SQLKIND.JDBC) {
 				for (PSM dr : drops) {
-					Stmt.execute(dr.toPSM());
+					Stmt.execute(dr.toPSM()); //TODO !!!
 				}
 
 				String[] prel0 = GlobalOptions.debug.fql.afterlude.split(";");
 				for (String s : prel0) {
 					if (s.trim().length() > 0) {
-						Stmt.execute(s);
+						Stmt.execute(s); //TODO !!!
 					}
 				}
 			}
@@ -375,7 +379,7 @@ public class JDBCBridge {
 		return ret;
 	}
 
-	private static void gatherTransform(FQLProgram prog,
+	private static void gatherTransform(@SuppressWarnings("unused") FQLProgram prog,
 			Map<String, Set<Map<Object, Object>>> ret, Statement Stmt,
 			String k, SigExp.Const t) throws SQLException {
 

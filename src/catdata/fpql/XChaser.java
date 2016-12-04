@@ -149,6 +149,7 @@ public class XChaser {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	public static <C> Triple<Map<String,Set<List<Triple<C,C,List<C>>>>>, 
 							 Map<Pair<String,List<Triple<C,C,List<C>>>>, Object>, 
 							 Set> 
@@ -255,7 +256,7 @@ public class XChaser {
 	public static <C> boolean triggers(
 			List<Pair<Triple<String,List<List<String>>,List<String>>,Triple<String,List<List<String>>,List<String>>>> lhs, 
 			Pair<Triple<String,List<List<String>>,List<String>>,Triple<String,List<List<String>>,List<String>>> rhs, 
-			LinkedHashMap<C, Triple<C, C, List<C>>> val, XCtx<C> I, Map<Pair<String, List<Triple<C, C, List<C>>>>, Object> gens, Map<String, Set<List<Triple<C, C, List<C>>>>> dom) {
+			@SuppressWarnings("unused") LinkedHashMap<C, Triple<C, C, List<C>>> val, XCtx<C> I, Map<Pair<String, List<Triple<C, C, List<C>>>>, Object> gens, Map<String, Set<List<Triple<C, C, List<C>>>>> dom) {
 		
 		for (Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>> c : lhs) {
 			Triple<String, List<List<String>>, List<String>> lhs1 = c.first;

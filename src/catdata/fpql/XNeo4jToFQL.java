@@ -23,6 +23,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
@@ -220,11 +222,11 @@ public class XNeo4jToFQL {
 	
 	String help = "Translates Neo4J Cypher into FPQL.  Graphs must have exactly one label per node and no properties on edges.";
 
-	protected String kind() {
+	protected static String kind() {
 		return "Neo4j";
 	}
 
-	String translate(String in) {
+	static String translate(String in) {
 		Pair<Map<String, Map<String, Object>>, Map<String, Set<Pair<String, String>>>> ne = program(in);
 		
 		String l = trans0(ne.first, ne.second);
@@ -270,8 +272,8 @@ public class XNeo4jToFQL {
 				jta.setWrapStyleWord(true);
 				// jta.setEditable(false);
 				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 				p.setPreferredSize(new Dimension(300, 200));
 
 				JOptionPane pane = new JOptionPane(p);
@@ -301,7 +303,7 @@ public class XNeo4jToFQL {
 		tp.add(helpButton);
 		// tp.add(jdbcButton);
 		// tp.add(helpButton);
-		tp.add(new JLabel("Load Example", JLabel.RIGHT));
+		tp.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		tp.add(box);
 
 		// bp.add(runButton);

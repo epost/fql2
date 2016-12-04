@@ -48,7 +48,7 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC>
 		this.F = F;
 		this.G = G;
 
-		objects = new LinkedList<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>>();
+		objects = new LinkedList<>();
 		for (ObjA objA : A.objects) {
 			for (ObjB objB : B.objects) {
 				ObjC s = F.objMapping.get(objA);

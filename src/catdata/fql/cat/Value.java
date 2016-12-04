@@ -79,7 +79,7 @@ public class Value<Y, X> {
 
 	public static enum VALUETYPE {
 		ATOM, RECORD, CHOICE
-	};
+	}
 
 	Value(Y tag, Value<Y, X> tagCargo) {
 		this.tag = tag;

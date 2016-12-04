@@ -456,7 +456,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		return new FinCat<>(mappings, arrows, composition, identities);
 	}
 
-	public static <Obj, Arrow, Y, X> List<LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>>> morphsX(
+	public static <Obj, Y, X> List<LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>>> morphsX(
 			LinkedHashMap<Obj, List<LinkedHashMap<Value<Y, X>, Value<Y, X>>>> map) {
 		List<LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>>> ret = new LinkedList<>();
 
@@ -483,7 +483,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		return ret;
 	}
 
-	private static <Obj, Arrow, Y, X> LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>> make5(
+	private static <Obj, Y, X> LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>> make5(
 			int[] counters, List<Obj> A,
 			LinkedHashMap<Obj, List<LinkedHashMap<Value<Y, X>, Value<Y, X>>>> B) {
 		LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>> ret = new LinkedHashMap<>();
@@ -494,7 +494,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		return ret;
 	}
 
-	private static <Obj, Arrow, Y, X> void inc5(int[] counters, int[] sizes) {
+	private static void inc5(int[] counters, int[] sizes) {
 		counters[0]++;
 		for (int i = 0; i < counters.length - 1; i++) {
 			if (counters[i] == sizes[i]) {
@@ -563,7 +563,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		return ret;
 	}
 
-	private static <X, Y> void inc3(int[] counters, int[] lengths) {
+	private static void inc3(int[] counters, int[] lengths) {
 		counters[0]++;
 		for (int i = 0; i < counters.length - 1; i++) {
 			if (counters[i] == lengths[i]) {
@@ -664,7 +664,7 @@ public class Inst<Obj, Arrow, Y, X> {
 		for (LinkedHashMap<Obj, LinkedHashMap<Value<Y, X>, Value<Y, X>>> map : y) {
 			try {
 				Map<Obj, Map<Value<Y, X>, Value<Y, X>>> uuu = (Map<Obj, Map<Value<Y, X>, Value<Y, X>>>) ((Object) map);
-				SetFunTrans<Obj, Arrow, Y, X> xxx = new SetFunTrans<Obj, Arrow, Y, X>(
+				SetFunTrans<Obj, Arrow, Y, X> xxx = new SetFunTrans<>(
 						uuu, i1, i2);
 				xxx.validate();
 				ret.add(xxx);
@@ -767,7 +767,7 @@ public class Inst<Obj, Arrow, Y, X> {
 	 * Constructs a terminal (one element) instance
 	 */
 	public static <Obj, Arrow, Y> Inst<Obj, Arrow, Y, Obj> terminal(
-			FinCat<Obj, Arrow> s) throws FQLException {
+			FinCat<Obj, Arrow> s) {
 
 		Map<Obj, Set<Value<Y, Obj>>> ret1 = new HashMap<>();
 		Map<Arr<Obj, Arrow>, Map<Value<Y, Obj>, Value<Y, Obj>>> ret2 = new HashMap<>();

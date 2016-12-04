@@ -159,7 +159,7 @@ public class LeftKanSigma {
 			for (Pair<Object, Object> v : i.data.get(k.name + "_edge")) {
 				Object v1 = getFrom(k, D, map /* ().get(k) */,
 						v.second.toString());
-				t.add(new Pair<Object, Object>(v.first, v1));
+				t.add(new Pair<>(v.first, v1));
 			}
 			d.put(k.name, t);
 		}

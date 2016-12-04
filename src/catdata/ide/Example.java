@@ -6,6 +6,7 @@ public abstract class Example implements Comparable<Example> {
 	
 	public abstract String getText();
 	
+	@SuppressWarnings("static-method")
 	public Language lang() {
 		return null;
 	}

@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import catdata.fql.FQLException;
-
 /**
  * 
  * @author ryan
@@ -25,8 +23,7 @@ public class InsertKeygen extends PSM {
 
 	}
 
-	public InsertKeygen(String name, String col, String r, List<String> attrs)
-			throws FQLException {
+	public InsertKeygen(String name, String col, String r, List<String> attrs) {
 		this.col = col;
 		this.r = r;
 		this.name = name;

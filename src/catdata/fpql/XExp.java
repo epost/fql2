@@ -1161,7 +1161,7 @@ public abstract class XExp {
 		}
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		private void countX(List l, Map counts) {
+		private static void countX(List l, Map counts) {
 			for (Object s : l) {
 				Integer i = (Integer) counts.get(s);
 				if (i == null) {
@@ -1271,7 +1271,7 @@ public abstract class XExp {
 		}
 		
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		private void count(List<Object> l, Map counts) {
+		private static void count(List<Object> l, Map counts) {
 			for (Object s : l) {
 				Integer i = (Integer) counts.get(s);
 				if (i == null) {
@@ -2331,7 +2331,7 @@ public abstract class XExp {
 			return "schema {\n " + x + ";\n}";
 		}
 		
-		private String printOneEq(List<String> l) {
+		private static String printOneEq(List<String> l) {
 			return Util.sep(l, ".");
 		}
 		

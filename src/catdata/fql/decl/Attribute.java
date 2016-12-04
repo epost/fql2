@@ -53,6 +53,7 @@ public class Attribute<Node> implements Comparable<Attribute<Node>> {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		return name; // + " : " + source + " -> " + target;
 	}

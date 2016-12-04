@@ -38,10 +38,9 @@ import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
 
-import catdata.fql.FqlOptions;
-import catdata.fql.FQLException;
-import catdata.ide.GlobalOptions;
 import catdata.Pair;
+import catdata.fql.FqlOptions;
+import catdata.ide.GlobalOptions;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -60,8 +59,7 @@ public class TransformEditor {
 
 	public Map<String, Set<Pair<Object, Object>>> d = new HashMap<>();
 
-	public TransformEditor(String name, Signature sig, TransExp.Const trans, InstExp.Const inst1, InstExp.Const inst2)
-			throws FQLException {
+	public TransformEditor(String name, Signature sig, TransExp.Const trans, InstExp.Const inst1, InstExp.Const inst2) {
 		this.trans = trans;
 		this.thesig = sig;
 		this.name = name;
@@ -80,7 +78,7 @@ public class TransformEditor {
 		}
 	}
 
-	public List<Pair<Object, Object>> proj1(List<Pair<Object, Object>> x) {
+	public static List<Pair<Object, Object>> proj1(List<Pair<Object, Object>> x) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 
 		for (Pair<Object, Object> k : x) {
@@ -90,7 +88,7 @@ public class TransformEditor {
 		return ret;
 	}
 
-	public List<Pair<Object, Object>> proj2(List<Pair<Object, Object>> x) {
+	public static List<Pair<Object, Object>> proj2(List<Pair<Object, Object>> x) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 
 		for (Pair<Object, Object> k : x) {
@@ -103,7 +101,7 @@ public class TransformEditor {
 	public Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
-		Graph<String, String> g2 = new DirectedSparseMultigraph<String, String>();
+		Graph<String, String> g2 = new DirectedSparseMultigraph<>();
 		for (Node n : thesig.nodes) {
 			g2.addVertex(n.string);
 		}
@@ -151,14 +149,14 @@ public class TransformEditor {
 		Vector arr = new Vector();
 		List<Pair<Object, Object>> jjj = lookup(inst1.data, n);
 		if (jjj == null) {
-			 jjj = new LinkedList<Pair<Object, Object>>();
+			 jjj = new LinkedList<>();
 		}
 		for (Pair<Object, Object> k : jjj) {
 			Vector v = new Vector();
 			v.add(k.first);
 			List<Pair<Object, Object>> hhh = lookup(trans.objs, n);
 			if (hhh == null) {
-				hhh = new LinkedList<Pair<Object, Object>>();
+				hhh = new LinkedList<>();
 			}
 			Object uuu = lookup(hhh, k.first);
 			if (uuu != null) {
@@ -174,6 +172,7 @@ public class TransformEditor {
 		cols3.add("ID in " + trans.dst);
 		DefaultTableModel dtm = new DefaultTableModel(arr, cols3 );
 		JTable foo = new JTable(dtm) {
+			@Override
 			public Dimension getPreferredScrollableViewportSize() {
 				Dimension d = getPreferredSize();
 				return new Dimension(d.width, d.height);
@@ -241,7 +240,7 @@ public class TransformEditor {
 			for (Vector row : rows) {
 				Object id = row.get(0);
 				Object id2 = row.get(1);
-				ids.add(new Pair<Object, Object>(id, id2));
+				ids.add(new Pair<>(id, id2));
 
 			}
 			nodes.add(new Pair<>(n.string, ids));
@@ -261,9 +260,10 @@ public class TransformEditor {
 					.newInstance(sgv);
 
 			layout.setSize(new Dimension(500, 340));
-			final VisualizationViewer<String, String> vv = new VisualizationViewer<String, String>(
+			final VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
 			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
+				@Override
 				public Paint transform(String i) {
 					if (thesig.isAttribute(i)) {
 						return UIManager.getColor("Panel.background");
@@ -327,6 +327,7 @@ public class TransformEditor {
 					10.0f);
 			final Stroke bs = new BasicStroke();
 			Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
+				@Override
 				public Stroke transform(String s) {
 					if (thesig.isAttribute(s)) {
 						return edgeStroke;
@@ -450,6 +451,7 @@ public class TransformEditor {
 		}
 
 		Comparator<String> strcmp = new Comparator<String>() {
+			@Override
 			public int compare(String f1, String f2) {
 				return f1.compareTo(f2);
 			}
@@ -460,11 +462,12 @@ public class TransformEditor {
 	}
 
 	@SuppressWarnings("serial")
-	private void makejoined(String pre,
+	private static void makejoined(String pre,
 			Map<String, JPanel> pans,
 			Map<String, Map<String, Set<Pair<Object, Object>>>> joined,
 			Map<String, Set<Pair<Object, Object>>> nd, List<String> names) {
 		Comparator<String> strcmp = new Comparator<String>() {
+			@Override
 			public int compare(String f1, String f2) {
 				return f1.compareTo(f2);
 			}
@@ -505,6 +508,7 @@ public class TransformEditor {
 			// foo and t are for the graph and tabular pane, resp
 			DefaultTableModel dtm = new DefaultTableModel(arr, cols3);
 			JTable foo = new JTable(dtm) {
+				@Override
 				public Dimension getPreferredScrollableViewportSize() {
 					Dimension d = getPreferredSize();
 					return new Dimension(d.width, d.height);

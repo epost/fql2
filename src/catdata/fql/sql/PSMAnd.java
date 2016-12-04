@@ -82,7 +82,7 @@ public class PSMAnd extends PSM {
 						throw new RuntimeException("bad");
 					}
 
-					Instance nA = null;;
+					Instance nA = null;
 					if (kind.equals("and")) {
 						nA = isect(A, B);
 					} else if (kind.equals("or")) {
@@ -111,7 +111,7 @@ public class PSMAnd extends PSM {
 		}
 	}
 
-	private Instance isect(Instance a, Instance b) throws FQLException {
+	private static Instance isect(Instance a, Instance b) throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
 		
 		for (Node n : a.thesig.nodes) {
@@ -136,7 +136,7 @@ public class PSMAnd extends PSM {
 		return new Instance(a.thesig, data);
 	}
 
-	private Instance union(Instance a, Instance b) throws FQLException {
+	private static Instance union(Instance a, Instance b) throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
 		
 		for (Node n : a.thesig.nodes) {
@@ -199,7 +199,7 @@ public class PSMAnd extends PSM {
 
 	
 	
-	private <X,Y> Y lookup(Set<Pair<X,Y>> set, X x) {
+	private static <X,Y> Y lookup(Set<Pair<X,Y>> set, X x) {
 		for (Pair<X, Y> k : set) {
 			if (k.first.equals(x)) {
 				return k.second;

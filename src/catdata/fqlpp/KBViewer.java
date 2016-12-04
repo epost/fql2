@@ -21,6 +21,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
 
 import catdata.Pair;
 import catdata.fqlpp.cat.Signature;
@@ -33,7 +35,7 @@ public class KBViewer {
 	protected Example[] examples = { new Cat() };
 
 	String help = ""; 
-	protected String kind() {
+	protected static String kind() {
 		return "Knuth Bendix";
 	}
 
@@ -91,8 +93,8 @@ public class KBViewer {
 				jta.setWrapStyleWord(true);
 				// jta.setEditable(false);
 				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 				p.setPreferredSize(new Dimension(300, 200));
 
 				JOptionPane pane = new JOptionPane(p);
@@ -119,7 +121,7 @@ public class KBViewer {
 		tp.add(transButton);
 		tp.add(helpButton);
 		tp.add(new JLabel());
-		tp.add(new JLabel("Load Example", JLabel.RIGHT));
+		tp.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		tp.add(box);
 
 		p.add(jsp, BorderLayout.CENTER);
@@ -132,7 +134,7 @@ public class KBViewer {
 		f.setVisible(true);
 	}
 	
-	private String translate(String s) {
+	private static String translate(String s) {
 		Object o = PPParser.catConst().from(PPParser.TOKENIZER, PPParser.IGNORED).parse(s);
 		CatExp.Const c = PPParser.toCatConst(o);
 		Signature<String, String> sig = new Signature<>(c.nodes, c.arrows, c.eqs);

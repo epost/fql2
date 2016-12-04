@@ -308,7 +308,7 @@ public abstract class CatExp implements Serializable {
 
 		}
 		
-		private String printOneEq(Pair<String, List<String>> l) {
+		private static String printOneEq(Pair<String, List<String>> l) {
 			String ret = l.first;
 			for (String a : l.second) {
 				ret += ".";

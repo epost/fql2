@@ -169,7 +169,7 @@ public class ToFullQueryExp implements
 		}
 	}
 
-	private Pair<Map<Set<Pair<String, String>>, String>, Map<Set<Pair<String, String>>, String>> computeEqCs(
+	private static Pair<Map<Set<Pair<String, String>>, String>, Map<Set<Pair<String, String>>, String>> computeEqCs(
 			catdata.fql.decl.SigExp.Const s, catdata.fql.decl.SigExp.Const t,
 			Set<Pair<String, String>> rel) {
 
@@ -208,7 +208,7 @@ public class ToFullQueryExp implements
 		return new Pair<>(node_map, attr_map);
 	}
 
-	private void mergeEqcs(Set<Set<Pair<String, String>>> nodeEqcs) {
+	private static void mergeEqcs(Set<Set<Pair<String, String>>> nodeEqcs) {
 
 		for (;;) {
 			Set<Pair<String, String>> x = null;
@@ -236,7 +236,7 @@ public class ToFullQueryExp implements
 		}
 	}
 
-	private boolean haveCommon(Set<Pair<String, String>> k,
+	private static boolean haveCommon(Set<Pair<String, String>> k,
 			Set<Pair<String, String>> v) {
 		for (Pair<String, String> kk : k) {
 			for (Pair<String, String> vv : v) {
@@ -248,7 +248,7 @@ public class ToFullQueryExp implements
 		return false;
 	}
 
-	private Triple<String, String, String> lookup(
+	private static Triple<String, String, String> lookup(
 			List<Triple<String, String, String>> attrs, String first) {
 		for (Triple<String, String, String> k : attrs) {
 			if (k.first.equals(first)) {
@@ -258,7 +258,7 @@ public class ToFullQueryExp implements
 		throw new RuntimeException();
 	}
 
-	private String lookupAttr(String pre, Triple<String, String, String> att,
+	private static String lookupAttr(String pre, Triple<String, String, String> att,
 			Map<Set<Pair<String, String>>, String> attr_map) {
 		for (Set<Pair<String, String>> k : attr_map.keySet()) {
 			if (k.contains(new Pair<>(pre, att.first))) {
@@ -269,7 +269,7 @@ public class ToFullQueryExp implements
 
 	}
 
-	private String lookupNode(String pre, String n,
+	private static String lookupNode(String pre, String n,
 			Map<Set<Pair<String, String>>, String> node_map) {
 		for (Set<Pair<String, String>> k : node_map.keySet()) {
 			if (k.contains(new Pair<>(pre, n))) {
