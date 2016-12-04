@@ -61,7 +61,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 			this.max_iterations = max_its;
 			//TODO note to serena - validate any options here, like this
 			if (max_iterations < 0) {
-				throw new RuntimeException("Expected max iterations to be > 0");
+				throw new RuntimeException("Expected max iterations to be >= 0");
 			}
 		}
 	}
