@@ -75,7 +75,9 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		if (!options.isEmpty()) {
 			throw new RuntimeException("No options allowed for similarity flooding matching - yet");
 		}
-		return new SimilarityFloodingParams<>((x, y) -> x.equals(y) ? 1.0 : 0.0, 1.0, Sigma.Basic, 6);  //TODO note to serena, here is where the magic number 6 went.  see how we are collecting all the defaults in one place?
+		return new SimilarityFloodingParams<>((x, y) -> x.equals(y) ? 1.0 : 0.0, 1.0, Sigma.Basic, 6); 
+		//TODO note to serena, here is where the magic number 6 went.  see how we are collecting all the defaults in one place?
+		
 	}
 
 	//////////////////////////////////////////////////////////////////
