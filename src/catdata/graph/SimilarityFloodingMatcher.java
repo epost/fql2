@@ -44,7 +44,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		public final BiFunction<E1, E2, Double> edgeComparator;
 
 		/**
-		 * If two edges compare to a number > cutoff, they should be considered
+		 * If two edges compare to a number >= cutoff, they should be considered
 		 * the same.
 		 */
 		public final Double cutoff;
