@@ -1,6 +1,10 @@
 package catdata.graph;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -159,6 +163,9 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		
 		//initialize the edges of the ipg
 		Set<Triple<Quad<Direction,E1,E2,Double>, Pair<N1, N2>, Pair<N1, N2>>> edges = new HashSet<>();
+		
+		
+		
 		for (Pair<E1, E2> e : pcg.edges.keySet()) {
 			Pair<N1, N2> s = pcg.edges.get(e).first; 
 			Pair<N1, N2> t = pcg.edges.get(e).second;
@@ -209,35 +216,56 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		// max iterations //TODO I have added this to the params class - please do this for all params
 		//int maxit = 6;
 		
+		// set up the map holding the sigma values 
+		Map<Pair<N1,N2>, Double> sigmap = new HashMap<>();
+		
+		Map<Integer, Double> sigmapInt = new HashMap<>(); // rep node as int index
+		// initialize nodes and 1 value
+		for (Pair<N1,N2> n: ipg.nodes) {
+			//sigmap.put(n, 1.0);
+		}
+		
+		
+		Map<Pair<N1,N2>, Double> sigmap_n = sigmap;
 		DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg_n = ipg; 
 		for (int i = 0; i < params.max_iterations; i++) { //things start at 0 in java
-			DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg_np1 = sigma(params.sigma, ipg_n);
-			System.out.println("On iteration " + i + ", ipg_n+1 is " + ipg_np1 + "\n");
-			if (ipg_np1.equals(ipg_n)) {
-				System.out.println("Fixpoint computation has converged.\n");
-				break;
-			} 
-			ipg_n = ipg_np1;
+			sigmap_n = sigmaBasic(ipg, sigmap_n);
+			
+		
+			
+			//System.out.println("On iteration " + i + ", ipg_n+1 is " + ipg_np1 + "\n");
+			
 		}
+		
+		
+		System.out.println("sigma is " + sigmap_n + "\n");
 
-		Match<N1,E1,N2,E2> best = createMatchFromIpg(ipg_n);
+		// Print final sigma values 
+		for (Pair<N1,N2> pn : sigmap_n.keySet()) {
+			// String value= sigmap.get(pn).toString();  
+	         //System.out.println(pn + " " + value);  
+			System.out.println(pn.toString());
+			System.out.printf("%f \n", sigmap_n.get(pn));
+		}
+		Match<N1,E1,N2,E2> best = createMatchFromIpg(ipg_n, sigmap_n);
 		System.out.println("best match is " + best + "\n");
 		System.out.println("----------------------------");
+		
 
 		return best;
 	}
 
 	//TODO serena notice how sigma(which) has type X -> X - this is how we know we can take its fixed point
-	private DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> sigma(Sigma which, DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg_n) {
+	private Collection<Pair<Pair<N1,N2>, Double>> sigma(Sigma which, DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg_n) {
 		switch (which) {
 		case A:
-			return sigmaA(ipg_n);
+			//return sigmaA(ipg_n);
 		case B:
-			return sigmaB(ipg_n);
+			//return sigmaB(ipg_n);
 		case Basic:
-			return sigmaBasic(ipg_n);
+			//return sigmaBasic(ipg_n);
 		case C:
-			return sigmaC(ipg_n);
+			//return sigmaC(ipg_n);
 		default:
 			throw new RuntimeException();
 		}
@@ -249,10 +277,12 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		throw new RuntimeException("Todo - serena");
 	}
 
+	/*
 	private DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> sigmaBasic(DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg_n) {
 		// TODO serena Auto-generated method stub
 		throw new RuntimeException("Todo - serena");
 	}
+	*/
 
 	private DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> sigmaB(DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg_n) {
 		// TODO serena Auto-generated method stub
@@ -265,6 +295,44 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 	}
 
 	
+	// vector sigma functions 
+	// also input map from nodes to an index 
+	// save sigma values in a map
+	private Map<Pair<N1,N2>, Double> sigmaBasic(DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg_n, Map<Pair<N1,N2>, Double> sigmap) {
+		Iterator sigIt = sigmap.entrySet().iterator();
+
+		// temp sigma values 
+		Map<Pair<N1, N2>, Double> tempsig = new HashMap<>();
+		
+		while (sigIt.hasNext()) {
+			Pair<Pair<N1,N2>, Double> nex = (Pair<Pair<N1, N2>, Double>) sigIt.next();
+			Double dnex = nex.second;
+			Pair<N1,N2> pn1n2 =  nex.first;
+			// sum outgoing edges from this node by searching all forward n1n2 first entry or backward n1n2 sec entry
+			// iterate over edges 
+			double sig0 = (double) sigIt.next();
+			for (Quad<Direction, E1, E2, Double> e: ipg_n.edges.keySet() ) {
+				Pair<N1, N2> p1 = ipg_n.edges.get(e).first;
+
+				Pair<N1, N2> p2 = ipg_n.edges.get(e).second;
+				
+				Direction d = e.first;
+				// forward with first entry matching
+				if (d.equals(Direction.forward) && p1.equals(pn1n2)) {
+					// add 
+					sig0 = sig0 + sigmap.get(pn1n2)*e.fourth;
+				} else if (d.equals(Direction.backward) && p2.equals(pn1n2)) {
+					//add 
+					sig0 = sig0 + sigmap.get(pn1n2)*e.fourth;
+				}
+				
+			}
+			tempsig.put(pn1n2, sig0);
+		}
+		
+		return tempsig;
+	}
+	
 	////////////
 	
 	/**
@@ -273,8 +341,13 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 	 * @param ipg_n
 	 * @return
 	 */
-	private Match<N1, E1, N2, E2> createMatchFromIpg(DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg_n) {
+	//also sigma val
+	private Match<N1, E1, N2, E2> createMatchFromIpg(DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg_n, Map<Pair<N1, N2>, Double> sig) {
+		
+		
+		//return bestMatch;
 		throw new RuntimeException("Todo - serena");
+		
 	}
 	
 	
@@ -285,19 +358,14 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 int e1 = 10;
 int e2 = 10;
 int es = e1 * e2; // size of edges
-
 double[] weights = new double[es];
-
 // nodes are a collection
 Collection<Pair<N1, N2>> pnodes = (Collection<Pair<N1, N2>>) new Pair<N1, N2>(null, null);
-
 Map<Pair<N1, N2>, Pair<N1, N2>> pcgnodes = new HashMap<>(); // out pair
 															// A,B and
 															// inc pair
 															// A,B
-
 Map<String, List<WPEdge>> pcgedges = new HashMap<>();
-
 Map<Pair<N1, N2>, List<WPEdge>> outedges = new HashMap<>(); // map where
 															// key is
 															// the node
@@ -305,64 +373,48 @@ Map<Pair<N1, N2>, List<WPEdge>> outedges = new HashMap<>(); // map where
 															// connected
 															// to outg
 															// edge
-
 Map<Pair<N1, N2>, List<WPEdge>> incedges = new HashMap<>(); // map where
 															// key is
 															// node pair
 															// connected
 															// to inc
 															// edge
-
 // DMG<Pair<N1,N2>, Pair<E1, E2>> pwcg = new DMG<Pair<N1,N2>, Pair<E1,
 // E2>>();
 PCGDMG pwcg = new PCGDMG((Collection) pcgnodes, pcgedges);
-
 // new hash map that hold the amount of edges outgoing from certain node
 Map<Pair<N1, N2>, Integer> outedgenum = new HashMap<>();
-
 // hash map for the weights in the propagation graph
 Map<Pair<Pair<N1, N2>, Pair<N1, N2>>, Double> propmap = new HashMap<>();
-
 for (E1 c : src.edges.keySet()) { // c in keySet is the edge label
 	// int min_d = Integer.MAX_VALUE;
 	// E2 min_c = null;
 	N1 n2_s = this.src.edges.get(c).first;
 	N1 n2_t = this.src.edges.get(c).second;
-
 	for (E2 d : dst.edges.keySet()) { // iterate through labels in the
 										// dest graph
 		// int cur_d = params.apply(c.toString(), d.toString());
 		double score = similarity(c.toString(), d.toString());
-
 		N2 n3_s = this.dst.edges.get(d).first;
 		N2 n3_t = this.dst.edges.get(d).second;
-
 		if (score > this.params.cutoff) {
 			// create new pair of edges from outg , incoming
 			Pair np1 = new Pair<>(n2_s, n3_s);
 			Pair np2 = new Pair<>(n2_t, n3_t);
-
 			// check if nodes contains these, and if not add
 			if (pnodes.contains(np1)) {
-
 			} else {
 				pnodes.add(np1);
 			}
-
 			if (pnodes.contains(np2)) {
-
 			} else {
 				pnodes.add(np2);
 			}
-
 			pcgnodes.put(np1, np2); // outg , inc
-
 			Pair<Pair<N1, N2>, Pair<N1, N2>> nn = new Pair<>(np1, np2); // outg
 																		// ,
 																		// inc
-
 			WPEdge wp = new WPEdge(np1, np2, c.toString(), 0);
-
 			// add to edges
 			if (pcgedges.containsKey(c.toString())) {
 				// add to linked list of WPEdges
@@ -372,7 +424,6 @@ for (E1 c : src.edges.keySet()) { // c in keySet is the edge label
 				incedges.put(np2, list);
 				// not sure if this is needed
 				outedges.put(np1, list);
-
 			} else {
 				// is this correct way to initialize linked list with
 				// entry
@@ -383,17 +434,14 @@ for (E1 c : src.edges.keySet()) { // c in keySet is the edge label
 				// not sure if this is needed
 				outedges.put(np1, lis);
 			}
-
 			// add to map outedgenum, check if there was the node
 			if (outedgenum.containsKey(np1)) {
 				// increment the weight
 				int g = outedgenum.get(np1);
 				outedgenum.put(np1, g + 1);
-
 			} else {
 				outedgenum.put(np1, 1);
 			}
-
 			if (outedgenum.containsKey(np2)) {
 				// increment the weight
 				int g = outedgenum.get(np2);
@@ -401,42 +449,29 @@ for (E1 c : src.edges.keySet()) { // c in keySet is the edge label
 			} else {
 				outedgenum.put(np2, 1);
 			}
-
 		}
-
 	}
-
 }
-
 // create the propagation graph with outedgenum
 Iterator it = pcgedges.entrySet().iterator();
 while (it.hasNext()) {
 	WPEdge w = (WPEdge) it.next();
-
 	// look for source node, and locate the number of outgoing edges
 	Pair<N1, N2> sn = w.source;
 	int wgt = outedgenum.get(sn.first);
 	// set the weight
 	double wt = 1 / wgt;
 	w.weight = wt; // set the weight of current edge
-
 	Pair<N1, N2> dn = w.target;
 	// add to the propmap
-
 	Pair<Pair<N1, N2>, Pair<N1, N2>> vpair1 = new Pair<Pair<N1, N2>, Pair<N1, N2>>(sn, dn);
-
 	propmap.put(vpair1, wt);
-
 	// check the reverse edge and see if there is an edge , if not, add
 	// reverse edge with weight 1
-
 	// reverse edge
 	Pair<Pair<N1, N2>, Pair<N1, N2>> vpair = new Pair<Pair<N1, N2>, Pair<N1, N2>>(dn, sn);
-
 	// propmap.put(vpair, wt);
-
 	WPEdge wp = new WPEdge(dn, sn, w.name, 1);
-
 	if (pcgedges.containsKey(dn)) {
 		List<WPEdge> list = pcgedges.get(dn);
 		if (list.contains(sn)) {
@@ -459,7 +494,5 @@ while (it.hasNext()) {
 		outedges.put(sn, lis);
 		incedges.put(dn, lis);
 	}
-
 }
-
 */
