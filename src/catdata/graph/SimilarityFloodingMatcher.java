@@ -233,8 +233,8 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg_n = ipg; 
 		for (int i = 0; i < params.max_iterations; i++) { //things start at 0 in java
 			sigmap_n = sigmaBasic(ipg, sigmap_n);
-			
-		
+			//note to serena: please have this loop break when the algorithm has converged
+			//note to serena: if the loop doesn't converge after max iterations, please throw an error
 			
 			//System.out.println("On iteration " + i + ", ipg_n+1 is " + ipg_np1 + "\n");
 			
