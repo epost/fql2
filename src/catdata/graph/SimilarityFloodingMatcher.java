@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -24,6 +25,7 @@ import catdata.graph.SimilarityFloodingMatcher.SimilarityFloodingParams;
  * @param <E1> type of source edges
  * @param <E2> type of target edges
  */
+@SuppressWarnings("unused")
 public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N2, E2, SimilarityFloodingParams<N1, N2, E1, E2>> {
 
 	// The four variations of the fixpoint formula from table 3
@@ -35,6 +37,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 	/**
 	 * Parameters to similarity flooding algorithm.
 	 */
+	
 	public static class SimilarityFloodingParams<N1, N2, E1, E2> {
 		//TODO note to Serena: add max iterations
 		
@@ -247,12 +250,13 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 			System.out.println(pn.toString());
 			System.out.printf("%f \n", sigmap_n.get(pn));
 		}
-		Match<N1,E1,N2,E2> best = createMatchFromIpg(ipg_n, sigmap_n);
-		System.out.println("best match is " + best + "\n");
-		System.out.println("----------------------------");
+//		Match<N1,E1,N2,E2> best = createMatchFromIpg(ipg_n, sigmap_n);
+//		System.out.println("best match is " + best + "\n");
+//		System.out.println("----------------------------");
 		
-
-		return best;
+//		return best;
+		
+		throw new RuntimeException("Todo");
 	}
 
 	//TODO serena notice how sigma(which) has type X -> X - this is how we know we can take its fixed point
@@ -299,32 +303,51 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 	// also input map from nodes to an index 
 	// save sigma values in a map
 	private Map<Pair<N1,N2>, Double> sigmaBasic(DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg_n, Map<Pair<N1,N2>, Double> sigmap) {
-		Iterator sigIt = sigmap.entrySet().iterator();
+		
+		//note to serena: please use generics.  If you don't, nothing will ever compile or run correctly.
+		Iterator<Entry<Pair<N1, N2>, Double>> sigIt = sigmap.entrySet().iterator();
 
 		// temp sigma values 
 		Map<Pair<N1, N2>, Double> tempsig = new HashMap<>();
 		
 		while (sigIt.hasNext()) {
-			Pair<Pair<N1,N2>, Double> nex = (Pair<Pair<N1, N2>, Double>) sigIt.next();
-			Double dnex = nex.second;
-			Pair<N1,N2> pn1n2 =  nex.first;
+			Entry<Pair<N1, N2>, Double> nex = sigIt.next();
+			Double dnex = nex.getValue();
+			Pair<N1,N2> pn1n2 =  nex.getKey();
+			
+			//note to serena: you should never need to cast anything.  If you are, 
+			//it's a sign that something is wrong.
+			//Pair<Pair<N1,N2>, Double> nex = (Pair<Pair<N1, N2>, Double>) sigIt.next();
+			 //			Double dnex = nex.second;
+			 //			Pair<N1,N2> pn1n2 =  nex.first;
+			// note to serena: you can only call next() once per iteration through the loop.
+			// more seriously, here you casting the next value in the iterator to a double,
+			// but directly above here you casting the next value in the iterator to a pair.
+			// the next value in the iterator can't be both a double and a pair, so this
+			//code would not have worked.
+			 //			double sig0 = (double) sigIt.next();
+			
 			// sum outgoing edges from this node by searching all forward n1n2 first entry or backward n1n2 sec entry
 			// iterate over edges 
-			double sig0 = (double) sigIt.next();
+			double sig0 = dnex; //note to Serena: please read https://docs.oracle.com/javase/tutorial/java/data/autoboxing.html
 			for (Quad<Direction, E1, E2, Double> e: ipg_n.edges.keySet() ) {
 				Pair<N1, N2> p1 = ipg_n.edges.get(e).first;
 
 				Pair<N1, N2> p2 = ipg_n.edges.get(e).second;
 				
-				Direction d = e.first;
+			//	Direction d = e.first;
 				// forward with first entry matching
-				if (d.equals(Direction.forward) && p1.equals(pn1n2)) {
+			//	if (d.equals(Direction.forward) && p1.equals(pn1n2)) {
 					// add 
-					sig0 = sig0 + sigmap.get(pn1n2)*e.fourth;
-				} else if (d.equals(Direction.backward) && p2.equals(pn1n2)) {
+			//		sig0 = sig0 + sigmap.get(pn1n2)*e.fourth;
+			//	} else if (d.equals(Direction.backward) && p2.equals(pn1n2)) {
 					//add 
+				
+				
+					//note to serena: if forward and backward are handled the same way, 
+					//you don't to do an if/else
 					sig0 = sig0 + sigmap.get(pn1n2)*e.fourth;
-				}
+			//	}
 				
 			}
 			tempsig.put(pn1n2, sig0);
