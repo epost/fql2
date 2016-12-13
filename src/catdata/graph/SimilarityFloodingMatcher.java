@@ -82,7 +82,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		if (!options.isEmpty()) {
 			throw new RuntimeException("No options allowed for similarity flooding matching - yet");
 		}
-		return new SimilarityFloodingParams<>((x, y) -> x.equals(y) ? 1.0 : 0.0, 1.0, Sigma.Basic, 6); 
+		return new SimilarityFloodingParams<>((x, y) -> x.toString().trim().equals(y.toString().trim()) ? 1.0 : 0.0, 1.0, Sigma.Basic, 5);  //note the use of trim
 		//TODO note to serena, here is where the magic number 6 went.  see how we are collecting all the defaults in one place?
 		
 	}
@@ -225,7 +225,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		Map<Integer, Double> sigmapInt = new HashMap<>(); // rep node as int index
 		// initialize nodes and 1 value
 		for (Pair<N1,N2> n: ipg.nodes) {
-			//sigmap.put(n, 1.0);
+			sigmap.put(n, 1.0);
 		}
 		
 		
@@ -310,10 +310,15 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		// temp sigma values 
 		Map<Pair<N1, N2>, Double> tempsig = new HashMap<>();
 		
+		// max 
+		Double maxsig = 0.0; 
+		
 		while (sigIt.hasNext()) {
 			Entry<Pair<N1, N2>, Double> nex = sigIt.next();
 			Double dnex = nex.getValue();
 			Pair<N1,N2> pn1n2 =  nex.getKey();
+			
+			
 			
 			//note to serena: you should never need to cast anything.  If you are, 
 			//it's a sign that something is wrong.
@@ -335,25 +340,44 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 
 				Pair<N1, N2> p2 = ipg_n.edges.get(e).second;
 				
-			//	Direction d = e.first;
+				Direction d = e.first;
 				// forward with first entry matching
-			//	if (d.equals(Direction.forward) && p1.equals(pn1n2)) {
+				if (d.equals(Direction.forward) && p1.equals(pn1n2)) {
 					// add 
-			//		sig0 = sig0 + sigmap.get(pn1n2)*e.fourth;
-			//	} else if (d.equals(Direction.backward) && p2.equals(pn1n2)) {
+					sig0 = sig0 + sigmap.get(pn1n2)*e.fourth;
+				} else if (d.equals(Direction.backward) && p2.equals(pn1n2)) {
 					//add 
 				
 				
 					//note to serena: if forward and backward are handled the same way, 
 					//you don't to do an if/else
 					sig0 = sig0 + sigmap.get(pn1n2)*e.fourth;
-			//	}
+				}
 				
 			}
 			tempsig.put(pn1n2, sig0);
+			// save max double
+			if (sig0 > maxsig) {
+				maxsig = sig0;
+			}
+			
 		}
 		
-		return tempsig;
+		// must normalize sigma values 
+		Iterator<Entry<Pair<N1, N2>, Double>> tempsigIt = tempsig.entrySet().iterator();
+		
+		Map<Pair<N1, N2>, Double> tempsig2 = new HashMap<>();
+
+		
+		while (tempsigIt.hasNext()) {
+			Entry<Pair<N1, N2>, Double> nex = tempsigIt.next();
+			Double dnex = nex.getValue();
+			Pair<N1,N2> pn1n2 =  nex.getKey();
+			tempsig2.put(pn1n2, dnex/maxsig);
+		}
+
+		
+		return tempsig2;
 	}
 	
 	////////////
@@ -376,146 +400,3 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 	
 
 }
-
-/*
-int e1 = 10;
-int e2 = 10;
-int es = e1 * e2; // size of edges
-double[] weights = new double[es];
-// nodes are a collection
-Collection<Pair<N1, N2>> pnodes = (Collection<Pair<N1, N2>>) new Pair<N1, N2>(null, null);
-Map<Pair<N1, N2>, Pair<N1, N2>> pcgnodes = new HashMap<>(); // out pair
-															// A,B and
-															// inc pair
-															// A,B
-Map<String, List<WPEdge>> pcgedges = new HashMap<>();
-Map<Pair<N1, N2>, List<WPEdge>> outedges = new HashMap<>(); // map where
-															// key is
-															// the node
-															// pair
-															// connected
-															// to outg
-															// edge
-Map<Pair<N1, N2>, List<WPEdge>> incedges = new HashMap<>(); // map where
-															// key is
-															// node pair
-															// connected
-															// to inc
-															// edge
-// DMG<Pair<N1,N2>, Pair<E1, E2>> pwcg = new DMG<Pair<N1,N2>, Pair<E1,
-// E2>>();
-PCGDMG pwcg = new PCGDMG((Collection) pcgnodes, pcgedges);
-// new hash map that hold the amount of edges outgoing from certain node
-Map<Pair<N1, N2>, Integer> outedgenum = new HashMap<>();
-// hash map for the weights in the propagation graph
-Map<Pair<Pair<N1, N2>, Pair<N1, N2>>, Double> propmap = new HashMap<>();
-for (E1 c : src.edges.keySet()) { // c in keySet is the edge label
-	// int min_d = Integer.MAX_VALUE;
-	// E2 min_c = null;
-	N1 n2_s = this.src.edges.get(c).first;
-	N1 n2_t = this.src.edges.get(c).second;
-	for (E2 d : dst.edges.keySet()) { // iterate through labels in the
-										// dest graph
-		// int cur_d = params.apply(c.toString(), d.toString());
-		double score = similarity(c.toString(), d.toString());
-		N2 n3_s = this.dst.edges.get(d).first;
-		N2 n3_t = this.dst.edges.get(d).second;
-		if (score > this.params.cutoff) {
-			// create new pair of edges from outg , incoming
-			Pair np1 = new Pair<>(n2_s, n3_s);
-			Pair np2 = new Pair<>(n2_t, n3_t);
-			// check if nodes contains these, and if not add
-			if (pnodes.contains(np1)) {
-			} else {
-				pnodes.add(np1);
-			}
-			if (pnodes.contains(np2)) {
-			} else {
-				pnodes.add(np2);
-			}
-			pcgnodes.put(np1, np2); // outg , inc
-			Pair<Pair<N1, N2>, Pair<N1, N2>> nn = new Pair<>(np1, np2); // outg
-																		// ,
-																		// inc
-			WPEdge wp = new WPEdge(np1, np2, c.toString(), 0);
-			// add to edges
-			if (pcgedges.containsKey(c.toString())) {
-				// add to linked list of WPEdges
-				List<WPEdge> list = pcgedges.get(c.toString());
-				list.add(wp);
-				pcgedges.put(c.toString(), list);
-				incedges.put(np2, list);
-				// not sure if this is needed
-				outedges.put(np1, list);
-			} else {
-				// is this correct way to initialize linked list with
-				// entry
-				List<WPEdge> lis = new LinkedList<WPEdge>();
-				lis.add(wp);
-				pcgedges.put(c.toString(), lis);
-				incedges.put(np2, lis);
-				// not sure if this is needed
-				outedges.put(np1, lis);
-			}
-			// add to map outedgenum, check if there was the node
-			if (outedgenum.containsKey(np1)) {
-				// increment the weight
-				int g = outedgenum.get(np1);
-				outedgenum.put(np1, g + 1);
-			} else {
-				outedgenum.put(np1, 1);
-			}
-			if (outedgenum.containsKey(np2)) {
-				// increment the weight
-				int g = outedgenum.get(np2);
-				outedgenum.put(np2, g + 1);
-			} else {
-				outedgenum.put(np2, 1);
-			}
-		}
-	}
-}
-// create the propagation graph with outedgenum
-Iterator it = pcgedges.entrySet().iterator();
-while (it.hasNext()) {
-	WPEdge w = (WPEdge) it.next();
-	// look for source node, and locate the number of outgoing edges
-	Pair<N1, N2> sn = w.source;
-	int wgt = outedgenum.get(sn.first);
-	// set the weight
-	double wt = 1 / wgt;
-	w.weight = wt; // set the weight of current edge
-	Pair<N1, N2> dn = w.target;
-	// add to the propmap
-	Pair<Pair<N1, N2>, Pair<N1, N2>> vpair1 = new Pair<Pair<N1, N2>, Pair<N1, N2>>(sn, dn);
-	propmap.put(vpair1, wt);
-	// check the reverse edge and see if there is an edge , if not, add
-	// reverse edge with weight 1
-	// reverse edge
-	Pair<Pair<N1, N2>, Pair<N1, N2>> vpair = new Pair<Pair<N1, N2>, Pair<N1, N2>>(dn, sn);
-	// propmap.put(vpair, wt);
-	WPEdge wp = new WPEdge(dn, sn, w.name, 1);
-	if (pcgedges.containsKey(dn)) {
-		List<WPEdge> list = pcgedges.get(dn);
-		if (list.contains(sn)) {
-			// don't need to add edge with wt 1
-		} else {
-			// add edge to list with wt 1
-			list.add(wp);
-			propmap.put(vpair, 1.0);
-			pcgedges.put(w.name, list);
-			// also add to out/ inc maps
-			outedges.put(sn, list);
-			incedges.put(dn, list);
-		}
-	} else { // doesnt have edge with reverse edge
-		List<WPEdge> lis = new LinkedList<WPEdge>();
-		lis.add(wp);
-		pcgedges.put(w.name, lis);
-		propmap.put(vpair, 1.0);
-		// also add to out/ inc maps
-		outedges.put(sn, lis);
-		incedges.put(dn, lis);
-	}
-}
-*/
