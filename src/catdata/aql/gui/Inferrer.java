@@ -37,7 +37,6 @@ public class Inferrer {
 		} else if (k.equals(Kind.INSTANCE)) {
 			String a = AqlParser.parseInfer1(in);
 			repl += inferInstance(editor.last_env.defs.schs.map.get(a));
-			
 		}	
 		repl += "\n}";
 		editor.topArea.insert(repl, editor.topArea.getSelectionEnd());

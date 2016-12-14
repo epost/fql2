@@ -1054,6 +1054,9 @@ public class RaToFql {
 			return;
 		}
 		eqcs.remove(rx);
+		if (lx == null) {
+			throw new RuntimeException("RA to FQL internal error");
+		}
 		lx.addAll(rx);
 	}
 

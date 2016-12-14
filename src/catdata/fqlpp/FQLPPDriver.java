@@ -13,7 +13,6 @@ import catdata.fqlpp.cat.FinSet.Fn;
 
 public class FQLPPDriver {
 
-	@SuppressWarnings("cast")
 	public static FQLPPEnvironment makeEnv(String str, FQLPPProgram init, String[] toUpdate) {
 		Map<String, Fn<?,?>> fns = new HashMap<>();
 		Map<String, Set<?>> sets = new HashMap<>();

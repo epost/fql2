@@ -48,9 +48,8 @@ public abstract class MapExp {
 		public String toString() {
 			if (lToR) {
 				return "iso1 " + l + " " + r;
-			} else {
-				return "iso2 " + l + " " + r;
-			}
+			} 
+			return "iso2 " + l + " " + r;
 		}
 		
 		boolean lToR;

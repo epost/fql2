@@ -154,7 +154,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			Object start_en = null;
 			List<Object> r = new LinkedList<>();
 			for (Object o : p.second) {
-				if (ens0.containsKey(o)) {
+				if (ens0.containsValue(o)) {
 					if (fks0.containsKey(o)) {
 						throw new RuntimeException("in foreign key mapping " + p.first + " -> " + Util.sep(p.second, ".") + ", " + o + " is both a target foreign key and a target entity, so the path is ambiguous");
 					}

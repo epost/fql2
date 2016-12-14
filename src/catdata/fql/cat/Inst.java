@@ -86,6 +86,8 @@ public class Inst<Obj, Arrow, Y, X> {
 				data1.add(new Pair<>(n.string, d1));
 				data2.add(new Pair<>(n.string, d2));
 			}
+			//TODO FQL
+			/*
 			try {
 				Transform t1 = new Transform(a, b, data1);
 				Transform t2 = new Transform(b, a, data2);
@@ -96,6 +98,7 @@ public class Inst<Obj, Arrow, Y, X> {
 				}
 			} catch (Exception re) {
 			}
+			*/
 		}
 
 		return null;

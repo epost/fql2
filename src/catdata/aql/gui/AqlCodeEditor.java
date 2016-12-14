@@ -7,6 +7,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
+import java.util.Collection;
 import java.util.Set;
 import java.util.Vector;
 
@@ -30,6 +31,7 @@ import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.TokenTypes;
 
 import catdata.Program;
+import catdata.Util;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.AqlMultiDriver;
 import catdata.aql.exp.AqlParser;
@@ -276,6 +278,11 @@ public final class AqlCodeEditor extends
 			thr.printStackTrace();
 			respArea.setText(thr.getMessage());
 		}
+	}
+
+	@Override
+	protected Collection<String> reservedWords() {
+		return Util.union(super.reservedWords(), Util.union(Util.list(AqlParser.ops), Util.list(AqlParser.res)));
 	}
 
 }

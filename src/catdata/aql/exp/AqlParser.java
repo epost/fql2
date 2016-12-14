@@ -76,10 +76,10 @@ public class AqlParser {
 				}
 			}); 
 
-	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
+	public static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };	
 	
-	static String[] res = new String[] {
+	public static String[] res = new String[] {
 			"typeside", "schema", "mapping", "instance", "transform", "query", "pragma", "graph",
 			"exec_jdbc",
 			"exec_js",

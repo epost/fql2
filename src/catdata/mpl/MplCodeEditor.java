@@ -25,12 +25,12 @@ public class MplCodeEditor extends CodeEditor<Program<MplExp<String,String>>, En
 
 	@Override
 	public Language lang() {
-		return Language.MPL;
+		return null; //Language.MPL;
 	}
 
 	@Override
 	protected String getATMFlhs() {
-		return "text/" + Language.MPL.name();
+		return null; //"text/" + Language.MPL.name();
 	}
 
 	@Override

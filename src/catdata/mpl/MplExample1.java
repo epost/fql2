@@ -7,7 +7,7 @@ public class MplExample1 extends Example {
 
 	@Override
 	public Language lang() {
-		return Language.MPL;
+		return null; //Language.MPL;
 	}
 	
 	@Override

@@ -184,6 +184,7 @@ public class JDBCBridge {
 		return psm;
 	}
 
+	@SuppressWarnings("null")
 	public static Triple<Map<String, Set<Map<Object, Object>>>, String, List<Throwable>> run(
 			FQLProgram prog) {
 		Map<String, Set<Map<Object, Object>>> ret = new HashMap<>();

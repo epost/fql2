@@ -707,7 +707,8 @@ public class Transform {
 		Instance ret = new Instance(src.thesig, map);
 		return ret;
 	}
-
+/*
+	@Deprecated
 	public Instance apply(Instance a) throws FQLException { //TODO !!!
 		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
 
@@ -741,5 +742,5 @@ public class Transform {
 
 		return new Instance(src.thesig, map);
 	}
-
+*/
 }

@@ -44,14 +44,16 @@ public class LeftKanSigma {
 			
 		if (F.target.isId(a)) {
 			return Fn.id(f2.applyO(G.target.new Node(F.target.source(a))));
-		} else {
-			return f2.applyA(G.target.path(G.target.getEdge(a)));
-		}
+		} 
+		return f2.applyA(G.target.path(G.target.getEdge(a)));
 		} );
 	
 		//use third
 		Transform<O2,A2,Set,Fn> thr = null; 
 		if (t != null) { 
+			if (JJJ == null) {
+				throw new RuntimeException("Left kan sigma anomaly, please report");
+			}
 			thr = new Transform<>(f3, JJJ, x -> new Fn(f3.applyO(x), JJJ.applyO(x), q.third.get(G.target.new Node(x))::get));
 		}
 		 
@@ -96,7 +98,6 @@ public class LeftKanSigma {
 		return new Quad<> (j, etables, D.utables2, hhh.second);
 	} 
 
-	@SuppressWarnings({ "unchecked" })
 	private static <O1,A1,O2,A2> Pair<Instance<O2,A2>, Map<Object, List<Pair<Signature<O2,A2>.Edge, Object>>>> sigma(
 			LeftKan<O1,A1,O2,A2> lk)  {
 		

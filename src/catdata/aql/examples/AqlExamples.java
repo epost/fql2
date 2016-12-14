@@ -14,6 +14,10 @@ public final class AqlExamples {
 									aqlPushout = new AqlPushoutExample(),
 									aqlPullback = new AqlPullbackExample(),
 									aqlJdbc = new AqlJdbcExample(),
+									aqlFlower = new AqlFlowerExample(),
+									aqlUnitConv = new AqlUnitConvExample(),
+									aqlQuotient = new AqlQuotientExample(),
+									aqlDenorm = new AqlDenormExample(),
 									aqlDelta = new AqlDeltaExample();
 	
 }

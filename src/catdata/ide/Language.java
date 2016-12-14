@@ -10,8 +10,6 @@ import catdata.fql.FqlExamples;
 import catdata.fql.gui.FqlCodeEditor;
 import catdata.fqlpp.FQLPPCodeEditor;
 import catdata.fqlpp.FqlppExamples;
-import catdata.mpl.MplCodeEditor;
-import catdata.mpl.MplExamples;
 import catdata.opl.OplCodeEditor;
 import catdata.opl.OplExamples;
 
@@ -21,7 +19,7 @@ public enum Language {
 	FQLPP,
 	FPQL,
 	OPL,
-	MPL,
+//	MPL,
 	AQL;
 	
 	public static Language getDefault() {
@@ -35,7 +33,7 @@ public enum Language {
 		case FQLPP: return "FQL++";
 		case FPQL: return "FPQL";
 		case OPL: return "OPL";
-		case MPL: return "MPL";
+//		case MPL: return "MPL";
 		case AQL: return "AQL";
 		default:
 			break;
@@ -49,7 +47,7 @@ public enum Language {
 		case FQLPP: return "+";
 		case FPQL: return "P";
 		case OPL: return "O";
-		case MPL: return "M";
+	//	case MPL: return "M";
 		case AQL: return "A";
 		default:
 			break;
@@ -63,7 +61,7 @@ public enum Language {
 		case FQLPP: return "fqlpp";
 		case FPQL: return "fpql";
 		case OPL: return "opl";
-		case MPL: return "mpl";
+//		case MPL: return "mpl";
 		case AQL: return "aql";
 		default:
 			throw new RuntimeException(); 
@@ -78,7 +76,7 @@ public enum Language {
 		case FQLPP: return new FQLPPCodeEditor(title, id, content);
 		case OPL: return new OplCodeEditor(title, id, content);
 		case FQL: return new FqlCodeEditor(title,id, content);
-		case MPL: return new MplCodeEditor(title, id, content);
+	//	case MPL: return new MplCodeEditor(title, id, content);
 		case AQL: return new AqlCodeEditor(title, id, content);
 		default:
 			throw new RuntimeException(this.toString());
@@ -104,7 +102,7 @@ public enum Language {
 		case FQLPP: return Examples.getExamples(FqlppExamples.class);
 		case OPL: return Examples.getExamples(OplExamples.class);
 		case FQL: return Examples.getExamples(FqlExamples.class);
-		case MPL: return Examples.getExamples(MplExamples.class);
+//		case MPL: return Examples.getExamples(MplExamples.class);
 		case AQL: return Examples.getExamples(AqlExamples.class);
 		default:
 			throw new RuntimeException(this.toString());

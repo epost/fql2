@@ -90,7 +90,7 @@ public final class RawTerm {
 			rhs_t.set(lhs_t);
 		} 
 		if (!lhs_t.x.equals(rhs_t.x)) {
-			throw new RuntimeException(lhs + " has sort " + lhs_t.x.toStringMash() + " but " + rhs + " actually has sort " + rhs_t.x.toStringMash());
+			throw new RuntimeException(lhs + " is " + lhs_t.x.toStringMash() + " but " + rhs + " actually has sort " + rhs_t.x.toStringMash());
 		}
 		Ctx<String, Chc<Ty,En>> ret = new Ctx<>();
 		for (String var : ctx0.keySet()) {
@@ -188,6 +188,7 @@ public final class RawTerm {
 		return b ? 1 : 0;
 	}
 
+	@SuppressWarnings("null")
 	public <Ty, En, Sym, Fk, Att, Gen, Sk> Ref<Chc<Ty,En>> infer(Set<String> vars, Map<String, Ref<Chc<Ty,En>>> ctx, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		boolean isSym, isAtt, isFk, isGen, isSk, isVar, isObj ;
 				
@@ -229,6 +230,7 @@ public final class RawTerm {
 			Ref<Chc<Ty,En>> arg_t = args.get(0).infer(vars, ctx, col);
 			En ty = atts_t == null ? fks_t.first : atts_t.first;
 			if (arg_t.x != null && !Chc.inRight(ty).equals(arg_t.x)) {
+				System.out.println(arg_t.x);
 				throw new RuntimeException("In " + this + ", the head " + head + " is an attribute/foreign key expecting argument type " + ty + " but its argument has actual type " + arg_t.x.toStringMash());					
 			}
 			arg_t.set(Chc.inRight(ty)); //redundant sometimes

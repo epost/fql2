@@ -229,6 +229,9 @@ public class ToFullQueryExp implements
 			if (x == null && y == null) {
 				return;
 			}
+			if (x == null) {
+				throw new RuntimeException("ToFullQuery FQL internal error");
+			}
 			x.addAll(y);
 			nodeEqcs.remove(y);
 			x = null;

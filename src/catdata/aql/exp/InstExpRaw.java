@@ -131,6 +131,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 			col.gens.putAll(v.gens().map);
 			col.sks.putAll(v.sks().map);
 			eqs0.addAll(v.eqs());
+			col.eqs.addAll(v.eqs().stream().map(x -> new Eq<>(new Ctx<>(), x.first, x.second)).collect(Collectors.toList()));
 		}
 		
 		for (Pair<Object, Object> p : gens) {

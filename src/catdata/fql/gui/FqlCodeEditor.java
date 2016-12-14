@@ -204,30 +204,33 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 			return;
 		}
 		try {
-		if (ie != null) {
-		InstExp.Const iec = (InstExp.Const) ie;
-			InstExp.Const n = new InstanceEditor(which, iec.sig
-					.toSig(init), iec).show(Color.black);
-			if (n == null) {
-				return;
+			if (ie != null) {
+				InstExp.Const iec = (InstExp.Const) ie;
+				InstExp.Const n = new InstanceEditor(which, iec.sig
+						.toSig(init), iec).show(Color.black);
+				if (n == null) {
+					return;
+				}
+				String newText = "instance " + which + " = " + n.toString()
+						+ " : " + n.sig + "\n\n";
+				topArea.replaceRange(newText, start, end);
+			} else {
+				TransExp.Const iec = (TransExp.Const) te;
+				if (iec == null) {
+					throw new RuntimeException("FQL code editor internal error");
+				}
+				
+				InstExp.Const s = (InstExp.Const) init.insts.get(iec.src);
+				InstExp.Const t = (InstExp.Const) init.insts.get(iec.dst);
+				TransExp.Const n = new TransformEditor(which, init.insts.get(iec.src).type(init).toSig(init), iec, s, t).show(Color.black);
+				if (n == null) {
+					return;
+				}
+				String newText = "transform " + which + " = " + n.toString()
+						+ " : " + n.src + " -> " + n.dst + "\n\n";
+				topArea.replaceRange(newText, start, end);
+				
 			}
-			String newText = "instance " + which + " = " + n.toString()
-					+ " : " + n.sig + "\n\n";
-			topArea.replaceRange(newText, start, end);
-		} else {
-			TransExp.Const iec = (TransExp.Const) te;
-			
-			InstExp.Const s = (InstExp.Const) init.insts.get(iec.src);
-			InstExp.Const t = (InstExp.Const) init.insts.get(iec.dst);
-			TransExp.Const n = new TransformEditor(which, init.insts.get(iec.src).type(init).toSig(init), iec, s, t).show(Color.black);
-			if (n == null) {
-				return;
-			}
-			String newText = "transform " + which + " = " + n.toString()
-					+ " : " + n.src + " -> " + n.dst + "\n\n";
-			topArea.replaceRange(newText, start, end);
-			
-		}
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			respArea.setText(fe.getLocalizedMessage());

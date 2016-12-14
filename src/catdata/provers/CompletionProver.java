@@ -46,8 +46,8 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 				prec.remove(c); //simplfied away TODO aql kind of weird
 			}
 		}		
-		
-		if (!prec.isEmpty()) {
+		//&& !(prec.get(0) instanceof Head)
+		if (!prec.isEmpty() && !(prec.get(0) != null)) {
 			throw new RuntimeException("Anomaly: please report");
 		}
 		KBOptions options = new KBOptions(true, sort, false, true, Integer.MAX_VALUE, Integer.MAX_VALUE, filter_subsumed, compose, syntactic_ac); //this ignores all but 4 options, see LPOUKB

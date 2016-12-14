@@ -11,9 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -702,10 +700,10 @@ public class GUI extends JPanel {
 				if (selectedFile == null) {
 					return;
 				}
-				if (!new Filter(e.lang()).accept(getSelectedFile())) {
+				/*if (!new Filter(e.lang()).accept(getSelectedFile())) {
 					return;
-				}
-				if (selectedFile.exists()) {
+				}*/
+				if (selectedFile.exists() && new Filter(e.lang()).accept(getSelectedFile())) {
 					int response = JOptionPane.showOptionDialog(this, "The file " + selectedFile.getName() + " already exists. Replace?", "Ovewrite file", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] { "Yes", "No" }, "No");
 					if (response == JOptionPane.NO_OPTION) {
 						return;
@@ -728,10 +726,10 @@ public class GUI extends JPanel {
 		if (f == null) {
 			return;
 		}
-		// if (!jfc.getSelectedFile().getAbsolutePath().endsWith("." +
-		// e.lang().fileExtension())) {
-		// f = new File(jfc.getSelectedFile() + "." + e.lang().fileExtension());
-		// }
+		if (!jfc.getSelectedFile().getAbsolutePath().endsWith("." +
+		 e.lang().fileExtension())) {
+		 f = new File(jfc.getSelectedFile() + "." + e.lang().fileExtension());
+		 }
 
 		doSave(f, e.getText());
 		dirty.put(e.id, false);
@@ -740,7 +738,7 @@ public class GUI extends JPanel {
 	}
 
 	private static void doOpen(File f, Language lang) {
-		String s = readFile(f.getAbsolutePath());
+		String s = Util.readFile(f.getAbsolutePath());
 		if (s == null) {
 			return;
 		}
@@ -826,27 +824,6 @@ public class GUI extends JPanel {
 		editors.setSelectedIndex(i);
 		return c.id;
 
-	}
-
-	static private String readFile(String file) {
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(file));
-			String line = null;
-			StringBuilder stringBuilder = new StringBuilder();
-			String ls = System.getProperty("line.separator");
-
-			while ((line = reader.readLine()) != null) {
-				stringBuilder.append(line);
-				stringBuilder.append(ls);
-			}
-
-			reader.close();
-			return stringBuilder.toString();
-		} catch (Exception e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Could not read from " + file);
-		}
-		return null;
 	}
 
 	private static void delay() {

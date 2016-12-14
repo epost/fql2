@@ -4,6 +4,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +28,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -40,73 +43,74 @@ import javax.swing.table.TableRowSorter;
 import org.apache.commons.collections15.CollectionUtils;
 
 public class Util {
-	
+
 	@SuppressWarnings("deprecation")
-	public static <X> X timeout(Callable<X> c, long timeout) { 
-			//final Object lock = new Object();
-			final Ref<X> ret = new Ref<>();
-			final Ref<Throwable> thr = new Ref<>();
-			Thread t = new Thread(() -> {
-				try {
-					X x = c.call();
-					synchronized (ret) {
-						ret.set(x);
-					}
-				} catch (Exception exn) {
-					exn.printStackTrace();
-					synchronized (thr) {
-						thr.set(exn);		
-					}
-				} catch (ThreadDeath d) {
-					synchronized (thr) {
-						thr.set(new RuntimeInterruptedException(d));
-					}
-				}
-			});
-			t.start();
-			
+	public static <X> X timeout(Callable<X> c, long timeout) {
+		// final Object lock = new Object();
+		final Ref<X> ret = new Ref<>();
+		final Ref<Throwable> thr = new Ref<>();
+		Thread t = new Thread(() -> {
 			try {
-				t.join(timeout);
-			} catch (InterruptedException e) {
-				t.stop();			
-				throw new RuntimeInterruptedException(e);
+				X x = c.call();
+				synchronized (ret) {
+					ret.set(x);
+				}
+			} catch (Exception exn) {
+				exn.printStackTrace();
+				synchronized (thr) {
+					thr.set(exn);
+				}
+			} catch (ThreadDeath d) {
+				synchronized (thr) {
+					thr.set(new RuntimeInterruptedException(d));
+				}
 			}
-			
-			synchronized (thr) { 
-			synchronized (ret) {	
+		});
+		t.start();
+
+		try {
+			t.join(timeout);
+		} catch (InterruptedException e) {
+			t.stop();
+			throw new RuntimeInterruptedException(e);
+		}
+
+		synchronized (thr) {
+			synchronized (ret) {
 				if (!ret.isSet() && !thr.isSet()) {
 					t.stop();
 					throw new RuntimeException("Timout after " + timeout + " ms.");
 				} else if (ret.isSet() && !thr.isSet()) {
-					//t should be dying
+					// t should be dying
 					return ret.x;
 				} else if (!ret.isSet() && thr.isSet()) {
-					//t should be dying
+					// t should be dying
 					throw new RuntimeException(thr.x.getMessage());
 				} else {
 					throw new RuntimeException("Anomaly: please report");
 				}
-			}}
-		
+			}
+		}
+
 	}
-	
+
 	public static Class<?> load(String clazz) {
 		try {
 			return Class.forName(clazz);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			throw new RuntimeException(clazz + " is not on the java classpath");
-		}		
+		}
 	}
-	
-	public static <X,Y> List<Pair<X,Y>> toList(Map<X,Y> map) {
-		List<Pair<X,Y>> ret = new LinkedList<>();
+
+	public static <X, Y> List<Pair<X, Y>> toList(Map<X, Y> map) {
+		List<Pair<X, Y>> ret = new LinkedList<>();
 		for (Entry<X, Y> e : map.entrySet()) {
-			ret.add(new Pair<>(e.getKey(),e.getValue()));
+			ret.add(new Pair<>(e.getKey(), e.getValue()));
 		}
 		return ret;
 	}
-	
+
 	public static <X> Set<X> toSetSafely(List<X> set) {
 		Set<X> ret = new HashSet<>();
 		for (X x : set) {
@@ -117,7 +121,7 @@ public class Util {
 		}
 		return ret;
 	}
-	
+
 	public static <X> List<X> concat(List<List<X>> l) {
 		List<X> ret = new LinkedList<>();
 		for (List<X> x : l) {
@@ -125,90 +129,86 @@ public class Util {
 		}
 		return ret;
 	}
-	
+
 	public static <X> List<X> diff(Collection<X> l, Collection<?> r) {
 		List<X> ret = new LinkedList<>(l);
 		ret.removeAll(r);
 		return ret;
 	}
-	
-	public static <X,Y> Map<X, Y> diff(Map<X, Y> l, Map<?, ?> r) {
+
+	public static <X, Y> Map<X, Y> diff(Map<X, Y> l, Map<?, ?> r) {
 		Map<X, Y> ret = new HashMap<>(l);
 		ret.keySet().removeAll(r.keySet());
 		return ret;
 	}
-	
-	public static <X> Function<Void,X> voidFn() {
+
+	public static <X> Function<Void, X> voidFn() {
 		return v -> {
 			throw new RuntimeException("Anomaly: please report");
 		};
 	}
 
-
-	public static class VoidIter implements Iterator<Void> { 
+	public static class VoidIter implements Iterator<Void> {
 
 		@Override
 		public boolean hasNext() {
-				return false;
+			return false;
 		}
 
 		@Override
 		public Void next() {
 			throw new RuntimeException("Anomaly: please report");
 		}
-		
-	} 
-	
+
+	}
+
 	public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 
-	public MyTableRowSorter(TableModel model) {
-		super(model);
-	}
+		public MyTableRowSorter(TableModel model) {
+			super(model);
+		}
 
-	@Override
-	protected boolean useToString(int c) {
-		return false;
+		@Override
+		protected boolean useToString(int c) {
+			return false;
+		}
+
+		@Override
+		public Comparator<?> getComparator(int c) {
+			return (o1, o2) -> {
+				if (o1 instanceof Integer && o2 instanceof Integer) {
+					return ((Integer) o1).compareTo((Integer) o2);
+				}
+				return o1.toString().compareTo(o2.toString());
+			};
+		}
 	}
-	
-	@Override 
-	public Comparator<?> getComparator(int c) {
-		return (o1, o2) -> { 
-                        if (o1 instanceof Integer && o2 instanceof Integer) {
-                            return ((Integer)o1).compareTo((Integer)o2);
-                        } 
-                        return o1.toString().compareTo(o2.toString());
-                };
-        }
-    }
 
 	@SuppressWarnings("serial")
 	public static class BoldifyingColumnHeaderRenderer extends JLabel implements TableCellRenderer {
-		
+
 		Collection<?> boldify;
 		Font normal = UIManager.getFont("TableHeader.font");
 		Font bold = normal.deriveFont(Font.BOLD);
 		TableCellRenderer r; // = new DefaultTableCellRenderer();
-		
+
 		public BoldifyingColumnHeaderRenderer(Collection<?> boldify, TableCellRenderer r) {
 			this.boldify = boldify;
 			this.r = r;
 		}
-	
-	
+
 		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value,
-		        boolean isSelected, boolean hasFocus, int row, int column) {
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 			JLabel ret = (JLabel) r.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			if (boldify.contains(value)){
-		        ret.setFont(bold);
-		    } else {
-		        ret.setFont(normal);
-		    }
-		    return ret;
-		}
-	
+			if (boldify.contains(value)) {
+				ret.setFont(bold);
+			} else {
+				ret.setFont(normal);
+			}
+			return ret;
 		}
 
+	}
 
 	public static void assertNotNull(Object... O) {
 		for (Object o : O) {
@@ -217,10 +217,10 @@ public class Util {
 			}
 		}
 	}
-	
-	public static <X,Y,Z> Pair<LinkedHashMap<X,Y>, LinkedHashMap<X,Z>> split(Map<X, Chc<Y, Z>> map) {
-		LinkedHashMap<X,Y> m1 = new LinkedHashMap<>();
-		LinkedHashMap<X,Z> m2 = new LinkedHashMap<>();
+
+	public static <X, Y, Z> Pair<LinkedHashMap<X, Y>, LinkedHashMap<X, Z>> split(Map<X, Chc<Y, Z>> map) {
+		LinkedHashMap<X, Y> m1 = new LinkedHashMap<>();
+		LinkedHashMap<X, Z> m2 = new LinkedHashMap<>();
 		for (X x : map.keySet()) {
 			Chc<Y, Z> e = map.get(x);
 			if (e.left) {
@@ -231,7 +231,7 @@ public class Util {
 		}
 		return new Pair<>(m1, m2);
 	}
-	
+
 	public static <X> X abort(Void v) {
 		if (v == null) {
 			throw new RuntimeException("Anomaly: please report");
@@ -242,9 +242,7 @@ public class Util {
 	public static <X> List<X> newIfNull(List<X> l) {
 		return l == null ? new LinkedList<>() : l;
 	}
-	
 
-	
 	public static String sep(Collection<?> c, String sep) {
 		return sep(c.iterator(), sep);
 	}
@@ -262,35 +260,33 @@ public class Util {
 			ret += o;
 		}
 		return ret;
-	} 
-	
-	public static <X,Y> boolean isBijection(Map<X, Y> m, Set<X> X, Set<Y> Y) {
+	}
+
+	public static <X, Y> boolean isBijection(Map<X, Y> m, Set<X> X, Set<Y> Y) {
 		if (!m.keySet().equals(X)) {
 			return false;
 		}
 		if (!new HashSet<>(m.values()).equals(Y)) {
 			return false;
 		}
-		Map<Y,X> n = rev(m, Y);
+		Map<Y, X> n = rev(m, Y);
 		if (n == null) {
 			return false;
 		}
-		
-		Map<X,X> a = compose0(m, n);
-		Map<Y,Y> b = compose0(n, m);
-		
+
+		Map<X, X> a = compose0(m, n);
+		Map<Y, Y> b = compose0(n, m);
+
 		if (!a.equals(id(X))) {
 			return false;
 		}
 		if (!b.equals(id(Y))) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
-	
-	
+
 	public static <X> Map<X, X> id(Collection<X> X) {
 		Map<X, X> ret = new LinkedHashMap<>();
 		for (X x : X) {
@@ -298,8 +294,8 @@ public class Util {
 		}
 		return ret;
 	}
-	
-	public static <X,Y> X rev(Map<X, Y> m, Y y) {
+
+	public static <X, Y> X rev(Map<X, Y> m, Y y) {
 		X x = null;
 		for (X x0 : m.keySet()) {
 			Y y0 = m.get(x0);
@@ -316,16 +312,16 @@ public class Util {
 	public static <A, B, C> Map<A, C> compose0(Map<A, B> x, Map<B, C> y) {
 		Map<A, C> ret = new HashMap<>();
 
-		for (Entry<A,B> a : x.entrySet()) {
+		for (Entry<A, B> a : x.entrySet()) {
 			ret.put(a.getKey(), y.get(a.getValue()));
 		}
-		
+
 		return ret;
 	}
-	
-	public static <X,Y> Map<Y,X> rev(Map<X, Y> m, Set<Y> Y) {
-		Map<Y,X> ret = new HashMap<>();
-		
+
+	public static <X, Y> Map<Y, X> rev(Map<X, Y> m, Set<Y> Y) {
+		Map<Y, X> ret = new HashMap<>();
+
 		for (Y y : Y) {
 			X x = rev(m, y);
 			if (x == null) {
@@ -333,42 +329,42 @@ public class Util {
 			}
 			ret.put(y, x);
 		}
-		
+
 		return ret;
 	}
-	
+
 	public static <X> List<X> append(List<X> x, List<X> y) {
 		List<X> ret = new LinkedList<>(x);
 		ret.addAll(y);
 		return ret;
-	}	
-	
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <X> X[] sing(X x) {
 		return (X[]) new Object[] { x };
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public static <X,Y> Y[] map(X[] xs, Function<X,Y> f) {
+	public static <X, Y> Y[] map(X[] xs, Function<X, Y> f) {
 		return (Y[]) Arrays.asList(xs).stream().map(f).collect(Collectors.toList()).toArray();
 	}
-	
-	public static <X,Y> Y fold(X[] xs, Y y, Function<Pair<X,Y>,Y> f) {
+
+	public static <X, Y> Y fold(X[] xs, Y y, Function<Pair<X, Y>, Y> f) {
 		for (X x : xs) {
 			y = f.apply(new Pair<>(x, y));
 		}
 		return y;
 	}
-	
+
 	@SafeVarargs
-	public static <X> List<X> list(X...xs) {
+	public static <X> List<X> list(X... xs) {
 		List<X> ret = new LinkedList<>();
 		for (X x : xs) {
 			ret.add(x);
 		}
 		return ret;
 	}
-	
+
 	public static <K, V> LinkedHashMap<K, V> listToMap(List<Pair<K, V>> list) {
 		if (list == null) {
 			throw new RuntimeException("Attempt to create a map with a null list");
@@ -394,10 +390,12 @@ public class Util {
 
 	/**
 	 * 
-	 * @param m target
-	 * @param m2 source
+	 * @param m
+	 *            target
+	 * @param m2
+	 *            source
 	 */
-	public static <K,V> void putAllSafely(Map<K,V> m, Map<K,V> m2) {
+	public static <K, V> void putAllSafely(Map<K, V> m, Map<K, V> m2) {
 		for (K k : m2.keySet()) {
 			V v2 = m2.get(k);
 			if (!m.containsKey(k)) {
@@ -552,10 +550,8 @@ public class Util {
 			return o1.toString().compareTo(o2.toString());
 		}
 	};
-	
-	public static Comparator<Object> AlphabeticalComparator = 
-                (o1, o2) -> o1.toString().compareTo(o2.toString());
-	
+
+	public static Comparator<Object> AlphabeticalComparator = (o1, o2) -> o1.toString().compareTo(o2.toString());
 
 	public static <X, Y> Map<Y, X> rev0(Map<X, Y> m) {
 		return Util.rev(m, new HashSet<>(m.values()));
@@ -574,7 +570,7 @@ public class Util {
 		}
 		return ret;
 	}
-	
+
 	public static <X, Y> Map<X, Y> singMapM(X x, Y y) {
 		Map<X, Y> ret = new HashMap<>();
 		ret.put(x, y);
@@ -682,7 +678,6 @@ public class Util {
 
 	}
 
-
 	@SuppressWarnings("serial")
 	public static JPanel makeBoldHeaderTable(Collection<String> atts, Border b, String border, Object[][] rowData, String[] colNames) {
 		JTable t = new JTable(rowData, colNames) {
@@ -692,11 +687,11 @@ public class Util {
 				return new Dimension(d.width, d.height);
 			}
 		};
-	//	PlusMinusCellRenderer r = new PlusMinusCellRenderer();
-	//	t.setDefaultRenderer(Object.class, r);
-	//	t.setDefaultEditor(Object.class, r);
-	//	t.setModel(new NonEditableModel(rowData, colNames));
-//		t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		// PlusMinusCellRenderer r = new PlusMinusCellRenderer();
+		// t.setDefaultRenderer(Object.class, r);
+		// t.setDefaultEditor(Object.class, r);
+		// t.setModel(new NonEditableModel(rowData, colNames));
+		// t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		JPanel p = new JPanel(new GridLayout(1, 1));
 		TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
@@ -708,36 +703,33 @@ public class Util {
 		p.add(new JScrollPane(t));
 
 		/*
-		for (int row = 0; row < t.getRowCount(); row++) {
-			int rowHeight = t.getRowHeight();
-
-			for (int column = 0; column < t.getColumnCount(); column++) {
-				Component comp = t.prepareRenderer(t.getCellRenderer(row, column), row, column);
-				rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
-			}
-
-			t.setRowHeight(row, rowHeight);
-		} */
+		 * for (int row = 0; row < t.getRowCount(); row++) { int rowHeight =
+		 * t.getRowHeight();
+		 * 
+		 * for (int column = 0; column < t.getColumnCount(); column++) {
+		 * Component comp = t.prepareRenderer(t.getCellRenderer(row, column),
+		 * row, column); rowHeight = Math.max(rowHeight,
+		 * comp.getPreferredSize().height); }
+		 * 
+		 * t.setRowHeight(row, rowHeight); }
+		 */
 
 		p.setBorder(BorderFactory.createTitledBorder(b, border));
-		//t.getTableHeader().set
+		// t.getTableHeader().set
 		for (int i = 0; i < t.getColumnModel().getColumnCount(); i++) {
-		 TableColumn col = t.getColumnModel().getColumn(i);
-		 
-		    col.setHeaderRenderer(new Util.BoldifyingColumnHeaderRenderer(atts, t.getTableHeader().getDefaultRenderer()));
+			TableColumn col = t.getColumnModel().getColumn(i);
+
+			col.setHeaderRenderer(new Util.BoldifyingColumnHeaderRenderer(atts, t.getTableHeader().getDefaultRenderer()));
 		}
-		
+
 		return p;
 
-	} 
-	
+	}
 
-	public static String nice(String s) { 
+	public static String nice(String s) {
 		return s;
 		// return s.replace("[", "{").replace("]", "}");
-	} 
-
-	
+	}
 
 	public static <X, Y> List<Y> proj2(Collection<Pair<X, Y>> l) {
 		return l.stream().map(x -> x.second).collect(Collectors.toList());
@@ -746,7 +738,7 @@ public class Util {
 	public static <X, Y> List<X> proj1(Collection<Pair<X, Y>> l) {
 		return l.stream().map(x -> x.first).collect(Collectors.toList());
 	}
-	
+
 	public static String sep(Collection<?> order, Map<?, ?> m, String sep1, String sep2, boolean skip) {
 		String ret = "";
 		boolean b = false;
@@ -760,7 +752,7 @@ public class Util {
 			if (b) {
 				ret += sep2;
 			}
-			b = true;	
+			b = true;
 			ret += o + sep1 + m.get(o);
 		}
 		return ret;
@@ -770,15 +762,12 @@ public class Util {
 		return sep(m.keySet(), m, sep1, sep2, false);
 	}
 
-	
-
 	public static String q(Object o) {
 		if (o == null) {
 			return "!!!NULL!!!";
 		}
 		String s = o.toString();
-		if ((s.contains("\t") || s.contains("\n") || s.contains("\r") || s.contains("-") || s.length() == 0)
-				&& !s.contains("\"")) {
+		if ((s.contains("\t") || s.contains("\n") || s.contains("\r") || s.contains("-") || s.length() == 0) && !s.contains("\"")) {
 			return "\"" + s + "\"";
 		}
 		return s;
@@ -827,14 +816,14 @@ public class Util {
 
 		return ret;
 	}
-	
+
 	public static <X, Y> void putSafely(Map<X, Y> ret, X k, Y v) {
 		if (ret.containsKey(k) && !ret.get(k).equals(v)) {
 			throw new RuntimeException("Two distinct bindings for " + k + ": " + v + " and " + ret.get(k));
 		}
 		ret.put(k, v);
 	}
-	
+
 	public static <X, Y> Map<X, Y> toMapSafely(Collection<Pair<X, Y>> t) {
 		Map<X, Y> ret = new HashMap<>();
 
@@ -844,7 +833,6 @@ public class Util {
 
 		return ret;
 	}
-
 
 	public static <X, Y> Set<Pair<X, Y>> convert(Map<X, Y> t) {
 		Set<Pair<X, Y>> ret = new HashSet<>();
@@ -940,8 +928,6 @@ public class Util {
 		}, o);
 	}
 
-
-
 	public static <X> List<List<X>> prod(List<Set<X>> in1) {
 		List<List<X>> y = new LinkedList<>();
 		List<X> z = new LinkedList<>();
@@ -970,18 +956,18 @@ public class Util {
 
 	public static <T> void assertNoDups(Collection<T> list) {
 
-	    Set<T> duplicates = new HashSet<>();
-	    Set<T> uniques = new HashSet<>();
+		Set<T> duplicates = new HashSet<>();
+		Set<T> uniques = new HashSet<>();
 
-	    for(T t : list) {
-	        if(!uniques.add(t)) {
-	            duplicates.add(t);
-	        }
-	    }
+		for (T t : list) {
+			if (!uniques.add(t)) {
+				duplicates.add(t);
+			}
+		}
 
-	    if (!duplicates.isEmpty()) {
-	    	throw new RuntimeException("List contains duplicates, namely " + duplicates);
-	    }
+		if (!duplicates.isEmpty()) {
+			throw new RuntimeException("List contains duplicates, namely " + duplicates);
+		}
 	}
 
 	/**
@@ -999,7 +985,7 @@ public class Util {
 		return ret;
 	}
 
-	public static <X,Y,Z> Map<X, Map<Y, Z>> newMapsFor(Collection<X> xs) {
+	public static <X, Y, Z> Map<X, Map<Y, Z>> newMapsFor(Collection<X> xs) {
 		Map<X, Map<Y, Z>> ret = new HashMap<>();
 		for (X x : xs) {
 			ret.put(x, new HashMap<>());
@@ -1007,31 +993,31 @@ public class Util {
 		return ret;
 	}
 
-	public static <X,Y> Map<X, Set<Y>> newSetsFor(Collection<X> xs) {
+	public static <X, Y> Map<X, Set<Y>> newSetsFor(Collection<X> xs) {
 		Map<X, Set<Y>> ret = new HashMap<>();
 		for (X x : xs) {
 			ret.put(x, new HashSet<>());
 		}
 		return ret;
 	}
-	
-	public static <X,Y> Map<X, List<Y>> newListsFor(Collection<X> xs) {
+
+	public static <X, Y> Map<X, List<Y>> newListsFor(Collection<X> xs) {
 		Map<X, List<Y>> ret = new HashMap<>();
 		for (X x : xs) {
 			ret.put(x, new LinkedList<>());
 		}
 		return ret;
 	}
-	
-	public static <X,Y> Map<X, Y> constMap(Collection<X> xs, Y y) {
-		Map<X,Y> ret = new HashMap<>();
+
+	public static <X, Y> Map<X, Y> constMap(Collection<X> xs, Y y) {
+		Map<X, Y> ret = new HashMap<>();
 		for (X x : xs) {
 			ret.put(x, y);
 		}
 		return ret;
 	}
 
-	public static <X extends Z,Y extends Z,Z>  Set<Z> union(Collection<X> x, Collection<Y> y) {
+	public static <X extends Z, Y extends Z, Z> Set<Z> union(Collection<X> x, Collection<Y> y) {
 		Set<Z> ret = new HashSet<>(x);
 		ret.addAll(y);
 		return ret;
@@ -1040,24 +1026,24 @@ public class Util {
 	public static <X> List<String> toString(Collection<X> list) {
 		return list.stream().map(Object::toString).collect(Collectors.toList());
 	}
-	
+
 	public static <T> Set<Set<T>> powerSet(Collection<T> originalSet) {
-	    Set<Set<T>> sets = new HashSet<>();
-	    if (originalSet.isEmpty()) {
-	    	sets.add(new HashSet<>());
-	    	return sets;
-	    }
-	    List<T> list = new ArrayList<>(originalSet);
-	    T head = list.get(0);
-	    Set<T> rest = new HashSet<>(list.subList(1, list.size())); 
-	    for (Set<T> set : powerSet(rest)) {
-	    	Set<T> newSet = new HashSet<>();
-	    	newSet.add(head);
-	    	newSet.addAll(set);
-	    	sets.add(newSet);
-	    	sets.add(set);
-	    }		
-	    return sets;
+		Set<Set<T>> sets = new HashSet<>();
+		if (originalSet.isEmpty()) {
+			sets.add(new HashSet<>());
+			return sets;
+		}
+		List<T> list = new ArrayList<>(originalSet);
+		T head = list.get(0);
+		Set<T> rest = new HashSet<>(list.subList(1, list.size()));
+		for (Set<T> set : powerSet(rest)) {
+			Set<T> newSet = new HashSet<>();
+			newSet.add(head);
+			newSet.addAll(set);
+			sets.add(newSet);
+			sets.add(set);
+		}
+		return sets;
 	}
 
 	public static Comparator<Object> ToStringComparator = new Comparator<Object>() {
@@ -1072,55 +1058,75 @@ public class Util {
 		}
 	};
 
-
 	public static void anomaly() {
 		throw new RuntimeException("Anomaly: please report");
 	}
 
-	public static <X,Y> Collection<Object> isect(Collection<X> xs, Collection<Y> ys) {
+	public static <X, Y> Collection<Object> isect(Collection<X> xs, Collection<Y> ys) {
 		return CollectionUtils.intersection(xs, ys);
 	}
 
 	/**
-	   * Levenshtein Edit Distance
-	   * http://rosettacode.org/wiki/Levenshtein_distance#Java
-	   * @param s1
-	   * @param s2
-	   * @return
-	   */
-	  public static int editDistance(String s1, String s2) {
-	    s1 = s1.toLowerCase();
-	    s2 = s2.toLowerCase();
-	
-	    int[] costs = new int[s2.length() + 1];
-	    for (int i = 0; i <= s1.length(); i++) {
-	      int lastValue = i;
-	      for (int j = 0; j <= s2.length(); j++) {
-	        if (i == 0)
-	          costs[j] = j;
-	        else {
-	          if (j > 0) {
-	            int newValue = costs[j - 1];
-	            if (s1.charAt(i - 1) != s2.charAt(j - 1))
-	              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-	            costs[j - 1] = lastValue;
-	            lastValue = newValue;
-	          }
-	        }
-	      }
-	      if (i > 0)
-	        costs[s2.length()] = lastValue;
-	    }
-	    return costs[s2.length()];
-	  }
+	 * Levenshtein Edit Distance
+	 * http://rosettacode.org/wiki/Levenshtein_distance#Java
+	 * 
+	 * @param s1
+	 * @param s2
+	 * @return
+	 */
+	public static int editDistance(String s1, String s2) {
+		s1 = s1.toLowerCase();
+		s2 = s2.toLowerCase();
+
+		int[] costs = new int[s2.length() + 1];
+		for (int i = 0; i <= s1.length(); i++) {
+			int lastValue = i;
+			for (int j = 0; j <= s2.length(); j++) {
+				if (i == 0)
+					costs[j] = j;
+				else {
+					if (j > 0) {
+						int newValue = costs[j - 1];
+						if (s1.charAt(i - 1) != s2.charAt(j - 1))
+							newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+						costs[j - 1] = lastValue;
+						lastValue = newValue;
+					}
+				}
+			}
+			if (i > 0)
+				costs[s2.length()] = lastValue;
+		}
+		return costs[s2.length()];
+	}
 
 	/**
-	   * Calculates a similarity (a number within 0 and 1) between two strings
-	   * as 1 / 1 + editDistance
-	   * 
-	   */
-	  public static double similarity(String s1, String s2) { //TODO aql
-			return (1) / ((double)1+editDistance(s1, s2));
-	  }
-     }
+	 * Calculates a similarity (a number within 0 and 1) between two strings as
+	 * 1 / 1 + editDistance
+	 * 
+	 */
+	public static double similarity(String s1, String s2) { // TODO aql
+		return (1) / ((double) 1 + editDistance(s1, s2));
+	}
 
+	public static String readFile(String file) {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			String line = null;
+			StringBuilder stringBuilder = new StringBuilder();
+			String ls = System.getProperty("line.separator");
+
+			while ((line = reader.readLine()) != null) {
+				stringBuilder.append(line);
+				stringBuilder.append(ls);
+			}
+
+			reader.close();
+			return stringBuilder.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Could not read from " + file);
+		}
+		return null;
+	}
+}

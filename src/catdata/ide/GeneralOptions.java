@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.function.Function;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -25,7 +26,7 @@ import catdata.Unit;
 
 public class GeneralOptions extends Options {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
 	@Override
 	public String getName() {
@@ -35,6 +36,7 @@ public class GeneralOptions extends Options {
 	public String file_path = "";
 	public String look_and_feel = UIManager.getSystemLookAndFeelClassName();
 	public int font_size = 12;
+	public boolean spellcheck = true;
 
 	//@Override
 	@Override
@@ -94,11 +96,19 @@ public class GeneralOptions extends Options {
 		font_label.setToolTipText("Sets the size of the font used in all editors.");
 		general1.add(font_label);
 		general2.add(wrap(font_field));
+			
+		JCheckBox spellbox = new JCheckBox("");
+		spellbox.setSelected(spellcheck);
+		JLabel slabel = new JLabel("Spell check comments:");
+		general1.add(slabel);
+		general2.add(spellbox);
 		
 		for (int j = 0; j < Options.biggestSize - size(); j++) {
 			general1.add(new JLabel());
 			general2.add(new JLabel());
 		}
+		
+		
 		
 		Function<Unit, Unit> fn = new Function<Unit, Unit>() {
 
@@ -121,6 +131,9 @@ public class GeneralOptions extends Options {
 					file_path = fileArea.getText();
 				}
 
+				spellcheck = spellbox.isSelected();
+				GUI.keys.values().forEach(x -> x.clearSpellCheck());
+				
 				if (!lfb.getSelectedItem().equals(look_and_feel)) {
 					try {
 						UIManager.setLookAndFeel(lfb.getSelectedItem().toString());
@@ -141,7 +154,7 @@ public class GeneralOptions extends Options {
 
 	@Override
 	public int size() {
-		return 3;
+		return 4;
 	} 
 
 }

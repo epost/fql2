@@ -59,7 +59,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		col.atts.putAll(Util.toMapSafely(atts));
 	
 		for (Quad<String, Object, RawTerm, RawTerm> eq : t_eqs) {
-				Map<String, Chc<Object, Object>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inLeft(eq.second));
+				Map<String, Chc<Object, Object>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
 				
 				Triple<Ctx<String,Chc<Object,Object>>,Term<Object,Object,Object,Object,Object,Void,Void>,Term<Object,Object,Object,Object,Object,Void,Void>>
 				eq0 = RawTerm.infer1(ctx, eq.third, eq.fourth, col, ts.js);

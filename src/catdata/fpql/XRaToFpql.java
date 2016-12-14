@@ -953,6 +953,9 @@ public class XRaToFpql {
 			return;
 		}
 		eqcs.remove(rx);
+		if (lx == null) {
+			throw new RuntimeException("RaToFpql internal error, please report");
+		}
 		lx.addAll(rx);
 	}
 

@@ -175,19 +175,12 @@ public class AqlJs<Ty, Sym> {
 	}
 	
 	private <En, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> reduce1(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
-		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args = null; 
-		Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg = null; 
-
 		if (term.var != null || term.gen != null || term.sk != null || term.obj != null) {
 			return term;
 		}
-
-		if (term.args != null) {
-			args = new LinkedList<>();
-			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> x : term.args) {
-				args.add(reduce1(x));
-			}
-		} else if (term.arg != null) {
+		
+		Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg = null; 
+		if (term.arg != null) {
 			arg = reduce1(term.arg);
 		} 
 		
@@ -195,7 +188,11 @@ public class AqlJs<Ty, Sym> {
 			return Term.Fk(term.fk, arg);
 		} else if (term.att != null) {
 			return Term.Att(term.att, arg);
-		} else if (term.sym != null) {
+		} else if (term.args != null) {
+			List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args = new LinkedList<>();
+			for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> x : term.args) {
+				args.add(reduce1(x));
+			}
 			if (!java_fns.containsKey(term.sym)) {
 				return Term.Sym(term.sym, args);
 			}

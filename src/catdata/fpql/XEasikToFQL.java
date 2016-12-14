@@ -112,6 +112,9 @@ public class XEasikToFQL {
        						w2 = wX;
        					}
        				}
+       				if (w1 == null || w2 == null) {
+       					throw new RuntimeException("Easik to FQL internal error");
+       				}
        				String cod1 = w1.getAttributes().getNamedItem("domain").getTextContent().toString(); 
        				String cod2 = w2.getAttributes().getNamedItem("domain").getTextContent().toString(); 
        				List<String> lhs = new LinkedList<>();

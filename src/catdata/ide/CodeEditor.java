@@ -10,6 +10,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.DateFormat;
+import java.util.Collection;
 import java.util.Date;
 
 import javax.swing.AbstractAction;
@@ -365,7 +366,20 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		JMenuItem unfoldall = new JMenuItem("UnFold All");
 		unfoldall.addActionListener(x -> foldAll(false));
 		topArea.getPopupMenu().add(unfoldall, 0);
+		
+		//TODO aql real DAWG?
+		spc = new SpellChecker(reservedWords());
+		topArea.addParser(spc); 
+		
+
 	}
+	
+	@SuppressWarnings("static-method")
+	protected Collection<String> reservedWords() {
+		return Util.list("schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
+	}
+	
+	private final SpellChecker spc;
 	
 	public void foldAll(boolean b) {
 		int i = topArea.getFoldManager().getFoldCount();
@@ -575,6 +589,10 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 		
 		return true;
+	}
+
+	public void clearSpellCheck() {
+		topArea.forceReparsing(spc);
 	}
 	
 
