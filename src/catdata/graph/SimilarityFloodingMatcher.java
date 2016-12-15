@@ -349,7 +349,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		double[] sigma = new double[size];
 		double[] tempsig = new double[size];
 		double[] finsig = new double[size];
-		double mx = 0.0;
+		
 		
 		// initialize sigma to ones
 		for (int i=0; i<size; i++) {
@@ -357,6 +357,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		}
 		
 		for (int i=0; i<maxiter; i++) {
+			double mx = 0.0;
 			// for each x y vertex in ipg 
 			for (int j=0; j< size; j++) {
 				double sig = sigma[j];
