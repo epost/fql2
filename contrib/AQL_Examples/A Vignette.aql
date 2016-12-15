@@ -1,0 +1,79 @@
+typeside Ty = literal { 
+	java_types
+		String = "java.lang.String"
+		Boolean = "java.lang.Boolean"
+	java_constants
+		String = "return input[0]"
+		Boolean = "return java.lang.Boolean.parseBoolean(input[0]);"
+     java_functions
+          eq : String, String -> Boolean = "return input[0].equals(input[1])"
+}
+
+schema Mon = literal : Ty {
+   entities
+     Mon
+   foreign_keys
+     parent : Mon -> Mon
+   path_equations
+     parent.parent = parent
+   attributes
+     name : Mon -> String   
+}
+
+instance i_Mon = literal : Mon {
+   generators
+	m1 m2 m3 m4 m5 m6 m7: Mon
+   multi_equations
+     // parent : Mon -> Mon
+	parent -> {m3 m1, m5 m1, m7 m1, m4 m2, m6 m2}	
+     // name : Mon -> String
+	name   -> {m1 parent1, m2 parent2, m3 child3, m4 child4, m5 child5,
+	           m6 child6, m7 child7}
+//	 options
+//	  	require_consistency = true           
+} 
+
+schema Two = literal : Ty {
+   entities
+	  Source Target
+   foreign_keys
+	  master : Source -> Target // Single foreign key representing a detail -> master relationship  
+   attributes
+	  rowSLbl  : Source -> String // Representitive Source attribute.
+	  rowTLbl  : Target -> String // Representitive Target attribute.
+	  mstrPtsTo: Source -> String // Move rowTLbl to Source by following master.rowTLbl.
+   observation_equations
+	  // Copy the target attribute up to source by following the master key.
+	  forall s. s.master.rowTLbl = s.mstrPtsTo
+}
+
+
+query qMonTwo = literal : Mon -> Two {
+   entities //source entities: Mon
+	Source -> {
+	  from
+	    ms : Mon
+	  where
+	    eq(ms.parent.name, ms.name) = false
+	  return
+	    mstrPtsTo -> ms.parent.name
+	    rowSLbl   -> ms.name}
+	Target -> {
+	  from
+	    mt : Mon
+	  where
+	    //mt.name = mt.parent.name
+	    mt.parent.name = mt.name
+	  return
+	    rowTLbl -> mt.name
+//	  options
+//	  	dont_validate_unsafe = true  
+	    }
+
+   foreign_keys
+	master -> {mt -> ms.parent}  //[parent:Mon->Mon]}
+
+	 
+}
+
+instance i_MonTwo = eval qMonTwo i_Mon

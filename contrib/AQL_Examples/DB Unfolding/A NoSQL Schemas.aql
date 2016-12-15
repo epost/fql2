@@ -1,0 +1,183 @@
+typeside Ty = literal {
+  java_types
+     string = "java.lang.String"
+  java_constants
+     string = "return input[0]"
+}
+
+
+schema EAV = literal : Ty {
+  entities
+     A E O V
+  foreign_keys
+     src      : O -> E
+     att      : O -> A
+     tgt      : O -> V
+  attributes
+     attLbl   : A -> string
+     entLbl   : E -> string
+     obsVal   : V -> string
+}
+
+schema GRF = literal : Ty {
+  entities
+     I_1 I_0
+  foreign_keys
+     src_i    : I_1 -> I_0
+     tgt_i    : I_1 -> I_0
+  attributes
+     arLbl    : I_1 -> string
+     nodeVal  : I_0 -> string
+}
+
+schema UDM = literal : Ty {
+  entities
+     Tbl Col Row Cel
+  foreign_keys
+     colTab  : Col -> Tbl
+     rowTab  : Row -> Tbl
+     celCol  : Cel -> Col
+     celRow  : Cel -> Row
+  path_equations
+     celCol.colTab = celRow.rowTab
+  attributes
+     tblName : Tbl -> string
+     colName : Col -> string
+     rowVal  : Row -> string
+     celVal  : Cel -> string
+}
+
+schema GRFS = literal : Ty {
+  entities
+     I_1 I_0 C_1 C_0
+  foreign_keys
+     src_i    : I_1 -> I_0
+     tgt_i    : I_1 -> I_0
+     ndType   : I_0 -> C_0
+     arType   : I_1 -> C_1
+     src_c    : C_1 -> C_0
+     tgt_c    : C_1 -> C_0
+  path_equations
+     tgt_i.ndType = arType.tgt_c
+     src_i.ndType = arType.src_c
+  attributes
+     tblLbl   : C_0 -> string
+     colLbl   : C_1 -> string
+     nodeVal  : I_0 -> string
+}
+
+mapping E_GS = literal : EAV -> GRFS {
+  entities
+     O      -> I_1
+     V      -> I_0
+     E      -> I_0
+     A      -> C_1
+  foreign_keys
+     tgt    -> tgt_i
+     src    -> src_i
+     att    -> arType
+  attributes
+     obsVal -> lambda x. nodeVal(x)
+     entLbl -> lambda x. nodeVal(x)
+     attLbl -> lambda x. colLbl(x)
+}
+
+mapping G_GS = literal : GRF -> GRFS {
+  entities
+     I_1    -> I_1
+     I_0    -> I_0
+  foreign_keys
+     src_i   -> src_i
+     tgt_i   -> tgt_i
+  attributes
+     arLbl   -> lambda x. colLbl(arType(x))
+     nodeVal -> lambda x. nodeVal(x)
+}
+
+mapping U_GS = literal : UDM -> GRFS {
+  entities
+     Tbl   -> C_0
+     Col   -> C_1
+     Row   -> I_0
+     Cel   -> I_1
+  foreign_keys
+     colTab  -> src_c
+     rowTab  -> ndType
+     celCol  -> arType
+     celRow  -> src_i
+  attributes
+     rowVal  -> lambda x. nodeVal(x)
+     celVal  -> lambda x. nodeVal(tgt_i(x))
+     tblName -> lambda x. tblLbl(x)
+     colName -> lambda x. colLbl(x)
+}
+
+instance i_GRFS = literal : GRFS {
+  generators
+     i11 i12 i13 : I_1
+     i01 i02 i03 i04 i05 : I_0
+     c01 c02 : C_0
+     c11 c12 : C_1
+  equations
+     i11.src_i=i04 i12.src_i=i04 i13.src_i=i05
+     i11.tgt_i=i01 i12.tgt_i=i02 i13.tgt_i=i03
+     i01.ndType=c01 i02.ndType=c01 i03.ndType=c01 // Instance nodes of type value.
+     i04.ndType=c02 i05.ndType=c02           // Instance nodes of type entity.
+     i11.arType=c11 i12.arType=c12 i13.arType=c11
+     c11.src_c=c02 c12.src_c=c02  // Source of BodyWt and HeartRt is Entity.
+     c11.tgt_c=c01 c12.tgt_c=c01  // Target of BodyWt and HeartRt is Value.
+     c01.tblLbl=Value c02.tblLbl=Entity
+     c11.colLbl=BodyWt c12.colLbl=HeartRt
+     i01.nodeVal="190_lbs" i02.nodeVal="60_bpm" i03.nodeVal="200_lbs" // instance values
+     i04.nodeVal=Peter_v1 i05.nodeVal=Peter_v2                         // instance entities
+}
+
+instance i_EAV = literal : EAV {
+  generators
+     a1 a2 : A
+     e1 e2 : E
+     o1 o2 o3 : O
+     v1 v2 v3 : V
+  equations
+     o1.src=e1 o2.src=e1 o3.src=e2
+     o1.att=a1 o2.att=a2 o3.att=a1
+     o1.tgt=v1 o2.tgt=v2 o3.tgt=v3
+     a1.attLbl=BodyWt a2.attLbl=HeartRt
+     e1.entLbl=Peter_v1 e2.entLbl=Peter_v2
+     v1.obsVal="190_lbs" v2.obsVal="60_bpm" v3.obsVal="200_lbs"
+}
+
+instance i_GRF = literal : GRF {
+  generators
+     i11 i12 i13 :  I_1
+     i01 i02 i03 i04 i05 : I_0
+  equations
+     i11.src_i=i04 i12.src_i=i04 i13.src_i=i05
+     i11.tgt_i=i01 i12.tgt_i=i02 i13.tgt_i=i03
+     i01.nodeVal="190_lbs" i02.nodeVal="60_bpm" i03.nodeVal="200_lbs"
+     i04.nodeVal=Peter_v1 i05.nodeVal=Peter_v2
+     i11.arLbl=BodyWt i12.arLbl=HeartRt i13.arLbl=BodyWt
+}
+
+instance i_UDM = literal : UDM {
+  generators
+     t1 t2 : Tbl
+     o1 o2 : Col
+     r1 r2 r3 r4 r5 r6 : Row
+     e1 e2 e3 e4 : Cel
+  equations
+     o1.colTab=t2 o2.colTab=t2
+     r1.rowTab=t1 r2.rowTab=t1 r3.rowTab=t1 r4.rowTab=t1 r5.rowTab=t2 r6.rowTab=t2
+     e1.celCol=o1 e2.celCol=o2 e3.celCol=o1 e4.celCol=o2
+     e1.celRow=r5 e2.celRow=r5 e3.celRow=r6 e4.celRow=r6
+     t1.tblName=Value t2.tblName=Entity
+     o1.colName=BodyWt o2.colName=HeartRt
+     r1.rowVal="190_lbs" r2.rowVal="60_bpm" r3.rowVal="200_lbs" /* r4.rowVal=PeterV2UnkHR skolem? */
+               r5.rowVal=Peter_v1 r6.rowVal=Peter_v2
+     e1.celVal="190_lbs" e2.celVal="60_bpm" e3.celVal="200_lbs" /* e4.celVal=PeterV2UnkHR skolem? */
+}
+
+instance dE_GS_on_i_GRFS = delta E_GS i_GRFS
+instance sE_GS_on_i_EAV = sigma E_GS i_EAV
+//instance pE_GS_on_i_EAV = pi E_GS i_EAV
+instance dU_GS_on_i_UDM =  delta U_GS i_GRFS

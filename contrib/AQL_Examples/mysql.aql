@@ -1,0 +1,78 @@
+typeside Ty = literal { 
+	java_types
+		string = "java.lang.String"
+		nat = "java.lang.Integer"
+	java_constants
+		string = "return input[0]"
+		nat = "return java.lang.Integer.parseInt(input[0])"
+	java_functions
+		plus : nat,nat -> nat = "return (input[0] + input[1]).intValue()"
+}
+
+schema S2 = literal : Ty {
+	entities
+		Employee Department 
+  	foreign_keys
+  	     department	: Employee -> Department
+  	attributes
+  		first last	: Employee -> string
+  		name 		: Department -> string
+}
+
+schema S = literal : Ty {
+	entities
+		Employee 
+		Department
+	foreign_keys
+		manager   : Employee -> Employee
+		worksIn   : Employee -> Department
+		secretary : Department -> Employee
+	path_equations 
+		manager.worksIn = worksIn
+  		secretary.worksIn = Department
+  		manager.manager = manager
+  	attributes
+  		first last	: Employee -> string
+     	age			: Employee -> nat
+     	cummulative_age: Employee -> nat
+     	name 		: Department -> string
+     observation_equations
+     	forall e. cummulative_age(e) = plus(age(e), age(manager(e)))
+}
+
+//import an instance by providing queries for each entity/foreign key/attribute (and optionally, type)
+/*instance J = import_jdbc 
+"com.mysql.jdbc.Driver"
+"jdbc:mysql://localhost:3306/employees?user=root&password=HappyFunctor" 
+ : S {
+	Employee -> "SELECT id FROM Employee"
+	Department -> "SELECT id FROM Department"
+	manager -> "SELECT id, NULL FROM Employee WHERE false"  
+	worksIn -> "SELECT id, NULL FROM Employee WHERE false" 
+	secretary -> "SELECT id, NULL FROM Department"
+	first -> "SELECT id, first_name FROM Employee"	//use name as first name
+  	last	-> "SELECT id, last_name FROM Employee"   //use null as last name
+     age -> "SELECT id, NULL FROM Employee where false"	  //use id as age	
+     cummulative_age -> "SELECT id, NULL FROM Employee WHERE FALSE" //add no equations about cummulative age 
+     name -> "SELECT id, name FROM Department"		  
+} */
+pragma test = exec_jdbc 
+	"com.mysql.jdbc.Driver" 
+	"jdbc:mysql://localhost:3306/employees?user=root&password=HappyFunctor" 
+{
+"select * from employee"
+"select id from employee"
+"select * from department"
+}
+
+instance J = import_jdbc 
+"com.mysql.jdbc.Driver"
+"jdbc:mysql://localhost:3306/employees?user=root&password=HappyFunctor" 
+ : S2 {
+	Employee -> "SELECT id FROM Employee"
+	Department -> "SELECT id FROM Department"
+	first -> "SELECT id, first_name FROM Employee"
+  	last	-> "SELECT id, last_name FROM Employee"
+  	name -> "SELECT id, name FROM Department"
+  	department -> "SELECT id, department_id FROM Department"
+}

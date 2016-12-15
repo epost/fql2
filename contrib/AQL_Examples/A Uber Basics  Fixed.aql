@@ -1,0 +1,1283 @@
+typeside Ty = literal { 
+	java_types
+		String = "java.lang.String"
+		Bool = "java.lang.Boolean"
+	java_constants
+		String = "return input[0]"
+		Bool = "return java.lang.Boolean.parseBoolean(input[0])"
+}
+/* Schemas and instances
+// The following sequence of schemas and associated instances are basic
+// structural elements that will be used to demonstrate how Uber-Flowers
+// work. These are our basic building blocks. */
+
+/* One schema declaration.
+// The terminal object, one object and an implicit identity arrow
+*/
+schema One = literal : Ty {
+	entities
+	  O
+	attributes
+	  rowOLbl: O -> String // Representitive O attribute
+}
+
+/* 
+ Proposed template for i_CoSpan instance.
+Type in:
+instance i_One = literal : One {
+and hit carrige return.
+
+If a valid compiled schema One exists, produce an instance template 
+
+instance i_One = literal : One {
+	generators
+	  <list generators here> : O
+	multi_equations
+	  // rowOLbl: O -> String // Representitive O attribute
+	  rowOLbl -> {<List assignments here>}
+}
+
+Example of a complete instance would look like: */
+instance i_One = literal : One {
+	generators
+	  o1 o2 : O
+	multi_equations
+	  // rowOLbl: O -> String // Representitive O attribute
+	  rowOLbl -> {o1 row_o1, o2 row_o2}
+}
+
+/* oPair schema declaration.
+// Discrete schema containing two tables without any nonprimary keys.
+ */
+schema oPair = literal : Ty {
+    entities
+      Ap Bp
+    attributes
+      rowApLbl: Ap -> String // Representitive Ap attribute
+      rowBpLbl: Bp -> String // Representitive Bp attribute
+}
+
+/*
+ Proposed template for i_Pair instance.
+Type in:
+instance i_Pair = literal : Pair {
+and hit carrige return.
+
+If a valid compiled schema Pair exists, produce an instance template 
+
+instance i_Pair = literal : Pair {
+	generators
+	  <list generators here> : Ap
+	  <List generators here> : Bp
+	multi_equations
+       rowApLbl: Ap -> String // Representitive Ap attribute
+       rowApLbl -> {<List assignments here>}
+       rowBpLbl: Bp -> String // Representitive Bp attribute
+       rowBpLbl -> {<List assignments here>}
+}
+
+Example of a complete instance would look like: */
+instance i_oPair = literal : oPair {
+  generators
+    a1 a2 a3 : Ap
+    b1 b2 b3 b4 : Bp
+  multi_equations
+    // rowApLbl: Ap -> String // Representitive Ap attribute
+    rowApLbl -> {a1 row_a1, a2 row_a2, a3 row_a3}
+    // rowBpLbl: Bp -> String // Representitive Bp attribute
+    rowBpLbl -> {b1 row_b1, b2 row_b2, b3 row_b3, b4 row_b4}
+}
+instance i_3_1_1 = literal : oPair { // See example 3.1.1 of CT4S
+  generators
+    a1 a2 a3 a4 a5 a6: Ap
+    b1 b2 b3 b4 : Bp
+  multi_equations
+    // rowApLbl: Ap -> String // Representitive Ap attribute
+    rowApLbl -> {a1 one, a2 two, a3 three, a4 four, a5 five, a6 six}
+    // rowBpLbl: Bp -> String // Representitive Bp attribute
+    rowBpLbl -> {b1 clubs, b2 diamonds, b3 hearts, b4 spades}
+}
+
+/* Two schema declaration.
+// Schema representing a foreign key, that is, a single arrow f: S -> T.
+// This is known as a detail -> master relationship in
+ database jargon.
+ */
+schema Two = literal : Ty {
+	entities
+	  Source Target
+	foreign_keys
+	  master: Source -> Target // Single foreign key representing a detail -> master relationship  
+	attributes
+	  rowSLbl: Source -> String // Representitive Source attribute.
+	  rowTLbl: Target -> String // Representitive Target attribute.
+	  mstrPtsTo: Source -> String // Move rowTLbl to Source by following master.rowTLbl.
+}
+
+/*
+ Proposed template for i_Two instance.
+Type in:
+instance i_Two = literal : Two {
+and hit carrige return.
+
+If a valid compiled schema Two exists, produce an instance template 
+
+instance i_Two = literal : Two { 
+	generators
+	  <list generators here> : Source
+	  <List generators here> : Target
+	multi_equations
+	  // master: Source -> Target // Single foreign key representing a detail -> master relationship
+	  master -> {<List assignments here>}
+	  // rowSLbl: Source -> String // Representitive Source attribute
+       rowSLbl -> {<List assignments here>}
+	  // rowTLbl: Target -> String // Representitive Target attribute
+       rowTLbl -> {<List assignments here>}
+}
+
+Example of a complete instance would look like: */
+instance i_Two = literal : Two {
+	generators
+	  s1 s2 s3 : Source
+	  t1 t2 : Target
+	multi_equations
+	  // master: Source -> Target // Single foreign key representing a detail -> master relationship
+	  master -> {s1 t1, s2 t1, s3 t2}
+	  // rowSLbl: Source -> String // Representitive Source attribute
+	  rowSLbl -> {s1 row_s1, s2 row_s2, s3 row_s3}
+	  // rowTLbl: Target -> String // Representitive Target attribute
+	  rowTLbl -> {t1 row_t1, t2 row_t2}
+	  // mstrPtsTo: Source -> String // Move rowTLbl to Source by following master.rowTLbl.
+	  mstrPtsTo -> {s1 row_t1, s2 row_t1, s3 row_t2}
+}
+/* aPair schema declaration.
+ */
+schema aPair = literal : Ty {
+	entities
+	  Srcp Tgtp
+	foreign_keys
+	  fp: Srcp -> Tgtp // First of a pair of parallel foreign keys
+	  gp: Srcp -> Tgtp // Second of a pair of parallel foreign keys
+	attributes
+	  rowSpLbl: Srcp -> String // Representitive Source attribute
+	  rowTpLbl: Tgtp -> String // Representitive Target attribute
+	  fpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing fp.rowTpLbl
+	  gpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing gp.rowTpLbl
+}
+/* Proposed template for i_aPair instance.
+instance i_aPair = literal : aPair {
+	generators
+	  <list generators here> : Srcp
+	  <List generators here> : Tgtp
+	multi_equations
+	  // fp: Srcp -> Tgtp // First of a pair of parallel foreign keys
+	  fp -> {<List assignments here>}
+	  // gp: Srcp -> Tgtp // Second of a pair of parallel foreign keys
+	  gp -> {<List assignments here>}
+	  // rowSpLbl: Srcp -> String // Representitive Source attribute
+	  rowSpLbl -> {<List assignments here>}
+	  // rowTpLbl: Tgtp -> String // Representitive Target attribute
+	  rowTpLbl -> {<List assignments here>}
+	  // fpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing fp.rowTpLbl
+	  fpPtsTo -> {<List assignments here>}
+	  // gpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing gp.rowTpLbl
+	  gpPtsTo -> {<List assignments here>}
+} */
+instance i_aPair = literal : aPair {
+	generators
+	  s1 s2 s3 s4 s5 s6 s7 : Srcp
+	  t1 t2 t3 : Tgtp
+	multi_equations
+	  // fp: Srcp -> Tgtp // First of a pair of parallel foreign keys
+	  fp -> {s1 t1, s2 t1, s3 t2, s4 t2, s5 t3, s6 t3, s7 t3}
+	  // gp: Srcp -> Tgtp // Second of a pair of parallel foreign keys
+	  gp -> {s1 t1, s2 t2, s3 t2, s4 t1, s5 t3, s6 t2, s7 t3}
+	  // rowSpLbl: Srcp -> String // Representitive Source attribute
+	  rowSpLbl -> {s1 row_s1, s2 row_s2, s3 row_s3, s4 row_s4, s5 row_s5, s6 row_s6, s7 row_s7}
+	  // rowTpLbl: Tgtp -> String // Representitive Target attribute
+	  rowTpLbl -> {t1 row_t1, t2 row_t2, t3 row_t3}
+	  // fpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing fp.rowTpLbl
+	  fpPtsTo -> {s1 s1.fp.rowTpLbl, s2 s2.fp.rowTpLbl, s3 s3.fp.rowTpLbl, s4 s4.fp.rowTpLbl,
+	              s5 s5.fp.rowTpLbl, s6 s6.fp.rowTpLbl, s7 s7.fp.rowTpLbl}
+	  // gpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing gp.rowTpLbl
+	  gpPtsTo -> {s1 s1.gp.rowTpLbl, s2 s2.gp.rowTpLbl, s3 s3.gp.rowTpLbl, s4 s4.gp.rowTpLbl,
+	              s5 s5.gp.rowTpLbl, s6 s6.gp.rowTpLbl, s7 s7.gp.rowTpLbl}
+}
+
+/* Span schema declaration.
+// Schema representing an entity that references two entities. This is called
+// a span in category theory and an intersection table in database jargon.
+// A state of a span is generally a relation between the two referenced entities.
+// In database jargon this is called a many to many relationship.
+//
+// The xPntsTo family of attributes are used to illustrate how one can make use
+// of paths to move an attribute that can be accessed through a path to an entity
+// that is the source of that path. They also serve to illustrate how schema and
+// instance interact to include built in providence features. Their intended use
+// is illustrated in the assignment statements in instances i_Span and i_Square. 
+*/
+schema Span = literal : Ty {
+	entities
+	  As Bs Cs
+	foreign_keys
+	  fs : Cs -> As // Foreign key to As
+	  gs : Cs -> Bs // Foreign key to Bs
+	attributes
+	  rowAsLbl: As -> String // Representitive As attribute
+	  rowBsLbl: Bs -> String // Representitive Bs attribute
+	  rowCsLbl: Cs -> String // Representitive Cs attribute
+	  fsPntsTo: Cs -> String // Move rowAsLbl to Cs by following fs.rowAsLbl
+	  gsPntsTo: Cs -> String // Move rowBsLbl to Cs by following gs.rowBsLbl
+}
+
+/*
+ Proposed template for i_Span instance.
+Type in:
+instance i_Span = literal : Span {
+and hit carrige return.
+
+If a valid compiled schema Span exists, produce an instance template 
+
+instance i_Span = literal : Span {
+	generators
+	  <list generators here> : As
+	  <List generators here> : Bs
+	  <List generators here> : Cs
+	multi_equations
+	  // fs : Cs -> As // Foreign key to As
+	  fs -> {<List assignments here>}
+	  // gs : Cs -> Bs // Foreign key to Bs
+	  gs -> {<List assignments here>}
+	  // rowAsLbl: As -> String // Representitive As attribute
+	  rowAsLbl -> {<List assignments here>}
+	  // rowBsLbl: Bs -> String // Representitive Bs attribute
+	  rowBsLbl -> {<List assignments here>}
+	  // rowCsLbl: Cs -> String // Representitive Cs attribute
+	  rowCsLbl -> {<List assignments here>}
+	  // fsPntsTo: Cs -> String // Move RowAsLbl to Cs by following fs.RowAsLbl
+	  fsPntsTo -> {<List assignments here>}
+	  // gsPntsTo: Cs -> String // Move RowBsLbl to Cs by following gs
+.RowBsLbl
+	  gsPntsTo -> {<List assignments here>}
+}
+
+Example of a complete instance would look like: */
+instance i_Span = literal : Span {
+  generators
+    a1 a2 a3 : As
+    b1 b2 : Bs
+    c1 c2 c3 c4 c5 c6 : Cs
+  multi_equations
+    // fs : Cs -> As // Foreign key to As
+    fs -> {c1 a1, c2 a2, c3 a3, c4 a1, c5 a2, c6 a3}
+    // gs : Cs -> Bs // Foreign key to Bs
+    gs -> {c1 b1, c2 b1, c3 b1, c4 b2, c5 b2, c6 b2}
+    // rowAsLbl: As -> String // Representitive As attribute
+    rowAsLbl -> {a1 row_a1, a2 row_a2, a3 row_a3}
+    // rowBsLbl: Bs -> String // Representitive Bs attribute
+    rowBsLbl -> {b1 row_b1, b2 row_b2}
+    // rowCsLbl: Cs -> String // Representitive Cs attribute
+    rowCsLbl -> {c1 row_c1_a1b1, c2 row_c2_a2b1, c3 row_c3_a3b1,
+                 c4 row_c4_a1b2, c5 row_c5_a2b2, c6 row_c6_a3b2}
+    // fsPntsTo: Cs -> String // Move RowAsLbl to Cs by following fs.RowAsLbl
+    fsPntsTo -> {c1 c1.fs.rowAsLbl, c2 c2.fs.rowAsLbl, c3 c3.fs.rowAsLbl,
+                 c4 c4.fs.rowAsLbl, c5 c5.fs.rowAsLbl, c6 c6.fs.rowAsLbl}
+    // gsPntsTo: Cs -> String // Move RowBsLbl to Cs by following gs.RowBsLbl
+    gsPntsTo -> {c1 c1.gs.rowBsLbl, c2 c2.gs.rowBsLbl, c3 c3.gs.rowBsLbl,
+                 c4 c4.gs.rowBsLbl, c5 c5.gs.rowBsLbl, c6 c6.gs.rowBsLbl}
+}
+
+/* CoSpan schema declaration.
+// Schema representing two entities that reference a common master. This is called
+// a cospan in category theory. The co prefix indicating that a cospan is related to
+// a span by reversing the direction of the arrows. I am unaware of standardized
+// jargon in the database community for this structure.
+*/
+schema CoSpan = literal : Ty {
+	entities
+	  Ac Bc Cc
+	foreign_keys
+	  fc: Ac -> Cc // Foreign key from Ac
+	  gc: Bc -> Cc // Foreign key from Bc
+	attributes
+	  rowAcLbl: Ac -> String // Representitive Ac attribute
+	  rowBcLbl: Bc -> String // Representitive Bc attribute
+	  rowCcLbl: Cc -> String // Representitive Cc attribute
+}
+
+/*
+ Proposed template for i_CoSpan instance.
+Type in:
+instance i_CoSpan = literal : CoSpan {
+and hit carrige return.
+
+If a valid compiled schema CoSpan exists, produce an instance template 
+
+instance i_CoSpan = literal : CoSpan {
+	generators
+	  <list generators here> : Ac
+	  <List generators here> : Bc
+	  <List generators here> : Cc
+	multi_equations
+	  // fc : Cc -> Ac // Foreign key from Ac
+	  fc -> {<List assignments here>}
+	  // gc : Cc -> Bc // Foreign key from Bc
+	  gs -> {<List assignments here>}
+	  // rowAcLbl: Ac -> String // Representitive Ac attribute
+	  rowAcLbl -> {<List assignments here>}
+	  // rowBcLbl: Bc -> String // Representitive Bc attribute
+	  rowBcLbl -> {<List assignments here>}
+	  // rowCcLbl: Cc -> String // Representitive Cc attribute
+	  rowCcLbl -> {<List assignments here>}
+}
+
+Example of a complete instance would look like: 
+*/
+instance i_CoSpan = literal : CoSpan {
+  generators
+     a1 a2 a3 a4 : Ac
+     b1 b2 b3 b4 b5 : Bc
+     c1 c2 : Cc
+  multi_equations
+     // fc : Cc -> Ac // Foreign key from Ac
+     fc -> {a1 c1, a2 c1, a3 c2, a4 c2}
+	// gc : Cc -> Bc // Foreign key from Bc
+     gc -> {b1 c1, b2 c1, b3 c2, b4 c2, b5 c2}
+     // rowAcLbl: Ac -> String // Representitive Ac attribute
+	rowAcLbl -> {a1 row_a1, a2 row_a2, a3 row_a3, a4 row_a4}
+	// rowBcLbl: Bc -> String // Representitive Bc attribute
+	rowBcLbl -> {b1 row_b1, b2 row_b2, b3 row_b3, b4 row_b4, b5 row_b5}
+	// rowCcLbl: Cc -> String // Representitive Cc attribute
+	rowCcLbl -> {c1 row_c1, c2 row_c2}
+}
+
+/* Square schema declaration.
+// Square defined as follows (neglecting xPntsTo attributes):
+// 
+//        n
+//   NW ------> NE 
+//  | |\      /||
+//  |  \     /  |
+// w|  String   |e
+//  | /|    |\  |
+// \//       \ \/
+// SW ------> SE
+//      s
+//    
+// We have added the path equation w followed by s is equal to n followed be e.
+// This equation is a statement that the square is comutitive. Considering this
+// from the perspective of a database, if we choose a record in NW and lookup
+// a record in SE by following the foriegn keys s followed by n we will get the
+// same record in SE as we would get by following the foreign keys w followed
+// by s. The AQL syntax provides a mechanism for declaring this path equivalence
+// as a property of the schema Square.
+//
+// The xPntsTo family of attributes are used to illustrate how one can make use
+// of paths to move an attribute that can be accessed through a path to an entity
+// that is the source of that path.
+ They also serve to illustrate how schema and
+// instance interact to incluide build in providence features. 
+*/
+schema Square = literal : Ty {
+	entities 
+	  NW NE SW SE
+	foreign_keys
+	  w:NW->SW // Forengn key on the west side of the sqaure 
+	  e:NE->SE // Forengn key on the eest side of the sqaure 
+	  s:SW->SE // Forengn key on the south side of the sqaure
+	  n:NW->NE // Forengn key on the north side of the sqaure
+	path_equations 
+	  w.s=n.e
+	attributes
+	  rowNWLbl: NW -> String // Representitive attribute for NW
+	  rowNELbl: NE -> String // Representitive attribute for NE
+	  rowSWLbl: SW -> String // Representitive attribute for SW
+	  rowSELbl: SE -> String // Representitive attribute for SE
+	  wPntsTo : NW -> String // Move RowSWLbl to NW by following w.rowSWLbl
+	  ePntsTo : NE -> String // Move rowSELbl to NE by following e.rowSELbl
+	  sPntsTo : SW -> String // Move rowSELbl to SW by following s.rowSELbl
+	  nPntsTo : NW -> String // Move rowNELbl to NW by following n.rowNELbl
+	  wsPntsTo: NW -> String // Move rowSELbl to NW by following w.s.rowSELbl
+	  nePntsTo: NW -> String // Move rowSELbl to NW by following n.e.rowSELbl
+}
+/* Proposed template for i_Square instance.
+Type in:
+instance i_Square = literal : Square {
+and hit carrige return.
+
+If a valid compiled schema Square exists, produce an instance template 
+
+instance i_Square = literal : Square {
+	generators
+	  <list generators here> : NW
+	  <List generators here> : NE
+	  <List generators here> : SW
+	  <List generators here> : SE
+	multi_equations
+	  // w:NW->SW // Forengn key on the west side of the sqaure 
+	  w -> {<List assignments here>}
+	  // e:NE->SE // Forengn key on the eest side of the sqaure 
+	  e -> {<List assignments here>}
+	  // s:SW->SE // Forengn key on the south side of the sqaure
+	  s -> {<List assignments here>}
+	  // n:NW->NE // Forengn key on the north side of the sqaure
+	  n -> {<List assignments here>}
+	  // rowNWLbL: NW -> String // Representitive attribute for NW
+	  rowNWLbL -> {<List assignments here>}
+	  // rowNELbl: NE -> String // Representitive attribute for NE
+	  rowNELbl -> {<List assignments here>}
+	  // rowSWLbl: SW -> String // Representitive attribute for SW
+	  rowSWLbl -> {<List assignments here>}
+	  // rowSELbl: SE -> String // Representitive attribute for SE
+	  rowSELbl -> {<List assignments here>}
+	  // wPntsTo : NW -> String // Move RowSWLbl to NW by following w.RowSWLbl
+	  wPntsTo -> {<List assignments here>}
+	  // ePntsTo : NE -> String // Move rowSELbl to NE by following e.rowSELbl
+	  ePntsTo -> {<List assignments here>}
+	  // sPntsTo : SW -> String // Move rowSELbl to SW by following s.rowSELbl
+	  sPntsTo -> {<List assignments here>}
+	  // nPntsTo : NW -> String // Move RowNELbl to NW by following n.RowNELbl
+	  nPntsTo -> {<List assignments here>}
+	  // wsPntsTo: NW -> String // Move rowSELbl to NW by following w.s.rowSELbl
+	  wsPntsTo -> {<List assignments here>}
+	  // nePntsTo: NW -> String // Move rowSELbl to NW by following n.e.rowSELbl
+	  nePntsTo -> {<List assignments here>}
+}
+
+Example of a complete instance would look like: 
+*/
+
+instance i_Square = literal : Square {
+	generators
+	  // <List generators here> : NW
+	  ne1 ne2 ne3 ne4 : NE
+	  sw1 sw2 sw3 sw4 sw5 : SW
+	  se1 se2 : SE
+	multi_equations
+	  // w:NW->SW // Forengn key on the west side of the sqaure 
+	  //w -> {<List assignments here>}
+	  // e:NE->SE // Forengn key on the eest side of the sqaure 
+	  e -> {ne1 se1, ne2 se1, ne3 se2, ne4 se2}
+	  // s:SW->SE // Forengn key on the south side of the sqaure
+	  s -> {sw1 se1, sw2 se1, sw3 se2, sw4 se2, sw5 se2}
+	  // n:NW->NE // Forengn key on the north side of the sqaure
+	  //n -> {<List assignments here>}
+	  // rowNWLbL: NW -> String // Representitive attribute for NW
+	  // rowNWLbL -> {<List assignments here>}
+	  // rowNELbl: NE -> String // Representitive attribute for NE
+	  rowNELbl -> {ne1 row_ne1, ne2 row_ne2, ne3 row_ne3, ne4 row_ne4}
+	  // rowSWLbl: SW -> String // Representitive attribute for SW
+	  rowSWLbl -> {sw1 row_sw1, sw2 row_sw2, sw3 row_sw3, sw4 row_sw4, sw5 row_sw5}
+	  // rowSELbl: SE -> String // Representitive attribute for SE
+	  rowSELbl -> {se1 row_se1, se2 row_se2}
+	  // wPntsTo : NW -> String // Move RowSWLbl to NW by following w.rowSWLbl
+	  // wPntsTo -> {<List assignments here>}
+	  // ePntsTo : NE -> String // Move rowSELbl to NE by following e.rowSELbl
+	  ePntsTo -> {ne1 ne1.e.rowSELbl, ne2 ne2.e.rowSELbl,
+	              ne3 ne3.e.rowSELbl, ne4 ne4.e.rowSELbl}
+	  // sPntsTo : SW -> String // Move RowSELbl to SW by following s.rowSELbl
+	  sPntsTo -> {sw1 sw1.s.rowSELbl, sw2 sw2.s.rowSELbl, sw3 sw3.s.rowSELbl,
+	              sw4 sw4.s.rowSELbl, sw5 sw5.s.rowSELbl}
+	  // nPntsTo : NW -> String // Move rowNELbl to NW by following n.rowNELbl
+	  // nPntsTo -> {<List assignments here>}
+	  // wsPntsTo: NW -> String // Move RowSELbl to NW by following w.s.rowSELbl
+	  // wsPntsTo -> {<List assignments here>}
+	  // nePntsTo: NW -> String // Move RowSELbl to NW by following n.e.rowSELbl
+	  // nePntsTo -> {<List assignments here>}
+}
+
+/* Querys that are identities
+ * We begin by demonstrating how one can implement an identity functor.
+ * In this series we illustrate how we can extract an instance from each
+ * of the schemas we have defined and load it back into that same schema.
+ * The identity functor is a special case of a class of functors that
+ * have the same source and target schemas. These are called endofunctors.
+ */
+ 
+/* Query template for qIdOne.
+*/
+query qIdOne = literal : One -> One {
+   entities	
+	O -> {                         // The target entity being constructed.
+	  from o:O                     // The source entities used in the construction.
+	  return
+	    // rowOLbl: O -> String // Representitive O attribute
+	    rowOLbl -> rowOLbl(o)}    // For each attribute in the target a value must be assigned.
+
+}
+/* Alternative syntax for specifying functions.
+// The following syntax makes use of the dot notation rather than the function notation. */
+query qIdOneAlt = literal : One -> One {
+   entities	
+	O -> {                         // The target entity being constructed.
+	  from o:O                     // The source entities used in the construction.
+	  return
+	    // rowOLbl: O -> String // Representitive O attribute
+	    rowOLbl -> o.rowOLbl}     // For each attribute in the target a value must be assigned.
+
+}
+instance i_IdOne = eval qIdOne i_One
+/* Query template for qIdPair.
+schema Pair = literal : Ty {
+    entities
+      Ap Bp
+    attributes
+      rowApLbl: Ap -> String // Representitive Ap attribute
+      rowBpLbl: Bp -> String // Representitive Bp attribute
+}
+Here is the query stub I would like:
+query aIdPair = literal : Pair -> Pair {
+   entities
+	Ap -> {
+	  from a:Ap
+	  return
+         // rowApLbl: Ap -> String // Representitive Ap attribute
+	    rowApLbl -> some type side symbols []
+	    applied to Attributes [rowApLbl rowBpLbl]
+	    applied to paths of foreign keys []
+	    ending on variables [v_Ap_Ap v_Ap_Bp]}
+	Bp -> {
+	  from b:Bp
+	  return
+         // rowBpLbl: Bp -> String // Representitive Bp attribute
+	    rowBpLbl -> some type side symbols []
+	    applied to Attributes [rowApLbl rowBpLbl]
+	    applied to paths of foreign keys []
+	    ending on variables [v_Bp_Ap v_Bp_Bp]}
+
+}
+To product the following example of a working query.*/
+query qIdoPair = literal : oPair -> oPair {
+   entities
+     Ap -> {
+       from a : Ap
+       return
+         // rowApLbl: Ap -> String // Representitive Ap attribute
+         rowApLbl -> rowApLbl(a)
+     }
+     Bp -> {
+       from b : Bp
+       return
+         // rowBpLbl: Bp -> String // Representitive Bp attribute
+         rowBpLbl -> rowBpLbl(b)
+     }
+
+}
+instance i_IdoPair = eval qIdoPair i_oPair
+/* Query template for qIdTwo.
+Given the following successfully compiled schema declaration:
+schema Two = literal : Ty {
+	entities
+	  Source Target
+	foreign_keys
+	  master: Source -> Target // Single foreign key representing a detail -> master relationship  
+	attributes
+	  rowSLbl: Source -> String // Representitive Source attribute
+	  rowTLbl: Target -> String // Representitive Target attribute
+}
+Produce the following query template  
+query qIdTwo = literal : Two -> Two {
+   entities
+     Source -> {
+    	  from
+    	    v_Source_Source:Source
+    	    v_Source_Target:Target
+	  return
+	    // rowSLbl: Source -> String // Representitive Source attribute
+	    rowSLbl -> some type side symbols []
+	               applied to Attributes [rowSLbl rowTLbl]
+	               applied to paths of foreign keys [master]
+	               ending on variables [v_Source_Source v_Source_Target]}
+     Target -> {
+    	  from
+    	    v_Target_Source:Source
+    	    v_Target_Target:Target
+	  return
+	    // rowTLbl: Target -> String // Representitive Target attribute
+	    rowTLbl -> some type side symbols []
+	               applied to Attributes [rowSLbl rowTLbl]
+	               applied to paths of foreign keys [master]
+	               ending on variables [v_Target_Source v_Target_Target]}
+
+	foreign_keys
+	  // master: Source -> Target // Single foreign key representing a detail -> master relationship  
+	  master -> {
+	    v_Target_Source -> a generator [v_Source_Source:Source v_Source_Target:Target]
+	                       . a path of foreign keys [master] ending at Source
+	    v_Target_Target -> a generator [v_Source_Source:Source v_Source_Target:Target]
+	                       . a path of foreign keys [master] ending at Source}
+} 
+*/
+query qIdTwo = literal : Two -> Two {
+   entities
+     Source -> {
+    	  from
+    	    s:Source
+	  return
+	    // rowSLbl: Source -> String // Representitive Source attribute
+	    rowSLbl -> s.rowSLbl
+	    // mstrPtsTo: Source -> String // Move rowTLbl to Source by following master.rowTLbl.
+	    mstrPtsTo -> s.master.rowTLbl}
+     Target -> {
+    	  from
+    	    t:Target
+	  return
+	    // rowTLbl: Target -> String // Representitive Target attribute
+	    rowTLbl -> t.rowTLbl}
+
+	foreign_keys
+       // master: Source -> Target // Single foreign key representing a detail -> master relationship
+	  master -> {t -> s.master}
+} 
+instance i_IdTwo = eval qIdTwo i_Two
+/* Query template for qIdaPair
+ * 
+query qIdaPair = literal : aPair ->  aPair {
+   entities
+	Srcp -> {
+	  from
+	    v_Srcp_Srcp:Srcp
+	    v_Srcp_Tgtp:Tgtp
+	  where
+	    equality of terms using some type side symbols []
+	    applied to Attributes [fpPtsTo gpPtsTo rowSpLbl rowTpLbl]
+	    applied to paths of foreign keys [fp gp]
+	    ending on variables [v_Srcp_Srcp v_Srcp_Tgtp]
+	  return
+	    // fpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing fp.rowTpLbl
+	    fpPtsTo -> some type side symbols []
+	               applied to Attributes [fpPtsTo gpPtsTo rowSpLbl rowTpLbl]
+	               applied to paths of foreign keys [fp gp]
+	               ending on variables [v_Srcp_Srcp v_Srcp_Tgtp]
+	    // gpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing gp.rowTpLbl
+	    gpPtsTo -> some type side symbols []
+	               applied to Attributes [fpPtsTo gpPtsTo rowSpLbl rowTpLbl]
+	               applied to paths of foreign keys [fp gp]
+	               ending on variables [v_Srcp_Srcp v_Srcp_Tgtp]
+	    // rowSpLbl: Srcp -> String // Representitive Source attribute
+	    rowSpLbl -> some type side symbols []
+	    			 applied to Attributes [fpPtsTo gpPtsTo rowSpLbl rowTpLbl]
+	    			 applied to paths of foreign keys [fp gp]
+	    			 ending on variables [v_Srcp_Srcp v_Srcp_Tgtp]}
+	Tgtp -> {
+	  from
+	    v_Tgtp_Srcp:Srcp
+	    v_Tgtp_Tgtp:Tgtp
+	  where
+	    equality of terms using some type side symbols []
+	    applied to Attributes [fpPtsTo gpPtsTo rowSpLbl rowTpLbl]
+	    applied to paths of foreign keys [fp gp]
+	    ending on variables [v_Tgtp_Srcp v_Tgtp_Tgtp]
+	  return
+	    // rowTpLbl: Tgtp -> String // Representitive Target attribute
+	    rowTpLbl -> some type side symbols []
+	    			 applied to Attributes [fpPtsTo gpPtsTo rowSpLbl rowTpLbl]
+	    			 applied to paths of foreign keys [fp gp]
+	    			 ending on variables [v_Tgtp_Srcp v_Tgtp_Tgtp]}
+
+   foreign_keys
+     // fp: Srcp -> Tgtp // First of a pair of parallel foreign keys
+	fp -> {v_Tgtp_Srcp -> a generator [v_Srcp_Srcp:Srcp v_Srcp_Tgtp:Tgtp] . a path of foreign keys [fp gp] ending at Srcp
+			v_Tgtp_Tgtp -> a generator [v_Srcp_Srcp:Srcp v_Srcp_Tgtp:Tgtp] . a path of foreign keys [fp gp] ending at Srcp}
+     // gp: Srcp -> Tgtp // Second of a pair of parallel foreign keys
+	gp -> {v_Tgtp_Srcp -> a generator [v_Srcp_Srcp:Srcp v_Srcp_Tgtp:Tgtp] . a path of foreign keys [fp gp] ending at Srcp
+			v_Tgtp_Tgtp -> a generator [v_Srcp_Srcp:Srcp v_Srcp_Tgtp:Tgtp] . a path of foreign keys [fp gp] ending at Srcp}
+}  */
+query qIdaPair = literal : aPair ->  aPair {
+   entities
+	Srcp -> {
+	  from
+	    s:Srcp
+	  return
+	    // fpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing fp.rowTpLbl
+	    fpPtsTo -> s.fp.rowTpLbl
+	    // gpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing gp.rowTpLbl
+	    gpPtsTo -> s.gp.rowTpLbl
+	    // rowSpLbl: Srcp -> String // Representitive Source attribute
+	    rowSpLbl -> s.rowSpLbl}
+	Tgtp -> {
+	  from
+	    t:Tgtp
+	  return
+	    // rowTpLbl: Tgtp -> String // Representitive Target attribute
+	    rowTpLbl -> t.rowTpLbl}
+
+   foreign_keys
+     // fp: Srcp -> Tgtp // First of a pair of parallel foreign keys
+	fp -> {t -> fp(s)}
+     // gp: Srcp -> Tgtp // Second of a pair of parallel foreign keys
+	gp -> {t -> gp(s)}
+}
+instance i_IdaPair = eval qIdaPair i_aPair
+/* Query template for qIdSpan.
+query qIdSpan = literal : Span -> Span {
+   entities
+	As -> {
+	  from
+	    v_As_As:As
+	    v_As_Bs:Bs
+	    v_As_Cs:Cs
+	  return
+	    // rowAsLbl: As -> String // Representitive As attribute.
+	    rowAsLbl -> some type side symbols []
+	    			 applied to Attributes [fsPntsTo gsPntsTo rowAsLbl rowBsLbl rowCsLbl]
+	    			 applied to paths of foreign keys [fs gs]
+	    			 ending on variables [v_As_As v_As_Bs v_As_Cs]}
+	Bs -> {
+	  from
+	    v_Bs_As:As
+	    v_Bs_Bs:Bs
+	    v_Bs_Cs:Cs
+	  return
+	    // rowBsLbl: Bs -> String // Representitive Bs attribute.
+	    rowBsLbl -> some type side symbols []
+	    			 applied to Attributes [fsPntsTo gsPntsTo rowAsLbl rowBsLbl rowCsLbl]
+	    			 applied to paths of foreign keys [fs gs]
+	    			 ending on variables [v_Bs_As v_Bs_Bs v_Bs_Cs]}
+	Cs -> {
+	  from
+	    v_Cs_As:As
+	    v_Cs_Bs:Bs
+	    v_Cs_Cs:Cs
+	  return
+	    // rowCsLbl: Cs -> String // Representitive Cs attribute.
+	    fsPntsTo -> some type side symbols []
+	    			 applied to Attributes [fsPntsTo gsPntsTo rowAsLbl rowBsLbl rowCsLbl]
+	    			 applied to paths of foreign keys [fs gs]
+	    			 ending on variables [v_Cs_As v_Cs_Bs v_Cs_Cs]
+	    // fsPntsTo: Cs -> String // Move rowAsLbl to Cs by following fs.rowAsLbl.
+	    gsPntsTo -> some type side symbols []
+	    			 applied to Attributes [fsPntsTo gsPntsTo rowAsLbl rowBsLbl rowCsLbl]
+	    			 applied to paths of foreign keys [fs gs]
+	    			 ending on variables [v_Cs_As v_Cs_Bs v_Cs_Cs]
+	    // gsPntsTo: Cs -> String // Move rowBsLbl to Cs by following gs.rowBsLbl.
+	    rowCsLbl -> some type side symbols []
+	    			 applied to Attributes [fsPntsTo gsPntsTo rowAsLbl rowBsLbl rowCsLbl]
+	    			 applied to paths of foreign keys [fs gs]
+	    			 ending on variables [v_Cs_As v_Cs_Bs v_Cs_Cs]}
+
+   foreign_keys
+	// fs : Cs -> As // Foreign key to As
+	fs -> {v_As_As -> a generator [v_Cs_As:As v_Cs_Bs:Bs v_Cs_Cs:Cs] . a path of foreign keys [fs gs] ending at Cs
+		  v_As_Bs -> a generator [v_Cs_As:As v_Cs_Bs:Bs v_Cs_Cs:Cs] . a path of foreign keys [fs gs] ending at Cs
+		  v_As_Cs -> a generator [v_Cs_As:As v_Cs_Bs:Bs v_Cs_Cs:Cs] . a path of foreign keys [fs gs] ending at Cs}
+	// gs : Cs -> Bs // Foreign key to Bs
+	gs -> {v_Bs_As -> a generator [v_Cs_As:As v_Cs_Bs:Bs v_Cs_Cs:Cs] . a path of foreign keys [fs gs] ending at Cs
+		  v_Bs_Bs -> a generator [v_Cs_As:As v_Cs_Bs:Bs v_Cs_Cs:Cs] . a path of foreign keys [fs gs] ending at Cs
+		  v_Bs_Cs -> a generator [v_Cs_As:As v_Cs_Bs:Bs v_Cs_Cs:Cs] . a path of foreign keys [fs gs] ending at Cs}
+}  to produce for example: */
+query qIdSpan = literal : Span -> Span {
+   entities
+	As -> {
+	  from
+	    a:As
+	  return
+	    // rowAsLbl: As -> String // Representitive As attribute.
+	    rowAsLbl -> a.rowAsLbl}
+	Bs -> {
+	  from
+	    b:Bs
+	  return
+	    // rowBsLbl: Bs -> String // Representitive Bs attribute.
+	    rowBsLbl -> b.rowBsLbl}
+	Cs -> {
+	  from
+	    c:Cs
+	  return
+	    // fsPntsTo: Cs -> String // Move rowAsLbl to Cs by following fs.rowAsLbl.
+	    fsPntsTo -> c.fs.rowAsLbl
+	    // gsPntsTo: Cs -> String // Move rowBsLbl to Cs by following gs.rowBsLbl.
+	    gsPntsTo -> c.gs.rowBsLbl
+	    // rowCsLbl: Cs -> String // Representitive Cs attribute.
+	    rowCsLbl -> c.rowCsLbl}
+
+   foreign_keys
+	// fs : Cs -> As // Foreign key to As
+	fs -> {a -> c.fs}
+	// gs : Cs -> Bs // Foreign key to Bs
+	gs -> {b -> c.gs}
+}
+instance i_IdSpan = eval qIdSpan i_Span
+/* Query template for qIdCoSpan.
+query qIdCoSpan = literal : CoSpan -> CoSpan {
+   entities
+	Ac -> {
+	  from 
+	    v_Ac_Ac:Ac
+	    v_Ac_Bc:Bc
+	    v_Ac_Cc:Cc
+	  where 
+	    equality of terms using some type side symbols [] applied to Attributes [rowAcLbl rowBcLbl rowCcLbl] applied to paths of foreign keys [fc gc] ending on variables [v_Ac_Ac v_Ac_Bc v_Ac_Cc]
+	  return
+	    // rowAcLbl: Ac -> String // Representitive Ac attribute
+	    rowAcLbl -> some type side symbols []
+	                applied to Attributes [rowAcLbl rowBcLbl rowCcLbl]
+	                applied to paths of foreign keys [fc gc]
+	                ending on variables [v_Ac_Ac v_Ac_Bc v_Ac_Cc]}
+	Bc -> {
+	  from
+	    v_Bc_Ac:Ac
+	    v_Bc_Bc:Bc
+	    v_Bc_Cc:Cc
+	  where
+	    equality of terms using some type side symbols []
+	    applied to Attributes [rowAcLbl rowBcLbl rowCcLbl]
+	    applied to paths of foreign keys [fc gc]
+	    ending on variables [v_Bc_Ac v_Bc_Bc v_Bc_Cc]
+	  return
+	    // rowBcLbl: Bc -> String // Representitive Bc attribute
+	    rowBcLbl -> some type side symbols []
+	                applied to Attributes [rowAcLbl rowBcLbl rowCcLbl]
+	                applied to paths of foreign keys [fc gc]
+	                ending on variables [v_Bc_Ac v_Bc_Bc v_Bc_Cc]}
+	Cc -> {
+	  from
+	    v_Cc_Ac:Ac
+	    v_Cc_Bc:Bc
+	    v_Cc_Cc:Cc
+	  where
+	    equality of terms using some type side symbols []
+	    applied to Attributes [rowAcLbl rowBcLbl rowCcLbl]
+	    applied to paths of foreign keys [fc gc]
+	    ending on variables [v_Cc_Ac v_Cc_Bc v_Cc_Cc]
+	  return
+	    // rowCcLbl: Cc -> String // Representitive Cc attribute
+	    rowCcLbl -> some type side symbols []
+	    applied to Attributes [rowAcLbl rowBcLbl rowCcLbl]
+	    applied to paths of foreign keys [fc gc]
+	    ending on variables [v_Cc_Ac v_Cc_Bc v_Cc_Cc]}
+
+	foreign_keys
+	  // fc: Ac -> Cc // Foreign key from Ac
+	  fc -> {v_Cc_Ac -> a generator [v_Ac_Ac:Ac v_Ac_Bc:Bc v_Ac_Cc:Cc]
+	         . a path of foreign keys [fc gc] ending at Ac
+		    v_Cc_Bc -> a generator [v_Ac_Ac:Ac v_Ac_Bc:Bc v_Ac_Cc:Cc]
+		    . a path of foreign keys [fc gc] ending at Ac
+		    v_Cc_Cc -> a generator [v_Ac_Ac:Ac v_Ac_Bc:Bc v_Ac_Cc:Cc]
+		    . a path of foreign keys [fc gc] ending at Ac}
+	  // gc: Bc -> Cc // Foreign key from Bc
+	  gc -> {v_Cc_Ac -> a generator [v_Bc_Ac:Ac v_Bc_Bc:Bc v_Bc_Cc:Cc] . a path of foreign keys [fc gc] ending at Bc
+		    v_Cc_Bc -> a generator [v_Bc_Ac:Ac v_Bc_Bc:Bc v_Bc_Cc:Cc] . a path of foreign keys [fc gc] ending at Bc
+		    v_Cc_Cc -> a generator [v_Bc_Ac:Ac v_Bc_Bc:Bc v_Bc_Cc:Cc] . a path of foreign keys [fc gc] ending at Bc}
+}
+Here is an example of a working query based on the above template.  */
+query qIdCoSpan = literal : CoSpan -> CoSpan {
+   entities
+	Ac -> {
+	  from 
+	    a:Ac
+	  return
+	    // rowAcLbl: Ac -> String // Representitive Ac attribute
+	    rowAcLbl -> a.rowAcLbl}
+	Bc -> {
+	  from
+	    b:Bc
+	  return
+	    // rowBcLbl: Bc -> String // Representitive Bc attribute
+	    rowBcLbl -> b.rowBcLbl}
+	Cc -> {
+	  from
+	    c:Cc
+	  return
+	    // rowCcLbl: Cc -> String // Representitive Cc attribute
+	    rowCcLbl -> c.rowCcLbl}
+
+	foreign_keys
+	  // fc: Ac -> Cc // Foreign key from Ac
+	  fc -> {c -> fc(a)}
+	  // gc: Bc -> Cc // Foreign key from Bc
+	  gc -> {c -> gc(b)}
+}
+instance i_IdCoSpan = eval qIdCoSpan i_CoSpan
+/* Query template for qIdSquare
+query qIdSquare = literal : Square -> Square {
+   entities
+	NE -> {
+	  from
+	    v_NE_NE:NE
+	    v_NE_NW:NW
+	    v_NE_SE:SE
+	    v_NE_SW:SW
+	  where
+	    equality of terms using some type side symbols []
+	    applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    applied to paths of foreign keys [e n s w]
+	    ending on variables [v_NE_NE v_NE_NW v_NE_SE v_NE_SW]
+	  return
+	    // ePntsTo : NE -> String // Move RowSELbl to NE by following e.RowSELbl
+	    ePntsTo -> some type side symbols []
+	    			applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    			applied to paths of foreign keys [e n s w]
+	    			ending on variables [v_NE_NE v_NE_NW v_NE_SE v_NE_SW]
+	    // rowNELbl: NE -> String // Representitive attribute for NE
+	    rowNELbl -> some type side symbols []
+	    			 applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    			 applied to paths of foreign keys [e n s w]
+	    			 ending on variables [v_NE_NE v_NE_NW v_NE_SE v_NE_SW]}
+	NW -> {
+	  from
+	    v_NW_NE:NE
+	    v_NW_NW:NW
+	    v_NW_SE:SE
+	    v_NW_SW:SW
+	  where
+	    equality of terms using some type side symbols []
+	    applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    applied to paths of foreign keys [e n s w]
+	    ending on variables [v_NW_NE v_NW_NW v_NW_SE v_NW_SW]
+	  return
+	    // nPntsTo : NW -> String // Move rowNELbl to NW by following n.rowNELbl
+	    nPntsTo -> some type side symbols []
+	    			applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    			applied to paths of foreign keys [e n s w]
+	    			ending on variables [v_NW_NE v_NW_NW v_NW_SE v_NW_SW]
+	    // nePntsTo: NW -> String // Move RowSELbl to NW by following n.e.RowSELbl
+	    nePntsTo -> some type side symbols []
+	    			 applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    			 applied to paths of foreign keys [e n s w]
+	    			 ending on variables [v_NW_NE v_NW_NW v_NW_SE v_NW_SW]
+	    // rowNWLbL: NW -> String // Representitive attribute for NW
+	    rowNWLbL -> some type side symbols []
+	    			 applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    			 applied to paths of foreign keys [e n s w]
+	    			 ending on variables [v_NW_NE v_NW_NW v_NW_SE v_NW_SW]
+	    // wPntsTo : NW -> String // Move RowSWLbl to NW by following w.RowSWLbl
+	    wPntsTo -> some type side symbols []
+	    			applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    			applied to paths of foreign keys [e n s w]
+	    			ending on variables [v_NW_NE v_NW_NW v_NW_SE v_NW_SW]
+	    // wsPntsTo: NW -> String // Move RowSELbl to NW by following w.s.RowSELbl
+	    wsPntsTo -> some type side symbols []
+	    			 applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    			 applied to paths of foreign keys [e n s w]
+	    			 ending on variables [v_NW_NE v_NW_NW v_NW_SE v_NW_SW]}
+	SE -> {
+	  from
+	    v_SE_NE:NE
+	    v_SE_NW:NW
+	    v_SE_SE:SE
+	    v_SE_SW:SW
+	  where
+	    equality of terms using some type side symbols []
+	    applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    applied to paths of foreign keys [e n s w]
+	    ending on variables [v_SE_NE v_SE_NW v_SE_SE v_SE_SW]
+	  return
+	    // rowSELbl: SE -> String // Representitive attribute for SE
+	    rowSELbl -> some type side symbols []
+	    			 applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    			 applied to paths of foreign keys [e n s w]
+	    			 ending on variables [v_SE_NE v_SE_NW v_SE_SE v_SE_SW]}
+	SW -> {
+	  from
+	    v_SW_NE:NE v_SW_NW:NW v_SW_SE:SE v_SW_SW:SW
+	  where
+	    equality of terms using some type side symbols []
+	    applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    applied to paths of foreign keys [e n s w]
+	    ending on variables [v_SW_NE v_SW_NW v_SW_SE v_SW_SW]
+	  return
+	    // rowSWLbl: SW -> String // Representitive attribute for SW
+	    rowSWLbl -> some type side symbols []
+	    			 applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    			 applied to paths of foreign keys [e n s w]
+	    			 ending on variables [v_SW_NE v_SW_NW v_SW_SE v_SW_SW]
+	    // sPntsTo : SW -> String // Move RowSELbl to SW by following s.RowSELbl
+	    sPntsTo -> some type side symbols []
+	    			applied to Attributes [ePntsTo nPntsTo nePntsTo rowNELbl rowNWLbL rowSELbl rowSWLbl sPntsTo wPntsTo wsPntsTo]
+	    			applied to paths of foreign keys [e n s w]
+	    			ending on variables [v_SW_NE v_SW_NW v_SW_SE v_SW_SW]}
+
+	foreign_keys
+	  // e:NE->SE // Forengn key on the eest side of the sqaure 
+	  e -> {v_SE_NE -> a generator [v_NE_NE:NE v_NE_NW:NW v_NE_SE:SE v_NE_SW:SW] . a path of foreign keys [e n s w] ending at NE
+		   v_SE_NW -> a generator [v_NE_NE:NE v_NE_NW:NW v_NE_SE:SE v_NE_SW:SW] . a path of foreign keys [e n s w] ending at NE
+		   v_SE_SE -> a generator [v_NE_NE:NE v_NE_NW:NW v_NE_SE:SE v_NE_SW:SW] . a path of foreign keys [e n s w] ending at NE
+		   v_SE_SW -> a generator [v_NE_NE:NE v_NE_NW:NW v_NE_SE:SE v_NE_SW:SW] . a path of foreign keys [e n s w] ending at NE}
+	  // n:NW->NE // Forengn key on the north side of the sqaure
+	  n -> {v_NE_NE -> a generator [v_NW_NE:NE v_NW_NW:NW v_NW_SE:SE v_NW_SW:SW] . a path of foreign keys [e n s w] ending at NW
+		   v_NE_NW -> a generator [v_NW_NE:NE v_NW_NW:NW v_NW_SE:SE v_NW_SW:SW] . a path of foreign keys [e n s w] ending at NW
+	        v_NE_SE -> a generator [v_NW_NE:NE v_NW_NW:NW v_NW_SE:SE v_NW_SW:SW] . a path of foreign keys [e n s w] ending at NW
+		   v_NE_SW -> a generator [v_NW_NE:NE v_NW_NW:NW v_NW_SE:SE v_NW_SW:SW] . a path of foreign keys [e n s w] ending at NW}
+	  // s:SW->SE // Forengn key on the south side of the sqaure
+	  s -> {v_SE_NE -> a generator [v_SW_NE:NE v_SW_NW:NW v_SW_SE:SE v_SW_SW:SW] . a path of foreign keys [e n s w] ending at SW
+		   v_SE_NW -> a generator [v_SW_NE:NE v_SW_NW:NW v_SW_SE:SE v_SW_SW:SW] . a path of foreign keys [e n s w] ending at SW
+	        v_SE_SE -> a generator [v_SW_NE:NE v_SW_NW:NW v_SW_SE:SE v_SW_SW:SW] . a path of foreign keys [e n s w] ending at SW
+		   v_SE_SW -> a generator [v_SW_NE:NE v_SW_NW:NW v_SW_SE:SE v_SW_SW:SW] . a path of foreign keys [e n s w] ending at SW}
+	  // w:NW->SW // Forengn key on the west side of the sqaure 
+	  w -> {v_SW_NE -> a generator [v_NW_NE:NE v_NW_NW:NW v_NW_SE:SE v_NW_SW:SW] . a path of foreign keys [e n s w] ending at NW
+		   v_SW_NW -> a generator [v_NW_NE:NE v_NW_NW:NW v_NW_SE:SE v_NW_SW:SW] . a path of foreign keys [e n s w] ending at NW
+		   v_SW_SE -> a generator [v_NW_NE:NE v_NW_NW:NW v_NW_SE:SE v_NW_SW:SW] . a path of foreign keys [e n s w] ending at NW
+		   v_SW_SW -> a generator [v_NW_NE:NE v_NW_NW:NW v_NW_SE:SE v_NW_SW:SW] . a path of foreign keys [e n s w] ending at NW}
+} */
+query qIdSquare = literal : Square -> Square {
+   entities
+	NE -> {
+	  from
+	    ne:NE
+	  return
+	    // ePntsTo : NE -> String // Move RowSELbl to NE by following e.rowSELbl
+	    ePntsTo -> ne.e.rowSELbl
+	    // rowNELbl: NE -> String // Representitive attribute for NE
+	    rowNELbl -> ne.rowNELbl}
+	NW -> {
+	  from
+	    nw:NW
+	  return
+	    // nPntsTo : NW -> String // Move rowNELbl to NW by following n.rowNELbl
+	    nPntsTo -> nw.n.rowNELbl
+	    // nePntsTo: NW -> String // Move rowSELbl to NW by following n.e.rowSELbl
+	    nePntsTo -> nw.n.e.rowSELbl
+	    // rowNWLbl: NW -> String // Representitive attribute for NW
+	    rowNWLbl -> nw.rowNWLbl
+	    // wPntsTo : NW -> String // Move rowSWLbl to NW by following w.rowSWLbl
+	    wPntsTo -> nw.w.rowSWLbl
+	    // wsPntsTo: NW -> String // Move rowSELbl to NW by following w.s.rowSELbl
+	    wsPntsTo -> nw.w.s.rowSELbl}
+	SE -> {
+	  from
+	    se:SE
+	  return
+	    // rowSELbl: SE -> String // Representitive attribute for SE
+	    rowSELbl -> se.rowSELbl}
+	SW -> {
+	  from
+	    sw:SW
+	  return
+	    // rowSWLbl: SW -> String // Representitive attribute for SW
+	    rowSWLbl -> sw.rowSWLbl
+	    // sPntsTo : SW -> String // Move rowSELbl to SW by following s.rowSELbl
+	    sPntsTo -> sw.s.rowSELbl}
+
+	foreign_keys
+	  // e:NE->SE // Forengn key on the eest side of the sqaure 
+	  e -> {se -> e(ne)}
+	  // n:NW->NE // Forengn key on the north side of the sqaure
+	  n -> {ne -> n(nw)}
+	  // s:SW->SE // Forengn key on the south side of the sqaure
+	  s -> {se -> s(sw)}
+	  // w:NW->SW // Forengn key on the west side of the sqaure 
+	  w -> {sw -> w(nw)}
+}
+instance i_IdSquare = eval qIdSquare i_Square
+
+/* Queries, delta data migration functors
+// In this section we consider a special case of an Uber-Flower that
+// implements what is known as a delta. A delta is a data migration functor
+// that moves data backwards through a schema functor. For this reason it
+// is known as a pullback data migration functor.
+//
+// The schema functor will point in the opposite direction as the direction
+// defined for the query. That is a query Q that moves data from a source
+// schema S to a target schema T (query Q = literal : S -> T { ... would be
+// associated with a schema functor F:T -> S. Such queries are characterized
+// by the absence of a "where" clause.
+//
+// In this first series we consider delta migration functors that arrise from
+// the single functor from any schema to the schema One. Since the delta data
+// migration functor pulls the data back through the functor the queries below
+// will move data from the schema one to each respective target schema. Notice
+// the only possible way to do this is to copy all of the rows from the instance
+// associated with the schema One to each entity of the target schema. The
+// foreign keys must all be identities and the representitive attribute with
+// the single entity in One is used to populate all all attributes in the target
+// schema.
+//
+// Note:
+// All of this is a special case that depends on the fact that we have a
+// particularly simple type side with only one data type and so all attributes
+// are of the same type.
+*/
+
+/* Query qoPairBang
+ * There is only one way to right this query. Both of the entities in oPair
+ * most be populated by the only available entity in One. In the queries that
+ * follow you will see this as a universal pattern.
+ */
+query qoPairBang = literal : One -> oPair {
+   entities
+	Ap -> {
+	  from
+	    oa:O
+	  return
+         // rowApLbl: Ap -> String // Representitive Ap attribute
+	    rowApLbl -> oa.rowOLbl}
+	Bp -> {
+	  from
+	    ob:O
+	  return
+         // rowBpLbl: Bp -> String // Representitive Bp attribute
+	    rowBpLbl -> ob.rowOLbl}
+}
+instance i_oPairBang = eval qoPairBang i_One
+/* Query qTwoBang
+ * 
+ */
+query qTwoBang = literal : One -> Two {
+   entities
+	Source -> {
+	  from
+	    os:O
+	  return
+	    // mstrPtsTo: Source -> String // Move rowTLbl to Source by following master.rowTLbl.
+	    mstrPtsTo -> os.rowOLbl
+	    // rowSLbl: Source -> String // Representitive Source attribute.
+	    rowSLbl -> os.rowOLbl}
+	Target -> {
+	  from
+	    ot:O
+	  return
+	    // rowTLbl: Target -> String // Representitive Target attribute.
+	    rowTLbl -> ot.rowOLbl}
+
+   foreign_keys
+	// master: Source -> Target // Single foreign key representing a detail -> master relationship  
+	master -> {ot -> os}
+}
+instance i_TwoBang = eval qTwoBang i_One
+/* Query qaPairBang
+ * 
+ */
+query qaPairBang = literal : One -> aPair {
+   entities
+	Srcp -> {
+	  from
+	    os:O
+	  return
+	    // fpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing fp.rowTpLbl
+	    fpPtsTo -> os.rowOLbl
+	    // gpPtsTo: Srcp -> String  // Move rowTpLbl to Srcp by follwoing gp.rowTpLbl
+	    gpPtsTo -> os.rowOLbl
+	    // rowSpLbl: Srcp -> String // Representitive Source attribute
+	    rowSpLbl -> os.rowOLbl}
+	Tgtp -> {
+	  from
+	    ot:O
+	  return
+	    // rowTpLbl: Tgtp -> String // Representitive Target attribute
+	    rowTpLbl -> ot.rowOLbl}
+
+   foreign_keys
+	// fp: Srcp -> Tgtp // First of a pair of parallel foreign keys
+	fp -> {ot -> os}
+	// gp: Srcp -> Tgtp // Second of a pair of parallel foreign keys
+	gp -> {ot -> os}
+}
+instance i_aPairBang = eval qaPairBang i_One
+/* Query qSpanBang
+ */
+query qSpanBang = literal : One -> Span {
+   entities
+	As -> {
+	  from
+	    oa:O
+	  return
+	    // rowAsLbl: As -> String // Representitive As attribute.
+	    rowAsLbl -> oa.rowOLbl}
+	Bs -> {
+	  from
+	    ob:O
+	  return
+	    // rowBsLbl: Bs -> String // Representitive Bs attribute.
+	    rowBsLbl -> ob.rowOLbl}
+	Cs -> {
+	  from
+	    oc:O
+	  return
+	    // fsPntsTo: Cs -> String // Move rowAsLbl to Cs by following fs.rowAsLbl.
+	    fsPntsTo -> oc.rowOLbl
+	    // gsPntsTo: Cs -> String // Move rowBsLbl to Cs by following gs.rowBsLbl.
+	    gsPntsTo -> oc.rowOLbl
+	    // rowCsLbl: Cs -> String // Representitive Cs attribute.
+	    rowCsLbl -> oc.rowOLbl}
+
+   foreign_keys
+	// fs : Cs -> As // Foreign key to As
+	fs -> {oa -> oc}
+	// gs : Cs -> Bs // Foreign key to Bs
+	gs -> {ob -> oc}
+}
+instance i_SpanBang = eval qSpanBang i_One
+/* Query qCoSpanBang
+*/
+query qCoSpanBang = literal : One -> CoSpan {
+   entities
+	Ac -> {
+	  from
+	    oa:O
+	  return
+	    // rowAcLbl: Ac -> String // Representitive Ac attribute
+	    rowAcLbl -> oa.rowOLbl}
+	Bc -> {
+	  from
+	    ob:O
+	  return
+	    // rowBcLbl: Bc -> String // Representitive Bc attribute
+	    rowBcLbl -> ob.rowOLbl}
+	Cc -> {
+	  from
+	    oc:O
+	  return
+	    // rowCcLbl: Cc -> String // Representitive Cc attribute
+	    rowCcLbl -> oc.rowOLbl}
+
+   foreign_keys
+	// fc: Ac -> Cc // Foreign key from Ac
+	fc -> {oc -> oa}
+	// gc: Bc -> Cc // Foreign key from Bc
+	gc -> {oc -> ob}
+}
+instance i_CoSpanBang = eval qCoSpanBang i_One
+/* Query qSquareBang
+ * 
+*/
+query qSquareBang = literal : One -> Square {
+   entities
+	NE -> {
+	  from
+	    one:O
+	  return
+	    // ePntsTo : NE -> String // Move rowSELbl to NE by following e.rowSELbl
+	    ePntsTo -> one.rowOLbl
+	    // rowNELbl: NE -> String // Representitive attribute for NE
+	    rowNELbl -> one.rowOLbl}
+	NW -> {
+	  from
+	    onw:O
+	  return
+	    // nPntsTo : NW -> String // Move rowNELbl to NW by following n.rowNELbl
+	    nPntsTo -> onw.rowOLbl
+	    // nePntsTo: NW -> String // Move rowSELbl to NW by following n.e.rowSELbl
+	    nePntsTo -> onw.rowOLbl
+	    // rowNWLbl: NW -> String // Representitive attribute for NW
+	    rowNWLbl -> onw.rowOLbl
+	    // wPntsTo : NW -> String // Move RowSWLbl to NW by following w.rowSWLbl
+	    wPntsTo -> onw.rowOLbl
+	    // wsPntsTo: NW -> String // Move rowSELbl to NW by following w.s.rowSELbl
+	    wsPntsTo -> onw.rowOLbl}
+	SE -> {
+	  from
+	    ose:O
+	  return
+	    // rowSELbl: SE -> String // Representitive attribute for SE
+	    rowSELbl -> ose.rowOLbl}
+	SW -> {
+	  from
+	    osw:O
+	  return
+	    // rowSWLbl: SW -> String // Representitive attribute for SW
+	    rowSWLbl -> osw.rowOLbl
+	    // sPntsTo : SW -> String // Move rowSELbl to SW by following s.rowSELbl
+	    sPntsTo -> osw.rowOLbl}
+
+   foreign_keys
+	// e:NE->SE // Forengn key on the east side of the sqaure 
+	e -> {ose -> one}
+	// n:NW->NE // Forengn key on the north side of the sqaure
+	n -> {one -> onw}
+	// s:SW->SE // Forengn key on the south side of the sqaure
+	s -> {ose -> osw}
+	// w:NW->SW // Forengn key on the west side of the sqaure 
+	w -> {osw -> onw}
+}
+//instance i_SquareBang = eval qSquareBang i_One
