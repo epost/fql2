@@ -296,7 +296,7 @@ public class OplWarehouse extends WizardModel<Program<OplExp>> {
 			}
 			decls.add(new Triple<>(name, null, bindings.get(name)));
 		}
-		return new Program<>(decls);
+		return new Program<>(decls, null);
 	}
 	
 	//TODO: AQL maintain compiling program?

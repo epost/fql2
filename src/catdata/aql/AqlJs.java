@@ -12,6 +12,8 @@ import catdata.Pair;
 import catdata.Util;
 
 public class AqlJs<Ty, Sym> {
+	
+	private static String postfix = "\n\nPossibly helpful info: javascript arguments are accessed as input[0], input[1], etc.\n\nPossibly useful links: http://docs.oracle.com/javase/8/docs/api/ and http://docs.oracle.com/javase/8/docs/technotes/guides/scripting/nashorn/intro.html .";
 
 	//private Map<String, String> binding = new HashMap<>();
 	
@@ -32,6 +34,7 @@ public class AqlJs<Ty, Sym> {
 		this.java_fns = java_fns;
 		this.java_parsers = java_parsers;
 		this.java_tys = java_tys;
+		String last = "";
 		try {
 			int i = 0;
 			for (Ty k : java_parsers.keySet()) {
@@ -39,6 +42,7 @@ public class AqlJs<Ty, Sym> {
 				iso1.put(k, "aqljsparser_" + i);
 				i++;
 				engine.eval(ret);
+				last = k.toString();
 			}
 			i = 0;
 			for (Sym k : java_fns.keySet()) {
@@ -46,9 +50,10 @@ public class AqlJs<Ty, Sym> {
 				iso2.put(k, "aqljsfn_" + i);
 				i++;
 				engine.eval(ret);
+				last = k.toString();
 			}
-		} catch (ScriptException e) {
-			throw new RuntimeException(e.getMessage());
+		} catch (Throwable e) {
+			throw new RuntimeException("In javascript execution, " + e.getMessage() + postfix + "\n\nlast binding evaluated: " + last);
 		}
 	}
 	//private final TypeSide<Ty, Sym> ts;
@@ -62,8 +67,8 @@ public class AqlJs<Ty, Sym> {
 			Object ret = ((Invocable)engine).invokeFunction(iso2.get(name), args);			
 			check(syms.get(name).second, ret);
 			return ret;
-		} catch (Exception e) {
-			throw new RuntimeException("In javascript execution, " + e.getClass() + " error: "  + e.getMessage());
+		} catch (Throwable e) {
+			throw new RuntimeException("In javascript execution of " + name + " on arguments " + args + ", " + e.getClass() + " error: "  + e.getMessage() + postfix);
 		}
 	}
 	
@@ -72,19 +77,19 @@ public class AqlJs<Ty, Sym> {
 			Object ret = ((Invocable)engine).invokeFunction(iso1.get(name), Util.singList(o));
 			check(name, ret);
 			return ret;
-		} catch (Exception e) {
-			throw new RuntimeException("In javascript execution, " + e.getClass() + " error: "  + e.getMessage());
+		} catch (Throwable e) {
+			throw new RuntimeException("In javascript execution of " + o + " cannot convert to " + name + ", " + e.getClass() + " error: "  + e.getMessage() + postfix);
 		}
 	}
 	
-	public void check(Ty ty, Object o) {
+	private void check(Ty ty, Object o) {
 		if (o == null) {
-			throw new RuntimeException("javascript evaluation created null");
+			throw new RuntimeException("evaluation return null." + postfix);
 		}
 		String clazz = java_tys.get(ty);
 		Class<?> c = Util.load(clazz);
 		if (!c.isInstance(o)) {
-			throw new RuntimeException(o + " is not an instance of " + c);
+			throw new RuntimeException(o + " is not an instance of " + c + postfix);
 		}
 	}
 	
@@ -219,7 +224,7 @@ public class AqlJs<Ty, Sym> {
 			return engine.eval(s);
 		} catch (ScriptException e) {
 			e.printStackTrace();
-			throw new RuntimeException("Error executing " + s + ": " + e.getMessage());
+			throw new RuntimeException("Error executing " + s + ": " + e.getMessage() + postfix);
 		}	
 	}
 

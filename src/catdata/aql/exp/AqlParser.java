@@ -851,7 +851,7 @@ public class AqlParser {
 	private static final Reference<TransExp<?,?,?,?,?,?,?,?,?,?,?,?,?>> trans_ref = Parser.newReference();
 	private static final Reference<QueryExp<?,?,?,?,?,?,?,?>> query_ref = Parser.newReference();
 	
-	private static Parser<Program<Exp<?>>> program() { //TODO: aql should create single instance of this rather than fn
+	private static Parser<Program<Exp<?>>> program(String s) { //TODO: aql should create single instance of this rather than fn
 		tyExp();
 		schExp();
 		instExp();
@@ -872,7 +872,7 @@ public class AqlParser {
 					 decl("pragma", pragma_ref.get())
 					 );
 		
-		return p.many().map(x -> new Program<>(conv(x)));
+		return p.many().map(x -> new Program<>(conv(x), s));
 	}
 	
 	private static List<Triple<String, Integer,Exp<?>>> conv(List<Triple<String, Integer, ? extends Exp<?>>> l) {
@@ -884,7 +884,7 @@ public class AqlParser {
 	}
 	
 	public static final Program<Exp<?>> parseProgram(String s) {
-		return AqlParser.program().from(TOKENIZER, IGNORED).parse(s);
+		return AqlParser.program(s).from(TOKENIZER, IGNORED).parse(s);
 	}
 
 	public static final List<String> parseManyIdent(String s) {

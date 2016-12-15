@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +37,7 @@ public final class AqlOptions {
 		always_reload,
 		varchar_length,
 				
+		program_allow_nontermination_unsafe,
 		completion_precedence,
 		completion_sort,
 		completion_compose,
@@ -119,7 +121,12 @@ public final class AqlOptions {
 	public static String printDefault() {
 		List<String> l = new LinkedList<>();
 		for (AqlOption option : AqlOption.values()) {
-			l.add(option + " = " + getDefault(option));
+			Object o = getDefault(option);
+			if (o == null) {
+				l.add(option + " has a null default ");
+			} else {
+				l.add(option + " = " + o);				
+			}
 		}
 		return Util.sep(l, "\n\t");
 	}
@@ -171,6 +178,8 @@ public final class AqlOptions {
 			return 64;
 		case csv_null_string:
 			return null;
+		case program_allow_nontermination_unsafe:
+			return false;
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -243,6 +252,8 @@ public final class AqlOptions {
 			return op.getInteger(map);
 		case csv_null_string:
 			return op.getString(map);
+		case program_allow_nontermination_unsafe:
+			return op.getBoolean(map);
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		}
@@ -314,11 +325,12 @@ public final class AqlOptions {
 			return Language.AQL.toString();
 		}
 		
-		String msg = "completion_precedence = \"a b c\" means a < b < c";
-	
+		String msg0 = "completion_precedence = \"a b c\" means a < b < c";
+		String msg1 = msg0 + "\n\nAvailable provers: " + Arrays.toString(ProverName.values());
+		String msg  = msg1 + "\n\nOption descriptions are available in the AQL manual, see categoricaldata.net/fql.html";
 		@Override
 		public Pair<JComponent, Function<Unit, Unit>> display() {
-			return new Pair<>(new CodeTextPanel("", "Aql options are specified as pragmas in each Aql file.\nHere are the available options and their defaults:\n\n\t" + AqlOptions.printDefault() + "\n\n" + msg), x -> x);
+			return new Pair<>(new CodeTextPanel("", "Aql options are specified in each Aql expression.\nHere are the available options and their defaults:\n\n\t" + AqlOptions.printDefault() + "\n\n" + msg), x -> x);
 		}
 	
 		@Override

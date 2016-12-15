@@ -197,7 +197,7 @@ public final class AqlDisplay implements Disp {
 
 		frame.setLocationRelativeTo(null);
 		if (exn != null) {
-			frame.setLocation(frame.getLocation().x + 400, frame.getLocation().y - 400);
+			frame.setLocation(frame.getLocation().x + 400, frame.getLocation().y);
 		}
 		frame.setVisible(true);
 		

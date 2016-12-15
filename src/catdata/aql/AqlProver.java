@@ -61,12 +61,18 @@ public class AqlProver {
 			case congruence:
 				return wrap(col1.simplify().second, new CongruenceProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
 			case program:
-				boolean check = !(Boolean) ops.getOrDefault(AqlOption.dont_verify_is_appropriate_for_prover_unsafe);
-				return wrap(col1.simplify().second, new ProgramProver<>(check, Var.it, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); // use
-																																																			// simplified
+				boolean check   = !(Boolean) ops.getOrDefault(AqlOption.dont_verify_is_appropriate_for_prover_unsafe);
+				boolean allowNonTerm = (Boolean) ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe);
+				try {
+					if (!allowNonTerm) {
+						col1 = reorient(col1);
+					}
+				} catch (Exception ex) {
+					throw new RuntimeException(ex.getMessage() + "\n\nPossible solution: add options program_allow_nontermination_unsafe=true");
+				}
+				return wrap(col1.simplify().second, new ProgramProver<>(check, Var.it, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); // use																																																		
 			case completion:
 				return wrap(col1.simplify().second, new CompletionProver<>(col1.toKB().second.keySet(), ops, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first, col1.simplify().first)); // use
-																																																															// simplified
 			case monoidal:
 				return wrap(col1.simplify().second, new MonoidalProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); // use
 																																																// simplified
@@ -79,32 +85,57 @@ public class AqlProver {
 		}
 	}
 
-	/*
-	 * try { if (timeout < 0) { return future.get(); } else { return
-	 * future.get(timeout, TimeUnit.SECONDS); } } catch (TimeoutException e) {
-	 * // e.printStackTrace(); future.cancel(true); throw new
-	 * RuntimeException("Timeout (" + timeout +
-	 * "s) during decision procedure construction.  If using completion, you might try a different completion_precedence."
-	 * ); } catch (InterruptedException e) { // e.printStackTrace();
-	 * future.cancel(true); throw new
-	 * InvisibleException("Interruption during decision procedure construction."
-	 * ); } catch (Throwable e) { e.printStackTrace(); throw new
-	 * RuntimeException(e); }
-	 */
-
-	private static <Sk, En, Fk, Ty, Att, Sym, Gen> ProverName auto(@SuppressWarnings("unused") AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+	private static <Sk, En, Fk, Ty, Att, Sym, Gen> ProverName auto(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		if (col.eqs.isEmpty()) {
 			return ProverName.free;
 		} else if (col.isGround()) {
 			return ProverName.congruence;
 		} else if (col.isMonoidal()) {
 			return ProverName.monoidal;
-		} else if (ProgramProver.isProgram(Var.it, col.toKB().first, false)) {
-			return ProverName.program; // TODO aql perhaps prover should not be
-										// enabled as auto choosable because eq
-										// can hang for bad systems
+		} else if (!(Boolean)ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe) && reorientable(col) && ProgramProver.isProgram(Var.it, reorient(col).toKB().first, false)) {
+			return ProverName.program; 
+		} else if ((Boolean)ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe) && ProgramProver.isProgram(Var.it, col.toKB().first, false)) {
+			return ProverName.program; 
+		} 
+		throw new RuntimeException("Cannot automatically chose prover: theory is not free, ground, unary, or program.  Possible solutions include: \n\n1) use the completion prover, possibly with an explicit precedence (see A KB example) \n\n2) Reorient equations from left to right to obtain a size-reducing orthogonal rewrite system \n\n3) Remove all binary function symbols \n\n4) Remove all type side and schema equations \n\n5) disable checking of equations in queries using dont_validate_unsafe=true as an option \n\n6) adding options program_allow_nontermination_unsafe=true \n\n7) emailing support, info@catinf.com ");
+	}
+	
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk> boolean reorientable(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+		try {
+			reorient(col);
+		} catch (Exception ex) {
+			return false;
 		}
-		throw new RuntimeException("Cannot automatically chose prover: theory is not free, ground, unary, or program.  You must use completion with an explicit precedence.");
+		return true;
+	}
+
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Collage<Ty, En, Sym, Fk, Att, Gen, Sk> reorient(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> ret = new Collage<>(col);
+		ret.eqs.clear();
+		for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : col.eqs) {
+			if (size(eq.lhs) < size(eq.rhs)) {
+				ret.eqs.add(new Eq<>(eq.ctx, eq.rhs, eq.lhs));
+			} else if (size(eq.lhs) > size(eq.rhs)) {
+				ret.eqs.add(eq);
+			} else {
+				throw new RuntimeException("Cannot orient " + eq + " in a size reducing manner.");
+			}
+				
+		}
+		return ret;
+	}
+
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk> int size(Term<Ty, En, Sym, Fk, Att, Gen, Sk> e) {
+		if (e.obj != null || e.gen != null || e.sk != null || e.var != null) {
+			return 1;
+		} else if (e.att != null || e.fk != null) {
+			return 1 + size(e.arg);
+		} 
+		int ret = 1;
+		for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : e.args) {
+			ret += size(arg);
+		}
+		return ret;
 	}
 
 	private static <Sk, En, Fk, Ty, Att, Sym, Gen> DP<Ty, En, Sym, Fk, Att, Gen, Sk> wrap(Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> simp, DPKB<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> dpkb) {

@@ -108,7 +108,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		
 		AqlOptions strat = new AqlOptions(options, col);
 		
-		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col));
+		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col), !((Boolean)strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
 		return ret; 
 		
 	}

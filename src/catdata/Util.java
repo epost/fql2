@@ -79,7 +79,7 @@ public class Util {
 			synchronized (ret) {
 				if (!ret.isSet() && !thr.isSet()) {
 					t.stop();
-					throw new RuntimeException("Timout after " + timeout + " ms.");
+					throw new RuntimeException("Timout after " + (timeout/1000) + " seconds. \n\nPossible solution: add options timeout=X where X > " + (timeout / 1000) + " is how many seconds to wait.");
 				} else if (ret.isSet() && !thr.isSet()) {
 					// t should be dying
 					return ret.x;

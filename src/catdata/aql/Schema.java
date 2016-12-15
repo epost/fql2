@@ -28,7 +28,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 	
 	//TODO: aql who is calling isTypeSide and isSchema?
 
-	public final void validate() {
+	public final void validate(boolean checkJava) {
 		//check that each att/fk is in tys/ens
 		for (Att att : atts.keySet()) {
 			Pair<En, Ty> ty = atts.get(att);
@@ -64,15 +64,15 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 			return;
 		}
 		for (Eq<Ty, En, Sym, Fk, Att, Object, Object> eq : collage().simplify().first.eqs) { 
-		//	if (!(Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)) {
+			if (checkJava) {
 				Chc<Ty, En> lhs = collage().type(eq.ctx, eq.lhs); 
 			
 				if (lhs.left && typeSide.js.java_tys.containsKey(lhs.l)) {
-					throw new RuntimeException("In schema equation " + eq + ", the return type is " + lhs.l + " which is a java type ");
+					throw new RuntimeException("In schema equation " + eq.lhs + " = " + eq.rhs + ", the return type is " + lhs.l + " which is a java type.  \n\nPossible solution: add options allow_java_eqs_unsafe=true ");
 				}
 				typeSide.assertNoJava(eq.lhs);
 				typeSide.assertNoJava(eq.rhs);
-		//	} 
+			} 
 		}
 		
 	}
@@ -86,13 +86,13 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 	}
 	
 	public final static <Ty,Sym> Schema<Ty,Void,Sym,Void,Void> terminal(TypeSide<Ty, Sym> t) {
-		return new Schema<>(t, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), t.semantics);
+		return new Schema<>(t, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), t.semantics, false);
 	}
 	
 	public Schema(TypeSide<Ty, Sym> typeSide, Set<En> ens,
 			Map<Att, Pair<En, Ty>> atts, Map<Fk, Pair<En, En>> fks,
 			Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs,
-			DP<Ty,En,Sym,Fk,Att,Void,Void> semantics) {
+			DP<Ty,En,Sym,Fk,Att,Void,Void> semantics, boolean checkJava) {
 		Util.assertNotNull(typeSide, ens, fks, atts, eqs, semantics);
 		this.typeSide = typeSide;
 		this.atts = new Ctx<>(atts);
@@ -100,7 +100,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		this.eqs = new HashSet<>(eqs);
 		this.ens = new HashSet<>(ens); //TODO aql arraylist
 		this.dp = semantics;
-		validate();
+		validate(checkJava);
 	}
 
 	public final DP<Ty,En,Sym,Fk,Att,Void,Void> dp;

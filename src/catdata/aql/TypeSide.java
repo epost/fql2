@@ -13,6 +13,7 @@ import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.AqlOptions.AqlOption;
 
 public final class TypeSide<Ty, Sym> {
 	
@@ -52,23 +53,22 @@ public final class TypeSide<Ty, Sym> {
 	}
 	
 	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string, AqlOptions strategy) {
-		this(tys, syms, eqs, new AqlJs<>(new Ctx<>(syms), new Ctx<>(java_tys_string), new Ctx<>(java_parser_string), new Ctx<>(java_fns_string)), AqlProver.create(strategy, col(tys, syms, eqs, java_tys_string, java_parser_string, java_fns_string)));
+		this(tys, syms, eqs, new AqlJs<>(new Ctx<>(syms), new Ctx<>(java_tys_string), new Ctx<>(java_parser_string), new Ctx<>(java_fns_string)), AqlProver.create(strategy, col(tys, syms, eqs, java_tys_string, java_parser_string, java_fns_string)), !((Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
 	}
 
 	
 	
-	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, /*Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string,*/ AqlJs<Ty,Sym> js, DP<Ty, Void, Sym, Void, Void, Void, Void> semantics) {
+	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, /*Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string,*/ AqlJs<Ty,Sym> js, DP<Ty, Void, Sym, Void, Void, Void, Void> semantics, boolean checkJava) {
 		Util.assertNotNull(tys, syms, eqs, js, semantics);
 		this.tys = tys;
 		this.syms = new Ctx<>(syms);
 		this.eqs = eqs;
 		this.semantics = semantics;		
 		this.js = js;
-		validate();
-		validateJava();
+		validate(checkJava);
 	}
 
-	public void validate() {
+	public void validate(boolean checkJava) {
 		//check that each sym is in tys
 		for (Sym sym : syms.keySet()) {
 			Pair<List<Ty>, Ty> ty = syms.get(sym);
@@ -97,11 +97,11 @@ public final class TypeSide<Ty, Sym> {
 			}
 			
 		}
-		
-		validateJava(); 
-	}
-
-	private void validateJava() {
+		for (Sym sym : js.java_fns.keySet()) {
+			if (!syms.containsKey(sym)) {
+				throw new RuntimeException("The java function " + sym + " is not a declared function");
+			}
+		}
 		for (Ty ty : js.java_tys.keySet()) {
 			String parser = js.java_parsers.get(ty);
 			if (parser == null) {
@@ -110,30 +110,33 @@ public final class TypeSide<Ty, Sym> {
 			String clazz = js.java_tys.get(ty);
 			Util.load(clazz);
 		}
+		if (checkJava) {
+			validateJava(); 
+		}
+	}
+
+	private void validateJava() {
+	
 		for (Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq : eqs) {
 			Ty lhs = type(eq.first, eq.second);
 			
 			if (js.java_tys.containsKey(lhs)) {
-				throw new RuntimeException("In typeside equation " + toString(eq) + ", the return type is " + lhs + " which is a java type ");
+				throw new RuntimeException("In typeside equation " + toString(eq) + ", the return type is " + lhs + " which is a java type "+ "\n\nPossible solution: add options allow_java_eqs_unsafe=true");
 			}
 			if (!Collections.disjoint(js.java_tys.keySet(), eq.first.values())) {
-				throw new RuntimeException("In typeside equation " + toString(eq) + ", the context variable(s) bind java type(s)");
+				throw new RuntimeException("In typeside equation " + toString(eq) + ", the context variable(s) bind java type(s)"+ "\n\nPossible solution: add options allow_java_eqs_unsafe=true");
 			}
 			assertNoJava(eq.second);
 			assertNoJava(eq.third);
 		}
 		
-		for (Sym sym : js.java_fns.keySet()) {
-			if (!syms.containsKey(sym)) {
-				throw new RuntimeException("The java function " + sym + " is not a declared function");
-			}
-		}
+		
 		for (Sym sym : syms.keySet()) {
 			Pair<List<Ty>, Ty> t = syms.get(sym);
 			if (allJava(t) || noJava(t)) {
 				
 			} else {
-				throw new RuntimeException("In symbol " + sym + ", functions must not mix java and non-java types");
+				throw new RuntimeException("In symbol " + sym + ", functions must not mix java and non-java types" + "\n\nPossible solution: add options allow_java_eqs_unsafe=true");
 			}
 		}
 	}
@@ -196,11 +199,11 @@ public final class TypeSide<Ty, Sym> {
 	
 	public String toString(Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq) {
 		String pre = eq.first.isEmpty() ? "" : "forall ";
-		return pre + eq.first + ", " + eq.first + " = " + eq.second;
+		return pre + eq.first + ". " + eq.second + " = " + eq.third;
 	}
 
 	public static TypeSide<Void,Void> terminal() {
-		return new TypeSide<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), new AqlJs<>(new Ctx<>(), new Ctx<>(), new Ctx<>(), new Ctx<>()), DP.terminal);
+		return new TypeSide<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), new AqlJs<>(new Ctx<>(), new Ctx<>(), new Ctx<>(), new Ctx<>()), DP.terminal, false);
 	}
 
 	public final DP<Ty, Void, Sym, Void, Void, Void, Void> semantics;

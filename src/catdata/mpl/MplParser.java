@@ -175,7 +175,7 @@ public class MplParser {
 			toProgHelper(pr.a.toString(), s, ret, decl);
 		}
 
-		return new Program<>(ret);  
+		return new Program<>(ret, null);  
 	}
 	
 	static MplExp<String,String> toExp(Object o) {

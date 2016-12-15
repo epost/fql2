@@ -131,8 +131,8 @@ public class AqlJdbcExample extends AqlExample {
 					+ "\n//"
 					+ "\n//execute actions as follows"
 					+ "\n//pragma js1 = exec_js  { "
-					+ "\n//\"javax.swing.JOptionPane.showMessageDialog(null, \"hello1\")\""
-					+ "\n//\"javax.swing.JOptionPane.showMessageDialog(null, \"hello2\")\""
+					+ "\n//\"javax.swing.JOptionPane.showMessageDialog(null, \\\"hello1\\\")\""
+					+ "\n//\"javax.swing.JOptionPane.showMessageDialog(null, \\\"hello2\\\")\""
 					+ "\n//}"
 					+ "\n"
 ;

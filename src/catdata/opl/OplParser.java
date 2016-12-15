@@ -444,7 +444,7 @@ public class OplParser {
 		}
 		sugarForNat = false;
 
-		return new Program<>(ret);
+		return new Program<>(ret, null);
 	}
 
 	private static void toProgHelper(String txt, String s,

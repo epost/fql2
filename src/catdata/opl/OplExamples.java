@@ -11,7 +11,6 @@ import catdata.opl.examples.OplHornExample;
 import catdata.opl.examples.OplIntegrationExample;
 import catdata.opl.examples.OplJSExample;
 import catdata.opl.examples.OplJee1;
-import catdata.opl.examples.OplMLExample;
 import catdata.opl.examples.OplMatrixExample;
 import catdata.opl.examples.OplMod4Example;
 import catdata.opl.examples.OplNested2Example;
@@ -46,7 +45,7 @@ public class OplExamples {
 	public static Example oplTyTest2 = new OplTyTest2Example();
 	public static Example oplNested = new OplNestedExample();
 	public static Example oplNested2 = new OplNested2Example();
-	public static Example oplML = new OplMLExample();
+	//public static Example oplML = new OplMLExample();
 	public static Example oplGrouping = new OplGroupingExample();
 	public static Example oplHorn = new OplHornExample();
 	public static Example oplPaper = new OplPaperExample();

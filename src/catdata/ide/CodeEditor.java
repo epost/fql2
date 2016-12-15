@@ -373,12 +373,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		
 
 	}
-	
-	@SuppressWarnings("static-method")
-	protected Collection<String> reservedWords() {
-		return Util.list("schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
-	}
-	
+		
 	private final SpellChecker spc;
 	
 	public void foldAll(boolean b) {
@@ -397,6 +392,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		topArea.setFont(font);
 	}
 
+	//TODO aql join reordering
 		
 	protected void findAction() {
 		makeSearchVisible();
@@ -595,5 +591,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		topArea.forceReparsing(spc);
 	}
 	
+	@SuppressWarnings("static-method")
+	protected Collection<String> reservedWords() {
+		return Util.list("boolean", "booleans", "equational", "axiomatization", "axiomatize", "axiom", "axioms", "functor", "functors", "schema", "schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
+	}
 
 }
