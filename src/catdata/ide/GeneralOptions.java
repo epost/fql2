@@ -34,7 +34,9 @@ public class GeneralOptions extends Options {
 	}
 	
 	public String file_path = "";
-	public String look_and_feel = UIManager.getSystemLookAndFeelClassName();
+	public String look_and_feel 
+	= System.getProperty("os.name").toLowerCase().contains("mac") 
+	  ? UIManager.getSystemLookAndFeelClassName() : "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
 	public int font_size = 12;
 	public boolean spellcheck = true;
 

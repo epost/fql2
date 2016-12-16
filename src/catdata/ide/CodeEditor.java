@@ -74,7 +74,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	public RSyntaxTextArea topArea;
 
-	protected CodeTextPanel respArea = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Compiler response", "");
+	protected CodeTextPanel respArea = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Response", "");
 
 	final JTextField searchField = new JTextField();	
 	final JButton nextButton = new JButton("Find Next");
@@ -232,6 +232,8 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		
 		Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), GlobalOptions.debug.general.font_size);
 		topArea.setFont(font);
+		Font font2 = new Font(respArea.area.getFont().getFontName(), respArea.area.getFont().getStyle(), GlobalOptions.debug.general.font_size + 1);
+		respArea.area.setFont(font2);
 
 		InputMap inputMap = topArea.getInputMap();
 
@@ -390,6 +392,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 		Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), size);
 		topArea.setFont(font);
+
+		Font font2 = new Font(respArea.area.getFont().getFontName(), respArea.area.getFont().getStyle(), size + 1);
+		respArea.area.setFont(font2);
 	}
 
 	//TODO aql join reordering

@@ -69,6 +69,14 @@ public class GUI extends JPanel {
 
 	public static JFrame topFrame;
 
+	private static CodeEditor<?, ?, ?> getSelectedEditor() {
+		int i = editors.getSelectedIndex();
+		if (i == -1) {
+			return null;
+		}
+		return (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
+	}
+
 	@SuppressWarnings({ "unchecked", "unused" })
 	public static Pair<JPanel, MenuBar> makeGUI(JFrame frame) {
 		topFrame = frame;
@@ -108,21 +116,9 @@ public class GUI extends JPanel {
 		fileMenu.add(closeItem);
 		fileMenu.add(exitItem);
 
-		closeItem.addActionListener(new ActionListener() {
+		closeItem.addActionListener(e -> closeAction());
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				closeAction();
-			}
-
-		});
-
-		saveAsItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				saveAsAction();
-			}
-		});
+		saveAsItem.addActionListener(e -> saveAsAction());
 
 		// respArea.setWrapStyleWord();
 
@@ -135,23 +131,20 @@ public class GUI extends JPanel {
 		MenuShortcut c = new MenuShortcut(ctrlW.getKeyCode());
 		closeItem.setShortcut(c);
 
-		// Get the appropriate input map using the JComponent constants.
-		// This one works well when the component is a container.
-		// InputMap inputMap =
-		// editors.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 		InputMap inputMap = editors.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		// Add the key binding for the keystroke to the action name
 		inputMap.put(ctrlW, "closeTab");
 		inputMap.put(commandW, "closeTab");
 
 		KeyStroke ctrlR = KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK);
 		KeyStroke commandR = KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.META_MASK);
 		AbstractAction runAction = new AbstractAction() {
-			@SuppressWarnings("rawtypes")
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex())).runAction();
+				CodeEditor<?, ?, ?> ed = getSelectedEditor();
+				if (ed != null) {
+					ed.runAction();
+				}
 			}
 		};
 
@@ -196,11 +189,10 @@ public class GUI extends JPanel {
 
 		MenuItem runItem = new MenuItem("Run");
 		toolsMenu.add(runItem);
-		runItem.addActionListener(new ActionListener() {
-			@SuppressWarnings("rawtypes")
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex())).runAction();
+		runItem.addActionListener(e -> {
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.runAction();
 			}
 		});
 		MenuShortcut q2 = new MenuShortcut(ctrlR.getKeyCode());
@@ -208,93 +200,66 @@ public class GUI extends JPanel {
 
 		MenuItem abortItem = new MenuItem("Abort");
 		toolsMenu.add(abortItem);
-		abortItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				abortAction();
-			}
-		});
+		abortItem.addActionListener(e -> abortAction());
 
 		MenuItem formatItem = new MenuItem("FQL Code Format");
 		editMenu.add(formatItem);
-		formatItem.addActionListener(x -> {
-			formatAction();
-		});
+		formatItem.addActionListener(x -> formatAction());
 
 		MenuItem visItem = new MenuItem("FQL Visual Edit");
 		editMenu.add(visItem);
-		visItem.addActionListener(x -> {
-			veditAction();
-		});
+		visItem.addActionListener(x -> veditAction());
 
 		MenuItem rtf = new MenuItem("Copy as RTF");
 		editMenu.add(rtf);
 		rtf.addActionListener(x -> {
-			int i = editors.getSelectedIndex();
-			CodeEditor<?, ?, ?> ed = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
-			if (ed == null) {
-				return;
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.copyAsRtf();
 			}
-			ed.copyAsRtf();
 		});
 
 		MenuItem fall = new MenuItem("Fold All");
 		editMenu.add(fall);
 		rtf.addActionListener(x -> {
-			int i = editors.getSelectedIndex();
-			CodeEditor<?, ?, ?> ed = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
-			if (ed == null) {
-				return;
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.foldAll(true);
 			}
-			ed.foldAll(true);
 		});
 
 		MenuItem uall = new MenuItem("Unfold All");
 		editMenu.add(uall);
 		rtf.addActionListener(x -> {
-			int i = editors.getSelectedIndex();
-			CodeEditor<?, ?, ?> ed = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
-			if (ed == null) {
-				return;
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.foldAll(false);
 			}
-			ed.foldAll(false);
 		});
 
 		MenuItem chaseItem = new MenuItem("ED Chaser");
 		toolsMenu.add(chaseItem);
-		chaseItem.addActionListener(x -> {
-			Chase.dostuff();
-		});
+		chaseItem.addActionListener(x -> Chase.dostuff());
 
 		MenuItem checkItem = new MenuItem("FQL Type Checker");
 		toolsMenu.add(checkItem);
-		checkItem.addActionListener(x -> {
-			checkAction();
-		});
+		checkItem.addActionListener(x -> checkAction());
 
 		MenuItem sqlLoaderItem = new MenuItem("SQL Loader");
 		toolsMenu.add(sqlLoaderItem);
-		sqlLoaderItem.addActionListener(x -> {
-			SqlLoader.showLoader();
-		});
+		sqlLoaderItem.addActionListener(x -> SqlLoader.showLoader());
 
 		MenuItem sqlMapperItem = new MenuItem("SQL Mapper");
 		toolsMenu.add(sqlMapperItem);
-		sqlMapperItem.addActionListener(x -> {
-			SqlMapper.showGuesser();
-		});
+		sqlMapperItem.addActionListener(x -> SqlMapper.showGuesser());
 
 		MenuItem sqlToOplItem = new MenuItem("SQL to OPL");
 		transMenu.add(sqlToOplItem);
-		sqlToOplItem.addActionListener(x -> {
-			SqlToOpl.showPanel();
-		});
+		sqlToOplItem.addActionListener(x -> SqlToOpl.showPanel());
 
 		MenuItem sqlCheckItem = new MenuItem("SQL Checker");
 		toolsMenu.add(sqlCheckItem);
-		sqlCheckItem.addActionListener(x -> {
-			new SqlChecker();
-		});
+		sqlCheckItem.addActionListener(x -> new SqlChecker());
 
 		MenuItem wizardItem = new MenuItem("Warehouse Wizard");
 		toolsMenu.add(wizardItem);
@@ -325,113 +290,68 @@ public class GUI extends JPanel {
 
 		MenuItem raToFqlItem = new MenuItem("SPCU to FQL");
 		transMenu.add(raToFqlItem);
-		raToFqlItem.addActionListener(x -> {
-			new RaToFql();
-		});
+		raToFqlItem.addActionListener(x -> new RaToFql());
 
 		MenuItem sqlToFqlItem = new MenuItem("SQL Schema to FQL");
 		transMenu.add(sqlToFqlItem);
-		sqlToFqlItem.addActionListener(x -> {
-			new SqlToFql();
-		});
+		sqlToFqlItem.addActionListener(x -> new SqlToFql());
 
 		MenuItem ringToFqlItem = new MenuItem("Polynomials to FQL");
 		transMenu.add(ringToFqlItem);
-		ringToFqlItem.addActionListener(x -> {
-			new RingToFql();
-		});
+		ringToFqlItem.addActionListener(x -> new RingToFql());
 
 		MenuItem shredItem = new MenuItem("NR Shredder");
 		toolsMenu.add(shredItem);
-		shredItem.addActionListener(x -> {
-			new NraViewer();
-		});
+		shredItem.addActionListener(x -> new NraViewer());
 
 		MenuItem kbItem = new MenuItem("FQL++ Knuth-Bendix");
 		toolsMenu.add(kbItem);
-		kbItem.addActionListener(x -> {
-			new KBViewer();
-		});
+		kbItem.addActionListener(x -> new KBViewer());
 
 		MenuItem enrichItem = new MenuItem("FPQL Enrich");
 		toolsMenu.add(enrichItem);
-		enrichItem.addActionListener(x -> {
-			new EnrichViewer();
-		});
+		enrichItem.addActionListener(x -> new EnrichViewer());
 
 		MenuItem raItem = new MenuItem("RA to FPQL");
 		transMenu.add(raItem);
-		raItem.addActionListener(x -> {
-			new XRaToFpql();
-		});
+		raItem.addActionListener(x -> new XRaToFpql());
 
 		MenuItem sqlItem = new MenuItem("SQL to FPQL");
 		transMenu.add(sqlItem);
-		sqlItem.addActionListener(x -> {
-			new XSqlToFql();
-		});
+		sqlItem.addActionListener(x -> new XSqlToFql());
 
 		MenuItem jsonItem = new MenuItem("JSON to FPQL");
 		transMenu.add(jsonItem);
-		jsonItem.addActionListener(x -> {
-			new XJsonToFQL();
-		});
+		jsonItem.addActionListener(x -> new XJsonToFQL());
 
 		MenuItem neo4j = new MenuItem("Neo4j to FPQL");
 		transMenu.add(neo4j);
-		neo4j.addActionListener(x -> {
-			new XNeo4jToFQL();
-		});
+		neo4j.addActionListener(x -> new XNeo4jToFQL());
 
 		MenuItem easik = new MenuItem("EASIK to FPQL");
 		transMenu.add(easik);
-		easik.addActionListener(x -> {
-			new XEasikToFQL();
-		});
+		easik.addActionListener(x -> new XEasikToFQL());
 
 		MenuItem cfgItem = new MenuItem("CFG to OPL");
 		transMenu.add(cfgItem);
-		cfgItem.addActionListener(x -> {
-			new CfgToOpl();
-		});
+		cfgItem.addActionListener(x -> new CfgToOpl());
 
 		Menu helpMenu = new Menu("About");
 		MenuItem aboutItem = new MenuItem("About");
 		helpMenu.add(aboutItem);
-		aboutItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				GlobalOptions.showAbout();
-			}
-		});
+		aboutItem.addActionListener(e -> GlobalOptions.showAbout());
 
-		openItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				openAction();
-			}
-		});
-		saveItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				saveAction();
-			}
-		});
+		openItem.addActionListener(e -> openAction());
 
-		exitItem.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				exitAction();
-			}
-		});
+		saveItem.addActionListener(e -> saveAction());
 
-		findItem.addActionListener(new ActionListener() {
-			@Override
-			@SuppressWarnings("rawtypes")
-			public void actionPerformed(ActionEvent e) {
-				delay();
-				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex())).findAction();
+		exitItem.addActionListener(e -> exitAction());
 
+		findItem.addActionListener(e -> {
+			delay();
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.findAction();
 			}
 		});
 
@@ -445,53 +365,40 @@ public class GUI extends JPanel {
 
 		pan.setLayout(new BorderLayout());
 
-		JPanel toolBar = new JPanel(new GridLayout(1, 7));
+		JPanel toolBar = new JPanel(new GridLayout(1, 8));
 
 		JButton compileB = new JButton("Run");
-		compileB.addActionListener(new ActionListener() {
-			@SuppressWarnings("rawtypes")
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				((CodeEditor) editors.getComponentAt(editors.getSelectedIndex())).runAction();
+		compileB.addActionListener(e -> {
+			CodeEditor<?, ?, ?> ed = (CodeEditor<?, ?, ?>) editors.getComponentAt(editors.getSelectedIndex());
+			if (ed != null) {
+				ed.runAction();
+			}
+		});
+
+		JButton abortB = new JButton("Abort");
+		abortB.addActionListener(e -> {
+			CodeEditor<?, ?, ?> ed = (CodeEditor<?, ?, ?>) editors.getComponentAt(editors.getSelectedIndex());
+			if (ed != null) {
+				ed.abortAction();
 			}
 		});
 
 		JButton new_button = new JButton("New " + Language.getDefault());
-		new_button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				newAction(null, "", Language.getDefault());
-			}
-		});
+		new_button.addActionListener(e -> newAction(null, "", Language.getDefault()));
 
 		JButton save_button = new JButton("Save");
-		save_button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				saveAction();
-			}
-		});
+		save_button.addActionListener(e -> saveAction());
 
 		JButton open_button = new JButton("Open");
-		open_button.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				openAction();
-			}
-		});
+		open_button.addActionListener(e -> openAction());
 
 		JButton optionsb = new JButton("Options");
-		optionsb.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				GlobalOptions.showOptions();
-			}
-		});
+		optionsb.addActionListener(e -> GlobalOptions.showOptions());
 
 		CardLayout cl = new CardLayout();
 		JPanel boxPanel = new JPanel(cl);
 		@SuppressWarnings("rawtypes")
-		JComboBox allBox = new JComboBox<>(Examples.getAllExamples());
+		JComboBox allBox = new JComboBox<>(Examples.filterBy(Language.getDefault().toString()));
 		allBox.setSelectedIndex(-1);
 		allBox.addActionListener(x -> doExample((Example) allBox.getSelectedItem()));
 		for (Language l : Language.values()) {
@@ -502,8 +409,8 @@ public class GUI extends JPanel {
 			boxPanel.add(box, l.toString());
 		}
 
-		boxPanel.add(allBox, "All");
-		cl.show(boxPanel, "All");
+		boxPanel.add(allBox, Language.getDefault().prefix());
+		cl.show(boxPanel, Language.getDefault().prefix());
 
 		Vector<String> vec = new Vector<>();
 		vec.add("All");
@@ -511,11 +418,13 @@ public class GUI extends JPanel {
 			vec.add(l.toString());
 		}
 		JComboBox<String> modeBox = new JComboBox<>(vec);
+		modeBox.setSelectedItem(Language.getDefault().toString());
 		modeBox.addActionListener(x -> {
 			cl.show(boxPanel, (String) modeBox.getSelectedItem());
 		});
 
 		toolBar.add(compileB);
+		toolBar.add(abortB);
 		toolBar.add(new_button);
 		toolBar.add(open_button);
 		toolBar.add(save_button);
@@ -545,6 +454,9 @@ public class GUI extends JPanel {
 		MenuItem m = new MenuItem("Outline (using last compiled state)");
 		m.addActionListener(x -> {
 			int i = editors.getSelectedIndex();
+			if (i == -1) {
+				return;
+			}
 			Object o = editors.getComponentAt(i);
 			if (o instanceof AqlCodeEditor) {
 				AqlCodeEditor a = (AqlCodeEditor) o;
@@ -576,30 +488,19 @@ public class GUI extends JPanel {
 	}
 
 	private static void abortAction() {
-		int i = editors.getSelectedIndex();
-		@SuppressWarnings("rawtypes")
-		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
-		if (c == null) {
-			return;
+		CodeEditor<?, ?, ?> c = getSelectedEditor();
+		if (c != null) {
+			c.abortAction();
 		}
-		c.abortAction();
 	}
 
-	@SuppressWarnings("rawtypes")
 	private static void closeAction() {
 		delay();
-		int i = editors.getSelectedIndex();
-		if (i < 1 || i >= editors.getTabCount()) {
+		CodeEditor<?, ?, ?> c = getSelectedEditor();
+		if (c == null || c.abortBecauseDirty()) {
 			return;
 		}
-		CodeEditor c = (CodeEditor) editors.getComponentAt(i);
-		if (c == null) {
-			return;
-		}
-		if (c.abortBecauseDirty()) {
-			return;
-		}
-		editors.remove(i);
+		editors.remove(c);
 		dirty.remove(c.id);
 		keys.remove(c.id);
 		files.remove(c.id);
@@ -625,24 +526,24 @@ public class GUI extends JPanel {
 	}
 
 	private static void saveAction() {
-		@SuppressWarnings("rawtypes")
-		CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
+		CodeEditor<?, ?, ?> e = getSelectedEditor();
+		if (e == null) {
+			return;
+		}
 		File f = files.get(e.id);
 		if (f == null) {
 			saveAsAction();
 		} else {
 			delay();
-			doSave(f, e.getText());
-			setDirty(e.id, false);
+			doSave(f, e.getText(), e.id);		
 		}
 	}
 
-	private static void doSave(File f, String s) {
-		try {
-			s = s.replace("\r", "");
-			FileWriter fw = new FileWriter(f);
+	private static void doSave(File f, String s, Integer id) {
+		s = s.replace("\r", "");
+		try (FileWriter fw = new FileWriter(f)) {
 			fw.write(s);
-			fw.close();
+			setDirty(id, false);
 		} catch (Exception e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "Could not save to " + f);
@@ -687,11 +588,15 @@ public class GUI extends JPanel {
 		}
 	}
 
-	//TODO aql file chooser does not bold the selectable files on mac see http://stackoverflow.com/questions/15016176/jfilechooser-showsavedialog-all-files-greyed-out
+	// TODO aql file chooser does not bold the selectable files on mac see
+	// http://stackoverflow.com/questions/15016176/jfilechooser-showsavedialog-all-files-greyed-out
 	protected static void saveAsAction() {
 		delay();
-		@SuppressWarnings("rawtypes")
-		CodeEditor e = (CodeEditor) editors.getComponentAt(editors.getSelectedIndex());
+
+		CodeEditor<?, ?, ?> e = getSelectedEditor();
+		if (e == null) {
+			return;
+		}
 
 		JFileChooser jfc = new JFileChooser(GlobalOptions.debug.general.file_path) {
 			@Override
@@ -700,9 +605,10 @@ public class GUI extends JPanel {
 				if (selectedFile == null) {
 					return;
 				}
-				/*if (!new Filter(e.lang()).accept(getSelectedFile())) {
-					return;
-				}*/
+				/*
+				 * if (!new Filter(e.lang()).accept(getSelectedFile())) {
+				 * return; }
+				 */
 				if (selectedFile.exists() && new Filter(e.lang()).accept(getSelectedFile())) {
 					int response = JOptionPane.showOptionDialog(this, "The file " + selectedFile.getName() + " already exists. Replace?", "Ovewrite file", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] { "Yes", "No" }, "No");
 					if (response == JOptionPane.NO_OPTION) {
@@ -726,13 +632,11 @@ public class GUI extends JPanel {
 		if (f == null) {
 			return;
 		}
-		if (!jfc.getSelectedFile().getAbsolutePath().endsWith("." +
-		 e.lang().fileExtension())) {
-		 f = new File(jfc.getSelectedFile() + "." + e.lang().fileExtension());
-		 }
+		if (!jfc.getSelectedFile().getAbsolutePath().endsWith("." + e.lang().fileExtension())) {
+			f = new File(jfc.getSelectedFile() + "." + e.lang().fileExtension());
+		}
 
-		doSave(f, e.getText());
-		dirty.put(e.id, false);
+		doSave(f, e.getText(), e.id);
 		closeAction();
 		doOpen(f, e.lang());
 	}
@@ -772,7 +676,7 @@ public class GUI extends JPanel {
 			for (Language l : Language.values()) {
 				if (f.getAbsolutePath().endsWith("." + l.fileExtension())) {
 					doOpen(f, l);
-				} 
+				}
 			}
 		}
 	}
@@ -786,27 +690,20 @@ public class GUI extends JPanel {
 		if (ret == null) {
 			throw new RuntimeException();
 		}
-		return dirty.get(i);
+		return ret;
 	}
 
 	public static void setFontSize(int size) {
-		for (@SuppressWarnings("rawtypes")
-		CodeEditor c : keys.values()) {
+		for (CodeEditor<?, ?, ?> c : keys.values()) {
 			c.setFontSize(size);
 		}
 	}
 
-	static Map<Integer, Boolean> dirty = new HashMap<>();
-	@SuppressWarnings("rawtypes")
-	static Map<Integer, CodeEditor> keys = new HashMap<>();
-	static Map<Integer, File> files = new HashMap<>();
-	static Map<Integer, String> titles = new HashMap<>();
-	// static Map<Integer, Integer> position = new HashMap<>();
-	static int untitled_count = 0;
-
-	/*
-	 * public static String getTitle(Integer i) { return titles.get(i); }
-	 */
+	private static Map<Integer, Boolean> dirty = new HashMap<>();
+	public static Map<Integer, CodeEditor<?, ?, ?>> keys = new HashMap<>();
+	private static Map<Integer, File> files = new HashMap<>();
+	private static Map<Integer, String> titles = new HashMap<>();
+	private static int untitled_count = 0;
 
 	static Integer newAction(String title, String content, Language lang) {
 		untitled_count++;
@@ -823,12 +720,10 @@ public class GUI extends JPanel {
 		editors.setTabComponentAt(i, new ButtonTabComponent(editors));
 		editors.setSelectedIndex(i);
 		return c.id;
-
 	}
 
 	private static void delay() {
 		try {
-			// Thread.currentThread();
 			Thread.sleep(100); // hack for enough time to unhighlight menu
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -837,12 +732,8 @@ public class GUI extends JPanel {
 	}
 
 	private static void formatAction() {
-		int i = editors.getSelectedIndex();
-		CodeEditor<?, ?, ?> c = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
-		if (c == null) {
-			return;
-		}
-		if (!c.lang().equals(Language.FQL)) {
+		CodeEditor<?, ?, ?> c = getSelectedEditor();
+		if (c == null || !c.lang().equals(Language.FQL)) {
 			return;
 		}
 		FqlCodeEditor cc = (FqlCodeEditor) c;
@@ -850,12 +741,8 @@ public class GUI extends JPanel {
 	}
 
 	private static void veditAction() {
-		int i = editors.getSelectedIndex();
-		CodeEditor<?, ?, ?> c = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
-		if (c == null) {
-			return;
-		}
-		if (!c.lang().equals(Language.FQL)) {
+		CodeEditor<?, ?, ?> c = getSelectedEditor();
+		if (c == null || !c.lang().equals(Language.FQL)) {
 			return;
 		}
 		FqlCodeEditor cc = (FqlCodeEditor) c;
@@ -864,12 +751,8 @@ public class GUI extends JPanel {
 	}
 
 	private static void checkAction() {
-		int i = editors.getSelectedIndex();
-		CodeEditor<?, ?, ?> c = (CodeEditor<?, ?, ?>) editors.getComponentAt(i);
-		if (c == null) {
-			return;
-		}
-		if (!c.lang().equals(Language.FQL)) {
+		CodeEditor<?, ?, ?> c = getSelectedEditor();
+		if (c == null || !c.lang().equals(Language.FQL)) {
 			return;
 		}
 		FqlCodeEditor cc = (FqlCodeEditor) c;

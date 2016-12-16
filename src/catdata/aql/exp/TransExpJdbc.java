@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.Collections;
@@ -137,16 +138,37 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 		
 		//TODO aql handling of empty fields
 		
-		Map<En, ResultSet> ens0 = new HashMap<>();
-		Map<Ty, ResultSet> tys0 = new HashMap<>();
-	
-		try {
-			Connection conn = DriverManager.getConnection(jdbcString);
+		try (Connection conn = DriverManager.getConnection(jdbcString)) {
 			
 			for (En en : sch.ens) {
 				Statement stmt = conn.createStatement();
 				stmt.execute(ens.get(en));
-				ens0.put(en, stmt.getResultSet()); 
+				ResultSet rs = stmt.getResultSet();
+				ResultSetMetaData rsmd = rs.getMetaData();
+				int columnsNumber = rsmd.getColumnCount();
+				if (columnsNumber != 2) {
+					conn.close();
+					stmt.close();
+					rs.close();
+					throw new RuntimeException("Error in " + en + ": Expected 2 columns but received " + columnsNumber);
+				}
+				while (rs.next()) {
+					 Object gen = rs.getObject(1);
+					 if (gen == null) {
+						stmt.close();
+						rs.close();
+						throw new RuntimeException("Error in " + en + ": Encountered a NULL generator (dom)");
+					 }
+					 Object gen2 = rs.getObject(2);
+					 if (gen2 == null) {
+						stmt.close();
+						rs.close();
+						throw new RuntimeException("Error in " + en + ": Encountered a NULL generator (cod)");
+					 }						 
+					 gens.put(objectToGen1(gen), Term.Gen(objectToGen2(gen2)));
+				}
+				stmt.close();
+				rs.close();
 			}
 			for (Ty ty : sch.typeSide.tys) {
 				if (!tys.containsKey(ty)) {
@@ -154,72 +176,48 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 				}
 				Statement stmt = conn.createStatement();
 				stmt.execute(tys.get(ty));
-				tys0.put(ty, stmt.getResultSet()); 
+				ResultSet rs = stmt.getResultSet();
+				ResultSetMetaData rsmd = rs.getMetaData();
+				int columnsNumber = rsmd.getColumnCount();
+				if (columnsNumber != 2) {
+					stmt.close();
+					rs.close();
+					throw new RuntimeException("Error in " + ty + ": Expected 2 columns but received " + columnsNumber);
+				}
+				 while (rs.next()) {
+					 Object sk = rs.getObject(1);
+					 if (sk == null) {
+						stmt.close();
+						rs.close();
+						throw new RuntimeException("Error in " + ty + ": Encountered a NULL labelled null (how ironic) (dom)");
+					 }
+					 Object rhs = rs.getObject(2);
+					 if (rhs == null) {
+						stmt.close();
+						rs.close();
+						throw new RuntimeException("Error in " + ty + ": Encountered a NULL labelled null (how ironic) (cod)");
+					 }
+					 Term<Ty,En,Sym,Fk,Att,Gen2,Sk2> rhs0 = null;
+					 if (sch.typeSide.js.java_tys.containsKey(ty)) {
+						rhs0 = Term.Obj(rhs, ty);
+					 } else if (dst0.sks().map.containsKey(rhs)) {
+						 rhs0 = Term.Sk(objectToSk2(rhs));
+					 } else if (dst0.schema().typeSide.syms.map.containsKey(rhs) && dst0.schema().typeSide.syms.map.get(rhs).first.isEmpty()) {
+						 rhs0 = Term.Sym(objectToSym(rhs), Collections.emptyList());
+					 } else {
+						stmt.close();
+						rs.close();
+						 throw new RuntimeException("Error in " + ty + ": " + rhs + " is not a java primitive, labelled null, or 0-ary constant symbol");
+					 }
+					 sks.put(objectToSk1(sk), rhs0);
+				}
+				stmt.close();
+				rs.close();		
 			}
 		
-			for (En en : sch.ens) {
-				try {
-					ResultSet rs = ens0.get(en);
-					ResultSetMetaData rsmd = rs.getMetaData();
-					int columnsNumber = rsmd.getColumnCount();
-					if (columnsNumber != 2) {
-						throw new RuntimeException("Expected 2 columns but received " + columnsNumber);
-					}
-					 while (rs.next()) {
-						 Object gen = rs.getObject(1);
-						 if (gen == null) {
-							 throw new RuntimeException("Encountered a NULL generator (dom)");
-						 }
-						 Object gen2 = rs.getObject(2);
-						 if (gen2 == null) {
-							 throw new RuntimeException("Encountered a NULL generator (cod)");
-						 }						 
-						 gens.put(objectToGen1(gen), Term.Gen(objectToGen2(gen2)));
-					}
-				} catch (Throwable thr) {
-					throw new RuntimeException("Error in " + en + ": " + thr.getMessage());
-				}
-			}
-			for (Ty ty : sch.typeSide.tys) {
-				if (!tys.containsKey(ty)) {
-					continue;
-				}
-				try	{
-					ResultSet rs = tys0.get(ty);
-					ResultSetMetaData rsmd = rs.getMetaData();
-					int columnsNumber = rsmd.getColumnCount();
-					if (columnsNumber != 2) {
-						throw new RuntimeException("Expected 2 columns but received " + columnsNumber);
-					}
-					 while (rs.next()) {
-						 Object sk = rs.getObject(1);
-						 if (sk == null) {
-							 throw new RuntimeException("Encountered a NULL labelled null (how ironic) (dom)");
-						 }
-						 Object rhs = rs.getObject(2);
-						 if (rhs == null) {
-							 throw new RuntimeException("Encountered a NULL labelled null (how ironic) (cod)");
-						 }
-						 Term<Ty,En,Sym,Fk,Att,Gen2,Sk2> rhs0 = null;
-						 if (sch.typeSide.js.java_tys.containsKey(ty)) {
-							rhs0 = Term.Obj(rhs, ty);
-						 } else if (dst0.sks().map.containsKey(rhs)) {
-							 rhs0 = Term.Sk(objectToSk2(rhs));
-						 } else if (dst0.schema().typeSide.syms.map.containsKey(rhs) && dst0.schema().typeSide.syms.map.get(rhs).first.isEmpty()) {
-							 rhs0 = Term.Sym(objectToSym(rhs), Collections.emptyList());
-						 } else {
-							 throw new RuntimeException(rhs + " is not a java primitive, labelled null, or 0-ary constant symbol");
-						 }
-						 sks.put(objectToSk1(sk), rhs0);
-					}
-				} catch (Throwable thr) {
-					throw new RuntimeException("Error in " + ty + ": " + thr.getMessage());
-				}
-			}
-						
-		} catch (Throwable exn) {
+		} catch (SQLException exn) {
 			exn.printStackTrace();
-			throw new RuntimeException("Error in underlying JDBC data: " + exn.getMessage());
+			throw new RuntimeException("JDBC error: " + exn.getMessage());
 		}
 			
 		AqlOptions op = new AqlOptions(options, null);

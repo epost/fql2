@@ -41,7 +41,7 @@ public class Examples {
 	
 	public static Vector<Example> filterBy(String string) {
 		Vector<Example> ret = new Vector<>();
-		for (Example e : examples) {
+		for (Example e : getAllExamples()) {
 			if (e.lang().toString().equals(string) || string.equals("All")) {
 				ret.add(e);
 			}

@@ -29,8 +29,9 @@ import javax.swing.undo.UndoManager;
  */
 public class CodeTextPanel extends JPanel {
 
-	public JTextArea area = new JTextArea();
+	public final JTextArea area = new JTextArea();
 
+	
 	public void setText(String s) {
 		area.setText(s);
 		area.setCaretPosition(0);

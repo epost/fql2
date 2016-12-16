@@ -23,7 +23,7 @@ public enum Language {
 	AQL;
 	
 	public static Language getDefault() {
-		return FQL;
+		return AQL;
 	}
 	
 	@Override
