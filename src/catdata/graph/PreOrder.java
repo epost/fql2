@@ -17,7 +17,7 @@ public class PreOrder<X> {
 	
 	private static Map<Integer, Set<PreOrder<Integer>>> totals = new HashMap<>();
 	public static <X> Collection<PreOrder<X>> allTotal(List<X> xs) {
-		Set<PreOrder<Integer>> set = null;
+		Set<PreOrder<Integer>> set;
 		if (totals.containsKey(xs.size())) {
 			set = totals.get(xs.size());
 		} else {

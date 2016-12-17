@@ -9,7 +9,7 @@ import javax.swing.JSplitPane;
  */
 public class Split extends JSplitPane {
 
-	double bias;
+	private final double bias;
 
 	public Split(double bias, int split) {
 		super(split);
@@ -19,7 +19,7 @@ public class Split extends JSplitPane {
 
 	@Override
 	public void setVisible(boolean b) {
-		setVisible(b);
+		super.setVisible(b);
 		setDividerLocation(bias);
 		invalidate();
 	}

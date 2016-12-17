@@ -39,7 +39,6 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
@@ -361,12 +360,9 @@ public class SqlChecker {
 
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				input.setText(((Example) box.getSelectedItem()).getText());
-			}
-		});
+		box.addActionListener((ActionEvent e) -> {
+                    input.setText(((Example) box.getSelectedItem()).getText());
+                });
 
 		transButton.addActionListener(x -> { check(); });
 		
@@ -491,19 +487,14 @@ public class SqlChecker {
 			temp1.add(yyy1);
 			yyy.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-			yyy.addListSelectionListener(new ListSelectionListener() {
-
-				@Override
-				public void valueChanged(ListSelectionEvent e) {
-					int i = yyy.getSelectedIndex();
-					if (i == -1) {
-						cl.show(x, "");
-					} else {
-						cl.show(x, ooo.get(i).toString());
-					}
-				}
-
-			});
+			yyy.addListSelectionListener((ListSelectionEvent e) -> {
+                            int i = yyy.getSelectedIndex();
+                            if (i == -1) {
+                                cl.show(x, "");
+                            } else {
+                                cl.show(x, ooo.get(i));
+                            }
+                        });
 
 			JPanel north = new JPanel(new GridLayout(1, 1));
 			JSplitPane px = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -525,12 +516,9 @@ public class SqlChecker {
 			frame.setContentPane(px);
 			frame.setSize(900, 600);
 
-			ActionListener escListener = new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					frame.dispose();
-				}
-			};
+			ActionListener escListener = (ActionEvent e) -> {
+                            frame.dispose();
+                        };
 
 			frame.getRootPane().registerKeyboardAction(escListener,
 					KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),

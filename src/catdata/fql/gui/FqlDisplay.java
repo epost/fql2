@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -33,7 +32,6 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -93,7 +91,7 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
  */
 public class FqlDisplay implements Disp {
 
-	List<Pair<String, JComponent>> frames = new LinkedList<>();
+	private final List<Pair<String, JComponent>> frames = new LinkedList<>();
 
 	public static JPanel showInst(String c, Color clr, Instance view) throws FQLException {
 		JTabbedPane px = new JTabbedPane();
@@ -318,29 +316,29 @@ public class FqlDisplay implements Disp {
 		try {
 			for (String c : p.order) {
 				if (environment.signatures.get(c) != null) {
-					frames.add(new Pair<String, JComponent>("schema " + c, showSchema(c,
+					frames.add(new Pair<>("schema " + c, showSchema(c,
 							environment, p.nmap.get(c), environment.getSchema(c))));
 				} else if (environment.mappings.get(c) != null) {
 					Pair<SigExp, SigExp> xxx = p.maps.get(c).type(p);
 					String a = xxx.first.accept(p.sigs, new Unresolver()).toString();
 					String b = xxx.second.accept(p.sigs, new Unresolver()).toString();
-					frames.add(new Pair<String, JComponent>(
+					frames.add(new Pair<>(
 							"mapping " + c + " : " + a + " -> " + b, showMapping(environment,
 									prog.smap(xxx.first), prog.smap(xxx.second),
 									environment.getMapping(c))));
 				} else if (environment.instances.get(c) != null) {
 					String xxx = p.insts.get(c).type(p).accept(p.sigs, new Unresolver()).toString();
-					frames.add(new Pair<String, JComponent>("instance " + c + " : " + xxx,
+					frames.add(new Pair<>("instance " + c + " : " + xxx,
 							showInst(c, p.nmap.get(c), environment.instances.get(c))));
 				} else if (environment.queries.get(c) != null) {
 					Pair<SigExp, SigExp> xxx = p.queries.get(c).type(p);
 					String a = xxx.first.accept(p.sigs, new Unresolver()).toString();
 					String b = xxx.second.accept(p.sigs, new Unresolver()).toString();
-					frames.add(new Pair<String, JComponent>("query " + c + " : " + a + " -> " + b,
+					frames.add(new Pair<>("query " + c + " : " + a + " -> " + b,
 							showQuery(prog, environment, environment.queries.get(c))));
 				} else if (environment.transforms.get(c) != null) {
 					Pair<String, String> xxx = p.transforms.get(c).type(p);
-					frames.add(new Pair<String, JComponent>("transform " + c + " : " + xxx.first
+					frames.add(new Pair<>("transform " + c + " : " + xxx.first
 							+ " -> " + xxx.second, showTransform(prog.nmap.get(xxx.first),
 							prog.nmap.get(xxx.second), environment, xxx.first, xxx.second,
 							environment.transforms.get(c))));
@@ -353,7 +351,7 @@ public class FqlDisplay implements Disp {
 					FullQuery view = env.full_queries.get(c);
 					FullQueryExp x = p.full_queries.get(c);
 
-					frames.add(new Pair<String, JComponent>("QUERY " + c + " : " + a + " -> " + b,
+					frames.add(new Pair<>("QUERY " + c + " : " + a + " -> " + b,
 							showFullQuery(p, environment, view, x)));
 				} else {
 					if (!GlobalOptions.debug.fql.continue_on_error) {
@@ -368,8 +366,8 @@ public class FqlDisplay implements Disp {
 		display(title + " | (exec: " + c1 + "s)(gui: " + c2 + "s)", p.order);
 	}
 
-	JFrame frame = null;
-	String name;
+	private JFrame frame = null;
+	private String name;
 
 	final CardLayout cl = new CardLayout();
 	final JPanel x = new JPanel(cl);
@@ -399,19 +397,14 @@ public class FqlDisplay implements Disp {
 		temp1.setMinimumSize(new Dimension(10, 10));
 		yyy.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		yyy.addListSelectionListener(new ListSelectionListener() {
-
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				int i = yyy.getSelectedIndex();
-				if (i == -1) {
-					cl.show(x, "blank");
-				} else {
-					cl.show(x, ooo.get(i).toString());
-				}
-			}
-
-		});
+		yyy.addListSelectionListener((ListSelectionEvent e) -> {
+                    int i = yyy.getSelectedIndex();
+                    if (i == -1) {
+                        cl.show(x, "blank");
+                    } else {
+                        cl.show(x, ooo.get(i));
+                    }
+                });
 
 		JPanel north = new JPanel(new GridLayout(2, 1));
 		JButton instanceFlowButton = new JButton("Instance Dependence Graph");
@@ -420,19 +413,13 @@ public class FqlDisplay implements Disp {
 		schemaFlowButton.setMinimumSize(new Dimension(10, 10));
 
 		north.add(instanceFlowButton);
-		instanceFlowButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				showInstanceFlow(prog);
-			}
-		});
+		instanceFlowButton.addActionListener((ActionEvent e) -> {
+                    showInstanceFlow(prog);
+                });
 		north.add(schemaFlowButton);
-		schemaFlowButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				showSchemaFlow();
-			}
-		});
+		schemaFlowButton.addActionListener((ActionEvent e) -> {
+                    showSchemaFlow();
+                });
 		Split px = new Split(.5, JSplitPane.HORIZONTAL_SPLIT);
 		px.setDividerSize(6);
 		px.setDividerLocation(220);
@@ -452,12 +439,9 @@ public class FqlDisplay implements Disp {
 		frame.setContentPane(px);
 		frame.setSize(900, 600);
 
-		ActionListener escListener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				frame.dispose();
-			}
-		};
+		ActionListener escListener = (ActionEvent e) -> {
+                    frame.dispose();
+                };
 
 		frame.getRootPane().registerKeyboardAction(escListener,
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -476,12 +460,9 @@ public class FqlDisplay implements Disp {
 	public void showInstanceFlow(FQLProgram prog) {
 		final JFrame f = new JFrame();
 
-		ActionListener escListener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				f.dispose();
-			}
-		};
+		ActionListener escListener = (ActionEvent e) -> {
+                    f.dispose();
+                };
 		f.getRootPane().registerKeyboardAction(escListener,
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 		KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK);
@@ -506,12 +487,9 @@ public class FqlDisplay implements Disp {
 	public void showSchemaFlow() {
 		final JFrame f = new JFrame();
 
-		ActionListener escListener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				f.dispose();
-			}
-		};
+		ActionListener escListener = (ActionEvent e) -> {
+                    f.dispose();
+                };
 		f.getRootPane().registerKeyboardAction(escListener,
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 		KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK);
@@ -535,7 +513,7 @@ public class FqlDisplay implements Disp {
 
 	
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked" })
 	public JComponent doView(Graph<String, Object> sgv) {
 	
 		try {
@@ -546,54 +524,33 @@ public class FqlDisplay implements Disp {
 
 			layout.setSize(new Dimension(600, 540));
 			final VisualizationViewer<String, Object> vv = new VisualizationViewer<>(layout);
-			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
-				@Override
-				public Paint transform(String i) {
-					return prog.nmap.get(i);
-				}
-			};
+			Transformer<String, Paint> vertexPaint = (String i) -> prog.nmap.get(i);
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<String>());
-			vv.getRenderContext().setEdgeLabelTransformer(new Transformer() {
+			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<>());
+			vv.getRenderContext().setEdgeLabelTransformer((Object arg0) -> ((Pair<?, ?>) arg0).second.toString());
 
-				@Override
-				public Object transform(Object arg0) {
-					return ((Pair<?, ?>) arg0).second.toString();
-				}
-			});
+			vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
+                            if (e.getStateChange() != ItemEvent.SELECTED) {
+                                return;
+                            }
+                            vv.getPickedEdgeState().clear();
+                            String str = ((String) e.getItem());
+                            yyy.setSelectedValue(indices.get(str), true);
+                        });
 
-			vv.getPickedVertexState().addItemListener(new ItemListener() {
-
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() != ItemEvent.SELECTED) {
-						return;
-					}
-					vv.getPickedEdgeState().clear();
-					String str = ((String) e.getItem());
-					yyy.setSelectedValue(indices.get(str), true);
-				}
-
-			});
-
-			vv.getPickedEdgeState().addItemListener(new ItemListener() {
-
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() != ItemEvent.SELECTED) {
-						return;
-					}
-					vv.getPickedVertexState().clear();
-					Object o = ((Pair<?, ?>) e.getItem()).second;
-					handleInstanceFlowEdge(o);
-				}
-
-			});
+			vv.getPickedEdgeState().addItemListener((ItemEvent e) -> {
+                            if (e.getStateChange() != ItemEvent.SELECTED) {
+                                return;
+                            }
+                            vv.getPickedVertexState().clear();
+                            Object o = ((Pair<?, ?>) e.getItem()).second;
+                            handleInstanceFlowEdge(o);
+                        });
 
 			vv.getRenderContext().setLabelOffset(20);
 			GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
@@ -607,7 +564,7 @@ public class FqlDisplay implements Disp {
 		}
 	}
 
-	Set<String> extraInsts = new HashSet<>();
+	private final Set<String> extraInsts = new HashSet<>();
 	private void handleInstanceFlowEdge(Object o) {
 		InstExp i = (InstExp) o;
 		Object f = i.accept(new Unit(), 	
@@ -782,12 +739,7 @@ public class FqlDisplay implements Disp {
 			Layout<String, Object> layout = (Layout<String, Object>) x.newInstance(sgv);
 			layout.setSize(new Dimension(600, 540));
 			final VisualizationViewer<String, Object> vv = new VisualizationViewer<>(layout);
-			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
-				@Override
-				public Paint transform(String i) {
-					return prog.smap(new SigExp.Var(i));
-				}
-			};
+			Transformer<String, Paint> vertexPaint = (String i) -> prog.smap(new SigExp.Var(i));
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
@@ -795,36 +747,25 @@ public class FqlDisplay implements Disp {
 		
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 			vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<>());
-			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<String>());
+			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<>());
 		
-			vv.getPickedVertexState().addItemListener(new ItemListener() {
+			vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
+                            if (e.getStateChange() != ItemEvent.SELECTED) {
+                                return;
+                            }
+                            vv.getPickedEdgeState().clear();
+                            String str = ((String) e.getItem());
+                            yyy.setSelectedValue(indices.get(str), true);
+                        });
 
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() != ItemEvent.SELECTED) {
-						return;
-					}
-					vv.getPickedEdgeState().clear();
-					String str = ((String) e.getItem());
-					yyy.setSelectedValue(indices.get(str), true);
-				}
-
-			});
-
-			vv.getPickedEdgeState().addItemListener(new ItemListener() {
-
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() != ItemEvent.SELECTED) {
-						return;
-					}
-					vv.getPickedVertexState().clear();
-					String str = ((String) e.getItem());
-					yyy.setSelectedValue(indices.get(str), true);
-
-				}
-
-			});
+			vv.getPickedEdgeState().addItemListener((ItemEvent e) -> {
+                            if (e.getStateChange() != ItemEvent.SELECTED) {
+                                return;
+                            }
+                            vv.getPickedVertexState().clear();
+                            String str = ((String) e.getItem());
+                            yyy.setSelectedValue(indices.get(str), true);
+                        });
 
 			vv.getRenderContext().setLabelOffset(20);
 		

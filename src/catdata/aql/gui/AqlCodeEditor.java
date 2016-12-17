@@ -19,8 +19,6 @@ import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.autocomplete.AutoCompletion;
@@ -76,14 +74,12 @@ public final class AqlCodeEditor extends
 			this.revalidate();
 		}
 				
-		public Outline(String title) {
+		private Outline(String title) {
 			super(title);
 			p.add(new JScrollPane(list)); 
 			this.setContentPane(p);
 			build();
-			list.addListSelectionListener(new ListSelectionListener() {
-				@Override
-				public void valueChanged(ListSelectionEvent e) {
+			list.addListSelectionListener(e -> {
 					String s = list.getSelectedValue(); 
 					if (s == null) {
 						return;
@@ -94,7 +90,7 @@ public final class AqlCodeEditor extends
 						line = 0;
 					}
 					setCaretPos(line);
-				}			
+							
 			});
 			setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 			 ComponentListener listener = new ComponentAdapter() {
@@ -245,10 +241,10 @@ public final class AqlCodeEditor extends
 		return ret;
 	}
 
-	String last_str;
-	Program<Exp<? extends Object>> last_prog;
-	AqlEnv last_env;
-	AqlMultiDriver driver;
+//	private String last_str;
+	private Program<Exp<? extends Object>> last_prog;
+	public AqlEnv last_env;
+	private AqlMultiDriver driver;
 	
 	@Override
 	protected AqlEnv makeEnv(String str, Program<Exp<? extends Object>> init) {
@@ -256,7 +252,7 @@ public final class AqlCodeEditor extends
 		driver.start();
 		last_env = driver.env; //constructor blocks
 		last_prog = init;
-		last_str = str;
+	//	last_str = str;
 		outline.build();
 		if (last_env.exn != null && last_env.defs.keySet().isEmpty()) {
 			throw last_env.exn;

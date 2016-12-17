@@ -4,9 +4,9 @@ package catdata;
 @SuppressWarnings("serial")
 public class LineException extends RuntimeException {
 
-		public String decl;
-		public String kind;
-		private String str;
+		public final String decl;
+		public final String kind;
+		private final String str;
 		
 		public LineException(String string, String decl, String kind) {
 			super(string);

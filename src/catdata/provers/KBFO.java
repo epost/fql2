@@ -32,8 +32,8 @@ public abstract class KBFO<S,C,V> {
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	public static class AndOr<S,C,V> extends KBFO<S,C,V> {
-		boolean isAnd;
-		List<KBFO<S,C,V>> es;
+		private final boolean isAnd;
+		private final List<KBFO<S,C,V>> es;
 		
 		public AndOr(boolean isAnd, List<KBFO<S, C, V>> es) {
 			this.isAnd = isAnd;
@@ -63,9 +63,7 @@ public abstract class KBFO<S,C,V> {
 					return false;
 			} else if (!es.equals(other.es))
 				return false;
-			if (isAnd != other.isAnd)
-				return false;
-			return true;
+			return (isAnd == other.isAnd);
 		}
 		
 		@Override
@@ -101,7 +99,7 @@ public abstract class KBFO<S,C,V> {
 	}
 	
 	public static class Implies<S,C,V> extends KBFO<S,C,V> {
-		KBFO<S,C,V> a, c;
+		private final KBFO<S,C,V> a, c;
 		
 		public Implies(KBFO<S, C, V> a, KBFO<S, C, V> c) {
 			this.a = a;
@@ -163,7 +161,7 @@ public abstract class KBFO<S,C,V> {
 	}
 	
 	public static class Not<S,C,V> extends KBFO<S,C,V> {
-		KBFO<S,C,V> e;
+		private final KBFO<S,C,V> e;
 		
 		public Not(KBFO<S, C, V> e) {
 			this.e = e;
@@ -216,9 +214,9 @@ public abstract class KBFO<S,C,V> {
 	}
 	
 	public static class Bind<S,C,V> extends KBFO<S,C,V> {
-		boolean isForall;
-		List<Pair<V, S>> vars;
-		KBFO<S,C,V> e;
+		private final boolean isForall;
+		private final List<Pair<V, S>> vars;
+		private final KBFO<S,C,V> e;
 		
 		public Bind(boolean isForall, List<Pair<V, S>> vars, KBFO<S, C, V> e) {
 			this.isForall = isForall;
@@ -329,7 +327,7 @@ public abstract class KBFO<S,C,V> {
 	}
 	
 	public static class Eq<S,C,V> extends KBFO<S,C,V> {
-		KBExp<C,V> l, r;
+		private final KBExp<C,V> l, r;
 		
 		public Eq(KBExp<C, V> l, KBExp<C, V> r) {
 			this.l = l;

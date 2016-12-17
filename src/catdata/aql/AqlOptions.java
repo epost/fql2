@@ -77,7 +77,7 @@ public final class AqlOptions {
 			if (s.length() != 1) {
 				throw new RuntimeException("Expected a character, instead received "+ s);
 			}
-			return Character.valueOf(s.charAt(0));
+			return s.charAt(0);
 		}
 		
 		public Integer getInteger(Map<String, String> map) {
@@ -325,9 +325,9 @@ public final class AqlOptions {
 			return Language.AQL.toString();
 		}
 		
-		String msg0 = "completion_precedence = \"a b c\" means a < b < c";
-		String msg1 = msg0 + "\n\nAvailable provers: " + Arrays.toString(ProverName.values());
-		String msg  = msg1 + "\n\nOption descriptions are available in the AQL manual, see categoricaldata.net/fql.html";
+		private final String msg0 = "completion_precedence = \"a b c\" means a < b < c";
+		private final String msg1 = msg0 + "\n\nAvailable provers: " + Arrays.toString(ProverName.values());
+		private final String msg  = msg1 + "\n\nOption descriptions are available in the AQL manual, see categoricaldata.net/fql.html";
 		@Override
 		public Pair<JComponent, Function<Unit, Unit>> display() {
 			return new Pair<>(new CodeTextPanel("", "Aql options are specified in each Aql expression.\nHere are the available options and their defaults:\n\n\t" + AqlOptions.printDefault() + "\n\n" + msg), x -> x);

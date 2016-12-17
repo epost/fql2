@@ -57,11 +57,11 @@ public final class DAG<N> {
 
 		private final Map<K, Set<V>> fMap= new LinkedHashMap<>();
 		
-		public MultiMap() {
+		private  MultiMap() {
 			
 		}
 		
-		public MultiMap(MultiMap<K,V> x) {
+		private MultiMap(MultiMap<K,V> x) {
 			for (K k : x.keySet()) {
 				fMap.put(k, new HashSet<>(x.get(k)));
 			}
@@ -133,7 +133,7 @@ public final class DAG<N> {
 		}
 	}
 
-	public final MultiMap<N,N> fOut, fIn; 
+	private final MultiMap<N,N> fOut, fIn; 
 	
 	/**
 	 * Adds a directed edge from <code>origin to target. The vertices are not
@@ -215,12 +215,11 @@ public final class DAG<N> {
 	private Set<N> computeZeroEdgeVertices(MultiMap<N,N> map) {
 		Set<N> candidates = map.keySet();
 		Set<N> roots = new LinkedHashSet<>(candidates.size());
-		for (Iterator<N> it = candidates.iterator(); it.hasNext();) {
-			N candidate= it.next();
-			if (map.get(candidate).isEmpty()) {
-				roots.add(candidate);
-			}
-		}
+            for (N candidate : candidates) {
+                if (map.get(candidate).isEmpty()) {
+                    roots.add(candidate);
+                }
+            }
 		return roots;
 	}
 

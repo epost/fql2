@@ -359,7 +359,7 @@ public abstract class KBExp<C, V> {
 			if (i == null) {
 				symbols.put(f, args.size());
 			} else {
-				if (args.size() != i.intValue()) {
+				if (args.size() != i) {
 					throw new RuntimeException("Symbol " + f + " used with arity " + i + " and also " + args.size());
 				}
 			}

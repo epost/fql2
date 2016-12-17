@@ -5,11 +5,14 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.function.Function;
 
 import javax.swing.JComponent;
@@ -20,6 +23,7 @@ import javax.swing.JTabbedPane;
 
 import catdata.Pair;
 import catdata.Unit;
+import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOptionsDefunct;
 import catdata.fpql.XOptions;
@@ -43,7 +47,7 @@ public class GlobalOptions implements Serializable {
 		debug = new GlobalOptions();
 	}
 
-	static int selected_tab = 0;
+	private static int selected_tab = 0;
 
 	public GeneralOptions general = new GeneralOptions(); 
 	public FqlOptions fql = new FqlOptions(); 
@@ -69,7 +73,7 @@ public class GlobalOptions implements Serializable {
 			out.writeObject(debug);
 			out.close();
 			fileOut.close();
-		} catch (Exception i) {
+		} catch (IOException i) {
 			i.printStackTrace();
 			JOptionPane.showMessageDialog(null, i.getLocalizedMessage());
 		}
@@ -99,11 +103,11 @@ public class GlobalOptions implements Serializable {
 			} else {
 				throw new RuntimeException("Cannot restore options, file corrupt");
 			}
-		} catch (Exception i) {
+		} catch (IOException | ClassNotFoundException | RuntimeException i) {
 				i.printStackTrace();
 				JOptionPane.showMessageDialog(null, i.getLocalizedMessage());
 		}
-		return;
+		
 	}
 
 				
@@ -164,14 +168,35 @@ public class GlobalOptions implements Serializable {
 		dialog.setVisible(true);
 	
 	}
-	
+	 
 
 	public static void showAbout() {
-		JOptionPane.showMessageDialog(null, about, "About",
+		JOptionPane.showMessageDialog(null, new CodeTextPanel("", about()), "About",
 				JOptionPane.PLAIN_MESSAGE, null);
 	}
 
-	static String about = "Categorical Data IDE Copyright Patrick Schultz, David Spivak, and Ryan Wisnesky"
-			+ "\n\nplease see categoricaldata.net/fql.html for more information";
+	private static final String aboutErr = "No cdide.properties found.  If you are building from source, make sure cdide.properties is on the classpath.";
+	
+	private static String aboutString = null;
+	private static String about() {
+		if (aboutString != null) {
+			return aboutString;
+		}
+		try (InputStream in = Object.class.getResourceAsStream("/cdide.properties")) {
+			Properties prop = new Properties();
+			prop.load(in);
+			
+			if (in == null) {
+				aboutString = aboutErr;
+			} else {			
+				aboutString = Util.sep(prop, ": ", "\n\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			aboutString = aboutErr;
+		}	
+		return aboutString;
+	}
+
 
 }

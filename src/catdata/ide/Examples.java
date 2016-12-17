@@ -33,7 +33,7 @@ public class Examples {
 				Example e = (Example) field.get(null);
 				ret.add(e);
 			}
-		} catch (Exception ex) {
+		} catch (IllegalAccessException | IllegalArgumentException | SecurityException ex) {
 			ex.printStackTrace();
 		}
 		return ret;
@@ -42,7 +42,7 @@ public class Examples {
 	public static Vector<Example> filterBy(String string) {
 		Vector<Example> ret = new Vector<>();
 		for (Example e : getAllExamples()) {
-			if (e.lang().toString().equals(string) || string.equals("All")) {
+			if (e.lang().toString().equals(string)) {
 				ret.add(e);
 			}
 		}

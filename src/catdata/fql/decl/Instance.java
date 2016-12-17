@@ -8,7 +8,6 @@ import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,13 +35,13 @@ import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
 
-import catdata.fql.FqlOptions;
-import catdata.fql.FQLException;
-import catdata.fql.Fn;
 import catdata.IntRef;
 import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
+import catdata.fql.FQLException;
+import catdata.fql.Fn;
+import catdata.fql.FqlOptions;
 import catdata.fql.FqlUtil;
 import catdata.fql.cat.Arr;
 import catdata.fql.cat.FDM;
@@ -1117,80 +1116,56 @@ public class Instance {
 
 			final VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
-			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
-				@Override
-				public Paint transform(String i) {
-					if (thesig.isAttribute(i)) {
-						return UIManager.getColor("Panel.background");
-					} else {
-						return clr;
-					}
-				}
-			};
+			Transformer<String, Paint> vertexPaint = (String i) -> {
+                            if (thesig.isAttribute(i)) {
+                                return UIManager.getColor("Panel.background");
+                            } else {
+                                return clr;
+                            }
+                        };
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-			vv.getRenderContext().setVertexLabelTransformer(new Transformer() {
+			vv.getRenderContext().setVertexLabelTransformer((String str) -> {
+                          
+                            if (thesig.isAttribute(str)) {
+                                str = thesig.getTypeLabel(str);
+                            }
+                            return str;
+                        });
 
-				@Override
-				public Object transform(Object arg0) {
-					String str = (String) arg0;
-					if (thesig.isAttribute(str)) {
-						str = thesig.getTypeLabel(str);
-					}
-					return str;
-				}
-
-			});
-
-			vv.getPickedVertexState().addItemListener(new ItemListener() {
-
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() != ItemEvent.SELECTED) {
-						return;
-					}
-					vv.getPickedEdgeState().clear();
-					String str = ((String) e.getItem());
-					prejoin();
-
-					if (!thesig.isAttribute(str)) {
-						cards.show(vwr, str);
-					} else {
-						cards.show(vwr, "domain of " + str);
-
-					}
-				}
-
-			});
-			vv.getPickedEdgeState().addItemListener(new ItemListener() {
-
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() != ItemEvent.SELECTED) {
-						return;
-					}
-					vv.getPickedVertexState().clear();
-					String str = ((String) e.getItem());
-					prejoin();
-					cards.show(vwr, str);
-				}
-
-			});
+			vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
+                            if (e.getStateChange() != ItemEvent.SELECTED) {
+                                return;
+                            }
+                            vv.getPickedEdgeState().clear();
+                            String str = ((String) e.getItem());
+                            prejoin();
+                            
+                            if (!thesig.isAttribute(str)) {
+                                cards.show(vwr, str);
+                            } else {
+                                cards.show(vwr, "domain of " + str);
+                                
+                            }
+                        });
+			vv.getPickedEdgeState().addItemListener((ItemEvent e) -> {
+                            if (e.getStateChange() != ItemEvent.SELECTED) {
+                                return;
+                            }
+                            vv.getPickedVertexState().clear();
+                            String str = ((String) e.getItem());
+                            prejoin();
+                            cards.show(vwr, str);
+                        });
 			vv.getRenderContext().setLabelOffset(20);
-			vv.getRenderContext().setEdgeLabelTransformer(new Transformer() {
-
-				@Override
-				public Object transform(Object arg0) {
-					String s = arg0.toString();
-					if (thesig.isAttribute(s)) {
-						return "";
-					}
-					return s;
-				}
-
-			});
+			vv.getRenderContext().setEdgeLabelTransformer((String s) -> {
+                            if (thesig.isAttribute(s)) {
+                                return "";
+                            }
+                            return s;
+                        });
 		
 			float dash[] = { 1.0f };
 			final Stroke edgeStroke = new BasicStroke(0.5f,
@@ -1207,7 +1182,7 @@ public class Instance {
 			vv.getRenderContext().setEdgeStrokeTransformer(
 					edgeStrokeTransformer);
 			vv.getRenderContext().setVertexLabelTransformer(
-					new ToStringLabeller<String>());
+					new ToStringLabeller<>());
 
 			final GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 		
@@ -1365,34 +1340,28 @@ public class Instance {
 		}
 	}
 
-	private Comparator<Pair<Path, Attribute<Node>>> comparator = new Comparator<Pair<Path, Attribute<Node>>>() {
-
-		@Override
-		public int compare(Pair<Path, Attribute<Node>> o1,
-				Pair<Path, Attribute<Node>> o2) {
-			List<String> x1 = o1.first.asList();
-			x1.add(o1.second.name);
-			List<String> x2 = o2.first.asList();
-			x2.add(o2.second.name);
-
-			Iterator<String> i1 = x1.iterator();
-			Iterator<String> i2 = x2.iterator();
-			while (i1.hasNext() && i2.hasNext()) {
-				int c = i1.next().compareTo(i2.next());
-				if (c != 0) {
-					return c;
-				}
-			}
-			if (i1.hasNext()) {
-				return 1;
-			} else if (i2.hasNext()) {
-				return -1;
-			} else {
-				return 0;
-			}
-		}
-
-	};
+	private Comparator<Pair<Path, Attribute<Node>>> comparator = (Pair<Path, Attribute<Node>> o1, Pair<Path, Attribute<Node>> o2) -> {
+            List<String> x1 = o1.first.asList();
+            x1.add(o1.second.name);
+            List<String> x2 = o2.first.asList();
+            x2.add(o2.second.name);
+            
+            Iterator<String> i1 = x1.iterator();
+            Iterator<String> i2 = x2.iterator();
+            while (i1.hasNext() && i2.hasNext()) {
+                int c = i1.next().compareTo(i2.next());
+                if (c != 0) {
+                    return c;
+                }
+            }
+            if (i1.hasNext()) {
+                return 1;
+            } else if (i2.hasNext()) {
+                return -1;
+            } else {
+                return 0;
+            }
+        };
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Map<Node, Pair<Object[], Object[][]>> computeObservables()

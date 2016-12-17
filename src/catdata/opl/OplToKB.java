@@ -440,19 +440,16 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	public Map<S, Set<OplTerm<C, V>>> doHoms() {
 		HashMap<S, Set<OplTerm<C, V>>> sorts = new HashMap<>();
 		Thread cur = Thread.currentThread();
-		Runnable r = new Runnable() {
-			@Override
-			public void run() {
-				try {
-				for (S s : sig.sorts) {
-					sorts.put(s, hom0(cur, new LinkedList<>(), s).stream().map(x -> x.second).collect(Collectors.toSet()));
-				}
-				} catch (Exception ex) {
-					ex.printStackTrace();
-			//		throw new RuntimeException(ex.getMessage());
-				}
-			}
-		};
+		Runnable r = () -> {
+                    try {
+                        for (S s : sig.sorts) {
+                            sorts.put(s, hom0(cur, new LinkedList<>(), s).stream().map(x -> x.second).collect(Collectors.toSet()));
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        //		throw new RuntimeException(ex.getMessage());
+                    }
+                };
 		Thread t = new Thread(r);
 		t.start();
 		try {

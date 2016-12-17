@@ -43,7 +43,7 @@ public class SqlTable {
 		}
 	}
 	
-	private Map<String, SqlColumn> colMap = new HashMap<>();
+	private final Map<String, SqlColumn> colMap = new HashMap<>();
 	public SqlColumn getColumn(String name) {
 		SqlColumn t = colMap.get(name.toUpperCase());
 		if (t != null) {

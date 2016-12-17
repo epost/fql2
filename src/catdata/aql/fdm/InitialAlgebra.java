@@ -253,6 +253,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 			if (!eq.ctx.isEmpty()) {
 				continue; //in type side or schema
 			}
+                        //TODO aql need convert
 			if (schema.typeSide.eqs.contains(new Triple<>(new Ctx<>(), eq.lhs, eq.rhs))) {
 				continue; //in type side
 			}

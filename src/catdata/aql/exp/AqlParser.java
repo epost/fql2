@@ -36,6 +36,7 @@ import catdata.aql.exp.InstExp.InstExpVar;
 import catdata.aql.exp.MapExp.MapExpId;
 import catdata.aql.exp.MapExp.MapExpVar;
 import catdata.aql.exp.PragmaExp.PragmaExpJs;
+import catdata.aql.exp.PragmaExp.PragmaExpLoadJars;
 import catdata.aql.exp.PragmaExp.PragmaExpMatch;
 import catdata.aql.exp.PragmaExp.PragmaExpProc;
 import catdata.aql.exp.PragmaExp.PragmaExpSql;
@@ -67,24 +68,17 @@ import catdata.aql.exp.TyExp.TyExpVar;
 
 public class AqlParser {
 
-	 static final Parser<String> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map(new org.codehaus.jparsec.functors.Map<String, String>() {
-				@Override
-				public String map(String s) {
-					Integer.valueOf(s);
-					return s;
-				}
-			}); 
 
-	public static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
+	public final static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };	
 	
-	public static String[] res = new String[] {
+	public final static String[] res = new String[] {
 			"typeside", "schema", "mapping", "instance", "transform", "query", "pragma", "graph",
 			"exec_jdbc",
 			"exec_js",
 			"exec_cmdline",
 			"literal",
+			"add_to_classpath", //TODO aql not officially supported
 			"id",
 			"match",
 			"attributes",
@@ -155,7 +149,7 @@ public class AqlParser {
 		return RESERVED.token(names);
 	}
 
-	public static Parser<String> ident = 
+	public final static Parser<String> ident = 
 		 Parsers.or(Terminals.StringLiteral.PARSER,Terminals.IntegerLiteral.PARSER,
 				Terminals.Identifier.PARSER);
 	
@@ -202,7 +196,7 @@ public class AqlParser {
 		return ret;
 	}
 
-	private static final void tyExp() {
+	private static void tyExp() {
 		Parser<TyExp<?, ?>> 
 			var = ident.map(TyExpVar::new),
 			empty = token("empty").map(x -> new TyExpEmpty()),
@@ -212,7 +206,7 @@ public class AqlParser {
 		ty_ref.set(ret);
 	}
 	
-	private static final void schExp() {		
+	private static void schExp() {		
 		Parser<SchExp<?,?,?,?,?>> 
 			var = ident.map(SchExpVar::new),
 			empty = Parsers.tuple(token("empty"), ty_ref.get()).map(x -> new SchExpEmpty<>(x.b)),
@@ -223,7 +217,7 @@ public class AqlParser {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static final void pragmaExp() {		
+	private static void pragmaExp() {		
 		Parser<Pair<List<String>, List<catdata.Pair<String, String>>>> p = Parsers.tuple(ident.many(), options).between(token("{"),token("}"));
 		
 		Parser<PragmaExp> 
@@ -247,13 +241,15 @@ public class AqlParser {
 			match = Parsers.tuple(token("match"), ident.followedBy(token(":")), graph_ref.lazy().followedBy(token("->")), graph_ref.lazy(), options.between(token("{"), token("}")).optional())
 			.map(x -> new PragmaExpMatch(x.b, x.c, x.d, x.e == null ? new LinkedList<>() : x.e)),
 			
-			ret = Parsers.or(csvInst, csvTrans, var, sql, js, proc, jdbcInst, jdbcTrans, match); 
+			load = Parsers.tuple(token("add_to_classpath"), token("{"), ident.many(), token("}")).map(x -> new PragmaExpLoadJars(x.c)),	
+			
+			ret = Parsers.or(csvInst, csvTrans, var, sql, js, proc, jdbcInst, jdbcTrans, match, load); 
 		
 			pragma_ref.set(ret);
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	private static final void instExp() {
+	private static void instExp() {
 		Parser <InstExp<?,?,?,?,?,?,?,?,?>> 
 			var = ident.map(InstExpVar::new),
 			empty = Parsers.tuple(token("empty"), sch_ref.get()).map(x -> new InstExpEmpty<>(x.b)),
@@ -274,7 +270,7 @@ public class AqlParser {
 	}
 	
 	//@SuppressWarnings({"unchecked"})
-	private static final void graphExp() {
+	private static void graphExp() {
 		Parser<GraphExp<?,?>> 
 			var = ident.map(GraphExpVar::new),
 		
@@ -283,7 +279,7 @@ public class AqlParser {
 		graph_ref.set(ret);
 	}
 	
-	private static final void mapExp() {
+	private static void mapExp() {
 		Parser<MapExp<?,?,?,?,?,?,?,?>> 
 			var = ident.map(MapExpVar::new),
 			id = Parsers.tuple(token("id"), sch_ref.lazy()).map(x -> new MapExpId<>(x.b)),
@@ -294,7 +290,7 @@ public class AqlParser {
 
 	//TODO aql revisit parser type safety
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private static final void transExp() {
+	private static void transExp() {
 		Parser<TransExp<?,?,?,?,?,?,?,?,?,?,?,?,?>>  
 			var = ident.map(TransExpVar::new),
 			id = Parsers.tuple(token("id"), inst_ref.lazy()).map(x -> new TransExpId<>(x.b)),
@@ -321,8 +317,8 @@ public class AqlParser {
 		trans_ref.set(ret);
 	}
 	
-	private static Parser<List<String>> imports = Parsers.tuple(token("imports"), ident.many()).optional().map(x -> x == null ? new LinkedList<>() : x.b);
-	private static Parser<List<catdata.Pair<String,String>>> options = Parsers.tuple(token("options"), Parsers.tuple(ident, token("="), ident).many()).optional().map(x -> {
+	private static final Parser<List<String>> imports = Parsers.tuple(token("imports"), ident.many()).optional().map(x -> x == null ? new LinkedList<>() : x.b);
+	private static final Parser<List<catdata.Pair<String,String>>> options = Parsers.tuple(token("options"), Parsers.tuple(ident, token("="), ident).many()).optional().map(x -> {
 		List<catdata.Pair<String,String>> ret = new LinkedList<>();
 		if (x != null) {
 			for (Tuple3<String, Token, String> y : x.b) {
@@ -331,7 +327,7 @@ public class AqlParser {
 		}
 		return ret;
 	});
-	private static Parser<List<catdata.Pair<String, String>>> ctx = Parsers.tuple(ident.many1(), Parsers.tuple(token(":"), ident).optional()).sepBy(token(",")).map(x -> {
+	private static final Parser<List<catdata.Pair<String, String>>> ctx = Parsers.tuple(ident.many1(), Parsers.tuple(token(":"), ident).optional()).sepBy(token(",")).map(x -> {
 		List<catdata.Pair<String, String>> ret = new LinkedList<>();
 		for (Pair<List<String>, Pair<Token, String>> y : x) {
 			for (String z : y.a) {
@@ -441,7 +437,7 @@ public class AqlParser {
 	}
 	*/
 
-	private static final Parser<GraphExpRaw> graphExpRaw() {
+	private static Parser<GraphExpRaw> graphExpRaw() {
 		Parser<List<String>> nodes = Parsers.tuple(token("nodes"), ident.many()).map(x -> x.b);
 		
 		Parser<Pair<Token, List<Tuple5<List<String>, Token, String, Token, String>>>> edges = Parsers.tuple(token("edges"), Parsers.tuple(ident.many1(), token(":"), ident, token("->"), ident).many());
@@ -466,7 +462,7 @@ public class AqlParser {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static final Parser<InstExpCsv> instExpCsv() {
+	private static Parser<InstExpCsv> instExpCsv() {
 		Parser<Pair<List<String>, List<catdata.Pair<String, String>>>> 
 		pa = Parsers.tuple(imports, options).between(token("{"), token("}"));
 		
@@ -475,7 +471,7 @@ public class AqlParser {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static final Parser<TransExpCsv> transExpCsv() {
+	private static Parser<TransExpCsv> transExpCsv() {
 		Parser<Pair<List<String>, List<catdata.Pair<String, String>>>> 
 		pa = Parsers.tuple(imports, options).between(token("{"), token("}"));
 		
@@ -489,7 +485,7 @@ public class AqlParser {
 	
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static final Parser<TransExpJdbc> transExpJdbc() {
+	private static Parser<TransExpJdbc> transExpJdbc() {
 		Parser<Pair<InstExp, InstExp>> st = Parsers.tuple(inst_ref.lazy(), token("->"), inst_ref.lazy())
 				.map(x -> new Pair<>(x.a, x.c));
 	
@@ -500,7 +496,7 @@ public class AqlParser {
 		return ret; 
 	}
 	
-	private  static final Parser<TyExpRaw> tyExpRaw() {
+	private  static Parser<TyExpRaw> tyExpRaw() {
 		Parser<List<String>> types = Parsers.tuple(token("types"), ident.many()).map(x -> x.b);
 		Parser<Pair<Token, List<Tuple3<List<String>, Token, String>>>> consts = Parsers.tuple(token("constants"), Parsers.tuple(ident.many1(), token(":"), ident).many());
 		Parser<List<catdata.Pair<String, catdata.Pair<List<String>, String>>>> consts0 = consts.map(x -> {
@@ -767,7 +763,7 @@ public class AqlParser {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private static final Parser<InstExpJdbc> instExpJdbc() {
+	private static Parser<InstExpJdbc> instExpJdbc() {
 		Parser<Tuple3<List<catdata.Pair<String, String>>, List<String>, List<catdata.Pair<String, String>>>> qs = Parsers.tuple(env(ident, "->"), imports, options).between(token("{"), token("}"));
 		
 		@SuppressWarnings("unchecked")
@@ -777,7 +773,7 @@ public class AqlParser {
 	}
 	
 	//TODO: aql reverse order on arguments env
-	private static final Parser<MapExpRaw> mapExpRaw() {
+	private static Parser<MapExpRaw> mapExpRaw() {
 		Parser<List<catdata.Pair<String, String>>> ens = Parsers.tuple(token("entities"), env(ident, "->")).map(x -> x.b);
 		
 		Parser<List<catdata.Pair<String, List<String>>>> fks = Parsers.tuple(token("foreign_keys"), env(ident.sepBy1(token(".")),"->")).map(x -> x.b);
@@ -804,7 +800,7 @@ public class AqlParser {
 		return ret;	
 	}
 	
-	private static final Parser<TransExpRaw> transExpRaw() {
+	private static Parser<TransExpRaw> transExpRaw() {
 		Parser<List<catdata.Pair<String, RawTerm>>> gens = Parsers.tuple(token("generators"), env(term(), "->")).map(x -> x.b);
 		
 				
@@ -823,7 +819,7 @@ public class AqlParser {
 		return ret;	
 	}
 
-	private static final Parser<Trans> trans() {
+	private static Parser<Trans> trans() {
 		Parser<List<catdata.Pair<String, RawTerm>>> gens = env(term(), "->");
 		
 		Parser<Pair<List<catdata.Pair<String, RawTerm>>, List<catdata.Pair<String, String>>>> 
@@ -838,7 +834,7 @@ public class AqlParser {
 
 
 	
-	private static final <Y>  Parser<Triple<String, Integer, Y>> decl(String s, Parser<Y> p) {
+	private static <Y>  Parser<Triple<String, Integer, Y>> decl(String s, Parser<Y> p) {
 		return Parsers.tuple(token(s), ident, Parsers.INDEX, token("="), p).map(x -> new Triple<>(x.b, x.c, x.e));
 	}
 	

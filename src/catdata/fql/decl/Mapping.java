@@ -8,7 +8,6 @@ import java.awt.Paint;
 import java.awt.Stroke;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -29,9 +28,9 @@ import org.apache.commons.collections15.Transformer;
 
 import catdata.Pair;
 import catdata.Triple;
-import catdata.fql.FqlOptions;
 import catdata.fql.FQLException;
 import catdata.fql.Fn;
+import catdata.fql.FqlOptions;
 import catdata.fql.FqlUtil;
 import catdata.fql.cat.Arr;
 import catdata.fql.cat.FinCat;
@@ -413,12 +412,7 @@ public class Mapping {
 			arr[i][1] = eq.getValue();
 			i++;
 		}
-		Arrays.sort(arr, new Comparator<Object[]>() {
-			@Override
-			public int compare(Object[] f1, Object[] f2) {
-				return f1[0].toString().compareTo(f2[0].toString());
-			}
-		});
+		Arrays.sort(arr, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
 
 		JTable nmC = new JTable(arr, new Object[] { "Source node",
 				"Target node" }){
@@ -436,12 +430,7 @@ public class Mapping {
 			arr2[i2][1] = eq.getValue().toLong();
 			i2++;
 		}
-		Arrays.sort(arr2, new Comparator<Object[]>() {
-			@Override
-			public int compare(Object[] f1, Object[] f2) {
-				return f1[0].toString().compareTo(f2[0].toString());
-			}
-		});
+		Arrays.sort(arr2, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
 
 		JTable emC = new JTable(arr2, new Object[] { "Source edge" ,
 				"Target path" }){
@@ -459,12 +448,7 @@ public class Mapping {
 			arr3[i3][1] = eq.getValue();
 			i3++;
 		}
-		Arrays.sort(arr3, new Comparator<Object[]>() {
-			@Override
-			public int compare(Object[] f1, Object[] f2) {
-				return f1[0].toString().compareTo(f2[0].toString());
-			}
-		});
+		Arrays.sort(arr3, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
 		JTable amC = new JTable(arr3, new Object[] { "Source attribute" ,
 				"Target attribute"}){
 			@Override
@@ -795,15 +779,12 @@ public class Mapping {
 				BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
 		final Stroke bs = new BasicStroke();
 
-		Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
-			@Override
-			public Stroke transform(String s) {
-				if (s.contains(" ")) {
-					return edgeStroke;
-				}
-				return bs;
-			}
-		};
+		Transformer<String, Stroke> edgeStrokeTransformer = (String s) -> {
+                    if (s.contains(" ")) {
+                        return edgeStroke;
+                    }
+                    return bs;
+                        };
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		vv.getRenderContext().setVertexLabelTransformer(

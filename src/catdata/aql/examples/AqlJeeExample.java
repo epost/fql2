@@ -40,7 +40,7 @@ public class AqlJeeExample extends AqlExample {
 			+ "\n "
 */	
 	
-	String s = "//Example courtesy of Jee Chung"
+	private final String s = "//Example courtesy of Jee Chung"
 			+ "\n"
 			+ "\ntypeside Ty = literal {"
 			+ "\n	java_types	"

@@ -2,6 +2,7 @@ package catdata.ide;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.net.*;
 import java.util.*;
 import javax.swing.*;
@@ -12,16 +13,16 @@ import javax.swing.text.html.*;
 @SuppressWarnings({ "rawtypes", "serial" })
 public class MiniBrowser extends JFrame implements HyperlinkListener {
 	// These are the buttons for iterating through the page list.
-	private JButton backButton, forwardButton;
+	private final JButton backButton, forwardButton;
 
 	// Page location text field.
-	private JTextField locationTextField;
+	private final JTextField locationTextField;
 
 	// Editor pane for displaying pages.
-	private JEditorPane displayEditorPane;
+	private final JEditorPane displayEditorPane;
 
 	// Browser's list of pages that have been visited.
-	private ArrayList pageList = new ArrayList();
+	private final ArrayList pageList = new ArrayList();
 
 	// Constructor for Mini Web Browser.
 	public MiniBrowser() {
@@ -93,7 +94,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 		int pageIndex = pageList.indexOf(currentUrl.toString());
 		try {
 			showPage(new URL((String) pageList.get(pageIndex - 1)), false);
-		} catch (Exception e) {
+		} catch (MalformedURLException e) {
 		}
 	}
 
@@ -103,7 +104,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 		int pageIndex = pageList.indexOf(currentUrl.toString());
 		try {
 			showPage(new URL((String) pageList.get(pageIndex + 1)), false);
-		} catch (Exception e) {
+		} catch (MalformedURLException e) {
 		}
 	}
 
@@ -132,8 +133,8 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 		URL verifiedUrl = null;
 		try {
 			verifiedUrl = new URL(url);
-		} catch (Exception e) {
-			return null;
+		} catch (MalformedURLException e) {
+			
 		}
 
 		return verifiedUrl;
@@ -179,7 +180,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 			
 			// Update buttons based on the page being displayed.
 			updateButtons();
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			showError("Unable to load page");
 		} finally {

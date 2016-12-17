@@ -30,10 +30,10 @@ import catdata.Util;
  */
 public class SemiThue<Y> {
 
-	private Set<Pair<List<Y>, List<Y>>> rules;
+	private final Set<Pair<List<Y>, List<Y>>> rules;
 	private boolean finished = false;
-	private Map<Pair<List<Y>, List<Y>>, Boolean> equivs = new HashMap<>();
-	private int max_iterations;
+	private final Map<Pair<List<Y>, List<Y>>, Boolean> equivs = new HashMap<>();
+	private final int max_iterations;
 	private int iteration = 0;
 	
 	/**
@@ -116,7 +116,7 @@ public class SemiThue<Y> {
 		if (!ce.isEmpty()) {
 			t.addAll(ce);
 			normalize(t);
-			ce = cp(t);
+			cp(t); //has side effect
 			return false;
 		} else {
 			simplify(t);
@@ -142,7 +142,7 @@ public class SemiThue<Y> {
 			t0.remove(rule);
 			if (!normal_form(rule.first, t0).equals(rule.first)) {
 				it.remove();
-				continue;
+				
 			}
 			// if (!normal_form(rule.second, t0).equals(rule.second)) {
 			// throw new RuntimeException();
@@ -152,7 +152,7 @@ public class SemiThue<Y> {
 
 	private <X> void normalize(Set<Pair<List<X>, List<X>>> t) {
 		Set<Pair<List<X>, List<X>>> marked = new HashSet<>();
-		Pair<List<X>, List<X>> lr = null;
+		Pair<List<X>, List<X>> lr;
 		while ((lr = getUnmarked(marked, t)) != null) {
 			t.remove(lr);
 			List<X> l0 = normal_form(lr.first, t);

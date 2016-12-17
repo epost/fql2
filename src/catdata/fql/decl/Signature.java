@@ -9,7 +9,6 @@ import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Collection;
@@ -322,12 +321,7 @@ public class Signature {
 			arr[i][1] = eq.rhs;
 			i++;
 		}
-		Arrays.sort(arr, new Comparator<Object[]>() {
-			@Override
-			public int compare(Object[] f1, Object[] f2) {
-				return f1[0].toString().compareTo(f2[0].toString());
-			}
-		});
+		Arrays.sort(arr, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
 
 		JTable eqsComponent = new JTable(arr, new Object[] { "lhs", "rhs" })  {
 			@Override
@@ -350,12 +344,7 @@ public class Signature {
 		for (Node n : nodes) {
 			sn[ii++][0] = n.string;
 		}
-		Arrays.sort(sn, new Comparator<Object[]>() {
-			@Override
-			public int compare(Object[] f1, Object[] f2) {
-				return f1[0].toString().compareTo(f2[0].toString());
-			}
-		});
+		Arrays.sort(sn, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
 
 		JTable nodesComponent = new JTable(sn, new String[] { "Name" }) {
 			@Override
@@ -377,12 +366,7 @@ public class Signature {
 			es[jj][2] = eq.target.string;
 			jj++;
 		}
-		Arrays.sort(es, new Comparator<Object[]>() {
-			@Override
-			public int compare(Object[] f1, Object[] f2) {
-				return f1[0].toString().compareTo(f2[0].toString());
-			}
-		});
+		Arrays.sort(es, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
 
 		JTable esC = new JTable(es, new String[] { "Name", "Source", "Target" }) {
 			@Override
@@ -404,12 +388,7 @@ public class Signature {
 			as[jj][2] = a.target.toString();
 			jj++;
 		}
-		Arrays.sort(as, new Comparator<Object[]>() {
-			@Override
-			public int compare(Object[] f1, Object[] f2) {
-				return f1[0].toString().compareTo(f2[0].toString());
-			}
-		});
+		Arrays.sort(as, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
 
 		JTable asC = new JTable(as, new String[] { "Name", "Source", "Type" }) {
 			@Override
@@ -690,16 +669,13 @@ public class Signature {
 			VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
 	
-			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
-				@Override
-				public Paint transform(String i) {
-					if (isAttribute(i)) {
-						return UIManager.getColor("Panel.background");
-					} else {
-						return clr;
-					}
-				}
-			};
+			Transformer<String, Paint> vertexPaint = (String i) -> {
+                            if (isAttribute(i)) {
+                                return UIManager.getColor("Panel.background");
+                            } else {
+                                return clr;
+                            }
+                        };
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
@@ -709,22 +685,19 @@ public class Signature {
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
 			final Stroke bs = new BasicStroke();
-			Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
-				@Override
-				public Stroke transform(String s) {
-					if (isAttribute(s)) {
-						return edgeStroke;
-					}
-					return bs;
-				}
-			};
+			Transformer<String, Stroke> edgeStrokeTransformer = (String s) -> {
+                            if (isAttribute(s)) {
+                                return edgeStroke;
+                            }
+                            return bs;
+                        };
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 			vv.getRenderContext().setEdgeStrokeTransformer(
 					edgeStrokeTransformer);
 			vv.getRenderContext().setVertexLabelTransformer(
-					new ToStringLabeller<String>());
+					new ToStringLabeller<>());
 			vv.getRenderContext().setEdgeLabelTransformer(
-					new ToStringLabeller<String>());
+					new ToStringLabeller<>());
 		
 			vv.getRenderContext().setVertexLabelTransformer(
 					new ToStringLabeller<String>() {
@@ -877,19 +850,16 @@ public class Signature {
 		p.add(p2);
 
 		JButton b = new JButton("Normalize");
-		b.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String s = p1.getText();
-				try {
-					Path path = Path.parsePath(Signature.this, s);
-					Path ap = cached.second.of(path).arr;
-					p2.setText(ap.toString());
-				} catch (FQLException ex) {
-					p2.setText(ex.toString());
-				}
-			}
-		});
+		b.addActionListener((ActionEvent e) -> {
+                    String s = p1.getText();
+                    try {
+                        Path path = Path.parsePath(Signature.this, s);
+                        Path ap = cached.second.of(path).arr;
+                        p2.setText(ap.toString());
+                    } catch (FQLException ex) {
+                        p2.setText(ex.toString());
+                    }
+                });
 
 		ret.add(p, BorderLayout.CENTER);
 		ret.add(b, BorderLayout.PAGE_END);
@@ -898,8 +868,8 @@ public class Signature {
 	}
 
 	public Signature onlyObjects() {
-		return new Signature(nodes, new LinkedList<Edge>(),
-				new LinkedList<Attribute<Node>>(), new HashSet<Eq>());
+		return new Signature(nodes, new LinkedList<>(),
+				new LinkedList<>(), new HashSet<>());
 	}
 
 	public boolean isNode(String s) {
@@ -910,7 +880,7 @@ public class Signature {
 		}
 	}
 
-	private Map<Node, List<Attribute<Node>>> attrsFor_cache = new HashMap<>();
+	private final Map<Node, List<Attribute<Node>>> attrsFor_cache = new HashMap<>();
 	public List<Attribute<Node>> attrsFor(Node n) {
 		List<Attribute<Node>> a = attrsFor_cache.get(n);
 		if (a != null) {
@@ -928,17 +898,12 @@ public class Signature {
 
 	public List<Node> order() {
 		List<Node> ret = new LinkedList<>(nodes);
-		Comparator<Node> c = new Comparator<Node>() {
-			@Override
-			public int compare(Node o1, Node o2) {
-				return edgesFrom(o1).size() - edgesFrom(o2).size(); 
-			}			
-		};
+		Comparator<Node> c = (Node o1, Node o2) -> edgesFrom(o1).size() - edgesFrom(o2).size();
 		Collections.sort(ret, c);
 		return ret;
 	}
 	
-	private Map<Node, List<Edge>> edgesFrom_cache = new HashMap<>();
+	private final Map<Node, List<Edge>> edgesFrom_cache = new HashMap<>();
 	public List<Edge> edgesFrom(Node n) {
 		List<Edge> a = edgesFrom_cache.get(n);
 		if (a != null) {

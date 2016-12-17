@@ -5,7 +5,6 @@ import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -16,8 +15,8 @@ import javax.swing.JSplitPane;
 
 public class ExampleMaker {
 
-	static CodeTextPanel p = new CodeTextPanel("input", "");
-	static CodeTextPanel q = new CodeTextPanel("output", "");
+	private final static CodeTextPanel p = new CodeTextPanel("input", "");
+	private final static CodeTextPanel q = new CodeTextPanel("output", "");
 	
 	static JPanel make() {
 		JPanel ret = new JPanel(new GridLayout(1,1));
@@ -42,15 +41,9 @@ public class ExampleMaker {
 		m.add(i);
 		f.setMenuBar(mb);
 		
-		i.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				q.setText(run(p.getText()));
-			}
-
-			
-		});
+		i.addActionListener((ActionEvent e) -> {
+                    q.setText(run(p.getText()));
+                });
 		
 		f.setContentPane(make());
 		f.setSize(600, 600);
@@ -61,7 +54,7 @@ public class ExampleMaker {
 	protected static String run(String s) {
 		s = s.replace("\"", "\\\"");
 		BufferedReader br = new BufferedReader(new StringReader(s.trim()));
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		String l;
 		try {
 			boolean first = true;

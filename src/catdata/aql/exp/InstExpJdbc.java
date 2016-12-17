@@ -288,6 +288,8 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, 
 		} catch (SQLException exn) {
 			exn.printStackTrace();
 			throw new RuntimeException("JDBC exception: " + exn.getMessage());
+		} catch (Throwable thr) {
+			throw new RuntimeException(thr.getMessage() + "\n\n" + helpStr);
 		}
 
 		AqlOptions strat = new AqlOptions(options, col);
@@ -298,6 +300,22 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, 
 		// TODO aql switch to saturated prover for jdbc
 	}
 
+	private final static String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example,"
+			+ "\n"
+			+ "\n	0:Employee"
+			+ "\n	0:Department"
+			+ "\n"
+			+ "\nPossible solution: Distinguish the IDs prior to import, or distinguish them during import, for example, "
+			+ "\n"
+			+ "\n	instance J = import_jdbc ... {"
+			+ "\n		Employee -> \"SELECT concat(\"emp\",id) FROM Employee\""
+			+ "\n		Department -> \"SELECT concat(\"dept\",id) FROM Dept\""
+			+ "\n		worksIn -> \"SELECT concat(\"emp\",id), concat(\"dept\",worksIn) FROM Employee\""
+			+ "\n	}"
+			+ "\n";
+
+
+	
 	@SuppressWarnings("unchecked")
 	private Fk stringToFk(String o) {
 		return (Fk) o;

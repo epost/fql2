@@ -19,8 +19,8 @@ public class DeltaAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y
 extends Algebra<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> {
  
 	
-	private Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
-	private Algebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> alg;
+	private final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
+	private final Algebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> alg;
 
 	@Override
 	public String toStringProver() {
@@ -80,7 +80,7 @@ extends Algebra<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> {
 	}
 
 
-	private Map<En1, Collection<Pair<En1, X>>> en_cache = new HashMap<>();
+	private final Map<En1, Collection<Pair<En1, X>>> en_cache = new HashMap<>();
 	@Override
 	public Collection<Pair<En1, X>> en(En1 en) {
 		if (en_cache.containsKey(en)) {

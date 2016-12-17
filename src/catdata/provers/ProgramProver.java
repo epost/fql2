@@ -73,7 +73,7 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 		return true;
 	}
 	
-	private Map<KBExp<C,V>, KBExp<C,V>> cache = new HashMap<>();
+	private final Map<KBExp<C,V>, KBExp<C,V>> cache = new HashMap<>();
 	
 	protected KBExp<C, V> red(KBExp<C, V> e) {
 		for (;;) {
@@ -115,8 +115,7 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 			
 			KBExp<C, V> lhs = r.first;
 			KBExp<C, V> rhs = r.second;
-			Map<V, KBExp<C, V>> s = null;
-			s = KBUnifier.findSubst(lhs, e);
+			Map<V, KBExp<C, V>> s = KBUnifier.findSubst(lhs, e);
 			if (s == null) {
 				continue;
 			}

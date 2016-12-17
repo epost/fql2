@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -31,7 +30,6 @@ import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
@@ -113,46 +111,35 @@ public class XSqlToFql {
 
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				input.setText(((Example) box.getSelectedItem()).getText());
-			}
-		});
+		box.addActionListener((ActionEvent e) -> {
+                    input.setText(((Example) box.getSelectedItem()).getText());
+                });
 		
 
-		transButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					output.setText(translate(input.getText(), depth.getText()).toString());
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					output.setText(ex.getLocalizedMessage());
-				}
-			}
-		});
+		transButton.addActionListener((ActionEvent e) -> {
+                    try {
+                        output.setText(translate(input.getText(), depth.getText()).toString());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        output.setText(ex.getLocalizedMessage());
+                    }
+                });
 
-		helpButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JTextArea jta = new JTextArea(help);
-				jta.setWrapStyleWord(true);
-				//jta.setEditable(false);
-				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-				p.setPreferredSize(new Dimension(300,200));
-
-				JOptionPane pane = new JOptionPane(p);
-				 // Configure via set methods
-				 JDialog dialog = pane.createDialog(null, "Help on SQL Schema to FQL");
-				 dialog.setModal(false);
-				 dialog.setVisible(true);
-				 dialog.setResizable(true);
-
-			}
-		});
+		helpButton.addActionListener((ActionEvent e) -> {
+                    JTextArea jta = new JTextArea(help);
+                    jta.setWrapStyleWord(true);
+                    //jta.setEditable(false);
+                    jta.setLineWrap(true);
+                    JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                    p.setPreferredSize(new Dimension(300,200));
+                    
+                    JOptionPane pane = new JOptionPane(p);
+                    // Configure via set methods
+                    JDialog dialog = pane.createDialog(null, "Help on SQL Schema to FQL");
+                    dialog.setModal(false);
+                    dialog.setVisible(true);
+                    dialog.setResizable(true);
+                });
 
 		JPanel p = new JPanel(new BorderLayout());
 
@@ -258,9 +245,9 @@ public class XSqlToFql {
 						}
 						arrows.add(new Triple<>(k.name + "_" + col.first,
 								k.name, ref));
-						iarrows.add(new Pair<String, List<Pair<Object, Object>>>(
+						iarrows.add(new Pair<>(
 								k.name + "_" + col.first,
-								new LinkedList<Pair<Object, Object>>()));
+								new LinkedList<>()));
 						
 						if (ref.equals(k.name)) {
 							List<String> lhs = deep(depth - 1, k.name + "_" +col.first);
@@ -300,7 +287,7 @@ public class XSqlToFql {
 					if (node == null) {
 						throw new RuntimeException("Missing table " + k.target);
 					}
-					node.add(new Pair<Object, Object>("v" + tuple.get(0), "v" + tuple
+					node.add(new Pair<>("v" + tuple.get(0), "v" + tuple
 							.get(0)));
 
 					for (int colNum = 1; colNum < tuple.size(); colNum++) {
@@ -309,12 +296,12 @@ public class XSqlToFql {
 						if (xxx == null) {
 							xxx = lookup2(k.target + "_" + lcols.get(colNum),
 									iarrows);
-							xxx.add(new Pair<Object, Object>("v" + tuple.get(0),
+							xxx.add(new Pair<>("v" + tuple.get(0),
 									"v" + maybeQuote(tuple.get(colNum))));
 
 						} else {
 							atoms.add(maybeQuote(tuple.get(colNum)));
-							xxx.add(new Pair<Object, Object>("v" + tuple.get(0),
+							xxx.add(new Pair<>("v" + tuple.get(0),
 									maybeQuote(tuple.get(colNum))));
 
 						}
@@ -334,7 +321,7 @@ public class XSqlToFql {
 		//		new SigExp.Var("S"));
 
 		String old = "S = " + exp + "\n\nI = " + inst + " : S";
-		return "adom : type\n\n" + Util.sep(atoms.stream().map(x -> x.toString() + " : adom").collect(Collectors.toList()), "\n") + "\n\n" + old;
+		return "adom : type\n\n" + Util.sep(atoms.stream().map(x -> x + " : adom").collect(Collectors.toList()), "\n") + "\n\n" + old;
 	}
 
 	private static List<String> deep(int j, String s) {
@@ -415,12 +402,7 @@ public class XSqlToFql {
 	}
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map(new Map<String, Integer>() {
-				@Override
-				public Integer map(String s) {
-					return Integer.valueOf(s);
-				}
-			});
+			.map((String s) -> Integer.valueOf(s));
 
 	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|" };

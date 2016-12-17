@@ -13,12 +13,12 @@ import catdata.Util;
 
 public class AqlJs<Ty, Sym> {
 	
-	private static String postfix = "\n\nPossibly helpful info: javascript arguments are accessed as input[0], input[1], etc.\n\nPossibly useful links: http://docs.oracle.com/javase/8/docs/api/ and http://docs.oracle.com/javase/8/docs/technotes/guides/scripting/nashorn/intro.html .";
+	private final static String postfix = "\n\nPossibly helpful info: javascript arguments are accessed as input[0], input[1], etc.\n\nPossibly useful links: http://docs.oracle.com/javase/8/docs/api/ and http://docs.oracle.com/javase/8/docs/technotes/guides/scripting/nashorn/intro.html .";
 
 	//private Map<String, String> binding = new HashMap<>();
 	
-	Ctx<Ty, String> iso1 = new Ctx<>();
-	Ctx<Sym, String> iso2 = new Ctx<>();
+	private final Ctx<Ty, String> iso1 = new Ctx<>();
+	private final Ctx<Sym, String> iso2 = new Ctx<>();
 	//Map<Integer, String> iso2 = new HashMap<>();
 	
 	private Ctx<Sym, Pair<List<Ty>, Ty>> syms; //TODO aql duplicates
@@ -52,7 +52,7 @@ public class AqlJs<Ty, Sym> {
 				engine.eval(ret);
 				last = k.toString();
 			}
-		} catch (Throwable e) {
+		} catch (ScriptException e) {
 			throw new RuntimeException("In javascript execution, " + e.getMessage() + postfix + "\n\nlast binding evaluated: " + last);
 		}
 	}
@@ -67,7 +67,7 @@ public class AqlJs<Ty, Sym> {
 			Object ret = ((Invocable)engine).invokeFunction(iso2.get(name), args);			
 			check(syms.get(name).second, ret);
 			return ret;
-		} catch (Throwable e) {
+		} catch (NoSuchMethodException | ScriptException e) {
 			throw new RuntimeException("In javascript execution of " + name + " on arguments " + args + ", " + e.getClass() + " error: "  + e.getMessage() + postfix);
 		}
 	}
@@ -77,7 +77,7 @@ public class AqlJs<Ty, Sym> {
 			Object ret = ((Invocable)engine).invokeFunction(iso1.get(name), Util.singList(o));
 			check(name, ret);
 			return ret;
-		} catch (Throwable e) {
+		} catch (NoSuchMethodException | ScriptException e) {
 			throw new RuntimeException("In javascript execution of " + o + " cannot convert to " + name + ", " + e.getClass() + " error: "  + e.getMessage() + postfix);
 		}
 	}

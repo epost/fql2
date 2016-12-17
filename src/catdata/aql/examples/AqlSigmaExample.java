@@ -12,7 +12,7 @@ public class AqlSigmaExample extends AqlExample {
 		return s;
 	}
 	
-	String s = "typeside Type = literal {"
+	private final String s = "typeside Type = literal {"
 			+ "\n	types "
 			+ "\n		String"
 			+ "\n	constants"

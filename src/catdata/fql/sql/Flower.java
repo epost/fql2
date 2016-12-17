@@ -139,26 +139,23 @@ public class Flower extends SQL {
 		Set<Map<Pair<Object, Object>, Object>> ret = null; // ok
 
 		List<String> ordered = new LinkedList<>(from.keySet());
-		Comparator<String> c = new Comparator<String>() {
-			@Override
-			public int compare(String o1, String o2) {
-				int xxx1 = timesInWhere(o1);
-				int xxx2 = timesInWhere(o2);
-				if (xxx1 == xxx2) {
-					if (from.get(o1) == null || state.get(from.get(o1)) == null) {
-						throw new RuntimeException("Missing: " + o1);
-					}
-					if (from.get(o2) == null || state.get(from.get(o2)) == null) {
-						throw new RuntimeException("Missing: " + o2);
-					}
-				return Integer.compare(state.get(from.get(o1)).size(), state.get(from.get(o2)).size()); 
-				} else if (xxx1 > xxx2) {
-					return -1;
-				} else {
-					return 1;
-				}
-			}
-		};
+		Comparator<String> c = (String o1, String o2) -> {
+                    int xxx1 = timesInWhere(o1);
+                    int xxx2 = timesInWhere(o2);
+                    if (xxx1 == xxx2) {
+                        if (from.get(o1) == null || state.get(from.get(o1)) == null) {
+                            throw new RuntimeException("Missing: " + o1);
+                        }
+                        if (from.get(o2) == null || state.get(from.get(o2)) == null) {
+                            throw new RuntimeException("Missing: " + o2);
+                        }
+                        return Integer.compare(state.get(from.get(o1)).size(), state.get(from.get(o2)).size());
+                    } else if (xxx1 > xxx2) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                };
 		Collections.sort(ordered, c); 
 		
 		

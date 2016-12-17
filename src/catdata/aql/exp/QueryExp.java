@@ -19,7 +19,7 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 	
 	
 	public static final class QueryExpVar extends QueryExp<Object,Object,Object,Object,Object,Object,Object,Object> {
-		String var;
+		public final String var;
 		
 		@Override
 		public Collection<Pair<String, Kind>> deps() {

@@ -72,52 +72,44 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
 
 		final SigExp.Const sig = new SigExp.Const(nodes, attrs, arrows,
-				new LinkedList<Pair<List<String>, List<String>>>());
+				new LinkedList<>());
 
-		Fn<SigExp.Const, MapExp.Const> fn = new Fn<SigExp.Const, MapExp.Const>() {
-			@Override
-			public MapExp.Const of(SigExp.Const src) {
-				List<Pair<String, String>> nm = new LinkedList<>();
-				for (String k : src.nodes) {
-					nm.add(new Pair<>(k, "node0"));
-				}
-
-				List<Pair<String, String>> am = new LinkedList<>();
-				for (Triple<String, String, String> k : src.attrs) {
-					if (!at.contains(k.third)) {
-						throw new RuntimeException("Enum/type not found: "
-								+ k.third);
-					}
-					am.add(new Pair<>(k.first, k.third + "_attr"));
-				}
-
-				List<Pair<String, List<String>>> em = new LinkedList<>();
-				for (Triple<String, String, String> k : src.arrows) {
-					List<String> l = new LinkedList<>();
-					l.add("node0");
-					em.add(new Pair<>(k.first, l));
-				}
-				return new MapExp.Const(nm, am, em, src, sig);
-			}
-		};
+		Fn<SigExp.Const, MapExp.Const> fn = (SigExp.Const src) -> {
+                    List<Pair<String, String>> nm = new LinkedList<>();
+                    for (String k : src.nodes) {
+                        nm.add(new Pair<>(k, "node0"));
+                    }
+                    
+                    List<Pair<String, String>> am = new LinkedList<>();
+                    for (Triple<String, String, String> k : src.attrs) {
+                        if (!at.contains(k.third)) {
+                            throw new RuntimeException("Enum/type not found: "
+                                    + k.third);
+                        }
+                        am.add(new Pair<>(k.first, k.third + "_attr"));
+                    }
+                    
+                    List<Pair<String, List<String>>> em = new LinkedList<>();
+                    for (Triple<String, String, String> k : src.arrows) {
+                        List<String> l = new LinkedList<>();
+                        l.add("node0");
+                        em.add(new Pair<>(k.first, l));
+                    }
+                    return new MapExp.Const(nm, am, em, src, sig);
+                };
 
 		return new Pair<>(sig, fn);
 	}
 
 	public static Pair<SigExp.Const, Fn<SigExp.Const, MapExp.Const>> zero() {
-		final SigExp.Const sig = new SigExp.Const(new LinkedList<String>(),
-				new LinkedList<Triple<String, String, String>>(),
-				new LinkedList<Triple<String, String, String>>(),
-				new LinkedList<Pair<List<String>, List<String>>>());
+		final SigExp.Const sig = new SigExp.Const(new LinkedList<>(),
+				new LinkedList<>(),
+				new LinkedList<>(),
+				new LinkedList<>());
 
-		Fn<SigExp.Const, MapExp.Const> fn = new Fn<SigExp.Const, MapExp.Const>() {
-			@Override
-			public MapExp.Const of(SigExp.Const x) {
-				return new MapExp.Const(new LinkedList<Pair<String, String>>(),
-						new LinkedList<Pair<String, String>>(),
-						new LinkedList<Pair<String, List<String>>>(), sig, x);
-			}
-		};
+		Fn<SigExp.Const, MapExp.Const> fn = (SigExp.Const x) -> new MapExp.Const(new LinkedList<>(),
+                        new LinkedList<>(),
+                        new LinkedList<>(), sig, x);
 
 		return new Pair<>(sig, fn);
 	}

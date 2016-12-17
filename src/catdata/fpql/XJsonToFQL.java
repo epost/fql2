@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.StringReader;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -208,45 +207,35 @@ public class XJsonToFQL {
 
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				input.setText(((Example) box.getSelectedItem()).getText());
-			}
-		});
+		box.addActionListener((ActionEvent e) -> {
+                    input.setText(((Example) box.getSelectedItem()).getText());
+                });
 
-		transButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					output.setText(translate(input.getText()));
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					output.setText(ex.getLocalizedMessage());
-				}
-			}
-		});
+		transButton.addActionListener((ActionEvent e) -> {
+                    try {
+                        output.setText(translate(input.getText()));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        output.setText(ex.getLocalizedMessage());
+                    }
+                });
 
-		helpButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JTextArea jta = new JTextArea(help);
-				jta.setWrapStyleWord(true);
-				// jta.setEditable(false);
-				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-				p.setPreferredSize(new Dimension(300, 200));
-
-				JOptionPane pane = new JOptionPane(p);
-				// Configure via set methods
-				JDialog dialog = pane.createDialog(null, "Help on JSON to FPQL");
-				dialog.setModal(false);
-				dialog.setVisible(true);
-				dialog.setResizable(true);
-			}
-		});
+		helpButton.addActionListener((ActionEvent e) -> {
+                    JTextArea jta = new JTextArea(help);
+                    jta.setWrapStyleWord(true);
+                    // jta.setEditable(false);
+                    jta.setLineWrap(true);
+                    JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                    p.setPreferredSize(new Dimension(300, 200));
+                    
+                    JOptionPane pane = new JOptionPane(p);
+                    // Configure via set methods
+                    JDialog dialog = pane.createDialog(null, "Help on JSON to FPQL");
+                    dialog.setModal(false);
+                    dialog.setVisible(true);
+                    dialog.setResizable(true);
+                });
 
 		JPanel p = new JPanel(new BorderLayout());
 

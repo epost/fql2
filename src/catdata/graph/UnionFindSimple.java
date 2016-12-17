@@ -7,7 +7,7 @@ import catdata.Util;
 import catdata.aql.Ctx;
 
 public class UnionFindSimple<X> {
-    private Ctx<X,X> id;    // id[i] = component identifier of i
+    private final Ctx<X,X> id;    // id[i] = component identifier of i
     private int count;   // number of components
 
     public UnionFindSimple(Collection<X> xs) {

@@ -68,7 +68,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	protected final Integer id;
 	protected final String title;
 	
-	DDisp display; 
+	private DDisp display; 
 
 	private static final long serialVersionUID = 1L;
 
@@ -85,7 +85,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	final JTextField replaceField = new JTextField();
 	
 
-	JFrame frame;
+	private JFrame frame;
 
 	public JPanel makeSearchDialog() {
 		JPanel toolBar = new JPanel(new GridLayout(3, 4));
@@ -93,27 +93,17 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 		toolBar.add(new JLabel("Search for:"));
 		toolBar.add(searchField);
-		nextButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doFind(true);
-			}
-		});
+		nextButton.addActionListener((ActionEvent e) -> {
+                    doFind(true);
+                });
 		toolBar.add(nextButton);
-		prevButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doFind(false);
-
-			}
-		});
+		prevButton.addActionListener((ActionEvent e) -> {
+                    doFind(false);
+                });
 		toolBar.add(prevButton);
-		searchField.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				nextButton.doClick(0);
-			}
-		});
+		searchField.addActionListener((ActionEvent e) -> {
+                    nextButton.doClick(0);
+                });
 
 		toolBar.add(new JLabel("Replace with:"));
 		toolBar.add(replaceField);
@@ -157,47 +147,41 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	}
 
 	public void makeSearchVisible() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				if (frame == null) {
-					frame = new JFrame();
-					frame.setContentPane(makeSearchDialog());
-					frame.setTitle("Find and Replace");
-
-					frame.pack();
-					frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-					frame.setLocationRelativeTo(null);
-					frame.addWindowListener(new WindowAdapter() {
-			            @Override
-						public void windowClosing(WindowEvent evt) {
-							SearchContext context = new SearchContext();
-							SearchEngine.markAll(topArea, context);
-				        }
-			        });
-
-					ActionListener escListener = new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							frame.setVisible(false);
-						}
-					};
-
-					frame.getRootPane().registerKeyboardAction(escListener,
-							KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-							JComponent.WHEN_IN_FOCUSED_WINDOW);
-					KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
-							InputEvent.CTRL_MASK);
-					KeyStroke commandW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
-							InputEvent.META_MASK);
-					frame.getRootPane().registerKeyboardAction(escListener,
-							ctrlW, JComponent.WHEN_IN_FOCUSED_WINDOW);
-					frame.getRootPane().registerKeyboardAction(escListener,
-							commandW, JComponent.WHEN_IN_FOCUSED_WINDOW);
-				}
-				frame.setVisible(true);
-			}
-		});
+		SwingUtilities.invokeLater(() -> {
+                    if (frame == null) {
+                        frame = new JFrame();
+                        frame.setContentPane(makeSearchDialog());
+                        frame.setTitle("Find and Replace");
+                        
+                        frame.pack();
+                        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                        frame.setLocationRelativeTo(null);
+                        frame.addWindowListener(new WindowAdapter() {
+                            @Override
+                            public void windowClosing(WindowEvent evt) {
+                                SearchContext context = new SearchContext();
+                                SearchEngine.markAll(topArea, context);
+                            }
+                        });
+                        
+                        ActionListener escListener = (ActionEvent e) -> {
+                            frame.setVisible(false);
+                        };
+                        
+                        frame.getRootPane().registerKeyboardAction(escListener,
+                                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                                JComponent.WHEN_IN_FOCUSED_WINDOW);
+                        KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
+                                InputEvent.CTRL_MASK);
+                        KeyStroke commandW = KeyStroke.getKeyStroke(KeyEvent.VK_W,
+                                InputEvent.META_MASK);
+                        frame.getRootPane().registerKeyboardAction(escListener,
+                                ctrlW, JComponent.WHEN_IN_FOCUSED_WINDOW);
+                        frame.getRootPane().registerKeyboardAction(escListener,
+                                commandW, JComponent.WHEN_IN_FOCUSED_WINDOW);
+                    }
+                    frame.setVisible(true);
+                });
 	} 
 	
 	protected abstract String getATMFlhs();
@@ -423,50 +407,47 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		respArea.setText("Aborted");
 	}
 	
-	protected String[] toUpdate = new String[] { null };
+	protected final String[] toUpdate = new String[] { null };
 	protected String toDisplay = null;
-	Thread thread, temp;
+	private Thread thread, temp;
 
 	public void runAction() {
 		toDisplay = null;
 		interruptAndNullify();
 		thread = new Thread(this);
-		temp = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					respArea.setText("Begin\n");
-					int count = 0;
-					while (!Thread.currentThread().isInterrupted()) {
-						count++;
-						Thread.sleep(250);
-						if (toDisplay != null) {
-							respArea.setText(toDisplay);
-							return;
-						} else if (thread != null) {
-							synchronized (toUpdate) {
-								if (toUpdate[0] != null) {
-									if ((count % 8) == 0) {
-										respArea.setText(toUpdate[0] + "\n");
-									} else {
-										respArea.setText(respArea.getText() + ".");
-									}
-								} else {
-									if (respArea.getText().length() > 1024*16) {
-										respArea.setText("");
-									}
-									respArea.setText(respArea.getText() + ".");
-								}
-							}							
-						}
-					}
-				} catch (InterruptedException ie) {
-				} catch (Exception tt) {
-					tt.printStackTrace();
-					respArea.setText(tt.getMessage());
-				} 
-			}
-		});
+		temp = new Thread(() -> {
+                    try {
+                        respArea.setText("Begin\n");
+                        int count = 0;
+                        while (!Thread.currentThread().isInterrupted()) {
+                            count++;
+                            Thread.sleep(250);
+                            if (toDisplay != null) {
+                                respArea.setText(toDisplay);
+                                return;
+                            } else if (thread != null) {
+                                synchronized (toUpdate) {
+                                    if (toUpdate[0] != null) {
+                                        if ((count % 8) == 0) {
+                                            respArea.setText(toUpdate[0] + "\n");
+                                        } else {
+                                            respArea.setText(respArea.getText() + ".");
+                                        }
+                                    } else {
+                                        if (respArea.getText().length() > 1024*16) {
+                                            respArea.setText("");
+                                        }
+                                        respArea.setText(respArea.getText() + ".");
+                                    }
+                                }
+                            }
+                        }
+                    } catch (InterruptedException ie) {
+                    } catch (Exception tt) {
+                        tt.printStackTrace();
+                        respArea.setText(tt.getMessage());
+                    }
+                });
 		temp.setPriority(Thread.MIN_PRIORITY);
 		temp.start();
 		thread.setPriority(Thread.MIN_PRIORITY);
@@ -484,8 +465,8 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			return;
 		}
 
-		long start = 0;
-		long middle = 0;
+		long start; 
+		long middle; 
 		
 		try {
 			start = System.currentTimeMillis();
@@ -512,9 +493,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			Integer theLine = init.getLine(e.decl);
 			setCaretPos(theLine);
 		} catch (Throwable re) {
-				toDisplay = "Error: " + re.getLocalizedMessage();
-				respArea.setText(toDisplay);
-				re.printStackTrace();
+                    toDisplay = "Error: " + re.getLocalizedMessage();
+                    respArea.setText(toDisplay);
+                    re.printStackTrace();
 		} 
 		interruptAndNullify();
 	}
@@ -559,9 +540,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			int line = e.getLocation().line;
 			moveTo(col, line);
 			
-			String s = e.getMessage();
-			String t = s.substring(s.indexOf(" "));
-			t.split("\\s+");
+			//String s = e.getMessage();
+			//String t = s.substring(s.indexOf(" "));
+			//t.split("\\s+");
 
 			toDisplay = "Syntax error: " + e.getLocalizedMessage();
 			e.printStackTrace();
@@ -585,11 +566,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		int choice = JOptionPane.showOptionDialog(null, 
 				"Unsaved Changes - Continue to close?", "Close?",
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Yes", "No"}, "No");
-		if (choice == JOptionPane.YES_OPTION) {
-			return false;
-		}
-		
-		return true;
+		return (choice != JOptionPane.YES_OPTION);
 	}
 
 	public void clearSpellCheck() {

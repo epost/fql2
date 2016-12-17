@@ -448,12 +448,7 @@ public abstract class Category<O, A> implements Serializable {
 
 	public List<O> order() {
 		List<O> ret = new LinkedList<>(objects());
-		Comparator<O> c = new Comparator<O>() {
-			@Override
-			public int compare(O o1, O o2) {
-				return arrowsFrom(o1).size() - arrowsFrom(o2).size();
-			}
-		};
+		Comparator<O> c = (O o1, O o2) -> arrowsFrom(o1).size() - arrowsFrom(o2).size();
 		Collections.sort(ret, c);
 		return ret;
 	}

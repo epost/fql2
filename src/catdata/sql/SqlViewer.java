@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,14 +34,14 @@ public class SqlViewer extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	
-	Graph<Chc<SqlType, SqlTable>, Chc<SqlColumn, SqlForeignKey>> graph = new DirectedSparseMultigraph<>();
-	SqlSchema info;
-	SqlInstance inst;
-	Color color;
+	private final Graph<Chc<SqlType, SqlTable>, Chc<SqlColumn, SqlForeignKey>> graph = new DirectedSparseMultigraph<>();
+	private final SqlSchema info;
+	private final SqlInstance inst;
+	private final Color color;
 	
-	CardLayout cards = new CardLayout();
-	JPanel bottom = new JPanel(cards);
-	JPanel top;
+	private final CardLayout cards = new CardLayout();
+	private final JPanel bottom = new JPanel(cards);
+	private JPanel top;
 		
 	public SqlViewer(Color color, SqlSchema info, SqlInstance inst) {
 		super(new GridLayout(1,1));
@@ -160,22 +159,18 @@ public class SqlViewer extends JPanel {
 			return;
 		}
 		
-		vv.getPickedVertexState().addItemListener(new ItemListener() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() != ItemEvent.SELECTED) {
-					return;
-				}
-				vv.getPickedEdgeState().clear();
-				Chc<SqlType, SqlTable> x = (Chc<SqlType, SqlTable>) e.getItem();
-				
-				if (x.left) {
-					return;
-				}
-				cards.show(bottom, x.r.name);
-			}
-		});
+		vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
+                    if (e.getStateChange() != ItemEvent.SELECTED) {
+                        return;
+                    }
+                    vv.getPickedEdgeState().clear();
+                    @SuppressWarnings("unchecked")
+                    Chc<SqlType, SqlTable> x1 = (Chc<SqlType, SqlTable>) e.getItem();
+                    if (x1.left) {
+                        return;
+                    }
+                    cards.show(bottom, x1.r.name);
+                });
 
 
 	}

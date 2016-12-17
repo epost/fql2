@@ -12,7 +12,7 @@ public class AqlUnitConvExample extends AqlExample {
 		return s;
 	}
 	
-	String s = "typeside Ty = literal { "
+	private final String s = "typeside Ty = literal { "
 			+ "\n	java_types"
 			+ "\n		in = \"java.lang.Double\""
 			+ "\n		cm = \"java.lang.Double\"		"

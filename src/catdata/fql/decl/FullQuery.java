@@ -122,12 +122,7 @@ public abstract class FullQuery {
 				layout);
 		// vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
-		Transformer<Pair<FullQuery, Integer>, Paint> vertexPaint = new Transformer<Pair<FullQuery, Integer>, Paint>() {
-			@Override
-			public Paint transform(Pair<FullQuery, Integer> i) {
-				return i.first.color();
-			}
-		};
+		Transformer<Pair<FullQuery, Integer>, Paint> vertexPaint = (Pair<FullQuery, Integer> i) -> i.first.color();
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);

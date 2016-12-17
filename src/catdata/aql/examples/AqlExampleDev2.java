@@ -12,7 +12,7 @@ public class AqlExampleDev2 extends AqlExample {
 		return s;
 	}
 
-	String s = "typeside T = literal {"
+	private final String s = "typeside T = literal {"
 			+ "\n	types"
 			+ "\n		Color Bool "
 			+ "\n	constants"

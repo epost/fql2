@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -187,10 +188,10 @@ public class Util {
 	@SuppressWarnings("serial")
 	public static class BoldifyingColumnHeaderRenderer extends JLabel implements TableCellRenderer {
 
-		Collection<?> boldify;
-		Font normal = UIManager.getFont("TableHeader.font");
-		Font bold = normal.deriveFont(Font.BOLD);
-		TableCellRenderer r; // = new DefaultTableCellRenderer();
+		private final Collection<?> boldify;
+		private final Font normal = UIManager.getFont("TableHeader.font");
+		private final Font bold = normal.deriveFont(Font.BOLD);
+		private final TableCellRenderer r; // = new DefaultTableCellRenderer();
 
 		public BoldifyingColumnHeaderRenderer(Collection<?> boldify, TableCellRenderer r) {
 			this.boldify = boldify;
@@ -280,11 +281,7 @@ public class Util {
 		if (!a.equals(id(X))) {
 			return false;
 		}
-		if (!b.equals(id(Y))) {
-			return false;
-		}
-
-		return true;
+		return (!b.equals(id(Y)));
 	}
 
 	public static <X> Map<X, X> id(Collection<X> X) {
@@ -359,9 +356,7 @@ public class Util {
 	@SafeVarargs
 	public static <X> List<X> list(X... xs) {
 		List<X> ret = new LinkedList<>();
-		for (X x : xs) {
-			ret.add(x);
-		}
+                ret.addAll(Arrays.asList(xs));
 		return ret;
 	}
 
@@ -452,7 +447,7 @@ public class Util {
 		try {
 			Integer.parseInt(s);
 			return true;
-		} catch (Exception ex) {
+		} catch (NumberFormatException ex) {
 			return false;
 		}
 	}
@@ -539,17 +534,14 @@ public class Util {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Comparator<Object> LengthComparator = new Comparator<Object>() {
-		@Override
-		public int compare(Object o1, Object o2) {
-			if (o1.toString().length() > o2.toString().length()) {
-				return 1;
-			} else if (o1.toString().length() < o2.toString().length()) {
-				return -1;
-			}
-			return o1.toString().compareTo(o2.toString());
-		}
-	};
+	public static Comparator<Object> LengthComparator = (Object o1, Object o2) -> {
+            if (o1.toString().length() > o2.toString().length()) {
+                return 1;
+            } else if (o1.toString().length() < o2.toString().length()) {
+                return -1;
+            }
+            return o1.toString().compareTo(o2.toString());
+        };
 
 	public static Comparator<Object> AlphabeticalComparator = (o1, o2) -> o1.toString().compareTo(o2.toString());
 
@@ -612,7 +604,7 @@ public class Util {
 	}
 
 	private static JPanel makeRowOrCol(List<JComponent> list, int orientation) {
-		if (list.size() == 0) {
+		if (list.isEmpty()) {
 			JPanel ret = new JPanel();
 			ret.setBorder(BorderFactory.createEmptyBorder());
 			return ret;
@@ -887,7 +879,7 @@ public class Util {
 	}
 
 	public static String printForPi(Map<?, ?> x) {
-		if (x.size() == 0) {
+		if (x.isEmpty()) {
 			return "";
 		}
 		if (x.size() == 1) {
@@ -1046,17 +1038,14 @@ public class Util {
 		return sets;
 	}
 
-	public static Comparator<Object> ToStringComparator = new Comparator<Object>() {
-		@Override
-		public int compare(Object o1, Object o2) {
-			if (o1.toString().length() > o2.toString().length()) {
-				return 1;
-			} else if (o1.toString().length() < o2.toString().length()) {
-				return -1;
-			}
-			return o1.toString().compareTo(o2.toString());
-		}
-	};
+	public static Comparator<Object> ToStringComparator = (Object o1, Object o2) -> {
+            if (o1.toString().length() > o2.toString().length()) {
+                return 1;
+            } else if (o1.toString().length() < o2.toString().length()) {
+                return -1;
+            }
+            return o1.toString().compareTo(o2.toString());
+        };
 
 	public static void anomaly() {
 		throw new RuntimeException("Anomaly: please report");
@@ -1112,7 +1101,7 @@ public class Util {
 	public static String readFile(String file) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(file));
-			String line = null;
+			String line;
 			StringBuilder stringBuilder = new StringBuilder();
 			String ls = System.getProperty("line.separator");
 
@@ -1123,7 +1112,7 @@ public class Util {
 
 			reader.close();
 			return stringBuilder.toString();
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "Could not read from " + file);
 		}

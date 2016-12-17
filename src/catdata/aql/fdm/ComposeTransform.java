@@ -12,11 +12,11 @@ import catdata.aql.Transform;
 public class ComposeTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2,Gen3,Sk3,X3,Y3> 
 	extends Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen3,Sk3,X1,Y1,X3,Y3> {
 	
-	private Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> t1;
-	private Transform<Ty,En,Sym,Fk,Att,Gen2,Sk2,Gen3,Sk3,X2,Y2,X3,Y3> t2;
+	private final Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> t1;
+	private final Transform<Ty,En,Sym,Fk,Att,Gen2,Sk2,Gen3,Sk3,X2,Y2,X3,Y3> t2;
 
-	private Ctx<Gen1, Term<Void, En, Void, Fk, Void, Gen3, Void>> gens = new Ctx<>();
-	private Ctx<Sk1, Term<Ty, En, Sym, Fk, Att, Gen3, Sk3>> sks = new Ctx<>();
+	private final Ctx<Gen1, Term<Void, En, Void, Fk, Void, Gen3, Void>> gens = new Ctx<>();
+	private final Ctx<Sk1, Term<Ty, En, Sym, Fk, Att, Gen3, Sk3>> sks = new Ctx<>();
 
 	public ComposeTransform(Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t1, Transform<Ty, En, Sym, Fk, Att, Gen2, Sk2, Gen3, Sk3, X2, Y2, X3, Y3> t2) {
 		this.t1 = t1;

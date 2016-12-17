@@ -171,20 +171,9 @@ public class FqlppOptions extends Options {
 			viewer1.add(new JLabel());
 			viewer2.add(new JLabel());
 		}
-		Function<Unit, Unit> fn = new Function<Unit, Unit>() {
-
-			@Override
-			public Unit apply(Unit t) {
-				try {
-	
-				} catch (NumberFormatException nfe) {
-				}
-				
-			
-				return new Unit();
-			}
-			
-		};
+		Function<Unit, Unit> fn = (Unit t) -> {
+                    return new Unit();
+                };
 
 		return new Pair<>(generalsplit, fn);
 	}

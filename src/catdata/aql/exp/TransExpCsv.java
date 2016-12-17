@@ -131,7 +131,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 			}
 		} catch (IOException exn) {
 			throw new RuntimeException(exn.getMessage());
-		} catch (Throwable exn) {
+		} catch (RuntimeException exn) {
 			exn.printStackTrace();
 			throw new RuntimeException("Parser error in underlying CSV data [text positions are relative to the record]: " + exn.getMessage());
 		}

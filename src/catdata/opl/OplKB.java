@@ -2,7 +2,6 @@ package catdata.opl;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,16 +13,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Pair;
+import catdata.RuntimeInterruptedException;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
 import catdata.provers.KBExp;
+import catdata.provers.KBExp.KBApp;
+import catdata.provers.KBExp.KBVar;
 import catdata.provers.KBHorn;
 import catdata.provers.KBOptions;
 import catdata.provers.KBUnifier;
-import catdata.provers.KBExp.KBApp;
-import catdata.provers.KBExp.KBVar;
-import catdata.RuntimeInterruptedException;
 
 /**
  * 
@@ -328,17 +327,14 @@ public class OplKB<C, V>  {
 	//if the parent dies, the current thread will too
 	public void complete(Thread parent) {
 		final String[] arr = new String[] { null };
-		Runnable r = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					while (!step(parent)){}
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					arr[0] = ex.getMessage();
-				}
-			}
-		};				
+		Runnable r = () -> {
+                    try {
+                        while (!step(parent)){}
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        arr[0] = ex.getMessage();
+                    }
+                };				
 		Thread t = new Thread(r);
 		t.start();
 		try {
@@ -545,12 +541,7 @@ public class OplKB<C, V>  {
 			}
 			E0.add(stripOuter(r.first.subst(m).toString()) + " = " + stripOuter(r.second.subst(m).toString()));
 		}
-		E0.sort(new Comparator<String>() {
-			@Override
-			public int compare(String o1, String o2) {
-				return o1.length() - o2.length();
-			}
-		});
+		E0.sort((String o1, String o2) -> o1.length() - o2.length());
 		
 		List<String> G0 = new LinkedList<>();
 		for (Pair<KBExp<String, String>, KBExp<String, String>> r : kb.G) {
@@ -568,12 +559,7 @@ public class OplKB<C, V>  {
 			}
 			G0.add(stripOuter(r.first.subst(m).toString()) + " = " + stripOuter(r.second.subst(m).toString()));
 		}
-		G0.sort(new Comparator<String>() {
-			@Override
-			public int compare(String o1, String o2) {
-				return o1.length() - o2.length();
-			}
-		});
+		G0.sort((String o1, String o2) -> o1.length() - o2.length());
 
 		
 		List<String> R0 = new LinkedList<>();
@@ -592,12 +578,7 @@ public class OplKB<C, V>  {
 			}
 			R0.add(stripOuter(r.first.subst(m).toString()) + " -> " + stripOuter(r.second.subst(m).toString()));
 		}
-		R0.sort(new Comparator<String>() {
-			@Override
-			public int compare(String o1, String o2) {
-				return o1.length() - o2.length();
-			}
-		});
+		R0.sort((String o1, String o2) -> o1.length() - o2.length());
 				
 		return (Util.sep(R0, "\n\n") + "\n\nE--\n\n" + Util.sep(E0, "\n\n") + "\n\nG--\n\n" + Util.sep(G0, "\n\n")).trim();
 	}
@@ -849,7 +830,7 @@ public class OplKB<C, V>  {
 			
 			KBExp<C, V> lhs = r.first;
 			KBExp<C, V> rhs = r.second;
-			Map<V, KBExp<C, V>> s = null;
+			Map<V, KBExp<C, V>> s;
 		//	if (lhs.equals(e)) { doesn't seem to help
 			//	e = rhs;
 		//		continue;

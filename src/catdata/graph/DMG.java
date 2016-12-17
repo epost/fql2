@@ -13,7 +13,7 @@ import catdata.Triple;
 import catdata.Util;
 
 /**
- * Directed labelled multi-graphs.  
+ * Directed labeled multi-graphs.  
  * 
  * @author ryan
  *
@@ -30,7 +30,7 @@ public class DMG<N,E> {
 		validate();
 	}
 	
-	public void validate() {
+	public final void validate() {
 		for (E e : edges.keySet()) {
 			if (!this.nodes.contains(edges.get(e).first)) {
 				throw new RuntimeException("Not a node: " + edges.get(e).first);

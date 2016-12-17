@@ -10,9 +10,9 @@ import catdata.aql.Pragma;
 
 public class JsPragma extends Pragma {
 
-	private List<String> jss = new LinkedList<>();
+	private final List<String> jss;
 	
-	private List<String> responses = new LinkedList<>();
+	private final List<String> responses = new LinkedList<>();
 		
 	@SuppressWarnings("unused")
 	private final Map<String, String> options; 

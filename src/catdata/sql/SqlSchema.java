@@ -87,7 +87,7 @@ public class SqlSchema {
 			String foreignColumn = null; 
 			//String localTable = fks.getString(7);
 			String localColumn = null;
-			String fkname = null;
+			String fkname;
 			String lfk = null;
 			while (rfks.next()) {
 				
@@ -101,7 +101,6 @@ public class SqlSchema {
 					fks0.add(new Triple<>(l, r, lfk));
 					l = new LinkedList<>();
 					r = new LinkedList<>();
-					lfk = null;
 				}
 				lastSeen = Integer.parseInt(seq);
 				
@@ -180,7 +179,7 @@ public class SqlSchema {
 		return allColumns;
 	}
 	
-	private Map<String, SqlTable> tableMap = new HashMap<>();
+	private final Map<String, SqlTable> tableMap = new HashMap<>();
 	private SqlTable getTable0(String name) {
 		SqlTable t = tableMap.get(name.toUpperCase());
 		if (t != null) {
@@ -205,10 +204,7 @@ public class SqlSchema {
 	
 	public boolean isTable(String name) {
 		SqlTable ret = getTable0(name);
-		if (ret == null) {
-			return false;
-		}
-		return true;
+		return (ret != null);
 	}
 	
 	private Map<String, SqlColumn> colNames;
@@ -260,7 +256,7 @@ public class SqlSchema {
 		return getForeignKey0(name) != null;
 	}
 
-	private Map<String, Set<SqlForeignKey>> fksFrom0 = new HashMap<>();
+	private final  Map<String, Set<SqlForeignKey>> fksFrom0 = new HashMap<>();
 	public Set<SqlForeignKey> fksFrom(String name) {
 		Set<SqlForeignKey> t = fksFrom0.get(name.toUpperCase());
 		if (t != null) {
@@ -276,7 +272,7 @@ public class SqlSchema {
 		return t;
 	}
 	
-	private Map<String, Set<SqlForeignKey>> fksTo0 = new HashMap<>();
+	private final Map<String, Set<SqlForeignKey>> fksTo0 = new HashMap<>();
 	public Set<SqlForeignKey> fksTo(String name) {
 
 		Set<SqlForeignKey> t = fksTo0.get(name.toUpperCase());

@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -45,19 +44,20 @@ import catdata.Util;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
 import catdata.ide.Language;
+import java.awt.HeadlessException;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class NraViewer {
 
 	protected Example[] examples = { new PeopleExample() };
 
-	String help = ""; // "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
+	private static final String help = ""; // "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
 
 	protected static String kind() {
 		return "NR Schema";
 	}
 
-	static class PeopleExample extends Example {
+	private static class PeopleExample extends Example {
 		
 		@Override
 		public Language lang() {
@@ -183,22 +183,18 @@ public class NraViewer {
 		}
 	} */
 
-	static TableCellRenderer jTableCellRenderer = new TableCellRenderer() {
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value,
-				boolean isSelected, boolean hasFocus, int row, int column) {
-			Component c = (Component) value;
-			int h = table.getRowHeight(row);
-			int j = 20 + c.getPreferredSize().height;
-			if (j > h) {
-			table.setRowHeight(row, j);
-			}
-			return c;
-		}
-	};
+	private final static TableCellRenderer jTableCellRenderer = (JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) -> {
+            Component c = (Component) value;
+            int h = table.getRowHeight(row);
+            int j = 20 + c.getPreferredSize().height;
+            if (j > h) {
+                table.setRowHeight(row, j);
+            }
+            return c;
+        };
 	
 	public static class NRel {
-		Map<String, Optional<NRel>> t;
+		private final Map<String, Optional<NRel>> t;
 		
 		public NRel(Map<String, Optional<NRel>> t) {
 			this.t = t;
@@ -422,66 +418,55 @@ public class NraViewer {
 
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				input.setText(((Example) box.getSelectedItem()).getText());
-			}
-		});
+		box.addActionListener((ActionEvent e) -> {
+                    input.setText(((Example) box.getSelectedItem()).getText());
+                });
 
-		transButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					Triple<String, Component, Component> p = translate(input.getText());
-					output.setText(p.first);
-					
-					JPanel pan = new JPanel(new GridLayout(1,1));
-					pan.add(p.second);
-					JFrame f = new JFrame("NR Shredder Input");
-					f.setContentPane(pan);
-					f.pack();
-					f.setSize(new Dimension(600, 500));
-					f.setLocationRelativeTo(null);
-					f.setVisible(true);
-					
-					pan = new JPanel(new GridLayout(1,1));
-					pan.add(p.third);
-					f = new JFrame("NR Shredder Output");
-					f.setContentPane(pan);
-					f.pack();
-					f.setSize(new Dimension(650, 450));
-					f.setLocationRelativeTo(null);
-					f.setVisible(true);
-		
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					output.setText(ex.getLocalizedMessage());
-				}
-			}
-		});
+		transButton.addActionListener((ActionEvent e) -> {
+                    try {
+                        Triple<String, Component, Component> p = translate(input.getText());
+                        output.setText(p.first);
+                        
+                        JPanel pan = new JPanel(new GridLayout(1,1));
+                        pan.add(p.second);
+                        JFrame f = new JFrame("NR Shredder Input");
+                        f.setContentPane(pan);
+                        f.pack();
+                        f.setSize(new Dimension(600, 500));
+                        f.setLocationRelativeTo(null);
+                        f.setVisible(true);
+                        
+                        pan = new JPanel(new GridLayout(1,1));
+                        pan.add(p.third);
+                        f = new JFrame("NR Shredder Output");
+                        f.setContentPane(pan);
+                        f.pack();
+                        f.setSize(new Dimension(650, 450));
+                        f.setLocationRelativeTo(null);
+                        f.setVisible(true);
+                        
+                    } catch (HeadlessException ex) {
+                        ex.printStackTrace();
+                        output.setText(ex.getLocalizedMessage());
+                    }
+                });
 
-		helpButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JTextArea jta = new JTextArea(help);
-				jta.setWrapStyleWord(true);
-				// jta.setEditable(false);
-				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-				p.setPreferredSize(new Dimension(300, 200));
-
-				JOptionPane pane = new JOptionPane(p);
-				// Configure via set methods
-				JDialog dialog = pane.createDialog(null, "Help on NR shredder");
-				dialog.setModal(false);
-				dialog.setVisible(true);
-				dialog.setResizable(true);
-
-			}
-		});
+		helpButton.addActionListener((ActionEvent e) -> {
+                    JTextArea jta = new JTextArea(help);
+                    jta.setWrapStyleWord(true);
+                    // jta.setEditable(false);
+                    jta.setLineWrap(true);
+                    JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                    p.setPreferredSize(new Dimension(300, 200));
+                    
+                    JOptionPane pane = new JOptionPane(p);
+                    // Configure via set methods
+                    JDialog dialog = pane.createDialog(null, "Help on NR shredder");
+                    dialog.setModal(false);
+                    dialog.setVisible(true);
+                    dialog.setResizable(true);
+                });
 
 		JPanel p = new JPanel(new BorderLayout());
 
@@ -521,7 +506,7 @@ public class NraViewer {
 		f.setLocationRelativeTo(null);
 		f.setVisible(true);
 	}
-	static String extext1 = "set (name:string, age:string, kids:set (name:string, gender:string, friends: set (name:string)))"
+	private final static String extext1 = "set (name:string, age:string, kids:set (name:string, gender:string, friends: set (name:string)))"
 	+ "\n"
 	+ "\n{(name:bill, age:30, kids:{(name:alice, gender:F, friends: {(name: kid1), (name: kid2), (name: kid3)}),"
 	+ "\n                           (name:sue,   gender:F, friends: {(name: kid1), (name: kid3)}),"
@@ -535,17 +520,12 @@ public class NraViewer {
 
 
 	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
-				@Override
-				public Integer map(String s) {
-					return Integer.valueOf(s);
-				}
-			});
+			.map((String s) -> Integer.valueOf(s));
 
-	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(", ")", "=", "->", "+",
+	static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(", ")", "=", "->", "+",
 			"*", "^", "|" };
 
-	static String[] res = new String[] { "set", "string" };
+	static final String[] res = new String[] { "set", "string" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 

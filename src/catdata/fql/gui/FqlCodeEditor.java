@@ -3,7 +3,6 @@ package catdata.fql.gui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.sql.Date;
 import java.text.DateFormat;
@@ -29,8 +28,8 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.fql.FQLException;
 import catdata.fql.decl.Driver;
-import catdata.fql.decl.FqlEnvironment;
 import catdata.fql.decl.FQLProgram;
+import catdata.fql.decl.FqlEnvironment;
 import catdata.fql.decl.InstExp;
 import catdata.fql.decl.InstanceEditor;
 import catdata.fql.decl.MapExp;
@@ -56,12 +55,9 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 		super(title, id, content);
 		
 		JMenuItem visualEdit = new JMenuItem("Visual Edit");
-		visualEdit.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				vedit();
-			}
-		});
+		visualEdit.addActionListener((ActionEvent e) -> {
+                    vedit();
+                });
 		topArea.getPopupMenu().add(visualEdit, 0);
 		
 		

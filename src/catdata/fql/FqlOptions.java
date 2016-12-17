@@ -427,89 +427,85 @@ public class FqlOptions extends Options {
 //			general2.add(new JLabel());
 	//	}
 
-		Function<Unit, Unit> fn = new Function<Unit, Unit>() {
-
-			@Override
-			public Unit apply(Unit t) {
-				int a = MAX_PATH_LENGTH;
-			int b = MAX_DENOTE_ITERATIONS;
-			int d = varlen;
-			try {
-				a = Integer.parseInt(plen.getText());
-				b = Integer.parseInt(iter.getText());
-				d = Integer.parseInt(vlen.getText());
-				
-			} catch (NumberFormatException nfe) {
-				
-			}
-			continue_on_error = coeB.isSelected();
-			VALIDATE_WITH_EDS = ed.isSelected();
-			ALLOW_NULLS = nullbox.isSelected();
-			ALL_GR_PATHS = gr.isSelected();
-			ALLOW_INFINITES = jcb0.isSelected();
-			VALIDATE = jcb.isSelected();
-		
-			MAX_PATH_LENGTH = a;
-			MAX_DENOTE_ITERATIONS = b;
-			varlen = d;
-			prelude = area.getText();
-			afterlude = area2.getText();
-		
-			schema_denotation = schema_denotation_box.isSelected();
-			schema_ed = schema_ed_box.isSelected();
-			schema_graphical = schema_graphical_box.isSelected();
-			schema_tabular = schema_tabular_box.isSelected();
-			schema_textual = schema_textual_box.isSelected();
-			schema_rdf = schema_rdf_box.isSelected();
-			schema_dot = schema_dot_box.isSelected();
-			schema_check = schema_chk_box.isSelected();
-			
-			mapping_ed = mapping_ed_box.isSelected();
-			mapping_graphical = mapping_graphical_box.isSelected();
-			mapping_tabular = mapping_tabular_box.isSelected();
-			mapping_textual = mapping_textual_box.isSelected();
-
-			query_graphical = query_graphical_box.isSelected();
-			query_textual = query_textual_box.isSelected();
-
-			inst_graphical = inst_graphical_box.isSelected();
-			inst_tabular = inst_tabular_box.isSelected();
-			inst_textual = inst_textual_box.isSelected();
-			inst_joined = inst_joined_box.isSelected();
-			inst_gr = inst_gr_box.isSelected();
-			inst_obs = inst_obs_box.isSelected();
-			inst_rdf = inst_rdf_box.isSelected();
-			inst_adom = inst_adom_box.isSelected();
-			inst_dot = inst_dot_box.isSelected();
-
-			schema_graph = (String) schemaBox.getSelectedItem();
-			mapping_graph = (String) mappingBox.getSelectedItem();
-			inst_graph = (String) instBox.getSelectedItem();
-			trans_graph = (String) transBox.getSelectedItem();
-			query_graph = (String) queryBox.getSelectedItem();
-			instFlow_graph = (String) instFlowBox.getSelectedItem();
-			schFlow_graph = (String) schFlowBox.getSelectedItem();
-			
-			allow_surjective = surjB.isSelected();
-			
-			transform_graphical = transform_graphical_box.isSelected();
-			transform_tabular = transform_tabular_box.isSelected();
-			transform_textual = transform_textual_box.isSelected();
-
-			if (h2Button.isSelected()) {
-				sqlKind = SQLKIND.H2;
-			} else if (jdbcButton.isSelected()) {
-				sqlKind = SQLKIND.JDBC;
-			} else if (nativeButton.isSelected()) {
-				sqlKind = SQLKIND.NATIVE;
-			}
-
-			jdbcUrl = jdbcField.getText();
-			jdbcClass = jdbcField2.getText();
-		
-			return new Unit();
-			}
-		};
+		Function<Unit, Unit> fn = (Unit t) -> {
+                    int a = MAX_PATH_LENGTH;
+                    int b = MAX_DENOTE_ITERATIONS;
+                    int d = varlen;
+                    try {
+                        a = Integer.parseInt(plen.getText());
+                        b = Integer.parseInt(iter.getText());
+                        d = Integer.parseInt(vlen.getText());
+                        
+                    } catch (NumberFormatException nfe) {
+                        
+                    }
+                    continue_on_error = coeB.isSelected();
+                    VALIDATE_WITH_EDS = ed.isSelected();
+                    ALLOW_NULLS = nullbox.isSelected();
+                    ALL_GR_PATHS = gr.isSelected();
+                    ALLOW_INFINITES = jcb0.isSelected();
+                    VALIDATE = jcb.isSelected();
+                    
+                    MAX_PATH_LENGTH = a;
+                    MAX_DENOTE_ITERATIONS = b;
+                    varlen = d;
+                    prelude = area.getText();
+                    afterlude = area2.getText();
+                    
+                    schema_denotation = schema_denotation_box.isSelected();
+                    schema_ed = schema_ed_box.isSelected();
+                    schema_graphical = schema_graphical_box.isSelected();
+                    schema_tabular = schema_tabular_box.isSelected();
+                    schema_textual = schema_textual_box.isSelected();
+                    schema_rdf = schema_rdf_box.isSelected();
+                    schema_dot = schema_dot_box.isSelected();
+                    schema_check = schema_chk_box.isSelected();
+                    
+                    mapping_ed = mapping_ed_box.isSelected();
+                    mapping_graphical = mapping_graphical_box.isSelected();
+                    mapping_tabular = mapping_tabular_box.isSelected();
+                    mapping_textual = mapping_textual_box.isSelected();
+                    
+                    query_graphical = query_graphical_box.isSelected();
+                    query_textual = query_textual_box.isSelected();
+                    
+                    inst_graphical = inst_graphical_box.isSelected();
+                    inst_tabular = inst_tabular_box.isSelected();
+                    inst_textual = inst_textual_box.isSelected();
+                    inst_joined = inst_joined_box.isSelected();
+                    inst_gr = inst_gr_box.isSelected();
+                    inst_obs = inst_obs_box.isSelected();
+                    inst_rdf = inst_rdf_box.isSelected();
+                    inst_adom = inst_adom_box.isSelected();
+                    inst_dot = inst_dot_box.isSelected();
+                    
+                    schema_graph = (String) schemaBox.getSelectedItem();
+                    mapping_graph = (String) mappingBox.getSelectedItem();
+                    inst_graph = (String) instBox.getSelectedItem();
+                    trans_graph = (String) transBox.getSelectedItem();
+                    query_graph = (String) queryBox.getSelectedItem();
+                    instFlow_graph = (String) instFlowBox.getSelectedItem();
+                    schFlow_graph = (String) schFlowBox.getSelectedItem();
+                    
+                    allow_surjective = surjB.isSelected();
+                    
+                    transform_graphical = transform_graphical_box.isSelected();
+                    transform_tabular = transform_tabular_box.isSelected();
+                    transform_textual = transform_textual_box.isSelected();
+                    
+                    if (h2Button.isSelected()) {
+                        sqlKind = SQLKIND.H2;
+                    } else if (jdbcButton.isSelected()) {
+                        sqlKind = SQLKIND.JDBC;
+                    } else if (nativeButton.isSelected()) {
+                        sqlKind = SQLKIND.NATIVE;
+                    }
+                    
+                    jdbcUrl = jdbcField.getText();
+                    jdbcClass = jdbcField2.getText();
+                    
+                    return new Unit();
+                };
 		JPanel pan = new JPanel(new GridLayout(1,1));
 		pan.setPreferredSize(new Dimension(300, 20*Options.biggestSize));
 		pan.add(new JScrollPane(generalsplit));

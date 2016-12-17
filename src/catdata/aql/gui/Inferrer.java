@@ -27,13 +27,24 @@ public class Inferrer {
 			Pair<String, String> s = AqlParser.parseInfer(in);
 			String a = s.first;
 			String b = s.second;
-			if (k.equals(Kind.MAPPING)) {
-				repl += inferMapping(editor.last_env.defs.schs.map.get(a), editor.last_env.defs.schs.map.get(b));
-			} else if (k.equals(Kind.QUERY)) {
-				repl += inferQuery(editor.last_env.defs.schs.map.get(a), editor.last_env.defs.schs.map.get(b));
-			} else if (k.equals(Kind.TRANSFORM)) {
-				repl += inferTransform(editor.last_env.defs.insts.map.get(a), editor.last_env.defs.insts.map.get(b));
-			} 
+                    switch (k) {
+                        case MAPPING:
+                            repl += inferMapping(editor.last_env.defs.schs.map.get(a), editor.last_env.defs.schs.map.get(b));
+                            break;
+                        case QUERY:
+                            repl += inferQuery(editor.last_env.defs.schs.map.get(a), editor.last_env.defs.schs.map.get(b));
+                            break; 
+                        case TRANSFORM:
+                            repl += inferTransform(editor.last_env.defs.insts.map.get(a), editor.last_env.defs.insts.map.get(b));
+                            break;
+					case GRAPH:
+					case INSTANCE:
+					case PRAGMA:
+					case SCHEMA:
+					case TYPESIDE:
+                        default:
+                            break;
+                    }
 		} else if (k.equals(Kind.INSTANCE)) {
 			String a = AqlParser.parseInfer1(in);
 			repl += inferInstance(editor.last_env.defs.schs.map.get(a));

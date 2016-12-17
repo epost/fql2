@@ -76,7 +76,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	public final Program<Exp<?>> last_prog;
 	public final AqlEnv last_env;
 
-	private List<RuntimeException> exn = Collections.synchronizedList(new LinkedList<>());
+	private final List<RuntimeException> exn = Collections.synchronizedList(new LinkedList<>());
 
 //	boolean stop = false;
 
@@ -137,8 +137,8 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		}
 	}
 
-	private IntRef ended = new IntRef(0);
-	private List<Thread> threads = new LinkedList<>();
+	private final IntRef ended = new IntRef(0);
+	private final List<Thread> threads = new LinkedList<>();
 
 	private void process() {
 		int numProcs = Runtime.getRuntime().availableProcessors();
@@ -164,7 +164,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		}
 	}
 
-	private Map<String, Boolean> changed = new HashMap<>();
+	private final Map<String, Boolean> changed = new HashMap<>();
 
 	private void init() {
 		if (last_prog == null) {
@@ -258,7 +258,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			exn.add(new RuntimeInterruptedException(exp));
 		} catch (RuntimeInterruptedException exp) {
 			exn.add(exp);
-		} catch (Exception e) {
+		} catch (RuntimeException e) {
 			e.printStackTrace();
 			synchronized (this) {
 				//stop = true;

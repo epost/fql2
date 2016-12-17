@@ -45,14 +45,14 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 	public final Set<Pair<Object, Triple<List<Object>, Object, String>>> java_fns_string;
 
 	public final Map<String, String> options;
-	private AqlOptions strat;
+	private final AqlOptions strat;
 	
 	@Override
 	public long timeout() {
 		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
 	}	
 	
-	private Set<Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>>> eqs0 = new HashSet<>();
+	private final Set<Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>>> eqs0 = new HashSet<>();
 
 
 	// typesafe by covariance of read-only collections

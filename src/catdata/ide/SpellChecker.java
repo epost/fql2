@@ -49,9 +49,9 @@ public class SpellChecker extends AbstractParser {
 		return words0;
 	}
 	
-	private DefaultParseResult result;
+	private final DefaultParseResult result;
 	private RSyntaxDocument doc;
-	private Collection<String> local;
+	private final Collection<String> local;
 
 	public SpellChecker(Collection<String> local) {
 		result = new DefaultParseResult(this);
@@ -59,11 +59,11 @@ public class SpellChecker extends AbstractParser {
 	}
 
 
-	private final int getLineOfOffset(int offs) {
+	private int getLineOfOffset(int offs) {
 		return doc.getDefaultRootElement().getElementIndex(offs);
 	}
 
-	private static Pattern pattern = Pattern.compile("\\S+");
+	private static final Pattern pattern = Pattern.compile("\\S+");
 	
 	
 	@Override
@@ -109,7 +109,7 @@ public class SpellChecker extends AbstractParser {
 					}
 					for (int i = 0; i < 10; i++) {
 						if (word.contains(Integer.toString(i))) {
-							continue;
+							
 						}
 					}
 					for (String a : local) {
@@ -149,7 +149,7 @@ public class SpellChecker extends AbstractParser {
 
 	private static class SpellingParserNotice extends DefaultParserNotice {
 	
-		public SpellingParserNotice(SpellChecker parser, String msg,
+		private SpellingParserNotice(SpellChecker parser, String msg,
 									int line, int offs, int len
 									) {
 			super(parser, msg, line, offs, len);

@@ -269,54 +269,49 @@ public class OplOptions extends Options implements Cloneable {
 			opl2.add(new JLabel());
 		}
 
-		Function<Unit, Unit> fn = new Function<Unit, Unit>() {
-
-			@Override
-			public Unit apply(Unit t) {
-				try {
-					int opl = opl_prover_timeout;
-					int opl_h = opl_saturate_timeout;
-					int opl_r = opl_prover_reduction_limit;
-					try {
-						opl = Integer.parseInt(opl_iterations_box.getText());
-						opl_h = Integer.parseInt(opl_homit_box.getText());
-						opl_r = Integer.parseInt(opl_red_box.getText());
-					} catch (NumberFormatException nfe) {
-					}
-					opl_prover_timeout = opl;
-					opl_saturate_timeout = opl_h;
-					opl_prover_reduction_limit = opl_r;
-				} catch (NumberFormatException nfe) {
-				}
-
-				opl_prover_require_const = opl_const_box.isSelected();
-				opl_prover_sort = opl_sort_box.isSelected();
-				opl_prover_unfailing = opl_unfailing_box.isSelected();
-				opl_validate = opl_validate_box.isSelected();
-				opl_pretty_print = opl_pretty_box.isSelected();
-				opl_reorder_joins = opl_reorder_box.isSelected();
-				opl_suppress_dom = opl_suppress_box.isSelected();
-				opl_allow_horn = opl_horn_box.isSelected();
-				opl_prover_ac = opl_semantic_ac_box.isSelected();
-				opl_query_check_eqs = opl_eqs_box.isSelected();
-				opl_pushout_simpl = opl_simpl_box.isSelected();
-				opl_lazy_gui = opl_lazy_box.isSelected();
-				opl_prover_filter_subsumed = opl_selfsub_box.isSelected();
-				// simplify = opl_simplify_box.isSelected();
-				opl_prover_compose = opl_compose_box.isSelected();
-				opl_cache_gui = opl_cache_box.isSelected();
-				opl_prover_force_prec = opl_prec_box.isSelected();
-				opl_require_consistency = opl_consistency_box.isSelected();
-				opl_desugar_nat = opl_nat_sugar_box.isSelected();
-				opl_print_simplified_presentations = opl_print_simpl_pres_box.isSelected();
-				opl_display_fresh_ids = opl_fresh_ids_box.isSelected();
-				opl_prover_simplify_instances = opl_simplify_box.isSelected();
-				opl_safe_java = opl_safejava_box.isSelected();
-				opl_secret_agg = opl_agg_box.isSelected();
-				return new Unit();
-			}
-
-		};
+		Function<Unit, Unit> fn = (Unit t) -> {
+                    try {
+                        int opl = opl_prover_timeout;
+                        int opl_h = opl_saturate_timeout;
+                        int opl_r = opl_prover_reduction_limit;
+                        try {
+                            opl = Integer.parseInt(opl_iterations_box.getText());
+                            opl_h = Integer.parseInt(opl_homit_box.getText());
+                            opl_r = Integer.parseInt(opl_red_box.getText());
+                        } catch (NumberFormatException nfe) {
+                        }
+                        opl_prover_timeout = opl;
+                        opl_saturate_timeout = opl_h;
+                        opl_prover_reduction_limit = opl_r;
+                    } catch (NumberFormatException nfe) {
+                    }
+                    
+                    opl_prover_require_const = opl_const_box.isSelected();
+                    opl_prover_sort = opl_sort_box.isSelected();
+                    opl_prover_unfailing = opl_unfailing_box.isSelected();
+                    opl_validate = opl_validate_box.isSelected();
+                    opl_pretty_print = opl_pretty_box.isSelected();
+                    opl_reorder_joins = opl_reorder_box.isSelected();
+                    opl_suppress_dom = opl_suppress_box.isSelected();
+                    opl_allow_horn = opl_horn_box.isSelected();
+                    opl_prover_ac = opl_semantic_ac_box.isSelected();
+                    opl_query_check_eqs = opl_eqs_box.isSelected();
+                    opl_pushout_simpl = opl_simpl_box.isSelected();
+                    opl_lazy_gui = opl_lazy_box.isSelected();
+                    opl_prover_filter_subsumed = opl_selfsub_box.isSelected();
+                    // simplify = opl_simplify_box.isSelected();
+                    opl_prover_compose = opl_compose_box.isSelected();
+                    opl_cache_gui = opl_cache_box.isSelected();
+                    opl_prover_force_prec = opl_prec_box.isSelected();
+                    opl_require_consistency = opl_consistency_box.isSelected();
+                    opl_desugar_nat = opl_nat_sugar_box.isSelected();
+                    opl_print_simplified_presentations = opl_print_simpl_pres_box.isSelected();
+                    opl_display_fresh_ids = opl_fresh_ids_box.isSelected();
+                    opl_prover_simplify_instances = opl_simplify_box.isSelected();
+                    opl_safe_java = opl_safejava_box.isSelected();
+                    opl_secret_agg = opl_agg_box.isSelected();
+                    return new Unit();
+                };
 
 		return new Pair<>(oplsplit, fn);
 	}

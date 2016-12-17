@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,12 +33,12 @@ public class KBViewer {
 
 	protected Example[] examples = { new Cat() };
 
-	String help = ""; 
+	private final String help = ""; 
 	protected static String kind() {
 		return "Knuth Bendix";
 	}
 
-	static class Cat extends Example {
+	private final static class Cat extends Example {
 		
 		@Override
 		public String getName() {
@@ -65,47 +64,36 @@ public class KBViewer {
 	
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				input.setText(((Example) box.getSelectedItem()).getText());
-			}
-		});
+		box.addActionListener((ActionEvent e) -> {
+                    input.setText(((Example) box.getSelectedItem()).getText());
+                });
 
-		transButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					String p = translate(input.getText());
-					output.setText(p);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					output.setText(ex.getLocalizedMessage());
-				}
-			}
-		});
+		transButton.addActionListener((ActionEvent e) -> {
+                    try {
+                        String p = translate(input.getText());
+                        output.setText(p);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        output.setText(ex.getLocalizedMessage());
+                    }
+                });
 
-		helpButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JTextArea jta = new JTextArea(help);
-				jta.setWrapStyleWord(true);
-				// jta.setEditable(false);
-				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-						ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-				p.setPreferredSize(new Dimension(300, 200));
-
-				JOptionPane pane = new JOptionPane(p);
-				// Configure via set methods
-				JDialog dialog = pane.createDialog(null, "Help on Knuth-Bendix Completion");
-				dialog.setModal(false);
-				dialog.setVisible(true);
-				dialog.setResizable(true);
-
-			}
-		});
+		helpButton.addActionListener((ActionEvent e) -> {
+                    JTextArea jta = new JTextArea(help);
+                    jta.setWrapStyleWord(true);
+                    // jta.setEditable(false);
+                    jta.setLineWrap(true);
+                    JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                    p.setPreferredSize(new Dimension(300, 200));
+                    
+                    JOptionPane pane = new JOptionPane(p);
+                    // Configure via set methods
+                    JDialog dialog = pane.createDialog(null, "Help on Knuth-Bendix Completion");
+                    dialog.setModal(false);
+                    dialog.setVisible(true);
+                    dialog.setResizable(true);
+                });
 
 		JPanel p = new JPanel(new BorderLayout());
 
@@ -150,7 +138,7 @@ public class KBViewer {
 	}
 	
 
-	static String catstr = "{"
+	private final static String catstr = "{"
 + "\n	objects "
 + "\n		Ob, "
 + "\n		Hom, "

@@ -83,10 +83,10 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	private boolean inhabGen1(Set<T> ret) {
 		boolean changed = false;
-		for (C c : sig.keySet()) {
+                outer: for (C c : sig.keySet()) {
 			for (T t : sig.get(c).first) {
 				if (!ret.contains(t)) {
-					continue;
+					continue outer;
 				}
 			}
 			changed = changed | ret.add(sig.get(c).second);
@@ -94,27 +94,28 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return changed;
 	}
 
-	private Set<T> groundInhabited = new HashSet<>();
+	private final Set<T> groundInhabited = new HashSet<>();
 
-	private List<C> prec;
+	private final List<C> prec;
 
 	private boolean isComplete = false;
 	private boolean isCompleteGround = false;
 
 	// order matters
-	private List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R, E, G;
+	private List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E;
+        private final List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R, G;
 
-	private Iterator<V> fresh;
+	private final Iterator<V> fresh;
 
-	private Set<Pair<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>>> seen = new HashSet<>();
+	private final Set<Pair<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>>> seen = new HashSet<>();
 
 	private Map<Chc<V, C>, List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>>> AC_symbols;
 
-	private KBOptions options;
+	private final KBOptions options;
 
-	private Map<T, Chc<V, C>> min = new HashMap<>();
+	private final Map<T, Chc<V, C>> min = new HashMap<>();
 
-	private Map<C, Pair<List<T>, T>> sig;
+	private final Map<C, Pair<List<T>, T>> sig;
 
 	public LPOUKB(Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>>> E0, Iterator<V> fresh, Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>>> R0, KBOptions options, List<C> prec, Map<C, Pair<List<T>, T>> sig, Set<T> tys) throws InterruptedException {
 		this.options = options;
@@ -446,8 +447,8 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	// is also compose2
 	// simplify RHS of a rule
 	private void compose() throws InterruptedException {
-		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> to_remove = null;
-		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> to_add = null;
+		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> to_remove;
+		Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> to_add;
 		do {
 			to_remove = null;
 			to_add = null;
@@ -521,9 +522,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 			KBExp<Chc<V, C>, V> lhs = r.first;
 			KBExp<Chc<V, C>, V> rhs = r.second;
-			Map<V, KBExp<Chc<V, C>, V>> s = null;
-
-			s = findSubst(lhs, e, r.third, inhab);
+			Map<V, KBExp<Chc<V, C>, V>> s = findSubst(lhs, e, r.third, inhab);
 
 			if (s == null) {
 				continue;
@@ -1190,15 +1189,9 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 				}
 				throw new RuntimeException("Anomaly: please report");
 			} else if (lhs.left && !rhs.left) {
-				if (min.contains(lhs)) { // lhs minimal
-					return false;
-				}
-				return true;
+				return (!min.contains(lhs));
 			} else if (!lhs.left && rhs.left) {
-				if (min.contains(rhs)) { // rhs minimal
-					return true;
-				}
-				return false;
+				return (min.contains(rhs));
 			}
 			return gt.apply(lhs.r, rhs.r);
 		};
@@ -1385,7 +1378,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			ret = and(ret, gt_lpoInfer(S, ti));
 		}
 
-		Set<DAG<X>> zz = null;
+		Set<DAG<X>> zz;
 		if (S.f.equals(T.f)) {
 			zz = and(ret, gt_lpo_lexInfer(S.args, T.args));
 		} else {

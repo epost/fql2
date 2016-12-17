@@ -1,6 +1,5 @@
 package catdata.fpql;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -1179,12 +1178,7 @@ public abstract class XExp {
 			}
 			count(where, count);
 			List l = new LinkedList<>(m.keySet());
-			l.sort(new Comparator() {
-				@Override
-				public int compare(Object o1, Object o2) {
-					return ((Integer)count.get(o2)) - ((Integer)count.get(o1));
-				}
-			});
+			l.sort((Object o1, Object o2) -> ((Integer)count.get(o2)) - ((Integer)count.get(o1)));
 			Map ret = new LinkedHashMap<>();
 			for (Object s : l) {
 				ret.put(s, m.get(s));
@@ -1292,12 +1286,7 @@ public abstract class XExp {
 				count(k.first, count);
 			}
 			List l = new LinkedList(m.keySet());
-			l.sort(new Comparator() {
-				@Override
-				public int compare(Object o1, Object o2) {
-					return ((Integer)count.get(o2)) - ((Integer)count.get(o1));
-				}
-			});
+			l.sort((Object o1, Object o2) -> ((Integer)count.get(o2)) - ((Integer)count.get(o1)));
 			Map ret = new LinkedHashMap<>();
 			for (Object s : l) {
 				ret.put(s, m.get(s));

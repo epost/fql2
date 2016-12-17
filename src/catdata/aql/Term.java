@@ -234,11 +234,11 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			}
 			ret = Chc.inRight(en);
 		} else if (sk != null) {
-			Ty ty = sks.get(sk);
-			if (ty == null) {
+			Ty tye = sks.get(sk);
+			if (tye == null) {
 				throw new RuntimeException("In " + this + ", " + "the type for labelled null " + sk + " is not defined");	
 			}
-			ret = Chc.inLeft(ty);
+			ret = Chc.inLeft(tye);
 		}
 		if (ret == null || (ret.left && ret.l == null) || (!ret.left && ret.r == null)) {
 			throw new RuntimeException("In " + this + "," + " typing encountered an ill-formed term.  Should be impossible, report to Ryan.  " + this);
@@ -268,7 +268,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		if (var != null) {
 			return var.toString();
 		} else if (sym != null) {
-			if (args.size() == 0) {
+			if (args.isEmpty()) {
 				return sym.toString();
 			} else if (args.size() == 1) {
 				return args.get(0).toString(sk_printer, gen_printer) + "." + sym;
@@ -685,7 +685,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	public void objs(Set<Pair<Object, Ty>> objs) {
 		if (var != null) {
-			return;
+			
 		} else if (obj != null) {
 			objs.add(new Pair<>(obj, ty));
 		} else {

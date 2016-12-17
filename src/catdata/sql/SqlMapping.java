@@ -13,11 +13,11 @@ public class SqlMapping {
 
 	//TODO aql give fks deterministic names based on table names, col names, etc 
 	
-	public SqlSchema source, target;
+	public final SqlSchema source, target;
 	
-	private Map<SqlTable, SqlTable> tm;
-	private Map<SqlColumn, Pair<SqlPath, SqlColumn>> am;
-	private Map<SqlForeignKey, SqlPath> em;
+	private final Map<SqlTable, SqlTable> tm;
+	private final Map<SqlColumn, Pair<SqlPath, SqlColumn>> am;
+	private final Map<SqlForeignKey, SqlPath> em;
 	
 	private static void fromPath(SqlPath path, String[] arr) {
 		arr[1] = path.source.name;
@@ -162,7 +162,7 @@ public class SqlMapping {
 		if (m.length > 2) {
 			throw new RuntimeException("Table mapping not length two: " + Arrays.deepToString(m));
 		}
-		if (tm.containsKey(s)) {
+                if (tm.containsKey(source.getTable(s))) {
 			throw new RuntimeException("Duplicate table mapping for " + s);
 		}
 		tm.put(source.getTable(s), target.getTable(t));
@@ -253,8 +253,8 @@ public class SqlMapping {
 			if (!target.tables.contains(p.target)) {
 				throw new RuntimeException(p.target + " is not a table in " + target);
 			}
-			for (SqlForeignKey fk : p.edges) {
-				if (!target.tables.contains(fk)) {
+                       for (SqlForeignKey fk : p.edges) {
+				if (!target.fks.contains(fk)) {
 					throw new RuntimeException(fk + " is not a foreign key in " + target);
 				}
 			}

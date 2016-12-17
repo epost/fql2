@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-import catdata.provers.DPKB;
-import catdata.provers.KBExp;
 import catdata.provers.KBExp.KBApp;
 
 

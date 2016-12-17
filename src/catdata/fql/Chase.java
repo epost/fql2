@@ -3,7 +3,6 @@ package catdata.fql;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import catdata.fql.decl.Instance;
 import catdata.fql.decl.Mapping;
 import catdata.fql.decl.Node;
 import catdata.fql.decl.Signature;
-import catdata.fql.parse.BadSyntax;
 import catdata.fql.parse.FqlTokenizer;
 import catdata.fql.parse.KeywordParser;
 import catdata.fql.parse.ParserUtils;
@@ -52,22 +50,17 @@ public class Chase {
 	public static void dostuff() {
 		JFrame f = new JFrame("Chaser");
 
-		run.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					Pair<String, String> x = run(eds.getText(), inst.getText(),
-							(KIND) box.getSelectedItem());
-					res.setText(x.second);
-					eds0.setText(x.first);
-				} catch (Throwable ee) {
-					ee.printStackTrace();
-					res.setText(ee.toString());
-				}
-			}
-
-		});
+		run.addActionListener((ActionEvent e) -> {
+                    try {
+                        Pair<String, String> x = run(eds.getText(), inst.getText(),
+                                (KIND) box.getSelectedItem());
+                        res.setText(x.second);
+                        eds0.setText(x.first);
+                    } catch (Throwable ee) {
+                        ee.printStackTrace();
+                        res.setText(ee.toString());
+                    }
+                });
 
 		JPanel ret = new JPanel(new BorderLayout());
 
@@ -123,11 +116,11 @@ public class Chase {
 
 		Pair<List<Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>>>, List<Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>>>> zzz = split(eds0);
 
-		if (inst0.size() == 0) {
+		if (inst0.isEmpty()) {
 			return new Pair<>(printNicely3(zzz), "");
 		}
 
-		Map<String, Set<Pair<Object, Object>>> res = chase(new HashSet<String>(), zzz, inst0, kind);
+		Map<String, Set<Pair<Object, Object>>> res = chase(new HashSet<>(), zzz, inst0, kind);
 
 		return new Pair<>(printNicely3(zzz), printNicely(res));
 	}
@@ -153,70 +146,57 @@ public class Chase {
 	}
 
 	private static RyanParser<EmbeddedDependency> make_ed_p() {
-		return new RyanParser<EmbeddedDependency>() {
-
-			@Override
-			public Partial<EmbeddedDependency> parse(Tokens s) throws BadSyntax {
-				RyanParser<List<String>> strings = ParserUtils.many(new StringParser());
-				RyanParser<List<Triple<String, String, String>>> where1 = ParserUtils.manySep(
-						facts_p(), new KeywordParser("/\\"));
-
-				RyanParser<Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>> where2 = facts_p2();
-
-				RyanParser<Pair<List<String>, List<Triple<String, String, String>>>> p = ParserUtils
-						.seq(new KeywordParser("forall"),
-								ParserUtils.inside(strings, new KeywordParser(","), where1));
-
-				RyanParser<Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>> q = ParserUtils
-						.seq(new KeywordParser("exists"),
-								ParserUtils.inside(strings, new KeywordParser(","), where2));
-
-				RyanParser<Pair<Pair<List<String>, List<Triple<String, String, String>>>, Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>>> xxx = ParserUtils
-						.inside(p, new KeywordParser("->"), q);
-
-				Partial<Pair<Pair<List<String>, List<Triple<String, String, String>>>, Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>>> yyy = xxx
-						.parse(s);
-				s = yyy.tokens;
-				Pair<Pair<List<String>, List<Triple<String, String, String>>>, Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>> t = yyy.value;
-
-				return new Partial<>(s, new EmbeddedDependency(t.first.first,
-						t.second.first, t.first.second, t.second.second.first,
-						t.second.second.second));
-
-			}
-
-		};
+		return (Tokens s) -> {
+                    RyanParser<List<String>> strings = ParserUtils.many(new StringParser());
+                    RyanParser<List<Triple<String, String, String>>> where1 = ParserUtils.manySep(
+                            facts_p(), new KeywordParser("/\\"));
+                    
+                    RyanParser<Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>> where2 = facts_p2();
+                    
+                    RyanParser<Pair<List<String>, List<Triple<String, String, String>>>> p = ParserUtils
+                            .seq(new KeywordParser("forall"),
+                                    ParserUtils.inside(strings, new KeywordParser(","), where1));
+                    
+                    RyanParser<Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>> q = ParserUtils
+                            .seq(new KeywordParser("exists"),
+                                    ParserUtils.inside(strings, new KeywordParser(","), where2));
+                    
+                    RyanParser<Pair<Pair<List<String>, List<Triple<String, String, String>>>, Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>>> xxx = ParserUtils
+                            .inside(p, new KeywordParser("->"), q);
+                    
+                    Partial<Pair<Pair<List<String>, List<Triple<String, String, String>>>, Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>>> yyy = xxx
+                            .parse(s);
+                    s = yyy.tokens;
+                    Pair<Pair<List<String>, List<Triple<String, String, String>>>, Pair<List<String>, Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>> t = yyy.value;
+                    
+                    return new Partial<>(s, new EmbeddedDependency(t.first.first,
+                            t.second.first, t.first.second, t.second.second.first,
+                            t.second.second.second));
+                };
 	}
 
+        @SuppressWarnings("unchecked")
 	protected static RyanParser<Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>> facts_p2() {
-		return new RyanParser<Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>>() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public Partial<Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>> parse(
-					Tokens s) throws BadSyntax {
-
-				RyanParser<List<Object>> objs0 = ParserUtils.manySep(
-						ParserUtils.or(facts_p(), eq_p()), new KeywordParser("/\\"));
-				Partial<List<Object>> par = objs0.parse(s);
-				List<Object> objs = par.value;
-				s = par.tokens;
-
-				List<Triple<String, String, String>> l1 = new LinkedList<>();
-				List<Pair<String, String>> l2 = new LinkedList<>();
-
-				for (Object o : objs) {
-					if (o instanceof Triple) {
-						l1.add((Triple<String, String, String>) o);
-					} else {
-						l2.add((Pair<String, String>) o);
-					}
-				}
-
-				return new Partial<>(s, new Pair<>(l1, l2));
-			}
-
-		};
+		return (Tokens s) -> {
+                    RyanParser<List<Object>> objs0 = ParserUtils.manySep(
+                            ParserUtils.or(facts_p(), eq_p()), new KeywordParser("/\\"));
+                    Partial<List<Object>> par = objs0.parse(s);
+                    List<Object> objs = par.value;
+                    s = par.tokens;
+                    
+                    List<Triple<String, String, String>> l1 = new LinkedList<>();
+                    List<Pair<String, String>> l2 = new LinkedList<>();
+                    
+                    for (Object o : objs) {
+                        if (o instanceof Triple) {
+                            l1.add((Triple<String, String, String>) o);
+                        } else {
+                            l2.add((Pair<String, String>) o);
+                        }
+                    }
+                    
+                    return new Partial<>(s, new Pair<>(l1, l2));
+                };
 	}
 
 	protected static RyanParser<Pair<String, String>> eq_p() {
@@ -224,33 +204,28 @@ public class Chase {
 	}
 
 	private static RyanParser<Triple<String, String, String>> facts_p() {
-		return new RyanParser<Triple<String, String, String>>() {
-
-			@Override
-			public Partial<Triple<String, String, String>> parse(Tokens s) throws BadSyntax {
-				StringParser p = new StringParser();
-
-				String b;
-				String a;
-				String r;
-
-				Partial<String> x = p.parse(s);
-				s = x.tokens;
-				r = x.value;
-
-				RyanParser<Pair<String, String>> h = ParserUtils.outside(new KeywordParser("("),
-						ParserUtils.inside(new StringParser(), new KeywordParser(","),
-								new StringParser()), new KeywordParser(")"));
-				Partial<Pair<String, String>> y = h.parse(s);
-				s = y.tokens;
-				a = y.value.first;
-				b = y.value.second;
-
-				return new Partial<>(s,
-						new Triple<>(r, a, b));
-			}
-
-		};
+		return (Tokens s) -> {
+                    StringParser p = new StringParser();
+                    
+                    String b;
+                    String a;
+                    String r;
+                    
+                    Partial<String> x = p.parse(s);
+                    s = x.tokens;
+                    r = x.value;
+                    
+                    RyanParser<Pair<String, String>> h = ParserUtils.outside(new KeywordParser("("),
+                            ParserUtils.inside(new StringParser(), new KeywordParser(","),
+                                    new StringParser()), new KeywordParser(")"));
+                    Partial<Pair<String, String>> y = h.parse(s);
+                    s = y.tokens;
+                    a = y.value.first;
+                    b = y.value.second;
+                    
+                    return new Partial<>(s,
+                            new Triple<>(r, a, b));
+                };
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -556,11 +531,11 @@ public class Chase {
 	public static <X> List<List<Pair<X, X>>> homomorphs(Collection<X> A, Collection<X> B) {
 		List<List<Pair<X, X>>> ret = new LinkedList<>();
 
-		if (A.size() == 0) {
+		if (A.isEmpty()) {
 			return ret;
 		}
 
-		if (B.size() == 0) {
+		if (B.isEmpty()) {
 			throw new RuntimeException();
 		}
 
@@ -629,7 +604,7 @@ public class Chase {
 		List<Pair<Object, Object>> subst0 = new LinkedList<>(subst);
 
 		for (;;) {
-			if (subst0.size() == 0) {
+			if (subst0.isEmpty()) {
 				break;
 			}
 			Pair<Object, Object> phi = subst0.remove(0);
@@ -687,7 +662,7 @@ public class Chase {
 
 		Map<String, Set<Pair<Object, Object>>> ret = new HashMap<>();
 		for (String k : i.keySet()) {
-			ret.put(k, new HashSet<Pair<Object, Object>>());
+			ret.put(k, new HashSet<>());
 		}
 
 		EmbeddedDependency xxx0 = conv2(forall, where, t);
@@ -832,13 +807,13 @@ public class Chase {
 
 		Map<String, Set<Pair<Object, Object>>> I = new HashMap<>();
 		for (Node n : cd.nodes) {
-			I.put(n.string, new HashSet<Pair<Object, Object>>());
+			I.put(n.string, new HashSet<>());
 		}
 		for (Edge n : cd.edges) {
-			I.put(n.name, new HashSet<Pair<Object, Object>>());
+			I.put(n.name, new HashSet<>());
 		}
 		for (Attribute<Node> n : cd.attrs) {
-			I.put(n.name, new HashSet<Pair<Object, Object>>());
+			I.put(n.name, new HashSet<>());
 		}
 		for (String k : i.data.keySet()) {
 			I.put("src_" + k, i.data.get(k));
@@ -885,13 +860,13 @@ public class Chase {
 
 		Map<String, Set<Pair<Object, Object>>> I = new HashMap<>();
 		for (Node n : cd.nodes) {
-			I.put(n.string, new HashSet<Pair<Object, Object>>());
+			I.put(n.string, new HashSet<>());
 		}
 		for (Edge n : cd.edges) {
-			I.put(n.name, new HashSet<Pair<Object, Object>>());
+			I.put(n.name, new HashSet<>());
 		}
 		for (Attribute<Node> n : cd.attrs) {
-			I.put(n.name, new HashSet<Pair<Object, Object>>());
+			I.put(n.name, new HashSet<>());
 		}
 		for (String k : i.data.keySet()) {
 			I.put("dst_" + k, i.data.get(k));
@@ -935,7 +910,7 @@ public class Chase {
 	public static <T> Set<Set<T>> pow(Set<T> originalSet) {
 		Set<Set<T>> sets = new HashSet<>();
 		if (originalSet.isEmpty()) {
-			sets.add(new HashSet<T>());
+			sets.add(new HashSet<>());
 			return sets;
 		}
 		List<T> list = new ArrayList<>(originalSet);

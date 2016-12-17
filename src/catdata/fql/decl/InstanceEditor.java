@@ -10,9 +10,7 @@ import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,11 +36,11 @@ import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.collections15.Transformer;
 
-import catdata.fql.FqlOptions;
+import catdata.Pair;
 import catdata.fql.FQLException;
+import catdata.fql.FqlOptions;
 import catdata.fql.decl.InstExp.Const;
 import catdata.ide.GlobalOptions;
-import catdata.Pair;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -225,85 +223,62 @@ public class InstanceEditor {
 			layout.setSize(new Dimension(500, 340));
 			final VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
-			Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
-				@Override
-				public Paint transform(String i) {
-					if (thesig.isAttribute(i)) {
-						return UIManager.getColor("Panel.background");
-					} else {
-						return clr;
-					}
-					// return color;
-				}
-			};
+			Transformer<String, Paint> vertexPaint = (String i) -> {
+                            if (thesig.isAttribute(i)) {
+                                return UIManager.getColor("Panel.background");
+                            } else {
+                                return clr;
+                            }
+                            // return color;
+                        };
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			// gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-			vv.getRenderContext().setVertexLabelTransformer(new Transformer() {
+			vv.getRenderContext().setVertexLabelTransformer((String str) -> {
+                            if (thesig.isAttribute(str)) {
+                                str = thesig.getTypeLabel(str);
+                            }
+                            return str;
+                        });
 
-				@Override
-				public Object transform(Object arg0) {
-					String str = (String) arg0;
-					if (thesig.isAttribute(str)) {
-						str = thesig.getTypeLabel(str);
-					}
-					return str;
-				}
-
-			});
-
-			vv.getPickedVertexState().addItemListener(new ItemListener() {
-
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() != ItemEvent.SELECTED) {
-						return;
-					}
-					vv.getPickedEdgeState().clear();
-					String str = ((String) e.getItem());
-
-					if (thesig.isNode(str)) {
-						cards.show(vwr, str);
-						card = str;
-					}
-				}
-
-			});
+			vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
+                            if (e.getStateChange() != ItemEvent.SELECTED) {
+                                return;
+                            }
+                            vv.getPickedEdgeState().clear();
+                            String str = ((String) e.getItem());
+                            
+                            if (thesig.isNode(str)) {
+                                cards.show(vwr, str);
+                                card = str;
+                            }
+                        });
 			vv.getRenderContext().setLabelOffset(20);
-			vv.getRenderContext().setEdgeLabelTransformer(new Transformer() {
-
-				@Override
-				public Object transform(Object arg0) {
-					String s = arg0.toString();
-					if (thesig.isAttribute(s)) {
-						return "";
-					}
-					return s;
-				}
-
-			});
+			vv.getRenderContext().setEdgeLabelTransformer((String s) -> {
+                            if (thesig.isAttribute(s)) {
+                                return "";
+                            }
+                            return s;
+                        });
 
 			float dash[] = { 1.0f };
 			final Stroke edgeStroke = new BasicStroke(0.5f,
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
 			final Stroke bs = new BasicStroke();
-			Transformer<String, Stroke> edgeStrokeTransformer = new Transformer<String, Stroke>() {
-				@Override
-				public Stroke transform(String s) {
-					if (thesig.isAttribute(s)) {
-						return edgeStroke;
-					}
-					return bs;
-				}
-			};
+			Transformer<String, Stroke> edgeStrokeTransformer = (String s) -> {
+                            if (thesig.isAttribute(s)) {
+                                return edgeStroke;
+                            }
+                            return bs;
+                        };
 
 			vv.getRenderContext().setEdgeStrokeTransformer(
 					edgeStrokeTransformer);
 			vv.getRenderContext().setVertexLabelTransformer(
-					new ToStringLabeller<String>());
+					new ToStringLabeller<>());
 
 			GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 			zzz.setPreferredSize(new Dimension(600, 400));
@@ -332,38 +307,32 @@ public class InstanceEditor {
 
 			newthing.resetToPreferredSizes();
 
-			dr.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					JTable t = joined.get(card);
-					int[] i = t.getSelectedRows();
-					int j = 0;
-					DefaultTableModel dtm = (DefaultTableModel) t.getModel();
-					for (int x : i) {
-						dtm.removeRow(t.convertRowIndexToModel(x) - j);
-						j++;
-					}
-					joined2.get(card).setBorder(
-							BorderFactory.createTitledBorder(
-									BorderFactory.createEmptyBorder(), card
-											+ " (" + dtm.getRowCount()
-											+ " rows)"));
-				}
-			});
+			dr.addActionListener((ActionEvent e) -> {
+                            JTable t = joined.get(card);
+                            int[] i = t.getSelectedRows();
+                            int j = 0;
+                            DefaultTableModel dtm = (DefaultTableModel) t.getModel();
+                            for (int x1 : i) {
+                                dtm.removeRow(t.convertRowIndexToModel(x1) - j);
+                                j++;
+                            }
+                            joined2.get(card).setBorder(
+                                    BorderFactory.createTitledBorder(
+                                            BorderFactory.createEmptyBorder(), card
+                                                    + " (" + dtm.getRowCount()
+                                                    + " rows)"));
+                        });
 
-			ar.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					JTable t = joined.get(card);
-					DefaultTableModel dtm = (DefaultTableModel) t.getModel();
-					dtm.addRow((Vector) null);
-					joined2.get(card).setBorder(
-							BorderFactory.createTitledBorder(
-									BorderFactory.createEmptyBorder(), card
-											+ " (" + dtm.getRowCount()
-											+ " rows)"));
-				}
-			});
+			ar.addActionListener((ActionEvent e) -> {
+                            JTable t = joined.get(card);
+                            DefaultTableModel dtm = (DefaultTableModel) t.getModel();
+                            dtm.addRow((Vector) null);
+                            joined2.get(card).setBorder(
+                                    BorderFactory.createTitledBorder(
+                                            BorderFactory.createEmptyBorder(), card
+                                                    + " (" + dtm.getRowCount()
+                                                    + " rows)"));
+                        });
 			// xxx.setMaximumSize(new Dimension(400,400));
 			// return xxx;
 			return newthing;
@@ -408,12 +377,7 @@ public class InstanceEditor {
 			// names.add(a.name);
 		}
 
-		Comparator<String> strcmp = new Comparator<String>() {
-			@Override
-			public int compare(String f1, String f2) {
-				return f1.compareTo(f2);
-			}
-		};
+		Comparator<String> strcmp = (String f1, String f2) -> f1.compareTo(f2);
 		Collections.sort(names, strcmp);
 		joined = makejoined(jnd, nd, names);
 
@@ -423,12 +387,7 @@ public class InstanceEditor {
 	private Map<String, JTable> makejoined(
 			Map<String, Map<String, Set<Pair<Object, Object>>>> joined,
 			Map<String, Set<Pair<Object, Object>>> nd, List<String> names) {
-		Comparator<String> strcmp = new Comparator<String>() {
-			@Override
-			public int compare(String f1, String f2) {
-				return f1.compareTo(f2);
-			}
-		};
+		Comparator<String> strcmp = (String f1, String f2) -> f1.compareTo(f2);
 		Map<String, JTable> ret = new HashMap<>();
 		for (String name : names) {
 			Map<String, Set<Pair<Object, Object>>> m = joined.get(name);

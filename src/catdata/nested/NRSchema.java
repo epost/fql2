@@ -3,11 +3,11 @@ package catdata.nested;
 import java.util.Map;
 import java.util.Optional;
 
-
+@SuppressWarnings("unused")
 public abstract class NRSchema {
 	
 	public static class NRel {
-		Map<String, Optional<NRel>> t;
+		private final Map<String, Optional<NRel>> t;
 		
 		public NRel(Map<String, Optional<NRel>> t) {
 			this.t = t;
@@ -67,7 +67,7 @@ public abstract class NRSchema {
 	
 	public static class Rcd extends NRSchema {
 		
-		Map<String, NRSchema> row;
+		private final Map<String, NRSchema> row;
 		
 		public Rcd(Map<String, NRSchema> row) {
 			this.row = row;
@@ -80,7 +80,7 @@ public abstract class NRSchema {
 	}
 	
 	public static class Pow extends NRSchema {
-		NRSchema t;
+		private final NRSchema t;
 		
 		public Pow(NRSchema t) {
 			this.t = t;

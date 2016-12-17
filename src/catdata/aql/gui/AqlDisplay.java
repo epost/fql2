@@ -20,8 +20,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import catdata.LineException;
 import catdata.Pair;
@@ -117,18 +115,18 @@ public final class AqlDisplay implements Disp {
 		display(pre + title + " | (exec: " + c1 + "s)(gui: " + c2 + "s)", p.order);
 	}
 	
-	JFrame frame = null;
-	String name;
-	List<Pair<String, JComponent>> frames = new LinkedList<>();
+	private JFrame frame = null;
+	//private String name;
+	private final List<Pair<String, JComponent>> frames = new LinkedList<>();
 
-	final CardLayout cl = new CardLayout();
-	final JPanel x = new JPanel(cl);
-	final JList<String> yyy = new JList<>();
-	final Map<String, String> indices = new HashMap<>();
+	private final CardLayout cl = new CardLayout();
+	private final JPanel x = new JPanel(cl);
+	private final JList<String> yyy = new JList<>();
+	private final Map<String, String> indices = new HashMap<>();
 
 	public void display(String s, List<String> order) {
 		frame = new JFrame();
-		this.name = s;
+		//this.name = s;
 
 		final Vector<String> ooo = new Vector<>();
 		int index = 0;
@@ -150,17 +148,14 @@ public final class AqlDisplay implements Disp {
 	//	yyy.setPreferredSize(new Dimension(200, 600));
 		yyy.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		yyy.addListSelectionListener(new ListSelectionListener() {
-
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
+		yyy.addListSelectionListener(e -> {
 				int i = yyy.getSelectedIndex();
 				if (i == -1) {
 					cl.show(x, "blank");
 				} else {
-					cl.show(x, ooo.get(i).toString());
+					cl.show(x, ooo.get(i));
 				}
-			}
+			
 
 		});
 

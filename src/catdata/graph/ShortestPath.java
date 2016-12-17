@@ -31,7 +31,7 @@ public class ShortestPath<N, E> {
 		public final N to;
 		public final double weight;
 
-		public DirectedEdge(N v, N w, E e, double weight) {
+		private DirectedEdge(N v, N w, E e, double weight) {
 			if (Double.isNaN(weight)) {
 				throw new IllegalArgumentException("Weight is NaN");
 			}
@@ -90,12 +90,12 @@ public class ShortestPath<N, E> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Map<N, Double> distTo; // distTo[v] = distance of shortest s->v path
-	private Map<N, DirectedEdge<N, E>> edgeTo; // edgeTo[v] = last edge on
+	private final Map<N, Double> distTo; // distTo[v] = distance of shortest s->v path
+	private final Map<N, DirectedEdge<N, E>> edgeTo; // edgeTo[v] = last edge on
 												// shortest s->v path
-	private Wrapper<N,Double> pq; // priority queue of vertices
+	private final Wrapper<N,Double> pq; // priority queue of vertices
 
-	private Collection<DirectedEdge<N, E>> edges;
+	private final Collection<DirectedEdge<N, E>> edges;
 
 	public ShortestPath(DMG<N, E> G, N s) {
 		edges = new LinkedList<>();
@@ -169,7 +169,7 @@ public class ShortestPath<N, E> {
 		}
 		for (N v : G.nodes) {
 			if (v.equals(s)) {
-				continue;
+				
 			} else if (edgeTo.get(v) == null && distTo.get(v) != Double.POSITIVE_INFINITY) {
 				throw new RuntimeException("distTo[] and edgeTo[] inconsistent");
 			}
@@ -207,7 +207,7 @@ public class ShortestPath<N, E> {
 		Map<N, Integer> iso1 = new HashMap<>();
 		Map<Integer, N> iso2 = new HashMap<>();
 		
-		public Wrapper(Collection<N> nodes) {
+		private Wrapper(Collection<N> nodes) {
 			int i = 0;
 			for (N n : nodes) {
 				iso1.put(n, i);
@@ -263,7 +263,7 @@ public class ShortestPath<N, E> {
 	    private Key[] keys;      // keys[i] = priority of i
 
 	    @SuppressWarnings("unchecked")
-		public IndexMinPQ(int maxN) {
+            private IndexMinPQ(int maxN) {
 	        if (maxN < 0) throw new IllegalArgumentException();
 	        this.maxN = maxN;
 	        n = 0;
@@ -404,11 +404,11 @@ public class ShortestPath<N, E> {
 
 	    private class HeapIterator implements Iterator<Integer> {
 	        // create a new pq
-	        private IndexMinPQ<Key> copy;
+	        private final IndexMinPQ<Key> copy;
 
 	        // add all elements to copy of heap
 	        // takes linear time since already in heap order so no keys move
-	        public HeapIterator() {
+	        private HeapIterator() {
 	            copy = new IndexMinPQ<>(pq.length - 1);
 	            for (int i = 1; i <= n; i++)
 	                copy.insert(pq[i], keys[pq[i]]);

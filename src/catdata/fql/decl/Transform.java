@@ -12,7 +12,6 @@ import java.awt.Paint;
 import java.awt.Stroke;
 import java.lang.reflect.Constructor;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -36,8 +35,8 @@ import org.apache.commons.collections15.Transformer;
 import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
-import catdata.fql.FqlOptions;
 import catdata.fql.FQLException;
+import catdata.fql.FqlOptions;
 import catdata.fql.FqlUtil;
 import catdata.fql.cat.Arr;
 import catdata.fql.cat.FinCat;
@@ -232,12 +231,7 @@ public class Transform {
 	public JPanel view(String src_n, String dst_n) {
 		List<JPanel> panels = new LinkedList<>();
 		LinkedList<String> sorted = new LinkedList<>(data.keySet());
-		Collections.sort(sorted, new Comparator<String>() {
-			@Override
-			public int compare(String f1, String f2) {
-				return f1.toString().compareTo(f2.toString());
-			}
-		});
+		Collections.sort(sorted, (String f1, String f2) -> f1.compareTo(f2));
 		for (String k : sorted) {
 			Set<Pair<Object, Object>> xxx = data.get(k);
 			List<Pair<Object, Object>> table = new LinkedList<>(xxx);
@@ -474,16 +468,13 @@ public class Transform {
 			VisualizationViewer<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> vv = new VisualizationViewer<>(
 					layout);
 	
-			Transformer<Quad<Node, Object, String, Boolean>, Paint> vertexPaint = new Transformer<Quad<Node, Object, String, Boolean>, Paint>() {
-				@Override
-				public Paint transform(Quad<Node, Object, String, Boolean> i) {
-					if (i.fourth) {
-						return scolor;
-					} else {
-						return tcolor;
-					}
-				}
-			};
+			Transformer<Quad<Node, Object, String, Boolean>, Paint> vertexPaint = (Quad<Node, Object, String, Boolean> i) -> {
+                            if (i.fourth) {
+                                return scolor;
+                            } else {
+                                return tcolor;
+                            }
+                        };
 
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
@@ -502,15 +493,12 @@ public class Transform {
 			// };
 			vv.getRenderContext().setVertexLabelRenderer(new MyVertexT(cards));
 			final Stroke bs = new BasicStroke();
-			Transformer<Pair<Path, Integer>, Stroke> edgeStrokeTransformer = new Transformer<Pair<Path, Integer>, Stroke>() {
-				@Override
-				public Stroke transform(Pair<Path, Integer> s) {
-					if (s.first == null) {
-						return edgeStroke;
-					}
-					return bs;
-				}
-			};
+			Transformer<Pair<Path, Integer>, Stroke> edgeStrokeTransformer = (Pair<Path, Integer> s) -> {
+                            if (s.first == null) {
+                                return edgeStroke;
+                            }
+                            return bs;
+                        };
 			 vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 			vv.getRenderContext().setEdgeStrokeTransformer(
 					edgeStrokeTransformer);

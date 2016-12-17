@@ -9,8 +9,8 @@ import catdata.aql.Transform;
 public class IdentityTransform<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y> {
 
 	private final Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
-	private Ctx<Gen, Term<Void,En,Void,Fk,Void,Gen,Void>> gens = new Ctx<>();
-	private Ctx<Sk, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> sks = new Ctx<>();
+	private final Ctx<Gen, Term<Void,En,Void,Fk,Void,Gen,Void>> gens = new Ctx<>();
+	private final Ctx<Sk, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> sks = new Ctx<>();
 
 	public IdentityTransform(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i) {
 		Util.assertNotNull(i);

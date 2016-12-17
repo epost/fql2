@@ -92,38 +92,33 @@ public class XOptions extends Options {
 			x_2.add(new JLabel());
 		}
 			
-		Function<Unit, Unit> fn = new Function<Unit, Unit>() {
-
-			@Override
-			public Unit apply(Unit t) {
-				int mpl = MAX_PATH_LENGTH;
-				try {
-					try {
-						mpl = Integer.parseInt(x_path_length_box.getText());
-					} catch (NumberFormatException nfe) {
-					}
-					if (mpl < 1) {
-						mpl = MAX_PATH_LENGTH;
-					}
-				} catch (NumberFormatException nfe) {
-				}
-				MAX_PATH_LENGTH = mpl;
-				x_adom = x_adom_box.isSelected();
-				x_cat = x_cat_box.isSelected();
-				x_graph = x_graph_box.isSelected();
-				x_tables = x_tabular_box.isSelected();
-				x_adom = x_adom_box.isSelected();
-				fast_amalgams = fast_amalgams_box.isSelected();
-				validate_amalgams = validate_amalgams_box.isSelected();
-				reorder_joins = reorder_joins_box.isSelected();
-				x_typing = x_typing_box.isSelected();
-				x_elements = x_elem_box.isSelected();
-				x_json = x_json_box.isSelected();		
-			
-				return new Unit();
-			}
-			
-		};
+		Function<Unit, Unit> fn = (Unit t) -> {
+                    int mpl = MAX_PATH_LENGTH;
+                    try {
+                        try {
+                            mpl = Integer.parseInt(x_path_length_box.getText());
+                        } catch (NumberFormatException nfe) {
+                        }
+                        if (mpl < 1) {
+                            mpl = MAX_PATH_LENGTH;
+                        }
+                    } catch (NumberFormatException nfe) {
+                    }
+                    MAX_PATH_LENGTH = mpl;
+                    x_adom = x_adom_box.isSelected();
+                    x_cat = x_cat_box.isSelected();
+                    x_graph = x_graph_box.isSelected();
+                    x_tables = x_tabular_box.isSelected();
+                    x_adom = x_adom_box.isSelected();
+                    fast_amalgams = fast_amalgams_box.isSelected();
+                    validate_amalgams = validate_amalgams_box.isSelected();
+                    reorder_joins = reorder_joins_box.isSelected();
+                    x_typing = x_typing_box.isSelected();
+                    x_elements = x_elem_box.isSelected();
+                    x_json = x_json_box.isSelected();
+                    
+                    return new Unit();
+                };
 
 		return new Pair<>(generalsplit, fn);
 	}

@@ -48,7 +48,7 @@ public enum Language {
 		case FPQL: return "P";
 		case OPL: return "O";
 	//	case MPL: return "M";
-		case AQL: return "A";
+		case AQL: return " ";
 		default:
 			break;
 		}

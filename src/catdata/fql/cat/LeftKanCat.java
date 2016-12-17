@@ -105,17 +105,14 @@ public class LeftKanCat {
 			}
 		}
 
-		Fn<Path, Arr<Node, Path>> r2 = new Fn<Path, Arr<Node, Path>>() {
-			@Override
-			public Arr<Node, Path> of(Path x) {
-				if (fn2.get(fn.of(x)) == null) {
-					throw new RuntimeException("Given path " + x
-							+ ", transforms to " + fn.of(x)
-							+ ", which is not in " + fn2);
-				}
-				return new Arr<>(fn2.get(fn.of(x)), x.source, x.target);
-			}
-		};
+		Fn<Path, Arr<Node, Path>> r2 = (Path x) -> {
+                    if (fn2.get(fn.of(x)) == null) {
+                        throw new RuntimeException("Given path " + x
+                                + ", transforms to " + fn.of(x)
+                                + ", which is not in " + fn2);
+                    }
+                    return new Arr<>(fn2.get(fn.of(x)), x.source, x.target);
+                };
 
 		Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, Arr<Node, Path>> composition = new HashMap<>();
 		for (Arr<Node, Path> x : arrows) {
@@ -154,13 +151,10 @@ public class LeftKanCat {
 	} 
 	
 	private static Fn<Path, Integer> makeFn(final LeftKan lk) {
-		return new Fn<Path, Integer>() {
-			@Override
-			public Integer of(Path p) {
-				Set<Pair<Object, Integer>> set = Instance.compose(lk.ua.get(p.source), lk.eval(p));
-				return getOne(set).second;
-			}
-		};
+		return (Path p) -> {
+                    Set<Pair<Object, Integer>> set = Instance.compose(lk.ua.get(p.source), lk.eval(p));
+                    return getOne(set).second;
+                };
 	}
 
 }

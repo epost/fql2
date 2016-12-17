@@ -24,6 +24,9 @@ public abstract class Matcher<N1,E1,N2,E2,P>  {
 		this.dst = dst;
 		this.params = createParams(options);
 		bestMatch = bestMatch();
+                if (bestMatch == null) {
+                    throw new RuntimeException("Anomaly: please report");
+                }
 	}
 		
 	/**
@@ -32,7 +35,7 @@ public abstract class Matcher<N1,E1,N2,E2,P>  {
 	protected abstract P createParams(Map<String, String> options);
 	
 	/**
-	 * @return the best match.  must not be null - throw execption if no best match exists
+	 * @return the best match.  must not be null - throw exception if no best match exists
 	 */
 	protected abstract Match<N1,E1,N2,E2> bestMatch();
 	

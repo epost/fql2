@@ -15,11 +15,11 @@ public class SqlType {
 			Field[] fields = c.getFields();
 			for (Field field : fields) {
 				Object o = field.get(null);
-				if (t.toString().equals(o.toString())) {
+				if (t.equals(o.toString())) {
 					return new SqlType(field.getName());
 				}
 			}
-		} catch (Exception ex) {
+		} catch (IllegalAccessException | IllegalArgumentException | SecurityException ex) {
 			ex.printStackTrace();
 		}
 		throw new RuntimeException("Couldn't find type " + t);

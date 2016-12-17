@@ -1,6 +1,5 @@
 package catdata.fpql;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -123,12 +122,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 				count(k.first, count);
 			}
 			List l = new LinkedList<>(m.keySet());
-			l.sort(new Comparator() {
-				@Override
-				public int compare(Object o1, Object o2) {
-					return ((Integer)count.get(o2)) - ((Integer)count.get(o1));
-				}
-			});
+			l.sort((Object o1, Object o2) -> ((Integer)count.get(o2)) - ((Integer)count.get(o1)));
 			Map ret = new LinkedHashMap<>();
 			for (Object s : l) {
 				ret.put(s, m.get(s));

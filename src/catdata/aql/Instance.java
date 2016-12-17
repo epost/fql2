@@ -113,7 +113,7 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
 
 	@Override
 	public final String toString() {
-		String toString = "";
+		String toString;
 		List<String> eqs0 = eqs().stream().map(x -> x.first + " = " + x.second).collect(Collectors.toList());
 		toString = "generating entities";
 		toString += "\n\t" + Util.sep(gens().map, " : ", "\n\t");

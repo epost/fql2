@@ -12,7 +12,7 @@ public class AqlMatchExample extends AqlExample {
 		return s;
 	}
 
-	String s = "//test graphs for matching"
+	private final String s = "//test graphs for matching"
 			+ "\n"
 			+ "\n////////////////////////////////////////////////////////////////"
 			+ "\n"

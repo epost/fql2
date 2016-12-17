@@ -42,7 +42,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 
 	public final Map<String, String> options;
 	
-	public final String file;
+	public final String fileStr;
 	
 	@Override
 	public long timeout() {
@@ -54,7 +54,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 		this.schema = schema;
 		this.imports = imports;
 		this.options = Util.toMapSafely(options);
-		this.file = file;
+		this.fileStr = file;
 	}
 
 	@Override
@@ -139,7 +139,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 			col.gens.putAll(v.gens().map);
 			col.sks.putAll(v.sks().map);
 		}
-		String pre = file;
+		String pre = fileStr;
 		if (!pre.endsWith("/")) {
 			pre = pre + "/";
 		}
@@ -164,6 +164,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 				File file = new File(pre + enToString(en) + ".csv");
 				CSVParser parser = CSVParser.parse(file, charset, format);
 				List<CSVRecord> rows = parser.getRecords();
+				parser.close();
 				for (CSVRecord row : rows) {
 					col.gens.put(stringToGen(row.get(idCol)), en);
 				}
@@ -176,6 +177,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 					for (CSVRecord row : parser) {
 						col.sks.put(stringToSk0(row.get(idCol)), ty);
 					}
+					parser.close();
 				}
 			}
 			
@@ -203,7 +205,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 			throw new RuntimeException(exn.getMessage());
 		} catch (Throwable exn) {
 			exn.printStackTrace();
-			throw new RuntimeException("Parser error in underlying CSV data [text positions are relative to the record]: " + exn.getMessage());
+			throw new RuntimeException("Error: [text positions are relative to the record]: " + exn.getMessage() + "\n\n" + helpStr);
 		}
 		
 		//TODO aql validate for collage
@@ -215,6 +217,14 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial); 
 		//TODO aql switch to saturated prover for csv
 	}
+	
+
+	private static final String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example,"
+			+ "\n"
+			+ "\n	0:Employee"
+			+ "\n	0:Department"
+			+ "\n"
+			+ "\nPossible solution: Distinguish the IDs prior to import";
 
 	public static CSVFormat getFormat(AqlOptions op) {
 		String format0 = (String) op.getOrDefault(AqlOption.csv_format);
@@ -240,7 +250,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 
 	@Override
 	public String toString() {
-		return "import_csv " + file;
+		return "import_csv " + fileStr;
 	}
 
 
@@ -256,7 +266,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((file == null) ? 0 : file.hashCode());
+		result = prime * result + ((fileStr == null) ? 0 : fileStr.hashCode());
 		result = prime * result + ((imports == null) ? 0 : imports.hashCode());
 		result = prime * result + ((options == null) ? 0 : options.hashCode());
 		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
@@ -279,10 +289,10 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 			return false;
 		}
 		
-		if (file == null) {
-			if (other.file != null)
+		if (fileStr == null) {
+			if (other.fileStr != null)
 				return false;
-		} else if (!file.equals(other.file))
+		} else if (!fileStr.equals(other.fileStr))
 			return false;
 		if (imports == null) {
 			if (other.imports != null)

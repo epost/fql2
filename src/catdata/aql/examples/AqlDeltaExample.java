@@ -12,7 +12,7 @@ public class AqlDeltaExample extends AqlExample {
 		return s;
 	}
 	
-	String s = "typeside Ty = literal {"
+	private final String s = "typeside Ty = literal {"
 			+ "\n	types"
 			+ "\n		int"
 			+ "\n	constants"

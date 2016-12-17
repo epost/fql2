@@ -6,10 +6,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -550,9 +548,7 @@ public class XCtx<C> implements XObject {
 		vv.getRenderContext().setEdgeLabelTransformer(ttt);
 		
 		
-		vv.getPickedVertexState().addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
+		vv.getPickedVertexState().addItemListener(e -> {
 				if (e.getStateChange() != ItemEvent.SELECTED) {
 					return;
 				}
@@ -562,7 +558,7 @@ public class XCtx<C> implements XObject {
 					return;
 				}
 //				cl.show(clx, xgrid.get(str));
-			}
+			
 		});
 
 		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
@@ -952,12 +948,8 @@ public class XCtx<C> implements XObject {
 			}
 
 			List<C> keys = new LinkedList<>(m.keySet());
-			keys.sort(new Comparator() {
-				@Override
-				public int compare(Object o1, Object o2) {
-					return ((Comparable) o1).compareTo(o2);
-				}
-			});
+			keys.sort((Object o1, Object o2) ->
+					 ((Comparable) o1).compareTo(o2));
 
 			for (C c : keys) {
 				if (c.equals("_1")) {
@@ -2243,27 +2235,24 @@ public class XCtx<C> implements XObject {
 			return colorMap.get(x.second);
 		};
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-		vv.getPickedVertexState().addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() != ItemEvent.SELECTED) {
-					return;
-				}
-				vv.getPickedEdgeState().clear();
-				@SuppressWarnings("unchecked")
-				Triple<C, C, List<C>> arr = (Triple<C, C, List<C>>)e.getItem();
-				
-		//		cl.show(clx, xgrid.get(str));
-				JPanel foo = attPanels.get(arr);
-				if (foo == null) {
-					foo = attsFor(arr);
-					attPanels.put(arr, foo);
-				}
-				botPanel.removeAll();
-				botPanel.add(foo);
-				botPanel.revalidate();
-			}
-		});
+		vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
+                    if (e.getStateChange() != ItemEvent.SELECTED) {
+                        return;
+                    }
+                    vv.getPickedEdgeState().clear();
+                    @SuppressWarnings("unchecked")
+                            Triple<C, C, List<C>> arr = (Triple<C, C, List<C>>)e.getItem();
+                    
+                    //		cl.show(clx, xgrid.get(str));
+                    JPanel foo = attPanels.get(arr);
+                    if (foo == null) {
+                        foo = attsFor(arr);
+                        attPanels.put(arr, foo);
+                    }
+                    botPanel.removeAll();
+                    botPanel.add(foo);
+                    botPanel.revalidate();
+                });
 		
 		Transformer<Triple<C,C,List<C>>, String> ttt = arg0 -> {
 			String ret = abbrPrint(arg0.third); //.toString();

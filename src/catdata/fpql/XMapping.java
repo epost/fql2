@@ -1475,15 +1475,12 @@ public class XMapping<C, D> implements XObject {
 				BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
 		final Stroke bs = new BasicStroke();
 
-		Transformer<Object, Stroke> edgeStrokeTransformer = new Transformer<Object, Stroke>() {
-			@Override
-			public Stroke transform(Object s) {
-				if (!(s instanceof Chc)) {
-					return edgeStroke;
-				}
-				return bs;
-			}
-		};
+		Transformer<Object, Stroke> edgeStrokeTransformer = (Object s) -> {
+                    if (!(s instanceof Chc)) {
+                        return edgeStroke;
+                    }
+                    return bs;
+                };
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 

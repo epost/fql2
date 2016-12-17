@@ -17,7 +17,7 @@ import catdata.Util;
 //TODO: aql can store these not as sets, but as maps from primary key
 public class SqlInstance {
 
-	private Map<SqlTable, Set<Map<SqlColumn, Optional<Object>>>> db = new HashMap<>();
+	private final Map<SqlTable, Set<Map<SqlColumn, Optional<Object>>>> db = new HashMap<>();
 	public SqlSchema schema;
 	public Connection conn;
 	

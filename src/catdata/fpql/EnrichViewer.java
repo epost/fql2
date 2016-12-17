@@ -3,8 +3,6 @@ package catdata.fpql;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -192,20 +190,16 @@ public class EnrichViewer {
 
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
+		box.addActionListener(e -> {
 				topArea.setText(((Example) box.getSelectedItem()).getText());
 				name.setText(((Example2) box.getSelectedItem()).att());
 				kid.setText(((Example2) box.getSelectedItem()).left());
 				instField.setText(((Example2) box.getSelectedItem()).toenrich_inst());
 				isaField.setText(((Example2) box.getSelectedItem()).isa_inst());
-			}
+			
 		});
 
-		transButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
+		transButton.addActionListener(e -> {
 				try {
 					String p = translate(topArea.getText());
 					output.setText(p);
@@ -213,13 +207,10 @@ public class EnrichViewer {
 					ex.printStackTrace();
 					output.setText(ex.getLocalizedMessage());
 				}
-			}
+			
 		});
 
-		helpButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
+		helpButton.addActionListener(e -> {
 				JTextArea jta = new JTextArea(help);
 				jta.setWrapStyleWord(true);
 				// jta.setEditable(false);
@@ -235,7 +226,7 @@ public class EnrichViewer {
 				dialog.setVisible(true);
 				dialog.setResizable(true);
 
-			}
+			
 		});
 
 		JPanel p = new JPanel(new BorderLayout());

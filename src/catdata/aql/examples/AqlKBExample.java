@@ -12,7 +12,7 @@ public class AqlKBExample extends AqlExample {
 		return s;
 	}
 	
-	String s = "//one = two should not be provable "
+	private final String s = "//one = two should not be provable "
 			+ "\ntypeside EmptySortsCheck = literal { "
 			+ "\n	types"
 			+ "\n 		void "

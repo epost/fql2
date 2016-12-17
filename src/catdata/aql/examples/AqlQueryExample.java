@@ -12,7 +12,7 @@ public class AqlQueryExample extends AqlExample {
 		return s;
 	}
 	
-	String s = "typeside Ty = literal { "
+	private final String s = "typeside Ty = literal { "
 			+ "\n	java_types"
 			+ "\n		String = \"java.lang.String\""
 			+ "\n		Bool = \"java.lang.Boolean\""

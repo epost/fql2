@@ -58,7 +58,7 @@ public class It implements Iterator<ID>, Serializable {
 
 		@Override
 		public String toString() {
-			return str.toString();
+			return str;
 		}
 
 		private It getOuterType() {

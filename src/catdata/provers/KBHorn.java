@@ -8,12 +8,12 @@ import catdata.provers.KBExp.KBApp;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class KBHorn {
 
-	public static String _false = "_false";
-	public static String _true = "_true";
-	public static String _eq = "_eq";
-	public static String _not = "_not";
-	public static String _or = "_or";
-	public static String[] reserved = new String[] {_false, _true, _eq, _not, _or};
+	public final static String _false = "_false";
+	public final static String _true = "_true";
+	public final static String _eq = "_eq";
+	public final static String _not = "_not";
+	public final static String _or = "_or";
+	public final static String[] reserved = new String[] {_false, _true, _eq, _not, _or};
 	
 	private static KBExp falseAtom, trueAtom; 
 	public static <C,V> KBExp<C,V> fals() {
@@ -66,9 +66,6 @@ public class KBHorn {
 		if (app.f.equals(_not)) {
 			return true;
 		}
-		if (app.f.equals(_eq)) {
-			return true;
-		}
-		return false;
+		return (app.f.equals(_eq));
 	}
 }

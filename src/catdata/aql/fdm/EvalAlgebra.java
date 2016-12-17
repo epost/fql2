@@ -102,7 +102,7 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 	//private final Algebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> alg;
 	public final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y>  I;
 	
-	Ctx<En2, Collection<Row<En2,X>>> ens = new Ctx<>();
+	private final Ctx<En2, Collection<Row<En2,X>>> ens = new Ctx<>();
 	
 	@Override
 	public Row<En2,X> fk(Fk2 fk, Row<En2,X> row) {

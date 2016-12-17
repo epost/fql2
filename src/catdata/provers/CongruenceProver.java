@@ -75,7 +75,7 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 		}
 	}
 
-	private Map<KBExp<C, V>, Set<KBExp<C, V>>> pred;
+	private final Map<KBExp<C, V>, Set<KBExp<C, V>>> pred;
 
 	public CongruenceProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
 		super(sorts, sig, eqs);

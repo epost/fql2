@@ -50,17 +50,17 @@ public class SqlLoader extends JPanel {
 	public SqlInstance instance;
 	public Connection conn;
 	
-	private static String help = "";
+	private final static String help = "";
 
 	public static Example[] examples = { new EmpExample(), new CompoundExample(), new EmpAutoExample() };
 
-	private String name;
+	private final String name;
 	
-	private CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), "SQL Input", "");
-	private CodeTextPanel output; // = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Response", "");
+	private final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), "SQL Input", "");
+	private  final CodeTextPanel output; // = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Response", "");
 	
-	private JCheckBox loadInstBox = new JCheckBox("Import Data?", true);
-	private JCheckBox showBox = new JCheckBox("Visualize?", true);
+	private final JCheckBox loadInstBox = new JCheckBox("Import Data?", true);
+	private final JCheckBox showBox = new JCheckBox("Visualize?", true);
 	
 	private void handleError(String msg) {
 		output.setText("Error in " + name + ": " + msg);
@@ -101,7 +101,7 @@ public class SqlLoader extends JPanel {
 			}
 			
 			populate();
-		} catch (Exception ex) {
+		} catch (ClassNotFoundException | SQLException ex) {
 			ex.printStackTrace();
 			handleError(ex.getLocalizedMessage());
 		}
@@ -128,7 +128,7 @@ public class SqlLoader extends JPanel {
 			Class.forName(f1.getText().trim());
 			conn = DriverManager.getConnection(f2.getText().trim());
 			populate();
-		} catch (Exception ex) {
+		} catch (ClassNotFoundException | RuntimeException | SQLException ex) {
 			ex.printStackTrace();
 			handleError(ex.getLocalizedMessage());
 		}	
@@ -190,7 +190,7 @@ public class SqlLoader extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	static class EmpExample extends Example {
+	private static class EmpExample extends Example {
 
 		@Override
 		public String getName() {
@@ -235,7 +235,7 @@ public class SqlLoader extends JPanel {
 
 	}
 	
-	static class EmpAutoExample extends Example {
+	private static class EmpAutoExample extends Example {
 
 		@Override
 		public String getName() {
@@ -281,7 +281,7 @@ public class SqlLoader extends JPanel {
 
 	}
 	
-	static class CompoundExample extends Example {
+	private static class CompoundExample extends Example {
 		@Override
 		public String getName() {
 			return "Compound";

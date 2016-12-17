@@ -12,7 +12,7 @@ public class AqlExampleDev1 extends AqlExample {
 		return s;
 	}
 	
-	String s = "typeside t = empty"
+	private final String s = "typeside t = empty"
 			+ "\n"
 			+ "\nschema s = empty t"
 			+ "\nmapping sid = id s"

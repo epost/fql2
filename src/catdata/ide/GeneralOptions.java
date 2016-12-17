@@ -105,6 +105,7 @@ public class GeneralOptions extends Options {
 		general1.add(slabel);
 		general2.add(spellbox);
 		
+		
 		for (int j = 0; j < Options.biggestSize - size(); j++) {
 			general1.add(new JLabel());
 			general2.add(new JLabel());
@@ -153,6 +154,8 @@ public class GeneralOptions extends Options {
 
 		return new Pair<>(generalsplit, fn);
 	}
+
+	
 
 	@Override
 	public int size() {

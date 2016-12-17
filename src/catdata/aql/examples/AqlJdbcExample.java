@@ -12,7 +12,7 @@ public class AqlJdbcExample extends AqlExample {
 		return s;
 	}
 
-	String s = 
+	private final String s = 
 			"//create some example data in a local temporary sql database"
 					+ "\npragma load = exec_jdbc \"org.h2.Driver\" \"jdbc:h2:mem:db1\" { "
 					+ "\n\"DROP TABLE IF EXISTS Employee;"

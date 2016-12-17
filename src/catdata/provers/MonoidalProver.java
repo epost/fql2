@@ -16,8 +16,8 @@ import catdata.Util;
 
 public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 
-	private SemiThue<Chc<Chc<Unit,T>,C>> kb;
-	private Set<Pair<List<Chc<Chc<Unit,T>,C>>, List<Chc<Chc<Unit,T>,C>>>> rules = new HashSet<>();
+	private final SemiThue<Chc<Chc<Unit,T>,C>> kb;
+	private final Set<Pair<List<Chc<Chc<Unit,T>,C>>, List<Chc<Chc<Unit,T>,C>>>> rules = new HashSet<>();
 	
 	public MonoidalProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
 		super(sorts, sig, eqs);
@@ -32,7 +32,7 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 			if (sig.get(c).first.size() > 1) {
 				throw new RuntimeException(c + " is not unary or zero-ary");
 			}
-			Chc<Unit,T> t = sig.get(c).first.size() == 0 ? Chc.inLeft(new Unit()) : Chc.inRight(sig.get(c).first.get(0));
+			Chc<Unit,T> t = sig.get(c).first.isEmpty() ? Chc.inLeft(new Unit()) : Chc.inRight(sig.get(c).first.get(0));
 			Chc<Unit,T> t0= Chc.inRight(sig.get(c).second);
 			List<Chc<Chc<Unit,T>,C>> lhs = Util.list(Chc.inRight(c), Chc.inLeft(t0));
 			List<Chc<Chc<Unit,T>,C>> rhs = Util.singList(Chc.inLeft(t));

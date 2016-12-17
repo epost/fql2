@@ -11,7 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,7 +31,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -43,12 +41,12 @@ import catdata.Util;
 import catdata.fqlpp.cat.Category;
 import catdata.fqlpp.cat.FinCat;
 import catdata.fqlpp.cat.FinSet;
+import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.fqlpp.cat.FunCat;
 import catdata.fqlpp.cat.Functor;
 import catdata.fqlpp.cat.Inst;
 import catdata.fqlpp.cat.Signature;
 import catdata.fqlpp.cat.Transform;
-import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
 import catdata.ide.GUI;
@@ -673,19 +671,14 @@ public class FqlppDisplay implements Disp {
 		temp1.add(yyy1);
 		yyy.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		yyy.addListSelectionListener(new ListSelectionListener() {
-
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				int i = yyy.getSelectedIndex();
-				if (i == -1) {
-					cl.show(x, "blank");
-				} else {
-					cl.show(x, ooo.get(i).toString());
-				}
-			}
-
-		});
+		yyy.addListSelectionListener((ListSelectionEvent e) -> {
+                    int i = yyy.getSelectedIndex();
+                    if (i == -1) {
+                        cl.show(x, "blank");
+                    } else {
+                        cl.show(x, ooo.get(i).toString());
+                    }
+                });
 
 		JPanel north = new JPanel(new GridLayout(1, 1));
 			JSplitPane px = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -710,12 +703,9 @@ public class FqlppDisplay implements Disp {
 		frame.setContentPane(px);
 		frame.setSize(900, 600);
 
-		ActionListener escListener = new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				frame.dispose();
-			}
-		};
+		ActionListener escListener = (ActionEvent e) -> {
+                    frame.dispose();
+                };
 
 		frame.getRootPane().registerKeyboardAction(escListener,
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -994,65 +984,59 @@ public class FqlppDisplay implements Disp {
 		vv.getRenderContext().setVertexLabelTransformer(fff);
 		vv.getRenderContext().setEdgeLabelTransformer(fff);
 
-		vv.getPickedVertexState().addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() != ItemEvent.SELECTED) {
-					return;
-				}
-				vv.getPickedEdgeState().clear();
-				X str = ((X) e.getItem());
-				Object y = fn.applyO(str);
-				p.removeAll();
-				if (y instanceof Category) {
-					Category ttt = (Category) y;
-					JPanel sss = showCat(ttt, getColor(ttt));
-					p.add(sss);
-				} else if (y instanceof Set) {
-					Set ttt = (Set) y;
-					JPanel sss = showSet(ttt, getColor(ttt));
-					p.add(sss);
-				} else if (y instanceof Functor) {
-					Functor ttt = (Functor) y;
-					JPanel sss = showFtr(ttt, getColor(ttt), null);
-					p.add(sss);
-				} else {
-					String sss = Util.nice(y.toString());
-					p.add(new CodeTextPanel(BorderFactory.createEtchedBorder(), null, sss));
-				}
-				p.revalidate();
-			}
-		});
+		vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
+                    if (e.getStateChange() != ItemEvent.SELECTED) {
+                        return;
+                    }
+                    vv.getPickedEdgeState().clear();
+                    X str = ((X) e.getItem());
+                    Object y = fn.applyO(str);
+                    p.removeAll();
+                    if (y instanceof Category) {
+                        Category ttt = (Category) y;
+                        JPanel sss = showCat(ttt, getColor(ttt));
+                        p.add(sss);
+                    } else if (y instanceof Set) {
+                        Set ttt = (Set) y;
+                        JPanel sss = showSet(ttt, getColor(ttt));
+                        p.add(sss);
+                    } else if (y instanceof Functor) {
+                        Functor ttt = (Functor) y;
+                        JPanel sss = showFtr(ttt, getColor(ttt), null);
+                        p.add(sss);
+                    } else {
+                        String sss = Util.nice(y.toString());
+                        p.add(new CodeTextPanel(BorderFactory.createEtchedBorder(), null, sss));
+                    }
+                    p.revalidate();
+                });
 
-		vv.getPickedEdgeState().addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() != ItemEvent.SELECTED) {
-					return;
-				}
-				vv.getPickedVertexState().clear();
-				X str = ((X) e.getItem());
-				Object y = fn.applyA(str);
-				p.removeAll();
-				if (y instanceof Functor) {
-					Functor ttt = (Functor) y;
-					JPanel sss = showFtr(ttt, getColor(ttt.source), null);
-					p.add(sss);
-				} else if (y instanceof Fn) {
-					Fn ttt = (Fn) y;
-					JPanel sss = showFn(ttt, getColor(ttt.source), getColor(ttt.target));
-					p.add(sss);
-				} else if (y instanceof Transform) {
-					Transform ttt = (Transform) y;
-					JPanel sss = showTrans(ttt, getColor(ttt.source));
-					p.add(sss);
-				} else {
-					String sss = Util.nice(y.toString());
-					p.add(new CodeTextPanel(BorderFactory.createEtchedBorder(), null, sss));
-				}
-				p.revalidate();
-			}
-		});
+		vv.getPickedEdgeState().addItemListener((ItemEvent e) -> {
+                    if (e.getStateChange() != ItemEvent.SELECTED) {
+                        return;
+                    }
+                    vv.getPickedVertexState().clear();
+                    X str = ((X) e.getItem());
+                    Object y = fn.applyA(str);
+                    p.removeAll();
+                    if (y instanceof Functor) {
+                        Functor ttt = (Functor) y;
+                        JPanel sss = showFtr(ttt, getColor(ttt.source), null);
+                        p.add(sss);
+                    } else if (y instanceof Fn) {
+                        Fn ttt = (Fn) y;
+                        JPanel sss = showFn(ttt, getColor(ttt.source), getColor(ttt.target));
+                        p.add(sss);
+                    } else if (y instanceof Transform) {
+                        Transform ttt = (Transform) y;
+                        JPanel sss = showTrans(ttt, getColor(ttt.source));
+                        p.add(sss);
+                    } else {
+                        String sss = Util.nice(y.toString());
+                        p.add(new CodeTextPanel(BorderFactory.createEtchedBorder(), null, sss));
+                    }
+                    p.revalidate();
+                });
 
 		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 		JPanel ret = new JPanel(new GridLayout(1, 1));
@@ -1079,35 +1063,29 @@ public class FqlppDisplay implements Disp {
 		vv.getRenderContext().setEdgeLabelTransformer(ttt);
 
 		Map<Object, JPanel> map = (Map<Object, JPanel>) makeJoined(sig, fn).second; //javac again
-		vv.getPickedVertexState().addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() != ItemEvent.SELECTED) {
-					return;
-				}
-				vv.getPickedEdgeState().clear();
-				X str = ((X) e.getItem());
-				// Object y = fn.applyO(str);
-				p.removeAll();
-				p.add(map.get(str));
-				p.revalidate();
-			}
-		});
+		vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
+                    if (e.getStateChange() != ItemEvent.SELECTED) {
+                        return;
+                    }
+                    vv.getPickedEdgeState().clear();
+                    X str = ((X) e.getItem());
+                    // Object y = fn.applyO(str);
+                    p.removeAll();
+                    p.add(map.get(str));
+                    p.revalidate();
+                });
 
-		vv.getPickedEdgeState().addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() != ItemEvent.SELECTED) {
-					return;
-				}
-				vv.getPickedVertexState().clear();
-				X str = ((X) e.getItem());
-				// Object y = fn.applyA(str);
-				p.removeAll();
-				p.add(map.get(str));
-				p.revalidate();
-			}
-		});
+		vv.getPickedEdgeState().addItemListener((ItemEvent e) -> {
+                    if (e.getStateChange() != ItemEvent.SELECTED) {
+                        return;
+                    }
+                    vv.getPickedVertexState().clear();
+                    X str = ((X) e.getItem());
+                    // Object y = fn.applyA(str);
+                    p.removeAll();
+                    p.add(map.get(str));
+                    p.revalidate();
+                });
 
 		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 		JPanel ret = new JPanel(new GridLayout(1, 1));
@@ -1250,35 +1228,32 @@ public class FqlppDisplay implements Disp {
 		vv.getRenderContext().setVertexLabelTransformer(www);
 		vv.getRenderContext().setEdgeLabelTransformer(www);
 
-		vv.getPickedVertexState().addItemListener(new ItemListener() {
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() != ItemEvent.SELECTED) {
-					return;
-				}
-				vv.getPickedEdgeState().clear();
-				X str = ((X) e.getItem());
-				Object y = fn.apply(str);
-				p.removeAll();
-				if (y instanceof Functor) {
-					Functor ttt = (Functor) y;
-					JPanel sss = showFtr(ttt, getColor(ttt.source), null);
-					p.add(sss);
-				} else if (y instanceof Fn) {
-					Fn ttt = (Fn) y;
-					JPanel sss = showFn(ttt, getColor(ttt.source), getColor(ttt.target));
-					p.add(sss);
-				} else if (y instanceof Transform) {
-					Transform ttt = (Transform) y;
-					JPanel sss = showTrans(ttt, getColor(ttt.source));
-					p.add(sss);
-				} else {
-					String sss = Util.nice(y.toString());
-					p.add(new CodeTextPanel(BorderFactory.createEtchedBorder(), null, sss));
-				}
-				p.revalidate();
-			}
-		});
+		vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
+                    if (e.getStateChange() != ItemEvent.SELECTED) {
+                        return;
+                    }
+                    vv.getPickedEdgeState().clear();
+                    X str = ((X) e.getItem());
+                    Object y = fn.apply(str);
+                    p.removeAll();
+                    if (y instanceof Functor) {
+                        Functor ttt = (Functor) y;
+                        JPanel sss = showFtr(ttt, getColor(ttt.source), null);
+                        p.add(sss);
+                    } else if (y instanceof Fn) {
+                        Fn ttt = (Fn) y;
+                        JPanel sss = showFn(ttt, getColor(ttt.source), getColor(ttt.target));
+                        p.add(sss);
+                    } else if (y instanceof Transform) {
+                        Transform ttt = (Transform) y;
+                        JPanel sss = showTrans(ttt, getColor(ttt.source));
+                        p.add(sss);
+                    } else {
+                        String sss = Util.nice(y.toString());
+                        p.add(new CodeTextPanel(BorderFactory.createEtchedBorder(), null, sss));
+                    }
+                    p.revalidate();
+                });
 
 		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 		JPanel ret = new JPanel(new GridLayout(1, 1));

@@ -153,12 +153,7 @@ public class CategoryOfElements {
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Pair<Node, Object>, Pair<Path, Integer>> vv = new VisualizationViewer<>(
 				layout);
-		Transformer<Pair<Node, Object>, Paint> vertexPaint = new Transformer<Pair<Node, Object>, Paint>() {
-			@Override
-			public Paint transform(Pair<Node, Object> i) {
-				return clr;
-			}
-		};
+		Transformer<Pair<Node, Object>, Paint> vertexPaint = (Pair<Node, Object> i) -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);

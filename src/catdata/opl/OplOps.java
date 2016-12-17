@@ -989,8 +989,9 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 
 				for (String edge : s0.projE().symbols.keySet()) {
 					Pair<OplCtx<String, String>, OplTerm<String, String>> edge2 = m0.m.symbols.get(edge);
+					@SuppressWarnings("unused")
 					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(x -> 
-						 new OplTerm(x)
+						 new OplTerm<String,String>(x)
 					).collect(Collectors.toList());
 					OplTerm<String, String> lhs = fun2(equivs0, new OplTerm<>(s + "_" + edge, args));
 					OplCtx<String, String> ctx = new OplCtx<>(edge2.first.values2().stream().map(x -> 
@@ -1002,8 +1003,9 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				}
 				for (String edge : s0.projA().symbols.keySet()) {
 					Pair<OplCtx<String, String>, OplTerm<String, String>> edge2 = m0.m.symbols.get(edge);
+					@SuppressWarnings("unused")
 					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map(x -> 
-						 new OplTerm(x)
+						 new OplTerm<String,String>(x)
 					).collect(Collectors.toList());
 					OplTerm<String, String> lhs = fun2(equivs0, new OplTerm<>(s + "_" + edge, args));
 					OplCtx<String, String> ctx = new OplCtx<>(edge2.first.values2().stream().map(x -> {

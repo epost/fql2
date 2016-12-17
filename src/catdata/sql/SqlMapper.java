@@ -19,10 +19,10 @@ public class SqlMapper extends JPanel {
 		Util.show(new SqlMapper(), 700, 600, "SQL Mapping Guesser");
 	}
 
-	private CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Output", "");
+	private final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Output", "");
 
-	SqlLoader input1 = new SqlLoader(output, "SQL Source");
-	SqlLoader input2 = new SqlLoader(output, "SQL Target");
+	private final SqlLoader input1 = new SqlLoader(output, "SQL Source");
+	private final SqlLoader input2 = new SqlLoader(output, "SQL Target");
 	
 	private static <X> String print(X[][] c) {
 		String ret = "";

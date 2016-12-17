@@ -19,9 +19,9 @@ import catdata.aql.Pragma;
 
 public class ProcPragma extends Pragma {
 
-	private List<String> cmds = new LinkedList<>();
+	private final List<String> cmds;
 	
-	private List<String> responses = Collections.synchronizedList(new LinkedList<>());
+	private final List<String> responses = Collections.synchronizedList(new LinkedList<>());
 		
 	@SuppressWarnings("unused")
 	private final Map<String, String> options; 
@@ -40,7 +40,7 @@ public class ProcPragma extends Pragma {
 				executor.setStreamHandler(new Handler(cmd));
 				executor.execute(cmdLine);
 			}
-		} catch (Throwable e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -50,15 +50,15 @@ public class ProcPragma extends Pragma {
 		return Util.sep(responses, "\n\n--------------\n\n");
 	}
 
-	class Handler implements ExecuteStreamHandler {
+	private class Handler implements ExecuteStreamHandler {
 		
-		String cmd;
+		private final String cmd;
 		
 		Thread out, err;
 	
 		InputStream outs, errs;
 		
-		public Handler(String str) {
+		private Handler(String str) {
 			cmd = str;
 		}
 		

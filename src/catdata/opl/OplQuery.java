@@ -1,6 +1,5 @@
 package catdata.opl;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -418,12 +417,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 			inc(eq.first, counts);
 			inc(eq.second, counts);
 		}
-		ret.sort(new Comparator<V1>() {
-			@Override
-			public int compare(V1 o1, V1 o2) {
-				return counts.get(o2).compareTo(counts.get(o1));
-			}
-		});
+		ret.sort((V1 o1, V1 o2) -> counts.get(o2).compareTo(counts.get(o1)));
 		return ret;
 	}
 

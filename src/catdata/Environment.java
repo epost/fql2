@@ -7,15 +7,13 @@ import java.util.Set;
 //TODO aql replace with Ctx
 public class Environment<X> {
 	
-	private Map<String, X> objs;
+	private final Map<String, X> objs = new LinkedHashMap<>();
 		
 	public Set<String> keys() {
-		return objs.keySet();
+            return objs.keySet();
 	}
 	
-	public Environment() {
-		objs = new LinkedHashMap<>();
-	}
+	
 		
 	public void put(String k, X v) {
 		if (k == null || v == null) {

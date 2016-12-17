@@ -21,7 +21,7 @@ import javax.swing.event.ChangeListener;
  */
 public abstract class WizardModel<T> {
 
-	private List<ChangeListener> listeners = new LinkedList<>();
+	private final List<ChangeListener> listeners = new LinkedList<>();
 	
 	public abstract boolean isComplete();
 

@@ -31,7 +31,7 @@ public class Ref<X> {
 			this.x = x;
 			var = -1;
 		} else if (this.x.equals(x)) {
-			return;
+			
 		} else {
 			throw new RuntimeException("Reference already set to " + this.x + ", cannot set to " + x);
 		}

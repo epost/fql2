@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +26,6 @@ import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Tuple3;
 
 import catdata.Pair;
@@ -78,45 +76,34 @@ public class CfgToOpl {
 	
 		final JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				input.setText(((Example) box.getSelectedItem()).getText());
-			}
-		});
+		box.addActionListener((ActionEvent e) -> {
+                    input.setText(((Example) box.getSelectedItem()).getText());
+                });
 		
-		transButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					output.setText(translate(input.getText()).toString());
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					output.setText(ex.getLocalizedMessage());
-				}
-			}
-		});
+		transButton.addActionListener((ActionEvent e) -> {
+                    try {
+                        output.setText(translate(input.getText()).toString());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        output.setText(ex.getLocalizedMessage());
+                    }
+                });
 
-		helpButton.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JTextArea jta = new JTextArea(help);
-				jta.setWrapStyleWord(true);
-				//jta.setEditable(false);
-				jta.setLineWrap(true);
-				JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-				p.setPreferredSize(new Dimension(300,200));
-
-				JOptionPane pane = new JOptionPane(p);
-				 // Configure via set methods
-				 JDialog dialog = pane.createDialog(null, "Help on CFG to OPL");
-				 dialog.setModal(false);
-				 dialog.setVisible(true);
-				 dialog.setResizable(true);
-
-			}
-		});
+		helpButton.addActionListener((ActionEvent e) -> {
+                    JTextArea jta = new JTextArea(help);
+                    jta.setWrapStyleWord(true);
+                    //jta.setEditable(false);
+                    jta.setLineWrap(true);
+                    JScrollPane p = new JScrollPane(jta, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                    p.setPreferredSize(new Dimension(300,200));
+                    
+                    JOptionPane pane = new JOptionPane(p);
+                    // Configure via set methods
+                    JDialog dialog = pane.createDialog(null, "Help on CFG to OPL");
+                    dialog.setModal(false);
+                    dialog.setVisible(true);
+                    dialog.setResizable(true);
+                });
 
 		JPanel p = new JPanel(new BorderLayout());
 
@@ -162,29 +149,21 @@ public class CfgToOpl {
 	//}
 	
 	
-	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map(new Map<String, Integer>() {
-				@Override
-				public Integer map(String s) {
-					return Integer.valueOf(s);
-				}
-			});
+	private static String[] ops = new String[] { "|" , "::=", "," };
 
-	static String[] ops = new String[] { "|" , "::=", "," };
-
-	static String[] res = new String[] { };
+	private static String[] res = new String[] { };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
-	static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
+	private static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
-	static final Parser<?> TOKENIZER = Parsers.or(
+	private static final Parser<?> TOKENIZER = Parsers.or(
 			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
 			RESERVED.tokenizer(), (Parser<?>) Terminals.Identifier.TOKENIZER,
 			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
 
-	static Parser<?> term(String... names) {
+	private static Parser<?> term(String... names) {
 		return RESERVED.token(names);
 	}
 

@@ -12,7 +12,7 @@ public class AqlPullbackExample extends AqlExample {
 		return s;
 	}
 	
-	String s = "typeside Type = literal {"
+	private final String s = "typeside Type = literal {"
 			+ "\n	java_types	"
 			+ "\n		dom = \"java.lang.Object\""
 			+ "\n	java_constants"

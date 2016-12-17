@@ -12,7 +12,7 @@ public class AqlPeterExample extends AqlExample {
 		return s;
 	}
 	
-	String s = "//Example courtesy of Peter Gates"
+	private final String s = "//Example courtesy of Peter Gates"
 			+ "\n"
 			+ "\ntypeside Type = literal {"
 			+ "\n	java_types	"
