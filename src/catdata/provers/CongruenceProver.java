@@ -1,15 +1,12 @@
 package catdata.provers;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import catdata.RuntimeInterruptedException;
-import catdata.Pair;
 import catdata.Triple;
 import catdata.graph.UnionFind;
 import catdata.provers.KBExp.KBApp;
@@ -77,8 +74,8 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 
 	private final Map<KBExp<C, V>, Set<KBExp<C, V>>> pred;
 
-	public CongruenceProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
-		super(sorts, sig, eqs);
+	public CongruenceProver(KBTheory<T,C,V> th) {
+		super(th.tys, th.syms, th.eqs);
 		pred = new HashMap<>();
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : theory) {
 			if (!eq.first.isEmpty()) {
@@ -87,7 +84,7 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 			eq.second.allSubExps(pred);
 			eq.third.allSubExps(pred);
 		}
-		for (C c : sig.keySet()) {
+		for (C c : th.syms.keySet()) {
 			(new KBApp<C,V>(c, Collections.emptyList())).allSubExps(pred);
 		}
 		doCong();

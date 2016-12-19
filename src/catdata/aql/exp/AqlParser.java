@@ -180,15 +180,17 @@ public class AqlParser {
 		Parser<RawTerm> app2 = Parsers.tuple(token("("), ref.lazy(), ident,
 				ref.lazy(), token(")")).map(x -> new RawTerm(x.c, Util.list(x.b, x.d)));
 		
-		Parser<RawTerm> dot = Parsers.tuple(ident, (Parsers.tuple(token("."), ident).map(x -> x.b)).many1()).map(x -> {
-			RawTerm r = new RawTerm(x.a, new LinkedList<>());
+		Parser<RawTerm> sing = ident.map(x -> new RawTerm(x, new LinkedList<>()));				
+		
+		//use of ref.lazy for first argument leads to left recursion
+		Parser<RawTerm> dot = Parsers.tuple(ident.label("\n\n **** Possible problem: only identifiers allowed in . notation (lest left-recusion ensue)\n\n"), (Parsers.tuple(token("."), ident).map(x -> x.b)).many1()).map(x -> {
+			RawTerm r = new RawTerm(x.a, Collections.emptyList());
 			for (String s : x.b) {
 				r = new RawTerm(s, Util.singList(r));
 			}
 			return r;
 		});
 		
-		Parser<RawTerm> sing = ident.map(x -> new RawTerm(x, new LinkedList<>()));				
 		
 		Parser<RawTerm> ret = Parsers.or(ann, app, app2, dot, /*appH,*/ sing);
  		
@@ -327,14 +329,15 @@ public class AqlParser {
 		}
 		return ret;
 	});
-	private static final Parser<List<catdata.Pair<String, String>>> ctx = Parsers.tuple(ident.many1(), Parsers.tuple(token(":"), ident).optional()).sepBy(token(",")).map(x -> {
-		List<catdata.Pair<String, String>> ret = new LinkedList<>();
-		for (Pair<List<String>, Pair<Token, String>> y : x) {
-			for (String z : y.a) {
-				ret.add(new catdata.Pair<>(z, y.b == null ? null : y.b.b));
+	private static final Parser<List<catdata.Pair<String, String>>> ctx 
+	= Parsers.tuple(ident.many1(), Parsers.tuple(token(":"), ident).optional()).sepBy(token(",")).map(x -> {
+			List<catdata.Pair<String, String>> ret = new LinkedList<>();
+			for (Pair<List<String>, Pair<Token, String>> y : x) {
+				for (String z : y.a) {
+					ret.add(new catdata.Pair<>(z, y.b == null ? null : y.b.b));
+				}
 			}
-		}
-		return ret;
+			return ret;
 	});
 	private static <X> Parser<List<catdata.Pair<String, X>>> env(Parser<X> p, String t) {
 		return Parsers.tuple(ident.many1(), Parsers.tuple(token(t), p)).many().map(x -> {
@@ -550,12 +553,13 @@ public class AqlParser {
 			return ret;
 		});
 		
-		Parser<Tuple5<List<String>, List<String>, List<catdata.Pair<String, catdata.Pair<List<String>, String>>>, List<catdata.Pair<String, catdata.Pair<List<String>, String>>>, List<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>>>> 
-		pa = Parsers.tuple(imports, types.optional(), consts0.optional(), fns0.optional(), eqs0.optional());
-		Parser<Tuple4<List<catdata.Pair<String, String>>, List<catdata.Pair<String, String>>, List<catdata.Pair<String, Triple<List<String>, String, String>>>, List<catdata.Pair<String, String>>>> 
-		pb = Parsers.tuple(java_typs0.optional(), java_consts0.optional(), java_fns0.optional(), options);
+		Parser<Tuple5<List<String>, List<String>, List<catdata.Pair<String, catdata.Pair<List<String>, String>>>, List<catdata.Pair<String, catdata.Pair<List<String>, String>>>, List<catdata.Pair<String, String>>>> 
+		pa = Parsers.tuple(imports, types.optional(), consts0.optional(), fns0.optional(), java_typs0.optional());
+		Parser<Tuple4<List<catdata.Pair<String, String>>, List<catdata.Pair<String, Triple<List<String>, String, String>>>, List<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>>, List<catdata.Pair<String, String>>>> 
+		pb = Parsers.tuple(java_consts0.optional(), java_fns0.optional(), eqs0.optional(), options);
 		
 		Parser<TyExpRaw> ret = Parsers.tuple(pa, pb).map(x -> {
+			
 			List<catdata.Pair<String, catdata.Pair<List<String>, String>>> l = new LinkedList<>();
 			if (x.a.c != null) {
 				l.addAll(x.a.c);
@@ -564,7 +568,7 @@ public class AqlParser {
 				l.addAll(x.a.d);
 			}
 			
-			return new TyExpRaw(x.a.a, Util.newIfNull(x.a.b), l, Util.newIfNull(x.a.e), Util.newIfNull(x.b.a), Util.newIfNull(x.b.b), Util.newIfNull(x.b.c), Util.newIfNull(x.b.d));
+			return new TyExpRaw(x.a.a, Util.newIfNull(x.a.b), l, Util.newIfNull(x.b.c), Util.newIfNull(x.a.e), Util.newIfNull(x.b.a), Util.newIfNull(x.b.b), Util.newIfNull(x.b.d));
 		});
 		return ret.between(token("literal").followedBy(token("{")), token("}")); 
 	}

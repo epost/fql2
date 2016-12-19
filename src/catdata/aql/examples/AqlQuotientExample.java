@@ -13,6 +13,7 @@ public class AqlQuotientExample extends AqlExample {
 	}
 	
 	private final String s = "typeside Ty = empty"
+			+ "\n"
 			+ "\nschema Likes = literal : Ty {"
 			+ "\n	entities"
 			+ "\n		Like "

@@ -1,16 +1,11 @@
 package catdata.provers;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-
-import catdata.Pair;
-import catdata.Triple;
 
 public class FreeProver<T,C,V> extends DPKB<T,C,V> {
 
-	public FreeProver(Collection<T> sorts, Map<C,Pair<List<T>,T>> signature, Collection<Triple<Map<V,T>, KBExp<C,V>, KBExp<C,V>>> theory) { 
-		super(sorts, signature, theory);
+	public FreeProver(KBTheory<T,C,V> th) { 
+		super(th.tys, th.syms, th.eqs);
 		if (!theory.isEmpty()) {
 			throw new RuntimeException("not an empty theory, as required by free proving strategy");
 		}

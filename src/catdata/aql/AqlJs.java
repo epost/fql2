@@ -52,7 +52,7 @@ public class AqlJs<Ty, Sym> {
 				engine.eval(ret);
 				last = k.toString();
 			}
-		} catch (ScriptException e) {
+		} catch (Throwable e) {
 			throw new RuntimeException("In javascript execution, " + e.getMessage() + postfix + "\n\nlast binding evaluated: " + last);
 		}
 	}
@@ -67,17 +67,20 @@ public class AqlJs<Ty, Sym> {
 			Object ret = ((Invocable)engine).invokeFunction(iso2.get(name), args);			
 			check(syms.get(name).second, ret);
 			return ret;
-		} catch (NoSuchMethodException | ScriptException e) {
+		} catch (Throwable e) {
 			throw new RuntimeException("In javascript execution of " + name + " on arguments " + args + ", " + e.getClass() + " error: "  + e.getMessage() + postfix);
 		}
 	}
 	
 	public Object parse(Ty name, String o) {
+		if (!iso1.containsKey(name)) {
+			throw new RuntimeException("In javascript execution of " + o + " no javascript definition for " + name);
+		}
 		try {
 			Object ret = ((Invocable)engine).invokeFunction(iso1.get(name), Util.singList(o));
 			check(name, ret);
 			return ret;
-		} catch (NoSuchMethodException | ScriptException e) {
+		} catch (Throwable e) {
 			throw new RuntimeException("In javascript execution of " + o + " cannot convert to " + name + ", " + e.getClass() + " error: "  + e.getMessage() + postfix);
 		}
 	}

@@ -18,6 +18,7 @@ public final class AqlExamples {
 									aqlUnitConv = new AqlUnitConvExample(),
 									aqlQuotient = new AqlQuotientExample(),
 									aqlDenorm = new AqlDenormExample(),
+									aqlOuter = new AqlOuterjoinExample(),
 									aqlDelta = new AqlDeltaExample();
 	
 }

@@ -11,11 +11,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
-import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
 import catdata.aql.Head;
 import catdata.aql.Var;
@@ -24,7 +23,8 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 	
 	final private LPOUKB<Chc<Ty,En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> cp;
 	
-	public CompletionProver(Collection<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> init, AqlOptions ops, @SuppressWarnings("unused") Collection<Chc<Ty, En>> sorts, Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>> signature, List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>> theory, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) throws InterruptedException {
+	public CompletionProver(Collection<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> init, AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) throws InterruptedException {
+		super(col.toKB().tys, col.toKB().syms, col.toKB().eqs);
 		boolean sort = (Boolean) ops.getOrDefault(AqlOption.completion_sort);
 		boolean filter_subsumed = (Boolean) ops.getOrDefault(AqlOption.completion_filter_subsumed);
 		boolean compose = (Boolean) ops.getOrDefault(AqlOption.completion_compose);
@@ -61,7 +61,7 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 			throw new RuntimeException("Incorrect precedence. Symbols in precedence but not signature: " + precMinusSig + " and symbols in signature but not precedence: " + sigMinusPrec);
 		}		
 		
-		cp = new LPOUKB<>(E0, Var.it, Collections.emptySet(), options, prec, col.toKB().second, col.toKB().third);	
+		cp = new LPOUKB<>(E0, Var.it, Collections.emptySet(), options, prec, col.toKB().syms, new HashSet<>(col.toKB().tys));	
 		
 	}
 

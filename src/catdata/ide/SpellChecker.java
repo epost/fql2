@@ -96,7 +96,9 @@ public class SpellChecker extends AbstractParser {
 				Matcher matcher = pattern.matcher(comment); 
 				outer: while (matcher.find()) {
 					String word = matcher.group().toLowerCase();
-					if (word.endsWith(".") || word.endsWith(",") || word.endsWith("!") || word.endsWith(";") || word.endsWith(":") || word.endsWith(")") || word.endsWith("]") || word.endsWith("\"") || word.endsWith("'")) {
+					
+					
+					if (word.endsWith(".") || word.endsWith(",") || word.endsWith("!") || word.endsWith(";") || (word.endsWith(":") && word.length()!=1) || word.endsWith(")") || word.endsWith("]") || word.endsWith("\"") || word.endsWith("'")) {
 						word = word.substring(0, word.length() - 1);
 					} 
 					if (word.startsWith("(") || word.startsWith("[") || word.startsWith("\"") || word.startsWith("'")) {
@@ -118,10 +120,16 @@ public class SpellChecker extends AbstractParser {
 						}
 					}
 					
-					if (word.contains(",") || word.contains("/") || word.contains("*") || word.contains("-") || word.contains("{") || word.contains("}")) {
+					if (word.contains(")") || word.contains("(") || word.contains(":") || word.contains(",") || word.contains("/") || word.contains("*") || word.contains("-") || word.contains("{") || word.contains("}")) {
 						continue;
 					}
 						
+					try {
+						Integer.parseInt(word);
+						continue;
+					} catch (Exception e) {
+						
+					}
 
 					if (!getWords().contains(word) &&  !word.contains("<") && !word.contains(">")&& !word.contains("=") && !word.contains("_") && !word.contains("@") && !word.contains("\"") && !word.contains("'") && !word.contains("\\") && !word.contains("%") && !word.contains(".") && !word.contains("$") && !word.contains("^")) {
 						spellingError(word, startOffs + matcher.start());

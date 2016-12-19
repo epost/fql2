@@ -1,6 +1,5 @@
 package catdata.provers;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -8,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.provers.KBExp.KBApp;
@@ -18,8 +16,8 @@ public class SaturatedProver<T, C, V> extends DPKB<T, C, V> {
 
 	public final Map<C, Map<List<C>, C>> map = new HashMap<>();
 
-	public SaturatedProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) throws InterruptedException {
-		super(sorts, sig, eqs);
+	public SaturatedProver(KBTheory<T,C,V> th) throws InterruptedException {
+		super(th.tys, th.syms, th.eqs);
 
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : theory) {
 			if (Thread.currentThread().isInterrupted()) {

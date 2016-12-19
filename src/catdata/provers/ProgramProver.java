@@ -26,8 +26,8 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 
 	private final Iterator<V> fresh;
 	
-	public ProgramProver(boolean check, Iterator<V> fresh, Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
-		super(sorts, sig, eqs);
+	public ProgramProver(boolean check, Iterator<V> fresh, KBTheory<T,C,V> th) {
+		super(th.tys, th.syms, th.eqs);
 
 		this.fresh = fresh;
 		

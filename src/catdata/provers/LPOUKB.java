@@ -585,6 +585,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		Map<V, KBExp<Chc<V, C>, V>> t = new HashMap<>();
 		for (V v : newvars) {
 			T ty = r.third.get(v);
+			//System.out.println(v + " and " + r.third + " and " + ty + " and " + min);
 			if (ty == null || min.get(ty) == null) {
 				throw new RuntimeException("Anomaly, please report");
 			}

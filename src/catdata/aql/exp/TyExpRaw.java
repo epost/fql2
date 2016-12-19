@@ -45,7 +45,7 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 	public final Set<Pair<Object, Triple<List<Object>, Object, String>>> java_fns_string;
 
 	public final Map<String, String> options;
-	private final AqlOptions strat;
+	//private final AqlOptions strat;
 	
 	@Override
 	public long timeout() {
@@ -67,24 +67,20 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 		this.java_fns_string = new HashSet(java_fns_string);
 		this.options = Util.toMapSafely(options);
 		
+	//	System.out.println(toString());
+		
 		col.tys.addAll(types);
 		col.syms.putAll(Util.toMapSafely(this.functions));
 		col.java_tys.putAll(Util.toMapSafely(this.java_tys_string));
 		col.tys.addAll(col.java_tys.keySet());
 		col.java_parsers.putAll(Util.toMapSafely(this.java_parser_string));
-		
+	//	System.out.println(this.java_fns_string);
 		for (Entry<Object, Triple<List<Object>, Object, String>> kv : Util.toMapSafely(this.java_fns_string).entrySet()) {
 			col.syms.put(kv.getKey(), new Pair<>(kv.getValue().first, kv.getValue().second));
 			col.java_fns.put(kv.getKey(), kv.getValue().third);
+		//	System.out.println(kv);
 		}
-		AqlJs<Object,Object> js = new AqlJs<>(col.syms, col.java_fns, col.java_tys, col.java_parsers);
-		for (Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq : this.eqs) {
-			Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> tr = inferEq(col, eq, js);
-			col.eqs.add(new Eq<>(tr.first.inLeft(), tr.second, tr.third));
-			eqs0.add(tr);
-		}
-
-		strat = new AqlOptions(Util.toMapSafely(options), col);
+	//	System.out.println("syms are " + col.syms.keySet());
 
 	}
 
@@ -164,6 +160,17 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 
 	@Override
 	public TypeSide<Object, Object> eval(AqlEnv env) {
+		//defer equation checking since invokes javascript
+		AqlJs<Object,Object> js = new AqlJs<>(col.syms, col.java_tys, col.java_parsers, col.java_fns);
+		for (Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq : this.eqs) {
+			Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> 
+			tr = inferEq(col, eq, js);
+			col.eqs.add(new Eq<>(tr.first.inLeft(), tr.second, tr.third));
+			eqs0.add(tr);
+		}
+
+		AqlOptions strat = new AqlOptions(options, col);
+
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
 			TypeSide<Object, Object> v = env.defs.tys.get(k);
@@ -193,7 +200,8 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 				ctx.put(p.first, null);
 			}
 		}
-		Triple<Ctx<String, Chc<Object, Void>>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> eq0 = RawTerm.infer1(ctx, eq.second, eq.third, col, js);
+		Triple<Ctx<String, Chc<Object, Void>>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> 
+		eq0 = RawTerm.infer1(ctx, eq.second, eq.third, col, js);
 
 		LinkedHashMap<Var, Object> map = new LinkedHashMap<>();
 		for (String k : ctx.keySet()) {

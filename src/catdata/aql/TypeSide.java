@@ -97,13 +97,18 @@ public final class TypeSide<Ty, Sym> {
 			}
 			
 		}
+		for (Ty k : js.java_parsers.keySet()) {
+			if (!js.java_tys.containsKey(k)) {
+				throw new RuntimeException("There is a java parser for " + k + " but it is not declared as a java type");	
+			}
+		}
 		for (Sym sym : js.java_fns.keySet()) {
 			if (!syms.containsKey(sym)) {
 				throw new RuntimeException("The java function " + sym + " is not a declared function");
 			}
 		}
 		for (Ty ty : js.java_tys.keySet()) {
-			String parser = js.java_parsers.get(ty);
+			String parser = js.java_parsers.map.get(ty);
 			if (parser == null) {
 				throw new RuntimeException("No constant parser for " + ty);
 			}

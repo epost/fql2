@@ -177,6 +177,15 @@ public final class RawTerm {
 			if (ty == null) {
 				throw new RuntimeException("Anomaly: please report");
 			}
+			if (!col.java_tys.containsKey(ty) && col.java_parsers.containsKey(ty)) {
+				throw new RuntimeException("Error in " + this + ", " + ty + " has a java parser but is not declared as a java type");		
+			}
+			if (col.java_tys.containsKey(ty) && !col.java_parsers.containsKey(ty)) {
+				throw new RuntimeException("Error in " + this + ", " + ty + " is a java type but does not hava a java parser");		
+			}
+			if (!col.java_tys.containsKey(ty) && !col.java_parsers.containsKey(ty)) {
+				throw new RuntimeException("Error in " + this + ", symbol not defined");		
+			}
 			Object o = js.parse(ty, head);
 			return Term.Obj(o, ty);
 		} 

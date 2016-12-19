@@ -1,6 +1,5 @@
 package catdata.aql;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,8 +9,6 @@ import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.RuntimeInterruptedException;
-import catdata.Pair;
-import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.provers.CompletionProver;
@@ -19,7 +16,6 @@ import catdata.provers.CongruenceProver;
 import catdata.provers.DPKB;
 import catdata.provers.FailProver;
 import catdata.provers.FreeProver;
-import catdata.provers.KBExp;
 import catdata.provers.MonoidalProver;
 import catdata.provers.ProgramProver;
 import catdata.provers.SaturatedProver;
@@ -55,11 +51,11 @@ public class AqlProver {
 					throw new RuntimeException();
 				}, new FailProver<>());
 			case free:
-				return wrap(col1.simplify().second, new FreeProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
+				return wrap(col1.simplify().second, new FreeProver<>(col1.simplify().first.toKB()));
 			case saturated:
-				return wrap(x -> x, saturatedProverHelper(ops, col1.toKB().third, col1.toKB().second, col1.toKB().first, col1));
+				return wrap(x -> x, saturatedProverHelper(ops, col1));
 			case congruence:
-				return wrap(col1.simplify().second, new CongruenceProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first));
+				return wrap(col1.simplify().second, new CongruenceProver<>(col1.simplify().first.toKB()));
 			case program:
 				boolean check   = !(Boolean) ops.getOrDefault(AqlOption.dont_verify_is_appropriate_for_prover_unsafe);
 				boolean allowNonTerm = (Boolean) ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe);
@@ -68,18 +64,18 @@ public class AqlProver {
 						col1 = reorient(col1);
 					}
 				} catch (Exception ex) {
-					throw new RuntimeException(ex.getMessage() + "\n\nPossible solution: add options program_allow_nontermination_unsafe=true");
+					throw new RuntimeException(ex.getMessage() + "\n\nPossible solution: add options program_allow_nontermination_unsafe=true, or prover=completion");
 				}
-				return wrap(col1.simplify().second, new ProgramProver<>(check, Var.it, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); // use																																																		
+				return wrap(col1.simplify().second, new ProgramProver<>(check, Var.it, col1.simplify().first.toKB())); // use																																																		
 			case completion:
-				return wrap(col1.simplify().second, new CompletionProver<>(col1.toKB().second.keySet(), ops, col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first, col1.simplify().first)); // use
+				return wrap(col1.simplify().second, new CompletionProver<>(col1.toKB().syms.keySet(), ops, col1.simplify().first));
 			case monoidal:
-				return wrap(col1.simplify().second, new MonoidalProver<>(col1.simplify().first.toKB().third, col1.simplify().first.toKB().second, col1.simplify().first.toKB().first)); // use
+				return wrap(col1.simplify().second, new MonoidalProver<>(col1.simplify().first.toKB())); // use
 																																																// simplified
 			default:
 				throw new RuntimeException("Anomaly: please report");
 			}
-
+ 
 		} catch (InterruptedException exn) {
 			throw new RuntimeInterruptedException(exn);
 		}
@@ -92,9 +88,9 @@ public class AqlProver {
 			return ProverName.congruence;
 		} else if (col.isMonoidal()) {
 			return ProverName.monoidal;
-		} else if (!(Boolean)ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe) && reorientable(col) && ProgramProver.isProgram(Var.it, reorient(col).toKB().first, false)) {
+		} else if (!(Boolean)ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe) && reorientable(col) && ProgramProver.isProgram(Var.it, reorient(col).toKB().eqs, false)) {
 			return ProverName.program; 
-		} else if ((Boolean)ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe) && ProgramProver.isProgram(Var.it, col.toKB().first, false)) {
+		} else if ((Boolean)ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe) && ProgramProver.isProgram(Var.it, col.toKB().eqs, false)) {
 			return ProverName.program; 
 		} 
 		throw new RuntimeException("Cannot automatically chose prover: theory is not free, ground, unary, or program.  Possible solutions include: \n\n1) use the completion prover, possibly with an explicit precedence (see A KB example) \n\n2) Reorient equations from left to right to obtain a size-reducing orthogonal rewrite system \n\n3) Remove all binary function symbols \n\n4) Remove all type side and schema equations \n\n5) disable checking of equations in queries using dont_validate_unsafe=true as an option \n\n6) adding options program_allow_nontermination_unsafe=true \n\n7) emailing support, info@catinf.com ");
@@ -177,9 +173,8 @@ public class AqlProver {
 		};
 	}
 
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> saturatedProverHelper(AqlOptions ops, Collection<Chc<Ty, En>> sorts, Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>> signature,
-			List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>> theory, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) throws InterruptedException {
-		SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> ret = new SaturatedProver<>(sorts, signature, theory);
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> saturatedProverHelper(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) throws InterruptedException {
+		SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> ret = new SaturatedProver<>(col.toKB());
 
 		if ((Boolean) ops.getOrDefault(AqlOption.dont_verify_is_appropriate_for_prover_unsafe)) {
 			return ret;

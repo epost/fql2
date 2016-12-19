@@ -1,6 +1,5 @@
 package catdata.provers;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,8 +18,8 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 	private final SemiThue<Chc<Chc<Unit,T>,C>> kb;
 	private final Set<Pair<List<Chc<Chc<Unit,T>,C>>, List<Chc<Chc<Unit,T>,C>>>> rules = new HashSet<>();
 	
-	public MonoidalProver(Collection<T> sorts, Map<C, Pair<List<T>, T>> sig, Collection<Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>>> eqs) {
-		super(sorts, sig, eqs);
+	public MonoidalProver(KBTheory<T,C,V> th) {
+		super(th.tys, th.syms, th.eqs);
 		
 		//!_1 =  (might be superflous) TODO aql
 		rules.add(new Pair<>(Util.singList(Chc.inLeft(Chc.inLeft(new Unit()))) , Collections.emptyList()));
@@ -28,17 +27,17 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 		//e : t -> 1 = !_1 - don't have any
 
 		//(e : t -> t').!_t' = !_t
-		for (C c : sig.keySet()) {
-			if (sig.get(c).first.size() > 1) {
+		for (C c : th.syms.keySet()) {
+			if (th.syms.get(c).first.size() > 1) {
 				throw new RuntimeException(c + " is not unary or zero-ary");
 			}
-			Chc<Unit,T> t = sig.get(c).first.isEmpty() ? Chc.inLeft(new Unit()) : Chc.inRight(sig.get(c).first.get(0));
-			Chc<Unit,T> t0= Chc.inRight(sig.get(c).second);
+			Chc<Unit,T> t = th.syms.get(c).first.isEmpty() ? Chc.inLeft(new Unit()) : Chc.inRight(th.syms.get(c).first.get(0));
+			Chc<Unit,T> t0= Chc.inRight(th.syms.get(c).second);
 			List<Chc<Chc<Unit,T>,C>> lhs = Util.list(Chc.inRight(c), Chc.inLeft(t0));
 			List<Chc<Chc<Unit,T>,C>> rhs = Util.singList(Chc.inLeft(t));
 			rules.add(new Pair<>(lhs, rhs));
 		} 
-		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : eqs) {
+		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : th.eqs) {
 			rules.add(new Pair<>(trans(eq.first, eq.second), trans(eq.first, eq.third)));
 		}
 		kb = new SemiThue<>(rules, -1); 

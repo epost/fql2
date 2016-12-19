@@ -180,6 +180,10 @@ public class GUI extends JPanel {
 		toolsMenu.add(abortItem);
 		abortItem.addActionListener(e -> abortAction());
 		
+		MenuItem optionsItem = new MenuItem("Options");
+		toolsMenu.add(optionsItem);
+		optionsItem.addActionListener(e -> GlobalOptions.showOptions());
+		
 		MenuItem rtf = new MenuItem("Copy as RTF");
 		editMenu.add(rtf);
 		rtf.addActionListener(x -> {
@@ -223,9 +227,6 @@ public class GUI extends JPanel {
 		toolsMenu.add(sqlCheckItem);
 		sqlCheckItem.addActionListener(x -> new SqlChecker());
 
-	
-
-	
 		MenuItem shredItem = new MenuItem("NR Shredder");
 		toolsMenu.add(shredItem);
 		shredItem.addActionListener(x -> new NraViewer());

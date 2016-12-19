@@ -14,11 +14,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
-import catdata.RuntimeInterruptedException;
 import catdata.Pair;
+import catdata.RuntimeInterruptedException;
 import catdata.Triple;
 import catdata.Util;
 import catdata.provers.KBExp;
+import catdata.provers.KBTheory;
 
 //TODO: aql validate collage
 public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
@@ -435,9 +436,9 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return ret;
 	} 
 
-	private Triple<List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>>, Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>>, Set<Chc<Ty, En>>> toKB = null;
+	private KBTheory<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> toKB = null;
 
-	public Triple<List<Triple<Map<Var, Chc<Ty, En>>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>, KBExp<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var>>>, Map<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Pair<List<Chc<Ty, En>>, Chc<Ty, En>>>, Set<Chc<Ty, En>>> toKB() {
+	public KBTheory<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> toKB() {
 		if (toKB != null) {
 			return toKB;
 		}
@@ -476,9 +477,9 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		Set<Chc<Ty, En>> sorts = new HashSet<>();
 		sorts.addAll(Chc.inLeft(new LinkedList<>(tys)));
-		sorts.addAll(Chc.inRight(new LinkedList<>(ens))); // TODO aql
+		sorts.addAll(Chc.inRight(new LinkedList<>(ens))); 
 
-		toKB = new Triple<>(theory, signature, sorts);
+		toKB = new KBTheory<>(sorts, signature, theory);
 		return toKB;
 	}
 
@@ -505,9 +506,9 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return;
 		}
 
-		HashSet<Chc<Ty, En>> m = new HashSet<>(toKB().third);
-		for (Head<Ty, En, Sym, Fk, Att, Gen, Sk> f : toKB().second.keySet()) {
-			Pair<List<Chc<Ty, En>>, Chc<Ty, En>> a = toKB().second.get(f);
+		Collection<Chc<Ty, En>> m = new HashSet<>(toKB().tys);
+		for (Head<Ty, En, Sym, Fk, Att, Gen, Sk> f : toKB().syms.keySet()) {
+			Pair<List<Chc<Ty, En>>, Chc<Ty, En>> a = toKB().syms.get(f);
 			if (a.first.isEmpty()) {
 				m.remove(a.second);
 			}

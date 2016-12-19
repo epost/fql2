@@ -64,9 +64,9 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 				Triple<Ctx<String,Chc<Object,Object>>,Term<Object,Object,Object,Object,Object,Void,Void>,Term<Object,Object,Object,Object,Object,Void,Void>>
 				eq0 = RawTerm.infer1(ctx, eq.third, eq.fourth, col, ts.js);
 				
-				if (eq0.first.size() != 1) {
-					throw new RuntimeException("In " + eq.third + " = " + eq.fourth + ", there are either unbound variables or java primitives (without annotations), neither of which are not allowed"); 
-				}
+				//if (eq0.first.size() != 1) {
+					//throw new RuntimeException("In " + eq.third + " = " + eq.fourth + ", there are either unbound variables or java primitives (without annotations), neither of which are not allowed"); 
+				//}
 
 				Chc<Object, Object> v = eq0.first.get(eq.first);
 				if (v.left) {
@@ -74,8 +74,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 				}
 				Object t = v.r;
 			
-				eqs0.add(new Triple<>
-				(new Pair<>(new Var(eq.first), t), eq0.second, eq0.third));
+				eqs0.add(new Triple<>(new Pair<>(new Var(eq.first), t), eq0.second, eq0.third));
 		}
 		
 		for (Pair<List<Object>, List<Object>> eq : p_eqs) {
@@ -103,7 +102,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 			eqs0.add(new Triple<>(new Pair<>(var, t), eq0.second, eq0.third));
 		}
 		for (Triple<Pair<Var, Object>, Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>> eq : eqs0) {
-			col.eqs.add(new Eq<>(new Ctx<>(eq.first).inLeft(), eq.second, eq.third));
+			col.eqs.add(new Eq<>(new Ctx<>(eq.first).inRight(), eq.second, eq.third));
 		}
 		
 		AqlOptions strat = new AqlOptions(options, col);
