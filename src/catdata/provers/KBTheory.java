@@ -15,11 +15,11 @@ public class KBTheory<T, C, V> {
 		for (C sym : syms.keySet()) {
 			Pair<List<T>, T> T = syms.get(sym);
 			if (!tys.contains(T.second)) {
-				throw new RuntimeException("On Typeside symbol " + sym + ", the return Type " + T.second + " is not declared.");
+				throw new RuntimeException("On symbol " + sym + ", the return Type " + T.second + " is not declared.");
 			}
 			for (T t : T.first) {
 				if (!tys.contains(t)) {
-					throw new RuntimeException("On Typeside symbol " + sym + ", the argument Type " + t + " is not declared.");
+					throw new RuntimeException("On symbol " + sym + ", the argument Type " + t + " is not declared.");
 				}
 			}
 			

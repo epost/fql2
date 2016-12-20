@@ -574,6 +574,10 @@ public class Util {
 		ret.put(x, y);
 		return ret;
 	}
+	
+	public static <X, Y> Map<X, Y> singMap0(X x, Y y) {
+		return singMap(x, y);
+	}
 
 	public static <X> List<X> singList(X x) {
 		List<X> ret = new LinkedList<>();

@@ -63,6 +63,8 @@ import catdata.sql.SqlMapper;
  */
 public class GUI extends JPanel {
 
+	//TODO aql maybe SQL import should check that constraints hold
+	
 	public static JTabbedPane editors = new JTabbedPane();
 
 	public static JFrame topFrame;

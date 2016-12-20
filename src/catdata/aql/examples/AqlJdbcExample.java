@@ -13,8 +13,8 @@ public class AqlJdbcExample extends AqlExample {
 	}
 
 	private final String s = 
-			"//create some example data in a local temporary sql database"
-					+ "\npragma load = exec_jdbc \"org.h2.Driver\" \"jdbc:h2:mem:db1\" { "
+			"//create some example data in a local temporary sql database. (close delay keeps H2 database alive across connections)"
+					+ "\npragma load = exec_jdbc \"org.h2.Driver\" \"jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1\" { "
 					+ "\n\"DROP TABLE IF EXISTS Employee;"
 					+ "\nDROP TABLE IF EXISTS Department;\" //multiple statements can be used, but many SQL engines (such as H2, AQL's internal engine) will only print the output of the first statement, and some require ?allowMultiQueries=true in the jdbc string "
 					+ "\n"
@@ -93,7 +93,7 @@ public class AqlJdbcExample extends AqlExample {
 					+ "\n	first -> \"SELECT id, name FROM Employee\"	//use name as first name"
 					+ "\n  	last	-> \"SELECT id, NULL FROM Employee\"   //use null as last name"
 					+ "\n     age -> \"SELECT id, id FROM Employee\"	  //use id as age	"
-					+ "\n     cummulative_age -> \"SELECT id, id FROM Employee WHERE FALSE\" //add no equations about cummulative age "
+					+ "\n     cummulative_age -> \"SELECT id, id FROM Employee WHERE FALSE\" //add no equations about cumulative age "
 					+ "\n     name -> \"SELECT id, name FROM Department\"		  "
 					+ "\n}"
 					+ "\n"

@@ -276,7 +276,16 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		
 		Ctx<En2, Collage<Ty, En1, Sym, Fk1, Att1, Var, Void>> cols = new Ctx<>();
 		for (Pair<En2, Block<En1, Att2>> p : blocks) {
+			if (!dst0.ens.contains(p.first)) {
+					throw new RuntimeException("There is a block for " + p.first + ", which is not a target entity");
+			}
 			Ctx<Var, En1> ctx = new Ctx<>(p.second.gens);
+			for (Var v : ctx.map.keySet()) {
+				En1 en = ctx.get(v);
+				if (!src0.ens.contains(en)) {
+					throw new RuntimeException("In block for " + p.first + ", from clause contains " + v + ":" + en + ", but " + en + " is not a source entity");
+				}
+			}
 			Collage<Ty, En1, Sym, Fk1, Att1, Var, Void> col = new Collage<>(src0.collage());
 			Ctx<String, Chc<Ty, En1>> ctx0 = unVar(ctx.inRight());
 			col.gens.putAll(ctx.map);

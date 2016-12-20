@@ -18,6 +18,9 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	
 	public abstract Schema<Ty,En,Sym,Fk,Att> schema();
 	
+	//TODO aql cant validate algebras bc are not dps
+	
+	
 	/**
 	 * The Xs need be to be unique across ens
 	 */
@@ -113,7 +116,17 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 			}
 			throw new RuntimeException("Anomaly: please report");
 		}
-
+/*
+		public X eval(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term, Var var, X x) {
+			if (term.var.equals(var)) {
+				return x;
+			} else if (term.gen != null) {
+				return nf(term.asGen());
+			} else if (term.fk != null) {
+				return fk(term.fk, nf(term.arg.asArgForFk()));
+			}
+			throw new RuntimeException("Anomaly: please report");
+		} */
 	
 	
 	public abstract String toStringProver();

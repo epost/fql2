@@ -14,7 +14,9 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.AqlProver;
+import catdata.aql.AqlProver.ProverName;
 import catdata.aql.Collage;
 import catdata.aql.Ctx;
 import catdata.aql.Eq;
@@ -23,7 +25,6 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
-import catdata.aql.AqlOptions.AqlOption;
 
 public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object>  {
 	
@@ -37,6 +38,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 
 	//TODO: aql printing of contexts broken when conitain choices
 	
+	@SuppressWarnings("unused")
 	@Override
 	public Schema<Object, Object, Object, Object, Object> eval(AqlEnv env) {
 		TypeSide<Object, Object> ts = typeSide.eval(env);
@@ -58,6 +60,13 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		col.fks.putAll(Util.toMapSafely(fks));
 		col.atts.putAll(Util.toMapSafely(atts));
 	
+		for (Pair<List<Object>, Object> eq : col.syms.values()) {
+			
+		}
+		for (Pair<Object, Object> eq : col.atts.values()) {
+			
+		}
+		
 		for (Quad<String, Object, RawTerm, RawTerm> eq : t_eqs) {
 				Map<String, Chc<Object, Object>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
 				
@@ -106,6 +115,11 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		}
 		
 		AqlOptions strat = new AqlOptions(options, col);
+		
+		AqlOptions s = new AqlOptions(Util.singMap(AqlOptions.AqlOption.prover.toString(), ProverName.fail.toString()), col);
+		
+		//forces type checking before prover construction
+		new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(s, col), false);
 		
 		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col), !((Boolean)strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
 		return ret; 

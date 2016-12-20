@@ -38,27 +38,34 @@ public class JdbcPragma extends Pragma {
 
 	@Override
 	public void execute() {
-		try {
-			Connection conn = DriverManager.getConnection(jdbcString);
+		try (Connection conn = DriverManager.getConnection(jdbcString)) {
 			List<String> ret = new LinkedList<>();
 			for (String sql : sqls) {
-				Statement stmt = conn.createStatement();
-				ret.add("START");
-				ret.add(sql);
-				ret.add("");
-				boolean hasMoreResultSets = stmt.execute(sql);
-			    while (hasMoreResultSets || stmt.getUpdateCount() != -1) {  
-			        if (hasMoreResultSets) {  
-			            ResultSet rs = stmt.getResultSet();
-			            ret.add(print(rs));
-			        } else { // if ddl/dml/...
-			            int queryResult = stmt.getUpdateCount();  
-			            ret.add("Updated " + queryResult + " rows.");
-			        } 
-			        hasMoreResultSets = stmt.getMoreResults();  
-			    }
-				ret.add("END");
-				ret.add("");
+				try (Statement stmt = conn.createStatement()) {
+					ret.add("START");
+					ret.add(sql);
+					ret.add("");
+					boolean hasMoreResultSets = stmt.execute(sql);
+				    while (hasMoreResultSets || stmt.getUpdateCount() != -1) {  
+				        if (hasMoreResultSets) {  
+				            try (ResultSet rs = stmt.getResultSet()) {
+					            ret.add(print(rs));
+				            } catch (SQLException e) {
+								e.printStackTrace();
+								throw new RuntimeException(e);
+							}    
+				        } else { // if ddl/dml/...
+				            int queryResult = stmt.getUpdateCount();  
+				            ret.add("Updated " + queryResult + " rows.");
+				        } 
+				        hasMoreResultSets = stmt.getMoreResults();  
+				    }
+					ret.add("END");
+					ret.add("");
+				}  catch (SQLException e) {
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				} 
 			}
 			responses.add(Util.sep(ret, "\n"));
 		} catch (SQLException e) {

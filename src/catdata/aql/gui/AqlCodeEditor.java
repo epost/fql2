@@ -252,7 +252,8 @@ public final class AqlCodeEditor extends
 		driver.start();
 		last_env = driver.env; //constructor blocks
 		last_prog = init;
-	//	last_str = str;
+		//topArea.forceReparsing(parser);
+		clearSpellCheck();
 		outline.build();
 		if (last_env.exn != null && last_env.defs.keySet().isEmpty()) {
 			throw last_env.exn;
@@ -260,6 +261,7 @@ public final class AqlCodeEditor extends
 		return last_env;
 	}
 
+	//TODO aql tokenizer error on multiline quotes (jdbc example)
 
 
 	@Override
@@ -278,7 +280,11 @@ public final class AqlCodeEditor extends
 
 	@Override
 	protected Collection<String> reservedWords() {
-		return Util.union(super.reservedWords(), Util.union(Util.list(AqlParser.ops), Util.list(AqlParser.res)));
+		Collection<String> ret = Util.union(super.reservedWords(), Util.union(Util.list(AqlParser.ops), Util.list(AqlParser.res)));
+		if (last_prog != null) {
+			ret = Util.union(ret, last_prog.exps.keySet());
+		}
+		return ret;
 	}
 
 }

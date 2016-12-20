@@ -5,7 +5,7 @@ import java.util.Map;
 public class FailProver<T,C,V> extends DPKB<T,C,V> {
 
 	public FailProver() { 
-		throw new RuntimeException("Attempt to create the always failing prover");
+		
 	}
 
 	@Override

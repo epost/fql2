@@ -668,7 +668,11 @@ private boolean zzAtBOL = true;
 	@Override
 	public void addToken(char[] array, int start, int end, int tokenType,
 						int startOffset, boolean hyperlink) {
-		super.addToken(array, start,end, tokenType, startOffset, hyperlink);
+		try {
+			super.addToken(array, start,end, tokenType, startOffset, hyperlink);
+		} catch (Throwable thr) {
+			thr.printStackTrace();
+		}
 		zzStartRead = zzMarkedPos;
 	}
 

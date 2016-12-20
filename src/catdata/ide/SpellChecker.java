@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +21,8 @@ import org.fife.ui.rsyntaxtextarea.parser.AbstractParser;
 import org.fife.ui.rsyntaxtextarea.parser.DefaultParseResult;
 import org.fife.ui.rsyntaxtextarea.parser.DefaultParserNotice;
 import org.fife.ui.rsyntaxtextarea.parser.ParseResult;
+
+import catdata.Unit;
 
 
 public class SpellChecker extends AbstractParser {
@@ -51,9 +54,9 @@ public class SpellChecker extends AbstractParser {
 	
 	private final DefaultParseResult result;
 	private RSyntaxDocument doc;
-	private final Collection<String> local;
-
-	public SpellChecker(Collection<String> local) {
+	private Function<Unit, Collection<String>> local;
+	
+	public SpellChecker(Function<Unit, Collection<String>> local) {
 		result = new DefaultParseResult(this);
 		this.local = local;
 	}
@@ -84,7 +87,6 @@ public class SpellChecker extends AbstractParser {
 			return result;
 		}
 		
-		
 		for (Token t : doc) {
 			if (t.isComment()) {
 				int startOffs = t.getOffset();
@@ -114,11 +116,14 @@ public class SpellChecker extends AbstractParser {
 							
 						}
 					}
-					for (String a : local) {
-						if (word.equals(a)) {
+					for (String a : local.apply(new Unit())) {
+				//		System.out.println("Compare against " + a + " word " + word);
+						if (word.toLowerCase().equals(a.toLowerCase())) {
 							continue outer;
 						}
 					}
+					
+					
 					
 					if (word.contains(")") || word.contains("(") || word.contains(":") || word.contains(",") || word.contains("/") || word.contains("*") || word.contains("-") || word.contains("{") || word.contains("}")) {
 						continue;
@@ -131,7 +136,7 @@ public class SpellChecker extends AbstractParser {
 						
 					}
 
-					if (!getWords().contains(word) &&  !word.contains("<") && !word.contains(">")&& !word.contains("=") && !word.contains("_") && !word.contains("@") && !word.contains("\"") && !word.contains("'") && !word.contains("\\") && !word.contains("%") && !word.contains(".") && !word.contains("$") && !word.contains("^")) {
+					if (!getWords().contains(word) && !word.contains("<") && !word.contains(">")&& !word.contains("=") && !word.contains("_") && !word.contains("@") && !word.contains("\"") && !word.contains("'") && !word.contains("\\") && !word.contains("%") && !word.contains(".") && !word.contains("$") && !word.contains("^")) {
 						spellingError(word, startOffs + matcher.start());
 					} 
 				}

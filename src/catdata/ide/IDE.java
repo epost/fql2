@@ -74,7 +74,6 @@ public class IDE {
                             public void windowClosing(
                                     java.awt.event.WindowEvent windowEvent) {
                                 GUI.exitAction();
-                                
                             }
                         });
                     } catch (HeadlessException | ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {

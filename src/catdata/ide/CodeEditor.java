@@ -354,7 +354,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		topArea.getPopupMenu().add(unfoldall, 0);
 		
 		//TODO aql real DAWG?
-		spc = new SpellChecker(reservedWords());
+		spc = new SpellChecker(z -> reservedWords());
 		topArea.addParser(spc); 
 		
 
@@ -575,7 +575,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	
 	@SuppressWarnings("static-method")
 	protected Collection<String> reservedWords() {
-		return Util.list("boolean", "booleans", "equational", "axiomatization", "axiomatize", "axiom", "axioms", "functor", "functors", "schema", "schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
+		return Util.list("validator", "boolean", "booleans", "equational", "axiomatization", "axiomatize", "axiom", "axioms", "functor", "functors", "schema", "schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
 	}
 
 }
