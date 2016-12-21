@@ -54,17 +54,20 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		 * the same.
 		 */
 		public final Double cutoff;
+		
+		public final Double threshold; // convergence of sigma vector
 
 		/**
 		 * Which fixpoint formula to use (Table 3)
 		 */
 		public final Sigma sigma;
 
-		public SimilarityFloodingParams(BiFunction<E1, E2, Double> edgeComparator, Double cutoff, Sigma sigma, int max_its) {
+		public SimilarityFloodingParams(BiFunction<E1, E2, Double> edgeComparator, Double cutoff, Sigma sigma, int max_its, Double threshold) {
 			this.edgeComparator = edgeComparator;
 			this.cutoff = cutoff;
 			this.sigma = sigma;
 			this.max_iterations = max_its;
+			this.threshold = threshold;
 			//TODO note to serena - validate any options here, like this
 			if (max_iterations < 0) {
 				throw new RuntimeException("Expected max iterations to be >= 0");
@@ -81,7 +84,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		if (!options.isEmpty()) {
 			throw new RuntimeException("No options allowed for similarity flooding matching - yet");
 		}
-		return new SimilarityFloodingParams<>((x, y) -> x.toString().trim().equals(y.toString().trim()) ? 1.0 : 0.0, 1.0, Sigma.Basic, 2);  //note the use of trim
+		return new SimilarityFloodingParams<>((x, y) -> x.toString().trim().equals(y.toString().trim()) ? 1.0 : 0.0, 1.0, Sigma.Basic, 7, 0.1);  //note the use of trim
 		//TODO note to serena, here is where the magic number 6 went.  see how we are collecting all the defaults in one place?
 		
 	}
@@ -203,11 +206,20 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 				
 				if (s.equals(n)) {
 					Quad<Direction,E1,E2,Double> fwde1e2double  = new Quad<>(Direction.forward,  e1, e2, wt); //TODO note to serena - we used params again
+					
+					// also check if the backward edge already exists within the edge 
+					
 					Quad<Direction,E1,E2,Double> bwde1e2double  = new Quad<>(Direction.backward,  e1, e2, 1.0); //TODO note to serena - we used params again
 
+					if (edges.contains(bwde1e2double)) {
+						
+					} else {
+						edges.add(new Triple<>(bwde1e2double, t2, t1));
+					}
+						
 					edges.add(new Triple<>(fwde1e2double, t1, t2)); 
 					// add backward edge (but need to check if it already exists )
-					edges.add(new Triple<>(bwde1e2double, t2, t1));
+					
 					
 					// add to the nodes list 
 					inodes.add(t1);
@@ -267,8 +279,6 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 			idi++;
 		}
 		
-		System.out.println(idi);
-
 		
 		// map the ipg nodes and weights to an adj matrix 
 		double[][] ipgAdMat = new double[idi][idi];
@@ -278,7 +288,6 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 				ipgAdMat[i][j]=0;
 			}
 		}
-		System.out.println(idi);
 
 		
 		for (Quad<Direction, E1, E2, Double> e: ipg.edges.keySet() ) {
@@ -294,10 +303,8 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 			
 		}
 		
-		System.out.println(idi);
-
-		//System.out.println("ipgAdMat is " + ipgAdMat + "\n");
 		
+		// print adj matrix 
 		for (int i = 0; i < ipgAdMat.length; i++) {
 		    for (int j = 0; j < ipgAdMat[i].length; j++) {
 		        System.out.print(ipgAdMat[i][j] + " ");
@@ -315,11 +322,10 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		
 		double[] sigma1 = new double[idi];
 		
-		sigma1 = sigmaBasicVector(ipgAdMat, 6, idi);
+		//  choose a type of fixpt sigma function 
+		sigma1 = sigmaBasicVector(ipgAdMat, params.max_iterations, idi, params.threshold);
 		 
 		
-		// sigmaId.put(idi, n);
-		// sigmaRevId.put(n, idi);
 		for (int i=0; i< idi; i++) {
 			Pair<N1, N2> n = sigmaId.get(i);
 			sigmap_n.put(n, sigma1[i]);
@@ -327,8 +333,9 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		}
 		// System.out.println(Arrays.toString(sigma1));
 		System.out.println("sigma is " + sigmap_n + "\n");
+		
 
-
+		// check for convergence
 
 		
 //		Match<N1,E1,N2,E2> best = createMatchFromIpg(ipg_n, sigmap_n);
@@ -341,7 +348,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 	}
 
 	// function for the fixpt computation based on ad mat representation of ipg 
-	private double[] sigmaBasicVector(double[][] matrix, int maxiter, int size){
+	private double[] sigmaBasicVector(double[][] matrix, int maxiter, int size, Double threshold){
 		
 		// sigma, temp sig
 		double[] sigma = new double[size];
@@ -377,15 +384,28 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 				}
 			}
 			
-			System.out.printf("max normalize %f\n",mx);
+			// check for convergence
+			if (i==maxiter-1) {
+				for (int p=0; p<size; p++) {
+					if (sigma[p] - tempsig[p]/mx > threshold) {
+						throw new RuntimeException("does not converge within max iterations");
+					}
+				}
+			}
+			
 			for (int p=0; p< size; p++) {
 				sigma[p] = tempsig[p]/mx;
 			}
+			
 		}
+		
+		
 		
 		
 		return sigma;
 	}
+	
+	
 	
 	
 	//TODO serena notice how sigma(which) has type X -> X - this is how we know we can take its fixed point
@@ -541,9 +561,209 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		
 	}
 	
-	
 
+	// other fixpt functions based on matrix
+private double[] sigmaAVector(double[][] matrix, int maxiter, int size, Double threshold){
+		
+		// sigma, temp sig
+		double[] sigma = new double[size];
+		double[] tempsig = new double[size];
+		double[] finsig = new double[size];
+		
+		
+		// initialize sigma to ones
+		for (int i=0; i<size; i++) {
+			sigma[i] = 1.0;
+		}
+		
+		for (int i=0; i<maxiter; i++) {
+			double mx = 0.0;
+			// for each x y vertex in ipg 
+			for (int j=0; j< size; j++) {
+				double sig = 1.0;
+				// column vector edges in to j 
+				//iterate through row of column j 
+				for (int k=0; k<size; k++) {
+					if (matrix[k][j]!= 0) {
+						sig = sig + sigma[k]*matrix[k][j];
+					}
+				}
+				tempsig[j] = sig;
+				
+			}
+			// set the sigma array update 
+			for (int p=0; p< size; p++) {
+				if (tempsig[p]>mx) {
+					mx = tempsig[p];
+				}
+			}
+			// check for convergence
+			
+			if (i==maxiter-1) {
+				for (int p=0; p<size; p++) {
+					if (sigma[p] - tempsig[p]/mx > threshold) {
+						throw new RuntimeException("does not converge within max iterations");
+					}
+				}
+			}		
+			
+			
+			for (int p=0; p< size; p++) {
+				sigma[p] = tempsig[p]/mx;
+			}
+		}
+		return sigma;
+	}
+
+private double[] sigmaBVector(double[][] matrix, int maxiter, int size, Double threshold){
+	
+	// sigma, temp sig
+	double[] sigma = new double[size];
+	double[] tempsig = new double[size];
+	double[] finsig = new double[size];
+	
+	
+	// initialize sigma to ones
+	for (int i=0; i<size; i++) {
+		sigma[i] = 1.0;
+	}
+	
+	for (int i=0; i<maxiter; i++) {
+		double mx = 0.0;
+		// for each x y vertex in ipg 
+		for (int j=0; j< size; j++) {
+			double sig = 0.0;
+			// column vector edges in to j 
+			//iterate through row of column j 
+			for (int k=0; k<size; k++) {
+				if (matrix[k][j]!= 0) {
+					sig = sig + (1.0+sigma[k])*matrix[k][j];
+				}
+			}
+			tempsig[j] = sig;
+			
+		}
+		// set the sigma array update 
+		for (int p=0; p< size; p++) {
+			if (tempsig[p]>mx) {
+				mx = tempsig[p];
+			}
+		}
+		// check for convergence
+		if (i==maxiter-1) {
+			for (int p=0; p<size; p++) {
+				if (sigma[p] - tempsig[p]/mx > threshold) {
+					throw new RuntimeException("does not converge within max iterations");
+					}
+				}
+			}
+		
+		for (int p=0; p< size; p++) {
+			sigma[p] = tempsig[p]/mx;
+		}
+	}
+	return sigma;
 }
+
+
+private double[] sigmaCVector(double[][] matrix, int maxiter, int size, Double threshold){
+	
+	// sigma, temp sig
+	double[] sigma = new double[size];
+	double[] tempsig = new double[size];
+	double[] finsig = new double[size];
+	
+	
+	// initialize sigma to ones
+	for (int i=0; i<size; i++) {
+		sigma[i] = 1.0;
+	}
+	
+	for (int i=0; i<maxiter; i++) {
+		double mx = 0.0;
+		// for each x y vertex in ipg 
+		for (int j=0; j< size; j++) {
+			double sig = 1.0+ sigma[j];
+			// column vector edges in to j 
+			//iterate through row of column j 
+			for (int k=0; k<size; k++) {
+				if (matrix[k][j]!= 0) {
+					sig = sig + (1.0+sigma[k])*matrix[k][j];
+				}
+			}
+			tempsig[j] = sig;
+			
+		}
+		// set the sigma array update 
+		for (int p=0; p< size; p++) {
+			if (tempsig[p]>mx) {
+				mx = tempsig[p];
+			}
+		}
+		
+		// check for convergence
+		if (i==maxiter-1) {
+			for (int p=0; p<size; p++) {
+				if (sigma[p] - tempsig[p]/mx > threshold) {
+					throw new RuntimeException("does not converge within max iterations");
+					}
+				}	
+			}
+		
+		for (int p=0; p< size; p++) {
+			sigma[p] = tempsig[p]/mx;
+		}
+	}
+	return sigma;
+}
+
+
+private double[] sigmaInvAveVector(double[][] matrix, int maxiter, int size){
+	
+	// sigma, temp sig
+	double[] sigma = new double[size];
+	double[] tempsig = new double[size];
+	double[] finsig = new double[size];
+	
+	
+	// initialize sigma to ones
+	for (int i=0; i<size; i++) {
+		sigma[i] = 1.0;
+	}
+	
+	for (int i=0; i<maxiter; i++) {
+		double mx = 0.0;
+		// for each x y vertex in ipg 
+		for (int j=0; j< size; j++) {
+			double sig = 0.0;
+			// column vector edges in to j 
+			//iterate through row of column j 
+			for (int k=0; k<size; k++) {
+				if (matrix[k][j]!= 0) {
+					sig = sig + (1.0)/(matrix[k][j]);
+				}
+			}
+			double sig2 = 2/sig;
+			tempsig[j] = sigma[j]*sig2;
+			
+		}
+		// set the sigma array update 
+		for (int p=0; p< size; p++) {
+			if (tempsig[p]>mx) {
+				mx = tempsig[p];
+			}
+		}
+		
+		for (int p=0; p< size; p++) {
+			sigma[p] = tempsig[p]/mx;
+		}
+	}
+	return sigma;
+}
+	
+	
+}
+
 
 
 //note to serena: you should never need to cast anything.  If you are, 
