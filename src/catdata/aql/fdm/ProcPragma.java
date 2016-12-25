@@ -80,11 +80,11 @@ public class ProcPragma extends Pragma {
 					    flag = true;
 					}
 				} catch (IOException e) {
-					responses.add(cmd + " " + pre + " " + result.toString() + " and "  + e.getMessage());
+					responses.add(cmd + " " + pre + " " + result + " and "  + e.getMessage());
 					throw new RuntimeException(e);
 				}
 
-				responses.add(cmd + " " + pre + " " + result.toString());
+				responses.add(cmd + " " + pre + " " + result);
 			};
 		}
 

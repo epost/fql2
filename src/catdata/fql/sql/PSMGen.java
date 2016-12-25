@@ -168,8 +168,7 @@ public class PSMGen {
 		String src = e.source.string;
 		String dst = e.target.string;
 
-		SQL f = compose(new String[] { i + "_" + src + "_subst_inv",
-				i + "_" + e.name, i + "_" + dst + "_subst" });
+		SQL f = compose(i + "_" + src + "_subst_inv", i + "_" + e.name, i + "_" + dst + "_subst");
 
 		return f;
 	}
@@ -177,8 +176,7 @@ public class PSMGen {
 	private static SQL makeAttr(String i, Attribute<Node> a) {
 		String src = a.source.string;
 
-		SQL f = compose(new String[] { i + "_" + src + "_subst_inv",
-				i + "_" + a.name });
+		SQL f = compose(i + "_" + src + "_subst_inv", i + "_" + a.name);
 
 		return f;
 	}
@@ -213,7 +211,7 @@ public class PSMGen {
 		String ret = "";
 		for (PSM p : l) {
 			String s = p.toPSM();
-			if (s.trim().length() == 0) {
+			if (s.trim().isEmpty()) {
 				continue;
 			}
 			ret += p.toPSM() + ";\n\n";
@@ -263,8 +261,8 @@ public class PSMGen {
 		return ret;
 	}
 
-	public static Set<Pair<Object, Object>> lookup(
-			List<Pair<String, List<Pair<Object, Object>>>> data, String str) {
+	private static Set<Pair<Object, Object>> lookup(
+            List<Pair<String, List<Pair<Object, Object>>>> data, String str) {
 		for (Pair<String, List<Pair<Object, Object>>> k : data) {
 			if (k.first.equals(str)) {
 				return new HashSet<>(k.second);
@@ -309,7 +307,7 @@ public class PSMGen {
 			m.put("c1", row.second);
 			values.add(m);
 		}
-		if (values.size() > 0) {
+		if (!values.isEmpty()) {
 			return new InsertValues(iname + "_" + tname, attrs, values);
 		}
 		return null;
@@ -356,7 +354,7 @@ public class PSMGen {
 		return ret0;
 	}
 
-	public static Flower compose(String[] p) {
+	public static Flower compose(String... p) {
 		LinkedHashMap<String, Pair<String, String>> select = new LinkedHashMap<>();
 		Map<String, String> from = new HashMap<>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
@@ -422,7 +420,7 @@ public class PSMGen {
 				}
 			}
 
-			if (tn.size() == 0) {
+			if (tn.isEmpty()) {
 				continue;
 			}
 			SQL y = foldUnion(tn);
@@ -440,7 +438,7 @@ public class PSMGen {
 					tn.add(q);
 				}
 			}
-			if (tn.size() == 0) {
+			if (tn.isEmpty()) {
 				continue;
 			}
 			SQL y = foldUnion(tn);
@@ -459,7 +457,7 @@ public class PSMGen {
 				}
 			}
 
-			if (tn.size() == 0) {
+			if (tn.isEmpty()) {
 				continue;
 			}
 			SQL y = foldUnion(tn);
@@ -470,7 +468,7 @@ public class PSMGen {
 	}
 
 	private static SQL foldUnion(List<Flower> tn) {
-		if (tn.size() == 0) {
+		if (tn.isEmpty()) {
 			throw new RuntimeException("Empty Union");
 		}
 		if (tn.size() == 1) {
@@ -750,11 +748,11 @@ public class PSMGen {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Triple<Flower, Triple<Node, Node, Arr<Node, Path>>[], Attribute<Node>[]> lim(
-			String pre, Signature sig, FinCat<Node, Path> cat,
-			CommaCat<Node, Path, Node, Path, Node, Path> b,
-			Map<Triple<Node, Node, Arr<Node, Path>>, String> map,
-			Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, String> map2)
+    private static Triple<Flower, Triple<Node, Node, Arr<Node, Path>>[], Attribute<Node>[]> lim(
+            String pre, Signature sig, FinCat<Node, Path> cat,
+            CommaCat<Node, Path, Node, Path, Node, Path> b,
+            Map<Triple<Node, Node, Arr<Node, Path>>, String> map,
+            Map<Pair<Arr<Node, Path>, Arr<Node, Path>>, String> map2)
 			throws FQLException {
 
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
@@ -827,7 +825,7 @@ public class PSMGen {
 				+ Arrays.toString(cnames));
 	}
 
-	static int tempTables = 0;
+	private static int tempTables = 0;
 
 	private static List<PSM> deltaX(
 			String pre,
@@ -936,12 +934,10 @@ public class PSMGen {
 			state.put(pre + "_" + n.string, m);
 		}
 		for (Edge n : I.src.thesig.edges) {
-			Set<Map<Object, Object>> m = new HashSet<>();
-			state.put(pre + "_" + n.name, m);
+			state.put(pre + "_" + n.name, new HashSet<>());
 		}
 		for (Attribute<Node> n : I.src.thesig.attrs) {
-			Set<Map<Object, Object>> m = new HashSet<>();
-			state.put(pre + "_" + n.name, m);
+			state.put(pre + "_" + n.name, new HashSet<>());
 		}	
 	}
 

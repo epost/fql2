@@ -21,7 +21,7 @@ public class TypedPiExample extends Example {
 		return s;
 	}
 	
-	String s = 
+	private final String s =
 			"schema C = {"
 					+ "\n nodes "
 					+ "\n 	c1, "

@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.event.ItemEvent;
-import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -47,18 +47,14 @@ import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
-import edu.uci.ics.jung.visualization.RenderContext;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
-import edu.uci.ics.jung.visualization.renderers.Renderer;
-import edu.uci.ics.jung.visualization.transform.shape.GraphicsDecorator;
 
 
 public class XCtx<C> implements XObject {
 	
-	public String toStringX() {
+	String toStringX() {
 		String rec1 = schema == null ? "null" : schema.toStringX();
 		String rec2 = global == null ? "null" : global.toStringX();
 		return "[[[" + ids + " ||| " + types + " ||| " + eqs + " ||| " + rec1 + " ||| " + rec2 + "]]]";
@@ -85,10 +81,10 @@ public class XCtx<C> implements XObject {
 	public boolean saturated = false;
 
 	private SemiThue<C> kb;
-	Set<C> ids;
-	XCtx<C> global;
-	XCtx<C> schema;
-	Map<C, Pair<C, C>> types;
+	final Set<C> ids;
+	final XCtx<C> global;
+	final XCtx<C> schema;
+	final Map<C, Pair<C, C>> types;
 	Set<Pair<List<C>, List<C>>> eqs;
 	private boolean initialized = false;
 
@@ -107,7 +103,7 @@ public class XCtx<C> implements XObject {
 		return Util.sep(r, ".");
 	}
 	
-	String kind = "TODO";
+	private String kind = "TODO";
 
 	@Override
 	public String kind() {
@@ -151,7 +147,7 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 
-	public Pair<C, C> typeWith0(C c, Map<C, C> m) {
+	private Pair<C, C> typeWith0(C c, Map<C, C> m) {
 		C x = m.get(c);
 		if (x != null) {
 			if (!ids.contains(x) && !x.equals("DOM")) {
@@ -238,9 +234,9 @@ public class XCtx<C> implements XObject {
 				}
 			}
 		}
-		sane();
+	//	sane();
 		init();
-		sane();
+	//	sane();
 		this.kind = kind;
 	}
 
@@ -251,12 +247,12 @@ public class XCtx<C> implements XObject {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void init() {
-		sane();
+	//	sane();
 		if (initialized) {
 			return;
 		}				
 		validate(true);
-		sane();
+	//	sane();
 		for (C c : ids) {
 			types.put((C) ("!_" + c), new Pair<>(c, (C) "_1"));
 		}
@@ -265,7 +261,7 @@ public class XCtx<C> implements XObject {
 		List rhs = new LinkedList<>();
 		rhs.add("!_" + "_1");
 		eqs.add(new Pair<>(lhs, rhs));
-		sane();
+	//	sane();
 		for (C c : terms()) {
 			Pair<C, C> t = types.get(c);
 			lhs = new LinkedList<>();
@@ -275,11 +271,11 @@ public class XCtx<C> implements XObject {
 			rhs.add("!_" + t.first);
 			eqs.add(new Pair<>(lhs, rhs));
 		}
-		sane();
+	//	sane();
 		validate(false);
-		sane();
+	//	sane();
 		kb();
-		sane();
+	//	sane();
 		initialized = true;
 	}
 
@@ -298,7 +294,7 @@ public class XCtx<C> implements XObject {
 	}
 
 	private void validate(boolean initial) {
-		sane();
+		//sane();
 		if (!types.keySet().containsAll(ids)) {
 			throw new RuntimeException("ids not contained in const");
 		}
@@ -342,21 +338,14 @@ public class XCtx<C> implements XObject {
 			}
 		}
 		
-		sane();
-	}
-	
-	public void sane() {
-		/* for (Object o : eqs) {
-			if (!eqs.contains(o)) {
-			//	tryFind(o, eqs);
-				throw new RuntimeException("??? " + o + " in " + eqs);
-			}
-		} */
+	//	sane();
 	}
 	
 
+	
+
 	public Pair<C, C> type(List<C> first) {
-		if (first.size() == 0) {
+		if (first.isEmpty()) {
 			throw new RuntimeException("Empty");
 		}
 		Iterator<C> it = first.iterator();
@@ -372,7 +361,7 @@ public class XCtx<C> implements XObject {
 	}
 	
 	public Pair<C,C> typeWith(List<C> first, Map<C, C> ctx) {
-		if (first.size() == 0) {
+		if (first.isEmpty()) {
 			throw new RuntimeException("Empty");
 		}
 		Iterator<C> it = first.iterator();
@@ -389,7 +378,7 @@ public class XCtx<C> implements XObject {
 	
 	
 
-	String toString = null;
+	private String toString = null;
 
 	@Override
 	public String toString() {
@@ -415,7 +404,7 @@ public class XCtx<C> implements XObject {
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked" })
+	@SuppressWarnings({"unchecked", "ConstantConditions"})
 	public JComponent display() {
 		init();
 
@@ -437,7 +426,7 @@ public class XCtx<C> implements XObject {
 
 			try {
 				kb.complete();
-				kb_text += "\n\nKnuth-Bendix Completion:\n" + kb.toString();
+				kb_text += "\n\nKnuth-Bendix Completion:\n" + kb;
 			} catch (Exception e) {
 				e.printStackTrace();
 				kb_text = "\n\nERROR in Knuth-Bendix\n\n" + e.getMessage();
@@ -469,7 +458,6 @@ public class XCtx<C> implements XObject {
 
 		String cat = null;
 		if (GlobalOptions.debug.fpql.x_cat) {
-			cat = "";
 			try {
 				cat = cat().toString();
 			} catch (Exception e) {
@@ -483,12 +471,7 @@ public class XCtx<C> implements XObject {
 		if (schema != null) {
 			if (GlobalOptions.debug.fpql.x_tables) {
 				// if category tab blew up, so should this
-				JComponent tables = null;
-				if (cat != null && cat.startsWith("ERROR")) {
-					tables = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", cat);
-				} else {
-					tables = makeTables(x -> cat().arrows(), new HashSet<>());
-				}
+				JComponent tables = cat != null && cat.startsWith("ERROR") ? new CodeTextPanel(BorderFactory.createEtchedBorder(), "", cat) : makeTables(x -> cat().arrows(), new HashSet<>());
 				ret.addTab("Full Tables", tables);
 			}
 			if (GlobalOptions.debug.fpql.x_adom) {
@@ -514,7 +497,7 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 
-	public JComponent makeGraph(boolean isInstance) {
+	private JComponent makeGraph(boolean isInstance) {
 		if (allTerms().size() > 128) {
 			return new JTextArea("Too large to display");
 		}
@@ -525,7 +508,7 @@ public class XCtx<C> implements XObject {
 		VisualizationViewer<C, C> vv = new VisualizationViewer<>(layout);
 		vv.getRenderContext().setLabelOffset(20);
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.PICKING); //was TRANSFORMING
+		gm.setMode(Mode.PICKING); //was TRANSFORMING
 		vv.setGraphMouse(gm);
 
 		Transformer<C, Paint> vertexPaint = x -> {
@@ -555,8 +538,7 @@ public class XCtx<C> implements XObject {
 				vv.getPickedEdgeState().clear();
 				//Object str = e.getItem();
 				if (cl == null) {
-					return;
-				}
+                }
 //				cl.show(clx, xgrid.get(str));
 			
 		});
@@ -605,9 +587,9 @@ public class XCtx<C> implements XObject {
 
 	// private Set<List<C>> hom(C src, C dst, int n);
 
-	Map<Integer, Set<List<C>>> pathsUpTo = new HashMap<>();
+	private final Map<Integer, Set<List<C>>> pathsUpTo = new HashMap<>();
 
-	public Set<List<C>> pathsUpTo(int n) {
+	private Set<List<C>> pathsUpTo(int n) {
 		if (pathsUpTo.containsKey(n)) {
 			return pathsUpTo.get(n);
 		}
@@ -894,7 +876,7 @@ public class XCtx<C> implements XObject {
 	
 	private JComponent clx;
 	private CardLayout cl;
-	private Map<C, String> xgrid;
+//	private Map<C, String> xgrid;
 //	public JComponent getGrid(C c) {
 //		if (xgrid != null) {
 //			return xgrid.get(c);
@@ -912,12 +894,12 @@ public class XCtx<C> implements XObject {
 	private JComponent makeTables(Function<Unit, Collection<Triple<C, C, List<C>>>> fn,
 			Set<C> ignore) {
 		cl = new CardLayout();
-		xgrid = new HashMap<>();
+	//	xgrid = new HashMap<>();
 		clx = new JPanel();
 		clx.setLayout(cl);
 		clx.add(new JPanel(), "0");
 		cl.show(clx, "0");
-		xgrid.put((C)"_1", "0");
+	//	xgrid.put((C)"_1", "0");
 
 		int www = 1;
 		try {
@@ -1011,7 +993,7 @@ public class XCtx<C> implements XObject {
 						c + " (" + src.size() + ") rows", rowData, colNames);
 				JPanel table2 = Util.makeTable(BorderFactory.createEtchedBorder(),
 						c + " (" + src.size() + ") rows", rowData, colNames);
-				xgrid.put(c, Integer.toString(www));
+			//	xgrid.put(c, Integer.toString(www));
 				clx.add(new JScrollPane(table2), Integer.toString(www));
 				www++;
 				grid.add(table);
@@ -1042,7 +1024,7 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 
-	Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> find_cache = new HashMap<>();
+	private final Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> find_cache = new HashMap<>();
 
 	public Triple<C, C, List<C>> find_fast(Triple<C, C, List<C>> tofind) {
 		if (find_cache.containsKey(tofind)) {
@@ -1055,8 +1037,8 @@ public class XCtx<C> implements XObject {
 	}
 
 	// test for inconsistency here?
-	public static <D> Triple<D, D, List<D>> find_old(SemiThue<D> kb, Triple<D, D, List<D>> tofind,
-			Collection<Triple<D, D, List<D>>> cat) {
+	private static <D> Triple<D, D, List<D>> find_old(SemiThue<D> kb, Triple<D, D, List<D>> tofind,
+                                                      Collection<Triple<D, D, List<D>>> cat) {
 		Set<Triple<D, D, List<D>>> ret = new HashSet<>();
 		for (Triple<D, D, List<D>> arr : cat) {
 			if (arr.first.equals(tofind.first) && arr.second.equals(tofind.second)) {
@@ -1179,7 +1161,7 @@ public class XCtx<C> implements XObject {
 				return yyy;
 			}
 
-			Map<Pair<Triple<C, C, List<C>>, Triple<C, C, List<C>>>, Triple<C, C, List<C>>> cache = new HashMap<>();
+			final Map<Pair<Triple<C, C, List<C>>, Triple<C, C, List<C>>>, Triple<C, C, List<C>>> cache = new HashMap<>();
 		};
 
 		if (GlobalOptions.debug.fpql.validate_amalgams) {
@@ -1259,7 +1241,7 @@ public class XCtx<C> implements XObject {
 				return ret;
 			}
 
-			@SuppressWarnings({"rawtypes", "unchecked", "cast" })
+			@SuppressWarnings({"rawtypes", "unchecked", "cast", "ConstantConditions"})
 			private Triple<C, C, List<C>> local_compose(Triple<C, C, List<C>> f,
 					Triple<C, C, List<C>> g) {
 				if (!arrows().contains(f)) {
@@ -1299,7 +1281,7 @@ public class XCtx<C> implements XObject {
 				}
 				if (new_arrs.contains(f) && sch.arrows().contains(g)) {
 					if (g.third.isEmpty()) {
-						if (!f.first.equals(f.first) || !f.second.equals(g.second)) {
+						if (!f.first.equals(g.first) || !f.second.equals(g.second)) {
 							throw new RuntimeException();
 						}
 						if (!arrows().contains(f)) {
@@ -1339,6 +1321,9 @@ public class XCtx<C> implements XObject {
 						l.addAll(g.third.subList(1, g.third.size()));
 						Triple<C, C, List<C>> ret = new Triple<>(a, g.second, l);
 						ret = find_old(getKB(), ret, hom(ret.first, ret.second));
+						if (ret == null) {
+							throw new RuntimeException("Anomaly: please report");
+						}
 						if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
 							throw new RuntimeException();
 						}
@@ -1357,7 +1342,7 @@ public class XCtx<C> implements XObject {
 						// must find equivalent - see CTDB example
 						ret = find_old(getKB(), ret, hom(ret.first, ret.second));
 						if (!arrows().contains(ret)) {
-							throw new RuntimeException(ret.toString());
+							throw new RuntimeException("Anomaly: please report: " + ret);
 						}
 						return ret;
 					}
@@ -1372,7 +1357,7 @@ public class XCtx<C> implements XObject {
 						sofar = findEq(sofar, gn);
 						if (sch.arrows().contains(sofar)) {
 							List hhh = new LinkedList();
-							hhh.add((C) ("!_" + a));
+							hhh.add("!_" + a);
 							hhh.addAll(sofar.third);
 							hhh.addAll(gnX);
 
@@ -1381,7 +1366,7 @@ public class XCtx<C> implements XObject {
 									sch.hom(ret0.first, ret0.second));
 							if (!arrows().contains(ret)) {
 								throw new RuntimeException("f " + f + " and " + g + "\n\nbad: "
-										+ ret.toString() + " not found inn\n\n"
+										+ ret + " not found inn\n\n"
 										+ Util.sep(arrows(), "\n"));
 							}
 							if (!ret.first.equals(f.first) || !ret.second.equals(g.second)) {
@@ -1413,7 +1398,7 @@ public class XCtx<C> implements XObject {
 					ret = find_old(getKB(), ret, hom(ret.first, ret.second));
 					if (!arrows().contains(ret)) {
 						throw new RuntimeException("f " + f + " and " + g + "\n\nbad: "
-								+ ret.toString() + " not found inn\n\n" + Util.sep(arrows(), "\n"));
+								+ ret + " not found inn\n\n" + Util.sep(arrows(), "\n"));
 					}
 					return ret;
 				}
@@ -1579,8 +1564,8 @@ public class XCtx<C> implements XObject {
 	}
 
 	// mutate paths in place
-	public static <C> void extend(SemiThue<C> kb, Collection<Triple<C, C, List<C>>> paths,
-			Map<C, Pair<C, C>> t, Collection<Triple<C, C, List<C>>> consts) {
+	private static <C> void extend(SemiThue<C> kb, Collection<Triple<C, C, List<C>>> paths,
+                                   Map<C, Pair<C, C>> t, Collection<Triple<C, C, List<C>>> consts) {
 		int iter = 0;
 		for (; iter < GlobalOptions.debug.fpql.MAX_PATH_LENGTH; iter++) {
 			Set<Triple<C, C, List<C>>> newPaths = new HashSet<>();
@@ -1643,9 +1628,9 @@ public class XCtx<C> implements XObject {
 		for (Pair<List<String>, List<String>> k : I.eqs) {
 			// : must expand paths
 			// : supress variable check for now
-			List l = new LinkedList<>();
+		
 			Set s = new HashSet<>();
-			s.add(l);
+			s.add(new LinkedList<>());
 			List<List> lhs = new LinkedList<>(expand(s, k.first, S, tmp));
 			List<List> rhs = new LinkedList<>(expand(s, k.second, S, tmp));
 			if (lhs.size() == 1 && rhs.size() > 1) {
@@ -1661,11 +1646,11 @@ public class XCtx<C> implements XObject {
 				lhsX.add(x);
 				lhs = lhsX;
 			}
-			if (rhs.size() ==  0) {
+			if (rhs.isEmpty()) {
 				throw new RuntimeException("In equation " 
 			+ Util.sep(k.first, ".") + " = " + Util.sep(k.second, ".") + ", the right hand side refers to non-existent terms.  You should probably add terms at the global or instance level.");
 			}
-			if (lhs.size() ==  0) {
+			if (lhs.isEmpty()) {
 				throw new RuntimeException("In equation " 
 			+ Util.sep(k.first, ".") + " = " + Util.sep(k.second, ".") + ", the left hand side refers to non-existent terms.  You should probably add terms at the global or instance level.");
 			}
@@ -1797,12 +1782,12 @@ public class XCtx<C> implements XObject {
 						+ " is not node or type");
 			}
 
-			if (edge1 == "false" && edge2 == "false") {
+			if (Objects.equals(edge1, "false") && Objects.equals(edge2, "false")) {
 				throw new RuntimeException("Error in " + k
 						+ ": functions should be declared at top-level");
 			}
 
-			if (edge1 == "false" && edge2 == "true") {
+			if (Objects.equals(edge1, "false") && Objects.equals(edge2, "true")) {
 				throw new RuntimeException("Error in " + k + ": cannot have functions from types");
 			}
 
@@ -1817,7 +1802,7 @@ public class XCtx<C> implements XObject {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
 		result = prime * result + ((global == null) ? 0 : global.hashCode());
@@ -1875,21 +1860,10 @@ public class XCtx<C> implements XObject {
 
 		subst((C) "!__1", (C) "_1");
 
-		for (;;) {
-			boolean b1 = cleanup();
-			boolean b2 = match();
-			if (!b1 && !b2) {
-				break;
-			}
-		}
-
 		kb();
 	}
 
-	private static boolean cleanup() {
-		return true;
-	}
-
+/*
 	private boolean match() {
 		Set<Pair<C, C>> substs = new HashSet<>();
 		for (Pair<List<C>, List<C>> eq1 : allEqs()) {
@@ -1914,7 +1888,7 @@ public class XCtx<C> implements XObject {
 			}
 		}
 
-		if (substs.size() == 0) {
+		if (substs.isEmpty()) {
 			return false;
 		}
 
@@ -1924,7 +1898,7 @@ public class XCtx<C> implements XObject {
 
 		return true;
 	}
-
+*/
 	private List<C> subst(C s, C t, List<C> l) {
 		return l.stream().map(x -> x.equals(s) ? t : x).collect(Collectors.toList());
 	}
@@ -2051,7 +2025,7 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 	
-	private Map<Pair<C,C>, XCtx<C>> y_cache = new HashMap<>();
+	private final Map<Pair<C,C>, XCtx<C>> y_cache = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
 	public XCtx<C> y(C name, C type) {
@@ -2087,7 +2061,7 @@ public class XCtx<C> implements XObject {
 			new_eqs.add(p);
 		}
 		
-		return new XCtx<>(ids, new_types, new_eqs, XCtx.empty_global(), null, "schema");
+		return new XCtx<>(ids, new_types, new_eqs, empty_global(), null, "schema");
 	}
 	
 	private boolean containsType(List<C> l) {
@@ -2148,7 +2122,7 @@ public class XCtx<C> implements XObject {
 		return g;
 	}
 	
-	public JPanel elements() {
+	private JPanel elements() {
 		if (schema == null || global == null) {
 			throw new RuntimeException();
 		}
@@ -2161,8 +2135,8 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 	
-	public static Color[] colors = { Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.YELLOW, Color.CYAN, Color.WHITE, Color.GRAY, Color.BLACK, Color.PINK, Color.ORANGE };
-	private Map<C, Color> colorMap = new HashMap<>();
+	private static final Color[] colors = { Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.YELLOW, Color.CYAN, Color.WHITE, Color.GRAY, Color.BLACK, Color.PINK, Color.ORANGE };
+	private final Map<C, Color> colorMap = new HashMap<>();
 	private void initColors() {
 		int i = 0;
 		for (C c : schema.ids) {
@@ -2174,7 +2148,7 @@ public class XCtx<C> implements XObject {
 		}
 	}
 	
-	private Map<Triple<C, C, List<C>>, JPanel> attPanels = new HashMap<>(); 
+	private final Map<Triple<C, C, List<C>>, JPanel> attPanels = new HashMap<>();
 	private JPanel attsFor(Triple<C, C, List<C>> arr) {
 		Map<C, String> tys = new HashMap<>();
 		Map<C, String> vals = new HashMap<>();
@@ -2214,7 +2188,7 @@ public class XCtx<C> implements XObject {
 		return ret;
 	}
 	
-	public JComponent makeElems() {
+	private JComponent makeElems() {
 		Graph<Triple<C,C,List<C>>, Pair<Integer, C>> sgv = elemGraph();
 		if (sgv.getVertexCount() > 64) {
 			return new JTextArea("Too large to display");
@@ -2225,15 +2199,13 @@ public class XCtx<C> implements XObject {
 		VisualizationViewer<Triple<C,C,List<C>>, Pair<Integer, C>> vv = new VisualizationViewer<>(layout);
 		vv.getRenderContext().setLabelOffset(20);
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		
 		JPanel botPanel = new JPanel(new GridLayout(1,1));
 
-		Transformer<Triple<C,C,List<C>>, Paint> vertexPaint = x -> {
-			return colorMap.get(x.second);
-		};
+		Transformer<Triple<C,C,List<C>>, Paint> vertexPaint = x -> colorMap.get(x.second);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
                     if (e.getStateChange() != ItemEvent.SELECTED) {
@@ -2244,12 +2216,8 @@ public class XCtx<C> implements XObject {
                             Triple<C, C, List<C>> arr = (Triple<C, C, List<C>>)e.getItem();
                     
                     //		cl.show(clx, xgrid.get(str));
-                    JPanel foo = attPanels.get(arr);
-                    if (foo == null) {
-                        foo = attsFor(arr);
-                        attPanels.put(arr, foo);
-                    }
-                    botPanel.removeAll();
+            JPanel foo = attPanels.computeIfAbsent(arr, k -> attsFor(arr));
+            botPanel.removeAll();
                     botPanel.add(foo);
                     botPanel.revalidate();
                 });
@@ -2261,9 +2229,7 @@ public class XCtx<C> implements XObject {
 			}
 			return ret;
 		};
-		Transformer<Pair<Integer, C>, String> ttt2 = arg0 -> {
-			return arg0.second.toString();
-		};
+		Transformer<Pair<Integer, C>, String> ttt2 = arg0 -> arg0.second.toString();
 		
 		vv.getRenderContext().setVertexLabelTransformer(ttt);
 		vv.getRenderContext().setEdgeLabelTransformer(ttt2);
@@ -2284,7 +2250,7 @@ public class XCtx<C> implements XObject {
 	
 	
 	 /*re-implement the render functionality to work with internal frames(JInternalFrame)*/
-     class MyRenderer extends JPanel implements Renderer.Vertex<C, C>
+   /*  private class MyRenderer extends JPanel implements Vertex<C, C>
     {
         static final long serialVersionUID = 420000L;
         @Override
@@ -2305,9 +2271,9 @@ public class XCtx<C> implements XObject {
                                      (int)center.getY(), (int)size.getWidth(), (int)size.getHeight(), true);
             
         }
-    }
+    } */
 
-     public String toJSON() {
+     private String toJSON() {
     	 if (global == null) {
     		  throw new RuntimeException("Attempt to JSON the type side");
     	 } else if (schema == null) {
@@ -2317,7 +2283,7 @@ public class XCtx<C> implements XObject {
     	 }
      }
      
-     public String toJSONSchema() {
+     private String toJSONSchema() {
     	// String ns = "";
     	// String es = "";
     	 

@@ -57,10 +57,10 @@ import catdata.fpql.XExp.XVoid;
 
 public class XOps implements XExpVisitor<XObject, XProgram> {
 	
-	XEnvironment ENV;
+	private final XEnvironment ENV;
 
 	public XOps(XEnvironment env) {
-		this.ENV = env;
+        ENV = env;
 	}
 
 	@Override
@@ -261,8 +261,8 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			throw new RuntimeException("LHS not an instance in " + e);
 		}
 		XObject r = e.r.accept(env, this);
-		if (!(l instanceof XCtx)) {
-			throw new RuntimeException("LHS not an instance in " + e);
+		if (!(r instanceof XCtx)) {
+			throw new RuntimeException("RHS not an instance in " + e);
 		}
 		XCtx ll = (XCtx) l;
 		XCtx rr = (XCtx) r;
@@ -276,16 +276,12 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			throw new RuntimeException("LHS not an instance in " + e);
 		}
 		XObject r = e.r.accept(env, this);
-		if (!(l instanceof XCtx)) {
-			throw new RuntimeException("LHS not an instance in " + e);
+		if (!(r instanceof XCtx)) {
+			throw new RuntimeException("RHS not an instance in " + e);
 		}
 		XCtx ll = (XCtx) l;
 		XCtx rr = (XCtx) r;
-		if (e.left) {
-			return XProd.inl(ll, rr);
-		} else {
-			return XProd.inr(ll, rr);
-		}
+        return e.left ? XProd.inl(ll, rr) : XProd.inr(ll, rr);
 	}
 
 	@Override
@@ -295,7 +291,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			throw new RuntimeException("LHS not a homomorphism");
 		}
 		XObject r = e.r.accept(env, this);
-		if (!(l instanceof XMapping)) {
+		if (!(r instanceof XMapping)) {
 			throw new RuntimeException("RHS not a homomorphism");
 		}
 		XMapping ll = (XMapping) l;
@@ -330,8 +326,8 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			throw new RuntimeException("LHS not an instance in " + e);
 		}
 		XObject r = e.r.accept(env, this);
-		if (!(l instanceof XCtx)) {
-			throw new RuntimeException("LHS not an instance in " + e);
+		if (!(r instanceof XCtx)) {
+			throw new RuntimeException("RHS not an instance in " + e);
 		}
 		XCtx<String> ll = (XCtx<String>) l;
 		XCtx<String> rr = (XCtx<String>) r;
@@ -346,16 +342,12 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			throw new RuntimeException("LHS not an instance in " + e);
 		}
 		XObject r = e.r.accept(env, this);
-		if (!(l instanceof XCtx)) {
-			throw new RuntimeException("LHS not an instance in " + e);
+		if (!(r instanceof XCtx)) {
+			throw new RuntimeException("RHS not an instance in " + e);
 		}
 		XCtx ll = (XCtx) l;
 		XCtx rr = (XCtx) r;
-		if (e.left) {
-			return XProd.fst(ll, rr);
-		} else {
-			return XProd.snd(ll, rr);
-		}
+        return e.left ? XProd.fst(ll, rr) : XProd.snd(ll, rr);
 	}
 
 	@Override
@@ -365,7 +357,7 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 			throw new RuntimeException("LHS not a homomorphism");
 		}
 		XObject r = e.r.accept(env, this);
-		if (!(l instanceof XMapping)) {
+		if (!(r instanceof XMapping)) {
 			throw new RuntimeException("RHS not a homomorphism");
 		}
 		XMapping ll = (XMapping) l;
@@ -543,13 +535,13 @@ public class XOps implements XExpVisitor<XObject, XProgram> {
 		XCtx c = (XCtx) o;
 
 		int i = 0;
-		Map m1 = new HashMap();
+		//Map m1 = new HashMap();
 		Map m2 = new HashMap();
 	//	Map mty = new HashMap();
 		
 		Map from = new HashMap<>();
 		for (Object t : c.terms()) {
-			m1.put("v_v"+i, t);
+		//	m1.put("v_v"+i, t);
 			m2.put(t, "v_v"+i);
 			from.put("v_v"+i, c.type(t).second);
 //			from.put("v"+i, c.type(((Pair)t).second);

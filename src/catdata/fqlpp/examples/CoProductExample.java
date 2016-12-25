@@ -20,7 +20,7 @@ public class CoProductExample extends Example {
 		return s;
 	}
 	
-	String s = "/* Functors S to Set ****************************/"
+	private final String s = "/* Functors S to Set ****************************/"
 			+ "\n"
 			+ "\ncategory S = {"
 			+ "\n	objects a, b;"

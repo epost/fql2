@@ -4,9 +4,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.It.ID;
 import catdata.aql.Query;
@@ -17,11 +17,12 @@ import catdata.aql.Var;
 public class CoEvalTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> 
 extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<Var,X1>, Y1, Pair<Var,X2>, Y2, ID, Chc<Y1, Pair<ID, Att1>>, ID, Chc<Y2, Pair<ID, Att1>>> {
 
-	public final Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
-	public final Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
+	private final Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
+	@SuppressWarnings("unused")
+	private final Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
 	
-	public final CoEvalInstance<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, X1, Y1> src; 
-	public final CoEvalInstance<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, En2, Fk2, Att2, X2, Y2> dst; 
+	private final CoEvalInstance<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, X1, Y1> src;
+	private final CoEvalInstance<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, En2, Fk2, Att2, X2, Y2> dst;
 
 	private final Ctx<Pair<Var, X1>, Term<Void, En1, Void, Fk1, Void, Pair<Var, X2>, Void>> gens = new Ctx<>();
 	private final Ctx<Y1, Term<Ty, En1, Sym, Fk1, Att1, Pair<Var, X2>, Y2>> sks = new Ctx<>();

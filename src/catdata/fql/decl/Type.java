@@ -2,6 +2,7 @@ package catdata.fql.decl;
 
 import java.util.Set;
 
+import catdata.Util;
 import catdata.fql.sql.PSM;
 
 /**
@@ -23,11 +24,11 @@ public abstract class Type {
 	public abstract int hashCode();
 	
 	public static class Enum extends Type {
-		public String name;
-		public Set<String> values;
+		public final String name;
+		public final Set<String> values;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((name == null) ? 0 : name.hashCode());
 			return result;
@@ -51,7 +52,7 @@ public abstract class Type {
 		
 		public static Object q(Object o) {
 			String s = o.toString();
-			if ((s.contains(" ") || s.contains("-") || s.length() == 0) && !s.contains("\"")) {
+			if ((s.contains(" ") || s.contains("-") || s.isEmpty()) && !s.contains("\"")) {
 				return "\"" + s + "\"";
 			}
 			return s;
@@ -75,8 +76,7 @@ public abstract class Type {
 			return name;
 		}
 		public Enum(String name, Set<String> values) {
-			super();
-			this.name = name;
+            this.name = name;
 			this.values = values;
 		//	if (values.size() == 0) {
 		//		throw new RuntimeException("Empty enum: " + name);
@@ -98,11 +98,8 @@ public abstract class Type {
 
 		@Override
 		public boolean equals(Object o) {
-			if (o instanceof Int) {
-				return true;
-			}
-			return false;
-		}
+            return o instanceof Int;
+        }
 
 		@Override
 		public int hashCode() {
@@ -117,12 +114,7 @@ public abstract class Type {
 
 		@Override
 		public boolean in(Object o) {
-			try {
-				Integer.parseInt(o.toString());
-				return true;
-			} catch (Exception e) {
-				return false;
-			}
+			return Util.isInt(o.toString());
 		}
 		@Override
 		public String psm() {
@@ -135,11 +127,8 @@ public abstract class Type {
 
 		@Override
 		public boolean equals(Object o) {
-			if (o instanceof Double) {
-				return true;
-			}
-			return false;
-		}
+            return o instanceof Double;
+        }
 
 		@Override
 		public int hashCode() {
@@ -178,11 +167,8 @@ public abstract class Type {
 
 		@Override
 		public boolean equals(Object o) {
-			if (o instanceof Varchar) {
-				return true;
-			}
-			return false;
-		}
+            return o instanceof Varchar;
+        }
 
 		@Override
 		public int hashCode() {

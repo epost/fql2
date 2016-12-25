@@ -21,7 +21,7 @@ public class Patrick22Example extends Example {
 		return s;
 	}
 	
-	String s = "old : type"
+	private final String s = "old : type"
 			+ "\n"
 			+ "\nGlassCeramics: old"
 			+ "\nGlass: old"

@@ -7,12 +7,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.DP;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
@@ -73,7 +73,7 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 		checkSatisfaction(); //TODO aql disable in production?
 	}
 
-	public void checkSatisfaction() {
+	private void checkSatisfaction() {
 		for (Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : schema().eqs) {
 			for (X x : algebra().en(eq.first.second)) {
 				Term<Ty, En, Sym, Fk, Att, X, Y> lhs = eq.second.mapGenSk(Util.<X>voidFn(), Util.<Y>voidFn()).subst(Util.singMap0(eq.first.first, Term.Gen(x)));
@@ -221,7 +221,7 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 			} else if (term.var != null) {
 				return Term.Var(term.var);
 			} else if (term.sym != null) {
-				return Term.Sym(term.sym, term.args.stream().map(x -> transL(x)).collect(Collectors.toList()));
+				return Term.Sym(term.sym, term.args.stream().map(this::transL).collect(Collectors.toList()));
 			} else if (term.att != null) {
 				return Term.Att(term.att, transL(term.arg));
 			} else if (term.fk != null) {

@@ -25,8 +25,7 @@ public class Arr<Obj, Arrow> {
 	public Obj dst;
 
 	public Arr(Arrow arr, Obj src, Obj dst) {
-		super();
-		if (arr == null) {
+        if (arr == null) {
 			throw new RuntimeException();
 		}
 		this.arr = arr;
@@ -36,7 +35,7 @@ public class Arr<Obj, Arrow> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((arr == null) ? 0 : arr.hashCode());
 		result = prime * result + ((dst == null) ? 0 : dst.hashCode());

@@ -20,7 +20,7 @@ public class OplJSExample extends Example {
 		return s;
 	}
 	
-	String s = "T = theory {"
+	private final String s = "T = theory {"
 			+ "\n	sorts "
 			+ "\n		Int, String;"
 			+ "\n	symbols "

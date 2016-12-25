@@ -20,7 +20,7 @@ public class PropExample extends Example {
 		return s;
 	}
 	
-	String s = 
+	private final String s =
 			"/* for better performance, disable: "
 	        + "\n *  - observables, elements, rdf for instances"
 			+ "\n *  - graph for transforms"
@@ -93,8 +93,8 @@ public class PropExample extends Example {
 			+ "\ninstance ker = kernel char_t"
 			+ "\ntransform char_t2 = ker.kernel"
 			+ "\n//I and ker are isomorphic"
-			+ "\ntransform iso = iso1 I ker"
-			+ "\ntransform should_equal_t = (iso then char_t2) //= t"
+			//+ "\ntransform iso = iso1 I ker"
+		//	+ "\ntransform should_equal_t = (iso then char_t2) //= t"
 			+ "\n"
 		+ "\n// Propositional logic ///////////////////////////////////////"
 		+ "\n"

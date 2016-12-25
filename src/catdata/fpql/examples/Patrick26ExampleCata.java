@@ -21,7 +21,7 @@ public class Patrick26ExampleCata extends Example {
 		return s;
 	}
 	
-	String s = "/*"
+	private final String s = "/*"
 			+ "\n * Nat(X) := 1+X"
 			+ "\n * Nat(f) := 1+f"
 			+ "\n * Nat := lfix X. Nat(X)"

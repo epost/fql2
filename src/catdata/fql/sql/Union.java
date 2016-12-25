@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class Union extends SQL {
 
-	List<Flower> flowers;
+	private final List<Flower> flowers;
 
 	public Union(List<Flower> flowers) {
 		if (flowers.size() < 2) {

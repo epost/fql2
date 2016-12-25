@@ -15,9 +15,9 @@ public abstract class PSM {
 	
 	public abstract String isSql();
 	
-	public final static String INTEGER = "INTEGER";
+	public static final String INTEGER = "INTEGER";
 	public static final String FLOAT = "FLOAT";
-	public final static String VARCHAR() {
+	public static String VARCHAR() {
 		return "VARCHAR(" + GlobalOptions.debug.fql.varlen + ")";
 	}
 

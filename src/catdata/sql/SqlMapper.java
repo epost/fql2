@@ -32,7 +32,7 @@ public class SqlMapper extends JPanel {
 		return ret;
 	}
 	
-	void doRun() {
+	private void doRun() {
 		if (input1.schema == null) {
 			output.setText("Please Run or Load first");
 			return;
@@ -47,14 +47,12 @@ public class SqlMapper extends JPanel {
 		output.setText(print(m.toStrings()));
 	}
 
-	public SqlMapper() {
+	private SqlMapper() {
 		super(new BorderLayout());
 
 		JButton transButton = new JButton("Guess Mapping");
 
-		transButton.addActionListener(x -> {
-			doRun();
-		});
+		transButton.addActionListener(x -> doRun());
 
 		JPanel tp = new JPanel(new GridLayout(1, 4));
 

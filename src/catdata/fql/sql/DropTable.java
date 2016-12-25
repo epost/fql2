@@ -11,7 +11,7 @@ import java.util.Set;
  */
 public class DropTable extends PSM {
 
-	String name;
+	private final String name;
 
 	public DropTable(String name) {
 		this.name = name;

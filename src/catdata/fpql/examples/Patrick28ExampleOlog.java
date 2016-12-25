@@ -21,7 +21,7 @@ public class Patrick28ExampleOlog extends Example {
 		return s;
 	}
 	
-	String s = "S = schema {"
+	private final String s = "S = schema {"
 			+ "\n	nodes \"arginine\", \"an electrically-charged side chain\", \"a side chain\", "
 			+ "\n		 \"an amino acid found in dairy\", \"an amino acid\", \"an amine group\","
 			+ "\n		 \"a carboxylic acid\";"

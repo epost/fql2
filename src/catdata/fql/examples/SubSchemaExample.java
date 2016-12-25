@@ -20,7 +20,7 @@ public class SubSchemaExample extends Example {
 		return s;
 	}
 	
-	String s = "schema ab = {"
+	private final String s = "schema ab = {"
 			+ "\n	nodes a, b;"
 			+ "\n	attributes atta : a -> string, attb : b -> string;"
 			+ "\n	arrows f : a -> b;"

@@ -37,7 +37,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		}
 	}
 
-	public static <X> Collection<Pair<String, Kind>> wrapDeps(String s, Exp<X> exp, Program<Exp<?>> prog) {
+	private static <X> Collection<Pair<String, Kind>> wrapDeps(String s, Exp<X> exp, Program<Exp<?>> prog) {
 		Collection<Pair<String, Kind>> ret = new HashSet<>(exp.deps());
 		for (String s0 : prog.order) {
 			if (s.equals(s0)) {
@@ -67,14 +67,14 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	public final AqlEnv env = new AqlEnv();
 
-	public final List<String> todo = Collections.synchronizedList(new LinkedList<>());
-	public final List<String> processing = Collections.synchronizedList(new LinkedList<>());
-	public final List<String> completed =Collections.synchronizedList(new LinkedList<>());
+	private final List<String> todo = Collections.synchronizedList(new LinkedList<>());
+	private final List<String> processing = Collections.synchronizedList(new LinkedList<>());
+	private final List<String> completed =Collections.synchronizedList(new LinkedList<>());
 
-	public final Program<Exp<?>> prog;
-	public final String[] toUpdate;
-	public final Program<Exp<?>> last_prog;
-	public final AqlEnv last_env;
+	private final Program<Exp<?>> prog;
+	private final String[] toUpdate;
+	private final Program<Exp<?>> last_prog;
+	private final AqlEnv last_env;
 
 	private final List<RuntimeException> exn = Collections.synchronizedList(new LinkedList<>());
 
@@ -143,7 +143,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	private void process() {
 		int numProcs = Runtime.getRuntime().availableProcessors();
 		for (int i = 0; i < numProcs; i++) {
-			Thread thr = new Thread(() -> call());
+			Thread thr = new Thread(this::call);
 			threads.add(thr);			
 			thr.start();
 		}
@@ -219,7 +219,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		String n = "";
 
 		try {
-			for (;;) {
+			while (true) {
 				n = null;
 
 				synchronized (this) {

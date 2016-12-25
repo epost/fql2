@@ -2,8 +2,8 @@ package catdata.aql.fdm;
 
 import java.util.function.Function;
 
+import catdata.Ctx;
 import catdata.Util;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.Query;
 import catdata.aql.Term;
@@ -13,11 +13,12 @@ import catdata.aql.fdm.EvalAlgebra.Row;
 public class EvalTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> 
 extends Transform<Ty, En2, Sym, Fk2, Att2, Row<En2,X1>, Y1, Row<En2,X2>, Y2, Row<En2,X1>, Y1, Row<En2,X2>, Y2>  {
 
-	public final Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
-	public final Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
+	private final Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
+	@SuppressWarnings("unused")
+	private final Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
 	
-	public final EvalInstance<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, X1, Y1> src; 
-	public final EvalInstance<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, En2, Fk2, Att2, X2, Y2> dst; 
+	private final EvalInstance<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, X1, Y1> src;
+	private final EvalInstance<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, En2, Fk2, Att2, X2, Y2> dst;
 
 	private final Ctx<Row<En2, X1>, Term<Void, En2, Void, Fk2, Void, Row<En2, X2>, Void>> gens = new Ctx<>();
 	private final Ctx<Y1, Term<Ty, En2, Sym, Fk2, Att2, Row<En2, X2>, Y2>> sks = new Ctx<>();

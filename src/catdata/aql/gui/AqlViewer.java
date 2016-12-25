@@ -22,13 +22,13 @@ import javax.swing.JTabbedPane;
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.AqlJs;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.DP;
 import catdata.aql.Instance;
 import catdata.aql.Mapping;
@@ -51,7 +51,6 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 //TODO: aql quoting
@@ -125,7 +124,7 @@ public final class AqlViewer {
 
 	}
 
-	public static <Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2> JComponent viewMorphism(Morphism<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Sym, Fk2, Att2, Gen2, Sk2> m, AqlJs<Ty,Sym> js) {
+	private static <Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2> JComponent viewMorphism(Morphism<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Sym, Fk2, Att2, Gen2, Sk2> m, AqlJs<Ty, Sym> js) {
 		CodeTextPanel input = new CodeTextPanel("Input", "");
 		CodeTextPanel output = new CodeTextPanel("Output", "");
 
@@ -170,7 +169,7 @@ public final class AqlViewer {
 	} */
 
 	
-	public static <N,E> JComponent viewGraph(DMG<N,E> g) {
+	private static <N,E> JComponent viewGraph(DMG<N, E> g) {
 		Graph<N, E> sgv = new DirectedSparseMultigraph<>();
 
 		for (N n : g.nodes) {
@@ -189,13 +188,13 @@ public final class AqlViewer {
 		VisualizationViewer<N, E> vv = new VisualizationViewer<>(layout);
 		Transformer<N, Paint> vertexPaint = x -> Color.black;
 		DefaultModalGraphMouse<N, E> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer<E, String> et = x -> x.toString();
-		Transformer<N, String> vt = x -> x.toString();
+		Transformer<E, String> et = Object::toString;
+		Transformer<N, String> vt = Object::toString;
 		vv.getRenderContext().setEdgeLabelTransformer(et);
 		vv.getRenderContext().setVertexLabelTransformer(vt);
 
@@ -211,7 +210,7 @@ public final class AqlViewer {
 	}	
 
 	
-	public static <Ty, En, Sym, Fk, Att> JComponent viewSchema(Schema<Ty, En, Sym, Fk, Att> schema) {
+	private static <Ty, En, Sym, Fk, Att> JComponent viewSchema(Schema<Ty, En, Sym, Fk, Att> schema) {
 		Graph<Chc<Ty, En>, Chc<Fk, Att>> sgv = new DirectedSparseMultigraph<>();
 
 		for (En en : schema.ens) {
@@ -237,13 +236,13 @@ public final class AqlViewer {
 		VisualizationViewer<Chc<Ty, En>, Chc<Fk, Att>> vv = new VisualizationViewer<>(layout);
 		Transformer<Chc<Ty, En>, Paint> vertexPaint = x -> x.left ? Color.gray : Color.black;
 		DefaultModalGraphMouse<Chc<Ty, En>, Chc<Fk, Att>> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer<Chc<Fk, Att>, String> et = x -> x.toStringMash();
-		Transformer<Chc<Ty, En>, String> vt = x -> x.toStringMash();
+		Transformer<Chc<Fk, Att>, String> et = Chc::toStringMash;
+		Transformer<Chc<Ty, En>, String> vt = Chc::toStringMash;
 		vv.getRenderContext().setEdgeLabelTransformer(et);
 		vv.getRenderContext().setVertexLabelTransformer(vt);
 
@@ -297,7 +296,7 @@ public final class AqlViewer {
 		return graphComponent;
 	}	*/
 
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> JComponent viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty,Sym> js) {
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk> JComponent viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty, Sym> js) {
 		CodeTextPanel input = new CodeTextPanel("Input", "");
 		CodeTextPanel output = new CodeTextPanel("Output", "");
 
@@ -320,9 +319,7 @@ public final class AqlViewer {
 		main.add(split, BorderLayout.CENTER);
 		main.add(buttonPanel, BorderLayout.NORTH);
 
-		print.addActionListener(x -> {
-			output.setText(dp.toString());
-		});
+		print.addActionListener(x -> output.setText(dp.toString()));
 		eq.addActionListener(x -> {
 			try {
 				Triple<List<Pair<String, String>>, RawTerm, RawTerm> y = AqlParser.parseEq(input.getText());
@@ -350,7 +347,7 @@ public final class AqlViewer {
 	}
 	
 	
-		public static <Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> JComponent viewTransform(Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
+		private static <Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> JComponent viewTransform(Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
 			List<JComponent> list = new LinkedList<>();
 
 			List<En> ens = Util.alphabetical(t.src().schema().ens);
@@ -401,7 +398,7 @@ public final class AqlViewer {
 	
 	
 
-		public static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Map<Ty, Object[][]> makeTyTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+		private static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Map<Ty, Object[][]> makeTyTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
 			Map<Ty, Object[][]> ret = new LinkedHashMap<>();
 
 			List<Ty> tys = Util.alphabetical(alg.schema().typeSide.tys);
@@ -414,9 +411,9 @@ public final class AqlViewer {
 				int n = m.get(ty).size();
 				Object[][] data = new Object[n][1];
 				int i = 0;
-				for (Y x : Util.alphabetical(m.get(ty))) {
+				for (Y y : Util.alphabetical(m.get(ty))) {
 					Object[] row = new Object[1];
-					row[0] = alg.printY(x);				
+					row[0] = alg.printY(y);
 					data[i] = row;
 					i++;
 				}
@@ -458,7 +455,7 @@ public final class AqlViewer {
 			return ret;
 		}
 		
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Component viewAlgebra(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Component viewAlgebra(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
 		List<JComponent> list = new LinkedList<>();
 
 		Map<En,Pair<List<String>,Object[][]>> entables = makeEnTables(alg);

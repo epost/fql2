@@ -103,7 +103,7 @@ public class SemiThue<Y> {
 	}
 
 	private <X> void go(Set<Pair<List<X>, List<X>>> t) {
-		while (!step(t)){} 
+		while (!step(t));
 	}
 
 	private <X> boolean step(Set<Pair<List<X>, List<X>>> t) {
@@ -113,15 +113,15 @@ public class SemiThue<Y> {
 		orient(t);
 		normalize(t);
 		Set<Pair<List<X>, List<X>>> ce = cp(t);
-		if (!ce.isEmpty()) {
-			t.addAll(ce);
-			normalize(t);
-			cp(t); //has side effect
-			return false;
-		} else {
-			simplify(t);
-			return true;
-		}
+        if (ce.isEmpty()) {
+            simplify(t);
+            return true;
+        } else {
+            t.addAll(ce);
+            normalize(t);
+            cp(t); //has side effect
+            return false;
+        }
 	}
 
 	private static <X> Pair<List<X>, List<X>> getUnmarked(Set<Pair<List<X>, List<X>>> marked,
@@ -250,13 +250,13 @@ public class SemiThue<Y> {
 		Set<List<X>> init = new HashSet<>();
 		init.add(e);
 
-		for (;;) {
-			Set<List<X>> next = close1(init, t);
-			if (init.equals(next)) {
-				return init;
-			}
-			init = next;
-		}
+        while (true) {
+            Set<List<X>> next = close1(init, t);
+            if (init.equals(next)) {
+                return init;
+            }
+            init = next;
+        }
 	}
 
 	private static <X> Set<List<X>> close1(Set<List<X>> set, Set<Pair<List<X>, List<X>>> t) {

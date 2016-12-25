@@ -47,7 +47,7 @@ import catdata.fpql.XExp.XVoid;
 
 public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>> {
 
-	static Var SET = new Var("Set");
+	private static final Var SET = new Var("Set");
 	
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, Var e) {
@@ -129,21 +129,21 @@ public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, XUnit e) {
 		if (e.kind.equals("sigma")) {
-			return new Pair<>(e.I, new XExp.XDelta(e.F, new XExp.XSigma(e.F, e.I)));
+			return new Pair<>(e.I, new XDelta(e.F, new XSigma(e.F, e.I)));
 		} else if (e.kind.equals("pi")) {
-			return new Pair<>(e.I, new XExp.XPi(e.F, new XExp.XDelta(e.F, e.I)));
+			return new Pair<>(e.I, new XPi(e.F, new XDelta(e.F, e.I)));
 		}
-		throw null;
+		throw new RuntimeException("Anomaly: please report");
 	}
 
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, XCounit e) {
 		if (e.kind.equals("sigma")) {
-			return new Pair<>(new XExp.XSigma(e.F, new XExp.XDelta(e.F, e.I)), e.I);
+			return new Pair<>(new XSigma(e.F, new XDelta(e.F, e.I)), e.I);
 		} else if (e.kind.equals("pi")) {
-			return new Pair<>(new XExp.XDelta(e.F, new XExp.XPi(e.F, e.I)), e.I);
+			return new Pair<>(new XDelta(e.F, new XPi(e.F, e.I)), e.I);
 		}
-		throw null;
+		throw new RuntimeException("Anomaly: please report");
 	}
 	
 	@Override
@@ -185,11 +185,7 @@ public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>
 		if (!l.first.equals(r.first)) {
 			throw new RuntimeException("Different schemas in " + e + ", are" + l.first + " and " + r.first);
 		}
-		if (e.left) {
-			return new Pair<>(e.l, new XCoprod(e.l, e.r));
-		} else {
-			return new Pair<>(e.r, new XCoprod(e.l, e.r));
-		}
+        return e.left ? new Pair<>(e.l, new XCoprod(e.l, e.r)) : new Pair<>(e.r, new XCoprod(e.l, e.r));
 	}
 
 	@Override
@@ -229,11 +225,7 @@ public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>
 		if (!l.first.equals(r.first)) {
 			throw new RuntimeException("Different schemas in " + e + ", are" + l.first + " and " + r.first);
 		}
-		if (e.left) {
-			return new Pair<>(new XTimes(e.l, e.r), e.l);
-		} else {
-			return new Pair<>(new XTimes(e.l, e.r), e.r);
-		}
+        return e.left ? new Pair<>(new XTimes(e.l, e.r), e.l) : new Pair<>(new XTimes(e.l, e.r), e.r);
 
 	}
 
@@ -339,22 +331,22 @@ public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>
 	
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, XToQuery e) {
-		throw null;
+		throw new RuntimeException("Anomaly: please report");
 	}
 
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, XUberPi e) {
-		throw null;
+		throw new RuntimeException("Anomaly: please report");
 	}
 
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, XLabel e) {
-		throw null;
+		throw new RuntimeException("Anomaly: please report");
 	}
 
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, XGrothLabels e) {
-		throw null;
+		throw new RuntimeException("Anomaly: please report");
 	}
 	
 	@Override
@@ -384,7 +376,7 @@ public class XChecker implements XExpVisitor<Pair<XExp, XExp>, Map<String, XExp>
 	
 	@Override
 	public Pair<XExp, XExp> visit(Map<String, XExp> env, Iter e) {
-		throw null;
+		throw new RuntimeException("Anomaly: please report");
 	}
 
 	

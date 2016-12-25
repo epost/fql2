@@ -10,6 +10,9 @@ import org.codehaus.jparsec.Parser.Reference;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
+import org.codehaus.jparsec.Terminals.Identifier;
+import org.codehaus.jparsec.Terminals.IntegerLiteral;
+import org.codehaus.jparsec.Terminals.StringLiteral;
 import org.codehaus.jparsec.Token;
 import org.codehaus.jparsec.functors.Pair;
 import org.codehaus.jparsec.functors.Tuple3;
@@ -69,10 +72,10 @@ import catdata.aql.exp.TyExp.TyExpVar;
 public class AqlParser {
 
 
-	public final static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
+	public static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };	
 	
-	public final static String[] res = new String[] {
+	public static final String[] res = new String[] {
 			"typeside", "schema", "mapping", "instance", "transform", "query", "pragma", "graph",
 			"exec_jdbc",
 			"exec_js",
@@ -140,18 +143,18 @@ public class AqlParser {
 			Scanners.WHITESPACES).skipMany();
 
 	private static final Parser<Object> TOKENIZER = Parsers.or(
-			Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
+			StringLiteral.DOUBLE_QUOTE_TOKENIZER,
 			RESERVED.tokenizer(), 
-			Terminals.Identifier.TOKENIZER,
-			Terminals.IntegerLiteral.TOKENIZER);
+			Identifier.TOKENIZER,
+			IntegerLiteral.TOKENIZER);
 
 	private static Parser<Token> token(String... names) {
 		return RESERVED.token(names);
 	}
 
-	public final static Parser<String> ident = 
-		 Parsers.or(Terminals.StringLiteral.PARSER,Terminals.IntegerLiteral.PARSER,
-				Terminals.Identifier.PARSER);
+	private static final Parser<String> ident =
+		 Parsers.or(StringLiteral.PARSER, IntegerLiteral.PARSER,
+				Identifier.PARSER);
 	
 
 //	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
@@ -162,15 +165,13 @@ public class AqlParser {
 
 	
 	
-	public static final Parser<RawTerm> term() {
+	private static Parser<RawTerm> term() {
 		Reference<RawTerm> ref = Parser.newReference();
 		
 		Parser<RawTerm> ann = Parsers.tuple(ident, token("@"), ident).map(x -> new RawTerm(x.a, x.c));
 		
 		Parser<RawTerm> app = Parsers.tuple(ident, token("("),
-				ref.lazy().sepBy(token(",")), token(")")).map(x -> {
-					return new RawTerm(x.a, x.c);
-				});
+				ref.lazy().sepBy(token(",")), token(")")).map(x -> new RawTerm(x.a, x.c));
 		
 		/* Parser<RawTerm> appH = Parsers.tuple(ident, 
 				ref.lazy().many()).map(x -> {
@@ -457,9 +458,7 @@ public class AqlParser {
 		Parser<Tuple3<List<String>, List<String>, List<catdata.Pair<String, catdata.Pair<String, String>>>>> 
 		pa = Parsers.tuple(imports, nodes.optional(), edges0.optional());
 		
-		Parser<GraphExpRaw> ret = pa.map(x -> {
-			return new GraphExpRaw(x.b, x.c, x.a);
-		});
+		Parser<GraphExpRaw> ret = pa.map(x -> new GraphExpRaw(x.b, x.c, x.a));
 		return ret.between(token("literal").followedBy(token("{")), token("}")); 
 		
 	}
@@ -598,16 +597,12 @@ public class AqlParser {
 			return ret;
 		});		
 
-		Parser<catdata.Pair<List<String>, List<String>>> p_eq = Parsers.tuple(ident.sepBy(token(".")), token("="), ident.sepBy(token("."))).map(x -> {
-			return new catdata.Pair<>(x.a, x.c);
-		});
+		Parser<catdata.Pair<List<String>, List<String>>> p_eq = Parsers.tuple(ident.sepBy(token(".")), token("="), ident.sepBy(token("."))).map(x -> new catdata.Pair<>(x.a, x.c));
 
 		Parser<Pair<Token, List<catdata.Pair<List<String>, List<String>>>>> p_eqs = Parsers.tuple(token("path_equations"), p_eq.many());
 		Parser<List<catdata.Pair<List<String>, List<String>>>> p_eqs0 = p_eqs.map(x -> x.b);
 				
-		Parser<Quad<String,String,RawTerm,RawTerm>> o_eq = Parsers.tuple(token("forall"), ident, Parsers.tuple(token(":"), ident).optional().followedBy(token(".")), term().followedBy(token("=")), term()).map(x -> {
-			return new Quad<>(x.b, x.c == null ? null : x.c.b, x.d, x.e);
-		});
+		Parser<Quad<String,String,RawTerm,RawTerm>> o_eq = Parsers.tuple(token("forall"), ident, Parsers.tuple(token(":"), ident).optional().followedBy(token(".")), term().followedBy(token("=")), term()).map(x -> new Quad<>(x.b, x.c == null ? null : x.c.b, x.d, x.e));
 
 		Parser<Pair<Token, List<Quad<String, String, RawTerm, RawTerm>>>> o_eqs = Parsers.tuple(token("observation_equations"), o_eq.many());
 		Parser<List<Quad<String, String, RawTerm, RawTerm>>> o_eqs0 = o_eqs.map(x -> x.b);
@@ -622,15 +617,13 @@ public class AqlParser {
 		
 		
 		//needs tyexp
-		Parser<SchExpRaw> ret = Parsers.tuple(l, pa, pb, token("}")).map(x -> {
-			return new SchExpRaw(x.a.c, 
-						 		 x.b.a, Util.newIfNull(x.b.b), 
-						 				Util.newIfNull(x.b.c), 
-						 				Util.newIfNull(x.b.d), 
-						 				Util.newIfNull(x.c.a),
-						 				Util.newIfNull(x.c.b), 
-					             x.c.c);
-		});
+		Parser<SchExpRaw> ret = Parsers.tuple(l, pa, pb, token("}")).map(x -> new SchExpRaw(x.a.c,
+                              x.b.a, Util.newIfNull(x.b.b),
+                                     Util.newIfNull(x.b.c),
+                                     Util.newIfNull(x.b.d),
+                                     Util.newIfNull(x.c.a),
+                                     Util.newIfNull(x.c.b),
+                             x.c.c));
 			
 		return ret;	
 	}
@@ -638,9 +631,7 @@ public class AqlParser {
 	 private static Parser<InstExpRaw> instExpRaw() {
 			Parser<List<catdata.Pair<String, String>>> generators = Parsers.tuple(token("generators"), env(ident, ":")).map(x -> x.b);
 			
-			Parser<catdata.Pair<RawTerm, RawTerm>> eq = Parsers.tuple(term(), token("="), term()).map(x -> {
-				return new catdata.Pair<>(x.a, x.c);
-			});
+			Parser<catdata.Pair<RawTerm, RawTerm>> eq = Parsers.tuple(term(), token("="), term()).map(x -> new catdata.Pair<>(x.a, x.c));
 
 			Parser<List<catdata.Pair<RawTerm, RawTerm>>> eqs = Parsers.tuple(token("equations"), eq.many()).map(x -> x.b);
 					
@@ -660,13 +651,11 @@ public class AqlParser {
 			
 			Parser<Tuple4<Token, Token, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"), sch_ref.lazy(), token("{")); //.map(x -> x.c);
 						
-			Parser<InstExpRaw> ret = Parsers.tuple(l, pa, token("}")).map(x -> {
-				return new InstExpRaw(x.a.c,
-							 		  Util.newIfNull(x.b.a), 
-							 	      Util.newIfNull(x.b.b), 
-							 	      new LinkedList<>(Util.union(Util.newIfNull(x.b.c), Util.newIfNull(x.b.d))),
-						              Util.toMapSafely(x.b.e));
-			});
+			Parser<InstExpRaw> ret = Parsers.tuple(l, pa, token("}")).map(x -> new InstExpRaw(x.a.c,
+                                   Util.newIfNull(x.b.a),
+                                   Util.newIfNull(x.b.b),
+                                   new LinkedList<>(Util.union(Util.newIfNull(x.b.c), Util.newIfNull(x.b.d))),
+                                  Util.toMapSafely(x.b.e)));
 				
 			return ret;	
 	}
@@ -675,9 +664,7 @@ public class AqlParser {
 		 Parser<List<catdata.Pair<String, String>>> generators 
 			= Parsers.tuple(token("from"), env(ident, ":")).map(x -> x.b);
 			
-			Parser<catdata.Pair<RawTerm, RawTerm>> eq = Parsers.tuple(term(), token("="), term()).map(x -> {
-				return new catdata.Pair<>(x.a, x.c);
-			});
+			Parser<catdata.Pair<RawTerm, RawTerm>> eq = Parsers.tuple(term(), token("="), term()).map(x -> new catdata.Pair<>(x.a, x.c));
 
 			Parser<List<catdata.Pair<RawTerm, RawTerm>>> eqs = Parsers.tuple(token("where"), eq.many()).map(x -> x.b);
 					
@@ -704,7 +691,7 @@ public class AqlParser {
 		return Parsers.fail("pragma parser not implemented yet"); //TODO aql pragma
 	} */
 
-	public static final void queryExp() {
+	private static void queryExp() {
 		Parser<QueryExp<?,?,?,?,?,?,?,?>> 
 		var = ident.map(QueryExpVar::new),
 		//id = Parsers.tuple(token("id"), sch_ref.lazy()).map(x -> new MapExpId<>(x.b)),
@@ -754,14 +741,11 @@ public class AqlParser {
 			
 			Parser<Tuple5<Token, Token, SchExp<?, ?, ?, ?, ?>, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"), sch_ref.lazy().followedBy(token("->")), sch_ref.lazy(), token("{")); //.map(x -> x.c);
 						
-			Parser<QueryExpRaw<String,String,String,String,String,String,String,String>> ret = Parsers.tuple(l, pa, token("}")).map(x -> {
-				
-			return new QueryExpRaw(x.a.c, x.a.d, 
-									x.b.a, 
-							 		 Util.newIfNull(x.b.b), 
-							 	     Util.newIfNull(x.b.c), 
-						              x.b.d);
-			});
+			Parser<QueryExpRaw<String,String,String,String,String,String,String,String>> ret = Parsers.tuple(l, pa, token("}")).map(x -> new QueryExpRaw(x.a.c, x.a.d,
+									x.b.a,
+							 		 Util.newIfNull(x.b.b),
+							 	     Util.newIfNull(x.b.c),
+						              x.b.d));
 				
 			return ret;	
 	}
@@ -792,14 +776,12 @@ public class AqlParser {
 		
 		Parser<Tuple5<Token, Token, SchExp<?, ?, ?, ?, ?>, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"), sch_ref.lazy().followedBy(token("->")), sch_ref.lazy(), token("{")); //.map(x -> x.c);
 					
-		Parser<MapExpRaw> ret = Parsers.tuple(l, pa, token("}")).map(x -> {
-			return new MapExpRaw(x.a.c, x.a.d, 
-								  x.b.a, 
-						 		  Util.newIfNull(x.b.b), 
-						 	      Util.newIfNull(x.b.c), 
-						 	      Util.newIfNull(x.b.d),
-					              x.b.e);
-		});
+		Parser<MapExpRaw> ret = Parsers.tuple(l, pa, token("}")).map(x -> new MapExpRaw(x.a.c, x.a.d,
+                              x.b.a,
+                               Util.newIfNull(x.b.b),
+                               Util.newIfNull(x.b.c),
+                               Util.newIfNull(x.b.d),
+                              x.b.e));
 			
 		return ret;	
 	}
@@ -813,12 +795,10 @@ public class AqlParser {
 		
 		Parser<Tuple5<Token, Token, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"), inst_ref.lazy().followedBy(token("->")), inst_ref.lazy(), token("{")); //.map(x -> x.c);
 					
-		Parser<TransExpRaw> ret = Parsers.tuple(l, pa, token("}")).map(x -> {
-			return new TransExpRaw(x.a.c, x.a.d, 
-								  x.b.a,
-						 		  Util.newIfNull(x.b.b), 
-					              x.b.c);
-		});
+		Parser<TransExpRaw> ret = Parsers.tuple(l, pa, token("}")).map(x -> new TransExpRaw(x.a.c, x.a.d,
+                              x.b.a,
+                               Util.newIfNull(x.b.b),
+                              x.b.c));
 			
 		return ret;	
 	}
@@ -829,9 +809,7 @@ public class AqlParser {
 		Parser<Pair<List<catdata.Pair<String, RawTerm>>, List<catdata.Pair<String, String>>>> 
 		pa = Parsers.tuple(gens.optional(), options);
 	
-		Parser<Trans> ret = Parsers.tuple(token("{"), pa, token("}")).map(x -> {
-			return new Trans(Util.newIfNull(x.b.a), x.b.b);
-		});
+		Parser<Trans> ret = Parsers.tuple(token("{"), pa, token("}")).map(x -> new Trans(Util.newIfNull(x.b.a), x.b.b));
 			
 		return ret;	
 	}
@@ -883,58 +861,50 @@ public class AqlParser {
 		return ret; 
 	}
 	
-	public static final Program<Exp<?>> parseProgram(String s) {
-		return AqlParser.program(s).from(TOKENIZER, IGNORED).parse(s);
+	public static Program<Exp<?>> parseProgram(String s) {
+		return program(s).from(TOKENIZER, IGNORED).parse(s);
 	}
 
-	public static final List<String> parseManyIdent(String s) {
+	public static List<String> parseManyIdent(String s) {
 		return ident.many().from(TOKENIZER, IGNORED).parse(s);
 	}
 
 	
-	public static final Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm> parseEq(String s) {
+	public static Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm> parseEq(String s) {
 		return Parsers.or(eq1, eq2).from(TOKENIZER, IGNORED).parse(s);
 	}
 	
-	public static final catdata.Pair<String, String> parseInfer(String s) {
+	public static catdata.Pair<String, String> parseInfer(String s) {
 		Parser<catdata.Pair<String, String>> p = Parsers.tuple(token("literal").followedBy(token(":")), ident.followedBy(token("->")), ident)
 				.map(x -> new catdata.Pair<>(x.b, x.c));		
 		return p.from(TOKENIZER, IGNORED).parse(s);
 	}
 	
-	public static final String parseInfer1(String s) {
+	public static String parseInfer1(String s) {
 		Parser<String> p = Parsers.tuple(token("literal"), token(":"), ident)
 				.map(x -> x.c);		
 		return p.from(TOKENIZER, IGNORED).parse(s);
 	}
 	
-	public static final catdata.Pair<List<catdata.Pair<String, String>>, RawTerm> parseTermInCtx(String s) {
+	public static catdata.Pair<List<catdata.Pair<String, String>>, RawTerm> parseTermInCtx(String s) {
 		return Parsers.or(term1, term2).from(TOKENIZER, IGNORED).parse(s);
 	}
 	
-	public static final RawTerm parseTermNoCtx(String s) {
+	public static RawTerm parseTermNoCtx(String s) {
 		return term().from(TOKENIZER, IGNORED).parse(s);
 	}
 	
 	private static final 
-	Parser<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>> eq1 = Parsers.tuple(token("forall"), ctx.followedBy(token(".")), term(), token("="), term()).map(x -> {
-		return new Triple<>(x.b, x.c, x.e);
-	});
+	Parser<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>> eq1 = Parsers.tuple(token("forall"), ctx.followedBy(token(".")), term(), token("="), term()).map(x -> new Triple<>(x.b, x.c, x.e));
 	
 	private static final
-	Parser<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>> eq2 = Parsers.tuple(term(), token("="), term()).map(x -> {
-		return new Triple<>(new LinkedList<>(), x.a, x.c);
-	});
+	Parser<Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>> eq2 = Parsers.tuple(term(), token("="), term()).map(x -> new Triple<>(new LinkedList<>(), x.a, x.c));
 	
 	private static final 
-	Parser<catdata.Pair<List<catdata.Pair<String, String>>, RawTerm>> term1 = Parsers.tuple(token("lambda"), ctx.followedBy(token(".")), term()).map(x -> {
-		return new catdata.Pair<>(x.b, x.c);
-	});
+	Parser<catdata.Pair<List<catdata.Pair<String, String>>, RawTerm>> term1 = Parsers.tuple(token("lambda"), ctx.followedBy(token(".")), term()).map(x -> new catdata.Pair<>(x.b, x.c));
 	
 	private static final 
-	Parser<catdata.Pair<List<catdata.Pair<String, String>>, RawTerm>> term2 = term().map(x -> {
-		return new catdata.Pair<>(new LinkedList<>(), x);
-	});
+	Parser<catdata.Pair<List<catdata.Pair<String, String>>, RawTerm>> term2 = term().map(x -> new catdata.Pair<>(new LinkedList<>(), x));
 	
 	
 	//TODO: aql visitor for aql exps?

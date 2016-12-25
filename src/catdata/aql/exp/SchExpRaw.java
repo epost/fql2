@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
@@ -18,7 +19,6 @@ import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.AqlProver;
 import catdata.aql.AqlProver.ProverName;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.Eq;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
@@ -59,13 +59,13 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		
 		col.fks.putAll(Util.toMapSafely(fks));
 		col.atts.putAll(Util.toMapSafely(atts));
-	
+	/*why were these empty loops here?
 		for (Pair<List<Object>, Object> eq : col.syms.values()) {
 			
 		}
 		for (Pair<Object, Object> eq : col.atts.values()) {
 			
-		}
+		}*/
 		
 		for (Quad<String, Object, RawTerm, RawTerm> eq : t_eqs) {
 				Map<String, Chc<Object, Object>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
@@ -116,7 +116,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		
 		AqlOptions strat = new AqlOptions(options, col);
 		
-		AqlOptions s = new AqlOptions(Util.singMap(AqlOptions.AqlOption.prover.toString(), ProverName.fail.toString()), col);
+		AqlOptions s = new AqlOptions(Util.singMap(AqlOption.prover.toString(), ProverName.fail.toString()), col);
 		
 		//forces type checking before prover construction
 		new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(s, col), false);
@@ -129,19 +129,19 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 	
 	
 	//could be ? - don't think so
-	public final TyExp<Object,Object> typeSide;
+	private final TyExp<Object,Object> typeSide;
 	
-	public final List<String> imports;
+	private final List<String> imports;
 	
-	public final List<Object> ens;
+	private final List<Object> ens;
 
-	public final List<Pair<Object, Pair<Object, Object>>> fks;		
-	public final List<Pair<List<Object>, List<Object>>> p_eqs;
+	private final List<Pair<Object, Pair<Object, Object>>> fks;
+	private final List<Pair<List<Object>, List<Object>>> p_eqs;
 
-	public final List<Pair<Object, Pair<Object, Object>>> atts; 
-	public final List<Quad<String, Object, RawTerm, RawTerm>> t_eqs;
+	private final List<Pair<Object, Pair<Object, Object>>> atts;
+	private final List<Quad<String, Object, RawTerm, RawTerm>> t_eqs;
 	
-	public final Map<String, String> options;
+	private final Map<String, String> options;
 	
 	@Override
 	public long timeout() {
@@ -155,7 +155,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((atts == null) ? 0 : atts.hashCode());
 		result = prime * result + ((ens == null) ? 0 : ens.hashCode());

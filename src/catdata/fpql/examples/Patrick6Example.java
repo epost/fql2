@@ -21,7 +21,7 @@ public class Patrick6Example extends Example {
 		return s;
 	}
 	
-	String s =
+	private final String s =
 			"\nInt : type"
 +			"\n"
 +			"\none : Int"

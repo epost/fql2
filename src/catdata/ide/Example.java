@@ -1,5 +1,6 @@
 package catdata.ide;
 
+@SuppressWarnings("ComparableImplementedButEqualsNotOverridden")
 public abstract class Example implements Comparable<Example> {
 	
 	public abstract String getName(); 
@@ -21,5 +22,8 @@ public abstract class Example implements Comparable<Example> {
 	public int compareTo(Example e) {
 		return toString().compareTo(e.toString());
 	}
-	
+
+
+
+
 }

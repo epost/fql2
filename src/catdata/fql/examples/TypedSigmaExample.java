@@ -21,7 +21,7 @@ public class TypedSigmaExample extends Example {
 		return text;
 	}
 	
-	String text  =
+	private final String text  =
 			"schema C = {"
 					+ "\n nodes "
 					+ "\n	a1, a2, a3, b1, b2, c1, c2, c3, c4;"

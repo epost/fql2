@@ -1,5 +1,6 @@
 package catdata.opl;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -44,10 +45,10 @@ public class OplCodeEditor extends
 		CompletionProvider provider = createCompletionProvider();
 		AutoCompletion ac = new AutoCompletion(provider);
 		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
-				java.awt.event.InputEvent.META_DOWN_MASK
-						| java.awt.event.InputEvent.SHIFT_DOWN_MASK);
+				InputEvent.META_DOWN_MASK
+						| InputEvent.SHIFT_DOWN_MASK);
 		ac.setTriggerKey(key);
-		ac.install(this.topArea);
+		ac.install(topArea);
 	}
 
 	private static CompletionProvider createCompletionProvider() {
@@ -134,9 +135,9 @@ public class OplCodeEditor extends
 		}
 	}
 
-	String last_str;
-	Program<OplExp> last_prog;
-	Environment<OplObject> last_env;
+	private String last_str;
+	private Program<OplExp> last_prog;
+	private Environment<OplObject> last_env;
 
 	@Override
 	protected Environment<OplObject> makeEnv(String str, Program<OplExp> init) {
@@ -155,7 +156,7 @@ public class OplCodeEditor extends
 		}
 	}
 
-	public OplOptions last_options;
+	private OplOptions last_options;
 
 	@Override
 	protected String textFor(Environment<OplObject> env) {

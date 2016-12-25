@@ -17,7 +17,7 @@ public class Attribute<Node> implements Comparable<Attribute<Node>> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((source == null) ? 0 : source.hashCode());
@@ -62,9 +62,9 @@ public class Attribute<Node> implements Comparable<Attribute<Node>> {
 	//	return name + " : " + source + " -> " + target;
 	//}
 
-	public String name;
-	public Node source;
-	public Type target;
+	public final String name;
+	public final Node source;
+	public final Type target;
 	@Override
 	public int compareTo(Attribute<Node> o) {
 		return name.compareTo(o.name);

@@ -21,7 +21,7 @@ public class CatExample extends Example {
 		return ret;
 	}
 	
-	String ret = "//operations on finite categories"
+	private final String ret = "//operations on finite categories"
 			+ "\n"
 			+ "\ncategory c1 = void"
 			+ "\ncategory c2 = unit"

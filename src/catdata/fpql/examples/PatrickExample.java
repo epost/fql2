@@ -21,7 +21,7 @@ public class PatrickExample extends Example {
 		return s;
 	}
 	
-	String s = 
+	private final String s =
 					  "dom : type"
 					+ "\nAl Akin Bob Bo Carl Cork Math Cs : dom"
 					+ "\n"

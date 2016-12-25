@@ -14,11 +14,11 @@ import catdata.fqlpp.cat.FinSet.Fn;
 public class FDM {
 	
 	@SuppressWarnings("rawtypes")
-	private static Map<Functor, Functor> deltas = new HashMap<>();
+	private static final Map<Functor, Functor> deltas = new HashMap<>();
 	@SuppressWarnings("rawtypes")
-	public static Map<Functor, Functor> sigmas = new HashMap<>();
+    private static final Map<Functor, Functor> sigmas = new HashMap<>();
 	@SuppressWarnings("rawtypes")
-	public static Map<Functor, Functor> pis = new HashMap<>();
+    private static final Map<Functor, Functor> pis = new HashMap<>();
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O1, A1, O2, A2> Functor<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> deltaF(
@@ -52,12 +52,8 @@ public class FDM {
 		Category<Functor<O2, A2, Set, Fn>, Transform<O2, A2, Set, Fn>> dst = Inst.get(F.target);
 
 		FUNCTION<Functor<O1, A1, Set, Fn>, Functor<O2, A2, Set, Fn>> o = I -> {
-			Functor<O2, A2, Set, Fn> J = cache.get(I);
-			if (J == null) {
-				J = LeftKanSigma.fullSigma(F, I, null, null).first;
-				cache.put(I, J);
-			}
-			return J;
+            Functor<O2, A2, Set, Fn> J = cache.computeIfAbsent(I, k -> LeftKanSigma.fullSigma(F, I, null, null).first);
+            return J;
 		};
 			
 		FUNCTION<Transform<O1, A1, Set, Fn>, Transform<O2, A2, Set, Fn>> a = t -> LeftKanSigma
@@ -134,21 +130,19 @@ public class FDM {
 		
 		FUNCTION<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> f = I -> {
 			Triple<Functor<O1,A1,Set,Fn>,Map<O1,Set<Map>>,Map<O1, Triple<O1,O2,A1>[]>> xxx = Pi.pi(F, Functor.compose(F, I));
-			FUNCTION<O1, Fn> j = n -> {
-				return new Fn<>(I.applyO(n), xxx.first.applyO(n), i -> {
-					outer: for (Map m : xxx.second.get(n)) {
-						for (int p = 1; p < m.size(); p++) {
-							if (xxx.third.get(n)[p-1].third.equals(F.target.identity(n))) {
-								if (!m.get(p).equals(i)) {
-									continue outer;
-								}
-							}
-						}
-						return m.get(0);
-					}
-				throw new RuntimeException("Cannot find diagonal of " + i + " in " + xxx.second.get(n));
-				}); 
-			};
+			FUNCTION<O1, Fn> j = n -> new Fn<>(I.applyO(n), xxx.first.applyO(n), i -> {
+                outer: for (Map m : xxx.second.get(n)) {
+                    for (int p = 1; p < m.size(); p++) {
+                        if (xxx.third.get(n)[p-1].third.equals(F.target.identity(n))) {
+                            if (!m.get(p).equals(i)) {
+                                continue outer;
+                            }
+                        }
+                    }
+                    return m.get(0);
+                }
+            throw new RuntimeException("Cannot find diagonal of " + i + " in " + xxx.second.get(n));
+            });
 			return new Transform<>(I, xxx.first, j);
 		};
 		Transform<Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>, Functor<O1, A1, Set, Fn>, Transform<O1, A1, Set, Fn>> unit 

@@ -20,7 +20,7 @@ public class DihedralExample extends Example {
 		return s;
 	}
 
-	String s =
+	private final String s =
 			"// should have 4 elements. "
 					+ "\nschema Dihedral2 = {"
 					+ "\n nodes G;"

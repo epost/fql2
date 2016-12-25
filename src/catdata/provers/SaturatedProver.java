@@ -1,20 +1,17 @@
 package catdata.provers;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import catdata.Ctx;
 import catdata.Triple;
 import catdata.Util;
 import catdata.provers.KBExp.KBApp;
 
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SaturatedProver<T, C, V> extends DPKB<T, C, V> {
 
-	public final Map<C, Map<List<C>, C>> map = new HashMap<>();
+
+	public final Ctx<C, Map<List<C>, C>> map = new Ctx<>();
 
 	public SaturatedProver(KBTheory<T,C,V> th) throws InterruptedException {
 		super(th.tys, th.syms, th.eqs);

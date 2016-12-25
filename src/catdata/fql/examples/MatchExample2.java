@@ -20,7 +20,7 @@ public class MatchExample2 extends Example {
 		return s;
 	}
 	
-	String s =  "/* Situation 1: "
+	private final String s =  "/* Situation 1: "
 			+ "\n *  We want to create a query between schema DogOwner and schema Dog"
 			+ "\n *  with attribute matching:"
 			+ "\n *  match {(dogatt,dname),(personatt,ownerName)}."

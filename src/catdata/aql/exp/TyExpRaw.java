@@ -11,13 +11,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlJs;
 import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.Eq;
 import catdata.aql.RawTerm;
 import catdata.aql.Term;
@@ -35,16 +35,16 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 		return imports.stream().map(x -> new Pair<>(x, Kind.TYPESIDE)).collect(Collectors.toSet());
 	}
 
-	public final Set<String> imports;
-	public final Set<Object> types;
-	public final Set<Pair<Object, Pair<List<Object>, Object>>> functions;
-	public final Set<Triple<List<Pair<String, Object>>, RawTerm, RawTerm>> eqs;
+	private final Set<String> imports;
+	private final Set<Object> types;
+	private final Set<Pair<Object, Pair<List<Object>, Object>>> functions;
+	private final Set<Triple<List<Pair<String, Object>>, RawTerm, RawTerm>> eqs;
 
-	public final Set<Pair<Object, String>> java_tys_string;
-	public final Set<Pair<Object, String>> java_parser_string;
-	public final Set<Pair<Object, Triple<List<Object>, Object, String>>> java_fns_string;
+	private final Set<Pair<Object, String>> java_tys_string;
+	private final Set<Pair<Object, String>> java_parser_string;
+	private final Set<Pair<Object, Triple<List<Object>, Object, String>>> java_fns_string;
 
-	public final Map<String, String> options;
+	private final Map<String, String> options;
 	//private final AqlOptions strat;
 	
 	@Override
@@ -86,7 +86,7 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
 		result = prime * result + ((functions == null) ? 0 : functions.hashCode());
@@ -162,7 +162,7 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 	public TypeSide<Object, Object> eval(AqlEnv env) {
 		//defer equation checking since invokes javascript
 		AqlJs<Object,Object> js = new AqlJs<>(col.syms, col.java_tys, col.java_parsers, col.java_fns);
-		for (Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq : this.eqs) {
+		for (Triple<List<Pair<String, Object>>, RawTerm, RawTerm> eq : eqs) {
 			Triple<Ctx<Var, Object>, Term<Object, Void, Object, Void, Void, Void, Void>, Term<Object, Void, Object, Void, Void, Void, Void>> 
 			tr = inferEq(col, eq, js);
 			col.eqs.add(new Eq<>(tr.first.inLeft(), tr.second, tr.third));

@@ -14,12 +14,12 @@ import catdata.aql.Transform;
 
 public class ToCsvPragmaTransform<Ty,En,Sym,Att,Fk> extends Pragma {
 	
-	public final File file;
+	private final File file;
 	
-	public final String str;
+	private final String str;
 	
 	public <Gen1,Sk1,X1,Y1,Gen2,Sk2,X2,Y2> ToCsvPragmaTransform(Transform<Ty,En,Sym,Att,Fk,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h, String s, CSVFormat format) {
-		this.file = new File(s);
+        file = new File(s);
 		
 		try {
 			StringBuffer sb = new StringBuffer();

@@ -20,7 +20,7 @@ public class MplExample1 extends Example {
 		return s;
 	}
 	
-	String s = "T = theory {"
+	private final String s = "T = theory {"
 			+ "\n	sorts"
 			+ "\n		A, B, C;"
 			+ "\n	symbols"

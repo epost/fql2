@@ -1,5 +1,6 @@
 package catdata.fqlpp;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -39,10 +40,10 @@ public class FQLPPCodeEditor extends CodeEditor<FQLPPProgram, FQLPPEnvironment, 
 	protected void doTemplates() {
 		  CompletionProvider provider = createCompletionProvider();
 		  AutoCompletion ac = new AutoCompletion(provider);
-		  KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, java.awt.event.InputEvent.META_DOWN_MASK
-                | java.awt.event.InputEvent.SHIFT_DOWN_MASK);
+		  KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, InputEvent.META_DOWN_MASK
+                | InputEvent.SHIFT_DOWN_MASK);
 		  ac.setTriggerKey(key);
-	      ac.install(this.topArea);
+	      ac.install(topArea);
 	}
 	
 	  private static CompletionProvider createCompletionProvider() {

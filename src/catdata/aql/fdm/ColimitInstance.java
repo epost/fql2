@@ -6,12 +6,12 @@ import java.util.Set;
 import java.util.function.Function;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.DP;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
@@ -26,12 +26,15 @@ import catdata.graph.DMG;
 public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> 
  extends Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> {
 	
-	public final Schema<Ty, En, Sym, Fk, Att> schema;
+	private final Schema<Ty, En, Sym, Fk, Att> schema;
 	
-	public final DMG<N, E> shape;
+	@SuppressWarnings("unused")
+	private final DMG<N, E> shape;
 	
-	public final Ctx<N, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> nodes;
-	public final Ctx<E, Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges;
+	@SuppressWarnings("unused")
+	private final Ctx<N, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> nodes;
+	@SuppressWarnings("unused")
+	private final Ctx<E, Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges;
 
 	private final Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> J;
 	

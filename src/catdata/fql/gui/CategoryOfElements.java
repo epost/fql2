@@ -39,7 +39,6 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
@@ -113,9 +112,9 @@ public class CategoryOfElements {
 		return false;
 	}
 
-	public static JPanel dot(String name, @SuppressWarnings("unused") final Instance inst,
-			Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv,
-			HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
+	private static JPanel dot(String name, @SuppressWarnings("unused") Instance inst,
+                              Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv,
+                              Map<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
 
 		String str = "";
 		int i = 0;
@@ -144,9 +143,9 @@ public class CategoryOfElements {
 		return p;
 	}
 
-	public static JPanel doView(final Color clr, @SuppressWarnings("unused") final Instance inst,
-			Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv,
-			HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
+	private static JPanel doView(Color clr, @SuppressWarnings("unused") Instance inst,
+                                 Graph<Pair<Node, Object>, Pair<Path, Integer>> sgv,
+                                 Map<Pair<Node, Object>, Map<Attribute<Node>, Object>> map0) {
 		JPanel cards = new JPanel(new CardLayout());
 
 		Layout<Pair<Node, Object>, Pair<Path, Integer>> layout = new FRLayout<>(sgv);
@@ -155,7 +154,7 @@ public class CategoryOfElements {
 				layout);
 		Transformer<Pair<Node, Object>, Paint> vertexPaint = (Pair<Node, Object> i) -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexLabelRenderer(new MyVertexT(cards));
@@ -218,11 +217,7 @@ public class CategoryOfElements {
 			JPanel ret;
 			JPanel ret2;
 			Pair<Graph<Pair<Node, Object>, Pair<Path, Integer>>, HashMap<Pair<Node, Object>, Map<Attribute<Node>, Object>>> g = build(i);
-			if (g.first.getVertexCount() == 0) {
-				ret = new JPanel();
-			}
-
-			ret = doView(c, i, g.first, g.second);
+			ret = g.first.getVertexCount() == 0 ? new JPanel() : doView(c, i, g.first, g.second);
 			ret2 = dot(name, i, g.first, g.second);
 
 			return new Pair<>(ret, ret2);
@@ -238,7 +233,7 @@ public class CategoryOfElements {
 
 	private static class MyVertexT implements VertexLabelRenderer {
 
-		JPanel cards;
+		final JPanel cards;
 
 		public MyVertexT(JPanel cards) {
 			this.cards = cards;

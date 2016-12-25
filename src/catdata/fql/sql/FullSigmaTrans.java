@@ -39,22 +39,23 @@ public class FullSigmaTrans extends PSM {
 				+ pre + "]";
 	}
 
-	Mapping f;
-	String srcH, src;
-	String dstH, dst;
-	String h;
-	public String pre;
+	private final Mapping f;
+	private final String srcH;
+    private final String src;
+	private final String dstH;
+    private final String dst;
+	private final String h;
+	private final String pre;
 
 	public FullSigmaTrans(Mapping f, String srcH, String src, String dstH,
 			String dst, String h, String out) {
-		super();
 		this.f = f;
 		this.srcH = srcH;
 		this.src = src;
 		this.dstH = dstH;
 		this.dst = dst;
 		this.h = h;
-		this.pre = out;
+        pre = out;
 	}
 
 	@Override
@@ -126,11 +127,11 @@ public class FullSigmaTrans extends PSM {
 			}
 			for (Attribute<Node> a : D.attrs) {
 				state.put(pre + "_" + a.name,
-						new HashSet<Map<Object, Object>>());
+                        new HashSet<>());
 			}
 			for (Edge a : D.edges) {
 				state.put(pre + "_" + a.name,
-						new HashSet<Map<Object, Object>>());
+                        new HashSet<>());
 			}
 
 		} catch (FQLException e) {
@@ -192,7 +193,7 @@ public class FullSigmaTrans extends PSM {
 	private static List<Pair<Object, Object>> convX(Set<Map<Object, Object>> x2) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 		for (Map<Object, Object> k : x2) {
-			ret.add(new Pair<Object, Object>(k.get("c0").toString(), k.get("c1").toString()));
+			ret.add(new Pair<>(k.get("c0").toString(), k.get("c1").toString()));
 		}
 
 		return ret;

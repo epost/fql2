@@ -22,8 +22,9 @@ import catdata.fql.decl.Transform;
 
 public class PSMNot extends PSM {
 
-	String pre, prop;
-	Signature sig;
+	private final String pre;
+    private final String prop;
+	private final Signature sig;
 
 	public PSMNot(Signature sig, String pre, String prop) {
 		this.sig = sig;
@@ -41,7 +42,7 @@ public class PSMNot extends PSM {
 			Map<String, Set<Map<Object, Object>>> state) {
 		try {
 
-			Signature sig0 = new Signature(sig.nodes, sig.edges, new LinkedList<Attribute<Node>>(), sig.eqs);
+			Signature sig0 = new Signature(sig.nodes, sig.edges, new LinkedList<>(), sig.eqs);
 			
 			Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> H1 = interp.prop1
 					.get(prop);
@@ -100,8 +101,7 @@ public class PSMNot extends PSM {
 						if (xxx == null) {
 							throw new RuntimeException();
 						}
-						if (!A.getNode(d0).contains(xxx)) {
-						} else {
+						if (A.getNode(d0).contains(xxx)) {
 							continue xxx;
 						}
 					}

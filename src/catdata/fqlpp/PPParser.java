@@ -7,12 +7,68 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.fqlpp.CatExp.Cod;
+import catdata.fqlpp.CatExp.Colim;
+import catdata.fqlpp.CatExp.Kleisli;
+import catdata.fqlpp.CatExp.Named;
+import catdata.fqlpp.CatExp.Plus;
+import catdata.fqlpp.CatExp.Times;
+import catdata.fqlpp.CatExp.Union;
+import catdata.fqlpp.FnExp.Const;
+import catdata.fqlpp.FnExp.Krnl;
+import catdata.fqlpp.FnExp.Tru;
+import catdata.fqlpp.FunctorExp.Apply;
+import catdata.fqlpp.FunctorExp.Case;
+import catdata.fqlpp.FunctorExp.Comp;
+import catdata.fqlpp.FunctorExp.Curry;
+import catdata.fqlpp.FunctorExp.Dom;
+import catdata.fqlpp.FunctorExp.Eval;
+import catdata.fqlpp.FunctorExp.Exp;
+import catdata.fqlpp.FunctorExp.FF;
+import catdata.fqlpp.FunctorExp.Fst;
+import catdata.fqlpp.FunctorExp.Id;
+import catdata.fqlpp.FunctorExp.Inl;
+import catdata.fqlpp.FunctorExp.Inr;
+import catdata.fqlpp.FunctorExp.Iso;
+import catdata.fqlpp.FunctorExp.Migrate;
+import catdata.fqlpp.FunctorExp.One;
+import catdata.fqlpp.FunctorExp.Pivot;
+import catdata.fqlpp.FunctorExp.Prod;
+import catdata.fqlpp.FunctorExp.Prop;
+import catdata.fqlpp.FunctorExp.Pushout;
+import catdata.fqlpp.FunctorExp.Snd;
+import catdata.fqlpp.FunctorExp.TT;
+import catdata.fqlpp.FunctorExp.Uncurry;
+import catdata.fqlpp.FunctorExp.Var;
+import catdata.fqlpp.FunctorExp.Zero;
+import catdata.fqlpp.SetExp.Intersect;
+import catdata.fqlpp.SetExp.Numeral;
+import catdata.fqlpp.SetExp.Range;
+import catdata.fqlpp.TransExp.Adj;
+import catdata.fqlpp.TransExp.AndOrNotImplies;
+import catdata.fqlpp.TransExp.ApplyPath;
+import catdata.fqlpp.TransExp.ApplyTrans;
+import catdata.fqlpp.TransExp.Bool;
+import catdata.fqlpp.TransExp.Chr;
+import catdata.fqlpp.TransExp.CoProd;
+import catdata.fqlpp.TransExp.Inj;
+import catdata.fqlpp.TransExp.Ker;
+import catdata.fqlpp.TransExp.PeterApply;
+import catdata.fqlpp.TransExp.Proj;
+import catdata.fqlpp.TransExp.SetSet;
+import catdata.fqlpp.TransExp.ToCat;
+import catdata.fqlpp.TransExp.ToInst;
+import catdata.fqlpp.TransExp.ToMap;
+import catdata.fqlpp.TransExp.ToSet;
+import catdata.fqlpp.TransExp.Whisker;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parser.Reference;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Token;
+import org.codehaus.jparsec.Terminals.Identifier;
+import org.codehaus.jparsec.Terminals.IntegerLiteral;
+import org.codehaus.jparsec.Terminals.StringLiteral;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
@@ -30,20 +86,15 @@ import catdata.fqlpp.FunctorExp.SetSetConst;
 import catdata.fqlpp.cat.FinSet.Fn;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class PPParser {
+class PPParser {
 
-	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
-				@Override
-				public Integer map(String s) {
-					return Integer.valueOf(s);
-				}
-			});
+	static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
+			.map(Integer::valueOf);
 
-	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
+	private static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?" };
 
-	static String[] res = new String[] {  "set", "function", "category", "functor", "range",
+	private static final String[] res = new String[] {  "set", "function", "category", "functor", "range",
 		    "colim", "not", "and", "or", "implies", "return", "coreturn", "uncurry", "pushout",
 			 "match",  "objects", "cod", "dom", "apply", "on", "object", "arrow", "left", "right", "whisker",
 			 "transform",  "arrows", "Set", "Cat", "kleisli", "cokleisli",
@@ -58,21 +109,21 @@ public class PPParser {
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
 	public static final Parser<?> TOKENIZER = Parsers.or(
-			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
-			RESERVED.tokenizer(), (Parser<?>) Terminals.Identifier.TOKENIZER,
-			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
+			(Parser<?>) StringLiteral.DOUBLE_QUOTE_TOKENIZER,
+			RESERVED.tokenizer(), (Parser<?>) Identifier.TOKENIZER,
+			(Parser<?>) IntegerLiteral.TOKENIZER);
 
-	static Parser<?> term(String... names) {
+	private static Parser<?> term(String... names) {
 		return RESERVED.token(names);
 	}
 
-	public static Parser<?> ident() {
-		return Terminals.Identifier.PARSER;
+	private static Parser<?> ident() {
+		return Identifier.PARSER;
 	}
 
-	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
+	private static final Parser<?> program = program().from(TOKENIZER, IGNORED);
 
-	public static final Parser<?> program() {
+	private static Parser<?> program() {
 		return Parsers
 				.or(    Parsers.tuple(setDecl().source().peek(), setDecl()),
 						Parsers.tuple(fnDecl().source().peek(), fnDecl()),
@@ -83,7 +134,7 @@ public class PPParser {
 
 	}
 	
-	public static final Object toValue(Object o) {
+	private static Object toValue(Object o) {
 		if (o.toString().equals("true")) {
 			return true;
 		}
@@ -131,7 +182,7 @@ public class PPParser {
 		return o.toString();
 	}
 	
-	public static final Parser<?> value() {
+	private static Parser<?> value() {
 		Reference ref = Parser.newReference();
 
 		Parser<?> p1 = Parsers.tuple(term("inl"), ref.lazy());
@@ -153,7 +204,7 @@ public class PPParser {
 		return a;
 	}
 
-	public static final Parser<?> set() {
+	private static Parser<?> set() {
 		Reference ref = Parser.newReference();
 
 		Parser<?> app = Parsers.tuple(term("apply"), ident(), term("on"), term("object"), ref.lazy());
@@ -172,16 +223,16 @@ public class PPParser {
 		Parser<?> k = Parsers.tuple(term("cod"), ident());
 		Parser<?> v = Parsers.tuple(term("dom"), ident());
 		Parser<?> u = Parsers.tuple(term("range"), ident());
-		Parser<?> a = Parsers.or(new Parser[] { union, isect, term("void"), term("unit"), term("prop"),
-				 plusTy, prodTy, expTy, k, v, u,
-				ident(), setConst(), Terminals.IntegerLiteral.PARSER, app  });
+		Parser<?> a = Parsers.or(union, isect, term("void"), term("unit"), term("prop"),
+				plusTy, prodTy, expTy, k, v, u,
+				ident(), setConst(), IntegerLiteral.PARSER, app);
 
 		ref.set(a);
 
 		return a;
 	}
 	
-	public static final Parser<?> cat() {
+	private static Parser<?> cat() {
 		Reference ref = Parser.newReference();
 
 		Parser<?> plusTy = Parsers.between(term("("),
@@ -200,16 +251,16 @@ public class PPParser {
 		
 		Parser<?> union = Parsers.tuple(term("union"), ref.lazy(), ref.lazy());
 		
-		Parser<?> a = Parsers.or(new Parser[] { colim, term("void"), term("unit"), 
-				 plusTy, prodTy, expTy, k, v,
-				ident() , catConst(), term("Cat"), term("Set"), kleisli, cokleisli, union });
+		Parser<?> a = Parsers.or(colim, term("void"), term("unit"),
+				plusTy, prodTy, expTy, k, v,
+				ident(), catConst(), term("Cat"), term("Set"), kleisli, cokleisli, union);
 
 		ref.set(a);
 
 		return a;
 	}
 	
-	public static final Parser<?> catConst() {
+	public static Parser<?> catConst() {
 		Parser<?> p1 = ident();
 		Parser<?> pX = Parsers.tuple(ident(), term(":"), ident(), term("->"),
 				ident());
@@ -220,16 +271,16 @@ public class PPParser {
 		return Parsers.between(term("{"), foo, term("}"));
 	}
 
-	public static final Parser<?> setDecl() {
+	private static Parser<?> setDecl() {
 		return Parsers.tuple(term("set"), ident(), term("="), set());
 	}
 
-	public static final Parser<?> setConst() {
+	private static Parser<?> setConst() {
 		return Parsers.tuple(term("{"), value().sepBy(term(",")), term("}"));
 	}
 
 
-	public static final SetExp toSet(Object o) {
+	private static SetExp toSet(Object o) {
 		try {
 			Tuple5 t = (Tuple5) o;
 			String f = t.b.toString();
@@ -239,7 +290,7 @@ public class PPParser {
 		
 		try {
 			int i = Integer.parseInt(o.toString());
-			return new SetExp.Numeral(i);
+			return new Numeral(i);
 		} catch (Exception e) { }
 		
 		try {
@@ -254,7 +305,7 @@ public class PPParser {
 			} else if (y.equals("union")) {
 				return new SetExp.Union(toSet(t.a), toSet(t.c));
 			} else if (y.equals("intersect")) {
-				return new SetExp.Intersect(toSet(t.a), toSet(t.c));
+				return new Intersect(toSet(t.a), toSet(t.c));
 			} 
 			
 			else if (t.a.toString().equals("{")) {
@@ -275,7 +326,7 @@ public class PPParser {
 			} else if (p.a.toString().equals("cod")) {
 				return new SetExp.Cod(toFn(p.b));
 			} else if (p.a.toString().equals("range")) {
-				return new SetExp.Range(toFn(p.b));
+				return new Range(toFn(p.b));
 			}
 		} catch (RuntimeException cce) {
 		}
@@ -296,7 +347,7 @@ public class PPParser {
 		return new SetExp.Var(o.toString()); 
 	}
 
-	public static final CatExp.Const toCatConst(Object y) {
+	public static CatExp.Const toCatConst(Object y) {
 		Set<String> nodes = new HashSet<>();
 		Set<Triple<String, String, String>> arrows = new HashSet<>();
 		Set<Pair<Pair<String, List<String>>, Pair<String, List<String>>>> eqs = new HashSet<>();
@@ -331,30 +382,30 @@ public class PPParser {
 		return c;
 	}
 
-	public static final CatExp toCat(Object o) {
+	private static CatExp toCat(Object o) {
 		 if (o.toString().equals("Set")) {
-			return new CatExp.Named("Set");
+			return new Named("Set");
 		} 
 		if (o.toString().equals("Cat")) {
-			return new CatExp.Named("Cat");
+			return new Named("Cat");
 		} 
 		
 		if (o instanceof Tuple4) {
 			Tuple4 t = (Tuple4) o;
-			return new CatExp.Kleisli(t.b.toString(), t.c.toString(), t.d.toString(), t.a.toString().equals("cokleisli"));
+			return new Kleisli(t.b.toString(), t.c.toString(), t.d.toString(), t.a.toString().equals("cokleisli"));
 		}
 		
 		try {
 			Tuple3<?, ?, ?> t = (Tuple3<?, ?, ?>) o;
 			String y = t.b.toString();
 			if (y.equals("+")) {
-				return new CatExp.Plus(toCat(t.a), toCat(t.c));
+				return new Plus(toCat(t.a), toCat(t.c));
 			} else if (y.equals("*")) {
-				return new CatExp.Times(toCat(t.a), toCat(t.c));
+				return new Times(toCat(t.a), toCat(t.c));
 			} else if (y.equals("^")) {
 				return new CatExp.Exp(toCat(t.a), toCat(t.c));
 			} else if (t.a.toString().equals("union")) {
-				return new CatExp.Union(toCat(t.b), toCat(t.c));
+				return new Union(toCat(t.b), toCat(t.c));
 			}
 			else {
 				return toCatConst(o);
@@ -367,9 +418,9 @@ public class PPParser {
 			if (p.a.toString().equals("dom")) {
 				return new CatExp.Dom(toFtr(p.b));
 			} else if (p.a.toString().equals("cod")) {
-				return new CatExp.Cod(toFtr(p.b));
+				return new Cod(toFtr(p.b));
 			} else if (p.a.toString().equals("colim")) {
-				return new CatExp.Colim((String)p.b);
+				return new Colim((String)p.b);
 			}
 		} catch (RuntimeException cce) {
 		}
@@ -387,28 +438,28 @@ public class PPParser {
 	}
 	
 //	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static final SetExp toSetConst(Object y) {
+	public static SetExp toSetConst(Object y) {
 		return new SetExp.Const((Set)toValue(y));
 	}
 
 
-	public static final Parser<?> transDecl() {
+	private static Parser<?> transDecl() {
 		return Parsers.tuple(term("transform"), ident(), term("="), trans());
 	}
 	
-	public static final Parser<?> fnDecl() {
+	private static Parser<?> fnDecl() {
 		return Parsers.tuple(term("function"), ident(), term("="), fn());
 	}
 	
-	public static final Parser<?> ftrDecl() {
+	private static Parser<?> ftrDecl() {
 		return Parsers.tuple(term("functor"), ident(), term("="), ftr());
 	}
 	
-	public static final Parser<?> catDecl() {
+	private static Parser<?> catDecl() {
 		return Parsers.tuple(term("category"), ident(), term("="), cat());
 	}
 	
-	public static final Parser<?> trans() {
+	private static Parser<?> trans() {
 		Reference ref = Parser.newReference();
 
 		Parser compTy = Parsers.between(term("("),
@@ -460,48 +511,46 @@ public class PPParser {
 		
 
 		
-		Parser a = Parsers.or(new Parser[] {   
-			ident(),
-			Parsers.tuple(term("id"), ftr()), tofinal,
-			compTy, setset, toset, tocat, tomap,
-			Parsers.tuple(term("tt"), ref.lazy()),
-			Parsers.tuple(term("not"), cat()),
-			Parsers.tuple(term("and"), cat()),
-			Parsers.tuple(term("or"), cat()),
-			Parsers.tuple(term("implies"), cat()),
-			Parsers.tuple(term("char"), ref.lazy()),
-			Parsers.tuple(term("kernel"), ref.lazy()),
-			Parsers.tuple(term("fst"), ftr(), ftr()),
-			Parsers.tuple(term("snd"), ftr(), ftr()),
-			Parsers.tuple(term("ff"), ref.lazy()),
-			Parsers.tuple(term("curry"), ref.lazy()),
-			Parsers.tuple(term("CURRY"), ref.lazy()),
-			Parsers.tuple(term("return"), term("sigma"), term("delta"), ftr()),
-			Parsers.tuple(term("coreturn"), term("sigma"), term("delta"), ftr()),
-			Parsers.tuple(term("return"), term("delta"), term("pi"), ftr()),
-			Parsers.tuple(term("coreturn"), term("delta"), term("pi"), ftr()),
-			Parsers.tuple(term("apply"), ftr(), term("on"), term("arrow"), ref.lazy()),
-			Parsers.tuple(term("apply"), ftr(), term("on"), term("path"), Parsers.tuple(path(), term("in"), cat())),
-			Parsers.tuple(term("APPLY"), ref.lazy(), term("on"), ident()),
-			Parsers.tuple(term("apply"), ref.lazy(), term("on"), ftr()),
-			Parsers.tuple(term("left"), term("whisker"), ftr(), ref.lazy()),
-			Parsers.tuple(term("right"), term("whisker"), ftr(), ref.lazy()),
-			Parsers.tuple(term("inl"), ftr(), ftr()),
-			Parsers.tuple(term("inr"), ftr(), ftr()),
-			Parsers.tuple(term("eval"), ftr(), ftr()),
-			Parsers.tuple(term("iso1"), ftr(), ftr()),
-			Parsers.tuple(term("iso2"), ftr(), ftr()),
-			Parsers.tuple(term("true"), cat()),
-			Parsers.tuple(term("false"), cat()),
-			prodTy, sumTy
-		});
+		Parser a = Parsers.or(ident(),
+				Parsers.tuple(term("id"), ftr()), tofinal,
+				compTy, setset, toset, tocat, tomap,
+				Parsers.tuple(term("tt"), ref.lazy()),
+				Parsers.tuple(term("not"), cat()),
+				Parsers.tuple(term("and"), cat()),
+				Parsers.tuple(term("or"), cat()),
+				Parsers.tuple(term("implies"), cat()),
+				Parsers.tuple(term("char"), ref.lazy()),
+				Parsers.tuple(term("kernel"), ref.lazy()),
+				Parsers.tuple(term("fst"), ftr(), ftr()),
+				Parsers.tuple(term("snd"), ftr(), ftr()),
+				Parsers.tuple(term("ff"), ref.lazy()),
+				Parsers.tuple(term("curry"), ref.lazy()),
+				Parsers.tuple(term("CURRY"), ref.lazy()),
+				Parsers.tuple(term("return"), term("sigma"), term("delta"), ftr()),
+				Parsers.tuple(term("coreturn"), term("sigma"), term("delta"), ftr()),
+				Parsers.tuple(term("return"), term("delta"), term("pi"), ftr()),
+				Parsers.tuple(term("coreturn"), term("delta"), term("pi"), ftr()),
+				Parsers.tuple(term("apply"), ftr(), term("on"), term("arrow"), ref.lazy()),
+				Parsers.tuple(term("apply"), ftr(), term("on"), term("path"), Parsers.tuple(path(), term("in"), cat())),
+				Parsers.tuple(term("APPLY"), ref.lazy(), term("on"), ident()),
+				Parsers.tuple(term("apply"), ref.lazy(), term("on"), ftr()),
+				Parsers.tuple(term("left"), term("whisker"), ftr(), ref.lazy()),
+				Parsers.tuple(term("right"), term("whisker"), ftr(), ref.lazy()),
+				Parsers.tuple(term("inl"), ftr(), ftr()),
+				Parsers.tuple(term("inr"), ftr(), ftr()),
+				Parsers.tuple(term("eval"), ftr(), ftr()),
+				Parsers.tuple(term("iso1"), ftr(), ftr()),
+				Parsers.tuple(term("iso2"), ftr(), ftr()),
+				Parsers.tuple(term("true"), cat()),
+				Parsers.tuple(term("false"), cat()),
+				prodTy, sumTy);
 		
 		ref.set(a);
 		return a;
 	}
 	
 
-	public static final Parser<?> fn() {
+	private static Parser<?> fn() {
 		Reference ref = Parser.newReference();
 
 		Parser plusTy = Parsers.between(term("("),
@@ -514,8 +563,7 @@ public class PPParser {
 		Parser<?> app2 = Parsers.tuple(term("apply"), ident(), set());
 		Parser<?> app = Parsers.tuple(term("apply"), ident(), term("on"), term("arrow"), ref.lazy());
 		
-		Parser a = Parsers.or(new Parser[] { 
-				term("true"), 
+		Parser a = Parsers.or(term("true"),
 				term("false"),
 				term("and"),
 				term("or"),
@@ -534,13 +582,13 @@ public class PPParser {
 				Parsers.tuple(term("char"), ref.lazy()),
 				Parsers.tuple(term("kernel"), ref.lazy()),
 				Parsers.tuple(term("id"), set()),
-				compTy, plusTy, prodTy, ident(), fnConst(), app, app2 });
+				compTy, plusTy, prodTy, ident(), fnConst(), app, app2);
 
 		ref.set(a);
 		return a;
 	}
 	
-	public static final Parser<?> ftr() {
+	private static Parser<?> ftr() {
 		Reference ref = Parser.newReference();
 
 		Parser plusTy = Parsers.between(term("("),
@@ -583,8 +631,7 @@ public class PPParser {
 		////
 		Parser catTerm = term("Cat");
 		Parser setTerm = term("Set");
-		Parser a = Parsers.or(new Parser[] {
-				Parsers.tuple(term("unit"), cat(), catTerm.or(setTerm)),
+		Parser a = Parsers.or(Parsers.tuple(term("unit"), cat(), catTerm.or(setTerm)),
 				Parsers.tuple(term("void"), cat(), catTerm.or(setTerm)),
 				Parsers.tuple(term("tt"), cat()),
 				Parsers.tuple(term("ff"), cat()),
@@ -608,15 +655,15 @@ public class PPParser {
 				Parsers.tuple(term("apply"), ref.lazy(), term("on"), term("object"), ref.lazy()),
 				Parsers.tuple(term("id"), cat()),
 				Parsers.tuple(term("prop"), cat()),
-				compTy, plusTy, prodTy, expTy, ident(), 
-				instanceConst(), constant, setsetConst(), constant2, 
-				mappingConst(),  }); 
+				compTy, plusTy, prodTy, expTy, ident(),
+				instanceConst(), constant, setsetConst(), constant2,
+				mappingConst());
 
 		ref.set(a);
 		return a;
 	}
 	
-	public static final Parser<?> instanceConst() {
+	private static Parser<?> instanceConst() {
 		Parser<?> node = Parsers.tuple(ident(), term("->"), set());
 		Parser<?> arrow = Parsers.tuple(
 				ident(),
@@ -631,7 +678,7 @@ public class PPParser {
 		return constant;
 	}
 	
-	public static final Parser<?> mappingConst() {
+	private static Parser<?> mappingConst() {
 		Parser<?> node = Parsers.tuple(ident(), term("->"), ident());
 		Parser<?> arrow = Parsers.tuple(
 				ident(),
@@ -646,11 +693,11 @@ public class PPParser {
 		return constant;
 	}
 	
-	public static Parser<?> section2(String s, Parser<?> p) {
+	private static Parser<?> section2(String s, Parser<?> p) {
 		return Parsers.tuple(term(s), p, term(";"));
 	}
 	
-	public static final Parser<?> setsetConst() {
+	private static Parser<?> setsetConst() {
 		Parser<?> node = Parsers.tuple(ident(), term("->"), set());
 		
 		Parser<?> arrow = Parsers.tuple(
@@ -668,18 +715,18 @@ public class PPParser {
 	}
 	
 	
-	public static final Parser setOfPairs() {
+	private static Parser setOfPairs() {
 		Parser<?> q = Parsers.tuple(term("("), value(), term(","), value(), term(")"));
 		return Parsers.tuple(term("{"), q.sepBy(term(",")), term("}"));		
 	}
 
-	public static final Parser<?> fnConst() { 
+	private static Parser<?> fnConst() {
 		Parser<?> p = Parsers.tuple(set(), term("->"), set());
 		Parser<?> q = Parsers.tuple(term("("), value(), term(","), value(), term(")"));
 		return Parsers.tuple(term("{"), q.sepBy(term(",")), term("}"), term(":"), p);
 	}
 	
-	public static final FnExp toFn(Object o) { 
+	private static FnExp toFn(Object o) {
 		try {
 			Tuple5 t5 = (Tuple5) o;
 			
@@ -702,7 +749,7 @@ public class PPParser {
 			}
 			SetExp t3a = toSet(t3.a);
 			SetExp t3c = toSet(t3.c);
-			return new FnExp.Const(s::get, t3a, t3c);
+			return new Const(s::get, t3a, t3c);
 		} catch (Exception e) {
 			
 		}
@@ -734,7 +781,7 @@ public class PPParser {
 				return new FnExp.Prod(toFn(o1), toFn(p3));
 			} else if (p2.toString().equals("+")) {
 				return new FnExp.Case(toFn(o1), toFn(p3));
-			} if (p1.toString().equals("apply")) {
+			} if (p1.equals("apply")) {
 				return new FnExp.ApplyTrans(p2.toString(), toSet(p3));
 			}
 
@@ -745,19 +792,22 @@ public class PPParser {
 		try {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
 			String p1 = p.a.toString();
-			Object p2 = p.b; 
-			if (p1.equals("id")) {
-				return new FnExp.Id(toSet(p2));
-			} else if (p1.equals("curry")) {
-				return new FnExp.Curry(toFn(p2));
-			} else if (p1.equals("ff")) {
-				return new FnExp.FF(toSet(p2));
-			} else if (p1.equals("tt")) {
-				return new FnExp.TT(toSet(p2));
-			} else if (p1.equals("char")) {
-				return new FnExp.Chr(toFn(p2));
-			} else if (p1.equals("kernel")) {
-				return new FnExp.Krnl(toFn(p2));
+			Object p2 = p.b;
+			switch (p1) {
+				case "id":
+					return new FnExp.Id(toSet(p2));
+				case "curry":
+					return new FnExp.Curry(toFn(p2));
+				case "ff":
+					return new FnExp.FF(toSet(p2));
+				case "tt":
+					return new FnExp.TT(toSet(p2));
+				case "char":
+					return new FnExp.Chr(toFn(p2));
+				case "kernel":
+					return new Krnl(toFn(p2));
+			default:
+				break;
 			}
 		} catch (RuntimeException re) {
 
@@ -767,17 +817,17 @@ public class PPParser {
 			return new FnExp.Var(o.toString());
 		}
 		if (o.toString().equals("true")) {
-			return new FnExp.Tru("true");
+			return new Tru("true");
 		} else if (o.toString().equals("false")) {
-			return new FnExp.Tru("false");
+			return new Tru("false");
 		} else if (o.toString().equals("and")) {
-			return new FnExp.Tru("and");
+			return new Tru("and");
 		} else if (o.toString().equals("or")) {
-			return new FnExp.Tru("or");
+			return new Tru("or");
 		} else if (o.toString().equals("not")) {
-			return new FnExp.Tru("not");
+			return new Tru("not");
 		} else if (o.toString().equals("implies")) {
-			return new FnExp.Tru("implies");
+			return new Tru("implies");
 		} 
 
 		throw new RuntimeException(); 
@@ -785,7 +835,7 @@ public class PPParser {
 	
 	//: ** notation
 	
-	public static final TransExp toTrans(Object o) { 
+	private static TransExp toTrans(Object o) {
 		try {
 			Tuple5 t = (Tuple5) o;
 			
@@ -797,7 +847,7 @@ public class PPParser {
 				} else {
 					Tuple3 t3 = (Tuple3) t.e;
 					List<String> l = (List<String>) t3.a;
-					return new TransExp.ApplyPath(f, l.remove(0), l, toCat(t3.c));
+					return new ApplyPath(f, l.remove(0), l, toCat(t3.c));
 				}
 			}
 			
@@ -807,16 +857,16 @@ public class PPParser {
 
 			if (a.c.toString().equals("Set") && a.e.toString().equals("Set") &&
 				b.c.toString().equals("Set") && b.e.toString().equals("Set")) {
-				Tuple3 z = (Tuple3) ((Tuple3) t.a).b;
+				Tuple3 z = (Tuple3) ((org.codehaus.jparsec.functors.Pair) t.a).b;
 				FunctorExp src = toFtr(a.a);
 				FunctorExp dst = toFtr(b.a);
 				String ob = z.a.toString();
 				FnExp fun = toFn(z.c);
-				return new TransExp.SetSet(ob, fun, src, dst);
+				return new SetSet(ob, fun, src, dst);
 			} else if (a.e.toString().equals("Set") && b.e.toString().equals("Set")) {
 				FunctorExp src = toFtr(a.a);
 				FunctorExp dst = toFtr(b.a);
-				List<Object> ob = (List<Object>) ((Tuple3) t.a).b;
+				List<Object> ob = (List<Object>) ((org.codehaus.jparsec.functors.Pair) t.a).b;
 				Map<String, Chc<FnExp, SetExp>> fun = new HashMap<>();
 		
 				for (Object ttt : ob) {
@@ -831,11 +881,11 @@ public class PPParser {
 						fun.put(n, Chc.inRight(toSet(u.c)));						
 					}
 				}
-				return new TransExp.ToSet(fun , src, dst);
+				return new ToSet(fun , src, dst);
 			} else if (a.e.toString().equals("Cat") && b.e.toString().equals("Cat")) {
 				FunctorExp src = toFtr(a.a);
 				FunctorExp dst = toFtr(b.a);
-				List<Object> ob = (List<Object>) ((Tuple3) t.a).b;
+				List<Object> ob = (List<Object>) ((org.codehaus.jparsec.functors.Pair) t.a).b;
 				Map<String, FunctorExp> fun = new HashMap<>();
 				
 				for (Object ttt : ob) {
@@ -846,12 +896,12 @@ public class PPParser {
 					String n = (String) u.a;
 					fun.put(n, toFtr(u.c));
 				}
-				return new TransExp.ToCat(fun , src, dst);
+				return new ToCat(fun , src, dst);
 			} else {
 				try {
 					FunctorExp src = toFtr(a.a);
 					FunctorExp dst = toFtr(b.a);
-					List<Object> ob = (List<Object>) ((Tuple3) t.a).b;
+					List<Object> ob = (List<Object>) ((org.codehaus.jparsec.functors.Pair) t.a).b;
 					Map<String, TransExp> fun = new HashMap<>();
 					
 					for (Object ttt : ob) {
@@ -862,12 +912,12 @@ public class PPParser {
 						String n = (String) u.a;
 						fun.put(n, toTrans(u.c));
 					}
-					return new TransExp.ToInst(fun , src, dst);	
+					return new ToInst(fun , src, dst);
 				}catch(Exception ex) { }
 				
 				FunctorExp src = toFtr(a.a);
 				FunctorExp dst = toFtr(b.a);
-				List<Object> ob = (List<Object>) ((Tuple3) t.a).b;
+				List<Object> ob = (List<Object>) ((org.codehaus.jparsec.functors.Pair) t.a).b;
 				Map<String, Pair<String, List<String>>> fun = new HashMap<>();		
 				for (Object ttt : ob) {
 					if (fun.containsKey(o)) {
@@ -879,22 +929,22 @@ public class PPParser {
 					String ll = l.remove(0);
 					fun.put(n, new Pair<>(ll, l));
 				}
-				return new TransExp.ToMap(fun , src, dst, toCat(a.c), toCat(a.e));
+				return new ToMap(fun , src, dst, toCat(a.c), toCat(a.e));
 			}
 		} catch (Exception re) { }
 		
 		try {
 			Tuple4 t = (Tuple4) o;
 			if (t.a.toString().equals("return") || t.a.toString().equals("coreturn")) {
-				return new TransExp.Adj(t.a.toString(), t.b.toString(), t.c.toString(), toFtr(t.d));
-			} else if (t.a.toString().toString().equals("left") ) {
-				return new TransExp.Whisker(true, toFtr(t.c), toTrans(t.d));
-			} else if (t.a.toString().toString().equals("right") ) {
-				return new TransExp.Whisker(false, toFtr(t.c), toTrans(t.d));
+				return new Adj(t.a.toString(), t.b.toString(), t.c.toString(), toFtr(t.d));
+			} else if (t.a.toString().equals("left") ) {
+				return new Whisker(true, toFtr(t.c), toTrans(t.d));
+			} else if (t.a.toString().equals("right") ) {
+				return new Whisker(false, toFtr(t.c), toTrans(t.d));
 			} else if (t.a.toString().equals("APPLY")) {
-				return new TransExp.PeterApply(t.d.toString(),toTrans(t.b));
+				return new PeterApply(t.d.toString(),toTrans(t.b));
 			} else {
-				return new TransExp.ApplyTrans(toTrans(t.b), toFtr(t.d));
+				return new ApplyTrans(toTrans(t.b), toFtr(t.d));
 			}
 		} catch (Exception re) { }
 
@@ -909,19 +959,19 @@ public class PPParser {
 			if (p2.toString().equals(";")) {
 				return new TransExp.Comp(toTrans(o1), toTrans(p3));
 			} else if (o1.toString().equals("fst")) {
-				return new TransExp.Proj(toFtr(p2), toFtr(p3), true);
+				return new Proj(toFtr(p2), toFtr(p3), true);
 			} else if (o1.toString().equals("snd")) {
-				return new TransExp.Proj(toFtr(p2), toFtr(p3), false);
+				return new Proj(toFtr(p2), toFtr(p3), false);
 			} else if (o1.toString().equals("inl")) {
-				return new TransExp.Inj(toFtr(p2), toFtr(p3), true);
+				return new Inj(toFtr(p2), toFtr(p3), true);
 			} else if (o1.toString().equals("inr")) {
-				return new TransExp.Inj(toFtr(p2), toFtr(p3), false);
+				return new Inj(toFtr(p2), toFtr(p3), false);
 			}  else if (o1.toString().equals("eval")) {
 				return new TransExp.Eval(toFtr(p2), toFtr(p3));
 			} else if (p2.toString().equals("*")) {
 				return new TransExp.Prod(toTrans(o1), toTrans(p3));
 			} else if (p2.toString().equals("+")) {
-				return new TransExp.CoProd(toTrans(o1), toTrans(p3));
+				return new CoProd(toTrans(o1), toTrans(p3));
 			} else if (o1.toString().equals("iso1")) {
 				return new TransExp.Iso(true, toFtr(p2), toFtr(p3));
 			} else if (o1.toString().equals("iso2")) {
@@ -933,27 +983,33 @@ public class PPParser {
 		try {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
 			String p1 = p.a.toString();
-			Object p2 = p.b; 
-			if (p1.equals("id")) {
-				return new TransExp.Id(toFtr(p2));
-			} else if (p1.equals("tt")) {
-				return new TransExp.One(toFtr(p2));
-			} else if (p1.equals("ff")) {
-				return new TransExp.Zero(toFtr(p2));
-			} else if (p1.equals("curry")) {
-				return new TransExp.Curry(toTrans(p2), true);
-			} else if (p1.equals("CURRY")) {
-				return new TransExp.Curry(toTrans(p2), false);
-			} else if (p1.equals("true")) {
-				return new TransExp.Bool(true, toCat(p2));
-			} else if (p1.equals("false")) {
-				return new TransExp.Bool(false,toCat(p2));
-			} else if (p1.equals("char")) {
-				return new TransExp.Chr(toTrans(p2));
-			} else if (p1.equals("kernel")) {
-				return new TransExp.Ker(toTrans(p2));
-			} else if (p1.equals("not") || p1.equals("and") || p1.equals("implies") || p1.equals("or")) {
-				return new TransExp.AndOrNotImplies(p1, toCat(p2));
+			Object p2 = p.b;
+			switch (p1) {
+				case "id":
+					return new TransExp.Id(toFtr(p2));
+				case "tt":
+					return new TransExp.One(toFtr(p2));
+				case "ff":
+					return new TransExp.Zero(toFtr(p2));
+				case "curry":
+					return new TransExp.Curry(toTrans(p2), true);
+				case "CURRY":
+					return new TransExp.Curry(toTrans(p2), false);
+				case "true":
+					return new Bool(true, toCat(p2));
+				case "false":
+					return new Bool(false, toCat(p2));
+				case "char":
+					return new Chr(toTrans(p2));
+				case "kernel":
+					return new Ker(toTrans(p2));
+				case "not":
+				case "and":
+				case "implies":
+				case "or":
+					return new AndOrNotImplies(p1, toCat(p2));
+			default:
+				break;
 			}
 		} catch (RuntimeException re) { }
 
@@ -964,7 +1020,7 @@ public class PPParser {
 		throw new RuntimeException("Could not create transform from " + o); 
 	}
 	
-	public static FunctorExp toSetSet(Object decl) {
+	private static FunctorExp toSetSet(Object decl) {
 		Tuple3 y = (Tuple3) decl;
 		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
 		
@@ -981,7 +1037,7 @@ public class PPParser {
 	}
 	
 //	@SuppressWarnings("rawtypes")
-	public static FunctorExp toInstConst(Object decl) {
+	private static FunctorExp toInstConst(Object decl) {
 		Tuple3 y = (Tuple3) decl;
 		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
 		
@@ -1022,7 +1078,7 @@ public class PPParser {
 		return ret;
 	}
 	
-	public static FunctorExp toCatFtrConst(Object decl) {
+	private static FunctorExp toCatFtrConst(Object decl) {
 		Tuple5 y = (Tuple5) decl;
 		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
 		
@@ -1057,7 +1113,7 @@ public class PPParser {
 		return ret;
 	}
 	
-	public static FunctorExp toFinalConst(Object decl) {
+	private static FunctorExp toFinalConst(Object decl) {
 		Tuple5 y = (Tuple5) decl;
 		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
 		
@@ -1092,7 +1148,7 @@ public class PPParser {
 		return ret;
 	}
 
-	public static FunctorExp toMapConst(Object decl) {
+	private static FunctorExp toMapConst(Object decl) {
 		Tuple5 y = (Tuple5) decl;
 		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
 		
@@ -1130,7 +1186,7 @@ public class PPParser {
 	}
 
 	
-	public static final FunctorExp toFtr(Object o) { 
+	private static FunctorExp toFtr(Object o) {
 		try {
 			
 			Tuple5 p = (Tuple5) o;
@@ -1138,15 +1194,11 @@ public class PPParser {
 			if (p.a.toString().equals("apply")) {
 				FunctorExp f = toFtr(p.b);
 				FunctorExp e = toFtr(p.e);
-				return new FunctorExp.Apply(f, e);
+				return new Apply(f, e);
 			} 
 			
 			if (p.e.toString().equals("Set")) {
-				if (p.c.toString().equals("Set")) {
-					return toSetSet(o);
-				} else {
-					return toInstConst(o);
-				}
+                return p.c.toString().equals("Set") ? toSetSet(o) : toInstConst(o);
 			} else if (p.e.toString().equals("Cat")) {
 				return toCatFtrConst(o);
 			} else {
@@ -1171,33 +1223,33 @@ public class PPParser {
 			String p1 = p.a.toString();
 
 			if (p1.equals("fst")) {
-				return new FunctorExp.Fst(toCat(p2), toCat(p3));
+				return new Fst(toCat(p2), toCat(p3));
 			} else if (p1.equals("snd")) {
-				return new FunctorExp.Snd(toCat(p2), toCat(p3));
+				return new Snd(toCat(p2), toCat(p3));
 			}  else if (p1.equals("inl")) {
-				return new FunctorExp.Inl(toCat(p2), toCat(p3));
+				return new Inl(toCat(p2), toCat(p3));
 			} else if (p1.equals("inr")) {
-				return new FunctorExp.Inr(toCat(p2), toCat(p3));
+				return new Inr(toCat(p2), toCat(p3));
 			} else if (p1.equals("iso1")) {
-				return new FunctorExp.Iso(true, toCat(p2), toCat(p3));
+				return new Iso(true, toCat(p2), toCat(p3));
 			} else if (p1.equals("iso2")) {
-				return new FunctorExp.Iso(false, toCat(p2), toCat(p3));
+				return new Iso(false, toCat(p2), toCat(p3));
 			} else if (p1.equals("eval")) {
-				return new FunctorExp.Eval(toCat(p2), toCat(p3));
+				return new Eval(toCat(p2), toCat(p3));
 			} else if (p2.toString().equals(";")) {
-				return new FunctorExp.Comp(toFtr(o1), toFtr(p3));
+				return new Comp(toFtr(o1), toFtr(p3));
 			} else if (p2.toString().equals("*")) {
-				return new FunctorExp.Prod(toFtr(o1), toFtr(p3));
+				return new Prod(toFtr(o1), toFtr(p3));
 			} else if (p2.toString().equals("+")) {
-				return new FunctorExp.Case(toFtr(o1), toFtr(p3));
+				return new Case(toFtr(o1), toFtr(p3));
 			} else if (p2.toString().equals("^")) {
-				return new FunctorExp.Exp(toFtr(o1), toFtr(p3));
+				return new Exp(toFtr(o1), toFtr(p3));
 			} else if (p1.equals("unit")) {
-				return new FunctorExp.One(toCat(p.b), toCat(p.c));	
+				return new One(toCat(p.b), toCat(p.c));
 			} else if (p1.equals("void")) {
-				return new FunctorExp.Zero(toCat(p.b), toCat(p.c));	
+				return new Zero(toCat(p.b), toCat(p.c));
 			} else if (p1.equals("pushout")) {
-				return new FunctorExp.Pushout(p.b.toString(), p.c.toString());					
+				return new Pushout(p.b.toString(), p.c.toString());
 			}
 
 		} catch (RuntimeException re) {
@@ -1207,44 +1259,49 @@ public class PPParser {
 		try {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
 			String p1 = p.a.toString();
-			Object p2 = p.b; 
-			if (p1.equals("id")) {
-				return new FunctorExp.Id(toCat(p2));
-			} else if (p1.equals("prop")) {
-				return new FunctorExp.Prop(toCat(p2));
-			} else if (p1.equals("curry")) {
-				return new FunctorExp.Curry(toFtr(p2));
-			} else if (p1.equals("uncurry")) {
-				return new FunctorExp.Uncurry(toFtr(p2));
-			} else if (p1.equals("delta") || p1.equals("sigma") || p1.equals("pi")) {
-				return new FunctorExp.Migrate(toFtr(p2), p1.toString());
-			} else if (p1.equals("ff")) {
-				return new FunctorExp.FF(toCat(p2));
-			} else if (p1.equals("tt")) {
-				return new FunctorExp.TT(toCat(p2));	
-			} else if (p1.equals("dom")) {
-				return new FunctorExp.Dom(p2.toString(), true);
-			} else if (p1.equals("cod")) {
-				return new FunctorExp.Dom(p2.toString(), false);
-			} else if (p1.equals("pivot")) {
-				return new FunctorExp.Pivot(toFtr(p2), true);
-			} else if (p1.equals("unpivot")) {
-				return new FunctorExp.Pivot(toFtr(p2), false);
+			Object p2 = p.b;
+			switch (p1) {
+				case "id":
+					return new Id(toCat(p2));
+				case "prop":
+					return new Prop(toCat(p2));
+				case "curry":
+					return new Curry(toFtr(p2));
+				case "uncurry":
+					return new Uncurry(toFtr(p2));
+				case "delta":
+				case "sigma":
+				case "pi":
+					return new Migrate(toFtr(p2), p1);
+				case "ff":
+					return new FF(toCat(p2));
+				case "tt":
+					return new TT(toCat(p2));
+				case "dom":
+					return new Dom(p2.toString(), true);
+				case "cod":
+					return new Dom(p2.toString(), false);
+				case "pivot":
+					return new Pivot(toFtr(p2), true);
+				case "unpivot":
+					return new Pivot(toFtr(p2), false);
+			default:
+				break;
 			} 
 		} catch (RuntimeException re) {
 
 		}
 
 		if (o instanceof String) {
-			return new FunctorExp.Var(o.toString());
+			return new Var(o.toString());
 		}
 
 		throw new RuntimeException("Bad: " + o); 
 	}
 
-	public static final FQLPPProgram program(String s) {
+	public static FQLPPProgram program(String s) {
 		List<NewDecl> ret = new LinkedList<>();
-		List decls = (List) PPParser.program.parse(s);
+		List decls = (List) program.parse(s);
 
 		for (Object d : decls) {
 			org.codehaus.jparsec.functors.Pair pr = (org.codehaus.jparsec.functors.Pair) d;
@@ -1256,33 +1313,33 @@ public class PPParser {
 			}
 
 			Tuple3 t = (Tuple3) decl;
-			String kind = ((Token) t.a).toString();
+			String kind = t.a.toString();
 			String name = t.b.toString();
 			switch (kind) {
 			case "set":
 				Tuple4 tt = (Tuple4) decl;
 		//		name = (String) t.b;
-				ret.add(FQLPPProgram.NewDecl.setDecl(name, idx, toSet(tt.d)));
+				ret.add(NewDecl.setDecl(name, idx, toSet(tt.d)));
 				break;
 			case "function":
 				Tuple4 t0 = (Tuple4) decl;
 			//	name = (String) t.b;
-				ret.add(FQLPPProgram.NewDecl.fnDecl(name, idx, toFn(t0.d)));
+				ret.add(NewDecl.fnDecl(name, idx, toFn(t0.d)));
 				break;
 			case "functor":
 				Tuple4 ti = (Tuple4) decl;
 			//	name = (String) t.b;
-				ret.add(FQLPPProgram.NewDecl.ftrDecl(name, idx, toFtr(ti.d)));
+				ret.add(NewDecl.ftrDecl(name, idx, toFtr(ti.d)));
 				break;
 			case "category":
 				Tuple4 tx = (Tuple4) decl;
 			//	name = (String) t.b;
-				ret.add(FQLPPProgram.NewDecl.catDecl(name, idx, toCat(tx.d)));
+				ret.add(NewDecl.catDecl(name, idx, toCat(tx.d)));
 				break;
 			case "transform":
 				Tuple4 te = (Tuple4) decl;
 			//	name = (String) t.b;
-				ret.add(FQLPPProgram.NewDecl.transDecl(name, idx, toTrans(te.d)));
+				ret.add(NewDecl.transDecl(name, idx, toTrans(te.d)));
 				break;
 			
 			default:
@@ -1294,16 +1351,16 @@ public class PPParser {
 	}
 
 		private static Parser<List<String>> path() {
-			return Terminals.Identifier.PARSER.sepBy1(term("."));
+			return Identifier.PARSER.sepBy1(term("."));
 		}
 
-	public static Parser<?> section(String s, Parser<?> p) {
+	private static Parser<?> section(String s, Parser<?> p) {
 		return Parsers.tuple(term(s), p.sepBy(term(",")), term(";"));
 	}
 
 	private static Parser<?> string() {
-		return Parsers.or(Terminals.StringLiteral.PARSER,
-				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
+		return Parsers.or(StringLiteral.PARSER,
+				IntegerLiteral.PARSER, Identifier.PARSER);
 	}
 
 }

@@ -1,23 +1,19 @@
 package catdata.mpl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import catdata.Environment;
 import catdata.LineException;
 import catdata.Program;
 import catdata.Unit;
 import catdata.mpl.Mpl.MplExp;
 
-public class MplDriver {
+class MplDriver {
 
 
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static Environment<MplObject> makeEnv(@SuppressWarnings("unused") String str, Program<MplExp<String,String>> init) {
 		Environment<MplObject> ret = new Environment<>();
-		Map<String, Integer> extra = new HashMap<>();
+		//Map<String, Integer> extra = new HashMap<>();
 		
 		for (String k : init.order) {
 			MplExp se = init.exps.get(k);
@@ -29,12 +25,7 @@ public class MplDriver {
 				throw new LineException(t.getLocalizedMessage(), k, "");
 			}
 		}
-		
-		int j = 0;
-		for (Entry<String, Integer> e : extra.entrySet()) {
-			init.order.add(e.getValue() + j, e.getKey()); 
-			j++;
-		}
+
 		
 		return ret;
 	}

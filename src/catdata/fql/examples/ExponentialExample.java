@@ -20,7 +20,7 @@ public class ExponentialExample extends Example {
 		return s;
 	}
 
-	String s = "schema A = {"
+	private final String s = "schema A = {"
 			+ "\n	nodes a1, a2;"
 			+ "\n	attributes;"
 			+ "\n	arrows af : a1 -> a2;"

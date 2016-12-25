@@ -12,7 +12,7 @@ import catdata.Util;
 public class SqlTable {
 
 	public String name;
-	public List<SqlColumn> columns = new LinkedList<>();
+	public final List<SqlColumn> columns = new LinkedList<>();
 	public Set<SqlColumn> pk = new HashSet<>();
 	
 	public SqlColumn getCnfId() {
@@ -20,11 +20,8 @@ public class SqlTable {
 	}
 		
 	public boolean isCnf() {
-		if (pk.size() != 1) {
-			return false;
-		}
-		return getCnfId().autoInc;
-	}
+        return pk.size() == 1 && getCnfId().autoInc;
+    }
 	
 	public void validate() {
 		if (name == null) {
@@ -72,7 +69,7 @@ public class SqlTable {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;

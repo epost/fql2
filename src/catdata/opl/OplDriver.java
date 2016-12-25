@@ -2,13 +2,10 @@ package catdata.opl;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import catdata.Environment;
 import catdata.LineException;
-import catdata.Pair;
 import catdata.Program;
 import catdata.ide.GlobalOptions;
 import catdata.opl.OplExp.OplInst0;
@@ -17,7 +14,7 @@ import catdata.opl.OplExp.OplSCHEMA0;
 import catdata.opl.OplExp.OplSig;
 
 @SuppressWarnings({"unused","unchecked","rawtypes"})
-public class OplDriver {
+class OplDriver {
 
 	// : let x be the position of the first change between old and new
 	// program.
@@ -32,8 +29,8 @@ public class OplDriver {
 	public static Environment<OplObject> makeEnv(String str,
 			Program<OplExp> init, String[] toUpdate, String last_str,
 			Program<OplExp> last_prog, Environment<OplObject> last_env) {
-		Environment<OplObject> ret = new Environment<OplObject>();
-		Map<String, Integer> extra = new HashMap<>();
+		Environment<OplObject> ret = new Environment<>();
+		//Map<String, Integer> extra = new HashMap<>();
 
 		boolean usesPragma = false;
 		for (String k : init.order) {
@@ -100,11 +97,11 @@ public class OplDriver {
 			}
 		}
 
-		int j = 0;
-		for (Entry<String, Integer> e : extra.entrySet()) {
-			init.order.add(e.getValue() + j, e.getKey());
-			j++;
-		}
+		//int j = 0;
+		//for (Entry<String, Integer> e : extra.entrySet()) {
+	//		init.order.add(e.getValue() + j, e.getKey());
+	//		j++;
+	//	}
 
 		// : add to order
 

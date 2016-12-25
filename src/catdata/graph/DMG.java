@@ -30,12 +30,12 @@ public class DMG<N,E> {
 		validate();
 	}
 	
-	public final void validate() {
+	private void validate() {
 		for (E e : edges.keySet()) {
-			if (!this.nodes.contains(edges.get(e).first)) {
+			if (!nodes.contains(edges.get(e).first)) {
 				throw new RuntimeException("Not a node: " + edges.get(e).first);
 			}
-			if (!this.nodes.contains(edges.get(e).second)) {
+			if (!nodes.contains(edges.get(e).second)) {
 				throw new RuntimeException("Not a node: " + edges.get(e).second);
 			}
 		}
@@ -89,7 +89,7 @@ public class DMG<N,E> {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((edges == null) ? 0 : edges.hashCode());
 		result = prime * result + ((nodes == null) ? 0 : nodes.hashCode());

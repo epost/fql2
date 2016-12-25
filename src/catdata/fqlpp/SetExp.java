@@ -9,7 +9,8 @@ import catdata.Util;
 public abstract class SetExp implements Serializable {
 	
 	public static class Intersect extends SetExp {
-		public SetExp set1, set;
+		public final SetExp set1;
+        public final SetExp set;
 
 		@Override
 		public <R, E> R accept(E env, SetExpVisitor<R, E> v) {
@@ -17,14 +18,13 @@ public abstract class SetExp implements Serializable {
 		}
 		
 		public Intersect(SetExp set1, SetExp set) {
-			super();
-			this.set1 = set1;
+            this.set1 = set1;
 			this.set = set;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((set == null) ? 0 : set.hashCode());
 			result = prime * result + ((set1 == null) ? 0 : set1.hashCode());
@@ -56,11 +56,11 @@ public abstract class SetExp implements Serializable {
 	}
 	
 	public static class Union extends SetExp {
-		public SetExp set1, set;
+		public final SetExp set1;
+        public final SetExp set;
 		
 		public Union(SetExp set1, SetExp set) {
-			super();
-			this.set1 = set1;
+            this.set1 = set1;
 			this.set = set;
 		}
 
@@ -71,7 +71,7 @@ public abstract class SetExp implements Serializable {
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((set == null) ? 0 : set.hashCode());
 			result = prime * result + ((set1 == null) ? 0 : set1.hashCode());
@@ -103,8 +103,8 @@ public abstract class SetExp implements Serializable {
 	}
 
 	public static class Apply extends SetExp {
-		public String f;
-		public SetExp set;
+		public final String f;
+		public final SetExp set;
 
 		public Apply(String f, SetExp set) {
 			this.f = f;
@@ -113,7 +113,7 @@ public abstract class SetExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			result = prime * result + ((set == null) ? 0 : set.hashCode());
@@ -150,7 +150,7 @@ public abstract class SetExp implements Serializable {
 	}
 
 	public static class Numeral extends SetExp {
-		public int i;
+		public final int i;
 
 		@Override
 		public <R, E> R accept(E env, SetExpVisitor<R, E> v) {
@@ -168,7 +168,7 @@ public abstract class SetExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + i;
 			return result;
@@ -183,10 +183,8 @@ public abstract class SetExp implements Serializable {
 			if (getClass() != obj.getClass())
 				return false;
 			Numeral other = (Numeral) obj;
-			if (i != other.i)
-				return false;
-			return true;
-		}
+            return i == other.i;
+        }
 
 	}
 
@@ -197,16 +195,15 @@ public abstract class SetExp implements Serializable {
 			return Util.nice(s.toString());
 		}
 
-		Set<?> s;
+		final Set<?> s;
 
 		public Const(Set<?> s) {
-			super();
-			this.s = s;
+            this.s = s;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			return result;
@@ -252,7 +249,7 @@ public abstract class SetExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((v == null) ? 0 : v.hashCode());
 			return result;
@@ -315,7 +312,7 @@ public abstract class SetExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -338,7 +335,7 @@ public abstract class SetExp implements Serializable {
 			return true;
 		}
 
-		public FnExp f;
+		public final FnExp f;
 
 		@Override
 		public String toString() {
@@ -359,7 +356,7 @@ public abstract class SetExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -382,7 +379,7 @@ public abstract class SetExp implements Serializable {
 			return true;
 		}
 
-		public FnExp f;
+		public final FnExp f;
 
 		@Override
 		public String toString() {
@@ -403,7 +400,7 @@ public abstract class SetExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -426,7 +423,7 @@ public abstract class SetExp implements Serializable {
 			return true;
 		}
 
-		public FnExp f;
+		public final FnExp f;
 
 		@Override
 		public String toString() {
@@ -492,7 +489,8 @@ public abstract class SetExp implements Serializable {
 	}
 
 	public static class Plus extends SetExp {
-		SetExp a, b;
+		final SetExp a;
+        final SetExp b;
 
 		public Plus(SetExp a, SetExp b) {
 			this.a = a;
@@ -504,34 +502,24 @@ public abstract class SetExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((a == null) ? 0 : a.hashCode());
-			result = prime * result + ((b == null) ? 0 : b.hashCode());
+			result = prime * result + a.hashCode();
+			result = prime * result + b.hashCode();
 			return result;
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			Plus other = (Plus) obj;
-			if (a == null) {
-				if (other.a != null)
-					return false;
-			} else if (!a.equals(other.a))
-				return false;
-			if (b == null) {
-				if (other.b != null)
-					return false;
-			} else if (!b.equals(other.b))
-				return false;
-			return true;
-		}
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Plus other = (Plus) obj;
+            return a.equals(other.a) && b.equals(other.b);
+        }
 
 		@Override
 		public String toString() {
@@ -545,7 +533,8 @@ public abstract class SetExp implements Serializable {
 	}
 
 	public static class Times extends SetExp {
-		public SetExp a, b;
+		public final SetExp a;
+        public final SetExp b;
 
 		public Times(SetExp a, SetExp b) {
 			this.a = a;
@@ -554,7 +543,7 @@ public abstract class SetExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -595,7 +584,8 @@ public abstract class SetExp implements Serializable {
 	}
 
 	public static class Exp extends SetExp {
-		public SetExp a, b;
+		public final SetExp a;
+        public final SetExp b;
 
 		public Exp(SetExp a, SetExp b) {
 			this.a = a;
@@ -604,7 +594,7 @@ public abstract class SetExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -654,35 +644,35 @@ public abstract class SetExp implements Serializable {
 	public abstract int hashCode();
 
 	public interface SetExpVisitor<R, E> {
-		public R visit(E env, Zero e);
+		R visit(E env, Zero e);
 
-		public R visit(E env, One e);
+		R visit(E env, One e);
 
-		public R visit(E env, Prop e);
+		R visit(E env, Prop e);
 
-		public R visit(E env, Plus e);
+		R visit(E env, Plus e);
 
-		public R visit(E env, Times e);
+		R visit(E env, Times e);
 
-		public R visit(E env, Exp e);
+		R visit(E env, Exp e);
 
-		public R visit(E env, Var e);
+		R visit(E env, Var e);
 
-		public R visit(E env, Dom e);
+		R visit(E env, Dom e);
 
-		public R visit(E env, Cod e);
+		R visit(E env, Cod e);
 
-		public R visit(E env, Range e);
+		R visit(E env, Range e);
 
-		public R visit(E env, Const e);
+		R visit(E env, Const e);
 
-		public R visit(E env, Numeral e);
+		R visit(E env, Numeral e);
 
-		public R visit(E env, Apply e);
+		R visit(E env, Apply e);
 		
-		public R visit(E env, Union e);
+		R visit(E env, Union e);
 		
-		public R visit(E env, Intersect e);
+		R visit(E env, Intersect e);
 		
 	}
 

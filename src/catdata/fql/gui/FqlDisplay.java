@@ -33,6 +33,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 
+import catdata.fql.decl.SigExp.Var;
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Pair;
@@ -79,7 +80,6 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
@@ -93,7 +93,7 @@ public class FqlDisplay implements Disp {
 
 	private final List<Pair<String, JComponent>> frames = new LinkedList<>();
 
-	public static JPanel showInst(String c, Color clr, Instance view) throws FQLException {
+	private static JPanel showInst(String c, Color clr, Instance view) throws FQLException {
 		JTabbedPane px = new JTabbedPane();
 
 		if (GlobalOptions.debug.fql.inst_graphical) {
@@ -149,7 +149,7 @@ public class FqlDisplay implements Disp {
 
 	}
 
-	public static JPanel showMapping(FqlEnvironment environment, Color scolor, Color tcolor, Mapping view) {
+	private static JPanel showMapping(FqlEnvironment environment, Color scolor, Color tcolor, Mapping view) {
 
 		JTabbedPane px = new JTabbedPane();
 
@@ -179,8 +179,8 @@ public class FqlDisplay implements Disp {
 		return top;
 	}
 
-	public static JPanel showTransform(Color scolor, Color tcolor, @SuppressWarnings("unused") FqlEnvironment environment,
-			String src_n, String dst_n, Transform view)  {
+	private static JPanel showTransform(Color scolor, Color tcolor, @SuppressWarnings("unused") FqlEnvironment environment,
+                                        String src_n, String dst_n, Transform view)  {
 		JTabbedPane px = new JTabbedPane();
 
 		if (GlobalOptions.debug.fql.transform_graphical) {
@@ -204,7 +204,7 @@ public class FqlDisplay implements Disp {
 		return top;
 	}
 
-	public static JPanel showSchema(String name, @SuppressWarnings("unused") FqlEnvironment environment, Color clr, Signature view)
+	private static JPanel showSchema(String name, @SuppressWarnings("unused") FqlEnvironment environment, Color clr, Signature view)
 			 {
 		JTabbedPane px = new JTabbedPane();
 
@@ -254,7 +254,7 @@ public class FqlDisplay implements Disp {
 		return top;
 	}
 
-	public static JPanel showFullQuery(FQLProgram p, @SuppressWarnings("unused") FqlEnvironment env, FullQuery view, FullQueryExp x) {
+	private static JPanel showFullQuery(FQLProgram p, @SuppressWarnings("unused") FqlEnvironment env, FullQuery view, FullQueryExp x) {
 		JTabbedPane px = new JTabbedPane();
 
 		JTextArea area = new JTextArea(x.printNicely(p));
@@ -272,7 +272,7 @@ public class FqlDisplay implements Disp {
 		return top;
 	}
 
-	public static JPanel showQuery(FQLProgram prog, FqlEnvironment environment , Query view)
+	private static JPanel showQuery(FQLProgram prog, FqlEnvironment environment, Query view)
 		 {
 		JTabbedPane px = new JTabbedPane();
 
@@ -300,17 +300,17 @@ public class FqlDisplay implements Disp {
 		return top;
 	}
 
-	FQLProgram prog;
-	FqlEnvironment env;
+	private final FQLProgram prog;
+	private final FqlEnvironment env;
 
-	public FqlDisplay(String title, FQLProgram p, final FqlEnvironment environment, long start,
+	public FqlDisplay(String title, FQLProgram p, FqlEnvironment environment, long start,
 			long middle) {
 		long end = System.currentTimeMillis();
 		int c1 = (int) ((middle - start) / (1000f));
 		int c2 = (int) ((end - middle) / (1000f));
 
-		this.prog = p;
-		this.env = environment;
+        prog = p;
+        env = environment;
 		p.doColors();
 
 		try {
@@ -342,9 +342,7 @@ public class FqlDisplay implements Disp {
 							+ " -> " + xxx.second, showTransform(prog.nmap.get(xxx.first),
 							prog.nmap.get(xxx.second), environment, xxx.first, xxx.second,
 							environment.transforms.get(c))));
-				} else if (p.enums.get(c) != null) {
-
-				} else if (p.full_queries.get(c) != null) {
+				}  else if (p.full_queries.get(c) != null) {
 					Pair<SigExp, SigExp> xxx = p.full_queries.get(c).type(p);
 					String a = xxx.first.accept(p.sigs, new Unresolver()).toString();
 					String b = xxx.second.accept(p.sigs, new Unresolver()).toString();
@@ -369,16 +367,16 @@ public class FqlDisplay implements Disp {
 	private JFrame frame = null;
 	private String name;
 
-	final CardLayout cl = new CardLayout();
-	final JPanel x = new JPanel(cl);
-	final JList<String> yyy = new JList<>();
-	final Map<String, String> indices = new HashMap<>();
+	private final CardLayout cl = new CardLayout();
+	private final JPanel x = new JPanel(cl);
+	private final JList<String> yyy = new JList<>();
+	private final Map<String, String> indices = new HashMap<>();
 
-	public void display(String s, List<String> order) {
+	private void display(String s, List<String> order) {
 		frame = new JFrame();
-		this.name = s;
+        name = s;
 
-		final Vector<String> ooo = new Vector<>();
+		Vector<String> ooo = new Vector<>();
 		int index = 0;
 		for (Pair<String, JComponent> p : frames) {
 			x.add(p.second, p.first);
@@ -413,13 +411,9 @@ public class FqlDisplay implements Disp {
 		schemaFlowButton.setMinimumSize(new Dimension(10, 10));
 
 		north.add(instanceFlowButton);
-		instanceFlowButton.addActionListener((ActionEvent e) -> {
-                    showInstanceFlow(prog);
-                });
+		instanceFlowButton.addActionListener((ActionEvent e) -> showInstanceFlow(prog));
 		north.add(schemaFlowButton);
-		schemaFlowButton.addActionListener((ActionEvent e) -> {
-                    showSchemaFlow();
-                });
+		schemaFlowButton.addActionListener((ActionEvent e) -> showSchemaFlow());
 		Split px = new Split(.5, JSplitPane.HORIZONTAL_SPLIT);
 		px.setDividerSize(6);
 		px.setDividerLocation(220);
@@ -439,9 +433,7 @@ public class FqlDisplay implements Disp {
 		frame.setContentPane(px);
 		frame.setSize(900, 600);
 
-		ActionListener escListener = (ActionEvent e) -> {
-                    frame.dispose();
-                };
+		ActionListener escListener = (ActionEvent e) -> frame.dispose();
 
 		frame.getRootPane().registerKeyboardAction(escListener,
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -457,12 +449,10 @@ public class FqlDisplay implements Disp {
 
 	}
 
-	public void showInstanceFlow(FQLProgram prog) {
-		final JFrame f = new JFrame();
+	private void showInstanceFlow(FQLProgram prog) {
+		JFrame f = new JFrame();
 
-		ActionListener escListener = (ActionEvent e) -> {
-                    f.dispose();
-                };
+		ActionListener escListener = (ActionEvent e) -> f.dispose();
 		f.getRootPane().registerKeyboardAction(escListener,
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 		KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK);
@@ -484,12 +474,10 @@ public class FqlDisplay implements Disp {
 		f.setVisible(true);
 	}
 
-	public void showSchemaFlow() {
-		final JFrame f = new JFrame();
+	private void showSchemaFlow() {
+		JFrame f = new JFrame();
 
-		ActionListener escListener = (ActionEvent e) -> {
-                    f.dispose();
-                };
+		ActionListener escListener = (ActionEvent e) -> f.dispose();
 		f.getRootPane().registerKeyboardAction(escListener,
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 		KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK);
@@ -514,7 +502,7 @@ public class FqlDisplay implements Disp {
 	
 
 	@SuppressWarnings({ "unchecked" })
-	public JComponent doView(Graph<String, Object> sgv) {
+    private JComponent doView(Graph<String, Object> sgv) {
 	
 		try {
 			Class<?> c = Class
@@ -523,10 +511,10 @@ public class FqlDisplay implements Disp {
 			Layout<String, Object> layout = (Layout<String, Object>) x.newInstance(sgv);
 
 			layout.setSize(new Dimension(600, 540));
-			final VisualizationViewer<String, Object> vv = new VisualizationViewer<>(layout);
-			Transformer<String, Paint> vertexPaint = (String i) -> prog.nmap.get(i);
+			VisualizationViewer<String, Object> vv = new VisualizationViewer<>(layout);
+			Transformer<String, Paint> vertexPaint = prog.nmap::get;
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-			gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+			gm.setMode(Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
@@ -732,16 +720,16 @@ public class FqlDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public JComponent doView2(Graph<String, Object> sgv) {
+    private JComponent doView2(Graph<String, Object> sgv) {
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix + GlobalOptions.debug.fql.schFlow_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
 			Layout<String, Object> layout = (Layout<String, Object>) x.newInstance(sgv);
 			layout.setSize(new Dimension(600, 540));
-			final VisualizationViewer<String, Object> vv = new VisualizationViewer<>(layout);
-			Transformer<String, Paint> vertexPaint = (String i) -> prog.smap(new SigExp.Var(i));
+			VisualizationViewer<String, Object> vv = new VisualizationViewer<>(layout);
+			Transformer<String, Paint> vertexPaint = (String i) -> prog.smap(new Var(i));
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-			gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+			gm.setMode(Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
 		

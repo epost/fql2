@@ -19,7 +19,7 @@ import catdata.opl.OplExp.OplPushout;
 import catdata.opl.OplQuery.Block;
 
 @SuppressWarnings({"unchecked","rawtypes"})
-public class OplChase {
+class OplChase {
 	
 	static OplInst chaseParallel(OplInst I, List EDs, int limit) {
 
@@ -62,7 +62,7 @@ public class OplChase {
 		
 	}
 	
-	static <S, C, V, X> OplTerm<Chc<C, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> 
+	private static <S, C, V, X> OplTerm<Chc<C, Pair<Triple<OplQuery<S, C, V, String, String, V>,Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>
 	inj(OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V> term, OplQuery<S, C, V, String, String, V> Q) {
 		if (term.var != null) {
 			return new OplTerm<>(term.var);
@@ -81,7 +81,7 @@ public class OplChase {
 		return new OplTerm<>(Chc.inRight(x), ret);
 	}
 	
-	static <S, C, V, X> 
+	private static <S, C, V, X>
 	OplPushout<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X, Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>  
 	stepParallel(OplInst<S, C, V, X> I, List<OplQuery<S, C, V, String, String, V>> Qs) {
 
@@ -141,7 +141,7 @@ public class OplChase {
 		Es.validate(I.S, E0, null);			
 		
 		OplPresTrans<S, C, V, Pair<Triple<OplQuery<S, C, V, String, String, V>, Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X> AstoI 
-		= new OplExp.OplPresTrans<>(AsImap, "?", "?", As.P, I.P);
+		= new OplPresTrans<>(AsImap, "?", "?", As.P, I.P);
 		AstoI.validateNotReally(As, I);
 		AstoI.validateNotReally(As.P, I.P);
 		AstoI.src1 = As; AstoI.dst1 = I;
@@ -162,7 +162,7 @@ public class OplChase {
 	}
 	
 	// this will fail because the schema will not have plain strings as entities, will be of the form Chc<S, String>?
-	static <S, C, V, X> 
+	private static <S, C, V, X>
 	OplPushout<S,C,V,Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>  
 	step(OplInst<S, C, V, X> I, OplQuery<S, C, V, String, String, V> Q) {
 		if (!Q.blocks.containsKey("EXISTS")) {
@@ -188,7 +188,7 @@ public class OplChase {
 		}
 //		Block<S, C, V, String, String, V> FORALL = Q.blocks.get("FORALL").second;
 
-		Pair<OplExp.OplInst<String,String,V,Chc<OplTerm<Chc<C,X>,V>,Pair<Object,Map<V,OplTerm<Chc<C,X>,V>>>>>,Map<Pair<Object,Map<V,OplTerm<Chc<C,X>,V>>>,Pair<Object,Map<V,OplTerm<Chc<C,X>,V>>>>>
+		Pair<OplInst<String,String,V,Chc<OplTerm<Chc<C,X>,V>,Pair<Object,Map<V,OplTerm<Chc<C,X>,V>>>>>,Map<Pair<Object,Map<V,OplTerm<Chc<C,X>,V>>>,Pair<Object,Map<V,OplTerm<Chc<C,X>,V>>>>>
 		temp2 = Q.eval(I);
 		OplInst<String,String,V,Chc<OplTerm<Chc<C,X>,V>,Pair<Object,Map<V,OplTerm<Chc<C,X>,V>>>>> 
 		QI0 = temp2.first;
@@ -208,7 +208,7 @@ public class OplChase {
 		for (Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> back : QIE) {
 			Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> front = temp2.second.get(back);
 			if (front == null) {
-				throw new RuntimeException("Report to Ryan, no front for back. front=" + front + " back=" + back + " temp2=" + temp2.second);
+				throw new RuntimeException("Report to Ryan, no front for back. front=null, back=" + back + " temp2=" + temp2.second);
 			}
 			QIm.put(back, front);
 		}
@@ -298,7 +298,7 @@ public class OplChase {
 		A.validate(Q.src, A0, null); E.validate(Q.src, E0, null);
 				
 		OplPresTrans<S, C, V, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>, X> AtoI 
-		= new OplExp.OplPresTrans<>(AImap, "?", "?", A.P, I.P);
+		= new OplPresTrans<>(AImap, "?", "?", A.P, I.P);
 		AtoI.validateNotReally(A, I);
 		AtoI.validateNotReally(A.P, I.P);
 		AtoI.src1 = A; AtoI.dst1 = I;
@@ -320,7 +320,7 @@ public class OplChase {
 	
 	static class Fun <C,X,V> implements Function<OplTerm<Chc<C, X>, V>,  OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>> {
 	
-		Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> t;
+		final Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> t;
 		
 		public Fun(Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> t) {
 			this.t = t;
@@ -353,7 +353,7 @@ public class OplChase {
 
 	static class Fun2 <C,X,V> implements Function<OplTerm<Chc<C, V>, V>,  OplTerm<Chc<C, Pair<Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>>, V>>, V>> {
 		
-		Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> t;
+		final Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> t;
 		
 		public Fun2(Pair<Object, Map<V, OplTerm<Chc<C, X>, V>>> t) {
 			this.t = t;

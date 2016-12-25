@@ -21,7 +21,7 @@ public class Patrick29ExampleEpiMono extends Example {
 		return s;
 	}
 	
-	String s = "//This FPQL program finds the image of any function, i.e., the epi-mono factorization."
+	private final String s = "//This FPQL program finds the image of any function, i.e., the epi-mono factorization."
 + "\n"
 + "\n//Schema A is where you put your function (as an instance)."
 + "\n"

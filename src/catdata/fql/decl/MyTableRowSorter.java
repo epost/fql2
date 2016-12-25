@@ -11,7 +11,7 @@ import javax.swing.table.TableRowSorter;
  *
  * Helper class for row sorting.
  */
-public class MyTableRowSorter extends TableRowSorter<TableModel> {
+class MyTableRowSorter extends TableRowSorter<TableModel> {
 
 	public MyTableRowSorter(TableModel model) {
 		super(model);

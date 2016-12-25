@@ -20,7 +20,7 @@ public class OplPivotExample extends Example {
 		return s;
 	}
 
-	String s = "Type = theory {"
+	private final String s = "Type = theory {"
 			+ "\n	sorts String, Nat;"
 			+ "\n	symbols"
 			+ "\n		Adam, Bill : String,"

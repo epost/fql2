@@ -22,9 +22,11 @@ import catdata.fql.decl.Transform;
 
 public class PSMAnd extends PSM {
 
-	String pre, prop, prod;
-	Signature sig;
-	String kind;
+	private final String pre;
+    private final String prop;
+    private final String prod;
+	private final Signature sig;
+	private final String kind;
 
 	public PSMAnd(Signature sig, String pre, String prod, String prop, String kind) {
 		this.sig = sig;
@@ -44,7 +46,7 @@ public class PSMAnd extends PSM {
 			Map<String, Set<Map<Object, Object>>> state) {
 		try {
 
-			Signature sig0 = new Signature(sig.nodes, sig.edges, new LinkedList<Attribute<Node>>(), sig.eqs);
+			Signature sig0 = new Signature(sig.nodes, sig.edges, new LinkedList<>(), sig.eqs);
 			
 			Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> H1 = interp.prop1
 					.get(prop);
@@ -82,16 +84,20 @@ public class PSMAnd extends PSM {
 						throw new RuntimeException("bad");
 					}
 
-					Instance nA = null;
-					if (kind.equals("and")) {
-						nA = isect(A, B);
-					} else if (kind.equals("or")) {
-						nA = union(A, B);
-					} else if (kind.equals("implies")) {
-						nA = implies(sig0, H1, Hc, A, B);
-					} else {
-						throw new RuntimeException();
-					}
+					Instance nA;
+                    switch (kind) {
+                        case "and":
+                            nA = isect(A, B);
+                            break;
+                        case "or":
+                            nA = union(A, B);
+                            break;
+                        case "implies":
+                            nA = implies(sig0, H1, Hc, A, B);
+                            break;
+                        default:
+                            throw new RuntimeException();
+                    }
 					
 					
 					Object notId = H2.second.get(c).second.get(nA);

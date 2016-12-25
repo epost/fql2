@@ -11,9 +11,9 @@ package catdata.fql.parse;
  *            combinators.
  */
 public class Partial<T> {
-	public Tokens tokens;
+	public final Tokens tokens;
 
-	public T value;
+	public final T value;
 
 	public Partial(Tokens t, T v) {
 		tokens = t;

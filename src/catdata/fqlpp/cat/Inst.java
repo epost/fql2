@@ -23,13 +23,15 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Inst)) {
-			return false;
-		}
-		return ((Inst<?, ?>) o).cat.equals(cat);
+        return o instanceof Inst && ((Inst<?, ?>) o).cat.equals(cat);
+    }
+
+	@Override
+	public int hashCode() {
+		return 0;
 	}
 
-	private static Map<Object, Object> map = new HashMap<>();
+	private static final Map<Object, Object> map = new HashMap<>();
 	public static <O,A> Inst<O,A> get(Category<O,A> cat) {
 		if (map.containsKey(cat)) {
 			return (Inst<O, A>) map.get(cat);
@@ -165,13 +167,13 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 
 	public Transform<O, A, Set, Fn> inleft(Functor<O, A, Set, Fn> o1, Functor<O, A, Set, Fn> o2) {
 		FUNCTION<O, Fn<?, Chc>> f = (O o) -> new Fn(o1.applyO(o), FinSet.coproduct(o1.applyO(o),
-				o2.applyO(o)), x -> Chc.inLeft(x));
+				o2.applyO(o)), Chc::inLeft);
 		return new Transform(o1, coproduct(o1, o2), f);
 	}
 
 	public Transform<O, A, Set, Fn> inright(Functor<O, A, Set, Fn> o1, Functor<O, A, Set, Fn> o2) {
 		FUNCTION<O, Fn<?, Chc>> f = (O o) -> new Fn(o2.applyO(o), FinSet.coproduct(o1.applyO(o),
-				o2.applyO(o)), x -> Chc.inRight(x));
+				o2.applyO(o)), Chc::inRight);
 		return new Transform(o2, coproduct(o1, o2), f);
 	}
 	
@@ -228,7 +230,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 		Category<O2, A2> B = AB.second;
 		Category<O1, A1> A = AB.first;
 		
-		Category<Functor<O2,A2,Set,Fn>, Transform<O2,A2,Set,Fn>> SetB = Inst.get(B);
+		Category<Functor<O2,A2,Set,Fn>, Transform<O2,A2,Set,Fn>> SetB = get(B);
 		
 		FUNCTION<O1, Functor<O2,A2,Set,Fn>> f 
 		  = o1 -> new Functor<>(B, FinSet.FinSet, o2 -> F.applyO(new Pair<>(o1,o2)), a2 -> F.applyA(new Pair<>(A.identity(o1), a2))); 
@@ -244,7 +246,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 			throw new RuntimeException("Source categories do not match.");
 		}
 
-		if (base.source.objects().size() == 0) {
+		if (base.source.objects().isEmpty()) {
 			Transform<O, A, Set, Fn> t1 = new Transform<>(base, exp, x -> { throw new RuntimeException(); });
 			Transform<O, A, Set, Fn> t2 = new Transform<>(exp, base, x -> { throw new RuntimeException(); });
 			return Optional.of(new Pair<>(t1, t2));
@@ -294,7 +296,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 		return Optional.empty();
 	}
 	
-	public Functor<O,A,Set,Fn> apply(Transform<O,A,Set,Fn> t1, Functor<O,A,Set,Fn> I) {
+	private Functor<O,A,Set,Fn> apply(Transform<O, A, Set, Fn> t1, Functor<O, A, Set, Fn> I) {
 		
 		FUNCTION<O, Set> f = o -> (Set) I.applyO(o).stream().map(i -> t1.apply(o).apply(i)).collect(Collectors.toSet());
 		
@@ -317,7 +319,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 			throw new RuntimeException("Source categories do not match.");
 		}
 		Set<Transform<O,A,Set,Fn>> ret = new HashSet<>();
-		if (base.source.objects().size() == 0) {
+		if (base.source.objects().isEmpty()) {
 			Transform<O, A, Set, Fn> t1 = new Transform<>(base, exp, x -> { throw new RuntimeException(); });
 			ret.add(t1);
 			return ret;
@@ -400,7 +402,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 			d.put(n, new Fn<>(X.applyO(n), Y.applyO(n), l::get));
 		}
 
-		return new Transform(X, Y, x -> d.get(x));
+		return new Transform(X, Y, d::get);
 	}
 	
 	public Transform<O,A,Set,Fn> eval(Functor<O,A,Set,Fn> a, Functor<O,A,Set,Fn> b) {
@@ -463,7 +465,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 				Transform<O,A,Set, Fn> xxx = new Transform<>(qqq, K, o -> new Fn<>(qqq.applyO(o), K.applyO(o), tx.get(o)::get)); //Hc * J -> K
 				s.put(x, xxx);
 			}
-			l.put(c, new Fn<>(I.applyO(c), JK.applyO(c), u -> s.get(u)));
+			l.put(c, new Fn<>(I.applyO(c), JK.applyO(c), s::get));
 		}
 		Transform zzz = new Transform(I, JK, l::get);
 		return zzz;
@@ -579,7 +581,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 				}
 				m.put(x, new Functor<>(cat, FinSet.FinSet, pb1::get, pb2::get));
 			}
-			map.put(c , new Fn<>(J.applyO(c), (Set) prop().applyO(c), m::get));
+			map.put(c , new Fn<>(J.applyO(c), prop().applyO(c), m::get));
 		}
 		
 		return new Transform<>(J, prop, map::get);
@@ -624,15 +626,19 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 			for (Object o : prpprp.applyO(n)) {
 				Pair<Functor<O,A,Set,Fn>, Functor<O,A,Set,Fn>> I = (Pair<Functor<O,A,Set,Fn>, Functor<O,A,Set,Fn>>) o;
 				
-				Functor<O,A,Set,Fn> J = null;
-				if (which.equals("and")) {
-				  J = isect(I.first, I.second);
-				} else if (which.equals("or")) {
-				  J = union(I.first, I.second);
-				} else if (which.equals("implies")) {
-				  J = implies(n, I.first, I.second);	
-				} else {
-					throw new RuntimeException("Report this error to Ryan.");
+				Functor<O,A,Set,Fn> J;
+				switch (which) {
+					case "and":
+						J = isect(I.first, I.second);
+						break;
+					case "or":
+						J = union(I.first, I.second);
+						break;
+					case "implies":
+						J = implies(n, I.first, I.second);
+						break;
+					default:
+						throw new RuntimeException("Report this error to Ryan.");
 				}
 				m.put(I, J);
 			}
@@ -751,7 +757,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 				A fg = cat.compose(ff, h);
 				dd.put(ff, fg);
 			}
-			em.put(h, new Fn<>((Set) nm.get(cat.source(h)), (Set) nm.get(cat.target(h)), dd::get));
+			em.put(h, new Fn(nm.get(cat.source(h)), nm.get(cat.target(h)), dd::get));
 		}		
 		
 		return new Functor<>(cat, FinSet.FinSet, nm::get, em::get);

@@ -17,11 +17,16 @@ public class NistContExample extends Example {
 
 	@Override
 	public String getText() {
-		return s + s2;
+		StringBuilder sb = new StringBuilder();
+		sb.append(s);
+		sb.append(sy);
+		sb.append(s2);
+		sb.append(s3);
+		return sb.toString();
 		
 	}
 	
-String s = "schema D = {"
+private final String s = "schema D = {"
 		+ "\n	nodes CM, M, C;"
 		+ "\n	attributes M_name : M -> string, C_name : C -> string;"
 		+ "\n	arrows g : CM -> C, f : CM -> M, P : M -> M;"
@@ -69,8 +74,9 @@ String s = "schema D = {"
 		+ "\n	attributes M_name -> M_name, C_name -> C_name;"
 		+ "\n	arrows g -> CM.g, f -> CM.f, i2 -> M.i2, i1 -> M.i1, p2 -> CMP.p2, Px -> M2.Px, pg -> CMP.p1.g;"
 		+ "\n} : Sep -> And"
-		+ "\n"
-		+ "\nmapping F2 = {"
+		+ "\n";
+	private final String sy =
+		 "\nmapping F2 = {"
 		+ "\n	nodes CM -> CM, C -> C, M2 -> M2, M -> M, M1 -> M1;"
 		+ "\n	attributes M_name -> M_name, C_name -> C_name;"
 		+ "\n	arrows g -> CM.g, f -> CM.f, i1 -> M.i1, i2 -> M.i2, Px -> M2.Px, P -> M1.P;"
@@ -109,7 +115,7 @@ String s = "schema D = {"
 		+ "\n"
 		+ "\n/////////////"
 		+ "\n";
-String s2 =
+private final String s2 =
 		 "\nschema A = {"
 		+ "\n	nodes CM, M, C;"
 		+ "\n	attributes M_name : M -> string, C_name : C -> string;"
@@ -141,8 +147,9 @@ String s2 =
 		+ "\n//instance old_I2 =  pi F2 old_I1"
 		+ "\n//instance old_I3 =  delta F3 old_I2"
 		+ "\n//instance old_answer =  SIGMA F4 old_I3"
-		+ "\n"
-		+ "\ninstance old_preanswer = {"
+		+ "\n";
+private final String s3 =
+		 "\ninstance old_preanswer = {"
 		+ "\n nodes"
 		+ "\n  C -> {697, 699, 705, 707, 701, 703, 698, 700, 706, 702, 704}, "
 		+ "\n  CM -> {747, 729, 761, 758, 754, 750, 743, 736, 732, 725, 721, 718, 714, 710, 769, 790, 787, 783, 776, 772, 765, 744, 780, 784, 788, 791, 708, 715, 711, 719, 740, 737, 733, 726, 748, 751, 759, 755, 762, 766, 773, 777, 722, 741, 749, 763, 756, 752, 727, 745, 738, 734, 730, 723, 709, 712, 716, 789, 792, 785, 781, 778, 774, 770, 767, 746, 728, 782, 786, 717, 713, 742, 739, 735, 731, 768, 771, 779, 775, 724, 760, 757, 753, 764, 720}, "

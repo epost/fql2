@@ -15,7 +15,7 @@ import catdata.Util;
 
 public class PreOrder<X> {
 	
-	private static Map<Integer, Set<PreOrder<Integer>>> totals = new HashMap<>();
+	private static final Map<Integer, Set<PreOrder<Integer>>> totals = new HashMap<>();
 	public static <X> Collection<PreOrder<X>> allTotal(List<X> xs) {
 		Set<PreOrder<Integer>> set;
 		if (totals.containsKey(xs.size())) {
@@ -32,7 +32,7 @@ public class PreOrder<X> {
 		return new PreOrder<>(p.g.stream().map(z -> new Pair<>(xs.get(z.first), xs.get(z.second))).collect(Collectors.toList()));
 	}
 
-	public static Collection<Integer> allUpTo(int n) {
+	private static Collection<Integer> allUpTo(int n) {
 		List<Integer> ret = new ArrayList<>(n);
 		for (int i = 0; i < n; i++) {
 			ret.add(i);
@@ -40,7 +40,7 @@ public class PreOrder<X> {
 		return ret;
 	}
 	
-	public static <X> Set<PreOrder<X>> allTotal2(Collection<X> xs) {
+	private static <X> Set<PreOrder<X>> allTotal2(Collection<X> xs) {
 		List<Pair<X, X>> dom = new LinkedList<>();
 		
 		for (X x : xs) {
@@ -103,7 +103,7 @@ public class PreOrder<X> {
 		return ret;
 	} */
 
-	public PreOrder() { }
+	private PreOrder() { }
 	
 	private PreOrder(Collection<Pair<X,X>> p) {
 		g.addAll(p);
@@ -114,30 +114,30 @@ public class PreOrder<X> {
 	
 	private final Set<Pair<X,X>> g = new HashSet<>();
 	
-	public Collection<X> dom() {
+	private Collection<X> dom() {
 		return Util.proj1(g);
 	}
 	
-	public void add(X lhs, X rhs) {
+	void add(X lhs, X rhs) {
 		g.add(new Pair<>(lhs, lhs));
 		g.add(new Pair<>(rhs, rhs));
 		g.add(new Pair<>(lhs, rhs));
 		
-		while (trans()){}
+		while (trans());
 	}
 	
 	public boolean gte(X lhs, X rhs) {
 		return lhs.equals(rhs) || g.contains(new Pair<>(lhs, rhs));
 	}
 	
-	public boolean trans() {
+	private boolean trans() {
 		Collection<X> Xs = dom();
 		boolean changed = false;
 		for (X a : Xs) {
 			for (X b : Xs) {
 				for (X c : Xs) {
 					if (gte(a,b) && gte(b, c)) {
-						changed = changed | g.add(new Pair<>(a, c));
+                        changed |= g.add(new Pair<>(a, c));
 					}
 				}
 			}
@@ -147,7 +147,7 @@ public class PreOrder<X> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((g == null) ? 0 : g.hashCode());
 		return result;

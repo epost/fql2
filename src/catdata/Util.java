@@ -48,8 +48,8 @@ public class Util {
 	@SuppressWarnings("deprecation")
 	public static <X> X timeout(Callable<X> c, long timeout) {
 		// final Object lock = new Object();
-		final Ref<X> ret = new Ref<>();
-		final Ref<Throwable> thr = new Ref<>();
+		Ref<X> ret = new Ref<>();
+		Ref<Throwable> thr = new Ref<>();
 		Thread t = new Thread(() -> {
 			try {
 				X x = c.call();
@@ -148,8 +148,8 @@ public class Util {
 			throw new RuntimeException("Anomaly: please report");
 		};
 	}
-
-	public static class VoidIter implements Iterator<Void> {
+/*
+	private static class VoidIter implements Iterator<Void> {
 
 		@Override
 		public boolean hasNext() {
@@ -162,7 +162,7 @@ public class Util {
 		}
 
 	}
-
+*/
 	public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 
 		public MyTableRowSorter(TableModel model) {
@@ -264,25 +264,22 @@ public class Util {
 	}
 
 	public static <X, Y> boolean isBijection(Map<X, Y> m, Set<X> X, Set<Y> Y) {
-		if (!m.keySet().equals(X)) {
-			return false;
-		}
-		if (!new HashSet<>(m.values()).equals(Y)) {
-			return false;
-		}
-		Map<Y, X> n = rev(m, Y);
-		if (n == null) {
-			return false;
-		}
+        if (!m.keySet().equals(X)) {
+            return false;
+        }
+        if (!new HashSet<>(m.values()).equals(Y)) {
+            return false;
+        }
+        Map<Y, X> n = rev(m, Y);
+        if (n == null) {
+            return false;
+        }
 
-		Map<X, X> a = compose0(m, n);
-		Map<Y, Y> b = compose0(n, m);
+        Map<X, X> a = compose0(m, n);
+        Map<Y, Y> b = compose0(n, m);
 
-		if (!a.equals(id(X))) {
-			return false;
-		}
-		return (!b.equals(id(Y)));
-	}
+        return a.equals(id(X)) && (!b.equals(id(Y)));
+    }
 
 	public static <X> Map<X, X> id(Collection<X> X) {
 		Map<X, X> ret = new LinkedHashMap<>();
@@ -292,7 +289,7 @@ public class Util {
 		return ret;
 	}
 
-	public static <X, Y> X rev(Map<X, Y> m, Y y) {
+	private static <X, Y> X rev(Map<X, Y> m, Y y) {
 		X x = null;
 		for (X x0 : m.keySet()) {
 			Y y0 = m.get(x0);
@@ -316,7 +313,7 @@ public class Util {
 		return ret;
 	}
 
-	public static <X, Y> Map<Y, X> rev(Map<X, Y> m, Set<Y> Y) {
+	private static <X, Y> Map<Y, X> rev(Map<X, Y> m, Set<Y> Y) {
 		Map<Y, X> ret = new HashMap<>();
 
 		for (Y y : Y) {
@@ -336,14 +333,15 @@ public class Util {
 		return ret;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "SuspiciousArrayCast"})
 	public static <X> X[] sing(X x) {
 		return (X[]) new Object[] { x };
 	}
 
 	@SuppressWarnings("unchecked")
 	public static <X, Y> Y[] map(X[] xs, Function<X, Y> f) {
-		return (Y[]) Arrays.asList(xs).stream().map(f).collect(Collectors.toList()).toArray();
+		//noinspection SuspiciousArrayCast
+		return (Y[]) Arrays.stream(xs).map(f).collect(Collectors.toList()).toArray();
 	}
 
 	public static <X, Y> Y fold(X[] xs, Y y, Function<Pair<X, Y>, Y> f) {
@@ -423,12 +421,12 @@ public class Util {
 	}
 
 	static <X extends Comparable<X>, Y> String printNicely(Set<Map<X, Y>> map) {
-		List<String> l = map.stream().map(x -> printNicely(x)).collect(Collectors.toList());
+		List<String> l = map.stream().map(Util::printNicely).collect(Collectors.toList());
 		Collections.sort(l);
-		return Util.sep(l, "\n");
+		return sep(l, "\n");
 	}
 
-	static <X extends Comparable<X>, Y> String printNicely(Map<X, Y> map) {
+	private static <X extends Comparable<X>, Y> String printNicely(Map<X, Y> map) {
 		List<X> l = new LinkedList<>(map.keySet());
 		Collections.sort(l);
 		boolean first = true;
@@ -453,7 +451,7 @@ public class Util {
 	}
 
 	public static String maybeQuote(String s) {
-		if (s.trim().length() == 0) {
+		if (s.trim().isEmpty()) {
 			return "\"" + s + "\"";
 		}
 		Character x = s.charAt(0);
@@ -491,7 +489,7 @@ public class Util {
 		return mat_conv2(mult(mat_conv1(l), mat_conv1(r)));
 	}
 
-	public static int[][] mat_conv1(List<List<Integer>> l) {
+	private static int[][] mat_conv1(List<List<Integer>> l) {
 		int[][] ret = new int[l.size()][];
 		int w = 0;
 		for (List<Integer> r : l) {
@@ -505,6 +503,7 @@ public class Util {
 		return ret;
 	}
 
+	//public for OPL example
 	public static List<List<Integer>> mat_conv2(int[][] l) {
 		List<List<Integer>> ret = new LinkedList<>();
 		for (int[] r : l) {
@@ -517,7 +516,7 @@ public class Util {
 		return ret;
 	}
 
-	public static int[][] mult(int[][] A, int[][] B) {
+	private static int[][] mult(int[][] A, int[][] B) {
 		int mA = A.length;
 		int nA = A[0].length;
 		int mB = B.length;
@@ -534,7 +533,7 @@ public class Util {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Comparator<Object> LengthComparator = (Object o1, Object o2) -> {
+	public static final Comparator<Object> LengthComparator = (Object o1, Object o2) -> {
             if (o1.toString().length() > o2.toString().length()) {
                 return 1;
             } else if (o1.toString().length() < o2.toString().length()) {
@@ -543,21 +542,17 @@ public class Util {
             return o1.toString().compareTo(o2.toString());
         };
 
-	public static Comparator<Object> AlphabeticalComparator = (o1, o2) -> o1.toString().compareTo(o2.toString());
+	private static final Comparator<Object> AlphabeticalComparator = Comparator.comparing(Object::toString);
 
 	public static <X, Y> Map<Y, X> rev0(Map<X, Y> m) {
-		return Util.rev(m, new HashSet<>(m.values()));
+		return rev(m, new HashSet<>(m.values()));
 	}
 
 	public static <X, Y> Map<Y, Set<X>> revS(Map<X, Y> m) {
 		Map<Y, Set<X>> ret = new HashMap<>();
 		for (X x : m.keySet()) {
 			Y y = m.get(x);
-			Set<X> s = ret.get(y);
-			if (s == null) {
-				s = new HashSet<>();
-				ret.put(y, s);
-			}
+			Set<X> s = ret.computeIfAbsent(y, k -> new HashSet<>());
 			s.add(x);
 		}
 		return ret;
@@ -651,7 +646,7 @@ public class Util {
 	}
 
 	@SuppressWarnings("serial")
-	public static JPanel makeTable(Border b, String border, Object[][] rowData, Object[] colNames) {
+	public static JPanel makeTable(Border b, String border, Object[][] rowData, Object... colNames) {
 		JTable t = new JTable(rowData, colNames) {
 			@Override
 			public Dimension getPreferredScrollableViewportSize() {
@@ -675,7 +670,7 @@ public class Util {
 	}
 
 	@SuppressWarnings("serial")
-	public static JPanel makeBoldHeaderTable(Collection<String> atts, Border b, String border, Object[][] rowData, String[] colNames) {
+	public static JPanel makeBoldHeaderTable(Collection<String> atts, Border b, String border, Object[][] rowData, String... colNames) {
 		JTable t = new JTable(rowData, colNames) {
 			@Override
 			public Dimension getPreferredScrollableViewportSize() {
@@ -715,7 +710,7 @@ public class Util {
 		for (int i = 0; i < t.getColumnModel().getColumnCount(); i++) {
 			TableColumn col = t.getColumnModel().getColumn(i);
 
-			col.setHeaderRenderer(new Util.BoldifyingColumnHeaderRenderer(atts, t.getTableHeader().getDefaultRenderer()));
+			col.setHeaderRenderer(new BoldifyingColumnHeaderRenderer(atts, t.getTableHeader().getDefaultRenderer()));
 		}
 
 		return p;
@@ -738,9 +733,7 @@ public class Util {
 	public static String sep(Collection<?> order, Map<?, ?> m, String sep1, String sep2, boolean skip) {
 		String ret = "";
 		boolean b = false;
-		Iterator<?> c = order.iterator();
-		while (c.hasNext()) {
-			Object o = c.next();
+		for (Object o : order) {
 			Object z = m.get(o);
 			if (z == null && skip) {
 				continue;
@@ -763,7 +756,7 @@ public class Util {
 			return "!!!NULL!!!";
 		}
 		String s = o.toString();
-		if ((s.contains("\t") || s.contains("\n") || s.contains("\r") || s.contains("-") || s.length() == 0) && !s.contains("\"")) {
+		if ((s.contains("\t") || s.contains("\n") || s.contains("\r") || s.contains("-") || s.isEmpty()) && !s.contains("\"")) {
 			return "\"" + s + "\"";
 		}
 		return s;
@@ -909,25 +902,18 @@ public class Util {
 			Chc c = (Chc) o;
 			if (c.left) {
 				Pair<Function, Object> p = stripChcs(c.l);
-				return new Pair<>(x -> {
-					return Chc.inLeft(p.first.apply(x));
-				}, p.second);
+				return new Pair<>(x -> Chc.inLeft(p.first.apply(x)), p.second);
 			} else {
 				Pair<Function, Object> p = stripChcs(c.r);
-				return new Pair<>(x -> {
-					return Chc.inRight(p.first.apply(x));
-				}, p.second);
+				return new Pair<>(x -> Chc.inRight(p.first.apply(x)), p.second);
 			}
 		}
-		return new Pair<>(x -> {
-			return x;
-		}, o);
+		return new Pair<>(x -> x, o);
 	}
 
 	public static <X> List<List<X>> prod(List<Set<X>> in1) {
 		List<List<X>> y = new LinkedList<>();
-		List<X> z = new LinkedList<>();
-		y.add(z);
+		y.add(new LinkedList<>());
 
 		for (Set<X> X : in1) {
 			List<List<X>> y0 = new LinkedList<>();
@@ -1042,7 +1028,7 @@ public class Util {
 		return sets;
 	}
 
-	public static Comparator<Object> ToStringComparator = (Object o1, Object o2) -> {
+	public static final Comparator<Object> ToStringComparator = (Object o1, Object o2) -> {
             if (o1.toString().length() > o2.toString().length()) {
                 return 1;
             } else if (o1.toString().length() < o2.toString().length()) {

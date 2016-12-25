@@ -26,13 +26,13 @@ public class MplStrict<O,A> implements
 	
 	static class Node<O,A> {	
 		
-		MplTerm<O, A> term;
-		boolean isInput;
-		int which;
-		O o;
+		final MplTerm<O, A> term;
+		final boolean isInput;
+		final int which;
+		final O o;
 		
 		static int global_id=0;
-		int id;
+		final int id;
 		
 		public Node(MplTerm<O, A> term, boolean isInput, int which, O o) {
 			this.term = term;
@@ -54,17 +54,17 @@ public class MplStrict<O,A> implements
 		}
  	}
 	
-	int counter = 0;
-	Integer fresh() {
+	private int counter = 0;
+	private Integer fresh() {
 		return counter++;
 	}
 	
-	MplSch<O, A> ctx;
+	private final MplSch<O, A> ctx;
 	public MplStrict(MplSch<O,A> ctx) {
 		this.ctx = ctx;
 	}
 	
-	Graph<Node<O,A>, Integer> g = new DirectedSparseMultigraph<>();
+	final Graph<Node<O,A>, Integer> g = new DirectedSparseMultigraph<>();
 		
 
 	////////////////
@@ -247,7 +247,7 @@ public class MplStrict<O,A> implements
 		return new Triple<>(ret1, ret2, ret + " }");
 	}
 
-	public Triple<List<Node<O, A>>, List<Node<O, A>>, String> makeId(MplTerm<O, A> e) {
+	private Triple<List<Node<O, A>>, List<Node<O, A>>, String> makeId(MplTerm<O, A> e) {
 		List<O> x = e.typeStrict(ctx).first;
 		
 		List<Node<O,A>> ret1 = new LinkedList<>();

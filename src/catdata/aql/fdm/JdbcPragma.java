@@ -17,7 +17,7 @@ public class JdbcPragma extends Pragma {
 
 	private List<String> sqls = new LinkedList<>();
 	
-	private List<String> responses = new LinkedList<>();
+	private final List<String> responses = new LinkedList<>();
 	
 	private final String jdbcString;
 	

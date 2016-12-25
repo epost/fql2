@@ -46,7 +46,7 @@ public abstract class QueryExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((v == null) ? 0 : v.hashCode());
 			return result;
@@ -60,11 +60,12 @@ public abstract class QueryExp {
 	}
 	
 	public static class Comp extends QueryExp {
-		QueryExp l, r;
+		final QueryExp l;
+        final QueryExp r;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -94,8 +95,7 @@ public abstract class QueryExp {
 		}
 
 		public Comp(QueryExp l, QueryExp r) {
-			super();
-			this.l = l;
+            this.l = l;
 			this.r = r;
 		}
 		
@@ -113,9 +113,9 @@ public abstract class QueryExp {
 	}
 	
 	public interface QueryExpVisitor<R,E> {
-		public R visit (E env, Const e);
-		public R visit (E env, Comp e);
-		public R visit (E env, Var e);
+		R visit(E env, Const e);
+		R visit(E env, Comp e);
+		R visit(E env, Var e);
 	}
 	
 	public abstract <R, E> R accept(E env, QueryExpVisitor<R, E> v);
@@ -129,11 +129,13 @@ public abstract class QueryExp {
 	
 	
 	public static class Const extends QueryExp {
-		MapExp delta, sigma, pi;
+		final MapExp delta;
+        final MapExp sigma;
+        final MapExp pi;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((delta == null) ? 0 : delta.hashCode());
 			result = prime * result + ((pi == null) ? 0 : pi.hashCode());
@@ -169,8 +171,7 @@ public abstract class QueryExp {
 		}
 
 		public Const(MapExp delta, MapExp pi, MapExp sigma) {
-			super();
-			this.delta = delta;
+            this.delta = delta;
 			this.sigma = sigma;
 			this.pi = pi;
 		}

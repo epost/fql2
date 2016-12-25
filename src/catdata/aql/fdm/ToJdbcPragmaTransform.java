@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,14 +19,15 @@ import catdata.aql.Transform;
 
 public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> extends Pragma {
 
-	public final String jdbcString;
-	public final String prefix;
-	public final String clazz;
-	public final String idCol;
+	private final String jdbcString;
+	private final String prefix;
+	private final String clazz;
+	private final String idCol;
 
-	public final Map<String, String> options;
+	@SuppressWarnings("unused")
+	private final Map<String, String> options;
 
-	public final Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h;
+	private final Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h;
 	
 	private final String colTy;
 	private final int colTy0;
@@ -44,7 +46,7 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 		this.clazz = clazz;
 		idCol = (String) new AqlOptions(options, null).getOrDefault(AqlOption.id_column_name);
 		colTy = "VARCHAR(" + new AqlOptions(options, null).getOrDefault(AqlOption.varchar_length) + ")";
-		colTy0 = java.sql.Types.VARCHAR;
+		colTy0 = Types.VARCHAR;
 		assertDisjoint();
 	}
 
@@ -58,7 +60,7 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 		}
 	}
 	
-	public void storeMyRecord(Connection conn, X1 x, String table) throws Exception {
+	private void storeMyRecord(Connection conn, X1 x, String table) throws Exception {
 		  List<String> hdrQ = new LinkedList<>();
 		  List<String> hdr = new LinkedList<>();
 		  hdr.add("src" + idCol);

@@ -4,7 +4,7 @@ public class AqlDenormExample extends AqlExample {
 
 	@Override
 	public String getName() {
-		return "DeNormalize";
+		return "Denormalize";
 	}
 
 	@Override

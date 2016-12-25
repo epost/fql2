@@ -1,6 +1,5 @@
 package catdata.fql;
 
-import catdata.fql.examples.AutoIsoExample;
 import catdata.fql.examples.CategoryExample;
 import catdata.fql.examples.CharExample;
 import catdata.fql.examples.CoProdExample;
@@ -89,7 +88,7 @@ public class FqlExamples {
 	public static Example cat = new CategoryExample();
 	public static Example eds2fql = new EDsToFqlExample();
 	public static Example fncomp = new FnCompExample();
-	public static Example auto = new AutoIsoExample();
+	//public static Example auto = new AutoIsoExample();
 	public static Example exp2 = new Exponentials2Example();
 	public static Example prop = new PropExample();
 	public static Example chare = new CharExample();

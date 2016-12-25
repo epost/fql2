@@ -1,7 +1,7 @@
 package catdata.aql.fdm;
 
+import catdata.Ctx;
 import catdata.Util;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.Term;
 import catdata.aql.Transform;
@@ -14,7 +14,7 @@ public class IdentityTransform<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Tran
 
 	public IdentityTransform(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i) {
 		Util.assertNotNull(i);
-		this.I = i;
+        I = i;
 		for (Gen gen : i.gens().keySet()) {
 			gens.put(gen, Term.Gen(gen));
 		}

@@ -7,11 +7,49 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.fpql.XExp.Apply;
+import catdata.fpql.XExp.Compose;
+import catdata.fpql.XExp.Id;
+import catdata.fpql.XExp.Var;
+import catdata.fpql.XExp.XBool;
+import catdata.fpql.XExp.XCoApply;
+import catdata.fpql.XExp.XConst;
+import catdata.fpql.XExp.XCoprod;
+import catdata.fpql.XExp.XCounit;
+import catdata.fpql.XExp.XDelta;
+import catdata.fpql.XExp.XEq;
+import catdata.fpql.XExp.XFF;
+import catdata.fpql.XExp.XFn;
+import catdata.fpql.XExp.XGrothLabels;
+import catdata.fpql.XExp.XIdPoly;
+import catdata.fpql.XExp.XInj;
+import catdata.fpql.XExp.XLabel;
+import catdata.fpql.XExp.XMapConst;
+import catdata.fpql.XExp.XMatch;
+import catdata.fpql.XExp.XOne;
+import catdata.fpql.XExp.XPair;
+import catdata.fpql.XExp.XPi;
+import catdata.fpql.XExp.XProj;
+import catdata.fpql.XExp.XPushout;
+import catdata.fpql.XExp.XRel;
+import catdata.fpql.XExp.XSchema;
+import catdata.fpql.XExp.XSigma;
+import catdata.fpql.XExp.XTT;
+import catdata.fpql.XExp.XTimes;
+import catdata.fpql.XExp.XToQuery;
+import catdata.fpql.XExp.XTransConst;
+import catdata.fpql.XExp.XTy;
+import catdata.fpql.XExp.XUberPi;
+import catdata.fpql.XExp.XUnit;
+import catdata.fpql.XExp.XVoid;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parser.Reference;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
+import org.codehaus.jparsec.Terminals.Identifier;
+import org.codehaus.jparsec.Terminals.IntegerLiteral;
+import org.codehaus.jparsec.Terminals.StringLiteral;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
@@ -28,47 +66,42 @@ import catdata.fpql.XExp.XSuperED.SuperFOED;
 import catdata.fpql.XPoly.Block;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class XParser {
+class XParser {
 
-	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
-				@Override
-				public Integer map(String s) {
-					return Integer.valueOf(s);
-				}
-			});
+	static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
+			.map(Integer::valueOf);
 
-	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
+	private static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?", "@", };
 	
 
-	static String[] res = new String[] { "forall", "exists", "supersoed", "soed", "on", "pushout", "coapply", "grothlabels", "idpoly", "labels", "uberpi", "hom", "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
+	private static final String[] res = new String[] { "forall", "exists", "supersoed", "soed", "on", "pushout", "coapply", "grothlabels", "idpoly", "labels", "uberpi", "hom", "for", "polynomial", "attributes", "not", "id", "ID", "apply", "iterate", "true", "false", "FLOWER", "and", "or", "INSTANCE", "as", "flower", "select", "from", "where", "unit", "tt", "pair", "fst", "snd", "void", "ff", "inl", "inr", "case", "relationalize", "return", "coreturn", "variables", "type", "constant", "fn", "assume", "nodes", "edges", "equations", "schema", "mapping", "instance", "homomorphism", "delta", "sigma", "pi" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
-	public static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
+	private static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
-	public static final Parser<?> TOKENIZER = Parsers.or(
-			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
-			RESERVED.tokenizer(), (Parser<?>) Terminals.Identifier.TOKENIZER,
-			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
+	private static final Parser<?> TOKENIZER = Parsers.or(
+			(Parser<?>) StringLiteral.DOUBLE_QUOTE_TOKENIZER,
+			RESERVED.tokenizer(), (Parser<?>) Identifier.TOKENIZER,
+			(Parser<?>) IntegerLiteral.TOKENIZER);
 
-	static Parser<?> term(String... names) {
+	private static Parser<?> term(String... names) {
 		return RESERVED.token(names);
 	}
 
-	public static Parser<?> ident() {
+	private static Parser<?> ident() {
 		return string(); //Terminals.Identifier.PARSER;
 	}
 
-	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
+	private static final Parser<?> program = program().from(TOKENIZER, IGNORED);
 
-	public static final Parser<?> program() {
+	private static Parser<?> program() {
 		return Parsers.tuple(decl().source().peek(), decl()).many();
 	}
 	
-	public static final Parser<?> exp() {
+	private static Parser<?> exp() {
 		Reference ref = Parser.newReference();
 
 		Parser<?> sigma = Parsers.tuple(term("sigma"), ref.lazy(), ref.lazy());
@@ -104,7 +137,7 @@ public class XParser {
 		
 //		Parser<?> query = query(ref);
 		Parser<?> apply = Parsers.tuple(term("apply"), ref.lazy(), ref.lazy());
-		Parser<?> iter = Parsers.tuple(term("iterate"), Terminals.IntegerLiteral.PARSER, ref.lazy(), ref.lazy());
+		Parser<?> iter = Parsers.tuple(term("iterate"), IntegerLiteral.PARSER, ref.lazy(), ref.lazy());
 		
 		Parser<?> hom = Parsers.tuple(term("hom"), ref.lazy(), ref.lazy());
 		Parser<?> uberpi = Parsers.tuple(term("uberpi"), ref.lazy());
@@ -117,30 +150,30 @@ public class XParser {
 		Parser<?> soed = soed();
 		Parser<?> supersoed = superSoed();
 		
-		Parser<?> a = Parsers.or(new Parser[] { supersoed, soed, pushout, coapply, glabels, idpoly, labels, uberpi, hom, poly(ref), id1, id2, comp, apply, iter, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta});
+		Parser<?> a = Parsers.or(supersoed, soed, pushout, coapply, glabels, idpoly, labels, uberpi, hom, poly(ref), id1, id2, comp, apply, iter, FLOWER, flower, prod, fst, snd, pair, unit, tt, zero, ff, coprod, inl, inr, match, rel, pi, ret, counit, unit1, counit1, ident(), schema(), mapping(ref), instance(ref), transform(ref), sigma, delta);
 
 		ref.set(a);
 
 		return a;
 	}
 
-	public static final Parser<?> type() {
+	public static Parser<?> type() {
 		return Parsers.tuple(term("type"), Parsers.always());
 	}
 	
-	public static final Parser<?> fn() {
+	public static Parser<?> fn() {
 		return Parsers.tuple(term("fn"), ident(), term("->"), ident(), Parsers.always());
 	}
 	
-	public static final Parser<?> constx() {
+	public static Parser<?> constx() {
 		return Parsers.tuple(term("constant"), ident(), Parsers.always());
 	}
 	
-	public static final Parser<?> assume() {
+	public static Parser<?> assume() {
 		return Parsers.tuple(term("assume"), path(), term("="), path());
 	}
 	
-	public static final Parser<?> superSoed() {
+	private static Parser<?> superSoed() {
 		Parser<?> es = Parsers.tuple(ident(), term(":"), ident().sepBy(term(",")), term("->"),
 				ident());
 		
@@ -162,7 +195,7 @@ public class XParser {
 		return Parsers.tuple(p, q);
 	}
 	
-	public static final Parser<?> soed() {
+	private static Parser<?> soed() {
 		Parser<?> es = Parsers.tuple(ident(), term(":"), ident(), term("->"),
 				ident());
 		Parser<?> x = Parsers.tuple(path(), term("="), path());
@@ -174,7 +207,7 @@ public class XParser {
 		return Parsers.tuple(p, q);
 	}
 	
-	public static final Parser<?> schema() {
+	private static Parser<?> schema() {
 		Parser<?> p1 = ident();
 		Parser<?> pX = Parsers.tuple(ident(), term(":"), ident(), term("->"),
 				ident());
@@ -186,7 +219,7 @@ public class XParser {
 	}
 	
 	
-	public static final XExp.XSchema toCatConst(Object y) {
+	private static XSchema toCatConst(Object y) {
 		List<String> nodes = new LinkedList<>();
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
@@ -215,12 +248,12 @@ public class XParser {
 			List<String> l2 = (List<String>) x.c;
 			eqs.add(new Pair<>(l1, l2));
 		}
-		XExp.XSchema c = new XExp.XSchema(nodes, arrows, eqs);
+		XSchema c = new XSchema(nodes, arrows, eqs);
 		return c;
 	}
 
 	
-	public static final Parser<?> decl() {
+	private static Parser<?> decl() {
 		//Parser e = Parsers.or(new Parser[] { exp(), type(), fn(), constx(), assume() });
 		
 		Parser p0 = Parsers.tuple(Parsers.tuple(ident(), term(":"), ident()).between(term("("), term(")")), term("="), exp());
@@ -245,7 +278,7 @@ public class XParser {
 		return ret;
 	} */
 		
-	public static final Parser<?> instance(Reference ref) {
+	private static Parser<?> instance(Reference ref) {
 		Parser<?> node = Parsers.tuple(ident().many1(), term(":"), ident());
 		Parser<?> p3 = Parsers.tuple(path(), term("="), path());
 		Parser<?> xxx = Parsers.tuple(section("variables", node), 
@@ -257,7 +290,7 @@ public class XParser {
 		return constant;
 	} 
 	
-	public static final Parser<?> mapping(Reference ref) {
+	private static Parser<?> mapping(Reference ref) {
 		Parser<?> node = Parsers.tuple(ident(), term("->"), ident());
 		Parser<?> arrow = Parsers.tuple(
 				ident(),
@@ -272,7 +305,7 @@ public class XParser {
 		return constant;
 	} 
 	
-	public static final Parser<?> transform(Reference ref) {
+	private static Parser<?> transform(Reference ref) {
 		Parser p = Parsers.tuple(ident(), term(":"), ident());
 		Parser<?> node = Parsers.tuple(p.or(ident()), term("->"), path());
 		Parser<?> xxx =section("variables", node);
@@ -405,10 +438,10 @@ public class XParser {
 		return ret;
 	} */
 
-	public static final List path(String s) {
-		Parser p = Parsers.or(Terminals.StringLiteral.PARSER,
-				              Terminals.IntegerLiteral.PARSER, 
-				              Terminals.Identifier.PARSER);
+	public static List path(String s) {
+		Parser p = Parsers.or(StringLiteral.PARSER,
+				              IntegerLiteral.PARSER,
+				              Identifier.PARSER);
 		Parser e = Parsers.tuple(p, term(","), p);
 		Parser q = Parsers.between(term("("), e, term(")"));
 		Parser a = Parsers.or(q, p).sepBy1(term("."));
@@ -428,7 +461,7 @@ public class XParser {
 		return ret;
 	}
 	
-	public static final XProgram program(String s) {
+	public static XProgram program(String s) {
 		List<Triple<String, Integer, XExp>> ret = new LinkedList<>();
 		List decls = (List) program.parse(s);
 
@@ -450,7 +483,7 @@ public class XParser {
 	}
 
 private static void toProgHelper(String z, String s, List<Triple<String, Integer, XExp>> ret, Tuple3 decl) {
-	String txt = z.toString();
+	String txt = z;
 	int idx = s.indexOf(txt);
 	if (idx < 0) {
 		throw new RuntimeException();
@@ -483,16 +516,16 @@ private static void toProgHelper(String z, String s, List<Triple<String, Integer
 
 	private static XExp newToExp(Object c) {
 		if (c.toString().equals("type")) {
-			return new XExp.XTy("");
+			return new XTy("");
 		}
 		if (c instanceof String) {
-			return new XExp.XConst((String)c, "");
+			return new XConst((String)c, "");
 		}
 		Tuple3 t = (Tuple3) c;
 		if (t.b.toString().equals("->")) {
-			return new XExp.XFn((String)t.a, (String)t.c, "");
+			return new XFn((String)t.a, (String)t.c, "");
 		}
-		return new XExp.XEq((List<String>) t.a, (List<String>) t.c);
+		return new XEq((List<String>) t.a, (List<String>) t.c);
 
 	}
 	/*
@@ -613,7 +646,7 @@ J = soed {
 
 	private static XExp toExp(Object c) {
 		if (c instanceof String) {
-			return new XExp.Var((String) c);
+			return new Var((String) c);
 		}
 		
 		try {
@@ -649,32 +682,32 @@ J = soed {
 		if (c instanceof Tuple5) {
 			Tuple5 p = (Tuple5) c; 
 			if (p.c.toString().equals("+")) {
-				return new XExp.XCoprod(toExp(p.b), toExp(p.d));
+				return new XCoprod(toExp(p.b), toExp(p.d));
 			}
 			if (p.c.toString().equals("*")) {
-				return new XExp.XTimes(toExp(p.b), toExp(p.d));
+				return new XTimes(toExp(p.b), toExp(p.d));
 			}
 			if (p.c.toString().equals(";")) {
-				return new XExp.Compose(toExp(p.b), toExp(p.d));
+				return new Compose(toExp(p.b), toExp(p.d));
 			}
 			if (p.a.toString().equals("return") && p.b.toString().equals("sigma")) {
-				return new XExp.XUnit("sigma", toExp(p.d), toExp(p.e));
+				return new XUnit("sigma", toExp(p.d), toExp(p.e));
 			}
 			if (p.a.toString().equals("coreturn") && p.b.toString().equals("sigma")) {
-				return new XExp.XCounit("sigma", toExp(p.d), toExp(p.e));
+				return new XCounit("sigma", toExp(p.d), toExp(p.e));
 			}
 			if (p.a.toString().equals("return") && p.b.toString().equals("delta")) {
-				return new XExp.XUnit("pi", toExp(p.d), toExp(p.e));
+				return new XUnit("pi", toExp(p.d), toExp(p.e));
 			}
 			if (p.a.toString().equals("coreturn") && p.b.toString().equals("delta")) {
-				return new XExp.XCounit("pi", toExp(p.d), toExp(p.e));
+				return new XCounit("pi", toExp(p.d), toExp(p.e));
 			}
 
-			return new XExp.XFn((String) p.b, (String) p.d, (String) p.e);
+			return new XFn((String) p.b, (String) p.d, (String) p.e);
 		}
 		if (c instanceof Tuple4) {
 			Tuple4 p = (Tuple4) c;
-			return new XExp.XEq((List<String>) p.b, (List<String>) p.d);
+			return new XEq((List<String>) p.b, (List<String>) p.d);
 		} 
 		if (c instanceof Tuple3) {
 			Tuple3 p = (Tuple3) c;
@@ -682,9 +715,9 @@ J = soed {
 				XExp I = toExp(p.c);
 				Tuple3 q = (Tuple3) p.b;
 				
-				List s = (List) ((Tuple3)q.a).b; //list of tuple3 of (path, string)
-				List f = (List) ((Tuple3)q.b).b; //list of tuple3 of (string, string)
-				List w = (List) ((Tuple3)q.c).b; //list of tuple3 of (path, path)
+				List s = (List) ((org.codehaus.jparsec.functors.Pair) q.a).b; //list of tuple3 of (path, string)
+				List f = (List) ((org.codehaus.jparsec.functors.Pair) q.b).b; //list of tuple3 of (string, string)
+				List w = (List) ((org.codehaus.jparsec.functors.Pair) q.c).b; //list of tuple3 of (path, path)
 				
 				Map<Object, List<Object>> select = new HashMap<>();
 				Map<Object, Object> from = new HashMap<>();
@@ -718,15 +751,15 @@ J = soed {
 					from.put(rhs, lhs);
 				}
 				
-				return new XExp.Flower(select, from, where, I);				
+				return new Flower(select, from, where, I);
 			}
 			if (p.a.toString().equals("FLOWER")) {
 				XExp I = toExp(p.c);
 				Tuple3 q = (Tuple3) p.b;
 				
-				List s = (List) ((Tuple3)q.a).b; //list of tuple3 of (path, string)
-				List f = (List) ((Tuple3)q.b).b; //list of tuple3 of (string, string)
-				Object w =  ((Tuple3)q.c).b; //list of tuple3 of (path, path)
+				List s = (List) ((org.codehaus.jparsec.functors.Pair) q.a).b; //list of tuple3 of (path, string)
+				List f = (List) ((org.codehaus.jparsec.functors.Pair) q.b).b; //list of tuple3 of (string, string)
+				Object w =  ((org.codehaus.jparsec.functors.Pair) q.c).b; //list of tuple3 of (path, path)
 				
 				Map<Object, List<Object>> select = new HashMap<>();
 				Map<Object, Object> from = new HashMap<>();
@@ -754,84 +787,84 @@ J = soed {
 					from.put(rhs, lhs);
 				}
 				
-				return new XExp.FLOWER2(select, from, toWhere(w), I);				
+				return new FLOWER2(select, from, toWhere(w), I);
 			}
 			
 			if (p.a.toString().equals("pushout")) {
-				return new XExp.XPushout(toExp(p.b), toExp(p.c));
+				return new XPushout(toExp(p.b), toExp(p.c));
 			}
 			if (p.a.toString().equals("hom")) {
-				return new XExp.XToQuery(toExp(p.b), toExp(p.c));
+				return new XToQuery(toExp(p.b), toExp(p.c));
 			}
 			if (p.a.toString().equals("sigma")) {
-				return new XExp.XSigma(toExp(p.b), toExp(p.c));
+				return new XSigma(toExp(p.b), toExp(p.c));
 			}
 			if (p.a.toString().equals("delta")) {
-				return new XExp.XDelta(toExp(p.b), toExp(p.c));
+				return new XDelta(toExp(p.b), toExp(p.c));
 			}
 			if (p.a.toString().equals("pi")) {
-				return new XExp.XPi(toExp(p.b), toExp(p.c));
+				return new XPi(toExp(p.b), toExp(p.c));
 			}
 			if (p.a.toString().equals("inl")) {
-				return new XExp.XInj(toExp(p.b), toExp(p.c), true);
+				return new XInj(toExp(p.b), toExp(p.c), true);
 			}
 			if (p.a.toString().equals("inr")) {
-				return new XExp.XInj(toExp(p.b), toExp(p.c), false);
+				return new XInj(toExp(p.b), toExp(p.c), false);
 			}
 			if (p.a.toString().equals("case")) {
-				return new XExp.XMatch(toExp(p.b), toExp(p.c));
+				return new XMatch(toExp(p.b), toExp(p.c));
 			}
 			if (p.a.toString().equals("fst")) {
-				return new XExp.XProj(toExp(p.b), toExp(p.c), true);
+				return new XProj(toExp(p.b), toExp(p.c), true);
 			}
 			if (p.a.toString().equals("snd")) {
-				return new XExp.XProj(toExp(p.b), toExp(p.c), false);
+				return new XProj(toExp(p.b), toExp(p.c), false);
 			}
 			if (p.a.toString().equals("pair")) {
-				return new XExp.XPair(toExp(p.b), toExp(p.c));
+				return new XPair(toExp(p.b), toExp(p.c));
 			}
 			if (p.a.toString().equals("apply")) {
-				return new XExp.Apply(toExp(p.b), toExp(p.c));
+				return new Apply(toExp(p.b), toExp(p.c));
 			}
 			if (p.a.toString().equals("coapply")) {
-				return new XExp.XCoApply(toExp(p.b), toExp(p.c));
+				return new XCoApply(toExp(p.b), toExp(p.c));
 			}
-			return new XExp.XConst((String) p.b, (String) p.c);
+			return new XConst((String) p.b, (String) p.c);
 		}
 		if (c instanceof org.codehaus.jparsec.functors.Pair) {
 			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) c;
 			if (p.a.toString().equals("idpoly")) {
-				return new XExp.XIdPoly(toExp(p.b));
+				return new XIdPoly(toExp(p.b));
 			}
 			if (p.a.toString().equals("uberpi")) {
-				return new XExp.XUberPi(toExp(p.b));
+				return new XUberPi(toExp(p.b));
 			}
 			if (p.a.toString().equals("labels")) {
-				return new XExp.XLabel(toExp(p.b));
+				return new XLabel(toExp(p.b));
 			}
 			if (p.a.toString().equals("grothlabels")) {
-				return new XExp.XGrothLabels(toExp(p.b));
+				return new XGrothLabels(toExp(p.b));
 			}
 			if (p.a.toString().equals("relationalize")) {
-				return new XExp.XRel(toExp(p.b));
+				return new XRel(toExp(p.b));
 			} 
 			if (p.a.toString().equals("void")) {
-				return new XExp.XVoid(toExp(p.b));
+				return new XVoid(toExp(p.b));
 			}
 			if (p.a.toString().equals("ff")) {
-				return new XExp.XFF(toExp(p.b));
+				return new XFF(toExp(p.b));
 			}
 			if (p.a.toString().equals("unit")) {
-				return new XExp.XOne(toExp(p.b));
+				return new XOne(toExp(p.b));
 			}
 			if (p.a.toString().equals("tt")) {
-				return new XExp.XTT(toExp(p.b));
+				return new XTT(toExp(p.b));
 			}
 			if (p.a.toString().equals("id")) {
-				return new XExp.Id(false, toExp(p.b));
+				return new Id(false, toExp(p.b));
 			}
 			if (p.a.toString().equals("ID")) {
-				return new XExp.Id(true, toExp(p.b));
+				return new Id(true, toExp(p.b));
 			}
 //			if (p.a.toString().equals("query")) {
 	//			Tuple3 t = (Tuple3) p.b;
@@ -846,7 +879,7 @@ J = soed {
 					e.printStackTrace();
 				}
 				
-				return new XExp.XTy((String)p.b);
+				return new XTy((String)p.b);
 			}
 		}
 		
@@ -865,7 +898,7 @@ J = soed {
 				.tuple(kkk, xxx.between(term("{"), term("}")), term(":"),
 						ref.lazy());
 		return constant;  */
-	public static XExp.XInst toInstConst(Object decl) {
+	private static XInst toInstConst(Object decl) {
 		Tuple4 y = (Tuple4) decl;
 		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.b;
 		
@@ -901,7 +934,7 @@ J = soed {
 		return ret;
 	}
 	
-	public static XExp.XMapConst toMapping(Object decl) {
+	private static XMapConst toMapping(Object decl) {
 		Tuple5 y = (Tuple5) decl;
 		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
 		
@@ -926,11 +959,11 @@ J = soed {
 			List<String> m = (List<String>) u.c;
 			eqsX.add(new Pair<>(n, m));
 		 }
-		XExp.XMapConst ret = new XExp.XMapConst(toExp(y.c), toExp(y.e), nodesX, eqsX);
+		XMapConst ret = new XMapConst(toExp(y.c), toExp(y.e), nodesX, eqsX);
 		return ret;
 	}
 	
-	public static XExp.XTransConst toTrans(Object decl) {
+	private static XTransConst toTrans(Object decl) {
 		Tuple5 y = (Tuple5) decl;
 //		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
 		
@@ -954,7 +987,7 @@ J = soed {
 			}
 
 		 }
-		XExp.XTransConst ret = new XExp.XTransConst(toExp(y.c), toExp(y.e), eqsX);
+		XTransConst ret = new XTransConst(toExp(y.c), toExp(y.e), eqsX);
 		return ret;
 	}
 
@@ -962,26 +995,26 @@ J = soed {
 		return  Parsers.or(ident()).sepBy1(term("."));
 	}
 	
-	private static XExp.XBool toWhere(Object o) {
+	private static XBool toWhere(Object o) {
 		if (o instanceof Tuple5) {
 			Tuple5 o2 = (Tuple5) o;
 			boolean isAnd = o2.c.toString().equals("and");
-			return new XExp.XBool(toWhere(o2.b), toWhere(o2.d), isAnd);
+			return new XBool(toWhere(o2.b), toWhere(o2.d), isAnd);
 		}
 		if (o instanceof Tuple3) {
 			Tuple3 o2 = (Tuple3) o;
-			return new XExp.XBool((List<Object>)o2.a, (List<Object>)o2.c);
+			return new XBool((List<Object>)o2.a, (List<Object>)o2.c);
 		}
 		if (o instanceof org.codehaus.jparsec.functors.Pair) {
 			org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) o;
-			return new XExp.XBool(toWhere(x.b));
+			return new XBool(toWhere(x.b));
 
 		}
 		if (o.toString().equals("true")) {
-			return new XExp.XBool(true);
+			return new XBool(true);
 		}
 		if (o.toString().equals("false")) {
-			return new XExp.XBool(false);
+			return new XBool(false);
 		}
 		throw new RuntimeException();
 	}
@@ -1001,16 +1034,16 @@ J = soed {
 		return p;
 	}
 
-	public static Parser<?> section(String s, Parser<?> p) {
+	private static Parser<?> section(String s, Parser<?> p) {
 		return Parsers.tuple(term(s), p.sepBy(term(",")), term(";"));
 	}
 
 	 private static Parser<?> string() {
-		return Parsers.or(Terminals.StringLiteral.PARSER,
-				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
+		return Parsers.or(StringLiteral.PARSER,
+				IntegerLiteral.PARSER, Identifier.PARSER);
 	} 
 	 
-	public static final Parser<?> flower(Reference self) {
+	private static Parser<?> flower(Reference self) {
 		Parser<?> from0 = Parsers.tuple(ident(), term("as"), ident()).sepBy(term(","));
 		Parser<?> from = Parsers.tuple(term("from"), from0, term(";"));
 
@@ -1026,7 +1059,7 @@ J = soed {
 		return ret;
 	}
 	
-	public static final Parser<?> FLOWER(Reference self) {
+	private static Parser<?> FLOWER(Reference self) {
 		Parser<?> from0 = Parsers.tuple(ident(), term("as"), ident()).sepBy(term(","));
 		Parser<?> from = Parsers.tuple(term("from"), from0, term(";"));
 
@@ -1047,7 +1080,7 @@ J = soed {
            edges e1 = {b2=a1.f, b3=a1.f} : q2,
                  e2 = { ... } : q3; 
            } */
-	public static final Parser<?> block() {
+	private static Parser<?> block() {
 		Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(",")).between(term("for"), term(";"));
 		Parser p2 = Parsers.tuple(ident().sepBy1(term(".")), term("="), ident().sepBy1(term("."))).sepBy(term(",")).between(term("where"), term(";"));
 		Parser p3 = Parsers.tuple(ident(), term("="), ident().sepBy1(term("."))).sepBy(term(",")).between(term("attributes"), term(";"));
@@ -1060,7 +1093,7 @@ J = soed {
 		return p.between(term("{"), term("}"));
 	}
 	
-	public static Block<String, String> fromBlock(Object o) {
+	private static Block<String, String> fromBlock(Object o) {
 		Tuple4<List, List, List, List> t = (Tuple4<List, List, List, List>) o;
 		Map<Object, String> from = new HashMap<>();
 		Set<Pair<List<Object>, List<Object>>> where = new HashSet<>();
@@ -1100,7 +1133,7 @@ J = soed {
 	}
 	
 	//{b2=a1.f, b3=a1.f}
-	public static Map<String, List<String>> fromBlockHelper(Object o) {
+	private static Map<String, List<String>> fromBlockHelper(Object o) {
 		List<Tuple3> l = (List<Tuple3>) o;
 		Map<String, List<String>> ret = new HashMap<>();
 		for (Tuple3 t : l) {
@@ -1112,7 +1145,7 @@ J = soed {
 		return ret;
 	}
 	
-	public static Map<Object, Pair<String, Block<String, String>>> fromBlocks(List l) {
+	private static Map<Object, Pair<String, Block<String, String>>> fromBlocks(List l) {
 		Map<Object, Pair<String, Block<String, String>>> ret = new HashMap<>();
 		for (Object o : l) {
 			Tuple5 t = (Tuple5) o;
@@ -1121,11 +1154,11 @@ J = soed {
 		}
 		return ret;
 	}
-	public static XPoly<String, String> fromPoly(Tuple4 o) {
+	private static XPoly<String, String> fromPoly(Tuple4 o) {
 		Map<Object, Pair<String, Block<String, String>>> blocks = fromBlocks((List)o.a);
 		return new XPoly<>(toExp(o.b), toExp(o.d), blocks);
 	}
-	public static final Parser<?> poly(Reference ref) {
+	private static Parser<?> poly(Reference ref) {
 		Parser p = Parsers.tuple(ident(), term("="), block(), term(":"), ident());
 		Parser p2 = p.sepBy(term(",")).between(term("{"), term("}")).between(term("polynomial"), term(":"));
 		return Parsers.tuple(p2, ref.lazy(), term("->"), ref.lazy());

@@ -21,7 +21,7 @@ public class Patrick13ExampleProd extends Example {
 		return s;
 	}
 	
-	String s = "string : type"
+	private final String s = "string : type"
 			+ "\ncommon : string"
 			+ "\nbaz : string"
 			+ "\n"

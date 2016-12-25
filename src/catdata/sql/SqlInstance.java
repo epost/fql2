@@ -18,8 +18,8 @@ import catdata.Util;
 public class SqlInstance {
 
 	private final Map<SqlTable, Set<Map<SqlColumn, Optional<Object>>>> db = new HashMap<>();
-	public SqlSchema schema;
-	public Connection conn;
+	private final SqlSchema schema;
+	//private final Connection conn;
 	
 	public Map<SqlColumn, Optional<Object>> follow(Map<SqlColumn, Optional<Object>> row, SqlForeignKey fk) {
 		Map<SqlColumn, Optional<Object>> cand = new HashMap<>();
@@ -58,7 +58,7 @@ public class SqlInstance {
 			throw new RuntimeException();
 		}
 		this.schema = schema;
-		this.conn = conn;
+		//this.conn = conn;
 		
 		for (SqlTable table : schema.tables) {
 			Statement stmt = conn.createStatement();

@@ -9,10 +9,10 @@ import catdata.fpql.XExp.Flower;
 import catdata.ide.GlobalOptions;
 
 
-public class XDriver {
+class XDriver {
 
 	@SuppressWarnings({ "rawtypes" })
-	public static XEnvironment makeEnv(String str, XProgram init, String[] toUpdate) {
+	public static XEnvironment makeEnv(String str, XProgram init, String... toUpdate) {
 		if (GlobalOptions.debug.fpql.x_typing) {
 			init.doTypes();
 		}

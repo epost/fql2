@@ -20,7 +20,7 @@ public class Transforms2Example extends Example {
 		return s;
 	}
 	
-String s = "schema C = {"
+private final String s = "schema C = {"
 		+ "\n	nodes A;"
 		+ "\n	attributes att:A->string;"
 		+ "\n	arrows f:A->A;"

@@ -13,8 +13,9 @@ import catdata.fqlpp.cat.FinSet.Fn;
 @SuppressWarnings("serial")
 public class FPTransform<O, A> implements Serializable {
 
-	public Instance<O, A> src, dst;
-	public Map<Signature<O, A>.Node, Map<Object, Object>> data;
+	public final Instance<O, A> src;
+    public final Instance<O, A> dst;
+	public final Map<Signature<O, A>.Node, Map<Object, Object>> data;
 	
 
 	public FPTransform(Instance<O, A> src, Instance<O, A> dst,
@@ -27,7 +28,7 @@ public class FPTransform<O, A> implements Serializable {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((data == null) ? 0 : data.hashCode());
 		result = prime * result + ((dst == null) ? 0 : dst.hashCode());
@@ -93,7 +94,7 @@ public class FPTransform<O, A> implements Serializable {
 		return "{\n " + nm + "}";
 	}
 
-	public void validate() {
+	private void validate() {
 		if (!src.thesig.equals(dst.thesig)) {
 			throw new RuntimeException("Signatures do not match: " + this);
 		}
@@ -125,6 +126,7 @@ public class FPTransform<O, A> implements Serializable {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <O,A> FPTransform<O,A> id(Instance<O,A> I) {
 		Map<Signature<O,A>.Node, Map<Object,Object>> m = new HashMap<>();
 		for (Signature<O,A>.Node k : I.thesig.nodes) {
@@ -132,10 +134,12 @@ public class FPTransform<O, A> implements Serializable {
 			for (Object o : I.nm.get(k)) {
 				p.put(o, o);
 			}
+			m.put(k, p);
 		}
 		return new FPTransform<>(I, I, m);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <O, A> FPTransform<O, A> compose(
 			FPTransform<O, A> f, FPTransform<O, A> g) {
 		if (!f.dst.equals(g.src)) {
@@ -150,7 +154,8 @@ public class FPTransform<O, A> implements Serializable {
 	}
 	
 	@SuppressWarnings({ "rawtypes" })
-	Transform<Signature<O,A>.Node,Signature<O,A>.Path,Set,Fn> transform;
+    private
+    Transform<Signature<O,A>.Node,Signature<O,A>.Path,Set,Fn> transform;
 
 	@SuppressWarnings("rawtypes")
 	public Transform<Signature<O,A>.Node,Signature<O,A>.Path,Set,Fn> toTransform() {

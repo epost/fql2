@@ -25,7 +25,7 @@ public final class AqlOptions {
 	
 	//TODO: aql each typeside/instance/etc should make sure only appropriate options are given to it
 
-	public static enum AqlOption {
+	public enum AqlOption {
 		csv_charset,
 		csv_line_delim_string,
 		csv_field_delim_char,
@@ -54,7 +54,7 @@ public final class AqlOptions {
 			
 		
 		private String getString(Map<String, String> map) {
-			String n = map.get(this.toString());
+			String n = map.get(toString());
 			if (n == null) {
 				throw new RuntimeException("No option named " + this + " in options");
 			}
@@ -118,7 +118,7 @@ public final class AqlOptions {
 		options.put(AqlOption.prover, name);
 	}
 	
-	public static String printDefault() {
+	private static String printDefault() {
 		List<String> l = new LinkedList<>();
 		for (AqlOption option : AqlOption.values()) {
 			Object o = getDefault(option);
@@ -145,7 +145,7 @@ public final class AqlOptions {
 		case require_consistency: 
 			return false;
 		case timeout:
-			return new Long(10);
+			return 10L;
 		case dont_verify_is_appropriate_for_prover_unsafe:
 			return false;
 		case completion_compose:
@@ -286,7 +286,7 @@ public final class AqlOptions {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((options == null) ? 0 : options.hashCode());
 		return result;
@@ -316,7 +316,7 @@ public final class AqlOptions {
 	}
 
 
-	public final static class AqlOptionsDefunct extends Options {
+	public static final class AqlOptionsDefunct extends Options {
 
 		private static final long serialVersionUID = 1L;
 	
@@ -330,7 +330,7 @@ public final class AqlOptions {
 		private final String msg  = msg1 + "\n\nOption descriptions are available in the AQL manual, see categoricaldata.net/fql.html";
 		@Override
 		public Pair<JComponent, Function<Unit, Unit>> display() {
-			return new Pair<>(new CodeTextPanel("", "Aql options are specified in each Aql expression.\nHere are the available options and their defaults:\n\n\t" + AqlOptions.printDefault() + "\n\n" + msg), x -> x);
+			return new Pair<>(new CodeTextPanel("", "Aql options are specified in each Aql expression.\nHere are the available options and their defaults:\n\n\t" + printDefault() + "\n\n" + msg), x -> x);
 		}
 	
 		@Override

@@ -26,36 +26,36 @@ public class FqlppOptions extends Options {
 		return Language.FQLPP.toString();
 	}
 	
-	public int MAX_NODES = 32;
-	public int MAX_EDGES = 128;
-	public int MAX_PATH_LENGTH = 8; 
-	public int MAX_DENOTE_ITERATIONS = 65536; 
+	public final int MAX_NODES = 32;
+	public final int MAX_EDGES = 128;
+	public final int MAX_PATH_LENGTH = 8;
+	public final int MAX_DENOTE_ITERATIONS = 65536;
 
-	public String useLineage = "Summary as ID"; 
-	public String piLineage = "Summary as ID"; 
+	public final String useLineage = "Summary as ID";
+	public final String piLineage = "Summary as ID";
 	
-	public boolean VALIDATE = true; 
-	public boolean set_textual = true; 
-	public boolean fn_textual = true;
-	public boolean set_tabular = true; 
-	public boolean fn_tabular = true;
-	public boolean cat_tabular = true;
-	public boolean cat_textual = true;
-	public boolean ftr_tabular = true;
-	public boolean ftr_textual = true;
-	public boolean cat_graph = true;
-	public boolean ftr_graph = true;
-	public boolean set_graph = true; 
-	public boolean fn_graph = true;
-	public boolean trans_textual = true;
-	public boolean trans_tabular = true;
-	public boolean trans_graph = true;
-	public boolean cat_schema = true;
-	public boolean ftr_elements = true;
-	public boolean ftr_instance = true;
-	public boolean ftr_joined = true;
-	public boolean ftr_mapping = true;
-	public boolean trans_elements =  true;
+	public final boolean VALIDATE = true;
+	public final boolean set_textual = true;
+	public final boolean fn_textual = true;
+	public final boolean set_tabular = true;
+	public final boolean fn_tabular = true;
+	public final boolean cat_tabular = true;
+	public final boolean cat_textual = true;
+	public final boolean ftr_tabular = true;
+	public final boolean ftr_textual = true;
+	public final boolean cat_graph = true;
+	public final boolean ftr_graph = true;
+	public final boolean set_graph = true;
+	public final boolean fn_graph = true;
+	public final boolean trans_textual = true;
+	public final boolean trans_tabular = true;
+	public final boolean trans_graph = true;
+	public final boolean cat_schema = true;
+	public final boolean ftr_elements = true;
+	public final boolean ftr_instance = true;
+	public final boolean ftr_joined = true;
+	public final boolean ftr_mapping = true;
+	public final boolean trans_elements =  true;
 	
 	@Override
 	public Pair<JComponent, Function<Unit, Unit>> display() {
@@ -171,9 +171,7 @@ public class FqlppOptions extends Options {
 			viewer1.add(new JLabel());
 			viewer2.add(new JLabel());
 		}
-		Function<Unit, Unit> fn = (Unit t) -> {
-                    return new Unit();
-                };
+		Function<Unit, Unit> fn = (Unit t) -> new Unit();
 
 		return new Pair<>(generalsplit, fn);
 	}

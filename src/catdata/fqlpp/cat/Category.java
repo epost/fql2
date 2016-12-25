@@ -1,7 +1,6 @@
 package catdata.fqlpp.cat;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,8 +36,11 @@ public abstract class Category<O, A> implements Serializable {
 		if (this == obj) {
 			return true;
 		}
+		if (!(obj instanceof Category)) {
+			return false;
+		}
 		Category<O, A> other = (Category<O, A>) obj;
-		if (this.isInfinite() || other.isInfinite()) {
+		if (isInfinite() || other.isInfinite()) {
 			return this == obj;
 		}
 
@@ -91,7 +93,7 @@ public abstract class Category<O, A> implements Serializable {
 
 	public abstract A compose(A a1, A a2);
 
-	String toString_cache = null;
+	private String toString_cache = null;
 
 	@Override
 	public String toString() {
@@ -154,7 +156,8 @@ public abstract class Category<O, A> implements Serializable {
 		return ret;
 	}
 
-	public void validate() {
+	@SuppressWarnings("ConstantConditions")
+    public void validate() {
 		if (!GlobalOptions.debug.fqlpp.VALIDATE) {
 			return;
 		}
@@ -230,14 +233,14 @@ public abstract class Category<O, A> implements Serializable {
 		}
 	}
 
-	Map<Pair<O, O>, Set<A>> cached = new HashMap<>();
+	private final Map<Pair<O, O>, Set<A>> cached = new HashMap<>();
 
 	public Set<A> hom(O A, O B) {
 		if (!objects().contains(A)) {
-			throw new RuntimeException(A.toString() + " not in " + objects() + " (src)");
+			throw new RuntimeException(A + " not in " + objects() + " (src)");
 		}
 		if (!objects().contains(B)) {
-			throw new RuntimeException(B.toString() + " not in " + objects() + " (dst)");
+			throw new RuntimeException(B + " not in " + objects() + " (dst)");
 		}
 		Pair<O, O> p = new Pair<>(A, B);
 		Set<A> retX = cached.get(p);
@@ -254,7 +257,7 @@ public abstract class Category<O, A> implements Serializable {
 		return ret;
 	}
 
-	Map<O, Set<A>> arrowsFrom = new HashMap<>();
+	private final Map<O, Set<A>> arrowsFrom = new HashMap<>();
 
 	public Set<A> arrowsFrom(O a) {
 		if (arrowsFrom.containsKey(a)) {
@@ -270,7 +273,7 @@ public abstract class Category<O, A> implements Serializable {
 		return ret;
 	}
 
-	Map<O, Set<A>> arrowsTo = new HashMap<>();
+	private final Map<O, Set<A>> arrowsTo = new HashMap<>();
 
 	public Set<A> arrowsTo(O a) {
 		if (arrowsTo.containsKey(a)) {
@@ -338,7 +341,7 @@ public abstract class Category<O, A> implements Serializable {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public Signature origin = null;
+	//public Signature origin = null;
 
 	private Signature<O, A> sig;
 
@@ -393,7 +396,7 @@ public abstract class Category<O, A> implements Serializable {
 		return ret;
 	}
 
-	private Map<O, Functor<O, A, Set<A>, Fn<A, A>>> repMap = new HashMap<>();
+	private final Map<O, Functor<O, A, Set<A>, Fn<A, A>>> repMap = new HashMap<>();
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Functor<O, A, Set<A>, Fn<A, A>> rep(O c) {
@@ -424,9 +427,9 @@ public abstract class Category<O, A> implements Serializable {
 		return repMap.get(c);
 	}
 
-	Pair<Map<O, Functor<O, A, Set<A>, Fn<A, A>>>, Map<A, Transform<O, A, Set<A>, Fn<A, A>>>> repX;
+	private Pair<Map<O, Functor<O, A, Set<A>, Fn<A, A>>>, Map<A, Transform<O, A, Set<A>, Fn<A, A>>>> repX;
 
-	public Pair<Map<O, Functor<O, A, Set<A>, Fn<A, A>>>, Map<A, Transform<O, A, Set<A>, Fn<A, A>>>> repX() {
+	Pair<Map<O, Functor<O, A, Set<A>, Fn<A, A>>>, Map<A, Transform<O, A, Set<A>, Fn<A, A>>>> repX() {
 		if (repX != null) {
 			return repX;
 		}
@@ -448,8 +451,8 @@ public abstract class Category<O, A> implements Serializable {
 
 	public List<O> order() {
 		List<O> ret = new LinkedList<>(objects());
-		Comparator<O> c = (O o1, O o2) -> arrowsFrom(o1).size() - arrowsFrom(o2).size();
-		Collections.sort(ret, c);
+		Comparator<O> c = Comparator.comparingInt(o -> arrowsFrom(o).size());
+		ret.sort(c);
 		return ret;
 	}
 

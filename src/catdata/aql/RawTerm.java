@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Ref;
 import catdata.Triple;
@@ -17,10 +18,10 @@ import catdata.Util;
 
 public final class RawTerm {
 
-	public final String head;
-	public final List<RawTerm> args;
+	private final String head;
+	private final List<RawTerm> args;
 	
-	public final String annotation;
+	private final String annotation;
 	
 	@Override
 	public String toString() {
@@ -37,7 +38,7 @@ public final class RawTerm {
 	infer0(Map<String, Chc<Ty,En>> ctx0, RawTerm lhs, Chc<Ty,En> expected, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, String pre, AqlJs<Ty,Sym> js) {
  
 		Map<String, Chc<Ty,En>> ctx = new HashMap<>(ctx0);		
-		String fresh = "expected sort of " + lhs.toString();
+		String fresh = "expected sort of " + lhs;
 		ctx.put(fresh, expected);
 
 		try {
@@ -144,7 +145,7 @@ public final class RawTerm {
 	
 	
 	
-	public <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> trans(Set<String> vars, Map<String, Ref<Chc<Ty, En>>> ctx0, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty,Sym> js) {
+	private <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> trans(Set<String> vars, Map<String, Ref<Chc<Ty, En>>> ctx0, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty, Sym> js) {
 		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args0 = args.stream().map(x -> x.trans(vars, ctx0, col, js)).collect(Collectors.toList());
 			
 		int n = boolToInt(vars.contains(head)) + boolToInt(col.syms.containsKey(resolve(head))) + boolToInt(col.atts.containsKey(resolve(head))) + boolToInt(col.fks.containsKey(resolve(head))) + boolToInt(col.gens.containsKey(resolve(head))) + boolToInt(col.sks.containsKey(resolve(head)));
@@ -197,8 +198,8 @@ public final class RawTerm {
 		return b ? 1 : 0;
 	}
 
-	@SuppressWarnings("null")
-	public <Ty, En, Sym, Fk, Att, Gen, Sk> Ref<Chc<Ty,En>> infer(Set<String> vars, Map<String, Ref<Chc<Ty,En>>> ctx, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+	@SuppressWarnings({"null", "ConstantConditions"})
+    private <Ty, En, Sym, Fk, Att, Gen, Sk> Ref<Chc<Ty,En>> infer(Set<String> vars, Map<String, Ref<Chc<Ty, En>>> ctx, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		boolean isSym, isAtt, isFk, isGen, isSk, isVar, isObj ;
 				
 		isObj = (annotation != null);
@@ -244,11 +245,7 @@ public final class RawTerm {
 			}
 			arg_t.set(Chc.inRight(ty)); //redundant sometimes
 
-			if (isAtt) {
-				return new Ref<>(Chc.inLeft(atts_t.second));
-			} else {
-				return new Ref<>(Chc.inRight(fks_t.second));				
-			}
+            return isAtt ? new Ref<>(Chc.inLeft(atts_t.second)) : new Ref<>(Chc.inRight(fks_t.second));
 		} else if (isSym) {
 			if (args.size() != syms_t.first.size()) {
 				throw new RuntimeException("In " + this + ", the head " + head + " is a typeside symbol of arity " + syms_t.first.size() + " but it is given " + args.size() + " arguments");
@@ -279,7 +276,7 @@ public final class RawTerm {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((annotation == null) ? 0 : annotation.hashCode());
 		result = prime * result + ((args == null) ? 0 : args.hashCode());
@@ -379,7 +376,7 @@ public final class RawTerm {
 			}
 		}
 		Triple<Ctx<String,Chc<Ty,En>>,Term<Ty, En, Sym, Fk, Att, Gen, Sk>,Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
-		eq0 = RawTerm.infer1(ctx, a, b, col, js);
+		eq0 = infer1(ctx, a, b, col, js);
 
 		LinkedHashMap<Var, Chc<Ty,En>> map = new LinkedHashMap<>();
 		for (String k : ctx.keySet()) {

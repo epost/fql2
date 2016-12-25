@@ -1,14 +1,6 @@
 package catdata.opl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -31,22 +23,24 @@ import catdata.provers.KBUnifier;
 @SuppressWarnings("deprecation")
 public class OplKB<C, V>  {
 	 
-	protected boolean isComplete = false;
-	protected boolean isCompleteGround = false;
+	private boolean isComplete = false;
+	private boolean isCompleteGround = false;
 	
-	protected List<Pair<KBExp<C, V>, KBExp<C, V>>> R, E, G; //order matters
+	private final List<Pair<KBExp<C, V>, KBExp<C, V>>> R;
+    private List<Pair<KBExp<C, V>, KBExp<C, V>>> E;
+    private List<Pair<KBExp<C, V>, KBExp<C, V>>> G; //order matters
 	
-	protected Iterator<V> fresh;
+	private final Iterator<V> fresh;
 	
-	public Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> gt;
-	protected Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen = new HashSet<>();	
+	public final Function<Pair<KBExp<C, V>, KBExp<C, V>>, Boolean> gt;
+	private final Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen = new HashSet<>();
 
-	protected Map<C, List<Pair<KBExp<C, V>, KBExp<C, V>>>> AC_symbols;
+	private Map<C, List<Pair<KBExp<C, V>, KBExp<C, V>>>> AC_symbols;
 //	protected List<Pair<KBExp<C, V>, KBExp<C, V>>> AC_R, G;
 	
-	protected int count = 0;
+	private int count = 0;
 
-	protected KBOptions options;
+	private final KBOptions options;
 	
 	/**
 	 * @param E0 initial equations
@@ -57,17 +51,17 @@ public class OplKB<C, V>  {
 			KBExp<C, V>>, Boolean> gt0, Iterator<V> fresh,
 			Set<Pair<KBExp<C, V>, KBExp<C, V>>> R0, KBOptions options) {
 		this.options = options;
-		this.R = new LinkedList<>();
+        R = new LinkedList<>();
 		for (Pair<KBExp<C, V>, KBExp<C, V>> r : R0) {
 			R.add(freshen(fresh, r));
 		}
-		this.gt = gt0;
+        gt = gt0;
 		this.fresh = fresh;
-		this.E = new LinkedList<>();
+        E = new LinkedList<>();
 		for (Pair<KBExp<C, V>, KBExp<C, V>> e : E0) {
 			E.add(freshen(fresh, e));
 		}
-		this.G = new LinkedList<>();
+        G = new LinkedList<>();
 		try {
 			initAC();
 		} catch (InterruptedException e1) {
@@ -124,7 +118,7 @@ public class OplKB<C, V>  {
 		}
 		outer: for (C f : symbols.keySet()) {
 			Integer i = symbols.get(f);
-			if (i.intValue() != 2) {
+			if (i != 2) {
 				continue;
 			}
 			boolean cand1_found = false;
@@ -133,14 +127,10 @@ public class OplKB<C, V>  {
 			Pair<KBExp<C, V>, KBExp<C, V>> cand1 = cands.get(0);
 			Pair<KBExp<C, V>, KBExp<C, V>> cand2 = cands.get(1);
 			for (Pair<KBExp<C, V>, KBExp<C, V>> other : E) {
-				if (subsumes(fresh, cand1, other)) {
+				if (subsumes(fresh, cand1, other) || subsumes(fresh, cand1, other.reverse())) {
 					cand1_found = true;
-				} else if (subsumes(fresh, cand1, other.reverse())) {
-					cand1_found = true;
-				} 
-				if (subsumes(fresh, cand2, other)) {
-					cand2_found = true;
-				} else if (subsumes(fresh, cand2, other.reverse())) {
+				}
+				if (subsumes(fresh, cand2, other) || subsumes(fresh, cand2, other.reverse())) {
 					cand2_found = true;
 				}
 				if (cand1_found && cand2_found) {
@@ -237,13 +227,13 @@ public class OplKB<C, V>  {
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	protected static <C, V> Pair<KBExp<C, V>, KBExp<C, V>> freshen(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> eq) {
+	private static <C, V> Pair<KBExp<C, V>, KBExp<C, V>> freshen(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> eq) {
 		Map<V, KBExp<C, V>> subst = freshenMap(fresh, eq).first;
 		return new Pair<>(eq.first.subst(subst), eq.second.subst(subst));
 	}
 
-	protected static <C,V> Pair<Map<V, KBExp<C, V>>, Map<V, KBExp<C, V>>> freshenMap(
-			Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> eq) {
+	private static <C,V> Pair<Map<V, KBExp<C, V>>, Map<V, KBExp<C, V>>> freshenMap(
+            Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> eq) {
 		Set<V> vars = new HashSet<>();
 		KBExp<C, V> lhs = eq.first;
 		KBExp<C, V> rhs = eq.second;
@@ -260,34 +250,32 @@ public class OplKB<C, V>  {
 	}
 	
 
-	protected static <X> void remove(Collection<X> X, X x) {
-		while (X.remove(x)){}
+	private static <X> void remove(Collection<X> X, X x) {
+		while (X.remove(x));
 	}
 	
-	protected static <X> void add(Collection<X> X, X x) {
+	private static <X> void add(Collection<X> X, X x) {
 		if (!X.contains(x)) {
 			X.add(x);
 		}
 	}
 	
-	protected static <X> void addFront(List<X> X, X x) {
+	private static <X> void addFront(List<X> X, X x) {
 		if (!X.contains(x)) {
 			X.add(0, x);
 		}
 	}
 	
-	protected static <X> void addAll(Collection<X> X, Collection<X> x) {
+	private static <X> void addAll(Collection<X> X, Collection<X> x) {
 		for (X xx : x) {
 			add(X, xx);
 		}
 	}
 
-	protected void sortByStrLen(List<Pair<KBExp<C,V>, KBExp<C,V>>> l) {
-		if (!options.unfailing) {
-			l.sort(Util.ToStringComparator);
-		} else {
-			List<Pair<KBExp<C,V>, KBExp<C,V>>> unorientable = new LinkedList<>();
-			List<Pair<KBExp<C,V>, KBExp<C,V>>> orientable = new LinkedList<>();
+	private void sortByStrLen(List<Pair<KBExp<C, V>, KBExp<C, V>>> l) {
+		if (options.unfailing) {
+			List<Pair<KBExp<C, V>, KBExp<C, V>>> unorientable = new LinkedList<>();
+			List<Pair<KBExp<C, V>, KBExp<C, V>>> orientable = new LinkedList<>();
 			for (Pair<KBExp<C, V>, KBExp<C, V>> k : l) {
 				if (orientable(k)) {
 					orientable.add(k);
@@ -299,6 +287,8 @@ public class OplKB<C, V>  {
 			l.clear();
 			l.addAll(orientable);
 			l.addAll(unorientable);
+		} else {
+			l.sort(Util.ToStringComparator);
 		}
 	}
 	
@@ -314,7 +304,7 @@ public class OplKB<C, V>  {
 	
 	public void complete() {
 		try {
-			while (!step(null)){}
+			while (!step(null));
 		} catch (InterruptedException ex) {
 			throw new RuntimeInterruptedException(ex);
 		}
@@ -326,10 +316,10 @@ public class OplKB<C, V>  {
 	
 	//if the parent dies, the current thread will too
 	public void complete(Thread parent) {
-		final String[] arr = new String[] { null };
+		String[] arr = new String[] { null };
 		Runnable r = () -> {
                     try {
-                        while (!step(parent)){}
+                        while (!step(parent));
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         arr[0] = ex.getMessage();
@@ -353,8 +343,8 @@ public class OplKB<C, V>  {
 		} 
 	}
 	
-	protected static <C, V> boolean subsumes(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> cand,
-			Pair<KBExp<C, V>, KBExp<C, V>> other) throws InterruptedException {
+	private static <C, V> boolean subsumes(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> cand,
+                                           Pair<KBExp<C, V>, KBExp<C, V>> other) throws InterruptedException {
 		return (subsumes0(fresh, cand, other) != null);
 	}
 	
@@ -375,8 +365,8 @@ public class OplKB<C, V>  {
 	} */
 	
 	@SuppressWarnings("unchecked")
-	protected static <C, V> Map<V, KBExp<C, V>> subsumes0(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> cand,
-			Pair<KBExp<C, V>, KBExp<C, V>> other) throws InterruptedException {
+    private static <C, V> Map<V, KBExp<C, V>> subsumes0(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> cand,
+                                                        Pair<KBExp<C, V>, KBExp<C, V>> other) throws InterruptedException {
 		if (Thread.interrupted()) {
 			throw new InterruptedException();
 		}
@@ -399,8 +389,8 @@ public class OplKB<C, V>  {
 		return subst;
 	}
 	
-	protected List<Pair<KBExp<C, V>, KBExp<C, V>>> filterSubsumed(
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> CPX) throws InterruptedException {
+	private List<Pair<KBExp<C, V>, KBExp<C, V>>> filterSubsumed(
+            Collection<Pair<KBExp<C, V>, KBExp<C, V>>> CPX) throws InterruptedException {
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> CP = new LinkedList<>();
 		outer: for (Pair<KBExp<C, V>, KBExp<C, V>> cand : CPX) {
 			for (Pair<KBExp<C, V>, KBExp<C, V>> e : E) {
@@ -413,8 +403,8 @@ public class OplKB<C, V>  {
 		return CP;
 	}
 
-	protected List<Pair<KBExp<C, V>, KBExp<C, V>>> filterSubsumedBySelf(
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> CPX) throws InterruptedException {
+	private List<Pair<KBExp<C, V>, KBExp<C, V>>> filterSubsumedBySelf(
+            Collection<Pair<KBExp<C, V>, KBExp<C, V>>> CPX) throws InterruptedException {
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> CP = new LinkedList<>(CPX);
 		
 		Iterator<Pair<KBExp<C, V>, KBExp<C, V>>> it = CP.iterator();
@@ -448,9 +438,9 @@ public class OplKB<C, V>  {
 	
 	//is also compose2
 	//simplify RHS of a rule
-	protected void compose() throws InterruptedException {
-		Pair<KBExp<C, V>, KBExp<C, V>> to_remove = null;
-		Pair<KBExp<C, V>, KBExp<C, V>> to_add = null;
+    private void compose() throws InterruptedException {
+		Pair<KBExp<C, V>, KBExp<C, V>> to_remove;
+		Pair<KBExp<C, V>, KBExp<C, V>> to_add;
 		do {
 			to_remove = null;
 			to_add = null;
@@ -473,7 +463,8 @@ public class OplKB<C, V>  {
 	
 	//  For this to be a true semi-decision procedure, open terms should first be skolemized
 	//@Override
-	public boolean eq(KBExp<C, V> lhs, KBExp<C, V> rhs) {
+    /*
+    private boolean eq(KBExp<C, V> lhs, KBExp<C, V> rhs) {
 		KBExp<C, V> lhs0 = nf(lhs);
 		KBExp<C, V> rhs0 = nf(rhs);
 		if (lhs0.equals(rhs0)) {
@@ -491,7 +482,7 @@ public class OplKB<C, V>  {
 			throw new RuntimeException("Interrupted " + e.getMessage());
 		}
 		return eq(lhs, rhs);
-	} 
+	} */
 	
 	//@Override
 	public KBExp<C, V> nf(KBExp<C, V> e) {
@@ -514,10 +505,10 @@ public class OplKB<C, V>  {
 	}
 	
 	@SuppressWarnings("unchecked")
-	/**
-	 * Requires <C> and <V> to be String.  Renames _v345487 to _v0, for example.
-	 * 
-	 * @return A nicer printout of the rules
+	/*
+	  Requires <C> and <V> to be String.  Renames _v345487 to _v0, for example.
+
+	  @return A nicer printout of the rules
 	 */
 	public String printKB() {
 		OplKB<String, String> kb = (OplKB<String, String>) this; //dangerous
@@ -531,17 +522,17 @@ public class OplKB<C, V>  {
 			Map<String, KBExp<String, String>> m = new HashMap<>();
 			for (String v : r.first.vars()) {
 				if (v.startsWith("_v") && !m.containsKey(v)) {
-					m.put(v, new KBVar<String, String>("v" + i++));
+					m.put(v, new KBVar<>("v" + i++));
 				}
 			}
 			for (String v : r.second.vars()) {
 				if (v.startsWith("_v") && !m.containsKey(v)) {
-					m.put(v, new KBVar<String, String>("v" + i++));
+					m.put(v, new KBVar<>("v" + i++));
 				}
 			}
 			E0.add(stripOuter(r.first.subst(m).toString()) + " = " + stripOuter(r.second.subst(m).toString()));
 		}
-		E0.sort((String o1, String o2) -> o1.length() - o2.length());
+		E0.sort(Comparator.comparingInt(String::length));
 		
 		List<String> G0 = new LinkedList<>();
 		for (Pair<KBExp<String, String>, KBExp<String, String>> r : kb.G) {
@@ -549,17 +540,17 @@ public class OplKB<C, V>  {
 			Map<String, KBExp<String, String>> m = new HashMap<>();
 			for (String v : r.first.vars()) {
 				if (v.startsWith("_v") && !m.containsKey(v)) {
-					m.put(v, new KBVar<String, String>("v" + i++));
+					m.put(v, new KBVar<>("v" + i++));
 				}
 			}
 			for (String v : r.second.vars()) {
 				if (v.startsWith("_v") && !m.containsKey(v)) {
-					m.put(v, new KBVar<String, String>("v" + i++));
+					m.put(v, new KBVar<>("v" + i++));
 				}
 			}
 			G0.add(stripOuter(r.first.subst(m).toString()) + " = " + stripOuter(r.second.subst(m).toString()));
 		}
-		G0.sort((String o1, String o2) -> o1.length() - o2.length());
+		G0.sort(Comparator.comparingInt(String::length));
 
 		
 		List<String> R0 = new LinkedList<>();
@@ -568,54 +559,54 @@ public class OplKB<C, V>  {
 			Map<String, KBExp<String, String>> m = new HashMap<>();
 			for (String v : r.first.vars()) {
 				if (v.startsWith("_v") && !m.containsKey(v)) {
-					m.put(v, new KBVar<String, String>("v" + i++));
+					m.put(v, new KBVar<>("v" + i++));
 				}
 			}
 			for (String v : r.second.vars()) {
 				if (v.startsWith("_v") && !m.containsKey(v)) {
-					m.put(v, new KBVar<String, String>("v" + i++));
+					m.put(v, new KBVar<>("v" + i++));
 				}
 			}
 			R0.add(stripOuter(r.first.subst(m).toString()) + " -> " + stripOuter(r.second.subst(m).toString()));
 		}
-		R0.sort((String o1, String o2) -> o1.length() - o2.length());
+		R0.sort(Comparator.comparingInt(String::length));
 				
 		return (Util.sep(R0, "\n\n") + "\n\nE--\n\n" + Util.sep(E0, "\n\n") + "\n\nG--\n\n" + Util.sep(G0, "\n\n")).trim();
 	}
 	
-	protected static String stripOuter(String s) {
+	private static String stripOuter(String s) {
 		if (s.startsWith("(") && s.endsWith(")")) {
 			return s.substring(1, s.length() - 1);
 		}
 		return s;
 	}
 
-	protected KBExp<C, V> red(Map<KBExp<C,V>, KBExp<C,V>> cache, 
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> Ex,
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> Ry,
-			KBExp<C, V> e) throws InterruptedException {
+	private KBExp<C, V> red(Map<KBExp<C, V>, KBExp<C, V>> cache,
+                            Collection<Pair<KBExp<C, V>, KBExp<C, V>>> Ex,
+                            Collection<Pair<KBExp<C, V>, KBExp<C, V>>> Ry,
+                            KBExp<C, V> e) throws InterruptedException {
 		int i = 0;
 		KBExp<C, V> orig = e;
 				
 //		Collection<Pair<KBExp<C, V>, KBExp<C, V>>> Ey = new LinkedList<>(Ex);
 	//	Ey.addAll(G);
-		for (;;) {
-			i++;			
-	
-			KBExp<C, V> e0 = step(cache, fresh, Ex, Ry, e);
-			if (e.equals(e0)) {
-				return e0;  
-			}
-			if (i > options.red_its) {
-				throw new RuntimeException(
-						"Reduction taking too long (>" + options.red_its + "):" + orig + " goes to " + e0 + " under\n\neqs:" + Util.sep(E,"\n") + "\n\nreds:"+ Util.sep(R,"\n"));
-			}
-			e = e0;
-		}
+        while (true) {
+            i++;
+
+            KBExp<C, V> e0 = step(cache, fresh, Ex, Ry, e);
+            if (e.equals(e0)) {
+                return e0;
+            }
+            if (i > options.red_its) {
+                throw new RuntimeException(
+                        "Reduction taking too long (>" + options.red_its + "):" + orig + " goes to " + e0 + " under\n\neqs:" + Util.sep(E, "\n") + "\n\nreds:" + Util.sep(R, "\n"));
+            }
+            e = e0;
+        }
 	}
 	
-	protected KBExp<C, V> step(Map<KBExp<C,V>, KBExp<C,V>> cache, Iterator<V> fresh,
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> ee) throws InterruptedException {
+	private KBExp<C, V> step(Map<KBExp<C, V>, KBExp<C, V>> cache, Iterator<V> fresh,
+                             Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> ee) throws InterruptedException {
 		if (ee.isVar) {
 			return step1(cache, fresh, E, R, ee); 
 		} else {
@@ -631,7 +622,7 @@ public class OplKB<C, V>  {
 	
 	//simplifies equations
 	//can also use E U G with extra checking
-	protected void simplify() throws InterruptedException {
+    private void simplify() throws InterruptedException {
 		Map<KBExp<C,V>, KBExp<C,V>> cache = new HashMap<>();  //helped 2x during tests
 
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> newE = new LinkedList<>();
@@ -653,7 +644,7 @@ public class OplKB<C, V>  {
 
 	//is not collapse2
 	//can also use E U G here
-	protected void collapseBy(Pair<KBExp<C, V>, KBExp<C, V>> ab) throws InterruptedException {
+    private void collapseBy(Pair<KBExp<C, V>, KBExp<C, V>> ab) throws InterruptedException {
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> AB = Collections.singleton(ab);
 		Iterator<Pair<KBExp<C, V>, KBExp<C, V>>> it = R.iterator();
 		while (it.hasNext()) {
@@ -669,9 +660,9 @@ public class OplKB<C, V>  {
 		}
 	}
 
-	protected Set<Pair<KBExp<C, V>, KBExp<C, V>>> allcps2(
-			Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen,
-			Pair<KBExp<C, V>, KBExp<C, V>> ab) throws InterruptedException {
+	private Set<Pair<KBExp<C, V>, KBExp<C, V>>> allcps2(
+            Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen,
+            Pair<KBExp<C, V>, KBExp<C, V>> ab) throws InterruptedException {
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> ret = new HashSet<>();
 
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> E0 = new HashSet<>(E);
@@ -756,9 +747,9 @@ public class OplKB<C, V>  {
 		return ret;
 	}
 
-	protected Set<Pair<KBExp<C, V>, KBExp<C, V>>> allcps(
-			Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen,
-			Pair<KBExp<C, V>, KBExp<C, V>> ab) throws InterruptedException {
+	private Set<Pair<KBExp<C, V>, KBExp<C, V>>> allcps(
+            Set<Pair<Pair<KBExp<C, V>, KBExp<C, V>>, Pair<KBExp<C, V>, KBExp<C, V>>>> seen,
+            Pair<KBExp<C, V>, KBExp<C, V>> ab) throws InterruptedException {
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> ret = new HashSet<>();
 		for (Pair<KBExp<C, V>, KBExp<C, V>> gd : R) {
 			if (Thread.currentThread().isInterrupted()) {
@@ -780,7 +771,7 @@ public class OplKB<C, V>  {
 		return ret;
 	}
 
-	protected  Set<Pair<KBExp<C, V>, KBExp<C, V>>> cp(Pair<KBExp<C, V>, KBExp<C, V>> gd0, Pair<KBExp<C, V>, KBExp<C, V>> ab0) throws InterruptedException {
+	private Set<Pair<KBExp<C, V>, KBExp<C, V>>> cp(Pair<KBExp<C, V>, KBExp<C, V>> gd0, Pair<KBExp<C, V>, KBExp<C, V>> ab0) throws InterruptedException {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InterruptedException();
 		}
@@ -811,8 +802,8 @@ public class OplKB<C, V>  {
 		return ret;
 	}
 
-	protected KBExp<C, V> step1(Map<KBExp<C,V>, KBExp<C,V>> cache, Iterator<V> fresh,
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> e0) throws InterruptedException {
+	private KBExp<C, V> step1(Map<KBExp<C, V>, KBExp<C, V>> cache, Iterator<V> fresh,
+                              Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> R, KBExp<C, V> e0) throws InterruptedException {
 		KBExp<C, V> e = e0;
 		if (cache != null && cache.containsKey(e)) {
 			return cache.get(e);
@@ -859,15 +850,15 @@ public class OplKB<C, V>  {
 	
 	public static class NewConst {
 		
-		private Unit u = new Unit();
+		private final Unit u = new Unit();
 
 		
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((u == null) ? 0 : u.hashCode());
+			result = prime * result + u.hashCode();
 			return result;
 		}
 
@@ -882,12 +873,7 @@ public class OplKB<C, V>  {
 			if (getClass() != obj.getClass())
 				return false;
 			NewConst other = (NewConst) obj;
-			if (u == null) {
-				if (other.u != null)
-					return false;
-			} else if (!u.equals(other.u))
-				return false;
-			return true;
+			return u.equals(other.u);
 		}
 
 
@@ -901,7 +887,7 @@ public class OplKB<C, V>  {
 
 	}
 	
-	protected KBExp<C, V> step1Es(Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, KBExp<C, V> e) {
+	private KBExp<C, V> step1Es(Collection<Pair<KBExp<C, V>, KBExp<C, V>>> E, KBExp<C, V> e) {
 		if (options.unfailing  && e.vars().isEmpty() ) {
 			for (Pair<KBExp<C, V>, KBExp<C, V>> r0 : E) {
 				KBExp<C, V> a = step1EsX(r0, e);
@@ -954,8 +940,8 @@ public class OplKB<C, V>  {
 	}
 
 	
-	protected Collection<Pair<KBExp<C, V>, KBExp<C, V>>> reduce(
-			Collection<Pair<KBExp<C, V>, KBExp<C, V>>> set) throws InterruptedException {
+	private Collection<Pair<KBExp<C, V>, KBExp<C, V>>> reduce(
+            Collection<Pair<KBExp<C, V>, KBExp<C, V>>> set) throws InterruptedException {
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> p = new HashSet<>();
 		for (Pair<KBExp<C, V>, KBExp<C, V>> e : set) {
 			KBExp<C, V> lhs = red(new HashMap<>(), Util.append(E,G), R, e.first);
@@ -981,7 +967,7 @@ public class OplKB<C, V>  {
 		return ret;
 	} */
 	
-	protected boolean strongGroundJoinable(KBExp<C, V> s, KBExp<C, V> t) throws InterruptedException {
+	private boolean strongGroundJoinable(KBExp<C, V> s, KBExp<C, V> t) throws InterruptedException {
 	List<Pair<KBExp<C, V>, KBExp<C, V>>> R0 = new LinkedList<>();
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> E0 = new LinkedList<>();
 		for (C f : AC_symbols.keySet()) {
@@ -1026,7 +1012,7 @@ public class OplKB<C, V>  {
 	}
 	
 	//: when filtering for subsumed, can also take G into account
-	protected boolean step(Thread parent) throws InterruptedException {
+    private boolean step(Thread parent) throws InterruptedException {
 		count++;
 
 		checkParentDead(parent); 
@@ -1047,7 +1033,7 @@ public class OplKB<C, V>  {
 		
 		KBExp<C, V> s0 = st.first;
 		KBExp<C, V> t0 = st.second;
-		KBExp<C, V> a = null, b = null;
+		KBExp<C, V> a, b;
 		boolean oriented = false;
 		if (gt.apply(new Pair<>(s0, t0))) {
 			a = s0; b = t0;
@@ -1109,7 +1095,7 @@ public class OplKB<C, V>  {
 		return false;	
 	}
 	
-	void filterStrongGroundJoinable() throws InterruptedException {
+	private void filterStrongGroundJoinable() throws InterruptedException {
 		List<Pair<KBExp<C, V>, KBExp<C, V>>> newE = new LinkedList<>(E);
 		for (Pair<KBExp<C, V>, KBExp<C, V>> st : newE) {
 			if (strongGroundJoinable(st.first, st.second)) {
@@ -1143,27 +1129,23 @@ public class OplKB<C, V>  {
 	}
 
 	private Pair<KBExp<C, V>, KBExp<C, V>> pick(List<Pair<KBExp<C, V>, KBExp<C, V>>> l) {
-		for (int i = 0; i < l.size(); i++) {
-			Pair<KBExp<C,V>, KBExp<C,V>> x = l.get(i);
-			if (orientable(x)) {
-				return l.get(i);
-			}
-		} 
+        for (Pair<KBExp<C, V>, KBExp<C, V>> x : l) {
+            if (orientable(x)) {
+                return x;
+            }
+        }
 		return l.get(0);
 	}
 	
-	boolean orientable(Pair<KBExp<C,V>, KBExp<C,V>> e) {
+	private boolean orientable(Pair<KBExp<C, V>, KBExp<C, V>> e) {
 		if (gt.apply(e)) {
 			return true;
 		}
-		if (gt.apply(e.reverse())) {
-			return true;
-		}
-		return false;
-	}
+        return gt.apply(e.reverse());
+    }
 	
 	//: add ground-completeness check sometime
-	protected boolean checkEmpty() throws InterruptedException {
+    private boolean checkEmpty() throws InterruptedException {
 		if (E.isEmpty()) {
 			isComplete = true;
 			isCompleteGround = true;
@@ -1181,7 +1163,7 @@ public class OplKB<C, V>  {
 		return false;
 	}
 	
-	protected boolean noEqsBetweenAtoms() {
+	private boolean noEqsBetweenAtoms() {
 		if (!options.horn) {
 			return true;
 		}
@@ -1193,7 +1175,7 @@ public class OplKB<C, V>  {
 		return true;
 	}
 	
-	protected boolean noNonReflRewrites() {
+	private boolean noNonReflRewrites() {
 		if (!options.horn) {
 			return true;
 		}
@@ -1210,7 +1192,7 @@ public class OplKB<C, V>  {
 		return true;
 	}
 
-	protected boolean allUnorientable() {
+	private boolean allUnorientable() {
 		for (Pair<KBExp<C, V>, KBExp<C, V>> e : E) {
 			if (orientable(e)) {
 				return false;
@@ -1219,7 +1201,7 @@ public class OplKB<C, V>  {
 		return true;
 	}
 
-	protected boolean allCpsConfluent(boolean print, boolean ground) throws InterruptedException {
+	private boolean allCpsConfluent(boolean print, boolean ground) throws InterruptedException {
 		for (Pair<KBExp<C, V>, KBExp<C, V>> e : E) {
 			List<Pair<KBExp<C, V>, KBExp<C, V>>> set = filterSubsumed(reduce(allcps2(
 					new HashSet<>(), e)));
@@ -1239,25 +1221,25 @@ public class OplKB<C, V>  {
 	
 
 	@SuppressWarnings("unused")
-	protected boolean allCpsConfluent(boolean print, boolean ground, String s, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> set) throws InterruptedException {
+	private boolean allCpsConfluent(boolean print, boolean ground, String s, Collection<Pair<KBExp<C, V>, KBExp<C, V>>> set) throws InterruptedException {
 		outer: for (Pair<KBExp<C, V>, KBExp<C, V>> e : set) {
 			KBExp<C, V> lhs = red(new HashMap<>(), Util.append(E,G), R, e.first);
 			KBExp<C, V> rhs = red(new HashMap<>(), Util.append(E,G), R, e.second);
 			if (!lhs.equals(rhs)) {
-				if (!ground) {
-					return false;
-				} else {
+				if (ground) {
 					for (Pair<KBExp<C, V>, KBExp<C, V>> ex : G) {
 						if (subsumes(fresh, new Pair<>(lhs, rhs), ex) ||
-							subsumes(fresh, new Pair<>(rhs, lhs), ex) ) {
+								subsumes(fresh, new Pair<>(rhs, lhs), ex)) {
 							continue outer;
 						}
 					}
 					if (options.semantic_ac) {
 						if (!lhs.sort(AC_symbols.keySet()).equals(rhs.sort(AC_symbols.keySet()))) {
 							return false;
-						}  
+						}
 					}
+				} else {
+					return false;
 				}
 			}
 		}

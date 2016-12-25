@@ -34,7 +34,7 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((var == null) ? 0 : var.hashCode());
 			return result;
@@ -104,9 +104,9 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((q == null) ? 0 : q.hashCode());
+			result = prime * result + (q.hashCode());
 			return result;
 		}
 
@@ -119,13 +119,8 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 			if (getClass() != obj.getClass())
 				return false;
 			QueryExpLit<?,?,?,?,?,?,?,?> other = (QueryExpLit<?,?,?,?,?,?,?,?>) obj;
-			if (q == null) {
-				if (other.q != null)
-					return false;
-			} else if (!q.equals(other.q))
-				return false;
-			return true;
-		}
+            return q.equals(other.q);
+        }
 
 		@Override
 		public String toString() {

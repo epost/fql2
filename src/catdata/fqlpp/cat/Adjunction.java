@@ -3,10 +3,10 @@ package catdata.fqlpp.cat;
 import catdata.ide.GlobalOptions;
 public class Adjunction<CO, CA, DO, DA> {
 
-	public Functor<DO, DA, CO, CA> F;
-	public Functor<CO, CA, DO, DA> G;
-	public Transform<CO, CA, CO, CA> counit;
-	public Transform<DO, DA, DO, DA> unit;
+	private final Functor<DO, DA, CO, CA> F;
+	private final Functor<CO, CA, DO, DA> G;
+	public final Transform<CO, CA, CO, CA> counit;
+	public final Transform<DO, DA, DO, DA> unit;
 
 	public Adjunction(Functor<DO, DA, CO, CA> f, Functor<CO, CA, DO, DA> g,
 			Transform<CO, CA, CO, CA> counit, Transform<DO, DA, DO, DA> unit) {
@@ -17,7 +17,8 @@ public class Adjunction<CO, CA, DO, DA> {
 		validate();
 	}
 
-	public void validate() {
+	@SuppressWarnings("ConstantConditions")
+	private void validate() {
 		if (!GlobalOptions.debug.fqlpp.VALIDATE) {
 			return;
 		}
@@ -71,18 +72,22 @@ public class Adjunction<CO, CA, DO, DA> {
 
 	} 
 
-	public Monad<DO, DA> monad() {
-		Functor<DO, DA, DO, DA> GF = Functor.compose(F, G);
-		Functor<DO, DA, DO, DA> GFGF = Functor.compose(GF, GF);
-		Transform<DO, DA, DO, DA> u = new Transform<>(GFGF, GF, x -> G.applyA(counit.apply(F.applyO(x))));
-		return new Monad<>(GF, unit, u);
-	}
+// --Commented out by Inspection START (12/24/16, 10:43 PM):
+//	public Monad<DO, DA> monad() {
+//		Functor<DO, DA, DO, DA> GF = Functor.compose(F, G);
+//		Functor<DO, DA, DO, DA> GFGF = Functor.compose(GF, GF);
+//		Transform<DO, DA, DO, DA> u = new Transform<>(GFGF, GF, x -> G.applyA(counit.apply(F.applyO(x))));
+//		return new Monad<>(GF, unit, u);
+//	}
+// --Commented out by Inspection STOP (12/24/16, 10:43 PM)
 
-	public CoMonad<CO, CA> comonad() {
-		Functor<CO, CA, CO, CA> FG = Functor.compose(G, F);
-		Functor<CO, CA, CO, CA> FGFG = Functor.compose(FG, FG);
-		Transform<CO, CA, CO, CA> u = new Transform<>(FG, FGFG, x -> F.applyA(unit.apply(G.applyO(x))));
-		return new CoMonad<>(FG, counit, u);
-	}
+// --Commented out by Inspection START (12/24/16, 10:43 PM):
+//	public CoMonad<CO, CA> comonad() {
+//		Functor<CO, CA, CO, CA> FG = Functor.compose(G, F);
+//		Functor<CO, CA, CO, CA> FGFG = Functor.compose(FG, FG);
+//		Transform<CO, CA, CO, CA> u = new Transform<>(FG, FGFG, x -> F.applyA(unit.apply(G.applyO(x))));
+//		return new CoMonad<>(FG, counit, u);
+//	}
+// --Commented out by Inspection STOP (12/24/16, 10:43 PM)
 
 }

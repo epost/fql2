@@ -20,7 +20,7 @@ public class TransformExample extends Example {
 		return s;
 	}
 
-	String s =
+	private final String s =
 
 	"schema s = {"
 

@@ -1,13 +1,7 @@
 package catdata.fqlpp.cat;
 
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import catdata.Pair;
 import catdata.Quad;
@@ -19,7 +13,7 @@ import catdata.fqlpp.cat.FinSet.Fn;
 import catdata.ide.GlobalOptions;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class Pi {
+class Pi {
 	
 	private static  Set squish(Set<Map> r) {
 		Set ret = new HashSet();
@@ -37,20 +31,15 @@ public class Pi {
 			Triple<ObjD, ObjC, ArrowD>[] q1cols, Set<Map> raw) {
 	
 	a: for (int i = 0; i < q2cols.length; i++) {
-		boolean b = false;
 		for (int j = 0; j < q1cols.length; j++) {
 			Triple<ObjD, ObjC, ArrowD> q2c = q2cols[i];
 			Triple<ObjD, ObjC, ArrowD> q1c = q1cols[j];
 			if (q1c.third.equals(cat.compose(e, q2c.third)) && q2c.second.equals(q1c.second)) {
 				raw = select(raw, i + 1, j + 2 + q2cols.length);
-				if (b) {
-					throw new RuntimeException();
-				}
-				b = true;
 				continue a;
 			}
 		}
-		throw new RuntimeException("No col " + q2cols[i] + " in " + q1cols);
+		throw new RuntimeException("No col " + q2cols[i] + " in " + Arrays.toString(q1cols));
 	}
 	return raw;
 	}
@@ -61,8 +50,8 @@ public class Pi {
 		
 		Map<O2, Map> ret = new HashMap<>();
 
-		Triple<Functor<O2,A2,Set,FinSet.Fn>,Map<O2,Set<Map>>,Map<O2, Triple<O2,O1,A2>[]>> k1 = pi(F, h.source);
-		Triple<Functor<O2,A2,Set,FinSet.Fn>,Map<O2,Set<Map>>,Map<O2, Triple<O2,O1,A2>[]>> k2 = pi(F, h.target);
+		Triple<Functor<O2,A2,Set,Fn>,Map<O2,Set<Map>>,Map<O2, Triple<O2,O1,A2>[]>> k1 = pi(F, h.source);
+		Triple<Functor<O2,A2,Set,Fn>,Map<O2,Set<Map>>,Map<O2, Triple<O2,O1,A2>[]>> k2 = pi(F, h.target);
 		
 		for (O2 d0 : D.objects()) {
 			Triple<Category<Triple<O2,O1,A2>,Quad<A2,A1,A2,A2>>,Functor<Triple<O2,O1,A2>,Quad<A2,A1,A2,A2>,O2,A2>,Functor<Triple<O2,O1,A2>,Quad<A2,A1,A2,A2>,O1,A1>> B = doComma2(D,C, F, d0);
@@ -91,7 +80,7 @@ public class Pi {
 		return new Transform<>(k1.first, k2.first, t);
 	}
 	
-	public static Object lookup2(Map x, Set<Map> set) {
+	private static Object lookup2(Map x, Set<Map> set) {
 		Object ret = null;
 		outer: for (Map y : set) {
 			for (int i = 1; i < y.size(); i++) {
@@ -110,7 +99,7 @@ public class Pi {
 		return ret;
 	}
 	
-	public static Map lookup(Object x, Set<Map> set) {
+	private static Map lookup(Object x, Set<Map> set) {
 		for (Map y : set) {
 			if (y.get(0).equals(x)) {
 				return y;
@@ -132,9 +121,7 @@ public class Pi {
 		for (O2 d0 : D.objects()) {
 			Triple<Category<Triple<O2,O1,A2>,Quad<A2,A1,A2,A2>>,Functor<Triple<O2,O1,A2>,Quad<A2,A1,A2,A2>,O2,A2>,Functor<Triple<O2,O1,A2>,Quad<A2,A1,A2,A2>,O1,A1>> B = doComma2(D,C, F, d0);
 			Set<Map> r = lim2(Functor.compose(B.third, inst));
-			if (r == null) {
-			//	throw new RuntimeException();
-			} else {
+			if (r != null) {
 				ret1.put(d0, squish(r));
 				nodetables.put(d0, r);
 			}
@@ -224,7 +211,7 @@ public class Pi {
 	
 		Category<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>> B = I.source;
 		
-		if (B.objects().size() == 0) {
+		if (B.objects().isEmpty()) {
 			Set<Map> ret = new HashSet<>();
 			Map m = new HashMap();
 			m.put(0, new Unit());
@@ -319,7 +306,7 @@ public class Pi {
 			}
 		}
 		throw new RuntimeException("Cannot lookup position of " + s + " in "
-				+ cnames.toString());
+				+ Arrays.toString(cnames));
 	}
 	
 	private static Set<Map> select(Set<Map> i, int m, int n) {
@@ -340,12 +327,16 @@ public class Pi {
 		Set<Map> ret = new HashSet<>();
 		for (Map x : x0) {
 			Map y =  new HashMap();
-			if (GlobalOptions.debug.fqlpp.piLineage.equals("Fresh IDs")) {
-				y.put(0, id++);
-			} else if (GlobalOptions.debug.fqlpp.piLineage.equals("Lineage as ID")) {
-				y.put(0, x);
-			} else {
-				y.put(0, Util.printForPi(x));
+			switch (GlobalOptions.debug.fqlpp.piLineage) {
+				case "Fresh IDs":
+					y.put(0, id++);
+					break;
+				case "Lineage as ID":
+					y.put(0, x);
+					break;
+				default:
+					y.put(0, Util.printForPi(x));
+					break;
 			}
 			for (int j = 1; j <= x.size(); j++) {
 				y.put(j, x.get(j - 1));

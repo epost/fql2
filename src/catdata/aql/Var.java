@@ -21,11 +21,11 @@ public final class Var {
 	
 	private static int index = 0;
 	
-	public static Var fresh() {
+	private static Var fresh() {
 		return new Var("v" + index++);
 	}
 	
-	public final static Iterator<Var> it = new Iterator<Var>() {
+	public static final Iterator<Var> it = new Iterator<Var>() {
 
 		@Override
 		public boolean hasNext() {
@@ -41,9 +41,9 @@ public final class Var {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
-		result = prime * result + ((var == null) ? 0 : var.hashCode());
+		result = prime * result + var.hashCode();
 		return result;
 	}
 
@@ -56,13 +56,8 @@ public final class Var {
 		if (getClass() != obj.getClass())
 			return false;
 		Var other = (Var) obj;
-		if (var == null) {
-			if (other.var != null)
-				return false;
-		} else if (!var.equals(other.var))
-			return false;
-		return true;
-	}
+        return var.equals(other.var);
+    }
 	
 	
 	

@@ -1,11 +1,6 @@
 package catdata.fql.decl;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import catdata.fql.FQLException;
 import catdata.Pair;
@@ -40,7 +35,7 @@ public abstract class SigExp {
 			this.name = name;
 		}
 
-		public String name;
+		public final String name;
 		
 		@Override
 		public boolean equals(Object obj) {
@@ -66,7 +61,7 @@ public abstract class SigExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((name == null) ? 0 : name.hashCode());
 			return result;
@@ -80,11 +75,11 @@ public abstract class SigExp {
 	}
 		
 	public static class Opposite extends SigExp {
-		SigExp e;
+		final SigExp e;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((e == null) ? 0 : e.hashCode());
 			return result;
@@ -113,8 +108,7 @@ public abstract class SigExp {
 		}
 
 		public Opposite(SigExp e) {
-			super();
-			this.e = e;
+            this.e = e;
 		}
 		
 		@Override
@@ -124,17 +118,17 @@ public abstract class SigExp {
 	}
 
 	public static class Union extends SigExp {
-		SigExp l, r;
+		final SigExp l;
+        final SigExp r;
 
 		public Union(SigExp l, SigExp r) {
-			super();
-			this.l = l;
+            this.l = l;
 			this.r = r;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -175,37 +169,32 @@ public abstract class SigExp {
 	}
 	
 	public static class Const extends SigExp {
-		public List<String> nodes;
-		public List<Triple<String, String, String>> attrs;
-		public List<Triple<String, String, String>> arrows;
-		public List<Pair<List<String>, List<String>>> eqs;
+		public final List<String> nodes;
+		public final List<Triple<String, String, String>> attrs;
+		public final List<Triple<String, String, String>> arrows;
+		public final List<Pair<List<String>, List<String>>> eqs;
 
 		public Const(List<String> nodes,
 				List<Triple<String, String, String>> attrs,
 				List<Triple<String, String, String>> arrows,
 				List<Pair<List<String>, List<String>>> eqs) {
-			super();
-			this.nodes = nodes;
+            this.nodes = nodes;
 			this.attrs = attrs;
 			this.arrows = arrows;
 			this.eqs = eqs;
 			Collections.sort(this.nodes);
 			Collections.sort(this.attrs);
 			Collections.sort(this.arrows);
-			Collections.sort(this.eqs, comp);
+			(this.eqs).sort(comp);
 		}
 		
-		static Comparator<Pair<List<String>, List<String>>> comp = new Comparator<Pair<List<String>, List<String>>>() {
+		static final Comparator<Pair<List<String>, List<String>>> comp = new Comparator<Pair<List<String>, List<String>>>() {
 
 			@Override
 			public int compare(Pair<List<String>, List<String>> o1,
 					Pair<List<String>, List<String>> o2) {
 				int c = compareTo(o1.first, o2.first);
-				if (c == 0) {
-					return compareTo(o1.second, o2.second);
-				} else {
-					return c;
-				}
+                return c == 0 ? compareTo(o1.second, o2.second) : c;
 
 			}
 
@@ -221,17 +210,16 @@ public abstract class SigExp {
 				for (int i = 0; i < small.size(); i++) {
 					int c = small.get(i).compareTo(large.get(i));
 					if (c == 0) {
-						continue;
 					}
 				}
 				if (l.size() == r.size()) {
 					return 0;
-				} else if (small == l) {
+				} else if (Objects.equals(small, l)) {
 					return -1;
-				} else if (large == l) {
-					return 1;
 				}
-				throw new RuntimeException();
+				return 1;
+
+
 			}
 			
 		};
@@ -239,7 +227,7 @@ public abstract class SigExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result
 					+ ((arrows == null) ? 0 : arrows.hashCode());
@@ -370,7 +358,7 @@ public abstract class SigExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((v == null) ? 0 : v.hashCode());
 			return result;
@@ -427,7 +415,7 @@ public abstract class SigExp {
 
 	public static class One extends SigExp {
 		
-		Set<String> attrs;
+		final Set<String> attrs;
 		
 		public One(Set<String> attrs) {
 			this.attrs = attrs;
@@ -435,7 +423,7 @@ public abstract class SigExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((attrs == null) ? 0 : attrs.hashCode());
 			return result;
@@ -470,7 +458,8 @@ public abstract class SigExp {
 	}
 
 	public static class Plus extends SigExp {
-		SigExp a, b;
+		final SigExp a;
+        final SigExp b;
 
 		public Plus(SigExp a, SigExp b) {
 			this.a = a;
@@ -479,7 +468,7 @@ public abstract class SigExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -520,7 +509,8 @@ public abstract class SigExp {
 	}
 
 	public static class Times extends SigExp {
-		public SigExp a, b;
+		public final SigExp a;
+        public final SigExp b;
 
 		public Times(SigExp a, SigExp b) {
 			this.a = a;
@@ -529,7 +519,7 @@ public abstract class SigExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -570,7 +560,8 @@ public abstract class SigExp {
 	}
 
 	public static class Exp extends SigExp {
-		public SigExp a, b;
+		public final SigExp a;
+        public final SigExp b;
 
 		public Exp(SigExp a, SigExp b) {
 			this.a = a;
@@ -579,7 +570,7 @@ public abstract class SigExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -634,16 +625,16 @@ public abstract class SigExp {
 	
 	
 	public interface SigExpVisitor<R, E> {
-		public R visit (E env, Zero e);
-		public R visit (E env, One e);
-		public R visit (E env, Plus e);
-		public R visit (E env, Times e);
-		public R visit (E env, Exp e);
-		public R visit (E env, Var e);
-		public R visit (E env, Const e);
-		public R visit (E env, Union e);
-		public R visit (E env, Opposite e);
-		public R visit (E env, Unknown e);
+		R visit(E env, Zero e);
+		R visit(E env, One e);
+		R visit(E env, Plus e);
+		R visit(E env, Times e);
+		R visit(E env, Exp e);
+		R visit(E env, Var e);
+		R visit(E env, Const e);
+		R visit(E env, Union e);
+		R visit(E env, Opposite e);
+		R visit(E env, Unknown e);
 
 	}
 	

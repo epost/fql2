@@ -11,8 +11,9 @@ import catdata.Triple;
 import catdata.fqlpp.CatExp.Const;
 import catdata.fqlpp.FunctorExp.CatConst;
 import catdata.fqlpp.FunctorExp.MapConst;
+import catdata.fqlpp.FunctorExp.Var;
 
-public class Ben {
+class Ben {
 
 	public static Const colim(FQLPPProgram env, CatConst f) {
 		if (!(f.sig instanceof CatExp.Var)) {
@@ -20,7 +21,7 @@ public class Ben {
 		}
 		
 		CatExp c = env.cats.get(((CatExp.Var)f.sig).v);
-		if (!(c instanceof CatExp.Const)) {
+		if (!(c instanceof Const)) {
 			throw new RuntimeException(c + " is not finitely presented, is " + c.getClass());
 		}
 		Const src = (Const) c;
@@ -42,10 +43,10 @@ public class Ben {
 		
 		for (String src_arr : f.em.keySet()) {
 			FunctorExp C = f.em.get(src_arr);
-			if (!(C instanceof FunctorExp.Var)) {
+			if (!(C instanceof Var)) {
 				throw new RuntimeException(C + " is not a variable");
 			}
-			FunctorExp D = env.ftrs.get(((FunctorExp.Var)C).v);
+			FunctorExp D = env.ftrs.get(((Var)C).v);
 			if (!(D instanceof MapConst)) {
 				throw new RuntimeException(D + " is not finitely presented");
 			}

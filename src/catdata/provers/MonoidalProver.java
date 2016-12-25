@@ -16,12 +16,12 @@ import catdata.Util;
 public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 
 	private final SemiThue<Chc<Chc<Unit,T>,C>> kb;
-	private final Set<Pair<List<Chc<Chc<Unit,T>,C>>, List<Chc<Chc<Unit,T>,C>>>> rules = new HashSet<>();
-	
+
 	public MonoidalProver(KBTheory<T,C,V> th) {
 		super(th.tys, th.syms, th.eqs);
 		
 		//!_1 =  (might be superflous) TODO aql
+		Set<Pair<List<Chc<Chc<Unit, T>, C>>, List<Chc<Chc<Unit, T>, C>>>> rules = new HashSet<>();
 		rules.add(new Pair<>(Util.singList(Chc.inLeft(Chc.inLeft(new Unit()))) , Collections.emptyList()));
 		
 		//e : t -> 1 = !_1 - don't have any
@@ -49,22 +49,22 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 		//Chc<Unit,V> v = ctx.isEmpty() ? Chc.inLeft(new Unit()) : Chc.inRight(Ctx.getOnly(ctx).first);
 		
 		List<Chc<Chc<Unit,T>,C>> ret = new LinkedList<>();
-		
-		for (;;) {
-			if (term.isVar) {
-				break;
-			} else if (term.getApp().args.isEmpty() &&  ctx.isEmpty()) {
-				ret.add(Chc.inRight(term.getApp().f));
-				break;
-			} else if (term.getApp().args.isEmpty() && !ctx.isEmpty()) {
-				ret.add(Chc.inRight(term.getApp().f));
-				ret.add(Chc.inLeft(t));
-				break;
-			} else {
-				ret.add(Chc.inRight(term.getApp().f));
-				term = term.getApp().args.get(0);
-			}
-		}
+
+        while (true) {
+            if (term.isVar) {
+                break;
+            } else if (term.getApp().args.isEmpty() && ctx.isEmpty()) {
+                ret.add(Chc.inRight(term.getApp().f));
+                break;
+            } else if (term.getApp().args.isEmpty() && !ctx.isEmpty()) {
+                ret.add(Chc.inRight(term.getApp().f));
+                ret.add(Chc.inLeft(t));
+                break;
+            } else {
+                ret.add(Chc.inRight(term.getApp().f));
+                term = term.getApp().args.get(0);
+            }
+        }
 		
 		return Util.reverse(ret);
 	}

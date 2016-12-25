@@ -30,10 +30,10 @@ public class Sig extends Category<Signature<?, ?>, Mapping<?, ?, ?, ?>> {
 
 	public static Sig Sig = new Sig();
 
-	@Override
-	public boolean equals(Object o) {
-		return (o == this);
-	}
+	//@Override
+	//public boolean equals(Object o) {
+	//	return (o == this);
+	//}
 
 	@Override
 	public Set<Signature<?, ?>> objects() {

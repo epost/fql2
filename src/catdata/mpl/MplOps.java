@@ -9,10 +9,10 @@ import catdata.mpl.Mpl.MplExpVisitor;
 
 public class MplOps<O,A> implements MplExpVisitor<O,A,MplObject,Unit> {
 
-	Environment<MplObject> ENV;
+	private final Environment<MplObject> ENV;
 
 	public MplOps(Environment<MplObject> env) {
-		this.ENV = env;
+        ENV = env;
 	}
 	
 	@Override

@@ -4,6 +4,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 
@@ -18,7 +19,7 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 	//TODO aql transform compose
 	//TODO aql transform initial
 
-	public void validate(boolean dontValidateEqs) {
+	protected void validate(boolean dontValidateEqs) {
 		if (!src().schema().equals(dst().schema())) {
 			throw new RuntimeException("Differing instance schemas\n\nsrc " + src().schema() + "\n\ndst " + dst().schema());
 		}
@@ -70,7 +71,7 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 
 	@Override
 	public final int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((dst() == null) ? 0 : dst().hashCode());
 		result = prime * result + ((gens() == null) ? 0 : gens().hashCode());

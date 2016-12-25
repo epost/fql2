@@ -14,6 +14,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.RuntimeInterruptedException;
 import catdata.Triple;
@@ -60,17 +61,17 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 
 	public Collage(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
-		this.tys.addAll(col.tys);
-		this.syms.putAll(col.syms.map);
-		this.java_tys.putAll(col.java_tys.map);
-		this.java_parsers.putAll(col.java_parsers.map);
-		this.java_fns.putAll(col.java_fns.map);
-		this.ens.addAll(col.ens);
-		this.atts.putAll(col.atts.map);
-		this.fks.putAll(col.fks.map);
-		this.gens.putAll(col.gens.map);
-		this.sks.putAll(col.sks.map);
-		this.eqs.addAll(col.eqs);
+        tys.addAll(col.tys);
+        syms.putAll(col.syms.map);
+        java_tys.putAll(col.java_tys.map);
+        java_parsers.putAll(col.java_parsers.map);
+        java_fns.putAll(col.java_fns.map);
+        ens.addAll(col.ens);
+        atts.putAll(col.atts.map);
+        fks.putAll(col.fks.map);
+        gens.putAll(col.gens.map);
+        sks.putAll(col.sks.map);
+        eqs.addAll(col.eqs);
 		// assertFreeOnJava(); causes infinite loop
 	}
 
@@ -113,7 +114,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	*/
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((atts == null) ? 0 : atts.hashCode());
 		result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
@@ -195,7 +196,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return toString(new Collage<>());
 	}
 
-	public <Ty1, En1, Sym1, Fk1, Att1, Gen1, Sk1> String toString(Collage<Ty1, En1, Sym1, Fk1, Att1, Gen1, Sk1> skip) {
+	private <Ty1, En1, Sym1, Fk1, Att1, Gen1, Sk1> String toString(Collage<Ty1, En1, Sym1, Fk1, Att1, Gen1, Sk1> skip) {
 		String toString = "";
 		toString += "\nfunctions";
 		List<String> temp = new LinkedList<>();
@@ -263,7 +264,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	private synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify0() throws InterruptedException {
 		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified = new Collage<>(this);
 		list = new LinkedList<>();
-		while (simplify1(simplified, list)) {}
+		while (simplify1(simplified, list));
 
 		Iterator<Eq<Ty, En, Sym, Fk, Att, Gen, Sk>> it = simplified.eqs.iterator();
 		while (it.hasNext()) {
@@ -289,9 +290,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> boolean simplify1(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> simplified, List<Triple<Head<Ty, En, Sym, Fk, Att, Gen, Sk>, List<Var>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> list) {
 		for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : simplified.eqs) {
-			if (simplify2(simplified, eq.ctx, eq.lhs, eq.rhs, list)) {
-				return true;
-			} else if (simplify2(simplified, eq.ctx, eq.rhs, eq.lhs, list)) {
+			if (simplify2(simplified, eq.ctx, eq.lhs, eq.rhs, list) || simplify2(simplified, eq.ctx, eq.rhs, eq.lhs, list)) {
 				return true;
 			}
 		}
@@ -361,9 +360,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> List<Var> getVarArgsUnique(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		List<Var> ret = new LinkedList<>();
 		for (Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : term.args()) {
-			if (arg.var == null) {
-				return null;
-			} else if (ret.contains(arg.var)) {
+			if (arg.var == null || ret.contains(arg.var)) {
 				return null;
 			}
 			ret.add(arg.var);

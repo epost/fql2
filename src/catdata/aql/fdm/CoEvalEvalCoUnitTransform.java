@@ -3,10 +3,10 @@ package catdata.aql.fdm;
 import java.util.Map;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.Query;
 import catdata.aql.Term;
@@ -18,10 +18,10 @@ import catdata.aql.fdm.EvalAlgebra.Row;
 public class CoEvalEvalCoUnitTransform<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>  
 extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<Var,Row<En2,X>>, Y, Gen, Sk, ID, Chc<Y, Pair<ID, Att1>>, X, Y> {
 	
-	public final Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q; 
-	public final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
-	public final EvalInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> J;
-	public final CoEvalInstance<Ty, En1, Sym, Fk1, Att1, Row<En2, X>, Y, En2, Fk2, Att2, Row<En2, X>, Y> K; //TODO aql recomputes
+	private final Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
+	private final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
+	private final EvalInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> J;
+	private final CoEvalInstance<Ty, En1, Sym, Fk1, Att1, Row<En2, X>, Y, En2, Fk2, Att2, Row<En2, X>, Y> K; //TODO aql recomputes
 	private final Ctx<Pair<Var, Row<En2, X>>, Term<Void, En1, Void, Fk1, Void, Gen, Void>> gens = new Ctx<>();
 	private final Ctx<Y, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> sks = new Ctx<>();
 	

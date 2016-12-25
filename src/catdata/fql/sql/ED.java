@@ -21,11 +21,13 @@ import catdata.Triple;
  */
 public class ED {
 
-	public List<String> forall, exists;
-	public List<Pair<Integer, Integer>> where, ret;
+	private final List<String> forall;
+	private final List<String> exists;
+	private final List<Pair<Integer, Integer>> where;
+	private final List<Pair<Integer, Integer>> ret;
 
-	public ED(List<String> forall, List<String> exists, List<Pair<Integer, Integer>> where,
-			List<Pair<Integer, Integer>> ret) {
+	private ED(List<String> forall, List<String> exists, List<Pair<Integer, Integer>> where,
+			   List<Pair<Integer, Integer>> ret) {
 		this.forall = forall;
 		this.exists = exists;
 		this.where = dedup(where);
@@ -156,10 +158,7 @@ public class ED {
 		Set<Map<Object, Object>> lhs = front.eval(state);
 		Set<Map<Object, Object>> rhs = back.eval(state);
 
-		if (lhs.equals(rhs)) {
-			return true;
-		}
-		return false;
+		return lhs.equals(rhs);
 	}
 
 	private static Flower make(int max, List<String> frm, List<Pair<Integer, Integer>> whr) {

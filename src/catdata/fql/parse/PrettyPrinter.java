@@ -15,20 +15,20 @@ public class PrettyPrinter {
 			return "!!!NULL!!!";
 		}
 		String s = o.toString();
-		if ((s.contains("\t") || s.contains("\n") || s.contains("\r") || s.contains(" ") || s.contains("-") || s.length() == 0) && !s.contains("\"")) {
+		if ((s.contains("\t") || s.contains("\n") || s.contains("\r") || s.contains(" ") || s.contains("-") || s.isEmpty()) && !s.contains("\"")) {
 			return "\"" + s + "\"";
 		}
 		return s;
 	}
 	
 	public static String sep0(String delim, List<String> o) {
-		if (o.size() == 0) {
+		if (o.isEmpty()) {
 			return "";
 		}
 		if (o.size() == 1) {
 			return o.get(0);
 		}
-		String s = o.get(0).toString();
+		String s = o.get(0);
 		for (int i = 1; i < o.size(); i++) {
 			s += delim + o.get(i);
 		}

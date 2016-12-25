@@ -21,7 +21,7 @@ import javax.swing.event.ChangeListener;
  * @param <T>
  *            the type of the result the wizard will generate
  */
-public class Wizard<T> implements ActionListener, ChangeListener {
+class Wizard<T> implements ActionListener, ChangeListener {
 	private final WizardModel<T> model;
 	private final JDialog dialog = new JDialog();
 	private final JPanel contentPanel = new JPanel();
@@ -34,7 +34,7 @@ public class Wizard<T> implements ActionListener, ChangeListener {
 	public Wizard(WizardModel<T> model, Consumer<T> completionCallback) {
 		dialog.setBounds(100, 100, 1000, 600);
 		dialog.getContentPane().setLayout(new BorderLayout());
-		this.layout = new CardLayout();
+        layout = new CardLayout();
 		contentPanel.setLayout(layout);
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		this.model = model;
@@ -112,7 +112,7 @@ public class Wizard<T> implements ActionListener, ChangeListener {
 	 * 
 	 * @return true when completable
 	 */
-	public boolean isComplete() {
+    private boolean isComplete() {
 		return model.isComplete();
 	}
 

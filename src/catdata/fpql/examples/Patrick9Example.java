@@ -21,7 +21,7 @@ public class Patrick9Example extends Example {
 		return s;
 	}
 	
-	String s = "string : type"
+	private final String s = "string : type"
 			+ "\nRyan Wisnesky David Spivak Harvard MIT Leslie : string"
 			+ "\n"
 			+ "\nC = schema {"

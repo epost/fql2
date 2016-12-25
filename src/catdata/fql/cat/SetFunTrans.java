@@ -14,9 +14,9 @@ import catdata.ide.GlobalOptions;
  */
 public class SetFunTrans<Obj, Arrow, Y, X> {
 
-	Map<Obj, Map<Value<Y, X>, Value<Y, X>>> eta;
-	public Inst<Obj, Arrow, Y, X> F;
-	public Inst<Obj, Arrow, Y, X> G;
+	private final Map<Obj, Map<Value<Y, X>, Value<Y, X>>> eta;
+	public final Inst<Obj, Arrow, Y, X> F;
+	public final Inst<Obj, Arrow, Y, X> G;
 
 	public SetFunTrans(Map<Obj, Map<Value<Y, X>, Value<Y, X>>> eta,
 			Inst<Obj, Arrow, Y, X> F, Inst<Obj, Arrow, Y, X> G)

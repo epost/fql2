@@ -20,7 +20,7 @@ public class EmployeeExample extends Example {
 		return s;
 	}
 	
-	String s = "category S = { "
+	private final String s = "category S = { "
 			+ "\n objects"
 			+ "\n 	Employee, Department;"
 			+ "\n arrows"

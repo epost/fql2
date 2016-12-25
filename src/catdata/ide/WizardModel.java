@@ -1,5 +1,7 @@
 package catdata.ide;
 
+import catdata.ide.Wizard.WizardModelChangeEvent;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,11 +11,11 @@ import javax.swing.event.ChangeListener;
 
 
 /**
- * A data model for a {@link Wizard}. The model is responsible for maintaining
+ * A data model for a Wizard. The model is responsible for maintaining
  * both the data and the state of the wizard as it works and the pages it uses.
  * 
  * A properly implemented model must give each of it's possible states a String
- * identifier and a {@link WizardPage} to be displayed while it is in that
+ * identifier and a WizardPage to be displayed while it is in that
  * state.
  *
  * @param <T>
@@ -39,7 +41,7 @@ public abstract class WizardModel<T> {
     	 String newstate = getState();
     	 
     	 for (ChangeListener l : listeners) {
-    		 l.stateChanged(new Wizard.WizardModelChangeEvent<>(this, newstate, oldstate));
+    		 l.stateChanged(new WizardModelChangeEvent<>(this, newstate, oldstate));
     	 }
     	 
     	 return newstate;
@@ -57,7 +59,7 @@ public abstract class WizardModel<T> {
     	 String newstate = getState();
     	 
     	 for (ChangeListener l : listeners) {
-    		 l.stateChanged(new Wizard.WizardModelChangeEvent<>(this, newstate, oldstate));
+    		 l.stateChanged(new WizardModelChangeEvent<>(this, newstate, oldstate));
     	 }
     	 
     	 return newstate;

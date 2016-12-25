@@ -20,7 +20,7 @@ public class OplGroupExample extends Example {
 		return s;
 	}
 	
-	String s = "Group = theory {"
+	private final String s = "Group = theory {"
 			+ "\n sorts "
 			+ "\n	S;"
 			+ "\n symbols"

@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import catdata.Pair;
+import catdata.fqlpp.FnExp.Apply;
+import catdata.fqlpp.FnExp.ApplyTrans;
 import catdata.fqlpp.FnExp.Case;
 import catdata.fqlpp.FnExp.Chr;
 import catdata.fqlpp.FnExp.Comp;
@@ -44,7 +46,7 @@ import catdata.fqlpp.cat.Functor;
 import catdata.fqlpp.cat.Transform;
 
 @SuppressWarnings({ "rawtypes", "serial" })
-public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor<FinSet.Fn, FQLPPProgram> , Serializable {
+public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor<Fn, FQLPPProgram> , Serializable {
 
 	private FQLPPEnvironment ENV;
 	public SetOps(FQLPPEnvironment ENV) {
@@ -187,11 +189,7 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 		if (!k.isPresent()) {
 			throw new RuntimeException("Not isomorphic: " + l + " and " + r);
 		}
-		if (e.lToR) {
-			return k.get().first;
-		} else {
-			return k.get().second;
-		}
+        return e.lToR ? k.get().first : k.get().second;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -245,7 +243,7 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 	}
 
 	@Override
-	public Set<?> visit(FQLPPProgram env, catdata.fqlpp.SetExp.Var e) {
+	public Set<?> visit(FQLPPProgram env, SetExp.Var e) {
 		Set x = ENV.sets.get(e.v);
 		if (x == null) {
 			throw new RuntimeException("Missing set: " + e);
@@ -277,27 +275,28 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 	}
 
 	@Override
-	public Set<?> visit(FQLPPProgram env, catdata.fqlpp.SetExp.Const e) {
+	public Set<?> visit(FQLPPProgram env, SetExp.Const e) {
 		return e.s;
 	}
 
 	@Override
 	public Fn visit(FQLPPProgram env, Tru e) {
-		if (e.str.equals("true")) {
-			return FinSet.tru();
-		} else if (e.str.equals("false")) {
-			return FinSet.fals();
-		} else if (e.str.equals("and")) {
-			return FinSet.and();
-		} else if (e.str.equals("or")) {
-			return FinSet.or();
-		} else if (e.str.equals("not")) {
-			return FinSet.not();
-		} else if (e.str.equals("implies")) {
-			return FinSet.implies();
-		} else {
-			throw new RuntimeException();
-		}
+        switch (e.str) {
+            case "true":
+                return FinSet.tru();
+            case "false":
+                return FinSet.fals();
+            case "and":
+                return FinSet.and();
+            case "or":
+                return FinSet.or();
+            case "not":
+                return FinSet.not();
+            case "implies":
+                return FinSet.implies();
+            default:
+                throw new RuntimeException();
+        }
 	}
 
 	@Override
@@ -314,10 +313,10 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Set<?> visit(FQLPPProgram env, catdata.fqlpp.SetExp.Apply e) {
+	public Set<?> visit(FQLPPProgram env, SetExp.Apply e) {
 		FunctorExp k = env.ftrs.get(e.f);
 		if (k == null) {
-			throw new RuntimeException("Missing functor: " + k);
+			throw new RuntimeException("Missing functor: " + e.f);
 		}
 		Set<?> s = e.set.accept(env, this);
 		Functor f = k.accept(env, new CatOps(ENV));
@@ -332,10 +331,10 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Fn visit(FQLPPProgram env, catdata.fqlpp.FnExp.Apply e) {
+	public Fn visit(FQLPPProgram env, Apply e) {
 		FunctorExp k = env.ftrs.get(e.f);
 		if (k == null) {
-			throw new RuntimeException("Missing functor: " + k);
+			throw new RuntimeException("Missing functor: " + e.f);
 		}
 		Fn s = e.set.accept(env, this);
 		Functor f = k.accept(env, new CatOps(ENV));
@@ -350,10 +349,10 @@ public class SetOps implements SetExpVisitor<Set<?>, FQLPPProgram>, FnExpVisitor
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Fn visit(FQLPPProgram env, catdata.fqlpp.FnExp.ApplyTrans e) {
+	public Fn visit(FQLPPProgram env, ApplyTrans e) {
 		TransExp k = env.trans.get(e.f);
 		if (k == null) {
-			throw new RuntimeException("Missing transform: " + k);
+			throw new RuntimeException("Missing transform: " + e.f);
 		}
 		Transform f = k.accept(env, new CatOps(ENV));
 		if (!FinSet.FinSet.equals(f.source.source)) {

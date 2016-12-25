@@ -9,8 +9,9 @@ package catdata.fql.parse;
  * 
  *            interface for parser combinators
  */
+@FunctionalInterface
 public interface RyanParser<T> {
 
-	public Partial<T> parse(Tokens s) throws BadSyntax;
+	Partial<T> parse(Tokens s) throws BadSyntax;
 
 }

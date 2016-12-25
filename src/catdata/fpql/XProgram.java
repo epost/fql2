@@ -24,15 +24,14 @@ public class XProgram implements Prog {
 		return ret;
 	}
 	
-	public Map<String, Pair<String, String>> types() {
+	private Map<String, Pair<String, String>> types() {
 		Map<String, Pair<String, String>> ret = new HashMap<>();
 		for (String k : order) {
 			try {
 				String s1 = "?";
 				String s2 = "?";
 				Pair<XExp, XExp> x = exps.get(k).type(exps);
-				if (x == null) { 
-				} else {
+				if (x != null) {
 					String s1x = x.first.toString();
 					String s2x = x.second.toString();
 					if (s1x.length() > 32) {
@@ -65,9 +64,9 @@ public class XProgram implements Prog {
 	} 
 
 	
-	public List<String> order = new LinkedList<>();
-	public LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();	
-	public LinkedHashMap<String, XExp> exps = new LinkedHashMap<>();
+	public final List<String> order = new LinkedList<>();
+	private final LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();
+	public final LinkedHashMap<String, XExp> exps = new LinkedHashMap<>();
 	
 	public XProgram(List<Triple<String, Integer, XExp>> decls) {
 			Set<String> seen = new HashSet<>();

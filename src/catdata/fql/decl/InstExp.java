@@ -13,8 +13,9 @@ public abstract class InstExp {
 	}
 	
 	public static class Step extends InstExp {
-		public String I;
-		public MapExp m, n;
+		public final String I;
+		public final MapExp m;
+        public final MapExp n;
 		
 		@Override
 		public <R, E> R accept(E env, InstExpVisitor<R, E> v) {
@@ -28,7 +29,7 @@ public abstract class InstExp {
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((m == null) ? 0 : m.hashCode());
@@ -62,8 +63,7 @@ public abstract class InstExp {
 			return true;
 		}
 		public Step(String i, MapExp m, MapExp n) {
-			super();
-			I = i;
+            I = i;
 			this.m = m;
 			this.n = n;
 		}
@@ -71,11 +71,10 @@ public abstract class InstExp {
 	}
 	
 	public static class Kernel extends InstExp {
-		public String trans;
+		public final String trans;
 
 		public Kernel(String trans) {
-			super();
-			this.trans = trans;
+            this.trans = trans;
 		}
 
 		@Override
@@ -102,7 +101,7 @@ public abstract class InstExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((trans == null) ? 0 : trans.hashCode());
 			return result;
@@ -159,18 +158,17 @@ public abstract class InstExp {
 	} */
 	
 	public static class FullEval extends InstExp {
-		public FullQueryExp q;
-		public String e;
+		public final FullQueryExp q;
+		public final String e;
 
 		public FullEval(FullQueryExp q, String e) {
-			super();
-			this.q = q;
+            this.q = q;
 			this.e = e;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((e == null) ? 0 : e.hashCode());
 			result = prime * result + ((q == null) ? 0 : q.hashCode());
@@ -212,18 +210,17 @@ public abstract class InstExp {
 	}
 	
 	public static class Eval extends InstExp {
-		public QueryExp q;
-		public String e;
+		public final QueryExp q;
+		public final String e;
 
 		public Eval(QueryExp q, String e) {
-			super();
-			this.q = q;
+            this.q = q;
 			this.e = e;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((e == null) ? 0 : e.hashCode());
 			result = prime * result + ((q == null) ? 0 : q.hashCode());
@@ -268,9 +265,11 @@ public abstract class InstExp {
 	public static class Const extends InstExp {
 		// pubic List
 		// public List<Pair<String, List<Pair<Object, Object>>>> data;
-		public SigExp sig;
-		public List<Pair<String, List<Pair<Object, Object>>>> nodes, attrs,
-				arrows, data;
+		public final SigExp sig;
+		public final List<Pair<String, List<Pair<Object, Object>>>> nodes;
+        public final List<Pair<String, List<Pair<Object, Object>>>> attrs;
+        public final List<Pair<String, List<Pair<Object, Object>>>> arrows;
+        public final List<Pair<String, List<Pair<Object, Object>>>> data;
 
 		public Const(List<Pair<String, List<Pair<Object, Object>>>> nodes,
 				List<Pair<String, List<Pair<Object, Object>>>> attrs,
@@ -308,7 +307,7 @@ public abstract class InstExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((data == null) ? 0 : data.hashCode());
 			result = prime * result + ((sig == null) ? 0 : sig.hashCode());
@@ -416,16 +415,15 @@ public abstract class InstExp {
 
 	public static class Zero extends InstExp {
 
-		public SigExp sig;
+		public final SigExp sig;
 
 		public Zero(SigExp sig) {
-			super();
-			this.sig = sig;
+            this.sig = sig;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((sig == null) ? 0 : sig.hashCode());
 			return result;
@@ -462,16 +460,15 @@ public abstract class InstExp {
 
 	public static class One extends InstExp {
 
-		public SigExp sig;
+		public final SigExp sig;
 
 		public One(SigExp sig) {
-			super();
-			this.sig = sig;
+            this.sig = sig;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((sig == null) ? 0 : sig.hashCode());
 			return result;
@@ -508,16 +505,15 @@ public abstract class InstExp {
 
 	public static class Two extends InstExp {
 
-		public SigExp sig;
+		public final SigExp sig;
 
 		public Two(SigExp sig) {
-			super();
-			this.sig = sig;
+            this.sig = sig;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((sig == null) ? 0 : sig.hashCode());
 			return result;
@@ -553,7 +549,8 @@ public abstract class InstExp {
 	}
 
 	public static class Plus extends InstExp {
-		public String a, b;
+		public final String a;
+        public final String b;
 
 		public Plus(String a, String b) {
 			this.a = a;
@@ -562,7 +559,7 @@ public abstract class InstExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -604,7 +601,8 @@ public abstract class InstExp {
 	}
 
 	public static class Times extends InstExp {
-		public String a, b;
+		public final String a;
+        public final String b;
 
 		public Times(String a, String b) {
 			this.a = a;
@@ -613,7 +611,7 @@ public abstract class InstExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -656,7 +654,8 @@ public abstract class InstExp {
 
 	
 	public static class Exp extends InstExp {
-		public String a, b;
+		public final String a;
+        public final String b;
 
 		public Exp(String a, String b) {
 			this.a = a;
@@ -665,7 +664,7 @@ public abstract class InstExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -708,18 +707,17 @@ public abstract class InstExp {
 
 	public static class Delta extends InstExp {
 
-		public MapExp F;
-		public String I;
+		public final MapExp F;
+		public final String I;
 
 		public Delta(MapExp f, String i) {
-			super();
-			F = f;
+            F = f;
 			I = i;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -762,18 +760,17 @@ public abstract class InstExp {
 
 	public static class Sigma extends InstExp {
 
-		public MapExp F;
-		public String I;
+		public final MapExp F;
+		public final String I;
 
 		public Sigma(MapExp f, String i) {
-			super();
-			F = f;
+            F = f;
 			I = i;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -816,18 +813,17 @@ public abstract class InstExp {
 
 	public static class Pi extends InstExp {
 
-		public MapExp F;
-		public String I;
+		public final MapExp F;
+		public final String I;
 
 		public Pi(MapExp f, String i) {
-			super();
-			F = f;
+            F = f;
 			I = i;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -869,18 +865,17 @@ public abstract class InstExp {
 
 	public static class FullSigma extends InstExp {
 
-		public MapExp F;
-		public String I;
+		public final MapExp F;
+		public final String I;
 
 		public FullSigma(MapExp f, String i) {
-			super();
-			F = f;
+            F = f;
 			I = i;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -921,16 +916,15 @@ public abstract class InstExp {
 	}
 
 	public static class Relationalize extends InstExp {
-		public String I;
+		public final String I;
 
 		public Relationalize(String i) {
-			super();
-			I = i;
+            I = i;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			return result;
@@ -967,12 +961,12 @@ public abstract class InstExp {
 
 	public static class External extends InstExp {
 
-		public SigExp sig;
-		public String name;
+		public final SigExp sig;
+		public final String name;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((name == null) ? 0 : name.hashCode());
 			result = prime * result + ((sig == null) ? 0 : sig.hashCode());
@@ -1002,8 +996,7 @@ public abstract class InstExp {
 		}
 
 		public External(SigExp sig, String name) {
-			super();
-			this.sig = sig;
+            this.sig = sig;
 			this.name = name;
 		}
 
@@ -1028,24 +1021,24 @@ public abstract class InstExp {
 	public abstract int hashCode();
 
 	public interface InstExpVisitor<R, E> {
-		public R visit(E env, Zero e);
-		public R visit(E env, One e);
-		public R visit(E env, Two e);
-		public R visit(E env, Plus e);
-		public R visit(E env, Times e);
-		public R visit(E env, Exp e);
+		R visit(E env, Zero e);
+		R visit(E env, One e);
+		R visit(E env, Two e);
+		R visit(E env, Plus e);
+		R visit(E env, Times e);
+		R visit(E env, Exp e);
 		// public R visit (E env, Var e);
-		public R visit(E env, Const e);
-		public R visit(E env, Delta e);
-		public R visit(E env, Sigma e);
-		public R visit(E env, Pi e);
-		public R visit(E env, FullSigma e);
-		public R visit(E env, Relationalize e);
-		public R visit(E env, External e);
-		public R visit(E env, Eval e);
-		public R visit(E env, FullEval e);
-		public R visit(E env, Kernel e);
-		public R visit(E env, Step e);
+        R visit(E env, Const e);
+		R visit(E env, Delta e);
+		R visit(E env, Sigma e);
+		R visit(E env, Pi e);
+		R visit(E env, FullSigma e);
+		R visit(E env, Relationalize e);
+		R visit(E env, External e);
+		R visit(E env, Eval e);
+		R visit(E env, FullEval e);
+		R visit(E env, Kernel e);
+		R visit(E env, Step e);
 	}
 
 }

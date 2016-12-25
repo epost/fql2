@@ -3,6 +3,7 @@ package catdata.fql.gui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.sql.Date;
 import java.text.DateFormat;
@@ -18,6 +19,7 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 
+import catdata.fql.decl.TransExp.Const;
 import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
@@ -55,9 +57,7 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 		super(title, id, content);
 		
 		JMenuItem visualEdit = new JMenuItem("Visual Edit");
-		visualEdit.addActionListener((ActionEvent e) -> {
-                    vedit();
-                });
+		visualEdit.addActionListener((ActionEvent e) -> vedit());
 		topArea.getPopupMenu().add(visualEdit, 0);
 		
 		
@@ -82,10 +82,10 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 	protected void doTemplates() {
 		  CompletionProvider provider = createCompletionProvider();
 		  AutoCompletion ac = new AutoCompletion(provider);
-		  KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, java.awt.event.InputEvent.META_DOWN_MASK
-            | java.awt.event.InputEvent.SHIFT_DOWN_MASK);
+		  KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, InputEvent.META_DOWN_MASK
+            | InputEvent.SHIFT_DOWN_MASK);
 		  ac.setTriggerKey(key);
-	      ac.install(this.topArea);
+	      ac.install(topArea);
 	}
 	
 	  private static CompletionProvider createCompletionProvider() {
@@ -122,7 +122,7 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 		return new FqlDisplay(foo, init, env, start, middle);
 	}
 
-	Map<FqlEnvironment, String> textForCache = new HashMap<>();
+	private final Map<FqlEnvironment, String> textForCache = new HashMap<>();
 	@Override
 	protected FqlEnvironment makeEnv(String str, FQLProgram init) {
 		Triple<FqlEnvironment, String, List<Throwable>> envX = Driver
@@ -155,7 +155,7 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 			respArea.setText(toDisplay);
 			return;
 		}
-		if (init.lines.size() == 0) {
+		if (init.lines.isEmpty()) {
 			return;
 		}
 		String which = null;
@@ -193,7 +193,7 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 		TransExp te = init.transforms.get(which);
 		if ( (ie == null && te == null) 
 		   ||(ie != null && !(ie instanceof InstExp.Const))
-		   ||(te != null && !(te instanceof TransExp.Const)) ) {
+		   ||(te != null && !(te instanceof Const)) ) {
 			respArea.setText("Cannot visually edit "
 					+ which
 					+ ": only constant instances or transforms are visually editable.");
@@ -207,22 +207,21 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 				if (n == null) {
 					return;
 				}
-				String newText = "instance " + which + " = " + n.toString()
+				String newText = "instance " + which + " = " + n
 						+ " : " + n.sig + "\n\n";
 				topArea.replaceRange(newText, start, end);
 			} else {
-				TransExp.Const iec = (TransExp.Const) te;
+				Const iec = (Const) te;
 				if (iec == null) {
-					throw new RuntimeException("FQL code editor internal error");
+					throw new RuntimeException("Anomaly: please report");
 				}
-				
 				InstExp.Const s = (InstExp.Const) init.insts.get(iec.src);
 				InstExp.Const t = (InstExp.Const) init.insts.get(iec.dst);
-				TransExp.Const n = new TransformEditor(which, init.insts.get(iec.src).type(init).toSig(init), iec, s, t).show(Color.black);
+				Const n = new TransformEditor(which, init.insts.get(iec.src).type(init).toSig(init), iec, s, t).show(Color.black);
 				if (n == null) {
 					return;
 				}
-				String newText = "transform " + which + " = " + n.toString()
+				String newText = "transform " + which + " = " + n
 						+ " : " + n.src + " -> " + n.dst + "\n\n";
 				topArea.replaceRange(newText, start, end);
 				
@@ -249,33 +248,33 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 			}
 		}
 		//order does not contain enums or drops
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (String k : p.enums.keySet()) {
 			Type t = p.enums.get(k);
 			if (!(t instanceof Type.Enum)) {
 				continue;
 			}
 			Type.Enum e = (Type.Enum) t;
-			sb.append("enum " + k + " = " + e.printFull());
+			sb.append("enum ").append(k).append(" = ").append(e.printFull());
 			sb.append("\n\n");
 		}
 		for (String k : p.order) {
 			Pair<String, Object> o = get(p, k);
-			sb.append(o.first + " " + k + " = " + o.second.toString());
+			sb.append(o.first).append(" ").append(k).append(" = ").append(o.second);
 			if (o.second instanceof InstExp.Const) {
 				InstExp.Const c = (InstExp.Const) o.second;
-				sb.append(" : " + c.sig);
+				sb.append(" : ").append(c.sig);
 			} else if (o.second instanceof MapExp.Const) {
 				MapExp.Const c = (MapExp.Const) o.second;
-				sb.append(" : " + c.src + " -> " + c.dst);
-			} else if (o.second instanceof TransExp.Const) {
-				TransExp.Const c = (TransExp.Const) o.second;
-				sb.append(" : " + c.src + " -> " + c.dst);
+				sb.append(" : ").append(c.src).append(" -> ").append(c.dst);
+			} else if (o.second instanceof Const) {
+				Const c = (Const) o.second;
+				sb.append(" : ").append(c.src).append(" -> ").append(c.dst);
 			}
 			sb.append("\n\n");
 		}
-		if (p.drop.size() > 0) {
-			sb.append("drop " + PrettyPrinter.sep0(" ", p.drop) + "\n\n");
+		if (!p.drop.isEmpty()) {
+			sb.append("drop ").append(PrettyPrinter.sep0(" ", p.drop)).append("\n\n");
 		}
 		topArea.setText(sb.toString().trim());
 		topArea.setCaretPosition(0);
@@ -283,9 +282,8 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 	
 
 	private static Pair<String, Object> get(FQLProgram p, String k) {
-		Object o = null;
-		
-		o = p.full_queries.get(k);
+		Object o = p.full_queries.get(k);
+
 		if (o != null) {
 			return new Pair<>("QUERY", o);
 		}
@@ -332,9 +330,9 @@ public class FqlCodeEditor extends CodeEditor<FQLProgram, FqlEnvironment, FqlDis
 					.getDefaultRootElement().getElement(line - 1)
 					.getStartOffset()
 					+ (col - 1));
-			String s = e.getMessage();
-			String t = s.substring(s.indexOf(" "));
-			t.split("\\s+");
+			//String s = e.getMessage();
+			//String t = s.substring(s.indexOf(" "));
+			//t.split("\\s+");
 
 			respArea.setText("Syntax error: " + e.getLocalizedMessage());
 			e.printStackTrace();

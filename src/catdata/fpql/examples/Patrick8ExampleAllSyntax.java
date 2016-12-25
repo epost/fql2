@@ -21,7 +21,7 @@ public class Patrick8ExampleAllSyntax extends Example {
 		return s;
 	}
 	
-	String s = "//Don't forget to enable 'adom tables' in the options menu to display instances on infinite schemas"
+	private final String s = "//Don't forget to enable 'adom tables' in the options menu to display instances on infinite schemas"
 			+ "\nstring : type"
 			+ "\nbill : string" 
 			+ "\ngeorge harry : string"

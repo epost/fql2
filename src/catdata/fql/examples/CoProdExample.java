@@ -20,7 +20,7 @@ public class CoProdExample extends Example {
 		return s;
 	}
 	
-	String s = "schema S = {"
+	private final String s = "schema S = {"
 			+ "\n	nodes a, b;"
 			+ "\n	attributes att : a -> string;"
 			+ "\n	arrows f : a -> b;"

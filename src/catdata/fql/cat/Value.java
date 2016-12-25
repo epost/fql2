@@ -15,12 +15,12 @@ public class Value<Y, X> {
 
 	public X x;
 
-	Value<Y, X>[] tuple;
+	private Value<Y, X>[] tuple;
 
-	Y tag;
+	private Y tag;
 	public Value<Y, X> tagCargo;
 
-	public VALUETYPE which;
+	public final VALUETYPE which;
 
 	@Override
 	public String toString() {
@@ -30,12 +30,13 @@ public class Value<Y, X> {
 		} else if (which == VALUETYPE.RECORD) {
 			s = "(" + printNicely(tuple) + ")";
 		} else if (which == VALUETYPE.CHOICE) {
-			s = "<" + tag.toString() + "_" + tagCargo.toString() + ">";
+			s = "<" + tag + "_" + tagCargo + ">";
 		}
 		return s;
 	}
 
-	private String printNicely(Value<Y, X>[] G) {
+	@SafeVarargs
+	private final String printNicely(Value<Y, X>... G) {
 		String s = " ";
 		for (Value<Y, X> g : G) {
 			s += (g + " ");
@@ -56,45 +57,46 @@ public class Value<Y, X> {
 		}
 		@SuppressWarnings("rawtypes")
 		Value that = (Value) o;
-		if (this.which == VALUETYPE.ATOM && that.which == VALUETYPE.ATOM) {
-			return (this.x.equals(that.x));
-		} else if (this.which == VALUETYPE.RECORD
+		if (which == VALUETYPE.ATOM && that.which == VALUETYPE.ATOM) {
+			return (x.equals(that.x));
+		} else if (which == VALUETYPE.RECORD
 				&& that.which == VALUETYPE.RECORD) {
-			if (this.tuple.length != that.tuple.length) {
+			if (tuple.length != that.tuple.length) {
 				return false;
 			}
-			for (int i = 0; i < this.tuple.length; i++) {
-				if (!this.tuple[i].equals(that.tuple[i])) {
+			for (int i = 0; i < tuple.length; i++) {
+				if (!tuple[i].equals(that.tuple[i])) {
 					return false;
 				}
 			}
 			return true;
-		} else if (this.which == VALUETYPE.CHOICE
+		} else if (which == VALUETYPE.CHOICE
 				&& that.which == VALUETYPE.CHOICE) {
-			return (this.tag.equals(that.tag) && this.tagCargo
+			return (tag.equals(that.tag) && tagCargo
 					.equals(that.tagCargo));
 		}
 		throw new RuntimeException();
 	}
 
-	public static enum VALUETYPE {
+	public enum VALUETYPE {
 		ATOM, RECORD, CHOICE
 	}
 
 	Value(Y tag, Value<Y, X> tagCargo) {
 		this.tag = tag;
 		this.tagCargo = tagCargo;
-		this.which = VALUETYPE.CHOICE;
+        which = VALUETYPE.CHOICE;
 	}
 
 	public Value(X x) {
 		this.x = x;
-		this.which = VALUETYPE.ATOM;
+        which = VALUETYPE.ATOM;
 	}
 
-	Value(Value<Y, X>[] tuple) {
+	@SafeVarargs
+	Value(Value<Y, X>... tuple) {
 		this.tuple = tuple;
-		this.which = VALUETYPE.RECORD;
+        which = VALUETYPE.RECORD;
 	}
 
 }

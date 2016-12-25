@@ -48,8 +48,8 @@ import catdata.fql.decl.SigExp.Zero;
 public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		MapExpVisitor<Const, FQLProgram> {
 
-	public static FinCat<Mapping, Map<Node, Path>> exp(@SuppressWarnings("unused") FQLProgram env,
-			final Signature base, final Signature exp) {
+	private static FinCat<Mapping, Map<Node, Path>> exp(@SuppressWarnings("unused") FQLProgram env,
+                                                        Signature base, Signature exp) {
 		try {
 			return Inst.stuff(base, exp);
 		} catch (FQLException fe) {
@@ -58,8 +58,8 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		}
 	}
 
-	public static Pair<SigExp.Const, Fn<SigExp.Const, MapExp.Const>> one(
-			final Set<String> at) {
+	private static Pair<SigExp.Const, Fn<SigExp.Const, Const>> one(
+            Set<String> at) {
 		List<String> nodes = new LinkedList<>();
 		nodes.add("node0");
 
@@ -71,10 +71,10 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
 
-		final SigExp.Const sig = new SigExp.Const(nodes, attrs, arrows,
+		SigExp.Const sig = new SigExp.Const(nodes, attrs, arrows,
 				new LinkedList<>());
 
-		Fn<SigExp.Const, MapExp.Const> fn = (SigExp.Const src) -> {
+		Fn<SigExp.Const, Const> fn = (SigExp.Const src) -> {
                     List<Pair<String, String>> nm = new LinkedList<>();
                     for (String k : src.nodes) {
                         nm.add(new Pair<>(k, "node0"));
@@ -95,31 +95,31 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
                         l.add("node0");
                         em.add(new Pair<>(k.first, l));
                     }
-                    return new MapExp.Const(nm, am, em, src, sig);
+                    return new Const(nm, am, em, src, sig);
                 };
 
 		return new Pair<>(sig, fn);
 	}
 
-	public static Pair<SigExp.Const, Fn<SigExp.Const, MapExp.Const>> zero() {
-		final SigExp.Const sig = new SigExp.Const(new LinkedList<>(),
+	private static Pair<SigExp.Const, Fn<SigExp.Const, Const>> zero() {
+		SigExp.Const sig = new SigExp.Const(new LinkedList<>(),
 				new LinkedList<>(),
 				new LinkedList<>(),
 				new LinkedList<>());
 
-		Fn<SigExp.Const, MapExp.Const> fn = (SigExp.Const x) -> new MapExp.Const(new LinkedList<>(),
+		Fn<SigExp.Const, Const> fn = (SigExp.Const x) -> new Const(new LinkedList<>(),
                         new LinkedList<>(),
                         new LinkedList<>(), sig, x);
 
 		return new Pair<>(sig, fn);
 	}
 
-	public static Pair<Quad<catdata.fql.decl.SigExp.Const, Const, Const, Fn<Triple<catdata.fql.decl.SigExp.Const, Const, Const>, Const>>, Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>>> prod(
-			final SigExp.Const a, final SigExp.Const b) {
+	private static Pair<Quad<SigExp.Const, Const, Const, Fn<Triple<SigExp.Const, Const, Const>, Const>>, Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>>> prod(
+            SigExp.Const a, SigExp.Const b) {
 		int node_count = 0;
-		final Map<Pair<String, String>, String> node_map = new LinkedHashMap<>();
-		final List<Pair<String, String>> a_objs = new LinkedList<>(); // fst
-		final List<Pair<String, String>> b_objs = new LinkedList<>(); // snd
+		Map<Pair<String, String>, String> node_map = new LinkedHashMap<>();
+		List<Pair<String, String>> a_objs = new LinkedList<>(); // fst
+		List<Pair<String, String>> b_objs = new LinkedList<>(); // snd
 		for (String n : a.nodes) {
 			for (String m : b.nodes) {
 				node_map.put(new Pair<>(n, m), "node" + node_count);
@@ -132,7 +132,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		nodes.addAll(node_map.values());
 
 		int attr_count = 0;
-		final Map<Pair<String, String>, String> attr_map = new LinkedHashMap<>();
+		Map<Pair<String, String>, String> attr_map = new LinkedHashMap<>();
 		List<Pair<String, String>> a_attrs = new LinkedList<>(); // fst
 		List<Pair<String, String>> b_attrs = new LinkedList<>(); // snd
 		List<Triple<String, String, String>> attrs = new LinkedList<>();
@@ -151,8 +151,8 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		}
 
 		int edge_count = 0;
-		final Map<Pair<String, String>, String> edge_map_1 = new LinkedHashMap<>();
-		final Map<Pair<String, String>, String> edge_map_2 = new LinkedHashMap<>();
+		Map<Pair<String, String>, String> edge_map_1 = new LinkedHashMap<>();
+		Map<Pair<String, String>, String> edge_map_2 = new LinkedHashMap<>();
 		List<Pair<String, List<String>>> a_edges = new LinkedList<>(); // fst
 		List<Pair<String, List<String>>> b_edges = new LinkedList<>(); // snd
 		List<Triple<String, String, String>> edges = new LinkedList<>();
@@ -267,81 +267,78 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 			}
 		}
 
-		final SigExp.Const sig = new SigExp.Const(nodes, attrs, edges, eqs);
-		Const fst = new MapExp.Const(a_objs, a_attrs, a_edges, sig, a);
-		Const snd = new MapExp.Const(b_objs, b_attrs, b_edges, sig, b);
+		SigExp.Const sig = new SigExp.Const(nodes, attrs, edges, eqs);
+		Const fst = new Const(a_objs, a_attrs, a_edges, sig, a);
+		Const snd = new Const(b_objs, b_attrs, b_edges, sig, b);
 
-		Fn<Triple<SigExp.Const, MapExp.Const, MapExp.Const>, MapExp.Const> pair = new Fn<Triple<SigExp.Const, MapExp.Const, MapExp.Const>, MapExp.Const>() {
-			@Override
-			public Const of(Triple<catdata.fql.decl.SigExp.Const, Const, Const> x) {
-				SigExp.Const c = x.first;
-				Const f = x.second;
-				Const g = x.third;
+		Fn<Triple<SigExp.Const, Const, Const>, Const> pair = x -> {
+            SigExp.Const c = x.first;
+            Const f = x.second;
+            Const g = x.third;
 
-				if (!f.src.equals(g.src)) {
-					throw new RuntimeException("Sources don't agree: " + f.src
-							+ " and " + g.src);
-				}
-				if (!f.dst.equals(a)) {
-					throw new RuntimeException("Target of " + f + " is not "
-							+ a);
-				}
-				if (!g.dst.equals(b)) {
-					throw new RuntimeException("Target of " + g + "is not " + b);
-				}
+            if (!f.src.equals(g.src)) {
+                throw new RuntimeException("Sources don't agree: " + f.src
+                        + " and " + g.src);
+            }
+            if (!f.dst.equals(a)) {
+                throw new RuntimeException("Target of " + f + " is not "
+                        + a);
+            }
+            if (!g.dst.equals(b)) {
+                throw new RuntimeException("Target of " + g + "is not " + b);
+            }
 
-				List<Pair<String, String>> objs = new LinkedList<>();
-				for (String obj_c : c.nodes) {
-					objs.add(new Pair<>(obj_c, node_map.get(new Pair<>(lookup(
-							obj_c, f.objs), lookup(obj_c, g.objs)))));
-				}
+            List<Pair<String, String>> objs = new LinkedList<>();
+            for (String obj_c : c.nodes) {
+                objs.add(new Pair<>(obj_c, node_map.get(new Pair<>(lookup(
+                        obj_c, f.objs), lookup(obj_c, g.objs)))));
+            }
 
-				List<Pair<String, String>> attrs = new LinkedList<>();
-				for (Triple<String, String, String> attr_c : c.attrs) {
-					attrs.add(new Pair<>(attr_c.first, attr_map.get(new Pair<>(
-							lookup(attr_c.first, f.attrs), lookup(attr_c.first,
-									g.attrs)))));
-				}
+            List<Pair<String, String>> attrs1 = new LinkedList<>();
+            for (Triple<String, String, String> attr_c : c.attrs) {
+                attrs1.add(new Pair<>(attr_c.first, attr_map.get(new Pair<>(
+                        lookup(attr_c.first, f.attrs), lookup(attr_c.first,
+                                g.attrs)))));
+            }
 
-				List<Pair<String, List<String>>> arrows = new LinkedList<>();
-				for (Triple<String, String, String> edge_c : c.arrows) {
-					List<String> fc = lookup(edge_c.first, f.arrows);
-					List<String> gc = lookup(edge_c.first, g.arrows);
-					List<String> ret = new LinkedList<>();
-					String fcN = fc.get(0);
-					String gcN = gc.get(0);
-					String node_start = node_map.get(new Pair<>(fcN, gcN));
-					ret.add(node_start);
-					for (int i = 1; i < fc.size(); i++) {
-						String fcE = fc.get(i);
-						Pair<String, String> p = new Pair<>(fcE, gcN);
-						String v = edge_map_1.get(p);
-						ret.add(v);
-					}
-					node_start = lookup(edge_c.third, f.objs);
+            List<Pair<String, List<String>>> arrows = new LinkedList<>();
+            for (Triple<String, String, String> edge_c : c.arrows) {
+                List<String> fc = lookup(edge_c.first, f.arrows);
+                List<String> gc = lookup(edge_c.first, g.arrows);
+                List<String> ret = new LinkedList<>();
+                String fcN = fc.get(0);
+                String gcN = gc.get(0);
+                String node_start = node_map.get(new Pair<>(fcN, gcN));
+                ret.add(node_start);
+                for (int i = 1; i < fc.size(); i++) {
+                    String fcE = fc.get(i);
+                    Pair<String, String> p = new Pair<>(fcE, gcN);
+                    String v = edge_map_1.get(p);
+                    ret.add(v);
+                }
+                node_start = lookup(edge_c.third, f.objs);
 
-						for (int i = 1; i < gc.size(); i++) {
-						String gcE = gc.get(i);
-						Pair<String, String> p = new Pair<>(gcE, node_start);
-						String v = edge_map_2.get(p);
-						ret.add(v);
-					}
-					arrows.add(new Pair<>(edge_c.first, ret));
-				}
-				Const ret = new Const(objs, attrs, arrows, c, sig);
-				return ret;
-			}
-		};
+                    for (int i = 1; i < gc.size(); i++) {
+                    String gcE = gc.get(i);
+                    Pair<String, String> p = new Pair<>(gcE, node_start);
+                    String v = edge_map_2.get(p);
+                    ret.add(v);
+                }
+                arrows.add(new Pair<>(edge_c.first, ret));
+            }
+            Const ret = new Const(objs, attrs1, arrows, c, sig);
+            return ret;
+        };
 
 		return new Pair<>(new Quad<>(sig, fst, snd, pair), new Quad<>(node_map,
 				attr_map, edge_map_1, edge_map_2));
 	}
 
-	public static Quad<SigExp.Const, Const, Const, Fn<Triple<SigExp.Const, Const, Const>, Const>> plus(
-			final SigExp.Const a, final SigExp.Const b) {
+	private static Quad<SigExp.Const, Const, Const, Fn<Triple<SigExp.Const, Const, Const>, Const>> plus(
+            SigExp.Const a, SigExp.Const b) {
 		int node_count = 0;
-		final Map<String, String> node_map_1 = new LinkedHashMap<>();
-		final Map<String, String> node_map_2 = new LinkedHashMap<>();
+		Map<String, String> node_map_1 = new LinkedHashMap<>();
+		Map<String, String> node_map_2 = new LinkedHashMap<>();
 		List<Pair<String, String>> a_objs = new LinkedList<>();
 		List<Pair<String, String>> b_objs = new LinkedList<>();
 		for (String n : a.nodes) {
@@ -359,8 +356,8 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		nodes.addAll(node_map_2.values());
 
 		int attr_count = 0;
-		final Map<String, Triple<String, String, String>> attr_map_1 = new LinkedHashMap<>();
-		final Map<String, Triple<String, String, String>> attr_map_2 = new LinkedHashMap<>();
+		Map<String, Triple<String, String, String>> attr_map_1 = new LinkedHashMap<>();
+		Map<String, Triple<String, String, String>> attr_map_2 = new LinkedHashMap<>();
 		List<Pair<String, String>> a_attrs = new LinkedList<>();
 		List<Pair<String, String>> b_attrs = new LinkedList<>();
 		for (Triple<String, String, String> n : a.attrs) {
@@ -380,8 +377,8 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		attrs.addAll(attr_map_2.values());
 
 		int edge_count = 0;
-		final Map<String, Triple<String, String, String>> edge_map_1 = new LinkedHashMap<>();
-		final Map<String, Triple<String, String, String>> edge_map_2 = new LinkedHashMap<>();
+		Map<String, Triple<String, String, String>> edge_map_1 = new LinkedHashMap<>();
+		Map<String, Triple<String, String, String>> edge_map_2 = new LinkedHashMap<>();
 		List<Pair<String, List<String>>> a_arrows = new LinkedList<>();
 		List<Pair<String, List<String>>> b_arrows = new LinkedList<>();
 		for (Triple<String, String, String> n : a.arrows) {
@@ -434,63 +431,59 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 			eqs.add(new Pair<>(lhs, rhs));
 		}
 
-		final SigExp.Const sig = new SigExp.Const(nodes, attrs, arrows, eqs);
-		Const inj1 = new MapExp.Const(a_objs, a_attrs, a_arrows, a, sig);
-		Const inj2 = new MapExp.Const(b_objs, b_attrs, b_arrows, b, sig);
+		SigExp.Const sig = new SigExp.Const(nodes, attrs, arrows, eqs);
+		Const inj1 = new Const(a_objs, a_attrs, a_arrows, a, sig);
+		Const inj2 = new Const(b_objs, b_attrs, b_arrows, b, sig);
 
-		Fn<Triple<SigExp.Const, MapExp.Const, MapExp.Const>, MapExp.Const> match = new Fn<Triple<SigExp.Const, MapExp.Const, MapExp.Const>, MapExp.Const>() {
-			@Override
-			public Const of(Triple<catdata.fql.decl.SigExp.Const, Const, Const> x) {
-				SigExp.Const c = x.first;
-				Const f = x.second;
-				Const g = x.third;
+		Fn<Triple<SigExp.Const, Const, Const>, Const> match = x -> {
+            SigExp.Const c = x.first;
+            Const f = x.second;
+            Const g = x.third;
 
-				if (!f.dst.equals(g.dst)) {
-					throw new RuntimeException("Targets don't agree: " + f.dst
-							+ " and " + g.dst);
-				}
-				if (!f.src.equals(a)) {
-					throw new RuntimeException("Source of " + f + " is not "
-							+ a);
-				}
-				if (!g.src.equals(b)) {
-					throw new RuntimeException("Source of " + g + "is not " + b);
-				}
+            if (!f.dst.equals(g.dst)) {
+                throw new RuntimeException("Targets don't agree: " + f.dst
+                        + " and " + g.dst);
+            }
+            if (!f.src.equals(a)) {
+                throw new RuntimeException("Source of " + f + " is not "
+                        + a);
+            }
+            if (!g.src.equals(b)) {
+                throw new RuntimeException("Source of " + g + "is not " + b);
+            }
 
-				List<Pair<String, String>> objs = new LinkedList<>();
-				for (String obj_a : a.nodes) {
-					objs.add(new Pair<>(node_map_1.get(obj_a), lookup(obj_a,
-							f.objs)));
-				}
-				for (String obj_b : b.nodes) {
-					objs.add(new Pair<>(node_map_2.get(obj_b), lookup(obj_b,
-							g.objs)));
-				}
+            List<Pair<String, String>> objs = new LinkedList<>();
+            for (String obj_a : a.nodes) {
+                objs.add(new Pair<>(node_map_1.get(obj_a), lookup(obj_a,
+                        f.objs)));
+            }
+            for (String obj_b : b.nodes) {
+                objs.add(new Pair<>(node_map_2.get(obj_b), lookup(obj_b,
+                        g.objs)));
+            }
 
-				List<Pair<String, String>> attrs = new LinkedList<>();
-				for (Triple<String, String, String> attr_a : a.attrs) {
-					attrs.add(new Pair<>(attr_map_1.get(attr_a.first).first,
-							lookup(attr_a.first, f.attrs)));
-				}
-				for (Triple<String, String, String> attr_b : b.attrs) {
-					attrs.add(new Pair<>(attr_map_2.get(attr_b.first).first,
-							lookup(attr_b.first, g.attrs)));
-				}
+            List<Pair<String, String>> attrs1 = new LinkedList<>();
+            for (Triple<String, String, String> attr_a : a.attrs) {
+                attrs1.add(new Pair<>(attr_map_1.get(attr_a.first).first,
+                        lookup(attr_a.first, f.attrs)));
+            }
+            for (Triple<String, String, String> attr_b : b.attrs) {
+                attrs1.add(new Pair<>(attr_map_2.get(attr_b.first).first,
+                        lookup(attr_b.first, g.attrs)));
+            }
 
-				List<Pair<String, List<String>>> arrows = new LinkedList<>();
-				for (Triple<String, String, String> edge_a : a.arrows) {
-					arrows.add(new Pair<>(edge_map_1.get(edge_a.first).first,
-							lookup(edge_a.first, f.arrows)));
-				}
-				for (Triple<String, String, String> edge_b : b.arrows) {
-					arrows.add(new Pair<>(edge_map_2.get(edge_b.first).first,
-							lookup(edge_b.first, g.arrows)));
-				}
+            List<Pair<String, List<String>>> arrows1 = new LinkedList<>();
+            for (Triple<String, String, String> edge_a : a.arrows) {
+                arrows1.add(new Pair<>(edge_map_1.get(edge_a.first).first,
+                        lookup(edge_a.first, f.arrows)));
+            }
+            for (Triple<String, String, String> edge_b : b.arrows) {
+                arrows1.add(new Pair<>(edge_map_2.get(edge_b.first).first,
+                        lookup(edge_b.first, g.arrows)));
+            }
 
-				return new Const(objs, attrs, arrows, sig, c);
-			}
-
-		};
+            return new Const(objs, attrs1, arrows1, sig, c);
+        };
 
 		return new Quad<>(sig, inj1, inj2, match);
 	}
@@ -507,27 +500,27 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 	// /////////////////////////////////////
 
 	@Override
-	public catdata.fql.decl.SigExp.Const visit(FQLProgram env, Zero e) {
+	public SigExp.Const visit(FQLProgram env, Zero e) {
 		return zero().first;
 	}
 
 	@Override
-	public catdata.fql.decl.SigExp.Const visit(FQLProgram env, One e) {
+	public SigExp.Const visit(FQLProgram env, One e) {
 		return one(e.attrs).first;
 	}
 
 	@Override
-	public catdata.fql.decl.SigExp.Const visit(FQLProgram env, Plus e) {
+	public SigExp.Const visit(FQLProgram env, Plus e) {
 		return plus(e.a.accept(env, this), e.b.accept(env, this)).first;
 	}
 
 	@Override
-	public catdata.fql.decl.SigExp.Const visit(FQLProgram env, Times e) {
+	public SigExp.Const visit(FQLProgram env, Times e) {
 		return prod(e.a.accept(env, this), e.b.accept(env, this)).first.first;
 	}
 
 	@Override
-	public catdata.fql.decl.SigExp.Const visit(FQLProgram env, Exp e) {
+	public SigExp.Const visit(FQLProgram env, Exp e) {
 		try {
 			return exp(env, e.a.accept(env, this).toSig(env),
 					e.b.accept(env, this).toSig(env)).toSig(env.enums).first
@@ -539,12 +532,12 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 	}
 
 	@Override
-	public catdata.fql.decl.SigExp.Const visit(FQLProgram env, Var e) {
+	public SigExp.Const visit(FQLProgram env, Var e) {
 		return env.sigs.get(e.v).accept(env, this);
 	}
 
 	@Override
-	public catdata.fql.decl.SigExp.Const visit(FQLProgram env, catdata.fql.decl.SigExp.Const e) {
+	public SigExp.Const visit(FQLProgram env, SigExp.Const e) {
 		return e;
 	}
 
@@ -621,7 +614,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 	}
 
 	@Override
-	public Const visit(FQLProgram env, catdata.fql.decl.MapExp.Var e) {
+	public Const visit(FQLProgram env, MapExp.Var e) {
 		return env.maps.get(e.v).accept(env, this);
 	}
 
@@ -664,8 +657,8 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 	@Override
 	public Const visit(FQLProgram env, Apply e) {
 		try {
-			catdata.fql.decl.SigExp.Const A = e.s.accept(env, this);
-			catdata.fql.decl.SigExp.Const B = e.t.accept(env, this);
+			SigExp.Const A = e.s.accept(env, this);
+			SigExp.Const B = e.t.accept(env, this);
 			Signature Bsig = B.toSig(env);
 			Signature Asig = A.toSig(env);
 
@@ -675,14 +668,14 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 			Quad<Signature, Pair<Map<Mapping, String>, Map<String, Mapping>>, Pair<Map<Arr<Mapping, Map<Node, Path>>, String>, Map<String, Arr<Mapping, Map<Node, Path>>>>, Pair<Map<Attribute<Mapping>, String>, Map<String, Attribute<Mapping>>>> AeB_stuff = cat
 					.toSig(env.enums);
 
-			catdata.fql.decl.SigExp.Const AeB = AeB_stuff.first.toConst(); // A^B
+			SigExp.Const AeB = AeB_stuff.first.toConst(); // A^B
 
-			Quad<catdata.fql.decl.SigExp.Const, Const, Const, Fn<Triple<catdata.fql.decl.SigExp.Const, Const, Const>, Const>> AeBtB_stuff = prod(
+			Quad<SigExp.Const, Const, Const, Fn<Triple<SigExp.Const, Const, Const>, Const>> AeBtB_stuff = prod(
 					AeB, e.t.accept(env, this)).first;
 
-			catdata.fql.decl.SigExp.Const AeBtB = AeBtB_stuff.first; // A^B * B
+			SigExp.Const AeBtB = AeBtB_stuff.first; // A^B * B
 
-			if (AeBtB.attrs.size() > 0) {
+			if (!AeBtB.attrs.isEmpty()) {
 				throw new RuntimeException("found attributes in A^B*B");
 			}
 
@@ -724,7 +717,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 
 			List<Pair<String, String>> attrs = new LinkedList<>();
 			// List<Pair<String, String>> objs = new LinkedList<>();
-			return new MapExp.Const(nm, attrs, arrows, AeBtB, A);
+			return new Const(nm, attrs, arrows, AeBtB, A);
 
 		} catch (FQLException fe) {
 			fe.printStackTrace();
@@ -736,27 +729,27 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 	@Override
 	public Const visit(FQLProgram env, Curry e) {
 		try {
-			MapExp.Const F = e.f.accept(env, this);
+			Const F = e.f.accept(env, this);
 
 			Pair<SigExp, SigExp> type = e.f.type(env);
 			SigExp.Const C = type.second.toConst(env);
 			Signature Csig = C.toSig(env);
 
-			if (!(type.first instanceof SigExp.Times)) {
+			if (!(type.first instanceof Times)) {
 				throw new RuntimeException();
 			}
 
-			SigExp.Times src = (SigExp.Times) type.first;
+			Times src = (Times) type.first;
 			SigExp.Const A = src.a.toConst(env);
 			SigExp.Const B = src.b.toConst(env);
 			//Signature Asig = A.toSig(env);
 			Signature Bsig = B.toSig(env);
 			
-			if (A.attrs.size() > 0) {
+			if (!A.attrs.isEmpty()) {
 				throw new RuntimeException("Cannot curry when context has attributes.");
 			}
 
-			Pair<Quad<catdata.fql.decl.SigExp.Const, Const, Const, Fn<Triple<catdata.fql.decl.SigExp.Const, Const, Const>, Const>>, Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>>> AB_stuff = prod(
+			Pair<Quad<SigExp.Const, Const, Const, Fn<Triple<SigExp.Const, Const, Const>, Const>>, Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>>> AB_stuff = prod(
 					A, B);
 		//	SigExp.Const AB = AB_stuff.first.first;
 			Quad<Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>, Map<Pair<String, String>, String>> maps = AB_stuff.second;
@@ -802,7 +795,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 			// A*B -> C
 			// A -> C^B
 			
-			MapExp.Const ret = new MapExp.Const(nmret, attrs, amret, A, CB.toConst());
+			Const ret = new Const(nmret, attrs, amret, A, CB.toConst());
 			ret.toMap(env);
 			return ret;
 			
@@ -813,7 +806,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 	}
 
 	private static Mapping curry_helper(
-			MapExp.Const F,
+			Const F,
 			Signature Csig,
 			SigExp.Const B,
 			Signature Bsig,
@@ -907,13 +900,13 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 	}
 
 	@Override
-	public catdata.fql.decl.SigExp.Const visit(FQLProgram env, Union e) {
+	public SigExp.Const visit(FQLProgram env, Union e) {
 		return (SigExp.Const) e.typeOf(env);
 	}
 
 	@Override
-	public catdata.fql.decl.SigExp.Const visit(FQLProgram env, Opposite e) {
-		catdata.fql.decl.SigExp.Const r = e.e.accept(env, this);
+	public SigExp.Const visit(FQLProgram env, Opposite e) {
+		SigExp.Const r = e.e.accept(env, this);
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
 
 		for (Triple<String, String, String> l : r.arrows) {
@@ -961,24 +954,24 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 	}
 
 	@Override
-	public Const visit(FQLProgram env, catdata.fql.decl.MapExp.Opposite e) {
+	public Const visit(FQLProgram env, MapExp.Opposite e) {
 		Const k = e.e.accept(env, this);
 		Pair<SigExp, SigExp> p = k.type(env);
 
 		List<Pair<String, List<String>>> arrows = new LinkedList<>();
 
-		catdata.fql.decl.SigExp.Const yyy = p.second.toConst(env);
+		SigExp.Const yyy = p.second.toConst(env);
 
 		for (Pair<String, List<String>> arrow : k.arrows) {
 			List<String> xxx = new LinkedList<>(arrow.second);
 
 			xxx.remove(0);
 			Collections.reverse(xxx);
-			if (xxx.size() > 0) {
+			if (xxx.isEmpty()) {
+				xxx.add(arrow.second.get(0));
+			} else {
 				String v = lookup(yyy.arrows, xxx.get(0));
 				xxx.add(0, v);
-			} else {
-				xxx.add(arrow.second.get(0));
 			}
 
 			arrows.add(new Pair<>(arrow.first, xxx));
@@ -989,7 +982,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 	}
 
 	@Override
-	public catdata.fql.decl.SigExp.Const visit(FQLProgram env, Unknown e) {
+	public SigExp.Const visit(FQLProgram env, Unknown e) {
 		throw new RuntimeException("Encountered unknown type.");
 	}
 
@@ -1003,11 +996,7 @@ public class SigOps implements SigExpVisitor<SigExp.Const, FQLProgram>,
 		if (s == null) {
 			throw new RuntimeException("Cannot find isomorphism for " + e);
 		}
-		if (e.lToR) {
-			return s.first.toConst();
-		} else {
-			return s.second.toConst();
-		}
+			return e.lToR ? s.first.toConst() : s.second.toConst();
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getMessage());

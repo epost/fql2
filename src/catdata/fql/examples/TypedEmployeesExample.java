@@ -20,7 +20,7 @@ public class TypedEmployeesExample extends Example {
 		return s;
 	}
 	
-	public static final String s = 
+	private static final String s =
 			"schema S = { "
 					+ "\n nodes"
 					+ "\n 	Employee, Department;"

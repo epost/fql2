@@ -9,12 +9,12 @@ import javax.swing.Timer;
 
 public class ProgressMonitorWrapper implements ActionListener {
 
-	ProgressMonitor pbar;
-	int counter = 0;
+	private final ProgressMonitor pbar;
+	private int counter = 0;
 
-	long start_time;
-	Thread thread;
-	Timer timer;
+	private final long start_time;
+	private final Thread thread;
+	private final Timer timer;
 	
 	public ProgressMonitorWrapper(String msg, Runnable task) {
 		pbar = new ProgressMonitor(null, msg, "Elapsed: 0 secs", 0, 4);

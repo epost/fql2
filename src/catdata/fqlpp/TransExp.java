@@ -20,11 +20,11 @@ public abstract class TransExp implements Serializable{
 	public abstract int hashCode();
 	
 	public static class PeterApply extends TransExp {
-		String node;
-		TransExp t;
+		final String node;
+		final TransExp t;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((node == null) ? 0 : node.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -52,7 +52,6 @@ public abstract class TransExp implements Serializable{
 			return true;
 		}
 		public PeterApply(String node, TransExp t) {
-			super();
 			this.node = node;
 			this.t = t;
 		}
@@ -63,8 +62,8 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class AndOrNotImplies extends TransExp {
-		String which;
-		CatExp cat;
+		final String which;
+		final CatExp cat;
 		
 		public AndOrNotImplies(String which, CatExp cat) {
 			this.cat = cat;
@@ -73,7 +72,7 @@ public abstract class TransExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((cat == null) ? 0 : cat.hashCode());
 			result = prime * result + ((which == null) ? 0 : which.hashCode());
@@ -109,7 +108,7 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class Chr extends TransExp {
-		TransExp t;
+		final TransExp t;
 
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
@@ -118,7 +117,7 @@ public abstract class TransExp implements Serializable{
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -142,13 +141,12 @@ public abstract class TransExp implements Serializable{
 		}
 
 		public Chr(TransExp t) {
-			super();
 			this.t = t;
 		}
 	}
 	
 	public static class Ker extends TransExp {
-		TransExp t;
+		final TransExp t;
 
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
@@ -157,7 +155,7 @@ public abstract class TransExp implements Serializable{
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -181,17 +179,16 @@ public abstract class TransExp implements Serializable{
 		}
 
 		public Ker(TransExp t) {
-			super();
 			this.t = t;
 		}
 	}
 	
 	public static class Bool extends TransExp {
-		boolean b;
-		CatExp cat;
+		final boolean b;
+		final CatExp cat;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + (b ? 1231 : 1237);
 			result = prime * result + ((cat == null) ? 0 : cat.hashCode());
@@ -216,7 +213,6 @@ public abstract class TransExp implements Serializable{
 			return true;
 		}
 		public Bool(boolean b, CatExp cat) {
-			super();
 			this.b = b;
 			this.cat = cat;
 		}
@@ -229,12 +225,12 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class Whisker extends TransExp {
-		boolean left;
-		FunctorExp func;
-		TransExp trans;
+		final boolean left;
+		final FunctorExp func;
+		final TransExp trans;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((func == null) ? 0 : func.hashCode());
 			result = prime * result + (left ? 1231 : 1237);
@@ -265,7 +261,6 @@ public abstract class TransExp implements Serializable{
 			return true;
 		}
 		public Whisker(boolean left, FunctorExp func, TransExp trans) {
-			super();
 			this.left = left;
 			this.func = func;
 			this.trans = trans;
@@ -279,11 +274,12 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class Eval extends TransExp {
-		FunctorExp a, b;
+		final FunctorExp a;
+        final FunctorExp b;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -313,7 +309,6 @@ public abstract class TransExp implements Serializable{
 		}
 
 		public Eval(FunctorExp a, FunctorExp b) {
-			super();
 			this.a = a;
 			this.b = b;
 		}
@@ -326,8 +321,8 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class Curry extends TransExp {
-		TransExp f;
-		Boolean useInst;
+		final TransExp f;
+		final Boolean useInst;
 		
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
@@ -336,7 +331,7 @@ public abstract class TransExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			result = prime * result + ((useInst == null) ? 0 : useInst.hashCode());
@@ -366,7 +361,6 @@ public abstract class TransExp implements Serializable{
 		}
 
 		public Curry(TransExp f, Boolean useInst) {
-			super();
 			this.f = f;
 			this.useInst = useInst;
 		}
@@ -374,11 +368,13 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class Adj extends TransExp {
-		String which, L, R;
-		FunctorExp F;
+		final String which;
+        final String L;
+        final String R;
+		final FunctorExp F;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((L == null) ? 0 : L.hashCode());
@@ -418,7 +414,6 @@ public abstract class TransExp implements Serializable{
 			return true;
 		}
 		public Adj(String which, String l, String r, FunctorExp f) {
-			super();
 			this.which = which;
 			L = l;
 			R = r;
@@ -433,13 +428,13 @@ public abstract class TransExp implements Serializable{
 	
 	
 	public static class ApplyPath extends TransExp {
-		FunctorExp F;
-		String node;
-		List<String> edges;
-		CatExp cat;
+		final FunctorExp F;
+		final String node;
+		final List<String> edges;
+		final CatExp cat;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((cat == null) ? 0 : cat.hashCode());
@@ -479,7 +474,6 @@ public abstract class TransExp implements Serializable{
 			return true;
 		}
 		public ApplyPath(FunctorExp f, String node, List<String> edges, CatExp cat) {
-			super();
 			F = f;
 			this.node = node;
 			this.edges = edges;
@@ -493,16 +487,15 @@ public abstract class TransExp implements Serializable{
 	}
 
 	public static class ApplyTrans extends TransExp {
-		TransExp F;
-		FunctorExp I;
+		final TransExp F;
+		final FunctorExp I;
 		public ApplyTrans(TransExp f, FunctorExp i) {
-			super();
 			F = f;
 			I = i;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -537,11 +530,11 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class Apply extends TransExp {
-		FunctorExp F;
-		TransExp I;
+		final FunctorExp F;
+		final TransExp I;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -569,7 +562,6 @@ public abstract class TransExp implements Serializable{
 			return true;
 		}
 		public Apply(FunctorExp f, TransExp i) {
-			super();
 			F = f;
 			I = i;
 		}
@@ -582,8 +574,9 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class Proj extends TransExp {
-		FunctorExp l, r;
-		Boolean proj1;
+		final FunctorExp l;
+        final FunctorExp r;
+		final Boolean proj1;
 		
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
@@ -592,7 +585,7 @@ public abstract class TransExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((proj1 == null) ? 0 : proj1.hashCode());
@@ -628,7 +621,6 @@ public abstract class TransExp implements Serializable{
 		}
 
 		public Proj(FunctorExp l, FunctorExp r, Boolean proj1) {
-			super();
 			this.l = l;
 			this.r = r;
 			this.proj1 = proj1;
@@ -638,8 +630,9 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class Inj extends TransExp {
-		FunctorExp l, r;
-		Boolean inj1;
+		final FunctorExp l;
+        final FunctorExp r;
+		final Boolean inj1;
 		
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
@@ -648,7 +641,7 @@ public abstract class TransExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((inj1 == null) ? 0 : inj1.hashCode());
@@ -684,7 +677,6 @@ public abstract class TransExp implements Serializable{
 		}
 
 		public Inj(FunctorExp l, FunctorExp r, Boolean inj1) {
-			super();
 			this.l = l;
 			this.r = r;
 			this.inj1 = inj1;
@@ -695,18 +687,17 @@ public abstract class TransExp implements Serializable{
 	
 	
 	public static class Zero extends TransExp {
-		FunctorExp f;
+		final FunctorExp f;
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
 		public Zero(FunctorExp f) {
-			super();
 			this.f = f;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -730,18 +721,17 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class One extends TransExp {
-		FunctorExp f;
+		final FunctorExp f;
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
 		public One(FunctorExp f) {
-			super();
 			this.f = f;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -766,19 +756,19 @@ public abstract class TransExp implements Serializable{
 	
 	
 	public static class Prod extends TransExp {
-		TransExp l, r;
+		final TransExp l;
+        final TransExp r;
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
 		public Prod(TransExp l, TransExp r) {
-			super();
 			this.l = l;
 			this.r = r;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -808,19 +798,19 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class CoProd extends TransExp {
-		TransExp l, r;
+		final TransExp l;
+        final TransExp r;
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
 		public CoProd(TransExp l, TransExp r) {
-			super();
 			this.l = l;
 			this.r = r;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -852,11 +842,13 @@ public abstract class TransExp implements Serializable{
 	
 	public static class ToMap extends TransExp {
 		
-		public Map<String, Pair<String, List<String>>> fun;
+		public final Map<String, Pair<String, List<String>>> fun;
 		
-		public FunctorExp src, dst;
+		public final FunctorExp src;
+        public final FunctorExp dst;
 		
-		public CatExp s, t;
+		public final CatExp s;
+        public final CatExp t;
 		
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
@@ -865,7 +857,6 @@ public abstract class TransExp implements Serializable{
 
 		public ToMap(Map<String, Pair<String, List<String>>> fun,
 				FunctorExp src, FunctorExp dst, CatExp s, CatExp t) {
-			super();
 			this.fun = fun;
 			this.src = src;
 			this.dst = dst;
@@ -875,7 +866,7 @@ public abstract class TransExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((fun == null) ? 0 : fun.hashCode());
@@ -927,9 +918,10 @@ public abstract class TransExp implements Serializable{
 	
 	public static class ToSet extends TransExp {
 		
-		public Map<String, Chc<FnExp,SetExp>> fun;
+		public final Map<String, Chc<FnExp,SetExp>> fun;
 		
-		public FunctorExp src, dst;
+		public final FunctorExp src;
+        public final FunctorExp dst;
 		
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
@@ -937,7 +929,6 @@ public abstract class TransExp implements Serializable{
 		}
 
 		public ToSet(Map<String, Chc<FnExp,SetExp>> fun, FunctorExp src, FunctorExp dst) {
-			super();
 			this.fun = fun;
 			this.src = src;
 			this.dst = dst;
@@ -945,7 +936,7 @@ public abstract class TransExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((fun == null) ? 0 : fun.hashCode());
@@ -985,9 +976,10 @@ public abstract class TransExp implements Serializable{
 	
 	public static class ToInst extends TransExp {
 		
-		public Map<String, TransExp> fun;
+		public final Map<String, TransExp> fun;
 		
-		public FunctorExp src, dst;
+		public final FunctorExp src;
+        public final FunctorExp dst;
 		
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
@@ -996,7 +988,7 @@ public abstract class TransExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((fun == null) ? 0 : fun.hashCode());
@@ -1012,7 +1004,7 @@ public abstract class TransExp implements Serializable{
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			ToCat other = (ToCat) obj;
+			ToInst other = (ToInst) obj;
 			if (dst == null) {
 				if (other.dst != null)
 					return false;
@@ -1032,7 +1024,6 @@ public abstract class TransExp implements Serializable{
 		}
 
 		public ToInst(Map<String, TransExp> fun, FunctorExp src, FunctorExp dst) {
-			super();
 			this.fun = fun;
 			this.src = src;
 			this.dst = dst;
@@ -1042,9 +1033,10 @@ public abstract class TransExp implements Serializable{
 	
 	public static class ToCat extends TransExp {
 		
-		public Map<String, FunctorExp> fun;
+		public final Map<String, FunctorExp> fun;
 		
-		public FunctorExp src, dst;
+		public final FunctorExp src;
+        public final FunctorExp dst;
 		
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
@@ -1053,7 +1045,7 @@ public abstract class TransExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((fun == null) ? 0 : fun.hashCode());
@@ -1089,7 +1081,6 @@ public abstract class TransExp implements Serializable{
 		}
 
 		public ToCat(Map<String, FunctorExp> fun, FunctorExp src, FunctorExp dst) {
-			super();
 			this.fun = fun;
 			this.src = src;
 			this.dst = dst;
@@ -1098,9 +1089,10 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class SetSet extends TransExp {
-		String ob;
-		FnExp fun;
-		FunctorExp src, dst;
+		final String ob;
+		final FnExp fun;
+		final FunctorExp src;
+        final FunctorExp dst;
 		
 		public SetSet(String ob, FnExp fun, FunctorExp src, FunctorExp dst) {
 			this.ob = ob;
@@ -1111,7 +1103,7 @@ public abstract class TransExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((fun == null) ? 0 : fun.hashCode());
@@ -1160,7 +1152,7 @@ public abstract class TransExp implements Serializable{
 	
 	
 	public static class Id extends TransExp {
-		public FunctorExp t;
+		public final FunctorExp t;
 
 		public Id(FunctorExp t) {
 			this.t = t;
@@ -1168,7 +1160,7 @@ public abstract class TransExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -1203,7 +1195,7 @@ public abstract class TransExp implements Serializable{
 	}
 
 	public static class Var extends TransExp {
-		public String v;
+		public final String v;
 
 		public Var(String v) {
 			this.v = v;
@@ -1219,7 +1211,7 @@ public abstract class TransExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((v == null) ? 0 : v.hashCode());
 			return result;
@@ -1249,16 +1241,17 @@ public abstract class TransExp implements Serializable{
 	}
 	
 	public static class Comp extends TransExp {
-		TransExp l, r;
+		final TransExp l;
+        final TransExp r;
 
 		public Comp(TransExp TransExp, TransExp r) {
-			this.l = TransExp;
+            l = TransExp;
 			this.r = r;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1307,18 +1300,15 @@ public static class Iso extends TransExp {
 		}
 		@Override
 		public String toString() {
-			if (lToR) {
-				return "iso1 " + l + " " + r;
-			} else {
-				return "iso2 " + l + " " + r;
-			}
+            return lToR ? "iso1 " + l + " " + r : "iso2 " + l + " " + r;
 		}
 		
-		boolean lToR;
-		FunctorExp l, r;
+		final boolean lToR;
+		final FunctorExp l;
+    final FunctorExp r;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + (lToR ? 1231 : 1237);
@@ -1355,32 +1345,32 @@ public static class Iso extends TransExp {
 	}
 
 	public interface TransExpVisitor<R, E> {
-		public R visit(E env, Id e);
-		public R visit(E env, Comp e);
-		public R visit(E env, Var e);
-		public R visit(E env, SetSet e);
-		public R visit(E env, ToMap e);
-		public R visit(E env, ToSet e);
-		public R visit(E env, ToCat e);
-		public R visit(E env, ToInst e);
-		public R visit(E env, One e);
-		public R visit(E env, Proj e);
-		public R visit(E env, Prod e);
-		public R visit(E env, CoProd e);
-		public R visit(E env, Inj e);
-		public R visit(E env, Zero e);
-		public R visit(E env, Apply e);
-		public R visit(E env, ApplyPath e);
-		public R visit(E env, Adj e);
-		public R visit(E env, Iso e);
-		public R visit(E env, ApplyTrans e);
-		public R visit(E env, Curry e);
-		public R visit(E env, Eval e);
-		public R visit(E env, Whisker e);
-		public R visit(E env, Bool e);
-		public R visit(E env, Chr e);
-		public R visit(E env, Ker e);
-		public R visit(E env, AndOrNotImplies e);
-		public R visit(E env, PeterApply e);
+		R visit(E env, Id e);
+		R visit(E env, Comp e);
+		R visit(E env, Var e);
+		R visit(E env, SetSet e);
+		R visit(E env, ToMap e);
+		R visit(E env, ToSet e);
+		R visit(E env, ToCat e);
+		R visit(E env, ToInst e);
+		R visit(E env, One e);
+		R visit(E env, Proj e);
+		R visit(E env, Prod e);
+		R visit(E env, CoProd e);
+		R visit(E env, Inj e);
+		R visit(E env, Zero e);
+		R visit(E env, Apply e);
+		R visit(E env, ApplyPath e);
+		R visit(E env, Adj e);
+		R visit(E env, Iso e);
+		R visit(E env, ApplyTrans e);
+		R visit(E env, Curry e);
+		R visit(E env, Eval e);
+		R visit(E env, Whisker e);
+		R visit(E env, Bool e);
+		R visit(E env, Chr e);
+		R visit(E env, Ker e);
+		R visit(E env, AndOrNotImplies e);
+		R visit(E env, PeterApply e);
 	} 
 }

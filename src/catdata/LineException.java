@@ -12,7 +12,7 @@ public class LineException extends RuntimeException {
 			super(string);
 			this.decl = decl;
 			this.kind = kind;
-			this.str = string;
+            str = string;
 		}
 		
 		@Override public boolean equals(Object o) {

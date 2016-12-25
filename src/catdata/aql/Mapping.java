@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -139,7 +140,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		semantics();
 	}
 
-	public void validate(boolean doNotCheckEquations) {
+	private void validate(boolean doNotCheckEquations) {
 		//for each (k,v) in ens/atts/fks, k must be in src and dst must be in target 
 		for (En1 en1 : src.ens) {
 			En2 en2 = ens.map.get(en1);
@@ -225,7 +226,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((atts == null) ? 0 : atts.hashCode());
 		result = prime * result + ((dst == null) ? 0 : dst.hashCode());

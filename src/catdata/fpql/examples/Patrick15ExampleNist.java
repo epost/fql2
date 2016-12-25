@@ -21,7 +21,7 @@ public class Patrick15ExampleNist extends Example {
 		return s;
 	}
 	
-	String s ="adom : type"
+	private final String s ="adom : type"
 			+ "\n"
 			+ "\n88 : adom"
 			+ "\n\"Micro Hole EDM\" : adom"

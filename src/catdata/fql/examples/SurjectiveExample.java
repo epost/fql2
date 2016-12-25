@@ -20,7 +20,7 @@ public class SurjectiveExample extends Example {
 		return s;
 	}
 	
-	String s = "schema C = {"
+	private final String s = "schema C = {"
 			+ "\n	nodes a, b;"
 			+ "\n	attributes att1 : a -> string, att2 : b -> string;"
 			+ "\n	arrows;"

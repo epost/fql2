@@ -82,9 +82,9 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		
 	}
 	
-	private OplSig<S, C, V> sig;
-	public OplKB<C, V> KB;
-	private Iterator<V> fr;
+	private final OplSig<S, C, V> sig;
+	public final OplKB<C, V> KB;
+	private final Iterator<V> fr;
 //	private OplJavaInst I;
 	
 	
@@ -113,7 +113,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		}
 	}
 	
-	private Map<Pair<List<S>, S>, Collection<Pair<OplCtx<S, V>, OplTerm<C, V>>>> hom = new HashMap<>();
+	private final Map<Pair<List<S>, S>, Collection<Pair<OplCtx<S, V>, OplTerm<C, V>>>> hom = new HashMap<>();
 	
 	@SuppressWarnings("deprecation")
 	private static void checkParentDead(Thread cur) {
@@ -151,18 +151,18 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			
 		//	int count = 0;
 			Map<S, Set<OplTerm<C, V>>> j = arity0(vars2);
-			for (;;) {
-				checkParentDead(cur);
-				Map<S, Set<OplTerm<C, V>>> k = inc(j);
-				checkParentDead(cur);
-				Map<S, Set<OplTerm<C, V>>> k2= red(k);
-				checkParentDead(cur);
-				if (j.equals(k2)) {
-					break;
-				} 
-				j = k2;			
-			}	
-			ret = j.get(t).stream().map(g -> { return nice(ctx, g); }).collect(Collectors.toList());
+            while (true) {
+                checkParentDead(cur);
+                Map<S, Set<OplTerm<C, V>>> k = inc(j);
+                checkParentDead(cur);
+                Map<S, Set<OplTerm<C, V>>> k2 = red(k);
+                checkParentDead(cur);
+                if (j.equals(k2)) {
+                    break;
+                }
+                j = k2;
+            }
+			ret = j.get(t).stream().map(g -> nice(ctx, g)).collect(Collectors.toList());
 			//ret = new LinkedList<>(ret);
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			List<Object> rret = (List) ret;
@@ -173,7 +173,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	Pair<OplCtx<S,V>, OplTerm<C,V>> nice(OplCtx<S,V> G, OplTerm<C,V> e) {
+    private Pair<OplCtx<S,V>, OplTerm<C,V>> nice(OplCtx<S, V> G, OplTerm<C, V> e) {
 		int i = 0;
 		Map m = new HashMap();
 		List<Pair> l = new LinkedList<>();
@@ -263,14 +263,14 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	
 	
 	public String printKB() {
-		return this.KB.printKB();
+		return KB.printKB();
 	}
 	
 	public static <C,V> KBExp<C, V> convert(OplTerm<C,V> t) {
 		if (t.var != null) {
 			return new KBVar<>(t.var);
 		}
-		List<KBExp<C, V>> l = t.args.stream().map(x -> { return convert(x); }).collect(Collectors.toList());
+		List<KBExp<C, V>> l = t.args.stream().map((Function<OplTerm<C, V>, KBExp<C, V>>) OplToKB::convert).collect(Collectors.toList());
 		return new KBApp<>(t.head, l);
 	}
 	
@@ -313,7 +313,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			if (l == null && r != null) {
 				return false;
 			}
-			if (r == null && l != null) {
+			if (l != null) {
 				return true;
 			}
 			String lx = x.first.toString();
@@ -350,7 +350,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			if (la >= 3 || ra >= 3) {  //added Aug 3 16
 				return la > ra;
 			}
-			throw new RuntimeException("Bug in precedence, report to Ryan: la=" + la + ", ra=" + ra + ", l=" + l + ", r=" + r);
+			throw new RuntimeException("Bug in precedence, report to Ryan: la=" + la + ", ra=" + ra + ", l=null r=null");
 			//function symbols: arity-0 < arity-2 < arity-1 < arity-3 < arity-4
 		};
 
@@ -372,7 +372,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		return new OplKB(eqs, KBOrders.lpogt(GlobalOptions.debug.opl.opl_allow_horn && !s.implications.isEmpty(), gt), fr, rs, options);			
 	}
 	
-	public static <C,V> Set<Pair<KBExp<C, V>, KBExp<C, V>>> convert(List<Pair<OplTerm<C, V>, OplTerm<C, V>>> x, List<Pair<OplTerm<C, V>, OplTerm<C, V>>> y) {
+	private static <C,V> Set<Pair<KBExp<C, V>, KBExp<C, V>>> convert(List<Pair<OplTerm<C, V>, OplTerm<C, V>>> x, List<Pair<OplTerm<C, V>, OplTerm<C, V>>> y) {
 		Set<Pair<KBExp<C, V>, KBExp<C, V>>> rs = new HashSet<>();
 		KBExp<C, V> lhs = KBHorn.fals();
 		for (Pair<OplTerm<C, V>, OplTerm<C, V>> l : x) {
@@ -438,7 +438,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		
 	@SuppressWarnings("deprecation")
 	public Map<S, Set<OplTerm<C, V>>> doHoms() {
-		HashMap<S, Set<OplTerm<C, V>>> sorts = new HashMap<>();
+		Map<S, Set<OplTerm<C, V>>> sorts = new HashMap<>();
 		Thread cur = Thread.currentThread();
 		Runnable r = () -> {
                     try {

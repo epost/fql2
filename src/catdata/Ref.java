@@ -30,9 +30,7 @@ public class Ref<X> {
 		if (this.x == null) {
 			this.x = x;
 			var = -1;
-		} else if (this.x.equals(x)) {
-			
-		} else {
+		} if (!this.x.equals(x)) {
 			throw new RuntimeException("Reference already set to " + this.x + ", cannot set to " + x);
 		}
 	}
@@ -55,7 +53,7 @@ public class Ref<X> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + var;
 		result = prime * result + ((x == null) ? 0 : x.hashCode());

@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -22,10 +23,14 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
+import catdata.opl.OplExp.OplSig;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
+import org.codehaus.jparsec.Terminals.Identifier;
+import org.codehaus.jparsec.Terminals.IntegerLiteral;
+import org.codehaus.jparsec.Terminals.StringLiteral;
 import org.codehaus.jparsec.functors.Tuple3;
 
 import catdata.Pair;
@@ -48,41 +53,39 @@ public class CfgToOpl {
 			return s;
 		}
 		
-		String s = "t ::= 1 | t \"*\" t | t \"^\" t"
+		final String s = "t ::= 1 | t \"*\" t | t \"^\" t"
 				+ "\n\n, //separate productions by ,\n"
 				+ "\ne ::= id t | e \";\" e | \"!\" t | \"(\" e \",\" e \")\" | fst t t | snd t t | curry e | eval t t";
 		
 	}
 
-	protected Example[] examples = { new STLCExample() } ;
+	private final Example[] examples = { new STLCExample() } ;
 	
-	String help = ""; 
+	private final String help = "";
 	
-	protected static String kind() {
+	private static String kind() {
 		return "CFG";
 	}
 	
 	
-	static String translate(String in) {
+	private static String translate(String in) {
 		return program(in).toString();
 	}
 
 	public CfgToOpl() {
-		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind() + " Input", "");
-		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "OPL Output", "");
+		CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind() + " Input", "");
+		CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "OPL Output", "");
 
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");
 	
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener((ActionEvent e) -> {
-                    input.setText(((Example) box.getSelectedItem()).getText());
-                });
+		box.addActionListener((ActionEvent e) -> input.setText(((Example) box.getSelectedItem()).getText()));
 		
 		transButton.addActionListener((ActionEvent e) -> {
                     try {
-                        output.setText(translate(input.getText()).toString());
+                        output.setText(translate(input.getText()));
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         output.setText(ex.getLocalizedMessage());
@@ -149,9 +152,9 @@ public class CfgToOpl {
 	//}
 	
 	
-	private static String[] ops = new String[] { "|" , "::=", "," };
+	private static final String[] ops = new String[] { "|" , "::=", "," };
 
-	private static String[] res = new String[] { };
+	private static final String[] res = new String[] { };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
@@ -159,25 +162,25 @@ public class CfgToOpl {
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
 	private static final Parser<?> TOKENIZER = Parsers.or(
-			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
-			RESERVED.tokenizer(), (Parser<?>) Terminals.Identifier.TOKENIZER,
-			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
+			(Parser<?>) StringLiteral.DOUBLE_QUOTE_TOKENIZER,
+			RESERVED.tokenizer(), (Parser<?>) Identifier.TOKENIZER,
+			(Parser<?>) IntegerLiteral.TOKENIZER);
 
 	private static Parser<?> term(String... names) {
 		return RESERVED.token(names);
 	}
 
-	public static Parser<?> ident() {
-		return Terminals.Identifier.PARSER;
+	private static Parser<?> ident() {
+		return Identifier.PARSER;
 	}
 
-	public static final Object program(String s) {
+	private static Object program(String s) {
 		return toCfg( program.parse(s) );
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	static OplExp toCfg(Object o) {
-		HashMap<String, List<List<String>>> ret = new HashMap<>();
+    private static OplExp toCfg(Object o) {
+		Map<String, List<List<String>>> ret = new HashMap<>();
 		
 		List<Tuple3> l = (List<Tuple3>) o;
 		for (Tuple3 p : l) {
@@ -188,7 +191,7 @@ public class CfgToOpl {
 			ret.put(x, (List<List<String>>) p.c);
 		}
 		
-		java.util.Map<String, Pair<List<String>, String>> symbols = new HashMap<>();
+		Map<String, Pair<List<String>, String>> symbols = new HashMap<>();
 		int i = 0;
 		for (String k : ret.keySet()) {
 			List<List<String>> v = ret.get(k);
@@ -209,11 +212,11 @@ public class CfgToOpl {
 				i++;
 			}
 		}
-		return new OplExp.OplSig(null, new HashMap<>(), ret.keySet(), symbols, new LinkedList<>());
+		return new OplSig(null, new HashMap<>(), ret.keySet(), symbols, new LinkedList<>());
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	static Parser program() {
+    private static Parser program() {
 		Parser q = string().many().sepBy(term("|"));
 		Parser p = Parsers.tuple(ident(), term("::="), q).sepBy(term(","));
 		return p;
@@ -221,12 +224,12 @@ public class CfgToOpl {
 	
 
 	@SuppressWarnings("unchecked")
-	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
+    private static final Parser<?> program = program().from(TOKENIZER, IGNORED);
 
 	
 	private static Parser<?> string() {
-		return Parsers.or(Terminals.StringLiteral.PARSER,
-				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
+		return Parsers.or(StringLiteral.PARSER,
+				IntegerLiteral.PARSER, Identifier.PARSER);
 	}
 	
 

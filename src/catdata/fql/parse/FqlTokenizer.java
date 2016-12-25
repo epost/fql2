@@ -16,21 +16,21 @@ import catdata.Pair;
  */
 public class FqlTokenizer implements Tokens {
 
-	private List<String> words;
+	private final List<String> words;
 	//private List<String> lines;
 	
-	private String[] symbols = new String[] { ",", ":", ";", "->", ".", "{",
+	private final String[] symbols = new String[] { ",", ":", ";", "->", ".", "{",
 			"}", "(", ")", "=", "[", "]", "+", "*" };
 
-	private String comment_start = "/*";
-	private String comment_end = "*/";
+	private final String comment_start = "/*";
+	private final String comment_end = "*/";
 
-	private String quote = "\"";
+	private final String quote = "\"";
 
-	private String space = " ";
-	private String tab = "\t";
-	private String linefeed = "\n";
-	private String carriagereturn = "\r";
+	private final String space = " ";
+	private final String tab = "\t";
+	private final String linefeed = "\n";
+	private final String carriagereturn = "\r";
 
 	private FqlTokenizer(List<String> s, @SuppressWarnings("unused") List<String> t) {
 		words = s; //lines = t;
@@ -38,7 +38,7 @@ public class FqlTokenizer implements Tokens {
 
 	public FqlTokenizer(String s) throws BadSyntax {
 		BufferedReader br = new BufferedReader(new StringReader(s));
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		String l;
 		try {
 			while ((l = br.readLine()) != null) {
@@ -60,7 +60,7 @@ public class FqlTokenizer implements Tokens {
 		words = tokenize(sb.toString()).first;
 	}
 
-	private static enum State {
+	private enum State {
 		IN_QUOTE, IN_COMMENT, NORMAL
 	}
 
@@ -72,83 +72,83 @@ public class FqlTokenizer implements Tokens {
 		String quote_state = "";
 		String comment_state = "";
 		String token_state = "";
-		for (;;) {
-			if (input.length() == 0) {
+		while (true) {
+			if (input.isEmpty()) {
 				switch (state) {
-				case NORMAL:
-					if (token_state.length() != 0) {
-						ret.add(token_state);
-						//ret2.add()
-					}
-					return new Pair<>(ret, ret2);
-				case IN_QUOTE:
-					throw new BadSyntax(this, "Unfinished quote: "
-							+ quote_state);
-				case IN_COMMENT:
-					throw new BadSyntax(this, "Unfinished comment: "
-							+ comment_state);
-				default:
-					break;
+					case NORMAL:
+						if (!token_state.isEmpty()) {
+							ret.add(token_state);
+							//ret2.add()
+						}
+						return new Pair<>(ret, ret2);
+					case IN_QUOTE:
+						throw new BadSyntax(this, "Unfinished quote: "
+								+ quote_state);
+					case IN_COMMENT:
+						throw new BadSyntax(this, "Unfinished comment: "
+								+ comment_state);
+					default:
+						break;
 				}
 			}
 			if (input.startsWith(comment_start)) {
 				switch (state) {
-				case NORMAL:
-					if (token_state.length() != 0) {
-						ret.add(token_state);
-						token_state = "";
-					}
-					state = State.IN_COMMENT;
-					break;
-				case IN_QUOTE:
-					quote_state += comment_start;
-					break;
-				case IN_COMMENT:
-					comment_state += comment_start;
-					break;
-				default:
-					break;
+					case NORMAL:
+						if (!token_state.isEmpty()) {
+							ret.add(token_state);
+							token_state = "";
+						}
+						state = State.IN_COMMENT;
+						break;
+					case IN_QUOTE:
+						quote_state += comment_start;
+						break;
+					case IN_COMMENT:
+						comment_state += comment_start;
+						break;
+					default:
+						break;
 				}
 				input = input.substring(comment_start.length());
 				continue;
 			}
 			if (input.startsWith(comment_end)) {
 				switch (state) {
-				case NORMAL:
-					throw new BadSyntax(this, "No comment to end: "
-							+ token_state);
-				case IN_QUOTE:
-					quote_state += comment_end;
-					break;
-				case IN_COMMENT:
-					comment_state = "";
-					state = State.NORMAL;
-					break;
-				default:
-					break;
+					case NORMAL:
+						throw new BadSyntax(this, "No comment to end: "
+								+ token_state);
+					case IN_QUOTE:
+						quote_state += comment_end;
+						break;
+					case IN_COMMENT:
+						comment_state = "";
+						state = State.NORMAL;
+						break;
+					default:
+						break;
 				}
 				input = input.substring(comment_end.length());
 				continue;
 			}
 			if (input.startsWith(quote)) {
 				switch (state) {
-				case NORMAL:
-					if (token_state.length() != 0) {
-						ret.add(token_state);
-						token_state = "";
-					}
-					state = State.IN_QUOTE;
-					break;
-				case IN_QUOTE:
-					ret.add(quote_state);
-					state = State.NORMAL;
-					quote_state = "";
-					break;
-				case IN_COMMENT:
-					comment_state += quote;
-					break;
-				default:
-					break;
+					case NORMAL:
+						if (!token_state.isEmpty()) {
+							ret.add(token_state);
+							token_state = "";
+						}
+						state = State.IN_QUOTE;
+						break;
+					case IN_QUOTE:
+						ret.add(quote_state);
+						state = State.NORMAL;
+						quote_state = "";
+						break;
+					case IN_COMMENT:
+						comment_state += quote;
+						break;
+					default:
+						break;
 				}
 				ret.add(quote);
 				input = input.substring(1);
@@ -158,20 +158,20 @@ public class FqlTokenizer implements Tokens {
 					|| input.startsWith(linefeed)
 					|| input.startsWith(carriagereturn)) {
 				switch (state) {
-				case NORMAL:
-					if (token_state.length() != 0) {
-						ret.add(token_state);
-						token_state = "";
-					}
-					break;
-				case IN_COMMENT:
-					comment_state += input.substring(0, 1);
-					break;
-				case IN_QUOTE:
-					quote_state += input.substring(0, 1);
-					break;
-				default:
-					break;
+					case NORMAL:
+						if (!token_state.isEmpty()) {
+							ret.add(token_state);
+							token_state = "";
+						}
+						break;
+					case IN_COMMENT:
+						comment_state += input.substring(0, 1);
+						break;
+					case IN_QUOTE:
+						quote_state += input.substring(0, 1);
+						break;
+					default:
+						break;
 				}
 				input = input.substring(1);
 				continue;
@@ -180,38 +180,38 @@ public class FqlTokenizer implements Tokens {
 			String matched = matchSymbol(input);
 			if (matched == null) {
 				switch (state) {
-				case NORMAL:
-					token_state += input.substring(0, 1);
-					break;
-				case IN_COMMENT:
-					comment_state += input.substring(0, 1);
-					break;
-				case IN_QUOTE:
-					quote_state += input.substring(0, 1);
-					break;
-				default:
-					break;
+					case NORMAL:
+						token_state += input.substring(0, 1);
+						break;
+					case IN_COMMENT:
+						comment_state += input.substring(0, 1);
+						break;
+					case IN_QUOTE:
+						quote_state += input.substring(0, 1);
+						break;
+					default:
+						break;
 				}
 				input = input.substring(1);
 				continue;
 			}
 
 			switch (state) {
-			case NORMAL:
-				if (token_state.length() != 0) {
-					ret.add(token_state);
-					token_state = "";
-				}
-				ret.add(matched);
-				break;
-			case IN_COMMENT:
-				comment_state += matched;
-				break;
-			case IN_QUOTE:
-				quote_state += matched;
-				break;
-			default:
-				break;
+				case NORMAL:
+					if (!token_state.isEmpty()) {
+						ret.add(token_state);
+						token_state = "";
+					}
+					ret.add(matched);
+					break;
+				case IN_COMMENT:
+					comment_state += matched;
+					break;
+				case IN_QUOTE:
+					quote_state += matched;
+					break;
+				default:
+					break;
 			}
 			input = input.substring(matched.length());
 

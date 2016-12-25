@@ -29,7 +29,7 @@ where unit is the terminal instance on C.*/
 	}
 	
 	@SuppressWarnings("serial")
-	public static <O,A,X> Category<Pair<O,X>,Triple<Pair<O,X>,Pair<O,X>,A>> pivotX(Functor<O,A,Set<X>,Fn<X,X>> F) {
+    private static <O,A,X> Category<Pair<O,X>,Triple<Pair<O,X>,Pair<O,X>,A>> pivotX(Functor<O, A, Set<X>, Fn<X, X>> F) {
 		
 		Set<Pair<O, X>> objects = new HashSet<>();
 		Set<Triple<Pair<O,X>, Pair<O,X>, A>> arrows = new HashSet<>();

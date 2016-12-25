@@ -12,11 +12,8 @@ public class Unit {
 	
 	@Override
 	public boolean equals(Object o) {
-            if (o == null) {
-                return false;
-            }
-            return (o instanceof Unit);
-	}
+        return o != null && (o instanceof Unit);
+    }
 	
 	@Override
 	public int hashCode() {

@@ -25,6 +25,7 @@ import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplSchema;
 import catdata.opl.OplExp.OplSig;
+import catdata.opl.OplParser.VIt;
 import catdata.sql.SqlColumn;
 import catdata.sql.SqlForeignKey;
 import catdata.sql.SqlInstance;
@@ -39,22 +40,18 @@ public class SqlToOpl extends JPanel {
 		Util.show(new SqlToOpl(), 700, 600, "SQL to OPL");
 	}
 
-	private CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "OPL Output", "");
+	private final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "OPL Output", "");
 
-	SqlLoader input = new SqlLoader(output, "SQL Input");
+	private final SqlLoader input = new SqlLoader(output, "SQL Input");
 
-	void doRun(boolean cnf) {
+	private void doRun(boolean cnf) {
 		if (input.schema == null) {
 			output.setText("Please Run or Load first");
 			return;
 		}
 		String ret = "";
 		Pair<OplSchema<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>, OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String>> x;
-		if (cnf) {
-			x = convertCnf(input.schema, input.instance, "S0", "I0");
-		} else {
-			x = convert(input.schema, input.instance, "S0", "I0");
-		}
+		x = cnf ? convertCnf(input.schema, input.instance, "S0", "I0") : convert(input.schema, input.instance, "S0", "I0");
 
 		ret += "S0 = " + x.first.sig;
 		ret += "\n\nS = " + x.first;
@@ -64,18 +61,14 @@ public class SqlToOpl extends JPanel {
 		output.setText(ret);
 	}
 
-	public SqlToOpl() {
+	private SqlToOpl() {
 		super(new BorderLayout());
 
 		JButton transButton = new JButton("Translate");
 		JButton cnfButton = new JButton("CNF Trans");
 
-		transButton.addActionListener(x -> {
-			doRun(false);
-		});
-		cnfButton.addActionListener(x -> {
-			doRun(true);
-		});
+		transButton.addActionListener(x -> doRun(false));
+		cnfButton.addActionListener(x -> doRun(true));
 
 		JPanel tp = new JPanel(new GridLayout(1, 4));
 
@@ -106,7 +99,7 @@ public class SqlToOpl extends JPanel {
 	
 	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Pair<OplSchema<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>, OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String>> convert(SqlSchema info, SqlInstance inst, String S0, String I0) {
+	private static Pair<OplSchema<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>, OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String>> convert(SqlSchema info, SqlInstance inst, String S0, String I0) {
 		Set<Chc<SqlType, SqlTable>> sorts = new HashSet<>();
 		Set<Chc<SqlType, SqlTable>> entities = new HashSet<>();
 		Map<Chc<Object, Chc<SqlColumn, SqlForeignKey>>, Pair<List<Chc<SqlType, SqlTable>>, Chc<SqlType, SqlTable>>> symbols = new HashMap<>();
@@ -144,7 +137,7 @@ public class SqlToOpl extends JPanel {
 
 		OplSchema<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sch = new OplSchema<>(S0, entities);
 
-		OplSig<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sig = new OplSig<>(OplParser.VIt.vit, new HashMap<>(), sorts, symbols, equations);
+		OplSig<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sig = new OplSig<>(VIt.vit, new HashMap<>(), sorts, symbols, equations);
 		sch.validate(sig);
 
 		OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String> I = new OplInst<>(S0, I0, "none");
@@ -155,17 +148,17 @@ public class SqlToOpl extends JPanel {
 		int fr = 0;
 		if (inst != null) {
 			Map<SqlTable, Map<Map<SqlColumn, Optional<Object>>, String>> iso1 = new HashMap<>();
-			Map<SqlTable, Map<String, Map<SqlColumn, Optional<Object>>>> iso2 = new HashMap<>();
+			//Map<SqlTable, Map<String, Map<SqlColumn, Optional<Object>>>> iso2 = new HashMap<>();
 
 			for (SqlTable table : info.tables) {
 				Set<Map<SqlColumn, Optional<Object>>> tuples = inst.get(table);
 
 				Map<Map<SqlColumn, Optional<Object>>, String> i1 = new HashMap<>();
-				Map<String, Map<SqlColumn, Optional<Object>>> i2 = new HashMap<>();
+			//	Map<String, Map<SqlColumn, Optional<Object>>> i2 = new HashMap<>();
 				for (Map<SqlColumn, Optional<Object>> tuple : tuples) {
 					String i = "v" + (fr++);
 					i1.put(tuple, i);
-					i2.put(i, tuple);
+				//	i2.put(i, tuple);
 					gens.put(i, Chc.inRight(table));
 					for (SqlColumn col : table.columns) {
 						SqlType ty = col.type;
@@ -180,7 +173,7 @@ public class SqlToOpl extends JPanel {
 					}
 				}
 				iso1.put(table, i1);
-				iso2.put(table, i2);
+			//	iso2.put(table, i2);
 			}
 
 			for (SqlForeignKey fk : info.fks) {
@@ -207,7 +200,7 @@ public class SqlToOpl extends JPanel {
 	}
 
 	// : code formatter should not wrap lines ever
-	public static Pair<OplSchema<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>, OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String>> convertCnf(SqlSchema info, SqlInstance inst, String S0, String I0) {
+	private static Pair<OplSchema<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>, OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String>> convertCnf(SqlSchema info, SqlInstance inst, String S0, String I0) {
 		if (!info.isCnf()) {
 			throw new RuntimeException("Schema not in categorical normal form");
 		}
@@ -241,7 +234,7 @@ public class SqlToOpl extends JPanel {
 
 		OplSchema<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sch = new OplSchema<>(S0, entities);
 
-		OplSig<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sig = new OplSig<>(OplParser.VIt.vit, new HashMap<>(), sorts, symbols, equations);
+		OplSig<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String> sig = new OplSig<>(VIt.vit, new HashMap<>(), sorts, symbols, equations);
 		sch.validate(sig);
 
 		OplInst<Chc<SqlType, SqlTable>, Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String, String> I = new OplInst<>(S0, I0, "none");
@@ -252,17 +245,20 @@ public class SqlToOpl extends JPanel {
 		int fr = 0;
 		if (inst != null) {
 			Map<SqlTable, Map<Object, String>> iso1 = new HashMap<>();
-			Map<SqlTable, Map<String, Object>> iso2 = new HashMap<>();
+			//Map<SqlTable, Map<String, Object>> iso2 = new HashMap<>();
 
 			for (SqlTable table : info.tables) {
 				Set<Map<SqlColumn, Optional<Object>>> tuples = inst.get(table);
 
 				Map<Object, String> i1 = new HashMap<>();
-				Map<String, Object> i2 = new HashMap<>();
+				//Map<String, Object> i2 = new HashMap<>();
 				for (Map<SqlColumn, Optional<Object>> tuple : tuples) {
 					String i = "v" + (fr++);
+					if (!tuple.get(table.getCnfId()).isPresent()) {
+						throw new RuntimeException("Anomly: please report");
+					}
 					i1.put(tuple.get(table.getCnfId()).get(), i);
-					i2.put(i, tuple.get(table.getCnfId()).get());
+					//i2.put(i, tuple.get(table.getCnfId()).get());
 					gens.put(i, Chc.inRight(table));
 					for (SqlColumn col : table.columns) {
 						if (col.equals(table.getCnfId())) {
@@ -283,12 +279,15 @@ public class SqlToOpl extends JPanel {
 					}
 				}
 				iso1.put(table, i1);
-				iso2.put(table, i2);
+				//iso2.put(table, i2);
 			}
 
 			for (SqlForeignKey fk : info.fks) {
 				for (Map<SqlColumn, Optional<Object>> in : inst.get(fk.source)) {
 					Map<SqlColumn, Optional<Object>> out = inst.follow(in, fk);
+					if (!out.get(fk.target.getCnfId()).isPresent() || !in.get(fk.source.getCnfId()).isPresent()) {
+						throw new RuntimeException("Anomaly: please report");
+					}
 					String tgen = iso1.get(fk.target).get(out.get(fk.target.getCnfId()).get());
 					String sgen = iso1.get(fk.source).get(in.get(fk.source.getCnfId()).get());
 					OplTerm<Chc<Chc<Object, Chc<SqlColumn, SqlForeignKey>>, String>, String> rhs = new OplTerm<>(Chc.inRight(tgen), new LinkedList<>());

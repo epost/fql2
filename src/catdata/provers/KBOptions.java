@@ -18,22 +18,22 @@ public class KBOptions {
 	@Deprecated
 	public int red_its = 32;
 	
-	public KBOptions() {	
+	private KBOptions() {
 	}
-	public static KBOptions defaultOptions = new KBOptions();
+	public static final KBOptions defaultOptions = new KBOptions();
 	
 	public KBOptions(boolean xunfailing, boolean xsort_cps, boolean xhorn, boolean xsemantic_ac,
 			int xiterations, int xred_its, boolean xfilter_subsumed_by_self,/* boolean simplify, */boolean xcompose, boolean xsyntactic_ac) {
-		this.unfailing = xunfailing;
-		this.sort_cps = xsort_cps;
-		this.horn = xhorn;
-		this.semantic_ac = xsemantic_ac;
-		this.iterations = xiterations;
-		this.red_its = xred_its;
-		this.filter_subsumed_by_self = xfilter_subsumed_by_self;
+        unfailing = xunfailing;
+        sort_cps = xsort_cps;
+        horn = xhorn;
+        semantic_ac = xsemantic_ac;
+        iterations = xiterations;
+        red_its = xred_its;
+        filter_subsumed_by_self = xfilter_subsumed_by_self;
 	//	this.simplify = simplify;
-		this.compose = xcompose;
-		this.syntactic_ac = xsyntactic_ac;
+        compose = xcompose;
+        syntactic_ac = xsyntactic_ac;
 	}
 	
 }

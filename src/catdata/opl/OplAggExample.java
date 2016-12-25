@@ -20,7 +20,7 @@ public class OplAggExample extends Example {
 		return s;
 	}
 
-	String s = "preamble = pragma {"
+	private final String s = "preamble = pragma {"
 			+ "\n	options"
 			+ "\n		\"opl_secret_agg\" = \"true\";"
 			+ "\n}"

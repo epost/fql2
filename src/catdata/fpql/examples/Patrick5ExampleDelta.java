@@ -21,7 +21,7 @@ public class Patrick5ExampleDelta extends Example {
 		return s;
 	}
 	
-	String s = "string int : type"
+	private final String s = "string int : type"
 			+ "\n"
 			+ "\nBob Sue Alice Smith Jones xxx c115234 c112988 c198887 : string"
 			+ "\nc100 c250 c300 c0 : int"

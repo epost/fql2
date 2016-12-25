@@ -2,8 +2,8 @@ package catdata.aql.fdm;
 
 import java.util.Map;
 
+import catdata.Ctx;
 import catdata.Util;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.Term;
 import catdata.aql.Transform;

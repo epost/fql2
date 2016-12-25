@@ -11,11 +11,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import catdata.fpql.XExp.XSchema;
+import catdata.opl.OplExp.OplSCHEMA0;
+import catdata.opl.OplExp.OplSchema;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parser.Reference;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
+import org.codehaus.jparsec.Terminals.Identifier;
+import org.codehaus.jparsec.Terminals.IntegerLiteral;
+import org.codehaus.jparsec.Terminals.StringLiteral;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
@@ -25,7 +31,6 @@ import catdata.Pair;
 import catdata.Program;
 import catdata.Triple;
 import catdata.Util;
-import catdata.fpql.XExp;
 import catdata.ide.GlobalOptions;
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplChaseExp;
@@ -65,18 +70,13 @@ import catdata.opl.OplQuery.Block;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class OplParser {
 
-	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
-				@Override
-				public Integer map(String s) {
-					return Integer.valueOf(s);
-				}
-			});
+	private static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
+			.map(Integer::valueOf);
 
-	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
+	private static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
-	static String[] res = new String[] { "agg", "arith", "distinct", "graph", "nodes", "ed", "tables", 
+	private static final String[] res = new String[] { "agg", "arith", "distinct", "graph", "nodes", "ed", "tables",
 			"chase", "with", "max", "insert", "into", "select", "and", "sql", 
 			"ID", "colimit" , "imports", "pragma", "options", "union",
 			"pushoutBen", "PUSHOUT", "pivot", "DELTA", "return", "coreturn",
@@ -91,33 +91,33 @@ public class OplParser {
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
-	public static final Parser<Void> IGNORED = Parsers.or(
+	private static final Parser<Void> IGNORED = Parsers.or(
 			Scanners.JAVA_LINE_COMMENT, Scanners.JAVA_BLOCK_COMMENT,
 			Scanners.WHITESPACES).skipMany();
 
-	public static final Parser<?> TOKENIZER = Parsers.or(
-			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
-			RESERVED.tokenizer(), (Parser<?>) Terminals.Identifier.TOKENIZER,
-			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
+	private static final Parser<?> TOKENIZER = Parsers.or(
+			(Parser<?>) StringLiteral.DOUBLE_QUOTE_TOKENIZER,
+			RESERVED.tokenizer(), (Parser<?>) Identifier.TOKENIZER,
+			(Parser<?>) IntegerLiteral.TOKENIZER);
 
-	static Parser<?> term(String... names) {
+	private static Parser<?> term(String... names) {
 		return RESERVED.token(names);
 	}
 
-	public static Parser<?> ident() {
-		return Parsers.or(Terminals.StringLiteral.PARSER,
-				Terminals.Identifier.PARSER);
+	private static Parser<?> ident() {
+		return Parsers.or(StringLiteral.PARSER,
+				Identifier.PARSER);
 	}
 
-	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
-	public static final Parser<?> exp = exp().from(TOKENIZER, IGNORED);
+	private static final Parser<?> program = program().from(TOKENIZER, IGNORED);
+	private static final Parser<?> exp = exp().from(TOKENIZER, IGNORED);
 
 	
-	public static final Parser<?> program() {
+	private static Parser<?> program() {
 		return Parsers.tuple(decl().source().peek(), decl()).many();
 	}
 
-	public static final Parser<?> oplTerm() {
+	private static Parser<?> oplTerm() {
 		Reference ref = Parser.newReference();
 		Parser<?> app = Parsers.tuple(string(), term("("),
 				ref.lazy().sepBy(term(",")), term(")"));
@@ -129,18 +129,18 @@ public class OplParser {
 		return a;
 	}
 
-	public static final Parser<?> oplSequent() {
+	private static Parser<?> oplSequent() {
 		Parser<?> p1 = Parsers.tuple(ident(), term(":"), ident());
-		Parser<?> z = Parsers.longest(new Parser[] { p1, ident() });
+		Parser<?> z = Parsers.longest(p1, ident());
 		Parser<?> p = z.sepBy(term(","));
 		Parser a = Parsers.tuple(term("forall"), p, term("."));
 		Parser retX = Parsers.tuple(a.optional(), oplTerm());
 		return retX;
 	}
 
-	public static final Parser<?> oplEq() {
+	private static Parser<?> oplEq() {
 		Parser<?> p1 = Parsers.tuple(ident(), term(":"), ident());
-		Parser<?> z = Parsers.longest(new Parser[] { p1, ident() });
+		Parser<?> z = Parsers.longest(p1, ident());
 		Parser<?> p = z.sepBy(term(","));
 		Parser<?> q = Parsers.tuple(oplTerm(), term("="), oplTerm());
 		Parser a = Parsers.tuple(term("forall"), p, term("."));
@@ -148,15 +148,15 @@ public class OplParser {
 		return retX;
 	}
 	
-	public static final Parser<?> sql() {
+	private static Parser<?> sql() {
 		Parser p = Parsers.tuple(term("insert"), term("into"), ident(), block2());
 		Parser p2 = p.sepBy(term(";"));
 		return Parsers.tuple(term("sql"), p2.between(term("{"), term("}")).followedBy(term(":")), ident(), term("->"), ident());
 	}
 
-	public static final Parser<?> oplImpl() {
+	private static Parser<?> oplImpl() {
 		Parser<?> p1 = Parsers.tuple(ident(), term(":"), ident());
-		Parser<?> z = Parsers.longest(new Parser[] { p1, ident() });
+		Parser<?> z = Parsers.longest(p1, ident());
 		Parser<?> p = z.sepBy(term(","));
 		Parser<?> q = Parsers.tuple(oplTerm(), term("="), oplTerm()).sepBy(
 				term(","));
@@ -166,7 +166,7 @@ public class OplParser {
 		return retX;
 	}
 
-	public static final Parser<?> exp() {
+	private static Parser<?> exp() {
 		Reference ref = Parser.newReference();
 
 		Parser<?> theory = theory();
@@ -210,20 +210,20 @@ public class OplParser {
 		Parser<?> model2 = model2();
 		Parser<?> graph = graph();
 		Parser<?> distinct = Parsers.tuple(term("distinct"), ident());
-		Parser<?> chase = Parsers.tuple(term("chase"), ident(), Parsers.tuple(term("with"), term("{"), ident().sepBy(term(",")), term("}")), term("max"), Terminals.IntegerLiteral.PARSER);
+		Parser<?> chase = Parsers.tuple(term("chase"), ident(), Parsers.tuple(term("with"), term("{"), ident().sepBy(term(",")), term("}")), term("max"), IntegerLiteral.PARSER);
 		Parser<?> arith = Parsers.tuple(term("arith"), NUMBER);
 		
-		Parser<?> a = Parsers.or(new Parser[] { arith, distinct, graph, model2, sql, chase, ID, colim, pragma, union, pushoutBen,
+		Parser<?> a = Parsers.or(arith, distinct, graph, model2, sql, chase, ID, colim, pragma, union, pushoutBen,
 				pushoutSch, pivot, DELTA, pushout, INST, SCHEMA, apply, idQ,
 				query, projEA, inst, schema, projE, projA, projT, flower,
 				ubersat, sigma, sat, unsat, presentation, delta, mapping,
-				theory, model, eval, trans, trans_pres, java });
+				theory, model, eval, trans, trans_pres, java);
 		ref.set(a);
 
 		return a;
 	}
 
-	public static final Parser<?> trans_pres() {
+	private static Parser<?> trans_pres() {
 		Parser<?> q = Parsers.tuple(term("("), ident(), term(","), oplTerm(),
 				term(")")).sepBy(term(","));
 		Parser<?> p = Parsers.tuple(ident(), term("->"), term("{"), q,
@@ -234,14 +234,14 @@ public class OplParser {
 						term("->"), ident()));
 	}
 
-	public static final Parser<?> pragma() {
-		Parser<?> p = Parsers.tuple(Terminals.StringLiteral.PARSER, term("="),
-				Terminals.StringLiteral.PARSER);
+	private static Parser<?> pragma() {
+		Parser<?> p = Parsers.tuple(StringLiteral.PARSER, term("="),
+				StringLiteral.PARSER);
 		Parser<?> foo = section("options", p);
 		return Parsers.tuple(term("pragma"), term("{"), foo, (term("}")));
 	}
 
-	public static final Parser<?> trans() {
+	private static Parser<?> trans() {
 		Parser<?> q = Parsers.tuple(term("("), string(), term(","), string(),
 				term(")")).sepBy(term(","));
 		Parser<?> p = Parsers.tuple(ident(), term("->"), term("{"), q,
@@ -252,7 +252,7 @@ public class OplParser {
 						term("->"), ident()));
 	}
 
-	public static final Parser<?> mapping() {
+	private static Parser<?> mapping() {
 		Parser<?> q = Parsers.tuple(ident(), term("->"), oplSequent());
 		Parser<?> p = Parsers.tuple(ident(), term("->"), ident());
 		Parser<?> foo = Parsers.tuple(
@@ -264,7 +264,7 @@ public class OplParser {
 						term("->"), ident()));
 	}
 
-	public static final Parser<?> theory() {
+	private static Parser<?> theory() {
 		Parser<?> q = Parsers.tuple(ident(), Parsers.tuple(term("@"), NUMBER)
 				.optional());
 
@@ -283,7 +283,7 @@ public class OplParser {
 				term("theory").followedBy(term("{")), foo, term("}")));
 	}
 
-	public static final Parser<?> SCHEMA() {
+	private static Parser<?> SCHEMA() {
 		Parser<?> q = Parsers.tuple(ident(), Parsers.tuple(term("@"), NUMBER)
 				.optional());
 
@@ -302,7 +302,7 @@ public class OplParser {
 				term("}").followedBy(term(":")), ident());
 	}
 
-	public static final Parser<?> presentation() {
+	private static Parser<?> presentation() {
 		Parser<?> q = Parsers.tuple(ident(), Parsers.tuple(term("@"), NUMBER)
 				.optional());
 		Parser<?> p = Parsers.tuple(q.sepBy1(term(",")), term(":"), ident());
@@ -313,7 +313,7 @@ public class OplParser {
 				term("}").followedBy(term(":")), ident());
 	}
 
-	public static final Parser<?> INSTANCE() {
+	private static Parser<?> INSTANCE() {
 		Parser<?> q = Parsers.tuple(ident(), Parsers.tuple(term("@"), NUMBER)
 				.optional());
 		Parser<?> p = Parsers.tuple(q.sepBy1(term(",")), term(":"), ident());
@@ -324,27 +324,27 @@ public class OplParser {
 				term("}").followedBy(term(":")), ident());
 	}
 
-	public static final Parser<?> schema() {
+	private static Parser<?> schema() {
 		Parser<?> foo = section("entities", ident());
 		return Parsers.tuple(term("schema").followedBy(term("{")), foo,
 				term("}").followedBy(term(":")), ident());
 	}
 	
-	public static final Parser<?> graph() {
+	private static Parser<?> graph() {
 		Parser<?> nodes = section("nodes", ident());
 		Parser<?> edges = section("edges", Parsers.tuple(ident(), term(":"), ident(), term("->"), ident()));
 		return Parsers.tuple(term("graph"), term("{"), nodes, edges,
 				term("}"));
 	}
 
-	public static final Parser<?> java() {
+	private static Parser<?> java() {
 		Parser<?> q = Parsers.tuple(ident(), term("->"), string());
 		Parser<?> foo = section("symbols", q);
 		return Parsers.tuple(term("javascript").followedBy(term("{")), foo,
 				Parsers.tuple(term("}").followedBy(term(":")), ident()));
 	}
 
-	public static final Parser<?> model() {
+	private static Parser<?> model() {
 		Parser<?> p = Parsers.tuple(ident(), term("->"), Parsers.between(
 				term("{"), string().sepBy(term(",")), term("}")));
 		Parser<?> y = Parsers.between(term("("), string().sepBy(term(",")),
@@ -359,7 +359,7 @@ public class OplParser {
 				Parsers.tuple(term("}").followedBy(term(":")), ident()));
 	}
 	
-	public static final Parser<?> model2() {
+	private static Parser<?> model2() {
 		Parser<?> p = Parsers.tuple(ident(), term("->"), Parsers.between(
 				term("{"), ident().sepBy(term(",")), term("}")));
 		
@@ -376,7 +376,7 @@ public class OplParser {
 	}
 
 
-	public static final XExp.XSchema toCatConst(Object y) {
+	public static XSchema toCatConst(Object y) {
 		List<String> nodes = new LinkedList<>();
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
@@ -405,33 +405,33 @@ public class OplParser {
 			List<String> l2 = (List<String>) x.c;
 			eqs.add(new Pair<>(l1, l2));
 		}
-		XExp.XSchema c = new XExp.XSchema(nodes, arrows, eqs);
+		XSchema c = new XSchema(nodes, arrows, eqs);
 		return c;
 	}
 
-	public static final Parser<?> decl() {
+	private static Parser<?> decl() {
 		Parser p1 = Parsers.tuple(ident(), term("="), exp());
 
-		return Parsers.or(new Parser[] { p1 });
+		return Parsers.or(p1);
 	}
 
 	public static Parser<?> section2(String s, Parser<?> p) {
 		return Parsers.tuple(term(s), p, term(";"));
 	}
 
-	public static final OplTerm parse_term(Map m, String s) {
+	public static OplTerm parse_term(Map m, String s) {
 		Object o = oplTerm().from(TOKENIZER, IGNORED).parse(s);
 		return toTerm(null, consts(m), o, false);
 	}
 
-	static boolean sugarForNat = false;
+	private static boolean sugarForNat = false;
 
-	public static final OplExp exp(String s) {
+	public static OplExp exp(String s) {
 		return toExp(exp.parse(s));
 	}
 
 		
-	public static final Program<OplExp> program(String s) {
+	public static Program<OplExp> program(String s) {
 		List<Triple<String, Integer, OplExp>> ret = new LinkedList<>();
 		List decls = (List) program.parse(s);
 
@@ -462,14 +462,14 @@ public class OplParser {
 	private static OplExp toTheory(Object o) {
 		Tuple5 t = (Tuple5) o;
 
-		List<String> imports = t.a == null ? new LinkedList<>() : (List<String>) ((Tuple3)t.a).b;
+		List<String> imports = t.a == null ? new LinkedList<>() : (List<String>) ((org.codehaus.jparsec.functors.Pair) t.a).b;
 		Tuple3 a = (Tuple3) t.b;
 		Tuple3 b = (Tuple3) t.c;
 		Tuple3 c = (Tuple3) t.d;
 		Tuple3 d = (Tuple3) t.e;
 
 		Set<String> sorts = a == null ? new HashSet<>() : new HashSet<>(
-				(List<String>) a.b);
+                (Collection<String>) a.b);
 
 		List<Tuple3> symbols0 = b == null ? new LinkedList<>()
 				: (List<Tuple3>) b.b;
@@ -556,7 +556,7 @@ public class OplParser {
 		}
 
 		
-		OplExp.OplSig ret = new OplExp.OplSig<>(new VIt(), prec, sorts, symbols, equations,
+		OplSig ret = new OplSig<>(new VIt(), prec, sorts, symbols, equations,
 				implications);
 		ret.imports = new HashSet<>(imports);
 		return ret;
@@ -568,7 +568,7 @@ public class OplParser {
 
 		org.codehaus.jparsec.functors.Pair newobj = (org.codehaus.jparsec.functors.Pair) oy.b;
 
-		List<String> imports = newobj.a == null ? new LinkedList<>() : (List<String>) ((Tuple3)newobj.a).b;
+		List<String> imports = newobj.a == null ? new LinkedList<>() : (List<String>) ((org.codehaus.jparsec.functors.Pair) newobj.a).b;
 		
 		
 		Tuple5 t = (Tuple5) newobj.b;
@@ -580,7 +580,7 @@ public class OplParser {
 		Tuple3 e = (Tuple3) t.e;
 		
 		Set<String> sorts = a == null ? new HashSet<>() : new HashSet<>(
-				(List<String>) a.b);
+                (Collection<String>) a.b);
 
 		List<Tuple3> symbolsE0 = b == null ? new LinkedList<>()
 				: (List<Tuple3>) b.b;
@@ -678,7 +678,7 @@ public class OplParser {
 			equationsA.add(new Triple<>(ctx, lhs, rhs));
 		}
 
-		OplExp.OplSCHEMA0 ret = new OplExp.OplSCHEMA0(prec, sorts, symbolsE, symbolsA,
+		OplSCHEMA0 ret = new OplSCHEMA0(prec, sorts, symbolsE, symbolsA,
 				equationsE, equationsA, ts);
 		ret.imports = new HashSet<>(imports);
 		return ret;
@@ -704,7 +704,7 @@ public class OplParser {
 		OplInst0 ret = new OplInst0(ex);
 		Tuple4 t = (Tuple4) o; 
 		Tuple3 e = (Tuple3) t.b;
-		List<String> imports = e.a == null ? new LinkedList<>() : (List<String>) ((Tuple3)e.a).b;
+		List<String> imports = e.a == null ? new LinkedList<>() : (List<String>) ((org.codehaus.jparsec.functors.Pair) e.a).b;
 		ret.imports = new HashSet<>(imports);
 		return ret;
 	}
@@ -751,8 +751,7 @@ public class OplParser {
 				throw new DoNotIgnore(
 						"Cannot have universally quantified equations in presentations");
 			}
-			List<Tuple3> fa = x.a == null ? new LinkedList<>()
-					: (List<Tuple3>) x.a.b;
+			List<Tuple3> fa = new LinkedList<>();
 			OplCtx<String, String> ctx = toCtx(fa);
 			Tuple3 eq = x.b;
 			OplTerm lhs = toTerm(ctx.names(), symbols.keySet(), eq.a, true);
@@ -760,7 +759,7 @@ public class OplParser {
 			equations.add(new Pair<>(lhs, rhs));
 		}
 
-		OplExp.OplPres ret = new OplExp.OplPres<>(prec, yyy,
+		OplPres ret = new OplPres<>(prec, yyy,
 				null, symbols, equations);
 		return ret;
 	}
@@ -774,7 +773,7 @@ public class OplParser {
 
 		List<String> symbols0 = (List<String>) e.b;
 
-		return new OplExp.OplSchema<String, String, String>(yyy, new HashSet<>(
+		return new OplSchema<String, String, String>(yyy, new HashSet<>(
 				symbols0));
 	}
 
@@ -852,7 +851,7 @@ public class OplParser {
 		List<Tuple3> q = (List<Tuple3>) z.b;
 		
 		Tuple3 z0 = (Tuple3) b.c;
-		q.addAll((List<Tuple3>) z0.b);
+		q.addAll((Collection<? extends Tuple3>) z0.b);
 		
 		for (Tuple3 r : q) {
 			List<Tuple5> u = (List<Tuple5>) r.c;
@@ -894,17 +893,13 @@ public class OplParser {
 				int i = Integer.parseInt(a0);
 				if (sugarForNat) {
 					return OplTerm.natToTerm(i); 
-				} else {
-					// return new OplTerm(a0);
 				}
 			} catch (Exception e) {
 			}
 
 			if (vars != null && vars.contains(a0)) {
 				return new OplTerm(a0);
-			} else if (vars != null && !vars.contains(a0)) {
-				return new OplTerm(a0, new LinkedList<>());
-			} else if (consts != null && consts.contains(a0)) {
+			} else if (vars != null && !vars.contains(a0) || consts != null && consts.contains(a0)) {
 				return new OplTerm(a0, new LinkedList<>());
 			} else if (consts == null || vars == null) {
 				return new OplTerm(a0);
@@ -959,7 +954,7 @@ public class OplParser {
 		
 		List<String> l = (List<String>) x.c;
 		
-		return new OplChaseExp(i0.intValue(), I, new LinkedList<>(l));		
+		return new OplChaseExp(i0, I, new LinkedList<>(l));
 	}
 	
 	private static OplExp toExp(Object c) {
@@ -1227,7 +1222,7 @@ public class OplParser {
 		Tuple3 b = (Tuple3) aa.c;
 		// Tuple3 b = (Tuple3) t.c;
 		
-		List<String> imports = aa.a == null ? new LinkedList<>() : (List<String>) ((Tuple3)aa.a).b;
+		List<String> imports = aa.a == null ? new LinkedList<>() : (List<String>) ((org.codehaus.jparsec.functors.Pair) aa.a).b;
 		
 
 		List<Tuple3> sorts = (List<Tuple3>) a.b;
@@ -1291,7 +1286,7 @@ public class OplParser {
 		VIt() {
 		}
 
-		public static VIt vit = new VIt();
+		public static final VIt vit = new VIt();
 
 		static int i = 0;
 
@@ -1316,7 +1311,7 @@ public class OplParser {
 
 	}
 
-	public static OplExp toJava(Object x) {
+	private static OplExp toJava(Object x) {
 		Tuple3 t = (Tuple3) x;
 
 		Tuple3 b = (Tuple3) t.b;
@@ -1335,7 +1330,7 @@ public class OplParser {
 		return new OplJavaInst(defs, (String) c.b);
 	}
 
-	public static OplExp toTrans(Object c) {
+	private static OplExp toTrans(Object c) {
 		Tuple3 t = (Tuple3) c;
 		if (!t.a.toString().equals("transform")) {
 			throw new RuntimeException();
@@ -1367,7 +1362,7 @@ public class OplParser {
 		return new OplSetTrans(map, (String) tc.b, (String) tc.d);
 	}
 
-	public static OplExp toTrans_2(Object c) {
+	private static OplExp toTrans_2(Object c) {
 		Tuple3 t = (Tuple3) c;
 		if (!t.a.toString().equals("transpres")) {
 			throw new RuntimeException();
@@ -1376,7 +1371,7 @@ public class OplParser {
 		Map<String, Map<String, OplTerm>> map = new HashMap<>();
 		
 		org.codehaus.jparsec.functors.Pair q = (org.codehaus.jparsec.functors.Pair) t.b;
-		List<String> imports = q.a == null ? new LinkedList<>() : (List<String>) ((Tuple3)q.a).b;
+		List<String> imports = q.a == null ? new LinkedList<>() : (List<String>) ((org.codehaus.jparsec.functors.Pair) q.a).b;
 		
 		
 		Tuple3 tb = (Tuple3) q.b;
@@ -1408,7 +1403,7 @@ public class OplParser {
 		return ret;
 	}
 
-	public static OplExp toPragma(Object t) {
+	private static OplExp toPragma(Object t) {
 		Tuple3 tb = (Tuple3) t;
 		List<Tuple3> l = (List<Tuple3>) tb.b;
 
@@ -1450,16 +1445,16 @@ public class OplParser {
 
 	}
 
-	public static Parser<?> section(String s, Parser<?> p) {
+	private static Parser<?> section(String s, Parser<?> p) {
 		return Parsers.tuple(term(s), p.sepBy(term(",")), term(";"));
 	}
 
 	private static Parser<?> string() {
-		return Parsers.or(Terminals.StringLiteral.PARSER,
-				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
+		return Parsers.or(StringLiteral.PARSER,
+				IntegerLiteral.PARSER, Identifier.PARSER);
 	}
 
-	public static final Parser<?> flower() {
+	private static Parser<?> flower() {
 		Parser<?> from0 = Parsers.tuple(ident(), term("as"), ident()).sepBy(
 				term(","));
 		Parser<?> from = Parsers.tuple(term("from"), from0, term(";"));
@@ -1485,9 +1480,9 @@ public class OplParser {
 		String I = (String) p.c;
 		Tuple3 q = (Tuple3) p.b;
 
-		List s = (List) ((Tuple3) q.a).b; // list of tuple3 of (path, string)
-		List f = (List) ((Tuple3) q.b).b; // list of tuple3 of (string, string)
-		List w = (List) ((Tuple3) q.c).b; // list of tuple3 of (path, path)
+		List s = (List) ((org.codehaus.jparsec.functors.Pair) q.a).b; // list of tuple3 of (path, string)
+		List f = (List) ((org.codehaus.jparsec.functors.Pair) q.b).b; // list of tuple3 of (string, string)
+		List w = (List) ((org.codehaus.jparsec.functors.Pair) q.c).b; // list of tuple3 of (path, path)
 
 		Map<String, OplTerm<String, String>> select = new HashMap<>();
 		Map<String, String> from = new HashMap<>();
@@ -1531,8 +1526,8 @@ public class OplParser {
 
 	}
 	
-	public static Block<String, String, String, String, String, String> fromBlock2(
-			Object o) {
+	private static Block<String, String, String, String, String, String> fromBlock2(
+            Object o) {
 		Tuple3<List, List, List> t = (Tuple3<List, List, List>) o;
 
 		LinkedHashMap<String, String> from = new LinkedHashMap<>();
@@ -1541,10 +1536,10 @@ public class OplParser {
 		Map<String, Pair<Object, Map<String, OplTerm<String, String>>>> edges = new HashMap<>();
 
 		//from
-		for (Object x : (List) ((org.codehaus.jparsec.functors.Pair)t.b).b) {
+		for (Object x : (Iterable) ((org.codehaus.jparsec.functors.Pair) t.b).b) {
 			org.codehaus.jparsec.functors.Pair l = (org.codehaus.jparsec.functors.Pair) x;
-			String gen = null;
-			String ty = null;
+			String gen;
+			String ty;
 			if (l.b == null) {
 				gen = (String) l.a;
 				ty = (String) l.a;
@@ -1562,7 +1557,7 @@ public class OplParser {
 		//where
 		//Object z = ((org.codehaus.jparsec.functors.Pair)t.c).b;
 		if (t.c != null) {
-			for (Object x : (List) ((org.codehaus.jparsec.functors.Pair)t.c).b) {
+			for (Object x : (Iterable) ((org.codehaus.jparsec.functors.Pair) t.c).b) {
 				Tuple3 l = (Tuple3) x;
 				where.add(new Pair(toTerm(from.keySet(), null, l.a, true), toTerm(
 						from.keySet(), null, l.c, true)));
@@ -1570,13 +1565,13 @@ public class OplParser {
 		}
 		
 		//return
-		for (Object x :  (List) ((org.codehaus.jparsec.functors.Pair)t.a).b){
+		for (Object x : (Iterable) ((org.codehaus.jparsec.functors.Pair) t.a).b){
 			Tuple3 l = (Tuple3) x;
 			String dst = (String) l.c;
 			if (attrs.containsKey(dst) || edges.containsKey(dst)) {
 				throw new DoNotIgnore("In select clause, duplicate for: " + dst);
 			}
-			if (l.a instanceof Tuple3 && ((Tuple3)l.a).a.toString().equals("(")) {
+			if (l.a instanceof Tuple3 && ((org.codehaus.jparsec.functors.Pair) l.a).a.toString().equals("(")) {
 				edges.put(dst,
 						new Pair(null,
 								fromBlockHelper2(from.keySet(), l.a)));				
@@ -1619,11 +1614,11 @@ public class OplParser {
 		
 		OplTerm<String, String> att = toTerm(allVars, null, t.d.b, true); 
 			
-		return new Agg<>(t.a.b.toString(), t.a.c.toString(), from, where, att);
+		return new Agg<>(t.a.b, t.a.c, from, where, att);
 	}
 	
-	public static Block<String, String, String, String, String, String> fromBlock(
-			Object o) {
+	private static Block<String, String, String, String, String, String> fromBlock(
+            Object o) {
 		Tuple4<List, List, List, List> t = (Tuple4<List, List, List, List>) o;
 
 		LinkedHashMap<String, String> from = new LinkedHashMap<>();
@@ -1667,13 +1662,13 @@ public class OplParser {
 							fromBlockHelper(from.keySet(), l.c)));
 		}
 
-		Block bl = new OplQuery.Block<>(from, where, attrs, edges);
+		Block bl = new Block<>(from, where, attrs, edges);
 		return bl;
 	}
 
 	// {b2=a1.f, b3=a1.f}
-	public static Map<String, OplTerm<String, String>> fromBlockHelper(
-			Set<String> vars, Object o) {
+	private static Map<String, OplTerm<String, String>> fromBlockHelper(
+            Set<String> vars, Object o) {
 		List<Tuple3> l = (List<Tuple3>) o;
 		Map<String, OplTerm<String, String>> ret = new HashMap<>();
 		for (Tuple3 t : l) {
@@ -1685,8 +1680,8 @@ public class OplParser {
 		return ret;
 	}
 
-	public static Map<String, OplTerm<String, String>> fromBlockHelper2(
-			Set<String> vars, Object o) {
+	private static Map<String, OplTerm<String, String>> fromBlockHelper2(
+            Set<String> vars, Object o) {
 		Tuple3 tx = (Tuple3) o;
 		List<Tuple3> l = (List<Tuple3>) tx.b; //is token ( ?
 		Map<String, OplTerm<String, String>> ret = new HashMap<>();
@@ -1700,8 +1695,8 @@ public class OplParser {
 	}
 
 	
-	public static Map<Object, Pair<String, Block<String, String, String, String, String, String>>> fromBlocks(
-			List l) {
+	private static Map<Object, Pair<String, Block<String, String, String, String, String, String>>> fromBlocks(
+            List l) {
 		Map<Object, Pair<String, Block<String, String, String, String, String, String>>> ret = new HashMap<>();
 		for (Object o : l) {
 			Tuple5 t = (Tuple5) o;
@@ -1711,8 +1706,8 @@ public class OplParser {
 		return ret;
 	}
 	
-	public static Map<Object, Pair<String, Block<String, String, String, String, String, String>>> fromBlocks2(
-			List l) {
+	private static Map<Object, Pair<String, Block<String, String, String, String, String, String>>> fromBlocks2(
+            List l) {
 		Map<Object, Pair<String, Block<String, String, String, String, String, String>>> ret = new HashMap<>();
 		for (Object o : l) {
 			Tuple4 t = (Tuple4) o;
@@ -1722,15 +1717,15 @@ public class OplParser {
 		return ret;
 	}
 
-	public static OplQuery<String, String, String, String, String, String> toQuery(
-			Tuple4 o) {
+	private static OplQuery<String, String, String, String, String, String> toQuery(
+            Tuple4 o) {
 		Map<Object, Pair<String, Block<String, String, String, String, String, String>>> blocks = fromBlocks((List) o.a);
 		return new OplQuery<>(
 				(String) o.b, (String) o.d, blocks);
 	}
 	
-	public static OplQuery<String, String, String, String, String, String> toSql(
-			Tuple5 o) {
+	private static OplQuery<String, String, String, String, String, String> toSql(
+            Tuple5 o) {
 		if (!o.a.toString().equals("sql")) {
 			throw new RuntimeException();
 		}
@@ -1739,7 +1734,7 @@ public class OplParser {
 		return new OplQuery<>(
 				(String) o.c, (String) o.e, blocks);
 	}
-	public static final Parser<?> block2() {
+	private static Parser<?> block2() {
 		Parser<?> fromAs = Parsers.tuple(ident(), Parsers.tuple(term("as"), ident()).optional());
 		
 		Parser<?> from = Parsers.tuple(term("from"), fromAs.sepBy(term(",")));
@@ -1757,7 +1752,7 @@ public class OplParser {
 	}
 	
 	
-	public static final Parser<?> agg() {
+	private static Parser<?> agg() {
 		Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(","))
 				.between(term("for"), term(";"));
 		Parser p2 = Parsers.tuple(oplTerm(), term("="), oplTerm())
@@ -1770,7 +1765,7 @@ public class OplParser {
 		return p;		
 	}
 	
-	public static final Parser<?> block() {
+	private static Parser<?> block() {
 		Parser eee = Parsers.or(term("="), Parsers.tuple(term(":"), term("=")));
 		Parser p1 = Parsers.tuple(ident(), term(":"), ident()).sepBy(term(","))
 				.between(term("for"), term(";"));
@@ -1788,7 +1783,7 @@ public class OplParser {
 		return p.between(term("{"), term("}"));
 	}
 
-	public static final Parser<?> query() {
+	private static Parser<?> query() {
 		Parser eee = Parsers.or(term("="), Parsers.tuple(term(":"), term("=")));
 		Parser p = Parsers.tuple(ident(), eee, block(), term(":"),
 				ident());

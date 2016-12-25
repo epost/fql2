@@ -4,9 +4,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.Mapping;
 import catdata.aql.Term;
@@ -16,11 +16,13 @@ import catdata.aql.It.ID;
 
 public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> extends Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, ID, Chc<Sk1, Pair<ID, Att2>>, ID, Chc<Sk2, Pair<ID, Att2>>>  {
 
-	public final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
-	public final Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
+	@SuppressWarnings("unused")
+	private final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
+	@SuppressWarnings("unused")
+	private final Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
 	
-	public final SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, X1, Y1> src; 
-	public final SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, En2, Fk2, Att2, X2, Y2> dst; 
+	private final SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, X1, Y1> src;
+	private final SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, En2, Fk2, Att2, X2, Y2> dst;
 
 	private final Ctx<Gen1, Term<Void, En2, Void, Fk2, Void, Gen2, Void>> gens = new Ctx<>();
 	private final Ctx<Sk1, Term<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2>> sks = new Ctx<>();
@@ -30,7 +32,7 @@ public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, 
 		if (!h.src().schema().equals(f.src)) {
 			throw new RuntimeException("Source of mapping is " + f.src + " but instances are on " + h.src().schema());
 		}
-		this.F = f;
+        F = f;
 		this.h = h;
 		src = new SigmaInstance<>(f, h.src(), options1);
 		dst = new SigmaInstance<>(f, h.dst(), options2);

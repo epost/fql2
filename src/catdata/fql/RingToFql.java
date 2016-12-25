@@ -40,9 +40,9 @@ import catdata.ide.Example;
  */
 public class RingToFql {
 
-	protected Example[] examples = { new PeopleExample() };
+	private final Example[] examples = { new PeopleExample() };
 
-	String help = "Polynomials written in fully explicit form (i.e., containing only additions of (\"1\" or multiplications of variables), can be treated as FQL queries.";
+	private final String help = "Polynomials written in fully explicit form (i.e., containing only additions of (\"1\" or multiplications of variables), can be treated as FQL queries.";
 	
 
 	static class PeopleExample extends Example {
@@ -58,7 +58,7 @@ public class RingToFql {
 	
 	}
 
-	String translate(String in) {
+	private String translate(String in) {
 		try {
 			List<Pair<String, List<List<String>>>> list = program(in);
 			return translate2(list) + "/* output will have\n" + in.trim() + "\n*/";
@@ -69,21 +69,19 @@ public class RingToFql {
 	}
 
 	public RingToFql() {
-		final CodeTextPanel input = new CodeTextPanel("Input Polynomials", "");
-		final CodeTextPanel output = new CodeTextPanel("FQL Output", "");
+		CodeTextPanel input = new CodeTextPanel("Input Polynomials", "");
+		CodeTextPanel output = new CodeTextPanel("FQL Output", "");
 
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");
 	
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener((ActionEvent e) -> {
-                    input.setText(((Example) box.getSelectedItem()).getText());
-                });
+		box.addActionListener((ActionEvent e) -> input.setText(((Example) box.getSelectedItem()).getText()));
 
 		transButton.addActionListener((ActionEvent e) -> {
                     try {
-                        output.setText(translate(input.getText()).toString());
+                        output.setText(translate(input.getText()));
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         output.setText(ex.getLocalizedMessage());
@@ -136,10 +134,10 @@ public class RingToFql {
 		f.setVisible(true);
 	}
 
-	static String extext1 = "p = x*x + y*y*y + y*y*y \nq = x + x*y + x*y + x*y\nr = 1 + 1 + 1 + y\n";
+	private static final String extext1 = "p = x*x + y*y*y + y*y*y \nq = x + x*y + x*y + x*y\nr = 1 + 1 + 1 + y\n";
 
 	
-	public static String translate2(List<Pair<String, List<List<String>>>> in) {
+	private static String translate2(List<Pair<String, List<List<String>>>> in) {
 		int fresh = 0;
 		
 		List<String> vars = new LinkedList<>();
@@ -246,7 +244,7 @@ public class RingToFql {
 		return ret;
 	}
 
-	static void assertVar(String o) {
+	private static void assertVar(String o) {
 		try {
 			int z = Integer.parseInt(o);
 			throw new RuntimeException("Encountered non-1 numeral: " + z);
@@ -254,19 +252,19 @@ public class RingToFql {
 		}
 	}
 	
-	RyanParser<List<List<String>>> tparser = ParserUtils.manySep(
+	private final RyanParser<List<List<String>>> tparser = ParserUtils.manySep(
 			ParserUtils.manySep(new StringParser(), new KeywordParser("*")),
 			new KeywordParser("+"));
-	RyanParser<List<Pair<String, List<List<String>>>>> parser = ParserUtils
+	private final RyanParser<List<Pair<String, List<List<String>>>>> parser = ParserUtils
 			.many(ParserUtils.inside(new StringParser(),
 					new KeywordParser("="), tparser));
 
-	public final List<Pair<String, List<List<String>>>> program(String s)
+	private List<Pair<String, List<List<String>>>> program(String s)
 			throws Exception {
 		Partial<List<Pair<String, List<List<String>>>>> k = parser
 				.parse(new FqlTokenizer(s));
 
-		if (k.tokens.toString().trim().length() > 0) {
+		if (!k.tokens.toString().trim().isEmpty()) {
 			throw new RuntimeException("Unconsumed input: " + k.tokens);
 		}
 

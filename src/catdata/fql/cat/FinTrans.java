@@ -1,16 +1,18 @@
 package catdata.fql.cat;
 
 import java.util.Map;
+import java.util.Objects;
 
 import catdata.ide.GlobalOptions;
 
 /**
  * @author ryan Implementation of finite natural transformations.
  */
-public class FinTrans<Obj1, Arrow1, Obj2, Arrow2> {
+class FinTrans<Obj1, Arrow1, Obj2, Arrow2> {
 
-	Map<Obj1, Arr<Obj2, Arrow2>> eta;
-	FinFunctor<Obj1, Arrow1, Obj2, Arrow2> F, G;
+	private final Map<Obj1, Arr<Obj2, Arrow2>> eta;
+	private final FinFunctor<Obj1, Arrow1, Obj2, Arrow2> F;
+    private final FinFunctor<Obj1, Arrow1, Obj2, Arrow2> G;
 
 	/**
 	 * Construct a new natural transformation. Does not copy inputs.
@@ -26,16 +28,16 @@ public class FinTrans<Obj1, Arrow1, Obj2, Arrow2> {
 		}
 	}
 
-	public Arr<Obj2, Arrow2> eta(Obj1 X) {
+	private Arr<Obj2, Arrow2> eta(Obj1 X) {
 		return eta.get(X);
 	}
 
-	public void validate() {
-		if (F.srcCat != G.srcCat) {
+	private void validate() {
+		if (!Objects.equals(F.srcCat, G.srcCat)) {
 			throw new RuntimeException("SrcCat FinTrans mismath " + F.srcCat
 					+ " and " + G.srcCat);
 		}
-		if (F.dstCat != G.dstCat) {
+		if (!Objects.equals(F.dstCat, G.dstCat)) {
 			throw new RuntimeException("DstCat FinTrans mismath " + F.dstCat
 					+ " and " + G.dstCat);
 		}

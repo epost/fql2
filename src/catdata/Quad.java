@@ -5,14 +5,14 @@ package catdata;
  */
 public class Quad<A,B,C,D> {
 
-	public A first;
-	public B second;
-	public C third;
-	public D fourth;
+	public final A first;
+	public final B second;
+	public final C third;
+	public final D fourth;
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((first == null) ? 0 : first.hashCode());
 		result = prime * result + ((fourth == null) ? 0 : fourth.hashCode());

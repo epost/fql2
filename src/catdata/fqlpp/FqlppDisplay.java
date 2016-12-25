@@ -1,12 +1,6 @@
 package catdata.fqlpp;
 
-import java.awt.BasicStroke;
-import java.awt.CardLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Paint;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -32,6 +26,9 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 
+import catdata.fqlpp.CatExp.Const;
+import catdata.fqlpp.cat.Signature.Edge;
+import catdata.fqlpp.cat.Signature.Node;
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Pair;
@@ -59,7 +56,6 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 /**
@@ -68,12 +64,12 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
  * 
  */
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes", "ConstantConditions"})
 public class FqlppDisplay implements Disp {
 
-	Map<Object, Color> colors = new HashMap<>();
+	private final Map<Object, Color> colors = new HashMap<>();
 
-	Color getColor(Object o) {
+	private Color getColor(Object o) {
 		if (FinSet.FinSet.equals(o) || FinCat.FinCat.equals(o)) {
 			return null;
 		}
@@ -84,12 +80,12 @@ public class FqlppDisplay implements Disp {
 		return colors.get(o);
 	}
 
-	int cindex = 0;
-	public static Color[] colors_arr = new Color[] { Color.RED, Color.GREEN, Color.BLUE,
+	private int cindex = 0;
+	private static final Color[] colors_arr = new Color[] { Color.RED, Color.GREEN, Color.BLUE,
 			Color.MAGENTA, Color.yellow, Color.CYAN, Color.GRAY, Color.ORANGE, Color.PINK,
 			Color.BLACK, Color.white };
 
-	public Color nColor() {
+	private Color nColor() {
 		if (cindex < colors_arr.length) {
 			return colors_arr[cindex++];
 		} else {
@@ -98,9 +94,10 @@ public class FqlppDisplay implements Disp {
 		}
 	}
 
-	List<Pair<String, JComponent>> frames = new LinkedList<>();
+	private final List<Pair<String, JComponent>> frames = new LinkedList<>();
 
-	public static JPanel showSet(Set<?> view, Color c) {
+	@SuppressWarnings("ConstantConditions")
+	private static JPanel showSet(Set<?> view, Color c) {
 		JTabbedPane px = new JTabbedPane();
 
 		if (GlobalOptions.debug.fqlpp.set_graph) {
@@ -132,15 +129,15 @@ public class FqlppDisplay implements Disp {
 		return top;
 	}
 
-	public JPanel showCat(Category<?, ?> view, Color c) {
+	private JPanel showCat(Category<?, ?> view, Color c) {
 		JTabbedPane px = new JTabbedPane();
 
 		Signature<String, String> sig = null;
 		String key = unr(env.cats, view, null);
 		if (key != null) {
 			CatExp r = CatOps.resolve(prog, prog.cats.get(key));
-			if (r instanceof CatExp.Const) {
-				CatExp.Const sig0 = (CatExp.Const) r;
+			if (r instanceof Const) {
+				Const sig0 = (Const) r;
 				sig = new Signature<>(sig0.nodes, sig0.arrows, sig0.eqs);
 			}
 		}
@@ -268,7 +265,7 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public JPanel showFn(Fn view, Color src, Color dst) {
+    private JPanel showFn(Fn view, Color src, Color dst) {
 		JTabbedPane px = new JTabbedPane();
 
 		if (GlobalOptions.debug.fqlpp.fn_graph) {
@@ -306,7 +303,7 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public JPanel showFtr(Functor view, Color c, @SuppressWarnings("unused") FunctorExp e) {
+    private JPanel showFtr(Functor view, Color c, @SuppressWarnings("unused") FunctorExp e) {
 		JTabbedPane px = new JTabbedPane();
 
 		if (view.source.isInfinite()) {
@@ -324,23 +321,23 @@ public class FqlppDisplay implements Disp {
 		String src_key = unr(env.cats, view.source, null);
 		if (src_key != null) {
 			CatExp r = CatOps.resolve(prog, prog.cats.get(src_key));
-			if (r instanceof CatExp.Const) {
-				CatExp.Const sig0 = (CatExp.Const) r;
+			if (r instanceof Const) {
+				Const sig0 = (Const) r;
 				src_sig = new Signature<>(sig0.nodes, sig0.arrows, sig0.eqs);
 			}
 		}
 		String dst_key = unr(env.cats, view.target, null);
 		if (dst_key != null) {
 			CatExp r = CatOps.resolve(prog, prog.cats.get(dst_key));
-			if (r instanceof CatExp.Const) {
-				CatExp.Const sig0 = (CatExp.Const) r;
+			if (r instanceof Const) {
+				Const sig0 = (Const) r;
 				dst_sig = new Signature<>(sig0.nodes, sig0.arrows, sig0.eqs);
 			}
 		}
 		if (src_sig != null && FinSet.FinSet.equals(view.target)) {
 			if (GlobalOptions.debug.fqlpp.ftr_instance) {
 			JPanel vwr = new JPanel(new GridLayout(1, 1));
-			if (view.source.objects().size() == 0) {
+			if (view.source.objects().isEmpty()) {
 				px.add("Instance", vwr);
 			} else {
 				JComponent zzz = doFNView2(view, vwr, c, buildFromSig(src_sig), src_sig);
@@ -355,7 +352,7 @@ public class FqlppDisplay implements Disp {
 			}
 
 			if (GlobalOptions.debug.fqlpp.ftr_joined) {
-			px.add("Joined", (JPanel) makeJoined(src_sig, view).first); //cast needed for javac for some reason
+			px.add("Joined", (Component) makeJoined(src_sig, view).first); //cast needed for javac for some reason
 			}
 
 			if (GlobalOptions.debug.fqlpp.ftr_elements) {
@@ -397,7 +394,7 @@ public class FqlppDisplay implements Disp {
 		if (GlobalOptions.debug.fqlpp.ftr_graph) {
 			JPanel vwr = new JPanel(new GridLayout(1, 1));
 			Graph g = buildFromCat(view.source);
-			if (view.source.objects().size() == 0) {
+			if (view.source.objects().isEmpty()) {
 				px.add("Graph", vwr);
 			} else if (g.getVertexCount() > GlobalOptions.debug.fqlpp.MAX_NODES) {
 				CodeTextPanel xxx = new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "Graph has " + g.getVertexCount() + " nodes, which exceeds limit of " + GlobalOptions.debug.fqlpp.MAX_NODES);
@@ -468,7 +465,7 @@ public class FqlppDisplay implements Disp {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public JPanel showTrans(Transform view, Color c) {
+    private JPanel showTrans(Transform view, Color c) {
 		JTabbedPane px = new JTabbedPane();
 
 		if (view.source.source.isInfinite()) {
@@ -489,8 +486,8 @@ public class FqlppDisplay implements Disp {
 		}
 		if (src_key != null) {
 			CatExp r = CatOps.resolve(prog, prog.cats.get(src_key));
-			if (r instanceof CatExp.Const) {
-				CatExp.Const sig0 = (CatExp.Const) r;
+			if (r instanceof Const) {
+				Const sig0 = (Const) r;
 				src_sig = new Signature(sig0.nodes, sig0.arrows, sig0.eqs);
 			}
 		}
@@ -519,7 +516,7 @@ public class FqlppDisplay implements Disp {
 
 		if (GlobalOptions.debug.fqlpp.trans_graph) {
 			JPanel vwr = new JPanel(new GridLayout(1, 1));
-			if (view.source.source.objects().size() == 0) {
+			if (view.source.source.objects().isEmpty()) {
 				px.add("Graph", vwr);
 
 			} else {
@@ -567,13 +564,13 @@ public class FqlppDisplay implements Disp {
 
 	
 			 
-	FQLPPProgram prog;
-	FQLPPEnvironment env;
+	private final FQLPPProgram prog;
+	private final FQLPPEnvironment env;
 	GUI gui;
 
 	// private Map<String, Color> cmap = new HashMap<>();
 	public FqlppDisplay(String title, FQLPPProgram p, FQLPPEnvironment env) {
-		this.prog = p;
+        prog = p;
 		this.env = env;
 	//	this.gui = gui;
 
@@ -641,24 +638,24 @@ public class FqlppDisplay implements Disp {
 		return xxx;
 	}
 
-	JFrame frame = null;
-	String name;
+	private JFrame frame = null;
+	//private String name;
 
-	final CardLayout cl = new CardLayout();
-	final JPanel x = new JPanel(cl);
-	final JList<String> yyy = new JList<>();
-	final Map<String, String> indices = new HashMap<>();
+	private final CardLayout cl = new CardLayout();
+	private final JPanel x = new JPanel(cl);
+	private final JList<String> yyy = new JList<>();
+	//private final Map<String, String> indices = new HashMap<>();
 
-	public void display(String s, List<String> order) {
+	private void display(String s, @SuppressWarnings("unused") List<String> order) {
 		frame = new JFrame();
-		this.name = s;
+       // name = s;
 
-		final Vector<String> ooo = new Vector<>();
-		int index = 0;
+		Vector<String> ooo = new Vector<>();
+		//int index = 0;
 		for (Pair<String, JComponent> p : frames) {
 			x.add(p.second, p.first);
 			ooo.add(p.first);
-			indices.put(order.get(index++), p.first);
+		//	indices.put(order.get(index++), p.first);
 		}
 		x.add(new JPanel(), "blank");
 		cl.show(x, "blank");
@@ -676,7 +673,7 @@ public class FqlppDisplay implements Disp {
                     if (i == -1) {
                         cl.show(x, "blank");
                     } else {
-                        cl.show(x, ooo.get(i).toString());
+                        cl.show(x, ooo.get(i));
                     }
                 });
 
@@ -703,9 +700,7 @@ public class FqlppDisplay implements Disp {
 		frame.setContentPane(px);
 		frame.setSize(900, 600);
 
-		ActionListener escListener = (ActionEvent e) -> {
-                    frame.dispose();
-                };
+		ActionListener escListener = (ActionEvent e) -> frame.dispose();
 
 		frame.getRootPane().registerKeyboardAction(escListener,
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -731,9 +726,9 @@ public class FqlppDisplay implements Disp {
 		frame = null;
 	}
 
-	public static <X, Y> Graph<Pair<X, Object>, Triple<Y, Pair<X, Object>, Pair<X, Object>>> buildElements(
-			Signature<X, Y> c,
-			Functor<Signature<X, Y>.Node, Signature<X, Y>.Path, Set<Object>, Fn<Object, Object>> I) {
+	private static <X, Y> Graph<Pair<X, Object>, Triple<Y, Pair<X, Object>, Pair<X, Object>>> buildElements(
+            Signature<X, Y> c,
+            Functor<Signature<X, Y>.Node, Signature<X, Y>.Path, Set<Object>, Fn<Object, Object>> I) {
 		Graph<Pair<X, Object>, Triple<Y, Pair<X, Object>, Pair<X, Object>>> ret = new DirectedSparseMultigraph<>();
 
 		for (Signature<X, Y>.Node n : c.nodes) {
@@ -754,31 +749,31 @@ public class FqlppDisplay implements Disp {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Graph buildMapping(Signature<String,String> src, Signature<String,String> dst, Functor F) {
+    private static Graph buildMapping(Signature<String, String> src, Signature<String, String> dst, Functor F) {
 	
 		Graph<Object, Object> ret = new DirectedSparseMultigraph<>();
 
-		for (Signature.Node n : src.nodes) {
+		for (Node n : src.nodes) {
 			ret.addVertex(new Pair<>(n.name, "src"));
 		}
-		for (Signature.Edge e : src.edges) {
+		for (Edge e : src.edges) {
 			Pair s = new Pair<>(e.source.name, "src");
 			Pair t = new Pair<>(e.target.name, "src");
 			ret.addEdge(new Quad<>(e.name, s, t, "src"), s, t);
 		}
 
-		for (Signature.Node n : dst.nodes) {
+		for (Node n : dst.nodes) {
 			ret.addVertex(new Pair<>(n.name, "dst"));
 		}
-		for (Signature.Edge e : dst.edges) {
+		for (Edge e : dst.edges) {
 			Pair s = new Pair<>(e.source.name, "dst");
 			Pair t = new Pair<>(e.target.name, "dst");
 			ret.addEdge(new Quad<>(e.name, s, t, "dst"), s, t);
 		}
 
 		int i = 0;
-		for (Signature.Node n : src.nodes) {
-			Signature.Node fo = (Signature.Node) F.applyO(n);
+		for (Node n : src.nodes) {
+			Node fo = (Node) F.applyO(n);
 			Pair s = new Pair<>(n.name, "src");
 			Pair t = new Pair<>(fo.name, "dst");
 			ret.addEdge(new Quad<>("", s, t, i++), s, t);
@@ -788,19 +783,19 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Graph build2Elements(Signature<Object, Object> sig,
-			Transform<Object, Object, Set, Fn> trans) {
+    private static Graph build2Elements(Signature<Object, Object> sig,
+                                        Transform<Object, Object, Set, Fn> trans) {
 		Functor<Object, Object, Set, Fn> I = trans.source;
 		Functor<Object, Object, Set, Fn> J = trans.target;
 
 		Graph<Object, Object> ret = new DirectedSparseMultigraph<>();
 
-		for (Signature.Node n : sig.nodes) {
+		for (Node n : sig.nodes) {
 			for (Object o : I.applyO(n)) {
 				ret.addVertex(new Triple<>(o, n.name, "src"));
 			}
 		}
-		for (Signature.Edge e : sig.edges) {
+		for (Edge e : sig.edges) {
 			for (Object o : I.applyO(e.source)) {
 				Object fo = I.applyA(sig.path(e)).apply(o);
 				Triple s = new Triple<>(o, e.source.name, "src");
@@ -809,12 +804,12 @@ public class FqlppDisplay implements Disp {
 			}
 		}
 
-		for (Signature.Node n : sig.nodes) {
+		for (Node n : sig.nodes) {
 			for (Object o : J.applyO(n)) {
 				ret.addVertex(new Triple<>(o, n.name, "dst"));
 			}
 		}
-		for (Signature.Edge e : sig.edges) {
+		for (Edge e : sig.edges) {
 			for (Object o : J.applyO(e.source)) {
 				Object fo = J.applyA(sig.path(e)).apply(o);
 				Triple s = new Triple<>(o, e.source.name, "dst");
@@ -824,7 +819,7 @@ public class FqlppDisplay implements Disp {
 		}
 
 		int i = 0;
-		for (Signature.Node n : sig.nodes) {
+		for (Node n : sig.nodes) {
 			for (Object o : I.applyO(n)) {
 				Object fo = trans.apply(n).apply(o);
 				Triple s = new Triple<>(o, n.name, "src");
@@ -836,8 +831,8 @@ public class FqlppDisplay implements Disp {
 		return ret;
 	}
 
-	public static Graph<Signature<String, String>.Node, String> buildFromSig(
-			Signature<String, String> c) {
+	private static Graph<Signature<String, String>.Node, String> buildFromSig(
+            Signature<String, String> c) {
 		Graph<Signature<String, String>.Node, String> g2 = new DirectedSparseMultigraph<>();
 		for (Signature<String, String>.Node n : c.nodes) {
 			g2.addVertex(n);
@@ -848,7 +843,7 @@ public class FqlppDisplay implements Disp {
 		return g2;
 	}
 
-	public static <X, Y> Graph<X, Y> buildFromCat(Category<X, Y> c) {
+	private static <X, Y> Graph<X, Y> buildFromCat(Category<X, Y> c) {
 		Graph<X, Y> g2 = new DirectedSparseMultigraph<>();
 		for (X n : c.objects()) {
 			g2.addVertex(n);
@@ -863,7 +858,7 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Graph<Pair<String, Color>, Integer> buildFromFn(Fn f, Color src, Color dst) {
+    private static Graph<Pair<String, Color>, Integer> buildFromFn(Fn f, Color src, Color dst) {
 
 		Graph<Pair<String, Color>, Integer> g2 = new DirectedSparseMultigraph<>();
 		for (Object n : f.source) {
@@ -877,13 +872,13 @@ public class FqlppDisplay implements Disp {
 			Pair<String, Color> p1 = new Pair<>(Util.nice(n.toString()), src);
 			Pair<String, Color> p2 = new Pair<>(Util.nice(f.apply(n).toString()), dst);
 
-			g2.addEdge(new Integer(i++), p1, p2);
+			g2.addEdge(i++, p1, p2);
 		}
 
 		return g2;
 	}
 
-	public static <X, Y> JComponent makeCatViewer(Category<X, Y> cat, Color clr) {
+	private static <X, Y> JComponent makeCatViewer(Category<X, Y> cat, Color clr) {
 		Graph<X, Y> g = buildFromCat(cat);
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
@@ -901,7 +896,7 @@ public class FqlppDisplay implements Disp {
 		return doCatView(clr, g);
 	}
 
-	public static JComponent makeFnViewer(Fn cat, Color src, Color dst) {
+	private static JComponent makeFnViewer(Fn cat, Color src, Color dst) {
 		Graph<Pair<String, Color>, Integer> g = buildFromFn(cat, src, dst);
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
@@ -919,14 +914,14 @@ public class FqlppDisplay implements Disp {
 		return doFnView(g);
 	}
 
-	public static JComponent doFnView(Graph<Pair<String, Color>, Integer> sgv) {
+	private static JComponent doFnView(Graph<Pair<String, Color>, Integer> sgv) {
 		try {
 			Layout<Pair<String, Color>, Integer> layout = new FRLayout<>(sgv);
 			// layout.setSize(new Dimension(600, 200));
 			VisualizationViewer<Pair<String, Color>, Integer> vv = new VisualizationViewer<>(layout);
 			Transformer<Pair<String, Color>, Paint> vertexPaint = x -> x.second;
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-			gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+			gm.setMode(Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
@@ -946,13 +941,13 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <X, Y> JComponent doCatView(final Color clr, Graph<X, Y> sgv) {
+    private static <X, Y> JComponent doCatView(Color clr, Graph<X, Y> sgv) {
 		Layout<X, Y> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<X, Y> vv = new VisualizationViewer<>(layout);
 		Transformer<X, Paint> vertexPaint = x -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
@@ -969,13 +964,13 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <X, Y> JComponent doFNView(Functor fn, JPanel p, final Color clr, Graph<X, Y> sgv) {
+    private <X, Y> JComponent doFNView(Functor fn, JPanel p, Color clr, Graph<X, Y> sgv) {
 		Layout<X, Y> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<X, Y> vv = new VisualizationViewer<>(layout);
 		Transformer<X, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
@@ -1046,14 +1041,14 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <X, Y> JComponent doFNView2(Functor fn, JPanel p, final Color clr, Graph<X, Y> sgv,
-			Signature sig) {
+    private static <X, Y> JComponent doFNView2(Functor fn, JPanel p, Color clr, Graph<X, Y> sgv,
+                                               Signature sig) {
 		Layout<X, Y> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<X, Y> vv = new VisualizationViewer<>(layout);
 		Transformer<X, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
@@ -1095,13 +1090,13 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static  JComponent doSchemaView(Color clr, Graph sgv) {
+    private static  JComponent doSchemaView(Color clr, Graph sgv) {
 		Layout layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer vv = new VisualizationViewer<>(layout);
 		Transformer vertexPaint = x -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
@@ -1118,13 +1113,13 @@ public class FqlppDisplay implements Disp {
 	}
 
 
-	public static JComponent doElementsView(Color clr, Graph<Pair, Triple> sgv) {
+	private static JComponent doElementsView(Color clr, Graph<Pair, Triple> sgv) {
 		Layout<Pair, Triple> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Pair, Triple> vv = new VisualizationViewer<>(layout);
 		Transformer<Pair, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
@@ -1142,12 +1137,12 @@ public class FqlppDisplay implements Disp {
 		return ret;
 	}
 	
-	public static JComponent doMappingView(Color clr1, Color clr2, Graph<Pair, Quad> sgv) {
+	private static JComponent doMappingView(Color clr1, Color clr2, Graph<Pair, Quad> sgv) {
 		Layout<Pair, Quad> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Pair, Quad> vv = new VisualizationViewer<>(layout);
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 
@@ -1175,12 +1170,12 @@ public class FqlppDisplay implements Disp {
 		return ret;
 	}
 
-	public static JComponent doElements2View(Color clr, Graph<Triple, Quad> sgv) {
+	private static JComponent doElements2View(Color clr, Graph<Triple, Quad> sgv) {
 		Layout<Triple, Quad> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Triple, Quad> vv = new VisualizationViewer<>(layout);
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 
@@ -1212,14 +1207,14 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <X, Y> JComponent doNTView(Transform fn, JPanel p, final Color clr, Graph<X, Y> sgv) {
+    private <X, Y> JComponent doNTView(Transform fn, JPanel p, Color clr, Graph<X, Y> sgv) {
 		//Layout<X, Y> layout = new FRLayout<>(sgv);
 		Layout<X, Y> layout = new FRLayout(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<X, Y> vv = new VisualizationViewer<>(layout);
 		Transformer<X, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
@@ -1263,22 +1258,22 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-	static
+    private static
 	Pair<JPanel, Map<Object, JPanel>> makeJoined(Signature<String, String> sig,
-			Functor<Object, Object, Set, Fn<Object, Object>> F) {
-		Map<Signature.Node, List<Signature<String, String>.Edge>> map = new HashMap<>();
+                                                 Functor<Object, Object, Set, Fn<Object, Object>> F) {
+		Map<Node, List<Signature<String, String>.Edge>> map = new HashMap<>();
 		Map<Object, JPanel> mapX = new HashMap<>();
-		for (Signature.Node n : sig.nodes) {
+		for (Node n : sig.nodes) {
 			map.put(n, new LinkedList<>());
 		}
-		for (Signature.Edge t : sig.edges) {
+		for (Edge t : sig.edges) {
 			map.get(t.source).add(t);
 		}
 
 //		int x = (int) Math.ceil(Math.sqrt(sig.nodes.size()));
 		List<JComponent> ret = new LinkedList<>();
 
-		for (Signature.Node n : sig.nodes) {
+		for (Node n : sig.nodes) {
 			List<Signature<String, String>.Edge> cols = map.get(n);
 			Object[] colNames = new Object[cols.size() + 1];
 			colNames[0] = "ID";

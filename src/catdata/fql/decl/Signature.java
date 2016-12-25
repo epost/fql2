@@ -33,6 +33,8 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
+import catdata.fql.decl.SigExp.Const;
+import catdata.fql.decl.Type.Int;
 import org.apache.commons.collections15.Transformer;
 
 import catdata.IntRef;
@@ -56,7 +58,6 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
@@ -68,7 +69,7 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
  */
 public class Signature {
 
-	public SigExp.Const toConst() {
+	public Const toConst() {
 		List<String> nds = new LinkedList<>();
 		for (Node n : nodes) {
 			nds.add(n.string);
@@ -85,7 +86,7 @@ public class Signature {
 		for (Eq e : eqs) {
 			es.add(new Pair<>(e.lhs.asList(), e.rhs.asList()));
 		}
-		return new SigExp.Const(nds, atts, arrs, es);
+		return new Const(nds, atts, arrs, es);
 	}
 
 	public List<Node> nodes;
@@ -126,7 +127,7 @@ public class Signature {
 		return s;
 	}
 
-	Map<String, Type> types;
+	private Map<String, Type> types;
 
 	public Signature(Map<String, Type> types, List<String> nodes_str,
 			List<Triple<String, String, String>> attrs_str,
@@ -270,7 +271,7 @@ public class Signature {
 
 	private Set<Node> reachableFix(Set<Node> nodes) {
 		Set<Node> x = new HashSet<>(nodes);
-		for (;;) {
+		while (true) {
 			int i = x.size();
 			x.addAll(reachableS1(nodes));
 			if (i == x.size()) {
@@ -309,7 +310,7 @@ public class Signature {
 				return node;
 			}
 		}
-		throw new FQLException("Unknown node: " + string);
+		throw new FQLException("Unknown node: " + string + " available " + nodes);
 	}
 
 	@SuppressWarnings("serial")
@@ -321,7 +322,7 @@ public class Signature {
 			arr[i][1] = eq.rhs;
 			i++;
 		}
-		Arrays.sort(arr, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
+		Arrays.sort(arr, Comparator.comparing(f4 -> f4[0].toString()));
 
 		JTable eqsComponent = new JTable(arr, new Object[] { "lhs", "rhs" })  {
 			@Override
@@ -344,7 +345,7 @@ public class Signature {
 		for (Node n : nodes) {
 			sn[ii++][0] = n.string;
 		}
-		Arrays.sort(sn, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
+		Arrays.sort(sn, Comparator.comparing(f3 -> f3[0].toString()));
 
 		JTable nodesComponent = new JTable(sn, new String[] { "Name" }) {
 			@Override
@@ -366,7 +367,7 @@ public class Signature {
 			es[jj][2] = eq.target.string;
 			jj++;
 		}
-		Arrays.sort(es, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
+		Arrays.sort(es, Comparator.comparing(f2 -> f2[0].toString()));
 
 		JTable esC = new JTable(es, new String[] { "Name", "Source", "Target" }) {
 			@Override
@@ -388,7 +389,7 @@ public class Signature {
 			as[jj][2] = a.target.toString();
 			jj++;
 		}
-		Arrays.sort(as, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
+		Arrays.sort(as, Comparator.comparing(f -> f[0].toString()));
 
 		JTable asC = new JTable(as, new String[] { "Name", "Source", "Type" }) {
 			@Override
@@ -414,7 +415,7 @@ public class Signature {
 			Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>> x) {
 
 		List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>> k = x.second;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 
 		boolean first = true;
 		for (Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>> eq : k) {
@@ -429,11 +430,7 @@ public class Signature {
 		}
 		sb.append("\n");
 
-		if (k.size() > 0) {
-			return x.first.toString() + "\n\nattribute equations\n" + sb;
-		} else {
-			return x.first.toString();
-		}
+		return !k.isEmpty() ? x.first + "\n\nattribute equations\n" + sb : x.first.toString();
 	}
 
 	@Override
@@ -456,7 +453,7 @@ public class Signature {
 				x += ",\n";
 			}
 			x += "  " + a.name + ": " + a.source.string + " -> "
-					+ a.target.toString();
+					+ a.target;
 			b = true;
 		}
 
@@ -563,10 +560,10 @@ public class Signature {
 	}
 
 	//  dangerous
-	Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> cached = null;
+    private Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> cached = null;
 
 	private void doInfiniteCheck() {
-		if (eqs.size() > 0) {
+		if (!eqs.isEmpty()) {
 			return;
 		}
 		for (Edge e : edges) {
@@ -625,7 +622,7 @@ public class Signature {
 		return ret;
 	}
 
-	public Graph<String, String> build() {
+	private Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
 		Graph<String, String> g2 = new DirectedSparseMultigraph<>();
@@ -645,7 +642,7 @@ public class Signature {
 		return g2;
 	}
 
-	public JComponent makeViewer(Color clr) {
+	private JComponent makeViewer(Color clr) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
@@ -654,7 +651,7 @@ public class Signature {
 	}
 
 	@SuppressWarnings("unchecked")
-	public JComponent doView(final Color clr,
+    private JComponent doView(Color clr,
 	/* final Environment env, */Graph<String, String> sgv) {
 	
 		try {
@@ -669,22 +666,16 @@ public class Signature {
 			VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
 	
-			Transformer<String, Paint> vertexPaint = (String i) -> {
-                            if (isAttribute(i)) {
-                                return UIManager.getColor("Panel.background");
-                            } else {
-                                return clr;
-                            }
-                        };
+			Transformer<String, Paint> vertexPaint = (String i) -> isAttribute(i) ? UIManager.getColor("Panel.background") : clr;
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-			gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+			gm.setMode(Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
 			float dash[] = { 1.0f };
-			final Stroke edgeStroke = new BasicStroke(0.5f,
+			Stroke edgeStroke = new BasicStroke(0.5f,
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
-			final Stroke bs = new BasicStroke();
+			Stroke bs = new BasicStroke();
 			Transformer<String, Stroke> edgeStrokeTransformer = (String s) -> {
                             if (isAttribute(s)) {
                                 return edgeStroke;
@@ -749,7 +740,7 @@ public class Signature {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((attrs == null) ? 0 : attrs.hashCode());
 		result = prime * result + ((edges == null) ? 0 : edges.hashCode());
@@ -795,7 +786,7 @@ public class Signature {
 	}
 
 	
-	JPanel den = null;
+	private JPanel den = null;
 
 	public JPanel denotation() {
 		try {
@@ -813,13 +804,13 @@ public class Signature {
 		}
 	}
 
-	public JPanel makePanel() throws FQLException {
+	private JPanel makePanel() throws FQLException {
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 		JTabbedPane t = new JTabbedPane();
 
 		JPanel p = new JPanel(new GridLayout(1, 1));
 		JTextArea a = new JTextArea();
-		JPanel q = null;
+		JPanel q;
 		JPanel rr = new JPanel(new GridLayout(1, 1));
 
 		a.setText(cached.first.toString());
@@ -841,11 +832,11 @@ public class Signature {
 	}
 
 	private JPanel makeNormalizer() {
-		final JPanel ret = new JPanel(new BorderLayout());
+		JPanel ret = new JPanel(new BorderLayout());
 
 		JPanel p = new JPanel(new GridLayout(2, 1));
-		final CodeTextPanel p1 = new CodeTextPanel("Input path", "");
-		final CodeTextPanel p2 = new CodeTextPanel("Normalized path", "");
+		CodeTextPanel p1 = new CodeTextPanel("Input path", "");
+		CodeTextPanel p2 = new CodeTextPanel("Normalized path", "");
 		p.add(p1);
 		p.add(p2);
 
@@ -853,7 +844,7 @@ public class Signature {
 		b.addActionListener((ActionEvent e) -> {
                     String s = p1.getText();
                     try {
-                        Path path = Path.parsePath(Signature.this, s);
+                        Path path = Path.parsePath(this, s);
                         Path ap = cached.second.of(path).arr;
                         p2.setText(ap.toString());
                     } catch (FQLException ex) {
@@ -898,8 +889,8 @@ public class Signature {
 
 	public List<Node> order() {
 		List<Node> ret = new LinkedList<>(nodes);
-		Comparator<Node> c = (Node o1, Node o2) -> edgesFrom(o1).size() - edgesFrom(o2).size();
-		Collections.sort(ret, c);
+		Comparator<Node> c = Comparator.comparingInt(o -> edgesFrom(o).size());
+		ret.sort(c);
 		return ret;
 	}
 	
@@ -919,7 +910,7 @@ public class Signature {
 		return a;
 	}
 	
-	private Map<Node, List<Edge>> edgesTo_cache = new HashMap<>();
+	private final Map<Node, List<Edge>> edgesTo_cache = new HashMap<>();
 	public List<Edge> edgesTo(Node n) {
 		List<Edge> a = edgesTo_cache.get(n);
 		if (a != null) {
@@ -960,7 +951,7 @@ public class Signature {
 
 	//
 
-	public List<EmbeddedDependency> toED(String pre) {
+	private List<EmbeddedDependency> toED(String pre) {
 		List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>> x = new LinkedList<>();
 		return toED(pre, new Pair<>(this, x));
 	}
@@ -1200,7 +1191,7 @@ public class Signature {
 		return tap;
 	}
 
-	public String rdfX() {
+	private String rdfX() {
 		String xxx = "";
 		// String prefix = "fql://entity/"; // + name + "/";
 
@@ -1214,11 +1205,7 @@ public class Signature {
 					+ a.name + "\">\n";
 			xxx += "    <rdfs:domain rdf:resource=\"fql://node/"
 					+ a.source.string + "\"/>\n";
-			if (a.target instanceof Type.Int) {
-				xxx += "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n";
-			} else {
-				xxx += "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n";
-			}
+			xxx += a.target instanceof Int ? "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n" : "    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n";
 			xxx += "</owl:FunctionalProperty>\n";
 			xxx += "\n";
 		}
@@ -1269,7 +1256,7 @@ public class Signature {
 					throw new RuntimeException();
 				}
 				m2.put(p, str);
-				t.add(new Pair<Object, Object>(str, str));
+				t.add(new Pair<>(str, str));
 			}
 			data.put(n.string, t);
 		}
@@ -1379,7 +1366,7 @@ public class Signature {
 		return new Pair<>(m1, m2);
 	}
 
-	Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs_cached = null;
+	private Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs_cached = null;
 	public  Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs() 
 			throws FQLException {
 		if (obs_cached != null) {
@@ -1406,7 +1393,7 @@ public class Signature {
 		return ret;
 	}
 	
-	Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> obsbar_cached = null;
+	private Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> obsbar_cached = null;
 	public  Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> obsbar() 
 			throws FQLException {
 		if (obsbar_cached != null) {
@@ -1425,7 +1412,7 @@ public class Signature {
 				for (Arr<Node, Path> p : cat.hom(c, d)) {
 					for (Attribute<Node> a : attrsFor(d)) {
 						Type.Enum en = (Type.Enum) a.target;
-						m.put(new Pair<>(p, a), new LinkedList<Object>(en.values));
+						m.put(new Pair<>(p, a), new LinkedList<>(en.values));
 					}
 				}
 			}

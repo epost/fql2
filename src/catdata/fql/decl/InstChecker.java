@@ -32,7 +32,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	@Override
 	public SigExp visit(FQLProgram env, One e) {
 		SigExp s = e.sig.typeOf(env);
-		catdata.fql.decl.SigExp.Const sig = s.toConst(env);
+		SigExp.Const sig = s.toConst(env);
 		for (Triple<String, String, String> k : sig.attrs) {
 			if (k.third.equals("string") || k.third.equals("int")) {
 				throw new RuntimeException("Cannot use unit with string or int (try enums instead).");
@@ -44,7 +44,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	@Override
 	public SigExp visit(FQLProgram env, Two e) {
 		SigExp s = e.sig.typeOf(env);
-		catdata.fql.decl.SigExp.Const sig = s.toConst(env);
+		SigExp.Const sig = s.toConst(env);
 		for (Triple<String, String, String> k : sig.attrs) {
 			if (k.third.equals("string") || k.third.equals("int")) {
 				throw new RuntimeException("Cannot use prop with string or int (try enums instead).");
@@ -86,7 +86,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	@Override
 	public SigExp visit(FQLProgram env, Exp e) {
 		SigExp ret = visit2(env, e.a, e.b);
-		catdata.fql.decl.SigExp.Const sig = ret.toConst(env);
+		SigExp.Const sig = ret.toConst(env);
 		for (Triple<String, String, String> k : sig.attrs) {
 			if (k.third.equals("string") || k.third.equals("int")) {
 				throw new RuntimeException("Cannot use exponentials with string or int (try enums instead).");
@@ -248,7 +248,7 @@ public class InstChecker implements InstExpVisitor<SigExp, FQLProgram> {
 	public SigExp visit(FQLProgram env, Kernel e) {
 		TransExp t = env.transforms.get(e.trans);
 		if (t == null) {
-			throw new RuntimeException("Missing transform: " + t);
+			throw new RuntimeException("Missing transform: " + e.trans);
 		}
 		Pair<String, String> u = t.type(env);
 		return env.insts.get(u.first).accept(env, this);

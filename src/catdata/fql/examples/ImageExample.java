@@ -20,7 +20,7 @@ public class ImageExample extends Example {
 		return s;
 	}
 	
-	String s = "/*"
+	private final String s = "/*"
 			+ "\n * Let A and B be sets and F : A -> B a function.  "
 			+ "\n * "
 			+ "\n * The pre-image of F is a function P(B) -> P(A) defined by"

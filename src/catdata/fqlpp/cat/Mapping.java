@@ -8,10 +8,10 @@ import java.util.Map.Entry;
 @SuppressWarnings("serial")
 public class Mapping<O1, A1, O2, A2> implements Serializable {
 
-	public Signature<O1, A1> source;
-	public Signature<O2, A2> target;
+	public final Signature<O1, A1> source;
+	public final Signature<O2, A2> target;
 	public Map<Signature<O1, A1>.Node, Signature<O2, A2>.Node> nm = new HashMap<>();
-	public Map<Signature<O1, A1>.Edge, Signature<O2, A2>.Path> em = new HashMap<>();
+	private Map<Signature<O1, A1>.Edge, Signature<O2, A2>.Path> em = new HashMap<>();
 
 	public Signature<O2, A2>.Path apply(Signature<O1, A1>.Path path) {
 		Signature<O2, A2>.Path ret = target.path(nm.get(path.source));
@@ -63,14 +63,14 @@ public class Mapping<O1, A1, O2, A2> implements Serializable {
 			}
 			Signature<O2, A2>.Path m = em.get(n);
 			if (m == null) {
-				throw new RuntimeException("Arrow " + n + " maps to " + m + " is not in target schema.");
+				throw new RuntimeException("Arrow " + n + " maps to null.");
 			}
 		}
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((em == null) ? 0 : em.hashCode());
 		result = prime * result + ((nm == null) ? 0 : nm.hashCode());
@@ -129,7 +129,7 @@ public class Mapping<O1, A1, O2, A2> implements Serializable {
 
 		nm += " arrows\n";
 		b = false;
-		for (Entry<Signature<O1, A1>.Edge, Signature<O2, A2>.Path> k : this.em
+		for (Entry<Signature<O1, A1>.Edge, Signature<O2, A2>.Path> k : em
 				.entrySet()) {
 			if (b) {
 				nm += ",\n";
@@ -142,7 +142,7 @@ public class Mapping<O1, A1, O2, A2> implements Serializable {
 
 		String ret = "{\n " + nm + "}";
 
-		ret += (" : " + source.toString());
+		ret += (" : " + source);
 		ret += (" \n\n -> \n\n ");
 		ret += (target.toString());
 		return ret;
@@ -174,7 +174,7 @@ public class Mapping<O1, A1, O2, A2> implements Serializable {
 		return new Mapping<>(xxx, yyy, l.source, r.target);
 	}
 	
-	Functor<Signature<O1,A1>.Node,Signature<O1,A1>.Path,Signature<O2,A2>.Node,Signature<O2,A2>.Path> functor;
+	private Functor<Signature<O1,A1>.Node,Signature<O1,A1>.Path,Signature<O2,A2>.Node,Signature<O2,A2>.Path> functor;
 	public Functor<Signature<O1,A1>.Node,Signature<O1,A1>.Path,Signature<O2,A2>.Node,Signature<O2,A2>.Path> toFunctor() {
 		if (functor != null) {
 			return functor;

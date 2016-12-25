@@ -44,6 +44,9 @@ import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
+import org.codehaus.jparsec.Terminals.Identifier;
+import org.codehaus.jparsec.Terminals.IntegerLiteral;
+import org.codehaus.jparsec.Terminals.StringLiteral;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 
@@ -207,12 +210,9 @@ public class SqlChecker {
 		for (Pair<String, String> p : edge.second) {
 			cand.add(p.second);
 		}
-		Set<String> cand2 = info.getTable(target).pk.stream().map(x -> { return x.name; }).collect(Collectors.toSet());
-		if (!cand2.equals(cand)) {
-			return false;
-		}
-		return true; 
-	}
+		Set<String> cand2 = info.getTable(target).pk.stream().map(x -> x.name).collect(Collectors.toSet());
+        return cand2.equals(cand);
+    }
 
 	private boolean match(String source, String target, List<Pair<String, String>> cand) {
 		for (SqlForeignKey fk : info.fks) {
@@ -264,7 +264,7 @@ public class SqlChecker {
 	private JComponent showDiff(String src, String dst, Set<Map<String, String>> lhs, Set<Map<String, String>> rhs, List<String> tCols) {
 		List<JPanel> tbls = new LinkedList<>();
 
-		List<String> sCols = new LinkedList<>(info.getTable(src).columns.stream().map(x -> { return x.name; }).collect(Collectors.toList()));
+		List<String> sCols = new LinkedList<>(info.getTable(src).columns.stream().map(x -> x.name).collect(Collectors.toList()));
 		
 		for (Map<String, String> row : lhs) {
 			List<String> lhs_out = new LinkedList<>();
@@ -318,7 +318,7 @@ public class SqlChecker {
 		throw new RuntimeException("No partner for " + row + " in " + rows);
 	}
 
-	static Set<Map<String, String>> toTuples(ResultSet resultSet) throws SQLException {
+	private static Set<Map<String, String>> toTuples(ResultSet resultSet) throws SQLException {
 		Set<Map<String, String>> rows = new HashSet<>();
 		
 		ResultSetMetaData rsmd = resultSet.getMetaData();
@@ -342,29 +342,27 @@ public class SqlChecker {
 	private Connection conn;
 	private SqlSchema info;
 
-	List<Pair<String, JComponent>> frames = new LinkedList<>();
+	private List<Pair<String, JComponent>> frames = new LinkedList<>();
 
-	JCheckBox haltOnErrors = new JCheckBox("Require FK Decls", true);
+	private final JCheckBox haltOnErrors = new JCheckBox("Require FK Decls", true);
 
-	private CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
+	private final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 			"Response", "");
 
-	public static Example[] examples = { new EmpExample()  };
+	private static final Example[] examples = { new EmpExample()  };
 
-	CodeTextPanel input = new CodeTextPanel("Path Equalities", "");
-	SqlLoader loader = new SqlLoader(output, "SQL Loader");
+	private final CodeTextPanel input = new CodeTextPanel("Path Equalities", "");
+	private final SqlLoader loader = new SqlLoader(output, "SQL Loader");
 	
 	public SqlChecker() {
 
 		JButton transButton = new JButton("Check");
 
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener((ActionEvent e) -> {
-                    input.setText(((Example) box.getSelectedItem()).getText());
-                });
+		box.addActionListener((ActionEvent e) -> input.setText(((Example) box.getSelectedItem()).getText()));
 
-		transButton.addActionListener(x -> { check(); });
+		transButton.addActionListener(x -> check());
 		
 		JPanel p = new JPanel(new BorderLayout());
 
@@ -427,7 +425,7 @@ public class SqlChecker {
 			//TODO: aql move this into the parser
 			for (String string0 : strings) {
 				String string = string0.trim();
-				if (string.length() == 0) {
+				if (string.isEmpty()) {
 					continue;
 				}
 				if (string.equals(";")) {
@@ -469,9 +467,9 @@ public class SqlChecker {
 
 		public void display(String s) {
 			frame = new JFrame();
-			this.name = s;
+            name = s;
 
-			final Vector<String> ooo = new Vector<>();
+			Vector<String> ooo = new Vector<>();
 			int index = 0;
 			for (Pair<String, JComponent> p : frames) {
 				x.add(p.second, p.first);
@@ -516,9 +514,7 @@ public class SqlChecker {
 			frame.setContentPane(px);
 			frame.setSize(900, 600);
 
-			ActionListener escListener = (ActionEvent e) -> {
-                            frame.dispose();
-                        };
+			ActionListener escListener = (ActionEvent e) -> frame.dispose();
 
 			frame.getRootPane().registerKeyboardAction(escListener,
 					KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
@@ -538,50 +534,45 @@ public class SqlChecker {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
-				@Override
-				public Integer map(String s) {
-					return Integer.valueOf(s);
-				}
-			});
+	static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
+			.map(Integer::valueOf);
 
-	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
+	private static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|" };
 
-	static String[] res = new String[] {  };
+	private static final String[] res = new String[] {  };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
-	static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
+	private static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
-	static final Parser<?> TOKENIZER = Parsers.or(
-			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
-			RESERVED.tokenizer(), (Parser<?>) Terminals.Identifier.TOKENIZER,
-			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
+	private static final Parser<?> TOKENIZER = Parsers.or(
+			(Parser<?>) StringLiteral.DOUBLE_QUOTE_TOKENIZER,
+			RESERVED.tokenizer(), (Parser<?>) Identifier.TOKENIZER,
+			(Parser<?>) IntegerLiteral.TOKENIZER);
 
-	static Parser<?> term(String... names) {
+	private static Parser<?> term(String... names) {
 		return RESERVED.token(names);
 	}
 
-	public static Parser<?> ident() {
-		return Terminals.Identifier.PARSER;
+	private static Parser<?> ident() {
+		return Identifier.PARSER;
 	}
 
-	static Parser<?> path() {
+	private static Parser<?> path() {
 		Parser<?> p = Parsers.tuple(ident(), term("->"), ident());
 		Parser<?> edge = Parsers.tuple(term("."), ident(), term(","), p.sepBy1(term(",")));
 		Parser<?> att = Parsers.tuple(term("|"), p.sepBy1(term(",")));
 		return Parsers.tuple(ident(), edge.many(), att.optional());
 	}
 	
-	static Parser<?> program() {
+	private static Parser<?> program() {
 		return Parsers.tuple(path(), term("="), path());
 	}
 	
 	@SuppressWarnings("rawtypes")
-	static Pair<String, List<Pair<String,String>>> toEdge(Object a) {
+    private static Pair<String, List<Pair<String,String>>> toEdge(Object a) {
 			Tuple4 t = (Tuple4) a;
 			String n = (String) t.b;
 			List z = (List) t.d;
@@ -596,7 +587,7 @@ public class SqlChecker {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	static Triple<String, List<Pair<String, List<Pair<String,String>>>>, List<Pair<String,String>>> toPath(Object ox) {
+    private static Triple<String, List<Pair<String, List<Pair<String,String>>>>, List<Pair<String,String>>> toPath(Object ox) {
 		Tuple3  o = (Tuple3) ox;
 		String start = (String) o.a;
 		List l = (List) o.b;
@@ -626,7 +617,7 @@ public class SqlChecker {
 	}
 	
 	@SuppressWarnings({ "rawtypes" })
-	public static final Pair<Triple<String, List<Pair<String, List<Pair<String,String>>>>, List<Pair<String, String>>>,
+    private static Pair<Triple<String, List<Pair<String, List<Pair<String,String>>>>, List<Pair<String, String>>>,
 	Triple<String, List<Pair<String, List<Pair<String,String>>>>, List<Pair<String, String>>>> eq(String s) {
 		Tuple3 decl = (Tuple3) program().from(TOKENIZER, IGNORED).parse(s);
 		return new Pair<>(toPath(decl.a), toPath(decl.c));

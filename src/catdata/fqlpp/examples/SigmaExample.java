@@ -20,7 +20,7 @@ public class SigmaExample extends Example {
 		return s;
 	}
 	
-	String s = "category C = {"
+	private final String s = "category C = {"
 			+ "\n	objects "
 			+ "\n		Amphibian,"
 			+ "\n		LandAnimal,"

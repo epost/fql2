@@ -20,7 +20,7 @@ public class OplMLExample extends Example {
 		return s;
 	}
 
-	String s = "//requires the classes and jars from the fqlml project to run"
+	private final String s = "//requires the classes and jars from the fqlml project to run"
 			+ "\nS0 = theory {"
 			+ "\n	sorts Person, Nat, String;"
 			+ "\n	symbols zero@0 : Nat, "

@@ -12,7 +12,7 @@ import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplParser.DoNotIgnore;
 
 public class OplCtx<S, V> {
-	LinkedHashMap<V, S> vars0;
+	final LinkedHashMap<V, S> vars0;
 
 	public OplCtx(Map<V, S> m) {
 		vars0 = new LinkedHashMap<>(m);
@@ -60,7 +60,7 @@ public class OplCtx<S, V> {
 	public S get(V s) {
 		S ret = vars0.get(s);
 		if (s == null) {
-			throw new DoNotIgnore("Unbound var " + s);
+			throw new DoNotIgnore("null var");
 		}
 		return ret;
 	}
@@ -112,7 +112,7 @@ public class OplCtx<S, V> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((vars0 == null) ? 0 : vars0.hashCode());
 		return result;

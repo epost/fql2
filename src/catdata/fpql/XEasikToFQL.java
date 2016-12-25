@@ -39,7 +39,7 @@ import catdata.ide.Example;
 
 public class XEasikToFQL {
 
-	protected Example[] examples = { new ContraintsEx(), new DemoEx() };
+	private final Example[] examples = { new ContraintsEx(), new DemoEx() };
 
 	static class DemoEx extends Example {
 			
@@ -68,13 +68,13 @@ public class XEasikToFQL {
 
 	}
 
-	String help = "Translates EASIK XML into FPQL.  Ignore constraints besides path equalities.";
+	private final String help = "Translates EASIK XML into FPQL.  Ignore constraints besides path equalities.";
 
-	protected static String kind() {
+	private static String kind() {
 		return "EASIK";
 	}
 
-	static String translate1(Node sketch) {
+	private static String translate1(Node sketch) {
 		List<String> ns = new LinkedList<>();
 		List<Triple<String, String, String>> es = new LinkedList<>();
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
@@ -87,19 +87,19 @@ public class XEasikToFQL {
     			Node m = j.item(temp2);
 
     			if (m.getNodeName().equals("entity")) {
-    				String nodeName = m.getAttributes().getNamedItem("name").getTextContent().toString(); 
+    				String nodeName = m.getAttributes().getNamedItem("name").getTextContent();
     				ns.add(nodeName);
     				NodeList k = m.getChildNodes();
     				for (int temp3 = 0; temp3 < k.getLength(); temp3++) {
     					Node w = k.item(temp3);
     					if (w.getNodeName().equals("attribute")) {
-    	    				String attName = w.getAttributes().getNamedItem("name").getTextContent().toString(); 
+    	    				String attName = w.getAttributes().getNamedItem("name").getTextContent();
     						es.add(new Triple<>(nodeName + "_" + attName.replace(" ", "_") , nodeName, "dom"));
     					}
     				}
     			} else if (m.getNodeName().equals("edge")) {
-    				es.add(new Triple<>(m.getAttributes().getNamedItem("id").getTextContent().toString(), 
-    						m.getAttributes().getNamedItem("source").getTextContent().toString(), m.getAttributes().getNamedItem("target").getTextContent().toString()));
+    				es.add(new Triple<>(m.getAttributes().getNamedItem("id").getTextContent(),
+							m.getAttributes().getNamedItem("source").getTextContent(), m.getAttributes().getNamedItem("target").getTextContent()));
     			} else if (m.getNodeName().equals("commutativediagram")) {
        				NodeList k = m.getChildNodes();
        				Node w1 = null;
@@ -115,8 +115,8 @@ public class XEasikToFQL {
        				if (w1 == null || w2 == null) {
        					throw new RuntimeException("Easik to FQL internal error");
        				}
-       				String cod1 = w1.getAttributes().getNamedItem("domain").getTextContent().toString(); 
-       				String cod2 = w2.getAttributes().getNamedItem("domain").getTextContent().toString(); 
+       				String cod1 = w1.getAttributes().getNamedItem("domain").getTextContent();
+       				String cod2 = w2.getAttributes().getNamedItem("domain").getTextContent();
        				List<String> lhs = new LinkedList<>();
        				List<String> rhs = new LinkedList<>();
        				lhs.add(cod1);
@@ -127,7 +127,7 @@ public class XEasikToFQL {
        					if (!lhsX.item(temp3).getNodeName().equals("edgeref")) {
        						continue;
        					}
-       					String toAdd = lhsX.item(temp3).getAttributes().getNamedItem("id").getTextContent().toString();
+       					String toAdd = lhsX.item(temp3).getAttributes().getNamedItem("id").getTextContent();
        					lhs.add(toAdd);
     				}
        				NodeList rhsX = w1.getChildNodes();
@@ -135,7 +135,7 @@ public class XEasikToFQL {
        					if (!rhsX.item(temp3).getNodeName().equals("edgeref")) {
        						continue;
        					}
-       					String toAdd = rhsX.item(temp3).getAttributes().getNamedItem("id").getTextContent().toString();
+       					String toAdd = rhsX.item(temp3).getAttributes().getNamedItem("id").getTextContent();
        					rhs.add(toAdd);
     				}
        				eqs.add(new Pair<>(lhs, rhs));
@@ -147,7 +147,7 @@ public class XEasikToFQL {
 		return sketch.getAttributes().getNamedItem("name").getTextContent().replace(" ", "_") + " = " + sch;
 	}
 	
-	static String translate(String in) {
+	private static String translate(String in) {
 		String ret = "dom : type\n\n";
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -177,19 +177,17 @@ public class XEasikToFQL {
 	}
 
 	public XEasikToFQL() {
-		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind()
+		CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind()
 				+ " Input", "");
-		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
+		CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"FPQL Output", "");
 
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");
 
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener((ActionEvent e) -> {
-                    input.setText(((Example) box.getSelectedItem()).getText());
-                });
+		box.addActionListener((ActionEvent e) -> input.setText(((Example) box.getSelectedItem()).getText()));
 
 		transButton.addActionListener((ActionEvent e) -> {
                     try {
@@ -228,7 +226,7 @@ public class XEasikToFQL {
 		f.setVisible(true);
 	}
 
-	static String constraints_example = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+	private static final String constraints_example = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
 			+ "\n<easketch_overview>"
 			+ "\n<header>"
 			+ "\n<title>Constraints</title>"
@@ -414,7 +412,7 @@ public class XEasikToFQL {
 			+ "\n<views/>"
 			+ "\n</easketch_overview>" + "\n";
 	
-	static String demo_example = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+	private static final String demo_example = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
 			+ "\n<easketch_overview>"
 			+ "\n<header>"
 			+ "\n<title/>"

@@ -18,7 +18,7 @@ public class FqlUtil {
 	public static <T> Collection<List<T>> permute(Collection<T> input) {
 		Collection<List<T>> output = new ArrayList<>();
 		if (input.isEmpty()) {
-			output.add(new ArrayList<T>());
+			output.add(new ArrayList<>());
 			return output;
 		}
 		List<T> list = new ArrayList<>(input);
@@ -38,7 +38,7 @@ public class FqlUtil {
 	} 
 
 	private static JPanel makeRowOrCol(List<JComponent> list, int orientation) {
-		if (list.size() == 0) {
+		if (list.isEmpty()) {
 			JPanel ret = new JPanel();
 			ret.setBorder(BorderFactory.createEmptyBorder());
 			return ret;

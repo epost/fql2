@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.RuntimeInterruptedException;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
@@ -29,7 +30,7 @@ import catdata.provers.SaturatedProver;
 //no java here!
 public class AqlProver {
 
-	public static enum ProverName {
+	public enum ProverName {
 		auto, saturated, monoidal, program, completion, congruence, fail, free,
 	}
 
@@ -88,11 +89,9 @@ public class AqlProver {
 			return ProverName.congruence;
 		} else if (col.isMonoidal()) {
 			return ProverName.monoidal;
-		} else if (!(Boolean)ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe) && reorientable(col) && ProgramProver.isProgram(Var.it, reorient(col).toKB().eqs, false)) {
+		} else if (!(Boolean) ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe) && reorientable(col) && ProgramProver.isProgram(Var.it, reorient(col).toKB().eqs, false) || (Boolean) ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe) && ProgramProver.isProgram(Var.it, col.toKB().eqs, false)) {
 			return ProverName.program; 
-		} else if ((Boolean)ops.getOrDefault(AqlOption.program_allow_nontermination_unsafe) && ProgramProver.isProgram(Var.it, col.toKB().eqs, false)) {
-			return ProverName.program; 
-		} 
+		}
 		throw new RuntimeException("Cannot automatically chose prover: theory is not free, ground, unary, or program.  Possible solutions include: \n\n1) use the completion prover, possibly with an explicit precedence (see A KB example) \n\n2) Reorient equations from left to right to obtain a size-reducing orthogonal rewrite system \n\n3) Remove all binary function symbols \n\n4) Remove all type side and schema equations \n\n5) disable checking of equations in queries using dont_validate_unsafe=true as an option \n\n6) adding options program_allow_nontermination_unsafe=true \n\n7) emailing support, info@catinf.com ");
 	}
 	
@@ -173,7 +172,7 @@ public class AqlProver {
 		};
 	}
 
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> saturatedProverHelper(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) throws InterruptedException {
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk> SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> saturatedProverHelper(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) throws InterruptedException {
 		SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> ret = new SaturatedProver<>(col.toKB());
 
 		if ((Boolean) ops.getOrDefault(AqlOption.dont_verify_is_appropriate_for_prover_unsafe)) {

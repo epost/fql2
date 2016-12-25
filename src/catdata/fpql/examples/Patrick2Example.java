@@ -21,7 +21,7 @@ public class Patrick2Example extends Example {
 		return s;
 	}
 	
-	String s = "String : type"
+	private final String s = "String : type"
 			+ "\n"
 			+ "\ngecko frog human cow horse dolphin fish : String"
 			+ "\n"

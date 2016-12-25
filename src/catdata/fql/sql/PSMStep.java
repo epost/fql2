@@ -9,18 +9,19 @@ import catdata.fql.decl.Signature;
 
 public class PSMStep extends PSM {
 	
-	String pre, I;
-	Mapping m, n;
+	private final String pre;
+    //private final String I;
+	private final Mapping m;
+    private final Mapping n;
 
 	@Override
 	public String isSql() {
 		return pre;
 	}
 	
-	public PSMStep(String pre, String i, Mapping m, Mapping n) {
-		super();
-		this.pre = pre;
-		I = i;
+	public PSMStep(String pre, @SuppressWarnings("unused") String i, Mapping m, Mapping n) {
+        this.pre = pre;
+	//	I = i;
 		this.m = m;
 		this.n = n;
 	}

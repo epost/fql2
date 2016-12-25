@@ -65,45 +65,39 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	
 	public abstract Language lang();
 	
-	protected final Integer id;
+	final Integer id;
 	protected final String title;
 	
 	private DDisp display; 
 
 	private static final long serialVersionUID = 1L;
 
-	public RSyntaxTextArea topArea;
+	public final RSyntaxTextArea topArea;
 
-	protected CodeTextPanel respArea = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Response", "");
+	protected final CodeTextPanel respArea = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Response", "");
 
-	final JTextField searchField = new JTextField();	
-	final JButton nextButton = new JButton("Find Next");
-	final JButton prevButton = new JButton("Find Previous");
-	final JCheckBox matchCaseCB = new JCheckBox("Match Case");
-	final JCheckBox replaceCB = new JCheckBox("Replace");
-	final JCheckBox wholeCB = new JCheckBox("Whole Word");
-	final JTextField replaceField = new JTextField();
+	private final JTextField searchField = new JTextField();
+	private final JButton nextButton = new JButton("Find Next");
+	private final JButton prevButton = new JButton("Find Previous");
+	private final JCheckBox matchCaseCB = new JCheckBox("Match Case");
+	private final JCheckBox replaceCB = new JCheckBox("Replace");
+	private final JCheckBox wholeCB = new JCheckBox("Whole Word");
+	private final JTextField replaceField = new JTextField();
 	
 
 	private JFrame frame;
 
-	public JPanel makeSearchDialog() {
+	private JPanel makeSearchDialog() {
 		JPanel toolBar = new JPanel(new GridLayout(3, 4));
 		toolBar.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
 		toolBar.add(new JLabel("Search for:"));
 		toolBar.add(searchField);
-		nextButton.addActionListener((ActionEvent e) -> {
-                    doFind(true);
-                });
+		nextButton.addActionListener((ActionEvent e) -> doFind(true));
 		toolBar.add(nextButton);
-		prevButton.addActionListener((ActionEvent e) -> {
-                    doFind(false);
-                });
+		prevButton.addActionListener((ActionEvent e) -> doFind(false));
 		toolBar.add(prevButton);
-		searchField.addActionListener((ActionEvent e) -> {
-                    nextButton.doClick(0);
-                });
+		searchField.addActionListener((ActionEvent e) -> nextButton.doClick(0));
 
 		toolBar.add(new JLabel("Replace with:"));
 		toolBar.add(replaceField);
@@ -117,10 +111,10 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		return toolBar;
 	}
 
-	protected void doFind(boolean b) {
+	private void doFind(boolean b) {
 		SearchContext context = new SearchContext();
 		String text = searchField.getText();
-		if (text.length() == 0) {
+		if (text.isEmpty()) {
 			return;
 		}
 		context.setSearchFor(text);
@@ -146,7 +140,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		return topArea.getText();
 	}
 
-	public void makeSearchVisible() {
+	private void makeSearchVisible() {
 		SwingUtilities.invokeLater(() -> {
                     if (frame == null) {
                         frame = new JFrame();
@@ -164,9 +158,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
                             }
                         });
                         
-                        ActionListener escListener = (ActionEvent e) -> {
-                            frame.setVisible(false);
-                        };
+                        ActionListener escListener = (ActionEvent e) -> frame.setVisible(false);
                         
                         frame.getRootPane().registerKeyboardAction(escListener,
                                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
@@ -222,11 +214,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		InputMap inputMap = topArea.getInputMap();
 
 		KeyStroke key2;
-		if (System.getProperty("os.name").contains("Windows")) {
-			key2 = KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.META_MASK);
-		} else {
-			key2 = KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.CTRL_MASK);
-		}
+        key2 = System.getProperty("os.name").contains("Windows") ? KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.META_MASK) : KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.CTRL_MASK);
 		inputMap.put(key2, DefaultEditorKit.beginLineAction);
 	
 		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_E, Event.META_MASK);
@@ -383,7 +371,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	//TODO aql join reordering
 		
-	protected void findAction() {
+	void findAction() {
 		makeSearchVisible();
 	}
 
@@ -395,7 +383,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		topArea.setText(program);
 		topArea.setCaretPosition(0);
 		respArea.setText("");
-		GUI.setDirty(CodeEditor.this.id, false);
+		GUI.setDirty(id, false);
 		if (display != null) {
 			display.close();
 		}
@@ -519,7 +507,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	protected abstract Progg parse(String program) throws ParserException;
 	
-	public void setCaretPos(int p) {
+	protected void setCaretPos(int p) {
 		topArea.requestFocusInWindow();
 		topArea.setCaretPosition(p);
 	}
@@ -575,7 +563,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	
 	@SuppressWarnings("static-method")
 	protected Collection<String> reservedWords() {
-		return Util.list("validator", "boolean", "booleans", "equational", "axiomatization", "axiomatize", "axiom", "axioms", "functor", "functors", "schema", "schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
+		return Util.list("observable", "observables", "validator", "boolean", "booleans", "equational", "axiomatization", "axiomatize", "axiom", "axioms", "functor", "functors", "schema", "schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
 	}
 
 }

@@ -20,7 +20,7 @@ public class OplJee1 extends Example {
 		return s;
 	}
 	
-	String s = "//Example courtesy of Jee Chung"
+	private final String s = "//Example courtesy of Jee Chung"
 			+ "\n////////////////////////////////////////////////////////////////////////"
 			+ "\n//Configure OPL options"
 			+ "\n////////////////////////////////////////////////////////////////////////"

@@ -63,7 +63,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
@@ -132,7 +132,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		//TODO aql recomputes
 		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q; 
 		public final InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> I;
-		public Map<String, String> options;
+		public final Map<String, String> options;
 		
 		@Override
 		public long timeout() {
@@ -147,7 +147,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
@@ -254,7 +254,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -327,7 +327,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -379,7 +379,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -473,7 +473,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -561,7 +561,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((options1 == null) ? 0 : options1.hashCode());
@@ -651,7 +651,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -728,9 +728,9 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
+			result = prime * result + inst.hashCode();
 			return result;
 		}
 
@@ -743,13 +743,8 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 			if (getClass() != obj.getClass())
 				return false;
 			TransExpId<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpId<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
-			if (inst == null) {
-				if (other.inst != null)
-					return false;
-			} else if (!inst.equals(other.inst))
-				return false;
-			return true;
-		}
+            return inst.equals(other.inst);
+        }
 
 		@Override
 		public String toString() {
@@ -796,7 +791,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((var == null) ? 0 : var.hashCode());
 			return result;
@@ -861,9 +856,9 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((trans == null) ? 0 : trans.hashCode());
+			result = prime * result + (trans.hashCode());
 			return result;
 		}
 
@@ -876,13 +871,8 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 			if (getClass() != obj.getClass())
 				return false;
 			TransExpLit<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpLit<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
-			if (trans == null) {
-				if (other.trans != null)
-					return false;
-			} else if (!trans.equals(other.trans))
-				return false;
-			return true;
-		}
+            return trans.equals(other.trans);
+        }
 
 		@Override
 		public String toString() {
@@ -913,7 +903,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;

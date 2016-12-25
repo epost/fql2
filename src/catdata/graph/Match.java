@@ -14,11 +14,11 @@ import catdata.Util;
  */
 public final class Match<N1,E1,N2,E2> {
 
-	public final DMG<N1,E1> src;
-	public final DMG<N2,E2> dst;
+	private final DMG<N1,E1> src;
+	private final DMG<N2,E2> dst;
 
-	public final Map<N1, N2> nodes;
-	public final Map<E1, List<E2>> edges;
+	private final Map<N1, N2> nodes;
+	private final Map<E1, List<E2>> edges;
 	
 	public Match(DMG<N1, E1> src, DMG<N2, E2> dst, Map<N1, N2> nodes, Map<E1, List<E2>> edges) {
 		this.src = src;
@@ -28,7 +28,7 @@ public final class Match<N1,E1,N2,E2> {
 		validate();
 	}
 	
-	public void validate() {
+	private void validate() {
 		for (N1 en1 : src.nodes) {
 			N2 en2 = nodes.get(en1);
 			if (en2 == null) {
@@ -59,7 +59,7 @@ public final class Match<N1,E1,N2,E2> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 		result = prime * result + ((edges == null) ? 0 : edges.hashCode());

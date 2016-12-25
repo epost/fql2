@@ -31,11 +31,14 @@ public class CommaCat<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC>
 		extends
 		FinCat<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>, Pair<Arr<ObjA, ArrowA>, Arr<ObjB, ArrowB>>> {
 
-	public FinCat<ObjA, ArrowA> A;
-	public FinCat<ObjB, ArrowB> B;
-	public FinCat<ObjC, ArrowC> C;
-	public FinFunctor<ObjA, ArrowA, ObjC, ArrowC> F;
-	public FinFunctor<ObjB, ArrowB, ObjC, ArrowC> G;
+	private final FinCat<ObjA, ArrowA> A;
+	private final FinCat<ObjB, ArrowB> B;
+	@SuppressWarnings("unused")
+	private final FinCat<ObjC, ArrowC> C;
+	@SuppressWarnings("unused")
+	private final FinFunctor<ObjA, ArrowA, ObjC, ArrowC> F;
+	@SuppressWarnings("unused")
+	private final FinFunctor<ObjB, ArrowB, ObjC, ArrowC> G;
 	public FinFunctor<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>, Pair<Arr<ObjA, ArrowA>, Arr<ObjB, ArrowB>>, ObjA, ArrowA> projA;
 	public FinFunctor<Triple<ObjA, ObjB, Arr<ObjC, ArrowC>>, Pair<Arr<ObjA, ArrowA>, Arr<ObjB, ArrowB>>, ObjB, ArrowB> projB;
 

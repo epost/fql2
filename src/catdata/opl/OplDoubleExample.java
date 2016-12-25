@@ -20,7 +20,7 @@ public class OplDoubleExample extends Example {
 		return s;
 	}
 	
-	String s = "T = theory { "
+	private final String s = "T = theory { "
 			+ "\n sorts"
 			+ "\n 	Double, Boolean;"
 			+ "\n symbols"

@@ -15,11 +15,11 @@ import java.util.Set;
 public class InsertKeygen extends PSM {
 
 	String name;
-	String col;
-	String r;
-	List<String> attrs;
+	private String col;
+	private String r;
+	private List<String> attrs;
 
-	public InsertKeygen() {
+	InsertKeygen() {
 
 	}
 
@@ -32,7 +32,7 @@ public class InsertKeygen extends PSM {
 
 	@Override
 	public String toPSM() {
-		if (attrs.size() == 0) {
+		if (attrs.isEmpty()) {
 			return "INSERT INTO " + name + "(" + col
 					+ ") VALUES (@guid := @guid+1)";
 		}
@@ -59,15 +59,15 @@ public class InsertKeygen extends PSM {
 		if (state.get(r) == null) {
 			throw new RuntimeException(r + "\n\n" + state);
 		}
-		if (state.get(name).size() > 0) {
-			throw new RuntimeException(this.toString());
+		if (!state.get(name).isEmpty()) {
+			throw new RuntimeException(toString());
 		}
 
 		Set<Map<Object, Object>> ret = new HashSet<>();
-		if (attrs.size() == 0) {
+		if (attrs.isEmpty()) {
 			Map<Object, Object> m = new HashMap<>();
 			ret.add(m);
-			m.put(col, new Integer(++interp.guid).toString());
+			m.put(col, Integer.toString(++interp.guid));
 			state.put(name, ret);
 		} else {
 			for (Map<Object, Object> row : state.get(r)) {
@@ -75,7 +75,7 @@ public class InsertKeygen extends PSM {
 				for (Object s : row.keySet()) {
 					row0.put(s, row.get(s));
 				}
-				row0.put(col, new Integer(++interp.guid).toString());
+				row0.put(col, Integer.toString(++interp.guid));
 				ret.add(row0);
 			}
 			state.put(name, ret);

@@ -7,12 +7,7 @@ import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
 import java.lang.reflect.Constructor;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
@@ -24,6 +19,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
+import catdata.fql.decl.MapExp.Const;
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Pair;
@@ -46,7 +42,6 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
@@ -58,8 +53,8 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
  */
 public class Mapping {
 
-	boolean ALLOW_WF_CHECK = true;
-	public boolean flag = false;
+	private boolean ALLOW_WF_CHECK = true;
+	private boolean flag = false;
 /*
 	public Mapping(Signature src, Signature dst, LinkedHashMap<Node, Node> nm,
 			LinkedHashMap<Edge, Path> em,
@@ -74,7 +69,7 @@ public class Mapping {
 	}
 */
 	
-	public MapExp.Const toConst() {
+	public Const toConst() {
 		List<Pair<String, String>> objs = new LinkedList<>();
 		List<Pair<String, String>> attrs = new LinkedList<>();
 		List<Pair<String, List<String>>> arrows = new LinkedList<>();
@@ -89,7 +84,7 @@ public class Mapping {
 			arrows.add(new Pair<>(e.name, em.get(e).asList()));
 		}
 		
-		return new MapExp.Const(objs, attrs, arrows, source.toConst(), target.toConst());
+		return new Const(objs, attrs, arrows, source.toConst(), target.toConst());
 	}
 	
 	public Mapping(boolean b, Signature src, Signature dst, LinkedHashMap<Node, Node> nm,
@@ -97,15 +92,15 @@ public class Mapping {
 			LinkedHashMap<Attribute<Node>, Attribute<Node>> am) throws FQLException {
 		ALLOW_WF_CHECK = b;
 		// this.name = name;
-		this.source = src;
-		this.target = dst;
+        source = src;
+        target = dst;
 		this.nm = nm;
 		this.em = em;
 		this.am = am;
 		validate();
 	}
 	
-	public void validate() throws FQLException {
+	private void validate() throws FQLException {
 		for (Attribute<Node> a : source.attrs) {
 			Attribute<Node> b = am.get(a);
 			if (b == null) {
@@ -224,7 +219,7 @@ public class Mapping {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + (ALLOW_WF_CHECK ? 1231 : 1237);
 		result = prime * result + ((am == null) ? 0 : am.hashCode());
@@ -277,7 +272,7 @@ public class Mapping {
 	public Mapping(boolean b, Signature source, Signature target,
 			List<Pair<String, String>> objs, List<Pair<String, String>> atts,
 			List<Pair<String, List<String>>> arrows) throws FQLException {
-		this.flag = b;
+        flag = b;
 		initialize(source, target, objs, atts, arrows);
 		validate();
 	}
@@ -323,26 +318,26 @@ public class Mapping {
 	private void initialize(Signature sourceX, Signature targetX,
 			List<Pair<String, String>> objs, List<Pair<String, String>> attrs,
 			List<Pair<String, List<String>>> arrows) throws FQLException {
-		this.source = sourceX;
-		this.target = targetX;
+        source = sourceX;
+        target = targetX;
 
 		Pair<List<Pair<String, String>>, List<Pair<String, String>>> s = filter(objs);
 		objs = s.first;
 		// List<Pair<String, String>> attrs = s.second;
 		for (Pair<String, String> p : objs) {
-			Node sn = this.source.getNode(p.first);
-			Node tn = this.target.getNode(p.second);
+			Node sn = source.getNode(p.first);
+			Node tn = target.getNode(p.second);
 			nm.put(sn, tn);
 		}
 		try {
 			for (Pair<String, List<String>> arrow : arrows) {
-				Edge e = this.source.getEdge(arrow.first);
-				Path p = new Path(this.target, arrow.second);
+				Edge e = source.getEdge(arrow.first);
+				Path p = new Path(target, arrow.second);
 				em.put(e, p);
 			}
 		} catch (FQLException e) {
 			throw new FQLException("In mapping " + this
-					+ ", bad path mapping: " + e.toString());
+					+ ", bad path mapping: " + e);
 		}
 		for (Pair<String, String> a : attrs) {
 			Attribute<Node> a1 = source.getAttr(a.first);
@@ -362,19 +357,19 @@ public class Mapping {
 						+ a);
 			}
 		}
-		for (Node n : this.source.nodes) {
+		for (Node n : source.nodes) {
 			if (nm.get(n) == null) {
 				throw new FQLException("Missing node mapping from " + n
 						+ " in " + this + "\n" + this);
 			}
 		}
-		for (Edge e : this.source.edges) {
+		for (Edge e : source.edges) {
 			if (em.get(e) == null) {
 				throw new FQLException("Missing arrow mapping from " + e
 						+ " in " + this);
 			}
 		}
-		for (Attribute<Node> a : this.source.attrs) {
+		for (Attribute<Node> a : source.attrs) {
 			if (am.get(a) == null) {
 				throw new FQLException("Missing attribute mapping from " + a
 						+ " in " + this);
@@ -395,8 +390,8 @@ public class Mapping {
 		for (Attribute<Node> a : s.attrs) {
 			am.put(a, a);
 		}
-		this.source = s;
-		this.target = s;
+        source = s;
+        target = s;
 		// isId = true;
 	}
 
@@ -412,7 +407,7 @@ public class Mapping {
 			arr[i][1] = eq.getValue();
 			i++;
 		}
-		Arrays.sort(arr, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
+		Arrays.sort(arr, Comparator.comparing(f3 -> f3[0].toString()));
 
 		JTable nmC = new JTable(arr, new Object[] { "Source node",
 				"Target node" }){
@@ -430,7 +425,7 @@ public class Mapping {
 			arr2[i2][1] = eq.getValue().toLong();
 			i2++;
 		}
-		Arrays.sort(arr2, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
+		Arrays.sort(arr2, Comparator.comparing(f2 -> f2[0].toString()));
 
 		JTable emC = new JTable(arr2, new Object[] { "Source edge" ,
 				"Target path" }){
@@ -448,7 +443,7 @@ public class Mapping {
 			arr3[i3][1] = eq.getValue();
 			i3++;
 		}
-		Arrays.sort(arr3, (Object[] f1, Object[] f2) -> f1[0].toString().compareTo(f2[0].toString()));
+		Arrays.sort(arr3, Comparator.comparing(f -> f[0].toString()));
 		JTable amC = new JTable(arr3, new Object[] { "Source attribute" ,
 				"Target attribute"}){
 			@Override
@@ -504,21 +499,21 @@ public class Mapping {
 		p.add(xxx);
 		tap.add(p);
 
-		String delta = "";
+		String delta;
 		try {
 			delta = printNicely(PSMGen.delta(this, "input", "output"));
 		} catch (Exception e) {
 			delta = e.toString();
 		}
 
-		String sigma = "";
+		String sigma;
 		try {
 			sigma = printNicely(PSMGen.sigma(this, "output", "input")); // backwards
 		} catch (Exception e) {
 			sigma = e.toString();
 		}
 
-		String pi = "";
+		String pi;
 		try {
 			pi = printNicely(PSMGen.pi(this, "input", "output").first);
 		} catch (Exception e) {
@@ -558,7 +553,7 @@ public class Mapping {
 		return FqlUtil.makeGrid(tap);
 	}
 
-	static String printNicely(List<PSM> delta) {
+	private static String printNicely(List<PSM> delta) {
 		String ret = "";
 		for (PSM p : delta) {
 			ret += p + "\n\n";
@@ -575,7 +570,7 @@ public class Mapping {
 		return toString2(false);
 	}
 
-	public String toString2(boolean xxx) {
+	private String toString2(boolean xxx) {
 		String nm = "\n nodes\n";
 		boolean b = false;
 		for (Entry<Node, Node> k : this.nm.entrySet()) {
@@ -590,7 +585,7 @@ public class Mapping {
 
 		nm += " attributes\n";
 		b = false;
-		for (Entry<Attribute<Node>, Attribute<Node>> k : this.am.entrySet()) {
+		for (Entry<Attribute<Node>, Attribute<Node>> k : am.entrySet()) {
 			if (b) {
 				nm += ",\n";
 			}
@@ -602,7 +597,7 @@ public class Mapping {
 		
 		nm += " arrows\n";
 		b = false;
-		for (Entry<Edge, Path> k : this.em.entrySet()) {
+		for (Entry<Edge, Path> k : em.entrySet()) {
 			if (b) {
 				nm += ",\n";
 			}
@@ -615,7 +610,7 @@ public class Mapping {
 		String ret = "{\n " + nm + "}";
 
 		if (xxx) {
-			ret += (" : " + source.toString());
+			ret += (" : " + source);
 			ret += (" \n\n -> \n\n ");
 			ret += (target.toString());
 		}
@@ -624,22 +619,22 @@ public class Mapping {
 
 	public Path appy(Signature val, Path path) {
 		try {
-		Node s = nm.get(path.source);
-		Node t = nm.get(path.target);
-		Path ret = new Path(val, s);
-		for (Edge e : path.path) {
-			Path p = em.get(e);
-			if (p == null) {
-				throw new RuntimeException("No mapping for " + e + " in " + this);
+			Node s = nm.get(path.source);
+			Node t = nm.get(path.target);
+			Path ret = new Path(val, s); //fql exn
+			for (Edge e : path.path) {
+				Path p = em.get(e);
+				if (p == null) {
+					throw new RuntimeException("No mapping for " + e + " in " + this);
+				}
+				ret = Path.append(val, ret, p);
 			}
-			ret = Path.append(val, ret, p);
-		}
-
-		if (!ret.target.equals(t)) {
-			throw new RuntimeException("Applying on " + path + " yields " + ret + " whose target is not " + t + " as required.");
-		}
-		
-		return ret;
+	
+			if (!ret.target.equals(t)) {
+				throw new RuntimeException("Applying on " + path + " yields " + ret + " whose target is not " + t + " as required.");
+			}
+			
+			return ret;
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getMessage());
@@ -683,7 +678,7 @@ public class Mapping {
 		return new Triple<>(F, srcCat0, dstCat0);
 	}
 
-	public JPanel pretty(final Color scolor, final Color tcolor, final FqlEnvironment env) {
+	public JPanel pretty(Color scolor, Color tcolor, FqlEnvironment env) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
@@ -691,7 +686,7 @@ public class Mapping {
 		return doView(scolor, tcolor, env, g);
 	}
 
-	public Graph<String, String> build() {
+	private Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
 		Graph<String, String> g2 = new DirectedSparseMultigraph<>();
@@ -737,7 +732,7 @@ public class Mapping {
 	}
 
 	@SuppressWarnings("unchecked")
-	public JPanel doView(final Color scolor, final Color tcolor, @SuppressWarnings("unused") final FqlEnvironment env, Graph<String, String> sgv) {
+    private JPanel doView(Color scolor, Color tcolor, @SuppressWarnings("unused") FqlEnvironment env, Graph<String, String> sgv) {
 		// Layout<V, E>, BasicVisualizationServer<V,E>
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix + GlobalOptions.debug.fql.mapping_graph);
@@ -769,15 +764,15 @@ public class Mapping {
 			}
 		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 
 		// Set up a new stroke Transformer for the edges
 		float dash[] = { 10.0f };
-		final Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
+		Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
-		final Stroke bs = new BasicStroke();
+		Stroke bs = new BasicStroke();
 
 		Transformer<String, Stroke> edgeStrokeTransformer = (String s) -> {
                     if (s.contains(" ")) {

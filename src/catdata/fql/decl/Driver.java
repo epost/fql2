@@ -20,6 +20,11 @@ import catdata.fql.decl.FullQueryExp.Match;
 import catdata.fql.decl.FullQueryExp.Pi;
 import catdata.fql.decl.FullQueryExp.Sigma;
 import catdata.fql.decl.FullQueryExp.Var;
+import catdata.fql.decl.InstExp.Const;
+import catdata.fql.decl.InstExp.FullEval;
+import catdata.fql.decl.InstExp.FullSigma;
+import catdata.fql.decl.InstExp.Plus;
+import catdata.fql.decl.InstExp.Times;
 import catdata.fql.sql.PSM;
 import catdata.fql.sql.PSMGen;
 import catdata.ide.GlobalOptions;
@@ -96,7 +101,7 @@ public class Driver {
 	}
 
 	public static Triple<FqlEnvironment, String, List<Throwable>> makeEnv(
-			FQLProgram prog, String[] toUpdate) {
+            FQLProgram prog, String... toUpdate) {
 
 		List<Throwable> exns = new LinkedList<>();
 
@@ -294,8 +299,8 @@ public class Driver {
 				continue;
 			}
 			InstExp v = prog.insts.get(k);
-			if (v instanceof InstExp.FullEval) {
-				InstExp.FullEval u = (InstExp.FullEval) v;
+			if (v instanceof FullEval) {
+				FullEval u = (FullEval) v;
 				List<Pair<String, InstExp>> n = u.q.toFullQueryExp(prog).accept(u.e, new ExpandFull(prog.full_queries));
 				n.get(n.size()-1).first = k;
 				//int pos = prog.order.indexOf(k);
@@ -317,7 +322,7 @@ public class Driver {
 	private static class ExpandFull implements FullQueryExpVisitor<List<Pair<String, InstExp>>, String> {
 
 		static int count = 0;
-		Map<String, FullQueryExp> prog;
+		final Map<String, FullQueryExp> prog;
 		
 		public ExpandFull(Map<String, FullQueryExp> prog) {
 			this.prog = prog;
@@ -344,7 +349,7 @@ public class Driver {
 		@Override
 		public List<Pair<String, InstExp>> visit(String env, Sigma e) {
 			List<Pair<String, InstExp>> ret = new LinkedList<>();
-			InstExp i = new InstExp.FullSigma(e.f, env);
+			InstExp i = new FullSigma(e.f, env);
 			ret.add(new Pair<>("fet_" + count++, i));
 			return ret;
 		}
@@ -376,7 +381,7 @@ public class Driver {
 	private static boolean containsFullSigma(FQLProgram prog) {
 		for (String k : prog.insts.keySet()) {
 			InstExp v = prog.insts.get(k);
-			if (v instanceof InstExp.FullSigma) {
+			if (v instanceof FullSigma) {
 				return true;
 			}
 		}
@@ -404,8 +409,8 @@ public class Driver {
 			Map<String, Instance> insts) throws FQLException {
 		for (String k : prog.insts.keySet()) {
 			InstExp v = prog.insts.get(k);
-			if (v instanceof InstExp.FullSigma) {
-				InstExp.FullSigma v0 = (InstExp.FullSigma) v;
+			if (v instanceof FullSigma) {
+				FullSigma v0 = (FullSigma) v;
 				Instance x = Chase.sigma(v0.F.toMap(prog), insts.get(v0.I));
 				if (!Instance.quickCompare(x, insts.get(k))) {
 					throw new RuntimeException(
@@ -443,8 +448,8 @@ public class Driver {
 				drops.addAll(PSMGen.dropTables(k, s));
 
 				// add other drops
-				if (i instanceof InstExp.Const || i instanceof InstExp.Plus
-						|| i instanceof InstExp.Times) {
+				if (i instanceof Const || i instanceof Plus
+						|| i instanceof Times) {
 					drops.addAll(PSMGen.dropTables(k + "_subst", s));
 					drops.addAll(PSMGen.dropTables(k + "_subst_inv", s));
 				}

@@ -11,12 +11,12 @@ import catdata.Pair;
 @SuppressWarnings("serial")
 public class FiniteCategory<O, A> extends Category<O, A> {
 
-	public Set<O> objects = new HashSet<>();
-	public Set<A> arrows = new HashSet<>();
-	public Map<A, O> sources = new HashMap<>();
-	public Map<A, O> targets = new HashMap<>();
-	public Map<Pair<A, A>, A> composition = new HashMap<>();
-	public Map<O, A> identities = new HashMap<>();
+	private Set<O> objects = new HashSet<>();
+	private Set<A> arrows = new HashSet<>();
+	private Map<A, O> sources = new HashMap<>();
+	private Map<A, O> targets = new HashMap<>();
+	private Map<Pair<A, A>, A> composition = new HashMap<>();
+	private Map<O, A> identities = new HashMap<>();
 
 	/**
 	 * Empty Category

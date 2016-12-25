@@ -19,9 +19,9 @@ public class SqlSchema {
 	
 	private static int fkidx = 0;
 	
-	public Set<SqlType> types = new HashSet<>();
-	public Set<SqlTable> tables = new HashSet<>();
-	public Set<SqlForeignKey> fks = new HashSet<>();
+	public final Set<SqlType> types = new HashSet<>();
+	public final Set<SqlTable> tables = new HashSet<>();
+	public final Set<SqlForeignKey> fks = new HashSet<>();
 	
 	public boolean isCnf() {
 		for (SqlTable table : tables) {
@@ -32,7 +32,7 @@ public class SqlSchema {
 		return true;
 	}
 	
-	public void validate() {
+	private void validate() {
 		for (SqlTable table : tables) {
 			table.validate();
 		}
@@ -142,11 +142,11 @@ public class SqlSchema {
 
 			ret += "CREATE TABLE "+ table.name;
 			ret += "(\n  ";
-			List<String> l = table.columns.stream().map(x -> { return x.name + " " + x.type.name; }).collect(Collectors.toList());
+			List<String> l = table.columns.stream().map(x -> x.name + " " + x.type.name).collect(Collectors.toList());
 			all.addAll(l);
 			
 //			ret += "(" + Util.sep(l, ", ") + ")";
-			all.add("PRIMARY KEY (" + Util.sep(table.pk.stream().map(x -> { return x.name; }).collect(Collectors.toList()) , ", ") + ")");
+			all.add("PRIMARY KEY (" + Util.sep(table.pk.stream().map(x -> x.name).collect(Collectors.toList()) , ", ") + ")");
 			
 			for (SqlForeignKey t : fksFrom(table.name)) {
 				List<String> src = new LinkedList<>();
@@ -257,7 +257,7 @@ public class SqlSchema {
 	}
 
 	private final  Map<String, Set<SqlForeignKey>> fksFrom0 = new HashMap<>();
-	public Set<SqlForeignKey> fksFrom(String name) {
+	private Set<SqlForeignKey> fksFrom(String name) {
 		Set<SqlForeignKey> t = fksFrom0.get(name.toUpperCase());
 		if (t != null) {
 			return t;

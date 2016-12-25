@@ -79,7 +79,7 @@ public enum Language {
 	//	case MPL: return new MplCodeEditor(title, id, content);
 		case AQL: return new AqlCodeEditor(title, id, content);
 		default:
-			throw new RuntimeException(this.toString());
+			throw new RuntimeException(toString());
 		}
 		
 	}
@@ -105,7 +105,7 @@ public enum Language {
 //		case MPL: return Examples.getExamples(MplExamples.class);
 		case AQL: return Examples.getExamples(AqlExamples.class);
 		default:
-			throw new RuntimeException(this.toString());
+			throw new RuntimeException(toString());
 		}
 		
 	}

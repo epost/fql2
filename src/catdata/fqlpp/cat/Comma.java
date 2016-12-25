@@ -7,7 +7,7 @@ import catdata.Quad;
 import catdata.Triple;
 
 // in future, don't have arrows(); only have arrows(node, node)
-public class Comma {
+class Comma {
 
 	public static <OA, AA, OB, AB, OC, AC> Triple<
 	Category<Triple<OA, OB, AC>, Quad<AA, AB, AC, AC>> ,

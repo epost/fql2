@@ -20,7 +20,7 @@ public class OplOuterExample extends Example {
 		return s;
 	}
 
-	String s = "preamble = pragma {"
+	private final String s = "preamble = pragma {"
 			+ "\n	options"
 			+ "\n		\"opl_prover_force_prec\" = \"true\";"
 			+ "\n}"

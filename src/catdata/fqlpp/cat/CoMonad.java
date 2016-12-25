@@ -7,14 +7,14 @@ import catdata.Pair;
 
 public class CoMonad<O,A> {
 	
-	public Functor<O,A,O,A> F;    //F : C -> C
-	public Transform<O,A,O,A> counit; //unit: F => Id_C
-	public Transform<O,A,O,A> cojoin; //join: F => F;F 
+	private final Functor<O,A,O,A> F;    //F : C -> C
+	private final Transform<O,A,O,A> counit; //unit: F => Id_C
+	private final Transform<O,A,O,A> cojoin; //join: F => F;F
 	
 	public CoMonad(Functor<O, A, O, A> F, Transform<O, A, O, A> unit, Transform<O, A, O, A> join) {
 		this.F = F;
-		this.counit = unit;
-		this.cojoin = join;
+        counit = unit;
+        cojoin = join;
 		validate();
 	}
 	
@@ -86,7 +86,7 @@ public class CoMonad<O,A> {
 		};
 	}
 	
-	public void validate() {
+	private void validate() {
 		Category<O,A> C = F.source;
 		if (C.isInfinite()) {
 			return;

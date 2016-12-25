@@ -12,7 +12,6 @@ import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.lang.reflect.Constructor;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,26 +51,26 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
 public class InstanceEditor {
 
-	public InstExp.Const inst;
-	public Signature thesig;
-	public String name;
+	private final Const inst;
+	private final Signature thesig;
+	private final String name;
 
-	public Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
+	private final Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
 
 	public InstanceEditor(String name, Signature sig, Const inst)
 			throws FQLException {
 		this.inst = inst;
-		this.thesig = sig;
+		thesig = sig;
 		this.name = name;
 
 		for (Node n : thesig.nodes) {
-			data.put(n.string, new HashSet<Pair<Object, Object>>());
+			data.put(n.string, new HashSet<>());
 		}
 		for (Edge n : thesig.edges) {
-			data.put(n.name, new HashSet<Pair<Object, Object>>());
+			data.put(n.name, new HashSet<>());
 		}
 		for (Attribute<Node> n : thesig.attrs) {
-			data.put(n.name, new HashSet<Pair<Object, Object>>());
+			data.put(n.name, new HashSet<>());
 		}
 		for (Pair<String, List<Pair<Object, Object>>> n : inst.nodes) {
 			Set<Pair<Object, Object>> p = data.get(n.first);
@@ -104,7 +103,7 @@ public class InstanceEditor {
 		}
 	}
 
-	public static List<Pair<Object, Object>> proj1(List<Pair<Object, Object>> x) {
+	private static List<Pair<Object, Object>> proj1(List<Pair<Object, Object>> x) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 
 		for (Pair<Object, Object> k : x) {
@@ -114,7 +113,7 @@ public class InstanceEditor {
 		return ret;
 	}
 
-	public static List<Pair<Object, Object>> proj2(List<Pair<Object, Object>> x) {
+	private static List<Pair<Object, Object>> proj2(List<Pair<Object, Object>> x) {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 
 		for (Pair<Object, Object> k : x) {
@@ -124,7 +123,7 @@ public class InstanceEditor {
 		return ret;
 	}
 
-	public Graph<String, String> build() {
+	private Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
 		Graph<String, String> g2 = new DirectedSparseMultigraph<>();
@@ -144,7 +143,7 @@ public class InstanceEditor {
 		return g2;
 	}
 
-	JComponent makePanel(Color c) {
+	private JComponent makePanel(Color c) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			JPanel p = new JPanel();
@@ -157,7 +156,7 @@ public class InstanceEditor {
 	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public InstExp.Const show(Color c) {
+	public Const show(Color c) {
 		String title = "Visual Editor for Instance " + name;
 		prejoin();
 
@@ -186,7 +185,7 @@ public class InstanceEditor {
 					String colname = m.getColumnName(col);
 					Object val = row.get(col);
 					if (!map.containsKey(colname)) {
-						map.put(colname, new LinkedList<Pair<Object, Object>>());
+						map.put(colname, new LinkedList<>());
 					}
 					List<Pair<Object, Object>> attr = map.get(colname);
 					attr.add(new Pair<>(id, val));
@@ -211,7 +210,7 @@ public class InstanceEditor {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public JComponent doView(final Color clr,
+    private JComponent doView(Color clr,
 	/* final Environment env , *//* final Color color */Graph<String, String> sgv) {
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix
@@ -221,14 +220,10 @@ public class InstanceEditor {
 					.newInstance(sgv);
 
 			layout.setSize(new Dimension(500, 340));
-			final VisualizationViewer<String, String> vv = new VisualizationViewer<>(
+			VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
 			Transformer<String, Paint> vertexPaint = (String i) -> {
-                            if (thesig.isAttribute(i)) {
-                                return UIManager.getColor("Panel.background");
-                            } else {
-                                return clr;
-                            }
+                return thesig.isAttribute(i) ? UIManager.getColor("Panel.background") : clr;
                             // return color;
                         };
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
@@ -264,10 +259,10 @@ public class InstanceEditor {
                         });
 
 			float dash[] = { 1.0f };
-			final Stroke edgeStroke = new BasicStroke(0.5f,
+			Stroke edgeStroke = new BasicStroke(0.5f,
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
-			final Stroke bs = new BasicStroke();
+			Stroke bs = new BasicStroke();
 			Transformer<String, Stroke> edgeStrokeTransformer = (String s) -> {
                             if (thesig.isAttribute(s)) {
                                 return edgeStroke;
@@ -342,12 +337,12 @@ public class InstanceEditor {
 		}
 	}
 
-	JPanel vwr = new JPanel();
-	CardLayout cards = new CardLayout();
-	Map<String, JTable> joined;
-	Map<String, JPanel> joined2 = new HashMap<>();
+	private final JPanel vwr = new JPanel();
+	private final CardLayout cards = new CardLayout();
+	private Map<String, JTable> joined;
+	private final Map<String, JPanel> joined2 = new HashMap<>();
 
-	String card = "";
+	private String card = "";
 
 	private void prejoin() {
 		if (joined != null) {
@@ -363,7 +358,7 @@ public class InstanceEditor {
 
 		for (Node n : thesig.nodes) {
 			nd.put(n.string, data.get(n.string));
-			jnd.put(n.string, new HashMap<String, Set<Pair<Object, Object>>>());
+			jnd.put(n.string, new HashMap<>());
 			names.add(n.string);
 		}
 
@@ -377,8 +372,8 @@ public class InstanceEditor {
 			// names.add(a.name);
 		}
 
-		Comparator<String> strcmp = (String f1, String f2) -> f1.compareTo(f2);
-		Collections.sort(names, strcmp);
+		Comparator<String> strcmp = String::compareTo;
+		names.sort(strcmp);
 		joined = makejoined(jnd, nd, names);
 
 	}
@@ -387,7 +382,7 @@ public class InstanceEditor {
 	private Map<String, JTable> makejoined(
 			Map<String, Map<String, Set<Pair<Object, Object>>>> joined,
 			Map<String, Set<Pair<Object, Object>>> nd, List<String> names) {
-		Comparator<String> strcmp = (String f1, String f2) -> f1.compareTo(f2);
+		Comparator<String> strcmp = String::compareTo;
 		Map<String, JTable> ret = new HashMap<>();
 		for (String name : names) {
 			Map<String, Set<Pair<Object, Object>>> m = joined.get(name);
@@ -395,7 +390,7 @@ public class InstanceEditor {
 			Object[][] arr = new Object[ids.size()][m.size() + 1];
 			Set<String> cols = m.keySet();
 			List<String> cols2 = new LinkedList<>(cols);
-			Collections.sort(cols2, strcmp);
+			cols2.sort(strcmp);
 			cols2.add(0, "ID");
 			Object[] cols3 = cols2.toArray();
 

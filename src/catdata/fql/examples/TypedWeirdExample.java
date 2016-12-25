@@ -21,7 +21,7 @@ public class TypedWeirdExample extends Example {
 		return s;
 	}
 	
-	String s = "schema Z2 = {"
+	private final String s = "schema Z2 = {"
 			+ "\n nodes "
 			+ "\n 	G; "
 			+ "\n attributes"

@@ -21,7 +21,7 @@ public class Patrick11Example extends Example {
 		return s;
 	}
 	
-	String s = "String : type "
+	private final String s = "String : type "
 			+ "\na b GoneWind Catch22 CatTheory : String"
 			+ "\n"
 			+ "\nIsbn_num : type "

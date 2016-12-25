@@ -12,7 +12,6 @@ import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.lang.reflect.Constructor;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +33,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.util.Vector;
 
+import catdata.fql.decl.InstExp.Const;
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Pair;
@@ -50,16 +50,17 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
 public class TransformEditor {
 
-	public InstExp.Const inst1, inst2;
-	public TransExp.Const trans;
-	public Signature thesig;
-	public String name;
+	private final Const inst1;
+    private final Const inst2;
+	private final TransExp.Const trans;
+	private final Signature thesig;
+	private final String name;
 
-	public Map<String, Set<Pair<Object, Object>>> d = new HashMap<>();
+	private final Map<String, Set<Pair<Object, Object>>> d = new HashMap<>();
 
-	public TransformEditor(String name, Signature sig, TransExp.Const trans, InstExp.Const inst1, InstExp.Const inst2) {
+	public TransformEditor(String name, Signature sig, TransExp.Const trans, Const inst1, Const inst2) {
 		this.trans = trans;
-		this.thesig = sig;
+        thesig = sig;
 		this.name = name;
 		this.inst1 = inst1;
 		this.inst2 = inst2;
@@ -96,7 +97,7 @@ public class TransformEditor {
 		return ret;
 	}
 
-	public Graph<String, String> build() {
+	private Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
 		Graph<String, String> g2 = new DirectedSparseMultigraph<>();
@@ -116,7 +117,7 @@ public class TransformEditor {
 		return g2;
 	}
 
-	JComponent makePanel(Color c) {
+	private JComponent makePanel(Color c) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			JPanel p = new JPanel();
@@ -248,7 +249,7 @@ public class TransformEditor {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public JComponent doView(final Color clr, 
+    private JComponent doView(Color clr,
 	/* final Environment env , *//* final Color color */Graph<String, String> sgv) {
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix
@@ -258,15 +259,9 @@ public class TransformEditor {
 					.newInstance(sgv);
 
 			layout.setSize(new Dimension(500, 340));
-			final VisualizationViewer<String, String> vv = new VisualizationViewer<>(
+			VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
-			Transformer<String, Paint> vertexPaint = (String i) -> {
-                            if (thesig.isAttribute(i)) {
-                                return UIManager.getColor("Panel.background");
-                            } else {
-                                return clr;
-                            }
-                        };
+			Transformer<String, Paint> vertexPaint = (String i) -> thesig.isAttribute(i) ? UIManager.getColor("Panel.background") : clr;
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			// gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
@@ -300,10 +295,10 @@ public class TransformEditor {
                         });
 
 			float dash[] = { 1.0f };
-			final Stroke edgeStroke = new BasicStroke(0.5f,
+			Stroke edgeStroke = new BasicStroke(0.5f,
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
-			final Stroke bs = new BasicStroke();
+			Stroke bs = new BasicStroke();
 			Transformer<String, Stroke> edgeStrokeTransformer = (String s) -> {
                             if (thesig.isAttribute(s)) {
                                 return edgeStroke;
@@ -395,7 +390,7 @@ public class TransformEditor {
 	
 	private String card = "";
 
-	private void prejoin(String pre, InstExp.Const I, Map<String, JPanel> pans) {
+	private void prejoin(String pre, Const I, Map<String, JPanel> pans) {
 		
 		Map<String, Map<String, Set<Pair<Object, Object>>>> jnd = new HashMap<>();
 		Map<String, Set<Pair<Object, Object>>> nd = new HashMap<>();
@@ -404,23 +399,41 @@ public class TransformEditor {
 
 		for (Node n : thesig.nodes) {
 			List<Pair<Object, Object>> xxx = lookup(I.data, n.string);
+			if (xxx == null) {
+				throw new RuntimeException("Anomaly: please report");
+			}
 			nd.put(n.string, new HashSet<>(xxx));
 			jnd.put(n.string, new HashMap<>());
 			names.add(n.string);
 		}
 
 		for (Edge e : thesig.edges) {
-			jnd.get(e.source.string).put(e.name, new HashSet<>(lookup(I.data, e.name)));
+			if (e.name == null) {
+				throw new RuntimeException("Anomaly: please report");
+			}
+
+			List<Pair<Object, Object>> y = lookup(I.data, e.name);
+			if (y == null) {
+				throw new RuntimeException("Anomaly: please report");
+			}
+			jnd.get(e.source.string).put(e.name, new HashSet<>(y));
 			// names.add(e.name);
 		}
 
 		for (Attribute<Node> a : thesig.attrs) {
-			jnd.get(a.source.string).put(a.name, new HashSet<>(lookup(I.data, a.name)));
+			if (a.name == null) {
+				throw new RuntimeException("Anomaly: please report");
+			}
+			List<Pair<Object, Object>> y = lookup(I.data, a.name);
+			if (y == null) {
+				throw new RuntimeException("Anomaly: please report");
+			}
+			jnd.get(a.source.string).put(a.name, new HashSet<>(y));
 			// names.add(a.name);
 		}
 
-		Comparator<String> strcmp = (String f1, String f2) -> f1.compareTo(f2);
-		Collections.sort(names, strcmp);
+		Comparator<String> strcmp = String::compareTo;
+		names.sort(strcmp);
 		makejoined(pre, pans, jnd, nd, names);
 
 	}
@@ -430,7 +443,7 @@ public class TransformEditor {
 			Map<String, JPanel> pans,
 			Map<String, Map<String, Set<Pair<Object, Object>>>> joined,
 			Map<String, Set<Pair<Object, Object>>> nd, List<String> names) {
-		Comparator<String> strcmp = (String f1, String f2) -> f1.compareTo(f2);
+		Comparator<String> strcmp = String::compareTo;
 //		Map<String, JTable> ret = new HashMap<>();
 		for (String name : names) {
 			Map<String, Set<Pair<Object, Object>>> m = joined.get(name);
@@ -438,7 +451,7 @@ public class TransformEditor {
 			Object[][] arr = new Object[ids.size()][m.size() + 1];
 			Set<String> cols = m.keySet();
 			List<String> cols2 = new LinkedList<>(cols);
-			Collections.sort(cols2, strcmp);
+			cols2.sort(strcmp);
 			cols2.add(0, "ID");
 			Object[] cols3 = cols2.toArray();
 			

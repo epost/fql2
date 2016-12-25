@@ -25,9 +25,9 @@ import catdata.fql.decl.Signature;
  */
 public class FullSigma extends PSM {
 	
-	Mapping f;
-	String pre;
-	String inst;
+	private final Mapping f;
+	private final String pre;
+	private final String inst;
 	
 	@Override 
 	public String toString() {
@@ -113,7 +113,7 @@ public class FullSigma extends PSM {
 		return ret;
 	}
 
-	static Set<Map<Object, Object>> conv(Set<Pair<Object, Object>> set) {
+	private static Set<Map<Object, Object>> conv(Set<Pair<Object, Object>> set) {
 		Set<Map<Object, Object>> ret = new HashSet<>();
 		for (Pair<Object, Object> p : set) {
 			Map<Object, Object> m = new HashMap<>();

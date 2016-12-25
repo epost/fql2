@@ -57,7 +57,7 @@ public class NaiveMatcher<N1,N2,E1,E2> extends Matcher<N1,E1,N2,E2,BiFunction<St
 			} else if (n2_s.equals(n2_t)) {
 				edges.put(c, new LinkedList<>());
 			} else {
-				ShortestPath<N2,E2> sp = new ShortestPath<>(this.dst, n2_s);
+				ShortestPath<N2,E2> sp = new ShortestPath<>(dst, n2_s);
 				if (sp.hasPathTo(n2_t)) {
 					edges.put(c, sp.pathTo(n2_t));
 				} else {

@@ -20,7 +20,7 @@ public class OplPaperExample extends Example {
 		return Language.OPL;
 	}
 	
-	String s = "MonoidActions = theory {"
+	private final String s = "MonoidActions = theory {"
 			+ "\n	sorts"
 			+ "\n		m, s;"
 			+ "\n	symbols"

@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -55,9 +56,9 @@ import catdata.sql.SqlLoader;
 import catdata.sql.SqlMapper;
 
 @SuppressWarnings("serial")
-/**
- * 
- * @author ryan
+/*
+
+  @author ryan
  *
  *         Top level gui
  */
@@ -65,7 +66,7 @@ public class GUI extends JPanel {
 
 	//TODO aql maybe SQL import should check that constraints hold
 	
-	public static JTabbedPane editors = new JTabbedPane();
+	public static final JTabbedPane editors = new JTabbedPane();
 
 	public static JFrame topFrame;
 
@@ -96,12 +97,10 @@ public class GUI extends JPanel {
 
 		Map<Language, MenuItem> newItems = new HashMap<>();
 		for (Language l : Language.values()) {
-			MenuItem newItem = new MenuItem("New " + l.toString());
+			MenuItem newItem = new MenuItem("New " + l);
 			fileMenu.add(newItem);
 			newItems.put(l, newItem);
-			newItem.addActionListener((ActionEvent e) -> {
-                            newAction(null, "", l);
-                        });
+			newItem.addActionListener((ActionEvent e) -> newAction(null, "", l));
 		}
 
 		fileMenu.add(openItem);
@@ -147,7 +146,7 @@ public class GUI extends JPanel {
 		Menu toolsMenu = new Menu("Tools");
 		//Menu transMenu = new Menu("Translate");
 
-		final Menu editMenu = new Menu("Edit");
+		Menu editMenu = new Menu("Edit");
 		MenuItem findItem = new MenuItem("Find");
 		editMenu.add(findItem);
 
@@ -320,9 +319,7 @@ public class GUI extends JPanel {
 		}
 		JComboBox<String> modeBox = new JComboBox<>(vec);
 		modeBox.setSelectedItem(Language.getDefault().toString());
-		modeBox.addActionListener(x -> {
-			cl.show(boxPanel, (String) modeBox.getSelectedItem());
-		});
+		modeBox.addActionListener(x -> cl.show(boxPanel, (String) modeBox.getSelectedItem()));
 
 		toolBar.add(compileB);
 		toolBar.add(abortB);
@@ -481,16 +478,16 @@ public class GUI extends JPanel {
 
 		@Override
 		public boolean accept(File f) {
-			return f.getName().endsWith("." + this.l.fileExtension()) || f.isDirectory();
+			return f.getName().endsWith("." + l.fileExtension()) || f.isDirectory();
 		}
 
 		@Override
 		public String getDescription() {
-			return l + " files (*." + this.l.fileExtension() + ")";
+			return l + " files (*." + l.fileExtension() + ")";
 		}
 	}
-
-	public static class AllFilter extends FileFilter {
+/*
+	private static class AllFilter extends FileFilter {
 		@Override
 		public boolean accept(File f) {
 			for (Language l : Language.values()) {
@@ -507,7 +504,7 @@ public class GUI extends JPanel {
 			return "All CatData Files";
 		}
 	}
-	
+	*/
 	public static class AllNameFilter implements FilenameFilter {
 	
 		@Override
@@ -623,7 +620,7 @@ public class GUI extends JPanel {
 		}
 	}
 	
-	protected static void saveAsActionAlternate(CodeEditor<?, ?, ?> e) {
+	private static void saveAsActionAlternate(CodeEditor<?, ?, ?> e) {
 		//delay();
 
 		if (e == null) {
@@ -685,7 +682,7 @@ public class GUI extends JPanel {
 		String title = (b ? "*" : "  ") + titles.get(i);
 		for (int tab = 0; tab < editors.getTabCount(); tab++) {
 			CodeEditor<?,?,?> ed = (CodeEditor<?,?,?>) editors.getComponentAt(tab);
-			if (wanted == ed) {
+			if (Objects.equals(wanted, ed)) {
 				editors.setTitleAt(tab, title);				
 				editors.setTabComponentAt(tab, new ButtonTabComponent(editors));
 			}
@@ -706,10 +703,10 @@ public class GUI extends JPanel {
 		}
 	}
 
-	private final static Map<Integer, Boolean> dirty = new HashMap<>();
-	public final static Map<Integer, CodeEditor<?, ?, ?>> keys = new HashMap<>();
-	private final static Map<Integer, File> files = new HashMap<>();
-	private final static Map<Integer, String> titles = new HashMap<>();
+	private static final Map<Integer, Boolean> dirty = new HashMap<>();
+	public static final Map<Integer, CodeEditor<?, ?, ?>> keys = new HashMap<>();
+	private static final Map<Integer, File> files = new HashMap<>();
+	private static final Map<Integer, String> titles = new HashMap<>();
 	private static int untitled_count = 0;
 
 	private static Integer newAction(String title, String content, Language lang) {
@@ -845,29 +842,27 @@ public class GUI extends JPanel {
 		MenuItem wizardItem = new MenuItem("Warehouse Wizard");
 			menu.add(wizardItem);
 
-			wizardItem.addActionListener(x -> {
-				new Wizard<>(new OplWarehouse(), y -> {
-					Example ex = new Example() {
+			wizardItem.addActionListener(x -> new Wizard<>(new OplWarehouse(), y -> {
+                Example ex = new Example() {
 
-						@Override
-						public Language lang() {
-							return Language.OPL;
-						}
+                    @Override
+                    public Language lang() {
+                        return Language.OPL;
+                    }
 
-						@Override
-						public String getName() {
-							return "Wizard";
-						}
+                    @Override
+                    public String getName() {
+                        return "Wizard";
+                    }
 
-						@Override
-						public String getText() {
-							return y.toString();
-						}
+                    @Override
+                    public String getText() {
+                        return y.toString();
+                    }
 
-					};
-					doExample(ex);
-				}).startWizard();
-			});
+                };
+                doExample(ex);
+            }).startWizard());
 	}
 	
 

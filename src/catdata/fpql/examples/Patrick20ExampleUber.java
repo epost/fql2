@@ -23,7 +23,7 @@ public class Patrick20ExampleUber extends Example {
 		return s;
 	}
 	
-	String s = "//first, we declare our domain to have three values"
+	private final String s = "//first, we declare our domain to have three values"
 			+ "\ndom : type"
 			+ "\n\"margo\" \"ryan\" \"david\" : dom"
 			+ "\n"

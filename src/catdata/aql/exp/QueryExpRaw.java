@@ -9,13 +9,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.Eq;
 import catdata.aql.Query;
 import catdata.aql.RawTerm;
@@ -27,18 +27,18 @@ import catdata.aql.Var;
 public class QueryExpRaw<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> 
 extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	
-	public final SchExp<Ty,En1,Sym,Fk1,Att1> src;
-	public final SchExp<Ty,En2,Sym,Fk2,Att2> dst;
+	private final SchExp<Ty,En1,Sym,Fk1,Att1> src;
+	private final SchExp<Ty,En2,Sym,Fk2,Att2> dst;
 	
-	public final List<String> imports;
+	private final List<String> imports;
 	
-	public final Map<String, String> options;
+	private final Map<String, String> options;
 	
-	public final List<Pair<En2, Block<En1,Att2>>> blocks;
+	private final List<Pair<En2, Block<En1,Att2>>> blocks;
 
-	public final List<Pair<Fk2, Trans>> fks;
+	private final List<Pair<Fk2, Trans>> fks;
 	
-	public final List<Pair<Att2, RawTerm>> atts;
+	private final List<Pair<Att2, RawTerm>> atts;
 	
 	@Override
 	public long timeout() {
@@ -60,7 +60,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((gens == null) ? 0 : gens.hashCode());
 			result = prime * result + ((options == null) ? 0 : options.hashCode());
@@ -107,7 +107,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
 			result = prime * result + ((gens == null) ? 0 : gens.hashCode());
@@ -161,7 +161,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((atts == null) ? 0 : atts.hashCode());
 		result = prime * result + ((blocks == null) ? 0 : blocks.hashCode());
@@ -234,7 +234,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		this.options = Util.toMapSafely(options);
 		this.blocks = blocks.stream().map(x -> new Pair<>(x.first, x.second.first)).collect(Collectors.toList());
 		this.fks = new LinkedList<>(fks);
-		this.atts = new LinkedList<>();
+        atts = new LinkedList<>();
 		for (Pair<En2, Pair<Block<En1, Att2>, List<Pair<Att2, RawTerm>>>> block : blocks) {
 			atts.addAll(block.second.second);
 		}

@@ -7,11 +7,12 @@ import java.net.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.text.html.*;
 
 // The Simple Web Browser.
 @SuppressWarnings({ "rawtypes", "serial" })
-public class MiniBrowser extends JFrame implements HyperlinkListener {
+class MiniBrowser extends JFrame implements HyperlinkListener {
 	// These are the buttons for iterating through the page list.
 	private final JButton backButton, forwardButton;
 
@@ -25,7 +26,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 	private final ArrayList pageList = new ArrayList();
 
 	// Constructor for Mini Web Browser.
-	public MiniBrowser() {
+    private MiniBrowser() {
 		// Set application title.
 		super("Mini Browser");
 
@@ -207,8 +208,8 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 	// Handle hyperlink's being clicked.
 	@Override
 	public void hyperlinkUpdate(HyperlinkEvent event) {
-		HyperlinkEvent.EventType eventType = event.getEventType();
-		if (eventType == HyperlinkEvent.EventType.ACTIVATED) {
+		EventType eventType = event.getEventType();
+		if (Objects.equals(eventType, EventType.ACTIVATED)) {
 			if (event instanceof HTMLFrameHyperlinkEvent) {
 				HTMLFrameHyperlinkEvent linkEvent = (HTMLFrameHyperlinkEvent) event;
 				HTMLDocument document = (HTMLDocument) displayEditorPane.getDocument();
@@ -221,7 +222,7 @@ public class MiniBrowser extends JFrame implements HyperlinkListener {
 
 	// Run the Mini Browser.
 	@SuppressWarnings("deprecation")
-	public static void main(String[] args)  {
+	public static void main(String... args)  {
 		MiniBrowser browser = new MiniBrowser();
 		browser.show();
 	}

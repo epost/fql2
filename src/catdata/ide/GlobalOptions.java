@@ -24,7 +24,6 @@ import javax.swing.JTabbedPane;
 import catdata.Pair;
 import catdata.Unit;
 import catdata.Util;
-import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOptionsDefunct;
 import catdata.fpql.XOptions;
 import catdata.fql.FqlOptions;
@@ -49,12 +48,12 @@ public class GlobalOptions implements Serializable {
 
 	private static int selected_tab = 0;
 
-	public GeneralOptions general = new GeneralOptions(); 
-	public FqlOptions fql = new FqlOptions(); 
-	public FqlppOptions fqlpp = new FqlppOptions(); 
-	public XOptions fpql = new XOptions(); 
+	public final GeneralOptions general = new GeneralOptions();
+	public final FqlOptions fql = new FqlOptions();
+	public final FqlppOptions fqlpp = new FqlppOptions();
+	public final XOptions fpql = new XOptions();
 	public OplOptions opl = new OplOptions(); 
-	public AqlOptionsDefunct aql = new AqlOptions.AqlOptionsDefunct();
+	private final AqlOptionsDefunct aql = new AqlOptionsDefunct();
 	
 	private Options[] options() {
 		return new Options[] { general, fql, fqlpp, fpql, opl, aql };
@@ -66,7 +65,7 @@ public class GlobalOptions implements Serializable {
 		}
 	}
 	
-	public static void save() {
+	private static void save() {
 		try {
 			FileOutputStream fileOut = new FileOutputStream("cdide.ser");
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
@@ -79,12 +78,14 @@ public class GlobalOptions implements Serializable {
 		}
 	}
 	
-	public static void delete() {
+	private static void delete() {
 		File f = new File("cdide.ser");
 		if (!f.exists()) {
 			return;
 		}
-		f.delete();
+		if (!f.delete()) {
+			throw new RuntimeException("Could not delete cdide.ser");
+		}
 	}
 
 	public static void load() {
@@ -153,8 +154,6 @@ public class GlobalOptions implements Serializable {
 				} else if (ret == "Load") { // load
 					load();
 					showOptions();
-				} else if (ret == "Cancel") {
-					
 				} else if (ret == "Delete") {
 					delete();
 					showOptions();
@@ -185,12 +184,8 @@ public class GlobalOptions implements Serializable {
 		try (InputStream in = Object.class.getResourceAsStream("/cdide.properties")) {
 			Properties prop = new Properties();
 			prop.load(in);
-			
-			if (in == null) {
-				aboutString = aboutErr;
-			} else {			
-				aboutString = Util.sep(prop, ": ", "\n\n");
-			}
+
+            aboutString = in == null ? aboutErr : Util.sep(prop, ": ", "\n\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 			aboutString = aboutErr;

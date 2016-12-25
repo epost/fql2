@@ -20,7 +20,7 @@ public class OplFlowerExamle extends Example {
 		return s;
 	}
 	
-	String s = "Mod4 = theory {"
+	private final String s = "Mod4 = theory {"
 			+ "\n	sorts"
 			+ "\n		Nat;"
 			+ "\n	symbols"

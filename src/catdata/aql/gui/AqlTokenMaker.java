@@ -6,6 +6,8 @@
 package catdata.aql.gui;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 
 import javax.swing.text.Segment;
@@ -19,20 +21,21 @@ import org.fife.ui.rsyntaxtextarea.TokenTypes;
  * 
  */
 
+@SuppressWarnings("UnusedAssignment")
 public class AqlTokenMaker extends AbstractJFlexCTokenMaker {
 
   /** This character denotes the end of file */
-  public static final int YYEOF = -1;
+  private static final int YYEOF = -1;
 
   /** initial size of the lookahead buffer */
   @SuppressWarnings("unused")
 private static final int ZZ_BUFFERSIZE = 16384;
 
   /** lexical states */
-  public static final int EOL_COMMENT = 6;
-  public static final int STRING = 2;
-  public static final int YYINITIAL = 0;
-  public static final int MLC = 4;
+  private static final int EOL_COMMENT = 6;
+  private static final int STRING = 2;
+  private static final int YYINITIAL = 0;
+  private static final int MLC = 4;
 
   /**
    * ZZ_LEXSTATE[l] is the state in the DFA for the lexical state l
@@ -83,7 +86,7 @@ private static final int ZZ_BUFFERSIZE = 16384;
     return result;
   }
 
-  private static int zzUnpackAction(String packed, int offset, int [] result) {
+  private static int zzUnpackAction(String packed, int offset, int... result) {
     int i = 0;       /* index in packed string  */
     int j = offset;  /* index in unpacked array */
     int l = packed.length();
@@ -146,7 +149,7 @@ private static final int ZZ_BUFFERSIZE = 16384;
     return result;
   }
 
-  private static int zzUnpackRowMap(String packed, int offset, int [] result) {
+  private static int zzUnpackRowMap(String packed, int offset, int... result) {
     int i = 0;  /* index in packed string  */
     int j = offset;  /* index in unpacked array */
     int l = packed.length();
@@ -511,7 +514,7 @@ private static final int ZZ_BUFFERSIZE = 16384;
     return result;
   }
 
-  private static int zzUnpackTrans(String packed, int offset, int [] result) {
+  private static int zzUnpackTrans(String packed, int offset, int... result) {
     int i = 0;       /* index in packed string  */
     int j = offset;  /* index in unpacked array */
     int l = packed.length();
@@ -556,7 +559,7 @@ private static final int ZZ_BUFFERSIZE = 16384;
     return result;
   }
 
-  private static int zzUnpackAttribute(String packed, int offset, int [] result) {
+  private static int zzUnpackAttribute(String packed, int offset, int... result) {
     int i = 0;       /* index in packed string  */
     int j = offset;  /* index in unpacked array */
     int l = packed.length();
@@ -569,7 +572,7 @@ private static final int ZZ_BUFFERSIZE = 16384;
   }
 
   /** the input device */
-  private java.io.Reader zzReader;
+  private Reader zzReader;
 
   /** the current state of the DFA */
   private int zzState;
@@ -671,7 +674,7 @@ private boolean zzAtBOL = true;
 		try {
 			super.addToken(array, start,end, tokenType, startOffset, hyperlink);
 		} catch (Throwable thr) {
-			thr.printStackTrace();
+			thr.printStackTrace(); 
 		}
 		zzStartRead = zzMarkedPos;
 	}
@@ -705,7 +708,7 @@ private boolean zzAtBOL = true;
 	public Token getTokenList(Segment text, int initialTokenType, int startOffset) {
 
 		resetTokenList();
-		this.offsetShift = -text.offset + startOffset;
+        offsetShift = -text.offset + startOffset;
 
 		// Start off in the proper state.
 		int state = TokenTypes.NULL;
@@ -721,14 +724,11 @@ private boolean zzAtBOL = true;
 		}
 
 		s = text;
-		try {
+
 			yyreset(zzReader);
 			yybegin(state);
 			return yylex();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-			return null;
-		}
+
 
 	}
 
@@ -754,7 +754,7 @@ private boolean zzAtBOL = true;
 	 *
 	 * @param reader   the new input stream 
 	 */
-	public final void yyreset(Reader reader) {
+    private void yyreset(Reader reader) {
 		// 's' has been updated.
 		zzBuffer = s.array;
 		/*
@@ -782,8 +782,8 @@ private boolean zzAtBOL = true;
    *
    * @param   in  the java.io.Reader to read input from.
    */
-  public AqlTokenMaker(java.io.Reader in) {
-    this.zzReader = in;
+  private AqlTokenMaker(Reader in) {
+      zzReader = in;
   }
 
   /**
@@ -792,8 +792,8 @@ private boolean zzAtBOL = true;
    *
    * @param   in  the java.io.Inputstream to read input from.
    */
-  public AqlTokenMaker(java.io.InputStream in) {
-    this(new java.io.InputStreamReader(in));
+  public AqlTokenMaker(InputStream in) {
+    this(new InputStreamReader(in));
   }
 
   /** 
@@ -818,7 +818,7 @@ private boolean zzAtBOL = true;
   /**
    * Closes the input stream.
    */
-  public final void yyclose() throws java.io.IOException {
+  public final void yyclose() throws IOException {
     zzAtEOF = true;            /* indicate end of file */
     zzEndRead = zzStartRead;  /* invalidate buffer    */
 
@@ -865,7 +865,7 @@ public final void yybegin(int newState) {
   /**
    * Returns the length of the matched text region.
    */
-  public final int yylength() {
+  private int yylength() {
     return zzMarkedPos-zzStartRead;
   }
 
@@ -918,9 +918,10 @@ public final void yybegin(int newState) {
    * the end of input is encountered or an I/O-Error occurs.
    *
    * @return      the next token
-   * @exception   java.io.IOException  if any I/O-Error occurs
+   * @exception   IOException  if any I/O-Error occurs
    */
-  public org.fife.ui.rsyntaxtextarea.Token yylex() throws java.io.IOException {
+  @SuppressWarnings("ConstantConditions")
+  private Token yylex() {
     int zzInput;
     int zzAction;
 
@@ -990,102 +991,96 @@ public final void yybegin(int newState) {
       zzMarkedPos = zzMarkedPosL;
 
       switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
-        case 4: 
-          { addNullToken(); return firstToken;
-          }
+        case 4:
+          addNullToken();
+          return firstToken;
         case 20: break;
-        case 14: 
-          { start = zzMarkedPos-2; yybegin(MLC);
-          }
+        case 14:
+          start = zzMarkedPos-2;
+          yybegin(MLC);
         case 21: break;
-        case 6: 
-          { addToken(TokenTypes.WHITESPACE);
-          }
+        case 6:
+          addToken(TokenTypes.WHITESPACE);
         case 22: break;
-        case 19: 
-          { addToken(TokenTypes.RESERVED_WORD);
-          }
+        case 19:
+          addToken(TokenTypes.RESERVED_WORD);
         case 23: break;
-        case 8: 
-          { addToken(TokenTypes.SEPARATOR);
-          }
+        case 8:
+          addToken(TokenTypes.SEPARATOR);
         case 24: break;
-        case 2: 
-          { addToken(TokenTypes.IDENTIFIER);
-          }
+        case 2:
+          addToken(TokenTypes.IDENTIFIER);
         case 25: break;
-        case 11: 
-          { addToken(start,zzStartRead-1, TokenTypes.COMMENT_EOL); addNullToken(); return firstToken;
-          }
+        case 11:
+          addToken(start,zzStartRead-1, TokenTypes.COMMENT_EOL);
+          addNullToken();
+          return firstToken;
         case 26: break;
-        case 13: 
-          { start = zzMarkedPos-2; yybegin(EOL_COMMENT);
-          }
+        case 13:
+          start = zzMarkedPos-2;
+          yybegin(EOL_COMMENT);
         case 27: break;
-        case 16: 
-          { yybegin(YYINITIAL); addToken(start,zzStartRead+2-1, TokenTypes.COMMENT_MULTILINE);
-          }
+        case 16:
+          yybegin(YYINITIAL);
+          addToken(start,zzStartRead+2-1, TokenTypes.COMMENT_MULTILINE);
         case 28: break;
         case 18: 
           { int temp=zzStartRead; addToken(start,zzStartRead-1, TokenTypes.COMMENT_EOL); addHyperlinkToken(temp,zzMarkedPos-1, TokenTypes.COMMENT_EOL); start = zzMarkedPos;
           }
         case 29: break;
-        case 17: 
-          { int temp=zzStartRead; addToken(start,zzStartRead-1, TokenTypes.COMMENT_MULTILINE); addHyperlinkToken(temp,zzMarkedPos-1, TokenTypes.COMMENT_MULTILINE); start = zzMarkedPos;
-          }
+        case 17:
+          int temp=zzStartRead;
+          addToken(start,zzStartRead-1, TokenTypes.COMMENT_MULTILINE);
+          addHyperlinkToken(temp,zzMarkedPos-1, TokenTypes.COMMENT_MULTILINE);
+          start = zzMarkedPos;
         case 30: break;
-        case 15: 
-          { addToken(TokenTypes.RESERVED_WORD_2);
-          }
+        case 15:
+          addToken(TokenTypes.RESERVED_WORD_2);
         case 31: break;
-        case 12: 
-          { addToken(TokenTypes.ERROR_NUMBER_FORMAT);
-          }
+        case 12:
+          addToken(TokenTypes.ERROR_NUMBER_FORMAT);
         case 32: break;
-        case 5: 
-          { start = zzMarkedPos-1; yybegin(STRING);
-          }
+        case 5:
+          start = zzMarkedPos-1;
+          yybegin(STRING);
         case 33: break;
-        case 3: 
-          { addToken(TokenTypes.LITERAL_NUMBER_DECIMAL_INT);
-          }
+        case 3:
+          addToken(TokenTypes.LITERAL_NUMBER_DECIMAL_INT);
         case 34: break;
-        case 7: 
-          { addToken(TokenTypes.OPERATOR);
-          }
+        case 7:
+          addToken(TokenTypes.OPERATOR);
         case 35: break;
-        case 9: 
-          { yybegin(YYINITIAL); addToken(start,zzStartRead, TokenTypes.LITERAL_STRING_DOUBLE_QUOTE);
-          }
+        case 9:
+          yybegin(YYINITIAL);
+          addToken(start,zzStartRead, TokenTypes.LITERAL_STRING_DOUBLE_QUOTE);
         case 36: break;
-        case 1: 
-          { 
-          }
+        case 1:
         case 37: break;
-        case 10: 
-          { addToken(start,zzStartRead-1, TokenTypes.COMMENT_MULTILINE); return firstToken;
-          }
+        case 10:
+          addToken(start,zzStartRead-1, TokenTypes.COMMENT_MULTILINE);
+          return firstToken;
         case 38: break;
         default: 
           if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
             zzAtEOF = true;
             switch (zzLexicalState) {
-            case EOL_COMMENT: {
-              addToken(start,zzStartRead-1, TokenTypes.COMMENT_EOL); addNullToken(); return firstToken;
-            }
-            case 285: break;
-            case STRING: {
-              addToken(start,zzStartRead-1, TokenTypes.LITERAL_STRING_DOUBLE_QUOTE); return firstToken;
-            }
-            case 286: break;
-            case YYINITIAL: {
-              addNullToken(); return firstToken;
-            }
-            case 287: break;
-            case MLC: {
-              addToken(start,zzStartRead-1, TokenTypes.COMMENT_MULTILINE); return firstToken;
-            }
-            case 288: break;
+            case EOL_COMMENT:
+              addToken(start,zzStartRead-1, TokenTypes.COMMENT_EOL);
+              addNullToken();
+              return firstToken;
+              case 285: break;
+            case STRING:
+              addToken(start,zzStartRead-1, TokenTypes.LITERAL_STRING_DOUBLE_QUOTE);
+              return firstToken;
+              case 286: break;
+            case YYINITIAL:
+              addNullToken();
+              return firstToken;
+              case 287: break;
+            case MLC:
+              addToken(start,zzStartRead-1, TokenTypes.COMMENT_MULTILINE);
+              return firstToken;
+              case 288: break;
             default:
             return null;
             }

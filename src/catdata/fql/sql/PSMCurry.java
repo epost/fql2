@@ -20,12 +20,14 @@ import catdata.fql.decl.Transform;
 
 public class PSMCurry extends PSM {
 
-	public String ret, inst_src, inst_dst;
-	public String trans;
-	public String trans_src;
-	public String trans_dst;
-	public String exp;
-	public Signature sig;
+	private final String ret;
+    private final String inst_src;
+    private final String inst_dst;
+	private final String trans;
+	private final String trans_src;
+	private final String trans_dst;
+	private final String exp;
+	private final Signature sig;
 
 	@Override
 	public void exec(PSMInterp interp,
@@ -131,8 +133,7 @@ public class PSMCurry extends PSM {
 
 	public PSMCurry(String ret, String inst_src, String inst_dst, String trans,
 			String trans_src, String trans_dst, String exp, Signature sig) {
-		super();
-		this.ret = ret;
+        this.ret = ret;
 		this.inst_src = inst_src;
 		this.inst_dst = inst_dst;
 		this.trans = trans;
@@ -144,7 +145,7 @@ public class PSMCurry extends PSM {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((exp == null) ? 0 : exp.hashCode());
 		result = prime * result

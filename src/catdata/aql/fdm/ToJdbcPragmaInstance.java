@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,14 +21,15 @@ import catdata.aql.Term;
 
 public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Pragma {
 
-	public final String jdbcString;
-	public final String prefix;
-	public final String clazz;
-	public final String idCol;
+	private final String jdbcString;
+	private final String prefix;
+	private final String clazz;
+	private final String idCol;
 
-	public final Map<String, String> options;
+	@SuppressWarnings("unused")
+	private final Map<String, String> options;
 
-	public final Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
+	private final Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
 	
 	private final String colTy;
 	private final int colTy0;
@@ -48,7 +50,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		this.clazz = clazz;
 		idCol = (String) new AqlOptions(options, null).getOrDefault(AqlOption.id_column_name);
 		colTy = "VARCHAR(" + new AqlOptions(options, null).getOrDefault(AqlOption.varchar_length) + ")";
-		colTy0 = java.sql.Types.VARCHAR;
+		colTy0 = Types.VARCHAR;
 		assertDisjoint(idCol);
 	}
 
@@ -73,20 +75,20 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		//TODO aql emit foreign keys
 	}
 	
-	public void storeMyRecord(Connection conn, X x, List<Chc<Fk,Att>> header, String table) throws Exception {
+	private void storeMyRecord(Connection conn, X x, List<Chc<Fk, Att>> header, String table) throws Exception {
 		  List<String> hdrQ = new LinkedList<>();
 		  List<String> hdr = new LinkedList<>();
 		  hdr.add(idCol);
 		  hdrQ.add("?");
-		  for (int i = 0; i < header.size(); i++) {
-			  hdrQ.add("?");
-			  Chc<Fk,Att> chc = header.get(i);			
-			  if (chc.left) {
-				  hdr.add(fkToString(chc.l));
-			  } else {
-				  hdr.add(attToString(chc.r));
-			  }
-		  }
+        for (Chc<Fk, Att> aHeader : header) {
+            hdrQ.add("?");
+            Chc<Fk, Att> chc = aHeader;
+            if (chc.left) {
+                hdr.add(fkToString(chc.l));
+            } else {
+                hdr.add(attToString(chc.r));
+            }
+        }
 		  
 		  String insertSQL = "INSERT INTO " + table + "(" + Util.sep(hdr,"," )+ ") values (" + Util.sep(hdrQ,",") + ")";
 		  PreparedStatement ps = conn.prepareStatement(insertSQL);
@@ -168,12 +170,10 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 			return term.obj;
 		} else if (term.sym != null && term.args.isEmpty()) {
 			return term.sym;
-		} else if (term.sym != null && !term.args.isEmpty()) {
+		} else if (term.sym != null && !term.args.isEmpty() || term.sk != null) {
 			return null;
-		} else if (term.sk != null) {
-			return null; //TODO aql return the sk?
 		}
-		throw new RuntimeException("anomaly: please report");
+        throw new RuntimeException("anomaly: please report");
 	}
 
 	private String fkToString(Fk fk) {

@@ -20,7 +20,7 @@ public class EmployeesExample extends Example {
 		return s;
 	}
 	
-	public static final String s = 
+	private static final String s =
 					"/* This is an example of an infinite schema. To compile it, "
 			        + "\n  - check 'allow infinte schemas' in the options menu"
 			        + "\n  - set 'maximum category iterations' to a low value like 400"

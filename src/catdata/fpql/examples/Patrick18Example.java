@@ -21,7 +21,7 @@ public class Patrick18Example extends Example {
 		return s;
 	}
 	
-	String s = "adom : type"
+	private final String s = "adom : type"
 			+ "\nc1 c2 c3 c4 c5 c6 c7 c8 : adom"
 			+ "\n"
 			+ "\nS = schema {"

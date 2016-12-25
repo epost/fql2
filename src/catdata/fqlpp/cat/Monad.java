@@ -7,9 +7,9 @@ import catdata.Pair;
 
 public class Monad<O,A> {
 	
-	public Functor<O,A,O,A> F;    //F : C -> C
-	public Transform<O,A,O,A> unit; //unit: Id_C => F
-	public Transform<O,A,O,A> join; //join: F;F => F
+	private final Functor<O,A,O,A> F;    //F : C -> C
+	private final Transform<O,A,O,A> unit; //unit: Id_C => F
+	private final Transform<O,A,O,A> join; //join: F;F => F
 	
 	public Monad(Functor<O, A, O, A> F, Transform<O, A, O, A> unit, Transform<O, A, O, A> join) {
 		this.F = F;
@@ -89,7 +89,7 @@ public class Monad<O,A> {
 	
 	
 	
-	public void validate() {
+	private void validate() {
 		Category<O,A> C = F.source;
 		if (C.isInfinite()) {
 			return;

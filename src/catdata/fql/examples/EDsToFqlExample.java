@@ -20,7 +20,7 @@ public class EDsToFqlExample extends Example {
 		return s;
 	}
 	
-	String s = "//This FQL program shows how to implement the EDs of Example 2 in \"Functorial Schema Mapping\" paper."
+	private final String s = "//This FQL program shows how to implement the EDs of Example 2 in \"Functorial Schema Mapping\" paper."
 			+ "\n"
 			+ "\n/* "
 			+ "\n * Begin with an instance I1 on the loop schema. We will produce three instances on the unit schema."

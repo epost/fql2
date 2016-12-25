@@ -9,10 +9,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import catdata.Ctx;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
 import catdata.aql.Query;
@@ -47,12 +47,12 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 
 		@Override
 		public String toString() {
-			return en2 + " " + ctx.toString(x -> x.toString());
+			return en2 + " " + ctx.toString(Object::toString);
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((ctx == null) ? 0 : ctx.hashCode());
 			result = prime * result + ((en2 == null) ? 0 : en2.hashCode());
@@ -98,9 +98,9 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 		}
 	}
 	
-	public final Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
+	private final Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
 	//private final Algebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> alg;
-	public final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y>  I;
+	private final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y>  I;
 	
 	private final Ctx<En2, Collection<Row<En2,X>>> ens = new Ctx<>();
 	
@@ -135,7 +135,11 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 	
 	@Override
 	public Term<Ty, Void, Sym, Void, Void, Void, Y> att(Att2 att, Row<En2,X> x) {
-		return I.algebra().intoY(trans1(x, Q.atts.get(att)).get());
+		Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> l = trans1(x, Q.atts.get(att));
+		if (!l.isPresent()) {
+			throw new RuntimeException("Anomly: please report");
+		}
+		return I.algebra().intoY(l.get());
 	}
 
 	@Override
@@ -210,11 +214,7 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 	
 	private Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> trans1(Row<En2, X> row, Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term) {
 		if (term.gen != null) {
-			if (row.ctx.containsKey(term.gen)) {
-				return Optional.of(I.algebra().repr(row.get(term.gen)).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn()));
-			} else {
-				return Optional.empty();
-			}
+            return row.ctx.containsKey(term.gen) ? Optional.of(I.algebra().repr(row.get(term.gen)).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn())) : Optional.empty();
 		} else if (term.obj != null) {
 			return Optional.of(term.asObj());
 		} else if (term.fk != null) {

@@ -34,7 +34,7 @@ public abstract class MapExp {
 
 	public final Pair<SigExp, SigExp> type(FQLProgram env) {
 		return accept(env, new MapExpChecker(
-				new LinkedList<String>()));
+                new LinkedList<>()));
 	}
 	
 	public static class Iso extends MapExp {
@@ -52,11 +52,12 @@ public abstract class MapExp {
 			return "iso2 " + l + " " + r;
 		}
 		
-		boolean lToR;
-		SigExp l, r;
+		final boolean lToR;
+		final SigExp l;
+        final SigExp r;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + (lToR ? 1231 : 1237);
@@ -94,11 +95,12 @@ public abstract class MapExp {
 	}
 	
 	public static class Sub extends MapExp {
-		SigExp s, t;
+		final SigExp s;
+        final SigExp t;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -128,7 +130,6 @@ public abstract class MapExp {
 		}
 
 		public Sub(SigExp s, SigExp t) {
-			super();
 			this.s = s;
 			this.t = t;
 		}
@@ -146,7 +147,7 @@ public abstract class MapExp {
 	}
 	
 	public static class Id extends MapExp {
-		public SigExp t;
+		public final SigExp t;
 
 		public Id(SigExp t) {
 			this.t = t;
@@ -154,7 +155,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -195,11 +196,13 @@ public abstract class MapExp {
 			return v.visit(env, this);
 		}
 
-		public SigExp a, b, c;
+		public final SigExp a;
+        public final SigExp b;
+        public final SigExp c;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -253,11 +256,13 @@ public abstract class MapExp {
 			return v.visit(env, this);
 		}
 
-		public SigExp a, b, c;
+		public final SigExp a;
+        public final SigExp b;
+        public final SigExp c;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -306,11 +311,11 @@ public abstract class MapExp {
 	}
 
 	public static class Const extends MapExp {
-		public List<Pair<String, List<String>>> arrows;
-		public List<Pair<String, String>> attrs;
-		public List<Pair<String, String>> objs;
-		public SigExp src;
-		public SigExp dst;
+		public final List<Pair<String, List<String>>> arrows;
+		public final List<Pair<String, String>> attrs;
+		public final List<Pair<String, String>> objs;
+		public final SigExp src;
+		public final SigExp dst;
 
 		public Const(List<Pair<String, String>> objs,
 				List<Pair<String, String>> attrs,
@@ -411,7 +416,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result
 					+ ((arrows == null) ? 0 : arrows.hashCode());
@@ -467,7 +472,7 @@ public abstract class MapExp {
 	}
 
 	public static class Var extends MapExp {
-		public String v;
+		public final String v;
 
 		public Var(String v) {
 			this.v = v;
@@ -483,7 +488,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((v == null) ? 0 : v.hashCode());
 			return result;
@@ -514,8 +519,8 @@ public abstract class MapExp {
 	}
 
 	public static class TT extends MapExp {
-		SigExp t;
-		Set<String> attrs;
+		final SigExp t;
+		final Set<String> attrs;
 
 		public TT(SigExp t, Set<String> attrs) {
 			this.t = t;
@@ -524,7 +529,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((attrs == null) ? 0 : attrs.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -566,7 +571,7 @@ public abstract class MapExp {
 	}
 
 	public static class FF extends MapExp {
-		SigExp t;
+		final SigExp t;
 
 		public FF(SigExp t) {
 			this.t = t;
@@ -574,7 +579,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -610,7 +615,8 @@ public abstract class MapExp {
 	}
 
 	public static class Fst extends MapExp {
-		SigExp s, t;
+		final SigExp s;
+        final SigExp t;
 
 		public Fst(SigExp s, SigExp t) {
 			this.s = s;
@@ -619,7 +625,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -661,7 +667,8 @@ public abstract class MapExp {
 	}
 
 	public static class Snd extends MapExp {
-		SigExp s, t;
+		final SigExp s;
+        final SigExp t;
 
 		public Snd(SigExp s, SigExp t) {
 			this.s = s;
@@ -670,7 +677,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -712,7 +719,8 @@ public abstract class MapExp {
 	}
 
 	public static class Inl extends MapExp {
-		SigExp s, t;
+		final SigExp s;
+        final SigExp t;
 
 		public Inl(SigExp s, SigExp t) {
 			this.s = s;
@@ -721,7 +729,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -763,7 +771,8 @@ public abstract class MapExp {
 	}
 
 	public static class Inr extends MapExp {
-		SigExp s, t;
+		final SigExp s;
+        final SigExp t;
 
 		public Inr(SigExp s, SigExp t) {
 			this.s = s;
@@ -772,7 +781,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -814,7 +823,8 @@ public abstract class MapExp {
 	}
 
 	public static class Apply extends MapExp {
-		SigExp s, t;
+		final SigExp s;
+        final SigExp t;
 
 		public Apply(SigExp s, SigExp t) {
 			this.s = s;
@@ -823,7 +833,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -865,7 +875,7 @@ public abstract class MapExp {
 	}
 
 	public static class Curry extends MapExp {
-		MapExp f;
+		final MapExp f;
 
 		public Curry(MapExp f) {
 			this.f = f;
@@ -873,7 +883,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -909,7 +919,8 @@ public abstract class MapExp {
 	}
 
 	public static class Prod extends MapExp {
-		MapExp l, r;
+		final MapExp l;
+        final MapExp r;
 
 		public Prod(MapExp l, MapExp r) {
 			this.l = l;
@@ -918,7 +929,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -960,16 +971,17 @@ public abstract class MapExp {
 	}
 
 	public static class Comp extends MapExp {
-		MapExp l, r;
+		final MapExp l;
+        final MapExp r;
 
 		public Comp(MapExp MapExp, MapExp r) {
-			this.l = MapExp;
+            l = MapExp;
 			this.r = r;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1011,7 +1023,8 @@ public abstract class MapExp {
 	}
 
 	public static class Case extends MapExp {
-		MapExp l, r;
+		final MapExp l;
+        final MapExp r;
 
 		public Case(MapExp l, MapExp r) {
 			this.l = l;
@@ -1020,7 +1033,7 @@ public abstract class MapExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1062,11 +1075,11 @@ public abstract class MapExp {
 	}
 	
 	public static class Opposite extends MapExp {
-		MapExp e;
+		final MapExp e;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((e == null) ? 0 : e.hashCode());
 			return result;
@@ -1095,7 +1108,6 @@ public abstract class MapExp {
 		}
 
 		public Opposite(MapExp e) {
-			super();
 			this.e = e;
 		}
 
@@ -1110,25 +1122,25 @@ public abstract class MapExp {
 	public abstract int hashCode();
 
 	public interface MapExpVisitor<R, E> {
-		public R visit(E env, Id e);
-		public R visit(E env, Comp e);
-		public R visit(E env, Dist1 e);
-		public R visit(E env, Dist2 e);
-		public R visit(E env, Var e);
-		public R visit(E env, Const e);
-		public R visit(E env, TT e);
-		public R visit(E env, FF e);
-		public R visit(E env, Fst e);
-		public R visit(E env, Snd e);
-		public R visit(E env, Inl e);
-		public R visit(E env, Inr e);
-		public R visit(E env, Apply e);
-		public R visit(E env, Curry e);
-		public R visit(E env, Case e);
-		public R visit(E env, Prod e);
-		public R visit(E env, Sub e);
-		public R visit(E env, Opposite e);
-		public R visit(E env, Iso e);
+		R visit(E env, Id e);
+		R visit(E env, Comp e);
+		R visit(E env, Dist1 e);
+		R visit(E env, Dist2 e);
+		R visit(E env, Var e);
+		R visit(E env, Const e);
+		R visit(E env, TT e);
+		R visit(E env, FF e);
+		R visit(E env, Fst e);
+		R visit(E env, Snd e);
+		R visit(E env, Inl e);
+		R visit(E env, Inr e);
+		R visit(E env, Apply e);
+		R visit(E env, Curry e);
+		R visit(E env, Case e);
+		R visit(E env, Prod e);
+		R visit(E env, Sub e);
+		R visit(E env, Opposite e);
+		R visit(E env, Iso e);
 	}
 
 	public String printNicely(FQLProgram p) {

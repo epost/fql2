@@ -1,7 +1,8 @@
 package catdata;
 
+@FunctionalInterface
 public interface Prog {
 
-	public Integer getLine(String s);
+	Integer getLine(String s);
 	
 }

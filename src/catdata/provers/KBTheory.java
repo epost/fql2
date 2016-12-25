@@ -11,7 +11,7 @@ import catdata.Triple;
 
 public class KBTheory<T, C, V> {
 	
-	public void validate() {
+	private void validate() {
 		for (C sym : syms.keySet()) {
 			Pair<List<T>, T> T = syms.get(sym);
 			if (!tys.contains(T.second)) {
@@ -52,7 +52,7 @@ public class KBTheory<T, C, V> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
 		result = prime * result + ((syms == null) ? 0 : syms.hashCode());

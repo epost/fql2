@@ -17,12 +17,12 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
 import catdata.aql.It;
@@ -36,13 +36,13 @@ import catdata.aql.fdm.LiteralInstance;
 public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk> 
 	extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> {
 
-	public final SchExp<Ty,En,Sym,Fk,Att> schema;
+	private final SchExp<Ty,En,Sym,Fk,Att> schema;
 	
-	public final List<String> imports;
+	private final List<String> imports;
 
-	public final Map<String, String> options;
+	private final Map<String, String> options;
 	
-	public final String fileStr;
+	private final String fileStr;
 	
 	@Override
 	public long timeout() {
@@ -54,7 +54,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 		this.schema = schema;
 		this.imports = imports;
 		this.options = Util.toMapSafely(options);
-		this.fileStr = file;
+        fileStr = file;
 	}
 
 	@Override
@@ -83,24 +83,29 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Sk stringToSk0(String s) {
+	private static <Sk> Sk stringToSk0(String s) {
 		if (s == null) {
 			throw new RuntimeException("Error: enountered a null labelled null (how ironic)");
 		}
 		return (Sk) s;
 	}
-		
-	
+
+
+	@SuppressWarnings("unchecked")
+	private static <Sym> Sym stringToSym(String s) {
+		return (Sym) s;
+	}
+
 	@SuppressWarnings({ "unchecked" })
 	public static <Ty,En,Sym,Fk,Att,Gen,Sk> Term<Ty,En,Sym,Fk,Att,Gen,Sk> stringToSk(Collection<Sk> sks, Ty t, Schema<Ty,En,Sym,Fk,Att> sch, String s) {
 		int i = 0;
 		Sym sym = null;
-		if (sch.typeSide.syms.map.containsKey(s) && sch.typeSide.syms.map.get(s).first.isEmpty() && sch.typeSide.syms.map.get(s).second.equals(t)) {
+		if (sch.typeSide.syms.containsKey(stringToSym(s)) && sch.typeSide.syms.get(stringToSym(s)).first.isEmpty() && sch.typeSide.syms.get(stringToSym(s)).second.equals(t)) {
 			sym = (Sym) s;
 			i++;
 		}
 		Sk sk = null;
-		if (sks.contains(s)) {
+		if (sks.contains(stringToSk0(s))) {
 			sk = (Sk) s; 
 			i++;
 		}
@@ -141,7 +146,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 		}
 		String pre = fileStr;
 		if (!pre.endsWith("/")) {
-			pre = pre + "/";
+            pre += "/";
 		}
 		AqlOptions op = new AqlOptions(options, null);
 		String charset0 = (String) op.getOrDefault(AqlOption.csv_charset);
@@ -212,7 +217,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 		AqlOptions strat = new AqlOptions(options, col);
 		
 		InitialAlgebra<Ty,En,Sym,Fk,Att,Gen,Sk,ID> 
-		initial = new InitialAlgebra<>(strat, sch, col, new It(), x -> x.toString(), x -> x.toString());
+		initial = new InitialAlgebra<>(strat, sch, col, new It(), Object::toString, Object::toString);
 				 
 		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial); 
 		//TODO aql switch to saturated prover for csv
@@ -264,7 +269,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((fileStr == null) ? 0 : fileStr.hashCode());
 		result = prime * result + ((imports == null) ? 0 : imports.hashCode());

@@ -20,7 +20,7 @@ public class GraphExample extends Example {
 		return s;
 	}
 	
-	String s = "schema Graph = {"
+	private final String s = "schema Graph = {"
 + "\n	nodes arrow,vertex;"
 + "\n	attributes;"
 + "\n	arrows src:arrow->vertex,tgt:arrow->vertex;"

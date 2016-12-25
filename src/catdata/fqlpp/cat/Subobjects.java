@@ -2,14 +2,14 @@ package catdata.fqlpp.cat;
 
 public interface Subobjects<O,A> {
 
-	public O prop();
+	O prop();
 	
-	public A tru();
+	A tru();
 	
-	public A fals();
+	A fals();
 	
-	public A chr(A a);
+	A chr(A a);
 	
-	public A kernel(A a);
+	A kernel(A a);
 	
 }

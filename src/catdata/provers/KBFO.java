@@ -10,12 +10,12 @@ import catdata.Util;
 
 public abstract class KBFO<S,C,V> {
 	
-	public static interface KBFOVisitor<S, C, V, R, E> {
-		public R visit(E env, AndOr<S, C, V> e);
-		public R visit(E env, Not<S, C, V> e);
-		public R visit(E env, Implies<S, C, V> e);
-		public R visit(E env, Bind<S, C, V> e);
-		public R visit(E env, Eq<S, C, V> e);
+	public interface KBFOVisitor<S, C, V, R, E> {
+		R visit(E env, AndOr<S, C, V> e);
+		R visit(E env, Not<S, C, V> e);
+		R visit(E env, Implies<S, C, V> e);
+		R visit(E env, Bind<S, C, V> e);
+		R visit(E env, Eq<S, C, V> e);
 	}
 
 	@Override
@@ -26,8 +26,8 @@ public abstract class KBFO<S,C,V> {
 
 	public abstract <R, E> R accept(E env, KBFOVisitor<S, C, V, R, E> e);
 	
-	public abstract void type(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur);
-	public abstract void typeInf(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur);
+	protected abstract void type(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur);
+	protected abstract void typeInf(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -42,7 +42,7 @@ public abstract class KBFO<S,C,V> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((es == null) ? 0 : es.hashCode());
 			result = prime * result + (isAnd ? 1231 : 1237);
@@ -108,7 +108,7 @@ public abstract class KBFO<S,C,V> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((c == null) ? 0 : c.hashCode());
@@ -169,7 +169,7 @@ public abstract class KBFO<S,C,V> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((e == null) ? 0 : e.hashCode());
 			return result;
@@ -229,7 +229,7 @@ public abstract class KBFO<S,C,V> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((e == null) ? 0 : e.hashCode());
 			result = prime * result + (isForall ? 1231 : 1237);
@@ -336,7 +336,7 @@ public abstract class KBFO<S,C,V> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());

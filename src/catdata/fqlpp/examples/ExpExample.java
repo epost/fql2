@@ -20,7 +20,7 @@ public class ExpExample extends Example {
 		return s;
 	}
 	
-	String s ="//Exponentials in C-Set"
+	private final String s ="//Exponentials in C-Set"
 			+ "\n"
 			+ "\ncategory C = {"
 			+ "\n         objects a, b;"

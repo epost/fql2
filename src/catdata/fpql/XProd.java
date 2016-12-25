@@ -21,7 +21,7 @@ import catdata.fpql.XExp.XBool;
 import catdata.fpql.XPoly.Block;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class XProd {
+class XProd {
 	
 	public static <X> XCtx<X> zero(XCtx<X> S) {
 		return new XCtx<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), S.global, S, "instance");
@@ -81,7 +81,7 @@ public class XProd {
 			em.put(x, l);
 		}
 
-		XMapping ret = new XMapping<X,X>(I, one(I.schema), em, "homomorphism");
+		XMapping ret = new XMapping(I, one(I.schema), em, "homomorphism");
 		return ret;
 	}
 	
@@ -98,7 +98,7 @@ public class XProd {
 			em.put(x, l);
 		}
 
-		return new XMapping<X,X>(zero(I.schema), I, em, "homomorphism");
+		return new XMapping(zero(I.schema), I, em, "homomorphism");
 	}
 	
 	public static <A,B,C> XMapping<Chc<A,B>, C> match(XMapping<A,C> l, XMapping<B,C> r) {
@@ -126,7 +126,7 @@ public class XProd {
 		}
 
 		
-		return new XMapping<Chc<A,B>, C>(src, l.dst, em, "homomorphism");
+		return new XMapping<>(src, l.dst, em, "homomorphism");
 	}
 	
 	public static <X,Y> XMapping<X, Chc<X,Y>> inl(XCtx<X> I, XCtx<Y> J) {
@@ -241,7 +241,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			}
 		}
 		
-		return new XCtx<Pair<Triple<X, X, List<X>>,Triple<X, X, List<X>>>>(ids, types, eqs, (XCtx)I.global, (XCtx)I.schema, "instance");
+		return new XCtx(ids, types, eqs, I.global, I.schema, "instance");
 		
 	}
 
@@ -283,7 +283,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			eqs.add(new Pair(lhs, rhs));
 		}
 		
-		XCtx<Chc<X,Y>> ret = new XCtx<Chc<X,Y>>(ids, types, eqs, (XCtx)I.global, (XCtx)I.schema, "instance");
+		XCtx<Chc<X,Y>> ret = new XCtx(ids, types, eqs, I.global, I.schema, "instance");
 		ret.saturated = I.saturated && J.saturated;
 		return ret;
 	}
@@ -398,7 +398,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	}
 	*/
 	
-	public static <C,D,E> List subst_new(List<D> eq, Map<E, Triple<C, C, List<C>>> tuple, Set<E> keys, Set xxx) {
+	private static <C,D,E> List subst_new(List<D> eq, Map<E, Triple<C, C, List<C>>> tuple, Set<E> keys, Set xxx) {
 		List ret = (List) eq.stream().flatMap(x -> { 
 			List l = new LinkedList<>();
 			if (tuple.containsKey(x)) {
@@ -657,7 +657,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		}
 	}
 	
-	public static XCtx frozen(FLOWER2 flower, XCtx S) {
+	private static XCtx frozen(FLOWER2 flower, XCtx S) {
 		Set ids = new HashSet<>();
 		Map types = new HashMap<>();
 		Set eqs = new HashSet<>();
@@ -679,7 +679,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return ret;
 	}
 	
-	public static XCtx frozen(Block flower, XCtx S) {
+	private static XCtx frozen(Block flower, XCtx S) {
 		Set ids = new HashSet<>();
 		Map types = new HashMap<>();
 		Set eqs = new HashSet<>();
@@ -705,7 +705,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	}
 
 	
-	public static <C> String eval(XExp.XBool where, Map<Object, Triple<C, C, List<C>>> k, Set<Object> keys, XCtx I) {
+	private static <C> String eval(XBool where, Map<Object, Triple<C, C, List<C>>> k, Set<Object> keys, XCtx I) {
 		if (where.isFalse != null) {
 			return "false";
 		}
@@ -759,8 +759,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		XCtx c = frozen(flower, I.schema); 
 		
 		Set<Map<Object, Triple<C, C, List<C>>>> ret = new HashSet<>();
-		Map<Object, Triple<C, C, List<C>>> m = new HashMap<>();
-		ret.add(m);
+		ret.add(new HashMap<>());
 		
 		//: check from vars do not occur in I
 		if (!Collections.disjoint(flower.from.keySet(), I.allTerms())) {
@@ -770,12 +769,12 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			Object node = flower.from.get(var);
 			Set<Map<Object, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
 			for (Map<Object, Triple<C, C, List<C>>> tuple : ret) {
-				outer: for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", (C)node)) {
+				for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", (C)node)) {
 					Map<Object, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
 					merged.put(var, t);
 					String result = eval(flower.where, merged, flower.from.keySet(), I);
 					if (result.equals("false")) {
-						continue outer;
+						continue;
 					}
 					ret2.add(merged);
 				}
@@ -857,7 +856,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		}
 		
 		XCtx c2 = new XCtx(ids2, types2, eqs2, I.global, null, "schema");		
-		XCtx<C> J = new XCtx<C>(ids, types, eqs, I.global, c2, "instance");
+		XCtx<C> J = new XCtx<>(ids, types, eqs, I.global, c2, "instance");
 		J.saturated = true; 
 		return J;
 	}
@@ -866,7 +865,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return flower2(convert(e), I);
 	}
 	
-	public static <C> XBool convert2(Set<Pair<List<C>, List<C>>> eqs) {
+	private static <C> XBool convert2(Set<Pair<List<C>, List<C>>> eqs) {
 		XBool where = new XBool(true);
 		for (Pair<List<C>, List<C>> eq : eqs) {
 			where = new XBool(new XBool((List<Object>)eq.first, (List<Object>)eq.second), where, true);
@@ -874,7 +873,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 		return where;
 	}
 	
-	public static FLOWER2 convert(Flower flower) {
+	private static FLOWER2 convert(Flower flower) {
 		XBool where = new XBool(true);
 		for (Pair<List<Object>, List<Object>> eq : flower.where) {
 			where = new XBool(new XBool(eq.first, eq.second), where, true);
@@ -1135,7 +1134,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 				em.put(k, Util.singList(k));
 			}
 		}
-		return new XMapping<Pair<Object, Map<Object, Triple<C, C, List<C>>>>, Pair<Object, Map<Object, Triple<C, C, List<C>>>>>(uberflower(poly, h.src), uberflower(poly, h.dst), em, "homomorphism");
+		return new XMapping(uberflower(poly, h.src), uberflower(poly, h.dst), em, "homomorphism");
 	}
 	
 	//: make sure this is conjunctive otherwise throw an error //duplicate for later
@@ -1154,18 +1153,17 @@ edge f:X->Y in S (including edges in type, like length or succ),
 			Block<C, D> flower = flowerX.second;
 
 			Set<Map<Object, Triple<C, C, List<C>>>> ret = new HashSet<>();
-			Map<Object, Triple<C, C, List<C>>> m = new HashMap<>();
-			ret.add(m);
+			ret.add(new HashMap<>());
 			for (Object var : flower.from.keySet()) {
 				C node = flower.from.get(var);
 				Set<Map<Object, Triple<C, C, List<C>>>> ret2 = new HashSet<>();
 				for (Map<Object, Triple<C, C, List<C>>> tuple : ret) {
-					outer: for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", node)) {
+					for (Triple<C, C, List<C>> t : I.cat().hom((C)"_1", node)) {
 						Map<Object, Triple<C, C, List<C>>> merged = new HashMap<>(tuple);
 						merged.put(var, t);
 						String result = eval(convert2(flower.where), merged, flower.from.keySet(), I);
 						if (result.equals("false")) {
-							continue outer;
+							continue;
 						}
 						ret2.add(merged);
 					}
@@ -1297,7 +1295,7 @@ edge f:X->Y in S (including edges in type, like length or succ),
 	//: check that INSTANCEs are saturated?
 	
 	@SuppressWarnings("unused")
-	static <C,D> void checkEdges(XPoly<C,D> poly, Map<Object, XCtx> frozens) {
+    private static <C,D> void checkEdges(XPoly<C, D> poly, Map<Object, XCtx> frozens) {
 		for (Object k : poly.blocks.keySet()) {
 			Pair<D, Block<C, D>> b = poly.blocks.get(k);
 			XCtx src = frozens.get(k);

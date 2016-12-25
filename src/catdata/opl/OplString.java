@@ -6,7 +6,7 @@ import javax.swing.JComponent;
 import catdata.ide.CodeTextPanel;
 
 public class OplString implements OplObject {
-	String str;
+	private final String str;
 
 	public OplString(String str) {
 		this.str = str;

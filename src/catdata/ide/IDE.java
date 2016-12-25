@@ -1,6 +1,8 @@
 package catdata.ide;
 
 import java.awt.MenuBar;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -25,15 +27,15 @@ import javax.swing.UnsupportedLookAndFeelException;
  * 
  *         Program entry point.
  */
-public class IDE {
+class IDE {
 	
-	public static void main(String[] args) {
+	public static void main(String... args) {
 		if (args.length == 1) {
 			try {
 				FQLProgram init = FQLParser.program(args[0]);
 				Triple<FqlEnvironment, String, List<Throwable>> envX = Driver
-						.makeEnv(init, new String[0]);
-				if (envX.third.size() > 0) {
+						.makeEnv(init);
+				if (!envX.third.isEmpty()) {
 					throw new RuntimeException("Errors: " + envX.third);
 				}
 				System.out.println("OK");
@@ -55,9 +57,9 @@ public class IDE {
                         
                         UIManager.setLookAndFeel(GlobalOptions.debug.general.look_and_feel);
                         
-                        final JFrame f = new JFrame("Categorical Data IDE");
+                        JFrame f = new JFrame("Categorical Data IDE");
                         
-                        final Pair<JPanel, MenuBar> gui = GUI.makeGUI(f);
+                        Pair<JPanel, MenuBar> gui = GUI.makeGUI(f);
                         
                         f.setContentPane(gui.first);
                         f.setMenuBar(gui.second);
@@ -69,10 +71,10 @@ public class IDE {
                         f.setVisible(true);
                         
                         f.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-                        f.addWindowListener(new java.awt.event.WindowAdapter() {
+                        f.addWindowListener(new WindowAdapter() {
                             @Override
                             public void windowClosing(
-                                    java.awt.event.WindowEvent windowEvent) {
+                                    WindowEvent windowEvent) {
                                 GUI.exitAction();
                             }
                         });

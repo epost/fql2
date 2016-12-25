@@ -20,7 +20,7 @@ public class FunctorExample extends Example {
 		return s;
 	}
 
-	String s = ""; /*"schema One = {"
+	private final String s = ""; /*"schema One = {"
 			+ "\n	nodes a;"
 			+ "\n	attributes attx:a->string,atty:a->string,attz:a->string;"
 			+ "\n	arrows;"

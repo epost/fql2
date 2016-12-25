@@ -26,8 +26,8 @@ import catdata.fql.decl.Transform;
 
 public class PropPSM extends PSM {
 	
-	String pre;
-	Signature sig;
+	private final String pre;
+	private final Signature sig;
 
 	@Override
 	public String isSql() {
@@ -40,7 +40,7 @@ public class PropPSM extends PSM {
 		try {
 			IntRef ref = new IntRef(interp.guid);
 		
-			Signature sigX = new Signature(sig.nodes, sig.edges, new LinkedList<Attribute<Node>>(), sig.eqs);
+			Signature sigX = new Signature(sig.nodes, sig.edges, new LinkedList<>(), sig.eqs);
 			
 			Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs = sig.obs();
 			
@@ -132,8 +132,7 @@ public class PropPSM extends PSM {
 	}
 	
 	public PropPSM(String pre, Signature sig) {
-		super();
-		this.pre = pre;
+        this.pre = pre;
 		this.sig = sig;
 	}
 
@@ -144,7 +143,7 @@ public class PropPSM extends PSM {
 	
 	@Override
 	public String toString() {
-		return "prop " + sig.toString();
+		return "prop " + sig;
 	}
 
 }

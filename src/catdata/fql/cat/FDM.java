@@ -1,12 +1,7 @@
 package catdata.fql.cat;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -24,8 +19,8 @@ public class FDM {
 	/**
 	 * N-ary product.
 	 */
-	public static <Obj, Y, X> Set<Value<Y,X>[]> productN(Map<Obj, Set<Value<Y,X>>> I,
-			List<Obj> objs) {
+	private static <Obj, Y, X> Set<Value<Y,X>[]> productN(Map<Obj, Set<Value<Y, X>>> I,
+                                                          List<Obj> objs) {
 
 		Set<Value<Y,X>[]> ret = null;
 		for (Obj o : objs) {
@@ -55,12 +50,12 @@ public class FDM {
 	 * Limit as join all
 	 */
 	@SuppressWarnings("unchecked")
-	public static <ObjC, ObjD, ArrowC, ArrowD, Y, X> Set<Value<Y,X>[]> lim2
-	(
-			CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> B,
-			Inst<Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>, Pair<Arr<ObjD,ArrowD>,Arr<ObjC,ArrowC>>, Y, X> I) throws FQLException {
+    private static <ObjC, ObjD, ArrowC, ArrowD, Y, X> Set<Value<Y,X>[]> lim2
+    (
+            CommaCat<ObjD, ArrowD, ObjC, ArrowC, ObjD, ArrowD> B,
+            Inst<Triple<ObjD, ObjC, Arr<ObjD, ArrowD>>, Pair<Arr<ObjD, ArrowD>, Arr<ObjC, ArrowC>>, Y, X> I) throws FQLException {
 	
-		if (B.objects.size() == 0) {
+		if (B.objects.isEmpty()) {
 			return null;
 		}
 		
@@ -122,9 +117,7 @@ public class FDM {
 			@SuppressWarnings("unchecked")
 			Value<Y,X>[] y =  new Value[x.length + 1];
 			y[0] = new Value<>(x);
-			for (int j = 1; j <= x.length; j++) {
-				y[j] = x[j - 1];
-			}
+			System.arraycopy(x, 0, y, 1, x.length);
 			ret.add(y);
 		}
 		return ret;
@@ -138,9 +131,7 @@ public class FDM {
 		for (Value<Y,X>[] x : X) {
 			@SuppressWarnings("unchecked")
 			Value<Y,X>[] g =  new Value[size];
-			for (int i = 0; i < size; i++) {
-				g[i] = x[i];
-			}
+			System.arraycopy(x, 0, g, 0, size);
 			ret.add(g);
 		}
 		return ret;
@@ -153,7 +144,7 @@ public class FDM {
 			}
 		}
 		throw new FQLException("Cannot lookup position of " + s + " in "
-				+ cnames.toString());
+				+ Arrays.toString(cnames));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -261,16 +252,14 @@ public class FDM {
 	// turn e into arrow e', compute e' ; q2col, look for that
 	
 	a: for (int i = 0; i < q2cols.length; i++) {
-		boolean b = false;
+		//boolean b = false;
 		for (int j = 0; j < q1cols.length; j++) {
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> q2c = q2cols[i];
 			Triple<ObjD, ObjC, Arr<ObjD, ArrowD>> q1c = q1cols[j];
 			if (q1c.third.equals(cat.compose(e, q2c.third)) && q2c.second.equals(q1c.second)) {				
 				raw = select(raw, i + 1, j + 2 + q2cols.length);
-				if (b) {
-					throw new RuntimeException();
-				}
-				b = true;
+
+				//b = true;
 				continue a;
 			}
 		}
@@ -362,8 +351,8 @@ public class FDM {
 	/**
 	 * Fiber product of sets
 	 */
-	static <A, B, C> List<Triple<A, B, C>> fpsets(List<A> A, List<B> B,
-			List<C> C, Map<A, C> f, Map<B, C> g) {
+	private static <A, B, C> List<Triple<A, B, C>> fpsets(List<A> A, List<B> B,
+                                                          List<C> C, Map<A, C> f, Map<B, C> g) {
 		List<Triple<A, B, C>> ret = new LinkedList<>();
 
 		for (A a : A) {
@@ -495,7 +484,7 @@ public class FDM {
 	public static <Y,X> Map<Value<Y,X>, Value<Y,X>> degraph(Set<Pair<X, X>> set) {
 		Map<Value<Y,X>, Value<Y,X>> ret = new HashMap<>(set.size());
 		for (Pair<X, X> p : set) {
-			ret.put(new Value<Y,X>(p.first), new Value<Y,X>(p.second));
+			ret.put(new Value<>(p.first), new Value<>(p.second));
 		}
 		return ret;
 	}
@@ -719,10 +708,10 @@ public class FDM {
 	/**
 	 * Sigma
 	 */
-	public static 
+	private static
 	<ObjC, ArrowC, ObjD, ArrowD, X> Inst<ObjD, ArrowD, ObjC, X>
 	sigma(
-			FinFunctor<ObjC, ArrowC, ObjD, ArrowD> F, Inst<ObjC, ArrowC, ObjC, X> inst)
+            FinFunctor<ObjC, ArrowC, ObjD, ArrowD> F, Inst<ObjC, ArrowC, ObjC, X> inst)
 			throws FQLException {
 		FinCat<ObjD, ArrowD> D = F.dstCat;
 		FinCat<ObjC, ArrowC> C = F.srcCat;

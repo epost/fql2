@@ -27,9 +27,10 @@ import catdata.provers.KBExp;
 public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 
 	OplSchema<S1, C1, V1> src;
-	OplSchema<S2, C2, V2> dst;
+	private OplSchema<S2, C2, V2> dst;
 
-	String src_e, dst_e;
+	final String src_e;
+    final String dst_e;
 
 	Map<Object, Pair<S2, Block<S1, C1, V1, S2, C2, V2>>> blocks = new HashMap<>();
 
@@ -41,9 +42,9 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 	}
 
 	public Map<Object, OplPres<S1, C1, V1, V1>> fI;
-	public Map<Pair<Object, C2>, OplPresTrans<S1, C1, V1, V1, V1>> fE;
+	//private Map<Pair<Object, C2>, OplPresTrans<S1, C1, V1, V1, V1>> fE;
 
-	static <C, V> OplTerm<Chc<C, V>, V> freeze(OplTerm<C, V> t) {
+	private static <C, V> OplTerm<Chc<C, V>, V> freeze(OplTerm<C, V> t) {
 		if (t.var != null) {
 			return new OplTerm<>(Chc.inRight(t.var), new LinkedList<>());
 		}
@@ -69,7 +70,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 			xx.toSig(); // validates
 			fI.put(l, xx);
 		}
-		fE = new HashMap<>();
+		//fE = new HashMap<>();
 		for (Object l : blocks.keySet()) {
 			Block<S1, C1, V1, S2, C2, V2> block = blocks.get(l).second;
 			//S2 s2 = blocks.get(l).first;
@@ -80,20 +81,17 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 				for (V1 v1 : l0f.second.keySet()) {
 					OplTerm<C1, V1> t = l0f.second.get(v1);
 					S1 s1 = fI.get(l0f.first).gens.get(v1);
-					Map<V1, OplTerm<Chc<C1, V1>, V1>> m = map.get(s1);
-					if (m == null) {
-						m = new HashMap<>();
-						map.put(s1, m);
-					}
-					m.put(v1, freeze(t));
+                    Map<V1, OplTerm<Chc<C1, V1>, V1>> m = map.computeIfAbsent(s1, k -> new HashMap<>());
+                    m.put(v1, freeze(t));
 				
 				}
 				// validates
 				try {
+					@SuppressWarnings("unused")
 					OplPresTrans<S1, C1, V1, V1, V1> xx = new OplPresTrans<>(map,
 						"?", "?", fI.get(l0f.first), fI.get(l));
 			
-					fE.put(new Pair<>(l, c2), xx);
+					//fE.put(new Pair<>(l, c2), xx);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 					throw new RuntimeException("Error in block " + l + " edge " + c2 + " " + ex.getMessage());
@@ -151,14 +149,14 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 							+ " is not an attribute in " + dst_e);
 				}
 				Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>> ee = block.attrs.get(a); 
-				S1 s1 = null;
+				S1 s1;
 				try {
 					if (ee.left) {
 						ee.l.validate();
 						s1 = ee.l.type(src.sig, ctx);
 						Pair<List<S1>, S1> zero_t = src.sig.getSymbol(ee.l.zero);
 						Pair<List<S1>, S1> plus_t = src.sig.getSymbol(ee.l.plus);
-						if (zero_t.first.size() != 0) {
+						if (!zero_t.first.isEmpty()) {
 							throw new RuntimeException(ee.l.zero + " is not zero-ary");
 						}
 						if (plus_t.first.size() != 2) {
@@ -260,7 +258,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 		}
 	}
 	
-	void checkPaths() {
+	private void checkPaths() {
 		for (Triple<OplCtx<S2, V2>, OplTerm<C2, V2>, OplTerm<C2, V2>> eq : dst.sig.equations) {
 			if (eq.first.vars0.size() != 1) {
 				continue;
@@ -287,8 +285,8 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 						}
 					
 						for (V1 b : block0.second.from.keySet()) {
-							OplTerm<C1, V1> lhs = convPath(new OplTerm<C1, V1>(b), l2, eq.second);
-							OplTerm<C1, V1> rhs = convPath(new OplTerm<C1, V1>(b), l2, eq.third); 
+							OplTerm<C1, V1> lhs = convPath(new OplTerm<>(b), l2, eq.second);
+							OplTerm<C1, V1> rhs = convPath(new OplTerm<>(b), l2, eq.third);
 							OplTerm<Chc<C1, V1>, V1> lhs0 = fI.get(l2).toSig().getKB().nf(lhs.inLeft());
 							OplTerm<Chc<C1, V1>, V1> rhs0 = fI.get(l2).toSig().getKB().nf(rhs.inLeft());
 							
@@ -318,7 +316,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 		
 	}
 	
-	OplTerm<Chc<C1, V1>, V1> squish(OplTerm<Chc<C1, V1>, V1> t) {
+	private OplTerm<Chc<C1, V1>, V1> squish(OplTerm<Chc<C1, V1>, V1> t) {
 		if (t.var != null) {
 			return new OplTerm<>(Chc.inRight(t.var), new LinkedList<>());
 		}
@@ -329,7 +327,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 		return new OplTerm<>(t.head, ret);
 	}
 
-	OplTerm<C1, V1> findBlock(C2 att) {
+	private OplTerm<C1, V1> findBlock(C2 att) {
 		OplTerm<C1, V1> ret = null;
 		for (Object l : blocks.keySet()) {
 			if (blocks.get(l).second.attrs.containsKey(att)) {
@@ -348,7 +346,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 	}
 	
 	@SuppressWarnings("unchecked")
-	OplTerm<C1, V1> convTerm(Object l2, OplTerm<C2, V2> t) {
+    private OplTerm<C1, V1> convTerm(Object l2, OplTerm<C2, V2> t) {
 		if (t.var != null) {
 			throw new RuntimeException();
 		}
@@ -363,12 +361,12 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 		return new OplTerm<>((C1)t.head, args0);
 	}
 	
-	OplTerm<C1, V1> convPath(OplTerm<C1, V1> base, Object l2, OplTerm<C2, V2> eqs) {
+	private OplTerm<C1, V1> convPath(OplTerm<C1, V1> base, Object l2, OplTerm<C2, V2> eqs) {
 		if (base == null) { throw new RuntimeException(); }
 		return subst(base, Util.reverse(trace(l2, eqs)));
 	} 
 	
-	static <X, Y> List<X> linearize(OplTerm<X, Y> t) {
+	private static <X, Y> List<X> linearize(OplTerm<X, Y> t) {
 		if (t.var != null) {
 			return new LinkedList<>();
 		}
@@ -377,7 +375,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 		return ret;
 	}
 
-	List<Pair<C2, Object>> trace(Object l, OplTerm<C2, V2> t) {
+	private List<Pair<C2, Object>> trace(Object l, OplTerm<C2, V2> t) {
 		List<Pair<C2, Object>> ret = new LinkedList<>();
 		List<C2> order = linearize(t);
 		
@@ -433,12 +431,13 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 
 	@SuppressWarnings("unused")
 	public static class Agg<S1, C1, V1, S2, C2, V2> {
-		String orig;
+		final String orig;
 
-		C1 zero, plus;
-		LinkedHashMap<V1, S1> from;
-		Set<Pair<OplTerm<C1, V1>, OplTerm<C1, V1>>> where;
-		OplTerm<C1, V1> att;
+		final C1 zero;
+        final C1 plus;
+		final LinkedHashMap<V1, S1> from;
+		final Set<Pair<OplTerm<C1, V1>, OplTerm<C1, V1>>> where;
+		final OplTerm<C1, V1> att;
 		
 		public Agg(C1 zero, C1 plus, LinkedHashMap<V1, S1> from, Set<Pair<OplTerm<C1, V1>, OplTerm<C1, V1>>> where, OplTerm<C1, V1> att) {
 			this.zero = zero;
@@ -470,7 +469,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((att == null) ? 0 : att.hashCode());
 			result = prime * result + ((from == null) ? 0 : from.hashCode());
@@ -529,12 +528,12 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 	
 	public static class Block<S1, C1, V1, S2, C2, V2> {
 
-		String orig;
+		final String orig;
 		
-		LinkedHashMap<V1, S1> from;
-		Set<Pair<OplTerm<C1, V1>, OplTerm<C1, V1>>> where;
-		Map<C2, Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>>> attrs;
-		Map<C2, Pair<Object, Map<V1, OplTerm<C1, V1>>>> edges;
+		final LinkedHashMap<V1, S1> from;
+		final Set<Pair<OplTerm<C1, V1>, OplTerm<C1, V1>>> where;
+		final Map<C2, Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>>> attrs;
+		final Map<C2, Pair<Object, Map<V1, OplTerm<C1, V1>>>> edges;
 
 		public Block(LinkedHashMap<V1, S1> from, Set<Pair<OplTerm<C1, V1>, OplTerm<C1, V1>>> where,
 				Map<C2, Chc<Agg<S1, C1, V1, S2, C2, V2>, OplTerm<C1, V1>>> attrs,
@@ -627,7 +626,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((orig == null) ? 0 : orig.hashCode());
 			return result;
@@ -701,7 +700,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 					continue;
 				}
 				OplTerm<C, V> l = new OplTerm<>(term,
-						Util.singList(new OplTerm<C, V>((V) "q_v")));
+						Util.singList(new OplTerm<>((V) "q_v")));
 				if (S.projE().symbols.containsKey(term)) {
 					Map<V, OplTerm<C, V>> m = new HashMap<>();
 					m.put((V) "q_v", l);
@@ -768,7 +767,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 	}
 
 
-	public static <S1, C1, C2, V1, V2, X> 
+	private static <S1, C1, C2, V1, V2, X>
 	OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>, V2>
 	              conv(OplInst<S1, C1, V1, X> i0, OplTerm<Chc<C1, OplTerm<Chc<C1, X>, V1>>, V1> e) {
 		if (e.var != null) {
@@ -795,21 +794,21 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 		}
 	}
 
-	public <X> int guessPrec(OplInst<S1, C1, V1, X> I0, int last, Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, Integer> prec) {
-		for (;;) {
+	private <X> int guessPrec(@SuppressWarnings("unused") OplInst<S1, C1, V1, X> I0, int last, Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, Integer> prec) {
+		while (true) {
 			last++;
 			if (prec.containsValue(last)) {
 				continue;
 			}
-			boolean inInst = I0.P.prec.containsValue(last);
+			//boolean inInst = I0.P.prec.containsValue(last);
 			boolean inSch = dst.sig.prec.containsValue(last);
-			if ((inInst && !inSch) || (!inInst && !inSch)) {
+			if (!inSch) {
 				return last;
 			}
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "ConstantConditions"})
 	public <X> Pair<OplInst<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>>,
 	Map<Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>> eval(
 			OplInst<S1, C1, V1, X> I0) {
@@ -980,8 +979,8 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 	
 	public <X, Y> OplPresTrans<S2, C2, V2, Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, Chc<OplTerm<Chc<C1, Y>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, Y>, V1>>>>> eval(
 			OplPresTrans<S1, C1, V1, X, Y> h) {
-		OplExp.OplInst<S2,C2,V2,Chc<OplTerm<Chc<C1,X>,V1>,Pair<Object,Map<V1,OplTerm<Chc<C1,X>,V1>>>>> QI = eval(h.src1).first;
-		OplExp.OplInst<S2,C2,V2,Chc<OplTerm<Chc<C1,Y>,V1>,Pair<Object,Map<V1,OplTerm<Chc<C1,Y>,V1>>>>> QJ = eval(h.dst1).first;
+		OplInst<S2,C2,V2,Chc<OplTerm<Chc<C1,X>,V1>,Pair<Object,Map<V1,OplTerm<Chc<C1,X>,V1>>>>> QI = eval(h.src1).first;
+		OplInst<S2,C2,V2,Chc<OplTerm<Chc<C1,Y>,V1>,Pair<Object,Map<V1,OplTerm<Chc<C1,Y>,V1>>>>> QJ = eval(h.dst1).first;
 
 		Map<S2, Map<Chc<OplTerm<Chc<C1, X>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, X>, V1>>>>, OplTerm<Chc<C2, Chc<OplTerm<Chc<C1, Y>, V1>, Pair<Object, Map<V1, OplTerm<Chc<C1, Y>, V1>>>>>, V2>>> m = new HashMap<>();
 
@@ -1016,7 +1015,7 @@ public class OplQuery<S1, C1, V1, S2, C2, V2> extends OplExp {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((blocks == null) ? 0 : blocks.hashCode());
 		result = prime * result + ((dst_e == null) ? 0 : dst_e.hashCode());

@@ -20,7 +20,7 @@ public class NistExample  extends Example {
 		return s;
 	}
 	
-	String s= "schema A = {"
+	private final String s= "schema A = {"
 			+ "\n nodes"
 			+ "\n  capability,"
 			+ "\n  capabilitycategories,"

@@ -47,10 +47,10 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 		return arrowMapping.get(a);
 	}
 
-	public Map<ObjA, ObjB> objMapping;
-	public Map<Arr<ObjA, ArrowA>, Arr<ObjB, ArrowB>> arrowMapping;
-	public FinCat<ObjA, ArrowA> srcCat;
-	public FinCat<ObjB, ArrowB> dstCat;
+	public final Map<ObjA, ObjB> objMapping;
+	public final Map<Arr<ObjA, ArrowA>, Arr<ObjB, ArrowB>> arrowMapping;
+	public final FinCat<ObjA, ArrowA> srcCat;
+	public final FinCat<ObjB, ArrowB> dstCat;
 
 	/**
 	 * Constructs a functor. Does not copy inputs.
@@ -83,7 +83,7 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 		return new FinFunctor<>(objMapping, arrowMapping, C, D);
 	}
 
-	public void validate() {
+	private void validate() {
 		for (ObjA o : srcCat.objects) {
 			if (!objMapping.containsKey(o)) {
 				throw new RuntimeException("Functor does not map " + o + this);
@@ -142,12 +142,6 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 	 * Converts a functor to a mapping by converting the source and target
 	 * categories
 	 * 
-	 * @param n
-	 *            name of the functor
-	 * @param n1
-	 *            name for the source category
-	 * @param n2
-	 *            name for the target category
 	 * @return the mapping, and a bunch of isomorphisms
 	 * @throws FQLException
 	 */
@@ -228,7 +222,7 @@ public class FinFunctor<ObjA, ArrowA, ObjB, ArrowB> {
 		FinFunctor<ObjC1, ArrowC1, ObjT, ArrowT> ret = new FinFunctor<>(ret1, ret2, h.srcCat, G.dstCat);
 
 		if (h.am == null && G.am == null) {
-			
+			//need empty block for correctness
 		} else if (h.am != null && G.am != null) {
 			
 			Map<Attribute<ObjC1>, Attribute<ObjT>> ret3 = new HashMap<>();

@@ -26,10 +26,10 @@ public class InsertEmptyKeygen extends InsertKeygen {
 	public void exec(PSMInterp interp,
 			Map<String, Set<Map<Object, Object>>> state) {
 		if (!state.containsKey(name)) {
-			throw new RuntimeException(this.toString());
+			throw new RuntimeException(toString());
 		}
-		if (state.get(name).size() > 0) {
-			throw new RuntimeException(this.toString());
+		if (!state.get(name).isEmpty()) {
+			throw new RuntimeException(toString());
 		}
 		Set<Map<Object, Object>> ret = new HashSet<>();
 		Map<Object, Object> m = new HashMap<>();

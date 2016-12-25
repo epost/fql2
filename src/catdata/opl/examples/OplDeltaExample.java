@@ -20,7 +20,7 @@ public class OplDeltaExample extends Example {
 		return s;
 	}
 	
-	String s = "C = theory {"
+	private final String s = "C = theory {"
 			+ "\n 	sorts "
 			+ "\n		T1, T2, string, int;"
 			+ "\n 	symbols"

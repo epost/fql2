@@ -3,7 +3,7 @@ package catdata;
 @SuppressWarnings("serial")
 public class RuntimeInterruptedException extends RuntimeException {
 	
-	public final Exception ex;
+	private final Exception ex;
 	
 	public RuntimeInterruptedException(InterruptedException ie) {
 		ex = ie;

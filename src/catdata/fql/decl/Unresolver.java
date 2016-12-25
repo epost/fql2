@@ -21,7 +21,7 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 		for (String k : env.keySet()) {
 			SigExp e0 = env.get(k);
 			if (e0.equals(e)) {
-				return new SigExp.Var(k);
+				return new Var(k);
 			}
 		}
 		return e;
@@ -32,7 +32,7 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 		for (String k : env.keySet()) {
 			SigExp e0 = env.get(k);
 			if (e0.equals(e)) {
-				return new SigExp.Var(k);
+				return new Var(k);
 			}
 		}
 		return e;
@@ -40,11 +40,11 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Plus e) {
-		SigExp t = new SigExp.Plus(e.a.accept(env, this), e.b.accept(env, this));
+		SigExp t = new Plus(e.a.accept(env, this), e.b.accept(env, this));
 		for (String k : env.keySet()) {
 			SigExp e0 = env.get(k);
 			if (e0.equals(t)) {
-				return new SigExp.Var(k);
+				return new Var(k);
 			}
 		}
 		return t;
@@ -52,11 +52,11 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Times e) {
-		SigExp t = new SigExp.Times(e.a.accept(env, this), e.b.accept(env, this));
+		SigExp t = new Times(e.a.accept(env, this), e.b.accept(env, this));
 		for (String k : env.keySet()) {
 			SigExp e0 = env.get(k);
 			if (e0.equals(t)) {
-				return new SigExp.Var(k);
+				return new Var(k);
 			}
 		}
 		return t;
@@ -64,11 +64,11 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Exp e) {
-		SigExp t = new SigExp.Exp(e.a.accept(env, this), e.b.accept(env, this));
+		SigExp t = new Exp(e.a.accept(env, this), e.b.accept(env, this));
 		for (String k : env.keySet()) {
 			SigExp e0 = env.get(k);
 			if (e0.equals(t)) {
-				return new SigExp.Var(k);
+				return new Var(k);
 			}
 		}
 		return t;
@@ -84,7 +84,7 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 		for (String k : env.keySet()) {
 			SigExp e0 = env.get(k);
 			if (e0.equals(e)) {
-				return new SigExp.Var(k);
+				return new Var(k);
 			}
 		}
 		return e;
@@ -92,11 +92,11 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Union e) {
-		SigExp t = new SigExp.Union(e.l.accept(env, this), e.r.accept(env, this));
+		SigExp t = new Union(e.l.accept(env, this), e.r.accept(env, this));
 		for (String k : env.keySet()) {
 			SigExp e0 = env.get(k);
 			if (e0.equals(t)) {
-				return new SigExp.Var(k);
+				return new Var(k);
 			}
 		}
 		return t;
@@ -104,18 +104,18 @@ public class Unresolver implements SigExpVisitor<SigExp, Map<String, SigExp>> {
 
 	@Override
 	public SigExp visit(Map<String, SigExp> env, Opposite e) {
-		SigExp t = new SigExp.Opposite(e.e.accept(env, this));
+		SigExp t = new Opposite(e.e.accept(env, this));
 		for (String k : env.keySet()) {
 			SigExp e0 = env.get(k);
 			if (e0.equals(t)) {
-				return new SigExp.Var(k);
+				return new Var(k);
 			}
 		}
 		return t;
 	}
 	
 	@Override
-	public catdata.fql.decl.SigExp.Const visit(Map<String, SigExp> env, Unknown e) {
+	public Const visit(Map<String, SigExp> env, Unknown e) {
 		throw new RuntimeException("Encountered unknown type.");
 	}
 

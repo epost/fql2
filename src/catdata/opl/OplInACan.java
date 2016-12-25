@@ -4,13 +4,13 @@ import catdata.Environment;
 import catdata.Program;
 import catdata.opl.OplExp.OplInst;
 
-public class OplInACan {
+class OplInACan {
 
-	public static void main(String[] args) {
+	public static void main(String... args) {
 		System.out.println(openCan(args[0]));
 	}
 	
-	public static String openCan(String can) {
+	private static String openCan(String can) {
 		try {
 			Program<OplExp> program = OplParser.program(can);
 			Environment<OplObject> result = OplDriver.makeEnv(null, program,

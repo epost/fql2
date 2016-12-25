@@ -3,23 +3,23 @@ package catdata.fql.sql;
 import java.util.Map;
 import java.util.Set;
 
-import catdata.fql.FQLException;
 import catdata.Pair;
+import catdata.fql.decl.Transform;
+import catdata.fql.FQLException;
 import catdata.fql.cat.Inst;
 import catdata.fql.decl.Instance;
 import catdata.fql.decl.Signature;
-import catdata.fql.decl.Transform;
 
 public class PSMIso extends PSM {
 	
-	public boolean lToR;
-	public String l, r;
-	public Signature sig;
-	public String pre;
+	private final boolean lToR;
+	private final String l;
+    private final String r;
+	private final Signature sig;
+	private final String pre;
 
 	public PSMIso(boolean lToR, String pre, String l, String r, Signature sig) {
-		super();
-		this.lToR = lToR;
+        this.lToR = lToR;
 		this.l = l;
 		this.r = r;
 		this.sig = sig;
@@ -29,7 +29,8 @@ public class PSMIso extends PSM {
 	@Override
 	public void exec(PSMInterp interp,
 			Map<String, Set<Map<Object, Object>>> state) {
-		try {
+		//throw new RuntimeException("Iso finder is not working right now");
+		 try {
 			Instance li = new Instance(sig, PSMGen.gather(l, sig, state));
 			Instance ri = new Instance(sig, PSMGen.gather(r, sig, state));
 			
@@ -47,7 +48,8 @@ public class PSMIso extends PSM {
 		} catch (FQLException fe) {
 			fe.printStackTrace();
 			throw new RuntimeException(fe.getMessage());
-		}
+		} 
+		
 	}
 
 	@Override
@@ -57,11 +59,7 @@ public class PSMIso extends PSM {
 	
 	@Override
 	public String toString() {
-		if (lToR) {
-			return "iso1 " + l + " " + r;
-		} else {
-			return "iso2 " + l + " " + r;
-		}
+        return lToR ? "iso1 " + l + " " + r : "iso2 " + l + " " + r;
 	}
 	
 	@Override

@@ -45,7 +45,7 @@ import catdata.ide.CodeTextPanel;
  */
 public class Chase {
 
-	static JButton run = new JButton("Run");
+	private static final JButton run = new JButton("Run");
 
 	public static void dostuff() {
 		JFrame f = new JFrame("Chaser");
@@ -83,26 +83,26 @@ public class Chase {
 
 	}
 
-	static JComboBox<KIND> box = new JComboBox<>(new KIND[] { KIND.PARALLEL, KIND.STANDARD,
+	private static final JComboBox<KIND> box = new JComboBox<>(new KIND[] { KIND.PARALLEL, KIND.STANDARD,
 			KIND.CORE, KIND.HYBRID });
-	static CodeTextPanel eds = new CodeTextPanel("EDs", "forall x, S(x,x) -> exists y, T(y,y)");
-	static CodeTextPanel eds0 = new CodeTextPanel("Simplified EDs", "");
-	static CodeTextPanel eds1 = new CodeTextPanel("Tuple EDs", "");
-	static CodeTextPanel inst = new CodeTextPanel("Instance", "S -> {(a,a),(b,b)}, T -> {}");
-	static CodeTextPanel res = new CodeTextPanel("Result", "");
+	private static final CodeTextPanel eds = new CodeTextPanel("EDs", "forall x, S(x,x) -> exists y, T(y,y)");
+	private static final CodeTextPanel eds0 = new CodeTextPanel("Simplified EDs", "");
+	//static CodeTextPanel eds1 = new CodeTextPanel("Tuple EDs", "");
+	private static final CodeTextPanel inst = new CodeTextPanel("Instance", "S -> {(a,a),(b,b)}, T -> {}");
+	private static final CodeTextPanel res = new CodeTextPanel("Result", "");
 
-	private static RyanParser<EmbeddedDependency> ed_p = make_ed_p();
-	private static RyanParser<Pair<String, List<Pair<String, String>>>> inst_p0 = make_inst_p0();
+	private static final RyanParser<EmbeddedDependency> ed_p = make_ed_p();
+	private static final RyanParser<Pair<String, List<Pair<String, String>>>> inst_p0 = make_inst_p0();
 
-	static RyanParser<List<EmbeddedDependency>> eds_p = ParserUtils.many(ed_p);
-	static RyanParser<List<Pair<String, List<Pair<String, String>>>>> inst_p = ParserUtils.manySep(
+	private static final RyanParser<List<EmbeddedDependency>> eds_p = ParserUtils.many(ed_p);
+	private static final RyanParser<List<Pair<String, List<Pair<String, String>>>>> inst_p = ParserUtils.manySep(
 			inst_p0, new KeywordParser(","));
 
-	protected static Pair<String, String> run(String eds, String inst, KIND kind) throws Exception {
+	private static Pair<String, String> run(String eds, String inst, KIND kind) throws Exception {
 		Partial<List<EmbeddedDependency>> xxx = eds_p.parse(new FqlTokenizer(eds));
 		List<EmbeddedDependency> eds0 = xxx.value;
 
-		if (xxx.tokens.toString().trim().length() > 0) {
+		if (!xxx.tokens.toString().trim().isEmpty()) {
 			throw new FQLException("Unconsumed input: " + xxx.tokens);
 		}
 
@@ -110,7 +110,7 @@ public class Chase {
 				.parse(new FqlTokenizer(inst));
 		Map<String, Set<Pair<Object, Object>>> inst0 = conv(yyy.value);
 
-		if (yyy.tokens.toString().trim().length() > 0) {
+		if (!yyy.tokens.toString().trim().isEmpty()) {
 			throw new FQLException("Unconsumed input: " + yyy.tokens);
 		}
 
@@ -176,7 +176,7 @@ public class Chase {
 	}
 
         @SuppressWarnings("unchecked")
-	protected static RyanParser<Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>> facts_p2() {
+		private static RyanParser<Pair<List<Triple<String, String, String>>, List<Pair<String, String>>>> facts_p2() {
 		return (Tokens s) -> {
                     RyanParser<List<Object>> objs0 = ParserUtils.manySep(
                             ParserUtils.or(facts_p(), eq_p()), new KeywordParser("/\\"));
@@ -199,7 +199,7 @@ public class Chase {
                 };
 	}
 
-	protected static RyanParser<Pair<String, String>> eq_p() {
+	private static RyanParser<Pair<String, String>> eq_p() {
 		return ParserUtils.inside(new StringParser(), new KeywordParser("="), new StringParser());
 	}
 
@@ -256,7 +256,7 @@ public class Chase {
 		return ret;
 	}
 
-	public static Pair<List<Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>>>, List<Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>>>> split(
+	private static Pair<List<Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>>>, List<Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>>>> split(
 			List<EmbeddedDependency> l) {
 		List<Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>>> ret1 = new LinkedList<>();
 		List<Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>>> ret2 = new LinkedList<>();
@@ -265,19 +265,19 @@ public class Chase {
 					e.forall, e.where, e.tgd);
 			Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> t = new Triple<>(
 					e.forall, e.where, e.egd);
-			if (s.third.size() > 0) {
+			if (!s.third.isEmpty()) {
 				ret1.add(s);
 			}
-			if (t.third.size() > 0) {
+			if (!t.third.isEmpty()) {
 				ret2.add(t);
 			}
 		}
 		return new Pair<>(ret1, ret2);
 	}
 
-	static int ruleNo = -1;
+	private static int ruleNo = -1;
 
-	public static enum KIND {
+	public enum KIND {
 		PARALLEL, STANDARD, CORE, HYBRID
 	}
 
@@ -293,96 +293,96 @@ public class Chase {
 
 		int i = 0;
 		ruleNo = 0;
-		for (;;) {
+		while (true) {
 			Map<String, Set<Pair<Object, Object>>> ret_old = new HashMap<>(ret);
 			switch (kind) {
-			case CORE:
-				boolean fired = false;
-				for (Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd : tgds) {
-					ret = union(ret, chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
-					fired = !ret.equals(ret_old);
-				}
-				for (Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd : egds) {
-					ret = apply(ret, chaseEgd(ret_old, egd.first, egd.second, egd.third));
-					fired = !ret.equals(ret_old);
-				}
-				ret = minimize(keys, ret, tgds, egds);
-				if (!fired) {
-					return ret;
-				}
-				break;
-			case PARALLEL:
-				for (Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd : tgds) {
-					ret = union(ret, chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
-				}
-				for (Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd : egds) {
-					ret = apply(ret, chaseEgd(ret_old, egd.first, egd.second, egd.third));
-				}
-				if (ret.equals(ret_old)) {
-					return ret;
-				}
-				break;
-			case STANDARD:
-				fired = false;
-				for (int x = 0; x < tgds.size() + egds.size(); x++) {
-					int pos = (ruleNo + x) % (tgds.size() + egds.size());
-					if (pos < egds.size()) {
-						Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd = egds
-								.get(pos);
+				case CORE:
+					boolean fired = false;
+					for (Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd : tgds) {
+						ret = union(ret, chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
+						fired = !ret.equals(ret_old);
+					}
+					for (Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd : egds) {
 						ret = apply(ret, chaseEgd(ret_old, egd.first, egd.second, egd.third));
-					} else if (pos < tgds.size() + egds.size()) {
-						Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd = tgds
-								.get(pos - egds.size());
+						fired = !ret.equals(ret_old);
+					}
+					ret = minimize(keys, ret, tgds, egds);
+					if (!fired) {
+						return ret;
+					}
+					break;
+				case PARALLEL:
+					for (Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd : tgds) {
 						ret = union(ret, chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
 					}
-					if (!ret.equals(ret_old)) {
-						ruleNo++;
-						if (ruleNo == tgds.size() + egds.size()) {
-							ruleNo = 0;
-						}
-						fired = true;
-						break;
+					for (Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd : egds) {
+						ret = apply(ret, chaseEgd(ret_old, egd.first, egd.second, egd.third));
 					}
-				}
-				if (!fired) {
-					return ret;
-				}
-				break;
-			case HYBRID:
-				fired = false;
-
-				for (Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd : egds) {
-					ret = apply(ret, chaseEgd(ret_old, egd.first, egd.second, egd.third));
-					if (!ret.equals(ret_old)) {
-						fired = true;
-						break;
+					if (ret.equals(ret_old)) {
+						return ret;
 					}
-				}
-				if (fired == true) {
 					break;
-				}
-
-				for (int x = 0; x < tgds.size(); x++) {
-					int pos = (ruleNo + x) % (tgds.size());
-					Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd = tgds
-							.get(pos);
-					ret = union(ret, chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
-
-					if (!ret.equals(ret_old)) {
-						ruleNo++;
-						if (ruleNo == tgds.size()) {
-							ruleNo = 0;
+				case STANDARD:
+					fired = false;
+					for (int x = 0; x < tgds.size() + egds.size(); x++) {
+						int pos = (ruleNo + x) % (tgds.size() + egds.size());
+						if (pos < egds.size()) {
+							Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd = egds
+									.get(pos);
+							ret = apply(ret, chaseEgd(ret_old, egd.first, egd.second, egd.third));
+						} else if (pos < tgds.size() + egds.size()) {
+							Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd = tgds
+									.get(pos - egds.size());
+							ret = union(ret, chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
 						}
-						fired = true;
+						if (!ret.equals(ret_old)) {
+							ruleNo++;
+							if (ruleNo == tgds.size() + egds.size()) {
+								ruleNo = 0;
+							}
+							fired = true;
+							break;
+						}
+					}
+					if (!fired) {
+						return ret;
+					}
+					break;
+				case HYBRID:
+					fired = false;
+
+					for (Triple<List<String>, List<Triple<String, String, String>>, List<Pair<String, String>>> egd : egds) {
+						ret = apply(ret, chaseEgd(ret_old, egd.first, egd.second, egd.third));
+						if (!ret.equals(ret_old)) {
+							fired = true;
+							break;
+						}
+					}
+					if (fired) {
 						break;
 					}
-				}
 
-				if (!fired) {
-					return ret;
-				}
-			default:
-				break;
+					for (int x = 0; x < tgds.size(); x++) {
+						int pos = (ruleNo + x) % (tgds.size());
+						Triple<List<String>, List<Triple<String, String, String>>, List<Triple<String, String, String>>> tgd = tgds
+								.get(pos);
+						ret = union(ret, chaseTgd(ret_old, tgd.first, tgd.second, tgd.third));
+
+						if (!ret.equals(ret_old)) {
+							ruleNo++;
+							if (ruleNo == tgds.size()) {
+								ruleNo = 0;
+							}
+							fired = true;
+							break;
+						}
+					}
+
+					if (!fired) {
+						return ret;
+					}
+				default:
+					break;
 			}
 
 			if (i++ > Chase.chase_limit) {
@@ -392,7 +392,7 @@ public class Chase {
 
 	}
 
-	public static int chase_limit = 64;
+	private static final int chase_limit = 64;
 
 	private static Map<String, Set<Pair<Object, Object>>> minimize(
 			Set<String> keys,
@@ -528,7 +528,7 @@ public class Chase {
 		return ret;
 	}
 
-	public static <X> List<List<Pair<X, X>>> homomorphs(Collection<X> A, Collection<X> B) {
+	private static <X> List<List<Pair<X, X>>> homomorphs(Collection<X> A, Collection<X> B) {
 		List<List<Pair<X, X>>> ret = new LinkedList<>();
 
 		if (A.isEmpty()) {
@@ -542,7 +542,7 @@ public class Chase {
 		int[] counters = new int[A.size() + 1];
 
 		// int i = 0;
-		for (;;) {
+		while (true) {
 
 			if (counters[A.size()] == 1) {
 				break;
@@ -603,7 +603,7 @@ public class Chase {
 
 		List<Pair<Object, Object>> subst0 = new LinkedList<>(subst);
 
-		for (;;) {
+		while (true) {
 			if (subst0.isEmpty()) {
 				break;
 			}
@@ -654,7 +654,7 @@ public class Chase {
 		return ret;
 	}
 
-	static int fresh = 0;
+	private static int fresh = 0;
 
 	private static Map<String, Set<Pair<Object, Object>>> chaseTgd(
 			Map<String, Set<Pair<Object, Object>>> i, List<String> forall,
@@ -907,7 +907,7 @@ public class Chase {
 
 	}
 
-	public static <T> Set<Set<T>> pow(Set<T> originalSet) {
+	private static <T> Set<Set<T>> pow(Set<T> originalSet) {
 		Set<Set<T>> sets = new HashSet<>();
 		if (originalSet.isEmpty()) {
 			sets.add(new HashSet<>());

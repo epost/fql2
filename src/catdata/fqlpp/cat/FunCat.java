@@ -14,13 +14,15 @@ public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Tra
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Inst)) {
-			return false;
-		}
-		return ((Inst<?, ?>) o).cat.equals(cat);
+        return o instanceof Inst && ((Inst<?, ?>) o).cat.equals(cat);
+    }
+
+    @Override
+	public int hashCode() {
+		return 0;
 	}
 
-	private static Map map = new HashMap<>();
+	private static final Map map = new HashMap<>();
 	public static <O,A> FunCat<O,A> get(Category<O,A> cat) {
 		if (map.containsKey(cat)) {
 			return (FunCat<O, A>) map.get(cat);
@@ -125,13 +127,13 @@ public class FunCat<O, A> extends Category<Functor<O, A, Category, Functor>, Tra
 	
 	public Transform<O, A, Category, Functor> inleft(Functor<O, A, Category, Functor> o1, Functor<O, A, Category, Functor> o2) {
 		FUNCTION<O, Functor> f = o -> new Functor(o1.applyO(o), FinCat.coproduct(o1.applyO(o),
-				o2.applyO(o)), x -> Chc.inLeft(x), x -> Chc.inLeft(x));
+				o2.applyO(o)), Chc::inLeft, Chc::inLeft);
 		return new Transform(o1, coproduct(o1, o2), f);
 	}
 
 	public Transform<O, A, Category, Functor> inright(Functor<O, A, Category, Functor> o1, Functor<O, A, Category, Functor> o2) {
 		FUNCTION<O, Functor> f = o -> new Functor(o2.applyO(o), FinCat.coproduct(o1.applyO(o),
-				o2.applyO(o)), x -> Chc.inRight(x), x -> Chc.inRight(x));
+				o2.applyO(o)), Chc::inRight, Chc::inRight);
 		return new Transform(o2, coproduct(o1, o2), f);
 	}
 	

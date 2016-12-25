@@ -1,14 +1,6 @@
 package catdata.fql.sql;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import catdata.Pair;
 
@@ -21,7 +13,7 @@ import catdata.Pair;
 public class Flower extends SQL {
 
 	Map<String, Pair<String, String>> select;
-	Map<String, String> from;
+	private Map<String, String> from;
 	List<Pair<Pair<String, String>, Pair<String, String>>> where;
 
 	public Flower(LinkedHashMap<String, Pair<String, String>> select,
@@ -30,12 +22,12 @@ public class Flower extends SQL {
 		this.select = select;
 		this.from = from;
 		this.where = where;
-		if (from.size() == 0) {
+		if (from.isEmpty()) {
 			throw new RuntimeException("Empty flower " + this);
 		}
 	}
 
-	public Flower() {
+	Flower() {
 
 	}
 
@@ -61,7 +53,7 @@ public class Flower extends SQL {
 		}
 
 		String where0 = "";
-		if (where.size() > 0) {
+		if (!where.isEmpty()) {
 			where0 = "WHERE ";
 		}
 
@@ -92,9 +84,9 @@ public class Flower extends SQL {
 		Set<Map<Pair<Object, Object>, Object>> ret = new HashSet<>();
 		a: for (Map<Pair<Object, Object>, Object> row : tableau) {
 			for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
-				if (row.get(eq.first) != null & row.get(eq.second) != null) {
+				if (row.get(eq.first) != null && row.get(eq.second) != null) {
 					if (!row.get(eq.first).equals(row.get(eq.second))) {
-						if (row.get(eq.first).getClass() != row.get(eq.second).getClass() ) {
+						if (!Objects.equals(row.get(eq.first).getClass(), row.get(eq.second).getClass())) {
 							throw new RuntimeException();
 						}
 						continue a;
@@ -119,7 +111,7 @@ public class Flower extends SQL {
 		return ret;
 	}
 
-	int timesInWhere(String x) {
+	private int timesInWhere(String x) {
 		int count = 0;
 		
 		for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
@@ -135,7 +127,7 @@ public class Flower extends SQL {
 	}
 	
 	private Set<Map<Pair<Object, Object>, Object>> evalFrom(
-			final Map<String, Set<Map<Object, Object>>> state) {
+			Map<String, Set<Map<Object, Object>>> state) {
 		Set<Map<Pair<Object, Object>, Object>> ret = null; // ok
 
 		List<String> ordered = new LinkedList<>(from.keySet());
@@ -156,7 +148,7 @@ public class Flower extends SQL {
                         return 1;
                     }
                 };
-		Collections.sort(ordered, c); 
+		ordered.sort(c);
 		
 		
 		for (String k : ordered) {
@@ -198,7 +190,7 @@ public class Flower extends SQL {
 					row.put(s, row2.get(s));
 				}
 				for (Pair<Pair<String, String>, Pair<String, String>> eq : where) {
-				if (row.get(eq.first) != null & row.get(eq.second) != null) {
+				if (row.get(eq.first) != null && row.get(eq.second) != null) {
 					if (!row.get(eq.first).equals(row.get(eq.second))) {
 						continue a;
 					}

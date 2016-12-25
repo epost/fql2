@@ -74,18 +74,18 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 	}
 	
 	private final Map<KBExp<C,V>, KBExp<C,V>> cache = new HashMap<>();
-	
-	protected KBExp<C, V> red(KBExp<C, V> e) {
-		for (;;) {
-			KBExp<C, V> e0 = step(e);
-			if (e.equals(e0)) {
-				return e0;  
-			}
-			e = e0;
-		}
+
+	private KBExp<C, V> red(KBExp<C, V> e) {
+        while (true) {
+            KBExp<C, V> e0 = step(e);
+            if (e.equals(e0)) {
+                return e0;
+            }
+            e = e0;
+        }
 	}
 	
-	protected KBExp<C, V> step(KBExp<C, V> ee) {
+	private KBExp<C, V> step(KBExp<C, V> ee) {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new RuntimeInterruptedException(new InterruptedException());
 		}
@@ -102,7 +102,7 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 		} 
 	}
 	
-	protected KBExp<C, V> step1(KBExp<C, V> e0) {
+	private KBExp<C, V> step1(KBExp<C, V> e0) {
 		KBExp<C, V> e = e0;
 		if (cache != null && cache.containsKey(e)) {
 			return cache.get(e);
@@ -120,6 +120,9 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 				continue;
 			}
 			e = rhs.subst(s);
+		}
+		if (cache == null || e0 == null || e == null) {
+			throw new RuntimeException("Anomaly: please report");
 		}
 		cache.put(e0, e);
 

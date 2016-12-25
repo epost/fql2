@@ -20,7 +20,7 @@ public class OplTyTest2Example extends Example {
 		return s;
 	}
 	
-	String s = "S = theory { "
+	private final String s = "S = theory { "
 			+ "\n sorts"
 			+ "\n 	Person, Nat;"
 			+ "\n symbols"

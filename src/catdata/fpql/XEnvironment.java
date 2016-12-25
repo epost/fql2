@@ -8,14 +8,17 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import catdata.Pair;
+import catdata.fpql.XExp.XConst;
+import catdata.fpql.XExp.XEq;
+import catdata.fpql.XExp.XFn;
 import catdata.fpql.XExp.XTy;
 
 public class XEnvironment {
 
 	XCtx<String> global;
-	public XProgram prog;
-	public String str;
-	public Map<String, XObject> objs;
+	private final XProgram prog;
+	private final String str;
+	public final Map<String, XObject> objs;
 //	public Set<String> types;
 //	public Map<String, Pair<String, String>> fns;
 //	public Set<Pair<List<String>, List<String>>> eqs = new HashSet<>();
@@ -35,7 +38,6 @@ public class XEnvironment {
 		types.add("_1");
 		fns = new HashMap<>();
 		fns.put("_1", new Pair<>("_1", "_1"));
-		eqs = new HashSet<>();
 
 		for (Entry<String, XExp> k : prog.exps.entrySet()) {
 			XExp e = k.getValue();
@@ -47,24 +49,24 @@ public class XEnvironment {
 				fns.put(k.getKey(), new Pair<>(k.getKey(), k.getKey()));
 //				eqs.add(new Pair)
 			}
-			if (e instanceof XExp.XFn) {
-				if (!types.contains(((XExp.XFn) e).src)) {
-					throw new RuntimeException("Unknown type: " + ((XExp.XFn) e).src);
+			if (e instanceof XFn) {
+				if (!types.contains(((XFn) e).src)) {
+					throw new RuntimeException("Unknown type: " + ((XFn) e).src);
 				}
-				if (!types.contains(((XExp.XFn) e).dst)) {
-					throw new RuntimeException("Unknown type: " + ((XExp.XFn) e).dst);
+				if (!types.contains(((XFn) e).dst)) {
+					throw new RuntimeException("Unknown type: " + ((XFn) e).dst);
 				}
-				fns.put(k.getKey(), new Pair<>(((XExp.XFn) e).src, ((XExp.XFn) e).dst));
+				fns.put(k.getKey(), new Pair<>(((XFn) e).src, ((XFn) e).dst));
 			}
-			if (e instanceof XExp.XConst) {
-				if (!types.contains(((XExp.XConst) e).dst)) {
-					throw new RuntimeException("Unknown type: " + ((XExp.XConst) e).dst);
+			if (e instanceof XConst) {
+				if (!types.contains(((XConst) e).dst)) {
+					throw new RuntimeException("Unknown type: " + ((XConst) e).dst);
 				}
-				fns.put(k.getKey(), new Pair<>("_1", ((XExp.XConst) e).dst));
+				fns.put(k.getKey(), new Pair<>("_1", ((XConst) e).dst));
 			}
 			//: check these here?
-			if (e instanceof XExp.XEq) {
-				eqs.add(new Pair<>(((XExp.XEq) e).lhs, ((XExp.XEq) e).rhs));
+			if (e instanceof XEq) {
+				eqs.add(new Pair<>(((XEq) e).lhs, ((XEq) e).rhs));
 			}
 		}
 		

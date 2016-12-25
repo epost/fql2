@@ -20,7 +20,7 @@ public class TypedFoilExample extends Example {
 		return s;
 	}
 	
-	String s = 
+	private final String s =
 			"schema Begin = {"
 					+ "\n nodes a, b, c, d;"
 					+ "\n attributes"

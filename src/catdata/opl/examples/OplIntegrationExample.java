@@ -20,7 +20,7 @@ public class OplIntegrationExample extends Example {
 		return s;
 	}
 
-	String s = "//Example via Peter Gates"
+	private final String s = "//Example via Peter Gates"
 			+ "\n///////////////////////////////////////////////////////////////////////////"
 			+ "\n"
 			+ "\nType = theory {"

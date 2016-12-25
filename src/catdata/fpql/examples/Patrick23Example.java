@@ -18,10 +18,16 @@ public class Patrick23Example extends Example {
 
 	@Override
 	public String getText() {
-		return s + s2 + s3 + s4;
+		StringBuilder sb = new StringBuilder();
+		sb.append(s);
+		sb.append(s1x);
+		sb.append(s2);
+		sb.append(s3);
+		sb.append(s4);
+		return sb.toString();
 	}
 	
-	String s = "old : type"
+	private final String s = "old : type"
 			+ "\n"
 			+ "\nGlassCeramics: old"
 			+ "\nGlass: old"
@@ -192,8 +198,9 @@ public class Patrick23Example extends Example {
 			+ "\n\"H-13 Tool Steel\" : adom"
 			+ "\n\"Inserts Only\" : adom"
 			+ "\n\"Ferrous\" : adom"
-			+ "\n"
-			+ "\n/////////////////////////////////////////////////////////////////////////////////////////////////////////"
+			+ "\n";
+		private final String s1x =
+			"\n/////////////////////////////////////////////////////////////////////////////////////////////////////////"
 			+ "\n"
 			+ "\nisa_preschema = schema {"
 			+ "\n	nodes B;"
@@ -381,7 +388,7 @@ public class Patrick23Example extends Example {
 			+ "\n	v29.l= vMaterial, v29.r = vMaterial;"
 			+ "\n} : isa_schema"
 			+ "\n";
-        String s2 = 
+        private final String s2 =
 			 "isa_schema_small = schema {"
 			+ "\n	nodes A;"
 			+ "\n	edges l : A -> old, r : A -> old;"
@@ -855,7 +862,7 @@ public class Patrick23Example extends Example {
 			+ "\n"
 			+ "\n/////////////////////////////////////////////////////////////////////////////////////////"
 			+ "\n";
-        String s3 =
+        private final String s3 =
 			 "\nS = schema {"
 			+ "\n nodes"
 			+ "\n  unitcode,"
@@ -1882,7 +1889,7 @@ public class Patrick23Example extends Example {
 			+ "\n  v11.capability_Tolerance = \"NULL\";"
 			+ "\n} : S"
 			+ "\n";
-        String s4=
+        private final String s4=
 			 "\n///////////////////////////////////////////////////////////////////////////////////////"
 			+ "\n"
 			+ "\nmerged = schema {"

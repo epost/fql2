@@ -26,6 +26,7 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
+import catdata.fpql.XExp.Var;
 import org.codehaus.jparsec.error.ParserException;
 
 import catdata.LineException;
@@ -39,14 +40,14 @@ import catdata.ide.Language;
 
 public class EnrichViewer {
 
-	abstract class Example2 extends Example {
+	abstract static class Example2 extends Example {
 		public abstract String att();		
 		public abstract String left();		
 		public abstract String isa_inst();
 		public abstract String toenrich_inst();		
 	}
 	
-	class NistExample extends Example2 {
+	static class NistExample extends Example2 {
 
 		@Override
 		public Language lang() {
@@ -84,7 +85,7 @@ public class EnrichViewer {
 			return s;
 		}
 		
-		String s = "adom : type"
+		final String s = "adom : type"
 				+ "\n"
 				+ "\nS = schema {"
 				+ "\n nodes"
@@ -156,25 +157,25 @@ public class EnrichViewer {
 	
 	}
 	
-	protected Example2[] examples = { new PeopleExample(), new NistExample() };
+	private final Example2[] examples = {new PeopleExample(), new NistExample()};
 
-	String help = "Schema, then Is_a"; // "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
+	private final String help = "Schema, then Is_a"; // "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
 
 	protected static String kind() {
 		return "Enrich";
 	}
 
 	
-	final CodeTextPanel topArea = new CodeTextPanel(BorderFactory.createEtchedBorder(),
+	private final CodeTextPanel topArea = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 			"Input FQL", "//Schema, then isa");
 
-	public JTextField name = new JTextField("");
-	public JTextField kid= new JTextField("");
-	public JTextField instField= new JTextField("");
-	public JTextField isaField= new JTextField("");
+	private final JTextField name = new JTextField("");
+	private final JTextField kid= new JTextField("");
+	private final JTextField instField= new JTextField("");
+	private final JTextField isaField= new JTextField("");
 	
 	public EnrichViewer() {
-		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
+		CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"Output FQL", "");
 
 		// JButton jdbcButton = new JButton("Load using JDBC");
@@ -188,7 +189,7 @@ public class EnrichViewer {
 		// final JTextField field = new JTextField(8);
 		// field.setText("fql");
 
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
 		box.addActionListener(e -> {
 				topArea.setText(((Example) box.getSelectedItem()).getText());
@@ -293,9 +294,9 @@ public class EnrichViewer {
 				.getDefaultRootElement().getElement(line - 1)
 				.getStartOffset()
 				+ (col - 1));
-		String s = e.getMessage();
-		String t = s.substring(s.indexOf(" "));
-		t.split("\\s+");
+		//String s = e.getMessage();
+		//String t = s.substring(s.indexOf(" "));
+		//t.split("\\s+");
 		e.printStackTrace();
 		return "Syntax error: " + e.getLocalizedMessage();
 	} catch (Throwable e) {
@@ -307,10 +308,10 @@ public class EnrichViewer {
 		}
 
 		String isaX = null, matX = null;
-		XExp.XSchema isa = null, mat = null;
+		XSchema isa = null, mat = null;
 		for (String line : init.order) {
 			XExp exp = init.exps.get(line);
-			if (exp instanceof XExp.XSchema) {
+			if (exp instanceof XSchema) {
 				if (isaX == null) {
 					isaX = line;
 					isa = (XSchema) exp;
@@ -339,7 +340,7 @@ public class EnrichViewer {
 
 		XEnvironment env; 
 		try {
-			env = XDriver.makeEnv(program, init, new String[0]);
+			env = XDriver.makeEnv(program, init);
 		} catch (LineException e) {
 			String toDisplay = "Error in " + e.kind + " " + e.decl + ": "
 					+ e.getLocalizedMessage();
@@ -389,16 +390,16 @@ public class EnrichViewer {
 	private static XPoly<String, String> enrich(XCtx<String> S0, XSchema S, String s, String T, String mat, String name, 
 			 String a, /*String b,*/ String l, String r, String n) {
 		Map<Object, Pair<String, Block<String, String>>> blocks = new HashMap<>();
-		Map<String, Map<String, Triple<String, String, List<String>>>> vars1 = new HashMap<>();
+		//Map<String, Map<String, Triple<String, String, List<String>>>> vars1 = new HashMap<>();
 		Map<String, Map<Triple<String, String, List<String>>, String>> vars2 = new HashMap<>();
 		int i = 0;
 		for (String X : S.nodes) {
-			Map<String, Triple<String, String, List<String>>> m1 = new HashMap<>();
+			//Map<String, Triple<String, String, List<String>>> m1 = new HashMap<>();
 			Map<Triple<String, String, List<String>>, String> m2 = new HashMap<>();
-			vars1.put(X, m1);
+		//	vars1.put(X, m1);
 			vars2.put(X, m2);
 			for (Triple<String, String, List<String>> rp : S0.cat().hom(X, mat)) {
-				m1.put("v" + i, rp);
+				//m1.put("v" + i, rp);
 				m2.put(rp, "v" + i);
 				i++;
 			}
@@ -473,7 +474,7 @@ public class EnrichViewer {
 			blocks.put("q" + X, new Pair<>(X, block));
 		}
 
-		XPoly<String, String> poly = new XPoly<>(new XExp.Var(s), new XExp.Var(T), blocks);
+		XPoly<String, String> poly = new XPoly<>(new Var(s), new Var(T), blocks);
 		return poly;
 	}
 
@@ -565,7 +566,7 @@ public class EnrichViewer {
 			Block<String, String> block = new Block<>(from, where, attrs, edges);
 			blocks.put("q_" + node, new Pair<>(node, block));
 		}
-		return new XPoly<>(new XExp.Var(isa0), new XExp.Var(merged), blocks);
+		return new XPoly<>(new Var(isa0), new Var(merged), blocks);
 	}
 	
 	/* @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -576,7 +577,7 @@ public class EnrichViewer {
 		return null;
 	} */
 
-	class PeopleExample extends Example2 {
+	static class PeopleExample extends Example2 {
 
 		@Override
 		public Language lang() {
@@ -613,7 +614,7 @@ public class EnrichViewer {
 			return s;
 		}
 		
-		String s = "adom : type"
+		final String s = "adom : type"
 				+ "\n"
 				+ "\nWisnesky Spivak Chlipala Morrisett Malecha Gross Harvard MIT Math CS Stanford : adom"
 				+ "\n"

@@ -5,10 +5,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.It.ID;
 import catdata.aql.Query;
@@ -21,10 +21,10 @@ import catdata.aql.fdm.EvalAlgebra.Row;
 public class CoEvalEvalUnitTransform<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>  
 extends Transform<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Row<En2,ID>, Chc<Y, Pair<ID, Att1>>, X, Y, Row<En2,ID>, Chc<Y, Pair<ID, Att1>>> {
 	//TODO aql recomputes
-	public final Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q; 
-	public final Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> I;
-	public final CoEvalInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> J;
-	public final EvalInstance<Ty, En1, Sym, Fk1, Att1, Pair<Var, X>, Y, En2, Fk2, Att2, ID, Chc<Y, Pair<ID, Att1>>> K; //TODO aql recomputes
+	private final Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
+	private final Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> I;
+	private final CoEvalInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> J;
+	private final EvalInstance<Ty, En1, Sym, Fk1, Att1, Pair<Var, X>, Y, En2, Fk2, Att2, ID, Chc<Y, Pair<ID, Att1>>> K; //TODO aql recomputes
 	private final Ctx<Gen, Term<Void, En2, Void, Fk2, Void, Row<En2, ID>, Void>> gens = new Ctx<>();
 	private final Ctx<Sk, Term<Ty, En2, Sym, Fk2, Att2, Row<En2, ID>, Chc<Y, Pair<ID, Att1>>>> sks = new Ctx<>();
 	

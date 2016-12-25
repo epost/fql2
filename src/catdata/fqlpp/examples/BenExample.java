@@ -20,7 +20,7 @@ public class BenExample extends Example {
 		return s;
 	}
 	
-	String s = "/* "
+	private final String s = "/* "
 			+ "\nConsider the diagram shape A <-- O --> B in Cat, "
 			+ "\nwhere O is the terminal category (x), A and B are free arrows "
 			+ "\nA = (a0--->a1) and B = (b0-->b1), "

@@ -16,35 +16,29 @@ import catdata.Util;
 import catdata.ide.GlobalOptions;
 
 @SuppressWarnings("serial")
-public class LeftKan<O1, A1, O2, A2> implements Serializable {
+class LeftKan<O1, A1, O2, A2> implements Serializable {
 
-	private Signature<O1, A1> A;
-	private Signature<O2, A2> B;
-	public Mapping<O1, A1, O2, A2> F;
-	private Instance<O1, A1> X;
-	public int fresh;
+	private final Signature<O1, A1> A;
+	private final Signature<O2, A2> B;
+	public final Mapping<O1, A1, O2, A2> F;
+	private final Instance<O1, A1> X;
+	private int fresh;
 
 	private boolean gamma() {
 		boolean ret = false;
 
-		for (;;) {
-			Pair<Signature<O2, A2>.Node, Pair<Integer, Integer>> k = gamma0();
-			if (k == null) {
-				return ret;
-			}
-			ret = true;
-			gamma1(k.first, k.second);
-		}
+        while (true) {
+            Pair<Signature<O2, A2>.Node, Pair<Integer, Integer>> k = gamma0();
+            if (k == null) {
+                return ret;
+            }
+            ret = true;
+            gamma1(k.first, k.second);
+        }
 	}
 
 	private static void filter(Set<Pair<Integer, Integer>> set, Integer d) {
-		Iterator<Pair<Integer, Integer>> it = set.iterator();
-		while (it.hasNext()) {
-			Pair<Integer, Integer> p = it.next();
-			if (p.first.equals(d) || p.second.equals(d)) {
-				it.remove();
-			}
-		}
+        set.removeIf(p -> p.first.equals(d) || p.second.equals(d));
 	}
 
 	private void gamma1(Signature<O2, A2>.Node b1, Pair<Integer, Integer> xy) {
@@ -131,7 +125,7 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 
 	private Pair<Signature<O2, A2>.Node, Pair<Integer, Integer>> gamma0() {
 		for (Entry<Signature<O2, A2>.Node, Set<Pair<Integer, Integer>>> c : Sb.entrySet()) {
-			if (c.getValue().size() == 0) {
+			if (c.getValue().isEmpty()) {
 				continue;
 			}
 			for (Pair<Integer, Integer> p0 : c.getValue()) {
@@ -304,9 +298,9 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 		return ret;
 	}
 
-	void updateLineage(Signature<O2, A2>.Edge col, Object old, Object nw) {
+	private void updateLineage(Signature<O2, A2>.Edge col, Object old, Object nw) {
 		if (!lineage.containsKey(old)) {
-			lineage.put(old, new LinkedList<Pair<Signature<O2, A2>.Edge, Object>>());
+			lineage.put(old, new LinkedList<>());
 		}
 		List<Pair<Signature<O2, A2>.Edge, Object>> l = new LinkedList<>(lineage.get(old));
 	 //else {
@@ -315,8 +309,8 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 		lineage.put(nw, l);
 	}
 
-	private Instance<O2, A2> J;
-	private FPTransform<O1, A1> alpha;
+	private final Instance<O2, A2> J;
+	private final FPTransform<O1, A1> alpha;
 
 	//private int initFresh;
 	public LeftKan(int fresh, Mapping<O1, A1, O2, A2> f, Instance<O1, A1> x) {
@@ -335,14 +329,14 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 		this.alpha = alpha;
 
 		for (Signature<O2, A2>.Node n : B.nodes) {
-			Pb.put(n, new HashSet<Pair<Integer, Integer>>());
-			Sb.put(n, new HashSet<Pair<Integer, Integer>>());
+			Pb.put(n, new HashSet<>());
+			Sb.put(n, new HashSet<>());
 			if (alpha != null) {
-				utables.put(n, new HashMap<Integer, Object>());
+				utables.put(n, new HashMap<>());
 			}
 		}
 		for (Signature<O2, A2>.Edge e : B.edges) {
-			Pg.put(e, new HashSet<Pair<Integer, Integer>>());
+			Pg.put(e, new HashSet<>());
 		}
 		
 		for (Signature<O1, A1>.Node n : A.nodes) {
@@ -356,7 +350,7 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 				// rank.add(v);
 				j.add(new Pair<>(v, id));
 				i.add(new Pair<>(id, id));
-				updateLineage(null, new Pair<>(n, v), new Integer(id)); // v is
+				updateLineage(null, new Pair<>(n, v), id); // v is
 																		// not
 																		// globally
 																		// unique
@@ -447,11 +441,11 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 		return ret;
 	}
 
-	private Map<Signature<O2, A2>.Node, Set<Pair<Integer, Integer>>> Pb = new HashMap<>();
-	private Map<Signature<O2, A2>.Edge, Set<Pair<Integer, Integer>>> Pg = new HashMap<>();
-	private Map<Signature<O1, A1>.Node, Set<Pair<Object, Integer>>> ua = new HashMap<>();
-	private Map<Signature<O2, A2>.Node, Map<Integer, Object>> utables = new HashMap<>();
-	private Map<Object, List<Pair<Signature<O2, A2>.Edge, Object>>> lineage = new HashMap<>();
+	private final Map<Signature<O2, A2>.Node, Set<Pair<Integer, Integer>>> Pb = new HashMap<>();
+	private final Map<Signature<O2, A2>.Edge, Set<Pair<Integer, Integer>>> Pg = new HashMap<>();
+	private final Map<Signature<O1, A1>.Node, Set<Pair<Object, Integer>>> ua = new HashMap<>();
+	private final Map<Signature<O2, A2>.Node, Map<Integer, Object>> utables = new HashMap<>();
+	private final Map<Object, List<Pair<Signature<O2, A2>.Edge, Object>>> lineage = new HashMap<>();
 
 	public Map<Signature<O2, A2>.Node, Set<Pair<Object, Object>>> Pb2 = new HashMap<>();
 	public Map<Signature<O2, A2>.Edge, Set<Pair<Object, Object>>> Pg2 = new HashMap<>();
@@ -459,6 +453,6 @@ public class LeftKan<O1, A1, O2, A2> implements Serializable {
 	public Map<Signature<O2, A2>.Node, Map<Object, Object>> utables2 = new HashMap<>();
 	public Map<Object, List<Pair<Signature<O2, A2>.Edge, Object>>> lineage2 = new HashMap<>();
 
-	private Map<Signature<O2, A2>.Node, Set<Pair<Integer, Integer>>> Sb = new HashMap<>();
+	private final Map<Signature<O2, A2>.Node, Set<Pair<Integer, Integer>>> Sb = new HashMap<>();
 
 }

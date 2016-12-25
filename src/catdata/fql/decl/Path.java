@@ -99,12 +99,12 @@ public class Path  {
 
 		source = schema.getNode(strings.get(0).first.first);
 
-		for (int i = 0; i < strings.size(); i++) {
-			String string = strings.get(i).second;
-			Edge e = schema.getEdge(string);
-			path.add(e);
-			target = e.target;
-		}
+        for (Pair<Pair<String, String>, String> string1 : strings) {
+            String string = string1.second;
+            Edge e = schema.getEdge(string);
+            path.add(e);
+            target = e.target;
+        }
 
 	}
 
@@ -119,12 +119,12 @@ public class Path  {
 		source = node;
 
 		target = source;
-		for (int i = 0; i < strings.size(); i++) {
-			String string = strings.get(i).second;
-			Edge e = schema.getEdge(string);
-			path.add(e);
-			target = e.target;
-		}
+        for (Pair<Pair<String, String>, String> string1 : strings) {
+            String string = string1.second;
+            Edge e = schema.getEdge(string);
+            path.add(e);
+            target = e.target;
+        }
 	}
 
 	// private static List<String> convert(
@@ -141,7 +141,7 @@ public class Path  {
 			Tokens t = new FqlTokenizer(s);
 			PathParser pp = new PathParser();
 			Partial<List<String>> r = pp.parse(t);
-			if (r.tokens.toString().trim().length() != 0) {
+			if (!r.tokens.toString().trim().isEmpty()) {
 				throw new FQLException("Invalid path: " + s);
 			}
 			return new Path(a, r.value);
@@ -192,7 +192,7 @@ public class Path  {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer(source.string);
+		StringBuilder sb = new StringBuilder(source.string);
 		for (Edge e : path) {
 			sb.append(".");
 			sb.append(e.name);
@@ -201,7 +201,7 @@ public class Path  {
 	}
 	
 	public String toStringShort() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int i = 0;
 		for (Edge e : path) {
 			if (i++ > 0) {
@@ -214,7 +214,7 @@ public class Path  {
 
 	@Override
 	public int hashCode() {
-		 final int prime = 31;
+		 int prime = 31;
 		int result = 1;
 		result = prime * result + ((path == null) ? 0 : path.hashCode());
 		result = prime * result + ((source == null) ? 0 : source.hashCode());
@@ -223,8 +223,8 @@ public class Path  {
 	}
 
 	@Override
-	/**
-	 * Syntactic equality of paths
+	/*
+	  Syntactic equality of paths
 	 */
 	public boolean equals(Object obj) {
 		if (this == obj)

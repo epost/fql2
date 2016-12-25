@@ -26,10 +26,10 @@ import javax.swing.plaf.basic.BasicButtonUI;
  * a JButton to close the tab it belongs to
  */
 @SuppressWarnings("serial")
-public class ButtonTabComponent extends JPanel {
+class ButtonTabComponent extends JPanel {
 	private final JTabbedPane pane;
 
-	public ButtonTabComponent(final JTabbedPane pane) {
+	public ButtonTabComponent(JTabbedPane pane) {
 		// unset default FlowLayout' gaps
 		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		if (pane == null) {
@@ -122,7 +122,7 @@ public class ButtonTabComponent extends JPanel {
 		}
 	}
 
-	private final static MouseListener buttonMouseListener = new MouseAdapter() {
+	private static final MouseListener buttonMouseListener = new MouseAdapter() {
 		@Override
 		public void mouseEntered(MouseEvent e) {
 			Component component = e.getComponent();

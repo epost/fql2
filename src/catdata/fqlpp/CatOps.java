@@ -1,12 +1,7 @@
 package catdata.fqlpp;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import catdata.Chc;
 import catdata.Pair;
@@ -56,6 +51,7 @@ import catdata.fqlpp.TransExp.ApplyPath;
 import catdata.fqlpp.TransExp.ApplyTrans;
 import catdata.fqlpp.TransExp.Bool;
 import catdata.fqlpp.TransExp.Chr;
+import catdata.fqlpp.TransExp.CoProd;
 import catdata.fqlpp.TransExp.Inj;
 import catdata.fqlpp.TransExp.Ker;
 import catdata.fqlpp.TransExp.PeterApply;
@@ -139,7 +135,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	}
 
 	@Override
-	public Category visit(FQLPPProgram env, catdata.fqlpp.CatExp.Var e) {
+	public Category visit(FQLPPProgram env, CatExp.Var e) {
 		Category<?, ?> x = ENV.cats.get(e.v);
 		if (x == null) {
 			throw new RuntimeException("Missing category: " + e);
@@ -148,7 +144,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	}
 
 	@Override
-	public Category visit(FQLPPProgram env, catdata.fqlpp.CatExp.Const e) {
+	public Category visit(FQLPPProgram env, Const e) {
 		Signature<String, String> s = new Signature<>(e.nodes, e.arrows, e.eqs);
 		//		s.KB();
 		return s.toCat();
@@ -197,7 +193,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		return c;
 	}
 
-	public Pair<Category, Instance<String,String>> toInstance(FQLPPProgram env, InstConst ic) {
+	private Pair<Category, Instance<String,String>> toInstance(FQLPPProgram env, InstConst ic) {
 		CatExp e = resolve(env, ic.sig);
 		if (!(e instanceof Const)) {
 			throw new RuntimeException(
@@ -241,7 +237,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 					}
 					uuu.put(oo.first, oo.second);
 				}
-				FnExp kkk = new FnExp.Const(x -> uuu.get(x), ic.nm.get(n.source.name),
+				FnExp kkk = new FnExp.Const(uuu::get, ic.nm.get(n.source.name),
 						ic.nm.get(n.target.name));
 				em.put(n, kkk.accept(env, new SetOps(ENV)).toMap());
 			}
@@ -371,7 +367,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			return fn;
 		};
 
-		return new Functor(cat, FinCat.FinCat, x -> nm.get(x), fff);
+		return new Functor(cat, FinCat.FinCat, nm::get, fff);
 	}
 
 	@Override
@@ -416,7 +412,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			return fn;
 		};
 
-		return new Functor(cat, target, x -> nm.get(x), fff);
+		return new Functor(cat, target, nm::get, fff);
 	}
 
 	@Override
@@ -542,11 +538,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		if (!k.isPresent()) {
 			throw new RuntimeException("Not isomorphic: " + e.l + " and " + e.r);
 		}
-		if (e.lToR) {
-			return k.get().first;
-		} else {
-			return k.get().second;
-		}
+		return e.lToR ? k.get().first : k.get().second;
 	}
 
 	@Override
@@ -589,20 +581,20 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	}
 
 	@Override
-	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.Id e) {
+	public Transform visit(FQLPPProgram env, TransExp.Id e) {
 		Functor ff = e.t.accept(env, this);
 		return Transform.id(ff);
 	}
 
 	@Override
-	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.Comp e) {
+	public Transform visit(FQLPPProgram env, TransExp.Comp e) {
 		Transform l = e.l.accept(env, this);
 		Transform r = e.r.accept(env, this);
 		return Transform.compose(l, r);
 	}
 
 	@Override
-	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.Var e) {
+	public Transform visit(FQLPPProgram env, TransExp.Var e) {
 		Transform<?, ?, ?, ?> x = ENV.trans.get(e.v);
 		if (x == null) {
 			throw new RuntimeException("Missing transform: " + e);
@@ -630,15 +622,15 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		Functor s = e.src.accept(env, this);
 		Functor t = e.dst.accept(env, this);
 		CatExp scat = resolve(env, e.s);
-		if (!(scat instanceof CatExp.Const)) {
+		if (!(scat instanceof Const)) {
 			throw new RuntimeException("Source category of " + e + " is not a constant.");
 		}
 		// CatExp.Const scon = (CatExp.Const) scat;
 		CatExp tcat = resolve(env, e.t);
-		if (!(tcat instanceof CatExp.Const)) {
+		if (!(tcat instanceof Const)) {
 			throw new RuntimeException("Target category of " + e + " is not a constant.");
 		}
-		CatExp.Const tcon = (CatExp.Const) tcat;
+		Const tcon = (Const) tcat;
 
 		// Signature ssig = new Signature(scon.nodes, scon.arrows, scon.eqs);
 		Signature<String, String> tsig = new Signature<>(tcon.nodes, tcon.arrows,
@@ -679,7 +671,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 					}
 					map.put(h.first, h.second);
 				}
-				return new Fn(src, dst, q -> map.get(q));
+				return new Fn(src, dst, map::get);
 			}
 		};
 
@@ -722,15 +714,15 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	public Category visit(FQLPPProgram env, Kleisli e) {
 		FunctorExp f0 = env.ftrs.get(e.F);
 		if (f0 == null) {
-			throw new RuntimeException("Missing functor: " + f0);
+			throw new RuntimeException("Missing functor: " + e.F);
 		}
 		TransExp ret0 = env.trans.get(e.unit);
 		if (ret0 == null) {
-			throw new RuntimeException("Missing transform: " + ret0);
+			throw new RuntimeException("Missing transform: " + e.unit);
 		}
 		TransExp join0 = env.trans.get(e.join);
 		if (join0 == null) {
-			throw new RuntimeException("Missing transform: " + join0);
+			throw new RuntimeException("Missing transform: " + e.join);
 		}
 
 		Functor F = f0.accept(env, this);
@@ -756,24 +748,16 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			throw new RuntimeException("Target category does not match");
 		}
 		if (l.target.equals(FinSet.FinSet)) {
-			if (e.proj1) {
-				return Inst.get(l.source).first(l, r);
-			} else {
-				return Inst.get(l.source).second(l, r);
-			}
+			return e.proj1 ? Inst.get(l.source).first(l, r) : Inst.get(l.source).second(l, r);
 		} else if (l.target.equals(FinCat.FinCat)) {
-			if (e.proj1) {
-				return FunCat.get(l.source).first(l, r);
-			} else {
-				return FunCat.get(l.source).second(l, r);
-			}
+			return e.proj1 ? FunCat.get(l.source).first(l, r) : FunCat.get(l.source).second(l, r);
 		} else {
 			throw new RuntimeException("report this error to ryan");
 		}
 	}
 
 	@Override
-	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.Prod e) {
+	public Transform visit(FQLPPProgram env, TransExp.Prod e) {
 		Transform l = e.l.accept(env, this);
 		Transform r = e.r.accept(env, this);
 		if (!l.source.equals(r.source)) {
@@ -792,7 +776,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	}
 
 	@Override
-	public Functor visit(FQLPPProgram env, catdata.fqlpp.FunctorExp.One e) {
+	public Functor visit(FQLPPProgram env, FunctorExp.One e) {
 		Category<?, ?> cat = e.cat.accept(env, this);
 		Category<?, ?> amb = e.ambient.accept(env, this);
 		if (amb.equals(FinSet.FinSet)) {
@@ -806,7 +790,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	}
 
 	@Override
-	public Functor visit(FQLPPProgram env, catdata.fqlpp.FunctorExp.Zero e) {
+	public Functor visit(FQLPPProgram env, FunctorExp.Zero e) {
 		Category<?, ?> cat = e.cat.accept(env, this);
 		Category<?, ?> amb = e.ambient.accept(env, this);
 		if (amb.equals(FinSet.FinSet)) {
@@ -820,7 +804,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	}
 
 	@Override
-	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.One e) {
+	public Transform visit(FQLPPProgram env, TransExp.One e) {
 		Functor F = e.f.accept(env, this);
 		if (F.target.equals(FinSet.FinSet)) {
 			return Inst.get(F.source).terminal(F);
@@ -832,7 +816,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	}
 
 	@Override
-	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.Zero e) {
+	public Transform visit(FQLPPProgram env, TransExp.Zero e) {
 		Functor F = e.f.accept(env, this);
 		if (F.target.equals(FinSet.FinSet)) {
 			return Inst.get(F.source).initial(F);
@@ -851,24 +835,16 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			throw new RuntimeException("Source category does not match");
 		}
 		if (l.target.equals(FinSet.FinSet)) {
-			if (e.inj1) {
-				return Inst.get(l.source).inleft(l, r);
-			} else {
-				return Inst.get(l.source).inright(l, r);
-			}
+			return e.inj1 ? Inst.get(l.source).inleft(l, r) : Inst.get(l.source).inright(l, r);
 		} else if (l.target.equals(FinCat.FinCat)) {
-			if (e.inj1) {
-				return FunCat.get(l.source).inleft(l, r);
-			} else {
-				return FunCat.get(l.source).inright(l, r);
-			}
+			return e.inj1 ? FunCat.get(l.source).inleft(l, r) : FunCat.get(l.source).inright(l, r);
 		} else {
 			throw new RuntimeException("Cannot inject: " + e + " to get a transform.");
 		}
 	}
 
 	@Override
-	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.CoProd e) {
+	public Transform visit(FQLPPProgram env, CoProd e) {
 		Transform l = e.l.accept(env, this);
 		Transform r = e.r.accept(env, this);
 		if (!l.target.equals(r.target)) {
@@ -898,12 +874,15 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	@Override
 	public Functor visit(FQLPPProgram env, Migrate e) {
 		Functor F = e.F.accept(env, this);
-		if (e.which.equals("delta")) {
-			return FDM.deltaF(F);
-		} else if (e.which.equals("sigma")) {
-			return FDM.sigmaF(F);
-		} else if (e.which.equals("pi")) {
-			return FDM.piF(F);
+		switch (e.which) {
+			case "delta":
+				return FDM.deltaF(F);
+			case "sigma":
+				return FDM.sigmaF(F);
+			case "pi":
+				return FDM.piF(F);
+			default:
+				break;
 		}
 		throw new RuntimeException("Report this error to Ryan.");
 	}
@@ -927,8 +906,8 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		}
 		
 		try {
-			FunctorExp.Var I = (FunctorExp.Var) e.I;
-			Signature.Node n = F.source.toSig().new Node(I.v);
+			Var I = (Var) e.I;
+			Node n = F.source.toSig().new Node(I.v);
 			ret2 = (Functor) F.applyO(n);
 		} catch (Exception ex) {
 			ret2_e = ex;
@@ -944,15 +923,19 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		if (ret2 != null) {
 			return ret2;
 		}
-		
-		ret1_e.printStackTrace(); // TODO !!!
-		ret2_e.printStackTrace();
-		throw new RuntimeException("Cannot apply:\n\nmost probable cause: " + ret1_e.getMessage() + "\n\nless probable cause: " + ret2_e.getMessage());
-	}
+
+		if (ret1_e != null) {
+			ret1_e.printStackTrace(); // TODO !!!
+		}
+		if (ret2_e != null) {
+			ret2_e.printStackTrace();
+		}
+		throw new RuntimeException("Cannot apply:\n\nmost probable cause: " + ret1_e + "\n\nless probable cause: " + ret2_e);
+}
 
 
 	@Override
-	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.Apply e) {
+	public Transform visit(FQLPPProgram env, TransExp.Apply e) {
 		Functor F = e.F.accept(env, this);
 		Transform I = e.I.accept(env, this);
 		return (Transform) F.applyA(I);
@@ -962,12 +945,12 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	public Transform visit(FQLPPProgram env, ApplyPath e) {
 		Functor F = e.F.accept(env, this);
 		CatExp c = resolve(env, e.cat);
-		if (!(c instanceof CatExp.Const)) {
+		if (!(c instanceof Const)) {
 			throw new RuntimeException("Can only take paths in constant categories.");
 		}
-		CatExp.Const C = (CatExp.Const) c;
+		Const C = (Const) c;
 		Signature s = new Signature(C.nodes, C.arrows, C.eqs);
-		Signature.Path n = s.path(e.node, e.edges);
+		Path n = s.path(e.node, e.edges);
 		return (Transform) F.applyA(n);
 	}
 
@@ -988,7 +971,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	}
 
 	@Override
-	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.Iso e) {
+	public Transform visit(FQLPPProgram env, TransExp.Iso e) {
 		Functor l = e.l.accept(env, this);
 		Functor r = e.r.accept(env, this);
 		if (!l.source.equals(r.source)) {
@@ -1004,11 +987,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		if (!k.isPresent()) {
 			throw new RuntimeException("Not isomorphic: " + e.l + " and " + e.r);
 		}
-		if (e.lToR) {
-			return k.get().first;
-		} else {
-			return k.get().second;
-		}
+		return e.lToR ? k.get().first : k.get().second;
 	}
 
 	@Override
@@ -1019,20 +998,16 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	}
 
 	@Override
-	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.Curry e) {
+	public Transform visit(FQLPPProgram env, TransExp.Curry e) {
 		Transform t = e.f.accept(env, this);
 		if (t.source.source.isInfinite() || !t.source.target.equals(FinSet.FinSet)) {
 			throw new RuntimeException("Cannot curry " + t);
 		}
-		if (e.useInst) {
-			return Inst.get(t.source.source).curry(t);
-		} else {
-			return Inst.CURRY(t);
-		}
+		return e.useInst ? Inst.get(t.source.source).curry(t) : Inst.CURRY(t);
 	}
 
 	@Override
-	public Transform visit(FQLPPProgram env, catdata.fqlpp.TransExp.Eval e) {
+	public Transform visit(FQLPPProgram env, TransExp.Eval e) {
 		Functor a = e.a.accept(env, this);
 		Functor b = e.b.accept(env, this);
 		if (!a.source.equals(b.source) || a.source.isInfinite() || !a.target.equals(FinSet.FinSet)) {
@@ -1045,12 +1020,8 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	public Transform visit(FQLPPProgram env, Whisker e) {
 		Functor F  = e.func .accept(env, this);
 		Transform T=e.trans.accept(env, this);
-		
-		if (e.left) {
-			return Transform.leftWhisker(F, T);
-		} else {
-			return Transform.rightWhisker(F, T);
-		}
+
+		return e.left ? Transform.leftWhisker(F, T) : Transform.rightWhisker(F, T);
 	}
 
 	@Override
@@ -1062,11 +1033,7 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	@Override
 	public Transform visit(FQLPPProgram env, Bool e) {
 		Category c = e.cat.accept(env, this);
-		if (e.b) {
-			return Inst.get(c).tru();
-		} else {
-			return Inst.get(c).fals();
-		}
+		return e.b ? Inst.get(c).tru() : Inst.get(c).fals();
 	}
 
 	@Override
@@ -1082,40 +1049,28 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 	}
 
 	@Override
-	public Functor visit(FQLPPProgram env, catdata.fqlpp.FunctorExp.Dom e) {
+	public Functor visit(FQLPPProgram env, FunctorExp.Dom e) {
 		Transform t = new TransExp.Var(e.t).accept(env, this);
-		if (e.dom) {
-			return t.source;
-		} else {
-			return t.target;
-		}
+		return e.dom ? t.source : t.target;
 	}
 
 	@Override
 	public Transform visit(FQLPPProgram env, AndOrNotImplies e) {
 		Category c = e.cat.accept(env, this);
-		if (e.which.equals("not")) {
-			return Inst.get(c).not();
-		} else {
-			return Inst.get(c).andOrImplies(e.which);
-		}
+		return e.which.equals("not") ? Inst.get(c).not() : Inst.get(c).andOrImplies(e.which);
 	}
 
 	@Override
 	public Transform visit(FQLPPProgram env, PeterApply e) {
 		Transform t = e.t.accept(env, this);
-		Signature.Node n = t.source.source.toSig().new Node(e.node);
+		Node n = t.source.source.toSig().new Node(e.node);
 		return (Transform) t.apply(n);
 	}
 
 	@Override
 	public Functor visit(FQLPPProgram env, Pivot e) {
 		Functor F = e.F.accept(env, this);
-		if (e.pivot) {
-			return Groth.pivot(F);
-		} else {
-			return Groth.unpivot(F);
-		}
+		return e.pivot ? Groth.pivot(F) : Groth.unpivot(F);
 	}
 
 	@Override
@@ -1175,14 +1130,15 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		
 		
 		FUNCTION<Pair<Object,String>,Set> o = p -> {
-			if (p.second.equals("A")) {
-				return (Set) l.source.applyO(p.first);
-			} else if (p.second.equals("B")) {
-				return (Set) l.target.applyO(p.first);
-			} else if (p.second.equals("C")) {
-				return (Set) r.target.applyO(p.first);
-			} else {
-				throw new RuntimeException();
+			switch (p.second) {
+				case "A":
+					return (Set) l.source.applyO(p.first);
+				case "B":
+					return (Set) l.target.applyO(p.first);
+				case "C":
+					return (Set) r.target.applyO(p.first);
+				default:
+					throw new RuntimeException();
 			}
 		};
 		FUNCTION<Pair<Object,String>,Fn> x = fp -> {
@@ -1193,10 +1149,10 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 			//String i = span.source(p);
 			String j = span.target(p);
 		//	Functor I = i == "A" ? l.source : i == "B" ? l.target : r.target;
-			Functor J = j == "A" ? l.source : j == "B" ? l.target : r.target;
+			Functor J = Objects.equals(j, "A") ? l.source : Objects.equals(j, "B") ? l.target : r.target;
 			//Fn If = (Fn) I.applyA(f);
 			Fn Jf = (Fn) J.applyA(f);
-			Transform P = p == "f" ? l : p == "g" ? r : p == "a" ? Transform.id(l.source) : p == "b" ? Transform.id(l.target) : Transform.id(r.target);
+			Transform P = Objects.equals(p, "f") ? l : Objects.equals(p, "g") ? r : Objects.equals(p, "a") ? Transform.id(l.source) : Objects.equals(p, "b") ? Transform.id(l.target) : Transform.id(r.target);
 			//Fn Pb = (Fn) P.apply(b);
 			Fn Pa = (Fn) P.apply(a);
 			return Fn.compose(Pa, Jf);

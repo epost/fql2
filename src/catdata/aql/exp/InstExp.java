@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.It.ID;
 import catdata.aql.Mapping;
@@ -54,7 +54,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -114,7 +114,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -191,7 +191,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((edges == null) ? 0 : edges.hashCode());
 			result = prime * result + ((nodes == null) ? 0 : nodes.hashCode());
@@ -355,7 +355,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((J == null) ? 0 : J.hashCode());
 			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
@@ -413,7 +413,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
@@ -494,7 +494,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -574,7 +574,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -653,9 +653,9 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+			result = prime * result + (schema.hashCode());
 			return result;
 		}
 
@@ -668,12 +668,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			if (getClass() != obj.getClass())
 				return false;
 			InstExpEmpty<?,?,?,?,?> other = (InstExpEmpty<?,?,?,?,?>) obj;
-			if (schema == null) {
-				if (other.schema != null)
-					return false;
-			} else if (!schema.equals(other.schema))
-				return false;
-			return true;
+			return schema.equals(other.schema);
 		}
 
 		@Override
@@ -721,9 +716,9 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((var == null) ? 0 : var.hashCode());
+			result = prime * result + (var.hashCode());
 			return result;
 		}
 
@@ -736,12 +731,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			if (getClass() != obj.getClass())
 				return false;
 			InstExpVar other = (InstExpVar) obj;
-			if (var == null) {
-				if (other.var != null)
-					return false;
-			} else if (!var.equals(other.var))
-				return false;
-			return true;
+			return var.equals(other.var);
 		}
 
 		@Override
@@ -788,9 +778,9 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
+			result = prime * result + (inst.hashCode());
 			return result;
 		}
 
@@ -803,12 +793,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			if (getClass() != obj.getClass())
 				return false;
 			InstExpLit<?,?,?,?,?,?,?,?,?> other = (InstExpLit<?,?,?,?,?,?,?,?,?>) obj;
-			if (inst == null) {
-				if (other.inst != null)
-					return false;
-			} else if (!inst.equals(other.inst))
-				return false;
-			return true;
+			return inst.equals(other.inst);
 		}
 
 		@Override
@@ -854,7 +839,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			return result;

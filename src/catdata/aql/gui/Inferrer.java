@@ -13,7 +13,7 @@ import catdata.aql.Schema;
 import catdata.aql.exp.AqlParser;
 import catdata.aql.exp.Kind;
 
-public class Inferrer {
+class Inferrer {
 
 	@SuppressWarnings("unchecked")
 	public static void infer(AqlCodeEditor editor, Kind k) { 

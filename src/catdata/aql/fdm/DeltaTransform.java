@@ -2,9 +2,9 @@ package catdata.aql.fdm;
 
 import java.util.function.Function;
 
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.Mapping;
 import catdata.aql.Term;
@@ -13,11 +13,13 @@ import catdata.aql.Transform;
 public class DeltaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2>
 extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<En1, X1>, Y1, Pair<En1, X2>, Y2, Pair<En1, X1>, Y1, Pair<En1, X2>, Y2> {
 
-	public final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
-	public final Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
+	@SuppressWarnings("unused")
+	private final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
+	@SuppressWarnings("unused")
+	private final Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
 	
-	public final DeltaInstance<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, X1, Y1> src; 
-	public final DeltaInstance<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, En2, Fk2, Att2, X2, Y2> dst; 
+	private final DeltaInstance<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, X1, Y1> src;
+	private final DeltaInstance<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, En2, Fk2, Att2, X2, Y2> dst;
 
 	private final Ctx<Pair<En1, X1>, Term<Void, En1, Void, Fk1, Void, Pair<En1, X2>, Void>> gens = new Ctx<>();
 	private final Ctx<Y1, Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, X2>, Y2>> sks = new Ctx<>();
@@ -26,7 +28,7 @@ extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<En1, X1>, Y1, Pair<En1, X2>, Y2,
 		if (!h.src().schema().equals(f.dst)) {
 			throw new RuntimeException("Target of mapping is " + f.dst + " but instances are on " + h.src().schema());
 		}
-		this.F = f;
+        F = f;
 		this.h = h;
 		src = new DeltaInstance<>(f, h.src());
 		dst = new DeltaInstance<>(f, h.dst());

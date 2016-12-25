@@ -26,8 +26,8 @@ public class LeftKanCat {
 			obm.add(new Pair<>(n.string, n.string));
 		}
 		return new Mapping(true, a, b, obm,
-				new LinkedList<Pair<String, String>>(),
-				new LinkedList<Pair<String, List<String>>>());
+                new LinkedList<>(),
+                new LinkedList<>());
 	}
 
 	public static Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory(
@@ -52,9 +52,9 @@ public class LeftKanCat {
 		Set<Arr<Node, Path>> arrows = new HashSet<>();
 		Map<Node, Arr<Node, Path>> identities = new HashMap<>();
 
-		final Fn<Path, Integer> fn = makeFn(lk);
+		Fn<Path, Integer> fn = makeFn(lk);
 		List<Path> paths = new LinkedList<>();
-		final Map<Integer, Path> fn2 = new HashMap<>();
+		Map<Integer, Path> fn2 = new HashMap<>();
 
 		int numarrs = numarrs(lk);
 		for (Node n : B.nodes) {
@@ -63,9 +63,7 @@ public class LeftKanCat {
 		outer: for (int iter = 0; iter < GlobalOptions.debug.fql.MAX_PATH_LENGTH; iter++) {
 			for (Path p : paths) {
 				Integer i = fn.of(p);
-				if (fn2.get(i) == null) {
-					fn2.put(i, p);
-				}
+				fn2.putIfAbsent(i, p);
 				if (fn2.size() == numarrs) {
 					break outer;
 				}
@@ -150,7 +148,7 @@ public class LeftKanCat {
 		throw new RuntimeException();
 	} 
 	
-	private static Fn<Path, Integer> makeFn(final LeftKan lk) {
+	private static Fn<Path, Integer> makeFn(LeftKan lk) {
 		return (Path p) -> {
                     Set<Pair<Object, Integer>> set = Instance.compose(lk.ua.get(p.source), lk.eval(p));
                     return getOne(set).second;

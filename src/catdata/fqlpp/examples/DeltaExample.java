@@ -20,7 +20,7 @@ public class DeltaExample extends Example {
 		return s;
 	}
 	
-	String s = "category C = {"
+	private final String s = "category C = {"
 			+ "\n objects "
 			+ "\n	T1, T2, string, int;"
 			+ "\n arrows"

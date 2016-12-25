@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.function.Function;
 
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.DP;
 import catdata.aql.Instance;
 import catdata.aql.Schema;
@@ -53,11 +53,12 @@ public class TerminalInstance<Ty, En, Sym, Fk, Att> extends Instance<Ty, En, Sym
 		return new EmptyAlgebra();
 	}
 	
+	@SuppressWarnings("ConstantConditions")
 	private class EmptyAlgebra extends Algebra<Ty, En, Sym, Fk, Att, Void, Void, Void, Void>  {
 
 		@Override
 		public String printX(Void x) {
-			return Util.abort(x);
+			return  Util.abort(x);
 		}
 
 		@Override

@@ -2,7 +2,6 @@ package catdata.graph;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -32,7 +31,7 @@ public final class DAG<N> {
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((fMap == null) ? 0 : fMap.hashCode());
 			return result;
@@ -76,11 +75,7 @@ public final class DAG<N> {
 		 * @param val the value
 		 */
 		public void put(K key, V val) {
-			Set<V> values = fMap.get(key);
-			if (values == null) {
-				values = new LinkedHashSet<>();
-				fMap.put(key, values);
-			}
+			Set<V> values = fMap.computeIfAbsent(key, k -> new LinkedHashSet<>());
 			if (val != null) {
 				values.add(val);
 			}
@@ -181,14 +176,14 @@ public final class DAG<N> {
 	 *
 	 * @param vertex the vertex to remove
 	 */
-	public void removeVertex(N vertex) {
+    void removeVertex(N vertex) {
 		Set<N> targets = fOut.removeAll(vertex);
-		for (Iterator<N> it = targets.iterator(); it.hasNext();) {
-			fIn.remove(it.next(), vertex);
+		for (N target : targets) {
+			fIn.remove(target, vertex);
 		}
 		Set<N> origins = fIn.removeAll(vertex);
-		for (Iterator<N> it = origins.iterator(); it.hasNext();) {
-			fOut.remove(it.next(), vertex);
+		for (N origin : origins) {
+			fOut.remove(origin, vertex);
 		}
 	}
 
@@ -198,7 +193,7 @@ public final class DAG<N> {
 	 * 
 	 * @return the sources of the receiver
 	 */
-	public Set<N> getSources() {
+    Set<N> getSources() {
 		return computeZeroEdgeVertices(fIn);
 	}
 
@@ -239,8 +234,8 @@ public final class DAG<N> {
 		}
 
 		Set<N> children = fOut.get(start);
-		for (Iterator<N> it= children.iterator(); it.hasNext();) {
-			if (hasPath(it.next(), end)){
+		for (N aChildren : children) {
+			if (hasPath(aChildren, end)) {
 				return true;
 			}
 		}
@@ -249,15 +244,15 @@ public final class DAG<N> {
 	
 	@Override
 	public String toString() {
-		return "Out edges: " + fOut.toString(); // + " In edges: " + fIn.toString(); 
+		return "Out edges: " + fOut; // + " In edges: " + fIn.toString();
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
-		result = prime * result + ((fIn == null) ? 0 : fIn.hashCode());
-		result = prime * result + ((fOut == null) ? 0 : fOut.hashCode());
+		result = prime * result + (fIn.hashCode());
+		result = prime * result + (fOut.hashCode());
 		return result;
 	}
 
@@ -296,7 +291,7 @@ public final class DAG<N> {
 		fIn= new MultiMap<>();
 	}
 	
-	public DAG(DAG<N> g) {
+	private DAG(DAG<N> g) {
 		fIn = new MultiMap<>(g.fIn);
 		fOut = new MultiMap<>(g.fOut);
 	}

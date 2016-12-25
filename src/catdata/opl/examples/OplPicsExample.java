@@ -20,7 +20,7 @@ public class OplPicsExample extends Example {
 		return s;
 	}
 	
-	String s = "S0 = theory { "
+	private final String s = "S0 = theory { "
 			+ "\n sorts"
 			+ "\n 	Person, Image, String;"
 			+ "\n symbols"

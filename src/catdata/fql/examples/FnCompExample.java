@@ -20,7 +20,7 @@ public class FnCompExample extends Example {
 		return s;
 	}
 
-	String s = "/* Here we show that all three data migration functors (delta, pi, SIGMA) "
+	private final String s = "/* Here we show that all three data migration functors (delta, pi, SIGMA) "
 			+ "\n * can be used to compute composition of functions."
 			+ "\n * It's good to TURN OBSERVABLES ON."
 			+ "\n  */"

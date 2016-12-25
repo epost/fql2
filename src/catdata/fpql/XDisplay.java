@@ -104,25 +104,25 @@ public class XDisplay implements Disp {
 		display(title + " | (exec: " + c1 + "s)(gui: " + c2 + "s)", p.order);
 	}
 	
-	JFrame frame = null;
-	String name;
-	List<Pair<String, JComponent>> frames = new LinkedList<>();
+	private JFrame frame = null;
+	//private String name;
+	private final List<Pair<String, JComponent>> frames = new LinkedList<>();
 
-	final CardLayout cl = new CardLayout();
-	final JPanel x = new JPanel(cl);
-	final JList<String> yyy = new JList<>();
-	final Map<String, String> indices = new HashMap<>();
+	private final CardLayout cl = new CardLayout();
+	private final JPanel x = new JPanel(cl);
+	private final JList<String> yyy = new JList<>();
+	//private final Map<String, String> indices = new HashMap<>();
 
-	public void display(String s, List<String> order) {
+	private void display(String s, @SuppressWarnings("unused") List<String> order) {
 		frame = new JFrame();
-		this.name = s;
+      //  name = s;
 
-		final Vector<String> ooo = new Vector<>();
-		int index = 0;
+		Vector<String> ooo = new Vector<>();
+	//	int index = 0;
 		for (Pair<String, JComponent> p : frames) {
 			x.add(p.second, p.first);
 			ooo.add(p.first);
-			indices.put(order.get(index++), p.first);
+		//	indices.put(order.get(index++), p.first);
 		}
 		x.add(new JPanel(), "blank");
 		cl.show(x, "blank");
@@ -178,9 +178,7 @@ public class XDisplay implements Disp {
 		frame.setContentPane(px);
 		frame.setSize(900, 600);
 
-		ActionListener escListener = (ActionEvent e) -> {
-                    frame.dispose();
-                };
+		ActionListener escListener = (ActionEvent e) -> frame.dispose();
 
 		frame.getRootPane().registerKeyboardAction(escListener,
 				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);

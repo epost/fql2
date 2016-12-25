@@ -12,7 +12,7 @@ import catdata.fql.decl.QueryExp.Var;
 public class QueryChecker implements
 		QueryExpVisitor<Pair<SigExp, SigExp>, FQLProgram> {
 
-	List<String> seen = new LinkedList<>();
+	private List<String> seen = new LinkedList<>();
 
 	@Override
 	public Pair<SigExp, SigExp> visit(FQLProgram env, Const e) {

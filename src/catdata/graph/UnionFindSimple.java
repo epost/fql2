@@ -3,10 +3,10 @@ package catdata.graph;
 import java.util.Collection;
 import java.util.Set;
 
+import catdata.Ctx;
 import catdata.Util;
-import catdata.aql.Ctx;
 
-public class UnionFindSimple<X> {
+class UnionFindSimple<X> {
     private final Ctx<X,X> id;    // id[i] = component identifier of i
     private int count;   // number of components
 
@@ -19,7 +19,7 @@ public class UnionFindSimple<X> {
         return count;
     }
   
-    public X find(X p) {
+    private X find(X p) {
         X x = id.map.get(p);
         if (x == null) {
         	count++;

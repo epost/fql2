@@ -20,7 +20,7 @@ public class Nist2 extends Example {
 		return s;
 	}
 	
-	String s = "category A = {"
+	private final String s = "category A = {"
 			+ "\n objects"
 			+ "\n  capability,"
 			+ "\n  capabilitycategories,"

@@ -26,12 +26,12 @@ public abstract class XExp {
 	
 	public static class XSuperED extends XExp {
 
-		Map<String, List<String>> dom;
-		Map<String, String> cod;
-		List<SuperFOED> as;
-		String S;
-		String T;
-		String I;
+		final Map<String, List<String>> dom;
+		final Map<String, String> cod;
+		final List<SuperFOED> as;
+		final String S;
+		final String T;
+		final String I;
 		
 		
 
@@ -47,7 +47,6 @@ public abstract class XExp {
 
 		public XSuperED(Map<String, List<String>> dom, Map<String, String> cod, List<SuperFOED> as,
 				String s, String t, String i) {
-			super();
 			this.dom = dom;
 			this.cod = cod;
 			this.as = as;
@@ -60,21 +59,22 @@ public abstract class XExp {
 
 		//f(x.p.q,y,z).a.b = 
 		static class SuperFOED {
-			Map<String, String> a;
-			List<Pair< Triple<String,List<List<String>>,List<String>>  , 
-				       Triple<String,List<List<String>>,List<String>>  >> lhs, rhs;
+			final Map<String, String> a;
+			final List<Pair< Triple<String,List<List<String>>,List<String>>  ,
+				       Triple<String,List<List<String>>,List<String>>  >> lhs;
+            final List<Pair< Triple<String,List<List<String>>,List<String>>  ,
+                       Triple<String,List<List<String>>,List<String>>  >> rhs;
 			public SuperFOED(
 					Map<String, String> a,
 					List<Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>> lhs,
 					List<Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>> rhs) {
-				super();
 				this.a = a;
 				this.lhs = lhs;
 				this.rhs = rhs;
 			}
 			@Override
 			public int hashCode() {
-				final int prime = 31;
+				int prime = 31;
 				int result = 1;
 				result = prime * result + ((a == null) ? 0 : a.hashCode());
 				result = prime * result + ((lhs == null) ? 0 : lhs.hashCode());
@@ -116,7 +116,7 @@ public abstract class XExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((S == null) ? 0 : S.hashCode());
@@ -182,10 +182,12 @@ public abstract class XExp {
 	
 	public static class XSOED extends XExp {
 				
-		List<Triple<String, String, String>> es;
-		List<FOED> as;
+		final List<Triple<String, String, String>> es;
+		final List<FOED> as;
 		
-		String src, dst, I;
+		final String src;
+        final String dst;
+        final String I;
 		
 		public XSOED(List<Triple<String, String, String>> es, List<FOED> as, String src,
 				String dst, String i) {
@@ -193,13 +195,13 @@ public abstract class XExp {
 			this.as = as;
 			this.src = src;
 			this.dst = dst;
-			this.I = i;
+            I = i;
 		}
 
 		static class FOED {
-			String a;
-			String t;
-			List<Pair<List<String>, List<String>>> eqs;
+			final String a;
+			final String t;
+			final List<Pair<List<String>, List<String>>> eqs;
 			
 			public FOED(String a, String t, List<Pair<List<String>, List<String>>> eqs) {
 				this.a = a;
@@ -214,7 +216,7 @@ public abstract class XExp {
 
 			@Override
 			public int hashCode() {
-				final int prime = 31;
+				int prime = 31;
 				int result = 1;
 				result = prime * result + ((a == null) ? 0 : a.hashCode());
 				result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
@@ -258,7 +260,7 @@ public abstract class XExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((as == null) ? 0 : as.hashCode());
@@ -315,11 +317,12 @@ public abstract class XExp {
 	}
 	
 	public static class XPushout extends XExp {
-		XExp f,g;
+		final XExp f;
+        final XExp g;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			result = prime * result + ((g == null) ? 0 : g.hashCode());
@@ -349,7 +352,6 @@ public abstract class XExp {
 		}
 
 		public XPushout(XExp f, XExp g) {
-			super();
 			this.f = f;
 			this.g = g;
 		}
@@ -361,11 +363,12 @@ public abstract class XExp {
 	}
 	
 	public static class XCoApply extends XExp {
-		XExp f, I;
+		final XExp f;
+        final XExp I;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
@@ -395,7 +398,6 @@ public abstract class XExp {
 		}
 
 		public XCoApply(XExp f, XExp i) {
-			super();
 			this.f = f;
 			I = i;
 		}
@@ -412,7 +414,7 @@ public abstract class XExp {
 	}
 	
 	public static class XGrothLabels extends XExp {
-		public XExp F;
+		public final XExp F;
 
 		@Override
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
@@ -421,7 +423,7 @@ public abstract class XExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			return result;
@@ -445,7 +447,6 @@ public abstract class XExp {
 		}
 
 		public XGrothLabels(XExp f) {
-			super();
 			F = f;
 		}
 
@@ -453,7 +454,7 @@ public abstract class XExp {
 	}
 	
 	public static class XIdPoly extends XExp {
-		public XExp F;
+		public final XExp F;
 
 		@Override
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
@@ -462,7 +463,7 @@ public abstract class XExp {
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			return result;
@@ -486,18 +487,17 @@ public abstract class XExp {
 		}
 
 		public XIdPoly(XExp f) {
-			super();
 			F = f;
 		}
 		
 	}
 	
 	public static class XLabel extends XExp {
-		public XExp F;
+		public final XExp F;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			return result;
@@ -521,7 +521,6 @@ public abstract class XExp {
 		}
 
 		public XLabel(XExp f) {
-			super();
 			F = f;
 		}
 		
@@ -532,16 +531,15 @@ public abstract class XExp {
 	}
 	
 	public static class XUberPi extends XExp {
-		public XExp F;
+		public final XExp F;
 
 		public XUberPi(XExp f) {
-			super();
 			F = f;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			return result;
@@ -573,11 +571,10 @@ public abstract class XExp {
 	
 	public static class XToQuery extends XExp {
 		
-		public XExp inst;
-		public XExp applyTo;
+		public final XExp inst;
+		public final XExp applyTo;
 		
 		public XToQuery(XExp inst, XExp applyTo) {
-			super();
 			this.inst = inst;
 			this.applyTo = applyTo;
 		}
@@ -591,7 +588,7 @@ public abstract class XExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((applyTo == null) ? 0 : applyTo.hashCode());
 			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
@@ -631,11 +628,11 @@ public abstract class XExp {
 			return v.visit(env, this);
 		}
 		
-		boolean isQuery;
-		public XExp C;
+		final boolean isQuery;
+		public final XExp C;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((C == null) ? 0 : C.hashCode());
 			result = prime * result + (isQuery ? 1231 : 1237);
@@ -655,12 +652,9 @@ public abstract class XExp {
 					return false;
 			} else if (!C.equals(other.C))
 				return false;
-			if (isQuery != other.isQuery)
-				return false;
-			return true;
-		}
+            return isQuery == other.isQuery;
+        }
 		public Id(boolean isQuery, XExp c) {
-			super();
 			this.isQuery = isQuery;
 			C = c;
 		}
@@ -674,11 +668,12 @@ public abstract class XExp {
 			return v.visit(env, this);
 		}
 		
-		XExp f, g;
+		final XExp f;
+        final XExp g;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			result = prime * result + ((g == null) ? 0 : g.hashCode());
@@ -708,7 +703,6 @@ public abstract class XExp {
 		}
 
 		public Compose(XExp f, XExp g) {
-			super();
 			this.f = f;
 			this.g = g;
 		}
@@ -721,11 +715,12 @@ public abstract class XExp {
 	}
 	
 	public static class Apply extends XExp {
-		XExp f, I;
+		final XExp f;
+        final XExp I;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
@@ -755,7 +750,6 @@ public abstract class XExp {
 		}
 
 		public Apply(XExp f, XExp i) {
-			super();
 			this.f = f;
 			I = i;
 		}
@@ -773,18 +767,18 @@ public abstract class XExp {
 	}
 	
 	public static class Iter extends XExp {
-		XExp f, initial;
-		int num;
+		final XExp f;
+        final XExp initial;
+		final int num;
 		
 		public Iter(XExp f, XExp initial, int num) {
-			super();
 			this.f = f;
 			this.initial = initial;
 			this.num = num;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			result = prime * result + ((initial == null) ? 0 : initial.hashCode());
@@ -810,10 +804,8 @@ public abstract class XExp {
 					return false;
 			} else if (!initial.equals(other.initial))
 				return false;
-			if (num != other.num)
-				return false;
-			return true;
-		}
+            return num == other.num;
+        }
 		
 		@Override
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
@@ -1008,7 +1000,7 @@ public abstract class XExp {
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + (isAnd ? 1231 : 1237);
 			result = prime * result + ((isFalse == null) ? 0 : isFalse.hashCode());
@@ -1072,15 +1064,15 @@ public abstract class XExp {
 	}
 	
 	public static class FLOWER2 extends XExp {
-		Map<Object, List<Object>> select;
+		final Map<Object, List<Object>> select;
 		Map<Object, Object> from;
-		XBool where;
-		XExp src; 
+		final XBool where;
+		final XExp src;
 		String ty;
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((from == null) ? 0 : from.hashCode());
 			result = prime * result + ((select == null) ? 0 : select.hashCode());
@@ -1130,16 +1122,11 @@ public abstract class XExp {
 		@SuppressWarnings("unchecked")
 		public FLOWER2(Map<Object, List<Object>> select, Map<Object, Object> from,
 				XBool where, XExp src) {
-			super();
 			this.select = select;
 			this.from = from;
 			this.where = where;
 			this.src = src;
-			if (GlobalOptions.debug.fpql.reorder_joins) {
-				this.from = sort(from);
-			} else {
-				this.from = from;
-			}
+            this.from = GlobalOptions.debug.fpql.reorder_joins ? sort(from) : from;
 		}
 		
 		private void count(XBool b, Map<String, Integer> counts) {
@@ -1195,15 +1182,15 @@ public abstract class XExp {
 	
 	
 	public static class Flower extends XExp {
-		Map<Object, List<Object>> select;
-		Map<Object, Object> from;
-		List<Pair<List<Object>, List<Object>>> where;
-		XExp src;
+		final Map<Object, List<Object>> select;
+		final Map<Object, Object> from;
+		final List<Pair<List<Object>, List<Object>>> where;
+		final XExp src;
 		String ty;
 		 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((from == null) ? 0 : from.hashCode());
 			result = prime * result + ((select == null) ? 0 : select.hashCode());
@@ -1253,15 +1240,10 @@ public abstract class XExp {
 		@SuppressWarnings("unchecked")
 		public Flower(Map<Object, List<Object>> select, Map<Object, Object> from,
 				List<Pair<List<Object>, List<Object>>> where, XExp src) {
-			super();
 			this.select = select;
 			this.where = where;
 			this.src = src;
-			if (GlobalOptions.debug.fpql.reorder_joins) {
-				this.from = sort(from);
-			} else {
-				this.from = from;
-			}
+            this.from = GlobalOptions.debug.fpql.reorder_joins ? sort(from) : from;
 		}
 		
 		@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1309,20 +1291,20 @@ public abstract class XExp {
 	
 	
 	public static class XTimes extends XExp {
-		XExp l, r;
+		final XExp l;
+        final XExp r;
 		@Override
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
 		public XTimes(XExp l, XExp r) {
-			super();
 			this.l = l;
 			this.r = r;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1362,11 +1344,12 @@ public abstract class XExp {
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
-		XExp l, r;
-		boolean left;
+		final XExp l;
+        final XExp r;
+		final boolean left;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + (left ? 1231 : 1237);
@@ -1397,7 +1380,6 @@ public abstract class XExp {
 			return true;
 		}
 		public XProj(XExp l, XExp r, boolean left) {
-			super();
 			this.l = l;
 			this.r = r;
 			this.left = left;
@@ -1409,17 +1391,17 @@ public abstract class XExp {
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
-		XExp l, r;
+		final XExp l;
+        final XExp r;
 
 		public XPair(XExp l, XExp r) {
-			super();
 			this.l = l;
 			this.r = r;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1456,11 +1438,11 @@ public abstract class XExp {
 	}
 	
 	public static class XTT extends XExp {
-		XExp S;
+		final XExp S;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((S == null) ? 0 : S.hashCode());
 			return result;
@@ -1484,7 +1466,6 @@ public abstract class XExp {
 		}
 
 		public XTT(XExp s) {
-			super();
 			S = s;
 		}
 	
@@ -1501,16 +1482,15 @@ public abstract class XExp {
 	}
 	
 	public static class XOne extends XExp {
-		XExp S;
+		final XExp S;
 
 		public XOne(XExp s) {
-			super();
 			S = s;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((S == null) ? 0 : S.hashCode());
 			return result;
@@ -1545,11 +1525,11 @@ public abstract class XExp {
 
 
 	public static class XFF extends XExp {
-		XExp S;
+		final XExp S;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((S == null) ? 0 : S.hashCode());
 			return result;
@@ -1573,7 +1553,6 @@ public abstract class XExp {
 		}
 
 		public XFF(XExp s) {
-			super();
 			S = s;
 		}
 	
@@ -1590,16 +1569,15 @@ public abstract class XExp {
 	}
 	
 	public static class XVoid extends XExp {
-		XExp S;
+		final XExp S;
 
 		public XVoid(XExp s) {
-			super();
 			S = s;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((S == null) ? 0 : S.hashCode());
 			return result;
@@ -1634,20 +1612,20 @@ public abstract class XExp {
 	}
 	
 	public static class XCoprod extends XExp {
-		XExp l, r;
+		final XExp l;
+        final XExp r;
 		@Override
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
 		public XCoprod(XExp l, XExp r) {
-			super();
 			this.l = l;
 			this.r = r;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1687,11 +1665,12 @@ public abstract class XExp {
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
-		XExp l, r;
-		boolean left;
+		final XExp l;
+        final XExp r;
+		final boolean left;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + (left ? 1231 : 1237);
@@ -1722,7 +1701,6 @@ public abstract class XExp {
 			return true;
 		}
 		public XInj(XExp l, XExp r, boolean left) {
-			super();
 			this.l = l;
 			this.r = r;
 			this.left = left;
@@ -1741,17 +1719,17 @@ public abstract class XExp {
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
-		XExp l, r;
+		final XExp l;
+        final XExp r;
 
 		public XMatch(XExp l, XExp r) {
-			super();
 			this.l = l;
 			this.r = r;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1789,20 +1767,19 @@ public abstract class XExp {
 	
 	
 	public static class XRel extends XExp {
-		XExp I;
+		final XExp I;
 		@Override
 		public <R, E> R accept(E env, XExpVisitor<R, E> v) {
 			return v.visit(env, this);
 		}
 
 		public XRel(XExp i) {
-			super();
 			I = i;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			return result;
@@ -1838,17 +1815,17 @@ public abstract class XExp {
 			return v.visit(env, this);
 		}
 
-		String kind;
-		XExp F, I;
+		final String kind;
+		final XExp F;
+        final XExp I;
 		public XUnit(String kind, XExp f, XExp i) {
-			super();
 			this.kind = kind;
 			F = f;
 			I = i;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -1898,17 +1875,17 @@ public abstract class XExp {
 			return v.visit(env, this);
 		}
 
-		String kind;
-		XExp F, I;
+		final String kind;
+		final XExp F;
+        final XExp I;
 		public XCounit(String kind, XExp f, XExp i) {
-			super();
 			this.kind = kind;
 			F = f;
 			I = i;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -1972,7 +1949,7 @@ public abstract class XExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((javaName == null) ? 0 : javaName.hashCode());
 			return result;
@@ -1996,11 +1973,10 @@ public abstract class XExp {
 		}
 
 		public XTy(String javaName) {
-			super();
 			this.javaName = javaName;
 		}
 
-		String javaName;
+		final String javaName;
 	}
 	
 	public static class XFn extends XExp {
@@ -2011,7 +1987,7 @@ public abstract class XExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((javaFn == null) ? 0 : javaFn.hashCode());
@@ -2047,13 +2023,14 @@ public abstract class XExp {
 		}
 
 		public XFn(String src, String dst, String javaFn) {
-			super();
 			this.src = src;
 			this.dst = dst;
 			this.javaFn = javaFn;
 		}
 
-		String src, dst, javaFn;
+		final String src;
+        final String dst;
+        final String javaFn;
 	}
 	
 	public static class XConst extends XExp {
@@ -2062,11 +2039,12 @@ public abstract class XExp {
 			return v.visit(env, this);
 		}
 
-		String dst, javaFn;
+		final String dst;
+        final String javaFn;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((javaFn == null) ? 0 : javaFn.hashCode());
@@ -2096,7 +2074,6 @@ public abstract class XExp {
 		}
 
 		public XConst(String dst, String javaFn) {
-			super();
 			this.dst = dst;
 			this.javaFn = javaFn;
 		}
@@ -2110,7 +2087,7 @@ public abstract class XExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((lhs == null) ? 0 : lhs.hashCode());
 			result = prime * result + ((rhs == null) ? 0 : rhs.hashCode());
@@ -2140,32 +2117,31 @@ public abstract class XExp {
 		}
 
 		public XEq(List<String> lhs, List<String> rhs) {
-			super();
 			this.lhs = lhs;
 			this.rhs = rhs;
 		}
 
-		List<String> lhs, rhs;
+		final List<String> lhs;
+        final List<String> rhs;
 	}
 	
 	public static class XInst extends XExp {
 		public boolean saturated = false;
-		public XExp schema;
+		public final XExp schema;
 		public XInst(XExp schema, List<Pair<String, String>> nodes,
 				List<Pair<List<String>, List<String>>> eqs) {
-			super();
 			this.schema = schema;
 			this.nodes = nodes;
 			this.eqs = eqs;
 		}
 
 
-		public List<Pair<String, String>> nodes;
-		public List<Pair<List<String>, List<String>>> eqs;
+		public final List<Pair<String, String>> nodes;
+		public final List<Pair<List<String>, List<String>>> eqs;
 	
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
 			result = prime * result + ((nodes == null) ? 0 : nodes.hashCode());
@@ -2223,9 +2199,9 @@ public abstract class XExp {
 	}
 	
 	public static class XSchema extends XExp {
-		public List<String> nodes;
-		public List<Triple<String, String, String>> arrows;
-		public List<Pair<List<String>, List<String>>> eqs;
+		public final List<String> nodes;
+		public final List<Triple<String, String, String>> arrows;
+		public final List<Pair<List<String>, List<String>>> eqs;
 
 		public XSchema(
 				List<String> nodes,
@@ -2243,7 +2219,7 @@ public abstract class XExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result
 					+ ((arrows == null) ? 0 : arrows.hashCode());
@@ -2343,7 +2319,7 @@ public abstract class XExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((v == null) ? 0 : v.hashCode());
 			return result;
@@ -2373,12 +2349,12 @@ public abstract class XExp {
 	}
 
 	public static class XTransConst extends XExp {
-		XExp src, dst;
-		public List<Pair<Pair<String, String>, List<String>>> vm;
+		final XExp src;
+        final XExp dst;
+		public final List<Pair<Pair<String, String>, List<String>>> vm;
 		
 
 		public XTransConst(XExp src, XExp dst, List<Pair<Pair<String, String>, List<String>>> vm) {
-			super();
 			this.src = src;
 			this.dst = dst;
 			this.vm = vm;
@@ -2386,7 +2362,7 @@ public abstract class XExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((src == null) ? 0 : src.hashCode());
@@ -2437,11 +2413,7 @@ public abstract class XExp {
 					nm0 += ",\n";
 				}
 				b = true;
-				if (k.first.second != null) {
-					nm0 += "  " + k.first.first + ":" + k.first.second + " -> " + Util.sep(k.second, ".");
-				} else {
-					nm0 += "  " + k.first.first + " -> " + Util.sep(k.second, ".");
-				}
+                nm0 += k.first.second != null ? "  " + k.first.first + ":" + k.first.second + " -> " + Util.sep(k.second, ".") : "  " + k.first.first + " -> " + Util.sep(k.second, ".");
 			}
 			nm0 = nm0.trim();
 			nm0 += ";\n";
@@ -2454,15 +2426,15 @@ public abstract class XExp {
 	
 	public static class XMapConst extends XExp {
 		
-		public XExp src, dst;
+		public final XExp src;
+        public final XExp dst;
 		
-		public List<Pair<String, String>> nm;
-		public List<Pair<String, List<String>>> em;
+		public final List<Pair<String, String>> nm;
+		public final List<Pair<String, List<String>>> em;
 		
 
 		public XMapConst(XExp src, XExp dst, List<Pair<String, String>> nm,
 				List<Pair<String, List<String>>> em) {
-			super();
 			this.src = src;
 			this.dst = dst;
 			this.nm = nm;
@@ -2503,7 +2475,7 @@ public abstract class XExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((em == null) ? 0 : em.hashCode());
@@ -2551,17 +2523,17 @@ public abstract class XExp {
 	
 	
 	public static class XSigma extends XExp {
-		XExp F, I;
+		final XExp F;
+        final XExp I;
 		
 		public XSigma(XExp f, XExp i) {
-			super();
 			F = f;
 			I = i;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -2603,18 +2575,18 @@ public abstract class XExp {
 	}
 	
 	public static class XPi extends XExp {
-		XExp F, I;
+		final XExp F;
+        final XExp I;
 		
 
 		public XPi(XExp f, XExp i) {
-			super();
 			F = f;
 			I = i;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -2656,17 +2628,17 @@ public abstract class XExp {
 
 	
 	public static class XDelta extends XExp {
-		XExp F, I;
+		final XExp F;
+        final XExp I;
 		
 		public XDelta(XExp f, XExp i) {
-			super();
 			F = f;
 			I = i;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -2706,48 +2678,48 @@ public abstract class XExp {
 	}
 	
 	public interface XExpVisitor<R, E> {
-		public R visit (E env, XSchema e);
-		public R visit (E env, XMapConst e);
-		public R visit (E env, XTransConst e);
-		public R visit (E env, XSigma e);
-		public R visit (E env, XDelta e);
-		public R visit (E env, XInst e);
-		public R visit (E env, Var e);
-		public R visit (E env, XTy e);
-		public R visit (E env, XFn e);
-		public R visit (E env, XConst e);
-		public R visit (E env, XEq e);
-		public R visit (E env, XUnit e);
-		public R visit (E env, XCounit e);
-		public R visit (E env, XPi e);
-		public R visit (E env, XRel e);
-		public R visit (E env, XCoprod e);
-		public R visit (E env, XInj e);
-		public R visit (E env, XMatch e);
-		public R visit (E env, XVoid e);
-		public R visit (E env, XFF e);
-		public R visit (E env, XTimes e);
-		public R visit (E env, XProj e);
-		public R visit (E env, XPair e);
-		public R visit (E env, XOne e);
-		public R visit (E env, XTT e);
-		public R visit (E env, Flower e);
-		public R visit (E env, FLOWER2 e);
+		R visit(E env, XSchema e);
+		R visit(E env, XMapConst e);
+		R visit(E env, XTransConst e);
+		R visit(E env, XSigma e);
+		R visit(E env, XDelta e);
+		R visit(E env, XInst e);
+		R visit(E env, Var e);
+		R visit(E env, XTy e);
+		R visit(E env, XFn e);
+		R visit(E env, XConst e);
+		R visit(E env, XEq e);
+		R visit(E env, XUnit e);
+		R visit(E env, XCounit e);
+		R visit(E env, XPi e);
+		R visit(E env, XRel e);
+		R visit(E env, XCoprod e);
+		R visit(E env, XInj e);
+		R visit(E env, XMatch e);
+		R visit(E env, XVoid e);
+		R visit(E env, XFF e);
+		R visit(E env, XTimes e);
+		R visit(E env, XProj e);
+		R visit(E env, XPair e);
+		R visit(E env, XOne e);
+		R visit(E env, XTT e);
+		R visit(E env, Flower e);
+		R visit(E env, FLOWER2 e);
 //		public R visit (E env, XQueryExp e);
-		public R visit (E env, Apply e);
-		public R visit (E env, Iter e);
-		public R visit (E env, Id e);
-		public R visit (E env, Compose e);
-		public R visit (E env, @SuppressWarnings("rawtypes") XPoly e);
-		public R visit (E env, XToQuery e);
-		public R visit (E env, XUberPi e);
-		public R visit (E env, XLabel e);
-		public R visit (E env, XIdPoly e);
-		public R visit (E env, XGrothLabels e);
-		public R visit (E env, XCoApply e);
-		public R visit (E env, XPushout e);
-		public R visit (E env, XSOED e);
-		public R visit (E env, XSuperED e);
+R visit(E env, Apply e);
+		R visit(E env, Iter e);
+		R visit(E env, Id e);
+		R visit(E env, Compose e);
+		R visit(E env, @SuppressWarnings("rawtypes") XPoly e);
+		R visit(E env, XToQuery e);
+		R visit(E env, XUberPi e);
+		R visit(E env, XLabel e);
+		R visit(E env, XIdPoly e);
+		R visit(E env, XGrothLabels e);
+		R visit(E env, XCoApply e);
+		R visit(E env, XPushout e);
+		R visit(E env, XSOED e);
+		R visit(E env, XSuperED e);
 	}
 
 }

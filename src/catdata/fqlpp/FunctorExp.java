@@ -17,11 +17,12 @@ public abstract class FunctorExp implements Serializable{
 	public abstract boolean equals(Object o);
 	
 	public static class Pushout extends FunctorExp {
-		String l, r;
+		final String l;
+        final String r;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -51,7 +52,6 @@ public abstract class FunctorExp implements Serializable{
 		}
 
 		public Pushout(String l, String r) {
-			super();
 			this.l = l;
 			this.r = r;
 		}
@@ -64,8 +64,8 @@ public abstract class FunctorExp implements Serializable{
 	}
 	
 	public static class Pivot extends FunctorExp {
-		FunctorExp F;
-		boolean pivot;
+		final FunctorExp F;
+		final boolean pivot;
 
 		@Override
 		public <R, E> R accept(E env, FunctorExpVisitor<R, E> v) {
@@ -74,7 +74,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + (pivot ? 1231 : 1237);
@@ -95,10 +95,8 @@ public abstract class FunctorExp implements Serializable{
 					return false;
 			} else if (!F.equals(other.F))
 				return false;
-			if (pivot != other.pivot)
-				return false;
-			return true;
-		}
+            return pivot == other.pivot;
+        }
 
 		public Pivot(FunctorExp f, boolean b) {
 			F = f;
@@ -108,16 +106,15 @@ public abstract class FunctorExp implements Serializable{
 	}
 	
 	public static class Dom extends FunctorExp {
-		String t;
-		boolean dom;
+		final String t;
+		final boolean dom;
 		public Dom(String t, boolean dom) {
-			super();
 			this.t = t;
 			this.dom = dom;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + (dom ? 1231 : 1237);
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -148,12 +145,12 @@ public abstract class FunctorExp implements Serializable{
 	}
 	
 	public static class Apply extends FunctorExp {
-		FunctorExp F;
-		public FunctorExp I;
+		final FunctorExp F;
+		public final FunctorExp I;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
@@ -183,7 +180,6 @@ public abstract class FunctorExp implements Serializable{
 		}
 
 		public Apply(FunctorExp f, FunctorExp i) {
-			super();
 			F = f;
 			I = i;
 		}
@@ -195,11 +191,11 @@ public abstract class FunctorExp implements Serializable{
 	}
 	
 	public static class Migrate extends FunctorExp {
-		public FunctorExp F;
-		public String which;
+		public final FunctorExp F;
+		public final String which;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((which == null) ? 0 : which.hashCode());
@@ -227,7 +223,6 @@ public abstract class FunctorExp implements Serializable{
 			return true;
 		}
 		public Migrate(FunctorExp f, String which) {
-			super();
 			F = f;
 			this.which = which;
 		}
@@ -240,11 +235,11 @@ public abstract class FunctorExp implements Serializable{
 	}
 	
 	public static class Uncurry extends FunctorExp {
-		public FunctorExp F;
+		public final FunctorExp F;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			return result;
@@ -268,7 +263,6 @@ public abstract class FunctorExp implements Serializable{
 		}
 
 		public Uncurry(FunctorExp f) {
-			super();
 			F = f;
 		}
 		
@@ -279,7 +273,7 @@ public abstract class FunctorExp implements Serializable{
 	}
 	
 	public static class Prop extends FunctorExp {
-		CatExp cat;
+		final CatExp cat;
 		
 		@Override
 		public <R, E> R accept(E env, FunctorExpVisitor<R, E> v) {
@@ -288,7 +282,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((cat == null) ? 0 : cat.hashCode());
 			return result;
@@ -312,7 +306,6 @@ public abstract class FunctorExp implements Serializable{
 		}
 
 		public Prop(CatExp cat) {
-			super();
 			this.cat = cat;
 		}
 		
@@ -321,8 +314,8 @@ public abstract class FunctorExp implements Serializable{
 	}
 
 	public static class One extends FunctorExp {
-		public CatExp cat;
-		public CatExp ambient;
+		public final CatExp cat;
+		public final CatExp ambient;
 		
 		@Override
 		public <R, E> R accept(E env, FunctorExpVisitor<R, E> v) {
@@ -330,14 +323,13 @@ public abstract class FunctorExp implements Serializable{
 		}
 
 		public One(CatExp cat, CatExp ambient) {
-			super();
 			this.cat = cat;
 			this.ambient = ambient;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((ambient == null) ? 0 : ambient.hashCode());
 			result = prime * result + ((cat == null) ? 0 : cat.hashCode());
@@ -369,8 +361,8 @@ public abstract class FunctorExp implements Serializable{
 	}
 	
 	public static class Zero extends FunctorExp {
-		public CatExp cat;
-		public CatExp ambient;
+		public final CatExp cat;
+		public final CatExp ambient;
 		
 		@Override
 		public <R, E> R accept(E env, FunctorExpVisitor<R, E> v) {
@@ -379,7 +371,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((ambient == null) ? 0 : ambient.hashCode());
 			result = prime * result + ((cat == null) ? 0 : cat.hashCode());
@@ -409,7 +401,6 @@ public abstract class FunctorExp implements Serializable{
 		}
 
 		public Zero(CatExp cat, CatExp ambient) {
-			super();
 			this.cat = cat;
 			this.ambient = ambient;
 		}
@@ -428,18 +419,15 @@ public abstract class FunctorExp implements Serializable{
 		}
 		@Override
 		public String toString() {
-			if (lToR) {
-				return "iso1 " + l + " " + r;
-			} else {
-				return "iso2 " + l + " " + r;
-			}
+            return lToR ? "iso1 " + l + " " + r : "iso2 " + l + " " + r;
 		}
 		
-		boolean lToR;
-		CatExp l, r;
+		final boolean lToR;
+		final CatExp l;
+        final CatExp r;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + (lToR ? 1231 : 1237);
@@ -476,7 +464,7 @@ public abstract class FunctorExp implements Serializable{
 	}
 	
 	public static class Id extends FunctorExp {
-		public CatExp t;
+		public final CatExp t;
 
 		public Id(CatExp t) {
 			this.t = t;
@@ -484,7 +472,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -523,14 +511,13 @@ public abstract class FunctorExp implements Serializable{
 	
 	public static class InstConst extends FunctorExp {
 		
-		public CatExp sig;
+		public final CatExp sig;
 		
-		public Map<String, SetExp> nm;
-		public Map<String, Chc<FnExp,SetExp>> em;
+		public final Map<String, SetExp> nm;
+		public final Map<String, Chc<FnExp,SetExp>> em;
 
 		public InstConst(CatExp sig, Map<String, SetExp> nm,
 				Map<String, Chc<FnExp,SetExp>> em) {
-			super();
 			this.sig = sig;
 			this.nm = nm;
 			this.em = em;
@@ -570,7 +557,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((em == null) ? 0 : em.hashCode());
 			result = prime * result + ((nm == null) ? 0 : nm.hashCode());
@@ -581,10 +568,11 @@ public abstract class FunctorExp implements Serializable{
 	
 	public static class MapConst extends FunctorExp {
 		
-		public CatExp src, dst;
+		public final CatExp src;
+        public final CatExp dst;
 		
-		public Map<String, String> nm;
-		public Map<String, Pair<String,List<String>>> em;
+		public final Map<String, String> nm;
+		public final Map<String, Pair<String,List<String>>> em;
 		
 		public MapConst(CatExp src, CatExp dst, Map<String, String> nm,
 				Map<String, Pair<String, List<String>>> em) {
@@ -633,7 +621,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((em == null) ? 0 : em.hashCode());
 			result = prime * result + ((nm == null) ? 0 : nm.hashCode());
@@ -644,11 +632,13 @@ public abstract class FunctorExp implements Serializable{
 	}
 	
 	public static class SetSetConst extends FunctorExp {
-		String ob;
-		SetExp set;
+		final String ob;
+		final SetExp set;
 		
-		String f, src, dst;
-		FnExp fun;
+		final String f;
+        final String src;
+        final String dst;
+		final FnExp fun;
 		
 		public SetSetConst(String ob, SetExp set, String f, String src,
 				String dst, FnExp fun) {
@@ -662,7 +652,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
@@ -724,13 +714,13 @@ public abstract class FunctorExp implements Serializable{
 	
 	public static class FinalConst extends FunctorExp {
 		
-		public CatExp src, C;
+		public final CatExp src;
+        public final CatExp C;
 		
-		public Map<String, FunctorExp> nm;
-		public Map<String, TransExp> em;
+		public final Map<String, FunctorExp> nm;
+		public final Map<String, TransExp> em;
 		
 		public FinalConst(CatExp src, CatExp c, Map<String, FunctorExp> nm, Map<String, TransExp> em) {
-			super();
 			this.src = src;
 			C = c;
 			this.nm = nm;
@@ -739,7 +729,7 @@ public abstract class FunctorExp implements Serializable{
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((C == null) ? 0 : C.hashCode());
 			result = prime * result + ((em == null) ? 0 : em.hashCode());
@@ -789,10 +779,10 @@ public abstract class FunctorExp implements Serializable{
 	
 	public static class CatConst extends FunctorExp {
 		
-		public CatExp sig;
+		public final CatExp sig;
 		
-		public Map<String, CatExp> nm;
-		public Map<String, FunctorExp> em;
+		public final Map<String, CatExp> nm;
+		public final Map<String, FunctorExp> em;
 
 		public CatConst(CatExp sig, Map<String, CatExp> nm,
 				Map<String, FunctorExp> em) {
@@ -835,7 +825,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((em == null) ? 0 : em.hashCode());
 			result = prime * result + ((nm == null) ? 0 : nm.hashCode());
@@ -845,7 +835,7 @@ public abstract class FunctorExp implements Serializable{
 	}
 
 	public static class Var extends FunctorExp {
-		public String v;
+		public final String v;
 
 		public Var(String v) {
 			this.v = v;
@@ -861,7 +851,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((v == null) ? 0 : v.hashCode());
 			return result;
@@ -892,7 +882,7 @@ public abstract class FunctorExp implements Serializable{
 	}
 	
 	public static class TT extends FunctorExp {
-		CatExp t;
+		final CatExp t;
 
 		public TT(CatExp t) {
 			this.t = t;
@@ -900,7 +890,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -936,7 +926,7 @@ public abstract class FunctorExp implements Serializable{
 	}
 
 	public static class FF extends FunctorExp {
-		CatExp t;
+		final CatExp t;
 
 		public FF(CatExp t) {
 			this.t = t;
@@ -944,7 +934,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -980,7 +970,8 @@ public abstract class FunctorExp implements Serializable{
 	}
 
 	public static class Fst extends FunctorExp {
-		CatExp s, t;
+		final CatExp s;
+        final CatExp t;
 
 		public Fst(CatExp s, CatExp t) {
 			this.s = s;
@@ -989,7 +980,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -1031,7 +1022,8 @@ public abstract class FunctorExp implements Serializable{
 	}
 
 	public static class Snd extends FunctorExp {
-		CatExp s, t;
+		final CatExp s;
+        final CatExp t;
 
 		public Snd(CatExp s, CatExp t) {
 			this.s = s;
@@ -1040,7 +1032,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -1082,7 +1074,8 @@ public abstract class FunctorExp implements Serializable{
 	}
 
 	public static class Inl extends FunctorExp {
-		CatExp s, t;
+		final CatExp s;
+        final CatExp t;
 
 		public Inl(CatExp s, CatExp t) {
 			this.s = s;
@@ -1091,7 +1084,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -1133,7 +1126,8 @@ public abstract class FunctorExp implements Serializable{
 	}
 
 	public static class Inr extends FunctorExp {
-		CatExp s, t;
+		final CatExp s;
+        final CatExp t;
 
 		public Inr(CatExp s, CatExp t) {
 			this.s = s;
@@ -1142,7 +1136,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -1184,7 +1178,8 @@ public abstract class FunctorExp implements Serializable{
 	}
 
 	public static class Eval extends FunctorExp {
-		CatExp s, t;
+		final CatExp s;
+        final CatExp t;
 
 		public Eval(CatExp s, CatExp t) {
 			this.s = s;
@@ -1193,7 +1188,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -1235,7 +1230,7 @@ public abstract class FunctorExp implements Serializable{
 	}
 
 	public static class Curry extends FunctorExp {
-		FunctorExp f;
+		final FunctorExp f;
 
 		public Curry(FunctorExp f) {
 			this.f = f;
@@ -1243,7 +1238,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -1279,7 +1274,8 @@ public abstract class FunctorExp implements Serializable{
 	}
 
 	public static class Prod extends FunctorExp {
-		FunctorExp l, r;
+		final FunctorExp l;
+        final FunctorExp r;
 
 		public Prod(FunctorExp l, FunctorExp r) {
 			this.l = l;
@@ -1288,7 +1284,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1330,7 +1326,8 @@ public abstract class FunctorExp implements Serializable{
 	}
 	
 	public static class Exp extends FunctorExp {
-		FunctorExp l, r;
+		final FunctorExp l;
+        final FunctorExp r;
 
 		public Exp(FunctorExp l, FunctorExp r) {
 			this.l = l;
@@ -1339,7 +1336,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1383,16 +1380,17 @@ public abstract class FunctorExp implements Serializable{
 	
 
 	public static class Comp extends FunctorExp {
-		FunctorExp l, r;
+		final FunctorExp l;
+        final FunctorExp r;
 
 		public Comp(FunctorExp FunctorExp, FunctorExp r) {
-			this.l = FunctorExp;
+            l = FunctorExp;
 			this.r = r;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1434,7 +1432,8 @@ public abstract class FunctorExp implements Serializable{
 	}
 
 	public static class Case extends FunctorExp {
-		FunctorExp l, r;
+		final FunctorExp l;
+        final FunctorExp r;
 
 		public Case(FunctorExp l, FunctorExp r) {
 			this.l = l;
@@ -1443,7 +1442,7 @@ public abstract class FunctorExp implements Serializable{
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1488,35 +1487,35 @@ public abstract class FunctorExp implements Serializable{
 	public abstract int hashCode();
 
 	public interface FunctorExpVisitor<R, E> {
-		public R visit(E env, Id e);
-		public R visit(E env, Comp e);
-		public R visit(E env, Var e);
-		public R visit(E env, InstConst e);
-		public R visit(E env, MapConst e);
-		public R visit(E env, CatConst e);
-		public R visit(E env, TT e);
-		public R visit(E env, FF e);
-		public R visit(E env, Fst e);
-		public R visit(E env, Snd e);
-		public R visit(E env, Inl e);
-		public R visit(E env, Inr e);
-		public R visit(E env, Eval e);
-		public R visit(E env, Curry e);
-		public R visit(E env, Case e);
-		public R visit(E env, Prod e);
-		public R visit(E env, Iso e);
-		public R visit(E env, SetSetConst e);
-		public R visit(E env, One e);
-		public R visit(E env, Zero e);
-		public R visit(E env, FinalConst e);
-		public R visit(E env, Uncurry e);
-		public R visit(E env, Migrate e);
-		public R visit(E env, Apply e);
-		public R visit(E env, Exp e);
-		public R visit(E env, Prop e);
-		public R visit(E env, Dom e);
-		public R visit(E env, Pivot e);
-		public R visit(E env, Pushout e);
+		R visit(E env, Id e);
+		R visit(E env, Comp e);
+		R visit(E env, Var e);
+		R visit(E env, InstConst e);
+		R visit(E env, MapConst e);
+		R visit(E env, CatConst e);
+		R visit(E env, TT e);
+		R visit(E env, FF e);
+		R visit(E env, Fst e);
+		R visit(E env, Snd e);
+		R visit(E env, Inl e);
+		R visit(E env, Inr e);
+		R visit(E env, Eval e);
+		R visit(E env, Curry e);
+		R visit(E env, Case e);
+		R visit(E env, Prod e);
+		R visit(E env, Iso e);
+		R visit(E env, SetSetConst e);
+		R visit(E env, One e);
+		R visit(E env, Zero e);
+		R visit(E env, FinalConst e);
+		R visit(E env, Uncurry e);
+		R visit(E env, Migrate e);
+		R visit(E env, Apply e);
+		R visit(E env, Exp e);
+		R visit(E env, Prop e);
+		R visit(E env, Dom e);
+		R visit(E env, Pivot e);
+		R visit(E env, Pushout e);
 	}
 
 }

@@ -3,7 +3,7 @@ package catdata.sql;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SqlPath {
+class SqlPath {
 
 	public SqlTable source, target;
 	
@@ -30,7 +30,7 @@ public class SqlPath {
 		validate();
 	}
 	
-	public void validate() {
+	private void validate() {
 		target = source;
 		for (SqlForeignKey edge : edges) {
 			if (!edge.source.equals(target)) {
@@ -42,7 +42,7 @@ public class SqlPath {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((edges == null) ? 0 : edges.hashCode());
 		result = prime * result + ((source == null) ? 0 : source.hashCode());

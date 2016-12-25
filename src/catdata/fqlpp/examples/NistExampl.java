@@ -20,7 +20,7 @@ public class NistExampl extends Example {
 		return t;
 	}
 	
-	String t = "//NIST example via Sub"
+	private final String t = "//NIST example via Sub"
 			+ "\n"
 			+ "\n//Portal A's schema"
 			+ "\ncategory ABig = {"

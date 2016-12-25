@@ -13,11 +13,10 @@ import java.util.Set;
  */
 public class SquishFlower extends Flower {
 
-	String name;
+	private final String name;
 
 	public SquishFlower(String name) {
-		super();
-		this.name = name;
+        this.name = name;
 	}
 
 	@Override

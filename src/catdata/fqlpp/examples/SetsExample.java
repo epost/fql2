@@ -21,7 +21,7 @@ public class SetsExample extends Example {
 		return text;
 	}
 	
-	String text = "/*"
+	private final String text = "/*"
 			+ "\n * In FQL++, a *value* is either:"
 			+ "\n *"
 			+ "\n *  - a string, that must be quoted if it contains spaces or special symbols, like \"-\"."

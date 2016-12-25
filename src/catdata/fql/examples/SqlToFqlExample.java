@@ -21,7 +21,7 @@ public class SqlToFqlExample extends Example {
 		return s;
 	}
 
-	String s= "/* Ryan's query, written in David's best SQL (See Ryan's original request at bottom of file):"
+	private final String s= "/* Ryan's query, written in David's best SQL (See Ryan's original request at bottom of file):"
 			+ "\n *  "
 			+ "\n *  SELECT A.c1, C.c5, C.c6 "
 			+ "\n *  FROM A,B,C"

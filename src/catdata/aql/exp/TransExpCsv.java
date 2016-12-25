@@ -28,14 +28,14 @@ import catdata.aql.fdm.LiteralTransform;
 public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 	extends TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> {
 
-	public final InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src;
-	public final InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst;
+	private final InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src;
+	private final InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst;
 	
-	public final List<String> imports;
+	private final List<String> imports;
 
-	public final Map<String, String> options;
+	private final Map<String, String> options;
 	
-	public final String file;
+	private final String file;
 	
 	@Override
 	public long timeout() {
@@ -108,7 +108,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 			for (CSVRecord row : parser) {
 				String gen = row.get(0);
 				
-				Chc<Ty,En> required = null;
+				Chc<Ty,En> required;
 				
 				if (s.gens().map.containsKey(gen) && s.sks().map.containsKey(gen)) {
 					throw new RuntimeException("in transform for " + gen + ", " + gen + " is ambiguously an entity generator and labelled null");
@@ -161,7 +161,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 		result = prime * result + ((file == null) ? 0 : file.hashCode());

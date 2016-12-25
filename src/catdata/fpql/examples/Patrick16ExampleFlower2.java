@@ -21,7 +21,7 @@ public class Patrick16ExampleFlower2 extends Example {
 		return s;
 	}
 	
-	String s = "adom : type"
+	private final String s = "adom : type"
 			+ "\n"
 			+ "\nWisnesky Spivak Chlipala Morrisett Malecha Gross Harvard MIT Math CS : adom"
 			+ "\n"

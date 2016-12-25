@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 
 import catdata.fqlpp.cat.Category;
-import catdata.fqlpp.cat.FinSet;
 import catdata.fqlpp.cat.Functor;
 import catdata.fqlpp.cat.Transform;
 import catdata.fqlpp.cat.FinSet.Fn;
@@ -17,13 +16,13 @@ import catdata.fqlpp.cat.FinSet.Fn;
 @SuppressWarnings("serial")
 public class FQLPPEnvironment implements Serializable {
 
-	public FQLPPProgram prog;
-	public String text;
-	public Map<String, Set<?>> sets;
-	public Map<String, FinSet.Fn<?,?>> fns;
-	public Map<String, Category<?, ?>> cats;
-	public Map<String, Functor<?,?,?,?>> ftrs;
-	public Map<String, Transform<?,?,?,?>> trans;
+	public final FQLPPProgram prog;
+	private final String text;
+	public final Map<String, Set<?>> sets;
+	public final Map<String, Fn<?,?>> fns;
+	public final Map<String, Category<?, ?>> cats;
+	public final Map<String, Functor<?,?,?,?>> ftrs;
+	public final Map<String, Transform<?,?,?,?>> trans;
 	
 	public FQLPPEnvironment(FQLPPEnvironment e) {
 		this(e.prog, e.text, new HashMap<>(e.sets), new HashMap<>(e.fns), new HashMap<>(e.cats), new HashMap<>(e.ftrs), new HashMap<>(e.trans));

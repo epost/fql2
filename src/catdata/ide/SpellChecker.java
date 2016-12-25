@@ -25,7 +25,7 @@ import org.fife.ui.rsyntaxtextarea.parser.ParseResult;
 import catdata.Unit;
 
 
-public class SpellChecker extends AbstractParser {
+class SpellChecker extends AbstractParser {
 	
 	private static Collection<String> words0;
 
@@ -54,7 +54,7 @@ public class SpellChecker extends AbstractParser {
 	
 	private final DefaultParseResult result;
 	private RSyntaxDocument doc;
-	private Function<Unit, Collection<String>> local;
+	private final Function<Unit, Collection<String>> local;
 	
 	public SpellChecker(Function<Unit, Collection<String>> local) {
 		result = new DefaultParseResult(this);
@@ -78,7 +78,7 @@ public class SpellChecker extends AbstractParser {
 			return parse(doc1, style);
 		}
 		spPrev = spNow;
-		this.doc = doc1;
+        doc = doc1;
 		Element root = doc.getDefaultRootElement();
 		int lineCount = root.getElementCount();
 		result.clearNotices();
@@ -113,11 +113,10 @@ public class SpellChecker extends AbstractParser {
 					}
 					for (int i = 0; i < 10; i++) {
 						if (word.contains(Integer.toString(i))) {
-							
+							continue outer;
 						}
 					}
 					for (String a : local.apply(new Unit())) {
-				//		System.out.println("Compare against " + a + " word " + word);
 						if (word.toLowerCase().equals(a.toLowerCase())) {
 							continue outer;
 						}

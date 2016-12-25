@@ -7,6 +7,12 @@ import catdata.Pair;
 import catdata.fql.FQLException;
 import catdata.fql.decl.FQLProgram;
 import catdata.fql.decl.InstExp;
+import catdata.fql.decl.InstExp.Exp;
+import catdata.fql.decl.InstExp.Kernel;
+import catdata.fql.decl.InstExp.One;
+import catdata.fql.decl.InstExp.Plus;
+import catdata.fql.decl.InstExp.Two;
+import catdata.fql.decl.InstExp.Zero;
 import catdata.fql.decl.Instance;
 import catdata.fql.decl.SigExp;
 import catdata.fql.decl.Signature;
@@ -48,7 +54,7 @@ import catdata.fql.decl.TransExp.Var;
 
 public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLProgram>{
 
-	List<String> seen = new LinkedList<>();
+	private List<String> seen = new LinkedList<>();
 	
 	@Override
 	public Pair<String, String> visit(FQLProgram env, Id e) {
@@ -127,7 +133,7 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (x == null) {
 			throw new RuntimeException("Missing " + e.obj + " in " + e);
 		}
-		if (!(x instanceof InstExp.One)) {
+		if (!(x instanceof One)) {
 			throw new RuntimeException(e.obj + " is not a unit: " + x);
 		}
 		//InstExp.One y = (InstExp.One) x;
@@ -150,7 +156,7 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (x == null) {
 			throw new RuntimeException("Missing " + e.obj + " in " + e);
 		}
-		if (!(x instanceof InstExp.Zero)) {
+		if (!(x instanceof Zero)) {
 			throw new RuntimeException(e.obj + " is not void: " + x);
 		}
 		//InstExp.One y = (InstExp.One) x;
@@ -173,10 +179,10 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (x == null) {
 			throw new RuntimeException("Missing " + e.obj + " in " + e);
 		}
-		if (!(x instanceof InstExp.Times)) {
+		if (!(x instanceof Times)) {
 			throw new RuntimeException(e.obj + " is not a times: " + x);
 		}
-		InstExp.Times y = (InstExp.Times) x;
+		Times y = (Times) x;
 		
 		return new Pair<>(e.obj, y.a);
 	}
@@ -187,10 +193,10 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (x == null) {
 			throw new RuntimeException("Missing " + e.obj + " in " + e);
 		}
-		if (!(x instanceof InstExp.Times)) {
+		if (!(x instanceof Times)) {
 			throw new RuntimeException(e.obj + " is not a times: " + x);
 		}
-		InstExp.Times y = (InstExp.Times) x;
+		Times y = (Times) x;
 		
 		return new Pair<>(e.obj, y.b);
 	}
@@ -201,10 +207,10 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (x == null) {
 			throw new RuntimeException("Missing " + e.obj + " in " + e);
 		}
-		if (!(x instanceof InstExp.Plus)) {
+		if (!(x instanceof Plus)) {
 			throw new RuntimeException(e.obj + " is not a plus: " + x);
 		}
-		InstExp.Plus y = (InstExp.Plus) x;
+		Plus y = (Plus) x;
 		
 		return new Pair<>(y.a, e.obj);
 	}
@@ -215,10 +221,10 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (x == null) {
 			throw new RuntimeException("Missing " + e.obj + " in " + e);
 		}
-		if (!(x instanceof InstExp.Plus)) {
+		if (!(x instanceof Plus)) {
 			throw new RuntimeException(e.obj + " is not a plus: " + x);
 		}
-		InstExp.Plus y = (InstExp.Plus) x;
+		Plus y = (Plus) x;
 		
 		return new Pair<>(y.b, e.obj);
 	}
@@ -229,7 +235,7 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (x == null) {
 			throw new RuntimeException("Missing " + e.obj + " in " + e);
 		}
-		if (!(x instanceof InstExp.Plus)) {
+		if (!(x instanceof Plus)) {
 			throw new RuntimeException(e.obj + " is not a plus: " + x);
 		}
 //		InstExp.Plus y = (InstExp.Plus) x;
@@ -250,7 +256,7 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (x == null) {
 			throw new RuntimeException("Missing " + e.obj + " in " + e);
 		}
-		if (!(x instanceof InstExp.Times)) {
+		if (!(x instanceof Times)) {
 			throw new RuntimeException(e.obj + " is not a times: " + x);
 		}
 		//InstExp.Times y = (InstExp.Times) x;
@@ -394,10 +400,10 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 	@Override
 	public Pair<String, String> visit(FQLProgram env, Squash e) {
 		InstExp s = env.insts.get(e.src);
-		if (!(s instanceof catdata.fql.decl.InstExp.Relationalize)) {
+		if (!(s instanceof InstExp.Relationalize)) {
 			throw new RuntimeException("Not a relationalize: " + e);
 		}
-		catdata.fql.decl.InstExp.Relationalize xxx = (catdata.fql.decl.InstExp.Relationalize) s;
+		InstExp.Relationalize xxx = (InstExp.Relationalize) s;
 		return new Pair<>(xxx.I, e.src);
 	}
 
@@ -515,15 +521,15 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (k == null) {
 			throw new RuntimeException("Missing instance: " + e.inst);
 		}
-		if (!(k instanceof InstExp.Times)) {
+		if (!(k instanceof Times)) {
 			throw new RuntimeException("Not a product: " + k + " in " + e);
 		}
-		InstExp.Times t = (InstExp.Times) k;
+		Times t = (Times) k;
 		InstExp v = env.insts.get(t.a);
-		if (!(v instanceof InstExp.Exp)) {
+		if (!(v instanceof Exp)) {
 			throw new RuntimeException("Not an exponential: " + v + " in " + e);
 		}
-		InstExp.Exp i = (InstExp.Exp) v;
+		Exp i = (Exp) v;
 		if (!(t.b.equals(i.b))) {
 			throw new RuntimeException("Exponent and product do not match in " + e);
 		}
@@ -534,12 +540,12 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 	public Pair<String, String> visit(FQLProgram env, TransCurry e) {
 		InstExp inst = env.insts.get(e.inst);
 		if (inst == null) {
-			throw new RuntimeException("Missing instance: " + inst);
+			throw new RuntimeException("Missing instance: " + e.inst);
 		}
-		if (!(inst instanceof InstExp.Exp)) {
+		if (!(inst instanceof Exp)) {
 			throw new RuntimeException("Instance is not an exponential");
 		}
-		InstExp.Exp i = (InstExp.Exp) inst;
+		Exp i = (Exp) inst;
 
 		if (seen.contains(e.trans)) {
 			throw new RuntimeException("Circular transform " + e);
@@ -547,10 +553,10 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		seen.add(e.trans);
 		Pair<String, String> k = env.transforms.get(e.trans).accept(env, this);
 		InstExp ab = env.insts.get(k.first);
-		if (!(ab instanceof InstExp.Times)) {
+		if (!(ab instanceof Times)) {
 			throw new RuntimeException("Source is not a product");
 		}
-		Times t = (InstExp.Times) ab;
+		Times t = (Times) ab;
 		
 		if (!i.a.equals(k.second)) {
 			throw new RuntimeException("Bases do not match");
@@ -566,17 +572,13 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 	public Pair<String, String> visit(FQLProgram env, TransIso e) {
 		InstExp l = env.insts.get(e.l);
 		if (l == null) {
-			throw new RuntimeException("Missing instance: " + l);
+			throw new RuntimeException("Missing instance: " + e.l);
 		}
 		InstExp r = env.insts.get(e.r);
 		if (r == null) {
-			throw new RuntimeException("Missing instance: " + r);
+			throw new RuntimeException("Missing instance: " + e.r);
 		}
-		if (e.lToR) {
-			return new Pair<>(e.l, e.r);
-		} else {
-			return new Pair<>(e.r, e.l);
-		}
+        return e.lToR ? new Pair<>(e.l, e.r) : new Pair<>(e.r, e.l);
 	}
 
 	@Override
@@ -585,14 +587,14 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (u == null) {
 			throw new RuntimeException("Missing instance: " + e.unit);
 		}
-		if (!(u instanceof InstExp.One)) {
+		if (!(u instanceof One)) {
 			throw new RuntimeException("Not a unit in " + e);
 		}
 		InstExp v = env.insts.get(e.prop);
 		if (v == null) {
 			throw new RuntimeException("Missing instance: " + e.prop);
 		}
-		if (!(v instanceof InstExp.Two)) {
+		if (!(v instanceof Two)) {
 			throw new RuntimeException("Not a prop in " + e);
 		}
 		
@@ -605,7 +607,7 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (v == null) {
 			throw new RuntimeException("Missing instance: " + e.prop);
 		}
-		if (!(v instanceof InstExp.Two)) {
+		if (!(v instanceof Two)) {
 			throw new RuntimeException("Not a prop in " + e);
 		}
 		
@@ -618,14 +620,14 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (v == null) {
 			throw new RuntimeException("Missing instance: " + e.prop);
 		}
-		if (!(v instanceof InstExp.Times)) {
+		if (!(v instanceof Times)) {
 			throw new RuntimeException("Not a product in " + e);
 		}
-		InstExp.Times v0 = (InstExp.Times) v;
+		Times v0 = (Times) v;
 		if (!v0.a.equals(v0.b)) {
 			throw new RuntimeException("Not the same prop in " + e);
 		}
-		if (!(env.insts.get(v0.a) instanceof InstExp.Two)) {
+		if (!(env.insts.get(v0.a) instanceof Two)) {
 			throw new RuntimeException("Not a prop in " + e);
 		}
 		
@@ -649,7 +651,7 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (prop == null) {
 			throw new RuntimeException("Missing instance " + e.prop);
 		}
-		if (!(prop instanceof InstExp.Two)) {
+		if (!(prop instanceof Two)) {
 			throw new RuntimeException("Not a prop " + e);
 		}
 		if (seen.contains(e.trans)) {
@@ -670,10 +672,10 @@ public class TransChecker implements TransExpVisitor<Pair<String, String>, FQLPr
 		if (p == null) {
 			throw new RuntimeException("Missing instance " + e.a);
 		}
-		if (!(p instanceof InstExp.Kernel)) {
+		if (!(p instanceof Kernel)) {
 			throw new RuntimeException("Not a kernel " + e);
 		}
-		InstExp.Kernel k = (InstExp.Kernel) p;
+		Kernel k = (Kernel) p;
 		Pair<String, String> trans = env.transforms.get(k.trans).type(env);
 		
 		return new Pair<>(e.a, trans.first); 

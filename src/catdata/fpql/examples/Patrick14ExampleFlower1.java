@@ -21,7 +21,7 @@ public class Patrick14ExampleFlower1 extends Example {
 		return s;
 	}
 	
-	String s = "adom : type"
+	private final String s = "adom : type"
 			+ "\n"
 			+ "\nS = schema {"
 			+ "\n	nodes two, three;"

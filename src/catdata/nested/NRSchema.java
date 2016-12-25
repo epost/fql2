@@ -93,8 +93,8 @@ public abstract class NRSchema {
 	}
 	
 	public interface NRSchemaVisitor<R, E> {
-		public R visit(E env, Dom e);
-		public R visit(E env, Rcd e);
-		public R visit(E env, Pow e);
+		R visit(E env, Dom e);
+		R visit(E env, Rcd e);
+		R visit(E env, Pow e);
 	}
 }

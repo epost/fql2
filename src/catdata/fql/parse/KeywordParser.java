@@ -10,7 +10,7 @@ import catdata.Unit;
  */
 public class KeywordParser implements RyanParser<Unit> {
 
-	String word;
+	private final String word;
 
 	public KeywordParser(String keyword) {
 		word = keyword;

@@ -20,7 +20,7 @@ public class FullSigmaExample2 extends Example {
 		return s;
 	}
 
-	String s = "schema T = {" + "\n	nodes s;" + "\n	attributes;" + "\n	arrows;"
+	private final String s = "schema T = {" + "\n	nodes s;" + "\n	attributes;" + "\n	arrows;"
 			+ "\n	equations;" + "\n}" + "\n" + "\ninstance I = {"
 			+ "\n	nodes s->{1,2};" + "\n	attributes;" + "\n	arrows;"
 			+ "\n} :  T" + "\n" + "\nschema Loop = {" + "\n	nodes s;"

@@ -35,6 +35,9 @@ import org.codehaus.jparsec.Parser.Reference;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
+import org.codehaus.jparsec.Terminals.Identifier;
+import org.codehaus.jparsec.Terminals.IntegerLiteral;
+import org.codehaus.jparsec.Terminals.StringLiteral;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 
@@ -49,7 +52,7 @@ import java.awt.HeadlessException;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class NraViewer {
 
-	protected Example[] examples = { new PeopleExample() };
+	private final Example[] examples = { new PeopleExample() };
 
 	private static final String help = ""; // "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
 
@@ -183,7 +186,7 @@ public class NraViewer {
 		}
 	} */
 
-	private final static TableCellRenderer jTableCellRenderer = (JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) -> {
+	private static final TableCellRenderer jTableCellRenderer = (JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) -> {
             Component c = (Component) value;
             int h = table.getRowHeight(row);
             int j = 20 + c.getPreferredSize().height;
@@ -215,7 +218,7 @@ public class NraViewer {
 		}
 	}
 
-	Triple<String, Component, Component> translate(String in) {
+	private Triple<String, Component, Component> translate(String in) {
 		Pair<NRel, Object> p = program(in);
 		
 		return new Triple<>("OK", conv(p.first, p.second), disp(shred(p.first, (Set<Map>) p.second)));
@@ -242,10 +245,10 @@ public class NraViewer {
 			for (Map<String, Object> o : s) {
 				col = 0;
 				for (Entry<String, Optional<NRel>> k : t.t.entrySet()) {
-					if (!k.getValue().isPresent()) {
-						rowData[r][col++] = o.get(k.getKey());
-					} else {
+					if (k.getValue().isPresent()) {
 						throw new RuntimeException("Not totally shredded");
+					} else {
+						rowData[r][col++] = o.get(k.getKey());
 					}
 				}
 				r++;
@@ -258,12 +261,12 @@ public class NraViewer {
 	}
 
 
-	public static Map<NRel, Set<Map>> shred(NRel t, Set<Map> s) {
+	private static Map<NRel, Set<Map>> shred(NRel t, Set<Map> s) {
 		Map<NRel, Set<Map>> ret = new HashMap<>();
 		ret.put(t, s);
 		
 		int[] ref = new int[] { 0 };
-		for (;;) {
+		while (true) {
 			Map<NRel, Set<Map>> ret2 = new HashMap<>();
 			for (Entry<NRel, Set<Map>> e : ret.entrySet()) {
 				ret2.putAll(unnest(e.getKey(), e.getValue(), ref));
@@ -275,7 +278,7 @@ public class NraViewer {
 		}
 	}
 	
-	public static <X,Y> Set<Pair<X, Y>> unnest1(Map<X, Set<Y>> s) {
+	private static <X,Y> Set<Pair<X, Y>> unnest1(Map<X, Set<Y>> s) {
 		Set<Pair<X, Y>> ret = new HashSet<>();
 		
 		for (Entry<X, Set<Y>> x : s.entrySet()) {
@@ -288,27 +291,22 @@ public class NraViewer {
 	}
 	
 	
-	public static Map<NRel, Set<Map>> unnest(NRel t, Set<Map> s, int[] ref) {
+	private static Map<NRel, Set<Map>> unnest(NRel t, Set<Map> s, int... ref) {
 		Set<Map> ret = new HashSet<>();
 		Map<NRel, Map<Integer, Set<Map>>> temp = new HashMap<>();
 		Map<String, Optional<NRel>> nw = new HashMap<>();
 		for (Map m : s) {
 			Map n = new HashMap<>();
 			for (Entry<String, Optional<NRel>> k : t.t.entrySet()) {
-				if (!k.getValue().isPresent()) {
-					n.put(k.getKey(), m.get(k.getKey()));
-					nw.put(k.getKey(), Optional.empty());
-				}
-				else {
-					Map<Integer, Set<Map>> u = temp.get(k.getValue().get());
-					if (u == null) {
-						u = new HashMap<>();
-						temp.put(k.getValue().get(), u);
-					}
+				if (k.getValue().isPresent()) {
+					Map<Integer, Set<Map>> u = temp.computeIfAbsent(k.getValue().get(), k1 -> new HashMap<>());
 					int z = ref[0]++;
-				//	tempX.put(m, z);
+					//	tempX.put(m, z);
 					u.put(z, (Set<Map>) m.get(k.getKey()));
 					n.put(k.getKey(), Integer.toString(z));
+					nw.put(k.getKey(), Optional.empty());
+				} else {
+					n.put(k.getKey(), m.get(k.getKey()));
 					nw.put(k.getKey(), Optional.empty());
 				}
 			}
@@ -346,7 +344,7 @@ public class NraViewer {
 	}
 
 
-	public Component conv(NRel t, Object i) {
+	private Component conv(NRel t, Object i) {
 		Set<Map<String, Object>> s = (Set<Map<String, Object>>) i;
 
 		Object[] colNames = new Object[t.t.size()];
@@ -361,11 +359,7 @@ public class NraViewer {
 		for (Map<String, Object> o : s) {
 			col = 0;
 			for (Entry<String, Optional<NRel>> k : t.t.entrySet()) {
-				if (!k.getValue().isPresent()) {
-					rowData[r][col++] = new JLabel((String)o.get(k.getKey()));
-				} else {
-					rowData[r][col++] =	conv(k.getValue().get(), o.get(k.getKey()));
-				}
+				rowData[r][col++] = !k.getValue().isPresent() ? new JLabel((String) o.get(k.getKey())) : conv(k.getValue().get(), o.get(k.getKey()));
 			}
 			r++;
 		}
@@ -400,9 +394,9 @@ public class NraViewer {
 	}
 
 	public NraViewer() {
-		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(),
+		CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"Input schema and instance", "");
-		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
+		CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"Response", "");
 
 		// JButton jdbcButton = new JButton("Load using JDBC");
@@ -416,11 +410,9 @@ public class NraViewer {
 		// final JTextField field = new JTextField(8);
 		// field.setText("fql");
 
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener((ActionEvent e) -> {
-                    input.setText(((Example) box.getSelectedItem()).getText());
-                });
+		box.addActionListener((ActionEvent e) -> input.setText(((Example) box.getSelectedItem()).getText()));
 
 		transButton.addActionListener((ActionEvent e) -> {
                     try {
@@ -506,7 +498,7 @@ public class NraViewer {
 		f.setLocationRelativeTo(null);
 		f.setVisible(true);
 	}
-	private final static String extext1 = "set (name:string, age:string, kids:set (name:string, gender:string, friends: set (name:string)))"
+	private static final String extext1 = "set (name:string, age:string, kids:set (name:string, gender:string, friends: set (name:string)))"
 	+ "\n"
 	+ "\n{(name:bill, age:30, kids:{(name:alice, gender:F, friends: {(name: kid1), (name: kid2), (name: kid3)}),"
 	+ "\n                           (name:sue,   gender:F, friends: {(name: kid1), (name: kid3)}),"
@@ -519,46 +511,46 @@ public class NraViewer {
 
 
 
-	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map((String s) -> Integer.valueOf(s));
+	static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
+			.map(Integer::valueOf);
 
-	static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(", ")", "=", "->", "+",
+	private static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(", ")", "=", "->", "+",
 			"*", "^", "|" };
 
-	static final String[] res = new String[] { "set", "string" };
+	private static final String[] res = new String[] { "set", "string" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
-	static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
+	private static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
-	static final Parser<?> TOKENIZER = Parsers.or(
-			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER, RESERVED.tokenizer(),
-			(Parser<?>) Terminals.Identifier.TOKENIZER,
-			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
+	private static final Parser<?> TOKENIZER = Parsers.or(
+			(Parser<?>) StringLiteral.DOUBLE_QUOTE_TOKENIZER, RESERVED.tokenizer(),
+			(Parser<?>) Identifier.TOKENIZER,
+			(Parser<?>) IntegerLiteral.TOKENIZER);
 
-	static Parser<?> term(String... names) {
+	private static Parser<?> term(String... names) {
 		return RESERVED.token(names);
 	}
 
-	public static Parser<?> ident() {
-		return Terminals.Identifier.PARSER;
+	private static Parser<?> ident() {
+		return Identifier.PARSER;
 	}
 
-	public static final Pair<NRel, Object> program(String s) {
+	private static Pair<NRel, Object> program(String s) {
 		Object o = program.parse(s);
 		return toProg(o);
 		// return to(o);
 	}
 
-	public static final Parser<?> program = Parsers.tuple(ty(), inst()).from(TOKENIZER, IGNORED);
+	private static final Parser<?> program = Parsers.tuple(ty(), inst()).from(TOKENIZER, IGNORED);
 
-	static Pair<NRel, Object> toProg(Object o) {
+	private static Pair<NRel, Object> toProg(Object o) {
 		org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
 		return new Pair<>(toTy(p.a), toInst(p.b));
 	}
 
-	static NRel toTy(Object o) {
+	private static NRel toTy(Object o) {
 		Tuple4 e = (Tuple4) o;
 		
 		List l = (List) e.c;
@@ -577,14 +569,14 @@ public class NraViewer {
 		return new NRel(m);
 	}
 
-	static Object toInst(Object o) {
+	private static Object toInst(Object o) {
 		if (o instanceof String) {
 			return o;
 		}
 		Tuple3 t = (Tuple3) o;
 		List l = (List) t.b;
 		if (t.a.toString().equals("(")) {
-			java.util.Map<String, Object> m = new HashMap();
+			Map<String, Object> m = new HashMap();
 			for (Object lx : l) {
 				Tuple3 u = (Tuple3) lx;
 				m.put(u.a.toString(), toInst(u.c));
@@ -599,7 +591,7 @@ public class NraViewer {
 		}
 	}
 
-	public static final Parser<?> inst() {
+	private static Parser<?> inst() {
 		Reference ref = Parser.newReference();
 
 		Parser rcd = Parsers.tuple(term("("),
@@ -612,7 +604,7 @@ public class NraViewer {
 		return p;
 	}
 
-	public static final Parser<?> ty() {
+	private static Parser<?> ty() {
 		Reference ref = Parser.newReference();
 
 		Parser p = Parsers.tuple(term("set"), term("("),
@@ -624,8 +616,8 @@ public class NraViewer {
 	}
 
 	private static Parser<?> string() {
-		return Parsers.or(Terminals.StringLiteral.PARSER, Terminals.IntegerLiteral.PARSER,
-				Terminals.Identifier.PARSER);
+		return Parsers.or(StringLiteral.PARSER, IntegerLiteral.PARSER,
+				Identifier.PARSER);
 	}
 	
 

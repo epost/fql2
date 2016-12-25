@@ -17,10 +17,9 @@ public abstract class FullQueryExp {
 			return "delta " + f;
 		}
 
-		public MapExp f;
+		public final MapExp f;
 
 		public Delta(MapExp f) {
-			super();
 			this.f = f;
 		}
 
@@ -48,7 +47,7 @@ public abstract class FullQueryExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -73,10 +72,9 @@ public abstract class FullQueryExp {
 			return "SIGMA " + f.printNicely(p);
 		}
 
-		public MapExp f;
+		public final MapExp f;
 
 		public Sigma(MapExp f) {
-			super();
 			this.f = f;
 		}
 
@@ -104,7 +102,7 @@ public abstract class FullQueryExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -124,7 +122,7 @@ public abstract class FullQueryExp {
 			return "pi " + f.printNicely(p);
 		}
 
-		public MapExp f;
+		public final MapExp f;
 
 		@Override
 		public <R, E> R accept(E env, FullQueryExpVisitor<R, E> v) {
@@ -132,7 +130,6 @@ public abstract class FullQueryExp {
 		}
 
 		public Pi(MapExp f) {
-			super();
 			this.f = f;
 		}
 
@@ -155,7 +152,7 @@ public abstract class FullQueryExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -206,7 +203,7 @@ public abstract class FullQueryExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((v == null) ? 0 : v.hashCode());
 			return result;
@@ -226,13 +223,13 @@ public abstract class FullQueryExp {
 
 	public static class Match extends FullQueryExp {
 
-		public Set<Pair<String, String>> rel;
-		public SigExp src, dst;
-		public String kind;
+		public final Set<Pair<String, String>> rel;
+		public final SigExp src;
+        public final SigExp dst;
+		public final String kind;
 
 		public Match(Set<Pair<String, String>> rel, SigExp src, SigExp dst,
 				String kind) {
-			super();
 			this.rel = rel;
 			this.src = src;
 			this.dst = dst;
@@ -278,7 +275,7 @@ public abstract class FullQueryExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((kind == null) ? 0 : kind.hashCode());
@@ -308,7 +305,7 @@ public abstract class FullQueryExp {
 
 		@Override
 		public String printNicely(FQLProgram p) {
-			return this.toFullQueryExp(p).printNicely(p);
+			return toFullQueryExp(p).printNicely(p);
 		}
 
 
@@ -323,11 +320,12 @@ public abstract class FullQueryExp {
 	}
 
 	public static class Comp extends FullQueryExp {
-		FullQueryExp l, r;
+		final FullQueryExp l;
+        final FullQueryExp r;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -357,7 +355,6 @@ public abstract class FullQueryExp {
 		}
 
 		public Comp(FullQueryExp l, FullQueryExp r) {
-			super();
 			this.l = l;
 			this.r = r;
 		}
@@ -381,17 +378,17 @@ public abstract class FullQueryExp {
 
 	public interface FullQueryExpVisitor<R, E> {
 		// public R visit (E env, Const e);
-		public R visit(E env, Comp e);
+        R visit(E env, Comp e);
 
-		public R visit(E env, Var e);
+		R visit(E env, Var e);
 
-		public R visit(E env, Match e);
+		R visit(E env, Match e);
 
-		public R visit(E env, Delta e);
+		R visit(E env, Delta e);
 
-		public R visit(E env, Sigma e);
+		R visit(E env, Sigma e);
 
-		public R visit(E env, Pi e);
+		R visit(E env, Pi e);
 	}
 
 	public abstract String printNicely(FQLProgram p);

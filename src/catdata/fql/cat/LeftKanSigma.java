@@ -19,7 +19,7 @@ import catdata.fql.decl.Node;
 import catdata.fql.decl.Path;
 import catdata.fql.decl.Signature;
 import catdata.fql.decl.Transform;
-import catdata.fql.decl.Type;
+import catdata.fql.decl.Type.Varchar;
 import catdata.fql.sql.PSMInterp;
 import catdata.ide.GlobalOptions;
 
@@ -181,7 +181,7 @@ public class LeftKanSigma {
 				}
 			}
 		}
-		if (pre.size() == 0) {
+		if (pre.isEmpty()) {
 			if (!GlobalOptions.debug.fql.ALLOW_NULLS) {
 				throw new RuntimeException(
 						"Full sigma not surjective: transform is " + etables
@@ -200,7 +200,7 @@ public class LeftKanSigma {
 			return ret;
 		}
 		if (GlobalOptions.debug.fql.ALLOW_NULLS) {
-			if (!(attr.target instanceof Type.Varchar)) {
+			if (!(attr.target instanceof Varchar)) {
 				throw new RuntimeException(
 						"Cannot create nulls for any type but string");
 			}
@@ -227,11 +227,11 @@ public class LeftKanSigma {
 			for (Pair<Object, Object> v : i.data.get(k.name)) {
 				Object x = revLookup(ret0, v.second);
 				if (x == null) {
-					x = new Integer(++inter.guid);
+					x = ++inter.guid;
 					ret0.put(x.toString(), v.second);
 				}
-				tn.add(new Pair<Object, Object>(x.toString(), x.toString()));
-				te.add(new Pair<Object, Object>(v.first, x.toString()));
+				tn.add(new Pair<>(x.toString(), x.toString()));
+				te.add(new Pair<>(v.first, x.toString()));
 			}
 			ret.put(k, ret0);
 			d.put(k.name, tn);
@@ -285,8 +285,8 @@ public class LeftKanSigma {
 		Set<Pair<Object, Object>> ret = new HashSet<>();
 
 		for (Pair<Integer, Integer> i : t) {
-			ret.add(new Pair<Object, Object>(i.first.toString(), i.second
-					.toString()));
+			ret.add(new Pair<>(i.first.toString(), i.second
+                    .toString()));
 		}
 
 		return ret;

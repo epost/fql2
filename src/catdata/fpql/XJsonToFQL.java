@@ -44,7 +44,7 @@ import catdata.ide.Language;
  */
 public class XJsonToFQL {
 
-	protected Example[] examples = { new EmpEx() };
+	private final Example[] examples = { new EmpEx() };
 
 	static class EmpEx extends Example {
 		
@@ -65,13 +65,13 @@ public class XJsonToFQL {
 		
 	}
 	
-	String help = "Translates Idea Flow JSON into an FPQL schema";
+	private final String help = "Translates Idea Flow JSON into an FPQL schema";
 
-	protected static String kind() {
+	private static String kind() {
 		return "JSON";
 	}
 
-	static String translate(String in) {
+	private static String translate(String in) {
 		try {
 			JsonReader rdr = Json.createReader(new StringReader(in));
 			JsonObject obj = rdr.readObject();
@@ -157,11 +157,7 @@ public class XJsonToFQL {
 				 if (c.third.equals("\"_1\"")) {
 					 continue;
 				 }
-				 if (c.second.equals("\"_1\"")) {
-					 ret += c.first + " : " + c.third + "\n";
-				 } else {
-					 ret += c.first + " : " +  c.second + " -> " + c.third + "\n";
-				 }
+                 ret += c.second.equals("\"_1\"") ? c.first + " : " + c.third + "\n" : c.first + " : " + c.second + " -> " + c.third + "\n";
 			 }
 			 ret += "\n";
 			 Set<String> temp1 = new HashSet<>();
@@ -197,19 +193,17 @@ public class XJsonToFQL {
 	}
 
 	public XJsonToFQL() {
-		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind()
+		CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind()
 				+ " Input", "");
-		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
+		CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"FPQL Output", "");
 
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");
 
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener((ActionEvent e) -> {
-                    input.setText(((Example) box.getSelectedItem()).getText());
-                });
+		box.addActionListener((ActionEvent e) -> input.setText(((Example) box.getSelectedItem()).getText()));
 
 		transButton.addActionListener((ActionEvent e) -> {
                     try {
@@ -275,7 +269,7 @@ public class XJsonToFQL {
 		f.setVisible(true);
 	}
 	
-	static String emp_str = "{\"graph\": { \"directed\":true,"
+	private static final String emp_str = "{\"graph\": { \"directed\":true,"
 			+ "\n\"nodes\":["
 			+ "\n{\"id\": \"dom\", \"type\":\"type\", \"label\":\"dom\"},"
 			+ "\n{\"id\": \"Employee\", \"type\":\"entity\", \"label\":\"Employee\"},"

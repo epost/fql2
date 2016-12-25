@@ -21,7 +21,7 @@ import catdata.aql.Var;
 
 public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty,En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> {
 	
-	final private LPOUKB<Chc<Ty,En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> cp;
+	private final LPOUKB<Chc<Ty,En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> cp;
 	
 	public CompletionProver(Collection<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> init, AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) throws InterruptedException {
 		super(col.toKB().tys, col.toKB().syms, col.toKB().eqs);
@@ -47,7 +47,7 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 			}
 		}		
 		//&& !(prec.get(0) instanceof Head)
-		if (!prec.isEmpty() && !(prec.get(0) != null)) {
+		if (!prec.isEmpty() && prec.get(0) == null) {
 			throw new RuntimeException("Anomaly: please report");
 		}
 		KBOptions options = new KBOptions(true, sort, false, true, Integer.MAX_VALUE, Integer.MAX_VALUE, filter_subsumed, compose, syntactic_ac); //this ignores all but 4 options, see LPOUKB

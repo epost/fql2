@@ -21,7 +21,7 @@ public class Patrick4Example extends Example {
 		return s;
 	}
 	
-	String s = "string : type"
+	private final String s = "string : type"
 			+ "\nnat : type"
 			+ "\n"
 			+ "\nlength : string -> nat"

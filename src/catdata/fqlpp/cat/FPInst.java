@@ -9,13 +9,15 @@ public class FPInst<O, A> extends Category<Instance<O, A>, FPTransform<O, A>> {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof FPInst)) {
-			return false;
-		}
-		return ((FPInst<?, ?>) o).cat.equals(cat);
+		return o instanceof FPInst && ((FPInst<?, ?>) o).cat.equals(cat);
 	}
 
-	private static Map<Object, Object> map = new HashMap<>();
+	@Override
+	public int hashCode() {
+		return 0;
+	}
+
+	private static final Map<Object, Object> map = new HashMap<>();
 	public static <O,A> FPInst<O,A> get(Signature<O,A> cat) {
 		if (map.containsKey(cat)) {
 			return (FPInst<O, A>) map.get(cat);
@@ -28,7 +30,7 @@ public class FPInst<O, A> extends Category<Instance<O, A>, FPTransform<O, A>> {
 		this.cat = cat;
 	}
 
-	public Signature<O, A> cat;
+	private final Signature<O, A> cat;
 
 	@Override
 	public boolean isInfinite() {

@@ -9,8 +9,8 @@ package catdata.fql.decl;
  */
 public class Eq  {
 
-	public Path lhs;
-	public Path rhs;
+	public final Path lhs;
+	public final Path rhs;
 
 	public Eq(Path lhs, Path rhs) {
 		this.lhs = lhs;
@@ -24,7 +24,7 @@ public class Eq  {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((lhs == null) ? 0 : lhs.hashCode());
 		result = prime * result + ((rhs == null) ? 0 : rhs.hashCode());

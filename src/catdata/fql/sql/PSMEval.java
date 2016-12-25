@@ -21,8 +21,12 @@ import catdata.fql.decl.Transform;
 
 public class PSMEval extends PSM {
 
-	public String pre, A, B, AB, ABB;
-	public Signature sig;
+	private final String pre;
+    private final String A;
+    private final String B;
+    private final String AB;
+    private final String ABB;
+	private final Signature sig;
 
 
 	@Override
@@ -90,7 +94,7 @@ public class PSMEval extends PSM {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((A == null) ? 0 : A.hashCode());
 		result = prime * result + ((AB == null) ? 0 : AB.hashCode());
@@ -144,8 +148,7 @@ public class PSMEval extends PSM {
 	}
 
 	public PSMEval(String pre, String a, String b, String aB, String aBB, Signature sig) {
-		super();
-		this.pre = pre;
+        this.pre = pre;
 		A = a;
 		B = b;
 		AB = aB;

@@ -23,11 +23,13 @@ import javax.swing.table.TableRowSorter;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.Util.BoldifyingColumnHeaderRenderer;
+import catdata.Util.MyTableRowSorter;
 import catdata.ide.GlobalOptions;
 import catdata.opl.OplExp.NonEditableModel;
 
 public class JSWrapper {
-	public Object o;
+	public final Object o;
 
 	public JSWrapper(Object o) {
 		this.o = o;
@@ -44,7 +46,7 @@ public class JSWrapper {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((o == null) ? 0 : o.hashCode());
 		return result;
@@ -67,10 +69,10 @@ public class JSWrapper {
 		return true;
 	}
 
-	public static JComponent extract(Object t0) {
+	private static JComponent extract(Object t0) {
 		if (t0 instanceof OplTerm) {
 			OplTerm<?, ?> t = (OplTerm<?, ?>) t0;
-			if (t.args.size() == 0) {
+			if (t.args.isEmpty()) {
 				Object o = Util.stripChcs(t.head).second;
 				if (o instanceof JSWrapper) {
 					JSWrapper w = (JSWrapper) o;
@@ -88,7 +90,7 @@ public class JSWrapper {
 		return null;
 	}
 	
-	static JPanel makePrettyTables(Set<String> atts, Border b, String border, Object[][] rowData, String[] colNames) {
+	static JPanel makePrettyTables(Set<String> atts, Border b, String border, Object[][] rowData, String... colNames) {
 
 		@SuppressWarnings("serial")
 		JTable t = new JTable() {
@@ -105,7 +107,7 @@ public class JSWrapper {
 		t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		JPanel p = new JPanel(new GridLayout(1, 1));
-		TableRowSorter<?> sorter = new Util.MyTableRowSorter(t.getModel());
+		TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
 		if (colNames.length > 0) {
 			sorter.toggleSortOrder(0);
 		}
@@ -129,7 +131,7 @@ public class JSWrapper {
 		for (int i = 0; i < t.getColumnModel().getColumnCount(); i++) {
 		 TableColumn col = t.getColumnModel().getColumn(i);
 		 
-		    col.setHeaderRenderer(new Util.BoldifyingColumnHeaderRenderer(atts, t.getTableHeader().getDefaultRenderer()));
+		    col.setHeaderRenderer(new BoldifyingColumnHeaderRenderer(atts, t.getTableHeader().getDefaultRenderer()));
 		}
 		
 		return p;
@@ -143,17 +145,17 @@ public class JSWrapper {
 			super(new JTextField());
 		}
 
-		Map<Pair<Integer, Integer>, Component> cache = new HashMap<>();
+		final Map<Pair<Integer, Integer>, Component> cache = new HashMap<>();
 
 		@Override
-		public Component getTableCellRendererComponent(final JTable table, Object value,
-				boolean isSelected, boolean hasFocus, int row, int column) {
+		public Component getTableCellRendererComponent(JTable table, Object value,
+													   boolean isSelected, boolean hasFocus, int row, int column) {
 			Pair<Integer, Integer> p = new Pair<>(row, column);
 			Component ret = cache.get(p);
 			if (ret != null) {
 				return ret;
 			}
-			ret = JSWrapper.extract(value);
+			ret = extract(value);
 			if (ret != null) {
 				cache.put(p, ret);
 				return ret;
@@ -174,7 +176,7 @@ public class JSWrapper {
 			if (ret != null) {
 				return ret;
 			}
-			ret = JSWrapper.extract(value);
+			ret = extract(value);
 			if (ret != null) {
 				cache.put(p, ret);
 				return ret;

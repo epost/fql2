@@ -41,7 +41,6 @@ import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
@@ -59,15 +58,15 @@ public class Query {
 
 	public Mapping project, join, union;
 
-	public Signature getSource() {
+	private Signature getSource() {
 		return project.target;
 	}
 
-	public Signature getTarget() {
+	private Signature getTarget() {
 		return union.target;
 	}
 
-	public Query(Mapping project, Mapping join, Mapping union)
+	private Query(Mapping project, Mapping join, Mapping union)
 			throws FQLException {
 		if (!project.source.equals(join.source)) {
 			throw new FQLException("Ill-typed: \nProject source: "
@@ -147,31 +146,31 @@ public class Query {
 		return ret;
 	}
 
-	public static Graph<String, String> legend() {
+	private static Graph<String, String> legend() {
 		Graph<String, String> ret = new DirectedSparseMultigraph<>();
 		return ret;
 	}
 
-	public static JPanel lowerComp2(@SuppressWarnings("unused") final FqlEnvironment env) {
+	public static JPanel lowerComp2(@SuppressWarnings("unused") FqlEnvironment env) {
 		Layout<String, String> layout = new ISOMLayout<>(legend());
 		layout.setSize(new Dimension(500, 100));
 		VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 				layout);
 		vv.setPreferredSize(new Dimension(500, 100));
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 
 		vv.getRenderContext().setEdgeLabelTransformer(
-				new ToStringLabeller<String>());
+                new ToStringLabeller<>());
 		vv.getRenderContext().setVertexLabelTransformer(
-				new ToStringLabeller<String>());
+                new ToStringLabeller<>());
 
 		return vv;
 	}
 
-	public static JPanel lowerComp(@SuppressWarnings("unused") final FqlEnvironment env) {
+	public static JPanel lowerComp(@SuppressWarnings("unused") FqlEnvironment env) {
 		JPanel pan = new JPanel(new GridLayout(1, 4));
 		return pan;
 	}
@@ -179,13 +178,13 @@ public class Query {
 	/**
 	 * Implements composition at the semantic level
 	 */
-	public static <ObjS, ArrowS, ObjB, ArrowB, ObjA, ArrowA, ObjT, ArrowT, ObjD, ArrowD, ObjC, ArrowC, ObjU, ArrowU> SemQuery<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, ObjS, ArrowS, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjU, ArrowU> doComposition(
-	FinFunctor<ObjB, ArrowB, ObjS, ArrowS> s,
-			FinFunctor<ObjB, ArrowB, ObjA, ArrowA> f,
-			FinFunctor<ObjA, ArrowA, ObjT, ArrowT> t,
-			FinFunctor<ObjD, ArrowD, ObjT, ArrowT> u,
-			FinFunctor<ObjD, ArrowD, ObjC, ArrowC> g,
-			FinFunctor<ObjC, ArrowC, ObjU, ArrowU> v) throws FQLException {
+	private static <ObjS, ArrowS, ObjB, ArrowB, ObjA, ArrowA, ObjT, ArrowT, ObjD, ArrowD, ObjC, ArrowC, ObjU, ArrowU> SemQuery<Triple<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>, Pair<Arr<Triple<ObjB, Triple<ObjA, ObjD, ObjT>, Arr<ObjA, ArrowA>>, Pair<Arr<ObjB, ArrowB>, Arr<Triple<ObjA, ObjD, ObjT>, Triple<Arr<ObjA, ArrowA>, Arr<ObjD, ArrowD>, Arr<ObjT, ArrowT>>>>>, Arr<Pair<ObjD, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjD, ArrowD>>>, ObjS, ArrowS, Pair<ObjC, Value<Triple<ObjA, ObjD, ObjT>, Triple<ObjA, ObjD, ObjT>>>, Arr<ObjC, ArrowC>, ObjU, ArrowU> doComposition(
+            FinFunctor<ObjB, ArrowB, ObjS, ArrowS> s,
+            FinFunctor<ObjB, ArrowB, ObjA, ArrowA> f,
+            FinFunctor<ObjA, ArrowA, ObjT, ArrowT> t,
+            FinFunctor<ObjD, ArrowD, ObjT, ArrowT> u,
+            FinFunctor<ObjD, ArrowD, ObjC, ArrowC> g,
+            FinFunctor<ObjC, ArrowC, ObjU, ArrowU> v) throws FQLException {
 
 		// FinCat<ObjS, ArrowS> S = s.dstCat;
 		FinCat<ObjB, ArrowB> B = s.srcCat;
@@ -414,7 +413,7 @@ public class Query {
 	/**
 	 * Implements composition at a syntactic level, adding to the environment.
 	 */
-	public static Query compose(Map<String, Type> types, Query q2, Query q1)
+	private static Query compose(Map<String, Type> types, Query q2, Query q1)
 			throws FQLException {
 		Mapping s0 = q1.project;
 		Mapping f0 = q1.join;

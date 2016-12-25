@@ -20,7 +20,7 @@ public class IntegrationExample extends Example {
 		return s;
 	}
 	
-	String s = "//Example via Peter Gates"
+	private final String s = "//Example via Peter Gates"
 			+ "\n/* p12 ****************************************************/"
 			+ "\ncategory A = {"
 			+ "\n	objects "

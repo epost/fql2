@@ -12,11 +12,12 @@ import catdata.fql.decl.FullQueryExp.Match;
 import catdata.fql.decl.FullQueryExp.Pi;
 import catdata.fql.decl.FullQueryExp.Sigma;
 import catdata.fql.decl.FullQueryExp.Var;
+import catdata.fql.decl.SigExp.Const;
 
 public class FullQueryExpChecker implements
 		FullQueryExpVisitor<Pair<SigExp, SigExp>, FQLProgram> {
 
-	List<String> seen = new LinkedList<>();
+	private List<String> seen = new LinkedList<>();
 
 	@Override
 	public Pair<SigExp, SigExp> visit(FQLProgram env, Comp e) {
@@ -48,9 +49,9 @@ public class FullQueryExpChecker implements
 	@Override
 	public Pair<SigExp, SigExp> visit(FQLProgram env, Match e) {
 		List<String> x = new LinkedList<>(seen);
-		SigExp.Const s = e.src.typeOf(env).toConst(env);
+		Const s = e.src.typeOf(env).toConst(env);
 		seen = x;
-		SigExp.Const t = e.dst.typeOf(env).toConst(env);
+		Const t = e.dst.typeOf(env).toConst(env);
 		seen = x;
 		for (Pair<String, String> p : e.rel) {
 			if (!contains(s.attrs, p.first)) {
@@ -60,17 +61,18 @@ public class FullQueryExpChecker implements
 				throw new RuntimeException(p.second + " is not in attributes of " + e.dst);				
 			}
 		}
-		if (e.kind.equals("delta sigma forward")) {
-			return new Pair<>(t,s);
-		} else if (e.kind.equals("delta pi forward")) {
-			return new Pair<>(t,s);			
-		} else if (e.kind.equals("delta sigma backward")) {
-			return new Pair<>(s,t);						
-		} else if (e.kind.equals("delta pi backward")) {
-			return new Pair<>(s,t);			
-		} else {
-			throw new RuntimeException("Unknown kind: " + e.kind);
-		}
+        switch (e.kind) {
+            case "delta sigma forward":
+                return new Pair<>(t, s);
+            case "delta pi forward":
+                return new Pair<>(t, s);
+            case "delta sigma backward":
+                return new Pair<>(s, t);
+            case "delta pi backward":
+                return new Pair<>(s, t);
+            default:
+                throw new RuntimeException("Unknown kind: " + e.kind);
+        }
 	}
 
 	private static boolean contains(List<Triple<String, String, String>> attrs,

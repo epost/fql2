@@ -6,12 +6,12 @@ import java.util.Set;
 import java.util.function.Function;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.DP;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
@@ -24,8 +24,8 @@ import catdata.aql.It.ID;
 public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
  extends Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID, Chc<Sk, Pair<ID, Att2>>> {
 	
-	public final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F; 
-	public final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
+	private final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
+	private final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
 	private final LiteralInstance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID, Chc<Sk, Pair<ID, Att2>>> J;
 
 	//options has to come in as a list, because conversion to AqlOptions requires the sigma'd collage

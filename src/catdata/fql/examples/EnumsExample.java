@@ -20,7 +20,7 @@ public class EnumsExample extends Example {
 		return s;
 	}
 	
-	String s = "enum color = { red, green, blue }"
+	private final String s = "enum color = { red, green, blue }"
 			+ "\n"
 			+ "\nenum quark = { \"top\", \"bottom\", \"up\", \"down\", \"charm\", \"strange\" }"
 			+ "\n"

@@ -20,7 +20,7 @@ public class AllSyntax extends Example {
 		return s;
 	}
 
-	String s = "//Syntax for the FQL fragment of FQL++"
+	private final String s = "//Syntax for the FQL fragment of FQL++"
 			+ "\n"
 			+ "\ncategory c1 = void"
 			+ "\ncategory c2 = unit"

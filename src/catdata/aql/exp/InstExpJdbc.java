@@ -16,12 +16,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
 import catdata.aql.It;
@@ -33,16 +33,16 @@ import catdata.aql.fdm.LiteralInstance;
 
 public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> {
 
-	public final SchExp<Ty, En, Sym, Fk, Att> schema;
+	private final SchExp<Ty, En, Sym, Fk, Att> schema;
 
-	public final List<String> imports;
+	private final List<String> imports;
 
-	public final Map<String, String> options;
+	private final Map<String, String> options;
 
-	public final String clazz;
-	public final String jdbcString;
+	private final String clazz;
+	private final String jdbcString;
 
-	public final Map<String, String> map;
+	private final Map<String, String> map;
 
 	@Override
 	public long timeout() {
@@ -63,7 +63,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, 
 		this.map = Util.toMapSafely(map);
 	}
 
-	public void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, Map<Ty, String> tys, Map<Att, String> atts, Map<Fk, String> fks) {
+	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, Map<Ty, String> tys, Map<Att, String> atts, Map<Fk, String> fks) {
 		for (En En : sch.ens) {
 			if (!ens.containsKey(En)) {
 				throw new RuntimeException("no query for " + En);
@@ -136,13 +136,13 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, 
 			assertUnambig(o, sch);
 			String q = map.get(o);
 
-			if (sch.typeSide.tys.contains(o)) {
+			if (sch.typeSide.tys.contains(stringToTy(o))) {
 				tys.put(stringToTy(o), q);
 			} else if (sch.ens.contains(o)) {
 				ens.put(stringToEn(o), q);
-			} else if (sch.atts.map.containsKey(o)) {
+			} else if (sch.atts.containsKey(stringToAtt(o))) {
 				atts.put(stringToAtt(o), q);
-			} else if (sch.fks.map.containsKey(o)) {
+			} else if (sch.fks.containsKey(stringToFk(o))) {
 				fks.put(stringToFk(o), q);
 			}
 		}
@@ -263,12 +263,12 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, 
 					if (rhs == null) {
 						continue;
 					}
-					Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs0 = null;
+					Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs0;
 					if (sch.typeSide.js.java_tys.containsKey(ty)) {
 						rhs0 = Term.Obj(rhs, ty);
-					} else if (col.sks.map.containsKey(rhs)) {
+					} else if (col.sks.containsKey(objectToSk(rhs))) {
 						rhs0 = Term.Sk(objectToSk(rhs));
-					} else if (col.syms.map.containsKey(rhs) && col.syms.map.get(rhs).first.isEmpty()) {
+					} else if (col.syms.containsKey(objectToSym(rhs)) && col.syms.get(objectToSym(rhs)).first.isEmpty()) {
 						rhs0 = Term.Sym(objectToSym(rhs), Collections.emptyList());
 					} else {
 						stmt.close();
@@ -294,13 +294,13 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, 
 
 		AqlOptions strat = new AqlOptions(options, col);
 
-		InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, ID> initial = new InitialAlgebra<>(strat, sch, col, new It(), x -> x.toString(), x -> x.toString());
+		InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, ID> initial = new InitialAlgebra<>(strat, sch, col, new It(), Object::toString, Object::toString);
 
 		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial);
 		// TODO aql switch to saturated prover for jdbc
 	}
 
-	private final static String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example,"
+	private static final String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example,"
 			+ "\n"
 			+ "\n	0:Employee"
 			+ "\n	0:Department"
@@ -322,9 +322,26 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, 
 	}
 
 	@SuppressWarnings("unchecked")
+	private Fk objectToFk(Object o) {
+		return (Fk) o;
+	}
+
+	@SuppressWarnings("unchecked") 
+	private En objectToEn(Object o) {
+		return (En) o;
+	}
+
+
+	@SuppressWarnings("unchecked")
 	private Att stringToAtt(String o) {
 		return (Att) o;
 	}
+
+	@SuppressWarnings("unchecked")
+	private Att objectToAtt(Object o) {
+		return (Att) o;
+	}
+
 
 	@SuppressWarnings("unchecked")
 	private En stringToEn(String o) {
@@ -336,18 +353,23 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, 
 		return (Ty) o;
 	}
 
+	@SuppressWarnings("unchecked")
+	private Ty objectToTy(Object o) {
+		return (Ty) o;
+	}
+
 	private void assertUnambig(Object o, Schema<Ty, En, Sym, Fk, Att> sch) {
 		int i = 0;
-		if (sch.typeSide.tys.contains(o)) {
+		if (sch.typeSide.tys.contains(objectToTy(o))) {
 			i++;
 		}
-		if (sch.ens.contains(o)) {
+		if (sch.ens.contains(objectToEn(o))) {
 			i++;
 		}
-		if (sch.atts.map.containsKey(o)) {
+		if (sch.atts.containsKey(objectToAtt(o))) {
 			i++;
 		}
-		if (sch.fks.map.containsKey(o)) {
+		if (sch.fks.map.containsKey(objectToFk(o))) {
 			i++;
 		}
 		if (i > 1) {
@@ -372,7 +394,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, 
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
 		result = prime * result + ((map == null) ? 0 : map.hashCode());

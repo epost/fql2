@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -10,9 +10,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import catdata.Chc;
-import catdata.Pair;
-import catdata.Util;
+import catdata.aql.Term;
 
 @SuppressWarnings("serial")
 public final class Ctx<K,V> implements Serializable {
@@ -95,7 +93,7 @@ public final class Ctx<K,V> implements Serializable {
 	
 	@Override
 	public String toString() {
-		return toString(x -> x.toString());
+		return toString(Object::toString);
 	}
 	
 	public String toString(Function<V,String> fn) {
@@ -104,7 +102,7 @@ public final class Ctx<K,V> implements Serializable {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((map == null) ? 0 : map.hashCode());
 		return result;

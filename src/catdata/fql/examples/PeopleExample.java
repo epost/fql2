@@ -20,7 +20,7 @@ public class PeopleExample extends Example {
 		return s;
 	}
 
-	String s = "/* Here we have males and females, each with first and last names, living in a dwelling in a city.*/"
+	private final String s = "/* Here we have males and females, each with first and last names, living in a dwelling in a city.*/"
 			+ "\nschema MalesAndFemales = { "
 			+ "\n nodes"
 			+ "\n 	Male, Female, Dwelling, City;"

@@ -20,7 +20,7 @@ public class OplSKExample extends Example {
 		return s;
 	}
 	
-	String s = "SK = theory {"
+	private final String s = "SK = theory {"
 			+ "\n	sorts "
 			+ "\n		U;"
 			+ "\n	symbols "

@@ -20,7 +20,7 @@ public class OplUberExample extends Example {
 		return s;
 	}
 	
-	String s = "//configure OPL prover"
+	private final String s = "//configure OPL prover"
 			+ "\npreamble = pragma {"
 			+ "\n	options"
 			+ "\n		\"opl_prover_force_prec\" = \"true\", "

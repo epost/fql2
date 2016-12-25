@@ -19,7 +19,7 @@ public class ProductsExample extends Example {
 	public String getText() {
 		return s;
 	}
-	String s = "/* Products in S-Inst ***********************/"
+	private final String s = "/* Products in S-Inst ***********************/"
 			+ "\n"
 			+ "\ncategory S = {"
 			+ "\n	objects a, b;"

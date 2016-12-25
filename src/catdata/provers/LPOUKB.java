@@ -54,13 +54,13 @@ import catdata.provers.KBExp.KBVar;
  */
 public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
-	protected static <C, V> Pair<KBExp<C, V>, KBExp<C, V>> freshen(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> eq) {
+	static <C, V> Pair<KBExp<C, V>, KBExp<C, V>> freshen(Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> eq) {
 		Map<V, KBExp<C, V>> subst = freshenMap(fresh, eq).first;
 		return new Pair<>(eq.first.subst(subst), eq.second.subst(subst));
 	}
 	
-	protected static <C,V> Pair<Map<V, KBExp<C, V>>, Map<V, KBExp<C, V>>> freshenMap(
-			Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> eq) {
+	private static <C,V> Pair<Map<V, KBExp<C, V>>, Map<V, KBExp<C, V>>> freshenMap(
+            Iterator<V> fresh, Pair<KBExp<C, V>, KBExp<C, V>> eq) {
 		Set<V> vars = new HashSet<>();
 		KBExp<C, V> lhs = eq.first;
 		KBExp<C, V> rhs = eq.second;
@@ -77,7 +77,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	}
 	
 	private void inhabGen(Set<T> inhabited) {
-		while (inhabGen1(inhabited)) {}
+		while (inhabGen1(inhabited));
 			
 	}
 
@@ -89,7 +89,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 					continue outer;
 				}
 			}
-			changed = changed | ret.add(sig.get(c).second);
+                    changed |= ret.add(sig.get(c).second);
 		}
 		return changed;
 	}
@@ -120,14 +120,14 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	public LPOUKB(Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>>> E0, Iterator<V> fresh, Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>>> R0, KBOptions options, List<C> prec, Map<C, Pair<List<T>, T>> sig, Set<T> tys) throws InterruptedException {
 		this.options = options;
 		this.prec = prec;
-		this.R = new LinkedList<>();
+        R = new LinkedList<>();
 		this.sig = sig;
 		for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>> r : R0) {
 			R.add(freshen(fresh, new Triple<>(r.first.inject(), r.second.inject(), r.third)));
 		}
 		this.fresh = fresh;
-		this.E = new LinkedList<>();
-		this.G = new LinkedList<>();
+        E = new LinkedList<>();
+        G = new LinkedList<>();
 		for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>> e : E0) {
 			E.add(freshen(fresh, new Triple<>(e.first.inject(), e.second.inject(), e.third)));
 			G.add(freshen(fresh, new Triple<>(e.first.inject(), e.second.inject(), e.third)));
@@ -169,14 +169,10 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> cand1 = cands.get(0);
 			Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> cand2 = cands.get(1);
 			for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> other : E) {
-				if (subsumes(cand1, other)) {
-					cand1_found = true;
-				} else if (subsumes(cand1, other.reverse12())) {
+				if (subsumes(cand1, other) || subsumes(cand1, other.reverse12())) {
 					cand1_found = true;
 				}
-				if (subsumes(cand2, other)) {
-					cand2_found = true;
-				} else if (subsumes(cand2, other.reverse12())) {
+				if (subsumes(cand2, other) || subsumes(cand2, other.reverse12())) {
 					cand2_found = true;
 				}
 				if (cand1_found && cand2_found) {
@@ -313,7 +309,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static <X> void remove(Collection<X> X, X x) {
-		while (X.remove(x)) {}
+		while (X.remove(x));
 	}
 
 	private static <X> void add(Collection<X> X, X x) {
@@ -335,9 +331,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	}
 
 	private void sortByStrLen(List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> l) {
-		if (!options.unfailing) {
-			l.sort(Util.ToStringComparator);
-		} else {
+		if (options.unfailing) {
 			List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> unorientable = new LinkedList<>();
 			List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> orientable = new LinkedList<>();
 			for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> k : l) {
@@ -351,6 +345,8 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			l.clear();
 			l.addAll(orientable);
 			l.addAll(unorientable);
+		} else {
+			l.sort(Util.ToStringComparator);
 		}
 	}
 
@@ -363,7 +359,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private void complete() throws InterruptedException {
-		while (!step()){}
+		while (!step());
 
 		if (!isCompleteGround) {
 			throw new RuntimeException("Not ground complete after iteration timeout.  Last state:\n\n" + toString());
@@ -474,16 +470,16 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		Set<T> inhab = Util.union(inhab0, groundInhabited);
 		inhabGen(inhab);
 
-		for (;;) {
-			KBExp<Chc<V, C>, V> e0 = step(gt, null, Ex, Ry, e, inhab);
-			if (e.equals(e0)) {
-				if (cache != null) {
-					cache.put(e0, e);
-				}
-				return e0;
-			}
-			e = e0;
-		}
+        while (true) {
+            KBExp<Chc<V, C>, V> e0 = step(gt, null, Ex, Ry, e, inhab);
+            if (e.equals(e0)) {
+                if (cache != null) {
+                    cache.put(e0, e);
+                }
+                return e0;
+            }
+            e = e0;
+        }
 	}
 
 	private KBExp<Chc<V, C>, V> step(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R, KBExp<Chc<V, C>, V> ee, Set<T> inhab) throws InterruptedException {
@@ -778,7 +774,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	}
 
 	private static <X> List<List<X>> allSubsetsOrderedBySize(Set<X> set) {
-		List<List<X>> ret = new LinkedList<>(Util.powerSet(set).stream().map(x -> new ArrayList<>(x)).collect(Collectors.toList()));
+		List<List<X>> ret = new LinkedList<>(Util.powerSet(set).stream().map(ArrayList<X>::new).collect(Collectors.toList()));
 		ret.sort((x, y) -> x.size() > y.size() ? 1 : x.size() == y.size() ? 0 : -1);
 		return ret;
 	}
@@ -838,7 +834,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	private boolean strongGroundJoinable(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t, Map<V, T> ctx) throws InterruptedException {
 		List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R0 = new LinkedList<>();
-		List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E0 = new LinkedList<>();
+		//List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E0 = new LinkedList<>();
 
 		if (!s.equals(red(gt, null, G, R0, s, ctx.values()))) {
 			return false;
@@ -846,7 +842,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		if (!t.equals(red(gt, null, G, R0, t, ctx.values()))) {
 			return false;
 		}
-		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : E0) {
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e : E) { //TODO aql was E0 = empty
 			Map<V, KBExp<Chc<V, C>, V>> m = subsumes0(new Triple<>(s, t, ctx), e);
 			if (m == null) {
 				m = subsumes0(new Triple<>(t, s, ctx), e);
@@ -917,7 +913,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 		KBExp<Chc<V, C>, V> s0 = st.first;
 		KBExp<Chc<V, C>, V> t0 = st.second;
-		KBExp<Chc<V, C>, V> a = null, b = null;
+		KBExp<Chc<V, C>, V> a , b;
 		boolean oriented = false;
 		if (gt_lpo(this::gtX, s0, t0)) {
 			a = s0;
@@ -1011,21 +1007,20 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 	}
 
 	private Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> pick(List<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> l) {
-		for (int i = 0; i < l.size(); i++) {
-			Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> x = l.get(i);
+		for (Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> x : l) {
 			if (orientable(x)) {
-				return l.get(i);
+				return x;
 			}
 		}
 		return l.get(0);
 	}
 
-	boolean orientable(Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e) {
+	private boolean orientable(Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e) {
 		return orientable(this::gtX, e);
 	}
 
 	//
-	boolean orientable(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e) {
+    private boolean orientable(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>> e) {
 		return (gt_lpo(gt, e.first, e.second) || gt_lpo(gt, e.second, e.first));
 	}
 
@@ -1172,10 +1167,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 				return false;
 			}
 			if (lhs.left && rhs.left) {
-				if (min.contains(lhs) && min.contains(rhs)) { // both minimal
-					return lhs.l.toString().compareTo(rhs.l.toString()) > 0;
-				} else if (!min.contains(lhs) && !min.contains(rhs)) { // both
-																		// maximal
+				if (min.contains(lhs) && min.contains(rhs) || !min.contains(lhs) && !min.contains(rhs)) { // both minimal
 					return lhs.l.toString().compareTo(rhs.l.toString()) > 0;
 				} else if (min.contains(lhs) && !min.contains(rhs)) { // lhs
 																		// minimal,
@@ -1189,9 +1181,9 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 					return true;
 				}
 				throw new RuntimeException("Anomaly: please report");
-			} else if (lhs.left && !rhs.left) {
+			} else if (lhs.left) {
 				return (!min.contains(lhs));
-			} else if (!lhs.left && rhs.left) {
+			} else if (rhs.left) {
 				return (min.contains(rhs));
 			}
 			return gt.apply(lhs.r, rhs.r);
@@ -1204,11 +1196,11 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	/////
 
-	public static <V, C> boolean gt_lpo(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t) {
+	private static <V, C> boolean gt_lpo(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t) {
 		return gt_lpo1(gt, s, t) || gt_lpo2(gt, s, t);
 	}
 
-	public static <V, C> boolean gt_lpo1(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t) {
+	private static <V, C> boolean gt_lpo1(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t) {
 		if (s.isVar) {
 			return false;
 		}
@@ -1220,7 +1212,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return false;
 	}
 
-	public static <V, C> boolean gt_lpo2(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t) {
+	private static <V, C> boolean gt_lpo2(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, KBExp<Chc<V, C>, V> s, KBExp<Chc<V, C>, V> t) {
 		if (s.isVar || t.isVar) {
 			return false;
 		}
@@ -1237,22 +1229,16 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return gt.apply(S.f, T.f);
 	}
 
-	public static <V, C> boolean gt_lpo_lex(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, List<KBExp<Chc<V, C>, V>> ss, List<KBExp<Chc<V, C>, V>> tt) {
-		if (ss.size() != tt.size()) {
-			throw new RuntimeException("Anomaly: please report");
-		}
-		if (ss.isEmpty()) {
-			return false;
-		}
-		KBExp<Chc<V, C>, V> s0 = ss.get(0), t0 = tt.get(0);
-		if (gt_lpo(gt, s0, t0)) {
-			return true;
-		}
-		if (!s0.equals(t0)) {
-			return false;
-		}
-		return gt_lpo_lex(gt, ss.subList(1, ss.size()), tt.subList(1, tt.size()));
-	}
+	private static <V, C> boolean gt_lpo_lex(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, List<KBExp<Chc<V, C>, V>> ss, List<KBExp<Chc<V, C>, V>> tt) {
+        if (ss.size() != tt.size()) {
+            throw new RuntimeException("Anomaly: please report");
+        }
+        if (ss.isEmpty()) {
+            return false;
+        }
+        KBExp<Chc<V, C>, V> s0 = ss.get(0), t0 = tt.get(0);
+        return gt_lpo(gt, s0, t0) || s0.equals(t0) && gt_lpo_lex(gt, ss.subList(1, ss.size()), tt.subList(1, tt.size()));
+    }
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 	// Constraint satisfaction problem for LPO orientability, used to infer
@@ -1351,11 +1337,11 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return Util.singSet(d);
 	}
 
-	public static <X, V> Set<DAG<X>> gt_lpoInfer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
+	private static <X, V> Set<DAG<X>> gt_lpoInfer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
 		return or(gt_lpo1Infer(s, t), gt_lpo2Infer(s, t));
 	}
 
-	public static <X, V> Set<DAG<X>> gt_lpo1Infer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
+	private static <X, V> Set<DAG<X>> gt_lpo1Infer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
 		if (s.isVar) {
 			return fals();
 		}
@@ -1367,7 +1353,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return ret;
 	}
 
-	public static <X, V> Set<DAG<X>> gt_lpo2Infer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
+	private static <X, V> Set<DAG<X>> gt_lpo2Infer(KBExp<X, V> s, KBExp<X, V> t) throws InterruptedException {
 		if (s.isVar || t.isVar) {
 			return fals();
 		}
@@ -1380,15 +1366,11 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		}
 
 		Set<DAG<X>> zz;
-		if (S.f.equals(T.f)) {
-			zz = and(ret, gt_lpo_lexInfer(S.args, T.args));
-		} else {
-			zz = and(ret, gtInfer(S.f, T.f));
-		}
+		zz = S.f.equals(T.f) ? and(ret, gt_lpo_lexInfer(S.args, T.args)) : and(ret, gtInfer(S.f, T.f));
 		return zz;
 	}
 
-	public static <X, V> Set<DAG<X>> gt_lpo_lexInfer(List<KBExp<X, V>> ss, List<KBExp<X, V>> tt) throws InterruptedException {
+	private static <X, V> Set<DAG<X>> gt_lpo_lexInfer(List<KBExp<X, V>> ss, List<KBExp<X, V>> tt) throws InterruptedException {
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InterruptedException();
 		}

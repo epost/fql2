@@ -11,13 +11,14 @@ import catdata.Pair;
  * 
  *         Combine parsers to make new parsers
  */
+@SuppressWarnings("InfiniteLoopStatement")
 public class ParserUtils {
 
-	public static <T> RyanParser<List<T>> many(final RyanParser<T> p) {
+	public static <T> RyanParser<List<T>> many(RyanParser<T> p) {
 		return (Tokens s) -> {
                     List<T> ret = new ArrayList<>();
                     try {
-                        for (;;) {
+                        while (true) {
                             Partial<? extends T> x = p.parse(s);
                             s = x.tokens;
                             ret.add(x.value);
@@ -31,13 +32,12 @@ public class ParserUtils {
 	/**
 	 * 
 	 * @param <T>
-	 * @param <V>
 	 * @param p1
 	 * @param p2
 	 * @return a parser that matches and ignores p1, followed by p2
 	 */
-	public static <T> RyanParser<T> seq(final RyanParser<?> p1,
-			final RyanParser<T> p2) {
+	public static <T> RyanParser<T> seq(RyanParser<?> p1,
+                                        RyanParser<T> p2) {
 		return (Tokens s) -> {
                     Partial<?> x = p1.parse(s);
                     Partial<T> y = p2.parse(x.tokens);
@@ -45,8 +45,8 @@ public class ParserUtils {
                 };
 	}
 
-	public static <T> RyanParser<List<T>> manySep(final RyanParser<T> p,
-			final RyanParser<?> sep) {
+	public static <T> RyanParser<List<T>> manySep(RyanParser<T> p,
+                                                  RyanParser<?> sep) {
 		return (Tokens s) -> {
                     try {
                         Partial<T> x = p.parse(s);
@@ -71,8 +71,8 @@ public class ParserUtils {
 	 * @param r
 	 * @return a parser that matches l u r and returns (l,r)
 	 */
-	public static <T, U> RyanParser<Pair<T, U>> inside(final RyanParser<T> l,
-			final RyanParser<?> u, final RyanParser<U> r) {
+	public static <T, U> RyanParser<Pair<T, U>> inside(RyanParser<T> l,
+                                                       RyanParser<?> u, RyanParser<U> r) {
 		return (Tokens s) -> {
                     Partial<? extends T> l0 = l.parse(s);
                     Partial<?> u0 = u.parse(l0.tokens);
@@ -89,8 +89,8 @@ public class ParserUtils {
 	 * @param r
 	 * @return a parser that matches l u r and returns u
 	 */
-	public static <T> RyanParser<T> outside(final RyanParser<?> l,
-			final RyanParser<T> u, final RyanParser<?> r) {
+	public static <T> RyanParser<T> outside(RyanParser<?> l,
+                                            RyanParser<T> u, RyanParser<?> r) {
 		return (Tokens s) -> {
                     Partial<?> l0 = l.parse(s);
                     Partial<? extends T> u0 = u.parse(l0.tokens);
@@ -100,7 +100,7 @@ public class ParserUtils {
 	}
 
 	@SuppressWarnings({"unchecked","rawtypes"})
-	public static RyanParser<Object> or(final RyanParser p, final RyanParser q) {
+	public static RyanParser<Object> or(RyanParser p, RyanParser q) {
 
 		return (Tokens s) -> {
                     try {

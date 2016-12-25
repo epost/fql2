@@ -16,7 +16,6 @@ import catdata.fql.cat.FinCat;
 import catdata.fql.decl.Attribute;
 import catdata.fql.decl.Edge;
 import catdata.fql.decl.FQLProgram;
-import catdata.fql.decl.InstExp;
 import catdata.fql.decl.Node;
 import catdata.fql.decl.Path;
 import catdata.fql.decl.SigExp;
@@ -32,11 +31,11 @@ import catdata.fql.decl.InstExp.Const;
  */
 public class Relationalizer {
 
-	public static Map<Pair<FQLProgram, SigExp.Const>, Triple<InstExp.Const, 
+	private static final Map<Pair<FQLProgram, SigExp.Const>, Triple<Const,
 	Map<Node, Map<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>>,
 	Map<Node, Map<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Object>>> > cache = new HashMap<>();
 	
-	public static Triple<InstExp.Const, 
+	public static Triple<Const,
 	Map<Node, Map<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>>,
 	Map<Node, Map<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Object>>> 
 	terminal(FQLProgram prog, SigExp.Const sig0) {
@@ -99,7 +98,7 @@ public class Relationalizer {
 				arrows.add(new Pair<>(a.name, set));
 			}
 			//			Instance ret0 = new Instance(sig, data);
-			InstExp.Const retX = new InstExp.Const(nodes, attrs, arrows, sig.toConst());
+			Const retX = new Const(nodes, attrs, arrows, sig.toConst());
 			Triple<Const, Map<Node, Map<Object, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>>, Map<Node, Map<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Object>>> ret = new Triple<>(retX, m1, m2);
 
 			cache.put(new Pair<>(prog, sig0), ret);
@@ -125,7 +124,7 @@ public class Relationalizer {
 
 		FinCat<Node, Path> cat = sig.toCategory2().first;
 		for (Node n : sig.nodes) {
-			attrs.put(n, new LinkedList<Pair<Path, Attribute<Node>>>());
+			attrs.put(n, new LinkedList<>());
 			int count = 0;
 			List<Map<String, String>> alltypes = new LinkedList<>();
 			for (Arr<Node, Path> p : cat.arrows) {
@@ -198,7 +197,7 @@ public class Relationalizer {
 						new Pair<>(in + "_" + n.string, "c0")));
 
 			}
-			if (select.size() == 0) {
+			if (select.isEmpty()) {
 				throw new RuntimeException("No observable for " + n.string);
 			}
 			Flower j = new Flower(select, from, where);
@@ -232,12 +231,12 @@ public class Relationalizer {
 		return observations(sig, out, in, true);
 	}
 
-	public static List<PSM> relationalize(
-			LinkedHashMap<String, Pair<String, String>> select,
-			Map<String, String> from,
-			List<Pair<Pair<String, String>, Pair<String, String>>> where,
-			Signature sig, String out, Map<String, String> ty, Node n, int u,
-			Map<String, String> edge_types) {
+	private static List<PSM> relationalize(
+            LinkedHashMap<String, Pair<String, String>> select,
+            Map<String, String> from,
+            List<Pair<Pair<String, String>, Pair<String, String>>> where,
+            Signature sig, String out, Map<String, String> ty, Node n, int u,
+            Map<String, String> edge_types) {
 		List<PSM> ret = new LinkedList<>();
 
 		LinkedHashMap<String, Pair<String, String>> select0 = new LinkedHashMap<>(
@@ -248,7 +247,7 @@ public class Relationalizer {
 		Flower j0 = new Flower(select0, from, where);
 		ret.add(new CreateTable(out + "_" + n.string + "_observables_proj",
 				ty0, false));
-		if (ty0.size() > 0) {
+		if (!ty0.isEmpty()) {
 			ret.add(new InsertSQL2(out + "_" + n.string + "_observables_proj",
 					j0, new LinkedList<>(j0.select.keySet())));
 		}
@@ -411,25 +410,25 @@ public class Relationalizer {
 		List<PSM> ret = new LinkedList<>();
 
 		for (Node n : sig.nodes) {
-			Map<String, String> attrs = new HashMap<>();
-			attrs.put("c0", PSM.VARCHAR());
-			attrs.put("c1", PSM.VARCHAR());
+		//	Map<String, String> attrs = new HashMap<>();
+		//	attrs.put("c0", PSM.VARCHAR());
+		//	attrs.put("c1", PSM.VARCHAR());
 			// ret.add(new CreateTable(out + "_" + n.string, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.string, new CopyFlower(in + "_"
 					+ n.string, "c0", "c1"), "c0", "c1"));
 		}
 		for (Attribute<Node> n : sig.attrs) {
-			Map<String, String> attrs = new HashMap<>();
-			attrs.put("c0", PSM.VARCHAR());
-			attrs.put("c1", n.target.psm());
+		//	Map<String, String> attrs = new HashMap<>();
+		//	attrs.put("c0", PSM.VARCHAR());
+		//	attrs.put("c1", n.target.psm());
 			// ret.add(new CreateTable(out + "_" + n.name, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.name, new CopyFlower(in + "_"
 					+ n.name, "c0", "c1"), "c0", "c1"));
 		}
 		for (Edge n : sig.edges) {
-			Map<String, String> attrs = new HashMap<>();
-			attrs.put("c0", PSM.VARCHAR());
-			attrs.put("c1", PSM.VARCHAR());
+		//	Map<String, String> attrs = new HashMap<>();
+		//	attrs.put("c0", PSM.VARCHAR());
+		//	attrs.put("c1", PSM.VARCHAR());
 			// ret.add(new CreateTable(out + "_" + n.name, attrs, false));
 			ret.add(new InsertSQL(out + "_" + n.name, new CopyFlower(in + "_"
 					+ n.name, "c0", "c1"), "c0", "c1"));

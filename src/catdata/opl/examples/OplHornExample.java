@@ -20,7 +20,7 @@ public class OplHornExample extends Example {
 		return s;
 	}
 	
-	String s = "S1 = theory {"
+	private final String s = "S1 = theory {"
 			+ "\n	sorts X, dom;"
 			+ "\n	symbols r1 : X -> dom, r2 : X -> dom;"
 			+ "\n	equations;"

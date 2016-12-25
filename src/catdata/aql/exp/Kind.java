@@ -46,10 +46,10 @@ public enum Kind {
 		
 	}
 	
-	public final Class<?> literal;
-	public final Class<?> exp;
+	private final Class<?> literal;
+	private final Class<?> exp;
 	
-	private Kind(Class<?> literal, Class<?> exp) {
+	Kind(Class<?> literal, Class<?> exp) {
 		this.literal = literal;
 		this.exp = exp;
 	} 

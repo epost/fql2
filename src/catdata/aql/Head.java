@@ -53,7 +53,7 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return new Head<>(null, null, null, null, null, obj, null);
 	}
 	
-	public Head(Sym sym, Fk fk, Att att, Gen gen, Sk sk, Object obj, Ty ty) {
+	private Head(Sym sym, Fk fk, Att att, Gen gen, Sk sk, Object obj, Ty ty) {
 		this.sym = sym;
 		this.fk = fk;
 		this.att = att;
@@ -64,13 +64,13 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 
 	public Head(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
-		this.sym = term.sym;
-		this.fk = term.fk;
-		this.att = term.att;
-		this.gen = term.gen;
-		this.sk = term.sk;
-		this.obj = term.obj;
-		this.ty = term.ty;
+        sym = term.sym;
+        fk = term.fk;
+        att = term.att;
+        gen = term.gen;
+        sk = term.sk;
+        obj = term.obj;
+        ty = term.ty;
 		if (term.var != null) {
 			throw new RuntimeException("Variable " + term.var + " cannot be a symbol");
 		} else if (sym == null && fk == null && att == null && gen == null && sk == null && obj == null) {
@@ -80,7 +80,7 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((att == null) ? 0 : att.hashCode());
 		result = prime * result + ((fk == null) ? 0 : fk.hashCode());

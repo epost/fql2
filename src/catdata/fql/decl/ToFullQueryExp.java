@@ -1,11 +1,6 @@
 package catdata.fql.decl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -16,28 +11,29 @@ import catdata.fql.decl.FullQueryExp.Match;
 import catdata.fql.decl.FullQueryExp.Pi;
 import catdata.fql.decl.FullQueryExp.Sigma;
 import catdata.fql.decl.FullQueryExp.Var;
+import catdata.fql.decl.SigExp.Const;
 
 public class ToFullQueryExp implements
 		FullQueryExpVisitor<FullQueryExp, FQLProgram> {
 
 	@Override
 	public FullQueryExp visit(FQLProgram env, Delta e) {
-		return new FullQueryExp.Delta(e.f);
+		return new Delta(e.f);
 	}
 
 	@Override
 	public FullQueryExp visit(FQLProgram env, Sigma e) {
-		return new FullQueryExp.Sigma(e.f);
+		return new Sigma(e.f);
 	}
 
 	@Override
 	public FullQueryExp visit(FQLProgram env, Pi e) {
-		return new FullQueryExp.Pi(e.f);
+		return new Pi(e.f);
 	}
 
 	@Override
 	public FullQueryExp visit(FQLProgram env, Comp e) {
-		return new FullQueryExp.Comp(e.l.accept(env, this), e.r.accept(env,
+		return new Comp(e.l.accept(env, this), e.r.accept(env,
 				this));
 	}
 
@@ -49,8 +45,8 @@ public class ToFullQueryExp implements
 	@Override
 	public FullQueryExp visit(FQLProgram env, Match e) {
 		try {
-			SigExp.Const s = e.src.typeOf(env).toConst(env);
-			SigExp.Const t = e.dst.typeOf(env).toConst(env);
+			Const s = e.src.typeOf(env).toConst(env);
+			Const t = e.dst.typeOf(env).toConst(env);
 
 			Pair<Map<Set<Pair<String, String>>, String>, Map<Set<Pair<String, String>>, String>> xxx = computeEqCs(
 					s, t, e.rel);
@@ -138,29 +134,35 @@ public class ToFullQueryExp implements
 				eqs.add(new Pair<>(lhs, rhs));
 			}
 
-			SigExp.Const x = new SigExp.Const(new LinkedList<>(nodes), new LinkedList<>(attrs), new LinkedList<>(arrows), new LinkedList<>(eqs));
+			Const x = new Const(new LinkedList<>(nodes), new LinkedList<>(attrs), new LinkedList<>(arrows), new LinkedList<>(eqs));
 			MapExp.Const inj1 = new MapExp.Const(inj1Node, inj1Attrs,
 					inj1Arrows, s, x);
 			MapExp.Const inj2 = new MapExp.Const(inj2Node, inj2Attrs,
 					inj2Arrows, t, x);
-	
-			if (e.kind.equals("delta sigma forward")) {
-				FullQueryExp q = new FullQueryExp.Comp(new FullQueryExp.Sigma(
-						inj2), new FullQueryExp.Delta(inj1));
-				return q;
-			} else if (e.kind.equals("delta pi forward")) {
-				FullQueryExp q = new FullQueryExp.Comp(
-						new FullQueryExp.Pi(inj2), new FullQueryExp.Delta(inj1));
-				return q;
-			} else if (e.kind.equals("delta sigma backward")) {
-				FullQueryExp q = new FullQueryExp.Comp(new FullQueryExp.Sigma(
-						inj1), new FullQueryExp.Delta(inj2));
-				return q;
-			} else if (e.kind.equals("delta pi backward")) {
-				FullQueryExp q = new FullQueryExp.Comp(
-						new FullQueryExp.Pi(inj1), new FullQueryExp.Delta(inj2));
-				return q;
-			}
+
+            switch (e.kind) {
+                case "delta sigma forward": {
+                    FullQueryExp q = new Comp(new Sigma(
+                            inj2), new Delta(inj1));
+                    return q;
+                }
+                case "delta pi forward": {
+                    FullQueryExp q = new Comp(
+                            new Pi(inj2), new Delta(inj1));
+                    return q;
+                }
+                case "delta sigma backward": {
+                    FullQueryExp q = new Comp(new Sigma(
+                            inj1), new Delta(inj2));
+                    return q;
+                }
+                case "delta pi backward":
+                    FullQueryExp q = new Comp(
+                            new Pi(inj1), new Delta(inj2));
+                    return q;
+			default:
+				break;
+            }
 			throw new RuntimeException("Unknown kind: " + e.kind);
 
 		} catch (Exception ex) {
@@ -170,7 +172,7 @@ public class ToFullQueryExp implements
 	}
 
 	private static Pair<Map<Set<Pair<String, String>>, String>, Map<Set<Pair<String, String>>, String>> computeEqCs(
-			catdata.fql.decl.SigExp.Const s, catdata.fql.decl.SigExp.Const t,
+			Const s, Const t,
 			Set<Pair<String, String>> rel) {
 
 		Map<Set<Pair<String, String>>, String> node_map = new HashMap<>();
@@ -210,33 +212,34 @@ public class ToFullQueryExp implements
 
 	private static void mergeEqcs(Set<Set<Pair<String, String>>> nodeEqcs) {
 
-		for (;;) {
-			Set<Pair<String, String>> x = null;
-			Set<Pair<String, String>> y = null;
-			lbl: for (Set<Pair<String, String>> k : nodeEqcs) {
-				for (Set<Pair<String, String>> v : nodeEqcs) {
-					if (k == v) {
-						continue;
-					}
-					if (haveCommon(k, v)) {
-						x = k;
-						y = v;
-						break lbl;
-					}
-				}
-			}
+        while (true) {
+            Set<Pair<String, String>> x = null;
+            Set<Pair<String, String>> y = null;
+            lbl:
+            for (Set<Pair<String, String>> k : nodeEqcs) {
+                for (Set<Pair<String, String>> v : nodeEqcs) {
+                    if (Objects.equals(k, v)) {
+                        continue;
+                    }
+                    if (haveCommon(k, v)) {
+                        x = k;
+                        y = v;
+                        break lbl;
+                    }
+                }
+            }
 
-			if (x == null && y == null) {
-				return;
-			}
-			if (x == null) {
-				throw new RuntimeException("ToFullQuery FQL internal error");
-			}
-			x.addAll(y);
-			nodeEqcs.remove(y);
-			x = null;
-			y = null;
-		}
+            if (x == null && y == null) {
+                return;
+            }
+            if (x == null) {
+                throw new RuntimeException("ToFullQuery FQL internal error");
+            }
+            x.addAll(y);
+            nodeEqcs.remove(y);
+            //x = null;
+            //y = null;
+        }
 	}
 
 	private static boolean haveCommon(Set<Pair<String, String>> k,

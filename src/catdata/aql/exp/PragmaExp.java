@@ -47,14 +47,14 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			this.files = files;
 			//this isn't side effect free, but it should be benign, or at least as benign as having direct access to the classpath from the command line
 			try {
-				Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
+				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 				method.setAccessible(true);
 				for (String f : files) {
 					File file = new File(f);
 					if (!file.exists()) {
 						throw new RuntimeException("Not a file: " + f);
 					}
-					method.invoke(ClassLoader.getSystemClassLoader(), new Object[] { file.toURI().toURL() });
+					method.invoke(ClassLoader.getSystemClassLoader(), file.toURI().toURL());
 				}
 			} catch (IllegalAccessException | NoSuchMethodException | RuntimeException | InvocationTargetException | MalformedURLException thr) {
 				thr.printStackTrace();
@@ -65,7 +65,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((files == null) ? 0 : files.hashCode());
 			return result;
@@ -160,18 +160,18 @@ public abstract class PragmaExp extends Exp<Pragma> {
 						return s;
 					}
 					// TODO aql eventually, this should not catch the exception
-					Matcher<N1, E1, N2, E2, ?> ret0 = null;
+					Matcher<N1, E1, N2, E2, ?> ret0;
 					try {
-                                            switch (which) {
-                                                case "naive":
-                                                    ret0 = new NaiveMatcher<>(src0, dst0, options);
-                                                    break;
-                                                case "sf":
-                                                    ret0 = new SimilarityFloodingMatcher<>(src0, dst0, options);
-                                                    break;
-                                                default:
-                                                    throw new RuntimeException("Please use naive or sf for which match desired, not " + which);
-                                            }
+						switch (which) {
+							case "naive":
+								ret0 = new NaiveMatcher<>(src0, dst0, options);
+								break;
+							case "sf":
+								ret0 = new SimilarityFloodingMatcher<>(src0, dst0, options);
+								break;
+							default:
+								throw new RuntimeException("Please use naive or sf for which match desired, not " + which);
+						}
 						s = ret0.bestMatch.toString();
 					} catch (RuntimeException e) {
 						e.printStackTrace();
@@ -194,7 +194,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((options == null) ? 0 : options.hashCode());
@@ -267,7 +267,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
 			result = prime * result + ((jdbcString == null) ? 0 : jdbcString.hashCode());
@@ -367,7 +367,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((file == null) ? 0 : file.hashCode());
 			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
@@ -439,7 +439,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((file == null) ? 0 : file.hashCode());
 			result = prime * result + ((options == null) ? 0 : options.hashCode());
@@ -524,7 +524,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((var == null) ? 0 : var.hashCode());
 			return result;
@@ -573,7 +573,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((options == null) ? 0 : options.hashCode());
 			result = prime * result + ((jss == null) ? 0 : jss.hashCode());
@@ -645,7 +645,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((options == null) ? 0 : options.hashCode());
 			result = prime * result + ((cmds == null) ? 0 : cmds.hashCode());
@@ -745,7 +745,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
@@ -848,7 +848,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((h == null) ? 0 : h.hashCode());
 			result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());

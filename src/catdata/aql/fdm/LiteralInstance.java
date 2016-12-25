@@ -3,10 +3,10 @@ package catdata.aql.fdm;
 import java.util.Map;
 import java.util.Set;
 
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Algebra;
-import catdata.aql.Ctx;
 import catdata.aql.DP;
 import catdata.aql.Instance;
 import catdata.aql.Schema;

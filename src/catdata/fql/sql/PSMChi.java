@@ -21,10 +21,14 @@ import catdata.fql.decl.Transform;
 
 public class PSMChi extends PSM {
 
-	Signature sig;
-	String pre, a, b, prop, f;
+	private final Signature sig;
+	private final String pre;
+    private final String a;
+    private final String b;
+    private final String prop;
+    private final String f;
 	
-	Signature fullSig;
+	private final Signature fullSig;
 
 	@Override
 	public String toString() {
@@ -146,14 +150,14 @@ public class PSMChi extends PSM {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((a == null) ? 0 : a.hashCode());
 		result = prime * result + ((b == null) ? 0 : b.hashCode());
 		result = prime * result + ((f == null) ? 0 : f.hashCode());
 		result = prime * result + ((pre == null) ? 0 : pre.hashCode());
 		result = prime * result + ((prop == null) ? 0 : prop.hashCode());
-		result = prime * result + ((sig == null) ? 0 : sig.hashCode());
+		result = prime * result + sig.hashCode();
 		return result;
 	}
 
@@ -191,19 +195,13 @@ public class PSMChi extends PSM {
 				return false;
 		} else if (!prop.equals(other.prop))
 			return false;
-		if (sig == null) {
-			if (other.sig != null)
-				return false;
-		} else if (!sig.equals(other.sig))
-			return false;
-		return true;
+		return sig.equals(other.sig);
 	}
 
 	public PSMChi(Signature sig, String pre, String a, String b, String prop,
 			String f) {
-		super();
-		this.fullSig = sig;
-		this.sig = new Signature(fullSig.nodes, fullSig.edges, new LinkedList<Attribute<Node>>(), fullSig.eqs);
+        fullSig = sig;
+		this.sig = new Signature(fullSig.nodes, fullSig.edges, new LinkedList<>(), fullSig.eqs);
 		this.pre = pre;
 		this.a = a;
 		this.b = b;

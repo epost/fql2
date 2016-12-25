@@ -37,9 +37,9 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((sch == null) ? 0 : sch.hashCode());
+			result = prime * result + (sch.hashCode());
 			return result;
 		}
 
@@ -52,13 +52,8 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 			if (getClass() != obj.getClass())
 				return false;
 			MapExpId<?,?,?,?,?> other = (MapExpId<?,?,?,?,?>) obj;
-			if (sch == null) {
-				if (other.sch != null)
-					return false;
-			} else if (!sch.equals(other.sch))
-				return false;
-			return true;
-		}
+            return sch.equals(other.sch);
+        }
 
 		@Override
 		public String toString() {
@@ -105,7 +100,7 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((var == null) ? 0 : var.hashCode());
 			return result;
@@ -169,9 +164,9 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((map == null) ? 0 : map.hashCode());
+			result = prime * result + (map.hashCode());
 			return result;
 		}
 
@@ -184,13 +179,8 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 			if (getClass() != obj.getClass())
 				return false;
 			MapExpLit<?,?,?,?,?,?,?,?> other = (MapExpLit<?,?,?,?,?,?,?,?>) obj;
-			if (map == null) {
-				if (other.map != null)
-					return false;
-			} else if (!map.equals(other.map))
-				return false;
-			return true;
-		}
+            return map.equals(other.map);
+        }
 
 		@Override
 		public String toString() {

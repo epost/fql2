@@ -20,7 +20,7 @@ public class OplUnfailingExample extends Example {
 		return s;
 	}
 	
-	String s = "Entropic = theory {"
+	private final String s = "Entropic = theory {"
 			+ "\n	 sorts "
 			+ "\n		S;"
 			+ "\n	 symbols"

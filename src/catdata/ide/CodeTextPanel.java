@@ -22,8 +22,8 @@ import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
 @SuppressWarnings("serial")
-/**
- * @author ryan
+/*
+  @author ryan
  * A text editor.
  */
 public class CodeTextPanel extends JPanel {
@@ -60,12 +60,10 @@ public class CodeTextPanel extends JPanel {
 		area.setFont(new Font("Courier", Font.PLAIN, 13));
 		//area.setEditable(false);
 
-		final UndoManager m = new UndoManager();
+		UndoManager m = new UndoManager();
 		// area.setundoManager = new UndoManager();
 		Document doc = area.getDocument();
-		doc.addUndoableEditListener((UndoableEditEvent e) -> {
-                    m.addEdit(e.getEdit());
-                });
+		doc.addUndoableEditListener((UndoableEditEvent e) -> m.addEdit(e.getEdit()));
 
 		InputMap im = area.getInputMap(JComponent.WHEN_FOCUSED);
 		ActionMap am = area.getActionMap();

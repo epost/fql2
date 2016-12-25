@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -27,7 +28,7 @@ public final class TypeSide<Ty, Sym> {
 
 	public final AqlJs<Ty, Sym> js;
 	
-	public <En,Fk,Att,Gen,Sk> Ty type(Ctx<Var,Ty> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+	private <En,Fk,Att,Gen,Sk> Ty type(Ctx<Var, Ty> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		if (!term.isTypeSide()) {
 			throw new RuntimeException(term + " is not a typeside term");
 		} 
@@ -68,7 +69,7 @@ public final class TypeSide<Ty, Sym> {
 		validate(checkJava);
 	}
 
-	public void validate(boolean checkJava) {
+	private void validate(boolean checkJava) {
 		//check that each sym is in tys
 		for (Sym sym : syms.keySet()) {
 			Pair<List<Ty>, Ty> ty = syms.get(sym);
@@ -177,12 +178,8 @@ public final class TypeSide<Ty, Sym> {
 	public <En,Fk,Att,Gen,Sk> void assertNoJava(Term<Ty, En, Sym, Fk, Att, Gen, Sk> t) {
 		if (t.var != null) {
 			return;
-		} else if (t.fk != null) {
+		} else if (t.fk != null || t.att != null) {
 			assertNoJava(t.arg);
-			return;
-		} else if (t.att != null) {
-			assertNoJava(t.arg);
-			//does not test for attribute ending at java type, but that should ruled out previously
 			return;
 		} else if (t.sym != null) {
 			Pair<List<Ty>, Ty> x = syms.get(t.sym);
@@ -202,7 +199,7 @@ public final class TypeSide<Ty, Sym> {
 		throw new RuntimeException("Anomaly: please report."); //else if (t.g)
 	} 
 	
-	public String toString(Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq) {
+	private String toString(Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq) {
 		String pre = eq.first.isEmpty() ? "" : "forall ";
 		return pre + eq.first + ". " + eq.second + " = " + eq.third;
 	}
@@ -237,7 +234,7 @@ public final class TypeSide<Ty, Sym> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
 	//	result = prime * result + ((java_fns == null) ? 0 : java_fns.hashCode());

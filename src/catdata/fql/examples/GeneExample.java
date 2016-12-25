@@ -20,7 +20,7 @@ public class GeneExample extends Example {
 		return p;
 	}
 	
-	String p = "//This example is courtesy of Peter C Marks - peter.c.marks@gmail.com\n" 
+	private final String p = "//This example is courtesy of Peter C Marks - peter.c.marks@gmail.com\n"
 					+ "\n/* This FQL file was programmatically generated from a Gene Ontology Yeast Slim OBO file "
 					+ "\n   located at http://www.geneontology.org/GO.slims.shtml The oboformat java library"
 					+ "\n   (https://code.google.com/p/oboformat/) was used to read the OBO file. */"

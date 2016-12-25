@@ -20,7 +20,7 @@ public class VikExample extends Example {
 		return s;
 	}
 	
-	String s = "//The query from http://categoricaldata.net/fql/introSlides.pdf#page=45"
+	private final String s = "//The query from http://categoricaldata.net/fql/introSlides.pdf#page=45"
 + "\n//It's best to go to options and choose \"Pi ID creation strategy\" to be \"Summary as ID\"."
 		+	"\n\ncategory C = {"
 			+ "\n	objects "

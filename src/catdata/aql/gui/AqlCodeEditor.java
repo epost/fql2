@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.Collection;
 import java.util.Set;
@@ -41,7 +42,7 @@ import catdata.ide.Language;
 
 @SuppressWarnings("serial")
 public final class AqlCodeEditor extends
-		CodeEditor<Program<Exp<? extends Object>>, AqlEnv, AqlDisplay> {
+		CodeEditor<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 
 	private final Outline outline;
 	
@@ -57,8 +58,8 @@ public final class AqlCodeEditor extends
 	
 	private final class Outline extends JFrame {
 		
-		private JPanel p = new JPanel(new GridLayout(1,1));
-		JList<String> list = new JList<>(); 
+		private final JPanel p = new JPanel(new GridLayout(1,1));
+		final JList<String> list = new JList<>();
 		
 		public void build() {
 			list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -71,13 +72,13 @@ public final class AqlCodeEditor extends
                             listData.add(s);
 			}
 			list.setListData(listData);
-			this.revalidate();
+			revalidate();
 		}
 				
 		private Outline(String title) {
 			super(title);
-			p.add(new JScrollPane(list)); 
-			this.setContentPane(p);
+			p.add(new JScrollPane(list));
+			setContentPane(p);
 			build();
 			list.addListSelectionListener(e -> {
 					String s = list.getSelectedValue(); 
@@ -100,8 +101,8 @@ public final class AqlCodeEditor extends
 			      }
 			 };
 			addComponentListener(listener);
-			this.setSize(new Dimension(200,300));
-			this.setLocationRelativeTo(null);
+			setSize(new Dimension(200,300));
+			setLocationRelativeTo(null);
 		}
 	
 	}
@@ -158,10 +159,10 @@ public final class AqlCodeEditor extends
 		CompletionProvider provider = createCompletionProvider();
 		AutoCompletion ac = new AutoCompletion(provider);
 		KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
-				java.awt.event.InputEvent.META_DOWN_MASK
-						| java.awt.event.InputEvent.SHIFT_DOWN_MASK);
+				InputEvent.META_DOWN_MASK
+						| InputEvent.SHIFT_DOWN_MASK);
 		ac.setTriggerKey(key);
-		ac.install(this.topArea);
+		ac.install(topArea);
 	}
 
 	private static CompletionProvider createCompletionProvider() {
@@ -227,12 +228,12 @@ public final class AqlCodeEditor extends
 	}
 
 	@Override
-	protected Program<Exp<? extends Object>> parse(String program) throws ParserException {
+	protected Program<Exp<?>> parse(String program) throws ParserException {
 		return AqlParser.parseProgram(program);
 	}
 
 	@Override
-	protected AqlDisplay makeDisplay(String foo, Program<Exp<? extends Object>> init,
+	protected AqlDisplay makeDisplay(String foo, Program<Exp<?>> init,
 		AqlEnv env, long start, long middle) {
 		AqlDisplay ret = new AqlDisplay(foo, init, env, start, middle);
 		if (env.exn != null) {
@@ -242,12 +243,12 @@ public final class AqlCodeEditor extends
 	}
 
 //	private String last_str;
-	private Program<Exp<? extends Object>> last_prog;
+	private Program<Exp<?>> last_prog;
 	public AqlEnv last_env;
 	private AqlMultiDriver driver;
 	
 	@Override
-	protected AqlEnv makeEnv(String str, Program<Exp<? extends Object>> init) {
+	protected AqlEnv makeEnv(String str, Program<Exp<?>> init) {
 		driver = new AqlMultiDriver(init, toUpdate, last_prog, last_env);
 		driver.start();
 		last_env = driver.env; //constructor blocks

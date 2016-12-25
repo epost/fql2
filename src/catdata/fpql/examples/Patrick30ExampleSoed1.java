@@ -21,7 +21,7 @@ public class Patrick30ExampleSoed1 extends Example {
 		return s;
 	}
 
-	String s = "String : type"
+	private final String s = "String : type"
 			+ "\n"
 			+ "\ngecko frog human cow horse dolphin fish : String"
 			+ "\n"
@@ -96,7 +96,7 @@ public class Patrick30ExampleSoed1 extends Example {
 			+ "\n	forall w:WaterAnimal, w.wa.yattW = w.attW ;		  "
 			+ "\n} : C -> D on I"
 			+ "\n"
-			+ "\nJ1 = supersoed {"
+			+ "\n/* J1 = supersoed {"
 			+ "\n	exists am : Amphibian -> yAmphibian,"
 			+ "\n	  la : LandAnimal -> yLandAnimal,"
 			+ "\n	  wa : WaterAnimal -> yWaterAnimal;"
@@ -105,7 +105,7 @@ public class Patrick30ExampleSoed1 extends Example {
 			+ "\n			     @wa(a.IsAW) = @am(a).yIsAW;"
 			+ "\nforall l:LandAnimal, -> @la(l).yattL = l.attL ;"
 			+ "\nforall w:WaterAnimal, -> @wa(w).yattW = w.attW ;"		  
-			+ "\n} : C -> D on I"
+			+ "\n} : C -> D on I */"
 			+ "\n"
 			+ "\n/*"	
 			+ "\nJ0 = soed {"

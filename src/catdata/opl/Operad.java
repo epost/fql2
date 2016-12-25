@@ -5,10 +5,10 @@ import java.util.Set;
 
 public interface Operad<O,A> {
 
-	static class Arrow<O,A> {
-		public A a;
-		public List<O> src;
-		public O dst;
+	class Arrow<O,A> {
+		public final A a;
+		public final List<O> src;
+		public final O dst;
 		
 		public Arrow(List<O> src, O dst, A a) {
 			this.a = a;
@@ -23,7 +23,7 @@ public interface Operad<O,A> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
@@ -60,12 +60,12 @@ public interface Operad<O,A> {
 		
 	}
 	
-	public Set<O> objects();
+	Set<O> objects();
 	
-	public Set<Arrow<O,A>> hom(List<O> src, O dst);
+	Set<Arrow<O,A>> hom(List<O> src, O dst);
 	
-	public Arrow<O,A> id(O o);
+	Arrow<O,A> id(O o);
 	
-	public Arrow<O,A> comp(Arrow<O,A> F, List<Arrow<O,A>> A);
+	Arrow<O,A> comp(Arrow<O, A> F, List<Arrow<O, A>> A);
 	
 }

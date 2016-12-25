@@ -14,8 +14,8 @@ import java.util.Set;
  */
 public class CreateTable extends PSM {
 
-	String name;
-	Map<String, String> attrs;
+	private final String name;
+	private final Map<String, String> attrs;
 
 	public CreateTable(String name, Map<String, String> attrs, boolean suppress) {
 		this.name = name;
@@ -23,13 +23,13 @@ public class CreateTable extends PSM {
 		this.suppress = suppress;
 		for (String k : attrs.values()) {
 			if (!(k.equals(PSM.VARCHAR()) || k.equals(PSM.INTEGER) || k.equals(PSM.FLOAT))) {
-				throw new RuntimeException("bad attribute in " + this + " are " + attrs.toString()
+				throw new RuntimeException("bad attribute in " + this + " are " + attrs
 						+ " problematic: " + k);
 			}
 		}
 	}
 
-	boolean suppress;
+	private final boolean suppress;
 
 	@Override
 	public String toPSM() {
@@ -54,7 +54,7 @@ public class CreateTable extends PSM {
 		if (state.get(name) != null) {
 			throw new RuntimeException("table already exists: " + name + " in " + state);
 		}
-		state.put(name, new HashSet<Map<Object, Object>>());
+		state.put(name, new HashSet<>());
 	}
 
 	@Override

@@ -20,7 +20,7 @@ public class Patrick10Example extends Example {
 		return s;
 	}
 	
-	String s ="string : type"
+	private final String s ="string : type"
 			+"\nc1 c2 c3 c4 c5 c6 c7 : string"
 			+"\n"
 			+"\nC = schema {"

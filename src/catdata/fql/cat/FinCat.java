@@ -33,13 +33,13 @@ public class FinCat<Obj, Arrow> {
 
 	public List<Obj> objects = new LinkedList<>();
 	public List<Arr<Obj, Arrow>> arrows = new LinkedList<>();
-	public Map<Pair<Arr<Obj, Arrow>, Arr<Obj, Arrow>>, Arr<Obj, Arrow>> composition = new HashMap<>();
+	Map<Pair<Arr<Obj, Arrow>, Arr<Obj, Arrow>>, Arr<Obj, Arrow>> composition = new HashMap<>();
 	public Map<Obj, Arr<Obj, Arrow>> identities = new HashMap<>();
 
 	/**
 	 * Empty Category
 	 */
-	public FinCat() {
+    FinCat() {
 	}
 
 	/**
@@ -83,7 +83,7 @@ public class FinCat<Obj, Arrow> {
 		}
 	}
 
-	public void validate() {
+	void validate() {
 		if (arrows.size() < objects.size()) {
 			throw new RuntimeException("Missing arrows: " + this);
 		}
@@ -157,7 +157,7 @@ public class FinCat<Obj, Arrow> {
 		return identities.get(o);
 	}
 
-	Map<Pair<Obj,Obj>, Set<Arr<Obj, Arrow>>> cached = new HashMap<>();
+	private final Map<Pair<Obj,Obj>, Set<Arr<Obj, Arrow>>> cached = new HashMap<>();
 	public Set<Arr<Obj, Arrow>> hom(Obj A, Obj B) {
 		Pair<Obj,Obj> p = new Pair<>(A,B);
 		Set<Arr<Obj, Arrow>> retX = cached.get(p);
@@ -165,10 +165,10 @@ public class FinCat<Obj, Arrow> {
 			return retX;
 		}
 		if (!objects.contains(A)) {
-			throw new RuntimeException(A.toString() + " not in " + objects);
+			throw new RuntimeException(A + " not in " + objects);
 		}
 		if (!objects.contains(B)) {
-			throw new RuntimeException(B.toString() + " not in " + objects);
+			throw new RuntimeException(B + " not in " + objects);
 		}
 		Set<Arr<Obj, Arrow>> ret = new HashSet<>();
 		for (Arr<Obj, Arrow> a : arrows) {
@@ -191,8 +191,6 @@ public class FinCat<Obj, Arrow> {
 	/**
 	 * Converts a category to a signature.
 	 * 
-	 * @param n
-	 *            the "name" of the signature
 	 * @return a signature and isomorphism
 	 * @throws FQLException
 	 */
@@ -310,7 +308,7 @@ public class FinCat<Obj, Arrow> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((arrows == null) ? 0 : arrows.hashCode());
 		result = prime * result

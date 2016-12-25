@@ -21,7 +21,7 @@ public class Patrick12ExampleCoprod extends Example {
 		return s;
 	}
 	
-	String s ="S = schema {"
+	private final String s ="S = schema {"
 			+ "\n	nodes A, B;"
 			+ "\n	edges f : A -> B;"
 			+ "\n	equations;"

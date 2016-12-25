@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -50,7 +51,7 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		for (Fk2 fk2 : fks.keySet()) {
 			try {
 				this.fks.put(fk2, new LiteralTransform<>(fks.get(fk2).first.map, new HashMap<>(), this.ens.get(dst.fks.get(fk2).second), this.ens.get(dst.fks.get(fk2).first), fks.get(fk2).second));
-				this.doNotValidate.put(fk2, fks.get(fk2).second);
+                doNotValidate.put(fk2, fks.get(fk2).second);
 			} catch (Throwable thr) {
 				throw new RuntimeException("In transform for foreign key " + fk2 + ", " + thr.getMessage());
 			}
@@ -61,7 +62,7 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		}
 	}
 
-	public void totalityCheck(Ctx<En2, ?> ens2, Ctx<Att2, ?> atts, Ctx<Fk2, ?> fks2) {
+	private void totalityCheck(Ctx<En2, ?> ens2, Ctx<Att2, ?> atts, Ctx<Fk2, ?> fks2) {
 		for (En2 en2 : dst.ens) {
 			if (!ens2.containsKey(en2)) {
 				throw new RuntimeException("no query for " + en2);
@@ -94,25 +95,25 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		}
 	}
 	
-	public void validate() {
+	private void validate() {
 		for (Triple<Pair<Var, En2>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>> eq : dst.eqs) {
 			Chc<Ty, En2> ty = dst.type(eq.first, eq.second);
 			Frozen<Ty, En1, Sym, Fk1, Att1> I = ens.get(eq.first.second);
-			if (!ty.left) { //entity
-				for (Var u : ens.get(ty.r).gens.keySet()) {
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> lhs = transP(eq.second, Term.Gen(u), ty.r);
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> rhs = transP(eq.third, Term.Gen(u), ty.r);
-					if (!I.dp.eq(new Ctx<>(), lhs, rhs)) {
-						throw new RuntimeException("Target equation " + eq.second + " = " + eq.third + " not respected: transforms to " + lhs + " = " + rhs + ", which is not provable in the sub-query for " + eq.first.second);
-					}
-				}
-			} else {
-				Term<Ty, En1, Sym, Fk1, Att1, Var, Void> lhs = transT(eq.second);
-				Term<Ty, En1, Sym, Fk1, Att1, Var, Void> rhs = transT(eq.third);
-				if (!I.dp.eq(new Ctx<>(), lhs, rhs)) {
-					throw new RuntimeException("Target equation " + eq.second + " = " + eq.third + " not respected: transforms to " + lhs + " = " + rhs + ", which is not provable in the sub-query for " + eq.first.second);
-				}
-			}
+            if (ty.left) {
+                Term<Ty, En1, Sym, Fk1, Att1, Var, Void> lhs = transT(eq.second);
+                Term<Ty, En1, Sym, Fk1, Att1, Var, Void> rhs = transT(eq.third);
+                if (!I.dp.eq(new Ctx<>(), lhs, rhs)) {
+                    throw new RuntimeException("Target equation " + eq.second + " = " + eq.third + " not respected: transforms to " + lhs + " = " + rhs + ", which is not provable in the sub-query for " + eq.first.second);
+                }
+            } else { //entity
+                for (Var u : ens.get(ty.r).gens.keySet()) {
+                    Term<Ty, En1, Sym, Fk1, Att1, Var, Void> lhs = transP(eq.second, Term.Gen(u), ty.r);
+                    Term<Ty, En1, Sym, Fk1, Att1, Var, Void> rhs = transP(eq.third, Term.Gen(u), ty.r);
+                    if (!I.dp.eq(new Ctx<>(), lhs, rhs)) {
+                        throw new RuntimeException("Target equation " + eq.second + " = " + eq.third + " not respected: transforms to " + lhs + " = " + rhs + ", which is not provable in the sub-query for " + eq.first.second);
+                    }
+                }
+            }
 		}
 	}
 	

@@ -28,10 +28,10 @@ import catdata.Util;
  */
 public abstract class KBExp<C, V> {
 
-	public static interface KBExpVisitor<C, V, R, E> {
-		public R visit(E env, KBVar<C, V> e);
+	public interface KBExpVisitor<C, V, R, E> {
+		R visit(E env, KBVar<C, V> e);
 
-		public R visit(E env, KBApp<C, V> e);
+		R visit(E env, KBApp<C, V> e);
 	}
 
 	@Override
@@ -46,9 +46,9 @@ public abstract class KBExp<C, V> {
 
 	public abstract <S> S typeInf(Map<C, Pair<List<S>, S>> ctx, Map<V, S> cur);
 
-	public abstract boolean hasAsSubterm(KBExp<C, V> sub);
+	protected abstract boolean hasAsSubterm(KBExp<C, V> sub);
 
-	public abstract boolean occurs(V v);
+	protected abstract boolean occurs(V v);
 
 	public abstract KBExp<C, V> subst(Map<V, KBExp<C, V>> sigma);
 
@@ -59,7 +59,7 @@ public abstract class KBExp<C, V> {
 
 	public abstract Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>>> cp(List<Integer> l, KBExp<C, V> a, KBExp<C, V> b, KBExp<C, V> g, KBExp<C, V> d);
 
-	public abstract KBExp<C, V> replace(List<Integer> p, KBExp<C, V> r);
+	protected abstract KBExp<C, V> replace(List<Integer> p, KBExp<C, V> r);
 
 	public boolean isVar;
 
@@ -96,19 +96,19 @@ public abstract class KBExp<C, V> {
 	@Deprecated
 	public KBExp<C, V> sort(Collection<C> acs) {
 		KBExp<C, V> ret = this;
-		for (;;) {
-			KBExp<C, V> next = ret.sort0(acs).sort1(acs);
-			if (ret.equals(next)) {
-				return ret;
-			}
-			ret = next;
-		}
+        while (true) {
+            KBExp<C, V> next = ret.sort0(acs).sort1(acs);
+            if (ret.equals(next)) {
+                return ret;
+            }
+            ret = next;
+        }
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static class KBVar<C, V> extends KBExp<C, V> {
-		public V var;
+		public final V var;
 
 		public KBVar(V var) {
 			this.var = var;
@@ -117,7 +117,7 @@ public abstract class KBExp<C, V> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((var == null) ? 0 : var.hashCode());
 			return result;
@@ -192,7 +192,7 @@ public abstract class KBExp<C, V> {
 		 */
 		@Override
 		public boolean hasAsSubterm(KBExp<C, V> sub) {
-			return this.equals(sub);
+			return equals(sub);
 		}
 
 		@Override
@@ -262,8 +262,8 @@ public abstract class KBExp<C, V> {
 	// //////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static class KBApp<C, V> extends KBExp<C, V> {
-		public C f;
-		public List<KBExp<C, V>> args;
+		public final C f;
+		public final List<KBExp<C, V>> args;
 
 		public KBApp(C f, List<KBExp<C, V>> args) {
 			this.f = f;
@@ -273,7 +273,7 @@ public abstract class KBExp<C, V> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((args == null) ? 0 : args.hashCode());
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
@@ -410,7 +410,7 @@ public abstract class KBExp<C, V> {
 
 		@Override
 		public boolean hasAsSubterm(KBExp<C, V> sub) {
-			if (this.equals(sub)) {
+			if (equals(sub)) {
 				return true;
 			}
 			for (KBExp<C, V> arg : args) {
@@ -422,7 +422,7 @@ public abstract class KBExp<C, V> {
 		}
 
 		@Override
-		public catdata.provers.KBExp.KBVar<C, V> getVar() {
+		public KBVar<C, V> getVar() {
 			throw new RuntimeException();
 		}
 
@@ -546,8 +546,8 @@ public abstract class KBExp<C, V> {
 				ret = true;
 			}
 			for (KBExp<C, V> arg : args) {
-				ret = ret | arg.allSubExps(pred);
-				ret = ret | pred.get(arg).add(this);
+                ret |= arg.allSubExps(pred);
+                ret |= pred.get(arg).add(this);
 			}
 			return ret;
 		}

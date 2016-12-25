@@ -21,7 +21,7 @@ public class ExternalExample extends Example {
 		return s;
 	}
 
-	String s = 
+	private final String s =
 			"//The keyword 'external' can be used to suppress CREATE TABLE statements"
 					+ "\n//in the generated SQL output.  Hence, the generated output can be run"
 					+ "\n//on pre-existing database intances."

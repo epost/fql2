@@ -24,6 +24,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import catdata.Pair;
+import catdata.fqlpp.CatExp.Const;
 import catdata.fqlpp.cat.Signature;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
@@ -31,14 +32,14 @@ import catdata.provers.SemiThue;
 
 public class KBViewer {
 
-	protected Example[] examples = { new Cat() };
+	private final Example[] examples = { new Cat() };
 
 	private final String help = ""; 
 	protected static String kind() {
 		return "Knuth Bendix";
 	}
 
-	private final static class Cat extends Example {
+	private static final class Cat extends Example {
 		
 		@Override
 		public String getName() {
@@ -54,19 +55,17 @@ public class KBViewer {
 
 	
 	public KBViewer() {
-		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(),
+		CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"Input Category", "");
-		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
+		CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"Output Re-writes", "");
 
 		JButton transButton = new JButton("Complete");
 		JButton helpButton = new JButton("Help");
 	
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener((ActionEvent e) -> {
-                    input.setText(((Example) box.getSelectedItem()).getText());
-                });
+		box.addActionListener((ActionEvent e) -> input.setText(((Example) box.getSelectedItem()).getText()));
 
 		transButton.addActionListener((ActionEvent e) -> {
                     try {
@@ -124,7 +123,7 @@ public class KBViewer {
 	
 	private static String translate(String s) {
 		Object o = PPParser.catConst().from(PPParser.TOKENIZER, PPParser.IGNORED).parse(s);
-		CatExp.Const c = PPParser.toCatConst(o);
+		Const c = PPParser.toCatConst(o);
 		Signature<String, String> sig = new Signature<>(c.nodes, c.arrows, c.eqs);
 		
 		Set<Pair<List<String>, List<String>>> rules = new HashSet<>();
@@ -138,7 +137,7 @@ public class KBViewer {
 	}
 	
 
-	private final static String catstr = "{"
+	private static final String catstr = "{"
 + "\n	objects "
 + "\n		Ob, "
 + "\n		Hom, "

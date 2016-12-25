@@ -28,13 +28,13 @@ public class XOptions extends Options {
 	public boolean fast_amalgams = true;
 	public boolean validate_amalgams = false;
 	public boolean reorder_joins = true;
-	public boolean x_text = true;
+	public final boolean x_text = true;
 	public boolean x_graph = true;
 	public boolean x_cat = false;
 	public boolean x_tables = true;
 	public boolean x_adom = false;
 	public boolean x_typing = true;
-	public boolean x_elements = true;
+	private boolean x_elements = true;
 	public boolean x_json = true;
 	public int MAX_PATH_LENGTH = 8;
 

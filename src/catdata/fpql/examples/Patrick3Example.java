@@ -21,7 +21,7 @@ public class Patrick3Example extends Example {
 		return s;
 	}
 	
-	String s = "CM53 = schema {"
+	private final String s = "CM53 = schema {"
 			+ "\n nodes M;"
 			+ "\n edges arr : M -> M;"
 			+ "\n equations M.arr.arr.arr.arr.arr = M.arr.arr;"

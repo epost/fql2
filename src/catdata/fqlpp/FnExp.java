@@ -7,8 +7,8 @@ public abstract class FnExp implements Serializable {
 
 	
 	public static class ApplyTrans extends FnExp {
-		public String f;
-		public SetExp set;
+		public final String f;
+		public final SetExp set;
 		
 		public ApplyTrans(String f, SetExp set) {
 			this.f = f;
@@ -17,7 +17,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			result = prime * result + ((set == null) ? 0 : set.hashCode());
@@ -54,12 +54,12 @@ public abstract class FnExp implements Serializable {
 	}
 	
 	public static class Apply extends FnExp {
-		public String f;
-		public FnExp set;
+		public final String f;
+		public final FnExp set;
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			result = prime * result + ((set == null) ? 0 : set.hashCode());
@@ -119,18 +119,15 @@ public abstract class FnExp implements Serializable {
 		}
 		@Override
 		public String toString() {
-			if (lToR) {
-				return "iso1 " + l + " " + r;
-			} else {
-				return "iso2 " + l + " " + r;
-			}
+            return lToR ? "iso1 " + l + " " + r : "iso2 " + l + " " + r;
 		}
 		
-		boolean lToR;
-		SetExp l, r;
+		final boolean lToR;
+		final SetExp l;
+        final SetExp r;
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + (lToR ? 1231 : 1237);
@@ -168,16 +165,15 @@ public abstract class FnExp implements Serializable {
 	}
 	
 	public static class Chr extends FnExp {
-		public FnExp f;
+		public final FnExp f;
 
 		public Chr(FnExp f) {
-			super();
 			this.f = f;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -208,13 +204,12 @@ public abstract class FnExp implements Serializable {
 	
 	public static class Krnl extends FnExp {
 		public Krnl(FnExp f) {
-			super();
 			this.f = f;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -237,7 +232,7 @@ public abstract class FnExp implements Serializable {
 			return true;
 		}
 
-		public FnExp f;
+		public final FnExp f;
 		@Override
 		public <R, E> R accept(E env, FnExpVisitor<R, E> v) {
 			return v.visit(env, this);
@@ -246,7 +241,7 @@ public abstract class FnExp implements Serializable {
 	}
 	
 	public static class Id extends FnExp {
-		public SetExp t;
+		public final SetExp t;
 
 		public Id(SetExp t) {
 			this.t = t;
@@ -254,7 +249,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -292,8 +287,9 @@ public abstract class FnExp implements Serializable {
 	
 	public static class Const extends FnExp {
 		
-		FUNCTION<?,?> f;
-		SetExp src, dst; 
+		final FUNCTION<?,?> f;
+		final SetExp src;
+        final SetExp dst;
 		
 		@Override
 		public <R, E> R accept(E env, FnExpVisitor<R, E> v) {
@@ -301,7 +297,6 @@ public abstract class FnExp implements Serializable {
 		}
 
 		public Const(FUNCTION<?,?> f, SetExp src, SetExp dst) {
-			super();
 			this.f = f;
 			this.src = src;
 			this.dst = dst;
@@ -336,7 +331,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
@@ -347,7 +342,7 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class Var extends FnExp {
-		public String v;
+		public final String v;
 
 		public Var(String v) {
 			this.v = v;
@@ -363,7 +358,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((v == null) ? 0 : v.hashCode());
 			return result;
@@ -396,15 +391,14 @@ public abstract class FnExp implements Serializable {
 	
 	public static class Tru extends FnExp {
 		
-		String str;
+		final String str;
 		
 		public Tru(String str) {
-			super();
 			this.str = str;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((str == null) ? 0 : str.hashCode());
 			return result;
@@ -432,7 +426,7 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class TT extends FnExp {
-		SetExp t;
+		final SetExp t;
 
 		public TT(SetExp t) {
 			this.t = t;
@@ -440,7 +434,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -476,7 +470,7 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class FF extends FnExp {
-		SetExp t;
+		final SetExp t;
 
 		public FF(SetExp t) {
 			this.t = t;
@@ -484,7 +478,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -520,7 +514,8 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class Fst extends FnExp {
-		SetExp s, t;
+		final SetExp s;
+        final SetExp t;
 
 		public Fst(SetExp s, SetExp t) {
 			this.s = s;
@@ -529,7 +524,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -571,7 +566,8 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class Snd extends FnExp {
-		SetExp s, t;
+		final SetExp s;
+        final SetExp t;
 
 		public Snd(SetExp s, SetExp t) {
 			this.s = s;
@@ -580,7 +576,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -622,7 +618,8 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class Inl extends FnExp {
-		SetExp s, t;
+		final SetExp s;
+        final SetExp t;
 
 		public Inl(SetExp s, SetExp t) {
 			this.s = s;
@@ -631,7 +628,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -673,7 +670,8 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class Inr extends FnExp {
-		SetExp s, t;
+		final SetExp s;
+        final SetExp t;
 
 		public Inr(SetExp s, SetExp t) {
 			this.s = s;
@@ -682,7 +680,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -724,7 +722,8 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class Eval extends FnExp {
-		SetExp s, t;
+		final SetExp s;
+        final SetExp t;
 
 		public Eval(SetExp s, SetExp t) {
 			this.s = s;
@@ -733,7 +732,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((s == null) ? 0 : s.hashCode());
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
@@ -775,7 +774,7 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class Curry extends FnExp {
-		FnExp f;
+		final FnExp f;
 
 		public Curry(FnExp f) {
 			this.f = f;
@@ -783,7 +782,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -819,7 +818,8 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class Prod extends FnExp {
-		FnExp l, r;
+		final FnExp l;
+        final FnExp r;
 
 		public Prod(FnExp l, FnExp r) {
 			this.l = l;
@@ -828,7 +828,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -870,16 +870,17 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class Comp extends FnExp {
-		FnExp l, r;
+		final FnExp l;
+        final FnExp r;
 
 		public Comp(FnExp FnExp, FnExp r) {
-			this.l = FnExp;
+            l = FnExp;
 			this.r = r;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -921,7 +922,8 @@ public abstract class FnExp implements Serializable {
 	}
 
 	public static class Case extends FnExp {
-		FnExp l, r;
+		final FnExp l;
+        final FnExp r;
 
 		public Case(FnExp l, FnExp r) {
 			this.l = l;
@@ -930,7 +932,7 @@ public abstract class FnExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -975,26 +977,26 @@ public abstract class FnExp implements Serializable {
 	public abstract int hashCode();
 
 	public interface FnExpVisitor<R, E> {
-		public R visit(E env, Id e);
-		public R visit(E env, Comp e);
-		public R visit(E env, Var e);
-		public R visit(E env, Const e);
-		public R visit(E env, TT e);
-		public R visit(E env, FF e);
-		public R visit(E env, Fst e);
-		public R visit(E env, Snd e);
-		public R visit(E env, Inl e);
-		public R visit(E env, Inr e);
-		public R visit(E env, Eval e);
-		public R visit(E env, Curry e);
-		public R visit(E env, Case e);
-		public R visit(E env, Prod e);
-		public R visit(E env, Iso e);
-		public R visit(E env, Chr e);
-		public R visit(E env, Krnl e);
-		public R visit(E env, Tru e);
-		public R visit(E env, Apply e);
-		public R visit(E env, ApplyTrans e);
+		R visit(E env, Id e);
+		R visit(E env, Comp e);
+		R visit(E env, Var e);
+		R visit(E env, Const e);
+		R visit(E env, TT e);
+		R visit(E env, FF e);
+		R visit(E env, Fst e);
+		R visit(E env, Snd e);
+		R visit(E env, Inl e);
+		R visit(E env, Inr e);
+		R visit(E env, Eval e);
+		R visit(E env, Curry e);
+		R visit(E env, Case e);
+		R visit(E env, Prod e);
+		R visit(E env, Iso e);
+		R visit(E env, Chr e);
+		R visit(E env, Krnl e);
+		R visit(E env, Tru e);
+		R visit(E env, Apply e);
+		R visit(E env, ApplyTrans e);
 	}
 
 }

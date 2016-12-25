@@ -32,15 +32,16 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.MAPPING)).collect(Collectors.toList()));
 		return ret;
 	}
-	public final SchExp<Object,Object,Object,Object,Object> src, dst;
+	private final SchExp<Object,Object,Object,Object,Object> src;
+    private final SchExp<Object,Object,Object,Object,Object> dst;
 	
-	public final List<String> imports;
+	private final List<String> imports;
 	
-	public final List<Pair<Object, Object>> ens;
-	public final List<Pair<Object, List<Object>>> fks;
-	public final List<Pair<Object, Triple<String, Object, RawTerm>>> atts;
+	private final List<Pair<Object, Object>> ens;
+	private final List<Pair<Object, List<Object>>> fks;
+	private final List<Pair<Object, Triple<String, Object, RawTerm>>> atts;
 	
-	public final Map<String, String> options; //TODO aql do mapexps really need options?
+	private final Map<String, String> options; //TODO aql do mapexps really need options?
 	
 	@Override
 	public long timeout() {
@@ -69,7 +70,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((atts == null) ? 0 : atts.hashCode());
 		result = prime * result + ((dst == null) ? 0 : dst.hashCode());

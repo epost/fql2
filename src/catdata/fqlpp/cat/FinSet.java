@@ -41,10 +41,11 @@ public class FinSet extends Category<Set, Fn> {
 	}
 
 	public static class Fn<X,Y> implements Serializable {
-		public Set<X> source;
-		public Set<Y> target;
-		private FUNCTION<X,Y> function;
+		public final Set<X> source;
+		public final Set<Y> target;
+		private final FUNCTION<X,Y> function;
 		
+		@SuppressWarnings("ConstantConditions")
 		public Y apply(X o) {
 			if (GlobalOptions.debug.fqlpp.VALIDATE) {
 				if (!source.contains(o)) {
@@ -62,7 +63,8 @@ public class FinSet extends Category<Set, Fn> {
 			validate();
 		}
 		
-		public void validate() {
+		@SuppressWarnings("ConstantConditions")
+        public void validate() {
 			if (!GlobalOptions.debug.fqlpp.VALIDATE) {
 				return;
 			}
@@ -153,7 +155,7 @@ public class FinSet extends Category<Set, Fn> {
 		return (Category<Set<X>, Fn<X,X>>) ((Object)FinSet);
 	}
 	
-	public static FinSet FinSet = new FinSet();
+	public static final FinSet FinSet = new FinSet();
 	
 
 	@Override
@@ -202,23 +204,23 @@ public class FinSet extends Category<Set, Fn> {
 			List<Y> B) {
 		List<LinkedHashMap<X, Y>> ret = new LinkedList<>();
 
-		if (A.size() == 0) {
-			ret.add(new LinkedHashMap<X, Y>());
+		if (A.isEmpty()) {
+			ret.add(new LinkedHashMap<>());
 			return ret;
 		}
-		if (B.size() == 0) {
+		if (B.isEmpty()) {
 			return ret;
 		}
 
 		int[] counters = new int[A.size() + 1];
 
-		for (;;) {
-			if (counters[A.size()] == 1) {
-				break;
-			}
-			ret.add(make2(counters, A, B));
-			inc(counters, B.size());
-		}
+        while (true) {
+            if (counters[A.size()] == 1) {
+                break;
+            }
+            ret.add(make2(counters, A, B));
+            inc(counters, B.size());
+        }
 
 		return ret;
 	}
@@ -230,8 +232,8 @@ public class FinSet extends Category<Set, Fn> {
 			throw new RuntimeException();
 		}
 
-		if (A.size() == 0) {
-			ret.add(new LinkedHashMap<X, Y>());
+		if (A.isEmpty()) {
+			ret.add(new LinkedHashMap<>());
 			return ret;
 		}
 
@@ -255,13 +257,13 @@ public class FinSet extends Category<Set, Fn> {
 		return ret;
 	}
 	
-	public static <X, Y> LinkedHashMap<X, Y> fast_iso(List<X> A, List<Y> B) {
+	private static <X, Y> LinkedHashMap<X, Y> fast_iso(List<X> A, List<Y> B) {
 	
 		if (A.size() != B.size()) {
 			return null;
 		}
 
-		if (A.size() == 0) {
+		if (A.isEmpty()) {
 			return new LinkedHashMap<>();
 		}
 
@@ -309,7 +311,7 @@ public class FinSet extends Category<Set, Fn> {
 		List<LinkedHashMap<X, Y>> ret = new LinkedList<>();
 
 		if (L.isEmpty()) {
-			ret.add(new LinkedHashMap<X, Y>());
+			ret.add(new LinkedHashMap<>());
 			return ret;
 		}
 		for (Entry<X, List<Y>> k : L.entrySet()) {
@@ -325,15 +327,15 @@ public class FinSet extends Category<Set, Fn> {
 			lengths[i++] = x.getValue().size();
 		}
 
-		for (;;) {
+        while (true) {
 
-			if (counters[L.keySet().size()] == 1) {
-				break;
-			}
-			ret.add(make3(counters, L));
-			inc3(counters, lengths);
+            if (counters[L.keySet().size()] == 1) {
+                break;
+            }
+            ret.add(make3(counters, L));
+            inc3(counters, lengths);
 
-		}
+        }
 
 		return ret;
 	}
@@ -348,7 +350,7 @@ public class FinSet extends Category<Set, Fn> {
 		return ret;
 	}
 
-	private static void inc3(int[] counters, int[] lengths) {
+	private static void inc3(int[] counters, int... lengths) {
 		counters[0]++;
 		for (int i = 0; i < counters.length - 1; i++) {
 			if (counters[i] == lengths[i]) {
@@ -358,10 +360,10 @@ public class FinSet extends Category<Set, Fn> {
 		}
 	}
 
-	public static <T> Collection<List<T>> permute(Collection<T> input) {
+	private static <T> Collection<List<T>> permute(Collection<T> input) {
 		Collection<List<T>> output = new ArrayList<>();
 		if (input.isEmpty()) {
-			output.add(new ArrayList<T>());
+			output.add(new ArrayList<>());
 			return output;
 		}
 		List<T> list = new ArrayList<>(input);
@@ -444,11 +446,11 @@ public class FinSet extends Category<Set, Fn> {
 	}
 
 	public static <X,Y> Fn<X,Chc<X,Y>> inleft(Set<X> o1, Set<Y> o2) {
-		return new Fn<>(o1, coproduct(o1, o2), x -> Chc.inLeft(x));
+		return new Fn<>(o1, coproduct(o1, o2), Chc::inLeft);
 	}
 
 	public static <X,Y> Fn<Y,Chc<X,Y>> inright(Set<X> o1, Set<Y> o2) {
-		return new Fn<>(o2, coproduct(o1, o2), x -> Chc.inRight(x));
+		return new Fn<>(o2, coproduct(o1, o2), Chc::inRight);
 	}
 
 	public static <X,Y,Z> Fn<Chc<X,Y>,Z> match(Fn<X,Z> a1, Fn<Y,Z> a2) {
@@ -464,7 +466,8 @@ public class FinSet extends Category<Set, Fn> {
 	}
 	
 	@SuppressWarnings("hiding")
-	Map<Pair<Set,Set>, Set<Fn>> cached = new HashMap<>();
+    private final
+    Map<Pair<Set,Set>, Set<Fn>> cached = new HashMap<>();
 	
 	@SuppressWarnings({ "unchecked" })
 	@Override
@@ -478,7 +481,7 @@ public class FinSet extends Category<Set, Fn> {
 
 		List<LinkedHashMap<Set, Set>> k = homomorphs(new LinkedList<>(A), new LinkedList<>(B));
 		for (LinkedHashMap<Set, Set> v : k) {
-			ret.add(new Fn(A, B, x -> v.get(x)));
+			ret.add(new Fn(A, B, v::get));
 		}
 		
 		cached.put(p, ret);
@@ -494,7 +497,7 @@ public class FinSet extends Category<Set, Fn> {
 	 //A^B * B -> A
 	public <A,B> Fn<Pair<Fn<B,A>,B>, A> eval(Set<A> a, Set<B> b) {
 		return new Fn<>(product(exp(a,b),b), a, 
-				x -> { return x.first.function.apply(x.second); });
+				x -> x.first.function.apply(x.second));
 	}
 
 	// a*b -> c ~~> a -> c^b
@@ -527,7 +530,7 @@ public class FinSet extends Category<Set, Fn> {
 		for (A a : f.source) {
 			s.add(f.function.apply(a));
 		}
-		return new Fn<>(f.target, prop(), x -> s.contains(x));
+		return new Fn<>(f.target, prop(), s::contains);
 	}
 
 	public static <B> Fn<B,B> kernel(Fn<B,Boolean> f) {
@@ -544,6 +547,11 @@ public class FinSet extends Category<Set, Fn> {
 	@Override
 	public boolean equals(Object o) {
 		return (o instanceof FinSet);
+	}
+
+	@Override
+	public int hashCode() {
+		return 0;
 	}
 	
 	private FinSet() { }

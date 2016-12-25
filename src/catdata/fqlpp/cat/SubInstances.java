@@ -17,9 +17,9 @@ import catdata.Pair;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
 
-public class SubInstances {
+class SubInstances {
 
-	private static List<Boolean> tf = Arrays.asList(new Boolean[] { true, false });
+	private static final List<Boolean> tf = Arrays.asList(true, false);
 
 	private static <X> List<X> toList(Set<Pair<X, X>> set) {
 		List<X> ret = new LinkedList<>();
@@ -34,7 +34,7 @@ public class SubInstances {
 			Category<O,A> sig, List<O> list,
 			Map<Chc<O,A>, Set<Pair<Object, Object>>> inst) {
 		Set<Map<Chc<O,A>, Set<Pair<Object, Object>>>> ret = new HashSet<>();
-		if (list.size() == 0) {
+		if (list.isEmpty()) {
 			ret.add(inst);
 			return ret;
 		}
@@ -45,7 +45,7 @@ public class SubInstances {
 		for (LinkedHashMap<Object, Boolean> subset : subsets) {
 			Map<Chc<O,A>, Set<Pair<Object, Object>>> j = recDel(sig, n, inst,
 					subset);
-			if (rest.size() == 0) {
+			if (rest.isEmpty()) {
 				ret.add(j);
 			} else {
 				Set<Map<Chc<O,A>, Set<Pair<Object, Object>>>> h = subInstances_fast0(sig, rest, j);
@@ -71,8 +71,8 @@ public class SubInstances {
 			}
 		}
 
-		for (;;) {
-			Pair<O, Object> toDel = pick(del); 
+		while (true) {
+			Pair<O, Object> toDel = pick(del);
 			if (toDel == null) {
 				return ret;
 			}
@@ -83,19 +83,14 @@ public class SubInstances {
 				remove(ret.get(Chc.inRight(e)), kill);
 			}
 			for (A e : sig.arrowsTo(n)) {
-				Set<Object> cleared = clearX(ret.get(Chc.inRight(e)), kill); 
+				Set<Object> cleared = clearX(ret.get(Chc.inRight(e)), kill);
 				del.get(sig.source(e)).addAll(cleared);
 			}
 		}
 	}
 	
 	private static void remove(Set<Pair<Object, Object>> set, Object o) {
-		Iterator<Pair<Object, Object>> it = set.iterator();
-		while (it.hasNext()) {
-			if (it.next().first.equals(o)) {
-				it.remove();
-			}
-		}
+        set.removeIf(objectObjectPair -> objectObjectPair.first.equals(o));
 	} 
 
 	private static Set<Object> clearX(Set<Pair<Object, Object>> set, Object o) {

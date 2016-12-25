@@ -25,12 +25,14 @@ import catdata.fql.decl.Transform;
  */
 public class ExpPSM extends PSM {
 
-	public String pre, I, J;
-	public Signature sig;
+	private final String pre;
+    private final String I;
+    private final String J;
+	private final Signature sig;
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((I == null) ? 0 : I.hashCode());
 		result = prime * result + ((J == null) ? 0 : J.hashCode());
@@ -72,8 +74,7 @@ public class ExpPSM extends PSM {
 	}
 
 	public ExpPSM(String pre, String i, String j, Signature sig) {
-		super();
-		this.pre = pre;
+        this.pre = pre;
 		I = i;
 		J = j;
 		this.sig = sig;

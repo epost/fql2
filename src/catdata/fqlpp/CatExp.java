@@ -12,7 +12,7 @@ import catdata.Triple;
 public abstract class CatExp implements Serializable {
 	
 	public static class Colim extends CatExp {
-		String F;
+		final String F;
 		
 		@Override
 		public <R, E> R accept(E env, CatExpVisitor<R, E> v) {
@@ -21,7 +21,7 @@ public abstract class CatExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			return result;
@@ -56,7 +56,8 @@ public abstract class CatExp implements Serializable {
 	
 	
 	public static class Union extends CatExp {
-		CatExp l, r;
+		final CatExp l;
+        final CatExp r;
 		
 		@Override
 		public <R, E> R accept(E env, CatExpVisitor<R, E> v) {
@@ -65,7 +66,7 @@ public abstract class CatExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -95,8 +96,7 @@ public abstract class CatExp implements Serializable {
 		}
 
 		public Union(CatExp l, CatExp r) {
-			super();
-			this.l = l;
+            this.l = l;
 			this.r = r;
 		}
 		
@@ -107,9 +107,11 @@ public abstract class CatExp implements Serializable {
 	
 	
 	public static class Kleisli extends CatExp {
-		String F, unit, join;
+		final String F;
+        final String unit;
+        final String join;
 		
-		Boolean isCo;
+		final Boolean isCo;
 		
 		@Override
 		public <R, E> R accept(E env, CatExpVisitor<R, E> v) {
@@ -118,7 +120,7 @@ public abstract class CatExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((isCo == null) ? 0 : isCo.hashCode());
@@ -160,8 +162,7 @@ public abstract class CatExp implements Serializable {
 		}
 
 		public Kleisli(String f, String unit, String join, Boolean isCo) {
-			super();
-			F = f;
+            F = f;
 			this.unit = unit;
 			this.join = join;
 			this.isCo = isCo;
@@ -170,7 +171,7 @@ public abstract class CatExp implements Serializable {
 	}
 	
 	public static class Named extends CatExp {
-		Object name;
+		final Object name;
 		
 		public Named(Object name) {
 			this.name = name;
@@ -183,7 +184,7 @@ public abstract class CatExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((name == null) ? 0 : name.hashCode());
 			return result;
@@ -210,9 +211,9 @@ public abstract class CatExp implements Serializable {
 		
 	public static class Const extends CatExp {
 		
-		public Set<String> nodes;
-		public Set<Triple<String, String, String>> arrows;
-		public Set<Pair<Pair<String, List<String>>, Pair<String, List<String>>>> eqs;
+		public final Set<String> nodes;
+		public final Set<Triple<String, String, String>> arrows;
+		public final Set<Pair<Pair<String, List<String>>, Pair<String, List<String>>>> eqs;
 
 		public Const(
 				Set<String> nodes,
@@ -230,7 +231,7 @@ public abstract class CatExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result
 					+ ((arrows == null) ? 0 : arrows.hashCode());
@@ -336,7 +337,7 @@ public abstract class CatExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((v == null) ? 0 : v.hashCode());
 			return result;
@@ -420,7 +421,8 @@ public abstract class CatExp implements Serializable {
 	
 	
 	public static class Plus extends CatExp {
-		CatExp a, b;
+		final CatExp a;
+        final CatExp b;
 
 		public Plus(CatExp a, CatExp b) {
 			this.a = a;
@@ -432,10 +434,10 @@ public abstract class CatExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((a == null) ? 0 : a.hashCode());
-			result = prime * result + ((b == null) ? 0 : b.hashCode());
+			result = prime * result + a.hashCode();
+			result = prime * result + b.hashCode();
 			return result;
 		}
 
@@ -448,17 +450,7 @@ public abstract class CatExp implements Serializable {
 			if (getClass() != obj.getClass())
 				return false;
 			Plus other = (Plus) obj;
-			if (a == null) {
-				if (other.a != null)
-					return false;
-			} else if (!a.equals(other.a))
-				return false;
-			if (b == null) {
-				if (other.b != null)
-					return false;
-			} else if (!b.equals(other.b))
-				return false;
-			return true;
+			return a.equals(other.a) && b.equals(other.b);
 		}
 
 		@Override
@@ -473,7 +465,8 @@ public abstract class CatExp implements Serializable {
 	}
 
 	public static class Times extends CatExp {
-		public CatExp a, b;
+		public final CatExp a;
+        public final CatExp b;
 
 		public Times(CatExp a, CatExp b) {
 			this.a = a;
@@ -482,7 +475,7 @@ public abstract class CatExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -523,7 +516,8 @@ public abstract class CatExp implements Serializable {
 	}
 
 	public static class Exp extends CatExp {
-		public CatExp a, b;
+		public final CatExp a;
+        public final CatExp b;
 
 		public Exp(CatExp a, CatExp b) {
 			this.a = a;
@@ -532,7 +526,7 @@ public abstract class CatExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			result = prime * result + ((b == null) ? 0 : b.hashCode());
@@ -581,7 +575,7 @@ public abstract class CatExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -604,7 +598,7 @@ public abstract class CatExp implements Serializable {
 			return true;
 		}
 
-		public FunctorExp f;
+		public final FunctorExp f;
 		
 		@Override
 		public String toString() {
@@ -625,7 +619,7 @@ public abstract class CatExp implements Serializable {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((f == null) ? 0 : f.hashCode());
 			return result;
@@ -648,7 +642,7 @@ public abstract class CatExp implements Serializable {
 			return true;
 		}
 
-		public FunctorExp f;
+		public final FunctorExp f;
 		
 		@Override
 		public String toString() {
@@ -671,19 +665,19 @@ public abstract class CatExp implements Serializable {
 	public abstract int hashCode();
 	
 	public interface CatExpVisitor<R, E> {
-		public R visit (E env, Zero e);
-		public R visit (E env, One e);
-		public R visit (E env, Plus e);
-		public R visit (E env, Times e);
-		public R visit (E env, Exp e);
-		public R visit (E env, Var e);
-		public R visit (E env, Const e);
-		public R visit (E env, Dom e);
-		public R visit (E env, Cod e);		
-		public R visit (E env, Named e);	
-		public R visit (E env, Kleisli e);
-		public R visit (E env, Union e);
-		public R visit (E env, Colim e);
+		R visit(E env, Zero e);
+		R visit(E env, One e);
+		R visit(E env, Plus e);
+		R visit(E env, Times e);
+		R visit(E env, Exp e);
+		R visit(E env, Var e);
+		R visit(E env, Const e);
+		R visit(E env, Dom e);
+		R visit(E env, Cod e);
+		R visit(E env, Named e);
+		R visit(E env, Kleisli e);
+		R visit(E env, Union e);
+		R visit(E env, Colim e);
 	}
 	
 }

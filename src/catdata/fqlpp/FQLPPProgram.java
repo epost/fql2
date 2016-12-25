@@ -14,19 +14,15 @@ import catdata.Prog;
 @SuppressWarnings("serial")
 public class FQLPPProgram implements Serializable, Prog {
 
-	@Override
-	public boolean equals(Object o) {
-		return super.equals(o);
-	}
 
 	public static class NewDecl {
 		TransExp trans;
-		String name;
+		final String name;
 		SetExp set;
 		FnExp fn;
 		CatExp cat;
 		FunctorExp ftr;		
-		Integer line;
+		final Integer line;
 		
 		public static NewDecl transDecl(String name, Integer line, TransExp trans) {
 			NewDecl ret = new NewDecl(name, line);
@@ -71,17 +67,17 @@ public class FQLPPProgram implements Serializable, Prog {
 	public LinkedHashMap<String, FunctorExp> ftrs = new LinkedHashMap<>();
 	public LinkedHashMap<String, TransExp> trans = new LinkedHashMap<>();
 	public List<String> order = new LinkedList<>();
-	public LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();
+	private LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();
 
 	//copies
 	public FQLPPProgram(FQLPPProgram p) {
-		this.sets = new LinkedHashMap<>(p.sets);
-		this.fns = new LinkedHashMap<>(p.fns);
-		this.cats = new LinkedHashMap<>(p.cats);
-		this.ftrs = new LinkedHashMap<>(p.ftrs);
-		this.order = new LinkedList<>(p.order);
-		this.lines = new LinkedHashMap<>(p.lines);
-		this.trans = new LinkedHashMap<>(p.trans);
+        sets = new LinkedHashMap<>(p.sets);
+        fns = new LinkedHashMap<>(p.fns);
+        cats = new LinkedHashMap<>(p.cats);
+        ftrs = new LinkedHashMap<>(p.ftrs);
+        order = new LinkedList<>(p.order);
+        lines = new LinkedHashMap<>(p.lines);
+        trans = new LinkedHashMap<>(p.trans);
 	}
 
 	public FQLPPProgram(List<NewDecl> decls) {
@@ -130,11 +126,6 @@ public class FQLPPProgram implements Serializable, Prog {
 	@Override
 	public Integer getLine(String s) {
 		return lines.get(s);
-	}
-
-	@Override
-	public int hashCode() {
-		return super.hashCode();
 	}
 
 }

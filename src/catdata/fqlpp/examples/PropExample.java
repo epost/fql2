@@ -20,7 +20,7 @@ public class PropExample extends Example {
 		return s;
 	}
 	
-	String s = "//for better performance, disable validation"
+	private final String s = "//for better performance, disable validation"
 			+ "\n"
 			+ "\ncategory S = { "
 			+ "\n objects"

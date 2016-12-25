@@ -7,14 +7,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
@@ -41,7 +35,6 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 public class XMapping<C, D> implements XObject {
@@ -68,7 +61,7 @@ public class XMapping<C, D> implements XObject {
 		if (!F.dst.equals(G.src)) {
 			throw new RuntimeException("Dom/Cod mismatch on " + F + " and " + G);
 		}
-		this.kind = G.kind;
+		kind = G.kind;
 		src = F.src;
 		dst = G.dst;
 		em = new HashMap<>();
@@ -100,7 +93,7 @@ public class XMapping<C, D> implements XObject {
 	}
 
 	// : make sure this is the identity for global and schema
-	public void validate() {
+    private void validate() {
 		unprovable = new HashMap<>();
 		for (C c : em.keySet()) {
 			if (!src.allTerms().contains(c)) {
@@ -142,7 +135,7 @@ public class XMapping<C, D> implements XObject {
 				if (!b) {
 					throw new RuntimeException("cannot prove " + eq);
 				}
-				unprovable.put(eq, b ? "true" : "false");
+				unprovable.put(eq, "true");
 			} catch (Exception ex) {
 				throw new RuntimeException("cannot prove " + eq + " in " + dst);
 			}
@@ -163,7 +156,7 @@ public class XMapping<C, D> implements XObject {
 
 	// is identity on non-mapped elements
 	@SuppressWarnings({ "unchecked" })
-	public List<D> applyAlsoId(List<C> p) {
+    List<D> applyAlsoId(List<C> p) {
 		List<D> ret = p.stream().flatMap(x -> {
 			List<D> r = em.get(x);
 			if (r == null) {
@@ -177,7 +170,8 @@ public class XMapping<C, D> implements XObject {
 		return ret;
 	}
 
-	@Override
+	@SuppressWarnings("ConstantConditions")
+    @Override
 	public JComponent display() {
 		JTabbedPane pane = new JTabbedPane();
 
@@ -281,7 +275,7 @@ public class XMapping<C, D> implements XObject {
 		}
 	}
 
-	String toString = null;
+	private String toString = null;
 
 	@Override
 	public String toString() {
@@ -465,8 +459,8 @@ public class XMapping<C, D> implements XObject {
 			}
 			List rhs = new LinkedList<>(k.second);
 			Set sofar = new HashSet();
-			List l = new LinkedList();
-			sofar.add(l);
+			//List l = new LinkedList();
+			sofar.add(new LinkedList<>());
 			Set<List> rhs0 = XCtx.expand(sofar, rhs, dst.schema, dst);
 			if (rhs0.size() == 1) {
 				rhs = (List) new LinkedList(rhs0).get(0);
@@ -474,15 +468,15 @@ public class XMapping<C, D> implements XObject {
 			}
 			// v:t -> u:?
 			if (!rightok && leftok && rhs.size() == 1 && dst.terms().contains(rhs.get(0))) {
-				List rhsX = new LinkedList<>();
-				rhsX.add(new Pair<>(((Pair) rhs.get(0)).first, lhs.second));
+				//List rhsX = new LinkedList<>();
+				//rhsX.add(new Pair<>(((Pair) rhs.get(0)).first, lhs.second));
 				rightok = true;
 			}
 			// v:? -> p:t
 			if (!leftok && rightok) {
 				Pair p = dst.type(rhs);
 				lhs.second = p.second;
-				leftok = true;
+				//leftok = true;
 			}
 
 			if (!src.terms().contains(lhs)) {
@@ -506,8 +500,8 @@ public class XMapping<C, D> implements XObject {
 
 	// on transforms
 	public XObject apply(XMapping<C, C> t) {
-		XCtx<D> src0 = this.apply0(t.src);
-		XCtx<D> dst0 = this.apply0(t.dst);
+		XCtx<D> src0 = apply0(t.src);
+		XCtx<D> dst0 = apply0(t.dst);
 
 		Map<D, List<D>> ret = new HashMap<>();
 		for (D c : src0.allTerms()) {
@@ -685,10 +679,10 @@ public class XMapping<C, D> implements XObject {
 						Triple ooo = I.global.find_fast(rhsX);
 						if (ooo != null) {
 							List lll = new LinkedList();
-							if (((List) ooo.third).isEmpty()) {
+							if (((Collection) ooo.third).isEmpty()) {
 								lll.add(ooo.first);
 							}
-							lll.addAll((List) ooo.third);
+							lll.addAll((Collection) ooo.third);
 
 							eqs.add(new Pair(lhs, lll));
 						} else {
@@ -708,26 +702,23 @@ public class XMapping<C, D> implements XObject {
 		return ret;
 	}
 
-	@SuppressWarnings("unused")
-	private boolean isSkipKey(C c, Triple<D, D, List<D>> f) {
-		return false;
-	}
+
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Triple<C, C, List<C>> getWrapper(XCtx I,
+	private Triple<C, C, List<C>> getWrapper(@SuppressWarnings("unused") XCtx I,
 			Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
 			Pair<C, Triple<D, D, List<D>>> key) {
-		Triple<D, D, List<D>> f = key.second;
-		C c = key.first;
+		//Triple<D, D, List<D>> f = key.second;
+		//C c = key.first;
 
 		Triple<C, C, List<C>> ret = theta.get(key);
 		if (ret != null) {
 			return ret;
 		}
 
-		if (!isSkipKey(c, f)) {
+		//if (!isSkipKey(c, f)) {
 			return null;
-		}
+		/*}
 
 		if (f.first.equals("_1")) {
 			return (Triple) f;
@@ -740,7 +731,7 @@ public class XMapping<C, D> implements XObject {
 		if (!I.cat().arrows().contains(newfound)) {
 			throw new RuntimeException();
 		}
-		return newfound;
+		return newfound;*/
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -769,17 +760,13 @@ public class XMapping<C, D> implements XObject {
 
 				for (C c : src.allIds()) {
 					for (Triple<D, D, List<D>> f : dst.cat().hom(t.second, em.get(c).get(0))) {
-						if (isSkipKey(c, f)) {
-							continue;
-						}
-
 						List<D> f0 = new LinkedList<>();
 						f0.add(h);
 						f0.addAll(f.third);
 						Triple<D, D, List<D>> key = dst.find_fast(new Triple<>(t.first, f.second,
 								f0));
 						if (key == null) {
-							throw new RuntimeException("Cannot find " + key + " in "
+							throw new RuntimeException("Cannot find null key in "
 									+ dst.cat().arrows());
 						}
 						Triple<C, C, List<C>> toStore = getWrapper(I, theta, new Pair<>(c, key));
@@ -808,7 +795,7 @@ public class XMapping<C, D> implements XObject {
 							throw new RuntimeException();
 						}
 						List lll = new LinkedList();
-						if (((List) val.third).isEmpty()) {
+						if (val.third.isEmpty()) {
 							lll.add(val.first);
 						} else {
 							lll.addAll((val.third)); 
@@ -874,8 +861,6 @@ public class XMapping<C, D> implements XObject {
 			if (dst.terms().contains(theta2)) {
 				l.add(theta2);
 				em.put(theta, l);
-			} else {
-				//fixed? 
 			}
 		}
 
@@ -894,9 +879,9 @@ public class XMapping<C, D> implements XObject {
 	
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	boolean fill(XCtx<C> I, Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
-			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
-			Pair<C, Triple<D, D, List<D>>> tag, Triple<C, C, List<C>> y) {
+    private boolean fill(XCtx<C> I, Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
+                         Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
+                         Pair<C, Triple<D, D, List<D>>> tag, Triple<C, C, List<C>> y) {
 
 		C c = tag.first;
 		Triple<D, D, List<D>> f = tag.second;
@@ -937,9 +922,9 @@ public class XMapping<C, D> implements XObject {
 	}
 
 	// 
-	void cleanup(Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
-			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
-			Pair<C, Triple<D, D, List<D>>> tag, @SuppressWarnings("unused") Triple<C, C, List<C>> y) {
+    private void cleanup(Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
+                         Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
+                         Pair<C, Triple<D, D, List<D>>> tag, @SuppressWarnings("unused") Triple<C, C, List<C>> y) {
 		for (Pair<C, Triple<D, D, List<D>>> k : theta.keySet()) {
 			Pair<C, Triple<D, D, List<D>>> v = theta2.get(k);
 			if (v == null) {
@@ -953,12 +938,12 @@ public class XMapping<C, D> implements XObject {
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	void try_branch(XCtx<C> I,
-			List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> thetas,
-			Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
-			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
-			Pair<C, Triple<D, D, List<D>>> tag, Triple<C, C, List<C>> y,
-			List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> bad_thetas) {
+    private void try_branch(XCtx<C> I,
+                            List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> thetas,
+                            Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
+                            Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2,
+                            Pair<C, Triple<D, D, List<D>>> tag, Triple<C, C, List<C>> y,
+                            List<Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>>> bad_thetas) {
 		C c = tag.first;
 		Triple<D, D, List<D>> f = tag.second;
 		if (!theta.keySet().contains(new Pair<>(c, f))) {
@@ -1030,9 +1015,6 @@ public class XMapping<C, D> implements XObject {
 					Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> bad_theta = new LinkedHashMap<>();
 					for (C c : src.allIds()) {
 						for (Triple<D, D, List<D>> f : dst.cat().hom(d, em.get(c).get(0))) {
-							if (isSkipKey(c, f)) {
-								continue;
-							}
 							Triple composed = dst.global.cat().compose(constant, f);
 							bad_theta.put(new Pair<>(c, f), composed);
 						}
@@ -1047,9 +1029,6 @@ public class XMapping<C, D> implements XObject {
 			Map<Pair<C, Triple<D, D, List<D>>>, Pair<C, Triple<D, D, List<D>>>> theta2 = new LinkedHashMap<>();
 			for (C c : src.allIds()) {
 				for (Triple<D, D, List<D>> f : dst.cat().hom(d, em.get(c).get(0))) {
-					if (isSkipKey(c, f)) {
-						continue;
-					}
 					theta.put(new Pair<>(c, f), null);
 					theta2.put(new Pair<>(c, f), null);
 				}
@@ -1088,9 +1067,6 @@ public class XMapping<C, D> implements XObject {
 			Map theta = new HashMap();
 			for (C c : src.allIds()) {
 				for (Triple<D, D, List<D>> f : dst.cat().hom(d, em.get(c).get(0))) {
-					if (isSkipKey(c, f)) {
-						continue;
-					}
 					List<D> tofind = new LinkedList<>();
 					tofind.add(x);
 					tofind.addAll(f.third);
@@ -1154,7 +1130,7 @@ public class XMapping<C, D> implements XObject {
 				continue;
 			}
 
-			Map theta = null;
+			Map theta;
 			if (deltapiI.saturated && GlobalOptions.debug.fpql.fast_amalgams) {
 				if (x0.first.third.size() != 2) {
 					throw new RuntimeException();
@@ -1176,7 +1152,7 @@ public class XMapping<C, D> implements XObject {
 			}
 			List l = new LinkedList();
 			l.add(((Triple) o).first);
-			l.addAll((List) ((Triple) o).third);
+			l.addAll((Collection) ((Triple) o).third);
 			m.put(x, l);
 		}
 
@@ -1202,7 +1178,7 @@ public class XMapping<C, D> implements XObject {
 			if (!arr.first.equals("_1")) {
 				continue;
 			}
-			Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> lx = null;
+			Map<Triple<C, C, List<C>>, Triple<C, C, List<C>>> lx;
 			if (src.schema.ids.contains(arr.second)) {
 				lx = src.obs(arr);
 			} else {
@@ -1221,7 +1197,7 @@ public class XMapping<C, D> implements XObject {
 
 			Triple<D, D, List<D>> y = dst.find_fast(new Triple<>((D) arr.first, (D) arr.second, x));
 
-			Map<Triple<D, D, List<D>>, Triple<D, D, List<D>>> rx = null; // dst.obs(y);
+			Map<Triple<D, D, List<D>>, Triple<D, D, List<D>>> rx;
 			if (dst.schema.ids.contains(y.second)) {
 				rx = dst.obs(y);
 			} else {
@@ -1354,7 +1330,7 @@ public class XMapping<C, D> implements XObject {
 	}
 
 	//must reverse
-	public static <D> XMapping<D, D> uber_sub(D d, D d0, D e, XCtx<D> I, XCtx<D> J) {
+	private static <D> XMapping<D, D> uber_sub(D d, D d0, D e, XCtx<D> I, XCtx<D> J) {
 		Map<D, List<D>> m = new HashMap<>();
 		List<D> l = new LinkedList<>();
 		l.add(d0);
@@ -1427,7 +1403,7 @@ public class XMapping<C, D> implements XObject {
 		return G;
 	}
 	
-	public JComponent makeGraph() {
+	private JComponent makeGraph() {
 		if (src.allTerms().size() > 128) {
 			return new JTextArea("Too large to display");
 		}
@@ -1438,7 +1414,7 @@ public class XMapping<C, D> implements XObject {
 		VisualizationViewer<Chc<C, D>, Object> vv = new VisualizationViewer<>(layout);
 		vv.getRenderContext().setLabelOffset(20);
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 
@@ -1471,9 +1447,9 @@ public class XMapping<C, D> implements XObject {
 		vv.getRenderContext().setEdgeLabelTransformer(hhh);
 		
 		float dash[] = { 10.0f };
-		final Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
+		Stroke edgeStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
-		final Stroke bs = new BasicStroke();
+		Stroke bs = new BasicStroke();
 
 		Transformer<Object, Stroke> edgeStrokeTransformer = (Object s) -> {
                     if (!(s instanceof Chc)) {

@@ -2,9 +2,10 @@ package catdata.mpl;
 
 import javax.swing.JComponent;
 
+@FunctionalInterface
 public interface MplObject {
 
-		public JComponent display() ;
+		JComponent display() ;
 
 
 }

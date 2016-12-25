@@ -27,20 +27,19 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
 
 public abstract class FullQuery {
 
-	public abstract Pair<Signature, Signature> type();
+	protected abstract Pair<Signature, Signature> type();
 	
-	public abstract Color color();
+	protected abstract Color color();
 
-	public abstract String kind();
+	protected abstract String kind();
 
-	private class ToGraph implements
+	private static class ToGraph implements
 			FullQueryVisitor<Integer, Graph<Pair<FullQuery, Integer>, Integer>> {
 
 		int count = 0;
@@ -53,9 +52,9 @@ public abstract class FullQuery {
 			Integer l = e.l.accept(env, this);
 			Integer r = e.r.accept(env, this);
 			env.addVertex(new Pair<>(e, count));
-			env.addEdge(edge_count++, new Pair<>((FullQuery) e, count),
+			env.addEdge(edge_count++, new Pair<>(e, count),
 					new Pair<>(e.l, l));
-			env.addEdge(edge_count++, new Pair<>((FullQuery) e, count),
+			env.addEdge(edge_count++, new Pair<>(e, count),
 					new Pair<>(e.r, r));
 			return count++;
 		}
@@ -64,7 +63,7 @@ public abstract class FullQuery {
 		@Override
 		public Integer visit(Graph<Pair<FullQuery, Integer>, Integer> env,
 				Delta e) {
-			env.addVertex(new Pair<>((FullQuery) e, count));
+			env.addVertex(new Pair<>(e, count));
 
 			return count++;
 		}
@@ -73,20 +72,20 @@ public abstract class FullQuery {
 		@Override
 		public Integer visit(Graph<Pair<FullQuery, Integer>, Integer> env,
 				Sigma e) {
-			env.addVertex(new Pair<>((FullQuery) e, count));
+			env.addVertex(new Pair<>(e, count));
 			return count++;
 		}
 
 		@SuppressWarnings("cast")
 		@Override
 		public Integer visit(Graph<Pair<FullQuery, Integer>, Integer> env, Pi e) {
-			env.addVertex(new Pair<>((FullQuery) e, count));
+			env.addVertex(new Pair<>(e, count));
 			return count++;
 		}
 
 	}
 
-	public Graph<Pair<FullQuery, Integer>, Integer> build() {
+	private Graph<Pair<FullQuery, Integer>, Integer> build() {
 		Graph<Pair<FullQuery, Integer>, Integer> g2 = new DirectedSparseMultigraph<>();
 		accept(g2, new ToGraph());
 		return g2;
@@ -101,7 +100,7 @@ public abstract class FullQuery {
 	}
 
 	@SuppressWarnings("unchecked")
-	public JComponent doView(
+    private JComponent doView(
 			/* final Environment env, */Graph<Pair<FullQuery, Integer>, Integer> sgv) {
 
 		try {
@@ -124,7 +123,7 @@ public abstract class FullQuery {
 		// Setup up a new vertex to paint transformer...
 		Transformer<Pair<FullQuery, Integer>, Paint> vertexPaint = (Pair<FullQuery, Integer> i) -> i.first.color();
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		// Set up a new stroke Transformer for the edges
@@ -186,19 +185,19 @@ public abstract class FullQuery {
 		}
 	}
 
-	JTextArea cards = new JTextArea();
+	private final JTextArea cards = new JTextArea();
 
 	public static class Comp extends FullQuery {
 		public Comp(FullQuery l, FullQuery r) {
-			super();
-			this.l = l;
+            this.l = l;
 			this.r = r;
 			if (!l.type().second.equals(r.type().first)) {
 				throw new RuntimeException("Ill-typed " + this + "\n\n\nbadness: " + l.type().second + " and " + r.type().first);
 			}
 		}
 
-		public FullQuery l, r;
+		public final FullQuery l;
+        public final FullQuery r;
 
 		@Override
 		public <R, E> R accept(E env, FullQueryVisitor<R, E> v) {
@@ -232,11 +231,10 @@ public abstract class FullQuery {
 	}
 
 	public static class Delta extends FullQuery {
-		public Mapping F;
+		public final Mapping F;
 
 		public Delta(Mapping f) {
-			super();
-			F = f;
+            F = f;
 		}
 
 		@Override
@@ -267,11 +265,10 @@ public abstract class FullQuery {
 
 	public static class Sigma extends FullQuery {
 		public Sigma(Mapping f) {
-			super();
-			F = f;
+            F = f;
 		}
 
-		public Mapping F;
+		public final Mapping F;
 
 		@Override
 		public String toString() {
@@ -304,7 +301,7 @@ public abstract class FullQuery {
 			F = f;
 		}
 
-		public Mapping F;
+		public final Mapping F;
 
 		@Override
 		public String toString() {
@@ -335,13 +332,13 @@ public abstract class FullQuery {
 	public abstract <R, E> R accept(E env, FullQueryVisitor<R, E> v);
 
 	public interface FullQueryVisitor<R, E> {
-		public R visit(E env, Comp e);
+		R visit(E env, Comp e);
 
-		public R visit(E env, Delta e);
+		R visit(E env, Delta e);
 
-		public R visit(E env, Sigma e);
+		R visit(E env, Sigma e);
 
-		public R visit(E env, Pi e);
+		R visit(E env, Pi e);
 	}
 
 	public Component text() {

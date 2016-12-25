@@ -16,11 +16,12 @@ public abstract class TransExp {
 	
 	public static class Chi extends TransExp {
 		
-		public String prop, trans;
+		public final String prop;
+        public final String trans;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
 			result = prime * result + ((trans == null) ? 0 : trans.hashCode());
@@ -50,7 +51,6 @@ public abstract class TransExp {
 		}
 
 		public Chi(String prop, String trans) {
-			super();
 			this.prop = prop;
 			this.trans = trans;
 		}
@@ -72,11 +72,11 @@ public abstract class TransExp {
 	
 public static class UnChi extends TransExp {
 		
-		public String a;
+		public final String a;
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((a == null) ? 0 : a.hashCode());
 			return result;
@@ -100,7 +100,6 @@ public static class UnChi extends TransExp {
 		}
 
 		public UnChi(String a) {
-			super();
 			this.a = a;
 		}
 
@@ -120,7 +119,7 @@ public static class UnChi extends TransExp {
 	}
 
 	public static class Not extends TransExp {
-		public String prop;
+		public final String prop;
 
 		public Not(String prop) {
 			this.prop = prop;
@@ -128,7 +127,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
 			return result;
@@ -165,7 +164,7 @@ public static class UnChi extends TransExp {
 	}
 	
 	public static class And extends TransExp {
-		public String prop;
+		public final String prop;
 
 		public And(String prop) {
 			this.prop = prop;
@@ -173,7 +172,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
 			return result;
@@ -210,7 +209,7 @@ public static class UnChi extends TransExp {
 	}
 	
 	public static class Or extends TransExp {
-		public String prop;
+		public final String prop;
 
 		public Or(String prop) {
 			this.prop = prop;
@@ -218,7 +217,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
 			return result;
@@ -255,7 +254,7 @@ public static class UnChi extends TransExp {
 	}
 	
 	public static class Implies extends TransExp {
-		public String prop;
+		public final String prop;
 
 		public Implies(String prop) {
 			this.prop = prop;
@@ -263,7 +262,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
 			return result;
@@ -301,18 +300,18 @@ public static class UnChi extends TransExp {
 	
 	public static class Bool extends TransExp {
 		
-		public boolean bool;
-		public String unit, prop;
+		public final boolean bool;
+		public final String unit;
+        public final String prop;
 		
 		public Bool(boolean bool, String unit, String prop) {
-			super();
 			this.bool = bool;
 			this.unit = unit;
 			this.prop = prop;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + (bool ? 1231 : 1237);
 			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
@@ -352,22 +351,19 @@ public static class UnChi extends TransExp {
 		}
 		@Override
 		public String toString() {
-			if (bool) {
-				return prop + ".true " + unit;
-			} else {
-				return prop + ".false " + unit;
-			}
+            return bool ? prop + ".true " + unit : prop + ".false " + unit;
 		}
 		
 	}
 	
 	public static class TransIso extends TransExp {
-		public boolean lToR;
-		public String l, r;
+		public final boolean lToR;
+		public final String l;
+        public final String r;
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + (lToR ? 1231 : 1237);
@@ -400,7 +396,6 @@ public static class UnChi extends TransExp {
 		}
 
 		public TransIso(boolean lToR, String l, String r) {
-			super();
 			this.lToR = lToR;
 			this.l = l;
 			this.r = r;
@@ -413,11 +408,7 @@ public static class UnChi extends TransExp {
 		
 		@Override
 		public String toString() {
-			if (lToR) {
-				return "iso1 " + l + " " + r;
-			} else {
-				return "iso2 " + l + " " + r;
-			}
+            return lToR ? "iso1 " + l + " " + r : "iso2 " + l + " " + r;
 		}
 
 		@Override
@@ -428,12 +419,12 @@ public static class UnChi extends TransExp {
 	
 	public static class TransCurry extends TransExp {
 		
-		public String inst;
-		public String trans;
+		public final String inst;
+		public final String trans;
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
 			result = prime * result + ((trans == null) ? 0 : trans.hashCode());
@@ -461,7 +452,6 @@ public static class UnChi extends TransExp {
 			return true;
 		}
 		public TransCurry(String inst, String trans) {
-			super();
 			this.inst = inst;
 			this.trans = trans;
 		}
@@ -482,7 +472,7 @@ public static class UnChi extends TransExp {
 	
 	public static class TransEval extends TransExp {
 		
-		public String inst;
+		public final String inst;
 		
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
@@ -490,13 +480,12 @@ public static class UnChi extends TransExp {
 		}
 
 		public TransEval(String inst) {
-			super();
 			this.inst = inst;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
 			return result;
@@ -533,7 +522,7 @@ public static class UnChi extends TransExp {
 	
 	public static class Return extends TransExp {
 		
-		public String inst;
+		public final String inst;
 		
 		public Return(String inst) {
 			this.inst = inst;
@@ -563,7 +552,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
 			return result;
@@ -588,7 +577,7 @@ public static class UnChi extends TransExp {
 			return !isFull;
 		}
 
-		public String inst;
+		public final String inst;
 		public boolean isFull = false; //should be set by checker
 		
 		
@@ -620,7 +609,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
 			return result;
@@ -634,7 +623,9 @@ public static class UnChi extends TransExp {
 	}
 	
 	public static class External extends TransExp {
-		public String src, dst, name;
+		public final String src;
+        public final String dst;
+        public final String name;
 		
 		@Override
 		public <R, E> R accept(E env, TransExpVisitor<R, E> v) {
@@ -668,14 +659,13 @@ public static class UnChi extends TransExp {
 			return true;
 		}
 		public External(String src, String dst, String name) {
-			super();
 			this.src = src;
 			this.dst = dst;
 			this.name = name;
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -695,7 +685,7 @@ public static class UnChi extends TransExp {
 	
 	public static class Squash extends TransExp {
 
-		public String src;
+		public final String src;
 		
 		@Override
 		public String toString() {
@@ -703,7 +693,6 @@ public static class UnChi extends TransExp {
 		}
 		
 		public Squash(String src) {
-			super();
 			this.src = src;
 		}
 
@@ -731,7 +720,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((src == null) ? 0 : src.hashCode());
 			return result;
@@ -744,14 +733,14 @@ public static class UnChi extends TransExp {
 	}
 	
 	public static class Delta extends TransExp {
-		public TransExp h;
+		public final TransExp h;
 		public Delta(TransExp h, String src, String dst) {
-			super();
 			this.h = h;
 			this.src = src;
 			this.dst = dst;
 		}
-		public String src, dst;
+		public final String src;
+        public final String dst;
 		
 		@Override
 		public String toString() {
@@ -791,7 +780,7 @@ public static class UnChi extends TransExp {
 		}
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((h == null) ? 0 : h.hashCode());
@@ -806,11 +795,11 @@ public static class UnChi extends TransExp {
 	}
 	
 	public static class Sigma extends TransExp {
-		public TransExp h;
-		public String src, dst;
+		public final TransExp h;
+		public final String src;
+        public final String dst;
 		
 		public Sigma(TransExp h, String src, String dst) {
-			super();
 			this.h = h;
 			this.src = src;
 			this.dst = dst;
@@ -824,7 +813,7 @@ public static class UnChi extends TransExp {
 		
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((h == null) ? 0 : h.hashCode());
@@ -872,8 +861,9 @@ public static class UnChi extends TransExp {
 	}
 	
 	public static class FullSigma extends TransExp {
-		public String h;
-		public String src, dst;
+		public final String h;
+		public final String src;
+        public final String dst;
 		
 		@Override
 		public String toString() {
@@ -881,7 +871,6 @@ public static class UnChi extends TransExp {
 		}
 		
 		public FullSigma(String h, String src, String dst) {
-			super();
 			this.h = h;
 			this.src = src;
 			this.dst = dst;
@@ -894,7 +883,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((h == null) ? 0 : h.hashCode());
@@ -938,8 +927,9 @@ public static class UnChi extends TransExp {
 	}
 	
 	public static class Pi extends TransExp {
-		public TransExp h;
-		public String src, dst;
+		public final TransExp h;
+		public final String src;
+        public final String dst;
 		
 		@Override
 		public String toString() {
@@ -948,7 +938,6 @@ public static class UnChi extends TransExp {
 		
 
 		public Pi(TransExp h, String src, String dst) {
-			super();
 			this.h = h;
 			this.src = src;
 			this.dst = dst;
@@ -962,7 +951,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((h == null) ? 0 : h.hashCode());
@@ -1005,8 +994,9 @@ public static class UnChi extends TransExp {
 	}
 	
 	public static class Relationalize extends TransExp {
-		public TransExp h;
-		public String src, dst;
+		public final TransExp h;
+		public final String src;
+        public final String dst;
 
 		@Override
 		public String toString() {
@@ -1015,7 +1005,6 @@ public static class UnChi extends TransExp {
 		
 
 		public Relationalize(TransExp h, String src, String dst) {
-			super();
 			this.h = h;
 			this.src = src;
 			this.dst = dst;
@@ -1024,7 +1013,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((h == null) ? 0 : h.hashCode());
@@ -1104,7 +1093,7 @@ public static class UnChi extends TransExp {
 	*/
 
 	public static class Id extends TransExp {
-		public String t;
+		public final String t;
 
 		public Id(String t) {
 			this.t = t;
@@ -1112,7 +1101,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((t == null) ? 0 : t.hashCode());
 			return result;
@@ -1269,8 +1258,9 @@ public static class UnChi extends TransExp {
 	}
 */
 	public static class Const extends TransExp {
-		public List<Pair<String, List<Pair<Object, Object>>>> objs;
-		public String src, dst;
+		public final List<Pair<String, List<Pair<Object, Object>>>> objs;
+		public final String src;
+    public final String dst;
 
 		public Const(List<Pair<String, List<Pair<Object, Object>>>> objs,
 				 String src, String dst) {
@@ -1313,7 +1303,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 			result = prime * result + ((objs == null) ? 0 : objs.hashCode());
@@ -1362,7 +1352,7 @@ public static class UnChi extends TransExp {
 	}
 
 	public static class Var extends TransExp {
-		public String v;
+		public final String v;
 
 		public Var(String v) {
 			this.v = v;
@@ -1378,7 +1368,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((v == null) ? 0 : v.hashCode());
 			return result;
@@ -1414,8 +1404,8 @@ public static class UnChi extends TransExp {
 	}
 
 	public static class TT extends TransExp {
-		public String obj;
-		public String tgt;
+		public final String obj;
+		public final String tgt;
 
 		public TT(String obj, String tgt) {
 			this.tgt = tgt;
@@ -1424,7 +1414,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((obj == null) ? 0 : obj.hashCode());
 			result = prime * result + ((tgt == null) ? 0 : tgt.hashCode());
@@ -1471,7 +1461,8 @@ public static class UnChi extends TransExp {
 	}
 
 	public static class FF extends TransExp {
-		public String tgt, obj;
+		public final String tgt;
+        public final String obj;
 
 		public FF(String obj, String tgt) {
 			this.tgt = tgt;
@@ -1480,7 +1471,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((obj == null) ? 0 : obj.hashCode());
 			result = prime * result + ((tgt == null) ? 0 : tgt.hashCode());
@@ -1527,7 +1518,7 @@ public static class UnChi extends TransExp {
 	}
 
 	public static class Fst extends TransExp {
-		public String obj;
+		public final String obj;
 
 		public Fst(String obj) {
 			this.obj = obj;
@@ -1535,7 +1526,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((obj == null) ? 0 : obj.hashCode());
 			return result;
@@ -1576,7 +1567,7 @@ public static class UnChi extends TransExp {
 	}
 
 	public static class Snd extends TransExp {
-		public String obj;
+		public final String obj;
 
 		public Snd(String obj) {
 			this.obj = obj;
@@ -1584,7 +1575,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((obj == null) ? 0 : obj.hashCode());
 			return result;
@@ -1625,7 +1616,7 @@ public static class UnChi extends TransExp {
 	}
 
 	public static class Inl extends TransExp {
-		public String obj;
+		public final String obj;
 
 		public Inl(String obj) {
 			this.obj = obj;
@@ -1633,7 +1624,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((obj == null) ? 0 : obj.hashCode());
 			return result;
@@ -1674,7 +1665,7 @@ public static class UnChi extends TransExp {
 	}
 
 	public static class Inr extends TransExp {
-		public String obj;
+		public final String obj;
 
 		public Inr(String obj) {
 			this.obj = obj;
@@ -1682,7 +1673,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((obj == null) ? 0 : obj.hashCode());
 			return result;
@@ -1817,8 +1808,9 @@ public static class UnChi extends TransExp {
 	}
 */
 	public static class Prod extends TransExp {
-		public String obj;
-		public TransExp l, r;
+		public final String obj;
+		public final TransExp l;
+    public final TransExp r;
 
 		public Prod(String obj, TransExp l, TransExp r) {
 			this.l = l;
@@ -1828,7 +1820,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((obj == null) ? 0 : obj.hashCode());
@@ -1882,16 +1874,17 @@ public static class UnChi extends TransExp {
 	}
 
 	public static class Comp extends TransExp {
-		public TransExp l, r;
+		public final TransExp l;
+        public final TransExp r;
 
 		public Comp(TransExp TransExp, TransExp r) {
-			this.l = TransExp;
+            l = TransExp;
 			this.r = r;
 		}
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((r == null) ? 0 : r.hashCode());
@@ -1939,8 +1932,9 @@ public static class UnChi extends TransExp {
 	}
 
 	public static class Case extends TransExp {
-		public String obj;
-		public TransExp l, r;
+		public final String obj;
+		public final TransExp l;
+        public final TransExp r;
 
 		public Case(String obj, TransExp l, TransExp r) {
 			this.l = l;
@@ -1950,7 +1944,7 @@ public static class UnChi extends TransExp {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((l == null) ? 0 : l.hashCode());
 			result = prime * result + ((obj == null) ? 0 : obj.hashCode());
@@ -2007,37 +2001,37 @@ public static class UnChi extends TransExp {
 	public abstract int hashCode();
 
 	public interface TransExpVisitor<R, E> {
-		public R visit(E env, Or e);
-		public R visit(E env, Implies e);
-		public R visit(E env, And e);
-		public R visit(E env, Not e);
-		public R visit(E env, Id e);
-		public R visit(E env, Comp e);
-		public R visit(E env, Var e);
-		public R visit(E env, Const e);
-		public R visit(E env, TT e);
-		public R visit(E env, FF e);
-		public R visit(E env, Fst e);
-		public R visit(E env, Snd e);
-		public R visit(E env, Inl e);
-		public R visit(E env, Inr e);
-		public R visit(E env, Delta e);
-		public R visit(E env, Sigma e);
-		public R visit(E env, FullSigma e);
-		public R visit(E env, Pi e);
-		public R visit(E env, Relationalize e);
-		public R visit(E env, Squash e);
-		public R visit(E env, TransCurry e);
-		public R visit(E env, TransEval e);
-		public R visit(E env, Case e);
-		public R visit(E env, Prod e);
-		public R visit(E env, External e);
-		public R visit(E env, Return e);
-		public R visit(E env, Coreturn e);
-		public R visit(E env, TransIso e);
-		public R visit(E env, Bool e);
-		public R visit(E env, Chi e);
-		public R visit(E env, UnChi e);
+		R visit(E env, Or e);
+		R visit(E env, Implies e);
+		R visit(E env, And e);
+		R visit(E env, Not e);
+		R visit(E env, Id e);
+		R visit(E env, Comp e);
+		R visit(E env, Var e);
+		R visit(E env, Const e);
+		R visit(E env, TT e);
+		R visit(E env, FF e);
+		R visit(E env, Fst e);
+		R visit(E env, Snd e);
+		R visit(E env, Inl e);
+		R visit(E env, Inr e);
+		R visit(E env, Delta e);
+		R visit(E env, Sigma e);
+		R visit(E env, FullSigma e);
+		R visit(E env, Pi e);
+		R visit(E env, Relationalize e);
+		R visit(E env, Squash e);
+		R visit(E env, TransCurry e);
+		R visit(E env, TransEval e);
+		R visit(E env, Case e);
+		R visit(E env, Prod e);
+		R visit(E env, External e);
+		R visit(E env, Return e);
+		R visit(E env, Coreturn e);
+		R visit(E env, TransIso e);
+		R visit(E env, Bool e);
+		R visit(E env, Chi e);
+		R visit(E env, UnChi e);
 	}
 
 

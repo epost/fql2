@@ -6,11 +6,11 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.DP;
 import catdata.aql.Instance;
 import catdata.aql.Schema;
@@ -20,7 +20,7 @@ import catdata.graph.UnionFind;
 //TODO aql example of distinct
 public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
 
-	public final Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
+	private final Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
 	
 	private final Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs = new HashSet<>();
 	
@@ -56,7 +56,7 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 		return true;
 	}
 	
-	public X conv(X x) {
+	private X conv(X x) {
 		return uf.find(x);
 	}
 
@@ -92,7 +92,7 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 
 	private final class InnerAlgebra extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
 
-		protected InnerAlgebra() {
+		InnerAlgebra() {
 		}
 
 		@Override
@@ -102,7 +102,7 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 
 		@Override
 		public Collection<X> en(En en) {
-			return I.algebra().en(en).stream().map(x -> conv(x)).collect(Collectors.toSet()); //TODO aql cache
+			return I.algebra().en(en).stream().map(DistinctInstance.this::conv).collect(Collectors.toSet()); //TODO aql cache
 		}
 
 		@Override

@@ -20,7 +20,7 @@ public class OplSigmaExample extends Example {
 		return s;
 	}
 	
-	String s = 
+	private final String s =
 			"Type = theory {"
 					+ "\n	sorts "
 					+ "\n		String;"

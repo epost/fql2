@@ -3,9 +3,9 @@ package catdata.aql.fdm;
 import java.util.Set;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.aql.Algebra;
-import catdata.aql.Ctx;
 import catdata.aql.DP;
 import catdata.aql.Instance;
 import catdata.aql.Mapping;
@@ -16,9 +16,9 @@ import catdata.aql.Var;
 public class DeltaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
 extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y>  
  implements DP<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y>  {	
-	public final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
-	public final Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y>  I;
-	public final DeltaAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> alg;
+	private final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
+	private final Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y>  I;
+	private final DeltaAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> alg;
 	private final SaturatedInstance<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> J;
 	
 	public DeltaInstance(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> i) {

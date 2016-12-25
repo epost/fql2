@@ -16,13 +16,13 @@ import catdata.ide.GlobalOptions;
 
 @SuppressWarnings("serial")
 public class Functor<O1, A1, O2, A2> implements Serializable {
-	public Category<O1, A1> source;
-	public Category<O2, A2> target;
-	private FUNCTION<O1, O2> o;
-	private FUNCTION<A1, A2> a;
+	public final Category<O1, A1> source;
+	public final Category<O2, A2> target;
+	private final FUNCTION<O1, O2> o;
+	private final FUNCTION<A1, A2> a;
 
 	@SuppressWarnings("rawtypes")
-	private static Map<Category, Functor> ids = new HashMap<>();
+	private static final Map<Category, Functor> ids = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
 	public static <O, A> Functor<O, A, O, A> identity(Category<O, A> o) {
@@ -34,7 +34,7 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 	}
 
 	@SuppressWarnings("rawtypes")
-	static Map<Pair<Functor, Functor>, Functor> cache = new HashMap<>();
+    private static final Map<Pair<Functor, Functor>, Functor> cache = new HashMap<>();
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static <O1, A1, O2, A2, O3, A3> Functor<O1, A1, O3, A3> compose(
@@ -164,7 +164,8 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 		return 0;
 	}
 
-	public void validate() {
+	@SuppressWarnings("ConstantConditions")
+    private void validate() {
 		if (!GlobalOptions.debug.fqlpp.VALIDATE) {
 			return;
 		}
@@ -215,7 +216,7 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public Instance<O1,A1> toInstanceX(Signature<O1,A1> src) {
+    private Instance<O1,A1> toInstanceX(Signature<O1, A1> src) {
 		if (source.isInfinite() || !target.equals(FinSet.FinSet)) {
 			throw new RuntimeException("Cannot create mapping from " + this);
 		}
@@ -247,7 +248,8 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 		mapping = toMappingX();
 		return mapping;
 	}
-	public Mapping<O1,A1,O2,A2> toMappingX() {
+	@SuppressWarnings("unchecked")
+    private Mapping<O1,A1,O2,A2> toMappingX() {
 		if (source.isInfinite() || target.isInfinite()) {
 			throw new RuntimeException("Cannot create mapping from " + this);
 		}
@@ -275,6 +277,7 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 		return new Mapping<>(nm, em, src, dst);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Mapping<O1,A1,O2,A2> toMappingZ(Signature<O1,A1> src, Signature<O2,A2> dst) {
 		if (source.isInfinite() || target.isInfinite()) {
 			throw new RuntimeException("Cannot create mapping from " + this);

@@ -20,7 +20,7 @@ public class PiExample extends Example {
 		return s;
 	}
 	
-	String s = "category C = {"
+	private final String s = "category C = {"
 			+ "\n objects "
 			+ "\n 	c1, "
 			+ "\n 	c2,"

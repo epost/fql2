@@ -20,7 +20,7 @@ public class OplTypedExample extends Example {
 		return s;
 	}
 	
-	String s = "//type side"
+	private final String s = "//type side"
 			+ "\nNat = theory {"
 			+ "\n	sorts "
 			+ "\n		Nat;"

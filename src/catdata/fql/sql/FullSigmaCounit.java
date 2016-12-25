@@ -12,9 +12,11 @@ import catdata.fql.decl.Node;
 
 public class FullSigmaCounit extends PSM {
 	
-	Mapping F;
-	String i1, i2, i3;
-	public String trans;
+	private final Mapping F;
+	private final String i1;
+    private final String i2;
+    private final String i3;
+	private final String trans;
 	
 	
 	public FullSigmaCounit(Mapping F, String i1, String i2, String i3, String trans) {
@@ -47,7 +49,7 @@ public class FullSigmaCounit extends PSM {
 							if (y.get("c0").toString().equals(idX)) {
 								String ret = y.get("c1").toString();
 								for (String col : cols) {
-									if (col.trim().length() == 0) {
+									if (col.trim().isEmpty()) {
 										continue;
 									}
 									Set<Map<Object, Object>> u = state.get(i1 + "_" + col);
@@ -70,10 +72,10 @@ public class FullSigmaCounit extends PSM {
 		}
 		
 		for (Attribute<Node> n : F.target.attrs) {
-			state.put(trans + "_" + n.name, new HashSet<Map<Object, Object>>());
+			state.put(trans + "_" + n.name, new HashSet<>());
 		}
 		for (Edge n : F.target.edges) {
-			state.put(trans + "_" + n.name, new HashSet<Map<Object, Object>>());
+			state.put(trans + "_" + n.name, new HashSet<>());
 		}
 	}
 

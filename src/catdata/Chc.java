@@ -34,10 +34,10 @@ public class Chc<X,Y> implements Serializable {
 		Set<Y> ret = new HashSet<>();
 		
 		for (Chc<X, Y> x : set) {
-			if (!x.left) {
-				ret.add(x.r);
-			} else {
+			if (x.left) {
 				throw new RuntimeException("Cannot projRight " + x);
+			} else {
+				ret.add(x.r);
 			}
 		}
 		
@@ -90,26 +90,18 @@ public class Chc<X,Y> implements Serializable {
 
 	@Override
 	public String toString() {
-		if (left) {
-			return "inl " + l;
-		} else {
-			return "inr " + r;
-		}
+        return left ? "inl " + l : "inr " + r;
 	}
 	
 	public String toStringMash() {
-		if (left) {
-			return l.toString();
-		} else {
-			return r.toString();
-		}
+        return left ? l.toString() : r.toString();
 	}
 	
 	
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((l == null) ? 0 : l.hashCode());
 		result = prime * result + (left ? 1231 : 1237);

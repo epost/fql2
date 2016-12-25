@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
-import catdata.aql.Ctx;
 import catdata.aql.Instance;
 import catdata.aql.Mapping;
 import catdata.aql.Term;
@@ -19,10 +19,10 @@ import catdata.aql.It.ID;
 public class SigmaDeltaUnitTransform<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
 extends Transform<Ty, En1, Sym, Fk1, Att1, Gen, Sk, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>, X, Y, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>> {
 	
-	public final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F; 
-	public final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
-	public final SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> J;
-	public final DeltaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, ID, Chc<Sk, Pair<ID, Att2>>> K; //TODO aql recomputes
+	private final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
+	private final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
+	private final SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> J;
+	private final DeltaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, ID, Chc<Sk, Pair<ID, Att2>>> K; //TODO aql recomputes
 	private final Ctx<Gen, Term<Void, En1, Void, Fk1, Void, Pair<En1, ID>, Void>> gens = new Ctx<>();
 	private final Ctx<Sk, Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>>> sks = new Ctx<>();
 	

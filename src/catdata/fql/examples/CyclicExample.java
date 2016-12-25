@@ -20,7 +20,7 @@ public class CyclicExample extends Example {
 		return s;
 	}
 
-	String s = 
+	private final String s =
 			"schema CM53 = {"
 					+ "\n nodes M;"
 					+ "\n attributes;"

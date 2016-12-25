@@ -10,7 +10,6 @@ import java.awt.Stroke;
 import java.awt.event.ItemEvent;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,7 +81,7 @@ public class Instance {
 
 	//  better drop handling, by kind, visitor
 
-	public void conformsTo(Signature s) throws FQLException {
+	private void conformsTo(Signature s) throws FQLException {
 
 		for (Node n : s.nodes) {
 			Set<Pair<Object, Object>> i = data.get(n.string);
@@ -216,14 +215,14 @@ public class Instance {
 		return ret;
 	}
 
-	public Object follow(Path p, Object id) {
+	private Object follow(Path p, Object id) {
 		for (Edge e : p.path) {
 			id = PropPSM.lookup(data.get(e.name), id);
 		}
 		return id;
 	}
 
-	Map<Path, Set<Pair<Object, Object>>> cache = new HashMap<>();
+	private final Map<Path, Set<Pair<Object, Object>>> cache = new HashMap<>();
 	public Set<Pair<Object, Object>> evaluate(Path p) {
 		Set<Pair<Object, Object>> x = data.get(p.source.string);
 		if (x == null) {
@@ -258,8 +257,8 @@ public class Instance {
 		return ret;
 	} 
 	
-	public static <X, Y, Z> Set<Pair<X, Z>> compose2(Set<Pair<X, Y>> x,
-			Set<Pair<Y, Z>> y) {
+	private static <X, Y, Z> Set<Pair<X, Z>> compose2(Set<Pair<X, Y>> x,
+													  Set<Pair<Y, Z>> y) {
 		Set<Pair<X, Z>> ret = new HashSet<>();
 
 		for (Pair<X, Y> p1 : x) {
@@ -287,8 +286,8 @@ public class Instance {
 		return ret;
 	}
 	
-	public static <X, Y, Z> Set<Pair<X, Z>> compose4(Set<Pair<X, Y>> x,
-			Set<Pair<Y, Z>> y) {
+	private static <X, Y, Z> Set<Pair<X, Z>> compose4(Set<Pair<X, Y>> x,
+													  Set<Pair<Y, Z>> y) {
 		Set<Pair<X, Z>> ret = new HashSet<>();
 
 		for (Pair<X, Y> p1 : x) {
@@ -311,9 +310,9 @@ public class Instance {
 		return false;
 	}
 
-	public Map<String, Set<Pair<Object, Object>>> data;
+	public final Map<String, Set<Pair<Object, Object>>> data;
 
-	public Signature thesig;
+	public final Signature thesig;
 
 	public Instance(Signature thesig,
 			Map<String, Set<Pair<Object, Object>>> data) throws FQLException {
@@ -324,8 +323,8 @@ public class Instance {
 			Map<String, Set<Pair<Object, Object>>> data2) {
 		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
 		for (Entry<String, Set<Pair<Object, Object>>> e : data2.entrySet()) {
-			ret.add(new Pair<String, List<Pair<Object, Object>>>(e.getKey(),
-					new LinkedList<>(e.getValue())));
+			ret.add(new Pair<>(e.getKey(),
+                    new LinkedList<>(e.getValue())));
 		}
 		return ret;
 	}
@@ -338,16 +337,16 @@ public class Instance {
 
 	public Instance(Signature thesig) throws FQLException {
 		// this.name = n;
-		this.data = new HashMap<>();
-		this.external = true;
+        data = new HashMap<>();
+        external = true;
 		for (Node node : thesig.nodes) {
-			this.data.put(node.string, new HashSet<Pair<Object, Object>>());
+            data.put(node.string, new HashSet<>());
 		}
 		for (Edge e : thesig.edges) {
-			this.data.put(e.name, new HashSet<Pair<Object, Object>>());
+            data.put(e.name, new HashSet<>());
 		}
 		for (Attribute<Node> a : thesig.attrs) {
-			this.data.put(a.name, new HashSet<Pair<Object, Object>>());
+            data.put(a.name, new HashSet<>());
 		}
 		this.thesig = thesig;
 		if (!typeCheck(thesig)) {
@@ -449,7 +448,7 @@ public class Instance {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((data == null) ? 0 : data.hashCode());
 		return result;
@@ -552,8 +551,8 @@ public class Instance {
 	public JPanel view() throws FQLException {
 		List<JPanel> panels = new LinkedList<>();
 		// Map<String, Set<Pair<String,String>>> data;
-		LinkedList<String> sorted = new LinkedList<>(data.keySet());
-		Collections.sort(sorted, (f1, f2) -> f1.toString().compareTo(f2.toString()));
+		List<String> sorted = new LinkedList<>(data.keySet());
+		sorted.sort(Comparator.comparing(String::toString));
 		for (String k : sorted) {
 			Set<Pair<Object, Object>> xxx = data.get(k);
 			List<Pair<Object, Object>> table = new LinkedList<>(xxx);
@@ -601,10 +600,10 @@ public class Instance {
 	private List<JPanel> makePanels() {
 		List<JPanel> ret = new LinkedList<>();
 
-		Comparator<String> strcmp = (f1, f2) -> f1.compareTo(f2);
+		Comparator<String> strcmp = String::compareTo;
 
 		List<String> xxx = new LinkedList<>(joined.keySet());
-		Collections.sort(xxx, strcmp);
+		xxx.sort(strcmp);
 
 		for (String name : xxx) {
 			JTable t = joined.get(name);
@@ -634,7 +633,7 @@ public class Instance {
 
 		for (Node n : thesig.nodes) {
 			nd.put(n.string, data.get(n.string));
-			jnd.put(n.string, new HashMap<String, Set<Pair<Object, Object>>>());
+			jnd.put(n.string, new HashMap<>());
 			names.add(n.string);
 		}
 
@@ -648,8 +647,8 @@ public class Instance {
 			// names.add(a.name);
 		}
 
-		Comparator<String> strcmp = (f1, f2) -> f1.compareTo(f2);
-		Collections.sort(names, strcmp);
+		Comparator<String> strcmp = String::compareTo;
+		names.sort(strcmp);
 		joined = makejoined(jnd, nd, names);
 
 		for (Edge e : thesig.edges) {
@@ -748,7 +747,7 @@ public class Instance {
 	private Map<String, JTable> makejoined(
 			Map<String, Map<String, Set<Pair<Object, Object>>>> joined,
 			Map<String, Set<Pair<Object, Object>>> nd, List<String> names) {
-		Comparator<String> strcmp = (f1, f2) -> f1.compareTo(f2);
+		Comparator<String> strcmp = String::compareTo;
 		Map<String, JTable> ret = new HashMap<>();
 		for (String name : names) {
 			Map<String, Set<Pair<Object, Object>>> m = joined.get(name);
@@ -756,7 +755,7 @@ public class Instance {
 			Object[][] arr = new Object[ids.size()][m.size() + 1];
 			Set<String> cols = m.keySet();
 			List<String> cols2 = new LinkedList<>(cols);
-			Collections.sort(cols2, strcmp);
+			cols2.sort(strcmp);
 			cols2.add(0, "ID");
 			Object[] cols3 = cols2.toArray();
 		
@@ -834,7 +833,7 @@ public class Instance {
 		return tap;
 	}
 
-	public String rdfX(@SuppressWarnings("unused") String name) {
+	private String rdfX(@SuppressWarnings("unused") String name) {
 		String xxx = "";
 		String prefix = "fql://entity/"; // + name + "/";
 
@@ -945,25 +944,21 @@ public class Instance {
 			} catch (Exception e) {
 			}
 		}
-		if (!flag) {
-			return false;
-		}
-
-		return true;
+		return flag;
 	}
 
 	static class Subs {
-		private Map<String, List<Map<Object, Object>>> sub;
-		private LinkedList<String> keys;
-		private int[] counters;
-		private int[] sizes;
+		private final Map<String, List<Map<Object, Object>>> sub;
+		private final LinkedList<String> keys;
+		private final int[] counters;
+		private final int[] sizes;
 
 		public Subs(Map<String, List<Map<Object, Object>>> subs1) {
-			this.sub = subs1;
-			this.keys = new LinkedList<>(sub.keySet());
+            sub = subs1;
+            keys = new LinkedList<>(sub.keySet());
 
-			this.counters = makeCounters(keys.size() + 1);
-			this.sizes = makeSizes(keys, sub);
+            counters = makeCounters(keys.size() + 1);
+            sizes = makeSizes(keys, sub);
 		}
 
 		public Map<String, Map<Object, Object>> next() {
@@ -992,7 +987,7 @@ public class Instance {
 		return ret;
 	}
 
-	private static void inc5(int[] counters, int[] sizes) {
+	private static void inc5(int[] counters, int... sizes) {
 		counters[0]++;
 		for (int i = 0; i < counters.length - 1; i++) {
 			if (counters[i] == sizes[i]) {
@@ -1005,7 +1000,7 @@ public class Instance {
 	private static int[] makeCounters(int size) {
 		int[] ret = new int[size];
 		for (int i = 0; i < size; i++) {
-			ret[i++] = 0;
+			ret[i] = 0;
 		}
 		return ret;
 	}
@@ -1076,7 +1071,7 @@ public class Instance {
 		return makeViewer(c);
 	}
 
-	public Graph<String, String> build() {
+	private Graph<String, String> build() {
 		// Graph<V, E> where V is the type of the vertices
 
 		Graph<String, String> g2 = new DirectedSparseMultigraph<>();
@@ -1096,7 +1091,7 @@ public class Instance {
 		return g2;
 	}
 
-	public JPanel makeViewer(Color c) {
+	private JPanel makeViewer(Color c) {
 		Graph<String, String> g = build();
 		if (g.getVertexCount() == 0) {
 			return new JPanel();
@@ -1105,24 +1100,18 @@ public class Instance {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public JPanel doView(
-	 final Color clr, Graph<String, String> sgv) {
+	private JPanel doView(
+			Color clr, Graph<String, String> sgv) {
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix
 					+ GlobalOptions.debug.fql.inst_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
-			final Layout<String, String> layout = (Layout<String, String>) x
+			Layout<String, String> layout = (Layout<String, String>) x
 					.newInstance(sgv);
 
-			final VisualizationViewer<String, String> vv = new VisualizationViewer<>(
+			VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
-			Transformer<String, Paint> vertexPaint = (String i) -> {
-                            if (thesig.isAttribute(i)) {
-                                return UIManager.getColor("Panel.background");
-                            } else {
-                                return clr;
-                            }
-                        };
+			Transformer<String, Paint> vertexPaint = (String i) -> thesig.isAttribute(i) ? UIManager.getColor("Panel.background") : clr;
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
@@ -1142,13 +1131,13 @@ public class Instance {
                             vv.getPickedEdgeState().clear();
                             String str = ((String) e.getItem());
                             prejoin();
-                            
-                            if (!thesig.isAttribute(str)) {
-                                cards.show(vwr, str);
-                            } else {
-                                cards.show(vwr, "domain of " + str);
-                                
-                            }
+
+                if (thesig.isAttribute(str)) {
+                    cards.show(vwr, "domain of " + str);
+
+                } else {
+                    cards.show(vwr, str);
+                }
                         });
 			vv.getPickedEdgeState().addItemListener((ItemEvent e) -> {
                             if (e.getStateChange() != ItemEvent.SELECTED) {
@@ -1168,10 +1157,10 @@ public class Instance {
                         });
 		
 			float dash[] = { 1.0f };
-			final Stroke edgeStroke = new BasicStroke(0.5f,
+			Stroke edgeStroke = new BasicStroke(0.5f,
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
-			final Stroke bs = new BasicStroke();
+			Stroke bs = new BasicStroke();
 			Transformer<String, Stroke> edgeStrokeTransformer = s -> {
 				if (thesig.isAttribute(s)) {
 					return edgeStroke;
@@ -1184,13 +1173,13 @@ public class Instance {
 			vv.getRenderContext().setVertexLabelTransformer(
 					new ToStringLabeller<>());
 
-			final GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
+			GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 		
 			JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 			newthing.setResizeWeight(.8d); 
 			newthing.add(zzz);
 			newthing.add(vwr);
-			final JPanel xxx = new JPanel(new GridLayout(1, 1));
+			JPanel xxx = new JPanel(new GridLayout(1, 1));
 			xxx.add(newthing);
 		    layout.setSize(new Dimension(400,400));
 			return xxx;
@@ -1215,7 +1204,7 @@ public class Instance {
 				g = Integer.toString(i);
 			}
 
-			tuples.add(new Pair<Object, Object>(g, g));
+			tuples.add(new Pair<>(g, g));
 			ret.add(new Pair<>(node.string, tuples));
 			map.put(node, g);
 			i++;
@@ -1223,8 +1212,8 @@ public class Instance {
 
 		for (Edge e : s.edges) {
 			List<Pair<Object, Object>> tuples = new LinkedList<>();
-			tuples.add(new Pair<Object, Object>(map.get(e.source.string), map
-					.get(e.target.string)));
+			tuples.add(new Pair<>(map.get(e.source.string), map
+                    .get(e.target.string)));
 			ret.add(new Pair<>(e.name, tuples));
 		}
 
@@ -1267,9 +1256,9 @@ public class Instance {
 		return ret;
 	}
 
-	JPanel vwr = new JPanel();
-	CardLayout cards = new CardLayout();
-	Map<String, JTable> joined;
+	private final JPanel vwr = new JPanel();
+	private final CardLayout cards = new CardLayout();
+	private Map<String, JTable> joined;
 
 	public Pair<JPanel, JPanel> groth(String name, Color c) {
 		return CategoryOfElements.makePanel(name, this, c);
@@ -1309,9 +1298,7 @@ public class Instance {
 		Set<List<Object>> ret = new HashSet<>();
 		for (Object[] k : in) {
 			List<Object> xxx = new LinkedList<>();
-			for (int i = 1; i < k.length; i++) {
-				xxx.add(k[i]);
-			}
+			xxx.addAll(Arrays.asList(k).subList(1, k.length));
 			ret.add(xxx);
 		}
 		return ret.size();
@@ -1340,7 +1327,7 @@ public class Instance {
 		}
 	}
 
-	private Comparator<Pair<Path, Attribute<Node>>> comparator = (Pair<Path, Attribute<Node>> o1, Pair<Path, Attribute<Node>> o2) -> {
+	private final Comparator<Pair<Path, Attribute<Node>>> comparator = (Pair<Path, Attribute<Node>> o1, Pair<Path, Attribute<Node>> o2) -> {
             List<String> x1 = o1.first.asList();
             x1.add(o1.second.name);
             List<String> x2 = o2.first.asList();
@@ -1381,14 +1368,14 @@ public class Instance {
 
 		Map<Node, List<Pair<Path, Attribute<Node>>>> m = new HashMap<>();
 		for (Node n : thesig.nodes) {
-			m.put(n, new LinkedList<Pair<Path, Attribute<Node>>>());
+			m.put(n, new LinkedList<>());
 		}
 		for (Pair<Path, Attribute<Node>> k : rem.keySet()) {
 			m.get(k.first.source).add(k);
 		}
 		Map<Node, Pair<Object[], Object[][]>> ret = new HashMap<>();
 		for (Node n : thesig.nodes) {
-			Collections.sort(m.get(n), comparator);
+			(m.get(n)).sort(comparator);
 			Object[] ar = new Object[m.get(n).size() + 1];
 			Map<Object, Object[]> rows = new HashMap<>();
 			for (Pair<Object, Object> o : data.get(n.string)) {
@@ -1421,7 +1408,7 @@ public class Instance {
 	 * the rows.
 	 */
 	public static boolean quickCompare(Instance i, Instance j) {
-		List<String> l = new LinkedList<>();
+		//List<String> l = new LinkedList<>();
 		if (!i.data.keySet().equals(j.data.keySet())) {
 			throw new RuntimeException(i.data.keySet() + "\n\n"
 					+ j.data.keySet());
@@ -1430,14 +1417,14 @@ public class Instance {
 			Set<Pair<Object, Object>> v = i.data.get(k);
 			Set<Pair<Object, Object>> v0 = j.data.get(k);
 			if (v.size() != v0.size()) {
-				l.add(k);
+		//		l.add(k);
 				return false;
 			}
 		}
 		return true;
 	}
 
-	public static Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> prod(
+	private static Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> prod(
 			IntRef idx, Instance I, Instance J) throws FQLException {
 		if (!I.thesig.equals(J.thesig)) {
 			throw new RuntimeException();
@@ -1454,7 +1441,7 @@ public class Instance {
 					String str = Integer.toString(++idx.i);
 					m1.put(str, p);
 					m2.put(p, str);
-					s.add(new Pair<Object, Object>(str, str));
+					s.add(new Pair<>(str, str));
 				}
 			}
 			d.put(n.string, s);
@@ -1602,7 +1589,7 @@ public class Instance {
 		return new Quad<>(IJ, map1, map4, xxx);
 	} 
 
-	public List<Pair<Object, Object>> ids() {
+	private List<Pair<Object, Object>> ids() {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
 
 		for (Node n : thesig.nodes) {
@@ -1628,13 +1615,13 @@ public class Instance {
 		return ret;
 	}
 
-	static List<Boolean> tf = Arrays.asList(new Boolean[] { true, false });
+	private static final List<Boolean> tf = Arrays.asList(true, false);
 
-	public static Set<Map<String, Set<Pair<Object, Object>>>> subInstances_fast0(
+	private static Set<Map<String, Set<Pair<Object, Object>>>> subInstances_fast0(
 			Signature sig, List<Node> list,
 			Map<String, Set<Pair<Object, Object>>> inst) {
 		Set<Map<String, Set<Pair<Object, Object>>>> ret = new HashSet<>();
-		if (list.size() == 0) {
+		if (list.isEmpty()) {
 			ret.add(inst);
 			return ret;
 		}
@@ -1645,7 +1632,7 @@ public class Instance {
 		for (LinkedHashMap<Object, Boolean> subset : subsets) {
 			Map<String, Set<Pair<Object, Object>>> j = recDel(sig, n, inst,
 					subset);
-			if (rest.size() == 0) {
+			if (rest.isEmpty()) {
 				ret.add(j);
 			} else {
 				Set<Map<String, Set<Pair<Object, Object>>>> h = subInstances_fast0(
@@ -1687,12 +1674,7 @@ public class Instance {
 	}
 
 	private static void remove(Set<Pair<Object, Object>> set, Object o) {
-		Iterator<Pair<Object, Object>> it = set.iterator();
-		while (it.hasNext()) {
-			if (it.next().first.equals(o)) {
-				it.remove();
-			}
-		}
+		set.removeIf(objectObjectPair -> objectObjectPair.first.equals(o));
 	} 
 
 	private static Set<Object> clearX(Set<Pair<Object, Object>> set, Object o) {
@@ -1723,26 +1705,26 @@ public class Instance {
 			}
 		}
 
-		for (;;) {
-			Pair<Node, Object> toDel = pick(del); // removes in place
-			if (toDel == null) {
-				return ret;
-			}
-			Node n = toDel.first;
-			Object kill = toDel.second;
-			// delete from n, and clear attrs
-			remove(ret.get(n.string), kill);
-			for (Attribute<Node> a : sig.attrsFor(n)) {
-				remove(ret.get(a.name), kill);
-			}
-			for (Edge e : sig.edgesFrom(n)) {
-				remove(ret.get(e.name), kill);
-			}
-			for (Edge e : sig.edgesTo(n)) {
-				Set<Object> cleared = clearX(ret.get(e.name), kill); 
-				del.get(e.source).addAll(cleared);
-			}
-		}
+        while (true) {
+            Pair<Node, Object> toDel = pick(del); // removes in place
+            if (toDel == null) {
+                return ret;
+            }
+            Node n = toDel.first;
+            Object kill = toDel.second;
+            // delete from n, and clear attrs
+            remove(ret.get(n.string), kill);
+            for (Attribute<Node> a : sig.attrsFor(n)) {
+                remove(ret.get(a.name), kill);
+            }
+            for (Edge e : sig.edgesFrom(n)) {
+                remove(ret.get(e.name), kill);
+            }
+            for (Edge e : sig.edgesTo(n)) {
+                Set<Object> cleared = clearX(ret.get(e.name), kill);
+                del.get(e.source).addAll(cleared);
+            }
+        }
 	}
 
 	private static Pair<Node, Object> pick(Map<Node, Set<Object>> del) {
@@ -1814,9 +1796,9 @@ public class Instance {
 	}
 
 	// must also return map, take in intref
-	public Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>> omega(Node c,
-			LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> w,
-			IntRef ref) throws FQLException {
+	private Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>> omega(Node c,
+																																				 LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> w,
+																																				 IntRef ref) throws FQLException {
 		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
 
 		FinCat<Node, Path> cat = thesig.toCategory2().first;

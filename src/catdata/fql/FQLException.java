@@ -1,9 +1,9 @@
 package catdata.fql;
 
 @SuppressWarnings("serial")
-/**
- * 
- * @author ryan
+/*
+
+  @author ryan
  *
  * Recoverable FQL exceptions (type errors, syntax errors, etc)
  */

@@ -50,9 +50,9 @@ public class SqlLoader extends JPanel {
 	public SqlInstance instance;
 	public Connection conn;
 	
-	private final static String help = "";
+	private static final String help = "";
 
-	public static Example[] examples = { new EmpExample(), new CompoundExample(), new EmpAutoExample() };
+	private static final Example[] examples = { new EmpExample(), new CompoundExample(), new EmpAutoExample() };
 
 	private final String name;
 	
@@ -90,7 +90,7 @@ public class SqlLoader extends JPanel {
 			
 			for (String string0 : strings) {
 				String string = string0.trim();
-				if (string.length() == 0) {
+				if (string.isEmpty()) {
 					continue;
 				}
 				if (string.equals(";")) {
@@ -109,7 +109,7 @@ public class SqlLoader extends JPanel {
 	
 	private void doLoad() {
 		try {
-			if (input.getText().trim().length() != 0) {
+			if (!input.getText().trim().isEmpty()) {
 				throw new RuntimeException("Cannot load if text entered");
 			}
 
@@ -144,13 +144,13 @@ public class SqlLoader extends JPanel {
 		JButton loadButton = new JButton("Load JDBC");
 		JButton helpButton = new JButton("Help");
 
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener(x -> { input.setText(((Example) box.getSelectedItem()).getText()); } );
+		box.addActionListener(x -> input.setText(((Example) box.getSelectedItem()).getText()));
 
-		transButton.addActionListener(x -> { doRun(); });
-		loadButton.addActionListener(x -> { doLoad(); });
-		helpButton.addActionListener(x -> { doHelp(); });
+		transButton.addActionListener(x -> doRun());
+		loadButton.addActionListener(x -> doLoad());
+		helpButton.addActionListener(x -> doHelp());
 
 		JPanel tp = new JPanel(new GridLayout(2, 4));
 
@@ -171,7 +171,7 @@ public class SqlLoader extends JPanel {
 	}
 	
 
-	public static void doHelp() {
+	private static void doHelp() {
 		JTextArea jta = new JTextArea(help);
 		jta.setWrapStyleWord(true);
 		jta.setLineWrap(true);

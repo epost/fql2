@@ -21,7 +21,7 @@ public class Patrick24ExampleBadUber extends Example {
 	return s;
 	}
 	
-	String s = "S = schema {"
+	private final String s = "S = schema {"
 			+ "\n	nodes A;"
 			+ "\n	edges;"
 			+ "\n	equations;"

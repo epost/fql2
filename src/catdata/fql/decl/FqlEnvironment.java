@@ -19,8 +19,7 @@ public class FqlEnvironment {
 			Map<String, Mapping> mappings, Map<String, Instance> instances,
 			Map<String, Query> queries, Map<String, Transform> transforms,
 			Map<String, FullQuery> full_queries) {
-		super();
-		this.signatures = signatures;
+        this.signatures = signatures;
 		this.mappings = mappings;
 		this.instances = instances;
 		this.queries = queries;
@@ -49,12 +48,12 @@ public class FqlEnvironment {
 	}
 	*/
 
-	public Map<String, Signature> signatures;
-	public Map<String, Mapping> mappings;
-	public Map<String, Query> queries;
-	public Map<String, FullQuery> full_queries;
-	public Map<String, Instance> instances;
-	public Map<String, Transform> transforms;
+	public final Map<String, Signature> signatures;
+	public final Map<String, Mapping> mappings;
+	public final Map<String, Query> queries;
+	public final Map<String, FullQuery> full_queries;
+	public final Map<String, Instance> instances;
+	public final Map<String, Transform> transforms;
 
 	
 	public Signature getSchema(String s0) throws FQLException {

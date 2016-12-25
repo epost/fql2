@@ -18,16 +18,16 @@ import catdata.aql.Term;
 
 public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 	
-	public final String fil;
+	private final String fil;
 		
-	public Map<En, String> ens = new HashMap<>();
-	public Map<Ty, String> tys = new HashMap<>();
+	private final Map<En, String> ens = new HashMap<>();
+	private final Map<Ty, String> tys = new HashMap<>();
 
 	public ToCsvPragmaInstance(Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I, String s, CSVFormat format, String idCol) {
 		if (!s.endsWith("/")) {
-			s = s + "/";
+            s += "/";
 		}
-		this.fil = s;
+        fil = s;
 	
 		try {
 			for (En en : I.schema().ens) {
@@ -96,31 +96,35 @@ public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 	private void delete() {
 		File file = new File(fil);
 		if (!file.exists()) {
-			if (!file.mkdirs()) {
-				throw new RuntimeException("Cannot create directory: " + file);
-			} else {
-				return;
-			}
+            if (file.mkdirs()) {
+                return;
+            } else {
+                throw new RuntimeException("Cannot create directory: " + file);
+            }
 		}
 		if (!file.isDirectory()) {
 			if (!file.delete()) {
 				throw new RuntimeException("Cannot delete file: " + file);
 			}
-			if (!file.mkdirs()) {
-				throw new RuntimeException("Cannot create directory: " + file);
-			} else {
-				return;
-			}
+            if (file.mkdirs()) {
+                return;
+            } else {
+                throw new RuntimeException("Cannot create directory: " + file);
+            }
 		}
 		if (file.isDirectory()) {
-			for (File f : file.listFiles()) {
-				if (!f.isDirectory()) {
-					if (!f.delete()) {
-						throw new RuntimeException("Cannot delete file: " + f);
-					}
-				} else {
-					throw new RuntimeException("Cannot delete directory: " + f);
-				}
+			File[] files = file.listFiles();
+			if (files == null) {
+				throw new RuntimeException("Anomaly: please report");
+			}
+			for (File f : files) {
+                if (f.isDirectory()) {
+                    throw new RuntimeException("Cannot delete directory: " + f);
+                } else {
+                    if (!f.delete()) {
+                        throw new RuntimeException("Cannot delete file: " + f);
+                    }
+                }
 			}
 		}	
 	}

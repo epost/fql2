@@ -16,7 +16,7 @@ import catdata.fpql.XExp.XSuperED.SuperFOED;
 import catdata.fqlpp.cat.FinSet;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class XChaser {
+class XChaser {
 
 	public static void validate(XSuperED phi, XCtx<String> S, XCtx<String> T) {
 		if (!phi.cod.keySet().equals(phi.dom.keySet())) {
@@ -85,18 +85,18 @@ public class XChaser {
 		}
 	}
 
-	private static Pair<String,String> check(XSuperED phi, XSuperED.SuperFOED psi, Triple<String, List<List<String>>, List<String>> bulb, XCtx<String> S, XCtx<String> T) {
+	private static Pair<String,String> check(XSuperED phi, SuperFOED psi, Triple<String, List<List<String>>, List<String>> bulb, XCtx<String> S, XCtx<String> T) {
 		String bulb_dst = null;
-		List<String> bulb_src0 = null;
+		List<String> bulb_src0;
 		if (bulb.first != null) {
 			bulb_src0 = phi.dom.get(bulb.first);
 			if (bulb_src0 == null) {
-				throw new RuntimeException("Not a function symbol: " + bulb_src0);
+				throw new RuntimeException("Not a function symbol: " + bulb.first);
 			}
 			List<Pair<String, String>> bulb_src = new LinkedList<>();
-			for (int i = 0; i < bulb_src0.size(); i++) {
-				bulb_src.add(new Pair<>("_1", bulb_src0.get(i)));
-			}
+            for (String aBulb_src0 : bulb_src0) {
+                bulb_src.add(new Pair<>("_1", aBulb_src0));
+            }
 
 			List<Pair<String,String>> arg_ts = bulb.second.stream().map(x -> S.typeWith(x, psi.a)).collect(Collectors.toList());
 			if (!bulb_src.equals(arg_ts)) {
@@ -150,11 +150,11 @@ public class XChaser {
 	}
 	
 	@SuppressWarnings("unused")
-	public static <C> Triple<Map<String,Set<List<Triple<C,C,List<C>>>>>, 
+    private static <C> Triple<Map<String,Set<List<Triple<C,C,List<C>>>>>,
 							 Map<Pair<String,List<Triple<C,C,List<C>>>>, Object>, 
 							 Set> 
-	step(XSuperED ED, XCtx<C> S, XCtx T, XCtx<C> I, Map<String,Set<List<Triple<C,C,List<C>>>>> dom, 
-			Map<Pair<String,List<Triple<C,C,List<C>>>>,Object> gens, Set eqs) {
+	step(XSuperED ED, XCtx<C> S, XCtx T, XCtx<C> I, Map<String, Set<List<Triple<C, C, List<C>>>>> dom,
+         Map<Pair<String, List<Triple<C, C, List<C>>>>, Object> gens, Set eqs) {
 		for (SuperFOED ed : ED.as) {
 			List<LinkedHashMap<C, Triple<C,C,List<C>>>> vals = allVals((Map<C,C>)ed.a, I);
 			for (LinkedHashMap<C, Triple<C,C,List<C>>> val : vals) {
@@ -163,30 +163,29 @@ public class XChaser {
 				for (Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>> rhs : ed.rhs) {
 					Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>
 					rhs_substed = new Pair<>(substLhs0(rhs.first, val), substLhs0(rhs.second, val));
-			
-						if (!triggers(ed.lhs, rhs, val, I, gens, dom)) {
-							continue;
-						} else {
-							if (rhs.first.first != null) {
-								Set<List<Triple<C, C, List<C>>>> set = dom.get(rhs.first.first);
-								List<List<C>> toadd = (List<List<C>>) ((Object)rhs_substed.first.second);
-								List<Triple<C, C, List<C>>> toadd2 = toadd.stream().map(x -> { return new Triple<>(I.type(x).first, I.type(x).second, x); }).collect(Collectors.toList());
-								set.add(toadd2); //to trigger, the rhs wasn't already there
-								gens.put(new Pair<>(rhs.first.first, toadd2), new Pair<>(rhs.first.first, toadd2));
-							}
-							if (rhs.second.first != null) {
-								Set<List<Triple<C, C, List<C>>>> set = dom.get(rhs.second.first);
-								List<List<C>> toadd = (List<List<C>>) ((Object)rhs_substed.second.second);
-								List<Triple<C, C, List<C>>> toadd2 = toadd.stream().map(x -> { return new Triple<>(I.type(x).first, I.type(x).second, x); }).collect(Collectors.toList());
-								set.add(toadd2); //to trigger, the rhs wasn't already there
-								gens.put(new Pair<>(rhs.second.first, toadd2), new Pair<>(rhs.second.first, toadd2));	
-							}
-							eqs.add(new Pair(massage(rhs_substed.first, I), massage(rhs_substed.second, I)));
+
+                    if (triggers(ed.lhs, rhs, val, I, gens, dom)) {
+                        if (rhs.first.first != null) {
+                            Set<List<Triple<C, C, List<C>>>> set = dom.get(rhs.first.first);
+                            List<List<C>> toadd = (List<List<C>>) ((Object) rhs_substed.first.second);
+                            List<Triple<C, C, List<C>>> toadd2 = toadd.stream().map(x -> new Triple<>(I.type(x).first, I.type(x).second, x)).collect(Collectors.toList());
+                            set.add(toadd2); //to trigger, the rhs wasn't already there
+                            gens.put(new Pair<>(rhs.first.first, toadd2), new Pair<>(rhs.first.first, toadd2));
+                        }
+                        if (rhs.second.first != null) {
+                            Set<List<Triple<C, C, List<C>>>> set = dom.get(rhs.second.first);
+                            List<List<C>> toadd = (List<List<C>>) ((Object) rhs_substed.second.second);
+                            List<Triple<C, C, List<C>>> toadd2 = toadd.stream().map(x -> new Triple<>(I.type(x).first, I.type(x).second, x)).collect(Collectors.toList());
+                            set.add(toadd2); //to trigger, the rhs wasn't already there
+                            gens.put(new Pair<>(rhs.second.first, toadd2), new Pair<>(rhs.second.first, toadd2));
+                        }
+                        eqs.add(new Pair(massage(rhs_substed.first, I), massage(rhs_substed.second, I)));
 //							if (rhs.first.first != null && rhs.second.first != null) {
-								
-	//						}
-							//: equate in gens map
-						}
+
+                        //						}
+                        //: equate in gens map
+                    } else {
+                    }
 				}
 				
 			}
@@ -194,11 +193,11 @@ public class XChaser {
 		return new Triple<>(dom, gens, eqs);
 	}
 	
-	static Object massage(Triple<String, List<List<String>>, List<String>> x, XCtx I) {
+	private static Object massage(Triple<String, List<List<String>>, List<String>> x, XCtx I) {
 		if (x.first == null) {
 			return x.third;
 		}
-		List y = x.second.stream().map(z -> { return new Triple<>(I.type(z).first, I.type(z).second, z); }).collect(Collectors.toList());
+		List y = x.second.stream().map(z -> new Triple<>(I.type(z).first, I.type(z).second, z)).collect(Collectors.toList());
 		List z = new LinkedList<>();
 		z.add(new Pair<>(x.first, y));
 		if (x.third != null) {
@@ -214,8 +213,8 @@ public class XChaser {
 		return lhs.stream().map(x -> new Pair<>(substLhs0(x.first, val), substLhs0(x.second, val))).collect(Collectors.toList());
 	}
 	
-	static <C> Triple<String, List<List<String>>, List<String>> 
-	  substLhs0(Triple<String, List<List<String>>, List<String>> x, LinkedHashMap<C, Triple<C,C,List<C>>> val) {
+	private static <C> Triple<String, List<List<String>>, List<String>>
+	  substLhs0(Triple<String, List<List<String>>, List<String>> x, LinkedHashMap<C, Triple<C, C, List<C>>> val) {
 		List<List<String>> p = null;
 		if (x.second != null) {
 			p = x.second.stream().map(z -> substLhs1(z, val)).collect(Collectors.toList());
@@ -228,7 +227,7 @@ public class XChaser {
 		return new Triple<>(x.first, p, q);
 	}	
 	
-	static <C> List<String> substLhs1(List<String> x, LinkedHashMap<C, Triple<C,C,List<C>>> val) {
+	private static <C> List<String> substLhs1(List<String> x, LinkedHashMap<C, Triple<C, C, List<C>>> val) {
 		List ret = new LinkedList<>();
 		for (String k : x) {
 			Triple<C, C, List<C>> v = val.get(k);
@@ -242,7 +241,7 @@ public class XChaser {
 		return ret;
 	}
 	
-	public static <C> List<LinkedHashMap<C, Triple<C,C,List<C>>>> allVals(Map<C,C> as, XCtx<C> I) {
+	private static <C> List<LinkedHashMap<C, Triple<C,C,List<C>>>> allVals(Map<C, C> as, XCtx<C> I) {
 		Map<C, List<Triple<C, C, List<C>>>> m = new HashMap<>();
 		for (C v : as.keySet()) {
 			C t = as.get(v);
@@ -253,10 +252,10 @@ public class XChaser {
 	}
 	
 	
-	public static <C> boolean triggers(
-			List<Pair<Triple<String,List<List<String>>,List<String>>,Triple<String,List<List<String>>,List<String>>>> lhs, 
-			Pair<Triple<String,List<List<String>>,List<String>>,Triple<String,List<List<String>>,List<String>>> rhs, 
-			@SuppressWarnings("unused") LinkedHashMap<C, Triple<C, C, List<C>>> val, XCtx<C> I, Map<Pair<String, List<Triple<C, C, List<C>>>>, Object> gens, Map<String, Set<List<Triple<C, C, List<C>>>>> dom) {
+	private static <C> boolean triggers(
+            List<Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>>> lhs,
+            Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>> rhs,
+            @SuppressWarnings("unused") LinkedHashMap<C, Triple<C, C, List<C>>> val, XCtx<C> I, Map<Pair<String, List<Triple<C, C, List<C>>>>, Object> gens, Map<String, Set<List<Triple<C, C, List<C>>>>> dom) {
 		
 		for (Pair<Triple<String, List<List<String>>, List<String>>, Triple<String, List<List<String>>, List<String>>> c : lhs) {
 			Triple<String, List<List<String>>, List<String>> lhs1 = c.first;
@@ -272,16 +271,12 @@ public class XChaser {
 		}
 		Triple<String, List<List<String>>, List<String>> rhs1 = rhs.first;
 		Triple<String, List<List<String>>, List<String>> rhs2 = rhs.second;
-		if (containedInDom(rhs1, dom, I) || containedInDom(rhs2, dom, I)) {
-			return false;
-		}
-
-		return true;
-	}
+        return !(containedInDom(rhs1, dom, I) || containedInDom(rhs2, dom, I));
+    }
 	
 	
 	
-	public static <C> Object eval(Triple<String, List<List<String>>, List<String>> x, XCtx I, Map<Pair<String, List<Triple<C, C, List<C>>>>, Object> gens) {
+	private static <C> Object eval(Triple<String, List<List<String>>, List<String>> x, XCtx I, Map<Pair<String, List<Triple<C, C, List<C>>>>, Object> gens) {
 		Triple<C, C, List<C>> t = null;
 		if (x.third != null) {
 			t = I.find_fast(new Triple<>(I.type(x.third).first, I.type(x.third).second, x.third));
@@ -296,7 +291,7 @@ public class XChaser {
 		return new Pair(k, t);
 	}
 	
-	public static <C> Object findIn(Map<Pair<String, List<Triple<C, C, List<C>>>>, Object> gens, String f, List<List<String>> args, XCtx I) {
+	private static <C> Object findIn(Map<Pair<String, List<Triple<C, C, List<C>>>>, Object> gens, String f, List<List<String>> args, XCtx I) {
 		for (Pair<String, List<Triple<C, C, List<C>>>> k : gens.keySet()) {
 			String f0 = k.first;
 			if (!f.equals(f0)) {
@@ -322,7 +317,7 @@ public class XChaser {
 		return null;
 	}
 	
-	public static <C> boolean containedInDom(Triple<String, List<List<String>>, List<String>> x, Map<String, Set<List<Triple<C, C, List<C>>>>> dom, XCtx<C> I) {
+	private static <C> boolean containedInDom(Triple<String, List<List<String>>, List<String>> x, Map<String, Set<List<Triple<C, C, List<C>>>>> dom, XCtx<C> I) {
 		if (x.first == null) {
 			return false;
 		}
@@ -338,7 +333,7 @@ public class XChaser {
 				List<C> z2 = new LinkedList<>();
 				z2.add(c1.first);
 				z2.addAll(c2);
-				found = found && I.getKB().equiv(z1, z2);
+				found = I.getKB().equiv(z1, z2);
 				if (!found) {
 					break;
 				}

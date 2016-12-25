@@ -13,7 +13,7 @@ import catdata.Quad;
 import catdata.Util;
 import catdata.fqlpp.cat.FinSet.Fn;
 
-public class LeftKanSigma {
+class LeftKanSigma {
 	
 	
 	@SuppressWarnings({ "rawtypes" , "unchecked"})
@@ -78,13 +78,13 @@ public class LeftKanSigma {
 	}
 
 
-	public static <O1,A1,O2,A2>
+	private static <O1,A1,O2,A2>
 	Quad<Instance<O2,A2>, 
 	     Map<Signature<O1,A1>.Node, Map<Object, Object>>, 
 	     Map<Signature<O2,A2>.Node, Map<Object, Object>>, 
 	     Map<Object, List<Pair<Signature<O2,A2>.Edge, Object>>>> 
 	fullSigmaOnPresentation(
-			 Mapping<O1,A1,O2,A2> F, Instance<O1,A1> I, FPTransform<O1,A1> t, Instance<O2,A2> JJJ, Integer kkk)  {
+            Mapping<O1, A1, O2, A2> F, Instance<O1, A1> I, FPTransform<O1, A1> t, Instance<O2, A2> JJJ, Integer kkk)  {
 
 		LeftKan<O1,A1,O2,A2> D = new LeftKan<>(kkk, F, I, t, JJJ);
 
@@ -98,7 +98,8 @@ public class LeftKanSigma {
 		return new Quad<> (j, etables, D.utables2, hhh.second);
 	} 
 
-	private static <O1,A1,O2,A2> Pair<Instance<O2,A2>, Map<Object, List<Pair<Signature<O2,A2>.Edge, Object>>>> sigma(
+	@SuppressWarnings("unchecked")
+    private static <O1,A1,O2,A2> Pair<Instance<O2,A2>, Map<Object, List<Pair<Signature<O2,A2>.Edge, Object>>>> sigma(
 			LeftKan<O1,A1,O2,A2> lk)  {
 		
 		if (!lk.compute()) {

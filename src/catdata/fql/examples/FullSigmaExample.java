@@ -20,7 +20,7 @@ public class FullSigmaExample extends Example {
 		return s;
 	}
 
-	String s = "/*"
+	private final String s = "/*"
 			+ "\nThe FQL SQL compiler only supports sigma for mappings "
 			+ "\nthat are discrete op-fibrations.  However, we have added "
 			+ "\nsupport for full Sigma directly to the FQL IDE.  " + "\n*/"

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Util;
@@ -61,7 +60,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	public abstract Collage<Ty, Void, Sym, Void, Void, Void, Y> talg();
 
 	/**
-	 * @param the T of Y must be obtained from a call to att or sk only! 
+	 * @param y the T of Y must be obtained from a call to att or sk only!
 	 * @return not a true normal form, but a 'simplified' term for e.g., display purposes
 	 */
 	public final Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT(Term<Ty, Void, Sym, Void, Void, Void, Y> y) {
@@ -77,11 +76,12 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	private final Map<Term<Ty, Void, Sym, Void, Void, Void, Y>, Term<Ty,En,Sym,Fk,Att,Gen,Sk>> reprT_cache = new HashMap<>();
 	protected abstract Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> y);
 	
+	private final Map<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, Void, Sym, Void, Void, Void, Y>>
+	intoY_cache = new HashMap<>();
+
 	/**
 	 * @param term of type sort
 	 */
-	private final Map<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, Void, Sym, Void, Void, Void, Y>> 
-	intoY_cache = new HashMap<>();
 	public Term<Ty, Void, Sym, Void, Void, Void, Y> intoY(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		Term<Ty, Void, Sym, Void, Void, Void, Y> ret = intoY_cache.get(term);
 		if (ret != null) {
@@ -96,7 +96,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 			if (term.obj != null) {
 				return Term.Obj(term.obj, term.ty);
 			} else if (term.sym != null) {
-				return Term.Sym(term.sym, term.args().stream().map(x -> intoY0(x)).collect(Collectors.toList()));
+				return Term.Sym(term.sym, term.args().stream().map(this::intoY0).collect(Collectors.toList()));
 			} else if (term.sk != null) {
 				return sk(term.sk);
 			} else if (term.att != null) {
@@ -155,26 +155,28 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	
 
 
-	//TODO aql visitor cleanup
-	public Term<Ty, En, Sym, Fk, Att, X, Y> trans(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
-		if (term.var != null) {
-			return Term.Var(term.var);
-		} else if (term.obj != null) {
-			return Term.Obj(term.obj, term.ty);
-		} else if (term.sym != null) {
-			return Term.Sym(term.sym, term.args.stream().map(this::trans).collect(Collectors.toList()));
-		} else if (term.att != null) {
-			return Term.Att(term.att, trans(term.arg));
-		} else if (term.fk != null) {
-			return Term.Fk(term.fk, trans(term.arg));
-		} else if (term.gen != null) {
-			return Term.Gen(nf(Term.Gen(term.gen)));
-		} else if (term.sk != null) {
-			return sk(term.sk).map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
-		}
-		throw new RuntimeException("Anomaly: please report");
-	}
-	
+// --Commented out by Inspection START (12/24/16, 10:43 PM):
+//	//TODO aql visitor cleanup
+//    private Term<Ty, En, Sym, Fk, Att, X, Y> trans(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+//		if (term.var != null) {
+//			return Term.Var(term.var);
+//		} else if (term.obj != null) {
+//			return Term.Obj(term.obj, term.ty);
+//		} else if (term.sym != null) {
+//			return Term.Sym(term.sym, term.args.stream().map(this::trans).collect(Collectors.toList()));
+//		} else if (term.att != null) {
+//			return Term.Att(term.att, trans(term.arg));
+//		} else if (term.fk != null) {
+//			return Term.Fk(term.fk, trans(term.arg));
+//		} else if (term.gen != null) {
+//			return Term.Gen(nf(Term.Gen(term.gen)));
+//		} else if (term.sk != null) {
+//			return sk(term.sk).map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
+//		}
+//		throw new RuntimeException("Anomaly: please report");
+//	}
+// --Commented out by Inspection STOP (12/24/16, 10:43 PM)
+
 	
 	//TODO: aql have simplified collages also print out their definitions
 	

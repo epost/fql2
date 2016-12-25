@@ -52,7 +52,7 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		args = a;
 	}
 
-	public JSWrapper eval(Invocable invokable) throws NoSuchMethodException, ScriptException {
+	JSWrapper eval(Invocable invokable) throws NoSuchMethodException, ScriptException {
 		if (var != null) {
 			throw new RuntimeException("Can only only evaluate closed terms.");
 		}
@@ -69,7 +69,7 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((args == null) ? 0 : args.hashCode());
 		result = prime * result + ((head == null) ? 0 : head.hashCode());
@@ -157,16 +157,20 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		if (i != null) {
 			return Integer.toString(i);
 		}
-		List<String> x = args.stream().map(z -> z.toString()).collect(Collectors.toList());
+		List<String> x = args.stream().map(OplTerm::toString).collect(Collectors.toList());
 		String ret =  Util.maybeQuote(strip(head.toString())) + "(" + Util.sep(x, ", ") + ")";
 		return ret;
 	}
 	
 	public static <V> double termToDouble(OplTerm<?, V> t) {
-		return termToNat(t);
+		Integer i = termToNat(t);
+		if (i == null) {
+			throw new RuntimeException("Anomaly: please report");
+		}
+		return i;
 	}
 
-	public static <V> Integer termToNat(OplTerm<?, V> t) {
+	private static <V> Integer termToNat(OplTerm<?, V> t) {
 		if (t.var != null) {
 			return null;
 		}
@@ -225,7 +229,7 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 	}
 
 	public OplTerm<C, V> replace(OplTerm<C, V> toreplace, OplTerm<C, V> replacee) {
-		if (this.equals(toreplace)) {
+		if (equals(toreplace)) {
 			return replacee;
 		}
 		List<OplTerm<C, V>> l = new LinkedList<>();
@@ -236,7 +240,7 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 	}
 	
 	public boolean contains(OplTerm<C, V> lookingfor) {
-		if (this.equals(lookingfor)) {
+		if (equals(lookingfor)) {
 			return true;
 		}
 		for (OplTerm<C, V> a : args) {
@@ -301,8 +305,8 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 		}
 		return new OplTerm<>(Chc.inRight(head), args0);
 	}
-
-	public static <C, X, V> OplTerm<C, V> deLeft(OplTerm<Chc<C, X>, V> e) {
+/*
+	private static <C, X, V> OplTerm<C, V> deLeft(OplTerm<Chc<C, X>, V> e) {
 		if (e.var != null) {
 			return new OplTerm<>(e.var);
 		}
@@ -314,9 +318,9 @@ public class OplTerm<C, V> implements Comparable<OplTerm<C, V>> {
 			args0.add(deLeft(a));
 		}
 		return new OplTerm<>(e.head.l, args0);
-	}
+	} */
 
-	public V getHead() {
+	V getHead() {
 		if (var != null) {
 			return var;
 		}

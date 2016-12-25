@@ -13,16 +13,16 @@ import catdata.Util;
  */
 public abstract class Matcher<N1,E1,N2,E2,P>  {
 
-	public final DMG<N1,E1> src;
-	public final DMG<N2,E2> dst;
-	protected final P params;
+	final DMG<N1,E1> src;
+	final DMG<N2,E2> dst;
+	final P params;
 	public final Match<N1,E1,N2,E2> bestMatch;
 	
-	protected Matcher(DMG<N1, E1> src, DMG<N2, E2> dst, Map<String, String> options) {
+	Matcher(DMG<N1, E1> src, DMG<N2, E2> dst, Map<String, String> options) {
 		Util.assertNotNull(src, dst, options);
 		this.src = src;
 		this.dst = dst;
-		this.params = createParams(options);
+        params = createParams(options);
 		bestMatch = bestMatch();
                 if (bestMatch == null) {
                     throw new RuntimeException("Anomaly: please report");

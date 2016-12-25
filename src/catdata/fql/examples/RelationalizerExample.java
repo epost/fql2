@@ -20,7 +20,7 @@ public class RelationalizerExample extends Example {
 		return s;
 	}
 	
-	String s =
+	private final String s =
 			 "\nschema C={nodes A;attributes att:A->string;arrows f:A->A;equations A.f.f.f.f=A.f.f;}"
 			+ "\n"
 			+ "\ninstance I ={"

@@ -54,35 +54,36 @@ public class EmbeddedDependency {
 			eqcs.add(S);
 		}
 
-		for (;;) {
-			Set<String> a = null, b = null;
-			X: for (Pair<String, String> eq : egd) {
-				for (Set<String> eqc1 : eqcs) {
-					if (eqc1.contains(eq.first)) {
-						for (Set<String> eqc2 : eqcs) {
-							if (eqc2.contains(eq.second)) {
-								if (eqc1.equals(eqc2)) {
-									continue;
-								}
-								a = eqc1;
-								b = eqc2;
-								break X;
-							}
-						}
-					}
-				}
-			}
-			if (a != null) {
-				eqcs.remove(a);
-				eqcs.remove(b);
-				Set<String> eqc = new HashSet<>();
-				eqc.addAll(a);
-				eqc.addAll(b);
-				eqcs.add(eqc);
-			} else {
-				break;
-			}
-		}
+        while (true) {
+            Set<String> a = null, b = null;
+            X:
+            for (Pair<String, String> eq : egd) {
+                for (Set<String> eqc1 : eqcs) {
+                    if (eqc1.contains(eq.first)) {
+                        for (Set<String> eqc2 : eqcs) {
+                            if (eqc2.contains(eq.second)) {
+                                if (eqc1.equals(eqc2)) {
+                                    continue;
+                                }
+                                a = eqc1;
+                                b = eqc2;
+                                break X;
+                            }
+                        }
+                    }
+                }
+            }
+            if (a != null) {
+                eqcs.remove(a);
+                eqcs.remove(b);
+                Set<String> eqc = new HashSet<>();
+                eqc.addAll(a);
+                eqc.addAll(b);
+                eqcs.add(eqc);
+            } else {
+                break;
+            }
+        }
 
 		this.exists = new LinkedList<>(exists);
 		this.tgd = new LinkedList<>(tgd);
@@ -116,30 +117,31 @@ public class EmbeddedDependency {
 			}
 		}
 
-		for (;;) {
-			Pair<String, String> toRemove = null;
-			a: for (Pair<String, String> p : this.egd) {
-				if (p.first.equals(p.second)) {
-					toRemove = p;
-					break a;
-				}
-				for (Pair<String, String> q : this.egd) {
-					if (p.equals(q)) {
-						continue;
-					}
-					if (equiv(eqcs, p.first, q.first)
-							&& equiv(eqcs, p.second, q.second)) {
-						toRemove = p;
-						break a;
-					}
-				}
-			}
-			if (toRemove != null) {
-				this.egd.remove(toRemove);
-			} else {
-				break;
-			}
-		}
+        while (true) {
+            Pair<String, String> toRemove = null;
+            a:
+            for (Pair<String, String> p : this.egd) {
+                if (p.first.equals(p.second)) {
+                    toRemove = p;
+                    break;
+                }
+                for (Pair<String, String> q : this.egd) {
+                    if (p.equals(q)) {
+                        continue;
+                    }
+                    if (equiv(eqcs, p.first, q.first)
+                            && equiv(eqcs, p.second, q.second)) {
+                        toRemove = p;
+                        break a;
+                    }
+                }
+            }
+            if (toRemove != null) {
+                this.egd.remove(toRemove);
+            } else {
+                break;
+            }
+        }
 
 		this.where = new LinkedList<>(new HashSet<>(where));
 		this.tgd = new LinkedList<>(new HashSet<>(this.tgd));

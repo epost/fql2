@@ -33,9 +33,9 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((inst == null) ? 0 : inst.hashCode());
+			result = prime * result + (inst.hashCode());
 			return result;
 		}
 
@@ -48,13 +48,8 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			if (getClass() != obj.getClass())
 				return false;
 			SchExpInst<?,?,?,?,?> other = (SchExpInst<?,?,?,?,?>) obj;
-			if (inst == null) {
-				if (other.inst != null)
-					return false;
-			} else if (!inst.equals(other.inst))
-				return false;
-			return true;
-		}
+            return inst.equals(other.inst);
+        }
 
 		@Override
 		public String toString() {
@@ -94,9 +89,9 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((typeSide == null) ? 0 : typeSide.hashCode());
+			result = prime * result + (typeSide.hashCode());
 			return result;
 		}
 
@@ -109,13 +104,8 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			if (getClass() != obj.getClass())
 				return false;
 			SchExpEmpty<?,?> other = (SchExpEmpty<?,?>) obj;
-			if (typeSide == null) {
-				if (other.typeSide != null)
-					return false;
-			} else if (!typeSide.equals(other.typeSide))
-				return false;
-			return true;
-		}
+            return typeSide.equals(other.typeSide);
+        }
 
 		@Override
 		public String toString() {
@@ -160,9 +150,9 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((var == null) ? 0 : var.hashCode());
+			result = prime * result + (var.hashCode());
 			return result;
 		}
 
@@ -175,13 +165,8 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			if (getClass() != obj.getClass())
 				return false;
 			SchExpVar other = (SchExpVar) obj;
-			if (var == null) {
-				if (other.var != null)
-					return false;
-			} else if (!var.equals(other.var))
-				return false;
-			return true;
-		}
+            return var.equals(other.var);
+        }
 
 		@Override
 		public String toString() {
@@ -221,9 +206,9 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+			result = prime * result + (schema.hashCode());
 			return result;
 		}
 
@@ -236,13 +221,8 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			if (getClass() != obj.getClass())
 				return false;
 			SchExpLit<?,?,?,?,?> other = (SchExpLit<?,?,?,?,?>) obj;
-			if (schema == null) {
-				if (other.schema != null)
-					return false;
-			} else if (!schema.equals(other.schema))
-				return false;
-			return true;
-		}
+            return schema.equals(other.schema);
+        }
 
 		@Override
 		public String toString() {

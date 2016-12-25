@@ -22,7 +22,7 @@ import catdata.Triple;
 
 public class SigExpChecker implements SigExpVisitor<SigExp, FQLProgram>{
 
-	public List<String> seen = new LinkedList<>();
+	private List<String> seen = new LinkedList<>();
 	
 	@Override
 	public SigExp visit(FQLProgram env, Zero e) {
@@ -41,7 +41,7 @@ public class SigExpChecker implements SigExpVisitor<SigExp, FQLProgram>{
 		seen = s;
 		SigExp b = e.b.accept(env, this);
 		seen = s;
-		return new SigExp.Plus(a,b); 
+		return new Plus(a,b);
 	}
 
 	@Override
@@ -93,14 +93,14 @@ public class SigExpChecker implements SigExpVisitor<SigExp, FQLProgram>{
 	public SigExp visit(FQLProgram env, Union e) {
 		SigExp lt = e.l.typeOf(env);
 		SigExp rt = e.r.typeOf(env);
-		if (! (lt instanceof SigExp.Const)) {
+		if (! (lt instanceof Const)) {
 			throw new RuntimeException(e.l + " does not have constant schema, has " + lt);
 		}
-		if (! (rt instanceof SigExp.Const)) {
+		if (! (rt instanceof Const)) {
 			throw new RuntimeException(e.r + " does not have constant schema, has " + lt);
 		}
-		SigExp.Const lt0 = (SigExp.Const) lt;
-		SigExp.Const rt0 = (SigExp.Const) rt;
+		Const lt0 = (Const) lt;
+		Const rt0 = (Const) rt;
 		
 		
 		Set<String> nodes = new HashSet<>(lt0.nodes);
@@ -112,12 +112,12 @@ public class SigExpChecker implements SigExpVisitor<SigExp, FQLProgram>{
 		Set<Pair<List<String>, List<String>>> eqs = new HashSet<>(lt0.eqs);
 		eqs.addAll(rt0.eqs);
 		
-		return new SigExp.Const(new LinkedList<>(nodes), new LinkedList<>(attrs), new LinkedList<>(arrows), new LinkedList<>(eqs));
+		return new Const(new LinkedList<>(nodes), new LinkedList<>(attrs), new LinkedList<>(arrows), new LinkedList<>(eqs));
 	}
 
 	@Override
 	public SigExp visit(FQLProgram env, Opposite e) {
-		return new SigExp.Opposite(e.e.accept(env, this));
+		return new Opposite(e.e.accept(env, this));
 	}
 
 	@Override

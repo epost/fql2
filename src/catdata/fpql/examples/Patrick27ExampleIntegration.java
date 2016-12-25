@@ -21,7 +21,7 @@ public class Patrick27ExampleIntegration extends Example {
 		return s;
 	}
 	
-	String s ="//Example via Peter Gates"
+	private final String s ="//Example via Peter Gates"
 			+ "\n/* **********************************************************"
 			+ "\nIMPORTANT IMPORTANT IMPORTANT : Requires disabling type checking to run"
 			+ "\n/********************************************************* */"

@@ -22,7 +22,7 @@ public abstract class Options implements Serializable {
 
 	public abstract int size();
 	
-	public static JPanel wrap(JTextField f) {
+	protected static JPanel wrap(JTextField f) {
 		GridBagConstraints c1 = new GridBagConstraints();
 		c1.weightx = 1.0;
 		c1.fill = GridBagConstraints.HORIZONTAL;

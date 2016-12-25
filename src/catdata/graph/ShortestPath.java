@@ -13,7 +13,7 @@ import catdata.Util;
 
 /* Dijkstra's algorith a la Sedgewick and Wayne
  */
-public class ShortestPath<N, E> {
+class ShortestPath<N, E> {
 
 	private Collection<DirectedEdge<N, E>> edgesFrom(N n) {
 		Collection<DirectedEdge<N, E>> ret = new LinkedList<>();
@@ -38,8 +38,8 @@ public class ShortestPath<N, E> {
 			if (weight <= 0) {
 				throw new IllegalArgumentException("Weight is <= 0");
 			}
-			this.from = v;
-			this.to = w;
+            from = v;
+            to = w;
 			this.weight = weight;
 			this.e = e;
 		}
@@ -51,7 +51,7 @@ public class ShortestPath<N, E> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((e == null) ? 0 : e.hashCode());
 			result = prime * result + ((from == null) ? 0 : from.hashCode());
@@ -204,8 +204,8 @@ public class ShortestPath<N, E> {
 	private static class Wrapper<N, Key extends Comparable<Key>> implements Iterable<N> {
 		private final IndexMinPQ<Key> x;
 		
-		Map<N, Integer> iso1 = new HashMap<>();
-		Map<Integer, N> iso2 = new HashMap<>();
+		final Map<N, Integer> iso1 = new HashMap<>();
+		final Map<Integer, N> iso2 = new HashMap<>();
 		
 		private Wrapper(Collection<N> nodes) {
 			int i = 0;
@@ -256,13 +256,13 @@ public class ShortestPath<N, E> {
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static class IndexMinPQ<Key extends Comparable<Key>> implements Iterable<Integer> {
-	    private int maxN;        // maximum number of elements on PQ
+	    private final int maxN;        // maximum number of elements on PQ
 	    private int n;           // number of elements on PQ
-	    private int[] pq;        // binary heap using 1-based indexing
-	    private int[] qp;        // inverse of pq - qp[pq[i]] = pq[qp[i]] = i
-	    private Key[] keys;      // keys[i] = priority of i
+	    private final int[] pq;        // binary heap using 1-based indexing
+	    private final int[] qp;        // inverse of pq - qp[pq[i]] = pq[qp[i]] = i
+	    private final Key[] keys;      // keys[i] = priority of i
 
-	    @SuppressWarnings("unchecked")
+	    @SuppressWarnings({"unchecked", "SuspiciousArrayCast"})
             private IndexMinPQ(int maxN) {
 	        if (maxN < 0) throw new IllegalArgumentException();
 	        this.maxN = maxN;
@@ -384,7 +384,7 @@ public class ShortestPath<N, E> {
 	    private void swim(int k) {
 	        while (k > 1 && greater(k/2, k)) {
 	            exch(k, k/2);
-	            k = k/2;
+                k /= 2;
 	        }
 	    }
 

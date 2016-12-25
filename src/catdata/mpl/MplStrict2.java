@@ -31,10 +31,10 @@ public class MplStrict2<O,A> implements MplTypeVisitor<O, List<O>, Unit>,
 	
 	static class Node<O,A> {	
 		
-		MplTerm<O, A> term;
+		final MplTerm<O, A> term;
 		
 		static int global_id=0;
-		int id;
+		final int id;
 		
 		public Node(MplTerm<O, A> term) {
 			this.term = term;
@@ -54,17 +54,17 @@ public class MplStrict2<O,A> implements MplTypeVisitor<O, List<O>, Unit>,
 		}
  	}
 	
-	int counter = 0;
-	Integer fresh() {
+	private int counter = 0;
+	private Integer fresh() {
 		return counter++;
 	}
 	
-	MplSch<O, A> ctx;
-	public MplStrict2(MplSch<O,A> ctx) {
-		this.ctx = ctx;
+	//private final MplSch<O, A> ctx;
+	public MplStrict2(@SuppressWarnings("unused") MplSch<O,A> ctx) {
+		//this.ctx = ctx;
 	}
 	
-	Graph<Node<O,A>, Integer> g = new DirectedSparseMultigraph<>();
+	private final Graph<Node<O,A>, Integer> g = new DirectedSparseMultigraph<>();
 		
 	@Override
 	public List<O> visit(Unit env, MplBase<O> e) {
@@ -152,7 +152,7 @@ public class MplStrict2<O,A> implements MplTypeVisitor<O, List<O>, Unit>,
 		return new Pair<>(n, ret + " }");
 	}
 
-	public Pair<Node<O, A>, String> makeId(MplTerm<O, A> e) {
+	private Pair<Node<O, A>, String> makeId(MplTerm<O, A> e) {
 			
 		String ret = "subgraph cluster" + fresh() + "{ label=\"" + e + "\"; "  ;
 		

@@ -21,7 +21,7 @@ public class Patrick19ExampleNist2 extends Example {
 		return s;
 	}
 	
-	String s = "adom : type"
+	private final String s = "adom : type"
 			+ "\n"
 			+ "\nGlassCeramics: adom"
 			+ "\nGlass: adom"

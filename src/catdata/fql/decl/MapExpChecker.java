@@ -25,10 +25,15 @@ import catdata.fql.decl.MapExp.Snd;
 import catdata.fql.decl.MapExp.Sub;
 import catdata.fql.decl.MapExp.TT;
 import catdata.fql.decl.MapExp.Var;
+import catdata.fql.decl.SigExp.Exp;
+import catdata.fql.decl.SigExp.One;
+import catdata.fql.decl.SigExp.Plus;
+import catdata.fql.decl.SigExp.Times;
+import catdata.fql.decl.SigExp.Zero;
 
 public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLProgram> {
 
-	public List<String> seen = new LinkedList<>();
+	private List<String> seen = new LinkedList<>();
 	
 	public MapExpChecker(List<String> seen) {
 		this.seen = seen;
@@ -62,9 +67,9 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 		SigExp aa = e.a.typeOf(env);
 		SigExp bb = e.b.typeOf(env);
 		SigExp cc = e.c.typeOf(env);
-		return new Pair<>(new SigExp.Times(aa,
-				new SigExp.Plus(bb, cc)), new SigExp.Plus(new SigExp.Times(aa,
-				bb), new SigExp.Times(aa, cc)));
+		return new Pair<>(new Times(aa,
+				new Plus(bb, cc)), new Plus(new Times(aa,
+				bb), new Times(aa, cc)));
 	}
 
 	@Override
@@ -73,9 +78,9 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 		SigExp aa = e.a.typeOf(env);
 		SigExp bb = e.b.typeOf(env);
 		SigExp cc = e.c.typeOf(env);
-		return new Pair<>(new SigExp.Plus(new SigExp.Times(aa,
-				bb), new SigExp.Times(aa, cc)), new SigExp.Times(aa,
-						new SigExp.Plus(bb, cc)));
+		return new Pair<>(new Plus(new Times(aa,
+				bb), new Times(aa, cc)), new Times(aa,
+						new Plus(bb, cc)));
 	}
 
 	@Override
@@ -111,14 +116,14 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 			}
 		}
 		
-		return new Pair<>(x, new SigExp.One(e.attrs));
+		return new Pair<>(x, new One(e.attrs));
 	}
 
 	@Override
 	public Pair<SigExp, SigExp> visit(
 			FQLProgram env, FF e) {
 		SigExp x = e.t.typeOf(env);
-		return new Pair<>(new SigExp.Zero(), x);
+		return new Pair<>(new Zero(), x);
 	}
 
 	@Override
@@ -126,7 +131,7 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 			FQLProgram env, Fst e) {
 		SigExp a = e.s.typeOf(env);
 		SigExp b = e.t.typeOf(env);
-		return new Pair<>(new SigExp.Times(a, b), a);
+		return new Pair<>(new Times(a, b), a);
 	}
 
 	@Override
@@ -134,7 +139,7 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 			FQLProgram env, Snd e) {
 		SigExp a = e.s.typeOf(env);
 		SigExp b = e.t.typeOf(env);
-		return new Pair<>(new SigExp.Times(a, b), b);
+		return new Pair<>(new Times(a, b), b);
 	}
 
 	@Override
@@ -142,7 +147,7 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 			FQLProgram env, Inl e) {
 		SigExp a = e.s.typeOf(env);
 		SigExp b = e.t.typeOf(env);
-		return new Pair<>(a, new SigExp.Plus(a, b));
+		return new Pair<>(a, new Plus(a, b));
 	}
 
 	@Override
@@ -150,7 +155,7 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 			FQLProgram env, Inr e) {
 		SigExp a = e.s.typeOf(env);
 		SigExp b = e.t.typeOf(env);
-		return new Pair<>(b, new SigExp.Plus(a, b));
+		return new Pair<>(b, new Plus(a, b));
 	}
 
 	@Override
@@ -158,7 +163,7 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 			FQLProgram env, Apply e) {
 		SigExp s = e.s.typeOf(env);
 		SigExp t = e.t.typeOf(env);
-		return new Pair<>(new SigExp.Times(new SigExp.Exp(s,
+		return new Pair<>(new Times(new Exp(s,
 				t), t), s);
 	}
 
@@ -166,11 +171,11 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 	public Pair<SigExp, SigExp> visit(
 			FQLProgram env, Curry e) {
 		Pair<SigExp, SigExp> ft = e.f.accept(env, this);
-		if (!(ft.first instanceof SigExp.Times)) {
+		if (!(ft.first instanceof Times)) {
 			throw new RuntimeException("Not a product: " + ft.first + " in " + e);
 		}
-		SigExp.Times t = (SigExp.Times) ft.first;
-		return new Pair<>(t.a, new SigExp.Exp(ft.second, t.b));
+		Times t = (Times) ft.first;
+		return new Pair<>(t.a, new Exp(ft.second, t.b));
 	}
 
 	@Override
@@ -184,7 +189,7 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 		if (!lt.second.equals(rt.second)) {
 			throw new RuntimeException("target schema mismatch on " + e + ": " + lt.second + " and " + rt.second);
 		}
-		return new Pair<>(new SigExp.Plus(lt.first, rt.first), lt.second);
+		return new Pair<>(new Plus(lt.first, rt.first), lt.second);
 
 	}
 
@@ -199,7 +204,7 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 		if (!lt.first.equals(rt.first)) {
 			throw new RuntimeException("source schema mismatch on " + e + ": " + lt.first + " and " + rt.first);
 		}
-		return new Pair<>(lt.first, new SigExp.Times(lt.second, rt.second));
+		return new Pair<>(lt.first, new Times(lt.second, rt.second));
 	}
 
 	@Override
@@ -244,12 +249,8 @@ public class MapExpChecker implements MapExpVisitor<Pair<SigExp, SigExp>, FQLPro
 	public Pair<SigExp, SigExp> visit(FQLProgram env, Iso e) {
 		SigExp l = e.l.typeOf(env);
 		SigExp r = e.r.typeOf(env);
-		
-		if (e.lToR) {
-			return new Pair<>(l,r);
-		} else {
-			return new Pair<>(r,l);
-		}
+
+        return e.lToR ? new Pair<>(l, r) : new Pair<>(r, l);
 	}
 
 }

@@ -21,7 +21,7 @@ public class CategoryExample extends Example {
 		return s;
 	}
 
-	String s = "schema Category = {"
+	private final String s = "schema Category = {"
 			+ "\n	nodes "
 			+ "\n		Ob, "
 			+ "\n		Hom, "

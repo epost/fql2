@@ -21,7 +21,7 @@ public class CharExample extends Example {
 		return s;
 	}
 
-	String s = "//our schema S has one node, so an instance on S will just be a set."
+	private final String s = "//our schema S has one node, so an instance on S will just be a set."
 			+ "\nschema S = {"
 			+ "\n	nodes n;"
 			+ "\n	attributes;"

@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;  
 
@@ -70,7 +71,7 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
 	
 	@Override
 	public final int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((eqs() == null) ? 0 : eqs().hashCode());
 		result = prime * result + ((gens() == null) ? 0 : gens().hashCode());

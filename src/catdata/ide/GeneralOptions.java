@@ -113,44 +113,39 @@ public class GeneralOptions extends Options {
 		
 		
 		
-		Function<Unit, Unit> fn = new Function<Unit, Unit>() {
+		Function<Unit, Unit> fn = t -> {
+            try {
+                Integer new_font_size = Integer.parseInt(font_field.getText().trim());
+                if (new_font_size < 1) {
+                    new_font_size = font_size;
+                }
+                font_size = new_font_size;
+                GUI.setFontSize(font_size);
+            } catch (NumberFormatException nfe) {
+            }
 
-			@Override
-			public Unit apply(Unit t) {
-				try {
-					Integer new_font_size = Integer.parseInt(font_field.getText().trim());
-					if (new_font_size < 1) {
-						new_font_size = font_size;
-					}
-					font_size = new_font_size;
-					GUI.setFontSize(font_size);
-				} catch (NumberFormatException nfe) {
-				}
-				
-				File file = new File(fileArea.getText());
-				if (!fileArea.getText().trim().equals("") && (!file.exists() || !file.isDirectory())) {
-					JOptionPane.showMessageDialog(null, "Bad file-system path");				
-				} else {
-					file_path = fileArea.getText();
-				}
+            File file = new File(fileArea.getText());
+            if (!fileArea.getText().trim().equals("") && (!file.exists() || !file.isDirectory())) {
+                JOptionPane.showMessageDialog(null, "Bad file-system path");
+            } else {
+                file_path = fileArea.getText();
+            }
 
-				spellcheck = spellbox.isSelected();
-				GUI.keys.values().forEach(x -> x.clearSpellCheck());
-				
-				if (!lfb.getSelectedItem().equals(look_and_feel)) {
-					try {
-						UIManager.setLookAndFeel(lfb.getSelectedItem().toString());
-						SwingUtilities.updateComponentTreeUI(GUI.topFrame);
-						look_and_feel = lfb.getSelectedItem().toString();
-					} catch (Exception e) {
-						JOptionPane.showMessageDialog(null, e);
-					}
-				}
-				
-				return new Unit();
-			}
-			
-		};
+            spellcheck = spellbox.isSelected();
+            GUI.keys.values().forEach(CodeEditor::clearSpellCheck);
+
+            if (!lfb.getSelectedItem().equals(look_and_feel)) {
+                try {
+                    UIManager.setLookAndFeel(lfb.getSelectedItem().toString());
+                    SwingUtilities.updateComponentTreeUI(GUI.topFrame);
+                    look_and_feel = lfb.getSelectedItem().toString();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, e);
+                }
+            }
+
+            return new Unit();
+        };
 
 		return new Pair<>(generalsplit, fn);
 	}

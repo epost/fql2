@@ -11,10 +11,10 @@ import org.codehaus.jparsec.error.ParserException;
 public class Program<X> implements Prog {
 
 	
-	public List<String> order = new LinkedList<>();
-	public LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();	
-	public LinkedHashMap<String, X> exps = new LinkedHashMap<>();
-	public String text;
+	public final List<String> order = new LinkedList<>();
+	public final LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();
+	public final LinkedHashMap<String, X> exps = new LinkedHashMap<>();
+	private final String text;
 	
 	@Override
 	public String toString() {

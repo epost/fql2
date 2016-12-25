@@ -3,7 +3,7 @@ package catdata.aql.exp;
 import java.util.HashSet;
 import java.util.Set;
 
-import catdata.aql.Ctx;
+import catdata.Ctx;
 
 public class KindCtx<V,G,T,S,I,H,F,Q,P> {
 

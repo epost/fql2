@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.RuntimeInterruptedException;
 import catdata.Triple;
@@ -22,7 +23,6 @@ import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.AqlProver;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.DP;
 import catdata.aql.Eq;
 import catdata.aql.Head;
@@ -43,7 +43,7 @@ public class InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, X>
 extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
-	public boolean hasFreeTypeAlgebra() {
+	private boolean hasFreeTypeAlgebra() {
 		return talg().eqs.isEmpty();
 	}
 	
@@ -59,16 +59,12 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	
 	@Override
 	public String printX(X x) {
-		return "[" + repr(x).toString(Util.voidFn(), g -> printGen.apply(g)) + "]";
+		return "[" + repr(x).toString(Util.voidFn(), printGen) + "]";
 	}
 
 	@Override
 	public String printY(Chc<Sk, Pair<X, Att>> y) {
-		if (y.left) {
-			return "[" + printSk.apply(y.l) + "]";
-		} else {
-			return "[" + printX(y.r.first) + "." + y.r.second + "]";
-		}
+        return y.left ? "[" + printSk.apply(y.l) + "]" : "[" + printX(y.r.first) + "." + y.r.second + "]";
 	}
 	
 	private final DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp; //may just be on entity side, if java
@@ -82,8 +78,8 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	private final Schema<Ty, En, Sym, Fk, Att> schema;
 	private final Iterator<X> fresh;
 	
-	public final Function<Gen, String> printGen;
-	public final Function<Sk, String> printSk;
+	private final Function<Gen, String> printGen;
+	private final Function<Sk, String> printSk;
 	
 	public InitialAlgebra(AqlOptions ops, Schema<Ty, En, Sym, Fk, Att> schema, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, Iterator<X> fresh, Function<Gen, String> printGen, Function<Sk, String> printSk) {
 		ens = Util.newSetsFor(schema.ens);
@@ -92,15 +88,11 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		this.fresh = fresh;
 		this.printGen = printGen;
 		this.printSk = printSk;
-		
-		if (schema.typeSide.js.java_tys.isEmpty()) {
-			dp = AqlProver.create(ops, col);
-		} else {
-			dp = AqlProver.create(ops, col.entities_only());
-		}
+
+        dp = schema.typeSide.js.java_tys.isEmpty() ? AqlProver.create(ops, col) : AqlProver.create(ops, col.entities_only());
 		//schema.typeSide.collage(); //sanity check remove
 		try {
-			while (saturate1()) {} 
+			while (saturate1());
 		} catch (InterruptedException exn) {
 			throw new RuntimeInterruptedException(exn);
 		}
@@ -109,7 +101,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		//TODO aql figure out how to do this only once but without concurrent modification exception
 			
 		if ((Boolean) ops.getOrDefault(AqlOption.require_consistency) && !hasFreeTypeAlgebra()) {
-			throw new RuntimeException("Not necessarily consistent; type algebra is\n\n" + talg().toString());
+			throw new RuntimeException("Not necessarily consistent; type algebra is\n\n" + talg());
 		}
 		
 		//new SaturatedInstance<>(this, this); // sanity check remove 
@@ -153,12 +145,12 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 			if (col.type(new Ctx<>(), Term.Gen(gen)).left) {
 				continue; 
 			}
-			changed = changed | add(Term.Gen(gen));			
+			changed |= add(Term.Gen(gen));
 		}
 		for (Fk fk : col.fks.keySet()) {
 			List<X> set = new ArrayList<>(ens.get(schema().fks.get(fk).first));
 			for (X x : set) { //concurrent modification otherwise
-				changed = changed | add(Term.Fk(fk, repr(x)));						
+				changed |= add(Term.Fk(fk, repr(x)));
 			}
 		}
 		return changed;
@@ -279,11 +271,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		if (schema.typeSide.js.java_tys.isEmpty()) {
 			return dp.eq(ctx, lhs, rhs);
 		} else {
-			if (col.type(ctx, lhs).left) { //type
-				return intoY(schema.typeSide.js.reduce(lhs)).equals(intoY(schema.typeSide.js.reduce(rhs))); //in this case, dp is only dp for entity side
-			} else {
-				return dp.eq(ctx, lhs, rhs);
-			}
+            return col.type(ctx, lhs).left ? intoY(schema.typeSide.js.reduce(lhs)).equals(intoY(schema.typeSide.js.reduce(rhs))) : dp.eq(ctx, lhs, rhs);
 		}
 	}
 
@@ -310,7 +298,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		throw new RuntimeException("Anomaly: please report");
 	}
 	
-	private List<Pair<Chc<Sk, Pair<X, Att>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X,Att>>>>> list = new LinkedList<>();
+	private final List<Pair<Chc<Sk, Pair<X, Att>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X,Att>>>>> list = new LinkedList<>();
 	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X,Att>>> simpl(Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X,Att>>> term) {
 		 //apparently trans can be called before talg()
 		for (Pair<Chc<Sk, Pair<X, Att>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>>> t : list) {
@@ -352,22 +340,14 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 			if (replacer == null) {
 				continue;
 			}
-			final Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> replacer2 = replacer;
+			Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> replacer2 = replacer;
 			sks_it.remove();
-			eqs = eqs.stream().map(x -> {
-				return new Eq<>(x.ctx, x.lhs.replaceHead(new Head<>(Term.Sk(sk)), Collections.emptyList(), replacer2), x.rhs.replaceHead(new Head<>(Term.Sk(sk)), Collections.emptyList(), replacer2));
-			}).collect(Collectors.toList());
+			eqs = eqs.stream().map(x -> new Eq<>(x.ctx, x.lhs.replaceHead(new Head<>(Term.Sk(sk)), Collections.emptyList(), replacer2), x.rhs.replaceHead(new Head<>(Term.Sk(sk)), Collections.emptyList(), replacer2))).collect(Collectors.toList());
 			
 			list.add(new Pair<>(sk, replacer));
 		}
-				
-		Iterator<Eq<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>>> it = eqs.iterator();
-		while (it.hasNext()) {
-			Eq<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> eq = it.next();
-			if (eq.lhs.equals(eq.rhs)) {
-				it.remove();
-			}
-		} 
+
+		eqs.removeIf(eq -> eq.lhs.equals(eq.rhs));
 
 		talg = new Collage<>();
 		for (Chc<Sk, Pair<X, Att>> sk : sks) {
@@ -382,13 +362,9 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		if (term.obj != null) {
 			return Term.Obj(term.obj, term.ty);
 		} else if (term.sym != null) {
-			return Term.Sym(term.sym, term.args().stream().map(x -> unflatten(x)).collect(Collectors.toList()));
+			return Term.Sym(term.sym, term.args().stream().map(this::unflatten).collect(Collectors.toList()));
 		} else if (term.sk != null) {
-			if (term.sk.left) {
-				return Term.Sk(term.sk.l);
-			} else {
-				return Term.Att(term.sk.r.second, repr(term.sk.r.first).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn()));
-			}
+            return term.sk.left ? Term.Sk(term.sk.l) : Term.Att(term.sk.r.second, repr(term.sk.r.first).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn()));
 		} 
 		throw new RuntimeException("Anomaly: please report");
 	}
@@ -404,21 +380,13 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
 	
 	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> reprT0(Chc<Sk, Pair<X, Att>> y) {
-		if (schema().typeSide.js.java_tys.isEmpty()) {
-			return simpl(Term.Sk(y));
-		} else {
-			return schema.typeSide.js.reduce(simpl(Term.Sk(y)));
-		}
+        return schema().typeSide.js.java_tys.isEmpty() ? simpl(Term.Sk(y)) : schema.typeSide.js.reduce(simpl(Term.Sk(y)));
 	} 
 	
 	
 	@Override
 	protected Term<Ty, En, Sym, Fk, Att, Gen, Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> y) {
-		if (schema().typeSide.js.java_tys.isEmpty()) {
-			return unflatten(simpl(y));
-		} else {
-			return unflatten(schema.typeSide.js.reduce(simpl(y)));
-		}
+        return schema().typeSide.js.java_tys.isEmpty() ? unflatten(simpl(y)) : unflatten(schema.typeSide.js.reduce(simpl(y)));
 	} 
 
 	@Override
@@ -432,7 +400,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		if (term.obj != null) {
 			return Term.Obj(term.obj, term.ty);
 		} else if (term.sym != null) {
-			return Term.Sym(term.sym, term.args().stream().map(x -> transX(x)).collect(Collectors.toList()));
+			return Term.Sym(term.sym, term.args().stream().map(this::transX).collect(Collectors.toList()));
 		} else if (term.sk != null) {
 			return Term.Sk(Chc.inLeft(term.sk));
 		} else if (term.att != null) {

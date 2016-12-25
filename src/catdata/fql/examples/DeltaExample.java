@@ -20,7 +20,7 @@ public class DeltaExample extends Example {
 		return s;
 	}
 
-	public static final String s = 
+	private static final String s =
 			"schema C = {"
 					+ "\n nodes "
 					+ "\n	T1, "

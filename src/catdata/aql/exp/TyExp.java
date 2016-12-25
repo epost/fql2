@@ -30,9 +30,9 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+			result = prime * result + (schema.hashCode());
 			return result;
 		}
 
@@ -45,13 +45,8 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 			if (getClass() != obj.getClass())
 				return false;
 			TyExpSch<?,?> other = (TyExpSch<?,?>) obj;
-			if (schema == null) {
-				if (other.schema != null)
-					return false;
-			} else if (!schema.equals(other.schema))
-				return false;
-			return true;
-		}
+            return schema.equals(other.schema);
+        }
 
 		@Override
 		public String toString() {
@@ -143,9 +138,9 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((typeSide == null) ? 0 : typeSide.hashCode());
+			result = prime * result + (typeSide.hashCode());
 			return result;
 		}
 
@@ -158,13 +153,8 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 			if (getClass() != obj.getClass())
 				return false;
 			TyExpLit<?,?> other = (TyExpLit<?,?>) obj;
-			if (typeSide == null) {
-				if (other.typeSide != null)
-					return false;
-			} else if (!typeSide.equals(other.typeSide))
-				return false;
-			return true;
-		}
+            return typeSide.equals(other.typeSide);
+        }
 
 		@Override
 		public String toString() {
@@ -204,9 +194,9 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
-			result = prime * result + ((var == null) ? 0 : var.hashCode());
+			result = prime * result + (var.hashCode());
 			return result;
 		}
 
@@ -219,13 +209,8 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 			if (getClass() != obj.getClass())
 				return false;
 			TyExpVar other = (TyExpVar) obj;
-			if (var == null) {
-				if (other.var != null)
-					return false;
-			} else if (!var.equals(other.var))
-				return false;
-			return true;
-		}
+            return var.equals(other.var);
+        }
 
 		@Override
 		public String toString() {

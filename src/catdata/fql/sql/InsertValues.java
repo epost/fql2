@@ -12,16 +12,16 @@ import java.util.Set;
  */
 public class InsertValues extends PSM {
 
-	String name;
-	List<String> attrs;
-	Set<Map<Object, Object>> values;
+	private final String name;
+	private final List<String> attrs;
+	private final Set<Map<Object, Object>> values;
 
 	public InsertValues(String name, List<String> attrs,
 			Set<Map<Object, Object>> values) {
 		this.name = name;
 		this.attrs = attrs;
 		this.values = values;
-		if (values.size() == 0) {
+		if (values.isEmpty()) {
 			throw new RuntimeException();
 		}
 	}
@@ -66,7 +66,7 @@ public class InsertValues extends PSM {
 	@Override
 	public void exec(PSMInterp interp,
 			Map<String, Set<Map<Object, Object>>> state) {
-		if (state.get(name).size() > 0) {
+		if (!state.get(name).isEmpty()) {
 			throw new RuntimeException("table not empty: " + name);
 		}
 		state.put(name, values);

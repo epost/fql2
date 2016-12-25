@@ -21,8 +21,11 @@ import catdata.fql.decl.Transform;
 
 public class PSMUnChi extends PSM {
 
-	Signature sig;
-	String pre, b, prop, f;
+	private final Signature sig;
+	private final String pre;
+    private final String b;
+    private final String prop;
+    private final String f;
 	Signature fullSig;
 
 	@Override
@@ -111,7 +114,7 @@ public class PSMUnChi extends PSM {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((b == null) ? 0 : b.hashCode());
 		result = prime * result + ((f == null) ? 0 : f.hashCode());
@@ -160,8 +163,7 @@ public class PSMUnChi extends PSM {
 
 	public PSMUnChi(Signature sig, String pre, String b, String prop,
 			String f) {
-		super();
-		this.sig = sig;
+        this.sig = sig;
 		//this.fullSig = sig;
 		//this.sig = new Signature(sig.nodes, sig.edges, new LinkedList<Attribute<Node>>(), sig.eqs);
 		this.pre = pre;

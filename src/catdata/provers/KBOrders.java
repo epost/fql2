@@ -39,9 +39,7 @@ public class KBOrders {
 					}
 				}
 				
-				if (!s.isVar && s.getApp().f.equals(new NewConst()) && !t.isVar && t.getApp().f.equals(new NewConst())) {
-					return false;
-				} else if (!s.isVar && s.getApp().f.equals(new NewConst())) {
+				if (!s.isVar && s.getApp().f.equals(new NewConst()) && !t.isVar && t.getApp().f.equals(new NewConst()) || !s.isVar && s.getApp().f.equals(new NewConst())) {
 					return false;
 				} else if (!t.isVar && t.getApp().f.equals(new NewConst())) {
 					return true;
@@ -90,7 +88,7 @@ public class KBOrders {
 				//LPO2c
 				if (f.equals(g)) {
 					for (KBExp<C, V> ti : t0.args) {
-						if (!this.apply(new Pair<>(s0, ti))) {
+						if (!apply(new Pair<>(s0, ti))) {
 							return false;
 						}
 					}
@@ -100,10 +98,10 @@ public class KBOrders {
 							return false;
 						}
 						KBExp<C, V> ti = t0.args.get(i++);
-						if (this.apply(new Pair<>(si, ti))) {
+						if (apply(new Pair<>(si, ti))) {
 							return true;
 						}
-						if (this.apply(new Pair<>(ti, si))) {
+						if (apply(new Pair<>(ti, si))) {
 							return false;
 						}
 						if (si.equals(ti)) {

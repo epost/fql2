@@ -11,11 +11,12 @@ import java.util.Set;
  */
 public class CopyFlower extends Flower {
 
-	String name, c0, c1;
+	private final String name;
+	private final String c0;
+	private final String c1;
 
 	public CopyFlower(String name, String c0, String c1) {
-		super();
-		this.name = name;
+        this.name = name;
 		this.c0 = c0;
 		this.c1 = c1;
 	}

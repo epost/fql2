@@ -21,7 +21,7 @@ public class Patrick7Example extends Example {
 		return s;
 	}
 	
-	String s = "Graph = schema {"
+	private final String s = "Graph = schema {"
 			+ "\n	nodes arrow,vertex;"
 			+ "\n	edges src:arrow->vertex,tgt:arrow->vertex;"
 			+ "\n	equations;"

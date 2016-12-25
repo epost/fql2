@@ -13,22 +13,29 @@ import catdata.ide.Example;
 import catdata.ide.Examples;
 
 //TODO: have this execute pragmas?
-public class AqlInACan {
+class AqlInACan {
 
-	protected static String quote(String s) {
+	private static String quote(String s) {
 		s = s.replace("\\", "\\" + "\\"); //  \ --> \\
 		s = s.replace("\"", "\\\""); // " --> \"
 		s = s.replace("\n", "\\n"); // <LF> --> \n
 		return s;
 	}
 	
+	private static List<Example> skip() {
+		return Util.list(AqlExamples.aqlKb, AqlExamples.aqlJdbc, AqlExamples.aqlMatch);
+	}
+	
+	//
+	
 	@SuppressWarnings("unused")
 	private static String makeHtml() {
 		String s = "";
 		String t = "";
-		//TODO aql skip any example containing text 'jdbc' or 'csv' or 'pragma'
-		//TODO aql alphabetize
-		for (Example ex : Examples.getExamples(AqlExamples.class)) {
+		for (Example ex : Util.alphabetical(Examples.getExamples(AqlExamples.class))) {
+			if (skip().contains(ex)) {
+				continue;
+			}
 			s += "\nif (v == \"" + ex.getName() + "\") { document.getElementById('code').innerHTML = \"" + quote(ex.getText()) + "\" }"; 
 			t += "\n<option value = \"" + ex.getName() + "\">" + ex.getName() + "</option>";
 		}
@@ -41,13 +48,6 @@ public class AqlInACan {
 		        + "\nfunction setExample(t) {"
 		        + "\n    var v = t.value;"
 		        + "\n" + s
-//		        + "\n    if (v == \"0\") {"
-//		        + "\n      document.getElementById('code').innerHTML = test0;"
-//		        + "\n    } else if (v == \"1\") {"
-//		        + "\n      document.getElementById('code').innerHTML = test1;"
-//		        + "\n    }  else if (v == \"2\") {"
-//		        + "\n       document.getElementById('code').innerHTML = test2;"
-//		        + "\n    }"
 		        + "\n}; "
 		        + "\n</script>"
 				+ "\n<body>"
@@ -55,15 +55,12 @@ public class AqlInACan {
 				+ "\n<select name=\"example\" onChange = \"setExample(this);\">"
 				+ "\n<option disabled selected value> -- select an option -- </option>"
 				+ "\n" + t
-		//		+ "\n <option value=\"0\">Admission</option>"
-		//		+ "\n <option value=\"1\">Registration</option>"
-		//		+ "\n <option value=\"2\">Speech on 2,3 May</option>"
 				+ "\n</select>"
 				+ "\n<br>"
 				+ "\nEnter AQL code here:"
 				+ "\n<form action=\"cgi-bin/try.cgi\""
 				+ "\n      method=\"POST\">"
-				+ "\n<textarea name=\"code\" id=\"code\" cols=80 rows=80>"
+				+ "\n<textarea name=\"code\" id=\"code\" cols=80 rows=40>"
 				+ "\n</textarea>"
 				+ "\n<br>"
 				+ "\n<input type=\"submit\" value=\"Run\">"
@@ -74,14 +71,14 @@ public class AqlInACan {
 		return html;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String... args) {
 //		System.out.println(makeHtml());
 		System.out.println(openCan(args[0]));
 	}
 
 
 	
-	public static String openCan(String can) {
+	private static String openCan(String can) {
 		try {
 			Program<Exp<?>> program = AqlParser.parseProgram(can);
 			String html = "<html><head><title>Result</title></head><body>\n\n";

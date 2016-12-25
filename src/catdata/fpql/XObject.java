@@ -4,8 +4,8 @@ import javax.swing.JComponent;
 
 public interface XObject {
 
-	public String kind();
+	String kind();
 	
-	public JComponent display();
+	JComponent display();
 
 }

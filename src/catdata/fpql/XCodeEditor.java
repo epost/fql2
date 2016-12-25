@@ -1,5 +1,6 @@
 package catdata.fpql;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Map.Entry;
@@ -43,10 +44,10 @@ public class XCodeEditor extends CodeEditor<XProgram, XEnvironment, XDisplay> {
 	protected void doTemplates() {
 		  CompletionProvider provider = createCompletionProvider();
 		  AutoCompletion ac = new AutoCompletion(provider);
-		  KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, java.awt.event.InputEvent.META_DOWN_MASK
-              | java.awt.event.InputEvent.SHIFT_DOWN_MASK);
+		  KeyStroke key = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, InputEvent.META_DOWN_MASK
+              | InputEvent.SHIFT_DOWN_MASK);
 		  ac.setTriggerKey(key);
-	      ac.install(this.topArea);
+	      ac.install(topArea);
 	}
 	
 	  private static CompletionProvider createCompletionProvider() {

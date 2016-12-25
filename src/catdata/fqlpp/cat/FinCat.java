@@ -33,7 +33,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 
 	@Override
 	public boolean isObject(Category<?,?> o) {
-		return !((Category<?,?>)o).isInfinite();
+		return !o.isInfinite();
 	}
 
 	@Override
@@ -42,12 +42,8 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 			return isObject(f.source) && isObject(f.target);
 	}
 
-	public static FinCat FinCat = new FinCat();
+	public static final FinCat FinCat = new FinCat();
 
-	@Override
-	public boolean equals(Object o) {
-		return (o == this);
-	}
 
 	@Override
 	public Set<Category<?, ?>> objects() {
@@ -204,14 +200,14 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 
 	public static <O1, A1, O2, A2> Functor<O1, A1, Chc<O1, O2>, Chc<A1, A2>> inleft(
 			Category<O1, A1> o1, Category<O2, A2> o2) {
-		return new Functor<>(o1, coproduct(o1, o2), x -> Chc.inLeft(x),
-				x -> Chc.inLeft(x));
+		return new Functor<>(o1, coproduct(o1, o2), Chc::inLeft,
+                Chc::inLeft);
 	}
 
 	public static <O1, A1, O2, A2> Functor<O2, A2, Chc<O1, O2>, Chc<A1, A2>> inright(
 			Category<O1, A1> o1, Category<O2, A2> o2) {
-		return new Functor<>(o2, coproduct(o1, o2), x -> Chc.inRight(x),
-				x -> Chc.inRight(x));
+		return new Functor<>(o2, coproduct(o1, o2), Chc::inRight,
+                Chc::inRight);
 	}
 
 	public static <O, A, O1, A1, O2, A2> Functor<Chc<O1, O2>, Chc<A1, A2>, O, A> match(
@@ -227,7 +223,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 	}
 
 	@SuppressWarnings("hiding")
-	private Map<Pair<Category<Object, Object>, Category<Object, Object>>, Set<Functor<Object, Object, Object, Object>>> cached = new HashMap<>();
+	private final Map<Pair<Category<Object, Object>, Category<Object, Object>>, Set<Functor<Object, Object, Object, Object>>> cached = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
 	public <O1, A1, O2, A2> Set<Functor<O1, A1, O2, A2>> hom(Category<O1, A1> A,
@@ -440,7 +436,7 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		return Optional.empty();
 	}
 	
-	public static <K, V> FUNCTION<V, K> invget(Map<K, V> m) {
+	private static <K, V> FUNCTION<V, K> invget(Map<K, V> m) {
 		return v -> {
 			for (Entry<K, V> e : m.entrySet()) {
 				if (e.getValue().equals(v)) {

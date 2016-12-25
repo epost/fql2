@@ -20,7 +20,7 @@ public class MatchExample extends Example {
 		return s;
 	}
  
-	String s = "schema C ={"
+	private final String s = "schema C ={"
 			+ "\n	nodes "
 			+ "\n		Amphibian,"
 			+ "\n		LandAnimal,"

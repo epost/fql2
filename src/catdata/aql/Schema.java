@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -28,7 +29,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 	
 	//TODO: aql who is calling isTypeSide and isSchema?
 
-	public final void validate(boolean checkJava) {
+	private void validate(boolean checkJava) {
 		//check that each att/fk is in tys/ens
 		for (Att att : atts.keySet()) {
 			Pair<En, Ty> ty = atts.get(att);
@@ -85,7 +86,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		return term.type(new Ctx<>(), new Ctx<>(p), typeSide.tys, typeSide.syms.map, typeSide.js.java_tys.map, ens, atts.map, fks.map, new HashMap<>(), new HashMap<>());
 	}
 	
-	public final static <Ty,Sym> Schema<Ty,Void,Sym,Void,Void> terminal(TypeSide<Ty, Sym> t) {
+	public static <Ty,Sym> Schema<Ty,Void,Sym,Void,Void> terminal(TypeSide<Ty, Sym> t) {
 		return new Schema<>(t, Collections.emptySet(), Collections.emptyMap(), Collections.emptyMap(), Collections.emptySet(), t.semantics, false);
 	}
 	
@@ -99,7 +100,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		this.fks = new Ctx<>(fks);
 		this.eqs = new HashSet<>(eqs);
 		this.ens = new HashSet<>(ens); //TODO aql arraylist
-		this.dp = semantics;
+        dp = semantics;
 		validate(checkJava);
 	}
 
@@ -130,13 +131,13 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		return (Collage<Ty, En, Sym, Fk, Att, Gen, Sk>) collage; 
 	}
 	
-	public final <Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> upgrade(Term<Ty, En, Sym, Fk, Att, Void, Void> term) {
+	private <Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> upgrade(Term<Ty, En, Sym, Fk, Att, Void, Void> term) {
 		return term.map(Function.identity(), Function.identity(), Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn());
 	}
 
 	@Override
 	public final int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((atts == null) ? 0 : atts.hashCode());
 		result = prime * result + ((ens == null) ? 0 : ens.hashCode());
@@ -225,7 +226,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> {
 		return fks.keySet().stream().filter(fk -> fks.get(fk).first.equals(en)).collect(Collectors.toList());
 	}
 	
-	public final static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> fold(List<Fk> fks, Term<Ty, En, Sym, Fk, Att, Gen, Sk> head) {
+	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> fold(List<Fk> fks, Term<Ty, En, Sym, Fk, Att, Gen, Sk> head) {
 		for (Fk fk : fks) {
 			head = Term.Fk(fk, head);
 		}

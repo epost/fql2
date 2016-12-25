@@ -16,14 +16,22 @@ import java.util.Set;
 import catdata.LineException;
 import catdata.Pair;
 import catdata.Triple;
+import catdata.fql.FqlOptions.SQLKIND;
 import catdata.fql.decl.Attribute;
 import catdata.fql.decl.Driver;
 import catdata.fql.decl.Edge;
 import catdata.fql.decl.FQLProgram;
 import catdata.fql.decl.InstExp;
+import catdata.fql.decl.InstExp.Delta;
+import catdata.fql.decl.InstExp.Exp;
+import catdata.fql.decl.InstExp.External;
+import catdata.fql.decl.InstExp.Kernel;
+import catdata.fql.decl.InstExp.One;
+import catdata.fql.decl.InstExp.Times;
+import catdata.fql.decl.InstExp.Two;
 import catdata.fql.decl.InstOps;
 import catdata.fql.decl.Node;
-import catdata.fql.decl.SigExp;
+import catdata.fql.decl.SigExp.Const;
 import catdata.fql.decl.Signature;
 import catdata.fql.decl.TransExp;
 import catdata.fql.sql.CreateTable;
@@ -55,7 +63,7 @@ public class JDBCBridge {
 
 		Pair<String, String> val = prog.transforms.get(k).type(prog);
 		InstExp i = prog.insts.get(val.first);
-		SigExp.Const ss = i.type(prog).toConst(prog);
+		Const ss = i.type(prog).toConst(prog);
 		Signature s = ss.toSig(prog);
 		psm.addAll(PSMGen.makeTables(k, s, false));
 		switch (GlobalOptions.debug.fql.sqlKind) {
@@ -67,7 +75,7 @@ public class JDBCBridge {
 		case JDBC:
 		default:
 			if (v instanceof TransExp.External
-					&& GlobalOptions.debug.fql.sqlKind == FqlOptions.SQLKIND.H2) {
+					&& GlobalOptions.debug.fql.sqlKind == SQLKIND.H2) {
 
 			} else {
 				psm.addAll(v.accept(k, ops));
@@ -108,7 +116,7 @@ public class JDBCBridge {
 				Stmt.execute("SET @guid = " + interp.guid);
 				psm.addAll(makeInserts(k, ret, v.type(prog).toSig(prog),
 						((InstExp.FullSigma) v).F.toMap(prog).source));
-			} else if (v instanceof InstExp.Exp) {
+			} else if (v instanceof Exp) {
 				List<PSM> xxx = v.accept(k, ops).first;
 				if (xxx.size() != 1) {
 					throw new RuntimeException();
@@ -119,7 +127,7 @@ public class JDBCBridge {
 				yyy.exec(interp, ret);
 				Stmt.execute("SET @guid = " + interp.guid);
 				psm.addAll(makeInserts(k, ret, v.type(prog).toSig(prog), null));
-			} else if (v instanceof InstExp.Two) {
+			} else if (v instanceof Two) {
 				List<PSM> xxx = v.accept(k, ops).first;
 				if (xxx.size() != 1) {
 					throw new RuntimeException();
@@ -131,7 +139,7 @@ public class JDBCBridge {
 				Stmt.execute("SET @guid = " + interp.guid);
 				
 				psm.addAll(makeInserts(k, ret, v.type(prog).toSig(prog), null));
-			} else if (v instanceof InstExp.Kernel) {
+			} else if (v instanceof Kernel) {
 				List<PSM> xxx = v.accept(k, ops).first;
 				if (xxx.size() != 1) {
 					throw new RuntimeException();
@@ -155,8 +163,8 @@ public class JDBCBridge {
 				psm.addAll(makeInserts(k + "_trans", ret, v.type(prog).toSig(prog), null));
 			}
 
-			else if (v instanceof InstExp.External
-					&& GlobalOptions.debug.fql.sqlKind == FqlOptions.SQLKIND.H2) {
+			else if (v instanceof External
+					&& GlobalOptions.debug.fql.sqlKind == SQLKIND.H2) {
 			} else {
 				psm.addAll(v.accept(k, ops).first);
 			}
@@ -164,20 +172,20 @@ public class JDBCBridge {
 				Stmt.execute(sql.toPSM());
 			}
 			if (!(v instanceof InstExp.FullSigma)
-					&& !(v instanceof InstExp.Exp)
-					&& !(v instanceof InstExp.Two) && !(v instanceof InstExp.Kernel)) {
+					&& !(v instanceof Exp)
+					&& !(v instanceof Two) && !(v instanceof Kernel)) {
 				gatherInstance(prog, ret, Stmt, k, v);
 			}
-				if (v instanceof InstExp.Delta) {
-					gatherSubstInv(prog, ret, Stmt, k, v);
-				} else if (v instanceof InstExp.Times) {
-					gatherTransform(prog, ret, Stmt, k + "_fst",
-							v.type(prog).toConst(prog));
-					gatherTransform(prog, ret, Stmt, k + "_snd",
-							v.type(prog).toConst(prog));
-				} else if (v instanceof InstExp.One) {
-					gatherSubstInv2(prog, ret, Stmt, k, v);
-				}
+			if (v instanceof Delta) {
+				gatherSubstInv(prog, ret, Stmt, k, v);
+			} else if (v instanceof Times) {
+				gatherTransform(prog, ret, Stmt, k + "_fst",
+						v.type(prog).toConst(prog));
+				gatherTransform(prog, ret, Stmt, k + "_snd",
+						v.type(prog).toConst(prog));
+			} else if (v instanceof One) {
+				gatherSubstInv2(prog, ret, Stmt, k, v);
+			}
 							
 			break;
 		}
@@ -191,7 +199,7 @@ public class JDBCBridge {
 		List<Throwable> exns = new LinkedList<>();
 		InstOps ops = new InstOps(prog);
 		PSMInterp interp = new PSMInterp();
-		Connection Conn = null;
+		Connection Conn;
 		Statement Stmt = null;
 		List<PSM> sqls = new LinkedList<>();
 		try {
@@ -237,11 +245,14 @@ public class JDBCBridge {
 					if (GlobalOptions.debug.fql.continue_on_error) {
 						exns.add(exn);
 					} else {
-						if (GlobalOptions.debug.fql.sqlKind == FqlOptions.SQLKIND.JDBC) {
+						if (GlobalOptions.debug.fql.sqlKind == SQLKIND.JDBC) {
 							String[] prel0 = GlobalOptions.debug.fql.afterlude.split(";");
 							for (String s : prel0) {
-								if (s.trim().length() > 0) {
-									Stmt.execute(s); //TODO !!!
+								if (!s.trim().isEmpty()) {
+									if (Stmt == null) {
+										throw new RuntimeException("Anomaly: please report");
+									}
+									Stmt.execute(s);
 								}
 							}
 						}
@@ -252,26 +263,32 @@ public class JDBCBridge {
 
 			List<PSM> drops = Driver.computeDrops(prog);
 
-			if (GlobalOptions.debug.fql.sqlKind == FqlOptions.SQLKIND.JDBC) {
+			if (GlobalOptions.debug.fql.sqlKind == SQLKIND.JDBC) {
 				for (PSM dr : drops) {
-					Stmt.execute(dr.toPSM()); //TODO !!!
+					if (Stmt == null) {
+						throw new RuntimeException("Anomaly: please report");
+					}
+					Stmt.execute(dr.toPSM());
 				}
 
 				String[] prel0 = GlobalOptions.debug.fql.afterlude.split(";");
 				for (String s : prel0) {
-					if (s.trim().length() > 0) {
-						Stmt.execute(s); //TODO !!!
+					if (!s.trim().isEmpty()) {
+						if (Stmt == null) {
+							throw new RuntimeException("Anomaly: please report");
+						}
+						Stmt.execute(s);
 					}
 				}
 			}
 
-			String str = "";
+			String str;
 			try {
 				str = GlobalOptions.debug.fql.prelude
 						+ "\n\n"
 						+ PSMGen.prettyPrint(sqls)
 						+ "\n\n"
-						+ (drops.size() == 0 ? "" : PSMGen.prettyPrint(drops)
+						+ (drops.isEmpty() ? "" : PSMGen.prettyPrint(drops)
 								+ "\n\n") + GlobalOptions.debug.fql.afterlude + "\n\n";
 			} catch (RuntimeException re) {
 				str = re.getLocalizedMessage();
@@ -310,7 +327,7 @@ public class JDBCBridge {
 		ResultSet RS = stmt
 				.executeQuery("SELECT * FROM GUID_TEMP_TABLE_XXX_YYY");
 		Integer i = null;
-		while (RS.next() != false) {
+		while (RS.next()) {
 			i = (Integer) RS.getObject("C0");
 			break;
 		}
@@ -319,7 +336,7 @@ public class JDBCBridge {
 		if (i == null) {
 			throw new RuntimeException("Cannot get GUID from database");
 		}
-		return i.intValue();
+		return i;
 	}
 
 	private static List<PSM> makeInserts(String k,
@@ -337,7 +354,7 @@ public class JDBCBridge {
 						+ "_e");
 				ret.add(new SimpleCreateTable(k + "_" + n.string + "_e", PSM
 						.VARCHAR(), false));
-				if (v.size() == 0) {
+				if (v.isEmpty()) {
 					continue;
 				}
 				ret.add(new InsertValues(k + "_" + n.string + "_e", attrs, v));
@@ -349,7 +366,7 @@ public class JDBCBridge {
 			at.put("c2", PSM.VARCHAR());
 			at.put("c3", PSM.VARCHAR());
 			ret.add(new CreateTable(k + "_lineage", at, false));
-			if (v.size() != 0) {
+			if (!v.isEmpty()) {
 				ret.add(new InsertValues(k + "_lineage", new LinkedList<>(at
 						.keySet()), v));
 			}
@@ -357,21 +374,21 @@ public class JDBCBridge {
 
 		for (Node n : sig.nodes) {
 			Set<Map<Object, Object>> v = state.get(k + "_" + n.string);
-			if (v.size() == 0) {
+			if (v.isEmpty()) {
 				continue;
 			}
 			ret.add(new InsertValues(k + "_" + n.string, attrs, v));
 		}
 		for (Edge e : sig.edges) {
 			Set<Map<Object, Object>> v = state.get(k + "_" + e.name);
-			if (v.size() == 0) {
+			if (v.isEmpty()) {
 				continue;
 			}
 			ret.add(new InsertValues(k + "_" + e.name, attrs, v));
 		}
 		for (Attribute<Node> a : sig.attrs) {
 			Set<Map<Object, Object>> v = state.get(k + "_" + a.name);
-			if (v.size() == 0) {
+			if (v.isEmpty()) {
 				continue;
 			}
 			ret.add(new InsertValues(k + "_" + a.name, attrs, v));
@@ -382,13 +399,13 @@ public class JDBCBridge {
 
 	private static void gatherTransform(@SuppressWarnings("unused") FQLProgram prog,
 			Map<String, Set<Map<Object, Object>>> ret, Statement Stmt,
-			String k, SigExp.Const t) throws SQLException {
+			String k, Const t) throws SQLException {
 
 		for (String n : t.nodes) {
 			ResultSet RS = Stmt
 					.executeQuery("SELECT c0,c1 FROM " + k + "_" + n);
 			Set<Map<Object, Object>> ms = new HashSet<>();
-			while (RS.next() != false) {
+			while (RS.next()) {
 				Map<Object, Object> m = new HashMap<>();
 				m.put("c0", RS.getObject("c0"));
 				m.put("c1", RS.getObject("c1"));
@@ -398,10 +415,10 @@ public class JDBCBridge {
 			ret.put(k + "_" + n, ms);
 		}
 		for (Triple<String, String, String> n : t.arrows) {
-			ret.put(k + "_" + n.first, new HashSet<Map<Object, Object>>());
+			ret.put(k + "_" + n.first, new HashSet<>());
 		}
 		for (Triple<String, String, String> n : t.attrs) {
-			ret.put(k + "_" + n.first, new HashSet<Map<Object, Object>>());
+			ret.put(k + "_" + n.first, new HashSet<>());
 		}
 	}
 
@@ -409,13 +426,13 @@ public class JDBCBridge {
 			Map<String, Set<Map<Object, Object>>> ret, Statement Stmt,
 			String k, InstExp v) throws SQLException {
 
-		SigExp.Const t = v.type(prog).toConst(prog);
+		Const t = v.type(prog).toConst(prog);
 
 		for (String n : t.nodes) {
 			ResultSet RS = Stmt.executeQuery("SELECT c0,c1 FROM " + k + "_" + n
 					+ "_subst_inv");
 			Set<Map<Object, Object>> ms = new HashSet<>();
-			while (RS.next() != false) {
+			while (RS.next()) {
 				Map<Object, Object> m = new HashMap<>();
 				m.put("c0", RS.getObject("c0").toString());
 				m.put("c1", RS.getObject("c1").toString());
@@ -430,13 +447,13 @@ public class JDBCBridge {
 			Map<String, Set<Map<Object, Object>>> ret, Statement Stmt,
 			String k, InstExp v) throws SQLException {
 
-		SigExp.Const t = v.type(prog).toConst(prog);
+		Const t = v.type(prog).toConst(prog);
 
 		for (String n : t.nodes) {
 			ResultSet RS = Stmt.executeQuery("SELECT c0,c1 FROM " + k + "_" + n
 					+ "_subst_inv");
 			Set<Map<Object, Object>> ms = new HashSet<>();
-			while (RS.next() != false) {
+			while (RS.next()) {
 				Map<Object, Object> m = new HashMap<>();
 				m.put("c0", Integer.parseInt(RS.getObject("c0").toString()));
 				m.put("c1", Integer.parseInt(RS.getObject("c1").toString()));
@@ -450,13 +467,13 @@ public class JDBCBridge {
 	private static void gatherInstance(FQLProgram prog,
 			Map<String, Set<Map<Object, Object>>> ret, Statement Stmt,
 			String k, InstExp v) throws SQLException {
-		SigExp.Const t = v.type(prog).toConst(prog);
+		Const t = v.type(prog).toConst(prog);
 
 		for (String n : t.nodes) {
 			ResultSet RS = Stmt
 					.executeQuery("SELECT c0,c1 FROM " + k + "_" + n);
 			Set<Map<Object, Object>> ms = new HashSet<>();
-			while (RS.next() != false) {
+			while (RS.next()) {
 				Map<Object, Object> m = new HashMap<>();
 				m.put("c0", RS.getObject("c0"));
 				m.put("c1", RS.getObject("c1"));
@@ -469,7 +486,7 @@ public class JDBCBridge {
 			ResultSet RS = Stmt.executeQuery("SELECT c0,c1 FROM " + k + "_"
 					+ n.first);
 			Set<Map<Object, Object>> ms = new HashSet<>();
-			while (RS.next() != false) {
+			while (RS.next()) {
 				Map<Object, Object> m = new HashMap<>();
 				m.put("c0", RS.getObject("c0"));
 				m.put("c1", RS.getObject("c1"));
@@ -482,7 +499,7 @@ public class JDBCBridge {
 			ResultSet RS = Stmt.executeQuery("SELECT c0,c1 FROM " + k + "_"
 					+ n.first);
 			Set<Map<Object, Object>> ms = new HashSet<>();
-			while (RS.next() != false) {
+			while (RS.next()) {
 				Map<Object, Object> m = new HashMap<>();
 				m.put("c0", RS.getObject("c0"));
 				m.put("c1", RS.getObject("c1"));

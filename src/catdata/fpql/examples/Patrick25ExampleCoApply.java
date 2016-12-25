@@ -21,7 +21,7 @@ public class Patrick25ExampleCoApply extends Example {
 		return s;
 	}
 	
-	String s = "dom : type"
+	private final String s = "dom : type"
 			+ "\n1 2 3 : dom"
 			+ "\n"
 			+ "\nS = schema {"

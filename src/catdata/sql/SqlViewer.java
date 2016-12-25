@@ -27,10 +27,9 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
-public class SqlViewer extends JPanel {
+class SqlViewer extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -66,7 +65,7 @@ public class SqlViewer extends JPanel {
 		setBorder(BorderFactory.createEtchedBorder());
 	}
 	
-	public void makeCards() {
+	private void makeCards() {
 		if (inst == null) {
 			return;
 		}
@@ -74,7 +73,7 @@ public class SqlViewer extends JPanel {
 		cards.show(bottom, "");
 
 		for (SqlTable table : info.tables) {
-			List<String> colNames = table.columns.stream().map(x -> { return x.name; }).collect(Collectors.toList());
+			List<String> colNames = table.columns.stream().map(x -> x.name).collect(Collectors.toList());
 			String[][] rowData = new String[inst.get(table).size()][colNames.size()];
 			
 			int r = 0;
@@ -98,7 +97,7 @@ public class SqlViewer extends JPanel {
 		
 	}
 
-	public void makeGraph() {
+	private void makeGraph() {
 		for (SqlType ty : info.types) {
 			graph.addVertex(Chc.inLeft(ty));
 		}
@@ -113,7 +112,7 @@ public class SqlViewer extends JPanel {
 		}
 	}
 
-	public void makeUI() {
+	private void makeUI() {
 		if (graph.getVertexCount() == 0) {
 			top = new JPanel();
 			return;
@@ -121,35 +120,17 @@ public class SqlViewer extends JPanel {
 		Layout<Chc<SqlType, SqlTable>, Chc<SqlColumn, SqlForeignKey>> layout = new FRLayout<>(graph);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Chc<SqlType, SqlTable>, Chc<SqlColumn, SqlForeignKey>> vv = new VisualizationViewer<>(layout);
-		Transformer<Chc<SqlType, SqlTable>, Paint> vertexPaint = x -> {
-			if (x.left) {
-				return UIManager.getColor("Panel.background");
-			} else {
-				return color;
-			}
-		};
+		Transformer<Chc<SqlType, SqlTable>, Paint> vertexPaint = x -> x.left ? UIManager.getColor("Panel.background") : color;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-		gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer<Chc<SqlType, SqlTable>, String> vt = x ->{
-			if (x.left) {
-				return x.l.name;
-			} else {
-				return x.r.name;
-			}
-		};
+		Transformer<Chc<SqlType, SqlTable>, String> vt = x -> x.left ? x.l.name : x.r.name;
 		
-		Transformer<Chc<SqlColumn, SqlForeignKey>, String> et = x -> {
-			if (x.left) {
-				return x.l.name;
-			} else {
-				return "";
-			}
-		};
+		Transformer<Chc<SqlColumn, SqlForeignKey>, String> et = x -> x.left ? x.l.name : "";
 		
 		vv.getRenderContext().setVertexLabelTransformer(vt);
 		vv.getRenderContext().setEdgeLabelTransformer(et);

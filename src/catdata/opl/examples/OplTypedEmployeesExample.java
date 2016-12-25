@@ -20,7 +20,7 @@ public class OplTypedEmployeesExample extends Example {
 		return s;
 	}
 
-	String s = "S0 = theory { "
+	private final String s = "S0 = theory { "
 			+ "\n sorts"
 			+ "\n 	Employee, Department, string, nat;"
 			+ "\n symbols"

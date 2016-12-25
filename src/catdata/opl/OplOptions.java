@@ -29,7 +29,7 @@ public class OplOptions extends Options implements Cloneable {
 	public Object clone() {
 		try {
 			Object ret = new OplOptions();
-			for (Field f : this.getClass().getFields()) {
+			for (Field f : getClass().getFields()) {
 				f.set(ret, f.get(this));
 			}
 			return ret;
@@ -56,16 +56,19 @@ public class OplOptions extends Options implements Cloneable {
 			if (field == null) {
 				throw new RuntimeException("No option named: " + key
 						+ ".  Allowed: "
-						+ Util.sep(Arrays.asList(OplOptions.class.getFields()).stream().map(x -> { return x.getName(); }).collect(Collectors.toList()), ", "));
+						+ Util.sep(Arrays.stream(OplOptions.class.getFields()).map(Field::getName).collect(Collectors.toList()), ", "));
 			}
 			if (field.getType().toString().equals("boolean")) {
-				if (value.equals("true")) {
-					field.set(this, true);
-				} else if (value.equals("false")) {
-					field.set(this, false);
-				} else {
-					throw new RuntimeException(
-							"Boolean-valued options must be true or false.");
+				switch (value) {
+					case "true":
+						field.set(this, true);
+						break;
+					case "false":
+						field.set(this, false);
+						break;
+					default:
+						throw new RuntimeException(
+								"Boolean-valued options must be true or false.");
 				}
 			} else if (field.getType().toString().equals("int")) {
 				Integer i = Integer.parseInt(value);
@@ -73,12 +76,9 @@ public class OplOptions extends Options implements Cloneable {
 			} else {
 				throw new RuntimeException("Report this error to Ryan. " + field.getType());
 			}
-		} catch (IllegalAccessException ex) {
+		} catch (IllegalAccessException | NumberFormatException ex) {
 			ex.printStackTrace();
 			throw new RuntimeException(ex.getMessage());
-		} catch (NumberFormatException nfe) {
-			nfe.printStackTrace();
-			throw new RuntimeException(nfe.getMessage());
 		}
 	}
 
@@ -318,7 +318,7 @@ public class OplOptions extends Options implements Cloneable {
 
 	@Override
 	public int size() {
-		return this.getClass().getFields().length-1;
+		return getClass().getFields().length-1;
 	}
 
 }

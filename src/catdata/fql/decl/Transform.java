@@ -11,7 +11,6 @@ import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
 import java.lang.reflect.Constructor;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -48,22 +47,22 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
-import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
 
 public class Transform {
 
-	public Instance src, dst;
-	public Map<String, Set<Pair<Object, Object>>> data;
+	public final Instance src;
+    private final Instance dst;
+	public final Map<String, Set<Pair<Object, Object>>> data;
 
 	public List<Pair<String, List<Pair<Object, Object>>>> data() {
 		List<Pair<String, List<Pair<Object, Object>>>> ret = new LinkedList<>();
 
 		for (String k : data.keySet()) {
-			ret.add(new Pair<String, List<Pair<Object, Object>>>(k,
-					new LinkedList<>(data.get(k))));
+			ret.add(new Pair<>(k,
+                    new LinkedList<>(data.get(k))));
 		}
 
 		return ret;
@@ -78,15 +77,13 @@ public class Transform {
 		for (Pair<String, List<Pair<Object, Object>>> k : b) {
 			if (src.thesig.isNode(k.first)) {
 				data.put(k.first, new HashSet<>(k.second));
-			} else {
-				continue;
 			}
 		}
 
 		validate();
 	}
 
-	public void validate() {
+	private void validate() {
 
 		for (Node n : src.thesig.nodes) {
 			Set<Pair<Object, Object>> v = data.get(n.string);
@@ -156,7 +153,7 @@ public class Transform {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((data == null) ? 0 : data.hashCode());
 		result = prime * result + ((dst == null) ? 0 : dst.hashCode());
@@ -200,8 +197,8 @@ public class Transform {
 		for (String k : l.data.keySet()) {
 			Set<Pair<Object, Object>> v = l.data.get(k);
 			Set<Pair<Object, Object>> v0 = r.data.get(k);
-			xxx.add(new Pair<String, List<Pair<Object, Object>>>(k,
-					new LinkedList<>(compose(v, v0))));
+			xxx.add(new Pair<>(k,
+                    new LinkedList<>(compose(v, v0))));
 		}
 
 		return new Transform(l.src, r.dst, xxx);
@@ -231,7 +228,7 @@ public class Transform {
 	public JPanel view(String src_n, String dst_n) {
 		List<JPanel> panels = new LinkedList<>();
 		LinkedList<String> sorted = new LinkedList<>(data.keySet());
-		Collections.sort(sorted, (String f1, String f2) -> f1.compareTo(f2));
+		sorted.sort(String::compareTo);
 		for (String k : sorted) {
 			Set<Pair<Object, Object>> xxx = data.get(k);
 			List<Pair<Object, Object>> table = new LinkedList<>(xxx);
@@ -393,7 +390,7 @@ public class Transform {
 			Set<Pair<Object, Object>> v = data.get(k);
 			for (Pair<Object, Object> i : v) {
 				Node n = src.thesig.getNode(k);
-				g2.addEdge(new Pair<Path, Integer>(null, j++), new Quad<>(n,
+				g2.addEdge(new Pair<>(null, j++), new Quad<>(n,
 						i.first, src_n, true), new Quad<>(n, i.second, dst_n,
 						false));
 			}
@@ -448,11 +445,11 @@ public class Transform {
 	 */
 
 	@SuppressWarnings("unchecked")
-	public static JPanel doView(final Color scolor, final Color tcolor,
-			@SuppressWarnings("unused") final String src_n,
-			@SuppressWarnings("unused") final String dst_n,
-			Graph<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> first,
-			HashMap<Quad<Node, Object, String, Boolean>, Map<Attribute<Node>, Object>> second) {
+    private static JPanel doView(Color scolor, Color tcolor,
+								 @SuppressWarnings("unused") String src_n,
+								 @SuppressWarnings("unused") String dst_n,
+								 Graph<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> first,
+								 Map<Quad<Node, Object, String, Boolean>, Map<Attribute<Node>, Object>> second) {
 
 		// HashMap<Pair<Node, Object>,String> map = new HashMap<>();
 		JPanel cards = new JPanel(new CardLayout());
@@ -468,21 +465,15 @@ public class Transform {
 			VisualizationViewer<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> vv = new VisualizationViewer<>(
 					layout);
 	
-			Transformer<Quad<Node, Object, String, Boolean>, Paint> vertexPaint = (Quad<Node, Object, String, Boolean> i) -> {
-                            if (i.fourth) {
-                                return scolor;
-                            } else {
-                                return tcolor;
-                            }
-                        };
+			Transformer<Quad<Node, Object, String, Boolean>, Paint> vertexPaint = (Quad<Node, Object, String, Boolean> i) -> i.fourth ? scolor : tcolor;
 
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
-			gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
+			gm.setMode(Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
 			// Set up a new stroke Transformer for the edges
 			float dash[] = { 1.0f };
-			final Stroke edgeStroke = new BasicStroke(0.5f,
+			Stroke edgeStroke = new BasicStroke(0.5f,
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
 			// Transformer<String, Stroke> edgeStrokeTransformer = new
@@ -492,7 +483,7 @@ public class Transform {
 			// }
 			// };
 			vv.getRenderContext().setVertexLabelRenderer(new MyVertexT(cards));
-			final Stroke bs = new BasicStroke();
+			Stroke bs = new BasicStroke();
 			Transformer<Pair<Path, Integer>, Stroke> edgeStrokeTransformer = (Pair<Path, Integer> s) -> {
                             if (s.first == null) {
                                 return edgeStroke;
@@ -529,7 +520,7 @@ public class Transform {
 								public String transform(
 										Quad<Node, Object, String, Boolean> t) {
 									return t.third + "." + t.first + "."
-											+ t.second.toString();
+											+ t.second;
 								}
 
 							});
@@ -593,7 +584,7 @@ public class Transform {
 		}
 	}
 
-	public JPanel makePanel(Color scolor, Color tcolor, String src_n, String dst_n) {
+	private JPanel makePanel(Color scolor, Color tcolor, String src_n, String dst_n) {
 		try {
 			Pair<Graph<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>>, HashMap<Quad<Node, Object, String, Boolean>, Map<Attribute<Node>, Object>>> g = build(
 					src_n, dst_n);
@@ -612,7 +603,7 @@ public class Transform {
 
 	private static class MyVertexT implements VertexLabelRenderer {
 
-		JPanel cards;
+		final JPanel cards;
 
 		public MyVertexT(JPanel cards) {
 			this.cards = cards;
@@ -695,9 +686,10 @@ public class Transform {
 		Instance ret = new Instance(src.thesig, map);
 		return ret;
 	}
-/*
-	@Deprecated
-	public Instance apply(Instance a) throws FQLException { //TODO !!!
+
+	
+
+	public Instance apply() throws FQLException { //TODO !!!
 		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
 
 		for (Node n : src.thesig.nodes) {
@@ -729,6 +721,6 @@ public class Transform {
 		}
 
 		return new Instance(src.thesig, map);
-	}
-*/
+	} 
+
 }

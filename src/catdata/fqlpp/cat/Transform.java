@@ -14,9 +14,9 @@ import catdata.ide.GlobalOptions;
 
 @SuppressWarnings("serial")
 public class Transform<O1, A1, O2, A2> implements Serializable {
-	public Functor<O1, A1, O2, A2> source;
-	public Functor<O1, A1, O2, A2> target;
-	private FUNCTION<O1, A2> t;
+	public final Functor<O1, A1, O2, A2> source;
+	public final Functor<O1, A1, O2, A2> target;
+	private final FUNCTION<O1, A2> t;
 
 	public Transform(Functor<O1, A1, O2, A2> source, Functor<O1, A1, O2, A2> target,
 			FUNCTION<O1, A2> t) {
@@ -97,7 +97,8 @@ public class Transform<O1, A1, O2, A2> implements Serializable {
 		return 0;
 	}
 
-	public void validate() {
+	@SuppressWarnings("ConstantConditions")
+    private void validate() {
 		if (!GlobalOptions.debug.fqlpp.VALIDATE) {
 			return;
 		}
@@ -162,7 +163,7 @@ public class Transform<O1, A1, O2, A2> implements Serializable {
 
 	public static <O1, A1, O2, A2> Transform<O1, A1, O2, A2> compose(
 			Transform<O1, A1, O2, A2> f, Transform<O1, A1, O2, A2> g) {
-		if (!f.target.equals(g.source) && !f.target.source.isInfinite() && ! f.target.source.isInfinite()) {
+		if (!f.target.equals(g.source) && !f.target.source.isInfinite()) {
 			throw new RuntimeException("Dom/Cod mismatch when composing "
 					+ f + " and " + g);
 		}

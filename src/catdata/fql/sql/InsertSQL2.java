@@ -14,9 +14,9 @@ import catdata.fql.parse.PrettyPrinter;
  */
 public class InsertSQL2 extends PSM {
 
-	String name;
-	SQL sql;
-	List<String> cols;
+	private final String name;
+	private final SQL sql;
+	private final List<String> cols;
 
 	public InsertSQL2(String name, SQL sql, List<String> cols) {
 		this.name = name;
@@ -34,7 +34,7 @@ public class InsertSQL2 extends PSM {
 		if (!state.containsKey(name)) {
 			throw new RuntimeException("does not contain key " + name + "\n\n" + state + " sql was " + this);
 		}
-		if (state.get(name).size() > 0) {
+		if (!state.get(name).isEmpty()) {
 			throw new RuntimeException(name + ": already " + state.get(name) + " in " + this);
 		}
 		state.put(name, sql.eval(state));

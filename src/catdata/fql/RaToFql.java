@@ -4,15 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -28,10 +21,14 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
+import catdata.fql.decl.SigExp.Var;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
+import org.codehaus.jparsec.Terminals.Identifier;
+import org.codehaus.jparsec.Terminals.IntegerLiteral;
+import org.codehaus.jparsec.Terminals.StringLiteral;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
@@ -40,7 +37,6 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.fql.decl.InstExp;
 import catdata.fql.decl.MapExp;
-import catdata.fql.decl.SigExp;
 import catdata.fql.decl.SigExp.Const;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
@@ -56,11 +52,11 @@ import catdata.ide.Language;
 public class RaToFql {
 
 	// always adom and guid
-	public static String doAdom(SigExp.Const A, String a) {
+	private static String doAdom(Const A, String a) {
 		String k = a;
 		List<Pair<List<String>, List<String>>> eeqs = new LinkedList<>();
-		List<Triple<String, String, String>> attrs = new LinkedList<>();
-		attrs.add(new Triple<>("att", "adom", "str"));
+		//List<Triple<String, String, String>> attrs = new LinkedList<>();
+		//attrs.add(new Triple<>("att", "adom", "str"));
 		List<Triple<String, String, String>> dd_attrs = new LinkedList<>();
 		dd_attrs.add(new Triple<>("att", "x", "str"));
 
@@ -294,15 +290,15 @@ public class RaToFql {
 			i++;
 		}
 
-		SigExp.Const b = new SigExp.Const(bn, e_attrs, barrs, eeqs);
+		Const b = new Const(bn, e_attrs, barrs, eeqs);
 		MapExp.Const ab = new MapExp.Const(abn, e_abatt, abarr, b, A); // F
 
-		SigExp.Const c = new SigExp.Const(cn, e_attrs, carrs, eeqs);
+		Const c = new Const(cn, e_attrs, carrs, eeqs);
 		MapExp.Const bc = new MapExp.Const(bcn, e_abatt, bcarr, b, c); // G
 
-		SigExp.Const bb = new SigExp.Const(bbn, e_attrs, bbarrs, eeqs);
-		SigExp.Const cc = new SigExp.Const(ccn, e_attrs, ccarrs, cceqs);
-		SigExp.Const dd = new SigExp.Const(ddn, dd_attrs, ddarrs, ddeqs);
+		Const bb = new Const(bbn, e_attrs, bbarrs, eeqs);
+		Const cc = new Const(ccn, e_attrs, ccarrs, cceqs);
+		Const dd = new Const(ddn, dd_attrs, ddarrs, ddeqs);
 
 		MapExp.Const ff = new MapExp.Const(ffn, e_abatt, ffarr, bb, c);
 		MapExp.Const gg = new MapExp.Const(ggn, e_abatt, ggarr, bb, cc);
@@ -340,11 +336,11 @@ public class RaToFql {
 		return ret;
 	}
 
-	protected Example[] examples = { new PeopleExample()  , new NegExample() , new EDExample() };
+	private final Example[] examples = { new PeopleExample()  , new NegExample() , new EDExample() };
 
-	String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries *of base relations* are supported, using DISTINCT and ALL for set semantics.  (The translated FQL will not compile if not translating unions of conjunctive queries of base relations).  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.  SQL keywords MUST be capitalized.  The observables viewer pane is useful for visualizing instances.";
+	private final String help = "Bags of tuples can be represented in FQL using an explicit active domain construction.  See the People example.  Unions of conjunctive queries *of base relations* are supported, using DISTINCT and ALL for set semantics.  (The translated FQL will not compile if not translating unions of conjunctive queries of base relations).  Primary and foreign keys are not supported by this encoding.  WHERE clauses must have equalities between variables, not constants.  SQL keywords MUST be capitalized.  The observables viewer pane is useful for visualizing instances.";
 
-	protected static String kind() {
+	private static String kind() {
 		return "SPCU";
 	}
 
@@ -405,19 +401,19 @@ public class RaToFql {
 		}
 	}
 
-	static String translate(String in) {
+	private static String translate(String in) {
 		List<Pair<String, EExternal>> list = program(in);
 		return transSQLSchema(list);
 	}
 
 	public RaToFql() {
-		final CodeTextPanel input = new CodeTextPanel(kind() + " Input", "");
-		final CodeTextPanel output = new CodeTextPanel("FQL Output", "");
+		CodeTextPanel input = new CodeTextPanel(kind() + " Input", "");
+		CodeTextPanel output = new CodeTextPanel("FQL Output", "");
 
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");
 		
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
 		box.addActionListener((ActionEvent e) -> {
                     if (box.getSelectedItem() != null) {
@@ -429,7 +425,7 @@ public class RaToFql {
 
 		transButton.addActionListener((ActionEvent e) -> {
                     try {
-                        output.setText(translate(input.getText()).toString());
+                        output.setText(translate(input.getText()));
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         output.setText(ex.getLocalizedMessage());
@@ -488,7 +484,7 @@ public class RaToFql {
 		f.setVisible(true);
 	}
 
-	static String extext1 = "CREATE TABLE Place ("
+	private static final String extext1 = "CREATE TABLE Place ("
 			+ "\n description VARCHAR(255)"
 			+ "\n);  "
 			+ "\n"
@@ -507,7 +503,7 @@ public class RaToFql {
 			+ "\n     WHERE x.description = y.description AND x.description = z.home" + "\n"
 			+ "\nq3 = q1 UNION q2" + "\n" + "\nq4 = q1 UNION ALL q2" + "\n";
 
-	static String negText = "//our encoding of negation doesn't work correctly yet\n"
+	private static final String negText = "//our encoding of negation doesn't work correctly yet\n"
 			+ "\nCREATE TABLE A (" + "\n a VARCHAR(255)" + "\n);  " + "\n"
 			+ "\nINSERT INTO A VALUES (\"a\"),(\"a\"),(\"a\"); " + "\n" + "\nCREATE TABLE B ("
 			+ "\n b VARCHAR(255)" + "\n);" + "\n" + "\nINSERT INTO B VALUES (\"b\"),(\"b\");"
@@ -538,7 +534,7 @@ public class RaToFql {
 			+ "\ntransform t1 = (t0 then prpprp.and)" + "\n"
 			+ "\ninstance F1minusF2 = kernel t1\n*/";
 
-	public static String transSQLSchema(List<Pair<String, EExternal>> in) {
+	private static String transSQLSchema(List<Pair<String, EExternal>> in) {
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
 		List<Triple<String, String, String>> attrs = new LinkedList<>();
@@ -552,17 +548,17 @@ public class RaToFql {
 		List<Pair<Object, Object>> adomT = new LinkedList<>();
 		LinkedList<Pair<Object, Object>> attT = new LinkedList<>();
 		inodes.add(new Pair<>(adom, adomT));
-		iattrs.add(new Pair<String, List<Pair<Object, Object>>>("att", attT));
+		iattrs.add(new Pair<>("att", attT));
 		attrs.add(new Triple<>("att", adom, "str"));
 		Set<Object> enums = new HashSet<>();
 
-		HashMap<String, Integer> dom1 = new HashMap<>();
+		Map<String, Integer> dom1 = new HashMap<>();
 
 		List<Pair<String, EExternal>> queries = new LinkedList<>();
 
 		int count = 0;
 		Set<String> seen = new HashSet<>();
-		HashMap<String, List<String>> cols = new HashMap<>();
+		Map<String, List<String>> cols = new HashMap<>();
 		for (Pair<String, EExternal> kk0 : in) {
 			EExternal k0 = kk0.second;
 			// String key = kk0.first;
@@ -576,8 +572,8 @@ public class RaToFql {
 				}
 				seen.add(k.name);
 				nodes.add(k.name);
-				inodes.add(new Pair<String, List<Pair<Object, Object>>>(k.name,
-						new LinkedList<Pair<Object, Object>>()));
+				inodes.add(new Pair<>(k.name,
+                        new LinkedList<>()));
 				List<String> lcols = new LinkedList<>();
 				for (Pair<String, String> col : k.types) {
 					lcols.add(col.first);
@@ -586,8 +582,8 @@ public class RaToFql {
 					}
 					seen.add(col.first);
 					arrows.add(new Triple<>(k.name + "_" + col.first, k.name, adom));
-					iarrows.add(new Pair<String, List<Pair<Object, Object>>>(k.name + "_"
-							+ col.first, new LinkedList<Pair<Object, Object>>()));
+					iarrows.add(new Pair<>(k.name + "_"
+                            + col.first, new LinkedList<>()));
 				}
 				cols.put(k.name, lcols);
 			}
@@ -605,24 +601,26 @@ public class RaToFql {
 					}
 
 					String id = "" + count++;
-					node.add(new Pair<Object, Object>(id, id));
+					node.add(new Pair<>(id, id));
 
 					for (int colNum = 0; colNum < tuple.size(); colNum++) {
 						Integer xxx = dom1.get(tuple.get(colNum));
 						if (xxx == null) {
 							dom1.put(tuple.get(colNum), count);
 							enums.add(tuple.get(colNum));
-							adomT.add(new Pair<Object, Object>(count, count));
-							attT.add(new Pair<Object, Object>(count, "\"" + tuple.get(colNum)
-									+ "\""));
+							adomT.add(new Pair<>(count, count));
+							attT.add(new Pair<>(count, "\"" + tuple.get(colNum)
+                                    + "\""));
 							xxx = count;
 							count++;
 						}
 
 						List<Pair<Object, Object>> yyy = lookup2(
 								k.target + "_" + lcols.get(colNum), iarrows);
-
-						yyy.add(new Pair<Object, Object>(id, xxx));
+						if (yyy == null) {
+							throw new RuntimeException("Anomaly: please report");
+						}
+						yyy.add(new Pair<>(id, xxx));
 					}
 				}
 			}
@@ -632,13 +630,13 @@ public class RaToFql {
 			}
 		}
 
-		SigExp.Const exp = new SigExp.Const(nodes, attrs, arrows, eqs);
-		InstExp.Const inst = new InstExp.Const(inodes, iattrs, iarrows, new SigExp.Var("S"));
+		Const exp = new Const(nodes, attrs, arrows, eqs);
+		InstExp.Const inst = new InstExp.Const(inodes, iattrs, iarrows, new Var("S"));
 
 		// int ctx = 0;
 		String xxx = "\n\n";
 		Map<String, String> schemas = new HashMap<>();
-		Map<String, SigExp.Const> schemas0 = new HashMap<>();
+		Map<String, Const> schemas0 = new HashMap<>();
 		Map<String, Boolean> done = new HashMap<>();
 		for (Pair<String, EExternal> gh0 : queries) {
 			String k = gh0.first;
@@ -712,12 +710,12 @@ public class RaToFql {
 
 			} else if (gh instanceof EED) {
 				EED c = (EED) gh;
-				catdata.fql.decl.MapExp.Const f = doED(cols, c.from1, c.where1, exp);
-				SigExp.Const src = (SigExp.Const) f.src;
+				MapExp.Const f = doED(cols, c.from1, c.where1, exp);
+				Const src = (Const) f.src;
 		
 				c.from2.putAll(c.from1);
 				c.where2.addAll(c.where1);
-				catdata.fql.decl.MapExp.Const g = doED(cols, c.from2, c.where2, exp);
+				MapExp.Const g = doED(cols, c.from2, c.where2, exp);
 				
 				List<Pair<String, String>> l = new LinkedList<>();
 				for (String x : src.nodes) {
@@ -731,7 +729,7 @@ public class RaToFql {
 					em.add(new Pair<>(e.first, y));
 				}
 				
-				catdata.fql.decl.MapExp.Const i = new MapExp.Const(l, new LinkedList<Pair<String,String>>(), em , f.src, g.src);
+				MapExp.Const i = new MapExp.Const(l, new LinkedList<>(), em , f.src, g.src);
 			
 				xxx += longSlash + "\n/* Translation of " + k + " */\n" + longSlash;
 				 xxx += "\n\nschema " + k + "A = " + f.src;
@@ -761,8 +759,8 @@ public class RaToFql {
 	}
 
 	
-	private static catdata.fql.decl.MapExp.Const doED(HashMap<String, List<String>> cols, Map<String, String> from,
-			List<Pair<Pair<String, String>, Pair<String, String>>> where, SigExp.Const target ) {
+	private static MapExp.Const doED(Map<String, List<String>> cols, Map<String, String> from,
+			List<Pair<Pair<String, String>, Pair<String, String>>> where, Const target ) {
 
 		Set<Triple<String, String, Map<String, String>>> s = new HashSet<>();
 		Set<Pair<String, String>> e = new HashSet<>(); // can process some
@@ -829,7 +827,7 @@ public class RaToFql {
 			}
 		}
 	
-		SigExp.Const w = new SigExp.Const(wn, wat, wa, we);
+		Const w = new Const(wn, wat, wa, we);
 
 		List<Pair<String, String>> omx = new LinkedList<>();
 		for (String x : wn) {
@@ -852,7 +850,7 @@ public class RaToFql {
 			}
 		}
 
-		MapExp.Const f = new MapExp.Const(omx, new LinkedList<Pair<String, String>>(), emx, w, target);
+		MapExp.Const f = new MapExp.Const(omx, new LinkedList<>(), emx, w, target);
 
 		return f;
 		
@@ -922,7 +920,6 @@ public class RaToFql {
 			for (List<Triple<String, String, String>> v : eqcs) {
 				if (v.contains(k) && !v.get(0).equals(k)) {
 					it.remove();
-					continue;
 				}
 			}
 		}
@@ -964,39 +961,39 @@ public class RaToFql {
 		Const sig2 = new Const(nodes2, attrs, edges2, eqs);
 		Const sig3 = new Const(nodes3, attrs, edges3, eqs);
 
-		MapExp.Const map1 = new MapExp.Const(inodes1, iattrs, iedges1, sig1, new SigExp.Var("S"));
+		MapExp.Const map1 = new MapExp.Const(inodes1, iattrs, iedges1, sig1, new Var("S"));
 		MapExp.Const map2 = new MapExp.Const(inodes2, iattrs, iedges2, src, sig2);
 		MapExp.Const map3 = new MapExp.Const(inodes3, iattrs, iedges3, sig3, sig2);
 
 		String xxx = "";
-		xxx += "\n\nschema " + pre + "fromSchema = " + sig1.toString();
-		xxx += "\n\nmapping " + pre + "fromMapping = " + map1.toString() + " : " + pre
+		xxx += "\n\nschema " + pre + "fromSchema = " + sig1;
+		xxx += "\n\nmapping " + pre + "fromMapping = " + map1 + " : " + pre
 				+ "fromSchema -> S";
 		xxx += "\n\ninstance " + pre + "fromInstance = delta " + pre + "fromMapping I";
 
-		xxx += "\n\nschema " + pre + "whereSchema = " + sig2.toString();
-		xxx += "\n\nmapping " + pre + "whereMapping = " + map2.toString() + " : " + pre
+		xxx += "\n\nschema " + pre + "whereSchema = " + sig2;
+		xxx += "\n\nmapping " + pre + "whereMapping = " + map2 + " : " + pre
 				+ "fromSchema -> " + pre + "whereSchema";
 		xxx += "\n\ninstance " + pre + "whereInstance = pi " + pre + "whereMapping " + pre
 				+ "fromInstance";
 
-		xxx += "\n\nschema " + pre + "Schema = " + sig3.toString();
-		xxx += "\n\nmapping " + pre + "selectMapping = " + map3.toString() + " : " + pre
+		xxx += "\n\nschema " + pre + "Schema = " + sig3;
+		xxx += "\n\nmapping " + pre + "selectMapping = " + map3 + " : " + pre
 				+ "Schema -> " + pre + "whereSchema";
 
-		if (!fl.distinct) {
-			xxx += "\n\ninstance " + pre + " = delta " + pre + "selectMapping " + pre
-					+ "whereInstance";
-		} else {
+		if (fl.distinct) {
 			xxx += "\n\ninstance " + pre + "selectInstance = delta " + pre + "selectMapping " + pre
 					+ "whereInstance";
 			xxx += "\n\ninstance " + pre + " = relationalize " + pre + "selectInstance";
+		} else {
+			xxx += "\n\ninstance " + pre + " = delta " + pre + "selectMapping " + pre
+					+ "whereInstance";
 		}
 		String comment = longSlash + "\n/* " + "Translation of " + pre + "  */\n" + longSlash;
 		return new Pair<>(comment + xxx, sig3);
 	}
 
-	static String longSlash = "////////////////////////////////////////////////////////////////////////////////";
+	private static final String longSlash = "////////////////////////////////////////////////////////////////////////////////";
 
 	private static List<List<Triple<String, String, String>>> merge(
 			List<Triple<String, String, String>> edges2,
@@ -1038,12 +1035,15 @@ public class RaToFql {
 				}
 			}
 		}
-		if (lx == rx) {
+		if (Objects.equals(lx, rx)) {
 			return;
+		}
+		if (rx == null) {
+			throw new RuntimeException("Anomaly: please report");
 		}
 		eqcs.remove(rx);
 		if (lx == null) {
-			throw new RuntimeException("RA to FQL internal error");
+			throw new RuntimeException("Anomaly: please report");
 		}
 		lx.addAll(rx);
 	}
@@ -1058,7 +1058,7 @@ public class RaToFql {
 				return Integer.parseInt(x);
 			} catch (Exception ex) {
 			}
-			return "\"" + o.toString() + "\"";
+			return "\"" + o + "\"";
 		}
 		return o;
 	}
@@ -1075,11 +1075,10 @@ public class RaToFql {
 
 	
 	public static class EInsertValues extends EExternal {
-		String target;
-		List<List<String>> values;
+		final String target;
+		final List<List<String>> values;
 
 		public EInsertValues(String target, List<List<String>> values) {
-			super();
 			this.target = target;
 			this.values = values;
 		}
@@ -1091,7 +1090,7 @@ public class RaToFql {
 
 	public static class EED extends EExternal {
 
-		public static <T> Set<T> diff(final Set<? extends T> s1, final Set<? extends T> s2) {
+		public static <T> Set<T> diff(Set<? extends T> s1, Set<? extends T> s2) {
 			Set<T> symmetricDiff = new HashSet<>(s1);
 			symmetricDiff.addAll(s2);
 			Set<T> tmp = new HashSet<>(s1);
@@ -1103,7 +1102,6 @@ public class RaToFql {
 		public EED(Map<String, String> from1, Map<String, String> from2,
 				List<Pair<Pair<String, String>, Pair<String, String>>> where1,
 				List<Pair<Pair<String, String>, Pair<String, String>>> where2) {
-			super();
 			this.from1 = from1;
 			this.from2 = from2;
 			this.where1 = where1;
@@ -1113,8 +1111,10 @@ public class RaToFql {
 			}
 		}
 
-		Map<String, String> from1, from2;
-		List<Pair<Pair<String, String>, Pair<String, String>>> where1, where2;
+		final Map<String, String> from1;
+        final Map<String, String> from2;
+		final List<Pair<Pair<String, String>, Pair<String, String>>> where1;
+        final List<Pair<Pair<String, String>, Pair<String, String>>> where2;
 
 		@Override
 		public String toString() {
@@ -1167,10 +1167,10 @@ public class RaToFql {
 	}
 
 	public static class EFlower extends EExternal {
-		Map<String, Pair<String, String>> select;
-		Map<String, String> from;
-		List<Pair<Pair<String, String>, Pair<String, String>>> where;
-		boolean distinct;
+		final Map<String, Pair<String, String>> select;
+		final Map<String, String> from;
+		final List<Pair<Pair<String, String>, Pair<String, String>>> where;
+		final boolean distinct;
 
 		public EFlower(Map<String, Pair<String, String>> select, Map<String, String> from,
 				List<Pair<Pair<String, String>, Pair<String, String>>> where, boolean distinct) {
@@ -1206,7 +1206,7 @@ public class RaToFql {
 				String p = from.get(k);
 				x += p + " AS " + k;
 			}
-			if (where.size() > 0) {
+			if (!where.isEmpty()) {
 				x += "\nWHERE ";
 			}
 
@@ -1225,11 +1225,11 @@ public class RaToFql {
 	}
 
 	public static class EUnion extends EExternal {
-		boolean distinct;
-		String l, r;
+		final boolean distinct;
+		final String l;
+        final String r;
 
 		public EUnion(boolean distinct, String l, String r) {
-			super();
 			this.distinct = distinct;
 			this.l = l;
 			this.r = r;
@@ -1241,16 +1241,16 @@ public class RaToFql {
 			if (!distinct) {
 				x += " ALL";
 			}
-			return l.toString() + "\n" + "UNION" + x + "\n" + r.toString();
+			return l + "\n" + "UNION" + x + "\n" + r;
 		}
 	}
 
 	public static class EDiff extends EExternal {
-		boolean distinct;
-		String l, r;
+		final boolean distinct;
+		final String l;
+        final String r;
 
 		public EDiff(boolean distinct, String l, String r) {
-			super();
 			this.distinct = distinct;
 			this.l = l;
 			this.r = r;
@@ -1262,72 +1262,66 @@ public class RaToFql {
 			if (!distinct) {
 				x += " ALL";
 			}
-			return l.toString() + "\n" + "EXCEPT" + x + "\n" + r.toString();
+			return l + "\n" + "EXCEPT" + x + "\n" + r;
 		}
 	}
 
 	public static class ECreateTable extends EExternal {
-		String name;
-		List<Pair<String, String>> types;
+		final String name;
+		final List<Pair<String, String>> types;
 
 		public ECreateTable(String name, List<Pair<String, String>> types) {
-			super();
 			this.name = name;
 			this.types = types;
 		}
 	}
 
-	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
-				@Override
-				public Integer map(String s) {
-					return Integer.valueOf(s);
-				}
-			});
+	static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
+			.map(Integer::valueOf);
 
-	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(", ")", "=", "->", "+",
+	private static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(", ")", "=", "->", "+",
 			"*", "^", "|" };
 
-	static String[] res = new String[] { "VARCHAR", "INT", "SELECT", "FROM", "WHERE", "DISTINCT",
+	private static final String[] res = new String[] { "VARCHAR", "INT", "SELECT", "FROM", "WHERE", "DISTINCT",
 			"UNION", "EXCEPT", "ALL", "CREATE", "TABLE", "AS", "AND", "OR", "NOT", "INSERT",
 			"INTO", "VALUES", "FORALL", "EXISTS" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
-	static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
+	private static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
-	static final Parser<?> TOKENIZER = Parsers.or(
-			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER, RESERVED.tokenizer(),
-			(Parser<?>) Terminals.Identifier.TOKENIZER,
-			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
+	private static final Parser<?> TOKENIZER = Parsers.or(
+			(Parser<?>) StringLiteral.DOUBLE_QUOTE_TOKENIZER, RESERVED.tokenizer(),
+			(Parser<?>) Identifier.TOKENIZER,
+			(Parser<?>) IntegerLiteral.TOKENIZER);
 
-	static Parser<?> term(String... names) {
+	private static Parser<?> term(String... names) {
 		return RESERVED.token(names);
 	}
 
-	public static Parser<?> ident() {
-		return Terminals.Identifier.PARSER;
+	private static Parser<?> ident() {
+		return Identifier.PARSER;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static final List<Pair<String, EExternal>> program(String s) {
+    private static List<Pair<String, EExternal>> program(String s) {
 		List<Pair<String, EExternal>> ret = new LinkedList<>();
 		List<Tuple3> decls = (List<Tuple3>) program.parse(s);
 
 		for (Tuple3 decl : decls) {
 			if (decl.a.toString().equals("CREATE")) {
-				ret.add(new Pair<String, EExternal>(null, toECreateTable(decl)));
+				ret.add(new Pair<>(null, toECreateTable(decl)));
 			} else if (decl.toString().contains("INSERT")) {
-				ret.add(new Pair<String, EExternal>(null, toEInsertValues(decl)));
+				ret.add(new Pair<>(null, toEInsertValues(decl)));
 			} else if (decl.toString().contains("SELECT")) {
-				ret.add(new Pair<String, EExternal>(decl.a.toString(), toFlower(decl.c)));
+				ret.add(new Pair<>(decl.a.toString(), toFlower(decl.c)));
 			} else if (decl.toString().contains("UNION")) {
-				ret.add(new Pair<String, EExternal>(decl.a.toString(), toUnion(decl.c)));
+				ret.add(new Pair<>(decl.a.toString(), toUnion(decl.c)));
 			} else if (decl.toString().contains("EXCEPT")) {
-				ret.add(new Pair<String, EExternal>(decl.a.toString(), toDiff(decl.c)));
+				ret.add(new Pair<>(decl.a.toString(), toDiff(decl.c)));
 			} else if (decl.toString().contains("FORALL")) {
-				ret.add(new Pair<String, EExternal>(decl.a.toString(), toEd(decl.c)));
+				ret.add(new Pair<>(decl.a.toString(), toEd(decl.c)));
 			} else {
 				throw new RuntimeException();
 			}
@@ -1352,7 +1346,7 @@ public class RaToFql {
 		return new ECreateTable(name, types);
 	}
 
-	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
+	private static final Parser<?> program = program().from(TOKENIZER, IGNORED);
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static EInsertValues toEInsertValues(Object decl) {
@@ -1367,7 +1361,7 @@ public class RaToFql {
 		return new EInsertValues(target, values);
 	}
 
-	public static final Parser<?> ed() {
+	private static Parser<?> ed() {
 		Parser<?> tuple = Parsers.tuple(ident(), term("."), ident());
 
 		Parser<?> from0 = Parsers.tuple(ident(), term("AS"), ident()).sepBy1(term(","));
@@ -1380,7 +1374,7 @@ public class RaToFql {
 		return Parsers.tuple(from1, where, from2, where);
 	}
 
-	public static final Parser<?> flower() {
+	private static Parser<?> flower() {
 		Parser<?> tuple = Parsers.tuple(ident(), term("."), ident());
 
 		Parser<?> from0 = Parsers.tuple(ident(), term("AS"), ident()).sepBy(term(","));
@@ -1396,7 +1390,7 @@ public class RaToFql {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static EED toEd(Object decl) {
+    private static EED toEd(Object decl) {
 		Map<String, String> from1 = new LinkedHashMap<>();
 		Map<String, String> from2 = new LinkedHashMap<>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where1 = new LinkedList<>();
@@ -1439,7 +1433,7 @@ public class RaToFql {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static EFlower toFlower(Object decl) {
+    private static EFlower toFlower(Object decl) {
 		Map<String, Pair<String, String>> select = new LinkedHashMap<>();
 		Map<String, String> from = new LinkedHashMap<>();
 		List<Pair<Pair<String, String>, Pair<String, String>>> where = new LinkedList<>();
@@ -1451,11 +1445,7 @@ public class RaToFql {
 		org.codehaus.jparsec.functors.Pair where0 = (org.codehaus.jparsec.functors.Pair) o.c;
 
 		boolean distinct;
-		if (select0.b == null) {
-			distinct = false;
-		} else {
-			distinct = true;
-		}
+        distinct = select0.b != null;
 
 		List<Tuple3> select1 = (List<Tuple3>) select0.c;
 		for (Tuple3 k : select1) {
@@ -1469,9 +1459,7 @@ public class RaToFql {
 			from.put(k.c.toString(), k.a.toString());
 		}
 
-		if (where0 == null) {
-
-		} else {
+		if (where0 != null) {
 			List<Tuple3> where1 = (List<Tuple3>) where0.b;
 			for (Tuple3 k : where1) {
 				Tuple3 l = (Tuple3) k.a;
@@ -1485,42 +1473,42 @@ public class RaToFql {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static final EUnion toUnion(Object o) {
+    private static EUnion toUnion(Object o) {
 		Tuple4 t = (Tuple4) o;
 		return new EUnion(t.c == null, t.a.toString(), t.d.toString());
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static final EDiff toDiff(Object o) {
+    private static EDiff toDiff(Object o) {
 		Tuple4 t = (Tuple4) o;
 		return new EDiff(t.c == null, t.a.toString(), t.d.toString());
 	}
 
-	public static final Parser<?> union() {
+	private static Parser<?> union() {
 		return Parsers.tuple(ident(), term("UNION"), term("ALL").optional(), ident());
 	}
 
-	public static final Parser<?> diff() {
+	private static Parser<?> diff() {
 		return Parsers.tuple(ident(), term("EXCEPT"), term("ALL").optional(), ident());
 	}
 
-	public static final Parser<?> insertValues() {
+	private static Parser<?> insertValues() {
 		Parser<?> p = string().sepBy(term(","));
 		return Parsers.tuple(Parsers.tuple(term("INSERT"), term("INTO")), ident(), term("VALUES"),
 				Parsers.tuple(term("("), p, term(")")).sepBy(term(",")), term(";"));
 	}
 
-	public static final Parser<?> createTable() {
+	private static Parser<?> createTable() {
 		Parser<?> q2 = Parsers.tuple(ident(), term("INT"));
 		Parser<?> q3 = Parsers.tuple(ident(), term("VARCHAR"),
-				Terminals.IntegerLiteral.PARSER.between(term("("), term(")")));
+				IntegerLiteral.PARSER.between(term("("), term(")")));
 		Parser<?> p = Parsers.or(q2, q3).sepBy1(term(","));
 
 		return Parsers.tuple(term("CREATE"), term("TABLE"), ident(),
 				Parsers.tuple(term("("), p, term(")")), term(";"));
 	}
 
-	public static final Parser<?> program() {
+	private static Parser<?> program() {
 		Parser<?> p1 = Parsers.tuple(ident(), term("="), flower());
 		Parser<?> p2 = Parsers.tuple(ident(), term("="), union());
 		Parser<?> p3 = Parsers.tuple(ident(), term("="), diff());
@@ -1530,7 +1518,7 @@ public class RaToFql {
 	}
 
 	private static Parser<?> string() {
-		return Parsers.or(Terminals.StringLiteral.PARSER, Terminals.IntegerLiteral.PARSER,
-				Terminals.Identifier.PARSER);
+		return Parsers.or(StringLiteral.PARSER, IntegerLiteral.PARSER,
+				Identifier.PARSER);
 	}
 }

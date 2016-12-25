@@ -8,12 +8,13 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 
 public class AqlJs<Ty, Sym> {
 	
-	private final static String postfix = "\n\nPossibly helpful info: javascript arguments are accessed as input[0], input[1], etc.\n\nPossibly useful links: http://docs.oracle.com/javase/8/docs/api/ and http://docs.oracle.com/javase/8/docs/technotes/guides/scripting/nashorn/intro.html .";
+	private static final String postfix = "\n\nPossibly helpful info: javascript arguments are accessed as input[0], input[1], etc.\n\nPossibly useful links: http://docs.oracle.com/javase/8/docs/api/ and http://docs.oracle.com/javase/8/docs/technotes/guides/scripting/nashorn/intro.html .";
 
 	//private Map<String, String> binding = new HashMap<>();
 	
@@ -21,12 +22,12 @@ public class AqlJs<Ty, Sym> {
 	private final Ctx<Sym, String> iso2 = new Ctx<>();
 	//Map<Integer, String> iso2 = new HashMap<>();
 	
-	private Ctx<Sym, Pair<List<Ty>, Ty>> syms; //TODO aql duplicates
+	private final Ctx<Sym, Pair<List<Ty>, Ty>> syms; //TODO aql duplicates
 	public final Ctx<Ty, String> java_tys;
 	public final Ctx<Ty, String> java_parsers;
 	public final Ctx<Sym, String> java_fns;
 
-	private ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
+	private final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
 	
 	
 	public AqlJs(Ctx<Sym, Pair<List<Ty>, Ty>> syms, Ctx<Ty, String> java_tys, Ctx<Ty, String> java_parsers, Ctx<Sym, String> java_fns) {
@@ -61,7 +62,7 @@ public class AqlJs<Ty, Sym> {
 		this(ts.syms, ts.java_tys, ts.java_parsers, ts.java_fns);
 	}*/
 	
-	public Object apply(Sym name, List<Object> args) {
+	private Object apply(Sym name, List<Object> args) {
 		try {
 			//TODO aql check inputs and outputs here?
 			Object ret = ((Invocable)engine).invokeFunction(iso2.get(name), args);			
@@ -173,7 +174,7 @@ public class AqlJs<Ty, Sym> {
 	
 
 	public <En, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> reduce(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
-		for (;;) {
+		while (true) {
 			Term<Ty, En, Sym, Fk, Att, Gen, Sk> next = reduce1(term);
 			if (next.equals(term)) {
 				return next;
@@ -233,7 +234,7 @@ public class AqlJs<Ty, Sym> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((java_fns == null) ? 0 : java_fns.hashCode());
 		result = prime * result + ((java_parsers == null) ? 0 : java_parsers.hashCode());

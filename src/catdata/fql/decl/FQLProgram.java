@@ -33,6 +33,9 @@ import catdata.fql.decl.InstExp.Step;
 import catdata.fql.decl.InstExp.Times;
 import catdata.fql.decl.InstExp.Two;
 import catdata.fql.decl.InstExp.Zero;
+import catdata.fql.decl.SigExp.Var;
+import catdata.fql.decl.Type.Int;
+import catdata.fql.decl.Type.Varchar;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
 
@@ -43,8 +46,8 @@ public class FQLProgram implements Prog {
 		return lines.get(s);
 	}
 	
-	public Map<String, Color> nmap = new HashMap<>();
-	private Map<SigExp, Color> smap = new HashMap<>();
+	public final Map<String, Color> nmap = new HashMap<>();
+	private final Map<SigExp, Color> smap = new HashMap<>();
 	
 	public Color smap(SigExp s) {
 		if (smap.containsKey(s)) {
@@ -61,7 +64,7 @@ public class FQLProgram implements Prog {
 		for (String k : sigs.keySet()) {
 			Color c = nColor();
 			nmap.put(k, c);
-			smap.put(new SigExp.Var(k), c);
+			smap.put(new Var(k), c);
 			smap.put(sigs.get(k), c);
 			smap.put(sigs.get(k).toConst(this), c);
 		}
@@ -75,10 +78,10 @@ public class FQLProgram implements Prog {
 	public Map<String, Paint> colorMap2 = new HashMap<>();
 	public Map<String, Paint> colorMap3 = new HashMap<>();
 
-	public Graph<String, Object> build2() {
-		final Graph<String, Object> g2 = new DirectedSparseMultigraph<>();
+	private Graph<String, Object> build2() {
+		Graph<String, Object> g2 = new DirectedSparseMultigraph<>();
 
-		for (final String k : maps.keySet()) {
+		for (String k : maps.keySet()) {
 			MapExp.Const i = maps.get(k).toConst(this);
 			SigExp src = i.src;
 			SigExp dst = i.dst;
@@ -103,13 +106,13 @@ public class FQLProgram implements Prog {
 		return null;
 	}
 	
-	public Graph<String, Object> build() {
+	private Graph<String, Object> build() {
 		// Graph<V, E> where V is the type of the vertices
 
-		final Graph<String, Object> g2 = new DirectedSparseMultigraph<>();
-		final Ref<Integer> guid = new Ref<>(0);
+		Graph<String, Object> g2 = new DirectedSparseMultigraph<>();
+		Ref<Integer> guid = new Ref<>(0);
 
-		for (final String k : insts.keySet()) {
+		for (String k : insts.keySet()) {
 			InstExp i = insts.get(k);
 			i.type(this).toConst(this);
 			g2.addVertex(k);
@@ -230,9 +233,9 @@ public class FQLProgram implements Prog {
 	}
 
 	
-	int cindex = 0;
-	public static Color[] colors_arr = new Color[] { Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.yellow, Color.CYAN, Color.GRAY, Color.ORANGE, Color.PINK, Color.BLACK, Color.white};
-	public Color nColor() {
+	private int cindex = 0;
+	private static final Color[] colors_arr = new Color[] { Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.yellow, Color.CYAN, Color.GRAY, Color.ORANGE, Color.PINK, Color.BLACK, Color.white};
+	private Color nColor() {
 		if (cindex < colors_arr.length) {
 			return colors_arr[cindex++];
 		} else {
@@ -242,10 +245,6 @@ public class FQLProgram implements Prog {
 	}
 
 
-	@Override
-	public boolean equals(Object o) {
-		return super.equals(o);
-	}
 
 	public FQLProgram(LinkedHashMap<String, Type> enums,
 			LinkedHashMap<String, SigExp> sigs,
@@ -256,8 +255,7 @@ public class FQLProgram implements Prog {
 			LinkedHashMap<String, TransExp> transforms,
 			LinkedHashMap<String, Integer> lines, List<String> drop,
 			List<String> order) {
-		super();
-		this.enums = enums;
+        this.enums = enums;
 		this.sigs = sigs;
 		this.maps = maps;
 		this.insts = insts;
@@ -275,11 +273,11 @@ public class FQLProgram implements Prog {
 	public static class NewDecl {
 		List<String> drop;
 		TransExp trans;
-		String name;
+		final String name;
 		SigExp sig;
 		MapExp map;
 		InstExp inst;
-		Integer line;
+		final Integer line;
 		QueryExp query;
 		FullQueryExp full_query;
 		List<String> enums;
@@ -404,8 +402,8 @@ public class FQLProgram implements Prog {
 			// throw new RuntimeException();
 			// }
 		}
-		enums.put("int", new Type.Int());
-		enums.put("string", new Type.Varchar());
+		enums.put("int", new Int());
+		enums.put("string", new Varchar());
 		enums.put("float", new Type.Float());
 	}
 
@@ -418,10 +416,6 @@ public class FQLProgram implements Prog {
 				+ "]";
 	}
 
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
 
 	private static void checkDup(Set<String> seen, String name, String s)
 			throws LineException {

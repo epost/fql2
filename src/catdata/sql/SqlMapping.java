@@ -13,13 +13,14 @@ public class SqlMapping {
 
 	//TODO aql give fks deterministic names based on table names, col names, etc 
 	
-	public final SqlSchema source, target;
+	private final SqlSchema source;
+    private final SqlSchema target;
 	
 	private final Map<SqlTable, SqlTable> tm;
 	private final Map<SqlColumn, Pair<SqlPath, SqlColumn>> am;
 	private final Map<SqlForeignKey, SqlPath> em;
 	
-	private static void fromPath(SqlPath path, String[] arr) {
+	private static void fromPath(SqlPath path, String... arr) {
 		arr[1] = path.source.name;
 		int i = 0;
 		for (SqlForeignKey edge : path.edges) {
@@ -107,9 +108,9 @@ public class SqlMapping {
 	public SqlMapping(SqlSchema source, SqlSchema target, String[][] ms) {
 		this.source = source;
 		this.target = target;
-		this.tm = new HashMap<>();
-		this.am = new HashMap<>();
-		this.em = new HashMap<>();
+        tm = new HashMap<>();
+        am = new HashMap<>();
+        em = new HashMap<>();
 		
 		for (String[] m : ms) {
 			if (m.length == 0) {
@@ -144,19 +145,19 @@ public class SqlMapping {
 		return new SqlPath(target.getTable(m[1]));
 	}
 	
-	private void addEM(String[] m) {
+	private void addEM(String... m) {
 		em.put(source.getForeignKey(m[0]), toPath(m, m.length));
 	}
 
 
-	private void addAM(String[] m) {
+	private void addAM(String... m) {
 		SqlPath path = toPath(m, m.length - 1);
 		SqlColumn col = target.getColumn(m[m.length-1]);
 		am.put(source.getColumn(m[0]), new Pair<>(path, col));
 	}
 
 
-	private void addTM(String[] m) {
+	private void addTM(String... m) {
 		String s = m[0];
 		String t = m[1];
 		if (m.length > 2) {
@@ -169,7 +170,7 @@ public class SqlMapping {
 	}
 
 
-	public SqlMapping(SqlSchema source, SqlSchema target, Map<SqlTable, SqlTable> tm, Map<SqlColumn, Pair<SqlPath, SqlColumn>> am, Map<SqlForeignKey, SqlPath> em) {
+	private SqlMapping(SqlSchema source, SqlSchema target, Map<SqlTable, SqlTable> tm, Map<SqlColumn, Pair<SqlPath, SqlColumn>> am, Map<SqlForeignKey, SqlPath> em) {
 		this.source = source;
 		this.target = target;
 		this.tm = tm;
@@ -178,7 +179,7 @@ public class SqlMapping {
 		validate();
 	}
 	
-	public SqlPath apply(SqlForeignKey in) {
+	private SqlPath apply(SqlForeignKey in) {
 		SqlPath out = em.get(in);
 		if (out == null) {
 			throw new RuntimeException(in + " is not a foreign key in " + source);
@@ -186,7 +187,7 @@ public class SqlMapping {
 		return out;
 	}
 	
-	public SqlTable apply(SqlTable in) {
+	private SqlTable apply(SqlTable in) {
 		SqlTable out = tm.get(in);
 		if (out == null) {
 			throw new RuntimeException(in + " is not a table in " + source);
@@ -194,7 +195,7 @@ public class SqlMapping {
 		return out;
 	}
 	
-	public Pair<SqlPath, SqlColumn> apply(SqlColumn in) {
+	private Pair<SqlPath, SqlColumn> apply(SqlColumn in) {
 		Pair<SqlPath, SqlColumn> out = am.get(in);
 		if (out == null) {
 			throw new RuntimeException(in + " is not a column in " + source);
@@ -202,7 +203,7 @@ public class SqlMapping {
 		return out;
 	}
 	
-	public void validate() {
+	private void validate() {
 		for (SqlTable t : tm.keySet()) {
 			if (!source.tables.contains(t)) {
 				throw new RuntimeException(t + " is not a table in " + source);

@@ -10,15 +10,14 @@ import catdata.fql.cat.FinFunctor;
  */
 public class SemQuery<ObjA, ArrowA, ObjB, ArrowB, ObjC, ArrowC, ObjD, ArrowD> {
 
-	public FinFunctor<ObjA, ArrowA, ObjB, ArrowB> project;
-	public FinFunctor<ObjA, ArrowA, ObjC, ArrowC> join;
-	public FinFunctor<ObjC, ArrowC, ObjD, ArrowD> union;
+	public final FinFunctor<ObjA, ArrowA, ObjB, ArrowB> project;
+	public final FinFunctor<ObjA, ArrowA, ObjC, ArrowC> join;
+	public final FinFunctor<ObjC, ArrowC, ObjD, ArrowD> union;
 
 	public SemQuery(FinFunctor<ObjA, ArrowA, ObjB, ArrowB> project,
 			FinFunctor<ObjA, ArrowA, ObjC, ArrowC> join,
 			FinFunctor<ObjC, ArrowC, ObjD, ArrowD> union) {
-		super();
-		this.project = project;
+        this.project = project;
 		this.join = join;
 		this.union = union;
 	}

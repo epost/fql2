@@ -12,9 +12,9 @@ import java.util.Set;
  */
 public class SimpleCreateTable extends PSM {
 
-	String name;
-	String attr;
-	boolean suppress;
+	private final String name;
+	private final String attr;
+	private final boolean suppress;
 
 	public SimpleCreateTable(String name, String attr, boolean suppress) {
 		this.name = name;
@@ -43,7 +43,7 @@ public class SimpleCreateTable extends PSM {
 			throw new RuntimeException("table already exists: " + name + " in "
 					+ state);
 		}
-		state.put(name, new HashSet<Map<Object, Object>>());
+		state.put(name, new HashSet<>());
 	}
 	
 	@Override

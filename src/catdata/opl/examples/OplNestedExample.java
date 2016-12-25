@@ -20,7 +20,7 @@ public class OplNestedExample extends Example {
 		return s;
 	}
 
-	String s = "Ax = theory {"
+	private final String s = "Ax = theory {"
 			+ "\n	sorts A1, A2;"
 			+ "\n	symbols a : A1 -> A2, a1 : A1, a2 : A2;"
 			+ "\n	equations;"

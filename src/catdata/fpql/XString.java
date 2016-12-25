@@ -7,8 +7,8 @@ import catdata.ide.CodeTextPanel;
 
 public class XString implements XObject {
 
-	private String title;
-	private String value;
+	private final String title;
+	private final String value;
 
 
 	public XString(String title, String value) {

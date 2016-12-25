@@ -6,11 +6,12 @@ package catdata.fql.parse;
  * 
  *         Exception for bad syntax
  */
+@SuppressWarnings("WeakerAccess")
 public class BadSyntax extends Exception {
 
 	private static final long serialVersionUID = 1L;
 
-	static Tokens furthest;
+	private static Tokens furthest;
 
 	// String f = "unknown";
 
@@ -32,10 +33,5 @@ public class BadSyntax extends Exception {
 		}
 	}
 
-	@Override
-	public String getMessage() {
 
-		return super.getMessage(); // + "\n\nlongest parse: " +
-									// furthest.toString2();
-	}
 }

@@ -2,11 +2,12 @@ package catdata.opl;
 
 import javax.swing.JComponent;
 
+@FunctionalInterface
 public interface OplObject {
 
-	public JComponent display();
+	JComponent display();
 
-	public default String toHtml() {
+	default String toHtml() {
 		return toString().replace("\n", "<br>").replace("\t", "&nbsp;");
 	}
 	

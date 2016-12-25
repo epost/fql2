@@ -41,10 +41,10 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 		
 		
 
-		public Set<Object> nodes;
-		public Map<Object,Pair<Object,Object>> edges;
+		public final Set<Object> nodes;
+		public final Map<Object,Pair<Object,Object>> edges;
 		
-		public List<String> imports;
+		public final List<String> imports;
 
 		@SuppressWarnings({ "unchecked" })
 		public GraphExpRaw(List<String> nodes, List<Pair<String, Pair<String, String>>> edges, List<String> imports) {
@@ -55,7 +55,7 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((edges == null) ? 0 : edges.hashCode());
 			result = prime * result + ((imports == null) ? 0 : imports.hashCode());
@@ -136,7 +136,7 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((graph == null) ? 0 : graph.hashCode());
 			return result;
@@ -189,7 +189,7 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 
 		@Override
 		public int hashCode() {
-			final int prime = 31;
+			int prime = 31;
 			int result = 1;
 			result = prime * result + ((var == null) ? 0 : var.hashCode());
 			return result;

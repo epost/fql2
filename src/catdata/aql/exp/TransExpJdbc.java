@@ -27,17 +27,17 @@ import catdata.aql.fdm.LiteralTransform;
 
 public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> {
 
-	public final InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src;
-	public final InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst;
+	private final InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src;
+	private final InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst;
 
-	public final List<String> imports;
+	private final List<String> imports;
 
-	public final Map<String, String> options;
+	private final Map<String, String> options;
 
-	public final String clazz;
-	public final String jdbcString;
+	private final String clazz;
+	private final String jdbcString;
 
-	public final Map<String, String> map;
+	private final Map<String, String> map;
 	
 	@Override
 	public long timeout() {
@@ -59,7 +59,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 		this.map = Util.toMapSafely(map);
 	}
 
-	public void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, Map<Ty, String> tys) {
+	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, Map<Ty, String> tys) {
 		for (En En : sch.ens) {
 			if (!ens.containsKey(En)) {
 				throw new RuntimeException("no query for " + En);
@@ -197,7 +197,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 						rs.close();
 						throw new RuntimeException("Error in " + ty + ": Encountered a NULL labelled null (how ironic) (cod)");
 					 }
-					 Term<Ty,En,Sym,Fk,Att,Gen2,Sk2> rhs0 = null;
+					 Term<Ty,En,Sym,Fk,Att,Gen2,Sk2> rhs0;
 					 if (sch.typeSide.js.java_tys.containsKey(ty)) {
 						rhs0 = Term.Obj(rhs, ty);
 					 } else if (dst0.sks().map.containsKey(rhs)) {
@@ -273,7 +273,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
 		result = prime * result + ((map == null) ? 0 : map.hashCode());

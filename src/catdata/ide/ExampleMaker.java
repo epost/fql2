@@ -13,12 +13,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-public class ExampleMaker {
+class ExampleMaker {
 
-	private final static CodeTextPanel p = new CodeTextPanel("input", "");
-	private final static CodeTextPanel q = new CodeTextPanel("output", "");
+	private static final CodeTextPanel p = new CodeTextPanel("input", "");
+	private static final CodeTextPanel q = new CodeTextPanel("output", "");
 	
-	static JPanel make() {
+	private static JPanel make() {
 		JPanel ret = new JPanel(new GridLayout(1,1));
 		
 		JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -31,7 +31,7 @@ public class ExampleMaker {
 		return ret;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String... args) {
 		JFrame f = new JFrame("Example Maker");	
 		
 		MenuBar mb = new MenuBar();
@@ -41,9 +41,7 @@ public class ExampleMaker {
 		m.add(i);
 		f.setMenuBar(mb);
 		
-		i.addActionListener((ActionEvent e) -> {
-                    q.setText(run(p.getText()));
-                });
+		i.addActionListener((ActionEvent e) -> q.setText(run(p.getText())));
 		
 		f.setContentPane(make());
 		f.setSize(600, 600);
@@ -51,7 +49,7 @@ public class ExampleMaker {
 		
 	}
 
-	protected static String run(String s) {
+	private static String run(String s) {
 		s = s.replace("\"", "\\\"");
 		BufferedReader br = new BufferedReader(new StringReader(s.trim()));
 		StringBuilder sb = new StringBuilder();
@@ -59,11 +57,11 @@ public class ExampleMaker {
 		try {
 			boolean first = true;
 			while ((l = br.readLine()) != null) {
-				if (!first) {
-					sb.append("+ \"\\n");
-				} else {
+				if (first) {
 					first = false;
 					sb.append("\"");
+				} else {
+					sb.append("+ \"\\n");
 				}
 				sb.append(l);
 				sb.append("\"\n");

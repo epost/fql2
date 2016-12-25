@@ -20,7 +20,7 @@ public class OplUnionExample extends Example {
 		return s;
 	}
 	
-	String s = "Type = theory {"
+	private final String s = "Type = theory {"
 			+ "\n	sorts"
 			+ "\n		String;"
 			+ "\n	symbols"

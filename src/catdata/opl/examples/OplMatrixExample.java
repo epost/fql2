@@ -20,7 +20,7 @@ public class OplMatrixExample extends Example {
 		return Language.OPL;
 	}
 	
-	String s = "//algebraic theory for boxes of wiring diagram 2.27"
+	private final String s = "//algebraic theory for boxes of wiring diagram 2.27"
 			+ "\nT = theory {"
 			+ "\n	sorts "
 			+ "\n		A, B, C;"

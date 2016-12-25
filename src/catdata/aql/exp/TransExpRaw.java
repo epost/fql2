@@ -32,13 +32,14 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 		ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.TRANSFORM)).collect(Collectors.toList()));
 		return ret;
 	}
-	public final InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object> src, dst;
+	private final InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object> src;
+    private final InstExp<Object,Object,Object,Object,Object,Object,Object,Object,Object> dst;
 	
-	public final List<String> imports;
+	private final List<String> imports;
 	
-	public final List<Pair<Object, RawTerm>> gens;		
+	private final List<Pair<Object, RawTerm>> gens;
 	
-	public final Map<String, String> options;
+	private final Map<String, String> options;
 	
 	@Override
 	public long timeout() {
@@ -52,7 +53,7 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 		result = prime * result + ((gens == null) ? 0 : gens.hashCode());
@@ -129,7 +130,7 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 			RawTerm term = gen.second;
 			Map<String, Chc<Object, Object>> ctx = new HashMap<>();
 				
-			Chc<Object,Object> required = null;
+			Chc<Object,Object> required;
 			if (src0.gens().containsKey(gen.first) && src0.sks().containsKey(gen.first)) {
 				throw new RuntimeException("in transform for " + gen.first + ", " + gen.first + " is ambiguously an entity generator and labelled null");
 			} else if (src0.gens().containsKey(gen.first)) {

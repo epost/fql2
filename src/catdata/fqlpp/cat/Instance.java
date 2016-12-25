@@ -15,7 +15,7 @@ import catdata.fqlpp.cat.FinSet.Fn;
 @SuppressWarnings("serial")
 public class Instance<O, A> implements Serializable{
 
-	public Signature<O, A> thesig;
+	public final Signature<O, A> thesig;
 	public Map<Signature<O, A>.Node, Set<Object>> nm = new HashMap<>();
 	public Map<Signature<O, A>.Edge, Map<Object, Object>> em = new HashMap<>();
 
@@ -41,7 +41,7 @@ public class Instance<O, A> implements Serializable{
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((em == null) ? 0 : em.hashCode());
 		result = prime * result + ((nm == null) ? 0 : nm.hashCode());
@@ -127,7 +127,7 @@ public class Instance<O, A> implements Serializable{
 		return "{\n " + x + ";\n}";
 	}
 
-	public void validate() {
+	private void validate() {
 
 		for (Signature<O, A>.Node n : thesig.nodes) {
 			Set<Object> i = nm.get(n);
@@ -166,7 +166,7 @@ public class Instance<O, A> implements Serializable{
 		}
 	}
 
-	Map<Signature<O, A>.Path, Map<Object, Object>> cache = new HashMap<>();
+	private final Map<Signature<O, A>.Path, Map<Object, Object>> cache = new HashMap<>();
 	public Map<Object, Object> evaluate(Signature<O, A>.Path p) {
 		if (!nm.containsKey(p.source)) {
 			throw new RuntimeException("Couldnt find " + p.source);
@@ -199,7 +199,8 @@ public class Instance<O, A> implements Serializable{
 		return x;
 	}
 	
-	public static <X,Y> Instance<X,Y> terminal(Signature<X,Y> sig) {
+	@SuppressWarnings("unchecked")
+    public static <X,Y> Instance<X,Y> terminal(Signature<X,Y> sig) {
 		Map<Signature<X, Y>.Node, Set<Object>> objs = new HashMap<>();
 		Map<Signature<X, Y>.Edge, Map<Object, Object>> arrs = new HashMap<>();
 
@@ -218,7 +219,8 @@ public class Instance<O, A> implements Serializable{
 		return new Instance<>(objs, arrs, sig);
 	}
 	@SuppressWarnings({ "rawtypes" })
-	Functor<Signature<O,A>.Node,Signature<O,A>.Path,Set,Fn> functor;
+    private
+    Functor<Signature<O,A>.Node,Signature<O,A>.Path,Set,Fn> functor;
 	
 	@SuppressWarnings({ "rawtypes" })
 	public Functor<Signature<O,A>.Node,Signature<O,A>.Path,Set,Fn> toFunctor() {

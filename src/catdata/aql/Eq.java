@@ -1,6 +1,7 @@
 package catdata.aql;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Triple;
 import catdata.Util;
 
@@ -18,7 +19,7 @@ public class Eq<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((ctx == null) ? 0 : ctx.hashCode());
 		result = prime * result + ((lhs == null) ? 0 : lhs.hashCode());

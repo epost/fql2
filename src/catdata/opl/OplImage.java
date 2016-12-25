@@ -1,18 +1,20 @@
 package catdata.opl;
 
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import java.net.URL;
 
 public class OplImage implements OplObject {
 	
-	String msg;
-	JLabel label;
-	String url;
+	private String msg;
+	private JLabel label;
+	private String url;
 	
 	public OplImage(String url) {
 		try {
 			this.url = url;
-			label = new javax.swing.JLabel(new javax.swing.ImageIcon(new java.net.URL(url)));
+			label = new JLabel(new ImageIcon(new URL(url)));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			msg = ex.getMessage();

@@ -20,7 +20,7 @@ public class OplChaseExample extends Example {
 		return s;
 	}
 
-	String s = "//In a relational data exchange setting, the type side will be discrete (implies finite), or free "
+	private final String s = "//In a relational data exchange setting, the type side will be discrete (implies finite), or free "
 			+ "\nTy = theory {"
 			+ "\n	sorts"
 			+ "\n		dom;"

@@ -25,10 +25,14 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
+import catdata.fpql.XExp.Var;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
+import org.codehaus.jparsec.Terminals.Identifier;
+import org.codehaus.jparsec.Terminals.IntegerLiteral;
+import org.codehaus.jparsec.Terminals.StringLiteral;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
@@ -44,7 +48,7 @@ import catdata.ide.Language;
 
 public class XNeo4jToFQL {
 
-	static String trans0(Map<String, Map<String, Object>> properties, Map<String, Set<Pair<String, String>>> edges) {
+	private static String trans0(Map<String, Map<String, Object>> properties, Map<String, Set<Pair<String, String>>> edges) {
 		labelForProperty(properties);
 		Map<String, Set<String>> pfl = propsForLabels(properties);
 		Map<String, Pair<String, String>> sfe = sortsForEges(edges, properties);
@@ -52,10 +56,10 @@ public class XNeo4jToFQL {
 		XSchema xxx = toSchema(pfl, sfe);
 		XInst yyy = toInst(properties, edges);
 				
-		return "dom : type\n" + Util.sep(adom(properties), " ") + " : dom\n\nS = " + xxx.toString() + "\n\nI = " + yyy.toString() + " : S\n"; 
+		return "dom : type\n" + Util.sep(adom(properties), " ") + " : dom\n\nS = " + xxx + "\n\nI = " + yyy + " : S\n";
 	}
 	
-	static Map<String, String> labelForProperty(Map<String, Map<String, Object>> properties) {
+	private static Map<String, String> labelForProperty(Map<String, Map<String, Object>> properties) {
 		Map<String, String> ret = new HashMap<>();
 		
 		for (String n : properties.keySet()) {
@@ -77,8 +81,8 @@ public class XNeo4jToFQL {
 		return ret;
 	}
 	
-	static XInst toInst(Map<String, Map<String, Object>> properties,
-			Map<String, Set<Pair<String, String>>> edges) {
+	private static XInst toInst(Map<String, Map<String, Object>> properties,
+                                Map<String, Set<Pair<String, String>>> edges) {
 
 		List<Pair<String, String>> data = new LinkedList<>();
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
@@ -110,11 +114,11 @@ public class XNeo4jToFQL {
 			}
 		}
 			
-		XInst ret = new XInst(new XExp.Var("S"), data, eqs);
+		XInst ret = new XInst(new Var("S"), data, eqs);
 		return ret;
 	}
 
-	static XSchema toSchema(Map<String, Set<String>> propsForLabels, Map<String, Pair<String, String>> sortsForEdges) {
+	private static XSchema toSchema(Map<String, Set<String>> propsForLabels, Map<String, Pair<String, String>> sortsForEdges) {
 		List<String> labels = new LinkedList<>(propsForLabels.keySet());
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
 
@@ -133,7 +137,7 @@ public class XNeo4jToFQL {
 		return ret;
 	}
 	
-	static Map<String, Pair<String, String>> sortsForEges(Map<String, Set<Pair<String, String>>> edges, Map<String, Map<String, Object>> nodes) {
+	private static Map<String, Pair<String, String>> sortsForEges(Map<String, Set<Pair<String, String>>> edges, Map<String, Map<String, Object>> nodes) {
 		Map<String, Pair<String, String>> ret = new HashMap<>();
 		
 		for (String e : edges.keySet()) {
@@ -162,7 +166,7 @@ public class XNeo4jToFQL {
 		return ret;
 	}
 	
-	static Set<Object> adom(Map<String, Map<String, Object>> nodes) {
+	private static Set<Object> adom(Map<String, Map<String, Object>> nodes) {
 		Set<Object> ret = new HashSet<>();
 		
 		for (String n : nodes.keySet()) {
@@ -179,18 +183,14 @@ public class XNeo4jToFQL {
 		return ret;
 	}
 	
-	static Map<String, Set<String>> propsForLabels(Map<String, Map<String, Object>> nodes) {
+	private static Map<String, Set<String>> propsForLabels(Map<String, Map<String, Object>> nodes) {
 		Map<String, Set<String>> ret = new HashMap<>();
 		
 		for (String n : nodes.keySet()) {
 			Map<String, Object> props = nodes.get(n);
 			String l = (String) props.get("label");
-			Set<String> s = ret.get(l);
-			if (s == null) {
-				s = new HashSet<>();
-				ret.put(l, s);
-			}
-			s.addAll(props.keySet());
+            Set<String> s = ret.computeIfAbsent(l, k -> new HashSet<>());
+            s.addAll(props.keySet());
 			s.remove("label");
 		}
 		
@@ -198,7 +198,7 @@ public class XNeo4jToFQL {
 	}
 	
 	
-	protected Example[] examples = { new PeopleEx() };
+	private final Example[] examples = { new PeopleEx() };
 
 	static class PeopleEx extends Example {
 		
@@ -219,13 +219,13 @@ public class XNeo4jToFQL {
 		
 	}
 	
-	String help = "Translates Neo4J Cypher into FPQL.  Graphs must have exactly one label per node and no properties on edges.";
+	private final String help = "Translates Neo4J Cypher into FPQL.  Graphs must have exactly one label per node and no properties on edges.";
 
-	protected static String kind() {
+	private static String kind() {
 		return "Neo4j";
 	}
 
-	static String translate(String in) {
+	private static String translate(String in) {
 		Pair<Map<String, Map<String, Object>>, Map<String, Set<Pair<String, String>>>> ne = program(in);
 		
 		String l = trans0(ne.first, ne.second);
@@ -234,19 +234,17 @@ public class XNeo4jToFQL {
 	}
 
 	public XNeo4jToFQL() {
-		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind()
+		CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind()
 				+ " Input", "");
-		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
+		CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(),
 				"FPQL Output", "");
 
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");
 
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener((ActionEvent e) -> {
-                    input.setText(((Example) box.getSelectedItem()).getText());
-                });
+		box.addActionListener((ActionEvent e) -> input.setText(((Example) box.getSelectedItem()).getText()));
 
 		transButton.addActionListener((ActionEvent e) -> {
                     try {
@@ -313,31 +311,31 @@ public class XNeo4jToFQL {
 	}
 
 
-	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
+	private static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "[", "]", "-" };
 
-	static String[] res = new String[] { "CREATE" };
+	private static final String[] res = new String[] { "CREATE" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
-	static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
+	private static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
-	static final Parser<?> TOKENIZER = Parsers.or(
-			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
-			RESERVED.tokenizer(), (Parser<?>) Terminals.Identifier.TOKENIZER,
-			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
+	private static final Parser<?> TOKENIZER = Parsers.or(
+			(Parser<?>) StringLiteral.DOUBLE_QUOTE_TOKENIZER,
+			RESERVED.tokenizer(), (Parser<?>) Identifier.TOKENIZER,
+			(Parser<?>) IntegerLiteral.TOKENIZER);
 
-	static Parser<?> term(String... names) {
+	private static Parser<?> term(String... names) {
 		return RESERVED.token(names);
 	}
 
-	public static Parser<?> ident() {
-		return Terminals.Identifier.PARSER;
+	private static Parser<?> ident() {
+		return Identifier.PARSER;
 	}
 
 	/*CREATE (n:label { a="b", c="d" }), ( ),  ; */
-	static Parser<?> createNodes() {
+	private static Parser<?> createNodes() {
 		Parser<?> q = Parsers.tuple(ident(), term("="), string());
 		Parser<?> p = Parsers.tuple(ident(), term(":"), ident(), Parsers.tuple(term("{"), q.sepBy(term(",")), term("}")));
 		return Parsers.tuple(term("CREATE"), Parsers.tuple(term("("), p, term(")")).sepBy(term(",")));
@@ -345,7 +343,7 @@ public class XNeo4jToFQL {
 	
 	/*CREATE (n) -[:label] ->(m)        */
 
-	static Parser<?> createEdges() {
+	private static Parser<?> createEdges() {
 		Parser<?> n = ident().between(term("("), term(")"));
 		Parser<?> e = Parsers.tuple(term("["), term(":"), ident(), term("]"));
 		Parser<?> p = Parsers.tuple(n, term("-"), e, term("->"), n);
@@ -353,18 +351,18 @@ public class XNeo4jToFQL {
 	}
 
 	
-	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
-	public static final Parser<?> program() {
+	private static final Parser<?> program = program().from(TOKENIZER, IGNORED);
+	private static Parser<?> program() {
 		return Parsers.tuple(createNodes(), createEdges(), Parsers.always() /*, query().many() */);
 	}
 
 	private static Parser<?> string() {
-		return Parsers.or(Terminals.StringLiteral.PARSER,
-				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
+		return Parsers.or(StringLiteral.PARSER,
+				IntegerLiteral.PARSER, Identifier.PARSER);
 	}
 	
 	@SuppressWarnings({  "rawtypes" })
-	public static final Pair<Map<String, Map<String, Object>>, Map<String, Set<Pair<String, String>>>> program(String s) {
+    private static Pair<Map<String, Map<String, Object>>, Map<String, Set<Pair<String, String>>>> program(String s) {
 		Tuple3 o = (Tuple3) program.parse(s);
 		
 		Map<String, Map<String, Object>> ret1 = fromNodes(o.a);
@@ -389,12 +387,8 @@ public class XNeo4jToFQL {
 			String t = (String) tt.e;
 			Tuple4 e0 = (Tuple4) tt.c;
 			String e = (String) e0.c;
-			 Set<Pair<String, String>> set = ret.get(e);
-			 if (set == null) {
-				 set = new HashSet<>();
-				 ret.put(e, set);
-			 }
-			 set.add(new Pair<>(s,t));
+            Set<Pair<String, String>> set = ret.computeIfAbsent(e, k -> new HashSet<>());
+            set.add(new Pair<>(s,t));
 		}
 		
 		return ret;
@@ -440,7 +434,7 @@ public class XNeo4jToFQL {
 	}
 
 	
-	static String people_example = 
+	private static final String people_example =
 			"CREATE (n:person { age=61, name=bill }), (m:person { name=Mary }), (w:woman { })"
 			+ "\n"
 			+ "\nCREATE (n)-[:mother]->(w)";

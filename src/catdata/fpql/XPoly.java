@@ -64,8 +64,8 @@ public class XPoly<C,D> extends XExp implements XObject {
 	}
 
 	public XPoly(XExp src, XExp dst, Map<Object, Pair<D, Block<C, D>>> blocks) {
-		this.src_e = src;
-		this.dst_e = dst;
+        src_e = src;
+        dst_e = dst;
 		this.blocks = blocks;
 	}
 	
@@ -83,23 +83,18 @@ public class XPoly<C,D> extends XExp implements XObject {
 			}
 			eqs.addAll(where);
 			
-			XCtx<C> ret = new XCtx<C>(ids, types, eqs, src.global, src, "instance");
+			XCtx<C> ret = new XCtx<>(ids, types, eqs, src.global, src, "instance");
 			
 			return ret;
 		}
 		
 		public Block(Map<Object, C> from, Set<Pair<List<Object>, List<Object>>> where, Map<D, List<Object>> attrs,
 				Map<D, Pair<Object, Map<Object, List<Object>>>> edges) {
-			super();
 			this.from = from;
 			this.where = where;
 			this.attrs = attrs;
 			this.edges = edges;
-			if (GlobalOptions.debug.fpql.reorder_joins) {
-				this.from = sort(from);
-			} else {
-				this.from = from;
-			}
+			this.from = GlobalOptions.debug.fpql.reorder_joins ? sort(from) : from;
 		}
 		
 		private static void count(List<Object> first, Map counts) {
@@ -308,7 +303,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((blocks == null) ? 0 : blocks.hashCode());
 		result = prime * result + ((dst == null) ? 0 : dst.hashCode());
@@ -318,7 +313,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 		return result;
 	}
 	
-	public XPoly<C,D> tilde() {
+	XPoly<C,D> tilde() {
 		Map<Object, Pair<D, Block<C, D>>> bs = new HashMap<>();
 		for (Object l : blocks.keySet()) {
 			Pair<D, Block<C, D>> b2 = blocks.get(l);
@@ -387,17 +382,14 @@ public class XPoly<C,D> extends XExp implements XObject {
 						if (dst.global.ids.contains(ty.second)) {
 							ret.add(new Pair(l0, y));
 							l0 = null;
-							continue;
 						} else {
 							if (l0 == null) {
 								throw new RuntimeException();
 							}
 							ret.add(new Pair(l0, y));
-							if (dst.ids.contains(y)) {
-							} else {
+							if (!dst.ids.contains(y)) {
 								l0 = blocks.get(l0).second.edges.get(y).first;
 							}
-							continue;
 						}
 					}
 					return ret;
@@ -407,7 +399,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 				new_eqs.add(new Pair(lhs0, rhs0));
 			}
 		}
-		return new XCtx<D>(new_ids, new_types, new_eqs, dst.global, null, "schema");
+		return new XCtx<>(new_ids, new_types, new_eqs, dst.global, null, "schema");
 	}
 	
 	private XCtx<D> o_cache = null;
@@ -437,23 +429,19 @@ public class XPoly<C,D> extends XExp implements XObject {
 		return o_cache;
 	}
 
-	Map<Object, D> conj1 = null; 
-	Map<D, Object> conj2 = null;
-	public XCtx<C> T(D d) {
+	private Map<Object, D> conj1 = null;
+	private Map<D, Object> conj2 = null;
+	private XCtx<C> T(D d) {
 		initConjs();
 		return freeze().apply(new Pair<>(conj2.get(d), Util.singList(d))).src;
 	}
-	public XMapping<C, C> T(List<D> d) {
+	private XMapping<C, C> T(List<D> d) {
 		initConjs();
 		D t = dst.type(d).first;
-		if (conj2.containsKey(t)) {
-			return freeze().apply(new Pair<>(conj2.get(t), d));
-		} else {
-			return freeze().apply(new Pair<>(t, d));
-		}
+		return conj2.containsKey(t) ? freeze().apply(new Pair<>(conj2.get(t), d)) : freeze().apply(new Pair<>(t, d));
 	}
 	
-	public void initConjs() {
+	private void initConjs() {
 		if (conj1 != null && conj2 != null) {
 			return;
 		}
@@ -473,7 +461,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 	}
 
 	private Function<Pair<Object, List<D>>, XMapping<C,C>> frozen = null;
-	public Function<Pair<Object, List<D>>, XMapping<C,C>> freeze() {
+	Function<Pair<Object, List<D>>, XMapping<C,C>> freeze() {
 		if (frozen != null) {
 			return frozen;
 		}
@@ -596,7 +584,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			}
 
 			for (D eX : p.second.subList(1, p.second.size())) {
-				XMapping<C, C> hX = null;
+				XMapping<C, C> hX;
 				if (transforms2.containsKey(eX)) {
 					l = null;
 					hX = transforms2.get(eX);
@@ -607,12 +595,8 @@ public class XPoly<C,D> extends XExp implements XObject {
 					if (l == null) {
 						throw new RuntimeException();
 					}
-					Object lX = null;
-					if (dst.ids.contains(e)) {
-						lX = l;
-					} else {
-						lX = blocks.get(l).second.edges.get(e).first;
-					}
+					Object lX;
+					lX = dst.ids.contains(e) ? l : blocks.get(l).second.edges.get(e).first;
 					hX = transforms.get(new Pair<>(lX, eX));
 					if (hX == null) {
 						throw new RuntimeException();
@@ -730,8 +714,8 @@ public class XPoly<C,D> extends XExp implements XObject {
 				Pair<C, List<C>> a1x = trySplit(a1, src, Tq1.dst.type(a1).second);
 				Pair<C, List<C>> a2x = trySplit(a2, src, Tq2.dst.type(a2).second);
 				
-				List newlhs = null;
-				List newrhs = null;
+				List newlhs;
+				List newrhs;
 				if (lhs.first == null) {
 					newlhs = eq.first;
 				} else if (a1x.first == null) {
@@ -754,7 +738,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			}
 		}
 		
-		return new XCtx<C>(new HashSet<>(), types, eqs, src.global, src, "instance");
+		return new XCtx<>(new HashSet<>(), types, eqs, src.global, src, "instance");
 	}
 
 
@@ -774,14 +758,14 @@ public class XPoly<C,D> extends XExp implements XObject {
 			}
 		}
 		List retl = l.subList(j, l.size());
-		if (retl.size() == 0) {
+		if (retl.isEmpty()) {
 			retl = Util.singList(o);
 		}
 		return new Pair<>(ret, retl);
 
 	}
 	
-	public XPoly<C,D> hat() {
+	XPoly<C,D> hat() {
 		Map<Object, Pair<D, Block<C, D>>> bs = new HashMap<>();
 		for (Object l : blocks.keySet()) {
 			Pair<D, Block<C, D>> b = blocks.get(l);
@@ -833,7 +817,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 		return false;
 	}
 
-	public XCtx<Pair<Object, Map<Object, Triple<C, C, List<C>>>>> apply(XCtx<C> I) {
+	XCtx<Pair<Object, Map<Object, Triple<C, C, List<C>>>>> apply(XCtx<C> I) {
 		return XProd.uberflower(this, I);
 	}
 	
@@ -880,7 +864,6 @@ public class XPoly<C,D> extends XExp implements XObject {
 					inth_pre.type(eq.second);
 					new_eqs.add(eq);
 				} catch (Exception ex) {
-					continue;
 				}
 			}
 			XCtx<D> inth = new XCtx<>(new HashSet<>(), types, new_eqs, intQo.global, intQo, "instance");

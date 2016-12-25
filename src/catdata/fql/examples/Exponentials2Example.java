@@ -20,7 +20,7 @@ public class Exponentials2Example extends Example {
 		return s;
 	}
 	
-	String s = "schema D0 = {"
+	private final String s = "schema D0 = {"
 			+ "\n	nodes a0;"
 			+ "\n	attributes;"
 			+ "\n	arrows;"
@@ -71,7 +71,7 @@ public class Exponentials2Example extends Example {
 			+ "\nschema H3_2=(D3^D2)"
 			+ "\n//schema H3_3=(D3^D3)"
 			+ "\n"
-			+ "\nmapping F = iso1 H1_2 H3_0"
+			//+ "\nmapping F = iso1 H1_2 H3_0"
 			+ "\n"
 			+ "\nschema Loop43 = {"
 			+ "\n	nodes a;"
@@ -96,11 +96,5 @@ public class Exponentials2Example extends Example {
 			+ "\n"
 			+ "\nschema Y=(Loop32^term)"
 			+ "\nschema X=(Loop43^Loop32)";
-
-
-
-
-
-
 
 }

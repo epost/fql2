@@ -9,7 +9,7 @@ import java.util.Vector;
 public class Examples {
 
 	private static Example[] examples;
-	public static Example[] getAllExamples() {
+	private static Example[] getAllExamples() {
 		if (examples != null) {
 			return examples;
 		}

@@ -10,12 +10,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
-import catdata.aql.Ctx;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
 import catdata.aql.It;
@@ -38,15 +38,15 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 		return ret;
 	}
  
-	public final SchExp<Object,Object,Object,Object,Object> schema;
+	private final SchExp<Object,Object,Object,Object,Object> schema;
 	
-	public final List<String> imports;
+	private final List<String> imports;
 
-	public final List<Pair<Object, Object>> gens; //TODO aql why is this object and not gens
+	private final List<Pair<Object, Object>> gens; //TODO aql why is this object and not gens
 
-	public final List<Pair<RawTerm, RawTerm>> eqs;
+	private final List<Pair<RawTerm, RawTerm>> eqs;
 	
-	public final Map<String, String> options;
+	private final Map<String, String> options;
 	
 	@Override
 	public long timeout() {
@@ -71,7 +71,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
 		result = prime * result + ((gens == null) ? 0 : gens.hashCode());
@@ -159,7 +159,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 		AqlOptions strat = new AqlOptions(options, col);
 		
 		InitialAlgebra<Object, Object, Object, Object, Object, Object, Object, ID> 
-		initial = new InitialAlgebra<>(strat, sch, col, new It(), x -> x.toString(), x -> x.toString());
+		initial = new InitialAlgebra<>(strat, sch, col, new It(), Object::toString, Object::toString);
 				 
 		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial); 
 	}

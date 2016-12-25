@@ -20,7 +20,7 @@ public class EmptyExample extends Example {
 		return s;
 	}
 
-	String s = 
+	private final String s =
 			"//illustrates all possible FQL declarations"
 					+ "\nenum color = {red, green, blue}"
 					+ "\n"
@@ -48,8 +48,8 @@ public class EmptyExample extends Example {
 					+ "\nmapping F14 = opposite F"
 					+ "\nmapping F11= eval C C"
 					+ "\nmapping F12= curry id (C*C)"
-					+ "\nmapping F15= iso1 C C"
-					+ "\nmapping F16= iso2 C C"
+				//	+ "\nmapping F15= iso1 C C"
+				//	+ "\nmapping F16= iso2 C C"
 					+ "\n"
 					+ "\nquery q = delta F pi F sigma F"
 					+ "\nquery p = (q then q)"
@@ -96,8 +96,8 @@ public class EmptyExample extends Example {
 					+ "\ntransform t21 = external I6 I6 name"
 					+ "\ntransform t22 = I9.eval"
 					+ "\ntransform t23 = I10.curry t22"
-					+ "\ntransform t24 = iso1 I I"
-					+ "\ntransform t25 = iso2 I I"
+			//		+ "\ntransform t24 = iso1 I I"
+			//		+ "\ntransform t25 = iso2 I I"
 					+ "\ntransform t26 = I13.true I11"
 					+ "\ntransform t27 = I13.false I11"
 					+ "\ntransform t28 = I13.char t26"

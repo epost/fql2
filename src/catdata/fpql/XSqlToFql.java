@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -26,10 +27,14 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
+import catdata.fpql.XExp.Var;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
+import org.codehaus.jparsec.Terminals.Identifier;
+import org.codehaus.jparsec.Terminals.IntegerLiteral;
+import org.codehaus.jparsec.Terminals.StringLiteral;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
@@ -50,11 +55,11 @@ import catdata.ide.Example;
  */
 public class XSqlToFql {
 
-	protected Example[] examples = { new PeopleExample() /* new GlobalSpec(), new Thomas() */, new A(), new B() };
+	private final Example[] examples = { new PeopleExample() /* new GlobalSpec(), new Thomas() */, new A(), new B() };
 
-	String help = "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
+	private final String help = "SQL schemas and instances in categorical normal form (CNF) can be treated as FQL instances directly.  To be in CNF, every table must have a primary key column called id.  This column will be treated as a meaningless ID.  Every column in a table must either be a string, an integer, or a foreign key to another table.  Inserted values must be quoted.  See the People example for details.";
 
-	protected static String kind() {
+	private static String kind() {
 		return "SQL Schema";
 	}
 	
@@ -95,30 +100,28 @@ public class XSqlToFql {
 		}
 	}
 
-	static String translate(String in, String depth) {
+	private static String translate(String in, String depth) {
 		List<EExternal> list = program(in);
 		return transSQLSchema(list, Integer.parseInt(depth));
 	}
 
 	public XSqlToFql() {
-		final CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind() + " Input", "");
-		final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "FPQL Output", "");
+		CodeTextPanel input = new CodeTextPanel(BorderFactory.createEtchedBorder(), kind() + " Input", "");
+		CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "FPQL Output", "");
 
-		final JTextField depth = new JTextField("4");
+		JTextField depth = new JTextField("4");
 		
 		JButton transButton = new JButton("Translate");
 		JButton helpButton = new JButton("Help");
 
-		final JComboBox<Example> box = new JComboBox<>(examples);
+		JComboBox<Example> box = new JComboBox<>(examples);
 		box.setSelectedIndex(-1);
-		box.addActionListener((ActionEvent e) -> {
-                    input.setText(((Example) box.getSelectedItem()).getText());
-                });
+		box.addActionListener((ActionEvent e) -> input.setText(((Example) box.getSelectedItem()).getText()));
 		
 
 		transButton.addActionListener((ActionEvent e) -> {
                     try {
-                        output.setText(translate(input.getText(), depth.getText()).toString());
+                        output.setText(translate(input.getText(), depth.getText()));
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         output.setText(ex.getLocalizedMessage());
@@ -175,7 +178,7 @@ public class XSqlToFql {
 		f.setVisible(true);
 	}
 
-	static String extext1 = "CREATE TABLE Place ("
+	private static final String extext1 = "CREATE TABLE Place ("
 			+ "\n id INT PRIMARY KEY, "
 			+ "\n description VARCHAR(255)"
 			+ "\n);  "
@@ -190,7 +193,7 @@ public class XSqlToFql {
 			+ "\nINSERT INTO Place VALUES (\"100\", \"New York\"),(\"200\", \"Chicago\");"
 			+ "\nINSERT INTO Person VALUES (\"7\", \"Alice\", \"200\");";
 
-	public static String transSQLSchema(List<EExternal> in, int depth) {
+	private static String transSQLSchema(List<EExternal> in, int depth) {
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
 		List<Triple<String, String, String>> arrows = new LinkedList<>();
 		List<Triple<String, String, String>> attrs = new LinkedList<>();
@@ -201,7 +204,7 @@ public class XSqlToFql {
 		List<Pair<String, List<Pair<Object, Object>>>> iarrows = new LinkedList<>();
 
 		Set<String> seen = new HashSet<>();
-		HashMap<String, List<String>> cols = new HashMap<>();
+		Map<String, List<String>> cols = new HashMap<>();
 		
 		Set<String> atoms = new HashSet<>();
 		
@@ -213,8 +216,8 @@ public class XSqlToFql {
 				}
 				seen.add(k.name);
 				nodes.add(k.name);
-				inodes.add(new Pair<String, List<Pair<Object, Object>>>(k.name,
-						new LinkedList<Pair<Object, Object>>()));
+				inodes.add(new Pair<>(k.name,
+                        new LinkedList<>()));
 				boolean found = false;
 				List<String> lcols = new LinkedList<>();
 				for (Pair<String, String> col : k.types) {
@@ -233,9 +236,9 @@ public class XSqlToFql {
 								: "adom";
 						attrs.add(new Triple<>(k.name + "_" + col.first,
 								k.name, col_t));
-						iattrs.add(new Pair<String, List<Pair<Object, Object>>>(
-								k.name + "_" + col.first,
-								new LinkedList<Pair<Object, Object>>()));
+						iattrs.add(new Pair<>(
+                                k.name + "_" + col.first,
+                                new LinkedList<>()));
 					} else {
 						if (!nodes.contains(ref)) {
 							
@@ -296,6 +299,9 @@ public class XSqlToFql {
 						if (xxx == null) {
 							xxx = lookup2(k.target + "_" + lcols.get(colNum),
 									iarrows);
+							if (xxx == null) {
+								throw new RuntimeException("Anomaly: please report");
+							}
 							xxx.add(new Pair<>("v" + tuple.get(0),
 									"v" + maybeQuote(tuple.get(colNum))));
 
@@ -316,7 +322,7 @@ public class XSqlToFql {
 	//	SigExp.Const exp = new SigExp.Const(nodes, attrs, arrows, eqs);
 		
 		iarrows.addAll(iattrs);
-		XInst inst = XRaToFpql.doInst(inodes, iarrows, new XExp.Var("S"));
+		XInst inst = XRaToFpql.doInst(inodes, iarrows, new Var("S"));
 	//	InstExp.Const inst = new InstExp.Const(inodes, iattrs, iarrows,
 		//		new SigExp.Var("S"));
 
@@ -332,7 +338,7 @@ public class XSqlToFql {
 		return ret;
 	}
 
-	public static String maybeQuote(Object o) {
+	private static String maybeQuote(Object o) {
 		if (o instanceof String) {
 			String x = (String) o;
 			if (x.startsWith("\"") && x.endsWith("\"")) {
@@ -342,7 +348,7 @@ public class XSqlToFql {
 				return Integer.toString(Integer.parseInt(x)); //.toString();
 			} catch (Exception ex) {
 			}
-			return "\"" + o.toString() + "\"";
+			return "\"" + o + "\"";
 		}
 		return o.toString();
 	}
@@ -368,11 +374,10 @@ public class XSqlToFql {
 	}
 
 	public static class EInsertValues extends EExternal {
-		String target;
-		List<List<String>> values;
+		final String target;
+		final List<List<String>> values;
 
 		public EInsertValues(String target, List<List<String>> values) {
-			super();
 			this.target = target;
 			this.values = values;
 		}
@@ -383,56 +388,55 @@ public class XSqlToFql {
 	}
 
 	public static class ECreateTable extends EExternal {
-		String name;
+		final String name;
 		@Override
 		public String toString() {
 			return "ECreateTable [name=" + name + ", types=" + types + ", fks=" + fks + "]";
 		}
 
-		List<Pair<String, String>> types;
-		List<Pair<String, String>> fks;
+		final List<Pair<String, String>> types;
+		final List<Pair<String, String>> fks;
 
 		public ECreateTable(String name, List<Pair<String, String>> types,
 				List<Pair<String, String>> fks) {
-			super();
 			this.name = name;
 			this.types = types;
 			this.fks = fks;
 		}
 	}
 
-	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map((String s) -> Integer.valueOf(s));
+	static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
+			.map(Integer::valueOf);
 
-	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
+	private static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|" };
 
 	
-	static String[] res = new String[] { "VARCHAR", "INT", "SELECT", "FROM",
+	private static final String[] res = new String[] { "VARCHAR", "INT", "SELECT", "FROM",
 			"WHERE", "DISTINCT", "UNION", "ALL", "CREATE", "TABLE", "AS",
 			"PRIMARY", "KEY", "FOREIGN", "REFERENCES", "id", "AND", "OR",
 			"NOT", "INSERT", "INTO", "VALUES" };
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
-	static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
+	private static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
-	static final Parser<?> TOKENIZER = Parsers.or(
-			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
-			RESERVED.tokenizer(), (Parser<?>) Terminals.Identifier.TOKENIZER,
-			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
+	private static final Parser<?> TOKENIZER = Parsers.or(
+			(Parser<?>) StringLiteral.DOUBLE_QUOTE_TOKENIZER,
+			RESERVED.tokenizer(), (Parser<?>) Identifier.TOKENIZER,
+			(Parser<?>) IntegerLiteral.TOKENIZER);
 
-	static Parser<?> term(String... names) {
+	private static Parser<?> term(String... names) {
 		return RESERVED.token(names);
 	}
 
-	public static Parser<?> ident() {
-		return Terminals.Identifier.PARSER;
+	private static Parser<?> ident() {
+		return Identifier.PARSER;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static final List<EExternal> program(String s) {
+    private static List<EExternal> program(String s) {
 		List<EExternal> ret = new LinkedList<>();
 		List<Tuple3> decls = (List<Tuple3>) program.parse(s);
 
@@ -476,7 +480,7 @@ public class XSqlToFql {
 		return new ECreateTable(name, types, fks);
 	}
 
-	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
+	private static final Parser<?> program = program().from(TOKENIZER, IGNORED);
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static EInsertValues toEInsertValues(Object decl) {
@@ -491,19 +495,19 @@ public class XSqlToFql {
 		return new EInsertValues(target, values);
 	}
 
-	public static final Parser<?> insertValues() {
+	private static Parser<?> insertValues() {
 		Parser<?> p = string().sepBy(term(","));
 		return Parsers.tuple(Parsers.tuple(term("INSERT"), term("INTO")),
 				ident(), term("VALUES"), Parsers.tuple(term("("), p, term(")"))
 						.sepBy(term(",")), term(";"));
 	}
 
-	public static final Parser<?> createTable() {
+	private static Parser<?> createTable() {
 		Parser<?> q1 = Parsers.tuple(term("id"), term("INT"), term("PRIMARY"),
 				term("KEY"));
 		Parser<?> q2 = Parsers.tuple(ident(), term("INT"));
 		Parser<?> q3 = Parsers.tuple(ident(), term("VARCHAR"),
-				Terminals.IntegerLiteral.PARSER.between(term("("), term(")")));
+				IntegerLiteral.PARSER.between(term("("), term(")")));
 		Parser<?> q4 = Parsers.tuple(term("FOREIGN").followedBy(term("KEY")),
 				Parsers.tuple(term("("), ident(), term(")")),
 				term("REFERENCES"), ident(),
@@ -514,13 +518,13 @@ public class XSqlToFql {
 				Parsers.tuple(term("("), p, term(")")), term(";"));
 	}
 
-	public static final Parser<?> program() {
+	private static Parser<?> program() {
 		return Parsers.or(createTable(), insertValues()).many();
 	}
 
 	private static Parser<?> string() {
-		return Parsers.or(Terminals.StringLiteral.PARSER,
-				Terminals.IntegerLiteral.PARSER, Terminals.Identifier.PARSER);
+		return Parsers.or(StringLiteral.PARSER,
+				IntegerLiteral.PARSER, Identifier.PARSER);
 	}
 	
 	static String globalspec = "//GlobalSpec"
@@ -1846,7 +1850,7 @@ static String thomas = "//Thomasnet"
 		+ "\n*/"
 		+ "\n";
 
-static String b_str = "CREATE TABLE material ("
+private static final String b_str = "CREATE TABLE material ("
 + "\n  id INT PRIMARY KEY,"
 + "\n  MaterialName VARCHAR(255)  "
 + "\n);"
@@ -2889,7 +2893,7 @@ static String a_str = "CREATE TABLE unitcode ("
 		+ "\n";
 
 
-static String a_str2 = "CREATE TABLE unitcode ("
+private static final String a_str2 = "CREATE TABLE unitcode ("
 		+ "\n  id INT PRIMARY KEY,"
 		+ "\n  Code VARCHAR(255),"
 		+ "\n  Description VARCHAR(255)"

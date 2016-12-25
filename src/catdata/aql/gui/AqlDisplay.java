@@ -5,10 +5,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -32,7 +30,7 @@ import catdata.ide.Disp;
 //TODO aql suppress instance equations - do not compute/display if not required - maybe make instance an interface
 public final class AqlDisplay implements Disp {
 
-	private Throwable exn;
+	private final Throwable exn;
 	
 	@Override
 	public Throwable exn() {
@@ -68,7 +66,7 @@ public final class AqlDisplay implements Disp {
 		
 	}
 	
-	static JComponent wrapDisplay(Kind kind, Object obj) {
+	private static JComponent wrapDisplay(Kind kind, Object obj) {
 	//	if (!NEWDEBUG.debug.opl.opl_lazy_gui) {
 			return AqlViewer.view(kind, obj);
 	/*	}
@@ -91,14 +89,14 @@ public final class AqlDisplay implements Disp {
 	}
 
 
-	public AqlDisplay(String title, Program<Exp<? extends Object>> p, AqlEnv env, long start, long middle) {
-		Map<Object, String> map = new HashMap<>();
-		this.exn = env.exn;
+	public AqlDisplay(String title, Program<Exp<?>> p, AqlEnv env, long start, long middle) {
+		//Map<Object, String> map = new HashMap<>();
+		exn = env.exn;
 		for (String c : p.order) {
 			Exp<?> exp = p.exps.get(c);
 			if (env.defs.keySet().contains(c)) {
 				Object obj = env.defs.get(c, exp.kind());
-				map.put(obj, c); 
+	//			map.put(obj, c);
 				try {
 					frames.add(new Pair<>(doLookup(c, exp, env), wrapDisplay(exp.kind(), obj)));
 				} catch (RuntimeException ex) {
@@ -122,18 +120,18 @@ public final class AqlDisplay implements Disp {
 	private final CardLayout cl = new CardLayout();
 	private final JPanel x = new JPanel(cl);
 	private final JList<String> yyy = new JList<>();
-	private final Map<String, String> indices = new HashMap<>();
+	//private final Map<String, String> indices = new HashMap<>();
 
-	public void display(String s, List<String> order) {
+	private void display(String s, @SuppressWarnings("unused") List<String> order) {
 		frame = new JFrame();
 		//this.name = s;
 
-		final Vector<String> ooo = new Vector<>();
-		int index = 0;
+		Vector<String> ooo = new Vector<>();
+		//int index = 0;
 		for (Pair<String, JComponent> p : frames) {
 			x.add(p.second, p.first);
 			ooo.add(p.first);
-			indices.put(order.get(index++), p.first);
+	//		indices.put(order.get(index++), p.first);
 		}
 		x.add(new JPanel(), "blank");
 		cl.show(x, "blank");

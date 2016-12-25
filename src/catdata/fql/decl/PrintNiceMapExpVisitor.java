@@ -50,7 +50,7 @@ public class PrintNiceMapExpVisitor implements MapExpVisitor<String, FQLProgram>
 
 	@Override
 	public String visit(FQLProgram env, Const e) {
-		return e.toString() + " : " + e.src.unresolve(env.sigs) + " -> " + e.dst.unresolve(env.sigs);
+		return e + " : " + e.src.unresolve(env.sigs) + " -> " + e.dst.unresolve(env.sigs);
 	}
 
 	@Override

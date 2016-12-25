@@ -1,17 +1,15 @@
 package catdata.mpl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parser.Reference;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
+import org.codehaus.jparsec.Terminals.Identifier;
+import org.codehaus.jparsec.Terminals.IntegerLiteral;
+import org.codehaus.jparsec.Terminals.StringLiteral;
 import org.codehaus.jparsec.Token;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
@@ -39,45 +37,40 @@ import catdata.mpl.Mpl.MplType.MplBase;
 import catdata.mpl.Mpl.MplType.MplProd;
 import catdata.mpl.Mpl.MplType.MplUnit;
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class MplParser {
+class MplParser {
 
-	static final Parser<Integer> NUMBER = Terminals.IntegerLiteral.PARSER
-			.map(new org.codehaus.jparsec.functors.Map<String, Integer>() {
-				@Override
-				public Integer map(String s) {
-					return Integer.valueOf(s);
-				}
-			});
+	static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
+			.map(Integer::valueOf);
 
-	static String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
+	private static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
 			")", "=", "->", "+", "*", "^", "|", "?", "@" };
 
-	static String[] res = new String[] { 
+	private static final String[] res = new String[] {
 		"sym", "tr", "id", "I", "theory", "eval", "sorts", "symbols", "equations", "lambda1", "lambda2", "rho1", "rho2", "alpha1", "alpha2"
 	};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
 
-	public static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
+	private static final Parser<Void> IGNORED = Parsers.or(Scanners.JAVA_LINE_COMMENT,
 			Scanners.JAVA_BLOCK_COMMENT, Scanners.WHITESPACES).skipMany();
 
-	public static final Parser<?> TOKENIZER = Parsers.or(
-			(Parser<?>) Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER,
-			RESERVED.tokenizer(), (Parser<?>) Terminals.Identifier.TOKENIZER,
-			(Parser<?>) Terminals.IntegerLiteral.TOKENIZER);
+	private static final Parser<?> TOKENIZER = Parsers.or(
+			(Parser<?>) StringLiteral.DOUBLE_QUOTE_TOKENIZER,
+			RESERVED.tokenizer(), (Parser<?>) Identifier.TOKENIZER,
+			(Parser<?>) IntegerLiteral.TOKENIZER);
 
-	static Parser<?> term(String... names) {
+	private static Parser<?> term(String... names) {
 		return RESERVED.token(names);
 	}
 
-	public static Parser<?> ident() {
-		return Parsers.or(Terminals.StringLiteral.PARSER,
-				Terminals.Identifier.PARSER);
+	private static Parser<?> ident() {
+		return Parsers.or(StringLiteral.PARSER,
+				Identifier.PARSER);
 	}
 
-	public static final Parser<?> program = program().from(TOKENIZER, IGNORED);
+	private static final Parser<?> program = program().from(TOKENIZER, IGNORED);
 
-	public static final Parser<?> program() {
+	private static Parser<?> program() {
 		return Parsers.tuple(decl().source().peek(), decl()).many();
 	}
 	
@@ -86,7 +79,7 @@ public class MplParser {
 
 
 	
-	public static final Parser<?> exp() {
+	private static Parser<?> exp() {
 		Reference ref = Parser.newReference();
 
 		Parser<?> eval = Parsers.tuple(term("eval"), ident(), term());
@@ -99,12 +92,12 @@ public class MplParser {
 	}	
 	
 	 
-	public static final Parser<?> eq() {
+	private static Parser<?> eq() {
 		return Parsers.tuple(term(), term("="), term());
 	}
 
 
-	public static final Parser<?> term() {
+	private static Parser<?> term() {
 		Reference ref = Parser.newReference();
 
 		Parser<?> prod = Parsers.tuple(term("("), ref.lazy(), term("*"), ref.lazy(), term(")"));
@@ -121,7 +114,7 @@ public class MplParser {
 
 //		Parser<?> rho = Parsers.tuple(term("("), ref.lazy(), term("*"), ref.lazy(), term(")"));
 		
-		Parser<?> a = Parsers.or(new Parser[] { sym, tr, id, ident(), prod, comp, alpha1, alpha2, lambda1, lambda2, rho1, rho2 });
+		Parser<?> a = Parsers.or(sym, tr, id, ident(), prod, comp, alpha1, alpha2, lambda1, lambda2, rho1, rho2);
 		
 		ref.set(a);
 
@@ -129,7 +122,7 @@ public class MplParser {
 		
 	}
 
-	public static final Parser<?> type() {
+	private static Parser<?> type() {
 		Reference ref = Parser.newReference();
 
 		Parser<?> prod = Parsers.tuple(term("("), ref.lazy(), term("*"), ref.lazy(), term(")"));
@@ -141,7 +134,7 @@ public class MplParser {
 		return a;
 	}
 	
-	public static final Parser<?> theory() {
+	private static Parser<?> theory() {
 		Parser<?> z1 = Parsers.tuple(type(), term("->"), type());
 		
 		Parser<?> p = Parsers.tuple(ident().sepBy1(term(",")), term(":"), z1);
@@ -152,10 +145,10 @@ public class MplParser {
 	}
 	
 	
-	public static final Parser<?> decl() {		
+	private static Parser<?> decl() {
 		Parser p1 = Parsers.tuple(ident(), term("="), exp());
 		
-		return Parsers.or(new Parser[] { p1 });
+		return Parsers.or(p1);
 	}	
 	
 	
@@ -164,7 +157,7 @@ public class MplParser {
 	}
 		
 	
-	public static final Program<MplExp<String, String>> program(String s) {
+	public static Program<MplExp<String, String>> program(String s) {
 		List<Triple<String, Integer, MplExp<String, String>>> ret = new LinkedList<>();
 		List decls = (List) program.parse(s);
 
@@ -178,7 +171,7 @@ public class MplParser {
 		return new Program<>(ret, null);  
 	}
 	
-	static MplExp<String,String> toExp(Object o) {
+	private static MplExp<String,String> toExp(Object o) {
 		if (o instanceof String) {
 			return new MplVar<>((String)o);
 		}
@@ -280,7 +273,7 @@ public class MplParser {
 		Tuple3 b = (Tuple3) t.b;
 		Tuple3 c = (Tuple3) t.c;
 				
-		Set<String> sorts = new HashSet<>((List<String>) a.b);
+		Set<String> sorts = new HashSet<>((Collection<String>) a.b);
 		
 		List<Tuple3> symbols0 = (List<Tuple3>) b.b;
 		List<Tuple3> equations0 = (List<Tuple3>) c.b;
@@ -327,7 +320,7 @@ public class MplParser {
 	
 	
 
-	public static Parser<?> section(String s, Parser<?> p) {
+	private static Parser<?> section(String s, Parser<?> p) {
 		return Parsers.tuple(term(s), p.sepBy(term(",")), term(";"));
 	}
 
