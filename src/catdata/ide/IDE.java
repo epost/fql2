@@ -1,5 +1,6 @@
 package catdata.ide;
 
+import java.awt.HeadlessException;
 import java.awt.MenuBar;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -10,6 +11,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import catdata.Pair;
@@ -18,8 +20,6 @@ import catdata.fql.decl.Driver;
 import catdata.fql.decl.FQLProgram;
 import catdata.fql.decl.FqlEnvironment;
 import catdata.fql.parse.FQLParser;
-import java.awt.HeadlessException;
-import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  * 
@@ -55,10 +55,13 @@ class IDE {
                     try {
                         GlobalOptions.load();
                         
-                        UIManager.setLookAndFeel(GlobalOptions.debug.general.look_and_feel);
+                       String lf = System.getProperty("os.name").toLowerCase().contains("mac") 
+                        		  ? UIManager.getSystemLookAndFeelClassName() : "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+
+                        UIManager.setLookAndFeel(lf);
                         
                         JFrame f = new JFrame("Categorical Data IDE");
-                        
+                       
                         Pair<JPanel, MenuBar> gui = GUI.makeGUI(f);
                         
                         f.setContentPane(gui.first);
@@ -69,6 +72,11 @@ class IDE {
                                 .requestFocusInWindow();
                         f.setLocationRelativeTo(null);
                         f.setVisible(true);
+                        /*
+                        ((Graphics2D)f.getGraphics()).setRenderingHint(
+                                RenderingHints.KEY_TEXT_ANTIALIASING,
+                                RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+           */
                         
                         f.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
                         f.addWindowListener(new WindowAdapter() {

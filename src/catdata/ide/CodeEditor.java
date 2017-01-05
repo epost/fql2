@@ -552,7 +552,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			return true;
 		}
 		int choice = JOptionPane.showOptionDialog(null, 
-				"Unsaved Changes - Continue to close?", "Close?",
+				"Unsaved changes - continue to close?", "Close?",
 				JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, null, new Object[] {"Yes", "No"}, "No");
 		return (choice != JOptionPane.YES_OPTION);
 	}
@@ -563,7 +563,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	
 	@SuppressWarnings("static-method")
 	protected Collection<String> reservedWords() {
-		return Util.list("observable", "observables", "validator", "boolean", "booleans", "equational", "axiomatization", "axiomatize", "axiom", "axioms", "functor", "functors", "schema", "schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
+		return Util.list("pushout", "pushouts", "pullback", "pullbacks", "observable", "observables", "validator", "boolean", "booleans", "equational", "axiomatization", "axiomatize", "axiom", "axioms", "functor", "functors", "schema", "schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
 	}
 
 }

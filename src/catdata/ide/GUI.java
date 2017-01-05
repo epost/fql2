@@ -635,10 +635,14 @@ public class GUI extends JPanel {
 		if (f == null) {
 			return;
 		}
+		String d = jfc.getDirectory();
+		if (d == null) {
+			throw new RuntimeException("Could not save file");
+		}
 		if (!f.endsWith("." + e.lang().fileExtension())) {
 			f = f + "." + e.lang().fileExtension();
 		}
-		File file = new File(f);
+		File file = new File(d, f);
 		files.put(e.id, file);
 		titles.put(e.id, file.getName());
 		doSave(file, e.getText(), e.id);
@@ -727,13 +731,13 @@ public class GUI extends JPanel {
 	}
 
 	private static void delay() {
-		try {
+/*		try {
 			Thread.sleep(100); // hack for enough time to unhighlight menu
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
+		} */
 	}
-
+ 
 	private static void formatAction() {
 		CodeEditor<?, ?, ?> c = getSelectedEditor();
 		if (c == null || !c.lang().equals(Language.FQL)) {

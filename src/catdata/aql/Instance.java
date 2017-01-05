@@ -86,8 +86,6 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
 		Instance<?,?,?,?,?,?,?,?,?> other = (Instance<?,?,?,?,?,?,?,?,?>) obj;
 		if (eqs() == null) {
 			if (other.eqs() != null)

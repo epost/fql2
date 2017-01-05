@@ -248,8 +248,6 @@ public class AqlJs<Ty, Sym> {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
 		AqlJs<?,?> other = (AqlJs<?,?>) obj;
 		if (java_fns == null) {
 			if (other.java_fns != null)

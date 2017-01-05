@@ -251,8 +251,6 @@ public final class TypeSide<Ty, Sym> {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
 		TypeSide<?,?> other = (TypeSide<?,?>) obj;
 		if (eqs == null) {
 			if (other.eqs != null)
