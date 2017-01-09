@@ -1,5 +1,6 @@
 package catdata.aql.exp;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -8,10 +9,10 @@ import catdata.Program;
 import catdata.Util;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
-import catdata.aql.examples.AqlExamples;
 import catdata.aql.gui.AqlViewer;
 import catdata.ide.Example;
 import catdata.ide.Examples;
+import catdata.ide.Language;
 
 //TODO: have this execute pragmas?
 class AqlInACan {
@@ -23,8 +24,9 @@ class AqlInACan {
 		return s;
 	}
 	
+	//TODO: AQL skipping feature will have to change
 	private static List<Example> skip() {
-		return Util.list(AqlExamples.aqlKb, AqlExamples.aqlJdbc, AqlExamples.aqlMatch);
+		return new LinkedList<>(); // Util.list(AqlExamples.aqlKb, AqlExamples.aqlJdbc, AqlExamples.aqlMatch);
 	}
 	
 	//
@@ -33,7 +35,7 @@ class AqlInACan {
 	private static String makeHtml() {
 		String s = "";
 		String t = "";
-		for (Example ex : Util.alphabetical(Examples.getExamples(AqlExamples.class))) {
+		for (Example ex : Util.alphabetical(Examples.getExamples(Language.AQL))) {
 			if (skip().contains(ex)) {
 				continue;
 			}

@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -64,10 +65,64 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		Util.toMapSafely(this.atts); //do here rather than wait
 	}
 
+
+	private String toString;
+	
 	@Override
 	public String toString() {
-		return "MapExpRaw [src=" + src + ", dst=" + dst + ", imports=" + imports + ", ens=" + ens + ", fks=" + fks + ", atts=" + atts + ", options=" + options + "]";
-	}
+		if (toString != null) {
+			return toString;
+		}
+		toString = "";
+		
+		if (!imports.isEmpty()) {
+			toString += "\timports";
+			toString += "\n\t\t" + Util.sep(imports, " ") + "\n";
+		}
+			
+		List<String> temp = new LinkedList<>();
+		
+		if (!ens.isEmpty()) {
+			toString += "\tentities";
+					
+			for (Pair<Object, Object> x : ens) {
+				temp.add(x.first + " -> " + x.second);
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!fks.isEmpty()) {
+			toString += "\tforeign_keys";
+			temp = new LinkedList<>();
+			for (Pair<Object, List<Object>> sym : fks) {
+				temp.add(sym.first + " -> " + Util.sep(sym.second, "."));
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!fks.isEmpty()) {
+			toString += "\tattributes";
+			temp = new LinkedList<>();
+			for (Pair<Object, Triple<String, Object, RawTerm>> sym : atts) {
+				temp.add(sym.first + " -> lambda " + sym.second.first + ". " + sym.second.second);
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!options.isEmpty()) {
+			toString += "\toptions";
+			temp = new LinkedList<>();
+			for (Entry<String, String> sym : options.entrySet()) {
+				temp.add(sym.getKey() + " = " + sym.getValue());
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		return "literal : " + src + " -> " + dst + " {\n" + toString + "}";
+	} 
+
 
 	@Override
 	public int hashCode() {

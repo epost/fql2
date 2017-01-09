@@ -487,8 +487,8 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	}
 
 	@Override
-	public <N, e> Unit visit(JTabbedPane ret, DMG<N, e> G) {
-		ret.add(viewGraph(G), "Graph");
+	public <N, e> Unit visit(JTabbedPane ret, catdata.aql.Graph<N, e> G) {
+		ret.add(viewGraph(G.dmg), "Graph");
 		return new Unit();
 	}
 

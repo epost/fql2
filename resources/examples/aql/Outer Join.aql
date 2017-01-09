@@ -1,0 +1,61 @@
+//Outer joins using java's Optional class
+
+typeside Ty = literal {
+	java_types
+		String = "java.lang.String"
+		Nat = "java.lang.Integer"
+		Bool = "java.lang.Boolean"
+		NullableNat = "java.util.Optional"
+	java_constants
+		String = "return input[0]"
+		Nat = "return java.lang.Integer.parseInt(input[0])"
+		Bool = "return java.lang.Boolean.parseBool(input[0])"
+		NullableNat = "return java.lang.Integer.parseInt(input[0])"
+	java_functions
+		null : -> NullableNat = "return java.util.Optional.empty()"
+		inNat : Nat -> NullableNat = "return java.util.Optional.of(input[0])"
+		eqNat : Nat, Nat -> Bool = "return (input[0].equals(input[1]))"
+		ifNat : Bool, NullableNat, NullableNat -> NullableNat = 
+		  "if (input[0]) { return input[1]; } else { return input[2]; }"
+}		  
+
+schema S = literal : Ty {
+	entities
+		A B
+	attributes
+		Aname : A -> String
+		Bname : B -> String
+		Aid : A -> Nat
+		Bid : B -> Nat
+}
+
+schema T = literal : Ty {
+	entities
+		C
+	attributes
+		CAname : C -> String
+		CBname : C -> String
+		Cid : C -> NullableNat
+} 
+
+query OuterJoin = literal : S -> T {
+ 	entities 
+	 	C  -> {from a:A b:B
+ 			  return Cid -> ifNat(eqNat(a.Aid, b.Bid), inNat(a.Aid), null)
+ 			         CAname -> a.Aname
+ 		     	    CBname -> b.Bname
+ 		  	} 
+}  
+
+instance I = literal : S {
+	generators
+		a1 a2 : A
+		b2 b3 : B
+	equations
+		a1.Aname = alice a1.Aid = "1"
+		a2.Aname = bob a2.Aid = "2"
+		b2.Bname = charlie b2.Bid = "2"
+		b3.Bname = dave b3.Bid = "3"
+} 
+
+instance J = eval OuterJoin I

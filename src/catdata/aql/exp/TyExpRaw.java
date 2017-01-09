@@ -174,23 +174,25 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 		
 		List<String> temp = new LinkedList<>();
 		
-		if (!functions.isEmpty()) {
+		Map<Object, Object> m = new HashMap<>();
+		temp = new LinkedList<>();
+		for (Pair<Object, Pair<List<Object>, Object>> sym : functions) {
+			if (sym.second.first.isEmpty()) {
+				m.put(sym.first, sym.second.second);
+			}
+		}
+		Map<Object, Set<Object>> n = Util.revS(m);
+
+		if (!n.isEmpty()) {
 			toString += "\tconstants";
 	
-			Map<Object, Object> m = new HashMap<>();
-			temp = new LinkedList<>();
-			for (Pair<Object, Pair<List<Object>, Object>> sym : functions) {
-				if (sym.second.first.isEmpty()) {
-					m.put(sym.first, sym.second.second);
-				}
-			}
-			Map<Object, Set<Object>> n = Util.revS(m);
 			for (Object x : n.keySet()) {
 				temp.add(Util.sep(n.get(x), " ") + " : " + x);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 		}
-		if (!functions.isEmpty()) {
+		
+		if (functions.size() != n.size()) {
 			toString += "\tfunctions";
 			temp = new LinkedList<>();
 			for (Pair<Object, Pair<List<Object>, Object>> sym : functions) {
@@ -215,7 +217,7 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 			toString += "\tjava_types";
 			temp = new LinkedList<>();
 			for (Pair<Object, String> sym : java_tys_string) {
-				temp.add(sym.first + " = " + sym.second);
+				temp.add(sym.first + " = " + Util.quote(sym.second));
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 		}		
@@ -224,7 +226,7 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 			toString += "\tjava_constants";
 			temp = new LinkedList<>();
 			for (Pair<Object, String> sym : java_parser_string) {
-				temp.add(sym.first + " = " + sym.second);
+				temp.add(sym.first + " = " + Util.quote(sym.second));
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 		}
@@ -233,7 +235,7 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 			toString += "\tjava_functions";
 			temp = new LinkedList<>();
 			for (Pair<Object, Triple<List<Object>, Object, String>> sym : java_fns_string) {
-				temp.add(sym.first + " : " + Util.sep(sym.second.first, ", ") + " -> " + sym.second.second + " = " + sym.second.third);
+				temp.add(sym.first + " : " + Util.sep(sym.second.first, ", ") + " -> " + sym.second.second + " = " + Util.quote(sym.second.third));
 			}
 			
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -251,6 +253,7 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 		
 		return "literal {\n" + toString + "}";
 	} 
+	
 	
 	private final Collage<Object, Void, Object, Void, Void, Void, Void> col = new Collage<>();
 

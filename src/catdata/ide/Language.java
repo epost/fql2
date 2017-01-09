@@ -2,16 +2,11 @@ package catdata.ide;
 
 import java.util.List;
 
-import catdata.aql.examples.AqlExamples;
 import catdata.aql.gui.AqlCodeEditor;
 import catdata.fpql.XCodeEditor;
-import catdata.fpql.XExamples;
-import catdata.fql.FqlExamples;
 import catdata.fql.gui.FqlCodeEditor;
 import catdata.fqlpp.FQLPPCodeEditor;
-import catdata.fqlpp.FqlppExamples;
 import catdata.opl.OplCodeEditor;
-import catdata.opl.OplExamples;
 
 public enum Language {
 
@@ -98,12 +93,12 @@ public enum Language {
 	
 	public List<Example> getExamples() {
 		switch (this) {
-		case FPQL: return Examples.getExamples(XExamples.class);
-		case FQLPP: return Examples.getExamples(FqlppExamples.class);
-		case OPL: return Examples.getExamples(OplExamples.class);
-		case FQL: return Examples.getExamples(FqlExamples.class);
+		case FPQL: return Examples.getExamples(Language.FPQL);
+		case FQLPP: return Examples.getExamples(Language.FQLPP);
+		case OPL: return Examples.getExamples(Language.OPL);
+		case FQL: return Examples.getExamples(Language.FQL);
 //		case MPL: return Examples.getExamples(MplExamples.class);
-		case AQL: return Examples.getExamples(AqlExamples.class);
+		case AQL: return Examples.getExamples(Language.AQL);
 		default:
 			throw new RuntimeException(toString());
 		}

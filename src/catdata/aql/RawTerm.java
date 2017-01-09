@@ -32,7 +32,7 @@ public final class RawTerm {
 		if (args.size() == 1) {
 			return args.get(0) + "." + head;
 		}
-		return head + "(" + Util.sep(args, ",") + ")";
+		return head + "(" + Util.sep(args, ", ") + ")";
 	}
 	
 	//TODO aql inefficient bitwise operations

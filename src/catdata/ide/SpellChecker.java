@@ -36,6 +36,7 @@ class SpellChecker extends AbstractParser {
 			return words0;
 		}
 		words0 = new HashSet<>();
+		//SpellChecker.class.getR
 		InputStream in = SpellChecker.class.getResourceAsStream("/words.txt"); 
 		if (in == null) {
 			System.err.println("Warning: no words for spellchecker found.  If you are building from source, make sure words.txt is on the classpath.");

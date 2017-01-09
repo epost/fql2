@@ -5,8 +5,12 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,6 +49,13 @@ import org.apache.commons.collections15.CollectionUtils;
 
 public class Util {
 
+
+	public static String quote(String s) {
+		s = s.replace("\\", "\\" + "\\"); //  \ --> \\
+		s = s.replace("\"", "\\\""); // " --> \"
+		return "\"" + s + "\"";
+	}
+	
 	@SuppressWarnings("deprecation")
 	public static <X> X timeout(Callable<X> c, long timeout) {
 		// final Object lock = new Object();
@@ -1087,21 +1098,47 @@ public class Util {
 	public static double similarity(String s1, String s2) { // TODO aql
 		return (1) / ((double) 1 + editDistance(s1, s2));
 	}
+	
+	public static String readFile(Reader r) throws IOException {
+			try (BufferedReader reader = new BufferedReader(r)) {
+				String line;
+				StringBuilder stringBuilder = new StringBuilder();
+				String ls = System.getProperty("line.separator");
+		
+				while ((line = reader.readLine()) != null) {
+					stringBuilder.append(line);
+					stringBuilder.append(ls);
+				}
+		
+				reader.close();
+				return stringBuilder.toString();
+			}
+		}
+	
+	public static String readFile(InputStream file) {
+		try (InputStreamReader r = new InputStreamReader(file)) {
+			
+			return readFile(r);
+		} catch (IOException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Could not read from " + file);
+		}
+		return null;
+	}
 
 	public static String readFile(String file) {
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(file));
-			String line;
-			StringBuilder stringBuilder = new StringBuilder();
-			String ls = System.getProperty("line.separator");
-
-			while ((line = reader.readLine()) != null) {
-				stringBuilder.append(line);
-				stringBuilder.append(ls);
-			}
-
-			reader.close();
-			return stringBuilder.toString();
+		try (FileReader r = new FileReader(file)) {
+			return readFile(r);
+		} catch (IOException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Could not read from " + file);
+		}
+		return null;
+	}
+	
+	public static String readFile(File file) {
+		try (FileReader r = new FileReader(file)) {
+			return readFile(r);
 		} catch (IOException e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "Could not read from " + file);

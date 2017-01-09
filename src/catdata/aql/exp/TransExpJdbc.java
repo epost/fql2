@@ -260,7 +260,11 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 
 	@Override
 	public String toString() {
-		return "import_jdbc " + clazz + " " + jdbcString + "\n\n" + Util.sep(map, " -> ", "\n\t");
+		String s = "";
+		if (!options.isEmpty()) {
+			s = "options" + Util.sep(options, "\n\t\t", " = ");
+		}
+		return "import_jdbc " + Util.quote(clazz) + " " + Util.quote(jdbcString) + " {\n\t" + Util.sep(map, " -> ", "\n\t") + s + "\n}";
 	}
 
 	@Override

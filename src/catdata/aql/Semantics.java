@@ -1,7 +1,5 @@
 package catdata.aql;
 
-import catdata.graph.DMG;
-
 public interface Semantics {
 
 	public Kind kind();
@@ -10,8 +8,8 @@ public interface Semantics {
 		return (TypeSide<?,?>) this;
 	}
 	
-	public default DMG<?,?> asGraph() {
-		return (DMG<?,?>) this;
+	public default Graph<?,?> asGraph() {
+		return (Graph<?,?>) this;
 	}
 	
 	public default Schema<?,?,?,?,?> asSchema() {

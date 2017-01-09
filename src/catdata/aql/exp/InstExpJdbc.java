@@ -25,8 +25,8 @@ import catdata.aql.Collage;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
 import catdata.aql.It;
-import catdata.aql.Kind;
 import catdata.aql.It.ID;
+import catdata.aql.Kind;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.fdm.InitialAlgebra;
@@ -382,7 +382,11 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, 
 
 	@Override
 	public String toString() {
-		return "import_jdbc " + schema + " " + clazz + " " + jdbcString + "\n\n" + Util.sep(map, " -> ", "\n\t");
+		String s = "";
+		if (!options.isEmpty()) {
+			s = "options" + Util.sep(options, "\n\t\t", " = ");
+		}
+		return "import_jdbc " + schema + " " + Util.quote(clazz) + " " + Util.quote(jdbcString) + " {\n\t" + Util.sep(map, " -> ", "\n\t") + s + "\n}";
 	}
 
 	@Override

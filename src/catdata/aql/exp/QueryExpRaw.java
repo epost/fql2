@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -90,11 +92,39 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			return true;
 		}
 
+		private String toString;
+
 		@Override
 		public String toString() {
-			return "Trans [gens=" + gens + ", options=" + options + "]";
-		}
+			if (toString != null) {
+				return toString;
+			}
+			toString = "";
+					
+			List<String> temp = new LinkedList<>();
+			
+			if (!gens.isEmpty()) {
+				for (Pair<Var, RawTerm> en1 : gens) {
+					temp.add(en1.first +  " -> " + en1.second);
+				}
+				
+				toString += Util.sep(temp, "\n\t\t\t\t");
+			}
+			
+			if (!options.isEmpty()) {
+				toString += "\n\toptions";
+				temp = new LinkedList<>();
+				for (Entry<String, String> sym : options.entrySet()) {
+					temp.add(sym.getKey() + " = " + sym.getValue());
+				}
+				
+				toString += "\n\t\t\t" + Util.sep(temp, "\n\t\t\t");
+			}
 		
+			return "\t{" + toString + "}";
+		} 
+		
+	
 		
 	}
 	
@@ -143,9 +173,11 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			return true;
 		}
 
+		public final List<Pair<Att2, RawTerm>> atts;
 	
-		public Block(List<Pair<String, En1>> gens, List<Pair<RawTerm, RawTerm>> eqs, List<Pair<String, String>> options) {
+		public Block(List<Pair<String, En1>> gens, List<Pair<RawTerm, RawTerm>> eqs, List<Pair<String, String>> options, List<Pair<Att2, RawTerm>> atts) {
 			this.gens = new LinkedList<>();
+			this.atts = atts;
 			for (Pair<String, En1> gen : gens) {
 				this.gens.add(new Pair<>(new Var(gen.first), gen.second));
 			}
@@ -153,10 +185,60 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			this.options = Util.toMapSafely(options);
 		}
 
+		private String toString;
+
 		@Override
 		public String toString() {
-			return "Block [gens=" + gens + ", eqs=" + eqs + ", options=" + options + "]";
-		}
+			if (toString != null) {
+				return toString;
+			}
+			toString = "";
+					
+			List<String> temp = new LinkedList<>();
+			
+			if (!gens.isEmpty()) {
+				toString += "from\t";
+						
+				Map<En1, Set<Var>> x = Util.revS(Util.toMapSafely(gens));
+				 temp = new LinkedList<>();
+				for (En1 en1 : x.keySet()) {
+					temp.add(Util.sep(x.get(en1), " ") +  " : " + en1);
+				}
+				
+				toString += Util.sep(temp, "\n\t\t\t\t\t");
+			}
+			
+			if (!eqs.isEmpty()) {
+				toString += "\n\t\t\t\twhere\t";
+				temp = new LinkedList<>();
+				for (Pair<RawTerm, RawTerm> sym : eqs) {
+					temp.add(sym.first + " = " + sym.second);
+				}
+				toString += Util.sep(temp, "\n\t\t\t\t\t");
+			}
+			
+			if (!atts.isEmpty()) {
+				toString += "\n\t\t\t\treturn\t";
+				temp = new LinkedList<>();
+				for (Pair<Att2, RawTerm> sym : atts) {
+					temp.add(sym.first + " -> " + sym.second);
+				}
+				toString += Util.sep(temp, "\n\t\t\t\t\t");
+			}
+			
+			
+			if (!options.isEmpty()) {
+				toString += "\n\t\t\t\toptions";
+				temp = new LinkedList<>();
+				for (Entry<String, String> sym : options.entrySet()) {
+					temp.add(sym.getKey() + " = " + sym.getValue());
+				}
+				
+				toString += "\n\t\t\t\t" + Util.sep(temp, "\n\t\t\t\t\t");
+			}
+		
+			return "\t{" + toString + "}";
+		} 
 		
 	}
 
@@ -221,13 +303,54 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		return true;
 	}
 
+	private String toString;
+	
 	@Override
 	public String toString() {
-		return "QueryExpRaw [src=" + src + ", dst=" + dst + ", imports=" + imports + ", options=" + options + ", blocks=" + blocks + ", fks=" + fks + ", atts=" + atts + "]";
-	}
+		if (toString != null) {
+			return toString;
+		}
+		toString = "";
+		
+		if (!imports.isEmpty()) {
+			toString += "\timports";
+			toString += "\n\t\t" + Util.sep(imports, " ") + "\n";
+		}
+			
+		List<String> temp = new LinkedList<>();
+		
+		if (!blocks.isEmpty()) {
+			toString += "\tentities";
+					
+			for (Pair<En2, Block<En1, Att2>> x : blocks) {
+				temp.add(x.first + " -> " + x.second.toString());
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\n\t\t") + "\n";
+		}
+		
+		if (!fks.isEmpty()) {
+			toString += "\tforeign_keys";
+			temp = new LinkedList<>();
+			for (Pair<Fk2, Trans> sym : fks) {
+				temp.add(sym.first + " -> " + sym.second);
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\n\t\t") + "\n";
+		}
+		
+		if (!options.isEmpty()) {
+			toString += "\toptions";
+			temp = new LinkedList<>();
+			for (Entry<String, String> sym : options.entrySet()) {
+				temp.add(sym.getKey() + " = " + sym.getValue());
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		return "literal : " + src + " -> " + dst + " {\n" + toString + "}";
+	} 
 
-
-	
 	public QueryExpRaw(SchExp<Ty, En1, Sym, Fk1, Att1> src, SchExp<Ty, En2, Sym, Fk2, Att2> dst, List<String> imports, List<Pair<En2, Pair<Block<En1, Att2>, List<Pair<Att2, RawTerm>>>>> blocks,  List<Pair<Fk2, Trans>> fks, List<Pair<String, String>> options) {
 		this.src = src;
 		this.dst = dst;

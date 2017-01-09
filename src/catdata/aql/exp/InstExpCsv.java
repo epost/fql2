@@ -256,7 +256,11 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen,Sk>
 
 	@Override
 	public String toString() {
-		return "import_csv " + fileStr;
+		String s = "";
+		if (!options.isEmpty()) {
+			s += " {\n\toptions" + Util.sep(options, "\n\t\t", " = ") + "\n}";
+		}
+		return "import_csv " + Util.quote(fileStr) + s;
 	}
 
 

@@ -150,9 +150,9 @@ public final class AqlCodeEditor extends
 			if (last_env == null || last_prog == null) {
 				respArea.setText("Must compile before emitting documentation.");
 			}
-			String html = AqlDoc.doc(last_env, last_prog, title);
+			String html = AqlDoc.doc(last_env, last_prog);
 			
-			File file = File.createTempFile(title, ".html");
+			File file = File.createTempFile("catdata" + title, ".html");
 			FileWriter w = new FileWriter(file);
 			w.write(html);
 			w.close();

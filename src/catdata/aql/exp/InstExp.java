@@ -241,12 +241,12 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		
 		@Override
 		public String toString() {
-			String ret = "colim " + shape + " " + schema + "\n\n";
-			ret += "nodes";
-			ret += Util.sep(nodes.map, "\n", " -> ");
-			ret += "\n\nedges";			
-			ret += Util.sep(edges.map, "\n", " -> ");
-			return ret;					
+			String ret = "colim " + shape + " " + schema + " {";
+			ret += "\n\tnodes";
+			ret += Util.sep(nodes.map, "\n\t\t", " -> ");
+			ret += "\n\tedges";			
+			ret += Util.sep(edges.map, "\n\t\t", " -> ");
+			return ret + "\n}";					
 		}
 		
 		@Override
@@ -261,7 +261,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 				edges0.put(e, edges.get(e).eval(env));
 			}
 
-			return new ColimitInstance<>(schema.eval(env), shape.eval(env), nodes0, edges0, options);
+			return new ColimitInstance<>(schema.eval(env), shape.eval(env).dmg, nodes0, edges0, options);
 		}
 
 	
@@ -276,7 +276,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			if (!(Boolean)new AqlOptions(options, null).getOrDefault(AqlOption.static_typing)) {
 				return schema;
 			}
-			DMG<N,E> g = shape.eval(G);
+			DMG<N,E> g = shape.eval(G).dmg;
 			
 			for (E e : g.edges.keySet()) {
 				InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> reqdSrc = nodes.get(g.edges.get(e).first);

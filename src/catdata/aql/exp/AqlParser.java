@@ -678,7 +678,7 @@ public class AqlParser {
 			ret = Parsers.tuple(token("{"), pa, token("}")).map(x -> {
 				Block<String, String> b = new Block<>(x.b.a, 
 							 		  Util.newIfNull(x.b.b), 
-							 	      x.b.d);
+							 	      x.b.d, Util.newIfNull(x.b.c));
 				return new catdata.Pair<>(b, Util.newIfNull(x.b.c));
 			});
 				

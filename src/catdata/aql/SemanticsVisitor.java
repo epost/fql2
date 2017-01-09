@@ -1,7 +1,5 @@
 package catdata.aql;
 
-import catdata.graph.DMG;
-
 public interface SemanticsVisitor<R,G,E extends Throwable> {
 	
 	public <T,C> R visit(G arg, TypeSide<T,C> T) throws E;
@@ -20,7 +18,7 @@ public interface SemanticsVisitor<R,G,E extends Throwable> {
 	
 	public <Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> R visit(G arg, Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> M) throws E;
 	
-	public <N,e> R visit(G arg, DMG<N,e> G) throws E;
+	public <N,e> R visit(G arg, Graph<N,e> G) throws E;
 	
 	public default R visit(G arg, Semantics o) throws E {
 		switch (o.kind()) {

@@ -1,0 +1,90 @@
+<"<html>">
+<"<head>">
+<"<title>AQL Tutorial</title>">
+<"</head>">
+<"<body>">
+<"<script src=\"http://catinf.com/js/ci.js\"></script>">
+<"<script type=\"text/javascript\" async src=\"https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML\"></script>">
+
+<"<h1>AQL Tutorial (in progress)</h1>">
+<"<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>">
+<"<p>There are two solutions to \\(ax^2 + bx + c = 0\\) and they are $$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.$$</p>">
+<"<img src=\"http://catinf.com/images/shot2.png\" height=\"100\"/>">
+<"<hr/>">
+
+<"<h2>Typesides</h2>">
+<"<p>Here is a <b>typeside</b>:</p>">
+
+typeside Ty = literal { 
+	types
+ 		string 
+ 		nat
+	constants
+ 		Al Akin Bob Bo Carl Cork Dan Dunn Math CS : string
+ 		zero : nat
+ 	functions 		
+	 	succ		: nat -> nat
+	 	plus		: nat, nat -> nat
+	equations  
+	 	forall x. plus(zero, x) = x
+	 	forall x, y. plus(succ(x),y) = succ(plus(x,y))
+	options
+		prover = completion
+}
+
+<"<hr/>">
+<"<h2>Schemas</h2>">
+<"<p>Here is a <b>schema</b>.  Look, a list!</p>
+<ul>
+<li>section1</li>
+<li>section2</li>
+</ul>
+">
+schema S = literal : Ty {
+	entities
+		Employee 
+		Department
+	foreign_keys
+		manager   : Employee -> Employee
+		worksIn   : Employee -> Department
+		secretary : Department -> Employee
+	path_equations 
+		manager.worksIn = worksIn
+  		secretary.worksIn = Department
+  	attributes
+  		first last	: Employee -> string
+     	age			: Employee -> nat
+     	cummulative_age: Employee -> nat
+     	name 		: Department -> string
+     observation_equations
+     	forall e. cummulative_age(e) = plus(age(e), age(manager(e)))
+	options
+		prover = completion
+}
+
+<"<hr/>">
+<"<h2>Instances</h2>">
+<"<p>Here is an instance:</p>">
+instance I = literal : S {
+	generators 
+		a b c : Employee
+		m s : Department
+	equations 
+		first(a) = Al
+		first(b) = Bob  last(b) = Bo
+		first(c) = Carl 
+		name(m)  = Math name(s) = CS
+		age(a) = age(c) 
+		manager(a) = b manager(b) = b manager(c) = c
+		worksIn(a) = m worksIn(b) = m worksIn(c) = s
+		secretary(s) = c secretary(m) = b 
+		secretary(worksIn(a)) = manager(a)
+		worksIn(a) = worksIn(manager(a))
+		age(a) = zero.succ.succ 
+		age(manager(a)) = zero.succ
+	options
+		prover = completion
+		completion_precedence = "zero a b c m s Al Akin Bob Bo Carl Cork Dan Dunn Math CS first last name age manager worksIn secretary succ plus"
+} 
+
+<"</body></html>">

@@ -1,7 +1,9 @@
 package catdata.aql.exp;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
@@ -10,12 +12,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
-import catdata.aql.Kind;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.Kind;
 import catdata.aql.Pragma;
 import catdata.aql.fdm.JdbcPragma;
 import catdata.aql.fdm.JsPragma;
@@ -28,8 +31,6 @@ import catdata.graph.DMG;
 import catdata.graph.Matcher;
 import catdata.graph.NaiveMatcher;
 import catdata.graph.SimilarityFloodingMatcher;
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 
 public abstract class PragmaExp extends Exp<Pragma> {
 
@@ -110,7 +111,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public String toString() {
-			return "load_jars { " + Util.sep(files, "\n") + "\n}";
+			return "load_jars {\n\t" + Util.sep(files.stream().map(Util::quote).collect(Collectors.toList()), "\n\t") + "\n}";
 		}
 
 		@Override
@@ -143,8 +144,8 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public Pragma eval(AqlEnv env) {
-			DMG<N1, E1> src0 = src.eval(env);
-			DMG<N2, E2> dst0 = dst.eval(env);
+			DMG<N1, E1> src0 = src.eval(env).dmg;
+			DMG<N2, E2> dst0 = dst.eval(env).dmg;
 
 			return new Pragma() {
 
@@ -321,9 +322,15 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			return new JdbcPragma(clazz, jdbcString, sqls, options);
 		}
 
+		//TODO aql add options
 		@Override
 		public String toString() {
-			return "sql " + Util.sep(sqls, "\n");
+			String s = "";
+			if (!options.isEmpty()) {
+				s = "\n\toptions" + Util.sep(options, "\n\t\t", " = ");
+			}
+		
+			return "sql " + Util.quote(clazz) + " " + Util.quote(jdbcString) + " {\n" + Util.sep(sqls.stream().map(Util::quote).collect(Collectors.toList()), "\n") + s + "\n}";
 		}
 
 		@Override
@@ -363,7 +370,11 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public String toString() {
-			return "export_csv_instance " + inst + " " + file;
+			String s = "";
+			if (!options.isEmpty()) {
+				s = " {\n\toptions" + Util.sep(options, "\n\t\t", " = ") + "\n}";
+			}
+			return "export_csv_instance " + inst + " " + Util.quote(file) + s;
 		}
 
 		@Override
@@ -489,7 +500,12 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public String toString() {
-			return "export_csv " + trans + " " + file;
+			String s = "";
+			if (!options.isEmpty()) {
+				s = " {\n\toptions" + Util.sep(options, "\n\t\t", " = ")  + "\n}";
+			}
+		
+			return "export_csv " + trans + " " + Util.quote(file) + s;
 		}
 
 		@Override
@@ -617,7 +633,12 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public String toString() {
-			return "exec_js " + Util.sep(jss, "\n");
+			String s = "";
+			if (!options.isEmpty()) {
+				s = "\n\toptions" + Util.sep(options, "\n\t\t", " = ");
+			}
+		
+			return "exec_js {\n" + Util.sep(jss.stream().map(Util::quote).collect(Collectors.toList()), "\n") + s + "\n}";
 		}
 
 		@Override
@@ -687,9 +708,16 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			return new ProcPragma(cmds, options);
 		}
 
+		//TODO aql doc
 		@Override
 		public String toString() {
-			return "exec_cmdline " + Util.sep(cmds, "\n");
+			
+			String s = "";
+			if (!options.isEmpty()) {
+				s = "\n\toptions" + Util.sep(options, "\n\t\t", " = ");
+			}
+		
+			return "exec_js {\n" + Util.sep(cmds.stream().map(Util::quote).collect(Collectors.toList()), "\n") + s + "\n}";
 		}
 
 		@Override
@@ -741,7 +769,12 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public String toString() {
-			return "export_jdbc_instance " + I + "\n\n" + clazz + " " + jdbcString + " " + prefix;
+			String s = "";
+			if (!options.isEmpty()) {
+				s = " {\n\toptions" + Util.sep(options, "\n\t\t", " = ")  + "\n}";;
+			}
+		
+			return "export_jdbc_instance " + I + " " + Util.quote(clazz) + " " + Util.quote(jdbcString) + " " + prefix + s;
 		}
 
 		@Override
@@ -842,9 +875,16 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			return new ToJdbcPragmaTransform<>(prefix, h.eval(env), clazz, jdbcString, options);
 		}
 
+		//TODO aql maybe quote for RHS of options
+		
 		@Override
 		public String toString() {
-			return "export_jdbc_transform " + h + "\n\n" + clazz + " " + jdbcString + " " + prefix;
+			String s = "";
+			if (!options.isEmpty()) {
+				s = " {\n\toptions" + Util.sep(options, "\n\t\t", " = ")  + "\n}";;
+			}
+		
+			return "export_jdbc_transform " + h + " " + Util.quote(clazz) + " " + Util.quote(jdbcString) + " " + prefix + s;
 		}
 
 		@Override

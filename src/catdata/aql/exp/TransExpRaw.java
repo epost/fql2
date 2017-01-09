@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,10 +48,45 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
 	}	
 	 
+	private String toString;
+	
 	@Override
 	public String toString() {
-		return "TransExpRaw [src=" + src + ", dst=" + dst + ", imports=" + imports + ", gens=" + gens + ", options=" + options + "]";
-	}
+		if (toString != null) {
+			return toString;
+		}
+		toString = "";
+		
+		if (!imports.isEmpty()) {
+			toString += "\timports";
+			toString += "\n\t\t" + Util.sep(imports, " ") + "\n";
+		}
+			
+		List<String> temp = new LinkedList<>();
+		
+		if (!gens.isEmpty()) {
+			toString += "\tentities";
+					
+			for (Pair<Object, RawTerm> x : gens) {
+				temp.add(x.first + " -> " + x.second);
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+			
+		if (!options.isEmpty()) {
+			toString += "\toptions";
+			temp = new LinkedList<>();
+			for (Entry<String, String> sym : options.entrySet()) {
+				temp.add(sym.getKey() + " = " + sym.getValue());
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		return "literal : " + src + " -> " + dst + " {\n" + toString + "}";
+	} 
+
 
 	@Override
 	public int hashCode() {

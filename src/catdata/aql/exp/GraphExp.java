@@ -3,6 +3,7 @@ package catdata.aql.exp;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,21 +11,22 @@ import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Graph;
 import catdata.aql.Kind;
 import catdata.graph.DMG;
 
-public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
+public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {
 
 	@Override
 	public Kind kind() {
 		return Kind.GRAPH;
 	}
 	
-	public abstract DMG<N,E> eval(AqlTyping G);
+	public abstract Graph<N,E> eval(AqlTyping G);
 	
 	@Override
-	public DMG<N,E> eval(AqlEnv env) { 
-		DMG<N,E> ret = eval(env.typing);
+	public Graph<N,E> eval(AqlEnv env) { 
+		Graph<N,E> ret = eval(env.typing);
 		if (ret == null) {
 			throw new RuntimeException("Anomaly: please report");
 		}
@@ -93,17 +95,21 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
-		public DMG<Object, Object> eval(AqlTyping G) {
+		public Graph<Object, Object> eval(AqlTyping G) {
 			for (String s : imports) {
 				nodes.addAll(G.defs.gs.get(s).nodes);
 				edges.putAll((Map)G.defs.gs.get(s).edges);
 			}
-			return new DMG<>(nodes, edges);
+			return new Graph<>(new DMG<>(nodes, edges));
 		}
 
 		@Override
 		public String toString() {
-			return "GraphExpRaw [nodes=" + nodes + ", edges=" + edges + "]";
+			List<String> l = new LinkedList<>();
+			for (Object e  : edges.keySet()) {
+				l.add(e + ": " + edges.get(e).first + " -> " + edges.get(e).second);
+			}
+			return "literal {\n\tnodes\n\t\t" + Util.sep(nodes, " ") + "\n\tedges\n\t\t" + Util.sep(l, "\n\t\t") + "\n}";
 		}
 
 		@Override
@@ -126,8 +132,8 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 		}
 
 		@Override
-		public DMG<N, E> eval(AqlTyping env) {
-			return graph;
+		public Graph<N, E> eval(AqlTyping env) {
+			return new Graph<>(graph);
 		}
 
 		@Override
@@ -165,6 +171,8 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 			return Collections.emptyList();
 		}
 		
+		
+		
 	}
 
 	//////////////
@@ -182,10 +190,10 @@ public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {
 			this.var = var;
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
-		public DMG<Object, Object> eval(AqlTyping env) {
-			return (DMG<Object, Object>) env.defs.gs.get(var);
+		public Graph<Object, Object> eval(AqlTyping env) {
+			return new Graph(env.defs.gs.get(var));
 		}
 
 		@Override

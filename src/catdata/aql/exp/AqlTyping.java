@@ -6,6 +6,8 @@ import catdata.graph.DMG;
 
 public class AqlTyping {
 	
+	//TODO aql turn into visitor
+	
 	public AqlTyping(Program<Exp<?>> prog) {
 		for (String s : prog.order) {
 			Exp<?> e = prog.exps.get(s);
@@ -32,7 +34,7 @@ public class AqlTyping {
 			case TYPESIDE:
 				continue;
 			case GRAPH:
-				defs.gs.put(s, ((GraphExp<?,?>)e).eval(this));
+				defs.gs.put(s, ((GraphExp<?,?>)e).eval(this).dmg);
 				continue;
 			case COMMENT:
 				continue;
