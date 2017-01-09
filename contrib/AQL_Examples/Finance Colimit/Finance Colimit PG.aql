@@ -1,0 +1,450 @@
+//Example courtesy of Jee Chung
+
+typeside Ty = literal {
+	java_types	
+		Integer = "java.lang.Integer"
+		String = "java.lang.String"
+		Double = "java.lang.Double"
+		Boolean = "java.lang.String" 
+		Date = "java.lang.String"
+//		Date = "java.util.Date" alternative type for dates
+	java_constants
+		Integer = "return java.lang.Integer.parseInt(input[0]);"
+		String = "return input[0]"
+		Double = "return java.lang.Double.parseDouble(input[0])"
+		Boolean = "return input[0]" 
+		Date = "return input[0]"
+//		Date = "return (new java.text.SimpleDateFormat(\"m/d/yyyy\").parse(input[0]));"
+	java_functions
+		keygen : Integer,Integer,Integer -> Integer = "return (2^input[0] * 3^input[1] * 5^input[2])"
+}
+
+		
+////////////////////////////////////////////////////////////////////////
+//Input schemas and instances separately
+////////////////////////////////////////////////////////////////////////
+
+//compile time input
+schema sClient = literal : Ty {
+	entities
+		client
+	attributes
+		client_id : client -> Integer
+		client_name : client -> String
+		client_description : client -> String
+} 
+
+//runtime input
+instance iClient = literal : sClient {
+     generators 
+     	cc1 cc2 cc3 : client   	
+     multi_equations //alternative, less verbose syntax
+     	client_id -> {cc1 "1", cc2 "2", cc3 "3"}
+     	client_name -> {cc1 Tom, cc2 Dick, cc3 Harry}
+     	client_description -> {cc1 "Tom Client", cc2 "Dick Client", cc3 "Harry Client"}
+} 
+//instance ClientInstance = import_csv "/Users/ryan/github/fql/examples/finance/Client" : Client 
+
+////////////////////////////////////////////////////////////////////////
+
+//compile time input
+schema sPrtfl = literal : Ty {
+	entities
+		strategy 
+		portfolio
+	foreign_keys			
+		portfolio_strategy : portfolio -> strategy
+		portfolio_parent_portfolio : portfolio -> portfolio //added
+	path_equations
+		portfolio_parent_portfolio.portfolio_parent_portfolio = portfolio_parent_portfolio //added required
+	attributes			
+		strategy_id : strategy -> Integer
+		strategy_name : strategy -> String
+		strategy_description : strategy -> String
+		portfolio_id : portfolio -> Integer
+		portfolio_name : portfolio -> String
+		portfolio_description : portfolio -> String
+		portfolio_client_id : portfolio -> Integer
+		portfolio_strategy_id : portfolio -> Integer
+		portfolio_parent_portfolio_id : portfolio -> Integer //added 
+	observation_equations
+		forall p. p.portfolio_strategy.strategy_id = p.portfolio_strategy_id
+		forall p. p.portfolio_parent_portfolio.portfolio_id = p.portfolio_parent_portfolio_id //added
+} 
+
+//runtime input
+instance iPrtfl = literal : sPrtfl {
+     generators 
+     	ps1 ps2 ps3 : strategy //not having ps2 here is really weird because it means this instance has nulls in it 
+     	pp1 pp2 pp3 : portfolio
+     equations
+		pp1.portfolio_parent_portfolio_id = "1" pp1.portfolio_parent_portfolio = pp1 //pp1 is parent of itself
+		pp2.portfolio_parent_portfolio_id = "2" pp2.portfolio_parent_portfolio = pp2 //pp2 is parent of itself
+		pp3.portfolio_parent_portfolio_id = "2" pp3.portfolio_parent_portfolio = pp2 //pp3's parent is pp2
+     
+		ps1.strategy_id = "1" ps1.strategy_name = Strat1 ps1.strategy_description = Strategy1 
+		ps2.strategy_id = "2" ps2.strategy_name = Strat2 ps2.strategy_description = Strategy2 
+		ps3.strategy_id = "3" ps3.strategy_name = Strat3 ps3.strategy_description = Strategy3 
+		pp1.portfolio_id = "1" pp1.portfolio_name = Port1 pp1.portfolio_description = Portfolio1 pp1.portfolio_client_id = "1" pp1.portfolio_strategy_id = "2" pp1.portfolio_strategy = ps2
+		pp2.portfolio_id = "2" pp2.portfolio_name = Port2 pp2.portfolio_description = Portfolio2 pp2.portfolio_client_id = "2" pp2.portfolio_strategy_id = "2" pp2.portfolio_strategy = ps2
+		pp3.portfolio_id = "3" pp3.portfolio_name = Port3 pp3.portfolio_description = Portfolio3 pp3.portfolio_client_id = "2" pp3.portfolio_strategy_id = "1" pp3.portfolio_strategy = ps1
+} 
+//instance PortfolioInstance = import_csv "/Users/ryan/github/fql/examples/finance/Portfolio" : Portfolio
+
+////////////////////////////////////////////////////////////////////////
+
+//compile time input		
+schema sRef = literal : Ty {
+	entities
+		country 
+		currency 
+		asset 
+		strategy
+	foreign_keys
+		currency_country : currency -> country
+		asset_strategy : asset -> strategy
+	attributes	
+		country_id : country -> Integer
+		country_code : country -> String
+		country_name : country -> String
+		asset_id : asset -> Integer
+		asset_name : asset -> String
+		asset_description : asset -> String
+		asset_strategy_id : asset -> Integer
+		strategy_id : strategy -> Integer
+		strategy_name : strategy -> String
+		strategy_description : strategy -> String
+		currency_id : currency -> Integer
+		currency_code : currency -> String
+		currency_name : currency -> String
+		currency_country_id : currency -> Integer
+	observation_equations	
+		forall c. c.currency_country.country_id = c.currency_country_id
+		forall a. a.asset_strategy.strategy_id = a.asset_strategy_id
+} 	
+
+//runtime input
+instance iRef = literal : sRef {
+     generators 
+     	rcty1 rcty2 rcty3 rcty4 rcty5 rcty6 : country 
+		rcur1 rcur2 rcur3 : currency 
+		ra1 ra2 ra3 ra4 ra5 ra6 ra7 ra8 ra9 ra10 : asset 
+		rs1 rs2 rs3 rs4 rs5 : strategy
+     equations	
+ 		rcty1.country_id = "1" rcty1.country_code = AU rcty1.country_name = Australia 
+ 		rcty2.country_id = "2" rcty2.country_code = CH rcty2.country_name = Switzerland 
+ 		rcty3.country_id = "3" rcty3.country_code = CN rcty3.country_name = China 
+ 		rcty4.country_id = "4" rcty4.country_code = EU rcty4.country_name = "European Union" 
+ 		rcty5.country_id = "5" rcty5.country_code = JP rcty5.country_name = Japan 
+ 		rcty6.country_id = "6" rcty6.country_code = US rcty6.country_name = "United States of America" 
+ 		rcur1.currency_id = "1" rcur1.currency_code = USD rcur1.currency_name = "US Dollar" rcur1.currency_country_id  = "6" rcur1.currency_country = rcty6 
+		rcur2.currency_id = "2" rcur2.currency_code = EUR rcur2.currency_name = "Euro" rcur2.currency_country_id  = "4" rcur2.currency_country = rcty4 
+		rcur3.currency_id = "3" rcur3.currency_code = JPY rcur3.currency_name = "Japanese Yen" rcur3.currency_country_id  = "5" rcur3.currency_country = rcty5 	 		 		
+		ra1.asset_id = "1" ra1.asset_name = A1 ra1.asset_description = Asset1 ra1.asset_strategy_id = "1" ra1.asset_strategy = rs1 
+		ra2.asset_id = "2" ra2.asset_name = A2 ra2.asset_description = Asset2 ra2.asset_strategy_id = "3" ra2.asset_strategy = rs3
+		ra3.asset_id = "3" ra3.asset_name = A3 ra3.asset_description = Asset3 ra3.asset_strategy_id = "2" ra3.asset_strategy = rs2		 
+		ra4.asset_id = "4" ra4.asset_name = A4 ra4.asset_description = Asset4 ra4.asset_strategy_id = "4" ra4.asset_strategy = rs4
+		ra5.asset_id = "5" ra5.asset_name = A5 ra5.asset_description = Asset5 ra5.asset_strategy_id = "5" ra5.asset_strategy = rs5
+		ra6.asset_id = "6" ra6.asset_name = A6 ra6.asset_description = Asset6 ra6.asset_strategy_id = "4" ra6.asset_strategy = rs4
+		ra7.asset_id = "7" ra7.asset_name = A7 ra7.asset_description = Asset7 ra7.asset_strategy_id = "4" ra7.asset_strategy = rs4
+		ra8.asset_id = "8" ra8.asset_name = A8 ra8.asset_description = Asset8 ra8.asset_strategy_id = "5" ra8.asset_strategy = rs5
+		ra9.asset_id = "9" ra9.asset_name = A9 ra9.asset_description = Asset9 ra9.asset_strategy_id = "3" ra9.asset_strategy = rs3
+		ra10.asset_id = "10" ra10.asset_name = A10 ra10.asset_description = Asset10 ra10.asset_strategy_id = "1" ra10.asset_strategy = rs1
+		rs1.strategy_id = "1" rs1.strategy_name = Strat1 rs1.strategy_description = Strategy1 
+		rs2.strategy_id = "2" rs2.strategy_name = Strat2 rs2.strategy_description = Strategy2 
+		rs3.strategy_id = "3" rs3.strategy_name = Strat3 rs3.strategy_description = Strategy3 
+		rs4.strategy_id = "4" rs4.strategy_name = Strat4 rs4.strategy_description = Strategy4 
+		rs5.strategy_id = "5" rs5.strategy_name = Strat5 rs5.strategy_description = Strategy5
+	options
+	  prover = monoidal
+} 
+//instance RefInstance = import_csv "/Users/ryan/github/fql/examples/finance/Ref" : Ref
+
+////////////////////////////////////////////////////////////////////////
+
+//compile time input		
+schema sTrans = literal : Ty {
+	entities
+		asset 
+		currency 
+		transaction
+	foreign_keys
+		transaction_asset : transaction -> asset
+		transaction_currency : transaction -> currency
+	attributes	
+		asset_id : asset -> Integer
+		asset_name : asset -> String
+		asset_description : asset -> String
+		currency_id : currency -> Integer
+		currency_code : currency -> String
+		currency_name : currency -> String
+		transaction_id : transaction -> Integer
+		transaction_date : transaction -> Date	// added as a new column
+		transaction_asset_id : transaction -> Integer
+		transaction_portfolio_id : transaction -> Integer
+		transaction_buy_sell_ind : transaction -> Boolean
+		transaction_quantity : transaction -> Integer
+		transaction_price : transaction -> Double
+		transaction_currency_id : transaction -> Integer
+	observation_equations	
+		forall t. t.transaction_asset.asset_id = t.transaction_asset_id
+		forall t. t.transaction_currency.currency_id = t.transaction_currency_id
+} 
+
+//runtime input
+instance iTrans = literal : sTrans {
+     generators 
+		ta1 ta3 ta5 ta7 ta9 : asset 
+		tc1 tc2 tc3 : currency 
+		tt1 tt2 tt3 tt4 tt5 tt6 : transaction
+     equations
+		ta1.asset_id = "1" ta1.asset_name = A1 ta1.asset_description = Asset1 
+		ta3.asset_id = "3" ta3.asset_name = A3 ta3.asset_description = Asset3 
+		ta5.asset_id = "5" ta5.asset_name = A5 ta5.asset_description = Asset5 
+		ta7.asset_id = "7" ta7.asset_name = A7 ta7.asset_description = Asset7 
+		ta9.asset_id = "9" ta9.asset_name = A9 ta9.asset_description = Asset9 
+		tc1.currency_id = "1" tc1.currency_code = USD tc1.currency_name = "US Dollar" 
+		tc2.currency_id = "2" tc2.currency_code = EUR tc2.currency_name = Euro 
+		tc3.currency_id = "3" tc3.currency_code = JPY tc3.currency_name = "Japanese Yen" 
+		tt1.transaction_id = "1" tt1.transaction_asset_id = "1" tt1.transaction_asset = ta1 tt1.transaction_portfolio_id = "1" tt1.transaction_buy_sell_ind = buy tt1.transaction_quantity = "200" tt1.transaction_price = "5.51" tt1.transaction_currency_id  = "2" tt1.transaction_currency = tc2 tt1.transaction_date = "1/1/2011"
+		tt2.transaction_id = "2" tt2.transaction_asset_id = "1" tt2.transaction_asset = ta1 tt2.transaction_portfolio_id = "1" tt2.transaction_buy_sell_ind = sell tt2.transaction_quantity = "100" tt2.transaction_price = "5.5" tt2.transaction_currency_id  = "2" tt2.transaction_currency = tc2 tt2.transaction_date = "6/1/2011"
+		tt3.transaction_id = "3" tt3.transaction_asset_id = "3" tt3.transaction_asset = ta3 tt3.transaction_portfolio_id = "2" tt3.transaction_buy_sell_ind = buy tt3.transaction_quantity = "150" tt3.transaction_price = "2.5" tt3.transaction_currency_id  = "1" tt3.transaction_currency = tc1 tt3.transaction_date = "9/1/2013"
+		tt4.transaction_id = "4" tt4.transaction_asset_id = "3" tt4.transaction_asset = ta3 tt4.transaction_portfolio_id = "2" tt4.transaction_buy_sell_ind = sell tt4.transaction_quantity = "150" tt4.transaction_price = "3.5" tt4.transaction_currency_id  = "1" tt4.transaction_currency = tc1 tt4.transaction_date = "3/1/2014"
+		tt5.transaction_id = "5" tt5.transaction_asset_id = "5" tt5.transaction_asset = ta5 tt5.transaction_portfolio_id = "3" tt5.transaction_buy_sell_ind = buy tt5.transaction_quantity = "200" tt5.transaction_price = "1.6" tt5.transaction_currency_id  = "3" tt5.transaction_currency = tc3 tt5.transaction_date = "2/1/2013"
+		tt6.transaction_id = "6" tt6.transaction_asset_id = "5" tt6.transaction_asset = ta5 tt6.transaction_portfolio_id = "3" tt6.transaction_buy_sell_ind = sell tt6.transaction_quantity = "100" tt6.transaction_price = "1.5" tt6.transaction_currency_id  = "3" tt6.transaction_currency = tc3 tt6.transaction_date = "7/1/2013"
+	options
+	  prover = monoidal
+} 
+//instance TransInstance = import_csv "/Users/ryan/github/fql/examples/finance/Trans" : Trans
+
+////////////////////////////////////////////////////////////////////////
+
+//compile time input
+schema sHoldPos = literal : Ty {
+	entities
+		client 
+		holding 
+		position
+	foreign_keys	
+		holding_client : holding -> client
+		position_client : position -> client
+	attributes	
+		client_no : client -> Integer	// new name
+		client_nm : client -> String	// new name
+		client_desc : client -> String	// new name
+		holding_id : holding -> Integer
+		holding_client_no : holding -> Integer	// new name
+		holding_portfolio_id : holding -> Integer
+		holding_asset_id : holding -> Integer
+		holding_quantity : holding -> Integer
+		holding_purchase_date : holding -> Date
+		holding_purchase_price : holding -> Double
+		holding_currency_code : holding -> String	// switched from _id to _code
+		holding_begin_date : holding -> Date	// new attribute
+		holding_end_date : holding -> Date		// new attribute
+		position_id : position -> Integer
+		position_client_no : position -> Integer	// new name
+		position_asset_id : position -> Integer
+		position_quantity : position -> Integer
+		position_current_value : position -> Integer
+		position_current_value_currency_code : position -> String	// switched from _id to _code
+		position_cost_basis : position -> Integer
+		position_cost_basis_currency_code : position -> String	// switched from _id to _code
+	observation_equations	
+		forall h. h.holding_client.client_no = h.holding_client_no
+		forall p. p.position_client.client_no = p.position_client_no
+} 
+
+//runtime input
+instance iHoldPos = literal : sHoldPos {
+     generators 
+  		hpc1 hpc2 : client 
+		hph1 hph2 hph3 hph4 hph5 : holding 
+		hpp1 hpp2 : position
+     equations
+		// below lines were also updated to reflect the new column names in HoldPos.client
+		hpc1.client_no  = "1" hpc1.client_nm = Tom hpc1.client_desc = "Tom Client" 
+		hpc2.client_no  = "2" hpc2.client_nm = Dick hpc2.client_desc = "Dick Client" 
+
+		// inserted two holding instances with IDs 2 & 5 ID values for all instances except 1 were adjusted
+		hph1.holding_id = "1" hph1.holding_client_no = "1" hph1.holding_client = hpc1 hph1.holding_portfolio_id = "1" hph1.holding_asset_id = "1" hph1.holding_quantity = "200" hph1.holding_purchase_date = "1/1/2011" hph1.holding_purchase_price = "5.51" hph1.holding_currency_code = "EUR" hph1.holding_begin_date = "1/1/2011" hph1.holding_end_date = "6/1/2011"
+		hph2.holding_id = "2" hph2.holding_client_no = "1" hph2.holding_client = hpc1 hph2.holding_portfolio_id = "1" hph2.holding_asset_id = "1" hph2.holding_quantity = "100" hph2.holding_purchase_date = "1/1/2011" hph2.holding_purchase_price = "5.51" hph2.holding_currency_code = "EUR" hph2.holding_begin_date = "6/1/2011"
+		hph3.holding_id = "3" hph3.holding_client_no = "2" hph3.holding_client = hpc2 hph3.holding_portfolio_id = "3" hph3.holding_asset_id = "3" hph3.holding_quantity = "150" hph3.holding_purchase_date = "9/1/2013" hph3.holding_purchase_price = "2.5"  hph3.holding_currency_code = "USD" hph3.holding_begin_date = "9/1/2013" hph3.holding_end_date = "3/1/2014"
+		hph4.holding_id = "4" hph4.holding_client_no = "2" hph4.holding_client = hpc2 hph4.holding_portfolio_id = "3" hph4.holding_asset_id = "5" hph4.holding_quantity = "200" hph4.holding_purchase_date = "2/1/2013" hph4.holding_purchase_price = "1.6"  hph4.holding_currency_code = "JPY" hph4.holding_begin_date = "2/1/2013" hph4.holding_end_date = "7/1/2013"
+		hph5.holding_id = "5" hph5.holding_client_no = "2" hph5.holding_client = hpc2 hph5.holding_portfolio_id = "3" hph5.holding_asset_id = "5" hph5.holding_quantity = "100" hph5.holding_purchase_date = "2/1/2013" hph5.holding_purchase_price = "1.6"  hph5.holding_currency_code = "JPY" hph5.holding_begin_date = "7/1/2013"
+
+		hpp1.position_id = "1" hpp1.position_client_no = "1" hpp1.position_client = hpc1 hpp1.position_asset_id = "1" hpp1.position_quantity = "100" hpp1.position_current_value = "550" hpp1.position_current_value_currency_code = "EUR" hpp1.position_cost_basis = "551" hpp1.position_cost_basis_currency_code = "EUR"		
+		hpp2.position_id = "2" hpp2.position_client_no = "2" hpp2.position_client = hpc2 hpp2.position_asset_id = "5" hpp2.position_quantity = "100" hpp2.position_current_value = "170" hpp2.position_current_value_currency_code = "JPY" hpp2.position_cost_basis = "160" hpp2.position_cost_basis_currency_code = "JPY"
+} 
+
+/* Peter's reconstruction of the above to create a new definition of sources.
+ * Outline of the plan:
+ * 
+ * Construct S_2
+ *   1) Define schema CurrencyCountry (currency -> country)
+ *   2) Delta currency -> country from Ref to CountryCurrency with a query
+ *   3) Define schema Asset (asset)
+ *   4) Delta asset from Ref to Asset with a query
+ *   5) Define schema ClientPosition (client -> position)
+ *   6) Delta client -> position from HoldPos to ClientPosition with a query
+ *   7) Take the colimit of CurrencyCountry, Asset and ClientPosition into
+ *     schema S_1_Colimit
+ *   8) Construct S_1 schema
+ *   9) Add the necessary foreign keys using a query S_1_Colimit -> S_1
+ * Construct S_3
+ *   10) Define schema HoldingClient (holding -> client)
+ *   11) Delta holding -> client from HoldPos to HoldingClient with a query
+ *   12) Define S_3_Colimit
+ *   13) Take the colimit of Transaction, Portfolio, Client, HoldingClient and
+ *   14) Ref into S_3_Colimit
+ *   15) Construct S_3 schema
+ *   16) Add the necessary foreign keys using a query S_3_Colimit -> S_3
+ * Construct S_2
+ *   17) Define schema S_2
+ *   18) This one is tricky, I will come back to this.
+ */
+/*   1) Define schema CurrencyCountry (currency -> country)
+ *   
+*/
+schema sCurCntry = literal : Ty {
+	entities
+		country 
+		currency 
+	foreign_keys
+		// Foreign key type: currency -> country
+		currency_country : currency -> country
+	attributes
+		// Imported primary key type : country -> Integer 	
+		country_id : country -> Integer
+		// Alternate key type : country -> string 	
+		country_code : country -> String
+		// Type country -> String 	
+		country_name : country -> String
+		// Imported primary key type : currency -> Integer 	
+		currency_id : currency -> Integer
+		// Alternate key type : currency -> String 	
+		currency_code : currency -> String
+		// Type currency -> String 	
+		currency_name : currency -> String
+		// Imported foreign key type : currency -> Integer 	
+		currency_country_id : currency -> Integer
+	observation_equations	
+		forall c. c.currency_country.country_id = c.currency_country_id
+}
+/*   2 Delta currency -> country from Ref to CountryCurrency with a query
+*/
+query qDltRefCurCntry = literal : sRef -> sCurCntry {
+   entities //source entities: asset country currency strategy
+	country -> {
+	  from
+	    cn:country
+	  return
+		// Alternate key type : country -> string 	
+	    country_code -> cn.country_code
+		// Imported primary key type : country -> Integer 	
+	    country_id -> cn.country_id
+		// Type : country -> String 	
+	    country_name -> cn.country_name}
+	currency -> {
+	  from
+	    cr:currency
+	  return
+		// Alternate key type : currency -> String 	
+	    currency_code -> cr.currency_code
+		// Imported foreign key type : currency -> Integer 	
+	    currency_country_id -> cr.currency_country_id
+		// Imported primary key type : currency -> Integer 	
+	    currency_id -> cr.currency_country_id
+		// Type : currency -> String 	
+	    currency_name -> cr.currency_name}
+
+   foreign_keys
+	// Foreign key type : currency -> country
+	currency_country -> {cn -> cr.currency_country}
+}
+instance iCCfromRef = eval qDltRefCurCntry iRef
+
+/*   3) Define schema Asset (asset)
+ *    
+ */
+schema sAsset = literal : Ty {
+	entities
+		asset 
+	attributes	
+		ast_id : asset -> Integer
+		name : asset -> String
+		description : asset -> String
+}
+/* 4a) Delta asset from Ref to Asset with a query
+ *  
+ */
+query qDltRefAsset = literal : sRef -> sAsset {
+   entities //source entities: asset country currency strategy
+	asset -> {
+	  from
+		a:asset
+	  return
+	    description -> a.asset_description
+	    ast_id -> a.asset_id
+	    name -> a.asset_name}
+}
+query qDltTransAst = literal : sTrans ->  sAsset {
+   entities //source entities: asset country currency strategy
+	asset -> {
+	  from
+		a:asset
+	  return
+	    description -> a.asset_description
+	    ast_id -> a.asset_id
+	    name -> a.asset_name}
+}
+mapping smAstRef = literal : sAsset -> sRef {
+	entities
+		asset -> asset
+	attributes
+		ast_id -> lambda a. a.asset_id // asset -> Integer 
+		description -> lambda a. a.asset_description // asset -> String 
+		name -> lambda a. a.asset_name // asset -> String 
+}
+mapping smAstTrans = literal : sAsset -> sTrans {
+	entities
+		asset -> asset
+	attributes
+		ast_id -> lambda a. a.asset_id // asset -> Integer
+		description -> lambda a. a.asset_description // asset -> String
+		name -> lambda a. a.asset_name // asset -> String
+}
+instance iAstLnk = literal : sAsset {
+	generators
+		la1 la3 la5 la7 la9 : asset
+	multi_equations
+		ast_id -> {la1 "1", la3 "3", la5 "5", la7 "7", la9 "9"} // asset -> Integer
+		description -> {la1 asset1, la3 asset3, la5 asset5, la7 asset7, la9 asset9} // asset -> String
+		name -> {la1 A1, la3 A3, la5 A5, la7 A7, la9 A9} // asset -> String
+	options
+	  prover = monoidal
+} 
+instance iSgmAstLnktoRef = sigma smAstRef iAstLnk
+instance iSgmAstLnktoTrans = sigma smAstTrans iAstLnk
+transform tSgmAstLnkAstTrns = literal : iSgmAstLnktoTrans -> iTrans {
+   generators
+	la1 -> ta1
+	la3 -> ta3
+	la5 -> ta5
+	la7 -> ta7
+	la9 -> ta9
+//   options
+//     prover = monoidal	
+}
+transform tSgmAstLnkAstRef = literal : iSgmAstLnktoRef -> iRef {
+   generators
+	la1 -> ra1
+	la3 -> ra3
+	la5 -> ra5
+	la7 -> ra7
+	la9 -> ra9
+//  options
+//     prover = monoidal
+}
+
+mapping smIdAsset = id sAsset

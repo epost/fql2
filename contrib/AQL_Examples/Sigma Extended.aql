@@ -1,0 +1,323 @@
+typeside Type = literal {
+   types
+     String
+   constants
+     newt frog human cow horse dolphin fish bass catfish : String
+}
+/* Schema that classifies animals as land, water and amphibians and
+ * injects each member of the set of amphibians into both the set of
+ * land animals (IsAL) and water animals (IsAW).
+ */
+schema sAnimalClass = literal : Type {
+   entities
+      Amphibian
+      LandAnimal
+      WaterAnimal
+   foreign_keys
+      AmpIsLndAn: Amphibian -> LandAnimal  // An amphibian is a land animal
+      AmpIsWtrAn: Amphibian -> WaterAnimal // An amphibian is a water animal
+   attributes
+      attA: Amphibian -> String
+      attL: LandAnimal -> String
+      attW: WaterAnimal -> String
+}
+/* Populate each entity with specific members and identify the amphibians 
+ * in the land and water entities.
+ */
+instance iAnmlCls1 = literal : sAnimalClass {
+   generators
+     a1 a2 : Amphibian
+     l1 l2 l3 l4 l5 : LandAnimal
+     w1 w2 w3 w4 : WaterAnimal
+   equations
+     // Assign labels to amphibians
+     attA(a1) = newt attA(a2) = frog
+     // Assign labels to land animals
+     attL(l1) = newt attL(l2) = frog attL(l3) = human attL(l4) = cow attL(l5) = horse
+     // Assign labels to water animals
+     attW(w1) = fish attW(w2) = newt attW(w3) = frog attW(w4) = dolphin
+     // Assign foreign key values mapping amphibians to land animals
+     AmpIsLndAn(a1) = l1 AmpIsLndAn(a2) = l2
+     // Assign foreign key values mapping amphibians to water animals
+     AmpIsWtrAn(a1) = w2 AmpIsWtrAn(a2) = w3
+}
+/* Extend the AnimalClass schema to include the union of land and water
+ * animals (yAnimal) overlapping on amphibians.
+ */
+schema sClassUnion = literal : Type {
+   entities
+     yAmphibian
+     yLandAnimal
+     yWaterAnimal
+     yAnimal
+   foreign_keys
+     yAmpIsLndAn:yAmphibian -> yLandAnimal
+     yAmpIsWtrAn:yAmphibian -> yWaterAnimal
+     yLndAnIsAn:yLandAnimal -> yAnimal
+     yWtrAnIsAn:yWaterAnimal -> yAnimal
+   path_equations
+     // This path equation forces equivalence of amphibians in the animal entity.
+     yAmpIsLndAn.yLndAnIsAn = yAmpIsWtrAn.yWtrAnIsAn
+   attributes
+     yattA:yAmphibian -> String
+     yattL:yLandAnimal -> String
+     yattW:yWaterAnimal -> String
+}
+/* Mapping that injects sAnimalClass into sClassUnion in the obvious
+ * way.
+ */
+mapping smMerge = literal : sAnimalClass -> sClassUnion {
+   entities
+     Amphibian->yAmphibian
+     LandAnimal->yLandAnimal
+     WaterAnimal->yWaterAnimal
+   foreign_keys
+     AmpIsLndAn -> yAmpIsLndAn
+     AmpIsWtrAn -> yAmpIsWtrAn
+   attributes
+     attW -> lambda x. yattW(x)
+     attL -> lambda x. yattL(x)
+     attA -> lambda x. yattA(x)
+}
+/* Use the sigma data migration functor to move the iAnmlCls instance
+ * forward through the mMerge functor into sClassUnion.
+ * 
+ * As a matter of notation, we label the sigma data migration functor
+ * as the mapping mSgm_Merge obtained by binding mMerge to sigma:
+ * 
+ *      mSgm_Merge: iAnmlCls -> iSgm_MergeofiAnmlCls
+ */
+instance iSgm_MergeofiAnmlCls1 = sigma smMerge iAnmlCls1
+
+/* Another instance of sAnimalClass but with some changes.
+ * Specifically, horse is dropped from land animal and dolphin from
+ * water animal. In addition, although the frog label is included as
+ * both a land animal and a water animal its land animal and water
+ * animal generators are not mapped to an amphibian generator.
+ */
+instance iAnmlCls2 = literal : sAnimalClass {
+   generators
+     xa1 : Amphibian
+     xl1 xl2 xl3 xl4 : LandAnimal
+     xw1 xw2 xw3: WaterAnimal
+   equations
+     attL(xl1) = newt attL(xl2) = frog attL(xl3) = human attL(xl4) = cow
+     attW(xw1) = fish attW(xw2) = newt attW(xw3) = frog
+     attA(xa1) = newt
+     AmpIsLndAn(xa1) = xl1
+     AmpIsWtrAn(xa1) = xw2
+}
+
+transform tACls2ACls1 = literal : iAnmlCls2 -> iAnmlCls1 {
+   generators
+     // Frog is missing in iAnmlCls_ as an amphibian and so not mapped.
+     xa1 -> a1
+     // Horse is missing in iAnmlCls_ and so not mapped.
+     xl1 -> l1 xl2 -> l2 xl3 -> l3 xl4 -> l4
+     // Dolphin is missing in iAnmlCls_ and so not mapped.
+     xw1 -> w1 xw2 -> w2 xw3 -> w3
+}
+/* Transform tACls2ACls1 maps iAnmlCls2 to iAnmlCls1. Notice the details as mentioned 
+ * in the comments. The transform injects iAnmlCls2 into iAnmlCls1 dropping frog from 
+ * amphibian, horse from land animal and dolphin from water animal. Notice there are
+ * still a land and water animals labeled frog, but as frog is missing from amphibian 
+ * these two records are not equated.
+ * 
+ * Sigma smMerge moves instances of sAnimalClass forward through smMerge to instances
+ * of sClassUnion. As such we refer to is as the instance map imSig_Merge. Instance
+ * maps with the prefix im act on the universe whose objects are instances and whose
+ * arrows are instance transforms. One can restrict this universe to a particular
+ * pair of schemas by binding a schema map such as smMerge. This means that imSig_Merge
+ * can take as input the instance transform tACls2ACls1 to produce a new transform
+ * tSgmMergeofACls2ACls1 that maps the instance object iSgm_MergeofiAnmlCls2 to the
+ * instance object iSgm_MergeofiAnmlCls1 and so we have:
+ * 
+ *       tSgm_MergeofACls2ACls1: iSgm_MergeofiAnmlCls2 -> iSgm_MergeofiAnmlCls1.
+ */
+transform tSgm_MergeofACls2ACls1 = sigma smMerge tACls2ACls1
+/* Run this model file and inspect the various schemas and instances above. Notice
+ * that in moving the transform tACls2ACls1 from an transform between instances of
+ * sAnimalClass to a transform between instances of sClassUnion sigma must add a map
+ * for animals (union of land and water animals) to the new transform. Since newt is
+ * the only animal designated as an amphibian frog is duplicated. To see this notice the
+ * land and water animal generators for frog in iAnmlCls2 are xl2 and xw3 respectively.
+ * Both of these generators appear in the yAnimal input of tSgm_MergeofACls2ACls1
+ * associated with a duplicate pair of the a2 amphibian generator of iAnmlCls1 in the
+ * output.
+ * 
+ * Sigma has a right adjoint delta that pulls instances of sClassUnion back through
+ * smMerge into sAnimalClass. Sigma and delta can be composed to produce an instance
+ * map that moves an instance sAnimalClass back into sAnimalClass; that is an endomap. 
+ * Following our notation for sigma we have imDltSgm_Merge which can take for example
+ * iAnmlCls1, and produce a new instance iDltSgm_MergeofiAnmlCls1, that is:
+ * 
+ *               imDltSgm_Merge: iAnmlCls1 -> iDltSgm_MergeofiAnmlCls1
+ */
+instance iDltSgm_MergeofiAnmlCls1 = delta smMerge iSgm_MergeofiAnmlCls1
+/* It is instructive to compare iDltSgm_MergeofiAnmlCls1 with iAnmlCls1. This reveals
+ * that the two instances are essentially the same.
+ * 
+ * Unit is a natural transformation that connects the identity of an instance
+ * to the endofunctor mDltSgm_Merge. Generally we have:
+ * 
+ *        tUntDltSgm_Merge: imIdiAnmlCls1 -> imDltSgm_Merge
+ */
+transform tUntDltSgm_MergeAC1 = unit smMerge iAnmlCls1
+
+instance iAnmlCls3 = literal : sAnimalClass {
+   generators
+     xa1 xa2 : Amphibian
+     xl1 xl2 xl3 xl4 : LandAnimal
+     xw1 xw2 xw3 xw4 : WaterAnimal
+   equations
+     attL(xl1) = newt attL(xl2) = frog attL(xl3) = human attL(xl4) = cow
+     attW(xw1) = fish attW(xw2) = newt attW(xw3) = frog attW(xw4) = dolphin
+     attA(xa1) = newt attA(xa2) = frog
+     AmpIsLndAn(xa1) = xl1 AmpIsLndAn(xa2) = xl2
+     AmpIsWtrAn(xa1) = xw2
+}
+transform tACls3ACls1 = literal : iAnmlCls3 -> iAnmlCls1 {
+   generators
+     xa1 -> a1 xa2 -> a2
+     xl1 -> l1 xl2 -> l2 xl3 -> l3 xl4 -> l4
+     xw1 -> w1 xw2 -> w2 xw3 -> w3 xw4 -> w4
+}
+transform tSgm_MergeofACls3ACls1 = sigma smMerge tACls3ACls1
+instance iSgm_MergeofiAnmlCls3 = sigma smMerge iAnmlCls3
+instance iDltSgm_MergeofiAnmlCls3 = delta smMerge iSgm_MergeofiAnmlCls3
+transform tUntDltSgm_MergeAC3 = unit smMerge iAnmlCls3
+
+/* Notice all of the entities in schema C are the same, they each have a
+ * generator and a label. As a first step in considering how to interact
+ * with multiple schemas lets create a schema consisting of a generic
+ * animal entity and create three instances, one for each entity in C.
+ */
+schema Animal = literal : Type {
+   entities
+     A
+   attributes
+     name : A -> String
+}
+/* Because all of the schemas in the colimit are the same we only need one
+ * mapping, the identity.
+ */
+mapping smIdAnimal = id Animal
+/* Load the animal instance with the land animals loaded in the LandAnimal
+ * entity of sAnimalClass.
+ */
+instance iLand = literal : Animal {
+   generators
+        la1 la2 la3 la4 la5 : A
+   multi_equations
+        name -> {la1 newt, la2 frog, la3 human, la4 cow, la5 horse}  // A -> String
+}
+/* Load the animal instance with the water animals loaded in the WaterAnimal
+ * entity of sAnimalClass.
+ */
+instance iWater = literal : Animal {
+   generators
+        wa1 wa2 wa3 wa4 : A
+   multi_equations
+        name -> {wa1 fish, wa2 newt, wa3 frog, wa4 dolphin}  // A -> String
+}
+/* Load the animal instance with the amphibians loaded in the Amphibian
+ * entity of sAnimalClass.
+ */
+instance iAmph = literal : Animal {
+   generators
+        aa1 aa2 : A
+   multi_equations
+        name -> {aa1 newt, aa2 frog}  // A -> String
+}
+
+/* In this degenerate case the pushout is the single entity Animal.
+ *
+ * Here is the picture:
+ *
+ *                Animal
+ *               /      \
+ *    mIdAnimal /        \ mIdAnimal
+ *             |/        \/
+ *          Animal      Animal
+ *             \         /
+ *    mIdAnimal \       / mIdAnimal
+ *              \/    |/
+ *               Animal
+ *
+ * Now we move the data.
+ *
+ * We need a transform (mapping between instances) that corresponds to each of
+ * the foreign key mappings in D.
+ *
+ * First we do the left hand side:
+ *   - The first transform moves the amphibian instance i_amphibian into the
+ *     landanimal instance i_land through the mapping mIdAnimal.
+ *   - The second moves i_land again through mIdAnimal into the colimit "Animal".
+ *
+ * corresponds to IsAL : Amphibian -> LandAnimal
+ * from the C instance I we have:
+ *   IsAL(a1) = l1
+ *   IsAL(a2) = l2
+ */
+transform tAmphLnd = literal : iAmph -> iLand {
+   generators
+        aa1 -> la1 // match amphibian newt to land newt
+        aa2 -> la2 // match amphibian frog to land frog
+}
+/* Second we do the right hand side:
+ *   - The first transform moves the amphibian instance i_amphibian into the
+ *     waternimal instance i_water through the mapping mIdAnimal.
+ *   - The second moves i_water again through mIdAnimal into the colimit "Animal".
+ *
+ * corresponds to yIsAW: yAmphibian -> yWaterAnimal
+ * from the C instance I we have
+ *   IsAW(a1) = w2
+ *   IsAW(a2) = w3
+ */
+transform tAmphWtr = literal : iAmph -> iWater {
+   generators
+        aa1 -> wa2 // match amphibian newt to water newt
+        aa2 -> wa3 // match amphibian frog to water frog
+}
+
+
+/* Define the graph of schemas we wish to take the colimit of
+ *
+ * BTW notice that Span is the same as schema C without the type side.
+*/ 
+graph Span = literal {
+   nodes
+        Amp Lan Wat // Amphibian LandAnimal WaterAnimal
+   edges
+        AmpLan : Amp -> Lan // IsAL: Amphibian -> LandAnimal
+        AmpWat : Amp -> Wat // IsAW: Amphibian -> WaterAnimal
+}
+/* And now the result
+ *
+ */
+instance iAnimalMerge = colimit Span Animal {
+   nodes
+     Amp -> iAmph
+     Lan -> iLand
+     Wat -> iWater
+   edges
+     AmpLan -> tAmphLnd
+     AmpWat -> tAmphWtr
+   options
+        static_typing = false
+}
+/* What if we did not merge land and water animals with amphibians?
+ * I speculate that a different graph would be needed. Let's give it
+ * a try!
+ 
+graph Pair = literal {
+   nodes
+     Lan Wat
+   edges
+}
+instance i_animalsum = colimit Pair Animal {
+   nodes
+     Lan -> iLand
+     Wat -> iWater
+}
+*/

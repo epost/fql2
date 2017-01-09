@@ -69,10 +69,10 @@ instance J = import_jdbc
 "com.mysql.jdbc.Driver"
 "jdbc:mysql://localhost:3306/employees?user=root&password=HappyFunctor" 
  : S2 {
-	Employee -> "SELECT id FROM Employee"
-	Department -> "SELECT id FROM Department"
-	first -> "SELECT id, first_name FROM Employee"
-  	last	-> "SELECT id, last_name FROM Employee"
-  	name -> "SELECT id, name FROM Department"
-  	department -> "SELECT id, department_id FROM Department"
+	Employee -> "SELECT concat('e', id) FROM Employee"
+	Department -> "SELECT concat('d', id) FROM Department"
+  	department -> "SELECT concat('e', id), concat('d', department_id) FROM Employee"
+	first -> "SELECT concat('e', id), first_name FROM Employee"
+  	last	-> "SELECT concat('e', id), last_name FROM Employee"
+  	name -> "SELECT concat('d', id), name FROM Department"
 }
