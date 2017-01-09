@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Kind;
 import catdata.aql.Schema;
 
 public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,Att>> {	

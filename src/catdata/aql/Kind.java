@@ -1,24 +1,16 @@
-package catdata.aql.exp;
-
-import catdata.aql.Instance;
-import catdata.aql.Mapping;
-import catdata.aql.Pragma;
-import catdata.aql.Query;
-import catdata.aql.Schema;
-import catdata.aql.Transform;
-import catdata.aql.TypeSide;
-import catdata.graph.DMG;
+package catdata.aql;
 
 public enum Kind {
 
-	TYPESIDE (TypeSide.class, TyExp.class),
-	SCHEMA (Schema.class, SchExp.class),
-	INSTANCE (Instance.class, InstExp.class),
-	MAPPING (Mapping.class, MapExp.class),
-	TRANSFORM (Transform.class, TransExp.class),
-	QUERY (Query.class, QueryExp.class), 
-	PRAGMA (Pragma.class, PragmaExp.class), 
-	GRAPH (DMG.class, GraphExp.class); //
+	TYPESIDE, //(TypeSide.class, TyExp.class),
+	SCHEMA, //(Schema.class, SchExp.class),
+	INSTANCE, //(Instance.class, InstExp.class),
+	MAPPING, //(Mapping.class, MapExp.class),
+	TRANSFORM, //(Transform.class, TransExp.class),
+	QUERY, //(Query.class, QueryExp.class), 
+	PRAGMA, //(Pragma.class, PragmaExp.class), 
+	GRAPH, //(DMG.class, GraphExp.class),
+	COMMENT; //(Comment.class, CommentExp.class); 
 	
 	@Override
 	public String toString() {
@@ -39,13 +31,15 @@ public enum Kind {
 			return "typeside";
 		case GRAPH:
 			return "graph";
+		case COMMENT:
+			return "comment";
 		default:
 			throw new RuntimeException();
 		}
 		
 		
 	}
-	
+	/*
 	private final Class<?> literal;
 	private final Class<?> exp;
 	
@@ -65,5 +59,5 @@ public enum Kind {
 			throw new RuntimeException(k + " is not a " + this + " literal, is a " + o.getClass());
 		}
 	}
-	
+	*/
 }

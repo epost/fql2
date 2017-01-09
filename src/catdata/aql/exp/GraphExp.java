@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Kind;
 import catdata.graph.DMG;
 
 public abstract class GraphExp<N,E> extends Exp<DMG<N,E>> {

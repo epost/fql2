@@ -15,16 +15,16 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
+import javax.swing.JSplitPane; 
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 
 import catdata.LineException;
 import catdata.Pair;
 import catdata.Program;
+import catdata.aql.Kind;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.Exp;
-import catdata.aql.exp.Kind;
 import catdata.ide.Disp;
 
 //TODO aql suppress instance equations - do not compute/display if not required - maybe make instance an interface
@@ -60,6 +60,8 @@ public final class AqlDisplay implements Disp {
 			return exp.kind() + " " + c;
 		case GRAPH:
 			return exp.kind() + " " + c;
+		case COMMENT:			
+			return exp.kind() + " " + c;
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		} 
@@ -94,6 +96,9 @@ public final class AqlDisplay implements Disp {
 		exn = env.exn;
 		for (String c : p.order) {
 			Exp<?> exp = p.exps.get(c);
+			if (exp.kind() == Kind.COMMENT) {
+				continue;
+			}
 			if (env.defs.keySet().contains(c)) {
 				Object obj = env.defs.get(c, exp.kind());
 	//			map.put(obj, c);

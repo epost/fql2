@@ -345,7 +345,11 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		spc = new SpellChecker(z -> reservedWords());
 		topArea.addParser(spc); 
 		
-
+		//topArea.setMasetMarginLineEnabled(true);
+		
+		JMenuItem wrap = new JMenuItem("Toggle line wrap");
+		wrap.addActionListener(x -> toggleWrap());
+		topArea.getPopupMenu().add(wrap, 0);
 	}
 		
 	private final SpellChecker spc;
@@ -540,6 +544,11 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public void toggleWrap() {
+		topArea.setLineWrap(!topArea.getLineWrap());
+	//	topArea.
 	}
 
 	public boolean abortBecauseDirty() {

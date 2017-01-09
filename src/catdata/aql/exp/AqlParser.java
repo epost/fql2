@@ -73,7 +73,7 @@ public class AqlParser {
 
 
 	public static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
-			")", "=", "->", "+", "*", "^", "|", "?", "@" };	
+			")", "=", "->", "@", "<", ">"};	
 	
 	public static final String[] res = new String[] {
 			"typeside", "schema", "mapping", "instance", "transform", "query", "pragma", "graph",
@@ -840,7 +840,8 @@ public class AqlParser {
 		pragmaExp();
 		
 		Parser<Triple<String, Integer, ? extends Exp<?>>> p 
-		= Parsers.or(decl("typeside", ty_ref.get()),
+		= Parsers.or(comment(),
+					 decl("typeside", ty_ref.get()),
 					 decl("schema", sch_ref.get()), 
 					 decl("instance", inst_ref.get()),
 					 decl("mapping", map_ref.get()),
@@ -851,6 +852,15 @@ public class AqlParser {
 					 );
 		
 		return p.many().map(x -> new Program<>(conv(x), s));
+	}
+	
+	
+	
+	private static int comment_id = 0;
+	private static Parser<Triple<String, Integer, ? extends Exp<?>>> comment() {
+		return Parsers.tuple(token("<"), StringLiteral.PARSER, Parsers.INDEX, token(">")).map(x -> 
+			new Triple<>(" " + comment_id++, x.c, new CommentExp(x.b))
+		);
 	}
 	
 	private static List<Triple<String, Integer,Exp<?>>> conv(List<Triple<String, Integer, ? extends Exp<?>>> l) {

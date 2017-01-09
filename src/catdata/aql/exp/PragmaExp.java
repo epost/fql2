@@ -14,6 +14,7 @@ import java.util.Map;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
+import catdata.aql.Kind;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Pragma;
 import catdata.aql.fdm.JdbcPragma;

@@ -15,7 +15,12 @@ import catdata.Triple;
 import catdata.Util;
 
 //apparently iteration of a set is not deterministic between calls, use linkedhashset if need deterministic order
-public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
+public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics {
+	
+	@Override
+	public Kind kind() {
+		return Kind.MAPPING;
+	}
 	
 	//TODO: aql push this into Morphism class?
 	private Morphism<Ty,En1,Sym,Fk1,Att1,Void,Void,En2,Sym,Fk2,Att2,Void,Void> semantics;

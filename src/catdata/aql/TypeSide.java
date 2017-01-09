@@ -16,7 +16,12 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
 
-public final class TypeSide<Ty, Sym> {
+public final class TypeSide<Ty, Sym> implements Semantics {
+	
+	@Override
+	public Kind kind() {
+		return Kind.TYPESIDE;
+	}
 	
 	public final Set<Ty> tys;
 	public final Ctx<Sym, Pair<List<Ty>, Ty>> syms;

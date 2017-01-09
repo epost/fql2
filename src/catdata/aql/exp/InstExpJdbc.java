@@ -25,6 +25,7 @@ import catdata.aql.Collage;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
 import catdata.aql.It;
+import catdata.aql.Kind;
 import catdata.aql.It.ID;
 import catdata.aql.Schema;
 import catdata.aql.Term;

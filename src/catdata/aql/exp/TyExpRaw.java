@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,6 +20,7 @@ import catdata.aql.AqlJs;
 import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
 import catdata.aql.Eq;
+import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
@@ -151,10 +153,104 @@ public final class TyExpRaw extends TyExp<Object, Object> {
 		return true;
 	}
 
+	private String toString;
+	
 	@Override
 	public String toString() {
-		return "RawTypeSide [imports=" + imports + ", types=" + types + ", functions=" + functions + ", eqs=" + eqs + ", java_tys_string=" + java_tys_string + ", java_parser_string=" + java_parser_string + ", java_fns_string=" + java_fns_string + ", options=" + options + "]";
-	}
+		if (toString != null) {
+			return toString;
+		}
+		toString = "";
+		
+		if (!imports.isEmpty()) {
+			toString += "\timports";
+			toString += "\n\t\t" + Util.sep(imports, " ") + "\n";
+		}
+		
+		if (!types.isEmpty()) {
+			toString += "\ttypes";
+			toString += "\n\t\t" + Util.sep(types, " ") + "\n";
+		}
+		
+		List<String> temp = new LinkedList<>();
+		
+		if (!functions.isEmpty()) {
+			toString += "\tconstants";
+	
+			Map<Object, Object> m = new HashMap<>();
+			temp = new LinkedList<>();
+			for (Pair<Object, Pair<List<Object>, Object>> sym : functions) {
+				if (sym.second.first.isEmpty()) {
+					m.put(sym.first, sym.second.second);
+				}
+			}
+			Map<Object, Set<Object>> n = Util.revS(m);
+			for (Object x : n.keySet()) {
+				temp.add(Util.sep(n.get(x), " ") + " : " + x);
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		if (!functions.isEmpty()) {
+			toString += "\tfunctions";
+			temp = new LinkedList<>();
+			for (Pair<Object, Pair<List<Object>, Object>> sym : functions) {
+				if (!sym.second.first.isEmpty()) {
+					temp.add(sym.first + " : " + Util.sep(sym.second.first, ", ") + " -> " + sym.second.second);
+				}
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!eqs.isEmpty()) {
+			toString += "\tequations";
+			temp = new LinkedList<>();
+			for (Triple<List<Pair<String, Object>>, RawTerm, RawTerm> sym : eqs) {
+				List<String> vars = Util.proj1(sym.first);
+				temp.add("forall " + Util.sep(vars, ", ") + ". " + sym.second + " = " + sym.third);
+			}
+			toString +="\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!java_tys_string.isEmpty()) {
+			toString += "\tjava_types";
+			temp = new LinkedList<>();
+			for (Pair<Object, String> sym : java_tys_string) {
+				temp.add(sym.first + " = " + sym.second);
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}		
+		
+		if (!java_parser_string.isEmpty()) {
+			toString += "\tjava_constants";
+			temp = new LinkedList<>();
+			for (Pair<Object, String> sym : java_parser_string) {
+				temp.add(sym.first + " = " + sym.second);
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!java_fns_string.isEmpty()) {
+			toString += "\tjava_functions";
+			temp = new LinkedList<>();
+			for (Pair<Object, Triple<List<Object>, Object, String>> sym : java_fns_string) {
+				temp.add(sym.first + " : " + Util.sep(sym.second.first, ", ") + " -> " + sym.second.second + " = " + sym.second.third);
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!options.isEmpty()) {
+			toString += "\toptions";
+			temp = new LinkedList<>();
+			for (Entry<String, String> sym : options.entrySet()) {
+				temp.add(sym.getKey() + " = " + sym.getValue());
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		return "literal {\n" + toString + "}";
+	} 
 	
 	private final Collage<Object, Void, Object, Void, Void, Void, Void> col = new Collage<>();
 

@@ -25,22 +25,28 @@ import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
+import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.AqlJs;
 import catdata.aql.Collage;
+import catdata.aql.Comment;
 import catdata.aql.DP;
 import catdata.aql.Instance;
+import catdata.aql.Kind;
 import catdata.aql.Mapping;
 import catdata.aql.Morphism;
+import catdata.aql.Pragma;
+import catdata.aql.Query;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
+import catdata.aql.Semantics;
+import catdata.aql.SemanticsVisitor;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
 import catdata.aql.exp.AqlParser;
-import catdata.aql.exp.Kind;
 import catdata.graph.DMG;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Split;
@@ -59,69 +65,18 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 //TODO aql replace literal by constant
 
-public final class AqlViewer {
+public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, RuntimeException> { 
 
 	public static String html(Object obj) {
 		return obj.toString().replace("\n", "<br>").replace("\t", "&nbsp;");
 	}
 
-	public static JComponent view(Kind kind, Object obj) {
+	public static JComponent view(@SuppressWarnings("unused") Kind kind, Object obj) {
+		Semantics s = (Semantics) obj;
 		JTabbedPane ret = new JTabbedPane();
-
 		ret.add(new CodeTextPanel("", obj.toString()), "Text");
-
-		switch (kind) {
-		case TYPESIDE:
-			@SuppressWarnings("unchecked")
-			TypeSide<Object, Object> typeSide = (TypeSide<Object, Object>) obj;
-			ret.add(viewDP(typeSide.semantics, typeSide.collage(), typeSide.js), "DP");
-			break;
-		case SCHEMA:
-			@SuppressWarnings("unchecked")
-			Schema<Object, Object, Object, Object, Object> schema = (Schema<Object, Object, Object, Object, Object>) obj;
-			ret.add(viewSchema(schema), "Graph");
-	//		ret.add(viewSchema2(schema), "Graph2");
-			ret.add(viewDP(schema.dp(), schema.collage(), schema.typeSide.js), "DP");
-		//	ret.add(new CodeTextPanel("", schema.collage().toString()), "Temp");
-			break;
-		case INSTANCE:
-			@SuppressWarnings("unchecked")
-			Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> instance = (Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object>) obj;
-			ret.add(viewAlgebra(instance.algebra()), "Tables");
-			ret.add(new CodeTextPanel("", instance.algebra().toString()), "Algebra");
-			ret.add(viewDP(instance.dp(), instance.collage(), instance.schema().typeSide.js), "DP");
-			break;
-		case MAPPING:
-			@SuppressWarnings("unchecked")
-			Mapping<Object, Object, Object, Object, Object, Object, Object, Object> mapping = (Mapping<Object, Object, Object, Object, Object, Object, Object, Object>) obj;
-			ret.add(viewMorphism(mapping.semantics(), mapping.src.typeSide.js), "Translate");
-			break;
-		case TRANSFORM:
-			@SuppressWarnings("unchecked")
-			Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> transform = (Transform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object>) obj;
-			ret.add(viewTransform(transform), "Algebra");
-		break;
-		case PRAGMA:
-			/* Pragma pragma = (Pragma) obj;
-			Optional<JComponent> comp = viewPragma(pragma);
-			if (comp.isPresent()) {
-				ret.add(comp.get(), "Graphical");
-			} */
-			break;
-		case QUERY:
-			// viewQuery(obj, ret);
-			break;
-			
-		case GRAPH:
-			@SuppressWarnings("unchecked") DMG<Object, Object> dmg = (DMG<Object, Object>) obj;
-			ret.add(viewGraph(dmg), "Graph");
-			break;
-		default:
-			throw new RuntimeException("Anomaly: please report");
-		}
-
+		new AqlViewer().visit(ret, s);
 		return ret;
-
 	}
 
 	private static <Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2> JComponent viewMorphism(Morphism<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Sym, Fk2, Att2, Gen2, Sk2> m, AqlJs<Ty, Sym> js) {
@@ -479,6 +434,62 @@ public final class AqlViewer {
 		}
 
 		return Util.makeGrid(list);
+	}
+
+	@Override
+	public <T, C> Unit visit(JTabbedPane ret, TypeSide<T, C> T)  {
+		ret.add(viewDP(T.semantics, T.collage(), T.js), "DP");
+		return new Unit();
+	}
+
+	@Override
+	public <Ty, En, Sym, Fk, Att> Unit visit(JTabbedPane ret, Schema<Ty, En, Sym, Fk, Att> S)  {
+		ret.add(viewSchema(S), "Graph");
+//		ret.add(viewSchema2(schema), "Graph2");
+		ret.add(viewDP(S.dp(), S.collage(), S.typeSide.js), "DP");
+	//	ret.add(new CodeTextPanel("", schema.collage().toString()), "Temp");
+		return new Unit();
+	}
+
+	@Override
+	public <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Unit visit(JTabbedPane ret, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I)  {
+		ret.add(viewAlgebra(I.algebra()), "Tables");
+		ret.add(new CodeTextPanel("", I.algebra().toString()), "Algebra");
+		ret.add(viewDP(I.dp(), I.collage(), I.schema().typeSide.js), "DP");
+		return new Unit();
+	}
+
+	@Override
+	public <Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> Unit visit(JTabbedPane ret, Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h)  {
+		ret.add(viewTransform(h), "Algebra");
+		return new Unit();
+	}
+
+	@Override
+	public Unit visit(JTabbedPane ret, Pragma P) {
+		return new Unit();
+	}
+
+	@Override
+	public Unit visit(JTabbedPane ret, Comment P) {
+		return new Unit();
+	}
+
+	@Override
+	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q) {
+		return new Unit();
+	}
+
+	@Override
+	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> M) {
+		ret.add(viewMorphism(M.semantics(), M.src.typeSide.js), "Translate");
+		return new Unit();
+	}
+
+	@Override
+	public <N, e> Unit visit(JTabbedPane ret, DMG<N, e> G) {
+		ret.add(viewGraph(G), "Graph");
+		return new Unit();
 	}
 
 

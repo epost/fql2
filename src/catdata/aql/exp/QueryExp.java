@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Kind;
 import catdata.aql.Query;
 import catdata.aql.exp.SchExp.SchExpLit;
 

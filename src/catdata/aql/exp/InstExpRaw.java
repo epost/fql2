@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,15 +16,16 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
 import catdata.aql.It;
+import catdata.aql.It.ID;
+import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
-import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.It.ID;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 
@@ -64,10 +66,57 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 		Util.toMapSafely(gens); //do this here rather than wait until 
 	}
 
-		@Override
+	private String toString;
+	
+	@Override
 	public String toString() {
-		return "InstExpRaw [schema=" + schema + ", imports=" + imports + ", gens=" + gens + ", eqs=" + eqs + ", options=" + options + "]";
-	}
+		if (toString != null) {
+			return toString;
+		}
+		toString = "";
+		
+		if (!imports.isEmpty()) {
+			toString += "\timports";
+			toString += "\n\t\t" + Util.sep(imports, " ") + "\n";
+		}
+			
+		List<String> temp = new LinkedList<>();
+		
+		if (!gens.isEmpty()) {
+			toString += "\tgenerators";
+					
+			Map<Object, Set<Object>> n = Util.revS(Util.toMapSafely(gens));
+			
+			temp = new LinkedList<>();
+			for (Object x : n.keySet()) {
+				temp.add(Util.sep(n.get(x), " ") + " : " + x);
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!eqs.isEmpty()) {
+			toString += "\tequations";
+			temp = new LinkedList<>();
+			for (Pair<RawTerm, RawTerm> sym : eqs) {
+				temp.add(sym.first + " = " + sym.second);
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!options.isEmpty()) {
+			toString += "\toptions";
+			temp = new LinkedList<>();
+			for (Entry<String, String> sym : options.entrySet()) {
+				temp.add(sym.getKey() + " = " + sym.getValue());
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		return "literal : " + schema + " {\n" + toString + "}";
+	} 
+
 
 	@Override
 	public int hashCode() {

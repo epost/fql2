@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Instance;
+import catdata.aql.Kind;
 import catdata.aql.Schema;
 import catdata.aql.exp.AqlParser;
-import catdata.aql.exp.Kind;
 
 class Inferrer {
 
@@ -42,6 +42,7 @@ class Inferrer {
 					case PRAGMA:
 					case SCHEMA:
 					case TYPESIDE:
+					case COMMENT:	
                         default:
                             break;
                     }

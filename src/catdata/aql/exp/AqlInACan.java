@@ -7,6 +7,7 @@ import catdata.Pair;
 import catdata.Program;
 import catdata.Util;
 import catdata.aql.Instance;
+import catdata.aql.Kind;
 import catdata.aql.examples.AqlExamples;
 import catdata.aql.gui.AqlViewer;
 import catdata.ide.Example;
@@ -100,7 +101,7 @@ class AqlInACan {
 		}
 	}
 	
-	private static <Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> String toHtml(Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I) {
+	public static <Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> String toHtml(Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I) {
 		String ret = "<div>";
 		
 		Map<En, Pair<List<String>,Object[][]>> tables = AqlViewer.makeEnTables(I.algebra());

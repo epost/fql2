@@ -13,6 +13,7 @@ import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Instance;
+import catdata.aql.Kind;
 import catdata.aql.It.ID;
 import catdata.aql.Mapping;
 import catdata.aql.Transform;

@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -20,6 +21,7 @@ import catdata.aql.AqlProver;
 import catdata.aql.AqlProver.ProverName;
 import catdata.aql.Collage;
 import catdata.aql.Eq;
+import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
@@ -148,10 +150,75 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
 	}	
 
+	private String toString;
+	
 	@Override
 	public String toString() {
-		return "SchExpRaw [typeSide=" + typeSide + ", imports=" + imports + ", ens=" + ens + ", fks=" + fks + ", p_eqs=" + p_eqs + ", atts=" + atts + ", t_eqs=" + t_eqs + ", options=" + options + "]";
-	}
+		if (toString != null) {
+			return toString;
+		}
+		toString = "";
+		
+		if (!imports.isEmpty()) {
+			toString += "\timports";
+			toString += "\n\t\t" + Util.sep(imports, " ") + "\n";
+		}
+		
+		if (!ens.isEmpty()) {
+			toString += "\tentities";
+			toString += "\n\t\t" + Util.sep(ens, " ") + "\n";
+		}
+		
+		List<String> temp = new LinkedList<>();
+		
+		if (!fks.isEmpty()) {
+			toString += "\tforeign_keys";
+			temp = new LinkedList<>();
+			for (Pair<Object, Pair<Object, Object>> sym : fks) {
+				temp.add(sym.first + " : " + sym.second.first + " -> " + sym.second.second);
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!p_eqs.isEmpty()) {
+			toString += "\tpath_equations";
+			temp = new LinkedList<>();
+			for (Pair<List<Object>, List<Object>> sym : p_eqs) {
+				temp.add(Util.sep(sym.first, ".") + " = " + Util.sep(sym.second, ".") );
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!atts.isEmpty()) {
+			toString += "\tattributes";
+			temp = new LinkedList<>();
+			for (Pair<Object, Pair<Object, Object>> sym : atts) {
+				temp.add(sym.first + " : " + sym.second.first + " -> " + sym.second.second);
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!t_eqs.isEmpty()) {
+			toString += "\tobservation_equations";
+			temp = new LinkedList<>();
+			for (Quad<String, Object, RawTerm, RawTerm> sym : t_eqs) {
+				temp.add("forall " + sym.first + ". " + sym.third + " = " + sym.fourth);
+			}
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		if (!options.isEmpty()) {
+			toString += "\toptions";
+			temp = new LinkedList<>();
+			for (Entry<String, String> sym : options.entrySet()) {
+				temp.add(sym.getKey() + " = " + sym.getValue());
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		
+		return "literal : " + typeSide + " {\n" + toString + "}";
+	} 
 
 	@Override
 	public int hashCode() {

@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Kind;
 import catdata.aql.TypeSide;
 
 public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {

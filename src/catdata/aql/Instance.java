@@ -9,8 +9,13 @@ import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;  
 
-public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
+public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements Semantics {
 
+	@Override
+	public Kind kind() {
+		return Kind.INSTANCE;
+	}
+	
 	public abstract Schema<Ty, En, Sym, Fk, Att> schema();
 	
 	public abstract Ctx<Gen, En> gens(); 

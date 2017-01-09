@@ -29,7 +29,10 @@ public final class RawTerm {
 		if (args.isEmpty()) {
 			return head + str;
 		}
-		return head + "(" + Util.sep(args, ",") + ")" + str;
+		if (args.size() == 1) {
+			return args.get(0) + "." + head;
+		}
+		return head + "(" + Util.sep(args, ",") + ")";
 	}
 	
 	//TODO aql inefficient bitwise operations

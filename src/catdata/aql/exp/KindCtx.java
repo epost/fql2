@@ -4,8 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import catdata.Ctx;
+import catdata.aql.Kind;
 
-public class KindCtx<V,G,T,S,I,H,F,Q,P> {
+public class KindCtx<V,G,T,S,I,H,F,Q,P,C> {
 
 	public final Ctx<V, G> gs = new Ctx<>();
 	public final Ctx<V, T> tys = new Ctx<>();
@@ -15,6 +16,7 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P> {
 	public final Ctx<V, F> maps = new Ctx<>();
 	public final Ctx<V, Q> qs = new Ctx<>();
 	public final Ctx<V, P> ps = new Ctx<>();
+	public final Ctx<V, C> cs = new Ctx<>();
 	
 	public Object get(V k, Kind kind) {
 		switch (kind) {
@@ -34,6 +36,8 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P> {
 			return ps.get(k);
 		case GRAPH:
 			return gs.get(k);
+		case COMMENT:
+			return cs.get(k);
 		default:
 			throw new RuntimeException();
 		}
@@ -66,6 +70,9 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P> {
 		case GRAPH:
 			gs.put(k, (G) o);
 			break;
+		case COMMENT:
+			cs.put(k, (C) o);
+			break;	
 		default:
 			throw new RuntimeException();
 		}
@@ -83,6 +90,7 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P> {
 		ret.addAll(tys.keySet());
 		ret.addAll(qs.keySet()); 
 		ret.addAll(gs.keySet());
+		ret.addAll(cs.keySet());
 		return ret;
 	}
 }

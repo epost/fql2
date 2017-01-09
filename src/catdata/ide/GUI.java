@@ -33,7 +33,7 @@ import javax.swing.filechooser.FileFilter;
 
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.exp.Kind;
+import catdata.aql.Kind;
 import catdata.aql.gui.AqlCodeEditor;
 import catdata.fpql.EnrichViewer;
 import catdata.fpql.XEasikToFQL;
@@ -64,8 +64,6 @@ import catdata.sql.SqlMapper;
  */
 public class GUI extends JPanel {
 
-	//TODO aql maybe SQL import should check that constraints hold
-	
 	public static final JTabbedPane editors = new JTabbedPane();
 
 	public static JFrame topFrame;
@@ -193,6 +191,17 @@ public class GUI extends JPanel {
 				ed.copyAsRtf();
 			}
 		});
+		
+		
+		MenuItem toggle = new MenuItem("Toggle line wrap");
+		editMenu.add(toggle);
+		toggle.addActionListener(x -> {
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.toggleWrap();
+			}
+		});
+		
 
 		MenuItem fall = new MenuItem("Fold All");
 		editMenu.add(fall);
@@ -375,6 +384,19 @@ public class GUI extends JPanel {
 		MenuItem ii = new MenuItem("Infer Instance (using last state)");
 		it.addActionListener(x -> infer(Kind.INSTANCE));
 		menu.add(ii);
+
+		MenuItem ih = new MenuItem("Emit HTML (using last compiled state)");
+		ih.addActionListener(x -> {
+			CodeEditor<?,?,?> c = getSelectedEditor();
+			if (c == null) {
+				return;
+			}
+			if (c instanceof AqlCodeEditor) {
+				AqlCodeEditor a = (AqlCodeEditor) c;
+				a.emitDoc();
+			}
+		});
+		menu.add(ih);
 	}
 
 	private static void doExample(Example e) {

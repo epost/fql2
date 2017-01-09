@@ -16,6 +16,7 @@ import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
+import catdata.aql.Kind;
 import catdata.aql.Mapping;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;

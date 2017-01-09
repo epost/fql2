@@ -18,8 +18,13 @@ import catdata.aql.fdm.ComposeTransform;
 import catdata.aql.fdm.IdentityTransform;
 import catdata.aql.fdm.LiteralTransform; //TODO aql why depend fdm
 
-public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
+public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics {
 
+	@Override
+	public Kind kind() {
+		return Kind.QUERY;
+	}
+	
 	public final Ctx<En2, Frozen<Ty,En1,Sym,Fk1,Att1>> ens = new Ctx<>();
 	public final Ctx<Att2, Term<Ty,En1,Sym,Fk1,Att1,Var,Void>> atts; 
 	

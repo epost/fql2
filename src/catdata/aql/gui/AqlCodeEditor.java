@@ -1,6 +1,7 @@
 package catdata.aql.gui;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ComponentAdapter;
@@ -8,15 +9,19 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.Collection;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
@@ -31,12 +36,14 @@ import org.fife.ui.rsyntaxtextarea.TokenTypes;
 
 import catdata.Program;
 import catdata.Util;
+import catdata.aql.Kind;
+import catdata.aql.exp.AqlDoc;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.AqlMultiDriver;
 import catdata.aql.exp.AqlParser;
 import catdata.aql.exp.Exp;
-import catdata.aql.exp.Kind;
 import catdata.ide.CodeEditor;
+import catdata.ide.CodeTextPanel;
 import catdata.ide.GUI;
 import catdata.ide.Language;
 
@@ -132,8 +139,49 @@ public final class AqlCodeEditor extends
 		JMenuItem o = new JMenuItem("Outline (using last compiled state)");
 		o.addActionListener(x -> showOutline());
 		topArea.getPopupMenu().add(o, 0);
+		
+		JMenuItem html = new JMenuItem("Emit HTML (using last compiled state)");
+		html.addActionListener(x -> emitDoc());
+		topArea.getPopupMenu().add(html, 0);
 	}
 
+	public void emitDoc() {
+		try {
+			if (last_env == null || last_prog == null) {
+				respArea.setText("Must compile before emitting documentation.");
+			}
+			String html = AqlDoc.doc(last_env, last_prog, title);
+			
+			File file = File.createTempFile(title, ".html");
+			FileWriter w = new FileWriter(file);
+			w.write(html);
+			w.close();
+			
+			
+			JTabbedPane p = new JTabbedPane();
+			JEditorPane pane = new JEditorPane("text/html", html);
+			pane.setEditable(false);
+			pane.setCaretPosition(0);
+		//	p.addTab("Rendered", new JScrollPane(pane));
+			
+			p.addTab("HTML", new CodeTextPanel("", html));
+			JFrame f = new JFrame("HTML for " + title);
+			JPanel ret = new JPanel(new GridLayout(1,1));
+			f.setContentPane(ret);
+			ret.add(p);
+			f.setSize(600, 800);
+			f.setLocation(100, 600);
+			f.setVisible(true);
+			f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			
+			Desktop.getDesktop().browse(file.toURI());
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	
+	}
+	
 	public void showOutline() {
 		outline.setVisible(true);
 		outline.toFront();

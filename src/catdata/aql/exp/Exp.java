@@ -3,6 +3,7 @@ package catdata.aql.exp;
 import java.util.Collection;
 
 import catdata.Pair;
+import catdata.aql.Kind;
 
 public abstract class Exp<X> {
 	

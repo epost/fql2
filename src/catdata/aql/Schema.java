@@ -17,7 +17,12 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 
-public final class Schema<Ty, En, Sym, Fk, Att> {
+public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
+	
+	@Override
+	public Kind kind() {
+		return Kind.SCHEMA;
+	}
 	
 	public final TypeSide<Ty, Sym> typeSide;
 	

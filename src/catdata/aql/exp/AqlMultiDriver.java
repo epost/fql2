@@ -16,6 +16,7 @@ import catdata.Program;
 import catdata.RuntimeInterruptedException;
 import catdata.Unit;
 import catdata.Util;
+import catdata.aql.Kind;
 import catdata.aql.Pragma;
 import catdata.graph.DAG;
 

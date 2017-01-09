@@ -8,8 +8,14 @@ import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 
-public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> {
+public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> implements Semantics {
 
+	@Override
+	public Kind kind() {
+		return Kind.TRANSFORM;
+	}
+	
+	
 	public abstract Ctx<Gen1, Term<Void,En,Void,Fk,Void,Gen2,Void>> gens();
 	public abstract Ctx<Sk1, Term<Ty,En,Sym,Fk,Att,Gen2,Sk2>> sks();
 			

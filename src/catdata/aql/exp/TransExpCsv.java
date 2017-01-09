@@ -21,6 +21,7 @@ import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Instance;
+import catdata.aql.Kind;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.fdm.LiteralTransform;

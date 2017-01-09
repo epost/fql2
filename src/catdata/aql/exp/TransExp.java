@@ -10,6 +10,7 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.It.ID;
 import catdata.aql.AqlOptions;
+import catdata.aql.Kind;
 import catdata.aql.Transform;
 import catdata.aql.Var;
 import catdata.aql.AqlOptions.AqlOption;
