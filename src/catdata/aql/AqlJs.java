@@ -14,7 +14,7 @@ import catdata.Util;
 
 public class AqlJs<Ty, Sym> {
 	
-	private static final String postfix = "\n\nPossibly helpful info: javascript arguments are accessed as input[0], input[1], etc.\n\nPossibly useful links: http://docs.oracle.com/javase/8/docs/api/ and http://docs.oracle.com/javase/8/docs/technotes/guides/scripting/nashorn/intro.html .";
+	private static final String postfix = "\n\nPossibly helpful info: 32-bit Java integers cannot exceed 2 billion; if you need larger numbers please use strings \n\nPossibly helpful info: javascript arguments are accessed as input[0], input[1], etc.\n\nPossibly useful links: http://docs.oracle.com/javase/8/docs/api/ and http://docs.oracle.com/javase/8/docs/technotes/guides/scripting/nashorn/intro.html .";
 
 	//private Map<String, String> binding = new HashMap<>();
 	

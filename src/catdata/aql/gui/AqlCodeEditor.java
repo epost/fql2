@@ -76,7 +76,9 @@ public final class AqlCodeEditor extends
 			Set<String> set = last_prog.exps.keySet();		
 			Vector<String> listData = new Vector<>();
 			for (String s : set) {
-                            listData.add(s);
+				if (last_prog.exps.get(s).kind() != Kind.COMMENT) {
+					listData.add(s);
+				}
 			}
 			list.setListData(listData);
 			revalidate();

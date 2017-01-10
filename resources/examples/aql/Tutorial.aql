@@ -1,19 +1,22 @@
-<"<html>">
-<"<head>">
-<"<title>AQL Tutorial</title>">
-<"</head>">
-<"<body>">
-<"<script src=\"http://catinf.com/js/ci.js\"></script>">
-<"<script type=\"text/javascript\" async src=\"https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML\"></script>">
+html {"
+	<html>
+	<head>
+		<title>AQL Tutorial</title>
+	</head>
+	<body>
+		<script src=\"http://catinf.com/js/ci.js\"></script>
+		<script type=\"text/javascript\" async src=\"https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML\"></script>
 
-<"<h1>AQL Tutorial (in progress)</h1>">
-<"<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>">
-<"<p>There are two solutions to \\(ax^2 + bx + c = 0\\) and they are $$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.$$</p>">
-<"<img src=\"http://catinf.com/images/shot2.png\" height=\"100\"/>">
-<"<hr/>">
+		<h1>AQL Tutorial (in progress)</h1>
+			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+			<p>There are two solutions to \\(ax^2 + bx + c = 0\\) and they are $$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.$$</p>
+			<img src=\"http://catinf.com/images/shot2.png\" height=\"100\"/>
+		<hr/>
 
-<"<h2>Typesides</h2>">
-<"<p>Here is a <b>typeside</b>:</p>">
+		<h2>Typesides</h2>
+			<p>Here is a <b>typeside</b>:</p>
+" //unfortunately, this can't be on the same line as } or folding breaks 
+}			
 
 typeside Ty = literal { 
 	types
@@ -32,14 +35,16 @@ typeside Ty = literal {
 		prover = completion
 }
 
-<"<hr/>">
-<"<h2>Schemas</h2>">
-<"<p>Here is a <b>schema</b>.  Look, a list!</p>
-<ul>
-<li>section1</li>
-<li>section2</li>
-</ul>
-">
+html {"
+	<hr/>
+	<h2>Schemas</h2>
+		<p>Here is a <b>schema</b>.  Look, a list!</p>
+		<ul>
+			<li>section1</li>
+				<li>section2</li>
+		</ul>
+"
+}
 schema S = literal : Ty {
 	entities
 		Employee 
@@ -61,10 +66,12 @@ schema S = literal : Ty {
 	options
 		prover = completion
 }
-
-<"<hr/>">
-<"<h2>Instances</h2>">
-<"<p>Here is an instance:</p>">
+html {"
+	<hr/>
+	<h2>Instances</h2>
+	<p>Here is an instance:</p>
+"
+}
 instance I = literal : S {
 	generators 
 		a b c : Employee
@@ -86,5 +93,7 @@ instance I = literal : S {
 		prover = completion
 		completion_precedence = "zero a b c m s Al Akin Bob Bo Carl Cork Dan Dunn Math CS first last name age manager worksIn secretary succ plus"
 } 
-
-<"</body></html>">
+html {"
+	</body></html>
+"
+}	

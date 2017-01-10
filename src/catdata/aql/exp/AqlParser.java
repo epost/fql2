@@ -73,9 +73,10 @@ public class AqlParser {
 
 
 	public static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
-			")", "=", "->", "@", "<", ">"};	
+			")", "=", "->", "@", };	
 	
 	public static final String[] res = new String[] {
+			"html",
 			"typeside", "schema", "mapping", "instance", "transform", "query", "pragma", "graph",
 			"exec_jdbc",
 			"exec_js",
@@ -858,8 +859,8 @@ public class AqlParser {
 	
 	private static int comment_id = 0;
 	private static Parser<Triple<String, Integer, ? extends Exp<?>>> comment() {
-		return Parsers.tuple(token("<"), StringLiteral.PARSER, Parsers.INDEX, token(">")).map(x -> 
-			new Triple<>(" " + comment_id++, x.c, new CommentExp(x.b))
+		return Parsers.tuple(token("html"), token("{"), StringLiteral.PARSER, Parsers.INDEX, token("}")).map(x -> 
+			new Triple<>(" " + comment_id++, x.d, new CommentExp(x.c))
 		);
 	}
 	

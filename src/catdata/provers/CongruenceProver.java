@@ -98,9 +98,9 @@ public class CongruenceProver<T, C, V> extends DPKB<T, C, V> {
 	}
 	
 	
-
+	//synchronized bc eq can trigger redo
 	@Override
-	public boolean eq(Map<V, T> ctx, KBExp<C, V> lhs, KBExp<C, V> rhs) {
+	public synchronized boolean eq(Map<V, T> ctx, KBExp<C, V> lhs, KBExp<C, V> rhs) {
 		if (!ctx.isEmpty()) {
 			throw new RuntimeException("Congruence prover can only be used with ground equations");
 		}

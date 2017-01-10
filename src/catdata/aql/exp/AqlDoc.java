@@ -43,8 +43,8 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 		return "";
 	}
 
-	private static String black = "";
-	private static String grey = "";
+//	private static String black = "";
+//	private static String grey = "";
 	
 	/*graph.addNodes('Dennis', 'Michael', 'Jessica', 'Timothy', 'Barbara')
 	graph.addNodes('Amphitryon', 'Alcmene', 'Iphicles', 'Heracles');

@@ -68,7 +68,7 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 					Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> lhs = trans(eq.first), rhs = trans(eq.second);
 					boolean ok = dst().dp().eq(new Ctx<>(), lhs, rhs);
 					if (!ok) {
-						throw new RuntimeException("Equation " + eq.first + " = " + eq.second + " translates to " + lhs + " = " + rhs + ", which is not provable");
+						throw new RuntimeException("Equation " + eq.first + " = " + eq.second + " translates to " + lhs + " = " + rhs + ", which is not provable in \n\n" + dst());
 					}
 				}
 			}
