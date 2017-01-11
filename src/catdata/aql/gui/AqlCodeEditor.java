@@ -26,7 +26,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 
-import org.codehaus.jparsec.error.ParserException;
+import org.jparsec.error.ParserException;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;

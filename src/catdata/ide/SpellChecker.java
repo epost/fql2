@@ -87,7 +87,7 @@ class SpellChecker extends AbstractParser {
 		if (!spNow) {
 			return result;
 		}
-		
+		//try {
 		for (Token t : doc) {
 			if (t.isComment()) {
 				int startOffs = t.getOffset();
@@ -142,6 +142,9 @@ class SpellChecker extends AbstractParser {
 				}
 			}
 		}
+		//} catch (StackOverflowError err) {
+		//	err.printStackTrace(); //TODO aql wtf
+		//}
 		return result;
 
 	}

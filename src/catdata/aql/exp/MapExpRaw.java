@@ -105,7 +105,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			toString += "\tattributes";
 			temp = new LinkedList<>();
 			for (Pair<Object, Triple<String, Object, RawTerm>> sym : atts) {
-				temp.add(sym.first + " -> lambda " + sym.second.first + ". " + sym.second.second);
+				temp.add(sym.first + " -> lambda " + sym.second.first + ". " + sym.second.third);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 		}

@@ -4,9 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.codehaus.jparsec.error.Location;
-import org.codehaus.jparsec.error.ParseErrorDetails;
-import org.codehaus.jparsec.error.ParserException;
+import org.jparsec.error.Location;
+import org.jparsec.error.ParseErrorDetails;
+import org.jparsec.error.ParserException;
 
 public class Program<X> implements Prog {
 
@@ -50,6 +50,7 @@ public class Program<X> implements Prog {
 		return new Location(line, col);
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void checkDup(List<Triple<String, Integer, X>> seen, Triple<String, Integer, X> toAdd) {
 		for (Triple<String, Integer, X> other : seen) {
 			if (other.first.equals(toAdd.first)) {

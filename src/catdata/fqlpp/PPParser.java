@@ -61,17 +61,17 @@ import catdata.fqlpp.TransExp.ToInst;
 import catdata.fqlpp.TransExp.ToMap;
 import catdata.fqlpp.TransExp.ToSet;
 import catdata.fqlpp.TransExp.Whisker;
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parser.Reference;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
-import org.codehaus.jparsec.functors.Tuple5;
+import org.jparsec.Parser;
+import org.jparsec.Parser.Reference;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.functors.Tuple3;
+import org.jparsec.functors.Tuple4;
+import org.jparsec.functors.Tuple5;
 
 import catdata.Chc;
 import catdata.Pair;
@@ -85,7 +85,7 @@ import catdata.fqlpp.FunctorExp.MapConst;
 import catdata.fqlpp.FunctorExp.SetSetConst;
 import catdata.fqlpp.cat.FinSet.Fn;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 class PPParser {
 
 	static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
@@ -169,8 +169,8 @@ class PPParser {
 			}
 			return s;
 		}
-		if (o instanceof org.codehaus.jparsec.functors.Pair) {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+		if (o instanceof org.jparsec.functors.Pair) {
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			if (p.a.toString().equals("inl")) {
 				return Chc.inLeft(toValue(p.b));
 			} else if (p.a.toString().equals("inr")) {
@@ -320,7 +320,7 @@ class PPParser {
 		}
 
 		try {
-			org.codehaus.jparsec.functors.Pair<?, ?> p = (org.codehaus.jparsec.functors.Pair<?, ?>) o;
+			org.jparsec.functors.Pair<?, ?> p = (org.jparsec.functors.Pair<?, ?>) o;
 			if (p.a.toString().equals("dom")) {
 				return new SetExp.Dom(toFn(p.b));
 			} else if (p.a.toString().equals("cod")) {
@@ -414,7 +414,7 @@ class PPParser {
 		}
 		
 		try {
-			org.codehaus.jparsec.functors.Pair<?, ?> p = (org.codehaus.jparsec.functors.Pair<?, ?>) o;
+			org.jparsec.functors.Pair<?, ?> p = (org.jparsec.functors.Pair<?, ?>) o;
 			if (p.a.toString().equals("dom")) {
 				return new CatExp.Dom(toFtr(p.b));
 			} else if (p.a.toString().equals("cod")) {
@@ -790,7 +790,7 @@ class PPParser {
 
 
 		try {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			String p1 = p.a.toString();
 			Object p2 = p.b;
 			switch (p1) {
@@ -857,7 +857,7 @@ class PPParser {
 
 			if (a.c.toString().equals("Set") && a.e.toString().equals("Set") &&
 				b.c.toString().equals("Set") && b.e.toString().equals("Set")) {
-				Tuple3 z = (Tuple3) ((org.codehaus.jparsec.functors.Pair) t.a).b;
+				Tuple3 z = (Tuple3) ((org.jparsec.functors.Pair) t.a).b;
 				FunctorExp src = toFtr(a.a);
 				FunctorExp dst = toFtr(b.a);
 				String ob = z.a.toString();
@@ -866,7 +866,7 @@ class PPParser {
 			} else if (a.e.toString().equals("Set") && b.e.toString().equals("Set")) {
 				FunctorExp src = toFtr(a.a);
 				FunctorExp dst = toFtr(b.a);
-				List<Object> ob = (List<Object>) ((org.codehaus.jparsec.functors.Pair) t.a).b;
+				List<Object> ob = (List<Object>) ((org.jparsec.functors.Pair) t.a).b;
 				Map<String, Chc<FnExp, SetExp>> fun = new HashMap<>();
 		
 				for (Object ttt : ob) {
@@ -885,7 +885,7 @@ class PPParser {
 			} else if (a.e.toString().equals("Cat") && b.e.toString().equals("Cat")) {
 				FunctorExp src = toFtr(a.a);
 				FunctorExp dst = toFtr(b.a);
-				List<Object> ob = (List<Object>) ((org.codehaus.jparsec.functors.Pair) t.a).b;
+				List<Object> ob = (List<Object>) ((org.jparsec.functors.Pair) t.a).b;
 				Map<String, FunctorExp> fun = new HashMap<>();
 				
 				for (Object ttt : ob) {
@@ -901,7 +901,7 @@ class PPParser {
 				try {
 					FunctorExp src = toFtr(a.a);
 					FunctorExp dst = toFtr(b.a);
-					List<Object> ob = (List<Object>) ((org.codehaus.jparsec.functors.Pair) t.a).b;
+					List<Object> ob = (List<Object>) ((org.jparsec.functors.Pair) t.a).b;
 					Map<String, TransExp> fun = new HashMap<>();
 					
 					for (Object ttt : ob) {
@@ -917,7 +917,7 @@ class PPParser {
 				
 				FunctorExp src = toFtr(a.a);
 				FunctorExp dst = toFtr(b.a);
-				List<Object> ob = (List<Object>) ((org.codehaus.jparsec.functors.Pair) t.a).b;
+				List<Object> ob = (List<Object>) ((org.jparsec.functors.Pair) t.a).b;
 				Map<String, Pair<String, List<String>>> fun = new HashMap<>();		
 				for (Object ttt : ob) {
 					if (fun.containsKey(o)) {
@@ -981,7 +981,7 @@ class PPParser {
 		} catch (RuntimeException re) { }
 
 		try {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			String p1 = p.a.toString();
 			Object p2 = p.b;
 			switch (p1) {
@@ -1022,7 +1022,7 @@ class PPParser {
 	
 	private static FunctorExp toSetSet(Object decl) {
 		Tuple3 y = (Tuple3) decl;
-		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) y.a;
 		
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 arrows = (Tuple3) x.b;
@@ -1039,7 +1039,7 @@ class PPParser {
 //	@SuppressWarnings("rawtypes")
 	private static FunctorExp toInstConst(Object decl) {
 		Tuple3 y = (Tuple3) decl;
-		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) y.a;
 		
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 arrows = (Tuple3) x.b;
@@ -1080,7 +1080,7 @@ class PPParser {
 	
 	private static FunctorExp toCatFtrConst(Object decl) {
 		Tuple5 y = (Tuple5) decl;
-		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) y.a;
 		
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 arrows = (Tuple3) x.b;
@@ -1115,7 +1115,7 @@ class PPParser {
 	
 	private static FunctorExp toFinalConst(Object decl) {
 		Tuple5 y = (Tuple5) decl;
-		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) y.a;
 		
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 arrows = (Tuple3) x.b;
@@ -1150,7 +1150,7 @@ class PPParser {
 
 	private static FunctorExp toMapConst(Object decl) {
 		Tuple5 y = (Tuple5) decl;
-		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) y.a;
 		
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 arrows = (Tuple3) x.b;
@@ -1257,7 +1257,7 @@ class PPParser {
 
 
 		try {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			String p1 = p.a.toString();
 			Object p2 = p.b;
 			switch (p1) {
@@ -1304,7 +1304,7 @@ class PPParser {
 		List decls = (List) program.parse(s);
 
 		for (Object d : decls) {
-			org.codehaus.jparsec.functors.Pair pr = (org.codehaus.jparsec.functors.Pair) d;
+			org.jparsec.functors.Pair pr = (org.jparsec.functors.Pair) d;
 			Object decl = pr.b;
 			String txt = pr.a.toString();
 			int idx = s.indexOf(txt);

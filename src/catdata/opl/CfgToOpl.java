@@ -24,14 +24,14 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import catdata.opl.OplExp.OplSig;
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.functors.Tuple3;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.functors.Tuple3;
 
 import catdata.Pair;
 import catdata.Util;
@@ -39,6 +39,7 @@ import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
 
 
+@SuppressWarnings("deprecation")
 public class CfgToOpl {
 	
 	static class STLCExample extends Example {

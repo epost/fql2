@@ -2,18 +2,18 @@ package catdata.mpl;
 
 import java.util.*;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parser.Reference;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.Token;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
-import org.codehaus.jparsec.functors.Tuple5;
+import org.jparsec.Parser;
+import org.jparsec.Parser.Reference;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.Token;
+import org.jparsec.functors.Tuple3;
+import org.jparsec.functors.Tuple4;
+import org.jparsec.functors.Tuple5;
 
 import catdata.Pair;
 import catdata.Program;
@@ -36,7 +36,7 @@ import catdata.mpl.Mpl.MplType;
 import catdata.mpl.Mpl.MplType.MplBase;
 import catdata.mpl.Mpl.MplType.MplProd;
 import catdata.mpl.Mpl.MplType.MplUnit;
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 class MplParser {
 
 	static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
@@ -162,7 +162,7 @@ class MplParser {
 		List decls = (List) program.parse(s);
 
 		 for (Object d : decls) {
-			org.codehaus.jparsec.functors.Pair pr = (org.codehaus.jparsec.functors.Pair) d;
+			org.jparsec.functors.Pair pr = (org.jparsec.functors.Pair) d;
 			Tuple3 decl = (Tuple3) pr.b;
 			
 			toProgHelper(pr.a.toString(), s, ret, decl);
@@ -179,8 +179,8 @@ class MplParser {
 			Tuple3 t = (Tuple3) o;
 			return new MplEval<>((String)t.b, toTerm(t.c));
 		}
-		if (o instanceof org.codehaus.jparsec.functors.Pair) {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+		if (o instanceof org.jparsec.functors.Pair) {
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			if (p.a.toString().equals("theory")) {
 				return toTheory(p.b);
 			}
@@ -227,8 +227,8 @@ class MplParser {
 				return new MplSym<>(toType(t.b), toType(t.c));
 			}
 		}
-		if (o instanceof org.codehaus.jparsec.functors.Pair) {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+		if (o instanceof org.jparsec.functors.Pair) {
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			if (p.a.toString().equals("id")) {
 				return new MplId(toType(p.b));
 			}

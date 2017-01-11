@@ -50,19 +50,19 @@ import catdata.fql.decl.TransExp.TransCurry;
 import catdata.fql.decl.TransExp.TransEval;
 import catdata.fql.decl.TransExp.TransIso;
 import catdata.fql.decl.TransExp.UnChi;
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parser.Reference;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.DecimalLiteral;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.Token;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
-import org.codehaus.jparsec.functors.Tuple5;
+import org.jparsec.Parser;
+import org.jparsec.Parser.Reference;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.DecimalLiteral;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.Token;
+import org.jparsec.functors.Tuple3;
+import org.jparsec.functors.Tuple4;
+import org.jparsec.functors.Tuple5;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -82,6 +82,7 @@ import catdata.fql.decl.SigExp.Const;
  * 
  *         Parser for FQL programs.
  */
+@SuppressWarnings("deprecation")
 public class FQLParser {
 
 	
@@ -270,7 +271,7 @@ public class FQLParser {
 		}
 
 		try {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			if (p.a.toString().equals("unit")) {
 				return new SigExp.One(new HashSet<>((Collection<String>) p.b));
 			} else if (p.a.toString().equals("opposite")) {
@@ -581,7 +582,7 @@ public class FQLParser {
 		}
 
 		try {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			String p1 = p.a.toString();
 			Object p2 = p.b;
 			if (p1.equals("id")) {
@@ -752,7 +753,7 @@ public class FQLParser {
 		}
 	
 		try {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			String p1 = p.a.toString();
 			Object p2 = p.b;
             switch (p1) {
@@ -975,7 +976,7 @@ public class FQLParser {
 		}
 
 		try {
-			org.codehaus.jparsec.functors.Pair pr = (org.codehaus.jparsec.functors.Pair) o;
+			org.jparsec.functors.Pair pr = (org.jparsec.functors.Pair) o;
 
 			if (pr.a.toString().equals("unit")) {
 				return new One(toSchema(pr.b));
@@ -1003,9 +1004,9 @@ public class FQLParser {
 
 		} else if (o instanceof Tuple3) {
 			Tuple3 x = (Tuple3) o;
-			org.codehaus.jparsec.functors.Pair p1 = (org.codehaus.jparsec.functors.Pair) x.a;
-			org.codehaus.jparsec.functors.Pair p2 = (org.codehaus.jparsec.functors.Pair) x.b;
-			org.codehaus.jparsec.functors.Pair p3 = (org.codehaus.jparsec.functors.Pair) x.c;
+			org.jparsec.functors.Pair p1 = (org.jparsec.functors.Pair) x.a;
+			org.jparsec.functors.Pair p2 = (org.jparsec.functors.Pair) x.b;
+			org.jparsec.functors.Pair p3 = (org.jparsec.functors.Pair) x.c;
 			return new QueryExp.Const(toMapping(p1.b), toMapping(p2.b),
 					toMapping(p3.b));
 		} else {
@@ -1022,8 +1023,8 @@ public class FQLParser {
 						toSchema(t.d), t.e.toString());
 			}
 			return new Comp(toFullQuery(t.b), toFullQuery(t.d));
-		} else if (o instanceof org.codehaus.jparsec.functors.Pair) {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+		} else if (o instanceof org.jparsec.functors.Pair) {
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			if (p.a.toString().equals("delta")) {
 				return new Delta(toMapping(p.b));
 			} else if (p.a.toString().equals("SIGMA")) {
@@ -1053,7 +1054,7 @@ public class FQLParser {
 		List decls = (List) program.parse(s);
 
 		for (Object d : decls) {
-			org.codehaus.jparsec.functors.Pair pr = (org.codehaus.jparsec.functors.Pair) d;
+			org.jparsec.functors.Pair pr = (org.jparsec.functors.Pair) d;
 			Object decl = pr.b;
 			String txt = pr.a.toString();
 			int idx = s.indexOf(txt);
@@ -1061,8 +1062,8 @@ public class FQLParser {
 				throw new RuntimeException();
 			}
 
-			if (decl instanceof org.codehaus.jparsec.functors.Pair) {
-				org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) decl;
+			if (decl instanceof org.jparsec.functors.Pair) {
+				org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) decl;
 				if (p.a.toString().equals("drop")) {
 					ret.add(NewDecl.dropDecl((List<String>) p.b));
 					continue;

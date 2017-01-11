@@ -20,7 +20,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 
 import catdata.fql.decl.TransExp.Const;
-import org.codehaus.jparsec.error.ParserException;
+import org.jparsec.error.ParserException;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;

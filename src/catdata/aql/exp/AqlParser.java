@@ -5,19 +5,19 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parser.Reference;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.Token;
-import org.codehaus.jparsec.functors.Pair;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
-import org.codehaus.jparsec.functors.Tuple5;
+import org.jparsec.Parser;
+import org.jparsec.Parser.Reference;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.Token;
+import org.jparsec.functors.Pair;
+import org.jparsec.functors.Tuple3;
+import org.jparsec.functors.Tuple4;
+import org.jparsec.functors.Tuple5;
 
 import catdata.Program;
 import catdata.Quad;
@@ -69,6 +69,7 @@ import catdata.aql.exp.TyExp.TyExpEmpty;
 import catdata.aql.exp.TyExp.TyExpSch;
 import catdata.aql.exp.TyExp.TyExpVar;
 
+@SuppressWarnings("deprecation")
 public class AqlParser {
 
 

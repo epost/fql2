@@ -40,15 +40,15 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.functors.Tuple3;
+import org.jparsec.functors.Tuple4;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -63,6 +63,7 @@ import catdata.sql.SqlType;
 
 // aql sqlchecker should use fk names
 
+@SuppressWarnings("deprecation")
 public class SqlChecker {
 
 	private static int count = 0;
@@ -598,7 +599,7 @@ public class SqlChecker {
 		
 		Set<String> seen = new HashSet<>();
 		List<Pair<String,String>> y = null;
-		org.codehaus.jparsec.functors.Pair qq = (org.codehaus.jparsec.functors.Pair) o.c;
+		org.jparsec.functors.Pair qq = (org.jparsec.functors.Pair) o.c;
 		if (qq != null) {
 			y = new LinkedList<>();
 			List z = (List) qq.b;

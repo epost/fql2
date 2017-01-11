@@ -26,16 +26,16 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import catdata.fpql.XExp.Var;
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
-import org.codehaus.jparsec.functors.Tuple5;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.functors.Tuple3;
+import org.jparsec.functors.Tuple4;
+import org.jparsec.functors.Tuple5;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -46,6 +46,7 @@ import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
 import catdata.ide.Language;
 
+@SuppressWarnings("deprecation")
 public class XNeo4jToFQL {
 
 	private static String trans0(Map<String, Map<String, Object>> properties, Map<String, Set<Pair<String, String>>> edges) {
@@ -379,7 +380,7 @@ public class XNeo4jToFQL {
 	private static Map<String, Set<Pair<String, String>>> fromEdges(Object oo) {
 		Map<String, Set<Pair<String, String>>> ret = new HashMap<>();
 		
-		org.codehaus.jparsec.functors.Pair o = (org.codehaus.jparsec.functors.Pair) oo;
+		org.jparsec.functors.Pair o = (org.jparsec.functors.Pair) oo;
 		List<Tuple5> xx = (List<Tuple5>) o.b;
 		
 		for (Tuple5 tt : xx) {
@@ -402,7 +403,7 @@ public class XNeo4jToFQL {
 	private static Map<String, Map<String, Object>> fromNodes(Object oo) {
 		Map<String, Map<String, Object>> ret = new HashMap<>();
 		
-		org.codehaus.jparsec.functors.Pair o = (org.codehaus.jparsec.functors.Pair) oo;
+		org.jparsec.functors.Pair o = (org.jparsec.functors.Pair) oo;
 		List<Tuple3> xx = (List<Tuple3>) o.b;
 		
 		for (Tuple3 tt : xx) {

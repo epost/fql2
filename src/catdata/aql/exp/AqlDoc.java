@@ -18,6 +18,9 @@ import catdata.graph.DMG;
 public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeException> {
 	
 	public static String doc(AqlEnv env, Program<Exp<?>> prog) {
+		if (prog == null || env == null) {
+			return "Anomaly: please report";
+		}
 		StringBuffer sb = new StringBuffer();
 		AqlDoc doc = new AqlDoc();
 		for (String k : prog.order) {
