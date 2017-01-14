@@ -35,7 +35,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 
-import org.jparsec.error.ParserException;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
@@ -45,6 +44,7 @@ import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
+import org.jparsec.error.ParserException;
 
 import catdata.LineException;
 import catdata.Prog;
@@ -206,10 +206,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		topArea.setCaretPosition(0);
 		topArea.setAutoscrolls(true);
 		
-		Font font = new Font(topArea.getFont().getFontName(), topArea.getFont().getStyle(), GlobalOptions.debug.general.font_size);
-		topArea.setFont(font);
-		Font font2 = new Font(respArea.area.getFont().getFontName(), respArea.area.getFont().getStyle(), GlobalOptions.debug.general.font_size + 1);
-		respArea.area.setFont(font2);
 
 		InputMap inputMap = topArea.getInputMap();
 
@@ -300,8 +296,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			private static final long serialVersionUID = 1L;
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				GlobalOptions.debug.general.font_size++;
-				GUI.setFontSize(GlobalOptions.debug.general.font_size);
+				IdeOptions.theCurrentOptions.fontSizeUp();
 			}
 		};
 		topArea.getActionMap().put("IncreaseFont", al);
@@ -316,11 +311,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (topArea.getFont().getSize() == 1) {
-					return;
-				}
-				GlobalOptions.debug.general.font_size--;
-				GUI.setFontSize(GlobalOptions.debug.general.font_size);
+				IdeOptions.theCurrentOptions.fontSizeDown();
 			}
 		};
 		topArea.getActionMap().put("DecreaseFont", al);
@@ -347,9 +338,14 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		
 		//topArea.setMasetMarginLineEnabled(true);
 		
-		JMenuItem wrap = new JMenuItem("Toggle line wrap");
-		wrap.addActionListener(x -> toggleWrap());
-		topArea.getPopupMenu().add(wrap, 0);
+		
+		topArea.setOpaque(true);
+		respArea.setOpaque(true);
+		IdeOptions.theCurrentOptions.apply(this);
+		
+		//System.out.println(topArea.getSyntaxScheme().getStyle(TokenTypes.COMMENT_EOL).foreground.getRGB());
+		
+//		RSyntaxTextArea.
 	}
 		
 	private final SpellChecker spc;
@@ -379,6 +375,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		makeSearchVisible();
 	}
 
+	//TODO -> private
 	protected void doExample(Example e) {
 		if (abortBecauseDirty()) {
 			return;
@@ -546,10 +543,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 	}
 	
-	public void toggleWrap() {
-		topArea.setLineWrap(!topArea.getLineWrap());
-	//	topArea.
-	}
+	
 
 	public boolean abortBecauseDirty() {
 		try {
@@ -566,11 +560,16 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		return (choice != JOptionPane.YES_OPTION);
 	}
 
+	public void optionsHaveChanged() {
+		IdeOptions.theCurrentOptions.apply(this);
+		clearSpellCheck();
+	}
+	
 	public void clearSpellCheck() {
 		try {
 			topArea.forceReparsing(spc);
 		} catch (Throwable t) {
-			t.printStackTrace();
+		//	t.printStackTrace(); 
 		}
 	}
 	
@@ -579,4 +578,5 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		return Util.list("pushout", "pushouts", "pullback", "pullbacks", "observable", "observables", "validator", "boolean", "booleans", "equational", "axiomatization", "axiomatize", "axiom", "axioms", "functor", "functors", "schema", "schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
 	}
 
+	
 }

@@ -185,6 +185,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	public String toString() {
 		String ret;
 
+		//TODO aql stop printing eventually
 		ret = "carriers\n\t";
 		ret += Util.sep(schema().ens.stream().map(x -> x + " -> {" + Util.sep(en(x).stream().map(this::printX).collect(Collectors.toList()), ", ") + "}").collect(Collectors.toList()), "\n\t");
 	
@@ -201,8 +202,8 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 		ret += "\n\n----- type algebra\n\n";
 		ret += talg().toString();
 		
-		ret += "\n\n----- prover\n\n";
-		ret += toStringProver();
+//		ret += "\n\n----- prover\n\n"; 
+	//	ret += toStringProver();
 		
 		return ret;
 	}

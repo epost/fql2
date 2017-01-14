@@ -23,13 +23,14 @@ import org.fife.ui.rsyntaxtextarea.parser.DefaultParserNotice;
 import org.fife.ui.rsyntaxtextarea.parser.ParseResult;
 
 import catdata.Unit;
+import catdata.ide.IdeOptions.IdeOption;
 
 
 class SpellChecker extends AbstractParser {
 	
 	private static Collection<String> words0;
 
-	private boolean spPrev = GlobalOptions.debug.general.spellcheck;
+	private boolean spPrev = IdeOptions.theCurrentOptions.getBool(IdeOption.SPELL_CHECK);
 	
 	private static Collection<String> getWords() {
 		if (words0 != null) {
@@ -72,7 +73,7 @@ class SpellChecker extends AbstractParser {
 	
 	@Override
 	public ParseResult parse(RSyntaxDocument doc1, String style) {
-		boolean spNow = GlobalOptions.debug.general.spellcheck;
+		boolean spNow = IdeOptions.theCurrentOptions.getBool(IdeOption.SPELL_CHECK);
 		if (spNow != spPrev) {
 			spPrev = spNow;
 			result.clearNotices();

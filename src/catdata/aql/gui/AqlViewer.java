@@ -74,16 +74,16 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	public static JComponent view(@SuppressWarnings("unused") Kind kind, Object obj) {
 		Semantics s = (Semantics) obj;
 		JTabbedPane ret = new JTabbedPane();
-		ret.add(new CodeTextPanel("", obj.toString()), "Text");
+		ret.addTab("Text", new CodeTextPanel("", obj.toString()));
 		new AqlViewer().visit(ret, s);
 		return ret;
 	}
 
 	private static <Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2> JComponent viewMorphism(Morphism<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Sym, Fk2, Att2, Gen2, Sk2> m, AqlJs<Ty, Sym> js) {
-		CodeTextPanel input = new CodeTextPanel("Input", "");
-		CodeTextPanel output = new CodeTextPanel("Output", "");
+		CodeTextPanel input = new CodeTextPanel("Input term-in-ctx", "");
+		CodeTextPanel output = new CodeTextPanel("Output term-in-ctx", "");
 
-		JButton nf = new JButton("Normalize Term-in-ctx");
+		JButton nf = new JButton("Translate");
 		JPanel buttonPanel = new JPanel(new GridLayout(1, 1));
 		buttonPanel.add(nf);
 
@@ -252,7 +252,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	}	*/
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> JComponent viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty, Sym> js) {
-		CodeTextPanel input = new CodeTextPanel("Input", "");
+		CodeTextPanel input = new CodeTextPanel("Input (either equation-in-ctx or term-in-ctx)", "");
 		CodeTextPanel output = new CodeTextPanel("Output", "");
 
 		JButton eq = new JButton("Decide Equation-in-ctx");
@@ -274,7 +274,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		main.add(split, BorderLayout.CENTER);
 		main.add(buttonPanel, BorderLayout.NORTH);
 
-		print.addActionListener(x -> output.setText(dp.toString()));
+		print.addActionListener(x -> output.setText(dp.toStringProver()));
 		eq.addActionListener(x -> {
 			try {
 				Triple<List<Pair<String, String>>, RawTerm, RawTerm> y = AqlParser.parseEq(input.getText());
@@ -438,30 +438,30 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 	@Override
 	public <T, C> Unit visit(JTabbedPane ret, TypeSide<T, C> T)  {
-		ret.add(viewDP(T.semantics, T.collage(), T.js), "DP");
+		ret.addTab("DP", viewDP(T.semantics, T.collage(), T.js));
 		return new Unit();
 	}
 
 	@Override
 	public <Ty, En, Sym, Fk, Att> Unit visit(JTabbedPane ret, Schema<Ty, En, Sym, Fk, Att> S)  {
-		ret.add(viewSchema(S), "Graph");
+		ret.addTab("Graph", viewSchema(S));
 //		ret.add(viewSchema2(schema), "Graph2");
-		ret.add(viewDP(S.dp(), S.collage(), S.typeSide.js), "DP");
+		ret.addTab("DP", viewDP(S.dp(), S.collage(), S.typeSide.js));
 	//	ret.add(new CodeTextPanel("", schema.collage().toString()), "Temp");
 		return new Unit();
 	}
 
 	@Override
 	public <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Unit visit(JTabbedPane ret, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I)  {
-		ret.add(viewAlgebra(I.algebra()), "Tables");
-		ret.add(new CodeTextPanel("", I.algebra().toString()), "Algebra");
-		ret.add(viewDP(I.dp(), I.collage(), I.schema().typeSide.js), "DP");
+		ret.addTab("Tables", viewAlgebra(I.algebra()));
+		ret.addTab("Type Algebra", new CodeTextPanel("", I.algebra().talg().toString()));
+		ret.addTab("DP", viewDP(I.dp(), I.collage(), I.schema().typeSide.js));
 		return new Unit();
 	}
 
 	@Override
 	public <Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> Unit visit(JTabbedPane ret, Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h)  {
-		ret.add(viewTransform(h), "Algebra");
+		ret.addTab("Tables", viewTransform(h));
 		return new Unit();
 	}
 
@@ -482,13 +482,13 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 	@Override
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> M) {
-		ret.add(viewMorphism(M.semantics(), M.src.typeSide.js), "Translate");
+		ret.addTab("Translate", viewMorphism(M.semantics(), M.src.typeSide.js));
 		return new Unit();
 	}
 
 	@Override
 	public <N, e> Unit visit(JTabbedPane ret, catdata.aql.Graph<N, e> G) {
-		ret.add(viewGraph(G.dmg), "Graph");
+		ret.add("Graph", viewGraph(G.dmg));
 		return new Unit();
 	}
 

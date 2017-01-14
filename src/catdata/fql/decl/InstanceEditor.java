@@ -39,7 +39,7 @@ import catdata.Pair;
 import catdata.fql.FQLException;
 import catdata.fql.FqlOptions;
 import catdata.fql.decl.InstExp.Const;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -214,7 +214,7 @@ public class InstanceEditor {
 	/* final Environment env , *//* final Color color */Graph<String, String> sgv) {
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix
-					+ GlobalOptions.debug.fql.inst_graph);
+					+ DefunctGlobalOptions.debug.fql.inst_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
 			Layout<String, String> layout = (Layout<String, String>) x
 					.newInstance(sgv);

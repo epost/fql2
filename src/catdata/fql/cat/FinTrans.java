@@ -3,7 +3,7 @@ package catdata.fql.cat;
 import java.util.Map;
 import java.util.Objects;
 
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 /**
  * @author ryan Implementation of finite natural transformations.
@@ -23,7 +23,7 @@ class FinTrans<Obj1, Arrow1, Obj2, Arrow2> {
 		this.eta = eta;
 		this.F = F;
 		this.G = G;
-		if (GlobalOptions.debug.fql.VALIDATE) {
+		if (DefunctGlobalOptions.debug.fql.VALIDATE) {
 			validate();
 		}
 	}

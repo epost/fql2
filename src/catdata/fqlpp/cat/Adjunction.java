@@ -1,6 +1,6 @@
 package catdata.fqlpp.cat;
 
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 public class Adjunction<CO, CA, DO, DA> {
 
 	private final Functor<DO, DA, CO, CA> F;
@@ -19,7 +19,7 @@ public class Adjunction<CO, CA, DO, DA> {
 
 	@SuppressWarnings("ConstantConditions")
 	private void validate() {
-		if (!GlobalOptions.debug.fqlpp.VALIDATE) {
+		if (!DefunctGlobalOptions.debug.fqlpp.VALIDATE) {
 			return;
 		}
 

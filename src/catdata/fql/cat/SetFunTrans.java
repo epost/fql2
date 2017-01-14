@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import catdata.fql.FQLException;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 /**
  * 
@@ -24,7 +24,7 @@ public class SetFunTrans<Obj, Arrow, Y, X> {
 		this.eta = eta;
 		this.F = F;
 		this.G = G;
-		if (GlobalOptions.debug.fql.VALIDATE) {
+		if (DefunctGlobalOptions.debug.fql.VALIDATE) {
 			validate();
 		}
 	}

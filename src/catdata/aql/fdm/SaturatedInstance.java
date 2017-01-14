@@ -194,11 +194,6 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 	}
 		
 	private class InnerDP implements DP<Ty, En, Sym, Fk, Att, X, Y> {
-/*
-		@Override
-		public Collage<Ty, En, Sym, Fk, Att, X, Y> collage() {
-			return col;
-		}*/
 
 		@Override
 		public boolean eq(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, X, Y> lhs, Term<Ty, En, Sym, Fk, Att, X, Y> rhs) {
@@ -233,6 +228,12 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 			}
 			throw new RuntimeException("Anomaly: please report");
 		}
+		
+		@Override
+		public String toStringProver() {
+			return "Saturated Inner DP wrapper of " + dp.toStringProver();
+		}
+
 		
 	}
 		

@@ -1048,7 +1048,7 @@ public class Util {
             return o1.toString().compareTo(o2.toString());
         };
 
-	public static void anomaly() {
+	public static <X> X anomaly() {
 		throw new RuntimeException("Anomaly: please report");
 	}
 

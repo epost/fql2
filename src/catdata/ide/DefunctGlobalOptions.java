@@ -24,7 +24,6 @@ import javax.swing.JTabbedPane;
 import catdata.Pair;
 import catdata.Unit;
 import catdata.Util;
-import catdata.aql.AqlOptions.AqlOptionsDefunct;
 import catdata.fpql.XOptions;
 import catdata.fql.FqlOptions;
 import catdata.fqlpp.FqlppOptions;
@@ -36,27 +35,27 @@ import catdata.opl.OplOptions;
  * 
  *         Contains global constants for debugging.
  */
-public class GlobalOptions implements Serializable {
+public class DefunctGlobalOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static GlobalOptions debug = new GlobalOptions();
+	public static DefunctGlobalOptions debug = new DefunctGlobalOptions();
 	
 	public static void clear() {
-		debug = new GlobalOptions();
+		debug = new DefunctGlobalOptions();
 	}
 
 	private static int selected_tab = 0;
 
-	public final GeneralOptions general = new GeneralOptions();
+	//public final GeneralOptions general = new GeneralOptions();
 	public final FqlOptions fql = new FqlOptions();
 	public final FqlppOptions fqlpp = new FqlppOptions();
 	public final XOptions fpql = new XOptions();
 	public OplOptions opl = new OplOptions(); 
-	private final AqlOptionsDefunct aql = new AqlOptionsDefunct();
+	//private final AqlOptionsDefunct aql = new AqlOptionsDefunct();
 	
 	private Options[] options() {
-		return new Options[] { general, fql, fqlpp, fpql, opl, aql };
+		return new Options[] { /*general,*/ fql, fqlpp, fpql, opl  /*,aql*/ };
 	}
 	
 	{
@@ -95,7 +94,7 @@ public class GlobalOptions implements Serializable {
 			}
 			FileInputStream fileIn = new FileInputStream("cdide.ser");
 			ObjectInputStream in = new ObjectInputStream(fileIn);
-			GlobalOptions e = (GlobalOptions) in.readObject();
+			DefunctGlobalOptions e = (DefunctGlobalOptions) in.readObject();
 			in.close();
 			fileIn.close();
 
@@ -105,8 +104,9 @@ public class GlobalOptions implements Serializable {
 				throw new RuntimeException("Cannot restore options, file corrupt");
 			}
 		} catch (IOException | ClassNotFoundException | RuntimeException i) {
-				i.printStackTrace();
-				JOptionPane.showMessageDialog(null, i.getLocalizedMessage());
+			i.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Cannot restore options - deleting");
+			delete();
 		}
 		
 	}
@@ -143,7 +143,7 @@ public class GlobalOptions implements Serializable {
 						callback.apply(new Unit());
 					}
 				} else if (ret == "Reset") {
-					debug = new GlobalOptions();
+					debug = new DefunctGlobalOptions();
 					showOptions();
 				} else if (ret == "Save") { // save
 					for (Function<Unit, Unit> callback : callbacks) {

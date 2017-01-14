@@ -5,19 +5,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.swing.JComponent;
-
-import catdata.Pair;
-import catdata.Unit;
 import catdata.Util;
 import catdata.aql.AqlProver.ProverName;
 import catdata.aql.exp.AqlParser;
-import catdata.ide.CodeTextPanel;
-import catdata.ide.Language;
-import catdata.ide.Options;
 
 public final class AqlOptions {
 	
@@ -315,30 +307,14 @@ public final class AqlOptions {
 		return Util.sep(options, " = ", "\n");
 	}
 
+	static String msg0 = "completion_precedence = \"a b c\" means a < b < c";
+	static String msg1 = msg0 + "\n\nAvailable provers: " + Arrays.toString(ProverName.values());
+	static String msg  = msg1 + "\n\nOption descriptions are available in the AQL manual, see categoricaldata.net/fql.html";
 
-	public static final class AqlOptionsDefunct extends Options {
+	public static String getMsg() {
+		return "AQL options are specified in each AQL expression.\nHere are the available options and their defaults:\n\n\t" + printDefault() + "\n\n" + msg;
+	}
 
-		private static final long serialVersionUID = 1L;
-	
-		@Override
-		public String getName() {
-			return Language.AQL.toString();
-		}
-		
-		private final String msg0 = "completion_precedence = \"a b c\" means a < b < c";
-		private final String msg1 = msg0 + "\n\nAvailable provers: " + Arrays.toString(ProverName.values());
-		private final String msg  = msg1 + "\n\nOption descriptions are available in the AQL manual, see categoricaldata.net/fql.html";
-		@Override
-		public Pair<JComponent, Function<Unit, Unit>> display() {
-			return new Pair<>(new CodeTextPanel("", "Aql options are specified in each Aql expression.\nHere are the available options and their defaults:\n\n\t" + printDefault() + "\n\n" + msg), x -> x);
-		}
-	
-		@Override
-		public int size() {
-			return 1;
-		}
-
-}
 	
 	
 	

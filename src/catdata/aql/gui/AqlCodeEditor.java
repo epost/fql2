@@ -1,6 +1,5 @@
 package catdata.aql.gui;
 
-import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -26,13 +25,11 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 
-import org.jparsec.error.ParserException;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
-import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
-import org.fife.ui.rsyntaxtextarea.TokenTypes;
+import org.jparsec.error.ParserException;
 
 import catdata.Program;
 import catdata.Util;
@@ -119,9 +116,12 @@ public final class AqlCodeEditor extends
 	
 	public AqlCodeEditor(String title, int id, String content) {
 		super(title, id, content);
-		SyntaxScheme scheme = topArea.getSyntaxScheme();
-		scheme.getStyle(TokenTypes.RESERVED_WORD).foreground = Color.RED;
-		scheme.getStyle(TokenTypes.RESERVED_WORD_2).foreground = Color.BLUE;
+		
+//		SyntaxScheme scheme = topArea.getSyntaxScheme();
+//		scheme.getStyle(TokenTypes.RESERVED_WORD).foreground = Color.RED;
+//		scheme.getStyle(TokenTypes.RESERVED_WORD_2).foreground = Color.BLUE;
+		
+		//IdeOptions.debug.set
 		
 		JMenuItem im = new JMenuItem("Infer Mapping (using last compiled state)");
 		im.addActionListener(x -> infer(Kind.MAPPING));

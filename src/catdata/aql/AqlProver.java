@@ -165,7 +165,7 @@ public class AqlProver {
 			}
 
 			@Override
-			public String toString() {
+			public String toStringProver() {
 				return "Caching definitional simplification and reflexivity wrapping of\n\n" + dpkb;
 			}
 

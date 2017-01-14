@@ -14,7 +14,8 @@ import catdata.ide.Example;
 import catdata.ide.Examples;
 import catdata.ide.Language;
 
-//TODO: have this execute pragmas?
+//TODO aql merge aqldoc with aqlinacan
+//TODO: aql have this execute pragmas?
 class AqlInACan {
 
 	private static String quote(String s) {
@@ -94,7 +95,9 @@ class AqlInACan {
 				if (exp.kind().equals(Kind.INSTANCE)) {
 					html += "<p><h2>" + n + " =\n</h2>" + toHtml((Instance<?,?,?,?,?,?,?,?,?>) o) 
 						+ "\n</p><br><hr>\n";
-				}
+				} 
+				//TODO aql revisit if this should print html or javascript graphs
+				//for example, could actually call HTML maker thingy, although security implication
 			}
 			return html + "\n\n</body></html>";
 		} catch (Throwable ex) {

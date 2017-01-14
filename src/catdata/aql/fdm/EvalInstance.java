@@ -85,6 +85,11 @@ extends Instance<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y>
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
+
+	@Override
+	public String toStringProver() {
+		return alg.toStringProver();
+	}
 	
 	
 	

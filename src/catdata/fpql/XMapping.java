@@ -27,7 +27,7 @@ import catdata.fpql.XExp.XMapConst;
 import catdata.fpql.XExp.XTransConst;
 import catdata.fpql.XPoly.Block;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -175,22 +175,22 @@ public class XMapping<C, D> implements XObject {
 	public JComponent display() {
 		JTabbedPane pane = new JTabbedPane();
 
-		if (GlobalOptions.debug.fpql.x_text) {
+		if (DefunctGlobalOptions.debug.fpql.x_text) {
 			String ret = toString();
 			pane.addTab("Text", new CodeTextPanel(BorderFactory.createEtchedBorder(), "", ret));
 		}
 
 		if (src.schema != null) {
-			if (GlobalOptions.debug.fpql.x_tables) {
+			if (DefunctGlobalOptions.debug.fpql.x_tables) {
 				pane.addTab("Tables", makeTables());
 			}
 		} else {
-			if (GlobalOptions.debug.fpql.x_tables) {
+			if (DefunctGlobalOptions.debug.fpql.x_tables) {
 				pane.addTab("Tables", makeTables2());
 			}
 		}
 		
-		if (GlobalOptions.debug.fpql.x_graph && src.schema == null) {
+		if (DefunctGlobalOptions.debug.fpql.x_graph && src.schema == null) {
 			pane.addTab("Graph", makeGraph());
 		}
 
@@ -1131,7 +1131,7 @@ public class XMapping<C, D> implements XObject {
 			}
 
 			Map theta;
-			if (deltapiI.saturated && GlobalOptions.debug.fpql.fast_amalgams) {
+			if (deltapiI.saturated && DefunctGlobalOptions.debug.fpql.fast_amalgams) {
 				if (x0.first.third.size() != 2) {
 					throw new RuntimeException();
 				}

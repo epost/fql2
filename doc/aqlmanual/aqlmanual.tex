@@ -12,7 +12,7 @@
 \begin{document}
 
 
-\title{AQL Reference Manual - Draft}
+\title{AQL-alpha Reference Manual}
 \author{Ryan Wisnesky}
 \date{\today}
 \maketitle
@@ -25,19 +25,19 @@
 \newpage
 \chapter{Introduction}
 
-This reference manual for AQL exhaustively documents 1) the keywords and options of AQL, 2) the features of the AQL IDE, and 3) the subtleties that arise when using AQL practice.  It is not a tutorial.
+This reference manual for AQL exhaustively documents 1) the keywords and options of AQL, 2) the features of the AQL IDE, and 3) the subtleties that arise when using AQL practice.  Users new to AQL may also benefit from the AQL tutorial, built-in to the IDE as the Tutorial example and available online at    \url{http://categoricaldata.net/fql.html}.
 
 %AQL is a language for querying {\it algebraic databases}.  An {\it algebraic database} can be formally defined in many ways: as a set-valued functor, using category theory; as a set of tables, using SQL; or as a set of axioms, using equational logic.  In this document we attempt to describe AQL informally without assuming any particular background, but familiarity with any of the preceding concepts will be useful to the reader.  This document is the reference manual for AQL: it is not a tutorial, but rather a comprehensive description of AQL's capabilities and syntax.
 
 \section{The IDE}
-AQL is implemented within the {\it functorial query language integrated development environment (FQL IDE)}.  The FQL IDE contains several query languages besides AQL that were developed as part of the research program that culminated in AQL  (all of the languages in the FQL IDE share a property known as {\it functorality}, hence the name FQL IDE).  AQL is not a superset of the other languages in the FQL IDE; readers interested in the non-AQL aspects of the FQL IDE are encouraged to visit \url{http://categoricaldata.net}.  By {\it AQL IDE}, we mean the FQL IDE set to the AQL language mode.  The AQL IDE is an open-source java program that provides an AQL code editor, an AQL execution engine, and a graphical viewer for AQL programs and results.   
+AQL is implemented within the {\it functorial query language integrated development environment (FQL IDE)}.  The FQL IDE contains several query languages besides AQL that were developed as part of the research program that culminated in AQL  (all of the languages in the FQL IDE share a property known as {\it functoriality}, hence the name FQL IDE).  AQL is not a superset of the other languages in the FQL IDE; readers interested in the non-AQL aspects of the FQL IDE are encouraged to visit \url{http://categoricaldata.net}.  By {\it AQL IDE}, we mean the FQL IDE set to the AQL language mode.  The AQL IDE is an open-source java program that provides an AQL code editor, an AQL execution engine, and a graphical viewer for AQL programs and results.   
 
 %The initial screen of the AQL IDE is shown below:
 %\begin{center}
 %\includegraphics[width=5in]{initial}
 %\end{center}
 
-The AQL IDE contains a multi-tabbed text file editor that supports saving, opening, copy-paste, undo-redo, RTF export, code folding, outline-view, and search-replace through right-click context menus, menu bars, and keyboard shortcuts.  A variety of options are available in the options menu (text size, default file path, etc.)  Below each AQL text editor is a response text area that displays error and status messages.  The built-in AQL examples are loaded by selecting them from load-example combo-box in the upper-right of the IDE.  To distinguish AQL examples from examples written in non-AQL languages, AQL examples are prefixed with the letter ``A'' (e.g., the AQL employees example is called ``A Employees'').  AQL programs are executed by pressing the run button in the upper-left of the IDE.  While an AQL program is running its status will be continually updated in the response area.  AQL programs that are running can be manually terminated using the abort menu option.   When an AQL program finishes running, the AQL IDE displays a graphical viewer allowing the result of the AQL program to be visually inspected.
+The AQL IDE contains a multi-tabbed text file editor that supports saving, opening, copy-paste, undo-redo, RTF export, code folding, outline-view, and search-replace through right-click context menus, menu bars, and keyboard shortcuts.  A variety of options are available in the options menu (text size, default file path, etc.)  Below each AQL text editor is a response text area that displays error and status messages.  The built-in AQL examples are loaded by selecting them from load-example combo-box in the upper-right of the IDE.  AQL programs are executed by pressing the run button in the upper-left of the IDE.  While an AQL program is running its status will be continually updated in the response area.  AQL programs that are running can be manually terminated using the abort menu option.   When an AQL program finishes running, the AQL IDE displays a graphical viewer allowing the result of the AQL program to be visually inspected.  Manual termination of AQL programs is best-effort and terminated AQL programs may leave resources (e.g., JDBC connections) open.
 
 \section{Changing the Memory Limit}
 
@@ -60,6 +60,18 @@ The AQL IDE also supports command-line execution: an AQL program is passed to st
 java -cp "./fql.jar" catdata.aql.exp.AqlInACan.openCan
 \end{verbatim}
 
+\section{HTML markup}
+The AQL IDE allows HTML markup to be inserted into AQL files.  After a program has compiled, the ``emit as HTML'' option in the AQL menu will emit the HTML code.  The HTML will contain pretty-printings of the program text, HTML tables for instances, and javascript graphs for schemas.  To insert HTML, use the keyword {\tt html}, then brackets, and then a quoted string (note that because the HTML appears in a string, any quotes and backslashes within that string must be escaped).  For example,
+\begin{verbatim}
+instance I = ...
+
+html {"<html>Hello world<a href=\"main.html\">link</a></html>"} 
+
+instance J = ...
+\end{verbatim}
+
+Due to a bug in the code editor, html sections will not fold if the closing quote is on the same line as the closing bracket.  The AQL tutorial, built-in as the Tutorial example, illustrates HTML output.
+
 \chapter{AQL Basics}
 
 \section{Comments}
@@ -72,7 +84,7 @@ A {\it kind} is either {\it typeside}, {\it schema},  {\it instance}, (schema) {
 
 \section{Identifiers}
 
-AQL identifiers are case-sensitive alpha-numeric strings that do not start with numerals, or arbitrary strings escaped with double-quotes.
+AQL identifiers are case-sensitive alpha-numeric strings, or arbitrary strings escaped with double-quotes.
 
 \section{Declarations}
 
@@ -80,7 +92,7 @@ An AQL program is an ordered list of {\it declarations} of the form $kind \ name
 
 \section{Caching}
 
-The AQL IDE will cache result artifacts to save time in subsequent executions; this behavior can be disabled per-expression through the {\tt always\_reload} option.  Disabling caching is can be useful when and AQL program contains side-effecting pragmas.
+The AQL IDE will cache result artifacts to save time in subsequent executions; this behavior can be disabled per-expression through the {\tt always\_reload} option.  Disabling caching is can be useful when an AQL program contains side-effecting pragmas.
 
 \section{Terms}
 
@@ -97,7 +109,7 @@ Intuitively, terms denote ``things which can be named'' in typesides (java objec
               | <term>.<attribute> | <term>.<foreign key> | <function>(<term>, ...) 
 \end{verbatim}
 
-The syntax $p.q$ abbreviates $q(p)$.  Parenthesis in AQL cannot be added (e.g., if $v$ is a variable, then $(v)$ is not valid syntax).  
+The syntax $p.q$ abbreviates $q(p)$.  Parenthesis in AQL cannot be added (e.g., if $v$ is a variable, then $(v)$ is not valid syntax) or omitted (e.g., $(x + y)$ cannot be written as $x + y$)..  
 
 \section{Contexts}
 
@@ -191,7 +203,7 @@ The AQL IDE provides code-assistance functions.  For example, if $S$ and $T$ are
 
 \section{Theorem Proving}
 
-The AQL engine uses automated theorem proving technology to ensure that AQL programs cannot fail at runtime (modulo javascript errors), or materialize instances that do not satisfy their data integrity constraints.  To provide this guarantee, every AQL typeside, schema, and instance must be a decidable equational theory.  Not all equational theories are decidable; moreover, automated theorem proving methods can be slow or further incomplete.  The AQL engine provides a number of theorem provers which by default it uses automatically as appropriate; however, specific theorem provers can be chosen by using the {\tt prover} option.  In addition, schema mappings and transforms are required to preserve provable equality; this behavior can be disabled with the {\tt dont\_validate\_unsafe} option.  To find out which prover is being used, click the ``info'' button in the ``DP'' pane in the viewer.  The DP pane also allows users to decide the equality of arbitrary terms by entering them as text (useful for debugging AQL programs).
+The AQL engine uses automated theorem proving technology to ensure that AQL programs cannot fail at runtime (modulo javascript errors), or materialize instances that do not satisfy their data integrity constraints.  To provide this guarantee, every AQL typeside, schema, and instance must be a decidable equational theory.  Not all equational theories are decidable; moreover, automated theorem proving methods can be slow or incomplete.  The AQL engine provides a number of theorem provers which by default it uses automatically as appropriate; however, specific theorem provers can be chosen by using the {\tt prover} option.  In addition, schema mappings and transforms are required to preserve provable equality; this behavior can be disabled with the {\tt dont\_validate\_unsafe} option.  To find out which prover is being used, click the ``info'' button in the ``DP'' pane in the viewer.  The DP pane also allows users to decide the equality of arbitrary terms by entering them as text (useful for debugging AQL programs).
 
 \section{Provenance / Lineage of generated IDs}
 
@@ -651,7 +663,7 @@ Applies only to theories where all symbols are 0-ary or 1-ary.  Uses length-redu
 
 Applies only to weakly orthogonal theories.  Interprets all equations $p = q$ as rewrite rules $p \to q$ if $p$ is syntactically smaller than $q$ and $q \to p$ if $q$ is syntactically smaller than $p$ and symbolically evaluates terms to normal forms.  Fails if an equation cannot be oriented.
 
-\subsubsection{{\tt program_allow_nontermination_unsafe}}
+\subsubsection{{\tt program\_allow\_nontermination\_unsafe}}
 
 Interprets all equations $p = q$ as rewrite rules $p \to q$ regardless of termination behavior.  Can diverge.
 
@@ -663,7 +675,7 @@ Applies unfailing (ordered) Knuth-Bendix completion specialized to lexicographic
 
 Defines the precedence to be used for Knuth-Bendix completion.  The list {\tt a b c} indicates that $a < b < c$.  Every symbol in a typeside or schema or instance must appear exactly once in this list.
 
-\subsubsection{{\tt completion\_sort} = boolean}
+\subsubsection{{\tt completion\_sort = boolean}}
 
 Sorts the list of critical pairs in Knuth-Bendix completion by length, processing shorter pairs first (but still fairly).
 

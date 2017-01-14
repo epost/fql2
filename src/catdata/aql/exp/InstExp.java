@@ -450,7 +450,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		@Override
 		public SchExp<Ty, En2, Sym, Fk2, Att2> type(AqlTyping G) {
 			if (!I.type(G).equals(Q.type(G).first)) { //TODO aql schema equality
-				throw new RuntimeException("Schema of instance is " + I.type(G) + " but source of query is " + Q.type(G).first);
+				throw new RuntimeException("In evaluating a query, schema of instance is " + I.type(G) + " but source of query is " + Q.type(G).first + "\nThe query is " + this);
 			}
 			return Q.type(G).second;
 		}

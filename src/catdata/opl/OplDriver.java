@@ -7,7 +7,7 @@ import java.util.Set;
 import catdata.Environment;
 import catdata.LineException;
 import catdata.Program;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 import catdata.opl.OplExp.OplInst0;
 import catdata.opl.OplExp.OplPragma;
 import catdata.opl.OplExp.OplSCHEMA0;
@@ -43,17 +43,17 @@ class OplDriver {
 			}
 		}
 		
-		if (GlobalOptions.debug.opl.opl_lazy_gui && usesPragma) {
+		if (DefunctGlobalOptions.debug.opl.opl_lazy_gui && usesPragma) {
 			throw new RuntimeException("Pragmas and lazy guis are not compatible");
 		}
 
-		if (GlobalOptions.debug.opl.opl_prover_force_prec) {
+		if (DefunctGlobalOptions.debug.opl.opl_prover_force_prec) {
 			inferPrec(init);
 		}
 
 		Set<String> unchanged = new HashSet<>();
 		int i = 0;
-		if (last_str != null && GlobalOptions.debug.opl.opl_cache_gui) {
+		if (last_str != null && DefunctGlobalOptions.debug.opl.opl_cache_gui) {
 			for (String k : init.order) {
 				if (i >= last_prog.order.size()) {
 					break;

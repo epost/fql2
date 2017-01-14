@@ -15,7 +15,7 @@ import catdata.Environment;
 import catdata.Program;
 import catdata.ide.CodeEditor;
 import catdata.ide.Language;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 @SuppressWarnings("serial")
 public class OplCodeEditor extends
@@ -125,11 +125,11 @@ public class OplCodeEditor extends
 			Environment<OplObject> env, long start, long middle) {
 		try {
 			OplDisplay ret = new OplDisplay(foo, init, env, start, middle);
-			GlobalOptions.debug.opl = last_options;
+			DefunctGlobalOptions.debug.opl = last_options;
 			return ret;
 		} catch (RuntimeException ex) {
 			if (last_options != null) {
-				GlobalOptions.debug.opl = last_options;
+				DefunctGlobalOptions.debug.opl = last_options;
 			}
 			throw ex;
 		}
@@ -141,7 +141,7 @@ public class OplCodeEditor extends
 
 	@Override
 	protected Environment<OplObject> makeEnv(String str, Program<OplExp> init) {
-		last_options = (OplOptions) GlobalOptions.debug.opl.clone();
+		last_options = (OplOptions) DefunctGlobalOptions.debug.opl.clone();
 		try {
 			last_env = OplDriver.makeEnv(str, init, toUpdate, last_str,
 					last_prog, last_env);
@@ -150,7 +150,7 @@ public class OplCodeEditor extends
 			return last_env;
 		} catch (Exception ex) {
 			if (last_options != null) {
-				GlobalOptions.debug.opl = last_options;
+				DefunctGlobalOptions.debug.opl = last_options;
 			}
 			throw ex;
 		}

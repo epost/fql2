@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -15,7 +16,8 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane; 
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 
@@ -101,13 +103,11 @@ public final class AqlDisplay implements Disp {
 			}
 			if (env.defs.keySet().contains(c)) {
 				Object obj = env.defs.get(c, exp.kind());
-	//			map.put(obj, c);
 				try {
 					frames.add(new Pair<>(doLookup(c, exp, env), wrapDisplay(exp.kind(), obj)));
 				} catch (RuntimeException ex) {
 					ex.printStackTrace();
 					throw new LineException(ex.getMessage(), c, exp.kind().toString());
-		//			frames.add(new Pair<>(doLookup(c, obj, exp), new CodeTextPanel(BorderFactory.createEtchedBorder(), "Exception", ex.getMessage())));
 				}
 			}
 		}
@@ -119,44 +119,89 @@ public final class AqlDisplay implements Disp {
 	}
 	
 	private JFrame frame = null;
-	//private String name;
 	private final List<Pair<String, JComponent>> frames = new LinkedList<>();
 
 	private final CardLayout cl = new CardLayout();
 	private final JPanel x = new JPanel(cl);
 	private final JList<String> yyy = new JList<>();
-	//private final Map<String, String> indices = new HashMap<>();
-
+	private String current;
+	
+	private final JComponent lookup(String s) {
+		for (Pair<String, JComponent> p : frames) {
+			if (p.first.equals(s)) {
+				return p.second;
+			}
+		}
+		return null;
+	}
+	
 	private void display(String s, @SuppressWarnings("unused") List<String> order) {
 		frame = new JFrame();
-		//this.name = s;
-
+	
 		Vector<String> ooo = new Vector<>();
-		//int index = 0;
 		for (Pair<String, JComponent> p : frames) {
 			x.add(p.second, p.first);
 			ooo.add(p.first);
-	//		indices.put(order.get(index++), p.first);
 		}
 		x.add(new JPanel(), "blank");
 		cl.show(x, "blank");
-
+		current = "blank";
+		
 		yyy.setListData(ooo);
 		JPanel temp1 = new JPanel(new GridLayout(1, 1));
 		temp1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(),
 				"Select:"));
 		JScrollPane yyy1 = new JScrollPane(yyy);
 		temp1.add(yyy1);
-	//	temp1.setMinimumSize(new Dimension(200, 600));
-	//	yyy.setPreferredSize(new Dimension(200, 600));
 		yyy.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
+		yyy.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				JTabbedPane p = (JTabbedPane) lookup(current);
+				if (p == null) {
+					return;
+				}
+				int i = p.getSelectedIndex();
+				int j = -1;
+				if (e.getKeyCode() == KeyEvent.VK_LEFT ) {
+					j = i - 1;
+					if (j < 0) {
+						j = p.getTabCount() - 1;
+					}
+					p.setSelectedIndex(j);
+					p.revalidate();
+				} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+					j = i + 1;
+					if (j >= p.getTabCount()) {
+						j = 0;
+					}
+					p.setSelectedIndex(j);
+					p.revalidate();
+				} 
+				
+			}
+			
+			
+		});
+		
 		yyy.addListSelectionListener(e -> {
 				int i = yyy.getSelectedIndex();
 				if (i == -1) {
 					cl.show(x, "blank");
+					current = "blank";
 				} else {
 					cl.show(x, ooo.get(i));
+					current = ooo.get(i);
 				}
 			
 
@@ -168,6 +213,7 @@ public final class AqlDisplay implements Disp {
 		px.setDividerSize(4);
 		frame = new JFrame(/* "Viewer for " + */s);
 
+		//TODO AQL what is other split pane?
 		JSplitPane temp2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		temp2.setResizeWeight(1);
 		temp2.setDividerSize(0);

@@ -25,7 +25,7 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.Util.BoldifyingColumnHeaderRenderer;
 import catdata.Util.MyTableRowSorter;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 import catdata.opl.OplExp.NonEditableModel;
 
 public class JSWrapper {
@@ -38,7 +38,7 @@ public class JSWrapper {
 	@Override
 	public String toString() {
 		String s = "JS<" + o + ">";
-		if (!GlobalOptions.debug.opl.opl_pretty_print) {
+		if (!DefunctGlobalOptions.debug.opl.opl_pretty_print) {
 			return s;
 		}
 		return o.toString();

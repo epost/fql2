@@ -421,7 +421,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	
 	@Override
 	public String toStringProver() {
-		return dp.toString();
+		return dp.toStringProver();
 	}
 	
 

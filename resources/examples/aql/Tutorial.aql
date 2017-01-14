@@ -265,6 +265,11 @@ instance deltaFJ_prime = eval deltaFAsQuery J
 
 html {" <br/>Here is a query corresponding to the previous section's sigma: </div>" }	
 
+//In general, it is not possible to use eval to do a sigma - the
+//dual of eval, "coeval", must be used instead.  A good illustration of this is to
+//change the mapping F to taking age to age + 1 and similarly for the uber flowers.  In this case, 
+//sigmaFdeltaFJ_prime is not the same as sigmaFdeltaFJ.  The former does what
+//is natural, and the latter contains labeled nulls and has a non-trivial type algebra.
 query sigmaFAsQuery = literal : C -> D {
 	entities
 		N -> {from n1:N1 return name -> name(n1) salary -> salary(n1) age -> age(f(n1))}

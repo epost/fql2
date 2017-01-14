@@ -68,6 +68,11 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y>
 		return I.dp().eq(F.trans(ctx),alg.translate(lhs),alg.translate(rhs));
 	}
 
+	@Override
+	public String toStringProver() {
+		return alg.toStringProver();
+	}
+
 		
 	
 

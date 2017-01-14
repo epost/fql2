@@ -21,7 +21,7 @@ import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
 import catdata.fqlpp.cat.FinSet;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 import catdata.opl.OplExp.OplJavaInst;
 import catdata.opl.OplExp.OplSig;
 import catdata.opl.OplParser.DoNotIgnore;
@@ -90,7 +90,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 	
 	public OplToKB(Iterator<V> fr, OplSig<S, C, V> sig) {
 		this.sig = sig;
-		if (GlobalOptions.debug.opl.opl_prover_require_const) {
+		if (DefunctGlobalOptions.debug.opl.opl_prover_require_const) {
 			checkEmpty();
 		}
 		this.fr = fr;
@@ -364,12 +364,12 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 			rs.addAll(convert(impl.second, impl.third));
 		}
 		
-		KBOptions options = new KBOptions(GlobalOptions.debug.opl.opl_prover_unfailing, 
-				GlobalOptions.debug.opl.opl_prover_sort, GlobalOptions.debug.opl.opl_allow_horn && !s.implications.isEmpty(), 
-				GlobalOptions.debug.opl.opl_prover_ac, GlobalOptions.debug.opl.opl_prover_timeout, 
-				GlobalOptions.debug.opl.opl_prover_reduction_limit, GlobalOptions.debug.opl.opl_prover_filter_subsumed,
-				/* NEWDEBUG.debug.opl.simplify, */ GlobalOptions.debug.opl.opl_prover_compose, false);
-		return new OplKB(eqs, KBOrders.lpogt(GlobalOptions.debug.opl.opl_allow_horn && !s.implications.isEmpty(), gt), fr, rs, options);			
+		KBOptions options = new KBOptions(DefunctGlobalOptions.debug.opl.opl_prover_unfailing, 
+				DefunctGlobalOptions.debug.opl.opl_prover_sort, DefunctGlobalOptions.debug.opl.opl_allow_horn && !s.implications.isEmpty(), 
+				DefunctGlobalOptions.debug.opl.opl_prover_ac, DefunctGlobalOptions.debug.opl.opl_prover_timeout, 
+				DefunctGlobalOptions.debug.opl.opl_prover_reduction_limit, DefunctGlobalOptions.debug.opl.opl_prover_filter_subsumed,
+				/* NEWDEBUG.debug.opl.simplify, */ DefunctGlobalOptions.debug.opl.opl_prover_compose, false);
+		return new OplKB(eqs, KBOrders.lpogt(DefunctGlobalOptions.debug.opl.opl_allow_horn && !s.implications.isEmpty(), gt), fr, rs, options);			
 	}
 	
 	private static <C,V> Set<Pair<KBExp<C, V>, KBExp<C, V>>> convert(List<Pair<OplTerm<C, V>, OplTerm<C, V>>> x, List<Pair<OplTerm<C, V>, OplTerm<C, V>>> y) {
@@ -453,7 +453,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		Thread t = new Thread(r);
 		t.start();
 		try {
-			t.join(GlobalOptions.debug.opl.opl_saturate_timeout);
+			t.join(DefunctGlobalOptions.debug.opl.opl_saturate_timeout);
 			t.stop();
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -462,7 +462,7 @@ public class OplToKB<S,C,V> implements Operad<S, Pair<OplCtx<S,V>, OplTerm<C,V>>
 		if (sorts.keySet().size() == sig.sorts.size()) {
 			return sorts;
 		}
-		throw new RuntimeException("Timeout (" + GlobalOptions.debug.opl.opl_saturate_timeout + ") exceeded, sorts are " + sorts + ".  Possible cause: infinite instance");
+		throw new RuntimeException("Timeout (" + DefunctGlobalOptions.debug.opl.opl_saturate_timeout + ") exceeded, sorts are " + sorts + ".  Possible cause: infinite instance");
 	}
 
 }

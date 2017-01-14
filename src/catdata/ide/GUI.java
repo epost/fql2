@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Vector;
@@ -29,6 +31,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
 import catdata.Pair;
@@ -47,6 +51,7 @@ import catdata.fql.RingToFql;
 import catdata.fql.SqlToFql;
 import catdata.fql.gui.FqlCodeEditor;
 import catdata.fqlpp.KBViewer;
+import catdata.ide.IdeOptions.IdeOption;
 import catdata.nested.NraViewer;
 import catdata.opl.CfgToOpl;
 import catdata.opl.OplWarehouse;
@@ -181,7 +186,11 @@ public class GUI extends JPanel {
 		
 		MenuItem optionsItem = new MenuItem("Options");
 		toolsMenu.add(optionsItem);
-		optionsItem.addActionListener(e -> GlobalOptions.showOptions());
+		optionsItem.addActionListener(e -> IdeOptions.showOptions());
+		
+		MenuItem optionsItem2 = new MenuItem("Legacy options");
+		toolsMenu.add(optionsItem2);
+		optionsItem2.addActionListener(e -> DefunctGlobalOptions.showOptions());
 		
 		MenuItem rtf = new MenuItem("Copy as RTF");
 		editMenu.add(rtf);
@@ -193,14 +202,7 @@ public class GUI extends JPanel {
 		});
 		
 		
-		MenuItem toggle = new MenuItem("Toggle line wrap");
-		editMenu.add(toggle);
-		toggle.addActionListener(x -> {
-			CodeEditor<?, ?, ?> ed = getSelectedEditor();
-			if (ed != null) {
-				ed.toggleWrap();
-			}
-		});
+	
 		
 
 		MenuItem fall = new MenuItem("Fold All");
@@ -245,7 +247,7 @@ public class GUI extends JPanel {
 		Menu helpMenu = new Menu("About");
 		MenuItem aboutItem = new MenuItem("About");
 		helpMenu.add(aboutItem);
-		aboutItem.addActionListener(e -> GlobalOptions.showAbout());
+		aboutItem.addActionListener(e -> IdeOptions.showAbout());
 
 		openItem.addActionListener(e -> openActionAlternate());
 
@@ -302,7 +304,7 @@ public class GUI extends JPanel {
 		open_button.addActionListener(e -> openActionAlternate());
 
 		JButton optionsb = new JButton("Options");
-		optionsb.addActionListener(e -> GlobalOptions.showOptions());
+		optionsb.addActionListener(e -> IdeOptions.showOptions());
 
 		CardLayout cl = new CardLayout();
 		JPanel boxPanel = new JPanel(cl);
@@ -343,8 +345,7 @@ public class GUI extends JPanel {
 		pan.add(toolBar, BorderLayout.PAGE_START);
 		pan.add(editors, BorderLayout.CENTER);
 
-		newAction(null, "", Language.getDefault());
-
+	
 		return new Pair<>(pan, menuBar);
 	}
 
@@ -538,6 +539,14 @@ public class GUI extends JPanel {
 			}
 			return false;
 		}
+
+		public static String getAllString() {
+			List<String> l = new LinkedList<>();
+			for (Language lang : Language.values()) {
+				l.add("*." + lang.fileExtension());
+			}
+			return Util.sep(l, ";");
+		}
 	}
 
 	// TODO aql file chooser does not bold the selectable files on mac see
@@ -604,42 +613,49 @@ public class GUI extends JPanel {
 	private static FileDialog openDialog;
 	private static FileDialog getOpenDialog() {
 		if (openDialog != null) {
+			openDialog.setFile(AllNameFilter.getAllString());
 			return openDialog;
 		}
 		openDialog = new FileDialog((Dialog)null, "Open", FileDialog.LOAD);
+		openDialog.setFile(AllNameFilter.getAllString());
 		openDialog.setFilenameFilter(new AllNameFilter());
-		if (!GlobalOptions.debug.general.file_path.isEmpty()) {
-			openDialog.setDirectory(GlobalOptions.debug.general.file_path);
-		}
+		//if (!GlobalOptions.debug.general.file_path.isEmpty()) {
+		openDialog.setDirectory(IdeOptions.theCurrentOptions.getFile(IdeOption.FILE_PATH).getAbsolutePath());
+		//}
 		openDialog.setMultipleMode(true);
 		return openDialog;
 	}
 	
 	private static FileDialog saveDialog;
-	private static FileDialog getSaveDialog() {
+	private static FileDialog getSaveDialog(Language lang) {
 		if (saveDialog != null) {
+			saveDialog.setFile("*." + lang.fileExtension());
 			return saveDialog;
 		}
 		saveDialog = new FileDialog((Dialog)null, "Save", FileDialog.SAVE);
+		saveDialog.setFile("*." + lang.fileExtension());
 		//openDialog.setFilenameFilter(new AllNameFilter());
-		if (!GlobalOptions.debug.general.file_path.isEmpty()) {
-			saveDialog.setDirectory(GlobalOptions.debug.general.file_path);
-		}
+		//if (!GlobalOptions.debug.general.file_path.isEmpty()) {
+			saveDialog.setDirectory(IdeOptions.theCurrentOptions.getFile(IdeOption.FILE_PATH).getAbsolutePath());
+		//}
 		saveDialog.setMultipleMode(false);
 		return saveDialog;
 	}
 	
-	private static void openActionAlternate() {
-		//delay();
-		FileDialog jfc = getOpenDialog();
-		jfc.setVisible(true);
-		for (File f : jfc.getFiles()) {
+	public static void openAction(File... fs) {
+		for (File f : fs) {
 			for (Language l : Language.values()) {
 				if (f.getAbsolutePath().endsWith("." + l.fileExtension())) {
 					doOpen(f, l);
 				}
 			}
 		}
+	}
+	private static void openActionAlternate() {
+		//delay();
+		FileDialog jfc = getOpenDialog();
+		jfc.setVisible(true);
+		openAction(jfc.getFiles());
 	}
 	
 	private static void saveAsActionAlternate(CodeEditor<?, ?, ?> e) {
@@ -649,7 +665,7 @@ public class GUI extends JPanel {
 			return;
 		}
 
-		FileDialog jfc = getSaveDialog();
+		FileDialog jfc = getSaveDialog(e.lang());
 		
 		jfc.setVisible(true);
 
@@ -723,10 +739,20 @@ public class GUI extends JPanel {
 		return ret;
 	}
 
-	public static void setFontSize(int size) {
+	public static void optionsHaveChanged() {
 		for (CodeEditor<?, ?, ?> c : keys.values()) {
-			c.setFontSize(size);
+			c.optionsHaveChanged();
 		}
+		String prev = UIManager.getLookAndFeel().getClass().getName();
+		String next = IdeOptions.theCurrentOptions.getString(IdeOption.LOOK_AND_FEEL);
+	    if (!prev.equals(next)) {
+            try {
+                UIManager.setLookAndFeel(next);
+                SwingUtilities.updateComponentTreeUI(GUI.topFrame);
+             } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, e);
+            }
+        }
 	}
 
 	private static final Map<Integer, Boolean> dirty = new HashMap<>();
@@ -735,7 +761,7 @@ public class GUI extends JPanel {
 	private static final Map<Integer, String> titles = new HashMap<>();
 	private static int untitled_count = 0;
 
-	private static Integer newAction(String title, String content, Language lang) {
+	public static Integer newAction(String title, String content, Language lang) {
 		untitled_count++;
 		if (title == null) {
 			title = "Untitled " + untitled_count + "." + lang.fileExtension();
