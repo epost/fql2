@@ -44,6 +44,11 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	
+	
+	
+	
+	////////////////////////////////////////////////////////////////////////////////////////
+	
 	public static class TransExpCoEvalEvalCoUnit<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>  
 	extends TransExp<Ty, En1, Sym, Fk1, Att1, Pair<Var,Row<En2,X>>, Y, Gen, Sk, ID, Chc<Y, Pair<ID, Att1>>, X, Y> {
 

@@ -315,9 +315,12 @@ public class AqlParser {
 			unitq = Parsers.tuple(token("unit_query"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
 					.map(x -> new TransExpCoEvalEvalUnit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 			counitq = Parsers.tuple(token("counit_query"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
-					.map(x -> new TransExpCoEvalEvalCoUnit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d)));
+					.map(x -> new TransExpCoEvalEvalCoUnit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
+					
+			comp = Parsers.tuple(token("("), trans_ref.lazy(), token(";"), trans_ref.lazy(), token(")"))
+			.map(x -> new TransExpCompose(x.b, x.d));
 		
-			Parser ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct, eval, coeval, transExpCsv(), unitq, counitq, transExpJdbc());
+			Parser ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct, eval, coeval, transExpCsv(), unitq, counitq, transExpJdbc(), comp);
 		
 		trans_ref.set(ret);
 	}

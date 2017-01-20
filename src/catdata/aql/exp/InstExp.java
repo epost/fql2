@@ -242,10 +242,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		@Override
 		public String toString() {
 			String ret = "colim " + shape + " " + schema + " {";
-			ret += "\n\tnodes";
-			ret += Util.sep(nodes.map, "\n\t\t", " -> ");
-			ret += "\n\tedges";			
-			ret += Util.sep(edges.map, "\n\t\t", " -> ");
+			ret += "\n\tnodes\n\t\t";
+			ret += Util.sep(nodes.map, " -> ",  "\n\t\t");
+			ret += "\n\tedges\n\t\t";			
+			ret += Util.sep(edges.map, " -> ",  "\n\t\t");
 			return ret + "\n}";					
 		}
 		

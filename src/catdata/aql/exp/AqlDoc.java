@@ -120,7 +120,7 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 	private int fresh = 0;
 	@Override
 	public <Ty, En, Sym, Fk, Att> String visit(Unit arg, Schema<Ty, En, Sym, Fk, Att> S)  {
-		String ret = "";
+		/* String ret = "";
 		ret += "\n<script>";
 		ret += "\nvar graph" + fresh + " = new Springy.Graph();";
 		
@@ -141,7 +141,8 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 		ret += "\n</script>";
 		ret += "\n<div><canvas id=\"canvas" + fresh + "\" width=\"640\" height=\"320\" /></div>";
 		fresh++;
-		return ret;
+		return ret; */
+		return "";
 	}
 
 
