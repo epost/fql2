@@ -89,7 +89,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		this.printGen = printGen;
 		this.printSk = printSk;
 
-        dp = schema.typeSide.js.java_tys.isEmpty() ? AqlProver.create(ops, col) : AqlProver.create(ops, col.entities_only());
+        dp = AqlProver.create(ops, col, schema.typeSide.js); //schema.typeSide.js.java_tys.isEmpty() ? AqlProver.create(ops, col) : AqlProver.create(ops, col.entities_only());
 		//schema.typeSide.collage(); //sanity check remove
 		try {
 			while (saturate1());

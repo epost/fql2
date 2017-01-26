@@ -10,12 +10,13 @@ import catdata.aql.Schema;
 import catdata.aql.Semantics;
 import catdata.aql.Transform;
 import catdata.aql.TypeSide;
+import catdata.aql.fdm.ColimitSchema;
 import catdata.graph.DMG;
 
 public final class AqlEnv {
 
 	@SuppressWarnings("rawtypes")
-	public final KindCtx<String, DMG, TypeSide, Schema, Instance, Transform, Mapping, Query, Pragma, Comment> defs = new KindCtx<>();
+	public final KindCtx<String, DMG, TypeSide, Schema, Instance, Transform, Mapping, Query, Pragma, Comment, ColimitSchema> defs = new KindCtx<>();
 	
 	public RuntimeException exn = null;
 	

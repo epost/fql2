@@ -206,7 +206,6 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 		}
 
 		AqlOptions strat = new AqlOptions(options, col);
-		
 		InitialAlgebra<Object, Object, Object, Object, Object, Object, Object, ID> 
 		initial = new InitialAlgebra<>(strat, sch, col, new It(), Object::toString, Object::toString);
 				 

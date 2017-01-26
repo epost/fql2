@@ -191,7 +191,7 @@ mapping F = literal : C -> D {
  	attributes
 		name -> lambda x. name(x)
 		salary -> lambda x. salary(x)
-		age -> lambda x. age(x)
+		age -> lambda x. age(x) //plus(1,age(x)) interesting to try this - sigma no longer inverse to delta, results in non-trivial type algebra
 } 
 
 

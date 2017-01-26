@@ -43,6 +43,7 @@ class Inferrer {
 					case SCHEMA:
 					case TYPESIDE:
 					case COMMENT:	
+					case SCHEMA_COLIMIT:	
                         default:
                             break;
                     }

@@ -281,7 +281,7 @@ public class XCtx<C> implements XObject {
 
 	//this will destroy terms, so must copy
 	private void kb() {
-		Set<Pair<List<C>, List<C>>> rules = new HashSet<>();
+		List<Pair<List<C>, List<C>>> rules = new LinkedList<>();
 		for (Pair<List<C>, List<C>> eq : allEqs()) {
 			rules.add(new Pair<>(new LinkedList<>(eq.first), new LinkedList<>(eq.second)));
 		}

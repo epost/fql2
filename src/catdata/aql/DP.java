@@ -3,7 +3,7 @@ package catdata.aql;
 import catdata.Chc;
 import catdata.Ctx;
 
-
+//TODO aql all DPs just have to handle java now
 public interface DP<Ty,En,Sym,Fk,Att,Gen,Sk> {
 	
 	public abstract String toStringProver();

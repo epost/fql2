@@ -13,6 +13,7 @@ import catdata.aql.Schema;
 import catdata.aql.SemanticsVisitor;
 import catdata.aql.Transform;
 import catdata.aql.TypeSide;
+import catdata.aql.fdm.ColimitSchema;
 import catdata.graph.DMG;
 
 public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeException> {
@@ -142,6 +143,11 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 		ret += "\n<div><canvas id=\"canvas" + fresh + "\" width=\"640\" height=\"320\" /></div>";
 		fresh++;
 		return ret; */
+		return "";
+	}
+
+	@Override
+	public <N, E0, Ty, En, Sym, Fk, Att> String visit(Unit arg, ColimitSchema<N, E0, Ty, En, Sym, Fk, Att> S) throws RuntimeException {
 		return "";
 	}
 

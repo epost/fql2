@@ -99,6 +99,8 @@ public class CodeTextPanel extends JPanel {
 		});
 
 		// setWordWrap(true);
+		
+		IdeOptions.theCurrentOptions.apply(this.area);
 	}
 
 	public void setWordWrap(boolean b) {

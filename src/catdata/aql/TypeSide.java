@@ -59,7 +59,14 @@ public final class TypeSide<Ty, Sym> implements Semantics {
 	}
 	
 	public TypeSide(Set<Ty> tys, Map<Sym, Pair<List<Ty>, Ty>> syms, Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs, Map<Ty, String> java_tys_string, Map<Ty, String> java_parser_string, Map<Sym, String> java_fns_string, AqlOptions strategy) {
-		this(tys, syms, eqs, new AqlJs<>(new Ctx<>(syms), new Ctx<>(java_tys_string), new Ctx<>(java_parser_string), new Ctx<>(java_fns_string)), AqlProver.create(strategy, col(tys, syms, eqs, java_tys_string, java_parser_string, java_fns_string)), !((Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
+		Util.assertNotNull(tys, syms, eqs, java_tys_string, java_parser_string, java_fns_string);
+		this.tys = tys;
+		this.syms = new Ctx<>(syms);
+		this.eqs = eqs;
+		this.js = new AqlJs<>(new Ctx<>(syms), new Ctx<>(java_tys_string), new Ctx<>(java_parser_string), new Ctx<>(java_fns_string));
+		boolean checkJava = !((Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe));
+		this.semantics = AqlProver.create(strategy, col(tys, syms, eqs, java_tys_string, java_parser_string, java_fns_string), js);		
+		validate(checkJava);
 	}
 
 	

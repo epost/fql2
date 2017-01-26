@@ -2,6 +2,7 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 import catdata.Pair;
 import catdata.Util;
@@ -15,6 +16,65 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 		return Kind.SCHEMA;
 	}
 	
+////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static class SchExpColim<N, E, Ty, En, Sym, Fk, Att> extends SchExp<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> {
+
+		public final ColimSchExp<N, E, Ty, En, Sym, Fk, Att> exp;
+
+		public SchExpColim(ColimSchExp<N, E, Ty, En, Sym, Fk, Att> exp) {
+			this.exp = exp;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((exp == null) ? 0 : exp.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SchExpColim<?, ?, ?, ?, ?, ?, ?> other = (SchExpColim<?, ?, ?, ?, ?, ?, ?>) obj;
+			if (exp == null) {
+				if (other.exp != null)
+					return false;
+			} else if (!exp.equals(other.exp))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "getSchema " + exp;
+		}
+
+		@Override
+		public long timeout() {
+			return 0;
+		}
+
+		@Override
+		public Schema<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>> eval(AqlEnv env) {
+			return exp.eval(env).schema;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return exp.deps();
+		}
+		
+		
+		
+		
+	}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final class SchExpInst<Ty,En,Sym,Fk,Att> extends SchExp<Ty,En,Sym,Fk,Att> {

@@ -1,7 +1,12 @@
 package catdata.fqlpp.cat;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -672,7 +677,7 @@ public class Signature<O,A> implements Serializable {
 			paths = paths0;
 		}
 		
-		Set<Pair<List<Edge>, List<Edge>>> rules = new HashSet<>();
+		List<Pair<List<Edge>, List<Edge>>> rules = new LinkedList<>();
 		for (Eq eq : eqs) {
 			rules.add(new Pair<>(eq.lhs.path, eq.rhs.path));
 		}

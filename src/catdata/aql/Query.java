@@ -163,7 +163,7 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 			this.eqs = eqs;
 			this.schema = schema;
 			this.options = options;
-			dp = AqlProver.create(new AqlOptions(options, collage()), collage());			
+			dp = AqlProver.create(new AqlOptions(options, collage()), collage(), schema.typeSide.js);			
 			validate();
 		}
 

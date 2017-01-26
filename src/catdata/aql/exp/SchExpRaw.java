@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -121,9 +121,9 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		AqlOptions s = new AqlOptions(Util.singMap(AqlOption.prover.toString(), ProverName.fail.toString()), col);
 		
 		//forces type checking before prover construction
-		new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(s, col), false);
+		new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(s, col, ts.js), false);
 		
-		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col), !((Boolean)strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
+		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col, ts.js), !((Boolean)strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
 		return ret; 
 		
 	}

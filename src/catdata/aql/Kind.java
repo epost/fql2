@@ -10,7 +10,8 @@ public enum Kind {
 	QUERY, //(Query.class, QueryExp.class), 
 	PRAGMA, //(Pragma.class, PragmaExp.class), 
 	GRAPH, //(DMG.class, GraphExp.class),
-	COMMENT; //(Comment.class, CommentExp.class); 
+	COMMENT,
+	SCHEMA_COLIMIT; //(Comment.class, CommentExp.class); 
 	
 	@Override
 	public String toString() {
@@ -33,6 +34,8 @@ public enum Kind {
 			return "graph";
 		case COMMENT:
 			return "comment";
+		case SCHEMA_COLIMIT:
+			return "schema_colimit";
 		default:
 			throw new RuntimeException();
 		}

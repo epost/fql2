@@ -17,6 +17,58 @@ import catdata.Util;
 //apparently iteration of a set is not deterministic between calls, use linkedhashset if need deterministic order
 public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics {
 	
+	public static <Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,En3,Fk3,Att3> Mapping<Ty,En1,Sym,Fk1,Att1,En3,Fk3,Att3> compose(Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> m1, Mapping<Ty,En2,Sym,Fk2,Att2,En3,Fk3,Att3> m2) {
+		if (!m1.dst.equals(m2.src)) {
+			Util.anomaly();
+		}
+		Map<En1, En3> ens0 = new HashMap<>();
+		for (En1 en1 : m1.ens.keySet()) {
+			ens0.put(en1, m2.ens.get(m1.ens.get(en1)));
+		}
+		Map<Fk1, Pair<En3, List<Fk3>>> fks0 = new HashMap<>();
+		for (Fk1 fk1 : m1.fks.keySet()) {
+			En3 en3 = m2.ens.get(m1.fks.get(fk1).first);
+			List<Fk3> l = new LinkedList<>();
+			for (Fk2 fk2 : m1.fks.get(fk1).second) {
+				l.addAll(m2.fks.get(fk2).second);
+			}
+			fks0.put(fk1, new Pair<>(en3, l));
+		}
+		Map<Att1, Triple<Var, En3, Term<Ty, En3, Sym, Fk3, Att3, Void, Void>>> atts0 = new HashMap<>();
+		for (Att1 att1 : m1.atts.keySet()) {
+			En3 en3 = m2.ens.get(m1.atts.get(att1).second);
+			Var v = m1.atts.get(att1).first; 
+			Term<Ty, En3, Sym, Fk3, Att3, Void, Void> t = subst(m1.atts.get(att1).third, m2);
+			atts0.put(att1, new Triple<>(v, en3, t));
+		}
+		
+		return new Mapping<>(ens0, atts0, fks0, m1.src, m2.dst, false); //TODO aql options here
+	}
+	
+	private static <Ty, En2, Sym, Fk2, Att2, En3, Fk3, Att3> Term<Ty, En3, Sym, Fk3, Att3, Void, Void> subst(Term<Ty, En2, Sym, Fk2, Att2, Void, Void> t, Mapping<Ty,En2,Sym,Fk2,Att2,En3,Fk3,Att3> m2) {
+		if (t.var != null) {
+			return Term.Var(t.var);
+		} else if (t.gen != null) {
+			return Util.abort(t.gen);
+		} else if (t.sk != null) {
+			return Util.abort(t.sk);
+		} else if (t.obj != null) {
+			return Term.Obj(t.obj, t.ty);
+		} else if (t.sym != null) {
+			List<Term<Ty, En3, Sym, Fk3, Att3, Void, Void>> l = new LinkedList<>();
+			for (Term<Ty, En2, Sym, Fk2, Att2, Void, Void> x : t.args) {
+				l.add(subst(x, m2));
+			}
+			return Term.Sym(t.sym, l);
+		} else if (t.fk != null) {
+			return Term.Fks(m2.fks.get(t.fk).second, subst(t.arg, m2));
+		} else if (t.att != null) {
+			Triple<Var, En3, Term<Ty, En3, Sym, Fk3, Att3, Void, Void>> x = m2.atts.get(t.att);
+			return x.third.subst(Util.singMap(x.first, subst(t.arg, m2)));
+		}
+		return Util.anomaly();
+	}
+	
 	@Override
 	public Kind kind() {
 		return Kind.MAPPING;

@@ -47,6 +47,7 @@ import catdata.aql.Transform;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
 import catdata.aql.exp.AqlParser;
+import catdata.aql.fdm.ColimitSchema;
 import catdata.graph.DMG;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Split;
@@ -74,8 +75,8 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	public static JComponent view(@SuppressWarnings("unused") Kind kind, Object obj) {
 		Semantics s = (Semantics) obj;
 		JTabbedPane ret = new JTabbedPane();
-		ret.addTab("Text", new CodeTextPanel("", obj.toString()));
 		new AqlViewer().visit(ret, s);
+		ret.addTab("Text", new CodeTextPanel("", obj.toString()));
 		return ret;
 	}
 
@@ -490,6 +491,11 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	public <N, e> Unit visit(JTabbedPane ret, catdata.aql.Graph<N, e> G) {
 		ret.add("Graph", viewGraph(G.dmg));
 		return new Unit();
+	}
+
+	@Override
+	public <N, E0, Ty, En, Sym, Fk, Att> Unit visit(JTabbedPane arg, ColimitSchema<N, E0, Ty, En, Sym, Fk, Att> S) throws RuntimeException {
+		return new Unit(); //TODO aql
 	}
 
 

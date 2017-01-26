@@ -1,5 +1,7 @@
 package catdata.aql;
 
+import catdata.aql.fdm.ColimitSchema;
+
 public interface Semantics {
 
 	public Kind kind();
@@ -38,6 +40,10 @@ public interface Semantics {
 	
 	public default Comment asComment() {
 		return (Comment) this;
+	}
+	
+	public default ColimitSchema<?,?,?,?,?,?,?> asSchemaColimit() {
+		return (ColimitSchema<?,?,?,?,?,?,?>) this;
 	}
 	
 	

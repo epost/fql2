@@ -64,6 +64,8 @@ public final class AqlDisplay implements Disp {
 			return exp.kind() + " " + c;
 		case COMMENT:			
 			return exp.kind() + " " + c;
+		case SCHEMA_COLIMIT:			
+			return exp.kind() + " " + c;
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		} 

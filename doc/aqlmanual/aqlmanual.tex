@@ -306,9 +306,9 @@ A schema mapping $F : S \to T$ takes entities in $S$ to entities in $T$, foreign
 %todo
 The identity schema mapping on a particular schema.
 
-\section{{\tt compose <mapping> <mapping>}}
+\section{{\tt (<mapping> ; <mapping>)}}
 %todo
-Composes two mappings: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt compose f g : A -> C}.
+Composes two mappings: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt (f ; g) : A -> C}.
 
 \section{{\tt literal : <schema1> -> <schema2>}}
 \subsection{{\tt imports}}
@@ -438,9 +438,9 @@ Allowable options are {\tt timeout}, {\tt prover} and related options, and {\tt 
 \section{{\tt id <instance>}}
 %todo
 The identity transform on an instance.
-\section{{\tt compose <transform> <transform>}}
+\section{{\tt (<transform> ; <transform>)}}
 %todo
-Composes two transforms: if {\tt f: A -> B} and {\tt g: B -> C}, then {\tt compose f g: A -> C}.
+Composes two transforms: if {\tt f: A -> B} and {\tt g: B -> C}, then {\tt (f ; g): A -> C}.
 
 \section{{\tt distinct <transform>}}
 If $t : I \to J$ is a transform, then $distinct \ t : distinct \ I \to distinct \ J$ is a transform.

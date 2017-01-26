@@ -6,7 +6,7 @@ import java.util.Set;
 import catdata.Ctx;
 import catdata.aql.Kind;
 
-public class KindCtx<V,G,T,S,I,H,F,Q,P,C> {
+public class KindCtx<V,G,T,S,I,H,F,Q,P,C,SC> {
 
 	public final Ctx<V, G> gs = new Ctx<>();
 	public final Ctx<V, T> tys = new Ctx<>();
@@ -17,6 +17,7 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C> {
 	public final Ctx<V, Q> qs = new Ctx<>();
 	public final Ctx<V, P> ps = new Ctx<>();
 	public final Ctx<V, C> cs = new Ctx<>();
+	public final Ctx<V, SC> scs = new Ctx<>();
 	
 	public Object get(V k, Kind kind) {
 		switch (kind) {
@@ -38,6 +39,8 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C> {
 			return gs.get(k);
 		case COMMENT:
 			return cs.get(k);
+		case SCHEMA_COLIMIT:
+			return scs.get(k);
 		default:
 			throw new RuntimeException();
 		}
@@ -73,6 +76,9 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C> {
 		case COMMENT:
 			cs.put(k, (C) o);
 			break;	
+		case SCHEMA_COLIMIT:
+			scs.put(k, (SC) o);
+			break;
 		default:
 			throw new RuntimeException();
 		}

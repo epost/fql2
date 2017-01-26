@@ -532,8 +532,8 @@ schema Colimit = literal : Ty {
 	observation_equations
 		forall x. x.client_nm = x.client_name
 		forall x. x.client_desc = x.client_description
-	options 
-		program_allow_nontermination_unsafe=true
+//	options 
+//		program_allow_nontermination_unsafe=true
 } 
 
 //since we used a custom
@@ -821,8 +821,8 @@ query ETL = literal : Colimit -> Target {
 			currency_name -> c.currency_name
 			currency_id -> c.currency_id
 			currency_country_id -> c.currency_country_id
-	options 
-		program_allow_nontermination_unsafe=true
+//	options 
+//		program_allow_nontermination_unsafe=true
 	} 
 
 
@@ -831,8 +831,8 @@ query ETL = literal : Colimit -> Target {
 		 return strategy_name -> s.strategy_name
 		 	strategy_description -> s.strategy_description
 		 	strategy_id -> s.strategy_id
-	options 
-		program_allow_nontermination_unsafe=true
+//	options 
+//		program_allow_nontermination_unsafe=true
 	}
 
 	//identity
@@ -841,8 +841,8 @@ query ETL = literal : Colimit -> Target {
 		 	asset_description -> a.asset_description
 		 	asset_name -> a.asset_name
 		 	asset_strategy_id -> a.asset_strategy_id
-	options 
-		program_allow_nontermination_unsafe=true
+//	options 
+//		program_allow_nontermination_unsafe=true
 	} 
 
 	//identity
@@ -850,8 +850,8 @@ query ETL = literal : Colimit -> Target {
 		 return client_description -> c.client_description 
 			client_name -> c.client_name
 			client_id -> c.client_id
-	options 
-		program_allow_nontermination_unsafe=true
+//	options 
+//		program_allow_nontermination_unsafe=true
 	} 
 
 	//identity
@@ -859,8 +859,8 @@ query ETL = literal : Colimit -> Target {
 		 return country_code -> c.country_code
 		 	country_name -> c.country_name
 		 	country_id -> c.country_id
-	options 
-		program_allow_nontermination_unsafe=true
+//	options 
+//		program_allow_nontermination_unsafe=true
 	} 
 
 	//not identity
@@ -874,8 +874,8 @@ query ETL = literal : Colimit -> Target {
 			transaction_date -> t.transaction_date
 			transaction_currency_id -> t.transaction_currency_id 			
 			transaction_portfolio_id -> t.transaction_portfolio_id
-	options 
-		program_allow_nontermination_unsafe=true
+//	options 
+//		program_allow_nontermination_unsafe=true
 	}
 
 	//not identity
@@ -891,8 +891,8 @@ query ETL = literal : Colimit -> Target {
 		 	position_asset_id -> p.position_asset_id
 		 	position_current_value_currency_id -> cv.currency_id
 		 	position_cost_basis_currency_id -> cb.currency_id
-	options 
-		program_allow_nontermination_unsafe=true
+//	options 
+//		program_allow_nontermination_unsafe=true
 		} 
 
 	//not identity
@@ -902,8 +902,8 @@ query ETL = literal : Colimit -> Target {
 		 	portfolio_description -> p.portfolio_description
 		 	portfolio_id -> p.portfolio_id
 		 	portfolio_strategy_id -> p.portfolio_strategy_id
-	options 
-		program_allow_nontermination_unsafe=true
+//	options 
+//		program_allow_nontermination_unsafe=true
 	} 
 
 	//not identity
@@ -918,8 +918,8 @@ query ETL = literal : Colimit -> Target {
 			holding_purchase_date -> h.holding_purchase_date 
 			holding_begin_date -> h.holding_begin_date 
 			holding_end_date -> h.holding_end_date
-	options 
-		program_allow_nontermination_unsafe=true
+//	options 
+//		program_allow_nontermination_unsafe=true
 	} 
    
 	//not identity 
@@ -934,8 +934,8 @@ query ETL = literal : Colimit -> Target {
 		 	portfolioholding_holding_id -> h.holding_id
 			portfolioholding_client_id -> c1.client_id
 			portfolioholding_portfolio_id -> p.portfolio_id
-		options
-			program_allow_nontermination_unsafe=true
+//		options
+//			program_allow_nontermination_unsafe=true
 		} 
 
  foreign_keys

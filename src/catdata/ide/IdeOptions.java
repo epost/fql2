@@ -194,6 +194,19 @@ public class IdeOptions {
 
 	public void setFont(IdeOption o, Font f) {
 		prop.put(o.name(), toString(o, f));
+		Font font = UIManager.getFont("Table.font");
+		font = new Font(font.getFontName(), font.getStyle(), f.getSize());
+		UIManager.put("Table.font", font);
+
+		font = UIManager.getFont("TableHeader.font");
+		font = new Font(font.getFontName(), font.getStyle(), f.getSize());
+		UIManager.put("TableHeader.font", font);
+		
+
+		font = UIManager.getFont("List.font");
+		font = new Font(font.getFontName(), font.getStyle(), f.getSize());
+		UIManager.put("List.font", font);
+
 	}
 
 	private static int size(boolean onlyColors) {
@@ -345,6 +358,14 @@ public class IdeOptions {
 	       return System.getProperty("os.name").toLowerCase().contains("mac") 
          		  ? UIManager.getSystemLookAndFeelClassName() :
          			  "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+	}
+	
+	public void apply(JTextArea a) {
+		for (IdeOption o : IdeOption.values()) {
+			apply(o, a);
+		}
+		a.repaint();
+		a.revalidate();
 	}
 	
 	public void apply(CodeEditor<?,?,?> a) {

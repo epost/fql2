@@ -1,5 +1,6 @@
 package catdata.provers;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,7 +31,7 @@ import catdata.Util;
  */
 public class SemiThue<Y> {
 
-	private final Set<Pair<List<Y>, List<Y>>> rules;
+	private final List<Pair<List<Y>, List<Y>>> rules;
 	private boolean finished = false;
 	private final Map<Pair<List<Y>, List<Y>>, Boolean> equivs = new HashMap<>();
 	private final int max_iterations;
@@ -40,7 +41,7 @@ public class SemiThue<Y> {
 	 * @param rules to be completed. DOES NOT copy, and MUTATES IN PLACE the pairs inside of rules 
 	 * @param max_iterations to run (-1 for infinity)
 	 */
-	public SemiThue(Set<Pair<List<Y>, List<Y>>> rules, int max_iterations) {
+	public SemiThue(List<Pair<List<Y>, List<Y>>> rules, int max_iterations) {
 		this.rules = rules;
 		this.max_iterations = max_iterations;
 		orient(this.rules);
@@ -96,23 +97,23 @@ public class SemiThue<Y> {
 		}
 	}
 
-	private static <X> void orient(Set<Pair<List<X>, List<X>>> t) {
+	private static <X> void orient(List<Pair<List<X>, List<X>>> t) {
 		for (Pair<List<X>, List<X>> rule : t) {
 			orient(rule);
 		}
 	}
 
-	private <X> void go(Set<Pair<List<X>, List<X>>> t) {
+	private <X> void go(List<Pair<List<X>, List<X>>> t) {
 		while (!step(t));
 	}
 
-	private <X> boolean step(Set<Pair<List<X>, List<X>>> t) {
+	private <X> boolean step(List<Pair<List<X>, List<X>>> t) {
 		if (iteration++ > max_iterations && max_iterations != -1) {
 			throw new RuntimeException("Max iterations exceeded: " + max_iterations);
 		}
 		orient(t);
 		normalize(t);
-		Set<Pair<List<X>, List<X>>> ce = cp(t);
+		Collection<Pair<List<X>, List<X>>> ce = new HashSet<>(cp(t));
         if (ce.isEmpty()) {
             simplify(t);
             return true;
@@ -124,8 +125,8 @@ public class SemiThue<Y> {
         }
 	}
 
-	private static <X> Pair<List<X>, List<X>> getUnmarked(Set<Pair<List<X>, List<X>>> marked,
-			Set<Pair<List<X>, List<X>>> t) {
+	private static <X> Pair<List<X>, List<X>> getUnmarked(List<Pair<List<X>, List<X>>> marked,
+			List<Pair<List<X>, List<X>>> t) {
 		for (Pair<List<X>, List<X>> rule : t) {
 			if (!marked.contains(rule)) {
 				return rule;
@@ -134,24 +135,22 @@ public class SemiThue<Y> {
 		return null;
 	}
 
-	private <X> void simplify(Set<Pair<List<X>, List<X>>> t) {
+	private <X> void simplify(List<Pair<List<X>, List<X>>> t) {
 		Iterator<Pair<List<X>, List<X>>> it = t.iterator();
 		while (it.hasNext()) {
 			Pair<List<X>, List<X>> rule = it.next();
-			Set<Pair<List<X>, List<X>>> t0 = new HashSet<>(t);
+			List<Pair<List<X>, List<X>>> t0 = new LinkedList<>(t);
 			t0.remove(rule);
 			if (!normal_form(rule.first, t0).equals(rule.first)) {
 				it.remove();
 				
 			}
-			// if (!normal_form(rule.second, t0).equals(rule.second)) {
-			// throw new RuntimeException();
-			// }
+			
 		}
 	}
 
-	private <X> void normalize(Set<Pair<List<X>, List<X>>> t) {
-		Set<Pair<List<X>, List<X>>> marked = new HashSet<>();
+	private <X> void normalize(List<Pair<List<X>, List<X>>> t) {
+		List<Pair<List<X>, List<X>>> marked = new LinkedList<>();
 		Pair<List<X>, List<X>> lr;
 		while ((lr = getUnmarked(marked, t)) != null) {
 			t.remove(lr);
@@ -167,7 +166,7 @@ public class SemiThue<Y> {
 		}
 	}
 
-	/* private static <X> void check_oriented(Set<Pair<List<X>, List<X>>> t) {
+	/* private static <X> void check_oriented(List<Pair<List<X>, List<X>>> t) {
 			return;
 		for (Pair<List<X>, List<X>> r : t) {
 			if (r.first.size() < r.second.size()) {
@@ -176,7 +175,7 @@ public class SemiThue<Y> {
 		}
 	} */
 
-	private <X> List<X> normal_form(List<X> e, Set<Pair<List<X>, List<X>>> t) {
+	private <X> List<X> normal_form(List<X> e, List<Pair<List<X>, List<X>>> t) {
 		List<X> ret = new LinkedList<>(e);
 		for (Pair<List<X>, List<X>> rule : t) {
 			if (rule.first.size() == rule.second.size()) {
@@ -238,20 +237,20 @@ public class SemiThue<Y> {
 		return true;
 	}
 
-	private <X> boolean almost_joinable(List<X> e, List<X> f, Set<Pair<List<X>, List<X>>> t) {
+	private <X> boolean almost_joinable(List<X> e, List<X> f, List<Pair<List<X>, List<X>>> t) {
 		List<X> e0 = normal_form(e, t);
 		List<X> f0 = normal_form(f, t);
 
-		Set<List<X>> e0_closed = close(e0, t);
+		List<List<X>> e0_closed = close(e0, t);
 		return e0_closed.contains(f0);
 	}
 
-	private static <X> Set<List<X>> close(List<X> e, Set<Pair<List<X>, List<X>>> t) {
-		Set<List<X>> init = new HashSet<>();
+	private static <X> List<List<X>> close(List<X> e, List<Pair<List<X>, List<X>>> t) {
+		List<List<X>> init = new LinkedList<>();
 		init.add(e);
 
         while (true) {
-            Set<List<X>> next = close1(init, t);
+        	List<List<X>> next = close1(init, t);
             if (init.equals(next)) {
                 return init;
             }
@@ -259,10 +258,10 @@ public class SemiThue<Y> {
         }
 	}
 
-	private static <X> Set<List<X>> close1(Set<List<X>> set, Set<Pair<List<X>, List<X>>> t) {
-		Set<List<X>> ret = new HashSet<>(set);
+	private static <X> List<List<X>> close1(List<List<X>> List, List<Pair<List<X>, List<X>>> t) {
+		Set<List<X>> ret = new HashSet<>(List);
 
-		for (List<X> e : set) {
+		for (List<X> e : List) {
 			for (Pair<List<X>, List<X>> rule : t) {
 				if (rule.first.size() != rule.second.size()) {
 					continue;
@@ -273,18 +272,18 @@ public class SemiThue<Y> {
 			}
 		}
 
-		return ret;
+		return new LinkedList<>(ret);
 	}
 
-	private <X> Set<Pair<List<X>, List<X>>> cp(Set<Pair<List<X>, List<X>>> t) {
-		Set<Pair<List<X>, List<X>>> ret = new HashSet<>();
+	private <X> Collection<Pair<List<X>, List<X>>> cp(List<Pair<List<X>, List<X>>> t) {
+		List<Pair<List<X>, List<X>>> ret = new LinkedList<>();
 		for (Pair<List<X>, List<X>> rule1 : t) {
 			for (Pair<List<X>, List<X>> rule2 : t) {
 				if (rule1.first.size() == rule1.second.size()
 						&& rule2.first.size() == rule2.second.size()) {
 					continue;
 				}
-				Set<Quad<List<X>, List<X>, List<X>, List<X>>> todo = new HashSet<>();
+				List<Quad<List<X>, List<X>, List<X>, List<X>>> todo = new LinkedList<>();
 				if (rule1.first.size() == rule1.second.size()) {
 					if (rule2.first.size() == rule2.second.size()) {
 						throw new RuntimeException();
@@ -311,8 +310,9 @@ public class SemiThue<Y> {
 	}
 
 	// does not include 0 length lists
-	private static <X> Set<Pair<List<X>, List<X>>> split(List<X> l) {
-		Set<Pair<List<X>, List<X>>> ret = new HashSet<>();
+	//TODO aql can be list
+	private static <X> Collection<Pair<List<X>, List<X>>> split(List<X> l) {
+		List<Pair<List<X>, List<X>>> ret = new LinkedList<>();
 		for (int i = 1; i < l.size(); i++) {
 			ret.add(new Pair<>(l.subList(0, i), l.subList(i, l.size())));
 		}
@@ -320,7 +320,7 @@ public class SemiThue<Y> {
 	}
 
 	private <X> void addCP1(List<X> li, List<X> ri, List<X> lj, List<X> rj,
-			Set<Pair<List<X>, List<X>>> t, Set<Pair<List<X>, List<X>>> ret) {
+			List<Pair<List<X>, List<X>>> t, Collection<Pair<List<X>, List<X>>> ret) {
 		for (Pair<List<X>, List<X>> uv : split(li)) {
 			for (Pair<List<X>, List<X>> vw : split(lj)) {
 				if (!uv.second.equals(vw.first)) {
@@ -330,7 +330,7 @@ public class SemiThue<Y> {
 				urj.addAll(rj);
 				List<X> riw = new LinkedList<>(ri);
 				riw.addAll(vw.second);
-				if (!almost_joinable(urj, riw, t)) {
+				if (!almost_joinable(urj, riw, t) && !ret.contains(new Pair<>(urj, riw))) {
 					ret.add(new Pair<>(urj, riw));
 				}
 			}
@@ -338,30 +338,23 @@ public class SemiThue<Y> {
 	}
 
 	private <X> void addCP2(List<X> li, List<X> ri, List<X> lj, List<X> rj,
-			Set<Pair<List<X>, List<X>>> t, Set<Pair<List<X>, List<X>>> ret) {
-		Set<Integer> uws = middle(li, lj);
+			List<Pair<List<X>, List<X>>> t, Collection<Pair<List<X>, List<X>>> ret) {
+		List<Integer> uws = middle(li, lj);
 		for (Integer i : uws) {
 			List<X> u = li.subList(0, i);
 			List<X> w = li.subList(i + lj.size(), li.size());
 
-			// List<X> split = new LinkedList<>(u);
-			// split.addAll(lj);
-			// split.addAll(w);
-			// if (!split.equals(li)) {
-			// throw new RuntimeException();
-			// }
-
-			List<X> urjw = new LinkedList<>(u);
+				List<X> urjw = new LinkedList<>(u);
 			urjw.addAll(rj);
 			urjw.addAll(w);
-			if (!almost_joinable(ri, urjw, t)) {
+			if (!almost_joinable(ri, urjw, t) && !ret.contains(new Pair<>(ri, urjw))) {
 				ret.add(new Pair<>(ri, urjw));
 			}
 		}
 	}
 
-	private static <X> Set<Integer> middle(List<X> l, List<X> find) {
-		Set<Integer> ret = new HashSet<>();
+	private static <X> List<Integer> middle(List<X> l, List<X> find) {
+		List<Integer> ret = new LinkedList<>();
 		for (int i = 0; i <= l.size() - find.size(); i++) {
 			if (occursAt(l, find, i)) {
 				ret.add(i);
@@ -373,14 +366,14 @@ public class SemiThue<Y> {
 
 	@Override
 	public String toString() {
-		Set<String> ret = rules.stream().map(x -> {
+		List<String> ret = rules.stream().map(x -> {
 			String s1 = Util.sep(x.first, ".");
 			String s2 = Util.sep(x.second, ".");
 			if (x.first.size() == x.second.size()) {
 				return "  " + s1 + " = " + s2;
 			}
 			return "  " + s1 + " -> " + s2;
-		}).collect(Collectors.toSet());
+		}).collect(Collectors.toList());
 		return Util.sep(ret, "\n");
 	}
 

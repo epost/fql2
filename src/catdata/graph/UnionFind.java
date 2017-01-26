@@ -1,7 +1,10 @@
 package catdata.graph;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import catdata.Util;
 
@@ -64,6 +67,25 @@ public class UnionFind<X>  {
         }
     }
 
+	public Map<X, Set<X>> toMap() {
+		Map<X, Set<X>> ret = new HashMap<>();
+		for (X x : parent.keySet()) {
+			ret.put(x, eqc(x));
+		}
+		return ret;
+	}
 	
+	private Set<X> eqc(X x) {
+		Set<X> ret = new HashSet<>();
+		for (X x0 : parent.keySet()) {
+			if (connected(x, x0)) {
+				ret.add(x0);
+			}
+		}
+		if (!ret.contains(x)) {
+			Util.anomaly();
+		}
+		return ret;
+	}
 
 }

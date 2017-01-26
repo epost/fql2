@@ -1,8 +1,12 @@
 package catdata.aql;
 
+import catdata.aql.fdm.ColimitSchema;
+
 public interface SemanticsVisitor<R,G,E extends Throwable> {
 	
 	public <T,C> R visit(G arg, TypeSide<T,C> T) throws E;
+
+	public <N, E0, Ty, En, Sym, Fk, Att> R visit(G arg, ColimitSchema<N, E0, Ty, En, Sym, Fk, Att> S) throws E;
 
 	public <Ty, En, Sym, Fk, Att> R visit(G arg, Schema<Ty, En, Sym, Fk, Att> S) throws E;
 	
@@ -40,6 +44,8 @@ public interface SemanticsVisitor<R,G,E extends Throwable> {
 			return visit(arg, o.asTransform());
 		case TYPESIDE:
 			return visit(arg, o.asTypeSide());
+		case SCHEMA_COLIMIT:
+			return visit(arg, o.asSchemaColimit());
 		default:
 			break;		
 		}

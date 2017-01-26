@@ -36,7 +36,7 @@ public class TransExpCompose<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2,Gen3
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		TransExpCompose other = (TransExpCompose) obj;
+		TransExpCompose<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpCompose<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
 		if (t1 == null) {
 			if (other.t1 != null)
 				return false;

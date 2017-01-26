@@ -36,6 +36,7 @@ import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
 import catdata.Pair;
+import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Kind;
 import catdata.aql.gui.AqlCodeEditor;
@@ -414,6 +415,15 @@ public class GUI extends JPanel {
 			c.abortAction();
 		}
 	}
+	
+	private static Unit deInc(CodeEditor<?,?,?> c) {
+		dirty.remove(c.id);
+		keys.remove(c.id);
+		files.remove(c.id);
+		titles.remove(c.id);
+		editors.remove(c);
+		return new Unit();
+	}
 
 	private static void closeAction() {
 		delay();
@@ -421,11 +431,7 @@ public class GUI extends JPanel {
 		if (c == null || c.abortBecauseDirty()) {
 			return;
 		}
-		editors.remove(c);
-		dirty.remove(c.id);
-		keys.remove(c.id);
-		files.remove(c.id);
-		titles.remove(c.id);
+		deInc(c);		
 	}
 
 	public static void exitAction() {
@@ -726,7 +732,7 @@ public class GUI extends JPanel {
 			CodeEditor<?,?,?> ed = (CodeEditor<?,?,?>) editors.getComponentAt(tab);
 			if (Objects.equals(wanted, ed)) {
 				editors.setTitleAt(tab, title);				
-				editors.setTabComponentAt(tab, new ButtonTabComponent(editors));
+				editors.setTabComponentAt(tab, new ButtonTabComponent(editors, x -> GUI.deInc(x)));
 			}
 		}
 	}
@@ -773,7 +779,7 @@ public class GUI extends JPanel {
 
 		titles.put(c.id, title);
 		editors.addTab("  " + title, c);
-		editors.setTabComponentAt(i, new ButtonTabComponent(editors));
+		editors.setTabComponentAt(i, new ButtonTabComponent(editors, x -> GUI.deInc(x)));
 		editors.setSelectedIndex(i);
 		return c.id;
 	}
