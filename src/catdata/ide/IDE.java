@@ -52,6 +52,10 @@ class IDE {
 		SwingUtilities.invokeLater(() -> {
 			try {
 				DefunctGlobalOptions.load();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			try {
 
 			//	String lf = System.getProperty("os.name").toLowerCase().contains("mac") ? UIManager.getSystemLookAndFeelClassName() : "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
 
