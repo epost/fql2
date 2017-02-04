@@ -1,7 +1,5 @@
 package catdata.aql;
 
-import catdata.aql.fdm.ColimitSchema;
-
 public interface SemanticsVisitor<R,G,E extends Throwable> {
 	
 	public <T,C> R visit(G arg, TypeSide<T,C> T) throws E;
@@ -9,6 +7,8 @@ public interface SemanticsVisitor<R,G,E extends Throwable> {
 	public <N, E0, Ty, En, Sym, Fk, Att> R visit(G arg, ColimitSchema<N, E0, Ty, En, Sym, Fk, Att> S) throws E;
 
 	public <Ty, En, Sym, Fk, Att> R visit(G arg, Schema<Ty, En, Sym, Fk, Att> S) throws E;
+	
+	public <Ty, En, Sym, Fk, Att> R visit(G arg, Constraints<Ty, En, Sym, Fk, Att> S) throws E;
 	
 	public <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> R visit(G arg, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I) throws E;
 
@@ -46,6 +46,8 @@ public interface SemanticsVisitor<R,G,E extends Throwable> {
 			return visit(arg, o.asTypeSide());
 		case SCHEMA_COLIMIT:
 			return visit(arg, o.asSchemaColimit());
+		case CONSTRAINTS:
+			return visit(arg, o.asConstraints());
 		default:
 			break;		
 		}

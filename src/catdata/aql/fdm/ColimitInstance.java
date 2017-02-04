@@ -24,7 +24,7 @@ import catdata.graph.DMG;
 
 //has to be gen rather than (N,gen) in order to use explicit prover
 public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> 
- extends Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> {
+ extends Instance<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>, ID, Chc<Pair<N,Sk>, Pair<ID, Att>>> {
 	
 	private final Schema<Ty, En, Sym, Fk, Att> schema;
 	
@@ -36,7 +36,7 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 	@SuppressWarnings("unused")
 	private final Ctx<E, Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges;
 
-	private final Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> J;
+	private final Instance<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>, ID, Chc<Pair<N,Sk>, Pair<ID, Att>>> J;
 	
 	public ColimitInstance(Schema<Ty, En, Sym, Fk, Att> schema, DMG<N, E> shape, Ctx<N, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> nodes, Ctx<E, Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges, Map<String, String> options) {
 		for (N n : nodes.keySet()) {
@@ -71,24 +71,20 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 		this.nodes = nodes;
 		this.edges = edges;
 		
-		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col = new Collage<>(schema.collage());
-		Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs = new HashSet<>();
+		Collage<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>> col = new Collage<>(schema.collage());
+		Set<Pair<Term<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>>, Term<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>>>> eqs = new HashSet<>();
 		
-		Ctx<Gen, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> genInv = new Ctx<>();
-		Ctx<Sk, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> skInv = new Ctx<>();
 		
 		for (N n : nodes.keySet()) {
 			for (Gen gen : nodes.get(n).gens().keySet()) {
-				col.gens.put(gen, nodes.get(n).gens().get(gen));
-				genInv.put(gen, nodes.get(n));
+				col.gens.put(new Pair<>(n,gen), nodes.get(n).gens().get(gen));
 			}
 			for (Sk sk : nodes.get(n).sks().keySet()) {
-				col.sks.put(sk, nodes.get(n).sks().get(sk));
-				skInv.put(sk, nodes.get(n));
+				col.sks.put(new Pair<>(n,sk), nodes.get(n).sks().get(sk));
 			}
 			for (Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : nodes.get(n).eqs()) {
-				col.eqs.add(new Eq<>(new Ctx<>(), eq.first, eq.second));
-				eqs.add(eq);
+				col.eqs.add(new Eq<>(new Ctx<>(), eq.first.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x)), eq.second.mapGenSk(x -> new Pair<>(n, x) ,x -> new Pair<>(n, x))));
+				eqs.add(new Pair<>(eq.first.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x)), eq.second.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x))));
 			}
 		}
 		
@@ -96,22 +92,22 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y> h = edges.get(e);
 			for (Gen gen : h.src().gens().keySet()) {
 				Term<Void, En, Void, Fk, Void, Gen, Void> rhs = h.gens().get(gen);
-				eqs.add(new Pair<>(Term.Gen(gen), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn())));
-				col.eqs.add(new Eq<>(new Ctx<>(), Term.Gen(gen), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn())));
+				eqs.add(new Pair<>(Term.Gen(new Pair<>(shape.edges.get(e).first, gen)), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), x -> new Pair<>(shape.edges.get(e).second, x), Util.voidFn())));
+				col.eqs.add(new Eq<>(new Ctx<>(), Term.Gen(new Pair<>(shape.edges.get(e).first, gen)), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), x -> new Pair<>(shape.edges.get(e).second, x), Util.voidFn())));
 			}
 			for (Sk sk : h.src().sks().keySet()) {
-				Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs = h.sks().get(sk);
-				eqs.add(new Pair<>(Term.Sk(sk), rhs));
-				col.eqs.add(new Eq<>(new Ctx<>(), Term.Sk(sk), rhs));
+				Term<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>> rhs = h.sks().get(sk).mapGenSk(x -> new Pair<>(shape.edges.get(e).second, x), x -> new Pair<>(shape.edges.get(e).second, x));
+				eqs.add(new Pair<>(Term.Sk(new Pair<>(shape.edges.get(e).first, sk)), rhs));
+				col.eqs.add(new Eq<>(new Ctx<>(), Term.Sk(new Pair<>(shape.edges.get(e).first, sk)), rhs));
 			}
 		}
 		
 		AqlOptions strat = new AqlOptions(options, col);  
 		
-		Function<Gen,String> printGen = x -> genInv.get(x).algebra().printX(genInv.get(x).algebra().nf(Term.Gen(x)));
-		Function<Sk, String> printSk = x -> skInv.get(x).algebra().sk(x).toString(skInv.get(x).algebra()::printY, Util.voidFn());
+		Function<Pair<N,Gen>,String> printGen = x -> nodes.get(x.first).algebra().printX(nodes.get(x.first).algebra().nf(Term.Gen(x.second)));
+		Function<Pair<N,Sk>, String> printSk = x -> nodes.get(x.first).algebra().sk(x.second).toString(nodes.get(x.first).algebra()::printY, Util.voidFn());
 		
-		InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, ID> initial 
+		InitialAlgebra<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>, ID> initial 
 		= new InitialAlgebra<>(strat, schema(), col, new It(), printGen, printSk);
 				
 		J = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, initial.dp(), initial); 
@@ -124,27 +120,27 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 	}
 
 	@Override
-	public Ctx<Gen, En> gens() {
+	public Ctx<Pair<N, Gen>, En> gens() {
 		return J.gens();
 	}
 
 	@Override
-	public Ctx<Sk, Ty> sks() {
+	public Ctx<Pair<N, Sk>, Ty> sks() {
 		return J.sks();
 	}
 
 	@Override
-	public Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs() {
+	public Set<Pair<Term<Ty, En, Sym, Fk, Att, Pair<N, Gen>, Pair<N, Sk>>, Term<Ty, En, Sym, Fk, Att, Pair<N, Gen>, Pair<N, Sk>>>> eqs() {
 		return J.eqs();
 	}
 
 	@Override
-	public DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp() {
+	public DP<Ty, En, Sym, Fk, Att, Pair<N, Gen>, Pair<N, Sk>> dp() {
 		return J.dp();
 	}
 
 	@Override
-	public Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> algebra() {
+	public Algebra<Ty, En, Sym, Fk, Att, Pair<N, Gen>, Pair<N, Sk>, ID, Chc<Pair<N, Sk>, Pair<ID, Att>>> algebra() {
 		return J.algebra();
 	}
 	

@@ -27,6 +27,8 @@ import catdata.Program;
 import catdata.aql.Kind;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.Exp;
+import catdata.aql.exp.PragmaExp.PragmaExpCheck;
+import catdata.aql.exp.PragmaExp.PragmaExpConsistent;
 import catdata.ide.Disp;
 
 //TODO aql suppress instance equations - do not compute/display if not required - maybe make instance an interface
@@ -66,6 +68,8 @@ public final class AqlDisplay implements Disp {
 			return exp.kind() + " " + c;
 		case SCHEMA_COLIMIT:			
 			return exp.kind() + " " + c;
+		case CONSTRAINTS:
+			return exp.kind() + " " + c + " : " + env.typing.defs.eds.get(c);
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		} 
@@ -100,11 +104,12 @@ public final class AqlDisplay implements Disp {
 		exn = env.exn;
 		for (String c : p.order) {
 			Exp<?> exp = p.exps.get(c);
-			if (exp.kind() == Kind.COMMENT) {
+			if (exp.kind() == Kind.COMMENT || exp instanceof PragmaExpCheck || exp instanceof PragmaExpConsistent) {
 				continue;
 			}
 			if (env.defs.keySet().contains(c)) {
 				Object obj = env.defs.get(c, exp.kind());
+				
 				try {
 					frames.add(new Pair<>(doLookup(c, exp, env), wrapDisplay(exp.kind(), obj)));
 				} catch (RuntimeException ex) {

@@ -43,9 +43,7 @@ public class InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, X>
 extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
-	private boolean hasFreeTypeAlgebra() {
-		return talg().eqs.isEmpty();
-	}
+	
 	
 /*
 	private <Y> Collage<Ty, Void, Sym, Void, Void, Void, Y> addTy(TypeSide<Ty, Sym> ty, Collage<Ty, Void, Sym, Void, Void, Void, Y> talg) {
@@ -82,6 +80,10 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	private final Function<Sk, String> printSk;
 	
 	public InitialAlgebra(AqlOptions ops, Schema<Ty, En, Sym, Fk, Att> schema, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, Iterator<X> fresh, Function<Gen, String> printGen, Function<Sk, String> printSk) {
+		this(AqlProver.create(ops, col, schema.typeSide.js), schema, col, fresh, printGen, printSk, (Boolean) ops.getOrDefault(AqlOption.require_consistency));
+	}
+	
+	public InitialAlgebra(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Schema<Ty, En, Sym, Fk, Att> schema, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, Iterator<X> fresh, Function<Gen, String> printGen, Function<Sk, String> printSk, boolean requireConsistency) {
 		ens = Util.newSetsFor(schema.ens);
 		this.col = col;
 		this.schema = schema;
@@ -89,8 +91,8 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		this.printGen = printGen;
 		this.printSk = printSk;
 
-        dp = AqlProver.create(ops, col, schema.typeSide.js); //schema.typeSide.js.java_tys.isEmpty() ? AqlProver.create(ops, col) : AqlProver.create(ops, col.entities_only());
-		//schema.typeSide.collage(); //sanity check remove
+        this.dp = dp; //AqlProver.create(ops, col, schema.typeSide.js);
+        
 		try {
 			while (saturate1());
 		} catch (InterruptedException exn) {
@@ -100,7 +102,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 				
 		//TODO aql figure out how to do this only once but without concurrent modification exception
 			
-		if ((Boolean) ops.getOrDefault(AqlOption.require_consistency) && !hasFreeTypeAlgebra()) {
+		if (requireConsistency && !hasFreeTypeAlgebra()) {
 			throw new RuntimeException("Not necessarily consistent; type algebra is\n\n" + talg());
 		}
 		

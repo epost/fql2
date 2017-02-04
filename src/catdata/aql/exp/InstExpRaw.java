@@ -212,6 +212,8 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial); 
 	}
 	
+	//TODO aql: schema eval should happen first, so can typecheck before running
+	
 	@Override
 	public SchExp<Object, Object, Object, Object, Object> type(AqlTyping G) {
 		return schema;

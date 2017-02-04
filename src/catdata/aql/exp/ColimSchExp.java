@@ -8,10 +8,10 @@ import java.util.Map;
 import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.ColimitSchema;
 import catdata.aql.Kind;
 import catdata.aql.Mapping;
 import catdata.aql.Schema;
-import catdata.aql.fdm.ColimitSchema;
 
 public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<ColimitSchema<N, E, Ty, En, Sym, Fk, Att>> {
 
@@ -88,17 +88,100 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	}
 	
 	////////////////////////////////////////
+	
+	public static class ColimSchExpWrap<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
+
+		public final ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim;
+		
+		public final MapExp<Ty,String,Sym,String,String,String,String,String> toUser;
+		
+		public final MapExp<Ty,String,Sym,String,String,String,String,String> fromUser;
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((colim == null) ? 0 : colim.hashCode());
+			result = prime * result + ((fromUser == null) ? 0 : fromUser.hashCode());
+			result = prime * result + ((toUser == null) ? 0 : toUser.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ColimSchExpWrap<?, ?, ?, ?, ?, ?, ?> other = (ColimSchExpWrap<?, ?, ?, ?, ?, ?, ?>) obj;
+			if (colim == null) {
+				if (other.colim != null)
+					return false;
+			} else if (!colim.equals(other.colim))
+				return false;
+			if (fromUser == null) {
+				if (other.fromUser != null)
+					return false;
+			} else if (!fromUser.equals(other.fromUser))
+				return false;
+			if (toUser == null) {
+				if (other.toUser != null)
+					return false;
+			} else if (!toUser.equals(other.toUser))
+				return false;
+			return true;
+		}
+
+		
+
+		public ColimSchExpWrap(ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim, MapExp<Ty, String, Sym, String, String, String, String, String> toUser, MapExp<Ty, String, Sym, String, String, String, String, String> fromUser) {
+			this.colim = colim;
+			this.toUser = toUser;
+			this.fromUser = fromUser;
+		}
+
+		@Override
+		public catdata.aql.exp.ColimSchExp.ColimSchExpLit<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+			return colim.type(G);
+		}
+
+		@Override
+		public long timeout() {
+			return 0;
+		}
+
+		@Override
+		public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+			return colim.eval(env).wrap(toUser.eval(env), fromUser.eval(env));
+		}
+
+		@Override
+		public String toString() {
+			return "wrap " + colim + " " + toUser + " " + fromUser;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(colim.deps(), Util.union(toUser.deps(), fromUser.deps()));
+		}
+		
+		
+	}
+	
+	////////////////////////////////////////
 
 	public static class ColimSchExpLit<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
-		public GraphExp<N, E> shape;
+		public final GraphExp<N, E> shape;
 
-		public TyExp<Ty, Sym> ty;
+		public final TyExp<Ty, Sym> ty;
 
-		public Ctx<N, SchExp<Ty, En, Sym, Fk, Att>> nodes;
+		public final Ctx<N, SchExp<Ty, En, Sym, Fk, Att>> nodes;
 
-		public Ctx<E, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>> edges;
+		public final Ctx<E, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>> edges;
 		
-		public Map<String, String> options;
+		public final Map<String, String> options;
 
 		public ColimSchExpLit(GraphExp<N, E> shape, TyExp<Ty, Sym> ty, List<Pair<N, SchExp<Ty, En, Sym, Fk, Att>>> nodes, List<Pair<E, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>>> edges, List<Pair<String, String>> options) {
 			this.shape = shape;

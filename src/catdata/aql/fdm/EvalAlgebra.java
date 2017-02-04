@@ -9,12 +9,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import catdata.Chc;
 import catdata.Ctx;
+import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.Collage;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
+import catdata.aql.It.ID;
 import catdata.aql.Query;
 import catdata.aql.Query.Frozen;
 import catdata.aql.Schema;
@@ -106,7 +109,7 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 	
 	@Override
 	public Row<En2,X> fk(Fk2 fk, Row<En2,X> row) {
-		Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, Void, Void, Void, Void> 
+		Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> 
 		t = Q.fks.get(fk);
 		
 		Ctx<Var,X> ret = new Ctx<>();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <TokenMakerDefinition>
   <general>
-    <package>fql_lib.aql</package>
+    <package>catdata.aql.gui</package>
     <className>AqlTokenMaker</className>
     <extendedClass>AbstractJFlexCTokenMaker</extendedClass>
     <classComment/>
@@ -11,7 +11,7 @@
   <comments>
     <lineComments enabled="true" start="//"/>
     <multiLineComments enabled="true" end="*/" start="/*"/>
-    <docComments enabled="false" end="" start=""/>
+    <docComments enabled="true" end="*)" start="(*"/>
   </comments>
   <keywords>
     <keyword>graph</keyword>
@@ -23,8 +23,12 @@
     <keyword>transform</keyword>
     <keyword>typeside</keyword>
     <keyword>html</keyword>
+    <keyword>constraints</keyword>
   </keywords>
   <keywords2>
+  	<keyword>chase</keyword>
+  	<keyword>check</keyword>
+  	<keyword>assert_consistent</keyword>
     <keyword>attributes</keyword>
     <keyword>coeval</keyword>
     <keyword>colimit</keyword>

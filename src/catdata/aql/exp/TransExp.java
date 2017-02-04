@@ -828,6 +828,9 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		@SuppressWarnings("unchecked")
 		@Override
 		public Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>, InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>> type(AqlTyping G) {
+			if (!G.defs.trans.containsKey(var)) {
+				throw new RuntimeException("Not a transform: " + var);
+			}
 			return (Pair<InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>,InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object>>) ((Object)G.defs.trans.get(var));
 		}
 		

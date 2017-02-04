@@ -13,8 +13,8 @@ import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Instance;
-import catdata.aql.Kind;
 import catdata.aql.It.ID;
+import catdata.aql.Kind;
 import catdata.aql.Mapping;
 import catdata.aql.Transform;
 import catdata.aql.Var;
@@ -37,6 +37,96 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	}
 	
 	public abstract SchExp<Ty,En,Sym,Fk,Att>  type(AqlTyping G);
+	
+	///////////////////////////////////////////////////////////////////////
+	
+	public static final class InstExpChase<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends InstExp<Ty,En,Sym,Fk,Att,Object,Object,Object,Object> {
+
+		public final InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I;
+		
+		public final EdsExp<Ty,En,Sym,Fk,Att> eds;
+		
+		public final int limit;
+
+		public InstExpChase(EdsExp<Ty, En, Sym, Fk, Att> eds, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i, int limit) {
+			if (limit < 0) {
+				throw new RuntimeException("In chase, expected positive number, received " + i);
+			}
+			I = i;
+			this.eds = eds;
+			this.limit = limit;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((eds == null) ? 0 : eds.hashCode());
+			result = prime * result + limit;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpChase<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpChase<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (eds == null) {
+				if (other.eds != null)
+					return false;
+			} else if (!eds.equals(other.eds))
+				return false;
+			if (limit != other.limit)
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "chase " + I + " " + eds + " " + limit;
+		}
+
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+			if (!I.type(G).equals(eds.type(G))) {
+				throw new RuntimeException("type of " + I + ", namely " + I.type(G) + " is not equal to type of " + eds + ", namely " + eds.type(G));
+			}
+			return I.type(G);
+			//TODO aql type equality
+		}
+
+		@Override
+		public long timeout() {
+			return I.timeout(); //TODO aql timeout for chase
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Instance<Ty, En, Sym, Fk, Att, Object, Object, Object, Object> eval(AqlEnv env) {
+			Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret = eds.eval(env).chase(I.eval(env), limit);
+			return (Instance<Ty, En, Sym, Fk, Att, Object, Object, Object, Object>) ret;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(eds.deps(), I.deps());
+		}
+		
+		
+		
+		
+	}
+	
 	
 	///////////////////////////////////////////////////////////////////////
 	
@@ -165,7 +255,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	public static class InstExpColim<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> 
-	 extends InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> {
+	 extends InstExp<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>, ID, Chc<Pair<N,Sk>, Pair<ID, Att>>> {
 		
 		public final SchExp<Ty, En, Sym, Fk, Att> schema;
 		
@@ -250,7 +340,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 		
 		@Override
-		public Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> eval(AqlEnv env) {
+		public Instance<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>, ID, Chc<Pair<N,Sk>, Pair<ID, Att>>> eval(AqlEnv env) {
 			Ctx<N, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> nodes0 = new Ctx<>();
 			Ctx<E, Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges0 = new Ctx<>();
 			
@@ -743,6 +833,9 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		@SuppressWarnings("unchecked")
 		@Override
 		public SchExp<Object, Object, Object, Object, Object> type(AqlTyping G) {
+			if (!G.defs.insts.containsKey(var)) {
+				throw new RuntimeException("Not an instance: " + var);
+			}
 			return (SchExp<Object, Object, Object, Object, Object>) G.defs.insts.get(var);
 		}
 

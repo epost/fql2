@@ -101,7 +101,9 @@ class SpellChecker extends AbstractParser {
 				outer: while (matcher.find()) {
 					String word = matcher.group().toLowerCase();
 					
-					
+					if (word.contains(",") || word.contains(")") || word.contains(")") || word.contains("<") || word.contains(">") || word.contains("+") || word.contains("*") || word.contains("-") || word.contains("_") || word.contains("/") || word.contains("\\") || word.contains("\"") ) {
+						continue;
+					}
 					if (word.endsWith(".") || word.endsWith(",") || word.endsWith("!") || word.endsWith(";") || (word.endsWith(":") && word.length()!=1) || word.endsWith(")") || word.endsWith("]") || word.endsWith("\"") || word.endsWith("'")) {
 						word = word.substring(0, word.length() - 1);
 					} 

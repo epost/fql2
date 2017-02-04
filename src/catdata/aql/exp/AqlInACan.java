@@ -90,6 +90,9 @@ class AqlInACan {
 			env.typing = new AqlTyping(program);	
 			for (String n : program.order) {
 				Exp<?> exp = program.exps.get(n);
+				if (exp.kind() == Kind.PRAGMA) {
+					throw new RuntimeException("Pragmas disabled in web-AQL");
+				}
 				Object o = Util.timeout(() -> exp.eval(env), 10 * 1000); //hardcode timeout, do not exec pragmas
 				env.defs.put(n, exp.kind(), o);
 				if (exp.kind().equals(Kind.INSTANCE)) {
@@ -111,8 +114,8 @@ class AqlInACan {
 		
 		Map<En, Pair<List<String>,Object[][]>> tables = AqlViewer.makeEnTables(I.algebra());
 		
-		for (En t : tables.keySet()) {
-				ret += "<table style=\"float: left\" border=\"1\" cellpadding=\"3\" cellspacing=\"1\">";
+		for (En t : Util.alphabetical(tables.keySet())) {
+			ret += "<table style=\"float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px\" border=\"1\"  cellpadding=\"3\">";
 	
 			List<String> cols = tables.get(t).first;
 			cols.remove(0);

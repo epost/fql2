@@ -24,7 +24,7 @@ import catdata.graph.SimilarityFloodingMatcher.SimilarityFloodingParams;
  * @param <E1> type of source edges
  * @param <E2> type of target edges
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"static-method", "unused"})
 public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N2, E2, SimilarityFloodingParams<N1, N2, E1, E2>> {
 
 	// The four variations of the fixpoint formula from table 3
@@ -192,7 +192,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 			}
 			// now set the weight of the edge 
 			if (tot > 0) {
-				wt =  ((double) 1.0)/tot;
+				wt =  ( 1.0)/tot;
 			}
 			// iterate over edges again, and add weight to the new edge  
 			for (Pair<E1, E2> e: pcg.edges.keySet()) {
@@ -767,6 +767,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 	
 
 	// other fixpt functions based on matrix
+
 private double[] sigmaAVector(double[][] matrix, int maxiter, int size, Double threshold){
 		
 		// sigma, temp sig

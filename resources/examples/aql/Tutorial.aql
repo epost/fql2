@@ -3,13 +3,13 @@
  * from the AQL menu, the HTML AQL tutorial posted on categoricaldata.net is obtained.
  */
 
-//HTML output is indicated by html {" <html code> "}.  If the closing quote and
-//bracket are on the same line, code folding may break.  The imported javascript file
-//renders the graphs.
-html {"
+//HTML output is indicated by html { (* " <html code> " *) }.  The imported javascript file
+//renders the graphs (if any).
+html { (* "
 	<html>
 	<head>
 		<title>AQL Tutorial</title>
+		<link rel=\"stylesheet\" type=\"text/css\" href=\"http://catinf.com/css/simple.css\" />
 	</head>
 	<body>
 		<script src=\"http://catinf.com/js/ci.js\"></script>
@@ -39,8 +39,7 @@ html {"
 				<i>Integer</i>, AQL will execute the <i>parseInt</i> function on the
 				string 100, yielding a <i>java.lang.Integer</i>.  Similarly, the 
 				<b>java_functions</b> section defines the <i>plus</i> function. 	
-			</p></div>"
-}			
+			</p></div>" *) }			
 
 
 typeside Ty = literal { 
@@ -56,7 +55,7 @@ typeside Ty = literal {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-html {" <hr/>
+html { (* " <hr/>
 	<div id=\"schemas\">
 	<h2>Schemas</h2>
 
@@ -78,8 +77,7 @@ html {" <hr/>
 			The observation_equations state that every <i>Employee</i> <i>e</i>'s 
 			<i>commulative_age</i> is the sum of <i>e</i>'s <i>age</i> and <i>e</i>'s
 			<i>manager</i>'s <i>age</i>.
-		</p>	</div>"
-}
+		</p>	</div>" *) }
 
 
 schema S = literal : Ty {
@@ -104,7 +102,7 @@ schema S = literal : Ty {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-html {" <hr/> <div id=\"instances\">
+html { (* " <hr/> <div id=\"instances\">
 	<h2>Instances</h2>
 
 		<p>An <b>instance</b> on a schema <i>S</i> contains a set of <b>generators</b>
@@ -120,8 +118,7 @@ html {" <hr/> <div id=\"instances\">
 			but <i>b.manager</i> does).  Note also that the tables contain nulls: 
 			<i>a.last</i>, for example.  Finally, note that
 			the <i>cummulative_age</i> attribute is automatically populated in the tables.
-		</p>	</div>  "
-}
+		</p>	</div>  " *) }
 
 //Readers are advised that it is easy to create infinite instances on this schema unless
 //care is taken to assign every employee a manager.  Simply adding a new employee d,
@@ -150,7 +147,7 @@ instance I = literal : S {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-html {" <hr/> <div id=\"mappings\">
+html { (* " <hr/> <div id=\"mappings\">
 	<h2>Mappings</h2>
 
 	<p>An <b>mapping</b> from schema <i>C</i> to schema <i>D</i> takes each entity in <i>C</i>
@@ -159,8 +156,7 @@ html {" <hr/> <div id=\"mappings\">
 		two entities <i>N1,N2</i> are taken to <i>N</i>, the foreign_key <i>f</i> is taken to the 
 		zero-length path on <i>N</i>, and the attribute <i>age</i> is taken to <i>age</i>.  We also
 		define an instance on <i>D</i> which will be used later.
-	</p>	"
-}	
+	</p>	"  *) }	
 
 schema C = literal : Ty {
  	entities 
@@ -195,7 +191,7 @@ mapping F = literal : C -> D {
 } 
 
 
-html {" <p>  We also define an instance on <i>D</i> which will be used later. </p> </div> "}	
+html { (* " <p>  We also define an instance on <i>D</i> which will be used later. </p> </div> " *) }	
 
 //multi_equations is a convenient shorthand to write lots of equations at once
 instance J = literal : D {
@@ -209,30 +205,28 @@ instance J = literal : D {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-html {" <hr/> <div id=\"fdm\">
+html { (* " <hr/> <div id=\"fdm\" >
 	<h2>Delta and Sigma</h2>
 
 	<p>Given a mapping <i>F</i> from schema <i>C</i> to schema <i>D</i>, the <b>delta</b>
 		operation converts instances on <i>D</i> to instances on <i>C</i>.  It can be thought
 		of as projection:
-	</p>	"
-}	
+	</p>	" *) }	
 
 instance deltaFJ = delta F J
 
-html {" 
+html { (* " 
 	<p>Given a mapping <i>F</i> from schema <i>C</i> to schema <i>D</i>, the <b>sigma</b>
 		operation converts instances on <i>C</i> to instances on <i>D</i>.  It can be thought
 		of as union, followed by merge.  In this example, sigma undoes delta:
-	</p>	</div>"
-}
+	</p>	</div>" *) }
 
 instance sigmaFdeltaFJ = sigma F deltaFJ
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-html {" <hr/> <div id=\"uberflowers\">
+html { (* " <hr/> <div id=\"uberflowers\">
 	<h2>Uber-flowers (From-Where) queries</h2>
 
 	<p> In addition to mappings, so-called uber-flower <b>queries</b> can be used to define
@@ -243,15 +237,14 @@ html {" <hr/> <div id=\"uberflowers\">
 	</p>
 	<p> A query from schema <i>C</i> to schema <i>D</i> specifies, for each entity <i>d</i>
 		 in <i>D</i>, a from-where-return statement that defines how <i>d</i> is to be
-		populated.  In addition, a query specifes how the foreign keys in <i>D</i> must be 
+		populated.  In addition, a query specifies how the foreign keys in <i>D</i> must be 
 		populated.  Here is a query corresponding to the previous section's delta; it does
 		not require any where clauses.  The block corresponding to foreign key <i>f</i>
 		says that for each <i>x</i> inserted into <i>N1</i>, the <i>y</i> to which <i>x</i>
 		should be sent to by <i>f</i> is <i>x</i>.  In general, the foreign_keys
 		part of a query is the most difficult part to write as should be attempted only
 		after writing the entities part.		
-	</p>"
-}	
+	</p>" *) }	
  
 query deltaFAsQuery = literal : D -> C {
 	entities
@@ -263,7 +256,7 @@ query deltaFAsQuery = literal : D -> C {
 
 instance deltaFJ_prime = eval deltaFAsQuery J
 
-html {" <br/>Here is a query corresponding to the previous section's sigma: </div>" }	
+html { (* " <br/>Here is a query corresponding to the previous section's sigma: </div>" *) }	
 
 //In general, it is not possible to use eval to do a sigma - the
 //dual of eval, "coeval", must be used instead.  A good illustration of this is to
@@ -279,7 +272,7 @@ instance sigmaFdeltaFJ_prime = eval sigmaFAsQuery deltaFJ_prime
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-html {" <hr/> <div id=\"conclusion\">
+html { (* " <hr/> <div id=\"conclusion\">
 	<h2>Conclusion</h2>
 
 	<p> This tutorial has barely scratched the surface of AQL's capabilities.  These capabilities
@@ -292,8 +285,7 @@ html {" <hr/> <div id=\"conclusion\">
 
 	</p>
 	<br />
-</div></body></html>"
-}	
+</div></body></html>" *) }	
 
 //it is possible to import mathjax to render math
 //		<script type=\"text/javascript\" async src=\"https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML\"></script>

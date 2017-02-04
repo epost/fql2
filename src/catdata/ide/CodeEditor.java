@@ -180,6 +180,8 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	protected abstract String getATMFrhs();
 	protected abstract void doTemplates();
 	
+	protected final RTextScrollPane sp;
+	
 	protected CodeEditor(String title, Integer id, String content) {
 		super(new GridLayout(1, 1));
 		this.id = id;
@@ -262,7 +264,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 		topArea.setCloseCurlyBraces(true);
 		topArea.setCodeFoldingEnabled(true);
-		RTextScrollPane sp = new RTextScrollPane(topArea);
+		sp = new RTextScrollPane(topArea);
 		sp.setFoldIndicatorEnabled(true);
      
 		JSplitPane xx1 = new Split(.8, JSplitPane.VERTICAL_SPLIT);
@@ -575,7 +577,8 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	
 	@SuppressWarnings("static-method")
 	protected Collection<String> reservedWords() {
-		return Util.list("pushout", "pushouts", "pullback", "pullbacks", "observable", "observables", "validator", "boolean", "booleans", "equational", "axiomatization", "axiomatize", "axiom", "axioms", "functor", "functors", "schema", "schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
+		return Util.list("IDE", "ID", "id", "uber", "Uber", "max", "alice", "Alice", "ED", "EDs", "TGD", "EGD", "TGDs", "EGDs", "FK", "FKs",
+"pushout", "pushouts", "pullback", "pullbacks", "observable", "observables", "validator", "boolean", "booleans", "equational", "axiomatization", "axiomatize", "axiom", "axioms", "functor", "functors", "schema", "schemas", "runtime", "sql", "aql", "fql", "fpql", "opl", "java", "javascript", "colimit");
 	}
 
 	

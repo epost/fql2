@@ -19,6 +19,9 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	
 	//TODO aql cant validate algebras bc are not dps
 	
+	public boolean hasFreeTypeAlgebra() {
+		return talg().eqs.isEmpty();
+	}
 	
 	/**
 	 * The Xs need be to be unique across ens

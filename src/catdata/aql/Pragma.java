@@ -8,5 +8,8 @@ public abstract class Pragma implements Semantics {
 	}
 	
 	public abstract void execute();
+	
+	@Override
+	public abstract String toString();
 
 }

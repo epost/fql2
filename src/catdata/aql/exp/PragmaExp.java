@@ -18,8 +18,11 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.ED;
+import catdata.aql.Instance;
 import catdata.aql.Kind;
 import catdata.aql.Pragma;
+import catdata.aql.fdm.EvalAlgebra;
 import catdata.aql.fdm.JdbcPragma;
 import catdata.aql.fdm.JsPragma;
 import catdata.aql.fdm.ProcPragma;
@@ -38,7 +41,165 @@ public abstract class PragmaExp extends Exp<Pragma> {
 	public Kind kind() {
 		return Kind.PRAGMA;
 	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static final class PragmaExpConsistent<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends PragmaExp {
+		public final InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I;
 
+		public PragmaExpConsistent(InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i) {
+			I = i;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			PragmaExpConsistent<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (PragmaExpConsistent<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "assert_consistent " + I;
+		}
+
+		@Override
+		public long timeout() {
+			return I.timeout();
+		}
+
+		@Override
+		public Pragma eval(AqlEnv env) {
+			return new Pragma() {
+
+				@Override
+				public void execute() {
+					Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> J = I.eval(env);
+					if (!J.algebra().hasFreeTypeAlgebra()) {
+						throw new RuntimeException("Not necessarily consistent: type algebra is\n\n" + J.algebra().talg());
+					}
+				}
+
+				@Override
+				public String toString() {
+					return "Consistent";
+				}
+				
+			};
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return I.deps();
+		}
+		
+		
+		
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final class PragmaExpCheck<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends PragmaExp {
+		public InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I;
+		public EdsExp<Ty,En,Sym,Fk,Att> C;
+		
+		public PragmaExpCheck(InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i, EdsExp<Ty, En, Sym, Fk, Att> c) {
+			I = i;
+			C = c;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((C == null) ? 0 : C.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			PragmaExpCheck<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (PragmaExpCheck<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (C == null) {
+				if (other.C != null)
+					return false;
+			} else if (!C.equals(other.C))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "check " + C + " " + I;
+		}
+
+		@Override
+		public long timeout() {
+			return I.timeout();
+		}
+
+		@Override
+		public Pragma eval(AqlEnv env) {
+			return new Pragma() {
+
+				@Override
+				public void execute() {
+					Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> J = I.eval(env);
+					Collection<EvalAlgebra.Row<ED.WHICH,X>> 
+						t = C.eval(env).triggers(J).stream().map(x -> x.second).collect(Collectors.toList());
+					if (!t.isEmpty()) {
+						throw new RuntimeException("Does not satisfy: triggers:\n\n" + Util.sep(t, "\n") + "\n\nin\n\n" + J);
+					}
+				}
+
+				@Override
+				public String toString() {
+					return "Satisfies";
+				}
+				
+				
+				
+			};
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(C.deps(), I.deps());
+		}
+		
+		
+		
+	}
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final class PragmaExpLoadJars extends PragmaExp {

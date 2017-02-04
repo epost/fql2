@@ -2,7 +2,6 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 import catdata.Pair;
 import catdata.Util;
@@ -100,7 +99,7 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 	//////////////////////////////////////////////////////////////////////
 	
 	public static class MapExpColim<N,E,Ty,En,Sym,Fk,Att> 
-	extends MapExp<Ty,En,Sym,Fk,Att,Set<Pair<N,En>>,Pair<N,Fk>,Pair<N,Att>> {
+	extends MapExp<Ty,En,Sym,Fk,Att,String,String,String> {
 
 		public final N node;
 		
@@ -143,10 +142,10 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 		}
 
 		@Override
-		public Pair<SchExp<Ty, En, Sym, Fk, Att>, SchExp<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>>> type(AqlTyping G) {
+		public Pair<SchExp<Ty, En, Sym, Fk, Att>, SchExp<Ty, String, Sym, String, String>> type(AqlTyping G) {
 			try {
 				SchExp<Ty, En, Sym, Fk, Att> src = exp.type(G).nodes.get(node);
-				SchExp<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> dst = new SchExpColim<>(exp);
+				SchExp<Ty, String, Sym, String, String> dst = new SchExpColim<>(exp);
 				return new Pair<>(src, dst);
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -160,8 +159,8 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 		}
 
 		@Override
-		public Mapping<Ty, En, Sym, Fk, Att, Set<Pair<N, En>>, Pair<N, Fk>, Pair<N, Att>> eval(AqlEnv env) {
-			return exp.eval(env).mappings.get(node);
+		public Mapping<Ty, En, Sym, Fk, Att, String, String, String> eval(AqlEnv env) {
+			return exp.eval(env).mappingsStr.get(node);
 		}
 
 		@Override
@@ -290,6 +289,9 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 		@SuppressWarnings("unchecked")
 		@Override
 		public Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>> type(AqlTyping G) {		
+			if (!G.defs.maps.containsKey(var)) {
+				throw new RuntimeException("Not a mapping: " + var);
+			}
 			return (Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>) ((Object)G.defs.maps.get(var));
 		}
 

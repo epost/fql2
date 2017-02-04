@@ -6,7 +6,7 @@ import java.util.Set;
 import catdata.Ctx;
 import catdata.aql.Kind;
 
-public class KindCtx<V,G,T,S,I,H,F,Q,P,C,SC> {
+public class KindCtx<V,G,T,S,I,H,F,Q,P,C,SC,ED> {
 
 	public final Ctx<V, G> gs = new Ctx<>();
 	public final Ctx<V, T> tys = new Ctx<>();
@@ -18,6 +18,7 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C,SC> {
 	public final Ctx<V, P> ps = new Ctx<>();
 	public final Ctx<V, C> cs = new Ctx<>();
 	public final Ctx<V, SC> scs = new Ctx<>();
+	public final Ctx<V, ED> eds = new Ctx<>();
 	
 	public Object get(V k, Kind kind) {
 		switch (kind) {
@@ -41,6 +42,8 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C,SC> {
 			return cs.get(k);
 		case SCHEMA_COLIMIT:
 			return scs.get(k);
+		case CONSTRAINTS:
+			return eds.get(k);
 		default:
 			throw new RuntimeException();
 		}
@@ -79,6 +82,9 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C,SC> {
 		case SCHEMA_COLIMIT:
 			scs.put(k, (SC) o);
 			break;
+		case CONSTRAINTS:
+			eds.put(k, (ED) o);
+			break;
 		default:
 			throw new RuntimeException();
 		}
@@ -97,6 +103,8 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C,SC> {
 		ret.addAll(qs.keySet()); 
 		ret.addAll(gs.keySet());
 		ret.addAll(cs.keySet());
+		ret.addAll(scs.keySet());
+		ret.addAll(eds.keySet());
 		return ret;
 	}
 }

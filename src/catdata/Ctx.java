@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -169,6 +170,15 @@ public final class Ctx<K,V> implements Serializable {
 		Ctx<K,Z> ret = new Ctx<>();
 		for (K k : map.keySet()) {
 			ret.put(k, f.apply(get(k)));			
+		}
+		return ret;
+	}
+	
+	public <X,Y> Ctx<X,Y> map(BiFunction<K, V, Pair<X,Y>> f) {
+		Ctx<X,Y> ret = new Ctx<>();
+		for (K k : map.keySet()) {
+			Pair<X, Y> x = f.apply(k, get(k));
+			ret.put(x.first, x.second);			
 		}
 		return ret;
 	}

@@ -2,6 +2,7 @@ package catdata.aql;
 
 public enum Kind {
 
+	CONSTRAINTS,
 	TYPESIDE, //(TypeSide.class, TyExp.class),
 	SCHEMA, //(Schema.class, SchExp.class),
 	INSTANCE, //(Instance.class, InstExp.class),
@@ -36,6 +37,8 @@ public enum Kind {
 			return "comment";
 		case SCHEMA_COLIMIT:
 			return "schema_colimit";
+		case CONSTRAINTS:
+			return "constraints";	
 		default:
 			throw new RuntimeException();
 		}

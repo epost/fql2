@@ -14,8 +14,10 @@ import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.It.ID;
 import catdata.aql.fdm.ComposeTransform;
 import catdata.aql.fdm.IdentityTransform;
+import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralTransform; //TODO aql why depend fdm
 
 public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics {
@@ -28,7 +30,7 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 	public final Ctx<En2, Frozen<Ty,En1,Sym,Fk1,Att1>> ens = new Ctx<>();
 	public final Ctx<Att2, Term<Ty,En1,Sym,Fk1,Att1,Var,Void>> atts; 
 	
-	public final Ctx<Fk2, Transform<Ty,En1,Sym,Fk1,Att1,Var,Void,Var,Void,Void,Void,Void,Void>> fks = new Ctx<>();
+	public final Ctx<Fk2, Transform<Ty,En1,Sym,Fk1,Att1,Var,Void,Var,Void,ID,Chc<Void, Pair<ID, Att1>>,ID,Chc<Void, Pair<ID, Att1>>>> fks = new Ctx<>();
 	public final Ctx<Fk2, Boolean> doNotValidate = new Ctx<>();
 	
 	public final Schema<Ty,En1,Sym,Fk1,Att1> src;
@@ -123,7 +125,7 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 	}
 	
 	//TODO aql pass just for better error messages in uber flowers
-	public static class Frozen<Ty,En1,Sym,Fk1,Att1> extends Instance<Ty,En1,Sym,Fk1,Att1,Var,Void,Void,Void> {
+	public static class Frozen<Ty,En1,Sym,Fk1,Att1> extends Instance<Ty,En1,Sym,Fk1,Att1,Var,Void,ID,Chc<Void, Pair<ID, Att1>>> {
 
 		public List<Var> order() {
 			Map<Var, Integer> counts = new HashMap<>();
@@ -191,10 +193,14 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 		public DP<Ty, En1, Sym, Fk1, Att1, Var, Void> dp() {
 			return dp;
 		}
-
+	
+		private InitialAlgebra<Ty, En1, Sym, Fk1, Att1, Var, Void, ID> hidden;
 		@Override
-		public Algebra<Ty, En1, Sym, Fk1, Att1, Var, Void, Void, Void> algebra() {
-			throw new RuntimeException("Anomaly: please report");
+		public Algebra<Ty, En1, Sym, Fk1, Att1, Var, Void, ID, Chc<Void, Pair<ID, Att1>>> algebra() {		if (hidden!=null) {
+				return hidden;
+			}
+			hidden = new InitialAlgebra<>(dp, schema, collage(), new It(), x->x.toString(), x->x.toString(), false);
+			return hidden;
 		}
 		
 	}
@@ -233,19 +239,19 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 		throw new RuntimeException("Anomaly: please report");
 	}
 	
-	private Transform<Ty,En1,Sym,Fk1,Att1,Var,Void,Var,Void,Void,Void,Void,Void> compose(List<Fk2> l, En2 en2) {
+	private Transform<Ty,En1,Sym,Fk1,Att1,Var,Void,Var,Void,ID,Chc<Void, Pair<ID, Att1>>,ID,Chc<Void, Pair<ID, Att1>>> compose(List<Fk2> l, En2 en2) {
 		if (l.isEmpty()) {
 			return new IdentityTransform<>(ens.get(en2));
 		} else {
-			Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, Void, Void, Void, Void> t = fks.get(l.get(0));
-			Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, Void, Void, Void, Void> u = compose(l.subList(1, l.size()), dst.fks.get(l.get(0)).first);
+			Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> t = fks.get(l.get(0));
+			Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> u = compose(l.subList(1, l.size()), dst.fks.get(l.get(0)).first);
 			return new ComposeTransform<>(t, u);
 		}
 	}
 	
 	private Term<Ty,En1,Sym,Fk1,Att1,Var,Void> transP(Term<Ty,En2,Sym,Fk2,Att2,Void,Void> term, Term<Ty,En1,Sym,Fk1,Att1,Var,Void> u, En2 en2) {
 		List<Fk2> l = transP(term);
-		Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, Void, Void, Void, Void> t = compose(l, en2);
+		Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> t = compose(l, en2);
 		return t.trans(u);
 	}
 	

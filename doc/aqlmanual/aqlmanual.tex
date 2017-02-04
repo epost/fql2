@@ -61,16 +61,20 @@ java -cp "./fql.jar" catdata.aql.exp.AqlInACan.openCan
 \end{verbatim}
 
 \section{HTML markup}
-The AQL IDE allows HTML markup to be inserted into AQL files.  After a program has compiled, the ``emit as HTML'' option in the AQL menu will emit the HTML code.  The HTML will contain pretty-printings of the program text, HTML tables for instances, and javascript graphs for schemas.  To insert HTML, use the keyword {\tt html}, then brackets, and then a quoted string (note that because the HTML appears in a string, any quotes and backslashes within that string must be escaped).  For example,
+The AQL IDE allows HTML markup to be inserted into AQL files.  After a program has compiled, the ``emit as HTML'' option in the AQL menu will emit the HTML code.  The HTML will contain pretty-printings of the program text, HTML tables for instances, and javascript graphs for schemas.  To insert HTML, use the keyword {\tt html}, then brackets, then (*, and then a quoted string (note that because the HTML appears in a string, any quotes and backslashes within that string must be escaped).  For example,
 \begin{verbatim}
 instance I = ...
 
-html {"<html>Hello world<a href=\"main.html\">link</a></html>"} 
+html { (* "<html>Hello world<a href=\"main.html\">link</a></html>" *) } 
 
 instance J = ...
 \end{verbatim}
 
-Due to a bug in the code editor, html sections will not fold if the closing quote is on the same line as the closing bracket.  The AQL tutorial, built-in as the Tutorial example, illustrates HTML output.
+The AQL tutorial, built-in as the Tutorial example, illustrates HTML output.
+
+\section{Just in time compilation}
+
+The AQL IDE theorem provers benefit greatly from native compilation, which the JVM performs lazily.  Experiments suggest several AQL theorem provers become 2-4x faster after JIT compilation.  For this reason, if performance is critical it is suggested to run a few ``warm-up'' built-in examples to trigger JIT compilation.
 
 \chapter{AQL Basics}
 
@@ -80,7 +84,7 @@ Comments in AQL are C style, either ``//'' or ``/* */''.
 
 \section{Kinds}
 
-A {\it kind} is either {\it typeside}, {\it schema},  {\it instance}, (schema) {\it  mapping}, (instance) {\it transform}, {\it query}, {\it graph}, or {\it pragma}. 
+A {\it kind} is either {\it typeside}, {\it schema},  {\it instance}, (schema) {\it  mapping}, (instance) {\it transform}, {\it query}, {\it graph},  {\it pragma}, or {\it constraints}. 
 
 \section{Identifiers}
 
@@ -325,12 +329,12 @@ Allowable options are {\tt timeout} and {\tt dont\_validate\_unsafe}, which disa
 \chapter{Kind  {\tt query}}
 A query $S \to T$ assigns to each entity $en$ in $S$ a (``frozen'') instance on $T$, which we will write as $[en]$, and to each foreign key $fk : e \to e'$ a transform $[fk] : [e'] \to [e]$ (note the reversal), and to each attribute $att : e \to \tau$ a term of type $\tau$ in context $[e]$.  
 
-\section{{\tt id <schema>}}
-%todo
-The identity query on a schema.
-\section{{\tt compose <mapping> <mapping>}}
-%todo
-Composes two queries: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt compose f g : A -> C}.
+%\section{{\tt id <schema>}}
+%%todo
+%The identity query on a schema.
+%\section{{\tt compose <mapping> <mapping>}}
+%%todo
+%Composes two queries: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt compose f g : A -> C}.
 
 \section{{\tt literal : <schema> -> <schema>}}
 \subsection{{\tt imports}}
@@ -343,6 +347,38 @@ A {\tt ctx(<foreign key>, <transform>)}.
 
 \subsection{{\tt options}}
 Allowed are {\tt timeout} and {\tt dont\_validate\_eqs}.  Note that each instance and transform in the query can have its own options.
+
+
+\chapter{Kind {\tt constraints}}
+
+\section{{\tt literal : <schema>}}
+
+A set of constraints (embedded dependencies). 
+
+\subsection{{\tt imports}}
+A list of constraints names.
+
+\subsection{{\tt constraints}}
+ Each constraint has the form
+\begin{verbatim}
+forall x1 : E1 , ..., xN : En 
+where p = q  p' = q' ...
+->
+exists y1:E'1, ..., yM : E;m 
+where p'' = q''  p''' = q''' ...
+\end{verbatim}
+
+\subsubsection{{\tt forall}}
+A {\tt ctx(<generator> , <entity>)}.
+
+\subsubsection{{\tt where}}
+A list of ground (non quantified) equations.
+
+\subsubsection{{\tt exists}}
+A {\tt ctx(<generator> , <entity>)}.
+
+\subsubsection{{\tt where}}
+A list of ground (non quantified) equations.
 
 \chapter{Kind {\tt instance}}
 \section{{\tt empty : <schema>}}
@@ -389,7 +425,7 @@ Allowable options are {\tt timeout} and {\tt static\_typing}, which when disable
 \subsection{\tt imports}
 A list of instance names.
 
-\subsubsection{entities}
+\subsection{entities}
 A {\tt ctx(<entity> | <attribute> | <foreign key> | <type> , [sql code])}.  The SQL code for each entity and type should return a one column table, and the SQL code for each attribute and foreign key should return a two column table.  
 
 \subsection{{\tt options}}
@@ -433,6 +469,10 @@ The key-value pairs in multi-equations must be comma separated (necessary for re
 
 \subsection{{\tt options}}
 Allowable options are {\tt timeout}, {\tt prover} and related options, and {\tt require\_consistency}.
+
+\section{{\tt chase <constraints> <instance> [number]}}
+
+Chases the input instance with the input constraints up to a maximum number of iterations.  If the chase succeeds, the result instance will satisfy the constraints.
 
 \chapter{Kind {\tt transform}}
 \section{{\tt id <instance>}}
@@ -530,6 +570,14 @@ Expects a list of (single) SQL commands inside a section.  Each string will be e
 \subsection{{\tt options}}
 
 Allowable options are {\tt timeout} and {\tt always\_reload}.
+
+\section{{\tt check <constraints> <instance>}}
+
+Checks that an instance obeys a set of constraints.
+
+\section{{\tt assert\_consistent <instance>}}
+
+Conservatively checks that an instance is consistent (e.g., does not prove $1=2$) by checking that it has a free type algebra.
 
 %%%%%%%%%%
 

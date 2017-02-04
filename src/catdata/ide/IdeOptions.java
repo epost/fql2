@@ -42,6 +42,7 @@ import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.TokenTypes;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextAreaBase;
+import org.fife.ui.rtextarea.RTextScrollPane;
 
 import catdata.Util;
 import catdata.aql.AqlOptions;
@@ -370,7 +371,7 @@ public class IdeOptions {
 	
 	public void apply(CodeEditor<?,?,?> a) {
 		for (IdeOption o : IdeOption.values()) {
-			apply(o, a.topArea);
+			apply(o, a.topArea, a.sp);
 			apply(o, a.respArea.area);
 		}
 		a.clearSpellCheck();
@@ -382,12 +383,16 @@ public class IdeOptions {
 	public void apply(IdeOption o, JTextArea a) {
 	
 		switch (o) {
+		case NUMBER_COLOR:
 		case FILE_PATH:
+		case HTML_COLOR:
+		case LINE_NUMBERS:
 		case LOOK_AND_FEEL:
 		case SPELL_CHECK:
 		case COMMENT_COLOR:
 		case KEYWORD_1_COLOR:
 		case KEYWORD_2_COLOR:
+		case SYMBOL_COLOR:
 		case QUOTE_COLOR:
 		case BRACKET_MATCH_BG_COLOR:
 		case BRACKET_MATCH_BORDER_COLOR:
@@ -442,14 +447,17 @@ public class IdeOptions {
 		GUI.optionsHaveChanged();
 	}
 	
-	public void apply(IdeOption o, RSyntaxTextArea a) {
+	private void apply(IdeOption o, RSyntaxTextArea a, RTextScrollPane sp) {
 		SyntaxScheme scheme = a.getSyntaxScheme();
-	
+		
 		switch (o) {
+		case LINE_NUMBERS:
+			sp.setLineNumbersEnabled(getBool(o));
+			return;
 		case FILE_PATH:
 			return;
 		case LOOK_AND_FEEL:
-			return;
+			return; 
 		case SPELL_CHECK:
 			return;
 
@@ -461,9 +469,18 @@ public class IdeOptions {
 			scheme.getStyle(TokenTypes.COMMENT_MULTILINE).foreground = getColor(o);
 			scheme.getStyle(TokenTypes.COMMENT_KEYWORD).foreground = getColor(o);*/
 			return;
+		case SYMBOL_COLOR:
+			scheme.getStyle(TokenTypes.OPERATOR).foreground = getColor(o);
+			return;
+		case HTML_COLOR:
+			scheme.getStyle(TokenTypes.COMMENT_DOCUMENTATION).foreground = getColor(o);
+			return;	
 		case KEYWORD_1_COLOR:
 			scheme.getStyle(TokenTypes.RESERVED_WORD).foreground = getColor(o);
 			return;
+		case NUMBER_COLOR:
+			scheme.getStyle(TokenTypes.LITERAL_NUMBER_DECIMAL_INT).foreground = getColor(o);
+			return;	
 		case KEYWORD_2_COLOR:
 			scheme.getStyle(TokenTypes.RESERVED_WORD_2).foreground = getColor(o);
 			return;
@@ -499,7 +516,7 @@ public class IdeOptions {
 			a.setMarginLineColor(getColor(o));
 			return;
 		case MARK_ALL_HIGHLIGHT_COLOR:
-			a.setMarkAllHighlightColor(getColor(o));
+			a.setMarkOccurrencesColor(getColor(o));
 			return;
 		case SELECTION_COLOR:
 			a.setSelectionColor(getColor(o));
@@ -556,6 +573,7 @@ public class IdeOptions {
 		FILE_PATH(IdeOptionType.FILE, new File("")), 
 		FONT(IdeOptionType.FONT, RTextAreaBase.getDefaultFont()),
 		LINE_WRAP(IdeOptionType.BOOL, false),
+		LINE_NUMBERS(IdeOptionType.BOOL, true),
 		SPELL_CHECK(IdeOptionType.BOOL, true),
 		AUTO_CLOSE_BRACES(IdeOptionType.BOOL, true),
 		AUTO_INDENT(IdeOptionType.BOOL, true),
@@ -575,7 +593,10 @@ public class IdeOptions {
 		KEYWORD_1_COLOR(IdeOptionType.COLOR, Color.RED), 
 		KEYWORD_2_COLOR(IdeOptionType.COLOR, Color.BLUE),
 		COMMENT_COLOR(IdeOptionType.COLOR, new Color(-16744448)),
+		HTML_COLOR(IdeOptionType.COLOR, new Color(-16744448)),
 		QUOTE_COLOR(IdeOptionType.COLOR, Color.gray),
+		SYMBOL_COLOR(IdeOptionType.COLOR, Color.RED),
+		NUMBER_COLOR(IdeOptionType.COLOR, Color.gray),
 		CURRENT_LINE_HIGHLIGHT_COLOR(IdeOptionType.COLOR, RTextAreaBase.getDefaultCurrentLineHighlightColor()),
 		MARK_ALL_HIGHLIGHT_COLOR(IdeOptionType.COLOR, RTextArea.getDefaultMarkAllHighlightColor()),
 		CARET_COLOR(IdeOptionType.COLOR, Color.black),
@@ -631,7 +652,7 @@ public class IdeOptions {
 			case MARGIN_LINE_COLOR:
 				return "Margin line";
 			case MARK_ALL_HIGHLIGHT_COLOR:
-				return "Mark all highlight";
+				return "Mark occurrences highlight";
 			case QUOTE_COLOR:
 				return "Quote";
 			case SELECTION_COLOR:
@@ -643,7 +664,7 @@ public class IdeOptions {
 			case LINE_HIGHLIGHT:
 				return "Highlight current line";
 			case MARK_OCCURANCES:
-				return "Mark occurances";
+				return "Mark occurrences";
 			case SHOW_MARGIN:
 				return "Show Margin";
 			case FADE_CURRENT_LINE:
@@ -664,6 +685,14 @@ public class IdeOptions {
 				return "Columns before margin";
 			case TAB_SIZE:
 				return "Spaces per tab";
+			case SYMBOL_COLOR:
+				return "Symbol color";
+			case LINE_NUMBERS:
+				return "Line numbers";
+			case NUMBER_COLOR:
+				return "Number color";
+			case HTML_COLOR:
+				return "HTML color";
 			default:
 				return Util.anomaly();
 			}

@@ -26,8 +26,13 @@ import catdata.Util;
 import catdata.aql.RawTerm;
 import catdata.aql.exp.ColimSchExp.ColimSchExpLit;
 import catdata.aql.exp.ColimSchExp.ColimSchExpVar;
+import catdata.aql.exp.ColimSchExp.ColimSchExpWrap;
+import catdata.aql.exp.EdsExp.EdExpRaw;
+import catdata.aql.exp.EdsExp.EdsExpRaw;
+import catdata.aql.exp.EdsExp.EdsExpVar;
 import catdata.aql.exp.GraphExp.GraphExpRaw;
 import catdata.aql.exp.GraphExp.GraphExpVar;
+import catdata.aql.exp.InstExp.InstExpChase;
 import catdata.aql.exp.InstExp.InstExpCoEval;
 import catdata.aql.exp.InstExp.InstExpCod;
 import catdata.aql.exp.InstExp.InstExpColim;
@@ -42,6 +47,8 @@ import catdata.aql.exp.MapExp.MapExpColim;
 import catdata.aql.exp.MapExp.MapExpComp;
 import catdata.aql.exp.MapExp.MapExpId;
 import catdata.aql.exp.MapExp.MapExpVar;
+import catdata.aql.exp.PragmaExp.PragmaExpCheck;
+import catdata.aql.exp.PragmaExp.PragmaExpConsistent;
 import catdata.aql.exp.PragmaExp.PragmaExpJs;
 import catdata.aql.exp.PragmaExp.PragmaExpLoadJars;
 import catdata.aql.exp.PragmaExp.PragmaExpMatch;
@@ -79,11 +86,16 @@ public class AqlParser {
 
 
 	public static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
-			")", "=", "->", "@", };	
+			")", "=", "->", "@", "(*", "*)"};	
 	
 	public static final String[] res = new String[] {
+			"chase",
+			"check",
+			"assert_consistent",
 			"html",
 			"schema_colimit",
+			"exists",
+			"constraints",
 			"getMapping",
 			"getSchema",
 			"typeside", "schema", "mapping", "instance", "transform", "query", "pragma", "graph",
@@ -143,7 +155,8 @@ public class AqlParser {
 			"export_jdbc_transform",
 			"export_jdbc_instance",
 			"unit_query",
-			"counit_query"
+			"counit_query",
+			"wrap"
 			};
 
 	private static final Terminals RESERVED = Terminals.caseSensitive(ops, res);
@@ -224,7 +237,7 @@ public class AqlParser {
 			var = ident.map(SchExpVar::new),
 			empty = Parsers.tuple(token("empty"), ty_ref.get()).map(x -> new SchExpEmpty<>(x.b)),
 			inst = Parsers.tuple(token("schemaOf"), inst_ref.lazy()).map(x -> new SchExpInst<>(x.b)),
-			colim = Parsers.tuple(token("getSchema"), colimSchExp()).map(x -> new SchExpColim<>(x.b)),
+			colim = Parsers.tuple(token("getSchema"), colim_ref.lazy()).map(x -> new SchExpColim<>(x.b)),
 			ret = Parsers.or(inst, empty, schExpRaw(), var, colim); 
 		
 		sch_ref.set(ret);
@@ -257,7 +270,11 @@ public class AqlParser {
 			
 			load = Parsers.tuple(token("add_to_classpath"), token("{"), ident.many(), token("}")).map(x -> new PragmaExpLoadJars(x.c)),	
 			
-			ret = Parsers.or(csvInst, csvTrans, var, sql, js, proc, jdbcInst, jdbcTrans, match, load); 
+			check = Parsers.tuple(token("check"), edsExp(), inst_ref.lazy()).map(x -> new PragmaExpCheck(x.c, x.b)),
+		
+			cons = Parsers.tuple(token("assert_consistent"), inst_ref.lazy()).map(x -> new PragmaExpConsistent(x.b)),
+					
+			ret = Parsers.or(check, csvInst, cons, csvTrans, var, sql, js, proc, jdbcInst, jdbcTrans, match, load); 
 		
 			pragma_ref.set(ret);
 	}
@@ -273,9 +290,10 @@ public class AqlParser {
 			eval = Parsers.tuple(token("eval"), query_ref.lazy(), inst_ref.lazy()).map(x -> new InstExpEval(x.b, x.c)),
 			dom = Parsers.tuple(token("src"), trans_ref.lazy()).map(x -> new InstExpDom(x.b)),
 			cod = Parsers.tuple(token("dst"), trans_ref.lazy()).map(x -> new InstExpCod(x.b)),
+			chase = Parsers.tuple(token("chase"), edsExp(), inst_ref.lazy(), IntegerLiteral.PARSER).map(x -> new InstExpChase(x.b, x.c, Integer.parseInt(x.d))),
 			coeval = Parsers.tuple(token("coeval"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new InstExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d));
 					
-		Parser ret = Parsers.or(instExpJdbc(),empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval);
+		Parser ret = Parsers.or(chase, instExpJdbc(),empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval);
 		
 		inst_ref.set(ret);
 	}
@@ -295,7 +313,7 @@ public class AqlParser {
 		Parser<MapExp<?,?,?,?,?,?,?,?>> 
 			var = ident.map(MapExpVar::new),
 			id = Parsers.tuple(token("id"), sch_ref.lazy()).map(x -> new MapExpId<>(x.b)),
-			colim = Parsers.tuple(token("getMapping"), colimSchExp(), ident).map(x -> new MapExpColim<>(x.c, x.b)),		
+			colim = Parsers.tuple(token("getMapping"), colim_ref.lazy(), ident).map(x -> new MapExpColim(x.c, x.b)),		
 			comp = Parsers.tuple(token("("), map_ref.lazy(), token(";"), map_ref.lazy(), token(")")).map(x -> new MapExpComp(x.b, x.d)),
 					
 			ret = Parsers.or(id, mapExpRaw(), var, colim, comp);
@@ -473,7 +491,7 @@ public class AqlParser {
 		Parser<Tuple3<List<String>, List<String>, List<catdata.Pair<String, catdata.Pair<String, String>>>>> 
 		pa = Parsers.tuple(imports, nodes.optional(), edges0.optional());
 		
-		Parser<GraphExpRaw> ret = pa.map(x -> new GraphExpRaw(x.b, x.c, x.a));
+		Parser<GraphExpRaw> ret = pa.map(x -> new GraphExpRaw(Util.newIfNull(x.b), Util.newIfNull(x.c), x.a));
 		return ret.between(token("literal").followedBy(token("{")), token("}")); 
 		
 	}
@@ -642,6 +660,40 @@ public class AqlParser {
 			
 		return ret;	
 	}
+	
+	 private static Parser<EdsExp<?,?,?,?,?>> edsExpRaw() {
+		Parser<SchExp<?, ?, ?, ?, ?>> l 
+		= Parsers.tuple(token("literal"), token(":"), sch_ref.lazy(), token("{")).map(x -> x.c);
+			
+		return Parsers.tuple(l, imports, edExpRaw().many(), token("}")).map(x -> new EdsExpRaw(x.a, x.b, x.c));
+	 }
+	 
+	 private static Parser<EdsExp<?,?,?,?,?>> edsExp() {
+		 Parser<EdsExp<?,?,?,?,?>> 
+			var = ident.map(EdsExpVar::new),
+			raw = edsExpRaw();
+		 return Parsers.or(var, raw);
+	 }
+	 
+	 private static Parser<EdExpRaw> edExpRaw() {
+			Parser<List<catdata.Pair<String, String>>> as 
+			= Parsers.tuple(token("forall"), env(ident, ":")).map(x -> x.b).optional();
+			
+			Parser<List<catdata.Pair<String, String>>> es 
+			= Parsers.tuple(token("exists"), env(ident, ":")).map(x -> x.b).optional();
+		
+			
+			Parser<catdata.Pair<RawTerm, RawTerm>> eq 
+			= Parsers.tuple(term(), token("="), term()).map(x -> new catdata.Pair<>(x.a, x.c));
+
+			Parser<List<catdata.Pair<RawTerm, RawTerm>>> eqs 
+			= Parsers.tuple(token("where"), eq.many()).map(x -> x.b).optional();
+						
+						
+			Parser<EdExpRaw> ret = Parsers.tuple(as, eqs, token("->"), es, eqs)
+					.map(x -> new EdExpRaw(Util.newIfNull(x.a), Util.newIfNull(x.b), Util.newIfNull(x.d), Util.newIfNull(x.e)));
+			return ret;	
+	}
 
 	 private static Parser<InstExpRaw> instExpRaw() {
 			Parser<List<catdata.Pair<String, String>>> generators = Parsers.tuple(token("generators"), env(ident, ":")).map(x -> x.b);
@@ -716,7 +768,7 @@ public class AqlParser {
 	} 
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static Parser<ColimSchExp<Object, Object, Object, Object,Object,Object,Object>> colimSchExp() {
+	private static void colimSchExp() {
 		 Parser<List<catdata.Pair<String, SchExp<?,?,?,?,?>>>>
 		 	nodes = Parsers.tuple(token("nodes"), env(sch_ref.lazy(), "->")).map(x -> x.b);
 		
@@ -740,8 +792,15 @@ public class AqlParser {
 			});
 				
 			Parser<ColimSchExp<Object, Object, Object, Object,Object,Object,Object>>
-			ret2 = ident.map(x -> new ColimSchExpVar(x));
-			return Parsers.or(ret, ret2);
+			ret2 = ident.map(x -> new ColimSchExpVar(x)),
+			ret3 = Parsers.tuple(token("wrap"), colim_ref.lazy(), map_ref.lazy(), map_ref.lazy())
+					.map(x -> new ColimSchExpWrap(x.b, x.c, x.d));
+			
+			Parser<ColimSchExp<?, ?, ?, ?,?,?,?>> retX =
+					Parsers.or(ret, ret2, ret3);
+			
+			colim_ref.set(retX);
+			
 		}
 	
 	private static Parser<InstExpColim<String, String, String, String,String,String,String,String,String,String,String>> colimInstExp() {
@@ -867,6 +926,7 @@ public class AqlParser {
 	private static final Reference<GraphExp<?, ?>> graph_ref = Parser.newReference();
 	private static final Reference<TyExp<?, ?>> ty_ref = Parser.newReference();
 	private static final Reference<SchExp<?,?,?,?,?>> sch_ref = Parser.newReference();
+	private static final Reference<ColimSchExp<?,?,?,?,?,?,?>> colim_ref = Parser.newReference();
 	private static final Reference<PragmaExp> pragma_ref = Parser.newReference();
 	private static final Reference<InstExp<?, ?, ?,?,?,?,?,?,?>> inst_ref = Parser.newReference();
 	private static final Reference<MapExp<?,?,?,?,?,?,?,?>> map_ref = Parser.newReference();
@@ -882,6 +942,7 @@ public class AqlParser {
 		graphExp();
 		queryExp();
 		pragmaExp();
+		colimSchExp();
 		
 		@SuppressWarnings("unchecked")
 		Parser<Triple<String, Integer, ? extends Exp<?>>> p 
@@ -894,7 +955,8 @@ public class AqlParser {
 					 decl("graph", graph_ref.get()),
 					 decl("query", query_ref.get()),
 					 decl("pragma", pragma_ref.get()),
-					 decl("schema_colimit", colimSchExp())
+					 decl("schema_colimit", colim_ref.get()),
+					 decl("constraints", edsExp())
 					 );
 		
 		return p.many().map(x -> new Program<>(conv(x), s));
@@ -904,7 +966,7 @@ public class AqlParser {
 	
 	private static int comment_id = 0;
 	private static Parser<Triple<String, Integer, ? extends Exp<?>>> comment() {
-		return Parsers.tuple(token("html"), token("{"), StringLiteral.PARSER, Parsers.INDEX, token("}")).map(x -> 
+		return Parsers.tuple(token("html"), token("{").followedBy(token("(*")), StringLiteral.PARSER, Parsers.INDEX, token("*)").followedBy(token("}"))).map(x -> 
 			new Triple<>(" " + comment_id++, x.d, new CommentExp(x.c))
 		);
 	}

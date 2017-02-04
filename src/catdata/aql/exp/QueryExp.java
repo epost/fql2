@@ -66,6 +66,9 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 		@SuppressWarnings("unchecked")
 		@Override
 		public Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>> type(AqlTyping G) {
+			if (!G.defs.qs.containsKey(var)) {
+				throw new RuntimeException("Not a query: " + var);
+			}
 			return (Pair<SchExp<Object, Object, Object, Object, Object>,SchExp<Object, Object, Object, Object, Object>>) ((Object)G.defs.qs.get(var));
 		}
 

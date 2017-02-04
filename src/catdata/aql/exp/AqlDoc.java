@@ -2,7 +2,9 @@ package catdata.aql.exp;
 
 import catdata.Program;
 import catdata.Unit;
+import catdata.aql.ColimitSchema;
 import catdata.aql.Comment;
+import catdata.aql.Constraints;
 import catdata.aql.Graph;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
@@ -13,14 +15,13 @@ import catdata.aql.Schema;
 import catdata.aql.SemanticsVisitor;
 import catdata.aql.Transform;
 import catdata.aql.TypeSide;
-import catdata.aql.fdm.ColimitSchema;
 import catdata.graph.DMG;
 
 public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeException> {
 	
 	public static String doc(AqlEnv env, Program<Exp<?>> prog) {
 		if (prog == null || env == null) {
-			return "Anomaly: please report";
+			throw new RuntimeException("Must compile before using HTML output");
 		}
 		StringBuffer sb = new StringBuffer();
 		AqlDoc doc = new AqlDoc();
@@ -148,6 +149,11 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 
 	@Override
 	public <N, E0, Ty, En, Sym, Fk, Att> String visit(Unit arg, ColimitSchema<N, E0, Ty, En, Sym, Fk, Att> S) throws RuntimeException {
+		return "";
+	}
+
+	@Override
+	public <Ty, En, Sym, Fk, Att> String visit(Unit arg, Constraints<Ty, En, Sym, Fk, Att> S) throws RuntimeException {
 		return "";
 	}
 

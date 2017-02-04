@@ -74,7 +74,7 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 									   eq.rhs.mapGenSk(x -> new Pair<>(x, j), Util::abort)));
 				}
 				for (Fk2 fk : J.schema().fksFrom(t)) {
-					Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, Void, Void, Void, Void> 
+					Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> 
 					fk0 = Q.fks.get(fk);
 					for (Var v0 : fk0.src().gens().keySet()) {
 						Term<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y> 

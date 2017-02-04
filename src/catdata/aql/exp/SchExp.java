@@ -2,7 +2,6 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 import catdata.Pair;
 import catdata.Util;
@@ -18,7 +17,7 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public static class SchExpColim<N, E, Ty, En, Sym, Fk, Att> extends SchExp<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> {
+	public static class SchExpColim<N, E, Ty, En, Sym, Fk, Att> extends SchExp<Ty, String, Sym, String, String> {
 
 		public final ColimSchExp<N, E, Ty, En, Sym, Fk, Att> exp;
 
@@ -62,8 +61,8 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 		}
 
 		@Override
-		public Schema<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>> eval(AqlEnv env) {
-			return exp.eval(env).schema;
+		public Schema<Ty, String, Sym, String, String> eval(AqlEnv env) {
+			return exp.eval(env).schemaStr;
 		}
 
 		@Override
