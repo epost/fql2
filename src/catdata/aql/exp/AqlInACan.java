@@ -135,7 +135,7 @@ class AqlInACan {
 			}
 			ret += "</table>";
 		} 
-		return ret + "</div><br style=\"clear:both;\">"; 
+		return ret + "</div><br style=\"clear:both;\"/>"; 
 	}
 
 	private static String strip(String s) {

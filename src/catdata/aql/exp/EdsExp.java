@@ -38,9 +38,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 				return toString;
 			}
 			toString = "";
-			
 		
-			
 			if (!As.isEmpty()) {
 				toString += "\tforall";
 				List<String> temp = new LinkedList<>();		
@@ -59,7 +57,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 				
 				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 			}
-			toString += "\n->\n";
+			toString += "->\n";
 			if (!Es.isEmpty()) {
 				toString += "\texists";
 				List<String> temp = new LinkedList<>();		

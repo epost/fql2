@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import catdata.Ctx;
@@ -33,7 +35,46 @@ public class ED<Ty, En, Sym, Fk, Att> {
 
 	@Override
 	public String toString() {
-		return Q.toString();
+		String toString = "";
+		
+		if (!As.isEmpty()) {
+			toString += "\tforall";
+			List<String> temp = new LinkedList<>();		
+			for (Entry<Var, En> p : As.map.entrySet()) {
+				temp.add(p.getKey() + ":" + p.getValue());
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		if (!Awh.isEmpty()) {
+			toString += "\twhere";
+			List<String> temp = new LinkedList<>();
+			for (Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> p : Awh) {
+				temp.add(p.first + " = " + p.second);
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		toString += "->\n";
+		if (!Es.isEmpty()) {
+			toString += "\texists";
+			List<String> temp = new LinkedList<>();		
+			for (Entry<Var, En> p : Es.map.entrySet()) {
+				temp.add(p.getKey() + ":" + p.getValue());
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		if (!Ewh.isEmpty()) {
+			toString += "\twhere";
+			List<String> temp = new LinkedList<>();
+			for (Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> p : Ewh) {
+				temp.add(p.first + " = " + p.second);
+			}
+			
+			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+		}
+		return toString;
 	}
 
 	public final Schema<Ty, En, Sym, Fk, Att> schema;
@@ -69,7 +110,7 @@ public class ED<Ty, En, Sym, Fk, Att> {
 		Awh = awh;
 		Ewh = ewh;
 		if (!Collections.disjoint(As.keySet(), Es.keySet())) {
-			throw new RuntimeException("The forall and where clauses do not use disjoint variables.");
+			throw new RuntimeException("The forall and exists clauses do not use disjoint variables.");
 		}
 		Ctx<WHICH, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>>, Map<String, String>>> 
 		is = new Ctx<>();

@@ -9,6 +9,7 @@ import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,10 +20,11 @@ import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.ED;
+import catdata.aql.ED.WHICH;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
 import catdata.aql.Pragma;
-import catdata.aql.fdm.EvalAlgebra;
+import catdata.aql.fdm.EvalAlgebra.Row;
 import catdata.aql.fdm.JdbcPragma;
 import catdata.aql.fdm.JsPragma;
 import catdata.aql.fdm.ProcPragma;
@@ -174,19 +176,35 @@ public abstract class PragmaExp extends Exp<Pragma> {
 				@Override
 				public void execute() {
 					Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> J = I.eval(env);
-					Collection<EvalAlgebra.Row<ED.WHICH,X>> 
-						t = C.eval(env).triggers(J).stream().map(x -> x.second).collect(Collectors.toList());
+					Collection<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>> t = C.eval(env).triggers(J);
 					if (!t.isEmpty()) {
-						throw new RuntimeException("Does not satisfy: triggers:\n\n" + Util.sep(t, "\n") + "\n\nin\n\n" + J);
+						throw new RuntimeException("Not satisfied.\n\n" + printTriggers(t, J)); 
 					}
+				}
+
+				private String printTriggers(Collection<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>> t, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> J) {
+					Map<ED<Ty, En, Sym, Fk, Att>, List<Row<WHICH, X>>> m = new HashMap<>();
+					for (Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>> p : t) {
+						if (!m.containsKey(p.first)) {
+							m.put(p.first, new LinkedList<>());
+						}
+						List<Row<WHICH, X>> l = m.get(p.first);
+						l.add(p.second);
+					}
+					String ret = "";
+					for (ED<Ty, En, Sym, Fk, Att> ed : m.keySet()) {
+						ret += "======================\n";
+						ret += "On constraint\n\n" + ed.toString() + "\n\nthe failing triggers are:\n\n";
+						ret += Util.sep(m.get(ed).iterator(), "\n", r->Util.sep(r.map(z->J.algebra().printX(z)).ctx.map,"->",", "));
+						ret += "\n";
+					}
+					return ret;
 				}
 
 				@Override
 				public String toString() {
 					return "Satisfies";
 				}
-				
-				
 				
 			};
 		}

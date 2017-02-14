@@ -28,6 +28,11 @@ public class AqlProver {
 		auto, saturated, monoidal, program, completion, congruence, fail, free
 	}
 
+	//these provers say that x = y when that is true when all java symbols are treated as free,
+	//or if x and y reduce to the same java normal form.  as such, the provers won't actually
+	//decide, for example, that e = 2 -> e + 1 = 3.  So the DP is not necessarily a decision
+	//procedure for the input theory + java - or even any theory at all, because you may not have
+	//x = y and y = z -> x = z when java is involved.  
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> DP<Ty, En, Sym, Fk, Att, Gen, Sk> create(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col1, AqlJs<Ty, Sym> js) {
 		ProverName name = (ProverName) ops.getOrDefault(AqlOption.prover);
 
@@ -65,7 +70,6 @@ public class AqlProver {
 			case completion:
 				return new KBtoDP<>(js, col1.simplify().second, new CompletionProver<>(col1.toKB().syms.keySet(), ops, col1.simplify().first));
 			case monoidal:
-			//case monoidal2:
 				return new MonoidalFreeDP<>(js, col1.simplify().second, col1.simplify().first); // use																																					// simplified
 			default:
 				throw new RuntimeException("Anomaly: please report");

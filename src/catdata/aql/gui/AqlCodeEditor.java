@@ -224,7 +224,7 @@ public final class AqlCodeEditor extends
 		provider.addCompletion(new ShorthandCompletion(
 				provider,
 				"schema",
-				"schema ? = literal : ? {\n\timports\n\tforeign_keys\n\tpath_equations\n\tattributes\n\tobservation_equations\n\toptions\n} ",
+				"schema ? = literal : ? {\n\timports\n\tentities\n\tforeign_keys\n\tpath_equations\n\tattributes\n\tobservation_equations\n\toptions\n} ",
 				""));
 		
 		provider.addCompletion(new ShorthandCompletion(

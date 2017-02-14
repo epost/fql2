@@ -87,6 +87,7 @@ public class DefunctGlobalOptions implements Serializable {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	public static void load() {
 		try {
 			if (!new File("cdide.ser").exists()) {

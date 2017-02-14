@@ -60,7 +60,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 			}
 			ret = ret2;
 		}		
-		throw new RuntimeException("Limit exceeded, last instance:\n\n" + ret);
+		throw new RuntimeException("Limit exceeded, last instance had " + ret.algebra().allXs().size() + " rows.");
 	}
 
 	// TODO aql needs to be over all eds

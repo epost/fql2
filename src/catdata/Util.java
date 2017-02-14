@@ -257,16 +257,20 @@ public class Util {
 	}
 
 	public static String sep(Iterator<?> c, String sep) {
+		return sep(c, sep, Object::toString);
+	}
+	
+	public static <X> String sep(Iterator<X> c, String sep, Function<X, String> fun) {
 		String ret = "";
 		boolean b = false;
 		while (c.hasNext()) {
-			Object o = c.next();
+			X o = c.next();
 			if (b) {
 				ret += sep;
 			}
 			b = true;
 
-			ret += o;
+			ret += fun.apply(o);
 		}
 		return ret;
 	}
@@ -388,6 +392,8 @@ public class Util {
 		}
 		return map;
 	}
+	
+	
 
 	/**
 	 * 

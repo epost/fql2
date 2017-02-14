@@ -52,7 +52,12 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 		public String toString() {
 			return en2 + " " + ctx.toString(Object::toString);
 		}
-
+/*
+		@Override
+		public static <En2,X> String toString2(Row<En2, X> row) {
+			row.ctx.map(f)
+		}*/
+		
 		@Override
 		public int hashCode() {
 			int prime = 31;

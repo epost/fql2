@@ -46,6 +46,7 @@
     <keyword>exec_cmdline</keyword>
     <keyword>exec_jdbc</keyword>
     <keyword>exec_js</keyword>
+    <keyword>exists</keyword>
     <keyword>export_csv_instance</keyword>
     <keyword>export_csv_transform</keyword>
     <keyword>export_jdbc_instance</keyword>

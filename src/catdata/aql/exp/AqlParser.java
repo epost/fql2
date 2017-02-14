@@ -235,7 +235,7 @@ public class AqlParser {
 	private static void schExp() {		
 		Parser<SchExp<?,?,?,?,?>> 
 			var = ident.map(SchExpVar::new),
-			empty = Parsers.tuple(token("empty"), ty_ref.get()).map(x -> new SchExpEmpty<>(x.b)),
+			empty = Parsers.tuple(token("empty"), token(":"), ty_ref.get()).map(x -> new SchExpEmpty<>(x.c)),
 			inst = Parsers.tuple(token("schemaOf"), inst_ref.lazy()).map(x -> new SchExpInst<>(x.b)),
 			colim = Parsers.tuple(token("getSchema"), colim_ref.lazy()).map(x -> new SchExpColim<>(x.b)),
 			ret = Parsers.or(inst, empty, schExpRaw(), var, colim); 
@@ -283,7 +283,7 @@ public class AqlParser {
 	private static void instExp() {
 		Parser<InstExp<?,?,?,?,?,?,?,?,?>> 
 			var = ident.map(InstExpVar::new),
-			empty = Parsers.tuple(token("empty"), sch_ref.get()).map(x -> new InstExpEmpty<>(x.b)),
+			empty = Parsers.tuple(token("empty"), token(":"), sch_ref.get()).map(x -> new InstExpEmpty<>(x.c)),
 			sigma = Parsers.tuple(token("sigma"), map_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new InstExpSigma(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 			delta = Parsers.tuple(token("delta"), map_ref.lazy(), inst_ref.lazy()).map(x -> new InstExpDelta(x.b, x.c)),	
 			distinct = Parsers.tuple(token("distinct"), inst_ref.lazy()).map(x -> new InstExpDistinct(x.b)),

@@ -79,3 +79,25 @@ instance J = chase theEDs I 3
 pragma JisOk1 = check theEDs J //verify the chased instance satisfies the EDs
 
 //pragma InotOk = check theEDs I //the input instance does not satisfy the EDs
+
+///////////////////////////////////////////////////////////////////////////
+//primary key constraints
+
+schema Sch = literal : Ty {
+	entities
+		E
+	attributes
+		att1 att2 att3 : E -> dom
+} 
+
+//says (att1,att2) is a primary key 
+constraints PkForSch = literal : Sch {
+	forall x y : E
+	where x.att1 = y.att1  x.att2 = y.att3 
+	->
+	where x.att3 = y.att3
+}
+
+///////////////////////////////////////////////////////////////////////////
+//see the pushout and pullback examples for more constraints
+

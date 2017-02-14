@@ -91,7 +91,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		this.printGen = printGen;
 		this.printSk = printSk;
 
-        this.dp = dp; //AqlProver.create(ops, col, schema.typeSide.js);
+        this.dp = dp; 
         
 		try {
 			while (saturate1());
@@ -270,11 +270,13 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
 	@Override
 	public boolean eq(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs, Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs) {
-		if (schema.typeSide.js.java_tys.isEmpty()) {
-			return dp.eq(ctx, lhs, rhs);
-		} else {
-            return col.type(ctx, lhs).left ? intoY(schema.typeSide.js.reduce(lhs)).equals(intoY(schema.typeSide.js.reduce(rhs))) : dp.eq(ctx, lhs, rhs);
-		}
+	//	if (schema.typeSide.js.java_tys.isEmpty()) {
+	//		return dp.eq(ctx, lhs, rhs);
+	//	} else {
+    //        return col.type(ctx, lhs).left ? intoY(schema.typeSide.js.reduce(lhs)).equals(intoY(schema.typeSide.js.reduce(rhs))) : dp.eq(ctx, lhs, rhs);
+	//	}
+            return dp.eq(ctx, lhs, rhs) || (col.type(ctx, lhs).left ? intoY(schema.typeSide.js.reduce(lhs)).equals(intoY(schema.typeSide.js.reduce(rhs))) : false);
+
 	}
 
 	@Override
