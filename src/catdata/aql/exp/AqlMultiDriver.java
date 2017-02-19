@@ -26,7 +26,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	public void abort() {
 		interruptAll();		
-		exn.add(new RuntimeException("Manual abort"));
+		exn.add(new RuntimeException("Execution interrupted while waiting.  If execution was not aborted manually, please report."));
 	}
 	
 	private void interruptAll() {
@@ -124,8 +124,8 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				try {
 					ended.wait();
 				} catch (InterruptedException e) {
+					e.printStackTrace();
 					abort();
-					exn.add(new RuntimeException("Execution interrupted while waiting.  If execution was not aborted manually, please report."));
 				}
 			}
 		}

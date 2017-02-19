@@ -26,7 +26,7 @@ import catdata.aql.fdm.DistinctInstance;
 import catdata.aql.fdm.EvalAlgebra.Row;
 import catdata.aql.fdm.EvalInstance;
 import catdata.aql.fdm.SigmaInstance;
-import catdata.aql.fdm.TerminalInstance;
+import catdata.aql.fdm.InitialInstance;
 import catdata.graph.DMG;
 
 public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>> {
@@ -768,8 +768,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		@Override
-		public TerminalInstance<Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
-			return new TerminalInstance<>(schema.eval(env)); 
+		public InitialInstance<Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+			return new InitialInstance<>(schema.eval(env)); 
 		}
 
 		@Override

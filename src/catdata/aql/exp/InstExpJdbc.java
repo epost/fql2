@@ -297,7 +297,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen, Sk> extends InstExp<Ty, En, 
 
 		InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, ID> initial = new InitialAlgebra<>(strat, sch, col, new It(), Object::toString, Object::toString);
 
-		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial);
+		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe));
 		// TODO aql switch to saturated prover for jdbc
 	}
 

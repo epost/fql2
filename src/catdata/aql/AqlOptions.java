@@ -135,7 +135,7 @@ public final class AqlOptions {
 		case dont_validate_unsafe:
 			return false;
 		case require_consistency: 
-			return false;
+			return true;
 		case timeout:
 			return 10L;
 		case dont_verify_is_appropriate_for_prover_unsafe:

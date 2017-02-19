@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.DateFormat;
@@ -208,8 +209,36 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		topArea.setCaretPosition(0);
 		topArea.setAutoscrolls(true);
 		
-
 		InputMap inputMap = topArea.getInputMap();
+		
+		topArea.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (KeyEvent.VK_DOWN == e.getKeyCode() && isCaretOnLastLine()) {
+					topArea.setCaretPosition(Integer.max(0, topArea.getText().length()));
+				} else if (KeyEvent.VK_UP == e.getKeyCode() && isCaretOnFirstLine()) {
+					topArea.setCaretPosition(0);
+				}
+			}
+
+			private boolean isCaretOnFirstLine() {
+				return topArea.getCaretLineNumber() == 0;
+			}
+
+			private boolean isCaretOnLastLine() {
+				return topArea.getCaretLineNumber() == Integer.max(0,topArea.getLineCount() - 1);
+			}
+			
+		});		
 
 		KeyStroke key2;
         key2 = System.getProperty("os.name").contains("Windows") ? KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.META_MASK) : KeyStroke.getKeyStroke(KeyEvent.VK_A, Event.CTRL_MASK);
@@ -446,6 +475,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	}
 
 	@Override
+	//TODO aql put this on another thread besides the event dispatch thread
 	public void run() {
 		String program = topArea.getText();
 
@@ -511,8 +541,14 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	protected abstract Progg parse(String program) throws ParserException;
 	
 	protected void setCaretPos(int p) {
-		topArea.requestFocusInWindow();
-		topArea.setCaretPosition(p);
+		try {
+			SwingUtilities.invokeLater(() -> {
+			topArea.requestFocusInWindow();
+			topArea.setCaretPosition(p);
+			});
+		} catch (Throwable ex) { 
+			ex.printStackTrace();
+		}
 	}
 	
 	private void moveTo(int col, int line) {

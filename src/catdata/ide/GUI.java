@@ -773,6 +773,7 @@ public class GUI extends JPanel {
 			title = "Untitled " + untitled_count + "." + lang.fileExtension();
 		}
 		CodeEditor<?, ?, ?> c = lang.createEditor(title, untitled_count, content);
+	
 		int i = editors.getTabCount();
 		keys.put(untitled_count, c);
 		setDirty(untitled_count, false);
@@ -781,6 +782,10 @@ public class GUI extends JPanel {
 		editors.addTab("  " + title, c);
 		editors.setTabComponentAt(i, new ButtonTabComponent(editors, x -> GUI.deInc(x)));
 		editors.setSelectedIndex(i);
+		
+		c.topArea.setCaretPosition(0);
+		c.topArea.requestFocusInWindow();
+		
 		return c.id;
 	}
 

@@ -23,6 +23,10 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 		return talg().eqs.isEmpty();
 	}
 	
+	public boolean hasFreeTypeAlgebraOnJava() {
+		return talg().eqs.stream().filter(x -> talg().java_tys.containsKey(talg().type(x.ctx, x.lhs).l)).collect(Collectors.toList()).isEmpty();
+	}
+	
 	/**
 	 * The Xs need be to be unique across ens
 	 */

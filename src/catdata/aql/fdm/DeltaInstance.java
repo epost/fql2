@@ -29,7 +29,8 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y>
 		F = f;
 		I = i;
 		alg = new DeltaAlgebra<>(F, I.algebra());
-		J = new SaturatedInstance<>(alg, dp());
+		J = new SaturatedInstance<>(alg, dp(), I.requireConsistency(), I.allowUnsafeJava());
+		validate();
 	}
 
 	@Override
@@ -71,6 +72,16 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y>
 	@Override
 	public String toStringProver() {
 		return alg.toStringProver();
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return I.requireConsistency();
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return I.allowUnsafeJava();
 	}
 
 		

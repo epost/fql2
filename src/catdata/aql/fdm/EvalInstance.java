@@ -32,7 +32,8 @@ extends Instance<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y>
 		Q = q;
 		I = i;
 		alg = new EvalAlgebra<>(Q, I);
-		J = new SaturatedInstance<>(alg, dp());
+		J = new SaturatedInstance<>(alg, dp(), I.requireConsistency(), I.allowUnsafeJava());
+		validate();
 	}
 
 	@Override
@@ -89,6 +90,16 @@ extends Instance<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y>
 	@Override
 	public String toStringProver() {
 		return alg.toStringProver();
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return I.requireConsistency();
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return I.allowUnsafeJava();
 	}
 	
 	

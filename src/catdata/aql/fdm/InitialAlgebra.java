@@ -20,7 +20,6 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.AqlOptions;
-import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.AqlProver;
 import catdata.aql.Collage;
 import catdata.aql.DP;
@@ -41,7 +40,7 @@ import catdata.aql.Var;
 //works for any  commutative ring. problem: Eq0 not decidable by grobner
 public class InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, X> 
 extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
-implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
+ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk>  { //is DP for entire instance
 
 	
 	
@@ -80,10 +79,10 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	private final Function<Sk, String> printSk;
 	
 	public InitialAlgebra(AqlOptions ops, Schema<Ty, En, Sym, Fk, Att> schema, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, Iterator<X> fresh, Function<Gen, String> printGen, Function<Sk, String> printSk) {
-		this(AqlProver.create(ops, col, schema.typeSide.js), schema, col, fresh, printGen, printSk, (Boolean) ops.getOrDefault(AqlOption.require_consistency));
+		this(AqlProver.create(ops, col, schema.typeSide.js), schema, col, fresh, printGen, printSk);
 	}
 	
-	public InitialAlgebra(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Schema<Ty, En, Sym, Fk, Att> schema, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, Iterator<X> fresh, Function<Gen, String> printGen, Function<Sk, String> printSk, boolean requireConsistency) {
+	public InitialAlgebra(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Schema<Ty, En, Sym, Fk, Att> schema, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, Iterator<X> fresh, Function<Gen, String> printGen, Function<Sk, String> printSk) {
 		ens = Util.newSetsFor(schema.ens);
 		this.col = col;
 		this.schema = schema;
@@ -102,9 +101,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 				
 		//TODO aql figure out how to do this only once but without concurrent modification exception
 			
-		if (requireConsistency && !hasFreeTypeAlgebra()) {
-			throw new RuntimeException("Not necessarily consistent; type algebra is\n\n" + talg());
-		}
+		
 		
 		//new SaturatedInstance<>(this, this); // sanity check remove 
 	}
@@ -275,8 +272,10 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 	//	} else {
     //        return col.type(ctx, lhs).left ? intoY(schema.typeSide.js.reduce(lhs)).equals(intoY(schema.typeSide.js.reduce(rhs))) : dp.eq(ctx, lhs, rhs);
 	//	}
-            return dp.eq(ctx, lhs, rhs) || (col.type(ctx, lhs).left ? intoY(schema.typeSide.js.reduce(lhs)).equals(intoY(schema.typeSide.js.reduce(rhs))) : false);
+   //     return dp.eq(ctx, schema.typeSide.js.reduce(lhs), schema.typeSide.js.reduce(rhs)) ; //|| (col.type(ctx, lhs).left ? intoY().equals(intoY(schema.typeSide.js.reduce(rhs))) : false);
 
+		//for typeside terms, must inject into type algebra bc type algebra does things like replace a.age with 45
+		return dp.eq(ctx, lhs, rhs) || (col.type(ctx, lhs).left ? intoY(schema.typeSide.js.reduce(lhs)).equals(intoY(schema.typeSide.js.reduce(rhs))) : false);
 	}
 
 	@Override
@@ -354,6 +353,11 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 		eqs.removeIf(eq -> eq.lhs.equals(eq.rhs));
 
 		talg = new Collage<>();
+		talg.syms.putAll(schema.typeSide.syms.map);
+		talg.tys.addAll(schema.typeSide.tys);
+		talg.java_fns.putAll(schema.typeSide.js.java_fns.map);
+		talg.java_parsers.putAll(schema.typeSide.js.java_parsers.map);
+		talg.java_tys.putAll(schema.typeSide.js.java_tys.map);
 		for (Chc<Sk, Pair<X, Att>> sk : sks) {
 			talg.sks.put(sk, talg_full().sks.get(sk));
 		}
@@ -431,6 +435,7 @@ implements DP<Ty, En, Sym, Fk, Att, Gen, Sk> { //is DP for entire instance
 
 //	@Override
 	public DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp() {
+		//return dp;
 		return this; //definitely this - not dp bc dp may be for entity side only
 	}
 

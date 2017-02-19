@@ -14,6 +14,7 @@ import catdata.Unit;
 import catdata.Util;
 import catdata.aql.ED.WHICH;
 import catdata.aql.It.ID;
+import catdata.aql.Query.Frozen;
 import catdata.aql.fdm.ColimitInstance;
 import catdata.aql.fdm.EvalAlgebra.Row;
 import catdata.aql.fdm.EvalInstance;
@@ -49,6 +50,16 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 	}
 	
 	public <Gen, Sk, X, Y> Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> chase(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I, int limit) {	
+		for (ED<Ty, En, Sym, Fk, Att> ed : eds) {
+			Frozen<Ty, En, Sym, Fk, Att> f = ed.Q.ens.get(ED.WHICH.FRONT);
+			if (!f.algebra().hasFreeTypeAlgebraOnJava()) {
+				throw new RuntimeException("Cannot chase, unsafe use of java in front of\n" + ed);
+			}
+			f = ed.Q.ens.get(ED.WHICH.BACK);
+			if (!f.algebra().hasFreeTypeAlgebraOnJava()) {
+				throw new RuntimeException("Cannot chase, unsafe use of java in back of\n" + ed);
+			}
+		}
 		if (limit < 0) {
 			throw new IllegalArgumentException();
 		}

@@ -11,6 +11,7 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
 import catdata.aql.DP;
 import catdata.aql.Eq;
@@ -50,15 +51,6 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 			}
 			eqs.add(new Pair<>(Term.upTalg(eq.lhs), Term.upTalg(eq.rhs)));		
 		}
-		
-		/*for (En2 t : J.schema().ens) {
-			for (X j : J.algebra().en(t)) {
-				for (Fk2 fk : J.schema().fks.keySet()) {
-					
-					J.algebra().fk(fk, j);
-				}
-			}
-		}*/
 		
 		for (En2 t : J.schema().ens) {
 			for (X j : J.algebra().en(t)) {
@@ -105,7 +97,8 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 		Function<Y, String> printSk = J.algebra()::printY; //TODO aql printing coeval
 		
 		init = new InitialAlgebra<>(strat, schema(), col, new It(), printGen, printSk);	
-		I = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, init.dp(), init); 
+		I = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, init.dp(), init, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
+		validate();
 	}
 
 	@Override
@@ -136,6 +129,16 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 	@Override
 	public Algebra<Ty, En1, Sym, Fk1, Att1, Pair<Var, X>, Y, ID, Chc<Y, Pair<ID, Att1>>> algebra() {
 		return I.algebra();
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return I.requireConsistency();
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return I.allowUnsafeJava();
 	}
 	
 }	

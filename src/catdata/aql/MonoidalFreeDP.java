@@ -72,7 +72,7 @@ public class MonoidalFreeDP<Ty, En, Sym, Fk, Att, Gen, Sk> implements DP<Ty, En,
 	}
 	
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> boolean ok(Term<Ty, En, Sym, Fk, Att, Gen, Sk> e) {
-		if (e.var != null || e.gen != null || e.sk != null || e.obj != null) {
+		if (e.var != null || e.gen != null || e.sk != null || e.obj != null || (e.sym != null && e.args().size() == 0)) {
 			return true;
 		} else if (e.args().size() > 1) {
 			return false;

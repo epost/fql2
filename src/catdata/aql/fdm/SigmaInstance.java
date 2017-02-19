@@ -19,6 +19,7 @@ import catdata.aql.It;
 import catdata.aql.Mapping;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.It.ID;
 
 public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
@@ -55,7 +56,8 @@ public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, 
 		InitialAlgebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID> initial 
 		= new InitialAlgebra<>(strat, schema(), col, new It(), printGen, printSk);
 				
-		J = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, initial.dp(), initial); 
+		J = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, initial.dp(), initial, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
+		validate();
 	}
 
 	@Override
@@ -86,6 +88,16 @@ public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, 
 	@Override
 	public Algebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID, Chc<Sk, Pair<ID, Att2>>> algebra() {
 		return J.algebra();
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return J.requireConsistency();
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return J.allowUnsafeJava();
 	}
 	
 	

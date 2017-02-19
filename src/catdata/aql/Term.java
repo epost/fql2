@@ -191,7 +191,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (sym != null) {
 			Pair<List<Ty>, Ty> t = syms.get(sym);
 			if (t == null) {
-				throw new RuntimeException("In " + this + ", " + sym + " is not a typeside symbol");
+				throw new RuntimeException("In " + this + ", " + sym + " is not a typeside symbol.  Typeside symbols:\n\n" + syms);
 			} else if (t.first.size() != args.size()) {
 				throw new RuntimeException("In " + this + ", " + sym + " given " + args.size() + "arguments but requires " + t.first.size());
 			}

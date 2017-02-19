@@ -209,7 +209,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 		InitialAlgebra<Object, Object, Object, Object, Object, Object, Object, ID> 
 		initial = new InitialAlgebra<>(strat, sch, col, new It(), Object::toString, Object::toString);
 				 
-		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial); 
+		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
 	}
 	
 	//TODO aql: schema eval should happen first, so can typecheck before running

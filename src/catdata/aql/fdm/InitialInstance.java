@@ -15,12 +15,13 @@ import catdata.aql.Instance;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 
-public class TerminalInstance<Ty, En, Sym, Fk, Att> extends Instance<Ty, En, Sym, Fk, Att,Void,Void,Void,Void> {
+public class InitialInstance<Ty, En, Sym, Fk, Att> extends Instance<Ty, En, Sym, Fk, Att,Void,Void,Void,Void> {
 
 	private final Schema<Ty, En, Sym, Fk, Att> schema;
 	
-	public TerminalInstance(Schema<Ty, En, Sym, Fk, Att> schema) {
+	public InitialInstance(Schema<Ty, En, Sym, Fk, Att> schema) {
 		this.schema = schema;
+		validate();
 	}
 
 	@Override
@@ -116,6 +117,16 @@ public class TerminalInstance<Ty, En, Sym, Fk, Att> extends Instance<Ty, En, Sym
 			return Util.abort(gen);
 		}
 		
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return true;
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return false;
 	}
 
 	

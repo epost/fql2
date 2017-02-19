@@ -166,7 +166,7 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 			this.schema = schema;
 			this.options = options;
 			dp = AqlProver.create(new AqlOptions(options, collage()), collage(), schema.typeSide.js);			
-			validate();
+			validateNoTalg(); 
 		}
 
 		@Override
@@ -196,11 +196,22 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 	
 		private InitialAlgebra<Ty, En1, Sym, Fk1, Att1, Var, Void, ID> hidden;
 		@Override
-		public Algebra<Ty, En1, Sym, Fk1, Att1, Var, Void, ID, Chc<Void, Pair<ID, Att1>>> algebra() {		if (hidden!=null) {
+		public Algebra<Ty, En1, Sym, Fk1, Att1, Var, Void, ID, Chc<Void, Pair<ID, Att1>>> algebra() {	
+			if (hidden!=null) {
 				return hidden;
 			}
-			hidden = new InitialAlgebra<>(dp, schema, collage(), new It(), x->x.toString(), x->x.toString(), false);
+			hidden = new InitialAlgebra<>(dp, schema, collage(), new It(), x->x.toString(), x->x.toString());
 			return hidden;
+		}
+
+		@Override
+		public boolean requireConsistency() {
+			return false;
+		}
+
+		@Override
+		public boolean allowUnsafeJava() {
+			return true;
 		}
 		
 	}

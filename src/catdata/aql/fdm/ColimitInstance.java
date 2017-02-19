@@ -19,6 +19,7 @@ import catdata.aql.It;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Transform;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.It.ID;
 import catdata.graph.DMG;
 
@@ -110,8 +111,8 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 		InitialAlgebra<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>, ID> initial 
 		= new InitialAlgebra<>(strat, schema(), col, new It(), printGen, printSk);
 				
-		J = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, initial.dp(), initial); 
-
+		J = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, initial.dp(), initial, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
+		validate();
 	}
 
 	@Override
@@ -142,6 +143,16 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 	@Override
 	public Algebra<Ty, En, Sym, Fk, Att, Pair<N, Gen>, Pair<N, Sk>, ID, Chc<Pair<N, Sk>, Pair<ID, Att>>> algebra() {
 		return J.algebra();
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return J.requireConsistency();
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return J.allowUnsafeJava();
 	}
 	
 	
