@@ -56,6 +56,14 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return map(this, tyf, symf, fkf, attf, genf, skf);
 	}
 	
+	public <Fk2> Term<Ty, En, Sym, Fk2, Att, Gen, Sk> mapFk(Function<Fk, Fk2> f) {
+		return map(this, Function.identity(), Function.identity(), f, Function.identity(), Function.identity(), Function.identity());
+	}
+	
+	public <Att2> Term<Ty, En, Sym, Fk, Att2, Gen, Sk> mapAtt(Function<Att, Att2> f) {
+		return map(this, Function.identity(), Function.identity(), Function.identity(), f, Function.identity(), Function.identity());
+	}
+	
 	public <Gen2> Term<Ty, En, Sym, Fk, Att, Gen2, Sk> mapGen(Function<Gen, Gen2> genf) {
 		return map(this, Function.identity(), Function.identity(), Function.identity(), Function.identity(), genf, Function.identity());
 	}

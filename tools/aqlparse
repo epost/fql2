@@ -59,6 +59,7 @@
     <keyword>id</keyword>
     <keyword>import_csv</keyword>
     <keyword>import_jdbc</keyword>
+    <keyword>import_jdbc_all</keyword>
     <keyword>imports</keyword>
     <keyword>insert</keyword>
     <keyword>java</keyword>

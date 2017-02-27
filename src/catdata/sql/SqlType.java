@@ -29,7 +29,7 @@ public class SqlType {
 		if (name == null) {
 			throw new RuntimeException();
 		}
-		this.name = name.toUpperCase();
+		this.name = name;
 	}
 
 	@Override

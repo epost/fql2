@@ -48,6 +48,7 @@ class IDE {
 
 	public static void main(String... args) {
 		System.setProperty("apple.eawt.quitStrategy", "CLOSE_ALL_WINDOWS");
+		//apple.awt.application.name
 
 		SwingUtilities.invokeLater(() -> {
 			try {

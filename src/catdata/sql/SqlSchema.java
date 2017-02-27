@@ -16,13 +16,13 @@ import catdata.Triple;
 import catdata.Util;
 
 public class SqlSchema {
-	
+
 	private static int fkidx = 0;
-	
+
 	public final Set<SqlType> types = new HashSet<>();
 	public final Set<SqlTable> tables = new HashSet<>();
 	public final Set<SqlForeignKey> fks = new HashSet<>();
-	
+
 	public boolean isCnf() {
 		for (SqlTable table : tables) {
 			if (!table.isCnf()) {
@@ -31,7 +31,7 @@ public class SqlSchema {
 		}
 		return true;
 	}
-	
+
 	private void validate() {
 		for (SqlTable table : tables) {
 			table.validate();
@@ -40,114 +40,116 @@ public class SqlSchema {
 			fk.validate();
 		}
 	}
-	
+
 	public SqlSchema(DatabaseMetaData meta) throws SQLException {
-		ResultSet result = meta.getTables(null, null, null, new String[] { "TABLE" });
-		while (result.next()) {
-			SqlTable table = new SqlTable();
-			table.name = result.getString(3).toUpperCase();
-			tables.add(table);
-			
-			ResultSet cols = meta.getColumns(null, null, table.name, null);
-			while (cols.next()) {
-				String columnName = cols.getString(4).toUpperCase();
-				SqlType resolvedType = SqlType.resolve(cols.getString(5));
-				SqlColumn col = new SqlColumn(table, columnName, resolvedType);
-				String autoInc = cols.getString(23).toUpperCase();
-				if (autoInc.equals("YES")) {
-					col.autoInc = true;
+		try (ResultSet result0 = meta.getTables(null, null, null, new String[] { "TABLE" })) {
+			while (result0.next()) {
+				SqlTable table = new SqlTable();
+				table.name = result0.getString(3);
+				tables.add(table);
+
+				try (ResultSet cols = meta.getColumns(null, null, table.name, null)) {
+					while (cols.next()) {
+						String columnName = cols.getString(4);
+						SqlType resolvedType = SqlType.resolve(cols.getString(5));
+						SqlColumn col = new SqlColumn(table, columnName, resolvedType);
+						String autoInc = cols.getString(23);
+						if (autoInc.equals("YES")) {
+							col.autoInc = true;
+						}
+						table.columns.add(col);
+						types.add(resolvedType);
+					}
 				}
-				table.columns.add(col);
-				types.add(resolvedType);
+
+				try (ResultSet pks = meta.getPrimaryKeys(null, null, table.name)) {
+					while (pks.next()) {
+						String colName = pks.getString(4);
+						table.pk.add(table.getColumn(colName));
+					}
+					if (table.pk.isEmpty()) {
+						table.pk = new HashSet<>(table.columns);
+					}
+				}
 			}
-			cols.close();
-			
-			ResultSet pks = meta.getPrimaryKeys(null, null, table.name);
-			while (pks.next()) {
-				String colName = pks.getString(4).toUpperCase();
-				table.pk.add(table.getColumn(colName));
+
+			try (ResultSet result = meta.getTables(null, null, null, new String[] { "TABLE" })) {
+				while (result.next()) {
+					SqlTable table = getTable(result.getString(3));
+
+					// name, local cols, foreign cols
+					List<Triple<List<String>, List<Pair<String, String>>, String>> fks0 = new LinkedList<>();
+					try (ResultSet rfks = meta.getImportedKeys(null, null, table.name)) {
+						int lastSeen = 0;
+						List<String> l = new LinkedList<>();
+						List<Pair<String, String>> r = new LinkedList<>();
+						String foreignTable = null;
+						String foreignColumn = null;
+						// String localTable = fks.getString(7);
+						String localColumn = null;
+						String fkname;
+						String lfk = null;
+						while (rfks.next()) {
+
+							fkname = rfks.getString(12); // 13 is pkey name,
+															// should
+															// be irrelevent
+							foreignTable = rfks.getString(3);
+							foreignColumn = rfks.getString(4);
+							// String localTable = fks.getString(7);
+							localColumn = rfks.getString(8);
+							String seq = rfks.getString(9);
+							if (Integer.parseInt(seq) <= lastSeen) {
+								fks0.add(new Triple<>(l, r, lfk));
+								l = new LinkedList<>();
+								r = new LinkedList<>();
+							}
+							lastSeen = Integer.parseInt(seq);
+
+							l.add(localColumn);
+							r.add(new Pair<>(foreignTable, foreignColumn));
+							lfk = fkname;
+						}
+						if (foreignTable != null || foreignColumn != null || localColumn != null) {
+							fks0.add(new Triple<>(l, r, lfk));
+						}
+						for (Triple<List<String>, List<Pair<String, String>>, String> xxx : fks0) {
+							SqlForeignKey fk = new SqlForeignKey();
+							fk.source = getTable(table.name);
+							fk.target = getTable(xxx.second.get(0).first);
+							fk.name = xxx.third == null ? "FK" + (fkidx++) : xxx.third;
+							int i = 0;
+							for (String lc : xxx.first) {
+								Pair<String, String> fc = xxx.second.get(i);
+								fk.map.put(fk.target.getColumn(fc.second), fk.source.getColumn(lc));
+								i++;
+							}
+							fks.add(fk);
+						}
+					}
+				}
 			}
-			if (table.pk.isEmpty()) {
-				table.pk = new HashSet<>(table.columns);
-			}	
-			pks.close();
 		}
-		
-		result = meta.getTables(null, null, null, new String[] { "TABLE" });
-		while (result.next()) {
-			SqlTable table = getTable(result.getString(3).toUpperCase());
-			
-			//name, local cols, foreign cols
-			List<Triple<List<String>, List<Pair<String, String>>, String>> fks0 = new LinkedList<>(); 
-			ResultSet rfks = meta.getImportedKeys(null, null, table.name);
-			int lastSeen = 0;
-			List<String> l = new LinkedList<>();
-			List<Pair<String, String>> r = new LinkedList<>();
-			String foreignTable = null;
-			String foreignColumn = null; 
-			//String localTable = fks.getString(7);
-			String localColumn = null;
-			String fkname;
-			String lfk = null;
-			while (rfks.next()) {
-				
-				fkname = rfks.getString(12); //13 is pkey name, should be irrelevent
-				foreignTable = rfks.getString(3);
-				foreignColumn = rfks.getString(4); 
-				//String localTable = fks.getString(7);
-				localColumn = rfks.getString(8);
-				String seq = rfks.getString(9);
-				if (Integer.parseInt(seq) <= lastSeen) {
-					fks0.add(new Triple<>(l, r, lfk));
-					l = new LinkedList<>();
-					r = new LinkedList<>();
-				}
-				lastSeen = Integer.parseInt(seq);
-				
-				l.add(localColumn);
-				r.add(new Pair<>(foreignTable, foreignColumn));
-				lfk = fkname;
-			}
-			if (foreignTable != null || foreignColumn != null || localColumn != null) {
-				fks0.add(new Triple<>(l, r, lfk));
-			}
-			for (Triple<List<String>, List<Pair<String, String>>, String> xxx : fks0) {
-				SqlForeignKey fk = new SqlForeignKey();
-				fk.source = getTable(table.name);
-				fk.target = getTable(xxx.second.get(0).first);
-				fk.name = xxx.third == null ? "FK" + (fkidx++) : xxx.third.toUpperCase();
-				int i = 0;
-				for (String lc : xxx.first) {
-					Pair<String, String> fc = xxx.second.get(i);
-					fk.map.put(fk.target.getColumn(fc.second), fk.source.getColumn(lc));
-					i++;
-				}
-				fks.add(fk);
-			}
-			
-		}
-		
-		
+
 		validate();
 	}
-	
+
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
-		
 	@Override
 	public String toString() {
 		String ret = "";
 		for (SqlTable table : tables) {
 			List<String> all = new LinkedList<>();
 
-			ret += "CREATE TABLE "+ table.name;
+			ret += "CREATE TABLE " + table.name;
 			ret += "(\n  ";
 			List<String> l = table.columns.stream().map(x -> x.name + " " + x.type.name).collect(Collectors.toList());
 			all.addAll(l);
-			
-//			ret += "(" + Util.sep(l, ", ") + ")";
-			all.add("PRIMARY KEY (" + Util.sep(table.pk.stream().map(x -> x.name).collect(Collectors.toList()) , ", ") + ")");
-			
+
+			// ret += "(" + Util.sep(l, ", ") + ")";
+			all.add("PRIMARY KEY (" + Util.sep(table.pk.stream().map(x -> x.name).collect(Collectors.toList()), ", ") + ")");
+
 			for (SqlForeignKey t : fksFrom(table.name)) {
 				List<String> src = new LinkedList<>();
 				List<String> dst = new LinkedList<>();
@@ -155,19 +157,18 @@ public class SqlSchema {
 					dst.add(tcol.name);
 					src.add(t.map.get(tcol).name);
 				}
-				all.add("CONSTRAINT " + t.name + " FOREIGN KEY (" + Util.sep(src, ", ") + ") REFERENCES " + t.target.name + " (" + Util.sep(dst, ", ") + ")"); 
+				all.add("CONSTRAINT " + t.name + " FOREIGN KEY (" + Util.sep(src, ", ") + ") REFERENCES " + t.target.name + " (" + Util.sep(dst, ", ") + ")");
 			}
-			
-			
+
 			ret += Util.sep(all, ",\n  ") + "\n);\n\n";
 		}
 		return ret.trim();
-	} 
-	
-	
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	private Set<SqlColumn> allColumns;
+
 	public Set<SqlColumn> cols() {
 		if (allColumns != null) {
 			return allColumns;
@@ -178,22 +179,23 @@ public class SqlSchema {
 		}
 		return allColumns;
 	}
-	
+
 	private final Map<String, SqlTable> tableMap = new HashMap<>();
+
 	private SqlTable getTable0(String name) {
-		SqlTable t = tableMap.get(name.toUpperCase());
+		SqlTable t = tableMap.get(name);
 		if (t != null) {
 			return t;
 		}
 		for (SqlTable table : tables) {
-			if (table.name.toUpperCase().equals(name.toUpperCase())) {
-				tableMap.put(name.toUpperCase(), table);
+			if (table.name.equals(name)) {
+				tableMap.put(name, table);
 				return table;
 			}
 		}
 		return null;
 	}
-	
+
 	public SqlTable getTable(String name) {
 		SqlTable ret = getTable0(name);
 		if (ret == null) {
@@ -201,13 +203,14 @@ public class SqlSchema {
 		}
 		return ret;
 	}
-	
+
 	public boolean isTable(String name) {
 		SqlTable ret = getTable0(name);
 		return (ret != null);
 	}
-	
+
 	private Map<String, SqlColumn> colNames;
+
 	private SqlColumn getColumn0(String name) {
 		if (colNames != null) {
 			return colNames.get(name);
@@ -218,7 +221,7 @@ public class SqlSchema {
 		}
 		return colNames.get(name);
 	}
-	
+
 	public SqlColumn getColumn(String name) {
 		SqlColumn ret = getColumn0(name);
 		if (ret == null) {
@@ -226,16 +229,18 @@ public class SqlSchema {
 		}
 		return ret;
 	}
+
 	public boolean isColumn(String name) {
 		return getColumn0(name) != null;
 	}
-	
+
 	private Map<String, SqlForeignKey> fkNames;
+
 	private SqlForeignKey getForeignKey0(String name) {
 		if (fkNames != null) {
 			return fkNames.get(name);
 		}
-		fkNames = new HashMap<>(); 
+		fkNames = new HashMap<>();
 		for (SqlForeignKey c : fks) {
 			if (fkNames.containsKey(c.name)) {
 				throw new RuntimeException("Report to Ryan: non-unique FK name");
@@ -244,7 +249,7 @@ public class SqlSchema {
 		}
 		return fkNames.get(name);
 	}
-	
+
 	public SqlForeignKey getForeignKey(String name) {
 		SqlForeignKey ret = getForeignKey0(name);
 		if (ret == null) {
@@ -252,13 +257,15 @@ public class SqlSchema {
 		}
 		return ret;
 	}
+
 	public boolean isForeignKey(String name) {
 		return getForeignKey0(name) != null;
 	}
 
-	private final  Map<String, Set<SqlForeignKey>> fksFrom0 = new HashMap<>();
+	private final Map<String, Set<SqlForeignKey>> fksFrom0 = new HashMap<>();
+
 	private Set<SqlForeignKey> fksFrom(String name) {
-		Set<SqlForeignKey> t = fksFrom0.get(name.toUpperCase());
+		Set<SqlForeignKey> t = fksFrom0.get(name);
 		if (t != null) {
 			return t;
 		}
@@ -268,14 +275,15 @@ public class SqlSchema {
 				t.add(fk);
 			}
 		}
-		fksFrom0.put(name.toUpperCase(), t);
+		fksFrom0.put(name, t);
 		return t;
 	}
-	
+
 	private final Map<String, Set<SqlForeignKey>> fksTo0 = new HashMap<>();
+
 	public Set<SqlForeignKey> fksTo(String name) {
 
-		Set<SqlForeignKey> t = fksTo0.get(name.toUpperCase());
+		Set<SqlForeignKey> t = fksTo0.get(name);
 		if (t != null) {
 			return t;
 		}
@@ -285,7 +293,7 @@ public class SqlSchema {
 				t.add(fk);
 			}
 		}
-		fksTo0.put(name.toUpperCase(), t);
+		fksTo0.put(name, t);
 		return t;
-	} 
+	}
 }

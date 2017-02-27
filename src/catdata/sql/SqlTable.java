@@ -41,18 +41,18 @@ public class SqlTable {
 	}
 	
 	private final Map<String, SqlColumn> colMap = new HashMap<>();
-	public SqlColumn getColumn(String name) {
-		SqlColumn t = colMap.get(name.toUpperCase());
+	public SqlColumn getColumn(String name0) {
+		SqlColumn t = colMap.get(name0);
 		if (t != null) {
 			return t;
 		}
 		for (SqlColumn col : columns) {
-			if (col.name.toUpperCase().equals(name.toUpperCase())) {
-				colMap.put(name.toUpperCase(), col);
+			if (col.name.equals(name0)) {
+				colMap.put(name0, col);
 				return col;
 			}
 		}
-		throw new RuntimeException("Not a column in " + this + ": " + name);
+		throw new RuntimeException("Not a column in " + this + ": " + name0);
 	}
 	
 	private Map<String, String> typeMap = null;

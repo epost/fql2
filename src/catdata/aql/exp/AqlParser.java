@@ -24,6 +24,7 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.RawTerm;
+import catdata.aql.exp.ColimSchExp.ColimExpModify;
 import catdata.aql.exp.ColimSchExp.ColimSchExpLit;
 import catdata.aql.exp.ColimSchExp.ColimSchExpVar;
 import catdata.aql.exp.ColimSchExp.ColimSchExpWrap;
@@ -125,6 +126,9 @@ public class AqlParser {
 			"path_equations",
 			"observation_equations",
 			"generators",
+			"rename",
+			"remove",
+			"modify",
 //			"labelled nulls",
 			"foreign_keys",
 			"lambda",
@@ -152,6 +156,7 @@ public class AqlParser {
 			"export_csv_instance",
 			"export_csv_transform",
 			"import_jdbc",
+			"import_jdbc_all",
 			"export_jdbc_transform",
 			"export_jdbc_instance",
 			"unit_query",
@@ -293,7 +298,7 @@ public class AqlParser {
 			chase = Parsers.tuple(token("chase"), edsExp(), inst_ref.lazy(), IntegerLiteral.PARSER).map(x -> new InstExpChase(x.b, x.c, Integer.parseInt(x.d))),
 			coeval = Parsers.tuple(token("coeval"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new InstExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d));
 					
-		Parser ret = Parsers.or(chase, instExpJdbc(),empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval);
+		Parser ret = Parsers.or(instExpJdbcAll(), chase, instExpJdbc(),empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval);
 		
 		inst_ref.set(ret);
 	}
@@ -797,7 +802,7 @@ public class AqlParser {
 					.map(x -> new ColimSchExpWrap(x.b, x.c, x.d));
 			
 			Parser<ColimSchExp<?, ?, ?, ?,?,?,?>> retX =
-					Parsers.or(ret, ret2, ret3);
+					Parsers.or(ret, ret2, ret3, colimExpModify());
 			
 			colim_ref.set(retX);
 			
@@ -863,6 +868,13 @@ public class AqlParser {
 		return ret; 
 	}
 	
+	private static Parser<InstExpJdbcAll> instExpJdbcAll() {
+		Parser<InstExpJdbcAll> ret = Parsers.tuple(token("import_jdbc_all"), ident, ident, options.between(token("{"), token("}")).optional())
+				.map(x -> new InstExpJdbcAll(x.b, x.c, Util.newIfNull(x.d)));
+		
+		return ret; 
+	}
+	
 	//TODO: aql reverse order on arguments env
 	private static Parser<MapExpRaw> mapExpRaw() {
 		Parser<List<catdata.Pair<String, String>>> ens = Parsers.tuple(token("entities"), env(ident, "->")).map(x -> x.b);
@@ -885,6 +897,41 @@ public class AqlParser {
                                Util.newIfNull(x.b.c),
                                Util.newIfNull(x.b.d),
                               x.b.e));
+			
+		return ret;	
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static Parser<ColimExpModify> colimExpModify() {
+		Parser<List<catdata.Pair<String, String>>> ens = Parsers.tuple(token("rename").followedBy(token("entities")), env(ident, "->")).map(x -> x.b);
+
+		Parser<List<catdata.Pair<String, String>>> fks0 = Parsers.tuple(token("rename").followedBy(token("foreign_keys")), env(ident, "->")).map(x -> x.b);
+
+		Parser<List<catdata.Pair<String, String>>> atts0 = Parsers.tuple(token("rename").followedBy(token("attributes")), env(ident, "->")).map(x -> x.b);
+
+		Parser<List<catdata.Pair<String, List<String>>>> fks = Parsers.tuple(token("remove").followedBy(token("foreign_keys")), env(ident.sepBy1(token(".")),"->")).map(x -> x.b);
+		
+		Parser<List<catdata.Pair<String, Triple<String, String, RawTerm>>>> envp = env(Parsers.tuple(token("lambda"), ident, Parsers.tuple(token(":"), ident).optional(), token("."), term()).map(x -> new Triple<>(x.b, x.c == null ? null : x.c.b, x.e)),"->");
+
+		Parser<List<catdata.Pair<String, Triple<String, String, RawTerm>>>> atts = Parsers.tuple(token("remove").followedBy(token("attributes")), envp).map(x -> x.b);
+		
+				
+		Parser<Tuple3<List<catdata.Pair<String, String>>, List<catdata.Pair<String, String>>, List<catdata.Pair<String, String>>>> 
+		pa = Parsers.tuple(ens.optional(), fks0.optional(), atts0.optional());
+
+		Parser<Tuple3<List<catdata.Pair<String, List<String>>>, List<catdata.Pair<String, Triple<String, String, RawTerm>>>, List<catdata.Pair<String, String>>>> 
+		pb = Parsers.tuple(fks.optional(), atts.optional(), options);
+
+		Parser<Tuple3<Token, ColimSchExp<?, ?, ?, ?, ?, ?, ?>, Token>> l 
+		= Parsers.tuple(token("modify"), colim_ref.lazy(), token("{")); //.map(x -> x.c);
+					
+		Parser<ColimExpModify> ret = Parsers.tuple(l, pa, pb, token("}")).map(x -> new ColimExpModify(x.a.b,
+                               Util.newIfNull(x.b.a),
+                               Util.newIfNull(x.b.b),
+                               Util.newIfNull(x.b.c),
+                               Util.newIfNull(x.c.a),
+                               Util.newIfNull(x.c.b),
+                              x.c.c));
 			
 		return ret;	
 	}

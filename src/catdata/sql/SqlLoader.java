@@ -96,8 +96,9 @@ public class SqlLoader extends JPanel {
 				if (string.equals(";")) {
 					continue;
 				}
-				Statement stmt = conn.createStatement();
-				stmt.execute(string);
+				try (Statement stmt = conn.createStatement()) {
+					stmt.execute(string);
+				}
 			}
 			
 			populate();

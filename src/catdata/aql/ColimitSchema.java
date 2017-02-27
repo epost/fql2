@@ -36,6 +36,298 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 	
 	public final Ctx<N, Mapping<Ty,En,Sym,Fk,Att,String,String,String>> mappingsStr;
 	
+
+	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> renameEntity(String src, String dst, boolean checkJava) {
+		if (!schemaStr.ens.contains(src)) {
+			throw new RuntimeException(src + " is not an entity in \n" + schemaStr);
+		}
+		if (schemaStr.ens.contains(dst)) {
+			throw new RuntimeException(dst + " is already an entity in \n" + schemaStr);
+		}
+		//System.out.println("renaming " + src + " to " + target);	
+		Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser = Mapping.id(schemaStr);
+		Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser = Mapping.id(schemaStr);
+	
+		Set<String> ens = new HashSet<>(schemaStr.ens);
+		ens.remove(src);
+		ens.add(dst);
+		Map<String, Pair<String, Ty>> atts = new HashMap<>();
+		for (String k : schemaStr.atts.keySet()) {
+			Pair<String, Ty> v = schemaStr.atts.get(k);
+			String s = v.first.equals(src) ? dst : v.first;
+			atts.put(k, new Pair<>(s, v.second));
+		}
+		Map<String, Pair<String, String>> fks = new HashMap<>();
+		for (String k : schemaStr.fks.keySet()) {
+			Pair<String, String> v = schemaStr.fks.get(k);
+			String s = v.first.equals(src) ? dst : v.first;
+			String t = v.second.equals(src) ? dst : v.second;
+			fks.put(k, new Pair<>(s, t));
+		}
+		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> eqs = new HashSet<>();
+		for (Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>> eq : schemaStr.eqs) {
+			Pair<Var, String> v = eq.first;
+			String t = v.second.equals(src) ? dst : v.second;
+			eqs.add(new Triple<>(new Pair<>(v.first, t), eq.second, eq.third));				
+		}			
+		DP<Ty, String, Sym, String, String, Void, Void> dp = new DP<Ty, String, Sym, String, String, Void, Void>() {
+			@Override
+			public String toStringProver() {
+				return "rename entity of " + schemaStr.dp.toStringProver();
+			}
+			@Override
+			//TODO aql check this
+			public boolean eq(Ctx<Var, Chc<Ty, String>> ctx, Term<Ty, String, Sym, String, String, Void, Void> lhs, Term<Ty, String, Sym, String, String, Void, Void> rhs) {
+				return schemaStr.dp.eq(ctx.map(v -> v.left ? v : (v.r.equals(dst) ? Chc.inRight(src) : v)), lhs, rhs);
+			}
+		};
+		Schema<Ty, String, Sym, String, String> schemaStr2 
+		= new Schema<>(ty, ens, atts, fks, eqs, dp, checkJava); //TODO aql java 
+		//System.out.println("schema is " + schemaStr2);
+		Map<String, String> ensM = new HashMap<>(); 
+		for (String k : schemaStr.ens) {
+			ensM.put(k, k.equals(src) ? dst : k);
+		}
+		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> attsM = new HashMap<>();
+		for (String k : schemaStr.atts.keySet()) {
+			attsM.put(k, new Triple<>(isoToUser.atts.get(k).first, isoToUser.atts.get(k).second.equals(src) ? dst : isoToUser.atts.get(k).second, isoToUser.atts.get(k).third));
+		}
+		Map<String, Pair<String, List<String>>> fksM = new HashMap<>();
+		for (String k : schemaStr.fks.keySet()) {
+			fksM.put(k, new Pair<>(isoToUser.fks.get(k).first.equals(src) ? dst : isoToUser.fks.get(k).first, isoToUser.fks.get(k).second));
+		}
+		isoToUser = new Mapping<>(ensM, attsM, fksM, schemaStr, schemaStr2, checkJava);
+		//System.out.println("isoToUser is " + isoToUser);
+		Map<String, String> ensM2 = new HashMap<>(); 
+		for (String k : schemaStr2.ens) {
+			ensM2.put(k, k.equals(dst) ? src : k);
+		}
+		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> attsM2 = new HashMap<>();
+		for (String k : schemaStr2.atts.keySet()) {
+			attsM2.put(k, new Triple<>(isoFromUser.atts.get(k).first, isoFromUser.atts.get(k).second.equals(dst) ? src : isoFromUser.atts.get(k).second, isoFromUser.atts.get(k).third));
+		}
+		Map<String, Pair<String, List<String>>> fksM2 = new HashMap<>();
+		for (String k : schemaStr2.fks.keySet()) {
+			fksM2.put(k, new Pair<>(isoFromUser.fks.get(k).first.equals(dst) ? src : isoFromUser.fks.get(k).first, isoFromUser.fks.get(k).second));
+		}
+		isoFromUser = new Mapping<>(ensM2, attsM2, fksM2, schemaStr2, schemaStr, checkJava);
+		//System.out.println("isoFromUser is " + isoFromUser);
+
+		return wrap(isoToUser, isoFromUser);
+	}
+	
+	
+	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> renameFk(String src, String dst, boolean checkJava) {
+		if (!schemaStr.fks.containsKey(src)) {
+			throw new RuntimeException(src + " is not a foreign_key in \n" + schemaStr);
+		}
+		if (schemaStr.fks.containsKey(dst)) {
+			throw new RuntimeException(dst + " is already a foreign_key in \n" + schemaStr);
+		}
+		//System.out.println("renaming " + src + " to " + dst);	
+		Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser = Mapping.id(schemaStr);
+		Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser = Mapping.id(schemaStr);
+		Function<String, String> fun = x -> x.equals(src) ? dst : x;
+		Function<String, String> fun2= x -> x.equals(dst) ? src : x;
+		
+		Map<String, Pair<String, String>> fks = new HashMap<>();
+		for (String k : schemaStr.fks.keySet()) {
+			fks.put(fun.apply(k), schemaStr.fks.get(k));
+		}
+		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> eqs = new HashSet<>();
+		for (Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>> eq : schemaStr.eqs) {
+			eqs.add(new Triple<>(eq.first, eq.second.mapFk(fun), eq.third.mapFk(fun)));				
+		}			
+		DP<Ty, String, Sym, String, String, Void, Void> dp = new DP<Ty, String, Sym, String, String, Void, Void>() {
+			@Override
+			public String toStringProver() {
+				return "rename foreign key of " + schemaStr.dp.toStringProver();
+			}
+			@Override
+			public boolean eq(Ctx<Var, Chc<Ty, String>> ctx, Term<Ty, String, Sym, String, String, Void, Void> lhs, Term<Ty, String, Sym, String, String, Void, Void> rhs) {
+				return schemaStr.dp.eq(ctx, lhs.mapFk(fun2), rhs.mapFk(fun2));
+			}
+		};
+		Schema<Ty, String, Sym, String, String> schemaStr2 
+		= new Schema<>(ty, schemaStr.ens, schemaStr.atts.map, fks, eqs, dp, checkJava); //TODO aql java 
+		//System.out.println("schema is " + schemaStr2);
+		Map<String, Pair<String, List<String>>> fksM = new HashMap<>();
+		for (String k : schemaStr.fks.keySet()) {
+			fksM.put(k, new Pair<>(schemaStr.fks.get(k).first, k.equals(src) ? Util.singList(dst) : Util.singList(k)));
+		}
+		isoToUser = new Mapping<>(isoToUser.ens.map, isoToUser.atts.map, fksM, schemaStr, schemaStr2, checkJava);
+		//System.out.println("isoToUser is " + isoToUser);
+		Map<String, Pair<String, List<String>>> fksM2 = new HashMap<>();
+		for (String k : schemaStr2.fks.keySet()) {
+			fksM2.put(k, new Pair<>(schemaStr2.fks.get(k).first, k.equals(dst) ? Util.singList(src) : Util.singList(k)));
+		}
+		isoFromUser = new Mapping<>(isoFromUser.ens.map, isoFromUser.atts.map, fksM2, schemaStr2, schemaStr, checkJava);
+		//System.out.println("isoFromUser is " + isoFromUser);
+
+		return wrap(isoToUser, isoFromUser);
+	}
+	
+	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> renameAtt(String src, String dst, boolean checkJava) {
+		if (!schemaStr.atts.containsKey(src)) {
+			throw new RuntimeException(src + " is not an attribute in \n" + schemaStr);
+		}
+		if (schemaStr.atts.containsKey(dst)) {
+			throw new RuntimeException(dst + " is already an attribute in \n" + schemaStr);
+		}
+		//System.out.println("renaming " + src + " to " + dst);	
+		Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser = Mapping.id(schemaStr);
+		Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser = Mapping.id(schemaStr);
+		Function<String, String> fun = x -> x.equals(src) ? dst : x;
+		Function<String, String> fun2= x -> x.equals(dst) ? src : x;
+		
+		Map<String, Pair<String, Ty>> atts = new HashMap<>();
+		for (String k : schemaStr.atts.keySet()) {
+			atts.put(fun.apply(k), schemaStr.atts.get(k));
+		}
+		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> eqs = new HashSet<>();
+		for (Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>> eq : schemaStr.eqs) {
+			eqs.add(new Triple<>(eq.first, eq.second.mapAtt(fun), eq.third.mapAtt(fun)));				
+		}			
+		DP<Ty, String, Sym, String, String, Void, Void> dp = new DP<Ty, String, Sym, String, String, Void, Void>() {
+			@Override
+			public String toStringProver() {
+				return "rename attribute of " + schemaStr.dp.toStringProver();
+			}
+			@Override
+			public boolean eq(Ctx<Var, Chc<Ty, String>> ctx, Term<Ty, String, Sym, String, String, Void, Void> lhs, Term<Ty, String, Sym, String, String, Void, Void> rhs) {
+				return schemaStr.dp.eq(ctx, lhs.mapAtt(fun2), rhs.mapAtt(fun2));
+			}
+		};
+		Schema<Ty, String, Sym, String, String> schemaStr2 
+		= new Schema<>(ty, schemaStr.ens, atts, schemaStr.fks.map, eqs, dp, checkJava);
+		//System.out.println("schema is " + schemaStr2);
+		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> attsM = new HashMap<>();
+		for (String k : schemaStr.atts.keySet()) {
+			attsM.put(k, new Triple<>(isoToUser.atts.get(k).first, isoToUser.atts.get(k).second, isoToUser.atts.get(k).third.mapAtt(fun)));
+		}
+		isoToUser = new Mapping<>(isoToUser.ens.map, attsM, isoToUser.fks.map, schemaStr, schemaStr2, checkJava);
+		//System.out.println("isoToUser is " + isoToUser);
+		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> attsM2 = new HashMap<>();
+		for (String k : schemaStr2.atts.keySet()) {
+			Var v = new Var("v");
+			attsM2.put(k, new Triple<>(v, schemaStr2.atts.get(k).first, Term.Att(fun2.apply(k), Term.Var(v))));
+		}
+		isoFromUser = new Mapping<>(isoFromUser.ens.map, attsM2, isoFromUser.fks.map, schemaStr2, schemaStr, checkJava);
+		//System.out.println("isoFromUser is " + isoFromUser);
+
+		return wrap(isoToUser, isoFromUser);
+	}
+	
+	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> removeFk(String src, List<String> l, boolean checkJava) {
+		Var v = new Var("v");
+		Term<Ty, String, Sym, String, String, Void, Void> t = Term.Fks(l, Term.Var(v));
+		if (!schemaStr.fks.containsKey(src)) {
+			throw new RuntimeException(src + " is not a foreign_key in \n" + schemaStr);
+		}
+		if (l.contains(src)) {
+			throw new RuntimeException("Cannot replace " + src + " with " + Util.sep(l, ".") + " because that path contains " + src);
+		}
+		String en1 = schemaStr.fks.get(src).first;
+		String en2 = schemaStr.fks.get(src).second;
+		if (!schemaStr.type(new Pair<>(v, en1), t).equals(Chc.inRight(en2))) {
+			throw new RuntimeException("The term " + t + " has type " + schemaStr.type(new Pair<>(v, en1), t).toStringMash() + " and not " + en2 + " as expected.");
+		}
+		if (!schemaStr.dp.eq(new Ctx<>(v, Chc.inRight(en1)), t, Term.Fk(src, Term.Var(v)))) {
+			throw new RuntimeException("The term " + t + " is not provably equal to " + Term.Fk(src, Term.Var(v)));
+		}
+		//System.out.println("removing " + src + " to " + t);	
+		Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser = Mapping.id(schemaStr);
+		Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser = Mapping.id(schemaStr);
+		
+		Map<String, Pair<String, String>> fks = new HashMap<>(schemaStr.fks.map);
+		fks.remove(src);
+		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> eqs = new HashSet<>();
+		for (Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>> eq : schemaStr.eqs) {
+			Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>> 
+			tr = new Triple<>(eq.first, eq.second.replaceHead(Head.Fk(src), Util.singList(v), t), eq.third.replaceHead(Head.Fk(src), Util.singList(v), t));
+			if (!tr.second.equals(tr.third) && !eqs.contains(tr)) {
+				eqs.add(tr);				
+			}
+		}			
+		DP<Ty, String, Sym, String, String, Void, Void> dp = new DP<Ty, String, Sym, String, String, Void, Void>() {
+			@Override
+			public String toStringProver() {
+				return "remove foreign key of " + schemaStr.dp.toStringProver();
+			}
+			@Override
+			public boolean eq(Ctx<Var, Chc<Ty, String>> ctx, Term<Ty, String, Sym, String, String, Void, Void> lhs, Term<Ty, String, Sym, String, String, Void, Void> rhs) {
+				return schemaStr.dp.eq(ctx, lhs, rhs);
+			}
+		};
+		Schema<Ty, String, Sym, String, String> schemaStr2 
+		= new Schema<>(ty, schemaStr.ens, schemaStr.atts.map, fks, eqs, dp, checkJava);  
+		//System.out.println("schema is " + schemaStr2);
+		Map<String, Pair<String, List<String>>> fksM = new HashMap<>(isoToUser.fks.map);
+		fksM.put(src, new Pair<>(en1, l));
+		isoToUser = new Mapping<>(isoToUser.ens.map, isoToUser.atts.map, fksM, schemaStr, schemaStr2, checkJava);
+		//System.out.println("isoToUser is " + isoToUser);
+		Map<String, Pair<String, List<String>>> fksM2 = new HashMap<>(isoFromUser.fks.map);
+		fksM2.remove(src);
+		isoFromUser = new Mapping<>(isoFromUser.ens.map, isoFromUser.atts.map, fksM2, schemaStr2, schemaStr, checkJava);
+		//System.out.println("isoFromUser is " + isoFromUser);
+
+		return wrap(isoToUser, isoFromUser);
+	}
+	
+	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> removeAtt(String src, Var v, Term<Ty, String, Sym, String, String, Void, Void> t, boolean checkJava) {
+		if (!schemaStr.atts.containsKey(src)) {
+			throw new RuntimeException(src + " is not an attribute in \n" + schemaStr);
+		}
+		String en1 = schemaStr.atts.get(src).first;
+		Ty ty0 = schemaStr.atts.get(src).second;
+		if (!schemaStr.type(new Pair<>(v, en1), t).equals(Chc.inLeft(ty0))) {
+			throw new RuntimeException("The term " + t + " has type " + schemaStr.type(new Pair<>(v, en1), t).toStringMash() + " and not " + ty0 + " as expected.");
+		}
+		if (!schemaStr.dp.eq(new Ctx<>(v, Chc.inRight(en1)), t, Term.Att(src, Term.Var(v)))) {
+			throw new RuntimeException("The term " + t + " is not provably equal to " + Term.Att(src, Term.Var(v)));
+		}
+		if (t.contains(Head.Att(src))) {
+			throw new RuntimeException("Cannot replace " + src + " with " + t + " because that term contains " + src);
+		}
+		//System.out.println("removing " + src + " to " + t);	
+		Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser = Mapping.id(schemaStr);
+		Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser = Mapping.id(schemaStr);
+		
+		Map<String, Pair<String, Ty>> atts = new HashMap<>(schemaStr.atts.map);
+		atts.remove(src);
+		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> eqs = new HashSet<>();
+		for (Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>> eq : schemaStr.eqs) {
+			Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>> 
+			tr = new Triple<>(eq.first, eq.second.replaceHead(Head.Att(src), Util.singList(v), t), eq.third.replaceHead(Head.Att(src), Util.singList(v), t));
+			if (!tr.second.equals(tr.third) && !eqs.contains(tr)) {
+				eqs.add(tr);				
+			}
+		}			
+		DP<Ty, String, Sym, String, String, Void, Void> dp = new DP<Ty, String, Sym, String, String, Void, Void>() {
+			@Override
+			public String toStringProver() {
+				return "remove attribute of " + schemaStr.dp.toStringProver();
+			}
+			@Override
+			public boolean eq(Ctx<Var, Chc<Ty, String>> ctx, Term<Ty, String, Sym, String, String, Void, Void> lhs, Term<Ty, String, Sym, String, String, Void, Void> rhs) {
+				return schemaStr.dp.eq(ctx, lhs, rhs);
+			}
+		};
+		Schema<Ty, String, Sym, String, String> schemaStr2 
+		= new Schema<>(ty, schemaStr.ens, atts, schemaStr.fks.map, eqs, dp, checkJava);  
+		//System.out.println("schema is " + schemaStr2);
+		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> attsM = new HashMap<>(isoToUser.atts.map);
+		attsM.put(src, new Triple<>(v, en1, t));
+		isoToUser = new Mapping<>(isoToUser.ens.map, attsM, isoToUser.fks.map, schemaStr, schemaStr2, checkJava);
+		//System.out.println("isoToUser is " + isoToUser);
+		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> attsM2 = new HashMap<>(isoFromUser.atts.map);
+		attsM2.remove(src);
+		isoFromUser = new Mapping<>(isoFromUser.ens.map, attsM2, isoFromUser.fks.map,schemaStr2, schemaStr, checkJava);
+		//System.out.println("isoFromUser is " + isoFromUser);
+
+		return wrap(isoToUser, isoFromUser);
+	}
+	
 	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> wrap(		
 			Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser, 
 			Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser) {
@@ -149,7 +441,7 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 			}
 			for (Att att : s.src.atts.keySet()) {
 				Triple<Var, En, Term<Ty, En, Sym, Fk, Att, Void, Void>> fk2 = s.atts.get(att);
-				Pair<Var, Set<Pair<N, En>>> x = new Pair<>(fk2.first, eqcs.get(new Pair<>(src, fk2.second)));
+				Pair<Var, Set<Pair<N, En>>> x = new Pair<>(fk2.first, eqcs.get(new Pair<>(dst, fk2.second)));
 				Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> 
 				lhs = Term.Att(new Pair<>(src, att), Term.Var(fk2.first));
 				Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> 

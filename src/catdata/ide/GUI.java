@@ -201,11 +201,7 @@ public class GUI extends JPanel {
 				ed.copyAsRtf();
 			}
 		});
-		
-		
 	
-		
-
 		MenuItem fall = new MenuItem("Fold All");
 		editMenu.add(fall);
 		rtf.addActionListener(x -> {
@@ -244,6 +240,9 @@ public class GUI extends JPanel {
 		toolsMenu.add(shredItem);
 		shredItem.addActionListener(x -> new NraViewer());
 
+		MenuItem easikItem = new MenuItem("EASIK");
+		toolsMenu.add(easikItem);
+		easikItem.addActionListener(x -> easik.Easik.main(new String[0]));
 		
 		Menu helpMenu = new Menu("About");
 		MenuItem aboutItem = new MenuItem("About");
@@ -325,7 +324,7 @@ public class GUI extends JPanel {
 		cl.show(boxPanel, Language.getDefault().prefix());
 
 		Vector<String> vec = new Vector<>();
-	//	vec.add("All");
+	
 		for (Language l : Language.values()) {
 			vec.add(l.toString());
 		}
@@ -345,7 +344,6 @@ public class GUI extends JPanel {
 
 		pan.add(toolBar, BorderLayout.PAGE_START);
 		pan.add(editors, BorderLayout.CENTER);
-
 	
 		return new Pair<>(pan, menuBar);
 	}

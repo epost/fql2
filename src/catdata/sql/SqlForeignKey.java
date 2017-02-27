@@ -10,7 +10,7 @@ public class SqlForeignKey {
 	
 	@Override
 	public String toString() {
-		return source.name + "_" + name.toUpperCase();
+		return source.name + "_" + name;
 	}
 	
 	@Override
@@ -54,7 +54,7 @@ public class SqlForeignKey {
 		if (name == null) {
 			throw new RuntimeException();
 		}
-		if (!name.equals(name.toUpperCase())) {
+		if (!name.equals(name)) {
 			throw new RuntimeException();
 		}
 		if (!map.keySet().equals(target.pk)) {

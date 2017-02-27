@@ -13,7 +13,7 @@ public class SqlColumn {
 		}
 
 		this.table = table;
-		this.name = name.toUpperCase();
+		this.name = name;
 		this.type = type;
 	}
 
@@ -59,7 +59,7 @@ public class SqlColumn {
 
 	@Override
 	public String toString() {
-		return table + "." + name;
+		return table + "_" + name;
 	}
 	
 }
