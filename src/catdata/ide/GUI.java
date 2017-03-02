@@ -100,7 +100,7 @@ public class GUI extends JPanel {
 		MenuItem exitItem = new MenuItem("Quit");
 
 		Map<Language, MenuItem> newItems = new HashMap<>();
-		for (Language l : Language.values()) {
+		for (Language l : Language.values0()) {
 			MenuItem newItem = new MenuItem("New " + l);
 			fileMenu.add(newItem);
 			newItems.put(l, newItem);
@@ -204,7 +204,7 @@ public class GUI extends JPanel {
 	
 		MenuItem fall = new MenuItem("Fold All");
 		editMenu.add(fall);
-		rtf.addActionListener(x -> {
+		fall.addActionListener(x -> {
 			CodeEditor<?, ?, ?> ed = getSelectedEditor();
 			if (ed != null) {
 				ed.foldAll(true);
@@ -213,7 +213,7 @@ public class GUI extends JPanel {
 
 		MenuItem uall = new MenuItem("Unfold All");
 		editMenu.add(uall);
-		rtf.addActionListener(x -> {
+		uall.addActionListener(x -> {
 			CodeEditor<?, ?, ?> ed = getSelectedEditor();
 			if (ed != null) {
 				ed.foldAll(false);
@@ -325,7 +325,7 @@ public class GUI extends JPanel {
 
 		Vector<String> vec = new Vector<>();
 	
-		for (Language l : Language.values()) {
+		for (Language l : Language.values0()) {
 			vec.add(l.toString());
 		}
 		JComboBox<String> modeBox = new JComboBox<>(vec);

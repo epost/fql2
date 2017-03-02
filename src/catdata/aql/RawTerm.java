@@ -335,6 +335,8 @@ public final class RawTerm {
 		this(head, args, null);
 	}
 	
+
+	
 	public RawTerm(String head) {
 		this(head, Collections.emptyList(), null);
 	}

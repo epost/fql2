@@ -122,6 +122,7 @@ public class AqlParser {
 			"options",
 			"entities",
 			"src",
+			"unique",
 			"dst",
 			"path_equations",
 			"observation_equations",
@@ -684,8 +685,8 @@ public class AqlParser {
 			Parser<List<catdata.Pair<String, String>>> as 
 			= Parsers.tuple(token("forall"), env(ident, ":")).map(x -> x.b).optional();
 			
-			Parser<List<catdata.Pair<String, String>>> es 
-			= Parsers.tuple(token("exists"), env(ident, ":")).map(x -> x.b).optional();
+			Parser<Pair<List<catdata.Pair<String, String>>, Boolean>> es 
+			= Parsers.tuple(token("exists"), token("unique").optional(), env(ident, ":")).map(x -> new Pair<>(x.c, x.b != null)).optional();
 		
 			
 			Parser<catdata.Pair<RawTerm, RawTerm>> eq 
@@ -696,7 +697,7 @@ public class AqlParser {
 						
 						
 			Parser<EdExpRaw> ret = Parsers.tuple(as, eqs, token("->"), es, eqs)
-					.map(x -> new EdExpRaw(Util.newIfNull(x.a), Util.newIfNull(x.b), Util.newIfNull(x.d), Util.newIfNull(x.e)));
+					.map(x -> new EdExpRaw(Util.newIfNull(x.a), Util.newIfNull(x.b), x.d==null?new LinkedList<>():x.d.a, Util.newIfNull(x.e), x.d==null?false:x.d.b));
 			return ret;	
 	}
 

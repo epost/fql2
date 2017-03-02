@@ -139,7 +139,7 @@ public class SketchFrame extends ModelFrame<SketchFrame, SketchGraphModel, Sketc
 	/**  */
 	private JMenuItem _UndoItem, _RedoItem;
 
-	/** The componenets making up the button pane */
+	/** The components making up the button pane */
 	private JPanel _buttons;
 
 	/** The label above our info tree which displays connection information */
@@ -204,7 +204,7 @@ public class SketchFrame extends ModelFrame<SketchFrame, SketchGraphModel, Sketc
 	 * the current sketch layout.
 	 *
 	 * @param inOverview
-	 *            The overivew in which this frame's sketch will exist
+	 *            The overview in which this frame's sketch will exist
 	 */
 	public SketchFrame(final Overview inOverview) {
 		super("EASIK - Untitled");
@@ -299,7 +299,7 @@ public class SketchFrame extends ModelFrame<SketchFrame, SketchGraphModel, Sketc
 		_mainPane.add(_ourSketchScrollPane, BorderLayout.CENTER);
 		_mainPane.add(_buttonPane, BorderLayout.SOUTH);
 
-		// Setup enitre window
+		// Setup entire window
 		_mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, _mainPane, _rightPane);
 
 		final int dividerPos = Integer.parseInt(_settings.getProperty("sketch_divider_position", String.valueOf((defaultWidth - 255))));
@@ -309,8 +309,14 @@ public class SketchFrame extends ModelFrame<SketchFrame, SketchGraphModel, Sketc
 		_mainSplitPane.setResizeWeight(1);
 		_mainSplitPane.setOneTouchExpandable(true);
 		_mainSplitPane.setContinuousLayout(true);
+		
 		getContentPane().add(_mainSplitPane, BorderLayout.CENTER);
 
+		//JPanel aqlPanel = new JPanel();
+		//JButton toAqlButton = new JButton("To AQL");
+		//aqlPanel.add(toAqlButton);
+		//getContentPane().add(aqlPanel, BorderLayout.NORTH);
+		
 		// Update the display in the overview whenever we lost focus
 		addWindowFocusListener(new WindowFocusListener() {
 			@Override

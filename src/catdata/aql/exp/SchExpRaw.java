@@ -61,13 +61,6 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		
 		col.fks.putAll(Util.toMapSafely(fks));
 		col.atts.putAll(Util.toMapSafely(atts));
-	/*why were these empty loops here?
-		for (Pair<List<Object>, Object> eq : col.syms.values()) {
-			
-		}
-		for (Pair<Object, Object> eq : col.atts.values()) {
-			
-		}*/
 		
 		for (Quad<String, Object, RawTerm, RawTerm> eq : t_eqs) {
 				Map<String, Chc<Object, Object>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));

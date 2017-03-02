@@ -101,4 +101,10 @@ public class FileSaveAction extends AbstractAction {
 
 		return true;
 	}
+	
+	public static void saveFileAql(Overview overview, File selFile) {
+		overview.getDocInfo().updateModificationDate();
+		overview.saveToXML(selFile);
+		overview.setFile(selFile);
+	}
 }

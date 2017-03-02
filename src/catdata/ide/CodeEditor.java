@@ -387,6 +387,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			Fold fold = topArea.getFoldManager().getFold(j);
 			fold.setCollapsed(b);
 		}
+		topArea.setCaretPosition(topArea.getCaretPosition());
+		topArea.revalidate();
+		sp.revalidate();
 	}	
 	
 	public void setFontSize(int size) {

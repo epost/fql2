@@ -21,6 +21,8 @@ public class ED<Ty, En, Sym, Fk, Att> {
 	
 	public static enum WHICH { FRONT, BACK };
 	
+	public final boolean isUnique;
+	
 	public static <Ty,Sym> Schema<Ty,WHICH,Sym,Unit,Void> getEDSchema(TypeSide<Ty,Sym> ty) {
 		Collage<Ty, WHICH, Sym, Unit, Void, Void, Void> col = new Collage<>(ty.collage());
 		col.ens.add(WHICH.FRONT);
@@ -58,6 +60,9 @@ public class ED<Ty, En, Sym, Fk, Att> {
 		toString += "->\n";
 		if (!Es.isEmpty()) {
 			toString += "\texists";
+			if (isUnique) {
+				toString += " unique";
+			}
 			List<String> temp = new LinkedList<>();		
 			for (Entry<Var, En> p : Es.map.entrySet()) {
 				temp.add(p.getKey() + ":" + p.getValue());
@@ -103,12 +108,13 @@ public class ED<Ty, En, Sym, Fk, Att> {
 		return ret;
 	}
 	
-	public ED(Schema<Ty, En, Sym, Fk, Att> schema, Ctx<Var, En> as, Ctx<Var, En> es, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> awh, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> ewh) {
+	public ED(Schema<Ty, En, Sym, Fk, Att> schema, Ctx<Var, En> as, Ctx<Var, En> es, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> awh, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> ewh, boolean isUnique) {
 		this.schema = schema;
 		As = as;
 		Es = es;
 		Awh = awh;
 		Ewh = ewh;
+		this.isUnique = isUnique;
 		if (!Collections.disjoint(As.keySet(), Es.keySet())) {
 			throw new RuntimeException("The forall and exists clauses do not use disjoint variables.");
 		}
@@ -140,6 +146,7 @@ public class ED<Ty, En, Sym, Fk, Att> {
 		result = prime * result + ((Awh == null) ? 0 : Awh.hashCode());
 		result = prime * result + ((Es == null) ? 0 : Es.hashCode());
 		result = prime * result + ((Ewh == null) ? 0 : Ewh.hashCode());
+		result = prime * result + (isUnique ? 1231 : 1237);
 		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
 		return result;
 	}
@@ -172,6 +179,8 @@ public class ED<Ty, En, Sym, Fk, Att> {
 			if (other.Ewh != null)
 				return false;
 		} else if (!Ewh.equals(other.Ewh))
+			return false;
+		if (isUnique != other.isUnique)
 			return false;
 		if (schema == null) {
 			if (other.schema != null)

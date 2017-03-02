@@ -61,26 +61,30 @@ public class ImportSketchAction extends AbstractAction {
 		File selFile = FileChooser.loadFile("Import EASIK Sketch", FileFilter.EASIK_SKETCH);
 
 		if (selFile != null) {
-			Point p = (_newPoint != null) ? _newPoint : _theOverview.getNewSketchPosition(10);
-
-			_theOverview.getFrame().getInfoTreeUI().storeExpansion();
-
-			SketchNode newNode = _theOverview.addNewSketch(_theOverview.getNewName("ImportedSketch0"), p.getX(), p.getY());
-
-			_theOverview.getFrame().getInfoTreeUI().storeExpansion();
-
-			SketchFrame newFrame = newNode.getFrame();
-			Sketch sk = newFrame.getMModel();
-
-			if (!sk.loadFromXML(selFile)) {
-				return;
-			}
-
-			newNode.updateName();
-			sk.updateThumb();
-			_theOverview.getFrame().getInfoTreeUI().revertExpansion();
-			_theOverview.setDirty(true);
-			_theOverview.refresh(); // Updates gui
+			actionPerformed0(selFile);
 		}
+	}
+	
+	public void actionPerformed0(File selFile) {
+		Point p = (_newPoint != null) ? _newPoint : _theOverview.getNewSketchPosition(10);
+
+		_theOverview.getFrame().getInfoTreeUI().storeExpansion();
+
+		SketchNode newNode = _theOverview.addNewSketch(_theOverview.getNewName("ImportedSketch0"), p.getX(), p.getY());
+
+		_theOverview.getFrame().getInfoTreeUI().storeExpansion();
+
+		SketchFrame newFrame = newNode.getFrame();
+		Sketch sk = newFrame.getMModel();
+
+		if (!sk.loadFromXML(selFile)) {
+			return;
+		}
+
+		newNode.updateName();
+		sk.updateThumb();
+		_theOverview.getFrame().getInfoTreeUI().revertExpansion();
+		_theOverview.setDirty(true);
+		_theOverview.refresh(); // Updates gui
 	}
 }

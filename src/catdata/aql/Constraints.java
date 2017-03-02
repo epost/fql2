@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,7 +36,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 	// TODO aql equals
 
 	public Constraints(Schema<Ty, En, Sym, Fk, Att> schema, Collection<ED<Ty, En, Sym, Fk, Att>> eds) {
-		this.eds = eds;
+		this.eds = desugar(eds);
 		this.schema = schema;
 		for (ED<Ty, En, Sym, Fk, Att> ed : eds) {
 			if (!ed.schema.equals(schema)) {
@@ -44,12 +45,44 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 		}
 	}
 
+	private static <Ty, En, Sym, Fk, Att> Collection<ED<Ty, En, Sym, Fk, Att>> desugar(Collection<ED<Ty, En, Sym, Fk, Att>> eds) {
+		List<ED<Ty, En, Sym, Fk, Att>> l = new LinkedList<>();
+		for (ED<Ty, En, Sym, Fk, Att> x : eds) {
+			l.add(new ED<>(x.schema, x.As, x.Es, x.Awh, x.Ewh, false));
+			
+			Ctx<Var, En> es2 = x.Es.map((v,t) -> new Pair<>(new Var(v + "0"), t));	
+			Map<Var, Term<Ty, En, Sym, Fk, Att, Void, Void>> subst = new HashMap<>();
+			Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> ewh = new HashSet<>();
+			
+			for (Var v : x.Es.keySet()) {
+				subst.put(v, Term.Var(new Var(v + "0")));
+				ewh.add(new Pair<>(Term.Var(v), subst.get(v)));
+			}
+			Ctx<Var, En> as = new Ctx<>();
+			as.putAll(x.As.map);
+			as.putAll(x.Es.map);
+			as.putAll(es2.map);
+			Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> awh = new HashSet<>();
+			awh.addAll(x.Awh);
+			awh.addAll(x.Ewh);
+			for (Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> p : x.Ewh) {
+				awh.add(new Pair<>(p.first.subst(subst), p.second.subst(subst)));
+			}
+			l.add(new ED<>(x.schema, as, new Ctx<>(), awh, ewh, false));
+			
+		}
+		return l;
+	}
+
 	@Override
 	public Kind kind() {
 		return Kind.CONSTRAINTS;
 	}
 	
 	public <Gen, Sk, X, Y> Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> chase(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I, int limit) {	
+		if (limit < 0) {
+			throw new IllegalArgumentException();
+		}
 		for (ED<Ty, En, Sym, Fk, Att> ed : eds) {
 			Frozen<Ty, En, Sym, Fk, Att> f = ed.Q.ens.get(ED.WHICH.FRONT);
 			if (!f.algebra().hasFreeTypeAlgebraOnJava()) {
@@ -59,9 +92,6 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 			if (!f.algebra().hasFreeTypeAlgebraOnJava()) {
 				throw new RuntimeException("Cannot chase, unsafe use of java in back of\n" + ed);
 			}
-		}
-		if (limit < 0) {
-			throw new IllegalArgumentException();
 		}
 		Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret = I;
 		for (int i = 0; i < limit; i++) {
@@ -159,8 +189,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 		es.put(TWO.A, new Pair<>(THREE.A,THREE.B));
 		es.put(TWO.B, new Pair<>(THREE.A,THREE.C));
 		DMG<THREE, TWO> shape = new DMG<>(ns, es);
-		
-		
+				
 		Ctx<THREE, Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?>> 
 		nodes = new Ctx<>();
 		nodes.put(THREE.A, j.src());

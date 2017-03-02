@@ -33,7 +33,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 	public static class EdExpRaw {
 		private String toString;
 		@Override
-		public String toString() {
+		public synchronized String toString() {
 			if (toString != null) {
 				return toString;
 			}
@@ -60,6 +60,9 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			toString += "->\n";
 			if (!Es.isEmpty()) {
 				toString += "\texists";
+				if (isUnique) {
+					toString += " unique";
+				}
 				List<String> temp = new LinkedList<>();		
 				for (Pair<String, String> p : Es) {
 					temp.add(p.first + ":" + p.second);
@@ -89,6 +92,8 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 		
 		private final List<Pair<RawTerm, RawTerm>> Ewh;
 		
+		public final boolean isUnique;
+		
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -97,6 +102,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			result = prime * result + ((Awh == null) ? 0 : Awh.hashCode());
 			result = prime * result + ((Es == null) ? 0 : Es.hashCode());
 			result = prime * result + ((Ewh == null) ? 0 : Ewh.hashCode());
+			result = prime * result + (isUnique ? 1231 : 1237);
 			return result;
 		}
 
@@ -131,14 +137,17 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 					return false;
 			} else if (!Ewh.equals(other.Ewh))
 				return false;
+			if (isUnique != other.isUnique)
+				return false;
 			return true;
 		}
 
-		public EdExpRaw(List<Pair<String, String>> as, List<Pair<RawTerm, RawTerm>> awh, List<Pair<String, String>> es, List<Pair<RawTerm, RawTerm>> ewh) {
+		public EdExpRaw(List<Pair<String, String>> as, List<Pair<RawTerm, RawTerm>> awh, List<Pair<String, String>> es, List<Pair<RawTerm, RawTerm>> ewh, boolean isUnique) {
 			As = as;
 			Es = es;
 			Awh = awh;
 			Ewh = ewh;
+			this.isUnique = isUnique;
 		}
 
 		public ED<Object, Object, Object, Object, Object> eval(Schema<Object, Object, Object, Object, Object> sch) {
@@ -151,7 +160,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			for (Var k : x.first.keySet()) {
 				y.first.remove(k);
 			}
-			return new ED<>(sch, x.first, y.first, x.second, y.second);
+			return new ED<>(sch, x.first, y.first, x.second, y.second, isUnique);
 		}
 
 
@@ -256,7 +265,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 		private String toString;
 
 		@Override
-		public String toString() {
+		public synchronized String toString() {
 			if (toString != null) {
 				return toString;
 			}

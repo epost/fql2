@@ -5,6 +5,7 @@ package easik.ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -17,9 +18,15 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.ImageProducer;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -29,9 +36,16 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.SwingConstants;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
+import catdata.Util;
+import catdata.aql.EasikAql;
+import catdata.ide.Example;
+import catdata.ide.Examples;
+import catdata.ide.GUI;
+import catdata.ide.Language;
 import easik.Easik;
 import easik.overview.Overview;
 import easik.overview.vertex.SketchNode;
@@ -218,6 +232,66 @@ public class ApplicationFrame extends EasikFrame {
 		_mainSplitPane.setOneTouchExpandable(true);
 		_mainSplitPane.setContinuousLayout(true);
 		getContentPane().add(_mainSplitPane, BorderLayout.CENTER);
+		
+		JPanel aqlPanel = new JPanel(new GridLayout(1,4));
+		JButton toAqlButton = new JButton("To AQL");
+		if (GUI.topFrame == null) {
+			toAqlButton.setEnabled(false);
+		}
+		toAqlButton.addActionListener(x -> {
+			try {
+				File selFile = File.createTempFile("aql_easik", Language.AQL.fileExtension());
+				FileSaveAction.saveFileAql(getOverview(), selFile);
+				String str = Util.readFile(selFile);
+				if (str == null) {
+					return;
+				}
+				GUI.newAction(getOverview().getDocInfo().getName(), EasikAql.easikToAql(str), Language.AQL);
+				GUI.topFrame.toFront();
+				GUI.topFrame.requestFocus();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Error, could not create temporary file to transfer to AQL");
+			} 
+		});
+		List<Example> l = new LinkedList<>();
+		l.addAll(Examples.getExamples(Language.EASIK));
+		l.addAll(Examples.getExamples(Language.SKETCH));
+		JComboBox<Example> box = new JComboBox<>(l.toArray(new Example[0]));
+		box.setSelectedIndex(-1);
+		box.addActionListener((ActionEvent e) -> {
+			Example ex = (Example) box.getSelectedItem();	
+			boolean proceed = true;
+			if (getOverview().getDirty()) {
+				proceed = JUtils.confirmLoss(this);
+			}
+			if (!proceed) {
+				return;
+			}
+			try {
+				File selFile = File.createTempFile("aql_easik", ex.lang().fileExtension());
+				FileWriter w = new FileWriter(selFile);
+				w.write(ex.getText());
+				w.close();
+				if (ex.lang().equals(Language.EASIK)) {
+					getOverview().openOverview(selFile);
+				} else if (ex.lang().equals(Language.SKETCH)) {
+					new ImportSketchAction(_popupPosition, _overview).actionPerformed0(selFile);
+				}
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Error, could not create temporary file for example");
+			} 
+		});
+
+		aqlPanel.add(toAqlButton);
+		aqlPanel.add(new JLabel());
+		aqlPanel.add(new JLabel("Load Example", SwingConstants.RIGHT));
+		aqlPanel.add(box);
+		getContentPane().add(aqlPanel, BorderLayout.NORTH);
+		
+
+		
 	}
 
 	/**
@@ -258,7 +332,8 @@ public class ApplicationFrame extends EasikFrame {
 			_settings.setProperty("overview_frame_location_x", String.valueOf(getX()));
 			_settings.setProperty("overview_frame_location_y", String.valueOf(getY()));
 			_settings.store();
-			System.exit(0);
+			this.dispose();
+			Easik.clear();
 		}
 	}
 

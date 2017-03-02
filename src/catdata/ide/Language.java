@@ -1,5 +1,7 @@
 package catdata.ide;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import catdata.aql.gui.AqlCodeEditor;
@@ -10,6 +12,8 @@ import catdata.opl.OplCodeEditor;
 
 public enum Language {
 
+	EASIK,
+	SKETCH,
 	FQL,
 	FQLPP,
 	FPQL,
@@ -21,6 +25,14 @@ public enum Language {
 		return AQL;
 	}
 	
+	//non easik ones
+	public static Language[] values0() {
+		List<Language> l = new LinkedList<>(Arrays.asList(values()));
+		l.remove(EASIK);
+		l.remove(SKETCH);
+		return l.toArray(new Language[0]);
+	}
+	
 	@Override
 	public String toString() {
 		switch (this) {
@@ -30,10 +42,12 @@ public enum Language {
 		case OPL: return "OPL";
 //		case MPL: return "MPL";
 		case AQL: return "AQL";
+		case EASIK: return "EASIK";
+		case SKETCH: return "Sketch";
 		default:
 			break;
 		}
-		throw new RuntimeException();
+		throw new RuntimeException("Anomaly - please report");
 	}
 	
 	public String prefix() {
@@ -44,10 +58,12 @@ public enum Language {
 		case OPL: return "O";
 	//	case MPL: return "M";
 		case AQL: return " ";
+		case EASIK: return "E";
+		case SKETCH: return "S";
 		default:
 			break;
 		}
-		throw new RuntimeException();
+		throw new RuntimeException("Anomaly - please report");
 	}
 	
 	public String fileExtension() {
@@ -58,13 +74,15 @@ public enum Language {
 		case OPL: return "opl";
 //		case MPL: return "mpl";
 		case AQL: return "aql";
+		case EASIK: return "easik";
+		case SKETCH: return "sketch";
 		default:
-			throw new RuntimeException(); 
+			throw new RuntimeException("Anomaly - please report"); 
 		}
 		
 	}
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "incomplete-switch" })
 	public CodeEditor createEditor(String title, int id, String content) {
 		switch (this) {
 		case FPQL: return new XCodeEditor(title, id, content);
@@ -74,7 +92,7 @@ public enum Language {
 	//	case MPL: return new MplCodeEditor(title, id, content);
 		case AQL: return new AqlCodeEditor(title, id, content);
 		default:
-			throw new RuntimeException(toString());
+			throw new RuntimeException("Anomaly - please report");
 		}
 		
 	}
@@ -99,8 +117,10 @@ public enum Language {
 		case FQL: return Examples.getExamples(Language.FQL);
 //		case MPL: return Examples.getExamples(MplExamples.class);
 		case AQL: return Examples.getExamples(Language.AQL);
+		case EASIK: return Examples.getExamples(Language.EASIK);
+		case SKETCH: return Examples.getExamples(Language.SKETCH);
 		default:
-			throw new RuntimeException(toString());
+			throw new RuntimeException("Anomaly - please report");
 		}
 		
 	}

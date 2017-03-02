@@ -79,16 +79,6 @@ public class Easik {
 		//}
 		//this seems to throw lots of null pointer exceptions - ryan TODO aql easik
 
-		/*
-		 * // Use the system look and feel, because the Java look and feel,
-		 * while consistent on every // platform, is consistently *wrong* on
-		 * every platform. try {
-		 * UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		 * } catch (Exception e) {
-		 * System.err.println("Unable to set system look and feel: " +
-		 * e.getMessage()); }
-		 */
-
 		final Easik e = Easik.getInstance();
 
 		// If a filename is specified, try to load it as an overview.
@@ -97,15 +87,15 @@ public class Easik {
 
 			e.getFrame().getOverview().openOverview(f);
 		} else { // Otherwise open the most recently used overview if possible
-			for (final String file : getInstance().getSettings().getPropertySet("recent_files")) {
+			/* for (final String file : getInstance().getSettings().getPropertySet("recent_files")) {
 				File f = new File(file);
 
-				if (f.exists()) {
+				if (f.exists() && f.length() != 0) {
 					getInstance().getFrame().getOverview().openOverview(f);
 
 					break;
 				}
-			}
+			} */
 		}
 	}
 
@@ -140,5 +130,9 @@ public class Easik {
 	 */
 	public EasikSettings getSettings() {
 		return _settings;
+	}
+
+	public static void clear() {
+		_instance = null;
 	}
 }

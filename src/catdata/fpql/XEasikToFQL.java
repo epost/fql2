@@ -130,7 +130,7 @@ public class XEasikToFQL {
        					String toAdd = lhsX.item(temp3).getAttributes().getNamedItem("id").getTextContent();
        					lhs.add(toAdd);
     				}
-       				NodeList rhsX = w1.getChildNodes();
+       				NodeList rhsX = w2.getChildNodes();
        				for (int temp3 = 0; temp3 < rhsX.getLength(); temp3++) {
        					if (!rhsX.item(temp3).getNodeName().equals("edgeref")) {
        						continue;
