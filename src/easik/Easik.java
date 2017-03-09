@@ -80,7 +80,7 @@ public class Easik {
 		//this seems to throw lots of null pointer exceptions - ryan TODO aql easik
 
 		final Easik e = Easik.getInstance();
-
+		e._theFrame.toFront();
 		// If a filename is specified, try to load it as an overview.
 		if (args.length > 0) {
 			final File f = new File(args[0]);
@@ -109,7 +109,6 @@ public class Easik {
 		if (_instance == null) {
 			new Easik();
 		}
-
 		return _instance;
 	}
 

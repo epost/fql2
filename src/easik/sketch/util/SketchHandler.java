@@ -122,6 +122,8 @@ public class SketchHandler extends DefaultHandler {
 
 	/** The entity nodes of the sketch, indexed by name */
 	private LinkedHashMap<String, EntityNode> _entityNodes;
+	
+	private EntityNode _curDomain; //added by ryan
 
 	/** The current entity node */
 	private EntityNode _newNode;
@@ -255,6 +257,7 @@ public class SketchHandler extends DefaultHandler {
 	 * @param atts
 	 * 			@see org.xml.sax.helpers.DefaultHandler
 	 */
+	
 	@Override
 	public void startElement(String namespace, String localName, String qName, Attributes atts) {
 		_currNode = qName;
@@ -378,6 +381,7 @@ public class SketchHandler extends DefaultHandler {
 		} else if (qName.equals("path")) {
 			_curPath = new LinkedList<>();
 			_curPathId = atts.getValue("id");
+			_curDomain = _entityNodes.get(atts.getValue("domain"));
 		} else if (qName.equals("edgeref")) {
 			_curPath.add(_edges.get(atts.getValue("id")));
 		} else if (qName.equals("sumconstraint") || qName.equals("pullbackconstraint") || qName.equals("productconstraint") || qName.equals("commutativediagram") || qName.equals("equalizerconstraint") || qName.equals("limitconstraint")) // TRIANGLES
@@ -470,7 +474,12 @@ public class SketchHandler extends DefaultHandler {
 				JOptionPane.showMessageDialog(_theFrame, "An error occured while loading a constraint.\n " + "Error on pullback between tables\n" + ModelConstraint.getTablesInvolvedForError(_curConstraintPaths), "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		} else if (qName.equals("path")) {
-			ModelPath<SketchFrame, SketchGraphModel, Sketch, EntityNode, SketchEdge> myPath = new ModelPath<>(_curPath);
+			ModelPath<SketchFrame, SketchGraphModel, Sketch, EntityNode, SketchEdge> myPath;
+			if (_curPath.isEmpty()) {
+				myPath = new ModelPath<>(_curDomain);
+			} else {
+				myPath = new ModelPath<>(_curPath);
+			}
 
 			_allPaths.put(_curPathId, myPath); // For old Easik sketch
 												// compatibility

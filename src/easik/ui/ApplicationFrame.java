@@ -22,8 +22,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -40,8 +42,11 @@ import javax.swing.SwingConstants;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
+import catdata.Pair;
 import catdata.Util;
 import catdata.aql.EasikAql;
+import catdata.aql.exp.AqlEnv;
+import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
 import catdata.ide.Examples;
 import catdata.ide.GUI;
@@ -254,6 +259,38 @@ public class ApplicationFrame extends EasikFrame {
 				JOptionPane.showMessageDialog(null, "Error, could not create temporary file to transfer to AQL");
 			} 
 		});
+		
+		JButton fromAqlButton = new JButton("From last run of AQL");
+		if (GUI.topFrame == null) {
+			fromAqlButton.setEnabled(false);
+		}
+		fromAqlButton.addActionListener(x -> {
+			try {
+				Pair<AqlEnv, String> p = GUI.getCurrent();
+				if (p == null) {
+					return;
+				} else if (p.first == null) {
+					JOptionPane.showMessageDialog(null, "Please run the AQL program first");
+					return;
+				}
+				File selFile = File.createTempFile("aql_easik", "easik");
+				FileWriter w = new FileWriter(selFile);
+				Set<String> warnings = new HashSet<>();
+				String str = EasikAql.aqlToEasik(p.first, p.second, warnings);
+				w.write(str);
+				w.close();
+				if (!warnings.isEmpty()) {
+					JOptionPane.showMessageDialog(null, new CodeTextPanel("AQL to EASIK warnings", Util.sep(warnings, "\n")));
+				}
+				getOverview().openOverview(selFile);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Error, could not create temporary file to transfer from AQL");
+			} 
+		});
+		
+		
+		
 		List<Example> l = new LinkedList<>();
 		l.addAll(Examples.getExamples(Language.EASIK));
 		l.addAll(Examples.getExamples(Language.SKETCH));
@@ -285,7 +322,7 @@ public class ApplicationFrame extends EasikFrame {
 		});
 
 		aqlPanel.add(toAqlButton);
-		aqlPanel.add(new JLabel());
+		aqlPanel.add(fromAqlButton);
 		aqlPanel.add(new JLabel("Load Example", SwingConstants.RIGHT));
 		aqlPanel.add(box);
 		getContentPane().add(aqlPanel, BorderLayout.NORTH);

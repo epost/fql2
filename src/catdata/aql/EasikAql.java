@@ -16,7 +16,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import catdata.Pair;
+import catdata.Triple;
 import catdata.Util;
+import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.EdsExp;
 import catdata.aql.exp.EdsExp.EdExpRaw;
 import catdata.aql.exp.EdsExp.EdsExpRaw;
@@ -28,6 +30,129 @@ import catdata.aql.exp.TyExpRaw;
 
 public class EasikAql {
 	
+	private static String removePrefix(String en, String s) {
+		if (s.startsWith(en + "_")) {
+			return s.substring(s.indexOf("_")+1, s.length());
+		}
+		return s;
+	}
+	
+	public static String aqlToEasik(AqlEnv in, String title, Set<String> warnings) {
+		String pre = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+		+ "\n<easketch_overview>"
+		+ "\n<header>"
+		+ "\n<title>" + title + "</title>"
+		+ "\n<author>Translated from AQL</author>"
+		+ "\n<description></description>"
+		+ "\n<creationDate></creationDate>"
+		+ "\n<lastModificationDate></lastModificationDate>"
+		+ "\n</header><sketches>";
+		
+		String post = "\n</sketches><views/>"
+		+ "\n</easketch_overview>";
+		
+		List<String> l = new LinkedList<>();
+		int x0 = 0, y0 = 0;
+		for (String s : in.defs.schs.keySet()) {
+			@SuppressWarnings("unchecked")
+			String x = aqlToEasik(s, in.defs.schs.get(s), x0, y0, 400, warnings);
+			l.add(x);
+			x0 += 100;
+			if (x0 > 400) {
+				x0 = 0;
+				y0 += 100;
+			}
+		}
+		if (!in.defs.eds.isEmpty()) {
+			warnings.add("constraints not exported");
+		}
+	//TODO what of warnings?
+		return pre + Util.sep(l, "\n") + post;
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////
+	
+	private static <Ty,En,Sym,Fk,Att> String aqlToEasik(String name, Schema<Ty,En,Sym,Fk,Att> schema, int x, int y, int len, Set<String> warnings) {
+		String pre = "\n<easketch cascade=\"cascade\" name=\"" + name + "\" partial-cascade=\"set_null\" x=\"" + x + "\" y=\"" + y + "\">"
+				+ "\n<header>"
+				+ "\n<title>" + name + "</title>"
+				+ "\n<description/>"
+				+ "\n<creationDate></creationDate>"
+				+ "\n<lastModificationDate></lastModificationDate>"
+				+ "\n</header>";
+		
+		String str = "";
+		
+		if (!schema.typeSide.eqs.isEmpty()) {
+			warnings.add("typeside equations not exported.");
+		}
+		
+		str += "\n<entities>";
+		int x0 = 0, y0 = 0;
+		for (En en : schema.ens) {
+			str += "\n<entity name=\"" + en.toString() + "\" x=\"" + x0 + "\" y=\"" + y0 + "\">";
+			for (Att att : schema.attsFrom(en)) {
+				str += "\n<attribute attributeTypeClass=\"" + aqlTypeToString(schema, schema.atts.get(att).second) + "\" name=\"" + removePrefix(en.toString(), att.toString()) + "\" />";
+			}
+			str += "\n</entity>";
+			
+			x0 += 100;
+			if (x0 > len) {
+				x0 = 0;
+				y0 += 100;
+			}
+		}
+		str += "\n</entities>";
+		
+		str += "\n<edges>";
+		for (Fk fk : schema.fks.keySet()) {
+			str += "\n<edge cascade=\"cascade\" id=\"" + fk.toString() + "\" source=\"" + schema.fks.get(fk).first + "\" target=\"" + schema.fks.get(fk).second + "\" type=\"normal\"/>";
+		}
+		str += "\n</edges>";
+		
+		str += "\n<keys/>";
+		
+		str += "\n<constraints>";
+		for (Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : schema.eqs) {
+			if (schema.type(eq.first, eq.second).left) {
+				warnings.add("observation_equations not exported.");
+				continue;
+			}
+			str += "\n<commutativediagram isVisible=\"true\" x=\"" + x0 + "\" y=\"" + y0 + "\">";
+			str += aqlToEasik(schema, eq.first, eq.second);
+			str += aqlToEasik(schema, eq.first, eq.third);
+			str += "\n</commutativediagram>";
+			x0 += 100;
+			if (x0 > len) {
+				x0 = 0;
+				y0 += 100;
+			}
+		}
+					
+		str += "\n</constraints>";		
+		str += "\n</easketch>";
+		return pre + str;
+	}
+
+	private static <Ty,En,Sym,Fk,Att> String aqlTypeToString(Schema<Ty,En,Sym,Fk,Att> schema, Ty t) {
+		String s = schema.typeSide.js.java_tys.containsKey(t) ? schema.typeSide.js.java_tys.get(t) : "";
+		return easikTypeFor(s);
+	}
+
+	private static <Ty,En,Sym,Fk,Att> String aqlToEasik(Schema<Ty,En,Sym,Fk,Att> schema, Pair<Var, En> p, Term<Ty, En, Sym, Fk, Att, Void, Void> term) {
+		String str = "\n<path codomain=\"" + schema.type(p, term).r + "\" domain=\"" + p.second +"\">";
+		List<String> l = new LinkedList<>();
+		while (term.fk != null) {
+			l.add("\n<edgeref id=\"" + term.fk + "\"/>");
+			term = term.arg;
+		}
+		for (String s : Util.reverse(l)) {
+			str += s;
+		}
+		str += "\n</path>";
+		return str;
+	}
+
 	private static String safe(String s) {
 		return s.replace(" ", "_").replace("-", "_");
 	}
@@ -283,19 +408,7 @@ public class EasikAql {
 					e_eqs.add(new Pair<>(toTerm(g.first, "a"),new RawTerm("c")));
 					EdExpRaw ed1 = new EdExpRaw(as, a_eqs, es, e_eqs, true);
 					edExps.add(ed1);
-/*
-					as = new LinkedList<>();
-					as.add(new Pair<>("a1", A));
-					as.add(new Pair<>("a2", A));
-					a_eqs = new LinkedList<>();
-					a_eqs.add(new Pair<>(toTerm(f.first, "a1"),toTerm(f.first, "a2")));					
-					a_eqs.add(new Pair<>(toTerm(g.first, "a1"),toTerm(g.first, "a2")));					
-					es = new LinkedList<>();
-					e_eqs = new LinkedList<>();
-					e_eqs.add(new Pair<>(new RawTerm("a1"),new RawTerm("a2")));
-					EdExpRaw ed2 = new EdExpRaw(as, a_eqs, es, e_eqs);
-					edExps.add(ed2);
-					*/
+
 				} else if (m.getNodeName().equals("equalizerconstraint")) {
 					List<String> h = null, f = null, g = null; 
 					for (int i = 0; i < m.getChildNodes().getLength(); i++) {
@@ -329,29 +442,7 @@ public class EasikAql {
 					e_eqs.add(new Pair<>(toTerm(h, "a"),new RawTerm("b")));
 					EdExpRaw ed1 = new EdExpRaw(as, a_eqs, es, e_eqs, true);
 					edExps.add(ed1);
-
-/*					as = new LinkedList<>();
-					as.add(new Pair<>("a1", A));
-					as.add(new Pair<>("a2", A));
-					a_eqs = new LinkedList<>();
-					a_eqs.add(new Pair<>(toTerm(h, "a1"),toTerm(h, "a2")));					
-					es = new LinkedList<>();
-					e_eqs = new LinkedList<>();
-					e_eqs.add(new Pair<>(new RawTerm("a1"),new RawTerm("a2")));
-					EdExpRaw ed2 = new EdExpRaw(as, a_eqs, es, e_eqs);
-					edExps.add(ed2);
-					*/
 					name = "equalizer";
-					
-//					warnings.add("equalizer constraints not exported - todo");
-					//the EASIK code indicates these will be in order - the equalizer then the two parallel paths
-				//	Assume your schema is just the graph A-->B==>C as you had it above. 
-					//		To sketch that you want models in which h is the equalizer of f,g, you need two EDs:
-					//	forall b : B, f(b)=g(b) -> exists a : A, h(a)=b.
-					///	forall a1 a2 : A, h(a1)=h(a2) -> a1=a2.
-					
-					
-					
 				} else {
 					continue;
 				}
@@ -398,6 +489,30 @@ public class EasikAql {
 		default:
 			throw new RuntimeException("Unknown type: " + tyName);
 		}
+	}
+	
+	public static String easikTypeFor(String s) {
+		switch (s) {
+		case "java.lang.Long":
+			return "easik.database.types.BigInt";
+		case "java.lang.Boolean":
+			return "easik.database.types.Boolean";
+		case "java.lang.Character":
+			return "easik.database.types.Char";
+		case "java.lang.Double":			
+			return "easik.database.types.DoublePrecision";
+		case "java.lang.Float":
+			return "easik.database.types.Float";
+		case "java.lang.Integer":
+			return "easik.database.types.Int";
+		case "java.lang.Short":
+			return "easik.database.types.SmallInt";
+		case "java.lang.String":
+			return "easik.database.types.Varchar";
+		default:
+			return "easik.database.types.Varchar";
+		}
+
 	}
 
 	public static String javaClassFor(String s) {

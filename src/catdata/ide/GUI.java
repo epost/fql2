@@ -39,6 +39,7 @@ import catdata.Pair;
 import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Kind;
+import catdata.aql.exp.AqlEnv;
 import catdata.aql.gui.AqlCodeEditor;
 import catdata.fpql.EnrichViewer;
 import catdata.fpql.XEasikToFQL;
@@ -69,6 +70,15 @@ import catdata.sql.SqlMapper;
  *         Top level gui
  */
 public class GUI extends JPanel {
+	
+	public static Pair<AqlEnv, String> getCurrent() {
+		CodeEditor<?, ?, ?> c = getSelectedEditor();
+		if (c == null || c.lang() != Language.AQL) {
+			return null;
+		}
+		AqlCodeEditor e = (AqlCodeEditor) c;
+		return new Pair<>(e.last_env, e.title);
+	}
 
 	public static final JTabbedPane editors = new JTabbedPane();
 

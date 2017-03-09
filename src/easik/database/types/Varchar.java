@@ -33,6 +33,10 @@ public class Varchar extends EasikType {
 	public Varchar(final int n) {
 		size = n;
 	}
+	
+	public Varchar() {
+		this(255);
+	}
 
 	/**
 	 * Recreates the object from the attributes returned by attributes().
