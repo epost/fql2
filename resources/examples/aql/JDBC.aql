@@ -71,13 +71,10 @@ schema S = literal : Ty {
   	attributes
   		first last	: Employee -> string
      	age			: Employee -> nat
-     	cummulative_age: Employee -> nat
      	name 		: Department -> string
-     observation_equations
-     	forall e. cummulative_age(e) = plus(age(e), age(manager(e)))
-}
+ }
 
-//import an instance by providing queries for each entity/foreign key/attribute (and optionally, type)
+//import an instance by providing queries for each entity/foreign key/attribute 
 instance J = import_jdbc "org.h2.Driver" "jdbc:h2:mem:db1" : S {
 	Employee -> "SELECT id FROM Employee"
 	Department -> "SELECT id FROM Department"
@@ -87,11 +84,10 @@ instance J = import_jdbc "org.h2.Driver" "jdbc:h2:mem:db1" : S {
 	first -> "SELECT id, name FROM Employee"	//use name as first name
   	last	-> "SELECT id, NULL FROM Employee"   //use null as last name
      age -> "SELECT id, id FROM Employee"	  //use id as age	
-     cummulative_age -> "SELECT id, id FROM Employee WHERE FALSE" //add no equations about cumulative age 
      name -> "SELECT id, name FROM Department"		  
 }
 
-//import a transform by providing queries for each entity (an optionally, type)
+//import a transform by providing queries for each entity
 transform Jid = import_jdbc "org.h2.Driver" "jdbc:h2:mem:db1" : J -> J {
 	Employee -> "SELECT id, id FROM Employee"
 	Department -> "SELECT id, id FROM Department"

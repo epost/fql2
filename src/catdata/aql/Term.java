@@ -150,6 +150,23 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		return false;
 	}
+	
+	public boolean hasTypeType() {
+		if (obj != null) {
+			return true;
+		} else if (sk != null) {
+			return true;
+		} else if (gen != null) {
+			return false; 
+		} else if (sym != null) {
+			return true;
+		} else if (fk != null) {
+			return arg.hasTypeType();
+		} else if (att != null) {
+			return true;
+		}
+		return Util.anomaly();
+	}
 /* wrong
 	public boolean isSchema() {
 		if (isTypeSide()) {

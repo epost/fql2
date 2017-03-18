@@ -422,11 +422,9 @@ A {\tt ctx(<name>, <transform>)}, where the transforms are typed according to th
 Allowable options are {\tt timeout} and {\tt static\_typing}, which when disabled causes AQL to type check the colimit at runtime rather than compile time.  This will reduce the number of transforms required to compute any particular colimit, at the cost of potential runtime failure.
 
 \section{{\tt import\_jdbc [jdbcclass] [jdbcuri] : <schema>}}
-\subsection{\tt imports}
-A list of instance names.
 
 \subsection{entities}
-A {\tt ctx(<entity> | <attribute> | <foreign key> | <type> , [sql code])}.  The SQL code for each entity and type should return a one column table, and the SQL code for each attribute and foreign key should return a two column table.  
+A {\tt ctx(<entity> | <attribute> | <foreign key> | <type> , [sql code])}.  The SQL code for each entity should return a one column table, and the SQL code for each attribute and foreign key should return a two column table.  
 
 \subsection{{\tt options}}
 Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, and {\tt require\_consistency}.
@@ -441,10 +439,8 @@ Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload
 
 
 \section{{\tt import\_csv [directoryname] : schema}}
-The directory name should contain one file named $en.csv$ per entity $en$, and optionally, one file named $t.csv$ per type $t$.  The file for $en$ should be a CSV file with a header; the fields of the header should be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.  For types, the file should have a header and one column.  Records can contain nulls (using the string specified in options).
+The directory name should contain one file named $en.csv$ per entity $en$.  The file for $en$ should be a CSV file with a header; the fields of the header should be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.  Records can contain (uni-labelled) nulls (using the string specified in options).
 
-\subsection{\tt imports}
-A list of instance names.
 
 \subsection{{\tt options}}
 Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, {\tt csv} related options, {\tt id\_column\_name}, and and {\tt require\_consistency}.
@@ -544,14 +540,13 @@ Allowed are {\tt timeout}, {\tt always\_reload}.
 
 \section{{\tt import\_csv [filename] : <instance> -> <instance>}} 
 
-Imports a transform from CSV.  The filename must be a CSV file without a header and with two columns (representing the source and target).  
+Imports a transform from CSV.  The filename must be a CSV file without a header and with two columns (representing the source and target).   The source and target instances must also be imported from CSV files.
 
 \subsection{options}
 Allowable options are {\tt timeout} and {\tt always\_reload}  and {\tt csv} related options.
 
 \section{{\tt literal : <instance> -> <instance>}}
-\subsection{{\tt imports}}
-A list of names of transforms.
+
 \subsection{{\tt generators}}
 A {\tt ctx(<generator> | <labelled null>, <term>)} that preserves types.  Note that the {\tt term} must be ground (not in a context).  
 

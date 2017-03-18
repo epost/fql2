@@ -504,23 +504,23 @@ public class AqlParser {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static Parser<InstExpCsv> instExpCsv() {
-		Parser<Pair<List<String>, List<catdata.Pair<String, String>>>> 
-		pa = Parsers.tuple(imports, options).between(token("{"), token("}"));
+		Parser<List<catdata.Pair<String, String>>> 
+		pa = options.between(token("{"), token("}"));
 		
 		return Parsers.tuple(token("import_csv"), ident, token(":"), sch_ref.lazy(),  pa.optional()).
-				map(x -> new InstExpCsv(x.d, x.b, x.e != null ? x.e.a : new LinkedList<>(), x.e != null ? x.e.b : new LinkedList<>() ));
+				map(x -> new InstExpCsv(x.d, x.b, x.e != null ? x.e : new LinkedList<>() ));
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static Parser<TransExpCsv> transExpCsv() {
-		Parser<Pair<List<String>, List<catdata.Pair<String, String>>>> 
-		pa = Parsers.tuple(imports, options).between(token("{"), token("}"));
+		Parser<List<catdata.Pair<String, String>>> 
+		pa = options.between(token("{"), token("}"));
 		
 		Parser<Pair<InstExp, InstExp>> st = Parsers.tuple(inst_ref.lazy(), token("->"), inst_ref.lazy())
 				.map(x -> new Pair<>(x.a, x.c));
 		
 		return Parsers.tuple(token("import_csv"), ident, token(":"), st, pa.optional()).
-				map(x -> new TransExpCsv(x.d.a, x.d.b, x.b, x.e != null ? x.e.a : new LinkedList<>(), x.e != null ? x.e.b : new LinkedList<>() ));
+				map(x -> new TransExpCsv(x.d.a, x.d.b, x.b, x.e != null ? x.e : new LinkedList<>() ));
 	}
 	//public TransExpJdbc(InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst, List<String> imports, List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<String, String>> map) {
 	
@@ -861,11 +861,12 @@ public class AqlParser {
 
 	@SuppressWarnings("rawtypes")
 	private static Parser<InstExpJdbc> instExpJdbc() {
-		Parser<Tuple3<List<catdata.Pair<String, String>>, List<String>, List<catdata.Pair<String, String>>>> qs = Parsers.tuple(env(ident, "->"), imports, options).between(token("{"), token("}"));
+		Parser<Pair<List<catdata.Pair<String, String>>, List<catdata.Pair<String, String>>>> 
+		qs = Parsers.tuple(env(ident, "->"), options).between(token("{"), token("}"));
 		
 		@SuppressWarnings("unchecked")
 		Parser<InstExpJdbc> ret = Parsers.tuple(token("import_jdbc"), ident, ident.followedBy(token(":")), sch_ref.lazy(), qs)
-				.map(x -> new InstExpJdbc(x.d, x.e.b, x.e.c, x.b, x.c, x.e.a));
+				.map(x -> new InstExpJdbc(x.d, x.e.b, x.b, x.c, x.e.a));
 		return ret; 
 	}
 	

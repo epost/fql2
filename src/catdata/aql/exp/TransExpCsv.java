@@ -9,22 +9,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.ImportAlgebra;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.fdm.LiteralTransform;
+import catdata.aql.fdm.SaturatedInstance;
 
 public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 	extends TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> {
@@ -32,7 +32,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 	private final InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src;
 	private final InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst;
 	
-	private final List<String> imports;
+	//private final List<String> imports;
 
 	private final Map<String, String> options;
 	
@@ -43,11 +43,11 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
 	}	
 
-	public TransExpCsv(InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src, InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst, String file, List<String> imports, List<Pair<String, String>> options) {
-		Util.assertNotNull(src, dst, imports, options, file);
+	public TransExpCsv(InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src, InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst, String file, /* List<String> imports ,*/ List<Pair<String, String>> options) {
+		Util.assertNotNull(src, dst, options, file);
 		this.src = src;
 		this.dst = dst;
-		this.imports = imports;
+		//this.imports = imports;
 		this.options = Util.toMapSafely(options);
 		this.file = file;
 	}
@@ -67,31 +67,35 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 	private Gen1 stringToGen1(String gen) {
 		return (Gen1) gen;
 	}
-	@SuppressWarnings("unchecked")
-	private Sk1 stringToSk1(String s) {
-		return (Sk1) s;
-	}
+///	@SuppressWarnings("unchecked")
+	//private Sk1 stringToSk1(String s) {
+		//return (Sk1) s;
+	//}
 	@SuppressWarnings("unchecked")
 	private Gen2 stringToGen2(String gen) {
 		return (Gen2) gen;
 	}
 	
-	
+	private static boolean cameFromImport(Instance I) {
+		if (!(I instanceof SaturatedInstance)) {
+			return false;
+		}
+		SaturatedInstance J = (SaturatedInstance) I;
+		return J.alg instanceof ImportAlgebra;
+	}
 	
 	@Override
 	public Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> eval(AqlEnv env) {
 		Instance<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> s = src.eval(env);
 		Instance<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> t = dst.eval(env);
-				
+
+		if (!(cameFromImport(s) || !(cameFromImport(t)))) {
+			throw new RuntimeException("Can only import CSV transforms between CSV instances");
+		}
+		
 		Map<Gen1, Term<Void,En,Void,Fk,Void,Gen2,Void>> gens = new HashMap<>();
 		Map<Sk1 , Term<Ty,En,Sym,Fk,Att,Gen2,Sk2>> sks = new HashMap<>();
 
-		for (String k : imports) {
-			@SuppressWarnings("unchecked")
-			Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> v = env.defs.trans.get(k);
-			Util.putAllSafely(gens, v.gens().map);
-			Util.putAllSafely(sks, v.sks().map);
-		}
 		AqlOptions op = new AqlOptions(options, null);
 		boolean dontValidateEqs = (Boolean) op.getOrDefault(AqlOption.dont_validate_unsafe);
 		String charset0 = (String) op.getOrDefault(AqlOption.csv_charset);
@@ -99,36 +103,30 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 		CSVFormat format = InstExpCsv.getFormat(op);
 	
 		try {
-		
 			File fil = new File(file);
 			if (!fil.exists()) {
 				throw new RuntimeException("File not found: " + fil.getAbsolutePath());
 			}
 			CSVParser parser = CSVParser.parse(fil, charset, format);
+			for (Sk1 sk : s.sks().keySet()) {
+				@SuppressWarnings("unchecked")
+				Sk2 sk2 = (Sk2) sk;
+				sks.put(sk, Term.Sk(sk2)); //map Null@Ty to Null@Ty
+			}
 			
 			for (CSVRecord row : parser) {
 				String gen = row.get(0);
 				
-				Chc<Ty,En> required;
-				
-				if (s.gens().map.containsKey(gen) && s.sks().map.containsKey(gen)) {
-					throw new RuntimeException("in transform for " + gen + ", " + gen + " is ambiguously an entity generator and labelled null");
-				} else if (s.gens().map.containsKey(gen)) {
-					required = Chc.inRight(s.gens().map.get(gen));
-				} else if (s.sks().map.containsKey(gen)){ //mediates
-					required = Chc.inLeft(s.sks().map.get(gen));				
-				} else {
-					throw new RuntimeException("in transform for " + gen + ", " + gen + " is not a source generator/labelled null");
+				if (!s.gens().map.containsKey(gen)) {
+					throw new RuntimeException("in transform for " + gen + ", " + gen + " is not a source generator");
 				}
 				
 				String gen2 = row.get(1);
 				
-				if (required.left) {
-					Util.putSafely(sks, stringToSk1(gen), InstExpCsv.stringToSk(t.sks().keySet(), required.l, s.schema(), gen2));				
-				} else {
-					Util.putSafely(gens, stringToGen1(gen), Term.Gen(stringToGen2(gen)));
-				} 
-			
+				if (!t.gens().map.containsKey(gen2)) {
+					throw new RuntimeException("in transform for " + gen + ", " + gen2 + " is not a target generator");
+				}
+				Util.putSafely(gens, stringToGen1(gen), Term.Gen(stringToGen2(gen2)));
 			}
 		} catch (IOException exn) {
 			throw new RuntimeException(exn.getMessage());
@@ -159,7 +157,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 		Set<Pair<String, Kind>> ret = new HashSet<>();
 		ret.addAll(src.deps());
 		ret.addAll(dst.deps());
-		ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.TRANSFORM)).collect(Collectors.toList()));
+//		ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.TRANSFORM)).collect(Collectors.toList()));
 		return ret;
 	}
 
@@ -170,7 +168,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 		int result = 1;
 		result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 		result = prime * result + ((file == null) ? 0 : file.hashCode());
-		result = prime * result + ((imports == null) ? 0 : imports.hashCode());
+	//	result = prime * result + ((imports == null) ? 0 : imports.hashCode());
 		result = prime * result + ((options == null) ? 0 : options.hashCode());
 		result = prime * result + ((src == null) ? 0 : src.hashCode());
 		return result;
@@ -203,11 +201,6 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 			if (other.file != null)
 				return false;
 		} else if (!file.equals(other.file))
-			return false;
-		if (imports == null) {
-			if (other.imports != null)
-				return false;
-		} else if (!imports.equals(other.imports))
 			return false;
 		if (options == null) {
 			if (other.options != null)

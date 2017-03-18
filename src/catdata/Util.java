@@ -1022,6 +1022,14 @@ public class Util {
 		return ret;
 	}
 
+	public static <X, Y> Map<X, Collection<Y>> newSetsFor0(Collection<X> xs) {
+		Map<X, Collection<Y>> ret = new HashMap<>();
+		for (X x : xs) {
+			ret.put(x, new HashSet<>());
+		}
+		return ret;
+	}
+
 	public static <X, Y> Map<X, List<Y>> newListsFor(Collection<X> xs) {
 		Map<X, List<Y>> ret = new HashMap<>();
 		for (X x : xs) {

@@ -267,7 +267,10 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 
 	@Override
 	public boolean eq(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs, Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs) {
-	//	if (schema.typeSide.js.java_tys.isEmpty()) {
+		if (!ctx.isEmpty()) {
+			Util.anomaly();
+		}
+		//	if (schema.typeSide.js.java_tys.isEmpty()) {
 	//		return dp.eq(ctx, lhs, rhs);
 	//	} else {
     //        return col.type(ctx, lhs).left ? intoY(schema.typeSide.js.reduce(lhs)).equals(intoY(schema.typeSide.js.reduce(rhs))) : dp.eq(ctx, lhs, rhs);

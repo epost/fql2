@@ -241,7 +241,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			Object var_en = att.second.second;
 			RawTerm term = att.second.third;
 
-			Pair<Object, Object> p = src0.atts.get(att.first);
+			Pair<Object, Object> p = src0.atts.map.get(att.first);
 			if (p == null) {
 				throw new RuntimeException("in mapping for " + att.first + ", " + att.first + " is not a source attribute.");
 			} 

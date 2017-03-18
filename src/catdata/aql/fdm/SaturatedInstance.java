@@ -28,7 +28,7 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 	private final Ctx<Y, Ty> sks; 
 	
 	private final DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp;
-	private final Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg;
+	public final Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg;
 	private final InnerAlgebra inner_alg;
 	private final InnerDP inner_dp;
 
