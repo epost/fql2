@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
+import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
@@ -18,26 +19,24 @@ import catdata.aql.AqlProver.ProverName;
 import catdata.graph.DMG;
 import catdata.graph.UnionFind;
 
-public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
+public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 
-	public final DMG<N, E> shape;
-	
 	public final TypeSide<Ty, Sym> ty;
 	
 	public final Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes;
 	
-	public final Ctx<E, Mapping<Ty,En,Sym,Fk,Att,En,Fk,Att>> edges;
+	//public final Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema;
 	
-	public final Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema;
-	
-	public final Ctx<N, Mapping<Ty,En,Sym,Fk,Att,Set<Pair<N,En>>,Pair<N,Fk>,Pair<N,Att>>> mappings;
+	//public final Ctx<N, Mapping<Ty,En,Sym,Fk,Att,Set<Pair<N,En>>,Pair<N,Fk>,Pair<N,Att>>> mappings;
 
+	//actually final 
 	public final Schema<Ty, String, Sym, String, String> schemaStr;
 	
+	//actually final
 	public final Ctx<N, Mapping<Ty,En,Sym,Fk,Att,String,String,String>> mappingsStr;
 	
 
-	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> renameEntity(String src, String dst, boolean checkJava) {
+	public ColimitSchema<N, Ty, En, Sym, Fk, Att> renameEntity(String src, String dst, boolean checkJava) {
 		if (!schemaStr.ens.contains(src)) {
 			throw new RuntimeException(src + " is not an entity in \n" + schemaStr);
 		}
@@ -117,7 +116,7 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 	}
 	
 	
-	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> renameFk(String src, String dst, boolean checkJava) {
+	public ColimitSchema<N, Ty, En, Sym, Fk, Att> renameFk(String src, String dst, boolean checkJava) {
 		if (!schemaStr.fks.containsKey(src)) {
 			throw new RuntimeException(src + " is not a foreign_key in \n" + schemaStr);
 		}
@@ -167,7 +166,7 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 		return wrap(isoToUser, isoFromUser);
 	}
 	
-	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> renameAtt(String src, String dst, boolean checkJava) {
+	public ColimitSchema<N, Ty, En, Sym, Fk, Att> renameAtt(String src, String dst, boolean checkJava) {
 		if (!schemaStr.atts.containsKey(src)) {
 			throw new RuntimeException(src + " is not an attribute in \n" + schemaStr);
 		}
@@ -218,7 +217,7 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 		return wrap(isoToUser, isoFromUser);
 	}
 	
-	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> removeFk(String src, List<String> l, boolean checkJava) {
+	public ColimitSchema<N, Ty, En, Sym, Fk, Att> removeFk(String src, List<String> l, boolean checkJava) {
 		Var v = new Var("v");
 		Term<Ty, String, Sym, String, String, Void, Void> t = Term.Fks(l, Term.Var(v));
 		if (!schemaStr.fks.containsKey(src)) {
@@ -274,7 +273,7 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 		return wrap(isoToUser, isoFromUser);
 	}
 	
-	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> removeAtt(String src, Var v, Term<Ty, String, Sym, String, String, Void, Void> t, boolean checkJava) {
+	public ColimitSchema<N, Ty, En, Sym, Fk, Att> removeAtt(String src, Var v, Term<Ty, String, Sym, String, String, Void, Void> t, boolean checkJava) {
 		if (!schemaStr.atts.containsKey(src)) {
 			throw new RuntimeException(src + " is not an attribute in \n" + schemaStr);
 		}
@@ -328,7 +327,7 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 		return wrap(isoToUser, isoFromUser);
 	}
 	
-	public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> wrap(		
+	public ColimitSchema<N, Ty, En, Sym, Fk, Att> wrap(		
 			Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser, 
 			Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser) {
 		if (!isoToUser.src.equals(schemaStr)) {
@@ -336,22 +335,18 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 		}
 		checkIso(isoToUser, isoFromUser);
 		Ctx<N, Mapping<Ty,En,Sym,Fk,Att,String,String,String>> newMapping = mappingsStr.map((k,v) -> new Pair<>(k, Mapping.compose(v, isoToUser)));
-		return new ColimitSchema<>(shape, ty, nodes, edges, schema, mappings, isoToUser.dst, newMapping);
+		return new ColimitSchema<>(ty, nodes, isoToUser.dst, newMapping);
 	}
 	
 	/*public Mapping<Ty,En,Sym,Fk,Att,String,String,String> getMapping(N n) {
 		return Mapping.compose(mappingsStr.get(n), isoToUser);
 	}*/
 
-	private ColimitSchema(DMG<N, E> shape, TypeSide<Ty, Sym> ty, Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes, Ctx<E, Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att>> edges, Schema<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>> schema, Ctx<N, Mapping<Ty, En, Sym, Fk, Att, Set<Pair<N, En>>, Pair<N, Fk>, Pair<N, Att>>> mappings, Schema<Ty, String, Sym, String, String> schemaStr,
+	private ColimitSchema(TypeSide<Ty, Sym> ty, Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes, /*Schema<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>> schema, Ctx<N, Mapping<Ty, En, Sym, Fk, Att, Set<Pair<N, En>>, Pair<N, Fk>, Pair<N, Att>>> mappings,*/ Schema<Ty, String, Sym, String, String> schemaStr,
 			Ctx<N, Mapping<Ty, En, Sym, Fk, Att, String, String, String>> mappingsStr) {
 		super();
-		this.shape = shape;
 		this.ty = ty;
 		this.nodes = nodes;
-		this.edges = edges;
-		this.schema = schema;
-		this.mappings = mappings;
 		this.schemaStr = schemaStr;
 		this.mappingsStr = mappingsStr;
 	}
@@ -377,11 +372,91 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 		return Chc.inRight(conv1(v.r));
 	}
 	
-	public ColimitSchema(DMG<N, E> shape, TypeSide<Ty, Sym> ty, Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes, Ctx<E, Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att>> edges, Map<String, String> options) {
-		this.shape = shape;
+	//should be real terms in the String schema
+	public ColimitSchema(TypeSide<Ty, Sym> ty, Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes, 
+			Set<Quad<N,En,N,En>> eqEn, 
+			Set<Quad<String,String,RawTerm,RawTerm>> eqTerms,
+			Map<String, String> options) {
 		this.ty = ty;
 		this.nodes = nodes;
-		this.edges = edges;
+		
+		Set<Pair<N,En>> ens = new HashSet<>();
+		for (N n : nodes.keySet()) {
+			Schema<Ty, En, Sym, Fk, Att> s = nodes.get(n);
+			for (En en : s.ens) {
+				ens.add(new Pair<>(n, en));
+			}
+		}
+		UnionFind<Pair<N,En>> uf = new UnionFind<>(ens);
+		for (Quad<N, En, N, En> s : eqEn) {
+			uf.union(new Pair<>(s.first, s.second), new Pair<>(s.third, s.fourth));
+		}
+		
+		Collage<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>, Void, Void> col = new Collage<>(ty.collage()); 
+		Ctx<Pair<N, En>, Set<Pair<N, En>>> eqcs = new Ctx<>(uf.toMap());
+		col.ens.addAll(eqcs.values());
+		Set<Triple<Pair<Var, Set<Pair<N, En>>>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>>> eqs = new HashSet<>();		
+		makeCoprodSchema(col, eqs, eqcs);
+	
+		AqlOptions ops = new AqlOptions(Util.singMap(AqlOption.prover.toString(), ProverName.fail.toString()), col);
+		DP<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> dp = AqlProver.create(ops, col, ty.js);
+		
+		//TODO aql dont forget to add equations to collage and to schema
+		//public final Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema;
+		
+		//public final Ctx<N, Mapping<Ty,En,Sym,Fk,Att,Set<Pair<N,En>>,Pair<N,Fk>,Pair<N,Att>>> mappings;
+		boolean b = ! (Boolean) AqlOptions.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
+		
+		Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema = new Schema<>(ty, col.ens, col.atts.map, col.fks.map, eqs, dp, b);
+		
+		Pair<Schema<Ty, String, Sym, String, String>, Ctx<N, Mapping<Ty, En, Sym, Fk, Att, String, String, String>>> 
+		x = initialUser(options, col, eqs, eqcs, schema);
+
+		Schema<Ty, String, Sym, String, String>
+		q = quotient(x.first, eqTerms, options);
+		
+		schemaStr = q;
+		mappingsStr = new Ctx<>();
+		for (N n : x.second.keySet()) {
+			Mapping<Ty, En, Sym, Fk, Att, String, String, String> f = x.second.get(n);
+			
+			Mapping<Ty, En, Sym, Fk, Att, String, String, String> g 
+			= new Mapping<>(f.ens.map, f.atts.map, f.fks.map, f.src, q, b);
+			
+			mappingsStr.put(n, g);
+		}
+	}
+	
+	private Schema<Ty, String, Sym, String, String> quotient(Schema<Ty, String, Sym, String, String> sch, Set<Quad<String, String, RawTerm, RawTerm>> eqTerms, Map<String, String> options) {
+		Collage<Ty, String, Sym, String, String, Void, Void> col = new Collage<>(sch.collage()); 
+		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> eqs0 = new HashSet<>();
+
+		for (Quad<String, String, RawTerm, RawTerm> eq : eqTerms) {
+			Map<String, Chc<Ty, String>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
+			
+			Triple<Ctx<String,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>> 
+			eq0 = RawTerm.infer1(ctx, eq.third, eq.fourth, col, ty.js);
+			
+			Chc<Ty, String> v = eq0.first.get(eq.first);
+			if (v.left) {
+				throw new RuntimeException("In " + eq.third + " = " + eq.fourth + ", variable " + eq.first + " has type " + v.l + " which is not an entity");
+			}
+		
+			eqs0.add(new Triple<>(new Pair<>(new Var(eq.first), v.r), eq0.second, eq0.third));
+			col.eqs.add(new Eq<>(new Ctx<>(new Var(eq.first), v), eq0.second, eq0.third));
+		}
+	
+		boolean b = ! (Boolean) AqlOptions.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
+		AqlOptions ops = new AqlOptions(options, col);		
+		DP<Ty,String,Sym,String,String,Void,Void> dp = AqlProver.create(ops, col, ty.js);
+		Schema<Ty, String, Sym, String, String> ret = new Schema<>(ty, col.ens, col.atts.map, col.fks.map, eqs0, dp, b);
+		return ret;
+	}
+
+
+	public <E> ColimitSchema(DMG<N, E> shape, TypeSide<Ty, Sym> ty, Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes, Ctx<E, Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att>> edges, Map<String, String> options) {
+		this.ty = ty;
+		this.nodes = nodes;
 		
 		Collage<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>, Void, Void> col = new Collage<>(ty.collage()); 
 		Set<Triple<Pair<Var, Set<Pair<N, En>>>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>>> eqs = new HashSet<>();
@@ -404,24 +479,8 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 		
 		Ctx<Pair<N, En>, Set<Pair<N, En>>> eqcs = new Ctx<>(uf.toMap());
 		col.ens.addAll(eqcs.values());
-		for (N n : shape.nodes) {
-			Schema<Ty, En, Sym, Fk, Att> s = nodes.get(n);
-			for (Att att : s.atts.keySet()) {
-				col.atts.put(new Pair<>(n, att), new Pair<>(eqcs.get(new Pair<>(n, s.atts.get(att).first)), s.atts.get(att).second));
-			}
-			for (Fk fk : s.fks.keySet()) {
-				col.fks.put(new Pair<>(n, fk), new Pair<>(eqcs.get(new Pair<>(n, s.fks.get(fk).first)), eqcs.get(new Pair<>(n, s.fks.get(fk).second))));
-			}
-			for (Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : s.eqs) {
-				Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> 
-				lhs = eq.second.map(Function.identity(), Function.identity(), z -> new Pair<>(n, z), z -> new Pair<>(n, z), Function.identity(), Function.identity());
-				Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> 
-				rhs = eq.third.map(Function.identity(), Function.identity(), z -> new Pair<>(n, z), z -> new Pair<>(n, z), Function.identity(), Function.identity());
-				Pair<Var, Set<Pair<N, En>>> x = new Pair<>(eq.first.first, eqcs.get(new Pair<>(n, eq.first.second)));
-				eqs.add(new Triple<>(x, lhs, rhs));
-				col.eqs.add(new Eq<>(new Ctx<>(x).inRight(), lhs, rhs));
-			}
-		}
+		
+		makeCoprodSchema(col, eqs, eqcs);
 		
 		for (E e : shape.edges.keySet()) {
 			Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> s = edges.get(e);
@@ -457,11 +516,25 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 		DP<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> dp = AqlProver.create(ops, col, ty.js);
 		
 		//TODO aql dont forget to add equations to collage and to schema
-		schema = new Schema<>(ty, col.ens, col.atts.map, col.fks.map, eqs, dp, b);
+		//public final Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema;
 		
-		mappings = new Ctx<>();
+		//public final Ctx<N, Mapping<Ty,En,Sym,Fk,Att,Set<Pair<N,En>>,Pair<N,Fk>,Pair<N,Att>>> mappings;
+		Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema = new Schema<>(ty, col.ens, col.atts.map, col.fks.map, eqs, dp, b);
 		
-		for (N n : shape.nodes) {
+		Pair<Schema<Ty, String, Sym, String, String>, Ctx<N, Mapping<Ty, En, Sym, Fk, Att, String, String, String>>> 
+		x = initialUser(options, col, eqs, eqcs, schema);
+		schemaStr = x.first;
+		mappingsStr = x.second;
+
+		//TODO: aql check for collisions
+	}
+
+
+	private Pair<Schema<Ty, String, Sym, String, String>, Ctx<N, Mapping<Ty, En, Sym, Fk, Att, String, String, String>>> initialUser(Map<String, String> options, Collage<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> col,
+			Set<Triple<Pair<Var, Set<Pair<N, En>>>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>>> eqs, Ctx<Pair<N, En>, Set<Pair<N, En>>> eqcs, Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema) {
+		Ctx<N, Mapping<Ty,En,Sym,Fk,Att,Set<Pair<N,En>>,Pair<N,Fk>,Pair<N,Att>>> mappings = new Ctx<>();
+		
+		for (N n : nodes.keySet()) {
 			Map<Att, Triple<Var, Set<Pair<N, En>>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>>> atts = new HashMap<>();
 			Map<Fk, Pair<Set<Pair<N, En>>, List<Pair<N, Fk>>>> fks = new HashMap<>();
 			Map<En, Set<Pair<N, En>>> ens0 = new HashMap<>();
@@ -479,8 +552,7 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 				t = Term.Att(new Pair<>(n, att), Term.Var(v));
 				atts.put(att, new Triple<>(v, eqcs.get(new Pair<>(n, s.atts.get(att).first)), t));
 			}
-			
-			
+						
 			Mapping<Ty,En,Sym,Fk,Att,Set<Pair<N,En>>,Pair<N,Fk>,Pair<N,Att>> m = new Mapping<>(ens0 , atts, fks, nodes.get(n), schema, false); //TODO aql allow as option?
 			mappings.put(n, m);
 		}
@@ -498,18 +570,37 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 		AqlOptions opsX = new AqlOptions(options, colX);
 		DP<Ty, String, Sym, String, String, Void, Void> dpX = AqlProver.create(opsX, colX, ty.js);
 	
-		schemaStr = new Schema<>(ty, colX.ens, colX.atts.map, colX.fks.map, eqsX, dpX, false);
+		Schema<Ty, String, Sym, String, String> schemaStr = new Schema<>(ty, colX.ens, colX.atts.map, colX.fks.map, eqsX, dpX, false);
 		
-		mappingsStr = new Ctx<>();
+		Ctx<N, Mapping<Ty,En,Sym,Fk,Att,String,String,String>> mappingsStr = new Ctx<>();
 		for (N n : mappings.keySet()) {
-			mappingsStr.put(n, conv5(mappings.get(n)));
+			mappingsStr.put(n, conv5(schemaStr, mappings.get(n)));
 		}
 		
-/*		schemaUser = schemaStr;
-		isoToUser = Mapping.id(schemaUser);
-		isoFromUser = isoToUser;
-*/
-		//TODO: aql check for collisions
+		return new Pair<>(schemaStr, mappingsStr);
+	}
+
+
+	private void makeCoprodSchema(Collage<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> col, Set<Triple<Pair<Var, Set<Pair<N, En>>>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>>> eqs,
+			Ctx<Pair<N, En>, Set<Pair<N, En>>> eqcs) {
+		for (N n : nodes.keySet()) {
+			Schema<Ty, En, Sym, Fk, Att> s = nodes.get(n);
+			for (Att att : s.atts.keySet()) {
+				col.atts.put(new Pair<>(n, att), new Pair<>(eqcs.get(new Pair<>(n, s.atts.get(att).first)), s.atts.get(att).second));
+			}
+			for (Fk fk : s.fks.keySet()) {
+				col.fks.put(new Pair<>(n, fk), new Pair<>(eqcs.get(new Pair<>(n, s.fks.get(fk).first)), eqcs.get(new Pair<>(n, s.fks.get(fk).second))));
+			}
+			for (Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : s.eqs) {
+				Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> 
+				lhs = eq.second.map(Function.identity(), Function.identity(), z -> new Pair<>(n, z), z -> new Pair<>(n, z), Function.identity(), Function.identity());
+				Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> 
+				rhs = eq.third.map(Function.identity(), Function.identity(), z -> new Pair<>(n, z), z -> new Pair<>(n, z), Function.identity(), Function.identity());
+				Pair<Var, Set<Pair<N, En>>> x = new Pair<>(eq.first.first, eqcs.get(new Pair<>(n, eq.first.second)));
+				eqs.add(new Triple<>(x, lhs, rhs));
+				col.eqs.add(new Eq<>(new Ctx<>(x).inRight(), lhs, rhs));
+			}
+		}
 	}
 	
 	private void checkIso(Mapping<Ty, String, Sym, String, String, String, String, String> F, Mapping<Ty, String, Sym, String, String, String, String, String> G) {
@@ -550,7 +641,7 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 		}
 	}
 
-	private Mapping<Ty, En, Sym, Fk, Att, String, String, String> conv5(Mapping<Ty, En, Sym, Fk, Att, Set<Pair<N, En>>, Pair<N, Fk>, Pair<N, Att>> m) {
+	private Mapping<Ty, En, Sym, Fk, Att, String, String, String> conv5(Schema<Ty, String, Sym, String, String> schemaStr, Mapping<Ty, En, Sym, Fk, Att, Set<Pair<N, En>>, Pair<N, Fk>, Pair<N, Att>> m) {
 		Map<En, String> ens = m.ens.map((k,v) -> new Pair<>(k, conv1(v))).map;
 		Map<Att, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> 
 		atts = m.atts.map((k,v) -> new Pair<>(k, new Triple<>(v.first, conv1(v.second), conv3(v.third)))).map;
@@ -571,9 +662,7 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((edges == null) ? 0 : edges.hashCode());
 		result = prime * result + ((nodes == null) ? 0 : nodes.hashCode());
-		result = prime * result + ((shape == null) ? 0 : shape.hashCode());
 		result = prime * result + ((ty == null) ? 0 : ty.hashCode());
 		return result;
 	}
@@ -586,21 +675,11 @@ public class ColimitSchema<N, E, Ty, En, Sym, Fk, Att> implements Semantics {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ColimitSchema<?, ?, ?, ?, ?, ?, ?> other = (ColimitSchema<?, ?, ?, ?, ?, ?, ?>) obj;
-		if (edges == null) {
-			if (other.edges != null)
-				return false;
-		} else if (!edges.equals(other.edges))
-			return false;
+		ColimitSchema<?, ?, ?, ?, ?, ?> other = (ColimitSchema<?, ?, ?, ?, ?, ?>) obj;
 		if (nodes == null) {
 			if (other.nodes != null)
 				return false;
 		} else if (!nodes.equals(other.nodes))
-			return false;
-		if (shape == null) {
-			if (other.shape != null)
-				return false;
-		} else if (!shape.equals(other.shape))
 			return false;
 		if (ty == null) {
 			if (other.ty != null)

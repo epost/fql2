@@ -76,11 +76,11 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 		return (Gen2) gen;
 	}
 	
-	private static boolean cameFromImport(Instance I) {
+	private static boolean cameFromImport(Instance<?, ?, ?, ?, ?, ?, ?, ?, ?> I) {
 		if (!(I instanceof SaturatedInstance)) {
 			return false;
 		}
-		SaturatedInstance J = (SaturatedInstance) I;
+		SaturatedInstance<?, ?, ?, ?, ?, ?, ?, ?, ?> J = (SaturatedInstance<?, ?, ?, ?, ?, ?, ?, ?, ?>) I;
 		return J.alg instanceof ImportAlgebra;
 	}
 	

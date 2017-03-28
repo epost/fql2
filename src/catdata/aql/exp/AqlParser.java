@@ -24,8 +24,9 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.RawTerm;
-import catdata.aql.exp.ColimSchExp.ColimExpModify;
 import catdata.aql.exp.ColimSchExp.ColimSchExpLit;
+import catdata.aql.exp.ColimSchExp.ColimSchExpModify;
+import catdata.aql.exp.ColimSchExp.ColimSchExpQuotient;
 import catdata.aql.exp.ColimSchExp.ColimSchExpVar;
 import catdata.aql.exp.ColimSchExp.ColimSchExpWrap;
 import catdata.aql.exp.EdsExp.EdExpRaw;
@@ -87,13 +88,15 @@ public class AqlParser {
 
 
 	public static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
-			")", "=", "->", "@", "(*", "*)"};	
+			")", "=", "->", "@", "(*", "*)", "+"};	
 	
 	public static final String[] res = new String[] {
 			"chase",
 			"check",
 			"assert_consistent",
 			"html",
+			"quotient",
+			"entity_equations",
 			"schema_colimit",
 			"exists",
 			"constraints",
@@ -667,6 +670,41 @@ public class AqlParser {
 		return ret;	
 	}
 	
+	@SuppressWarnings("rawtypes")
+	private static Parser<ColimSchExpQuotient> colimSchExpQuotient() {
+		Parser<Quad<String,String,String,String>> q 
+		= Parsers.tuple(ident.followedBy(token(".")), ident, token("="), ident.followedBy(token(".")), ident)
+				.map(x -> new Quad<>(x.a, x.b, x.d, x.e));
+
+		Parser<List<Quad<String, String, String, String>>> entities 
+		= Parsers.tuple(token("entity_equations"), q.many()).map(x -> x.b);
+		
+		Parser<catdata.Pair<List<String>, List<String>>> p_eq = Parsers.tuple(ident.sepBy(token(".")), token("="), ident.sepBy(token("."))).map(x -> new catdata.Pair<>(x.a, x.c));
+
+		Parser<Pair<Token, List<catdata.Pair<List<String>, List<String>>>>> p_eqs = Parsers.tuple(token("path_equations"), p_eq.many());
+		Parser<List<catdata.Pair<List<String>, List<String>>>> p_eqs0 = p_eqs.map(x -> x.b);
+				
+		Parser<Quad<String,String,RawTerm,RawTerm>> o_eq = Parsers.tuple(token("forall"), ident, Parsers.tuple(token(":"), ident).optional().followedBy(token(".")), term().followedBy(token("=")), term()).map(x -> new Quad<>(x.b, x.c == null ? null : x.c.b, x.d, x.e));
+
+		Parser<Pair<Token, List<Quad<String, String, RawTerm, RawTerm>>>> o_eqs = Parsers.tuple(token("observation_equations"), o_eq.many());
+		Parser<List<Quad<String, String, RawTerm, RawTerm>>> o_eqs0 = o_eqs.map(x -> x.b);
+		
+		Parser<Tuple4<List<Quad<String, String, String, String>>, List<catdata.Pair<List<String>, List<String>>>, List<Quad<String, String, RawTerm, RawTerm>>, List<catdata.Pair<String, String>>>> 
+		pa = Parsers.tuple(entities.optional(), p_eqs0.optional(), o_eqs0.optional(), options);
+		
+		Parser<Tuple5<Token, List<String>, Token, TyExp<?, ?>, Token>> l 
+		= Parsers.tuple(token("quotient"), ident.sepBy(token("+")), token(":"), ty_ref.lazy(), token("{")); //.map(x -> x.c);
+				
+		@SuppressWarnings("unchecked")
+		Parser<ColimSchExpQuotient> ret = Parsers.tuple(l, pa, token("}")).map(x -> new ColimSchExpQuotient(x.a.d,
+                              x.a.b, Util.newIfNull(x.b.a),
+                                     Util.newIfNull(x.b.c),
+                                     Util.newIfNull(x.b.b),
+                             x.b.d));
+			
+		return ret;	
+	}
+	
 	 private static Parser<EdsExp<?,?,?,?,?>> edsExpRaw() {
 		Parser<SchExp<?, ?, ?, ?, ?>> l 
 		= Parsers.tuple(token("literal"), token(":"), sch_ref.lazy(), token("{")).map(x -> x.c);
@@ -803,7 +841,7 @@ public class AqlParser {
 					.map(x -> new ColimSchExpWrap(x.b, x.c, x.d));
 			
 			Parser<ColimSchExp<?, ?, ?, ?,?,?,?>> retX =
-					Parsers.or(ret, ret2, ret3, colimExpModify());
+					Parsers.or(ret, ret2, ret3, colimExpModify(), colimSchExpQuotient());
 			
 			colim_ref.set(retX);
 			
@@ -904,7 +942,7 @@ public class AqlParser {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static Parser<ColimExpModify> colimExpModify() {
+	private static Parser<ColimSchExpModify> colimExpModify() {
 		Parser<List<catdata.Pair<String, String>>> ens = Parsers.tuple(token("rename").followedBy(token("entities")), env(ident, "->")).map(x -> x.b);
 
 		Parser<List<catdata.Pair<String, String>>> fks0 = Parsers.tuple(token("rename").followedBy(token("foreign_keys")), env(ident, "->")).map(x -> x.b);
@@ -927,7 +965,7 @@ public class AqlParser {
 		Parser<Tuple3<Token, ColimSchExp<?, ?, ?, ?, ?, ?, ?>, Token>> l 
 		= Parsers.tuple(token("modify"), colim_ref.lazy(), token("{")); //.map(x -> x.c);
 					
-		Parser<ColimExpModify> ret = Parsers.tuple(l, pa, pb, token("}")).map(x -> new ColimExpModify(x.a.b,
+		Parser<ColimSchExpModify> ret = Parsers.tuple(l, pa, pb, token("}")).map(x -> new ColimSchExpModify(x.a.b,
                                Util.newIfNull(x.b.a),
                                Util.newIfNull(x.b.b),
                                Util.newIfNull(x.b.c),

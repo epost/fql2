@@ -27,8 +27,8 @@ public class ImportAlgebra<Ty,En,Sym,Fk,Att,X,Y> extends Algebra<Ty,En,Sym,Fk,At
 		this.fks = fks;
 		this.atts = atts;
 		this.printX = printX;
-		this.printY = printY;
-		initTalg();
+		this.printY = printY; 
+		initTalg(); 
 	}
 
 	private void initTalg() {

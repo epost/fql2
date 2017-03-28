@@ -6,10 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
+import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
@@ -21,20 +23,182 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.SchExp.SchExpVar;
 
-public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<ColimitSchema<N, E, Ty, En, Sym, Fk, Att>> {
+//TODO aql E shouldn't really be a type param here
+public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<ColimitSchema<N, Ty, En, Sym, Fk, Att>> {
 
 	@Override
 	public Kind kind() {
 		return Kind.SCHEMA_COLIMIT;
 	}
 	
-	public abstract ColimSchExpLit<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G); 
+	public abstract SchExp<Ty, En, Sym, Fk, Att> getNode(N n, AqlTyping G);
+	
+	public abstract ColimSchExp<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G); 
 
 	/////////////////////////////////////////////////////////////////
 	
+	
+	public static class ColimSchExpQuotient<N, Ty, En, Sym, Fk, Att> 
+	extends ColimSchExp<N, Void, Ty, En, Sym, Fk, Att> {
+
+		public final TyExp<Ty, Sym> ty;
+
+		public final Ctx<N, SchExp<Ty, En, Sym, Fk, Att>> nodes;
+
+		public final Set<Quad<N,En,N,En>> eqEn; 
+		
+		//TODO add separate path equations
+		public final Set<Quad<String,String,RawTerm,RawTerm>> eqTerms; 
+		
+		public final Set<Pair<List<String>,List<String>>> eqTerms2; 
+		
+		public  Map<String, String> options;
+		
+		
+
+		@SuppressWarnings("unchecked")
+		public ColimSchExpQuotient(TyExp<Ty, Sym> ty, List<N> nodes, List<Quad<N, En, N, En>> eqEn, List<Quad<String, String, RawTerm, RawTerm>> eqTerms, List<Pair<List<String>, List<String>>> eqTerms2, List<Pair<String, String>> options) {
+			super();
+			this.ty = ty;
+			this.nodes = new Ctx<>();
+			for (N n : nodes) {
+				if (this.nodes.containsKey(n)) {
+					throw new RuntimeException("Duplicate schema " + n + " - please create new schema variable if necessary.");
+				}
+				this.nodes.put(n, (SchExp<Ty, En, Sym, Fk, Att>) new SchExpVar((String)n));
+			}
+			this.eqEn = new HashSet<>(eqEn);
+			this.eqTerms = new HashSet<>(eqTerms);
+			this.eqTerms2 = new HashSet<>(eqTerms2);
+			this.options = Util.toMapSafely(options);
+		}
+
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}
+
+		@Override
+		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+			Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes0 = new Ctx<>();
+			for (N n : nodes.keySet()) {
+				nodes0.put(n, nodes.get(n).eval(env));
+			}
+			Set<Quad<String,String,RawTerm,RawTerm>> eqs = new HashSet<>(eqTerms);
+			for (Pair<List<String>, List<String>> t : eqTerms2) {
+				eqs.add(new Quad<>("_v0", null, tr(t.first), tr(t.second)));
+			}
+			return new ColimitSchema<>(ty.eval(env), nodes0, eqEn, eqs, options);		
+		}
+	
+		private static RawTerm tr(List<String> l) {
+			return RawTerm.fold(l, "_v0");  
+		}
+
+		@Override
+		public String toString() {
+			return "ColimSchExpQuotient [ty=" + ty + ", nodes=" + nodes + ", eqEn=" + eqEn + ", eqTerms=" + eqTerms + ", eqTerms2=" + eqTerms2 + ", options=" + options + "]";
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			Set<Pair<String, Kind>> ret = new HashSet<>();
+			ret.addAll(ty.deps());
+			for (SchExp<Ty, En, Sym, Fk, Att> v : nodes.values()) {
+				ret.addAll(v.deps());
+			}
+			return ret;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((eqEn == null) ? 0 : eqEn.hashCode());
+			result = prime * result + ((eqTerms == null) ? 0 : eqTerms.hashCode());
+			result = prime * result + ((eqTerms2 == null) ? 0 : eqTerms2.hashCode());
+			result = prime * result + ((nodes == null) ? 0 : nodes.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((ty == null) ? 0 : ty.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ColimSchExpQuotient<?, ?, ?, ?, ?, ?> other = (ColimSchExpQuotient<?, ?, ?, ?, ?, ?>) obj;
+			if (eqEn == null) {
+				if (other.eqEn != null)
+					return false;
+			} else if (!eqEn.equals(other.eqEn))
+				return false;
+			if (eqTerms == null) {
+				if (other.eqTerms != null)
+					return false;
+			} else if (!eqTerms.equals(other.eqTerms))
+				return false;
+			if (eqTerms2 == null) {
+				if (other.eqTerms2 != null)
+					return false;
+			} else if (!eqTerms2.equals(other.eqTerms2))
+				return false;
+			if (nodes == null) {
+				if (other.nodes != null)
+					return false;
+			} else if (!nodes.equals(other.nodes))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			if (ty == null) {
+				if (other.ty != null)
+					return false;
+			} else if (!ty.equals(other.ty))
+				return false;
+			return true;
+		}
+
+		@Override
+		public ColimSchExp<N, Void, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+			return this;
+		}
+
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> getNode(N n, AqlTyping G) {
+			return nodes.get(n);
+		}
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/////////////////////////////////////////////////////////////////
+	
+	
+	
 	public static final class ColimSchExpVar extends ColimSchExp<Object, Object, Object, Object, Object, Object, Object> {
 		public final String var;
+
+		@Override
+		public SchExp<Object, Object, Object, Object, Object> getNode(Object n, AqlTyping G) {
+			return type(G).getNode(n, G);
+		}
 		
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
@@ -80,14 +244,14 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public ColimSchExpLit<Object, Object, Object, Object, Object, Object, Object> type(AqlTyping G) {
-			return (catdata.aql.exp.ColimSchExp.ColimSchExpLit<Object, Object, Object, Object, Object, Object, Object>) 
+		public ColimSchExp<Object, Object, Object, Object, Object, Object, Object> type(AqlTyping G) {
+			return (catdata.aql.exp.ColimSchExp<Object, Object, Object, Object, Object, Object, Object>) 
 					G.defs.scs.get(var); 
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public ColimitSchema<Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
+		public ColimitSchema<Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
 			return env.defs.scs.get(var);
 		}
 
@@ -105,6 +269,11 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		public final MapExp<Ty,String,Sym,String,String,String,String,String> toUser;
 		
 		public final MapExp<Ty,String,Sym,String,String,String,String,String> fromUser;
+		
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> getNode(N n, AqlTyping G) {
+			return colim.getNode(n, G);
+		}
 
 		@Override
 		public int hashCode() {
@@ -152,7 +321,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		}
 
 		@Override
-		public ColimSchExpLit<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+		public ColimSchExp<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 			return colim.type(G);
 		}
 
@@ -162,7 +331,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		}
 
 		@Override
-		public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
 			return colim.eval(env).wrap(toUser.eval(env), fromUser.eval(env));
 		}
 
@@ -191,6 +360,11 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		public final Ctx<E, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>> edges;
 		
 		public final Map<String, String> options;
+		
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> getNode(N n, AqlTyping G) {
+			return nodes.get(n);
+		}
 
 		public ColimSchExpLit(GraphExp<N, E> shape, TyExp<Ty, Sym> ty, List<Pair<N, SchExp<Ty, En, Sym, Fk, Att>>> nodes, List<Pair<E, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>>> edges, List<Pair<String, String>> options) {
 			this.shape = shape;
@@ -202,7 +376,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 
 		@Override
 		public long timeout() {
-			return 0;
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
 		}
 
 		@Override
@@ -279,7 +453,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		}
 
 		@Override
-		public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
 			Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes0 = new Ctx<>();
 			for (N n : nodes.keySet()) {
 				nodes0.put(n, nodes.get(n).eval(env));
@@ -300,7 +474,12 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	
-	public static final class ColimExpModify<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
+	public static final class ColimSchExpModify<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
+		
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> getNode(N n, AqlTyping G) {
+			return colim.getNode(n, G);
+		}
 		
 		public final ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim;
 		
@@ -317,7 +496,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		
 		//typesafe by covariance of read only collections
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public ColimExpModify(ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim, List<Pair<String, String>> ens, List<Pair<String, String>> fks0, List<Pair<String, String>> atts0, List<Pair<String, List<String>>> fks, List<Pair<String, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
+		public ColimSchExpModify(ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim, List<Pair<String, String>> ens, List<Pair<String, String>> fks0, List<Pair<String, String>> atts0, List<Pair<String, List<String>>> fks, List<Pair<String, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
 			this.ens = new LinkedList(ens);
 			this.fks = new LinkedList(fks);
 			this.atts = new LinkedList(atts);
@@ -355,7 +534,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			ColimExpModify<?, ?, ?, ?, ?, ?, ?> other = (ColimExpModify<?, ?, ?, ?, ?, ?, ?>) obj;
+			ColimSchExpModify<?, ?, ?, ?, ?, ?, ?> other = (ColimSchExpModify<?, ?, ?, ?, ?, ?, ?>) obj;
 			if (atts == null) {
 				if (other.atts != null)
 					return false;
@@ -468,9 +647,9 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		} 
 
 		@Override
-		public ColimitSchema<N, E, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
 			boolean checkJava = ! (Boolean) AqlOptions.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
-			ColimitSchema<N, E, Ty, En, Sym, Fk, Att> colim0 = colim.eval(env);
+			ColimitSchema<N, Ty, En, Sym, Fk, Att> colim0 = colim.eval(env);
 			for (Pair<String, String> k : ens) {
 				colim0 = colim0.renameEntity(k.first, k.second, checkJava);
 			}
@@ -504,7 +683,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 
 
 		@Override
-		public ColimSchExpLit<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+		public ColimSchExp<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 			return colim.type(G);
 		}
 

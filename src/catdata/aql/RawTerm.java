@@ -356,6 +356,14 @@ public final class RawTerm {
 		return ret;
 	}
 	
+	public static RawTerm fold (List<String> l, String v) {
+		RawTerm ret = new RawTerm(v, (String) null);
+		for (Object o : l) {
+			ret = new RawTerm(o.toString(), Util.singList(ret));
+		}
+		return ret;
+	}
+	
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Triple<Ctx<Var, Chc<Ty,En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> infer2(List<Pair<String, String>> l, RawTerm a, RawTerm b, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty,Sym> js) {
 		Map<String, Chc<Ty, En>> ctx = new HashMap<>();
 		for (Pair<String, ?> p : l) {

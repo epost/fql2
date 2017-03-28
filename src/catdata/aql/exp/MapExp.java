@@ -144,9 +144,9 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 		@Override
 		public Pair<SchExp<Ty, En, Sym, Fk, Att>, SchExp<Ty, String, Sym, String, String>> type(AqlTyping G) {
 			try {
-				SchExp<Ty, En, Sym, Fk, Att> src = exp.type(G).nodes.get(node);
 				SchExp<Ty, String, Sym, String, String> dst = new SchExpColim<>(exp);
-				return new Pair<>(src, dst);
+				SchExp<Ty, En, Sym, Fk, Att> src = exp.getNode(node, G);
+				return new Pair<>(src, dst);				
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				throw new RuntimeException(ex.getMessage() + "\n\n In " + this);

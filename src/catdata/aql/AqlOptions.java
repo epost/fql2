@@ -38,6 +38,7 @@ public final class AqlOptions {
 		allow_java_eqs_unsafe, //TODO aql enforce
 		require_consistency, //TODO: aql enforce require_consistency
 		timeout, 
+		allow_attribute_merges,
 		dont_verify_is_appropriate_for_prover_unsafe,
 		dont_validate_unsafe,
 		static_typing,
@@ -128,6 +129,8 @@ public final class AqlOptions {
 		switch (option) {
 		case allow_java_eqs_unsafe:
 			return false;
+		case allow_attribute_merges:
+			return false;
 		case completion_precedence:
 			return null;
 		case prover:
@@ -201,6 +204,8 @@ public final class AqlOptions {
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
 		case allow_java_eqs_unsafe:
+			return op.getBoolean(map);
+		case allow_attribute_merges:
 			return op.getBoolean(map);
 		case completion_precedence:
 			return AqlOption.getPrec(map.get(op.toString()), col);

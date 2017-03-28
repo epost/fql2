@@ -44,8 +44,8 @@ public interface Semantics {
 		return (Comment) this;
 	}
 	
-	public default ColimitSchema<?,?,?,?,?,?,?> asSchemaColimit() {
-		return (ColimitSchema<?,?,?,?,?,?,?>) this;
+	public default ColimitSchema<?,?,?,?,?,?> asSchemaColimit() {
+		return (ColimitSchema<?,?,?,?,?,?>) this;
 	}
 	
 	

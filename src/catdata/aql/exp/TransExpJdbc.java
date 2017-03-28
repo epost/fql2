@@ -61,7 +61,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 		this.map = Util.toMapSafely(map);
 	}
 
-	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, Map<Ty, String> tys) {
+	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, @SuppressWarnings("unused") Map<Ty, String> tys) {
 //		for (En En : sch.ens) {
 //			if (!ens.containsKey(En)) {
 //				throw new RuntimeException("no query for " + En);
@@ -106,11 +106,11 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 	}
 */
 	
-	private static boolean cameFromImport(Instance I) {
+	private static boolean cameFromImport(Instance<?, ?, ?, ?, ?, ?, ?, ?, ?> I) {
 		if (!(I instanceof SaturatedInstance)) {
 			return false;
 		}
-		SaturatedInstance J = (SaturatedInstance) I;
+		SaturatedInstance<?, ?, ?, ?, ?, ?, ?, ?, ?> J = (SaturatedInstance<?, ?, ?, ?, ?, ?, ?, ?, ?>) I;
 		return J.alg instanceof ImportAlgebra;
 	}
 	

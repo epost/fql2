@@ -31,7 +31,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 
 	private final SchExp<Ty, En, Sym, Fk, Att> schema;
 
-	//private final List<String> imports;
+	// private final List<String> imports;
 
 	private final Map<String, String> options;
 
@@ -45,9 +45,10 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
 	}
 
-	public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema, /*List<String> imports,*/ List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<String, String>> map) {
+	public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema,
+			/* List<String> imports, */ List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<String, String>> map) {
 		this.schema = schema;
-		//this.imports = imports;
+		// this.imports = imports;
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
 		try {
@@ -60,11 +61,11 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 	}
 
 	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, Map<Ty, String> tys, Map<Att, String> atts, Map<Fk, String> fks) {
-//		for (En En : sch.ens) {
-//			if (!ens.containsKey(En)) {
-//				throw new RuntimeException("no query for " + En);
-//			}
-//		}
+		// for (En En : sch.ens) {
+		// if (!ens.containsKey(En)) {
+		// throw new RuntimeException("no query for " + En);
+		// }
+		// }
 		for (En En : ens.keySet()) {
 			if (!sch.ens.contains(En)) {
 				throw new RuntimeException("there is a query for " + En + ", which is not an entity in the schema");
@@ -75,21 +76,21 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 				throw new RuntimeException("there is a query for " + ty + ", which is not a type in the schema");
 			}
 		}
-//		for (Att Att : sch.atts.keySet()) {
-//			if (!atts.containsKey(Att)) {
-//				throw new RuntimeException("no query for attribute " + Att);
-//			}
-//		}
+		// for (Att Att : sch.atts.keySet()) {
+		// if (!atts.containsKey(Att)) {
+		// throw new RuntimeException("no query for attribute " + Att);
+		// }
+		// }
 		for (Att Att : atts.keySet()) {
 			if (!sch.atts.containsKey(Att)) {
 				throw new RuntimeException("there is a query for " + Att + ", which is not an attribute in the schema");
 			}
 		}
-//		for (Fk Fk : sch.fks.keySet()) {
-//			if (!fks.containsKey(Fk)) {
-//				throw new RuntimeException("no query for foreign key " + Fk);
-//			}
-//		}
+		// for (Fk Fk : sch.fks.keySet()) {
+		// if (!fks.containsKey(Fk)) {
+		// throw new RuntimeException("no query for foreign key " + Fk);
+		// }
+		// }
 		for (Fk Fk : fks.keySet()) {
 			if (!sch.fks.containsKey(Fk)) {
 				throw new RuntimeException("there is a query for " + Fk + ", which is not a foreign key in the schema");
@@ -107,7 +108,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 		return (Gen) gen;
 	}
 
-	//@SuppressWarnings("unchecked")
+	// @SuppressWarnings("unchecked")
 	private Term<Ty, Void, Sym, Void, Void, Void, Null<Ty>> objectToSk(Schema<Ty, En, Sym, Fk, Att> sch, Ty ty, Object rhs) {
 		if (rhs == null) {
 			return Term.Sk(new Null<>(ty));
@@ -150,13 +151,13 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 			}
 		}
 		totalityCheck(sch, ens, tys, atts, fks);
-		
+
 		Ctx<En, Collection<Gen>> ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
 		Ctx<Ty, Collection<Null<Ty>>> tys0 = new Ctx<>();
 		Ctx<Gen, Ctx<Fk, Gen>> fks0 = new Ctx<>();
 		Ctx<Gen, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<Ty>>>> atts0 = new Ctx<>();
 		AqlOptions op = new AqlOptions(options, null);
-		
+
 		for (Ty ty : sch.typeSide.tys) {
 			tys0.put(ty, Util.singList(new Null<>(ty)));
 		}
@@ -185,7 +186,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 				stmt.close();
 				rs.close();
 			}
-			
+
 			for (Fk fk : fks.keySet()) {
 				Statement stmt = conn.createStatement();
 				stmt.execute(fks.get(fk));
@@ -213,7 +214,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 					if (!fks0.containsKey(objectToGen(lhs))) {
 						fks0.put(objectToGen(lhs), new Ctx<>());
 					}
-					fks0.get(objectToGen(lhs)).put(fk, objectToGen(rhs));					
+					fks0.get(objectToGen(lhs)).put(fk, objectToGen(rhs));
 				}
 				stmt.close();
 				rs.close();
@@ -241,8 +242,8 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 					if (!atts0.containsKey(objectToGen(lhs))) {
 						atts0.put(objectToGen(lhs), new Ctx<>());
 					}
-					atts0.get(objectToGen(lhs)).put(att, objectToSk(sch, ty, rhs));					
-			}
+					atts0.get(objectToGen(lhs)).put(att, objectToSk(sch, ty, rhs));
+				}
 				stmt.close();
 				rs.close();
 			}
@@ -255,31 +256,18 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 			throw new RuntimeException(thr.getMessage() + "\n\n" + helpStr);
 		}
 
-		ImportAlgebra<Ty,En,Sym,Fk,Att,Gen,Null<Ty>> alg = new ImportAlgebra<>(sch, ens0, tys0, fks0, atts0, Object::toString, Object::toString); 
-		
-		//TODO aql validate for collage
-		//AqlOptions strat = new AqlOptions(options, col);
-		
-		return new SaturatedInstance<>(alg, alg, (Boolean) op.getOrDefault(AqlOption.require_consistency), (Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe)) ; 
-	
+		ImportAlgebra<Ty, En, Sym, Fk, Att, Gen, Null<Ty>> alg = new ImportAlgebra<>(sch, ens0, tys0, fks0, atts0, Object::toString, Object::toString);
+
+		// TODO aql validate for collage
+		// AqlOptions strat = new AqlOptions(options, col);
+
+		return new SaturatedInstance<>(alg, alg, (Boolean) op.getOrDefault(AqlOption.require_consistency), (Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe));
+
 	}
 
-	private static final String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example,"
-			+ "\n"
-			+ "\n	0:Employee"
-			+ "\n	0:Department"
-			+ "\n"
-			+ "\nPossible solution: Distinguish the IDs prior to import, or distinguish them during import, for example, "
-			+ "\n"
-			+ "\n	instance J = import_jdbc ... {"
-			+ "\n		Employee -> \"SELECT concat(\"emp\",id) FROM Employee\""
-			+ "\n		Department -> \"SELECT concat(\"dept\",id) FROM Dept\""
-			+ "\n		worksIn -> \"SELECT concat(\"emp\",id), concat(\"dept\",worksIn) FROM Employee\""
-			+ "\n	}"
-			+ "\n";
+	private static final String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example," + "\n" + "\n	0:Employee" + "\n	0:Department" + "\n" + "\nPossible solution: Distinguish the IDs prior to import, or distinguish them during import, for example, " + "\n" + "\n	instance J = import_jdbc ... {"
+			+ "\n		Employee -> \"SELECT concat(\"emp\",id) FROM Employee\"" + "\n		Department -> \"SELECT concat(\"dept\",id) FROM Dept\"" + "\n		worksIn -> \"SELECT concat(\"emp\",id), concat(\"dept\",worksIn) FROM Employee\"" + "\n	}" + "\n";
 
-
-	
 	@SuppressWarnings("unchecked")
 	private Fk stringToFk(String o) {
 		return (Fk) o;
@@ -290,11 +278,10 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 		return (Fk) o;
 	}
 
-	@SuppressWarnings("unchecked") 
+	@SuppressWarnings("unchecked")
 	private En objectToEn(Object o) {
 		return (En) o;
 	}
-
 
 	@SuppressWarnings("unchecked")
 	private Att stringToAtt(String o) {
@@ -305,7 +292,6 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 	private Att objectToAtt(Object o) {
 		return (Att) o;
 	}
-
 
 	@SuppressWarnings("unchecked")
 	private En stringToEn(String o) {
@@ -356,7 +342,8 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 	public Collection<Pair<String, Kind>> deps() {
 		Set<Pair<String, Kind>> ret = new HashSet<>();
 		ret.addAll(schema.deps());
-		//ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.INSTANCE)).collect(Collectors.toList()));
+		// ret.addAll(imports.stream().map(x -> new Pair<>(x,
+		// Kind.INSTANCE)).collect(Collectors.toList()));
 		return ret;
 	}
 
@@ -367,7 +354,8 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 		result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
 		result = prime * result + ((map == null) ? 0 : map.hashCode());
 		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
-		//result = prime * result + ((imports == null) ? 0 : imports.hashCode());
+		// result = prime * result + ((imports == null) ? 0 :
+		// imports.hashCode());
 		result = prime * result + ((jdbcString == null) ? 0 : jdbcString.hashCode());
 		result = prime * result + ((options == null) ? 0 : options.hashCode());
 		return result;

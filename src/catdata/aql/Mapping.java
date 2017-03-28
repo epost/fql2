@@ -19,7 +19,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantic
 	
 	public static <Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,En3,Fk3,Att3> Mapping<Ty,En1,Sym,Fk1,Att1,En3,Fk3,Att3> compose(Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> m1, Mapping<Ty,En2,Sym,Fk2,Att2,En3,Fk3,Att3> m2) {
 		if (!m1.dst.equals(m2.src)) {
-			Util.anomaly();
+			throw new RuntimeException("Anomaly, please report.\n\n" + m1.dst + "\n\n" + m2.src);
 		}
 		Map<En1, En3> ens0 = new HashMap<>();
 		for (En1 en1 : m1.ens.keySet()) {

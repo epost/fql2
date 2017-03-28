@@ -494,8 +494,9 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		return new Unit();
 	}
 
+	@SuppressWarnings("unused")
 	@Override
-	public <N, E0, Ty, En, Sym, Fk, Att> Unit visit(JTabbedPane arg, ColimitSchema<N, E0, Ty, En, Sym, Fk, Att> S) throws RuntimeException {
+	public <N, E0, Ty, En, Sym, Fk, Att> Unit visit(JTabbedPane arg, ColimitSchema<N, Ty, En, Sym, Fk, Att> S) throws RuntimeException {
 		return new Unit(); //TODO aql
 	}
 
