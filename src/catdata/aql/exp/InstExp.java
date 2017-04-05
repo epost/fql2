@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 
 import catdata.Chc;
 import catdata.Ctx;
@@ -12,10 +14,15 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.Collage;
+import catdata.aql.Eq;
 import catdata.aql.Instance;
+import catdata.aql.It;
 import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.Mapping;
+import catdata.aql.Schema;
+import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.Var;
 import catdata.aql.exp.SchExp.SchExpLit;
@@ -25,8 +32,10 @@ import catdata.aql.fdm.DeltaInstance;
 import catdata.aql.fdm.DistinctInstance;
 import catdata.aql.fdm.EvalAlgebra.Row;
 import catdata.aql.fdm.EvalInstance;
-import catdata.aql.fdm.SigmaInstance;
+import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.InitialInstance;
+import catdata.aql.fdm.LiteralInstance;
+import catdata.aql.fdm.SigmaInstance;
 import catdata.graph.DMG;
 
 public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>> {
@@ -37,6 +46,236 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	}
 	
 	public abstract SchExp<Ty,En,Sym,Fk,Att>  type(AqlTyping G);
+			
+	///////////////////////////////////////////////////////////////////////
+	
+	public static final class InstExpCoEq<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2>
+	extends InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,ID,Chc<Sk2, Pair<ID, Att>>> {
+		
+		public final TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t1, t2;
+		
+		public final Map<String, String> options;
+		
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(t1.deps(), t2.deps());
+		}
+	
+
+		public InstExpCoEq(TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t1, TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t2, List<Pair<String, String>> options) {
+			this.t1 = t1;
+			this.t2 = t2;
+			this.options = Util.toMapSafely(options);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((t1 == null) ? 0 : t1.hashCode());
+			result = prime * result + ((t2 == null) ? 0 : t2.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpCoEq<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpCoEq<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			if (t1 == null) {
+				if (other.t1 != null)
+					return false;
+			} else if (!t1.equals(other.t1))
+				return false;
+			if (t2 == null) {
+				if (other.t2 != null)
+					return false;
+			} else if (!t2.equals(other.t2))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "InstExpCoEq [t1=" + t1 + ", t2=" + t2 + ", options=" + options + "]";
+		}
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}
+
+
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+			if (!t1.type(G).first.equals(t2.type(G).first)) {
+				throw new RuntimeException("Domains do not match: " + t1.type(G).first + " and \n\n" + t2.type(G).first);
+			} else if (!t1.type(G).second.equals(t2.type(G).second)) {
+				throw new RuntimeException("CoDomains do not match: " + t1.type(G).second + " and \n\n" + t2.type(G).second);
+			}
+			return t1.type(G).first.type(G);
+		}
+
+
+		@Override
+		public Instance<Ty, En, Sym, Fk, Att, Gen2, Sk2, ID, Chc<Sk2, Pair<ID, Att>>> eval(AqlEnv env) {
+			Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h1 = t1.eval(env);
+			Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h2 = t2.eval(env);
+			
+			//Schema<Ty, En, Sym, Fk, Att> sch0 = sch.eval(env);
+			Collage<Ty, En, Sym, Fk, Att, Gen2, Sk2> col = new Collage<>(h1.dst().collage());
+			AqlOptions strat = new AqlOptions(options, col);
+			Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen2, Sk2>, Term<Ty, En, Sym, Fk, Att, Gen2, Sk2>>> eqs0 = new HashSet<>();
+
+			
+				for (Gen1 g : h1.src().gens().keySet()) {
+					Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> l = h1.gens().get(g).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn());
+					Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> r = h2.gens().get(g).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn());
+					eqs0.add(new Pair<>(l, r));
+					col.eqs.add(new Eq<>(new Ctx<>(), l, r));	
+				}
+				for (Sk1 g : h1.src().sks().keySet()) {
+					Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> l = h1.sks().get(g);
+					Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> r = h2.sks().get(g);
+					eqs0.add(new Pair<>(l, r));
+					col.eqs.add(new Eq<>(new Ctx<>(), l, r));
+			}		
+				InitialAlgebra<Ty, En, Sym, Fk, Att, Gen2, Sk2, ID> initial0 = new InitialAlgebra<>(strat, h1.src().schema(), col, new It(), Object::toString, Object::toString);			 
+				
+			return new LiteralInstance<>(h1.src().schema(), col.gens.map, col.sks.map, eqs0, initial0.dp(), initial0, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
+		}
+
+		
+	}
+	
+	///////////////////////////////////////////////////////////////////////
+	
+	public static final class InstExpCoProd<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> 
+		extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
+
+		public final List<InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>> Is;
+		
+		public final SchExp<Ty,En,Sym,Fk,Att> sch;
+		
+		public final Map<String, String> options;
+
+		public InstExpCoProd(List<InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> is, SchExp<Ty, En, Sym, Fk, Att> sch, List<Pair<String, String>> options) {
+			Is = is;
+			this.sch = sch;
+			this.options = Util.toMapSafely(options);
+		}
+		
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			Set<Pair<String, Kind>> ret = new HashSet<>(sch.deps());	
+			for(InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i : Is) {
+				ret.addAll(i.deps());
+			}
+			return ret;
+		}
+		
+		
+
+		@Override
+		public String toString() {
+			return "InstExpCoProd [Is=" + Is + ", sch=" + sch + ", options=" + options + "]";
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((Is == null) ? 0 : Is.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((sch == null) ? 0 : sch.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpCoProd<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpCoProd<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (Is == null) {
+				if (other.Is != null)
+					return false;
+			} else if (!Is.equals(other.Is))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			if (sch == null) {
+				if (other.sch != null)
+					return false;
+			} else if (!sch.equals(other.sch))
+				return false;
+			return true;
+		}
+
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+			for (InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i : Is) {
+				SchExp<Ty, En, Sym, Fk, Att> ac = i.type(G);
+				if (!ac.equals(sch)) { //TODO aql type equality
+					throw new RuntimeException("Instance " + i + " has schema " + ac + ",\n\nnot " + sch + "\n\nas expected");
+				}
+			}
+			return sch;
+		}
+
+		@Override
+		public long timeout() {
+			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		}
+
+		@Override
+		public Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> eval(AqlEnv env) {
+			Schema<Ty, En, Sym, Fk, Att> sch0 = sch.eval(env);
+			Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col = new Collage<>(sch0.collage());
+			AqlOptions strat = new AqlOptions(options, col);
+			Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs0 = new HashSet<>();
+	
+			for (InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I0 : Is) {
+				Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I = I0.eval(env);
+				for (Gen g : I.gens().keySet()) {
+					if (col.gens.containsKey(g)) {
+						throw new RuntimeException("The generators in the input instances of a coproduct must be unique, but there is more than one " + g);
+					}
+					col.gens.put(g, I.gens().get(g));
+				}
+				for (Sk g : I.sks().keySet()) {
+					if (col.sks.containsKey(g)) {
+						throw new RuntimeException("The generators in the input instances of a coproduct must be unique, but there is more than one " + g);
+					}
+					col.sks.put(g, I.sks().get(g));
+				}
+				for (Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : I.eqs()) {
+					eqs0.add(eq);
+					col.eqs.add(new Eq<>(new Ctx<>(), eq.first, eq.second));
+				}
+			}		
+			InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, ID> initial0 = new InitialAlgebra<>(strat, sch0, col, new It(), Object::toString, Object::toString);			 
+			return new LiteralInstance<>(sch0, col.gens.map, col.sks.map, eqs0, initial0.dp(), initial0, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
+		}
+		
+		
+		
+	}
 	
 	///////////////////////////////////////////////////////////////////////
 	

@@ -154,7 +154,7 @@ public class EasikAql {
 	}
 
 	private static String safe(String s) {
-		return s.replace(" ", "_").replace("-", "_");
+		return s.replace(" ", "_").replace("-", "_").replace(".", "_").replaceAll("/", "_");
 	}
 
 	private static Pair<SchExp<?, ?, ?, ?, ?>,List<Pair<String,EdsExpRaw>>> translate1(Node sketch, Set<String> used, Set<String> warnings, String sname) {

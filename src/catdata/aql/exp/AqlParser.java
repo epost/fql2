@@ -35,7 +35,9 @@ import catdata.aql.exp.EdsExp.EdsExpVar;
 import catdata.aql.exp.GraphExp.GraphExpRaw;
 import catdata.aql.exp.GraphExp.GraphExpVar;
 import catdata.aql.exp.InstExp.InstExpChase;
+import catdata.aql.exp.InstExp.InstExpCoEq;
 import catdata.aql.exp.InstExp.InstExpCoEval;
+import catdata.aql.exp.InstExp.InstExpCoProd;
 import catdata.aql.exp.InstExp.InstExpCod;
 import catdata.aql.exp.InstExp.InstExpColim;
 import catdata.aql.exp.InstExp.InstExpDelta;
@@ -94,6 +96,8 @@ public class AqlParser {
 			"chase",
 			"check",
 			"assert_consistent",
+			"coproduct",
+			"coequalize",
 			"html",
 			"quotient",
 			"entity_equations",
@@ -302,7 +306,7 @@ public class AqlParser {
 			chase = Parsers.tuple(token("chase"), edsExp(), inst_ref.lazy(), IntegerLiteral.PARSER).map(x -> new InstExpChase(x.b, x.c, Integer.parseInt(x.d))),
 			coeval = Parsers.tuple(token("coeval"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new InstExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d));
 					
-		Parser ret = Parsers.or(instExpJdbcAll(), chase, instExpJdbc(),empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval);
+		Parser ret = Parsers.or(instExpCoProd(), instExpCoEq(), instExpJdbcAll(), chase, instExpJdbc(),empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval);
 		
 		inst_ref.set(ret);
 	}
@@ -896,6 +900,22 @@ public class AqlParser {
 				
 			return ret;	
 	}
+	 
+	 @SuppressWarnings({ "rawtypes", "unchecked" })
+	 private static Parser<InstExpCoProd> instExpCoProd() {
+			Parser<InstExpCoProd> ret = Parsers.tuple(token("coproduct"), inst_ref.lazy().many(), token(":"), sch_ref.lazy(), options.between(token("{"), token("}")).optional())
+					.map(x -> new InstExpCoProd(x.b, x.d, Util.newIfNull(x.e)));
+			
+			return ret; 
+		}
+	 
+	 @SuppressWarnings({ "rawtypes", "unchecked" })
+	private static Parser<InstExpCoEq> instExpCoEq() {
+			Parser<InstExpCoEq> ret = Parsers.tuple(token("coequalize"), trans_ref.lazy(), trans_ref.lazy(), options.between(token("{"), token("}")).optional())
+					.map(x -> new InstExpCoEq(x.b, x.c, Util.newIfNull(x.d)));
+			
+			return ret; 
+		}
 
 	@SuppressWarnings("rawtypes")
 	private static Parser<InstExpJdbc> instExpJdbc() {

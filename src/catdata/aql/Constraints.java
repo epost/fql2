@@ -36,7 +36,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 	// TODO aql equals
 
 	public Constraints(Schema<Ty, En, Sym, Fk, Att> schema, Collection<ED<Ty, En, Sym, Fk, Att>> eds) {
-		this.eds = desugar(eds);
+		this.eds = new HashSet<>(desugar(eds));
 		this.schema = schema;
 		for (ED<Ty, En, Sym, Fk, Att> ed : eds) {
 			if (!ed.schema.equals(schema)) {

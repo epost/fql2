@@ -30,9 +30,11 @@
   	<keyword>check</keyword>
   	<keyword>assert_consistent</keyword>
     <keyword>attributes</keyword>
+    <keyword>coequalize</keyword>
     <keyword>coeval</keyword>
     <keyword>colimit</keyword>
     <keyword>constants</keyword>
+    <keyword>coproduct</keyword>
     <keyword>counit</keyword>
     <keyword>counit_query</keyword>
     <keyword>delta</keyword>
