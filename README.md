@@ -10,7 +10,17 @@ Binaries are available there.
 Build 
 -----
 
-### Maven
+### Pre-compiled binary jar file:
+
+	http://categoricaldata.net/fql.jar
+
+### Eclipse
+	
+	For best results, compile using the Eclipse IDE:
+	
+	https://eclipse.org/jdt/
+
+### Maven (may or may not work)
 
     git clone https://github.com/CategoricalData/fql.git
     cd fql
