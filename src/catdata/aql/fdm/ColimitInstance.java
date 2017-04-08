@@ -84,8 +84,8 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 				col.sks.put(new Pair<>(n,sk), nodes.get(n).sks().get(sk));
 			}
 			for (Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : nodes.get(n).eqs()) {
-				col.eqs.add(new Eq<>(new Ctx<>(), eq.first.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x)), eq.second.mapGenSk(x -> new Pair<>(n, x) ,x -> new Pair<>(n, x))));
-				eqs.add(new Pair<>(eq.first.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x)), eq.second.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x))));
+				col.eqs.add(new Eq(new Ctx<>(), eq.first.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x)), eq.second.mapGenSk(x -> new Pair<>(n, x) ,x -> new Pair<>(n, x))));
+				eqs.add(new Pair(eq.first.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x)), eq.second.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x))));
 			}
 		}
 		
@@ -93,8 +93,8 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y> h = edges.get(e);
 			for (Gen gen : h.src().gens().keySet()) {
 				Term<Void, En, Void, Fk, Void, Gen, Void> rhs = h.gens().get(gen);
-				eqs.add(new Pair<>(Term.Gen(new Pair<>(shape.edges.get(e).first, gen)), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), x -> new Pair<>(shape.edges.get(e).second, x), Util.voidFn())));
-				col.eqs.add(new Eq<>(new Ctx<>(), Term.Gen(new Pair<>(shape.edges.get(e).first, gen)), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), x -> new Pair<>(shape.edges.get(e).second, x), Util.voidFn())));
+				eqs.add(new Pair(Term.Gen(new Pair<>(shape.edges.get(e).first, gen)), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), x -> new Pair<>(shape.edges.get(e).second, x), Util.voidFn())));
+				col.eqs.add(new Eq(new Ctx<>(), Term.Gen(new Pair<>(shape.edges.get(e).first, gen)), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), x -> new Pair<>(shape.edges.get(e).second, x), Util.voidFn())));
 			}
 			for (Sk sk : h.src().sks().keySet()) {
 				Term<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>> rhs = h.sks().get(sk).mapGenSk(x -> new Pair<>(shape.edges.get(e).second, x), x -> new Pair<>(shape.edges.get(e).second, x));

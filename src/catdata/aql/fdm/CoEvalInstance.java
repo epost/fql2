@@ -62,8 +62,8 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 					if (!eq.ctx.isEmpty()) {
 						throw new RuntimeException("Anomaly: please report");
 					}
-					eqs.add(new Pair<>(eq.lhs.mapGenSk(x -> new Pair<>(x, j), Util::abort), 
-									   eq.rhs.mapGenSk(x -> new Pair<>(x, j), Util::abort)));
+					eqs.add(new Pair<>(eq.lhs.mapGenSk(x -> new Pair(x, j), Util::abort), 
+									   eq.rhs.mapGenSk(x -> new Pair(x, j), Util::abort)));
 				}
 				for (Fk2 fk : J.schema().fksFrom(t)) {
 					Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> 
