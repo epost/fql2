@@ -2,7 +2,10 @@ package catdata.aql;
 
 public interface Semantics {
 
+	
 	public Kind kind();
+	
+	public int size();
 	
 	public default TypeSide<?,?> asTypeSide() {
 		return (TypeSide<?,?>) this;

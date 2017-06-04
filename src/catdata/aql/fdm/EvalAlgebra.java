@@ -93,6 +93,7 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 			return en2 + " " + ctx.toString(printX);
 		}
 		
+		//TODO AQL slowness hurts chase
 		public static <En2,X> Set<Row<En2, X>> extend(Collection<Row<En2, X>> tuples, Collection<X> dom, Var v, En2 en2) {
 			Set<Row<En2, X>> ret = new HashSet<>();
 			for (Row<En2, X> tuple : tuples) {

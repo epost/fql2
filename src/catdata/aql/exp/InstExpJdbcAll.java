@@ -47,8 +47,8 @@ public class InstExpJdbcAll extends InstExp<String, String, Void, String, String
 	private final String jdbcString;
 
 	@Override
-	public long timeout() {
-		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	public Map<String, String> options() {
+		return options;
 	}
 
 	public InstExpJdbcAll(String clazz, String jdbcString, List<Pair<String, String>> options) {
@@ -58,8 +58,8 @@ public class InstExpJdbcAll extends InstExp<String, String, Void, String, String
 		this.options = Util.toMapSafely(options);
 	}
 
-	private Instance<String, String, Void, String, String, String, Null<String>, String, Null<String>> toInstance(SqlInstance inst, SqlSchema info) {
-		boolean checkJava = !(Boolean) AqlOptions.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
+	private Instance<String, String, Void, String, String, String, Null<String>, String, Null<String>> toInstance(AqlEnv env, SqlInstance inst, SqlSchema info) {
+		boolean checkJava = !(Boolean) env.defaults.getOrDefault(AqlOption.allow_java_eqs_unsafe);
 
 		Collage<String, Void, Void, Void, Void, Void, Void> col = new Collage<>();
 		col.tys.add("dom");
@@ -96,7 +96,7 @@ public class InstExpJdbcAll extends InstExp<String, String, Void, String, String
 			}
 		}
 
-		DP<String, String, Void, String, String, Void, Void> dp = AqlProver.create(new AqlOptions(options, col0), col0, js);
+		DP<String, String, Void, String, String, Void, Void> dp = AqlProver.create(new AqlOptions(options, col0, env.defaults), col0, js);
 
 		Schema<String, String, Void, String, String> sch = new Schema<>(typeSide, col0.ens, col0.atts.map, col0.fks.map, eqs, dp, checkJava);
 
@@ -104,7 +104,7 @@ public class InstExpJdbcAll extends InstExp<String, String, Void, String, String
 		Ctx<String, Collection<Null<String>>> tys0 = new Ctx<>();
 		Ctx<String, Ctx<String, String>> fks0 = new Ctx<>();
 		Ctx<String, Ctx<String, Term<String, Void, Void, Void, Void, Void, Null<String>>>> atts0 = new Ctx<>();
-		AqlOptions op = new AqlOptions(options, null);
+		AqlOptions op = new AqlOptions(options, null, env.defaults);
 
 		for (String ty : sch.typeSide.tys) {
 			tys0.put(ty, Util.singList(new Null<>(ty)));
@@ -169,7 +169,7 @@ public class InstExpJdbcAll extends InstExp<String, String, Void, String, String
 		try (Connection conn = DriverManager.getConnection(jdbcString)) {
 			SqlSchema sch = new SqlSchema(conn.getMetaData());
 			SqlInstance inst = new SqlInstance(sch, conn);
-			return toInstance(inst, sch);
+			return toInstance(env, inst, sch);
 		} catch (SQLException exn) {
 			exn.printStackTrace();
 			throw new RuntimeException("JDBC exception: " + exn.getMessage());
@@ -211,11 +211,6 @@ public class InstExpJdbcAll extends InstExp<String, String, Void, String, String
 		if (getClass() != obj.getClass())
 			return false;
 		InstExpJdbcAll other = (InstExpJdbcAll) obj;
-		AqlOptions op = new AqlOptions(options, null);
-		Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-		if (reload) {
-			return false;
-		}
 		if (clazz == null) {
 			if (other.clazz != null)
 				return false;

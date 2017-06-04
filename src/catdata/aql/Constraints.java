@@ -24,6 +24,11 @@ import catdata.graph.DMG;
 
 public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 
+	@Override
+	public int size() {
+		return toString().length();
+	}
+	
 	public final Schema<Ty, En, Sym, Fk, Att> schema;
 
 	public final Collection<ED<Ty, En, Sym, Fk, Att>> eds;
@@ -35,8 +40,8 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 
 	// TODO aql equals
 
-	public Constraints(Schema<Ty, En, Sym, Fk, Att> schema, Collection<ED<Ty, En, Sym, Fk, Att>> eds) {
-		this.eds = new HashSet<>(desugar(eds));
+	public Constraints(Schema<Ty, En, Sym, Fk, Att> schema, Collection<ED<Ty, En, Sym, Fk, Att>> eds, AqlOptions options) {
+		this.eds = new HashSet<>(desugar(eds, options));
 		this.schema = schema;
 		for (ED<Ty, En, Sym, Fk, Att> ed : eds) {
 			if (!ed.schema.equals(schema)) {
@@ -45,30 +50,32 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 		}
 	}
 
-	private static <Ty, En, Sym, Fk, Att> Collection<ED<Ty, En, Sym, Fk, Att>> desugar(Collection<ED<Ty, En, Sym, Fk, Att>> eds) {
+	private static <Ty, En, Sym, Fk, Att> Collection<ED<Ty, En, Sym, Fk, Att>> desugar(Collection<ED<Ty, En, Sym, Fk, Att>> eds, AqlOptions options) {
 		List<ED<Ty, En, Sym, Fk, Att>> l = new LinkedList<>();
 		for (ED<Ty, En, Sym, Fk, Att> x : eds) {
-			l.add(new ED<>(x.schema, x.As, x.Es, x.Awh, x.Ewh, false));
+			l.add(new ED<>(x.schema, x.As, x.Es, x.Awh, x.Ewh, false, options));
 			
-			Ctx<Var, En> es2 = x.Es.map((v,t) -> new Pair<>(new Var(v + "0"), t));	
-			Map<Var, Term<Ty, En, Sym, Fk, Att, Void, Void>> subst = new HashMap<>();
-			Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> ewh = new HashSet<>();
-			
-			for (Var v : x.Es.keySet()) {
-				subst.put(v, Term.Var(new Var(v + "0")));
-				ewh.add(new Pair<>(Term.Var(v), subst.get(v)));
+			if (x.isUnique) {
+				Ctx<Var, En> es2 = x.Es.map((v,t) -> new Pair<>(new Var(v + "0"), t));	
+				Map<Var, Term<Ty, En, Sym, Fk, Att, Void, Void>> subst = new HashMap<>();
+				Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> ewh = new HashSet<>();
+				
+				for (Var v : x.Es.keySet()) {
+					subst.put(v, Term.Var(new Var(v + "0")));
+					ewh.add(new Pair<>(Term.Var(v), subst.get(v)));
+				}
+				Ctx<Var, En> as = new Ctx<>();
+				as.putAll(x.As.map);
+				as.putAll(x.Es.map);
+				as.putAll(es2.map);
+				Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> awh = new HashSet<>();
+				awh.addAll(x.Awh);
+				awh.addAll(x.Ewh);
+				for (Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> p : x.Ewh) {
+					awh.add(new Pair<>(p.first.subst(subst), p.second.subst(subst)));
+				}
+				l.add(new ED<>(x.schema, as, new Ctx<>(), awh, ewh, false, options));
 			}
-			Ctx<Var, En> as = new Ctx<>();
-			as.putAll(x.As.map);
-			as.putAll(x.Es.map);
-			as.putAll(es2.map);
-			Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> awh = new HashSet<>();
-			awh.addAll(x.Awh);
-			awh.addAll(x.Ewh);
-			for (Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> p : x.Ewh) {
-				awh.add(new Pair<>(p.first.subst(subst), p.second.subst(subst)));
-			}
-			l.add(new ED<>(x.schema, as, new Ctx<>(), awh, ewh, false));
 			
 		}
 		return l;
@@ -79,7 +86,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 		return Kind.CONSTRAINTS;
 	}
 	
-	public <Gen, Sk, X, Y> Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> chase(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I, int limit) {	
+	public <Gen, Sk, X, Y> Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> chase(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I, int limit, AqlOptions options) {	
 		if (limit < 0) {
 			throw new IllegalArgumentException();
 		}
@@ -95,7 +102,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 		}
 		Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret = I;
 		for (int i = 0; i < limit; i++) {
-			Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret2 = step(ret);
+			Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret2 = step(ret, options);
 			if (ret2 == null) {
 				return ret;
 			}
@@ -105,7 +112,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 	}
 
 	// TODO aql needs to be over all eds
-	public <Gen, Sk, X, Y> Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> step(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I) {
+	public <Gen, Sk, X, Y> Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> step(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I, AqlOptions options) {
 		Collection<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>> T = triggers(I);
 
 		if (T.isEmpty()) {
@@ -139,9 +146,9 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 			}*/
 		}
 
-		ColimitInstance<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void, Ty, En, Sym, Fk, Att, Var, Void, ID, Chc<Void, Pair<ID, Att>>> A0 = new ColimitInstance<>(schema, shape, nodesA, new Ctx<>(), new HashMap<>());
+		ColimitInstance<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void, Ty, En, Sym, Fk, Att, Var, Void, ID, Chc<Void, Pair<ID, Att>>> A0 = new ColimitInstance<>(schema, shape, nodesA, new Ctx<>(), options);
 
-		ColimitInstance<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void, Ty, En, Sym, Fk, Att, Var, Void, ID, Chc<Void, Pair<ID, Att>>> E0 = new ColimitInstance<>(schema, shape, nodesE, new Ctx<>(), new HashMap<>());
+		ColimitInstance<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void, Ty, En, Sym, Fk, Att, Var, Void, ID, Chc<Void, Pair<ID, Att>>> E0 = new ColimitInstance<>(schema, shape, nodesE, new Ctx<>(), options);
 
 		LiteralTransform<Ty, En, Sym, Fk, Att, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, ID, Chc<Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, Pair<ID, Att>>, ID, Chc<Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, Pair<ID, Att>>> 
 		A0E0 = new LiteralTransform<>(xxx, new HashMap<>(), A0, E0, false);
@@ -149,7 +156,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 		LiteralTransform<Ty, En, Sym, Fk, Att, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, Gen, Sk, ID, Chc<Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, Pair<ID, Att>>, X, Y> A0I 
 		= new LiteralTransform<>(aaa, new HashMap<>(), A0, I, false);
 		
-		return pushout(A0E0, A0I);
+		return pushout(A0E0, A0I, options);
 		// TODO aql disable checking for speed
 
 	}
@@ -177,7 +184,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 	public static enum TWO {A, B}
 	
 	public static <Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2,Gen3,Sk3,X3,Y3> 
-	ColimitInstance<THREE, TWO, Ty, En, Sym, Fk, Att, ?, ?, ?, ?> pushout(Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> j, Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen3,Sk3,X1,Y1,X3,Y3> k) {
+	ColimitInstance<THREE, TWO, Ty, En, Sym, Fk, Att, ?, ?, ?, ?> pushout(Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> j, Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen3,Sk3,X1,Y1,X3,Y3> k, AqlOptions options) {
 		if (!j.src().equals(k.src())) {
 			throw new RuntimeException("Source of \n" + j + "\nnamely \n" + j.src() + "\n is not equal to source of\n" + k + "\nnamely \n" + k.src() );
 		}
@@ -203,7 +210,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 		
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		ColimitInstance<THREE, TWO, Ty, En, Sym, Fk, Att, ?, ?, ?, ?> 
-		ret = new ColimitInstance(j.src().schema(), shape, nodes, edges, new HashMap<>());
+		ret = new ColimitInstance(j.src().schema(), shape, nodes, edges, options);
 		return ret;
 	}
 

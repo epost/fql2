@@ -2,6 +2,7 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import catdata.Pair;
 import catdata.Util;
@@ -24,7 +25,10 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 		public SchExpColim(ColimSchExp<N, E, Ty, En, Sym, Fk, Att> exp) {
 			this.exp = exp;
 		}
-
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -55,11 +59,7 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			return "getSchema " + exp;
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
-
+		
 		@Override
 		public Schema<Ty, String, Sym, String, String> eval(AqlEnv env) {
 			return exp.eval(env).schemaStr;
@@ -78,7 +78,10 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 
 	public static final class SchExpInst<Ty,En,Sym,Fk,Att> extends SchExp<Ty,En,Sym,Fk,Att> {
 		public final InstExp<Ty,En,Sym,Fk,Att,?,?,?,?> inst;
-
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return inst.deps();
@@ -121,10 +124,6 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			return inst.eval(env).schema();
 		}
 
-		@Override
-		public long timeout() {
-			return inst.timeout();
-		}
 		
 		
 	}
@@ -134,7 +133,10 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 	public static final class SchExpEmpty<Ty,Sym> extends SchExp<Ty,Void,Sym,Void,Void> {
 		
 		public final TyExp<Ty,Sym> typeSide;
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return typeSide.deps();
@@ -177,10 +179,7 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			return Schema.terminal(typeSide.eval(env));
 		}
 
-		@Override
-		public long timeout() {
-			return typeSide.timeout();
-		}
+		
 		
 	}
 	
@@ -189,7 +188,10 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 	public static final class SchExpVar extends SchExp<Object, Object, Object, Object, Object> {
 		
 		public final String var;
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Util.singList(new Pair<>(var, Kind.SCHEMA));
@@ -233,10 +235,6 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			return var;
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
 		
 		
 	}
@@ -249,7 +247,10 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 		public Collection<Pair<String, Kind>> deps() {
 			return Collections.emptyList();
 		}
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		public final Schema<Ty,Sym,En,Fk,Att> schema;
 		
 		public SchExpLit(Schema<Ty,Sym,En,Fk,Att> schema) {
@@ -289,12 +290,7 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			return "SchExpLit [schema=" + schema + "]";
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
 		
-	
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

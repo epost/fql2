@@ -51,6 +51,14 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 
 	public abstract Term<Void, En, Void, Fk, Void, Gen, Void> repr(X x);
 	
+	public int size() {
+		int i = 0;
+		for (En en : schema().ens) {
+			i += en(en).size();
+		}
+		return i;
+	}
+	
 	public Collection<X> allXs() {
 		Set<X> ret = new HashSet<>();
 		for (En en : schema().ens) {

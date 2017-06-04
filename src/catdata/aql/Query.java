@@ -21,7 +21,12 @@ import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralTransform; //TODO aql why depend fdm
 
 public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics {
-
+	
+	@Override
+	public int size() {
+		return src.size();
+	}
+	
 	@Override
 	public Kind kind() {
 		return Kind.QUERY;
@@ -37,11 +42,11 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 	public final Schema<Ty,En2,Sym,Fk2,Att2> dst;
 
 	public Query(
-			Ctx<En2, Triple<Ctx<Var,En1>,Collection<Eq<Ty,En1,Sym,Fk1,Att1,Var,Void>>,Map<String,String>>> ens,
+			Ctx<En2, Triple<Ctx<Var,En1>,Collection<Eq<Ty,En1,Sym,Fk1,Att1,Var,Void>>,AqlOptions>> ens,
 			Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts, 
 			Ctx<Fk2, Pair<Ctx<Var, Term<Void,En1,Void,Fk1,Void,Var,Void>>, Boolean>> fks,
 			Schema<Ty, En1, Sym, Fk1, Att1> src, Schema<Ty, En2, Sym, Fk2, Att2> dst,
-			boolean doNotCheckPathEqs) {
+			boolean doNotCheckPathEqs) { //is actually "do not check outer", will stop constructing DPs for frozens
 		Util.assertNotNull(ens, atts, fks, src, dst);
 		this.src = src;
 		this.dst = dst;
@@ -49,17 +54,20 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 		
 		for (En2 en2 : ens.keySet()) {
 			try {
-				this.ens.put(en2, new Frozen<>(ens.get(en2).first, ens.get(en2).second, src, ens.get(en2).third));
+				this.ens.put(en2, new Frozen<>(ens.get(en2).first, ens.get(en2).second, src, ens.get(en2).third, doNotCheckPathEqs));
 			} catch (Throwable thr) {
+				thr.printStackTrace();
 				throw new RuntimeException("In block for entity " + en2 + ", " + thr.getMessage());
 			}
 		}
 		
 		for (Fk2 fk2 : fks.keySet()) {
 			try {
-				this.fks.put(fk2, new LiteralTransform<>(fks.get(fk2).first.map, new HashMap<>(), this.ens.get(dst.fks.get(fk2).second), this.ens.get(dst.fks.get(fk2).first), fks.get(fk2).second));
-                doNotValidate.put(fk2, fks.get(fk2).second);
+				Boolean b = fks.get(fk2).second || doNotCheckPathEqs;
+				this.fks.put(fk2, new LiteralTransform<>(fks.get(fk2).first.map, new HashMap<>(), this.ens.get(dst.fks.get(fk2).second), this.ens.get(dst.fks.get(fk2).first), b));
+                doNotValidate.put(fk2, b);
 			} catch (Throwable thr) {
+				thr.printStackTrace();
 				throw new RuntimeException("In transform for foreign key " + fk2 + ", " + thr.getMessage());
 			}
 		}
@@ -127,6 +135,8 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 	//TODO aql pass just for better error messages in uber flowers
 	public static class Frozen<Ty,En1,Sym,Fk1,Att1> extends Instance<Ty,En1,Sym,Fk1,Att1,Var,Void,ID,Chc<Void, Pair<ID, Att1>>> {
 
+		
+		
 		public List<Var> order() {
 			Map<Var, Integer> counts = new HashMap<>();
 			List<Var> ret = new LinkedList<>();
@@ -158,15 +168,19 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 		public final Collection<Eq<Ty,En1,Sym,Fk1,Att1,Var,Void>> eqs;
 		public final Schema<Ty, En1, Sym, Fk1, Att1> schema;
 		private final DP<Ty, En1, Sym, Fk1, Att1, Var, Void> dp;
-		public final Map<String, String> options;
+		public final AqlOptions options;
 		
-		public Frozen(Ctx<Var, En1> gens, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs, Schema<Ty, En1, Sym, Fk1, Att1> schema, Map<String, String> options) {
+		public Frozen(Ctx<Var, En1> gens, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs, Schema<Ty, En1, Sym, Fk1, Att1> schema, AqlOptions options, boolean dont_validate_unsafe) {
 			this.gens = gens;
 			this.eqs = eqs;
 			this.schema = schema;
-			this.options = options;
-			dp = AqlProver.create(new AqlOptions(options, collage()), collage(), schema.typeSide.js);			
-			validateNoTalg(); 
+			if (!dont_validate_unsafe) {
+				dp = AqlProver.create(options, collage(), schema.typeSide.js);			
+				validateNoTalg();
+			} else {
+				dp = null;
+			}
+			this.options=options;
 		}
 
 		@Override

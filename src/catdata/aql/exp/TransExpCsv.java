@@ -39,9 +39,9 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 	private final String file;
 	
 	@Override
-	public long timeout() {
-		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-	}	
+	public Map<String, String> options() {
+		return options;
+	}
 
 	public TransExpCsv(InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src, InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst, String file, /* List<String> imports ,*/ List<Pair<String, String>> options) {
 		Util.assertNotNull(src, dst, options, file);
@@ -96,7 +96,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 		Map<Gen1, Term<Void,En,Void,Fk,Void,Gen2,Void>> gens = new HashMap<>();
 		Map<Sk1 , Term<Ty,En,Sym,Fk,Att,Gen2,Sk2>> sks = new HashMap<>();
 
-		AqlOptions op = new AqlOptions(options, null);
+		AqlOptions op = new AqlOptions(options, null, env.defaults);
 		boolean dontValidateEqs = (Boolean) op.getOrDefault(AqlOption.dont_validate_unsafe);
 		String charset0 = (String) op.getOrDefault(AqlOption.csv_charset);
 		Charset charset = Charset.forName(charset0);		
@@ -186,12 +186,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 			return false;
 		
 		TransExpCsv<?,?,?,?,?,?,?, ?, ?, ?, ?, ?, ?> other = (TransExpCsv<?,?,?,?,?,?,?, ?, ?, ?, ?, ?, ?>) obj;
-		AqlOptions op = new AqlOptions(options, null);
-		Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-		if (reload) {
-			return false;
-		}
-	
+		
 		if (dst == null) {
 			if (other.dst != null)
 				return false;

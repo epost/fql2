@@ -108,7 +108,7 @@ public class ED<Ty, En, Sym, Fk, Att> {
 		return ret;
 	}
 	
-	public ED(Schema<Ty, En, Sym, Fk, Att> schema, Ctx<Var, En> as, Ctx<Var, En> es, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> awh, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> ewh, boolean isUnique) {
+	public ED(Schema<Ty, En, Sym, Fk, Att> schema, Ctx<Var, En> as, Ctx<Var, En> es, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> awh, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> ewh, boolean isUnique, AqlOptions options) {
 		this.schema = schema;
 		As = as;
 		Es = es;
@@ -118,14 +118,14 @@ public class ED<Ty, En, Sym, Fk, Att> {
 		if (!Collections.disjoint(As.keySet(), Es.keySet())) {
 			throw new RuntimeException("The forall and exists clauses do not use disjoint variables.");
 		}
-		Ctx<WHICH, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>>, Map<String, String>>> 
+		Ctx<WHICH, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>>, AqlOptions>> 
 		is = new Ctx<>();
 	
-		is.put(WHICH.FRONT, new Triple<>(As, freeze(Awh), new HashMap<>()));
+		is.put(WHICH.FRONT, new Triple<>(As, freeze(Awh), options));
 		Ctx<Var, En> AsEs = new Ctx<>();
 		AsEs.putAll(As.map);
 		AsEs.putAll(Es.map);
-		is.put(WHICH.BACK, new Triple<>(AsEs, freeze(Util.union(Awh, Ewh)), new HashMap<>()));
+		is.put(WHICH.BACK, new Triple<>(AsEs, freeze(Util.union(Awh, Ewh)), options));
 
 		Ctx<Var, Term<Void, En, Void, Fk, Void, Var, Void>> ctx = new Ctx<>();
 		for (Var v : As.keySet()) {
@@ -135,7 +135,7 @@ public class ED<Ty, En, Sym, Fk, Att> {
 		fks = new Ctx<>();
 		fks.put(new Unit(), new Pair<>(ctx, true));
 		
-		Q = new Query<>(is, new Ctx<>(), fks, schema, getEDSchema(schema.typeSide), false);
+		Q = new Query<>(is, new Ctx<>(), fks, schema, getEDSchema(schema.typeSide), false); //TODO AQL speed this can be set to true
 	}
 	
 	@Override

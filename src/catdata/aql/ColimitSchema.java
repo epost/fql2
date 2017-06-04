@@ -15,11 +15,18 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.AqlProver.ProverName;
 import catdata.graph.DMG;
 import catdata.graph.UnionFind;
 
 public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
+
+	/**
+	 * size of underlying schema
+	 */
+	@Override
+	public int size() {
+		return schemaStr.size();
+	}
 
 	public final TypeSide<Ty, Sym> ty;
 	
@@ -376,7 +383,7 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 	public ColimitSchema(TypeSide<Ty, Sym> ty, Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes, 
 			Set<Quad<N,En,N,En>> eqEn, 
 			Set<Quad<String,String,RawTerm,RawTerm>> eqTerms,
-			Map<String, String> options) {
+			AqlOptions options) {
 		this.ty = ty;
 		this.nodes = nodes;
 		
@@ -398,22 +405,25 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		Set<Triple<Pair<Var, Set<Pair<N, En>>>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>>> eqs = new HashSet<>();		
 		makeCoprodSchema(col, eqs, eqcs);
 	
-		AqlOptions ops = new AqlOptions(Util.singMap(AqlOption.prover.toString(), ProverName.fail.toString()), col);
-		DP<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> dp = AqlProver.create(ops, col, ty.js);
+		DP<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> dp = AqlProver.create(options, col, ty.js);
 		
 		//TODO aql dont forget to add equations to collage and to schema
 		//public final Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema;
 		
 		//public final Ctx<N, Mapping<Ty,En,Sym,Fk,Att,Set<Pair<N,En>>,Pair<N,Fk>,Pair<N,Att>>> mappings;
-		boolean b = ! (Boolean) AqlOptions.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
+		boolean b = ! (Boolean) options.getOrDefault(AqlOption.allow_java_eqs_unsafe);
 		
 		Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema = new Schema<>(ty, col.ens, col.atts.map, col.fks.map, eqs, dp, b);
+		//System.out.println("schema " + schema);
 		
 		Pair<Schema<Ty, String, Sym, String, String>, Ctx<N, Mapping<Ty, En, Sym, Fk, Att, String, String, String>>> 
 		x = initialUser(options, col, eqs, eqcs, schema);
-
+		//System.out.println("\n\niuser " + x.first);
+		
 		Schema<Ty, String, Sym, String, String>
 		q = quotient(x.first, eqTerms, options);
+		//System.out.println("q " + q);
+		
 		
 		schemaStr = q;
 		mappingsStr = new Ctx<>();
@@ -427,9 +437,10 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		}
 	}
 	
-	private Schema<Ty, String, Sym, String, String> quotient(Schema<Ty, String, Sym, String, String> sch, Set<Quad<String, String, RawTerm, RawTerm>> eqTerms, Map<String, String> options) {
+	private Schema<Ty, String, Sym, String, String> quotient(Schema<Ty, String, Sym, String, String> sch, Set<Quad<String, String, RawTerm, RawTerm>> eqTerms, AqlOptions options) {
 		Collage<Ty, String, Sym, String, String, Void, Void> col = new Collage<>(sch.collage()); 
-		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> eqs0 = new HashSet<>();
+		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> 
+		eqs0 = new HashSet<>(sch.eqs);
 
 		for (Quad<String, String, RawTerm, RawTerm> eq : eqTerms) {
 			Map<String, Chc<Ty, String>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
@@ -446,15 +457,14 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 			col.eqs.add(new Eq<>(new Ctx<>(new Var(eq.first), v), eq0.second, eq0.third));
 		}
 	
-		boolean b = ! (Boolean) AqlOptions.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
-		AqlOptions ops = new AqlOptions(options, col);		
-		DP<Ty,String,Sym,String,String,Void,Void> dp = AqlProver.create(ops, col, ty.js);
+		boolean b = ! (Boolean) options.getOrDefault(AqlOption.allow_java_eqs_unsafe);
+		DP<Ty,String,Sym,String,String,Void,Void> dp = AqlProver.create(options, col, ty.js);
 		Schema<Ty, String, Sym, String, String> ret = new Schema<>(ty, col.ens, col.atts.map, col.fks.map, eqs0, dp, b);
 		return ret;
 	}
 
 
-	public <E> ColimitSchema(DMG<N, E> shape, TypeSide<Ty, Sym> ty, Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes, Ctx<E, Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att>> edges, Map<String, String> options) {
+	public <E> ColimitSchema(DMG<N, E> shape, TypeSide<Ty, Sym> ty, Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes, Ctx<E, Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att>> edges, AqlOptions options) {
 		this.ty = ty;
 		this.nodes = nodes;
 		
@@ -510,10 +520,9 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 			}
 		}
 	
-		boolean b = ! (Boolean) AqlOptions.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
+		boolean b = ! (Boolean) options.getOrDefault(AqlOption.allow_java_eqs_unsafe);
 			
-		AqlOptions ops = new AqlOptions(Util.singMap(AqlOption.prover.toString(), ProverName.fail.toString()), col);
-		DP<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> dp = AqlProver.create(ops, col, ty.js);
+		DP<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> dp = AqlProver.create(options, col, ty.js);
 		
 		//TODO aql dont forget to add equations to collage and to schema
 		//public final Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema;
@@ -530,7 +539,7 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 	}
 
 
-	private Pair<Schema<Ty, String, Sym, String, String>, Ctx<N, Mapping<Ty, En, Sym, Fk, Att, String, String, String>>> initialUser(Map<String, String> options, Collage<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> col,
+	private Pair<Schema<Ty, String, Sym, String, String>, Ctx<N, Mapping<Ty, En, Sym, Fk, Att, String, String, String>>> initialUser(AqlOptions options, Collage<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> col,
 			Set<Triple<Pair<Var, Set<Pair<N, En>>>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>>> eqs, Ctx<Pair<N, En>, Set<Pair<N, En>>> eqcs, Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema) {
 		Ctx<N, Mapping<Ty,En,Sym,Fk,Att,Set<Pair<N,En>>,Pair<N,Fk>,Pair<N,Att>>> mappings = new Ctx<>();
 		
@@ -567,8 +576,8 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		eqsX = eqs.stream().map(t -> new Triple<>(new Pair<>(t.first.first, conv1(t.first.second)), conv3(t.second), conv3(t.third))).collect(Collectors.toSet());
 		colX.eqs.addAll(col.eqs.stream().map(t -> new Eq<>(t.ctx.map((k,v) -> new Pair<>(k, conv4(v))), conv3(t.lhs), conv3(t.rhs))).collect(Collectors.toSet()));
 		
-		AqlOptions opsX = new AqlOptions(options, colX);
-		DP<Ty, String, Sym, String, String, Void, Void> dpX = AqlProver.create(opsX, colX, ty.js);
+		//AqlOptions opsX = new AqlOptions(options, colX);
+		DP<Ty, String, Sym, String, String, Void, Void> dpX = AqlProver.create(options, colX, ty.js);
 	
 		Schema<Ty, String, Sym, String, String> schemaStr = new Schema<>(ty, colX.ens, colX.atts.map, colX.fks.map, eqsX, dpX, false);
 		

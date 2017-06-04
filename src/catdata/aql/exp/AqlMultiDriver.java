@@ -16,6 +16,7 @@ import catdata.Program;
 import catdata.RuntimeInterruptedException;
 import catdata.Unit;
 import catdata.Util;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Kind;
 import catdata.aql.Pragma;
 import catdata.graph.DAG;
@@ -90,7 +91,8 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	
 	public void start() {
 		checkAcyclic();
-		env.typing = new AqlTyping(prog); // TODO aql line exceptions in typing
+		//set the defaults here
+		env.typing = new AqlTyping(prog, env.defaults); // TODO aql line exceptions in typing
 		init();
 		update();
 		process();
@@ -114,9 +116,11 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	private boolean isEnded() {
 		synchronized (ended) {
-			return ended.i == Runtime.getRuntime().availableProcessors();
+			return ended.i == numProcs;
 		}
 	}
+	
+	static int numProcs = 2; //Runtime.getRuntime().availableProcessors();
 
 	private void barrier() {
 		synchronized (ended) {
@@ -142,7 +146,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	private final List<Thread> threads = new LinkedList<>();
 
 	private void process() {
-		int numProcs = Runtime.getRuntime().availableProcessors();
+	//	int numProcs = 12; //Runtime.getRuntime().availableProcessors();
 		for (int i = 0; i < numProcs; i++) {
 			Thread thr = new Thread(this::call);
 			threads.add(thr);			
@@ -188,7 +192,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			return changed.get(n);
 		}
 		Exp<?> prev = last_prog.exps.get(n);
-		if (prev == null) {
+		if (prev == null || (Boolean) prog.exps.get(n).getOrDefault(env.defaults, AqlOption.always_reload)) {
 			changed.put(n, true);
 			return true;
 		}
@@ -240,7 +244,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				Exp<?> exp = prog.exps.get(n);
 				Kind k = exp.kind();
 				k2 = k.toString();
-				Object val = Util.timeout(() -> exp.eval(env), exp.timeout() * 1000);
+				Object val = Util.timeout(() -> exp.eval(env), (Long)exp.getOrDefault(env.defaults, AqlOption.timeout) * 1000);
 				// Object val = exp.eval(env);
 				if (val == null) {
 					throw new RuntimeException("anomaly, please report: null result on " + exp);

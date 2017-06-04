@@ -1100,7 +1100,7 @@ public class Signature {
 		}
 
 		for (Eq eq : sig.eqs) {
-			ret.add(EmbeddedDependency.eq2(pre, eq.lhs, eq.rhs));
+			ret.add(EmbeddedDependency.eq2(pre, eq.lhs, eq.rhs)); //TODO phokion
 		}
 
 		for (Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>> eq : xxx.second) {

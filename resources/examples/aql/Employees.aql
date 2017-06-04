@@ -111,3 +111,11 @@ instance IJava = literal : SJava {
 		age(a) = "2" 
 		age(manager(a)) = "1"
 }
+
+instance IRandom = random : SJava {
+	generators
+		Employee -> 10
+		Department -> 2
+	//options
+	//	random_seed = 2
+}

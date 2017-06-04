@@ -2,13 +2,15 @@ package catdata.aql.exp;
 
 import catdata.Pair;
 import catdata.Program;
+import catdata.aql.AqlOptions;
 import catdata.graph.DMG;
 
 public class AqlTyping {
 	
 	//TODO aql turn into visitor
 	
-	public AqlTyping(Program<Exp<?>> prog) {
+	public AqlTyping(Program<Exp<?>> prog, AqlOptions defaults) {
+		this.defaults = defaults;
 		for (String s : prog.order) {
 			Exp<?> e = prog.exps.get(s);
 			switch (e.kind()) {
@@ -54,4 +56,5 @@ public class AqlTyping {
 	//TODO aql
 	public final KindCtx<String, DMG<?,?>, Void, Void, SchExp<?,?,?,?,?>, Pair<InstExp<?,?,?,?,?,?,?,?,?>,InstExp<?,?,?,?,?,?,?,?,?>>, Pair<SchExp<?,?,?,?,?>,SchExp<?,?,?,?,?>>, Pair<SchExp<?,?,?,?,?>,SchExp<?,?,?,?,?>>, Void, Void, ColimSchExp<?,?,?,?,?,?,?>,SchExp<?,?,?,?,?>> defs = new KindCtx<>();
 	
+	public final AqlOptions defaults;
 }

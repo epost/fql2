@@ -44,11 +44,16 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		return Kind.PRAGMA;
 	}
 	
+	
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	public static final class PragmaExpConsistent<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends PragmaExp {
 		public final InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I;
-
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		public PragmaExpConsistent(InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i) {
 			I = i;
 		}
@@ -83,11 +88,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			return "assert_consistent " + I;
 		}
 
-		@Override
-		public long timeout() {
-			return I.timeout();
-		}
-
+		
 		@Override
 		public Pragma eval(AqlEnv env) {
 			return new Pragma() {
@@ -127,6 +128,10 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			I = i;
 			C = c;
 		}
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 
 		@Override
 		public int hashCode() {
@@ -164,10 +169,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			return "check " + C + " " + I;
 		}
 
-		@Override
-		public long timeout() {
-			return I.timeout();
-		}
+		
 
 		@Override
 		public Pragma eval(AqlEnv env) {
@@ -222,8 +224,10 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 	public static final class PragmaExpLoadJars extends PragmaExp {
 
-		public final List<String> files;
-
+		public final List<String> files;@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		public PragmaExpLoadJars(List<String> files) {
 			this.files = files;
 			//this isn't side effect free, but it should be benign, or at least as benign as having direct access to the classpath from the command line
@@ -269,10 +273,6 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			return true;
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
 
 		@Override
 		public Pragma eval(AqlEnv env) {
@@ -310,8 +310,8 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public final GraphExp<N2, E2> dst;
 
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		public Map<String, String> options() {
+			return options;
 		}
 
 		public PragmaExpMatch(String which, GraphExp<N1, E1> src, GraphExp<N2, E2> dst, List<Pair<String, String>> options) {
@@ -430,8 +430,8 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		private final Map<String, String> options;
 
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		public Map<String, String> options() {
+			return options;
 		}
 
 		public PragmaExpSql(String clazz, String jdbcString, List<String> sqls, List<Pair<String, String>> options) {
@@ -466,13 +466,6 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			if (getClass() != obj.getClass())
 				return false;
 			PragmaExpSql other = (PragmaExpSql) obj;
-
-			AqlOptions op = new AqlOptions(options, null);
-			Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-			if (reload) {
-				return false;
-			}
-
 			if (clazz == null) {
 				if (other.clazz != null)
 					return false;
@@ -530,8 +523,8 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public final InstExp<Ty, En, Sym, Att, Fk, Gen, Sk, X, Y> inst;
 
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		public Map<String, String> options() {
+			return options;
 		}
 
 		public PragmaExpToCsvInst(InstExp<Ty, En, Sym, Att, Fk, Gen, Sk, X, Y> inst, String file, List<Pair<String, String>> options) {
@@ -543,7 +536,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public Pragma eval(AqlEnv env) {
-			AqlOptions op = new AqlOptions(options, null);
+			AqlOptions op = new AqlOptions(options, null, env.defaults);
 			return new ToCsvPragmaInstance<>(inst.eval(env), file, InstExpCsv.getFormat(op), (String) op.getOrDefault(AqlOption.id_column_name));
 		}
 
@@ -575,13 +568,6 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			if (getClass() != obj.getClass())
 				return false;
 			PragmaExpToCsvInst<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (PragmaExpToCsvInst<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
-
-			AqlOptions op = new AqlOptions(options, null);
-			Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-			if (reload) {
-				return false;
-			}
-
 			if (file == null) {
 				if (other.file != null)
 					return false;
@@ -618,8 +604,8 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public final TransExp<Ty, En, Sym, Att, Fk, Gen1, Sk1, X1, Y1, Gen2, Sk2, X2, Y2> trans;
 
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		public Map<String, String> options() {
+			return options;
 		}
 
 		public PragmaExpToCsvTrans(TransExp<Ty, En, Sym, Att, Fk, Gen1, Sk1, X1, Y1, Gen2, Sk2, X2, Y2> trans, String file, List<Pair<String, String>> options) {
@@ -647,13 +633,6 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			if (getClass() != obj.getClass())
 				return false;
 			PragmaExpToCsvTrans<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (PragmaExpToCsvTrans<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
-
-			AqlOptions op = new AqlOptions(options, null);
-			Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-			if (reload) {
-				return false;
-			}
-
 			if (file == null) {
 				if (other.file != null)
 					return false;
@@ -689,7 +668,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public Pragma eval(AqlEnv env) {
-			return new ToCsvPragmaTransform<>(trans.eval(env), file, InstExpCsv.getFormat(new AqlOptions(options, null)));
+			return new ToCsvPragmaTransform<>(trans.eval(env), file, InstExpCsv.getFormat(new AqlOptions(options, null, env.defaults)));
 		}
 	}
 
@@ -699,8 +678,8 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public final String var;
 
 		@Override
-		public long timeout() {
-			return 0;
+		public Map<String, String> options() {
+			return Collections.emptyMap();
 		}
 
 		@Override
@@ -755,12 +734,13 @@ public abstract class PragmaExp extends Exp<Pragma> {
 	public static final class PragmaExpJs extends PragmaExp {
 		private final List<String> jss;
 
-		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-		}
-
+	
 		private final Map<String, String> options;
+		
+		@Override
+		public Map<String, String> options() {
+			return options;
+		}
 
 		public PragmaExpJs(List<String> jss, List<Pair<String, String>> options) {
 			this.options = Util.toMapSafely(options);
@@ -785,12 +765,6 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			if (getClass() != obj.getClass())
 				return false;
 			PragmaExpJs other = (PragmaExpJs) obj;
-
-			AqlOptions op = new AqlOptions(options, null);
-			Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-			if (reload) {
-				return false;
-			}
 
 			if (options == null) {
 				if (other.options != null)
@@ -833,8 +807,8 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		private final List<String> cmds;
 
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		public Map<String, String> options() {
+			return options;
 		}
 
 		private final Map<String, String> options;
@@ -862,12 +836,6 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			if (getClass() != obj.getClass())
 				return false;
 			PragmaExpProc other = (PragmaExpProc) obj;
-
-			AqlOptions op = new AqlOptions(options, null);
-			Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-			if (reload) {
-				return false;
-			}
 
 			if (options == null) {
 				if (other.options != null)
@@ -919,8 +887,8 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public final InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
 
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		public Map<String, String> options() {
+			return options;
 		}
 
 		public PragmaExpToJdbcInst(InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i, String clazz, String jdbcString, String prefix, List<Pair<String, String>> options) {
@@ -943,7 +911,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public Pragma eval(AqlEnv env) {
-			return new ToJdbcPragmaInstance<>(prefix, I.eval(env), clazz, jdbcString, options);
+			return new ToJdbcPragmaInstance<>(prefix, I.eval(env), clazz, jdbcString, new AqlOptions(options, null, env.defaults));
 		}
 
 		@Override
@@ -977,12 +945,6 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			if (getClass() != obj.getClass())
 				return false;
 			PragmaExpToJdbcInst<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (PragmaExpToJdbcInst<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
-
-			AqlOptions op = new AqlOptions(options, null);
-			Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-			if (reload) {
-				return false;
-			}
 
 			if (I == null) {
 				if (other.I != null)
@@ -1027,8 +989,8 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public final TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
 
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+		public Map<String, String> options() {
+			return options;
 		}
 
 		public PragmaExpToJdbcTrans(TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h, String clazz, String jdbcString, String prefix, List<Pair<String, String>> options) {
@@ -1051,7 +1013,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public Pragma eval(AqlEnv env) {
-			return new ToJdbcPragmaTransform<>(prefix, h.eval(env), clazz, jdbcString, options);
+			return new ToJdbcPragmaTransform<>(prefix, h.eval(env), clazz, jdbcString, new AqlOptions(options, null, env.defaults));
 		}
 
 		//TODO aql maybe quote for RHS of options
@@ -1087,12 +1049,6 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			if (getClass() != obj.getClass())
 				return false;
 			PragmaExpToJdbcTrans<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (PragmaExpToJdbcTrans<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
-
-			AqlOptions op = new AqlOptions(options, null);
-			Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-			if (reload) {
-				return false;
-			}
 
 			if (h == null) {
 				if (other.h != null)

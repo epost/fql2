@@ -9,8 +9,6 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
@@ -24,16 +22,13 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 	private final String clazz;
 	private final String idCol;
 
-	@SuppressWarnings("unused")
-	private final Map<String, String> options;
-
 	private final Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h;
 	
 	private final String colTy;
 	private final int colTy0;
 
 	//TODO aql column type mapping for jdbc instance export
-	public ToJdbcPragmaTransform(String prefix, Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h, String clazz, String jdbcString, Map<String, String> options) {
+	public ToJdbcPragmaTransform(String prefix, Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h, String clazz, String jdbcString, AqlOptions options) {
 		try {
 			Class.forName(clazz);
 		} catch (ClassNotFoundException e) {
@@ -42,10 +37,9 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 		this.jdbcString = jdbcString;
 		this.prefix = prefix;
 		this.h = h;
-		this.options = options;
 		this.clazz = clazz;
-		idCol = (String) new AqlOptions(options, null).getOrDefault(AqlOption.id_column_name);
-		colTy = "VARCHAR(" + new AqlOptions(options, null).getOrDefault(AqlOption.varchar_length) + ")";
+		idCol = (String) options.getOrDefault(AqlOption.id_column_name);
+		colTy = "VARCHAR(" + options.getOrDefault(AqlOption.varchar_length) + ")";
 		colTy0 = Types.VARCHAR;
 		assertDisjoint();
 	}

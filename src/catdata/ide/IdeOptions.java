@@ -1,6 +1,7 @@
 package catdata.ide;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -53,8 +54,6 @@ public class IdeOptions {
 	private static File fname = new File(".fql.properties");
 
 	public static IdeOptions theCurrentOptions = new IdeOptions();
-
-	
 	
 	static {
 		if (fname.exists()) {
@@ -429,7 +428,7 @@ public class IdeOptions {
 			a.setForeground(getColor(o));
 			return;	
 		case LINE_WRAP:
-			a.setLineWrap(getBool(o));
+		//	a.setLineWrap(getBool(o));
 			return;
 		case SELECTION_COLOR:
 			a.setSelectionColor(getColor(o));
@@ -605,10 +604,8 @@ public class IdeOptions {
 		BRACKET_MATCH_BG_COLOR(IdeOptionType.COLOR, RSyntaxTextArea.getDefaultBracketMatchBGColor()),
 		BRACKET_MATCH_BORDER_COLOR(IdeOptionType.COLOR, RSyntaxTextArea.getDefaultBracketMatchBorderColor()),
 		
-		MARGIN_COLS(IdeOptionType.NAT, 100),
-		TAB_SIZE(IdeOptionType.NAT, 4)
-		
-		;
+		MARGIN_COLS(IdeOptionType.NAT, 128),
+		TAB_SIZE(IdeOptionType.NAT, 4);
 
 		public final IdeOptionType type;
 		public final Object default0;
@@ -799,12 +796,20 @@ public class IdeOptions {
 	}
 
 	public static void showAbout() {
-		JOptionPane.showMessageDialog(null, new CodeTextPanel("", about()), "About", JOptionPane.PLAIN_MESSAGE, null);
+		//JDialog d = new JDialog()
+		CodeTextPanel p = new CodeTextPanel("", about() + "\n\n" + help());
+		p.setPreferredSize(new Dimension(480,480));
+		JOptionPane.showMessageDialog(null, p, "Help/About", JOptionPane.PLAIN_MESSAGE, null);
 	}
 
 	private static final String aboutErr = "No cdide.properties found.  If you are building from source, make sure cdide.properties is on the classpath.";
 
 	private static String aboutString = null;
+	
+	private static final String helpErr = "No cdide.properties found.  If you are building from source, make sure cdide.properties is on the classpath.";
+
+	private static String helpString = null;
+
 
 	private static String about() {
 		if (aboutString != null) {
@@ -815,6 +820,20 @@ public class IdeOptions {
 			prop.load(in);
 
 			aboutString = in == null ? aboutErr : Util.sep(prop, ": ", "\n\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+			aboutString = aboutErr;
+		}
+		return aboutString;
+	}
+	
+
+	private static String help() {
+		if (helpString != null) {
+			return helpErr;
+		}
+		try (InputStream in = Object.class.getResourceAsStream("/help.txt")) {
+			aboutString = in == null ? helpErr : Util.readFile(in);
 		} catch (IOException e) {
 			e.printStackTrace();
 			aboutString = aboutErr;

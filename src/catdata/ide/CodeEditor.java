@@ -188,7 +188,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		this.id = id;
 		this.title = title;
 		Util.assertNotNull(id);
-		respArea.setWordWrap(true);
+		//respArea.setWordWrap(true);
 		
 		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory
 				.getDefaultInstance();

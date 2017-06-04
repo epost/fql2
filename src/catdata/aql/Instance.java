@@ -16,6 +16,15 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements S
 		return Kind.INSTANCE;
 	}
 	
+	/**	  
+	 * @return sum of rows in the algebra
+	 */
+	@Override
+	public int size() {
+		return algebra().size();
+	}
+
+	
 	public abstract Schema<Ty, En, Sym, Fk, Att> schema();
 	
 	public abstract Ctx<Gen, En> gens(); 

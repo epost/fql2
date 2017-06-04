@@ -1,5 +1,6 @@
 package catdata.aql.exp;
 
+import catdata.aql.AqlOptions;
 import catdata.aql.ColimitSchema;
 import catdata.aql.Comment;
 import catdata.aql.Constraints;
@@ -22,6 +23,8 @@ public final class AqlEnv {
 	public RuntimeException exn = null;
 	
 	public AqlTyping typing = null;
+	
+	public AqlOptions defaults = AqlOptions.initialOptions;
 	
 	public Semantics get(Kind k, String s) {
 		return (Semantics) defs.get(s, k);

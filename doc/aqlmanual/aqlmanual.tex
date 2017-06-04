@@ -163,7 +163,7 @@ The type side $Ty$ is an example of a {\it literal}; i.e., an expression that ev
 
 Many expressions contain import sections.  For example, a typeside $T$ can import another typeside $T'$, whose effect is the same as if $T'$ were textually included in $T$.  In the above example, $Ty$ imports the typeside for arithmetic.
 
-Many expressions contain lists of key-value pairs that specify options in an option section.  The defaults of these options many change with new releases of AQL and are displayed in the AQL pane of the AQL IDE options menu.  The effect of these options is described in the rest of the manual.  In the above example, the execution timeout for the type side is set to five seconds.
+Many expressions contain lists of key-value pairs that specify options in an option section.  The defaults of these options many change with new releases of AQL and are displayed in the AQL pane of the AQL IDE options menu.  The effect of these options is described in the rest of the manual.  In the above example, the execution timeout for the type side is set to five seconds.  Every expression that supports options supports the timeout option, as well as the GUI (display) options and the always reload option.
  
 \section{AQL's Typing Discipline}
 
@@ -207,7 +207,7 @@ The AQL IDE provides code-assistance functions.  For example, if $S$ and $T$ are
 
 \section{Theorem Proving}
 
-The AQL engine uses automated theorem proving technology to ensure that AQL programs cannot fail at runtime (modulo javascript errors), or materialize instances that do not satisfy their data integrity constraints.  To provide this guarantee, every AQL typeside, schema, and instance must be a decidable equational theory.  Not all equational theories are decidable; moreover, automated theorem proving methods can be slow or incomplete.  The AQL engine provides a number of theorem provers which by default it uses automatically as appropriate; however, specific theorem provers can be chosen by using the {\tt prover} option.  In addition, schema mappings and transforms are required to preserve provable equality; this behavior can be disabled with the {\tt dont\_validate\_unsafe} option.  To find out which prover is being used, click the ``info'' button in the ``DP'' pane in the viewer.  The DP pane also allows users to decide the equality of arbitrary terms by entering them as text (useful for debugging AQL programs).
+The AQL engine uses automated theorem proving technology to ensure that AQL programs cannot fail at runtime (modulo javascript errors), or materialize instances that do not satisfy their data integrity constraints.  To provide this guarantee, every AQL typeside, schema, and instance must be a decidable equational theory.  Not all equational theories are decidable; moreover, automated theorem proving methods can be slow or incomplete.  The AQL engine provides a number of theorem provers which by default it uses automatically as appropriate; however, specific theorem provers can be chosen by using the {\tt prover} option.  In addition, schema mappings and transforms and queries are required to preserve provable equality; this behavior can be disabled with the {\tt dont\_validate\_unsafe} option.  To find out which prover is being used, click the ``info'' button in the ``DP'' pane in the viewer.  The DP pane also allows users to decide the equality of arbitrary terms by entering them as text (useful for debugging AQL programs).
 
 \section{Provenance / Lineage of generated IDs}
 
@@ -346,7 +346,7 @@ A {\tt ctx(<entity>, <instance>, ctx(<attribute>, <term>))}.  The instance uses 
 A {\tt ctx(<foreign key>, <transform>)}.
 
 \subsection{{\tt options}}
-Allowed are {\tt timeout} and {\tt dont\_validate\_eqs}.  Note that each instance and transform in the query can have its own options.
+Allowed are {\tt timeout} and {\tt dont\_validate\_unsafe}.  Note that each instance and transform in the query can have its own options.
 
 
 \chapter{Kind {\tt constraints}}
@@ -478,6 +478,16 @@ Allowable options are {\tt timeout}, {\tt prover} and related options, and {\tt 
 \section{{\tt chase <constraints> <instance> [number]}}
 
 Chases the input instance with the input constraints up to a maximum number of iterations.  If the chase succeeds, the result instance will satisfy the constraints.
+
+\section{{\tt random : <schema>}}
+
+Constructs a random instance with the specified number of generators per entity or type. Then for each generator $e:s$ and fk/att $f : s \to t$, it adds equation $f(e) = y$, where $y:t$ is a randomly selected generator (or no equation if t has no generators).
+
+\subsection{{\tt generators}}
+A {\tt ctx(<generator> | <labelled null> -> integer)}.
+
+\subsection{{\tt options}}
+Allowable options are the same for literal instances, and {\tt random\_seed}.
 
 \chapter{Kind {\tt transform}}
 \section{{\tt id <instance>}}
@@ -622,6 +632,9 @@ Allowed are {\tt timeout}, {\tt always\_reload},  {\tt id\_column\_name} and {\t
 
 \chapter{{\tt options}}
 
+\section{{\tt random\_seed = integer}}
+Sets the random number generator seed.
+
 \section{{\tt timeout = number (seconds)}}
 Causes execution to halt after {\tt number} seconds.
 
@@ -635,7 +648,7 @@ When disabled, relaxes AQL's nominal typing discipline for colimit instances.
 When enabled, allows arbitrary equations involving java typeside symbols.
 
 \section{{\tt dont\_validate\_unsafe = boolean}}
-When enabled, mappings and transforms are not checked to be equality-preserving.
+When enabled, mappings and transforms and queries are not checked to be equality-preserving.  For a query, when true it also disables decision procedure construction for sub-queries.
 
 \section{{\tt always\_reload = boolean}}
 When enabled, pragmas (which can have side effects, like loading data from CSV files) are always executed and are not cached between runs of the AQL program.
@@ -743,8 +756,31 @@ Filters out equations that are substitution instances of other equations in Knut
 
 Enables special support for associative and commutative operators in Knuth-Bendix completion.
 
+\section{GUI options}
 
+Associated with each object is a {\it size}, according to its kind:
+\begin{itemize}
+\item pragma, constraints: length of the text string
+\item instance: rows in the algebra
+\item colimit schema: size of the schema
+\item graph: nodes + edges
+\item typeside: types + functions + equations
+\item schema: entities + attributes + fks + equations
+\item mapping, transform, query: size of source
+\end{itemize}
 
+The maximum size of such an object to be displayed in the viewer is controlled by the three options below.
 
+\subsection{{\tt gui\_max\_table\_size = integer}}
+
+For instances.
+
+\subsection{{\tt gui\_max\_graph\_size = integer}}
+
+For type sides, (colimit) schemas, mappings, transforms, queries.
+
+\subsection{{\tt gui\_max\_string\_size = integer}}
+
+For pragmas and constraints.
 
 \end{document}

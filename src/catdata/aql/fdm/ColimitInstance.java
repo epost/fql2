@@ -1,7 +1,6 @@
 package catdata.aql.fdm;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -39,7 +38,8 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 
 	private final Instance<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>, ID, Chc<Pair<N,Sk>, Pair<ID, Att>>> J;
 	
-	public ColimitInstance(Schema<Ty, En, Sym, Fk, Att> schema, DMG<N, E> shape, Ctx<N, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> nodes, Ctx<E, Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges, Map<String, String> options) {
+	@SuppressWarnings("unused")
+	public ColimitInstance(Schema<Ty, En, Sym, Fk, Att> schema, DMG<N, E> shape, Ctx<N, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> nodes, Ctx<E, Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges, AqlOptions options) {
 		for (N n : nodes.keySet()) {
 			if (!nodes.get(n).schema().equals(schema)) {
 				throw new RuntimeException("The instance for " + n + " has schema " + nodes.get(n).schema() + ", not " + schema + " as expected");
@@ -84,8 +84,8 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 				col.sks.put(new Pair<>(n,sk), nodes.get(n).sks().get(sk));
 			}
 			for (Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : nodes.get(n).eqs()) {
-				col.eqs.add(new Eq(new Ctx<>(), eq.first.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x)), eq.second.mapGenSk(x -> new Pair<>(n, x) ,x -> new Pair<>(n, x))));
-				eqs.add(new Pair(eq.first.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x)), eq.second.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x))));
+				col.eqs.add(new Eq<>(new Ctx<>(), eq.first.mapGenSk(x -> new Pair<N,Gen>(n, x), x -> new Pair<>(n, x)), eq.second.mapGenSk(x -> new Pair<>(n, x) ,x -> new Pair<>(n, x))));
+				eqs.add(new Pair<>(eq.first.mapGenSk(x -> new Pair<N,Gen>(n, x), x -> new Pair<>(n, x)), eq.second.mapGenSk(x -> new Pair<>(n, x), x -> new Pair<>(n, x))));
 			}
 		}
 		
@@ -93,8 +93,8 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y> h = edges.get(e);
 			for (Gen gen : h.src().gens().keySet()) {
 				Term<Void, En, Void, Fk, Void, Gen, Void> rhs = h.gens().get(gen);
-				eqs.add(new Pair(Term.Gen(new Pair<>(shape.edges.get(e).first, gen)), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), x -> new Pair<>(shape.edges.get(e).second, x), Util.voidFn())));
-				col.eqs.add(new Eq(new Ctx<>(), Term.Gen(new Pair<>(shape.edges.get(e).first, gen)), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), x -> new Pair<>(shape.edges.get(e).second, x), Util.voidFn())));
+				eqs.add(new Pair<>(Term.Gen(new Pair<>(shape.edges.get(e).first, gen)), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), x -> new Pair<N,Gen>(shape.edges.get(e).second, x), Util.voidFn())));
+				col.eqs.add(new Eq<>(new Ctx<>(), Term.Gen(new Pair<>(shape.edges.get(e).first, gen)), rhs.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), x -> new Pair<N,Gen>(shape.edges.get(e).second, x), Util.voidFn())));
 			}
 			for (Sk sk : h.src().sks().keySet()) {
 				Term<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>> rhs = h.sks().get(sk).mapGenSk(x -> new Pair<>(shape.edges.get(e).second, x), x -> new Pair<>(shape.edges.get(e).second, x));
@@ -103,15 +103,15 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			}
 		}
 		
-		AqlOptions strat = new AqlOptions(options, col);  
+		//AqlOptions strat = new AqlOptions(options, col);  
 		
 		Function<Pair<N,Gen>,String> printGen = x -> nodes.get(x.first).algebra().printX(nodes.get(x.first).algebra().nf(Term.Gen(x.second)));
 		Function<Pair<N,Sk>, String> printSk = x -> nodes.get(x.first).algebra().sk(x.second).toString(nodes.get(x.first).algebra()::printY, Util.voidFn());
 		
 		InitialAlgebra<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>, ID> initial 
-		= new InitialAlgebra<>(strat, schema(), col, new It(), printGen, printSk);
+		= new InitialAlgebra<>(options, schema(), col, new It(), printGen, printSk);
 				
-		J = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, initial.dp(), initial, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
+		J = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, initial.dp(), initial, (Boolean) options.getOrDefault(AqlOption.require_consistency), (Boolean) options.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
 		validate();
 	}
 

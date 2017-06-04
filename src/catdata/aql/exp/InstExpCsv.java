@@ -39,10 +39,11 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen> extends InstExp<Ty,En,Sym,Fk,Att,G
 	
 	private final String fileStr;
 	
+
 	@Override
-	public long timeout() {
-		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-	}	
+	public Map<String, String> options() {
+		return options;
+	}
 
 	public InstExpCsv(SchExp<Ty, En, Sym, Fk, Att> schema, String file, /*List<String> imports,*/ List<Pair<String, String>> options) {
 		Util.assertNotNull(schema, options, file);
@@ -280,15 +281,8 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen> extends InstExp<Ty,En,Sym,Fk,Att,G
 		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
-			return false;
-		
+			return false;	
 		InstExpCsv<?, ?, ?, ?, ?, ?> other = (InstExpCsv<?, ?, ?, ?, ?, ?>) obj;
-		AqlOptions op = new AqlOptions(options, null);
-		Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-		if (reload) {
-			return false;
-		}
-		
 		if (fileStr == null) {
 			if (other.fileStr != null)
 				return false;
@@ -320,7 +314,7 @@ public class InstExpCsv<Ty,En,Sym,Fk,Att,Gen> extends InstExp<Ty,En,Sym,Fk,Att,G
 		if (!pre.endsWith("/")) {
             pre += "/";
 		}
-		AqlOptions op = new AqlOptions(options, null);
+		AqlOptions op = new AqlOptions(options, null, env.defaults);
 		String charset0 = (String) op.getOrDefault(AqlOption.csv_charset);
 		Charset charset = Charset.forName(charset0);
 		String idCol = (String) op.getOrDefault(AqlOption.id_column_name);

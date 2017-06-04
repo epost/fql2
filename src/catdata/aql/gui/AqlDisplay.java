@@ -24,11 +24,14 @@ import javax.swing.ListSelectionModel;
 import catdata.LineException;
 import catdata.Pair;
 import catdata.Program;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Kind;
+import catdata.aql.Semantics;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.Exp;
 import catdata.aql.exp.PragmaExp.PragmaExpCheck;
 import catdata.aql.exp.PragmaExp.PragmaExpConsistent;
+import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
 
 //TODO aql suppress instance equations - do not compute/display if not required - maybe make instance an interface
@@ -76,10 +79,40 @@ public final class AqlDisplay implements Disp {
 		
 	}
 	
-	private static JComponent wrapDisplay(Kind kind, Object obj) {
-	//	if (!NEWDEBUG.debug.opl.opl_lazy_gui) {
-			return AqlViewer.view(kind, obj);
-	/*	}
+	private static int getMaxSize(Exp<?> exp, AqlEnv env) {
+		switch (exp.kind()) {
+		case INSTANCE:
+		case TRANSFORM:	
+			return (Integer) exp.getOrDefault(env.defaults, AqlOption.gui_max_table_size);
+						
+		case PRAGMA:
+		case CONSTRAINTS:
+			return (Integer) exp.getOrDefault(env.defaults, AqlOption.gui_max_string_size);
+
+		case MAPPING:
+		case QUERY:
+		case SCHEMA:
+		case SCHEMA_COLIMIT:			
+		case GRAPH:			
+		case TYPESIDE:
+			return (Integer) exp.getOrDefault(env.defaults, AqlOption.gui_max_graph_size);
+			
+		case COMMENT:			
+			return 0;
+			
+		default:
+			throw new RuntimeException("Anomaly: please report");
+		} 
+	}
+	
+	private static JComponent wrapDisplay(Exp<?> exp, Semantics obj, AqlEnv env) {
+		int maxSize = getMaxSize(exp, env);
+		if (obj.size() > maxSize) {
+			return new CodeTextPanel("", "Display supressed, size > " + maxSize + ".\n\nSee manual for a description of size, or try options gui_max_Z_size = X for X > " + obj.size() + " (the size of this object) and Z one of table, graph, string.  \n\nWarning: sizes that are too large will hang the viewer." );
+		}
+		 
+		return AqlViewer.view(obj);
+	/*
 		JPanel ret = new JPanel(new GridLayout(1,1));
 		JPanel lazyPanel = new JPanel();
 		JButton button = new JButton("Show");
@@ -108,10 +141,10 @@ public final class AqlDisplay implements Disp {
 				continue;
 			}
 			if (env.defs.keySet().contains(c)) {
-				Object obj = env.defs.get(c, exp.kind());
+				Semantics obj = (Semantics) env.defs.get(c, exp.kind());
 				
 				try {
-					frames.add(new Pair<>(doLookup(c, exp, env), wrapDisplay(exp.kind(), obj)));
+					frames.add(new Pair<>(doLookup(c, exp, env), wrapDisplay(exp, obj, env)));
 				} catch (RuntimeException ex) {
 					ex.printStackTrace();
 					throw new LineException(ex.getMessage(), c, exp.kind().toString());

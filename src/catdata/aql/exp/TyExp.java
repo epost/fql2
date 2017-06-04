@@ -2,6 +2,7 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import catdata.Pair;
 import catdata.Util;
@@ -10,6 +11,7 @@ import catdata.aql.TypeSide;
 
 public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	
+
 	@Override
 	public Kind kind() {
 		return Kind.TYPESIDE;
@@ -20,12 +22,14 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 
 	public static final class TyExpSch<Ty, Sym> extends TyExp<Ty, Sym> {
 		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
+		
 		public final SchExp<Ty, ?, Sym, ?, ?> schema;
 
 		public TyExpSch(SchExp<Ty, ?, Sym, ?, ?> schema) {
-			if (schema == null) {
-				throw new RuntimeException("Attempt to take the typeside of a null schema");
-			}
 			this.schema = schema;
 		}
 
@@ -64,10 +68,7 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 			return schema.deps();
 		}
 
-		@Override
-		public long timeout() {
-			return schema.timeout();
-		}		
+			
 		
 	}
 	 
@@ -75,18 +76,17 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 
 	public static final class TyExpEmpty extends TyExp<Void,Void> {
 		
-		@Override
-		public long timeout() {
-			return 0;
-		}
+		
 
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Collections.emptyList();
 		}
-		
-		public TyExpEmpty() { 
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
 		}
+		
 		
 		@Override
 		public TypeSide<Void,Void> eval(AqlEnv env) {
@@ -116,8 +116,8 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		public final TypeSide<Ty, Sym> typeSide;
 		
 		@Override
-		public long timeout() {
-			return 0;
+		public Map<String, String> options() {
+			return Collections.emptyMap();
 		}
 		
 		@Override
@@ -171,8 +171,8 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		public final String var;
 		
 		@Override
-		public long timeout() {
-			return 0;
+		public Map<String, String> options() {
+			return Collections.emptyMap();
 		}
 		
 		@Override

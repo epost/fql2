@@ -1,6 +1,5 @@
 package catdata.aql.fdm;
 
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,7 +27,7 @@ extends Transform<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Row<En2,ID>, Chc<Y, Pair<ID,
 	private final Ctx<Gen, Term<Void, En2, Void, Fk2, Void, Row<En2, ID>, Void>> gens = new Ctx<>();
 	private final Ctx<Sk, Term<Ty, En2, Sym, Fk2, Att2, Row<En2, ID>, Chc<Y, Pair<ID, Att1>>>> sks = new Ctx<>();
 	
-	public CoEvalEvalUnitTransform(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> i, Map<String, String> options) {
+	public CoEvalEvalUnitTransform(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> i, AqlOptions options) {
 		if (!q.dst.equals(i.schema())) {
 			throw new RuntimeException("Q has dst schema " + q.src + " but instance has schema " + i.schema());
 		}
@@ -55,7 +54,7 @@ extends Transform<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Row<En2,ID>, Chc<Y, Pair<ID,
 			Term<Ty, En2, Sym, Fk2, Att2, Row<En2, ID>, Chc<Y, Pair<ID, Att1>>> w = y2.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
 			sks.put(sk, w);
 		}	
-		validate((Boolean) AqlOptions.getOrDefault(options, AqlOption.dont_validate_unsafe));
+		validate((Boolean) options.getOrDefault(AqlOption.dont_validate_unsafe));
 	}
 	
 	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Pair<ID, Att1>>> trans0(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {

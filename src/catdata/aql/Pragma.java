@@ -12,4 +12,12 @@ public abstract class Pragma implements Semantics {
 	@Override
 	public abstract String toString();
 
+	/**	  
+	 * @return length of text string
+	 */
+	@Override
+	public int size() {
+		return toString().length();
+	}
+
 }

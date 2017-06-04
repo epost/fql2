@@ -1,17 +1,17 @@
 package catdata.aql.fdm;
 
-import java.util.Map;
 import java.util.function.Function;
 
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.AqlOptions;
 import catdata.aql.Instance;
+import catdata.aql.It.ID;
 import catdata.aql.Mapping;
 import catdata.aql.Term;
 import catdata.aql.Transform;
-import catdata.aql.It.ID;
 
 
 public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2, X1, Y1, X2, Y2> extends Transform<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, Gen2, Sk2, ID, Chc<Sk1, Pair<ID, Att2>>, ID, Chc<Sk2, Pair<ID, Att2>>>  {
@@ -28,7 +28,7 @@ public class SigmaTransform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, 
 	private final Ctx<Sk1, Term<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2>> sks = new Ctx<>();
 	
 	//TODO: aql this recomputes the instances
-	public SigmaTransform(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h,  Map<String, String> options1,  Map<String, String> options2) {
+	public SigmaTransform(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h, AqlOptions options1,  AqlOptions options2) {
 		if (!h.src().schema().equals(f.src)) {
 			throw new RuntimeException("Source of mapping is " + f.src + " but instances are on " + h.src().schema());
 		}

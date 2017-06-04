@@ -1,6 +1,7 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -54,6 +55,11 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		
 		public final Set<Pair<List<String>,List<String>>> eqTerms2; 
 		
+		@Override
+		public Map<String, String> options() {
+			return options;
+		}
+		
 		public  Map<String, String> options;
 		
 		
@@ -75,11 +81,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			this.options = Util.toMapSafely(options);
 		}
 
-		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-		}
-
+	
 		@Override
 		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
 			Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes0 = new Ctx<>();
@@ -90,7 +92,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			for (Pair<List<String>, List<String>> t : eqTerms2) {
 				eqs.add(new Quad<>("_v0", null, tr(t.first), tr(t.second)));
 			}
-			return new ColimitSchema<>(ty.eval(env), nodes0, eqEn, eqs, options);		
+			return new ColimitSchema<>(ty.eval(env), nodes0, eqEn, eqs, new AqlOptions(options, null, env.defaults));		
 		}
 	
 		private static RawTerm tr(List<String> l) {
@@ -194,6 +196,11 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	
 	public static final class ColimSchExpVar extends ColimSchExp<Object, Object, Object, Object, Object, Object, Object> {
 		public final String var;
+		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 
 		@Override
 		public SchExp<Object, Object, Object, Object, Object> getNode(Object n, AqlTyping G) {
@@ -237,12 +244,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		}
 		
 	
-		@Override
-		public long timeout() {
-			return 0;
-		}
-
-		@SuppressWarnings("unchecked")
+			@SuppressWarnings("unchecked")
 		@Override
 		public ColimSchExp<Object, Object, Object, Object, Object, Object, Object> type(AqlTyping G) {
 			return (catdata.aql.exp.ColimSchExp<Object, Object, Object, Object, Object, Object, Object>) 
@@ -269,6 +271,11 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		public final MapExp<Ty,String,Sym,String,String,String,String,String> toUser;
 		
 		public final MapExp<Ty,String,Sym,String,String,String,String,String> fromUser;
+		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		
 		@Override
 		public SchExp<Ty, En, Sym, Fk, Att> getNode(N n, AqlTyping G) {
@@ -325,10 +332,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			return colim.type(G);
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
+	
 
 		@Override
 		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
@@ -362,6 +366,11 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		public final Map<String, String> options;
 		
 		@Override
+		public Map<String, String> options() {
+			return options;
+		}
+		
+		@Override
 		public SchExp<Ty, En, Sym, Fk, Att> getNode(N n, AqlTyping G) {
 			return nodes.get(n);
 		}
@@ -374,10 +383,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			this.options = Util.toMapSafely(options);
 		}
 
-		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-		}
+	
 
 		@Override
 		public String toString() {
@@ -462,7 +468,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			for (E e : edges.keySet()) {
 				edges0.put(e, edges.get(e).eval(env));
 			}
-			return new ColimitSchema<>(shape.eval(env).dmg, ty.eval(env), nodes0, edges0, options);
+			return new ColimitSchema<>(shape.eval(env).dmg, ty.eval(env), nodes0, edges0, new AqlOptions(options, null, env.defaults));
 		}
 
 		@Override
@@ -490,9 +496,9 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		private final Map<String, String> options; 
 		
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-		}	
+		public Map<String, String> options() {
+			return options;
+		}
 		
 		//typesafe by covariance of read only collections
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -646,9 +652,10 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			return "modify {\n" + toString + "}";
 		} 
 
+		//TODO aql add options
 		@Override
 		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
-			boolean checkJava = ! (Boolean) AqlOptions.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
+			boolean checkJava = ! (Boolean) env.defaults.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
 			ColimitSchema<N, Ty, En, Sym, Fk, Att> colim0 = colim.eval(env);
 			for (Pair<String, String> k : ens) {
 				colim0 = colim0.renameEntity(k.first, k.second, checkJava);

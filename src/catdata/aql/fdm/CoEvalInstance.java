@@ -1,7 +1,6 @@
 package catdata.aql.fdm;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -33,7 +32,8 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 	private final InitialAlgebra<Ty, En1, Sym, Fk1, Att1, Pair<Var, X>, Y, ID> init;
 	private final Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, Att1>>> I;
 	
-	public CoEvalInstance(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q, Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> J, Map<String, String> options) {
+	@SuppressWarnings("unused")
+	public CoEvalInstance(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q, Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> J, AqlOptions options) {
 		if (!Q.dst.equals(J.schema())) {
 			throw new RuntimeException("In co-eval instance, target of query is " + Q.dst + ", but instance has type " + J.schema());
 		}
@@ -62,8 +62,8 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 					if (!eq.ctx.isEmpty()) {
 						throw new RuntimeException("Anomaly: please report");
 					}
-					eqs.add(new Pair<>(eq.lhs.mapGenSk(x -> new Pair(x, j), Util::abort), 
-									   eq.rhs.mapGenSk(x -> new Pair(x, j), Util::abort)));
+					eqs.add(new Pair<>(eq.lhs.mapGenSk(x -> new Pair<Var,X>(x, j), x -> Util.abort(x)), 
+									   eq.rhs.mapGenSk(x -> new Pair<>(x, j), x -> Util.abort(x))));
 				}
 				for (Fk2 fk : J.schema().fksFrom(t)) {
 					Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> 
@@ -91,13 +91,13 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 			col.eqs.add(new Eq<>(new Ctx<>(), eq.first, eq.second));			
 		}
 	
-		AqlOptions strat = new AqlOptions(options, col);  
+		//AqlOptions strat = new AqlOptions(options, col);  
 				
 		Function<Pair<Var,X>, String> printGen = x -> x.first + " " + J.algebra().printX(x.second);
 		Function<Y, String> printSk = J.algebra()::printY; //TODO aql printing coeval
 		
-		init = new InitialAlgebra<>(strat, schema(), col, new It(), printGen, printSk);	
-		I = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, init.dp(), init, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
+		init = new InitialAlgebra<>(options, schema(), col, new It(), printGen, printSk);	
+		I = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, init.dp(), init, (Boolean) options.getOrDefault(AqlOption.require_consistency), (Boolean) options.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
 		validate();
 	}
 

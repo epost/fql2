@@ -41,8 +41,8 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 	private final Map<String, String> map;
 
 	@Override
-	public long timeout() {
-		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
+	public Map<String, String> options() {
+		return options;
 	}
 
 	public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema,
@@ -118,6 +118,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 			return Term.Sym(objectToSym(rhs), Collections.emptyList());
 		}
 		return Util.anomaly();
+		//throw new RuntimeException("One of the following conditions has not been trigger 1) the 2nd column value, " + rhs + " is not null, and " + ty + " is not a type");	
 	}
 
 	@SuppressWarnings("unchecked")
@@ -130,6 +131,12 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 	@Override
 	public Instance<Ty, En, Sym, Fk, Att, Gen, Null<Ty>, Gen, Null<Ty>> eval(AqlEnv env) {
 		Schema<Ty, En, Sym, Fk, Att> sch = schema.eval(env);
+		for (Ty ty : sch.typeSide.tys) {
+			if (!sch.typeSide.js.java_tys.containsKey(ty)) {
+				throw new RuntimeException("Import is only allowed onto java types");
+			}
+		}
+
 
 		Map<En, String> ens = new HashMap<>();
 		Map<Ty, String> tys = new HashMap<>();
@@ -156,7 +163,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 		Ctx<Ty, Collection<Null<Ty>>> tys0 = new Ctx<>();
 		Ctx<Gen, Ctx<Fk, Gen>> fks0 = new Ctx<>();
 		Ctx<Gen, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<Ty>>>> atts0 = new Ctx<>();
-		AqlOptions op = new AqlOptions(options, null);
+		AqlOptions op = new AqlOptions(options, null, env.defaults);
 
 		for (Ty ty : sch.typeSide.tys) {
 			tys0.put(ty, Util.singList(new Null<>(ty)));
@@ -370,11 +377,6 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 		if (getClass() != obj.getClass())
 			return false;
 		InstExpJdbc<?, ?, ?, ?, ?, ?> other = (InstExpJdbc<?, ?, ?, ?, ?, ?>) obj;
-		AqlOptions op = new AqlOptions(options, null);
-		Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-		if (reload) {
-			return false;
-		}
 		if (clazz == null) {
 			if (other.clazz != null)
 				return false;

@@ -17,6 +17,11 @@ import catdata.Util;
 //apparently iteration of a set is not deterministic between calls, use linkedhashset if need deterministic order
 public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics {
 	
+	@Override
+	public int size() {
+		return src.size();
+	}
+	
 	public static <Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,En3,Fk3,Att3> Mapping<Ty,En1,Sym,Fk1,Att1,En3,Fk3,Att3> compose(Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> m1, Mapping<Ty,En2,Sym,Fk2,Att2,En3,Fk3,Att3> m2) {
 		if (!m1.dst.equals(m2.src)) {
 			throw new RuntimeException("Anomaly, please report.\n\n" + m1.dst + "\n\n" + m2.src);

@@ -35,7 +35,6 @@ import catdata.aql.Comment;
 import catdata.aql.Constraints;
 import catdata.aql.DP;
 import catdata.aql.Instance;
-import catdata.aql.Kind;
 import catdata.aql.Mapping;
 import catdata.aql.Morphism;
 import catdata.aql.Pragma;
@@ -73,11 +72,10 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		return obj.toString().replace("\n", "<br>").replace("\t", "&nbsp;");
 	}
 
-	public static JComponent view(@SuppressWarnings("unused") Kind kind, Object obj) {
-		Semantics s = (Semantics) obj;
+	public static JComponent view(Semantics s) {
 		JTabbedPane ret = new JTabbedPane();
 		new AqlViewer().visit(ret, s);
-		ret.addTab("Text", new CodeTextPanel("", obj.toString()));
+		ret.addTab("Text", new CodeTextPanel("", s.toString()));
 		return ret;
 	}
 

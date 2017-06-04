@@ -44,9 +44,9 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	private final List<Pair<Att2, RawTerm>> atts;
 	
 	@Override
-	public long timeout() {
-		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-	}	
+	public Map<String, String> options() {
+		return options;
+	}
 	
 	public static class Trans {
 		public final List<Pair<Var, RawTerm>> gens; 
@@ -183,6 +183,10 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			}
 			this.eqs = eqs;
 			this.options = Util.toMapSafely(options);
+			if (this.options.containsKey(AqlOption.dont_validate_unsafe.toString())) {
+				throw new RuntimeException("option dont_validate_unsafe should be at the top level of the query");
+			}
+			
 		}
 
 		private String toString;
@@ -380,7 +384,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		Schema<Ty, En1, Sym, Fk1, Att1> src0 = src.eval(env);
 		Schema<Ty, En2, Sym, Fk2, Att2> dst0 = dst.eval(env);
 	
-		Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, Map<String, String>>> ens0 = new Ctx<>();
+		Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens0 = new Ctx<>();
 		Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts0 = new Ctx<>();
 		Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> fks0 = new Ctx<>();
 	
@@ -419,7 +423,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 				Triple<Ctx<String,Chc<Ty,En1>>,Term<Ty,En1,Sym,Fk1,Att1,Var,Void>,Term<Ty,En1,Sym,Fk1,Att1,Var,Void>> x = RawTerm.infer1(ctx0.map, eq.first, eq.second, col, src0.typeSide.js);
 				eqs.add(new Eq<>(new Ctx<>(), freeze(x.second), freeze(x.third)));
 			}
-			Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, Map<String, String>> b = new Triple<>(ctx, eqs, p.second.options);
+			Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions> b = new Triple<>(ctx, eqs, new AqlOptions(p.second.options,null,env.defaults));
 			ens0.put(p.first, b);
 		}
 		
@@ -440,14 +444,14 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 				Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term = RawTerm.infer0(ctx.map, v.second, required , col, "in foreign key " + p.first + ", ", src0.typeSide.js);
 				trans.put(v.first, freeze(term).convert());
 			}
-			boolean doNotCheckEqs = (Boolean) new AqlOptions(p.second.options, null).getOrDefault(AqlOption.dont_validate_unsafe); 
+			boolean doNotCheckEqs = (Boolean) new AqlOptions(p.second.options, null, env.defaults).getOrDefault(AqlOption.dont_validate_unsafe); 
 			fks0.put(p.first, new Pair<>(trans, doNotCheckEqs));
 		}
 	
 		
-		boolean doNotCheckEqs = (Boolean) new AqlOptions(options, null).getOrDefault(AqlOption.dont_validate_unsafe); 
+		boolean doNotCheckEqs = (Boolean) new AqlOptions(options, null, env.defaults).getOrDefault(AqlOption.dont_validate_unsafe); 
 		
-		return new Query<>(ens0, atts0, fks0, src0, dst0, doNotCheckEqs );
+		return new Query<>(ens0, atts0, fks0, src0, dst0, doNotCheckEqs);
 	}
 
 	private Term<Ty, En1, Sym, Fk1, Att1, Var, Void> freeze(Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term) {

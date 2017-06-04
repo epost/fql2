@@ -69,7 +69,7 @@ class IDE {
 				f.setContentPane(gui.first);
 				f.setMenuBar(gui.second);
 				f.pack();
-				f.setSize(840, 630);
+				f.setSize(1024, 640);
 				f.setLocationRelativeTo(null);
 				f.setVisible(true);
 				

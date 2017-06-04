@@ -254,11 +254,13 @@ public class GUI extends JPanel {
 		toolsMenu.add(easikItem);
 		easikItem.addActionListener(x -> easik.Easik.main(new String[0]));
 		
-		Menu helpMenu = new Menu("About");
-		MenuItem aboutItem = new MenuItem("About");
+		Menu helpMenu = new Menu("Help");
+		MenuItem aboutItem = new MenuItem("Help/About");
 		helpMenu.add(aboutItem);
 		aboutItem.addActionListener(e -> IdeOptions.showAbout());
-
+		JButton helpb = new JButton("Help");
+		helpb.addActionListener(e -> IdeOptions.showAbout());
+		
 		openItem.addActionListener(e -> openActionAlternate());
 
 		saveItem.addActionListener(e -> saveAction());
@@ -348,6 +350,7 @@ public class GUI extends JPanel {
 		toolBar.add(open_button);
 		toolBar.add(save_button);
 		toolBar.add(optionsb);
+		toolBar.add(helpb);
 		toolBar.add(new JLabel("Load Example:", SwingConstants.RIGHT));
 		toolBar.add(modeBox);
 		toolBar.add(boxPanel);

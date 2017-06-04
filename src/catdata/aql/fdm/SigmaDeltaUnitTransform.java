@@ -1,6 +1,5 @@
 package catdata.aql.fdm;
 
-import java.util.Map;
 import java.util.function.Function;
 
 import catdata.Chc;
@@ -26,7 +25,7 @@ extends Transform<Ty, En1, Sym, Fk1, Att1, Gen, Sk, Pair<En1, ID>, Chc<Sk, Pair<
 	private final Ctx<Gen, Term<Void, En1, Void, Fk1, Void, Pair<En1, ID>, Void>> gens = new Ctx<>();
 	private final Ctx<Sk, Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>>> sks = new Ctx<>();
 	
-	public SigmaDeltaUnitTransform(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
+	public SigmaDeltaUnitTransform(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, AqlOptions options) {
 		F = f;
 		I = i;
 		J = new SigmaInstance<>(F, I, options);
@@ -41,7 +40,7 @@ extends Transform<Ty, En1, Sym, Fk1, Att1, Gen, Sk, Pair<En1, ID>, Chc<Sk, Pair<
 			Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>> term = J.algebra().intoY(F.trans(Term.Sk(sk))).map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
 			sks.put(sk, term);
 		}
-		validate((Boolean) AqlOptions.getOrDefault(options, AqlOption.dont_validate_unsafe));
+		validate((Boolean) options.getOrDefault(AqlOption.dont_validate_unsafe));
 
 	}
 

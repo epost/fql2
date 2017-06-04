@@ -39,12 +39,12 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 	private final String clazz;
 	private final String jdbcString;
 
-	private final Map<String, String> map;
+	private final Map<String, String> map;		
 	
 	@Override
-	public long timeout() {
-		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-	}	
+	public Map<String, String> options() {
+		return options;
+	}
 
 	public TransExpJdbc(InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst, List<String> imports, List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<String, String>> map) {
 		this.src = src;
@@ -186,7 +186,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 			throw new RuntimeException("JDBC error: " + exn.getMessage());
 		}
 			
-		AqlOptions op = new AqlOptions(options, null);
+		AqlOptions op = new AqlOptions(options, null, env.defaults);
 		Boolean dontValidateEqs = (Boolean) op.getOrDefault(AqlOption.dont_validate_unsafe);
 		
 		return new LiteralTransform<>(gens, sks, src0, dst0, dontValidateEqs); 
@@ -265,11 +265,6 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 		if (getClass() != obj.getClass())
 			return false;
 		TransExpJdbc<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpJdbc<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
-		AqlOptions op = new AqlOptions(options, null);
-		Boolean reload = (Boolean) op.getOrDefault(AqlOption.always_reload);
-		if (reload) {
-			return false;
-		}
 		if (clazz == null) {
 			if (other.clazz != null)
 				return false;

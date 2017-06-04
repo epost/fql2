@@ -11,6 +11,9 @@ import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
 
+/**
+ * works correctly on empty sorts
+ */
 public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 
 	private final SemiThue<Chc<Chc<Unit,T>,C>> kb;

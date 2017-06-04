@@ -23,14 +23,12 @@ import javax.swing.undo.UndoManager;
 
 @SuppressWarnings("serial")
 /*
-  @author ryan
- * A text editor.
+ * @author ryan A text editor.
  */
 public class CodeTextPanel extends JPanel {
 
-	public final JTextArea area = new JTextArea();
+	public final JTextArea area;
 
-	
 	public void setText(String s) {
 		area.setText(s);
 		area.setCaretPosition(0);
@@ -43,22 +41,24 @@ public class CodeTextPanel extends JPanel {
 	public CodeTextPanel(String title, String text) {
 		this(BorderFactory.createEtchedBorder(), title, text);
 	}
-	
+
+	JScrollPane p;
+
 	public CodeTextPanel(Border bb, String title, String text) {
 		super(new GridLayout(1, 1));
 		if (bb != null) {
-		Border b = BorderFactory.createTitledBorder(
-				bb, title);
-		setBorder(b);
+			Border b = BorderFactory.createTitledBorder(bb, title);
+			setBorder(b);
 		}
-
-		JScrollPane p = new JScrollPane(area);
+		area = new JTextArea(text);
+		p = new JScrollPane(area);
+		//p.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		add(p);
 		p.setBorder(BorderFactory.createEmptyBorder());
 		setText(text);
 
 		area.setFont(new Font("Courier", Font.PLAIN, 13));
-		//area.setEditable(false);
+		// area.setEditable(false);
 
 		UndoManager m = new UndoManager();
 		// area.setundoManager = new UndoManager();
@@ -68,10 +68,8 @@ public class CodeTextPanel extends JPanel {
 		InputMap im = area.getInputMap(JComponent.WHEN_FOCUSED);
 		ActionMap am = area.getActionMap();
 
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit
-				.getDefaultToolkit().getMenuShortcutKeyMask()), "Undo");
-		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit
-				.getDefaultToolkit().getMenuShortcutKeyMask()), "Redo");
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "Undo");
+		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "Redo");
 
 		am.put("Undo", new AbstractAction() {
 			@Override
@@ -98,14 +96,17 @@ public class CodeTextPanel extends JPanel {
 			}
 		});
 
-		// setWordWrap(true);
-		
+		setWordWrap(true);
+
 		IdeOptions.theCurrentOptions.apply(this.area);
 	}
 
-	public void setWordWrap(boolean b) {
+	private void setWordWrap(boolean b) {
 		area.setLineWrap(b);
 		area.setWrapStyleWord(b);
+		//p.revalidate();
+		//getScrollableTracksViewportWidth
+		//area.getScrgetViewport().set
 	}
 
 }

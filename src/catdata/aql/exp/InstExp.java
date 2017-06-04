@@ -3,10 +3,13 @@ package catdata.aql.exp;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Ctx;
@@ -21,6 +24,7 @@ import catdata.aql.It;
 import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.Mapping;
+import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Transform;
@@ -46,7 +50,125 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	}
 	
 	public abstract SchExp<Ty,En,Sym,Fk,Att>  type(AqlTyping G);
-			
+
+	///////////////////////////////////////////////////////////////////////
+
+	public static final class InstExpRandom
+	extends InstExp<Object,Object,Object,Object,Object,Object,Object,ID,Chc<Object,Pair<ID,Object>>> {
+	
+		public final Map<String, Integer> ens;
+				
+		public final Map<String, String> options;
+		
+		public final SchExp<Object, Object, Object, Object, Object> sch;
+		
+		@Override
+		public Map<String, String> options() {
+			return options;
+		}
+		
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		public InstExpRandom(SchExp sch, List<Pair<String, String>> ens, List<Pair<String, String>> options) {
+			this.ens = Util.toMapSafely(ens.stream().map(x -> new Pair<>(x.first, Integer.parseInt(x.second))).collect(Collectors.toList()));
+			this.options = Util.toMapSafely(options);
+			this.sch = sch;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return sch.deps();
+		}
+		
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((ens == null) ? 0 : ens.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((sch == null) ? 0 : sch.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpRandom other = (InstExpRandom) obj;
+			if (ens == null) {
+				if (other.ens != null)
+					return false;
+			} else if (!ens.equals(other.ens))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			if (sch == null) {
+				if (other.sch != null)
+					return false;
+			} else if (!sch.equals(other.sch))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "InstExpRandom [ens=" + ens + ", options=" + options + ", sch=" + sch + "]"; //TODO aql tostring
+		}
+
+		@Override
+		public SchExp<Object, Object, Object, Object, Object> type(AqlTyping G) {
+			return sch;
+		}
+
+		//not exactly the smartest way
+		@Override
+		public Instance<Object, Object, Object, Object, Object, Object, Object, ID, Chc<Object, Pair<ID, Object>>> eval(AqlEnv env) {
+			int seed = (Integer) new AqlOptions(options, null, env.defaults).getOrDefault(AqlOption.random_seed);
+			Random rand = new Random(seed);
+			List<Pair<String, String>> gens = new LinkedList<>();
+			List<Pair<RawTerm, RawTerm>> eqs = new LinkedList<>();
+			Schema<Object, Object, Object, Object, Object> schema = sch.eval(env);
+			for (String en : ens.keySet()) {
+				int size = ens.get(en);
+				for (int i = 0; i < size; i++) {
+					String src = en.toString() + i;
+					gens.add(new Pair<>(src, en.toString())); //TODO aql typing
+					for (Object fk : schema.fksFrom(en)) {
+						Object dst_en = schema.fks.get(fk).second;
+						int dst_size = ens.containsKey(dst_en) ? ens.get(dst_en) : 0;
+						if (dst_size == 0) {
+							continue;
+						}
+						String dst = dst_en.toString() + rand.nextInt(dst_size);
+						eqs.add(new Pair<>(new RawTerm(fk.toString(), Util.singList(new RawTerm(src))), new RawTerm(dst)));
+					}
+					for (Object att : schema.attsFrom(en)) {
+						Object dst_ty = schema.atts.get(att).second;
+						int dst_size = ens.containsKey(dst_ty) ? ens.get(dst_ty) : 0;
+
+						if (dst_size == 0) {
+							continue;
+						}
+						String dst = dst_ty.toString() + rand.nextInt(dst_size);
+						eqs.add(new Pair<>(new RawTerm(att.toString(), Util.singList(new RawTerm(src))), new RawTerm(dst)));
+					}
+				}
+			}
+					
+			return new InstExpRaw(sch, Collections.emptyList(), gens, eqs, options).eval(env);  //inherits options
+		}
+
+		
+	}
+	
+	
 	///////////////////////////////////////////////////////////////////////
 	
 	public static final class InstExpCoEq<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2>
@@ -57,11 +179,15 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final Map<String, String> options;
 		
 		@Override
+		public Map<String, String> options() {
+			return options;
+		}
+		
+		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Util.union(t1.deps(), t2.deps());
 		}
 	
-
 		public InstExpCoEq(TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t1, TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t2, List<Pair<String, String>> options) {
 			this.t1 = t1;
 			this.t2 = t2;
@@ -108,11 +234,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		@Override
 		public String toString() {
 			return "InstExpCoEq [t1=" + t1 + ", t2=" + t2 + ", options=" + options + "]";
-		}
-		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-		}
+		} //TODO aql tostring
+	
 
 
 		@Override
@@ -133,7 +256,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			
 			//Schema<Ty, En, Sym, Fk, Att> sch0 = sch.eval(env);
 			Collage<Ty, En, Sym, Fk, Att, Gen2, Sk2> col = new Collage<>(h1.dst().collage());
-			AqlOptions strat = new AqlOptions(options, col);
+			AqlOptions strat = new AqlOptions(options, col, env.defaults);
 			Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen2, Sk2>, Term<Ty, En, Sym, Fk, Att, Gen2, Sk2>>> eqs0 = new HashSet<>();
 
 			
@@ -167,6 +290,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final SchExp<Ty,En,Sym,Fk,Att> sch;
 		
 		public final Map<String, String> options;
+		
+		@Override
+		public Map<String, String> options() {
+			return options;
+		}
 
 		public InstExpCoProd(List<InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> is, SchExp<Ty, En, Sym, Fk, Att> sch, List<Pair<String, String>> options) {
 			Is = is;
@@ -239,15 +367,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-		}
-
-		@Override
 		public Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> eval(AqlEnv env) {
 			Schema<Ty, En, Sym, Fk, Att> sch0 = sch.eval(env);
 			Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col = new Collage<>(sch0.collage());
-			AqlOptions strat = new AqlOptions(options, col);
+			AqlOptions strat = new AqlOptions(options, col, env.defaults);
 			Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs0 = new HashSet<>();
 	
 			for (InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I0 : Is) {
@@ -286,6 +409,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final EdsExp<Ty,En,Sym,Fk,Att> eds;
 		
 		public final int limit;
+		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 
 		public InstExpChase(EdsExp<Ty, En, Sym, Fk, Att> eds, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i, int limit) {
 			if (limit < 0) {
@@ -344,15 +472,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			//TODO aql type equality
 		}
 
-		@Override
-		public long timeout() {
-			return I.timeout(); //TODO aql timeout for chase
-		}
-
+	
 		@SuppressWarnings("unchecked")
 		@Override
 		public Instance<Ty, En, Sym, Fk, Att, Object, Object, Object, Object> eval(AqlEnv env) {
-			Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret = eds.eval(env).chase(I.eval(env), limit);
+			Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret = eds.eval(env).chase(I.eval(env), limit, env.defaults);
 			return (Instance<Ty, En, Sym, Fk, Att, Object, Object, Object, Object>) ret;
 		}
 
@@ -372,7 +496,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	public static class InstExpDom<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> {
 		
 		public final TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
-
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		public InstExpDom(TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t) {
 			this.t = t;
 		}
@@ -422,14 +549,16 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return t.type(G).first.type(G);
 		}
 
-		@Override
-		public long timeout() {
-			return t.timeout();
-		}
+		
 		
 	}
 	
 	public static class InstExpCod<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> {
+		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		
 		public final TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t;
 
@@ -482,12 +611,6 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return t.type(G).first.type(G);
 		}
 
-		@Override
-		public long timeout() {
-			return t.timeout();
-		}
-		
-		
 		
 	}
 
@@ -506,10 +629,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final Map<String, String> options;
 		
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-		}	
-	
+		public Map<String, String> options() {
+			return options;
+		}
+		
 		//TODO AQL imports for colimit
 		public InstExpColim(GraphExp<N, E> shape, SchExp<Ty, En, Sym, Fk, Att> schema, @SuppressWarnings("unused") List<String> imports, List<Pair<N, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> nodes, List<Pair<E, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>>> edges, List<Pair<String, String>> options) {
 			this.schema = schema;
@@ -590,7 +713,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 				edges0.put(e, edges.get(e).eval(env));
 			}
 
-			return new ColimitInstance<>(schema.eval(env), shape.eval(env).dmg, nodes0, edges0, options);
+			return new ColimitInstance<>(schema.eval(env), shape.eval(env).dmg, nodes0, edges0, new AqlOptions(options, null, env.defaults));
 		}
 
 	
@@ -602,7 +725,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 					throw new RuntimeException("The instance for " + n + " has schema " + nodes.get(n).type(G) + ", not " + schema + " as expected");
 				}
 			}
-			if (!(Boolean)new AqlOptions(options, null).getOrDefault(AqlOption.static_typing)) {
+			if (!(Boolean)new AqlOptions(options, null, G.defaults).getOrDefault(AqlOption.static_typing)) {
 				return schema;
 			}
 			DMG<N,E> g = shape.eval(G).dmg;
@@ -650,9 +773,9 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final Map<String, String> options;
 		
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-		}	
+		public Map<String, String> options() {
+			return options;
+		}
 		
 		public InstExpCoEval(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> j, List<Pair<String, String>> options) {
 			Q = q;
@@ -675,7 +798,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var, X>, Y, ID, Chc<Y, Pair<ID, Att1>>> eval(AqlEnv env) {
-			return new CoEvalInstance<>(Q.eval(env), J.eval(env), options);
+			return new CoEvalInstance<>(Q.eval(env), J.eval(env), new AqlOptions(options, null, env.defaults));
 		}
 
 		@Override
@@ -732,10 +855,9 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y>  I;
 		
 		@Override
-		public long timeout() {
-			return Q.timeout() + I.timeout();
+		public Map<String, String> options() {
+			return Collections.emptyMap();
 		}
-		
 		public InstExpEval(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i) {
 			Q = q;
 			I = i;
@@ -807,9 +929,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final Map<String, String> options;
 		
 		@Override
-		public long timeout() {
-			return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-		}	
+		public Map<String, String> options() {
+			return options;
+		}
+	
 		
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
@@ -881,7 +1004,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> eval(AqlEnv env) {
 			Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f = F.eval(env);
 			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i = I.eval(env);		
-			return new SigmaInstance<>(f, i, options);
+			return new SigmaInstance<>(f, i, new AqlOptions(options, null, env.defaults));
 		}
 		
 	}
@@ -892,6 +1015,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public final InstExp<Ty,En2,Sym,Fk2,Att2,Gen,Sk,X,Y> I;
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
 		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Util.union(I.deps(), F.deps());
@@ -958,17 +1085,17 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return new DeltaInstance<>(f, i);
 		}
 
-		@Override
-		public long timeout() {
-			return I.timeout() + F.timeout();
-		}
+		
 		
 	}
 	
 	public static final class InstExpEmpty<Ty,Sym,En,Fk,Att> extends InstExp<Ty,En,Sym,Fk,Att,Void,Void,Void,Void> {
 		
 		public final SchExp<Ty,En,Sym,Fk,Att> schema;
-
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return schema.deps();
@@ -1016,16 +1143,16 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return schema;
 		}
 
-		@Override
-		public long timeout() {
-			return schema.timeout();
-		}
+		
 		
 	}
 
 	public static final class InstExpVar extends InstExp<Object, Object, Object, Object, Object, Object, Object, Object, Object> {
 		public final String var;
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Util.singList(new Pair<>(var, Kind.INSTANCE));
@@ -1078,11 +1205,6 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return (SchExp<Object, Object, Object, Object, Object>) G.defs.insts.get(var);
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
-
 		
 	}
 
@@ -1091,7 +1213,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	public static final class InstExpLit<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> {
 
 		public final Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> inst;
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Collections.emptyList();
@@ -1139,10 +1264,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return new SchExpLit<>(inst.schema());
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
+		
 	}
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1150,7 +1272,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	public static final class InstExpDistinct<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
 
 		public final InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		public InstExpDistinct(InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i) {
 			I = i;
 		}
@@ -1200,10 +1325,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return I.deps();
 		}
 
-		@Override
-		public long timeout() {
-			return I.timeout();
-		}
+		
 		
 	}
 

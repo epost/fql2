@@ -37,6 +37,11 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		ret.addAll(typeSide.deps());
 		return ret;
 	}
+	
+	@Override
+	public Map<String, String> options() {
+		return options;
+	}
 
 	//TODO: aql printing of contexts broken when conitain choices
 	
@@ -109,9 +114,9 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 			col.eqs.add(new Eq<>(new Ctx<>(eq.first).inRight(), eq.second, eq.third));
 		}
 		
-		AqlOptions strat = new AqlOptions(options, col);
+		AqlOptions strat = new AqlOptions(options, col, env.defaults);
 		
-		AqlOptions s = new AqlOptions(Util.singMap(AqlOption.prover.toString(), ProverName.fail.toString()), col);
+		AqlOptions s = new AqlOptions(Util.singMap(AqlOption.prover.toString(), ProverName.fail.toString()), col, env.defaults);
 		
 		//forces type checking before prover construction
 		new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(s, col, ts.js), false);
@@ -138,10 +143,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 	
 	private final Map<String, String> options;
 	
-	@Override
-	public long timeout() {
-		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-	}	
+		
 
 	private String toString;
 	

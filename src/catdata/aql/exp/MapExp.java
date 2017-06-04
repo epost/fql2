@@ -2,6 +2,7 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import catdata.Pair;
 import catdata.Util;
@@ -28,7 +29,10 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 		
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> m1;
 		public final MapExp<Ty,En2,Sym,Fk2,Att2,En3,Fk3,Att3> m2;
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		public MapExpComp(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> m1, MapExp<Ty, En2, Sym, Fk2, Att2, En3, Fk3, Att3> m2) {
 			this.m1 = m1;
 			this.m2 = m2;
@@ -80,11 +84,6 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 		}
 
 		@Override
-		public long timeout() {
-			return 0;
-		}
-
-		@Override
 		public Mapping<Ty, En1, Sym, Fk1, Att1, En3, Fk3, Att3> eval(AqlEnv env) {
 			return Mapping.compose(m1.eval(env), m2.eval(env));
 		}
@@ -104,7 +103,10 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 		public final N node;
 		
 		public final ColimSchExp<N, E, Ty, En, Sym, Fk, Att> exp;
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		public MapExpColim(N node, ColimSchExp<N, E, Ty, En, Sym, Fk, Att> exp) {
 			this.node = node;
 			this.exp = exp;
@@ -153,10 +155,7 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 			}
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
+		
 
 		@Override
 		public Mapping<Ty, En, Sym, Fk, Att, String, String, String> eval(AqlEnv env) {
@@ -179,7 +178,10 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 	/////////////////////////////////////////////////////////////////////
 
 	public static final class MapExpId<Ty,En,Sym,Fk,Att> extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att> {
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}		
 		@Override
 		public Collection<Pair<String, Kind>> deps() { 
 			return sch.deps();
@@ -229,10 +231,6 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 			return new Pair<>(sch, sch);
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
 		
 	}
 	
@@ -240,7 +238,10 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 	
 	public static final class MapExpVar extends MapExp<Object, Object, Object, Object, Object, Object, Object, Object> {
 		public final String var;
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Util.singList(new Pair<>(var, Kind.MAPPING));
@@ -295,16 +296,16 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 			return (Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>>) ((Object)G.defs.maps.get(var));
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}	
+		
 	}
 
 /////////////////////////////////////////////////////////////////////
 	
 	public static final class MapExpLit<Ty,En1,Sym1,Fk1,Att1,En2,Fk2,Att2> extends MapExp<Ty,En1,Sym1,Fk1,Att1,En2,Fk2,Att2> {
-
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Collections.emptyList();
@@ -352,11 +353,7 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 			return new Pair<>(new SchExpLit<>(map.src), new SchExpLit<>(map.dst));
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
-		
+
 		
 	}
 }

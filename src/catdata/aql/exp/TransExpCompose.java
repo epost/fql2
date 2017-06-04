@@ -1,6 +1,8 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 import catdata.Pair;
 import catdata.Util;
@@ -14,6 +16,10 @@ public class TransExpCompose<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2,Gen3
 	public final TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> t1;
 	public final TransExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,Gen3,Sk3,X2,Y2,X3,Y3> t2;
 	
+	@Override
+	public Map<String, String> options() {
+		return Collections.emptyMap();
+	}
 	public TransExpCompose(TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> t1, TransExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, Gen3, Sk3, X2, Y2, X3, Y3> t2) {
 		this.t1 = t1;
 		this.t2 = t2;
@@ -60,10 +66,7 @@ public class TransExpCompose<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2,Gen3
 		return new Pair<>(l.first, r.second);
 	}
 
-	@Override
-	public long timeout() {
-		return t1.timeout() + t2.timeout();
-	}
+	
 
 	@Override
 	public Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen3, Sk3, X1, Y1, X3, Y3> eval(AqlEnv env) {

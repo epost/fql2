@@ -1,9 +1,11 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -150,7 +152,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			this.isUnique = isUnique;
 		}
 
-		public ED<Object, Object, Object, Object, Object> eval(Schema<Object, Object, Object, Object, Object> sch) {
+		public ED<Object, Object, Object, Object, Object> eval(Schema<Object, Object, Object, Object, Object> sch, AqlEnv env) {
 			Pair<Ctx<Var, Object>, Set<Pair<Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>>>> 
 			x = eval1(sch, As, Awh);
 		
@@ -160,7 +162,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			for (Var k : x.first.keySet()) {
 				y.first.remove(k);
 			}
-			return new ED<>(sch, x.first, y.first, x.second, y.second, isUnique);
+			return new ED<>(sch, x.first, y.first, x.second, y.second, isUnique, env.defaults);
 		}
 
 
@@ -199,6 +201,11 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 	public static class EdsExpRaw extends EdsExp<Object, Object, Object, Object, Object> {
 
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
+		
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -250,11 +257,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 		private final List<EdExpRaw> eds;
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
-
+		
 		@SuppressWarnings("unchecked")
 		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<EdExpRaw> eds) {
 			this.schema = (SchExp<Object, Object, Object, Object, Object>) schema;
@@ -291,10 +294,10 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 				l.addAll(v.eds);
 			}
 			for (catdata.aql.exp.EdsExp.EdExpRaw e : eds) {
-				l.add(e.eval(sch));
+				l.add(e.eval(sch, env));
 			}
 
-			return new Constraints<>(sch, l);
+			return new Constraints<>(sch, l, env.defaults);
 
 		}
 
@@ -308,6 +311,11 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 	public static final class EdsExpVar extends EdsExp<Object, Object, Object, Object, Object> {
 
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
+		
 		public final String var;
 
 		@Override
@@ -351,10 +359,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			return var;
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
+		
 
 		@SuppressWarnings("unchecked")
 		@Override

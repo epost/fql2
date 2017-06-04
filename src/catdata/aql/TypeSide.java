@@ -19,6 +19,11 @@ import catdata.aql.AqlOptions.AqlOption;
 public final class TypeSide<Ty, Sym> implements Semantics {
 	
 	@Override
+	public int size() {
+		return tys.size() + syms.size() + eqs.size();
+	}
+	
+	@Override
 	public Kind kind() {
 		return Kind.TYPESIDE;
 	}
@@ -26,10 +31,6 @@ public final class TypeSide<Ty, Sym> implements Semantics {
 	public final Set<Ty> tys;
 	public final Ctx<Sym, Pair<List<Ty>, Ty>> syms;
 	public final Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> eqs;
-/*
-	public final Ctx<Ty, String> java_tys;
-	public final Ctx<Ty, String> java_parsers;
-	public final Ctx<Sym, String> java_fns; */
 
 	public final AqlJs<Ty, Sym> js;
 	

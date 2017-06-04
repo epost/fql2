@@ -87,7 +87,7 @@ class AqlInACan {
 			Program<Exp<?>> program = AqlParser.parseProgram(can);
 			String html = "<html><head><title>Result</title></head><body>\n\n";
 			AqlEnv env = new AqlEnv();
-			env.typing = new AqlTyping(program);	
+			env.typing = new AqlTyping(program, env.defaults);	
 			for (String n : program.order) {
 				Exp<?> exp = program.exps.get(n);
 				if (exp.kind() == Kind.PRAGMA) {

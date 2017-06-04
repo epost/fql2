@@ -51,9 +51,9 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	private final Map<String, String> options;
 	
 	@Override
-	public long timeout() {
-		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-	}	
+	public Map<String, String> options() {
+		return options;
+	}
 
 	//typesafe by covariance of read-only collections
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -69,7 +69,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	private String toString;
 	
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		if (toString != null) {
 			return toString;
 		}
@@ -205,7 +205,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 				col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));
 		}
 
-		AqlOptions strat = new AqlOptions(options, col);
+		AqlOptions strat = new AqlOptions(options, col, env.defaults);
 		InitialAlgebra<Object, Object, Object, Object, Object, Object, Object, ID> 
 		initial = new InitialAlgebra<>(strat, sch, col, new It(), Object::toString, Object::toString);
 				 

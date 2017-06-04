@@ -2,6 +2,7 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import catdata.Pair;
 import catdata.aql.Comment;
@@ -10,6 +11,11 @@ import catdata.aql.Kind;
 public class CommentExp extends Exp<Comment> {
 
 	public final String s;
+	
+	@Override
+	public Map<String, String> options() {
+		return Collections.emptyMap();
+	}
 	
 	@Override
 	public int hashCode() {
@@ -40,10 +46,7 @@ public class CommentExp extends Exp<Comment> {
 		this.s = s;
 	}
 
-	@Override
-	public long timeout() {
-		return 0;
-	}
+	
 
 	@Override
 	public Kind kind() {

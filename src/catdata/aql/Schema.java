@@ -20,6 +20,11 @@ import catdata.Util;
 public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 	
 	@Override
+	public int size() {
+		return ens.size() + atts.size() + fks.size() + eqs.size();
+	}
+	
+	@Override
 	public Kind kind() {
 		return Kind.SCHEMA;
 	}

@@ -13,6 +13,8 @@ import catdata.aql.exp.AqlParser;
 
 public final class AqlOptions {
 	
+	public static final AqlOptions initialOptions = new AqlOptions();
+	
 	//TODO aql number of cores
 	
 	//TODO: aql each typeside/instance/etc should make sure only appropriate options are given to it
@@ -28,7 +30,11 @@ public final class AqlOptions {
 		id_column_name,
 		always_reload,
 		varchar_length,
-				
+		gui_max_table_size,		
+		gui_max_graph_size,		
+		gui_max_string_size,	
+		random_seed,
+		
 		program_allow_nontermination_unsafe,
 		completion_precedence,
 		completion_sort,
@@ -106,12 +112,16 @@ public final class AqlOptions {
 	
 	public final Map<AqlOption, Object> options; 
 
+	private AqlOptions() {
+		options = new HashMap<>();
+	}
+
 	public AqlOptions(ProverName name) {
 		options = new HashMap<>();
 		options.put(AqlOption.prover, name);
 	}
 	
-	private static String printDefault() {
+	private String printDefault() {
 		List<String> l = new LinkedList<>();
 		for (AqlOption option : AqlOption.values()) {
 			Object o = getDefault(option);
@@ -125,10 +135,13 @@ public final class AqlOptions {
 	}
 	
 	//anything 'unsafe' should default to false
-	private static Object getDefault(AqlOption option) {
+	@SuppressWarnings("static-method")
+	private Object getDefault(AqlOption option) {
 		switch (option) {
 		case allow_java_eqs_unsafe:
 			return false;
+		case random_seed:
+			return 0;
 		case allow_attribute_merges:
 			return false;
 		case completion_precedence:
@@ -175,34 +188,66 @@ public final class AqlOptions {
 			return null;
 		case program_allow_nontermination_unsafe:
 			return false;
+			
+		case gui_max_table_size:
+			return 1024;
+		case gui_max_string_size:
+			return 8096;
+		case gui_max_graph_size:
+			return 128;
+	
+
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
 		
 	}
 	
-	public static Object getOrDefault(Map<String, String> map, AqlOption op) {
+	public Object getOrDefault(Map<String, String> map, AqlOption op) {
 		if (map.containsKey(op.toString())) {
 			return getFromMap(map, null, op);
 		}
-			return getDefault(op);
+		return getDefault(op);
 	}
 	
+
 	/**
 	 * @param map
 	 * @param col possibly null
 	 */ 
-	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(Map<String, String> map, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col) {
-		options = new HashMap<>();
+	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(Map<String, String> map, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col, AqlOptions defaults) {
+		options = new HashMap<>(defaults.options);
 		for (String key : map.keySet()) {
 			AqlOption op = AqlOption.valueOf(key);
 			Object ob = getFromMap(map, col, op);
 			options.put(op, ob);
 		}		
 	} 
+	
+	
+	/**
+	 * @param map
+	 * @param col possibly null
+	 */ 
+	/*public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(Map<String, String> map, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col) {
+		options = new HashMap<>();
+		for (String key : map.keySet()) {
+			AqlOption op = AqlOption.valueOf(key);
+			Object ob = getFromMap(map, col, op);
+			options.put(op, ob);
+		}		
+	} */
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case gui_max_table_size:
+			return op.getInteger(map);
+		case gui_max_graph_size:
+			return op.getInteger(map);
+		case gui_max_string_size:
+			return op.getInteger(map);
+		case random_seed:
+			return op.getInteger(map);
 		case allow_java_eqs_unsafe:
 			return op.getBoolean(map);
 		case allow_attribute_merges:
@@ -317,7 +362,7 @@ public final class AqlOptions {
 	static String msg  = msg1 + "\n\nOption descriptions are available in the AQL manual, see categoricaldata.net/fql.html";
 
 	public static String getMsg() {
-		return "AQL options are specified in each AQL expression.\nHere are the available options and their defaults:\n\n\t" + printDefault() + "\n\n" + msg;
+		return "AQL options are specified in each AQL expression.\nHere are the available options and their defaults:\n\n\t" + new AqlOptions().printDefault() + "\n\n" + msg;
 	}
 
 	

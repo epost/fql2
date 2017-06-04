@@ -33,16 +33,14 @@ public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {
 		return ret;
 	}
 	
-	@Override
-	public long timeout() {
-		return 0;
-	}
-
 	////////////////////////////
 
 	public static class GraphExpRaw extends GraphExp<Object,Object> {
 		
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 
 		public final Set<Object> nodes;
 		public final Map<Object,Pair<Object,Object>> edges;
@@ -126,6 +124,11 @@ public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {
 
 		public final DMG<N, E> graph;
 		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
+		
 		public GraphExpLiteral(DMG<N, E> graph) {
 			Util.assertNotNull(graph);
 			this.graph = graph;
@@ -179,6 +182,11 @@ public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {
 	
 	public static final class GraphExpVar extends GraphExp<Object, Object> {
 		public final String var;
+		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		
 		@Override
 		public Collection<Pair<String, Kind>> deps() {

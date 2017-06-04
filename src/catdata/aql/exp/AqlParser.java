@@ -45,6 +45,7 @@ import catdata.aql.exp.InstExp.InstExpDistinct;
 import catdata.aql.exp.InstExp.InstExpDom;
 import catdata.aql.exp.InstExp.InstExpEmpty;
 import catdata.aql.exp.InstExp.InstExpEval;
+import catdata.aql.exp.InstExp.InstExpRandom;
 import catdata.aql.exp.InstExp.InstExpSigma;
 import catdata.aql.exp.InstExp.InstExpVar;
 import catdata.aql.exp.MapExp.MapExpColim;
@@ -93,6 +94,7 @@ public class AqlParser {
 			")", "=", "->", "@", "(*", "*)", "+"};	
 	
 	public static final String[] res = new String[] {
+			"random",
 			"chase",
 			"check",
 			"assert_consistent",
@@ -306,7 +308,7 @@ public class AqlParser {
 			chase = Parsers.tuple(token("chase"), edsExp(), inst_ref.lazy(), IntegerLiteral.PARSER).map(x -> new InstExpChase(x.b, x.c, Integer.parseInt(x.d))),
 			coeval = Parsers.tuple(token("coeval"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new InstExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d));
 					
-		Parser ret = Parsers.or(instExpCoProd(), instExpCoEq(), instExpJdbcAll(), chase, instExpJdbc(),empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval);
+		Parser ret = Parsers.or(instExpCoProd(), instExpRand(), instExpCoEq(), instExpJdbcAll(), chase, instExpJdbc(),empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval);
 		
 		inst_ref.set(ret);
 	}
@@ -740,6 +742,21 @@ public class AqlParser {
 						
 			Parser<EdExpRaw> ret = Parsers.tuple(as, eqs, token("->"), es, eqs)
 					.map(x -> new EdExpRaw(Util.newIfNull(x.a), Util.newIfNull(x.b), x.d==null?new LinkedList<>():x.d.a, Util.newIfNull(x.e), x.d==null?false:x.d.b));
+			return ret;	
+	}
+	 
+	 private static Parser<InstExpRandom> instExpRand() {
+			Parser<List<catdata.Pair<String, String>>> 
+			generators = Parsers.tuple(token("generators"), env(ident, "->")).map(x -> x.b);
+			
+			Parser<Tuple4<Token, Token, SchExp<?, ?, ?, ?, ?>, Token>> l 
+			= Parsers.tuple(token("random"), token(":"), sch_ref.lazy(), token("{")); 
+						
+			Parser<InstExpRandom> ret = Parsers.tuple(l, generators, options, token("}"))
+					.map(x -> new InstExpRandom(x.a.c,
+                               x.b,
+                                x.c));
+				
 			return ret;	
 	}
 
