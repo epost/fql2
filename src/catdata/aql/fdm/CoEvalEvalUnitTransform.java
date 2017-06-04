@@ -44,7 +44,7 @@ extends Transform<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Row<En2,ID>, Chc<Y, Pair<ID,
 				ID id = J.algebra().gen(new Pair<>(v, x));
 				tuple.put(v, id);
 			}
-			Row<En2, ID> row = new Row<>(tuple, en2);		
+			Row<En2, ID> row = Row.mkRow(tuple, en2);		
 			Term<Void, En2, Void, Fk2, Void, Row<En2, ID>, Void> term = Term.Gen(row);
 			gens.put(gen, term);
 		}

@@ -197,7 +197,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 					for (ED<Ty, En, Sym, Fk, Att> ed : m.keySet()) {
 						ret += "======================\n";
 						ret += "On constraint\n\n" + ed.toString() + "\n\nthe failing triggers are:\n\n";
-						ret += Util.sep(m.get(ed).iterator(), "\n", r->Util.sep(r.map(z->J.algebra().printX(z)).ctx.map,"->",", "));
+						ret += Util.sep(m.get(ed).iterator(), "\n", r->Util.sep(r.map(z->J.algebra().printX(z)).asMap(),"->",", "));
 						ret += "\n";
 					}
 					return ret;

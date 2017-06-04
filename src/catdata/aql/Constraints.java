@@ -138,7 +138,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 			nodesE.put(t, E);
 			for (Var v : AE.src().gens().keySet()) {
 				xxx.put(new Pair<>(t,v), Term.Gen(new Pair<>(t, v))); // revisit after colimit fixed
-				aaa.put(new Pair<>(t,v), I.algebra().repr(t.second.ctx.get(v)));
+				aaa.put(new Pair<>(t,v), I.algebra().repr(t.second.get(v)));
 			}
 			/*for (Void v : AE.src().sks().keySet()) {
 				yyy.put(v, Util.abort(v)); // revisit after colimit fixed

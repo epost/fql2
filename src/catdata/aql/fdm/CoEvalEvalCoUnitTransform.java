@@ -33,7 +33,7 @@ extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<Var,Row<En2,X>>, Y, Gen, Sk, ID,
 		K = new CoEvalInstance<>(Q, J, options);
 		
 		for (Pair<Var, Row<En2, X>> gen : src().gens().keySet()) {
-			gens.put(gen, I.algebra().repr(gen.second.ctx.get(gen.first)));
+			gens.put(gen, I.algebra().repr(gen.second.get(gen.first)));
 		}
 		for (Y y : src().sks().keySet()) {
 			sks.put(y, I.algebra().reprT(Term.Sk(y)));

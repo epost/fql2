@@ -2,9 +2,11 @@ package catdata.aql.fdm;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -30,40 +32,94 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
  
 	@SuppressWarnings("serial")
+	//these have to be tagged with the entity to be unique across entities
 	public static class Row<En2,X> implements Serializable {
 		
 		public <Z> Row<En2,Z> map(Function<X,Z> f) {
-			return new Row<>(ctx.map(f), en2);
+			if (en2 != null) {
+				return new Row<>(en2);
+			} 
+			return new Row<>(tail.map(f), v, f.apply(x));
 		}
 		
-		public final Ctx<Var,X> ctx;
-		public final En2 en2; 
+		//public final Ctx<Var,X> ctx;
+		private final En2 en2; 
+		private final Var v;
+		private final X x;
+		private final Row<En2,X> tail;
 		
-		public final X get(Var v) {
-			return ctx.get(v);
+		public Map<Var, X> asMap() {
+			Row<En2,X> r = this;
+			Map<Var, X> ret = new HashMap<>();
+			for (;;) {
+				if (r.en2 != null) {
+					return ret;
+				}
+				ret.put(v, x);
+				r = tail;
+			}
 		}
 		
-		public Row(Ctx<Var, X> ctx, En2 en2) {
-			this.ctx = ctx;
+		public final boolean containsKey(Var vv) {
+			if (en2 != null) {
+				return false;
+			} else if (v.equals(vv)) {
+				return true;
+			}
+			return tail.containsKey(vv);
+		}
+		
+		public final X get(Var vv) {
+			if (en2 != null) {
+				throw new RuntimeException("Not found: " + vv + ", please report.");
+			} else if (v.equals(vv)) {
+				return x;
+			}
+			return tail.get(vv);
+		}
+		
+		public Row(En2 en2) {
 			this.en2 = en2;
+			this.v = null;
+			this.x = null;
+			this.tail = null;
 		}
-
+		
+		public Row(Row<En2,X> tail, Var v, X x) {
+			this.v = v;
+			this.x = x;
+			this.tail = tail;
+			this.en2 = null;
+		}
+		
+		public static <X, En2> Row<En2, X> mkRow(Ctx<Var, X> ctx, En2 en2) {
+			Row<En2, X> r = new Row<>(en2);
+			for (Var v : ctx.keySet()) {
+				r = new Row<>(r, v, ctx.get(v));
+			}
+			return r;
+		}
+		
 		@Override
 		public String toString() {
-			return en2 + " " + ctx.toString(Object::toString);
+			if (en2 != null) {
+				return en2.toString();
+			}
+			return " " + v + "=" + x + "," + tail.toString();
 		}
-/*
-		@Override
-		public static <En2,X> String toString2(Row<En2, X> row) {
-			row.ctx.map(f)
-		}*/
+		
+		public String toString(Function<X,String> printX) {
+			return map(printX).toString();
+		}
 		
 		@Override
 		public int hashCode() {
-			int prime = 31;
+			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((ctx == null) ? 0 : ctx.hashCode());
 			result = prime * result + ((en2 == null) ? 0 : en2.hashCode());
+			result = prime * result + ((tail == null) ? 0 : tail.hashCode());
+			result = prime * result + ((v == null) ? 0 : v.hashCode());
+			result = prime * result + ((x == null) ? 0 : x.hashCode());
 			return result;
 		}
 
@@ -75,32 +131,38 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Row<?,?> other = (Row<?,?>) obj;
-			if (ctx == null) {
-				if (other.ctx != null)
-					return false;
-			} else if (!ctx.equals(other.ctx))
-				return false;
+			Row other = (Row) obj;
 			if (en2 == null) {
 				if (other.en2 != null)
 					return false;
 			} else if (!en2.equals(other.en2))
 				return false;
+			if (tail == null) {
+				if (other.tail != null)
+					return false;
+			} else if (!tail.equals(other.tail))
+				return false;
+			if (v == null) {
+				if (other.v != null)
+					return false;
+			} else if (!v.equals(other.v))
+				return false;
+			if (x == null) {
+				if (other.x != null)
+					return false;
+			} else if (!x.equals(other.x))
+				return false;
 			return true;
 		}
 
-		public String toString(Function<X,String> printX) {
-			return en2 + " " + ctx.toString(printX);
-		}
+		
 		
 		//TODO AQL slowness hurts chase
-		public static <En2,X> Set<Row<En2, X>> extend(Collection<Row<En2, X>> tuples, Collection<X> dom, Var v, En2 en2) {
+		public static <En2,X> Set<Row<En2, X>> extend(Collection<Row<En2, X>> tuples, Collection<X> dom, Var v) {
 			Set<Row<En2, X>> ret = new HashSet<>();
 			for (Row<En2, X> tuple : tuples) {
 				for (X x : dom) {
-					Ctx<Var, X> m = new Ctx<>(tuple.ctx.map);
-					m.put(v, x);
-					ret.add(new Row<>(m, en2));
+					ret.add(new Row<>(tuple, v, x));
 				}
 			}
 			return ret;
@@ -124,7 +186,7 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 			ret.put(v, trans2(row, t.gens().get(v)));
 		}
 
-		return new Row<>(ret, Q.dst.fks.get(fk).second);
+		return Row.mkRow(ret, Q.dst.fks.get(fk).second);
 	}
 		
 	private X trans2(Row<En2, X> row, Term<Void, En1, Void, Fk1, Void, Var, Void> term) {
@@ -212,10 +274,10 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 
 	private Collection<Row<En2, X>> eval(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q) {
 		Collection<Row<En2, X>> ret = new LinkedList<>();
-		ret.add(new Row<>(new Ctx<>(), en2));
+		ret.add(new Row<>(en2));
 		for (Var v : q.order()) { 
 			Collection<X> dom = I.algebra().en(q.gens.get(v));
-			ret = Row.extend(ret, dom, v, en2);
+			ret = Row.extend(ret, dom, v);
 			ret = filter(ret, q);
 		}
 		return ret;
@@ -223,7 +285,7 @@ extends Algebra<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> {
 	
 	private Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> trans1(Row<En2, X> row, Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term) {
 		if (term.gen != null) {
-            return row.ctx.containsKey(term.gen) ? Optional.of(I.algebra().repr(row.get(term.gen)).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn())) : Optional.empty();
+            return row.containsKey(term.gen) ? Optional.of(I.algebra().repr(row.get(term.gen)).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn())) : Optional.empty();
 		} else if (term.obj != null) {
 			return Optional.of(term.asObj());
 		} else if (term.fk != null) {
