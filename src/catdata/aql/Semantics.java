@@ -2,7 +2,6 @@ package catdata.aql;
 
 public interface Semantics {
 
-	
 	public Kind kind();
 	
 	public int size();

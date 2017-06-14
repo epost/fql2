@@ -34,6 +34,9 @@ public final class AqlOptions {
 		gui_max_graph_size,		
 		gui_max_string_size,	
 		random_seed,
+		num_threads,
+		eval_max_temp_size,
+		eval_reorder_joins,
 		
 		program_allow_nontermination_unsafe,
 		completion_precedence,
@@ -138,8 +141,14 @@ public final class AqlOptions {
 	@SuppressWarnings("static-method")
 	private Object getDefault(AqlOption option) {
 		switch (option) {
+		case eval_max_temp_size:
+			return 1024*64;
+		case eval_reorder_joins:
+			return true;
 		case allow_java_eqs_unsafe:
 			return false;
+		case num_threads:
+			return Runtime.getRuntime().availableProcessors();
 		case random_seed:
 			return 0;
 		case allow_attribute_merges:
@@ -240,6 +249,12 @@ public final class AqlOptions {
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case eval_max_temp_size:
+			return op.getInteger(map);
+		case eval_reorder_joins:
+			return op.getBoolean(map);
+		case num_threads:
+			return op.getInteger(map);
 		case gui_max_table_size:
 			return op.getInteger(map);
 		case gui_max_graph_size:

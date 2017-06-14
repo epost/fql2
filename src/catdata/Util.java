@@ -73,7 +73,13 @@ public class Util {
 				synchronized (thr) {
 					thr.set(exn);
 				}
-			} catch (ThreadDeath d) {
+			} catch (OutOfMemoryError exn) {
+				exn.printStackTrace();
+				synchronized (thr) {
+					thr.set(exn);
+				}
+			} 
+			catch (ThreadDeath d) {
 				synchronized (thr) {
 					thr.set(new RuntimeInterruptedException(d));
 				}

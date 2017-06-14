@@ -258,6 +258,7 @@ public class SemiThue<Y> {
         }
 	}
 
+	//TODO aql bottleneck
 	private static <X> List<List<X>> close1(List<List<X>> List, List<Pair<List<X>, List<X>>> t) {
 		Set<List<X>> ret = new HashSet<>(List);
 

@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import catdata.Ctx;
 import catdata.Util;
+import catdata.aql.AqlOptions;
 import catdata.aql.Instance;
 import catdata.aql.Query;
 import catdata.aql.Term;
@@ -25,7 +26,7 @@ extends Transform<Ty, En2, Sym, Fk2, Att2, Row<En2,X1>, Y1, Row<En2,X2>, Y2, Row
 	
 	
 	//TODO aql recomputes
-	public EvalTransform(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h) {
+	public EvalTransform(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, Transform<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h, AqlOptions options) {
 		if (!h.src().schema().equals(q.src)) {
 			throw new RuntimeException("Source of query is " + q.src + " but transform is on " + h.src().schema());
 		}
@@ -33,8 +34,8 @@ extends Transform<Ty, En2, Sym, Fk2, Att2, Row<En2,X1>, Y1, Row<En2,X2>, Y2, Row
 		Q = q;
 		this.h = h;
 		
-		src = new EvalInstance<>(Q, h.src());
-		dst = new EvalInstance<>(Q, h.dst());
+		src = new EvalInstance<>(Q, h.src(), options);
+		dst = new EvalInstance<>(Q, h.dst(), options);
 		
 		for (Row<En2, X1> gen1 : src.gens().keySet()) {
 			gens.put(gen1, Term.Gen(gen1.map(h::repr))); 

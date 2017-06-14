@@ -8,8 +8,8 @@ import java.util.Map;
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.It.ID;
 import catdata.aql.AqlOptions;
+import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.Transform;
 import catdata.aql.Var;
@@ -113,7 +113,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 			if (!Q.type(G).first.equals(I.type(G))) {
 				throw new RuntimeException("Q has src schema " + Q.type(G).first + " but instance has schema " + I.type(G));
 			}
-			return new Pair<>(new InstExpCoEval<>(Q,new InstExpEval<>(Q, I), Util.toList(options)),I);
+			return new Pair<>(new InstExpCoEval<>(Q,new InstExpEval<>(Q, I, Util.toList(options)), Util.toList(options)),I);
 		}
 
 		@Override
@@ -197,7 +197,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 			if (!Q.type(G).second.equals(I.type(G))) {
 				throw new RuntimeException("Q has dst schema " + Q.type(G).second + " but instance has schema " + I.type(G));
 			}
-			return new Pair<>(I, new InstExpEval<>(Q,new InstExpCoEval<>(Q, I, Util.toList(options))));
+			return new Pair<>(I, new InstExpEval<>(Q,new InstExpCoEval<>(Q, I, Util.toList(options)), Util.toList(options)));
 		}
 
 		@Override
@@ -325,12 +325,12 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 			if (!t.type(G).first.type(G).equals(Q.type(G).first)) {
 				throw new RuntimeException("Source of query is " + t.type(G).first.type(G) + " but transform is on " + t.type(G).first);
 			}
-			return new Pair<>(new InstExpEval<>(Q, t.type(G).first), new InstExpEval<>(Q, t.type(G).second));
+			return new Pair<>(new InstExpEval<>(Q, t.type(G).first, Collections.emptyList()), new InstExpEval<>(Q, t.type(G).second, Collections.emptyList()));
 		}
 
 		@Override
 		public Transform<Ty, En2, Sym, Fk2, Att2, Row<En2, X1>, Y1, Row<En2, X2>, Y2, Row<En2, X1>, Y1, Row<En2, X2>, Y2> eval(AqlEnv env) {
-			return new EvalTransform<>(Q.eval(env), t.eval(env));
+			return new EvalTransform<>(Q.eval(env), t.eval(env), env.defaults);
 		}
 
 		@Override

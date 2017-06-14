@@ -1,5 +1,8 @@
 package catdata.aql.exp;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import catdata.aql.AqlOptions;
 import catdata.aql.ColimitSchema;
 import catdata.aql.Comment;
@@ -25,6 +28,10 @@ public final class AqlEnv {
 	public AqlTyping typing = null;
 	
 	public AqlOptions defaults = AqlOptions.initialOptions;
+	
+	public Map<String, String> user_defaults = null;
+	
+	public final Map<String, String> performance = new HashMap<>();
 	
 	public Semantics get(Kind k, String s) {
 		return (Semantics) defs.get(s, k);

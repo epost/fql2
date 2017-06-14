@@ -34,7 +34,7 @@ extends Transform<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Row<En2,ID>, Chc<Y, Pair<ID,
 		Q = q;
 		I = i;
 		J = new CoEvalInstance<>(Q, I, options);
-		K = new EvalInstance<>(Q, J);
+		K = new EvalInstance<>(Q, J, options);
 		
 		for (Gen gen : src().gens().keySet()) {
 			X x = I.algebra().nf(Term.Gen(gen));

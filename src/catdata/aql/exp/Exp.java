@@ -1,17 +1,19 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import catdata.Pair;
-import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Kind;
 
 public abstract class Exp<X> {
 	
-	public Object getOrDefault(AqlOptions defaults, AqlOption option) {
-		return defaults.getOrDefault(options(), option);
+	public Object getOrDefault(AqlEnv env, AqlOption option) {
+		Map<String, String> m = new HashMap<>(env.user_defaults);
+		m.putAll(options());
+		return env.defaults.getOrDefault(m, option);
 	}
 	
 	protected abstract Map<String, String> options();

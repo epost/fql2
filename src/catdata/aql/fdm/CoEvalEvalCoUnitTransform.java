@@ -29,7 +29,7 @@ extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<Var,Row<En2,X>>, Y, Gen, Sk, ID,
 		}
 		Q = q;
 		I = i;
-		J = new EvalInstance<>(Q, I);
+		J = new EvalInstance<>(Q, I, options);
 		K = new CoEvalInstance<>(Q, J, options);
 		
 		for (Pair<Var, Row<En2, X>> gen : src().gens().keySet()) {

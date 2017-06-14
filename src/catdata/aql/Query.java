@@ -14,6 +14,7 @@ import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.It.ID;
 import catdata.aql.fdm.ComposeTransform;
 import catdata.aql.fdm.IdentityTransform;
@@ -138,6 +139,10 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 		
 		
 		public List<Var> order() {
+			if (!(Boolean)options.getOrDefault(AqlOption.eval_reorder_joins)) {
+				System.out.println("not reordering");
+				return new LinkedList<>(gens.map.keySet());
+			}
 			Map<Var, Integer> counts = new HashMap<>();
 			List<Var> ret = new LinkedList<>();
 			for (Var v1 : gens.keySet()) {

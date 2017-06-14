@@ -178,7 +178,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 				@Override
 				public void execute() {
 					Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> J = I.eval(env);
-					Collection<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>> t = C.eval(env).triggers(J);
+					Collection<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>> t = C.eval(env).triggers(J, env.defaults);
 					if (!t.isEmpty()) {
 						throw new RuntimeException("Not satisfied.\n\n" + printTriggers(t, J)); 
 					}

@@ -1,10 +1,10 @@
 package catdata.aql;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Util;
@@ -28,7 +28,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	}
 	
 	/**
-	 * The Xs need be to be unique across ens
+	 * The Xs need be to be unique across ens, so that repr can invert.  Is it worth checking this? TODO aql
 	 */
 	public abstract Collection<X> en(En en);
 
@@ -58,13 +58,18 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 		}
 		return i;
 	}
-	
-	public Collection<X> allXs() {
-		Set<X> ret = new HashSet<>();
-		for (En en : schema().ens) {
-			ret.addAll(en(en));
+
+	private Collection<X> allXs;
+
+	public synchronized Collection<X> allXs() {
+		if (allXs != null) {
+			return allXs;
 		}
-		return ret;
+		allXs = new LinkedList<>();
+		for (En en : schema().ens) {
+			allXs.addAll(en(en));
+		}
+		return allXs;
 	}
 	
 	
@@ -88,11 +93,11 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 		return ret;
 	}
 	
-	private final Map<Term<Ty, Void, Sym, Void, Void, Void, Y>, Term<Ty,En,Sym,Fk,Att,Gen,Sk>> reprT_cache = new HashMap<>();
+	private final Map<Term<Ty, Void, Sym, Void, Void, Void, Y>, Term<Ty,En,Sym,Fk,Att,Gen,Sk>> reprT_cache = Collections.synchronizedMap(new HashMap<>());
 	protected abstract Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> y);
 	
 	private final Map<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, Void, Sym, Void, Void, Void, Y>>
-	intoY_cache = new HashMap<>();
+	intoY_cache = Collections.synchronizedMap(new HashMap<>());
 
 	/**
 	 * @param term of type sort

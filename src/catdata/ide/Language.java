@@ -82,7 +82,7 @@ public enum Language {
 		
 	}
 	
-	@SuppressWarnings({ "rawtypes", "incomplete-switch" })
+	@SuppressWarnings({ "rawtypes" })
 	public CodeEditor createEditor(String title, int id, String content) {
 		switch (this) {
 		case FPQL: return new XCodeEditor(title, id, content);
@@ -91,6 +91,8 @@ public enum Language {
 		case FQL: return new FqlCodeEditor(title,id, content);
 	//	case MPL: return new MplCodeEditor(title, id, content);
 		case AQL: return new AqlCodeEditor(title, id, content);
+		case EASIK: 
+		case SKETCH: 
 		default:
 			throw new RuntimeException("Anomaly - please report");
 		}

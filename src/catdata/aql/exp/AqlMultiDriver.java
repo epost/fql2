@@ -16,6 +16,7 @@ import catdata.Program;
 import catdata.RuntimeInterruptedException;
 import catdata.Unit;
 import catdata.Util;
+import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Kind;
 import catdata.aql.Pragma;
@@ -87,6 +88,11 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		this.toUpdate = toUpdate;
 		this.last_prog = last_prog;
 		this.last_env = last_env;
+		this.env.user_defaults = prog.options;
+		this.numProcs = (int) new AqlOptions(this.env.user_defaults, null, AqlOptions.initialOptions).getOrDefault(AqlOption.num_threads);
+		if (numProcs < 1) {
+			throw new RuntimeException("num_procs must be > 0");
+		}
 	}
 	
 	public void start() {
@@ -120,7 +126,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		}
 	}
 	
-	static int numProcs = 2; //Runtime.getRuntime().availableProcessors();
+	//static int numProcs = 2; //Runtime.getRuntime().availableProcessors();
 
 	private void barrier() {
 		synchronized (ended) {
@@ -144,9 +150,9 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	private final IntRef ended = new IntRef(0);
 	private final List<Thread> threads = new LinkedList<>();
+	private final int  numProcs;
 
 	private void process() {
-	//	int numProcs = 12; //Runtime.getRuntime().availableProcessors();
 		for (int i = 0; i < numProcs; i++) {
 			Thread thr = new Thread(this::call);
 			threads.add(thr);			
@@ -172,7 +178,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	private final Map<String, Boolean> changed = new HashMap<>();
 
 	private void init() {
-		if (last_prog == null) {
+		if (last_prog == null || !last_prog.options.equals(prog.options)) {
 			todo.addAll(prog.order);
 			return;
 		}
@@ -182,6 +188,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			} else {
 				Kind k = prog.exps.get(n).kind();
 				env.defs.put(n, k, last_env.defs.get(n, k));
+				env.performance.put(n, last_env.performance.get(n));
 				completed.add(n);
 			}
 		}
@@ -192,7 +199,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			return changed.get(n);
 		}
 		Exp<?> prev = last_prog.exps.get(n);
-		if (prev == null || (Boolean) prog.exps.get(n).getOrDefault(env.defaults, AqlOption.always_reload)) {
+		if (prev == null || (Boolean) prog.exps.get(n).getOrDefault(env, AqlOption.always_reload)) {
 			changed.put(n, true);
 			return true;
 		}
@@ -244,7 +251,9 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				Exp<?> exp = prog.exps.get(n);
 				Kind k = exp.kind();
 				k2 = k.toString();
-				Object val = Util.timeout(() -> exp.eval(env), (Long)exp.getOrDefault(env.defaults, AqlOption.timeout) * 1000);
+				long time1 = System.currentTimeMillis();
+				Object val = Util.timeout(() -> exp.eval(env), (Long)exp.getOrDefault(env, AqlOption.timeout) * 1000);
+				long time2 = System.currentTimeMillis();
 				// Object val = exp.eval(env);
 				if (val == null) {
 					throw new RuntimeException("anomaly, please report: null result on " + exp);
@@ -253,6 +262,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				}
 				synchronized (this) {
 					env.defs.put(n, k, val);
+					env.performance.put(n, Float.toString((time2 - time1) / (1000f)));
 					processing.remove(n);
 					completed.add(n);
 					update();

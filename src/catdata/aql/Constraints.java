@@ -108,12 +108,12 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 			}
 			ret = ret2;
 		}		
-		throw new RuntimeException("Limit exceeded, last instance had " + ret.algebra().allXs().size() + " rows.");
+		throw new RuntimeException("Iteration limit exceeded.  Last instance had " + ret.algebra().size() + " rows.");
 	}
 
 	// TODO aql needs to be over all eds
 	public <Gen, Sk, X, Y> Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> step(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I, AqlOptions options) {
-		Collection<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>> T = triggers(I);
+		Collection<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>> T = triggers(I, options);
 
 		if (T.isEmpty()) {
 			 return null;
@@ -161,12 +161,12 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 
 	}
 
-	public <X, Y, Gen, Sk> Collection<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>> triggers(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I) {
+	public <X, Y, Gen, Sk> Collection<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>> triggers(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I, AqlOptions options) {
 		Collection<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>> T = new LinkedList<>();
 
 		for (ED<Ty, En, Sym, Fk, Att> ed : eds) {
 			Query<Ty, En, Sym, Fk, Att, WHICH, Unit, Void> Q = ed.Q;
-			EvalInstance<Ty, En, Sym, Fk, Att, Gen, Sk, WHICH, Unit, Void, X, Y> QI = new EvalInstance<>(Q, I);
+			EvalInstance<Ty, En, Sym, Fk, Att, Gen, Sk, WHICH, Unit, Void, X, Y> QI = new EvalInstance<>(Q, I, options);
 			outer: for (Row<WHICH, X> e : QI.algebra().en(WHICH.FRONT)) {
 				for (Row<WHICH, X> a : QI.algebra().en(WHICH.BACK)) {
 					if (QI.algebra().fk(new Unit(), a).equals(e)) {

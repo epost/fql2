@@ -83,11 +83,11 @@ public final class AqlDisplay implements Disp {
 		switch (exp.kind()) {
 		case INSTANCE:
 		case TRANSFORM:	
-			return (Integer) exp.getOrDefault(env.defaults, AqlOption.gui_max_table_size);
+			return (Integer) exp.getOrDefault(env, AqlOption.gui_max_table_size);
 						
 		case PRAGMA:
 		case CONSTRAINTS:
-			return (Integer) exp.getOrDefault(env.defaults, AqlOption.gui_max_string_size);
+			return (Integer) exp.getOrDefault(env, AqlOption.gui_max_string_size);
 
 		case MAPPING:
 		case QUERY:
@@ -95,7 +95,7 @@ public final class AqlDisplay implements Disp {
 		case SCHEMA_COLIMIT:			
 		case GRAPH:			
 		case TYPESIDE:
-			return (Integer) exp.getOrDefault(env.defaults, AqlOption.gui_max_graph_size);
+			return (Integer) exp.getOrDefault(env, AqlOption.gui_max_graph_size);
 			
 		case COMMENT:			
 			return 0;
@@ -105,13 +105,13 @@ public final class AqlDisplay implements Disp {
 		} 
 	}
 	
-	private static JComponent wrapDisplay(Exp<?> exp, Semantics obj, AqlEnv env) {
+	private static JComponent wrapDisplay(String c, Exp<?> exp, Semantics obj, AqlEnv env, String time) {
 		int maxSize = getMaxSize(exp, env);
 		if (obj.size() > maxSize) {
-			return new CodeTextPanel("", "Display supressed, size > " + maxSize + ".\n\nSee manual for a description of size, or try options gui_max_Z_size = X for X > " + obj.size() + " (the size of this object) and Z one of table, graph, string.  \n\nWarning: sizes that are too large will hang the viewer." );
+			return new CodeTextPanel("", "Display supressed, size > " + maxSize + ".\n\nSee manual for a description of size, or try options gui_max_Z_size = X for X > " + obj.size() + " (the size of this object) and Z one of table, graph, string.  \n\nWarning: sizes that are too large will hang the viewer.\n\nCompute time: " + env.performance.getOrDefault(c, "unkown") );
 		}
 		 
-		return AqlViewer.view(obj);
+		return AqlViewer.view(time, obj);
 	/*
 		JPanel ret = new JPanel(new GridLayout(1,1));
 		JPanel lazyPanel = new JPanel();
@@ -144,7 +144,7 @@ public final class AqlDisplay implements Disp {
 				Semantics obj = (Semantics) env.defs.get(c, exp.kind());
 				
 				try {
-					frames.add(new Pair<>(doLookup(c, exp, env), wrapDisplay(exp, obj, env)));
+					frames.add(new Pair<>(doLookup(c, exp, env), wrapDisplay(c, exp, obj, env, env.performance.getOrDefault(c, "unkown"))));
 				} catch (RuntimeException ex) {
 					ex.printStackTrace();
 					throw new LineException(ex.getMessage(), c, exp.kind().toString());

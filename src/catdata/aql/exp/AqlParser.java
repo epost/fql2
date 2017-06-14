@@ -91,14 +91,14 @@ public class AqlParser {
 
 
 	public static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(",
-			")", "=", "->", "@", "(*", "*)", "+"};	
+			")", "=", "->", "@", "(*", "*)", "+", "[", "]"};	
 	
 	public static final String[] res = new String[] {
 			"random",
 			"chase",
 			"check",
 			"assert_consistent",
-			"coproduct",
+			"coproduct_sigma",
 			"coequalize",
 			"html",
 			"quotient",
@@ -110,7 +110,7 @@ public class AqlParser {
 			"getSchema",
 			"typeside", "schema", "mapping", "instance", "transform", "query", "pragma", "graph",
 			"exec_jdbc",
-			"exec_js",
+			"exec_js", 
 			"exec_cmdline",
 			"literal",
 			"add_to_classpath", //TODO aql not officially supported
@@ -231,18 +231,25 @@ public class AqlParser {
 		});
 		
 		
-		Parser<RawTerm> ret = Parsers.or(ann, app, app2, dot, /*appH,*/ sing);
+		Parser<RawTerm> ret = Parsers.or(ann, app, app2, dot, /*appH,*/ sing /*,parens(ref)*/); //conflicts with infix? TODO aql
  		
 		ref.set(ret);
 		return ret;
 	}
 
+	
+	private static <X> Parser<X> parens(Reference<X> p) {
+		Parser<X> q = Parsers.tuple(token("("), p.lazy(), token(")")).map(x -> x.b);
+		return q;
+	}
+	
+	
 	private static void tyExp() {
 		Parser<TyExp<?, ?>> 
 			var = ident.map(TyExpVar::new),
 			empty = token("empty").map(x -> new TyExpEmpty()),
 			sch = Parsers.tuple(token("typesideOf"), sch_ref.lazy()).map(x -> new TyExpSch<>(x.b)),
-			ret = Parsers.or(sch, empty, tyExpRaw(), var);
+			ret = Parsers.or(sch, empty, tyExpRaw(), var, parens(ty_ref));
 		
 		ty_ref.set(ret);
 	}
@@ -253,7 +260,7 @@ public class AqlParser {
 			empty = Parsers.tuple(token("empty"), token(":"), ty_ref.get()).map(x -> new SchExpEmpty<>(x.c)),
 			inst = Parsers.tuple(token("schemaOf"), inst_ref.lazy()).map(x -> new SchExpInst<>(x.b)),
 			colim = Parsers.tuple(token("getSchema"), colim_ref.lazy()).map(x -> new SchExpColim<>(x.b)),
-			ret = Parsers.or(inst, empty, schExpRaw(), var, colim); 
+			ret = Parsers.or(inst, empty, schExpRaw(), var, colim, parens(sch_ref)); 
 		
 		sch_ref.set(ret);
 	}
@@ -289,7 +296,7 @@ public class AqlParser {
 		
 			cons = Parsers.tuple(token("assert_consistent"), inst_ref.lazy()).map(x -> new PragmaExpConsistent(x.b)),
 					
-			ret = Parsers.or(check, csvInst, cons, csvTrans, var, sql, js, proc, jdbcInst, jdbcTrans, match, load); 
+			ret = Parsers.or(check, csvInst, cons, csvTrans, var, sql, js, proc, jdbcInst, jdbcTrans, match, load, parens(pragma_ref)); 
 		
 			pragma_ref.set(ret);
 	}
@@ -302,13 +309,13 @@ public class AqlParser {
 			sigma = Parsers.tuple(token("sigma"), map_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new InstExpSigma(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 			delta = Parsers.tuple(token("delta"), map_ref.lazy(), inst_ref.lazy()).map(x -> new InstExpDelta(x.b, x.c)),	
 			distinct = Parsers.tuple(token("distinct"), inst_ref.lazy()).map(x -> new InstExpDistinct(x.b)),
-			eval = Parsers.tuple(token("eval"), query_ref.lazy(), inst_ref.lazy()).map(x -> new InstExpEval(x.b, x.c)),
+			eval = Parsers.tuple(token("eval"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new InstExpEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d)),
 			dom = Parsers.tuple(token("src"), trans_ref.lazy()).map(x -> new InstExpDom(x.b)),
 			cod = Parsers.tuple(token("dst"), trans_ref.lazy()).map(x -> new InstExpCod(x.b)),
-			chase = Parsers.tuple(token("chase"), edsExp(), inst_ref.lazy(), IntegerLiteral.PARSER).map(x -> new InstExpChase(x.b, x.c, Integer.parseInt(x.d))),
+			chase = Parsers.tuple(token("chase"), edsExp(), inst_ref.lazy(), IntegerLiteral.PARSER, options.between(token("{"), token("}")).optional()).map(x -> new InstExpChase(x.b, x.c, Integer.parseInt(x.d), x.e == null ? new LinkedList<>() : x.e)),
 			coeval = Parsers.tuple(token("coeval"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new InstExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d));
 					
-		Parser ret = Parsers.or(instExpCoProd(), instExpRand(), instExpCoEq(), instExpJdbcAll(), chase, instExpJdbc(),empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval);
+		Parser ret = Parsers.or(instExpCoProd(), instExpRand(), instExpCoEq(), instExpJdbcAll(), chase, instExpJdbc(),empty,instExpRaw(),var,sigma,delta,distinct,eval,colimInstExp(),dom,cod,instExpCsv(),coeval, parens(inst_ref));
 		
 		inst_ref.set(ret);
 	}
@@ -318,7 +325,7 @@ public class AqlParser {
 		Parser<GraphExp<?,?>> 
 			var = ident.map(GraphExpVar::new),
 		
-			ret = Parsers.or(var, graphExpRaw());
+			ret = Parsers.or(var, graphExpRaw(), parens(graph_ref));
 		
 		graph_ref.set(ret);
 	}
@@ -329,9 +336,9 @@ public class AqlParser {
 			var = ident.map(MapExpVar::new),
 			id = Parsers.tuple(token("id"), sch_ref.lazy()).map(x -> new MapExpId<>(x.b)),
 			colim = Parsers.tuple(token("getMapping"), colim_ref.lazy(), ident).map(x -> new MapExpColim(x.c, x.b)),		
-			comp = Parsers.tuple(token("("), map_ref.lazy(), token(";"), map_ref.lazy(), token(")")).map(x -> new MapExpComp(x.b, x.d)),
+			comp = Parsers.tuple(token("["), map_ref.lazy(), token(";"), map_ref.lazy(), token("]")).map(x -> new MapExpComp(x.b, x.d)),
 					
-			ret = Parsers.or(id, mapExpRaw(), var, colim, comp);
+			ret = Parsers.or(id, mapExpRaw(), var, colim, comp, parens(map_ref));
 		
 		map_ref.set(ret);
 	}
@@ -360,10 +367,10 @@ public class AqlParser {
 			counitq = Parsers.tuple(token("counit_query"), query_ref.lazy(), inst_ref.lazy(), options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
 					.map(x -> new TransExpCoEvalEvalCoUnit(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 					
-			comp = Parsers.tuple(token("("), trans_ref.lazy(), token(";"), trans_ref.lazy(), token(")"))
+			comp = Parsers.tuple(token("["), trans_ref.lazy(), token(";"), trans_ref.lazy(), token("]"))
 			.map(x -> new TransExpCompose(x.b, x.d));
 		
-			Parser ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct, eval, coeval, transExpCsv(), unitq, counitq, transExpJdbc(), comp);
+			Parser ret = Parsers.or(id, transExpRaw(), var, sigma, delta, unit, counit, distinct, eval, coeval, transExpCsv(), unitq, counitq, transExpJdbc(), comp, parens(trans_ref));
 		
 		trans_ref.set(ret);
 	}
@@ -722,7 +729,7 @@ public class AqlParser {
 		 Parser<EdsExp<?,?,?,?,?>> 
 			var = ident.map(EdsExpVar::new),
 			raw = edsExpRaw();
-		 return Parsers.or(var, raw);
+		 return Parsers.or(var, raw); //TODO aql no parens
 	 }
 	 
 	 private static Parser<EdExpRaw> edExpRaw() {
@@ -827,7 +834,7 @@ public class AqlParser {
 		Parser<QueryExp<?,?,?,?,?,?,?,?>> 
 		var = ident.map(QueryExpVar::new),
 		//id = Parsers.tuple(token("id"), sch_ref.lazy()).map(x -> new MapExpId<>(x.b)),
-		ret = Parsers.or(/*id,*/ queryExpRaw(), var);
+		ret = Parsers.or(/*id,*/ queryExpRaw(), var, parens(query_ref));
 	
 		query_ref.set(ret);	
 	} 
@@ -862,7 +869,7 @@ public class AqlParser {
 					.map(x -> new ColimSchExpWrap(x.b, x.c, x.d));
 			
 			Parser<ColimSchExp<?, ?, ?, ?,?,?,?>> retX =
-					Parsers.or(ret, ret2, ret3, colimExpModify(), colimSchExpQuotient());
+					Parsers.or(ret, ret2, ret3, colimExpModify(), colimSchExpQuotient(), parens(colim_ref));
 			
 			colim_ref.set(retX);
 			
@@ -920,7 +927,8 @@ public class AqlParser {
 	 
 	 @SuppressWarnings({ "rawtypes", "unchecked" })
 	 private static Parser<InstExpCoProd> instExpCoProd() {
-			Parser<InstExpCoProd> ret = Parsers.tuple(token("coproduct"), inst_ref.lazy().many(), token(":"), sch_ref.lazy(), options.between(token("{"), token("}")).optional())
+		 Parser<catdata.Pair<MapExp, InstExp>> p = Parsers.tuple(map_ref.lazy(), inst_ref.lazy()).map(x -> new catdata.Pair<>(x.a, x.b)); 
+			Parser<InstExpCoProd> ret = Parsers.tuple(token("coproduct_sigma"), p.many(), token(":"), sch_ref.lazy(), options.between(token("{"), token("}")).optional())
 					.map(x -> new InstExpCoProd(x.b, x.d, Util.newIfNull(x.e)));
 			
 			return ret; 
@@ -1083,7 +1091,7 @@ public class AqlParser {
 					 decl("constraints", edsExp())
 					 );
 		
-		return p.many().map(x -> new Program<>(conv(x), s));
+		return Parsers.tuple(options, p.many()).map(x -> new Program<>(conv(x.b), s, x.a));
 	}
 	
 	

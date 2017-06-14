@@ -72,10 +72,11 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		return obj.toString().replace("\n", "<br>").replace("\t", "&nbsp;");
 	}
 
-	public static JComponent view(Semantics s) {
+	public static JComponent view(String time, Semantics s) {
 		JTabbedPane ret = new JTabbedPane();
 		new AqlViewer().visit(ret, s);
 		ret.addTab("Text", new CodeTextPanel("", s.toString()));
+		ret.addTab("Performance", new CodeTextPanel("",  "Compute time: " + time + " seconds"));
 		return ret;
 	}
 

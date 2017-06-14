@@ -9,6 +9,7 @@ import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
 import java.awt.MenuShortcut;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -61,6 +62,8 @@ import catdata.opl.SqlChecker;
 import catdata.opl.SqlToOpl;
 import catdata.sql.SqlLoader;
 import catdata.sql.SqlMapper;
+import easik.Easik;
+import easik.ui.menu.popup.ImportSketchAction;
 
 @SuppressWarnings("serial")
 /*
@@ -623,6 +626,13 @@ public class GUI extends JPanel {
 			return;
 		}
 		s = s.replace("\r", "");
+		if (lang.equals(Language.EASIK)) {
+			Easik.getInstance().getFrame().getOverview().openOverview(f);
+			return;
+		} else if (lang.equals(Language.SKETCH)) {
+			new ImportSketchAction(new Point(0,0), Easik.getInstance().getFrame().getOverview()).actionPerformed0(f);
+			return;
+		}
 		Integer i = newAction(f.getName(), s, lang);
 		files.put(i, f);
 	}

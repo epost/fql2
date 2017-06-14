@@ -16,7 +16,7 @@ import catdata.aql.Term;
 @SuppressWarnings("serial")
 public final class Ctx<K,V> implements Serializable {
 	
-	public final Map<K,V> map;
+	public final LinkedHashMap<K,V> map;
 	
 	public <X> Ctx<K,Chc<V,X>> inLeft() {
 		LinkedHashMap<K,Chc<V,X>> ret = new LinkedHashMap<>();

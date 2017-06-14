@@ -282,10 +282,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	
 	///////////////////////////////////////////////////////////////////////
 	
+	//TODO aql the types here are lies
 	public static final class InstExpCoProd<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> 
 		extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
 
-		public final List<InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>> Is;
+		public final List<Pair<MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>, InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>>> Is;
 		
 		public final SchExp<Ty,En,Sym,Fk,Att> sch;
 		
@@ -296,7 +297,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return options;
 		}
 
-		public InstExpCoProd(List<InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> is, SchExp<Ty, En, Sym, Fk, Att> sch, List<Pair<String, String>> options) {
+		public InstExpCoProd(List<Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> is, SchExp<Ty, En, Sym, Fk, Att> sch, List<Pair<String, String>> options) {
 			Is = is;
 			this.sch = sch;
 			this.options = Util.toMapSafely(options);
@@ -305,8 +306,9 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			Set<Pair<String, Kind>> ret = new HashSet<>(sch.deps());	
-			for(InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i : Is) {
-				ret.addAll(i.deps());
+			for(Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> i : Is) {
+				ret.addAll(i.first.deps());
+				ret.addAll(i.second.deps());
 			}
 			return ret;
 		}
@@ -315,7 +317,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public String toString() {
-			return "InstExpCoProd [Is=" + Is + ", sch=" + sch + ", options=" + options + "]";
+			return "InstExpCoProd [Is=" + Is + ", sch=" + sch + ", options=" + options + "]"; //TODO aql toString
 		}
 
 		@Override
@@ -357,10 +359,10 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
-			for (InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i : Is) {
-				SchExp<Ty, En, Sym, Fk, Att> ac = i.type(G);
+			for (Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> x : Is) {
+				SchExp<Ty, En, Sym, Fk, Att> ac = new InstExpSigma<>(x.first, x.second, Collections.emptyMap()).type(G);
 				if (!ac.equals(sch)) { //TODO aql type equality
-					throw new RuntimeException("Instance " + i + " has schema " + ac + ",\n\nnot " + sch + "\n\nas expected");
+					throw new RuntimeException("Instance " + x.second + " has schema " + ac + ",\n\nnot " + sch + "\n\nas expected");
 				}
 			}
 			return sch;
@@ -373,13 +375,14 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			AqlOptions strat = new AqlOptions(options, col, env.defaults);
 			Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs0 = new HashSet<>();
 	
-			for (InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I0 : Is) {
-				Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I = I0.eval(env);
+			for (Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> x : Is) {
+				Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> M = x.first.eval(env);
+				Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I = x.second.eval(env);
 				for (Gen g : I.gens().keySet()) {
 					if (col.gens.containsKey(g)) {
 						throw new RuntimeException("The generators in the input instances of a coproduct must be unique, but there is more than one " + g);
 					}
-					col.gens.put(g, I.gens().get(g));
+					col.gens.put(g, M.ens.get(I.gens().get(g)));
 				}
 				for (Sk g : I.sks().keySet()) {
 					if (col.sks.containsKey(g)) {
@@ -388,8 +391,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 					col.sks.put(g, I.sks().get(g));
 				}
 				for (Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : I.eqs()) {
-					eqs0.add(eq);
-					col.eqs.add(new Eq<>(new Ctx<>(), eq.first, eq.second));
+					eqs0.add(new Pair<>(M.trans(eq.first), M.trans(eq.second)));
+					col.eqs.add(new Eq<>(new Ctx<>(), M.trans(eq.first), M.trans(eq.second)));
 				}
 			}		
 			InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, ID> initial0 = new InitialAlgebra<>(strat, sch0, col, new It(), Object::toString, Object::toString);			 
@@ -410,18 +413,21 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		
 		public final int limit;
 		
+		public final Map<String, String> options;
+		
 		@Override
 		public Map<String, String> options() {
-			return Collections.emptyMap();
+			return options;
 		}
 
-		public InstExpChase(EdsExp<Ty, En, Sym, Fk, Att> eds, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i, int limit) {
+		public InstExpChase(EdsExp<Ty, En, Sym, Fk, Att> eds, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i, int limit, List<Pair<String, String>> options) {
 			if (limit < 0) {
 				throw new RuntimeException("In chase, expected positive number, received " + i);
 			}
 			I = i;
 			this.eds = eds;
 			this.limit = limit;
+			this.options = Util.toMapSafely(options);
 		}
 
 		@Override
@@ -430,6 +436,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((eds == null) ? 0 : eds.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
 			result = prime * result + limit;
 			return result;
 		}
@@ -452,6 +459,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 				if (other.eds != null)
 					return false;
 			} else if (!eds.equals(other.eds))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
 				return false;
 			if (limit != other.limit)
 				return false;
@@ -476,7 +488,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		@SuppressWarnings("unchecked")
 		@Override
 		public Instance<Ty, En, Sym, Fk, Att, Object, Object, Object, Object> eval(AqlEnv env) {
-			Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret = eds.eval(env).chase(I.eval(env), limit, env.defaults);
+			Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret = eds.eval(env).chase(I.eval(env), limit, new AqlOptions(options, null, env.defaults));
 			return (Instance<Ty, En, Sym, Fk, Att, Object, Object, Object, Object>) ret;
 		}
 
@@ -853,14 +865,17 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		
 		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
 		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y>  I;
+		public final Map<String, String> options;
 		
 		@Override
 		public Map<String, String> options() {
-			return Collections.emptyMap();
+			return options;
 		}
-		public InstExpEval(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i) {
+		
+		public InstExpEval(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, List<Pair<String, String>> options) {
 			Q = q;
 			I = i;
+			this.options = Util.toMapSafely(options);
 		}
 		
 		@Override
@@ -869,6 +884,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			int result = 1;
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
 			return result;
 		}
 		
@@ -891,6 +907,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 					return false;
 			} else if (!Q.equals(other.Q))
 				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
 			return true;
 		}
 		@Override
@@ -908,7 +929,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public Instance<Ty, En2, Sym, Fk2, Att2, Row<En2, X>, Y, Row<En2, X>, Y> eval(AqlEnv env) {
-			return new EvalInstance<>(Q.eval(env), I.eval(env));
+			return new EvalInstance<>(Q.eval(env), I.eval(env), new AqlOptions(options, null, env.defaults));
 		}
 
 		@Override
