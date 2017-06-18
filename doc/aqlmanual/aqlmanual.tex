@@ -163,7 +163,9 @@ The type side $Ty$ is an example of a {\it literal}; i.e., an expression that ev
 
 Many expressions contain import sections.  For example, a typeside $T$ can import another typeside $T'$, whose effect is the same as if $T'$ were textually included in $T$.  In the above example, $Ty$ imports the typeside for arithmetic.
 
-Many expressions contain lists of key-value pairs that specify options in an option section.  The defaults of these options many change with new releases of AQL and are displayed in the AQL pane of the AQL IDE options menu.  The effect of these options is described in the rest of the manual.  In the above example, the execution timeout for the type side is set to five seconds.  Every expression that supports options supports the timeout option, as well as the GUI (display) options and the always reload option.
+Many expressions contain lists of key-value pairs that specify options in an option section.  The defaults of these options many change with new releases of AQL and are displayed in the AQL pane of the AQL IDE options menu.  The effect of these options is described in the rest of the manual.  In the above example, the execution timeout for the type side is set to five seconds.  Every expression that supports options supports the timeout option, as well as the GUI (display) options and the always reload option.  
+
+Every AQL file may contain an optional options section before the list of declarations.  These options are inherited by every expression (e.g., so you can set the timeout globally to 30, rather than having to specify that for every expression).  
  
 \section{AQL's Typing Discipline}
 
@@ -310,7 +312,7 @@ A schema mapping $F : S \to T$ takes entities in $S$ to entities in $T$, foreign
 %todo
 The identity schema mapping on a particular schema.
 
-\section{{\tt (<mapping> ; <mapping>)}}
+\section{{\tt [<mapping> ; <mapping>]}}
 %todo
 Composes two mappings: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt (f ; g) : A -> C}.
 
@@ -346,7 +348,7 @@ A {\tt ctx(<entity>, <instance>, ctx(<attribute>, <term>))}.  The instance uses 
 A {\tt ctx(<foreign key>, <transform>)}.
 
 \subsection{{\tt options}}
-Allowed are {\tt timeout} and {\tt dont\_validate\_unsafe}.  Note that each instance and transform in the query can have its own options.
+Allowed are {\tt timeout} and {\tt dont\_validate\_unsafe}.  Note that each instance and transform in the query can have its own options (the Query Evaluation Entity Block options described in this manual).
 
 
 \chapter{Kind {\tt constraints}}
@@ -479,6 +481,10 @@ Allowable options are {\tt timeout}, {\tt prover} and related options, and {\tt 
 
 Chases the input instance with the input constraints up to a maximum number of iterations.  If the chase succeeds, the result instance will satisfy the constraints.
 
+\subsection{{\tt options}}
+Allowable options are the same as for an instance.
+
+
 \section{{\tt random : <schema>}}
 
 Constructs a random instance with the specified number of generators per entity or type. Then for each generator $e:s$ and fk/att $f : s \to t$, it adds equation $f(e) = y$, where $y:t$ is a randomly selected generator (or no equation if t has no generators).
@@ -493,7 +499,7 @@ Allowable options are the same for literal instances, and {\tt random\_seed}.
 \section{{\tt id <instance>}}
 %todo
 The identity transform on an instance.
-\section{{\tt (<transform> ; <transform>)}}
+\section{{\tt [<transform> ; <transform>]}}
 %todo
 Composes two transforms: if {\tt f: A -> B} and {\tt g: B -> C}, then {\tt (f ; g): A -> C}.
 
@@ -631,6 +637,9 @@ Allowed are {\tt timeout}, {\tt always\_reload},  {\tt id\_column\_name} and {\t
 
 
 \chapter{{\tt options}}
+
+\section{{\tt num\_threads = integer}}
+Sets the number of threads to be used when running an AQL program.
 
 \section{{\tt random\_seed = integer}}
 Sets the random number generator seed.
@@ -783,4 +792,34 @@ For type sides, (colimit) schemas, mappings, transforms, queries.
 
 For pragmas and constraints.
 
+\section{Query Evaluation Entity Block options}
+
+\subsection{{\tt eval\_max\_temp\_size = integer}}
+
+Sets the maximum size of intermediate tables when executing sub-queries.
+
+\subsection{{\tt eval\_reorder\_joins = boolean}}
+
+Sets whether or not it is permissible for AQL to choose a join order based on a heuristic.
+
 \end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

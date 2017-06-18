@@ -142,7 +142,7 @@ public final class AqlOptions {
 	private Object getDefault(AqlOption option) {
 		switch (option) {
 		case eval_max_temp_size:
-			return 1024*64;
+			return 1024*1024*8;
 		case eval_reorder_joins:
 			return true;
 		case allow_java_eqs_unsafe:
@@ -192,7 +192,7 @@ public final class AqlOptions {
 		case csv_quote_char:
 			return '\"';
 		case varchar_length:
-			return 64;
+			return 256;
 		case csv_null_string:
 			return null;
 		case program_allow_nontermination_unsafe:

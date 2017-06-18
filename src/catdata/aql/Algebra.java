@@ -4,9 +4,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import catdata.Pair;
+import catdata.Triple;
 import catdata.Util;
 
 
@@ -31,6 +34,52 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	 * The Xs need be to be unique across ens, so that repr can invert.  Is it worth checking this? TODO aql
 	 */
 	public abstract Collection<X> en(En en);
+	
+	public synchronized Collection<X> en_indexed(En en, List<Pair<Fk, X>> fks, List<Pair<Att, Object>> atts) {
+		List<X> l = new LinkedList<>(en(en));
+		for (Pair<Fk, X> p : fks) {
+			l.retainAll(en_indexedFk(en, p.first, p.second));
+		}
+		for (Pair<Att, Object> p : atts) {
+			l.retainAll(en_indexedAtt(en, p.first, p.second));			
+		}
+		return l;
+	}
+	
+	private final Map<Triple<En, Fk, X>, Collection<X>> fk_index = Collections.synchronizedMap(new HashMap<>());
+	public synchronized Collection<X> en_indexedFk(En en, Fk fk, X x) {
+		Triple<En, Fk, X> t = new Triple<>(en, fk, x);
+		if (fk_index.containsKey(t)) {
+			return fk_index.get(t);
+		}
+		List<X> ret = new LinkedList<>();
+		for (X y : en(en)) {
+			if (fk(fk, y).equals(x)) {
+				ret.add(y);
+			}
+		}
+		fk_index.put(t, ret);
+		return ret;
+	}
+	public synchronized Collection<X> en_indexedAtt(En en, Att att, Object y) {
+		Triple<En, Att, Object> t = new Triple<>(en, att, y);
+		if (att_index.containsKey(t)) {
+			return att_index.get(t);
+		} else if (!hasFreeTypeAlgebra() || schema().typeSide.tys.size() != schema().typeSide.js.java_tys.size()) {
+			return en(en);
+		}
+		List<X> ret = new LinkedList<>();
+		for (X x : en(en)) {
+			if (att(att, x).equals(Term.Obj(y, schema().atts.get(att).second))) { //TODO aql only works bc free
+				ret.add(x);
+			}
+		}
+		att_index.put(t, ret);
+		return ret;
+	}
+	
+	private final Map<Triple<En, Att, Object>, Collection<X>> att_index = Collections.synchronizedMap(new HashMap<>());
+	
 
 	public abstract X gen(Gen gen);
 	

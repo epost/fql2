@@ -25,7 +25,7 @@ extends Instance<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y>
 	private final EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> alg;
 	private final SaturatedInstance<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y> J;
 	
-	public EvalInstance(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, AqlOptions options) {
+	public EvalInstance(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, @SuppressWarnings("unused") AqlOptions options) {
 		if (!q.src.equals(i.schema())) {
 			throw new RuntimeException("In eval instance, source of query is " + q.src + ", but instance has type " + i.schema());
 		}

@@ -158,12 +158,27 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		}
 
 		// TODO AQL slowness hurts chase
-		public static <En2, X, Ty, En1, Sym, Fk1, Att1, Gen, Sk> Collection<Row<En2, X>> extend(En2 entity, Collection<Row<En2, X>> tuples, Collection<X> dom, Var v, Frozen<Ty, En1, Sym, Fk1, Att1> q, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, ?> I, int max) {
-			List<Row<En2, X>> ret = new LinkedList<>(); //tuples.size() * dom.size());
+		public static <En2, X, Y, Ty, En1, Sym, Fk1, Att1, Gen, Sk> Collection<Row<En2, X>> extend(En2 entity, Collection<Row<En2, X>> tuples, Var v, Frozen<Ty, En1, Sym, Fk1, Att1> q, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I, int max) {
+			List<Row<En2, X>> ret = new LinkedList<>(); // tuples.size() *
+														// dom.size());
 			for (Row<En2, X> tuple : tuples) {
+			
+				List<Pair<Fk1, X>> l1 = getAccessPath(v, tuple, q, I);
+				List<Pair<Att1, Object>> l2 = getAccessPath2(v, tuple, q, I);
+				Collection<X> dom = I.algebra().en_indexed(q.gens.get(v), l1, l2);
+				/*if (!l1.isEmpty() || !l2.isEmpty()) {
+					System.out.println("tuple " + tuple);
+					System.out.println("var " + v);
+					System.out.println("Access paths " + l1 + " and " + l2);
+					System.out.println("old " + I.algebra().en(q.gens.get(v)).size());
+					System.out.println("new " + dom.size());
+					System.out.println();
+				}*/
+				
 				outer: for (X x : dom) {
 					if (ret.size() > max) {
-						throw new RuntimeException("On entity " + entity + ", query evaluation maximum intermediate result size (" + max + ") exceeded.  Try, in the sub-query for " + entity + ", options eval_max_temp_size = " + tuples.size() * dom.size() + " (the largest possible size of the temporary table that triggered this error).  Or, try, in the subquery for " + entity + ", options eval_reorder_joins=false and choose a nested loops join order that results in smaller intermediate results." );
+						throw new RuntimeException("On entity " + entity + ", query evaluation maximum intermediate result size (" + max + ") exceeded.  Try, in the sub-query for " + entity + ", options eval_max_temp_size = " + tuples.size() * dom.size() + " (the largest possible size of the temporary table that triggered this error).  Or, try, in the subquery for " + entity
+								+ ", options eval_reorder_joins=false and choose a nested loops join order that results in smaller intermediate results.");
 					}
 					Row<En2, X> row = new Row<>(tuple, v, x);
 					for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : q.eqs) {
@@ -184,8 +199,6 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		}
 	}
 
-	
-	
 	private final Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
 	// private final Algebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> alg;
 	private final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
@@ -288,15 +301,63 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 
 	private Collection<Row<En2, X>> eval(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q) {
 		Collection<Row<En2, X>> ret = new LinkedList<>();
+	//	System.out.println("+++++++++++" + en2 + " --- " + Thread.currentThread());
 		ret.add(new Row<>(en2));
 		for (Var v : q.order()) {
-			Collection<X> dom = I.algebra().en(q.gens.get(v));
 			Integer k = (int) q.options.getOrDefault(AqlOption.eval_max_temp_size);
-			ret = Row.extend(en2, ret, dom, v, q, I, k);
+			ret = Row.extend(en2, ret, v, q, I, k);
 		}
 		return ret;
 	}
 
+	private static <Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y, En2> List<Pair<Fk1, X>> getAccessPath(Var v, Row<En2, X> tuple, Frozen<Ty, En1, Sym, Fk1, Att1> q2, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
+		List<Pair<Fk1, X>> ret = new LinkedList<>();
+		for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : q2.eqs) {
+			if (eq.lhs.fk != null && eq.lhs.arg.equals(Term.Gen(v))) {
+				Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> rhs = trans1(tuple, eq.rhs, I);
+				if (!rhs.isPresent()) {
+					continue;
+				}
+				X x = I.algebra().nf(rhs.get().convert());
+				ret.add(new Pair<>(eq.lhs.fk, x));
+			} else if (eq.rhs.fk != null && eq.rhs.arg.equals(Term.Gen(v))) {
+				Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> lhs = trans1(tuple, eq.lhs, I);
+				if (!lhs.isPresent()) {
+					continue;
+				}
+				X x = I.algebra().nf(lhs.get().convert());
+				ret.add(new Pair<>(eq.rhs.fk, x));
+			}
+		}
+		return ret;
+	}
+
+	private static <Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y, En2> List<Pair<Att1, Object>> getAccessPath2(Var v, Row<En2, X> tuple, Frozen<Ty, En1, Sym, Fk1, Att1> q2, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
+		List<Pair<Att1, Object>> ret = new LinkedList<>();
+		for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : q2.eqs) {
+			if (eq.lhs.att != null && eq.lhs.arg.equals(Term.Gen(v))) {
+				Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> rhs = trans1(tuple, eq.rhs, I);
+				if (!rhs.isPresent()) {
+					continue;
+				}
+				Term<Ty, Void, Sym, Void, Void, Void, Y> x = I.algebra().intoY(rhs.get().convert());
+				if (x.obj != null) {
+					ret.add(new Pair<>(eq.lhs.att, x.obj));
+				}
+			} else if (eq.rhs.att != null && eq.rhs.arg.equals(Term.Gen(v))) {
+				Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> lhs = trans1(tuple, eq.lhs, I);
+				if (!lhs.isPresent()) {
+					continue;
+				}
+				Term<Ty, Void, Sym, Void, Void, Void, Y> x = I.algebra().intoY(lhs.get().convert());
+				if (x.obj != null) {
+					ret.add(new Pair<>(eq.rhs.att, x.obj));
+				}
+			}
+		}
+		return ret;
+	}
+	
 	private static <Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, X, Y> Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> trans1(Row<En2, X> row, Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
 		if (term.gen != null) {
 			return row.containsKey(term.gen) ? Optional.of(I.algebra().repr(row.get(term.gen)).map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn())) : Optional.empty();
@@ -327,28 +388,20 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
-/*
-	private Collection<Row<En2, X>> filter(Collection<Row<En2, X>> rows, Frozen<Ty, En1, Sym, Fk1, Att1> q) {
-		Collection<Row<En2, X>> ret = new LinkedList<>();
-
-		outer: for (Row<En2, X> row : rows) {
-			for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : q.eqs) {
-				Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> lhs = trans1(row, eq.lhs, I);
-				Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> rhs = trans1(row, eq.rhs, I);
-				if (!lhs.isPresent() || !rhs.isPresent()) {
-					ret.add(row);
-					continue outer;
-				}
-				if (!I.dp().eq(new Ctx<>(), lhs.get(), rhs.get())) {
-					continue outer;
-				}
-			}
-			ret.add(row);
-		}
-
-		return ret;
-	}
-*/
+	/*
+	 * private Collection<Row<En2, X>> filter(Collection<Row<En2, X>> rows,
+	 * Frozen<Ty, En1, Sym, Fk1, Att1> q) { Collection<Row<En2, X>> ret = new
+	 * LinkedList<>();
+	 * 
+	 * outer: for (Row<En2, X> row : rows) { for (Eq<Ty, En1, Sym, Fk1, Att1,
+	 * Var, Void> eq : q.eqs) { Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>
+	 * lhs = trans1(row, eq.lhs, I); Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen,
+	 * Sk>> rhs = trans1(row, eq.rhs, I); if (!lhs.isPresent() ||
+	 * !rhs.isPresent()) { ret.add(row); continue outer; } if (!I.dp().eq(new
+	 * Ctx<>(), lhs.get(), rhs.get())) { continue outer; } } ret.add(row); }
+	 * 
+	 * return ret; }
+	 */
 	/*
 	 * public Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> translate(Term<Ty, En1,
 	 * Sym, Fk1, Att1, Pair<En1, X>, Y> e) { if (e.var != null) { return
