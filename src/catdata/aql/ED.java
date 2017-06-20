@@ -135,7 +135,7 @@ public class ED<Ty, En, Sym, Fk, Att> {
 		fks = new Ctx<>();
 		fks.put(new Unit(), new Pair<>(ctx, true));
 		
-		Q = new Query<>(is, new Ctx<>(), fks, schema, getEDSchema(schema.typeSide), false); //TODO AQL speed this can be set to true
+		Q = Query.makeQuery(is, new Ctx<>(), fks, schema, getEDSchema(schema.typeSide), false, false); //TODO AQL speed these can be set to true
 	}
 	
 	@Override

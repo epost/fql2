@@ -3,6 +3,7 @@ package catdata.aql;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -705,6 +706,18 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		return Head(e.getApp().f, e.getApp().args.stream().map(Term::fromKB).collect(Collectors.toList()));
 	}
+	
+	public void gens(Set<Gen> gens) {
+		if (var != null) {
+			
+		} else if (gen != null) {
+			gens.add(gen);
+		} else {
+			for (@SuppressWarnings("hiding") Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
+				arg.gens(gens);
+			}
+		} 
+	}
 
 	public void objs(Set<Pair<Object, Ty>> objs) {
 		if (var != null) {
@@ -731,5 +744,12 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> upTalg(Term<Ty, Void, Sym, Void, Void, Void, Sk> term) {
 		return term.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity()); 
+	}
+
+
+	public Set<Gen> gens() {
+		Set<Gen> ret = new HashSet<>();
+		gens(ret);
+		return ret;
 	}
 }

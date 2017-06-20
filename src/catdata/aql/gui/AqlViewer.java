@@ -62,19 +62,22 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 //TODO: aql quoting
 
-//TODO aql random instances
-
 //TODO aql replace literal by constant
 
 public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, RuntimeException> { 
 
+	private int maxrows;
+	public AqlViewer(int maxrows) {
+		this.maxrows = maxrows;
+	}
+	
 	public static String html(Object obj) {
 		return obj.toString().replace("\n", "<br>").replace("\t", "&nbsp;");
 	}
 
-	public static JComponent view(String time, Semantics s) {
+	public static JComponent view(String time, Semantics s, int maxrows) {
 		JTabbedPane ret = new JTabbedPane();
-		new AqlViewer().visit(ret, s);
+		new AqlViewer(maxrows).visit(ret, s);
 		ret.addTab("Text", new CodeTextPanel("", s.toString()));
 		ret.addTab("Performance", new CodeTextPanel("",  "Compute time: " + time + " seconds"));
 		return ret;
@@ -354,17 +357,18 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	
 	
 
-		private static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Map<Ty, Object[][]> makeTyTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+		private <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Map<Ty, Object[][]> makeTyTables(Map<Ty, Set<Y>> m, Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
 			Map<Ty, Object[][]> ret = new LinkedHashMap<>();
 
 			List<Ty> tys = Util.alphabetical(alg.schema().typeSide.tys);
 
-			Map<Ty, Set<Y>> m = Util.revS(alg.talg().sks.map);
+			
 			for (Ty ty : tys) {
 				if (!m.containsKey(ty)) {
 					continue;
 				}
-				int n = m.get(ty).size();
+				int n = Integer.min(maxrows, m.get(ty).size());
+
 				Object[][] data = new Object[n][1];
 				int i = 0;
 				for (Y y : Util.alphabetical(m.get(ty))) {
@@ -372,13 +376,16 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 					row[0] = alg.printY(y);
 					data[i] = row;
 					i++;
+					if (i == n) {
+						break;
+					}
 				}
 				ret.put(ty,  data);
 			}
 			return ret;
 		}
 
-		public static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Map<En, Pair<List<String>, Object[][]>> makeEnTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+		public  <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Map<En, Pair<List<String>, Object[][]>> makeEnTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
 			Map<En, Pair<List<String>, Object[][]>> ret = new LinkedHashMap<>();
 
 			List<En> ens = Util.alphabetical(alg.schema().ens);
@@ -389,7 +396,8 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 				List<String> header = Util.append(Util.toString(atts0), Util.toString(fks0));
 				header.add(0, "ID");
-				int n = alg.en(en).size();
+				int n = Integer.min(maxrows, alg.en(en).size());
+				//System.out.println("n " + n);
 				Object[][] data = new Object[n][];
 				int i = 0;
 				for (X x : Util.alphabetical(alg.en(en))) {
@@ -403,35 +411,53 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 					}
 					data[i] = row.toArray();
 					i++;
+					if (i == n) {
+						break;
+					}
 				}
-			
+				//System.out.println("size " + data.length);
+				
 				ret.put(en, new Pair<>(header, data));
 			}
 					
 			return ret;
 		}
 		
-	private static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Component viewAlgebra(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+	private <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Component viewAlgebra(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
 		List<JComponent> list = new LinkedList<>();
 
 		Map<En,Pair<List<String>,Object[][]>> entables = makeEnTables(alg);
-		Map<Ty,Object[][]> tytables = makeTyTables(alg);
+		Map<Ty, Set<Y>> m = Util.revS(alg.talg().sks.map);
+		Map<Ty,Object[][]> tytables = makeTyTables(m, alg);
 		
 		for (En en : entables.keySet()) {
 			Pair<List<String>,Object[][]> x = entables.get(en);
-			JPanel p = Util.makeBoldHeaderTable(Util.toString(alg.schema().attsFrom(en)), BorderFactory.createEmptyBorder(), en + " (" + x.second.length + ")", x.second, x.first.toArray(new String[x.first.size()]));
+			String str;
+			//System.out.println("XY " + x.second.length + " - " + alg.en(en).size());
+			if (x.second.length < alg.en(en).size()) {
+				str = en + " (" + x.second.length + " of " + alg.en(en).size() + ")";
+			} else {
+				str = en + " (" + x.second.length + ")";
+			}
+			JPanel p = Util.makeBoldHeaderTable(Util.toString(alg.schema().attsFrom(en)), BorderFactory.createEmptyBorder(), str, x.second, x.first.toArray(new String[x.first.size()]));
 			list.add(p);
 		}
 		
 		List<String> header = Util.singList("ID")	;	
-		Map<Ty, Set<Y>> m = Util.revS(alg.talg().sks.map);
+		
 		for (Ty ty : tytables.keySet()) {
 			if (!m.containsKey(ty)) {
 				continue;
 			}
 			Object[][] arr = tytables.get(ty);
-			
-			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + arr.length + ")", arr, header.toArray())); // TODO: aql boldify attributes
+			String str;
+			if (arr.length < m.get(ty).size()) {
+				str = ty + " (" + arr.length + " of " + m.get(ty).size() + ")";
+			} else {
+				str = ty + " (" + arr.length + ")";
+			}
+
+			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), str, arr, header.toArray())); // TODO: aql boldify attributes
 		}
 
 		return Util.makeGrid(list);

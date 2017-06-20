@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.sql.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -24,7 +25,9 @@ import javax.swing.ListSelectionModel;
 import catdata.LineException;
 import catdata.Pair;
 import catdata.Program;
+import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.Instance;
 import catdata.aql.Kind;
 import catdata.aql.Semantics;
 import catdata.aql.exp.AqlEnv;
@@ -110,8 +113,9 @@ public final class AqlDisplay implements Disp {
 		if (obj.size() > maxSize) {
 			return new CodeTextPanel("", "Display supressed, size > " + maxSize + ".\n\nSee manual for a description of size, or try options gui_max_Z_size = X for X > " + obj.size() + " (the size of this object) and Z one of table, graph, string.  \n\nWarning: sizes that are too large will hang the viewer.\n\nCompute time: " + env.performance.getOrDefault(c, "unkown") );
 		}
-		 
-		return AqlViewer.view(time, obj);
+		int max_rows = (int) exp.getOrDefault(env, AqlOption.gui_rows_to_display);
+		//System.out.println("maxrows " + max_rows);
+		return AqlViewer.view(time, obj, max_rows);
 	/*
 		JPanel ret = new JPanel(new GridLayout(1,1));
 		JPanel lazyPanel = new JPanel();
@@ -155,9 +159,55 @@ public final class AqlDisplay implements Disp {
 		int c1 = (int) ((middle - start) / (1000f));
 		int c2 = (int) ((end - middle) / (1000f));
 		String pre = exn == null ? "" : "(ERROR, PARTIAL RESULT) | ";
-		display(pre + title + " | (exec: " + c1 + "s)(gui: " + c2 + "s)", p.order);
+		JComponent report = report(p, env, p.order, c1, c2, pre + title, new Date(start).toString());
+		frames.add(0, new Pair<>("Summary", report ));
+		
+		display(pre + title, p.order, report);
 	}
 	
+	private JComponent report(Program<Exp<?>> prog, AqlEnv env, List<String> order, int c1, int c2, String pre, String date) {
+		List<String> l = new LinkedList<>();
+		Object[][] rowData = new Object[env.defs.insts.size()][3];
+		int i = 0;
+		List<String> missing = new LinkedList<>();
+		for (String k : order) {
+			if (env.defs.insts.containsKey(k)) {
+				Instance<?, ?, ?, ?, ?, ?, ?, ?, ?> I = (Instance<?, ?, ?, ?, ?, ?, ?, ?, ?>) env.get(Kind.INSTANCE, k);
+				String s = k + "\t" + I.size() + "\t" + env.performance.get(k); 
+				l.add(s);
+				rowData[i][0] = k;
+				rowData[i][1] = I.size();
+				rowData[i][2] = env.performance.get(k);
+				i++;
+			} else if (prog.exps.get(k).kind().equals(Kind.INSTANCE)) {
+				missing.add(k);
+			}
+		}
+	
+		JPanel t = Util.makeTable(BorderFactory.createEmptyBorder(), "", rowData, "instance", "rows", "seconds");
+		JPanel pan = new JPanel(new GridLayout(1,1));
+		pan.add(new JScrollPane(t));
+		String tsv = "instance\trows\tseconds\n" + Util.sep(l, "\n");
+		JTabbedPane jtb = new JTabbedPane();
+		String text = pre;
+		if (!missing.isEmpty()) {
+			text += "\n\nInstances not computed: " + Util.sep(Util.alphabetical(missing), ", ");
+		}
+		text += "\n\nComputation  time: " + c1 + " seconds\nGUI building time: " + c2 + " seconds\n";
+		for (Kind k : Kind.values()) {
+			if (env.defs.size(k) == 0) {
+				continue;
+			}
+			text += "\n" + k + ": " + env.defs.size(k);
+		}
+		
+		
+		jtb.addTab("Text", new CodeTextPanel("", text));
+		jtb.addTab("Performance", pan);
+		jtb.addTab("TSV", new CodeTextPanel("", tsv));
+		return jtb;
+	}
+
 	private JFrame frame = null;
 	private final List<Pair<String, JComponent>> frames = new LinkedList<>();
 
@@ -175,7 +225,7 @@ public final class AqlDisplay implements Disp {
 		return null;
 	}
 	
-	private void display(String s, @SuppressWarnings("unused") List<String> order) {
+	private void display(String s, @SuppressWarnings("unused") List<String> order, JComponent report) {
 		frame = new JFrame();
 	
 		Vector<String> ooo = new Vector<>();
@@ -183,11 +233,12 @@ public final class AqlDisplay implements Disp {
 			x.add(p.second, p.first);
 			ooo.add(p.first);
 		}
-		x.add(new JPanel(), "blank");
-		cl.show(x, "blank");
-		current = "blank";
+		x.add(report, "Summary");
+		cl.show(x, "Summary");
+		current = "Summary";
 		
 		yyy.setListData(ooo);
+		yyy.setSelectedIndex(0);
 		JPanel temp1 = new JPanel(new GridLayout(1, 1));
 		temp1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(),
 				"Select:"));
@@ -237,8 +288,8 @@ public final class AqlDisplay implements Disp {
 		yyy.addListSelectionListener(e -> {
 				int i = yyy.getSelectedIndex();
 				if (i == -1) {
-					cl.show(x, "blank");
-					current = "blank";
+					cl.show(x, "Summary");
+					current = "Summary";
 				} else {
 					cl.show(x, ooo.get(i));
 					current = ooo.get(i);

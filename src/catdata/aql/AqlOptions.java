@@ -32,11 +32,16 @@ public final class AqlOptions {
 		varchar_length,
 		gui_max_table_size,		
 		gui_max_graph_size,		
-		gui_max_string_size,	
+		gui_max_string_size,
+		gui_rows_to_display,
 		random_seed,
 		num_threads,
 		eval_max_temp_size,
 		eval_reorder_joins,
+		eval_max_plan_depth,
+		eval_join_selectivity,
+		eval_use_indices,
+		query_remove_redundancy,
 		
 		program_allow_nontermination_unsafe,
 		completion_precedence,
@@ -80,6 +85,10 @@ public final class AqlOptions {
 				throw new RuntimeException("Expected a character, instead received "+ s);
 			}
 			return s.charAt(0);
+		}
+		
+		public Float getFloat(Map<String, String> map) {
+			return Float.parseFloat(getString(map));
 		}
 		
 		public Integer getInteger(Map<String, String> map) {
@@ -138,8 +147,8 @@ public final class AqlOptions {
 	}
 	
 	//anything 'unsafe' should default to false
-	@SuppressWarnings("static-method")
-	private Object getDefault(AqlOption option) {
+	//@SuppressWarnings("static-method")
+	private static Object getDefault(AqlOption option) {
 		switch (option) {
 		case eval_max_temp_size:
 			return 1024*1024*8;
@@ -197,15 +206,22 @@ public final class AqlOptions {
 			return null;
 		case program_allow_nontermination_unsafe:
 			return false;
-			
 		case gui_max_table_size:
 			return 1024;
 		case gui_max_string_size:
 			return 8096;
 		case gui_max_graph_size:
 			return 128;
-	
-
+		case eval_join_selectivity:
+			return 0.5f;
+		case eval_max_plan_depth:
+			return 8;
+		case eval_use_indices:
+			return true;
+		case gui_rows_to_display:
+			return 256;
+		case query_remove_redundancy:
+			return true;
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -215,6 +231,8 @@ public final class AqlOptions {
 	public Object getOrDefault(Map<String, String> map, AqlOption op) {
 		if (map.containsKey(op.toString())) {
 			return getFromMap(map, null, op);
+		} else if (options.containsKey(op)) {
+			return options.get(op);
 		}
 		return getDefault(op);
 	}
@@ -310,6 +328,16 @@ public final class AqlOptions {
 		case csv_null_string:
 			return op.getString(map);
 		case program_allow_nontermination_unsafe:
+			return op.getBoolean(map);
+		case eval_join_selectivity:
+			return op.getFloat(map);
+		case eval_max_plan_depth:
+			return op.getInteger(map);
+		case eval_use_indices:
+			return op.getBoolean(map);
+		case gui_rows_to_display:
+			return op.getInteger(map);
+		case query_remove_redundancy:
 			return op.getBoolean(map);
 		default:
 			throw new RuntimeException("Anomaly: please report");

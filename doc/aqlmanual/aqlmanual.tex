@@ -792,6 +792,10 @@ For type sides, (colimit) schemas, mappings, transforms, queries.
 
 For pragmas and constraints.
 
+\subsection{{\tt gui\_rows\_to\_display = integer}}
+
+Sets the maximum number of rows to display per table per instance in the viewer.  (I.e., the table in the viewer is conceptually similar to a SQL LIMIT query for the given number of rows).
+
 \section{Query Evaluation Entity Block options}
 
 \subsection{{\tt eval\_max\_temp\_size = integer}}
@@ -800,7 +804,23 @@ Sets the maximum size of intermediate tables when executing sub-queries.
 
 \subsection{{\tt eval\_reorder\_joins = boolean}}
 
-Sets whether or not it is permissible for AQL to choose a join order based on a heuristic.
+Sets whether or not it is permissible for AQL to choose a join order based on exhaustive order enumeration under a heuristic cost metric.
+
+\subsection{{\tt eval\_max\_plan\_depth = integer}}
+
+If enabled, join reordering will be performed on FROM clauses with a number of variables smaller than this number (used to prevent the join ordering chooser from spending forever enumerating huge spaces of plans).
+
+\subsection{{\tt eval\_join\_selectivity = float}}
+
+Sets the join selectivity factor used by the cost metric heuristic for the join order chooser.
+
+\subsection{{\tt eval\_use\_indices = boolean}}
+			
+Sets whether AQL should automatically index instances along their foreign keys and attributes, to reduce the number of intermediate tuples generated during query evaluation.			
+
+\subsection{{\tt query\_remove\_redundancy = boolean}}
+
+Sets whether redundant joins (i.e., containing a binding $v$ and an equation $v = e$ where $v \notin e$) should be eliminated.
 
 \end{document}
 

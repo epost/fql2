@@ -29,7 +29,7 @@ public final class AqlEnv {
 	
 	public AqlOptions defaults = AqlOptions.initialOptions;
 	
-	public Map<String, String> user_defaults = null;
+	//public Map<String, String> user_defaults = null;
 	
 	public final Map<String, String> performance = new HashMap<>();
 	

@@ -128,7 +128,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		
 	}
 	
-	@SuppressWarnings("unused")
+	
 	public static class Block<En1, Att2> {
 		public final List<Pair<Var, En1>> gens; 
 
@@ -182,11 +182,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 				this.gens.add(new Pair<>(new Var(gen.first), gen.second));
 			}
 			this.eqs = eqs;
-			this.options = Util.toMapSafely(options);
-			if (this.options.containsKey(AqlOption.dont_validate_unsafe.toString())) {
-				throw new RuntimeException("option dont_validate_unsafe should be at the top level of the query");
-			}
-			
+			this.options = Util.toMapSafely(options);			
 		}
 
 		private String toString;
@@ -423,7 +419,12 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 				Triple<Ctx<String,Chc<Ty,En1>>,Term<Ty,En1,Sym,Fk1,Att1,Var,Void>,Term<Ty,En1,Sym,Fk1,Att1,Var,Void>> x = RawTerm.infer1(ctx0.map, eq.first, eq.second, col, src0.typeSide.js);
 				eqs.add(new Eq<>(new Ctx<>(), freeze(x.second), freeze(x.third)));
 			}
-			Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions> b = new Triple<>(ctx, eqs, new AqlOptions(p.second.options,null,env.defaults));
+			Map<String, String> uu = new HashMap<>(options);
+			uu.putAll(p.second.options);
+			AqlOptions theops = new AqlOptions(uu,null,env.defaults);
+			//System.out.println("UI " + theops.getOrDefault(AqlOption.eval_max_temp_size));
+			//System.out.println("UH " + env.defaults.getOrDefault(AqlOption.eval_max_temp_size));
+			Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions> b = new Triple<>(ctx, eqs, theops);
 			ens0.put(p.first, b);
 		}
 		
@@ -450,8 +451,10 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	
 		
 		boolean doNotCheckEqs = (Boolean) new AqlOptions(options, null, env.defaults).getOrDefault(AqlOption.dont_validate_unsafe); 
-		
-		return new Query<>(ens0, atts0, fks0, src0, dst0, doNotCheckEqs);
+
+		boolean elimRed = (Boolean) new AqlOptions(options, null, env.defaults).getOrDefault(AqlOption.query_remove_redundancy); 
+
+		return Query.makeQuery(ens0, atts0, fks0, src0, dst0, doNotCheckEqs, elimRed);
 	}
 
 	private Term<Ty, En1, Sym, Fk1, Att1, Var, Void> freeze(Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term) {

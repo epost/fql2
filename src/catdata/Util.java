@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -1186,5 +1187,113 @@ public class Util {
 			JOptionPane.showMessageDialog(null, "Could not read from " + file);
 		}
 		return null;
+	} 
+	
+	public static <T> Iterable<List<T>> permutationsOf(List<T> l) {
+		return new Iterable<List<T>>() {
+			@Override
+			public Iterator<List<T>> iterator() {
+				return new PermutationIterator<>(l);
+			}
+		};
 	}
+	
+	//seems like heap's algorithm
+	private static final class PermutationIterator<T> 
+    implements Iterator<List<T>> {
+
+        private List<T> nextPermutation;
+        private final List<T> allElements = new ArrayList<>();
+        private int[] indices;
+
+        PermutationIterator(List<T> allElements) {
+            if (allElements.isEmpty()) {
+                nextPermutation = null;
+                return;
+            }
+
+            this.allElements.addAll(allElements);
+            this.indices = new int[allElements.size()];
+
+            for (int i = 0; i < indices.length; ++i) {
+                indices[i] = i;
+            }
+
+            nextPermutation = new ArrayList<>(this.allElements);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return nextPermutation != null;
+        }
+
+        @Override
+        public List<T> next() {
+            if (nextPermutation == null) {
+                throw new NoSuchElementException("No permutations left.");
+            }
+
+            List<T> ret = nextPermutation;
+            generateNextPermutation();
+            return ret;
+        }
+
+        private void generateNextPermutation() {
+            int i = indices.length - 2;
+
+            while (i >= 0 && indices[i] > indices[i + 1]) {
+                --i;
+            }
+
+            if (i == -1) {
+                // No more new permutations.
+                nextPermutation = null;
+                return;
+            }
+
+            int j = i + 1;
+            int min = indices[j];
+            int minIndex = j;
+
+            while (j < indices.length) {
+                if (indices[i] < indices[j] && indices[j] < min) {
+                    min = indices[j];
+                    minIndex = j;
+                }
+
+                ++j;
+            }
+
+            swap(indices, i, minIndex);
+
+            ++i;
+            j = indices.length - 1;
+
+            while (i < j) {
+                swap(indices, i++, j--);
+            }
+
+            loadPermutation();
+        }
+
+        private void loadPermutation() {
+            List<T> newPermutation = new ArrayList<>(indices.length);
+
+            for (int i : indices) {
+                newPermutation.add(allElements.get(i));
+            }
+
+            this.nextPermutation = newPermutation;
+        }
+    
+
+    private static void swap(int[] array, int a, int b) {
+        int tmp = array[a];
+        array[a] = array[b];
+        array[b] = tmp;
+    }
+
+   
+}
+
 }

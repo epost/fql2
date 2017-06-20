@@ -3,10 +3,12 @@ package catdata.aql;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -41,8 +43,136 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 	
 	public final Schema<Ty,En1,Sym,Fk1,Att1> src;
 	public final Schema<Ty,En2,Sym,Fk2,Att2> dst;
+	
+	public static <Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> makeQuery(
+			Ctx<En2, Triple<Ctx<Var,En1>,Collection<Eq<Ty,En1,Sym,Fk1,Att1,Var,Void>>,AqlOptions>> ens,
+			Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts, 
+			Ctx<Fk2, Pair<Ctx<Var, Term<Void,En1,Void,Fk1,Void,Var,Void>>, Boolean>> fks,
+			Schema<Ty, En1, Sym, Fk1, Att1> src, Schema<Ty, En2, Sym, Fk2, Att2> dst,
+			boolean doNotCheckPathEqs, boolean removeRedundantVars) {
+		//do this first to type check
+		Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> q = new Query<>(ens, atts, fks, src, dst, true);
+		//System.out.println("original " + q);
+		//System.out.println("--------");
+		
+		Blob<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> b = new Blob<>(ens, atts, fks, src, dst);
+		if (removeRedundantVars) {
+			b = removeRedundantVars(b);
+		}
+		//System.out.println("+++++ " + b);
+		
+		Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> p = new Query<>(b.ens, b.atts, b.fks, src, dst, doNotCheckPathEqs);
+		//System.out.println("new " + p);
+		
+		return p;
+	}
+	
+	private static <Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> removeRedundantVars(
+			Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> b) {
+		
+		for (;;) {
+			Triple<Var, En2, Term<Void, En1, Void, Fk1, Void, Var, Void>> p = findRedundant(b);
+			if (p == null) {
+				return b;
+			} else {
+				b = elimRedundant(p.first, p.second, b, p.third);
+			}
+		}
+		
+	}
 
-	public Query(
+	private static <Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> elimRedundant
+	(Var v, En2 en2, Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> b, Term<Void, En1, Void, Fk1, Void, Var, Void> term) {
+			
+		Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> xens = new Ctx<>();
+		Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> xatts = new Ctx<>();
+		Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> xfks = new Ctx<>();
+
+		for (Att2 att2 : b.atts.keySet()) {
+			En2 atts_en2 = b.dst.atts.get(att2).first;
+			if (en2.equals(atts_en2)) {
+				xatts.put(att2, b.atts.get(att2).replaceHead(Head.Gen(v), Collections.emptyList(), term.map(Util::abort, Util::abort, Function.identity(), Util::abort, Function.identity(), Function.identity())));
+			} else {
+				xatts.put(att2, b.atts.get(att2));
+			}
+		}
+		
+		for (Fk2 fk2 : b.fks.keySet()) {
+			En2 src = b.dst.fks.get(fk2).first;
+			En2 dst = b.dst.fks.get(fk2).second;
+			Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>> g = new Ctx<>(b.fks.get(fk2).first.map);
+			if (en2.equals(dst)) {
+				g.remove(v);
+			}
+			if (en2.equals(src)) {
+				g = g.map(t -> t.replaceHead(Head.Gen(v), Collections.emptyList(), term));
+			}
+			
+			xfks.put(fk2, new Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>(g, b.fks.get(fk2).second));
+		}
+		
+		for (En2 en : b.ens.keySet()) {
+			if (en.equals(en2)) {
+				Ctx<Var, En1> ctx = new Ctx<>(b.ens.get(en).first.map);
+				ctx.remove(v);
+				Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs = new LinkedList<>();
+				for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : b.ens.get(en).second) {
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> 
+						l = eq.lhs.replaceHead(Head.Gen(v), Collections.emptyList(), term.convert()), 
+						r = eq.rhs.replaceHead(Head.Gen(v), Collections.emptyList(), term.convert());
+					if (!l.equals(r)) {
+						eqs.add(new Eq<>(new Ctx<>(), l, r));
+					}
+				}
+				xens.put(en, new Triple<>(ctx, eqs, b.ens.get(en).third));
+			} else {
+				xens.put(en, b.ens.get(en));
+			}
+		}
+		
+		return new Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>(xens, xatts, xfks, b.src, b.dst);
+	}
+
+	private static <Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> Triple<Var, En2, Term<Void, En1, Void, Fk1, Void, Var, Void>> findRedundant(Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> b) {
+		for (En2 en2 : b.ens.keySet()) {
+			for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : b.ens.get(en2).second) { //TODO aql convert()
+				if (eq.lhs.gen != null && !eq.rhs.gens().contains(eq.lhs.gen)) {
+					return new Triple<>(eq.lhs.gen, en2, eq.rhs.convert());
+				} else if (eq.rhs.gen != null && !eq.lhs.vars().contains(eq.rhs.gen)) {
+					return new Triple<>(eq.rhs.gen, en2, eq.lhs.convert());
+				}
+			}
+		}		
+		return null;
+	}
+
+	private static class Blob<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
+		public final Ctx<En2, Triple<Ctx<Var,En1>,Collection<Eq<Ty,En1,Sym,Fk1,Att1,Var,Void>>,AqlOptions>> ens;
+		public final Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts;
+		public final Ctx<Fk2, Pair<Ctx<Var, Term<Void,En1,Void,Fk1,Void,Var,Void>>, Boolean>> fks;
+		public final Schema<Ty,En1,Sym,Fk1,Att1> src;
+		public final Schema<Ty,En2,Sym,Fk2,Att2> dst;
+		
+		public Blob(Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens,
+				Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts,
+				Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> fks, Schema<Ty,En1,Sym,Fk1,Att1> src,
+		 Schema<Ty,En2,Sym,Fk2,Att2> dst) {
+			this.ens = ens;
+			this.atts = atts;
+			this.fks = fks;
+			this.src = src;
+			this.dst = dst;
+		}
+
+		@Override
+		public String toString() {
+			return "Blob [ens=" + ens + ",\n\natts=" + atts + ",\n\nfks=" + fks + "]";
+		}
+
+	}
+	
+
+	private Query(
 			Ctx<En2, Triple<Ctx<Var,En1>,Collection<Eq<Ty,En1,Sym,Fk1,Att1,Var,Void>>,AqlOptions>> ens,
 			Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts, 
 			Ctx<Fk2, Pair<Ctx<Var, Term<Void,En1,Void,Fk1,Void,Var,Void>>, Boolean>> fks,
@@ -138,27 +268,86 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 
 		
 		
-		public List<Var> order() {
-			if (!(Boolean)options.getOrDefault(AqlOption.eval_reorder_joins)) {
-				System.out.println("not reordering");
+		public <Gen, Sk, X, Y> List<Var> order(Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
+			if (!(Boolean)options.getOrDefault(AqlOption.eval_reorder_joins) || gens().size() > (Integer)options.getOrDefault(AqlOption.eval_max_plan_depth)) { //TODO AQL magic number
 				return new LinkedList<>(gens.map.keySet());
 			}
-			Map<Var, Integer> counts = new HashMap<>();
-			List<Var> ret = new LinkedList<>();
-			for (Var v1 : gens.keySet()) {
-				counts.put(v1, 0);
-				ret.add(v1);
+			Map<Pair<Var,Var>, Float> selectivities = estimateSelectivities();
+			//System.out.println(Util.sep(selectivities, "->", "\n"));
+			if (I.gens().isEmpty()) {
+				return new LinkedList<>();
 			}
-			for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : eqs) {
-				inc(eq.lhs, counts);
-				inc(eq.rhs, counts);
+			List<Var> lowest_plan = null;
+			float lowest_cost = -1;
+			for (List<Var> plan : generatePlans()) {
+				float cost = estimateCost(plan, I, selectivities);
+				//System.out.println("candidate " + plan + " costs " + cost);
+				if (lowest_plan == null || cost < lowest_cost) {
+					lowest_plan = plan;
+					lowest_cost = cost;
+					//System.out.println("*** hit!");
+				}
 			}
 			
-			ret.sort((o1,o2) -> counts.get(o2).compareTo(counts.get(o1)));
-
+			return lowest_plan;
+		}
+		
+		private float estimateSelectivity(List<Var> l, Var v, Map<Pair<Var,Var>, Float> sel) {
+			if (l.isEmpty()) {
+				return sel.get(new Pair<>(v, v));
+			}
+			float ret = sel.get(new Pair<>(v, v));
+			for (Var u : l) {
+				ret *= sel.get(new Pair<>(u, v));
+			}
 			return ret;
 		}
 		
+		private <Gen, Sk, X, Y> Map<Pair<Var,Var>, Float> estimateSelectivities() {
+			Map<Pair<Var,Var>, Float> ret = new HashMap<>();
+			for (Var v1 : gens().keySet()) {
+				for (Var v2 : gens().keySet()) {
+					ret.put(new Pair<>(v1, v2), 1f);
+				}
+			}
+			for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : eqs) {
+				Set<Var> l = new HashSet<>();
+				Set<Var> r = new HashSet<>(); 
+				eq.lhs.gens(l);
+				eq.rhs.gens(r);
+				for (Var v : l) {
+					for (Var u : r) {
+						ret.put(new Pair<>(v,u), ret.get(new Pair<>(v,u)) * .5f); //TODO aql magic number
+						ret.put(new Pair<>(u,v), ret.get(new Pair<>(u,v)) * .5f); //TODO aql magic number
+
+					}
+				}
+			}
+			return ret;
+		}
+		
+		private <Gen, Sk, X, Y> float estimateCost(List<Var> plan, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I, Map<Pair<Var,Var>, Float> selectivities) {
+			if (plan.isEmpty()) {
+				return 0;
+			} else if (plan.size() == 1) {
+				return I.algebra().en(gens.get(plan.get(0))).size();
+			}
+			float cost = I.algebra().en(gens.get(plan.get(0))).size();
+			List<Var> vl = Util.singList(plan.get(0));
+			for (int i = 1; i < plan.size() - 1; i++) {
+				Var vr = plan.get(i);
+				float sel = estimateSelectivity(vl, vr, selectivities);
+				float cost2 = I.algebra().en(gens.get(vr)).size();
+				cost *= (sel * cost2);
+				vl.add(vr);
+			}
+			return cost;
+		}
+
+		private <Gen, Sk, X, Y> Iterable<List<Var>> generatePlans() {
+			return Util.permutationsOf(new LinkedList<>(gens.keySet()));
+		}
+/*
 		private void inc(Term<Ty, En1, Sym, Fk1, Att1, Var, Void> t, Map<Var, Integer> counts) {
 			if (t.gen != null) {
 				counts.put(t.gen, counts.get(t.gen) + 1);
@@ -167,7 +356,7 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 			for (Term<Ty, En1, Sym, Fk1, Att1, Var, Void> arg : t.args()) {
 				inc(arg, counts);
 			}
-		}
+		}*/
 		
 		public final Ctx<Var,En1> gens;
 		public final Collection<Eq<Ty,En1,Sym,Fk1,Att1,Var,Void>> eqs;
@@ -285,5 +474,9 @@ public final class Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics 
 		return t.trans(u);
 	}
 	
+	////////////////
 	
+
+	
+	   
 }

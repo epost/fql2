@@ -78,9 +78,13 @@ public class Examples {
 			return examples2;
 		}
 		try {
-			URL url = Object.class.getResource("/resources");
+			URL url = Object.class.getResource("/help.txt");
 			if (url == null) {
-				File f = new File(Object.class.getResource("/examples").toURI());
+				URL l = Object.class.getResource("/examples");
+				if (l == null) {
+					throw new RuntimeException("Cannot locate built-in examples");
+				}
+				File f = new File(l.toURI());
 				examples2 = getExamples(f);
 				return examples2;
 			} else {
@@ -88,8 +92,15 @@ public class Examples {
 				if (uri.getScheme().equals("jar")) {
 					examples2 = getExamplesFromJar(uri);
 					return examples2;
-				} else {
-					throw new RuntimeException("Anomaly: please report");
+				} else { //TODO AQL this is really messed up what's going on with Eclipse
+					URL l = Object.class.getResource("/examples");
+					if (l == null) {
+						throw new RuntimeException("Cannot locate built-in examples");
+					}
+					File f = new File(l.toURI());
+					examples2 = getExamples(f);
+					return examples2;
+//					throw new RuntimeException("Anomaly: please report");
 				}
 			}
 			//

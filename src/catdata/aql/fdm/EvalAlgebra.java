@@ -105,9 +105,9 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		@Override
 		public String toString() {
 			if (en2 != null) {
-				return en2.toString();
+				return " : " + en2.toString();
 			}
-			return " " + v + "=" + x + "," + tail.toString();
+			return v + "=" + x + ", " + tail.toString();
 		}
 
 		public String toString(Function<X, String> printX) {
@@ -158,14 +158,18 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		}
 
 		// TODO AQL slowness hurts chase
-		public static <En2, X, Y, Ty, En1, Sym, Fk1, Att1, Gen, Sk> Collection<Row<En2, X>> extend(En2 entity, Collection<Row<En2, X>> tuples, Var v, Frozen<Ty, En1, Sym, Fk1, Att1> q, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I, int max) {
+		public static <En2, X, Y, Ty, En1, Sym, Fk1, Att1, Gen, Sk> Collection<Row<En2, X>> extend(En2 entity, Collection<Row<En2, X>> tuples, Var v, Frozen<Ty, En1, Sym, Fk1, Att1> q, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I, int max, boolean useIndices) {
 			List<Row<En2, X>> ret = new LinkedList<>(); // tuples.size() *
 														// dom.size());
 			for (Row<En2, X> tuple : tuples) {
-			
-				List<Pair<Fk1, X>> l1 = getAccessPath(v, tuple, q, I);
-				List<Pair<Att1, Object>> l2 = getAccessPath2(v, tuple, q, I);
-				Collection<X> dom = I.algebra().en_indexed(q.gens.get(v), l1, l2);
+				Collection<X> dom;
+				if (useIndices) {
+					List<Pair<Fk1, X>> l1 = getAccessPath(v, tuple, q, I);
+					List<Pair<Att1, Object>> l2 = getAccessPath2(v, tuple, q, I);
+					dom = I.algebra().en_indexed(q.gens.get(v), l1, l2);	
+				} else {
+					dom = I.algebra().en(q.gens.get(v));
+				}
 				/*if (!l1.isEmpty() || !l2.isEmpty()) {
 					System.out.println("tuple " + tuple);
 					System.out.println("var " + v);
@@ -301,11 +305,15 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 
 	private Collection<Row<En2, X>> eval(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q) {
 		Collection<Row<En2, X>> ret = new LinkedList<>();
-	//	System.out.println("+++++++++++" + en2 + " --- " + Thread.currentThread());
 		ret.add(new Row<>(en2));
-		for (Var v : q.order()) {
-			Integer k = (int) q.options.getOrDefault(AqlOption.eval_max_temp_size);
-			ret = Row.extend(en2, ret, v, q, I, k);
+		List<Var> plan = q.order(I);
+		//System.out.println("-----");
+		//System.out.println("original order: " + q.gens);
+		//System.out.println("planned order: " + plan);
+		Integer k = (int) q.options.getOrDefault(AqlOption.eval_max_temp_size);
+		boolean useIndices = (boolean) q.options.getOrDefault(AqlOption.eval_use_indices);
+		for (Var v : plan) {
+			ret = Row.extend(en2, ret, v, q, I, k, useIndices);
 		}
 		return ret;
 	}

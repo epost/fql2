@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import catdata.Ctx;
+import catdata.Util;
 import catdata.aql.Kind;
 
 public class KindCtx<V,G,T,S,I,H,F,Q,P,C,SC,ED> {
@@ -106,5 +107,34 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C,SC,ED> {
 		ret.addAll(scs.keySet());
 		ret.addAll(eds.keySet());
 		return ret;
+	}
+
+	public int size(Kind k) {
+		switch (k) {
+		case COMMENT:
+			return cs.size();
+		case CONSTRAINTS:
+			return eds.size();
+		case GRAPH:
+			return gs.size();
+		case INSTANCE:
+			return insts.size();
+		case MAPPING:
+			return maps.size();
+		case PRAGMA:
+			return ps.size();
+		case QUERY:
+			return qs.size();
+		case SCHEMA:
+			return schs.size();
+		case SCHEMA_COLIMIT:
+			return scs.size();
+		case TRANSFORM:
+			return trans.size();
+		case TYPESIDE:
+			return tys.size();
+		
+		}
+		return Util.anomaly();
 	}
 }

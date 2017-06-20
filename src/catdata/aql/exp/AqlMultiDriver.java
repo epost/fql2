@@ -88,8 +88,10 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		this.toUpdate = toUpdate;
 		this.last_prog = last_prog;
 		this.last_env = last_env;
-		this.env.user_defaults = prog.options;
-		this.numProcs = (int) new AqlOptions(this.env.user_defaults, null, AqlOptions.initialOptions).getOrDefault(AqlOption.num_threads);
+		//this.env.user_defaults = prog.options;
+		this.env.defaults = new AqlOptions(prog.options, null, AqlOptions.initialOptions);
+		//System.out.println("pre " + env.defaults.getOrDefault(AqlOption.gui_rows_to_display));
+		this.numProcs = (int) this.env.defaults.getOrDefault(AqlOption.num_threads);
 		if (numProcs < 1) {
 			throw new RuntimeException("num_procs must be > 0");
 		}
