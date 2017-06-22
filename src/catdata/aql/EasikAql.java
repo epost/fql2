@@ -473,7 +473,7 @@ public class EasikAql {
 		case "easik.database.types.Float":
 			return "Float"; // Float
 		case "easik.database.types.Int":
-			return "Int"; // Integer
+			return "Integer"; // Integer
 		case "easik.database.types.SmallInt":
 			return "SmallInt"; // Short
 		case "easik.database.types.Text":
@@ -514,7 +514,7 @@ public class EasikAql {
 		}
 
 	}
-
+/*
 	public static String javaClassFor(String s) {
 		switch (s) {
 		case "BigInt":
@@ -578,8 +578,8 @@ public class EasikAql {
 		default:
 			return "return input[0]";
 		}
-	}
-
+	} */
+/*
 	// TODO: AQL add operations here
 	public static TyExpRaw sql(Set<String> used) {
 		List<Pair<String, String>> java_tys = new LinkedList<>();
@@ -592,7 +592,7 @@ public class EasikAql {
 		}
 
 		return new TyExpRaw(new LinkedList<>(), new LinkedList<>(), new LinkedList<>(), new LinkedList<>(), java_tys, java_parsers, new LinkedList<>(), new LinkedList<>());
-	}
+	} */
 
 	public static String easikToAql(String in) {
 		String ret = "";
@@ -641,7 +641,7 @@ public class EasikAql {
 			if (views != null && views.getLength() != 0 && views.item(0).hasChildNodes()) {
 				warnings.add("Cannot export views - AQL does not currently support views ");
 			}
-			ret = "typeside SqlTypeSide = " + sql(tys) + "\n\n" + ret2;
+			ret = "typeside SqlTypeSide = sql \n\n" + ret2;
 			if (!warnings.isEmpty()) {
 				ret += "/* Warnings:\n\n" + Util.sep(warnings, "\n") + "\n*/";
 			}

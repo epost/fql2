@@ -168,7 +168,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		} else if (term.sym != null && !term.args.isEmpty() || term.sk != null) {
 			return null;
 		}
-        throw new RuntimeException("anomaly: please report");
+       return Util.anomaly();
 	}
 
 	private String fkToString(Fk fk) {

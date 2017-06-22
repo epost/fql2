@@ -84,6 +84,7 @@ import catdata.aql.exp.TransExp.TransExpSigmaDeltaUnit;
 import catdata.aql.exp.TransExp.TransExpVar;
 import catdata.aql.exp.TyExp.TyExpEmpty;
 import catdata.aql.exp.TyExp.TyExpSch;
+import catdata.aql.exp.TyExp.TyExpSql;
 import catdata.aql.exp.TyExp.TyExpVar;
 
 @SuppressWarnings("deprecation")
@@ -95,6 +96,7 @@ public class AqlParser {
 	
 	public static final String[] res = new String[] {
 			"random",
+			"sql",
 			"chase",
 			"check",
 			"assert_consistent",
@@ -247,9 +249,10 @@ public class AqlParser {
 	private static void tyExp() {
 		Parser<TyExp<?, ?>> 
 			var = ident.map(TyExpVar::new),
+			sql = token("sql").map(x -> new TyExpSql()),
 			empty = token("empty").map(x -> new TyExpEmpty()),
 			sch = Parsers.tuple(token("typesideOf"), sch_ref.lazy()).map(x -> new TyExpSch<>(x.b)),
-			ret = Parsers.or(sch, empty, tyExpRaw(), var, parens(ty_ref));
+			ret = Parsers.or(sch, empty, sql, tyExpRaw(), var, parens(ty_ref));
 		
 		ty_ref.set(ret);
 	}

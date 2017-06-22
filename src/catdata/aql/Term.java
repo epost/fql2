@@ -209,6 +209,9 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				throw new RuntimeException("In " + this + ", " + var + " is not a variable in context [" + ctxt + "] and [" + ctxe + "]");
 			}
 		} else if (obj != null) {
+			if (!java_tys_string.containsKey(ty)) {
+				throw new RuntimeException("In " + this + ", not a declared type: " + ty);
+			} 
 			Class<?> c = Util.load(java_tys_string.get(ty));
 			if (!c.isInstance(obj)) {
 				throw new RuntimeException("In " + this + ", " + "primitive " + obj + " is given type " + ty + " but is not an instance of " + c + ", is an instance of " + obj.getClass());
@@ -744,12 +747,34 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> upTalg(Term<Ty, Void, Sym, Void, Void, Void, Sk> term) {
 		return term.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity()); 
-	}
+	}	
 
 
 	public Set<Gen> gens() {
 		Set<Gen> ret = new HashSet<>();
 		gens(ret);
 		return ret;
+	}
+
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replace(Map<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> g) {
+		if (g.containsKey(this)) {
+			return g.get(this);
+		} else if (obj != null || gen != null || sk != null || var != null) {
+			return this;
+		} else if (fk != null) {
+			return Term.Fk(fk, arg.replace(g));
+		} else if (att != null) {
+			return Term.Att(att, arg.replace(g));
+		} else if (sym != null) {
+			if (args.size() == 0) {
+				return this;
+			} 
+			return Term.Sym(sym, args.stream().map(x -> x.replace(g)).collect(Collectors.toList()));
+		}
+		return Util.anomaly();
+	}
+	
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replace(Term<Ty, En, Sym, Fk, Att, Gen, Sk> s, Term<Ty, En, Sym, Fk, Att, Gen, Sk> t) {
+		return replace(Util.singMap(s, t));
 	}
 }

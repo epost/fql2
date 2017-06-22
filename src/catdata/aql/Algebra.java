@@ -35,7 +35,32 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	 */
 	public abstract Collection<X> en(En en);
 	
+	private final Map<Triple<En, List<Pair<Fk, X>>, List<Pair<Att, Object>>>, Collection<X>> en_index2 = Collections.synchronizedMap(new HashMap<>());
+
+	/*
 	public synchronized Collection<X> en_indexed(En en, List<Pair<Fk, X>> fks, List<Pair<Att, Object>> atts) {
+		//TODO aql just pick smallest
+		if (atts.size() > 0) {
+			return en_indexedAtt(en, atts.get(0).first, atts.get(0).second);
+		} else if (atts.size() > 0) {
+			return en_indexedFk(en, fks.get(0).first, fks.get(0).second);						
+		} 
+		return en(en);
+		
+	} */
+	
+	
+	public synchronized Collection<X> en_indexed(En en, List<Pair<Fk, X>> fks, List<Pair<Att, Object>> atts) {
+		Triple<En, List<Pair<Fk, X>>, List<Pair<Att, Object>>> t = new Triple<>(en, fks, atts);
+		if (en_index2.containsKey(t)) {
+			return en_index2.get(t);
+		} else if (atts.isEmpty() && fks.size() == 1) {
+			return en_indexedFk(en, fks.get(0).first, fks.get(0).second);
+		} else if (fks.isEmpty() && atts.size() == 1) {
+			return en_indexedAtt(en, atts.get(0).first, atts.get(0).second);			
+		} else if (atts.isEmpty() && fks.isEmpty()) {
+			return en(en);
+		} 
 		List<X> l = new LinkedList<>(en(en));
 		for (Pair<Fk, X> p : fks) {
 			l.retainAll(en_indexedFk(en, p.first, p.second));
@@ -43,9 +68,10 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 		for (Pair<Att, Object> p : atts) {
 			l.retainAll(en_indexedAtt(en, p.first, p.second));			
 		}
-		return l;
+		en_index2.put(t, l);
+		return l;		
 	}
-	
+
 	private final Map<Triple<En, Fk, X>, Collection<X>> fk_index = Collections.synchronizedMap(new HashMap<>());
 	public synchronized Collection<X> en_indexedFk(En en, Fk fk, X x) {
 		Triple<En, Fk, X> t = new Triple<>(en, fk, x);

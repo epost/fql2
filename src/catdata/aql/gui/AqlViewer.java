@@ -15,9 +15,11 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 
 import org.apache.commons.collections15.Transformer;
 
@@ -504,9 +506,30 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 	@Override
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q) {
+		try {
+			Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q = Q.unnest();
+			JComponent comp = makeQueryPanel(q);
+			ret.add("SQL", comp); 
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			ret.add("SQL", new CodeTextPanel("Exception", ex.getMessage()));
+		}
 		return new Unit();
 	}
 
+	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> JComponent makeQueryPanel(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q) {
+		List<String> l = new LinkedList<>();
+		for (Pair<List<Chc<Fk1, Att1>>, String> s : q.toSQL_srcSchemas().values()) {
+			l.add(s.second);
+		}
+		l.add("////////// Insert source data here /////////");
+		Map<En2, String> m = q.toSQL();
+		for (En2 en2 : m.keySet()) {
+			l.add(en2 + " = " + m.get(en2));
+		}
+		return new CodeTextPanel("", Util.sep(l, ";\n\n"));
+	}
+	
 	@Override
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> M) {
 		ret.addTab("Translate", viewMorphism(M.semantics(), M.src.typeSide.js));

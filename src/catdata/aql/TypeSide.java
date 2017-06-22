@@ -16,7 +16,7 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
 
-public final class TypeSide<Ty, Sym> implements Semantics {
+public class TypeSide<Ty, Sym> implements Semantics {
 	
 	@Override
 	public int size() {

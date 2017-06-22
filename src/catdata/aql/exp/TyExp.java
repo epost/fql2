@@ -7,6 +7,7 @@ import java.util.Map;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Kind;
+import catdata.aql.SqlTypeSide;
 import catdata.aql.TypeSide;
 
 public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
@@ -76,8 +77,6 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 
 	public static final class TyExpEmpty extends TyExp<Void,Void> {
 		
-		
-
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Collections.emptyList();
@@ -86,8 +85,7 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		public Map<String, String> options() {
 			return Collections.emptyMap();
 		}
-		
-		
+			
 		@Override
 		public TypeSide<Void,Void> eval(AqlEnv env) {
 			return TypeSide.terminal();
@@ -106,6 +104,41 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		@Override
 		public boolean equals(Object o) {
 			return (o != null && o instanceof TyExpEmpty);
+		}
+		
+	}
+	
+	//////////////////////////////////////////////////////////
+	
+public static final class TyExpSql extends TyExp<String,String> {
+		
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Collections.emptyList();
+		}
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
+			
+		@Override
+		public TypeSide<String,String> eval(AqlEnv env) {
+			return new SqlTypeSide(env.defaults);
+		}
+	
+		@Override
+		public String toString() {
+			return "sql";
+		}
+	
+		@Override
+		public int hashCode() {
+			return 0;
+		}
+	
+		@Override
+		public boolean equals(Object o) {
+			return (o != null && o instanceof TyExpSql);
 		}
 		
 	}

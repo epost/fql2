@@ -212,7 +212,7 @@ public abstract class KBExp<C, V> {
 
 		@Override
 		public KBApp<C, V> getApp() {
-			throw new RuntimeException();
+			throw new RuntimeException("Not an app: " + this);
 		}
 
 		@Override

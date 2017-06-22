@@ -1,6 +1,15 @@
 package catdata.aql.fdm;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.SQLType;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,6 +31,7 @@ import catdata.aql.It.ID;
 import catdata.aql.Query;
 import catdata.aql.Query.Frozen;
 import catdata.aql.Schema;
+import catdata.aql.SqlTypeSide;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.Var;
@@ -170,14 +180,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 				} else {
 					dom = I.algebra().en(q.gens.get(v));
 				}
-				/*if (!l1.isEmpty() || !l2.isEmpty()) {
-					System.out.println("tuple " + tuple);
-					System.out.println("var " + v);
-					System.out.println("Access paths " + l1 + " and " + l2);
-					System.out.println("old " + I.algebra().en(q.gens.get(v)).size());
-					System.out.println("new " + dom.size());
-					System.out.println();
-				}*/
+				
 				
 				outer: for (X x : dom) {
 					if (ret.size() > max) {
@@ -301,23 +304,155 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		for (En2 en2 : Q.ens.keySet()) {
 			ens.put(en2, eval(en2, Q.ens.get(en2)));
 		}
+		//TODO aql delete here
+	/*	if (session_id != -1) {
+			try {
+				getConnection().createStatement().executeQuery("DROP ALL TABLES").close(); //TODO now working
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} */
 	}
 
+	//TODO must convert back to original unfolded vars
 	private Collection<Row<En2, X>> eval(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q) {
-		Collection<Row<En2, X>> ret = new LinkedList<>();
-		ret.add(new Row<>(en2));
-		List<Var> plan = q.order(I);
-		//System.out.println("-----");
-		//System.out.println("original order: " + q.gens);
-		//System.out.println("planned order: " + plan);
+		int minSizeForSql = Integer.MAX_VALUE ; // (int) q.options.getOrDefault(AqlOption.eval_use_indices); TODO aql
+		Collection<Row<En2, X>> ret = null; 
 		Integer k = (int) q.options.getOrDefault(AqlOption.eval_max_temp_size);
-		boolean useIndices = (boolean) q.options.getOrDefault(AqlOption.eval_use_indices);
-		for (Var v : plan) {
-			ret = Row.extend(en2, ret, v, q, I, k, useIndices);
+		if (I.size() > minSizeForSql && I.algebra().hasFreeTypeAlgebra() && I.schema().typeSide instanceof SqlTypeSide) {
+			ret = evalSql(en2, q, I);
+		System.out.println("whasabi");
+			//TODO aql should also stop on max temp size?
+			return ret;
+		} else {
+			ret = new LinkedList<>();
+			List<Var> plan = q.order(I);
+			boolean useIndices = (boolean) q.options.getOrDefault(AqlOption.eval_use_indices) && q.gens.size() > 1;
+			ret.add(new Row<>(en2));
+			for (Var v : plan) {
+				ret = Row.extend(en2, ret, v, q, I, k, useIndices);
+			}
+			return ret;
 		}
-		return ret;
+	}
+	
+	private static int session_id_static = 0;
+
+	private int session_id = -1;
+	private Connection getConnection() throws SQLException {
+		if (session_id == -1) {
+			session_id = session_id_static++;
+		}
+		return DriverManager.getConnection("jdbc:h2:mem:db_temp_" + session_id + ";DB_CLOSE_DELAY=-1");
 	}
 
+	
+	private void initConn() {
+		if (session_id != -1) {
+			return;
+		}
+		try {
+			Connection conn = getConnection();
+			try (Statement stmt = conn.createStatement()) {
+				for (En1 en1 : I.schema().ens) {
+					Pair<List<Chc<Fk1, Att1>>, String> qqq = Q.toSQL_srcSchemas().get(en1);
+					stmt.execute(qqq.second);
+					for (X x : I.algebra().en(en1)) {
+						storeMyRecord(conn, x, qqq.first, en1.toString());
+					}
+				}
+
+				stmt.close();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
+			}				
+			conn.close();
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	private Collection<Row<En2, X>> evalSql(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q,
+			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
+		initConn();
+		
+		try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
+			ResultSet rs = stmt.executeQuery(Q.toSQL().get(en2));
+			Collection<Row<En2, X>> ret = new LinkedList<>();
+			//ResultSetMetaData rsmd = rs.getMetaData();
+			while (rs.next()) {
+				Row<En2, X> r = new Row<>(en2);
+				for (Var v : q.gens.keySet()) {
+					X x = (X) rs.getObject(v.var); //TODO aql unsafe
+					if (x == null) {
+						stmt.close();
+						rs.close();
+						throw new RuntimeException("Encountered a NULL generator");
+					}
+					r = new Row<>(r, v, x); 
+				}
+				ret.add(r);
+			}
+			rs.close();
+			stmt.close();
+			conn.close();
+			return ret;
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		
+	}
+	
+	//TODO aql refactor
+	private void storeMyRecord(Connection conn, X x, List<Chc<Fk1, Att1>> header, String table) throws Exception {
+		  List<String> hdrQ = new LinkedList<>();
+		  List<String> hdr = new LinkedList<>();
+		  hdr.add("id");
+		  hdrQ.add("?");
+      for (Chc<Fk1, Att1> aHeader : header) {
+          hdrQ.add("?");
+          Chc<Fk1, Att1> chc = aHeader;
+          if (chc.left) {
+              hdr.add((String)chc.l); //TODO aql unsafe
+          } else {
+              hdr.add((String)chc.r); //TODO aql unsafe
+          }
+      }
+		  
+		  String insertSQL = "INSERT INTO " + table + "(" + Util.sep(hdr,"," )+ ") values (" + Util.sep(hdrQ,",") + ")";
+		  PreparedStatement ps = conn.prepareStatement(insertSQL);
+		
+		  ps.setObject(1, x, Types.JAVA_OBJECT);
+		
+		  for (int i = 0; i < header.size(); i++) {
+			  Chc<Fk1,Att1> chc = header.get(i);
+			  if (chc.left) {
+				  ps.setObject(i+1+1, I.algebra().fk(chc.l, x), Types.JAVA_OBJECT);			   
+			  } else {
+				  Object o = fromTerm(I.algebra().att(chc.r, x));
+				  ps.setObject(i+1+1, o, SqlTypeSide.getSqlType(I.schema().atts.get(chc.r).second.toString()));			   			  
+			  }
+		  }
+		
+		  ps.executeUpdate();
+	} 
+
+	
+
+	private Object fromTerm(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
+		if (term.obj != null) {
+			return term.obj;
+		} else if (term.sym != null && term.args.isEmpty()) {
+			return term.sym;
+		} else if (term.sym != null && !term.args.isEmpty() || term.sk != null) {
+			return null;
+		}
+       return Util.anomaly();
+	}
+	
 	private static <Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y, En2> List<Pair<Fk1, X>> getAccessPath(Var v, Row<En2, X> tuple, Frozen<Ty, En1, Sym, Fk1, Att1> q2, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
 		List<Pair<Fk1, X>> ret = new LinkedList<>();
 		for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : q2.eqs) {

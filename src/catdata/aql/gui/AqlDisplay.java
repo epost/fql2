@@ -258,10 +258,11 @@ public final class AqlDisplay implements Disp {
 
 			@Override
 			public void keyReleased(KeyEvent e) {
-				JTabbedPane p = (JTabbedPane) lookup(current);
-				if (p == null) {
+				JComponent c = lookup(current);
+				if (!(c instanceof JTabbedPane) || c == null) {
 					return;
 				}
+				JTabbedPane p = (JTabbedPane) c;
 				int i = p.getSelectedIndex();
 				int j = -1;
 				if (e.getKeyCode() == KeyEvent.VK_LEFT ) {

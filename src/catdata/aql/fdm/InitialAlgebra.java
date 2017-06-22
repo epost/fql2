@@ -183,7 +183,8 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 		}
 		Term<Void, En, Void, Fk, Void, Gen, Void> ret = reprs.get(x);
 		if (ret == null) {
-			throw new RuntimeException("Anomaly: please report: " + x + " not in " + reprs);
+			System.out.println("class " + Util.get0X(reprs.keySet()).getClass());
+			throw new RuntimeException("Anomaly: please report: " + x + " (" + x.getClass() + ")" + " not in " + reprs);
 		}
 		return ret;
 	}

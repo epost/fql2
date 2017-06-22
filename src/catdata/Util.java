@@ -115,6 +115,9 @@ public class Util {
 	}
 
 	public static Class<?> load(String clazz) {
+		if (clazz == null) {
+			return Util.anomaly();
+		}
 		try {
 			return Class.forName(clazz);
 		} catch (ClassNotFoundException e) {

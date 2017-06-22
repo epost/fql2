@@ -65,7 +65,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	@Override
 	public synchronized String toString() {
-		return "Completed: " + Util.sep(completed, " ") + "\nProcessing: " + Util.sep(processing, " ") + "\nTodo: " + Util.sep(todo, " ");
+		return "Completed: " + Util.sep(completed, " ") + "\nTodo: " + Util.sep(todo, " ") + "\nProcessing: " + Util.sep(processing, " ");
 	}
 
 	public final AqlEnv env = new AqlEnv();
