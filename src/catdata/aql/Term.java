@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,7 +21,7 @@ import catdata.provers.KBExp;
 import catdata.provers.KBExp.KBApp;
 import catdata.provers.KBExp.KBVar;
 
-public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
+public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> implements Serializable {
 	
 	
 	<X> X visit(Function<Var, X> varf, BiFunction<Object, Ty, X> tyf, BiFunction<Sym, List<X>, X> symf, BiFunction<Fk, X, X> fkf, BiFunction<Att, X, X> attf, Function<Gen, X> genf, Function<Sk, X> skf) {
@@ -721,6 +722,30 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			}
 		} 
 	}
+	
+	public void fks(Set<Fk> fks) {
+		if (var != null) {
+			
+		} else if (fk != null) {
+			fks.add(fk);
+		} else {
+			for (@SuppressWarnings("hiding") Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
+				arg.fks(fks);
+			}
+		} 
+	}
+	
+	public void atts(Set<Att> atts) {
+		if (var != null) {
+			
+		} else if (att != null) {
+			atts.add(att);
+		} else {
+			for (@SuppressWarnings("hiding") Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
+				arg.atts(atts);
+			}
+		} 
+	}
 
 	public void objs(Set<Pair<Object, Ty>> objs) {
 		if (var != null) {
@@ -753,6 +778,18 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	public Set<Gen> gens() {
 		Set<Gen> ret = new HashSet<>();
 		gens(ret);
+		return ret;
+	}
+	
+	public Set<Fk> fks() {
+		Set<Fk> ret = new HashSet<>();
+		fks(ret);
+		return ret;
+	}
+	
+	public Set<Att> atts() {
+		Set<Att> ret = new HashSet<>();
+		atts(ret);
 		return ret;
 	}
 

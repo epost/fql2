@@ -2,7 +2,7 @@ package catdata;
 
 public class Null<X> {
 
-	public final X x;
+	private final X x;
 
 	public Null(X x) {
 		Util.assertNotNull(x);

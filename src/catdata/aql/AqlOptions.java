@@ -41,6 +41,8 @@ public final class AqlOptions {
 		eval_max_plan_depth,
 		eval_join_selectivity,
 		eval_use_indices,
+		eval_use_sql_above,
+		eval_approx_sql_unsafe,
 		query_remove_redundancy,
 		
 		program_allow_nontermination_unsafe,
@@ -222,6 +224,10 @@ public final class AqlOptions {
 			return 256;
 		case query_remove_redundancy:
 			return true;
+		case eval_approx_sql_unsafe:
+			return false;
+		case eval_use_sql_above:
+			return 16*1024;
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -339,6 +345,10 @@ public final class AqlOptions {
 			return op.getInteger(map);
 		case query_remove_redundancy:
 			return op.getBoolean(map);
+		case eval_approx_sql_unsafe:
+			return op.getBoolean(map);
+		case eval_use_sql_above:
+			return op.getInteger(map);
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		}

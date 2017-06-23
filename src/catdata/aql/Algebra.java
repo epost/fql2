@@ -303,6 +303,24 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 		return ret;
 	}
 	
+	private Pair<Map<X,Integer>, Map<Integer, X>> intifyX;
+	public synchronized Pair<Map<X,Integer>, Map<Integer, X>> intifyX() {
+		if (intifyX != null) {
+			return intifyX;
+		}
+		int i = 0;	
+		intifyX = new Pair<>(new HashMap<>(), new HashMap<>());
+		for (En en : schema().ens) {
+			for (X x : en(en)) {
+				intifyX.first.put(x, i);
+				intifyX.second.put(i, x);
+				i++;
+			}
+		}
+			
+		return intifyX;
+	}
+	
 /*	
 	public Term<Ty, Void, Sym, Void, Void, Void, Y> trans(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		if (term.obj != null) {

@@ -5,9 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.SQLType;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Collection;
@@ -23,6 +21,7 @@ import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Algebra;
+import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
 import catdata.aql.Eq;
@@ -184,7 +183,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 				
 				outer: for (X x : dom) {
 					if (ret.size() > max) {
-						throw new RuntimeException("On entity " + entity + ", query evaluation maximum intermediate result size (" + max + ") exceeded.  Try, in the sub-query for " + entity + ", options eval_max_temp_size = " + tuples.size() * dom.size() + " (the largest possible size of the temporary table that triggered this error).  Or, try, in the subquery for " + entity
+						throw new RuntimeException("On entity " + entity + ", query evaluation maximum intermediate result size (" + max + ") exceeded.  Try options eval_max_temp_size = " + tuples.size() * dom.size() + " (the largest possible size of the temporary table that triggered this error).  Or, try "
 								+ ", options eval_reorder_joins=false and choose a nested loops join order that results in smaller intermediate results.");
 					}
 					Row<En2, X> row = new Row<>(tuple, v, x);
@@ -295,39 +294,64 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		return Q.dst;
 	}
 
-	public EvalAlgebra(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
+	//TODO aql: associate the loaded and indexed data with the instance, so can be re-used
+	public final AqlOptions options;
+	public EvalAlgebra(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I, AqlOptions options) {
 		this.I = I;
-		this.Q = q;
-		if (!I.schema().equals(Q.src)) {
+		this.options = options;
+		if (!I.schema().equals(q.src)) {
 			throw new RuntimeException("Anomaly: please report");
 		}
-		for (En2 en2 : Q.ens.keySet()) {
-			ens.put(en2, eval(en2, Q.ens.get(en2)));
+		Connection conn = null;
+		boolean safe = (I.algebra().talg().sks.isEmpty() && I.algebra().talg().eqs.isEmpty()) || allowUnsafeSql();
+		boolean useSql = I.size() >= minSizeForSql() && safe && (I.schema().typeSide instanceof SqlTypeSide);
+		if (useSql) {
+			this.Q = q.unnest();
+			conn = initConn(session_id_static++);
+		} else {
+			this.Q = q;
 		}
-		//TODO aql delete here
-	/*	if (session_id != -1) {
+		for (En2 en2 : Q.ens.keySet()) {
+			ens.put(en2, eval(en2, this.Q.ens.get(en2), conn, useSql));
+		}
+		if (useSql) {
 			try {
-				getConnection().createStatement().executeQuery("DROP ALL TABLES").close(); //TODO now working
+				conn.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-		} */
+		}		
+		
 	}
-
+	
+	private boolean allowUnsafeSql() {
+		return (boolean) options.getOrDefault(AqlOption.eval_approx_sql_unsafe);
+	}
+	
+	private int maxTempSize() {
+		return (int) options.getOrDefault(AqlOption.eval_max_temp_size);
+	}
+	
+	private boolean useIndices() {
+		return (boolean) options.getOrDefault(AqlOption.eval_use_indices);
+	}
+	
+	private int minSizeForSql() {
+		return (int) options.getOrDefault(AqlOption.eval_use_sql_above);
+	}
+	
 	//TODO must convert back to original unfolded vars
-	private Collection<Row<En2, X>> eval(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q) {
-		int minSizeForSql = Integer.MAX_VALUE ; // (int) q.options.getOrDefault(AqlOption.eval_use_indices); TODO aql
+	private Collection<Row<En2, X>> eval(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q, Connection conn, boolean useSql) {
 		Collection<Row<En2, X>> ret = null; 
-		Integer k = (int) q.options.getOrDefault(AqlOption.eval_max_temp_size);
-		if (I.size() > minSizeForSql && I.algebra().hasFreeTypeAlgebra() && I.schema().typeSide instanceof SqlTypeSide) {
-			ret = evalSql(en2, q, I);
-		System.out.println("whasabi");
+		Integer k = maxTempSize();
+		if (useSql) {
+			ret = evalSql(en2, q, I, conn);
 			//TODO aql should also stop on max temp size?
 			return ret;
 		} else {
 			ret = new LinkedList<>();
-			List<Var> plan = q.order(I);
-			boolean useIndices = (boolean) q.options.getOrDefault(AqlOption.eval_use_indices) && q.gens.size() > 1;
+			List<Var> plan = q.order(options, I);
+			boolean useIndices = useIndices() && q.gens.size() > 1;
 			ret.add(new Row<>(en2));
 			for (Var v : plan) {
 				ret = Row.extend(en2, ret, v, q, I, k, useIndices);
@@ -338,36 +362,29 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 	
 	private static int session_id_static = 0;
 
-	private int session_id = -1;
-	private Connection getConnection() throws SQLException {
-		if (session_id == -1) {
-			session_id = session_id_static++;
-		}
-		return DriverManager.getConnection("jdbc:h2:mem:db_temp_" + session_id + ";DB_CLOSE_DELAY=-1");
-	}
-
-	
-	private void initConn() {
-		if (session_id != -1) {
-			return;
-		}
+	private Connection initConn(int id) {
 		try {
-			Connection conn = getConnection();
+			Connection conn = DriverManager.getConnection("jdbc:h2:mem:db_temp_" + id + ";DB_CLOSE_DELAY=-1");
 			try (Statement stmt = conn.createStatement()) {
 				for (En1 en1 : I.schema().ens) {
 					Pair<List<Chc<Fk1, Att1>>, String> qqq = Q.toSQL_srcSchemas().get(en1);
 					stmt.execute(qqq.second);
+					Map<En1, List<String>> e = Q.toSQL_srcIdxs();
+					if (useIndices()) { //TODO aql too bad reorder joins won't work here either
+						for (String s : e.get(en1)) {
+							stmt.execute(s);
+						}
+					}
 					for (X x : I.algebra().en(en1)) {
 						storeMyRecord(conn, x, qqq.first, en1.toString());
 					}
 				}
-
 				stmt.close();
+				return conn;
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}				
-			conn.close();
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
@@ -375,17 +392,15 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 	}
 	
 	private Collection<Row<En2, X>> evalSql(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q,
-			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
-		initConn();
-		
-		try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
+			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I, Connection conn) {
+		try (Statement stmt = conn.createStatement()) {
 			ResultSet rs = stmt.executeQuery(Q.toSQL().get(en2));
 			Collection<Row<En2, X>> ret = new LinkedList<>();
 			//ResultSetMetaData rsmd = rs.getMetaData();
 			while (rs.next()) {
 				Row<En2, X> r = new Row<>(en2);
 				for (Var v : q.gens.keySet()) {
-					X x = (X) rs.getObject(v.var); //TODO aql unsafe
+					X x = I.algebra().intifyX().second.get(rs.getInt(v.var)); 
 					if (x == null) {
 						stmt.close();
 						rs.close();
@@ -397,7 +412,6 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 			}
 			rs.close();
 			stmt.close();
-			conn.close();
 			return ret;
 		} catch (SQLException ex) {
 			ex.printStackTrace();
@@ -425,12 +439,12 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		  String insertSQL = "INSERT INTO " + table + "(" + Util.sep(hdr,"," )+ ") values (" + Util.sep(hdrQ,",") + ")";
 		  PreparedStatement ps = conn.prepareStatement(insertSQL);
 		
-		  ps.setObject(1, x, Types.JAVA_OBJECT);
+		  ps.setObject(1, I.algebra().intifyX().first.get(x), Types.INTEGER);
 		
 		  for (int i = 0; i < header.size(); i++) {
 			  Chc<Fk1,Att1> chc = header.get(i);
 			  if (chc.left) {
-				  ps.setObject(i+1+1, I.algebra().fk(chc.l, x), Types.JAVA_OBJECT);			   
+				  ps.setObject(i+1+1, I.algebra().intifyX().first.get(I.algebra().fk(chc.l, x)), Types.INTEGER);			   
 			  } else {
 				  Object o = fromTerm(I.algebra().att(chc.r, x));
 				  ps.setObject(i+1+1, o, SqlTypeSide.getSqlType(I.schema().atts.get(chc.r).second.toString()));			   			  
@@ -445,12 +459,8 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 	private Object fromTerm(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
 		if (term.obj != null) {
 			return term.obj;
-		} else if (term.sym != null && term.args.isEmpty()) {
-			return term.sym;
-		} else if (term.sym != null && !term.args.isEmpty() || term.sk != null) {
-			return null;
 		}
-       return Util.anomaly();
+		return null;
 	}
 	
 	private static <Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y, En2> List<Pair<Fk1, X>> getAccessPath(Var v, Row<En2, X> tuple, Frozen<Ty, En1, Sym, Fk1, Att1> q2, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {

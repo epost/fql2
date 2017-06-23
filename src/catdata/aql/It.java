@@ -28,7 +28,7 @@ public class It implements Iterator<ID>, Serializable {
 		public int hashCode() {
 			int prime = 31;
 			int result = 1;
-	//		result = prime * result + getOuterType().hashCode();
+			result = prime * result + getOuterType().hashCode();
 			result = prime * result + ((str == null) ? 0 : str.hashCode());
 			return result;
 		}
@@ -39,13 +39,15 @@ public class It implements Iterator<ID>, Serializable {
 				return true;
 			if (obj == null)
 				return false;
-			//if (getClass() != obj.getClass()) {
-			//	throw new RuntimeException("Anomaly: please report");
-			//}
+			if (getClass() != obj.getClass()) {
+				System.out.println("Please report this message to Ryan.");
+				throw new RuntimeException("Anomaly: please report");
+			}
 			ID other = (ID) obj;
-	//		if (!getOuterType().equals(other.getOuterType())) {
-		//		throw new RuntimeException("Anomaly: please report");
-	//		}
+			if (!getOuterType().equals(other.getOuterType())) {
+				System.out.println("Please report this message to Ryan.");
+				throw new RuntimeException("Anomaly: please report");
+			}
 			if (str == null) {
 				if (other.str != null)
 					return false;

@@ -1,6 +1,5 @@
 package catdata.aql;
 
-import java.sql.SQLType;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,6 +12,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 
+//TODO AQL add dates
 public class SqlTypeSide extends TypeSide<String, String> {
 
 //	private final AqlOptions ops;
