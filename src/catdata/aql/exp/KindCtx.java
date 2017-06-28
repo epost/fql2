@@ -21,33 +21,38 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C,SC,ED> {
 	public final Ctx<V, SC> scs = new Ctx<>();
 	public final Ctx<V, ED> eds = new Ctx<>();
 	
-	public Object get(V k, Kind kind) {
+	
+	public Ctx<V, ?> get(Kind kind) {
 		switch (kind) {
 		case INSTANCE:
-			return insts.get(k);
+			return insts;
 		case MAPPING:
-			return maps.get(k);
+			return maps;
 		case SCHEMA:
-			return schs.get(k);
+			return schs;
 		case TRANSFORM:
-			return trans.get(k);
+			return trans;
 		case TYPESIDE:
-			return tys.get(k);
+			return tys;
 		case QUERY:
-			return qs.get(k);
+			return qs;
 		case PRAGMA:
-			return ps.get(k);
+			return ps;
 		case GRAPH:
-			return gs.get(k);
+			return gs;
 		case COMMENT:
-			return cs.get(k);
+			return cs;
 		case SCHEMA_COLIMIT:
-			return scs.get(k);
+			return scs;
 		case CONSTRAINTS:
-			return eds.get(k);
+			return eds;
 		default:
 			throw new RuntimeException();
 		}
+	}
+	
+	public Object get(V k, Kind kind) {
+		return get(kind).get(k);
 	}
 	
 	@SuppressWarnings("unchecked")

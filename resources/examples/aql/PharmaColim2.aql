@@ -1,0 +1,135 @@
+//Example courtesy of Peter Gates
+
+typeside Type = literal {
+	java_types	
+		dom = "java.lang.Object"
+	java_constants
+		dom = "return input[0]"
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+schema S1 = literal : Type {
+	entities 
+		Observation Person Gender ObsType
+	foreign_keys 
+		f: Observation -> Person
+		h: Person -> Gender
+		g: Observation -> ObsType
+	attributes	
+	     Person_att: Person -> dom
+	     Gender_att: Gender -> dom
+	     ObsType_att: ObsType -> dom
+} 
+
+schema S2 = literal : Type {
+	entities 
+		Observation Patient Method Type
+	foreign_keys 
+		f : Observation -> Patient
+		g1: Observation -> Method
+		g2: Method -> Type
+	attributes
+	     Patient_att: Patient -> dom
+	     Type_att: Type -> dom
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+//compute the canonical schema colimit
+
+schema_colimit ColimAuto = quotient S1 + S2 : Type {
+	entity_equations
+		S1.Observation = S2.Observation
+		S1.Person = S2.Patient
+		S1.ObsType = S2.Type
+	path_equations
+		S1_f = S2_f
+		S1_g = S2_g1.S2_g2
+}
+
+///////////////////////////////////////////////////////////////////////////
+//use a different, less verbose colimit constructed manually
+
+schema_colimit Colim = modify ColimAuto {
+	rename entities
+		S1_Observation__S2_Observation -> O
+		S1_Person__S2_Patient -> P
+		S1_ObsType__S2_Type -> T
+		S1_Gender -> G
+		S2_Method -> M
+	rename foreign_keys
+		S1_f -> f
+		S1_h -> h
+		S2_g1 -> g1
+		S2_g2 -> g2
+	rename attributes
+		S1_ObsType_att -> T_att1
+		S1_Gender_att -> G_att
+		S1_Person_att -> P_att1
+		S2_Type_att -> T_att2
+		S2_Patient_att -> P_att2
+	remove foreign_keys	
+		S2_f -> f
+		S1_g -> g1.g2
+	/* e.g. remove attributes
+		B_ObsType_att -> lambda x. x.T_att1 */
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+
+instance I1 = literal : S1 {
+	generators
+		one two three : Observation
+		Peter Paul : Person
+	    	M F :Gender
+	    	BloodPressure BodyWeight HeartRate: ObsType
+	equations
+		Peter.Person_att = xPeter Paul.Person_att = xPaul
+		M.Gender_att = xM F.Gender_att = xF
+		BloodPressure.ObsType_att = xBloodPressure
+		BodyWeight.ObsType_att = xBodyWeight
+		HeartRate.ObsType_att = xHeartRate
+		one.f = Peter two.f = Peter three.f = Paul
+		Peter.h = M Paul.h = M
+		one.g = BloodPressure two.g = BodyWeight three.g = HeartRate
+} 
+
+instance I2 = literal : S2 {
+	generators
+		o1 o2 o3 o4 : Observation
+		Pete Jane : Patient
+		m1 m2 m3 m4 : Method
+		BP Wt : Type
+	equations
+	     Pete.Patient_att = xPete Jane.Patient_att = xJane
+	     BP.Type_att = xBloodPressure Wt.Type_att = xBodyWeight
+	     o1.f = Pete o2.f = Pete o3.f = Jane o4.f = Jane
+	     o1.g1 = m1 o2.g1 = m2 o3.g1 = m3 o4.g1 = m1
+	     m1.g2 = BP m2.g2 = BP m3.g2 = Wt m4.g2 = Wt
+} 
+
+instance CoProd = coproduct_sigma (getMapping Colim S1) I1 (getMapping Colim S2) I2 : getSchema Colim
+
+instance E = literal : getSchema Colim {
+	generators 
+	  	P : P 
+	  	B W : T
+} 
+
+transform a1 = literal : E -> CoProd {
+		generators 
+			P -> Peter
+			B -> BloodPressure
+			W -> BodyWeight
+} 
+
+transform a2 = literal : E -> CoProd {
+		generators
+			P -> Pete
+			B -> BP 
+			W -> Wt
+} 
+
+instance answer = coequalize a1 a2 

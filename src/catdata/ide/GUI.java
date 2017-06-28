@@ -420,6 +420,20 @@ public class GUI extends JPanel {
 		if (e == null) {
 			return;
 		}
+		if (e.lang().equals(Language.EASIK)) {
+			try {
+				File file = File.createTempFile("easik_", "");
+				FileWriter w = new FileWriter(file);
+				w.write(e.getText());
+				w.close();
+				Easik.getInstance().getFrame().getOverview().openOverview(file);
+				return;
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			
+		}
+			
 		newAction(e.toString(), e.getText(), e.lang());
 	}
 

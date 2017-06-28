@@ -1,5 +1,11 @@
 package catdata.aql;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -344,4 +351,122 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 		throw new RuntimeException("Anomaly: please report");
 	}
 	*/
+	private static int session_id = 0;
+	private Connection conn;
+	private Collection<String> indicesLoaded = new LinkedList<>();
+	
+	/**
+	 * MUST close this connection
+	 */
+	public Connection createAndLoad(Map<En, List<String>> indices) {
+		try {
+			Connection conn = DriverManager.getConnection("jdbc:h2:mem:db_temp_" + session_id++ + ";DB_CLOSE_DELAY=-1");
+			try (Statement stmt = conn.createStatement()) {
+				for (En en1 : schema().ens) {
+					Pair<List<Chc<Fk, Att>>, String> qqq = schema().toSQL_srcSchemas().get(en1);
+					stmt.execute(qqq.second);
+					for (String s : indices.get(en1)) {
+						stmt.execute(s);
+					}
+					for (X x : en(en1)) {
+						storeMyRecord(conn, x, qqq.first, en1.toString());
+					}
+				}
+				stmt.close();
+				//this.conn = conn;
+				return conn;
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
+			}				
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	
+	/**
+	 * DO NOT close this connection
+	 */
+	//client should not remove
+	public synchronized Connection addIndices(Map<En, List<String>> indices) {
+		if (conn == null) {
+			conn = createAndLoad(indices);
+			this.indicesLoaded = new LinkedList<>();
+			for (List<String> l : indices.values()) {
+				this.indicesLoaded.addAll(l);
+			}
+			return conn;
+		}
+		try (Statement stmt = conn.createStatement()) {
+			for (List<String> ss : indices.values()) {
+				for (String s : ss) {
+					if (!indicesLoaded.contains(s)) {
+						stmt.execute(s);
+						indicesLoaded.add(s);
+					}
+				}
+			}
+			stmt.close();
+			return conn;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}			
+	}
+	
+	//TODO aql refactor
+		private void storeMyRecord(Connection conn, X x, List<Chc<Fk, Att>> header, String table) throws Exception {
+			  List<String> hdrQ = new LinkedList<>();
+			  List<String> hdr = new LinkedList<>();
+			  hdr.add("id");
+			  hdrQ.add("?");
+	      for (Chc<Fk, Att> aHeader : header) {
+	          hdrQ.add("?");
+	          Chc<Fk, Att> chc = aHeader;
+	          if (chc.left) {
+	              hdr.add((String)chc.l); //TODO aql unsafe
+	          } else {
+	              hdr.add((String)chc.r); //TODO aql unsafe
+	          }
+	      }
+			  
+			  String insertSQL = "INSERT INTO " + table + "(" + Util.sep(hdr,"," )+ ") values (" + Util.sep(hdrQ,",") + ")";
+			  PreparedStatement ps = conn.prepareStatement(insertSQL);
+			
+			  ps.setObject(1, intifyX().first.get(x), Types.INTEGER);
+			
+			  for (int i = 0; i < header.size(); i++) {
+				  Chc<Fk,Att> chc = header.get(i);
+				  if (chc.left) {
+					  ps.setObject(i+1+1, intifyX().first.get(fk(chc.l, x)), Types.INTEGER);			   
+				  } else {
+					  Object o = fromTerm(att(chc.r, x));
+					  ps.setObject(i+1+1, o, SqlTypeSide.getSqlType(schema().atts.get(chc.r).second.toString()));			   			  
+				  }
+			  }
+			
+			  ps.executeUpdate();
+		} 
+
+
+		private Object fromTerm(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
+			if (term.obj != null) {
+				return term.obj;
+			}
+			return null;
+		}
+	
+		@Override
+		protected void finalize() {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+
 }

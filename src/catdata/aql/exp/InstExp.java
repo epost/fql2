@@ -361,7 +361,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 			for (Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> x : Is) {
 				SchExp<Ty, En, Sym, Fk, Att> ac = new InstExpSigma<>(x.first, x.second, Collections.emptyMap()).type(G);
-				if (!ac.equals(sch)) { //TODO aql type equality
+				if (!G.eq(ac,sch)) { //TODO aql schema equality
 					throw new RuntimeException("Instance " + x.second + " has schema " + ac + ",\n\nnot " + sch + "\n\nas expected");
 				}
 			}
@@ -477,11 +477,11 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
-			if (!I.type(G).equals(eds.type(G))) {
+			if (!G.eq(I.type(G), eds.type(G))) {
 				throw new RuntimeException("type of " + I + ", namely " + I.type(G) + " is not equal to type of " + eds + ", namely " + eds.type(G));
 			}
 			return I.type(G);
-			//TODO aql type equality
+			//TODO aql schema equality
 		}
 
 	
@@ -733,7 +733,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		@Override
 		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 			for (N n : nodes.keySet()) {
-				if (!nodes.get(n).type(G).equals(schema)) { //TODO aql schema equality
+				if (!G.eq(nodes.get(n).type(G), schema)) { //TODO aql schema equality
 					throw new RuntimeException("The instance for " + n + " has schema " + nodes.get(n).type(G) + ", not " + schema + " as expected");
 				}
 			}
@@ -921,7 +921,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public SchExp<Ty, En2, Sym, Fk2, Att2> type(AqlTyping G) {
-			if (!I.type(G).equals(Q.type(G).first)) { //TODO aql schema equality
+			if (!G.eq(I.type(G), Q.type(G).first)) { //TODO aql schema equality
 				throw new RuntimeException("In evaluating a query, schema of instance is " + I.type(G) + " but source of query is " + Q.type(G).first + "\nThe query is " + this);
 			}
 			return Q.type(G).second;
@@ -1009,7 +1009,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			SchExp<Ty, En1, Sym, Fk1, Att1> t0 = I.type(G);
 			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(G);
 			
-			if (!t1.first.equals(t0)) { //TODO aql schema equality
+			if (!G.eq(t1.first, t0)) { //TODO aql schema equality
 				throw new RuntimeException("Type error: In " + this + " domain of mapping is " + t1.first + " but instance has schema " + t0);
 			} 
 			
@@ -1087,7 +1087,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			SchExp<Ty, En2, Sym, Fk2, Att2> t0 = I.type(G);
 			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(G);
 			
-			if (!t1.second.equals(t0)) { //TODO aql type equality
+			if (!G.eq(t1.second, t0)) { //TODO aql schema equality
 				throw new RuntimeException("Type error: In " + this + " codomain of mapping is " + t1.first + " but instance has schema " + t0);
 			} 
 			

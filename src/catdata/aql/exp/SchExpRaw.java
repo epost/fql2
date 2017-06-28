@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
+import catdata.Program;
 import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
@@ -30,6 +31,10 @@ import catdata.aql.Var;
 
 public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object>  {
 	
+	public SchExp<Object,Object,Object,Object,Object> resolve(AqlTyping G, Program<Exp<?>> prog) {
+	return this;
+	}
+
 	@Override
 	public Collection<Pair<String, Kind>> deps() {
 		Set<Pair<String, Kind>> ret = new HashSet<>();

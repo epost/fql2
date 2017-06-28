@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import catdata.IntRef;
 import catdata.LineException;
@@ -52,7 +53,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			}
 			// each pragma depends on all expressions before it
 			if (exp.kind().equals(Kind.PRAGMA)) {
-				ret.add(new Pair<>(s0, Kind.PRAGMA));
+				ret.add(new Pair<>(s0, prog.exps.get(s0).kind()));
 			}
 		}
 		return ret;
@@ -65,7 +66,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	@Override
 	public synchronized String toString() {
-		return "Completed: " + Util.sep(completed, " ") + "\nTodo: " + Util.sep(todo, " ") + "\nProcessing: " + Util.sep(processing, " ");
+		return "Completed: " + Util.sep(completed.stream().filter(x -> !prog.exps.get(x).kind().equals(Kind.COMMENT)).collect(Collectors.toList()), " ") + "\nTodo: " + Util.sep(todo.stream().filter(x -> !prog.exps.get(x).kind().equals(Kind.COMMENT)).collect(Collectors.toList()), " ") + "\nProcessing: " + Util.sep(processing.stream().filter(x -> !prog.exps.get(x).kind().equals(Kind.COMMENT)).collect(Collectors.toList()), " ");
 	}
 
 	public final AqlEnv env = new AqlEnv();
@@ -184,8 +185,12 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			todo.addAll(prog.order);
 			return;
 		}
+		
 		for (String n : prog.order) {
-			if (!last_env.defs.keySet().contains(n) || changed(n)) {
+			if (prog.exps.get(n) == null) {
+				Util.anomaly();
+			}
+			if ((!last_env.defs.keySet().contains(n)) || changed(n)) {
 				todo.add(n);
 			} else {
 				Kind k = prog.exps.get(n).kind();
@@ -201,11 +206,17 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			return changed.get(n);
 		}
 		Exp<?> prev = last_prog.exps.get(n);
+		if (prog.exps.get(n) == null) {
+			Util.anomaly();
+		}
 		if (prev == null || (Boolean) prog.exps.get(n).getOrDefault(env, AqlOption.always_reload)) {
 			changed.put(n, true);
 			return true;
 		}
-		for (Pair<String, Kind> d : wrapDeps(n, prev, last_prog)) {
+		for (Pair<String, Kind> d : wrapDeps(n, prev, prog)) {
+			if (prog.exps.get(d.first) == null) {
+				Util.anomaly();
+			}
 			if (changed(d.first)) {
 				changed.put(n, true);
 				return true;
@@ -264,7 +275,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				}
 				synchronized (this) {
 					env.defs.put(n, k, val);
-					env.performance.put(n, Float.toString((time2 - time1) / (1000f)));
+					env.performance.put(n, (time2 - time1) / (1000f));
 					processing.remove(n);
 					completed.add(n);
 					update();

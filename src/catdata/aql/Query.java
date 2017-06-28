@@ -5,12 +5,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -671,40 +669,9 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 
 	////////////////
 
-	private Map<En1, List<String>> sqlSrcSchsIdxs;
 	
-	public synchronized <Fk, Att> Map<En1, List<String>> toSQL_srcIdxs() {
-		if (sqlSrcSchsIdxs != null) {
-			return sqlSrcSchsIdxs;
-		}
-		Pair<Collection<Fk1>, Collection<Att1>> inWhereClause = fksAndAttsOfWhere(); 
-		sqlSrcSchsIdxs = new HashMap<>();
-		for (En1 en1 : src.ens) {
-			List<String> x = new LinkedList<>();
-			for (Fk1 fk1 : src.fksFrom(en1)) {
-				if (inWhereClause.first.contains(fk1)) {
-					x.add("create index " + en1 + fk1 + " on " + en1 + "(" + fk1 + ")");
-				}
-			}
-			for (Att1 att1 : src.attsFrom(en1)) {
-				//TODO skip those that can't be indexed - other, text, blob, 
-				if (inWhereClause.second.contains(att1)) {
-					if (!cannotBeIndexed(src.atts.get(att1).second)) {
-						x.add("create index " + en1 + att1 + " on " + en1 + "(" + att1 + ")");
-					}
-				}
-			}
-			sqlSrcSchsIdxs.put(en1, x);
-		}
-		return sqlSrcSchsIdxs;
-	}
 	
-	private boolean cannotBeIndexed(Ty t) {
-		String s = t.toString().toLowerCase();
-		return s.equals("custom") || s.equals("text");
-	}
-
-	private Pair<Collection<Fk1>, Collection<Att1>> fksAndAttsOfWhere() {
+	public Pair<Collection<Fk1>, Collection<Att1>> fksAndAttsOfWhere() {
 		Set<Fk1> fks = new HashSet<>();
 		Set<Att1> atts = new HashSet<>();
 		for (Frozen<Ty, En1, Sym, Fk1, Att1> I : ens.values()) {
@@ -718,37 +685,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		return new Pair<>(fks, atts);
 	}
 
-	private Map<En1, Pair<List<Chc<Fk1, Att1>>,String>> sqlSrcSchs;
 	
-
-	public synchronized Map<En1, Pair<List<Chc<Fk1, Att1>>,String>> toSQL_srcSchemas() {
-		if (sqlSrcSchs != null) {
-			return sqlSrcSchs;
-		}
-		sqlSrcSchs = new HashMap<>();
-		for (En1 en1 : src.ens) {
-			List<String> l = new LinkedList<>();
-			List<Chc<Fk1, Att1>> k = new LinkedList<>();
-			l.add("id integer primary key");
-		//	List<String> x = new LinkedList<>();
-			for (Fk1 fk1 : src.fksFrom(en1)) {
-				l.add(fk1 + " integer "  /* + " foreign key references " + src.fks.get(fk1).second + ".id" */ );
-				k.add(Chc.inLeft(fk1));
-		//		x.add("create index " + en1 + fk1 + " on " + en1 + "(" + fk1 + ")");
-			}
-			for (Att1 att1 : src.attsFrom(en1)) {
-				l.add(att1 + " " + src.atts.get(att1).second.toString());		 //TODO aql
-				k.add(Chc.inRight(att1));
-			//	x.add("create index " + en1 + att1 + " on " + en1 + "(" + att1 + ")");
-			}
-			String str = "create table " + en1 + "("+Util.sep(l, ", ") + ")";
-		//	x.add(0, str);
-			
-			
-			sqlSrcSchs.put(en1, new Pair<>(k, str));
-		}
-		return sqlSrcSchs;
-	}
 		
 	private Map<En2,String> ret;
 

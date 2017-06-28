@@ -15,12 +15,9 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Chc;
@@ -77,7 +74,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		return obj.toString().replace("\n", "<br>").replace("\t", "&nbsp;");
 	}
 
-	public static JComponent view(String time, Semantics s, int maxrows) {
+	public static JComponent view(float time, Semantics s, int maxrows) {
 		JTabbedPane ret = new JTabbedPane();
 		new AqlViewer(maxrows).visit(ret, s);
 		ret.addTab("Text", new CodeTextPanel("", s.toString()));
@@ -519,7 +516,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> JComponent makeQueryPanel(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q) {
 		List<String> l = new LinkedList<>();
-		for (Pair<List<Chc<Fk1, Att1>>, String> s : q.toSQL_srcSchemas().values()) {
+		for (Pair<List<Chc<Fk1, Att1>>, String> s : q.src.toSQL_srcSchemas().values()) {
 			l.add(s.second);
 		}
 		l.add("////////// Insert source data here /////////");

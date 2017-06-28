@@ -1102,7 +1102,7 @@ public class AqlParser {
 	private static int comment_id = 0;
 	private static Parser<Triple<String, Integer, ? extends Exp<?>>> comment() {
 		return Parsers.tuple(token("html"), token("{").followedBy(token("(*")), StringLiteral.PARSER, Parsers.INDEX, token("*)").followedBy(token("}"))).map(x -> 
-			new Triple<>(" " + comment_id++, x.d, new CommentExp(x.c))
+			new Triple<>(Integer.toString(comment_id++), x.d, new CommentExp(x.c))
 		);
 	}
 	

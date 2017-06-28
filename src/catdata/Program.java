@@ -39,6 +39,9 @@ public class Program<X> implements Prog {
 			checkDup(seen, decl);
 			exps.put(decl.first, decl.third);
 			lines.put(decl.first, decl.second);
+			if (decl.second == null || decl.third == null) {
+				Util.anomaly();
+			}
 			order.add(decl.first);				
 		}
 		this.options = Util.toMapSafely(options);

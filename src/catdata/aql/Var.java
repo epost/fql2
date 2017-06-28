@@ -1,9 +1,8 @@
 package catdata.aql;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
-public final class Var implements Serializable {
+public final class Var {
 
 	
 	public final String var;

@@ -1,6 +1,5 @@
 package catdata.aql;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,7 +20,7 @@ import catdata.provers.KBExp;
 import catdata.provers.KBExp.KBApp;
 import catdata.provers.KBExp.KBVar;
 
-public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> implements Serializable {
+public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	
 	
 	<X> X visit(Function<Var, X> varf, BiFunction<Object, Ty, X> tyf, BiFunction<Sym, List<X>, X> symf, BiFunction<Fk, X, X> fkf, BiFunction<Att, X, X> attf, Function<Gen, X> genf, Function<Sk, X> skf) {

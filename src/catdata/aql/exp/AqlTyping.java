@@ -7,10 +7,21 @@ import catdata.graph.DMG;
 
 public class AqlTyping {
 	
+	
+	public <Ty,Sym> boolean eq(TyExp<Ty,Sym> t1, TyExp<Ty,Sym> t2) {
+		return t1.resolve(prog).equals(t2.resolve(prog));
+	}
+	
+	public <Ty,En,Sym,Fk,Att> boolean eq(SchExp<Ty,En,Sym,Fk,Att> s1, SchExp<Ty,En,Sym,Fk,Att> s2) {
+		return s1.resolve(this, prog).equals(s2.resolve(this, prog));
+	}
+	
 	//TODO aql turn into visitor
+	private final Program<Exp<?>> prog;
 	
 	public AqlTyping(Program<Exp<?>> prog, AqlOptions defaults) {
 		this.defaults = defaults;
+		this.prog = prog;
 		for (String s : prog.order) {
 			Exp<?> e = prog.exps.get(s);
 			switch (e.kind()) {

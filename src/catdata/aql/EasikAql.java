@@ -26,7 +26,6 @@ import catdata.aql.exp.SchExp;
 import catdata.aql.exp.SchExp.SchExpVar;
 import catdata.aql.exp.SchExpRaw;
 import catdata.aql.exp.TyExp.TyExpVar;
-import catdata.aql.exp.TyExpRaw;
 
 public class EasikAql {
 	

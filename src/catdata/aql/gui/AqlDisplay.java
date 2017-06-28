@@ -6,9 +6,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.math.RoundingMode;
 import java.sql.Date;
+import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -108,10 +112,10 @@ public final class AqlDisplay implements Disp {
 		} 
 	}
 	
-	private static JComponent wrapDisplay(String c, Exp<?> exp, Semantics obj, AqlEnv env, String time) {
+	private static JComponent wrapDisplay(String c, Exp<?> exp, Semantics obj, AqlEnv env, float time) {
 		int maxSize = getMaxSize(exp, env);
 		if (obj.size() > maxSize) {
-			return new CodeTextPanel("", "Display supressed, size > " + maxSize + ".\n\nSee manual for a description of size, or try options gui_max_Z_size = X for X > " + obj.size() + " (the size of this object) and Z one of table, graph, string.  \n\nWarning: sizes that are too large will hang the viewer.\n\nCompute time: " + env.performance.getOrDefault(c, "unkown") );
+			return new CodeTextPanel("", "Display supressed, size > " + maxSize + ".\n\nSee manual for a description of size, or try options gui_max_Z_size = X for X > " + obj.size() + " (the size of this object) and Z one of table, graph, string.  \n\nWarning: sizes that are too large will hang the viewer.\n\nCompute time: " + env.performance.get(c) );
 		}
 		int max_rows = (int) exp.getOrDefault(env, AqlOption.gui_rows_to_display);
 		//System.out.println("maxrows " + max_rows);
@@ -148,7 +152,7 @@ public final class AqlDisplay implements Disp {
 				Semantics obj = (Semantics) env.defs.get(c, exp.kind());
 				
 				try {
-					frames.add(new Pair<>(doLookup(c, exp, env), wrapDisplay(c, exp, obj, env, env.performance.getOrDefault(c, "unkown"))));
+					frames.add(new Pair<>(doLookup(c, exp, env), wrapDisplay(c, exp, obj, env, env.performance.get(c))));
 				} catch (RuntimeException ex) {
 					ex.printStackTrace();
 					throw new LineException(ex.getMessage(), c, exp.kind().toString());
@@ -156,8 +160,8 @@ public final class AqlDisplay implements Disp {
 			}
 		}
 		long end = System.currentTimeMillis();
-		int c1 = (int) ((middle - start) / (1000f));
-		int c2 = (int) ((end - middle) / (1000f));
+		float c1 =  ((middle - start) / (1000f));
+		float c2 =  ((end - middle) / (1000f));
 		String pre = exn == null ? "" : "(ERROR, PARTIAL RESULT) | ";
 		JComponent report = report(p, env, p.order, c1, c2, pre + title, new Date(start).toString());
 		frames.add(0, new Pair<>("Summary", report ));
@@ -165,7 +169,9 @@ public final class AqlDisplay implements Disp {
 		display(pre + title, p.order, report);
 	}
 	
-	private JComponent report(Program<Exp<?>> prog, AqlEnv env, List<String> order, int c1, int c2, String pre, String date) {
+	private JComponent report(Program<Exp<?>> prog, AqlEnv env, List<String> order, float c1, float c2, String pre, String date) {
+		DecimalFormat df = new DecimalFormat("#.#");
+		df.setRoundingMode(RoundingMode.CEILING);
 		List<String> l = new LinkedList<>();
 		Object[][] rowData = new Object[env.defs.insts.size()][3];
 		int i = 0;
@@ -193,12 +199,25 @@ public final class AqlDisplay implements Disp {
 		if (!missing.isEmpty()) {
 			text += "\n\nInstances not computed: " + Util.sep(Util.alphabetical(missing), ", ");
 		}
-		text += "\n\nComputation  time: " + c1 + " seconds\nGUI building time: " + c2 + " seconds\n";
+		text += "\n\nComputation wall-clock time: " + df.format(c1) + "s\nGUI building time: " + df.format(c2) + "s\n";
+		Map<Kind, Float> perfs = new HashMap<>();
 		for (Kind k : Kind.values()) {
-			if (env.defs.size(k) == 0) {
+			perfs.put(k, 0f);
+		}
+		for (String s : env.performance.keySet()) {
+			Kind k = prog.exps.get(s).kind();
+			perfs.put(k, perfs.get(k) + env.performance.get(s));
+		}
+		for (Kind k : Kind.values()) {
+			if (perfs.get(k) < .05f) {
 				continue;
 			}
-			text += "\n" + k + ": " + env.defs.size(k);
+			text += "\n" + k + " computation total time: " + df.format(perfs.get(k)) + "s";
+		}
+		
+		if (!prog.options.isEmpty()) {
+			text += "\n\nGlobal options:\n";
+			text += Util.sep(prog.options, " = ", "\n");
 		}
 		
 		

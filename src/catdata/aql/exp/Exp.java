@@ -10,8 +10,6 @@ import catdata.aql.Kind;
 public abstract class Exp<X> {
 	
 	public Object getOrDefault(AqlEnv env, AqlOption option) {
-		//Map<String, String> m = new HashMap<>(env.user_defaults);
-		//m.putAll(options());
 		return env.defaults.getOrDefault(options(), option);
 	}
 	

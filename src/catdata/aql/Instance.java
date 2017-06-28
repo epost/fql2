@@ -89,7 +89,7 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements S
 	public abstract Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> algebra();
 
 	private Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage;
-	public final Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
+	public final synchronized Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
 		if (collage != null) {
 			return collage;
 		}

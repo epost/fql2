@@ -28,7 +28,7 @@ public enum Language {
 	//non easik ones
 	public static Language[] values0() {
 		List<Language> l = new LinkedList<>(Arrays.asList(values()));
-		l.remove(EASIK);
+		//l.remove(EASIK);
 		l.remove(SKETCH);
 		return l.toArray(new Language[0]);
 	}

@@ -307,7 +307,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 	public Pair<InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1>, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2>> type(AqlTyping G) {
 		SchExp<Ty, En, Sym, Fk, Att> s = src.type(G);
 		SchExp<Ty, En, Sym, Fk, Att> t = dst.type(G);
-		if (!s.equals(t)) { //TODO aql schema equality
+		if (!G.eq(s, t)) { //TODO aql schema equality
 			throw new RuntimeException("Source instance of transform has schema\n" + s + " \n\n but target instance has schema\n" + t);
 		}
 		return new Pair<>(src, dst);

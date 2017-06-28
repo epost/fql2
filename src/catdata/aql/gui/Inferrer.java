@@ -106,7 +106,7 @@ class Inferrer {
 		if (a == null || b == null) {
 			throw new RuntimeException("Compiled instances(s) not found - try compiling before using inference.");
 		}
-		if (!a.schema().equals(b.schema())) { // TODO aql schema equality
+		if (!a.schema().equals(b.schema())) { 
 			throw new RuntimeException("Source instance is on schema " + a.schema() + "\n\nand target instance is on schema " + b.schema());
 		}
 

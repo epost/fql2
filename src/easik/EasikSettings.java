@@ -396,7 +396,7 @@ public class EasikSettings extends Properties {
 	private static File propertiesFile() {
 		final String homedir = System.getProperty("user.home");
 
-		return new File(homedir, "easik-settings");
+		return new File(homedir, ".easik-settings");
 	}
 
 	/**

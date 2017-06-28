@@ -76,8 +76,8 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 
 		@Override
 		public Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En3, Sym, Fk3, Att3>> type(AqlTyping G) {
-			//TODO aql type equality
-			if (!m1.type(G).second.equals(m2.type(G).first)) {
+			//TODO aql schema equality
+			if (!G.eq(m1.type(G).second, m2.type(G).first)) {
 				throw new RuntimeException("Cod of first arg, " + m1.type(G).second + " is not equal to dom of second arg, " + m2.type(G).first + " in " + this);
 			}
 			return new Pair<>(m1.type(G).first, m2.type(G).second);

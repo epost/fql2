@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import catdata.Pair;
+import catdata.Program;
 import catdata.Util;
 import catdata.aql.Kind;
 import catdata.aql.SqlTypeSide;
@@ -12,7 +13,10 @@ import catdata.aql.TypeSide;
 
 public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	
-
+	public TyExp<Ty, Sym> resolve(Program<Exp<?>> prog) {
+		return this;
+	}
+	
 	@Override
 	public Kind kind() {
 		return Kind.TYPESIDE;
@@ -202,6 +206,20 @@ public static final class TyExpSql extends TyExp<String,String> {
 	
 	public static final class TyExpVar extends TyExp<Object, Object> {
 		public final String var;
+		
+		@Override
+		public TyExp<Object, Object> resolve(Program<Exp<?>> prog) {
+			if (!prog.exps.containsKey(var)) {
+				throw new RuntimeException("Unbound typeside variable: " + var);
+			}
+			Exp<?> x = prog.exps.get(var);
+			if (!(x instanceof TyExp)) {
+				throw new RuntimeException("Variable " + var + " is bound to something that is not a typeside, namely\n\n" + x);
+			}
+			@SuppressWarnings("unchecked")
+			TyExp<Object,Object> texp = (TyExp<Object,Object>) x;
+			return texp.resolve(prog);
+		}
 		
 		@Override
 		public Map<String, String> options() {

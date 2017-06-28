@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import catdata.Chc;
@@ -69,33 +70,36 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			super();
 			this.ty = ty;
 			this.nodes = new Ctx<>();
-			for (N n : nodes) {
-				if (this.nodes.containsKey(n)) {
-					throw new RuntimeException("Duplicate schema " + n + " - please create new schema variable if necessary.");
-				}
-				this.nodes.put(n, (SchExp<Ty, En, Sym, Fk, Att>) new SchExpVar((String)n));
-			}
 			this.eqEn = new HashSet<>(eqEn);
 			this.eqTerms = new HashSet<>(eqTerms);
 			this.eqTerms2 = new HashSet<>(eqTerms2);
 			this.options = Util.toMapSafely(options);
+			for (N n : nodes) {
+				if (this.nodes.containsKey(n)) {
+					throw new RuntimeException("In schema colimit " + this + " duplicate schema " + n + " - please create new schema variable if necessary.");
+				}
+				this.nodes.put(n, (SchExp<Ty, En, Sym, Fk, Att>) new SchExpVar((String)n));
+			}
 		}
 
 	
 		@Override
 		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
 			Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes0 = new Ctx<>();
+			Set<String> ens = new HashSet<>();
 			for (N n : nodes.keySet()) {
 				nodes0.put(n, nodes.get(n).eval(env));
+				ens.addAll(nodes0.get(n).ens.stream().map(x -> n + "_" + x).collect(Collectors.toSet()));
 			}
 			Set<Quad<String,String,RawTerm,RawTerm>> eqs = new HashSet<>(eqTerms);
 			for (Pair<List<String>, List<String>> t : eqTerms2) {
-				eqs.add(new Quad<>("_v0", null, tr(t.first), tr(t.second)));
+				eqs.add(new Quad<>("_v0", null, tr(t.first, ens), tr(t.second, ens)));
 			}
 			return new ColimitSchema<>(ty.eval(env), nodes0, eqEn, eqs, new AqlOptions(options, null, env.defaults));		
 		}
 	
-		private static RawTerm tr(List<String> l) {
+		private static RawTerm tr(List<String> l, Set<?> ens) {
+			l = l.stream().filter(x -> !ens.contains(x)).collect(Collectors.toList());
 			return RawTerm.fold(l, "_v0");  
 		}
 

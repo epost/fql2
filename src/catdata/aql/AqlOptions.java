@@ -43,6 +43,7 @@ public final class AqlOptions {
 		eval_use_indices,
 		eval_use_sql_above,
 		eval_approx_sql_unsafe,
+		eval_sql_persistent_indices,
 		query_remove_redundancy,
 		
 		program_allow_nontermination_unsafe,
@@ -71,7 +72,13 @@ public final class AqlOptions {
 		}
 		
 		public Boolean getBoolean(Map<String, String> map) {
-			return Boolean.parseBoolean(getString(map));
+			String s = getString(map).toLowerCase();
+			if (s.equals("true")) {
+				return true;
+			} else if (s.equals("false")) {
+				return false;
+			}
+			throw new RuntimeException("In " + map + ", neither true nor false: " + s);
 		}
 		/*
 		public String getMaybeString(Map<String, String> map) {
@@ -228,6 +235,8 @@ public final class AqlOptions {
 			return false;
 		case eval_use_sql_above:
 			return 16*1024;
+		case eval_sql_persistent_indices:
+			return false;
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -349,6 +358,8 @@ public final class AqlOptions {
 			return op.getBoolean(map);
 		case eval_use_sql_above:
 			return op.getInteger(map);
+		case eval_sql_persistent_indices:
+			return op.getBoolean(map);
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		}

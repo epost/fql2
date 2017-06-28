@@ -14,6 +14,7 @@
     <docComments enabled="true" end="*)" start="(*"/>
   </comments>
   <keywords>
+    <keyword>schema_colimit</keyword>
     <keyword>graph</keyword>
     <keyword>instance</keyword>
     <keyword>mapping</keyword>
@@ -37,6 +38,7 @@
     <keyword>coproduct</keyword>
     <keyword>counit</keyword>
     <keyword>counit_query</keyword>
+<keyword>coproduct_sigma</keyword>
     <keyword>delta</keyword>
     <keyword>distinct</keyword>
     <keyword>dst</keyword>
@@ -59,6 +61,8 @@
     <keyword>from</keyword>
     <keyword>functions</keyword>
     <keyword>generators</keyword>
+<keyword>getMapping</keyword>
+<keyword>getSchema</keyword>
     <keyword>id</keyword>
     <keyword>import_csv</keyword>
     <keyword>import_jdbc</keyword>
@@ -71,12 +75,16 @@
     <keyword>java_types</keyword>
     <keyword>lambda</keyword>
     <keyword>literal</keyword>
+<keyword>modify</keyword>
     <keyword>multi_equations</keyword>
     <keyword>nodes</keyword>
     <keyword>observation_equations</keyword>
     <keyword>options</keyword>
     <keyword>path_equations</keyword>
+<keyword>quotient</keyword>
     <keyword>random</keyword>
+<keyword>remove</keyword>
+<keyword>rename</keyword>
     <keyword>return</keyword>
     <keyword>schemaOf</keyword>
     <keyword>sql</keyword>

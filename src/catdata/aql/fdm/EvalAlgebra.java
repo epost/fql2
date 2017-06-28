@@ -2,13 +2,11 @@ package catdata.aql.fdm;
 
 import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -307,23 +305,35 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		boolean useSql = I.size() >= minSizeForSql() && safe && (I.schema().typeSide instanceof SqlTypeSide);
 		if (useSql) {
 			this.Q = q.unnest();
-			conn = initConn(session_id_static++);
+			Map<En1, List<String>> xx = Collections.emptyMap();
+			if (useIndices()) {
+				Pair<Collection<Fk1>, Collection<Att1>> l = this.Q.fksAndAttsOfWhere();
+				xx = I.schema().toSQL_srcIdxs(l);
+			} 
+			if (persistentIndices()) {
+				conn = I.algebra().addIndices(xx);
+			} else {
+				conn = I.algebra().createAndLoad(xx);
+			}
 		} else {
 			this.Q = q;
 		}
 		for (En2 en2 : Q.ens.keySet()) {
 			ens.put(en2, eval(en2, this.Q.ens.get(en2), conn, useSql));
 		}
-		if (useSql) {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
+		if (conn != null) {
+			if (!persistentIndices()) {
+				try {
+					conn.close();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
 			}
 		}		
 		
 	}
 	
+
 	private boolean allowUnsafeSql() {
 		return (boolean) options.getOrDefault(AqlOption.eval_approx_sql_unsafe);
 	}
@@ -334,6 +344,10 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 	
 	private boolean useIndices() {
 		return (boolean) options.getOrDefault(AqlOption.eval_use_indices);
+	}
+	
+	private boolean persistentIndices() {
+		return (boolean) options.getOrDefault(AqlOption.eval_sql_persistent_indices);
 	}
 	
 	private int minSizeForSql() {
@@ -351,7 +365,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		} else {
 			ret = new LinkedList<>();
 			List<Var> plan = q.order(options, I);
-			boolean useIndices = useIndices() && q.gens.size() > 1;
+			boolean useIndices = useIndices() && q.gens.size() > 1 && I.algebra().hasFreeTypeAlgebra();
 			ret.add(new Row<>(en2));
 			for (Var v : plan) {
 				ret = Row.extend(en2, ret, v, q, I, k, useIndices);
@@ -360,36 +374,6 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		}
 	}
 	
-	private static int session_id_static = 0;
-
-	private Connection initConn(int id) {
-		try {
-			Connection conn = DriverManager.getConnection("jdbc:h2:mem:db_temp_" + id + ";DB_CLOSE_DELAY=-1");
-			try (Statement stmt = conn.createStatement()) {
-				for (En1 en1 : I.schema().ens) {
-					Pair<List<Chc<Fk1, Att1>>, String> qqq = Q.toSQL_srcSchemas().get(en1);
-					stmt.execute(qqq.second);
-					Map<En1, List<String>> e = Q.toSQL_srcIdxs();
-					if (useIndices()) { //TODO aql too bad reorder joins won't work here either
-						for (String s : e.get(en1)) {
-							stmt.execute(s);
-						}
-					}
-					for (X x : I.algebra().en(en1)) {
-						storeMyRecord(conn, x, qqq.first, en1.toString());
-					}
-				}
-				stmt.close();
-				return conn;
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				throw new RuntimeException(ex);
-			}				
-		} catch (SQLException ex) {
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
-		}
-	}
 	
 	private Collection<Row<En2, X>> evalSql(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q,
 			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I, Connection conn) {
@@ -420,48 +404,8 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		
 	}
 	
-	//TODO aql refactor
-	private void storeMyRecord(Connection conn, X x, List<Chc<Fk1, Att1>> header, String table) throws Exception {
-		  List<String> hdrQ = new LinkedList<>();
-		  List<String> hdr = new LinkedList<>();
-		  hdr.add("id");
-		  hdrQ.add("?");
-      for (Chc<Fk1, Att1> aHeader : header) {
-          hdrQ.add("?");
-          Chc<Fk1, Att1> chc = aHeader;
-          if (chc.left) {
-              hdr.add((String)chc.l); //TODO aql unsafe
-          } else {
-              hdr.add((String)chc.r); //TODO aql unsafe
-          }
-      }
-		  
-		  String insertSQL = "INSERT INTO " + table + "(" + Util.sep(hdr,"," )+ ") values (" + Util.sep(hdrQ,",") + ")";
-		  PreparedStatement ps = conn.prepareStatement(insertSQL);
-		
-		  ps.setObject(1, I.algebra().intifyX().first.get(x), Types.INTEGER);
-		
-		  for (int i = 0; i < header.size(); i++) {
-			  Chc<Fk1,Att1> chc = header.get(i);
-			  if (chc.left) {
-				  ps.setObject(i+1+1, I.algebra().intifyX().first.get(I.algebra().fk(chc.l, x)), Types.INTEGER);			   
-			  } else {
-				  Object o = fromTerm(I.algebra().att(chc.r, x));
-				  ps.setObject(i+1+1, o, SqlTypeSide.getSqlType(I.schema().atts.get(chc.r).second.toString()));			   			  
-			  }
-		  }
-		
-		  ps.executeUpdate();
-	} 
-
 	
-
-	private Object fromTerm(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
-		if (term.obj != null) {
-			return term.obj;
-		}
-		return null;
-	}
+	
 	
 	private static <Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y, En2> List<Pair<Fk1, X>> getAccessPath(Var v, Row<En2, X> tuple, Frozen<Ty, En1, Sym, Fk1, Att1> q2, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
 		List<Pair<Fk1, X>> ret = new LinkedList<>();

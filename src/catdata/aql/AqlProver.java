@@ -1,19 +1,12 @@
 package catdata.aql;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import catdata.Chc;
 import catdata.RuntimeInterruptedException;
-import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.provers.CompletionProver;
 import catdata.provers.CongruenceProver;
 import catdata.provers.FailProver;
 import catdata.provers.FreeProver;
 import catdata.provers.ProgramProver;
-import catdata.provers.SaturatedProver;
 
 //TODO: aql cache hashcode for term?
 
@@ -25,7 +18,7 @@ import catdata.provers.SaturatedProver;
 public class AqlProver {
 
 	public enum ProverName {
-		auto, saturated, monoidal, program, completion, congruence, fail, free
+		auto, monoidal, program, completion, congruence, fail, free
 	}
 
 	//these provers say that x = y when that is true when all java symbols are treated as free,
@@ -52,8 +45,6 @@ public class AqlProver {
 				}, new FailProver<>());
 			case free:
 				return new KBtoDP<>(js, col1.simplify().second, new FreeProver<>(col1.simplify().first.toKB()));
-			case saturated:
-				return new KBtoDP<>(js, x -> x, saturatedProverHelper(ops, col1));
 			case congruence:
 				return new KBtoDP<>(js, col1.simplify().second, new CongruenceProver<>(col1.simplify().first.toKB()));
 			case program:
@@ -132,61 +123,10 @@ public class AqlProver {
 	}
 
 	
-	private static <Ty, En, Sym, Fk, Att, Gen, Sk> SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> saturatedProverHelper(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) throws InterruptedException {
-		SaturatedProver<Chc<Ty, En>, Head<Ty, En, Sym, Fk, Att, Gen, Sk>, Var> ret = new SaturatedProver<>(col.toKB());
-
-		if ((Boolean) ops.getOrDefault(AqlOption.dont_verify_is_appropriate_for_prover_unsafe)) {
-			return ret;
-		}
-		for (Fk fk : col.fks.keySet()) {
-			for (Gen gen : col.gens.keySet()) {
-				if (!col.fks.get(fk).first.equals(col.gens.get(gen))) {
-					continue;
-				}
-				if (!ret.map.containsKey(Head.Fk(fk))) {
-					throw new RuntimeException("No equations for " + fk);
-				}
-				Head<Ty, En, Sym, Fk, Att, Gen, Sk> x = ret.map.get(Head.Fk(fk)).get(Util.singList(Head.Gen(gen)));
-				if (x == null) {
-					throw new RuntimeException("No equation for " + gen + "." + fk);
-				}
-			}
-		}
-		for (Att att : col.atts.keySet()) {
-			for (Gen gen : col.gens.keySet()) {
-				if (!col.atts.get(att).first.equals(col.gens.get(gen))) {
-					continue;
-				}
-				if (!ret.map.containsKey(Head.Att(att))) {
-					throw new RuntimeException("No equations for " + att);
-				}
-				Head<Ty, En, Sym, Fk, Att, Gen, Sk> x = ret.map.get(Head.Att(att)).get(Util.singList(Head.Gen(gen)));
-				if (x == null) {
-					throw new RuntimeException("No equation for " + gen + "." + att);
-				}
-			}
-		}
-		for (Sym sym : col.syms.keySet()) {
-			if (col.syms.get(sym).first.isEmpty() || col.java_fns.containsKey(sym)) {
-				continue;
-			}
-			List<List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>>> allArgs = allArgs(sym, col);
-			for (List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> arg : allArgs) {
-				if (!ret.map.containsKey(Head.Sym(sym))) {
-					throw new RuntimeException("No equations for " + sym);
-				}
-				Head<Ty, En, Sym, Fk, Att, Gen, Sk> x = ret.map.get(Head.Sym(sym)).get(arg);
-				if (x == null) {
-					List<String> s = arg.stream().map(Head::toString).collect(Collectors.toList());
-					throw new RuntimeException("No equation for " + sym + "(" + Util.sep(s, ",") + ")");
-				}
-			}
-		}
-		return ret;
-	}
+	
 
 	// these Lists will never have dups
-	private static <Ty, En, Sym, Fk, Att, Gen, Sk> List<List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>>> allArgs(Sym sym, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+	/* private static <Ty, En, Sym, Fk, Att, Gen, Sk> List<List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>>> allArgs(Sym sym, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		List<List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>>> ret = new LinkedList<>();
 		ret.add(new LinkedList<>());
 
@@ -206,8 +146,8 @@ public class AqlProver {
 		}
 
 		return ret;
-	}
-
+	} 
+/*
 	private static <X> List<List<X>> extend(List<List<X>> ls, List<X> r) { // TODO
 																			// aql
 		List<List<X>> ret = new LinkedList<>();
@@ -219,6 +159,6 @@ public class AqlProver {
 			}
 		}
 		return ret;
-	}
+	} */
 
 }

@@ -454,7 +454,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		            InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y>> type(AqlTyping G) {
 			SchExp<Ty, En2, Sym, Fk2, Att2> x = I.type(G);
 			//TODO aql schema equality
-			if (!x.equals(F.type(G).second)) {
+			if (!G.eq(x, F.type(G).second)) {
 				throw new RuntimeException("In " + this + ", mapping codomain is " + F.type(G).second + " but instance schema is " + x);
 			}
 			return new Pair<>(new InstExpSigma<>(F, new InstExpDelta<>(F, I), options), I);
@@ -526,7 +526,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>, Pair<En1, ID>, Chc<Sk, Pair<ID, Att2>>>> type(AqlTyping G) {
 			SchExp<Ty, En1, Sym, Fk1, Att1> x = I.type(G);
 			//TODO aql schema equality
-			if (!x.equals(F.type(G).first)) {
+			if (!G.eq(x, F.type(G).first)) {
 				throw new RuntimeException("In " + this + ", mapping domain is " + F.type(G).first + " but instance schema is " + x);
 			}
 			return new Pair<>(I,new InstExpDelta<>(F, new InstExpSigma<>(F, I, options)));
@@ -619,7 +619,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		            InstExp<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2, ID,Chc<Sk2,Pair<ID,Att2>>>> type(AqlTyping G) {
 			Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, X1, Y1>, InstExp<Ty, En1, Sym, Fk1, Att1, Gen2, Sk2, X2, Y2>> x = t.type(G);
 			//TODO aql schema equality
-			if (!x.first.type(G).equals(F.type(G).first)) {
+			if (!G.eq(x.first.type(G), F.type(G).first)) {
 				throw new RuntimeException("In " + this + ", mapping domain is " + F.type(G).first + " but transform domain schema is " + x.first.type(G));
 			}
 			InstExp<Ty,En2,Sym,Fk2,Att2,Gen1,Sk1,ID,Chc<Sk1,Pair<ID,Att2>>> a = new InstExpSigma<>(F, x.first, options1);
@@ -694,7 +694,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 		public Pair<InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, X1>, Y1, Pair<En1, X1>, Y1>, InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, X2>, Y2, Pair<En1, X2>, Y2>> type(AqlTyping G) {
 			Pair<InstExp<Ty, En2, Sym, Fk2, Att2, Gen1, Sk1, X1, Y1>, InstExp<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2, X2, Y2>> x = t.type(G);
 			//TODO aql schema equality
-			if (!x.first.type(G).equals(F.type(G).second)) {
+			if (!G.eq(x.first.type(G), F.type(G).second)) {
 				throw new RuntimeException("In " + this + ", mapping codomain is " + F.type(G).second + " but transform domain schema is " + x.first.type(G));
 			}
 			InstExp<Ty, En1, Sym, Fk1, Att1, Pair<En1, X1>, Y1, Pair<En1, X1>, Y1> a = new InstExpDelta<>(F, x.first);
