@@ -186,8 +186,8 @@ schema_colimit S_T_SnT_Sum = modify S_T_SnT_SumAuto {
 	rename attributes
 		sS_SName -> SName
 		sT_TName -> TName
-	    sSnt_skill -> skill
-	    sSnt_task -> task
+	    sSnT_skill -> skill
+	    sSnT_task -> task
 }
 
 // Provide addressable labels for the various components of the coproduct STSum
@@ -197,13 +197,87 @@ mapping mTaskToS_T_Snt_Sum = getMapping S_T_SnT_Sum sT
 mapping mSkillNeededForTaskToS_T_SnT_Sum = getMapping S_T_SnT_Sum sSnT
 
 // Build an instance for sSTSum from iTsk and iSkl
-instance iSTSum = coproduct_sigma
+instance iS_T_SnT_Sum = coproduct_sigma
    mSkillToS_T_SnT_Sum iSkl
    mTaskToS_T_Snt_Sum iTsk
    mSkillNeededForTaskToS_T_SnT_Sum iSnT
-   : S_T_SnT_Sum
+   : sS_T_SnT_Sum
 
+schema sSTJoy = literal : TypeSide {
+	entities
+	  Skill Task
+	  SkillNdFrTask SkillxTask
+	foreign_keys
+	  fk_pSkill  : SkillxTask -> Skill
+	  fk_pTask   : SkillxTask -> Task
+	  fk_SnT_S   : SkillNdFrTask -> Skill
+	  fk_SnT_T   : SkillNdFrTask -> Task
+	  fk_SnT_SxT : SkillNdFrTask -> SkillxTask
+	path_equations
+	  fk_SnT_SxT.fk_pSkill = fk_SnT_S
+	  fk_SnT_SxT.fk_pTask  = fk_SnT_T
+	attributes
+	  SName  : Skill -> Varchar
+	  TName  : Task -> Varchar
+	  SonSxT : SkillxTask -> Varchar
+	  TonSxT : SkillxTask -> Varchar
+	  skill  : SkillNdFrTask -> Varchar
+	  task   : SkillNdFrTask -> Varchar
+	observation_equations
+	  forall st. st.fk_pSkill.SName = st.SonSxT
+	  forall st. st.fk_pTask.TName = st.TonSxT
+	  forall snt. snt.fk_SnT_S.SName = snt.skill
+	  forall snt. snt.fk_SnT_T.TName = snt.task
+}
 
+query qS_T_SnT_SumToSTJoy = literal : sS_T_SnT_Sum -> sSTJoy {
+	entities //source entities: Skill SkillNeededForTask Task
+		Skill -> {
+			from
+				ss : Skill
+			return
+				SName -> ss.SName
+		}
+		SkillNdFrTask -> {
+			from
+				snt : SkillNeededForTask
+				sn  : Skill
+				nt  : Task
+			where
+				snt.skill = sn.SName
+				snt.task = nt.TName
+			return
+				skill -> snt.skill
+				task  -> snt.task
+		}
+		SkillxTask -> {
+			from
+				xs : Skill
+				xt : Task
+			return
+				SonSxT -> xs.SName
+				TonSxT -> xt.TName
+		}
+		Task -> {
+			from
+				tt : Task
+			return
+				TName -> tt.TName
+		}
+	foreign_keys
+		// fk_SnT_S   : SkillNdFrTask -> Skill
+		fk_SnT_S   -> {ss -> sn}
+		// fk_SnT_SxT : SkillNdFrTask -> SkillxTask
+		fk_SnT_SxT -> {xs -> sn xt -> nt}
+		// fk_SnT_T   : SkillNdFrTask -> Task
+		fk_SnT_T   -> {tt -> nt}
+	    // fk_pSkill  : SkillxTask -> Skill
+		fk_pSkill  -> {ss -> xs}
+		//fk_pTask   : SkillxTask -> Task
+		fk_pTask   -> {tt -> xt}
+}
+
+instance iSTJoy = eval qS_T_SnT_SumToSTJoy iS_T_SnT_Sum
 /*
 constraints prdED = literal : sTS {
 	forall t:Task s:Skill
