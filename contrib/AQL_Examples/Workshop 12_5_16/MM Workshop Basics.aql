@@ -1,3 +1,44 @@
+html {(*"
+	<html>
+	<head>
+		<title>AQL Basics</title>
+		<link rel=\"stylesheet\" type=\"text/css\" href=\"http://catinf.com/css/simple.css\" />
+	</head>
+	<body>
+		<script src=\"http://catinf.com/js/ci.js\"></script>
+		<h1>Finance Colimit (h1)</h1>
+		
+			<p> This web page illustrates how concepts can be modeled using the Algebraic Query Language (AQL). The approach taken is to
+				consider the notion of a database schema as an assembly that can be manipulated and related to other schemas through the
+				use of higher order maps. AQL provides a formalization of schemas that codifies their structure and in so doing enables
+				us to define higher order maps that preserve that structure. This creates a mathematical universe where schemas and the
+				data contained there in can be manipulated as first class objects.</p>
+				
+			<p> With this universe in hand we are confronted with the problem of understanding its features. The good news is that a
+				great deal of insight can be gained by considering very simple examples of such schemas and maps between them.
+				We will explore some key cases that can be considered to be the building blocks from which more complex database
+				schemas can be constructed. This approach is related to the notion of design patterns for which much has already been
+				published. Our discussion differs from this literature in that it is motivated by a body of mathematics where patterns
+				are known as universal constructions. These constructions are in some sense the best solution to a formally defined
+				problem. This approach leads to patterns that are deceptively simple and surprisingly general.<p/>
+
+			<p> The following links can be used to navigate to various parts of the model. <p/>
+			
+			<p> <a href=\"#typeside\">Typeside</a>, <a href=\"#schms_instncs\">Schemas</a>,
+				<a href=\"#link\">Link</a>,
+				<a href=\"#schemamerg\">Schema Merge</a>, <a href=\"#transform\">Transform</a>,
+				<a href=\"#land\">Land</a>,	<a href=\"#staging\">Stag</a>,
+				<a href=\"#instancemerge\">Instance Merge</a>, <a href=\"#refactor\">Refactor</a>,
+				<a href=\"#Publish\">Publish</a>.  
+			</p>	  
+	
+		<hr/> <div id=\"typeside\">
+		<h2>Typeside</h2>
+			<p> Every AQL file begins with a <b>typeside</b>. Since we are interested in exploring the essential structure of database schemas
+				we will restrict the typeside to strings alone. AQL has the ability to build many powerful features into the typeside, but in
+				the interest of simplicity we will reserve such considerations for a future discussion.
+			</p></div>"*)
+}
 typeside Ty = literal { 
 	java_types
 		String = "java.lang.String"
@@ -6,63 +47,168 @@ typeside Ty = literal {
 	java_functions
 		plus : String,String->String = "return (input[0] + input[1])" 
 }
-/* Introductory Schemas and instances
-// The following sequence of schemas and associated instances are basic
-// structural elements that will be used to demonstrate how Uber-Flowers
-// work. These are our basic building blocks. */
+html {(*" <hr/><div id=\"schms_instncs\">
+	<h2>Schemas and Instances</h2>
 
-/* One schema declaration.
-// The terminal object, one object and an implicit identity arrow
-*/
+		<p>	In this section we introduce a series of schemas each followed by one or more instances. With each example we will discuss how
+			that example is related to other database technologies and what its significance is within the universe of all schemas. A more
+			complete understanding of how each example fits into the larger universe will have to wait for the introduction of structure
+			preserving schema maps. </p>
+
+		<p> Our first example is the simplest possible schema that is nonempty. It contains a single entity and no attributes. An instance
+			of this schema is simply a abstract set with elements represented by the generators for that set. and a single string attribute
+			we will use to provide a label to keep track of the data we place in that entity through the declaration of an instance of that
+			schema. We designate this schema as the schema One and label its only entity O. </p>"*)
+}
 schema One = literal : Ty {
 	entities
 	  O
-	attributes
-	  rowOLbl: O -> String // Representitive O attribute
 }
-/* Generate a template for i_One instance.
-Type in:
-instance i_One = literal : One
-Highlight "i_One = literal" right click and select infer instance
+html {(*"
+	    <p>	You can generate a template instance for the schema One by typing in: <br /> <br /> 
 
-If a valid compiled schema One exists, this will produce an instance template 
+<strong>	instance i_One = literal : One </strong> <br /> <br /> 
+	    
+	    select <strong>literal : One </strong><br /> <br /> 
+	    
+	    right mouse click and then select <strong>infer instance </strong><br /> <br /> 
+	    
+	    This should produce something like: </p>
 
-}
-
-Example of a complete instance would look like: */
+	<p><strong>
+	instance i_one = literal : One {								<br />
+&emsp;	generators													<br />
+&emsp;&emsp;	[list Generators here] : O							<br />
+&emsp;	multi_equations												<br />
+&emsp;&emsp;	OrowLbl -> [list assignments here] // O -> String	<br />
+}																	<br /></strong> </p>
+			
+An example of a complete instance would look like:
+"*)}
 instance i_One = literal : One {
 	generators
-	  o1 o2 : O
+	  o1 o2 o3: O
 	multi_equations
-	  // rowOLbl: O -> String // Representitive O attribute
-	  rowOLbl -> {o1 row_o1, o2 row_o2}
+	  // OrowLbl: O -> String // Representitive O attribute
+	  OrowLbl -> {o1 row_o1, o2 row_o2}
 }
+html {(*"
+	    <p>	Let's take a moment to examine the schema One and its associated entity. First we should emphasize that in AQL a schema is
+	    	viewed as a type. When a schema is declared all of its internal structure is understood by the AQL engine. When an instance
+	    	is created the AQL engine enforces the instance associated with its underlying schema to have all of the necessary components
+	    	as defined by the schema. </p>
+	    	
+	    <p>	Having only one entity we could consider the schema One as a sort of representative type for an entity. Notice this is both
+	    	similar to and different from the relational approach. The basic unit of construction in relational algebra is a relvar or a
+	    	table declaration. In this case entities are the building blocks. The notion of a schema emerges by connecting entities with
+	    	foreign keys. Not so with AQL where schemas are the building blocks, but with the schema One we recover the ability to isolate
+	    	and manipulate a single entity. Later in this section we will consider schemas with more than one entity, but before we do
+	    	let's highlighty some of the more important features of One. </p>
+	    	
+	    <p>	An instance in a relational table is defined by and referenced through its primary key. The primary key is defined through
+	    	association with one or more columns whose values will uniquely identify a row in that table. By analogy, AQL requires that a
+	    	generator be supplied for each record of an entity. This notion is analogous to the primary key of a relational table but
+	    	differs conceptually in that it is sufficient to generate specific values for each attribute associated with that row. This
+	    	has far reaching implications in AQL. </p>
+	    
+	    <p>	If a value for an attribute is not known, it still has a place holder for that specific value. This place holder is called a
+	    	labeled null. Labeled nulls differ from relational nulls in that they have very specific typing information associated with
+	    	them. In our example instance i_One we specified three generators but only assigned values to the OrowLbl attribute for two
+	    	of them. The attribute value for OrowLbl for the third record of O has the generator o3 so we have a labeled null whose type
+	    	is o3.OrowLbl. In the absence of an assigned value as part of the instance, the type of the labeled null is assigned as the
+	    	default value. In contrast with the relational null value, for every (generator, attribute) pair there is the potential for
+	    	a null of that type. </p>
 
-//create some example data in a local temporary sql database
-pragma load = exec_jdbc "org.h2.Driver" "jdbc:h2:mem:db1" {
+	    <p> The intuitive ideas above can be formalized as follows. In AQL an entity is an abstract construction which can be thought of as
+	    	a variable set. An instance of an entity can be thought of as assigning a value to the entity that is a specific set. In
+	    	contrast, in relational algebra an entity is known as a relvar or relational variable. An instance of a relvar is a relation
+	    	or a set of tuples. An instance is a way to assign a specific
+	    	set to that variable. So in our case the entity O is a variable that can be assigned a value or instance that is a set. In
+	    	the case above we assigned three elements to the entity (variable set) O -> {o1, o2, o3}. These three elements should be
+	    	thought of as featureless place holders. Through the type side, in this case strings, we can attach features to these elements. 
+
+	    <p> To further illustrate the connection between the relational view of entities in our next code example we connect with a MySQL
+	    	instance hosted by the Categorical Informatics web site. We use the JDBC driver for MySQL to first create a relational version
+	    	of the entity O and then to insert a pair of rows into that entity. Using the analogy described above we create a relational
+	    	table with two columns Oid and OrowLbl and declare the first as the primary key. We then insert two rows and display them.
+	    	Finally we demonstrate that we can create an instance of One by loading data from the relational table into the corresponding
+	    	AQL schema.</p>
+
+	    <p>	In order to view the output from the model you can execute the model by clicking on the run button. This will compile the
+	    	model and launch the execution GUI. On the left of the execution pannel you will see a list of the various model components
+	    	in the order they appear in this file.
+"*)}
+/*instance ici_s1 = import_jdbc "com.mysql.jdbc.Driver" //"jdbc:mysql://localhost:3306/ci_s1?user=root&password=HappyFunctor" 
+	"jdbc:mysql://mysql.catinf.com:3306/ci_s1?user=catinfcom&password=FDiUY!pr" : ci_s1 {*/
+pragma load = exec_jdbc "com.mysql.jdbc.Driver"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_s1?user=catinfcom&password=FDiUY!pr" {
 "DROP TABLE IF EXISTS O"
-"CREATE TABLE O(id VARCHAR(255) PRIMARY KEY, rowOLbl VARCHAR(255))"
-"INSERT INTO O VALUES ('o1', 'row_o1'), ('o2', 'row_o2')"
+"CREATE TABLE O (`Oid` varchar(10) NOT NULL, `OrowLbl` varchar(45) DEFAULT NULL, PRIMARY KEY (`Oid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Example used in AQL basics model.';"
+"INSERT INTO O (`Oid`, `OrowLbl`) VALUES ('o1', 'row_o1');"
+"INSERT INTO O (`Oid`, `OrowLbl`) VALUES ('o2', 'row_o2');"
 }
 /* look at the example data
 //  The above imported SQL instance is isomorphic to the i_One instance. */
-pragma view_example_data = exec_jdbc "org.h2.Driver" "jdbc:h2:mem:db1" {
+pragma view_example_data = exec_jdbc "com.mysql.jdbc.Driver"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_s3?user=catinfcom&password=FDiUY!pr"  {
 "SELECT * FROM O"
 }
-instance i_One_from_sql = import_jdbc "org.h2.Driver" "jdbc:h2:mem:db1" : One {
-        O -> "SELECT id FROM O"
-        rowOLbl -> "SELECT id, rowOLbl FROM O"
-}
 
-/* oPair schema declaration.
- * Discrete schema containing two tables without any nonprimary keys.
- */
+instance i_One_from_sql = import_jdbc "com.mysql.jdbc.Driver"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_s3?user=catinfcom&password=FDiUY!pr" : One {
+        O -> "SELECT Oid FROM O"
+        OrowLbl -> "SELECT Oid, OrowLbl FROM O"
+}
+html {(*"
+	    <p>	Next we examine a slightly more interesting schema. In this case we consider a schema with two independent entities. Such a
+	    	schema </p>
+	    	
+	    <p>	Having only one entity we could consider the schema One as a sort of representative type for an entity. Notice this is very
+	    	different from the relational approach. The basic unit of construction in relational algebra is a relvar or a table declaration.
+	    	Here entities are the building blocks. The notion of a schema emerges by connecting entities with foreign keys. Not so with AQL
+	    	where schemas are the building blocks, but with the schema One we recover the ability to isolate and manipulate a single entity.
+	    	Later in this section we will consider schemas with more than one entity, but before we do let's highlighty some of the more
+	    	important features of One. </p>
+	    	
+	    <p>	An instance in a relational table is defined by and referenced through its primary key. The primary key is defined through
+	    	association with one or more columns whose values will uniquely identify a row in that table. By analogy, AQL requires that a
+	    	generator be supplied for each record of an entity. This notion is analogous to the primary key of a relational table but
+	    	differs conceptually in that it is sufficient to generate specific values for each attribute associated with that row. This
+	    	has far reaching implications in AQL. </p>
+	    
+	    <p>	If a value for an attribute is not known, it still has a place holder for that specific value. This place holder is called a
+	    	labeled null. Labeled nulls differ from relational nulls in that they have very specific typing information associated with
+	    	them. In our example instance i_One we specified three generators but only assigned values to the OrowLbl attribute for two
+	    	of them. The attribute value for OrowLbl for the third record of O has the generator o3 so we have a labeled null whose type
+	    	is o3.OrowLbl. In the absence of an assigned value as part of the instance, the type of the labeled null is assigned as the
+	    	default value. In contrast with the relational null value, for every (generator, attribute) pair there is the potential for
+	    	a null of that type. </p>
+
+	    <p> The intuitive ideas above can be formalized as follows. In AQL an entity is an abstract construction which can be thought of as
+	    	a variable set. An instance of an entity can be thought of as assigning a value to the entity that is a specific set. In
+	    	contrast, in relational algebra an entity is known as a relvar or relational variable. An instance of a relvar is a relation
+	    	or a set of tuples. An instance is a way to assign a specific
+	    	set to that variable. So in our case the entity O is a variable that can be assigned a value or instance that is a set. In
+	    	the case above we assigned three elements to the entity (variable set) O -> {o1, o2, o3}. These three elements should be
+	    	thought of as featureless place holders. Through the type side, in this case strings, we can attach features to these elements. 
+
+	    <p> To further illustrate the connection between the relational view of entities in our next code example we connect with a MySQL
+	    	instance hosted by the Categorical Informatics web site. We use the JDBC driver for MySQL to first create a relational version
+	    	of the entity O and then to insert a pair of rows into that entity. Using the analogy described above we create a relational
+	    	table with two columns Oid and OrowLbl and declare the first as the primary key. We then insert two rows and display them.
+	    	Finally we demonstrate that we can create an instance of One by loading data from the relational table into the corresponding
+	    	AQL schema.</p>
+
+	    <p>	In order to view the output from the model you can execute the model by clicking on the run button. This will compile the
+	    	model and launch the execution GUI. On the left of the execution pannel you will see a list of the various model components
+	    	in the order they appear in this file.
+"*)}
 schema oPair = literal : Ty {
     entities
       Ap Bp
     attributes
-      rowApLbl: Ap -> String // Representitive Ap attribute
-      rowBpLbl: Bp -> String // Representitive Bp attribute
+      rowApLbl: Ap -> String // Representative Ap attribute
+      rowBpLbl: Bp -> String // Representative Bp attribute
 }
 // Example oPair instances
 instance i_oPair = literal : oPair {
@@ -424,13 +570,13 @@ query qoPairBang = literal : One -> oPair {
 	    oa:O
 	  return
          // rowApLbl: Ap -> String // Representitive Ap attribute
-	    rowApLbl -> oa.rowOLbl}
+	    rowApLbl -> oa.OrowLbl}
 	Bp -> {
 	  from
 	    ob:O
 	  return
          // rowBpLbl: Bp -> String // Representitive Bp attribute
-	    rowBpLbl -> ob.rowOLbl}
+	    rowBpLbl -> ob.OrowLbl}
 }
 instance i_oPairBang = eval qoPairBang i_One
 /* Query qTwoBang
@@ -444,15 +590,15 @@ query qTwoBang = literal : One -> Two {
 	    os:O // Populate the Source entity with records from O
 	  return
 	    // mstrPtsTo: Source -> String // Move rowTLbl to Source by following master.rowTLbl.
-	    mstrPtsTo -> os.rowOLbl
+	    mstrPtsTo -> os.OrowLbl
 	    // rowSLbl: Source -> String // Representitive Source attribute.
-	    rowSLbl -> os.rowOLbl}
+	    rowSLbl -> os.OrowLbl}
 	Target -> {
 	  from
 	    ot:O // Populate the Target entity with records from O
 	  return
 	    // rowTLbl: Target -> String // Representitive Target attribute.
-	    rowTLbl -> ot.rowOLbl}
+	    rowTLbl -> ot.OrowLbl}
 
    foreign_keys
 	// master: Source -> Target // Single foreign key representing a detail -> master relationship
@@ -463,7 +609,7 @@ query qTwoBang = literal : One -> Two {
 	master -> {ot -> os}  
 }
 instance i_TwoBang = eval qTwoBang i_One
-instance i_TwoCoeval = coeval qTwoBang i_Two
+//instance i_TwoCoeval = coeval qTwoBang i_Two
 
 // Injective deltas
 
@@ -485,8 +631,8 @@ query qPickAp = literal : oPair -> One {
 	  from
 	    a:Ap
 	  return
-	    // rowOLbl: O -> String // Representitive O attribute
-	    rowOLbl -> a.rowApLbl}
+	    // OrowLbl: O -> String // Representitive O attribute
+	    OrowLbl -> a.rowApLbl}
 }
 instance i_PickAp = eval qPickAp i_oPair
 // Pick the entity SW of Square
@@ -495,7 +641,7 @@ query qPickSW = literal : Square -> One {
 	O -> {
 	  from
 	    sw:SW
-	  return rowOLbl -> sw.rowSWLbl}
+	  return OrowLbl -> sw.rowSWLbl}
 }
 instance i_pickSW = eval qPickSW i_Square
 // Span as target schema
@@ -572,7 +718,7 @@ query qProd = literal : oPair -> One {
 	    a:Ap
 	    b:Bp
 	  return
-	    rowOLbl /*:String*/ -> plus(plus(a.rowApLbl,", "),b.rowBpLbl)}
+	    OrowLbl /*:String*/ -> plus(plus(a.rowApLbl,", "),b.rowBpLbl)}
 }
 instance i_Prod = eval qProd i_oPair
 // Build a pullback from a CoSpan.
@@ -603,7 +749,7 @@ query qPBc1 = literal : CoSpan -> One {
 	  where
 	    a.fc = b.gc
 	  return
-		rowOLbl /*:String*/ -> b.rowBcLbl}
+		OrowLbl /*:String*/ -> b.rowBcLbl}
 }
 instance i_PBc1 = eval qPBc1 i_CoSpan2
 
@@ -612,476 +758,3 @@ instance i_PBc1 = eval qPBc1 i_CoSpan2
 instance i_Sum = coeval qoPairBang i_oPair
 // Build a pushout from a Span.
 instance i_PO = coeval qPickSqSpn i_SpanSum
-
-/* The main event
- * 
- */
-
-/* Entity Attribute Value model (EAV)
- *  
- * This model is structurally related to a the Span schema.
- * In this case there are three foreign keys radiating from
- * a central entity rather than two. For this reason EVA is
- * what category theorists would call a wide span.
- * 
- * The EAV model has been a popular strategy to provide for
- * attribute volatility in relational databases. The idea is
- * to create a model that alows new entities and attributes be
- * added at run time through the transaction engine associated
- * with the database. This means that a database schema change
- * (add new tables and new columns) can be handled as part of
- * an insert statement. 
- * 
- * This model can be considered the first example of a schema-
- * less strategy. In our world we can see that this is not a
- * model without a schema, rather a model with a generic schema.
- * In fact, those familiar with the data dictionary of a relational
- * database will recognize the similarity between the "Tables"
- * and "Columns" data dictionary tables and the Entity and Attribute
- * Entities in the EAV model. As we shall see there are multiple
- * such strategies and they can be related through the use of
- * structure preserving maps.
- */
-schema EAV = literal : Ty {
-  entities
-     Observation
-     Entity
-     Attribute
-     Value
-  foreign_keys
-     source : Observation -> Entity	// Observation source entity 
-     attr   : Observation -> Attribute	// Observation attribute name
-     target : Observation -> Value		// Observation value entity
-  attributes
-     attLbl : Attribute -> String	// Attribute label
-     entLbl : Entity -> String	// Entity label
-     obsVal : Value -> String		// Observation value as string
-}
-instance i_EAV = literal : EAV {
-  generators
-     a1 a2 : Attribute
-     e1 e2 : Entity
-     o1 o2 o3 : Observation
-     v1 v2 v3 : Value
-/*  equations // verbose equational syntax
-     // source : Observation -> Entity // Observation source entity
-     o1.source=e1 o2.source=e1 o3.source=e2
-     // attr   : Observation -> Attribute // Observation attribute name
-     o1.attr=a1 o2.attr=a2 o3.attr=a1
-     // target : Observation -> Value // Observation value entity
-     o1.target=v1 o2.target=v2 o3.target=v3
-     // attLbl : Attribute -> String // Attribute label
-     a1.attLbl=BodyWt a2.attLbl=HeartRt
-     // entLbl : Entity -> String // String label for an entity
-     e1.entLbl=Peter_v1 e2.entLbl=Peter_v2
-     // obsVal : Value -> String // Observation value as string
-     v1.obsVal="190_lbs" v2.obsVal="60_bpm" v3.obsVal="200_lbs" */
-  multi_equations // consise alternative systax
-   // source : Observation -> Entity // Observation source entity
-   source -> {o1 e1, o2 e1, o3 e2}
-   // attr   : Observation -> Attribute // Observation attribute name
-   attr -> {o1 a1, o2 a2, o3 a1}
-   // target : Observation -> Value // Observation value entity
-   target -> {o1 v1, o2 v2, o3 v3}
-   // attLbl : Attribute -> String // Attribute label
-   attLbl -> {a1 BodyWt, a2 HeartRt}
-   // entLbl : Entity -> String // String label for an entity
-   entLbl -> {e1 Peter_v1, e2 Peter_v2}
-   // obsVal : Value -> String // Observation value as string
-   obsVal -> {v1 "190_lbs", v2 "60_bpm", v3 "200_lbs"}
-}
-// Graph instance analogous to 
-instance i_GRF2 = literal : GRF {
-  generators
-     a1 a2 a3 : Arrow
-     n1 n2 n3 n4 n5 : Node
-  multi_equations
-     source -> {a1 n4, a2 n4, a3 n5}
-     target -> {a1 n1, a2 n2, a3 n3}
-     rowNdLbl -> {n1 "190_lbs", n2 "60_bpm", n3 "200_lbs"}
-     rowNdLbl -> {n4 Peter_v1, n5 Peter_v2}
-     rowArLbl -> {a1 BodyWt, a2 HeartRt, a3 BodyWt}
-}
-/* Query mapping EAV to GRF
- * This query illustrates a structure presurving map from EAV to
- * GRF. */
-query qEAVSpan = literal : EAV -> Span {
-entities /*source entities: Attribute Entity Observation Value*/
-   As -> {
-	from
-	  e:Entity
-	return
-	  rowAsLbl /*:String*/ -> e.entLbl}
-   Bs -> {
-   	from
-	  v:Value
-	return
-	  rowBsLbl /*:String*/ -> v.obsVal}
-   Cs -> {
-   	from
-	  o:Observation
-	return
-	  fsPntsTo /*:String*/ -> o.source.entLbl
-	  gsPntsTo /*:String*/ -> o.target.obsVal
-	  rowCsLbl /*:String*/ -> o.attr.attLbl}
-
-   foreign_keys
-	fs /*:Cs->As*/ -> {e -> o.source}
-	gs /*:Cs->Bs*/ -> {v -> o.target}
-}
-instance i_EAVSpan = eval qEAVSpan i_EAV
-instance i_EAVGRF = coeval qGRFSpan i_EAVSpan
-/* Instance graph typed by schema/dictionary entities (GRFS)
- * Here we introduce a generic data model that combines and extends
- * all of the features of the obove two generic (schema-less)
- * models.
- * 
- * The model consists of two copies of the parallel arrow graph
- * pattern connect by a pair of foreign keys, one connecting
- * instance nodes to schema nodes and one connecting instance
- * arrows to schema columns (foreign keys).
- */
-schema GRFS = literal : Ty {
-  entities
-     I_1 I_0 C_1 C_0
-  foreign_keys
-     src_i    : I_1 -> I_0
-     tgt_i    : I_1 -> I_0
-     ndType   : I_0 -> C_0
-     arType   : I_1 -> C_1
-     src_c    : C_1 -> C_0
-     tgt_c    : C_1 -> C_0
-  path_equations
-     tgt_i.ndType = arType.tgt_c
-     src_i.ndType = arType.src_c
-  attributes
-     tblLbl   : C_0 -> String
-     colLbl   : C_1 -> String
-     nodeVal  : I_0 -> String
-}
-instance i_GRFS = literal : GRFS {
-  generators
-     i11 i12 i13 : I_1
-     i01 i02 i03 i04 i05 : I_0
-     c01 c02 : C_0
-     c11 c12 : C_1
-  equations
-     i11.src_i=i04 i12.src_i=i04 i13.src_i=i05
-     i11.tgt_i=i01 i12.tgt_i=i02 i13.tgt_i=i03
-     i01.ndType=c01 i02.ndType=c01 i03.ndType=c01 // Instance nodes of type value.
-     i04.ndType=c02 i05.ndType=c02           // Instance nodes of type entity.
-     i11.arType=c11 i12.arType=c12 i13.arType=c11
-     c11.src_c=c02 c12.src_c=c02  // Source of BodyWt and HeartRt is Entity.
-     c11.tgt_c=c01 c12.tgt_c=c01  // Target of BodyWt and HeartRt is Value.
-     c01.tblLbl=Value c02.tblLbl=Entity
-     c11.colLbl=BodyWt c12.colLbl=HeartRt
-     i01.nodeVal="190_lbs" i02.nodeVal="60_bpm" i03.nodeVal="200_lbs" // instance values
-     i04.nodeVal=Peter_v1 i05.nodeVal=Peter_v2                         // instance entities
-}
-/* GRFS unfolded using pullbacks.
- *  
- */
-/*
-schema UFLD = literal : Ty {
-  entities
-    I_1 // Instance arrow 
-    I_0 // Instance node
-    C_1 // Entity column
-    C_0 // Entity
-    One // Terminal object
-    E_sa // Columns of a source entity. Pullback src_c: C_1 -> C_0 <- One :s_ent
-    E_sr // Rows of a source entity.   Pullback ndType: I_0 -> C_0 <- One :s_ent
-    E_sc // Cells of a source entity. Pullbacks   esa: E_sa -> One <- E_sr :esr
-         //                                    s_enta: E_sa -> C_1 <- I_1 :arType
-         //                                      src_i: I_1 -> I_0 <- E_sr :s_entn
-    E_ta // Columns of a target entity. Pullback tgt_c: C_1 -> C_0 <- One :t_ent
-    E_tr // Rows of a target entity.   Pullback ndType: I_0 -> C_0 <- One :t_ent
-    E_tc // Cells of a target entity. Pullbacks   eta: E_ta -> One <- E_tr :etr
-         //                                    s_enta: E_sa -> C_1 <- I_1 :arType
-         //                                      tgt_i: I_1 -> I_0 <- E_sr :t_entn
-
-  foreign_keys
-    src_i   : I_1 -> I_0  // Source node for an instance arrow
-    tgt_i   : I_1 -> I_0  // Target node for an instance arrow
-    arType  : I_1 -> C_1  // Typeing an instance arrow to a table column
-    src_c   : C_1 -> C_0  // Source table for a column
-    tgt_c   : C_1 -> C_0  // Target table for a column
-    ndType  : I_0 -> C_0  // Typing an instance node to a table
-    s_ent   : One -> C_0  // Picking a particular source table (entity) for consideration
-    t_ent   : One -> C_0  // Picking a particular target table (entity) for consideration
-    s_enta  : E_sa -> C_1  // Inclustion of columns of the source entity into the dictionary of all columns.
-    esa     : E_sa -> One  // Arrows of the source entity mapped to one
-    s_entn  : E_sr -> I_0  // Inclusion of rows of the source entity into the set of instance nodes.
-    esr     : E_sr -> One  // Rows of the source entity mapped to one.
-    s_entc_I_1: E_sc -> I_1  // Inclusion of cells of the source entity into the set of instance arrows.
-    s_entc_I_0: E_sc -> E_sr  // Cells of the source entity mapped to their rows.
-    s_entc_C_1: E_sc -> E_sa  // Cells of the source entity mapped to thier columns (attributes)
-    t_enta  : E_ta -> C_1  // Inclustion of columns of the target entity into the dictionary of all columns.
-    eta     : E_ta -> One  // Arrows of the target entity mapped to one
-    t_entn  : E_tr -> I_0  // Inclusion of rows of the target entity into the set of instance nodes.
-    etr     : E_tr -> One  // Rows of the target entity mapped to one.
-    t_entc_I_1: E_tc -> I_1  // Inclusion of cells of the target entity into the set of instance arrows.
-    t_entc_I_0: E_tc -> E_tr  // Cells of the target entity mapped to their rows.
-    t_entc_C_1: E_tc -> E_ta  // Cells of the target entity mapped to thier columns (attributes)
-    sc_tr   : E_sc -> E_tr // Cells of the source entity mapped to the rows of the target entity   
-
-  path_equations
-    tgt_i.ndType = arType.tgt_c
-    src_i.ndType = arType.src_c
-    s_enta.src_c = esa.s_ent
-    s_entn.ndType = esr.s_ent
-    s_entc_I_1.arType = s_entc_C_1.s_enta
-    s_entc_I_1.src_i = s_entc_I_0.s_entn
-    s_entc_C_1.esa = s_entc_I_0.esr
-    t_entc_I_1.arType = t_entc_C_1.t_enta
-    t_entc_I_1.src_i = t_entc_I_0.t_entn
-    t_entc_C_1.eta = t_entc_I_0.etr
-    sc_tr.t_entn = s_entc_I_1.tgt_i
-      
-  attributes
-    tblLbl  : C_0 -> String // Label for a table
-    colLbl  : C_1 -> String // label for a column
-    nodeVal : I_0 -> String // Value associated with a node of the instance graph
-}
-instance i_UFLDs = literal : UFLD {
-	generators
-		c01 c02 : C_0
-		c11 c12 : C_1
-		i01 i02 i03 i04 i05 : I_0
-		i11 i12 i13 : I_1
-		o1 : One
-	multi_equations
-		arType  -> {i11 c11, i12 c12, i13 c11}
-		ndType  -> {i01 c01, i02 c01, i03 c01, i04 c02, i05 c02}
-		src_c  -> {c11 c02, c12 c02}
-		src_i  -> {i11 i04, i12 i04, i13 i05}
-		tgt_c  -> {c11 c01, c12 c01}
-		tgt_i  -> {i11 i01, i12 i02, i13 i03}
-		s_ent  -> {o1 c02}
-		t_ent  -> {o1 c01}	
-		colLbl  -> {c11 BodyWt, c12 HeartRt}
-		nodeVal  -> {i01 "190_lbs", i02 "60_bpm", i03 "200_lbs", i04 Peter_v1, i05 Peter_v2}
-		tblLbl  -> {c01 Value, c02 Entity}
-}
-query qUFLD = literal : UFLD -> UFLD {
-entities
-   // Instance arrow 
-   I_1 -> {
-     // The source entity(ies) from which the target is constructed
-   	from
-   	  i1:I_1
-   } 
-   // Instance node
-   I_0 -> {
-   	from
-   	  i0:I_0
-   	return
-       // Assignment of attributes associated with the target entity from attributes
-       // in the source.
-       // nodeVal : I_0 -> string; Value associated with a node of the instance graph
-   	  nodeVal -> nodeVal(i0)}
-   // Entity column
-   C_1 -> {
-   	from
-   	  c1:C_1
-   	return
-       // colLbl  : C_1 -> string, label for a column
-   	  colLbl -> colLbl(c1)}
-   // Entity
-   C_0 -> {
-   	from
-   	  c0:C_0
-   	return
-       // tblLbl  : C_0 -> string, Label for a table
-   	  tblLbl -> tblLbl(c0)}
-   // Terminal object
-   One -> {
-   	from
-   	  o:One}
-   // Columns of a source entity. Pullback src_c: C_1 -> C_0 <- One :s_ent
-   E_sa -> {
-   	from
-   	  sao:One
-   	  sac1:C_1
-   	where
-       //forall sa. sa.s_enta.src_c = sa.esa.s_ent
-   	  src_c(sac1) = s_ent(sao)}
-   // Rows of a source entity.   Pullback ndType: I_0 -> C_0 <- One :s_ent
-   E_sr -> {
-   	from
-   	  sro : One
-   	  sri0 : I_0
-   	where
-       //forall sr. sr.sentn.ndType = sr.esr.s_ent
-   	  ndType(sri0) = s_ent(sro)}
-   // Cells of a source entity.
-   //  Pullbacks   esa: E_sa -> One <- E_sr :esr
-   //           s_enta: E_sa -> C_1 <- I_1 :arType
-   //             src_i: I_1 -> I_0 <- E_sr :s_entn
-   E_sc -> {
-     /* How one assembles E_sc on the target side is involved, but with a little thought,
-     // completely obvious :). E_sc is simultaniously the pullback for three diagrams.
-     // Duplicating the comments in the schema definition we have:
-     // 
-     //  E_sc contains cells of a source entity. Pullbacks
-     //
-     //    esa: E_sa -> One <- E_sr :esr
-     // s_enta: E_sa -> C_1 <- I_1 :arType
-     //   src_i: I_1 -> I_0 <- E_sr :s_entn
-     //
-     // E_sa and E_sr inturn are pullbacks again duplicating the comments in the schema
-     // definition we have:
-     //
-     // E_sa contains columns of a source entity. Pullback
-     //
-     //  src_c: C_1 -> C_0 <- One :s_ent
-     //
-     // and E_sr contains rows of a source entity. Pullback
-     //
-     //  ndType: I_0 -> C_0 <- One :s_ent
-     //
-     // and E_tr contains rows of a target entity. Pullback
-     //
-     // ndType: I_0 -> C_0 <- One :t_ent
-     //
-     // In order to construct E_sc you must first construct E_sr from I_0 and One and
-     // E_sa from C_1 and One. Having done so we must have I_1 to satisfy the three
-     // pullbacks for E_sc. This means we need representitive generators ...
-   	from
-   	  sci1 : I_1
-   	  sco : One
-   	  sci0 : I_0
-   	  scc1 : C_1
-   	  sctri0 : I_0
-   	  sctro : One
-   	where
-       src_c(scc1) = s_ent(sco)     //   src_c: C_1 -> C_0 <- One :s_ent
-   	  ndType(sci0) = s_ent(sco)    //  ndType: I_0 -> C_0 <- One :s_ent
-       arType(sci1) = scc1          //  arType: I_1 -> C_1
-   	  src_i(sci1) = sci0           //   src_i: I_1 -> I_0
-	  ndType(sctri0) = t_ent(sctro)//  ndType: I_0 -> C_0 <- One :t_ent
-   	  tgt_i(sci1) = sctri0}        //   tgt_i: I_1 -> I_0
-   // Columns of a target entity. Pullback tgt_c: C_1 -> C_0 <- One :t_ent
-   E_ta -> {
-   	from
-   	  tao:One
-   	  tac1:C_1
-   	where
-       //forall ta. ta.t_enta.src_c = ta.eta.t_ent,
-   	  src_c(tac1) = t_ent(tao)}
-   // Rows of a target entity.   Pullback ndType: I_0 -> C_0 <- One :t_ent
-   E_tr -> {
-   	from
-   	  tro : One
-   	  tri0 : I_0
-   	where
-       //forall tr. tr.t_entn.ndType = tr.etr.t_ent,
-   	  ndType(tri0) = t_ent(tro)}
-   // Cells of a target entity.
-   //  Pullbacks   eta: E_ta -> One <- E_tr :etr
-   //           s_enta: E_sa -> C_1 <- I_1 :arType
-   //             tgt_i: I_1 -> I_0 <- E_sr :t_entn
-   E_tc -> {
-   	from
-   	  tci1 : I_1
-   	  tco : One
-   	  tci0 : I_0
-   	  tcc1 : C_1
-   	where
-       src_c(tcc1) = t_ent(tco)
-   	  ndType(tci0) = t_ent(tco)
-       arType(tci1) = tcc1
-   	  src_i(tci1) = tci0}
-
-   foreign_keys
-   	  // As a practice for keeping track of what you need to build I have
-   	  // found that it is convenient to copy the keys from the target schema
-   	  // that must be assembled. These keys are all keys that originate from
-   	  // the target entity being constructed.
-       //
-       // The uber flower must assign each of the foriegn keys of the source
-       // to a path in the target.
-       // For example:
-   	  // Assign the src_i value in the target instance to i0 in the source
-   	  // instance that is returned by src_i evaluated at i1 in the source
-   	  // instance. This i0 is the working generator in the I_0q query block.
-   	  // Note above: src_i is a foriegn key from I_1 to I_0.
-   	  // Similarly for tgt_i and arType. 
-   	  // Below are the three I_1 foriegn keys from the schema definition:
-       // src_i   : I_1 -> I_0,  Source node for an instance arrow
-   	  src_i  -> {i0 -> src_i(i1)}
-       // tgt_i   : I_1 -> I_0,  Target node for an instance arrow
-   	  tgt_i  -> {i0 -> tgt_i(i1)}
-       // arType  : I_1 -> C_1,  Typeing an instance arrow to a table column
-   	  arType -> {c1 -> arType(i1)}
-       // ndType  : I_0 -> C_0,  Typing an instance node to a table
-   	  ndType -> {c0 -> ndType(i0)}
-       // src_c   : C_1 -> C_0,  Source table for a column
-   	  src_c -> {c0 -> c1.src_c}
-       // tgt_c   : C_1 -> C_0,  Target table for a column
-   	  tgt_c -> {c0 -> c1.tgt_c}
-       // s_ent   : One -> C_0,  Picking a particular source table (entity) for consideration
-   	  s_ent -> {c0 -> o.s_ent}
-       // t_ent   : One -> C_0,  Picking a particular target table (entity) for consideration
-   	  t_ent -> {c0 -> o.t_ent}
-       // s_enta  : E_sa -> C_1,  Attributges of the selected entitiy (selected entity attribute)
-   	  s_enta -> {c1 -> sac1}
-       // esa     : E_sa -> One,  All arrows of the selected entity mapped to one
-   	  esa -> {o -> sao}
-       // s_entn  : E_sr -> I_0,  Rows of the selected entity (selected entity node)
-   	  s_entn -> {i0 -> sri0}
-       // esr     : E_sr -> One,  Rows of the selected entity mapped to one
-   	  esr -> {o -> sro}
-       // s_entc_I_1 : E_sc -> I_1,  Cells of the selected entity mapped to their instance arrows
-   	  s_entc_I_1 -> {i1 -> sci1}
-       // s_entc_I_0 : E_sc -> E_sr,  Cells of the selected entity mapped to their rows
-   	  s_entc_I_0 -> {sro -> sco sri0 -> sci0}
-       // s_entc_C_1 : E_sc -> E_sa;  Cells of the selected entity mapped to thier columns (attributes)
-   	  s_entc_C_1 -> {sao -> sco sac1 -> scc1}
-       // t_enta   : E_ta -> C_1,  Attributges of the selected entitiy (selected entity attribute)
-   	  t_enta -> {c1 -> tac1}
-       // eta     : E_ta -> One,  All arrows of the selected entity mapped to one
-   	  eta -> {o -> tao}
-       // t_entn  : E_tr -> I_0,  Rows of the selected entity (selected entity node)
-   	  t_entn -> {i0 -> tri0}
-       // etr     : E_tr -> One,  Rows of the selected entity mapped to one
-   	  etr -> {o -> tro}
-       // t_entc_I_1: E_tc -> I_1  // Inclusion of cells of the target entity into the set of instance arrows.
-   	  t_entc_I_1 -> {i1 -> tci1}
-       // t_entc_I_0: E_tc -> E_tr  // Cells of the target entity mapped to their rows.
-   	  t_entc_I_0 -> {tro -> tco tri0 -> tci0}
-       // t_entc_C_1: E_tc -> E_ta  // Cells of the target entity mapped to thier columns (attributes)
-   	  t_entc_C_1 -> {tao -> tco tac1 -> tcc1}
-       // sc_tr   : E_sc -> E_tr // Cells of the source entity mapped to the rows of the target entity
-       sc_tr -> {tro -> sctro tri0 -> sctri0}
-}
-instance i_UFLDt = eval qUFLD i_UFLDs
-// Delta EAV out of UFLD
-query qPickEAVfromUFLD = literal : UFLD -> EAV {
-   entities
-	Attribute -> {
-	  from
-	    sa:E_sa
-	  return
-	    attLbl -> sa.s_enta.colLbl}
-	Entity -> {
-	  from
-	    sr:E_sr
-	  return
-	    entLbl -> sr.s_entn.nodeVal}
-	Observation -> {
-	  from
-	    sc:E_sc}
-	Value -> {
-	  from
-	    tr:E_tr
-	  return
-	    obsVal -> tr.t_entn.nodeVal}
-
-   foreign_keys
-	attr -> {sa -> sc.s_entc_C_1}
-	source -> {sr -> sc.s_entc_I_0}
-	target -> {tr -> sc.sc_tr}
-}
-instance i_PickEAVfromUFLD = eval qPickEAVfromUFLD i_UFLDt
-*/
