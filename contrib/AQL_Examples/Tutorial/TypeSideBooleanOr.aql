@@ -1,0 +1,73 @@
+typeside Ty = literal {
+	java_types	
+		Integer = "java.lang.Integer"
+		String = "java.lang.String"
+		Double = "java.lang.Double"
+//		Boolean = "java.lang.String" 
+		Bool = "java.lang.Boolean"
+//		Date = "java.lang.String"
+		Date = "java.util.Date" //alternative type for dates
+		//tru = "java.lang.Boolean" doesn't work
+	java_constants
+		Integer = "return java.lang.Integer.parseInt(input[0]);"
+		String = "return input[0]"
+		Double = "return java.lang.Double.parseDouble(input[0])"
+//		Boolean = "return input[0]" 
+		Bool = "return java.lang.Boolean.parseBoolean(input[0])"
+		Date = "return input[0]"
+		//tru  = "return true" doesn't work
+    java_functions
+    	and : Bool, Bool -> Bool = "return java.lang.Boolean.logicalAnd(input[0], input[1])"
+    	not : Bool -> Bool = "return !input[0]"
+    	or  : Bool, Bool -> Bool = "return java.lang.Boolean.logicalOr(input[0], input[1])"
+    	eq  : String, String -> Bool = "return input[0].equals(input[1])"
+    	
+}
+
+schema sTest = literal : Ty {
+	entities
+	  Src Tgt
+	foreign_keys
+	  arrow : Src -> Tgt
+	attributes
+	  sAtt : Src -> String
+	  tAtt : Tgt -> String
+	  tAttonSrc : Src -> String
+	observation_equations
+	  forall s. s.tAttonSrc = s.arrow.tAtt
+}
+
+instance iTest = literal : sTest {
+	generators
+	  s0 s1 s2 : Src
+	  t0 t1    : Tgt
+	multi_equations
+	  arrow -> {s0 t0, s1 t1, s2 t1}
+	  sAtt  -> {s0 sRow0, s1 sRow1, s2 sRow2}
+	  tAtt  -> {t0 tRow0, t1 tRow1}
+}
+
+query qEndo = literal : sTest -> sTest {
+	entities
+	  Src -> {
+	  	from
+	  	  s : Src
+	  	where
+	  	 s.tAttonSrc = tRow1
+	  	return
+	  	  sAtt -> s.sAtt
+	  	  tAttonSrc -> s.arrow.tAtt
+	  }
+	  Tgt -> {
+	  	from
+	  	  t : Tgt
+	  	where
+	  	  t.tAtt = tRow1
+	  	return
+	  	  tAtt -> t.tAtt
+	  }
+	foreign_keys
+	  arrow -> {t -> s.arrow} // Src -> Tgt
+}
+
+instance iEndo = eval qEndo iTest

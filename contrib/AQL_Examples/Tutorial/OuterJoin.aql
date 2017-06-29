@@ -1,0 +1,84 @@
+//Outer joins using java's Optional class
+typeside Ty = literal {
+	 
+	java_types
+		String = "java.lang.String"
+		Bool = "java.lang.Boolean"
+		Integer = "java.lang.Integer"
+		OptionalString = "java.util.Optional"
+	java_constants
+	    // This refers to the first input variable of a implied function 
+		String = "return input[0]"
+		Bool = "return java.lang.Boolean.parseBoolean(input[0])"
+		Integer = "return java.lang.Integer.parseInt(input[0])"
+		OptionalString = "throw new RuntimeException()"
+    java_functions
+    	// String concatination
+    	concat : String, String -> String = "return input[0].concat(input[1])" // nonstatic example
+    	// concatstat : Sring, String -> String = "return concatstat(input[0], input[1])"
+    	sum : Integer, Integer -> Integer = "return java.lang.Integer.sum(input[0], input[1])"
+    	and : Bool, Bool -> Bool = "return java.lang.Boolean.logicalAnd(input[0], input[1])"
+    	not : Bool -> Bool = "return !input[0]"
+
+    	null : -> OptionalString = "return java.util.Optional.empty()"
+    	of : String -> OptionalString = "return java.util.Optional.of(input[0])"
+    	isPresent : OptionalString -> Bool = "return input[0].isPresent()"
+    	getStr : OptionalString -> String = "return input[0].get()"
+    	// Need to create a block if statement in a function call. Specifically, if the two strings are equal than return one of them --say the first--
+    	// else return a null (the return value of the optional empty method).
+    	func : String, String -> OptionalString = "if (input[0].equals(input[1])) { return java.util.Optional.of(input[0]); } else { return java.util.Optional.empty(); }"
+
+/*	equations
+		forall x . not(not(x)) = x
+	options
+		allow_java_eqs_unsafe = true
+		program_allow_nontermination_unsafe=true */
+}
+
+schema S = literal : Ty {
+	entities
+		A B
+	attributes
+		Aname : A -> String
+		Aid : A -> String
+		Bname : B -> String
+		Bid : B -> String
+}
+
+schema T = literal : Ty {
+	entities
+		C
+	attributes
+		Aname : C -> String
+		Bname : C -> String
+		ABid  : C -> OptionalString
+}
+
+query qOuter = literal : S -> T {
+	entities //source entities: A B
+		C -> {
+			from
+				a:A
+				b:B
+			return
+				ABid -> func(a.Aid, b.Bid) 
+				Aname -> a.Aname
+				Bname -> b.Bname}
+
+	foreign_keys
+
+}
+
+
+instance I = literal : S {
+	generators
+		a1 a2 : A
+		b2 b3 : B
+	equations
+		a1.Aname = alice a1.Aid = "1"
+		a2.Aname = bob a2.Aid = "2"
+		b2.Bname = charlie b2.Bid = "2"
+		b3.Bname = dave b3.Bid = "3"
+} 
+
+instance J = eval qOuter I

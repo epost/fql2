@@ -1,0 +1,102 @@
+typeside Ty = literal {
+	 
+	java_types
+		String = "java.lang.String"
+		Bool = "java.lang.Boolean"
+		Integer = "java.lang.Integer"
+		OptionalString = "java.util.Optional"
+	java_constants
+	    // This refers to the first input variable of a implied function 
+		String = "return input[0]"
+		Bool = "return java.lang.Boolean.parseBoolean(input[0])"
+		Integer = "return java.lang.Integer.parseInt(input[0])"
+		OptionalString = "throw new RuntimeException()"
+    java_functions
+    	// String concatination
+    	concat : String, String -> String = "return input[0].concat(input[1])" // nonstatic example
+    	// concatstat : Sring, String -> String = "return concatstat(input[0], input[1])"
+    	sum : Integer, Integer -> Integer = "return java.lang.Integer.sum(input[0], input[1])"
+    	and : Bool, Bool -> Bool = "return java.lang.Boolean.logicalAnd(input[0], input[1])"
+    	not : Bool -> Bool = "return !input[0]"
+    	or  : Bool, Bool -> Bool = "return java.lang.Boolean.logicalOr(input[0], input[1])"
+
+    	null : -> OptionalString = "return java.util.Optional.empty()"
+    	of : String -> OptionalString = "return java.util.Optional.of(input[0])"
+    	isPresent : OptionalString -> Bool = "return input[0].isPresent()"
+    	getStr : OptionalString -> String = "return input[0].get()"
+
+/*	equations
+		forall x . not(not(x)) = x
+	options
+		allow_java_eqs_unsafe = true
+		program_allow_nontermination_unsafe=true */
+}
+
+schema One = literal : Ty {
+	entities
+	  O
+	attributes
+	  name : O -> String
+	  Batt : O -> Bool
+	  Iatt : O -> Integer
+	  NullableStr : O -> OptionalString
+	  isNull : O -> Bool
+	observation_equations
+	 forall o. isNull(o) = not(isPresent(o.NullableStr))	  
+
+	 //	options
+	//	allow_java_eqs_unsafe = true
+
+}
+
+instance iOne = literal : One {
+	generators
+	  o1 o2 o3 : O
+	equations
+	  o1.name = Peter
+	  o1.Batt = true // anything other than true and false gets parsed as false.
+	  o1.Iatt = 3
+	  o1.NullableStr = null()
+	  
+	  //o2.Satt = concat(o1.Satt, " Gates")
+	  o2.name = (o1.name concat " Gates") // infix looks like this and is always available(?).
+	  o2.Batt = and(o1.Batt, false)
+	  o2.Iatt = sum(o1.Iatt, 10)
+	  o2.NullableStr = of("hello")
+
+	options
+	  //require_consistency=false 
+	  //allow_java_eqs_unsafe=true // Herein dragons lie, unsafe really means unsafe.
+		//allow_java_eqs_unsafe = true
+		//program_allow_nontermination_unsafe=true 
+
+}
+
+schema Pair = literal : Ty {
+	entities
+	  A B //A has the non null ones, B has the null ones
+	attributes
+	  Aname : A -> String
+	  AsNonNullThing : A -> String
+	  Bname : B -> String
+}
+/*
+query qsplit = literal : One -> Pair {
+	entities //source entities: O
+		A -> {
+			from
+				oa:O
+			where
+				oa.isNull = false
+			return
+				Aname -> oa.name
+				AsNonNullThing -> getStr(oa.NullableStr)}
+		B -> {
+			from
+				ob:O
+			where
+				ob.isNull = true
+			return
+				Bname -> ob.name}
+}
+*/
