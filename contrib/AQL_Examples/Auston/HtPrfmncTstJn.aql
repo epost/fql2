@@ -1,0 +1,540 @@
+typeside Ty = literal {
+	java_types	
+		Integer = "java.lang.Integer"
+		String = "java.lang.String"
+		Double = "java.lang.Double"
+		Bool = "java.lang.Boolean"
+		Date = "java.util.Date" //alternative type for dates
+	java_constants
+		Integer = "return java.lang.Integer.parseInt(input[0]);"
+		String = "return input[0]"
+		Double = "return java.lang.Double.parseDouble(input[0])"
+		Bool = "return java.lang.Boolean.parseBoolean(input[0])"
+		Date = "return input[0]"
+}
+
+
+schema sHtRs = literal : Ty {
+	entities
+		Edge
+		Node
+		EdgeKind
+		NodeKind
+	foreign_keys
+		source : Edge -> Node
+		target : Edge -> Node
+		edgeHasKind : Edge -> EdgeKind
+		nodeHasKind : Node -> NodeKind
+		edgeKindHasSource : EdgeKind -> NodeKind
+		edgeKindHasTarget : EdgeKind -> NodeKind
+//	path_equations
+//		source.nodeHasKind = edgeHasKind.edgeKindHasSource
+//		target.nodeHasKind = edgeHasKind.edgeKindHasTarget
+  	attributes
+		nid  : Node -> String
+		name : Node -> String
+		nodeKindOnNode : Node -> String
+		edgeKindOnEdge : Edge -> String
+		edgeHasSourceKind : Edge -> String
+		edgeHasTargetKind : Edge -> String
+		edgeKind : EdgeKind -> String
+		nodeKind : NodeKind -> String
+//	observation_equations
+//		forall n. n.nodeKindOnNode = n.nodeHasKind.nodeKind
+//		forall e. e.edgeKindOnEdge = e.edgeHasKind.edgeKind
+//		forall e. e.edgeHasSourceKind = e.edgeHasKind.edgeKindHasSource.nodeKind
+//		forall e. e.edgeHasTargetKind = e.edgeHasKind.edgeKindHasTarget.nodeKind
+}
+
+schema sRs1 = literal : Ty {
+	entities
+	  Rslt
+	attributes
+	  name0 : Rslt -> String
+	  name1 : Rslt -> String
+	  name2 : Rslt -> String
+	  edge01Kind : Rslt -> String
+	  edge12Kind : Rslt -> String
+}
+
+schema sRs2 = literal : Ty {
+	entities
+	  Rslt
+	attributes
+	  name0 : Rslt -> String
+	  name1 : Rslt -> String
+	  name2 : Rslt -> String
+	  name3 : Rslt -> String
+	  edge01Kind : Rslt -> String
+	  edge12Kind : Rslt -> String
+	  edge23Kind : Rslt -> String
+}
+
+/*
+instance iHtRs1k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHtRs {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   Edge -> "select concat('e', id) from edge_1k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_1k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_1k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_1k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_1k"
+   edgeHasSourceKind -> "select concat('e', edge_1k.id), edgeKind.sourceKind from edge_1k, edgeKind where edge_1k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_1k.id), edgeKind.targetKind from edge_1k, edgeKind where edge_1k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 200
+    always_reload = true
+}
+
+instance iHtRs2k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHtRs {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_2k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_2k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_2k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_2k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_2k"
+   edgeHasSourceKind -> "select concat('e', edge_2k.id), edgeKind.sourceKind from edge_2k, edgeKind where edge_2k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_2k.id), edgeKind.targetKind from edge_2k, edgeKind where edge_2k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 200
+    always_reload = true
+}
+
+instance iHtRs4k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHtRs {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_4k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_4k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_4k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_4k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_4k"
+   edgeHasSourceKind -> "select concat('e', edge_4k.id), edgeKind.sourceKind from edge_4k, edgeKind where edge_4k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_4k.id), edgeKind.targetKind from edge_4k, edgeKind where edge_4k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 200
+    always_reload = true
+}
+
+instance iHtRs8k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHtRs {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_8k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_8k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_8k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_8k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_8k"
+   edgeHasSourceKind -> "select concat('e', edge_8k.id), edgeKind.sourceKind from edge_8k, edgeKind where edge_8k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_8k.id), edgeKind.targetKind from edge_8k, edgeKind where edge_8k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 200
+    always_reload = true
+}
+
+instance iHtRs16k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHtRs {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_16k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_16k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_16k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_16k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_16k"
+   edgeHasSourceKind -> "select concat('e', edge_16k.id), edgeKind.sourceKind from edge_16k, edgeKind where edge_16k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_16k.id), edgeKind.targetKind from edge_16k, edgeKind where edge_16k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 400
+    always_reload = true
+}
+*/
+instance iHtRs32k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHtRs {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_32k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_32k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_32k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_32k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_32k"
+   edgeHasSourceKind -> "select concat('e', edge_32k.id), edgeKind.sourceKind from edge_32k, edgeKind where edge_32k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_32k.id), edgeKind.targetKind from edge_32k, edgeKind where edge_32k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 400
+    always_reload = true
+}
+/*
+instance iHtRs64k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHtRs {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_64k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_64k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_64k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_64k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_64k"
+   edgeHasSourceKind -> "select concat('e', edge_64k.id), edgeKind.sourceKind from edge_64k, edgeKind where edge_64k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_64k.id), edgeKind.targetKind from edge_64k, edgeKind where edge_64k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 400
+    always_reload = true
+}
+
+instance iHtRs128k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHtRs {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_128k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_128k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_128k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_128k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_128k"
+   edgeHasSourceKind -> "select concat('e', edge_128k.id), edgeKind.sourceKind from edge_128k, edgeKind where edge_128k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_128k.id), edgeKind.targetKind from edge_128k, edgeKind where edge_128k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 400
+    always_reload = true
+}
+*/
+
+query qHt1Jn1Ds = literal : sHtRs -> sRs1 {
+	entities //source entities: Edge EdgeKind Node NodeKind One
+		Rslt -> {
+			from
+				e1 : Edge
+				e2 : Edge
+			where
+				e1.source.nid  = "Disease::DOID:1612"
+				e1.target = e2.source			// Follow paths of length two whose source is the starting disease 
+			return
+				name0 -> e1.source.name			// Display the name of the starting disease
+				edge01Kind -> e1.edgeKindOnEdge	// Display the kind of edge that originates on the starting disease
+				name1 -> e1.target.name			// Display the name of the node one edge away from the starting disease
+				edge12Kind -> e2.edgeKindOnEdge	// Display the kind of edge that originates on a node adjacent to the starting disease
+				name2 -> e2.target.name}		// Display the name of the node two edges away from the starting disease
+}
+
+query qHt1JnAllDs = literal : sHtRs -> sRs1 {
+	entities //source entities: Edge EdgeKind Node NodeKind One
+		Rslt -> {
+			from
+				e1 : Edge
+				e2 : Edge
+			where
+				e1.source.nodeKindOnNode = Disease // Get all of the edges whose source is a disease node.
+				e1.target = e2.source			   // Follow paths of length two whose source is an node of kind disease 
+			return
+				name0 -> e1.source.name			// Display the name of the starting disease
+				edge01Kind -> e1.edgeKindOnEdge	// Display the kind of edge that originates on the starting disease
+				name1 -> e1.target.name			// Display the name of the node one edge away from the starting disease
+				edge12Kind -> e2.edgeKindOnEdge	// Display the kind of edge that originates on a node adjacent to the starting disease
+				name2 -> e2.target.name}		// Display the name of the node two edges away from the starting disease
+}
+query qHt2Jn1Ds = literal : sHtRs -> sRs2 {
+	entities //source entities: Edge EdgeKind Node NodeKind One
+		Rslt -> {
+			from
+				e1 : Edge
+				e2 : Edge
+				e3 : Edge
+			where
+				e1.source.nid  = "Disease::DOID:1612"
+				e1.target = e2.source			// Follow paths of length two whose source is a disease node.
+				e2.target = e3.source
+			return
+				edge01Kind -> e1.edgeKindOnEdge	// Display the kind of edge that originates on a disease node.
+				edge12Kind -> e2.edgeKindOnEdge	// Display the kind of edge that originates adjacent to a starting disease
+				edge23Kind -> e3.edgeKindOnEdge // Display the kind of edge that originates two hops away from a disease node.
+				name0 -> e1.source.name			// Display the name of a starting disease.
+				name1 -> e1.target.name			// Display the name of the node one edge away from a starting disease.
+				name2 -> e2.target.name 		// Display the name of the node two edges away from a starting disease.
+				name3 -> e3.target.name}		// Display the name of the node three edges away from a starting disease.
+}
+
+query qHt2JnAllDs = literal : sHtRs -> sRs2 {
+	entities //source entities: Edge EdgeKind Node NodeKind One
+		Rslt -> {
+			from
+				e1 : Edge
+				e2 : Edge
+				e3 : Edge
+			where
+				e1.source.nodeKindOnNode = Disease // Get all of the edges whose source is a disease node.
+				e1.target = e2.source			// Follow paths of length two whose source is a disease node.
+				e2.target = e3.source
+			return
+				edge01Kind -> e1.edgeKindOnEdge	// Display the kind of edge that originates on a disease node.
+				edge12Kind -> e2.edgeKindOnEdge	// Display the kind of edge that originates adjacent to a starting disease
+				edge23Kind -> e3.edgeKindOnEdge // Display the kind of edge that originates two hops away from a disease node.
+				name0 -> e1.source.name			// Display the name of a starting disease.
+				name1 -> e1.target.name			// Display the name of the node one edge away from a starting disease.
+				name2 -> e2.target.name 		// Display the name of the node two edges away from a starting disease.
+				name3 -> e3.target.name}		// Display the name of the node three edges away from a starting disease.
+}
+
+// Pass #1 Ran two times.
+
+/*
+instance iHt1Jn1Ds1k = eval qHt1Jn1Ds iHtRs1k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+instance iHt1JnAllDs1k = eval qHt1JnAllDs iHtRs1k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+instance iHt2Jn1Ds1k = eval qHt2Jn1Ds iHtRs1k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+
+instance iHt2JnAllDs1k = eval qHt2JnAllDs iHtRs1k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+// Pass #2 Ran two times
+instance iHt1Jn1Ds2k = eval qHt1Jn1Ds iHtRs2k
+  { options
+		timeout = 500
+	    always_reload = true}
+
+instance iHt1JnAllDs2k = eval qHt1JnAllDs iHtRs2k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+instance iHt2Jn1Ds2k = eval qHt2Jn1Ds iHtRs2k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+instance iHt2JnAllDs2k = eval qHt2JnAllDs iHtRs2k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+// Pass #3 Ran two times
+instance iHt1Jn1Ds4k = eval qHt1Jn1Ds iHtRs4k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+instance iHt1JnAllDs4k = eval qHt1JnAllDs iHtRs4k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+instance iHt2Jn1Ds4k = eval qHt2Jn1Ds iHtRs4k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+instance iHt2JnAllDs4k = eval qHt2JnAllDs iHtRs4k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+// Pass #4 Ran two times
+instance iHt1Jn1Ds8k = eval qHt1Jn1Ds iHtRs8k
+   { options timeout = 500 
+	    always_reload = true}
+
+instance iHt1JnAllDs8k = eval qHt1JnAllDs iHtRs8k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+instance iHt2Jn1Ds8k = eval qHt2Jn1Ds iHtRs8k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+instance iHt2JnAllDs8k = eval qHt2JnAllDs iHtRs8k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+// Pass #5 Ran one time
+instance iHt1Jn1Ds16k = eval qHt1Jn1Ds iHtRs16k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+instance iHt1JnAllDs16k = eval qHt1JnAllDs iHtRs16k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+instance iHt2Jn1Ds16k = eval qHt2Jn1Ds iHtRs16k
+   { options
+   		timeout = 500 
+	    always_reload = true}
+
+// Had to restart this one three times before I got a successful run.
+instance iHt2JnAllDs16k = eval qHt2JnAllDs iHtRs16k
+   { options
+   		timeout = 6000 
+	    always_reload = true}
+
+// Pass #6 Ran one time each sepperately.
+instance iHt1Jn1Ds32k = eval qHt1Jn1Ds iHtRs32k
+   { options
+   		timeout = 6000 
+	    always_reload = true}
+
+instance iHt1JnAllDs32k = eval qHt1JnAllDs iHtRs32k
+   { options
+   		timeout = 6000 
+	    always_reload = true}
+*/
+instance iHt2Jn1Ds32k = eval qHt2Jn1Ds iHtRs32k
+   { options
+   		timeout = 6000 
+	    always_reload = true}
+/*
+instance iHt2JnAllDs32k = eval qHt2JnAllDs iHtRs32k
+   { options
+   		timeout = 36000 
+	    always_reload = true}
+
+// Pass #7 Ran one time each sepperately.
+instance iHt1Jn1Ds64k = eval qHt1Jn1Ds iHtRs64k
+   { options
+   		timeout = 36000
+	    always_reload = true}
+
+instance iHt1JnAllDs64k = eval qHt1JnAllDs iHtRs64k
+   { options
+   		timeout = 36000 
+	    always_reload = true}
+
+instance iHt2Jn1Ds64k = eval qHt2Jn1Ds iHtRs64k
+   { options
+   		timeout = 36000 
+	    always_reload = true}
+
+instance iHt2JnAllDs64k = eval qHt2JnAllDs iHtRs64k
+   { options
+   		timeout = 36000 
+	    always_reload = true}
+*/
+
+
