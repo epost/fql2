@@ -25,8 +25,10 @@ public class LiteralInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Instan
 	private final DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp;
 
 	private final Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg;
+	
+	boolean requireConsistency, allowUnsafeJava;
 
-	public LiteralInstance(Schema<Ty, En, Sym, Fk, Att> schema, Map<Gen, En> gens, Map<Sk, Ty> sks, Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs, DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+	public LiteralInstance(Schema<Ty, En, Sym, Fk, Att> schema, Map<Gen, En> gens, Map<Sk, Ty> sks, Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs, DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg, boolean requireConsistency, boolean allowUnsafeJava) {
 		Util.assertNotNull(schema, gens, sks, eqs, dp);
 		this.schema = schema;
 		this.gens = new Ctx<>(gens);
@@ -34,6 +36,8 @@ public class LiteralInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Instan
 		this.eqs = eqs;
 		this.dp = dp;
 		this.alg = alg;
+		this.requireConsistency = requireConsistency;
+		this.allowUnsafeJava = allowUnsafeJava;
 		validate(); // TODO: aql validate algebra against instance
 
 	}
@@ -66,6 +70,16 @@ public class LiteralInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Instan
 	@Override
 	public Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> algebra() {
 		return alg;
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return requireConsistency;
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return allowUnsafeJava;
 	}
 
 }

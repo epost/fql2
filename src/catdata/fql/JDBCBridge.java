@@ -44,7 +44,7 @@ import catdata.fql.sql.PSMInterp;
 import catdata.fql.sql.PSMUnChi;
 import catdata.fql.sql.PropPSM;
 import catdata.fql.sql.SimpleCreateTable;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 //todo always execute postlude
 
@@ -66,7 +66,7 @@ public class JDBCBridge {
 		Const ss = i.type(prog).toConst(prog);
 		Signature s = ss.toSig(prog);
 		psm.addAll(PSMGen.makeTables(k, s, false));
-		switch (GlobalOptions.debug.fql.sqlKind) {
+		switch (DefunctGlobalOptions.debug.fql.sqlKind) {
 		case NATIVE:
 			psm.addAll(v.accept(k, ops));
 			interp.interpX(psm, ret);
@@ -75,7 +75,7 @@ public class JDBCBridge {
 		case JDBC:
 		default:
 			if (v instanceof TransExp.External
-					&& GlobalOptions.debug.fql.sqlKind == SQLKIND.H2) {
+					&& DefunctGlobalOptions.debug.fql.sqlKind == SQLKIND.H2) {
 
 			} else {
 				psm.addAll(v.accept(k, ops));
@@ -96,7 +96,7 @@ public class JDBCBridge {
 
 		List<PSM> psm = new LinkedList<>();
 		psm.addAll(PSMGen.makeTables(k, v.type(prog).toSig(prog), false));
-		switch (GlobalOptions.debug.fql.sqlKind) {
+		switch (DefunctGlobalOptions.debug.fql.sqlKind) {
 		case NATIVE:
 			psm.addAll(v.accept(k, ops).first);
 			interp.interpX(psm, ret);
@@ -164,7 +164,7 @@ public class JDBCBridge {
 			}
 
 			else if (v instanceof External
-					&& GlobalOptions.debug.fql.sqlKind == SQLKIND.H2) {
+					&& DefunctGlobalOptions.debug.fql.sqlKind == SQLKIND.H2) {
 			} else {
 				psm.addAll(v.accept(k, ops).first);
 			}
@@ -203,7 +203,7 @@ public class JDBCBridge {
 		Statement Stmt = null;
 		List<PSM> sqls = new LinkedList<>();
 		try {
-			switch (GlobalOptions.debug.fql.sqlKind) {
+			switch (DefunctGlobalOptions.debug.fql.sqlKind) {
 			case H2:
 				Class.forName("org.h2.Driver");
 				Conn = DriverManager.getConnection("jdbc:h2:mem:");
@@ -211,10 +211,10 @@ public class JDBCBridge {
 				Stmt.execute("SET @GUID = 0");
 				break;
 			case JDBC:
-				Class.forName(GlobalOptions.debug.fql.jdbcClass);
-				Conn = DriverManager.getConnection(GlobalOptions.debug.fql.jdbcUrl);
+				Class.forName(DefunctGlobalOptions.debug.fql.jdbcClass);
+				Conn = DriverManager.getConnection(DefunctGlobalOptions.debug.fql.jdbcUrl);
 				Stmt = Conn.createStatement();
-				String[] prel = GlobalOptions.debug.fql.prelude.split(";");
+				String[] prel = DefunctGlobalOptions.debug.fql.prelude.split(";");
 				for (String s : prel) {
 					Stmt.execute(s);
 				}
@@ -242,11 +242,11 @@ public class JDBCBridge {
 					re.printStackTrace();
 					LineException exn = new LineException(
 							re.getLocalizedMessage(), k, thing);
-					if (GlobalOptions.debug.fql.continue_on_error) {
+					if (DefunctGlobalOptions.debug.fql.continue_on_error) {
 						exns.add(exn);
 					} else {
-						if (GlobalOptions.debug.fql.sqlKind == SQLKIND.JDBC) {
-							String[] prel0 = GlobalOptions.debug.fql.afterlude.split(";");
+						if (DefunctGlobalOptions.debug.fql.sqlKind == SQLKIND.JDBC) {
+							String[] prel0 = DefunctGlobalOptions.debug.fql.afterlude.split(";");
 							for (String s : prel0) {
 								if (!s.trim().isEmpty()) {
 									if (Stmt == null) {
@@ -263,7 +263,7 @@ public class JDBCBridge {
 
 			List<PSM> drops = Driver.computeDrops(prog);
 
-			if (GlobalOptions.debug.fql.sqlKind == SQLKIND.JDBC) {
+			if (DefunctGlobalOptions.debug.fql.sqlKind == SQLKIND.JDBC) {
 				for (PSM dr : drops) {
 					if (Stmt == null) {
 						throw new RuntimeException("Anomaly: please report");
@@ -271,7 +271,7 @@ public class JDBCBridge {
 					Stmt.execute(dr.toPSM());
 				}
 
-				String[] prel0 = GlobalOptions.debug.fql.afterlude.split(";");
+				String[] prel0 = DefunctGlobalOptions.debug.fql.afterlude.split(";");
 				for (String s : prel0) {
 					if (!s.trim().isEmpty()) {
 						if (Stmt == null) {
@@ -284,12 +284,12 @@ public class JDBCBridge {
 
 			String str;
 			try {
-				str = GlobalOptions.debug.fql.prelude
+				str = DefunctGlobalOptions.debug.fql.prelude
 						+ "\n\n"
 						+ PSMGen.prettyPrint(sqls)
 						+ "\n\n"
 						+ (drops.isEmpty() ? "" : PSMGen.prettyPrint(drops)
-								+ "\n\n") + GlobalOptions.debug.fql.afterlude + "\n\n";
+								+ "\n\n") + DefunctGlobalOptions.debug.fql.afterlude + "\n\n";
 			} catch (RuntimeException re) {
 				str = re.getLocalizedMessage();
 			}

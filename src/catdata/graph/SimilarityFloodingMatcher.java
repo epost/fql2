@@ -24,7 +24,7 @@ import catdata.graph.SimilarityFloodingMatcher.SimilarityFloodingParams;
  * @param <E1> type of source edges
  * @param <E2> type of target edges
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"static-method", "unused"})
 public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N2, E2, SimilarityFloodingParams<N1, N2, E1, E2>> {
 
 	// The four variations of the fixpoint formula from table 3
@@ -192,7 +192,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 			}
 			// now set the weight of the edge 
 			if (tot > 0) {
-				wt =  ((double) 1.0)/tot;
+				wt =  ( 1.0)/tot;
 			}
 			// iterate over edges again, and add weight to the new edge  
 			for (Pair<E1, E2> e: pcg.edges.keySet()) {
@@ -209,7 +209,8 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 					
 					// also check if the backward edge already exists within the edge 
 					
-					Quad<Direction,E1,E2,Double> bwde1e2double  = new Quad<>(Direction.backward,  e1, e2, 1.0); //TODO note to serena - we used params again
+					// try symmetric edges
+					Quad<Direction,E1,E2,Double> bwde1e2double  = new Quad<>(Direction.backward,  e1, e2, wt); //TODO note to serena - we used params again
 
 					if (edges.contains(bwde1e2double)) {
 						
@@ -268,7 +269,8 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		// reverse map
 		Map<Pair<N1,N2>, Integer> sigmaRevId = new HashMap<>();
 		
-		
+		Map<Set<Pair<N1,N2>>, Integer> sigmagrp = new HashMap<>();
+
 		
 		Integer idi=0;
 		// initialize nodes and 1 value
@@ -313,6 +315,27 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		}
 
 		
+		Map<Integer, Set<Pair<N1,N2>>> Revsigmagrp = new HashMap<>();
+		// sigmagrp - add groups of nodes to a sigma value initialized to 1 
+		//		Map<Set<Pair<N1,N2>>, Integer> sigmagrp = new HashMap<>();
+		for (int i=0; i < ipgAdMat.length; i++) {
+			// look at the row i 
+			// initialize with the current row's node pair
+			Pair<N1, N2> np1 = sigmaId.get(i);
+			Set<Pair<N1,N2>> sp = new HashSet<Pair<N1,N2>>();
+			sp.add(np1);
+			for (int j=0; j<ipgAdMat[i].length; j++) {
+				if (ipgAdMat[i][j] ==1) {
+					Pair<N1,N2> np2 = sigmaId.get(j);
+					sp.add(np2);
+				}
+			}
+			// add to the sigmagrp
+			sigmagrp.put(sp,i); 
+			Revsigmagrp.put(i, sp);
+		}
+		
+		
 		Map<Pair<N1,N2>, Double> sigmap_n = new HashMap<>();
 		
 		
@@ -331,6 +354,112 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 			sigmap_n.put(n, sigma1[i]);
 			//System.out.printf("%f\n",sigma1[i]);
 		}
+		
+		
+		
+		// vect holding final values corresp to sigmagrp 
+		double[] finval = new double[idi];
+		// vect holding values of indices corresto sigma
+		int[] finind = new int[idi];
+		int i = 0;
+		// analyze the final values 
+		for (Set<Pair<N1, N2>> n: sigmagrp.keySet()) {
+			// iterate to ct cardinality
+			int s = n.size();
+			Iterator<Pair<N1,N2>> ni = n.iterator();
+			double v = 0;
+			while (ni.hasNext()) {
+				Pair<N1,N2> np = ni.next();
+				double nw = sigmap_n.get(np);
+				v= v + s*nw; //sigmagrp.cardinality * n.node.weight;
+				// print the values 
+				System.out.print(np + "np ");
+				System.out.print(v + "v ");
+				System.out.println();
+			}
+			finval[i] = v;
+			i++;
+		}
+		
+		// look for max 
+		double mv = 0;
+		int index =0;
+		for (i=0; i< idi; i++) {
+			if (finval[i] > mv ) {
+				mv = finval[i];
+				index = i;
+			}
+		}
+		// look through relevant node list of max 
+		
+		/*
+		 sigmagrp.put(sp,i); 	
+		 Revsigmagrp.put(i, sp);
+		 * 
+		 */
+		
+		Set<Pair<N1,N2>> maxpr = Revsigmagrp.get(index); 
+		Iterator<Pair<N1,N2>> miter = maxpr.iterator();
+		while (miter.hasNext()) {
+			Pair<N1,N2> np = miter.next();
+			// print / save the configuration of matching pairs 
+			System.out.print(np + "np next ");
+			System.out.println();
+		}
+		
+		Pair<N1,N2> npr = null;
+		
+		// look for highest sigma and then look for matching nodes on path
+		double maxsigma=0;
+		int imaxsigma = 0;
+		for (i=0; i<idi; i++) {
+			if (sigma1[i] > maxsigma) {
+				maxsigma = sigma1[i];
+				imaxsigma = i;
+				// get associated node pair j
+				npr = sigmaId.get(i);
+			}
+		}
+		
+		
+		// keep looking to the left + right for each schema 
+		// iterate through edges ( easier to look at adj matrix ) 
+		
+		// final set of matched nodes
+		Set<Pair<N1,N2>> fs = new HashSet<Pair<N1,N2>>();
+		fs.add(npr);
+		// start with maxsigma id  // look at row to tell if it has outgoing edges 
+		for ( i=0; i < ipgAdMat.length; i++) {
+			double d = ipgAdMat[imaxsigma][i];
+			if (d != 0 ) {
+				// record index with the pair // check from this index
+				Pair<N1,N2> pn = sigmaId.get(i);
+				 // add this to the match list of nodes given that it has high enough threshold > 0.1
+				if (sigmap_n.get(pn) > 0.1) {
+					fs.add(pn);
+				}
+				
+				for (int j =0; j< ipgAdMat.length; j++ ) {
+					double d1 = ipgAdMat[i][j];
+					if (d!=0 ) {
+						Pair<N1,N2> pn1 = sigmaId.get(j);
+						if (sigmap_n.get(pn1) > 0.1) {
+							fs.add(pn1);
+						}
+					}
+				}
+			}
+		}
+		
+		// print set fs
+		Iterator<Pair<N1,N2>> ip = fs.iterator();
+		while (ip.hasNext()) {
+			Pair<N1,N2> pnn = ip.next();
+			System.out.print(pnn + "fs final match np next ");
+			System.out.println();
+		}
+		
+		
 		// System.out.println(Arrays.toString(sigma1));
 		System.out.println("sigma is " + sigmap_n + "\n");
 		
@@ -405,6 +534,81 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		return sigma;
 	}
 	
+	
+	
+	// function for the fixpt computation based on ad mat representation of ipg and the sigmagrp
+	   // same function except normalize for each group of nodes separately 
+		private double[] sigmaBasicVectorGp(double[][] matrix, int maxiter, int size, int sizeg, Double threshold, Map<Set<Pair<N1,N2>>,Integer> sg, Map<Integer, Set<Pair<N1,N2>>> Revsg){
+			
+			// sigma, temp sig
+			double[] sigma = new double[size];
+			double[] tempsig = new double[size];
+			double[] finsig = new double[size];
+			
+			
+			// initialize sigma to ones
+			for (int i=0; i<size; i++) {
+				sigma[i] = 1.0;
+			}
+			
+			for (int i=0; i<maxiter; i++) {
+				double mx = 0.0;
+				// for each x y vertex in ipg 
+				for (int j=0; j< size; j++) {
+					double sig = sigma[j];
+					
+					// get the nodes within the sigma grp 
+					Set<Pair<N1,N2>> sp = Revsg.get(j); 
+					
+					// column vector edges in to j 
+					//iterate through row of column j 
+					for (int k=0; k<size; k++) {
+						if (matrix[k][j]!= 0) {
+							sig = sig + sigma[k]*matrix[k][j];
+						}
+					}
+					tempsig[j] = sig;
+					
+				}
+				
+				// set the sigma array update 
+				for (int p=0; p< size; p++) {
+					if (tempsig[p]>mx) {
+						mx = tempsig[p];
+					}
+				}
+				
+				// check for convergence
+				if (i==maxiter-1) {
+					for (int p=0; p<size; p++) {
+						if (sigma[p] - tempsig[p]/mx > threshold) {
+							throw new RuntimeException("does not converge within max iterations");
+						}
+					}
+				}
+				
+				// this step update each sigma group instead
+				
+				// must makesure the sigma group has the nodes uniquely within group of more nodes 
+				
+				for (int p=0; p< size; p++) {
+					sigma[p] = tempsig[p]/mx;
+				}
+
+				//for (int p=0; p<sizeg; p++) {
+				//	int pin = sg.get(p);
+				//	sigma[p] = tempsig[p]/pin;
+				//}
+				
+			}
+			
+			
+			
+			
+			return sigma;
+		}
+		
+		
 	
 	
 	
@@ -563,6 +767,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 	
 
 	// other fixpt functions based on matrix
+
 private double[] sigmaAVector(double[][] matrix, int maxiter, int size, Double threshold){
 		
 		// sigma, temp sig

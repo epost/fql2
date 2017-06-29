@@ -18,7 +18,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Chc;
@@ -29,11 +28,12 @@ import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.AqlJs;
+import catdata.aql.ColimitSchema;
 import catdata.aql.Collage;
 import catdata.aql.Comment;
+import catdata.aql.Constraints;
 import catdata.aql.DP;
 import catdata.aql.Instance;
-import catdata.aql.Kind;
 import catdata.aql.Mapping;
 import catdata.aql.Morphism;
 import catdata.aql.Pragma;
@@ -61,29 +61,32 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 //TODO: aql quoting
 
-//TODO aql random instances
-
 //TODO aql replace literal by constant
 
 public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, RuntimeException> { 
 
+	private int maxrows;
+	public AqlViewer(int maxrows) {
+		this.maxrows = maxrows;
+	}
+	
 	public static String html(Object obj) {
 		return obj.toString().replace("\n", "<br>").replace("\t", "&nbsp;");
 	}
 
-	public static JComponent view(@SuppressWarnings("unused") Kind kind, Object obj) {
-		Semantics s = (Semantics) obj;
+	public static JComponent view(float time, Semantics s, int maxrows) {
 		JTabbedPane ret = new JTabbedPane();
-		ret.add(new CodeTextPanel("", obj.toString()), "Text");
-		new AqlViewer().visit(ret, s);
+		new AqlViewer(maxrows).visit(ret, s);
+		ret.addTab("Text", new CodeTextPanel("", s.toString()));
+		ret.addTab("Performance", new CodeTextPanel("",  "Compute time: " + time + " seconds"));
 		return ret;
 	}
 
 	private static <Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Fk2, Att2, Gen2, Sk2> JComponent viewMorphism(Morphism<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1, En2, Sym, Fk2, Att2, Gen2, Sk2> m, AqlJs<Ty, Sym> js) {
-		CodeTextPanel input = new CodeTextPanel("Input", "");
-		CodeTextPanel output = new CodeTextPanel("Output", "");
+		CodeTextPanel input = new CodeTextPanel("Input term-in-ctx", "");
+		CodeTextPanel output = new CodeTextPanel("Output term-in-ctx", "");
 
-		JButton nf = new JButton("Normalize Term-in-ctx");
+		JButton nf = new JButton("Translate");
 		JPanel buttonPanel = new JPanel(new GridLayout(1, 1));
 		buttonPanel.add(nf);
 
@@ -252,7 +255,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	}	*/
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> JComponent viewDP(DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty, Sym> js) {
-		CodeTextPanel input = new CodeTextPanel("Input", "");
+		CodeTextPanel input = new CodeTextPanel("Input (either equation-in-ctx or term-in-ctx)", "");
 		CodeTextPanel output = new CodeTextPanel("Output", "");
 
 		JButton eq = new JButton("Decide Equation-in-ctx");
@@ -274,7 +277,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		main.add(split, BorderLayout.CENTER);
 		main.add(buttonPanel, BorderLayout.NORTH);
 
-		print.addActionListener(x -> output.setText(dp.toString()));
+		print.addActionListener(x -> output.setText(dp.toStringProver()));
 		eq.addActionListener(x -> {
 			try {
 				Triple<List<Pair<String, String>>, RawTerm, RawTerm> y = AqlParser.parseEq(input.getText());
@@ -353,17 +356,18 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	
 	
 
-		private static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Map<Ty, Object[][]> makeTyTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+		private <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Map<Ty, Object[][]> makeTyTables(Map<Ty, Set<Y>> m, Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
 			Map<Ty, Object[][]> ret = new LinkedHashMap<>();
 
 			List<Ty> tys = Util.alphabetical(alg.schema().typeSide.tys);
 
-			Map<Ty, Set<Y>> m = Util.revS(alg.talg().sks.map);
+			
 			for (Ty ty : tys) {
 				if (!m.containsKey(ty)) {
 					continue;
 				}
-				int n = m.get(ty).size();
+				int n = Integer.min(maxrows, m.get(ty).size());
+
 				Object[][] data = new Object[n][1];
 				int i = 0;
 				for (Y y : Util.alphabetical(m.get(ty))) {
@@ -371,13 +375,16 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 					row[0] = alg.printY(y);
 					data[i] = row;
 					i++;
+					if (i == n) {
+						break;
+					}
 				}
 				ret.put(ty,  data);
 			}
 			return ret;
 		}
 
-		public static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Map<En, Pair<List<String>, Object[][]>> makeEnTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+		public  <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Map<En, Pair<List<String>, Object[][]>> makeEnTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
 			Map<En, Pair<List<String>, Object[][]>> ret = new LinkedHashMap<>();
 
 			List<En> ens = Util.alphabetical(alg.schema().ens);
@@ -388,7 +395,8 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 				List<String> header = Util.append(Util.toString(atts0), Util.toString(fks0));
 				header.add(0, "ID");
-				int n = alg.en(en).size();
+				int n = Integer.min(maxrows, alg.en(en).size());
+				//System.out.println("n " + n);
 				Object[][] data = new Object[n][];
 				int i = 0;
 				for (X x : Util.alphabetical(alg.en(en))) {
@@ -402,35 +410,53 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 					}
 					data[i] = row.toArray();
 					i++;
+					if (i == n) {
+						break;
+					}
 				}
-			
+				//System.out.println("size " + data.length);
+				
 				ret.put(en, new Pair<>(header, data));
 			}
 					
 			return ret;
 		}
 		
-	private static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Component viewAlgebra(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+	private <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Component viewAlgebra(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
 		List<JComponent> list = new LinkedList<>();
 
 		Map<En,Pair<List<String>,Object[][]>> entables = makeEnTables(alg);
-		Map<Ty,Object[][]> tytables = makeTyTables(alg);
+		Map<Ty, Set<Y>> m = Util.revS(alg.talg().sks.map);
+		Map<Ty,Object[][]> tytables = makeTyTables(m, alg);
 		
 		for (En en : entables.keySet()) {
 			Pair<List<String>,Object[][]> x = entables.get(en);
-			JPanel p = Util.makeBoldHeaderTable(Util.toString(alg.schema().attsFrom(en)), BorderFactory.createEmptyBorder(), en + " (" + x.second.length + ")", x.second, x.first.toArray(new String[x.first.size()]));
+			String str;
+			//System.out.println("XY " + x.second.length + " - " + alg.en(en).size());
+			if (x.second.length < alg.en(en).size()) {
+				str = en + " (" + x.second.length + " of " + alg.en(en).size() + ")";
+			} else {
+				str = en + " (" + x.second.length + ")";
+			}
+			JPanel p = Util.makeBoldHeaderTable(Util.toString(alg.schema().attsFrom(en)), BorderFactory.createEmptyBorder(), str, x.second, x.first.toArray(new String[x.first.size()]));
 			list.add(p);
 		}
 		
 		List<String> header = Util.singList("ID")	;	
-		Map<Ty, Set<Y>> m = Util.revS(alg.talg().sks.map);
+		
 		for (Ty ty : tytables.keySet()) {
 			if (!m.containsKey(ty)) {
 				continue;
 			}
 			Object[][] arr = tytables.get(ty);
-			
-			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + arr.length + ")", arr, header.toArray())); // TODO: aql boldify attributes
+			String str;
+			if (arr.length < m.get(ty).size()) {
+				str = ty + " (" + arr.length + " of " + m.get(ty).size() + ")";
+			} else {
+				str = ty + " (" + arr.length + ")";
+			}
+
+			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), str, arr, header.toArray())); // TODO: aql boldify attributes
 		}
 
 		return Util.makeGrid(list);
@@ -438,30 +464,30 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 	@Override
 	public <T, C> Unit visit(JTabbedPane ret, TypeSide<T, C> T)  {
-		ret.add(viewDP(T.semantics, T.collage(), T.js), "DP");
+		ret.addTab("DP", viewDP(T.semantics, T.collage(), T.js));
 		return new Unit();
 	}
 
 	@Override
 	public <Ty, En, Sym, Fk, Att> Unit visit(JTabbedPane ret, Schema<Ty, En, Sym, Fk, Att> S)  {
-		ret.add(viewSchema(S), "Graph");
+		ret.addTab("Graph", viewSchema(S));
 //		ret.add(viewSchema2(schema), "Graph2");
-		ret.add(viewDP(S.dp(), S.collage(), S.typeSide.js), "DP");
+		ret.addTab("DP", viewDP(S.dp(), S.collage(), S.typeSide.js));
 	//	ret.add(new CodeTextPanel("", schema.collage().toString()), "Temp");
 		return new Unit();
 	}
 
 	@Override
 	public <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Unit visit(JTabbedPane ret, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I)  {
-		ret.add(viewAlgebra(I.algebra()), "Tables");
-		ret.add(new CodeTextPanel("", I.algebra().toString()), "Algebra");
-		ret.add(viewDP(I.dp(), I.collage(), I.schema().typeSide.js), "DP");
+		ret.addTab("Tables", viewAlgebra(I.algebra()));
+		ret.addTab("Type Algebra", new CodeTextPanel("", I.algebra().talg().toString()));
+		ret.addTab("DP", viewDP(I.dp(), I.collage(), I.schema().typeSide.js));
 		return new Unit();
 	}
 
 	@Override
 	public <Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> Unit visit(JTabbedPane ret, Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h)  {
-		ret.add(viewTransform(h), "Algebra");
+		ret.addTab("Tables", viewTransform(h));
 		return new Unit();
 	}
 
@@ -477,19 +503,51 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 	@Override
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q) {
+		try {
+			Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q = Q.unnest();
+			JComponent comp = makeQueryPanel(q);
+			ret.add("SQL", comp); 
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			ret.add("SQL", new CodeTextPanel("Exception", ex.getMessage()));
+		}
 		return new Unit();
 	}
 
+	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> JComponent makeQueryPanel(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q) {
+		List<String> l = new LinkedList<>();
+		for (Pair<List<Chc<Fk1, Att1>>, String> s : q.src.toSQL_srcSchemas().values()) {
+			l.add(s.second);
+		}
+		l.add("////////// Insert source data here /////////");
+		Map<En2, String> m = q.toSQL();
+		for (En2 en2 : m.keySet()) {
+			l.add(en2 + " = " + m.get(en2));
+		}
+		return new CodeTextPanel("", Util.sep(l, ";\n\n"));
+	}
+	
 	@Override
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> M) {
-		ret.add(viewMorphism(M.semantics(), M.src.typeSide.js), "Translate");
+		ret.addTab("Translate", viewMorphism(M.semantics(), M.src.typeSide.js));
 		return new Unit();
 	}
 
 	@Override
 	public <N, e> Unit visit(JTabbedPane ret, catdata.aql.Graph<N, e> G) {
-		ret.add(viewGraph(G.dmg), "Graph");
+		ret.add("Graph", viewGraph(G.dmg));
 		return new Unit();
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public <N, E0, Ty, En, Sym, Fk, Att> Unit visit(JTabbedPane arg, ColimitSchema<N, Ty, En, Sym, Fk, Att> S) throws RuntimeException {
+		return new Unit(); //TODO aql
+	}
+
+	@Override
+	public <Ty, En, Sym, Fk, Att> Unit visit(JTabbedPane arg, Constraints<Ty, En, Sym, Fk, Att> S) throws RuntimeException {
+		return new Unit(); 
 	}
 
 

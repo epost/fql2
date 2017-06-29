@@ -21,7 +21,7 @@ import catdata.fql.decl.Signature;
 import catdata.fql.decl.Transform;
 import catdata.fql.decl.Type.Varchar;
 import catdata.fql.sql.PSMInterp;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 public class LeftKanSigma {
 
@@ -182,7 +182,7 @@ public class LeftKanSigma {
 			}
 		}
 		if (pre.isEmpty()) {
-			if (!GlobalOptions.debug.fql.ALLOW_NULLS) {
+			if (!DefunctGlobalOptions.debug.fql.ALLOW_NULLS) {
 				throw new RuntimeException(
 						"Full sigma not surjective: transform is " + etables
 								+ " saved " + saved + " new key " + newkey);
@@ -199,7 +199,7 @@ public class LeftKanSigma {
 		for (Object ret : x) {
 			return ret;
 		}
-		if (GlobalOptions.debug.fql.ALLOW_NULLS) {
+		if (DefunctGlobalOptions.debug.fql.ALLOW_NULLS) {
 			if (!(attr.target instanceof Varchar)) {
 				throw new RuntimeException(
 						"Cannot create nulls for any type but string");

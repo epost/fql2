@@ -30,16 +30,16 @@ import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parser.Reference;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
+import org.jparsec.Parser;
+import org.jparsec.Parser.Reference;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.functors.Tuple3;
+import org.jparsec.functors.Tuple4;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -49,7 +49,7 @@ import catdata.ide.Example;
 import catdata.ide.Language;
 import java.awt.HeadlessException;
 
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
 public class NraViewer {
 
 	private final Example[] examples = { new PeopleExample() };
@@ -546,7 +546,7 @@ public class NraViewer {
 	private static final Parser<?> program = Parsers.tuple(ty(), inst()).from(TOKENIZER, IGNORED);
 
 	private static Pair<NRel, Object> toProg(Object o) {
-		org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+		org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 		return new Pair<>(toTy(p.a), toInst(p.b));
 	}
 

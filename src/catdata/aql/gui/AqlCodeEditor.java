@@ -1,6 +1,5 @@
 package catdata.aql.gui;
 
-import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -26,13 +25,11 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 
-import org.codehaus.jparsec.error.ParserException;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
-import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
-import org.fife.ui.rsyntaxtextarea.TokenTypes;
+import org.jparsec.error.ParserException;
 
 import catdata.Program;
 import catdata.Util;
@@ -76,7 +73,9 @@ public final class AqlCodeEditor extends
 			Set<String> set = last_prog.exps.keySet();		
 			Vector<String> listData = new Vector<>();
 			for (String s : set) {
-                            listData.add(s);
+				if (last_prog.exps.get(s).kind() != Kind.COMMENT) {
+					listData.add(s);
+				}
 			}
 			list.setListData(listData);
 			revalidate();
@@ -117,9 +116,12 @@ public final class AqlCodeEditor extends
 	
 	public AqlCodeEditor(String title, int id, String content) {
 		super(title, id, content);
-		SyntaxScheme scheme = topArea.getSyntaxScheme();
-		scheme.getStyle(TokenTypes.RESERVED_WORD).foreground = Color.RED;
-		scheme.getStyle(TokenTypes.RESERVED_WORD_2).foreground = Color.BLUE;
+		
+//		SyntaxScheme scheme = topArea.getSyntaxScheme();
+//		scheme.getStyle(TokenTypes.RESERVED_WORD).foreground = Color.RED;
+//		scheme.getStyle(TokenTypes.RESERVED_WORD_2).foreground = Color.BLUE;
+		
+		//IdeOptions.debug.set
 		
 		JMenuItem im = new JMenuItem("Infer Mapping (using last compiled state)");
 		im.addActionListener(x -> infer(Kind.MAPPING));
@@ -222,7 +224,7 @@ public final class AqlCodeEditor extends
 		provider.addCompletion(new ShorthandCompletion(
 				provider,
 				"schema",
-				"schema ? = literal : ? {\n\timports\n\tforeign_keys\n\tpath_equations\n\tattributes\n\tobservation_equations\n\toptions\n} ",
+				"schema ? = literal : ? {\n\timports\n\tentities\n\tforeign_keys\n\tpath_equations\n\tattributes\n\tobservation_equations\n\toptions\n} ",
 				""));
 		
 		provider.addCompletion(new ShorthandCompletion(
@@ -313,6 +315,7 @@ public final class AqlCodeEditor extends
 	//TODO aql tokenizer error on multiline quotes (jdbc example)
 
 
+	//TODO aql break out the word list into a file that lives in the jar
 	@Override
 	protected String textFor(AqlEnv env) {
 		return "Done.";

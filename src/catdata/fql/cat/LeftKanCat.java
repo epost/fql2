@@ -16,7 +16,7 @@ import catdata.fql.decl.Mapping;
 import catdata.fql.decl.Node;
 import catdata.fql.decl.Path;
 import catdata.fql.decl.Signature;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 public class LeftKanCat {	
 
@@ -60,7 +60,7 @@ public class LeftKanCat {
 		for (Node n : B.nodes) {
 			paths.add(new Path(B, n));
 		}
-		outer: for (int iter = 0; iter < GlobalOptions.debug.fql.MAX_PATH_LENGTH; iter++) {
+		outer: for (int iter = 0; iter < DefunctGlobalOptions.debug.fql.MAX_PATH_LENGTH; iter++) {
 			for (Path p : paths) {
 				Integer i = fn.of(p);
 				fn2.putIfAbsent(i, p);
@@ -79,7 +79,7 @@ public class LeftKanCat {
 
 		if (fn2.size() < numarrs) {
 			String old_str = "Basis path lengths exceed allowed limit ("
-					+ GlobalOptions.debug.fql.MAX_PATH_LENGTH
+					+ DefunctGlobalOptions.debug.fql.MAX_PATH_LENGTH
 					+ ").  Only have "
 					+ fn2.size()
 					+ " basis paths out of required "

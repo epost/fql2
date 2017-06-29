@@ -14,24 +14,24 @@ import java.util.stream.Collectors;
 import catdata.fpql.XExp.XSchema;
 import catdata.opl.OplExp.OplSCHEMA0;
 import catdata.opl.OplExp.OplSchema;
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parser.Reference;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
-import org.codehaus.jparsec.functors.Tuple5;
+import org.jparsec.Parser;
+import org.jparsec.Parser.Reference;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.functors.Tuple3;
+import org.jparsec.functors.Tuple4;
+import org.jparsec.functors.Tuple5;
 
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Program;
 import catdata.Triple;
 import catdata.Util;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 import catdata.opl.OplExp.OplApply;
 import catdata.opl.OplExp.OplChaseExp;
 import catdata.opl.OplExp.OplColim;
@@ -67,7 +67,7 @@ import catdata.opl.OplExp.OplVar;
 import catdata.opl.OplQuery.Agg;
 import catdata.opl.OplQuery.Block;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class OplParser {
 
 	private static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
@@ -437,7 +437,7 @@ public class OplParser {
 
 		sugarForNat = false;
 		for (Object d : decls) {
-			org.codehaus.jparsec.functors.Pair pr = (org.codehaus.jparsec.functors.Pair) d;
+			org.jparsec.functors.Pair pr = (org.jparsec.functors.Pair) d;
 			Tuple3 decl = (Tuple3) pr.b;
 
 			toProgHelper(pr.a.toString(), s, ret, decl);
@@ -462,7 +462,7 @@ public class OplParser {
 	private static OplExp toTheory(Object o) {
 		Tuple5 t = (Tuple5) o;
 
-		List<String> imports = t.a == null ? new LinkedList<>() : (List<String>) ((org.codehaus.jparsec.functors.Pair) t.a).b;
+		List<String> imports = t.a == null ? new LinkedList<>() : (List<String>) ((org.jparsec.functors.Pair) t.a).b;
 		Tuple3 a = (Tuple3) t.b;
 		Tuple3 b = (Tuple3) t.c;
 		Tuple3 c = (Tuple3) t.d;
@@ -473,11 +473,11 @@ public class OplParser {
 
 		List<Tuple3> symbols0 = b == null ? new LinkedList<>()
 				: (List<Tuple3>) b.b;
-		List<org.codehaus.jparsec.functors.Pair> equations0 = c == null ? new LinkedList<>()
-				: (List<org.codehaus.jparsec.functors.Pair>) c.b;
-		List<org.codehaus.jparsec.functors.Pair> implications0 = new LinkedList<>();
+		List<org.jparsec.functors.Pair> equations0 = c == null ? new LinkedList<>()
+				: (List<org.jparsec.functors.Pair>) c.b;
+		List<org.jparsec.functors.Pair> implications0 = new LinkedList<>();
 		if (d != null) {
-			implications0 = (List<org.codehaus.jparsec.functors.Pair>) d.b;
+			implications0 = (List<org.jparsec.functors.Pair>) d.b;
 		}
 		Map<String, Pair<List<String>, String>> symbols = new HashMap<>();
 		Map<String, Integer> prec = new HashMap<>();
@@ -493,14 +493,14 @@ public class OplParser {
 				args = new LinkedList<>();
 			}
 
-			List<org.codehaus.jparsec.functors.Pair> name0s = (List<org.codehaus.jparsec.functors.Pair>) x.a;
-			for (org.codehaus.jparsec.functors.Pair name0 : name0s) {
-				// org.codehaus.jparsec.functors.Pair name0 =
-				// (org.codehaus.jparsec.functors.Pair) x.a;
+			List<org.jparsec.functors.Pair> name0s = (List<org.jparsec.functors.Pair>) x.a;
+			for (org.jparsec.functors.Pair name0 : name0s) {
+				// org.jparsec.functors.Pair name0 =
+				// (org.jparsec.functors.Pair) x.a;
 				String name = (String) name0.a;
 
 				if (name0.b != null) {
-					org.codehaus.jparsec.functors.Pair zzz = (org.codehaus.jparsec.functors.Pair) name0.b;
+					org.jparsec.functors.Pair zzz = (org.jparsec.functors.Pair) name0.b;
 					Integer i = (Integer) zzz.b;
 					prec.put(name, i);
 				}
@@ -513,12 +513,12 @@ public class OplParser {
 		}
 
 		if (sorts.contains("Nat") && symbols.keySet().contains("zero")
-				&& symbols.keySet().contains("succ") && GlobalOptions.debug.opl.opl_desugar_nat) {
+				&& symbols.keySet().contains("succ") && DefunctGlobalOptions.debug.opl.opl_desugar_nat) {
 			sugarForNat = true;
 		}
 
 		List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> equations = new LinkedList<>();
-		for (org.codehaus.jparsec.functors.Pair<Tuple3, Tuple3> x : equations0) {
+		for (org.jparsec.functors.Pair<Tuple3, Tuple3> x : equations0) {
 			List<Tuple3> fa = x.a == null ? new LinkedList<>()
 					: (List<Tuple3>) x.a.b;
 			OplCtx<String, String> ctx = toCtx(fa);
@@ -529,7 +529,7 @@ public class OplParser {
 		}
 
 		List<Triple<OplCtx<String, String>, List<Pair<OplTerm<String, String>, OplTerm<String, String>>>, List<Pair<OplTerm<String, String>, OplTerm<String, String>>>>> implications = new LinkedList<>();
-		for (org.codehaus.jparsec.functors.Pair<Tuple3, Tuple3> x : implications0) {
+		for (org.jparsec.functors.Pair<Tuple3, Tuple3> x : implications0) {
 			List<Tuple3> fa = x.a == null ? new LinkedList<>()
 					: (List<Tuple3>) x.a.b;
 			OplCtx<String, String> ctx = toCtx(fa);
@@ -566,9 +566,9 @@ public class OplParser {
 		Tuple4 oy = (Tuple4) ox;
 		String ts = (String) oy.d;
 
-		org.codehaus.jparsec.functors.Pair newobj = (org.codehaus.jparsec.functors.Pair) oy.b;
+		org.jparsec.functors.Pair newobj = (org.jparsec.functors.Pair) oy.b;
 
-		List<String> imports = newobj.a == null ? new LinkedList<>() : (List<String>) ((org.codehaus.jparsec.functors.Pair) newobj.a).b;
+		List<String> imports = newobj.a == null ? new LinkedList<>() : (List<String>) ((org.jparsec.functors.Pair) newobj.a).b;
 		
 		
 		Tuple5 t = (Tuple5) newobj.b;
@@ -587,10 +587,10 @@ public class OplParser {
 		List<Tuple3> symbolsA0 = c == null ? new LinkedList<>()
 				: (List<Tuple3>) c.b;
 
-		List<org.codehaus.jparsec.functors.Pair> equationsE0 = c == null ? new LinkedList<>()
-				: (List<org.codehaus.jparsec.functors.Pair>) d.b;
-		List<org.codehaus.jparsec.functors.Pair> equationsA0 = c == null ? new LinkedList<>()
-				: (List<org.codehaus.jparsec.functors.Pair>) e.b;
+		List<org.jparsec.functors.Pair> equationsE0 = c == null ? new LinkedList<>()
+				: (List<org.jparsec.functors.Pair>) d.b;
+		List<org.jparsec.functors.Pair> equationsA0 = c == null ? new LinkedList<>()
+				: (List<org.jparsec.functors.Pair>) e.b;
 
 		Map<String, Pair<List<String>, String>> symbolsE = new HashMap<>();
 		Map<String, Pair<List<String>, String>> symbolsA = new HashMap<>();
@@ -608,12 +608,12 @@ public class OplParser {
 				args = new LinkedList<>();
 			}
 
-			List<org.codehaus.jparsec.functors.Pair> name0s = (List<org.codehaus.jparsec.functors.Pair>) x.a;
-			for (org.codehaus.jparsec.functors.Pair name0 : name0s) {
+			List<org.jparsec.functors.Pair> name0s = (List<org.jparsec.functors.Pair>) x.a;
+			for (org.jparsec.functors.Pair name0 : name0s) {
 				String name = (String) name0.a;
 
 				if (name0.b != null) {
-					org.codehaus.jparsec.functors.Pair zzz = (org.codehaus.jparsec.functors.Pair) name0.b;
+					org.jparsec.functors.Pair zzz = (org.jparsec.functors.Pair) name0.b;
 					Integer i = (Integer) zzz.b;
 					prec.put(name, i);
 				}
@@ -637,12 +637,12 @@ public class OplParser {
 				args = new LinkedList<>();
 			}
 
-			List<org.codehaus.jparsec.functors.Pair> name0s = (List<org.codehaus.jparsec.functors.Pair>) x.a;
-			for (org.codehaus.jparsec.functors.Pair name0 : name0s) {
+			List<org.jparsec.functors.Pair> name0s = (List<org.jparsec.functors.Pair>) x.a;
+			for (org.jparsec.functors.Pair name0 : name0s) {
 				String name = (String) name0.a;
 
 				if (name0.b != null) {
-					org.codehaus.jparsec.functors.Pair zzz = (org.codehaus.jparsec.functors.Pair) name0.b;
+					org.jparsec.functors.Pair zzz = (org.jparsec.functors.Pair) name0.b;
 					Integer i = (Integer) zzz.b;
 					prec.put(name, i);
 				}
@@ -659,7 +659,7 @@ public class OplParser {
 
 		List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> equationsE = new LinkedList<>();
 		List<Triple<OplCtx<String, String>, OplTerm<String, String>, OplTerm<String, String>>> equationsA = new LinkedList<>();
-		for (org.codehaus.jparsec.functors.Pair<Tuple3, Tuple3> x : equationsE0) {
+		for (org.jparsec.functors.Pair<Tuple3, Tuple3> x : equationsE0) {
 			List<Tuple3> fa = x.a == null ? new LinkedList<>()
 					: (List<Tuple3>) x.a.b;
 			OplCtx<String, String> ctx = toCtx(fa);
@@ -668,7 +668,7 @@ public class OplParser {
 			OplTerm rhs = toTerm(ctx.names(), consts(symbolsEA), eq.c, false);
 			equationsE.add(new Triple<>(ctx, lhs, rhs));
 		}
-		for (org.codehaus.jparsec.functors.Pair<Tuple3, Tuple3> x : equationsA0) {
+		for (org.jparsec.functors.Pair<Tuple3, Tuple3> x : equationsA0) {
 			List<Tuple3> fa = x.a == null ? new LinkedList<>()
 					: (List<Tuple3>) x.a.b;
 			OplCtx<String, String> ctx = toCtx(fa);
@@ -704,7 +704,7 @@ public class OplParser {
 		OplInst0 ret = new OplInst0(ex);
 		Tuple4 t = (Tuple4) o; 
 		Tuple3 e = (Tuple3) t.b;
-		List<String> imports = e.a == null ? new LinkedList<>() : (List<String>) ((org.codehaus.jparsec.functors.Pair) e.a).b;
+		List<String> imports = e.a == null ? new LinkedList<>() : (List<String>) ((org.jparsec.functors.Pair) e.a).b;
 		ret.imports = new HashSet<>(imports);
 		return ret;
 	}
@@ -717,8 +717,8 @@ public class OplParser {
 		
 		String yyy = (String) t.d;
 
-		org.codehaus.jparsec.functors.Pair b = (org.codehaus.jparsec.functors.Pair) e.b;
-		org.codehaus.jparsec.functors.Pair c = (org.codehaus.jparsec.functors.Pair) e.c;
+		org.jparsec.functors.Pair b = (org.jparsec.functors.Pair) e.b;
+		org.jparsec.functors.Pair c = (org.jparsec.functors.Pair) e.c;
 
 		List<Tuple3> symbols0 = (List<Tuple3>) b.b;
 		List<Tuple4> equations0 = (List<Tuple4>) c.b;
@@ -728,12 +728,12 @@ public class OplParser {
 		for (Tuple3 x : symbols0) {
 			String dom = (String) x.c;
 
-			List<org.codehaus.jparsec.functors.Pair> name0s = (List<org.codehaus.jparsec.functors.Pair>) x.a;
-			for (org.codehaus.jparsec.functors.Pair name0 : name0s) {
+			List<org.jparsec.functors.Pair> name0s = (List<org.jparsec.functors.Pair>) x.a;
+			for (org.jparsec.functors.Pair name0 : name0s) {
 				String name = (String) name0.a;
 
 				if (name0.b != null) {
-					org.codehaus.jparsec.functors.Pair zzz = (org.codehaus.jparsec.functors.Pair) name0.b;
+					org.jparsec.functors.Pair zzz = (org.jparsec.functors.Pair) name0.b;
 					Integer i = (Integer) zzz.b;
 					prec.put(name, i);
 				}
@@ -746,7 +746,7 @@ public class OplParser {
 		} 
 
 		List<Pair<OplTerm<Chc<String, String>, String>, OplTerm<Chc<String, String>, String>>> equations = new LinkedList<>();
-		for (org.codehaus.jparsec.functors.Pair<Tuple3, Tuple3> x : equations0) {
+		for (org.jparsec.functors.Pair<Tuple3, Tuple3> x : equations0) {
 			if (x.a != null) {
 				throw new DoNotIgnore(
 						"Cannot have universally quantified equations in presentations");
@@ -767,7 +767,7 @@ public class OplParser {
 	private static OplExp toSchema(Object o) {
 		Tuple4 t = (Tuple4) o;
 
-		org.codehaus.jparsec.functors.Pair e = (org.codehaus.jparsec.functors.Pair) t.b;
+		org.jparsec.functors.Pair e = (org.jparsec.functors.Pair) t.b;
 
 		String yyy = (String) t.d;
 
@@ -783,8 +783,8 @@ public class OplParser {
 		}
 		Tuple3 t = (Tuple3) o;
 
-		org.codehaus.jparsec.functors.Pair b = (org.codehaus.jparsec.functors.Pair) t.b;
-		org.codehaus.jparsec.functors.Pair c = (org.codehaus.jparsec.functors.Pair) t.c;
+		org.jparsec.functors.Pair b = (org.jparsec.functors.Pair) t.b;
+		org.jparsec.functors.Pair c = (org.jparsec.functors.Pair) t.c;
 
 		Tuple3 y = (Tuple3) b.a;
 		List<Tuple3> sorts = (List<Tuple3>) y.b;
@@ -832,7 +832,7 @@ public class OplParser {
 		Tuple3 t = (Tuple3) o;
 
 		Tuple3 b = (Tuple3) t.b;
-		org.codehaus.jparsec.functors.Pair c = (org.codehaus.jparsec.functors.Pair) t.c;
+		org.jparsec.functors.Pair c = (org.jparsec.functors.Pair) t.c;
 
 		Tuple3 y = (Tuple3) b.a;
 		List<Tuple3> sorts = (List<Tuple3>) y.b;
@@ -1002,8 +1002,8 @@ public class OplParser {
 
 	
 
-		if (c instanceof org.codehaus.jparsec.functors.Pair) {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) c;
+		if (c instanceof org.jparsec.functors.Pair) {
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) c;
 			if (p.a.toString().equals("theory")) {
 				return toTheory(p.b);
 			} else if (p.a.toString().equals("saturate")) {
@@ -1222,7 +1222,7 @@ public class OplParser {
 		Tuple3 b = (Tuple3) aa.c;
 		// Tuple3 b = (Tuple3) t.c;
 		
-		List<String> imports = aa.a == null ? new LinkedList<>() : (List<String>) ((org.codehaus.jparsec.functors.Pair) aa.a).b;
+		List<String> imports = aa.a == null ? new LinkedList<>() : (List<String>) ((org.jparsec.functors.Pair) aa.a).b;
 		
 
 		List<Tuple3> sorts = (List<Tuple3>) a.b;
@@ -1245,7 +1245,7 @@ public class OplParser {
 			if (sorts0.containsKey(p)) {
 				throw new DoNotIgnore("Duplicate symbol: " + p);
 			}
-			org.codehaus.jparsec.functors.Pair ppp = (org.codehaus.jparsec.functors.Pair) z.c;
+			org.jparsec.functors.Pair ppp = (org.jparsec.functors.Pair) z.c;
 			Tuple3 q = (Tuple3) ppp.a;
 			List<Tuple3> ctx = q == null ? new LinkedList<>()
 					: (List<Tuple3>) q.b;
@@ -1326,7 +1326,7 @@ public class OplParser {
 			defs.put(f, body);
 		}
 
-		org.codehaus.jparsec.functors.Pair c = (org.codehaus.jparsec.functors.Pair) t.c;
+		org.jparsec.functors.Pair c = (org.jparsec.functors.Pair) t.c;
 		return new OplJavaInst(defs, (String) c.b);
 	}
 
@@ -1370,8 +1370,8 @@ public class OplParser {
 
 		Map<String, Map<String, OplTerm>> map = new HashMap<>();
 		
-		org.codehaus.jparsec.functors.Pair q = (org.codehaus.jparsec.functors.Pair) t.b;
-		List<String> imports = q.a == null ? new LinkedList<>() : (List<String>) ((org.codehaus.jparsec.functors.Pair) q.a).b;
+		org.jparsec.functors.Pair q = (org.jparsec.functors.Pair) t.b;
+		List<String> imports = q.a == null ? new LinkedList<>() : (List<String>) ((org.jparsec.functors.Pair) q.a).b;
 		
 		
 		Tuple3 tb = (Tuple3) q.b;
@@ -1480,9 +1480,9 @@ public class OplParser {
 		String I = (String) p.c;
 		Tuple3 q = (Tuple3) p.b;
 
-		List s = (List) ((org.codehaus.jparsec.functors.Pair) q.a).b; // list of tuple3 of (path, string)
-		List f = (List) ((org.codehaus.jparsec.functors.Pair) q.b).b; // list of tuple3 of (string, string)
-		List w = (List) ((org.codehaus.jparsec.functors.Pair) q.c).b; // list of tuple3 of (path, path)
+		List s = (List) ((org.jparsec.functors.Pair) q.a).b; // list of tuple3 of (path, string)
+		List f = (List) ((org.jparsec.functors.Pair) q.b).b; // list of tuple3 of (string, string)
+		List w = (List) ((org.jparsec.functors.Pair) q.c).b; // list of tuple3 of (path, path)
 
 		Map<String, OplTerm<String, String>> select = new HashMap<>();
 		Map<String, String> from = new HashMap<>();
@@ -1536,15 +1536,15 @@ public class OplParser {
 		Map<String, Pair<Object, Map<String, OplTerm<String, String>>>> edges = new HashMap<>();
 
 		//from
-		for (Object x : (Iterable) ((org.codehaus.jparsec.functors.Pair) t.b).b) {
-			org.codehaus.jparsec.functors.Pair l = (org.codehaus.jparsec.functors.Pair) x;
+		for (Object x : (Iterable) ((org.jparsec.functors.Pair) t.b).b) {
+			org.jparsec.functors.Pair l = (org.jparsec.functors.Pair) x;
 			String gen;
 			String ty;
 			if (l.b == null) {
 				gen = (String) l.a;
 				ty = (String) l.a;
 			} else {
-				org.codehaus.jparsec.functors.Pair g = (org.codehaus.jparsec.functors.Pair) l.b;
+				org.jparsec.functors.Pair g = (org.jparsec.functors.Pair) l.b;
 				gen = (String) g.b;
 				ty = (String) l.a;
 			}
@@ -1555,9 +1555,9 @@ public class OplParser {
 		}
 
 		//where
-		//Object z = ((org.codehaus.jparsec.functors.Pair)t.c).b;
+		//Object z = ((org.jparsec.functors.Pair)t.c).b;
 		if (t.c != null) {
-			for (Object x : (Iterable) ((org.codehaus.jparsec.functors.Pair) t.c).b) {
+			for (Object x : (Iterable) ((org.jparsec.functors.Pair) t.c).b) {
 				Tuple3 l = (Tuple3) x;
 				where.add(new Pair(toTerm(from.keySet(), null, l.a, true), toTerm(
 						from.keySet(), null, l.c, true)));
@@ -1565,13 +1565,13 @@ public class OplParser {
 		}
 		
 		//return
-		for (Object x : (Iterable) ((org.codehaus.jparsec.functors.Pair) t.a).b){
+		for (Object x : (Iterable) ((org.jparsec.functors.Pair) t.a).b){
 			Tuple3 l = (Tuple3) x;
 			String dst = (String) l.c;
 			if (attrs.containsKey(dst) || edges.containsKey(dst)) {
 				throw new DoNotIgnore("In select clause, duplicate for: " + dst);
 			}
-			if (l.a instanceof Tuple3 && ((org.codehaus.jparsec.functors.Pair) l.a).a.toString().equals("(")) {
+			if (l.a instanceof Tuple3 && ((org.jparsec.functors.Pair) l.a).a.toString().equals("(")) {
 				edges.put(dst,
 						new Pair(null,
 								fromBlockHelper2(from.keySet(), l.a)));				
@@ -1590,7 +1590,7 @@ public class OplParser {
 	private static Agg<String, String, String, String, String, String> fromAgg(Collection vars, Collection consts, Object o,
 			boolean suppressError) {
 		
-		Tuple5<Tuple4<?,String,String,?>, List<Tuple3<String,?,String>>, List<Tuple3<?,?,?>>, org.codehaus.jparsec.functors.Pair<?,?>,?> t = (Tuple5<Tuple4<?, String, String, ?>, List<Tuple3<String, ?, String>>, List<Tuple3<?, ?, ?>>, org.codehaus.jparsec.functors.Pair<?, ?>, ?>) o;
+		Tuple5<Tuple4<?,String,String,?>, List<Tuple3<String,?,String>>, List<Tuple3<?,?,?>>, org.jparsec.functors.Pair<?,?>,?> t = (Tuple5<Tuple4<?, String, String, ?>, List<Tuple3<String, ?, String>>, List<Tuple3<?, ?, ?>>, org.jparsec.functors.Pair<?, ?>, ?>) o;
 
 		LinkedHashMap<String, String> from = new LinkedHashMap<>();
 		Set<Pair<OplTerm<String, String>, OplTerm<String, String>>> where = new HashSet<>();

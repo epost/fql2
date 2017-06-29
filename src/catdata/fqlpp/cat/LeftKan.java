@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import catdata.Pair;
 import catdata.Util;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 @SuppressWarnings("serial")
 class LeftKan<O1, A1, O2, A2> implements Serializable {
@@ -150,7 +150,7 @@ class LeftKan<O1, A1, O2, A2> implements Serializable {
 
 	// true = success
 	public boolean compute() {
-		for (int i = 0; i < GlobalOptions.debug.fqlpp.MAX_DENOTE_ITERATIONS; i++) {
+		for (int i = 0; i < DefunctGlobalOptions.debug.fqlpp.MAX_DENOTE_ITERATIONS; i++) {
 			if (!step()) {
 				substLineage();
 				return true;
@@ -372,7 +372,7 @@ class LeftKan<O1, A1, O2, A2> implements Serializable {
 	@SuppressWarnings("unchecked")
 	private void substLineage() {
 		//could make getLineage aware of Fresh, but this avoids copying
-		if (GlobalOptions.debug.fqlpp.useLineage.equals("Fresh IDs")) {
+		if (DefunctGlobalOptions.debug.fqlpp.useLineage.equals("Fresh IDs")) {
 			Pb2 = (Map<Signature<O2, A2>.Node, Set<Pair<Object, Object>>>) ((Object) Pb);
 			Pg2 = (Map<Signature<O2, A2>.Edge, Set<Pair<Object, Object>>>) ((Object) Pg);
 			ua2 = (Map<Signature<O1, A1>.Node, Set<Pair<Object, Object>>>) ((Object) ua);
@@ -415,7 +415,7 @@ class LeftKan<O1, A1, O2, A2> implements Serializable {
 	private Object getLineage(Object i) {
 		List<Pair<Signature<O2, A2>.Edge, Object>> l = lineage.get(i);
 		
-		if (GlobalOptions.debug.fqlpp.useLineage.equals("Lineage as ID")) {
+		if (DefunctGlobalOptions.debug.fqlpp.useLineage.equals("Lineage as ID")) {
 			return l;
 		}
 

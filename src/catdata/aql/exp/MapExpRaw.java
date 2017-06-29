@@ -43,12 +43,12 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 	private final List<Pair<Object, List<Object>>> fks;
 	private final List<Pair<Object, Triple<String, Object, RawTerm>>> atts;
 	
-	private final Map<String, String> options; //TODO aql do mapexps really need options?
+	private final Map<String, String> options; 
 	
 	@Override
-	public long timeout() {
-		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-	}	
+	public Map<String, String> options() {
+		return options;
+	}
 	
 	//typesafe by covariance of read only collections
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -105,7 +105,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			toString += "\tattributes";
 			temp = new LinkedList<>();
 			for (Pair<Object, Triple<String, Object, RawTerm>> sym : atts) {
-				temp.add(sym.first + " -> lambda " + sym.second.first + ". " + sym.second.second);
+				temp.add(sym.first + " -> lambda " + sym.second.first + ". " + sym.second.third);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 		}
@@ -241,7 +241,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			Object var_en = att.second.second;
 			RawTerm term = att.second.third;
 
-			Pair<Object, Object> p = src0.atts.get(att.first);
+			Pair<Object, Object> p = src0.atts.map.get(att.first);
 			if (p == null) {
 				throw new RuntimeException("in mapping for " + att.first + ", " + att.first + " is not a source attribute.");
 			} 
@@ -252,7 +252,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			}
 			
 			if (var_en != null && !var_en.equals(dst_att_dom_en)) {
-				throw new RuntimeException("in mapping for " + att.first + ", the given source entity for the variable, " + var_en + ", is not " + p.first + " as expected.");
+				throw new RuntimeException("in mapping for " + att.first + ", the given source entity for the variable, " + var_en + ", is not " + dst_att_dom_en + " as expected.");
 			}
 										
 			Object src_att_cod_ty = p.second;
@@ -270,7 +270,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 			Util.putSafely(atts0, att.first, new Triple<>(new Var(var), dst_att_dom_en, term0));
 		} 
 		
-		AqlOptions ops = new AqlOptions(options, null);
+		AqlOptions ops = new AqlOptions(options, null, env.defaults);
 		
 		Mapping<Object, Object, Object, Object, Object, Object, Object, Object> ret = new Mapping<>(ens0, atts0, fks0, src0, dst0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
 		return ret; 

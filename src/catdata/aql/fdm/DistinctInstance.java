@@ -40,6 +40,7 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 				}
 			}
 		}
+		validate();
 	}
 	
 	private boolean obsEq(En en, X x, X y) {
@@ -142,7 +143,7 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 
 		@Override
 		public String toStringProver() {
-			return "Distinct Instance wrapper of " + I.algebra().toStringProver();
+			return "Distinct-instance wrapper of " + I.algebra().toStringProver();
 		}
 
 		@Override
@@ -155,5 +156,15 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 			return "|" + I.algebra().printY(y) + "|";
 		}
 		
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return I.requireConsistency();
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return I.requireConsistency();
 	}
 }

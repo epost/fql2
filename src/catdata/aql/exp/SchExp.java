@@ -2,13 +2,17 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import catdata.Pair;
+import catdata.Program;
 import catdata.Util;
 import catdata.aql.Kind;
 import catdata.aql.Schema;
 
 public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,Att>> {	
+	
+	public abstract SchExp<Ty,En,Sym,Fk,Att> resolve(AqlTyping G, Program<Exp<?>> prog); 
 	
 	@Override
 	public Kind kind() {
@@ -16,10 +20,84 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 	}
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static class SchExpColim<N, E, Ty, En, Sym, Fk, Att> extends SchExp<Ty, String, Sym, String, String> {
+
+		public final ColimSchExp<N, E, Ty, En, Sym, Fk, Att> exp;
+
+		public SchExpColim(ColimSchExp<N, E, Ty, En, Sym, Fk, Att> exp) {
+			this.exp = exp;
+		}
+		
+		//TODO aql schema equality too weak
+		@Override
+		public SchExp<Ty, String, Sym, String, String> resolve(AqlTyping G, Program<Exp<?>> prog) {
+			return this;
+		}
+		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((exp == null) ? 0 : exp.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SchExpColim<?, ?, ?, ?, ?, ?, ?> other = (SchExpColim<?, ?, ?, ?, ?, ?, ?>) obj;
+			if (exp == null) {
+				if (other.exp != null)
+					return false;
+			} else if (!exp.equals(other.exp))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "getSchema " + exp;
+		}
+
+		
+		@Override
+		public Schema<Ty, String, Sym, String, String> eval(AqlEnv env) {
+			return exp.eval(env).schemaStr;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return exp.deps();
+		}
+		
+		
+		
+		
+	}
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final class SchExpInst<Ty,En,Sym,Fk,Att> extends SchExp<Ty,En,Sym,Fk,Att> {
 		public final InstExp<Ty,En,Sym,Fk,Att,?,?,?,?> inst;
-
+		
+		@Override
+		public SchExp<Ty,En,Sym,Fk,Att> resolve(AqlTyping G, Program<Exp<?>> prog) {
+			return (SchExp<Ty,En,Sym,Fk,Att>) inst.type(G);
+		}
+		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return inst.deps();
@@ -62,10 +140,6 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			return inst.eval(env).schema();
 		}
 
-		@Override
-		public long timeout() {
-			return inst.timeout();
-		}
 		
 		
 	}
@@ -76,6 +150,15 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 		
 		public final TyExp<Ty,Sym> typeSide;
 		
+		public SchExp<Ty,Void,Sym,Void,Void> resolve(AqlTyping G, Program<Exp<?>> prog) {
+			return new SchExpEmpty<>(typeSide.resolve(prog));
+		}
+		
+		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return typeSide.deps();
@@ -118,10 +201,7 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			return Schema.terminal(typeSide.eval(env));
 		}
 
-		@Override
-		public long timeout() {
-			return typeSide.timeout();
-		}
+		
 		
 	}
 	
@@ -129,8 +209,25 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 
 	public static final class SchExpVar extends SchExp<Object, Object, Object, Object, Object> {
 		
-		public final String var;
+		@Override
+		public SchExp<Object, Object, Object, Object, Object> resolve(AqlTyping G, Program<Exp<?>> prog) {
+			if (!prog.exps.containsKey(var)) {
+				throw new RuntimeException("Unbound typeside variable: " + var);
+			}
+			Exp<?> x = prog.exps.get(var);
+			if (!(x instanceof SchExp)) {
+				throw new RuntimeException("Variable " + var + " is bound to something that is not a schema, namely\n\n" + x);
+			}
+			@SuppressWarnings("unchecked")
+			SchExp<Object, Object, Object, Object, Object> texp = (SchExp<Object, Object, Object, Object, Object>) x;
+			return texp.resolve(G, prog);
+		}
 		
+		public final String var;
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Util.singList(new Pair<>(var, Kind.SCHEMA));
@@ -174,10 +271,6 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 			return var;
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}
 		
 		
 	}
@@ -186,11 +279,15 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 
 	public static final class SchExpLit<Ty,Sym,En,Fk,Att> extends SchExp<Ty,Sym,En,Fk,Att> {
 
+		
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Collections.emptyList();
 		}
-		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		public final Schema<Ty,Sym,En,Fk,Att> schema;
 		
 		public SchExpLit(Schema<Ty,Sym,En,Fk,Att> schema) {
@@ -229,13 +326,13 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 		public String toString() {
 			return "SchExpLit [schema=" + schema + "]";
 		}
-
-		@Override
-		public long timeout() {
-			return 0;
-		}
 		
-	
+		@Override
+		public SchExp<Ty, Sym, En, Fk, Att> resolve(AqlTyping G, Program<Exp<?>> prog) {
+			return this;
+		}
+
+		
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

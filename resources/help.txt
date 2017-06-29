@@ -1,0 +1,11 @@
+Help:
+
+For available AQL options and general IDE display options, use the Options button in the main IDE window.
+
+AQL homepage: http://categoricaldata.net/aql.html
+
+AQL manual (contains a detailed description of AQL syntax, options, and behavior): http://categoricaldata.net/aqlmanual.pdf 
+
+AQL tutorial: http://categoricaldata.net/tutorial.html
+
+CI homepage: http://catinf.com

@@ -1,13 +1,19 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
+import java.util.Map;
 
 import catdata.Pair;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Kind;
 
 public abstract class Exp<X> {
 	
-	public abstract long timeout();
+	public Object getOrDefault(AqlEnv env, AqlOption option) {
+		return env.defaults.getOrDefault(options(), option);
+	}
+	
+	protected abstract Map<String, String> options();
 	
 	public abstract Kind kind();
 	

@@ -212,7 +212,7 @@ public abstract class KBExp<C, V> {
 
 		@Override
 		public KBApp<C, V> getApp() {
-			throw new RuntimeException();
+			throw new RuntimeException("Not an app: " + this);
 		}
 
 		@Override
@@ -265,14 +265,26 @@ public abstract class KBExp<C, V> {
 		public final C f;
 		public final List<KBExp<C, V>> args;
 
+		private final int hash;
+		/**
+		 * DO NOT mutate the args list!
+		 * 
+		 * @param f
+		 * @param args
+		 */
 		public KBApp(C f, List<KBExp<C, V>> args) {
 			this.f = f;
 			this.args = args;
 			isVar = false;
+			hash = hash();
 		}
 
 		@Override
 		public int hashCode() {
+			return hash;
+		}
+		
+		private int hash() {
 			int prime = 31;
 			int result = 1;
 			result = prime * result + ((args == null) ? 0 : args.hashCode());

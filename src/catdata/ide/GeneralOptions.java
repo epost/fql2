@@ -1,31 +1,8 @@
 package catdata.ide;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.io.File;
-import java.util.function.Function;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
-
-import catdata.Pair;
-import catdata.Unit;
-
-
-public class GeneralOptions extends Options {
-
+//TODO AQL delete this class
+public class GeneralOptions {
+/*
 	private static final long serialVersionUID = 2L;
 
 	@Override
@@ -33,10 +10,10 @@ public class GeneralOptions extends Options {
 		return "General";
 	}
 	
-	public String file_path = "";
-	public String look_and_feel = UIManager.getLookAndFeel().getClass().getName();
-	public int font_size = 12;
-	public boolean spellcheck = true;
+	//public String file_path = "";
+	//public String look_and_feel = UIManager.getLookAndFeel().getClass().getName();
+	//public int font_size = 12;
+	//public boolean spellcheck = true;
 
 	//@Override
 	@Override
@@ -154,5 +131,5 @@ public class GeneralOptions extends Options {
 	public int size() {
 		return 4;
 	} 
-
+*/
 }

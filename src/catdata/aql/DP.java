@@ -3,8 +3,10 @@ package catdata.aql;
 import catdata.Chc;
 import catdata.Ctx;
 
-@FunctionalInterface
+//TODO aql all DPs just have to handle java now
 public interface DP<Ty,En,Sym,Fk,Att,Gen,Sk> {
+	
+	public abstract String toStringProver();
 		
 	boolean eq(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs, Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs);
 	
@@ -31,6 +33,11 @@ public interface DP<Ty,En,Sym,Fk,Att,Gen,Sk> {
 		@Override
 		public Term<Void, Void, Void, Void, Void, Void, Void> nf(Ctx<Var, Chc<Void, Void>> ctx, Term<Void, Void, Void, Void, Void, Void, Void> term) {
 			throw new RuntimeException();
+		}
+
+		@Override
+		public String toStringProver() {
+			return "Theorem prover for empty theory";
 		}
 
 	};

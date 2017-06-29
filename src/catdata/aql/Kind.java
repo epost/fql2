@@ -2,6 +2,7 @@ package catdata.aql;
 
 public enum Kind {
 
+	CONSTRAINTS,
 	TYPESIDE, //(TypeSide.class, TyExp.class),
 	SCHEMA, //(Schema.class, SchExp.class),
 	INSTANCE, //(Instance.class, InstExp.class),
@@ -10,7 +11,8 @@ public enum Kind {
 	QUERY, //(Query.class, QueryExp.class), 
 	PRAGMA, //(Pragma.class, PragmaExp.class), 
 	GRAPH, //(DMG.class, GraphExp.class),
-	COMMENT; //(Comment.class, CommentExp.class); 
+	COMMENT,
+	SCHEMA_COLIMIT; //(Comment.class, CommentExp.class); 
 	
 	@Override
 	public String toString() {
@@ -33,6 +35,10 @@ public enum Kind {
 			return "graph";
 		case COMMENT:
 			return "comment";
+		case SCHEMA_COLIMIT:
+			return "schema_colimit";
+		case CONSTRAINTS:
+			return "constraints";	
 		default:
 			throw new RuntimeException();
 		}

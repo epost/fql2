@@ -19,7 +19,7 @@ import catdata.Unit;
 import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 @SuppressWarnings({ "rawtypes", "serial" })
 public class FinSet extends Category<Set, Fn> {
@@ -47,7 +47,7 @@ public class FinSet extends Category<Set, Fn> {
 		
 		@SuppressWarnings("ConstantConditions")
 		public Y apply(X o) {
-			if (GlobalOptions.debug.fqlpp.VALIDATE) {
+			if (DefunctGlobalOptions.debug.fqlpp.VALIDATE) {
 				if (!source.contains(o)) {
 					throw new RuntimeException("Cannot apply " + this + " to " + o);
 				}
@@ -65,7 +65,7 @@ public class FinSet extends Category<Set, Fn> {
 		
 		@SuppressWarnings("ConstantConditions")
         public void validate() {
-			if (!GlobalOptions.debug.fqlpp.VALIDATE) {
+			if (!DefunctGlobalOptions.debug.fqlpp.VALIDATE) {
 				return;
 			}
 			if (source == null) {

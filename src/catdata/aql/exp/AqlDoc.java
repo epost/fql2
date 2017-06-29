@@ -2,7 +2,9 @@ package catdata.aql.exp;
 
 import catdata.Program;
 import catdata.Unit;
+import catdata.aql.ColimitSchema;
 import catdata.aql.Comment;
+import catdata.aql.Constraints;
 import catdata.aql.Graph;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
@@ -18,6 +20,9 @@ import catdata.graph.DMG;
 public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeException> {
 	
 	public static String doc(AqlEnv env, Program<Exp<?>> prog) {
+		if (prog == null || env == null) {
+			throw new RuntimeException("Must compile before using HTML output");
+		}
 		StringBuffer sb = new StringBuffer();
 		AqlDoc doc = new AqlDoc();
 		for (String k : prog.order) {
@@ -43,8 +48,8 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 		return "";
 	}
 
-	private static String black = "";
-	private static String grey = "";
+//	private static String black = "";
+//	private static String grey = "";
 	
 	/*graph.addNodes('Dennis', 'Michael', 'Jessica', 'Timothy', 'Barbara')
 	graph.addNodes('Amphitryon', 'Alcmene', 'Iphicles', 'Heracles');
@@ -117,7 +122,7 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 	private int fresh = 0;
 	@Override
 	public <Ty, En, Sym, Fk, Att> String visit(Unit arg, Schema<Ty, En, Sym, Fk, Att> S)  {
-		String ret = "";
+		/* String ret = "";
 		ret += "\n<script>";
 		ret += "\nvar graph" + fresh + " = new Springy.Graph();";
 		
@@ -138,7 +143,19 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 		ret += "\n</script>";
 		ret += "\n<div><canvas id=\"canvas" + fresh + "\" width=\"640\" height=\"320\" /></div>";
 		fresh++;
-		return ret;
+		return ret; */
+		return "";
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public <N, E0, Ty, En, Sym, Fk, Att> String visit(Unit arg, ColimitSchema<N, Ty, En, Sym, Fk, Att> S) throws RuntimeException {
+		return "";
+	}
+
+	@Override
+	public <Ty, En, Sym, Fk, Att> String visit(Unit arg, Constraints<Ty, En, Sym, Fk, Att> S) throws RuntimeException {
+		return "";
 	}
 
 

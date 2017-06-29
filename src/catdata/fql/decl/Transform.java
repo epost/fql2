@@ -40,7 +40,7 @@ import catdata.fql.FqlUtil;
 import catdata.fql.cat.Arr;
 import catdata.fql.cat.FinCat;
 import catdata.fql.parse.PrettyPrinter;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 import edu.uci.ics.jung.graph.Graph;
@@ -343,7 +343,7 @@ public class Transform {
 					if (c.isId(arr)) {
 						continue;
 					}
-					if (!GlobalOptions.debug.fql.ALL_GR_PATHS && arr.arr.path.size() != 1) {
+					if (!DefunctGlobalOptions.debug.fql.ALL_GR_PATHS && arr.arr.path.size() != 1) {
 						continue;
 					}
 					if (doLookup(src, arr.arr, x.second, y.second)) {
@@ -376,7 +376,7 @@ public class Transform {
 					if (c.isId(arr)) {
 						continue;
 					}
-					if (!GlobalOptions.debug.fql.ALL_GR_PATHS && arr.arr.path.size() != 1) {
+					if (!DefunctGlobalOptions.debug.fql.ALL_GR_PATHS && arr.arr.path.size() != 1) {
 						continue;
 					}
 					if (doLookup(dst, arr.arr, x.second, y.second)) {
@@ -456,7 +456,7 @@ public class Transform {
 
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix
-					+ GlobalOptions.debug.fql.trans_graph);
+					+ DefunctGlobalOptions.debug.fql.trans_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
 			Layout<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> layout = (Layout<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>>) x
 					.newInstance(first);

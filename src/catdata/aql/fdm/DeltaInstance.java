@@ -29,7 +29,8 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y>
 		F = f;
 		I = i;
 		alg = new DeltaAlgebra<>(F, I.algebra());
-		J = new SaturatedInstance<>(alg, dp());
+		J = new SaturatedInstance<>(alg, dp(), I.requireConsistency(), I.allowUnsafeJava());
+		validate();
 	}
 
 	@Override
@@ -66,6 +67,21 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y>
 	public boolean eq(Ctx<Var, Chc<Ty, En1>> ctx, Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y> lhs, Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y> rhs) {
 		//return J.dp().eq(ctx, lhs, rhs); //doesn't work bc J calls eq here
 		return I.dp().eq(F.trans(ctx),alg.translate(lhs),alg.translate(rhs));
+	}
+
+	@Override
+	public String toStringProver() {
+		return alg.toStringProver();
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return I.requireConsistency();
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return I.allowUnsafeJava();
 	}
 
 		

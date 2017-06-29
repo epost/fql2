@@ -28,16 +28,16 @@ import javax.swing.SwingConstants;
 
 import catdata.fql.decl.InstExp.Const;
 import catdata.fql.decl.SigExp.Var;
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
-import org.codehaus.jparsec.functors.Tuple5;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.functors.Tuple3;
+import org.jparsec.functors.Tuple4;
+import org.jparsec.functors.Tuple5;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -51,6 +51,7 @@ import catdata.ide.Example;
  *
  * Translates SQL schemas (in categorical normal form) to FQL.
  */
+@SuppressWarnings("deprecation")
 public class SqlToFql {
 
 	private final Example[] examples = { new PeopleExample() /* new GlobalSpec(), new Thomas() */, new A(), new B() };
@@ -458,7 +459,7 @@ public class SqlToFql {
 		List<Pair<String, String>> fks = new LinkedList<>();
 
 		for (Object o : t1) {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			if (p.a.toString().equals("FOREIGN")) {
 				Tuple5 x = (Tuple5) o;
 				Tuple3 y = (Tuple3) x.b;

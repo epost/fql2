@@ -33,6 +33,24 @@ schema Square = literal : Type {
 		D_attC : D -> dom	
 } 
 
+
+instance J = literal : Span {
+	generators
+		a : A
+		b1 b2 : B
+		c1 c2 : C
+	equations
+		b1.B_att = "b1"@dom
+		b2.B_att = "b2"@dom
+		c1.C_att = "c1"@dom
+		c2.C_att = "c2"@dom
+		a.f = b1 
+		a.g = c1
+} 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//pushouts, using queries
+
 query pushout = literal : Square -> Span {
  entities
  		
@@ -51,19 +69,6 @@ foreign_keys
 
 }
 
-instance J = literal : Span {
-	generators
-		a : A
-		b1 b2 : B
-		c1 c2 : C
-	equations
-		b1.B_att = "b1"@dom
-		b2.B_att = "b2"@dom
-		c1.C_att = "c1"@dom
-		c2.C_att = "c2"@dom
-		a.f = b1 
-		a.g = c1
-} 
 
 instance I = coeval pushout J
 

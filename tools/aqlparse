@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <TokenMakerDefinition>
   <general>
-    <package>fql_lib.aql</package>
+    <package>catdata.aql.gui</package>
     <className>AqlTokenMaker</className>
     <extendedClass>AbstractJFlexCTokenMaker</extendedClass>
     <classComment/>
@@ -11,9 +11,10 @@
   <comments>
     <lineComments enabled="true" start="//"/>
     <multiLineComments enabled="true" end="*/" start="/*"/>
-    <docComments enabled="false" end="" start=""/>
+    <docComments enabled="true" end="*)" start="(*"/>
   </comments>
   <keywords>
+    <keyword>schema_colimit</keyword>
     <keyword>graph</keyword>
     <keyword>instance</keyword>
     <keyword>mapping</keyword>
@@ -22,25 +23,35 @@
     <keyword>schema</keyword>
     <keyword>transform</keyword>
     <keyword>typeside</keyword>
+    <keyword>html</keyword>
+    <keyword>constraints</keyword>
   </keywords>
   <keywords2>
+  	<keyword>chase</keyword>
+  	<keyword>check</keyword>
+  	<keyword>assert_consistent</keyword>
     <keyword>attributes</keyword>
+    <keyword>coequalize</keyword>
     <keyword>coeval</keyword>
     <keyword>colimit</keyword>
     <keyword>constants</keyword>
+    <keyword>coproduct</keyword>
     <keyword>counit</keyword>
     <keyword>counit_query</keyword>
+<keyword>coproduct_sigma</keyword>
     <keyword>delta</keyword>
     <keyword>distinct</keyword>
     <keyword>dst</keyword>
     <keyword>edges</keyword>
     <keyword>empty</keyword>
     <keyword>entities</keyword>
+    <keyword>entity_equations</keyword>
     <keyword>equations</keyword>
     <keyword>eval</keyword>
     <keyword>exec_cmdline</keyword>
     <keyword>exec_jdbc</keyword>
     <keyword>exec_js</keyword>
+    <keyword>exists</keyword>
     <keyword>export_csv_instance</keyword>
     <keyword>export_csv_transform</keyword>
     <keyword>export_jdbc_instance</keyword>
@@ -50,9 +61,12 @@
     <keyword>from</keyword>
     <keyword>functions</keyword>
     <keyword>generators</keyword>
+<keyword>getMapping</keyword>
+<keyword>getSchema</keyword>
     <keyword>id</keyword>
     <keyword>import_csv</keyword>
     <keyword>import_jdbc</keyword>
+    <keyword>import_jdbc_all</keyword>
     <keyword>imports</keyword>
     <keyword>insert</keyword>
     <keyword>java</keyword>
@@ -61,17 +75,24 @@
     <keyword>java_types</keyword>
     <keyword>lambda</keyword>
     <keyword>literal</keyword>
+<keyword>modify</keyword>
     <keyword>multi_equations</keyword>
     <keyword>nodes</keyword>
     <keyword>observation_equations</keyword>
     <keyword>options</keyword>
     <keyword>path_equations</keyword>
+<keyword>quotient</keyword>
+    <keyword>random</keyword>
+<keyword>remove</keyword>
+<keyword>rename</keyword>
     <keyword>return</keyword>
     <keyword>schemaOf</keyword>
+    <keyword>sql</keyword>
     <keyword>sigma</keyword>
     <keyword>src</keyword>
     <keyword>types</keyword>
     <keyword>typesideOf</keyword>
+    <keyword>unique</keyword>    
     <keyword>unit</keyword>
     <keyword>unit_query</keyword>
     <keyword>where</keyword>

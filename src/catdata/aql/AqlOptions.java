@@ -5,21 +5,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.swing.JComponent;
-
-import catdata.Pair;
-import catdata.Unit;
 import catdata.Util;
 import catdata.aql.AqlProver.ProverName;
 import catdata.aql.exp.AqlParser;
-import catdata.ide.CodeTextPanel;
-import catdata.ide.Language;
-import catdata.ide.Options;
 
 public final class AqlOptions {
+	
+	public static final AqlOptions initialOptions = new AqlOptions();
 	
 	//TODO aql number of cores
 	
@@ -36,7 +30,22 @@ public final class AqlOptions {
 		id_column_name,
 		always_reload,
 		varchar_length,
-				
+		gui_max_table_size,		
+		gui_max_graph_size,		
+		gui_max_string_size,
+		gui_rows_to_display,
+		random_seed,
+		num_threads,
+		eval_max_temp_size,
+		eval_reorder_joins,
+		eval_max_plan_depth,
+		eval_join_selectivity,
+		eval_use_indices,
+		eval_use_sql_above,
+		eval_approx_sql_unsafe,
+		eval_sql_persistent_indices,
+		query_remove_redundancy,
+		
 		program_allow_nontermination_unsafe,
 		completion_precedence,
 		completion_sort,
@@ -46,6 +55,7 @@ public final class AqlOptions {
 		allow_java_eqs_unsafe, //TODO aql enforce
 		require_consistency, //TODO: aql enforce require_consistency
 		timeout, 
+		allow_attribute_merges,
 		dont_verify_is_appropriate_for_prover_unsafe,
 		dont_validate_unsafe,
 		static_typing,
@@ -62,7 +72,13 @@ public final class AqlOptions {
 		}
 		
 		public Boolean getBoolean(Map<String, String> map) {
-			return Boolean.parseBoolean(getString(map));
+			String s = getString(map).toLowerCase();
+			if (s.equals("true")) {
+				return true;
+			} else if (s.equals("false")) {
+				return false;
+			}
+			throw new RuntimeException("In " + map + ", neither true nor false: " + s);
 		}
 		/*
 		public String getMaybeString(Map<String, String> map) {
@@ -78,6 +94,10 @@ public final class AqlOptions {
 				throw new RuntimeException("Expected a character, instead received "+ s);
 			}
 			return s.charAt(0);
+		}
+		
+		public Float getFloat(Map<String, String> map) {
+			return Float.parseFloat(getString(map));
 		}
 		
 		public Integer getInteger(Map<String, String> map) {
@@ -113,12 +133,16 @@ public final class AqlOptions {
 	
 	public final Map<AqlOption, Object> options; 
 
+	private AqlOptions() {
+		options = new HashMap<>();
+	}
+
 	public AqlOptions(ProverName name) {
 		options = new HashMap<>();
 		options.put(AqlOption.prover, name);
 	}
 	
-	private static String printDefault() {
+	private String printDefault() {
 		List<String> l = new LinkedList<>();
 		for (AqlOption option : AqlOption.values()) {
 			Object o = getDefault(option);
@@ -132,9 +156,20 @@ public final class AqlOptions {
 	}
 	
 	//anything 'unsafe' should default to false
+	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
+		case eval_max_temp_size:
+			return 1024*1024*8;
+		case eval_reorder_joins:
+			return true;
 		case allow_java_eqs_unsafe:
+			return false;
+		case num_threads:
+			return Runtime.getRuntime().availableProcessors();
+		case random_seed:
+			return 0;
+		case allow_attribute_merges:
 			return false;
 		case completion_precedence:
 			return null;
@@ -143,9 +178,9 @@ public final class AqlOptions {
 		case dont_validate_unsafe:
 			return false;
 		case require_consistency: 
-			return false;
+			return true;
 		case timeout:
-			return 10L;
+			return 30L;
 		case dont_verify_is_appropriate_for_prover_unsafe:
 			return false;
 		case completion_compose:
@@ -175,10 +210,32 @@ public final class AqlOptions {
 		case csv_quote_char:
 			return '\"';
 		case varchar_length:
-			return 64;
+			return 256;
 		case csv_null_string:
 			return null;
 		case program_allow_nontermination_unsafe:
+			return false;
+		case gui_max_table_size:
+			return 1024;
+		case gui_max_string_size:
+			return 8096;
+		case gui_max_graph_size:
+			return 128;
+		case eval_join_selectivity:
+			return 0.5f;
+		case eval_max_plan_depth:
+			return 8;
+		case eval_use_indices:
+			return true;
+		case gui_rows_to_display:
+			return 256;
+		case query_remove_redundancy:
+			return true;
+		case eval_approx_sql_unsafe:
+			return false;
+		case eval_use_sql_above:
+			return 16*1024;
+		case eval_sql_persistent_indices:
 			return false;
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
@@ -186,29 +243,62 @@ public final class AqlOptions {
 		
 	}
 	
-	public static Object getOrDefault(Map<String, String> map, AqlOption op) {
+	public Object getOrDefault(Map<String, String> map, AqlOption op) {
 		if (map.containsKey(op.toString())) {
 			return getFromMap(map, null, op);
+		} else if (options.containsKey(op)) {
+			return options.get(op);
 		}
-			return getDefault(op);
+		return getDefault(op);
 	}
 	
+
 	/**
 	 * @param map
 	 * @param col possibly null
 	 */ 
-	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(Map<String, String> map, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col) {
-		options = new HashMap<>();
+	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(Map<String, String> map, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col, AqlOptions defaults) {
+		options = new HashMap<>(defaults.options);
 		for (String key : map.keySet()) {
 			AqlOption op = AqlOption.valueOf(key);
 			Object ob = getFromMap(map, col, op);
 			options.put(op, ob);
 		}		
 	} 
+	
+	
+	/**
+	 * @param map
+	 * @param col possibly null
+	 */ 
+	/*public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(Map<String, String> map, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col) {
+		options = new HashMap<>();
+		for (String key : map.keySet()) {
+			AqlOption op = AqlOption.valueOf(key);
+			Object ob = getFromMap(map, col, op);
+			options.put(op, ob);
+		}		
+	} */
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case eval_max_temp_size:
+			return op.getInteger(map);
+		case eval_reorder_joins:
+			return op.getBoolean(map);
+		case num_threads:
+			return op.getInteger(map);
+		case gui_max_table_size:
+			return op.getInteger(map);
+		case gui_max_graph_size:
+			return op.getInteger(map);
+		case gui_max_string_size:
+			return op.getInteger(map);
+		case random_seed:
+			return op.getInteger(map);
 		case allow_java_eqs_unsafe:
+			return op.getBoolean(map);
+		case allow_attribute_merges:
 			return op.getBoolean(map);
 		case completion_precedence:
 			return AqlOption.getPrec(map.get(op.toString()), col);
@@ -253,6 +343,22 @@ public final class AqlOptions {
 		case csv_null_string:
 			return op.getString(map);
 		case program_allow_nontermination_unsafe:
+			return op.getBoolean(map);
+		case eval_join_selectivity:
+			return op.getFloat(map);
+		case eval_max_plan_depth:
+			return op.getInteger(map);
+		case eval_use_indices:
+			return op.getBoolean(map);
+		case gui_rows_to_display:
+			return op.getInteger(map);
+		case query_remove_redundancy:
+			return op.getBoolean(map);
+		case eval_approx_sql_unsafe:
+			return op.getBoolean(map);
+		case eval_use_sql_above:
+			return op.getInteger(map);
+		case eval_sql_persistent_indices:
 			return op.getBoolean(map);
 		default:
 			throw new RuntimeException("Anomaly: please report");
@@ -315,30 +421,14 @@ public final class AqlOptions {
 		return Util.sep(options, " = ", "\n");
 	}
 
+	static String msg0 = "completion_precedence = \"a b c\" means a < b < c";
+	static String msg1 = msg0 + "\n\nAvailable provers: " + Arrays.toString(ProverName.values());
+	static String msg  = msg1 + "\n\nOption descriptions are available in the AQL manual, see categoricaldata.net/fql.html";
 
-	public static final class AqlOptionsDefunct extends Options {
+	public static String getMsg() {
+		return "AQL options are specified in each AQL expression.\nHere are the available options and their defaults:\n\n\t" + new AqlOptions().printDefault() + "\n\n" + msg;
+	}
 
-		private static final long serialVersionUID = 1L;
-	
-		@Override
-		public String getName() {
-			return Language.AQL.toString();
-		}
-		
-		private final String msg0 = "completion_precedence = \"a b c\" means a < b < c";
-		private final String msg1 = msg0 + "\n\nAvailable provers: " + Arrays.toString(ProverName.values());
-		private final String msg  = msg1 + "\n\nOption descriptions are available in the AQL manual, see categoricaldata.net/fql.html";
-		@Override
-		public Pair<JComponent, Function<Unit, Unit>> display() {
-			return new Pair<>(new CodeTextPanel("", "Aql options are specified in each Aql expression.\nHere are the available options and their defaults:\n\n\t" + printDefault() + "\n\n" + msg), x -> x);
-		}
-	
-		@Override
-		public int size() {
-			return 1;
-		}
-
-}
 	
 	
 	

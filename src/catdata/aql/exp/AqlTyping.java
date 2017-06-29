@@ -2,13 +2,26 @@ package catdata.aql.exp;
 
 import catdata.Pair;
 import catdata.Program;
+import catdata.aql.AqlOptions;
 import catdata.graph.DMG;
 
 public class AqlTyping {
 	
-	//TODO aql turn into visitor
 	
-	public AqlTyping(Program<Exp<?>> prog) {
+	public <Ty,Sym> boolean eq(TyExp<Ty,Sym> t1, TyExp<Ty,Sym> t2) {
+		return t1.resolve(prog).equals(t2.resolve(prog));
+	}
+	
+	public <Ty,En,Sym,Fk,Att> boolean eq(SchExp<Ty,En,Sym,Fk,Att> s1, SchExp<Ty,En,Sym,Fk,Att> s2) {
+		return s1.resolve(this, prog).equals(s2.resolve(this, prog));
+	}
+	
+	//TODO aql turn into visitor
+	private final Program<Exp<?>> prog;
+	
+	public AqlTyping(Program<Exp<?>> prog, AqlOptions defaults) {
+		this.defaults = defaults;
+		this.prog = prog;
 		for (String s : prog.order) {
 			Exp<?> e = prog.exps.get(s);
 			switch (e.kind()) {
@@ -38,6 +51,12 @@ public class AqlTyping {
 				continue;
 			case COMMENT:
 				continue;
+			case SCHEMA_COLIMIT:
+				defs.scs.put(s, ((ColimSchExp<?,?,?,?,?,?,?>)e).type(this));
+				continue;
+			case CONSTRAINTS:
+				defs.eds.put(s, ((EdsExp<?,?,?,?,?>)e).type(this));
+				continue;
 			default:
 				break;
 			}
@@ -45,6 +64,8 @@ public class AqlTyping {
 		}
 	}
 
-	public final KindCtx<String, DMG<?,?>, Void, Void, SchExp<?,?,?,?,?>, Pair<InstExp<?,?,?,?,?,?,?,?,?>,InstExp<?,?,?,?,?,?,?,?,?>>, Pair<SchExp<?,?,?,?,?>,SchExp<?,?,?,?,?>>, Pair<SchExp<?,?,?,?,?>,SchExp<?,?,?,?,?>>, Void, Void> defs = new KindCtx<>();
+	//TODO aql
+	public final KindCtx<String, DMG<?,?>, Void, Void, SchExp<?,?,?,?,?>, Pair<InstExp<?,?,?,?,?,?,?,?,?>,InstExp<?,?,?,?,?,?,?,?,?>>, Pair<SchExp<?,?,?,?,?>,SchExp<?,?,?,?,?>>, Pair<SchExp<?,?,?,?,?>,SchExp<?,?,?,?,?>>, Void, Void, ColimSchExp<?,?,?,?,?,?,?>,SchExp<?,?,?,?,?>> defs = new KindCtx<>();
 	
+	public final AqlOptions defaults;
 }

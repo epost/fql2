@@ -61,19 +61,25 @@ public class SqlInstance {
 		//this.conn = conn;
 		
 		for (SqlTable table : schema.tables) {
-			Statement stmt = conn.createStatement();
-			stmt.execute("SELECT DISTINCT * FROM " + table.name);
-			ResultSet resultSet = stmt.getResultSet();
-			
-			Set<Map<SqlColumn, Optional<Object>>> rows = new HashSet<>();
-			while (resultSet.next()) {
-				Map<SqlColumn, Optional<Object>> row = new HashMap<>();
-				for (SqlColumn col : table.columns) {
-			        row.put(col, Optional.of(resultSet.getObject(col.name)));
-			    }
-				rows.add(row);
+			try (Statement stmt = conn.createStatement()) {
+				stmt.execute("SELECT DISTINCT * FROM " + table.name);
+				try (ResultSet resultSet = stmt.getResultSet()) {
+					Set<Map<SqlColumn, Optional<Object>>> rows = new HashSet<>();
+					while (resultSet.next()) {
+						Map<SqlColumn, Optional<Object>> row = new HashMap<>();
+						for (SqlColumn col : table.columns) {
+							Object o = resultSet.getObject(col.name);
+							if (o != null) {
+								row.put(col, Optional.of(o));
+							} else {
+								row.put(col, Optional.empty());
+							}
+					    }
+						rows.add(row);
+					}
+					db.put(table, rows);
+				}
 			}
-			db.put(table, rows);
 		}
 	}
 	

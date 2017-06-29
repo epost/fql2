@@ -11,7 +11,7 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 
 @SuppressWarnings("serial")
@@ -166,7 +166,7 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 
 	@SuppressWarnings("ConstantConditions")
     private void validate() {
-		if (!GlobalOptions.debug.fqlpp.VALIDATE) {
+		if (!DefunctGlobalOptions.debug.fqlpp.VALIDATE) {
 			return;
 		}
 		if (source.isInfinite()) {

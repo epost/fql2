@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.function.Function;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -21,6 +22,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.plaf.basic.BasicButtonUI;
 
+import catdata.Unit;
+
 /**
  * Component to be used as tabComponent; Contains a JLabel to show the text and
  * a JButton to close the tab it belongs to
@@ -28,14 +31,17 @@ import javax.swing.plaf.basic.BasicButtonUI;
 @SuppressWarnings("serial")
 class ButtonTabComponent extends JPanel {
 	private final JTabbedPane pane;
+	
+	private Function<CodeEditor<?,?,?>, Unit> callback;
 
-	public ButtonTabComponent(JTabbedPane pane) {
+	public ButtonTabComponent(JTabbedPane pane, Function<CodeEditor<?,?,?>, Unit> callback) {
 		// unset default FlowLayout' gaps
 		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		if (pane == null) {
 			throw new NullPointerException("TabbedPane is null");
 		}
 		this.pane = pane;
+		this.callback = callback;
 		setOpaque(false);
 
 		// make JLabel read titles from JTabbedPane
@@ -90,7 +96,8 @@ class ButtonTabComponent extends JPanel {
 				if (c.abortBecauseDirty()) {
 					return;
 				}
-				pane.remove(i);
+				//pane.remove(i); //done by GUI
+				callback.apply(c);
 			}
 		}
 

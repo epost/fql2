@@ -22,16 +22,16 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import catdata.fpql.XExp.Var;
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
-import org.codehaus.jparsec.functors.Tuple5;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.functors.Tuple3;
+import org.jparsec.functors.Tuple4;
+import org.jparsec.functors.Tuple5;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -44,6 +44,7 @@ import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
 import catdata.ide.Language;
 
+@SuppressWarnings("deprecation")
 public class XRaToFpql {
 
 	private static XMapConst doMapping(List<Pair<String, String>> nm,
@@ -1241,7 +1242,7 @@ public class XRaToFpql {
 		List<Pair<String, String>> types = new LinkedList<>();
 
 		for (Object o : t1) {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) o;
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) o;
 			types.add(new Pair<>(p.a.toString(), p.b.toString()));
 		}
 		return new ECreateTable(name, types);
@@ -1303,10 +1304,10 @@ public class XRaToFpql {
 
 		Tuple4 o = (Tuple4) decl;
 
-		org.codehaus.jparsec.functors.Pair from10 = (org.codehaus.jparsec.functors.Pair) o.a;
-		org.codehaus.jparsec.functors.Pair where10 = (org.codehaus.jparsec.functors.Pair) o.b;
-		org.codehaus.jparsec.functors.Pair from11 = (org.codehaus.jparsec.functors.Pair) o.c;
-		org.codehaus.jparsec.functors.Pair where11 = (org.codehaus.jparsec.functors.Pair) o.d;
+		org.jparsec.functors.Pair from10 = (org.jparsec.functors.Pair) o.a;
+		org.jparsec.functors.Pair where10 = (org.jparsec.functors.Pair) o.b;
+		org.jparsec.functors.Pair from11 = (org.jparsec.functors.Pair) o.c;
+		org.jparsec.functors.Pair where11 = (org.jparsec.functors.Pair) o.d;
 
 		List<Tuple3> from10x = (List<Tuple3>) from10.b;
 		for (Tuple3 k : from10x) {
@@ -1364,8 +1365,8 @@ public class XRaToFpql {
 		Tuple3 o = (Tuple3) decl;
 
 		Tuple3 select0 = (Tuple3) o.a;
-		org.codehaus.jparsec.functors.Pair from0 = (org.codehaus.jparsec.functors.Pair) o.b;
-		org.codehaus.jparsec.functors.Pair where0 = (org.codehaus.jparsec.functors.Pair) o.c;
+		org.jparsec.functors.Pair from0 = (org.jparsec.functors.Pair) o.b;
+		org.jparsec.functors.Pair where0 = (org.jparsec.functors.Pair) o.c;
 
 		boolean distinct;
         distinct = select0.b != null;

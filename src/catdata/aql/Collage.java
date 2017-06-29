@@ -368,7 +368,8 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return ret;
 	}
 
-	public void assertFreeOnJava() {
+	//TODO aql move this into schema
+	/*public void assertFreeOnJava() {
 		// each symbol must be of the form
 		// f : s_1 , ... , s_n -> s
 		// where isJava(s) implies all( isJava(s_i)) or all(!isJava(s_i))
@@ -394,7 +395,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			}
 		}
 
-	}
+	}*/
 
 	public Chc<Ty, En> type(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		Pair<LinkedHashMap<Var, Ty>, LinkedHashMap<Var, En>> m = Util.split(ctx.map);
@@ -403,24 +404,7 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return term.type(ctxt, ctxe, tys, syms.map, java_tys.map, ens, atts.map, fks.map, gens.map, sks.map);
 	}
 
-	/*
-	 * private List<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att,
-	 * Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>>
-	 * removeNonJavaTypedEqs(Set<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym,
-	 * Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs) {
-	 * List<Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>,
-	 * Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> ret = new LinkedList<>(); for
-	 * (Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>,
-	 * Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : eqs) { Chc<Ty, En> type =
-	 * type(eq.first, eq.second); if (type.left && java_tys.containsKey(type.l))
-	 * { ret.add(eq); } } return ret; }
-	 */
-
-	// conservative
-	// public boolean isFree() {
-	// return simplify().first.eqs.isEmpty();
-	// }
-
+	
 	
 	public Collage<Ty, En, Sym, Fk, Att, Gen, Sk> reduce(AqlJs<Ty,Sym> js) {
 		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> ret = new Collage<>(this);

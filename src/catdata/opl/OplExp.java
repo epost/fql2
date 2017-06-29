@@ -40,7 +40,7 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.fqlpp.cat.FinSet;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 import catdata.opl.OplParser.DoNotIgnore;
 import catdata.opl.OplQuery.Agg;
 import catdata.opl.OplQuery.Block;
@@ -1043,7 +1043,7 @@ public abstract class OplExp implements OplObject {
 				substed.put(s2, s1);
 			}
 			// simplifies the presentation, favoring the left over the right
-			if (GlobalOptions.debug.opl.opl_pushout_simpl) {
+			if (DefunctGlobalOptions.debug.opl.opl_pushout_simpl) {
 				for (C c : F1.src.projEA().symbols.keySet()) {
 					Pair<OplCtx<S1, V>, OplTerm<C1, V>> p1 = F1.m.symbols.get(c);
 					Pair<OplCtx<S2, V>, OplTerm<C2, V>> p2 = F2.m.symbols.get(c);
@@ -1335,7 +1335,7 @@ public abstract class OplExp implements OplObject {
 				OplTerm<Chc<C, Chc<Y, Z>>, V> term = new OplTerm<>(Chc.inRight(Chc.inLeft(y)), new LinkedList<>());
 				map1.get(s).put(y, term);
 				ytm.get(s).put(y, term);
-				if (GlobalOptions.debug.opl.opl_prover_force_prec) {
+				if (DefunctGlobalOptions.debug.opl.opl_prover_force_prec) {
 					prec.put(Chc.inLeft(y), precIdx++);
 				}
 			}
@@ -2376,7 +2376,7 @@ public abstract class OplExp implements OplObject {
 				Thread t = new Thread(runnable);
 				try {
 					t.start();
-					t.join(GlobalOptions.debug.opl.opl_saturate_timeout);
+					t.join(DefunctGlobalOptions.debug.opl.opl_saturate_timeout);
 
 					t.stop();
 					if (bot.getText().equals("")) {
@@ -2487,7 +2487,7 @@ public abstract class OplExp implements OplObject {
 		public final Iterator<V> fr;
 
 		void validate() {
-			if (!GlobalOptions.debug.opl.opl_allow_horn && !implications.isEmpty()) {
+			if (!DefunctGlobalOptions.debug.opl.opl_allow_horn && !implications.isEmpty()) {
 				throw new DoNotIgnore("Implications in theories disabled in options menu.");
 			}
 			for (C k : symbols.keySet()) {
@@ -3061,7 +3061,7 @@ public abstract class OplExp implements OplObject {
 			for (Triple<OplCtx<S1, V>, OplTerm<C1, V>, OplTerm<C1, V>> eq : src.equations) {
 				OplTerm<C2, V> l = subst(eq.second);
 				OplTerm<C2, V> r = subst(eq.third);
-				if (GlobalOptions.debug.opl.opl_validate) {
+				if (DefunctGlobalOptions.debug.opl.opl_validate) {
 					KBExp<C2, V> l0 = dst.getKB().nf(OplToKB.convert(l));
 					KBExp<C2, V> r0 = dst.getKB().nf(OplToKB.convert(r));
 					if (!l0.equals(r0)) {
@@ -3732,7 +3732,7 @@ public abstract class OplExp implements OplObject {
 			List<String> xxx = new LinkedList<>(all.keySet());
 			xxx.sort(comp);
 			for (String n : xxx) {
-				if (skip.contains(n) && GlobalOptions.debug.opl.opl_suppress_dom) {
+				if (skip.contains(n) && DefunctGlobalOptions.debug.opl.opl_suppress_dom) {
 					continue;
 				}
 				if (!skipGUI) {
@@ -4864,7 +4864,7 @@ public abstract class OplExp implements OplObject {
 				throw new RuntimeException("JS model not on expected theory:\n\n" + S.projT() + "\n\nvs\n\n" + J.sig0);
 			}
 			if (J != null) {
-				if (GlobalOptions.debug.opl.opl_safe_java && !S.projT().equations.isEmpty()) {
+				if (DefunctGlobalOptions.debug.opl.opl_safe_java && !S.projT().equations.isEmpty()) {
 					throw new RuntimeException("With safe java option enabled, type sides cannot have equations");
 				}
 			}
@@ -4883,7 +4883,7 @@ public abstract class OplExp implements OplObject {
 
 		@Override
 		public String toString() {
-			String x = GlobalOptions.debug.opl.opl_print_simplified_presentations ? P.simplify().toString() : P.toString();
+			String x = DefunctGlobalOptions.debug.opl.opl_print_simplified_presentations ? P.simplify().toString() : P.toString();
 
 			int j = "presentation ".length();
 			return "INSTANCE " + x.substring(j);
@@ -4904,13 +4904,13 @@ public abstract class OplExp implements OplObject {
 			try {
 				Quad<OplSetInst<S, C, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<Chc<C, X>, JSWrapper>, V>>, OplPres<S, C, V, OplTerm<Chc<C, X>, V>>, OplSetInst<S, C, OplTerm<Chc<C, X>, V>>> xxx = saturate();
 
-				String xxxthird = GlobalOptions.debug.opl.opl_print_simplified_presentations ? xxx.third.simplify().toString() : xxx.third.toString();
+				String xxxthird = DefunctGlobalOptions.debug.opl.opl_print_simplified_presentations ? xxx.third.simplify().toString() : xxx.third.toString();
 
 				ret.add(new CodeTextPanel(BorderFactory.createEtchedBorder(), "", xxxthird), "Type Algebra");
 
 				ret.add(xxx.first.makeTables(S.projT().sorts, false).first, "Saturation");
 
-				if (GlobalOptions.debug.opl.opl_display_fresh_ids) {
+				if (DefunctGlobalOptions.debug.opl.opl_display_fresh_ids) {
 					Pair<JComponent, Map<Object, Pair<List<String>, List<Object[]>>>> ggg = xxx.fourth.number(S.projT().sorts).makeTables(S.projT().sorts, false);
 					ret.add(ggg.first, "Normalized");
 					ret.add(new CodeTextPanel("", makeCsv(ggg.second, S.projT().sorts)), "CSV");
@@ -4954,7 +4954,7 @@ public abstract class OplExp implements OplObject {
 
 			OplPres<S, C, V, OplTerm<Chc<C, X>, V>> T = typeAlg(I, S, P, P0);
 
-			if (I0 != null && GlobalOptions.debug.opl.opl_safe_java) {
+			if (I0 != null && DefunctGlobalOptions.debug.opl.opl_safe_java) {
 				OplPres.checkFreeExtension(T);
 			}
 
@@ -5090,7 +5090,7 @@ public abstract class OplExp implements OplObject {
 
 			ret.toSig();
 
-			if (GlobalOptions.debug.opl.opl_require_consistency) {
+			if (DefunctGlobalOptions.debug.opl.opl_require_consistency) {
 				OplPres.checkFreeExtension(ret);
 			}
 

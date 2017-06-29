@@ -5,13 +5,14 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
+import catdata.Program;
 import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
@@ -30,12 +31,21 @@ import catdata.aql.Var;
 
 public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object>  {
 	
+	public SchExp<Object,Object,Object,Object,Object> resolve(AqlTyping G, Program<Exp<?>> prog) {
+	return this;
+	}
+
 	@Override
 	public Collection<Pair<String, Kind>> deps() {
 		Set<Pair<String, Kind>> ret = new HashSet<>();
 		ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.SCHEMA)).collect(Collectors.toList()));
 		ret.addAll(typeSide.deps());
 		return ret;
+	}
+	
+	@Override
+	public Map<String, String> options() {
+		return options;
 	}
 
 	//TODO: aql printing of contexts broken when conitain choices
@@ -61,13 +71,6 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		
 		col.fks.putAll(Util.toMapSafely(fks));
 		col.atts.putAll(Util.toMapSafely(atts));
-	/*why were these empty loops here?
-		for (Pair<List<Object>, Object> eq : col.syms.values()) {
-			
-		}
-		for (Pair<Object, Object> eq : col.atts.values()) {
-			
-		}*/
 		
 		for (Quad<String, Object, RawTerm, RawTerm> eq : t_eqs) {
 				Map<String, Chc<Object, Object>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
@@ -116,14 +119,14 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 			col.eqs.add(new Eq<>(new Ctx<>(eq.first).inRight(), eq.second, eq.third));
 		}
 		
-		AqlOptions strat = new AqlOptions(options, col);
+		AqlOptions strat = new AqlOptions(options, col, env.defaults);
 		
-		AqlOptions s = new AqlOptions(Util.singMap(AqlOption.prover.toString(), ProverName.fail.toString()), col);
+		AqlOptions s = new AqlOptions(Util.singMap(AqlOption.prover.toString(), ProverName.fail.toString()), col, env.defaults);
 		
 		//forces type checking before prover construction
-		new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(s, col), false);
+		new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(s, col, ts.js), false);
 		
-		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col), !((Boolean)strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
+		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col, ts.js), !((Boolean)strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
 		return ret; 
 		
 	}
@@ -145,10 +148,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 	
 	private final Map<String, String> options;
 	
-	@Override
-	public long timeout() {
-		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-	}	
+		
 
 	private String toString;
 	

@@ -3,6 +3,7 @@ package catdata.aql;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,14 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	public <Ty2, En2, Sym2, Fk2, Att2, Gen2, Sk2> Term<Ty2, En2, Sym2, Fk2, Att2, Gen2, Sk2>
 	map(Function<Ty,Ty2> tyf, Function<Sym, Sym2> symf, Function<Fk, Fk2> fkf, Function<Att, Att2> attf, Function<Gen, Gen2> genf, Function<Sk, Sk2> skf) {
 		return map(this, tyf, symf, fkf, attf, genf, skf);
+	}
+	
+	public <Fk2> Term<Ty, En, Sym, Fk2, Att, Gen, Sk> mapFk(Function<Fk, Fk2> f) {
+		return map(this, Function.identity(), Function.identity(), f, Function.identity(), Function.identity(), Function.identity());
+	}
+	
+	public <Att2> Term<Ty, En, Sym, Fk, Att2, Gen, Sk> mapAtt(Function<Att, Att2> f) {
+		return map(this, Function.identity(), Function.identity(), Function.identity(), f, Function.identity(), Function.identity());
 	}
 	
 	public <Gen2> Term<Ty, En, Sym, Fk, Att, Gen2, Sk> mapGen(Function<Gen, Gen2> genf) {
@@ -142,6 +151,23 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		return false;
 	}
+	
+	public boolean hasTypeType() {
+		if (obj != null) {
+			return true;
+		} else if (sk != null) {
+			return true;
+		} else if (gen != null) {
+			return false; 
+		} else if (sym != null) {
+			return true;
+		} else if (fk != null) {
+			return arg.hasTypeType();
+		} else if (att != null) {
+			return true;
+		}
+		return Util.anomaly();
+	}
 /* wrong
 	public boolean isSchema() {
 		if (isTypeSide()) {
@@ -183,6 +209,9 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 				throw new RuntimeException("In " + this + ", " + var + " is not a variable in context [" + ctxt + "] and [" + ctxe + "]");
 			}
 		} else if (obj != null) {
+			if (!java_tys_string.containsKey(ty)) {
+				throw new RuntimeException("In " + this + ", not a declared type: " + ty);
+			} 
 			Class<?> c = Util.load(java_tys_string.get(ty));
 			if (!c.isInstance(obj)) {
 				throw new RuntimeException("In " + this + ", " + "primitive " + obj + " is given type " + ty + " but is not an instance of " + c + ", is an instance of " + obj.getClass());
@@ -191,7 +220,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (sym != null) {
 			Pair<List<Ty>, Ty> t = syms.get(sym);
 			if (t == null) {
-				throw new RuntimeException("In " + this + ", " + sym + " is not a typeside symbol");
+				throw new RuntimeException("In " + this + ", " + sym + " is not a typeside symbol.  Typeside symbols:\n\n" + syms);
 			} else if (t.first.size() != args.size()) {
 				throw new RuntimeException("In " + this + ", " + sym + " given " + args.size() + "arguments but requires " + t.first.size());
 			}
@@ -680,6 +709,42 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		return Head(e.getApp().f, e.getApp().args.stream().map(Term::fromKB).collect(Collectors.toList()));
 	}
+	
+	public void gens(Set<Gen> gens) {
+		if (var != null) {
+			
+		} else if (gen != null) {
+			gens.add(gen);
+		} else {
+			for (@SuppressWarnings("hiding") Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
+				arg.gens(gens);
+			}
+		} 
+	}
+	
+	public void fks(Set<Fk> fks) {
+		if (var != null) {
+			
+		} else if (fk != null) {
+			fks.add(fk);
+		} else {
+			for (@SuppressWarnings("hiding") Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
+				arg.fks(fks);
+			}
+		} 
+	}
+	
+	public void atts(Set<Att> atts) {
+		if (var != null) {
+			
+		} else if (att != null) {
+			atts.add(att);
+		} else {
+			for (@SuppressWarnings("hiding") Term<Ty, En, Sym, Fk, Att, Gen, Sk> arg : args()) {
+				arg.atts(atts);
+			}
+		} 
+	}
 
 	public void objs(Set<Pair<Object, Ty>> objs) {
 		if (var != null) {
@@ -706,5 +771,46 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> upTalg(Term<Ty, Void, Sym, Void, Void, Void, Sk> term) {
 		return term.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity()); 
+	}	
+
+
+	public Set<Gen> gens() {
+		Set<Gen> ret = new HashSet<>();
+		gens(ret);
+		return ret;
+	}
+	
+	public Set<Fk> fks() {
+		Set<Fk> ret = new HashSet<>();
+		fks(ret);
+		return ret;
+	}
+	
+	public Set<Att> atts() {
+		Set<Att> ret = new HashSet<>();
+		atts(ret);
+		return ret;
+	}
+
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replace(Map<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> g) {
+		if (g.containsKey(this)) {
+			return g.get(this);
+		} else if (obj != null || gen != null || sk != null || var != null) {
+			return this;
+		} else if (fk != null) {
+			return Term.Fk(fk, arg.replace(g));
+		} else if (att != null) {
+			return Term.Att(att, arg.replace(g));
+		} else if (sym != null) {
+			if (args.size() == 0) {
+				return this;
+			} 
+			return Term.Sym(sym, args.stream().map(x -> x.replace(g)).collect(Collectors.toList()));
+		}
+		return Util.anomaly();
+	}
+	
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replace(Term<Ty, En, Sym, Fk, Att, Gen, Sk> s, Term<Ty, En, Sym, Fk, Att, Gen, Sk> t) {
+		return replace(Util.singMap(s, t));
 	}
 }

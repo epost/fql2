@@ -24,12 +24,14 @@ public class ToCsvPragmaTransform<Ty,En,Sym,Att,Fk> extends Pragma {
 		try {
 			StringBuffer sb = new StringBuffer();
 			CSVPrinter printer = new CSVPrinter(sb, format);
-	
-			for (X1 x1 : h.src().algebra().allXs()) {
-				List<String> row = new LinkedList<>();
-				row.add(x1.toString());
-				row.add(h.repr(x1).toString());
-				printer.printRecord(row);
+			
+			for (En en : h.src().schema().ens) {
+				for (X1 x1 : h.src().algebra().en(en)) {
+					List<String> row = new LinkedList<>();
+					row.add(x1.toString());
+					row.add(h.repr(x1).toString());
+					printer.printRecord(row);
+				}
 			}
 			for (Y1 y1 : h.src().algebra().talg().sks.keySet()) {
 				List<String> row = new LinkedList<>();

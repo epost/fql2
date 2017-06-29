@@ -16,11 +16,25 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements S
 		return Kind.INSTANCE;
 	}
 	
+	/**	  
+	 * @return sum of rows in the algebra
+	 */
+	@Override
+	public int size() {
+		return algebra().size();
+	}
+
+	
 	public abstract Schema<Ty, En, Sym, Fk, Att> schema();
 	
 	public abstract Ctx<Gen, En> gens(); 
 	public abstract Ctx<Sk, Ty> sks();
 
+	
+	public abstract boolean requireConsistency();
+	
+	public abstract boolean allowUnsafeJava();
+	
 	public abstract Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs();
 
 	public abstract DP<Ty,En,Sym,Fk,Att,Gen,Sk> dp();
@@ -29,8 +43,19 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements S
 	public final Chc<Ty,En> type(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {		
 		return term.type(new Ctx<>(), new Ctx<>(), schema().typeSide.tys, schema().typeSide.syms.map, schema().typeSide.js.java_tys.map, schema().ens, schema().atts.map, schema().fks.map, gens().map, sks().map);
 	}
+	
+	public final void validate() {	
+		validateNoTalg();
+		
+		if (requireConsistency() && !algebra().hasFreeTypeAlgebra()) {
+			throw new RuntimeException("Not necessarily consistent.  This isn't necessarily an error, but is unusual.  Set require_consistency=false to proceed.  Type algebra is\n\n" + algebra().talg());
+		}
+		if (!allowUnsafeJava() && !algebra().hasFreeTypeAlgebraOnJava()) {
+			throw new RuntimeException("Unsafe use of java - AQL's behavior is undefined.  Possible solution: add allow_java_eqs_unsafe=true, change the equations, or contact support at info@catinf.com.  Type algebra is\n\n" + algebra().talg());
+		}
+	}
 
-	public final void validate() {		
+	public final void validateNoTalg() {		
 			//check that each gen/sk is in tys/ens
 			for (Gen gen : gens().keySet()) {
 				En en = gens().get(gen);
@@ -59,10 +84,12 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements S
 		return eq.first + " = " + eq.second;
 	}
 	
+	
+	
 	public abstract Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> algebra();
 
 	private Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage;
-	public final Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
+	public final synchronized Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
 		if (collage != null) {
 			return collage;
 		}
@@ -129,6 +156,6 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements S
 		return toString;
 	} 
 
-	
+	//TODO aql validate instances against algebras
 	
 }

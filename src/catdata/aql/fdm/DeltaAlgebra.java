@@ -126,16 +126,19 @@ extends Algebra<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> {
 
 	@Override
 	public Term<Ty, Void, Sym, Void, Void, Void, Y> att(Att1 att, Pair<En1, X> e) {
-		return attY(F.atts.get(att).third, e);
+		Term<Ty, Void, Sym, Void, Void, Void, Y> ret =  attY(F.atts.get(att).third, e);
+		return alg.intoY(alg.reprT(ret));
 	}
 
 	private Term<Ty, Void, Sym, Void, Void, Void, Y> attY(Term<Ty, En2, Sym, Fk2, Att2, Void, Void> term, Pair<En1, X> x) {
-		if (term.att != null) {
+		if (term.obj != null) {
+			return Term.Obj(term.obj, term.ty);
+		} else if (term.att != null) {
 			return alg.att(term.att, attX(term.arg.asArgForAtt().map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn()), x.second)); 
 		} else if (term.sym != null) {
 			return Term.Sym(term.sym, term.args.stream().map(q -> attY(q, x)).collect(Collectors.toList()));
 		} 
-		throw new RuntimeException("Anomaly: please report");
+		throw new RuntimeException("Anomaly: please report: " + term + " and " + x);
 	}
 
 	private X attX(Term<Void, En2, Void, Fk2, Void, Gen, Void> term, X x) {

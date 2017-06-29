@@ -232,7 +232,46 @@ public class EmbeddedDependency {
 		
 		return ed;
 	}
+	/*
+	public static EmbeddedDependency eq2_phokion(String pre, Path lhs, Path rhs) {
+		List<Triple<String, String, String>> where = new LinkedList<>();
 
+		List<String> forall = new LinkedList<>();
+		forall.add("x");
+		where.add(new Triple<>(pre + lhs.source, "x", "x"));
+
+		List<String> exists = new LinkedList<>();
+		List<Triple<String, String, String>> tgd = new LinkedList<>();
+		
+		int i = 0;
+		String last = "x";
+		String xxx = "x";
+		for (String e : lhs.asList().subList(1, lhs.asList().size())) {
+			i++;
+			tgd.add(new Triple<>(pre + e, last, "y"+i));
+			last = "y" + i;
+			exists.add(last);
+		}
+		xxx = last;
+
+		last = "x";
+		for (String e : rhs.asList().subList(1, rhs.asList().size())) {
+			i++;
+			tgd.add(new Triple<>(pre + e, last, "y"+i));
+			last = "y" + i;
+			exists.add(last);
+		}
+		tgd.get(tgd.size()-1).third = xxx;
+		exists.remove(exists.size()-1);
+
+		List<Pair<String, String>> egd = new LinkedList<>();
+		
+		EmbeddedDependency ed = new EmbeddedDependency(forall, exists, where,
+				tgd, egd);
+		
+		return ed;
+	}
+*/
 	public static EmbeddedDependency eq2(String pre, Path lhs, Path rhs) {
 
 		List<Triple<String, String, String>> where = new LinkedList<>();
@@ -306,7 +345,7 @@ public class EmbeddedDependency {
 		}
 
 		ret += " -> ";
-		// if (exists.size() > 0) {
+		if (exists.size() > 0) {
 		ret += "exists ";
 		i = 0;
 		for (String s : exists) {
@@ -316,7 +355,7 @@ public class EmbeddedDependency {
 			ret += s;
 		}
 		ret += ", ";
-		// }
+		}
 
 		i = 0;
 		for (Pair<String, String> s : egd) {

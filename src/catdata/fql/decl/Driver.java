@@ -27,7 +27,7 @@ import catdata.fql.decl.InstExp.Plus;
 import catdata.fql.decl.InstExp.Times;
 import catdata.fql.sql.PSM;
 import catdata.fql.sql.PSMGen;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 public class Driver {
 
@@ -121,7 +121,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "schema");
-				if (GlobalOptions.debug.fql.continue_on_error) {
+				if (DefunctGlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -140,7 +140,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "mapping");
-				if (GlobalOptions.debug.fql.continue_on_error) {
+				if (DefunctGlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -158,7 +158,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "query");
-				if (GlobalOptions.debug.fql.continue_on_error) {
+				if (DefunctGlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -175,7 +175,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "QUERY");
-				if (GlobalOptions.debug.fql.continue_on_error) {
+				if (DefunctGlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -191,7 +191,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "instance");
-				if (GlobalOptions.debug.fql.continue_on_error) {
+				if (DefunctGlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -208,7 +208,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "transform");
-				if (GlobalOptions.debug.fql.continue_on_error) {
+				if (DefunctGlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -237,7 +237,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "instance");
-				if (GlobalOptions.debug.fql.continue_on_error) {
+				if (DefunctGlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -262,7 +262,7 @@ public class Driver {
 				re.printStackTrace();
 				LineException exn = new LineException(re.getLocalizedMessage(),
 						k, "transform");
-				if (GlobalOptions.debug.fql.continue_on_error) {
+				if (DefunctGlobalOptions.debug.fql.continue_on_error) {
 					exns.add(exn);
 				} else {
 					throw exn;
@@ -272,7 +272,7 @@ public class Driver {
 		
 		toUpdate[0] = "Load of SQL data into FQL complete.";
 		// check full sigmas with EDs
-		if (GlobalOptions.debug.fql.VALIDATE_WITH_EDS) {
+		if (DefunctGlobalOptions.debug.fql.VALIDATE_WITH_EDS) {
 			try {
 				validateWithEds(prog, insts);
 			} catch (FQLException fe) {

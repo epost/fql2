@@ -23,13 +23,14 @@ import org.fife.ui.rsyntaxtextarea.parser.DefaultParserNotice;
 import org.fife.ui.rsyntaxtextarea.parser.ParseResult;
 
 import catdata.Unit;
+import catdata.ide.IdeOptions.IdeOption;
 
 
 class SpellChecker extends AbstractParser {
 	
 	private static Collection<String> words0;
 
-	private boolean spPrev = GlobalOptions.debug.general.spellcheck;
+	private boolean spPrev = IdeOptions.theCurrentOptions.getBool(IdeOption.SPELL_CHECK);
 	
 	private static Collection<String> getWords() {
 		if (words0 != null) {
@@ -72,7 +73,7 @@ class SpellChecker extends AbstractParser {
 	
 	@Override
 	public ParseResult parse(RSyntaxDocument doc1, String style) {
-		boolean spNow = GlobalOptions.debug.general.spellcheck;
+		boolean spNow = IdeOptions.theCurrentOptions.getBool(IdeOption.SPELL_CHECK);
 		if (spNow != spPrev) {
 			spPrev = spNow;
 			result.clearNotices();
@@ -87,7 +88,7 @@ class SpellChecker extends AbstractParser {
 		if (!spNow) {
 			return result;
 		}
-		
+		//try {
 		for (Token t : doc) {
 			if (t.isComment()) {
 				int startOffs = t.getOffset();
@@ -100,7 +101,9 @@ class SpellChecker extends AbstractParser {
 				outer: while (matcher.find()) {
 					String word = matcher.group().toLowerCase();
 					
-					
+					if (word.contains(",") || word.contains(")") || word.contains(")") || word.contains("<") || word.contains(">") || word.contains("+") || word.contains("*") || word.contains("-") || word.contains("_") || word.contains("/") || word.contains("\\") || word.contains("\"") ) {
+						continue;
+					}
 					if (word.endsWith(".") || word.endsWith(",") || word.endsWith("!") || word.endsWith(";") || (word.endsWith(":") && word.length()!=1) || word.endsWith(")") || word.endsWith("]") || word.endsWith("\"") || word.endsWith("'")) {
 						word = word.substring(0, word.length() - 1);
 					} 
@@ -142,6 +145,9 @@ class SpellChecker extends AbstractParser {
 				}
 			}
 		}
+		//} catch (StackOverflowError err) {
+		//	err.printStackTrace(); //TODO aql wtf
+		//}
 		return result;
 
 	}

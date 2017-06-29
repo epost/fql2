@@ -1,6 +1,5 @@
 package catdata.aql.fdm;
 
-import java.util.Map;
 import java.util.function.Function;
 
 import catdata.Chc;
@@ -28,7 +27,7 @@ extends Transform<Ty, En2, Sym, Fk2, Att2, Pair<En1, X>, Y, Gen, Sk, ID, Chc<Y, 
 	private final Ctx<Pair<En1, X>, Term<Void, En2, Void, Fk2, Void, Gen, Void>> gens = new Ctx<>();
 	private final Ctx<Y, Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> sks = new Ctx<>();
 	
-	public SigmaDeltaCounitTransform(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> i, Map<String, String> options) {
+	public SigmaDeltaCounitTransform(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> i, AqlOptions options) {
 		F = f;
 		I = i;
 		J = new DeltaInstance<>(F, I);
@@ -40,7 +39,7 @@ extends Transform<Ty, En2, Sym, Fk2, Att2, Pair<En1, X>, Y, Gen, Sk, ID, Chc<Y, 
 		for (Y sk : src().sks().keySet()) {
 			sks.put(sk, I.algebra().reprT(Term.Sk(sk)));
 		}
-		validate((Boolean) AqlOptions.getOrDefault(options, AqlOption.dont_validate_unsafe));
+		validate((Boolean) options.getOrDefault(AqlOption.dont_validate_unsafe));
 
 	}
 

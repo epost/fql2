@@ -12,7 +12,7 @@
 \begin{document}
 
 
-\title{AQL Reference Manual - Draft}
+\title{AQL-alpha Reference Manual}
 \author{Ryan Wisnesky}
 \date{\today}
 \maketitle
@@ -25,40 +25,56 @@
 \newpage
 \chapter{Introduction}
 
-This reference manual for AQL exhaustively documents 1) the keywords and options of AQL, 2) the features of the AQL IDE, and 3) the subtleties that arise when using AQL practice.  It is not a tutorial.
+This reference manual for AQL exhaustively documents 1) the keywords and options of AQL, 2) the features of the AQL IDE, and 3) the subtleties that arise when using AQL practice.  Users new to AQL may also benefit from the AQL tutorial, built-in to the IDE as the Tutorial example and available online at    \url{http://categoricaldata.net/aql.html}.
 
 %AQL is a language for querying {\it algebraic databases}.  An {\it algebraic database} can be formally defined in many ways: as a set-valued functor, using category theory; as a set of tables, using SQL; or as a set of axioms, using equational logic.  In this document we attempt to describe AQL informally without assuming any particular background, but familiarity with any of the preceding concepts will be useful to the reader.  This document is the reference manual for AQL: it is not a tutorial, but rather a comprehensive description of AQL's capabilities and syntax.
 
 \section{The IDE}
-AQL is implemented within the {\it functorial query language integrated development environment (FQL IDE)}.  The FQL IDE contains several query languages besides AQL that were developed as part of the research program that culminated in AQL  (all of the languages in the FQL IDE share a property known as {\it functorality}, hence the name FQL IDE).  AQL is not a superset of the other languages in the FQL IDE; readers interested in the non-AQL aspects of the FQL IDE are encouraged to visit \url{http://categoricaldata.net}.  By {\it AQL IDE}, we mean the FQL IDE set to the AQL language mode.  The AQL IDE is an open-source java program that provides an AQL code editor, an AQL execution engine, and a graphical viewer for AQL programs and results.   
+AQL is implemented within the {\it functorial query language integrated development environment (FQL IDE)}.  The FQL IDE contains several query languages besides AQL that were developed as part of the research program that culminated in AQL  (all of the languages in the FQL IDE share a property known as {\it functoriality}, hence the name FQL IDE).  AQL is not a superset of the other languages in the FQL IDE; readers interested in the non-AQL aspects of the FQL IDE are encouraged to visit \url{http://categoricaldata.net}.  By {\it AQL IDE}, we mean the FQL IDE set to the AQL language mode.  The AQL IDE is an open-source java program that provides an AQL code editor, an AQL execution engine, and a graphical viewer for AQL programs and results.   
 
 %The initial screen of the AQL IDE is shown below:
 %\begin{center}
 %\includegraphics[width=5in]{initial}
 %\end{center}
 
-The AQL IDE contains a multi-tabbed text file editor that supports saving, opening, copy-paste, undo-redo, RTF export, code folding, outline-view, and search-replace through right-click context menus, menu bars, and keyboard shortcuts.  A variety of options are available in the options menu (text size, default file path, etc.)  Below each AQL text editor is a response text area that displays error and status messages.  The built-in AQL examples are loaded by selecting them from load-example combo-box in the upper-right of the IDE.  To distinguish AQL examples from examples written in non-AQL languages, AQL examples are prefixed with the letter ``A'' (e.g., the AQL employees example is called ``A Employees'').  AQL programs are executed by pressing the run button in the upper-left of the IDE.  While an AQL program is running its status will be continually updated in the response area.  AQL programs that are running can be manually terminated using the abort menu option.   When an AQL program finishes running, the AQL IDE displays a graphical viewer allowing the result of the AQL program to be visually inspected.
+The AQL IDE contains a multi-tabbed text file editor that supports saving, opening, copy-paste, undo-redo, RTF export, code folding, outline-view, and search-replace through right-click context menus, menu bars, and keyboard shortcuts.  A variety of options are available in the options menu (text size, default file path, etc.)  Below each AQL text editor is a response text area that displays error and status messages.  The built-in AQL examples are loaded by selecting them from load-example combo-box in the upper-right of the IDE.  AQL programs are executed by pressing the run button in the upper-left of the IDE.  While an AQL program is running its status will be continually updated in the response area.  AQL programs that are running can be manually terminated using the abort menu option.   When an AQL program finishes running, the AQL IDE displays a graphical viewer allowing the result of the AQL program to be visually inspected.  Manual termination of AQL programs is best-effort and terminated AQL programs may leave resources (e.g., JDBC connections) open.
 
 \section{Changing the Memory Limit}
 
 To run the AQL IDE with more/less than the default 64mb heap, you must use a command line option such as:
 \begin{verbatim}
-java -Xms512m -Xmx2048m -jar fql.jar
+java -Xms512m -Xmx2048m -jar aql.jar
 \end{verbatim}
 
 \section{Adding JDBC drivers to the classpath}
 
 To run the AQL IDE with a particular JDBC driver requires placing the driver on the class path using a ``-cp'' command line option {\bf and} running java directly, for example:
 \begin{verbatim}
-java -cp "./mysql-connector-java-5.1.27-bin.jar:./fql.jar" catdata.ide.IDE 
+java -cp "./mysql-connector-java-5.1.27-bin.jar:./aql.jar" catdata.ide.IDE 
 \end{verbatim}
 
 \section{Using AQL without a GUI}
 
 The AQL IDE also supports command-line execution: an AQL program is passed to stdin, and an HTML view of the result is output on stdout:
 \begin{verbatim}
-java -cp "./fql.jar" catdata.aql.exp.AqlInACan.openCan
+java -cp "./aql.jar" catdata.aql.exp.AqlInACan.openCan
 \end{verbatim}
+
+\section{HTML markup}
+The AQL IDE allows HTML markup to be inserted into AQL files.  After a program has compiled, the ``emit as HTML'' option in the AQL menu will emit the HTML code.  The HTML will contain pretty-printings of the program text, HTML tables for instances, and javascript graphs for schemas.  To insert HTML, use the keyword {\tt html}, then brackets, then (*, and then a quoted string (note that because the HTML appears in a string, any quotes and backslashes within that string must be escaped).  For example,
+\begin{verbatim}
+instance I = ...
+
+html { (* "<html>Hello world<a href=\"main.html\">link</a></html>" *) } 
+
+instance J = ...
+\end{verbatim}
+
+The AQL tutorial, built-in as the Tutorial example, illustrates HTML output.
+
+\section{Just in time compilation}
+
+The AQL IDE theorem provers benefit greatly from native compilation, which the JVM performs lazily.  Experiments suggest several AQL theorem provers become 2-4x faster after JIT compilation.  For this reason, if performance is critical it is suggested to run a few ``warm-up'' built-in examples to trigger JIT compilation.
 
 \chapter{AQL Basics}
 
@@ -68,11 +84,11 @@ Comments in AQL are C style, either ``//'' or ``/* */''.
 
 \section{Kinds}
 
-A {\it kind} is either {\it typeside}, {\it schema},  {\it instance}, (schema) {\it  mapping}, (instance) {\it transform}, {\it query}, {\it graph}, or {\it pragma}. 
+A {\it kind} is either {\it typeside}, {\it schema},  {\it instance}, (schema) {\it  mapping}, (instance) {\it transform}, {\it query}, {\it graph},  {\it pragma}, {\it schema\_colimit}, or {\it constraints}. 
 
 \section{Identifiers}
 
-AQL identifiers are case-sensitive alpha-numeric strings that do not start with numerals, or arbitrary strings escaped with double-quotes.
+AQL identifiers are case-sensitive alpha-numeric strings, or arbitrary strings escaped with double-quotes.
 
 \section{Declarations}
 
@@ -80,7 +96,7 @@ An AQL program is an ordered list of {\it declarations} of the form $kind \ name
 
 \section{Caching}
 
-The AQL IDE will cache result artifacts to save time in subsequent executions; this behavior can be disabled per-expression through the {\tt always\_reload} option.  Disabling caching is can be useful when and AQL program contains side-effecting pragmas.
+The AQL IDE will cache result artifacts to save time in subsequent executions; this behavior can be disabled per-expression through the {\tt always\_reload} option.  Disabling caching is can be useful when an AQL program contains side-effecting pragmas.
 
 \section{Terms}
 
@@ -97,7 +113,7 @@ Intuitively, terms denote ``things which can be named'' in typesides (java objec
               | <term>.<attribute> | <term>.<foreign key> | <function>(<term>, ...) 
 \end{verbatim}
 
-The syntax $p.q$ abbreviates $q(p)$.  Parenthesis in AQL cannot be added (e.g., if $v$ is a variable, then $(v)$ is not valid syntax).  
+The syntax $p.q$ abbreviates $q(p)$.  Parenthesis in AQL cannot be added (e.g., if $v$ is a variable, then $(v)$ is not valid syntax) or omitted (e.g., $(x + y)$ cannot be written as $x + y$)..  
 
 \section{Contexts}
 
@@ -147,11 +163,13 @@ The type side $Ty$ is an example of a {\it literal}; i.e., an expression that ev
 
 Many expressions contain import sections.  For example, a typeside $T$ can import another typeside $T'$, whose effect is the same as if $T'$ were textually included in $T$.  In the above example, $Ty$ imports the typeside for arithmetic.
 
-Many expressions contain lists of key-value pairs that specify options in an option section.  The defaults of these options many change with new releases of AQL and are displayed in the AQL pane of the AQL IDE options menu.  The effect of these options is described in the rest of the manual.  In the above example, the execution timeout for the type side is set to five seconds.
+Many expressions contain lists of key-value pairs that specify options in an option section.  The defaults of these options many change with new releases of AQL and are displayed in the AQL pane of the AQL IDE options menu.  The effect of these options is described in the rest of the manual.  In the above example, the execution timeout for the type side is set to five seconds.  Every expression that supports options supports the timeout option, as well as the GUI (display) options and the always reload option.  
+
+Every AQL file may contain an optional options section before the list of declarations.  These options are inherited by every expression (e.g., so you can set the timeout globally to 30, rather than having to specify that for every expression).  
  
 \section{AQL's Typing Discipline}
 
-AQL programs are nominally typed.  For example, if {\tt schema X = Y} is a declaration, then {\tt id X} has type {\tt X -> X} {\it which is not equal to} {\tt Y -> Y} (beause {\tt X} and {\tt Y} are different {\it names}).  
+Officially, AQL programs are nominally typed.  For example, if {\tt schema X = Y} is a declaration, then {\tt id X} has type {\tt X -> X} {\it which is not equal to} {\tt Y -> Y} (beause {\tt X} and {\tt Y} are different {\it names}).  Unofficially, the AQL type-checker accepts many programs that are not nominally typed but are still well-typed.
 
 \section{Scripting with Side Effects using Pragmas}
 
@@ -163,7 +181,7 @@ AQL databases are deductive: that is, they are defined only up to provable equal
 
 \section{Java (script) typesides and inline functions}
 
-AQL typesides can contain bindings of types to java classes and of function symbols to javascript code.  (In this manual, we use java and javascript interchangeably, because the Java VM's Nashorn execution engine for javascript allows the use of java functions.)  The AQL execution engine will invoke this javascript code during execution, for example, to reduce $2+2$ to $4$.  In order to maintain completeness of AQL's theorem prover, certain equations involving java are disallowed.  This restriction can be overridden using the {\tt allow\_java\_eqs\_unsafe} option.  Java functions need to be side-effect free.
+AQL typesides can contain bindings of types to java classes and of function symbols to javascript code.  (In this manual, we use java and javascript interchangeably, because the Java VM's Nashorn execution engine for javascript allows the use of java functions.)  The AQL execution engine will invoke this javascript code during execution, for example, to reduce $2+2$ to $4$.  In order to maintain completeness of AQL's theorem prover, certain equations involving java are disallowed.  This restriction can be overridden using the {\tt allow\_java\_eqs\_unsafe} option.  Java functions need to be side-effect free.  For SQL interaction, AQL provides a special built-in typeside called {\tt sql}.  
 
 \section{Consistency}
 
@@ -191,7 +209,7 @@ The AQL IDE provides code-assistance functions.  For example, if $S$ and $T$ are
 
 \section{Theorem Proving}
 
-The AQL engine uses automated theorem proving technology to ensure that AQL programs cannot fail at runtime (modulo javascript errors), or materialize instances that do not satisfy their data integrity constraints.  To provide this guarantee, every AQL typeside, schema, and instance must be a decidable equational theory.  Not all equational theories are decidable; moreover, automated theorem proving methods can be slow or further incomplete.  The AQL engine provides a number of theorem provers which by default it uses automatically as appropriate; however, specific theorem provers can be chosen by using the {\tt prover} option.  In addition, schema mappings and transforms are required to preserve provable equality; this behavior can be disabled with the {\tt dont\_validate\_unsafe} option.  To find out which prover is being used, click the ``info'' button in the ``DP'' pane in the viewer.  The DP pane also allows users to decide the equality of arbitrary terms by entering them as text (useful for debugging AQL programs).
+The AQL engine uses automated theorem proving technology to ensure that AQL programs cannot fail at runtime (modulo javascript errors), or materialize instances that do not satisfy their data integrity constraints.  To provide this guarantee, every AQL typeside, schema, and instance must be a decidable equational theory.  Not all equational theories are decidable; moreover, automated theorem proving methods can be slow or incomplete.  The AQL engine provides a number of theorem provers which by default it uses automatically as appropriate; however, specific theorem provers can be chosen by using the {\tt prover} option.  In addition, schema mappings and transforms and queries are required to preserve provable equality; this behavior can be disabled with the {\tt dont\_validate\_unsafe} option.  To find out which prover is being used, click the ``info'' button in the ``DP'' pane in the viewer.  The DP pane also allows users to decide the equality of arbitrary terms by entering them as text (useful for debugging AQL programs).
 
 \section{Provenance / Lineage of generated IDs}
 
@@ -222,6 +240,9 @@ The empty {\tt typeside} with no types or java types.
 
 \section{{\tt typeSideOf <schema>}}
 The {\tt typeside} that a {\tt schema} is on.
+
+\section{{\tt sql}}
+The {\tt typeside} with java types corresponding to SQL.
 
 \section{{\tt literal : <typeside>}}
 \subsection{{\tt imports}}
@@ -285,6 +306,9 @@ A list of {\tt forall <variable> : <entity> . <term> = <term> }, where the terms
 \subsection{{\tt options}}
 Allowable options are {\tt timeout}, {\tt prover} and related options, and {\tt allow\_java\_eqs\_unsafe}.
 
+\section{{\tt getSchema <schema\_colimit>}}
+
+Gets the schema associated with a colimit of schemas.
 
 \chapter{Kind  {\tt mapping}}
 
@@ -294,9 +318,9 @@ A schema mapping $F : S \to T$ takes entities in $S$ to entities in $T$, foreign
 %todo
 The identity schema mapping on a particular schema.
 
-\section{{\tt compose <mapping> <mapping>}}
+\section{{\tt [<mapping> ; <mapping>]}}
 %todo
-Composes two mappings: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt compose f g : A -> C}.
+Composes two mappings: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt (f ; g) : A -> C}.
 
 \section{{\tt literal : <schema1> -> <schema2>}}
 \subsection{{\tt imports}}
@@ -313,12 +337,12 @@ Allowable options are {\tt timeout} and {\tt dont\_validate\_unsafe}, which disa
 \chapter{Kind  {\tt query}}
 A query $S \to T$ assigns to each entity $en$ in $S$ a (``frozen'') instance on $T$, which we will write as $[en]$, and to each foreign key $fk : e \to e'$ a transform $[fk] : [e'] \to [e]$ (note the reversal), and to each attribute $att : e \to \tau$ a term of type $\tau$ in context $[e]$.  
 
-\section{{\tt id <schema>}}
-%todo
-The identity query on a schema.
-\section{{\tt compose <mapping> <mapping>}}
-%todo
-Composes two queries: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt compose f g : A -> C}.
+%\section{{\tt id <schema>}}
+%%todo
+%The identity query on a schema.
+%\section{{\tt compose <mapping> <mapping>}}
+%%todo
+%Composes two queries: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt compose f g : A -> C}.
 
 \section{{\tt literal : <schema> -> <schema>}}
 \subsection{{\tt imports}}
@@ -330,7 +354,43 @@ A {\tt ctx(<entity>, <instance>, ctx(<attribute>, <term>))}.  The instance uses 
 A {\tt ctx(<foreign key>, <transform>)}.
 
 \subsection{{\tt options}}
-Allowed are {\tt timeout} and {\tt dont\_validate\_eqs}.  Note that each instance and transform in the query can have its own options.
+Allowed are {\tt timeout} and {\tt dont\_validate\_unsafe}.  Note that each instance and transform in the query can have its own options.
+See the {\tt query}-prefixed options.
+
+\section{{\tt getMapping <schema\_colimit> <schema>}}
+
+The expression ${\tt getMapping} \ C \ X$ gets the mapping $X \to C$ associated with schema $X$ in the colimit of schemas $C$.
+
+\chapter{Kind {\tt constraints}}
+
+\section{{\tt literal : <schema>}}
+
+A set of constraints (embedded dependencies). 
+
+\subsection{{\tt imports}}
+A list of constraints names.
+
+\subsection{{\tt constraints}}
+ Each constraint has the form
+\begin{verbatim}
+forall x1 : E1 , ..., xN : En 
+where p = q  p' = q' ...
+->
+exists y1:E'1, ..., yM : E;m 
+where p'' = q''  p''' = q''' ...
+\end{verbatim}
+
+\subsubsection{{\tt forall}}
+A {\tt ctx(<generator> , <entity>)}.
+
+\subsubsection{{\tt where}}
+A list of ground (non quantified) equations.
+
+\subsubsection{{\tt exists}}
+A {\tt ctx(<generator> , <entity>)}.  Optionally, {\tt exists unique} can be used instead.
+
+\subsubsection{{\tt where}}
+A list of ground (non quantified) equations.
 
 \chapter{Kind {\tt instance}}
 \section{{\tt empty : <schema>}}
@@ -349,6 +409,7 @@ Returns an instance that equates all (entity) generators that are observationall
 
 \section{{\tt eval <query> <instance>}}
 Evaluates a query on an instance.  If $Q : S \to T$, and $I$ is an instance on $S$, then $eval \ Q \ I$ is an instance on $T$.
+See the {\tt eval}-prefixed options.
 
 \section{{\tt coeval <query> <instance>}}
 Co-evaluates a query on an instance.  If $Q : S \to T$, and $J$ is an instance on $T$, then $coeval \ Q \ J$ is an instance on $S$.
@@ -360,6 +421,13 @@ If $F : S \to T$ is a mapping and $J$ is an $T$-instance, then $\Delta_F J$ is a
 
 \section{{\tt sigma <mapping> <instance>}}
 If $F : S \to T$ is a mapping and $I$ is an $S$-instance, then $\Sigma_F I$ is a $T$-instance. 
+
+\section{{\tt coproduct\_sigma (<mapping> <instance>)+ : <schema>}}
+The expression {\tt coproduct\_sigma}  $F \ I \ G \ J \ : S$ means $\Sigma_F(I) + \Sigma_G(J)$, where $+$ is $S$-instance co-product.  Arbitrarily many mapping-instance pairs can be used.  This operation is provided to help minimize the number of intermediate materializations required to execute an AQL program.
+
+\section{{\tt coequalize <transform> <transform>}}
+Computes the coqualizer of two transforms.
+
 
 \section{{\tt colimit <graph> : <schema>}}
 Let $G$ be a graph and $S$ a schema.
@@ -374,20 +442,25 @@ A {\tt ctx(<name>, <transform>)}, where the transforms are typed according to th
 Allowable options are {\tt timeout} and {\tt static\_typing}, which when disabled causes AQL to type check the colimit at runtime rather than compile time.  This will reduce the number of transforms required to compute any particular colimit, at the cost of potential runtime failure.
 
 \section{{\tt import\_jdbc [jdbcclass] [jdbcuri] : <schema>}}
-\subsection{\tt imports}
-A list of instance names.
 
-\subsubsection{entities}
-A {\tt ctx(<entity> | <attribute> | <foreign key> | <type> , [sql code])}.  The SQL code for each entity and type should return a one column table, and the SQL code for each attribute and foreign key should return a two column table.  
+\subsection{entities}
+A {\tt ctx(<entity> | <attribute> | <foreign key> | <type> , [sql code])}.  The SQL code for each entity should return a one column table, and the SQL code for each attribute and foreign key should return a two column table.  
 
 \subsection{{\tt options}}
 Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, and {\tt require\_consistency}.
 
-\section{{\tt import\_csv [directoryname] : schema}}
-The directory name should contain one file named $en.csv$ per entity $en$, and optionally, one file named $t.csv$ per type $t$.  The file for $en$ should be a CSV file with a header; the fields of the header should be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.  For types, the file should have a header and one column.  Records can contain nulls (using the string specified in options).
 
-\subsection{\tt imports}
-A list of instance names.
+\section{{\tt import\_jdbc\_all [jdbcclass] [jdbcuri]}}
+
+Imports a SQL database onto an autogenerated AQL schema.  The AQL schema will have one attribute per column in the input DB, and one foreign key per foreign key in the input DB, and equations capturing the input DB's foreign key constraints.  The type side will have a single type, ``dom''.
+
+\subsection{{\tt options}}
+Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, and {\tt require\_consistency}.
+
+
+\section{{\tt import\_csv [directoryname] : schema}}
+The directory name should contain one file named $en.csv$ per entity $en$.  The file for $en$ should be a CSV file with a header; the fields of the header should be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.  Records can contain (uni-labelled) nulls (using the string specified in options).
+
 
 \subsection{{\tt options}}
 Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, {\tt csv} related options, {\tt id\_column\_name}, and and {\tt require\_consistency}.
@@ -422,13 +495,31 @@ The key-value pairs in multi-equations must be comma separated (necessary for re
 \subsection{{\tt options}}
 Allowable options are {\tt timeout}, {\tt prover} and related options, and {\tt require\_consistency}.
 
+\section{{\tt chase <constraints> <instance> [number]}}
+
+Chases the input instance with the input constraints up to a maximum number of iterations.  If the chase succeeds, the result instance will satisfy the constraints.
+
+\subsection{{\tt options}}
+Allowable options are the same as for an instance.
+
+
+\section{{\tt random : <schema>}}
+
+Constructs a random instance with the specified number of generators per entity or type. Then for each generator $e:s$ and fk/att $f : s \to t$, it adds equation $f(e) = y$, where $y:t$ is a randomly selected generator (or no equation if t has no generators).
+
+\subsection{{\tt generators}}
+A {\tt ctx(<generator> | <labelled null> -> integer)}.
+
+\subsection{{\tt options}}
+Allowable options are the same for literal instances, and {\tt random\_seed}.
+
 \chapter{Kind {\tt transform}}
 \section{{\tt id <instance>}}
 %todo
 The identity transform on an instance.
-\section{{\tt compose <transform> <transform>}}
+\section{{\tt [<transform> ; <transform>]}}
 %todo
-Composes two transforms: if {\tt f: A -> B} and {\tt g: B -> C}, then {\tt compose f g: A -> C}.
+Composes two transforms: if {\tt f: A -> B} and {\tt g: B -> C}, then {\tt (f ; g): A -> C}.
 
 \section{{\tt distinct <transform>}}
 If $t : I \to J$ is a transform, then $distinct \ t : distinct \ I \to distinct \ J$ is a transform.
@@ -483,14 +574,13 @@ Allowed are {\tt timeout}, {\tt always\_reload}.
 
 \section{{\tt import\_csv [filename] : <instance> -> <instance>}} 
 
-Imports a transform from CSV.  The filename must be a CSV file without a header and with two columns (representing the source and target).  
+Imports a transform from CSV.  The filename must be a CSV file without a header and with two columns (representing the source and target).   The source and target instances must also be imported from CSV files.
 
 \subsection{options}
 Allowable options are {\tt timeout} and {\tt always\_reload}  and {\tt csv} related options.
 
 \section{{\tt literal : <instance> -> <instance>}}
-\subsection{{\tt imports}}
-A list of names of transforms.
+
 \subsection{{\tt generators}}
 A {\tt ctx(<generator> | <labelled null>, <term>)} that preserves types.  Note that the {\tt term} must be ground (not in a context).  
 
@@ -518,6 +608,14 @@ Expects a list of (single) SQL commands inside a section.  Each string will be e
 \subsection{{\tt options}}
 
 Allowable options are {\tt timeout} and {\tt always\_reload}.
+
+\section{{\tt check <constraints> <instance>}}
+
+Checks that an instance obeys a set of constraints.
+
+\section{{\tt assert\_consistent <instance>}}
+
+Conservatively checks that an instance is consistent (e.g., does not prove $1=2$) by checking that it has a free type algebra.
 
 %%%%%%%%%%
 
@@ -553,10 +651,52 @@ table $prefixty$ for each type $ty$.  The two columns will be $srcidcol$ and $ds
 \subsection{options}
 Allowed are {\tt timeout}, {\tt always\_reload},  {\tt id\_column\_name} and {\tt varchar\_length}.
 
+\chapter{{\tt schema\_colimit}}
+
+\section{{\tt quotient <schema> + ... + <schema> : <typeside>}}
+
+Constructs a colimit of schemas as a quotient of a co-product.  Each schema must be a variable, whose name will serve as a prefix for attributes and foreign keys in the resulting colimit schema.  For this reason, the variable names must be distinct.  The entities of the resulting colimit schema are canonicalized strings describing equivalence classes of source entities.
+
+\subsection{{\tt entity\_equations}}
+
+Each equation has the form $v_1.e_1 = v_2.e_2$, where $v_1, v_2$ are schema names and $e_1, e_2$ are entities in $v_1, v_2$, respectively.
+
+\subsection{{\tt path\_equations}}
+
+Each equation has the form {\tt <path>=<path>}, where the foreign keys in each path have the form $v\_fk$, where $v$ is a schema name and $fk$ is a foreign key in $v$.
+
+\subsection{{\tt observation\_equations}}
+
+Each equation has the form {\tt forall x. <term> = <term>}, where the symbols in each term have the form $v\_f(\ldots)$, where $v$ is a schema name and $f$ is a symbol in $v$.
 
 
+\section{\tt modify <schema\_colimit>}
 
+\subsection{{\tt rename entities}}
+A $Ctx(name,name)$ specifying a renaming of entities.
+
+\subsection{{\tt rename foreign\_keys}}
+A $Ctx(name,name)$ specifying a renaming of foreign keys. 
+
+\subsection{{\tt rename attributes}}
+
+A $Ctx(name,name)$ specifying a renaming of attributes. 
+
+\subsection{{\tt remove foreign\_keys}}
+
+A $Ctx(name,path)$ specifying that the foreign key named by name can be deleted by replacing all occurrences of it by the given path.  AQL checks if the removal is semantics-preserving. 
+
+\subsection{{\tt remove attributes}}
+
+A $Ctx(name,\lambda x. \ term)$ specifying that the attribute named by name can be deleted by replacing all occurrences of it by the given term.  AQL checks if the removal is semantics-preserving. 
+		
 \chapter{{\tt options}}
+
+\section{{\tt num\_threads = integer}}
+Sets the number of threads to be used when running an AQL program.
+
+\section{{\tt random\_seed = integer}}
+Sets the random number generator seed.
 
 \section{{\tt timeout = number (seconds)}}
 Causes execution to halt after {\tt number} seconds.
@@ -571,7 +711,7 @@ When disabled, relaxes AQL's nominal typing discipline for colimit instances.
 When enabled, allows arbitrary equations involving java typeside symbols.
 
 \section{{\tt dont\_validate\_unsafe = boolean}}
-When enabled, mappings and transforms are not checked to be equality-preserving.
+When enabled, mappings and transforms and queries are not checked to be equality-preserving.  For a query, when true it also disables decision procedure construction for sub-queries.
 
 \section{{\tt always\_reload = boolean}}
 When enabled, pragmas (which can have side effects, like loading data from CSV files) are always executed and are not cached between runs of the AQL program.
@@ -651,7 +791,7 @@ Applies only to theories where all symbols are 0-ary or 1-ary.  Uses length-redu
 
 Applies only to weakly orthogonal theories.  Interprets all equations $p = q$ as rewrite rules $p \to q$ if $p$ is syntactically smaller than $q$ and $q \to p$ if $q$ is syntactically smaller than $p$ and symbolically evaluates terms to normal forms.  Fails if an equation cannot be oriented.
 
-\subsubsection{{\tt program_allow_nontermination_unsafe}}
+\subsubsection{{\tt program\_allow\_nontermination\_unsafe}}
 
 Interprets all equations $p = q$ as rewrite rules $p \to q$ regardless of termination behavior.  Can diverge.
 
@@ -663,7 +803,7 @@ Applies unfailing (ordered) Knuth-Bendix completion specialized to lexicographic
 
 Defines the precedence to be used for Knuth-Bendix completion.  The list {\tt a b c} indicates that $a < b < c$.  Every symbol in a typeside or schema or instance must appear exactly once in this list.
 
-\subsubsection{{\tt completion\_sort} = boolean}
+\subsubsection{{\tt completion\_sort = boolean}}
 
 Sorts the list of critical pairs in Knuth-Bendix completion by length, processing shorter pairs first (but still fairly).
 
@@ -679,8 +819,98 @@ Filters out equations that are substitution instances of other equations in Knut
 
 Enables special support for associative and commutative operators in Knuth-Bendix completion.
 
+\section{GUI options}
+
+Associated with each object is a {\it size}, according to its kind:
+\begin{itemize}
+\item pragma, constraints: length of the text string
+\item instance: rows in the algebra
+\item colimit schema: size of the schema
+\item graph: nodes + edges
+\item typeside: types + functions + equations
+\item schema: entities + attributes + fks + equations
+\item mapping, transform, query: size of source
+\end{itemize}
+
+The maximum size of such an object to be displayed in the viewer is controlled by the three options below.
+
+\subsection{{\tt gui\_max\_table\_size = integer}}
+
+For instances.
+
+\subsection{{\tt gui\_max\_graph\_size = integer}}
+
+For type sides, (colimit) schemas, mappings, transforms, queries.
+
+\subsection{{\tt gui\_max\_string\_size = integer}}
+
+For pragmas and constraints.
+
+\subsection{{\tt gui\_rows\_to\_display = integer}}
+
+Sets the maximum number of rows to display per table per instance in the viewer.  (I.e., the table in the viewer is conceptually similar to a SQL LIMIT query for the given number of rows).
+
+\section{Evaluation options}
+
+\subsection{{\tt eval\_max\_temp\_size = integer}}
+
+Sets the maximum size of intermediate tables when executing sub-queries.
+
+\subsection{{\tt eval\_reorder\_joins = boolean}}
+
+Sets whether or not it is permissible for AQL to choose a join order based on exhaustive order enumeration under a heuristic cost metric.
+
+\subsection{{\tt eval\_max\_plan\_depth = integer}}
+
+If enabled, join reordering will be performed on FROM clauses with a number of variables smaller than this number (used to prevent the join ordering chooser from spending forever enumerating huge spaces of plans).
+
+\subsection{{\tt eval\_join\_selectivity = float}}
+
+Sets the join selectivity factor used by the cost metric heuristic for the join order chooser.
+
+\subsection{{\tt eval\_use\_indices = boolean}}
+			
+Sets whether AQL should automatically index instances along their foreign keys and attributes, to reduce the number of intermediate tuples generated during query evaluation.
+Also applies to SQL-based execution method.
+
+\subsection{{\tt eval\_use\_sql\_above = integer}}
+
+If possible, translate AQL queries into SQL and use AQL's built-in SQL database (``H2'')) to execute the query.  The translation process incurs overhead, so this option controls how large input instances have to be before translation is used.
+
+\subsection{{\tt eval\_approx\_sql\_unsafe = boolean}}
+
+Queries executed against instances containing nulls cannot be implemented by translation to SQL due to differences between null semantics in AQL and SQL.  
+When enabled, AQL will execute the generated SQL anyway, leading to an undefined, but quickly computed, answer.  
+
+\subsection{{\tt eval\_sql\_persistent\_indices = boolean}}
+
+Queries executed by translation to SQL can store any computed indicies for future use. 
+
+\section{{\tt query\_remove\_redundancy = boolean}}
+
+Sets whether redundant joins (i.e., containing a binding $v$ and an equation $v = e$ where $v \notin e$) should be eliminated.
 
 
 
 
 \end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

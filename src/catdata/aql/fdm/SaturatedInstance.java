@@ -28,10 +28,12 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 	private final Ctx<Y, Ty> sks; 
 	
 	private final DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp;
-	private final Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg;
+	public final Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg;
 	private final InnerAlgebra inner_alg;
 	private final InnerDP inner_dp;
 
+	boolean requireConsistency, allowUnsafeJava;
+	
 	@Override
 	public DP<Ty, En, Sym, Fk, Att, X, Y> dp() {
 		return inner_dp;
@@ -40,11 +42,13 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 	@Override
 	public Algebra<Ty, En, Sym, Fk, Att, X, Y, X, Y> algebra() {
 		return inner_alg;
-	}
+	} 
 
-	public SaturatedInstance(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg, DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp) {
+	public SaturatedInstance(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg, DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, boolean requireConsistency, boolean allowUnsafeJava) {
 		this.alg = alg;
 		this.dp = dp;
+		this.requireConsistency = requireConsistency;
+		this.allowUnsafeJava = allowUnsafeJava;
 		for (En en : schema().ens) {
 			for (X x : alg.en(en)) {
 				gens.put(x, en);
@@ -71,6 +75,7 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 		inner_dp = new InnerDP();
 		inner_alg = new InnerAlgebra();
 		checkSatisfaction(); //TODO aql disable in production?
+		validate();
 	}
 
 	private void checkSatisfaction() {
@@ -194,11 +199,6 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 	}
 		
 	private class InnerDP implements DP<Ty, En, Sym, Fk, Att, X, Y> {
-/*
-		@Override
-		public Collage<Ty, En, Sym, Fk, Att, X, Y> collage() {
-			return col;
-		}*/
 
 		@Override
 		public boolean eq(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, X, Y> lhs, Term<Ty, En, Sym, Fk, Att, X, Y> rhs) {
@@ -234,6 +234,22 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 			throw new RuntimeException("Anomaly: please report");
 		}
 		
+		@Override
+		public String toStringProver() {
+			return "Saturated Inner DP wrapper of " + dp.toStringProver();
+		}
+
+		
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return requireConsistency;
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return allowUnsafeJava;
 	}
 		
 	

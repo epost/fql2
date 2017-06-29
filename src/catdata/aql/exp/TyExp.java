@@ -2,13 +2,20 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import catdata.Pair;
+import catdata.Program;
 import catdata.Util;
 import catdata.aql.Kind;
+import catdata.aql.SqlTypeSide;
 import catdata.aql.TypeSide;
 
 public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
+	
+	public TyExp<Ty, Sym> resolve(Program<Exp<?>> prog) {
+		return this;
+	}
 	
 	@Override
 	public Kind kind() {
@@ -20,12 +27,14 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 
 	public static final class TyExpSch<Ty, Sym> extends TyExp<Ty, Sym> {
 		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
+		
 		public final SchExp<Ty, ?, Sym, ?, ?> schema;
 
 		public TyExpSch(SchExp<Ty, ?, Sym, ?, ?> schema) {
-			if (schema == null) {
-				throw new RuntimeException("Attempt to take the typeside of a null schema");
-			}
 			this.schema = schema;
 		}
 
@@ -64,10 +73,7 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 			return schema.deps();
 		}
 
-		@Override
-		public long timeout() {
-			return schema.timeout();
-		}		
+			
 		
 	}
 	 
@@ -76,18 +82,14 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	public static final class TyExpEmpty extends TyExp<Void,Void> {
 		
 		@Override
-		public long timeout() {
-			return 0;
-		}
-
-		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Collections.emptyList();
 		}
-		
-		public TyExpEmpty() { 
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
 		}
-		
+			
 		@Override
 		public TypeSide<Void,Void> eval(AqlEnv env) {
 			return TypeSide.terminal();
@@ -110,14 +112,49 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		
 	}
 	
+	//////////////////////////////////////////////////////////
+	
+public static final class TyExpSql extends TyExp<String,String> {
+		
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Collections.emptyList();
+		}
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
+			
+		@Override
+		public TypeSide<String,String> eval(AqlEnv env) {
+			return new SqlTypeSide(env.defaults);
+		}
+	
+		@Override
+		public String toString() {
+			return "sql";
+		}
+	
+		@Override
+		public int hashCode() {
+			return 0;
+		}
+	
+		@Override
+		public boolean equals(Object o) {
+			return (o != null && o instanceof TyExpSql);
+		}
+		
+	}
+	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final class TyExpLit<Ty, Sym> extends TyExp<Ty, Sym> {
 		public final TypeSide<Ty, Sym> typeSide;
 		
 		@Override
-		public long timeout() {
-			return 0;
+		public Map<String, String> options() {
+			return Collections.emptyMap();
 		}
 		
 		@Override
@@ -171,8 +208,22 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 		public final String var;
 		
 		@Override
-		public long timeout() {
-			return 0;
+		public TyExp<Object, Object> resolve(Program<Exp<?>> prog) {
+			if (!prog.exps.containsKey(var)) {
+				throw new RuntimeException("Unbound typeside variable: " + var);
+			}
+			Exp<?> x = prog.exps.get(var);
+			if (!(x instanceof TyExp)) {
+				throw new RuntimeException("Variable " + var + " is bound to something that is not a typeside, namely\n\n" + x);
+			}
+			@SuppressWarnings("unchecked")
+			TyExp<Object,Object> texp = (TyExp<Object,Object>) x;
+			return texp.resolve(prog);
+		}
+		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
 		}
 		
 		@Override

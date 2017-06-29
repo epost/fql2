@@ -4,9 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
@@ -126,7 +125,7 @@ public class KBViewer {
 		Const c = PPParser.toCatConst(o);
 		Signature<String, String> sig = new Signature<>(c.nodes, c.arrows, c.eqs);
 		
-		Set<Pair<List<String>, List<String>>> rules = new HashSet<>();
+		List<Pair<List<String>, List<String>>> rules = new LinkedList<>();
 		for (Signature<String,String>.Eq eq : sig.eqs) {
 			rules.add(new Pair<>(eq.lhs.path.stream().map(x -> x.name).collect(Collectors.toList()), 
 					             eq.rhs.path.stream().map(x -> x.name).collect(Collectors.toList())));

@@ -10,7 +10,7 @@ import catdata.Unit;
 import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.fqlpp.cat.FinSet.Fn;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 class Pi {
@@ -327,7 +327,7 @@ class Pi {
 		Set<Map> ret = new HashSet<>();
 		for (Map x : x0) {
 			Map y =  new HashMap();
-			switch (GlobalOptions.debug.fqlpp.piLineage) {
+			switch (DefunctGlobalOptions.debug.fqlpp.piLineage) {
 				case "Fresh IDs":
 					y.put(0, id++);
 					break;

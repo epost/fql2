@@ -19,7 +19,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.ide.CodeTextPanel;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class XPoly<C,D> extends XExp implements XObject {
@@ -94,7 +94,7 @@ public class XPoly<C,D> extends XExp implements XObject {
 			this.where = where;
 			this.attrs = attrs;
 			this.edges = edges;
-			this.from = GlobalOptions.debug.fpql.reorder_joins ? sort(from) : from;
+			this.from = DefunctGlobalOptions.debug.fpql.reorder_joins ? sort(from) : from;
 		}
 		
 		private static void count(List<Object> first, Map counts) {

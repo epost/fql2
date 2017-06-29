@@ -73,7 +73,7 @@ import catdata.fql.decl.Signature;
 import catdata.fql.decl.Transform;
 import catdata.fql.decl.Unresolver;
 import catdata.ide.Disp;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 import catdata.ide.Split;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.Graph;
@@ -96,47 +96,47 @@ public class FqlDisplay implements Disp {
 	private static JPanel showInst(String c, Color clr, Instance view) throws FQLException {
 		JTabbedPane px = new JTabbedPane();
 
-		if (GlobalOptions.debug.fql.inst_graphical) {
+		if (DefunctGlobalOptions.debug.fql.inst_graphical) {
 			JPanel gp = view.pretty(clr);
 			px.add("Graphical", gp);
 		}
 
-		if (GlobalOptions.debug.fql.inst_textual) {
+		if (DefunctGlobalOptions.debug.fql.inst_textual) {
 			JPanel ta = view.text();
 			px.add("Textual", ta);
 		}
 
-		if (GlobalOptions.debug.fql.inst_tabular) {
+		if (DefunctGlobalOptions.debug.fql.inst_tabular) {
 			JPanel tp = view.view();
 			px.add("Tabular", tp);
 		}
 
-		if (GlobalOptions.debug.fql.inst_joined) {
+		if (DefunctGlobalOptions.debug.fql.inst_joined) {
 			JPanel joined = view.join();
 			px.add("Joined", joined);
 		}
 
-		if (GlobalOptions.debug.fql.inst_gr || GlobalOptions.debug.fql.inst_dot) {
+		if (DefunctGlobalOptions.debug.fql.inst_gr || DefunctGlobalOptions.debug.fql.inst_dot) {
 			Pair<JPanel, JPanel> groth = view.groth(c, clr);
-			if (GlobalOptions.debug.fql.inst_gr) {
+			if (DefunctGlobalOptions.debug.fql.inst_gr) {
 				px.add("Elements", groth.first);
 			}
-			if (GlobalOptions.debug.fql.inst_dot) {
+			if (DefunctGlobalOptions.debug.fql.inst_dot) {
 				px.add("Dot", groth.second);
 			}
 		}
 
-		if (GlobalOptions.debug.fql.inst_obs) {
+		if (DefunctGlobalOptions.debug.fql.inst_obs) {
 			JPanel rel = view.observables2();
 			px.add("Observables", rel);
 		}
 
-		if (GlobalOptions.debug.fql.inst_rdf) {
+		if (DefunctGlobalOptions.debug.fql.inst_rdf) {
 			JPanel rel = view.rdf(c);
 			px.add("RDF", rel);
 		}
 
-		if (GlobalOptions.debug.fql.inst_adom) {
+		if (DefunctGlobalOptions.debug.fql.inst_adom) {
 			JPanel rel = view.adom();
 			px.add("Adom", rel);
 		}
@@ -153,22 +153,22 @@ public class FqlDisplay implements Disp {
 
 		JTabbedPane px = new JTabbedPane();
 
-		if (GlobalOptions.debug.fql.mapping_graphical) {
+		if (DefunctGlobalOptions.debug.fql.mapping_graphical) {
 			JPanel gp = view.pretty(scolor, tcolor, environment);
 			px.add("Graphical", gp);
 		}
 
-		if (GlobalOptions.debug.fql.mapping_textual) {
+		if (DefunctGlobalOptions.debug.fql.mapping_textual) {
 			JPanel ta = view.text();
 			px.add("Textual", ta);
 		}
 
-		if (GlobalOptions.debug.fql.mapping_tabular) {
+		if (DefunctGlobalOptions.debug.fql.mapping_tabular) {
 			JPanel tp = view.view();
 			px.add("Tabular", tp);
 		}
 
-		if (GlobalOptions.debug.fql.mapping_ed) {
+		if (DefunctGlobalOptions.debug.fql.mapping_ed) {
 			JPanel map = view.constraint();
 			px.add("ED", map);
 		}
@@ -183,17 +183,17 @@ public class FqlDisplay implements Disp {
                                         String src_n, String dst_n, Transform view)  {
 		JTabbedPane px = new JTabbedPane();
 
-		if (GlobalOptions.debug.fql.transform_graphical) {
+		if (DefunctGlobalOptions.debug.fql.transform_graphical) {
 			JPanel gp = view.graphical(scolor, tcolor, src_n, dst_n);
 			px.add("Graphical", gp);
 		}
 
-		if (GlobalOptions.debug.fql.transform_textual) {
+		if (DefunctGlobalOptions.debug.fql.transform_textual) {
 			JPanel ta = view.text();
 			px.add("Textual", ta);
 		}
 
-		if (GlobalOptions.debug.fql.transform_tabular) {
+		if (DefunctGlobalOptions.debug.fql.transform_tabular) {
 			JPanel tp = view.view(src_n, dst_n);
 			px.add("Tabular", tp);
 		}
@@ -208,42 +208,42 @@ public class FqlDisplay implements Disp {
 			 {
 		JTabbedPane px = new JTabbedPane();
 
-		if (GlobalOptions.debug.fql.schema_graphical) {
+		if (DefunctGlobalOptions.debug.fql.schema_graphical) {
 			JComponent gp = view.pretty(clr);
 			px.add("Graphical", gp);
 		}
 
-		if (GlobalOptions.debug.fql.schema_textual) {
+		if (DefunctGlobalOptions.debug.fql.schema_textual) {
 			JPanel ta = view.text();
 			px.add("Textual", ta);
 		}
 
-		if (GlobalOptions.debug.fql.schema_tabular) {
+		if (DefunctGlobalOptions.debug.fql.schema_tabular) {
 			JPanel tp = view.view();
 			px.add("Tabular", tp);
 		}
 
-		if (GlobalOptions.debug.fql.schema_ed) {
+		if (DefunctGlobalOptions.debug.fql.schema_ed) {
 			JPanel map = view.constraint();
 			px.add("ED", map);
 		}
 
-		if (GlobalOptions.debug.fql.schema_denotation) {
+		if (DefunctGlobalOptions.debug.fql.schema_denotation) {
 			JPanel den = view.denotation();
 			px.add("Denotation", den);
 		}
 
-		if (GlobalOptions.debug.fql.schema_rdf) {
+		if (DefunctGlobalOptions.debug.fql.schema_rdf) {
 			JPanel rel = view.rdf();
 			px.add("OWL", rel);
 		}
 
-		if (GlobalOptions.debug.fql.schema_dot) {
+		if (DefunctGlobalOptions.debug.fql.schema_dot) {
 			JPanel dot = view.dot(name);
 			px.addTab("Dot", dot);
 		}
 
-		if (GlobalOptions.debug.fql.schema_check) {
+		if (DefunctGlobalOptions.debug.fql.schema_check) {
 			JPanel chk = view.chk();
 			px.addTab("Check", chk);
 		}
@@ -259,10 +259,10 @@ public class FqlDisplay implements Disp {
 
 		JTextArea area = new JTextArea(x.printNicely(p));
 
-		if (GlobalOptions.debug.fql.query_graphical) {
+		if (DefunctGlobalOptions.debug.fql.query_graphical) {
 			px.add("Graphical", view.pretty());
 		}
-		if (GlobalOptions.debug.fql.query_textual) {
+		if (DefunctGlobalOptions.debug.fql.query_textual) {
 			px.add("Text", new JScrollPane(area));
 		}
 
@@ -352,7 +352,7 @@ public class FqlDisplay implements Disp {
 					frames.add(new Pair<>("QUERY " + c + " : " + a + " -> " + b,
 							showFullQuery(p, environment, view, x)));
 				} else {
-					if (!GlobalOptions.debug.fql.continue_on_error) {
+					if (!DefunctGlobalOptions.debug.fql.continue_on_error) {
 						throw new RuntimeException("Not found: " + c);
 					}
 				}
@@ -506,7 +506,7 @@ public class FqlDisplay implements Disp {
 	
 		try {
 			Class<?> c = Class
-					.forName(FqlOptions.layout_prefix + GlobalOptions.debug.fql.instFlow_graph);
+					.forName(FqlOptions.layout_prefix + DefunctGlobalOptions.debug.fql.instFlow_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
 			Layout<String, Object> layout = (Layout<String, Object>) x.newInstance(sgv);
 
@@ -722,7 +722,7 @@ public class FqlDisplay implements Disp {
 	@SuppressWarnings("unchecked")
     private JComponent doView2(Graph<String, Object> sgv) {
 		try {
-			Class<?> c = Class.forName(FqlOptions.layout_prefix + GlobalOptions.debug.fql.schFlow_graph);
+			Class<?> c = Class.forName(FqlOptions.layout_prefix + DefunctGlobalOptions.debug.fql.schFlow_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
 			Layout<String, Object> layout = (Layout<String, Object>) x.newInstance(sgv);
 			layout.setSize(new Dimension(600, 540));

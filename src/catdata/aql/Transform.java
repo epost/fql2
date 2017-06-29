@@ -15,6 +15,10 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 		return Kind.TRANSFORM;
 	}
 	
+	@Override
+	public int size() {
+		return src().size();
+	}
 	
 	public abstract Ctx<Gen1, Term<Void,En,Void,Fk,Void,Gen2,Void>> gens();
 	public abstract Ctx<Sk1, Term<Ty,En,Sym,Fk,Att,Gen2,Sk2>> sks();
@@ -22,7 +26,6 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 	public abstract Instance<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src();
 	public abstract Instance<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst();
 	
-	//TODO aql transform compose
 	//TODO aql transform initial
 
 	protected void validate(boolean dontValidateEqs) {
@@ -68,7 +71,7 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 					Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> lhs = trans(eq.first), rhs = trans(eq.second);
 					boolean ok = dst().dp().eq(new Ctx<>(), lhs, rhs);
 					if (!ok) {
-						throw new RuntimeException("Equation " + eq.first + " = " + eq.second + " translates to " + lhs + " = " + rhs + ", which is not provable");
+						throw new RuntimeException("Equation " + eq.first + " = " + eq.second + " translates to " + lhs + " = " + rhs + ", which is not provable in \n\n" + dst());
 					}
 				}
 			}

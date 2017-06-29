@@ -1,7 +1,12 @@
 package catdata.fqlpp.cat;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -10,7 +15,7 @@ import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
 import catdata.fqlpp.FUNCTION;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 import catdata.provers.SemiThue;
 
 //this requires finite denotations (paths always normalized)
@@ -559,7 +564,7 @@ public class Signature<O,A> implements Serializable {
 		for (Signature<O, A>.Node n : nodes) {
 			paths.add(new Path(n));
 		}
-		outer: for (int iter = 0; iter < GlobalOptions.debug.fqlpp.MAX_PATH_LENGTH; iter++) {
+		outer: for (int iter = 0; iter < DefunctGlobalOptions.debug.fqlpp.MAX_PATH_LENGTH; iter++) {
 			for (Signature<O, A>.Path p : paths) {
 				Object i = fn.apply(p);
 				fn2.putIfAbsent(i, p);
@@ -578,7 +583,7 @@ public class Signature<O,A> implements Serializable {
 
 		if (fn2.size() < numarrs) {
 			String old_str = "Basis path lengths exceed allowed limit ("
-					+ GlobalOptions.debug.fqlpp.MAX_PATH_LENGTH
+					+ DefunctGlobalOptions.debug.fqlpp.MAX_PATH_LENGTH
 					+ ").  Only have "
 					+ fn2.size()
 					+ " basis paths out of required "
@@ -662,7 +667,7 @@ public class Signature<O,A> implements Serializable {
 		for (Signature<O, A>.Node n : nodes) {
 			paths.add(new Path(n));
 		}
-		for (int iter = 0; iter < GlobalOptions.debug.fqlpp.MAX_PATH_LENGTH; iter++) {
+		for (int iter = 0; iter < DefunctGlobalOptions.debug.fqlpp.MAX_PATH_LENGTH; iter++) {
 			List<Signature<O, A>.Path> paths0 = new LinkedList<>();
 			for (Signature<O, A>.Path p : paths) {
 				for (Signature<O, A>.Edge e : outEdges(p.target)) {
@@ -672,7 +677,7 @@ public class Signature<O,A> implements Serializable {
 			paths = paths0;
 		}
 		
-		Set<Pair<List<Edge>, List<Edge>>> rules = new HashSet<>();
+		List<Pair<List<Edge>, List<Edge>>> rules = new LinkedList<>();
 		for (Eq eq : eqs) {
 			rules.add(new Pair<>(eq.lhs.path, eq.rhs.path));
 		}

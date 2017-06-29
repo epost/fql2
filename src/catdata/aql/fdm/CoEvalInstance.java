@@ -1,7 +1,6 @@
 package catdata.aql.fdm;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -11,6 +10,7 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
 import catdata.aql.DP;
 import catdata.aql.Eq;
@@ -32,7 +32,8 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 	private final InitialAlgebra<Ty, En1, Sym, Fk1, Att1, Pair<Var, X>, Y, ID> init;
 	private final Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, Att1>>> I;
 	
-	public CoEvalInstance(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q, Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> J, Map<String, String> options) {
+	@SuppressWarnings("unused")
+	public CoEvalInstance(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q, Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> J, AqlOptions options) {
 		if (!Q.dst.equals(J.schema())) {
 			throw new RuntimeException("In co-eval instance, target of query is " + Q.dst + ", but instance has type " + J.schema());
 		}
@@ -51,15 +52,6 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 			eqs.add(new Pair<>(Term.upTalg(eq.lhs), Term.upTalg(eq.rhs)));		
 		}
 		
-		/*for (En2 t : J.schema().ens) {
-			for (X j : J.algebra().en(t)) {
-				for (Fk2 fk : J.schema().fks.keySet()) {
-					
-					J.algebra().fk(fk, j);
-				}
-			}
-		}*/
-		
 		for (En2 t : J.schema().ens) {
 			for (X j : J.algebra().en(t)) {
 				for (Var v : Q.ens.get(t).gens.keySet()) {
@@ -70,11 +62,11 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 					if (!eq.ctx.isEmpty()) {
 						throw new RuntimeException("Anomaly: please report");
 					}
-					eqs.add(new Pair<>(eq.lhs.mapGenSk(x -> new Pair<>(x, j), Util::abort), 
-									   eq.rhs.mapGenSk(x -> new Pair<>(x, j), Util::abort)));
+					eqs.add(new Pair<>(eq.lhs.mapGenSk(x -> new Pair<Var,X>(x, j), x -> Util.abort(x)), 
+									   eq.rhs.mapGenSk(x -> new Pair<>(x, j), x -> Util.abort(x))));
 				}
 				for (Fk2 fk : J.schema().fksFrom(t)) {
-					Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, Void, Void, Void, Void> 
+					Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> 
 					fk0 = Q.fks.get(fk);
 					for (Var v0 : fk0.src().gens().keySet()) {
 						Term<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y> 
@@ -99,13 +91,14 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 			col.eqs.add(new Eq<>(new Ctx<>(), eq.first, eq.second));			
 		}
 	
-		AqlOptions strat = new AqlOptions(options, col);  
+		//AqlOptions strat = new AqlOptions(options, col);  
 				
 		Function<Pair<Var,X>, String> printGen = x -> x.first + " " + J.algebra().printX(x.second);
 		Function<Y, String> printSk = J.algebra()::printY; //TODO aql printing coeval
 		
-		init = new InitialAlgebra<>(strat, schema(), col, new It(), printGen, printSk);	
-		I = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, init.dp(), init); 
+		init = new InitialAlgebra<>(options, schema(), col, new It(), printGen, printSk);	
+		I = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, init.dp(), init, (Boolean) options.getOrDefault(AqlOption.require_consistency), (Boolean) options.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
+		validate();
 	}
 
 	@Override
@@ -136,6 +129,16 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 	@Override
 	public Algebra<Ty, En1, Sym, Fk1, Att1, Pair<Var, X>, Y, ID, Chc<Y, Pair<ID, Att1>>> algebra() {
 		return I.algebra();
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return I.requireConsistency();
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return I.allowUnsafeJava();
 	}
 	
 }	

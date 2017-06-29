@@ -42,17 +42,17 @@ import catdata.fpql.XExp.XTy;
 import catdata.fpql.XExp.XUberPi;
 import catdata.fpql.XExp.XUnit;
 import catdata.fpql.XExp.XVoid;
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parser.Reference;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.Terminals.Identifier;
-import org.codehaus.jparsec.Terminals.IntegerLiteral;
-import org.codehaus.jparsec.Terminals.StringLiteral;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
-import org.codehaus.jparsec.functors.Tuple5;
+import org.jparsec.Parser;
+import org.jparsec.Parser.Reference;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.Terminals.Identifier;
+import org.jparsec.Terminals.IntegerLiteral;
+import org.jparsec.Terminals.StringLiteral;
+import org.jparsec.functors.Tuple3;
+import org.jparsec.functors.Tuple4;
+import org.jparsec.functors.Tuple5;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -65,7 +65,7 @@ import catdata.fpql.XExp.XSOED.FOED;
 import catdata.fpql.XExp.XSuperED.SuperFOED;
 import catdata.fpql.XPoly.Block;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 class XParser {
 
 	static final Parser<Integer> NUMBER = IntegerLiteral.PARSER
@@ -325,7 +325,7 @@ class XParser {
 //	@SuppressWarnings("rawtypes")
 	public static FunctorExp toInstConst(Object decl) {
 		Tuple3 y = (Tuple3) decl;
-		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) y.a;
 		
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 arrows = (Tuple3) x.b;
@@ -367,7 +367,7 @@ class XParser {
 	/*
 	public static FunctorExp toCatFtrConst(Object decl) {
 		Tuple5 y = (Tuple5) decl;
-		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) y.a;
 		
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 arrows = (Tuple3) x.b;
@@ -403,7 +403,7 @@ class XParser {
 
 	/*public static FunctorExp toMapConst(Object decl) {
 		Tuple5 y = (Tuple5) decl;
-		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) y.a;
 		
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 arrows = (Tuple3) x.b;
@@ -466,7 +466,7 @@ class XParser {
 		List decls = (List) program.parse(s);
 
 		for (Object d : decls) {
-			org.codehaus.jparsec.functors.Pair pr = (org.codehaus.jparsec.functors.Pair) d;
+			org.jparsec.functors.Pair pr = (org.jparsec.functors.Pair) d;
 			Tuple3 decl = (Tuple3) pr.b;
 			
 			if (decl.a instanceof List) {
@@ -536,7 +536,7 @@ J = soed {
 } : X -> Y on I
 	 */
 	private static XSOED fromSoed(Object ooo) {
-		org.codehaus.jparsec.functors.Pair ooo1 = (org.codehaus.jparsec.functors.Pair) ooo;
+		org.jparsec.functors.Pair ooo1 = (org.jparsec.functors.Pair) ooo;
 		
 		
 		Tuple4 a = (Tuple4) ooo1.a;
@@ -573,7 +573,7 @@ J = soed {
 	} : X -> Y on I
 		 */
 		private static XSuperED fromSuperSoed(Object ooo) {
-			org.codehaus.jparsec.functors.Pair ooo1 = (org.codehaus.jparsec.functors.Pair) ooo;
+			org.jparsec.functors.Pair ooo1 = (org.jparsec.functors.Pair) ooo;
 			
 			Tuple4 a = (Tuple4) ooo1.a;
 		//	List<Triple<String, List<String>, String>> es = new LinkedList<>();
@@ -715,9 +715,9 @@ J = soed {
 				XExp I = toExp(p.c);
 				Tuple3 q = (Tuple3) p.b;
 				
-				List s = (List) ((org.codehaus.jparsec.functors.Pair) q.a).b; //list of tuple3 of (path, string)
-				List f = (List) ((org.codehaus.jparsec.functors.Pair) q.b).b; //list of tuple3 of (string, string)
-				List w = (List) ((org.codehaus.jparsec.functors.Pair) q.c).b; //list of tuple3 of (path, path)
+				List s = (List) ((org.jparsec.functors.Pair) q.a).b; //list of tuple3 of (path, string)
+				List f = (List) ((org.jparsec.functors.Pair) q.b).b; //list of tuple3 of (string, string)
+				List w = (List) ((org.jparsec.functors.Pair) q.c).b; //list of tuple3 of (path, path)
 				
 				Map<Object, List<Object>> select = new HashMap<>();
 				Map<Object, Object> from = new HashMap<>();
@@ -757,9 +757,9 @@ J = soed {
 				XExp I = toExp(p.c);
 				Tuple3 q = (Tuple3) p.b;
 				
-				List s = (List) ((org.codehaus.jparsec.functors.Pair) q.a).b; //list of tuple3 of (path, string)
-				List f = (List) ((org.codehaus.jparsec.functors.Pair) q.b).b; //list of tuple3 of (string, string)
-				Object w =  ((org.codehaus.jparsec.functors.Pair) q.c).b; //list of tuple3 of (path, path)
+				List s = (List) ((org.jparsec.functors.Pair) q.a).b; //list of tuple3 of (path, string)
+				List f = (List) ((org.jparsec.functors.Pair) q.b).b; //list of tuple3 of (string, string)
+				Object w =  ((org.jparsec.functors.Pair) q.c).b; //list of tuple3 of (path, path)
 				
 				Map<Object, List<Object>> select = new HashMap<>();
 				Map<Object, Object> from = new HashMap<>();
@@ -831,8 +831,8 @@ J = soed {
 			}
 			return new XConst((String) p.b, (String) p.c);
 		}
-		if (c instanceof org.codehaus.jparsec.functors.Pair) {
-			org.codehaus.jparsec.functors.Pair p = (org.codehaus.jparsec.functors.Pair) c;
+		if (c instanceof org.jparsec.functors.Pair) {
+			org.jparsec.functors.Pair p = (org.jparsec.functors.Pair) c;
 			if (p.a.toString().equals("idpoly")) {
 				return new XIdPoly(toExp(p.b));
 			}
@@ -900,7 +900,7 @@ J = soed {
 		return constant;  */
 	private static XInst toInstConst(Object decl) {
 		Tuple4 y = (Tuple4) decl;
-		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.b;
+		org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) y.b;
 		
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 arrows = (Tuple3) x.b;
@@ -936,7 +936,7 @@ J = soed {
 	
 	private static XMapConst toMapping(Object decl) {
 		Tuple5 y = (Tuple5) decl;
-		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+		org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) y.a;
 		
 		Tuple3 nodes = (Tuple3) x.a;
 		Tuple3 arrows = (Tuple3) x.b;
@@ -965,7 +965,7 @@ J = soed {
 	
 	private static XTransConst toTrans(Object decl) {
 		Tuple5 y = (Tuple5) decl;
-//		org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) y.a;
+//		org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) y.a;
 		
 		Tuple3 nodes = (Tuple3) y.a;
 //		Tuple3 arrows = (Tuple3) x.b;
@@ -1005,8 +1005,8 @@ J = soed {
 			Tuple3 o2 = (Tuple3) o;
 			return new XBool((List<Object>)o2.a, (List<Object>)o2.c);
 		}
-		if (o instanceof org.codehaus.jparsec.functors.Pair) {
-			org.codehaus.jparsec.functors.Pair x = (org.codehaus.jparsec.functors.Pair) o;
+		if (o instanceof org.jparsec.functors.Pair) {
+			org.jparsec.functors.Pair x = (org.jparsec.functors.Pair) o;
 			return new XBool(toWhere(x.b));
 
 		}

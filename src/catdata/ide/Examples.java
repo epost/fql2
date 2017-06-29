@@ -71,16 +71,6 @@ public class Examples {
 		return es0;
 	}
 
-	/*
-	 * public static void main(String[] args) { try { for (Example e :
-	 * getAllExamples()) { String s =
-	 * "/Users/ryan/github/fql2/resources/examples/" + e.lang().fileExtension()
-	 * + "/" + e.getName().replaceAll("/", "") + "." + e.lang().fileExtension();
-	 * System.out.println(s); File f = new File(s); f.createNewFile();
-	 * FileWriter w = new FileWriter(f); w.write(e.getText()); w.close(); } }
-	 * catch (Exception e) { e.printStackTrace(); } }
-	 */
-
 	private static Map<Language, List<Example>> examples2;
 
 	public static Map<Language, List<Example>> getAllExamples2() {
@@ -88,9 +78,13 @@ public class Examples {
 			return examples2;
 		}
 		try {
-			URL url = Object.class.getResource("/resources");
+			URL url = Object.class.getResource("/help.txt");
 			if (url == null) {
-				File f = new File(Object.class.getResource("/examples").toURI());
+				URL l = Object.class.getResource("/examples");
+				if (l == null) {
+					throw new RuntimeException("Cannot locate built-in examples");
+				}
+				File f = new File(l.toURI());
 				examples2 = getExamples(f);
 				return examples2;
 			} else {
@@ -98,8 +92,15 @@ public class Examples {
 				if (uri.getScheme().equals("jar")) {
 					examples2 = getExamplesFromJar(uri);
 					return examples2;
-				} else {
-					throw new RuntimeException("Anomaly: please report");
+				} else { //TODO AQL this is really messed up what's going on with Eclipse
+					URL l = Object.class.getResource("/examples");
+					if (l == null) {
+						throw new RuntimeException("Cannot locate built-in examples");
+					}
+					File f = new File(l.toURI());
+					examples2 = getExamples(f);
+					return examples2;
+//					throw new RuntimeException("Anomaly: please report");
 				}
 			}
 			//
@@ -178,14 +179,6 @@ public class Examples {
 	public static List<Example> getExamples(Language l) {
 		return getAllExamples2().get(l);
 	}
-
-	/*
-	 * public static List<Example> getExamples(Class<?> c) { List<Example> ret =
-	 * new LinkedList<>(); try { Field[] fields = c.getFields(); for (Field
-	 * field : fields) { Example e = (Example) field.get(null); ret.add(e); } }
-	 * catch (IllegalAccessException | IllegalArgumentException |
-	 * SecurityException ex) { ex.printStackTrace(); } return ret; }
-	 */
 
 	public static Vector<Example> filterBy(String string) {
 		Vector<Example> ret = new Vector<>();

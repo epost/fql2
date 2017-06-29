@@ -52,7 +52,7 @@ public class Triple<S1, S2, S3> implements Comparable<Triple<S1, S2, S3>> {
 
 	public S1 first;
 	public final S2 second;
-	public final S3 third;
+	public S3 third;
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override

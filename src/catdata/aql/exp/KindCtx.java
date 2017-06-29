@@ -4,9 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import catdata.Ctx;
+import catdata.Util;
 import catdata.aql.Kind;
 
-public class KindCtx<V,G,T,S,I,H,F,Q,P,C> {
+public class KindCtx<V,G,T,S,I,H,F,Q,P,C,SC,ED> {
 
 	public final Ctx<V, G> gs = new Ctx<>();
 	public final Ctx<V, T> tys = new Ctx<>();
@@ -17,30 +18,41 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C> {
 	public final Ctx<V, Q> qs = new Ctx<>();
 	public final Ctx<V, P> ps = new Ctx<>();
 	public final Ctx<V, C> cs = new Ctx<>();
+	public final Ctx<V, SC> scs = new Ctx<>();
+	public final Ctx<V, ED> eds = new Ctx<>();
 	
-	public Object get(V k, Kind kind) {
+	
+	public Ctx<V, ?> get(Kind kind) {
 		switch (kind) {
 		case INSTANCE:
-			return insts.get(k);
+			return insts;
 		case MAPPING:
-			return maps.get(k);
+			return maps;
 		case SCHEMA:
-			return schs.get(k);
+			return schs;
 		case TRANSFORM:
-			return trans.get(k);
+			return trans;
 		case TYPESIDE:
-			return tys.get(k);
+			return tys;
 		case QUERY:
-			return qs.get(k);
+			return qs;
 		case PRAGMA:
-			return ps.get(k);
+			return ps;
 		case GRAPH:
-			return gs.get(k);
+			return gs;
 		case COMMENT:
-			return cs.get(k);
+			return cs;
+		case SCHEMA_COLIMIT:
+			return scs;
+		case CONSTRAINTS:
+			return eds;
 		default:
 			throw new RuntimeException();
 		}
+	}
+	
+	public Object get(V k, Kind kind) {
+		return get(kind).get(k);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -73,6 +85,12 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C> {
 		case COMMENT:
 			cs.put(k, (C) o);
 			break;	
+		case SCHEMA_COLIMIT:
+			scs.put(k, (SC) o);
+			break;
+		case CONSTRAINTS:
+			eds.put(k, (ED) o);
+			break;
 		default:
 			throw new RuntimeException();
 		}
@@ -91,6 +109,37 @@ public class KindCtx<V,G,T,S,I,H,F,Q,P,C> {
 		ret.addAll(qs.keySet()); 
 		ret.addAll(gs.keySet());
 		ret.addAll(cs.keySet());
+		ret.addAll(scs.keySet());
+		ret.addAll(eds.keySet());
 		return ret;
+	}
+
+	public int size(Kind k) {
+		switch (k) {
+		case COMMENT:
+			return cs.size();
+		case CONSTRAINTS:
+			return eds.size();
+		case GRAPH:
+			return gs.size();
+		case INSTANCE:
+			return insts.size();
+		case MAPPING:
+			return maps.size();
+		case PRAGMA:
+			return ps.size();
+		case QUERY:
+			return qs.size();
+		case SCHEMA:
+			return schs.size();
+		case SCHEMA_COLIMIT:
+			return scs.size();
+		case TRANSFORM:
+			return trans.size();
+		case TYPESIDE:
+			return tys.size();
+		
+		}
+		return Util.anomaly();
 	}
 }

@@ -1,12 +1,14 @@
 package catdata;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-import org.codehaus.jparsec.error.Location;
-import org.codehaus.jparsec.error.ParseErrorDetails;
-import org.codehaus.jparsec.error.ParserException;
+import org.jparsec.error.Location;
+import org.jparsec.error.ParseErrorDetails;
+import org.jparsec.error.ParserException;
 
 public class Program<X> implements Prog {
 
@@ -14,6 +16,7 @@ public class Program<X> implements Prog {
 	public final List<String> order = new LinkedList<>();
 	public final LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();
 	public final LinkedHashMap<String, X> exps = new LinkedHashMap<>();
+	public final Map<String, String> options;
 	private final String text;
 	
 	@Override
@@ -26,14 +29,22 @@ public class Program<X> implements Prog {
 	}
 	
 	public Program(List<Triple<String, Integer, X>> decls, String text) {
+		this(decls, text, Collections.emptyList());
+	}
+	
+	public Program(List<Triple<String, Integer, X>> decls, String text, List<Pair<String, String>> options) {
 		this.text = text;
 		List<Triple<String, Integer, X>> seen = new LinkedList<>();
 		for (Triple<String, Integer, X> decl : decls) { 
 			checkDup(seen, decl);
 			exps.put(decl.first, decl.third);
 			lines.put(decl.first, decl.second);
+			if (decl.second == null || decl.third == null) {
+				Util.anomaly();
+			}
 			order.add(decl.first);				
 		}
+		this.options = Util.toMapSafely(options);
 	}
 
 	private Location conv(int i) {
@@ -50,6 +61,7 @@ public class Program<X> implements Prog {
 		return new Location(line, col);
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void checkDup(List<Triple<String, Integer, X>> seen, Triple<String, Integer, X> toAdd) {
 		for (Triple<String, Integer, X> other : seen) {
 			if (other.first.equals(toAdd.first)) {

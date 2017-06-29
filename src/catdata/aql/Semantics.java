@@ -4,6 +4,8 @@ public interface Semantics {
 
 	public Kind kind();
 	
+	public int size();
+	
 	public default TypeSide<?,?> asTypeSide() {
 		return (TypeSide<?,?>) this;
 	}
@@ -14,6 +16,10 @@ public interface Semantics {
 	
 	public default Schema<?,?,?,?,?> asSchema() {
 		return (Schema<?,?,?,?,?>) this;
+	}
+	
+	public default Constraints<?,?,?,?,?> asConstraints() {
+		return (Constraints<?,?,?,?,?>) this;
 	}
 	
 	public default Instance<?,?,?,?,?,?,?,?,?> asInstance() {
@@ -38,6 +44,10 @@ public interface Semantics {
 	
 	public default Comment asComment() {
 		return (Comment) this;
+	}
+	
+	public default ColimitSchema<?,?,?,?,?,?> asSchemaColimit() {
+		return (ColimitSchema<?,?,?,?,?,?>) this;
 	}
 	
 	

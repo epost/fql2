@@ -1,5 +1,6 @@
 package catdata;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -24,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -40,6 +42,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -49,13 +52,12 @@ import org.apache.commons.collections15.CollectionUtils;
 
 public class Util {
 
-
 	public static String quote(String s) {
-		s = s.replace("\\", "\\" + "\\"); //  \ --> \\
+		s = s.replace("\\", "\\" + "\\"); // \ --> \\
 		s = s.replace("\"", "\\\""); // " --> \"
 		return "\"" + s + "\"";
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public static <X> X timeout(Callable<X> c, long timeout) {
 		// final Object lock = new Object();
@@ -72,7 +74,13 @@ public class Util {
 				synchronized (thr) {
 					thr.set(exn);
 				}
-			} catch (ThreadDeath d) {
+			} catch (OutOfMemoryError exn) {
+				exn.printStackTrace();
+				synchronized (thr) {
+					thr.set(exn);
+				}
+			} 
+			catch (ThreadDeath d) {
 				synchronized (thr) {
 					thr.set(new RuntimeInterruptedException(d));
 				}
@@ -91,7 +99,7 @@ public class Util {
 			synchronized (ret) {
 				if (!ret.isSet() && !thr.isSet()) {
 					t.stop();
-					throw new RuntimeException("Timout after " + (timeout/1000) + " seconds. \n\nPossible solution: add options timeout=X where X > " + (timeout / 1000) + " is how many seconds to wait.");
+					throw new RuntimeException("Timout after " + (timeout / 1000) + " seconds. \n\nPossible solution: add options timeout=X where X > " + (timeout / 1000) + " is how many seconds to wait.");
 				} else if (ret.isSet() && !thr.isSet()) {
 					// t should be dying
 					return ret.x;
@@ -107,6 +115,9 @@ public class Util {
 	}
 
 	public static Class<?> load(String clazz) {
+		if (clazz == null) {
+			return Util.anomaly();
+		}
 		try {
 			return Class.forName(clazz);
 		} catch (ClassNotFoundException e) {
@@ -159,21 +170,17 @@ public class Util {
 			throw new RuntimeException("Anomaly: please report");
 		};
 	}
-/*
-	private static class VoidIter implements Iterator<Void> {
 
-		@Override
-		public boolean hasNext() {
-			return false;
-		}
-
-		@Override
-		public Void next() {
-			throw new RuntimeException("Anomaly: please report");
-		}
-
-	}
-*/
+	/*
+	 * private static class VoidIter implements Iterator<Void> {
+	 * 
+	 * @Override public boolean hasNext() { return false; }
+	 * 
+	 * @Override public Void next() { throw new
+	 * RuntimeException("Anomaly: please report"); }
+	 * 
+	 * }
+	 */
 	public static class MyTableRowSorter extends TableRowSorter<TableModel> {
 
 		public MyTableRowSorter(TableModel model) {
@@ -260,37 +267,41 @@ public class Util {
 	}
 
 	public static String sep(Iterator<?> c, String sep) {
+		return sep(c, sep, Object::toString);
+	}
+	
+	public static <X> String sep(Iterator<X> c, String sep, Function<X, String> fun) {
 		String ret = "";
 		boolean b = false;
 		while (c.hasNext()) {
-			Object o = c.next();
+			X o = c.next();
 			if (b) {
 				ret += sep;
 			}
 			b = true;
 
-			ret += o;
+			ret += fun.apply(o);
 		}
 		return ret;
 	}
 
 	public static <X, Y> boolean isBijection(Map<X, Y> m, Set<X> X, Set<Y> Y) {
-        if (!m.keySet().equals(X)) {
-            return false;
-        }
-        if (!new HashSet<>(m.values()).equals(Y)) {
-            return false;
-        }
-        Map<Y, X> n = rev(m, Y);
-        if (n == null) {
-            return false;
-        }
+		if (!m.keySet().equals(X)) {
+			return false;
+		}
+		if (!new HashSet<>(m.values()).equals(Y)) {
+			return false;
+		}
+		Map<Y, X> n = rev(m, Y);
+		if (n == null) {
+			return false;
+		}
 
-        Map<X, X> a = compose0(m, n);
-        Map<Y, Y> b = compose0(n, m);
+		Map<X, X> a = compose0(m, n);
+		Map<Y, Y> b = compose0(n, m);
 
-        return a.equals(id(X)) && (!b.equals(id(Y)));
-    }
+		return a.equals(id(X)) && (!b.equals(id(Y)));
+	}
 
 	public static <X> Map<X, X> id(Collection<X> X) {
 		Map<X, X> ret = new LinkedHashMap<>();
@@ -344,14 +355,14 @@ public class Util {
 		return ret;
 	}
 
-	@SuppressWarnings({"unchecked", "SuspiciousArrayCast"})
+	@SuppressWarnings({ "unchecked", "SuspiciousArrayCast" })
 	public static <X> X[] sing(X x) {
 		return (X[]) new Object[] { x };
 	}
 
 	@SuppressWarnings("unchecked")
 	public static <X, Y> Y[] map(X[] xs, Function<X, Y> f) {
-		//noinspection SuspiciousArrayCast
+		// noinspection SuspiciousArrayCast
 		return (Y[]) Arrays.stream(xs).map(f).collect(Collectors.toList()).toArray();
 	}
 
@@ -365,7 +376,7 @@ public class Util {
 	@SafeVarargs
 	public static <X> List<X> list(X... xs) {
 		List<X> ret = new LinkedList<>();
-                ret.addAll(Arrays.asList(xs));
+		ret.addAll(Arrays.asList(xs));
 		return ret;
 	}
 
@@ -391,6 +402,8 @@ public class Util {
 		}
 		return map;
 	}
+	
+	
 
 	/**
 	 * 
@@ -514,7 +527,7 @@ public class Util {
 		return ret;
 	}
 
-	//public for OPL example
+	// public for OPL example
 	public static List<List<Integer>> mat_conv2(int[][] l) {
 		List<List<Integer>> ret = new LinkedList<>();
 		for (int[] r : l) {
@@ -545,13 +558,13 @@ public class Util {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final Comparator<Object> LengthComparator = (Object o1, Object o2) -> {
-            if (o1.toString().length() > o2.toString().length()) {
-                return 1;
-            } else if (o1.toString().length() < o2.toString().length()) {
-                return -1;
-            }
-            return o1.toString().compareTo(o2.toString());
-        };
+		if (o1.toString().length() > o2.toString().length()) {
+			return 1;
+		} else if (o1.toString().length() < o2.toString().length()) {
+			return -1;
+		}
+		return o1.toString().compareTo(o2.toString());
+	};
 
 	private static final Comparator<Object> AlphabeticalComparator = Comparator.comparing(Object::toString);
 
@@ -580,7 +593,7 @@ public class Util {
 		ret.put(x, y);
 		return ret;
 	}
-	
+
 	public static <X, Y> Map<X, Y> singMap0(X x, Y y) {
 		return singMap(x, y);
 	}
@@ -656,6 +669,10 @@ public class Util {
 		return ret;
 	}
 
+	/*public static JPanel makeTable(Border b, String border, Object[][] rowData, Object... colNames) {
+		return makeTable(null, b, border, rowData, colNames);
+	}*/
+
 	@SuppressWarnings("serial")
 	public static JPanel makeTable(Border b, String border, Object[][] rowData, Object... colNames) {
 		JTable t = new JTable(rowData, colNames) {
@@ -665,6 +682,9 @@ public class Util {
 				return new Dimension(d.width, d.height);
 			}
 		};
+		/*if (f != null) {
+			t.setFont(f);
+		}*/
 		JPanel p = new JPanel(new GridLayout(1, 1));
 		TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
 		if (colNames.length > 0) {
@@ -673,14 +693,26 @@ public class Util {
 		t.setRowSorter(sorter);
 		sorter.allRowsChanged();
 		p.add(new JScrollPane(t));
+		
+		for (int row = 0; row < t.getRowCount(); row++) {
+			int rowHeight = t.getRowHeight();
 
-		// p.setMaximumSize(new Dimension(200,200));
-		p.setBorder(BorderFactory.createTitledBorder(b, border));
+			for (int column = 0; column < t.getColumnCount(); column++) {
+				Component comp = t.prepareRenderer(t.getCellRenderer(row, column), row, column);
+				rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
+			}
+
+			t.setRowHeight(row, rowHeight);
+		}
+
+		Font font = UIManager.getFont("TableHeader.font");
+		p.setBorder(BorderFactory.createTitledBorder(b, border, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, font, Color.black));
 		return p;
 
 	}
 
 	@SuppressWarnings("serial")
+	//TODO aql merge with other makeTable method
 	public static JPanel makeBoldHeaderTable(Collection<String> atts, Border b, String border, Object[][] rowData, String... colNames) {
 		JTable t = new JTable(rowData, colNames) {
 			@Override
@@ -689,6 +721,9 @@ public class Util {
 				return new Dimension(d.width, d.height);
 			}
 		};
+		/*if (f != null) {
+			t.setFont(f);
+		}*/
 		// PlusMinusCellRenderer r = new PlusMinusCellRenderer();
 		// t.setDefaultRenderer(Object.class, r);
 		// t.setDefaultEditor(Object.class, r);
@@ -704,17 +739,16 @@ public class Util {
 		sorter.allRowsChanged();
 		p.add(new JScrollPane(t));
 
-		/*
-		 * for (int row = 0; row < t.getRowCount(); row++) { int rowHeight =
-		 * t.getRowHeight();
-		 * 
-		 * for (int column = 0; column < t.getColumnCount(); column++) {
-		 * Component comp = t.prepareRenderer(t.getCellRenderer(row, column),
-		 * row, column); rowHeight = Math.max(rowHeight,
-		 * comp.getPreferredSize().height); }
-		 * 
-		 * t.setRowHeight(row, rowHeight); }
-		 */
+		for (int row = 0; row < t.getRowCount(); row++) {
+			int rowHeight = t.getRowHeight();
+
+			for (int column = 0; column < t.getColumnCount(); column++) {
+				Component comp = t.prepareRenderer(t.getCellRenderer(row, column), row, column);
+				rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
+			}
+
+			t.setRowHeight(row, rowHeight);
+		}
 
 		p.setBorder(BorderFactory.createTitledBorder(b, border));
 		// t.getTableHeader().set
@@ -723,6 +757,10 @@ public class Util {
 
 			col.setHeaderRenderer(new BoldifyingColumnHeaderRenderer(atts, t.getTableHeader().getDefaultRenderer()));
 		}
+		
+		Font font = UIManager.getFont("TableHeader.font");
+		p.setBorder(BorderFactory.createTitledBorder(b, border, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, font, Color.black));
+
 
 		return p;
 
@@ -994,6 +1032,14 @@ public class Util {
 		return ret;
 	}
 
+	public static <X, Y> Map<X, Collection<Y>> newSetsFor0(Collection<X> xs) {
+		Map<X, Collection<Y>> ret = new HashMap<>();
+		for (X x : xs) {
+			ret.put(x, new HashSet<>());
+		}
+		return ret;
+	}
+
 	public static <X, Y> Map<X, List<Y>> newListsFor(Collection<X> xs) {
 		Map<X, List<Y>> ret = new HashMap<>();
 		for (X x : xs) {
@@ -1040,15 +1086,15 @@ public class Util {
 	}
 
 	public static final Comparator<Object> ToStringComparator = (Object o1, Object o2) -> {
-            if (o1.toString().length() > o2.toString().length()) {
-                return 1;
-            } else if (o1.toString().length() < o2.toString().length()) {
-                return -1;
-            }
-            return o1.toString().compareTo(o2.toString());
-        };
+		if (o1.toString().length() > o2.toString().length()) {
+			return 1;
+		} else if (o1.toString().length() < o2.toString().length()) {
+			return -1;
+		}
+		return o1.toString().compareTo(o2.toString());
+	};
 
-	public static void anomaly() {
+	public static <X> X anomaly() {
 		throw new RuntimeException("Anomaly: please report");
 	}
 
@@ -1098,26 +1144,26 @@ public class Util {
 	public static double similarity(String s1, String s2) { // TODO aql
 		return (1) / ((double) 1 + editDistance(s1, s2));
 	}
-	
+
 	public static String readFile(Reader r) throws IOException {
-			try (BufferedReader reader = new BufferedReader(r)) {
-				String line;
-				StringBuilder stringBuilder = new StringBuilder();
-				String ls = System.getProperty("line.separator");
-		
-				while ((line = reader.readLine()) != null) {
-					stringBuilder.append(line);
-					stringBuilder.append(ls);
-				}
-		
-				reader.close();
-				return stringBuilder.toString();
+		try (BufferedReader reader = new BufferedReader(r)) {
+			String line;
+			StringBuilder stringBuilder = new StringBuilder();
+			String ls = System.getProperty("line.separator");
+
+			while ((line = reader.readLine()) != null) {
+				stringBuilder.append(line);
+				stringBuilder.append(ls);
 			}
+
+			reader.close();
+			return stringBuilder.toString();
 		}
-	
+	}
+
 	public static String readFile(InputStream file) {
 		try (InputStreamReader r = new InputStreamReader(file)) {
-			
+
 			return readFile(r);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -1135,7 +1181,7 @@ public class Util {
 		}
 		return null;
 	}
-	
+
 	public static String readFile(File file) {
 		try (FileReader r = new FileReader(file)) {
 			return readFile(r);
@@ -1144,5 +1190,113 @@ public class Util {
 			JOptionPane.showMessageDialog(null, "Could not read from " + file);
 		}
 		return null;
+	} 
+	
+	public static <T> Iterable<List<T>> permutationsOf(List<T> l) {
+		return new Iterable<List<T>>() {
+			@Override
+			public Iterator<List<T>> iterator() {
+				return new PermutationIterator<>(l);
+			}
+		};
 	}
+	
+	//seems like heap's algorithm
+	private static final class PermutationIterator<T> 
+    implements Iterator<List<T>> {
+
+        private List<T> nextPermutation;
+        private final List<T> allElements = new ArrayList<>();
+        private int[] indices;
+
+        PermutationIterator(List<T> allElements) {
+            if (allElements.isEmpty()) {
+                nextPermutation = null;
+                return;
+            }
+
+            this.allElements.addAll(allElements);
+            this.indices = new int[allElements.size()];
+
+            for (int i = 0; i < indices.length; ++i) {
+                indices[i] = i;
+            }
+
+            nextPermutation = new ArrayList<>(this.allElements);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return nextPermutation != null;
+        }
+
+        @Override
+        public List<T> next() {
+            if (nextPermutation == null) {
+                throw new NoSuchElementException("No permutations left.");
+            }
+
+            List<T> ret = nextPermutation;
+            generateNextPermutation();
+            return ret;
+        }
+
+        private void generateNextPermutation() {
+            int i = indices.length - 2;
+
+            while (i >= 0 && indices[i] > indices[i + 1]) {
+                --i;
+            }
+
+            if (i == -1) {
+                // No more new permutations.
+                nextPermutation = null;
+                return;
+            }
+
+            int j = i + 1;
+            int min = indices[j];
+            int minIndex = j;
+
+            while (j < indices.length) {
+                if (indices[i] < indices[j] && indices[j] < min) {
+                    min = indices[j];
+                    minIndex = j;
+                }
+
+                ++j;
+            }
+
+            swap(indices, i, minIndex);
+
+            ++i;
+            j = indices.length - 1;
+
+            while (i < j) {
+                swap(indices, i++, j--);
+            }
+
+            loadPermutation();
+        }
+
+        private void loadPermutation() {
+            List<T> newPermutation = new ArrayList<>(indices.length);
+
+            for (int i : indices) {
+                newPermutation.add(allElements.get(i));
+            }
+
+            this.nextPermutation = newPermutation;
+        }
+    
+
+    private static void swap(int[] array, int a, int b) {
+        int tmp = array[a];
+        array[a] = array[b];
+        array[b] = tmp;
+    }
+
+   
+}
+
 }

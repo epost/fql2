@@ -14,7 +14,8 @@ import catdata.ide.Example;
 import catdata.ide.Examples;
 import catdata.ide.Language;
 
-//TODO: have this execute pragmas?
+//TODO aql merge aqldoc with aqlinacan
+//TODO: aql have this execute pragmas?
 class AqlInACan {
 
 	private static String quote(String s) {
@@ -86,15 +87,20 @@ class AqlInACan {
 			Program<Exp<?>> program = AqlParser.parseProgram(can);
 			String html = "<html><head><title>Result</title></head><body>\n\n";
 			AqlEnv env = new AqlEnv();
-			env.typing = new AqlTyping(program);	
+			env.typing = new AqlTyping(program, env.defaults);	
 			for (String n : program.order) {
 				Exp<?> exp = program.exps.get(n);
+				if (exp.kind() == Kind.PRAGMA) {
+					throw new RuntimeException("Pragmas disabled in web-AQL");
+				}
 				Object o = Util.timeout(() -> exp.eval(env), 10 * 1000); //hardcode timeout, do not exec pragmas
 				env.defs.put(n, exp.kind(), o);
 				if (exp.kind().equals(Kind.INSTANCE)) {
 					html += "<p><h2>" + n + " =\n</h2>" + toHtml((Instance<?,?,?,?,?,?,?,?,?>) o) 
 						+ "\n</p><br><hr>\n";
-				}
+				} 
+				//TODO aql revisit if this should print html or javascript graphs
+				//for example, could actually call HTML maker thingy, although security implication
 			}
 			return html + "\n\n</body></html>";
 		} catch (Throwable ex) {
@@ -106,10 +112,10 @@ class AqlInACan {
 	public static <Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> String toHtml(Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I) {
 		String ret = "<div>";
 		
-		Map<En, Pair<List<String>,Object[][]>> tables = AqlViewer.makeEnTables(I.algebra());
+		Map<En, Pair<List<String>,Object[][]>> tables = new AqlViewer(64).makeEnTables(I.algebra()); //TODO aql hardcoded
 		
-		for (En t : tables.keySet()) {
-				ret += "<table style=\"float: left\" border=\"1\" cellpadding=\"3\" cellspacing=\"1\">";
+		for (En t : Util.alphabetical(tables.keySet())) {
+			ret += "<table style=\"float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px\" border=\"1\"  cellpadding=\"3\">";
 	
 			List<String> cols = tables.get(t).first;
 			cols.remove(0);
@@ -129,7 +135,7 @@ class AqlInACan {
 			}
 			ret += "</table>";
 		} 
-		return ret + "</div><br style=\"clear:both;\">"; 
+		return ret + "</div><br style=\"clear:both;\"/>"; 
 	}
 
 	private static String strip(String s) {

@@ -335,6 +335,8 @@ public final class RawTerm {
 		this(head, args, null);
 	}
 	
+
+	
 	public RawTerm(String head) {
 		this(head, Collections.emptyList(), null);
 	}
@@ -349,6 +351,14 @@ public final class RawTerm {
 				} 
 				continue;
 			}
+			ret = new RawTerm(o.toString(), Util.singList(ret));
+		}
+		return ret;
+	}
+	
+	public static RawTerm fold (List<String> l, String v) {
+		RawTerm ret = new RawTerm(v, (String) null);
+		for (Object o : l) {
 			ret = new RawTerm(o.toString(), Util.singList(ret));
 		}
 		return ret;

@@ -1,11 +1,9 @@
 package catdata.provers;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import catdata.Chc;
 import catdata.Pair;
@@ -13,6 +11,9 @@ import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
 
+/**
+ * works correctly on empty sorts
+ */
 public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 
 	private final SemiThue<Chc<Chc<Unit,T>,C>> kb;
@@ -21,7 +22,7 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 		super(th.tys, th.syms, th.eqs);
 		
 		//!_1 =  (might be superflous) TODO aql
-		Set<Pair<List<Chc<Chc<Unit, T>, C>>, List<Chc<Chc<Unit, T>, C>>>> rules = new HashSet<>();
+		List<Pair<List<Chc<Chc<Unit, T>, C>>, List<Chc<Chc<Unit, T>, C>>>> rules = new LinkedList<>();
 		rules.add(new Pair<>(Util.singList(Chc.inLeft(Chc.inLeft(new Unit()))) , Collections.emptyList()));
 		
 		//e : t -> 1 = !_1 - don't have any

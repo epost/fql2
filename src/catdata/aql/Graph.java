@@ -4,6 +4,14 @@ import catdata.graph.DMG;
 
 public class Graph<N,E> implements Semantics {
 
+	/**
+	 * return size of nodes plus size of edges
+	 */
+	@Override
+	public int size() {
+		return dmg.nodes.size() + dmg.edges.size();
+	}
+	
 	public final DMG<N,E> dmg;
 	
 	public Graph(DMG<N, E> dmg) {

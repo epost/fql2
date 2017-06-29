@@ -44,9 +44,9 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 	private final Map<String, String> options;
 	
 	@Override
-	public long timeout() {
-		return (Long) AqlOptions.getOrDefault(options, AqlOption.timeout);
-	}	
+	public Map<String, String> options() {
+		return options;
+	}
 	 
 	private String toString;
 	
@@ -152,7 +152,7 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 	public LiteralTransform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
 		Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> src0 = src.eval(env), dst0 = dst.eval(env);
 		//Collage<Object, Object, Object, Object, Object, Void, Void> scol = new Collage<>(src0);
-		Collage<Object, Object, Object, Object, Object, Object, Object> dcol = dst0.collage(); //new Collage<>(dst0);
+		Collage<Object, Object, Object, Object, Object, Object, Object> dcol = new Collage<>(dst0.collage());
 		
 		Map<Object, Term<Void,Object,Void,Object,Void,Object,Void>> gens0 = new HashMap<>();
 		Map<Object, Term<Object,Object,Object,Object,Object,Object,Object>> sks0 = new HashMap<>();
@@ -187,7 +187,7 @@ public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Obje
 			}
 		}
 		
-		AqlOptions ops = new AqlOptions(options, null);
+		AqlOptions ops = new AqlOptions(options, null, env.defaults);
 		
 		
 		LiteralTransform<Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object> ret = new LiteralTransform<>(gens0, sks0, src0, dst0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe) );

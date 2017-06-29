@@ -39,11 +39,15 @@ public class It implements Iterator<ID>, Serializable {
 				return true;
 			if (obj == null)
 				return false;
-			if (getClass() != obj.getClass())
+			if (getClass() != obj.getClass()) {
+				System.out.println("Please report this message to Ryan.");
 				throw new RuntimeException("Anomaly: please report");
+			}
 			ID other = (ID) obj;
-			if (!getOuterType().equals(other.getOuterType()))
+			if (!getOuterType().equals(other.getOuterType())) {
+				System.out.println("Please report this message to Ryan.");
 				throw new RuntimeException("Anomaly: please report");
+			}
 			if (str == null) {
 				if (other.str != null)
 					return false;

@@ -27,7 +27,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import catdata.fpql.XExp.Var;
-import org.codehaus.jparsec.error.ParserException;
+import org.jparsec.error.ParserException;
 
 import catdata.LineException;
 import catdata.Pair;

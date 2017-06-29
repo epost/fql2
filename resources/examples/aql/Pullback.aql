@@ -33,31 +33,6 @@ schema Square = literal : Type {
 		A_attC : A -> dom	
 } 
 
-query pullback = literal : CoSpan -> Square {
- entities
- 
-	D -> {from d:D}
-		
-	B -> {from b:B 
-		 return B_att -> b.B_att}
-
-	C -> {from c:C 
-		 return C_att -> c.C_att}
-
-	A -> {from b0:B c0:C 
-		 where b0.f = c0.g 
-		 return A_attB -> b0.B_att 
-		 	   A_attC -> c0.C_att} 
-
-foreign_keys		 	   
-
-	f -> {d -> b.f}
-	g -> {d -> c.g}
-	f2 -> {b -> b0}
-	g2 -> {c -> c0}
-
-}
-
 instance I = literal : CoSpan {
 	generators
 		b1 b2 : B
@@ -74,6 +49,57 @@ instance I = literal : CoSpan {
 		c1.g = d3 
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//pullbacks, using queries
+
+query pullback = literal : CoSpan -> Square {
+ entities
+ 
+	D -> {from d:D}
+		
+	B -> {from b:B 
+		 return B_att -> b.B_att}
+
+	C -> {from c:C 
+		 return C_att -> c.C_att}
+
+	A -> {from b0:B c0:C 
+		 where b0.f = c0.g 
+		 return A_attB -> b0.B_att 
+		 	   A_attC -> c0.C_att} 
+
+ foreign_keys		 	   
+
+	f -> {d -> b.f}
+	g -> {d -> c.g}
+	f2 -> {b -> b0}
+	g2 -> {c -> c0}
+
+}
+
 instance J = eval pullback I
 
 transform t = counit_query pullback I
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//pullbacks, using constraints (EDs) and the chase
+
+instance K = literal : Square {
+	imports
+		I
+}
+
+constraints pullbackED = literal : Square {
+	forall b:B c:C
+	where b.f = c.g
+	->
+	exists a:A
+	where a.f2 = b  a.g2 = c
+		b.B_att = a.A_attB
+		c.C_att = a.A_attC
+}
+
+instance L = chase pullbackED K 3
+
+
+

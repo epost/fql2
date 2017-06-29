@@ -1,7 +1,6 @@
 package catdata.aql.fdm;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -19,6 +18,7 @@ import catdata.aql.It;
 import catdata.aql.Mapping;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.It.ID;
 
 public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
@@ -29,7 +29,7 @@ public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, 
 	private final LiteralInstance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID, Chc<Sk, Pair<ID, Att2>>> J;
 
 	//options has to come in as a list, because conversion to AqlOptions requires the sigma'd collage
-	public SigmaInstance(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
+	public SigmaInstance(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, AqlOptions strat) {
 		if (!f.src.equals(i.schema())) {
 			throw new RuntimeException("In sigma instance, source of mapping is " + f.src + ", but instance has type " + i.schema());
 		}
@@ -48,14 +48,14 @@ public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, 
 			eqs.add(new Pair<>(F.trans(eq.first), F.trans(eq.second)));
 			col.eqs.add(new Eq<>(new Ctx<>(), F.trans(eq.first), F.trans(eq.second)));
 		}
-		AqlOptions strat = new AqlOptions(options, col);  
 				
 		Function<Gen,String> printGen = x -> I.algebra().printX(I.algebra().nf(Term.Gen(x)));
 		Function<Sk, String> printSk = x -> I.algebra().sk(x).toString(I.algebra()::printY, Util.voidFn());
 		InitialAlgebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID> initial 
 		= new InitialAlgebra<>(strat, schema(), col, new It(), printGen, printSk);
 				
-		J = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, initial.dp(), initial); 
+		J = new LiteralInstance<>(schema(), col.gens.map, col.sks.map, eqs, initial.dp(), initial, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
+		validate();
 	}
 
 	@Override
@@ -86,6 +86,16 @@ public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, 
 	@Override
 	public Algebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID, Chc<Sk, Pair<ID, Att2>>> algebra() {
 		return J.algebra();
+	}
+
+	@Override
+	public boolean requireConsistency() {
+		return J.requireConsistency();
+	}
+
+	@Override
+	public boolean allowUnsafeJava() {
+		return J.allowUnsafeJava();
 	}
 	
 	

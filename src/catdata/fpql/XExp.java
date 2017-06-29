@@ -11,7 +11,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
-import catdata.ide.GlobalOptions;
+import catdata.ide.DefunctGlobalOptions;
 
 public abstract class XExp {
 	
@@ -1126,7 +1126,7 @@ public abstract class XExp {
 			this.from = from;
 			this.where = where;
 			this.src = src;
-            this.from = GlobalOptions.debug.fpql.reorder_joins ? sort(from) : from;
+            this.from = DefunctGlobalOptions.debug.fpql.reorder_joins ? sort(from) : from;
 		}
 		
 		private void count(XBool b, Map<String, Integer> counts) {
@@ -1243,7 +1243,7 @@ public abstract class XExp {
 			this.select = select;
 			this.where = where;
 			this.src = src;
-            this.from = GlobalOptions.debug.fpql.reorder_joins ? sort(from) : from;
+            this.from = DefunctGlobalOptions.debug.fpql.reorder_joins ? sort(from) : from;
 		}
 		
 		@SuppressWarnings({ "rawtypes", "unchecked" })

@@ -1,7 +1,5 @@
 package catdata.aql.fdm;
 
-import java.util.Map;
-
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
@@ -25,22 +23,22 @@ extends Transform<Ty, En1, Sym, Fk1, Att1, Pair<Var,Row<En2,X>>, Y, Gen, Sk, ID,
 	private final Ctx<Pair<Var, Row<En2, X>>, Term<Void, En1, Void, Fk1, Void, Gen, Void>> gens = new Ctx<>();
 	private final Ctx<Y, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> sks = new Ctx<>();
 	
-	public CoEvalEvalCoUnitTransform(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
+	public CoEvalEvalCoUnitTransform(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, AqlOptions options) {
 		if (!q.src.equals(i.schema())) { 
 			throw new RuntimeException("Q has src schema " + q.src + " but instance has schema " + i.schema());
 		}
 		Q = q;
 		I = i;
-		J = new EvalInstance<>(Q, I);
+		J = new EvalInstance<>(Q, I, options);
 		K = new CoEvalInstance<>(Q, J, options);
 		
 		for (Pair<Var, Row<En2, X>> gen : src().gens().keySet()) {
-			gens.put(gen, I.algebra().repr(gen.second.ctx.get(gen.first)));
+			gens.put(gen, I.algebra().repr(gen.second.get(gen.first)));
 		}
 		for (Y y : src().sks().keySet()) {
 			sks.put(y, I.algebra().reprT(Term.Sk(y)));
 		}		
-		validate((Boolean) AqlOptions.getOrDefault(options, AqlOption.dont_validate_unsafe));
+		validate((Boolean) options.getOrDefault(AqlOption.dont_validate_unsafe));
 	}
 	
 	@Override

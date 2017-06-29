@@ -2,6 +2,7 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 import catdata.Pair;
 import catdata.Util;
@@ -25,6 +26,9 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
 			return Util.singList(new Pair<>(var, Kind.QUERY));
+		}@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -66,6 +70,9 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 		@SuppressWarnings("unchecked")
 		@Override
 		public Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>> type(AqlTyping G) {
+			if (!G.defs.qs.containsKey(var)) {
+				throw new RuntimeException("Not a query: " + var);
+			}
 			return (Pair<SchExp<Object, Object, Object, Object, Object>,SchExp<Object, Object, Object, Object, Object>>) ((Object)G.defs.qs.get(var));
 		}
 
@@ -73,10 +80,6 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 			this.var = var;
 		}
 
-		@Override
-		public long timeout() {
-			return 0;
-		}	
 		
 	}
 
@@ -84,7 +87,10 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 	public static final class QueryExpLit<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 
 		//TODO: aql add imports
-
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
 		public final Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> q;
 		
 		@Override
@@ -132,10 +138,7 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 		public Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> type(AqlTyping G) {
 			return new Pair<>(new SchExpLit<>(q.src), new SchExpLit<>(q.dst));
 		}
-		@Override
-		public long timeout() {
-			return 0;
-		}
+		
 	}
 
 }
