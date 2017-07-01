@@ -4,102 +4,7 @@ typeside Ty = literal {
 	java_constants
 		String = "return input[0]"
 }
-/* Introductory Schemas and instances
-// The following sequence of schemas and associated instances are basic
-// structural elements that will be used to demonstrate how Uber-Flowers
-// work. These are our basic building blocks. */
 
-/* One schema declaration.
-// The terminal object, one object and an implicit identity arrow
-*/
-schema One = literal : Ty {
-	entities
-	  O
-	attributes
-	  rowOLbl: O -> String // Representitive O attribute
-}
-/* Generate a template for i_One instance.
-Type in:
-instance i_One = literal : One
-Highlight "i_One = literal" right click and select infer instance
-
-If a valid compiled schema One exists, this will produce an instance template 
-
-}
-
-Example of a complete instance would look like: */
-instance i_One = literal : One {
-	generators
-	  o1 o2 : O
-	multi_equations
-	  // rowOLbl: O -> String // Representitive O attribute
-	  rowOLbl -> {o1 row_o1, o2 row_o2}
-}
-/* oPair schema declaration.
- * Discrete schema containing two tables without any nonprimary keys.
- */
-schema oPair = literal : Ty {
-    entities
-      Ap Bp
-    attributes
-      rowApLbl: Ap -> String // Representitive Ap attribute
-      rowBpLbl: Bp -> String // Representitive Bp attribute
-}
-// Example oPair instances
-instance i_oPair = literal : oPair {
-  generators
-    a1 a2 a3 : Ap
-    b1 b2 b3 b4 : Bp
-  multi_equations
-    // rowApLbl: Ap -> String // Representitive Ap attribute
-    rowApLbl -> {a1 row_a1, a2 row_a2, a3 row_a3}
-    // rowBpLbl: Bp -> String // Representitive Bp attribute
-    rowBpLbl -> {b1 row_b1, b2 row_b2, b3 row_b3, b4 row_b4}
-}
-instance i_oPairCT4S = literal : oPair { // See example 3.1.1 of CT4S
-  generators
-    a1 a2 a3 a4 a5 a6: Ap
-    b1 b2 b3 b4 : Bp
-  multi_equations
-    // rowApLbl: Ap -> String // Representitive Ap attribute
-    rowApLbl -> {a1 one, a2 two, a3 three, a4 four, a5 five, a6 six}
-    // rowBpLbl: Bp -> String // Representitive Bp attribute
-    rowBpLbl -> {b1 clubs, b2 diamonds, b3 hearts, b4 spades}
-}
-/* Two schema declaration.
-// Schema representing a foreign key, that is, a single arrow f: S -> T.
-// This is known as a detail -> master relationship in
- database jargon.
- */
-schema Two = literal : Ty {
-	entities
-	  Source Target
-	foreign_keys
-	  master: Source -> Target // Single foreign key representing a detail -> master relationship  
-	attributes
-	  rowSLbl: Source -> String // Representitive Source attribute.
-	  rowTLbl: Target -> String // Representitive Target attribute.
-	  mstrPtsTo: Source -> String // Move rowTLbl to Source by following master.rowTLbl.
-	observation_equations
-	  // Copy the target attribute up to source by following the master key.
-	  forall s. s.mstrPtsTo = s.master.rowTLbl
-}
-// Example of a Two instance:
-instance i_Two = literal : Two {
-	generators
-	  s1 s2 s3 s4: Source
-	  t1 t2 t3: Target
-	multi_equations
-	  // master: Source -> Target // Single foreign key representing a detail -> master relationship
-	  master -> {s1 t1, s2 t1, s3 t2, s4 t2}
-	  // rowSLbl: Source -> String // Representitive Source attribute
-	  rowSLbl -> {s1 row_s1, s2 row_s2, s3 row_s3, s4 row_s4}
-	  // rowTLbl: Target -> String // Representitive Target attribute
-	  rowTLbl -> {t1 row_t1, t2 row_t2, t3 row_t3}
-	  // mstrPtsTo: Source -> String // Move rowTLbl to Source by following master.rowTLbl.
-	  // Don't need this, handled by observation_equations
-	  // mstrPtsTo -> {s1 s1.master.rowTLbl, s2 s1.master.rowTLbl, s3 s1.master.rowTLbl} 
-}
 /* Graph schema declaration.
  *  A directed graph can be completely described with a pair of sets and
  *  two functions. The first set is a set of Arrows and the second a set
@@ -144,7 +49,10 @@ instance i_GRF = literal : GRF {
 // Schema representing an entity that references two entities. This is called
 // a span in category theory and an intersection table in database jargon.
 // A state of a span is generally a relation between the two referenced entities.
-// In database jargon this is called a many to many relationship.
+// In database practice spans are typically used to implement many to many
+// relationships. More generally instances on spans are 'bag' relations -
+// these relations need not be many to many (e.g., could be many to one, one to
+// many, one to one, etc)
 //
 // For further reading about spans see section 3.2.2 Spans, experiments and 
 // matrices of CT4S.
@@ -172,337 +80,6 @@ schema Span = literal : Ty {
 	  forall c. c.fsPntsTo = c.fs.rowAsLbl
 	  forall c. c.gsPntsTo = c.gs.rowBsLbl
 }
-// Example Span instance: */
-instance i_SpanPrd = literal : Span {
-  generators
-    a1 a2 a3 : As
-    b1 b2 : Bs
-    c1 c2 c3 c4 c5 c6 : Cs
-  multi_equations
-    // fs : Cs -> As // Foreign key to As
-    fs -> {c1 a1, c2 a2, c3 a3, c4 a1, c5 a2, c6 a3}
-    // gs : Cs -> Bs // Foreign key to Bs
-    gs -> {c1 b1, c2 b1, c3 b1, c4 b2, c5 b2, c6 b2}
-    // rowAsLbl: As -> String // Representitive As attribute
-    rowAsLbl -> {a1 row_a1, a2 row_a2, a3 row_a3}
-    // rowBsLbl: Bs -> String // Representitive Bs attribute
-    rowBsLbl -> {b1 row_b1, b2 row_b2}
-    // rowCsLbl: Cs -> String // Representitive Cs attribute
-    rowCsLbl -> {c1 row_c1_a1b1, c2 row_c2_a2b1, c3 row_c3_a3b1,
-                 c4 row_c4_a1b2, c5 row_c5_a2b2, c6 row_c6_a3b2}
-}
-instance i_SpanSum = literal : Span {
-  generators
-    a1 a2 a3 : As
-    b1 b2 b3 b4: Bs
-    c1 c2 : Cs
-  multi_equations
-    // fs : Cs -> As // Foreign key to As
-    fs -> {c1 a1, c2 a2}
-    // gs : Cs -> Bs // Foreign key to Bs
-    gs -> {c1 b1, c2 b4}
-    // rowAsLbl: As -> String // Representitive As attribute
-    rowAsLbl -> {a1 row_a1, a2 row_a2, a3 row_a3}
-    // rowBsLbl: Bs -> String // Representitive Bs attribute
-    rowBsLbl -> {b1 row_b1, b2 row_b2}
-    // rowCsLbl: Cs -> String // Representitive Cs attribute
-    rowCsLbl -> {c1 row_c1, c2 row_c2}
-}
-/* CoSpan schema declaration.
-// Schema representing two entities that reference a common master. This is called
-// a cospan in category theory. The co prefix indicating that a cospan is related to
-// a span by reversing the direction of the arrows. I am unaware of standardized
-// jargon in the database community for this structure.
-*/
-schema CoSpan = literal : Ty {
-	entities
-	  Ac Bc Cc
-	foreign_keys
-	  fc: Ac -> Cc // Foreign key from Ac
-	  gc: Bc -> Cc // Foreign key from Bc
-	attributes
-	  rowAcLbl: Ac -> String // Representitive Ac attribute
-	  rowBcLbl: Bc -> String // Representitive Bc attribute
-	  rowCcLbl: Cc -> String // Representitive Cc attribute
-	  fcPntsTo: Ac -> String
-	  gcPntsTo: Bc -> String
-	observation_equations
-	  forall a. a.fcPntsTo = a.fc.rowCcLbl
-	  forall b. b.gcPntsTo = b.gc.rowCcLbl 
-}
-// Example of a CoSpan instance: 
-instance i_CoSpan = literal : CoSpan {
-  generators
-     a1 a2 a3 a4 : Ac
-     b1 b2 b3 b4 b5 : Bc
-     c1 c2 : Cc
-  multi_equations
-     // fc : Cc -> Ac // Foreign key from Ac
-     fc -> {a1 c1, a2 c1, a3 c2, a4 c2}
-	// gc : Cc -> Bc // Foreign key from Bc
-     gc -> {b1 c1, b2 c1, b3 c2, b4 c2, b5 c2}
-     // rowAcLbl: Ac -> String // Representitive Ac attribute
-	rowAcLbl -> {a1 row_a1, a2 row_a2, a3 row_a3, a4 row_a4}
-	// rowBcLbl: Bc -> String // Representitive Bc attribute
-	rowBcLbl -> {b1 row_b1, b2 row_b2, b3 row_b3, b4 row_b4, b5 row_b5}
-	// rowCcLbl: Cc -> String // Representitive Cc attribute
-	rowCcLbl -> {c1 row_c1, c2 row_c2}
-}
-/* Square schema declaration.
-// Square defined as follows (neglecting xPntsTo attributes):
-// 
-//        n
-//   NW ------> NE 
-//  | |\      /||
-//  |  \     /  |
-// w|  String   |e
-//  | /|    |\  |
-// \//       \ \/
-// SW ------> SE
-//      s
-//    
-// We have added the path equation w followed by s is equal to n followed be e.
-// This equation is a statement that the square is comutitive. Considering this
-// from the perspective of a database, if we choose a record in NW and lookup
-// a record in SE by following the foriegn keys s followed by n we will get the
-// same record in SE as we would get by following the foreign keys w followed
-// by s. The AQL syntax provides a mechanism for declaring this path equivalence
-// as a property of the schema Square.
-//
-// The xPntsTo family of attributes are used to illustrate how one can make use
-// of paths to move an attribute that can be accessed through a path to an entity
-// that is the source of that path.
- They also serve to illustrate how schema and
-// instance interact to incluide build in providence features. 
-*/
-schema Square = literal : Ty {
-	entities 
-	  NW NE SW SE
-	foreign_keys
-	  w:NW->SW // Forengn key on the west side of the sqaure 
-	  e:NE->SE // Forengn key on the eest side of the sqaure 
-	  s:SW->SE // Forengn key on the south side of the sqaure
-	  n:NW->NE // Forengn key on the north side of the sqaure
-	path_equations 
-	  w.s=n.e
-	attributes
-	  rowNWLbl: NW -> String // Representitive attribute for NW
-	  rowNELbl: NE -> String // Representitive attribute for NE
-	  rowSWLbl: SW -> String // Representitive attribute for SW
-	  rowSELbl: SE -> String // Representitive attribute for SE
-	  wPntsTo : NW -> String // Move RowSWLbl to NW by following w.rowSWLbl
-	  ePntsTo : NE -> String // Move rowSELbl to NE by following e.rowSELbl
-	  sPntsTo : SW -> String // Move rowSELbl to SW by following s.rowSELbl
-	  nPntsTo : NW -> String // Move rowNELbl to NW by following n.rowNELbl
-	  wsPntsTo: NW -> String // Move rowSELbl to NW by following w.s.rowSELbl
-	  nePntsTo: NW -> String // Move rowSELbl to NW by following n.e.rowSELbl
-	observation_equations
-	  // Copy all attributes referenced through foreign keys
-	  forall nw. nw.wPntsTo = nw.w.rowSWLbl
-	  forall nw. nw.nPntsTo = nw.n.rowNELbl
-	  forall ne. ne.ePntsTo = ne.e.rowSELbl
-	  forall sw. sw.sPntsTo = sw.s.rowSELbl
-	  forall nw. nw.wsPntsTo = nw.w.s.rowSELbl
-	  forall nw. nw.nePntsTo = nw.n.e.rowSELbl
-}
-instance i_Square = literal : Square {
-	generators
-	  nw1 nw2 nw3 nw4 nw5 nw6 : NW
-	  ne1 ne2 ne3 ne4 : NE
-	  sw1 sw2 sw3 sw4 sw5 : SW
-	  se1 se2 : SE
-	multi_equations
-	  // w:NW->SW // Forengn key on the west side of the sqaure 
-	  w -> {nw1 sw1, nw2 sw1, nw3 sw2, nw4 sw3, nw5 sw4, nw6 sw5}
-	  // e:NE->SE // Forengn key on the eest side of the sqaure 
-	  e -> {ne1 se1, ne2 se1, ne3 se2, ne4 se2}
-	  // s:SW->SE // Forengn key on the south side of the sqaure
-	  s -> {sw1 se1, sw2 se1, sw3 se2, sw4 se2, sw5 se2}
-	  // n:NW->NE // Forengn key on the north side of the sqaure
-	  n -> {nw1 ne1, nw2 ne2, nw3 ne1, nw4 ne3, nw5 ne3, nw6 ne3}
-	  // rowNWLbL: NW -> String // Representitive attribute for NW
-	  rowNWLbl -> {nw1 row_nw1, nw2 row_nw2, nw3 row_nw3,
-	               nw4 row_nw4, nw5 row_nw5, nw6 row_nw6}
-	  // rowNELbl: NE -> String // Representitive attribute for NE
-	  rowNELbl -> {ne1 row_ne1, ne2 row_ne2, ne3 row_ne3, ne4 row_ne4}
-	  // rowSWLbl: SW -> String // Representitive attribute for SW
-	  rowSWLbl -> {sw1 row_sw1, sw2 row_sw2, sw3 row_sw3, sw4 row_sw4, sw5 row_sw5}
-	  // rowSELbl: SE -> String // Representitive attribute for SE
-	  rowSELbl -> {se1 row_se1, se2 row_se2}
-}
-instance i_SqrPB = literal : Square {
-	generators
-	  //nw1 nw2 nw3 nw4 nw5 nw6 : NW
-	  ne1 ne2 ne3 ne4 : NE
-	  sw1 sw2 sw3 sw4 sw5 : SW
-	  se1 se2 : SE
-	multi_equations
-	  // w:NW->SW // Forengn key on the west side of the sqaure 
-	  // w -> {nw1 sw1, nw2 sw1, nw3 sw2, nw4 sw3, nw5 sw4, nw6 sw5}
-	  // e:NE->SE // Forengn key on the eest side of the sqaure 
-	  e -> {ne1 se1, ne2 se1, ne3 se2, ne4 se2}
-	  // s:SW->SE // Forengn key on the south side of the sqaure
-	  s -> {sw1 se1, sw2 se1, sw3 se2, sw4 se2, sw5 se2}
-	  // n:NW->NE // Forengn key on the north side of the sqaure
-	  // n -> {nw1 ne1, nw2 ne2, nw3 ne1, nw4 ne3, nw5 ne3, nw6 ne3}
-	  // rowNWLbL: NW -> String // Representitive attribute for NW
-	  //rowNWLbl -> {nw1 row_nw1, nw2 row_nw2, nw3 row_nw3,
-	  //             nw4 row_nw4, nw5 row_nw5, nw6 row_nw6}
-	  // rowNELbl: NE -> String // Representitive attribute for NE
-	  rowNELbl -> {ne1 row_ne1, ne2 row_ne2, ne3 row_ne3, ne4 row_ne4}
-	  // rowSWLbl: SW -> String // Representitive attribute for SW
-	  rowSWLbl -> {sw1 row_sw1, sw2 row_sw2, sw3 row_sw3, sw4 row_sw4, sw5 row_sw5}
-	  // rowSELbl: SE -> String // Representitive attribute for SE
-	  rowSELbl -> {se1 row_se1, se2 row_se2}
-}
-
-/* Some examples of queries on the above schemas
- * 
- */
-// The identitity query on Two
-query qIdTwo = literal : Two -> Two {
-   entities
-     Source -> {
-    	  from
-    	    s:Source
-	  return
-	    // rowSLbl: Source -> String // Representitive Source attribute
-	    rowSLbl -> s.rowSLbl
-	    // mstrPtsTo: Source -> String // Move rowTLbl to Source by following master.rowTLbl.
-	    mstrPtsTo -> s.master.rowTLbl}
-     Target -> {
-    	  from
-    	    t:Target
-	  return
-	    // rowTLbl: Target -> String // Representitive Target attribute
-	    rowTLbl -> t.rowTLbl}
-
-	foreign_keys
-       // master: Source -> Target // Single foreign key representing a detail -> master relationship
-	  master -> {t -> s.master}
-} 
-instance i_IdTwo = eval qIdTwo i_Two
-/* Query qoPairBang
- * There is only one way to right this query. Both of the entities in oPair
- * most be populated by the only available entity in One. In the queries that
- * follow (those labeled (xxxBang) you will see this as a universal pattern.
- */
-query qoPairBang = literal : One -> oPair {
-   entities
-	Ap -> {
-	  from
-	    oa:O
-	  return
-         // rowApLbl: Ap -> String // Representitive Ap attribute
-	    rowApLbl -> oa.rowOLbl}
-	Bp -> {
-	  from
-	    ob:O
-	  return
-         // rowBpLbl: Bp -> String // Representitive Bp attribute
-	    rowBpLbl -> ob.rowOLbl}
-}
-instance i_oPairBang = eval qoPairBang i_One
-/* Query qTwoBang
- * Here we add a detail->master foreign key to the above example. The implications
- * are explained below in the comments for the foriegn keys clause.
- */
-query qTwoBang = literal : One -> Two {
-   entities
-	Source -> {
-	  from
-	    os:O // Populate the Source entity with records from O
-	  return
-	    // mstrPtsTo: Source -> String // Move rowTLbl to Source by following master.rowTLbl.
-	    mstrPtsTo -> os.rowOLbl
-	    // rowSLbl: Source -> String // Representitive Source attribute.
-	    rowSLbl -> os.rowOLbl}
-	Target -> {
-	  from
-	    ot:O // Populate the Target entity with records from O
-	  return
-	    // rowTLbl: Target -> String // Representitive Target attribute.
-	    rowTLbl -> ot.rowOLbl}
-
-   foreign_keys
-	// master: Source -> Target // Single foreign key representing a detail -> master relationship
-	// Assign the value returned by master to be a record in Target. But what argument should be
-	// supplied to master? The record in Source. But the records in Source and Target are copies
-	// of the records that came from O. This effectively implements an identity function on the
-	// records taken from O.
-	master -> {ot -> os}  
-}
-instance i_TwoBang = eval qTwoBang i_One
-//instance i_TwoCoeval = coeval qTwoBang i_Two
-
-// Injective deltas
-
-/* One as target schema
- * Queries of this type can be used to identify a single entity from any
- * schema and load its contents into the single table one. Notice again
- * that our ability to do this depends on our particularly simple choice
- * of the type side. More generally we would need a target schema One
- * that contained all of the attributes of the entity we were extracting.
- * 
- * Notice also that all foreign keys must by necesity be left behind and
- * so this process effectively removes an entity from the context it
- * enjoys as a part of a larger schema.
- */
-// Pick the entity Ap of oPair
-query qPickAp = literal : oPair -> One {
-   entities
-	O -> {
-	  from
-	    a:Ap
-	  return
-	    // rowOLbl: O -> String // Representitive O attribute
-	    rowOLbl -> a.rowApLbl}
-}
-instance i_PickAp = eval qPickAp i_oPair
-// Pick the entity SW of Square
-query qPickSW = literal : Square -> One {
-   entities
-	O -> {
-	  from
-	    sw:SW
-	  return rowOLbl -> sw.rowSWLbl}
-}
-instance i_pickSW = eval qPickSW i_Square
-// Span as target schema
-// Pick the Span in Square
-query qPickSqSpn = literal : Square -> Span {
-   entities
-	As -> {
-	  from 
-	    ne:NE
-	  return
-	    // rowAsLbl: As -> String // Representitive As attribute
-	    rowAsLbl -> ne.rowNELbl}
-	Bs -> {
-	  from
-	    sw:SW
-	  return
-	    // rowBsLbl: Bs -> String // Representitive Bs attribute
-	    rowBsLbl -> sw.rowSWLbl}
-	Cs -> {
-	  from 
-	    nw:NW
-	  return
-	    // fsPntsTo: Cs -> String // Move rowAsLbl to Cs by following fs.rowAsLbl
-	    fsPntsTo -> nw.nPntsTo
-	    // gsPntsTo: Cs -> String // Move rowBsLbl to Cs by following gs.rowBsLbl
-	    gsPntsTo -> nw.wPntsTo
-	    // rowCsLbl: Cs -> String // Representitive Cs attribute
-	    rowCsLbl -> nw.rowNWLbl}
-
-   foreign_keys
-	//  fs : Cs -> As // Foreign key to As
-	fs -> {ne -> n(nw)}
-	//  gs : Cs -> Bs // Foreign key to Bs
-	gs -> {sw -> w(nw)}
-}
-instance i_PickSqSpn = eval qPickSqSpn i_Square
-// Mapping GRF to Span
 query qGRFSpan = literal : GRF -> Span {
    entities /*source entities: Srcp Tgtp*/
 	As -> {
@@ -530,58 +107,7 @@ query qGRFSpan = literal : GRF -> Span {
 		fs /*:Cs->As*/ -> {na -> source(s)}
 		gs /*:Cs->Bs*/ -> {nb -> target(s)}
 }
-instance i_GRFSpan = eval qGRFSpan i_GRF
-instance i_SpanGRF = coeval qGRFSpan i_SpanPrd
 
-// Pi
-// Build a product from an oPair.
-query qProd = literal : oPair -> One {
-   entities /*source entities: Ap Bp*/
-	O -> {
-	  from
-	    a:Ap
-	    b:Bp
-	  return
-	    rowOLbl /*:String*/ -> a.rowApLbl}
-}
-instance i_Prod = eval qProd i_oPair
-// Build a pullback from a CoSpan.
-instance i_CoSpan2 = literal : CoSpan {
-  generators
-     a1 : Ac
-     b1 b2 b3 b4 b5 b6 b7: Bc
-     c1 c2 c3: Cc
-  multi_equations
-     // fc : Cc -> Ac // Foreign key from Ac
-     fc -> {a1 c1}
-	// gc : Cc -> Bc // Foreign key from Bc
-     gc -> {b1 c1, b2 c1, b3 c1, b4 c2, b5 c2, b6 c3, b7 c3}
-     // rowAcLbl: Ac -> String // Representitive Ac attribute
-	rowAcLbl -> {a1 row_a1}
-	// rowBcLbl: Bc -> String // Representitive Bc attribute
-	rowBcLbl -> {b1 row_b1, b2 row_b2, b3 row_b3, b4 row_b4,
-	             b5 row_b5, b6 row_b6, b7 row_b7}
-	// rowCcLbl: Cc -> String // Representitive Cc attribute
-	rowCcLbl -> {c1 row_c1, c2 row_c2, c3 row_c3}
-}
-query qPBc1 = literal : CoSpan -> One {
-   entities /*source entities: Ac Bc Cc*/
-	O -> {
-	  from
-	    a:Ac
-	    b:Bc
-	  where
-	    a.fc = b.gc
-	  return
-		rowOLbl /*:String*/ -> b.rowBcLbl}
-}
-instance i_PBc1 = eval qPBc1 i_CoSpan2
-
-// Sigma
-// Build a sum from an oPair.
-instance i_Sum = coeval qoPairBang i_oPair
-// Build a pushout from a Span.
-instance i_PO = coeval qPickSqSpn i_SpanSum
 
 /* The main event
  * 
@@ -660,7 +186,6 @@ instance i_EAV = literal : EAV {
    // obsVal : Value -> String // Observation value as string
    obsVal -> {v1 "190_lbs", v2 "60_bpm", v3 "200_lbs"}
 }
-// Graph instance analogous to 
 instance i_GRF2 = literal : GRF {
   generators
      a1 a2 a3 : Arrow
@@ -748,9 +273,7 @@ instance i_GRFS = literal : GRFS {
      i01.nodeVal="190_lbs" i02.nodeVal="60_bpm" i03.nodeVal="200_lbs" // instance values
      i04.nodeVal=Peter_v1 i05.nodeVal=Peter_v2                         // instance entities
 }
-/* GRFS unfolded using pullbacks.
- *  
- */
+// GRFS unfolded using pullbacks.
 schema UFLD = literal : Ty {
   entities
     I_1 // Instance arrow 
@@ -758,13 +281,13 @@ schema UFLD = literal : Ty {
     C_1 // Entity column
     C_0 // Entity
     One // Terminal object
-    E_sa // Columns of a source entity. Pullback src_c: C_1 -> C_0 <- One :s_ent
-    E_sr // Rows of a source entity.   Pullback ndType: I_0 -> C_0 <- One :s_ent
-    E_sc // Cells of a source entity. Pullbacks   esa: E_sa -> One <- E_sr :esr
+    E_sa // Columns of a source entity. Pullback src_c: C_1 -> C_0 <- One :s_ent   -> Attribute
+    E_sr // Rows of a source entity.   Pullback ndType: I_0 -> C_0 <- One :s_ent   -> Entity 
+    E_sc // Cells of a source entity. Pullbacks   esa: E_sa -> One <- E_sr :esr    -> Observation
          //                                    s_enta: E_sa -> C_1 <- I_1 :arType
          //                                      src_i: I_1 -> I_0 <- E_sr :s_entn
     E_ta // Columns of a target entity. Pullback tgt_c: C_1 -> C_0 <- One :t_ent
-    E_tr // Rows of a target entity.   Pullback ndType: I_0 -> C_0 <- One :t_ent
+    E_tr // Rows of a target entity.   Pullback ndType: I_0 -> C_0 <- One :t_ent   -> Value
     E_tc // Cells of a target entity. Pullbacks   eta: E_ta -> One <- E_tr :etr
          //                                    s_enta: E_sa -> C_1 <- I_1 :arType
          //                                      tgt_i: I_1 -> I_0 <- E_sr :t_entn
@@ -784,7 +307,7 @@ schema UFLD = literal : Ty {
     esr     : E_sr -> One  // Rows of the source entity mapped to one.
     s_entc_I_1: E_sc -> I_1  // Inclusion of cells of the source entity into the set of instance arrows.
     s_entc_I_0: E_sc -> E_sr  // Cells of the source entity mapped to their rows.
-    s_entc_C_1: E_sc -> E_sa  // Cells of the source entity mapped to thier columns (attributes)
+    s_entc_C_1: E_sc -> E_sa  // Cells of the source entity mapped to their columns (attributes)
     t_enta  : E_ta -> C_1  // Inclustion of columns of the target entity into the dictionary of all columns.
     eta     : E_ta -> One  // Arrows of the target entity mapped to one
     t_entn  : E_tr -> I_0  // Inclusion of rows of the target entity into the set of instance nodes.
@@ -820,28 +343,28 @@ instance i_UFLDs = literal : UFLD {
 		i11 i12 i13 : I_1
 		o1 : One
 	multi_equations
-		arType /*:I_1->C_1*/ -> {i11 c11, i12 c12, i13 c11}
-		ndType /*:I_0->C_0*/ -> {i01 c01, i02 c01, i03 c01, i04 c02, i05 c02}
-		src_c /*:C_1->C_0*/ -> {c11 c02, c12 c02}
-		src_i /*:I_1->I_0*/ -> {i11 i04, i12 i04, i13 i05}
-		tgt_c /*:C_1->C_0*/ -> {c11 c01, c12 c01}
-		tgt_i /*:I_1->I_0*/ -> {i11 i01, i12 i02, i13 i03}
-		s_ent /*:One->C_0*/ -> {o1 c02}
-		t_ent /*:One->C_0*/ -> {o1 c01}	
-		colLbl /*:C_1->String*/ -> {c11 BodyWt, c12 HeartRt}
-		nodeVal /*:I_0->String*/ -> {i01 "190_lbs", i02 "60_bpm", i03 "200_lbs", i04 Peter_v1, i05 Peter_v2}
-		tblLbl /*:C_0->String*/ -> {c01 Value, c02 Entity}
+		arType  -> {i11 c11, i12 c12, i13 c11}
+		ndType  -> {i01 c01, i02 c01, i03 c01, i04 c02, i05 c02}
+		src_c  -> {c11 c02, c12 c02}
+		src_i  -> {i11 i04, i12 i04, i13 i05}
+		tgt_c  -> {c11 c01, c12 c01}
+		tgt_i  -> {i11 i01, i12 i02, i13 i03}
+		s_ent  -> {o1 c02}  // We are picking c02 as the source entity we wish to pivot. In EAV this is the entity labeled Entity.
+		t_ent  -> {o1 c01}	// We are picking c01 as the target entity we wish to pivot. In EAV this is the entity labeled Value.
+		colLbl  -> {c11 BodyWt, c12 HeartRt}
+		nodeVal  -> {i01 "190_lbs", i02 "60_bpm", i03 "200_lbs", i04 Peter_v1, i05 Peter_v2}
+		tblLbl  -> {c01 Value, c02 Entity}
 }
 query qUFLD = literal : UFLD -> UFLD {
 entities
-   // Instance arrow 
    I_1 -> {
+   // Instance arrow 
      // The source entity(ies) from which the target is constructed
    	from
    	  i1:I_1
    } 
-   // Instance node
    I_0 -> {
+   // Instance node
    	from
    	  i0:I_0
    	return
@@ -849,15 +372,15 @@ entities
        // in the source.
        // nodeVal : I_0 -> string; Value associated with a node of the instance graph
    	  nodeVal -> nodeVal(i0)}
-   // Entity column
    C_1 -> {
+   // Entity column
    	from
    	  c1:C_1
    	return
        // colLbl  : C_1 -> string, label for a column
    	  colLbl -> colLbl(c1)}
-   // Entity
    C_0 -> {
+   // Entity
    	from
    	  c0:C_0
    	return
@@ -867,28 +390,30 @@ entities
    One -> {
    	from
    	  o:One}
-   // Columns of a source entity. Pullback src_c: C_1 -> C_0 <- One :s_ent
    E_sa -> {
+   // Columns of a source entity. Pullback src_c: C_1 -> C_0 <- One :s_ent
+   // Get the inverse image of the chosen source entity (One -> C_0). All such elements
+   // of the inverse image are columns (attributes) of the chosen source entity. 
    	from
    	  sao:One
    	  sac1:C_1
    	where
        //forall sa. sa.s_enta.src_c = sa.esa.s_ent
    	  src_c(sac1) = s_ent(sao)}
-   // Rows of a source entity.   Pullback ndType: I_0 -> C_0 <- One :s_ent
    E_sr -> {
+   // Rows of a source entity.   Pullback ndType: I_0 -> C_0 <- One :s_ent
    	from
    	  sro : One
    	  sri0 : I_0
    	where
        //forall sr. sr.sentn.ndType = sr.esr.s_ent
    	  ndType(sri0) = s_ent(sro)}
-   /* Cells of a source entity.
-    *  Pullbacks   esa: E_sa -> One <- E_sr :esr
-    *           s_enta: E_sa -> C_1 <- I_1 :arType
-    *             src_i: I_1 -> I_0 <- E_sr :s_entn */
    E_sc -> {
-     /* How one assembles E_sc on the target side is involved, but with a little thought,
+   // Cells of a source entity.
+   //  Pullbacks   esa: E_sa -> One <- E_sr :esr
+   //           s_enta: E_sa -> C_1 <- I_1 :arType
+   //             src_i: I_1 -> I_0 <- E_sr :s_entn
+     // How one assembles E_sc on the target side is involved, but with a little thought,
      // completely obvious :). E_sc is simultaniously the pullback for three diagrams.
      // Duplicating the comments in the schema definition we have:
      // 
@@ -915,51 +440,51 @@ entities
      //
      // In order to construct E_sc you must first construct E_sr from I_0 and One and
      // E_sa from C_1 and One. Having done so we must have I_1 to satisfy the three
-     // pullbacks for E_sc. This means we need representitive generators ...*/
+     // pullbacks for E_sc. This means we need representitive generators ...
    	from
    	  sci1 : I_1
-   	  sco : One
-   	  sci0 : I_0
+   	  sco : One  //
+   	  sci0 : I_0 //
    	  scc1 : C_1
    	  sctri0 : I_0
    	  sctro : One
    	where
-       src_c(scc1) = s_ent(sco)     //   src_c: C_1 -> C_0 <- One :s_ent
+      src_c(scc1) = s_ent(sco)     //   src_c: C_1 -> C_0 <- One :s_ent
    	  ndType(sci0) = s_ent(sco)    //  ndType: I_0 -> C_0 <- One :s_ent
-       arType(sci1) = scc1          //  arType: I_1 -> C_1
+      arType(sci1) = scc1          //  arType: I_1 -> C_1
    	  src_i(sci1) = sci0           //   src_i: I_1 -> I_0
 	  ndType(sctri0) = t_ent(sctro)//  ndType: I_0 -> C_0 <- One :t_ent
    	  tgt_i(sci1) = sctri0}        //   tgt_i: I_1 -> I_0
-   // Columns of a target entity. Pullback tgt_c: C_1 -> C_0 <- One :t_ent
    E_ta -> {
+   // Columns of a target entity. Pullback tgt_c: C_1 -> C_0 <- One :t_ent
    	from
    	  tao:One
    	  tac1:C_1
    	where
        //forall ta. ta.t_enta.src_c = ta.eta.t_ent,
    	  src_c(tac1) = t_ent(tao)}
-   // Rows of a target entity.   Pullback ndType: I_0 -> C_0 <- One :t_ent
    E_tr -> {
+   // Rows of a target entity.   Pullback ndType: I_0 -> C_0 <- One :t_ent
    	from
    	  tro : One
    	  tri0 : I_0
    	where
        //forall tr. tr.t_entn.ndType = tr.etr.t_ent,
    	  ndType(tri0) = t_ent(tro)}
-   /* Cells of a target entity.
-    *  Pullbacks   eta: E_ta -> One <- E_tr :etr
-    *           s_enta: E_sa -> C_1 <- I_1 :arType
-    *             tgt_i: I_1 -> I_0 <- E_sr :t_entn */
    E_tc -> {
+   // Cells of a target entity.
+   //  Pullbacks   eta: E_ta -> One <- E_tr :etr
+   //           s_enta: E_sa -> C_1 <- I_1 :arType
+   //             tgt_i: I_1 -> I_0 <- E_sr :t_entn
    	from
    	  tci1 : I_1
    	  tco : One
    	  tci0 : I_0
    	  tcc1 : C_1
    	where
-       src_c(tcc1) = t_ent(tco)
+      src_c(tcc1) = t_ent(tco)
    	  ndType(tci0) = t_ent(tco)
-       arType(tci1) = tcc1
+      arType(tci1) = tcc1
    	  src_i(tci1) = tci0}
 
    foreign_keys
@@ -1003,11 +528,23 @@ entities
    	  esr -> {o -> sro}
        // s_entc_I_1 : E_sc -> I_1,  Cells of the selected entity mapped to their instance arrows
    	  s_entc_I_1 -> {i1 -> sci1}
+   	   // At this point things get more difficult. We are constructing a foreign key between a pair of
+   	   // entities both of which are constructed as part of the query. This means there is a direct map
+   	   // between the generators of the source entity to the target entity.
        // s_entc_I_0 : E_sc -> E_sr,  Cells of the selected entity mapped to their rows
+       // To assign the value of a foreign key we need to get a generator for E_sr --the pair (sro, sri0)--
+       // and associate it with a generator for E_sc. Both of these entities are constructed as part
+       // of this query so we must make the assignments directly.
+       // Note: E_sr is constructed from the pullback ndType: I_0 -> C_0 <- One :s_ent and so its generator
+       // is the pair (sro, sri0) subject to the constraint ndType(sri0) = s_ent(sro)
+       // We need to match this up with the corresponding pair in the zoo of generators for E_sc, specifically:
+       //    	  ndType(sci0) = s_ent(sco)    //  ndType: I_0 -> C_0 <- One :s_ent
    	  s_entc_I_0 -> {sro -> sco sri0 -> sci0}
-       // s_entc_C_1 : E_sc -> E_sa;  Cells of the selected entity mapped to thier columns (attributes)
-   	  s_entc_C_1 -> {sao -> sco sac1 -> scc1}
-       // t_enta   : E_ta -> C_1,  Attributges of the selected entitiy (selected entity attribute)
+       // s_entc_C_1 : E_sc -> E_sa;  Cells of the selected entity mapped to their columns (attributes)
+       // sao, sco are representatives of One in E_sa and E_sc blocks respectively
+       // similarly sac1 and scc1 are representatives of C_1 in E_sa and E_sc 
+ 	  s_entc_C_1 -> {sao -> sco sac1 -> scc1} 
+       // t_enta   : E_ta -> C_1,  Attributes of the selected entity (selected entity attribute)
    	  t_enta -> {c1 -> tac1}
        // eta     : E_ta -> One,  All arrows of the selected entity mapped to one
    	  eta -> {o -> tao}
@@ -1053,3 +590,156 @@ query qPickEAVfromUFLD = literal : UFLD -> EAV {
 	target -> {tr -> sc.sc_tr}
 }
 instance i_PickEAVfromUFLD = eval qPickEAVfromUFLD i_UFLDt
+
+// Compose qUFLD with qPickEAVfromUFLD
+query qUFLDtoEAV = literal : UFLD -> EAV {
+   entities
+	Attribute -> {
+/*
+   // Columns of a source entity. Pullback src_c: C_1 -> C_0 <- One :s_ent
+   // Get the inverse image of the chosen source entity (One -> C_0). All such elements
+   // of the inverse image are columns (attributes) of the chosen source entity.
+   Attribute is populated from E_sa which is in turn constructed from the above pullback
+	   E_sa -> {
+   		from
+   		  sao:One
+   		  sac1:C_1
+   		where
+          //forall sa. sa.s_enta.src_c = sa.esa.s_ent
+   	  	  src_c(sac1) = s_ent(sao)}*/
+	  from
+   	    sao:One   // the one record in One that is used to pick the desired source attribute from C_1
+   	    sac1:C_1  // source attribute 
+   	  where
+        //forall sa. sa.s_enta.src_c = sa.esa.s_ent
+    	// src_c   : C_1 -> C_0  Source table for a column
+        // s_ent   : One -> C_0  Picking a particular source table (entity) for consideration
+        // Note: sao represents the single row in One. The foreign key s_ent picks a record in
+        // in C_0 which is the dictionary table containing entities. This means we are identifying
+        // a particular entity as the source entity we are interested in. The equation below ensures
+        // that all of the attributes (rows of C_1) associated with that entity are populated into
+        // Attribute. That is all of the attributes associated with the particular source entity we
+        // are interested in. 
+   	    src_c(sac1) = s_ent(sao)
+	  return
+	    attLbl -> sac1.colLbl}
+	Entity -> {
+/*
+ * This construction is analogous to the one above except we are identfying all of the rows associated
+ * with the source entity we are interested.
+   // Rows of a source entity.   Pullback ndType: I_0 -> C_0 <- One :s_ent
+	   E_sr -> {
+	   	from
+	   	  sro : One
+	   	  sri0 : I_0
+	   	where
+	      //forall sr. sr.sentn.ndType = sr.esr.s_ent
+	   	  ndType(sri0) = s_ent(sro)}*/
+	  from
+	   	sro : One
+	   	sri0 : I_0
+   	  where
+        //forall sr. sr.sentn.ndType = sr.esr.s_ent
+   	    ndType(sri0) = s_ent(sro)
+	  return
+	    entLbl -> sri0.nodeVal}
+	Observation -> {
+/* This is the hard one!!!
+ * Observation is construction from E_sc, which is in turn constructed from E_sa and E_sr
+     // How one assembles E_sc on the target side is involved, but with a little thought,
+     // completely obvious :). E_sc is simultaniously the pullback for three diagrams.
+     // Duplicating the comments in the schema definition we have:
+     // 
+     //  E_sc contains cells of a source entity. Pullbacks
+     //
+     //    esa: E_sa -> One <- E_sr :esr
+     // s_enta: E_sa -> C_1 <- I_1 :arType
+     //   src_i: I_1 -> I_0 <- E_sr :s_entn
+     //
+     // E_sa and E_sr inturn are pullbacks again duplicating the comments in the schema
+     // definition we have:
+     //
+     // E_sa contains columns of a source entity. Pullback
+     //
+     //  src_c: C_1 -> C_0 <- One :s_ent
+     //
+     // and E_sr contains rows of a source entity. Pullback
+     //
+     //  ndType: I_0 -> C_0 <- One :s_ent
+     //
+     // and E_tr contains rows of a target entity. Pullback
+     //
+     // ndType: I_0 -> C_0 <- One :t_ent
+     //
+     // In order to construct E_sc you must first construct E_sr from I_0 and One and
+     // E_sa from C_1 and One. Having done so we must have I_1 to satisfy the three
+     // pullbacks for E_sc. This means we need representitive generators ...
+   	from
+   	  sci1 : I_1
+   	  sco : One
+   	  sci0 : I_0
+   	  scc1 : C_1
+   	  sctri0 : I_0
+   	  sctro : One
+   	where
+      src_c(scc1) = s_ent(sco)     //   src_c: C_1 -> C_0 <- One :s_ent
+   	  ndType(sci0) = s_ent(sco)    //  ndType: I_0 -> C_0 <- One :s_ent
+      arType(sci1) = scc1          //  arType: I_1 -> C_1
+   	  src_i(sci1) = sci0           //   src_i: I_1 -> I_0
+	  ndType(sctri0) = t_ent(sctro)//  ndType: I_0 -> C_0 <- One :t_ent
+   	  tgt_i(sci1) = sctri0}        //   tgt_i: I_1 -> I_0 */
+	  from
+   	    sci1 : I_1
+   	    sco : One
+   	    sci0 : I_0
+   	    scc1 : C_1
+   	    sctri0 : I_0
+   	    sctro : One
+   	  where
+        src_c(scc1) = s_ent(sco)     //   src_c: C_1 -> C_0 <- One :s_ent
+   	    ndType(sci0) = s_ent(sco)    //  ndType: I_0 -> C_0 <- One :s_ent
+        arType(sci1) = scc1          //  arType: I_1 -> C_1
+   	    src_i(sci1) = sci0           //   src_i: I_1 -> I_0
+	    ndType(sctri0) = t_ent(sctro)//  ndType: I_0 -> C_0 <- One :t_ent
+   	    tgt_i(sci1) = sctri0}        //   tgt_i: I_1 -> I_0
+	Value -> {
+/*   	from
+	   	  tro : One
+	   	  tri0 : I_0
+	   	where
+	       //forall tr. tr.t_entn.ndType = tr.etr.t_ent,
+	   	  ndType(tri0) = t_ent(tro)} */
+	  from
+	   	tro : One
+	   	tri0 : I_0
+   	  where
+        //forall tr. tr.t_entn.ndType = tr.etr.t_ent,
+   	    ndType(tri0) = t_ent(tro)	   	
+	  return
+	    obsVal -> tri0.nodeVal}
+
+   foreign_keys
+// s_entc_I_0 : E_sc -> E_sr,  Cells of the selected entity mapped to their rows
+// To assign the value of a foreign key we need to get a generator for E_sr --the pair (sro, sri0)--
+// and associate it with a generator for E_sc. Both of these entities are constructed as part
+// of this query so we must make the assignments directly.
+// Note: E_sr is constructed from the pullback ndType: I_0 -> C_0 <- One :s_ent and so its generator
+// is the pair (sro, sri0) subject to the constraint ndType(sri0) = s_ent(sro)
+// We need to match this up with the corresponding pair in the zoo of generators for E_sc, specifically:
+//    	  ndType(sci0) = s_ent(sco)    //  ndType: I_0 -> C_0 <- One :s_ent
+//
+// From the query above we mapped the source foreign key to s_entc_I_0. We must now compose these two
+// constructions.
+//	source -> {s_entc_I_0 -> {sro -> sco sri0 -> sci0} followed by source -> {sr -> sc.s_entc_I_0}}
+	source -> {sro -> sco sri0 -> sci0}
+
+// Using the same pattern we need to implement:
+//	target -> {sc_tr -> {tro -> sctro tri0 -> sctri0} followed by target -> {tr -> sc.sc_tr}}
+	target -> {tro -> sctro tri0 -> sctri0}
+
+// Again using the above pattern:
+//	attr -> {s_entc_C_1 -> {sao -> sco sac1 -> scc1} followed by attr -> {sa -> sc.s_entc_C_1}}
+	attr -> {sao -> sco sac1 -> scc1}	
+}
+
+instance iUFLDtoEAV = eval qUFLDtoEAV i_UFLDs

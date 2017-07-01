@@ -60,65 +60,95 @@ html {(*" <hr/><div id=\"schms_instncs\">
 			we will use to provide a label to keep track of the data we place in that entity through the declaration of an instance of that
 			schema. We designate this schema as the schema One and label its only entity O. </p>"*)
 }
-schema One = literal : Ty {
+schema sOne = literal : Ty {
 	entities
 	  O
 }
 html {(*"
 	    <p>	You can generate a template instance for the schema One by typing in: <br /> <br /> 
 
-<strong>	instance i_One = literal : One </strong> <br /> <br /> 
+<strong>	instance iOne = literal : sOne </strong> <br /> <br /> 
 	    
-	    select <strong>literal : One </strong><br /> <br /> 
+	    select the string <strong>&#34;literal : sOne&#34; </strong><br /> <br /> 
 	    
 	    right mouse click and then select <strong>infer instance </strong><br /> <br /> 
 	    
 	    This should produce something like: </p>
 
 	<p><strong>
-	instance i_one = literal : One {								<br />
+	instance iOne = literal : sOne {								<br />
 &emsp;	generators													<br />
 &emsp;&emsp;	[list Generators here] : O							<br />
-&emsp;	multi_equations												<br />
-&emsp;&emsp;	OrowLbl -> [list assignments here] // O -> String	<br />
 }																	<br /></strong> </p>
 			
 An example of a complete instance would look like:
 "*)}
-instance i_One = literal : One {
+instance iOne = literal : sOne {
 	generators
 	  o1 o2 o3: O
-	multi_equations
-	  // OrowLbl: O -> String // Representitive O attribute
-	  OrowLbl -> {o1 row_o1, o2 row_o2}
 }
 html {(*"
-	    <p>	Let's take a moment to examine the schema One and its associated entity. First we should emphasize that in AQL a schema is
-	    	viewed as a type. When a schema is declared all of its internal structure is understood by the AQL engine. When an instance
-	    	is created the AQL engine enforces the instance associated with its underlying schema to have all of the necessary components
-	    	as defined by the schema. </p>
+	    <p>	In order to anchor this abstract schema to the outside world we need to associate elements of the set to specific concepts
+	    	through the typeside. In this case we provide string labels. The notion of an entity is analogous to a relational relvar in
+	    	that an instance consists of a set whose elements are determined by some predicate. For our concrete example we consider the
+	    	entity Skill whose elements x are elements that get mapped to true by the boolean valued function P(x) where P is defined by
+	    	(x is a skill). We think of entities as defining classes of objects that share a property defined by the predicate function.
+	    	By convention we label the entity with the name of the property: <br /> <br /> 
+"*)}
+
+schema sSkill = literal : Ty {
+	entities
+	  Skill
+	attributes
+	  skillLbl : Skill -> String 
+}
+schema sOneStrAtt = literal : Ty {
+	entities
+	  O
+	attributes
+	  rowOLbl : O -> String
+}
+html {(*"
+	    <p>	An instance of our one entity schema now consists of a set each of whose elements satisfy the predicate. <br /> <br /> 
+"*)}
+
+instance iSkill = literal : sOneStrAtt {
+	generators
+	  o1 o2 o3 o4: O
+	multi_equations
+	  // rowOLbl: O -> String
+	  rowOLbl -> {o1 walking, o2 chewing}
+}
+
+html {(*"
+		<p> Before continuing our discussion we briefly call attention to an important difference between AQL's behavior and the behavior
+			of traditional relational databases. Notice we only assigned labels to two of the three generators. AQL semantics completes the
+			instance by assigning a labeled null to the skillLbl attribute associated with the s3 generator. This labeled null is different
+			than the null value of existing relational database implementations. A labeled null is strongly typed in that it is an unknown
+			that is specific to the pair (s3 generator, attribute skillLbl) whose label is [[s3].skillLbl]. This means if we failed to assign
+			values to any attribute in a schema we would have a labeled null for every (generator, attribute) pair. This way of defining
+			null values has far reaching consequences which we will return to as we go.
+
+	    <p>	Let's take a moment to examine the schemas sSkill and its attributeless counterpart sOne. First we should emphasize that in
+	    	AQL a schema is viewed as a type. When a schema is declared all of its internal structure is understood by the AQL engine.
+	    	When an instance is created, the AQL engine enforces the instance associated with its underlying schema to have all of the
+	    	necessary components as defined by the schema. As mentioned above in the case of sKill this includes filling in specific
+	    	labeled nulls for any missing attribute values on the type side.</p>
 	    	
-	    <p>	Having only one entity we could consider the schema One as a sort of representative type for an entity. Notice this is both
-	    	similar to and different from the relational approach. The basic unit of construction in relational algebra is a relvar or a
-	    	table declaration. In this case entities are the building blocks. The notion of a schema emerges by connecting entities with
-	    	foreign keys. Not so with AQL where schemas are the building blocks, but with the schema One we recover the ability to isolate
-	    	and manipulate a single entity. Later in this section we will consider schemas with more than one entity, but before we do
-	    	let's highlighty some of the more important features of One. </p>
+	    <p>	Having only one entity and no attributes we could consider the schema One as a sort of representative type for an structure
+	    	of an entity. Notice this is both similar to and different from the relational approach. The basic unit of construction in
+	    	relational algebra is a relvar or a	table declaration. In this case entities are the building blocks. The notion of a schema
+	    	emerges by connecting entities with	foreign keys. Not so with AQL where schemas are the building blocks, but with the schema
+	    	sOne we recover the ability to isolate and manipulate a single entity. Additionally we have this idea of the structure of an
+	    	entity independent of any predicate. Later in this section we will consider schemas with more than one entity, but before we
+	    	do let's highlighty some of the more important features of sOne. </p>
 	    	
 	    <p>	An instance in a relational table is defined by and referenced through its primary key. The primary key is defined through
 	    	association with one or more columns whose values will uniquely identify a row in that table. By analogy, AQL requires that a
 	    	generator be supplied for each record of an entity. This notion is analogous to the primary key of a relational table but
-	    	differs conceptually in that it is sufficient to generate specific values for each attribute associated with that row. This
-	    	has far reaching implications in AQL. </p>
-	    
-	    <p>	If a value for an attribute is not known, it still has a place holder for that specific value. This place holder is called a
-	    	labeled null. Labeled nulls differ from relational nulls in that they have very specific typing information associated with
-	    	them. In our example instance i_One we specified three generators but only assigned values to the OrowLbl attribute for two
-	    	of them. The attribute value for OrowLbl for the third record of O has the generator o3 so we have a labeled null whose type
-	    	is o3.OrowLbl. In the absence of an assigned value as part of the instance, the type of the labeled null is assigned as the
-	    	default value. In contrast with the relational null value, for every (generator, attribute) pair there is the potential for
-	    	a null of that type. </p>
+	    	differs conceptually in that it is sufficient to generate specific values for each attribute associated with that row. </p>
 
+*************************Needs work or should be omitted****************************
 	    <p> The intuitive ideas above can be formalized as follows. In AQL an entity is an abstract construction which can be thought of as
 	    	a variable set. An instance of an entity can be thought of as assigning a value to the entity that is a specific set. In
 	    	contrast, in relational algebra an entity is known as a relvar or relational variable. An instance of a relvar is a relation
@@ -126,112 +156,229 @@ html {(*"
 	    	set to that variable. So in our case the entity O is a variable that can be assigned a value or instance that is a set. In
 	    	the case above we assigned three elements to the entity (variable set) O -> {o1, o2, o3}. These three elements should be
 	    	thought of as featureless place holders. Through the type side, in this case strings, we can attach features to these elements. 
-
+	    
 	    <p> To further illustrate the connection between the relational view of entities in our next code example we connect with a MySQL
 	    	instance hosted by the Categorical Informatics web site. We use the JDBC driver for MySQL to first create a relational version
-	    	of the entity O and then to insert a pair of rows into that entity. Using the analogy described above we create a relational
-	    	table with two columns Oid and OrowLbl and declare the first as the primary key. We then insert two rows and display them.
-	    	Finally we demonstrate that we can create an instance of One by loading data from the relational table into the corresponding
+	    	of the entity Skill and then to insert a set of rows into that entity. Using the analogy described above we create a relational
+	    	table with two columns skill_id and skillLbl and declare the first as the primary key. We then insert two rows and display them.
+	    	Finally we demonstrate that we can create an instance of Skill by loading data from the relational table into the corresponding
 	    	AQL schema.</p>
 
 	    <p>	In order to view the output from the model you can execute the model by clicking on the run button. This will compile the
 	    	model and launch the execution GUI. On the left of the execution pannel you will see a list of the various model components
-	    	in the order they appear in this file.
+	    	in the order they appear in this file.</p>
+
+	    <p> Using the JDBC driver we create the table Skill and insert three records.
 "*)}
-/*instance ici_s1 = import_jdbc "com.mysql.jdbc.Driver" //"jdbc:mysql://localhost:3306/ci_s1?user=root&password=HappyFunctor" 
-	"jdbc:mysql://mysql.catinf.com:3306/ci_s1?user=catinfcom&password=FDiUY!pr" : ci_s1 {*/
+
 pragma load = exec_jdbc "com.mysql.jdbc.Driver"
-	"jdbc:mysql://mysql.catinf.com:3306/ci_s1?user=catinfcom&password=FDiUY!pr" {
-"DROP TABLE IF EXISTS O"
-"CREATE TABLE O (`Oid` varchar(10) NOT NULL, `OrowLbl` varchar(45) DEFAULT NULL, PRIMARY KEY (`Oid`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Example used in AQL basics model.';"
-"INSERT INTO O (`Oid`, `OrowLbl`) VALUES ('o1', 'row_o1');"
-"INSERT INTO O (`Oid`, `OrowLbl`) VALUES ('o2', 'row_o2');"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_s3?user=catinfcom&password=FDiUY!pr" {
+"DROP TABLE IF EXISTS Skill"
+"CREATE TABLE Skill (`skill_id` varchar(10) NOT NULL, `skillLbl` varchar(45) DEFAULT NULL, PRIMARY KEY (`skill_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Example used in AQL basics model.';"
+"INSERT INTO Skill (`skill_id`, `skillLbl`) VALUES ('s1', 'walking');"
+"INSERT INTO Skill (`skill_id`, `skillLbl`) VALUES ('s2', 'juggling');"
+"INSERT INTO Skill (`skill_id`) VALUES ('s3');"
 }
-/* look at the example data
-//  The above imported SQL instance is isomorphic to the i_One instance. */
+html {(*"
+	    <p>	With this pragma we display the rows of the Skill table we just created. <br /> <br /> 
+"*)}
+
 pragma view_example_data = exec_jdbc "com.mysql.jdbc.Driver"
 	"jdbc:mysql://mysql.catinf.com:3306/ci_s3?user=catinfcom&password=FDiUY!pr"  {
-"SELECT * FROM O"
+"SELECT * FROM Skill"
 }
 
-instance i_One_from_sql = import_jdbc "com.mysql.jdbc.Driver"
-	"jdbc:mysql://mysql.catinf.com:3306/ci_s3?user=catinfcom&password=FDiUY!pr" : One {
-        O -> "SELECT Oid FROM O"
-        OrowLbl -> "SELECT Oid, OrowLbl FROM O"
+html {(*"
+	    <p>	With the AQL inport_jdbc method we can load the data from the Skill table into the sSkill schema. <br /> <br /> 
+"*)}
+
+
+instance iSkill_from_sql = import_jdbc "com.mysql.jdbc.Driver"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_s3?user=catinfcom&password=FDiUY!pr" : sSkill {
+        Skill -> "SELECT skill_id FROM Skill"
+        skillLbl -> "SELECT skill_id, skillLbl FROM Skill"
 }
 html {(*"
-	    <p>	Next we examine a slightly more interesting schema. In this case we consider a schema with two independent entities. Such a
-	    	schema </p>
-	    	
-	    <p>	Having only one entity we could consider the schema One as a sort of representative type for an entity. Notice this is very
-	    	different from the relational approach. The basic unit of construction in relational algebra is a relvar or a table declaration.
-	    	Here entities are the building blocks. The notion of a schema emerges by connecting entities with foreign keys. Not so with AQL
-	    	where schemas are the building blocks, but with the schema One we recover the ability to isolate and manipulate a single entity.
-	    	Later in this section we will consider schemas with more than one entity, but before we do let's highlighty some of the more
-	    	important features of One. </p>
-	    	
-	    <p>	An instance in a relational table is defined by and referenced through its primary key. The primary key is defined through
-	    	association with one or more columns whose values will uniquely identify a row in that table. By analogy, AQL requires that a
-	    	generator be supplied for each record of an entity. This notion is analogous to the primary key of a relational table but
-	    	differs conceptually in that it is sufficient to generate specific values for each attribute associated with that row. This
-	    	has far reaching implications in AQL. </p>
+	    <p>	In order to formalize the obviously close structural relationship between sOne and sSkill let us do a brief preview of structure preserving maps
+	    	between the two. <br /> <br /> 
+
+	    <p>	You can generate a template for mapping sOne to sSkill typing in: <br /> <br /> 
+
+<strong>	mapping mOneToSkill = literal : sOne -> sSkill </strong> <br /> <br /> 
 	    
-	    <p>	If a value for an attribute is not known, it still has a place holder for that specific value. This place holder is called a
-	    	labeled null. Labeled nulls differ from relational nulls in that they have very specific typing information associated with
-	    	them. In our example instance i_One we specified three generators but only assigned values to the OrowLbl attribute for two
-	    	of them. The attribute value for OrowLbl for the third record of O has the generator o3 so we have a labeled null whose type
-	    	is o3.OrowLbl. In the absence of an assigned value as part of the instance, the type of the labeled null is assigned as the
-	    	default value. In contrast with the relational null value, for every (generator, attribute) pair there is the potential for
-	    	a null of that type. </p>
+	    select the string <strong>&#34;literal : sOne -> sSkill&#34; </strong><br /> <br /> 
+	    
+	    right mouse click and then select <strong>infer mapping </strong><br /> <br /> 
+	    
+	    This should produce something like: </p>
 
-	    <p> The intuitive ideas above can be formalized as follows. In AQL an entity is an abstract construction which can be thought of as
-	    	a variable set. An instance of an entity can be thought of as assigning a value to the entity that is a specific set. In
-	    	contrast, in relational algebra an entity is known as a relvar or relational variable. An instance of a relvar is a relation
-	    	or a set of tuples. An instance is a way to assign a specific
-	    	set to that variable. So in our case the entity O is a variable that can be assigned a value or instance that is a set. In
-	    	the case above we assigned three elements to the entity (variable set) O -> {o1, o2, o3}. These three elements should be
-	    	thought of as featureless place holders. Through the type side, in this case strings, we can attach features to these elements. 
+	<p><strong>
+	mapping mOneToSkill = literal : sOne -> sSkill {				<br />
+&emsp;	entities													<br />
+&emsp;&emsp;	O -> an entity [Skill]								<br />
+&emsp;  foreign_keys												<br /><br />
 
-	    <p> To further illustrate the connection between the relational view of entities in our next code example we connect with a MySQL
-	    	instance hosted by the Categorical Informatics web site. We use the JDBC driver for MySQL to first create a relational version
-	    	of the entity O and then to insert a pair of rows into that entity. Using the analogy described above we create a relational
-	    	table with two columns Oid and OrowLbl and declare the first as the primary key. We then insert two rows and display them.
-	    	Finally we demonstrate that we can create an instance of One by loading data from the relational table into the corresponding
-	    	AQL schema.</p>
+&emsp;  attributes													<br />
+}																	<br /></strong> </p>
 
-	    <p>	In order to view the output from the model you can execute the model by clicking on the run button. This will compile the
-	    	model and launch the execution GUI. On the left of the execution pannel you will see a list of the various model components
-	    	in the order they appear in this file.
+		<p>	Since there are no foreign keys or attributes the foreign keys and attribute clauses can be deleted and we have the following
+			definition for the mapping. Notice there really is no other way to construct such a mapping.
 "*)}
-schema oPair = literal : Ty {
+mapping mOneToSkill = literal : sOne -> sSkill {
+	entities
+		O -> Skill
+}
+
+mapping mOneStrAttToSkill = literal : sOneStrAtt -> sSkill 
+{
+	entities
+	  O -> Skill
+	attributes
+	  rowOLbl -> lambda s. s.skillLbl
+}
+/* Leave this for now.
+mapping mOneToSkill = literal : sSkill -> sOne {
+	entities
+		Skill -> O
+	attributes
+		skillLbl -> lambda v. v.some type side symbols [plus] applied to Attributes [] applied to paths of foreign keys [] ending on variable [v]  // Skill -> String 
+} */
+html {(*"
+	    <p>	Mappings induce two ways to move data from one schema to another. The first is the delta data migration functor. It is also known as the pullback data 
+	    	migration functor. In this case, since the mapping translates the structure of sOne into the structure of sSkill, delta moves an instance of sSkill to
+	    	and instance of sOne. In contrast, sigma pushes data forward through the mapping and so moves an instance of sOne to and instance of sSkill.  
+
+		<p>	One can also use AQL to move data using the query construction. The behavior in this particularly simple case is also illustrated below.
+"*)}
+instance iSkillInSkill = sigma mOneStrAttToSkill iSkill
+instance iDeltaSkillToOne = delta mOneToSkill iSkillInSkill
+instance iSigmaOneToSkill = sigma mOneToSkill iOne
+
+query qOneToSkill = literal : sSkill -> sOne {
+	entities //source entities: Skill
+		O -> {
+			from
+				o:Skill
+		}
+}
+//instance iSkillToOne = eval qOneToSkill iSkill
+
+html {(*"
+	    <p>	Next we examine a slightly more interesting schema. In this case we consider a schema with two independent entities. Again we will
+	    	contrast one version without attributes and another with attributes. The first schema we call sPair as it contains a pair of unrelated
+	    	entities. We contrast this with a concrete schema sST by extending our schema sSkill to include a second entity Task. </p>
+
+"*)}
+
+schema sPair = literal : Ty {
     entities
       Ap Bp
-    attributes
-      rowApLbl: Ap -> String // Representative Ap attribute
-      rowBpLbl: Bp -> String // Representative Bp attribute
 }
-// Example oPair instances
-instance i_oPair = literal : oPair {
+schema sST = literal : Ty {
+	entities
+	  Skill Task
+	attributes
+	  skillLbl : Skill -> String
+	  taskLbl  : Task  -> String
+}
+html {(*"
+	    <p>	Below we construct a variety of instances to illustrate what happens when we fill our two new schemas. Notice that in the second sPair instance
+	    	we use meaningful strings as generators even though we have no typeside. Hence we can rig up an instance of an attributeless schema to be
+	    	concrete by using meaning full strings as generators. This can serve as a quick shortcut, but as we shall see later it has drawbacks.</p>
+
+"*)}
+instance iPair = literal : sPair {
   generators
     a1 a2 a3 : Ap
     b1 b2 b3 b4 : Bp
-  multi_equations
-    // rowApLbl: Ap -> String // Representitive Ap attribute
-    rowApLbl -> {a1 row_a1, a2 row_a2, a3 row_a3}
-    // rowBpLbl: Bp -> String // Representitive Bp attribute
-    rowBpLbl -> {b1 row_b1, b2 row_b2, b3 row_b3, b4 row_b4}
 }
-instance i_oPairCT4S = literal : oPair { // See example 3.1.1 of CT4S
+instance iPairCT4S = literal : sPair { // See example 3.1.1 of CT4S
   generators
-    a1 a2 a3 a4 a5 a6: Ap
-    b1 b2 b3 b4 : Bp
-  multi_equations
-    // rowApLbl: Ap -> String // Representitive Ap attribute
-    rowApLbl -> {a1 one, a2 two, a3 three, a4 four, a5 five, a6 six}
-    // rowBpLbl: Bp -> String // Representitive Bp attribute
-    rowBpLbl -> {b1 clubs, b2 diamonds, b3 hearts, b4 spades}
+    one two three four five six: Ap
+    clubs diamonds hearts spades : Bp
 }
-/* Two schema declaration.
+instance iST = literal : sST {
+  generators
+    s1 s2 s3 : Skill
+    t1 t2 t3 t4 : Task
+  multi_equations
+    // skillLbl: Skill -> String
+    skillLbl -> {s1 walking, s2 chewing, s3 juggleing}
+    // taskLbl: Task -> String
+    taskLbl -> {t1 "walk dog", t2 "eat lunch", t3 "entertain", t4 "walk dog while chewing gum"}
+}
+html {(*"
+	    <p>	With these schemas we now have enough to begin to meaningfully explore the notion of structure preserving maps between schemas. To do this we
+	    	will extend the iPairCT4S instance to include a generator for each face value in a deck of cards. For clarity lets create a new schema called
+	    	sDeckGen that is structurally equivalent with sPair but with more meaningful entity names FaceValue and Suit. We create the extend instance
+	    	iDeckGen as	an instance of type sDeckGen</p>
+
+"*)}
+schema sDeckGen = literal : Ty {
+	entities
+	  FaceValue Suit
+}
+instance iDeckGen = literal : sDeckGen {
+  generators
+    ace two three four five six seven eight nine ten jack queen king : FaceValue
+    clubs diamonds hearts spades : Suit
+}
+html {(*"
+	    <p>	Let's see what happens when we build maps between sOne and sDeckGen. </p>
+
+"*)}
+mapping mDeckGenOne = literal : sDeckGen -> sOne {
+	entities
+		FaceValue -> O
+		Suit -> O
+}
+instance iDeckGenFromOne = delta mDeckGenOne iOne
+html {(*"
+	    <p>	To describe this result we say that the pullback data migration instance mapping delta mDeckGenOne projects the generators of O into both
+	    	FaceValue and Suit entities of sDeckGen. </p>
+
+"*)}
+instance iOneFromDeckGen = sigma mDeckGenOne iDeckGen
+html {(*"
+	    <p>	The sigma push forward data migration functor in contrast takes FaceValue and Suit sets of generators and adds them togehter. Now let's look
+	    	at what the query operator does when we migrate data from sDeckGen into sOne.</p>
+
+"*)}
+query qDeckGenToOne = literal : sDeckGen -> sOne {
+	entities //source entities: FaceValue Suit
+		O -> {
+			from
+				fv:FaceValue
+				s:Suit
+				}
+}
+instance iDeck = eval qDeckGenToOne iDeckGen
+html {(*"
+	    <p>	The query construction takes the Cartesian product of the FaceValue and Suit sets of generators, and so we have our deck of cards.</p>
+
+	    <p> Moving on let's consider a schema with two entities connected by a single foreign key. As an example of such a schema let's consider
+	    	an extension of the sSkill schema that includes an entity SkillClass that classifies skills.
+
+"*)}
+schema sSSC = literal : Ty {
+	entities
+	  Skill SkillClass
+	foreign_keys
+	  skillClass : Skill -> SkillClass
+	attributes
+	  skillLbl : Skill -> String
+	  skillClassLbl : SkillClass -> String
+}
+instance iSSC = literal : sSSC {
+	generators
+		s1 s2 s3 s4 s5 s6 s7 : Skill
+		sc1 sc2 sc3 : SkillClass
+	multi_equations
+		skillClass -> {s1 sc1, s2 sc1, s3 sc2, s4 sc3, s5 sc3, s6 sc3} // Skill -> SkillClass	
+		skillClassLbl -> {sc1 congnitive, sc2 social, sc3 psychomotor} // SkillClass -> String
+		skillLbl -> {s1 math, s2 biology, s3 empathy, s4 walking, s5 chewing, s6 juggling} // Skill -> String
+}
+// Two schema declaration.
 // Schema representing a foreign key, that is, a single arrow f: S -> T.
 // This is known as a detail -> master relationship in
 // database jargon.
@@ -240,7 +387,7 @@ instance i_oPairCT4S = literal : oPair { // See example 3.1.1 of CT4S
 // the LHS is just an abbrevation for the RHS.  When all equations re definitions,
 // the category denoted is free (which is extremely nice). example definititional
 // schemas below: Two GRF Span CoSpan
- */
+
 schema Two = literal : Ty {
 	entities
 	  Source Target
@@ -279,7 +426,7 @@ instance i_Two = literal : Two {
  *  
  *  What this means is that any directed graph is an instance of the schema
  *  below and any instance of the schema below is a directed graph.
- */
+ *//*
 schema GRF = literal : Ty {
 	entities
 	  Arrow Node
@@ -327,7 +474,7 @@ instance i_GRF = literal : GRF {
 // that is the source of that path. They also serve to illustrate how schema and
 // instance interact to include built in providence features. Their intended use
 // is illustrated in the assignment statements in instances i_Span and i_Square. 
-*/
+*//*
 schema Span = literal : Ty {
 	entities
 	  As Bs Cs
@@ -345,7 +492,7 @@ schema Span = literal : Ty {
 	  forall c. c.fsPntsTo = c.fs.rowAsLbl
 	  forall c. c.gsPntsTo = c.gs.rowBsLbl
 }
-// Example Span instance: */
+// Example Span instance: *//*
 instance i_SpanPrd = literal : Span {
   generators
     a1 a2 a3 : As
@@ -389,7 +536,7 @@ instance i_SpanSum = literal : Span {
 //
 // See:
 // https://en.wikipedia.org/wiki/Merge_(SQL)
-*/
+*//*
 schema CoSpan = literal : Ty {
 	entities
 	  Ac Bc Cc
@@ -450,7 +597,7 @@ instance i_CoSpan = literal : CoSpan {
 // that is the source of that path.
  They also serve to illustrate how schema and
 // instance interact to incluide build in providence features. 
-*/
+*//*
 schema Square = literal : Ty {
 	entities 
 	  NW NE SW SE
@@ -534,7 +681,7 @@ instance i_SqrPB = literal : Square {
 
 /* Some examples of queries on the above schemas
  * 
- */
+ *//*
 // The identitity query on Two
 query qIdTwo = literal : Two -> Two {
    entities
@@ -562,8 +709,8 @@ instance i_IdTwo = eval qIdTwo i_Two
  * There is only one way to write this query. Both of the entities in oPair
  * most be populated by the only available entity in One. In the queries that
  * follow (those labeled (xxxBang) you will see this as a universal pattern.
- */
-query qoPairBang = literal : One -> oPair {
+ *//*
+query qoPairBang = literal : sOne -> oPair {
    entities
 	Ap -> {
 	  from
@@ -582,7 +729,7 @@ instance i_oPairBang = eval qoPairBang i_One
 /* Query qTwoBang
  * Here we add a detail->master foriegn key to the above example. The implications
  * are explained below in the comments for the foriegn keys clause.
- */
+ *//*
 query qTwoBang = literal : One -> Two {
    entities
 	Source -> {
@@ -623,7 +770,7 @@ instance i_TwoBang = eval qTwoBang i_One
  * Notice also that all foreign keys must by necesity be left behind and
  * so this process effectively removes an entity from the context it
  * enjoys as a part of a larger schema.
- */
+ *//*
 // Pick the entity Ap of oPair
 query qPickAp = literal : oPair -> One {
    entities
@@ -680,31 +827,31 @@ query qPickSqSpn = literal : Square -> Span {
 instance i_PickSqSpn = eval qPickSqSpn i_Square
 // Mapping GRF to Span
 query qGRFSpan = literal : GRF -> Span {
-   entities /*source entities: Srcp Tgtp*/
+   entities /*source entities: Srcp Tgtp*//*
 	As -> {
 	  from
 	    na:Node
 	  //where
 	  return
-	    rowAsLbl /*:String*/ -> na.rowNdLbl}
+	    rowAsLbl /*:String*//* -> na.rowNdLbl}
 	Bs -> {
 	  from
 	    nb:Node
 	  //where
 	  return
-	    rowBsLbl /*:String*/ -> nb.rowNdLbl}
+	    rowBsLbl /*:String*//* -> nb.rowNdLbl}
 	Cs -> {
 	  from
 	    s:Arrow
 	  //where
 	  return
-	    fsPntsTo /*:String*/ -> s.srcPtsTo
-	    gsPntsTo /*:String*/ -> s.tgtPtsTo
-	    rowCsLbl /*:String*/ -> s.rowArLbl}
+	    fsPntsTo /*:String*//* -> s.srcPtsTo
+	    gsPntsTo /*:String*//* -> s.tgtPtsTo
+	    rowCsLbl /*:String*//* -> s.rowArLbl}
 
 	foreign_keys
-		fs /*:Cs->As*/ -> {na -> source(s)}
-		gs /*:Cs->Bs*/ -> {nb -> target(s)}
+		fs /*:Cs->As*//* -> {na -> source(s)}
+		gs /*:Cs->Bs*//* -> {nb -> target(s)}
 }
 instance i_GRFSpan = eval qGRFSpan i_GRF
 instance i_SpanGRF = coeval qGRFSpan i_SpanPrd
@@ -712,13 +859,13 @@ instance i_SpanGRF = coeval qGRFSpan i_SpanPrd
 // Pi
 // Build a product from an oPair.
 query qProd = literal : oPair -> One {
-   entities /*source entities: Ap Bp*/
+   entities /*source entities: Ap Bp*//*
 	O -> {
 	  from
 	    a:Ap
 	    b:Bp
 	  return
-	    OrowLbl /*:String*/ -> plus(plus(a.rowApLbl,", "),b.rowBpLbl)}
+	    OrowLbl /*:String*//* -> plus(plus(a.rowApLbl,", "),b.rowBpLbl)}
 }
 instance i_Prod = eval qProd i_oPair
 // Build a pullback from a CoSpan.
@@ -741,7 +888,7 @@ instance i_CoSpan2 = literal : CoSpan {
 	rowCcLbl -> {c1 row_c1, c2 row_c2, c3 row_c3}
 }
 query qPBc1 = literal : CoSpan -> One {
-   entities /*source entities: Ac Bc Cc*/
+   entities /*source entities: Ac Bc Cc*//*
 	O -> {
 	  from
 	    a:Ac
@@ -749,7 +896,7 @@ query qPBc1 = literal : CoSpan -> One {
 	  where
 	    a.fc = b.gc
 	  return
-		OrowLbl /*:String*/ -> b.rowBcLbl}
+		OrowLbl /*:String*//* -> b.rowBcLbl}
 }
 instance i_PBc1 = eval qPBc1 i_CoSpan2
 
@@ -758,3 +905,4 @@ instance i_PBc1 = eval qPBc1 i_CoSpan2
 instance i_Sum = coeval qoPairBang i_oPair
 // Build a pushout from a Span.
 instance i_PO = coeval qPickSqSpn i_SpanSum
+*/

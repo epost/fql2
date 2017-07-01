@@ -1,0 +1,192 @@
+typeside Ty = literal { 
+	java_types
+		String = "java.lang.String"
+	java_constants
+		String = "return input[0]"
+	java_functions
+		plus : String,String->String = "return (input[0] + input[1])" 
+}
+
+// One entity schema for recording possible face values of a deck of cards.
+schema sFaceVal = literal : Ty {
+	entities
+	  FaceVal
+	attributes
+	  faceVal : FaceVal -> String
+}
+
+// One entity schema for recording possible suits of a deck of cards.
+schema sSuit = literal : Ty {
+	entities
+	  Suit
+	attributes
+	  suit : Suit -> String
+}
+
+// One entity schema for recording members of a deck of cards. 
+schema sDeck = literal : Ty {
+	entities
+	  Card
+	attributes
+	  faceValue : Card -> String
+	  suit : Card -> String
+}
+
+// An instance assigning face values to sFaceVal
+instance iFaceVal = literal : sFaceVal {
+  generators
+    f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 : FaceVal
+  multi_equations
+    faceVal -> {f1 ace, f2 two, f3 three, f4 four, f5 five, f6 six, f7 seven,
+    			f8 eight, f9 nine, f10 ten, f11 jack, f12 queen, f13 king}
+}
+
+// An instance assigning suits to sSuit
+instance iSuit = literal : sSuit {
+  generators
+    s1 s2 s3 s4 : Suit
+  multi_equations
+    suit -> {s1 clubs, s2 diamonds, s3 hearts, s4 spades}
+}
+
+// Assemble a schema with two independent entities, one for face values and one for suits. This is done
+// by taking the disjoint union (sum) of sFaceVal and SSuit.
+schema_colimit FSSumAuto = quotient sFaceVal + sSuit : Ty {}
+
+// Give the default names in the automatically generated sum more consise names.
+schema_colimit FSSum = modify FSSumAuto {
+	rename entities
+		sFaceVal_FaceVal -> FaceVal
+		sSuit_Suit 		 -> Suit
+	rename attributes
+		sFaceVal_faceVal -> faceVal
+		sSuit_suit		 -> suit
+}
+
+// Extract from the colimit (sum, FSSum, of Face value and Suit in this case) its schema and mappings.
+schema sDeckGen = getSchema FSSum
+mapping mFaceValToDeckGen = getMapping FSSum sFaceVal
+mapping mSuitToDeckGen = getMapping FSSum sSuit
+// Note: Now that we have assigned names to its component parts FSSum looks like:
+//
+//       mFaceValToDeckGen     mSuitToDeckGen
+//  sFaceVal --------> sDeckGen <-------- sSuit
+//
+// Create an instance of sDeckGen based on instances of sFaceVal and sSuit.  
+instance iDeckGen = coproduct_sigma
+	mFaceValToDeckGen iFaceVal
+	mSuitToDeckGen iSuit
+	: sDeckGen
+
+// Use a query to define a card. One can read this as saying a card is defined as
+//                          a face value AND a suit
+query qDeckGenToDeck = literal : sDeckGen -> sDeck {
+	entities
+	  Card -> {
+	  	from
+		  	f : FaceVal
+		  	s : Suit
+		return
+		    faceValue -> f.faceVal
+		    suit -> s.suit
+	  }
+}
+
+// Execute the query to generate a deck of cards.
+instance iDeck = eval qDeckGenToDeck iDeckGen
+
+// Elaborating on the nature of the relationship between members of a deck of cards
+// and their face values and suits consider the following schema:
+schema sDeckStrct = literal : Ty {
+	entities
+	  Card FaceVal Suit
+	foreign_keys
+	  cardFaceVal : Card -> FaceVal
+	  cardSuit : Card -> Suit
+	attributes
+	  faceValue : FaceVal -> String
+	  suit : Suit -> String
+	  crdFcVl : Card -> String
+	  crdSt : Card -> String
+	observation_equations
+	  forall c. c.crdFcVl = c.cardFaceVal.faceValue
+	  forall c. c.crdSt = c.cardSuit.suit
+}
+
+// We can assemble the structure of a card with the following query.
+query qDeckGenToDeckStrct = literal : sDeckGen -> sDeckStrct {
+	entities //source entities: FaceVal Suit
+		Card -> {
+			// A card is a face value and a suit
+			from
+				cf : FaceVal
+				cs : Suit
+			return
+				crdFcVl -> cf.faceVal
+				crdSt -> cs.suit
+		}
+		FaceVal -> {
+			// Face value gets copied over.
+			from
+				ff : FaceVal
+			return
+				faceValue -> ff.faceVal
+		}
+		Suit -> {
+			// Suit gets copied over.
+			from
+				ss : Suit
+			return
+				suit -> ss.suit
+		}
+	foreign_keys
+		// cardFaceVal : Card -> FaceVal
+		// The cardFaceVal foreign key cf of Card is assigned the value ff of the FaceVal generator.
+		cardFaceVal -> {ff -> cf}
+		// cardSuit : Card -> Suit
+		// The cardSuit foreign key cs of Card is assigned the value ss of the suite generator.
+		cardSuit -> {ss -> cs}
+}
+
+// Note: The following version of qDeckGenToDeckStrct will not run due to the fact that the query
+// does not respect the observation equations. The AQL imbedded theorem prover will only validate
+// queries consistent with the constraints of the target schema. Similarly instance definitions
+// must be consistent with their schema type.
+/*query qDeckGenToDeckStrct = literal : sDeckGen -> sDeckStrct {
+	entities //source entities: FaceVal Suit
+		Card -> {
+			// A card is a face value and a suit
+			from
+				cf : FaceVal
+				cs : Suit
+			return
+				crdFcVl -> cs.suit
+				crdSt -> cf.faceVal
+		}
+		FaceVal -> {
+			// Face value gets copied over.
+			from
+				ff : FaceVal
+			return
+				faceValue -> ff.faceVal
+		}
+		Suit -> {
+			// Suit gets copied over.
+			from
+				ss : Suit
+			return
+				suit -> ss.suit
+		}
+	foreign_keys
+		// cardFaceVal : Card -> FaceVal
+		// The cardFaceVal foreign key cf of Card is assigned the value ff of the FaceVal generator.
+		cardFaceVal -> {ff -> cf}
+		// cardSuit : Card -> Suit
+		// The cardSuit foreign key cs of Card is assigned the value ss of the suite generator.
+		cardSuit -> {ss -> cs}
+} */
+
+// Evaluating the query on the instance we constructed on the sDeckGen schema we can see elements
+// of a card deck as being constructed as the product of face value and suit. These independent
+// contributions to a card definition can be recoverd by projecting through the foreign keys.
+instance iDeckStrct = eval qDeckGenToDeckStrct iDeckGen

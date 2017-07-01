@@ -1,0 +1,1476 @@
+typeside Ty = literal {
+	java_types	
+		Integer = "java.lang.Integer"
+		String = "java.lang.String"
+		Double = "java.lang.Double"
+		Bool = "java.lang.Boolean"
+		Date = "java.util.Date" //alternative type for dates
+	java_constants
+		Integer = "return java.lang.Integer.parseInt(input[0]);"
+		String = "return input[0]"
+		Double = "return java.lang.Double.parseDouble(input[0])"
+		Bool = "return java.lang.Boolean.parseBoolean(input[0])"
+		Date = "return input[0]"
+}
+
+schema sHt = literal : Ty {
+	entities
+		Edge
+		Node
+		EdgeKind
+		NodeKind
+	foreign_keys
+		source : Edge -> Node
+		target : Edge -> Node
+		edgeHasKind : Edge -> EdgeKind
+		nodeHasKind : Node -> NodeKind
+		edgeKindHasSource : EdgeKind -> NodeKind
+		edgeKindHasTarget : EdgeKind -> NodeKind
+	path_equations
+		source.nodeHasKind = edgeHasKind.edgeKindHasSource
+		target.nodeHasKind = edgeHasKind.edgeKindHasTarget
+  	attributes
+		nid  : Node -> String
+		name : Node -> String
+		nodeKindOnNode : Node -> String
+		edgeKindOnEdge : Edge -> String
+		edgeHasSourceKind : Edge -> String
+		edgeHasTargetKind : Edge -> String
+		edgeKind : EdgeKind -> String
+		nodeKind : NodeKind -> String
+	observation_equations
+		forall n. n.nodeKindOnNode = n.nodeHasKind.nodeKind
+		forall e. e.edgeKindOnEdge = e.edgeHasKind.edgeKind
+		forall e. e.edgeHasSourceKind = e.edgeHasKind.edgeKindHasSource.nodeKind
+		forall e. e.edgeHasTargetKind = e.edgeHasKind.edgeKindHasTarget.nodeKind
+}
+/*
+// Note: All the below imports bring in the entire set of 47,031 nodes
+// The execution times listed below each import. These are different as the path and observation equations had to be activated
+// for the query to run.
+instance iHt1k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHt {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   Edge -> "select concat('e', id) from edge_1k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_1k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_1k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_1k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_1k"
+   edgeHasSourceKind -> "select concat('e', edge_1k.id), edgeKind.sourceKind from edge_1k, edgeKind where edge_1k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_1k.id), edgeKind.targetKind from edge_1k, edgeKind where edge_1k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 200
+    // Execution time on Peter's laptop: 8.745 seconds
+}
+
+instance iHt2k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHt {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_2k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_2k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_2k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_2k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_2k"
+   edgeHasSourceKind -> "select concat('e', edge_2k.id), edgeKind.sourceKind from edge_2k, edgeKind where edge_2k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_2k.id), edgeKind.targetKind from edge_2k, edgeKind where edge_2k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 200
+    // Execution time on Peter's laptop: 17.069 seconds
+}
+
+instance iHt4k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHt {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_4k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_4k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_4k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_4k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_4k"
+   edgeHasSourceKind -> "select concat('e', edge_4k.id), edgeKind.sourceKind from edge_4k, edgeKind where edge_4k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_4k.id), edgeKind.targetKind from edge_4k, edgeKind where edge_4k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 200
+    // Execution time on Peter's laptop: 10.936 seconds
+}
+
+instance iHt8k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHt {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_8k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_8k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_8k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_8k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_8k"
+   edgeHasSourceKind -> "select concat('e', edge_8k.id), edgeKind.sourceKind from edge_8k, edgeKind where edge_8k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_8k.id), edgeKind.targetKind from edge_8k, edgeKind where edge_8k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 200
+    // Execution time on Peter's laptop: 13.862 seconds
+}
+
+instance iHt16k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHt {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_16k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_16k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_16k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_16k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_16k"
+   edgeHasSourceKind -> "select concat('e', edge_16k.id), edgeKind.sourceKind from edge_16k, edgeKind where edge_16k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_16k.id), edgeKind.targetKind from edge_16k, edgeKind where edge_16k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 400
+    // Execution time on Peter's laptop after a restart: 8.521 seconds
+}
+
+instance iHt32k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHt {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_32k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_32k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_32k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_32k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_32k"
+   edgeHasSourceKind -> "select concat('e', edge_32k.id), edgeKind.sourceKind from edge_32k, edgeKind where edge_32k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_32k.id), edgeKind.targetKind from edge_32k, edgeKind where edge_32k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 400
+    // Execution time on Peter's laptop after a restart: 14.808 seconds
+}
+*/
+instance iHt64k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHt {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_64k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_64k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_64k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_64k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_64k"
+   edgeHasSourceKind -> "select concat('e', edge_64k.id), edgeKind.sourceKind from edge_64k, edgeKind where edge_64k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_64k.id), edgeKind.targetKind from edge_64k, edgeKind where edge_64k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 400
+    // Execution time on Peter's laptop after a restart: 11.362 seconds
+}
+/*
+instance iHt128k = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sHt {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   NodeKind -> "select kind from nodeKind"
+   EdgeKind -> "select metaedge from edgeKind"
+   Node -> "select id from node"
+   //***************
+   Edge -> "select concat('e', id) from edge_128k"
+   // foreign_keys
+   // These two are foreign keys and so are populated by selecting the primary key of the
+   // source entity and foreign key of the target entity 
+   source -> "select concat('e', id), source from edge_128k" // Edge -> Node
+   target -> "select concat('e', id), target from edge_128k" // Edge -> Node
+   edgeHasKind -> "select concat('e', id), metaedge from edge_128k" // Edge -> EdgeKind
+   nodeHasKind -> "select id, kind from node" // Node -> NodeKind
+   edgeKindHasSource -> "select metaedge, sourceKind from edgeKind" // EdgeKind -> NodeKind
+   edgeKindHasTarget -> "select metaedge, targetKind from edgeKind" // EdgeKind -> NodeKind
+   // attributes
+   nid -> "select id, id from node" // Node -> String
+   name -> "select id, name from node"// Node -> String
+   edgeKind -> "select metaedge, metaedge from edgeKind"// EdgeKind -> String
+   nodeKind -> "select kind, kind from nodeKind"// NodeKind -> String
+   nodeKindOnNode -> "select id, kind from node"
+   edgeKindOnEdge -> "select concat('e', id), metaedge from edge_128k"
+   edgeHasSourceKind -> "select concat('e', edge_128k.id), edgeKind.sourceKind from edge_128k, edgeKind where edge_128k.metaedge = edgeKind.metaedge"
+   edgeHasTargetKind -> "select concat('e', edge_128k.id), edgeKind.targetKind from edge_128k, edgeKind where edge_128k.metaedge = edgeKind.metaedge"
+  options
+    timeout = 400
+    // Execution time on Peter's laptop after a restart: 30.254 seconds
+}
+*/
+// Target schema into which the sHt can be unfolded. Contains three entities and two EAV connectors.
+schema sUfld2 = literal : Ty {
+   entities
+     // The entities we are creating. Each corresponds to a node kind.
+     Anatomy     		// Anatomy<R>Gene, Disease<R>Anatomy
+     Gene		 		// Anatomy<R>Gene, Disease<R>Gene, Gene<R>Biological Process, Gene<R>Cellular Component, Gene<R>Molecular Function, Gene<R>Pathway
+     Biological_Process	// Gene<R>Biological Process
+     // Hom(Anatomy, Gene)
+     Antm_Gn     // Head of Anatomy<R>Gene 
+     Antm_Gn_Att // Attribute of Anatomy<R>Gene
+	 // Hom(Gene, Biological Process)
+	 Gn_BlgclPrcs
+	 Gn_BlgclPrcs_Att
+   foreign_keys
+     // Hom(Anatomy, Gene)
+     // Edge kinds inserted into Antm_Gn_Att.
+	 // Anatomy – downregulates – Gene	AdG
+	 // Anatomy – expresses – Gene		AeG
+	 // Anatomy - upregulates – Gene	AuG
+     Antm_Gn_E : Antm_Gn -> Anatomy
+     Antm_Gn_V : Antm_Gn -> Gene
+     Antm_Gn_A : Antm_Gn -> Antm_Gn_Att
+
+	 // Hom(Gene, Biological Process)
+     // Edge kinds inserted into Gn_BlgclPrcs_Att.
+	 // Gene - participates - Biological Process	GpBP
+	 Gn_BlgclPrcs_E : Gn_BlgclPrcs -> Gene
+	 Gn_BlgclPrcs_V : Gn_BlgclPrcs -> Biological_Process
+	 Gn_BlgclPrcs_A : Gn_BlgclPrcs -> Gn_BlgclPrcs_Att
+	 
+   attributes
+     // Hom(Anatomy, String)
+     Antm_Name : Anatomy -> String
+     Antm_Id : Anatomy -> String
+
+     // Hom(Gene, String)
+     Gn_Name : Gene -> String
+     Gn_Id : Gene -> String
+
+     // Hom(Biological_Process, String)
+     BlgclPrcs_Name : Biological_Process -> String
+     BlgclPrcs_Id : Biological_Process -> String
+
+     // Hom(Antm_Gn_Att, String)
+     Antm_Gn_Att_Name : Antm_Gn_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Antm_Gn, String)
+     AG_Antm_Name : Antm_Gn -> String
+     AG_Antm_Id : Antm_Gn -> String
+     AG_Gn_Name : Antm_Gn -> String
+     AG_Gn_Id : Antm_Gn -> String
+     AG_Att_Name : Antm_Gn -> String
+	 
+     // Hom(Gn_BlgclPrcs_Att, String)
+     Gn_BlgclPrcs_Att_Name : Gn_BlgclPrcs_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Gn_BlgclPrcs, String)
+     GBP_Gn_Name : Gn_BlgclPrcs -> String
+     GBP_Gn_Id : Gn_BlgclPrcs -> String
+     GBP_BlgclPrcs_Name : Gn_BlgclPrcs -> String
+     GBP_BlgclPrcs_Id : Gn_BlgclPrcs -> String
+     GBP_Att_Name : Gn_BlgclPrcs -> String
+   observation_equations
+	// Anatomy<R>Gene
+     forall a. a.Antm_Gn_E.Antm_Name = a.AG_Antm_Name
+     forall a. a.Antm_Gn_E.Antm_Id = a.AG_Antm_Id
+     forall g. g.Antm_Gn_V.Gn_Name = g.AG_Gn_Name
+     forall g. g.Antm_Gn_V.Gn_Id = g.AG_Gn_Id
+     forall a. a.Antm_Gn_A.Antm_Gn_Att_Name = a.AG_Att_Name
+	// Gene<R>Biological Process
+     forall g. g.Gn_BlgclPrcs_E.Gn_Name = g.GBP_Gn_Name
+     forall g. g.Gn_BlgclPrcs_E.Gn_Id = g.GBP_Gn_Id
+     forall b. b.Gn_BlgclPrcs_V.BlgclPrcs_Name = b.GBP_BlgclPrcs_Name
+     forall b. b.Gn_BlgclPrcs_V.BlgclPrcs_Id = b.GBP_BlgclPrcs_Id
+     forall a. a.Gn_BlgclPrcs_A.Gn_BlgclPrcs_Att_Name = a.GBP_Att_Name
+}
+
+// Target schema into which the sHt can be unfolded. Contains five entities and four EAV connectors.
+schema sUfld4 = literal : Ty {
+   entities
+     // The entities we are creating. Each corresponds to a node kind.
+     Anatomy     		// Anatomy<R>Gene, Disease<R>Anatomy
+     Disease			// Disease<R>Gene, Disease<R>Anatomy, Disease<R>Disease
+     Gene		 		// Anatomy<R>Gene, Disease<R>Gene, Gene<R>Biological Process, Gene<R>Cellular Component, Gene<R>Molecular Function, Gene<R>Pathway
+     Molecular_Function	// Gene<R>Molecular Function
+     Pathway			// Gene<R>Pathway
+//     Biological_Process	// Gene<R>Biological Process
+//     Cellular_Component // Gene<R>Cellular Component
+     // Hom(Anatomy, Gene)
+     Antm_Gn     // Head of Anatomy<R>Gene 
+     Antm_Gn_Att // Attribute of Anatomy<R>Gene
+     // Hom(Disease, Gene)
+     Ds_Gn // Head of Disease<R>Gene
+     Ds_Gn_Att // Attribute of Disease<R>Gene
+	 // Hom(Gene, Molecular Function)
+     Gn_MlclrFnctn // Head of Gene<R>Molecular_Function
+     Gn_MlclrFnctn_Att // Attribute of Gene<R>Molecular_Function
+     // Hom(Gene, Pathway)
+     Gn_Pthw // Head of Gene<R>Pathway
+     Gn_Pthw_Att // Attribute of Gene<R>Pathway
+   foreign_keys
+     // Hom(Anatomy, Gene)
+     // Note: Each of the three foreign keys below will be a record in Antm_Gn_Att.
+     // Antm_downregulates_Gn : Anatomy -> Gene 
+     // Antm_expresses_Gn : Anatomy -> Gene
+     // Antm_upregulates_Gn : Anatomy -> Gene
+     // Replace with EAV wide span:
+     Antm_Gn_E : Antm_Gn -> Anatomy
+     Antm_Gn_V : Antm_Gn -> Gene
+     Antm_Gn_A : Antm_Gn -> Antm_Gn_Att
+	 // Hom(Gene, Molecular_Function)
+	 // Gn_participates_MlclrFnctn : Gene -> Molecular_Function
+     // Replace with:
+     Gn_MlclrFnctn_E : Gn_MlclrFnctn -> Gene
+     Gn_MlclrFnctn_V : Gn_MlclrFnctn -> Molecular_Function
+     Gn_MlclrFnctn_A : Gn_MlclrFnctn -> Gn_MlclrFnctn_Att
+	 // Hom(Gene, Pathway)
+	 // Gn_participates_Pthw : Gene -> Pathway
+     // Replace with:
+     Gn_Pthw_E : Gn_Pthw -> Gene
+     Gn_Pthw_V : Gn_Pthw -> Pathway
+     Gn_Pthw_A : Gn_Pthw -> Gn_Pthw_Att
+	 // Hom(Disease, Gene)
+	 // Ds_associates_Gn : Disease -> Gene
+	 // Ds_downregulates_Gn : Disease -> Gene
+	 // Ds_upregulates_Gn : Disease -> Gene
+     // Replace with:
+     Ds_Gn_E : Ds_Gn -> Disease
+     Ds_Gn_V : Ds_Gn -> Gene
+     Ds_Gn_A : Ds_Gn -> Ds_Gn_Att
+   attributes
+     // Hom(Anatomy, String)
+     Antm_Name : Anatomy -> String
+     Antm_Id : Anatomy -> String
+
+     // Hom(Disease, String)
+     Ds_Name : Disease -> String
+     Ds_Id : Disease -> String
+
+     // Hom(Gene, String)
+     Gn_Name : Gene -> String
+     Gn_Id : Gene -> String
+
+     // Hom(Molecular_Function, String)
+     MlclrFnctn_Name : Molecular_Function -> String
+     MlclrFnctn_Id : Molecular_Function -> String
+
+     // Hom(Pathway, String)
+     Pthw_Name : Pathway -> String
+     Pthw_Id : Pathway -> String
+
+     // Hom(Antm_Gn_Att, String)
+     Antm_Gn_Att_Name : Antm_Gn_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Antm_Gn, String)
+     AG_Antm_Name : Antm_Gn -> String
+     AG_Antm_Id : Antm_Gn -> String
+     AG_Gn_Name : Antm_Gn -> String
+     AG_Gn_Id : Antm_Gn -> String
+     AG_Att_Name : Antm_Gn -> String
+
+     // Hom(Ds_Gn_Att, String)
+     Ds_Gn_Att_Name : Ds_Gn_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Gn_Pthw, String)
+     DG_Ds_Name : Ds_Gn -> String
+     DG_Ds_Id : Ds_Gn -> String
+     DG_Gn_Name : Ds_Gn -> String
+     DG_Gn_Id : Ds_Gn -> String
+     DG_Att_Name : Ds_Gn -> String
+
+     // Hom(Gn_MlclrFnctn_Att, String)
+     Gn_MlclrFnctn_Att_Name : Gn_MlclrFnctn_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Gn_MlclrFnctn, String)
+     GMF_Gn_Name : Gn_MlclrFnctn -> String
+     GMF_Gn_Id : Gn_MlclrFnctn -> String
+     GMF_MlclrFnctn_Name : Gn_MlclrFnctn -> String
+     GMF_MlclrFnctn_Id : Gn_MlclrFnctn -> String
+     GMF_Att_Name : Gn_MlclrFnctn -> String
+
+     // Hom(Gn_Pthw_Att, String)
+     Gn_Pthw_Att_Name : Gn_Pthw_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Gn_Pthw, String)
+     GP_Gn_Name : Gn_Pthw -> String
+     GP_Gn_Id : Gn_Pthw -> String
+     GP_Pthw_Name : Gn_Pthw -> String
+     GP_Pthw_Id : Gn_Pthw -> String
+     GP_Att_Name : Gn_Pthw -> String
+   observation_equations
+	// Anatomy<R>Gene
+     forall a. a.Antm_Gn_E.Antm_Name = a.AG_Antm_Name
+     forall a. a.Antm_Gn_E.Antm_Id = a.AG_Antm_Id
+     forall g. g.Antm_Gn_V.Gn_Name = g.AG_Gn_Name
+     forall g. g.Antm_Gn_V.Gn_Id = g.AG_Gn_Id
+     forall a. a.Antm_Gn_A.Antm_Gn_Att_Name = a.AG_Att_Name
+    // Gene<R>Molecular_Function
+     forall g. g.Gn_MlclrFnctn_E.Gn_Name = g.GMF_Gn_Name
+     forall g. g.Gn_MlclrFnctn_E.Gn_Id = g.GMF_Gn_Id
+     forall m. m.Gn_MlclrFnctn_V.MlclrFnctn_Name = m.GMF_MlclrFnctn_Name
+     forall m. m.Gn_MlclrFnctn_V.MlclrFnctn_Id = m.GMF_MlclrFnctn_Id
+     forall a. a.Gn_MlclrFnctn_A.Gn_MlclrFnctn_Att_Name = a.GMF_Att_Name
+    // Gene<R>Pathway
+     forall g. g.Gn_Pthw_E.Gn_Name = g.GP_Gn_Name
+     forall g. g.Gn_Pthw_E.Gn_Id = g.GP_Gn_Id
+     forall p. p.Gn_Pthw_V.Pthw_Name = p.GP_Pthw_Name
+     forall p. p.Gn_Pthw_V.Pthw_Id = p.GP_Pthw_Id
+     forall a. a.Gn_Pthw_A.Gn_Pthw_Att_Name = a.GP_Att_Name
+    // Disease<R>Gene
+     forall d. d.Ds_Gn_E.Ds_Name = d.DG_Ds_Name
+     forall d. d.Ds_Gn_E.Ds_Id = d.DG_Ds_Id
+     forall g. g.Ds_Gn_V.Gn_Name = g.DG_Gn_Name
+     forall g. g.Ds_Gn_V.Gn_Id = g.DG_Gn_Id
+     forall a. a.Ds_Gn_A.Ds_Gn_Att_Name = a.DG_Att_Name
+}
+
+// Target schema into which the sHt can be unfolded. Contains seven entities and eight EAV connectors.
+schema sUfld8 = literal : Ty {
+   entities
+     // The entities we are creating. Each corresponds to a node kind.
+     Anatomy     		// Anatomy<R>Gene, Disease<R>Anatomy
+     Disease			// Disease<R>Gene, Disease<R>Anatomy, Disease<R>Disease
+     Gene		 		// Anatomy<R>Gene, Disease<R>Gene, Gene<R>Biological Process, Gene<R>Cellular Component, Gene<R>Molecular Function, Gene<R>Pathway
+     Biological_Process	// Gene<R>Biological Process
+     Cellular_Component // Gene<R>Cellular Component
+     Molecular_Function	// Gene<R>Molecular Function
+     Pathway			// Gene<R>Pathway
+     // Hom(Anatomy, Gene)
+     Antm_Gn     // Head of Anatomy<R>Gene 
+     Antm_Gn_Att // Attribute of Anatomy<R>Gene
+     // Hom(Disease, Gene)
+     Ds_Gn // Head of Disease<R>Gene
+     Ds_Gn_Att // Attribute of Disease<R>Gene
+	 // Hom(Disease, Anatomy)
+	 Ds_Antm
+	 Ds_Antm_Att
+	 // Hom(Disease, Disease)
+	 Ds_Ds
+	 Ds_Ds_Att
+	 // Hom(Gene, Biological Process)
+	 Gn_BlgclPrcs
+	 Gn_BlgclPrcs_Att
+	 // Hom(Gene, Cellular Component)
+	 Gn_ClrCmpnt
+	 Gn_ClrCmpnt_Att
+	 // Hom(Gene, Molecular Function)
+     Gn_MlclrFnctn // Head of Gene<R>Molecular_Function
+     Gn_MlclrFnctn_Att // Attribute of Gene<R>Molecular_Function
+     // Hom(Gene, Pathway)
+     Gn_Pthw // Head of Gene<R>Pathway
+     Gn_Pthw_Att // Attribute of Gene<R>Pathway
+   foreign_keys
+     // Hom(Anatomy, Gene)
+     // Edge kinds inserted into Antm_Gn_Att.
+	 // Anatomy – downregulates – Gene	AdG
+	 // Anatomy – expresses – Gene		AeG
+	 // Anatomy - upregulates – Gene	AuG
+     Antm_Gn_E : Antm_Gn -> Anatomy
+     Antm_Gn_V : Antm_Gn -> Gene
+     Antm_Gn_A : Antm_Gn -> Antm_Gn_Att
+
+	 // Hom(Disease, Gene)
+     // Edge kinds inserted into Ds_Gn_Att.
+	 // Disease - downregulates - Gene	DdG
+	 // Disease - associates - Gene		DaG
+	 // Disease - upregulates - Gene	DuG
+     Ds_Gn_E : Ds_Gn -> Disease
+     Ds_Gn_V : Ds_Gn -> Gene
+     Ds_Gn_A : Ds_Gn -> Ds_Gn_Att
+     
+	 // Hom(Disease, Anatomy)
+     // Edge kinds inserted into Ds_Antm_Att.
+	 // Disease - localizes - Anatomy	DlA
+	 Ds_Antm_E : Ds_Antm -> Disease
+	 Ds_Antm_V : Ds_Antm -> Anatomy
+	 Ds_Antm_A : Ds_Antm -> Ds_Antm_Att
+	 
+	 // Hom(Disease, Disease)
+     // Edge kinds inserted into Ds_Ds_Att.
+	 // Disease - resembles - Disease	DrD
+	 Ds_Ds_E : Ds_Ds -> Disease
+	 Ds_Ds_V : Ds_Ds -> Disease
+	 Ds_Ds_A : Ds_Ds -> Ds_Ds_Att
+	 
+	 // Hom(Gene, Biological Process)
+     // Edge kinds inserted into Gn_BlgclPrcs_Att.
+	 // Gene - participates - Biological Process	GpBP
+	 Gn_BlgclPrcs_E : Gn_BlgclPrcs -> Gene
+	 Gn_BlgclPrcs_V : Gn_BlgclPrcs -> Biological_Process
+	 Gn_BlgclPrcs_A : Gn_BlgclPrcs -> Gn_BlgclPrcs_Att
+	 
+	 // Hom(Gene, Cellular Component)
+     // Edge kinds inserted into Gn_ClrCmpnt_Att.
+	 // Gene - participates - Cellular Component	GpCC
+	 Gn_ClrCmpnt_E : Gn_ClrCmpnt -> Gene
+	 Gn_ClrCmpnt_V : Gn_ClrCmpnt -> Cellular_Component
+	 Gn_ClrCmpnt_A : Gn_ClrCmpnt -> Gn_ClrCmpnt_Att
+	 
+	 // Hom(Gene, Molecular_Function)
+     // Edge kinds inserted into Gn_MlclrFnctn_Att.
+	 // Gene - participates - Molecular Function	GpMF
+     Gn_MlclrFnctn_E : Gn_MlclrFnctn -> Gene
+     Gn_MlclrFnctn_V : Gn_MlclrFnctn -> Molecular_Function
+     Gn_MlclrFnctn_A : Gn_MlclrFnctn -> Gn_MlclrFnctn_Att
+
+	 // Hom(Gene, Pathway)
+     // Edge kinds inserted into Gn_Pthw_Att.
+	 // Gene - participates - Pathway	GpPW
+     Gn_Pthw_E : Gn_Pthw -> Gene
+     Gn_Pthw_V : Gn_Pthw -> Pathway
+     Gn_Pthw_A : Gn_Pthw -> Gn_Pthw_Att
+   attributes
+     // Hom(Anatomy, String)
+     Antm_Name : Anatomy -> String
+     Antm_Id : Anatomy -> String
+
+     // Hom(Disease, String)
+     Ds_Name : Disease -> String
+     Ds_Id : Disease -> String
+
+     // Hom(Gene, String)
+     Gn_Name : Gene -> String
+     Gn_Id : Gene -> String
+
+     // Hom(Biological_Process, String)
+     BlgclPrcs_Name : Biological_Process -> String
+     BlgclPrcs_Id : Biological_Process -> String
+
+     // Hom(Cellular_Component, String
+     ClrCmpnt_Name : Cellular_Component -> String
+     ClrCmpnt_Id : Cellular_Component -> String
+
+     // Hom(Molecular_Function, String)
+     MlclrFnctn_Name : Molecular_Function -> String
+     MlclrFnctn_Id : Molecular_Function -> String
+
+     // Hom(Pathway, String)
+     Pthw_Name : Pathway -> String
+     Pthw_Id : Pathway -> String
+
+     // Hom(Antm_Gn_Att, String)
+     Antm_Gn_Att_Name : Antm_Gn_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Antm_Gn, String)
+     AG_Antm_Name : Antm_Gn -> String
+     AG_Antm_Id : Antm_Gn -> String
+     AG_Gn_Name : Antm_Gn -> String
+     AG_Gn_Id : Antm_Gn -> String
+     AG_Att_Name : Antm_Gn -> String
+
+     // Hom(Ds_Gn_Att, String)
+     Ds_Gn_Att_Name : Ds_Gn_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Ds_Gn, String)
+     DG_Ds_Name : Ds_Gn -> String
+     DG_Ds_Id : Ds_Gn -> String
+     DG_Gn_Name : Ds_Gn -> String
+     DG_Gn_Id : Ds_Gn -> String
+     DG_Att_Name : Ds_Gn -> String
+     
+     // Hom(Ds_Antm_Att, String)
+     Ds_Antm_Att_Name : Ds_Antm_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Ds_Antm, String)
+     DA_Ds_Name : Ds_Antm -> String
+     DA_Ds_Id : Ds_Antm -> String
+     DA_Antm_Name : Ds_Antm -> String
+     DA_Antm_Id : Ds_Antm -> String
+     DA_Att_Name : Ds_Antm -> String
+	 
+     // Hom(Ds_Ds_Att, String)
+     Ds_Ds_Att_Name : Ds_Ds_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Ds_Ds, String)
+     DD_SrcDs_Name : Ds_Ds -> String
+     DD_SrcDs_Id : Ds_Ds -> String
+     DD_TgtDs_Name : Ds_Ds -> String
+     DD_TgtDs_Id : Ds_Ds -> String
+     DD_Att_Name : Ds_Ds -> String
+	 
+     // Hom(Gn_BlgclPrcs_Att, String)
+     Gn_BlgclPrcs_Att_Name : Gn_BlgclPrcs_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Gn_BlgclPrcs, String)
+     GBP_Gn_Name : Gn_BlgclPrcs -> String
+     GBP_Gn_Id : Gn_BlgclPrcs -> String
+     GBP_BlgclPrcs_Name : Gn_BlgclPrcs -> String
+     GBP_BlgclPrcs_Id : Gn_BlgclPrcs -> String
+     GBP_Att_Name : Gn_BlgclPrcs -> String
+	 
+     // Hom(Gn_ClrCmpnt_Att, String)
+     Gn_ClrCmpnt_Att_Name : Gn_ClrCmpnt_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Ds_ClrCmpnt, String)
+     GCC_Gn_Name : Gn_ClrCmpnt -> String
+     GCC_Gn_Id : Gn_ClrCmpnt -> String
+     GCC_ClrCmpnt_Name : Gn_ClrCmpnt -> String
+     GCC_ClrCmpnt_Id : Gn_ClrCmpnt -> String
+     GCC_Att_Name : Gn_ClrCmpnt -> String
+
+     // Hom(Gn_MlclrFnctn_Att, String)
+     Gn_MlclrFnctn_Att_Name : Gn_MlclrFnctn_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Gn_MlclrFnctn, String)
+     GMF_Gn_Name : Gn_MlclrFnctn -> String
+     GMF_Gn_Id : Gn_MlclrFnctn -> String
+     GMF_MlclrFnctn_Name : Gn_MlclrFnctn -> String
+     GMF_MlclrFnctn_Id : Gn_MlclrFnctn -> String
+     GMF_Att_Name : Gn_MlclrFnctn -> String
+
+     // Hom(Gn_Pthw_Att, String)
+     Gn_Pthw_Att_Name : Gn_Pthw_Att -> String
+     // Copy all of the above attributes onto the wide span
+     // Hom(Gn_Pthw, String)
+     GP_Gn_Name : Gn_Pthw -> String
+     GP_Gn_Id : Gn_Pthw -> String
+     GP_Pthw_Name : Gn_Pthw -> String
+     GP_Pthw_Id : Gn_Pthw -> String
+     GP_Att_Name : Gn_Pthw -> String
+   observation_equations
+	// Anatomy<R>Gene
+     forall a. a.Antm_Gn_E.Antm_Name = a.AG_Antm_Name
+     forall a. a.Antm_Gn_E.Antm_Id = a.AG_Antm_Id
+     forall g. g.Antm_Gn_V.Gn_Name = g.AG_Gn_Name
+     forall g. g.Antm_Gn_V.Gn_Id = g.AG_Gn_Id
+     forall a. a.Antm_Gn_A.Antm_Gn_Att_Name = a.AG_Att_Name
+    // Disease<R>Gene
+     forall d. d.Ds_Gn_E.Ds_Name = d.DG_Ds_Name
+     forall d. d.Ds_Gn_E.Ds_Id = d.DG_Ds_Id
+     forall g. g.Ds_Gn_V.Gn_Name = g.DG_Gn_Name
+     forall g. g.Ds_Gn_V.Gn_Id = g.DG_Gn_Id
+     forall a. a.Ds_Gn_A.Ds_Gn_Att_Name = a.DG_Att_Name
+	// Disease<R>Anatomy
+     forall d. d.Ds_Antm_E.Ds_Name = d.DA_Ds_Name
+     forall d. d.Ds_Antm_E.Ds_Id = d.DA_Ds_Id
+     forall a. a.Ds_Antm_V.Antm_Name = a.DA_Antm_Name
+     forall a. a.Ds_Antm_V.Antm_Id = a.DA_Antm_Id
+     forall a. a.Ds_Antm_A.Ds_Antm_Att_Name = a.DA_Att_Name
+	// Disease<R>Disease
+     forall d. d.Ds_Ds_E.Ds_Name = d.DD_SrcDs_Name
+     forall d. d.Ds_Ds_E.Ds_Id = d.DD_SrcDs_Id
+     forall a. a.Ds_Ds_V.Ds_Name = a.DD_TgtDs_Name
+     forall a. a.Ds_Ds_V.Ds_Id = a.DD_TgtDs_Id
+     forall a. a.Ds_Ds_A.Ds_Ds_Att_Name = a.DD_Att_Name
+	// Gene<R>Biological Process
+     forall g. g.Gn_BlgclPrcs_E.Gn_Name = g.GBP_Gn_Name
+     forall g. g.Gn_BlgclPrcs_E.Gn_Id = g.GBP_Gn_Id
+     forall b. b.Gn_BlgclPrcs_V.BlgclPrcs_Name = b.GBP_BlgclPrcs_Name
+     forall b. b.Gn_BlgclPrcs_V.BlgclPrcs_Id = b.GBP_BlgclPrcs_Id
+     forall a. a.Gn_BlgclPrcs_A.Gn_BlgclPrcs_Att_Name = a.GBP_Att_Name
+	// Gene<R>Cellular Component
+     forall g. g.Gn_ClrCmpnt_E.Gn_Name = g.GCC_Gn_Name
+     forall g. g.Gn_ClrCmpnt_E.Gn_Id = g.GCC_Gn_Id
+     forall c. c.Gn_ClrCmpnt_V.ClrCmpnt_Name = c.GCC_ClrCmpnt_Name
+     forall c. c.Gn_ClrCmpnt_V.ClrCmpnt_Id = c.GCC_ClrCmpnt_Id
+     forall a. a.Gn_ClrCmpnt_A.Gn_ClrCmpnt_Att_Name = a.GCC_Att_Name
+    // Gene<R>Molecular_Function
+     forall g. g.Gn_MlclrFnctn_E.Gn_Name = g.GMF_Gn_Name
+     forall g. g.Gn_MlclrFnctn_E.Gn_Id = g.GMF_Gn_Id
+     forall m. m.Gn_MlclrFnctn_V.MlclrFnctn_Name = m.GMF_MlclrFnctn_Name
+     forall m. m.Gn_MlclrFnctn_V.MlclrFnctn_Id = m.GMF_MlclrFnctn_Id
+     forall a. a.Gn_MlclrFnctn_A.Gn_MlclrFnctn_Att_Name = a.GMF_Att_Name
+    // Gene<R>Pathway
+     forall g. g.Gn_Pthw_E.Gn_Name = g.GP_Gn_Name
+     forall g. g.Gn_Pthw_E.Gn_Id = g.GP_Gn_Id
+     forall p. p.Gn_Pthw_V.Pthw_Name = p.GP_Pthw_Name
+     forall p. p.Gn_Pthw_V.Pthw_Id = p.GP_Pthw_Id
+     forall a. a.Gn_Pthw_A.Gn_Pthw_Att_Name = a.GP_Att_Name
+}
+
+query qUfld2 = literal : sHt -> sUfld2 {
+	entities
+		Anatomy -> {
+		// Populate the Anatomy entity from nodes of kind Anatomy.
+			from
+				a_n : Node
+			where
+			// The following equation selects those nodes whose node kind is Anatomy.
+				nodeKindOnNode(a_n) = Anatomy
+			return
+				Antm_Name -> a_n.name
+				Antm_Id -> a_n.nid
+		}
+		Gene -> {
+		// Populate the Gene entity from nodes of kind Gene.
+			from
+				g_n : Node
+			where
+			// Nodes whose nodeKind is Gene.
+				nodeKindOnNode(g_n) = Gene
+   	    	return
+				Gn_Name -> g_n.name
+				Gn_Id -> g_n.nid
+		}
+		Biological_Process -> {
+		// Populate the Biological_Process entity from nodes of kind Biological Process.
+			from
+				bp_n : Node
+			where
+			// Nodes whose nodeKind is Biological Process.
+				nodeKindOnNode(bp_n) = "Biological Process"
+   	    	return
+				BlgclPrcs_Name -> bp_n.name
+				BlgclPrcs_Id -> bp_n.nid
+		}
+
+        Antm_Gn_Att -> {
+        // Anatomy<R>Gene EAV Attribute
+			from
+				aga_ek:EdgeKind // representative row of available attributes 
+			where
+			// The following equation selects those EdgeKinds whose source node
+        	// kind is Anatomy.
+   	    		aga_ek.edgeKindHasSource.nodeKind = Anatomy
+   	    		aga_ek.edgeKindHasTarget.nodeKind = Gene
+	  		return
+	    		Antm_Gn_Att_Name -> aga_ek.edgeKind
+	    }
+		Antm_Gn -> {
+		// This is the entity at the head of the EAV wide span
+		// This construction is the one that ties the wide span together.
+		from
+			ag_e  : Edge
+		where
+			// We want edges that start on nodes whose kind is Anatomy and end on nodes whose kind is Gene.
+		    ag_e.edgeHasSourceKind = Anatomy
+		    ag_e.edgeHasTargetKind = Gene
+		return
+			AG_Antm_Name -> ag_e.source.name
+			AG_Antm_Id -> ag_e.source.nid
+			AG_Gn_Name -> ag_e.target.name
+			AG_Gn_Id -> ag_e.target.nid
+			AG_Att_Name -> ag_e.edgeKindOnEdge
+		}
+		Gn_BlgclPrcs_Att -> {
+        // Gene<R>Biological_Process EAV Attribute.
+			from
+				gbpa_ek:EdgeKind
+			where
+   	    		gbpa_ek.edgeKindHasSource.nodeKind = Gene
+   	    		gbpa_ek.edgeKindHasTarget.nodeKind = "Biological Process"
+	  		return
+	    		Gn_BlgclPrcs_Att_Name -> gbpa_ek.edgeKind
+		}
+		Gn_BlgclPrcs -> {
+		// Gene<R>Biological_Process EAV head.
+		from
+			gbp_e  : Edge
+		where
+			// We want edges that start on nodes whose kind is Gene and end on nodes whose kind is Biological Process.
+		    gbp_e.edgeHasSourceKind = Gene
+		    gbp_e.edgeHasTargetKind = "Biological Process"
+		return
+			GBP_Gn_Name -> gbp_e.source.name
+			GBP_Gn_Id -> gbp_e.source.nid
+			GBP_BlgclPrcs_Name -> gbp_e.target.name
+			GBP_BlgclPrcs_Id -> gbp_e.target.nid
+			GBP_Att_Name -> gbp_e.edgeKindOnEdge
+		}
+
+	foreign_keys
+		// Antm_Gn -> Anatomy
+		Antm_Gn_E -> {a_n -> ag_e.source}
+		// Antm_Gn -> Gene
+		Antm_Gn_V -> {g_n -> ag_e.target}
+		// Antm_Gn -> Antm_Gn_Att
+		Antm_Gn_A -> {aga_ek -> ag_e.edgeHasKind}
+
+		// Gn_BlgclPrcs -> Gene
+		Gn_BlgclPrcs_E -> {g_n -> gbp_e.source}
+		// Gn_BlgclPrcs -> Piological_Process
+		Gn_BlgclPrcs_V -> {bp_n -> gbp_e.target}
+		// Gn_BlgclPrcs -> Gn_MlclrFnctn_Att
+		Gn_BlgclPrcs_A -> {gbpa_ek -> gbp_e.edgeHasKind}
+}
+
+// Let's see if we can write a query that migrates the data in iHtf into the schema sHtTst
+query qUfld4 = literal : sHt -> sUfld4 {
+	entities
+		Anatomy -> {
+		// Populate the Anatomy entity from nodes of kind Anatomy.
+			from
+				a_n : Node
+			where
+			// The following equation selects those nodes whose node kind is Anatomy.
+				nodeKindOnNode(a_n) = Anatomy
+			return
+				Antm_Name -> a_n.name
+				Antm_Id -> a_n.nid
+		}
+		Disease -> {
+		// Populate the Disease entity from nodes of kind Disease.
+			from
+				d_n : Node
+			where
+				nodeKindOnNode(d_n) = Disease
+   	    	return
+				Ds_Name -> d_n.name
+				Ds_Id -> d_n.nid
+		}
+		Gene -> {
+		// Populate the Gene entity from nodes of kind Gene.
+			from
+				g_n : Node
+			where
+			// Nodes whose nodeKind is Gene.
+				nodeKindOnNode(g_n) = Gene
+   	    	return
+				Gn_Name -> g_n.name
+				Gn_Id -> g_n.nid
+		}
+		Molecular_Function -> {
+		// Populate the Molecular_Function entity from nodes of kind Molecular Function.
+			from
+				mf_n : Node
+			where
+				nodeKindOnNode(mf_n) = "Molecular Function"
+   	    	return
+				MlclrFnctn_Name -> mf_n.name
+				MlclrFnctn_Id -> mf_n.nid
+		}
+		Pathway -> {
+		// Populate the Pathway entity from nodes of kind Pathway.
+			from
+				p_n : Node
+			where
+				nodeKindOnNode(p_n) = Pathway
+   	    	return
+				Pthw_Name -> p_n.name
+				Pthw_Id -> p_n.nid
+		}
+        Antm_Gn_Att -> {
+        // Anatomy<R>Gene EAV Attribute
+			from
+				aga_ek:EdgeKind // representative row of available attributes 
+			where
+			// The following equation selects those EdgeKinds whose source node
+        	// kind is Anatomy.
+   	    		aga_ek.edgeKindHasSource.nodeKind = Anatomy
+   	    		aga_ek.edgeKindHasTarget.nodeKind = Gene
+	  		return
+	    		Antm_Gn_Att_Name -> aga_ek.edgeKind
+	    }
+		Antm_Gn -> {
+		// This is the entity at the head of the EAV wide span
+		// This construction is the one that ties the wide span together.
+		from
+			ag_e  : Edge
+		where
+			// We want edges that start on nodes whose kind is Anatomy and end on nodes whose kind is Gene.
+		    ag_e.edgeHasSourceKind = Anatomy
+		    ag_e.edgeHasTargetKind = Gene
+		return
+			AG_Antm_Name -> ag_e.source.name
+			AG_Antm_Id -> ag_e.source.nid
+			AG_Gn_Name -> ag_e.target.name
+			AG_Gn_Id -> ag_e.target.nid
+			AG_Att_Name -> ag_e.edgeKindOnEdge
+		}
+        Ds_Gn_Att -> {
+        // Disease<R>Gene EAV Attribute.
+			from
+				dga_ek:EdgeKind
+			where
+   	    		dga_ek.edgeKindHasSource.nodeKind = Disease
+   	    		dga_ek.edgeKindHasTarget.nodeKind = Gene
+	  		return
+	    		Ds_Gn_Att_Name -> dga_ek.edgeKind
+	    }
+		Ds_Gn -> {
+		// Disease<R>Gene EAV head.
+		from
+			dg_e : Edge
+		where
+			// We want edges that start on nodes whose kind is Disease and end on nodes whose kind is Gene.
+		    dg_e.edgeHasSourceKind = Disease
+		    dg_e.edgeHasTargetKind = Gene
+		return
+			DG_Ds_Name -> dg_e.source.name
+			DG_Ds_Id -> dg_e.source.nid
+			DG_Gn_Name -> dg_e.target.name
+			DG_Gn_Id -> dg_e.target.nid
+			DG_Att_Name -> dg_e.edgeKindOnEdge
+		}
+        Gn_MlclrFnctn_Att -> {
+        // Gene<R>Molecular_Function EAV Attribute.
+			from
+				gmfa_ek:EdgeKind
+			where
+   	    		gmfa_ek.edgeKindHasSource.nodeKind = Gene
+   	    		gmfa_ek.edgeKindHasTarget.nodeKind = "Molecular Function"
+	  		return
+	    		Gn_MlclrFnctn_Att_Name -> gmfa_ek.edgeKind
+	    }
+		Gn_MlclrFnctn -> {
+		// Gene<R>Molecular_Function EAV head.
+		from
+			gmf_e  : Edge
+		where
+			// We want edges that start on nodes whose kind is Gene and end on nodes whose kind is Molecular Function.
+		    gmf_e.edgeHasSourceKind = Gene
+		    gmf_e.edgeHasTargetKind = "Molecular Function"
+		return
+			GMF_Gn_Name -> gmf_e.source.name
+			GMF_Gn_Id -> gmf_e.source.nid
+			GMF_MlclrFnctn_Name -> gmf_e.target.name
+			GMF_MlclrFnctn_Id -> gmf_e.target.nid
+			GMF_Att_Name -> gmf_e.edgeKindOnEdge
+		}
+        Gn_Pthw_Att -> {
+        // Gene<R>Pathway EAV Attribute.
+			from
+				gpa_ek:EdgeKind
+			where
+   	    		gpa_ek.edgeKindHasSource.nodeKind = Gene
+   	    		gpa_ek.edgeKindHasTarget.nodeKind = Pathway
+	  		return
+	    		Gn_Pthw_Att_Name -> gpa_ek.edgeKind
+	    }
+		Gn_Pthw -> {
+		// Gene<R>Pathway EAV head.
+		from
+			gp_e  : Edge
+		where
+			gp_e.edgeHasSourceKind = Gene
+			gp_e.edgeHasTargetKind = Pathway
+		return
+			GP_Gn_Name -> gp_e.source.name
+			GP_Gn_Id -> gp_e.source.nid
+			GP_Pthw_Name -> gp_e.target.name
+			GP_Pthw_Id -> gp_e.target.nid
+			GP_Att_Name -> gp_e.edgeKindOnEdge
+		}
+
+	foreign_keys
+		// Antm_Gn -> Anatomy
+		Antm_Gn_E -> {a_n -> ag_e.source}
+		// Antm_Gn -> Gene
+		Antm_Gn_V -> {g_n -> ag_e.target}
+		// Antm_Gn -> Antm_Gn_Att
+		Antm_Gn_A -> {aga_ek -> ag_e.edgeHasKind}
+
+		// Ds_Gn -> Disease
+		Ds_Gn_E -> {d_n -> dg_e.source}
+		// Ds_Gn -> Gene
+		Ds_Gn_V -> {g_n -> dg_e.target}
+		// Ds_Gn -> Ds_Gn_Att
+		Ds_Gn_A -> {dga_ek -> dg_e.edgeHasKind}
+
+		// Gn_MlclrFnctn -> Gene
+		Gn_MlclrFnctn_E -> {g_n -> gmf_e.source}
+		// Gn_MlclrFnctn -> Molecular_Function
+		Gn_MlclrFnctn_V -> {mf_n -> gmf_e.target}
+		// Gn_MlclrFnctn -> Gn_MlclrFnctn_Att
+		Gn_MlclrFnctn_A -> {gmfa_ek -> gmf_e.edgeHasKind}
+
+		// Gn_Pthw -> Gene
+		Gn_Pthw_E -> {g_n -> gp_e.source}
+		// Gn_Pthw -> Pathway
+		Gn_Pthw_V -> {p_n -> gp_e.target}
+		// Gn_Pthw -> Gn_Pthw_Att
+		Gn_Pthw_A -> {gpa_ek -> gp_e.edgeHasKind}
+}
+
+query qUfld8 = literal : sHt -> sUfld8 {
+	entities
+		Anatomy -> {
+		// Populate the Anatomy entity from nodes of kind Anatomy.
+			from
+				a_n : Node
+			where
+			// The following equation selects those nodes whose node kind is Anatomy.
+				nodeKindOnNode(a_n) = Anatomy
+			return
+				Antm_Name -> a_n.name
+				Antm_Id -> a_n.nid
+		}
+		Disease -> {
+		// Populate the Disease entity from nodes of kind Disease.
+			from
+				d_n : Node
+			where
+				nodeKindOnNode(d_n) = Disease
+   	    	return
+				Ds_Name -> d_n.name
+				Ds_Id -> d_n.nid
+		}
+		Gene -> {
+		// Populate the Gene entity from nodes of kind Gene.
+			from
+				g_n : Node
+			where
+			// Nodes whose nodeKind is Gene.
+				nodeKindOnNode(g_n) = Gene
+   	    	return
+				Gn_Name -> g_n.name
+				Gn_Id -> g_n.nid
+		}
+		Biological_Process -> {
+		// Populate the Biological_Process entity from nodes of kind Biological Process.
+			from
+				bp_n : Node
+			where
+			// Nodes whose nodeKind is Biological Process.
+				nodeKindOnNode(bp_n) = "Biological Process"
+   	    	return
+				BlgclPrcs_Name -> bp_n.name
+				BlgclPrcs_Id -> bp_n.nid
+		}
+		Cellular_Component -> {
+		// Populate the Cellular_Component entity from nodes of kind Cellular Component.
+			from
+				cc_n : Node
+			where
+			// Nodes whose nodeKind is Cellular Component.
+				nodeKindOnNode(cc_n) = "Cellular Component"
+   	    	return
+				ClrCmpnt_Name -> cc_n.name
+				ClrCmpnt_Id -> cc_n.nid
+		}
+		Molecular_Function -> {
+		// Populate the Molecular_Function entity from nodes of kind Molecular Function.
+			from
+				mf_n : Node
+			where
+				nodeKindOnNode(mf_n) = "Molecular Function"
+   	    	return
+				MlclrFnctn_Name -> mf_n.name
+				MlclrFnctn_Id -> mf_n.nid
+		}
+		Pathway -> {
+		// Populate the Pathway entity from nodes of kind Pathway.
+			from
+				p_n : Node
+			where
+				nodeKindOnNode(p_n) = Pathway
+   	    	return
+				Pthw_Name -> p_n.name
+				Pthw_Id -> p_n.nid
+		}
+
+        Antm_Gn_Att -> {
+        // Anatomy<R>Gene EAV Attribute
+			from
+				aga_ek:EdgeKind // representative row of available attributes 
+			where
+			// The following equation selects those EdgeKinds whose source node
+        	// kind is Anatomy.
+   	    		aga_ek.edgeKindHasSource.nodeKind = Anatomy
+   	    		aga_ek.edgeKindHasTarget.nodeKind = Gene
+	  		return
+	    		Antm_Gn_Att_Name -> aga_ek.edgeKind
+	    }
+		Antm_Gn -> {
+		// This is the entity at the head of the EAV wide span
+		// This construction is the one that ties the wide span together.
+		from
+			ag_e  : Edge
+		where
+			// We want edges that start on nodes whose kind is Anatomy and end on nodes whose kind is Gene.
+		    ag_e.edgeHasSourceKind = Anatomy
+		    ag_e.edgeHasTargetKind = Gene
+		return
+			AG_Antm_Name -> ag_e.source.name
+			AG_Antm_Id -> ag_e.source.nid
+			AG_Gn_Name -> ag_e.target.name
+			AG_Gn_Id -> ag_e.target.nid
+			AG_Att_Name -> ag_e.edgeKindOnEdge
+		}
+        Ds_Gn_Att -> {
+        // Disease<R>Gene EAV Attribute.
+			from
+				dga_ek:EdgeKind
+			where
+   	    		dga_ek.edgeKindHasSource.nodeKind = Disease
+   	    		dga_ek.edgeKindHasTarget.nodeKind = Gene
+	  		return
+	    		Ds_Gn_Att_Name -> dga_ek.edgeKind
+	    }
+		Ds_Gn -> {
+		// Disease<R>Gene EAV head.
+		from
+			dg_e : Edge
+		where
+			// We want edges that start on nodes whose kind is Disease and end on nodes whose kind is Gene.
+		    dg_e.edgeHasSourceKind = Disease
+		    dg_e.edgeHasTargetKind = Gene
+		return
+			DG_Ds_Name -> dg_e.source.name
+			DG_Ds_Id -> dg_e.source.nid
+			DG_Gn_Name -> dg_e.target.name
+			DG_Gn_Id -> dg_e.target.nid
+			DG_Att_Name -> dg_e.edgeKindOnEdge
+		}
+		
+		Ds_Antm_Att -> {
+        // Disease<R>Anatomy EAV Attribute.
+			from
+				daa_ek:EdgeKind
+			where
+   	    		daa_ek.edgeKindHasSource.nodeKind = Disease
+   	    		daa_ek.edgeKindHasTarget.nodeKind = Anatomy
+	  		return
+	    		Ds_Antm_Att_Name -> daa_ek.edgeKind
+		}
+		Ds_Antm -> {
+		// Disease<R>Anatomy EAV head.
+		from
+			da_e : Edge
+		where
+			// We want edges that start on nodes whose kind is Disease and end on nodes whose kind is Anatomy.
+		    da_e.edgeHasSourceKind = Disease
+		    da_e.edgeHasTargetKind = Anatomy
+		return
+			DA_Ds_Name -> da_e.source.name
+			DA_Ds_Id -> da_e.source.nid
+			DA_Antm_Name -> da_e.target.name
+			DA_Antm_Id -> da_e.target.nid
+			DA_Att_Name -> da_e.edgeKindOnEdge
+		}
+		Ds_Ds_Att -> {
+        // Disease<R>Disease EAV Attribute.
+			from
+				dda_ek:EdgeKind
+			where
+   	    		dda_ek.edgeKindHasSource.nodeKind = Disease
+   	    		dda_ek.edgeKindHasTarget.nodeKind = Disease
+	  		return
+	    		Ds_Ds_Att_Name -> dda_ek.edgeKind
+		}
+		Ds_Ds -> {
+		// Disease<R>Disease EAV head.
+		from
+			dd_e : Edge
+		where
+			// We want edges that start on nodes whose kind is Disease and end on nodes whose kind is Disease.
+		    dd_e.edgeHasSourceKind = Disease
+		    dd_e.edgeHasTargetKind = Disease
+		return
+			DD_SrcDs_Name -> dd_e.source.name
+			DD_SrcDs_Id -> dd_e.source.nid
+			DD_TgtDs_Name -> dd_e.target.name
+			DD_TgtDs_Id -> dd_e.target.nid
+			DD_Att_Name -> dd_e.edgeKindOnEdge
+		}
+		Gn_BlgclPrcs_Att -> {
+        // Gene<R>Biological_Process EAV Attribute.
+			from
+				gbpa_ek:EdgeKind
+			where
+   	    		gbpa_ek.edgeKindHasSource.nodeKind = Gene
+   	    		gbpa_ek.edgeKindHasTarget.nodeKind = "Biological Process"
+	  		return
+	    		Gn_BlgclPrcs_Att_Name -> gbpa_ek.edgeKind
+		}
+		Gn_BlgclPrcs -> {
+		// Gene<R>Biological_Process EAV head.
+		from
+			gbp_e  : Edge
+		where
+			// We want edges that start on nodes whose kind is Gene and end on nodes whose kind is Biological Process.
+		    gbp_e.edgeHasSourceKind = Gene
+		    gbp_e.edgeHasTargetKind = "Biological Process"
+		return
+			GBP_Gn_Name -> gbp_e.source.name
+			GBP_Gn_Id -> gbp_e.source.nid
+			GBP_BlgclPrcs_Name -> gbp_e.target.name
+			GBP_BlgclPrcs_Id -> gbp_e.target.nid
+			GBP_Att_Name -> gbp_e.edgeKindOnEdge
+		}
+		Gn_ClrCmpnt_Att -> {
+        // Gene<R>Cellular_Component EAV Attribute.
+			from
+				gcca_ek:EdgeKind
+			where
+   	    		gcca_ek.edgeKindHasSource.nodeKind = Gene
+   	    		gcca_ek.edgeKindHasTarget.nodeKind = "Cellular Component"
+	  		return
+	    		Gn_ClrCmpnt_Att_Name -> gcca_ek.edgeKind
+		}
+		Gn_ClrCmpnt -> {
+		// Gene<R>Cellular_Component EAV head.
+		from
+			gcc_e  : Edge
+		where
+			// We want edges that start on nodes whose kind is Gene and end on nodes whose kind is Cellular Component.
+		    gcc_e.edgeHasSourceKind = Gene
+		    gcc_e.edgeHasTargetKind = "Cellular Component"
+		return
+			GCC_Gn_Name -> gcc_e.source.name
+			GCC_Gn_Id -> gcc_e.source.nid
+			GCC_ClrCmpnt_Name -> gcc_e.target.name
+			GCC_ClrCmpnt_Id -> gcc_e.target.nid
+			GCC_Att_Name -> gcc_e.edgeKindOnEdge
+		}
+		
+        Gn_MlclrFnctn_Att -> {
+        // Gene<R>Molecular_Function EAV Attribute.
+			from
+				gmfa_ek:EdgeKind
+			where
+   	    		gmfa_ek.edgeKindHasSource.nodeKind = Gene
+   	    		gmfa_ek.edgeKindHasTarget.nodeKind = "Molecular Function"
+	  		return
+	    		Gn_MlclrFnctn_Att_Name -> gmfa_ek.edgeKind
+	    }
+		Gn_MlclrFnctn -> {
+		// Gene<R>Molecular_Function EAV head.
+		from
+			gmf_e  : Edge
+		where
+			// We want edges that start on nodes whose kind is Gene and end on nodes whose kind is Molecular Function.
+		    gmf_e.edgeHasSourceKind = Gene
+		    gmf_e.edgeHasTargetKind = "Molecular Function"
+		return
+			GMF_Gn_Name -> gmf_e.source.name
+			GMF_Gn_Id -> gmf_e.source.nid
+			GMF_MlclrFnctn_Name -> gmf_e.target.name
+			GMF_MlclrFnctn_Id -> gmf_e.target.nid
+			GMF_Att_Name -> gmf_e.edgeKindOnEdge
+		}
+        Gn_Pthw_Att -> {
+        // Gene<R>Pathway EAV Attribute.
+			from
+				gpa_ek:EdgeKind
+			where
+   	    		gpa_ek.edgeKindHasSource.nodeKind = Gene
+   	    		gpa_ek.edgeKindHasTarget.nodeKind = Pathway
+	  		return
+	    		Gn_Pthw_Att_Name -> gpa_ek.edgeKind
+	    }
+		Gn_Pthw -> {
+		// Gene<R>Pathway EAV head.
+		from
+			gp_e  : Edge
+		where
+			gp_e.edgeHasSourceKind = Gene
+			gp_e.edgeHasTargetKind = Pathway
+		return
+			GP_Gn_Name -> gp_e.source.name
+			GP_Gn_Id -> gp_e.source.nid
+			GP_Pthw_Name -> gp_e.target.name
+			GP_Pthw_Id -> gp_e.target.nid
+			GP_Att_Name -> gp_e.edgeKindOnEdge
+		}
+
+	foreign_keys
+		// Antm_Gn -> Anatomy
+		Antm_Gn_E -> {a_n -> ag_e.source}
+		// Antm_Gn -> Gene
+		Antm_Gn_V -> {g_n -> ag_e.target}
+		// Antm_Gn -> Antm_Gn_Att
+		Antm_Gn_A -> {aga_ek -> ag_e.edgeHasKind}
+
+		// Ds_Gn -> Disease
+		Ds_Gn_E -> {d_n -> dg_e.source}
+		// Ds_Gn -> Gene
+		Ds_Gn_V -> {g_n -> dg_e.target}
+		// Ds_Gn -> Ds_Gn_Att
+		Ds_Gn_A -> {dga_ek -> dg_e.edgeHasKind}
+
+		// Ds_Antm -> Disease
+		Ds_Antm_E -> {d_n -> da_e.source}
+		// Ds_Antm -> Anatomy
+		Ds_Antm_V -> {a_n -> da_e.target}
+		// Ds_Antm -> Ds_Antm_Att
+		Ds_Antm_A -> {daa_ek -> da_e.edgeHasKind}
+	 
+		// Ds_Ds -> Disease
+		Ds_Ds_E -> {d_n -> dd_e.source}
+		// Ds_Ds -> Disease
+		Ds_Ds_V -> {d_n -> dd_e.target}
+		// Ds_Ds -> Ds_Ds_Att
+		Ds_Ds_A -> {dda_ek -> dd_e.edgeHasKind}
+	 
+		// Gn_BlgclPrcs -> Gene
+		Gn_BlgclPrcs_E -> {g_n -> gbp_e.source}
+		// Gn_BlgclPrcs -> Piological_Process
+		Gn_BlgclPrcs_V -> {bp_n -> gbp_e.target}
+		// Gn_BlgclPrcs -> Gn_MlclrFnctn_Att
+		Gn_BlgclPrcs_A -> {gbpa_ek -> gbp_e.edgeHasKind}
+	 
+		// Gn_MlclrFnctn -> Gene
+		Gn_ClrCmpnt_E -> {g_n -> gcc_e.source}
+		// Gn_MlclrFnctn -> Molecular_Function
+		Gn_ClrCmpnt_V -> {cc_n -> gcc_e.target}
+		// Gn_MlclrFnctn -> Gn_MlclrFnctn_Att
+		Gn_ClrCmpnt_A -> {gcca_ek -> gcc_e.edgeHasKind}
+
+		// Gn_MlclrFnctn -> Gene
+		Gn_MlclrFnctn_E -> {g_n -> gmf_e.source}
+		// Gn_MlclrFnctn -> Molecular_Function
+		Gn_MlclrFnctn_V -> {mf_n -> gmf_e.target}
+		// Gn_MlclrFnctn -> Gn_MlclrFnctn_Att
+		Gn_MlclrFnctn_A -> {gmfa_ek -> gmf_e.edgeHasKind}
+
+		// Gn_Pthw -> Gene
+		Gn_Pthw_E -> {g_n -> gp_e.source}
+		// Gn_Pthw -> Pathway
+		Gn_Pthw_V -> {p_n -> gp_e.target}
+		// Gn_Pthw -> Gn_Pthw_Att
+		Gn_Pthw_A -> {gpa_ek -> gp_e.edgeHasKind}
+}
+
+
+// Pass #1 1k edges
+//instance iUfld2E1k = eval qUfld2 iHt1k 
+//   { options timeout=100 }
+  
+//instance iUfld4E1k = eval qUfld4 iHt1k 
+//   { options timeout=100 }
+   
+//instance iUfld8E1k = eval qUfld8 iHt1k 
+//   { options timeout=200 }
+
+// Pass #2 2k edges
+//instance iUfld2E2k = eval qUfld2 iHt2k 
+//   { options timeout=1000 }
+   
+//instance iUfld4E2k = eval qUfld4 iHt2k 
+//   { options timeout=1000 }
+   
+//instance iUfld8E2k = eval qUfld8 iHt2k 
+//   { options timeout=1000 }
+   
+// Pass #3 4k edges
+//instance iUfld2E4k = eval qUfld2 iHt4k 
+//   { options timeout=1000 }
+   
+//instance iUfld4E4k = eval qUfld4 iHt4k 
+//   { options timeout=1000 }
+   
+//instance iUfld8E4k = eval qUfld8 iHt4k 
+//   { options timeout=1000 }
+   
+// Pass #4 8k edges
+//instance iUfld2E8k = eval qUfld2 iHt8k 
+//   { options timeout=1000 }
+   
+//instance iUfld4E8k = eval qUfld4 iHt8k 
+//   { options timeout=1000 }
+   
+//instance iUfld8E8k = eval qUfld8 iHt8k 
+//   { options timeout=1000 }
+   
+// Pass #5 16k edges
+//instance iUfld2E16k = eval qUfld2 iHt16k 
+//   { options timeout=1000 }
+   
+//instance iUfld4E16k = eval qUfld4 iHt16k 
+//   { options timeout=1000 }
+   
+//instance iUfld8E16k = eval qUfld8 iHt16k 
+//   { options timeout=1000 }
+   
+// Pass #6 32k edges
+//instance iUfld2E32k = eval qUfld2 iHt32k 
+//   { options timeout=1000 }
+   
+//instance iUfld4E32k = eval qUfld4 iHt32k 
+//   { options timeout=1000 }
+   
+//instance iUfld8E32k = eval qUfld8 iHt32k 
+//   { options timeout=6000 }
+   
+// Pass #7 64k edges
+//instance iUfld2E64k = eval qUfld2 iHt64k 
+//   { options timeout=1000 }
+   
+//instance iUfld4E64k = eval qUfld4 iHt64k 
+//   { options timeout=1000 }
+   
+instance iUfld8E64k = eval qUfld8 iHt64k 
+   { options timeout=1000 }
+   
+// Pass #6 128k edges
+//instance iUfld2E128k = eval qUfld2 iHt128k 
+//   { options timeout=2000 }
+   
+//instance iUfld4E128k = eval qUfld4 iHt128k 
+//   { options timeout=2000 }
+   
+//instance iUfld8E128k = eval qUfld8 iHt128k 
+//   { options timeout=2000 }
+ 
+
