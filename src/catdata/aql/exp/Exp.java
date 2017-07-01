@@ -3,11 +3,17 @@ package catdata.aql.exp;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import catdata.Pair;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Kind;
 
 public abstract class Exp<X> {
+	
+	public void asTree(DefaultMutableTreeNode node) {
+		
+	}
 	
 	public Object getOrDefault(AqlEnv env, AqlOption option) {
 		return env.defaults.getOrDefault(options(), option);

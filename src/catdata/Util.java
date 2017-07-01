@@ -566,7 +566,7 @@ public class Util {
 		return o1.toString().compareTo(o2.toString());
 	};
 
-	private static final Comparator<Object> AlphabeticalComparator = Comparator.comparing(Object::toString);
+	public static final Comparator<Object> AlphabeticalComparator = Comparator.comparing(Object::toString);
 
 	public static <X, Y> Map<Y, X> rev0(Map<X, Y> m) {
 		return rev(m, new HashSet<>(m.values()));

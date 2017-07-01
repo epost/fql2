@@ -27,6 +27,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -166,18 +167,12 @@ public class GUI extends JPanel {
 		Menu editMenu = new Menu("Edit");
 		MenuItem findItem = new MenuItem("Find");
 		editMenu.add(findItem);
+		MenuItem replaceItem = new MenuItem("Replace");
+		editMenu.add(replaceItem);
+		MenuItem gotoItem = new MenuItem("Goto Line");
+		editMenu.add(gotoItem);
 
-		Menu aqlMenu = new Menu("AQL");
-		Menu fqlMenu = new Menu("FQL");
-		Menu fqlppMenu = new Menu("FQL++");
-		Menu oplMenu = new Menu("OPL");
-		Menu fpqlMenu = new Menu("FPQL");
-
-		populateAql(aqlMenu);
-		populateFql(fqlMenu);
-		populateFqlpp(fqlppMenu);
-		populateFpql(fpqlMenu);
-		populateOpl(oplMenu);
+		
 		
 		KeyStroke ctrlF = KeyStroke.getKeyStroke(KeyEvent.VK_F,  Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 		MenuShortcut f = new MenuShortcut(ctrlF.getKeyCode());
@@ -191,6 +186,9 @@ public class GUI extends JPanel {
 				ed.runAction();
 			}
 		});
+		
+		
+		
 		MenuShortcut q2 = new MenuShortcut(ctrlR.getKeyCode());
 		runItem.setShortcut(q2);
 
@@ -214,6 +212,25 @@ public class GUI extends JPanel {
 				ed.copyAsRtf();
 			}
 		});
+		
+		MenuItem back = new MenuItem("Back");
+		back.addActionListener(x -> {
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.backAction();
+			}
+		});
+		editMenu.add(back);
+		
+		MenuItem fwd = new MenuItem("Forward");
+		fwd.addActionListener(x -> {
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.fwdAction();
+			}
+		});
+		editMenu.add(fwd);
+
 	
 		MenuItem fall = new MenuItem("Fold All");
 		editMenu.add(fall);
@@ -261,8 +278,6 @@ public class GUI extends JPanel {
 		MenuItem aboutItem = new MenuItem("Help/About");
 		helpMenu.add(aboutItem);
 		aboutItem.addActionListener(e -> IdeOptions.showAbout());
-		JButton helpb = new JButton("Help");
-		helpb.addActionListener(e -> IdeOptions.showAbout());
 		
 		openItem.addActionListener(e -> openActionAlternate());
 
@@ -277,11 +292,44 @@ public class GUI extends JPanel {
 				ed.findAction();
 			}
 		});
+		
+		replaceItem.addActionListener(e -> {
+			delay();
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.replaceAction();
+			}
+		});
+		
+		gotoItem.addActionListener(e -> {
+			delay();
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.gotoLine();
+			}
+		});
 
 		menuBar.add(fileMenu);
 		menuBar.add(editMenu);
 		menuBar.add(toolsMenu);
+		
+		Menu aqlMenu = new Menu("AQL");
+		populateAql(aqlMenu);
 		menuBar.add(aqlMenu);
+
+		Menu legacyMenu = new Menu("Legacy");
+		Menu fqlMenu = new Menu("FQL");
+		Menu fqlppMenu = new Menu("FQL++");
+		Menu oplMenu = new Menu("OPL");
+		Menu fpqlMenu = new Menu("FPQL");
+		
+
+		populateFql(fqlMenu);
+		populateFqlpp(fqlppMenu);
+		populateFpql(fpqlMenu);
+		populateOpl(oplMenu);
+		
+		
 		menuBar.add(fqlMenu);
 		menuBar.add(fqlppMenu);
 		menuBar.add(fpqlMenu);
@@ -291,8 +339,20 @@ public class GUI extends JPanel {
 
 		pan.setLayout(new BorderLayout());
 
-		JPanel toolBar = new JPanel(new GridLayout(1, 8));
+		JPanel toolBar = makeToolBar();
 
+		pan.add(toolBar, BorderLayout.PAGE_START);
+		pan.add(editors, BorderLayout.CENTER);
+	
+		return new Pair<>(pan, menuBar);
+	}
+
+	private static JPanel makeToolBar() {
+		JPanel toolBar = new JPanel(new GridLayout(1, 10));
+
+		JButton helpb = new JButton("Help");
+		helpb.addActionListener(e -> IdeOptions.showAbout());
+	
 		JButton compileB = new JButton("Run");
 		compileB.addActionListener(e -> {
 			CodeEditor<?, ?, ?> ed = (CodeEditor<?, ?, ?>) editors.getComponentAt(editors.getSelectedIndex());
@@ -309,7 +369,7 @@ public class GUI extends JPanel {
 			}
 		});
 
-		JButton new_button = new JButton("New " + Language.getDefault());
+		JButton new_button = new JButton("New");
 		new_button.addActionListener(e -> newAction(null, "", Language.getDefault()));
 
 		JButton save_button = new JButton("Save");
@@ -347,21 +407,36 @@ public class GUI extends JPanel {
 		modeBox.setSelectedItem(Language.getDefault().toString());
 		modeBox.addActionListener(x -> cl.show(boxPanel, (String) modeBox.getSelectedItem()));
 
+		JButton back = new JButton("< Back");
+		back.addActionListener(x -> {
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.backAction();
+			}
+		});
+
+		
+		JButton fwd = new JButton("Fwd >");
+		fwd.addActionListener(x -> {
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.fwdAction();
+			}
+		});
+	
 		toolBar.add(compileB);
 		toolBar.add(abortB);
 		toolBar.add(new_button);
 		toolBar.add(open_button);
 		toolBar.add(save_button);
+		toolBar.add(back);
+		toolBar.add(fwd);
 		toolBar.add(optionsb);
 		toolBar.add(helpb);
-		toolBar.add(new JLabel("Load Example:", SwingConstants.RIGHT));
+		toolBar.add(new JLabel("Example:", SwingConstants.RIGHT));
 		toolBar.add(modeBox);
 		toolBar.add(boxPanel);
-
-		pan.add(toolBar, BorderLayout.PAGE_START);
-		pan.add(editors, BorderLayout.CENTER);
-	
-		return new Pair<>(pan, menuBar);
+		return toolBar;
 	}
 
 	private static void infer(Kind k) {
@@ -374,7 +449,7 @@ public class GUI extends JPanel {
 	}
 
 	private static void populateAql(Menu menu) {
-		MenuItem m = new MenuItem("Outline (using last state)");
+	/*	MenuItem m = new MenuItem("Outline (using last state)");
 		m.addActionListener(x -> {
 			int i = editors.getSelectedIndex();
 			if (i == -1) {
@@ -386,7 +461,7 @@ public class GUI extends JPanel {
 				a.showOutline();
 			}
 		});
-		menu.add(m);
+		menu.add(m); */
 
 		MenuItem im = new MenuItem("Infer Mapping (using last state)");
 		im.addActionListener(x -> infer(Kind.MAPPING));
@@ -459,6 +534,7 @@ public class GUI extends JPanel {
 		if (c == null || c.abortBecauseDirty()) {
 			return;
 		}
+		c.close();
 		deInc(c);		
 	}
 

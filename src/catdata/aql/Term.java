@@ -257,7 +257,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (gen != null) {
 			En en = gens.get(gen);
 			if (en == null) {
-				throw new RuntimeException("In " + this + ", " + "the entity for generator " + gen + " is not defined");	
+				throw new RuntimeException("In " + this + ", " + "the entity for generator " + gen + " is not defined.  Candidates:\n" + gens );	
 			}
 			ret = Chc.inRight(en);
 		} else if (sk != null) {

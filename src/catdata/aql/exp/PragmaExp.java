@@ -31,6 +31,7 @@ import catdata.aql.fdm.ProcPragma;
 import catdata.aql.fdm.ToCsvPragmaInstance;
 import catdata.aql.fdm.ToCsvPragmaTransform;
 import catdata.aql.fdm.ToJdbcPragmaInstance;
+import catdata.aql.fdm.ToJdbcPragmaQuery;
 import catdata.aql.fdm.ToJdbcPragmaTransform;
 import catdata.graph.DMG;
 import catdata.graph.Matcher;
@@ -1074,6 +1075,115 @@ public abstract class PragmaExp extends Exp<Pragma> {
 				if (other.prefix != null)
 					return false;
 			} else if (!prefix.equals(other.prefix))
+				return false;
+			return true;
+		}
+
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static class PragmaExpToJdbcQuery<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends PragmaExp {
+
+		public final String jdbcString;
+		public final String prefixSrc;
+		public final String prefixDst;
+		public final String clazz;
+
+		public final Map<String, String> options;
+
+		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
+
+		@Override
+		public Map<String, String> options() {
+			return options;
+		}
+
+		public PragmaExpToJdbcQuery(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q, String clazz, String jdbcString, String prefixSrc, String prefixDst, List<Pair<String, String>> options) {
+			this.jdbcString = jdbcString;
+			this.prefixSrc = prefixSrc;
+			this.prefixDst = prefixDst;
+			this.clazz = clazz;
+			this.options = Util.toMapSafely(options);
+			this.Q = Q;
+			try {
+				Class.forName(clazz);
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Q.deps();
+		}
+
+		@Override
+		public Pragma eval(AqlEnv env) {
+			return new ToJdbcPragmaQuery<>(prefixSrc, prefixDst, Q.eval(env), clazz, jdbcString, new AqlOptions(options, null, env.defaults));
+		}
+
+		@Override
+		public String toString() {
+			String s = "";
+			if (!options.isEmpty()) {
+				s = " {\n\toptions" + Util.sep(options, "\n\t\t", " = ")  + "\n}";;
+			}
+		
+			return "export_jdbc_query " + Q + " " + Util.quote(clazz) + " " + Util.quote(jdbcString) + " " + prefixSrc + " " + prefixDst + s;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
+			result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
+			result = prime * result + ((jdbcString == null) ? 0 : jdbcString.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((prefixDst == null) ? 0 : prefixDst.hashCode());
+			result = prime * result + ((prefixSrc == null) ? 0 : prefixSrc.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			PragmaExpToJdbcQuery<?, ?, ?, ?, ?, ?, ?, ?> other = (PragmaExpToJdbcQuery<?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (Q == null) {
+				if (other.Q != null)
+					return false;
+			} else if (!Q.equals(other.Q))
+				return false;
+			if (clazz == null) {
+				if (other.clazz != null)
+					return false;
+			} else if (!clazz.equals(other.clazz))
+				return false;
+			if (jdbcString == null) {
+				if (other.jdbcString != null)
+					return false;
+			} else if (!jdbcString.equals(other.jdbcString))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			if (prefixDst == null) {
+				if (other.prefixDst != null)
+					return false;
+			} else if (!prefixDst.equals(other.prefixDst))
+				return false;
+			if (prefixSrc == null) {
+				if (other.prefixSrc != null)
+					return false;
+			} else if (!prefixSrc.equals(other.prefixSrc))
 				return false;
 			return true;
 		}

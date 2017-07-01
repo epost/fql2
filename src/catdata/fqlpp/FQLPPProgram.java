@@ -1,6 +1,7 @@
 package catdata.fqlpp;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -68,7 +69,6 @@ public class FQLPPProgram implements Serializable, Prog {
 	public LinkedHashMap<String, TransExp> trans = new LinkedHashMap<>();
 	public List<String> order = new LinkedList<>();
 	private LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();
-
 	//copies
 	public FQLPPProgram(FQLPPProgram p) {
         sets = new LinkedHashMap<>(p.sets);
@@ -126,6 +126,11 @@ public class FQLPPProgram implements Serializable, Prog {
 	@Override
 	public Integer getLine(String s) {
 		return lines.get(s);
+	}
+
+	@Override
+	public Collection<String> keySet() {
+		return order;
 	}
 
 }

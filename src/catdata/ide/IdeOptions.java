@@ -43,7 +43,6 @@ import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.TokenTypes;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextAreaBase;
-import org.fife.ui.rtextarea.RTextScrollPane;
 
 import catdata.Util;
 import catdata.aql.AqlOptions;
@@ -224,7 +223,8 @@ public class IdeOptions {
 	}
 	
 
-	private JComponent display(boolean onlyColors) {
+
+	private JComponent onlyColors() {
 		JPanel p1 = new JPanel(new GridLayout(size(), 1));
 		JPanel p2 = new JPanel(new GridLayout(size(), 1));
 
@@ -234,7 +234,7 @@ public class IdeOptions {
 		p.add(p2);
 
 		for (IdeOption o : IdeOption.values()) {
-			if ( (onlyColors && o.type == IdeOptionType.COLOR) || (!onlyColors && o.type != IdeOptionType.COLOR) ) {
+			if (o.type == IdeOptionType.COLOR) {
 				p1.add(new JLabel(o.toString()));
 				p2.add(viewerFor(o));
 			}		
@@ -242,6 +242,44 @@ public class IdeOptions {
 
 		return p;
 	}
+	private JComponent general() {
+		JPanel p1 = new JPanel(new GridLayout(size(), 1));
+		JPanel p2 = new JPanel(new GridLayout(size(), 1));
+
+		JSplitPane p = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+
+		p.add(p1);
+		p.add(p2);
+
+		for (IdeOption o : IdeOption.values()) {
+			if (o.type != IdeOptionType.COLOR && !o.name().contains("OUTLINE")) {
+				p1.add(new JLabel(o.toString()));
+				p2.add(viewerFor(o));
+			}		
+		}
+
+		return p;
+	}
+	
+	private JComponent outline() {
+		JPanel p1 = new JPanel(new GridLayout(size(), 1));
+		JPanel p2 = new JPanel(new GridLayout(size(), 1));
+
+		JSplitPane p = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+
+		p.add(p1);
+		p.add(p2);
+
+		for (IdeOption o : IdeOption.values()) {
+			if (o.name().contains("OUTLINE")) {
+				p1.add(new JLabel(o.toString()));
+				p2.add(viewerFor(o));
+			}		
+		}
+
+		return p;
+	}
+	
 
 	private static JComponent pair(JComponent l, JComponent r) {
 		JPanel pan = new JPanel(new GridBagLayout());
@@ -370,7 +408,7 @@ public class IdeOptions {
 	
 	public void apply(CodeEditor<?,?,?> a) {
 		for (IdeOption o : IdeOption.values()) {
-			apply(o, a.topArea, a.sp);
+			apply(o, a);
 			apply(o, a.respArea.area);
 		}
 		a.clearSpellCheck();
@@ -383,7 +421,9 @@ public class IdeOptions {
 	
 		switch (o) {
 		case NUMBER_COLOR:
+		case OUTLINE_ELONGATED:
 		case FILE_PATH:
+		case OUTLINE_DELAY:
 		case HTML_COLOR:
 		case LINE_NUMBERS:
 		case LOOK_AND_FEEL:
@@ -411,6 +451,11 @@ public class IdeOptions {
 		case TABS_EMULATED:
 		case ANIMATE_MATCH:
 		case MARGIN_COLS:
+		case ENABLE_OUTLINE:
+		case OUTLINE_ALPHABETICAL:
+		case OUTLINE_ON_LEFT:
+		case OUTLINE_PREFIX_KIND:
+	
 			return;
 	
 		case BACKGROUND_COLOR:
@@ -428,7 +473,6 @@ public class IdeOptions {
 			a.setForeground(getColor(o));
 			return;	
 		case LINE_WRAP:
-		//	a.setLineWrap(getBool(o));
 			return;
 		case SELECTION_COLOR:
 			a.setSelectionColor(getColor(o));
@@ -446,12 +490,12 @@ public class IdeOptions {
 		GUI.optionsHaveChanged();
 	}
 	
-	private void apply(IdeOption o, RSyntaxTextArea a, RTextScrollPane sp) {
-		SyntaxScheme scheme = a.getSyntaxScheme();
+	private void apply(IdeOption o, CodeEditor<?,?,?> a) {
+		SyntaxScheme scheme = a.topArea.getSyntaxScheme();
 		
 		switch (o) {
 		case LINE_NUMBERS:
-			sp.setLineNumbersEnabled(getBool(o));
+			a.sp.setLineNumbersEnabled(getBool(o));
 			return;
 		case FILE_PATH:
 			return;
@@ -491,16 +535,16 @@ public class IdeOptions {
 			a.setBackground(getColor(o));
 			return;
 		case BRACKET_MATCH_BG_COLOR:
-			a.setMatchedBracketBGColor(getColor(o));
+			a.topArea.setMatchedBracketBGColor(getColor(o));
 			return;
 		case BRACKET_MATCH_BORDER_COLOR:
-			a.setMatchedBracketBorderColor(getColor(o));
+			a.topArea.setMatchedBracketBorderColor(getColor(o));
 			return;
 		case CARET_COLOR:
-			a.setCaretColor(getColor(o));
+			a.topArea.setCaretColor(getColor(o));
 			return;
 		case CURRENT_LINE_HIGHLIGHT_COLOR:
-			a.setCurrentLineHighlightColor(getColor(o));
+			a.topArea.setCurrentLineHighlightColor(getColor(o));
 			return;
 		case FONT:
 			a.setFont(getFont(o));
@@ -509,58 +553,76 @@ public class IdeOptions {
 			a.setForeground(getColor(o));
 			return;	
 		case LINE_WRAP:
-			a.setLineWrap(getBool(o));
+			a.topArea.setLineWrap(getBool(o));
 			return;
 		case MARGIN_LINE_COLOR:
-			a.setMarginLineColor(getColor(o));
+			a.topArea.setMarginLineColor(getColor(o));
 			return;
 		case MARK_ALL_HIGHLIGHT_COLOR:
-			a.setMarkOccurrencesColor(getColor(o));
+			a.topArea.setMarkOccurrencesColor(getColor(o));
 			return;
 		case SELECTION_COLOR:
-			a.setSelectionColor(getColor(o));
+			a.topArea.setSelectionColor(getColor(o));
 			return;
 		case AUTO_CLOSE_BRACES:
-			a.setCloseCurlyBraces(getBool(o));
+			a.topArea.setCloseCurlyBraces(getBool(o));
 			return;
 		case AUTO_INDENT:
-			a.setAutoIndentEnabled(getBool(o));
+			a.topArea.setAutoIndentEnabled(getBool(o));
 			return;
 		case LINE_HIGHLIGHT:
-			a.setHighlightCurrentLine(getBool(o));
+			a.topArea.setHighlightCurrentLine(getBool(o));
 			return;
 		case MARK_OCCURANCES:
-			a.setMarkOccurrences(getBool(o));
+			a.topArea.setMarkOccurrences(getBool(o));
 			return;
 		case SHOW_MARGIN:
-			a.setMarginLineEnabled(getBool(o));
+			a.topArea.setMarginLineEnabled(getBool(o));
 			return;
 		case FADE_CURRENT_LINE:
-			a.setFadeCurrentLineHighlight(getBool(o));
+			a.topArea.setFadeCurrentLineHighlight(getBool(o));
 			return;
 		case FOLDING:
-			a.setCodeFoldingEnabled(getBool(o));
+			a.topArea.setCodeFoldingEnabled(getBool(o));
 			return;
 		case MATCH_BRACKET:
-			a.setBracketMatchingEnabled(getBool(o));
+			a.topArea.setBracketMatchingEnabled(getBool(o));
 			return;
 		case ROUNDED_EDGES:
-			a.setRoundedSelectionEdges(getBool(o));
+			a.topArea.setRoundedSelectionEdges(getBool(o));
 			return;
 		case SHOW_MATCHED_POPUP:
-			a.setShowMatchedBracketPopup(getBool(o));
+			a.topArea.setShowMatchedBracketPopup(getBool(o));
 			return;
 		case TABS_EMULATED:
-			a.setTabsEmulated(getBool(o));
+			a.topArea.setTabsEmulated(getBool(o));
 			return;
 		case ANIMATE_MATCH:
-			a.setAnimateBracketMatching(getBool(o));
+			a.topArea.setAnimateBracketMatching(getBool(o));
 			return;
 		case MARGIN_COLS:
-			a.setMarginLinePosition(getNat(o));
+			a.topArea.setMarginLinePosition(getNat(o));
 			return;
 		case TAB_SIZE:
-			a.setTabSize(getNat(o));
+			a.topArea.setTabSize(getNat(o));
+			return;
+		case ENABLE_OUTLINE:
+			a.enable_outline(getBool(o));
+			return;
+		case OUTLINE_ALPHABETICAL:
+			a.outline_alphabetical(getBool(o));
+			return;
+		case OUTLINE_ON_LEFT:
+			a.outline_on_left(getBool(o));
+			return;
+		case OUTLINE_PREFIX_KIND:
+			a.outline_prefix_kind(getBool(o));
+			return;
+		case OUTLINE_ELONGATED:
+			a.outline_elongated(getBool(o));
+			return;
+		case OUTLINE_DELAY:
+			a.set_delay(getNat(o));
 			return;
 		default:
 			Util.anomaly();
@@ -568,6 +630,15 @@ public class IdeOptions {
 	}
 	
 	public static enum IdeOption {
+
+		OUTLINE_DELAY(IdeOptionType.NAT, 2),
+
+		ENABLE_OUTLINE(IdeOptionType.BOOL, true),
+		OUTLINE_ON_LEFT(IdeOptionType.BOOL, false),
+		OUTLINE_ALPHABETICAL(IdeOptionType.BOOL, false),
+		OUTLINE_PREFIX_KIND(IdeOptionType.BOOL, false),
+		OUTLINE_ELONGATED(IdeOptionType.BOOL, false),
+		
 		LOOK_AND_FEEL(IdeOptionType.LF, defaultLF()), 
 		FILE_PATH(IdeOptionType.FILE, new File("")), 
 		FONT(IdeOptionType.FONT, RTextAreaBase.getDefaultFont()),
@@ -604,7 +675,7 @@ public class IdeOptions {
 		BRACKET_MATCH_BG_COLOR(IdeOptionType.COLOR, RSyntaxTextArea.getDefaultBracketMatchBGColor()),
 		BRACKET_MATCH_BORDER_COLOR(IdeOptionType.COLOR, RSyntaxTextArea.getDefaultBracketMatchBorderColor()),
 		
-		MARGIN_COLS(IdeOptionType.NAT, 128),
+		MARGIN_COLS(IdeOptionType.NAT, 100),
 		TAB_SIZE(IdeOptionType.NAT, 4);
 
 		public final IdeOptionType type;
@@ -690,6 +761,18 @@ public class IdeOptions {
 				return "Number color";
 			case HTML_COLOR:
 				return "HTML color";
+			case ENABLE_OUTLINE:
+				return "Enable outline";
+			case OUTLINE_ALPHABETICAL:
+				return "Alphabetical order";
+			case OUTLINE_ON_LEFT:
+				return "Outline on left";
+			case OUTLINE_PREFIX_KIND:
+				return "Show kinds";
+			case OUTLINE_ELONGATED:
+				return "Elongate the outline";
+			case OUTLINE_DELAY:
+				return "Parsing polling delay (s)";
 			default:
 				return Util.anomaly();
 			}
@@ -747,8 +830,9 @@ public class IdeOptions {
 		IdeOptions o = this; //new IdeOptions(IdeOptions.theCurrentOptions);
 
 		JTabbedPane jtb = new JTabbedPane();
-		jtb.add("General", o.display(false));
-		jtb.add("Colors", o.display(true));
+		jtb.add("General", general());
+		jtb.add("Colors", onlyColors());
+		jtb.add("Outline", outline());
 		jtb.addTab("AQL", new CodeTextPanel("", AqlOptions.getMsg()));
 
 		jtb.setSelectedIndex(selected_tab);

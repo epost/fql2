@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
@@ -17,6 +19,8 @@ import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
 
 public class TypeSide<Ty, Sym> implements Semantics {
+	
+	
 	
 	@Override
 	public int size() {

@@ -57,14 +57,18 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		private final X x;
 		private final Row<En2, X> tail;
 
-		public Map<Var, X> asMap() {
+		private Map<Var, X> map;
+		public synchronized Map<Var, X> asMap() {
+			if (map != null) {
+				return map;
+			}
 			Row<En2, X> r = this;
-			Map<Var, X> ret = new HashMap<>();
+			map = new HashMap<>();
 			for (;;) {
 				if (r.en2 != null) {
-					return ret;
+					return map;
 				}
-				ret.put(v, x);
+				map.put(v, x);
 				r = tail;
 			}
 		}
@@ -112,14 +116,17 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		@Override
 		public String toString() {
 			if (en2 != null) {
-				return " : " + en2.toString();
+				return ""; 
 			}
-			return v + "=" + x + ", " + tail.toString();
+			return "(" + v + "=" + x + ")" + tail.toString();
 		}
 
 		public String toString(Function<X, String> printX) {
 			return map(printX).toString();
 		}
+
+		
+		
 
 		@Override
 		public int hashCode() {
@@ -140,7 +147,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Row<?, ?> other = (Row<?, ?>) obj;
+			Row other = (Row) obj;
 			if (en2 == null) {
 				if (other.en2 != null)
 					return false;
@@ -207,7 +214,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 	// private final Algebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> alg;
 	private final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
 
-	private final Ctx<En2, Collection<Row<En2, X>>> ens = new Ctx<>();
+	private final Ctx<En2, Pair<List<Var>,Collection<Row<En2, X>>>> ens = new Ctx<>();
 
 	@Override
 	public Row<En2, X> fk(Fk2 fk, Row<En2, X> row) {
@@ -215,7 +222,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 
 		Ctx<Var, X> ret = new Ctx<>();
 
-		for (Var v : t.src().gens().keySet()) {
+		for (Var v : ens.get(Q.dst.fks.get(fk).second).first) {
 			ret.put(v, trans2(row, t.gens().get(v)));
 		}
 
@@ -247,7 +254,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 
 	@Override
 	public Collection<Row<En2, X>> en(En2 en) {
-		return ens.get(en);
+		return ens.get(en).second;
 	}
 
 	@Override
@@ -355,13 +362,13 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 	}
 	
 	//TODO must convert back to original unfolded vars
-	private Collection<Row<En2, X>> eval(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q, Connection conn, boolean useSql) {
+	private Pair<List<Var>,Collection<Row<En2, X>>> eval(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q, Connection conn, boolean useSql) {
 		Collection<Row<En2, X>> ret = null; 
 		Integer k = maxTempSize();
 		if (useSql) {
-			ret = evalSql(en2, q, I, conn);
+			Pair<List<Var>, Collection<Row<En2, X>>> ret2 = evalSql(en2, q, I, conn);
 			//TODO aql should also stop on max temp size?
-			return ret;
+			return ret2;
 		} else {
 			ret = new LinkedList<>();
 			List<Var> plan = q.order(options, I);
@@ -370,20 +377,27 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 			for (Var v : plan) {
 				ret = Row.extend(en2, ret, v, q, I, k, useIndices);
 			}
-			return ret;
+			return new Pair<>(plan,ret);
 		}
 	}
 	
 	
-	private Collection<Row<En2, X>> evalSql(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q,
+	private Pair<List<Var>, Collection<Row<En2, X>>> evalSql(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q,
 			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I, Connection conn) {
+		
+			if (q.gens.isEmpty()) {
+				Collection<Row<En2, X>> ret = new LinkedList<>();
+				ret.add(new Row<>(en2));
+				return new Pair<>(Collections.emptyList(), ret);
+			}
+		List<Var> order = new LinkedList<>(q.gens().keySet());
 		try (Statement stmt = conn.createStatement()) {
 			ResultSet rs = stmt.executeQuery(Q.toSQL().get(en2));
 			Collection<Row<En2, X>> ret = new LinkedList<>();
 			//ResultSetMetaData rsmd = rs.getMetaData();
 			while (rs.next()) {
 				Row<En2, X> r = new Row<>(en2);
-				for (Var v : q.gens.keySet()) {
+				for (Var v : order) {
 					X x = I.algebra().intifyX().second.get(rs.getInt(v.var)); 
 					if (x == null) {
 						stmt.close();
@@ -396,7 +410,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 			}
 			rs.close();
 			stmt.close();
-			return ret;
+			return new Pair<>(order, ret);
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 			throw new RuntimeException(ex);

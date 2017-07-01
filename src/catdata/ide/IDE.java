@@ -62,7 +62,7 @@ class IDE {
 
 				UIManager.setLookAndFeel(IdeOptions.theCurrentOptions.getString(IdeOption.LOOK_AND_FEEL));
 
-				JFrame f = new JFrame("Categorical Data IDE");
+				JFrame f = new JFrame("AQL IDE");
 
 				Pair<JPanel, MenuBar> gui = GUI.makeGUI(f);
 

@@ -1,5 +1,6 @@
 package catdata.fpql;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -108,6 +109,11 @@ public class XProgram implements Prog {
 
 	public void doTypes() {
 		tys = types();
+	}
+
+	@Override
+	public Collection<String> keySet() {
+		return order;
 	}
 
 }

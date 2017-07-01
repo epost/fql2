@@ -7,7 +7,9 @@ import java.util.Map;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Kind;
+import catdata.aql.Mapping;
 import catdata.aql.Query;
+import catdata.aql.exp.MapExp.MapExpId;
 import catdata.aql.exp.SchExp.SchExpLit;
 
 public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2>> {
@@ -19,6 +21,66 @@ public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Que
 	
 	public abstract Pair<SchExp<Ty,En1,Sym,Fk1,Att1>, SchExp<Ty,En2,Sym,Fk2,Att2>> type(AqlTyping G);
 	
+	///////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static final class QueryExpId<Ty,En,Sym,Fk,Att> extends QueryExp<Ty,En,Sym,Fk,Att,En,Fk,Att> {
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}		
+		@Override
+		public Collection<Pair<String, Kind>> deps() { 
+			return sch.deps();
+		}
+				
+		public final SchExp<Ty,En,Sym,Fk,Att> sch;
+
+		public QueryExpId(SchExp<Ty, En, Sym, Fk, Att> sch) {
+			if (sch == null) {
+				throw new RuntimeException("Attempt to create QueryExpId with null schema");
+			}
+			this.sch = sch;
+		}
+
+		@Override
+		public int hashCode() {
+			int prime = 31;
+			int result = 1;
+			result = prime * result + (sch.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			QueryExpId<?,?,?,?,?> other = (QueryExpId<?,?,?,?,?>) obj;
+            return sch.equals(other.sch);
+        }
+
+		@Override
+		public String toString() {
+			return "id " + sch;
+		}
+
+		@Override
+		public Query<Ty, En, Sym, Fk, Att, En, Fk, Att> eval(AqlEnv env) {
+			return Query.id(env.defaults, sch.eval(env));
+		}
+
+		@Override
+		public Pair<SchExp<Ty, En, Sym, Fk, Att>, SchExp<Ty, En, Sym, Fk, Att>> type(AqlTyping G) {
+			return new Pair<>(sch, sch);
+		}
+
+		
+	}
+	
+	////////////////////////////////////////////////////////////
 	
 	public static final class QueryExpVar extends QueryExp<Object,Object,Object,Object,Object,Object,Object,Object> {
 		public final String var;

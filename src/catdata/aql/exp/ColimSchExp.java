@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import java.util.Set;
 
 import catdata.Chc;
@@ -45,6 +48,51 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	public static class ColimSchExpQuotient<N, Ty, En, Sym, Fk, Att> 
 	extends ColimSchExp<N, Void, Ty, En, Sym, Fk, Att> {
 
+		@Override
+		public void asTree(DefaultMutableTreeNode root) {
+			if (nodes.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("schemas");
+				for (N t : nodes.keySet()) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.toString());
+					nodes.get(t).asTree(m);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (eqEn.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("en_eqs");
+				for (Quad<N, En, N, En> t : eqEn) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + "." + t.second + " = " + t.third + "." + t.fourth);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (eqTerms2.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("path_eqs");
+				for (Pair<List<String>, List<String>> t : eqTerms2) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(Util.sep(t.first, ".") + " = " + Util.sep(t.second, "."));
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (eqTerms.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("obs_eqs");
+				for (Quad<String, String, RawTerm, RawTerm> t : eqTerms) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.third + " = " + t.fourth);
+					n.add(m);
+				}
+				root.add(n);
+			}
+		}
+		
 		public final TyExp<Ty, Sym> ty;
 
 		public final Ctx<N, SchExp<Ty, En, Sym, Fk, Att>> nodes;
@@ -270,6 +318,8 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	
 	public static class ColimSchExpWrap<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
 
+		
+		
 		public final ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim;
 		
 		public final MapExp<Ty,String,Sym,String,String,String,String,String> toUser;
@@ -358,7 +408,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	
 	////////////////////////////////////////
 
-	public static class ColimSchExpLit<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
+	public static class ColimSchExpRaw<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
 		public final GraphExp<N, E> shape;
 
 		public final TyExp<Ty, Sym> ty;
@@ -366,6 +416,33 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		public final Ctx<N, SchExp<Ty, En, Sym, Fk, Att>> nodes;
 
 		public final Ctx<E, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>> edges;
+		
+		@Override
+		public void asTree(DefaultMutableTreeNode root) {
+			if (nodes.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("schemas");
+				for (N t : nodes.keySet()) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.toString());
+					nodes.get(t).asTree(m);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (edges.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("mappings");
+				for (E t : edges.keySet()) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.toString());
+					edges.get(t).asTree(m);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			
+		}
 		
 		public final Map<String, String> options;
 		
@@ -379,7 +456,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			return nodes.get(n);
 		}
 
-		public ColimSchExpLit(GraphExp<N, E> shape, TyExp<Ty, Sym> ty, List<Pair<N, SchExp<Ty, En, Sym, Fk, Att>>> nodes, List<Pair<E, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>>> edges, List<Pair<String, String>> options) {
+		public ColimSchExpRaw(GraphExp<N, E> shape, TyExp<Ty, Sym> ty, List<Pair<N, SchExp<Ty, En, Sym, Fk, Att>>> nodes, List<Pair<E, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>>> edges, List<Pair<String, String>> options) {
 			this.shape = shape;
 			this.ty = ty;
 			this.nodes = new Ctx<>(Util.toMapSafely(nodes));
@@ -419,7 +496,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			ColimSchExpLit<?, ?, ?, ?, ?, ?, ?> other = (ColimSchExpLit<?, ?, ?, ?, ?, ?, ?>) obj;
+			ColimSchExpRaw<?, ?, ?, ?, ?, ?, ?> other = (ColimSchExpRaw<?, ?, ?, ?, ?, ?, ?>) obj;
 			if (edges == null) {
 				if (other.edges != null)
 					return false;
@@ -476,7 +553,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		}
 
 		@Override
-		public ColimSchExpLit<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+		public ColimSchExpRaw<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 			return this;
 		}
 	}
@@ -485,6 +562,61 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	
 	
 	public static final class ColimSchExpModify<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
+		
+		@Override
+		public void asTree(DefaultMutableTreeNode root) {
+			if (ens.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("rename ens");
+				for (Pair<String, String> t : ens) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.toString());
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (fks0.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("rename fks");
+				for (Pair<String, String> t : fks0) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + " -> " + t.second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (atts0.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("rename atts");
+				for (Pair<String, String> t : atts0) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + " -> " + t.second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (fks.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("remove fks");
+				for (Pair<String, List<String>> t : fks) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + " -> " + t.second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (atts.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("remove atts");
+				for (Pair<String, Triple<String, String, RawTerm>> t : atts) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + " -> \\" + t.second.first + ". " + t.second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			
+		}
 		
 		@Override
 		public SchExp<Ty, En, Sym, Fk, Att> getNode(N n, AqlTyping G) {

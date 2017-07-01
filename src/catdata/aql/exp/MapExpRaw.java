@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import catdata.Chc;
 import catdata.Pair;
 import catdata.Triple;
@@ -25,6 +27,50 @@ import catdata.aql.Term;
 import catdata.aql.Var;
 
 public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,Object,Object,Object> {
+	
+	@Override
+	public void asTree(DefaultMutableTreeNode root) {
+		if (imports.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("imports");
+			for (Object t : imports) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.toString());
+				n.add(m);
+			}
+		}
+		if (ens.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("entities");
+			for (Pair<Object, Object> t : ens) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.first + " -> " + t.second);
+				n.add(m);
+			}
+			root.add(n);
+		}
+		if (fks.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("eqs");
+			for (Pair<Object, List<Object>> t : fks) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.first + " -> " + Util.sep(t.second, "."));
+				n.add(m);
+			}
+			root.add(n);
+		}
+		if (atts.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("atts");
+			for (Pair<Object, Triple<String, Object, RawTerm>> t : atts) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.first + " -> \\" + t.second + ". " + t.second.third);
+				n.add(m);
+			}
+			root.add(n);
+		}
+		
+	}
 	
 	@Override
 	public Collection<Pair<String, Kind>> deps() {

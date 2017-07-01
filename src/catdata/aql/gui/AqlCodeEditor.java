@@ -1,28 +1,19 @@
 package catdata.aql.gui;
 
 import java.awt.Desktop;
-import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Collection;
-import java.util.Set;
-import java.util.Vector;
 
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 
 import org.fife.ui.autocomplete.AutoCompletion;
@@ -43,12 +34,13 @@ import catdata.ide.CodeEditor;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.GUI;
 import catdata.ide.Language;
+import catdata.ide.Outline;
+import catdata.ide.TreeOutline;
 
 @SuppressWarnings("serial")
 public final class AqlCodeEditor extends
 		CodeEditor<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 
-	private final Outline outline;
 	
 	
         @Override
@@ -60,69 +52,11 @@ public final class AqlCodeEditor extends
 		
 	}
 	
-	private final class Outline extends JFrame {
-		
-		private final JPanel p = new JPanel(new GridLayout(1,1));
-		final JList<String> list = new JList<>();
-		
-		public void build() {
-			list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			if (last_prog == null) {
-				return;
-			}
-			Set<String> set = last_prog.exps.keySet();		
-			Vector<String> listData = new Vector<>();
-			for (String s : set) {
-				if (last_prog.exps.get(s).kind() != Kind.COMMENT) {
-					listData.add(s);
-				}
-			}
-			list.setListData(listData);
-			revalidate();
-		}
-				
-		private Outline(String title) {
-			super(title);
-			p.add(new JScrollPane(list));
-			setContentPane(p);
-			build();
-			list.addListSelectionListener(e -> {
-					String s = list.getSelectedValue(); 
-					if (s == null) {
-						return;
-					}
-					Integer line = last_prog.lines.get(s);
-					if (line == null) {
-						toDisplay = "Cannot fine line for " + s + " - try recompiling. ";
-						line = 0;
-					}
-					setCaretPos(line);
-							
-			});
-			setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-			 ComponentListener listener = new ComponentAdapter() {
-			      @Override
-				public void componentShown(ComponentEvent evt) {
-			    	  build();
-			      }
-			 };
-			addComponentListener(listener);
-			setSize(new Dimension(200,300));
-			setLocationRelativeTo(null);
-		}
-	
-	}
 	
 	
 	public AqlCodeEditor(String title, int id, String content) {
 		super(title, id, content);
-		
-//		SyntaxScheme scheme = topArea.getSyntaxScheme();
-//		scheme.getStyle(TokenTypes.RESERVED_WORD).foreground = Color.RED;
-//		scheme.getStyle(TokenTypes.RESERVED_WORD_2).foreground = Color.BLUE;
-		
-		//IdeOptions.debug.set
-		
+			
 		JMenuItem im = new JMenuItem("Infer Mapping (using last compiled state)");
 		im.addActionListener(x -> infer(Kind.MAPPING));
 		topArea.getPopupMenu().add(im, 0);
@@ -136,12 +70,8 @@ public final class AqlCodeEditor extends
 		ii.addActionListener(x -> infer(Kind.INSTANCE));
 		topArea.getPopupMenu().add(ii, 0);
 			
-		outline = new Outline(title);
-		
-		JMenuItem o = new JMenuItem("Outline (using last compiled state)");
-		o.addActionListener(x -> showOutline());
-		topArea.getPopupMenu().add(o, 0);
-		
+		getOutline();
+				
 		JMenuItem html = new JMenuItem("Emit HTML (using last compiled state)");
 		html.addActionListener(x -> emitDoc());
 		topArea.getPopupMenu().add(html, 0);
@@ -184,11 +114,7 @@ public final class AqlCodeEditor extends
 	
 	}
 	
-	public void showOutline() {
-		outline.setVisible(true);
-		outline.toFront();
-	}
-
+	
 	@Override
 	public Language lang() {
 		return Language.AQL;
@@ -297,6 +223,7 @@ public final class AqlCodeEditor extends
 	public AqlEnv last_env;
 	private AqlMultiDriver driver;
 	
+	
 	@Override
 	protected AqlEnv makeEnv(String str, Program<Exp<?>> init) {
 		driver = new AqlMultiDriver(init, toUpdate, last_prog, last_env);
@@ -305,7 +232,6 @@ public final class AqlCodeEditor extends
 		last_prog = init;
 		//topArea.forceReparsing(parser);
 		clearSpellCheck();
-		outline.build();
 		if (last_env.exn != null && last_env.defs.keySet().isEmpty()) {
 			throw last_env.exn;
 		}
@@ -329,14 +255,28 @@ public final class AqlCodeEditor extends
 			respArea.setText(thr.getMessage());
 		}
 	}
+	
+	@Override
+	protected boolean omit(String s, Program<Exp<?>> p) {
+		return p.exps.get(s).kind().equals(Kind.COMMENT);
+	}
 
 	@Override
 	protected Collection<String> reservedWords() {
-		Collection<String> ret = Util.union(super.reservedWords(), Util.union(Util.list(AqlParser.ops), Util.list(AqlParser.res)));
+		Collection<String> ret = Util.union(Util.list(AqlParser.ops), Util.list(AqlParser.res));
 		if (last_prog != null) {
 			ret = Util.union(ret, last_prog.exps.keySet());
 		}
 		return ret;
 	}
+	
+	
 
+	protected synchronized Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> getOutline() {
+		if (outline == null) {
+			outline = new TreeOutline(this);
+		}
+		return outline;
+	}
+	
 }

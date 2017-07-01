@@ -2,6 +2,7 @@ package catdata.fql.decl;
 
 import java.awt.Color;
 import java.awt.Paint;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -424,6 +425,11 @@ public class FQLProgram implements Prog {
 			throw new RuntimeException("Duplicate name: " + s + " " + name);
 		}
 
+	}
+
+	@Override
+	public Collection<String> keySet() {
+		return order;
 	}
 
 }

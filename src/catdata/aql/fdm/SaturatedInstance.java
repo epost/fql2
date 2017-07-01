@@ -74,8 +74,9 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 
 		inner_dp = new InnerDP();
 		inner_alg = new InnerAlgebra();
-		checkSatisfaction(); //TODO aql disable in production?
 		validate();
+		checkSatisfaction(); //TODO aql disable in production?
+		
 	}
 
 	private void checkSatisfaction() {

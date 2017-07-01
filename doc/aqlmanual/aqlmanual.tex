@@ -315,7 +315,6 @@ Gets the schema associated with a colimit of schemas.
 A schema mapping $F : S \to T$ takes entities in $S$ to entities in $T$, foreign keys in $S$ to paths in $T$, and attributes in $S$ to terms in $T$, in a way that is functorial: if $f : s \to s'$ is a symbol in $S$, then it must be that $F(f) : F(s) \to F(s')$.  In addition, if $\forall \Gamma . e = e'$ is provable in $S$, then $\forall F(\Gamma). F(e) = F(e')$ must be provable in $T$.
 
 \section{{\tt id <schema>}}
-%todo
 The identity schema mapping on a particular schema.
 
 \section{{\tt [<mapping> ; <mapping>]}}
@@ -337,9 +336,9 @@ Allowable options are {\tt timeout} and {\tt dont\_validate\_unsafe}, which disa
 \chapter{Kind  {\tt query}}
 A query $S \to T$ assigns to each entity $en$ in $S$ a (``frozen'') instance on $T$, which we will write as $[en]$, and to each foreign key $fk : e \to e'$ a transform $[fk] : [e'] \to [e]$ (note the reversal), and to each attribute $att : e \to \tau$ a term of type $\tau$ in context $[e]$.  
 
-%\section{{\tt id <schema>}}
-%%todo
-%The identity query on a schema.
+\section{{\tt id <schema>}}
+The identity query on a schema.
+
 %\section{{\tt compose <mapping> <mapping>}}
 %%todo
 %Composes two queries: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt compose f g : A -> C}.
@@ -635,12 +634,20 @@ Exports a transform as CSV.  The filename will be a CSV file without a header an
 Allowable options are {\tt timeout} and {\tt always\_reload}  and {\tt csv} related options.
 
 %%%%%%%%%%%
-\section{{\tt export\_instance\_jdbc  [jdbcclass] [jdbcuri] [prefix] <instance>}}
+\section{{\tt export\_instance\_jdbc <instance> [jdbcclass] [jdbcuri] [prefix] }}
 
-Exports an instance using JDBC.  There will be a table $prefixen$ for each entity $en$ and a table $prefixty$ for each type $ty$.  The columns will be the entities and foreign keys whose domain is $en$, and an ID column whose name is set in options.  Every column will be a VARCHAR type whose length is set in the options.  AQL rows that are not constants will be exported as NULL.
+Exports an instance (on SQL typeside) using JDBC.  There will be a table $prefixen$ for each entity $en$.  The columns will be the attributes and foreign keys whose domain is $en$, and an ID column whose name is set in options.  AQL rows that are not constants will be exported as NULL.
 
 \subsection{options}
 Allowable options are {\tt timeout}  and {\tt always\_reload} and  {\tt id\_column\_name} and {\tt varchar\_length}.
+
+\section{{\tt export\_query\_jdbc <query> [jdbcclass] [jdbcuri] [prefixSrc] [prefixDst] }}
+
+Exports a query (on SQL typeside) as a set of views using JDBC.  There will be a view $prefixen$ for each entity $en$.  The columns will be the attributes and foreign keys whose domain is $en$, and an ID column whose name is set in options.  
+
+\subsection{options}
+Allowable options are {\tt timeout}  and {\tt always\_reload} and  {\tt id\_column\_name} and {\tt varchar\_length}.
+
 
 %%
 

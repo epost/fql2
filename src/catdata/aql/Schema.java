@@ -260,31 +260,29 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 		return head;
 	}
 
-	private Map<En, Pair<List<Chc<Fk, Att>>, String>> sqlSrcSchs;
-
-	public synchronized Map<En, Pair<List<Chc<Fk, Att>>, String>> toSQL_srcSchemas() {
-		if (sqlSrcSchs != null) {
-			return sqlSrcSchs;
-		}
-		sqlSrcSchs = new HashMap<>();
+	static int constraint_static = 0;
+	public Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> toSQL_srcSchemas(String prefix, String idTy, String idCol) {
+		Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> sqlSrcSchs = new HashMap<>();
 		for (En en1 : ens) {
 			List<String> l = new LinkedList<>();
 			List<Chc<Fk, Att>> k = new LinkedList<>();
-			l.add("id integer primary key");
+			l.add(idCol + " " + idTy + " primary key");
+			List<String> f = new LinkedList<>();
 			for (Fk fk1 : fksFrom(en1)) {
-				l.add(fk1 + " integer " /*
-										 * + " foreign key references " +
-										 * src.fks.get(fk1).second + ".id"
-										 */ );
+				l.add(fk1 + " " + idTy + " not null ");
 				k.add(Chc.inLeft(fk1));
+				f.add("alter table " + prefix + en1 + " add constraint " + prefix + en1 + fk1 + constraint_static++ + 
+						" foreign key (" + fk1 + ") references " + prefix + fks.get(fk1).second + "(" + idCol + ")");
 			}
 			for (Att att1 : attsFrom(en1)) {
-				l.add(att1 + " " + atts.get(att1).second.toString()); // TODO
-																		// aql
+				l.add(att1 + " " + SqlTypeSide.mediate(atts.get(att1).second.toString())); 
 				k.add(Chc.inRight(att1));
 			}
-			String str = "create table " + en1 + "(" + Util.sep(l, ", ") + ")";
-			sqlSrcSchs.put(en1, new Pair<>(k, str));
+			String str = "create table " + prefix + en1 + "(" + Util.sep(l, ", ") + ")";
+			List<String> q = new LinkedList<>();
+			q.add("drop table if exists " + prefix + en1);
+			q.add(str);
+			sqlSrcSchs.put(en1, new Triple<>(k, q, f));
 		}
 		return sqlSrcSchs;
 	}

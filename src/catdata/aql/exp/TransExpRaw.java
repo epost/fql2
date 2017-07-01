@@ -10,8 +10,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import catdata.Chc;
 import catdata.Pair;
+import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
@@ -25,6 +28,31 @@ import catdata.aql.fdm.LiteralTransform;
 
 //TODO aql grobner basis prover
 public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object> {
+	
+	@Override
+	public void asTree(DefaultMutableTreeNode root) {
+		if (imports.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("imports");
+			for (Object t : imports) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.toString());
+				n.add(m);
+			}
+		}
+		if (gens.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("entities");
+			for (Pair<Object, RawTerm> t : gens) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.first + " -> " + t.second);
+				n.add(m);
+			}
+			root.add(n);
+		}
+	
+		
+	}
 	
 	@Override
 	public Collection<Pair<String, Kind>> deps() {

@@ -891,8 +891,8 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public String toString() {
-			return "TransExpLit [trans=" + trans + "]";
-		} //TODO aql tostring
+			return trans.toString();
+		} 
 
 		@Override
 		public Pair<InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1>, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2>> type(AqlTyping G) {
