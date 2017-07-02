@@ -18,14 +18,11 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
-import catdata.Program;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
@@ -50,7 +47,6 @@ import catdata.aql.Transform;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
 import catdata.aql.exp.AqlParser;
-import catdata.aql.exp.Exp;
 import catdata.graph.DMG;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Split;
@@ -345,9 +341,10 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 				int i = 0;
 				for (Y1 y1 : z.get(ty)) {
 					Object[] row = new Object[2];
+					Term<Ty, En, Sym, Fk, Att, Gen1, Sk1> a = t.src().algebra().reprT_protected(Term.Sk(y1));
 					row[0] = t.src().algebra().printY(y1); 
-					Term<Ty, Void, Sym, Void, Void, Void, Y2> y0 = t.dst().algebra().intoY(t.reprT(y1));
-					row[1] = y0.toString(t.dst().algebra()::printY, Util.voidFn());
+					Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> y0 = t.trans(a); //t.dst().algebra().intoY(t.reprT(y1));
+					row[1] = y0.toString(); //t.dst().algebra().pr, Util.voidFn()); //TODO aql viewer printing revisit
 					data[i] = row;
 					i++;
 				}

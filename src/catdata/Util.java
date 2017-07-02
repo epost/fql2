@@ -2,9 +2,12 @@ package catdata;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -40,6 +43,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.JViewport;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
@@ -47,6 +52,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
 
 import org.apache.commons.collections15.CollectionUtils;
 
@@ -1009,6 +1016,13 @@ public class Util {
 		ret.sort(AlphabeticalComparator);
 		return ret;
 	}
+	
+	public static <Ty> Collection<Ty> alphaMaybe(boolean b, Collection<Ty> tys) {
+		if (b) {
+			return alphabetical(tys);
+		}
+		return tys;
+	}
 
 	public static <X> List<String> shortest(Collection<X> set) {
 		List<String> ret = set.stream().map(Object::toString).collect(Collectors.toList());
@@ -1098,6 +1112,27 @@ public class Util {
 		throw new RuntimeException("Anomaly: please report");
 	}
 
+	public static void centerLineInScrollPane(JTextComponent component)
+	{
+		Container container = SwingUtilities.getAncestorOfClass(JViewport.class, component);
+
+		if (container == null) return;
+
+		try
+		{
+			Rectangle r = component.modelToView(component.getCaretPosition());
+			JViewport viewport = (JViewport)container;
+			int extentHeight = viewport.getExtentSize().height;
+			int viewHeight = viewport.getViewSize().height;
+
+			int y = Math.max(0, r.y - ((extentHeight - r.height) / 2));
+			y = Math.min(y, viewHeight - extentHeight);
+
+			viewport.setViewPosition(new Point(0, y));
+		}
+		catch(BadLocationException ble) {}
+	}
+	
 	public static <X, Y> Collection<Object> isect(Collection<X> xs, Collection<Y> ys) {
 		return CollectionUtils.intersection(xs, ys);
 	}

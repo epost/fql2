@@ -883,7 +883,7 @@ public final void yybegin(int newState) {
    * @return      the next token
    * @exception   IOException  if any I/O-Error occurs
    */
-  @SuppressWarnings({"static-access", "ConstantConditions"})
+  @SuppressWarnings({"ConstantConditions"})
   private Token yylex() {
     int zzInput;
     int zzAction;

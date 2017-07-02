@@ -1,7 +1,5 @@
 package catdata.ide;
 
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -19,7 +17,8 @@ import catdata.aql.gui.AqlDisplay;
 
 public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 
-	private DefaultMutableTreeNode makeTree(List<String> set, Program<Exp<?>> prog, boolean prefix) {
+	
+	private DefaultMutableTreeNode makeTree(List<String> set, Program<Exp<?>> prog, boolean prefix, boolean alpha) {
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode();
 		for (String k : set) {
 			Exp<?> e = prog.exps.get(k);
@@ -28,7 +27,7 @@ public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 			}
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject(prefix ? e.kind() + " " + k : k);
-			e.asTree(n);
+			e.asTree(n, alpha);
 			root.add(n);
 		}
 		return root;
@@ -63,12 +62,12 @@ public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 
 		});
 
-		tree.addFocusListener(new FocusAdapter() {
+		/* tree.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent arg0) {
 				//tree.clearSelection();
 			}
-		});
+		}); */
 
 		return tree;
 	}
@@ -81,6 +80,7 @@ public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 		return renderer;
 	}
 
+	@SuppressWarnings("unchecked")
 	TreePath conv(TreePath path) {
 		TreePath parent = path.getParentPath();
 		if (parent == null) {
@@ -99,6 +99,7 @@ public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean nodeEq(DefaultMutableTreeNode m, DefaultMutableTreeNode n) {
 		if (!n.getUserObject().equals(m.getUserObject())) {
 			return false;
@@ -122,7 +123,7 @@ public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 
 		Enumeration<TreePath> p = getComp().getExpandedDescendants(new TreePath(getComp().getModel().getRoot()));
 
-		getComp().setModel(new DefaultTreeModel(makeTree(set, codeEditor.parsed_prog, codeEditor.outline_prefix_kind)));
+		getComp().setModel(new DefaultTreeModel(makeTree(set, codeEditor.parsed_prog, codeEditor.outline_prefix_kind, codeEditor.outline_alphabetical)));
 		tree.setCellRenderer(makeRenderer());
 
 		while (p.hasMoreElements()) {

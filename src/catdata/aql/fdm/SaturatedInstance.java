@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Ctx;
+import catdata.Null;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -33,6 +34,7 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 	private final InnerDP inner_dp;
 
 	boolean requireConsistency, allowUnsafeJava;
+	private final Ctx<Y, Term<Ty, En, Sym, Fk, Att, X, Y>> reprT_extra;
 	
 	@Override
 	public DP<Ty, En, Sym, Fk, Att, X, Y> dp() {
@@ -44,7 +46,7 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 		return inner_alg;
 	} 
 
-	public SaturatedInstance(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg, DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, boolean requireConsistency, boolean allowUnsafeJava) {
+	public SaturatedInstance(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg, DP<Ty, En, Sym, Fk, Att, Gen, Sk> dp, boolean requireConsistency, boolean allowUnsafeJava, boolean labelledNulls, Ctx<Y, Term<Ty, En, Sym, Fk, Att, X, Y>> reprT_extra) {
 		this.alg = alg;
 		this.dp = dp;
 		this.requireConsistency = requireConsistency;
@@ -54,8 +56,16 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 				gens.put(x, en);
 				for (Att att : schema().attsFrom(en)) {
 					Term<Ty, En, Sym, Fk, Att, X, Y> lhs = Term.Att(att, Term.Gen(x));
-					Term<Ty, En, Sym, Fk, Att, X, Y> rhs = alg.att(att, x).map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
-					eqs.add(new Pair<>(lhs, rhs));
+					if (labelledNulls) {
+						Term<Ty, En, Sym, Fk, Att, X, Y> rhs = lnConv(att, x);
+						if (rhs == null) {
+							continue;
+						}
+						eqs.add(new Pair<>(lhs, rhs));
+					} else {
+						Term<Ty, En, Sym, Fk, Att, X, Y> rhs = alg.att(att, x).map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
+						eqs.add(new Pair<>(lhs, rhs));
+					}
 				}
 				for (Fk fk : schema().fksFrom(en)) {
 					Term<Ty, En, Sym, Fk, Att, X, Y> lhs = Term.Fk(fk, Term.Gen(x));
@@ -64,19 +74,32 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 				}
 			}
 		}
-		sks = new Ctx<>(alg.talg().sks.map);
+		if (labelledNulls) {
+			sks = new Ctx<>();
+		} else {
+			sks = new Ctx<>(alg.talg().sks.map);
+		}
 		for (Eq<Ty, Void, Sym, Void, Void, Void, Y> eq : alg.talg().eqs) {
 			if (!eq.ctx.isEmpty()) {
 				continue;
 			}
 			eqs.add(new Pair<>(eq.lhs.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity()), eq.rhs.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity())));
 		}
-
+		this.reprT_extra = reprT_extra;
 		inner_dp = new InnerDP();
 		inner_alg = new InnerAlgebra();
 		validate();
 		checkSatisfaction(); //TODO aql disable in production?
 		
+	}
+
+	
+	private Term<Ty, En, Sym, Fk, Att, X, Y> lnConv(Att att, X x) {
+		if (alg.talg().sks.map.containsKey(new Null<>(Term.Att(att, Term.Gen(x))))) {
+			return null;
+		} else {
+			return alg.att(att, x).map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity()); 
+		}
 	}
 
 	private void checkSatisfaction() {
@@ -160,26 +183,14 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 
 		@Override
 		public Term<Ty, En, Sym, Fk, Att, X, Y> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
-			return term.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
+			if (term.sk != null && reprT_extra.containsKey(term.sk)) {
+				return reprT_extra.get(term.sk);
+			}
+			Term<Ty, En, Sym, Fk, Att, X, Y> x = alg.intoY(alg.reprT_protected(term)).map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
+			return x;
 		}
 		
-		/*
-		private Term<Ty, En, Sym, Fk, Att, X, Y> transR(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
-			if (term.obj != null || term.var != null) {
-				return term.convert();
-			} else if (term.sym != null) {
-				return Term.Sym(term.sym, term.args.stream().map(x -> transR(x)).collect(Collectors.toList()));
-			} else if (term.att != null) {
-				return Term.Att(term.att, transR(term.arg));
-			} else if (term.fk != null) {
-				return Term.Fk(term.fk, transR(term.arg));
-			} else if (term.gen != null) {
-				return Term.Gen(outer.nf(term.arg.convert()));
-			} else if (term.sk != null) {
-				return outer.sk(term.sk).convert();
-			}
-			throw new RuntimeException("Anomaly: please report");
-		}			 */
+		
 
 		@Override
 		public Schema<Ty, En, Sym, Fk, Att> schema() {

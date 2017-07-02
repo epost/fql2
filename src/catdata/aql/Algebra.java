@@ -176,7 +176,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	}
 	
 	private final Map<Term<Ty, Void, Sym, Void, Void, Void, Y>, Term<Ty,En,Sym,Fk,Att,Gen,Sk>> reprT_cache = Collections.synchronizedMap(new HashMap<>());
-	protected abstract Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> y);
+	public abstract Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> y);
 	
 	private final Map<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, Void, Sym, Void, Void, Void, Y>>
 	intoY_cache = Collections.synchronizedMap(new HashMap<>());

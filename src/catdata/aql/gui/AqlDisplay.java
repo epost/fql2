@@ -1,7 +1,6 @@
 package catdata.aql.gui;
 
 import java.awt.CardLayout;
-import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -12,7 +11,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.math.RoundingMode;
-import java.sql.Date;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -28,11 +26,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 
 import catdata.LineException;
 import catdata.Pair;
@@ -46,7 +41,6 @@ import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.Exp;
 import catdata.aql.exp.PragmaExp.PragmaExpCheck;
 import catdata.aql.exp.PragmaExp.PragmaExpConsistent;
-import catdata.ide.CodeEditor;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
 
@@ -156,7 +150,7 @@ public final class AqlDisplay implements Disp {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                JList list = (JList) e.getSource();
+                JList<?> list = (JList<?>) e.getSource();
                 if (list.locationToIndex(e.getPoint()) == -1 && !e.isShiftDown()
                         && !isMenuShortcutKeyDown(e)) {
                     list.clearSelection();
@@ -191,14 +185,13 @@ public final class AqlDisplay implements Disp {
 		float c1 = ((middle - start) / (1000f));
 		float c2 = ((end - middle) / (1000f));
 		String pre = exn == null ? "" : "(ERROR, PARTIAL RESULT) | ";
-		JComponent report = report(p, env, p.order, c1, c2, pre + title, new Date(start).toString());
+		JComponent report = report(p, env, p.order, c1, c2, pre + title);
 		frames.add(0, new Pair<>("Summary", report));
 
 		display(pre + title, p.order, report);
 	}
 
-	private JComponent report(Program<Exp<?>> prog, AqlEnv env, List<String> order, float c1, float c2, String pre,
-			String date) {
+	private JComponent report(Program<Exp<?>> prog, AqlEnv env, List<String> order, float c1, float c2, String pre) {
 		DecimalFormat df = new DecimalFormat("#.#");
 		df.setRoundingMode(RoundingMode.CEILING);
 		List<String> l = new LinkedList<>();
@@ -265,6 +258,8 @@ public final class AqlDisplay implements Disp {
 	private final CardLayout cl = new CardLayout();
 	private final JPanel x = new JPanel(cl);
 	private final JList<String> yyy = new JList<String>() {
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public int locationToIndex(Point location) {
 			int index = super.locationToIndex(location);

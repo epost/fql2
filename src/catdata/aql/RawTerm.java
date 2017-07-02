@@ -201,7 +201,7 @@ public final class RawTerm {
 		return b ? 1 : 0;
 	}
 
-	@SuppressWarnings({"null", "ConstantConditions"})
+	@SuppressWarnings({"ConstantConditions"})
     private <Ty, En, Sym, Fk, Att, Gen, Sk> Ref<Chc<Ty,En>> infer(Set<String> vars, Map<String, Ref<Chc<Ty, En>>> ctx, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		boolean isSym, isAtt, isFk, isGen, isSk, isVar, isObj ;
 				

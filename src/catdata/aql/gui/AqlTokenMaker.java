@@ -14,6 +14,7 @@ import org.fife.ui.rsyntaxtextarea.*;
 /**
  * 
  */
+@SuppressWarnings("unused")
 
 public class AqlTokenMaker extends AbstractJFlexCTokenMaker {
 
@@ -748,7 +749,7 @@ public class AqlTokenMaker extends AbstractJFlexCTokenMaker {
   private int yyline;
 
   /** the number of characters up to the start of the matched text */
-  private int yychar;
+private int yychar;
 
   /**
    * the number of characters from the last newline up to the start of the 

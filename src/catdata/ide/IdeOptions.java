@@ -72,6 +72,11 @@ public class IdeOptions {
 		Font old = getFont(IdeOption.FONT);
 		Font font = new Font(old.getFontName(), old.getStyle(), old.getSize()+1);
 		setFont(IdeOption.FONT, font);
+		
+		old = getFont(IdeOption.OUTLINE_FONT);
+		font = new Font(old.getFontName(), old.getStyle(), old.getSize()+1);
+		setFont(IdeOption.OUTLINE_FONT, font);
+		
 		notifyListenersOfChange();
 	}
 	
@@ -79,6 +84,11 @@ public class IdeOptions {
 		Font old = getFont(IdeOption.FONT);
 		Font font = new Font(old.getFontName(), old.getStyle(), Integer.max(1, old.getSize()-1));
 		setFont(IdeOption.FONT, font);
+		
+		old = getFont(IdeOption.OUTLINE_FONT);
+		font = new Font(old.getFontName(), old.getStyle(), Integer.max(1, old.getSize()-1));
+		setFont(IdeOption.OUTLINE_FONT, font);
+		
 		notifyListenersOfChange();
 	}
 	
@@ -426,6 +436,7 @@ public class IdeOptions {
 		case OUTLINE_DELAY:
 		case HTML_COLOR:
 		case LINE_NUMBERS:
+		case OUTLINE_FONT:
 		case LOOK_AND_FEEL:
 		case SPELL_CHECK:
 		case COMMENT_COLOR:
@@ -532,7 +543,7 @@ public class IdeOptions {
 			return;
 
 		case BACKGROUND_COLOR:
-			a.setBackground(getColor(o));
+			a.topArea.setBackground(getColor(o));
 			return;
 		case BRACKET_MATCH_BG_COLOR:
 			a.topArea.setMatchedBracketBGColor(getColor(o));
@@ -547,10 +558,11 @@ public class IdeOptions {
 			a.topArea.setCurrentLineHighlightColor(getColor(o));
 			return;
 		case FONT:
-			a.setFont(getFont(o));
+			a.topArea.setFont(getFont(o));
+			a.topArea.requestFocus();
 			return;
 		case FOREGROUND_COLOR:
-			a.setForeground(getColor(o));
+			a.topArea.setForeground(getColor(o));
 			return;	
 		case LINE_WRAP:
 			a.topArea.setLineWrap(getBool(o));
@@ -624,6 +636,9 @@ public class IdeOptions {
 		case OUTLINE_DELAY:
 			a.set_delay(getNat(o));
 			return;
+		case OUTLINE_FONT:
+			a.getOutline().setFont(getFont(o));
+			return;
 		default:
 			Util.anomaly();
 		}
@@ -641,6 +656,7 @@ public class IdeOptions {
 		
 		LOOK_AND_FEEL(IdeOptionType.LF, defaultLF()), 
 		FILE_PATH(IdeOptionType.FILE, new File("")), 
+		OUTLINE_FONT(IdeOptionType.FONT, UIManager.getFont("Tree.font")),
 		FONT(IdeOptionType.FONT, RTextAreaBase.getDefaultFont()),
 		LINE_WRAP(IdeOptionType.BOOL, false),
 		LINE_NUMBERS(IdeOptionType.BOOL, true),
@@ -773,6 +789,8 @@ public class IdeOptions {
 				return "Elongate the outline";
 			case OUTLINE_DELAY:
 				return "Parsing polling delay (s)";
+			case OUTLINE_FONT:
+				return "Outline font";
 			default:
 				return Util.anomaly();
 			}
@@ -833,10 +851,11 @@ public class IdeOptions {
 		jtb.add("General", general());
 		jtb.add("Colors", onlyColors());
 		jtb.add("Outline", outline());
-		jtb.addTab("AQL", new CodeTextPanel("", AqlOptions.getMsg()));
+		CodeTextPanel cc = new CodeTextPanel("", AqlOptions.getMsg());
+		jtb.addTab("AQL", cc);
 
 		jtb.setSelectedIndex(selected_tab);
-
+		//outline at top otherwise weird sizing collapse on screen
 		JOptionPane pane = new JOptionPane(new JScrollPane(jtb), JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, new String[] { "OK", "Cancel", "Reset", "Save", "Load", "Delete" }, "OK");
 
 		JDialog dialog = pane.createDialog(null, "Options");
@@ -873,10 +892,10 @@ public class IdeOptions {
 			}
 
 		});
-
+		dialog.setPreferredSize(new Dimension(800,800));
 		dialog.pack();
 		dialog.setVisible(true);
-
+		
 	}
 
 	public static void showAbout() {

@@ -222,7 +222,6 @@ public class FinCat extends Category<Category<?, ?>, Functor<?, ?, ?, ?>> {
 		return new Functor<>(coproduct(a1.source, a2.source), a1.target, o, a);
 	}
 
-	@SuppressWarnings("hiding")
 	private final Map<Pair<Category<Object, Object>, Category<Object, Object>>, Set<Functor<Object, Object, Object, Object>>> cached = new HashMap<>();
 
 	@SuppressWarnings("unchecked")

@@ -7,9 +7,7 @@ import java.util.Map;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Kind;
-import catdata.aql.Mapping;
 import catdata.aql.Query;
-import catdata.aql.exp.MapExp.MapExpId;
 import catdata.aql.exp.SchExp.SchExpLit;
 
 public abstract class QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Query<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2>> {

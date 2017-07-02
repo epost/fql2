@@ -98,6 +98,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 
 		AqlOptions op = new AqlOptions(options, null, env.defaults);
 		boolean dontValidateEqs = (Boolean) op.getOrDefault(AqlOption.dont_validate_unsafe);
+		boolean labelledNulls = (Boolean) op.getOrDefault(AqlOption.labelled_nulls);
 		String charset0 = (String) op.getOrDefault(AqlOption.csv_charset);
 		Charset charset = Charset.forName(charset0);		
 		CSVFormat format = InstExpCsv.getFormat(op);
@@ -108,11 +109,13 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 				throw new RuntimeException("File not found: " + fil.getAbsolutePath());
 			}
 			CSVParser parser = CSVParser.parse(fil, charset, format);
-			for (Sk1 sk : s.sks().keySet()) {
-				@SuppressWarnings("unchecked")
-				Sk2 sk2 = (Sk2) sk;
-				sks.put(sk, Term.Sk(sk2)); //map Null@Ty to Null@Ty
-			}
+			if (!labelledNulls) {
+				for (Sk1 sk : s.sks().keySet()) {
+					Ty ty = s.sks().get(sk);
+					Sk2 sk2 = Util.get0(Util.revS(t.sks().map).get(ty));
+					sks.put(sk, Term.Sk(sk2)); //map Null@Ty to Null@Ty
+				}
+			} 
 			
 			for (CSVRecord row : parser) {
 				String gen = row.get(0);
@@ -137,7 +140,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 				 
 		return new LiteralTransform<>(gens, sks, s, t, dontValidateEqs); 
 	
-		//TODO aql CSV instances with skolems.
+		
 	}
 
 	

@@ -250,11 +250,11 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 
 		@Override
-		public void asTree(DefaultMutableTreeNode root) {
+		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
 			if (eds.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("nodes");
-				for (EdExpRaw t : eds) {
+				for (EdExpRaw t : Util.alphaMaybe(alpha, eds)) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(" ");
 					t.asTree(m);

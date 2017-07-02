@@ -15,7 +15,6 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Graph;
 import catdata.aql.Kind;
-import catdata.aql.RawTerm;
 import catdata.graph.DMG;
 
 public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {
@@ -41,11 +40,11 @@ public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {
 	public static class GraphExpRaw extends GraphExp<Object,Object> {
 		
 		@Override
-		public void asTree(DefaultMutableTreeNode root) {
+		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
 			if (imports.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("imports");
-				for (Object t : imports) {
+				for (Object t : Util.alphaMaybe(alpha, imports)) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.toString());
 					n.add(m);
@@ -54,7 +53,7 @@ public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {
 			if (nodes.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("nodes");
-				for (Object t : nodes) {
+				for (Object t : Util.alphaMaybe(alpha, nodes)) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.toString());
 					n.add(m);
@@ -64,7 +63,7 @@ public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {
 			if (edges.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("edges");
-				for (Object t : edges.keySet()) {
+				for (Object t : Util.alphaMaybe(alpha, edges.keySet())) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t + " : " + edges.get(t).first + " -> " + edges.get(t).second);
 					n.add(m);

@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;

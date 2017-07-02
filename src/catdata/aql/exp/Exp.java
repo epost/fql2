@@ -11,7 +11,8 @@ import catdata.aql.Kind;
 
 public abstract class Exp<X> {
 	
-	public void asTree(DefaultMutableTreeNode node) {
+	@SuppressWarnings("unused")
+	public void asTree(DefaultMutableTreeNode node, boolean alpha) {
 		
 	}
 	

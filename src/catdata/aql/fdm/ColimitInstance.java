@@ -38,7 +38,6 @@ public class ColimitInstance<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 
 	private final Instance<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>, ID, Chc<Pair<N,Sk>, Pair<ID, Att>>> J;
 	
-	@SuppressWarnings("unused")
 	public ColimitInstance(Schema<Ty, En, Sym, Fk, Att> schema, DMG<N, E> shape, Ctx<N, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> nodes, Ctx<E, Transform<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> edges, AqlOptions options) {
 		for (N n : nodes.keySet()) {
 			if (!nodes.get(n).schema().equals(schema)) {

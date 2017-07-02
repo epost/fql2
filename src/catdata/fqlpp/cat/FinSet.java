@@ -465,8 +465,7 @@ public class FinSet extends Category<Set, Fn> {
 		});
 	}
 	
-	@SuppressWarnings("hiding")
-    private final
+	private final
     Map<Pair<Set,Set>, Set<Fn>> cached = new HashMap<>();
 	
 	@SuppressWarnings({ "unchecked" })

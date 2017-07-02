@@ -137,7 +137,7 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 		}
 
 		@Override
-		protected Term<Ty, En, Sym, Fk, Att, Gen, Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> y) {
+		public Term<Ty, En, Sym, Fk, Att, Gen, Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> y) {
 			return I.algebra().reprT(y);
 		}
 

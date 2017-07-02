@@ -14,7 +14,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import catdata.Chc;
 import catdata.Pair;
-import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
@@ -30,7 +29,7 @@ import catdata.aql.fdm.LiteralTransform;
 public final class TransExpRaw extends TransExp<Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object,Object> {
 	
 	@Override
-	public void asTree(DefaultMutableTreeNode root) {
+	public void asTree(DefaultMutableTreeNode root, boolean alpha) {
 		if (imports.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject("imports");

@@ -8,6 +8,7 @@ public interface Prog {
 	
 	Collection<String> keySet();
 	
+	@SuppressWarnings("unused")
 	default String kind(String s) {
 		return "";
 	}

@@ -35,11 +35,11 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 	
 	
 	@Override
-	public void asTree(DefaultMutableTreeNode root) {
+	public void asTree(DefaultMutableTreeNode root, boolean alpha) {
 		if (imports.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject("imports");
-			for (Object t : imports) {
+			for (Object t : Util.alphaMaybe(alpha, imports)) {
 				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 				m.setUserObject(t.toString());
 				n.add(m);
@@ -48,7 +48,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		if (ens.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject("entities");
-			for (Object t : ens) {
+			for (Object t : Util.alphaMaybe(alpha, ens)) {
 				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 				m.setUserObject(t.toString());
 				n.add(m);
@@ -58,7 +58,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		if (fks.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject("fks");
-			for (Pair<Object, Pair<Object, Object>> t : fks) {
+			for (Pair<Object, Pair<Object, Object>> t : Util.alphaMaybe(alpha, fks)) {
 				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 				m.setUserObject(t.first + " : " + t.second.first + "->" + t.second.second);
 				n.add(m);
@@ -68,7 +68,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		if (atts.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject("fks");
-			for (Pair<Object, Pair<Object, Object>> t : atts) {
+			for (Pair<Object, Pair<Object, Object>> t : Util.alphaMaybe(alpha, atts)) {
 				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 				m.setUserObject(t.first + " : " + t.second.first + "->" + t.second.second);
 				n.add(m);
@@ -78,7 +78,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		if (p_eqs.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject("path_eqs");
-			for (Pair<List<Object>, List<Object>> t : p_eqs) {
+			for (Pair<List<Object>, List<Object>> t : Util.alphaMaybe(alpha, p_eqs)) {
 				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 				m.setUserObject(Util.sep(t.first, ".") + "=" + Util.sep(t.second, "."));
 				n.add(m);
@@ -88,7 +88,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		if (t_eqs.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject("obs_eqs");
-			for (Quad<String, Object, RawTerm, RawTerm> t : t_eqs) {
+			for (Quad<String, Object, RawTerm, RawTerm> t : Util.alphaMaybe(alpha, t_eqs)) {
 				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 				m.setUserObject(t.third + "=" + t.fourth);
 				n.add(m);

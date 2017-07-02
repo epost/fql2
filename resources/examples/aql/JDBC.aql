@@ -1,3 +1,7 @@
+//toggle the two different SQL import NULL semantics
+//options
+	//labelled_nulls = true
+
 //create some example data in a local temporary sql database. (close delay keeps H2 database alive across connections)
 pragma load = exec_jdbc "org.h2.Driver" "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1" { 
 "DROP TABLE IF EXISTS Employee;
@@ -147,4 +151,6 @@ pragma store_id_query = export_jdbc_query Q "org.h2.Driver" "jdbc:h2:mem:db2" "E
 pragma view_view = exec_jdbc "org.h2.Driver" "jdbc:h2:mem:db2" { 
 	"SELECT * FROM ViewEmployee"
 	"SELECT * FROM ViewDepartment"
+	"DROP VIEW ViewEmployee"
+	"DROP VIEW ViewDepartment" //clean up is important when re-running the program
 }

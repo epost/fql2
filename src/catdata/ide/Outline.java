@@ -1,23 +1,14 @@
 package catdata.ide;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
-
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
-
 import catdata.Prog;
 import catdata.Unit;
 import catdata.Util;
@@ -48,7 +39,7 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" }) Outline(CodeEditor<Progg, Env, DDisp> codeEditor) {
+	 Outline(CodeEditor<Progg, Env, DDisp> codeEditor) {
 		this.codeEditor = codeEditor;
 		JScrollPane jsp = new JScrollPane(getComp());
 		jsp.setBorder(BorderFactory.createEmptyBorder());
@@ -76,6 +67,7 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 								Outline.this.codeEditor.parsed_prog_string = s;
 							}
 							build();
+							Outline.this.codeEditor.clearSpellCheck(); //morally, should have its own thread, but meh
 						}
 					} catch (Exception ex) {
 					}
@@ -96,6 +88,10 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 		t.start();
 
 		
+	}
+
+	public void setFont(Font font) {
+		getComp().setFont(font);
 	}
 
 }

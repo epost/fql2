@@ -504,7 +504,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		return s;
 	}
 
-	private KBExp<Chc<V, C>, V> step1(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, @SuppressWarnings("unused") Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache, @SuppressWarnings("hiding") Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R, KBExp<Chc<V, C>, V> e0, Set<T> inhab) throws InterruptedException {
+	private KBExp<Chc<V, C>, V> step1(BiFunction<Chc<V, C>, Chc<V, C>, Boolean> gt, @SuppressWarnings("unused") Map<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>> cache,  Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> E, Collection<Triple<KBExp<Chc<V, C>, V>, KBExp<Chc<V, C>, V>, Map<V, T>>> R, KBExp<Chc<V, C>, V> e0, Set<T> inhab) throws InterruptedException {
 		KBExp<Chc<V, C>, V> e = e0;
 		/*
 		 * if (cache != null && cache.containsKey(e)) { return cache.get(e); }

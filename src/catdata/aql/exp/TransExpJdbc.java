@@ -82,12 +82,12 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 
 	@SuppressWarnings("unchecked")
 	private Gen1 objectToGen1(Object gen) {
-		return (Gen1) gen;
+		return (Gen1) gen.toString();
 	}
 
 	@SuppressWarnings("unchecked")
 	private Gen2 objectToGen2(Object gen) {
-		return (Gen2) gen;
+		return (Gen2) gen.toString();
 	}
 /*
 	@SuppressWarnings("unchecked")
@@ -141,11 +141,18 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 		
 		Map<Gen1, Term<Void, En, Void, Fk, Void, Gen2, Void>> gens = new HashMap<>();
 		Map<Sk1, Term<Ty, En, Sym, Fk, Att, Gen2, Sk2>> sks = new HashMap<>();
-		for (Sk1 sk : src0.sks().keySet()) {
-			@SuppressWarnings("unchecked")
-			Sk2 sk2 = (Sk2) sk;
-			sks.put(sk, Term.Sk(sk2)); //map Null@Ty to Null@Ty
-		}
+		
+		AqlOptions op = new AqlOptions(options, null, env.defaults);
+		Boolean dontValidateEqs = (Boolean) op.getOrDefault(AqlOption.dont_validate_unsafe);
+		boolean labelledNulls = (Boolean) op.getOrDefault(AqlOption.labelled_nulls);
+		
+		if (!labelledNulls) {
+			for (Sk1 sk : src0.sks().keySet()) {
+				Ty ty = src0.sks().get(sk);
+				Sk2 sk2 = Util.get0(Util.revS(dst0.sks().map).get(ty));
+				sks.put(sk, Term.Sk(sk2)); //map Null@Ty to Null@Ty
+			}
+		} 
 	
 		try (Connection conn = DriverManager.getConnection(jdbcString)) {
 			
@@ -186,8 +193,6 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 			throw new RuntimeException("JDBC error: " + exn.getMessage());
 		}
 			
-		AqlOptions op = new AqlOptions(options, null, env.defaults);
-		Boolean dontValidateEqs = (Boolean) op.getOrDefault(AqlOption.dont_validate_unsafe);
 		
 		return new LiteralTransform<>(gens, sks, src0, dst0, dontValidateEqs); 
 	}

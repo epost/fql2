@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import catdata.Ctx;
+import catdata.IntRef;
 import catdata.Null;
 import catdata.Pair;
 import catdata.Util;
@@ -27,7 +28,7 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.fdm.SaturatedInstance;
 
-public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<Ty>, Gen, Null<Ty>> {
+public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> {
 
 	private final SchExp<Ty, En, Sym, Fk, Att> schema;
 
@@ -44,6 +45,9 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 	public Map<String, String> options() {
 		return options;
 	}
+	
+	public static IntRef counter = new IntRef(0); 
+	private final int cur_count;
 
 	public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema,
 			/* List<String> imports, */ List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<String, String>> map) {
@@ -58,6 +62,10 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 		}
 		this.options = Util.toMapSafely(options);
 		this.map = Util.toMapSafely(map);
+		synchronized (counter) {
+			cur_count = counter.i;
+			counter.i = counter.i + 1;
+		}
 	}
 
 	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, Map<Ty, String> tys, Map<Att, String> atts, Map<Fk, String> fks) {
@@ -105,31 +113,39 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 
 	@SuppressWarnings("unchecked")
 	private Gen objectToGen(Object gen) {
-		return (Gen) gen;
+		return (Gen) gen.toString();
 	}
 
 	// @SuppressWarnings("unchecked")
-	private Term<Ty, Void, Sym, Void, Void, Void, Null<Ty>> objectToSk(Schema<Ty, En, Sym, Fk, Att> sch, Ty ty, Object rhs) {
+	public static <Ty,Sym,En,Fk,Att,Gen> Term<Ty, Void, Sym, Void, Void, Void, Null<?>> objectToSk(Schema<Ty, En, Sym, Fk, Att> sch, Object rhs, Gen x, Att att, boolean labelledNulls, Ctx<Ty, Collection<Null<?>>> sks, int cur_count, Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>> extraRepr, boolean shouldJS) {
+		Ty ty = sch.atts.get(att).second;
 		if (rhs == null) {
-			return Term.Sk(new Null<>(ty));
+			Null<?> n = labelledNulls ? new Null<>(Term.Att(att, Term.Gen(x))) : new Null<>(ty.toString() + Integer.toString(cur_count));			
+			if (labelledNulls) {
+				extraRepr.put(n, Term.Att(att, Term.Gen(x)));
+			}
+			sks.get(ty).add(n);
+			return Term.Sk(n);
 		} else if (sch.typeSide.js.java_tys.containsKey(ty)) {
+			if (shouldJS) {
+				return Term.Obj(sch.typeSide.js.parse(ty, (String) rhs), ty);
+			} 
 			return Term.Obj(rhs, ty);
 		} else if (sch.typeSide.syms.containsKey(objectToSym(rhs)) && sch.typeSide.syms.get(objectToSym(rhs)).first.isEmpty()) {
 			return Term.Sym(objectToSym(rhs), Collections.emptyList());
 		}
 		return Util.anomaly();
-		//throw new RuntimeException("One of the following conditions has not been trigger 1) the 2nd column value, " + rhs + " is not null, and " + ty + " is not a type");	
 	}
 
 	@SuppressWarnings("unchecked")
-	private Sym objectToSym(Object s) {
-		return (Sym) s;
+	private static <Sym2> Sym2 objectToSym(Object s) {
+		return (Sym2) s;
 	}
 
 	// TODO aql csv import still broken re: quoting
 
 	@Override
-	public Instance<Ty, En, Sym, Fk, Att, Gen, Null<Ty>, Gen, Null<Ty>> eval(AqlEnv env) {
+	public Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> eval(AqlEnv env) {
 		Schema<Ty, En, Sym, Fk, Att> sch = schema.eval(env);
 		for (Ty ty : sch.typeSide.tys) {
 			if (!sch.typeSide.js.java_tys.containsKey(ty)) {
@@ -160,13 +176,21 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 		totalityCheck(sch, ens, tys, atts, fks);
 
 		Ctx<En, Collection<Gen>> ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
-		Ctx<Ty, Collection<Null<Ty>>> tys0 = new Ctx<>();
+		Ctx<Ty, Collection<Null<?>>> tys0 = new Ctx<>();
 		Ctx<Gen, Ctx<Fk, Gen>> fks0 = new Ctx<>();
-		Ctx<Gen, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<Ty>>>> atts0 = new Ctx<>();
+		Ctx<Gen, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<?>>>> atts0 = new Ctx<>();
 		AqlOptions op = new AqlOptions(options, null, env.defaults);
+		Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>> extraRepr = new Ctx<>();
+
+		
+		boolean labelledNulls = (boolean) op.getOrDefault(AqlOption.labelled_nulls);
 
 		for (Ty ty : sch.typeSide.tys) {
-			tys0.put(ty, Util.singList(new Null<>(ty)));
+			if (labelledNulls) {
+				tys0.put(ty, new HashSet<>());
+			} else {
+				tys0.put(ty, Util.singSet(new Null<>(ty.toString() + Integer.toString(cur_count))));
+			}
 		}
 
 		try (Connection conn = DriverManager.getConnection(jdbcString)) {
@@ -237,7 +261,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 					rs.close();
 					throw new RuntimeException("Error in " + att + ": Expected 2 columns but received " + columnsNumber);
 				}
-				Ty ty = sch.atts.get(att).second;
+				//Ty ty = sch.atts.get(att).second;
 				while (rs.next()) {
 					Object lhs = rs.getObject(1);
 					if (lhs == null) {
@@ -249,7 +273,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 					if (!atts0.containsKey(objectToGen(lhs))) {
 						atts0.put(objectToGen(lhs), new Ctx<>());
 					}
-					atts0.get(objectToGen(lhs)).put(att, objectToSk(sch, ty, rhs));
+					atts0.get(objectToGen(lhs)).put(att, objectToSk(sch, rhs, objectToGen(lhs), att, labelledNulls, tys0, cur_count, extraRepr, false));
 				}
 				stmt.close();
 				rs.close();
@@ -263,12 +287,12 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 			throw new RuntimeException(thr.getMessage() + "\n\n" + helpStr);
 		}
 
-		ImportAlgebra<Ty, En, Sym, Fk, Att, Gen, Null<Ty>> alg = new ImportAlgebra<>(sch, ens0, tys0, fks0, atts0, Object::toString, Object::toString);
+		ImportAlgebra<Ty, En, Sym, Fk, Att, Gen, Null<?>> alg = new ImportAlgebra<>(sch, ens0, tys0, fks0, atts0, Object::toString, Object::toString);
 
 		// TODO aql validate for collage
 		// AqlOptions strat = new AqlOptions(options, col);
 
-		return new SaturatedInstance<>(alg, alg, (Boolean) op.getOrDefault(AqlOption.require_consistency), (Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe));
+		return new SaturatedInstance<>(alg, alg, (Boolean) op.getOrDefault(AqlOption.require_consistency), (Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe), labelledNulls, extraRepr);
 
 	}
 

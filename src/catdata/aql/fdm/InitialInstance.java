@@ -103,7 +103,7 @@ public class InitialInstance<Ty, En, Sym, Fk, Att> extends Instance<Ty, En, Sym,
 		}
 
 		@Override
-		protected Term<Ty, En, Sym, Fk, Att, Void, Void> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Void> y) {
+		public Term<Ty, En, Sym, Fk, Att, Void, Void> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Void> y) {
 			return y.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Util.voidFn());
 		}
 

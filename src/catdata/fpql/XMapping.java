@@ -704,7 +704,7 @@ public class XMapping<C, D> implements XObject {
 
 
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes" })
 	private Triple<C, C, List<C>> getWrapper(@SuppressWarnings("unused") XCtx I,
 			Map<Pair<C, Triple<D, D, List<D>>>, Triple<C, C, List<C>>> theta,
 			Pair<C, Triple<D, D, List<D>>> key) {

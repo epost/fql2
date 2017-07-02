@@ -8,7 +8,6 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 
@@ -24,6 +23,8 @@ public  class ListOutline<Progg extends Prog, Env, DDisp extends Disp>  extends 
 		}
 		
 			list = new JList<String>() {
+				private static final long serialVersionUID = 1L;
+
 				@Override
 				public int locationToIndex(Point location) {
 					int index = super.locationToIndex(location);
@@ -51,7 +52,7 @@ public  class ListOutline<Progg extends Prog, Env, DDisp extends Disp>  extends 
 	}
 	
 
-	@SuppressWarnings({ "unchecked", "rawtypes" }) ListOutline(CodeEditor<Progg, Env, DDisp> codeEditor) {
+	@SuppressWarnings({ "rawtypes" }) ListOutline(CodeEditor<Progg, Env, DDisp> codeEditor) {
 		super(codeEditor);
 		
 		list.addMouseListener(new MouseAdapter() {

@@ -117,7 +117,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	public void setText(String s) {
 		topArea.setText(s);
-		topArea.setCaretPosition(0);
+		setCaretPos(0);
 	}
 
 	public String getText() {
@@ -148,7 +148,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		} else if (position >= history.size()) {
 			position = history.size() - 1;
 		}
-		topArea.setCaretPosition(history.get(position));
+		setCaretPos(history.get(position));
 	}
 	public void backAction() {
 		position++;
@@ -195,7 +195,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			topArea.setSyntaxEditingStyle(getATMFlhs());
 		}
 		topArea.setText(content);
-		topArea.setCaretPosition(0);
+		setCaretPos(0);
 		topArea.setAutoscrolls(true);
 
 		InputMap inputMap = topArea.getInputMap();
@@ -213,9 +213,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (KeyEvent.VK_DOWN == e.getKeyCode() && isCaretOnLastLine()) {
-					topArea.setCaretPosition(Integer.max(0, topArea.getText().length()));
+					setCaretPos(Integer.max(0, topArea.getText().length()));
 				} else if (KeyEvent.VK_UP == e.getKeyCode() && isCaretOnFirstLine()) {
-					topArea.setCaretPosition(0);
+					setCaretPos(0);
 				}
 			}
 
@@ -454,7 +454,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			Fold fold = topArea.getFoldManager().getFold(j);
 			fold.setCollapsed(b);
 		}
-		topArea.setCaretPosition(topArea.getCaretPosition());
+		setCaretPos(topArea.getCaretPosition());
 		topArea.revalidate();
 		sp.revalidate();
 	}
@@ -485,7 +485,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		int line = dialog.getLineNumber();
 		if (line > 0) {
 			try {
-				topArea.setCaretPosition(topArea.getLineStartOffset(line - 1));
+				setCaretPos(topArea.getLineStartOffset(line - 1));
 			} catch (BadLocationException ble) { // Never happens
 				UIManager.getLookAndFeel().provideErrorFeedback(topArea);
 				ble.printStackTrace();
@@ -514,7 +514,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 		String program = e.getText();
 		topArea.setText(program);
-		topArea.setCaretPosition(0);
+		setCaretPos(0);
 		respArea.setText("");
 		GUI.setDirty(id, false);
 		if (display != null) {
@@ -647,6 +647,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			SwingUtilities.invokeLater(() -> {
 				topArea.requestFocusInWindow();
 				topArea.setCaretPosition(p);
+				Util.centerLineInScrollPane(topArea);
 			});
 		} catch (Throwable ex) {
 			ex.printStackTrace();
@@ -655,7 +656,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	private void moveTo(int col, int line) {
 		topArea.requestFocusInWindow();
-		topArea.setCaretPosition(
+		setCaretPos(
 				topArea.getDocument().getDefaultRootElement().getElement(line - 1).getStartOffset() + (col - 1));
 	}
 
@@ -710,7 +711,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	@SuppressWarnings("static-method")
 	protected Collection<String> reservedWords() {
-		return Collections.emptyList();
+		return Collections.emptySet();
 	}
 
 	@Override
@@ -756,9 +757,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	Boolean isClosed = false;
 
-	Progg parsed_prog;
-	String parsed_prog_string;
-	Unit parsed_prog_lock;
+	protected Progg parsed_prog;
+	protected String parsed_prog_string;
+	protected Unit parsed_prog_lock;
 
 	public void close() {
 		synchronized (isClosed) {
@@ -766,6 +767,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 	}
 
+	@SuppressWarnings("unused")
 	protected boolean omit(String s, Progg p) {
 		return false;
 	}

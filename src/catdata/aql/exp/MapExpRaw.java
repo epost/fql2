@@ -29,11 +29,11 @@ import catdata.aql.Var;
 public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,Object,Object,Object> {
 	
 	@Override
-	public void asTree(DefaultMutableTreeNode root) {
+	public void asTree(DefaultMutableTreeNode root, boolean alpha) {
 		if (imports.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject("imports");
-			for (Object t : imports) {
+			for (Object t : Util.alphaMaybe(alpha, imports)) {
 				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 				m.setUserObject(t.toString());
 				n.add(m);
@@ -42,7 +42,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		if (ens.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject("entities");
-			for (Pair<Object, Object> t : ens) {
+			for (Pair<Object, Object> t : Util.alphaMaybe(alpha, ens)) {
 				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 				m.setUserObject(t.first + " -> " + t.second);
 				n.add(m);
@@ -52,7 +52,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		if (fks.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject("eqs");
-			for (Pair<Object, List<Object>> t : fks) {
+			for (Pair<Object, List<Object>> t : Util.alphaMaybe(alpha, fks)) {
 				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 				m.setUserObject(t.first + " -> " + Util.sep(t.second, "."));
 				n.add(m);
@@ -62,7 +62,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		if (atts.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 			n.setUserObject("atts");
-			for (Pair<Object, Triple<String, Object, RawTerm>> t : atts) {
+			for (Pair<Object, Triple<String, Object, RawTerm>> t : Util.alphaMaybe(alpha, atts)) {
 				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 				m.setUserObject(t.first + " -> \\" + t.second + ". " + t.second.third);
 				n.add(m);

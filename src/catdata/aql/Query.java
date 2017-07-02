@@ -57,9 +57,9 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		return ret;
 	}
 
-	private Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> conv2(
-			Ctx<Fk2, Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>>> fks2) {
-		Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> ret = new Ctx<>();
+	private Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> conv2()
+		{
+			Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> ret = new Ctx<>();
 		for (Fk2 fk2 : fks.keySet()) {
 			ret.put(fk2, new Pair<>(fks.get(fk2).gens(), true)); //TODO aql true is correct here?
 		}
@@ -68,7 +68,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 
 	public Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> unnest() {
 		Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> b = new Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>(conv1(ens),
-				atts, conv2(fks), src, dst);
+				atts, conv2(), src, dst);
 		b = unfoldNestedApplications(b);
 		//System.out.println(b);
 		Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> p = new Query<>(b.ens, b.atts, b.fks, src, dst, true);
@@ -82,6 +82,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			Schema<Ty, En1, Sym, Fk1, Att1> src, Schema<Ty, En2, Sym, Fk2, Att2> dst, boolean doNotCheckPathEqs,
 			boolean removeRedundantVars) {
 		// do this first to type check
+		@SuppressWarnings("unused")
 		Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q = new Query<>(ens, atts, fks, src, dst, true);
 		// System.out.println("original " + q);
 		// System.out.println("--------");
@@ -159,7 +160,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			En2 dst = b.dst.fks.get(fk2).second;
 			Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>> g = new Ctx<>(b.fks.get(fk2).first.map);
 			if (second.equals(dst)) {
-				g.put(v, third.replace(g.map((s,t) -> new Pair(Term.Gen(s), t.convert())).map));
+				g.put(v, third.replace(g.map((s,t) -> new Pair<Term<Ty, En1, Sym, Fk1, Att1, Var, Void>,Term<Ty, En1, Sym, Fk1, Att1, Var, Void>>(Term.Gen(s), t.convert())).map).convert());
 			}
 			if (second.equals(src)) {
 				g = g.map(t -> t.replace(third.convert(), Term.Gen(v)));
@@ -483,7 +484,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			return ret;
 		}
 
-		private <Gen, Sk, X, Y> Map<Pair<Var, Var>, Float> estimateSelectivities() {
+		private  Map<Pair<Var, Var>, Float> estimateSelectivities() {
 			Map<Pair<Var, Var>, Float> ret = new HashMap<>();
 			for (Var v1 : gens().keySet()) {
 				for (Var v2 : gens().keySet()) {
@@ -531,7 +532,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			return cost;
 		}
 
-		private <Gen, Sk, X, Y> Iterable<List<Var>> generatePlans() {
+		private  Iterable<List<Var>> generatePlans() {
 			return Util.permutationsOf(new LinkedList<>(gens.keySet()));
 		}
 		/*
@@ -767,7 +768,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 
 			ret.add("drop view if exists " + post + en2);
 			
-			ret.add("create view " + post + en2 + " as select " + Util.sep(select, ", ") + "\nfrom " + Util.sep(from, ", ") + "\n " + whereToString(ens.get(en2).eqs, idCol));
+			ret.add("create view " + post + en2 + " as select " + Util.sep(select, ", ") + "\nfrom " + Util.sep(from, ", ") + "\n " + whereToString(eqs, idCol));
 		}
 
 		return ret;
@@ -777,7 +778,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		return "convert(" + x + ", varchar)";
 	}
 	
-	private String qdirty(Term t, String idCol) {
+	private String qdirty(Term<?,?,?,?,?,?,?> t, String idCol) {
 		if (t.gen != null) {
 			return t.gen + "." + idCol;
 		} else if (t.fk != null) {

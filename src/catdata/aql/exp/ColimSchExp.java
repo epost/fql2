@@ -49,14 +49,14 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	extends ColimSchExp<N, Void, Ty, En, Sym, Fk, Att> {
 
 		@Override
-		public void asTree(DefaultMutableTreeNode root) {
+		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
 			if (nodes.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("schemas");
-				for (N t : nodes.keySet()) {
+				for (N t : Util.alphaMaybe(alpha, nodes.keySet())) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.toString());
-					nodes.get(t).asTree(m);
+					nodes.get(t).asTree(m, alpha);
 					n.add(m);
 				}
 				root.add(n);
@@ -64,7 +64,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			if (eqEn.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("en_eqs");
-				for (Quad<N, En, N, En> t : eqEn) {
+				for (Quad<N, En, N, En> t : Util.alphaMaybe(alpha, eqEn)) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.first + "." + t.second + " = " + t.third + "." + t.fourth);
 					n.add(m);
@@ -74,7 +74,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			if (eqTerms2.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("path_eqs");
-				for (Pair<List<String>, List<String>> t : eqTerms2) {
+				for (Pair<List<String>, List<String>> t : Util.alphaMaybe(alpha, eqTerms2)) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(Util.sep(t.first, ".") + " = " + Util.sep(t.second, "."));
 					n.add(m);
@@ -84,7 +84,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			if (eqTerms.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("obs_eqs");
-				for (Quad<String, String, RawTerm, RawTerm> t : eqTerms) {
+				for (Quad<String, String, RawTerm, RawTerm> t : Util.alphaMaybe(alpha, eqTerms)) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.third + " = " + t.fourth);
 					n.add(m);
@@ -418,14 +418,14 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		public final Ctx<E, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>> edges;
 		
 		@Override
-		public void asTree(DefaultMutableTreeNode root) {
+		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
 			if (nodes.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("schemas");
-				for (N t : nodes.keySet()) {
+				for (N t : Util.alphaMaybe(alpha, nodes.keySet()))   {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.toString());
-					nodes.get(t).asTree(m);
+					nodes.get(t).asTree(m, alpha);
 					n.add(m);
 				}
 				root.add(n);
@@ -433,10 +433,10 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			if (edges.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("mappings");
-				for (E t : edges.keySet()) {
+				for (E t : Util.alphaMaybe(alpha, edges.keySet())) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.toString());
-					edges.get(t).asTree(m);
+					edges.get(t).asTree(m, alpha);
 					n.add(m);
 				}
 				root.add(n);
@@ -564,11 +564,11 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	public static final class ColimSchExpModify<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
 		
 		@Override
-		public void asTree(DefaultMutableTreeNode root) {
+		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
 			if (ens.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("rename ens");
-				for (Pair<String, String> t : ens) {
+				for (Pair<String, String> t : Util.alphaMaybe(alpha, ens)) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.toString());
 					n.add(m);
@@ -578,7 +578,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			if (fks0.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("rename fks");
-				for (Pair<String, String> t : fks0) {
+				for (Pair<String, String> t : Util.alphaMaybe(alpha, fks0)) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.first + " -> " + t.second);
 					n.add(m);
@@ -588,7 +588,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			if (atts0.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("rename atts");
-				for (Pair<String, String> t : atts0) {
+				for (Pair<String, String> t : Util.alphaMaybe(alpha, atts0)) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.first + " -> " + t.second);
 					n.add(m);
@@ -598,7 +598,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			if (fks.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("remove fks");
-				for (Pair<String, List<String>> t : fks) {
+				for (Pair<String, List<String>> t : Util.alphaMaybe(alpha, fks)) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.first + " -> " + t.second);
 					n.add(m);
@@ -608,7 +608,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			if (atts.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("remove atts");
-				for (Pair<String, Triple<String, String, RawTerm>> t : atts) {
+				for (Pair<String, Triple<String, String, RawTerm>> t : Util.alphaMaybe(alpha, atts)) {
 					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
 					m.setUserObject(t.first + " -> \\" + t.second.first + ". " + t.second);
 					n.add(m);

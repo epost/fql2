@@ -67,7 +67,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return options;
 		}
 		
-		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@SuppressWarnings({ "unchecked" })
 		public InstExpRandom(SchExp sch, List<Pair<String, String>> ens, List<Pair<String, String>> options) {
 			this.ens = Util.toMapSafely(ens.stream().map(x -> new Pair<>(x.first, Integer.parseInt(x.second))).collect(Collectors.toList()));
 			this.options = Util.toMapSafely(options);

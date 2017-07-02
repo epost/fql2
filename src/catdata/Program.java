@@ -8,13 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import org.jparsec.error.Location;
 import org.jparsec.error.ParseErrorDetails;
 import org.jparsec.error.ParserException;
-
-import catdata.aql.exp.Exp;
 
 public class Program<X> implements Prog {
 

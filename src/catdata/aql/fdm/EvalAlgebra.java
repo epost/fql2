@@ -147,7 +147,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Row other = (Row) obj;
+			Row<?, ?> other = (Row<?, ?>) obj;
 			if (en2 == null) {
 				if (other.en2 != null)
 					return false;
@@ -273,7 +273,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 	}
 
 	@Override
-	protected Term<Ty, En2, Sym, Fk2, Att2, Row<En2, X>, Y> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
+	public Term<Ty, En2, Sym, Fk2, Att2, Row<En2, X>, Y> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
 		Term<Ty, Void, Sym, Void, Void, Void, Y> t = I.algebra().intoY(I.algebra().reprT(term));
 		Term<Ty, Void, Sym, Void, Void, Void, Y> u = I.schema().typeSide.js.reduce(t);
 		return u.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());

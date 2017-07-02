@@ -29,7 +29,7 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y>
 		F = f;
 		I = i;
 		alg = new DeltaAlgebra<>(F, I.algebra());
-		J = new SaturatedInstance<>(alg, dp(), I.requireConsistency(), I.allowUnsafeJava());
+		J = new SaturatedInstance<>(alg, dp(), I.requireConsistency(), I.allowUnsafeJava(), false, null);
 		validate();
 	}
 

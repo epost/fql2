@@ -126,7 +126,6 @@ public class FPTransform<O, A> implements Serializable {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static <O,A> FPTransform<O,A> id(Instance<O,A> I) {
 		Map<Signature<O,A>.Node, Map<Object,Object>> m = new HashMap<>();
 		for (Signature<O,A>.Node k : I.thesig.nodes) {
@@ -139,7 +138,6 @@ public class FPTransform<O, A> implements Serializable {
 		return new FPTransform<>(I, I, m);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <O, A> FPTransform<O, A> compose(
 			FPTransform<O, A> f, FPTransform<O, A> g) {
 		if (!f.dst.equals(g.src)) {

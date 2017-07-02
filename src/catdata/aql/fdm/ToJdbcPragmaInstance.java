@@ -2,24 +2,20 @@ package catdata.aql.fdm;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import catdata.Chc;
-import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Instance;
 import catdata.aql.Pragma;
-import catdata.aql.Term;
 
 public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Pragma {
 
@@ -123,7 +119,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 			throw new RuntimeException("Cannot JDBC export: id column (" + idCol + ") is also a foreign key" );
 		}	
 	}
-
+/*
 	private Object fromTerm(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
 		if (term.obj != null) {
 			return term.obj;
@@ -134,14 +130,8 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		}
        return Util.anomaly();
 	}
-
-	private String fkToString(Fk fk) {
-		return (String) fk;
-	}
-
-	private String attToString(Att att) {
-		return (String) att;
-	}
+*/
+	
 
 	private String enToString(En en) {
 		return (String) en;
