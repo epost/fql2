@@ -1,0 +1,187 @@
+typeside TypeSide = literal {
+	java_types
+		Varchar = "java.lang.String"
+	java_constants
+		Varchar = "return input[0]"
+}
+
+// Define the span:
+//          fk_SnT_S         fk_SnT_T
+//      Skill <-- SkillNdFrTask --> Task
+//
+schema sSTSpn = literal : TypeSide {
+	entities
+	  Skill Task
+	  SkillNdFrTask
+	foreign_keys
+	  fk_SnT_S   : SkillNdFrTask -> Skill
+	  fk_SnT_T   : SkillNdFrTask -> Task
+	attributes
+	  SName  : Skill -> Varchar
+	  TName  : Task -> Varchar
+	  skill  : SkillNdFrTask -> Varchar
+	  task   : SkillNdFrTask -> Varchar
+	observation_equations
+	  forall snt. snt.fk_SnT_S.SName = snt.skill
+	  forall snt. snt.fk_SnT_T.TName = snt.task
+}
+
+// Define the span:
+//
+//          fk_SpP_S             fk_SpP_P
+//      Skill <-- SkillPrvdByPerson --> Person
+//
+schema sSPSpn = literal : TypeSide {
+	entities
+	  Skill Person
+	  SkillPrvdByPerson
+	foreign_keys
+	  fk_SpP_S   : SkillPrvdByPerson -> Skill
+	  fk_SpP_P   : SkillPrvdByPerson -> Person
+	attributes
+	  SName  : Skill -> Varchar
+	  PName  : Person -> Varchar
+	  skill  : SkillPrvdByPerson -> Varchar
+	  person   : SkillPrvdByPerson -> Varchar
+	observation_equations
+	  forall spp. spp.fk_SpP_S.SName = spp.skill
+	  forall spp. spp.fk_SpP_P.PName = spp.person
+}
+
+// Import an instance for sSTSpn
+instance iSTSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   Skill -> "select id from sts_Skill"
+   Task -> "select id from sts_Task"
+   SkillNdFrTask -> "select id from sts_SkillNdFrTask"
+   // foreign keys
+   fk_SnT_S -> "select id, fk_SnT_S from sts_SkillNdFrTask"
+   fk_SnT_T -> "select id, fk_SnT_T from sts_SkillNdFrTask"
+   // attributes
+   SName -> "select id, SName from sts_Skill"
+   TName -> "select id, TName from sts_Task"
+   skill -> "select id, skill from sts_SkillNdFrTask"
+   task -> "select id, task from sts_SkillNdFrTask"
+}
+
+// Import an instance of for sSPSpn 
+instance iSPSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSPSpn {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   Skill -> "select id from sps_Skill"
+   Person -> "select id from sps_Person"
+   SkillPrvdByPerson -> "select id from sps_SkillPrvdByPerson"
+   // foreign keys
+   fk_SpP_S   -> "select id, fk_SpP_S from sps_SkillPrvdByPerson"
+   fk_SpP_P   -> "select id, fk_SpP_P from sps_SkillPrvdByPerson"
+   // attributes
+   SName  -> "select id, SName from sps_Skill"
+   PName  -> "select id, PName from sps_Person"
+   skill  -> "select id, skill from sps_SkillPrvdByPerson"
+   person -> "select id, person from sps_SkillPrvdByPerson"
+}
+
+// Create a new schema that takes the colimit of the sSTSpn and sSPSpn create a single schema with five entities Task, Skill,
+// Person and the two intersection tables SkillNdFrTask and SkillPrvdByPerson. We glue on Skill.
+schema_colimit STSpn_SPSpn_CoLimAuto = quotient sSTSpn + sSPSpn : TypeSide {
+	entity_equations
+	  sSTSpn.Skill = sSPSpn.Skill
+	observation_equations
+	  forall s. s.sSTSpn_SName = s.sSPSpn_SName}
+
+
+// Give the default names in the automatically generated sum more consise names.
+schema_colimit STSpn_SPSpn_CoLim = modify STSpn_SPSpn_CoLimAuto {
+	rename entities
+		sSPSpn_Person -> Person
+		sSPSpn_SkillPrvdByPerson -> SkillPrvdByPerson
+		sSPSpn_Skill__sSTSpn_Skill -> Skill
+		sSTSpn_SkillNdFrTask -> SkillNdFrTask
+		sSTSpn_Task -> Task
+	rename foreign_keys
+		sSTSpn_fk_SnT_S -> fk_SnT_S
+		sSTSpn_fk_SnT_T -> fk_SnT_T
+		sSPSpn_fk_SpP_S -> fk_SpP_S
+		sSPSpn_fk_SpP_P -> fk_SpP_P
+	rename attributes
+		sSTSpn_task   -> task
+		sSTSpn_skill  -> TskSkill
+		sSTSpn_SName  -> TskSName
+		sSTSpn_TName  -> TName
+		sSPSpn_person -> person
+		sSPSpn_PName  -> PName
+		sSPSpn_skill  -> PrsnSkill
+		sSPSpn_SName  -> PrsnSName
+}
+
+// Provide addressable labels for the various components of the coproduct STSum
+schema sSTSpn_SPSpn_CoLim = getSchema STSpn_SPSpn_CoLim
+mapping mSTSpnToSTSpn_SPSpn_CoLim = getMapping STSpn_SPSpn_CoLim sSTSpn
+mapping mSPSpnToSTSpn_SPSpn_CoLim = getMapping STSpn_SPSpn_CoLim sSPSpn
+
+// Build an instance for sS_T_SnT_Sum from iTsk, iSkl and iSnT
+instance iSTSpn_SPSpn_CoLim = coproduct_sigma
+   mSTSpnToSTSpn_SPSpn_CoLim iSTSpnImp
+   mSPSpnToSTSpn_SPSpn_CoLim iSPSpnImp
+   : sSTSpn_SPSpn_CoLim
+
+/* The following are literal analogs to the imported instance and transforms below.
+instance iSkillMatch = literal : sSTSpn_SPSpn_CoLim {
+	generators
+	  s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
+}
+
+pragma eSMtch = export_jdbc_instance iSkillMatch "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" "sm_"
+  { options varchar_length = 256 }
+
+transform tSMToSTSpn = literal : iSkillMatch -> iSTSpn_SPSpn_CoLim {
+	generators
+	  s1 -> "0"
+	  s2 -> "1"
+	  s3 -> "2"
+	  s4 -> "3"
+	  s5 -> "4"
+	  s6 -> "5"
+	  s7 -> "6"
+	  s8 -> "7"
+	  s9 -> "8"
+	  s10 -> "9"
+}
+
+transform tSMToSPSpn = literal : iSkillMatch -> iSTSpn_SPSpn_CoLim {
+	generators
+	  s1 -> "41"
+	  s2 -> "40"
+	  s3 -> "43"
+	  s4 -> "42"
+	  s5 -> "35"
+	  s6 -> "34"
+	  s7 -> "37"
+	  s8 -> "36"
+	  s9 -> "39"
+	  s10 -> "38"
+}
+*/
+// Set up the SkillMatch table based on the exports from ColimitTutorialTaskSkillV1 (sts prefix) and ColimitTutorialPrsnSklV1 (sps prefix).
+pragma pSetUpSkillMatch = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"DROP TABLE IF EXISTS SkillMatch"
+"create table SkillMatch as select concat('s', t.id) as sm_id, p.id as ps_id, p.SName as pSName, t.id as ts_id, t.SName as tSName from sps_Skill as p join sts_Skill as t on p.SName = t.SName"
+}
+
+
+instance iSkillMatch = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn_SPSpn_CoLim {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   Skill -> "select sm_id from SkillMatch"
+   PrsnSName -> "select sm_id, psName from SkillMatch"
+   TskSName -> "select sm_id, tsName from SkillMatch"
+}
+
+transform tSMToSTSpn = import_jdbc "com.mysql.jdbc.Driver" //"jdbc:mysql://localhost:3306/ci_s0?user=root&password=HappyFunctor"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : iSkillMatch -> iSTSpn_SPSpn_CoLim {
+	Skill -> "select sm_id, ts_id from SkillMatch"}
+
+transform tSMToSPSpn = import_jdbc "com.mysql.jdbc.Driver" //"jdbc:mysql://localhost:3306/ci_s0?user=root&password=HappyFunctor"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : iSkillMatch -> iSTSpn_SPSpn_CoLim {
+	Skill -> "select sm_id, ps_id from SkillMatch"}
+
+instance iSTSpn_SPSpn_Merge = coequalize tSMToSTSpn tSMToSPSpn
+

@@ -1,0 +1,269 @@
+typeside TypeSide = literal {
+	java_types
+		Varchar = "java.lang.String"
+	java_constants
+		Varchar = "return input[0]"
+}
+
+// Schema with the single entity Skill.
+schema sS = literal : TypeSide {
+	entities
+		Skill
+	attributes
+		SName : Skill -> Varchar
+}
+
+// Schema with the single entity Task.
+schema sT = literal : TypeSide {
+	entities
+		Task
+	attributes
+		TName : Task -> Varchar
+}
+
+// Instance of skills
+instance iSkl = literal : sS {
+	generators
+	    s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
+	multi_equations
+	    SName -> {s0 Math, s1 CompSci, s2 DBA, s3 Pharma, s4 Programming, s5 Teaching, 
+	    		  s6 GrantWriting, s7 Finance, s8 Management, s9 PaperWriting}
+}
+
+// Instance of tasks
+instance iTsk = literal : sT {
+	generators
+	    t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 : Task
+	multi_equations
+	    TName -> {t1 LaunchCIStartup, t2 BuildSWProduct, t3 WriteTutorial, t4 BuildPhrmColim, t5 BuildFncColim,
+	              t6 WriteMathPaper, t7 TeachMath, t8 TeachCS, t9 RunPhrmIntProject, t10 RunFincIntProject}
+}
+
+// Schema with one entity that assigns skills to tasks
+schema sSnT = literal : TypeSide {
+	entities
+	  SkillNeededForTask
+	attributes
+	  skill : SkillNeededForTask -> Varchar
+	  task : SkillNeededForTask -> Varchar
+}
+
+instance iSnT = literal : sSnT {
+	generators
+		st1 st2 st3 st4 st5 st6 st7 st8 st9 st10
+		st11 st12 st13 st14 st15 st16 st17 st18 st19 st20
+		st21 st22 : SkillNeededForTask
+	multi_equations
+		skill -> {st1 CompSci,         st2 Programming,     st3 GrantWriting,    st4 PaperWriting,
+				  st5 CompSci,         st6 Programming,     st7 Management,
+				  st8 Programming,     st9 Teaching,        st10 PaperWriting,
+				  st11 Pharma,         st12 Programming,
+				  st13 Finance,        st14 Programming,
+				  st15 Math,           st16 PaperWriting,
+				  st17 Math,           st18 Teaching,
+				  st19 Pharma,         st20 Management,
+				  st21 Finance,        st22 Management}
+		task ->  {st1 LaunchCIStartup, st2 LaunchCIStartup, st3 LaunchCIStartup, st4 LaunchCIStartup,
+				  st5 BuildSWProduct,  st6 BuildSWProduct,  st7 BuildSWProduct,
+				  st8 WriteTutorial,   st9 WriteTutorial,   st10 WriteTutorial,
+				  st11 BuildPhrmColim, st12 BuildPhrmColim,
+				  st13 BuildFncColim,  st14 BuildFncColim,
+				  st15 WriteMathPaper, st16 WriteMathPaper,
+				  st17 TeachMath,      st18 TeachMath,
+				  st19 RunPhrmProject, st20 RunPhrmProject,
+				  st21 RunFncProject,  st22 RunFncProject}
+}
+
+// Create a new schema that takes the coproduct of the sT, sS and sSnT schemas to create a single
+// schema with three entities Task and Skill and SkillNeededForTask.
+schema_colimit S_T_SnT_SumAuto = quotient sT + sS + sSnT: TypeSide {}
+
+// Give the default names in the automatically generated sum more consise names.
+schema_colimit S_T_SnT_Sum = modify S_T_SnT_SumAuto {
+	rename entities
+		sS_Skill -> Skill
+		sT_Task -> Task
+		sSnT_SkillNeededForTask -> SkillNeededForTask
+	rename attributes
+		sS_SName -> SName
+		sT_TName -> TName
+	    sSnT_skill -> skill
+	    sSnT_task -> task
+}
+
+// Provide addressable labels for the various components of the coproduct STSum
+schema sS_T_SnT_Sum = getSchema S_T_SnT_Sum
+mapping mSkillToS_T_SnT_Sum = getMapping S_T_SnT_Sum sS
+mapping mTaskToS_T_Snt_Sum = getMapping S_T_SnT_Sum sT
+mapping mSkillNeededForTaskToS_T_SnT_Sum = getMapping S_T_SnT_Sum sSnT
+
+// Build an instance for sS_T_SnT_Sum from iTsk, iSkl and iSnT
+instance iS_T_SnT_Sum = coproduct_sigma
+   mSkillToS_T_SnT_Sum iSkl
+   mTaskToS_T_Snt_Sum iTsk
+   mSkillNeededForTaskToS_T_SnT_Sum iSnT
+   : sS_T_SnT_Sum
+
+/* This is cool, but is something of a tangent. I really just want to create the span.
+ * The idea here is to create a schema that adds both the product and a span based on the Skill,  
+ * Task and SkillNeededForTask entities and establishes the unique arrow between the two required
+ * by the universal mapping property.
+ */
+schema sSTJoy = literal : TypeSide {
+	entities
+	  Skill Task
+	  SkillNdFrTask SkillxTask
+	foreign_keys
+	  fk_pSkill  : SkillxTask -> Skill
+	  fk_pTask   : SkillxTask -> Task
+	  fk_SnT_S   : SkillNdFrTask -> Skill
+	  fk_SnT_T   : SkillNdFrTask -> Task
+	  fk_SnT_SxT : SkillNdFrTask -> SkillxTask
+	path_equations
+	  fk_SnT_SxT.fk_pSkill = fk_SnT_S
+	  fk_SnT_SxT.fk_pTask  = fk_SnT_T
+	attributes
+	  SName  : Skill -> Varchar
+	  TName  : Task -> Varchar
+	  SonSxT : SkillxTask -> Varchar
+	  TonSxT : SkillxTask -> Varchar
+	  skill  : SkillNdFrTask -> Varchar
+	  task   : SkillNdFrTask -> Varchar
+	observation_equations
+	  forall st. st.fk_pSkill.SName = st.SonSxT
+	  forall st. st.fk_pTask.TName = st.TonSxT
+	  forall snt. snt.fk_SnT_S.SName = snt.skill
+	  forall snt. snt.fk_SnT_T.TName = snt.task
+}
+
+query qS_T_SnT_SumToSTJoy = literal : sS_T_SnT_Sum -> sSTJoy {
+	entities //source entities: Skill SkillNeededForTask Task
+		Skill -> {
+			from
+				ss : Skill
+			return
+				SName -> ss.SName
+		}
+		SkillNdFrTask -> {
+			from
+				snt : SkillNeededForTask
+				sn  : Skill
+				nt  : Task
+			where
+				snt.skill = sn.SName
+				snt.task = nt.TName
+			return
+				skill -> snt.skill
+				task  -> snt.task
+		}
+		SkillxTask -> {
+			from
+				xs : Skill
+				xt : Task
+			return
+				SonSxT -> xs.SName
+				TonSxT -> xt.TName
+		}
+		Task -> {
+			from
+				tt : Task
+			return
+				TName -> tt.TName
+		}
+	foreign_keys
+		// fk_SnT_S   : SkillNdFrTask -> Skill
+		fk_SnT_S   -> {ss -> sn}
+		// fk_SnT_SxT : SkillNdFrTask -> SkillxTask
+		fk_SnT_SxT -> {xs -> sn xt -> nt}
+		// fk_SnT_T   : SkillNdFrTask -> Task
+		fk_SnT_T   -> {tt -> nt}
+	    // fk_pSkill  : SkillxTask -> Skill
+		fk_pSkill  -> {ss -> xs}
+		//fk_pTask   : SkillxTask -> Task
+		fk_pTask   -> {tt -> xt}
+}
+
+instance iSTJoy = eval qS_T_SnT_SumToSTJoy iS_T_SnT_Sum
+
+
+schema sSTSpn = literal : TypeSide {
+	entities
+	  Skill Task
+	  SkillNdFrTask
+	foreign_keys
+	  fk_SnT_S   : SkillNdFrTask -> Skill
+	  fk_SnT_T   : SkillNdFrTask -> Task
+	attributes
+	  SName  : Skill -> Varchar
+	  TName  : Task -> Varchar
+	  skill  : SkillNdFrTask -> Varchar
+	  task   : SkillNdFrTask -> Varchar
+	observation_equations
+	  forall snt. snt.fk_SnT_S.SName = snt.skill
+	  forall snt. snt.fk_SnT_T.TName = snt.task
+}
+
+query qS_T_SnT_SumToSTSpn = literal : sS_T_SnT_Sum -> sSTSpn {
+	entities //source entities: Skill SkillNeededForTask Task
+		Skill -> {
+			from
+				ss : Skill
+			return
+				SName -> ss.SName
+		}
+		SkillNdFrTask -> {
+			from
+				snt : SkillNeededForTask
+				sn  : Skill
+				nt  : Task
+			where
+				snt.skill = sn.SName
+				snt.task = nt.TName
+			return
+				skill -> snt.skill
+				task  -> snt.task
+		}
+		Task -> {
+			from
+				tt : Task
+			return
+				TName -> tt.TName
+		}
+	foreign_keys
+		// fk_SnT_S   : SkillNdFrTask -> Skill
+		fk_SnT_S   -> {ss -> sn}
+		// fk_SnT_T   : SkillNdFrTask -> Task
+		fk_SnT_T   -> {tt -> nt}
+}
+
+instance iSTSpn = eval qS_T_SnT_SumToSTSpn iS_T_SnT_Sum
+
+// Export the instance iSTSpn to SQL
+pragma pCleanUp = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"DROP TABLE IF EXISTS sts_SkillNdFrTask"
+"DROP TABLE IF EXISTS sts_Skill"
+"DROP TABLE IF EXISTS sts_Task"}
+
+pragma eSTS = export_jdbc_instance iSTSpn "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" "sts_"
+  { options varchar_length = 256 }
+
+pragma pp2 = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"SHOW  TABLES"}
+
+
+// Bring the exported instance back in
+instance iSTSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   Skill -> "select id from sts_Skill"
+   Task -> "select id from sts_Task"
+   SkillNdFrTask -> "select id from sts_SkillNdFrTask"
+   // foreign keys
+   fk_SnT_S -> "select id, fk_SnT_S from sts_SkillNdFrTask"
+   fk_SnT_T -> "select id, fk_SnT_T from sts_SkillNdFrTask"
+   // attributes
+   SName -> "select id, SName from sts_Skill"
+   TName -> "select id, TName from sts_Task"
+   skill -> "select id, skill from sts_SkillNdFrTask"
+   task -> "select id, task from sts_SkillNdFrTask"
+}
+
