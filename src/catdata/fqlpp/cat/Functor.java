@@ -248,8 +248,7 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 		mapping = toMappingX();
 		return mapping;
 	}
-	@SuppressWarnings("unchecked")
-    private Mapping<O1,A1,O2,A2> toMappingX() {
+	private Mapping<O1,A1,O2,A2> toMappingX() {
 		if (source.isInfinite() || target.isInfinite()) {
 			throw new RuntimeException("Cannot create mapping from " + this);
 		}
@@ -293,11 +292,8 @@ public class Functor<O1, A1, O2, A2> implements Serializable {
 		for (Signature<O1, A1>.Edge a : src.edges) {
 			A2 b = applyA(a.name);
 				
-			@SuppressWarnings("unchecked")
 			Signature<O2, A2>.Path p = (Signature<O2, A2>.Path) b;
-			@SuppressWarnings("unchecked")
 			O2 p1 = (O2) p.source;
-			@SuppressWarnings("unchecked")
 			O2 p2 = (O2) p.target;
 			p.source = p.sig().new Node(p1);
 			p.target = p.sig().new Node(p2);

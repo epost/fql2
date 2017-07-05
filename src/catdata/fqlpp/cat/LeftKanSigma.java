@@ -98,8 +98,7 @@ class LeftKanSigma {
 		return new Quad<> (j, etables, D.utables2, hhh.second);
 	} 
 
-	@SuppressWarnings("unchecked")
-    private static <O1,A1,O2,A2> Pair<Instance<O2,A2>, Map<Object, List<Pair<Signature<O2,A2>.Edge, Object>>>> sigma(
+	private static <O1,A1,O2,A2> Pair<Instance<O2,A2>, Map<Object, List<Pair<Signature<O2,A2>.Edge, Object>>>> sigma(
 			LeftKan<O1,A1,O2,A2> lk)  {
 		
 		if (!lk.compute()) {

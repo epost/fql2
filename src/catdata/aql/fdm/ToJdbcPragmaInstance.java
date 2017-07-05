@@ -2,20 +2,20 @@ package catdata.aql.fdm;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
 import catdata.Chc;
+import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Instance;
 import catdata.aql.Pragma;
-import catdata.aql.Term;
 
 public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Pragma {
 
@@ -27,12 +27,11 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 	
 	private final Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
 	
-	private final String colTy;
-	private final int colTy0;
+	private final int len;
 
 	//TODO aql have pragma for tojdbc inst print queries
 	//TODO aql multi-line quoting doesn't colorize correctly
-	//TODO aql column type mapping for jdbc instance export
+	
 	public ToJdbcPragmaInstance(String prefix, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I, String clazz, String jdbcString, AqlOptions options) {
 		try {
 			Class.forName(clazz);
@@ -44,72 +43,25 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		this.I = I;
 		this.clazz = clazz;
 		idCol = (String) options.getOrDefault(AqlOption.id_column_name);
-		colTy = "VARCHAR(" + options.getOrDefault(AqlOption.varchar_length) + ")";
-		colTy0 = Types.VARCHAR;
+		len = (Integer) options.getOrDefault(AqlOption.varchar_length);
+		
 		assertDisjoint(idCol);
 	}
 
 	private void deleteThenCreate(Connection conn) throws SQLException {
-		for (En en : I.schema().ens) {
-			Statement stmt = conn.createStatement();
-			stmt.execute("DROP TABLE IF EXISTS " + prefix + enToString(en));
-			String str = idCol + " " + colTy + " PRIMARY KEY NOT NULL";
-			for (Att att : I.schema().attsFrom(en)) {
-				str += ", " + attToString(att) + " " + colTy; //JAVA_OBJECT
-			}
-			for (Fk fk : I.schema().fksFrom(en)) {
-				str += ", " + fkToString(fk) + " " + colTy + " NOT NULL";
-			}
-			stmt.execute("CREATE TABLE " + prefix + enToString(en) + "(" + str + ")");
+		Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> m = I.schema().toSQL_srcSchemas(prefix, "integer", "id");
+		Statement stmt = conn.createStatement();
+		for (En en : I.schema().ens) {		
+			for (String x : m.get(en).second) {
+				stmt.execute(x.replace("Varchar", "Varchar(" + len + ")"));
+			}			
 		}
-		/*for (Ty en : I.schema().typeSide.tys) {
-			Statement stmt = conn.createStatement();
-			stmt.execute("DROP TABLE IF EXISTS " + prefix + tyToString(en));
-			stmt.execute("CREATE TABLE " + prefix + tyToString(en) + "(" + idCol + " " + colTy + " PRIMARY KEY)");
-		}*/
-		//TODO aql emit foreign keys
+		stmt.close();
 	}
+	 
 	
-	private void storeMyRecord(Connection conn, X x, List<Chc<Fk, Att>> header, String table) throws Exception {
-		  List<String> hdrQ = new LinkedList<>();
-		  List<String> hdr = new LinkedList<>();
-		  hdr.add(idCol);
-		  hdrQ.add("?");
-        for (Chc<Fk, Att> aHeader : header) {
-            hdrQ.add("?");
-            Chc<Fk, Att> chc = aHeader;
-            if (chc.left) {
-                hdr.add(fkToString(chc.l));
-            } else {
-                hdr.add(attToString(chc.r));
-            }
-        }
-		  
-		  String insertSQL = "INSERT INTO " + table + "(" + Util.sep(hdr,"," )+ ") values (" + Util.sep(hdrQ,",") + ")";
-		  PreparedStatement ps = conn.prepareStatement(insertSQL);
-		
-		  ps.setObject(1, x.toString(), colTy0);
-		
-		  for (int i = 0; i < header.size(); i++) {
-			  Chc<Fk,Att> chc = header.get(i);
-			  if (chc.left) {
-				  ps.setObject(i+1+1, I.algebra().fk(chc.l, x).toString(), colTy0);			   
-			  } else {
-				  Object o = fromTerm(I.algebra().att(chc.r, x));
-				  ps.setObject(i+1+1, o == null ? null : o.toString(), colTy0);			   			  
-			  }
-		  }
-		
-		  ps.executeUpdate();
-	} 
 
-	/*public void storeMyRecord(Connection conn, Y y, String table) throws Exception {
-		  String insertSQL = "INSERT INTO " + table + "(" + idCol + ") values (?)";
-		  PreparedStatement ps = conn.prepareStatement(insertSQL);
-		  ps.setObject(1, y.toString(), colTy0);
-		  ps.executeUpdate();
-	} */
-
+	
 	@Override
 	public void execute() {
 		try {
@@ -118,9 +70,17 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 			for (En en : I.schema().ens) {
 				List<Chc<Fk, Att>> header = headerFor(en);
 				for (X x : I.algebra().en(en)) {
-					storeMyRecord(conn, x, header, prefix + enToString(en));
+					I.algebra().storeMyRecord(conn, x, header, enToString(en), prefix);
 				}
 			}
+			Statement stmt = conn.createStatement();
+			for (En en : I.schema().ens) {
+				for (String x : I.schema().toSQL_srcSchemas(prefix, "integer", idCol).get(en).third) {
+					stmt.execute(x);
+				}
+			}
+			stmt.close();
+			conn.close();
 			//kind of pointless to store labelled nulls since they are de-labelled in the entity part
 			/*for (Ty ty : I.schema().typeSide.tys) {
 				for (Y y : I.algebra().talg().sks.keySet()) {
@@ -159,7 +119,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 			throw new RuntimeException("Cannot JDBC export: id column (" + idCol + ") is also a foreign key" );
 		}	
 	}
-
+/*
 	private Object fromTerm(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
 		if (term.obj != null) {
 			return term.obj;
@@ -170,14 +130,8 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		}
        return Util.anomaly();
 	}
-
-	private String fkToString(Fk fk) {
-		return (String) fk;
-	}
-
-	private String attToString(Att att) {
-		return (String) att;
-	}
+*/
+	
 
 	private String enToString(En en) {
 		return (String) en;
@@ -191,5 +145,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 	public String toString() {
 		return "export_jdbc_instance " + clazz + " " + jdbcString + " " + prefix + "\n\n" + I;
 	}
+	
+	
 
 }

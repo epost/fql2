@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
@@ -30,6 +32,37 @@ import catdata.aql.Var;
 
 //TODO aql quoting (reuse example maker?)
 public final class TyExpRaw extends TyExp<Object, Object> {
+	
+	@Override
+	public void asTree(DefaultMutableTreeNode root, boolean alpha) {
+		if (types.size() + java_tys_string.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("types");
+			for (Object t : Util.alphaMaybe(alpha, types)) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.toString());
+				n.add(m);
+			}
+			for (Pair<Object, String> t : Util.alphaMaybe(alpha, java_tys_string)) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.first.toString());
+				n.add(m);
+			}
+			root.add(n);
+		}
+		if (eqs.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("fns");
+			for (Triple<List<Pair<String, Object>>, RawTerm, RawTerm> t : Util.alphaMaybe(alpha, eqs)) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.second + "=" + t.third);
+				n.add(m);
+			}
+			root.add(n);
+		}
+		
+
+	}
 
 	@Override
 	public Collection<Pair<String, Kind>> deps() {

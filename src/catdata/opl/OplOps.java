@@ -977,7 +977,6 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 
 				for (String edge : s0.projE().symbols.keySet()) {
 					Pair<OplCtx<String, String>, OplTerm<String, String>> edge2 = m0.m.symbols.get(edge);
-					@SuppressWarnings("unused")
 					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map((Function<String, OplTerm<String, String>>) OplTerm::new
 					).collect(Collectors.toList());
 					OplTerm<String, String> lhs = fun2(equivs0, new OplTerm<>(s + "_" + edge, args));
@@ -990,7 +989,6 @@ public class OplOps implements OplExpVisitor<OplObject, Program<OplExp>> {
 				}
 				for (String edge : s0.projA().symbols.keySet()) {
 					Pair<OplCtx<String, String>, OplTerm<String, String>> edge2 = m0.m.symbols.get(edge);
-					@SuppressWarnings("unused")
 					List<OplTerm<String, String>> args = edge2.first.vars0.keySet().stream().map((Function<String, OplTerm<String, String>>) OplTerm::new
 					).collect(Collectors.toList());
 					OplTerm<String, String> lhs = fun2(equivs0, new OplTerm<>(s + "_" + edge, args));

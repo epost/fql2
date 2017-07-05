@@ -13,7 +13,7 @@ import catdata.aql.TypeSide;
 
 public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	
-	public TyExp<Ty, Sym> resolve(Program<Exp<?>> prog) {
+	public TyExp<Ty, Sym> resolve(@SuppressWarnings("unused") Program<Exp<?>> prog) {
 		return this;
 	}
 	

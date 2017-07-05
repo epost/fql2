@@ -32,7 +32,7 @@ class SpellChecker extends AbstractParser {
 
 	private boolean spPrev = IdeOptions.theCurrentOptions.getBool(IdeOption.SPELL_CHECK);
 	
-	private static Collection<String> getWords() {
+	private synchronized static Collection<String> getWords() {
 		if (words0 != null) {
 			return words0;
 		}

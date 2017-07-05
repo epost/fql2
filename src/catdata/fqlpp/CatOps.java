@@ -887,7 +887,6 @@ public class CatOps implements CatExpVisitor<Category, FQLPPProgram>,
 		throw new RuntimeException("Report this error to Ryan.");
 	}
 
-	@SuppressWarnings("null")
 	@Override
 	public Functor visit(FQLPPProgram env, Apply e) {
 		Functor ret1 = null;

@@ -1,8 +1,16 @@
 package catdata;
 
-@FunctionalInterface
+import java.util.Collection;
+
 public interface Prog {
 
 	Integer getLine(String s);
+	
+	Collection<String> keySet();
+	
+	@SuppressWarnings("unused")
+	default String kind(String s) {
+		return "";
+	}
 	
 }

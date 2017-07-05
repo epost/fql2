@@ -1,3 +1,7 @@
+//toggle the two different SQL import NULL semantics
+//options
+	//labelled_nulls = true
+
 //create some example data in a local temporary sql database. (close delay keeps H2 database alive across connections)
 pragma load = exec_jdbc "org.h2.Driver" "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1" { 
 "DROP TABLE IF EXISTS Employee;
@@ -45,18 +49,7 @@ pragma view0 = exec_jdbc "org.h2.Driver" "jdbc:h2:mem:db1" {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typeside Ty = literal { 
-	java_types
-		string = "java.lang.String"
-		nat = "java.lang.Integer"
-	java_constants
-		string = "return input[0]"
-		nat = "return java.lang.Integer.parseInt(input[0])"
-	java_functions
-		plus : nat,nat -> nat = "return (input[0] + input[1]).intValue()"
-}
-
-schema S = literal : Ty {
+schema S = literal : sql {
 	entities
 		Employee 
 		Department
@@ -69,9 +62,9 @@ schema S = literal : Ty {
   		secretary.worksIn = Department
   		manager.manager = manager
   	attributes
-  		first last	: Employee -> string
-     	age			: Employee -> nat
-     	name 		: Department -> string
+  		first last	: Employee -> Varchar
+     	age			: Employee -> Integer
+     	name 		: Department -> Varchar
  }
 
 //import an instance by providing queries for each entity/foreign key/attribute 
@@ -94,7 +87,7 @@ transform Jid = import_jdbc "org.h2.Driver" "jdbc:h2:mem:db1" : J -> J {
 }
 
 //export the instance to SQL
-pragma store1 = export_jdbc_instance J "org.h2.Driver" "jdbc:h2:mem:db2" "Exported" 
+pragma store1 = export_jdbc_instance J "org.h2.Driver" "jdbc:h2:mem:db2;DB_CLOSE_DELAY=-1" "Exported" 
 
 //view exported SQL instance
 pragma view1 = exec_jdbc "org.h2.Driver" "jdbc:h2:mem:db2" { 
@@ -129,3 +122,35 @@ schema import_all_schema = schemaOf import_all
 //"javax.swing.JOptionPane.showMessageDialog(null, \"hello1\")"
 //"javax.swing.JOptionPane.showMessageDialog(null, \"hello2\")"
 //}
+
+//store query evaluation as a view
+
+
+query Q = literal : S -> S {
+	entities
+		Employee -> 
+		{from e:Employee d:Department
+		 where e.worksIn = d
+		 return first -> e.manager.first 
+		        last -> d.name 
+		        age -> e.age}
+		
+		Department -> {from d:Department 
+		               return name -> d.name}
+		
+	foreign_keys
+		manager -> {e -> e.manager
+		            d -> e.manager.worksIn}
+		worksIn -> {d -> e.worksIn}
+		secretary -> {e -> d.secretary 
+		              d -> d}
+}
+
+pragma store_id_query = export_jdbc_query Q "org.h2.Driver" "jdbc:h2:mem:db2" "Exported" "View"
+
+pragma view_view = exec_jdbc "org.h2.Driver" "jdbc:h2:mem:db2" { 
+	"SELECT * FROM ViewEmployee"
+	"SELECT * FROM ViewDepartment"
+	"DROP VIEW ViewEmployee"
+	"DROP VIEW ViewDepartment" //clean up is important when re-running the program
+}

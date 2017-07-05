@@ -57,9 +57,9 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		return ret;
 	}
 
-	private Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> conv2(
-			Ctx<Fk2, Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>>> fks2) {
-		Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> ret = new Ctx<>();
+	private Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> conv2()
+		{
+			Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> ret = new Ctx<>();
 		for (Fk2 fk2 : fks.keySet()) {
 			ret.put(fk2, new Pair<>(fks.get(fk2).gens(), true)); //TODO aql true is correct here?
 		}
@@ -68,7 +68,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 
 	public Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> unnest() {
 		Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> b = new Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>(conv1(ens),
-				atts, conv2(fks), src, dst);
+				atts, conv2(), src, dst);
 		b = unfoldNestedApplications(b);
 		//System.out.println(b);
 		Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> p = new Query<>(b.ens, b.atts, b.fks, src, dst, true);
@@ -82,6 +82,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			Schema<Ty, En1, Sym, Fk1, Att1> src, Schema<Ty, En2, Sym, Fk2, Att2> dst, boolean doNotCheckPathEqs,
 			boolean removeRedundantVars) {
 		// do this first to type check
+		@SuppressWarnings("unused")
 		Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q = new Query<>(ens, atts, fks, src, dst, true);
 		// System.out.println("original " + q);
 		// System.out.println("--------");
@@ -159,7 +160,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			En2 dst = b.dst.fks.get(fk2).second;
 			Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>> g = new Ctx<>(b.fks.get(fk2).first.map);
 			if (second.equals(dst)) {
-				g.put(v, third.replace(g.map((s,t) -> new Pair(Term.Gen(s), t.convert())).map));
+				g.put(v, third.replace(g.map((s,t) -> new Pair<Term<Ty, En1, Sym, Fk1, Att1, Var, Void>,Term<Ty, En1, Sym, Fk1, Att1, Var, Void>>(Term.Gen(s), t.convert())).map).convert());
 			}
 			if (second.equals(src)) {
 				g = g.map(t -> t.replace(third.convert(), Term.Gen(v)));
@@ -449,10 +450,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 
 		public <Gen, Sk, X, Y> List<Var> order(AqlOptions options, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
 			if (!(Boolean) options.getOrDefault(AqlOption.eval_reorder_joins)
-					|| gens().size() > (Integer) options.getOrDefault(AqlOption.eval_max_plan_depth)) { // TODO
-																										// AQL
-																										// magic
-																										// number
+					|| gens().size() > (Integer) options.getOrDefault(AqlOption.eval_max_plan_depth)) { 
 				return new LinkedList<>(gens.map.keySet());
 			}
 			Map<Pair<Var, Var>, Float> selectivities = estimateSelectivities();
@@ -462,16 +460,16 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			}
 			List<Var> lowest_plan = null;
 			float lowest_cost = -1;
+		//	System.out.println("xxxxxx " + I);
 			for (List<Var> plan : generatePlans()) {
 				float cost = estimateCost(plan, I, selectivities);
-				// System.out.println("candidate " + plan + " costs " + cost);
+//				 System.out.println("candidate " + plan + " costs " + cost);
 				if (lowest_plan == null || cost < lowest_cost) {
 					lowest_plan = plan;
 					lowest_cost = cost;
-					// System.out.println("*** hit!");
 				}
 			}
-
+		//	 System.out.println("*** lowest " + lowest_plan);
 			return lowest_plan;
 		}
 
@@ -486,7 +484,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			return ret;
 		}
 
-		private <Gen, Sk, X, Y> Map<Pair<Var, Var>, Float> estimateSelectivities() {
+		private  Map<Pair<Var, Var>, Float> estimateSelectivities() {
 			Map<Pair<Var, Var>, Float> ret = new HashMap<>();
 			for (Var v1 : gens().keySet()) {
 				for (Var v2 : gens().keySet()) {
@@ -534,7 +532,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			return cost;
 		}
 
-		private <Gen, Sk, X, Y> Iterable<List<Var>> generatePlans() {
+		private  Iterable<List<Var>> generatePlans() {
 			return Util.permutationsOf(new LinkedList<>(gens.keySet()));
 		}
 		/*
@@ -693,73 +691,154 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		if (ret != null) {
 			return ret;
 		}
-//		String pre = "src_";
-	//	String dst = "dst_";
+		String idCol = "id"; //used internally, so don't honor options
 		ret = new HashMap<>();
-//		ret.add("set @GUID := 0"); TODO aql
 		for (En2 en2 : ens.keySet()) {
 			Frozen<Ty, En1, Sym, Fk1, Att1> b = ens.get(en2);
 			Ctx<Var, En1> gens = b.gens;
 			Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs = b.eqs;
-
-			//if (!Collections.disjoint(gens.keySet(), dst.attsFrom(en2))) {
-			//	throw new RuntimeException("In query block for " + en2 + ", variables and target attributes cannot have the same name");
-			//} //TODO aql weaken
-			
-			if (gens.isEmpty()) {
-				throw new RuntimeException("Empty from clause doesn't work with sql yet"); // TODO
+		
+			if (ens.get(en2).gens.isEmpty()) {
+				ret.put(en2, "Empty from clause doesn't work with sql"); 
+				return ret;
 			}
 			// TODO aql check name collision
 			String toString2 = " from ";
-			//String schema = "create table " + post + en2 + "(";
 
 			List<String> temp = new LinkedList<>();
-			//List<String> temq = new LinkedList<>();
 			List<String> tempL = new LinkedList<>();
 			
 			for (Var v : gens.keySet()) {
 				temp.add(gens.get(v) + " as " + v);
-//				temq.add(v + " integer foreign key references " + pre + gens.get(v) + ".id");
-				tempL.add(v.toString() + ".id as " + v); 
+				tempL.add(v.toString() + "." + idCol + " as " + v); 
 			}
 
 			toString2 += Util.sep(temp, ", ");
 			
 			if (!eqs.isEmpty()) {
-				toString2 += " where ";
-				temp = new LinkedList<>();
-				for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : eqs) {
-					String newLhs;
-					if (eq.lhs.gen != null) {
-						newLhs = eq.lhs.gen + ".id";
-					} else {
-						newLhs = quotePrim(eq.lhs).toString();
-					}
-					String newRhs;
-					if (eq.rhs.gen != null) {
-						newRhs = eq.rhs.gen + ".id";
-					} else {
-						newRhs = quotePrim(eq.rhs).toString();
-					}
-					temp.add(newLhs + " = " + newRhs);
-				}
-				toString2 += Util.sep(temp, " and ");
+				toString2 += whereToString(eqs, idCol);
 			}
 
 			
 			String toString3 = " select ";
 			toString3 += Util.sep(tempL, ", ");
-		//	schema += Util.sep(temq, ", ");
-			//String x = schema + ")";
 			String y = toString3 + toString2;	
 			ret.put(en2, y);
-			//TODO: aql allow circular fks?
 		}
 
-		// TODO populate foreign keys?
-	
 
 		return ret;
+	}
+	
+	public List<String> toSQLViews(String pre, String post, String idCol) {
+		if (!(src.typeSide instanceof SqlTypeSide)) {
+			throw new RuntimeException("Not on SQL typeside");
+		}
+		
+		List<String> ret = new LinkedList<>();
+		
+	/*	Map<En2, Triple<List<Chc<Fk2, Att2>>, List<String>, List<String>>> ss = dst.toSQL_srcSchemas(post, "Varchar");
+		for (En2 en2 : dst.ens) {
+			ret.addAll(ss.get(en2).second);
+		} */
+		
+  		for (En2 en2 : ens.keySet()) {
+			Frozen<Ty, En1, Sym, Fk1, Att1> b = ens.get(en2);
+			Ctx<Var, En1> gens = b.gens;
+			Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs = b.eqs;
+		
+			if (ens.get(en2).gens.isEmpty()) {
+				throw new RuntimeException("Empty from clause doesn't work with sql"); 
+			}
+
+			List<String> from = new LinkedList<>();
+			List<String> select = new LinkedList<>();
+			
+			select.add(sk(gens.keySet(), idCol) + " as " + idCol); //add id column
+			for (Var v : gens.keySet()) {
+				from.add(pre + gens.get(v) + " as " + v);
+			}
+			for (Att2 att2 : dst.attsFrom(en2)) {
+				select.add(atts.get(att2) + " as " + att2); 
+			}
+			for (Fk2 fk2 : dst.fksFrom(en2)) {
+				select.add(sk(fks.get(fk2), idCol) + " as " + fk2); 
+			}
+			//TODO ADD FOREIGN KEYS aql
+
+			ret.add("drop view if exists " + post + en2);
+			
+			ret.add("create view " + post + en2 + " as select " + Util.sep(select, ", ") + "\nfrom " + Util.sep(from, ", ") + "\n " + whereToString(eqs, idCol));
+		}
+
+		return ret;
+	}
+	
+	private String convert(String x) {
+		return "convert(" + x + ", varchar)";
+	}
+	
+	private String qdirty(Term<?,?,?,?,?,?,?> t, String idCol) {
+		if (t.gen != null) {
+			return t.gen + "." + idCol;
+		} else if (t.fk != null) {
+			return t.toString();
+		}
+		return Util.anomaly();
+	}
+	
+	private String sk(Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> h, String idCol) {
+		List<Pair<String, String>> l = h.src().gens().keySet().stream().map(v -> new Pair<>(v.var, convert(qdirty(h.gens().get(v), idCol)))).collect(Collectors.toList());
+		return sk(l);
+	}
+	
+	private String sk(Collection<Pair<String,String>> vs) {
+		if (vs.isEmpty()) {
+			Util.anomaly();
+		}
+		List<String> l = vs.stream().map(x -> "concat('(" + x.first + "=', concat(" + convert(x.second) + ", ')'))").collect(Collectors.toList());
+		
+		String s = l.get(0);
+		for (int i = 1; i < l.size(); i++) {
+			s = "concat(" + s + ", " + l.get(i) + ")";
+		}
+		return s;
+	}
+
+	private String sk(Set<Var> vs, String idCol) {
+		return sk(vs.stream().map(x -> new Pair<>(x.var, x.var + "." + idCol)).collect(Collectors.toList()));
+		/*
+		if (vs.isEmpty()) {
+			Util.anomaly();
+		}
+		List<String> l = vs.stream().map(x -> "concat('(" + x + "=', concat(" + convert(x.var + "." + idCol) + ", ')'))").collect(Collectors.toList());
+		return Util.sep(l, " + "); */
+	}
+
+	private String whereToString(Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs, String idCol) {
+		if (eqs.isEmpty()) {
+			return "";
+		}
+		List<String> temp;
+		String toString2 = " where ";
+		temp = new LinkedList<>();
+		for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : eqs) {
+			String newLhs;
+			if (eq.lhs.gen != null) {
+				newLhs = eq.lhs.gen + "." + idCol;
+			} else {
+				newLhs = quotePrim(eq.lhs).toString();
+			}
+			String newRhs;
+			if (eq.rhs.gen != null) {
+				newRhs = eq.rhs.gen + "." + idCol;
+			} else {
+				newRhs = quotePrim(eq.rhs).toString();
+			}
+			temp.add(newLhs + " = " + newRhs);
+		}
+		toString2 += Util.sep(temp, " and ");
+		return toString2;
 	}
 
 	private Term<Ty, En1, Sym, Fk1, Att1, Var, Void> quotePrim(Term<Ty, En1, Sym, Fk1, Att1, Var, Void> t) {
@@ -776,5 +855,31 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		}
 		return Util.anomaly();
 	}
+	
+	
+	public static <Ty, En, Sym, Fk, Att> Query<Ty, En, Sym, Fk, Att, En, Fk, Att> id(AqlOptions options, Schema<Ty, En, Sym, Fk, Att> S) {
+		Var v = new Var("v");
+		
+		Ctx<En, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>>, AqlOptions>> ens0 = new Ctx<>();
+		Ctx<Att, Term<Ty, En, Sym, Fk, Att, Var, Void>> atts0 = new Ctx<>();
+		Ctx<Fk, Pair<Ctx<Var, Term<Void, En, Void, Fk, Void, Var, Void>>, Boolean>> fks0 = new Ctx<>();
+		
+		for (En en : S.ens) {
+			Ctx<Var, En> from = new Ctx<>();
+			from.put(v, en);
+			ens0.put(en, new Triple<>(from, Collections.emptyList(), options));
+			for (Att att : S.attsFrom(en)) {
+				atts0.put(att, Term.Att(att, Term.Gen(v)));
+			}
+			for (Fk fk : S.fksFrom(en)) {
+				Ctx<Var, Term<Void, En, Void, Fk, Void, Var, Void>> h = new Ctx<>();
+				h.put(v, Term.Fk(fk, Term.Gen(v)));
+				fks0.put(fk, new Pair<>(h, true));
+			}
+		}
+		
+		return new Query<>(ens0, atts0, fks0, S, S, true);
+	}
+	
 
 }

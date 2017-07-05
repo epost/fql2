@@ -341,9 +341,10 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 				int i = 0;
 				for (Y1 y1 : z.get(ty)) {
 					Object[] row = new Object[2];
+					Term<Ty, En, Sym, Fk, Att, Gen1, Sk1> a = t.src().algebra().reprT_protected(Term.Sk(y1));
 					row[0] = t.src().algebra().printY(y1); 
-					Term<Ty, Void, Sym, Void, Void, Void, Y2> y0 = t.dst().algebra().intoY(t.reprT(y1));
-					row[1] = y0.toString(t.dst().algebra()::printY, Util.voidFn());
+					Term<Ty, En, Sym, Fk, Att, Gen2, Sk2> y0 = t.trans(a); //t.dst().algebra().intoY(t.reprT(y1));
+					row[1] = y0.toString(); //t.dst().algebra().pr, Util.voidFn()); //TODO aql viewer printing revisit
 					data[i] = row;
 					i++;
 				}
@@ -503,29 +504,25 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 	@Override
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q) {
-		try {
+		/* try {
 			Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q = Q.unnest();
 			JComponent comp = makeQueryPanel(q);
 			ret.add("SQL", comp); 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			ret.add("SQL", new CodeTextPanel("Exception", ex.getMessage()));
-		}
+		} */
 		return new Unit();
 	}
-
+/*
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> JComponent makeQueryPanel(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q) {
-		List<String> l = new LinkedList<>();
-		for (Pair<List<Chc<Fk1, Att1>>, String> s : q.src.toSQL_srcSchemas().values()) {
-			l.add(s.second);
+		try {
+			List<String> l = q.unnest().toSQLViews("input", "output", "id");
+			return new CodeTextPanel("", Util.sep(l, ";\n\n"));
+		} catch (Exception ex) {
+			return new CodeTextPanel("", ex.getMessage());
 		}
-		l.add("////////// Insert source data here /////////");
-		Map<En2, String> m = q.toSQL();
-		for (En2 en2 : m.keySet()) {
-			l.add(en2 + " = " + m.get(en2));
-		}
-		return new CodeTextPanel("", Util.sep(l, ";\n\n"));
-	}
+	} */
 	
 	@Override
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> M) {
@@ -550,5 +547,20 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		return new Unit(); 
 	}
 
+	///////////////////////////////////////////////////////
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 }

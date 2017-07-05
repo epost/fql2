@@ -38,7 +38,7 @@ import catdata.sql.SqlInstance;
 import catdata.sql.SqlSchema;
 import catdata.sql.SqlTable;
 
-public class InstExpJdbcAll extends InstExp<String, String, String, String, String, String, Null<String>, String, Null<String>> {
+public class InstExpJdbcAll extends InstExp<String, String, String, String, String, String, Null<?>, String, Null<?>> {
 
 	private final Map<String, String> options;
 
@@ -62,7 +62,7 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 		return x.substring(0, 1).toUpperCase() + x.substring(1, x.length());
 	}
 	
-	private Instance<String, String, String, String, String, String, Null<String>, String, Null<String>> toInstance(AqlEnv env, SqlInstance inst, SqlSchema info) {
+	private Instance<String, String, String, String, String, String, Null<?>, String, Null<?>> toInstance(AqlEnv env, SqlInstance inst, SqlSchema info) {
 		boolean checkJava = !(Boolean) env.defaults.getOrDefault(AqlOption.allow_java_eqs_unsafe);
 
 		TypeSide<String, String> typeSide = new SqlTypeSide(new AqlOptions(options, null, env.defaults));
@@ -98,38 +98,46 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 		Schema<String, String, String, String, String> sch = new Schema<>(typeSide, col0.ens, col0.atts.map, col0.fks.map, eqs, dp, checkJava);
 
 		Ctx<String, Collection<String>> ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
-		Ctx<String, Collection<Null<String>>> tys0 = new Ctx<>();
+		Ctx<String, Collection<Null<?>>> tys0 = new Ctx<>();
 		Ctx<String, Ctx<String, String>> fks0 = new Ctx<>();
-		Ctx<String, Ctx<String, Term<String, Void, String, Void, Void, Void, Null<String>>>> atts0 = new Ctx<>();
+		Ctx<String, Ctx<String, Term<String, Void, String, Void, Void, Void, Null<?>>>> atts0 = new Ctx<>();
 		AqlOptions op = new AqlOptions(options, null, env.defaults);
+		boolean labelledNulls = (Boolean) op.getOrDefault(AqlOption.labelled_nulls);
+		Ctx<Null<?>, Term<String, String, String, String, String, String, Null<?>>> extraRepr = new Ctx<>();
 
+		int cur_count;
+		synchronized (InstExpJdbc.counter) {
+			cur_count = InstExpJdbc.counter.i;
+			InstExpJdbc.counter.i = InstExpJdbc.counter.i + 1;
+		}
 		for (String ty : sch.typeSide.tys) {
-			tys0.put(ty, Util.singList(new Null<>(ty)));
+			if (labelledNulls) {
+				tys0.put(ty, new HashSet<>());
+			} else {
+				tys0.put(ty, Util.singSet(new Null<>(ty.toString() + Integer.toString(cur_count))));
+			}
 		}
 
 		int fr = 0;
 		Map<SqlTable, Map<Map<SqlColumn, Optional<Object>>, String>> iso1 = new HashMap<>();
-		// Map<SqlTable, Map<String, Map<SqlColumn, Optional<Object>>>> iso2 =
-		// new HashMap<>();
-
+	
 		for (SqlTable table : info.tables) {
 			Set<Map<SqlColumn, Optional<Object>>> tuples = inst.get(table);
 
 			Map<Map<SqlColumn, Optional<Object>>, String> i1 = new HashMap<>();
-			// Map<String, Map<SqlColumn, Optional<Object>>> i2 = new
-			// HashMap<>();
 			for (Map<SqlColumn, Optional<Object>> tuple : tuples) {
 				String i = "v" + (fr++);
 				i1.put(tuple, i);
 				// i2.put(i, tuple);
 				ens0.get(table.name).add(i);
 				for (SqlColumn c : table.columns) {
-					// SqlType ty = c.type;
 					if (!atts0.containsKey(i)) {
 						atts0.put(i, new Ctx<>());
 					}
 					Optional<Object> val = tuple.get(c);
-					atts0.get(i).put(c.toString(), conv(sqlTypeToAqlType(c.type.name), val));
+					Term<String, Void, String, Void, Void, Void, Null<?>> xxx
+					 = InstExpJdbc.objectToSk(sch, val.orElse(null), i, c.toString(), labelledNulls, tys0, cur_count, extraRepr, false);
+					atts0.get(i).put(c.toString(), xxx);
 				}
 			}
 			iso1.put(table, i1);
@@ -148,20 +156,15 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 			}
 		}
 
-		ImportAlgebra<String, String, String, String, String, String, Null<String>> alg = new ImportAlgebra<String,String,String,String,String,String,Null<String>>(sch, ens0, tys0, fks0, atts0, Object::toString, Object::toString);
+		ImportAlgebra<String, String, String, String, String, String, Null<?>> alg = new ImportAlgebra<String,String,String,String,String,String,Null<?>>(sch, ens0, tys0, fks0, atts0, Object::toString, Object::toString);
 
-		return new SaturatedInstance<>(alg, alg, (Boolean) op.getOrDefault(AqlOption.require_consistency), (Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe));
+		return new SaturatedInstance<>(alg, alg, (Boolean) op.getOrDefault(AqlOption.require_consistency), (Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe), labelledNulls, extraRepr);
 	}
 
-	private static Term<String, Void, String, Void, Void, Void, Null<String>> conv(String t, Optional<Object> val) {
-		if (!val.isPresent()) {
-			return Term.Sk(new Null<>(t));
-		}
-		return Term.Obj(val.get(), t);
-	}
+	
 
 	@Override
-	public Instance<String, String, String, String, String, String, Null<String>, String, Null<String>> eval(AqlEnv env) {
+	public Instance<String, String, String, String, String, String, Null<?>, String, Null<?>> eval(AqlEnv env) {
 
 		try (Connection conn = DriverManager.getConnection(jdbcString)) {
 			SqlSchema sch = new SqlSchema(conn.getMetaData());

@@ -1099,7 +1099,7 @@ public class Instance {
 		return doView(c, g);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked" })
 	private JPanel doView(
 			Color clr, Graph<String, String> sgv) {
 		try {

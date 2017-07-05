@@ -1,10 +1,12 @@
 package catdata;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.jparsec.error.Location;
 import org.jparsec.error.ParseErrorDetails;
@@ -28,11 +30,18 @@ public class Program<X> implements Prog {
 		return ret;
 	}
 	
-	public Program(List<Triple<String, Integer, X>> decls, String text) {
-		this(decls, text, Collections.emptyList());
+	public Function<X, String> kindOf;
+	
+	@Override 
+	public String kind(String s) {
+		return kindOf.apply(exps.get(s));
 	}
 	
-	public Program(List<Triple<String, Integer, X>> decls, String text, List<Pair<String, String>> options) {
+	public Program(List<Triple<String, Integer, X>> decls, String text) {
+		this(decls, text, Collections.emptyList(), x -> "");
+	}
+	
+	public Program(List<Triple<String, Integer, X>> decls, String text, List<Pair<String, String>> options, Function<X, String> k) {
 		this.text = text;
 		List<Triple<String, Integer, X>> seen = new LinkedList<>();
 		for (Triple<String, Integer, X> decl : decls) { 
@@ -45,6 +54,7 @@ public class Program<X> implements Prog {
 			order.add(decl.first);				
 		}
 		this.options = Util.toMapSafely(options);
+		this.kindOf = k;
 	}
 
 	private Location conv(int i) {
@@ -104,5 +114,11 @@ public class Program<X> implements Prog {
 	public Integer getLine(String s) {
 		return lines.get(s);
 	}
+
+	@Override
+	public Collection<String> keySet() {
+		return order;
+	}
+
 
 }

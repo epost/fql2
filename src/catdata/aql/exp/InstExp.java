@@ -67,7 +67,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return options;
 		}
 		
-		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@SuppressWarnings({ "unchecked" })
 		public InstExpRandom(SchExp sch, List<Pair<String, String>> ens, List<Pair<String, String>> options) {
 			this.ens = Util.toMapSafely(ens.stream().map(x -> new Pair<>(x.first, Integer.parseInt(x.second))).collect(Collectors.toList()));
 			this.options = Util.toMapSafely(options);
@@ -119,7 +119,13 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public String toString() {
-			return "InstExpRandom [ens=" + ens + ", options=" + options + ", sch=" + sch + "]"; //TODO aql tostring
+			String s = "random : " + sch + " {\n";
+			String x = "";
+			if (ens.size() > 0) {
+				x = "generators\n" + Util.sep(ens, " -> ", "\n");
+			}
+			
+			return s + x + "\n}";
 		}
 
 		@Override
@@ -233,8 +239,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public String toString() {
-			return "InstExpCoEq [t1=" + t1 + ", t2=" + t2 + ", options=" + options + "]";
-		} //TODO aql tostring
+			return "coequalize " + t1 + " " + t2; 
+		} 
 	
 
 
@@ -283,7 +289,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	///////////////////////////////////////////////////////////////////////
 	
 	//TODO aql the types here are lies
-	public static final class InstExpCoProd<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> 
+	public static final class InstExpCoProdSigma<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> 
 		extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
 
 		public final List<Pair<MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>, InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>>> Is;
@@ -297,7 +303,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return options;
 		}
 
-		public InstExpCoProd(List<Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> is, SchExp<Ty, En, Sym, Fk, Att> sch, List<Pair<String, String>> options) {
+		public InstExpCoProdSigma(List<Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> is, SchExp<Ty, En, Sym, Fk, Att> sch, List<Pair<String, String>> options) {
 			Is = is;
 			this.sch = sch;
 			this.options = Util.toMapSafely(options);
@@ -317,7 +323,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 
 		@Override
 		public String toString() {
-			return "InstExpCoProd [Is=" + Is + ", sch=" + sch + ", options=" + options + "]"; //TODO aql toString
+			List<String> l = Is.stream().map(x -> x.first + " " + x.second).collect(Collectors.toList());
+			return "coproduct_sigma " + Util.sep(l, " ") + " : " + sch;  
 		}
 
 		@Override
@@ -338,7 +345,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			InstExpCoProd<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpCoProd<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			InstExpCoProdSigma<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpCoProdSigma<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
 			if (Is == null) {
 				if (other.Is != null)
 					return false;

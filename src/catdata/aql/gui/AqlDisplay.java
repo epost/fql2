@@ -2,12 +2,15 @@ package catdata.aql.gui;
 
 import java.awt.CardLayout;
 import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.math.RoundingMode;
-import java.sql.Date;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -45,53 +48,56 @@ import catdata.ide.Disp;
 public final class AqlDisplay implements Disp {
 
 	private final Throwable exn;
-	
+
 	@Override
 	public Throwable exn() {
 		return exn;
 	}
-	  
+
 	@Override
 	public void close() {
 	}
-	
-	//TODO aql unresolve, should be controllable with option [since expensive]
+
+	// TODO aql unresolve, should be controllable with option [since expensive]
 	private static String doLookup(String c, Exp<?> exp, AqlEnv env) {
 		switch (exp.kind()) {
 		case INSTANCE:
 			return exp.kind() + " " + c + " : " + env.typing.defs.insts.get(c);
 		case MAPPING:
-			return exp.kind() + " " + c + " : " + env.typing.defs.maps.get(c).first + " -> " + env.typing.defs.maps.get(c).second;
+			return exp.kind() + " " + c + " : " + env.typing.defs.maps.get(c).first + " -> "
+					+ env.typing.defs.maps.get(c).second;
 		case PRAGMA:
 			return exp.kind() + " " + c;
 		case QUERY:
-			return exp.kind() + " " + c + " : " + env.typing.defs.qs.get(c).first + " -> " + env.typing.defs.qs.get(c).second;
+			return exp.kind() + " " + c + " : " + env.typing.defs.qs.get(c).first + " -> "
+					+ env.typing.defs.qs.get(c).second;
 		case SCHEMA:
 			return exp.kind() + " " + c;
 		case TRANSFORM:
-			return exp.kind() + " " + c + " : " + env.typing.defs.trans.get(c).first + " -> " + env.typing.defs.trans.get(c).second;
+			return exp.kind() + " " + c + " : " + env.typing.defs.trans.get(c).first + " -> "
+					+ env.typing.defs.trans.get(c).second;
 		case TYPESIDE:
 			return exp.kind() + " " + c;
 		case GRAPH:
 			return exp.kind() + " " + c;
-		case COMMENT:			
+		case COMMENT:
 			return exp.kind() + " " + c;
-		case SCHEMA_COLIMIT:			
+		case SCHEMA_COLIMIT:
 			return exp.kind() + " " + c;
 		case CONSTRAINTS:
 			return exp.kind() + " " + c + " : " + env.typing.defs.eds.get(c);
 		default:
 			throw new RuntimeException("Anomaly: please report");
-		} 
-		
+		}
+
 	}
-	
+
 	private static int getMaxSize(Exp<?> exp, AqlEnv env) {
 		switch (exp.kind()) {
 		case INSTANCE:
-		case TRANSFORM:	
+		case TRANSFORM:
 			return (Integer) exp.getOrDefault(env, AqlOption.gui_max_table_size);
-						
+
 		case PRAGMA:
 		case CONSTRAINTS:
 			return (Integer) exp.getOrDefault(env, AqlOption.gui_max_string_size);
@@ -99,49 +105,64 @@ public final class AqlDisplay implements Disp {
 		case MAPPING:
 		case QUERY:
 		case SCHEMA:
-		case SCHEMA_COLIMIT:			
-		case GRAPH:			
+		case SCHEMA_COLIMIT:
+		case GRAPH:
 		case TYPESIDE:
 			return (Integer) exp.getOrDefault(env, AqlOption.gui_max_graph_size);
-			
-		case COMMENT:			
+
+		case COMMENT:
 			return 0;
-			
+
 		default:
 			throw new RuntimeException("Anomaly: please report");
-		} 
+		}
 	}
-	
+
 	private static JComponent wrapDisplay(String c, Exp<?> exp, Semantics obj, AqlEnv env, float time) {
 		int maxSize = getMaxSize(exp, env);
 		if (obj.size() > maxSize) {
-			return new CodeTextPanel("", "Display supressed, size > " + maxSize + ".\n\nSee manual for a description of size, or try options gui_max_Z_size = X for X > " + obj.size() + " (the size of this object) and Z one of table, graph, string.  \n\nWarning: sizes that are too large will hang the viewer.\n\nCompute time: " + env.performance.get(c) );
+			return new CodeTextPanel("",
+					"Display supressed, size > " + maxSize
+							+ ".\n\nSee manual for a description of size, or try options gui_max_Z_size = X for X > "
+							+ obj.size()
+							+ " (the size of this object) and Z one of table, graph, string.  \n\nWarning: sizes that are too large will hang the viewer.\n\nCompute time: "
+							+ env.performance.get(c));
 		}
 		int max_rows = (int) exp.getOrDefault(env, AqlOption.gui_rows_to_display);
-		//System.out.println("maxrows " + max_rows);
+		// System.out.println("maxrows " + max_rows);
 		return AqlViewer.view(time, obj, max_rows);
-	/*
-		JPanel ret = new JPanel(new GridLayout(1,1));
-		JPanel lazyPanel = new JPanel();
-		JButton button = new JButton("Show");
-
-		lazyPanel.add(button); 
-		button.addActionListener(x -> {
-			JComponent[] comp = new JComponent[1];
-			new ProgressMonitorWrapper( "Making GUI for " + name, () -> {
-				comp[0] = obj.display();
-				ret.remove(lazyPanel);
-				ret.add(comp[0]);
-				ret.validate();
-			});
-		});
-		ret.add(lazyPanel);
-		return ret; */
+		/*
+		 * JPanel ret = new JPanel(new GridLayout(1,1)); JPanel lazyPanel = new
+		 * JPanel(); JButton button = new JButton("Show");
+		 * 
+		 * lazyPanel.add(button); button.addActionListener(x -> { JComponent[]
+		 * comp = new JComponent[1]; new ProgressMonitorWrapper(
+		 * "Making GUI for " + name, () -> { comp[0] = obj.display();
+		 * ret.remove(lazyPanel); ret.add(comp[0]); ret.validate(); }); });
+		 * ret.add(lazyPanel); return ret;
+		 */
 	}
 
-
 	public AqlDisplay(String title, Program<Exp<?>> p, AqlEnv env, long start, long middle) {
-		//Map<Object, String> map = new HashMap<>();
+		// Map<Object, String> map = new HashMap<>();
+		
+		yyy.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JList<?> list = (JList<?>) e.getSource();
+                if (list.locationToIndex(e.getPoint()) == -1 && !e.isShiftDown()
+                        && !isMenuShortcutKeyDown(e)) {
+                    list.clearSelection();
+                }
+            }
+
+            private boolean isMenuShortcutKeyDown(InputEvent event) {
+                return (event.getModifiers() & Toolkit.getDefaultToolkit()
+                        .getMenuShortcutKeyMask()) != 0;
+            }
+        });
+		
 		exn = env.exn;
 		for (String c : p.order) {
 			Exp<?> exp = p.exps.get(c);
@@ -150,9 +171,10 @@ public final class AqlDisplay implements Disp {
 			}
 			if (env.defs.keySet().contains(c)) {
 				Semantics obj = (Semantics) env.defs.get(c, exp.kind());
-				
+
 				try {
-					frames.add(new Pair<>(doLookup(c, exp, env), wrapDisplay(c, exp, obj, env, env.performance.get(c))));
+					frames.add(
+							new Pair<>(doLookup(c, exp, env), wrapDisplay(c, exp, obj, env, env.performance.get(c))));
 				} catch (RuntimeException ex) {
 					ex.printStackTrace();
 					throw new LineException(ex.getMessage(), c, exp.kind().toString());
@@ -160,16 +182,16 @@ public final class AqlDisplay implements Disp {
 			}
 		}
 		long end = System.currentTimeMillis();
-		float c1 =  ((middle - start) / (1000f));
-		float c2 =  ((end - middle) / (1000f));
+		float c1 = ((middle - start) / (1000f));
+		float c2 = ((end - middle) / (1000f));
 		String pre = exn == null ? "" : "(ERROR, PARTIAL RESULT) | ";
-		JComponent report = report(p, env, p.order, c1, c2, pre + title, new Date(start).toString());
-		frames.add(0, new Pair<>("Summary", report ));
-		
+		JComponent report = report(p, env, p.order, c1, c2, pre + title);
+		frames.add(0, new Pair<>("Summary", report));
+
 		display(pre + title, p.order, report);
 	}
-	
-	private JComponent report(Program<Exp<?>> prog, AqlEnv env, List<String> order, float c1, float c2, String pre, String date) {
+
+	private JComponent report(Program<Exp<?>> prog, AqlEnv env, List<String> order, float c1, float c2, String pre) {
 		DecimalFormat df = new DecimalFormat("#.#");
 		df.setRoundingMode(RoundingMode.CEILING);
 		List<String> l = new LinkedList<>();
@@ -179,7 +201,7 @@ public final class AqlDisplay implements Disp {
 		for (String k : order) {
 			if (env.defs.insts.containsKey(k)) {
 				Instance<?, ?, ?, ?, ?, ?, ?, ?, ?> I = (Instance<?, ?, ?, ?, ?, ?, ?, ?, ?>) env.get(Kind.INSTANCE, k);
-				String s = k + "\t" + I.size() + "\t" + env.performance.get(k); 
+				String s = k + "\t" + I.size() + "\t" + env.performance.get(k);
 				l.add(s);
 				rowData[i][0] = k;
 				rowData[i][1] = I.size();
@@ -189,9 +211,9 @@ public final class AqlDisplay implements Disp {
 				missing.add(k);
 			}
 		}
-	
+
 		JPanel t = Util.makeTable(BorderFactory.createEmptyBorder(), "", rowData, "instance", "rows", "seconds");
-		JPanel pan = new JPanel(new GridLayout(1,1));
+		JPanel pan = new JPanel(new GridLayout(1, 1));
 		pan.add(new JScrollPane(t));
 		String tsv = "instance\trows\tseconds\n" + Util.sep(l, "\n");
 		JTabbedPane jtb = new JTabbedPane();
@@ -214,27 +236,43 @@ public final class AqlDisplay implements Disp {
 			}
 			text += "\n" + k + " computation total time: " + df.format(perfs.get(k)) + "s";
 		}
-		
+
 		if (!prog.options.isEmpty()) {
 			text += "\n\nGlobal options:\n";
 			text += Util.sep(prog.options, " = ", "\n");
 		}
-		
-		
+
 		jtb.addTab("Text", new CodeTextPanel("", text));
 		jtb.addTab("Performance", pan);
 		jtb.addTab("TSV", new CodeTextPanel("", tsv));
+		//jtb.addTab("Tree", viewTree(prog));
 		return jtb;
 	}
+
+	
+	
 
 	private JFrame frame = null;
 	private final List<Pair<String, JComponent>> frames = new LinkedList<>();
 
 	private final CardLayout cl = new CardLayout();
 	private final JPanel x = new JPanel(cl);
-	private final JList<String> yyy = new JList<>();
+	private final JList<String> yyy = new JList<String>() {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public int locationToIndex(Point location) {
+			int index = super.locationToIndex(location);
+			if (index != -1 && !getCellBounds(index, index).contains(location)) {
+				return -1;
+			} else {
+				return index;
+			}
+		}
+	};
+
 	private String current;
-	
+
 	private final JComponent lookup(String s) {
 		for (Pair<String, JComponent> p : frames) {
 			if (p.first.equals(s)) {
@@ -243,10 +281,10 @@ public final class AqlDisplay implements Disp {
 		}
 		return null;
 	}
-	
+
 	private void display(String s, @SuppressWarnings("unused") List<String> order, JComponent report) {
 		frame = new JFrame();
-	
+
 		Vector<String> ooo = new Vector<>();
 		for (Pair<String, JComponent> p : frames) {
 			x.add(p.second, p.first);
@@ -255,12 +293,11 @@ public final class AqlDisplay implements Disp {
 		x.add(report, "Summary");
 		cl.show(x, "Summary");
 		current = "Summary";
-		
+
 		yyy.setListData(ooo);
 		yyy.setSelectedIndex(0);
 		JPanel temp1 = new JPanel(new GridLayout(1, 1));
-		temp1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(),
-				"Select:"));
+		temp1.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), "Select:"));
 		JScrollPane yyy1 = new JScrollPane(yyy);
 		temp1.add(yyy1);
 		yyy.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -284,7 +321,7 @@ public final class AqlDisplay implements Disp {
 				JTabbedPane p = (JTabbedPane) c;
 				int i = p.getSelectedIndex();
 				int j = -1;
-				if (e.getKeyCode() == KeyEvent.VK_LEFT ) {
+				if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 					j = i - 1;
 					if (j < 0) {
 						j = p.getTabCount() - 1;
@@ -298,23 +335,21 @@ public final class AqlDisplay implements Disp {
 					}
 					p.setSelectedIndex(j);
 					p.revalidate();
-				} 
-				
-			}
-			
-			
-		});
-		
-		yyy.addListSelectionListener(e -> {
-				int i = yyy.getSelectedIndex();
-				if (i == -1) {
-					cl.show(x, "Summary");
-					current = "Summary";
-				} else {
-					cl.show(x, ooo.get(i));
-					current = ooo.get(i);
 				}
-			
+
+			}
+
+		});
+
+		yyy.addListSelectionListener(e -> {
+			int i = yyy.getSelectedIndex();
+			if (i == -1) {
+				cl.show(x, "Summary");
+				current = "Summary";
+			} else {
+				cl.show(x, ooo.get(i));
+				current = ooo.get(i);
+			}
 
 		});
 
@@ -324,7 +359,7 @@ public final class AqlDisplay implements Disp {
 		px.setDividerSize(4);
 		frame = new JFrame(/* "Viewer for " + */s);
 
-		//TODO AQL what is other split pane?
+		// TODO AQL what is other split pane?
 		JSplitPane temp2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		temp2.setResizeWeight(1);
 		temp2.setDividerSize(0);
@@ -341,26 +376,19 @@ public final class AqlDisplay implements Disp {
 
 		ActionListener escListener = e -> frame.dispose();
 
-		frame.getRootPane().registerKeyboardAction(escListener,
-				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		frame.getRootPane().registerKeyboardAction(escListener, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+				JComponent.WHEN_IN_FOCUSED_WINDOW);
 		KeyStroke ctrlW = KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK);
 		KeyStroke commandW = KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.META_MASK);
-		frame.getRootPane().registerKeyboardAction(escListener, ctrlW,
-				JComponent.WHEN_IN_FOCUSED_WINDOW);
-		frame.getRootPane().registerKeyboardAction(escListener, commandW,
-				JComponent.WHEN_IN_FOCUSED_WINDOW);
+		frame.getRootPane().registerKeyboardAction(escListener, ctrlW, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		frame.getRootPane().registerKeyboardAction(escListener, commandW, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		frame.setLocationRelativeTo(null);
 		if (exn != null) {
 			frame.setLocation(frame.getLocation().x + 400, frame.getLocation().y);
 		}
 		frame.setVisible(true);
-		
 
 	}
 
-	
-
-
 }
-

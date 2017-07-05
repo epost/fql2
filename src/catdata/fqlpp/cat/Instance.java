@@ -199,8 +199,7 @@ public class Instance<O, A> implements Serializable{
 		return x;
 	}
 	
-	@SuppressWarnings("unchecked")
-    public static <X,Y> Instance<X,Y> terminal(Signature<X,Y> sig) {
+	public static <X,Y> Instance<X,Y> terminal(Signature<X,Y> sig) {
 		Map<Signature<X, Y>.Node, Set<Object>> objs = new HashMap<>();
 		Map<Signature<X, Y>.Edge, Map<Object, Object>> arrs = new HashMap<>();
 

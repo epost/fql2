@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
@@ -25,6 +27,7 @@ import catdata.aql.Var;
 
 public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, En, Sym, Fk, Att>> {
 
+	
 	@Override
 	public Kind kind() {
 		return Kind.CONSTRAINTS;
@@ -33,6 +36,50 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 	public abstract SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G);
 
 	public static class EdExpRaw {
+		
+		public void asTree(DefaultMutableTreeNode root) {
+			if (As.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("forall");
+				for (Pair<String, String> t : As) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + " : " + t.second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (Awh.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("where");
+				for (Pair<RawTerm, RawTerm> t : Awh) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + " = " + t.second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (Es.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("exists");
+				for (Pair<String, String> t : Es) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + " : " + t.second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (Ewh.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("where");
+				for (Pair<RawTerm, RawTerm> t : Ewh) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + " = " + t.second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+		}
+		
 		private String toString;
 		@Override
 		public synchronized String toString() {
@@ -201,6 +248,22 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 	public static class EdsExpRaw extends EdsExp<Object, Object, Object, Object, Object> {
 
+
+		@Override
+		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
+			if (eds.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("nodes");
+				for (EdExpRaw t : Util.alphaMaybe(alpha, eds)) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(" ");
+					t.asTree(m);
+					n.add(m);
+				}
+				root.add(n);
+			}
+		}
+		
 		@Override
 		public Map<String, String> options() {
 			return Collections.emptyMap();

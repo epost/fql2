@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
@@ -29,6 +31,52 @@ import catdata.aql.Var;
 //TODO aql add type params to all raws?
 public class QueryExpRaw<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> 
 extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
+	
+	
+	public void asTree(DefaultMutableTreeNode root) {
+		if (imports.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("imports");
+			for (Object t : imports) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.toString());
+				n.add(m);
+			}
+		}
+		if (blocks.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("entities");
+			for (Pair<En2, Block<En1, Att2>> t : blocks) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.first);
+				t.second.asTree(m);
+				n.add(m);
+			}
+			root.add(n);
+		}
+		if (fks.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("fks");
+			for (Pair<Fk2, Trans> t : fks) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.first);
+				t.second.asTree(m);
+				n.add(m);
+			}
+			root.add(n);
+		}
+		if (atts.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("atts");
+			for (Pair<Att2, RawTerm> t : atts) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.first + " -> " + t.second);
+				n.add(m);
+			}
+			root.add(n);
+		}
+		
+	}
 	
 	private final SchExp<Ty,En1,Sym,Fk1,Att1> src;
 	private final SchExp<Ty,En2,Sym,Fk2,Att2> dst;
@@ -53,6 +101,20 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 
 		public final Map<String, String> options;
 
+		public void asTree(DefaultMutableTreeNode root) {
+				if (gens.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("entities");
+				for (Pair<Var, RawTerm> t : gens) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + " -> " + t.second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+		
+			
+		}
 		public Trans(List<Pair<String, RawTerm>> gens, List<Pair<String, String>> options) {
 			this.gens = new LinkedList<>();
 			for (Pair<String, RawTerm> gen : gens) {
@@ -130,6 +192,31 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	
 	
 	public static class Block<En1, Att2> {
+		
+		public void asTree(DefaultMutableTreeNode root) {
+			if (gens.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("gens");
+				for (Pair<Var, En1> t : gens) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + " : " + t.second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (eqs.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("eqs");
+				for (Pair<RawTerm, RawTerm> t : eqs) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.first + "=" + t.second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+			
+		}
+		
 		public final List<Pair<Var, En1>> gens; 
 
 		public final List<Pair<RawTerm, RawTerm>> eqs;
@@ -146,7 +233,7 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			return result;
 		}
 
-		@Override
+			@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;

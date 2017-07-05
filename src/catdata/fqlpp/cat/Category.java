@@ -340,9 +340,6 @@ public abstract class Category<O, A> implements Serializable {
 		return i;
 	}
 
-	@SuppressWarnings("rawtypes")
-	//public Signature origin = null;
-
 	private Signature<O, A> sig;
 
 	public Signature<O, A> toSig() {

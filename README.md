@@ -107,7 +107,7 @@ Copyright (c) JGraph Ltd
 ### JUNG - Java Universal Network/Graph Framework (BSD License)
 Copyright (c) Joshua O'Madadhain, Danyel Fisher, and Scott White
 
-### RSyntaxTextArea (and autocomplete library) (BSD License)
+### RSyntaxTextArea (and autocomplete, rstaui libraries) (BSD License)
 Copyright (c) Robert Futrell
 
 ### JFlex (BSD License)

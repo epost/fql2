@@ -397,7 +397,7 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 	
 	
 	@Override
-	protected Term<Ty, En, Sym, Fk, Att, Gen, Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> y) {
+	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> y) {
         return schema().typeSide.js.java_tys.isEmpty() ? unflatten(simpl(y)) : unflatten(schema.typeSide.js.reduce(simpl(y)));
 	} 
 

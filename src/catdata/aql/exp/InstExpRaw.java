@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
@@ -32,6 +34,40 @@ import catdata.aql.fdm.LiteralInstance;
 
 public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object,Object,Object,ID,Chc<Object,Pair<ID,Object>>> {
 
+	@Override
+	public void asTree(DefaultMutableTreeNode root, boolean alpha) {
+		if (imports.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("imports");
+			for (Object t : Util.alphaMaybe(alpha, imports)) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.toString());
+				n.add(m);
+			}
+		}
+		if (gens.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("gens");
+			for (Pair<Object, Object> t : Util.alphaMaybe(alpha, gens)) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.first + " : " + t.second);
+				n.add(m);
+			}
+			root.add(n);
+		}
+		if (eqs.size() > 0) { 
+			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+			n.setUserObject("eqs");
+			for (Pair<RawTerm, RawTerm> t : Util.alphaMaybe(alpha, eqs)) {
+				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+				m.setUserObject(t.first + "=" + t.second);
+				n.add(m);
+			}
+			root.add(n);
+		}
+		
+	}
+	
 	@Override
 	public Collection<Pair<String, Kind>> deps() {
 		Set<Pair<String, Kind>> ret = new HashSet<>();

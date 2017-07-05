@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Graph;
@@ -37,6 +39,40 @@ public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {
 
 	public static class GraphExpRaw extends GraphExp<Object,Object> {
 		
+		@Override
+		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
+			if (imports.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("imports");
+				for (Object t : Util.alphaMaybe(alpha, imports)) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.toString());
+					n.add(m);
+				}
+			}
+			if (nodes.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("nodes");
+				for (Object t : Util.alphaMaybe(alpha, nodes)) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t.toString());
+					n.add(m);
+				}
+				root.add(n);
+			}
+			if (edges.size() > 0) { 
+				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+				n.setUserObject("edges");
+				for (Object t : Util.alphaMaybe(alpha, edges.keySet())) {
+					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
+					m.setUserObject(t + " : " + edges.get(t).first + " -> " + edges.get(t).second);
+					n.add(m);
+				}
+				root.add(n);
+			}
+		
+			
+		}
 		@Override
 		public Map<String, String> options() {
 			return Collections.emptyMap();

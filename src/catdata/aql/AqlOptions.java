@@ -45,7 +45,8 @@ public final class AqlOptions {
 		eval_approx_sql_unsafe,
 		eval_sql_persistent_indices,
 		query_remove_redundancy,
-		
+		labelled_nulls	,
+
 		program_allow_nontermination_unsafe,
 		completion_precedence,
 		completion_sort,
@@ -61,7 +62,6 @@ public final class AqlOptions {
 		static_typing,
 		prover;
 		
-			
 		
 		private String getString(Map<String, String> map) {
 			String n = map.get(toString());
@@ -237,6 +237,8 @@ public final class AqlOptions {
 			return 16*1024;
 		case eval_sql_persistent_indices:
 			return false;
+		case labelled_nulls:
+			return false;
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -282,6 +284,8 @@ public final class AqlOptions {
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case labelled_nulls:
+			return op.getBoolean(map);
 		case eval_max_temp_size:
 			return op.getInteger(map);
 		case eval_reorder_joins:

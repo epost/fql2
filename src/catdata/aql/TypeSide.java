@@ -18,6 +18,8 @@ import catdata.aql.AqlOptions.AqlOption;
 
 public class TypeSide<Ty, Sym> implements Semantics {
 	
+	
+	
 	@Override
 	public int size() {
 		return tys.size() + syms.size() + eqs.size();

@@ -187,10 +187,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		}
 		
 		for (String n : prog.order) {
-			if (prog.exps.get(n) == null) {
-				Util.anomaly();
-			}
-			if ((!last_env.defs.keySet().contains(n)) || changed(n)) {
+			if (/* (!last_env.defs.keySet().contains(n)) || */ changed(n)) {
 				todo.add(n);
 			} else {
 				Kind k = prog.exps.get(n).kind();
@@ -206,17 +203,11 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			return changed.get(n);
 		}
 		Exp<?> prev = last_prog.exps.get(n);
-		if (prog.exps.get(n) == null) {
-			Util.anomaly();
-		}
 		if (prev == null || (Boolean) prog.exps.get(n).getOrDefault(env, AqlOption.always_reload)) {
 			changed.put(n, true);
 			return true;
 		}
 		for (Pair<String, Kind> d : wrapDeps(n, prev, prog)) {
-			if (prog.exps.get(d.first) == null) {
-				Util.anomaly();
-			}
 			if (changed(d.first)) {
 				changed.put(n, true);
 				return true;
@@ -266,13 +257,13 @@ public final class AqlMultiDriver implements Callable<Unit> {
 				k2 = k.toString();
 				long time1 = System.currentTimeMillis();
 				Object val = Util.timeout(() -> exp.eval(env), (Long)exp.getOrDefault(env, AqlOption.timeout) * 1000);
-				long time2 = System.currentTimeMillis();
-				// Object val = exp.eval(env);
 				if (val == null) {
 					throw new RuntimeException("anomaly, please report: null result on " + exp);
 				} else if (k.equals(Kind.PRAGMA)) {
 					((Pragma) val).execute();
 				}
+				long time2 = System.currentTimeMillis();
+		
 				synchronized (this) {
 					env.defs.put(n, k, val);
 					env.performance.put(n, (time2 - time1) / (1000f));

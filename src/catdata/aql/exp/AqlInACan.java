@@ -129,6 +129,7 @@ class AqlInACan {
 			for (Object[] row : rows) {
 				ret += "<tr>";
 				for (Object col : row) {
+				//	System.ou
 					ret += "<td>" + strip(col.toString()) + "</td>";
 				}
 				ret += "</tr>";
