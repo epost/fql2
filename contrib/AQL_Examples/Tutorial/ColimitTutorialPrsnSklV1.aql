@@ -1,0 +1,184 @@
+options
+  eval_reorder_joins = false
+  
+typeside TypeSide = literal {
+	java_types
+		Varchar = "java.lang.String"
+	java_constants
+		Varchar = "return input[0]"
+}
+
+// Schema with the single entity Skill.
+schema sS = literal : TypeSide {
+	entities
+		Skill
+	attributes
+		SName : Skill -> Varchar
+}
+
+// Schema with the single entity Task.
+schema sP = literal : TypeSide {
+	entities
+		Person
+	attributes
+		PName : Person -> Varchar
+}
+
+// Instance of skills
+instance iSkl = literal : sS {
+	generators
+	    s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
+	multi_equations
+	    SName -> {s0 Math, s1 CompSci, s2 DBA, s3 Pharma, s4 Programming, s5 Teaching, 
+	    		  s6 GrantWriting, s7 Finance, s8 Management, s9 PaperWriting}
+}
+
+// Instance of tasks
+instance iPrsn = literal : sP {
+	generators
+		p1 p2 p3 p4 : Person
+	multi_equations
+		PName -> {p1 Jane, p2 Joan, p3 Jim, p4 John}// Person -> Varchar
+}
+
+// Schema with one entity that assigns skills to people
+schema sSpP = literal : TypeSide {
+	entities
+	  SkillProvidedByPerson
+	attributes
+	  skill : SkillProvidedByPerson -> Varchar
+	  person : SkillProvidedByPerson -> Varchar
+}
+
+instance iSpP = literal : sSpP {
+	generators
+		//p1 p2 p3 p4 : Person
+	    //s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
+	    ps1 ps2 ps3 ps4 ps5 ps6 ps7 ps8 ps9 ps10 ps11 ps12 ps13 ps14 ps15 ps16 ps17 ps18 ps19 : SkillProvidedByPerson
+	multi_equations
+		person -> {ps1  Jane,    ps2  Jane,     ps3  Jane,         ps4  Jane,       ps5  Jane,
+		           ps6  Joan,    ps7  Joan,     ps8  Joan,         ps9  Joan,       ps10 Joan,
+		           ps11 Jim,     ps12 Jim,      ps13 Jim,          ps14 Jim,        ps15 Jim,
+		           ps16 John,    ps17 John,     ps18 John,         ps19 John}// Person -> Varchar
+
+	    skill ->  {ps1  DBA,     ps2 Pharma,    ps3 Teaching,      ps4 Management,  ps5  PaperWriting,
+		           ps6  Math,    ps7 Teaching,  ps8 GrantWriting,  ps9 Management,  ps10 PaperWriting,
+		           ps11 CompSci, ps12 Teaching, ps13 GrantWriting, ps14 Management, ps15 PaperWriting,
+		           ps16 DBA,     ps17 Finance,  ps18 Management,   ps19 PaperWriting}
+
+}
+
+// Create a new schema that takes the coproduct of the sT and sS schemas to create a single
+// schema with two entities Task and Skill.
+schema_colimit S_P_SpP_SumAuto = quotient sP + sS + sSpP: TypeSide {}
+
+// Give the default names in the automatically generated sum more consise names.
+schema_colimit S_P_SpP_Sum = modify S_P_SpP_SumAuto {
+	rename entities
+		sS_Skill -> Skill
+		sP_Person -> Person
+		sSpP_SkillProvidedByPerson -> SkillProvidedByPerson
+	rename attributes
+		sS_SName -> SName
+		sP_PName -> PName
+	    sSpP_skill -> skill
+	    sSpP_person -> person
+}
+
+// Provide addressable labels for the various components of the coproduct STSum
+schema sS_P_SpP_Sum = getSchema S_P_SpP_Sum
+mapping mSkillToS_P_SpP_Sum = getMapping S_P_SpP_Sum sS
+mapping mPersonToS_P_SpP_Sum = getMapping S_P_SpP_Sum sP
+mapping mSkillProvidedByPersonToS_P_SpP_Sum = getMapping S_P_SpP_Sum sSpP
+
+// Build an instance for sS_P_SpS_Sum from iPrsn and iSkl
+instance iS_P_SpP_Sum = coproduct_sigma
+   mSkillToS_P_SpP_Sum iSkl
+   mPersonToS_P_SpP_Sum iPrsn
+   mSkillProvidedByPersonToS_P_SpP_Sum iSpP
+   : sS_P_SpP_Sum
+
+
+// Define the span
+schema sSPSpn = literal : TypeSide {
+	entities
+	  Skill Person
+	  SkillPrvdByPerson
+	foreign_keys
+	  fk_SpP_S   : SkillPrvdByPerson -> Skill
+	  fk_SpP_P   : SkillPrvdByPerson -> Person
+	attributes
+	  SName  : Skill -> Varchar
+	  PName  : Person -> Varchar
+	  skill  : SkillPrvdByPerson -> Varchar
+	  person   : SkillPrvdByPerson -> Varchar
+	observation_equations
+	  forall spp. spp.fk_SpP_S.SName = spp.skill
+	  forall spp. spp.fk_SpP_P.PName = spp.person
+}
+
+// Construct the span from the three entities in sS_P_SpP_Sum
+query qS_P_SpP_SumToSPSpn = literal : sS_P_SpP_Sum -> sSPSpn {
+	entities 
+		Skill -> {
+			from
+				ss : Skill
+			return
+				SName -> ss.SName
+		}
+		SkillPrvdByPerson -> {
+			from
+				spp : SkillProvidedByPerson
+				sp  : Skill
+				pb  : Person
+			where
+				spp.skill = sp.SName
+				spp.person = pb.PName
+			return
+				skill  -> spp.skill
+				person -> spp.person
+		}
+		Person -> {
+			from
+				pp : Person
+			return
+				PName -> pp.PName
+		}
+	foreign_keys
+		// fk_SnT_S   : SkillPrvdByPerson -> Skill
+		fk_SpP_S   -> {ss -> sp}
+		// fk_SnT_T   : SkillPrvdByPerson -> Person
+		fk_SpP_P   -> {pp -> pb}
+}
+
+// Populate the span
+instance iSPSpn = eval qS_P_SpP_SumToSPSpn iS_P_SpP_Sum
+
+// Drop the tables if they exist so this script can be re-exicuted.
+pragma pCleanUpSpn = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"DROP TABLE IF EXISTS sps_SkillPrvdByPerson"
+"DROP TABLE IF EXISTS sps_Skill"
+"DROP TABLE IF EXISTS sps_Person"}
+
+pragma eSPSpn = export_jdbc_instance iSPSpn "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" "sps_"
+  { options varchar_length = 256 }
+
+pragma pp = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"SHOW  TABLES"}
+ 
+// Bring the exported instance back in
+instance iSPSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSPSpn {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   Skill -> "select id from sps_Skill"
+   Person -> "select id from sps_Person"
+   SkillPrvdByPerson -> "select id from sps_SkillPrvdByPerson"
+   // foreign keys
+   fk_SpP_S   -> "select id, fk_SpP_S from sps_SkillPrvdByPerson"
+   fk_SpP_P   -> "select id, fk_SpP_P from sps_SkillPrvdByPerson"
+   // attributes
+   SName  -> "select id, SName from sps_Skill"
+   PName  -> "select id, PName from sps_Person"
+   skill  -> "select id, skill from sps_SkillPrvdByPerson"
+   person -> "select id, person from sps_SkillPrvdByPerson"
+}
+
