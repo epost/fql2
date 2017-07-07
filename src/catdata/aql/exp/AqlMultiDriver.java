@@ -89,9 +89,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		this.toUpdate = toUpdate;
 		this.last_prog = last_prog;
 		this.last_env = last_env;
-		//this.env.user_defaults = prog.options;
 		this.env.defaults = new AqlOptions(prog.options, null, AqlOptions.initialOptions);
-		//System.out.println("pre " + env.defaults.getOrDefault(AqlOption.gui_rows_to_display));
 		this.numProcs = (int) this.env.defaults.getOrDefault(AqlOption.num_threads);
 		if (numProcs < 1) {
 			throw new RuntimeException("num_procs must be > 0");
@@ -101,7 +99,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	public void start() {
 		checkAcyclic();
 		//set the defaults here
-		env.typing = new AqlTyping(prog, env.defaults); // TODO aql line exceptions in typing
+		env.typing = new AqlTyping(prog, env.defaults, false); // TODO aql line exceptions in typing
 		init();
 		update();
 		process();
@@ -203,7 +201,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			return changed.get(n);
 		}
 		Exp<?> prev = last_prog.exps.get(n);
-		if (prev == null || (Boolean) prog.exps.get(n).getOrDefault(env, AqlOption.always_reload)) {
+		if (prev == null || (Boolean) prog.exps.get(n).getOrDefault(env, AqlOption.always_reload) || last_env == null || last_env.defs.keySet().contains(n)) {
 			changed.put(n, true);
 			return true;
 		}
@@ -277,7 +275,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			exn.add(new RuntimeInterruptedException(exp));
 		} catch (RuntimeInterruptedException exp) {
 			exn.add(exp);
-		} catch (RuntimeException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			synchronized (this) {
 				//stop = true;

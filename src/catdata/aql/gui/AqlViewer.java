@@ -397,7 +397,6 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 				List<String> header = Util.append(Util.toString(atts0), Util.toString(fks0));
 				header.add(0, "ID");
 				int n = Integer.min(maxrows, alg.en(en).size());
-				//System.out.println("n " + n);
 				Object[][] data = new Object[n][];
 				int i = 0;
 				for (X x : Util.alphabetical(alg.en(en))) {
@@ -415,7 +414,6 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 						break;
 					}
 				}
-				//System.out.println("size " + data.length);
 				
 				ret.put(en, new Pair<>(header, data));
 			}
@@ -433,7 +431,6 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		for (En en : entables.keySet()) {
 			Pair<List<String>,Object[][]> x = entables.get(en);
 			String str;
-			//System.out.println("XY " + x.second.length + " - " + alg.en(en).size());
 			if (x.second.length < alg.en(en).size()) {
 				str = en + " (" + x.second.length + " of " + alg.en(en).size() + ")";
 			} else {

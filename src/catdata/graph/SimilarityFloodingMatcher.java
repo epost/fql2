@@ -240,16 +240,16 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 	
 	@Override
 	public Match<N1, E1, N2, E2> bestMatch() {
-		System.out.println("----------------------------");
-		System.out.println("Starting bestMatch for \n " + src + "\n   ---->\n" + dst + "\n");
+		//System.out.println("----------------------------");
+		//System.out.println("Starting bestMatch for \n " + src + "\n   ---->\n" + dst + "\n");
 		
 		//to get the best match, start by computing the pcg
 		DMG<Pair<N1,N2>,Pair<E1,E2>> pcg = pcg(src, dst);
-		System.out.println("pcg is " + pcg + "\n");
+		//System.out.println("pcg is " + pcg + "\n");
 		
 		//then compute the pig
 		DMG<Pair<N1, N2>, Quad<Direction, E1, E2, Double>> ipg = ipg(pcg);
-		System.out.println("ipg is " + ipg + "\n");
+		//System.out.println("ipg is " + ipg + "\n");
 		
 		//TODO note to Serena, let's just do a case-statement of which sigma to use, rather
 		//than try to pull out each sigma as a separate function.
@@ -309,9 +309,9 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		// print adj matrix 
 		for (int i = 0; i < ipgAdMat.length; i++) {
 		    for (int j = 0; j < ipgAdMat[i].length; j++) {
-		        System.out.print(ipgAdMat[i][j] + " ");
+		        //System.out.print(ipgAdMat[i][j] + " ");
 		    }
-		    System.out.println();
+		    //System.out.println();
 		}
 
 		
@@ -352,7 +352,7 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		for (int i=0; i< idi; i++) {
 			Pair<N1, N2> n = sigmaId.get(i);
 			sigmap_n.put(n, sigma1[i]);
-			//System.out.printf("%f\n",sigma1[i]);
+			////System.out.printf("%f\n",sigma1[i]);
 		}
 		
 		
@@ -373,9 +373,9 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 				double nw = sigmap_n.get(np);
 				v= v + s*nw; //sigmagrp.cardinality * n.node.weight;
 				// print the values 
-				System.out.print(np + "np ");
-				System.out.print(v + "v ");
-				System.out.println();
+				//System.out.print(np + "np ");
+				//System.out.print(v + "v ");
+				//System.out.println();
 			}
 			finval[i] = v;
 			i++;
@@ -403,8 +403,8 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		while (miter.hasNext()) {
 			Pair<N1,N2> np = miter.next();
 			// print / save the configuration of matching pairs 
-			System.out.print(np + "np next ");
-			System.out.println();
+			//System.out.print(np + "np next ");
+			//System.out.println();
 		}
 		
 		Pair<N1,N2> npr = null;
@@ -455,21 +455,21 @@ public class SimilarityFloodingMatcher<N1, N2, E1, E2> extends Matcher<N1, E1, N
 		Iterator<Pair<N1,N2>> ip = fs.iterator();
 		while (ip.hasNext()) {
 			Pair<N1,N2> pnn = ip.next();
-			System.out.print(pnn + "fs final match np next ");
-			System.out.println();
+			//System.out.print(pnn + "fs final match np next ");
+			//System.out.println();
 		}
 		
 		
-		// System.out.println(Arrays.toString(sigma1));
-		System.out.println("sigma is " + sigmap_n + "\n");
+		// //System.out.println(Arrays.toString(sigma1));
+		//System.out.println("sigma is " + sigmap_n + "\n");
 		
 
 		// check for convergence
 
 		
 //		Match<N1,E1,N2,E2> best = createMatchFromIpg(ipg_n, sigmap_n);
-//		System.out.println("best match is " + best + "\n");
-//		System.out.println("----------------------------");
+//		//System.out.println("best match is " + best + "\n");
+//		//System.out.println("----------------------------");
 		
 //		return best;
 		
@@ -1050,17 +1050,17 @@ for (int i = 0; i < params.max_iterations; i++) { //things start at 0 in java
 	//note to serena: please have this loop break when the algorithm has converged
 	//note to serena: if the loop doesn't converge after max iterations, please throw an error
 	
-	//System.out.println("On iteration " + i + ", ipg_n+1 is " + ipg_np1 + "\n");
+	////System.out.println("On iteration " + i + ", ipg_n+1 is " + ipg_np1 + "\n");
 	
 }
 
 
-System.out.println("sigma is " + sigmap_n + "\n");
+//System.out.println("sigma is " + sigmap_n + "\n");
 
 // Print final sigma values 
 for (Pair<N1,N2> pn : sigmap_n.keySet()) {
 	// String value= sigmap.get(pn).toString();  
-     //System.out.println(pn + " " + value);  
-	System.out.println(pn.toString());
-	System.out.printf("%f \n", sigmap_n.get(pn));
+     ////System.out.println(pn + " " + value);  
+	//System.out.println(pn.toString());
+	//System.out.printf("%f \n", sigmap_n.get(pn));
 } */ 

@@ -21,6 +21,8 @@ import catdata.Util;
 
 
 public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,En,Sym,Fk,Att,Gen,Sk> */ {
+	
+	
 	//TODO aql generic map method like printX
 	
 	//TODO aql add final eq method here

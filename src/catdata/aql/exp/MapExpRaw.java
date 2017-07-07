@@ -6,13 +6,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -26,51 +25,9 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
 
-public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,Object,Object,Object> {
+public final class MapExpRaw extends MapExp<String,String,String,String,String,String,String,String> implements Raw {
 	
-	@Override
-	public void asTree(DefaultMutableTreeNode root, boolean alpha) {
-		if (imports.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("imports");
-			for (Object t : Util.alphaMaybe(alpha, imports)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.toString());
-				n.add(m);
-			}
-		}
-		if (ens.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("entities");
-			for (Pair<Object, Object> t : Util.alphaMaybe(alpha, ens)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.first + " -> " + t.second);
-				n.add(m);
-			}
-			root.add(n);
-		}
-		if (fks.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("eqs");
-			for (Pair<Object, List<Object>> t : Util.alphaMaybe(alpha, fks)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.first + " -> " + Util.sep(t.second, "."));
-				n.add(m);
-			}
-			root.add(n);
-		}
-		if (atts.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("atts");
-			for (Pair<Object, Triple<String, Object, RawTerm>> t : Util.alphaMaybe(alpha, atts)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.first + " -> \\" + t.second + ". " + t.second.third);
-				n.add(m);
-			}
-			root.add(n);
-		}
-		
-	}
+	
 	
 	@Override
 	public Collection<Pair<String, Kind>> deps() {
@@ -80,16 +37,17 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.MAPPING)).collect(Collectors.toList()));
 		return ret;
 	}
-	private final SchExp<Object,Object,Object,Object,Object> src;
-    private final SchExp<Object,Object,Object,Object,Object> dst;
 	
-	private final List<String> imports;
+	public final SchExp<String,String,String,String,String> src;
+	public final SchExp<String,String,String,String,String> dst;
 	
-	private final List<Pair<Object, Object>> ens;
-	private final List<Pair<Object, List<Object>>> fks;
-	private final List<Pair<Object, Triple<String, Object, RawTerm>>> atts;
+	public final Set<String> imports;
 	
-	private final Map<String, String> options; 
+	public final Set<Pair<String, String>> ens;
+	public final Set<Pair<String, List<String>>> fks;
+	public final Set<Pair<String, Triple<String, String, RawTerm>>> atts;
+	
+	public final Map<String, String> options; 
 	
 	@Override
 	public Map<String, String> options() {
@@ -97,25 +55,55 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 	}
 	
 	//typesafe by covariance of read only collections
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public MapExpRaw(SchExp<?, ?, ?, ?, ?> src, SchExp<?, ?, ?, ?, ?> dst, List<String> imports, List<Pair<String, String>> ens, List<Pair<String, List<String>>> fks, List<Pair<String, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
-		this.src = (SchExp<Object, Object, Object, Object, Object>) src;
-		this.dst = (SchExp<Object, Object, Object, Object, Object>) dst;
-		this.imports = imports;
-		this.ens = new LinkedList(ens);
-		this.fks = new LinkedList(fks);
-		this.atts = new LinkedList(atts);
+	public MapExpRaw(SchExp<?, ?, ?, ?, ?> src, SchExp<?, ?, ?, ?, ?> dst, List<LocStr> imports, List<Pair<LocStr, String>> ens, List<Pair<LocStr, List<String>>> fks, List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
+		this.src = (SchExp<String, String, String, String, String>) src;
+		this.dst = (SchExp<String, String, String, String, String>) dst;
+		this.imports = LocStr.set1(imports);
+		this.ens = LocStr.set2(ens);
+		this.fks = LocStr.set2(fks);
+		this.atts = LocStr.set2(atts);
 		this.options = Util.toMapSafely(options);
 		Util.toMapSafely(this.ens);
 		Util.toMapSafely(this.fks);
 		Util.toMapSafely(this.atts); //do here rather than wait
+		
+		List<InteriorLabel<Object>> t = InteriorLabel.imports( "imports", imports);
+		raw.put("imports", t);
+		
+		List<InteriorLabel<Object>> f = new LinkedList<>();
+		for (Pair<LocStr, String> p : ens) {
+			f.add(new InteriorLabel<>("entities", new Pair<>(p.first.str, p.second), p.first.loc,
+					x -> x.first + " -> " + x.second ).conv());
+		}
+		raw.put("entities", f);
+		
+		f = new LinkedList<>();
+		for (Pair<LocStr, List<String>> p : fks) {
+			f.add(new InteriorLabel<>("foreign keys", new Pair<>(p.first.str, p.second), p.first.loc,
+					x -> x.first + " -> " + Util.sep(x.second, ".") ).conv());
+		}
+		raw.put("foreign keys", f);
+		
+		f = new LinkedList<>();
+		for (Pair<LocStr, Triple<String, String, RawTerm>> p : atts) {
+			f.add(new InteriorLabel<>("attributes", new Pair<>(p.first.str, p.second), p.first.loc,
+					x -> x.first + " -> \\" + x.second.first + ". " + x.second.third ).conv());
+		}
+		raw.put("attributes", f);
 	}
 
+	Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+	
+	@Override
+	public Ctx<String, List<InteriorLabel<Object>>> raw() {
+		return raw ;
+	} 
+	
 
 	private String toString;
 	
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		if (toString != null) {
 			return toString;
 		}
@@ -131,7 +119,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		if (!ens.isEmpty()) {
 			toString += "\tentities";
 					
-			for (Pair<Object, Object> x : ens) {
+			for (Pair<String, String> x : ens) {
 				temp.add(x.first + " -> " + x.second);
 			}
 			
@@ -141,7 +129,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		if (!fks.isEmpty()) {
 			toString += "\tforeign_keys";
 			temp = new LinkedList<>();
-			for (Pair<Object, List<Object>> sym : fks) {
+			for (Pair<String, List<String>> sym : fks) {
 				temp.add(sym.first + " -> " + Util.sep(sym.second, "."));
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -150,7 +138,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		if (!fks.isEmpty()) {
 			toString += "\tattributes";
 			temp = new LinkedList<>();
-			for (Pair<Object, Triple<String, Object, RawTerm>> sym : atts) {
+			for (Pair<String, Triple<String, String, RawTerm>> sym : atts) {
 				temp.add(sym.first + " -> lambda " + sym.second.first + ". " + sym.second.third);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -234,29 +222,29 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 	
 		
 	@Override
-	public Mapping<Object, Object, Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
-		Schema<Object, Object, Object, Object, Object> src0 = src.eval(env);
-		Schema<Object, Object, Object, Object, Object> dst0 = dst.eval(env);
-		//Collage<Object, Object, Object, Object, Object, Void, Void> scol = new Collage<>(src0);
-		Collage<Object, Object, Object, Object, Object, Void, Void> dcol = new Collage<>(dst0.collage());
+	public Mapping<String, String, String, String, String, String, String, String> eval(AqlEnv env) {
+		Schema<String, String, String, String, String> src0 = src.eval(env);
+		Schema<String, String, String, String, String> dst0 = dst.eval(env);
+		//Collage<String, String, String, String, String, Void, Void> scol = new Collage<>(src0);
+		Collage<String, String, String, String, String, Void, Void> dcol = new Collage<>(dst0.collage());
 		
-		Map<Object, Object> ens0 = new HashMap<>();
-		Map<Object, Pair<Object, List<Object>>> fks0 = new HashMap<>();
-		Map<Object, Triple<Var, Object, Term<Object, Object, Object, Object, Object, Void, Void>>> atts0 = new HashMap<>();
+		Map<String, String> ens0 = new HashMap<>();
+		Map<String, Pair<String, List<String>>> fks0 = new HashMap<>();
+		Map<String, Triple<Var, String, Term<String, String, String, String, String, Void, Void>>> atts0 = new HashMap<>();
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
-			Mapping< Object, Object, Object, Object, Object, Object, Object, Object> v = env.defs.maps.get(k);
+			Mapping< String, String, String, String, String, String, String, String> v = env.defs.maps.get(k);
 			Util.putAllSafely(ens0, v.ens.map);
 			Util.putAllSafely(fks0, v.fks.map);
 			Util.putAllSafely(atts0, v.atts.map);
 		}
 		
 		Util.putAllSafely(ens0, Util.toMapSafely(ens));
-		List<Pair<Object, Pair<Object, List<Object>>>> fksX = new LinkedList<>();
-		for (Pair<Object, List<Object>> p : fks) {
-			Object start_en = null;
-			List<Object> r = new LinkedList<>();
-			for (Object o : p.second) {
+		List<Pair<String, Pair<String, List<String>>>> fksX = new LinkedList<>();
+		for (Pair<String, List<String>> p : fks) {
+			String start_en = null;
+			List<String> r = new LinkedList<>();
+			for (String o : p.second) {
 				if (ens0.containsValue(o)) {
 					if (fks0.containsKey(o)) {
 						throw new RuntimeException("in foreign key mapping " + p.first + " -> " + Util.sep(p.second, ".") + ", " + o + " is both a target foreign key and a target entity, so the path is ambiguous");
@@ -266,7 +254,7 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 					}
 				} else {
 					if (start_en == null) {
-						Pair<Object, Object> j = dst0.fks.get(o);
+						Pair<String, String> j = dst0.fks.get(o);
 						if (j == null) {
 							throw new RuntimeException("in foreign key mapping " + p.first + " -> " + Util.sep(p.second, ".") + ", " + p.second.get(0) + " is not a foreign key in the target");
 						}
@@ -282,17 +270,17 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 		}
 		Util.putAllSafely(fks0, Util.toMapSafely(fksX));
 		
-		for (Pair<Object, Triple<String, Object, RawTerm>> att : atts) {
+		for (Pair<String, Triple<String, String, RawTerm>> att : atts) {
 			String var = att.second.first;
-			Object var_en = att.second.second;
+			String var_en = att.second.second;
 			RawTerm term = att.second.third;
 
-			Pair<Object, Object> p = src0.atts.map.get(att.first);
+			Pair<String, String> p = src0.atts.map.get(att.first);
 			if (p == null) {
 				throw new RuntimeException("in mapping for " + att.first + ", " + att.first + " is not a source attribute.");
 			} 
-			Object src_att_dom_en = p.first;
-			Object dst_att_dom_en = ens0.get(src_att_dom_en);
+			String src_att_dom_en = p.first;
+			String dst_att_dom_en = ens0.get(src_att_dom_en);
 			if (dst_att_dom_en == null) {
 				throw new RuntimeException("in mapping for " + att.first + ", no entity mapping for " + src_att_dom_en + " , required for domain for " + att.first);
 			}
@@ -301,29 +289,29 @@ public final class MapExpRaw extends MapExp<Object,Object,Object,Object,Object,O
 				throw new RuntimeException("in mapping for " + att.first + ", the given source entity for the variable, " + var_en + ", is not " + dst_att_dom_en + " as expected.");
 			}
 										
-			Object src_att_cod_ty = p.second;
+			String src_att_cod_ty = p.second;
 			if (!dst0.typeSide.tys.contains(src_att_cod_ty)) {
 				throw new RuntimeException("in mapping for " + att.first + ", type " + p.second + " does not exist in target typeside.");
 			}
-			Chc<Object,Object> proposed_ty2 = Chc.inLeft(src_att_cod_ty);	
+			Chc<String,String> proposed_ty2 = Chc.inLeft(src_att_cod_ty);	
 			
-			Chc<Object, Object> var_en2 = Chc.inRight(dst_att_dom_en);
+			Chc<String, String> var_en2 = Chc.inRight(dst_att_dom_en);
 			
-			Map<String, Chc<Object, Object>> ctx = Util.singMap(var, var_en2);
+			Map<String, Chc<String, String>> ctx = Util.singMap(var, var_en2);
 	
-			Term<Object, Object, Object, Object, Object, Void, Void> term0 = RawTerm.infer0(ctx, term, proposed_ty2, dcol, "In checking mapping for attribute " + att.first + ", ", src0.typeSide.js);
+			Term<String, String, String, String, String, Void, Void> term0 = RawTerm.infer0(ctx, term, proposed_ty2, dcol, "In checking mapping for attribute " + att.first + ", ", src0.typeSide.js);
 
 			Util.putSafely(atts0, att.first, new Triple<>(new Var(var), dst_att_dom_en, term0));
 		} 
 		
 		AqlOptions ops = new AqlOptions(options, null, env.defaults);
 		
-		Mapping<Object, Object, Object, Object, Object, Object, Object, Object> ret = new Mapping<>(ens0, atts0, fks0, src0, dst0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
+		Mapping<String, String, String, String, String, String, String, String> ret = new Mapping<>(ens0, atts0, fks0, src0, dst0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
 		return ret; 
 	}
 
 	@Override
-	public Pair<SchExp<Object, Object, Object, Object, Object>, SchExp<Object, Object, Object, Object, Object>> type(AqlTyping G) {
+	public Pair<SchExp<String, String, String, String, String>, SchExp<String, String, String, String, String>> type(AqlTyping G) {
 		return new Pair<>(src, dst);
 	}
 }

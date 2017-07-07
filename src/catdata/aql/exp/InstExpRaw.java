@@ -10,8 +10,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
@@ -24,6 +22,7 @@ import catdata.aql.Eq;
 import catdata.aql.Instance;
 import catdata.aql.It;
 import catdata.aql.It.ID;
+import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
@@ -32,40 +31,13 @@ import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 
 
-public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object,Object,Object,ID,Chc<Object,Pair<ID,Object>>> {
+public final class InstExpRaw<Ty,En,Sym,Fk,Att> extends InstExp<Ty,En,Sym,Fk,Att,String,String,ID,Chc<String,Pair<ID,Att>>> implements Raw {
 
-	@Override
-	public void asTree(DefaultMutableTreeNode root, boolean alpha) {
-		if (imports.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("imports");
-			for (Object t : Util.alphaMaybe(alpha, imports)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.toString());
-				n.add(m);
-			}
-		}
-		if (gens.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("gens");
-			for (Pair<Object, Object> t : Util.alphaMaybe(alpha, gens)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.first + " : " + t.second);
-				n.add(m);
-			}
-			root.add(n);
-		}
-		if (eqs.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("eqs");
-			for (Pair<RawTerm, RawTerm> t : Util.alphaMaybe(alpha, eqs)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.first + "=" + t.second);
-				n.add(m);
-			}
-			root.add(n);
-		}
-		
+	
+private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+	
+	public Ctx<String, List<InteriorLabel<Object>>> raw() {
+		return raw;
 	}
 	
 	@Override
@@ -76,15 +48,15 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 		return ret;
 	}
  
-	private final SchExp<Object,Object,Object,Object,Object> schema;
+	public final SchExp<Ty,En,Sym,Fk,Att> schema;
 	
-	private final List<String> imports;
+	public final Set<String> imports;
 
-	private final List<Pair<Object, Object>> gens; //TODO aql why is this object and not gens
+	public final Set<Pair<String, String>> gens; 
 
-	private final List<Pair<RawTerm, RawTerm>> eqs;
+	public final Set<Pair<RawTerm, RawTerm>> eqs;
 	
-	private final Map<String, String> options;
+	public final Map<String, String> options;
 	
 	@Override
 	public Map<String, String> options() {
@@ -92,14 +64,27 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	}
 
 	//typesafe by covariance of read-only collections
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public InstExpRaw(SchExp<?,?,?,?,?> schema, List<String> imports, List<Pair<String, String>> gens, List<Pair<RawTerm, RawTerm>> eqs, Map<String, String> options) {
-		this.schema = (SchExp<Object, Object, Object, Object, Object>) schema;
-		this.imports = imports;
-		this.gens = new LinkedList(gens);
-		this.eqs = eqs;
-		this.options = options;
-		Util.toMapSafely(gens); //do this here rather than wait until 
+	public InstExpRaw(SchExp<?,?,?,?,?> schema, List<LocStr> imports, List<Pair<LocStr, String>> gens, List<Pair<Integer,Pair<RawTerm, RawTerm>>> eqs, List<Pair<String, String>> options) {
+		this.schema =  (SchExp<Ty, En, Sym, Fk, Att>) schema;
+		this.imports = LocStr.set1(imports);
+		this.gens = LocStr.set2(gens);
+		this.eqs = LocStr.proj2(eqs);
+		this.options = Util.toMapSafely(options);
+
+		List<InteriorLabel<Object>> i = InteriorLabel.imports( "imports", imports);
+		raw.put("imports", i);
+		
+		List<InteriorLabel<Object>> e = new LinkedList<>();
+		for (Pair<LocStr, String> p : gens) {
+			e.add(new InteriorLabel<>("generators",new Pair<>(p.first.str, p.second), p.first.loc,  x -> x.first + " : " + x.second).conv());
+		}
+		raw.put("generators", e);
+		
+		List<InteriorLabel<Object>> xx = new LinkedList<>();
+		for (Pair<Integer, Pair<RawTerm, RawTerm>> p : eqs) {
+			xx.add(new InteriorLabel<>("generators", p.second, p.first,  x -> x.first + " = " + x.second).conv());
+		}
+		raw.put("equations", xx);
 	}
 
 	private String toString;
@@ -121,7 +106,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 		if (!gens.isEmpty()) {
 			toString += "\tgenerators";
 					
-			Map<Object, Set<Object>> n = Util.revS(Util.toMapSafely(gens));
+			Map<String, Set<String>> n = Util.revS(Util.toMapSafely(gens));
 			
 			temp = new LinkedList<>();
 			for (Object x : n.keySet()) {
@@ -174,7 +159,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InstExpRaw other = (InstExpRaw) obj;
+		InstExpRaw<?, ?, ?, ?, ?> other = (InstExpRaw<?, ?, ?, ?, ?>) obj;
 		if (eqs == null) {
 			if (other.eqs != null)
 				return false;
@@ -204,37 +189,37 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	}
 
 	@Override
-	public Instance<Object, Object, Object, Object, Object, Object, Object, ID, Chc<Object, Pair<ID, Object>>> eval(AqlEnv env) {
-		Schema<Object, Object, Object, Object, Object> sch = schema.eval(env);
-		Collage<Object, Object, Object, Object, Object, Object, Object> col = new Collage<>(sch.collage());
+	public Instance<Ty, En, Sym, Fk, Att, String, String, ID, Chc<String, Pair<ID, Att>>> eval(AqlEnv env) {
+		Schema<Ty, En, Sym, Fk, Att> sch = schema.eval(env);
+		Collage<Ty,En,Sym,Fk,Att,String,String> col = new Collage<>(sch.collage());
 		
-		Set<Pair<Term<Object, Object, Object, Object, Object, Object, Object>, Term<Object, Object, Object, Object, Object, Object, Object>>> eqs0 = new HashSet<>();
+		Set<Pair<Term<Ty,En,Sym,Fk,Att,String,String>, Term<Ty,En,Sym,Fk,Att,String,String>>> eqs0 = new HashSet<>();
 
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
-			Instance<Object, Object, Object, Object, Object, Object, Object, Object, Object> v = env.defs.insts.get(k);
+			Instance<Ty, En, Sym, Fk, Att, String, String, ID, Chc<String, Pair<ID, String>>> v = env.defs.insts.get(k);
 			col.gens.putAll(v.gens().map);
 			col.sks.putAll(v.sks().map);
 			eqs0.addAll(v.eqs());
 			col.eqs.addAll(v.eqs().stream().map(x -> new Eq<>(new Ctx<>(), x.first, x.second)).collect(Collectors.toList()));
 		}
 		
-		for (Pair<Object, Object> p : gens) {
-			Object gen = p.first;
-			Object ty = p.second;
+		for (Pair<String, String> p : gens) {
+			String gen = p.first;
+			String ty = p.second;
 			if (col.ens.contains(ty)) {
-				col.gens.put(gen, ty);
+				col.gens.put(gen, (En) ty);
 			} else if (col.tys.contains(ty)) {
-				col.sks.put(gen, ty);
+				col.sks.put(gen, (Ty) ty);
 			} else {
 				throw new RuntimeException("The sort for " + gen + ", namely " + ty + ", is not declared as a type or entity");
 			}
 		}
 	
 		for (Pair<RawTerm, RawTerm> eq : eqs) {
-				Map<String, Chc<Object, Object>> ctx = Collections.emptyMap();
+				Map<String, Chc<Ty, En>> ctx = Collections.emptyMap();
 				
-				Triple<Ctx<String,Chc<Object,Object>>,Term<Object,Object,Object,Object,Object,Object,Object>,Term<Object,Object,Object,Object,Object,Object,Object>>
+				Triple<Ctx<String,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,String,String>,Term<Ty,En,Sym,Fk,Att,String,String>>
 				eq0 = RawTerm.infer1(ctx, eq.first, eq.second, col, sch.typeSide.js);
 						
 				eqs0.add(new Pair<>(eq0.second, eq0.third));
@@ -242,7 +227,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 		}
 
 		AqlOptions strat = new AqlOptions(options, col, env.defaults);
-		InitialAlgebra<Object, Object, Object, Object, Object, Object, Object, ID> 
+		InitialAlgebra<Ty,En,Sym,Fk,Att,String,String,ID> 
 		initial = new InitialAlgebra<>(strat, sch, col, new It(), Object::toString, Object::toString);
 				 
 		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
@@ -251,7 +236,7 @@ public final class InstExpRaw extends InstExp<Object,Object,Object,Object,Object
 	//TODO aql: schema eval should happen first, so can typecheck before running
 	
 	@Override
-	public SchExp<Object, Object, Object, Object, Object> type(AqlTyping G) {
+	public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 		return schema;
 	}
 	

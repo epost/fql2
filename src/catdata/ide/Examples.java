@@ -126,7 +126,6 @@ public class Examples {
 						Path p = it.next();
 						String s = p.toString();
 						if (s.endsWith(l.fileExtension())) {
-							//System.out.println(s);	
 							try (InputStream in = Object.class.getResourceAsStream(s)) {
 								String text = Util.readFile(in);
 								

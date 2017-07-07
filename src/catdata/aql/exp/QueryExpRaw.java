@@ -1,6 +1,7 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,6 +20,7 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.aql.Collage;
 import catdata.aql.Eq;
 import catdata.aql.Kind;
@@ -30,9 +32,9 @@ import catdata.aql.Var;
 
 //TODO aql add type params to all raws?
 public class QueryExpRaw<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> 
-extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
+extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Raw {
 	
-	
+	/*
 	public void asTree(DefaultMutableTreeNode root) {
 		if (imports.size() > 0) { 
 			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
@@ -76,32 +78,65 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			root.add(n);
 		}
 		
-	}
+	} */
 	
 	private final SchExp<Ty,En1,Sym,Fk1,Att1> src;
 	private final SchExp<Ty,En2,Sym,Fk2,Att2> dst;
 	
-	private final List<String> imports;
+	private final Set<String> imports;
 	
 	private final Map<String, String> options;
 	
-	private final List<Pair<En2, Block<En1,Att2>>> blocks;
+	private final Set<Pair<En2, Block<En1,Att2>>> blocks;
 
-	private final List<Pair<Fk2, Trans>> fks;
+	private final Set<Pair<Fk2, Trans>> fks;
 	
-	private final List<Pair<Att2, RawTerm>> atts;
+	private final Set<Pair<Att2, RawTerm>> atts;
 	
 	@Override
 	public Map<String, String> options() {
 		return options;
 	}
 	
-	public static class Trans {
-		public final List<Pair<Var, RawTerm>> gens; 
+	public static class Trans extends Exp<Void> implements Raw {
+		
+		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+		
+		@Override 
+		public Ctx<String, List<InteriorLabel<Object>>> raw() {
+			return raw;
+		}
+		
+		@Override
+		protected Map<String, String> options() {
+			return null;
+		}
+
+
+
+		@Override
+		public Kind kind() {
+			return null;
+		}
+
+
+
+		@Override
+		public Void eval(AqlEnv env) {
+			return null;
+		}
+
+
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return null;
+		}
+		public final Set<Pair<Var, RawTerm>> gens; 
 
 		public final Map<String, String> options;
 
-		public void asTree(DefaultMutableTreeNode root) {
+		/*public void asTree(DefaultMutableTreeNode root) {
 				if (gens.size() > 0) { 
 				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
 				n.setUserObject("entities");
@@ -114,13 +149,20 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			}
 		
 			
-		}
-		public Trans(List<Pair<String, RawTerm>> gens, List<Pair<String, String>> options) {
-			this.gens = new LinkedList<>();
-			for (Pair<String, RawTerm> gen : gens) {
-				this.gens.add(new Pair<>(new Var(gen.first), gen.second));
+		} */
+		public Trans(List<Pair<LocStr, RawTerm>> gens, List<Pair<String, String>> options) {
+			this.gens = new HashSet<>();
+			for (Pair<LocStr, RawTerm> gen : gens) {
+				this.gens.add(new Pair<>(new Var(gen.first.str), gen.second));
 			}
 			this.options = Util.toMapSafely(options);
+			
+			List<InteriorLabel<Object>> f = new LinkedList<>();
+			for (Pair<LocStr, RawTerm> p : gens) {
+				f.add(new InteriorLabel<>("generators", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " -> " + x.second ).conv());
+			}
+			raw.put("generators", f);
 		}
 
 		@Override
@@ -191,35 +233,30 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 	}
 	
 	
-	public static class Block<En1, Att2> {
+	public static class Block<En1, Att2> extends Exp<Void> implements Raw  {
 		
-		public void asTree(DefaultMutableTreeNode root) {
-			if (gens.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("gens");
-				for (Pair<Var, En1> t : gens) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.first + " : " + t.second);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (eqs.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("eqs");
-				for (Pair<RawTerm, RawTerm> t : eqs) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.first + "=" + t.second);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			
+		public Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+		
+		@Override
+		public Kind kind() {
+			return null;
+		}
+
+		@Override
+		public Void eval(AqlEnv env) {
+			return null;
+		}
+
+		
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return null;
 		}
 		
-		public final List<Pair<Var, En1>> gens; 
+		public final Set<Pair<Var, En1>> gens; 
 
-		public final List<Pair<RawTerm, RawTerm>> eqs;
+		public final Set<Pair<RawTerm, RawTerm>> eqs;
 	
 		public final Map<String, String> options;
 
@@ -260,16 +297,34 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			return true;
 		}
 
-		public final List<Pair<Att2, RawTerm>> atts;
+		public final Set<Pair<Att2, RawTerm>> atts;
 	
-		public Block(List<Pair<String, En1>> gens, List<Pair<RawTerm, RawTerm>> eqs, List<Pair<String, String>> options, List<Pair<Att2, RawTerm>> atts) {
-			this.gens = new LinkedList<>();
-			this.atts = atts;
-			for (Pair<String, En1> gen : gens) {
-				this.gens.add(new Pair<>(new Var(gen.first), gen.second));
+		public Block(List<Pair<LocStr, String>> gens, List<Pair<Integer, Pair<RawTerm, RawTerm>>> eqs, List<Pair<String, String>> options, List<Pair<LocStr, RawTerm>> atts) {
+			this.gens = new HashSet<>();
+			this.atts = LocStr.set2(atts).stream().map(x -> new Pair<>((Att2) x.first, x.second)).collect(Collectors.toSet());
+			for (Pair<LocStr, String> gen : gens) {
+				this.gens.add(new Pair<>(new Var(gen.first.str), (En1) gen.second));
 			}
-			this.eqs = eqs;
-			this.options = Util.toMapSafely(options);			
+			this.eqs = LocStr.proj2(eqs);
+			this.options = Util.toMapSafely(options);	
+			
+			List<InteriorLabel<Object>> e = new LinkedList<>();
+			for (Pair<LocStr, String> p : gens) {
+				e.add(new InteriorLabel<>("from",new Pair<>(p.first.str, p.second), p.first.loc,  x -> x.first + " : " + x.second).conv());
+			}
+			raw.put("from", e);
+			
+			List<InteriorLabel<Object>> xx = new LinkedList<>();
+			for (Pair<Integer, Pair<RawTerm, RawTerm>> p : eqs) {
+				xx.add(new InteriorLabel<>("where", p.second, p.first,  x -> x.first + " = " + x.second).conv());
+			}
+			raw.put("where", xx);
+			
+			xx = new LinkedList<>();
+			for (Pair<LocStr, RawTerm> p : atts) {
+				xx.add(new InteriorLabel<>("return", new Pair<>(p.first.str, p.second), p.first.loc,  x -> x.first + " -> " + x.second).conv());
+			}
+			raw.put("return", xx);
 		}
 
 		private String toString;
@@ -325,6 +380,16 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			}
 		
 			return "\t{" + toString + "}";
+		}
+
+		@Override
+		public Ctx<String, List<InteriorLabel<Object>>> raw() {
+			return raw;
+		}
+
+		@Override
+		protected Map<String, String> options() {
+			return options;
 		} 
 		
 	}
@@ -437,15 +502,140 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 		
 		return "literal : " + src + " -> " + dst + " {\n" + toString + "}";
 	} 
+	
+	/* public static class QueryExpRawHelper<En1, Att2> extends Exp<Void> implements Raw {
+		
+		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+		
+		
+		
+		Block<En1, Att2> b;
+		List<Pair<LocStr, RawTerm>> atts;
 
-	public QueryExpRaw(SchExp<Ty, En1, Sym, Fk1, Att1> src, SchExp<Ty, En2, Sym, Fk2, Att2> dst, List<String> imports, List<Pair<En2, Pair<Block<En1, Att2>, List<Pair<Att2, RawTerm>>>>> blocks,  List<Pair<Fk2, Trans>> fks, List<Pair<String, String>> options) {
+		public QueryExpRawHelper(Block<En1, Att2> b, List<Pair<LocStr, RawTerm>> atts) {
+			this.b = b;
+			this.atts = atts;
+				
+			raw.putAll(b.raw.map);
+			
+			List<InteriorLabel<Object>> xx = new LinkedList<>();
+			for (Pair<Att2, RawTerm> p : b.atts) {
+				xx.add(new InteriorLabel<>("return", new Pair<>(p.first.str, p.second), p.first.loc,  x -> x.first + " -> " + x.second).conv());
+			}
+			raw.put("return", xx);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((atts == null) ? 0 : atts.hashCode());
+			result = prime * result + ((b == null) ? 0 : b.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			QueryExpRawHelper other = (QueryExpRawHelper) obj;
+			if (atts == null) {
+				if (other.atts != null)
+					return false;
+			} else if (!atts.equals(other.atts))
+				return false;
+			if (b == null) {
+				if (other.b != null)
+					return false;
+			} else if (!b.equals(other.b))
+				return false;
+			return true;
+		}
+
+		@Override
+		public Ctx<String, List<InteriorLabel<Object>>> raw() {
+			return null;
+		}
+
+		@Override
+		protected Map<String, String> options() {
+			return null;
+		}
+
+		@Override
+		public Kind kind() {
+			return null;
+		}
+
+		@Override
+		public Void eval(AqlEnv env) {
+			return null;
+		}
+
+		@Override
+		public String toString() {
+			return null;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return null;
+		}
+
+		
+		
+		
+	} */
+
+	public QueryExpRaw(SchExp<?, ?, ?, ?, ?> c, SchExp<?, ?, ?, ?, ?> d, List<LocStr> imports, List<Pair<LocStr, Pair<Block<En1, Att2>, List<Pair<LocStr, RawTerm>>>>> list,  List<Pair<LocStr, Trans>> fks, List<Pair<String, String>> options) {
+		this.src = (SchExp<Ty, En1, Sym, Fk1, Att1>) c;
+		this.dst = (SchExp<Ty, En2, Sym, Fk2, Att2>) d;
+		this.imports = LocStr.set1(imports);
+		this.options = Util.toMapSafely(options);
+		this.blocks = list.stream().map(x -> new Pair<>((En2)x.first.str, x.second.first)).collect(Collectors.toSet());
+		this.fks = LocStr.set2(fks).stream().map(x -> new Pair<>((Fk2)x.first, x.second)).collect(Collectors.toSet());
+        atts = new HashSet<>();
+		for (Pair<LocStr, Pair<Block<En1, Att2>, List<Pair<LocStr, RawTerm>>>> block : list) {
+			atts.addAll(block.second.second.stream().map(x -> 
+			new Pair<>((Att2) x.first.str, x.second)).collect(Collectors.toList()));
+		}
+		
+		raw.put("imports", InteriorLabel.imports("imports", imports));
+		
+		List<InteriorLabel<Object>> f = new LinkedList<>();
+		for (Pair<LocStr, Pair<Block<En1, Att2>, List<Pair<LocStr, RawTerm>>>> p : list) {
+			f.add(new InteriorLabel<>("entities", p.second.first, p.first.loc,
+					x -> p.first.str ).conv());
+		}
+		raw.put("entities", f);
+		
+		f = new LinkedList<>();
+		for (Pair<LocStr, Trans> p : fks) {
+			f.add(new InteriorLabel<>("foreign keys", p.second, p.first.loc,
+					x -> p.first.str ).conv());
+		}
+		raw.put("foreign keys", f);
+	}
+	
+	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+	
+	@Override 
+	public Ctx<String, List<InteriorLabel<Object>>> raw() {
+		return raw;
+	}
+	
+	public QueryExpRaw(SchExp<Ty, En1, Sym, Fk1, Att1> src, SchExp<Ty, En2, Sym, Fk2, Att2> dst, List<String> imports, List<Pair<En2, Pair<Block<En1, Att2>, List<Pair<Att2, RawTerm>>>>> blocks,  List<Pair<Fk2, Trans>> fks, List<Pair<String, String>> options, Object o) {
 		this.src = src;
 		this.dst = dst;
-		this.imports = imports;
+		this.imports = new HashSet<>(imports);
 		this.options = Util.toMapSafely(options);
-		this.blocks = blocks.stream().map(x -> new Pair<>(x.first, x.second.first)).collect(Collectors.toList());
-		this.fks = new LinkedList<>(fks);
-        atts = new LinkedList<>();
+		this.blocks = blocks.stream().map(x -> new Pair<>(x.first, x.second.first)).collect(Collectors.toSet());
+		this.fks = new HashSet<>(fks);
+        atts = Collections.emptySet();
 		for (Pair<En2, Pair<Block<En1, Att2>, List<Pair<Att2, RawTerm>>>> block : blocks) {
 			atts.addAll(block.second.second);
 		}
@@ -490,7 +680,8 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			if (!dst0.ens.contains(p.first)) {
 					throw new RuntimeException("There is a block for " + p.first + ", which is not a target entity");
 			}
-			Ctx<Var, En1> ctx = new Ctx<>(p.second.gens);
+			
+			Ctx<Var, En1> ctx = new Ctx<Var, En1>(Util.toMapSafely(p.second.gens)); //p.second.gens);
 			for (Var v : ctx.map.keySet()) {
 				En1 en = ctx.get(v);
 				if (!src0.ens.contains(en)) {
@@ -509,8 +700,6 @@ extends QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> {
 			Map<String, String> uu = new HashMap<>(options);
 			uu.putAll(p.second.options);
 			AqlOptions theops = new AqlOptions(uu,null,env.defaults);
-			//System.out.println("UI " + theops.getOrDefault(AqlOption.eval_max_temp_size));
-			//System.out.println("UH " + env.defaults.getOrDefault(AqlOption.eval_max_temp_size));
 			Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions> b = new Triple<>(ctx, eqs, theops);
 			ens0.put(p.first, b);
 		}

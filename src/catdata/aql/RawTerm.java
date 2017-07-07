@@ -243,7 +243,6 @@ public final class RawTerm {
 			Ref<Chc<Ty,En>> arg_t = args.get(0).infer(vars, ctx, col);
 			En ty = atts_t == null ? fks_t.first : atts_t.first;
 			if (arg_t.x != null && !Chc.inRight(ty).equals(arg_t.x)) {
-				System.out.println(arg_t.x);
 				throw new RuntimeException("In " + this + ", the head " + head + " is an attribute/foreign key expecting argument type " + ty + " but its argument has actual type " + arg_t.x.toStringMash());					
 			}
 			arg_t.set(Chc.inRight(ty)); //redundant sometimes
@@ -342,7 +341,7 @@ public final class RawTerm {
 	}
 
 	//TODO: aql use of toString here is ugly
-	public static RawTerm fold (Set<Object> fks, Set<Object> entities, List<Object> l, String v) {
+	public static <X,Y,Z> RawTerm fold (Set<X> fks, Set<Y> entities, List<Z> l, String v) {
 		RawTerm ret = new RawTerm(v, (String) null);
 		for (Object o : l) {
 			if (entities.contains(o)) {

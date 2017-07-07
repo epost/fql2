@@ -443,7 +443,7 @@ Allowable options are {\tt timeout} and {\tt static\_typing}, which when disable
 \section{{\tt import\_jdbc [jdbcclass] [jdbcuri] : <schema>}}
 
 \subsection{entities}
-A {\tt ctx(<entity> | <attribute> | <foreign key> | <type> , [sql code])}.  The SQL code for each entity should return a one column table, and the SQL code for each attribute and foreign key should return a two column table.  
+A {\tt ctx(<entity> | <attribute> | <foreign key> | <type> , [sql code])}.  The SQL code for each entity should return a one column table, and the SQL code for each attribute and foreign key should return a two column table.  Note that these tables must be complete: this keyword imports a model (set of tables) of a schema, not a presentation of a model of a schema (i.e., as {\tt literal} does).
 
 \subsection{{\tt options}}
 Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, and {\tt require\_consistency}.  Also {\tt labelled\_nulls} toggles between labelled and unlabelled NULL semantics.
@@ -458,7 +458,7 @@ Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload
 
 
 \section{{\tt import\_csv [directoryname] : schema}}
-The directory name should contain one file named $en.csv$ per entity $en$.  The file for $en$ should be a CSV file with a header; the fields of the header should be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.  Records can contain (uni-labelled) nulls (using the string specified in options).
+The directory name should contain one file named $en.csv$ per entity $en$.  The file for $en$ should be a CSV file with a header; the fields of the header should be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.  Records can contain nulls (using the string specified in options).  Note that these tables must be complete: this keyword imports a model (set of tables) of a schema, not a presentation of a model of a schema (i.e., as {\tt literal} does).
 
 
 \subsection{{\tt options}}

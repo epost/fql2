@@ -35,7 +35,6 @@ import catdata.ide.CodeTextPanel;
 import catdata.ide.GUI;
 import catdata.ide.Language;
 import catdata.ide.Outline;
-import catdata.ide.TreeOutline;
 
 @SuppressWarnings("serial")
 public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, AqlDisplay> {

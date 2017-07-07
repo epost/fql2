@@ -9,8 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
@@ -22,6 +20,7 @@ import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.AqlProver;
 import catdata.aql.AqlProver.ProverName;
+import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.aql.Collage;
 import catdata.aql.Eq;
 import catdata.aql.Kind;
@@ -31,74 +30,13 @@ import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
 
-public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object>  {
+public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String> implements Raw {
 	
 	
-	@Override
-	public void asTree(DefaultMutableTreeNode root, boolean alpha) {
-		if (imports.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("imports");
-			for (Object t : Util.alphaMaybe(alpha, imports)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.toString());
-				n.add(m);
-			}
-		}
-		if (ens.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("entities");
-			for (Object t : Util.alphaMaybe(alpha, ens)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.toString());
-				n.add(m);
-			}
-			root.add(n);
-		}
-		if (fks.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("fks");
-			for (Pair<Object, Pair<Object, Object>> t : Util.alphaMaybe(alpha, fks)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.first + " : " + t.second.first + "->" + t.second.second);
-				n.add(m);
-			}
-			root.add(n);
-		}
-		if (atts.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("fks");
-			for (Pair<Object, Pair<Object, Object>> t : Util.alphaMaybe(alpha, atts)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.first + " : " + t.second.first + "->" + t.second.second);
-				n.add(m);
-			}
-			root.add(n);
-		}
-		if (p_eqs.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("path_eqs");
-			for (Pair<List<Object>, List<Object>> t : Util.alphaMaybe(alpha, p_eqs)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(Util.sep(t.first, ".") + "=" + Util.sep(t.second, "."));
-				n.add(m);
-			}
-			root.add(n);
-		}
-		if (t_eqs.size() > 0) { 
-			DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-			n.setUserObject("obs_eqs");
-			for (Quad<String, Object, RawTerm, RawTerm> t : Util.alphaMaybe(alpha, t_eqs)) {
-				DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-				m.setUserObject(t.third + "=" + t.fourth);
-				n.add(m);
-			}
-			root.add(n);
-		}
-	}
 	
-	public SchExp<Object,Object,Object,Object,Object> resolve(AqlTyping G, Program<Exp<?>> prog) {
-	return this;
+	
+	public SchExp<Ty,String,Sym,String,String> resolve(AqlTyping G, Program<Exp<?>> prog) {
+		return this;
 	}
 
 	@Override
@@ -116,17 +54,15 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 
 	//TODO: aql printing of contexts broken when conitain choices
 	
-	@SuppressWarnings("unused")
 	@Override
-	public Schema<Object, Object, Object, Object, Object> eval(AqlEnv env) {
-		TypeSide<Object, Object> ts = typeSide.eval(env);
-		Collage<Object, Object, Object, Object, Object, Void, Void> col = new Collage<>(ts.collage());
+	public Schema<Ty, String, Sym, String, String> eval(AqlEnv env) {
+		TypeSide<Ty, Sym> ts = typeSide.eval(env);
+		Collage<Ty, String, Sym, String, String, Void, Void> col = new Collage<>(ts.collage());
 		
-		Set<Triple<Pair<Var, Object>, Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>>> eqs0 = new HashSet<>();
+		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> eqs0 = new HashSet<>();
 
 		for (String k : imports) {
-			@SuppressWarnings("unchecked")
-			Schema<Object, Object, Object, Object, Object> v = env.defs.schs.get(k);
+			Schema<Ty, String, Sym, String, String> v = env.defs.schs.get(k);
 			col.ens.addAll(v.ens);
 			col.fks.putAll(v.fks.map);
 			col.atts.putAll(v.atts.map);
@@ -138,42 +74,38 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		col.fks.putAll(Util.toMapSafely(fks));
 		col.atts.putAll(Util.toMapSafely(atts));
 		
-		for (Quad<String, Object, RawTerm, RawTerm> eq : t_eqs) {
-				Map<String, Chc<Object, Object>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
+		for (Quad<String, String, RawTerm, RawTerm> eq : t_eqs) {
+				Map<String, Chc<Ty, String>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
 				
-				Triple<Ctx<String,Chc<Object,Object>>,Term<Object,Object,Object,Object,Object,Void,Void>,Term<Object,Object,Object,Object,Object,Void,Void>>
+				Triple<Ctx<String,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>>
 				eq0 = RawTerm.infer1(ctx, eq.third, eq.fourth, col, ts.js);
 				
-				//if (eq0.first.size() != 1) {
-					//throw new RuntimeException("In " + eq.third + " = " + eq.fourth + ", there are either unbound variables or java primitives (without annotations), neither of which are not allowed"); 
-				//}
-
-				Chc<Object, Object> v = eq0.first.get(eq.first);
+				Chc<Ty, String> v = eq0.first.get(eq.first);
 				if (v.left) {
 					throw new RuntimeException("In " + eq.third + " = " + eq.fourth + ", variable " + eq.first + " has type " + v.l + " which is not an entity");
 				}
-				Object t = v.r;
+				String t = v.r;
 			
 				eqs0.add(new Triple<>(new Pair<>(new Var(eq.first), t), eq0.second, eq0.third));
 		}
 		
-		for (Pair<List<Object>, List<Object>> eq : p_eqs) {
+		for (Pair<List<String>, List<String>> eq : p_eqs) {
 			String vv = "v";
 			Var var = new Var(vv);
 			
-			Map<String, Chc<Object, Object>> ctx = Util.singMap(vv, null);
+			Map<String, Chc<Ty, String>> ctx = Util.singMap(vv, null);
 			
 			RawTerm lhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.first, vv);
 			RawTerm rhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.second,vv);
 			
-			Triple<Ctx<String,Chc<Object,Object>>,Term<Object,Object,Object,Object,Object,Void,Void>,Term<Object,Object,Object,Object,Object,Void,Void>>
+			Triple<Ctx<String,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>>
 			eq0 = RawTerm.infer1(ctx, lhs, rhs, col, ts.js);
 		
-			Chc<Object, Object> v = eq0.first.get(vv);
+			Chc<Ty, String> v = eq0.first.get(vv);
 			if (v.left) {
 				throw new RuntimeException("In " + Util.sep(eq.first, ".") + " = " + Util.sep(eq.second, ".") + ", the equations source " + eq.first + " is type " + v.l + " which is not an entity");
 			}
-			Object t = v.r;
+			String t = v.r;
 		
 			if (eq0.first.size() != 1) {
 				throw new RuntimeException("In " + Util.sep(eq.first, ".") + " = " + Util.sep(eq.second, ".") + ", java constants cannot be used ");
@@ -181,7 +113,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 
 			eqs0.add(new Triple<>(new Pair<>(var, t), eq0.second, eq0.third));
 		}
-		for (Triple<Pair<Var, Object>, Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>> eq : eqs0) {
+		for (Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>> eq : eqs0) {
 			col.eqs.add(new Eq<>(new Ctx<>(eq.first).inRight(), eq.second, eq.third));
 		}
 		
@@ -192,34 +124,35 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		//forces type checking before prover construction
 		new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(s, col, ts.js), false);
 		
-		Schema<Object, Object, Object, Object, Object> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col, ts.js), !((Boolean)strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
+		Schema<Ty, String, Sym, String, String> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col, ts.js), !((Boolean)strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
 		return ret; 
 		
 	}
 
 	
 	
-	//could be ? - don't think so
-	private final TyExp<Object,Object> typeSide;
+	public final TyExp<Ty,Sym> typeSide;
 	
-	private final List<String> imports;
+	public final Set<String> imports;
 	
-	private final List<Object> ens;
+	public final Set<String> ens;
 
-	private final List<Pair<Object, Pair<Object, Object>>> fks;
-	private final List<Pair<List<Object>, List<Object>>> p_eqs;
+	public final Set<Pair<String, Pair<String, String>>> fks;
+	public final Set<Pair<List<String>, List<String>>> p_eqs;
 
-	private final List<Pair<Object, Pair<Object, Object>>> atts;
-	private final List<Quad<String, Object, RawTerm, RawTerm>> t_eqs;
+	public final Set<Pair<String, Pair<String, Ty>>> atts;
+	public final Set<Quad<String, String, RawTerm, RawTerm>> t_eqs;
 	
-	private final Map<String, String> options;
+	public final Map<String, String> options;
 	
 		
 
 	private String toString;
+
+	private final Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 	
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		if (toString != null) {
 			return toString;
 		}
@@ -240,7 +173,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		if (!fks.isEmpty()) {
 			toString += "\tforeign_keys";
 			temp = new LinkedList<>();
-			for (Pair<Object, Pair<Object, Object>> sym : fks) {
+			for (Pair<String, Pair<String, String>> sym : fks) {
 				temp.add(sym.first + " : " + sym.second.first + " -> " + sym.second.second);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -249,7 +182,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		if (!p_eqs.isEmpty()) {
 			toString += "\tpath_equations";
 			temp = new LinkedList<>();
-			for (Pair<List<Object>, List<Object>> sym : p_eqs) {
+			for (Pair<List<String>, List<String>> sym : p_eqs) {
 				temp.add(Util.sep(sym.first, ".") + " = " + Util.sep(sym.second, ".") );
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -258,7 +191,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		if (!atts.isEmpty()) {
 			toString += "\tattributes";
 			temp = new LinkedList<>();
-			for (Pair<Object, Pair<Object, Object>> sym : atts) {
+			for (Pair<String, Pair<String, Ty>> sym : atts) {
 				temp.add(sym.first + " : " + sym.second.first + " -> " + sym.second.second);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -267,7 +200,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		if (!t_eqs.isEmpty()) {
 			toString += "\tobservation_equations";
 			temp = new LinkedList<>();
-			for (Quad<String, Object, RawTerm, RawTerm> sym : t_eqs) {
+			for (Quad<String, String, RawTerm, RawTerm> sym : t_eqs) {
 				temp.add("forall " + sym.first + ". " + sym.third + " = " + sym.fourth);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -309,7 +242,7 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SchExpRaw other = (SchExpRaw) obj;
+		SchExpRaw<?, ?> other = (SchExpRaw<?, ?>) obj;
 		if (atts == null) {
 			if (other.atts != null)
 				return false;
@@ -353,19 +286,66 @@ public final class SchExpRaw extends SchExp<Object,Object,Object,Object,Object> 
 		return true;
 	}
 
-	//type safe by covariance of read only collections
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public SchExpRaw(TyExp<?, ?> typeSide, List<String> imports, List<String> ens, List<Pair<String, Pair<String, String>>> fks, List<Pair<List<String>, List<String>>> p_eqs, List<Pair<String, Pair<String, String>>> atts, List<Quad<String, String, RawTerm, RawTerm>> t_eqs, List<Pair<String, String>> options) {
-		this.typeSide = (TyExp<Object, Object>) typeSide;
-		this.imports = imports;
-		this.ens = new LinkedList<>(ens);
-		this.fks = new LinkedList(fks);
-		this.p_eqs = new LinkedList(p_eqs);
-		this.atts = new LinkedList(atts);
-		this.t_eqs = new LinkedList(t_eqs);
+	public SchExpRaw(TyExp<?, ?> typeSide, List<LocStr> imports, List<LocStr> ens, List<Pair<LocStr, Pair<String, String>>> fks, List<Pair<Integer, Pair<List<String>, List<String>>>> list, List<Pair<LocStr, Pair<String, String>>> atts, List<Pair<Integer, Quad<String, String, RawTerm, RawTerm>>> list2, List<Pair<String, String>> options) {
+		this.typeSide = (TyExp<Ty, Sym>) typeSide;
+		this.imports = LocStr.set1(imports);
+		this.ens = LocStr.set1(ens);
+		this.fks = LocStr.set2(fks);
+		this.p_eqs = LocStr.proj2(list);
+		this.atts = LocStr.set2x(atts, x ->  (Ty) x);
+		this.t_eqs = LocStr.proj2(list2);
 		this.options = Util.toMapSafely(options);
 		Util.toMapSafely(fks); //check no dups here rather than wait until eval
 		Util.toMapSafely(atts);	
+		
+		List<InteriorLabel<Object>> i = InteriorLabel.imports( "imports", imports);
+		raw.put("imports", i);
+		List<InteriorLabel<Object>> t = InteriorLabel.imports( "entities", ens);
+		raw.put("entities", t);
+		
+		List<InteriorLabel<Object>> f = new LinkedList<>();
+		for (Pair<LocStr, Pair<String, String>> p : fks) {
+			f.add(new InteriorLabel<>("foreign keys", new Triple<>(p.first.str, p.second.first, p.second.second), p.first.loc,
+					x -> x.first + " : " + x.second + " -> " + x.third).conv());
+		}
+		raw.put("foreign keys", f);
+		
+		List<InteriorLabel<Object>> e = new LinkedList<>();
+		for (Pair<Integer, Pair<List<String>, List<String>>> p : list) {
+			e.add(new InteriorLabel<>("path equations", p.second, p.first,  x -> Util.sep(x.first, ".") + " = " + Util.sep(x.second, ".")).conv());
+		}
+		raw.put("path equations", e);
+		
+		List<InteriorLabel<Object>> jt = new LinkedList<>();
+		raw.put("attributes", jt);
+		for (Pair<LocStr, Pair<String, String>> p : atts) {
+			jt.add(new InteriorLabel<>("attributes", new Pair<>(p.first.str, p.second), p.first.loc,  x -> x.first + " : " + x.second.first + " -> " + x.second.second).conv());
+		}
+		
+		List<InteriorLabel<Object>> jc = new LinkedList<>();
+		for (Pair<Integer, Quad<String, String, RawTerm, RawTerm>> p : list2) {
+			jc.add(new InteriorLabel<>("obs equations", p.second, p.first,  x -> x.third + " = " + x.fourth).conv());
+		}
+		raw.put("obs equations", jc);
+		
+	} 
+	
+	public SchExpRaw(TyExp<?, ?> typeSide, List<String> imports, List<String> ens, List<Pair<String, Pair<String, String>>> fks, List<Pair<List<String>, List<String>>> list, List<Pair<String, Pair<String, Ty>>> atts, List<Quad<String, String, RawTerm, RawTerm>> list2, List<Pair<String, String>> options, Object o) {
+		this.typeSide = (TyExp<Ty, Sym>) typeSide;
+		this.imports = new HashSet<>(imports);
+		this.ens = new HashSet<>(ens);
+		this.fks = new HashSet<>(fks);
+		this.p_eqs = new HashSet<>(list);
+		this.atts = new HashSet<>(atts);
+		this.t_eqs = new HashSet<>(list2);
+		this.options = Util.toMapSafely(options);
+		Util.toMapSafely(fks); //check no dups here rather than wait until eval
+		Util.toMapSafely(atts);	
+	}
+
+	@Override
+	public Ctx<String, List<InteriorLabel<Object>>> raw() {
+		return raw ;
 	} 
 	
 	

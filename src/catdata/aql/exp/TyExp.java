@@ -204,11 +204,11 @@ public static final class TyExpSql extends TyExp<String,String> {
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public static final class TyExpVar extends TyExp<Object, Object> {
+	public static final class TyExpVar extends TyExp<String, String> {
 		public final String var;
 		
 		@Override
-		public TyExp<Object, Object> resolve(Program<Exp<?>> prog) {
+		public TyExp<String, String> resolve(Program<Exp<?>> prog) {
 			if (!prog.exps.containsKey(var)) {
 				throw new RuntimeException("Unbound typeside variable: " + var);
 			}
@@ -217,7 +217,7 @@ public static final class TyExpSql extends TyExp<String,String> {
 				throw new RuntimeException("Variable " + var + " is bound to something that is not a typeside, namely\n\n" + x);
 			}
 			@SuppressWarnings("unchecked")
-			TyExp<Object,Object> texp = (TyExp<Object,Object>) x;
+			TyExp<String,String> texp = (TyExp<String,String>) x;
 			return texp.resolve(prog);
 		}
 		
@@ -240,7 +240,7 @@ public static final class TyExpSql extends TyExp<String,String> {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public TypeSide<Object, Object> eval(AqlEnv env) {
+		public TypeSide<String, String> eval(AqlEnv env) {
 			return env.defs.tys.get(var);
 		}
 

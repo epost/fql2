@@ -29,6 +29,7 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.Var;
+import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.aql.exp.SchExp.SchExpLit;
 import catdata.aql.fdm.CoEvalInstance;
 import catdata.aql.fdm.ColimitInstance;
@@ -54,24 +55,35 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	///////////////////////////////////////////////////////////////////////
 
 	public static final class InstExpRandom
-	extends InstExp<Object,Object,Object,Object,Object,Object,Object,ID,Chc<Object,Pair<ID,Object>>> {
+	extends InstExp<String,String,String,String,String,String,String,ID,Chc<String,Pair<ID,String>>> implements Raw {
 	
+		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+		
+		@Override 
+		public Ctx<String, List<InteriorLabel<Object>>> raw() {
+			return raw;
+		}
 		public final Map<String, Integer> ens;
 				
 		public final Map<String, String> options;
 		
-		public final SchExp<Object, Object, Object, Object, Object> sch;
+		public final SchExp<String, String, String, String, String> sch;
 		
 		@Override
 		public Map<String, String> options() {
 			return options;
 		}
 		
-		@SuppressWarnings({ "unchecked" })
-		public InstExpRandom(SchExp sch, List<Pair<String, String>> ens, List<Pair<String, String>> options) {
-			this.ens = Util.toMapSafely(ens.stream().map(x -> new Pair<>(x.first, Integer.parseInt(x.second))).collect(Collectors.toList()));
+		public InstExpRandom(SchExp<?,?,?,?,?> sch, List<Pair<LocStr, String>> ens, List<Pair<String, String>> options) {
+			this.ens = Util.toMapSafely(LocStr.set2y(ens, x -> Integer.parseInt(x)));
 			this.options = Util.toMapSafely(options);
-			this.sch = sch;
+			this.sch = (SchExp<String, String, String, String, String>) sch;
+			List<InteriorLabel<Object>> f = new LinkedList<>();
+			for (Pair<LocStr, String> p : ens) {
+				f.add(new InteriorLabel<>("generators", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " -> " + x.second).conv());
+			}
+			raw.put("generators", f);
 		}
 
 		@Override
@@ -129,33 +141,33 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		@Override
-		public SchExp<Object, Object, Object, Object, Object> type(AqlTyping G) {
+		public SchExp<String, String, String, String, String> type(AqlTyping G) {
 			return sch;
 		}
 
 		//not exactly the smartest way
 		@Override
-		public Instance<Object, Object, Object, Object, Object, Object, Object, ID, Chc<Object, Pair<ID, Object>>> eval(AqlEnv env) {
+		public Instance<String, String, String, String, String, String, String, ID, Chc<String, Pair<ID, String>>> eval(AqlEnv env) {
 			int seed = (Integer) new AqlOptions(options, null, env.defaults).getOrDefault(AqlOption.random_seed);
 			Random rand = new Random(seed);
-			List<Pair<String, String>> gens = new LinkedList<>();
-			List<Pair<RawTerm, RawTerm>> eqs = new LinkedList<>();
-			Schema<Object, Object, Object, Object, Object> schema = sch.eval(env);
+			List<Pair<LocStr, String>> gens = new LinkedList<>();
+			List<Pair<Integer, Pair<RawTerm, RawTerm>>> eqs = new LinkedList<>();
+			Schema<String, String, String, String, String> schema = sch.eval(env);
 			for (String en : ens.keySet()) {
 				int size = ens.get(en);
 				for (int i = 0; i < size; i++) {
-					String src = en.toString() + i;
-					gens.add(new Pair<>(src, en.toString())); //TODO aql typing
-					for (Object fk : schema.fksFrom(en)) {
+					String src = en + i;
+					gens.add(new Pair<>(new LocStr(0, src), en)); 
+					for (String fk : schema.fksFrom(en)) {
 						Object dst_en = schema.fks.get(fk).second;
 						int dst_size = ens.containsKey(dst_en) ? ens.get(dst_en) : 0;
 						if (dst_size == 0) {
 							continue;
 						}
 						String dst = dst_en.toString() + rand.nextInt(dst_size);
-						eqs.add(new Pair<>(new RawTerm(fk.toString(), Util.singList(new RawTerm(src))), new RawTerm(dst)));
+						eqs.add(new Pair<>(0, new Pair<>(new RawTerm(fk.toString(), Util.singList(new RawTerm(src))), new RawTerm(dst))));
 					}
-					for (Object att : schema.attsFrom(en)) {
+					for (String att : schema.attsFrom(en)) {
 						Object dst_ty = schema.atts.get(att).second;
 						int dst_size = ens.containsKey(dst_ty) ? ens.get(dst_ty) : 0;
 
@@ -163,12 +175,12 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 							continue;
 						}
 						String dst = dst_ty.toString() + rand.nextInt(dst_size);
-						eqs.add(new Pair<>(new RawTerm(att.toString(), Util.singList(new RawTerm(src))), new RawTerm(dst)));
+						eqs.add(new Pair<>(0, new Pair<>(new RawTerm(att.toString(), Util.singList(new RawTerm(src))), new RawTerm(dst))));
 					}
 				}
 			}
 					
-			return new InstExpRaw(sch, Collections.emptyList(), gens, eqs, options).eval(env);  //inherits options
+			return new InstExpRaw<String, String, String, String, String>(sch, Collections.emptyList(), gens, eqs, Util.toList(options)).eval(env);  //inherits options
 		}
 
 		
@@ -636,7 +648,14 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	public static class InstExpColim<N, E, Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> 
-	 extends InstExp<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>, ID, Chc<Pair<N,Sk>, Pair<ID, Att>>> {
+	 extends InstExp<Ty, En, Sym, Fk, Att, Pair<N,Gen>, Pair<N,Sk>, ID, Chc<Pair<N,Sk>, Pair<ID, Att>>> implements Raw {
+		
+		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+		
+		@Override 
+		public Ctx<String, List<InteriorLabel<Object>>> raw() {
+			return raw;
+		}
 		
 		public final SchExp<Ty, En, Sym, Fk, Att> schema;
 		
@@ -652,13 +671,26 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return options;
 		}
 		
-		//TODO AQL imports for colimit
-		public InstExpColim(GraphExp<N, E> shape, SchExp<Ty, En, Sym, Fk, Att> schema, @SuppressWarnings("unused") List<String> imports, List<Pair<N, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> nodes, List<Pair<E, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>>> edges, List<Pair<String, String>> options) {
+		public InstExpColim(GraphExp<N, E> shape, SchExp<Ty, En, Sym, Fk, Att> schema, List<Pair<LocStr, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> nodes, List<Pair<LocStr, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>>> edges, List<Pair<String, String>> options) {
 			this.schema = schema;
 			this.shape = shape;
-			this.nodes = new Ctx<>(nodes);
-			this.edges = new Ctx<>(edges);
+			this.nodes = new Ctx<>(LocStr.list2(nodes, x -> (N) x));
+			this.edges = new Ctx<>(LocStr.list2(edges, x -> (E) x));
 			this.options = Util.toMapSafely(options);
+			
+			List<InteriorLabel<Object>> f = new LinkedList<>();
+			for (Pair<LocStr, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> p : nodes) {
+				f.add(new InteriorLabel<>("nodes", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " -> " + x.second).conv());
+			}
+			raw.put("nodes", f);
+			
+			f = new LinkedList<>();
+			for (Pair<LocStr, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>> p : edges) {
+				f.add(new InteriorLabel<>("edges", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " -> " + x.second).conv());
+			}
+			raw.put("edges", f);
 		}
 
 		@Override

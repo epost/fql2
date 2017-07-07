@@ -9,6 +9,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -166,6 +167,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		this.title = title;
 		Util.assertNotNull(id);
 		history.add(0);
+		last_keystroke = System.currentTimeMillis();
 		// respArea.setWordWrap(true);
 		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
 
@@ -174,8 +176,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 		topArea = new RSyntaxTextArea();
 		topArea.addMouseListener(new MouseAdapter() {
-
-			
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				int i = topArea.getCaretPosition();
@@ -184,11 +184,15 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 					history = Collections.synchronizedList(history.subList(0, 32));
 				}
 			}
-
-			
-			
 		});
-		// this is kind of neat
+		
+		topArea.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				last_keystroke = System.currentTimeMillis();
+			}
+		});
+		
 		topArea.setMarkOccurrences(true);
 
 		if (getATMFrhs() != null) {
@@ -755,35 +759,41 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	protected Outline<Progg, Env, DDisp> outline;
 
-	Boolean isClosed = false;
+	public volatile boolean isClosed = false;
 
-	protected Progg parsed_prog;
+	public Progg parsed_prog;
 	protected String parsed_prog_string;
 	protected Unit parsed_prog_lock;
 
 	public void close() {
-		synchronized (isClosed) {
 			isClosed = true;
-		}
-	}
+	} 
 
 	@SuppressWarnings("unused")
 	protected boolean omit(String s, Progg p) {
 		return false;
 	}
 
-	private Boolean enable_outline = false;
-	volatile Boolean outline_alphabetical = true;
-	private Boolean outline_on_left = true;
-	volatile Boolean outline_prefix_kind = true;
-	private Boolean outline_elongated = true;
-	protected volatile long sleepDelay = 1000;
+	//TODO aql pull these from options rather than cache her?
+	private volatile Boolean enable_outline = false;
+	 public volatile Boolean outline_alphabetical = true;
+	private volatile Boolean outline_on_left = true;
+	 public volatile Boolean outline_prefix_kind = true;
+	private volatile Boolean outline_elongated = true;
+	protected volatile long sleepDelay = 2;
+	 public volatile Boolean outline_types = true;
+	 public volatile Long last_keystroke = null;
 	
 	public void set_delay(int i) {
 		if (i < 1) {
 			i = 1;
 		}
 		sleepDelay = (long) i * 1000;
+	}
+	
+	public void outline_types(Boolean bool) {
+		outline_types = bool;
+		//getOutline().build();
 	}
 	
 	public void enable_outline(Boolean bool) {
@@ -793,7 +803,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	public void outline_alphabetical(Boolean bool) {
 		outline_alphabetical = bool;
-		getOutline().build();
+		//getOutline().build();
 	}
 
 	public void outline_on_left(Boolean bool) {
@@ -803,7 +813,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	public void outline_prefix_kind(Boolean bool) {
 		outline_prefix_kind = bool;
-		getOutline().build();
+		//getOutline().build();
 	}
 
 	public void outline_elongated(Boolean bool) {
@@ -811,5 +821,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		situate();
 	}
 
+	
 	
 }

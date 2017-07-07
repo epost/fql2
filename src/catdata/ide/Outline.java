@@ -34,12 +34,11 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 				set.sort(Util.AlphabeticalComparator);
 			}
 			setComp(set);
-			
-			this.codeEditor.revalidate();
 		}
+		this.codeEditor.revalidate();
 	}
 
-	 Outline(CodeEditor<Progg, Env, DDisp> codeEditor) {
+	 protected Outline(CodeEditor<Progg, Env, DDisp> codeEditor) {
 		this.codeEditor = codeEditor;
 		JScrollPane jsp = new JScrollPane(getComp());
 		jsp.setBorder(BorderFactory.createEmptyBorder());
@@ -48,7 +47,7 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 		
 		this.codeEditor.parsed_prog_lock = new Unit();
 		this.codeEditor.parsed_prog_string = "";
-		build();
+//		build();
 		
 		p.setMinimumSize(new Dimension(0, 0));
 	
@@ -57,31 +56,38 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 			@Override
 			public void run() {
 				for (;;) {
-					
-					String s = Outline.this.codeEditor.topArea.getText();
-					try {
-						if (!s.equals(Outline.this.codeEditor.parsed_prog_string)) {
-							Progg e = Outline.this.codeEditor.parse(s);
-							synchronized (Outline.this.codeEditor.parsed_prog_lock) {
-								Outline.this.codeEditor.parsed_prog = e;
-								Outline.this.codeEditor.parsed_prog_string = s;
-							}
-							build();
-							Outline.this.codeEditor.clearSpellCheck(); //morally, should have its own thread, but meh
-						}
-					} catch (Exception ex) {
-					}
-					
 					try {
 						Thread.sleep(codeEditor.sleepDelay);
-					} catch (InterruptedException e1) {
+					} catch (Throwable e1) {
 						return;
 					}
 					if (Outline.this.codeEditor.isClosed) {
 						return;
 					}
+					
+					String s = Outline.this.codeEditor.topArea.getText();
+					try {
+						if (!s.equals(Outline.this.codeEditor.parsed_prog_string)) {
+							Progg e = Outline.this.codeEditor.parse(s);
+							if (!equiv(e, Outline.this.codeEditor.parsed_prog)) {
+								if (System.currentTimeMillis() - Outline.this.codeEditor.last_keystroke > codeEditor.sleepDelay) {
+									synchronized (Outline.this.codeEditor.parsed_prog_lock) {
+										Outline.this.codeEditor.parsed_prog = e;
+										Outline.this.codeEditor.parsed_prog_string = s;
+									}
+									build();
+									Outline.this.codeEditor.clearSpellCheck(); //morally, should have its own thread, but meh
+								}
+							}
+						}
+					} catch (Exception ex) {
+					}
+					
+					
 				}
 			}
+
+			
 		});
 		t.setDaemon(true);
 		t.setPriority(Thread.MIN_PRIORITY);
@@ -89,6 +95,11 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 
 		
 	}
+	 
+	 @SuppressWarnings("unused")
+	protected  boolean equiv(Progg now, Progg then) {
+			return false;
+		}
 
 	public void setFont(Font font) {
 		getComp().setFont(font);

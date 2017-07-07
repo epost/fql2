@@ -1124,7 +1124,9 @@ public class Util {
 			JViewport viewport = (JViewport)container;
 			int extentHeight = viewport.getExtentSize().height;
 			int viewHeight = viewport.getViewSize().height;
-
+			if (r == null || viewport == null) {
+				return;
+			}
 			int y = Math.max(0, r.y - ((extentHeight - r.height) / 2));
 			y = Math.min(y, viewHeight - extentHeight);
 

@@ -24,6 +24,7 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.Raw.InteriorLabel;
 
 public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, En, Sym, Fk, Att>> {
 
@@ -35,50 +36,16 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 	public abstract SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G);
 
-	public static class EdExpRaw {
+	public static class EdExpRaw extends Exp<Void> implements Raw {
 		
-		public void asTree(DefaultMutableTreeNode root) {
-			if (As.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("forall");
-				for (Pair<String, String> t : As) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.first + " : " + t.second);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (Awh.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("where");
-				for (Pair<RawTerm, RawTerm> t : Awh) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.first + " = " + t.second);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (Es.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("exists");
-				for (Pair<String, String> t : Es) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.first + " : " + t.second);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (Ewh.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("where");
-				for (Pair<RawTerm, RawTerm> t : Ewh) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.first + " = " + t.second);
-					n.add(m);
-				}
-				root.add(n);
-			}
+	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+		
+		@Override 
+		public Ctx<String, List<InteriorLabel<Object>>> raw() {
+			return raw;
 		}
+		
+		
 		
 		private String toString;
 		@Override
@@ -137,9 +104,9 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 		private final List<Pair<String, String>> Es; 
 		
-		private final List<Pair<RawTerm, RawTerm>> Awh;
+		private final Set<Pair<RawTerm, RawTerm>> Awh;
 		
-		private final List<Pair<RawTerm, RawTerm>> Ewh;
+		private final Set<Pair<RawTerm, RawTerm>> Ewh;
 		
 		public final boolean isUnique;
 		
@@ -190,13 +157,54 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 				return false;
 			return true;
 		}
-
-		public EdExpRaw(List<Pair<String, String>> as, List<Pair<RawTerm, RawTerm>> awh, List<Pair<String, String>> es, List<Pair<RawTerm, RawTerm>> ewh, boolean isUnique) {
-			As = as;
-			Es = es;
-			Awh = awh;
-			Ewh = ewh;
+		
+		public EdExpRaw(List<Pair<String, String>> as, List<Pair<RawTerm, RawTerm>> list, List<Pair<String, String>> es, List<Pair<RawTerm, RawTerm>> list2, boolean isUnique, Object u) {
+			As = new LinkedList<>(as);
+			Es = new LinkedList<>(es);
+			Awh = new HashSet<>(list);
+			Ewh = new HashSet<>(list2);
+			Util.toMapSafely(As);
+			Util.toMapSafely(Es);
 			this.isUnique = isUnique;
+		} 
+
+		public EdExpRaw(List<Pair<LocStr, String>> as, List<Pair<Integer, Pair<RawTerm, RawTerm>>> list, List<Pair<LocStr, String>> es, List<Pair<Integer, Pair<RawTerm, RawTerm>>> list2, boolean isUnique) {
+			As = LocStr.list2(as);
+			Es = LocStr.list2(es);
+			Util.toMapSafely(As);
+			Util.toMapSafely(Es);
+			Awh = LocStr.proj2(list);
+			Ewh = LocStr.proj2(list2);
+			this.isUnique = isUnique;
+			
+			List<InteriorLabel<Object>> f = new LinkedList<>();
+			for (Pair<LocStr, String> p : as) {
+				f.add(new InteriorLabel<>("forall", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " : " + x.second).conv());
+			}
+			raw.put("forall", f);
+			
+			f = new LinkedList<>();
+			for (Pair<Integer, Pair<RawTerm, RawTerm>> p : list) {
+				f.add(new InteriorLabel<>("where", p.second, p.first,
+						x -> x.first + " = " + x.second).conv());
+			}
+			raw.put("where", f);
+			
+			String ex = isUnique ? "exists unique" : "exists";
+			f = new LinkedList<>();
+			for (Pair<LocStr, String> p : es) {
+				f.add(new InteriorLabel<>(ex, new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " : " + x.second).conv());
+			}
+			raw.put(ex, f);
+			
+			f = new LinkedList<>();
+			for (Pair<Integer, Pair<RawTerm, RawTerm>> p : list2) {
+				f.add(new InteriorLabel<>("where ", p.second, p.first,
+						x -> x.first + " = " + x.second).conv());
+			}
+			raw.put("where ", f);
 		}
 
 		public ED<Object, Object, Object, Object, Object> eval(Schema<Object, Object, Object, Object, Object> sch, AqlEnv env) {
@@ -214,7 +222,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 
 
-		private static Pair<Ctx<Var, Object>, Set<Pair<Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>>>> eval1(Schema<Object, Object, Object, Object, Object> sch, List<Pair<String, String>> As, List<Pair<RawTerm, RawTerm>> Awh) {
+		private static Pair<Ctx<Var, Object>, Set<Pair<Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>>>> eval1(Schema<Object, Object, Object, Object, Object> sch, List<Pair<String, String>> As, Set<Pair<RawTerm, RawTerm>> Awh) {
 			Ctx<Var, Object> As0 = new Ctx<>();
 			Set<Pair<Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>>> 
 			Awh0 = new HashSet<>();
@@ -242,29 +250,41 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 			return new Pair<>(As0, Awh0);
 		}
+
+
+
+		@Override
+		protected Map<String, String> options() {
+			return null;
+		}
+
+
+
+		@Override
+		public Kind kind() {
+			return null;
+		}
+
+
+
+		@Override
+		public Void eval(AqlEnv env) {
+			return null;
+		}
+
+
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return null;
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 
-	public static class EdsExpRaw extends EdsExp<Object, Object, Object, Object, Object> {
+	public static class EdsExpRaw extends EdsExp<Object, Object, Object, Object, Object> implements Raw {
 
-
-		@Override
-		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
-			if (eds.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("nodes");
-				for (EdExpRaw t : Util.alphaMaybe(alpha, eds)) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(" ");
-					t.asTree(m);
-					n.add(m);
-				}
-				root.add(n);
-			}
-		}
-		
-		@Override
+	@Override
 		public Map<String, String> options() {
 			return Collections.emptyMap();
 		}
@@ -314,20 +334,42 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			return ret;
 		}
 
-		private final SchExp<Object, Object, Object, Object, Object> schema;
+		public final SchExp<Object, Object, Object, Object, Object> schema;
 
-		private final List<String> imports;
+		public final Set<String> imports;
 
-		private final List<EdExpRaw> eds;
+		public final Set<EdExpRaw> eds;
 
 		
 		@SuppressWarnings("unchecked")
-		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<EdExpRaw> eds) {
+		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<LocStr> imports, List<Pair<Integer, EdExpRaw>> eds) {
 			this.schema = (SchExp<Object, Object, Object, Object, Object>) schema;
-			this.imports = imports;
-			this.eds = eds;
+			this.imports = LocStr.set1(imports);
+			this.eds = LocStr.proj2(eds);
+			
+			raw.put("imports", InteriorLabel.imports("imports", imports)); 
+
+			List<InteriorLabel<Object>> f = new LinkedList<>();
+			for (Pair<Integer, EdExpRaw> p : eds) {
+				f.add(new InteriorLabel<>("constraints", p.second, p.first,
+						x -> "...").conv());
+			}
+			raw.put("constraints", f); 
+		}
+		
+		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+		
+		@Override 
+		public Ctx<String, List<InteriorLabel<Object>>> raw() {
+			return raw;
 		}
 
+		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<EdExpRaw> eds, Object o) {
+			this.schema = (SchExp<Object, Object, Object, Object, Object>) schema;
+			this.imports = new HashSet<>(imports);
+			this.eds = new HashSet<>(eds);
+		}
+		
 		private String toString;
 
 		@Override

@@ -9,15 +9,18 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.aql.ImportAlgebra;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
@@ -27,29 +30,36 @@ import catdata.aql.Transform;
 import catdata.aql.fdm.LiteralTransform;
 import catdata.aql.fdm.SaturatedInstance;
 
-public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> {
+public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> implements Raw {
 
-	private final InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src;
-	private final InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst;
+	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+	
+	@Override 
+	public Ctx<String, List<InteriorLabel<Object>>> raw() {
+		return raw;
+	}
+	
+	public final InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src;
+	public final InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst;
 
-	private final List<String> imports;
+	public final Set<String> imports;
 
-	private final Map<String, String> options;
+	public final Map<String, String> options;
 
-	private final String clazz;
-	private final String jdbcString;
+	public final String clazz;
+	public final String jdbcString;
 
-	private final Map<String, String> map;		
+	public final Map<String, String> map;		
 	
 	@Override
 	public Map<String, String> options() {
 		return options;
 	}
 
-	public TransExpJdbc(InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst, List<String> imports, List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<String, String>> map) {
+	public TransExpJdbc(InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst, List<LocStr> imports, List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<LocStr, String>> map) {
 		this.src = src;
 		this.dst = dst;
-		this.imports = imports;
+		this.imports = LocStr.set1(imports);
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
 		try {
@@ -58,7 +68,14 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 			throw new RuntimeException(e);
 		}
 		this.options = Util.toMapSafely(options);
-		this.map = Util.toMapSafely(map);
+		this.map = Util.toMapSafely(LocStr.set2(map));
+		
+		List<InteriorLabel<Object>> f = new LinkedList<>();
+		for (Pair<LocStr, String> p : map) {
+			f.add(new InteriorLabel<>("queries", new Pair<>(p.first.str, p.second), p.first.loc,
+					x -> x.first + " -> " + x.second).conv());
+		}
+		raw.put("queries", f);
 	}
 
 	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, @SuppressWarnings("unused") Map<Ty, String> tys) {
@@ -149,7 +166,8 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 		if (!labelledNulls) {
 			for (Sk1 sk : src0.sks().keySet()) {
 				Ty ty = src0.sks().get(sk);
-				Sk2 sk2 = Util.get0(Util.revS(dst0.sks().map).get(ty));
+				//TODO aql this is a hack with the get0X
+				Sk2 sk2 = Util.get0X(Util.revS(dst0.sks().map).get(ty));
 				sks.put(sk, Term.Sk(sk2)); //map Null@Ty to Null@Ty
 			}
 		} 

@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.aql.ImportAlgebra;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
@@ -28,18 +30,25 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.fdm.SaturatedInstance;
 
-public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> {
+public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> implements Raw {
 
-	private final SchExp<Ty, En, Sym, Fk, Att> schema;
+	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+	
+	@Override 
+	public Ctx<String, List<InteriorLabel<Object>>> raw() {
+		return raw;
+	}
+	
+	public final SchExp<Ty, En, Sym, Fk, Att> schema;
 
 	// private final List<String> imports;
 
-	private final Map<String, String> options;
+	public final Map<String, String> options;
 
-	private final String clazz;
-	private final String jdbcString;
+	public final String clazz;
+	public final String jdbcString;
 
-	private final Map<String, String> map;
+	public final Map<String, String> map;
 
 	@Override
 	public Map<String, String> options() {
@@ -50,7 +59,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 	private final int cur_count;
 
 	public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema,
-			/* List<String> imports, */ List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<String, String>> map) {
+			/* List<String> imports, */ List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<LocStr, String>> map) {
 		this.schema = schema;
 		// this.imports = imports;
 		this.clazz = clazz;
@@ -61,11 +70,17 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 			throw new RuntimeException(e);
 		}
 		this.options = Util.toMapSafely(options);
-		this.map = Util.toMapSafely(map);
+		this.map = Util.toMapSafely(LocStr.set2(map));
 		synchronized (counter) {
 			cur_count = counter.i;
 			counter.i = counter.i + 1;
 		}
+		List<InteriorLabel<Object>> f = new LinkedList<>();
+		for (Pair<LocStr, String> p : map) {
+			f.add(new InteriorLabel<>("queries", new Pair<>(p.first.str, p.second), p.first.loc,
+					x -> x.first + " -> " + x.second).conv());
+		}
+		raw.put("queries", f);
 	}
 
 	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, Map<Ty, String> tys, Map<Att, String> atts, Map<Fk, String> fks) {
@@ -297,7 +312,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 	}
 
 	private static final String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example," + "\n" + "\n	0:Employee" + "\n	0:Department" + "\n" + "\nPossible solution: Distinguish the IDs prior to import, or distinguish them during import, for example, " + "\n" + "\n	instance J = import_jdbc ... {"
-			+ "\n		Employee -> \"SELECT concat(\"emp\",id) FROM Employee\"" + "\n		Department -> \"SELECT concat(\"dept\",id) FROM Dept\"" + "\n		worksIn -> \"SELECT concat(\"emp\",id), concat(\"dept\",worksIn) FROM Employee\"" + "\n	}" + "\n";
+			+ "\n		Employee -> \"SELECT concat(\"emp\",id) FROM Employee\"" + "\n		Department -> \"SELECT concat(\"dept\",id) FROM Dept\"" + "\n		worksIn -> \"SELECT concat(\"emp\",id), concat(\"dept\",worksIn) FROM Employee\"" + "\n	}" + "\nRemember also that imports are of entire sets of tables; there can be no missing data.";
 
 	@SuppressWarnings("unchecked")
 	private Fk stringToFk(String o) {

@@ -31,6 +31,55 @@ public class ImportAlgebra<Ty,En,Sym,Fk,Att,X,Y> extends Algebra<Ty,En,Sym,Fk,At
 		this.printX = printX;
 		this.printY = printY; 
 		initTalg(); 
+		checkClosure();
+		
+		//TODO: it is likely someone will try to load an incomplete algebra.  much catch this here
+	}
+
+	private void checkClosure() {
+		for (En en : schema.ens) {
+			for (X x : ens.get(en)) {
+				for (Fk fk : schema.fksFrom(en)) {
+					if (!fks.containsKey(x)) {
+						//moved inside fk loop because don't have Ctx if no fks/atts out
+						throw new RuntimeException("Incomplete import: no foreign key values specified for ID " + x + " in entity " + en);
+					}
+					if (!fks.get(x).containsKey(fk)) {
+						throw new RuntimeException("Incomplete import: no value for foreign key " + fk + " specified for  ID " + x+ " in entity " + en);
+					}
+					X y = fk(fk, x);
+					if (!ens.get(schema.fks.get(fk).second).contains(y)) {
+						throw new RuntimeException("Incomplete import: value for " + x + "'s foreign key " + fk + " is " + y + " which is not an ID imported into " + schema.fks.get(fk).second) ;
+					}
+				}
+				for (Att att : schema.attsFrom(en)) {
+					if (!atts.containsKey(x)) {
+						throw new RuntimeException("Incomplete import: no attribute values specified for ID " + x + " in entity " + en);
+					}
+					if (!atts.get(x).containsKey(att)) {
+						throw new RuntimeException("Incomplete import: no value for attribute " + att + " specified for  ID " + x + " in entity " + en);
+							}
+					Term<Ty, Void, Sym, Void, Void, Void, Y> y = att(att, x);
+					if (y.sk != null && !tys.get(schema.atts.get(att).second).contains(y.sk)) {
+						throw new RuntimeException("Incomplete import: value for " + x + "'s attribute " + att + " is " + y.sk + " which is not an ID imported into " + schema.atts.get(att).second) ;
+					}
+				}
+			}
+		}
+		for (Ty ty : schema.typeSide.tys) {
+			if (!tys.containsKey(ty)) {
+				throw new RuntimeException("Incomplete import: no skolem values for " + ty);
+			}
+		}
+		
+		/*
+		 * for (Fk fk : schema.fksFrom(en)) {
+					if (!fks.get(x).containsKey(fk)) {
+						throw new RuntimeException("Incomplete import: no value for " + x + " along fk " + fk);
+					}
+					if (!ens.get)
+				}
+		 */
 	}
 
 	private void initTalg() {
