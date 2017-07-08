@@ -66,10 +66,15 @@ public class TypeSide<Ty, Sym> implements Semantics {
 		this.tys = tys;
 		this.syms = new Ctx<>(syms);
 		this.eqs = eqs;
-		this.js = new AqlJs<>(new Ctx<>(syms), new Ctx<>(java_tys_string), new Ctx<>(java_parser_string), new Ctx<>(java_fns_string));
 		boolean checkJava = !((Boolean)strategy.getOrDefault(AqlOption.allow_java_eqs_unsafe));
+		
+		this.js = new AqlJs<>(new Ctx<>(syms), new Ctx<>(java_tys_string), new Ctx<>(java_parser_string), new Ctx<>(java_fns_string));
+		
+		if (checkJava) {
+			validate(checkJava);
+		}
+		
 		this.semantics = AqlProver.create(strategy, col(tys, syms, eqs, java_tys_string, java_parser_string, java_fns_string), js);		
-		validate(checkJava);
 	}
 
 	

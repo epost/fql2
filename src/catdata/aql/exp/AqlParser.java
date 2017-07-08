@@ -693,7 +693,7 @@ public class AqlParser {
 			return ret;	
 	}
 
-	 private static Parser<InstExpRaw> instExpRaw() {
+	 private static Parser<InstExpRaw<?,?,?,?,?>> instExpRaw() {
 			Parser<List<catdata.Pair<LocStr, String>>> generators = Parsers.tuple(token("generators"), env(ident, ":")).map(x -> x.b);
 			
 			Parser<catdata.Pair<Integer, catdata.Pair<RawTerm, RawTerm>>> eq = Parsers.tuple(Parsers.INDEX, Parsers.tuple(term(), token("="), term())).map(x -> new catdata.Pair<>(x.a, new catdata.Pair<>(x.b.a, x.b.c)));
@@ -716,7 +716,7 @@ public class AqlParser {
 			
 			Parser<Tuple4<Token, Token, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"), sch_ref.lazy(), token("{")); //.map(x -> x.c);
 						
-			Parser<InstExpRaw> ret = Parsers.tuple(l, pa, token("}")).map(x -> new InstExpRaw<String,String,String,String,String>(x.a.c,
+			Parser<InstExpRaw<?,?,?,?,?>> ret = Parsers.tuple(l, pa, token("}")).map(x -> new InstExpRaw<String,String,String,String,String>(x.a.c,
                                    Util.newIfNull(x.b.a),
                                    Util.newIfNull(x.b.b),
                                    new LinkedList<>(Util.append(Util.newIfNull(x.b.c), Util.newIfNull(x.b.d))),
@@ -729,7 +729,7 @@ public class AqlParser {
 		 Parser<List<catdata.Pair<LocStr, String>>> generators 
 			= Parsers.tuple(token("from"), env(ident, ":")).map(x -> x.b);
 			
-			Parser<catdata.Pair<Integer, catdata.Pair<RawTerm, RawTerm>>> eq = Parsers.tuple(Parsers.INDEX, Parsers.tuple(term(), token("="), term()).map(x -> new catdata.Pair<>(x.a, x.c))).map(x -> new catdata.Pair(x.a, x.b));
+			Parser<catdata.Pair<Integer, catdata.Pair<RawTerm, RawTerm>>> eq = Parsers.tuple(Parsers.INDEX, Parsers.tuple(term(), token("="), term()).map(x -> new catdata.Pair<>(x.a, x.c))).map(x -> new catdata.Pair<>(x.a, x.b));
 
 			Parser<List<catdata.Pair<Integer, catdata.Pair<RawTerm, RawTerm>>>> eqs = Parsers.tuple(token("where"), eq.many()).map(x -> x.b);
 					

@@ -130,10 +130,62 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			return RawTerm.fold(l, "_v0");  
 		}
 
+		private String toString;
+		
 		@Override
-		public String toString() {
-			return "ColimSchExpQuotient [ty=" + ty + ", nodes=" + nodes + ", eqEn=" + eqEn + ", eqTerms=" + eqTerms + ", eqTerms2=" + eqTerms2 + ", options=" + options + "]";
-		}
+		public synchronized String toString() {
+			if (toString != null) {
+				return toString;
+			}
+			toString = "";
+				
+			List<String> temp = new LinkedList<>();
+			
+	
+			
+			if (!eqEn.isEmpty()) {
+				toString += "\tentity equations";
+						
+				for (Quad<N, En, N, En> x : eqEn) {
+					temp.add(x.first + "." + x.second + " = " + x.third + "." + x.fourth);
+				}
+				
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			}
+			
+			if (!eqTerms2.isEmpty()) {
+				toString += "\tpath equations";
+						
+				for (Pair<List<String>, List<String>> x : eqTerms2) {
+					temp.add(Util.sep(x.first, ".") + " = " + Util.sep(x.second, "."));
+				}
+				
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			}
+			
+			if (!eqTerms.isEmpty()) {
+				toString += "\trename attributes";
+						
+				for (Quad<String, String, RawTerm, RawTerm> x : eqTerms) {
+					temp.add("forall " + x.first + ". " + x.third + " = " + x.fourth);
+				}
+				
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			}
+			
+			if (!options.isEmpty()) {
+				toString += "\toptions";
+				temp = new LinkedList<>();
+				for (Entry<String, String> sym : options.entrySet()) {
+					temp.add(sym.getKey() + " = " + sym.getValue());
+				}
+				
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			}
+			
+			toString = "quotient " + Util.sep(nodes.keySet(), " + ") + "{\n" + toString + "}";
+			return toString;
+		} 
 
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
@@ -684,7 +736,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		private String toString;
 		
 		@Override
-		public String toString() {
+		public synchronized String toString() {
 			if (toString != null) {
 				return toString;
 			}
@@ -750,7 +802,8 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 			}
 			
-			return "modify {\n" + toString + "}";
+			toString = "modify {\n" + toString + "}";
+			return toString;
 		} 
 
 		//TODO aql add options

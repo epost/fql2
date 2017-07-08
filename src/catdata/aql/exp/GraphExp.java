@@ -14,7 +14,6 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.aql.Graph;
 import catdata.aql.Kind;
-import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.graph.DMG;
 
 public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {

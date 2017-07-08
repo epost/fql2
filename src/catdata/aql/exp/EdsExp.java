@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
@@ -24,7 +22,6 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
-import catdata.aql.exp.Raw.InteriorLabel;
 
 public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, En, Sym, Fk, Att>> {
 
@@ -158,7 +155,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			return true;
 		}
 		
-		public EdExpRaw(List<Pair<String, String>> as, List<Pair<RawTerm, RawTerm>> list, List<Pair<String, String>> es, List<Pair<RawTerm, RawTerm>> list2, boolean isUnique, Object u) {
+		public EdExpRaw(List<Pair<String, String>> as, List<Pair<RawTerm, RawTerm>> list, List<Pair<String, String>> es, List<Pair<RawTerm, RawTerm>> list2, boolean isUnique, @SuppressWarnings("unused") Object u) {
 			As = new LinkedList<>(as);
 			Es = new LinkedList<>(es);
 			Awh = new HashSet<>(list);
@@ -364,7 +361,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			return raw;
 		}
 
-		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<EdExpRaw> eds, Object o) {
+		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<EdExpRaw> eds, @SuppressWarnings("unused") Object o) {
 			this.schema = (SchExp<Object, Object, Object, Object, Object>) schema;
 			this.imports = new HashSet<>(imports);
 			this.eds = new HashSet<>(eds);

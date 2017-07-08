@@ -16,7 +16,6 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.aql.Collage;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
@@ -182,26 +181,31 @@ Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		}
 		
 		for (Pair<String, RawTerm> gen : gens) {
-			RawTerm term = gen.second;
-			Map<String, Chc<String, String>> ctx = new HashMap<>();
+			try {
+				RawTerm term = gen.second;
+				Map<String, Chc<String, String>> ctx = new HashMap<>();
+					
+				Chc<String,String> required;
+				if (src0.gens().containsKey(gen.first) && src0.sks().containsKey(gen.first)) {
+					throw new RuntimeException(gen.first + " is ambiguous");
+				} else if (src0.gens().containsKey(gen.first)) {
+					required = Chc.inRight(src0.gens().get(gen.first));
+				} else if (src0.sks().containsKey(gen.first)){
+					required = Chc.inLeft(src0.sks().get(gen.first));				
+				} else {
+					throw new RuntimeException(gen.first + " is not a source generator/labelled null");
+				}
 				
-			Chc<String,String> required;
-			if (src0.gens().containsKey(gen.first) && src0.sks().containsKey(gen.first)) {
-				throw new RuntimeException("in transform for " + gen.first + ", " + gen.first + " is ambiguously an entity generator and labelled null");
-			} else if (src0.gens().containsKey(gen.first)) {
-				required = Chc.inRight(src0.gens().get(gen.first));
-			} else if (src0.sks().containsKey(gen.first)){
-				required = Chc.inLeft(src0.sks().get(gen.first));				
-			} else {
-				throw new RuntimeException("in transform for " + gen.first + ", " + gen.first + " is not a source generator/labelled null");
-			}
-			
-			Term<String, String, String, String, String, String, String> term0 = RawTerm.infer0(ctx, term, required, dcol, "in transform for " + gen.first + ", ", src0.schema().typeSide.js);
-						
-			if (required.left) {
-				Util.putSafely(sks0, gen.first, term0);				
-			} else {
-				Util.putSafely(gens0, gen.first, term0.convert());
+				Term<String, String, String, String, String, String, String> term0 = RawTerm.infer0(ctx, term, required, dcol, "", src0.schema().typeSide.js);
+							
+				if (required.left) {
+					Util.putSafely(sks0, gen.first, term0);				
+				} else {
+					Util.putSafely(gens0, gen.first, term0.convert());
+				}
+			} catch (RuntimeException ex) {
+				ex.printStackTrace();
+				throw new LocException(find("generators", gen), "In transform for " + gen.first + ", " + ex.getMessage());
 			}
 		}
 		

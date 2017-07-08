@@ -1,5 +1,6 @@
 package catdata.aql.gui;
 
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
@@ -20,11 +21,9 @@ import catdata.aql.AqlOptions;
 import catdata.aql.Kind;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.AqlTyping;
-import catdata.aql.exp.ColimSchExp.ColimSchExpQuotient;
-import catdata.aql.exp.ColimSchExp.ColimSchExpRaw;
 import catdata.aql.exp.Exp;
+import catdata.aql.exp.InteriorLabel;
 import catdata.aql.exp.Raw;
-import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.ide.CodeEditor;
 import catdata.ide.Outline;
 
@@ -145,15 +144,18 @@ public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 					if (codeEditor.parsed_prog.exps.containsKey(l.s)) {
 						Integer line = codeEditor.parsed_prog.getLine(l.s);
 						codeEditor.setCaretPos(line);
+						codeEditor.addToHistory(line);
 					}
 				} else if (o instanceof InteriorLabel) {
-					InteriorLabel l = (InteriorLabel) o;
+					InteriorLabel<?> l = (InteriorLabel<?>) o;
 					codeEditor.setCaretPos(l.loc);
+					codeEditor.addToHistory(l.loc);
 				} else if (node.getChildCount() != 0) {
 					DefaultMutableTreeNode n = (DefaultMutableTreeNode) node.getChildAt(0);
 					if (n.getUserObject() instanceof InteriorLabel) {
-						InteriorLabel lx = (InteriorLabel) n.getUserObject();
+						InteriorLabel<?> lx = (InteriorLabel<?>) n.getUserObject();
 						codeEditor.setCaretPos(lx.loc);
+						codeEditor.addToHistory(lx.loc);
 					}
 				}
 

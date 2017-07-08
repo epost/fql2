@@ -44,8 +44,8 @@ import javax.swing.event.MenuListener;
 
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.EasikAql;
 import catdata.aql.exp.AqlEnv;
+import catdata.aql.exp.EasikAql;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
 import catdata.ide.Examples;

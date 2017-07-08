@@ -20,7 +20,6 @@ import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.AqlProver;
 import catdata.aql.AqlProver.ProverName;
-import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.aql.Collage;
 import catdata.aql.Eq;
 import catdata.aql.Kind;
@@ -75,6 +74,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 		col.atts.putAll(Util.toMapSafely(atts));
 		
 		for (Quad<String, String, RawTerm, RawTerm> eq : t_eqs) {
+			try {
 				Map<String, Chc<Ty, String>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
 				
 				Triple<Ctx<String,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>>
@@ -82,36 +82,45 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 				
 				Chc<Ty, String> v = eq0.first.get(eq.first);
 				if (v.left) {
-					throw new RuntimeException("In " + eq.third + " = " + eq.fourth + ", variable " + eq.first + " has type " + v.l + " which is not an entity");
+					throw new RuntimeException(eq.first + " has type " + v.l + " which is not an entity");
 				}
 				String t = v.r;
 			
 				eqs0.add(new Triple<>(new Pair<>(new Var(eq.first), t), eq0.second, eq0.third));
+			} catch (RuntimeException ex) {
+				ex.printStackTrace();
+				throw new LocException(find("obs equations", eq), "In equation " + eq.third + " = " + eq.fourth + ", " + ex.getMessage());
+			}
 		}
 		
 		for (Pair<List<String>, List<String>> eq : p_eqs) {
-			String vv = "v";
-			Var var = new Var(vv);
+			try {
+				String vv = "v";
+				Var var = new Var(vv);
+				
+				Map<String, Chc<Ty, String>> ctx = Util.singMap(vv, null);
+				
+				RawTerm lhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.first, vv);
+				RawTerm rhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.second,vv);
+				
+				Triple<Ctx<String,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>>
+				eq0 = RawTerm.infer1(ctx, lhs, rhs, col, ts.js);
 			
-			Map<String, Chc<Ty, String>> ctx = Util.singMap(vv, null);
+				Chc<Ty, String> v = eq0.first.get(vv);
+				if (v.left) {
+					throw new RuntimeException("the equation's source " + eq.first + " is type " + v.l + " which is not an entity");
+				}
+				String t = v.r;
 			
-			RawTerm lhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.first, vv);
-			RawTerm rhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.second,vv);
-			
-			Triple<Ctx<String,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>>
-			eq0 = RawTerm.infer1(ctx, lhs, rhs, col, ts.js);
-		
-			Chc<Ty, String> v = eq0.first.get(vv);
-			if (v.left) {
-				throw new RuntimeException("In " + Util.sep(eq.first, ".") + " = " + Util.sep(eq.second, ".") + ", the equations source " + eq.first + " is type " + v.l + " which is not an entity");
+				if (eq0.first.size() != 1) {
+					throw new RuntimeException("java constants cannot be used ");
+				}
+	
+				eqs0.add(new Triple<>(new Pair<>(var, t), eq0.second, eq0.third));
+			} catch (RuntimeException ex) {
+				ex.printStackTrace();
+				throw new LocException(find("path equations", eq), "In equation " + Util.sep(eq.first, ".") + " = " + Util.sep(eq.second, ".") + ", " + ex.getMessage());
 			}
-			String t = v.r;
-		
-			if (eq0.first.size() != 1) {
-				throw new RuntimeException("In " + Util.sep(eq.first, ".") + " = " + Util.sep(eq.second, ".") + ", java constants cannot be used ");
-			}
-
-			eqs0.add(new Triple<>(new Pair<>(var, t), eq0.second, eq0.third));
 		}
 		for (Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>> eq : eqs0) {
 			col.eqs.add(new Eq<>(new Ctx<>(eq.first).inRight(), eq.second, eq.third));
@@ -330,7 +339,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 		
 	} 
 	
-	public SchExpRaw(TyExp<?, ?> typeSide, List<String> imports, List<String> ens, List<Pair<String, Pair<String, String>>> fks, List<Pair<List<String>, List<String>>> list, List<Pair<String, Pair<String, Ty>>> atts, List<Quad<String, String, RawTerm, RawTerm>> list2, List<Pair<String, String>> options, Object o) {
+	public SchExpRaw(TyExp<?, ?> typeSide, List<String> imports, List<String> ens, List<Pair<String, Pair<String, String>>> fks, List<Pair<List<String>, List<String>>> list, List<Pair<String, Pair<String, Ty>>> atts, List<Quad<String, String, RawTerm, RawTerm>> list2, List<Pair<String, String>> options, @SuppressWarnings("unused") Object o) {
 		this.typeSide = (TyExp<Ty, Sym>) typeSide;
 		this.imports = new HashSet<>(imports);
 		this.ens = new HashSet<>(ens);

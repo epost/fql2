@@ -22,7 +22,6 @@ import catdata.aql.Eq;
 import catdata.aql.Instance;
 import catdata.aql.It;
 import catdata.aql.It.ID;
-import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
@@ -212,11 +211,12 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			} else if (col.tys.contains(ty)) {
 				col.sks.put(gen, (Ty) ty);
 			} else {
-				throw new RuntimeException("The sort for " + gen + ", namely " + ty + ", is not declared as a type or entity");
+				throw new LocException(find("generators", p), "The sort for " + gen + ", namely " + ty + ", is not declared as a type or entity");
 			}
 		}
 	
 		for (Pair<RawTerm, RawTerm> eq : eqs) {
+			try {
 				Map<String, Chc<Ty, En>> ctx = Collections.emptyMap();
 				
 				Triple<Ctx<String,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,String,String>,Term<Ty,En,Sym,Fk,Att,String,String>>
@@ -224,6 +224,10 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 						
 				eqs0.add(new Pair<>(eq0.second, eq0.third));
 				col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));
+			} catch (RuntimeException ex) {
+				ex.printStackTrace();
+				throw new LocException(find("equations", eq), "In equation " + eq.first + " = " + eq.second + ", " + ex.getMessage());
+			}
 		}
 
 		AqlOptions strat = new AqlOptions(options, col, env.defaults);

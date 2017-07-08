@@ -22,7 +22,6 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.aql.ImportAlgebra;
 import catdata.aql.Instance;
 import catdata.aql.Kind;

@@ -61,6 +61,7 @@ import catdata.LineException;
 import catdata.Prog;
 import catdata.Unit;
 import catdata.Util;
+import catdata.aql.exp.LocException;
 
 /**
  * 
@@ -175,15 +176,15 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		FoldParserManager.get().addFoldParserMapping(getATMFlhs(), new CurlyFoldParser());
 
 		topArea = new RSyntaxTextArea();
+//		topArea.setPreferredSize(new Dimension(200,600));
 		topArea.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				int i = topArea.getCaretPosition();
-				history.add(0, i); 
-				if (history.size() > 128) {
-					history = Collections.synchronizedList(history.subList(0, 32));
-				}
+				addToHistory(i);
 			}
+
+			
 		});
 		
 		topArea.addKeyListener(new KeyAdapter() {
@@ -371,6 +372,13 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		situate();
 	}
 
+	public synchronized void addToHistory(int i) {
+		history.add(0, i); 
+		if (history.size() > 128) {
+			history = Collections.synchronizedList(history.subList(0, 32));
+		}
+	}
+	
 	private void situate() {
 		if (outline_elongated) {
 			situateElongated();
@@ -384,7 +392,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		
 		JSplitPane xx1 = new Split(.8, JSplitPane.VERTICAL_SPLIT);
 		xx1.setDividerSize(6);
-		xx1.setResizeWeight(.8);
+		//xx1.setResizeWeight(.8);
 		xx1.add(sp);
 		xx1.add(respArea);
 		xx1.setBorder(BorderFactory.createEmptyBorder());
@@ -395,11 +403,11 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			xx2.setDividerSize(6);
 
 			if (outline_on_left) {
-				xx2.setResizeWeight(.2);
+			//	xx2.setResizeWeight(.2);
 				xx2.add(outline);
 				xx2.add(xx1);
 			} else {
-				xx2.setResizeWeight(.8);
+			//	xx2.setResizeWeight(.8);
 				xx2.add(xx1);
 				xx2.add(outline);
 			}
@@ -595,6 +603,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		long middle;
 
 		try {
+			
 			start = System.currentTimeMillis();
 			env = makeEnv(program, init);
 			middle = System.currentTimeMillis();
@@ -617,6 +626,11 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			e.printStackTrace();
 			Integer theLine = init.getLine(e.decl);
 			setCaretPos(theLine);
+		} catch (LocException e) {
+			toDisplay = "Error: " + e.getLocalizedMessage();
+			respArea.setText(toDisplay);
+			e.printStackTrace();
+			setCaretPos(e.loc);
 		} catch (Throwable re) {
 			toDisplay = "Error: " + re.getLocalizedMessage();
 			respArea.setText(toDisplay);
@@ -653,6 +667,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 				topArea.setCaretPosition(p);
 				Util.centerLineInScrollPane(topArea);
 			});
+			//addToHistory(p); //seems to break lots of stuff
 		} catch (Throwable ex) {
 			ex.printStackTrace();
 		}
@@ -672,11 +687,12 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			int line = e.getLocation().line;
 			moveTo(col, line);
 
-			// String s = e.getMessage();
-			// String t = s.substring(s.indexOf(" "));
-			// t.split("\\s+");
-
 			toDisplay = "Syntax error: " + e.getLocalizedMessage();
+			e.printStackTrace();
+			return null;
+		} catch (LocException e) {
+			setCaretPos(e.loc);
+			toDisplay = "Type error: " + e.getLocalizedMessage();
 			e.printStackTrace();
 			return null;
 		} catch (Throwable e) {

@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata.aql.exp;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -18,13 +18,13 @@ import org.w3c.dom.NodeList;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-import catdata.aql.exp.AqlEnv;
-import catdata.aql.exp.EdsExp;
+import catdata.aql.RawTerm;
+import catdata.aql.Schema;
+import catdata.aql.Term;
+import catdata.aql.Var;
 import catdata.aql.exp.EdsExp.EdExpRaw;
 import catdata.aql.exp.EdsExp.EdsExpRaw;
-import catdata.aql.exp.SchExp;
 import catdata.aql.exp.SchExp.SchExpVar;
-import catdata.aql.exp.SchExpRaw;
 import catdata.aql.exp.TyExp.TyExpVar;
 
 public class EasikAql {

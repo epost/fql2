@@ -29,7 +29,6 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.Var;
-import catdata.aql.exp.Raw.InteriorLabel;
 import catdata.aql.exp.SchExp.SchExpLit;
 import catdata.aql.fdm.CoEvalInstance;
 import catdata.aql.fdm.ColimitInstance;

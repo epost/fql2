@@ -201,7 +201,8 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			return changed.get(n);
 		}
 		Exp<?> prev = last_prog.exps.get(n);
-		if (prev == null || (Boolean) prog.exps.get(n).getOrDefault(env, AqlOption.always_reload) || last_env == null || last_env.defs.keySet().contains(n)) {
+		//System.out.println(xprog.exps.get(n));
+		if (prev == null || (Boolean) prog.exps.get(n).getOrDefault(env, AqlOption.always_reload) || last_env == null || !last_env.defs.keySet().contains(n)) {
 			changed.put(n, true);
 			return true;
 		}
@@ -278,8 +279,11 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		} catch (Exception e) {
 			e.printStackTrace();
 			synchronized (this) {
-				//stop = true;
-				exn.add(new LineException(e.getMessage(), n, k2));
+				if (e instanceof LocException) {
+					exn.add((LocException)e);					
+				} else {
+					exn.add(new LineException(e.getMessage(), n, k2));
+				}
 				notifyAll();
 				interruptAll();
 			}

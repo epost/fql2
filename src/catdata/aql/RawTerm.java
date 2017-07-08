@@ -87,20 +87,20 @@ public final class RawTerm {
 		Ref<Chc<Ty,En>> lhs_t = lhs.infer(vars, ctx0, col);
 		Ref<Chc<Ty,En>> rhs_t = rhs.infer(vars, ctx0, col);
 		if (lhs_t.x == null && rhs_t.x == null) {
-			throw new RuntimeException("Ambiguous result type (cannot infer) for " + lhs + " = " + rhs);
+			throw new RuntimeException("In equation " +  lhs + " = " + rhs + "the result type is ambiguous");
 		} else if (lhs_t.x == null && rhs_t.x != null) {
 			lhs_t.set(rhs_t);
 		} else if (rhs_t.x == null && lhs_t.x != null) {
 			rhs_t.set(lhs_t);
 		} 
 		if (!lhs_t.x.equals(rhs_t.x)) {
-			throw new RuntimeException(lhs + " is " + lhs_t.x.toStringMash() + " but " + rhs + " actually has sort " + rhs_t.x.toStringMash());
+			throw new RuntimeException("In term " + lhs + ", the infered sort of subterm " + rhs + " is " + lhs_t.x.toStringMash() + " but " + rhs + " actually has sort " + rhs_t.x.toStringMash());
 		}
 		Ctx<String, Chc<Ty,En>> ret = new Ctx<>();
 		for (String var : ctx0.keySet()) {
 			Ref<Chc<Ty, En>> ref = ctx0.get(var);
 			if (ref.x == null) {
-				throw new RuntimeException("Ambiguous type (cannot infer) for variable/primitive " + var + " in " + lhs + " = " + rhs);
+				throw new RuntimeException("In equation " + lhs + " = " + rhs + ", the variable/primitive " + var + ", has ambiguous sort");
 			}
 			ref.x.assertNeitherNull();
 			ret.put(var, ref.x);
@@ -175,20 +175,20 @@ public final class RawTerm {
 			return Term.Sk(find(col.sks.map, head));
 		} else if (ctx0.containsKey(head) && !ctx0.get(head).x.left) {
 			//this must be a generator - but why isn't it in gens?
-			throw new RuntimeException("Error: " + this + " inferred as a generator, but available generators at this location are: " + col.gens.keySet());
+			throw new RuntimeException("In term " + this + ", inference implies that that term must be a generator, but available generators at this location are: " + col.gens.keySet());
 		} else if (ctx0.containsKey(head) && ctx0.get(head).x.left) {
 			Ty ty = ctx0.get(head).x.l;
 			if (ty == null) {
 				throw new RuntimeException("Anomaly: please report");
 			}
 			if (!col.java_tys.containsKey(ty) && col.java_parsers.containsKey(ty)) {
-				throw new RuntimeException("Error in " + this + ", " + ty + " has a java parser but is not declared as a java type");		
+				throw new RuntimeException("In term " + this + ", " + ty + " has a java parser but is not declared as a java type");		
 			}
 			if (col.java_tys.containsKey(ty) && !col.java_parsers.containsKey(ty)) {
-				throw new RuntimeException("Error in " + this + ", " + ty + " is a java type but does not hava a java parser");		
+				throw new RuntimeException("In term " + this + ", " + ty + " is a java type but does not hava a java parser");		
 			}
 			if (!col.java_tys.containsKey(ty) && !col.java_parsers.containsKey(ty)) {
-				throw new RuntimeException("Error in " + this + ", symbol not defined");		
+				throw new RuntimeException("In term " + this + ", symbol not defined");		
 			}
 			Object o = js.parse(ty, head);
 			return Term.Obj(o, ty);
