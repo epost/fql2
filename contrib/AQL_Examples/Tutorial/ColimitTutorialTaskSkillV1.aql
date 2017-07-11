@@ -21,7 +21,7 @@ schema sT = literal : TypeSide {
 		TName : Task -> Varchar
 }
 
-// Instance of skills
+// Representative instance of skills
 instance iSkl = literal : sS {
 	generators
 	    s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
@@ -30,7 +30,7 @@ instance iSkl = literal : sS {
 	    		  s6 GrantWriting, s7 Finance, s8 Management, s9 PaperWriting}
 }
 
-// Instance of tasks
+// Representative instance of tasks
 instance iTsk = literal : sT {
 	generators
 	    t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 : Task
@@ -48,6 +48,7 @@ schema sSnT = literal : TypeSide {
 	  task : SkillNeededForTask -> Varchar
 }
 
+// Representative instance associating skills needed for a task.
 instance iSnT = literal : sSnT {
 	generators
 		st1 st2 st3 st4 st5 st6 st7 st8 st9 st10
@@ -75,10 +76,11 @@ instance iSnT = literal : sSnT {
 }
 
 // Create a new schema that takes the coproduct of the sT, sS and sSnT schemas to create a single
-// schema with three entities Task and Skill and SkillNeededForTask.
+// schema with three entities Task and Skill and SkillNeededForTask. This construction is analogous
+// to an ETL process that takes three source schemas and lands them into a single target schema.
 schema_colimit S_T_SnT_SumAuto = quotient sT + sS + sSnT: TypeSide {}
 
-// Give the default names in the automatically generated sum more consise names.
+// Give the default names in the automatically generated sum more concise names.
 schema_colimit S_T_SnT_Sum = modify S_T_SnT_SumAuto {
 	rename entities
 		sS_Skill -> Skill
@@ -104,12 +106,17 @@ instance iS_T_SnT_Sum = coproduct_sigma
    mSkillNeededForTaskToS_T_SnT_Sum iSnT
    : sS_T_SnT_Sum
 
-/* This is cool, but is something of a tangent. I really just want to create the span.
+/* This is cool, but is something of a tangent. The overall objective of this model is to create 
+ * the span.
+ * 
  * The idea here is to create a schema that adds both the product and a span based on the Skill,  
  * Task and SkillNeededForTask entities and establishes the unique arrow between the two required
- * by the universal mapping property.
+ * by the universal mapping property (UMP).
+ * 
+ * What the UMP tells us is that a pair of foreign keys (fk_SnT_S, fk_SnT_T) i.e. the span can be
+ * replaced by a single foreign key fk_SnT_SxT to the cartesian product SkillxTask.
  */
-schema sSTJoy = literal : TypeSide {
+schema sSTUMP = literal : TypeSide {
 	entities
 	  Skill Task
 	  SkillNdFrTask SkillxTask
@@ -136,7 +143,8 @@ schema sSTJoy = literal : TypeSide {
 	  forall snt. snt.fk_SnT_T.TName = snt.task
 }
 
-query qS_T_SnT_SumToSTJoy = literal : sS_T_SnT_Sum -> sSTJoy {
+// This query constructs sSTUMP 
+query qS_T_SnT_SumToSTUMP = literal : sS_T_SnT_Sum -> sSTUMP {
 	entities //source entities: Skill SkillNeededForTask Task
 		Skill -> {
 			from
@@ -183,9 +191,14 @@ query qS_T_SnT_SumToSTJoy = literal : sS_T_SnT_Sum -> sSTJoy {
 		fk_pTask   -> {tt -> xt}
 }
 
-instance iSTJoy = eval qS_T_SnT_SumToSTJoy iS_T_SnT_Sum
+// And the associated representative instance.
+instance iSTUMP = eval qS_T_SnT_SumToSTUMP iS_T_SnT_Sum
 
-
+// Now we return to the main objective, creation of the span:
+//
+//          fk_SnT_S             fk_SnT_T
+//     Skill <----- SkillNdFrTask -----> Task
+//
 schema sSTSpn = literal : TypeSide {
 	entities
 	  Skill Task
@@ -203,6 +216,8 @@ schema sSTSpn = literal : TypeSide {
 	  forall snt. snt.fk_SnT_T.TName = snt.task
 }
 
+// This query is analogous to qS_T_SnT_SumToSTUMP but with sSTSpn as target, excluding the cartesian
+// product and its associated foreign keys.
 query qS_T_SnT_SumToSTSpn = literal : sS_T_SnT_Sum -> sSTSpn {
 	entities //source entities: Skill SkillNeededForTask Task
 		Skill -> {
@@ -236,22 +251,25 @@ query qS_T_SnT_SumToSTSpn = literal : sS_T_SnT_Sum -> sSTSpn {
 		fk_SnT_T   -> {tt -> nt}
 }
 
+// The representative instance for the span constructed from the sum.
 instance iSTSpn = eval qS_T_SnT_SumToSTSpn iS_T_SnT_Sum
 
-// Export the instance iSTSpn to SQL
+// Export the instance iSTSpn to SQL. First clean out the target tables if present from a previous run.
 pragma pCleanUp = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
 "DROP TABLE IF EXISTS sts_SkillNdFrTask"
 "DROP TABLE IF EXISTS sts_Skill"
 "DROP TABLE IF EXISTS sts_Task"}
 
+// Export the results of the above construction of the span and its representative instance.
 pragma eSTS = export_jdbc_instance iSTSpn "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" "sts_"
   { options varchar_length = 256 }
 
+// Display the contents of the ci_test schema in MySQL
 pragma pp2 = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
 "SHOW  TABLES"}
 
 
-// Bring the exported instance back in
+// Bring the exported instance back in for round trip (export iSTSpan import iSTSpnImp) comparison.
 instance iSTSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn {
    // entities - create generators for each entity based on the primary key of each entity in the source database
    Skill -> "select id from sts_Skill"

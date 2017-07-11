@@ -8,12 +8,30 @@ typeside TypeSide = literal {
 		Varchar = "return input[0]"
 }
 
-// Schema with the single entity Skill.
+// On the person side of this construction we create a two level taxonomy for version 2. This difference
+// from the task side of the construction is chosen so we can later illustrate how AQL can handle merging
+// schemas that differ in their modeling resolution.
+//
+// Contrast this with the version 1 skill schema on the person side of the construction.
+/*
 schema sS = literal : TypeSide {
 	entities
 		Skill
 	attributes
 		SName : Skill -> Varchar
+}
+ */
+schema sS = literal : TypeSide {
+	entities
+		Skill SkillClass
+	foreign_keys
+		fk_SkillClass : Skill -> SkillClass
+	attributes
+		SName : Skill -> Varchar
+		SSCName : Skill -> Varchar
+		SCName : SkillClass -> Varchar
+	observation_equations
+		forall s. s.SSCName = s.fk_SkillClass.SCName
 }
 
 // Schema with the single entity Task.
@@ -27,13 +45,16 @@ schema sP = literal : TypeSide {
 // Representative instance of skills
 instance iSkl = literal : sS {
 	generators
-	    s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
+	    s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 : Skill
+	    sc0 sc1 sc2 : SkillClass
 	multi_equations
-	    SName -> {s0 Math, s1 CompSci, s2 DBA, s3 Pharma, s4 Programming, s5 Teaching, 
-	    		  s6 GrantWriting, s7 Finance, s8 Management, s9 PaperWriting}
+		fk_SkillClass -> {s0 sc0, s1 sc0, s2 sc0, s4 sc0, s3 sc1, s7 sc1, s5 sc1, s6 sc2, s8 sc1, s9 sc2, s10 sc2}
+	    SName -> {s0 CategoryTheory, s1 CompSci, s2 DBA, s3 Pharma, s4 Programming, s5 Lecture, 
+	    		  s6 GrantWriting, s7 Finance, s8 Management, s9 PaperWriting, s10 Singing}
+		SCName -> {sc0 Cognitive, sc1 Social, sc2 Psychomotor}
 }
 
-// Representative instance of tasks
+// Representative instance of Person
 instance iPrsn = literal : sP {
 	generators
 		p1 p2 p3 p4 : Person
@@ -41,7 +62,7 @@ instance iPrsn = literal : sP {
 		PName -> {p1 Jane, p2 Joan, p3 Jim, p4 John}// Person -> Varchar
 }
 
-// Schema with one entity that assigns skills to people
+// Schema with one entity that associates skills provided by people
 schema sSpP = literal : TypeSide {
 	entities
 	  SkillProvidedByPerson
@@ -50,7 +71,7 @@ schema sSpP = literal : TypeSide {
 	  person : SkillProvidedByPerson -> Varchar
 }
 
-// Representative instance of skills provided by a person.
+// Representative instance of skills provided by people.
 instance iSpP = literal : sSpP {
 	generators
 	    ps1 ps2 ps3 ps4 ps5 ps6 ps7 ps8 ps9 ps10 ps11 ps12 ps13 ps14 ps15 ps16 ps17 ps18 ps19 : SkillProvidedByPerson
@@ -58,13 +79,12 @@ instance iSpP = literal : sSpP {
 		person -> {ps1  Jane,    ps2  Jane,     ps3  Jane,         ps4  Jane,       ps5  Jane,
 		           ps6  Joan,    ps7  Joan,     ps8  Joan,         ps9  Joan,       ps10 Joan,
 		           ps11 Jim,     ps12 Jim,      ps13 Jim,          ps14 Jim,        ps15 Jim,
-		           ps16 John,    ps17 John,     ps18 John,         ps19 John}// Person -> Varchar
+		           ps16 John,    ps17 John,     ps18 John,         ps19 John}
 
-	    skill ->  {ps1  DBA,     ps2 Pharma,    ps3 Teaching,      ps4 Management,  ps5  PaperWriting,
-		           ps6  Math,    ps7 Teaching,  ps8 GrantWriting,  ps9 Management,  ps10 PaperWriting,
-		           ps11 CompSci, ps12 Teaching, ps13 GrantWriting, ps14 Management, ps15 PaperWriting,
-		           ps16 DBA,     ps17 Finance,  ps18 Management,   ps19 PaperWriting}
-
+	    skill ->  {ps1  DBA,            ps2 Pharma,   ps3 Lecture,       ps4 Management,  ps5  PaperWriting,
+		           ps6  CategoryTheory, ps7 Lecture,  ps8 GrantWriting,  ps9 Management,  ps10 PaperWriting,
+		           ps11 CompSci,        ps12 Lecture, ps13 GrantWriting, ps14 Management, ps15 PaperWriting,
+		           ps16 DBA,            ps17 Finance, ps18 Management,   ps19 PaperWriting}
 }
 
 // Create a new schema that takes the coproduct of the sT and sS schemas to create a single
@@ -75,10 +95,15 @@ schema_colimit S_P_SpP_SumAuto = quotient sP + sS + sSpP: TypeSide {}
 schema_colimit S_P_SpP_Sum = modify S_P_SpP_SumAuto {
 	rename entities
 		sS_Skill -> Skill
+		sS_SkillClass -> SkillClass
 		sP_Person -> Person
 		sSpP_SkillProvidedByPerson -> SkillProvidedByPerson
+	rename foreign_keys
+		sS_fk_SkillClass -> fk_SkillClass
 	rename attributes
 		sS_SName -> SName
+		sS_SSCName -> SSCName
+		sS_SCName -> SCName
 		sP_PName -> PName
 	    sSpP_skill -> skill
 	    sSpP_person -> person
@@ -98,24 +123,24 @@ instance iS_P_SpP_Sum = coproduct_sigma
    : sS_P_SpP_Sum
 
 
-// Define the span:
-//
-//          fk_SnP_S               fk_SnP_P
-//     Skill <----- SkillPrvdByTask -----> Person
-//
+// Define the span
 schema sSPSpn = literal : TypeSide {
 	entities
-	  Skill Person
+	  Skill SkillClass Person
 	  SkillPrvdByPerson
 	foreign_keys
+	  fk_SkillClass : Skill -> SkillClass
 	  fk_SpP_S   : SkillPrvdByPerson -> Skill
 	  fk_SpP_P   : SkillPrvdByPerson -> Person
 	attributes
 	  SName  : Skill -> Varchar
+	  SSCName : Skill -> Varchar
+	  SCName : SkillClass -> Varchar
 	  PName  : Person -> Varchar
 	  skill  : SkillPrvdByPerson -> Varchar
 	  person   : SkillPrvdByPerson -> Varchar
 	observation_equations
+	  forall s. s.SSCName = s.fk_SkillClass.SCName
 	  forall spp. spp.fk_SpP_S.SName = spp.skill
 	  forall spp. spp.fk_SpP_P.PName = spp.person
 }
@@ -128,6 +153,13 @@ query qS_P_SpP_SumToSPSpn = literal : sS_P_SpP_Sum -> sSPSpn {
 				ss : Skill
 			return
 				SName -> ss.SName
+				SSCName -> ss.SSCName
+		}
+		SkillClass -> {
+			from
+				scsc : SkillClass
+			return
+				SCName -> scsc.SCName
 		}
 		SkillPrvdByPerson -> {
 			from
@@ -148,41 +180,47 @@ query qS_P_SpP_SumToSPSpn = literal : sS_P_SpP_Sum -> sSPSpn {
 				PName -> pp.PName
 		}
 	foreign_keys
-		// fk_SnT_S   : SkillPrvdByPerson -> Skill
-		fk_SpP_S   -> {ss -> sp}
-		// fk_SnT_T   : SkillPrvdByPerson -> Person
-		fk_SpP_P   -> {pp -> pb}
+		// fk_SkillClass : Skill -> SkillClass
+		fk_SkillClass -> {scsc -> ss.fk_SkillClass}
+		// fk_SnT_S      : SkillPrvdByPerson -> Skill
+		fk_SpP_S      -> {ss -> sp}
+		// fk_SnT_T      : SkillPrvdByPerson -> Person
+		fk_SpP_P      -> {pp -> pb}
 }
 
-// Populate the span using the instance produced by the sum.
+// Populate the span
 instance iSPSpn = eval qS_P_SpP_SumToSPSpn iS_P_SpP_Sum
 
 // Drop the tables if they exist so this script can be re-exicuted.
 pragma pCleanUpSpn = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
-"DROP TABLE IF EXISTS sps_SkillPrvdByPerson"
-"DROP TABLE IF EXISTS sps_Skill"
-"DROP TABLE IF EXISTS sps_Person"}
+"DROP TABLE IF EXISTS sps2_SkillPrvdByPerson"
+"DROP TABLE IF EXISTS sps2_Skill"
+"DROP TABLE IF EXISTS sps2_SkillClass"
+"DROP TABLE IF EXISTS sps2_Person"}
 
-// Export the results of this construction.
-pragma eSPSpn = export_jdbc_instance iSPSpn "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" "sps_"
+pragma eSPSpn = export_jdbc_instance iSPSpn "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" "sps2_"
   { options varchar_length = 256 }
 
 pragma pp = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
 "SHOW  TABLES"}
  
-// Bring the exported instance back in for round trip (export iSTPpan import iSTPpnImp) comparison.
+// Bring the exported instance back in
 instance iSPSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSPSpn {
    // entities - create generators for each entity based on the primary key of each entity in the source database
-   Skill -> "select id from sps_Skill"
-   Person -> "select id from sps_Person"
-   SkillPrvdByPerson -> "select id from sps_SkillPrvdByPerson"
+   Skill -> "select id from sps2_Skill"
+   SkillClass -> "select id from sps2_SkillClass"
+   Person -> "select id from sps2_Person"
+   SkillPrvdByPerson -> "select id from sps2_SkillPrvdByPerson"
    // foreign keys
-   fk_SpP_S   -> "select id, fk_SpP_S from sps_SkillPrvdByPerson"
-   fk_SpP_P   -> "select id, fk_SpP_P from sps_SkillPrvdByPerson"
+   fk_SkillClass -> "select id, fk_SkillClass from sps2_Skill"
+   fk_SpP_S   -> "select id, fk_SpP_S from sps2_SkillPrvdByPerson"
+   fk_SpP_P   -> "select id, fk_SpP_P from sps2_SkillPrvdByPerson"
    // attributes
-   SName  -> "select id, SName from sps_Skill"
-   PName  -> "select id, PName from sps_Person"
-   skill  -> "select id, skill from sps_SkillPrvdByPerson"
-   person -> "select id, person from sps_SkillPrvdByPerson"
+   SName  -> "select id, SName from sps2_Skill"
+   SSCName -> "select id, SSCName from sps2_Skill"
+   SCName -> "select id, SCName from sps2_SkillClass"
+   PName  -> "select id, PName from sps2_Person"
+   skill  -> "select id, skill from sps2_SkillPrvdByPerson"
+   person -> "select id, person from sps2_SkillPrvdByPerson"
 }
 

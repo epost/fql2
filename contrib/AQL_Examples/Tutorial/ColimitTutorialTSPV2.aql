@@ -1,0 +1,212 @@
+//options
+//	require_consistency=false
+
+typeside TypeSide = literal {
+	java_types
+		Varchar = "java.lang.String"
+	java_constants
+		Varchar = "return input[0]"
+}
+
+// Define the task span to include the three level skill taxonomy:
+schema sSTSpn = literal : TypeSide {
+	entities
+	  Skill SkillType SkillClass Task
+	  SkillNdFrTask
+	foreign_keys
+	  fk_SnT_S   : SkillNdFrTask -> Skill
+	  fk_SnT_T   : SkillNdFrTask -> Task
+	  fk_SkillType : Skill -> SkillType
+	  fk_SkillTypeClass : SkillType -> SkillClass
+	attributes
+	  SName  : Skill -> Varchar
+	  TName  : Task -> Varchar
+	  SSTName : Skill -> Varchar
+	  SSCName : Skill -> Varchar
+	  STName : SkillType -> Varchar
+	  SCName : SkillClass -> Varchar
+	  skill  : SkillNdFrTask -> Varchar
+	  task   : SkillNdFrTask -> Varchar
+	observation_equations
+	  forall snt. snt.fk_SnT_S.SName = snt.skill
+	  forall snt. snt.fk_SnT_T.TName = snt.task
+	  forall s. s.SSTName = s.fk_SkillType.STName
+	  forall s. s.SSCName = s.fk_SkillType.fk_SkillTypeClass.SCName
+}
+
+// Define the person span to include the two level skill taxonomy:
+schema sSPSpn = literal : TypeSide {
+	entities
+	  Skill SkillClass Person
+	  SkillPrvdByPerson
+	foreign_keys
+	  fk_SkillClass : Skill -> SkillClass
+	  fk_SpP_S   : SkillPrvdByPerson -> Skill
+	  fk_SpP_P   : SkillPrvdByPerson -> Person
+	attributes
+	  SName  : Skill -> Varchar
+	  SSCName : Skill -> Varchar
+	  SCName : SkillClass -> Varchar
+	  PName  : Person -> Varchar
+	  skill  : SkillPrvdByPerson -> Varchar
+	  person   : SkillPrvdByPerson -> Varchar
+	observation_equations
+	  forall s. s.SSCName = s.fk_SkillClass.SCName
+	  forall spp. spp.fk_SpP_S.SName = spp.skill
+	  forall spp. spp.fk_SpP_P.PName = spp.person
+}
+
+/* Create a new schema that takes the colimit of the taxonomy enhanced task and person spans. Notice this
+ * construction glues on two entities, skill and skill class as well as equating the sSPSpn_fk_SkillClass
+ * foreign key with the path sSTSpn_fk_SkillType.sSTSpn_fk_SkillTypeClass. This allows us to glue the
+ * taxonomies even though they classify skills at different resolutions. We include the version 1 construction
+ * for comparison.
+ 
+schema_colimit STSpn_SPSpn_CoLimAuto = quotient sSTSpn + sSPSpn : TypeSide {
+	entity_equations
+	  sSTSpn.Skill = sSPSpn.Skill
+	observation_equations
+	  forall s. s.sSTSpn_SName = s.sSPSpn_SName}
+*/
+schema_colimit STSpn_SPSpn_CoLimAuto = quotient sSTSpn + sSPSpn : TypeSide {
+	entity_equations
+	  sSTSpn.Skill = sSPSpn.Skill
+	  sSTSpn.SkillClass = sSPSpn.SkillClass
+	path_equations
+	  sSPSpn_fk_SkillClass = sSTSpn_fk_SkillType.sSTSpn_fk_SkillTypeClass
+	observation_equations
+	  forall s. s.sSTSpn_SName = s.sSPSpn_SName
+	  forall c. c.sSTSpn_SCName = c.sSPSpn_SCName
+}
+
+
+// Give the default names in the automatically generated sum more consise names.
+schema_colimit STSpn_SPSpn_CoLim = modify STSpn_SPSpn_CoLimAuto {
+	rename entities
+		sSPSpn_Person -> Person
+		sSPSpn_SkillClass__sSTSpn_SkillClass -> SkillClass
+		sSPSpn_SkillPrvdByPerson -> SkillPrvdByPerson
+		sSPSpn_Skill__sSTSpn_Skill -> Skill
+		sSTSpn_SkillNdFrTask -> SkillNdFrTask
+		sSTSpn_SkillType -> SkillType
+		sSTSpn_Task -> Task
+	rename foreign_keys
+		sSTSpn_fk_SnT_S -> fk_SnT_S
+		sSTSpn_fk_SkillType -> fk_SkillType
+		sSTSpn_fk_SnT_T -> fk_SnT_T
+		sSTSpn_fk_SkillTypeClass -> fk_SkillTypeClass
+		sSPSpn_fk_SkillClass -> fk_SkillClass
+		sSPSpn_fk_SpP_S -> fk_SpP_S
+		sSPSpn_fk_SpP_P -> fk_SpP_P
+	rename attributes
+		sSTSpn_SSCName  -> TskSSCName
+		sSPSpn_SSCName -> PrsnSSCName
+		sSTSpn_SSTName  -> SSTName
+		sSTSpn_task -> task
+		sSTSpn_skill -> TskSkill
+		sSPSpn_skill -> PrsnSkill
+		sSTSpn_SName -> TskSName
+		sSPSpn_SName -> PrsnSName
+		sSTSpn_STName -> STName
+		sSTSpn_TName -> TName
+		sSTSpn_SCName -> TskSCName
+		sSPSpn_SCName -> PrsnSCName
+		sSPSpn_person -> person
+		sSPSpn_PName -> PName
+}
+
+// Provide addressable labels for the various components of the coproduct STSum
+schema sSTSpn_SPSpn_CoLim = getSchema STSpn_SPSpn_CoLim
+mapping mSTSpnToSTSpn_SPSpn_CoLim = getMapping STSpn_SPSpn_CoLim sSTSpn
+mapping mSPSpnToSTSpn_SPSpn_CoLim = getMapping STSpn_SPSpn_CoLim sSPSpn
+
+// Import an instance for sSTSpn
+instance iSTSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   Skill -> "select id from sts2_Skill"
+   SkillType -> "select id from sts2_SkillType"
+   SkillClass -> "select id from sts2_SkillClass"
+   Task -> "select id from sts2_Task"
+   SkillNdFrTask -> "select id from sts2_SkillNdFrTask"
+   // foreign keys
+   fk_SnT_S -> "select id, fk_SnT_S from sts2_SkillNdFrTask"
+   fk_SnT_T -> "select id, fk_SnT_T from sts2_SkillNdFrTask"
+   fk_SkillType -> "select id, fk_SkillType from sts2_Skill"
+   fk_SkillTypeClass -> "select id, fk_SkillTypeClass from sts2_SkillType"
+   // attributes
+   SName -> "select id, SName from sts2_Skill"
+   SSTName -> "select id, SSTName from sts2_Skill"
+   SSCName -> "select id, SSCName from sts2_Skill"
+   STName -> "select id, STName from sts2_SkillType"
+   SCName -> "select id, SCName from sts2_SkillClass"
+   TName -> "select id, TName from sts2_Task"
+   skill -> "select id, skill from sts2_SkillNdFrTask"
+   task -> "select id, task from sts2_SkillNdFrTask"
+   options
+     null_prefix = "ST"
+     import_as_theory = true
+}
+
+// Import an instance of for sSPSpn 
+instance iSPSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSPSpn {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   Skill -> "select id from sps2_Skill"
+   SkillClass -> "select id from sps2_SkillClass"
+   Person -> "select id from sps2_Person"
+   SkillPrvdByPerson -> "select id from sps2_SkillPrvdByPerson"
+   // foreign keys
+   fk_SkillClass -> "select id, fk_SkillClass from sps2_Skill"
+   fk_SpP_S   -> "select id, fk_SpP_S from sps2_SkillPrvdByPerson"
+   fk_SpP_P   -> "select id, fk_SpP_P from sps2_SkillPrvdByPerson"
+   // attributes
+   SName  -> "select id, SName from sps2_Skill"
+   SSCName -> "select id, SSCName from sps2_Skill"
+   SCName -> "select id, SCName from sps2_SkillClass"
+   PName  -> "select id, PName from sps2_Person"
+   skill  -> "select id, skill from sps2_SkillPrvdByPerson"
+   person -> "select id, person from sps2_SkillPrvdByPerson"
+ options
+     null_prefix = "SP"
+     import_as_theory = true
+}
+
+// Build an instance for sS_T_SnT_Sum from iSTSpnImp and iSPSpnImp
+instance iS3_S2_Sum2 = coproduct_sigma
+   mSTSpnToSTSpn_SPSpn_CoLim iSTSpnImp
+   mSPSpnToSTSpn_SPSpn_CoLim iSPSpnImp
+   : sSTSpn_SPSpn_CoLim
+
+// Set up the SkillMatch table based on the exports from ColimitTutorialTaskSkillV1 (sts prefix) and ColimitTutorialPrsnSklV1 (sps prefix).
+pragma pSetUpSkillMatch = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"DROP TABLE IF EXISTS SkillMatch2"
+"DROP TABLE IF EXISTS SkillTypeMatch2"
+"DROP TABLE IF EXISTS SkillClassMatch2"
+"create table SkillMatch2 as select concat('s', t.id) as sm_id, p.id as ps_id, p.SName as pSName, t.id as ts_id, t.SName as tSName, p.SSCName as pSSCName, t.SSCName as tSSCName, t.SSTName as tSSTName, concat('st', t.fk_SkillType) as sm_fk_SkillType, t.fk_SkillType, concat('sc', st.fk_SkillTypeClass) as scm_fk_SkillClass, p.fk_SkillClass from sps2_Skill p join sts2_Skill t on p.SName = t.SName join sts2_SkillType st  on t.fk_SkillType = st.id"
+"create table SkillTypeMatch2 as select concat('st', st.id) as stm_id, st.id as st_id, st.STName as STName, concat('sc', fk_SkillTypeClass) as scm_fk_SkillTypeClass, st.fk_SkillTypeClass from sts2_SkillType st"
+"create table SkillClassMatch2 as select concat('sc', t.id) as scm_id, p.id as psc_id, p.SCName as pSCName, t.id as tsc_id, t.SCName as tSCName from sps2_SkillClass as p join sts2_SkillClass as t  on p.SCName = t.SCName"
+}
+
+// Need to rewrite the select statement for SkillMatch2 so that we can get the colimit version of the generators in the proper place for foreign key import.
+instance iSkillMatch = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn_SPSpn_CoLim {
+	Skill -> "select sm_id from SkillMatch2"
+	SkillClass -> "select scm_id from SkillClassMatch2"
+   options
+     null_prefix = "SM"
+     import_as_theory = true
+}
+
+transform tSMToSTSpn = import_jdbc "com.mysql.jdbc.Driver" //"jdbc:mysql://localhost:3306/ci_s0?user=root&password=HappyFunctor"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : iSkillMatch -> iS3_S2_Sum2 {
+	Skill -> "select sm_id, ts_id from SkillMatch2"
+	SkillClass -> "select scm_id, tsc_id from SkillClassMatch2"
+}
+
+transform tSMToSPSpn = import_jdbc "com.mysql.jdbc.Driver" //"jdbc:mysql://localhost:3306/ci_s0?user=root&password=HappyFunctor"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : iSkillMatch -> iS3_S2_Sum2 {
+	Skill -> "select sm_id, ps_id from SkillMatch2"
+	SkillClass -> "select scm_id, psc_id from SkillClassMatch2"
+}
+
+instance iSTSpn_SPSpn_Merge = coequalize tSMToSTSpn tSMToSPSpn
+
+

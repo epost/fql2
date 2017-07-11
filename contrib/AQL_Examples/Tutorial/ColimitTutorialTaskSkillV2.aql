@@ -1,0 +1,269 @@
+/*
+ * Version 2 of the construction of the Task 
+ */
+
+typeside TypeSide = literal {
+	java_types
+		Varchar = "java.lang.String"
+	java_constants
+		Varchar = "return input[0]"
+}
+
+/* Schema modeling skills with a three level hierarchy. Contrast this with the schema from version 1:
+schema sS = literal : TypeSide {
+	entities
+		Skill
+	attributes
+		SName : Skill -> Varchar
+} 
+The model for skill now has two additional entities providing a three level taxonomy for skills. */
+schema sS = literal : TypeSide {
+	entities
+		Skill SkillType SkillClass
+	foreign_keys
+		fk_SkillType : Skill -> SkillType
+		fk_SkillTypeClass : SkillType -> SkillClass
+	attributes
+		SName : Skill -> Varchar
+		SSTName : Skill -> Varchar
+		SSCName : Skill -> Varchar
+		STName : SkillType -> Varchar
+		SCName : SkillClass -> Varchar
+	observation_equations
+		forall s. s.SSTName = s.fk_SkillType.STName
+		forall s. s.SSCName = s.fk_SkillType.fk_SkillTypeClass.SCName
+}
+
+// Schema with the single entity Task. This schema is unchanged from version 1.
+schema sT = literal : TypeSide {
+	entities
+		Task
+	attributes
+		TName : Task -> Varchar
+}
+
+// Representative instance of skills. For version 2 we must classify each skill by type and then class. This is
+// done through the use of functional dependencies from skill to skill type and from skill type to skill class
+// implemented respectively through the foreign keys fk_SkillType and fk_SkillTypeClass.
+instance iSkl = literal : sS {
+	generators
+	    s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 : Skill
+	    sp0 sp1 sp2 sp3 sp4 sp5 : SkillType
+	    sc0 sc1 sc2 : SkillClass
+	multi_equations
+		fk_SkillType -> {s0 sp0, s1 sp1, s2 sp1, s4 sp1, s3 sp2, s7 sp2, s5 sp3, s6 sp4, s8 sp2, s9 sp4, s10 sp5}
+		fk_SkillTypeClass -> {sp0 sc0, sp1 sc0, sp2 sc1, sp3 sc1, sp4 sc2, sp5 sc2}
+	    SName -> {s0 CategoryTheory, s1 CompSci, s2 DBA, s3 Pharma, s4 Programming, s5 Lecture, 
+	    		  s6 GrantWriting, s7 Finance, s8 Management, s9 PaperWriting, s10 Juggling}
+		STName -> {sp0 Math, sp1 Computing, sp2 Business, sp3 Teaching, sp4 Writing, sp5 Entertaining}
+		SCName -> {sc0 Cognitive, sc1 Social, sc2 Psychomotor}
+}
+
+// Representative instance of tasks
+instance iTsk = literal : sT {
+	generators
+	    t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 : Task
+	multi_equations
+	    TName -> {t1 LaunchCIStartup, t2 BuildSWProduct, t3 WriteTutorial, t4 BuildPhrmColim, t5 BuildFncColim,
+	              t6 WriteCTPaper, t7 TeachCT, t8 TeachCS, t9 RunPhrmIntProject, t10 RunFincIntProject, t11 PaintHouseInterior}
+}
+
+// Schema with one entity that assigns skills to tasks
+schema sSnT = literal : TypeSide {
+	entities
+	  SkillNeededForTask
+	attributes
+	  skill : SkillNeededForTask -> Varchar
+	  task : SkillNeededForTask -> Varchar
+}
+
+// Representative instance of the assignment of skills needed to perform tasks.
+instance iSnT = literal : sSnT {
+	generators
+		st1 st2 st3 st4 st5 st6 st7 st8 st9 st10
+		st11 st12 st13 st14 st15 st16 st17 st18 st19 st20
+		st21 st22 st23 : SkillNeededForTask
+	multi_equations
+		skill -> {st1 CompSci,            st2 Programming,     st3 GrantWriting,    st4 PaperWriting,    st23 CategoryTheory,
+				  st5 CompSci,            st6 Programming,     st7 Management,
+				  st8 Programming,        st9 Lecture,        st10 PaperWriting,
+				  st11 Pharma,            st12 Programming,
+				  st13 Finance,           st14 Programming,
+				  st15 CategoryTheory,    st16 PaperWriting,
+				  st17 CategoryTheory,    st18 Lecture,
+				  st19 Pharma,            st20 Management,
+				  st21 Finance,           st22 Management}
+		task ->  {st1 LaunchCIStartup,    st2 LaunchCIStartup, st3 LaunchCIStartup, st4 LaunchCIStartup, st23 LaunchCIStartup,
+				  st5 BuildSWProduct,     st6 BuildSWProduct,  st7 BuildSWProduct,
+				  st8 WriteTutorial,      st9 WriteTutorial,   st10 WriteTutorial,
+				  st11 BuildPhrmColim,    st12 BuildPhrmColim,
+				  st13 BuildFncColim,     st14 BuildFncColim,
+				  st15 WriteCTPaper,      st16 WriteCTPaper,
+				  st17 TeachCT,           st18 TeachCT,
+				  st19 RunPhrmIntProject, st20 RunPhrmIntProject,
+				  st21 RunFncIntProject,  st22 RunFncIntProject}
+}
+
+// Create a new schema that takes the coproduct of the sT, sS and sSnT schemas to create a single
+// schema with three entities Task and Skill and SkillNeededForTask. This construction is unchanged
+// from version 1.
+schema_colimit S_T_SnT_SumAuto = quotient sT + sS + sSnT: TypeSide {}
+
+// Give the default names in the automatically generated sum more consise names.
+schema_colimit S_T_SnT_Sum = modify S_T_SnT_SumAuto {
+	rename entities
+		sS_Skill -> Skill
+		sS_SkillType -> SkillType
+		sS_SkillClass -> SkillClass
+		sT_Task -> Task
+		sSnT_SkillNeededForTask -> SkillNeededForTask
+	rename foreign_keys
+		sS_fk_SkillType -> fk_SkillType
+		sS_fk_SkillTypeClass -> fk_SkillTypeClass
+	rename attributes
+		sS_SName -> SName
+		sS_SSTName -> SSTName
+		sS_SSCName -> SSCName
+		sS_STName -> STName
+		sS_SCName -> SCName
+		sT_TName -> TName
+	    sSnT_skill -> skill
+	    sSnT_task -> task
+}
+
+// Provide addressable labels for the various components of the coproduct STSum
+schema sS_T_SnT_Sum = getSchema S_T_SnT_Sum
+mapping mSkillToS_T_SnT_Sum = getMapping S_T_SnT_Sum sS
+mapping mTaskToS_T_Snt_Sum = getMapping S_T_SnT_Sum sT
+mapping mSkillNeededForTaskToS_T_SnT_Sum = getMapping S_T_SnT_Sum sSnT
+
+// Build an instance for sS_T_SnT_Sum from iTsk, iSkl and iSnT
+instance iS_T_SnT_Sum = coproduct_sigma
+   mSkillToS_T_SnT_Sum iSkl
+   mTaskToS_T_Snt_Sum iTsk
+   mSkillNeededForTaskToS_T_SnT_Sum iSnT
+   : sS_T_SnT_Sum
+
+// The span schema. This schema is the target of the query below and along with its representative instance
+// constitutes the desired output of this model. In comparison with version 1, the target schema is now
+// extended to include the three level skill taxonomy.
+schema sSTSpn = literal : TypeSide {
+	entities
+	  Skill SkillType SkillClass Task
+	  SkillNdFrTask
+	foreign_keys
+	  fk_SnT_S   : SkillNdFrTask -> Skill
+	  fk_SnT_T   : SkillNdFrTask -> Task
+	  fk_SkillType : Skill -> SkillType
+	  fk_SkillTypeClass : SkillType -> SkillClass
+	attributes
+	  SName  : Skill -> Varchar
+	  TName  : Task -> Varchar
+	  SSTName : Skill -> Varchar
+	  SSCName : Skill -> Varchar
+	  STName : SkillType -> Varchar
+	  SCName : SkillClass -> Varchar
+	  skill  : SkillNdFrTask -> Varchar
+	  task   : SkillNdFrTask -> Varchar
+	observation_equations
+	  forall snt. snt.fk_SnT_S.SName = snt.skill
+	  forall snt. snt.fk_SnT_T.TName = snt.task
+	  forall s. s.SSTName = s.fk_SkillType.STName
+	  forall s. s.SSCName = s.fk_SkillType.fk_SkillTypeClass.SCName
+}
+
+// Similarly the query that constructs the span must now include additional blocks to populate the
+// additional skill taxonomy entities in the target schema.
+query qS_T_SnT_SumToSTSpn = literal : sS_T_SnT_Sum -> sSTSpn {
+	entities //source entities: Skill SkillNeededForTask Task
+		Skill -> {
+			from
+				ss : Skill
+			return
+				SName -> ss.SName
+				SSTName -> ss.SSTName
+				SSCName -> ss.SSCName
+		}
+		SkillType -> {
+			from
+				stst : SkillType
+			return
+				STName -> stst.STName
+		}
+		SkillClass -> {
+			from
+				scsc : SkillClass
+			return
+				SCName -> scsc.SCName
+		}
+		SkillNdFrTask -> {
+			from
+				snt : SkillNeededForTask
+				sn  : Skill
+				nt  : Task
+			where
+				snt.skill = sn.SName
+				snt.task = nt.TName
+			return
+				skill -> snt.skill
+				task  -> snt.task
+		}
+		Task -> {
+			from
+				tt : Task
+			return
+				TName -> tt.TName
+		}
+	foreign_keys
+	  	// fk_SkillType : Skill -> SkillType
+	  	fk_SkillType -> {stst -> ss.fk_SkillType}
+	  	// fk_SkillTypeClass : SkillType -> SkillClass
+	  	fk_SkillTypeClass -> {scsc -> stst.fk_SkillTypeClass}
+		// fk_SnT_S   : SkillNdFrTask -> Skill
+		fk_SnT_S   -> {ss -> sn}
+		// fk_SnT_T   : SkillNdFrTask -> Task
+		fk_SnT_T   -> {tt -> nt}
+}
+
+instance iSTSpn = eval qS_T_SnT_SumToSTSpn iS_T_SnT_Sum
+
+
+// Export the instance iSTSpn to SQL
+pragma pCleanUp = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"DROP TABLE IF EXISTS sts2_SkillNdFrTask"
+"DROP TABLE IF EXISTS sts2_Skill"
+"DROP TABLE IF EXISTS sts2_SkillType"
+"DROP TABLE IF EXISTS sts2_SkillClass"
+"DROP TABLE IF EXISTS sts2_Task"}
+
+pragma eSTS2 = export_jdbc_instance iSTSpn "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" "sts2_"
+  { options varchar_length = 256 }
+
+pragma pp2 = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"SHOW  TABLES"}
+
+
+// Bring the exported instance back in
+instance iSTSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   Skill -> "select id from sts2_Skill"
+   SkillType -> "select id from sts2_SkillType"
+   SkillClass -> "select id from sts2_SkillClass"
+   Task -> "select id from sts2_Task"
+   SkillNdFrTask -> "select id from sts2_SkillNdFrTask"
+   // foreign keys
+   fk_SnT_S -> "select id, fk_SnT_S from sts2_SkillNdFrTask"
+   fk_SnT_T -> "select id, fk_SnT_T from sts2_SkillNdFrTask"
+   fk_SkillType -> "select id, fk_SkillType from sts2_Skill"
+   fk_SkillTypeClass -> "select id, fk_SkillTypeClass from sts2_SkillType"
+   // attributes
+   SName -> "select id, SName from sts2_Skill"
+   SSTName -> "select id, SSTName from sts2_Skill"
+   SSCName -> "select id, SSCName from sts2_Skill"
+   STName -> "select id, STName from sts2_SkillType"
+   SCName -> "select id, SCName from sts2_SkillClass"
+   TName -> "select id, TName from sts2_Task"
+   skill -> "select id, skill from sts2_SkillNdFrTask"
+   task -> "select id, task from sts2_SkillNdFrTask"
+}
+
