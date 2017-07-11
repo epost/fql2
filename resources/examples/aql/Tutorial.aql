@@ -23,7 +23,7 @@ html { (* "
 			    Readers are encouraged to use the IDE while reading the tutorial.
 			</p>
 			
-			<p> Jump to section: <a href=\"#typesIDEs\">TypesIDEs</a>, 
+			<p> Jump to section: <a href=\"#typesides\">Typesides</a>, 
 				<a href=\"#schemas\">Schemas</a>, <a href=\"#instances\">Instances</a>, 
 				<a href=\"#mappings\">Mappings</a>, 
 				<a href=\"#fdm\">Delta and Sigma</a>, 
@@ -31,10 +31,10 @@ html { (* "
 				<a href=\"#conclusion\">Conclusion</a>.  
 			</p>	  
 	
-		<hr/> <div id=\"typesIDEs\">
-		<h2>TypesIDEs</h2>
-			<p>Every AQL file begins with a <b>typesIDE</b>.  
-				The typesIDE for this tutorial contains two <b>java_types</b>: <i>String</i>, 
+		<hr/> <div id=\"typesides\">
+		<h2>typesides</h2>
+			<p>Every AQL file begins with a <b>typeside</b>.  
+				The typeside for this tutorial contains two <b>java_types</b>: <i>String</i>, 
 				which is bound to <i>java.lang.String</i>;
 				and <i>Integer</i>, which is bound to <i>java.lang.Integer</i>.  The
 				<b>java_constants</b> section defines, for each java_type, javascript code that
@@ -46,7 +46,7 @@ html { (* "
 			</p></div>" *) }			
 
 
-typesIDE Ty = literal { 
+typeside Ty = literal { 
 	java_types
 		String = "java.lang.String"
 		Integer = "java.lang.Integer"
@@ -63,7 +63,7 @@ html { (* " <hr/>
 	<div id=\"schemas\">
 	<h2>Schemas</h2>
 
-		<p>A <b>schema</b> on a typesIDE <i>Ty</i> contains a set of <b>entities</b>, a set
+		<p>A <b>schema</b> on a typeside <i>Ty</i> contains a set of <b>entities</b>, a set
 			of <b>attributes</b> taking entities to types, a set of <b>foreign_keys</b>
 			taking entities to entities, a set of <b>path_equations</b> between paths of foreign_keys,
 			and a set of <b>observation_equations</b> between attributes and foreign_keys. 

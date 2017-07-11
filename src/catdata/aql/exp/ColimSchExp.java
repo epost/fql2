@@ -7,11 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import javax.swing.tree.DefaultMutableTreeNode;
-
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Ctx;
@@ -46,51 +43,13 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	
 	
 	public static class ColimSchExpQuotient<N, Ty, En, Sym, Fk, Att> 
-	extends ColimSchExp<N, Void, Ty, En, Sym, Fk, Att> {
+	extends ColimSchExp<N, Void, Ty, En, Sym, Fk, Att> implements Raw {
 
-		@Override
-		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
-			if (nodes.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("schemas");
-				for (N t : Util.alphaMaybe(alpha, nodes.keySet())) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.toString());
-					nodes.get(t).asTree(m, alpha);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (eqEn.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("en_eqs");
-				for (Quad<N, En, N, En> t : Util.alphaMaybe(alpha, eqEn)) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.first + "." + t.second + " = " + t.third + "." + t.fourth);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (eqTerms2.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("path_eqs");
-				for (Pair<List<String>, List<String>> t : Util.alphaMaybe(alpha, eqTerms2)) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(Util.sep(t.first, ".") + " = " + Util.sep(t.second, "."));
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (eqTerms.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("obs_eqs");
-				for (Quad<String, String, RawTerm, RawTerm> t : Util.alphaMaybe(alpha, eqTerms)) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.third + " = " + t.fourth);
-					n.add(m);
-				}
-				root.add(n);
-			}
+		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+		
+		@Override 
+		public Ctx<String, List<InteriorLabel<Object>>> raw() {
+			return raw;
 		}
 		
 		public final TyExp<Ty, Sym> ty;
@@ -114,20 +73,40 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		
 
 		@SuppressWarnings("unchecked")
-		public ColimSchExpQuotient(TyExp<Ty, Sym> ty, List<N> nodes, List<Quad<N, En, N, En>> eqEn, List<Quad<String, String, RawTerm, RawTerm>> eqTerms, List<Pair<List<String>, List<String>>> eqTerms2, List<Pair<String, String>> options) {
-			super();
+		public ColimSchExpQuotient(TyExp<Ty, Sym> ty, List<LocStr> nodes, List<Pair<Integer, Quad<N, En, N, En>>> eqEn, List<Pair<Integer, Quad<String, String, RawTerm, RawTerm>>> eqTerms, List<Pair<Integer, Pair<List<String>, List<String>>>> eqTerms2, List<Pair<String, String>> options) {
 			this.ty = ty;
 			this.nodes = new Ctx<>();
-			this.eqEn = new HashSet<>(eqEn);
-			this.eqTerms = new HashSet<>(eqTerms);
-			this.eqTerms2 = new HashSet<>(eqTerms2);
+			this.eqEn = LocStr.proj2(eqEn);
+			this.eqTerms = LocStr.proj2(eqTerms);
+			this.eqTerms2 = LocStr.proj2(eqTerms2);
 			this.options = Util.toMapSafely(options);
-			for (N n : nodes) {
-				if (this.nodes.containsKey(n)) {
+			for (LocStr n : nodes) {
+				if (this.nodes.containsKey((N)n.str)) {
 					throw new RuntimeException("In schema colimit " + this + " duplicate schema " + n + " - please create new schema variable if necessary.");
 				}
-				this.nodes.put(n, (SchExp<Ty, En, Sym, Fk, Att>) new SchExpVar((String)n));
+				this.nodes.put((N)n.str, (SchExp<Ty, En, Sym, Fk, Att>) new SchExpVar(n.str));
 			}
+			
+			List<InteriorLabel<Object>> f = new LinkedList<>();
+			for (Pair<Integer, Quad<N, En, N, En>> p : eqEn) {
+				f.add(new InteriorLabel<>("entities", p.second, p.first,
+						x -> x.first + "." + x.second + " = " + x.third + "." + x.fourth).conv());
+			}
+			raw.put("entities", f);
+			
+			f = new LinkedList<>();
+			for (Pair<Integer, Quad<String, String, RawTerm, RawTerm>> p : eqTerms) {
+				f.add(new InteriorLabel<>("path eqs", p.second, p.first,
+						x -> x.third + " = " + x.fourth).conv());
+			}
+			raw.put("path eqs", f);
+	
+			f = new LinkedList<>();
+			for (Pair<Integer, Pair<List<String>, List<String>>> p : eqTerms2) {
+				f.add(new InteriorLabel<>("obs eqs", p.second, p.first,
+						x -> Util.sep(x.first, ".") + " = " + Util.sep(x.second, ".")).conv());
+			}
+			raw.put("obs eqs", f);
 		}
 
 	
@@ -151,10 +130,62 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			return RawTerm.fold(l, "_v0");  
 		}
 
+		private String toString;
+		
 		@Override
-		public String toString() {
-			return "ColimSchExpQuotient [ty=" + ty + ", nodes=" + nodes + ", eqEn=" + eqEn + ", eqTerms=" + eqTerms + ", eqTerms2=" + eqTerms2 + ", options=" + options + "]";
-		}
+		public synchronized String toString() {
+			if (toString != null) {
+				return toString;
+			}
+			toString = "";
+				
+			List<String> temp = new LinkedList<>();
+			
+	
+			
+			if (!eqEn.isEmpty()) {
+				toString += "\tentity equations";
+						
+				for (Quad<N, En, N, En> x : eqEn) {
+					temp.add(x.first + "." + x.second + " = " + x.third + "." + x.fourth);
+				}
+				
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			}
+			
+			if (!eqTerms2.isEmpty()) {
+				toString += "\tpath equations";
+						
+				for (Pair<List<String>, List<String>> x : eqTerms2) {
+					temp.add(Util.sep(x.first, ".") + " = " + Util.sep(x.second, "."));
+				}
+				
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			}
+			
+			if (!eqTerms.isEmpty()) {
+				toString += "\trename attributes";
+						
+				for (Quad<String, String, RawTerm, RawTerm> x : eqTerms) {
+					temp.add("forall " + x.first + ". " + x.third + " = " + x.fourth);
+				}
+				
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			}
+			
+			if (!options.isEmpty()) {
+				toString += "\toptions";
+				temp = new LinkedList<>();
+				for (Entry<String, String> sym : options.entrySet()) {
+					temp.add(sym.getKey() + " = " + sym.getValue());
+				}
+				
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			}
+			
+			toString = "quotient " + Util.sep(nodes.keySet(), " + ") + "{\n" + toString + "}";
+			return toString;
+		} 
 
 		@Override
 		public Collection<Pair<String, Kind>> deps() {
@@ -408,7 +439,16 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	
 	////////////////////////////////////////
 
-	public static class ColimSchExpRaw<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
+	public static class ColimSchExpRaw<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> implements Raw {
+		
+		
+		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+		
+		@Override 
+		public Ctx<String, List<InteriorLabel<Object>>> raw() {
+			return raw;
+		}
+		
 		public final GraphExp<N, E> shape;
 
 		public final TyExp<Ty, Sym> ty;
@@ -417,32 +457,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 
 		public final Ctx<E, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>> edges;
 		
-		@Override
-		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
-			if (nodes.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("schemas");
-				for (N t : Util.alphaMaybe(alpha, nodes.keySet()))   {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.toString());
-					nodes.get(t).asTree(m, alpha);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (edges.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("mappings");
-				for (E t : Util.alphaMaybe(alpha, edges.keySet())) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.toString());
-					edges.get(t).asTree(m, alpha);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			
-		}
+	
 		
 		public final Map<String, String> options;
 		
@@ -456,12 +471,27 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			return nodes.get(n);
 		}
 
-		public ColimSchExpRaw(GraphExp<N, E> shape, TyExp<Ty, Sym> ty, List<Pair<N, SchExp<Ty, En, Sym, Fk, Att>>> nodes, List<Pair<E, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>>> edges, List<Pair<String, String>> options) {
+		public ColimSchExpRaw(GraphExp<N, E> shape, TyExp<Ty, Sym> ty, List<Pair<LocStr, SchExp<Ty, En, Sym, Fk, Att>>> nodes, List<Pair<LocStr, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>>> edges, List<Pair<String, String>> options) {
 			this.shape = shape;
 			this.ty = ty;
-			this.nodes = new Ctx<>(Util.toMapSafely(nodes));
-			this.edges = new Ctx<>(Util.toMapSafely(edges));
+			this.nodes = new Ctx<>(LocStr.list2(nodes, x -> (N) x));
+			this.edges = new Ctx<>(LocStr.list2(edges, x -> (E) x));
 			this.options = Util.toMapSafely(options);
+			
+			List<InteriorLabel<Object>> f = new LinkedList<>();
+			for (Pair<LocStr, SchExp<Ty, En, Sym, Fk, Att>> p : nodes) {
+				f.add(new InteriorLabel<>("nodes", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " -> " + x.second).conv());
+			}
+			raw.put("nodes", f);
+			
+			f = new LinkedList<>();
+			for (Pair<LocStr, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>> p : edges) {
+				f.add(new InteriorLabel<>("edges", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " -> " + x.second).conv());
+			}
+			raw.put("edges", f);
+			
 		}
 
 	
@@ -561,61 +591,13 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	
-	public static final class ColimSchExpModify<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
+	public static final class ColimSchExpModify<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> implements Raw {
 		
-		@Override
-		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
-			if (ens.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("rename ens");
-				for (Pair<String, String> t : Util.alphaMaybe(alpha, ens)) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.toString());
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (fks0.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("rename fks");
-				for (Pair<String, String> t : Util.alphaMaybe(alpha, fks0)) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.first + " -> " + t.second);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (atts0.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("rename atts");
-				for (Pair<String, String> t : Util.alphaMaybe(alpha, atts0)) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.first + " -> " + t.second);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (fks.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("remove fks");
-				for (Pair<String, List<String>> t : Util.alphaMaybe(alpha, fks)) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.first + " -> " + t.second);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (atts.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("remove atts");
-				for (Pair<String, Triple<String, String, RawTerm>> t : Util.alphaMaybe(alpha, atts)) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.first + " -> \\" + t.second.first + ". " + t.second);
-					n.add(m);
-				}
-				root.add(n);
-			}
-			
+		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+		
+		@Override 
+		public Ctx<String, List<InteriorLabel<Object>>> raw() {
+			return raw;
 		}
 		
 		@Override
@@ -625,32 +607,67 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		
 		public final ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim;
 		
-		private final List<Pair<String, String>> ens, fks0, atts0;
-		private final List<Pair<String, List<String>>> fks;
-		private final List<Pair<String, Triple<String, String, RawTerm>>> atts;
+		public final List<Pair<String, String>> ens;
+
+		public final List<Pair<String, String>> fks0;
+
+		public final List<Pair<String, String>> atts0;
+		public final List<Pair<String, List<String>>> fks;
+		public final List<Pair<String, Triple<String, String, RawTerm>>> atts;
 		
-		private final Map<String, String> options; 
+		public final Map<String, String> options; 
 		
 		@Override
 		public Map<String, String> options() {
 			return options;
 		}
 		
-		//typesafe by covariance of read only collections
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public ColimSchExpModify(ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim, List<Pair<String, String>> ens, List<Pair<String, String>> fks0, List<Pair<String, String>> atts0, List<Pair<String, List<String>>> fks, List<Pair<String, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
-			this.ens = new LinkedList(ens);
-			this.fks = new LinkedList(fks);
-			this.atts = new LinkedList(atts);
-			this.fks0 = new LinkedList(fks0);
-			this.atts0= new LinkedList(atts0);
+		public ColimSchExpModify(ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim, List<Pair<LocStr, String>> ens, List<Pair<LocStr, String>> fks0, List<Pair<LocStr, String>> atts0, List<Pair<LocStr, List<String>>> fks, List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
+			this.ens = LocStr.list2(ens);
+			this.fks = LocStr.list2(fks);
+			this.atts = LocStr.list2(atts);
+			this.fks0 = LocStr.list2(fks0);
+			this.atts0= LocStr.list2(atts0);
 			this.options = Util.toMapSafely(options);
 			Util.toMapSafely(this.ens);
 			Util.toMapSafely(this.fks);
 			Util.toMapSafely(this.atts); //do here rather than wait
 			this.colim = colim;
+						
+			List<InteriorLabel<Object>> f = new LinkedList<>();
+			for (Pair<LocStr, String> p : ens) {
+				f.add(new InteriorLabel<>("rename entities", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " -> " + x.second).conv());
+			}
+			raw.put("rename entities", f);
 			
-			//cmds = null;//turn into cmds
+			f = new LinkedList<>();
+			for (Pair<LocStr, String> p : fks0) {
+				f.add(new InteriorLabel<>("rename fks", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " -> " + x.second).conv());
+			}
+			raw.put("rename fks", f);
+			
+			f = new LinkedList<>();
+			for (Pair<LocStr, String> p : atts0) {
+				f.add(new InteriorLabel<>("rename atts", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " -> " + x.second).conv());
+			}
+			raw.put("rename atts", f);
+			
+			f = new LinkedList<>();
+			for (Pair<LocStr, List<String>> p : fks) {
+				f.add(new InteriorLabel<>("remove fks", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " -> " + Util.sep(x.second, ".")).conv());
+			}
+			raw.put("remove fks", f);
+			
+			f = new LinkedList<>();
+			for (Pair<LocStr, Triple<String, String, RawTerm>> p : atts) {
+				f.add(new InteriorLabel<>("remove atts", new Pair<>(p.first.str, p.second), p.first.loc,
+						x -> x.first + " -> \\" + x.second.first + ". " + x.second.third).conv());
+			}
+			raw.put("remove atts", f);
 		}
 
 
@@ -719,7 +736,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		private String toString;
 		
 		@Override
-		public String toString() {
+		public synchronized String toString() {
 			if (toString != null) {
 				return toString;
 			}
@@ -785,7 +802,8 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 			}
 			
-			return "modify {\n" + toString + "}";
+			toString = "modify {\n" + toString + "}";
+			return toString;
 		} 
 
 		//TODO aql add options

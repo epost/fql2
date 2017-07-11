@@ -26,6 +26,7 @@ import catdata.aql.Transform;
 import catdata.aql.fdm.LiteralTransform;
 import catdata.aql.fdm.SaturatedInstance;
 
+//TODO aql merge this with the jdbc transform class
 public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 	extends TransExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> {
 
@@ -76,21 +77,15 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 		return (Gen2) gen;
 	}
 	
-	private static boolean cameFromImport(Instance<?, ?, ?, ?, ?, ?, ?, ?, ?> I) {
-		if (!(I instanceof SaturatedInstance)) {
-			return false;
-		}
-		SaturatedInstance<?, ?, ?, ?, ?, ?, ?, ?, ?> J = (SaturatedInstance<?, ?, ?, ?, ?, ?, ?, ?, ?>) I;
-		return J.alg instanceof ImportAlgebra;
-	}
+	
 	
 	@Override
 	public Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> eval(AqlEnv env) {
 		Instance<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> s = src.eval(env);
 		Instance<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> t = dst.eval(env);
 
-		if (!(cameFromImport(s) || !(cameFromImport(t)))) {
-			throw new RuntimeException("Can only import CSV transforms between CSV instances");
+		if ((!s.algebra().imported) || (!t.algebra().imported)) {
+			throw new RuntimeException("Can only import transforms between imported instances");
 		}
 		
 		Map<Gen1, Term<Void,En,Void,Fk,Void,Gen2,Void>> gens = new HashMap<>();
@@ -112,6 +107,10 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 			if (!labelledNulls) {
 				for (Sk1 sk : s.sks().keySet()) {
 					Ty ty = s.sks().get(sk);
+					Set<Sk2> xxx = Util.revS(t.sks().map).get(ty);
+					if (xxx.isEmpty()) {
+						throw new RuntimeException("Cannot automatically map nulls to target instance");
+					}
 					Sk2 sk2 = Util.get0(Util.revS(t.sks().map).get(ty));
 					sks.put(sk, Term.Sk(sk2)); //map Null@Ty to Null@Ty
 				}

@@ -9,6 +9,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -60,6 +61,7 @@ import catdata.LineException;
 import catdata.Prog;
 import catdata.Unit;
 import catdata.Util;
+import catdata.aql.exp.LocException;
 
 /**
  * 
@@ -166,6 +168,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		this.title = title;
 		Util.assertNotNull(id);
 		history.add(0);
+		last_keystroke = System.currentTimeMillis();
 		// respArea.setWordWrap(true);
 		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
 
@@ -173,22 +176,24 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		FoldParserManager.get().addFoldParserMapping(getATMFlhs(), new CurlyFoldParser());
 
 		topArea = new RSyntaxTextArea();
+//		topArea.setPreferredSize(new Dimension(200,600));
 		topArea.addMouseListener(new MouseAdapter() {
-
-			
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				int i = topArea.getCaretPosition();
-				history.add(0, i); 
-				if (history.size() > 128) {
-					history = Collections.synchronizedList(history.subList(0, 32));
-				}
+				addToHistory(i);
 			}
 
 			
-			
 		});
-		// this is kind of neat
+		
+		topArea.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				last_keystroke = System.currentTimeMillis();
+			}
+		});
+		
 		topArea.setMarkOccurrences(true);
 
 		if (getATMFrhs() != null) {
@@ -367,6 +372,13 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		situate();
 	}
 
+	public synchronized void addToHistory(int i) {
+		history.add(0, i); 
+		if (history.size() > 128) {
+			history = Collections.synchronizedList(history.subList(0, 32));
+		}
+	}
+	
 	private void situate() {
 		if (outline_elongated) {
 			situateElongated();
@@ -380,7 +392,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		
 		JSplitPane xx1 = new Split(.8, JSplitPane.VERTICAL_SPLIT);
 		xx1.setDividerSize(6);
-		xx1.setResizeWeight(.8);
+		//xx1.setResizeWeight(.8);
 		xx1.add(sp);
 		xx1.add(respArea);
 		xx1.setBorder(BorderFactory.createEmptyBorder());
@@ -391,11 +403,11 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			xx2.setDividerSize(6);
 
 			if (outline_on_left) {
-				xx2.setResizeWeight(.2);
+			//	xx2.setResizeWeight(.2);
 				xx2.add(outline);
 				xx2.add(xx1);
 			} else {
-				xx2.setResizeWeight(.8);
+			//	xx2.setResizeWeight(.8);
 				xx2.add(xx1);
 				xx2.add(outline);
 			}
@@ -591,6 +603,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		long middle;
 
 		try {
+			
 			start = System.currentTimeMillis();
 			env = makeEnv(program, init);
 			middle = System.currentTimeMillis();
@@ -613,6 +626,11 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			e.printStackTrace();
 			Integer theLine = init.getLine(e.decl);
 			setCaretPos(theLine);
+		} catch (LocException e) {
+			toDisplay = "Error: " + e.getLocalizedMessage();
+			respArea.setText(toDisplay);
+			e.printStackTrace();
+			setCaretPos(e.loc);
 		} catch (Throwable re) {
 			toDisplay = "Error: " + re.getLocalizedMessage();
 			respArea.setText(toDisplay);
@@ -649,6 +667,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 				topArea.setCaretPosition(p);
 				Util.centerLineInScrollPane(topArea);
 			});
+			//addToHistory(p); //seems to break lots of stuff
 		} catch (Throwable ex) {
 			ex.printStackTrace();
 		}
@@ -668,11 +687,12 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			int line = e.getLocation().line;
 			moveTo(col, line);
 
-			// String s = e.getMessage();
-			// String t = s.substring(s.indexOf(" "));
-			// t.split("\\s+");
-
 			toDisplay = "Syntax error: " + e.getLocalizedMessage();
+			e.printStackTrace();
+			return null;
+		} catch (LocException e) {
+			setCaretPos(e.loc);
+			toDisplay = "Type error: " + e.getLocalizedMessage();
 			e.printStackTrace();
 			return null;
 		} catch (Throwable e) {
@@ -755,35 +775,41 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	protected Outline<Progg, Env, DDisp> outline;
 
-	Boolean isClosed = false;
+	public volatile boolean isClosed = false;
 
-	protected Progg parsed_prog;
+	public Progg parsed_prog;
 	protected String parsed_prog_string;
 	protected Unit parsed_prog_lock;
 
 	public void close() {
-		synchronized (isClosed) {
 			isClosed = true;
-		}
-	}
+	} 
 
 	@SuppressWarnings("unused")
 	protected boolean omit(String s, Progg p) {
 		return false;
 	}
 
-	private Boolean enable_outline = false;
-	volatile Boolean outline_alphabetical = true;
-	private Boolean outline_on_left = true;
-	volatile Boolean outline_prefix_kind = true;
-	private Boolean outline_elongated = true;
-	protected volatile long sleepDelay = 1000;
+	//TODO aql pull these from options rather than cache her?
+	private volatile Boolean enable_outline = false;
+	 public volatile Boolean outline_alphabetical = true;
+	private volatile Boolean outline_on_left = true;
+	 public volatile Boolean outline_prefix_kind = true;
+	private volatile Boolean outline_elongated = true;
+	protected volatile long sleepDelay = 2;
+	 public volatile Boolean outline_types = true;
+	 public volatile Long last_keystroke = null;
 	
 	public void set_delay(int i) {
 		if (i < 1) {
 			i = 1;
 		}
 		sleepDelay = (long) i * 1000;
+	}
+	
+	public void outline_types(Boolean bool) {
+		outline_types = bool;
+		//getOutline().build();
 	}
 	
 	public void enable_outline(Boolean bool) {
@@ -793,7 +819,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	public void outline_alphabetical(Boolean bool) {
 		outline_alphabetical = bool;
-		getOutline().build();
+		//getOutline().build();
 	}
 
 	public void outline_on_left(Boolean bool) {
@@ -803,7 +829,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	public void outline_prefix_kind(Boolean bool) {
 		outline_prefix_kind = bool;
-		getOutline().build();
+		//getOutline().build();
 	}
 
 	public void outline_elongated(Boolean bool) {
@@ -811,5 +837,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		situate();
 	}
 
+	
 	
 }

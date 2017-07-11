@@ -1,4 +1,4 @@
-package catdata.aql;
+package catdata.aql.exp;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -18,13 +18,13 @@ import org.w3c.dom.NodeList;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-import catdata.aql.exp.AqlEnv;
-import catdata.aql.exp.EdsExp;
+import catdata.aql.RawTerm;
+import catdata.aql.Schema;
+import catdata.aql.Term;
+import catdata.aql.Var;
 import catdata.aql.exp.EdsExp.EdExpRaw;
 import catdata.aql.exp.EdsExp.EdsExpRaw;
-import catdata.aql.exp.SchExp;
 import catdata.aql.exp.SchExp.SchExpVar;
-import catdata.aql.exp.SchExpRaw;
 import catdata.aql.exp.TyExp.TyExpVar;
 
 public class EasikAql {
@@ -200,9 +200,9 @@ public class EasikAql {
 						List<Pair<String, String>> Es = new LinkedList<>();
 						List<Pair<RawTerm, RawTerm>> Eeqs = new LinkedList<>();
 						Eeqs.add(new Pair<>(new RawTerm("x"), new RawTerm("y")));
-						EdExpRaw ed = new EdExpRaw(As, Aeqs, Es, Eeqs, false);
+						EdExpRaw ed = new EdExpRaw(As, Aeqs, Es, Eeqs, false, null);
 						eds.add(ed);
-						edsExps.add(new Pair<>("injective", new EdsExpRaw(new SchExpVar(sname), new LinkedList<>(), eds)));
+						edsExps.add(new Pair<>("injective", new EdsExpRaw(new SchExpVar(sname), new LinkedList<>(), eds, null)));
 					} if (m.getAttributes().getNamedItem("type").getTextContent().equals("partial")) {
 						warnings.add("Not exported - partial edges.  Their AQL semantics is unclear");
 					}
@@ -228,9 +228,9 @@ public class EasikAql {
 					List<Pair<String, String>> Es = new LinkedList<>();
 					List<Pair<RawTerm, RawTerm>> Eeqs = new LinkedList<>();
 					Eeqs.add(new Pair<>(new RawTerm("x"), new RawTerm("y")));
-					EdExpRaw ed = new EdExpRaw(As, Aeqs, Es, Eeqs, false);
+					EdExpRaw ed = new EdExpRaw(As, Aeqs, Es, Eeqs, false, null);
 					eds.add(ed);
-					edsExps.add(new Pair<>("key", new EdsExpRaw(new SchExpVar(sname), new LinkedList<>(), eds)));
+					edsExps.add(new Pair<>("key", new EdsExpRaw(new SchExpVar(sname), new LinkedList<>(), eds, null)));
 				}
 				
 				else if (m.getNodeName().equals("commutativediagram")) {
@@ -275,14 +275,14 @@ public class EasikAql {
 				}
 			}
 		}
-		SchExp<?, ?, ?, ?, ?> schExp = new SchExpRaw(new TyExpVar("SqlTypeSide"), new LinkedList<>(), ens, fks, eqs, atts, new LinkedList<>(), new LinkedList<>());
+		SchExp<?, ?, ?, ?, ?> schExp = new SchExpRaw<String, String>(new TyExpVar("SqlTypeSide"), new LinkedList<>(), ens, fks, eqs, atts, new LinkedList<>(), new LinkedList<>(), null);
 		
 		return new Pair<>(schExp, edsExps);
 	}
 	
 	private static Pair<List<String>, String> path(Node w1) {
 		String dom = safe(w1.getAttributes().getNamedItem("domain").getTextContent());
-		List<String> lhs = new LinkedList<>();
+		List<String> lhs = new LinkedList<>(); 
 		lhs.add(dom);
 
 		NodeList lhsX = w1.getChildNodes();
@@ -359,7 +359,7 @@ public class EasikAql {
 					List<Pair<RawTerm, RawTerm>> e_eqs = new LinkedList<>();
 					e_eqs.add(new Pair<>(toTerm(f1.first, "a"),new RawTerm("b")));
 					e_eqs.add(new Pair<>(toTerm(g1.first, "a"),new RawTerm("c")));
-					EdExpRaw ed1 = new EdExpRaw(as, a_eqs, es, e_eqs, true);
+					EdExpRaw ed1 = new EdExpRaw(as, a_eqs, es, e_eqs, true, null);
 					edExps.add(ed1);
 /*
 					as = new LinkedList<>();
@@ -405,7 +405,7 @@ public class EasikAql {
 					List<Pair<RawTerm, RawTerm>> e_eqs = new LinkedList<>();
 					e_eqs.add(new Pair<>(toTerm(f.first, "a"),new RawTerm("b")));
 					e_eqs.add(new Pair<>(toTerm(g.first, "a"),new RawTerm("c")));
-					EdExpRaw ed1 = new EdExpRaw(as, a_eqs, es, e_eqs, true);
+					EdExpRaw ed1 = new EdExpRaw(as, a_eqs, es, e_eqs, true, null);
 					edExps.add(ed1);
 
 				} else if (m.getNodeName().equals("equalizerconstraint")) {
@@ -439,14 +439,14 @@ public class EasikAql {
 					es.add(new Pair<>("a", A));
 					List<Pair<RawTerm, RawTerm>> e_eqs = new LinkedList<>();
 					e_eqs.add(new Pair<>(toTerm(h, "a"),new RawTerm("b")));
-					EdExpRaw ed1 = new EdExpRaw(as, a_eqs, es, e_eqs, true);
+					EdExpRaw ed1 = new EdExpRaw(as, a_eqs, es, e_eqs, true, null);
 					edExps.add(ed1);
 					name = "equalizer";
 				} else {
 					continue;
 				}
 				
-				EdsExpRaw edsExp = new EdsExp.EdsExpRaw(schExp, new LinkedList<>(), edExps);
+				EdsExpRaw edsExp = new EdsExp.EdsExpRaw(schExp, new LinkedList<>(), edExps, null);
 				edsExps.add(new Pair<>(name, edsExp));
 			}
 		}

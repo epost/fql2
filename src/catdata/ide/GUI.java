@@ -39,6 +39,7 @@ import javax.swing.filechooser.FileFilter;
 import catdata.Pair;
 import catdata.Unit;
 import catdata.Util;
+import catdata.aql.AqlTester;
 import catdata.aql.Kind;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.gui.AqlCodeEditor;
@@ -118,8 +119,8 @@ public class GUI extends JPanel {
 		menuBar.add(editMenu);
 		menuBar.add(toolsMenu);
 		
-		Menu aqlMenu = new Menu("AQL");
-		populateAql(aqlMenu);
+		Menu aqlMenu = populateAql();
+		
 		menuBar.add(aqlMenu);
 
 		//Menu legacyMenu = new Menu("Legacy");
@@ -422,6 +423,15 @@ public class GUI extends JPanel {
 			}
 		});
 		
+		MenuItem clear = new MenuItem("Refresh Outline");
+		editMenu.add(clear);
+		clear.addActionListener(x -> {
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.getOutline().build();;
+			}
+		});
+		
 		return editMenu;
 	}
 
@@ -526,21 +536,12 @@ public class GUI extends JPanel {
 		}
 	}
 
-	private static void populateAql(Menu menu) {
-	/*	MenuItem m = new MenuItem("Outline (using last state)");
-		m.addActionListener(x -> {
-			int i = editors.getSelectedIndex();
-			if (i == -1) {
-				return;
-			}
-			Object o = editors.getComponentAt(i);
-			if (o instanceof AqlCodeEditor) {
-				AqlCodeEditor a = (AqlCodeEditor) o;
-				a.showOutline();
-			}
-		});
-		menu.add(m); */
-
+	private static Menu populateAql() {
+		Menu menu = new Menu("AQL");
+		MenuItem st = new MenuItem("Self-Test");
+		st.addActionListener(x -> AqlTester.doSelfTests());
+		menu.add(st);
+	
 		MenuItem im = new MenuItem("Infer Mapping (using last compiled)");
 		im.addActionListener(x -> infer(Kind.MAPPING));
 		menu.add(im);
@@ -557,7 +558,7 @@ public class GUI extends JPanel {
 		MenuItem ih = new MenuItem("Emit HTML (using last compiled)");
 		ih.addActionListener(x -> {
 			CodeEditor<?,?,?> c = getSelectedEditor();
-			if (c == null) {
+			if (c == null) { //TODO aql refact these actions that depend on selected editor
 				return;
 			}
 			if (c instanceof AqlCodeEditor) {
@@ -566,6 +567,10 @@ public class GUI extends JPanel {
 			}
 		});
 		menu.add(ih);
+		
+		
+		return menu;
+		
 	}
 
 	private static void doExample(Example e) {

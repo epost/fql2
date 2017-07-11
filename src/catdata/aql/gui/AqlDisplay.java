@@ -38,6 +38,7 @@ import catdata.aql.Instance;
 import catdata.aql.Kind;
 import catdata.aql.Semantics;
 import catdata.aql.exp.AqlEnv;
+import catdata.aql.exp.AqlTyping;
 import catdata.aql.exp.Exp;
 import catdata.aql.exp.PragmaExp.PragmaExpCheck;
 import catdata.aql.exp.PragmaExp.PragmaExpConsistent;
@@ -58,34 +59,37 @@ public final class AqlDisplay implements Disp {
 	public void close() {
 	}
 
-	// TODO aql unresolve, should be controllable with option [since expensive]
-	private static String doLookup(String c, Exp<?> exp, AqlEnv env) {
-		switch (exp.kind()) {
+	public static String doLookup(boolean prefix, String c, Kind k, AqlTyping typing) {
+		String s = prefix ? k + " " + c : c ;
+		if (!typing.defs.keySet().contains(c)) {
+			return s;
+		}
+		switch (k) {
 		case INSTANCE:
-			return exp.kind() + " " + c + " : " + env.typing.defs.insts.get(c);
+			return s + " : " + typing.defs.insts.get(c);
 		case MAPPING:
-			return exp.kind() + " " + c + " : " + env.typing.defs.maps.get(c).first + " -> "
-					+ env.typing.defs.maps.get(c).second;
+			return s + " : " + typing.defs.maps.get(c).first + " -> "
+					+ typing.defs.maps.get(c).second;
 		case PRAGMA:
-			return exp.kind() + " " + c;
+			return s;
 		case QUERY:
-			return exp.kind() + " " + c + " : " + env.typing.defs.qs.get(c).first + " -> "
-					+ env.typing.defs.qs.get(c).second;
+			return s + " : " + typing.defs.qs.get(c).first + " -> "
+					+ typing.defs.qs.get(c).second;
 		case SCHEMA:
-			return exp.kind() + " " + c;
+			return s;
 		case TRANSFORM:
-			return exp.kind() + " " + c + " : " + env.typing.defs.trans.get(c).first + " -> "
-					+ env.typing.defs.trans.get(c).second;
+			return s + " : " + typing.defs.trans.get(c).first + " -> "
+					+ typing.defs.trans.get(c).second;
 		case TYPESIDE:
-			return exp.kind() + " " + c;
+			return s;
 		case GRAPH:
-			return exp.kind() + " " + c;
+			return s;
 		case COMMENT:
-			return exp.kind() + " " + c;
+			return s;
 		case SCHEMA_COLIMIT:
-			return exp.kind() + " " + c;
+			return s;
 		case CONSTRAINTS:
-			return exp.kind() + " " + c + " : " + env.typing.defs.eds.get(c);
+			return s + " : " + typing.defs.eds.get(c);
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		}
@@ -129,18 +133,7 @@ public final class AqlDisplay implements Disp {
 							+ env.performance.get(c));
 		}
 		int max_rows = (int) exp.getOrDefault(env, AqlOption.gui_rows_to_display);
-		// System.out.println("maxrows " + max_rows);
 		return AqlViewer.view(time, obj, max_rows);
-		/*
-		 * JPanel ret = new JPanel(new GridLayout(1,1)); JPanel lazyPanel = new
-		 * JPanel(); JButton button = new JButton("Show");
-		 * 
-		 * lazyPanel.add(button); button.addActionListener(x -> { JComponent[]
-		 * comp = new JComponent[1]; new ProgressMonitorWrapper(
-		 * "Making GUI for " + name, () -> { comp[0] = obj.display();
-		 * ret.remove(lazyPanel); ret.add(comp[0]); ret.validate(); }); });
-		 * ret.add(lazyPanel); return ret;
-		 */
 	}
 
 	public AqlDisplay(String title, Program<Exp<?>> p, AqlEnv env, long start, long middle) {
@@ -174,7 +167,7 @@ public final class AqlDisplay implements Disp {
 
 				try {
 					frames.add(
-							new Pair<>(doLookup(c, exp, env), wrapDisplay(c, exp, obj, env, env.performance.get(c))));
+							new Pair<>(doLookup(true, c, exp.kind(), env.typing), wrapDisplay(c, exp, obj, env, env.performance.get(c))));
 				} catch (RuntimeException ex) {
 					ex.printStackTrace();
 					throw new LineException(ex.getMessage(), c, exp.kind().toString());

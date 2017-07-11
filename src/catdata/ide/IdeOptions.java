@@ -362,7 +362,6 @@ public class IdeOptions {
 					setFont(o, c.getSelectedFont());
 					l.setText(toString(o, getFont(o)));
 					l.revalidate();
-					// System.out.println("Set to " + c.getSelectedFont());
 				}
 			});
 
@@ -443,6 +442,7 @@ public class IdeOptions {
 		case KEYWORD_1_COLOR:
 		case KEYWORD_2_COLOR:
 		case SYMBOL_COLOR:
+		case OUTLINE_TYPES:
 		case QUOTE_COLOR:
 		case BRACKET_MATCH_BG_COLOR:
 		case BRACKET_MATCH_BORDER_COLOR:
@@ -507,6 +507,9 @@ public class IdeOptions {
 		switch (o) {
 		case LINE_NUMBERS:
 			a.sp.setLineNumbersEnabled(getBool(o));
+			return;
+		case OUTLINE_TYPES: 
+			a.outline_types(getBool(o));
 			return;
 		case FILE_PATH:
 			return;
@@ -651,8 +654,10 @@ public class IdeOptions {
 		ENABLE_OUTLINE(IdeOptionType.BOOL, true),
 		OUTLINE_ON_LEFT(IdeOptionType.BOOL, false),
 		OUTLINE_ALPHABETICAL(IdeOptionType.BOOL, false),
-		OUTLINE_PREFIX_KIND(IdeOptionType.BOOL, false),
+		OUTLINE_PREFIX_KIND(IdeOptionType.BOOL, true),
 		OUTLINE_ELONGATED(IdeOptionType.BOOL, false),
+		OUTLINE_TYPES(IdeOptionType.BOOL, true),
+
 		
 		LOOK_AND_FEEL(IdeOptionType.LF, defaultLF()), 
 		FILE_PATH(IdeOptionType.FILE, new File("")), 
@@ -791,6 +796,8 @@ public class IdeOptions {
 				return "Parsing polling delay (s)";
 			case OUTLINE_FONT:
 				return "Outline font";
+			case OUTLINE_TYPES:
+				return "Show type info";
 			default:
 				return Util.anomaly();
 			}

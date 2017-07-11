@@ -58,8 +58,7 @@ import javax.swing.text.Position;
  *   int result = fontChooser.showDialog(parent);
  *   if (result == JFontChooser.OK_OPTION)
  *   {
- *      Font font = fontChooser.getSelectedFont(); 
- *      System.out.println("Selected Font : " + font); 
+ *      Font font = fontChooser.getSelectedFont();  
  *   }
  * <pre>
  **/

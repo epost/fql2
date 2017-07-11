@@ -794,7 +794,9 @@ private int yychar;
 	 * @param tokenType The token's type.
 	 */
 	private void addToken(int tokenType) {
-		addToken(zzStartRead, zzMarkedPos-1, tokenType);
+		try {
+			addToken(zzStartRead, zzMarkedPos-1, tokenType);
+		} catch (Exception ex) { } //TODO aql sigh
 	}
 
 
@@ -1046,7 +1048,7 @@ private int yychar;
       message = ZZ_ERROR_MSG[ZZ_UNKNOWN_ERROR];
     }
 
-    throw new Error(message);
+//    throw new Error(message);
   } 
 
 

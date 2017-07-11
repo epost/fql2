@@ -88,6 +88,7 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 		this.reprT_extra = reprT_extra;
 		inner_dp = new InnerDP();
 		inner_alg = new InnerAlgebra();
+		inner_alg.imported = alg.imported;
 		validate();
 		checkSatisfaction(); //TODO aql disable in production?
 		
@@ -135,6 +136,7 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 	}
 
 	private class InnerAlgebra extends Algebra<Ty,En,Sym,Fk,Att,X,Y,X,Y> {
+		
 		
 		@Override
 		public String printX(X x) {

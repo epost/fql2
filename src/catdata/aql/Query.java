@@ -70,7 +70,6 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> b = new Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>(conv1(ens),
 				atts, conv2(), src, dst);
 		b = unfoldNestedApplications(b);
-		//System.out.println(b);
 		Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> p = new Query<>(b.ens, b.atts, b.fks, src, dst, true);
 		return p;
 	}
@@ -84,21 +83,18 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		// do this first to type check
 		@SuppressWarnings("unused")
 		Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q = new Query<>(ens, atts, fks, src, dst, true);
-		// System.out.println("original " + q);
-		// System.out.println("--------");
-
+		
 		Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> b = new Blob<>(ens, atts, fks, src, dst);
 		if (removeRedundantVars) {
 			b = removeRedundantVars(b);
 		}
 
-		// TODO aql
+		//for testing
 		//b = unfoldNestedApplications(b);
 
 		Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> p = new Query<>(b.ens, b.atts, b.fks, src, dst,
 				doNotCheckPathEqs);
-		// System.out.println("new " + p);
-
+	
 		return p;
 	}
 
@@ -454,22 +450,18 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 				return new LinkedList<>(gens.map.keySet());
 			}
 			Map<Pair<Var, Var>, Float> selectivities = estimateSelectivities();
-			// System.out.println(Util.sep(selectivities, "->", "\n"));
 			if (I.gens().isEmpty()) {
 				return new LinkedList<>();
 			}
 			List<Var> lowest_plan = null;
 			float lowest_cost = -1;
-		//	System.out.println("xxxxxx " + I);
 			for (List<Var> plan : generatePlans()) {
 				float cost = estimateCost(plan, I, selectivities);
-//				 System.out.println("candidate " + plan + " costs " + cost);
 				if (lowest_plan == null || cost < lowest_cost) {
 					lowest_plan = plan;
 					lowest_cost = cost;
 				}
 			}
-		//	 System.out.println("*** lowest " + lowest_plan);
 			return lowest_plan;
 		}
 

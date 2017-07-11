@@ -69,7 +69,7 @@ public class Util {
 	public static <X> X timeout(Callable<X> c, long timeout) {
 		// final Object lock = new Object();
 		Ref<X> ret = new Ref<>();
-		Ref<Throwable> thr = new Ref<>();
+		Ref<Exception> thr = new Ref<>();
 		Thread t = new Thread(() -> {
 			try {
 				X x = c.call();
@@ -84,7 +84,7 @@ public class Util {
 			} catch (OutOfMemoryError exn) {
 				exn.printStackTrace();
 				synchronized (thr) {
-					thr.set(exn);
+					thr.set(new RuntimeException("Out of memory.  Try increasing the java heap space (see manual)."));
 				}
 			} 
 			catch (ThreadDeath d) {
@@ -112,7 +112,11 @@ public class Util {
 					return ret.x;
 				} else if (!ret.isSet() && thr.isSet()) {
 					// t should be dying
-					throw new RuntimeException(thr.x.getMessage());
+					if (thr.x instanceof RuntimeException) {
+						throw (RuntimeException) thr.x;
+					} else {
+						throw new RuntimeException(thr.x);
+					}
 				} else {
 					throw new RuntimeException("Anomaly: please report");
 				}
@@ -1124,7 +1128,9 @@ public class Util {
 			JViewport viewport = (JViewport)container;
 			int extentHeight = viewport.getExtentSize().height;
 			int viewHeight = viewport.getViewSize().height;
-
+			if (r == null || viewport == null) {
+				return;
+			}
 			int y = Math.max(0, r.y - ((extentHeight - r.height) / 2));
 			y = Math.min(y, viewHeight - extentHeight);
 

@@ -245,7 +245,8 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	private Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplified_pair;
 
 	public synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify() {
-		if (simplified_pair != null) {
+	//	return new Pair<>(this, x -> x);
+	if (simplified_pair != null) {
 			return simplified_pair;
 		}
 
@@ -255,7 +256,8 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			e.printStackTrace();
 			throw new RuntimeInterruptedException(e);
 		}
-		return simplified_pair;
+		return simplified_pair; 
+		
 	}
 
 

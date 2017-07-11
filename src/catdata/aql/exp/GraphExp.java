@@ -2,16 +2,15 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-
+import catdata.Ctx;
 import catdata.Pair;
+import catdata.Triple;
 import catdata.Util;
 import catdata.aql.Graph;
 import catdata.aql.Kind;
@@ -37,57 +36,42 @@ public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {
 	
 	////////////////////////////
 
-	public static class GraphExpRaw extends GraphExp<Object,Object> {
+	public static class GraphExpRaw extends GraphExp<String,String> implements Raw {
+		
+		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		
 		@Override
-		public void asTree(DefaultMutableTreeNode root, boolean alpha) {
-			if (imports.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("imports");
-				for (Object t : Util.alphaMaybe(alpha, imports)) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.toString());
-					n.add(m);
-				}
-			}
-			if (nodes.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("nodes");
-				for (Object t : Util.alphaMaybe(alpha, nodes)) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t.toString());
-					n.add(m);
-				}
-				root.add(n);
-			}
-			if (edges.size() > 0) { 
-				DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-				n.setUserObject("edges");
-				for (Object t : Util.alphaMaybe(alpha, edges.keySet())) {
-					DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-					m.setUserObject(t + " : " + edges.get(t).first + " -> " + edges.get(t).second);
-					n.add(m);
-				}
-				root.add(n);
-			}
+		public Ctx<String, List<InteriorLabel<Object>>> raw() {
+			return raw;
+		} 
 		
-			
-		}
 		@Override
 		public Map<String, String> options() {
 			return Collections.emptyMap();
 		}
 
-		public final Set<Object> nodes;
-		public final Map<Object,Pair<Object,Object>> edges;
+		public final Set<String> nodes;
+		public final Map<String,Pair<String,String>> edges;
 		
-		public final List<String> imports;
+		public final Set<String> imports;
 
-		@SuppressWarnings({ "unchecked" })
-		public GraphExpRaw(List<String> nodes, List<Pair<String, Pair<String, String>>> edges, List<String> imports) {
-			this.nodes = new HashSet<>(Util.toSetSafely(nodes));
-			this.edges = (Map<Object,Pair<Object,Object>>) ((Object)Util.toMapSafely(edges));
-			this.imports = imports;
+		public GraphExpRaw(List<LocStr> nodes, List<Pair<LocStr, Pair<String, String>>> edges, List<LocStr> imports) {
+			this.nodes = LocStr.set1(nodes);
+			this.edges = Util.toMapSafely(LocStr.set2(edges));
+			this.imports = LocStr.set1(imports);
+			
+			List<InteriorLabel<Object>> t = InteriorLabel.imports( "imports", imports);
+			raw.put("imports", t);
+			
+			t = InteriorLabel.imports( "nodes", nodes);
+			raw.put("nodes", t);
+			
+			List<InteriorLabel<Object>> f = new LinkedList<>();
+			for (Pair<LocStr, Pair<String, String>> p : edges) {
+				f.add(new InteriorLabel<>("edges", new Triple<>(p.first.str, p.second.first, p.second.second), p.first.loc,
+						x -> x.first + " : " + x.second + " -> " + x.third).conv());
+			}
+			raw.put("edges", f);
 		}
 
 		@Override
@@ -129,9 +113,9 @@ public abstract class GraphExp<N,E> extends Exp<Graph<N,E>> {
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
-		public Graph<Object, Object> eval(AqlTyping G) {
+		public Graph<String, String> eval(AqlTyping G) {
 			for (String s : imports) {
-				nodes.addAll(G.defs.gs.get(s).nodes);
+				nodes.addAll((Collection<String>)G.defs.gs.get(s).nodes);
 				edges.putAll((Map)G.defs.gs.get(s).edges);
 			}
 			return new Graph<>(new DMG<>(nodes, edges));

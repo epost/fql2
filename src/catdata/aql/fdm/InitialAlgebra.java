@@ -61,6 +61,14 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 
 	@Override
 	public String printY(Chc<Sk, Pair<X, Att>> y) {
+	/*	if (y.left) {
+			System.out.println("left");
+		System.out.println(printSk.apply(y.l));
+		} else {
+			System.out.println("right");
+		System.out.println(printX(y.r.first));
+		System.out.println(y.r.second);
+		} */
         return y.left ? "[" + printSk.apply(y.l) + "]" : "[" + printX(y.r.first) + "." + y.r.second + "]";
 	}
 	
@@ -183,7 +191,6 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 		}
 		Term<Void, En, Void, Fk, Void, Gen, Void> ret = reprs.get(x);
 		if (ret == null) {
-			System.out.println("class " + Util.get0X(reprs.keySet()).getClass());
 			throw new RuntimeException("Anomaly: please report: " + x + " (" + x.getClass() + ")" + " not in " + reprs);
 		}
 		return ret;

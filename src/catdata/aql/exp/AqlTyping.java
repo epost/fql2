@@ -6,23 +6,23 @@ import catdata.aql.AqlOptions;
 import catdata.graph.DMG;
 
 public class AqlTyping {
-	
-	
-	public <Ty,Sym> boolean eq(TyExp<Ty,Sym> t1, TyExp<Ty,Sym> t2) {
+
+	public <Ty, Sym> boolean eq(TyExp<Ty, Sym> t1, TyExp<Ty, Sym> t2) {
 		return t1.resolve(prog).equals(t2.resolve(prog));
 	}
-	
-	public <Ty,En,Sym,Fk,Att> boolean eq(SchExp<Ty,En,Sym,Fk,Att> s1, SchExp<Ty,En,Sym,Fk,Att> s2) {
+
+	public <Ty, En, Sym, Fk, Att> boolean eq(SchExp<Ty, En, Sym, Fk, Att> s1, SchExp<Ty, En, Sym, Fk, Att> s2) {
 		return s1.resolve(this, prog).equals(s2.resolve(this, prog));
 	}
-	
-	//TODO aql turn into visitor
-	private final Program<Exp<?>> prog;
-	
-	public AqlTyping(Program<Exp<?>> prog, AqlOptions defaults) {
+
+	// TODO aql turn into visitor
+	public final Program<Exp<?>> prog;
+
+	public AqlTyping(Program<Exp<?>> prog, AqlOptions defaults, boolean continue0) {
 		this.defaults = defaults;
 		this.prog = prog;
 		for (String s : prog.order) {
+			try {
 			Exp<?> e = prog.exps.get(s);
 			switch (e.kind()) {
 			case INSTANCE:
@@ -58,14 +58,18 @@ public class AqlTyping {
 				defs.eds.put(s, ((EdsExp<?,?,?,?,?>)e).type(this));
 				continue;
 			default:
-				break;
+				throw new RuntimeException("Anomaly: please report");
 			}
-			throw new RuntimeException("Anomaly: please report");
+			} catch (Exception ex) {
+				if (!continue0) {
+					throw ex;
+				}
+			}
 		}
 	}
 
-	//TODO aql
-	public final KindCtx<String, DMG<?,?>, Void, Void, SchExp<?,?,?,?,?>, Pair<InstExp<?,?,?,?,?,?,?,?,?>,InstExp<?,?,?,?,?,?,?,?,?>>, Pair<SchExp<?,?,?,?,?>,SchExp<?,?,?,?,?>>, Pair<SchExp<?,?,?,?,?>,SchExp<?,?,?,?,?>>, Void, Void, ColimSchExp<?,?,?,?,?,?,?>,SchExp<?,?,?,?,?>> defs = new KindCtx<>();
-	
+	// TODO aql
+	public final KindCtx<String, DMG<?, ?>, Void, Void, SchExp<?, ?, ?, ?, ?>, Pair<InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>>, Pair<SchExp<?, ?, ?, ?, ?>, SchExp<?, ?, ?, ?, ?>>, Pair<SchExp<?, ?, ?, ?, ?>, SchExp<?, ?, ?, ?, ?>>, Void, Void, ColimSchExp<?, ?, ?, ?, ?, ?, ?>, SchExp<?, ?, ?, ?, ?>> defs = new KindCtx<>();
+
 	public final AqlOptions defaults;
 }

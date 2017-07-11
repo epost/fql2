@@ -50,7 +50,6 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		if (schemaStr.ens.contains(dst)) {
 			throw new RuntimeException(dst + " is already an entity in \n" + schemaStr);
 		}
-		//System.out.println("renaming " + src + " to " + target);	
 		Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser = Mapping.id(schemaStr);
 		Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser = Mapping.id(schemaStr);
 	
@@ -89,7 +88,6 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		};
 		Schema<Ty, String, Sym, String, String> schemaStr2 
 		= new Schema<>(ty, ens, atts, fks, eqs, dp, checkJava); //TODO aql java 
-		//System.out.println("schema is " + schemaStr2);
 		Map<String, String> ensM = new HashMap<>(); 
 		for (String k : schemaStr.ens) {
 			ensM.put(k, k.equals(src) ? dst : k);
@@ -103,7 +101,6 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 			fksM.put(k, new Pair<>(isoToUser.fks.get(k).first.equals(src) ? dst : isoToUser.fks.get(k).first, isoToUser.fks.get(k).second));
 		}
 		isoToUser = new Mapping<>(ensM, attsM, fksM, schemaStr, schemaStr2, checkJava);
-		//System.out.println("isoToUser is " + isoToUser);
 		Map<String, String> ensM2 = new HashMap<>(); 
 		for (String k : schemaStr2.ens) {
 			ensM2.put(k, k.equals(dst) ? src : k);
@@ -117,8 +114,7 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 			fksM2.put(k, new Pair<>(isoFromUser.fks.get(k).first.equals(dst) ? src : isoFromUser.fks.get(k).first, isoFromUser.fks.get(k).second));
 		}
 		isoFromUser = new Mapping<>(ensM2, attsM2, fksM2, schemaStr2, schemaStr, checkJava);
-		//System.out.println("isoFromUser is " + isoFromUser);
-
+	
 		return wrap(isoToUser, isoFromUser);
 	}
 	
@@ -130,7 +126,6 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		if (schemaStr.fks.containsKey(dst)) {
 			throw new RuntimeException(dst + " is already a foreign_key in \n" + schemaStr);
 		}
-		//System.out.println("renaming " + src + " to " + dst);	
 		Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser = Mapping.id(schemaStr);
 		Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser = Mapping.id(schemaStr);
 		Function<String, String> fun = x -> x.equals(src) ? dst : x;
@@ -156,20 +151,17 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		};
 		Schema<Ty, String, Sym, String, String> schemaStr2 
 		= new Schema<>(ty, schemaStr.ens, schemaStr.atts.map, fks, eqs, dp, checkJava); //TODO aql java 
-		//System.out.println("schema is " + schemaStr2);
 		Map<String, Pair<String, List<String>>> fksM = new HashMap<>();
 		for (String k : schemaStr.fks.keySet()) {
 			fksM.put(k, new Pair<>(schemaStr.fks.get(k).first, k.equals(src) ? Util.singList(dst) : Util.singList(k)));
 		}
 		isoToUser = new Mapping<>(isoToUser.ens.map, isoToUser.atts.map, fksM, schemaStr, schemaStr2, checkJava);
-		//System.out.println("isoToUser is " + isoToUser);
 		Map<String, Pair<String, List<String>>> fksM2 = new HashMap<>();
 		for (String k : schemaStr2.fks.keySet()) {
 			fksM2.put(k, new Pair<>(schemaStr2.fks.get(k).first, k.equals(dst) ? Util.singList(src) : Util.singList(k)));
 		}
 		isoFromUser = new Mapping<>(isoFromUser.ens.map, isoFromUser.atts.map, fksM2, schemaStr2, schemaStr, checkJava);
-		//System.out.println("isoFromUser is " + isoFromUser);
-
+	
 		return wrap(isoToUser, isoFromUser);
 	}
 	
@@ -180,7 +172,6 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		if (schemaStr.atts.containsKey(dst)) {
 			throw new RuntimeException(dst + " is already an attribute in \n" + schemaStr);
 		}
-		//System.out.println("renaming " + src + " to " + dst);	
 		Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser = Mapping.id(schemaStr);
 		Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser = Mapping.id(schemaStr);
 		Function<String, String> fun = x -> x.equals(src) ? dst : x;
@@ -206,21 +197,18 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		};
 		Schema<Ty, String, Sym, String, String> schemaStr2 
 		= new Schema<>(ty, schemaStr.ens, atts, schemaStr.fks.map, eqs, dp, checkJava);
-		//System.out.println("schema is " + schemaStr2);
 		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> attsM = new HashMap<>();
 		for (String k : schemaStr.atts.keySet()) {
 			attsM.put(k, new Triple<>(isoToUser.atts.get(k).first, isoToUser.atts.get(k).second, isoToUser.atts.get(k).third.mapAtt(fun)));
 		}
 		isoToUser = new Mapping<>(isoToUser.ens.map, attsM, isoToUser.fks.map, schemaStr, schemaStr2, checkJava);
-		//System.out.println("isoToUser is " + isoToUser);
 		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> attsM2 = new HashMap<>();
 		for (String k : schemaStr2.atts.keySet()) {
 			Var v = new Var("v");
 			attsM2.put(k, new Triple<>(v, schemaStr2.atts.get(k).first, Term.Att(fun2.apply(k), Term.Var(v))));
 		}
 		isoFromUser = new Mapping<>(isoFromUser.ens.map, attsM2, isoFromUser.fks.map, schemaStr2, schemaStr, checkJava);
-		//System.out.println("isoFromUser is " + isoFromUser);
-
+		
 		return wrap(isoToUser, isoFromUser);
 	}
 	
@@ -241,7 +229,6 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		if (!schemaStr.dp.eq(new Ctx<>(v, Chc.inRight(en1)), t, Term.Fk(src, Term.Var(v)))) {
 			throw new RuntimeException("The term " + t + " is not provably equal to " + Term.Fk(src, Term.Var(v)));
 		}
-		//System.out.println("removing " + src + " to " + t);	
 		Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser = Mapping.id(schemaStr);
 		Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser = Mapping.id(schemaStr);
 		
@@ -267,16 +254,13 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		};
 		Schema<Ty, String, Sym, String, String> schemaStr2 
 		= new Schema<>(ty, schemaStr.ens, schemaStr.atts.map, fks, eqs, dp, checkJava);  
-		//System.out.println("schema is " + schemaStr2);
 		Map<String, Pair<String, List<String>>> fksM = new HashMap<>(isoToUser.fks.map);
 		fksM.put(src, new Pair<>(en1, l));
 		isoToUser = new Mapping<>(isoToUser.ens.map, isoToUser.atts.map, fksM, schemaStr, schemaStr2, checkJava);
-		//System.out.println("isoToUser is " + isoToUser);
 		Map<String, Pair<String, List<String>>> fksM2 = new HashMap<>(isoFromUser.fks.map);
 		fksM2.remove(src);
 		isoFromUser = new Mapping<>(isoFromUser.ens.map, isoFromUser.atts.map, fksM2, schemaStr2, schemaStr, checkJava);
-		//System.out.println("isoFromUser is " + isoFromUser);
-
+	
 		return wrap(isoToUser, isoFromUser);
 	}
 	
@@ -295,7 +279,6 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		if (t.contains(Head.Att(src))) {
 			throw new RuntimeException("Cannot replace " + src + " with " + t + " because that term contains " + src);
 		}
-		//System.out.println("removing " + src + " to " + t);	
 		Mapping<Ty,String,Sym,String,String,String,String,String> isoToUser = Mapping.id(schemaStr);
 		Mapping<Ty,String,Sym,String,String,String,String,String> isoFromUser = Mapping.id(schemaStr);
 		
@@ -321,15 +304,12 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		};
 		Schema<Ty, String, Sym, String, String> schemaStr2 
 		= new Schema<>(ty, schemaStr.ens, atts, schemaStr.fks.map, eqs, dp, checkJava);  
-		//System.out.println("schema is " + schemaStr2);
 		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> attsM = new HashMap<>(isoToUser.atts.map);
 		attsM.put(src, new Triple<>(v, en1, t));
 		isoToUser = new Mapping<>(isoToUser.ens.map, attsM, isoToUser.fks.map, schemaStr, schemaStr2, checkJava);
-		//System.out.println("isoToUser is " + isoToUser);
 		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> attsM2 = new HashMap<>(isoFromUser.atts.map);
 		attsM2.remove(src);
 		isoFromUser = new Mapping<>(isoFromUser.ens.map, attsM2, isoFromUser.fks.map,schemaStr2, schemaStr, checkJava);
-		//System.out.println("isoFromUser is " + isoFromUser);
 
 		return wrap(isoToUser, isoFromUser);
 	}
@@ -414,16 +394,12 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		boolean b = ! (Boolean) options.getOrDefault(AqlOption.allow_java_eqs_unsafe);
 		
 		Schema<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>> schema = new Schema<>(ty, col.ens, col.atts.map, col.fks.map, eqs, dp, b);
-		//System.out.println("schema " + schema);
 		
 		Pair<Schema<Ty, String, Sym, String, String>, Ctx<N, Mapping<Ty, En, Sym, Fk, Att, String, String, String>>> 
 		x = initialUser(options, col, eqs, eqcs, schema);
-		//System.out.println("\n\niuser " + x.first);
 		
 		Schema<Ty, String, Sym, String, String>
 		q = quotient(x.first, eqTerms, options);
-		//System.out.println("q " + q);
-		
 		
 		schemaStr = q;
 		mappingsStr = new Ctx<>();

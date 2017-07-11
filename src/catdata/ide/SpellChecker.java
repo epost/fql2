@@ -155,7 +155,6 @@ class SpellChecker extends AbstractParser {
 
 	
 	private void spellingError(String word, int off) {
-	//	System.out.println("error on " + word + " " + off);
 		//int offs = startOffs + off;
 		int line = getLineOfOffset(off);
 		String text = word; //noticePrefix + word + noticeSuffix;

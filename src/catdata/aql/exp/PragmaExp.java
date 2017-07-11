@@ -355,9 +355,10 @@ public abstract class PragmaExp extends Exp<Pragma> {
 								throw new RuntimeException("Please use naive or sf for which match desired, not " + which);
 						}
 						s = ret0.bestMatch.toString();
-					} catch (RuntimeException e) {
-						e.printStackTrace();
+					} catch (Exception e) {
+						//e.printStackTrace();
 						s = e.getMessage();
+						throw e;
 					}
 					return s;
 				}
