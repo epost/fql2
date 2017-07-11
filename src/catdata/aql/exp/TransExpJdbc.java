@@ -20,14 +20,12 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.ImportAlgebra;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.fdm.LiteralTransform;
-import catdata.aql.fdm.SaturatedInstance;
 
 public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> implements Raw {
 
@@ -122,13 +120,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 	}
 */
 	
-	private static boolean cameFromImport(Instance<?, ?, ?, ?, ?, ?, ?, ?, ?> I) {
-		if (!(I instanceof SaturatedInstance)) {
-			return false;
-		}
-		SaturatedInstance<?, ?, ?, ?, ?, ?, ?, ?, ?> J = (SaturatedInstance<?, ?, ?, ?, ?, ?, ?, ?, ?>) I;
-		return J.alg instanceof ImportAlgebra;
-	}
+	
 	
 	@Override
 	public Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> eval(AqlEnv env) {
@@ -138,8 +130,8 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 			throw new RuntimeException("Schema of instance source is " + src0  + " but schema of target instance is " + dst0);
 		}
 		Schema<Ty, En, Sym, Fk, Att> sch = src0.schema();
-		if (!(cameFromImport(src0) || !(cameFromImport(dst0)))) {
-			throw new RuntimeException("Can only import JDBC transforms between JDBC instances");
+		if ((!src0.algebra().imported) || (!dst0.algebra().imported)) {
+			throw new RuntimeException("Can only import transforms between imported instances");
 		}
 		Map<En, String> ens = new HashMap<>();
 		Map<Ty, String> tys = new HashMap<>();
@@ -166,7 +158,11 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 			for (Sk1 sk : src0.sks().keySet()) {
 				Ty ty = src0.sks().get(sk);
 				//TODO aql this is a hack with the get0X
-				Sk2 sk2 = Util.get0X(Util.revS(dst0.sks().map).get(ty));
+				Set<Sk2> xxx = Util.revS(dst0.sks().map).get(ty);
+				if (xxx.isEmpty()) {
+					throw new RuntimeException("Cannot automatically map nulls to target instance");
+				}
+				Sk2 sk2 = Util.get0X(xxx);
 				sks.put(sk, Term.Sk(sk2)); //map Null@Ty to Null@Ty
 			}
 		} 
@@ -210,7 +206,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 			throw new RuntimeException("JDBC error: " + exn.getMessage());
 		}
 			
-		
+//		return new 
 		return new LiteralTransform<>(gens, sks, src0, dst0, dontValidateEqs); 
 	}
 

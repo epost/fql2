@@ -723,7 +723,7 @@ When enabled, mappings and transforms and queries are not checked to be equality
 \section{{\tt always\_reload = boolean}}
 When enabled, pragmas (which can have side effects, like loading data from CSV files) are always executed and are not cached between runs of the AQL program.
 
-\section{CSV options}
+\section{Import options}
 \subsection{{\tt csv\_charset = string}}
 Sets the java character set to be used for CSV import/export.  Should be one of 
 US-ASCII, 	
@@ -764,8 +764,16 @@ Specifies the name of the ID columns for CSV and JDBC import/export.
 \section{{\tt varchar\_length = number}}
 Specifies the length of the VARCHAR fields to use for JDBC export.
 
-\section{ {\tt labelled\_nulls} }
+\section{ {\tt labelled\_nulls = boolean} }
 Toggles between labelled and unlabelled NULL semantics in JDBC/CSV import.
+
+\section{ {\tt null\_name = string}}
+
+Indicates the prefix to use for imported NULL values; can be used to distinguish the nulls imported from one instance with nulls imported from another instance.
+
+\section{ {\tt import\_as\_theory = boolean}}
+
+When enabled, imported data will be interpreted as an equational theory, rather than an entire model.  This allows the importation of partial data sets, at the expense of additional theorem proving.
 				
 \section{{\tt dont\_verify\_is\_appropriate\_for\_prover\_unsafe = boolean}}
 Many provers require that their input equational theories have a certain form (e.g., be unary).  When this option is enabled, this (possibly expensive) condition will not be checked.
@@ -900,8 +908,13 @@ Queries executed by translation to SQL can store any computed indicies for futur
 
 Sets whether redundant joins (i.e., containing a binding $v$ and an equation $v = e$ where $v \notin e$) should be eliminated.
 
+\section{Coproduct options}
 
+The generators and labelled nulls of instances participating in a coproduct are required to be unique.  The following two options disable the uniqueness check.  These options are marked unsafe because they can result in an instance that is not a coproduct, but is rather a coproduct followed by a quotient.
 
+\subsection{{\tt coproduct\_allow\_type\_collisions\_unsafe = boolean}}
+
+\subsection{{\tt coproduct\_allow\_entity\_collisions\_unsafe = boolean}}
 
 \end{document}
 

@@ -103,6 +103,7 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 		Ctx<String, Ctx<String, Term<String, Void, String, Void, Void, Void, Null<?>>>> atts0 = new Ctx<>();
 		AqlOptions op = new AqlOptions(options, null, env.defaults);
 		boolean labelledNulls = (Boolean) op.getOrDefault(AqlOption.labelled_nulls);
+		String nullPrefix = (String) op.getOrDefault(AqlOption.null_prefix);
 		Ctx<Null<?>, Term<String, String, String, String, String, String, Null<?>>> extraRepr = new Ctx<>();
 
 		int cur_count;
@@ -136,7 +137,7 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 					}
 					Optional<Object> val = tuple.get(c);
 					Term<String, Void, String, Void, Void, Void, Null<?>> xxx
-					 = InstExpJdbc.objectToSk(sch, val.orElse(null), i, c.toString(), labelledNulls, tys0, cur_count, extraRepr, false);
+					 = InstExpJdbc.objectToSk(sch, val.orElse(null), i, c.toString(), labelledNulls, tys0, nullPrefix, extraRepr, false);
 					atts0.get(i).put(c.toString(), xxx);
 				}
 			}

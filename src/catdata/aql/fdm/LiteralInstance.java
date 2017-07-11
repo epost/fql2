@@ -1,5 +1,6 @@
 package catdata.aql.fdm;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,7 +34,7 @@ public class LiteralInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Instan
 		this.schema = schema;
 		this.gens = new Ctx<>(gens);
 		this.sks = new Ctx<>(sks);
-		this.eqs = eqs;
+		this.eqs = new HashSet<>(eqs);
 		this.dp = dp;
 		this.alg = alg;
 		this.requireConsistency = requireConsistency;

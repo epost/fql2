@@ -30,10 +30,10 @@ public class ImportAlgebra<Ty,En,Sym,Fk,Att,X,Y> extends Algebra<Ty,En,Sym,Fk,At
 		this.atts = atts;
 		this.printX = printX;
 		this.printY = printY; 
+		this.imported = true;
 		initTalg(); 
 		checkClosure();
 		
-		//TODO: it is likely someone will try to load an incomplete algebra.  much catch this here
 	}
 
 	private void checkClosure() {

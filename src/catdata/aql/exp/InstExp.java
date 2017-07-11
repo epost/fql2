@@ -398,15 +398,25 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 				Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I = x.second.eval(env);
 				for (Gen g : I.gens().keySet()) {
 					if (col.gens.containsKey(g)) {
-						throw new RuntimeException("The generators in the input instances of a coproduct must be unique, but there is more than one " + g);
+						if (!(boolean)strat.getOrDefault(AqlOption.coproduct_allow_type_collisions_unsafe)) {
+							throw new RuntimeException("The generators in the input instances of a coproduct must be unique, but there is more than one " + g + ". Possible solution: add options coproduct_allow_entity_collisions_unsafe=true");
+						} else {
+							continue;
+						}
+					} else {
+						col.gens.put(g, M.ens.get(I.gens().get(g)));
 					}
-					col.gens.put(g, M.ens.get(I.gens().get(g)));
 				}
 				for (Sk g : I.sks().keySet()) {
 					if (col.sks.containsKey(g)) {
-						throw new RuntimeException("The generators in the input instances of a coproduct must be unique, but there is more than one " + g);
+						if (!(boolean)strat.getOrDefault(AqlOption.coproduct_allow_type_collisions_unsafe)) {
+							throw new RuntimeException("The labelled nulls in the input instances of a coproduct must be unique, but there is more than one " + g + ". Possible solution: add options coproduct_allow_type_collisions_unsafe=true");
+						} else {
+							continue;
+						}
+					} else {
+						col.sks.put(g, I.sks().get(g));
 					}
-					col.sks.put(g, I.sks().get(g));
 				}
 				for (Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : I.eqs()) {
 					eqs0.add(new Pair<>(M.trans(eq.first), M.trans(eq.second)));
@@ -1385,7 +1395,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		
-		
+		 
 	}
 
 }

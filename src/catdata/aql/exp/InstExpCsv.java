@@ -285,6 +285,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym, 
 		Charset charset = Charset.forName(charset0);
 		String idCol = (String) op.getOrDefault(AqlOption.id_column_name);
 		CSVFormat format = getFormat(op);
+		String nullPrefix = (String) op.getOrDefault(AqlOption.null_prefix);
 		format = format.withFirstRecordAsHeader();
 
 		// TODO aql handling of empty fields
@@ -331,7 +332,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym, 
 					for (Att att : sch.attsFrom(en)) {
 						Object o = row.get(attToString(att));
 						Term<Ty, Void, Sym, Void, Void, Void, Null<?>> r 
-						= InstExpJdbc.objectToSk(sch, o ,l0, att, labelledNulls, tys, cur_count, extraRepr, true); 
+						= InstExpJdbc.objectToSk(sch, o ,l0, att, labelledNulls, tys, nullPrefix, extraRepr, true); 
 						
 						ctx2.put(att, r);
 					}
@@ -345,12 +346,16 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym, 
 			throw new RuntimeException(
 					"Error: [text positions are relative to the record]: " + exn.getMessage() + "\n\n" + helpStr);
 		}
+		
+		boolean import_as_theory = (Boolean) op.getOrDefault(AqlOption.import_as_theory);
+
+		if (import_as_theory) {
+			return InstExpJdbc.forTheory(sch, ens, tys, fks, atts, op);
+		}
 
 		ImportAlgebra<Ty, En, Sym, Fk, Att, Gen, Null<?>> alg = new ImportAlgebra<>(sch, ens, tys, fks, atts,
 				Object::toString, Object::toString);
 
-		// TODO aql validate for collage
-		// AqlOptions strat = new AqlOptions(options, col);
 
 		return new SaturatedInstance<>(alg, alg, (Boolean) op.getOrDefault(AqlOption.require_consistency),
 				(Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe), labelledNulls, extraRepr);
