@@ -1,7 +1,59 @@
 /***************************************************************************************************
+ *                                         Introduction
+ *                                         
  * This file is the first of a sequence of files whose purpose is to illustrate the use of AQL to
- * construct a sequence of models of increasing complexity. As we proceed we will draw analogies
- * to relational constructions that may be more familiar to practicing database engineers.  
+ * construct a collection of interrelated models. Each member of the sequence will build on previous
+ * ideas, introducing AQL features in the context of conceptual models relating skills to tasks and
+ * people.
+ * 
+ * The following is a brief outline of the sequence of models and what the reader should take away
+ * from reviewing each model in the sequence.
+ * 
+ *  1) This file ColimitTutorialTaskSkillV1 introduces a series of AQL constructions and compairs
+ *     those constructions with analogous relational constructions where appropriate. We begin a set
+ *     of schemas each with a single table and produce a schema that is an an integrated assembly of
+ *     the three independent single table schemas. Along the way we will see some basic AQL
+ *     constructions to include:
+ *       a) A user defined construction called the type side that provides for customization of data
+ *          types.
+ *       b) A type known as a schema that extends the type side.
+ *       c) A type known as a instance that extends the schema type. Instance types can be thought
+ *          of as the data that "fills" the schema.
+ *       d) A type known as a schema_colimit that formalizes a diagram of schemas that can be used
+ *          to assemble multiple source schemas into a single target schemas.
+ *       e) A type known as a mapping that provides a higher order function which can be used to
+ *          translate the structure of a source schema to the structure of a target in a way that
+ *          preserves that structure.
+ *       f) A type known as a query that extends the mapping type to include familiar query
+ *          features.
+ *       g) We conclude with a set of features that illustrate how AQL constructions can be exported
+ *          to and imported from a relational database.
+ *          
+ *  2) The next file/model in the sequence is ColimitTutorialPrnsSklV1. This model is structurally
+ *     equivalent to the one above except that instead of relating tasks to skills this model
+ *     relates people to skills. The AQL features used in this model are identical to the ones used
+ *     in the task-skill model above.
+ *  
+ *  3) The third model in the sequence is ColimitTutorialTSPV1. This model imports the output of the
+ *     two models above and merges them by equating the Skills entity of the skill-task model and 
+ *     Skills entity of the skill-person model. This model allows us to elaborate on the features of 
+ *     the schema_colimit construction used in 1d and 2d above. This third model concludes the first
+ *     pass through this modeling sequence.
+ *  
+ *  4) ColimitTutorialTaskSkillV2 extends model 1) above by replacing the single Skills entity in
+ *     the task-skill model with a three level skill taxonomy.
+ *     
+ *  5) ColimitTutotialPrsnSklV2 extends model 2) above by replacing the single Skills entity in the
+ *     person-skill model with with a two level skill taxonomy.
+ *  
+ *  6) We conclude this second pass with ColimitTutorialTSPV2. Like model 3) above we import the 
+ *     output of models 4) and 5) and integrate the two by gluing the three level skills taxonomy to 
+ *     the two level skills taxonomy. This again allows us to bring into play additional features of
+ *     the schema_colimit construction.
+ * 
+ * As we proceed we will draw analogies to relational constructions that may be more familiar to
+ * practicing database engineers. We open with a brief review of the essential features of
+ * relational algebra as they are related to AQL features.
  * 
  * The structural element that forms the foundation of relational algebra is the relvar. A relvar is
  * a mathematical definition that roughly corresponds to the structure of a single table. Commercial
@@ -13,16 +65,27 @@
  * In contrast, AQL provides a declarative structure that allows the user to define an algebraic
  * definition of the type side. In its current implementation AQL defines this algebra by wrapping
  * a selection of Java types and functions. In this sequence of files we will restrict the type side
- * to a simple nonempty type side consisting of a string. This will allow us to label records in a 
- * way that will provide human readable output associated with the sequence of models we produce.
+ * to a string type compatible with a MySQL Varchar. This will allow us to label records in a way
+ * that will provide human readable output associated with the sequence of models we produce.
  *
- * The type side defines a foundation that can then be extended to define a schema. Notice that in  
- * contrast with relational algebra there is no notion of an entity or relvar in isolation. The
- * closest analog to a relvar in AQL is a schema with a single entity. With that in mind we proceed
- * by creating a sequence of schemas, each with a single entity.
+ * AQL models always begin with a type side declaration. The type side defines a foundation that can 
+ * then be extended to define a schema. Notice that in contrast with relational algebra there is no
+ * notion of an entity or relvar in isolation. The closest analog to a relvar in AQL is a schema
+ * with a single entity. With that in mind we proceed by creating a sequence of schemas, each with a 
+ * single entity.
  ***************************************************************************************************
 
- * Simple type side that creates a string type compatible with MySQL Varchar. */
+ ***************************************************************************************************
+ *                                         Type Side
+ *
+ * Simple type side that creates a string type compatible with MySQL Varchar. Type sides are an AQL
+ * feature that provides the possibility of introducing programming language features that can be
+ * used to enhance the power of a database. These features are roughly analogous to stored functions
+ * that can be invoked inline within an SQL statement. This is an involved topic that would take us
+ * too far afield of the thrust of this tutorial as our use of the AQL type side features is
+ * minimal. For more details we refer the reader to the examples available by selecting the dropdown
+ * in the upper right hand corner of the application. Specifically, the AQL Tutorial example.
+ ***************************************************************************************************/
 typeside TypeSide = literal {
 	java_types
 		Varchar = "java.lang.String"
@@ -30,7 +93,10 @@ typeside TypeSide = literal {
 		Varchar = "return input[0]"
 }
 
-/* As mentioned above the schema is declared as an extension of the typeside. The first schema we
+/***************************************************************************************************
+ *                                          Schema
+ * 
+ *  As mentioned above the schema is declared as an extension of the type side. The first schema we
  * create is minimal in that it contains a single entity skill with a single attribute that allows
  * us to label a skill. AQL contains a variety of higher order types that build on previously
  * defined types. By convention we prefix the schema name with the letter "s" to aid the user in
@@ -38,8 +104,9 @@ typeside TypeSide = literal {
  * 
  * By clicking on the run button AQL will construct a runtime viewing window that has a list of each
  * of the constructions created in this model in a pane on the left hand side of the window. A view
- * each construction is available by clicking on the construction of interest.
- */
+ * of each construction is available by clicking on the construction of interest in the left hand
+ * pane. 
+ ***************************************************************************************************/
 schema sS = literal : TypeSide {
 	entities
 		Skill
@@ -47,7 +114,7 @@ schema sS = literal : TypeSide {
 		SName : Skill -> Varchar
 }
 
-// Schema with the single entity Task.
+// Structurally equivalent one entity schema whose single entity is Task.
 schema sT = literal : TypeSide {
 	entities
 		Task
@@ -55,20 +122,33 @@ schema sT = literal : TypeSide {
 		TName : Task -> Varchar
 }
 
-/* As schemas extend the type side so instances extend schemas. An AQL instance consists of a set of
- * generators for each entity in the schema. The user can optionally create equational definitions
- * which associate attribute values with each generator. In the absence of such an association AQL
- * will create what is called a labeled null. Labeled nulls are essential for creating a structure
- * that can be formally defined and verified as consistent. Notice that labeled nulls are very
- * different than nulls in currently available RDBMSs.
+/***************************************************************************************************
+ *                                          Instance
+ * 
+ * As schemas extend the type side so instances extend schemas. An AQL instance can be
+ * conceptualized as the data that "fills" a schema and consists of a set of generators for each
+ * entity in the schema. The user can optionally create equational definitions which associate
+ * attribute values with each generator. In the absence of such an association AQL will create what 
+ * is called a labeled null. Labeled nulls are essential for creating a structure that can be
+ * formally defined and verified as consistent. Notice that labeled nulls are very different than
+ * nulls in currently available RDBMSs.
  * 
  * A labeled null is strongly typed, hence the qualifier "labeled". Every null in AQL is typed by
- * its associated generator and attribute. For example in the instance definition below if the
+ * its associated generator and attribute. For example in the instance definition below, if the
  * association of the generator s0 with the string "Math" were missing AQL would create a null value
- * that would be typed by the pair (s0, SName).
+ * that would be typed by the pair (s0, SName). Hence this null value is specific to the generator
+ * (record) of that entity and a specific attribute.
  * 
- * Representative instance of skills. Running this file and selecting an instance below will display
- * a tabular representation of each instance. */
+ * The following is a representative instance of skills. The way to think about this representative
+ * is that it is one member of a universe of possible instances all of which are derived from the
+ * same schema type sS. To summarize, so far we have introduced the idea that AQL constructions are 
+ * organized around the type hierarchy:
+ * 
+ * typeside <- schema <- instance.
+ * 
+ * Running this file and selecting an instance below will display a tabular representation of each
+ * instance.
+ ***************************************************************************************************/
 instance iSkl = literal : sS {
 	generators
 	    s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
@@ -77,7 +157,7 @@ instance iSkl = literal : sS {
 	    		  s6 GrantWriting, s7 Finance, s8 Management, s9 PaperWriting}
 }
 
-/* Similarly to the skills instance above we create a representative instance of tasks. */
+/* Analogous to the skills instance above we create a representative instance for tasks. */
 instance iTsk = literal : sT {
 	generators
 	    t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 : Task
@@ -97,7 +177,7 @@ schema sSnT = literal : TypeSide {
 }
 
 /* The definition of an entity with a pair of attributes provides us with the ability to create an
- * instance that associates each such pair with the same generator. Here will illustrate this idea
+ * instance that associates each such pair with the same generator. Here we illustrate this idea
  * with such a representative instance. */
 instance iSnT = literal : sSnT {
 	generators
@@ -125,15 +205,19 @@ instance iSnT = literal : sSnT {
 				  st21 RunFncProject,  st22 RunFncProject}
 }
 
-/* Next we introduce an AQL feature that allows us to assemble multiple source schemas into a single
+/***************************************************************************************************
+ *                                        Schema Colimit
+ * 
+ * Next we introduce an AQL feature that allows us to assemble multiple source schemas into a single
  * target schema. This construction is called a schema colimit by virtue of its mathematical origins
- * in category theory. In its full generality this construction can become fairly involved so we 
- * begin with a degenerate case that is analogous to what is sometimes called landing tables from 
- * source schemas into a single schema where data transforms can be conveniently developed.
+ * in category theory. This particular application of the colimit construction is analogous to what
+ * is sometimes called landing tables from source schemas into a single schema where data transforms
+ * can be conveniently developed.
  * 
  * In this particular case we "land" the three single table schemas sT, sS, sSnT into a single 
  * structure S_T_SnT_SumAuto whose type is schema_colimit. Behind the scenes a schema_colimit
- * includes a variety of structures we will describe in a moment. */
+ * includes a variety of structures we will describe in a moment.
+ ***************************************************************************************************/
 schema_colimit S_T_SnT_SumAuto = quotient sT + sS + sSnT: TypeSide {}
 
 /* The automatically generated schema colimit prefixes each object within the target schema with the
@@ -151,40 +235,60 @@ schema_colimit S_T_SnT_Sum = modify S_T_SnT_SumAuto {
 	    sSnT_task -> task
 }
 
-/* With this sequence of constructions we reveal the inner structure of the schema colimit. This
- * consists of a target schema and a schema mapping from each source schema to that target.
+/*************************************************************************************************** 
+ *  								 Schema Preserving Maps
+ *  
+ * With the sequence of constructions below we reveal the inner structure of the schema colimit.
+ * This consists of a target schema and a schema mapping from each source schema to that target.
+ * This means that a schema colimit can be thought of as a diagram of schemas and schema mappings.
+ * In this particular case, using the assigned labels below, we have:
  * 
- * In so doing we have introduced another AQL construction with no formal analogy in relational
+ *                      mSToS_T_SnT_Sum        mTToS_T_Snt_Sum
+ *                      sS --------> sS_T_Snt_Sum <-------- sT
+ *                                        /\
+ *                      mSnTToS_T_SnT_Sum |
+ *                                        |
+ *                                      sSnT
+ * 
+ * In so doing we have introduced another AQL construction with no formal analog in relational
  * algebra, a schema mapping. Schema mappings are generally formal structures that provide a means
  * of defining an arrow from one schema to another. Such an arrow can be thought of as a higher
  * order function which takes a source schema as input and produces a target schema as output. AQL
  * provides machinery for both indirectly (as below) and directly defining such mappings. That
  * machinery guarantees that the structure of the source schema is faithfully preserved as it is
- * mapped to the target schema. */
+ * mapped to the target schema.
+ ***************************************************************************************************/
 schema sS_T_SnT_Sum = getSchema S_T_SnT_Sum
-mapping mSkillToS_T_SnT_Sum = getMapping S_T_SnT_Sum sS
-mapping mTaskToS_T_Snt_Sum = getMapping S_T_SnT_Sum sT
-mapping mSkillNeededForTaskToS_T_SnT_Sum = getMapping S_T_SnT_Sum sSnT
+mapping mSToS_T_SnT_Sum = getMapping S_T_SnT_Sum sS
+mapping mTToS_T_Snt_Sum = getMapping S_T_SnT_Sum sT
+mapping mSnTToS_T_SnT_Sum = getMapping S_T_SnT_Sum sSnT
 
-/* AQL provides a convenient shortcut to the construction of an instance for the colimit referenced
- * by the keyword coproduct_sigma. Without going into the details for now, in this degenerate case
- * the effect of this construction is to create an instance of the schema associated with the
- * colimit that independently adds each of the representative instances above for each single entity 
- * associated with the three source schemas. It accomplishes this by pushing each of those instances
- * through the structure preserving maps created by the colimit construction. */
+/* AQL provides a convenient shortcut for the construction of an instance of the colimit referenced
+ * by the keyword coproduct_sigma. Without going into the details for now, in this case the effect
+ * of this construction is to create an instance of the schema associated with the colimit that
+ * independently adds each of the representative instances above for each single entity associated
+ * with the three source schemas. It accomplishes this by pushing each of those instances through
+ * the structure preserving maps created by the colimit construction. */
 instance iS_T_SnT_Sum = coproduct_sigma
-   mSkillToS_T_SnT_Sum iSkl
-   mTaskToS_T_Snt_Sum iTsk
-   mSkillNeededForTaskToS_T_SnT_Sum iSnT
+   mSToS_T_SnT_Sum iSkl
+   mTToS_T_Snt_Sum iTsk
+   mSnTaskToS_T_SnT_Sum iSnT
    : sS_T_SnT_Sum
 
-/* In the next step of this modeling sequence we introduce another AQL construction. This
- * construction is referenced using the query keyword. As you might expect this construction is
- * related to the SQL notion of a query. This is the case, but in the style of AQL a query is
- * an extension of the notion of a structure preserving map. As such, like the mappings described
- * above in connection with the colimit construction, a query is a structure preserving map between
- * schemas. This means that in order to define a query one must have in place the definition of a
- * source schema and a target schema.
+/*************************************************************************************************** 
+ *                                           Queries
+ *  
+ *  In the next step of this modeling sequence we introduce another AQL construction. This
+ * construction is referenced using the query keyword. This construction is related to the SQL
+ * notion of a query but in contrast, in the style of AQL a query is an extension of the notion of a
+ * structure preserving map. As such, like the mappings described above in connection with the
+ * colimit construction, a query is also a structure preserving map between schemas, but extends
+ * mappings with machinery that provides support for familiar querying features like filtering and
+ * joining. This means that in order to define an AQL query one must have in place the definition of
+ * a source schema and a target schema. This is in stark contrast with SQL where both the source and
+ * target schemas are implied. The source schema is implied by the SQL join graph and the target
+ * schema is always a single table whose attributes are implied by the attributes listed in the
+ * select clause.
  * 
  * In the current context we have as source schema the result of the colimit construction. If you
  * run this file and look at the colimit schema sS_T_SnT_Sum and associated instance you will
@@ -195,9 +299,9 @@ instance iS_T_SnT_Sum = coproduct_sigma
  * 
  * We now set up the query construction by defining the desired target schema. This schema is
  * identical to the output of the colimit construction but with the addition of a pair of foreign
- * keys from the entity with (skill, task) attribute pair to the skill and task entities
+ * keys from the entity with the (skill, task) attribute pair to the Skill and Task entities
  * respectively. This produces a schema which is known in category theory as a span and it can be
- * summarized as follows:
+ * again be summarized as a diagram, but in this case a diagram of entities rather than schemas.
  *
  *          fk_SnT_S             fk_SnT_T
  *     Skill <----- SkillNdFrTask -----> Task
@@ -213,13 +317,14 @@ instance iS_T_SnT_Sum = coproduct_sigma
  *           |      skill     \/
  *    SkillNdFrTask -----> Varchar
  *    
- * This means that the value of the attribute skill attribute on SkillNdFrTask is guarenteed to be
- * the same value you will get by following the foreign key fk_SnT_S through Skill to the SName
- * attribute, that is the high road gives the same answer as the low road. In a relational schema
- * this is known as denormalization and is generally regarded as bad practice as guarantees of the
- * equality of such attributes requires the overhead of triggers that verify such equalities for
- * each transaction. AQL on the other hand verifies this as part of its type checking at design
- * time. */
+ * This means that the value of the skill attribute on SkillNdFrTask is guarenteed to be the same
+ * value you will get by following the foreign key fk_SnT_S through Skill to the SName attribute,
+ * that is, the high road gives the same answer as the low road. In a relational schema this is
+ * known as denormalization and is generally regarded as bad practice as guarantees of the equality
+ * of such attributes requires the runtime overhead of triggers that verify such equalities for each
+ * transaction. AQL on the other hand verifies this as part of its type checking at design time.
+ * The runtime burden is associated with instance validation either during import or during the 
+ * literal declaration of an instance. */
 schema sSTSpn = literal : TypeSide {
 	entities
 	  Skill Task
@@ -237,8 +342,8 @@ schema sSTSpn = literal : TypeSide {
 	  forall snt. snt.fk_SnT_T.TName = snt.task
 }
 
-/* As mentioned earler in connection with structure preserving maps a query by extension can be
- * thought of as a higher order function that maps one schema onto another in such a way that it
+/* As mentioned earlier in connection with structure preserving maps a query by extension can be
+ * thought of as a higher order function that maps one schema to another in such a way that it
  * preserves the structure of the source schema in the structure of the target schema. Queries have
  * additional features that provide functionality analogous to that found in SQL queries. To see
  * this we will deconstruct the query below as follows.
@@ -249,10 +354,10 @@ schema sSTSpn = literal : TypeSide {
  * 
  * The entities block on the other hand does have a close analogy to SQL. Within the entities block
  * there is a sub-block for each entity of the target schema. Remember that the output of a SQL
- * query is a single table or relation. The structure of an entity block closely resembles that of
- * a SQL query. The from clause corresponds to the from clause of SQL. Similarly, the where clause 
- * corresponds to the where clause of SQL. The return block corresponds to the select clause of
- * SQL.
+ * query is a single table or relation. The structure of an entity sub-block closely resembles that
+ * of a SQL query. The from clause corresponds to the from clause of SQL. Similarly, the where 
+ * clause corresponds to the where clause of SQL. The return block corresponds to the select clause 
+ * of SQL.
  * 
  * The specific AQL syntax does differ from SQL so a few words about that. The from clause consists
  * of a set of variables typed by entities using the ":" character. These variables can be thought
@@ -275,10 +380,10 @@ schema sSTSpn = literal : TypeSide {
  * these sub-blocks the records of the source entity are copied into the target entity (each having
  * the same name in this degenerate case).
  * 
- * The interesting sub-block is the one associated with SkillNdFrTask. Notice that the target entity
- * SkillNdFrTask requires records from all three source entities. The way in which the target
- * records are assembled is through a pair of joins indicated by the pair equations in the where
- * clause.
+ * The interesting sub-block is the one associated with SkillNdFrTask. Notice that the construction
+ * of the target entity SkillNdFrTask requires records from all three source entities. The way in
+ * which the target records are assembled is through a pair of joins on the string labels for tasks 
+ * and skills indicated by the pair of equations in the where clause.
  * 
  * Now we return to the foreign keys clause. Each foreign key is an arrow defining a functional
  * dependency from a source table to a target table. As such we must specify how a representative 
