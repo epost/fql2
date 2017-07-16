@@ -1340,4 +1340,20 @@ public class Util {
    
 }
 
+	public static <X,Y> boolean containsUpToCase(Collection<X> set, Y s) {
+		for (X t : set) {
+			if (s.toString().toLowerCase().equals(t.toString().toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static String[] union(String[] res, String[] res2) {
+		String[] ret = new String[res.length + res2.length];
+		System.arraycopy(res , 0, ret, 0, res.length);
+		System.arraycopy(res2, 0, ret, res.length, res2.length);
+		return ret;
+	}
+
 }

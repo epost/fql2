@@ -1,15 +1,11 @@
 package catdata.aql.exp;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -21,177 +17,25 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.ImportAlgebra;
-import catdata.aql.Instance;
-import catdata.aql.Kind;
 import catdata.aql.Schema;
 import catdata.aql.Term;
-import catdata.aql.fdm.SaturatedInstance;
 
-public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> {
-
-	private final SchExp<Ty, En, Sym, Fk, Att> schema;
-
-	// private final List<String> imports;
-
-	private final Map<String, String> options;
-
-	private final String fileStr;
-
-	@Override
-	public Map<String, String> options() {
-		return options;
+public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En, Sym, Fk, Att, Gen, Map<En, List<CSVRecord>>> {
+	
+	public InstExpCsv(SchExp<Ty, En, Sym, Fk, Att> schema, List<Pair<LocStr, String>> map,
+			 List<Pair<String, String>> options) {
+		super(schema, map, options);
 	}
 
-	private final int cur_count;
-
-	public InstExpCsv(SchExp<Ty, En, Sym, Fk, Att> schema, String file,
-			/* List<String> imports, */ List<Pair<String, String>> options) {
-		Util.assertNotNull(schema, options, file);
-		this.schema = schema;
-		this.options = Util.toMapSafely(options);
-		fileStr = file;
-		synchronized (InstExpJdbc.counter) {
-			cur_count = InstExpJdbc.counter.i;
-			InstExpJdbc.counter.i = InstExpJdbc.counter.i + 1;
-		}
-	}
-
-	@Override
-	public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
-		return schema;
-	}
-
-	private String attToString(Att att) {
-		return (String) att;
-	}
-
-	private String fkToString(Fk fk) {
-		return (String) fk;
-	}
-
-	private String enToString(En en) {
-		return (String) en;
-	}
-
-	// private String tyToString(Ty ty) {
-	// return (String) ty;
-	// }
-	@SuppressWarnings("unchecked")
-	private Gen stringToGen(String gen) {
-		if (gen == null) {
-			throw new RuntimeException("Error: generators cannot be null");
-		}
-		return (Gen) gen.toString();
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <Sym> Sym stringToSym(String s) {
-		return (Sym) s;
-	}
-
-	@SuppressWarnings({ "unchecked" })
-	public static <Ty, En, Sym, Fk, Att> Term<Ty, Void, Sym, Void, Void, Void, Null<?>> stringToSk(Ty t,
-			Schema<Ty, En, Sym, Fk, Att> sch, String s) {
-		if (s == null) {
-			return Term.Sk(new Null<>(t));
-		}
-
-		int i = 0;
-		Sym sym = null;
-		if (sch.typeSide.syms.containsKey(stringToSym(s)) && sch.typeSide.syms.get(stringToSym(s)).first.isEmpty()
-				&& sch.typeSide.syms.get(stringToSym(s)).second.equals(t)) {
-			sym = (Sym) s;
-			i++;
-		}
-		Object o = null;
-		if (sch.typeSide.js.java_tys.containsKey(t)) {
-			o = s;
-			i++;
-		}
-		if (i < 1) {
-			throw new RuntimeException("Not null, java object, or constant symbol: " + s);
-		} else if (i > 1) {
-			throw new RuntimeException("Ambiguously java object or constant symbol: " + s);
-		}
-		if (sym != null) {
-			return Term.Sym(sym, Collections.emptyList());
-		} else if (o != null) {
-			return Term.Obj(sch.typeSide.js.parse(t, s), t);
-		}
-		throw new RuntimeException("Anomaly: please report");
-	}
-
-	/*
-	 * @Override public Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk,
-	 * Pair<ID, Att>>> eval(AqlEnv env) { Schema<Ty, En, Sym, Fk, Att> sch =
-	 * schema.eval(env); Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col = new
-	 * Collage<>(sch.collage());
-	 * 
-	 * Set<Pair<Term<Ty,En,Sym,Fk,Att,Gen,Sk>, Term<Ty,En,Sym,Fk,Att,Gen,Sk>>>
-	 * eqs0 = new HashSet<>();
-	 * 
-	 * for (String k : imports) {
-	 * 
-	 * @SuppressWarnings("unchecked") Instance<Ty,En,Sym,Fk,Att,Gen,Sk,?,?> v =
-	 * env.defs.insts.get(k); eqs0.addAll(v.eqs());
-	 * col.gens.putAll(v.gens().map); col.sks.putAll(v.sks().map); } String pre
-	 * = fileStr; if (!pre.endsWith("/")) { pre += "/"; } AqlOptions op = new
-	 * AqlOptions(options, null); String charset0 = (String)
-	 * op.getOrDefault(AqlOption.csv_charset); Charset charset =
-	 * Charset.forName(charset0); String idCol = (String)
-	 * op.getOrDefault(AqlOption.id_column_name); CSVFormat format =
-	 * getFormat(op); format = format.withFirstRecordAsHeader();
-	 * 
-	 * //TODO aql handling of empty fields for (En en : sch.ens) { File file =
-	 * new File(pre + enToString(en) + ".csv"); if (!file.exists()) { throw new
-	 * RuntimeException("File does not exist: " + file.getAbsolutePath()); } }
-	 * try {
-	 * 
-	 * Map<En, List<CSVRecord>> map = new HashMap<>(); for (En en : sch.ens) {
-	 * File file = new File(pre + enToString(en) + ".csv"); CSVParser parser =
-	 * CSVParser.parse(file, charset, format); List<CSVRecord> rows =
-	 * parser.getRecords(); parser.close(); for (CSVRecord row : rows) {
-	 * col.gens.put(stringToGen(row.get(idCol)), en); } map.put(en, rows); } for
-	 * (Ty ty : sch.typeSide.tys) { File file = new File(pre + tyToString(ty) +
-	 * ".csv"); if (file.exists()) { CSVParser parser = CSVParser.parse(file,
-	 * charset, format); for (CSVRecord row : parser) {
-	 * col.sks.put(stringToSk0(row.get(idCol)), ty); } parser.close(); } }
-	 * 
-	 * for (En en : sch.ens) { for (CSVRecord row : map.get(en)) {
-	 * Term<Ty,En,Sym,Fk,Att,Gen,Sk> l0 = Term.Gen(stringToGen(row.get(idCol)));
-	 * for (Fk fk : sch.fksFrom(en)) { Term<Ty,En,Sym,Fk,Att,Gen,Sk> l =
-	 * Term.Fk(fk, l0); Term<Ty,En,Sym,Fk,Att,Gen,Sk> r =
-	 * Term.Gen(stringToGen(row.get(fkToString(fk)))); eqs0.add(new Pair<>(l,
-	 * r)); col.eqs.add(new Eq<>(new Ctx<>(), l, r)); } for (Att att :
-	 * sch.attsFrom(en)) { Term<Ty,En,Sym,Fk,Att,Gen,Sk> l = Term.Att(att, l0);
-	 * if (row.get(attToString(att)) == null) { continue; }
-	 * Term<Ty,En,Sym,Fk,Att,Gen,Sk> r = stringToSk(col.sks.keySet(),
-	 * sch.atts.get(att).second, sch, row.get(attToString(att))); eqs0.add(new
-	 * Pair<>(l,r)); col.eqs.add(new Eq<>(new Ctx<>(), l, r)); } } } } catch
-	 * (IOException exn) { throw new RuntimeException(exn.getMessage()); } catch
-	 * (Throwable exn) { exn.printStackTrace(); throw new
-	 * RuntimeException("Error: [text positions are relative to the record]: " +
-	 * exn.getMessage() + "\n\n" + helpStr); }
-	 * 
-	 * //TODO aql validate for collage AqlOptions strat = new
-	 * AqlOptions(options, col);
-	 * 
-	 * InitialAlgebra<Ty,En,Sym,Fk,Att,Gen,Sk,ID> initial = new
-	 * InitialAlgebra<>(strat, sch, col, new It(), Object::toString,
-	 * Object::toString);
-	 * 
-	 * return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0,
-	 * initial.dp(), initial, (Boolean)
-	 * strat.getOrDefault(AqlOption.require_consistency), (Boolean)
-	 * strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); }
-	 * 
-	 */
-
-	private static final String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example,"
+	public final static String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example,"
 			+ "\n" + "\n	0:Employee" + "\n	0:Department" + "\n"
 			+ "\nPossible solution: Distinguish the IDs prior to import";
-
+	
+	@Override
+	protected String getHelpStr() {
+		return helpStr;
+	}
+	
 	public static CSVFormat getFormat(AqlOptions op) {
 		String format0 = (String) op.getOrDefault(AqlOption.csv_format);
 		CSVFormat format = CSVFormat.valueOf(format0);
@@ -216,149 +60,99 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym, 
 
 	@Override
 	public String toString() {
-		String s = "";
-		if (!options.isEmpty()) {
-			s += " {\n\toptions" + Util.sep(options, "\n\t\t", " = ") + "\n}";
-		}
-		return "import_csv " + Util.quote(fileStr) + s;
+		return "import_csv : " + schema + " {\n\t"
+				+ Util.sep(map, " -> ", "\n\t") + "\n}";
 	}
 
-	@Override
-	public Collection<Pair<String, Kind>> deps() {
-		Set<Pair<String, Kind>> ret = new HashSet<>();
-		ret.addAll(schema.deps());
-		return ret;
-	}
-
-	@Override
-	public int hashCode() {
-		int prime = 31;
-		int result = 1;
-		result = prime * result + ((fileStr == null) ? 0 : fileStr.hashCode());
-		result = prime * result + ((options == null) ? 0 : options.hashCode());
-		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
-		return result;
-	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		InstExpCsv<?, ?, ?, ?, ?, ?> other = (InstExpCsv<?, ?, ?, ?, ?, ?>) obj;
-		if (fileStr == null) {
-			if (other.fileStr != null)
-				return false;
-		} else if (!fileStr.equals(other.fileStr))
-			return false;
-		if (options == null) {
-			if (other.options != null)
-				return false;
-		} else if (!options.equals(other.options))
-			return false;
-		if (schema == null) {
-			if (other.schema != null)
-				return false;
-		} else if (!schema.equals(other.schema))
-			return false;
-		return true;
+		return (obj instanceof InstExpCsv) && super.equals(obj);
+	}
+
+	
+	public static <Ty, En, Sym, Fk, Att> Map<En, List<CSVRecord>> start(boolean firstRecHeader, Map<String, String> map, AqlOptions op, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		String charset0 = (String) op.getOrDefault(AqlOption.csv_charset);
+		Charset charset = Charset.forName(charset0);
+		CSVFormat format = getFormat(op);
+		if (firstRecHeader) {
+			format = format.withFirstRecordAsHeader();
+		}
+		
+		Map<En, List<CSVRecord>> ret = new HashMap<>();
+		for (String k : map.keySet()) {
+			if (!sch.ens.contains(k)) {
+				throw new RuntimeException("Not an entity: " + k);
+			}
+			File file = new File(map.get(k));
+			CSVParser parser = CSVParser.parse(file, charset, format);
+			List<CSVRecord> rows = parser.getRecords();
+			parser.close();
+			ret.put((En)k, rows);
+		}
+		for (En en : sch.ens) {
+			if (!ret.containsKey(en)) {
+				ret.put(en, new LinkedList<>());
+			}
+		}
+		return ret;
+	}
+	
+	@Override
+	protected Map<En, List<CSVRecord>> start(Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		return start(true, map, op, sch);
 	}
 
 	@Override
-	public Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> eval(AqlEnv env) {
-		Schema<Ty, En, Sym, Fk, Att> sch = schema.eval(env);
+	protected void end(Map<En, List<CSVRecord>> h) throws Exception {
+		//clear h?
+	}
 
-		Ctx<En, Collection<Gen>> ens = new Ctx<>(Util.newSetsFor0(sch.ens));
-		Ctx<Ty, Collection<Null<?>>> tys = new Ctx<>();
-		Ctx<Gen, Ctx<Fk, Gen>> fks = new Ctx<>();
-		Ctx<Gen, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<?>>>> atts = new Ctx<>();
-
-		String pre = fileStr;
-		if (!pre.endsWith("/")) {
-			pre += "/";
-		}
-		AqlOptions op = new AqlOptions(options, null, env.defaults);
-		String charset0 = (String) op.getOrDefault(AqlOption.csv_charset);
-		Charset charset = Charset.forName(charset0);
+	@Override
+	protected void joinedEn(Map<En, List<CSVRecord>> map, En en, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
 		String idCol = (String) op.getOrDefault(AqlOption.id_column_name);
-		CSVFormat format = getFormat(op);
-		String nullPrefix = (String) op.getOrDefault(AqlOption.null_prefix);
-		format = format.withFirstRecordAsHeader();
+		for (CSVRecord row : map.get(en)) {
+			Gen l0 = (Gen) row.get(idCol);
 
-		// TODO aql handling of empty fields
-		for (En en : sch.ens) {
-			File file = new File(pre + enToString(en) + ".csv");
-			if (!file.exists()) {
-				throw new RuntimeException("File does not exist: " + file.getAbsolutePath());
-			}
-		}
-		boolean labelledNulls = (boolean) op.getOrDefault(AqlOption.labelled_nulls);
-		Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>> extraRepr = new Ctx<>();
-
-		for (Ty ty : sch.typeSide.tys) {
-			if (labelledNulls) {
-				tys.put(ty, new HashSet<>());
-			} else {
-				tys.put(ty, Util.singSet(new Null<>(ty.toString() + Integer.toString(cur_count))));
-			}
-		}
-		try {
-			Map<En, List<CSVRecord>> map = new HashMap<>();
-			for (En en : sch.ens) {
-				File file = new File(pre + enToString(en) + ".csv");
-				CSVParser parser = CSVParser.parse(file, charset, format);
-				List<CSVRecord> rows = parser.getRecords();
-				parser.close();
-				for (CSVRecord row : rows) {
-					ens.get(en).add(stringToGen(row.get(idCol)));
+			ens0.get(en).add(l0);
+			
+			for (Fk fk : sch.fksFrom(en)) {
+				if (!fks0.containsKey(l0)) {
+					fks0.put(l0, new Ctx<>());
 				}
-				map.put(en, rows);
+				Gen g = (Gen) row.get((String) fk);				
+				fks0.get(l0).put(fk, g);
 			}
-
-			for (En en : sch.ens) {
-				for (CSVRecord row : map.get(en)) {
-					Gen l0 = stringToGen(row.get(idCol));
-					Ctx<Fk, Gen> ctx1 = new Ctx<>();
-					fks.put(l0, ctx1);
-					for (Fk fk : sch.fksFrom(en)) {
-						Gen g = stringToGen(row.get(fkToString(fk)));
-						ctx1.put(fk, g);
-					}
-					Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<?>>> ctx2 = new Ctx<>();
-					atts.put(l0, ctx2);
-					for (Att att : sch.attsFrom(en)) {
-						Object o = row.get(attToString(att));
-						Term<Ty, Void, Sym, Void, Void, Void, Null<?>> r 
-						= InstExpJdbc.objectToSk(sch, o ,l0, att, labelledNulls, tys, nullPrefix, extraRepr, true); 
-						
-						ctx2.put(att, r);
-					}
+			
+			for (Att att : sch.attsFrom(en)) {
+				if (!atts0.containsKey(l0)) {
+					atts0.put(l0, new Ctx<>());
 				}
+				Object o = row.get((String) att);
+				Term<Ty, Void, Sym, Void, Void, Void, Null<?>> r 
+				= objectToSk(sch, o, l0.toString(), att, tys0, extraRepr, true); 
+				atts0.get(l0).put(att, r);
 			}
-		} catch (IOException exn) {
-			exn.printStackTrace();
-			throw new RuntimeException(exn.getMessage());
-		} catch (Throwable exn) {
-			exn.printStackTrace();
-			throw new RuntimeException(
-					"Error: [text positions are relative to the record]: " + exn.getMessage() + "\n\n" + helpStr);
 		}
 		
-		boolean import_as_theory = (Boolean) op.getOrDefault(AqlOption.import_as_theory);
-
-		if (import_as_theory) {
-			return InstExpJdbc.forTheory(sch, ens, tys, fks, atts, op);
-		}
-
-		ImportAlgebra<Ty, En, Sym, Fk, Att, Gen, Null<?>> alg = new ImportAlgebra<>(sch, ens, tys, fks, atts,
-				Object::toString, Object::toString);
-
-
-		return new SaturatedInstance<>(alg, alg, (Boolean) op.getOrDefault(AqlOption.require_consistency),
-				(Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe), labelledNulls, extraRepr);
 	}
+
+	//TODO aql shredded input format for CSV
+	@Override
+	protected void shreddedAtt(Map<En, List<CSVRecord>> h, Att att, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		throw new RuntimeException("Shredded input format not avaiable for CSV (if desired, please email info@catinf.com)");
+	}
+
+	@Override
+	protected void shreddedFk(Map<En, List<CSVRecord>> h, Fk fk, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		throw new RuntimeException("Shredded input format not avaiable for CSV (if desired, please email info@catinf.com)");
+	}
+
+	@Override
+	protected void shreddedEn(Map<En, List<CSVRecord>> h, En en, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		throw new RuntimeException("Shredded input format not avaiable for CSV (if desired, please email info@catinf.com)");
+	}
+
+	
 
 }

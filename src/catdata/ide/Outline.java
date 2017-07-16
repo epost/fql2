@@ -1,14 +1,20 @@
 package catdata.ide;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.LinkedList;
 import java.util.List;
+
 import javax.swing.BorderFactory;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+
 import catdata.Prog;
 import catdata.Unit;
 import catdata.Util;
@@ -17,7 +23,7 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 
 	protected final CodeEditor<Progg, Env, DDisp> codeEditor;
 	
-	final JPanel p = new JPanel(new GridLayout(1, 1));
+	final JPanel p;
 	
 	protected abstract JComponent getComp();
 	
@@ -42,8 +48,19 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 		this.codeEditor = codeEditor;
 		JScrollPane jsp = new JScrollPane(getComp());
 		jsp.setBorder(BorderFactory.createEmptyBorder());
-		p.add(jsp);
-		p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Outline"));
+		p = new JPanel(new BorderLayout());
+		JPanel q = new JPanel(new GridLayout(1,2));
+		q.add(new JLabel("Outline"));
+		JCheckBox alphaBox = new JCheckBox("Sort");
+		alphaBox.addActionListener(x -> {
+			codeEditor.outline_alphabetical(alphaBox.isSelected());
+		});
+		alphaBox.setHorizontalTextPosition(SwingConstants.LEFT);
+		alphaBox.setHorizontalAlignment(SwingConstants.RIGHT);
+		q.add(alphaBox);
+		p.add(q, BorderLayout.NORTH);
+		p.add(jsp, BorderLayout.CENTER);
+		p.setBorder(BorderFactory.createEtchedBorder());
 		
 		this.codeEditor.parsed_prog_lock = new Unit();
 		this.codeEditor.parsed_prog_string = "";

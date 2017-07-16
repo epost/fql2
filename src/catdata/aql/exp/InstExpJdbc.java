@@ -6,70 +6,26 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import catdata.Chc;
 import catdata.Ctx;
-import catdata.IntRef;
-import catdata.Null;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.AqlOptions;
-import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.Collage;
-import catdata.aql.Eq;
-import catdata.aql.ImportAlgebra;
-import catdata.aql.Instance;
-import catdata.aql.It;
-import catdata.aql.It.ID;
-import catdata.aql.Kind;
 import catdata.aql.Schema;
-import catdata.aql.Term;
-import catdata.aql.fdm.InitialAlgebra;
-import catdata.aql.fdm.LiteralInstance;
-import catdata.aql.fdm.SaturatedInstance;
 
 //TODO this type is actually a lie bc of import_as_theory option
-public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>>
-		implements Raw {
-
-	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
-
-	@Override
-	public Ctx<String, List<InteriorLabel<Object>>> raw() {
-		return raw;
-	}
-
-	public final SchExp<Ty, En, Sym, Fk, Att> schema;
-
-	// private final List<String> imports;
-
-	public final Map<String, String> options;
+public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En, Sym, Fk, Att, Gen, Connection> {
 
 	public final String clazz;
 	public final String jdbcString;
 
-	public final Map<String, String> map;
-
-	@Override
-	public Map<String, String> options() {
-		return options;
-	}
-
-	public static IntRef counter = new IntRef(0);
-
 	public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema,
-			/* List<String> imports, */ List<Pair<String, String>> options, String clazz, String jdbcString,
+			List<Pair<String, String>> options, String clazz, String jdbcString,
 			List<Pair<LocStr, String>> map) {
-		this.schema = schema;
-		// this.imports = imports;
+		super(schema, map, options);
+
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
 		try {
@@ -77,373 +33,32 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
-		this.options = Util.toMapSafely(options);
-		this.map = Util.toMapSafely(LocStr.set2(map));
-		/*
-		 * synchronized (counter) { cur_count = counter.i; counter.i = counter.i
-		 * + 1; }
-		 */
-		List<InteriorLabel<Object>> f = new LinkedList<>();
-		for (Pair<LocStr, String> p : map) {
-			f.add(new InteriorLabel<>("queries", new Pair<>(p.first.str, p.second), p.first.loc,
-					x -> x.first + " -> " + x.second).conv());
-		}
-		raw.put("queries", f);
-	}
-
-	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, Map<Ty, String> tys,
-			Map<Att, String> atts, Map<Fk, String> fks) {
-		// for (En En : sch.ens) {
-		// if (!ens.containsKey(En)) {
-		// throw new RuntimeException("no query for " + En);
-		// }
-		// }
-		for (En En : ens.keySet()) {
-			if (!sch.ens.contains(En)) {
-				throw new RuntimeException("there is a query for " + En + ", which is not an entity in the schema");
-			}
-		}
-		for (Ty ty : tys.keySet()) {
-			if (!sch.ens.contains(ty)) {
-				throw new RuntimeException("there is a query for " + ty + ", which is not a type in the schema");
-			}
-		}
-		// for (Att Att : sch.atts.keySet()) {
-		// if (!atts.containsKey(Att)) {
-		// throw new RuntimeException("no query for attribute " + Att);
-		// }
-		// }
-		for (Att Att : atts.keySet()) {
-			if (!sch.atts.containsKey(Att)) {
-				throw new RuntimeException("there is a query for " + Att + ", which is not an attribute in the schema");
-			}
-		}
-		// for (Fk Fk : sch.fks.keySet()) {
-		// if (!fks.containsKey(Fk)) {
-		// throw new RuntimeException("no query for foreign key " + Fk);
-		// }
-		// }
-		for (Fk Fk : fks.keySet()) {
-			if (!sch.fks.containsKey(Fk)) {
-				throw new RuntimeException("there is a query for " + Fk + ", which is not a foreign key in the schema");
-			}
-		}
 	}
 
 	@Override
-	public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
-		return schema;
+	protected Connection start(Schema<Ty, En, Sym, Fk, Att> sch) throws SQLException {
+		return DriverManager.getConnection(jdbcString);	
 	}
-
-	@SuppressWarnings("unchecked")
-	private Gen objectToGen(Object gen) {
-		return (Gen) gen.toString();
-	}
-
-	// @SuppressWarnings("unchecked")
-	public static <Ty, Sym, En, Fk, Att, Gen> Term<Ty, Void, Sym, Void, Void, Void, Null<?>> objectToSk(
-			Schema<Ty, En, Sym, Fk, Att> sch, Object rhs, Gen x, Att att, boolean labelledNulls,
-			Ctx<Ty, Collection<Null<?>>> sks, String nullPrefix,
-			Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>> extraRepr, boolean shouldJS) {
-		Ty ty = sch.atts.get(att).second;
-		if (rhs == null) {
-			Null<?> n = labelledNulls ? new Null<>(Term.Att(att, Term.Gen(x))) : new Null<>(nullPrefix + ty.toString());
-			if (labelledNulls) {
-				extraRepr.put(n, Term.Att(att, Term.Gen(x)));
-			}
-			sks.get(ty).add(n);
-			return Term.Sk(n);
-		} else if (sch.typeSide.js.java_tys.containsKey(ty)) {
-			if (shouldJS) {
-				return Term.Obj(sch.typeSide.js.parse(ty, (String) rhs), ty);
-			}
-			return Term.Obj(rhs, ty);
-		} else if (sch.typeSide.syms.containsKey(objectToSym(rhs))
-				&& sch.typeSide.syms.get(objectToSym(rhs)).first.isEmpty()) {
-			return Term.Sym(objectToSym(rhs), Collections.emptyList());
-		}
-		return Util.anomaly();
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <Sym2> Sym2 objectToSym(Object s) {
-		return (Sym2) s;
-	}
-
-	// TODO aql csv import still broken re: quoting
-
+	
 	@Override
-	public Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> eval(AqlEnv env) {
-		Schema<Ty, En, Sym, Fk, Att> sch = schema.eval(env);
-		for (Ty ty : sch.typeSide.tys) {
-			if (!sch.typeSide.js.java_tys.containsKey(ty)) {
-				throw new RuntimeException("Import is only allowed onto java types");
-			}
-		}
-
-		Map<En, String> ens = new HashMap<>();
-		Map<Ty, String> tys = new HashMap<>();
-		Map<Att, String> atts = new HashMap<>();
-		Map<Fk, String> fks = new HashMap<>();
-
-		for (String o : map.keySet()) {
-			assertUnambig(o, sch);
-			String q = map.get(o);
-
-			if (sch.typeSide.tys.contains(stringToTy(o))) {
-				tys.put(stringToTy(o), q);
-			} else if (sch.ens.contains(o)) {
-				ens.put(stringToEn(o), q);
-			} else if (sch.atts.containsKey(stringToAtt(o))) {
-				atts.put(stringToAtt(o), q);
-			} else if (sch.fks.containsKey(stringToFk(o))) {
-				fks.put(stringToFk(o), q);
-			}
-		}
-		totalityCheck(sch, ens, tys, atts, fks);
-
-		Ctx<En, Collection<Gen>> ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
-		Ctx<Ty, Collection<Null<?>>> tys0 = new Ctx<>();
-		Ctx<Gen, Ctx<Fk, Gen>> fks0 = new Ctx<>();
-		Ctx<Gen, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<?>>>> atts0 = new Ctx<>();
-		AqlOptions op = new AqlOptions(options, null, env.defaults);
-		Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>> extraRepr = new Ctx<>();
-
-		boolean labelledNulls = (boolean) op.getOrDefault(AqlOption.labelled_nulls);
-		String nullPrefix = (String) op.getOrDefault(AqlOption.null_prefix);
-
-		for (Ty ty : sch.typeSide.tys) {
-			if (labelledNulls) {
-				tys0.put(ty, new HashSet<>());
-			} else {
-				tys0.put(ty, Util.singSet(new Null<>(nullPrefix + ty.toString())));
-			}
-		}
-
-		try (Connection conn = DriverManager.getConnection(jdbcString)) {
-			for (En en : ens.keySet()) {
-				Statement stmt = conn.createStatement();
-				stmt.execute(ens.get(en));
-				ResultSet rs = stmt.getResultSet();
-				ResultSetMetaData rsmd = rs.getMetaData();
-				int columnsNumber = rsmd.getColumnCount();
-				if (columnsNumber != 1) {
-					stmt.close();
-					rs.close();
-					throw new RuntimeException("Expected 1 column but received " + columnsNumber);
-				}
-				while (rs.next()) {
-					Object gen = rs.getObject(1);
-					if (gen == null) {
-						stmt.close();
-						rs.close();
-						throw new RuntimeException("Encountered a NULL generator");
-					}
-					ens0.get(en).add(objectToGen(gen));
-				}
-				stmt.close();
-				rs.close();
-			}
-
-			for (Fk fk : fks.keySet()) {
-				Statement stmt = conn.createStatement();
-				stmt.execute(fks.get(fk));
-				ResultSet rs = stmt.getResultSet();
-				ResultSetMetaData rsmd = rs.getMetaData();
-				int columnsNumber = rsmd.getColumnCount();
-				if (columnsNumber != 2) {
-					stmt.close();
-					rs.close();
-					throw new RuntimeException("Error in " + fk + ": Expected 2 columns but received " + columnsNumber);
-				}
-				while (rs.next()) {
-					Object lhs = rs.getObject(1);
-					if (lhs == null) {
-						stmt.close();
-						rs.close();
-						throw new RuntimeException("Error in " + fk + ": Encountered a NULL generator");
-					}
-					Object rhs = rs.getObject(2);
-					if (rhs == null) {
-						stmt.close();
-						rs.close();
-						throw new RuntimeException("Error in " + fk + ": Encountered a NULL foreign key");
-					}
-					if (!fks0.containsKey(objectToGen(lhs))) {
-						fks0.put(objectToGen(lhs), new Ctx<>());
-					}
-					fks0.get(objectToGen(lhs)).put(fk, objectToGen(rhs));
-				}
-				stmt.close();
-				rs.close();
-			}
-			for (Att att : atts.keySet()) {
-				Statement stmt = conn.createStatement();
-				stmt.execute(atts.get(att));
-				ResultSet rs = stmt.getResultSet();
-				ResultSetMetaData rsmd = rs.getMetaData();
-				int columnsNumber = rsmd.getColumnCount();
-				if (columnsNumber != 2) {
-					stmt.close();
-					rs.close();
-					throw new RuntimeException(
-							"Error in " + att + ": Expected 2 columns but received " + columnsNumber);
-				}
-				// Ty ty = sch.atts.get(att).second;
-				while (rs.next()) {
-					Object lhs = rs.getObject(1);
-					if (lhs == null) {
-						stmt.close();
-						rs.close();
-						throw new RuntimeException("Error in " + att + ": Encountered a NULL generator)");
-					}
-					Object rhs = rs.getObject(2);
-					if (!atts0.containsKey(objectToGen(lhs))) {
-						atts0.put(objectToGen(lhs), new Ctx<>());
-					}
-					atts0.get(objectToGen(lhs)).put(att, objectToSk(sch, rhs, objectToGen(lhs), att, labelledNulls,
-							tys0, nullPrefix, extraRepr, false));
-				}
-				stmt.close();
-				rs.close();
-			}
-
-		} catch (SQLException exn) {
-			exn.printStackTrace();
-			throw new RuntimeException("JDBC exception: " + exn.getMessage());
-		} catch (Throwable thr) {
-			thr.printStackTrace();
-			throw new RuntimeException(thr.getMessage() + "\n\n" + helpStr);
-		}
-
-		boolean import_as_theory = (Boolean) op.getOrDefault(AqlOption.import_as_theory);
-
-		if (import_as_theory) {
-			return forTheory(sch, ens0, tys0, fks0, atts0, op);
-		}
-
-		ImportAlgebra<Ty, En, Sym, Fk, Att, Gen, Null<?>> alg = new ImportAlgebra<>(sch, ens0, tys0, fks0, atts0,
-				Object::toString, Object::toString);
-
-		// TODO aql validate for collage
-		return new SaturatedInstance<>(alg, alg, (Boolean) op.getOrDefault(AqlOption.require_consistency),
-				(Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe), labelledNulls, extraRepr);
-
+	protected void end(Connection conn) throws SQLException {
+		conn.close();
 	}
-
-	static <Ty, En, Sym, Fk, Att, Gen> Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> forTheory(Schema<Ty, En, Sym, Fk, Att> sch,
-			Ctx<En, Collection<Gen>> ens0, Ctx<Ty, Collection<Null<?>>> tys0, Ctx<Gen, Ctx<Fk, Gen>> fks0,
-			Ctx<Gen, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<?>>>> atts0, AqlOptions op) {
-
-		Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>>> eqs0 = new HashSet<>();
-		Collage<Ty, En, Sym, Fk, Att, Gen, Null<?>> col = new Collage<>(sch.collage());
-		for (Gen gen : fks0.keySet()) {
-			for (Fk fk : fks0.get(gen).keySet()) {
-				eqs0.add(new Pair<>(Term.Fk(fk, Term.Gen(gen)), Term.Gen(fks0.get(gen).get(fk))));
-				col.eqs.add(new Eq<>(new Ctx<>(), Term.Fk(fk, Term.Gen(gen)), Term.Gen(fks0.get(gen).get(fk))));
-			}
-		}
-		for (Gen gen : atts0.keySet()) {
-			for (Att att : atts0.get(gen).keySet()) {
-				eqs0.add(new Pair<>(Term.Att(att, Term.Gen(gen)), atts0.get(gen).get(att).convert()));
-				col.eqs.add(new Eq<>(new Ctx<>(), Term.Att(att, Term.Gen(gen)), atts0.get(gen).get(att).convert()));
-			}
-		}
-		for (En en : ens0.keySet()) {
-			for (Gen gen : ens0.get(en)) {
-				col.gens.put(gen, en);
-			}
-		}
-		for (Ty ty : tys0.keySet()) {
-			for (Null<?> sk : tys0.get(ty)) {
-				col.sks.put(sk, ty);
-			}
-		}
-
-		InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Null<?>, ID> initial = new InitialAlgebra<>(op, sch, col, new It(),
-				(Gen x) -> x.toString(), (Null<?> x) -> x.toString());
-		initial.imported = true;
-
-		Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, ID, Chc<Null<?>, Pair<ID, Att>>> I = new LiteralInstance<>(sch,
-				col.gens.map, col.sks.map, eqs0, initial.dp(), initial,
-				(Boolean) op.getOrDefault(AqlOption.require_consistency),
-				(Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe));
-
-		Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> J = (Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>>) ((Object) I);
-		
-		return J;
-	}
-
-	private static final String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example,"
+	
+	public final static String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example,"
 			+ "\n" + "\n	0:Employee" + "\n	0:Department" + "\n"
 			+ "\nPossible solution: Distinguish the IDs prior to import, or distinguish them during import, for example, "
 			+ "\n" + "\n	instance J = import_jdbc ... {"
 			+ "\n		Employee -> \"SELECT concat(\"emp\",id) FROM Employee\""
 			+ "\n		Department -> \"SELECT concat(\"dept\",id) FROM Dept\""
 			+ "\n		worksIn -> \"SELECT concat(\"emp\",id), concat(\"dept\",worksIn) FROM Employee\"" + "\n	}"
-			+ "\nRemember also that imports are of entire sets of tables; there can be no missing data.";
-
-	@SuppressWarnings("unchecked")
-	private Fk stringToFk(String o) {
-		return (Fk) o;
+			+ "\nRemember also that by default imports are of entire sets of tables with no missing data; see the import_as_theory option in the manual to change this behavior";
+	
+	@Override
+	protected String getHelpStr() {
+		return helpStr;
 	}
-
-	@SuppressWarnings("unchecked")
-	private Fk objectToFk(Object o) {
-		return (Fk) o;
-	}
-
-	@SuppressWarnings("unchecked")
-	private En objectToEn(Object o) {
-		return (En) o;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Att stringToAtt(String o) {
-		return (Att) o;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Att objectToAtt(Object o) {
-		return (Att) o;
-	}
-
-	@SuppressWarnings("unchecked")
-	private En stringToEn(String o) {
-		return (En) o;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Ty stringToTy(String o) {
-		return (Ty) o;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Ty objectToTy(Object o) {
-		return (Ty) o;
-	}
-
-	private void assertUnambig(Object o, Schema<Ty, En, Sym, Fk, Att> sch) {
-		int i = 0;
-		if (sch.typeSide.tys.contains(objectToTy(o))) {
-			i++;
-		}
-		if (sch.ens.contains(objectToEn(o))) {
-			i++;
-		}
-		if (sch.atts.containsKey(objectToAtt(o))) {
-			i++;
-		}
-		if (sch.fks.map.containsKey(objectToFk(o))) {
-			i++;
-		}
-		if (i > 1) {
-			throw new RuntimeException(o + " is ambiguously a type/entity/attribute/foreign key");
-		} else if (i == 0) {
-			throw new RuntimeException(o + " is not a type/entity/attribute/foreign key");
-		}
-	}
-
+	
 	@Override
 	public String toString() {
 		String s = "";
@@ -455,28 +70,190 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 	}
 
 	@Override
-	public Collection<Pair<String, Kind>> deps() {
-		Set<Pair<String, Kind>> ret = new HashSet<>();
-		ret.addAll(schema.deps());
-		// ret.addAll(imports.stream().map(x -> new Pair<>(x,
-		// Kind.INSTANCE)).collect(Collectors.toList()));
-		return ret;
+	protected void shreddedAtt(Connection conn, Att att, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		Statement stmt = conn.createStatement();
+		stmt.execute(s);
+		ResultSet rs = stmt.getResultSet();
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnsNumber = rsmd.getColumnCount();
+		if (columnsNumber != 2) {
+			stmt.close();
+			rs.close();
+			conn.close();
+			throw new RuntimeException(
+					"Error in " + att + ": Expected 2 columns but received " + columnsNumber);
+		}
+		while (rs.next()) {
+			Object lhs = rs.getObject(1);
+			if (lhs == null) {
+				stmt.close();
+				rs.close();
+				conn.close();
+				throw new RuntimeException("Error in " + att + ": Encountered a NULL column 1");
+			}
+			Object rhs = rs.getObject(2);
+			if (!atts0.map.containsKey(lhs.toString())) {
+				atts0.put((Gen) lhs.toString(), new Ctx<>());
+			}
+			atts0.get((Gen) lhs.toString()).put(att, objectToSk(sch, rhs, lhs.toString(), att,
+					tys0, extraRepr, false));
+		}
+		stmt.close();
+		rs.close();
 	}
+
+	@Override
+	protected void shreddedFk(Connection conn, Fk fk, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		Statement stmt = conn.createStatement();
+		stmt.execute(s);
+		ResultSet rs = stmt.getResultSet();
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnsNumber = rsmd.getColumnCount();
+		if (columnsNumber != 2) {
+			stmt.close();
+			rs.close();
+			conn.close();
+			throw new RuntimeException("Error in " + fk + ": Expected 2 columns but received " + columnsNumber);
+		}
+		while (rs.next()) {
+			Object lhs = rs.getObject(1);
+			if (lhs == null) {
+				stmt.close();
+				rs.close();
+				conn.close();
+				throw new RuntimeException("Error in " + fk + ": Encountered a NULL in column 1");
+			}
+			Object rhs = rs.getObject(2);
+			if (rhs == null) {
+				stmt.close();
+				rs.close();
+				conn.close();
+				throw new RuntimeException("Error in " + fk + ": Encountered a NULL in column 2");
+			}
+			Gen g1 = (Gen) lhs.toString();
+			Gen g2 = (Gen) rhs.toString(); //store strings
+			if (!fks0.containsKey(g1)) {
+				fks0.put(g1, new Ctx<>());
+			}
+			fks0.get(g1).put(fk, g2);
+		}
+		stmt.close();
+		rs.close();
+	}
+
+	@Override
+	protected void shreddedEn(Connection conn, En en, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		Statement stmt = conn.createStatement();
+		stmt.execute(s);
+		ResultSet rs = stmt.getResultSet();
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnsNumber = rsmd.getColumnCount();
+		if (columnsNumber != 1) {
+			rs.close();
+			stmt.close();
+			conn.close();
+			throw new RuntimeException("Expected 1 column but received " + columnsNumber);
+		}
+		while (rs.next()) {
+			Object gen = rs.getObject(1);
+			if (gen == null) {
+				stmt.close();
+				rs.close();
+				conn.close();
+				throw new RuntimeException("Encountered a NULL generator");
+			}
+			ens0.get(en).add((Gen) gen.toString()); //store strings 
+		}
+		rs.close();
+		stmt.close();
+	}
+
+	@Override
+	protected void joinedEn(Connection conn, En en, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		Statement stmt = conn.createStatement();
+		stmt.execute(s);
+		ResultSet rs = stmt.getResultSet();
+		ResultSetMetaData rsmd = rs.getMetaData();
+		checkColumns(en, s, sch, rsmd);
+		
+		while (rs.next()) {
+			Object gen = rs.getObject(idCol);
+			if (gen == null) {
+				stmt.close();
+				rs.close();
+				conn.close();
+				throw new RuntimeException("Encountered a NULL generator in ID column " + idCol);
+			}
+			Gen g1 = (Gen) gen.toString();
+			ens0.get(en).add(g1); //store strings 
+			
+			for (Fk fk : sch.fksFrom(en)) {
+				Object rhs = rs.getObject((String) fk);
+				if (rhs == null) {
+					stmt.close();
+					rs.close();
+					conn.close();
+					throw new RuntimeException("ID " + gen + " has a NULL foreign key value on " + fk);
+				}	
+				Gen g2 = (Gen) rhs.toString(); //store strings
+				if (!fks0.containsKey(g1)) {
+					fks0.put(g1, new Ctx<>());
+				}
+				fks0.get(g1).put(fk, g2);
+			}
+			for (Att att : sch.attsFrom(en)) {
+				Object rhs = rs.getObject((String) att);
+				if (!atts0.map.containsKey(g1)) {
+					atts0.put(g1, new Ctx<>());
+				}
+				atts0.get(g1).put(att, objectToSk(sch, rhs, gen.toString(), att,
+						tys0, extraRepr, false));
+			}
+			
+		}
+	
+	}
+
+	private void checkColumns(En en, String s, Schema<Ty, En, Sym, Fk, Att> sch, ResultSetMetaData rsmd)
+			throws SQLException {
+		Set<String> colNames = new HashSet<>();
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			String colName = rsmd.getColumnLabel(i);
+			if (!(colName.equalsIgnoreCase(idCol) || Util.containsUpToCase(sch.attsFrom(en), colName) || Util.containsUpToCase(sch.fksFrom(en), colName))) {
+				throw new RuntimeException("Column name " + colName + " does not refer to a foreign key or attribute in \n\n" + s);
+			}
+			colNames.add(colName);
+		}
+		for (Att att : sch.attsFrom(en)) {
+			if (! Util.containsUpToCase(colNames, att)) {
+				throw new RuntimeException("Attribute " + att + " has no column in \n\n" + s);
+			}
+		}
+		for (Fk fk : sch.fksFrom(en)) {
+			if (! Util.containsUpToCase(colNames, fk)) {
+				throw new RuntimeException("Foreign key " + fk + " has no column in \n\n" + s);
+			}
+		}
+		if (! Util.containsUpToCase(colNames, idCol)) {
+			throw new RuntimeException("No ID column " + idCol + " in \n\n" + s);
+		}
+	}
+
+	//TODO AQL *******************************************************************
+	// must invoke super
+
 
 	@Override
 	public int hashCode() {
 		int prime = 31;
 		int result = 1;
 		result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
-		result = prime * result + ((map == null) ? 0 : map.hashCode());
-		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
-		// result = prime * result + ((imports == null) ? 0 :
-		// imports.hashCode());
 		result = prime * result + ((jdbcString == null) ? 0 : jdbcString.hashCode());
-		result = prime * result + ((options == null) ? 0 : options.hashCode());
+		result = prime * result + super.hashCode();
 		return result;
 	}
 
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -491,27 +268,14 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExp<Ty, En, Sym,
 				return false;
 		} else if (!clazz.equals(other.clazz))
 			return false;
-		if (map == null) {
-			if (other.map != null)
-				return false;
-		} else if (!map.equals(other.map))
-			return false;
 		if (jdbcString == null) {
 			if (other.jdbcString != null)
 				return false;
 		} else if (!jdbcString.equals(other.jdbcString))
 			return false;
-		if (options == null) {
-			if (other.options != null)
-				return false;
-		} else if (!options.equals(other.options))
-			return false;
-		if (schema == null) {
-			if (other.schema != null)
-				return false;
-		} else if (!schema.equals(other.schema))
-			return false;
-		return true;
+		return super.equals(obj);
 	}
+
+	
 
 }

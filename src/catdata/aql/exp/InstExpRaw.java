@@ -195,8 +195,21 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		Set<Pair<Term<Ty,En,Sym,Fk,Att,String,String>, Term<Ty,En,Sym,Fk,Att,String,String>>> eqs0 = new HashSet<>();
 
 		for (String k : imports) {
+			Instance<?, ?, ?, ?, ?, ?, ?, ?, ?> u = env.defs.insts.get(k);
+			for (Object o : u.gens().keySet()) {
+				if (!(o instanceof String)) {
+					throw new RuntimeException("Cannot import " + o + " from " + k + " because it is not a string");
+				}
+			}
+			for (Object o : u.sks().keySet()) {
+				if (!(o instanceof String)) {
+					throw new RuntimeException("Cannot import " + o + " from " + k + " because it is not a string");
+				}
+			}
+			
 			@SuppressWarnings("unchecked")
 			Instance<Ty, En, Sym, Fk, Att, String, String, ID, Chc<String, Pair<ID, String>>> v = env.defs.insts.get(k);
+			
 			col.gens.putAll(v.gens().map);
 			col.sks.putAll(v.sks().map);
 			eqs0.addAll(v.eqs());

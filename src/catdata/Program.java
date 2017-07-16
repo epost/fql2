@@ -92,7 +92,7 @@ public class Program<X> implements Prog {
 
 					@Override
 					public String getFailureMessage() {
-						return "Other occurance: " + conv(other.second);
+						return "Other occurance: line " + conv(other.second).line + ", column " + conv(other.second).column;
 					}
 
 					@Override

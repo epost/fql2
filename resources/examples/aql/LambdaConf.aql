@@ -73,9 +73,9 @@ mapping F = literal : S -> T {
 	foreign_keys
 		f -> N //
 	attributes
-		name -> lambda x. name(x)
-		salary -> lambda x. salary(x)
-		age -> lambda x. age(x)
+		name -> name
+		salary -> salary
+		age -> age
 }
 
 instance I = literal : S {

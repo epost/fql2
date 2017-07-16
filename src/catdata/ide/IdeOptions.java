@@ -463,7 +463,6 @@ public class IdeOptions {
 		case ANIMATE_MATCH:
 		case MARGIN_COLS:
 		case ENABLE_OUTLINE:
-		case OUTLINE_ALPHABETICAL:
 		case OUTLINE_ON_LEFT:
 		case OUTLINE_PREFIX_KIND:
 	
@@ -624,9 +623,6 @@ public class IdeOptions {
 		case ENABLE_OUTLINE:
 			a.enable_outline(getBool(o));
 			return;
-		case OUTLINE_ALPHABETICAL:
-			a.outline_alphabetical(getBool(o));
-			return;
 		case OUTLINE_ON_LEFT:
 			a.outline_on_left(getBool(o));
 			return;
@@ -653,7 +649,6 @@ public class IdeOptions {
 
 		ENABLE_OUTLINE(IdeOptionType.BOOL, true),
 		OUTLINE_ON_LEFT(IdeOptionType.BOOL, false),
-		OUTLINE_ALPHABETICAL(IdeOptionType.BOOL, false),
 		OUTLINE_PREFIX_KIND(IdeOptionType.BOOL, true),
 		OUTLINE_ELONGATED(IdeOptionType.BOOL, false),
 		OUTLINE_TYPES(IdeOptionType.BOOL, true),
@@ -784,8 +779,6 @@ public class IdeOptions {
 				return "HTML color";
 			case ENABLE_OUTLINE:
 				return "Enable outline";
-			case OUTLINE_ALPHABETICAL:
-				return "Alphabetical order";
 			case OUTLINE_ON_LEFT:
 				return "Outline on left";
 			case OUTLINE_PREFIX_KIND:

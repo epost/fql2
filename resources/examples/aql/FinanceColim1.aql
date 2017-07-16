@@ -43,7 +43,11 @@ instance ClientInstance = literal : Client {
      	client_name -> {cc1 Tom, cc2 Dick, cc3 Harry}
      	client_description -> {cc1 "Tom Client", cc2 "Dick Client", cc3 "Harry Client"}
 } 
-//instance ClientInstance = import_csv "/Users/ryan/github/fql/data/finance/Client" : Client 
+/*
+instance ClientInstance = import_csv : Client {
+	client -> "/Users/ryan/GitHub/fql/data/finance/Client/Client.csv"
+}
+*/
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -89,7 +93,12 @@ instance PortfolioInstance = literal : Portfolio {
 		pp2.portfolio_id = "2" pp2.portfolio_name = Port2 pp2.portfolio_description = Portfolio2 pp2.portfolio_client_id = "2" pp2.portfolio_strategy_id = "2" pp2.portfolio_strategy = ps2
 		pp3.portfolio_id = "3" pp3.portfolio_name = Port3 pp3.portfolio_description = Portfolio3 pp3.portfolio_client_id = "2" pp3.portfolio_strategy_id = "1" pp3.portfolio_strategy = ps1
 } 
-//instance PortfolioInstance = import_csv "/Users/ryan/github/fql/data/finance/Portfolio" : Portfolio
+/*
+instance PortfolioInstance = import_csv : Portfolio {
+	portfolio -> "/Users/ryan/github/fql/data/finance/Portfolio/portfolio.csv"
+	strategy -> "/Users/ryan/github/fql/data/finance/Portfolio/strategy.csv"
+}
+*/
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -156,7 +165,14 @@ instance RefInstance = literal : Ref {
 		rs4.strategy_id = "4" rs4.strategy_name = Strat4 rs4.strategy_description = Strategy4 
 		rs5.strategy_id = "5" rs5.strategy_name = Strat5 rs5.strategy_description = Strategy5
 } 
-//instance RefInstance = import_csv "/Users/ryan/github/fql/data/finance/Ref" : Ref
+/*
+instance RefInstance = import_csv : Ref {
+	currency -> "/Users/ryan/github/fql/data/finance/Ref/currency.csv"
+	country -> "/Users/ryan/github/fql/data/finance/Ref/country.csv"
+	strategy -> "/Users/ryan/github/fql/data/finance/Ref/strategy.csv"
+	asset -> "/Users/ryan/github/fql/data/finance/Ref/asset.csv"
+}
+*/
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -211,7 +227,13 @@ instance TransInstance = literal : Trans {
 		tt5.transaction_id = "5" tt5.transaction_asset_id = "5" tt5.transaction_asset = ta5 tt5.transaction_portfolio_id = "3" tt5.transaction_buy_sell_ind = buy tt5.transaction_quantity = "200" tt5.transaction_price = "1.6" tt5.transaction_currency_id  = "3" tt5.transaction_currency = tc3 tt5.transaction_date = "2/1/2013"
 		tt6.transaction_id = "6" tt6.transaction_asset_id = "5" tt6.transaction_asset = ta5 tt6.transaction_portfolio_id = "3" tt6.transaction_buy_sell_ind = sell tt6.transaction_quantity = "100" tt6.transaction_price = "1.5" tt6.transaction_currency_id  = "3" tt6.transaction_currency = tc3 tt6.transaction_date = "7/1/2013"
 } 
-//instance TransInstance = import_csv "/Users/ryan/github/fql/data/finance/Trans" : Trans
+/*
+instance TransInstance = import_csv : Trans {
+	currency -> "/Users/ryan/github/fql/data/finance/Trans/currency.csv"
+	transaction -> "/Users/ryan/github/fql/data/finance/Trans/transaction.csv"
+	asset -> "/Users/ryan/github/fql/data/finance/Trans/asset.csv"	
+}
+*/
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -272,12 +294,14 @@ instance HoldPosInstance = literal : HoldPos {
 		hpp1.position_id = "1" hpp1.position_client_no = "1" hpp1.position_client = hpc1 hpp1.position_asset_id = "1" hpp1.position_quantity = "100" hpp1.position_current_value = "550" hpp1.position_current_value_currency_code = "EUR" hpp1.position_cost_basis = "551" hpp1.position_cost_basis_currency_code = "EUR"		
 		hpp2.position_id = "2" hpp2.position_client_no = "2" hpp2.position_client = hpc2 hpp2.position_asset_id = "5" hpp2.position_quantity = "100" hpp2.position_current_value = "170" hpp2.position_current_value_currency_code = "JPY" hpp2.position_cost_basis = "160" hpp2.position_cost_basis_currency_code = "JPY"
 } 
+/*
+instance HoldPosInstance = import_csv : HoldPos {
+	client -> "/Users/ryan/github/fql/data/finance/HoldPos/client.csv"
+	holding -> "/Users/ryan/github/fql/data/finance/HoldPos/holding.csv"
+	position -> "/Users/ryan/github/fql/data/finance/HoldPos/position.csv"	
+}
+*/
 
-//nulls in CSV data are indicated with csv_null_string
-//instance HoldPosInstance = import_csv "/Users/ryan/github/fql/data/finance/HoldPos" : HoldPos {
-//	options
-//		csv_null_string = "NULL" 
-//}	
 ////////////////////////////////////////////////////////////////////////
 //Linkages between input schemas and instances
 ////////////////////////////////////////////////////////////////////////
@@ -299,9 +323,9 @@ mapping ClientHoldPosLinkageToClient = literal : ClientHoldPosLinkage -> Client 
 	entities
 		client -> client
 	attributes
-		client_id -> lambda x. x.client_id
-		client_name -> lambda x. x.client_name
-		client_description -> lambda x. x.client_description
+		client_id -> x.client_id
+		client_name -> x.client_name
+		client_description -> x.client_description
 } 
 
 //compile time input
@@ -309,9 +333,9 @@ mapping ClientHoldPosLinkageToHoldPos = literal : ClientHoldPosLinkage -> HoldPo
 	entities
 		client -> client
 	attributes
-		client_id -> lambda x. client_no(x)             // updated to reflect the new name
-		client_name -> lambda x. client_nm(x)         // updated to reflect the new name
-		client_description -> lambda x. client_desc(x)  // updated to reflect the new name
+		client_id -> client_no             // updated to reflect the new name
+		client_name -> client_nm         // updated to reflect the new name
+		client_description -> client_desc  // updated to reflect the new name
 } 
 
 //runtime input
@@ -326,7 +350,11 @@ instance ClientHoldPosLinkageInstance = literal : ClientHoldPosLinkage {
 		dick.client_name = Dick
 		dick.client_description = "Dick Client"
 } 
-//instance ClientHoldPosLinkageInstance = import_csv "/Users/ryan/github/fql/data/finance/ClientHoldPos" : ClientHoldPosLinkage
+/*
+instance ClientHoldPosLinkageInstance = import_csv : ClientHoldPosLinkage {
+	client -> "/Users/ryan/github/fql/data/finance/ClientHoldPos/client.csv"	
+}
+*/
 
 //computed at compile time
 instance Sigma_ClientHoldPosLinkageToClient_ClientHoldPosLinkageInstance = sigma ClientHoldPosLinkageToClient ClientHoldPosLinkageInstance
@@ -337,7 +365,11 @@ transform ClientHoldPosLinkageInstanceToClientInstance = literal : Sigma_ClientH
 		tom -> cc1
 		dick -> cc2
 } 
-//transform ClientHoldPosLinkageInstanceToClientInstance = import_csv "/Users/ryan/github/fql/data/finance/ClientHoldPos/toClient.csv" : Sigma_ClientHoldPosLinkageToClient_ClientHoldPosLinkageInstance -> ClientInstance
+/*
+transform ClientHoldPosLinkageInstanceToClientInstance = import_csv : Sigma_ClientHoldPosLinkageToClient_ClientHoldPosLinkageInstance -> ClientInstance {
+	client -> "/Users/ryan/github/fql/data/finance/ClientHoldPos/toClient.csv"
+}
+*/
 
 //computed at compile time
 instance Sigma_ClientHoldPosLinkageToHoldPos_ClientHoldPosLinkageInstance = sigma ClientHoldPosLinkageToHoldPos ClientHoldPosLinkageInstance
@@ -348,8 +380,11 @@ transform ClientHoldPosLinkageInstanceToHoldPosInstance = literal : Sigma_Client
 		tom -> hpc1
 		dick -> hpc2
 } 
-//transform ClientHoldPosLinkageInstanceToHoldPosInstance = import_csv "/Users/ryan/github/fql/data/finance/ClientHoldPos/toHoldPos.csv" : Sigma_ClientHoldPosLinkageToHoldPos_ClientHoldPosLinkageInstance -> HoldPosInstance
-
+/*
+transform ClientHoldPosLinkageInstanceToHoldPosInstance = import_csv : Sigma_ClientHoldPosLinkageToHoldPos_ClientHoldPosLinkageInstance -> HoldPosInstance {
+	client -> "/Users/ryan/github/fql/data/finance/ClientHoldPos/toHoldPos.csv"
+}
+*/
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -368,9 +403,9 @@ mapping PortfolioRefLinkageToPortfolio = literal  : PortfolioRefLinkage -> Portf
 	entities
 		strategy -> strategy
 	attributes
-		strategy_id -> lambda c. c.strategy_id
-		strategy_name -> lambda c. c.strategy_name
-		strategy_description -> lambda c. c.strategy_description
+		strategy_id -> strategy_id
+		strategy_name -> strategy_name
+		strategy_description -> strategy_description
 }
 
 //compile time input
@@ -378,9 +413,9 @@ mapping PortfolioRefLinkageToRef = literal : PortfolioRefLinkage -> Ref {
 	entities
 		strategy -> strategy
 	attributes
-		strategy_id -> lambda c. c.strategy_id
-		strategy_name -> lambda c. c.strategy_name
-		strategy_description -> lambda c. c.strategy_description	
+		strategy_id -> strategy_id
+		strategy_name -> strategy_name
+		strategy_description -> strategy_description	
 } 
 
 //runtime input
@@ -392,8 +427,11 @@ instance PortfolioRefLinkageInstance = literal : PortfolioRefLinkage {
 //		strat2.strategy_id = "2" strat2.strategy_name = Strat2 strat2.strategy_description = Strategy2
 		strat3.strategy_id = "3" strat3.strategy_name = Strat3 strat3.strategy_description = Strategy3
 } 
-//instance PortfolioRefLinkageInstance = import_csv "/Users/ryan/github/fql/data/finance/PortfolioRef" : PortfolioRefLinkage
-
+/*
+instance PortfolioRefLinkageInstance = import_csv : PortfolioRefLinkage {
+	strategy -> "/Users/ryan/github/fql/data/finance/PortfolioRef/strategy.csv"	
+}
+*/
 
 //computed at compile time
 instance Sigma_PortfolioRefLinkageToPortfolio_PortfolioRefLinkageInstance = sigma PortfolioRefLinkageToPortfolio PortfolioRefLinkageInstance 
@@ -405,7 +443,11 @@ transform PortfolioRefLinkageInstanceToPortfolioInstance = literal : Sigma_Portf
 		//strat2 -> ps2
 		strat3 -> ps3
 } 
-//transform PortfolioRefLinkageInstanceToPortfolioInstance = import_csv "/Users/ryan/github/fql/data/finance/PortfolioRef/toPortfolio.csv" : Sigma_PortfolioRefLinkageToPortfolio_PortfolioRefLinkageInstance -> PortfolioInstance
+/*
+transform PortfolioRefLinkageInstanceToPortfolioInstance = import_csv : Sigma_PortfolioRefLinkageToPortfolio_PortfolioRefLinkageInstance -> PortfolioInstance {
+	strategy -> "/Users/ryan/github/fql/data/finance/PortfolioRef/toPortfolio.csv" 
+}
+*/
 
 //computed at compile time
 instance Sigma_PortfolioRefLinkageToRef_PortfolioRefLinkageInstance = sigma PortfolioRefLinkageToRef PortfolioRefLinkageInstance 
@@ -417,7 +459,11 @@ transform PortfolioRefLinkageInstanceToRefInstance = literal : Sigma_PortfolioRe
 	//	strat2 -> rs2 
 		strat3 -> rs3
 } 
-//transform PortfolioRefLinkageInstanceToRefInstance = import_csv "/Users/ryan/github/fql/data/finance/PortfolioRef/toRef.csv" : Sigma_PortfolioRefLinkageToRef_PortfolioRefLinkageInstance -> RefInstance
+/*
+transform PortfolioRefLinkageInstanceToRefInstance = import_csv : Sigma_PortfolioRefLinkageToRef_PortfolioRefLinkageInstance -> RefInstance {
+	strategy -> "/Users/ryan/github/fql/data/finance/PortfolioRef/toRef.csv"
+}
+*/
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -441,12 +487,12 @@ mapping RefTransLinkageToRef = literal : RefTransLinkage -> Ref	 {
 		currency -> currency
 		asset -> asset
 	attributes
-		currency_id -> lambda c. c.currency_id
-		currency_code -> lambda c. c.currency_code
-		currency_name -> lambda c. c.currency_name	
-		asset_id -> lambda c. c.asset_id
-		asset_name -> lambda a. a.asset_name
-		asset_description -> lambda a. a.asset_description
+		currency_id -> currency_id
+		currency_code -> currency_code
+		currency_name -> currency_name	
+		asset_id -> asset_id
+		asset_name -> asset_name
+		asset_description -> asset_description
 } 
 
 //compile time input				
@@ -455,12 +501,12 @@ mapping RefTransLinkageToTrans = literal : RefTransLinkage -> Trans {
 		currency -> currency
 		asset -> asset
 	attributes
-		currency_id -> lambda c. c.currency_id
-		currency_code -> lambda c. c.currency_code
-		currency_name -> lambda c. c.currency_name
-		asset_id -> lambda c. c.asset_id	
-		asset_name -> lambda a. a.asset_name
-		asset_description -> lambda a. a.asset_description
+		currency_id -> currency_id
+		currency_code -> currency_code
+		currency_name -> currency_name
+		asset_id -> asset_id	
+		asset_name -> asset_name
+		asset_description -> asset_description
 }
 
 //runtime input
@@ -479,8 +525,12 @@ instance RefTransLinkageInstance = literal : RefTransLinkage {
 		seven.asset_id = "7" seven.asset_name = A7 seven.asset_description = Asset7 
 		nine.asset_id = "9" nine.asset_name = A9 nine.asset_description = Asset9
 } 
-//instance RefTransLinkageInstance = import_csv "/Users/ryan/github/fql/data/finance/RefTrans" : RefTransLinkage 
-
+/*
+instance RefTransLinkageInstance = import_csv : RefTransLinkage {
+	currency -> "/Users/ryan/github/fql/data/finance/RefTrans/currency.csv"
+	asset -> "/Users/ryan/github/fql/data/finance/RefTrans/asset.csv"
+}
+*/
 
 //computed at compile time
 instance Sigma_RefTransLinkageToRef_RefTransLinkageInstance = sigma RefTransLinkageToRef RefTransLinkageInstance 
@@ -497,8 +547,13 @@ transform RefTransLinkageInstanceToRefInstance = literal : Sigma_RefTransLinkage
 		seven -> ra7
 		nine -> ra9
 } 
-//transform RefTransLinkageInstanceToRefInstance = import_csv "/Users/ryan/github/fql/data/finance/RefTrans/toRef.csv" : Sigma_RefTransLinkageToRef_RefTransLinkageInstance -> RefInstance
-
+/*
+transform RefTransLinkageInstanceToRefInstance = import_csv : Sigma_RefTransLinkageToRef_RefTransLinkageInstance -> RefInstance {
+	currency -> "/Users/ryan/github/fql/data/finance/RefTrans/toRefcurrency.csv"
+	asset -> "/Users/ryan/github/fql/data/finance/RefTrans/toRefasset.csv"
+}
+*/
+	
 //computed at compile time
 instance Sigma_RefTransLinkageToTrans_RefTransLinkageInstance = sigma RefTransLinkageToTrans RefTransLinkageInstance
 
@@ -514,7 +569,12 @@ transform RefTransLinkageInstanceToTransInstance = literal : Sigma_RefTransLinka
 		seven -> ta7
 		nine -> ta9
 } 
-//transform RefTransLinkageInstanceToTransInstance = import_csv "/Users/ryan/github/fql/data/finance/RefTrans/toTrans.csv" : Sigma_RefTransLinkageToTrans_RefTransLinkageInstance -> TransInstance 
+/*
+transform RefTransLinkageInstanceToTransInstance = import_csv : Sigma_RefTransLinkageToTrans_RefTransLinkageInstance -> TransInstance {
+  currency -> "/Users/ryan/github/fql/data/finance/RefTrans/toTranscurrency.csv"
+	asset -> "/Users/ryan/github/fql/data/finance/RefTrans/toTransasset.csv"
+}
+*/
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -547,9 +607,9 @@ mapping ClientToColimit = literal : Client -> Colimit  {
 	entities
 		client -> client
 	attributes
-		client_id -> lambda x. client_no(x)
-		client_name -> lambda x. client_nm(x)
-		client_description -> lambda x. client_desc(x)	
+		client_id -> client_no
+		client_name -> client_nm
+		client_description -> client_desc	
 } 
 
 mapping RefIdentityMapping = id Ref
@@ -607,9 +667,9 @@ mapping ClientHoldPosLinkageToColimit = literal : ClientHoldPosLinkage -> Colimi
 	entities
 		client -> client
 	attributes
-		client_id -> lambda x. client_no(x)
-		client_name -> lambda x. client_nm(x)
-		client_description -> lambda x. client_desc(x)	
+		client_id -> client_no
+		client_name -> client_nm
+		client_description -> client_desc	
 } 
 
 ////////////////////////////////////////////////////////////////////////

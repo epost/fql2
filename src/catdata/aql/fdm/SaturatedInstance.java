@@ -88,7 +88,6 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 		this.reprT_extra = reprT_extra;
 		inner_dp = new InnerDP();
 		inner_alg = new InnerAlgebra();
-		inner_alg.imported = alg.imported;
 		validate();
 		checkSatisfaction(); //TODO aql disable in production?
 		

@@ -1,5 +1,7 @@
 package catdata.aql.exp;
 
+import com.github.rjeschke.txtmark.Processor;
+
 import catdata.Program;
 import catdata.Unit;
 import catdata.aql.ColimitSchema;
@@ -85,7 +87,12 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 
 	@Override
 	public String visit(Unit arg, Comment C)  {
-		return C.toString();
+		if (C.isMarkdown) {
+			String result = Processor.process(C.comment);
+			return result;	
+		} else {
+			return C.toString();
+		}
 	}
 
 	@Override
