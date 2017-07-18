@@ -21,18 +21,11 @@ public class JdbcPragma extends Pragma {
 	
 	private final String jdbcString;
 	
-	@SuppressWarnings("unused")
-	private final Map<String, String> options; 
 	
-	public JdbcPragma(String clazz, String jdbcString, List<String> sqls, Map<String, String> options) {
+	public JdbcPragma(String jdbcString, List<String> sqls) {
 		this.sqls = sqls;
 		this.jdbcString = jdbcString;
-		this.options = options;
-		try {
-			Class.forName(clazz);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
+		
 	}
 
 

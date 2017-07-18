@@ -1356,4 +1356,14 @@ public class Util {
 		return ret;
 	}
 
+	public static void checkClass(String clazz) {
+		try {
+			if (!clazz.trim().isEmpty()) {
+				Class.forName(clazz);
+			}
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 }

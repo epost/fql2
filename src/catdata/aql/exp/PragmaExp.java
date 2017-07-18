@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.sql.DriverManager;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -441,11 +442,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			this.jdbcString = jdbcString;
 			this.options = Util.toMapSafely(options);
 			this.sqls = new LinkedList<>(sqls);
-			try {
-				Class.forName(clazz);
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
+			Util.checkClass(clazz);			
 		}
 
 		@Override
@@ -493,7 +490,17 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public Pragma eval(AqlEnv env) {
-			return new JdbcPragma(clazz, jdbcString, sqls, options);
+			String toGet = jdbcString;
+			String driver = clazz;
+			AqlOptions op = new AqlOptions(options, null, env.defaults);
+			if (clazz.trim().isEmpty()) {
+				driver = (String) op.getOrDefault(AqlOption.jdbc_default_class);
+				Util.checkClass(driver);
+			}
+			if (jdbcString.trim().isEmpty()) {
+				toGet = (String) op.getOrDefault(AqlOption.jdbc_default_string);
+			}
+			return new JdbcPragma(toGet, sqls);
 		}
 
 		//TODO aql add options
@@ -899,11 +906,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			this.clazz = clazz;
 			this.options = Util.toMapSafely(options);
 			I = i;
-			try {
-				Class.forName(clazz);
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
+			Util.checkClass(clazz);
 		}
 
 		@Override
@@ -913,7 +916,17 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public Pragma eval(AqlEnv env) {
-			return new ToJdbcPragmaInstance<>(prefix, I.eval(env), clazz, jdbcString, new AqlOptions(options, null, env.defaults));
+			String toGet = jdbcString;
+			String driver = clazz;
+			AqlOptions op = new AqlOptions(options, null, env.defaults);
+			if (clazz.trim().isEmpty()) {
+				driver = (String) op.getOrDefault(AqlOption.jdbc_default_class);
+				Util.checkClass(driver);
+			}
+			if (jdbcString.trim().isEmpty()) {
+				toGet = (String) op.getOrDefault(AqlOption.jdbc_default_string);
+			}
+			return new ToJdbcPragmaInstance<>(prefix, I.eval(env), driver, toGet, op);
 		}
 
 		@Override
@@ -1001,11 +1014,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			this.clazz = clazz;
 			this.options = Util.toMapSafely(options);
 			this.h = h;
-			try {
-				Class.forName(clazz);
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
+			Util.checkClass(clazz);
 		}
 
 		@Override
@@ -1015,7 +1024,17 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public Pragma eval(AqlEnv env) {
-			return new ToJdbcPragmaTransform<>(prefix, h.eval(env), clazz, jdbcString, new AqlOptions(options, null, env.defaults));
+			String toGet = jdbcString;
+			String driver = clazz;
+			AqlOptions op = new AqlOptions(options, null, env.defaults);
+			if (clazz.trim().isEmpty()) {
+				driver = (String) op.getOrDefault(AqlOption.jdbc_default_class);
+				Util.checkClass(driver);
+			}
+			if (jdbcString.trim().isEmpty()) {
+				toGet = (String) op.getOrDefault(AqlOption.jdbc_default_string);
+			}
+			return new ToJdbcPragmaTransform<>(prefix, h.eval(env), driver, toGet, op);
 		}
 
 		//TODO aql maybe quote for RHS of options
@@ -1107,11 +1126,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			this.clazz = clazz;
 			this.options = Util.toMapSafely(options);
 			this.Q = Q;
-			try {
-				Class.forName(clazz);
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
+			Util.checkClass(clazz);
 		}
 
 		@Override
@@ -1121,7 +1136,17 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public Pragma eval(AqlEnv env) {
-			return new ToJdbcPragmaQuery<>(prefixSrc, prefixDst, Q.eval(env), clazz, jdbcString, new AqlOptions(options, null, env.defaults));
+			String toGet = jdbcString;
+			String driver = clazz;
+			AqlOptions op = new AqlOptions(options, null, env.defaults);
+			if (clazz.trim().isEmpty()) {
+				driver = (String) op.getOrDefault(AqlOption.jdbc_default_class);
+				Util.checkClass(driver);
+			}
+			if (jdbcString.trim().isEmpty()) {
+				toGet = (String) op.getOrDefault(AqlOption.jdbc_default_string);
+			}
+			return new ToJdbcPragmaQuery<>(prefixSrc, prefixDst, Q.eval(env), driver, toGet, op);
 		}
 
 		@Override

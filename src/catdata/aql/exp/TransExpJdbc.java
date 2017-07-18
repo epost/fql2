@@ -11,6 +11,7 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.AqlOptions.AqlOption;
 
 public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> 
 extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2, Connection>  {
@@ -24,11 +25,7 @@ extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y
 		super(src, dst, map, options);
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
-		try {
-			Class.forName(clazz);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
+		Util.checkClass(clazz);
 	}
 
 	
@@ -107,7 +104,15 @@ extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y
 
 	@Override
 	protected Connection start(Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
-		return DriverManager.getConnection(jdbcString);	
+		String toGet = jdbcString;
+		if (clazz.trim().isEmpty()) {
+			String driver = (String) op.getOrDefault(AqlOption.jdbc_default_class);
+			Util.checkClass(driver);
+		}
+		if (jdbcString.trim().isEmpty()) {
+			toGet = (String) op.getOrDefault(AqlOption.jdbc_default_string);
+		}
+		return DriverManager.getConnection(toGet);	
 	}
 	
 	@Override

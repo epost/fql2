@@ -62,6 +62,8 @@ public final class AqlOptions {
 		import_as_theory,
 		import_joined,
 		map_nulls_arbitrarily_unsafe,
+		jdbc_default_class,
+		jdbc_default_string,
 
 		program_allow_nontermination_unsafe,
 		completion_precedence,
@@ -72,7 +74,6 @@ public final class AqlOptions {
 		allow_java_eqs_unsafe, //TODO aql enforce
 		require_consistency, //TODO: aql enforce require_consistency
 		timeout, 
-		allow_attribute_merges,
 		dont_verify_is_appropriate_for_prover_unsafe,
 		dont_validate_unsafe,
 		static_typing,
@@ -197,8 +198,6 @@ public final class AqlOptions {
 			return Runtime.getRuntime().availableProcessors();
 		case random_seed:
 			return 0;
-		case allow_attribute_merges:
-			return false;
 		case completion_precedence:
 			return null;
 		case prover:
@@ -265,6 +264,10 @@ public final class AqlOptions {
 			return 16*1024;
 		case eval_sql_persistent_indices:
 			return false;
+		case jdbc_default_class:
+			return "org.h2.Driver";
+		case jdbc_default_string:
+			return "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1";
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -337,8 +340,6 @@ public final class AqlOptions {
 			return op.getInteger(map);
 		case allow_java_eqs_unsafe:
 			return op.getBoolean(map);
-		case allow_attribute_merges:
-			return op.getBoolean(map);
 		case completion_precedence:
 			return AqlOption.getPrec(map.get(op.toString()), col);
 		case prover:
@@ -399,6 +400,10 @@ public final class AqlOptions {
 			return op.getInteger(map);
 		case eval_sql_persistent_indices:
 			return op.getBoolean(map);
+		case jdbc_default_class:
+			return op.getString(map);
+		case jdbc_default_string:
+			return op.getString(map);
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		}

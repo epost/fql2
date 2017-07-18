@@ -53,7 +53,7 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 	public InstExpJdbcAll(String clazz, String jdbcString, List<Pair<String, String>> options) {
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
-		Util.load(clazz);
+		Util.checkClass(clazz);
 		this.options = Util.toMapSafely(options);
 	}
 
@@ -155,8 +155,17 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 
 	@Override
 	public Instance<String, String, String, String, String, String, Null<?>, String, Null<?>> eval(AqlEnv env) {
-
-		try (Connection conn = DriverManager.getConnection(jdbcString)) {
+		String toGet = jdbcString;
+		String driver = clazz;
+		AqlOptions op = new AqlOptions(options, null, env.defaults);
+		if (clazz.trim().isEmpty()) {
+			driver = (String) op.getOrDefault(AqlOption.jdbc_default_class);
+			Util.checkClass(driver);
+		}
+		if (jdbcString.trim().isEmpty()) {
+			toGet = (String) op.getOrDefault(AqlOption.jdbc_default_string);
+		}
+		try (Connection conn = DriverManager.getConnection(toGet)) {
 			SqlSchema sch = new SqlSchema(conn.getMetaData());
 			SqlInstance inst = new SqlInstance(sch, conn);
 			return toInstance(env, inst, sch);

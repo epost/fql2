@@ -31,28 +31,7 @@ import catdata.aql.Var;
 public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		extends QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Raw {
 
-	/*
-	 * public void asTree(DefaultMutableTreeNode root) { if (imports.size() > 0)
-	 * { DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-	 * n.setUserObject("imports"); for (Object t : imports) {
-	 * DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-	 * m.setUserObject(t.toString()); n.add(m); } } if (blocks.size() > 0) {
-	 * DefaultMutableTreeNode n = new DefaultMutableTreeNode();
-	 * n.setUserObject("entities"); for (Pair<En2, Block<En1, Att2>> t : blocks)
-	 * { DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-	 * m.setUserObject(t.first); t.second.asTree(m); n.add(m); } root.add(n); }
-	 * if (fks.size() > 0) { DefaultMutableTreeNode n = new
-	 * DefaultMutableTreeNode(); n.setUserObject("fks"); for (Pair<Fk2, Trans> t
-	 * : fks) { DefaultMutableTreeNode m = new DefaultMutableTreeNode();
-	 * m.setUserObject(t.first); t.second.asTree(m); n.add(m); } root.add(n); }
-	 * if (atts.size() > 0) { DefaultMutableTreeNode n = new
-	 * DefaultMutableTreeNode(); n.setUserObject("atts"); for (Pair<Att2,
-	 * RawTerm> t : atts) { DefaultMutableTreeNode m = new
-	 * DefaultMutableTreeNode(); m.setUserObject(t.first + " -> " + t.second);
-	 * n.add(m); } root.add(n); }
-	 * 
-	 * }
-	 */
+	
 
 	private final SchExp<Ty, En1, Sym, Fk1, Att1> src;
 	private final SchExp<Ty, En2, Sym, Fk2, Att2> dst;
@@ -613,41 +592,13 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 		Ctx<En2, Collage<Ty, En1, Sym, Fk1, Att1, Var, Void>> cols = new Ctx<>();
 		for (Pair<En2, Block<En1, Att2>> p : blocks) {
+			
 			try {
-				if (!dst0.ens.contains(p.first)) {
-					throw new RuntimeException(
-							"the proposed target entity " + p.first + " does not actually appear in the target schema");
-				}
-
-				Ctx<Var, En1> ctx = new Ctx<Var, En1>(Util.toMapSafely(p.second.gens)); // p.second.gens);
-				for (Var v : ctx.map.keySet()) {
-					En1 en = ctx.get(v);
-					if (!src0.ens.contains(en)) {
+					if (!dst0.ens.contains(p.first)) {
 						throw new RuntimeException(
-								"from clause contains " + v + ":" + en + ", but " + en + " is not a source entity");
+								"the proposed target entity " + p.first + " does not actually appear in the target schema");
 					}
-				}
-				Collage<Ty, En1, Sym, Fk1, Att1, Var, Void> col = new Collage<>(src0.collage());
-				Ctx<String, Chc<Ty, En1>> ctx0 = unVar(ctx.inRight());
-				col.gens.putAll(ctx.map);
-				cols.put(p.first, col);
-				Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs = new HashSet<>();
-				for (Pair<RawTerm, RawTerm> eq : p.second.eqs) {
-					try {
-						Triple<Ctx<String, Chc<Ty, En1>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> x = RawTerm
-								.infer1(ctx0.map, eq.first, eq.second, col, src0.typeSide.js);
-						eqs.add(new Eq<>(new Ctx<>(), freeze(x.second), freeze(x.third)));
-					} catch (RuntimeException ex) {
-						ex.printStackTrace();
-						throw new RuntimeException("In equation " + eq.first + " = " + eq.second + ", " + ex.getMessage());
-					}
-				}
-				Map<String, String> uu = new HashMap<>(options);
-				uu.putAll(p.second.options);
-				AqlOptions theops = new AqlOptions(uu, null, env.defaults);
-				Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions> b = new Triple<>(
-						ctx, eqs, theops);
-				ens0.put(p.first, b);
+				processBlock(options, env, src0, ens0, cols, p);
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LocException(find("entities", p.second),
@@ -657,12 +608,8 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 		for (Pair<Att2, RawTerm> p : atts) {
 			try {
-				Ctx<String, Chc<Ty, En1>> ctx = unVar(ens0.get(dst0.atts.get(p.first).first).first.inRight());
-				Collage<Ty, En1, Sym, Fk1, Att1, Var, Void> col = cols.get(dst0.atts.get(p.first).first);
-				Chc<Ty, En1> required = Chc.inLeft(dst0.atts.get(p.first).second);
-				Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term = RawTerm.infer0(ctx.map, p.second, required, col, "",
-						src0.typeSide.js);
-				atts0.put(p.first, freeze(term));
+			
+				processAtt(src0, dst0, ens0, atts0, cols, p);
 
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
@@ -701,7 +648,54 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		return Query.makeQuery(ens0, atts0, fks0, src0, dst0, doNotCheckEqs, elimRed);
 	}
 
-	private Term<Ty, En1, Sym, Fk1, Att1, Var, Void> freeze(Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term) {
+	public static <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> void processAtt(Schema<Ty, En1, Sym, Fk1, Att1> src0, Schema<Ty, En2, Sym, Fk2, Att2> dst0,
+			Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens0,
+			Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts0,
+			Ctx<En2, Collage<Ty, En1, Sym, Fk1, Att1, Var, Void>> cols, Pair<Att2, RawTerm> p) {
+		Ctx<String, Chc<Ty, En1>> ctx = unVar(ens0.get(dst0.atts.get(p.first).first).first.inRight());
+		Collage<Ty, En1, Sym, Fk1, Att1, Var, Void> col = cols.get(dst0.atts.get(p.first).first);
+		Chc<Ty, En1> required = Chc.inLeft(dst0.atts.get(p.first).second);
+		Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term = RawTerm.infer0(ctx.map, p.second, required, col, "",
+				src0.typeSide.js);
+		atts0.put(p.first, freeze(term));
+	}
+
+	public static <Ty, En1, Sym, Fk1, Att1, En2, Att2> void processBlock(Map<String, String> options, AqlEnv env, Schema<Ty, En1, Sym, Fk1, Att1> src0,
+			Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens0,
+			Ctx<En2, Collage<Ty, En1, Sym, Fk1, Att1, Var, Void>> cols, Pair<En2, Block<En1, Att2>> p) {
+
+		Ctx<Var, En1> ctx = new Ctx<Var, En1>(Util.toMapSafely(p.second.gens)); // p.second.gens);
+		for (Var v : ctx.map.keySet()) {
+			En1 en = ctx.get(v);
+			if (!src0.ens.contains(en)) {
+				throw new RuntimeException(
+						"from clause contains " + v + ":" + en + ", but " + en + " is not a source entity");
+			}
+		}
+		Collage<Ty, En1, Sym, Fk1, Att1, Var, Void> col = new Collage<>(src0.collage());
+		Ctx<String, Chc<Ty, En1>> ctx0 = unVar(ctx.inRight());
+		col.gens.putAll(ctx.map);
+		cols.put(p.first, col);
+		Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs = new HashSet<>();
+		for (Pair<RawTerm, RawTerm> eq : p.second.eqs) {
+			try {
+				Triple<Ctx<String, Chc<Ty, En1>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> x = RawTerm
+						.infer1(ctx0.map, eq.first, eq.second, col, src0.typeSide.js);
+				eqs.add(new Eq<>(new Ctx<>(), freeze(x.second), freeze(x.third)));
+			} catch (RuntimeException ex) {
+				ex.printStackTrace();
+				throw new RuntimeException("In equation " + eq.first + " = " + eq.second + ", " + ex.getMessage());
+			}
+		}
+		Map<String, String> uu = new HashMap<>(options);
+		uu.putAll(p.second.options);
+		AqlOptions theops = new AqlOptions(uu, null, env.defaults);
+		Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions> b = new Triple<>(
+				ctx, eqs, theops);
+		ens0.put(p.first, b);
+	}
+
+	public static <Ty, En1, Sym, Fk1, Att1> Term<Ty, En1, Sym, Fk1, Att1, Var, Void> freeze(Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term) {
 		Map<Var, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> m = new HashMap<>();
 		for (Var v : term.vars()) {
 			m.put(v, Term.Gen(v));
@@ -709,7 +703,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		return term.subst(m);
 	}
 
-	private static <X> Ctx<String, X> unVar(Ctx<Var, X> ctx) {
+	public static <X> Ctx<String, X> unVar(Ctx<Var, X> ctx) {
 		Ctx<String, X> ret = new Ctx<>();
 		for (Var v : ctx.keySet()) {
 			ret.put(v.var, ctx.get(v));

@@ -53,6 +53,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 
 	//TODO: aql printing of contexts broken when conitain choices
 	
+	@SuppressWarnings("unused")
 	@Override
 	public Schema<Ty, String, Sym, String, String> eval(AqlEnv env) {
 		TypeSide<Ty, Sym> ts = typeSide.eval(env);

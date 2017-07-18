@@ -52,4 +52,17 @@ query BiggestDeptIsMathQuery = literal : Schools -> Person {
 			  		   schoolName -> p.instituteOf.schoolName}
 } 
 
+//simpler, dynamic version of the above query
+query BiggestDeptIsMathQuery_simple = simple : Schools  {
+	from   p:Person
+	where  p.instituteOf.biggestDept.deptName = Mathematics
+    return lastName -> p.lastName 
+    schoolName -> p.instituteOf.schoolName
+} 
+
 instance BiggestDeptIsMathInBoston = eval BiggestDeptIsMathQuery BostonSchools
+
+
+
+
+

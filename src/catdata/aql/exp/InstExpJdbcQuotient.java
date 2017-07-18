@@ -63,11 +63,7 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
 		this.queries = queries;
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
-		try {
-			Class.forName(clazz);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
+		Util.checkClass(clazz);
 	}
 
 	@Override

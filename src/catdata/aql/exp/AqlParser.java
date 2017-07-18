@@ -1,6 +1,5 @@
 package catdata.aql.exp;
 
-import java.text.ParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -26,7 +25,6 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
-import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.RawTerm;
 import catdata.aql.exp.ColimSchExp.ColimSchExpModify;
 import catdata.aql.exp.ColimSchExp.ColimSchExpQuotient;
@@ -106,6 +104,7 @@ public class AqlParser {
 			"sql",
 			"chase",
 			"check",
+			"simple",
 			"assert_consistent",
 			"coproduct_sigma",
 			"coequalize",
@@ -594,9 +593,14 @@ public class AqlParser {
 
 		Parser<Pair<Token, List<catdata.Pair<Integer, catdata.Pair<List<String>, List<String>>>>>> p_eqs = Parsers.tuple(token("path_equations"), p_eq.many());
 		Parser<List<catdata.Pair<Integer, catdata.Pair<List<String>, List<String>>>>> p_eqs0 = p_eqs.map(x -> x.b);
-				
-		Parser<catdata.Pair<Integer, Quad<String,String,RawTerm,RawTerm>>> o_eq = Parsers.tuple(Parsers.INDEX, Parsers.tuple(token("forall"), ident, Parsers.tuple(token(":"), ident).optional().followedBy(token(".")), term().followedBy(token("=")), term())).map(x -> new catdata.Pair<>(x.a, new Quad<>(x.b.b, x.b.c == null ? null : x.b.c.b, x.b.d, x.b.e)));
 
+		Parser<catdata.Pair<Integer, Quad<String,String,RawTerm,RawTerm>>> o_eq_from_p_eq 
+		 = p_eq.map(x -> new catdata.Pair<>(x.first, new Quad<>("_x", null, RawTerm.fold(x.second.first, "_x"), RawTerm.fold(x.second.second, "_x"))));
+
+		Parser<catdata.Pair<Integer, Quad<String,String,RawTerm,RawTerm>>> o_eq_old = Parsers.tuple(Parsers.INDEX, Parsers.tuple(token("forall"), ident, Parsers.tuple(token(":"), ident).optional().followedBy(token(".")), term().followedBy(token("=")), term())).map(x -> new catdata.Pair<>(x.a, new Quad<>(x.b.b, x.b.c == null ? null : x.b.c.b, x.b.d, x.b.e)));
+
+		Parser<catdata.Pair<Integer, Quad<String,String,RawTerm,RawTerm>>> o_eq = Parsers.or(o_eq_old, o_eq_from_p_eq);
+		
 		Parser<Pair<Token, List<catdata.Pair<Integer, Quad<String, String, RawTerm, RawTerm>>>>> o_eqs = Parsers.tuple(token("observation_equations"), o_eq.many());
 		Parser<List<catdata.Pair<Integer, Quad<String, String, RawTerm, RawTerm>>>> o_eqs0 = o_eqs.map(x -> x.b);
 		
@@ -635,10 +639,16 @@ public class AqlParser {
 		Parser<catdata.Pair<Token, List<catdata.Pair<Integer, catdata.Pair<List<String>, List<String>>>>>> p_eqs = Parsers.tuple(token("path_equations"), p_eq.many()).map(x -> new catdata.Pair<>(x.a, x.b));
 		Parser<List<catdata.Pair<Integer, catdata.Pair<List<String>, List<String>>>>> p_eqs0 = p_eqs.map(x -> x.second);
 				
-		Parser<catdata.Pair<Integer, Quad<String, String, RawTerm, RawTerm>>> o_eq = Parsers.tuple(Parsers.INDEX, Parsers.tuple(token("forall"), ident, Parsers.tuple(token(":"), ident).optional().followedBy(token(".")), term().followedBy(token("=")), term()).map(x -> new Quad<>(x.b, x.c == null ? null : x.c.b, x.d, x.e))).map(x -> new catdata.Pair<>(x.a, x.b));
+		Parser<catdata.Pair<Integer, Quad<String, String, RawTerm, RawTerm>>> o_eq_old = Parsers.tuple(Parsers.INDEX, Parsers.tuple(token("forall"), ident, Parsers.tuple(token(":"), ident).optional().followedBy(token(".")), term().followedBy(token("=")), term()).map(x -> new Quad<>(x.b, x.c == null ? null : x.c.b, x.d, x.e))).map(x -> new catdata.Pair<>(x.a, x.b));
+
+		Parser<catdata.Pair<Integer, Quad<String,String,RawTerm,RawTerm>>> o_eq_from_p_eq 
+		 = p_eq.map(x -> new catdata.Pair<>(x.first, new Quad<>("_x", null, RawTerm.fold(x.second.first, "_x"), RawTerm.fold(x.second.second, "_x"))));
+
+		Parser<catdata.Pair<Integer, Quad<String, String, RawTerm, RawTerm>>> o_eq = Parsers.or(o_eq_old, o_eq_from_p_eq);
 
 		Parser<Pair<Token, List<catdata.Pair<Integer, Quad<String, String, RawTerm, RawTerm>>>>> o_eqs = Parsers.tuple(token("observation_equations"), o_eq.many());
 		Parser<List<catdata.Pair<Integer, Quad<String, String, RawTerm, RawTerm>>>> o_eqs0 = o_eqs.map(x -> x.b);
+		
 		
 		Parser<Tuple4<List<catdata.Pair<Integer, Quad<String, String, String, String>>>, List<catdata.Pair<Integer, catdata.Pair<List<String>, List<String>>>>, List<catdata.Pair<Integer, Quad<String, String, RawTerm, RawTerm>>>, List<catdata.Pair<String, String>>>> 
 		pa = Parsers.tuple(entities.optional(), p_eqs0.optional(), o_eqs0.optional(), options);
@@ -773,7 +783,7 @@ public class AqlParser {
 		Parser<QueryExp<?,?,?,?,?,?,?,?>> 
 		var = ident.map(QueryExpVar::new),
 		id = Parsers.tuple(token("id"), sch_ref.lazy()).map(x -> new QueryExpId<>(x.b)),
-		ret = Parsers.or(id, queryExpRaw(), var, parens(query_ref));
+		ret = Parsers.or(id, queryExpRaw(), queryExpRawSimple(), var, parens(query_ref));
 	
 		query_ref.set(ret);	
 	} 
@@ -842,6 +852,14 @@ public class AqlParser {
 		return ret;	
 	}
 	
+	private static Parser<QueryExpRawSimple<String,String,String,String,String,String,String,String>> queryExpRawSimple() {
+		Parser<Tuple4<Token, Token, SchExp<?, ?, ?, ?, ?>, catdata.Pair<Block<String, String>, List<catdata.Pair<LocStr, RawTerm>>>>> l = Parsers.tuple(token("simple"), token(":"), sch_ref.lazy(), block()); 
+					
+		Parser<QueryExpRawSimple<String,String,String,String,String,String,String,String>> ret = l.map(x -> 
+		new QueryExpRawSimple<String,String,String,String,String,String,String,String>(x.c, x.d.first, new LinkedList<>()));
+			
+		return ret;	
+}
 	
 	private static Parser<QueryExpRaw<String,String,String,String,String,String,String,String>> queryExpRaw() {
 		 	Parser<List<catdata.Pair<LocStr, catdata.Pair<Block<String, String>, List<catdata.Pair<LocStr, RawTerm>>>>>> 

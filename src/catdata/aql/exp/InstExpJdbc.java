@@ -13,7 +13,9 @@ import java.util.Set;
 import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.AqlOptions;
 import catdata.aql.Schema;
+import catdata.aql.AqlOptions.AqlOption;
 
 //TODO this type is actually a lie bc of import_as_theory option
 public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En, Sym, Fk, Att, Gen, Connection> {
@@ -28,16 +30,21 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
-		try {
-			Class.forName(clazz);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
+		Util.checkClass(clazz);
 	}
 
 	@Override
 	protected Connection start(Schema<Ty, En, Sym, Fk, Att> sch) throws SQLException {
-		return DriverManager.getConnection(jdbcString);	
+		String toGet = jdbcString;
+		String driver = clazz;
+		if (clazz.trim().isEmpty()) {
+			driver = (String) op.getOrDefault(AqlOption.jdbc_default_class);
+			Util.checkClass(driver);
+		}
+		if (jdbcString.trim().isEmpty()) {
+			toGet = (String) op.getOrDefault(AqlOption.jdbc_default_string);
+		}
+		return DriverManager.getConnection(toGet);	
 	}
 	
 	@Override
