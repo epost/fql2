@@ -274,7 +274,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		private String toString;
 
 		@Override
-		public String toString() {
+		public synchronized String toString() {
 			if (toString != null) {
 				return toString;
 			}
@@ -287,7 +287,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 				Map<En1, Set<Var>> x = Util.revS(Util.toMapSafely(gens));
 				temp = new LinkedList<>();
-				for (En1 en1 : x.keySet()) {
+				for (En1 en1 : Util.alphabetical(x.keySet())) {
 					temp.add(Util.sep(x.get(en1), " ") + " : " + en1);
 				}
 
@@ -297,7 +297,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			if (!eqs.isEmpty()) {
 				toString += "\n\t\t\t\twhere\t";
 				temp = new LinkedList<>();
-				for (Pair<RawTerm, RawTerm> sym : eqs) {
+				for (Pair<RawTerm, RawTerm> sym : Util.alphabetical(eqs)) {
 					temp.add(sym.first + " = " + sym.second);
 				}
 				toString += Util.sep(temp, "\n\t\t\t\t\t");
@@ -306,7 +306,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			if (!atts.isEmpty()) {
 				toString += "\n\t\t\t\treturn\t";
 				temp = new LinkedList<>();
-				for (Pair<Att2, RawTerm> sym : atts) {
+				for (Pair<Att2, RawTerm> sym : Util.alphabetical(atts)) {
 					temp.add(sym.first + " -> " + sym.second);
 				}
 				toString += Util.sep(temp, "\n\t\t\t\t\t");
@@ -322,7 +322,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				toString += "\n\t\t\t\t" + Util.sep(temp, "\n\t\t\t\t\t");
 			}
 
-			return "\t{" + toString + "}";
+			return "\t" + toString ;
 		}
 
 		@Override
@@ -401,7 +401,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 	private String toString;
 
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		if (toString != null) {
 			return toString;
 		}
@@ -417,8 +417,8 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		if (!blocks.isEmpty()) {
 			toString += "\tentities";
 
-			for (Pair<En2, Block<En1, Att2>> x : blocks) {
-				temp.add(x.first + " -> " + x.second.toString());
+			for (Pair<En2, Block<En1, Att2>> x : Util.alphabetical(blocks)) {
+				temp.add(x.first + " -> {" + x.second.toString() + "}");
 			}
 
 			toString += "\n\t\t" + Util.sep(temp, "\n\n\t\t") + "\n";
@@ -427,8 +427,8 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		if (!fks.isEmpty()) {
 			toString += "\tforeign_keys";
 			temp = new LinkedList<>();
-			for (Pair<Fk2, Trans> sym : fks) {
-				temp.add(sym.first + " -> " + sym.second);
+			for (Pair<Fk2, Trans> sym : Util.alphabetical(fks)) {
+				temp.add(sym.first + " -> { " + sym.second + " }");
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\n\t\t") + "\n";
 		}

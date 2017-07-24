@@ -18,6 +18,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+
 import org.apache.commons.collections15.Transformer;
 
 import catdata.Chc;
@@ -399,7 +400,9 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 				int n = Integer.min(maxrows, alg.en(en).size());
 				Object[][] data = new Object[n][];
 				int i = 0;
-				for (X x : Util.alphabetical(alg.en(en))) {
+				List<X> lll = new LinkedList<>(alg.en(en));
+				lll.sort((x, y) -> Util.AlphabeticalComparator.compare(alg.printX(x), alg.printX(y)));
+				for (X x : lll) {
 					List<Object> row = new LinkedList<>();
 					row.add(alg.printX(x));
 					for (Att att0 : atts0) {

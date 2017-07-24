@@ -131,7 +131,8 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
 		
 		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col = new Collage<>(J.collage());
 		AqlOptions strat = new AqlOptions(options, col, env.defaults);
-		Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs0 = new HashSet<>();
+		Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> 
+		eqs0 = new HashSet<>(J.eqs());
 
 //		Collection<Pair<Gen, Gen>> q = new HashSet<>(); //TODO aql
 		

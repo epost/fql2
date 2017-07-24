@@ -248,7 +248,7 @@ html { (* " <hr/> <div id=\"uberflowers\">
 		not require any where clauses.  The block corresponding to foreign key <i>f</i>
 		says that for each <i>x</i> inserted into <i>N1</i>, the <i>y</i> to which <i>x</i>
 		should be sent to by <i>f</i> is <i>x</i>.  In general, the foreign_keys
-		part of a query is the most difficult part to write as should be attempted only
+		part of a query is the most difficult part to write and should be attempted only
 		after writing the entities part.		
 	</p>" *) }	
  

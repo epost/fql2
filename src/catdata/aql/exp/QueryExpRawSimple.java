@@ -2,8 +2,10 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import catdata.Chc;
 import catdata.Ctx;
@@ -23,6 +25,7 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
 import catdata.aql.exp.QueryExpRaw.Block;
+import catdata.aql.exp.QueryExpRaw.Trans;
 import catdata.aql.exp.SchExp.SchExpCod;
 
 public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Raw {
@@ -158,11 +161,35 @@ public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends 
 		return Query.makeQuery(ens0, atts0, fks0, src0, dst0, doNotCheckEqs, elimRed);
 	}
 
+	private String toString;
 	@Override
-	public String toString() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public synchronized String toString() {
+			if (toString != null) {
+				return toString;
+			}
+			toString = "";
+
+		
+			List<String> temp = new LinkedList<>();
+
+			temp.add(block.toString());
+			
+				toString += "\t\t" + Util.sep(temp, "\n\n\t\t") + "\n";
+			
+			if (!options.isEmpty()) {
+				toString += "\toptions";
+				temp = new LinkedList<>();
+				for (Entry<String, String> sym : options.entrySet()) {
+					temp.add(sym.getKey() + " = " + sym.getValue());
+				}
+
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			}
+
+			return "simple : " + src + " {\n" + toString + "\n}";
+		}
+
+	
 
 	
 	

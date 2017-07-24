@@ -128,7 +128,7 @@ class SpellChecker extends AbstractParser {
 					
 					
 					
-					if (word.contains(")") || word.contains("(") || word.contains(":") || word.contains(",") || word.contains("/") || word.contains("*") || word.contains("-") || word.contains("{") || word.contains("}")) {
+					if (word.contains("#") || word.contains(")") || word.contains("(") || word.contains(":") || word.contains(",") || word.contains("/") || word.contains("*") || word.contains("-") || word.contains("{") || word.contains("}")) {
 						continue;
 					}
 						

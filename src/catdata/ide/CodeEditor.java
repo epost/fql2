@@ -115,11 +115,12 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		frame.getRootPane().registerKeyboardAction(escListener, commandW, JComponent.WHEN_IN_FOCUSED_WINDOW);
 	}
 
-	// private JFrame frame;
 
 	public void setText(String s) {
-		topArea.setText(s);
-		setCaretPos(0);
+		SwingUtilities.invokeLater(() -> {
+			topArea.setText(s);
+			setCaretPos(0);
+		});
 	}
 
 	public String getText() {

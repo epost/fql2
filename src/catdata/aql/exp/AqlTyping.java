@@ -65,7 +65,7 @@ public class AqlTyping {
 				}
 			} catch (Exception ex) {
 				if (!continue0) {
-					throw new LineException(ex.getMessage(), prog.exps.get(s).kind().toString(), s);
+					throw new LineException(ex.getMessage(), s, prog.exps.get(s).kind().toString());
 				}
 			}
 		}

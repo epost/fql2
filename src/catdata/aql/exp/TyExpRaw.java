@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -200,7 +201,7 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 	private String toString;
 
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		if (toString != null) {
 			return toString;
 		}
@@ -213,14 +214,14 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 
 		if (!types.isEmpty()) {
 			toString += "\ttypes";
-			toString += "\n\t\t" + Util.sep(types, " ") + "\n";
+			toString += "\n\t\t" + Util.sep(Util.alphabetical(types), " ") + "\n";
 		}
 
 		List<String> temp = new LinkedList<>();
 
 		Map<Object, Object> m = new HashMap<>();
 		temp = new LinkedList<>();
-		for (Pair<String, Pair<List<String>, String>> sym : functions) {
+		for (Pair<String, Pair<List<String>, String>> sym : Util.alphabetical(functions)) {
 			if (sym.second.first.isEmpty()) {
 				m.put(sym.first, sym.second.second);
 			}
@@ -230,7 +231,7 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 		if (!n.isEmpty()) {
 			toString += "\tconstants";
 
-			for (Object x : n.keySet()) {
+			for (Object x : Util.alphabetical(n.keySet())) {
 				temp.add(Util.sep(n.get(x), " ") + " : " + x);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -239,7 +240,7 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 		if (functions.size() != n.size()) {
 			toString += "\tfunctions";
 			temp = new LinkedList<>();
-			for (Pair<String, Pair<List<String>, String>> sym : functions) {
+			for (Pair<String, Pair<List<String>, String>> sym : Util.alphabetical(functions)) {
 				if (!sym.second.first.isEmpty()) {
 					temp.add(sym.first + " : " + Util.sep(sym.second.first, ", ") + " -> " + sym.second.second);
 				}
@@ -250,7 +251,7 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 		if (!eqs.isEmpty()) {
 			toString += "\tequations";
 			temp = new LinkedList<>();
-			for (Triple<List<Pair<String, String>>, RawTerm, RawTerm> sym : eqs) {
+			for (Triple<List<Pair<String, String>>, RawTerm, RawTerm> sym : Util.alphabetical(eqs)) {
 				List<String> vars = Util.proj1(sym.first);
 				temp.add("forall " + Util.sep(vars, ", ") + ". " + sym.second + " = " + sym.third);
 			}
@@ -260,7 +261,7 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 		if (!java_tys_string.isEmpty()) {
 			toString += "\tjava_types";
 			temp = new LinkedList<>();
-			for (Pair<String, String> sym : java_tys_string) {
+			for (Pair<String, String> sym : Util.alphabetical(java_tys_string)) {
 				temp.add(sym.first + " = " + Util.quote(sym.second));
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -269,17 +270,18 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 		if (!java_parser_string.isEmpty()) {
 			toString += "\tjava_constants";
 			temp = new LinkedList<>();
-			for (Pair<String, String> sym : java_parser_string) {
+			for (Pair<String, String> sym : Util.alphabetical(java_parser_string)) {
 				temp.add(sym.first + " = " + Util.quote(sym.second));
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 		}
 
+		Function<List<String>, String> fff = x -> x.isEmpty() ? "" : (Util.sep(x, ", ") + " -> ");
 		if (!java_fns_string.isEmpty()) {
 			toString += "\tjava_functions";
 			temp = new LinkedList<>();
-			for (Pair<String, Triple<List<String>, String, String>> sym : java_fns_string) {
-				temp.add(sym.first + " : " + Util.sep(sym.second.first, ", ") + " -> " + sym.second.second + " = "
+			for (Pair<String, Triple<List<String>, String, String>> sym : Util.alphabetical(java_fns_string)) {
+				temp.add(sym.first + " : " + fff.apply(sym.second.first) + sym.second.second + " = "
 						+ Util.quote(sym.second.third));
 			}
 
@@ -289,7 +291,7 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 		if (!options.isEmpty()) {
 			toString += "\toptions";
 			temp = new LinkedList<>();
-			for (Entry<String, String> sym : options.entrySet()) {
+			for (Entry<String, String> sym : Util.alphabetical(options.entrySet())) {
 				temp.add(sym.getKey() + " = " + sym.getValue());
 			}
 

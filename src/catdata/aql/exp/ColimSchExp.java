@@ -138,10 +138,8 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 				return toString;
 			}
 			toString = "";
-				
-			List<String> temp = new LinkedList<>();
 			
-	
+			List<String> temp = new LinkedList<>();
 			
 			if (!eqEn.isEmpty()) {
 				toString += "\tentity equations";
@@ -182,9 +180,13 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 				
 				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 			}
-			
-			toString = "quotient " + Util.sep(nodes.keySet(), " + ") + "{\n" + toString + "}";
-			return toString;
+			if (eqEn.isEmpty() && eqTerms.isEmpty() && eqTerms2.isEmpty()) {
+				toString = "coproduct " + Util.sep(nodes.keySet(), " + "); // + " {\n" + toString + "\n}";
+				return toString;
+			} else {
+				toString = "quotient " + Util.sep(nodes.keySet(), " + ") + " {\n" + toString + "\n}";
+				return toString;
+			}
 		} 
 
 		@Override
@@ -802,7 +804,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 			}
 			
-			toString = "modify {\n" + toString + "}";
+			toString = "modify " + colim + " {\n" + toString + "}";
 			return toString;
 		} 
 

@@ -9,8 +9,6 @@ import catdata.aql.Kind;
 
 public abstract class Exp<X> {
 	
-	
-	
 	public Object getOrDefault(AqlEnv env, AqlOption option) {
 		return env.defaults.getOrDefault(options(), option);
 	}
