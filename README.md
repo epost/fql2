@@ -65,6 +65,7 @@ Commons Generics, CSV, and Exec (Apache License),
 JFlex (BSD License),
 H2 (Mozilla Public License or Eclipse Public License),
 JGraph (BSD License)
+txtmark (Apache)
 
 And a source distribution of:
 
@@ -80,6 +81,10 @@ which is dual licensed and available under the MPL 2.0
 (Mozilla Public License) or under the EPL 1.0 (Eclipse Public License).
 An original copy of the license agreement can be found at:
 http://www.h2database.com/html/license.html
+
+### txtmark (Apache 2.0 License)
+
+Copyright (C) 2011-2015 René Jeschke
 
 ### JParsec (Apache 2.0 License)
 

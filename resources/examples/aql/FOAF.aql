@@ -1,5 +1,5 @@
 /*
-  AQL + EDs is equivalent to Evan Patterson's "relational ologs".  Going to the latter to the former is trivial.
+  AQL + EDs is equivalent to Evan Patterson's "relational ologs".  Going to the latter from the former is trivial.
  
   The algorithm for translating a relational olog to AQL + EDs involves structural recursion on formulae,
   so here is just an example instead.

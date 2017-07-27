@@ -487,6 +487,6 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 			}
 		}
 		
-		public volatile boolean imported = false;
+		
 
 }

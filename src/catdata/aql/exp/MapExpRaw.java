@@ -119,7 +119,7 @@ public final class MapExpRaw extends MapExp<String, String, String, String, Stri
 		if (!ens.isEmpty()) {
 			toString += "\tentities";
 
-			for (Pair<String, String> x : ens) {
+			for (Pair<String, String> x : Util.alphabetical(ens)) {
 				temp.add(x.first + " -> " + x.second);
 			}
 
@@ -129,7 +129,7 @@ public final class MapExpRaw extends MapExp<String, String, String, String, Stri
 		if (!fks.isEmpty()) {
 			toString += "\tforeign_keys";
 			temp = new LinkedList<>();
-			for (Pair<String, List<String>> sym : fks) {
+			for (Pair<String, List<String>> sym : Util.alphabetical(fks)) {
 				temp.add(sym.first + " -> " + Util.sep(sym.second, "."));
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -138,7 +138,7 @@ public final class MapExpRaw extends MapExp<String, String, String, String, Stri
 		if (!fks.isEmpty()) {
 			toString += "\tattributes";
 			temp = new LinkedList<>();
-			for (Pair<String, Triple<String, String, RawTerm>> sym : atts) {
+			for (Pair<String, Triple<String, String, RawTerm>> sym : Util.alphabetical(atts)) {
 				temp.add(sym.first + " -> lambda " + sym.second.first + ". " + sym.second.third);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";

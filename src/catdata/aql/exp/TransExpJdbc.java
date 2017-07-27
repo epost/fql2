@@ -4,242 +4,31 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.AqlOptions;
-import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.Instance;
-import catdata.aql.Kind;
 import catdata.aql.Schema;
 import catdata.aql.Term;
-import catdata.aql.Transform;
-import catdata.aql.fdm.LiteralTransform;
+import catdata.aql.AqlOptions.AqlOption;
 
-public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> implements Raw {
+public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> 
+extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2, Connection>  {
 
-	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
-	
-	@Override 
-	public Ctx<String, List<InteriorLabel<Object>>> raw() {
-		return raw;
-	}
-	
-	public final InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src;
-	public final InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst;
-
-	public final Set<String> imports;
-
-	public final Map<String, String> options;
 
 	public final String clazz;
 	public final String jdbcString;
 
-	public final Map<String, String> map;		
-	
-	@Override
-	public Map<String, String> options() {
-		return options;
-	}
 
-	public TransExpJdbc(InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst, List<LocStr> imports, List<Pair<String, String>> options, String clazz, String jdbcString, List<Pair<LocStr, String>> map) {
-		this.src = src;
-		this.dst = dst;
-		this.imports = LocStr.set1(imports);
+	public TransExpJdbc(String clazz, String jdbcString, InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst, List<Pair<LocStr, String>> map, List<Pair<String, String>> options) {
+		super(src, dst, map, options);
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
-		try {
-			Class.forName(clazz);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-		this.options = Util.toMapSafely(options);
-		this.map = Util.toMapSafely(LocStr.set2(map));
-		
-		List<InteriorLabel<Object>> f = new LinkedList<>();
-		for (Pair<LocStr, String> p : map) {
-			f.add(new InteriorLabel<>("queries", new Pair<>(p.first.str, p.second), p.first.loc,
-					x -> x.first + " -> " + x.second).conv());
-		}
-		raw.put("queries", f);
+		Util.checkClass(clazz);
 	}
 
-	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, @SuppressWarnings("unused") Map<Ty, String> tys) {
-//		for (En En : sch.ens) {
-//			if (!ens.containsKey(En)) {
-//				throw new RuntimeException("no query for " + En);
-//			}
-//		}
-		for (En En : ens.keySet()) {
-			if (!sch.ens.contains(En)) {
-				throw new RuntimeException("there is a query for " + En + ", which is not an entity in the schema");
-			}
-		}
-//		for (Ty ty : tys.keySet()) {
-//			if (!sch.ens.contains(ty)) {
-//				throw new RuntimeException("there is a query for " + ty + ", which is not a type in the schema");
-//			}
-//		}
-	}
-
-
-	@SuppressWarnings("unchecked")
-	private Gen1 objectToGen1(Object gen) {
-		return (Gen1) gen.toString();
-	}
-
-	@SuppressWarnings("unchecked")
-	private Gen2 objectToGen2(Object gen) {
-		return (Gen2) gen.toString();
-	}
-/*
-	@SuppressWarnings("unchecked")
-	private Sk1 objectToSk1(Object s) {
-		return (Sk1) s;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Sk2 objectToSk2(Object s) {
-		return (Sk2) s;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Sym objectToSym(Object s) {
-		return (Sym) s;
-	}
-*/
 	
-	
-	
-	@Override
-	public Transform<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> eval(AqlEnv env) {
-		Instance<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src0 = src.eval(env);
-		Instance<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst0 = dst.eval(env);
-		if (!src0.schema().equals(dst0.schema())) {
-			throw new RuntimeException("Schema of instance source is " + src0  + " but schema of target instance is " + dst0);
-		}
-		Schema<Ty, En, Sym, Fk, Att> sch = src0.schema();
-		if ((!src0.algebra().imported) || (!dst0.algebra().imported)) {
-			throw new RuntimeException("Can only import transforms between imported instances");
-		}
-		Map<En, String> ens = new HashMap<>();
-		Map<Ty, String> tys = new HashMap<>();
-		
-		for (String o : map.keySet()) {
-			assertUnambig(o, sch);
-			String q = map.get(o);
-			if (sch.typeSide.tys.contains(o)) {
-				tys.put(stringToTy(o), q);
-			} else if (sch.ens.contains(o)) {
-				ens.put(stringToEn(o), q);
-			} 
-		}
-		totalityCheck(sch, ens, tys);
-		
-		Map<Gen1, Term<Void, En, Void, Fk, Void, Gen2, Void>> gens = new HashMap<>();
-		Map<Sk1, Term<Ty, En, Sym, Fk, Att, Gen2, Sk2>> sks = new HashMap<>();
-		
-		AqlOptions op = new AqlOptions(options, null, env.defaults);
-		Boolean dontValidateEqs = (Boolean) op.getOrDefault(AqlOption.dont_validate_unsafe);
-		boolean labelledNulls = (Boolean) op.getOrDefault(AqlOption.labelled_nulls);
-		
-		if (!labelledNulls) {
-			for (Sk1 sk : src0.sks().keySet()) {
-				Ty ty = src0.sks().get(sk);
-				//TODO aql this is a hack with the get0X
-				Set<Sk2> xxx = Util.revS(dst0.sks().map).get(ty);
-				if (xxx.isEmpty()) {
-					throw new RuntimeException("Cannot automatically map nulls to target instance");
-				}
-				Sk2 sk2 = Util.get0X(xxx);
-				sks.put(sk, Term.Sk(sk2)); //map Null@Ty to Null@Ty
-			}
-		} 
-	
-		try (Connection conn = DriverManager.getConnection(jdbcString)) {
-			
-			for (En en : ens.keySet()) {
-				Statement stmt = conn.createStatement();
-				stmt.execute(ens.get(en));
-				ResultSet rs = stmt.getResultSet();
-				ResultSetMetaData rsmd = rs.getMetaData();
-				int columnsNumber = rsmd.getColumnCount();
-				if (columnsNumber != 2) {
-					conn.close();
-					stmt.close();
-					rs.close();
-					throw new RuntimeException("Error in " + en + ": Expected 2 columns but received " + columnsNumber);
-				}
-				while (rs.next()) {
-					 Object gen = rs.getObject(1);
-					 if (gen == null) {
-						stmt.close();
-						rs.close();
-						throw new RuntimeException("Error in " + en + ": Encountered a NULL generator (dom)");
-					 }
-					 Object gen2 = rs.getObject(2);
-					 if (gen2 == null) {
-						stmt.close();
-						rs.close();
-						throw new RuntimeException("Error in " + en + ": Encountered a NULL generator (cod)");
-					 }						 
-					 gens.put(objectToGen1(gen), Term.Gen(objectToGen2(gen2)));
-				}
-				stmt.close();
-				rs.close();
-			}
-			
-		
-		} catch (SQLException exn) {
-			exn.printStackTrace();
-			throw new RuntimeException("JDBC error: " + exn.getMessage());
-		}
-			
-//		return new 
-		return new LiteralTransform<>(gens, sks, src0, dst0, dontValidateEqs); 
-	}
-
-	@SuppressWarnings("unchecked")
-	private En stringToEn(String o) {
-		return (En) o;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Ty stringToTy(String o) {
-		return (Ty) o;
-	}
-
-	private void assertUnambig(Object o, Schema<Ty, En, Sym, Fk, Att> sch) {
-		int i = 0;
-		if (sch.typeSide.tys.contains(o)) {
-			i++;
-		}
-		if (sch.ens.contains(o)) {
-			i++;
-		}
-		if (sch.atts.map.containsKey(o)) {
-			i++;
-		}
-		if (sch.fks.map.containsKey(o)) {
-			i++;
-		}
-		if (i > 1) {
-			throw new RuntimeException(o + " is ambiguously a type/entity");
-		} else if (i == 0) {
-			throw new RuntimeException(o + " is not a type/entity");
-		}
-	}
 
 	@Override
 	public String toString() {
@@ -247,30 +36,16 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 		if (!options.isEmpty()) {
 			s = "options" + Util.sep(options, "\n\t\t", " = ");
 		}
-		return "import_jdbc " + Util.quote(clazz) + " " + Util.quote(jdbcString) + " {\n\t" + Util.sep(map, " -> ", "\n\t") + s + "\n}";
+		return "import_jdbc " + Util.quote(clazz) + " " + Util.quote(jdbcString) + " : " + src + " -> " + dst + " {\n\t" + Util.sep(map, " -> ", "\n\t") + s + "\n}";
 	}
 
-	@Override
-	public Collection<Pair<String, Kind>> deps() {
-		Set<Pair<String, Kind>> ret = new HashSet<>();
-		ret.addAll(src.deps());
-		ret.addAll(dst.deps());
-		ret.addAll(imports.stream().map(x -> new Pair<>(x, Kind.TRANSFORM)).collect(Collectors.toList()));
-		return ret;
-	}
 
 	@Override
 	public int hashCode() {
 		int prime = 31;
-		int result = 1;
+		int result = super.hashCode(); //TODO aql note
 		result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
-		result = prime * result + ((map == null) ? 0 : map.hashCode());
-		result = prime * result + ((imports == null) ? 0 : imports.hashCode());
 		result = prime * result + ((jdbcString == null) ? 0 : jdbcString.hashCode());
-		result = prime * result + ((options == null) ? 0 : options.hashCode());
-		result = prime * result + ((src == null) ? 0 : src.hashCode());
-		result = prime * result + ((dst == null) ? 0 : dst.hashCode());
-
 		return result;
 	}
 
@@ -293,11 +68,7 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 				return false;
 		} else if (!map.equals(other.map))
 			return false;
-		if (imports == null) {
-			if (other.imports != null)
-				return false;
-		} else if (!imports.equals(other.imports))
-			return false;
+		
 		if (jdbcString == null) {
 			if (other.jdbcString != null)
 				return false;
@@ -318,17 +89,62 @@ public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2
 				return false;
 		} else if (!dst.equals(other.dst))
 			return false;
-		return true;
+		return super.equals(obj); //TODO aql note
+	}
+
+	@Override
+	protected String getHelpStr() {
+		return InstExpJdbc.helpStr;
+	}
+
+	@Override
+	protected void stop(Connection h) throws Exception {
+		h.close();
+	}
+
+	@Override
+	protected Connection start(Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		String toGet = jdbcString;
+		if (clazz.trim().isEmpty()) {
+			String driver = (String) op.getOrDefault(AqlOption.jdbc_default_class);
+			Util.checkClass(driver);
+		}
+		if (jdbcString.trim().isEmpty()) {
+			toGet = (String) op.getOrDefault(AqlOption.jdbc_default_string);
+		}
+		return DriverManager.getConnection(toGet);	
 	}
 	
 	@Override
-	public Pair<InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1>, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2>> type(AqlTyping G) {
-		SchExp<Ty, En, Sym, Fk, Att> s = src.type(G);
-		SchExp<Ty, En, Sym, Fk, Att> t = dst.type(G);
-		if (!G.eq(s, t)) { //TODO aql schema equality
-			throw new RuntimeException("Source instance of transform has schema\n" + s + " \n\n but target instance has schema\n" + t);
+	protected void processEn(En en, Schema<Ty, En, Sym, Fk, Att> sch, Connection conn, String q) throws Exception {
+		Statement stmt = conn.createStatement();
+		stmt.execute(q);
+		ResultSet rs = stmt.getResultSet();
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnsNumber = rsmd.getColumnCount();
+		if (columnsNumber != 2) {
+			stmt.close();
+			rs.close();
+			throw new RuntimeException("Error in " + en + ": Expected 2 columns but received " + columnsNumber);
 		}
-		return new Pair<>(src, dst);
+		while (rs.next()) {
+			 Object gen = rs.getObject(1);
+			 if (gen == null) {
+				stmt.close();
+				rs.close();
+				throw new RuntimeException("Error in " + en + ": Encountered a NULL generator in column 1");
+			 }
+			 Object gen2 = rs.getObject(2);
+			 if (gen2 == null) {
+				stmt.close();
+				rs.close();
+				throw new RuntimeException("Error in " + en + ": Encountered a NULL generator in column 2");
+			 }						 
+			 gens.put((Gen1) gen.toString(), Term.Gen((Gen2) gen2.toString()));
+		}
+		stmt.close();
+		rs.close();		
 	}
+
 
 }

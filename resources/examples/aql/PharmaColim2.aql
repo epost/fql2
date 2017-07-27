@@ -48,6 +48,9 @@ schema_colimit ColimAuto = quotient S1 + S2 : Type {
 		S1_g = S2_g1.S2_g2
 }
 
+//just for fun
+schema_colimit Coproduct = coproduct S1 + S2 : Type 
+
 ///////////////////////////////////////////////////////////////////////////
 //use a different, less verbose colimit constructed manually
 
@@ -112,6 +115,9 @@ instance I2 = literal : S2 {
 
 instance CoProd = coproduct_sigma (getMapping Colim S1) I1 (getMapping Colim S2) I2 : getSchema Colim
 
+//alternative notation for coproducts
+instance CoProd2 = coproduct (sigma (getMapping Colim S1) I1) (sigma (getMapping Colim S2) I2) : getSchema Colim
+
 instance E = literal : getSchema Colim {
 	generators 
 	  	P : P 
@@ -133,3 +139,11 @@ transform a2 = literal : E -> CoProd {
 } 
 
 instance answer = coequalize a1 a2 
+
+//quotient directly
+instance answer2 = quotient CoProd {
+	equations
+		Peter = Pete
+		BloodPressure = BP
+		Wt = BodyWeight
+}

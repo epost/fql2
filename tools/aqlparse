@@ -24,6 +24,7 @@
     <keyword>transform</keyword>
     <keyword>typeside</keyword>
     <keyword>html</keyword>
+    <keyword>md</keyword>
     <keyword>constraints</keyword>
   </keywords>
   <keywords2>
@@ -83,10 +84,12 @@
     <keyword>options</keyword>
     <keyword>path_equations</keyword>
 <keyword>quotient</keyword>
+<keyword>quotient_jdbc</keyword>
     <keyword>random</keyword>
 <keyword>remove</keyword>
 <keyword>rename</keyword>
     <keyword>return</keyword>
+<keyword>simple</keyword>
     <keyword>schemaOf</keyword>
     <keyword>sql</keyword>
     <keyword>sigma</keyword>

@@ -112,7 +112,7 @@ class AqlInACan {
 	public static <Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> String toHtml(Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I) {
 		String ret = "<div>";
 		
-		Map<En, Pair<List<String>,Object[][]>> tables = new AqlViewer(64).makeEnTables(I.algebra()); //TODO aql hardcoded
+		Map<En, Pair<List<String>,Object[][]>> tables = new AqlViewer(256).makeEnTables(I.algebra()); //TODO aql hardcoded
 		
 		for (En t : Util.alphabetical(tables.keySet())) {
 			ret += "<table style=\"float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px\" border=\"1\"  cellpadding=\"3\">";

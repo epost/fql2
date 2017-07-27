@@ -11,6 +11,7 @@ import catdata.aql.Kind;
 public class CommentExp extends Exp<Comment> {
 
 	public final String s;
+	public final boolean isM;
 	
 	@Override
 	public Map<String, String> options() {
@@ -21,6 +22,7 @@ public class CommentExp extends Exp<Comment> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (isM ? 1231 : 1237);
 		result = prime * result + ((s == null) ? 0 : s.hashCode());
 		return result;
 	}
@@ -34,6 +36,8 @@ public class CommentExp extends Exp<Comment> {
 		if (getClass() != obj.getClass())
 			return false;
 		CommentExp other = (CommentExp) obj;
+		if (isM != other.isM)
+			return false;
 		if (s == null) {
 			if (other.s != null)
 				return false;
@@ -42,8 +46,9 @@ public class CommentExp extends Exp<Comment> {
 		return true;
 	}
 
-	public CommentExp(String s) {
+	public CommentExp(String s, boolean isM) {
 		this.s = s;
+		this.isM = isM;
 	}
 
 	
@@ -55,7 +60,7 @@ public class CommentExp extends Exp<Comment> {
 
 	@Override
 	public Comment eval(AqlEnv env) {
-		return new Comment(s);
+		return new Comment(s, isM);
 	}
 
 	@Override

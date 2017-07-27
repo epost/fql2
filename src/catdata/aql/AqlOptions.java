@@ -1,6 +1,7 @@
 package catdata.aql;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,19 @@ import catdata.aql.AqlProver.ProverName;
 import catdata.aql.exp.AqlParser;
 
 public final class AqlOptions {
+	
+	private static List<String> optionNames;
+	public static synchronized Collection<String> optionNames() {
+		if (optionNames != null) {
+			return optionNames;
+		}
+		List<String> optionNames = new LinkedList<>();
+		for (AqlOption x : AqlOption.values()) {
+			optionNames.add(x.toString());
+		}
+		optionNames.sort(Util.AlphabeticalComparator);
+		return optionNames;
+	}
 	
 	public static final AqlOptions initialOptions = new AqlOptions();
 	
@@ -45,8 +59,11 @@ public final class AqlOptions {
 		eval_approx_sql_unsafe,
 		eval_sql_persistent_indices,
 		query_remove_redundancy,
-		labelled_nulls	,
 		import_as_theory,
+		import_joined,
+		map_nulls_arbitrarily_unsafe,
+		jdbc_default_class,
+		jdbc_default_string,
 
 		program_allow_nontermination_unsafe,
 		completion_precedence,
@@ -57,12 +74,10 @@ public final class AqlOptions {
 		allow_java_eqs_unsafe, //TODO aql enforce
 		require_consistency, //TODO: aql enforce require_consistency
 		timeout, 
-		allow_attribute_merges,
 		dont_verify_is_appropriate_for_prover_unsafe,
 		dont_validate_unsafe,
 		static_typing,
 		prover, 
-		null_prefix, 
 		coproduct_allow_entity_collisions_unsafe,
 		coproduct_allow_type_collisions_unsafe;
 		
@@ -163,14 +178,16 @@ public final class AqlOptions {
 	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
+		case map_nulls_arbitrarily_unsafe:
+			return false;
+		case import_joined:
+			return true;
 		case coproduct_allow_type_collisions_unsafe:
 			return false;
 		case coproduct_allow_entity_collisions_unsafe:
 			return false;
 		case eval_max_temp_size:
 			return 1024*1024*8;
-		case null_prefix:
-			return "";
 		case import_as_theory:
 			return false;
 		case eval_reorder_joins:
@@ -181,8 +198,6 @@ public final class AqlOptions {
 			return Runtime.getRuntime().availableProcessors();
 		case random_seed:
 			return 0;
-		case allow_attribute_merges:
-			return false;
 		case completion_precedence:
 			return null;
 		case prover:
@@ -249,8 +264,10 @@ public final class AqlOptions {
 			return 16*1024;
 		case eval_sql_persistent_indices:
 			return false;
-		case labelled_nulls:
-			return false;
+		case jdbc_default_class:
+			return "org.h2.Driver";
+		case jdbc_default_string:
+			return "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1";
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -266,7 +283,8 @@ public final class AqlOptions {
 		return getDefault(op);
 	}
 	
-
+	
+	
 	/**
 	 * @param map
 	 * @param col possibly null
@@ -296,11 +314,13 @@ public final class AqlOptions {
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case map_nulls_arbitrarily_unsafe:
+			return op.getBoolean(map);
+		case import_joined:
+			return op.getBoolean(map);
 		case coproduct_allow_type_collisions_unsafe:
 			return op.getBoolean(map);
 		case coproduct_allow_entity_collisions_unsafe:
-			return op.getBoolean(map);
-		case labelled_nulls:
 			return op.getBoolean(map);
 		case import_as_theory:
 			return op.getBoolean(map);
@@ -319,8 +339,6 @@ public final class AqlOptions {
 		case random_seed:
 			return op.getInteger(map);
 		case allow_java_eqs_unsafe:
-			return op.getBoolean(map);
-		case allow_attribute_merges:
 			return op.getBoolean(map);
 		case completion_precedence:
 			return AqlOption.getPrec(map.get(op.toString()), col);
@@ -348,8 +366,6 @@ public final class AqlOptions {
 			return op.getBoolean(map);
 		case csv_charset:
 			return op.getString(map);
-		case null_prefix:
-			return op.getString(map);	
 		case csv_escape_char:
 			return op.getChar(map);
 		case csv_field_delim_char:
@@ -384,6 +400,10 @@ public final class AqlOptions {
 			return op.getInteger(map);
 		case eval_sql_persistent_indices:
 			return op.getBoolean(map);
+		case jdbc_default_class:
+			return op.getString(map);
+		case jdbc_default_string:
+			return op.getString(map);
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		}

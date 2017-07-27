@@ -115,17 +115,18 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		frame.getRootPane().registerKeyboardAction(escListener, commandW, JComponent.WHEN_IN_FOCUSED_WINDOW);
 	}
 
-	// private JFrame frame;
 
 	public void setText(String s) {
-		topArea.setText(s);
-		setCaretPos(0);
+		SwingUtilities.invokeLater(() -> {
+			topArea.setText(s);
+			setCaretPos(0);
+		});
 	}
 
 	public String getText() {
 		return topArea.getText();
 	}
-	
+
 	protected abstract String getATMFlhs();
 
 	protected abstract String getATMFrhs();
@@ -143,7 +144,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	volatile List<Integer> history = Collections.synchronizedList(new LinkedList<>());
 	int position = 0;
-	
+
 	private void hist() {
 		if (position < 0) {
 			position = 0;
@@ -152,16 +153,17 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 		setCaretPos(history.get(position));
 	}
+
 	public void backAction() {
 		position++;
 		hist();
 	}
-	
+
 	public void fwdAction() {
 		position--;
 		hist();
 	}
-	
+
 	protected CodeEditor(String title, Integer id, String content) {
 		super(new GridLayout(1, 1));
 		this.id = id;
@@ -176,7 +178,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		FoldParserManager.get().addFoldParserMapping(getATMFlhs(), new CurlyFoldParser());
 
 		topArea = new RSyntaxTextArea();
-//		topArea.setPreferredSize(new Dimension(200,600));
+		// topArea.setPreferredSize(new Dimension(200,600));
 		topArea.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -184,16 +186,15 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 				addToHistory(i);
 			}
 
-			
 		});
-		
+
 		topArea.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				last_keystroke = System.currentTimeMillis();
 			}
 		});
-		
+
 		topArea.setMarkOccurrences(true);
 
 		if (getATMFrhs() != null) {
@@ -355,30 +356,29 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		JMenuItem unfoldall = new JMenuItem("UnFold All");
 		unfoldall.addActionListener(x -> foldAll(false));
 		topArea.getPopupMenu().add(unfoldall, 0);
-		
-		
+
 		// TODO aql real DAWG?
 		spc = new SpellChecker(z -> reservedWords());
 		topArea.addParser(spc);
 
 		respArea.setMinimumSize(new Dimension(0, 0));
-		respArea.setPreferredSize(new Dimension(600,200));
+		respArea.setPreferredSize(new Dimension(600, 200));
 		topArea.setOpaque(true);
 		respArea.setOpaque(true);
 		IdeOptions.theCurrentOptions.apply(this);
 
 		initSearchDialogs();
-		
+
 		situate();
 	}
 
 	public synchronized void addToHistory(int i) {
-		history.add(0, i); 
+		history.add(0, i);
 		if (history.size() > 128) {
 			history = Collections.synchronizedList(history.subList(0, 32));
 		}
 	}
-	
+
 	private void situate() {
 		if (outline_elongated) {
 			situateElongated();
@@ -386,13 +386,13 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			situateNotElongated();
 		}
 	}
-	
+
 	private void situateElongated() {
 		JComponent outline = getOutline().p;
-		
+
 		JSplitPane xx1 = new Split(.8, JSplitPane.VERTICAL_SPLIT);
 		xx1.setDividerSize(6);
-		//xx1.setResizeWeight(.8);
+		// xx1.setResizeWeight(.8);
 		xx1.add(sp);
 		xx1.add(respArea);
 		xx1.setBorder(BorderFactory.createEmptyBorder());
@@ -403,11 +403,11 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			xx2.setDividerSize(6);
 
 			if (outline_on_left) {
-			//	xx2.setResizeWeight(.2);
+				// xx2.setResizeWeight(.2);
 				xx2.add(outline);
 				xx2.add(xx1);
 			} else {
-			//	xx2.setResizeWeight(.8);
+				// xx2.setResizeWeight(.8);
 				xx2.add(xx1);
 				xx2.add(outline);
 			}
@@ -415,16 +415,14 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			newtop = xx2;
 		}
 
-		
-
 		this.removeAll();
 		add(newtop);
-		//revalidate();
+		// revalidate();
 	}
-	
+
 	private void situateNotElongated() {
 		JComponent outline = getOutline().p;
-		
+
 		JComponent newtop = sp;
 
 		if (enable_outline) {
@@ -450,7 +448,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		xx1.add(newtop);
 		xx1.add(respArea);
 		xx1.setBorder(BorderFactory.createEmptyBorder());
-		
+
 		respArea.setMinimumSize(new Dimension(0, 0));
 
 		this.removeAll();
@@ -603,7 +601,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		long middle;
 
 		try {
-			
+
 			start = System.currentTimeMillis();
 			env = makeEnv(program, init);
 			middle = System.currentTimeMillis();
@@ -657,8 +655,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	protected abstract Env makeEnv(String program, Progg init);
 
 	protected abstract Progg parse(String program) throws ParserException;
-	
-	
 
 	public void setCaretPos(int p) {
 		try {
@@ -667,7 +663,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 				topArea.setCaretPosition(p);
 				Util.centerLineInScrollPane(topArea);
 			});
-			//addToHistory(p); //seems to break lots of stuff
+			// addToHistory(p); //seems to break lots of stuff
 		} catch (Throwable ex) {
 			ex.printStackTrace();
 		}
@@ -675,8 +671,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	private void moveTo(int col, int line) {
 		topArea.requestFocusInWindow();
-		setCaretPos(
-				topArea.getDocument().getDefaultRootElement().getElement(line - 1).getStartOffset() + (col - 1));
+		setCaretPos(topArea.getDocument().getDefaultRootElement().getElement(line - 1).getStartOffset() + (col - 1));
 	}
 
 	protected Progg tryParse(String program) {
@@ -685,6 +680,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		} catch (ParserException e) {
 			int col = e.getLocation().column;
 			int line = e.getLocation().line;
+			
 			moveTo(col, line);
 
 			toDisplay = "Syntax error: " + e.getLocalizedMessage();
@@ -769,8 +765,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			break;
 		}
 
-	
-
 	}
 
 	protected Outline<Progg, Env, DDisp> outline;
@@ -782,36 +776,36 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	protected Unit parsed_prog_lock;
 
 	public void close() {
-			isClosed = true;
-	} 
+		isClosed = true;
+	}
 
 	@SuppressWarnings("unused")
 	protected boolean omit(String s, Progg p) {
 		return false;
 	}
 
-	//TODO aql pull these from options rather than cache her?
+	// TODO aql pull these from options rather than cache her?
 	private volatile Boolean enable_outline = false;
-	 public volatile Boolean outline_alphabetical = true;
+	public volatile Boolean outline_alphabetical = false;
 	private volatile Boolean outline_on_left = true;
-	 public volatile Boolean outline_prefix_kind = true;
+	public volatile Boolean outline_prefix_kind = true;
 	private volatile Boolean outline_elongated = true;
 	protected volatile long sleepDelay = 2;
-	 public volatile Boolean outline_types = true;
-	 public volatile Long last_keystroke = null;
-	
+	public volatile Boolean outline_types = true;
+	public volatile Long last_keystroke = null;
+
 	public void set_delay(int i) {
 		if (i < 1) {
 			i = 1;
 		}
 		sleepDelay = (long) i * 1000;
 	}
-	
+
 	public void outline_types(Boolean bool) {
 		outline_types = bool;
-		//getOutline().build();
+		// getOutline().build();
 	}
-	
+
 	public void enable_outline(Boolean bool) {
 		enable_outline = bool;
 		situate();
@@ -819,7 +813,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	public void outline_alphabetical(Boolean bool) {
 		outline_alphabetical = bool;
-		//getOutline().build();
+		getOutline().build();
 	}
 
 	public void outline_on_left(Boolean bool) {
@@ -829,7 +823,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	public void outline_prefix_kind(Boolean bool) {
 		outline_prefix_kind = bool;
-		//getOutline().build();
+		// getOutline().build();
 	}
 
 	public void outline_elongated(Boolean bool) {
@@ -837,6 +831,4 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		situate();
 	}
 
-	
-	
 }

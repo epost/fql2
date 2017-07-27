@@ -53,6 +53,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 
 	//TODO: aql printing of contexts broken when conitain choices
 	
+	@SuppressWarnings("unused")
 	@Override
 	public Schema<Ty, String, Sym, String, String> eval(AqlEnv env) {
 		TypeSide<Ty, Sym> ts = typeSide.eval(env);
@@ -174,7 +175,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 		
 		if (!ens.isEmpty()) {
 			toString += "\tentities";
-			toString += "\n\t\t" + Util.sep(ens, " ") + "\n";
+			toString += "\n\t\t" + Util.sep(Util.alphabetical(ens), " ") + "\n";
 		}
 		
 		List<String> temp = new LinkedList<>();
@@ -182,7 +183,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 		if (!fks.isEmpty()) {
 			toString += "\tforeign_keys";
 			temp = new LinkedList<>();
-			for (Pair<String, Pair<String, String>> sym : fks) {
+			for (Pair<String, Pair<String, String>> sym : Util.alphabetical(fks)) {
 				temp.add(sym.first + " : " + sym.second.first + " -> " + sym.second.second);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -191,7 +192,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 		if (!p_eqs.isEmpty()) {
 			toString += "\tpath_equations";
 			temp = new LinkedList<>();
-			for (Pair<List<String>, List<String>> sym : p_eqs) {
+			for (Pair<List<String>, List<String>> sym : Util.alphabetical(p_eqs)) {
 				temp.add(Util.sep(sym.first, ".") + " = " + Util.sep(sym.second, ".") );
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -200,7 +201,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 		if (!atts.isEmpty()) {
 			toString += "\tattributes";
 			temp = new LinkedList<>();
-			for (Pair<String, Pair<String, Ty>> sym : atts) {
+			for (Pair<String, Pair<String, Ty>> sym : Util.alphabetical((atts))) {
 				temp.add(sym.first + " : " + sym.second.first + " -> " + sym.second.second);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -209,7 +210,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 		if (!t_eqs.isEmpty()) {
 			toString += "\tobservation_equations";
 			temp = new LinkedList<>();
-			for (Quad<String, String, RawTerm, RawTerm> sym : t_eqs) {
+			for (Quad<String, String, RawTerm, RawTerm> sym : Util.alphabetical(t_eqs)) {
 				temp.add("forall " + sym.first + ". " + sym.third + " = " + sym.fourth);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";

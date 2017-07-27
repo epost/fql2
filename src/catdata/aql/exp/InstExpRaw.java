@@ -2,9 +2,11 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -81,7 +83,7 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		
 		List<InteriorLabel<Object>> xx = new LinkedList<>();
 		for (Pair<Integer, Pair<RawTerm, RawTerm>> p : eqs) {
-			xx.add(new InteriorLabel<>("generators", p.second, p.first,  x -> x.first + " = " + x.second).conv());
+			xx.add(new InteriorLabel<>("equations", p.second, p.first,  x -> x.first + " = " + x.second).conv());
 		}
 		raw.put("equations", xx);
 	}
@@ -108,8 +110,8 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			Map<String, Set<String>> n = Util.revS(Util.toMapSafely(gens));
 			
 			temp = new LinkedList<>();
-			for (Object x : n.keySet()) {
-				temp.add(Util.sep(n.get(x), " ") + " : " + x);
+			for (Object x : Util.alphabetical(n.keySet())) {
+				temp.add(Util.sep(Util.alphabetical(n.get(x)), " ") + " : " + x);
 			}
 			
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -118,10 +120,34 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		if (!eqs.isEmpty()) {
 			toString += "\tequations";
 			temp = new LinkedList<>();
-			for (Pair<RawTerm, RawTerm> sym : eqs) {
+			for (Pair<RawTerm, RawTerm> sym : Util.alphabetical(eqs)) {
 				temp.add(sym.first + " = " + sym.second);
 			}
-			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			if (eqs.size() < 9) {
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			} else {
+				int step = 3;
+				int longest = 32;
+				for (String s : temp) {
+					if (s.length() > longest) {
+						longest = s.length() + 4;
+					}
+				}
+				for (int i = 0; i < temp.size(); i += step) {
+					StringBuilder sb = new StringBuilder();
+					Formatter formatter = new Formatter(sb, Locale.US);
+					List<String> args = new LinkedList<>();
+					List<String> format = new LinkedList<>();
+					for (int j = i; j < Integer.min(temp.size(), i + step); j++) {
+						args.add(temp.get(j));
+						format.add("%-" + longest + "s");
+					}
+					String x = formatter.format(Util.sep(format, ""), args.toArray(new String[0])).toString();
+					formatter.close();
+					toString += "\n\t\t" + x;
+				}
+				toString += "\n";
+			}
 		}
 		
 		if (!options.isEmpty()) {
@@ -195,8 +221,21 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		Set<Pair<Term<Ty,En,Sym,Fk,Att,String,String>, Term<Ty,En,Sym,Fk,Att,String,String>>> eqs0 = new HashSet<>();
 
 		for (String k : imports) {
+			Instance<?, ?, ?, ?, ?, ?, ?, ?, ?> u = env.defs.insts.get(k);
+			for (Object o : u.gens().keySet()) {
+				if (!(o instanceof String)) {
+					throw new RuntimeException("Cannot import " + o + " from " + k + " because it is not a string");
+				}
+			}
+			for (Object o : u.sks().keySet()) {
+				if (!(o instanceof String)) {
+					throw new RuntimeException("Cannot import " + o + " from " + k + " because it is not a string");
+				}
+			}
+			
 			@SuppressWarnings("unchecked")
 			Instance<Ty, En, Sym, Fk, Att, String, String, ID, Chc<String, Pair<ID, String>>> v = env.defs.insts.get(k);
+			
 			col.gens.putAll(v.gens().map);
 			col.sks.putAll(v.sks().map);
 			eqs0.addAll(v.eqs());

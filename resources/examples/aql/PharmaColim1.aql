@@ -92,9 +92,9 @@ mapping G1 = literal : S1 -> T {
 		g -> g1.g2
 		h -> h
 	attributes
-		Person_att  -> lambda x. P_att1(x)
-		Gender_att  -> lambda x. G_att(x)
-		ObsType_att -> lambda x. T_att1(x)
+		Person_att  ->  P_att1
+		Gender_att  ->  G_att
+		ObsType_att ->  T_att1
 } 
 
 mapping G2 = literal : S2 -> T {
@@ -108,8 +108,8 @@ mapping G2 = literal : S2 -> T {
 		g1 -> g1
 		g2 -> g2
 	attributes
-		Patient_att -> lambda x. P_att2(x)
-		Type_att    -> lambda x. T_att2(x)		
+		Patient_att -> P_att2
+		Type_att    ->  T_att2	
 } 
 
 ///////////////////////////////////////////////////////////////////////////

@@ -76,7 +76,7 @@ Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		if (!gens.isEmpty()) {
 			toString += "\tentities";
 					
-			for (Pair<String, RawTerm> x : gens) {
+			for (Pair<String, RawTerm> x : Util.alphabetical(gens)) {
 				temp.add(x.first + " -> " + x.second);
 			}
 			

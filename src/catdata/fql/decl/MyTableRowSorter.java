@@ -39,7 +39,7 @@ class MyTableRowSorter extends TableRowSorter<TableModel> {
 //					if (o1 instanceof Integer && o2 instanceof Integer) {
 //					return ((Integer)o1).compareTo((Integer)o2);
 //			}
-return o1.toString().compareTo(o2.toString());
+                        	return o1.toString().compareTo(o2.toString());
                         } }
                 };
 	}

@@ -19,6 +19,74 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 		return Kind.SCHEMA;
 	}
 	
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public static class SchExpCod<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends SchExp<Ty,En2,Sym,Fk2,Att2> {
+
+		public final QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> exp;
+
+		public SchExpCod(QueryExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> exp) {
+			Util.assertNotNull(exp);
+			this.exp = exp;
+		}
+		
+		//TODO aql schema equality too weak
+		@Override
+		public SchExp<Ty,En2,Sym,Fk2,Att2> resolve(AqlTyping G, Program<Exp<?>> prog) {
+			return this;
+		}
+		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((exp == null) ? 0 : exp.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SchExpCod<?, ?, ?, ?, ?, ?, ?, ?> other = (SchExpCod<?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (exp == null) {
+				if (other.exp != null)
+					return false;
+			} else if (!exp.equals(other.exp))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "dynamic";
+		}
+
+		
+		@Override
+		public Schema<Ty,En2,Sym,Fk2,Att2> eval(AqlEnv env) {
+			return exp.eval(env).dst;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return exp.deps();
+		}
+		
+		
+		
+		
+	}
+	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	public static class SchExpColim<N, E, Ty, En, Sym, Fk, Att> extends SchExp<Ty, String, Sym, String, String> {

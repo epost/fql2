@@ -8,9 +8,11 @@ public class Comment implements Semantics {
 	}
 	
 	public final String comment;
+	public final boolean isMarkdown;
 
-	public Comment(String comment) {
+	public Comment(String comment, boolean isMarkdown) {
 		this.comment = comment;
+		this.isMarkdown = isMarkdown;
 	}
 
 	@Override
@@ -18,6 +20,7 @@ public class Comment implements Semantics {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((comment == null) ? 0 : comment.hashCode());
+		result = prime * result + (isMarkdown ? 1231 : 1237);
 		return result;
 	}
 
@@ -34,6 +37,8 @@ public class Comment implements Semantics {
 			if (other.comment != null)
 				return false;
 		} else if (!comment.equals(other.comment))
+			return false;
+		if (isMarkdown != other.isMarkdown)
 			return false;
 		return true;
 	}

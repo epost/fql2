@@ -1,6 +1,10 @@
 //options
 //	require_consistency=false
 
+options
+ import_joined=false
+ import_as_theory = true
+
 typeside TypeSide = literal {
 	java_types
 		Varchar = "java.lang.String"
@@ -143,7 +147,6 @@ instance iSTSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.cat
    skill -> "select id, skill from sts2_SkillNdFrTask"
    task -> "select id, task from sts2_SkillNdFrTask"
    options
-     null_prefix = "ST"
      import_as_theory = true
 }
 
@@ -166,7 +169,7 @@ instance iSPSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.cat
    skill  -> "select id, skill from sps2_SkillPrvdByPerson"
    person -> "select id, person from sps2_SkillPrvdByPerson"
  options
-     null_prefix = "SP"
+    
      import_as_theory = true
 }
 
@@ -190,10 +193,14 @@ pragma pSetUpSkillMatch = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.
 instance iSkillMatch = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn_SPSpn_CoLim {
 	Skill -> "select sm_id from SkillMatch2"
 	SkillClass -> "select scm_id from SkillClassMatch2"
-   options
-     null_prefix = "SM"
-     import_as_theory = true
 }
+
+pragma p = exec_jdbc "com.mysql.jdbc.Driver" //"jdbc:mysql://localhost:3306/ci_s0?user=root&password=HappyFunctor"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr"  {
+	 "select sm_id, ts_id from SkillMatch2"
+	 "select scm_id, tsc_id from SkillClassMatch2"
+}
+
 
 transform tSMToSTSpn = import_jdbc "com.mysql.jdbc.Driver" //"jdbc:mysql://localhost:3306/ci_s0?user=root&password=HappyFunctor"
 	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : iSkillMatch -> iS3_S2_Sum2 {

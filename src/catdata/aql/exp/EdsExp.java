@@ -55,7 +55,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			if (!As.isEmpty()) {
 				toString += "\tforall";
 				List<String> temp = new LinkedList<>();		
-				for (Pair<String, String> p : As) {
+				for (Pair<String, String> p : Util.alphabetical(As)) {
 					temp.add(p.first + ":" + p.second);
 				}
 				
@@ -64,7 +64,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			if (!Awh.isEmpty()) {
 				toString += "\twhere";
 				List<String> temp = new LinkedList<>();
-				for (Pair<RawTerm, RawTerm> p : Awh) {
+				for (Pair<RawTerm, RawTerm> p : Util.alphabetical(Awh)) {
 					temp.add(p.first + " = " + p.second);
 				}
 				
@@ -77,7 +77,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 					toString += " unique";
 				}
 				List<String> temp = new LinkedList<>();		
-				for (Pair<String, String> p : Es) {
+				for (Pair<String, String> p : Util.alphabetical(Es)) {
 					temp.add(p.first + ":" + p.second);
 				}
 				
@@ -86,7 +86,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			if (!Ewh.isEmpty()) {
 				toString += "\twhere";
 				List<String> temp = new LinkedList<>();
-				for (Pair<RawTerm, RawTerm> p : Ewh) {
+				for (Pair<RawTerm, RawTerm> p : Util.alphabetical(Ewh)) {
 					temp.add(p.first + " = " + p.second);
 				}
 				

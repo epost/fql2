@@ -309,7 +309,7 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 		} else if (ctx.isEmpty()){
 			return repr(nf(term.convert())).convert();
 		}*/
-		throw new RuntimeException("Anomaly: please report");
+		throw new RuntimeException("Not implemented");
 	}
 	
 	private final List<Pair<Chc<Sk, Pair<X, Att>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X,Att>>>>> list = new LinkedList<>();

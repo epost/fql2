@@ -29,6 +29,7 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.Var;
+import catdata.aql.exp.MapExp.MapExpId;
 import catdata.aql.exp.SchExp.SchExpLit;
 import catdata.aql.fdm.CoEvalInstance;
 import catdata.aql.fdm.ColimitInstance;
@@ -274,7 +275,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			//Schema<Ty, En, Sym, Fk, Att> sch0 = sch.eval(env);
 			Collage<Ty, En, Sym, Fk, Att, Gen2, Sk2> col = new Collage<>(h1.dst().collage());
 			AqlOptions strat = new AqlOptions(options, col, env.defaults);
-			Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen2, Sk2>, Term<Ty, En, Sym, Fk, Att, Gen2, Sk2>>> eqs0 = new HashSet<>();
+			Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen2, Sk2>, Term<Ty, En, Sym, Fk, Att, Gen2, Sk2>>> eqs0 
+			= new HashSet<>(h1.dst().eqs());
 
 			
 				for (Gen1 g : h1.src().gens().keySet()) {
@@ -331,11 +333,24 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 		
 		
-
 		@Override
 		public String toString() {
-			List<String> l = Is.stream().map(x -> x.first + " " + x.second).collect(Collectors.toList());
+			if (hasNoSigmas()) {
+				List<String> l = Is.stream().map(x -> "(" + x.second + ")").collect(Collectors.toList());
+				return "coproduct " + Util.sep(l, " ") + " : " + sch;  				
+			}			
+			List<String> l = Is.stream().map(x -> "(" + x.first + ") (" + x.second + ")").collect(Collectors.toList());
 			return "coproduct_sigma " + Util.sep(l, " ") + " : " + sch;  
+		}
+
+		//TODO aql term equality
+		private boolean hasNoSigmas() {
+			for (Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> l : Is) {
+				if (!l.first.equals(new MapExpId<>(sch))) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 		@Override
@@ -430,6 +445,133 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		
 		
 	}
+	
+	///////////////////////////////////////////////////////////////////////
+	
+	/* public static final class InstExpCoProd<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> 
+		extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
+
+	public final InstExpCoProdSigma<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> exp;		
+			
+	@Override
+	public Map<String, String> options() {
+		return exp.options;
+	}
+
+	public InstExpCoProd(List<InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> is, SchExp<Ty, En, Sym, Fk, Att> sch, List<Pair<String, String>> options) {
+		List<Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> 
+		js;
+		this.exp = new InstExpCoProdSigma<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>(js, sch, options);
+	}
+	
+	@Override
+	public Collection<Pair<String, Kind>> deps() {
+		Set<Pair<String, Kind>> ret = new HashSet<>(sch.deps());	
+		for(Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> i : Is) {
+			ret.addAll(i.first.deps());
+			ret.addAll(i.second.deps());
+		}
+		return ret;
+	}
+	
+	
+
+	@Override
+	public String toString() {
+		List<String> l = Is.stream().map(x -> x.first + " " + x.second).collect(Collectors.toList());
+		return "coproduct_sigma " + Util.sep(l, " ") + " : " + sch;  
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((Is == null) ? 0 : Is.hashCode());
+		result = prime * result + ((options == null) ? 0 : options.hashCode());
+		result = prime * result + ((sch == null) ? 0 : sch.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		InstExpCoProdSigma<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpCoProdSigma<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		if (Is == null) {
+			if (other.Is != null)
+				return false;
+		} else if (!Is.equals(other.Is))
+			return false;
+		if (options == null) {
+			if (other.options != null)
+				return false;
+		} else if (!options.equals(other.options))
+			return false;
+		if (sch == null) {
+			if (other.sch != null)
+				return false;
+		} else if (!sch.equals(other.sch))
+			return false;
+		return true;
+	}
+
+	@Override
+	public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+		for (Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> x : Is) {
+			SchExp<Ty, En, Sym, Fk, Att> ac = new InstExpSigma<>(x.first, x.second, Collections.emptyMap()).type(G);
+			if (!G.eq(ac,sch)) { //TODO aql schema equality
+				throw new RuntimeException("Instance " + x.second + " has schema " + ac + ",\n\nnot " + sch + "\n\nas expected");
+			}
+		}
+		return sch;
+	}
+
+	@Override
+	public Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> eval(AqlEnv env) {
+		Schema<Ty, En, Sym, Fk, Att> sch0 = sch.eval(env);
+		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col = new Collage<>(sch0.collage());
+		AqlOptions strat = new AqlOptions(options, col, env.defaults);
+		Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> eqs0 = new HashSet<>();
+
+		for (Pair<MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>> x : Is) {
+			Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> M = x.first.eval(env);
+			Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I = x.second.eval(env);
+			for (Gen g : I.gens().keySet()) {
+				if (col.gens.containsKey(g)) {
+					if (!(boolean)strat.getOrDefault(AqlOption.coproduct_allow_type_collisions_unsafe)) {
+						throw new RuntimeException("The generators in the input instances of a coproduct must be unique, but there is more than one " + g + ". Possible solution: add options coproduct_allow_entity_collisions_unsafe=true");
+					} else {
+						continue;
+					}
+				} else {
+					col.gens.put(g, M.ens.get(I.gens().get(g)));
+				}
+			}
+			for (Sk g : I.sks().keySet()) {
+				if (col.sks.containsKey(g)) {
+					if (!(boolean)strat.getOrDefault(AqlOption.coproduct_allow_type_collisions_unsafe)) {
+						throw new RuntimeException("The labelled nulls in the input instances of a coproduct must be unique, but there is more than one " + g + ". Possible solution: add options coproduct_allow_type_collisions_unsafe=true");
+					} else {
+						continue;
+					}
+				} else {
+					col.sks.put(g, I.sks().get(g));
+				}
+			}
+			for (Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : I.eqs()) {
+				eqs0.add(new Pair<>(M.trans(eq.first), M.trans(eq.second)));
+				col.eqs.add(new Eq<>(new Ctx<>(), M.trans(eq.first), M.trans(eq.second)));
+			}
+		}		
+		InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, ID> initial0 = new InitialAlgebra<>(strat, sch0, col, new It(), Object::toString, Object::toString);			 
+		return new LiteralInstance<>(sch0, col.gens.map, col.sks.map, eqs0, initial0.dp(), initial0, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
+	}
+	
+} */
 	
 	///////////////////////////////////////////////////////////////////////
 	

@@ -203,13 +203,16 @@ public class Util {
 			return false;
 		}
 
+		AlphanumComparator noc = new AlphanumComparator();
+//		NaturalOrderComparator noc = new NaturalOrderComparator();
+		
 		@Override
 		public Comparator<?> getComparator(int c) {
 			return (o1, o2) -> {
 				if (o1 instanceof Integer && o2 instanceof Integer) {
 					return ((Integer) o1).compareTo((Integer) o2);
 				}
-				return o1.toString().compareTo(o2.toString());
+				return noc.compare(o1.toString(), o2.toString());
 			};
 		}
 	}
@@ -577,7 +580,9 @@ public class Util {
 		return o1.toString().compareTo(o2.toString());
 	};
 
-	public static final Comparator<Object> AlphabeticalComparator = Comparator.comparing(Object::toString);
+	public static final Comparator<Object> AlphabeticalComparator = new AlphanumComparator();
+			
+//			Comparator.comparing(Object::toString);
 
 	public static <X, Y> Map<Y, X> rev0(Map<X, Y> m) {
 		return rev(m, new HashSet<>(m.values()));
@@ -1103,14 +1108,14 @@ public class Util {
 		return sets;
 	}
 
-	public static final Comparator<Object> ToStringComparator = (Object o1, Object o2) -> {
+	public static final Comparator<Object> ToStringComparator =  (Object o1, Object o2) -> {
 		if (o1.toString().length() > o2.toString().length()) {
 			return 1;
 		} else if (o1.toString().length() < o2.toString().length()) {
 			return -1;
 		}
 		return o1.toString().compareTo(o2.toString());
-	};
+	}; 
 
 	public static <X> X anomaly() {
 		throw new RuntimeException("Anomaly: please report");
@@ -1339,5 +1344,31 @@ public class Util {
 
    
 }
+
+	public static <X,Y> boolean containsUpToCase(Collection<X> set, Y s) {
+		for (X t : set) {
+			if (s.toString().toLowerCase().equals(t.toString().toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static String[] union(String[] res, String[] res2) {
+		String[] ret = new String[res.length + res2.length];
+		System.arraycopy(res , 0, ret, 0, res.length);
+		System.arraycopy(res2, 0, ret, res.length, res2.length);
+		return ret;
+	}
+
+	public static void checkClass(String clazz) {
+		try {
+			if (!clazz.trim().isEmpty()) {
+				Class.forName(clazz);
+			}
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 }

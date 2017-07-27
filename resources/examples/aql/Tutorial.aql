@@ -4,7 +4,9 @@
  */
 
 //HTML output is indicated by html { (* " <html code> " *) }.  The imported javascript file
-//renders the graphs (if any).
+//renders the graphs (if any).  Markdown (a less verbose way to write HTML) is indicated by
+//md { (* " markdown code " *) }.  
+
 html { (* "
 <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> 
  <html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">
@@ -156,7 +158,7 @@ html { (* " <hr/> <div id=\"mappings\">
 
 	<p>An <b>mapping</b> from schema <i>C</i> to schema <i>D</i> takes each entity in <i>C</i>
 		to an entity <i>D</i>, each foreign_key in <i>C</i> to a path of foreign_keys in <i>D</i>,
-		and each attribute in <i>C</i> to a lambda expression in <i>D</i>.  In this example, the 
+		and each attribute in <i>C</i> to a lambda expression in <i>D</i> (which may be abbreviated as a path).  In this example, the 
 		two entities <i>N1,N2</i> are taken to <i>N</i>, the foreign_key <i>f</i> is taken to the 
 		zero-length path on <i>N</i>, and the attribute <i>age</i> is taken to <i>age</i>.  We also
 		define an instance on <i>D</i> which will be used later.
@@ -189,7 +191,7 @@ mapping F = literal : C -> D {
 	foreign_keys
 		f -> N	
  	attributes
-		name -> lambda x. name(x)
+		name -> name //shorter, path-based notation
 		salary -> lambda x. salary(x)
 		age -> lambda x. age(x) //plus(1,age(x)) interesting to try this - sigma no longer inverse to delta, results in non-trivial type algebra
 } 
@@ -246,7 +248,7 @@ html { (* " <hr/> <div id=\"uberflowers\">
 		not require any where clauses.  The block corresponding to foreign key <i>f</i>
 		says that for each <i>x</i> inserted into <i>N1</i>, the <i>y</i> to which <i>x</i>
 		should be sent to by <i>f</i> is <i>x</i>.  In general, the foreign_keys
-		part of a query is the most difficult part to write as should be attempted only
+		part of a query is the most difficult part to write and should be attempted only
 		after writing the entities part.		
 	</p>" *) }	
  

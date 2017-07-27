@@ -62,9 +62,9 @@ mapping F = literal : C -> D {
 		IsAL -> yIsAL
 		IsAW -> yIsAW
 	attributes
-		attW -> lambda x. yattW(x)
-		attL -> lambda x. yattL(x)
-		attA -> lambda x. yattA(x)
+		attW -> yattW
+		attL -> yattL
+		attA -> yattA
 } 
 
 instance J = sigma F I

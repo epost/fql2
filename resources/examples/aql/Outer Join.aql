@@ -1,5 +1,10 @@
 //Outer joins using java's Optional class
 
+/*
+This is not an outer join per se (it returns A*B rows, rather than A+B rows, 
+when A and B don't join at all), but is similar in spirit. 
+*/
+
 typeside Ty = literal {
 	java_types
 		String = "java.lang.String"
