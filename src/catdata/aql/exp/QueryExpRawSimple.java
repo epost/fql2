@@ -35,7 +35,6 @@ public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends 
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((block == null) ? 0 : block.hashCode());
-		result = prime * result + ((options == null) ? 0 : options.hashCode());
 		result = prime * result + ((src == null) ? 0 : src.hashCode());
 		return result;
 	}
@@ -54,11 +53,6 @@ public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends 
 				return false;
 		} else if (!block.equals(other.block))
 			return false;
-		if (options == null) {
-			if (other.options != null)
-				return false;
-		} else if (!options.equals(other.options))
-			return false;
 		if (src == null) {
 			if (other.src != null)
 				return false;
@@ -69,21 +63,18 @@ public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends 
 
 	private final SchExp<Ty, En1, Sym, Fk1, Att1> src;
 
-	private final Map<String, String> options;
-
 	private final Block<En1, Att2> block;
 	
 	public QueryExpRawSimple(SchExp<?, ?, ?, ?, ?> src,
-			Block<En1, Att2> block,
-			List<Pair<String, String>> options) {
+			Block<En1, Att2> block
+			) {
 		this.src = (SchExp<Ty, En1, Sym, Fk1, Att1>) src;
-		this.options = Util.toMapSafely(options);
 		this.block = block;
 	}
 
 	@Override
 	public Map<String, String> options() {
-		return options;
+		return block.options;
 	}
 
 	@Override
@@ -108,7 +99,7 @@ public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends 
 		Collage<Ty, En1, Sym, Fk1, Att1, Void, Void> srcCol = src0.collage();
 		En2 en2 = (En2) "Q";
 		
-		AqlOptions ops =  new AqlOptions(options, null, env.defaults);
+		AqlOptions ops =  new AqlOptions(block.options, null, env.defaults);
 		
 		boolean doNotCheckEqs = (Boolean)
 				ops.getOrDefault(AqlOption.dont_validate_unsafe);
@@ -126,7 +117,7 @@ public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends 
 
 		Ctx<En2, Collage<Ty, En1, Sym, Fk1, Att1, Var, Void>> cols = new Ctx<>();
 			
-		QueryExpRaw.processBlock(options, env, src0, ens0, cols, new Pair<>(en2, block));
+		QueryExpRaw.processBlock(block.options, env, src0, ens0, cols, new Pair<>(en2, block));
 		
 		Collage<Ty, En2, Sym, Fk2, Att2, Void, Void> colForDst = new Collage<>(src0.typeSide.collage());
 		colForDst.ens.add(en2);
@@ -176,15 +167,7 @@ public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends 
 			
 				toString += "\t\t" + Util.sep(temp, "\n\n\t\t") + "\n";
 			
-			if (!options.isEmpty()) {
-				toString += "\toptions";
-				temp = new LinkedList<>();
-				for (Entry<String, String> sym : options.entrySet()) {
-					temp.add(sym.getKey() + " = " + sym.getValue());
-				}
-
-				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
-			}
+			
 
 			return "simple : " + src + " {\n" + toString + "\n}";
 		}

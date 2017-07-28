@@ -635,7 +635,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
-				throw new LocException(find("foreign keys", p), "In foreign key  " + p.first + ", " + ex.getMessage());
+				throw new LocException(find("foreign keys", p.second), ex.getMessage());
 			}
 		}
 

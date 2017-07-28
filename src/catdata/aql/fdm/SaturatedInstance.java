@@ -108,7 +108,7 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 				Term<Ty, En, Sym, Fk, Att, X, Y> lhs = eq.second.mapGenSk(Util.<X>voidFn(), Util.<Y>voidFn()).subst(Util.singMap0(eq.first.first, Term.Gen(x)));
 				Term<Ty, En, Sym, Fk, Att, X, Y> rhs = eq.third.mapGenSk(Util.<X>voidFn(), Util.<Y>voidFn()).subst(Util.singMap0(eq.first.first, Term.Gen(x)));
 				if (!dp().eq(new Ctx<>(), lhs, rhs)) {
-					throw new RuntimeException("Algebra does not satisfy equation forall " + eq.first.first + ". " + eq.second + " = " + eq.third + " on ID " + alg.printX(x) + ", yields " + lhs.toString(alg::printY, alg::printX) + " and " + rhs.toString(alg::printY, alg::printX));
+					throw new RuntimeException("Algebra does not satisfy equation forall " + eq.first.first + ". " + eq.second + " = " + eq.third + " on ID " + alg.printX(x) + ", yields unequal IDs " + lhs.toString(alg::printY, alg::printX) + " and " + rhs.toString(alg::printY, alg::printX));
 				}
 			}
 		}

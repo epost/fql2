@@ -54,10 +54,10 @@ ALTER TABLE Department ADD CONSTRAINT d1
    
   options
     jdbc_default_class = "org.h2.Driver" 
-    jdbc_default_string "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1"
+    jdbc_default_string = "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1"
  */
 //look at the example data
-pragma view0 = exec_jdbc "" "" { 
+pragma view0 = exec_jdbc "" "" {  //see note above!!!
 "SELECT * FROM Department"
 "SELECT * FROM Employee"
 }
@@ -106,7 +106,9 @@ instance J_again = import_jdbc "" "" : S {
      import_joined = false      
 }
 
-
+instance K = quotient_jdbc "" "" J {
+	"SELECT id, id FROM Employee"
+}
 
 //import a transform by providing queries for each entity
 transform Jid = import_jdbc "" "" : J -> J {
@@ -136,6 +138,11 @@ pragma view2 = exec_jdbc "" "" {
 instance import_all = import_jdbc_all "" "" 
 //the schema can be obtained as
 schema import_all_schema = schemaOf import_all
+//or
+schema import_all_schema_2 = schemaOf (import_jdbc_all "" "" {
+	options
+		schema_only = true
+})
 
 ////////////////////////////////////////////////////////////
 //

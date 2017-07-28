@@ -337,7 +337,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public String toString() {
 			if (hasNoSigmas()) {
 				List<String> l = Is.stream().map(x -> "(" + x.second + ")").collect(Collectors.toList());
-				return "coproduct " + Util.sep(l, " ") + " : " + sch;  				
+				return "coproduct " + Util.sep(l, " + ") + " : " + sch;  				
 			}			
 			List<String> l = Is.stream().map(x -> "(" + x.first + ") (" + x.second + ")").collect(Collectors.toList());
 			return "coproduct_sigma " + Util.sep(l, " ") + " : " + sch;  

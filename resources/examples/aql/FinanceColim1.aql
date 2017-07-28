@@ -98,6 +98,7 @@ instance PortfolioInstance = import_csv : Portfolio {
 	portfolio -> "/Users/ryan/github/fql/data/finance/Portfolio/portfolio.csv"
 	strategy -> "/Users/ryan/github/fql/data/finance/Portfolio/strategy.csv"
 }
+pragma exportPortfolio = export_csv_instance PortfolioInstance "/Users/ryan/Desktop/exported/"
 */
 
 ////////////////////////////////////////////////////////////////////////
@@ -463,6 +464,8 @@ transform PortfolioRefLinkageInstanceToRefInstance = literal : Sigma_PortfolioRe
 transform PortfolioRefLinkageInstanceToRefInstance = import_csv : Sigma_PortfolioRefLinkageToRef_PortfolioRefLinkageInstance -> RefInstance {
 	strategy -> "/Users/ryan/github/fql/data/finance/PortfolioRef/toRef.csv"
 }
+pragma exportRefTransLinkageInstanceToRefInstance = export_csv_transform RefTransLinkageInstanceToRefInstance "/Users/ryan/Desktop/exportedtrans/"
+
 */
 
 ////////////////////////////////////////////////////////////////////////

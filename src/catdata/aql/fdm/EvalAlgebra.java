@@ -184,8 +184,6 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 				} else {
 					dom = I.algebra().en(q.gens.get(v));
 				}
-				
-				
 				outer: for (X x : dom) {
 					if (ret.size() > max) {
 						throw new RuntimeException("On entity " + entity + ", query evaluation maximum intermediate result size (" + max + ") exceeded.  Try options eval_max_temp_size = " + tuples.size() * dom.size() + " (the largest possible size of the temporary table that triggered this error).  Or, try "
@@ -247,7 +245,8 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 	public Term<Ty, Void, Sym, Void, Void, Void, Y> att(Att2 att, Row<En2, X> x) {
 		Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> l = trans1(x, Q.atts.get(att), I);
 		if (!l.isPresent()) {
-			throw new RuntimeException("Anomly: please report");
+			System.out.flush();
+			throw new RuntimeException("Anomly: please report: cannot translate " + att + " on " + x + " alg is " + this.ens);
 		}
 		return I.algebra().intoY(l.get());
 	}
@@ -326,7 +325,8 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 			this.Q = q;
 		}
 		for (En2 en2 : Q.ens.keySet()) {
-			ens.put(en2, eval(en2, this.Q.ens.get(en2), conn, useSql));
+			Pair<List<Var>, Collection<Row<En2, X>>> x = eval(en2, this.Q.ens.get(en2), conn, useSql);
+			ens.put(en2, x);
 		}
 		if (conn != null) {
 			if (!persistentIndices()) {

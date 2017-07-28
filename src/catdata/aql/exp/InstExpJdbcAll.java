@@ -63,9 +63,71 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 	}
 	
 	private Instance<String, String, String, String, String, String, Null<?>, String, Null<?>> toInstance(AqlEnv env, SqlInstance inst, SqlSchema info) {
-		boolean checkJava = !(Boolean) env.defaults.getOrDefault(AqlOption.allow_java_eqs_unsafe);
+		AqlOptions ops = new AqlOptions(options, null, env.defaults);
+		Schema<String, String, String, String, String> sch = makeSchema(env, info, ops);
 
-		TypeSide<String, String> typeSide = new SqlTypeSide(new AqlOptions(options, null, env.defaults));
+		Ctx<String, Collection<String>> ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
+		Ctx<String, Collection<Null<?>>> tys0 = new Ctx<>();
+		Ctx<String, Ctx<String, String>> fks0 = new Ctx<>();
+		Ctx<String, Ctx<String, Term<String, Void, String, Void, Void, Void, Null<?>>>> atts0 = new Ctx<>();
+		Ctx<Null<?>, Term<String, String, String, String, String, String, Null<?>>> extraRepr = new Ctx<>();
+
+		for (String ty : sch.typeSide.tys) {
+			tys0.put(ty, new HashSet<>());
+		}
+		
+		boolean schemaOnly = (Boolean) ops.getOrDefault(AqlOption.schema_only);
+
+		if (!schemaOnly) {
+
+			int fr = 0;
+			Map<SqlTable, Map<Map<SqlColumn, Optional<Object>>, String>> iso1 = new HashMap<>();
+		
+			for (SqlTable table : info.tables) {
+				Set<Map<SqlColumn, Optional<Object>>> tuples = inst.get(table);
+	
+				Map<Map<SqlColumn, Optional<Object>>, String> i1 = new HashMap<>();
+				for (Map<SqlColumn, Optional<Object>> tuple : tuples) {
+					String i = "v" + (fr++);
+					i1.put(tuple, i);
+					// i2.put(i, tuple);
+					ens0.get(table.name).add(i);
+					for (SqlColumn c : table.columns) {
+						if (!atts0.containsKey(i)) {
+							atts0.put(i, new Ctx<>());
+						}
+						Optional<Object> val = tuple.get(c);
+						Term<String, Void, String, Void, Void, Void, Null<?>> xxx
+						 = InstExpJdbc.objectToSk(sch, val.orElse(null), i, c.toString(), tys0, extraRepr, false);
+						atts0.get(i).put(c.toString(), xxx);
+					}
+				}
+				iso1.put(table, i1);
+				// iso2.put(table, i2);
+			}
+	
+			for (SqlForeignKey fk : info.fks) {
+				for (Map<SqlColumn, Optional<Object>> in : inst.get(fk.source)) {
+					Map<SqlColumn, Optional<Object>> out = inst.follow(in, fk);
+					String tgen = iso1.get(fk.target).get(out);
+					String sgen = iso1.get(fk.source).get(in);
+					if (!fks0.containsKey(sgen)) {
+						fks0.put(sgen, new Ctx<>());
+					}
+					fks0.get(sgen).put(fk.toString(), tgen);
+				}
+			}
+		}
+
+		ImportAlgebra<String, String, String, String, String, String, Null<?>> alg = new ImportAlgebra<String,String,String,String,String,String,Null<?>>(sch, ens0, tys0, fks0, atts0, Object::toString, Object::toString);
+
+		return new SaturatedInstance<>(alg, alg, (Boolean) ops.getOrDefault(AqlOption.require_consistency), (Boolean) ops.getOrDefault(AqlOption.allow_java_eqs_unsafe), true, extraRepr);
+	}
+
+	public Schema<String, String, String, String, String> makeSchema(AqlEnv env, SqlSchema info, AqlOptions ops) {
+		boolean checkJava = !(Boolean) ops.getOrDefault(AqlOption.allow_java_eqs_unsafe);
+	
+		TypeSide<String, String> typeSide = new SqlTypeSide(ops);
 		//typeSide.validate(true);
 		Collage<String, String, String, String, String, Void, Void> col0 = new Collage<>(typeSide.collage());
 		Set<Triple<Pair<Var, String>, Term<String, String, String, String, String, Void, Void>, Term<String, String, String, String, String, Void, Void>>> eqs = new HashSet<>();
@@ -96,59 +158,7 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 		DP<String, String, String, String, String, Void, Void> dp = AqlProver.create(new AqlOptions(options, col0, env.defaults), col0, typeSide.js);
 
 		Schema<String, String, String, String, String> sch = new Schema<>(typeSide, col0.ens, col0.atts.map, col0.fks.map, eqs, dp, checkJava);
-
-		Ctx<String, Collection<String>> ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
-		Ctx<String, Collection<Null<?>>> tys0 = new Ctx<>();
-		Ctx<String, Ctx<String, String>> fks0 = new Ctx<>();
-		Ctx<String, Ctx<String, Term<String, Void, String, Void, Void, Void, Null<?>>>> atts0 = new Ctx<>();
-		AqlOptions op = new AqlOptions(options, null, env.defaults);
-		Ctx<Null<?>, Term<String, String, String, String, String, String, Null<?>>> extraRepr = new Ctx<>();
-
-		for (String ty : sch.typeSide.tys) {
-			tys0.put(ty, new HashSet<>());
-		}
-
-		int fr = 0;
-		Map<SqlTable, Map<Map<SqlColumn, Optional<Object>>, String>> iso1 = new HashMap<>();
-	
-		for (SqlTable table : info.tables) {
-			Set<Map<SqlColumn, Optional<Object>>> tuples = inst.get(table);
-
-			Map<Map<SqlColumn, Optional<Object>>, String> i1 = new HashMap<>();
-			for (Map<SqlColumn, Optional<Object>> tuple : tuples) {
-				String i = "v" + (fr++);
-				i1.put(tuple, i);
-				// i2.put(i, tuple);
-				ens0.get(table.name).add(i);
-				for (SqlColumn c : table.columns) {
-					if (!atts0.containsKey(i)) {
-						atts0.put(i, new Ctx<>());
-					}
-					Optional<Object> val = tuple.get(c);
-					Term<String, Void, String, Void, Void, Void, Null<?>> xxx
-					 = InstExpJdbc.objectToSk(sch, val.orElse(null), i, c.toString(), tys0, extraRepr, false);
-					atts0.get(i).put(c.toString(), xxx);
-				}
-			}
-			iso1.put(table, i1);
-			// iso2.put(table, i2);
-		}
-
-		for (SqlForeignKey fk : info.fks) {
-			for (Map<SqlColumn, Optional<Object>> in : inst.get(fk.source)) {
-				Map<SqlColumn, Optional<Object>> out = inst.follow(in, fk);
-				String tgen = iso1.get(fk.target).get(out);
-				String sgen = iso1.get(fk.source).get(in);
-				if (!fks0.containsKey(sgen)) {
-					fks0.put(sgen, new Ctx<>());
-				}
-				fks0.get(sgen).put(fk.toString(), tgen);
-			}
-		}
-
-		ImportAlgebra<String, String, String, String, String, String, Null<?>> alg = new ImportAlgebra<String,String,String,String,String,String,Null<?>>(sch, ens0, tys0, fks0, atts0, Object::toString, Object::toString);
-
-		return new SaturatedInstance<>(alg, alg, (Boolean) op.getOrDefault(AqlOption.require_consistency), (Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe), true, extraRepr);
+		return sch;
 	}
 
 	
@@ -167,8 +177,12 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 		}
 		try (Connection conn = DriverManager.getConnection(toGet)) {
 			SqlSchema sch = new SqlSchema(conn.getMetaData());
-			SqlInstance inst = new SqlInstance(sch, conn);
-			return toInstance(env, inst, sch);
+			boolean schemaOnly = (Boolean) op.getOrDefault(AqlOption.schema_only);
+			if (!schemaOnly) {
+				SqlInstance inst = new SqlInstance(sch, conn);
+				return toInstance(env, inst, sch);
+			}
+			return toInstance(env, null, sch);	
 		} catch (SQLException exn) {
 			exn.printStackTrace();
 			throw new RuntimeException("JDBC exception: " + exn.getMessage());

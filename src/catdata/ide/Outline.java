@@ -44,13 +44,15 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 		this.codeEditor.revalidate();
 	}
 
+	JLabel oLabel = new JLabel("", JLabel.CENTER);
 	 protected Outline(CodeEditor<Progg, Env, DDisp> codeEditor) {
 		this.codeEditor = codeEditor;
 		JScrollPane jsp = new JScrollPane(getComp());
 		jsp.setBorder(BorderFactory.createEmptyBorder());
 		p = new JPanel(new BorderLayout());
-		JPanel q = new JPanel(new GridLayout(1,2));
+		JPanel q = new JPanel(new GridLayout(1,3));
 		q.add(new JLabel("Outline"));
+		q.add(oLabel);
 		JCheckBox alphaBox = new JCheckBox("Sort");
 		alphaBox.addActionListener(x -> {
 			codeEditor.outline_alphabetical(alphaBox.isSelected());
@@ -86,6 +88,7 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 					try {
 						if (!s.equals(Outline.this.codeEditor.parsed_prog_string)) {
 							Progg e = Outline.this.codeEditor.parse(s);
+							oLabel.setText("");
 							if (!equiv(e, Outline.this.codeEditor.parsed_prog)) {
 								if (System.currentTimeMillis() - Outline.this.codeEditor.last_keystroke > codeEditor.sleepDelay) {
 									synchronized (Outline.this.codeEditor.parsed_prog_lock) {
@@ -98,6 +101,7 @@ public abstract class Outline<Progg extends Prog, Env, DDisp extends Disp> {
 							}
 						}
 					} catch (Exception ex) {
+						oLabel.setText("err");
 					}
 					
 					

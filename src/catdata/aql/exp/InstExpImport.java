@@ -201,7 +201,7 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 	protected abstract void joinedEn(Handle h, En en, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception;
 	
 
-	static <Ty, En, Sym, Fk, Att, Gen> Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> forTheory(
+	public static <Ty, En, Sym, Fk, Att, Gen> Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> forTheory(
 			Schema<Ty, En, Sym, Fk, Att> sch, Ctx<En, Collection<Gen>> ens0, Ctx<Ty, Collection<Null<?>>> tys0,
 			Ctx<Gen, Ctx<Fk, Gen>> fks0, Ctx<Gen, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<?>>>> atts0,
 			AqlOptions op) {

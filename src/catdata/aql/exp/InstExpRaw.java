@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Ctx;
+import catdata.Null;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
@@ -21,6 +22,7 @@ import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
 import catdata.aql.Eq;
+import catdata.aql.ImportAlgebra;
 import catdata.aql.Instance;
 import catdata.aql.It;
 import catdata.aql.It.ID;
@@ -30,6 +32,7 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
+import catdata.aql.fdm.SaturatedInstance;
 
 
 public final class InstExpRaw<Ty,En,Sym,Fk,Att> extends InstExp<Ty,En,Sym,Fk,Att,String,String,ID,Chc<String,Pair<ID,Att>>> implements Raw {
@@ -270,6 +273,56 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		}
 
 		AqlOptions strat = new AqlOptions(options, col, env.defaults);
+
+		boolean interpret_as_algebra = (boolean) strat.getOrDefault(AqlOption.interpret_as_algebra);
+	
+		if (interpret_as_algebra) {
+			Ctx<En, Collection<String>> ens0 = new Ctx(Util.revS(col.gens.map));
+			if (!col.sks.isEmpty()) {
+				throw new RuntimeException("Cannot have generating labelled nulls with import_as_theory");
+			}
+			Ctx<Ty, Collection<Null<?>>> tys0 = new Ctx<>();
+			for (Ty ty : sch.typeSide.tys) {
+				tys0.put(ty, new HashSet<>());
+			}
+			Ctx<String, Ctx<Fk, String>> fks0 = new Ctx<>();
+			Ctx<String, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<?>>>> atts0 = new Ctx<>();
+			for (String gen : col.gens.keySet()) {
+				fks0.put(gen, new Ctx<>());
+				atts0.put(gen, new Ctx<>());
+			}
+			for (Pair<Term<Ty, En, Sym, Fk, Att, String, String>, Term<Ty, En, Sym, Fk, Att, String, String>> e : eqs0) {
+				Term<Ty, En, Sym, Fk, Att, String, String> lhs = e.first;
+				Term<Ty, En, Sym, Fk, Att, String, String> rhs = e.second;
+				if (rhs.gen != null && lhs.fk != null && lhs.arg.gen != null) {
+					fks0.get(lhs.arg.gen).put(lhs.fk, rhs.gen);
+				} else if (lhs.gen != null && rhs.fk != null && rhs.arg.gen != null) {
+					fks0.get(rhs.arg.gen).put(rhs.fk, lhs.gen);					
+				} else if (rhs.obj != null && lhs.att != null && lhs.arg.gen != null) {
+					atts0.get(lhs.arg.gen).put(lhs.att, Term.Obj(rhs.obj, rhs.ty));					
+				} else if (lhs.obj != null && rhs.att != null && rhs.arg.gen != null) {
+					atts0.get(rhs.arg.gen).put(rhs.att, Term.Obj(lhs.obj, lhs.ty));										
+				} else {
+					throw new RuntimeException("import_as_theory not compatible with equation " + lhs + " = " + rhs + "; each equation must be of the form gen.fk=gen or gen.att=javaobject");
+				}
+			}
+			Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, String, Null<?>>> extraRepr = new Ctx<>();
+			for (String gen : col.gens.keySet()) {
+				for (Att att : sch.attsFrom(col.gens.get(gen))) {
+					if (!atts0.get(gen).containsKey(att)) {
+						atts0.get(gen).put(att, InstExpImport.objectToSk(sch, null, gen, att, tys0, extraRepr, false));
+					}
+				}
+			}
+			
+			ImportAlgebra<Ty, En, Sym, Fk, Att, String, Null<?>> alg = new ImportAlgebra<>(sch, ens0, tys0, fks0, atts0,
+					Object::toString, Object::toString);
+
+			return new SaturatedInstance(alg, alg, (Boolean) strat.getOrDefault(AqlOption.require_consistency),
+					(Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe), true, extraRepr);
+			
+		}
+		
 		InitialAlgebra<Ty,En,Sym,Fk,Att,String,String,ID> 
 		initial = new InitialAlgebra<>(strat, sch, col, new It(), Object::toString, Object::toString);
 				 

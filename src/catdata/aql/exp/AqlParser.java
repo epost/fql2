@@ -207,7 +207,9 @@ public class AqlParser {
 		Parser<Pair<List<String>, List<catdata.Pair<String, String>>>> p = Parsers.tuple(ident.many(), options)
 				.between(token("{"), token("}"));
 
-		Parser<PragmaExp> var = ident.map(PragmaExpVar::new), csvInst = Parsers
+		Parser<PragmaExp> var = ident.map(PragmaExpVar::new), 
+				
+				csvInst = Parsers
 				.tuple(token("export_csv_instance"), inst_ref.lazy(), ident,
 						options.between(token("{"), token("}")).optional())
 				.map(x -> new PragmaExpToCsvInst(x.b, x.c, x.d == null ? new LinkedList<>() : x.d)),
@@ -352,13 +354,13 @@ public class AqlParser {
 
 				unitq = Parsers
 						.tuple(token("unit_query"), query_ref.lazy(), inst_ref.lazy(),
-								options.between(token("{"), token("}")).optional(),
+						//		options.between(token("{"), token("}")).optional(),
 								options.between(token("{"), token("}")).optional())
 						.map(x -> new TransExpCoEvalEvalUnit(x.b, x.c,
 								x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 				counitq = Parsers
 						.tuple(token("counit_query"), query_ref.lazy(), inst_ref.lazy(),
-								options.between(token("{"), token("}")).optional(),
+					//			options.between(token("{"), token("}")).optional(),
 								options.between(token("{"), token("}")).optional())
 						.map(x -> new TransExpCoEvalEvalCoUnit(x.b, x.c,
 								x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
@@ -698,8 +700,8 @@ public class AqlParser {
 				.map(x -> x.c);
 
 		return Parsers.tuple(l, imports,
-				Parsers.tuple(Parsers.INDEX, edExpRaw()).map(x -> new catdata.Pair<>(x.a, x.b)).many(), token("}"))
-				.map(x -> new EdsExpRaw(x.a, x.b, x.c));
+				Parsers.tuple(Parsers.INDEX, edExpRaw()).map(x -> new catdata.Pair<>(x.a, x.b)).many(), options, token("}"))
+				.map(x -> new EdsExpRaw(x.a, x.b, x.c, x.d));
 	}
 
 	private static Parser<EdsExp<?, ?, ?, ?, ?>> edsExp() {
@@ -927,7 +929,7 @@ public class AqlParser {
 
 		Parser<QueryExpRawSimple<String, String, String, String, String, String, String, String>> ret = l
 				.map(x -> new QueryExpRawSimple<String, String, String, String, String, String, String, String>(x.c,
-						x.d.first, new LinkedList<>()));
+						x.d.first));
 
 		return ret;
 	}
@@ -969,7 +971,7 @@ public class AqlParser {
 		Parser<InstExpCoProdSigma> ret2 = Parsers
 				.tuple(token("coproduct"),
 						inst_ref.lazy()
-								.many(),
+								.sepBy(token("+")),
 						token(":"), sch_ref
 								.lazy(),
 						options.between(token("{"), token("}")).optional())

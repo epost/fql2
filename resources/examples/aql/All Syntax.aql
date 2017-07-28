@@ -1,0 +1,227 @@
+/* see options button to disable spellcheck or outline */
+
+//global options at start of file, see manual or options button
+options
+	timeout = 30
+	
+//////////// Kind comment
+
+html { (* "some html" *) } //be sure to escape slashes and quotes
+md { (* "some markdown" *) }
+
+//////////// Kind graph
+
+graph g1 = literal {
+	nodes
+		n1 n2
+	edges
+		f : n1 -> n2		
+}
+
+//////////// Kind typeside
+
+typeside ty1 = empty
+typeside ty2 = sql
+typeside ty3 = typesideOf (empty : ty1)
+typeside ty4 = literal {
+	imports //order of sections (imports, types, ...) matters, but sections can be omitted
+		ty1 
+	types
+		Nat	
+	constants
+		zero : Nat
+	functions
+		succ : Nat -> Nat
+		plus : Nat, Nat -> Nat
+	java_types
+	 	String = "java.lang.String"
+	java_constants
+	 	String = "return input[0].toString()"	
+	java_functions
+	 	append : String, String -> String = "return input[0] + input[1]"		
+	equations	
+		forall x. plus(zero, x) = x
+	 	forall x, y. plus(succ(x),y) = succ(plus(x,y))
+	 options
+	 	prover = completion	
+}
+
+//////////// Kind schema
+
+schema s1 = empty : ty2
+schema s2 = schemaOf (empty : s1)
+schema s3 = literal : ty4 {
+	imports 
+		s1
+	entities
+		Employee 
+		Department
+	foreign_keys
+		manager   : Employee -> Employee
+		worksIn   : Employee -> Department
+		secretary : Department -> Employee
+	path_equations 
+		manager.worksIn = worksIn
+  		secretary.worksIn = Department //use entity name for empty (identity) path
+  	attributes
+  		ename	: Employee -> String
+     	age			: Employee -> Nat
+     	cummulative_age: Employee -> Nat
+     	dname 		: Department -> String
+     observation_equations
+     	forall e. cummulative_age(e) = plus(age(e), age(manager(e)))
+	options
+		prover = completion		
+}
+//getSchema - see PharmaColim1 example
+
+//////////// Kind mapping
+
+mapping m1 = id s1
+mapping m2 = [m1 ; m1]
+mapping m3 = literal : s3 -> s3 {
+	entities
+		Employee -> Employee
+		Department -> Department
+	foreign_keys
+		manager -> manager.manager
+		worksIn -> worksIn
+		secretary -> secretary
+	attributes
+		ename -> manager.ename
+		age -> manager.age
+		cummulative_age -> lambda e. (age(e) plus age(e))
+		dname -> dname	
+	options
+		dont_validate_unsafe = true // this isn't a real mapping		
+}
+//getMapping - see FinanceColim2
+
+//////////// Kind query
+
+query q1 = id s1
+query q2 = literal : s3 -> s3 {
+	entities
+		Employee -> {from e:Employee d:Department
+		 		      where e.worksIn = d
+		 		      return ename -> e.ename
+		 		      	     age -> e.age
+		 		      	     cummulative_age -> e.cummulative_age}
+		Department -> {from d:Department
+						return dname -> d.dname}
+	foreign_keys
+		manager -> {e -> e.manager d -> d}
+		worksIn -> {d -> e.worksIn}
+		secretary -> {d -> d e -> d.secretary}
+	options
+		dont_validate_unsafe = true // this isn't a real query		
+}
+query q3 = simple : s3 {
+	from e:Employee
+	where e.ename = bill
+	return mgrName -> e.manager.ename
+	options
+		prover = completion
+}
+
+//////////// Kind instance
+
+instance i1 = empty : s3
+instance i2 = distinct i1
+instance i3 = src (id i1)
+instance i4 = dst (id i1)
+instance i5 = eval (id s3) i1
+instance i6 = coeval (id s3) i1 { options prover = completion }
+instance i7 = sigma (id s3) i1 { options prover = completion }
+instance i8 = delta (id s3) i1
+instance i9 = coproduct i1 + i1 : s3 { options prover = completion }
+instance i10 = coproduct_sigma (id s3) i1 (id s3) i1 : s3 { options prover = completion }
+instance i11 = coequalize (id i1) (id i1) { options prover = completion }
+instance i12 = chase literal : s3 { } i3 1
+//random -- see Employees example
+//import_jdbc -- see JDBC example
+//import_jdbc_all -- see JDBC example
+//quotient_jdbc -- see JDBC example
+//import_csv -- See FinanceColim1 example
+
+instance i13 = literal : s3 {
+	generators 
+		e : Employee
+	equations 
+		e.manager = e
+		e.worksIn.secretary = e
+	multi_equations
+		ename -> {e Al, e.manager Al}		
+	options
+		prover = completion
+} 
+
+
+
+//////////// Kind transform
+
+transform t1 = id i1
+transform t2 = [t1 ; t1]
+transform t3 = distinct t1
+transform t4 = eval (id s3) t1
+//the { options } blocks are optional
+transform t5 = coeval (id s3) t1 { options prover = completion } { options prover = completion } 
+transform t6 = sigma (id s3) t1 { options prover = completion } { options prover = completion } 
+transform t7 = delta (id s3) t1
+transform t8 = unit (id s3) i1 { options prover = completion } 
+transform t9 = counit (id s3) i1 { options prover = completion } 
+transform t10= counit_query (id s3) i1 { options prover = completion }
+//import_jdbc - see JDBC example
+//import_csv - see Finance Colim example
+transform t11= literal : i13 -> i13 {
+	generators
+		e -> e.manager
+}
+
+//////////// Kind constraints
+constraints c1 = literal : s3 {
+	forall e:Employee d:Department
+	where e.worksIn = d
+	->
+	exists e0:Employee
+	where e0.ename = e.ename
+
+	forall e:Employee
+	->
+	where e = e
+
+	options prover = completion
+
+}
+
+//////////// Kind pragma
+
+pragma p1 = check c1 i3 //check instance against constraints
+pragma p2 = assert_consistent i3 
+pragma p3 = exec_cmdline {
+	"echo hello"
+	"echo world"
+}
+pragma p4 = exec_js {
+	"1+2;"
+	"2+3;"
+}
+
+//exec_jdbc - see JDBC example
+//export_jdbc_instance - see JDBC example
+//export_jdbc_query - see JDBC example
+//export_jdbc_transform - see JDBC example
+
+//export_instance_csv - see FinanceColim1 example
+//export_transform_csv - see FinanceColim1 example
+
+
+//////////// Kind colimit_schema
+
+//quotient - see PharmaColim2
+//coproduct - see PharmaColim2
+//modify - see PharmaColim2
+//colimit - unnecessarily verbose; recommend quotient instead 
+
+
+
