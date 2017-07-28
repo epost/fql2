@@ -485,7 +485,7 @@ instance iSklCls = literal : sS {
  * construction that takes the product of two instances obtained by reversing all of the arrows. We 
  * say that iA and iB are injections of the instances iSklExt and iSklCls into the coproduct. You 
  * can see the effect of this construction by running this file and selecting iSklCP in the viewer. */
-instance iSklCP = coproduct iSklExt iSklCls : sS
+instance iSklCP = coproduct iSklExt + iSklCls : sS
 
 /* Now that we have all of the desired records in the same instance we want to identify the
  * generators that came from iSklCls with the skolum terms that came from the iSklExt instance. To 
@@ -908,6 +908,61 @@ query qS_T_SnT_SumToSTSpn = literal : sS_T_SnT_Sum -> sSTSpn {
  * as part of the query definition. */
 instance iSTSpn = eval qS_T_SnT_SumToSTSpn iS_T_SnT_Sum
 
+
+/* We export the instance iSTSpn to MySQL for use in later stages of this tutorial.
+ * First clean out the target tables if present from a previous run. 
+schema sSTSpn = literal : TypeSide {
+	entities
+	  Skill SkillClass
+	  Task
+	  SkillNdFrTask
+	foreign_keys
+	  fk_HasClass    : Skill -> SkillClass
+	  fk_SkillNeeded : SkillNdFrTask -> Skill
+	  fk_ForTask     : SkillNdFrTask -> Task
+	attributes
+	  SName         : Skill -> Varchar
+	  SCNameOnSkl   : Skill -> Varchar
+	  SCName        : SkillClass -> Varchar
+	  TName         : Task -> Varchar
+	  skill         : SkillNdFrTask -> Varchar
+	  skillclass	: SkillNdFrTask -> Varchar
+	  task          : SkillNdFrTask -> Varchar
+	observation_equations
+	  SCNameOnSkl = fk_HasClass.SCName
+	  skill = fk_SkillNeeded.SName
+	  skillclass = fk_SkillNeeded.fk_HasClass.SCName
+	  task = fk_ForTask.TName
+}*/
+/* Clean up any tables from a previous run
+
+pragma pCleanUp = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"DROP TABLE IF EXISTS sts_SkillNdFrTask"
+"DROP TABLE IF EXISTS sts_Skill"
+"DROP TABLE IF EXISTS sts_SkillClass"
+"DROP TABLE IF EXISTS sts_Task"}
+
+// Export the results of the above construction of the span and its representative instance.
+pragma eSTS = export_jdbc_instance iSTSpn "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" "sts_"
+  { options varchar_length = 256 }
+
+// Display the contents of the ci_test schema in MySQL
+pragma pp2 = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"SHOW  TABLES"}
+ */
+// Bring the exported instance back in for round trip (export iSTSpan import iSTSpnImp) comparison.
+instance iSTSpnImp = import_jdbc "com.mysql.jdbc.Driver"
+"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn {
+   // entities - create generators for each entity based on the primary key of each entity in the source database
+   Skill -> "select id, fk_HasClass, SName, SCNameOnSkl from sts_Skill"
+   SkillClass -> "select id, SCName from sts_SkillClass"
+   Task -> "select id, TName from sts_Task"
+   SkillNdFrTask -> "select id, fk_SkillNeeded, fk_ForTask, skill, task, skillclass from sts_SkillNdFrTask"
+options
+   always_reload = true
+}
+
+
 /* Having constructed a span modeling the way skills are related to tasks, we now turn to another
  * model involving a span relating skills to people. We could build this model up piece by piece as
  * we did above, but in this case we illustrate how AQL can extract existing data from a relational
@@ -941,44 +996,212 @@ schema sSPSpn = literal : TypeSide {
  * against the source database. */
 instance iSPSpnImp = import_jdbc "com.mysql.jdbc.Driver"
 	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSPSpn {
-   // entities - create generators for each entity based on the primary key of each entity in the source database
-   SpecificSkill -> "select id, fk_IsType, SSName, SSGSName, SSSCName from sps2_SpecificSkill"
-   GeneralSkill -> "select id, fk_HasClass, GSName, GSSCName from sps2_GeneralSkill"
-   SkillClass -> "select id, SCName from sps2_SkillClass"
-   Person -> "select id, PName from sps2_Person"
-   SkillPrvdByPerson -> "select id, fk_SpP_S, fk_SpP_P, skill, person from sps2_SkillPrvdByPerson"
+   SpecificSkill -> "select id, fk_IsType, SSName, SSGSName, SSSCName from sps_SpecificSkill"
+   GeneralSkill -> "select id, fk_HasClass, GSName, GSSCName from sps_GeneralSkill"
+   SkillClass -> "select id, SCName from sps_SkillClass"
+   Person -> "select id, PName from sps_Person"
+   SkillPrvdByPerson -> "select id, fk_SpP_S, fk_SpP_P, skill, person from sps_SkillPrvdByPerson"
+options
+   always_reload = true
 }
 
-
-/* We export the instance iSTSpn to MySQL for use in later stages of this tutorial.
- * First clean out the target tables if present from a previous run. 
-pragma pCleanUp = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
-"DROP TABLE IF EXISTS sts_SkillNdFrTask"
-"DROP TABLE IF EXISTS sts_Skill"
-"DROP TABLE IF EXISTS sts_Task"}
-
-// Export the results of the above construction of the span and its representative instance.
-pragma eSTS = export_jdbc_instance iSTSpn "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" "sts_"
-  { options varchar_length = 256 }
-
-// Display the contents of the ci_test schema in MySQL
-pragma pp2 = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
-"SHOW  TABLES"}
-
-
-// Bring the exported instance back in for round trip (export iSTSpan import iSTSpnImp) comparison.
-instance iSTSpnImp = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn {
-   // entities - create generators for each entity based on the primary key of each entity in the source database
-   Skill -> "select id from sts_Skill"
-   Task -> "select id from sts_Task"
-   SkillNdFrTask -> "select id from sts_SkillNdFrTask"
-   // foreign keys
-   fk_SnT_S -> "select id, fk_SnT_S from sts_SkillNdFrTask"
-   fk_SnT_T -> "select id, fk_SnT_T from sts_SkillNdFrTask"
-   // attributes
-   SName -> "select id, SName from sts_Skill"
-   TName -> "select id, TName from sts_Task"
-   skill -> "select id, skill from sts_SkillNdFrTask"
-   task -> "select id, task from sts_SkillNdFrTask"
+/* More interesting colimit where we are gluing (equating) on a defined overlap. In this case we
+ * are assuming that the Skill entity from sSTSpn can be equated with the SpecificSkill entity from
+ * sSPSpn and likewise the SkillClass entities from both. We also note what this implies about
+ * foreign keys. Since SpecificSkill has a foreign key path through GeneralSkill we equate that path
+ * with the foreign key fk_HasClass from sSTSpn. In so doing we consolidate the two schemas in a way
+ * that eliminates redundant entities and paths.
+ */
+schema_colimit STSpn_SPSpn_CoLimAuto = quotient sSTSpn + sSPSpn : TypeSide {
+	entity_equations
+	  sSTSpn.Skill = sSPSpn.SpecificSkill
+	  sSTSpn.SkillClass = sSPSpn.SkillClass
+	path_equations
+	  sSTSpn_fk_HasClass = sSPSpn_fk_IsType.sSPSpn_fk_HasClass
+//	observation_equations
+//	  forall s. s.sSTSpn_SName = s.sSPSpn_SName
+//	  forall c. c.sSTSpn_SCName = c.sSPSpn_SCName
 }
-*/
+
+/* As before we can relabel components in the colimit schema using the modify command. */
+schema_colimit STSpn_SPSpn_CoLim = modify STSpn_SPSpn_CoLimAuto {
+	rename entities
+		sSPSpn_GeneralSkill -> GeneralSkill
+		sSPSpn_Person -> Person
+		sSPSpn_SkillClass__sSTSpn_SkillClass -> SkillClass
+		sSPSpn_SkillPrvdByPerson -> SkillPrvdByPerson
+		sSPSpn_SpecificSkill__sSTSpn_Skill -> SpecificSkill
+		sSTSpn_SkillNdFrTask -> SkillNdFrTask
+		sSTSpn_Task -> Task
+	rename foreign_keys
+		sSTSpn_fk_SkillNeeded -> fk_SkillNeeded
+		sSTSpn_fk_ForTask -> fk_ForTask
+		sSPSpn_fk_SpP_S -> fk_SpP_S
+		sSPSpn_fk_SpP_P -> fk_SpP_P
+		sSPSpn_fk_IsType -> fk_IsType 
+		sSPSpn_fk_HasClass -> fk_HasClass
+	rename attributes
+		sSTSpn_skillclass -> ST_SCNameOnSnT
+		sSPSpn_SCName -> SP_SCName
+		sSTSpn_task -> ST_TNameOnSnT
+		sSTSpn_skill -> ST_SNameOnSnT
+		sSTSpn_SName -> ST_SklName
+		sSTSpn_TName -> ST_TName
+		sSTSpn_SCName -> ST_SCName
+		sSTSpn_SCNameOnSkl -> ST_SCNameOnSS
+		sSPSpn_SSGSName -> SP_GSNameOnSS
+		sSPSpn_SSName -> SP_SSName
+		sSPSpn_SSSCName -> SP_SCNameOnSS
+		sSPSpn_person -> SP_PNameOnSnP
+		sSPSpn_skill -> SP_SNameOnSnP
+		sSPSpn_PName -> SP_PName
+		sSPSpn_GSSCName -> SP_SCNameOnGS
+		sSPSpn_GSName -> SP_GSName
+	remove foreign_keys	
+		sSTSpn_fk_HasClass -> fk_IsType.fk_HasClass
+}
+
+// Provide addressable labels for the various components of the coproduct STSum
+schema sSTSpn_SPSpn_CoLim = getSchema STSpn_SPSpn_CoLim
+mapping mSTSpnToSTSpn_SPSpn_CoLim = getMapping STSpn_SPSpn_CoLim sSTSpn
+mapping mSPSpnToSTSpn_SPSpn_CoLim = getMapping STSpn_SPSpn_CoLim sSPSpn
+
+// Build an instance for sS_T_SnT_Sum from iSTSpnImp and iSPSpnImp
+instance iST_SP_Sum = coproduct_sigma
+   mSTSpnToSTSpn_SPSpn_CoLim iSTSpnImp
+   mSPSpnToSTSpn_SPSpn_CoLim iSPSpnImp  // check
+   : sSTSpn_SPSpn_CoLim
+
+/* Merging records using literal transforms. Beware, this is VERY brittle. If you re-export the
+ * instances all of the ids will change and this code segment will break.
+ */
+instance iSklLnk = literal : sSTSpn_SPSpn_CoLim {
+	generators
+	  s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : SpecificSkill
+	  sc0 sc1 sc2 : SkillClass
+}
+
+/* What we are effectively doing is to equate records that are in the image of a link generator. For
+ * example ids 100 and 81 are in the image of s0 and so are equated. We must manually construct 
+ * these literal transforms by inspecting the imported instances. Clearly this approach does not
+ * scale. */
+transform tLnkToSTSpnImp = literal : iSklLnk -> iST_SP_Sum {
+	generators
+	  s0 -> 100
+	  s1 -> 101
+	  s2 -> 102
+	  s3 -> 103
+	  s4 -> 104
+	  s5 -> 105
+	  s6 -> 106
+	  s7 -> 107
+	  s8 -> 108
+	  s9 -> 109
+	  sc0 -> 120
+	  sc1 -> 121
+	  sc2 -> 122
+}
+
+transform tLnkToSPSpnImp = literal : iSklLnk -> iST_SP_Sum {
+	generators
+	  s0 -> 81
+	  s1 -> 77
+	  s2 -> 85
+	  s3 -> 86
+	  s4 -> 83
+	  s5 -> 84
+	  s6 -> 80
+	  s7 -> 78
+	  s8 -> 82
+	  s9 -> 79
+	  sc0 -> 48
+	  sc1 -> 47
+	  sc2 -> 49
+}
+
+instance iSTSpn_SPSpn_Merge1 = coequalize tLnkToSTSpnImp tLnkToSPSpnImp
+
+/* Merging records by importing a link table and transforms from tables constructed externally.
+ * 
+ * In this sequence we create external tables using SQL statements against the tables generated in
+ * the export. The essence of this approach is matching records based on attributes. Clearly this
+ * will only work if we can get exact string matches. This process can be generalized using any
+ * number of technical enhancements to include fuzzing matching using things like edit distance or
+ * matching through machine learning approaches.
+ * 
+ * As is well known reliable integration depends on standardization and/or investment in the
+ * construction of translations between systems that make use of different reference information,
+ * e.g. skill classification in this case.
+ */
+
+// Set up the SkillMatch and SkillClassMatch tables based on the exports.
+pragma pSetUpSkillMatch = exec_jdbc "com.mysql.jdbc.Driver"
+"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"DROP TABLE IF EXISTS SkillMatch"
+"DROP TABLE IF EXISTS SkillClassMatch"
+
+"create table SkillMatch as
+select
+  concat('s', t.id) as sm_id,
+  p.id as ps_id,
+  t.id as ts_id,
+  t.fk_HasClass
+from
+  sps_SpecificSkill p
+  join sts_Skill t
+    on p.SSName = t.SName
+  join sps_GeneralSkill gs
+    on p.fk_IsType = gs.id"
+
+"create table SkillClassMatch as
+select
+  concat('sc', t.id) as scm_id,
+  p.id as psc_id,
+  t.id as tsc_id
+from
+  sps_SkillClass as p
+  join sts_SkillClass as t
+    on p.SCName = t.SCName"
+}
+
+/* Need to say something about options.
+ */
+instance iSkillMatch = import_jdbc "com.mysql.jdbc.Driver"
+"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn_SPSpn_CoLim {
+	SpecificSkill -> "select sm_id from SkillMatch"
+	SkillClass -> "select scm_id from SkillClassMatch"
+options
+  import_as_theory = true
+  import_joined = false
+}
+
+transform tSMToSTSpn = import_jdbc "com.mysql.jdbc.Driver"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : iSkillMatch -> iST_SP_Sum {
+	SpecificSkill -> "select sm_id, ts_id from SkillMatch"
+	SkillClass -> "select scm_id, tsc_id from SkillClassMatch"
+}
+
+transform tSMToSPSpn = import_jdbc "com.mysql.jdbc.Driver"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : iSkillMatch -> iST_SP_Sum {
+	SpecificSkill -> "select sm_id, ps_id from SkillMatch"
+	SkillClass -> "select scm_id, psc_id from SkillClassMatch"
+}
+
+instance iSTSpn_SPSpn_Merge2 = coequalize tSMToSTSpn tSMToSPSpn
+
+/* Importing everything in one go using the quotient_jdbc import
+ */
+instance iSTSpn_SPSpn_Merge3 = quotient_jdbc "com.mysql.jdbc.Driver"
+	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" iST_SP_Sum { 
+"select
+   ps_id as sp_id,
+   ts_id as st_id
+from
+   SkillMatch
+union
+select
+   psc_id as sp_id,
+   tsc_id as st_id
+from
+   SkillClassMatch"
+}
