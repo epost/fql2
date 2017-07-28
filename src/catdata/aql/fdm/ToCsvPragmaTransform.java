@@ -33,12 +33,12 @@ public class ToCsvPragmaTransform<Ty,En,Sym,Att,Fk> extends Pragma {
 					printer.printRecord(row);
 				}
 			}
-			for (Y1 y1 : h.src().algebra().talg().sks.keySet()) {
+/*			for (Y1 y1 : h.src().algebra().talg().sks.keySet()) {
 				List<String> row = new LinkedList<>();
 				row.add(y1.toString());
 				row.add(ToCsvPragmaInstance.print(h.dst().algebra().intoY(h.reprT(y1)), format.getNullString() != null));
 				printer.printRecord(row);		
-			}
+			} */
 			str = sb.toString();
 			printer.close();				
 		} catch (IOException e) {

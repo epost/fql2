@@ -718,11 +718,14 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	}
 
 	public void clearSpellCheck() {
-		try {
-			topArea.forceReparsing(spc);
-		} catch (Throwable t) {
-			// t.printStackTrace();
+		SwingUtilities.invokeLater(() -> {
+			try {
+				topArea.forceReparsing(spc);
+			} catch (Throwable t) {
+				// t.printStackTrace();
+			}
 		}
+		);
 	}
 
 	@SuppressWarnings("static-method")

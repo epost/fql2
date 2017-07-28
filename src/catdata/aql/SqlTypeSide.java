@@ -37,6 +37,7 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		case "boolean": return Types.BOOLEAN;
 		case "char": return Types.CHAR;
 		case "doubleprecision": return Types.DOUBLE;
+		case "decimal": return Types.DECIMAL;
 		case "float": return Types.FLOAT;
 		case "integer": return Types.INTEGER;
 		case "smallint": return Types.SMALLINT;
@@ -58,6 +59,7 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		m.put("Bool", "java.lang.Boolean");
 		m.put("Char", "java.lang.Character");
 		m.put("DoublePrecision", "java.lang.Double");
+		m.put("Decimal", "java.math.BigDecimal");
 		m.put("Float", "java.lang.Float");
 		m.put("Integer", "java.lang.Integer");
 		m.put("Int", "java.lang.Integer");
@@ -78,6 +80,7 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		m.put("Bool", "return new java.lang.Boolean(input[0])");
 		m.put("Char", "return input[0].charAt(0)");
 		m.put("DoublePrecision", "return new java.lang.Double(input[0])");
+		m.put("Decimal", "return new java.math.BigDecimal(input[0])");
 		m.put("Float", "return new java.lang.Float(input[0])");
 		m.put("Integer", "return new java.lang.Integer(input[0])");
 		m.put("Int", "return new java.lang.Integer(input[0])");

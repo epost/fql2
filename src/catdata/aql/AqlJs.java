@@ -82,7 +82,7 @@ public class AqlJs<Ty, Sym> {
 			check(name, ret);
 			return ret;
 		} catch (Throwable e) {
-			if (e.getMessage().contains("jdk.nashorn.internal.codegen.TypeMap")) {
+			if (e.getMessage() != null && e.getMessage().contains("jdk.nashorn.internal.codegen.TypeMap")) {
 				throw new RuntimeException("The Java Runtime has suffered an internal error and the IDE must be restarted.\n\n" + e.getMessage());
 			}
 			throw new RuntimeException("In javascript execution of " + o + " cannot convert to " + name + ", " + e.getClass() + " error: "  + e.getMessage() + postfix);

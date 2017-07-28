@@ -128,15 +128,26 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
 	@Override
 	public Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> eval(AqlEnv env) {
 		Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> J = I.eval(env);
-		
 		Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col = new Collage<>(J.collage());
 		AqlOptions strat = new AqlOptions(options, col, env.defaults);
+
+		String toGet = jdbcString;
+		String driver = clazz;
+		if (clazz.trim().isEmpty()) {
+			driver = (String) strat.getOrDefault(AqlOption.jdbc_default_class);
+			Util.checkClass(driver);
+		}
+		if (jdbcString.trim().isEmpty()) {
+			toGet = (String) strat.getOrDefault(AqlOption.jdbc_default_string);
+		}
+		
+		
 		Set<Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> 
 		eqs0 = new HashSet<>(J.eqs());
 
 //		Collection<Pair<Gen, Gen>> q = new HashSet<>(); //TODO aql
 		
-		try (Connection conn = DriverManager.getConnection(jdbcString)) {
+		try (Connection conn = DriverManager.getConnection(toGet)) {
 			Statement stmt = conn.createStatement();
 
 			for (String q : queries) {

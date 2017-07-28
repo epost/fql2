@@ -54,7 +54,7 @@ public class SqlSchema {
 						SqlType resolvedType = SqlType.resolve(cols.getString(5));
 						SqlColumn col = new SqlColumn(table, columnName, resolvedType);
 						String autoInc = cols.getString(23);
-						if (autoInc.equals("YES")) {
+						if (autoInc != null && autoInc.equals("YES")) {
 							col.autoInc = true;
 						}
 						table.columns.add(col);

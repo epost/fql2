@@ -116,7 +116,7 @@ instance I2 = literal : S2 {
 instance CoProd = coproduct_sigma (getMapping Colim S1) I1 (getMapping Colim S2) I2 : getSchema Colim
 
 //alternative notation for coproducts
-instance CoProd2 = coproduct (sigma (getMapping Colim S1) I1) (sigma (getMapping Colim S2) I2) : getSchema Colim
+instance CoProd2 = coproduct (sigma (getMapping Colim S1) I1) + (sigma (getMapping Colim S2) I2) : getSchema Colim
 
 instance E = literal : getSchema Colim {
 	generators 

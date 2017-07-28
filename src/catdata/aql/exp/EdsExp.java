@@ -14,6 +14,7 @@ import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.AqlOptions;
 import catdata.aql.Collage;
 import catdata.aql.Constraints;
 import catdata.aql.ED;
@@ -204,7 +205,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			raw.put("where ", f);
 		}
 
-		public ED<Object, Object, Object, Object, Object> eval(Schema<Object, Object, Object, Object, Object> sch, AqlEnv env) {
+		public ED<Object, Object, Object, Object, Object> eval(Schema<Object, Object, Object, Object, Object> sch, AqlOptions ops) {
 			Pair<Ctx<Var, Object>, Set<Pair<Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>>>> 
 			x = eval1(sch, As, Awh);
 		
@@ -214,7 +215,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			for (Var k : x.first.keySet()) {
 				y.first.remove(k);
 			}
-			return new ED<>(sch, x.first, y.first, x.second, y.second, isUnique, env.defaults);
+			return new ED<>(sch, x.first, y.first, x.second, y.second, isUnique, ops);
 		}
 
 
@@ -281,10 +282,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 	public static class EdsExpRaw extends EdsExp<Object, Object, Object, Object, Object> implements Raw {
 
-	@Override
-		public Map<String, String> options() {
-			return Collections.emptyMap();
-		}
+	
 		
 		@Override
 		public int hashCode() {
@@ -292,6 +290,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			int result = 1;
 			result = prime * result + ((eds == null) ? 0 : eds.hashCode());
 			result = prime * result + ((imports == null) ? 0 : imports.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
 			result = prime * result + ((schema == null) ? 0 : schema.hashCode());
 			return result;
 		}
@@ -315,6 +314,11 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 					return false;
 			} else if (!imports.equals(other.imports))
 				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
 			if (schema == null) {
 				if (other.schema != null)
 					return false;
@@ -337,12 +341,19 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 		public final Set<EdExpRaw> eds;
 
+		public final Map<String, String> options;
+
+		@Override
+		public Map<String, String> options() {
+			return options;
+		}
 		
 		@SuppressWarnings("unchecked")
-		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<LocStr> imports, List<Pair<Integer, EdExpRaw>> eds) {
+		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<LocStr> imports, List<Pair<Integer, EdExpRaw>> eds, List<Pair<String, String>> options) {
 			this.schema = (SchExp<Object, Object, Object, Object, Object>) schema;
 			this.imports = LocStr.set1(imports);
 			this.eds = LocStr.proj2(eds);
+			this.options = Util.toMapSafely(options);
 			
 			raw.put("imports", InteriorLabel.imports("imports", imports)); 
 
@@ -365,6 +376,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			this.schema = (SchExp<Object, Object, Object, Object, Object>) schema;
 			this.imports = new HashSet<>(imports);
 			this.eds = new HashSet<>(eds);
+			this.options = Collections.emptyMap();
 		}
 		
 		private String toString;
@@ -396,10 +408,10 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 				l.addAll(v.eds);
 			}
 			for (catdata.aql.exp.EdsExp.EdExpRaw e : eds) {
-				l.add(e.eval(sch, env));
+				l.add(e.eval(sch, new AqlOptions(options, null, env.defaults)));
 			}
 
-			return new Constraints<>(sch, l, env.defaults);
+			return new Constraints<>(sch, l, new AqlOptions(options, null, env.defaults));
 
 		}
 

@@ -121,6 +121,9 @@ query Q = simple : SJava {
 
 instance J = eval Q IJava
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 instance IRandom = random : SJava {
 	generators
 		Employee -> 10
@@ -128,3 +131,34 @@ instance IRandom = random : SJava {
 	//options
 	//	random_seed = 2
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//demonstrates 'interpret as instance' option.   which interprets the instance as a model, 
+//similar to JDBC / CSV import.  This behavior can be useful when writing down an 
+//instance that is already saturated and for which one wants to check the schema constraints, 
+//rather than impose them  
+
+schema SS = literal : empty {
+        entities
+                Person
+        foreign_keys
+                mother father : Person -> Person
+        path_equations
+                mother = father
+}
+
+//works; sets b = c.  This is normal ‘theory’ or ‘initial algebra' semantics
+instance I1 = literal : SS {
+        generators
+                a b c : Person
+        equations
+                a.mother = b
+                a.father = c
+
+                b.mother = b b.father = b
+                c.mother = c c.father = c
+
+                //fails because b != c.  This is 'algebra' semantics
+  		//options
+          		//interpret_as_algebra = true
+}          		

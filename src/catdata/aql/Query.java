@@ -450,7 +450,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 				return new LinkedList<>(gens.map.keySet());
 			}
 			Map<Pair<Var, Var>, Float> selectivities = estimateSelectivities();
-			if (I.gens().isEmpty()) {
+			if (gens().isEmpty()) {
 				return new LinkedList<>();
 			}
 			List<Var> lowest_plan = null;

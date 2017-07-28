@@ -118,7 +118,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public Transform<Ty, En1, Sym, Fk1, Att1, Pair<Var, Row<En2, X>>, Y, Gen, Sk, ID, Chc<Y, Pair<ID, Att1>>, X, Y> eval(AqlEnv env) {
-			return new CoEvalEvalCoUnitTransform<>(Q.eval(env), I.eval(env), env.defaults);
+			return new CoEvalEvalCoUnitTransform<>(Q.eval(env), I.eval(env), new AqlOptions(options, null, env.defaults));
 		}
 
 		@Override
