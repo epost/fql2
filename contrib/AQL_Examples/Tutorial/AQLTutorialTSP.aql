@@ -50,16 +50,16 @@
  *      12) schema colimits -- A kind that unifies coproducts and coequalizers but in the context of
  *          the category of schemas rather than the category of instances of a schema. Generally
  *          formalizes a diagram of schemas connected by mappings that can be used to assemble
- *          source schemas into a single target schemas.
+ *          source schemas into a single target schema.
  *          
- *      13) category of the category of instances of a schema -- The category where all the action
- *          is. We might call this the enterprise category (EC). This is where we tackle problems 
- *          that involve moving data between schemas and the larger problem of bringing multiple 
- *          source schemas together and integrating them.
+ *      13) Migrating data between schemas -- This is the problem of Extracting - Transforming -
+ *      		Loading or ETL. This is where we tackle problems that involve moving data between 
+ *      		schemas and the larger problem of bringing multiple source schemas together and 
+ *      		integrating them.
  *      
- *      13) sigma --| delta --| pi -- Arrows in EC. The machinery AQL uses to move data around the 
- *          enterprise. These arrows are the building blocks of the eval construction that moves 
- *          data through AQL queries.
+ *      13) sigma --| delta --| pi -- The machinery AQL uses to move data around the enterprise. 
+ *      	  These mappings are the building blocks of the eval construction that moves data through 
+ *          AQL queries.
  *      	
  *************************************************************************************************** 
  *****I will add additional items as I complete the merging of the other files into this file.******
@@ -79,7 +79,9 @@
  * definition of the type side. In its current implementation AQL defines this algebra by wrapping
  * a selection of Java types and functions. In this sequence of files we will restrict the type side
  * to a string type compatible with a MySQL Varchar. This will allow us to label records in a way
- * that will provide human readable output associated with the sequence of models we produce.
+ * that will provide human readable output associated with the sequence of models we produce. This 
+ * will also alow us to integrate with an external RDBMS by exporting and importing various AQL 
+ * constructions.
  *
  * AQL models always begin with a type side declaration. The type side defines a foundation that can 
  * then be extended to define schemas.
@@ -88,14 +90,15 @@
  ***************************************************************************************************
  *                                         Type Sides
  *
- * Type sides are an AQL construction that provides the possibility of introducing programming
- * language features that can be used to enhance the power of a database. These features are roughly 
- * analogous to stored functions that can be invoked inline within an SQL statement. To illustrate
- * how this capability works we will create a type side that exposes a string type which we label
- * Varchar in anticipation of later integration with an external RDBMS. To this we add the Java
- * string matches method to illustrate how Java functions can be exposed to the AQL framework. For
- * more details we refer the reader to the examples available by selecting the dropdown in the upper
- * right hand corner of the application. Specifically, the AQL Tutorial example.
+ * Type sides are an AQL construction that extends the built in types typically found in RDBMSs and
+ * provides the possibility of introducing programming language features that can be used to enhance 
+ * the power of a database. These features are roughly analogous to stored functions that can be 
+ * invoked inline within an SQL statement. To illustrate how this capability works we will create a 
+ * type side that exposes a string type which we label Varchar in anticipation of later integration 
+ * with an external RDBMS. To this we add the Java string matches method to illustrate how Java 
+ * functions can be exposed to the AQL framework. For more details we refer the reader to the 
+ * examples available by selecting the dropdown in the upper right hand corner of the application. 
+ * Specifically, the AQL Tutorial example.
  ***************************************************************************************************/
 typeside TypeSide = literal {
 	java_types
@@ -175,20 +178,21 @@ schema sSnT = literal : TypeSide {
  * 
  * Category Theory for the Sciences By David Spivak
  *  
- * Conceptual Mathematics: A first introduction to categories by F.William Lawverer and Stephen H.
+ * Conceptual Mathematics: A first introduction to categories by F. William Lawverer and Stephen H.
  * Schanuel.
  * 
- * Here we intuitively describe categories and identify specific concrete examples as they relate to
- * AQL. A category consists of a set of objects connected by arrows. As such it is related to a
- * directed graph where the objects are nodes and arrows are edges with direction indicated by their     
- * associated arrow. In addition to the properties of a directed graph each object of a category
- * is required to have a distinguished arrow that identifies that object and whose source and target 
- * are equal to the object it identifies.
+ * We begin with an intuitive description of categories and identify specific concrete examples as 
+ * they relate to AQL. This is followed by a formal description of a category. A category consists 
+ * of a set of objects connected by arrows. As such it is  related to a directed graph where the 
+ * objects are nodes and arrows are edges with direction indicated by their associated arrow. In 
+ * addition to the properties of a directed graph each object of a category is required to have a 
+ * distinguished arrow that identifies that object and whose source and target are equal to the 
+ * object it identifies.
  * 
  * Let's consider the three schemas we have so far constructed, but with an empty type side (i.e. no
  * attributes). Each could be viewed as an abstract category where the set of objects is the set of
- * entities. Hence schemas are the first example of an AQL construction that can be interpreted as
- * a category.
+ * entities and its arrows are foreign keys. Hence schemas are the first example of an AQL 
+ * construction that can be interpreted as a category.
  * 
  * With this in mind sT and sSnT are both one object categories. By virtue of the fact that the set 
  * of identity arrows and the set of objects are essentially the same set (technically isomorphic
@@ -304,7 +308,7 @@ schema sS = literal : TypeSide {
  * generator of one entity with that of another or a generator with an attribute value. In the
  * absence of such an association AQL will create what is called a skolum term. Skolum terms are
  * essential for creating a structure that can be formally defined and verified as consistent.
- * Skolum terms at a type are referred to as a labeled null. Skolum terms as an entity are referred 
+ * Skolum terms at a type are referred to as a labeled null. Skolum terms at an entity are referred 
  * to as a meaningless identifier. Notice that labeled nulls are very different than nulls in
  * currently available RDBMSs.
  * 
@@ -383,31 +387,32 @@ instance iSkl = literal : sS {
 	generators
 	    s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
 	equations
-	    s0.SName = CategoryTheory  	s1.SName = CompSci	    s2.SName = DBA
-	    s3.SName = Pharma   		s4.SName = Programming  s5.SName = Lecturing
-		s6.SName = GrantWriting		s7.SName = Finance		s8.SName = Management
+	  s0.SName = CategoryTheory s1.SName = CompSci	    s2.SName = DBA
+	  s3.SName = Pharma   			s4.SName = Programming  s5.SName = Lecturing
+		s6.SName = GrantWriting		s7.SName = Finance			s8.SName = Management
 		s9.SName = PaperWriting
 }
 instance iSkl = literal : sS {
 	generators
 	    s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
 	equations
-	    SName(s0) = CategoryTheory	SName(s1) = CompSci	    SName(s2) = DBA
-	    SName(s3) = Pharma   		SName(s4) = Programming SName(s5) = Lecturing
-		SName(s6) = GrantWriting	SName(s7) = Finance		SName(s8) = Management
+	  SName(s0) = CategoryTheory	SName(s1) = CompSci	    SName(s2) = DBA
+	  SName(s3) = Pharma   				SName(s4) = Programming SName(s5) = Lecturing
+		SName(s6) = GrantWriting		SName(s7) = Finance			SName(s8) = Management
 		SName(s9) = PaperWriting
 }
- * The objects of an instance category are the generators. The arrows are either a foreign key
- * evaluated at a generator or an attribute evaluated at a generator. Like a schema the literal
- * declaration of an instance is a presentation of an instance category. As you will see when you
- * run an AQL model with an instance declaration AQL will fill skolum terms as implied by the schema
- * and the provided generators.
+ * The objects of an instance category are the generators plus the skolum terms produced by those
+ * generators. The arrows are either a foreign key evaluated at a generator/skolum term or an 
+ * attribute evaluated at a generator/skolum term. Like a schema the literal declaration of an 
+ * instance is a presentation of an instance category. As you will see when you run an AQL model 
+ * with a literal instance declaration AQL will fill skolum terms as implied by the schema and the 
+ * provided generators.
  * 
  * Notice these equations declare instance arrows in a way that is closely analogous to an RDF 
- * triple. The subject of a triple is a generator, the object of a triple is either a literal (value 
- * on the type side) or another generator and the predicate is the type on the arrow as determined 
- * by the underlying schema. As such AQL instances are closely related to graph databases although 
- * they are very strongly typed by their underlying schema.
+ * triple. The subject of a triple is a generator/skolum term, the object of a triple is either a 
+ * literal (value on the type side) or another generator/skolum term and the predicate is the type 
+ * on the arrow as determined by the underlying schema. As such AQL instances are closely related to 
+ * graph databases although they are very strongly typed by their underlying schema.
  * 
  * In order to extend the instance iSkl to include classes we need to decide how we want to
  * partition the skills we have into broad equivalence classes (we list the generators for 
@@ -479,12 +484,15 @@ instance iSklCls = literal : sS {
  * 
  *****************************************Add diagram here.*****************************************
  * 
- * Conceptually this construction is a generalization of the SQL union all statement. It is a 
+ * Conceptually this construction is a generalization of the SQL "union all" statement. It is a 
  * generalization in that it applies to a pair of instances of a schema rather than a pair of 
  * relations of a relvar. This construction is known as a coproduct since there is an analogous 
- * construction that takes the product of two instances obtained by reversing all of the arrows. We 
- * say that iA and iB are injections of the instances iSklExt and iSklCls into the coproduct. You 
- * can see the effect of this construction by running this file and selecting iSklCP in the viewer. */
+ * construction that takes the product of two instances obtained by reversing all of the arrows; the
+ * co prefix is a short hand for "reverse all arrows of a construction". We say that iA and iB are 
+ * injections of the instances iSklExt and iSklCls into the coproduct. You can see the effect of
+ * this construction by running this file and selecting iSklCP in the viewer. Notice the result is
+ * an instance sS that is the disjoint union of the records of iSklExt and iSklCls that has
+ * respected the foreign key fk_HasClass. */
 instance iSklCP = coproduct iSklExt + iSklCls : sS
 
 /* Now that we have all of the desired records in the same instance we want to identify the
@@ -502,7 +510,7 @@ instance iSklSklCls1 = literal : sS {
 	  s6.fk_HasClass = sc2
 }
 
-/* There is an alternative construction that is universal. First we create the instance iSLnk with a 
+/* There is an alternative construction that is universal. First we create an instance iSLnk with a 
  * generator for each of the skill classes. We then create two instance transforms, the first 
  * mapping each link generator to a iSklExt skolum term and the second mapping each link generator 
  * to our iSklCls generators. The new universal construction is known as a coequalizer. An instance 
@@ -532,6 +540,15 @@ transform tS2 = literal : iSLnk -> iSklCP {
 }
 instance iSklSklCls2 = coequalize tS1 tS2
 
+/* Notice we can summarize the sequence of constructions above this as follows:
+ *  
+ *  s0.fk_HasClass <- scLnk0 -> sc0
+ *  s3.fk_HasClass <- scLnk1 -> sc1
+ *  s6.fk_HasClass <- scLnk2 -> sc2,
+ * 
+ * which in turn is structurally equivalent to the equations in iSklSklCls1.
+ */
+
 /***************************************************************************************************
  *                                        AQL Queries and                                          *
  *                                    The Category of Schemas                                      *
@@ -546,7 +563,7 @@ instance iSklSklCls2 = coequalize tS1 tS2
  * 
  * Conceptually mappings preserve the structure of a schema, that is, they map entities and foreign
  * keys/attributes in a consistent way. For the interested reader the name given mappings in the
- * mathematical literature is functor, as functors can be viewed as a generalized function. Queries
+ * mathematical literature is functor, as a functor can be viewed as a generalized function. Queries
  * further generalize mappings in the same way that a cospan A -> B <- C generalizes a single arrow 
  * A -> C. 
  * 
@@ -565,7 +582,7 @@ instance iSklSklCls2 = coequalize tS1 tS2
  * We make use of the Java string method "matches" we have exposed through the type side. This
  * method allows us to pass a regular expression that can be used as a filter for any skill name 
  * ending in the string "Writing".
- ***************************************************************************************************/
+ **************************************************************************************************/
 query qWrtngSklS = simple : sS {
 	from
 	  s: Skill
@@ -696,12 +713,12 @@ schema_colimit S_T_SnT_Sum = modify S_T_SnT_SumAuto {
 		sS_SCNameOnSkl -> lSCNameOnSkl
 		sS_SCName -> lSCName
 		sT_TName -> lTName
-	    sSnT_skill -> lskill
-	    sSnT_task -> ltask
+	  sSnT_skill -> lskill
+	  sSnT_task -> ltask
 }
 
 /*************************************************************************************************** 
- *  								 schema_colimit Diagram
+ *  								               schema_colimit Diagram
  *  
  * Recalling our earlier description of the instance coproduct which was a cospan of instances, a 
  * schema coproduct is a cospan of schemas and as such includes a schema and a pair of structure
@@ -727,7 +744,7 @@ mapping mTToS_T_Snt_Sum = getMapping S_T_SnT_Sum sT
 mapping mSnTToS_T_SnT_Sum = getMapping S_T_SnT_Sum sSnT
 
 /***************************************************************************************************
- *                   The Category of the Category of Instances of a Schema                         *
+ *                              Migrating Data Between Schemas                                     *
  *                                  Sigma --| Dela --| Pi                                          *
  ***************************************************************************************************
  * Let's recap where we are. We have a set of three source schemas sS, sT and sSnT, each with an
@@ -742,14 +759,17 @@ mapping mSnTToS_T_SnT_Sum = getMapping S_T_SnT_Sum sSnT
  * ideas would be a lengthy digression so we will only mention them in passing along with some 
  * informal remarks about their properties. 
  * 
- * These three constructions are called sigma, pi and delta. They are universal and they all can be 
- * understood as moving instance data through mappings in a way that is analogous to how eval moves
- * instances through queries. Sigma, pi and delta are all "mappings" of a richer category of 
- * instances typed by schemas or instance categories. This means that sigma, pi and delta map not 
- * only instances but instance transforms. These three mappings are related as follows. Delta pulls 
- * data backward through a mapping and generalizes the notion of projection. Both Sigma and Pi push 
- * data forward through a mapping and generalize sums/unions and products/joins respectively. Delta 
- * can be paired with sigma on the left and pi on the right to create data migration round trips.
+ * These three constructions are called sigma, pi and delta. They all can be understood as moving 
+ * instance data through mappings in a way that is analogous to how eval moves instances through 
+ * queries. This family of functors collectively define AQL's implementation of Extration, 
+ * Transformation and Load abbreviated ETL processes. Sigma, pi and delta are all structure 
+ * preserving maps between the category of instances of one schema to the category of instances of 
+ * another schema. so they are functors. This means that sigma, pi and delta map not only instances 
+ * but instance transforms. These three mappings are related as follows. Delta pulls data backward 
+ * through a mapping and generalizes the notion of projection. Both Sigma and Pi push data forward 
+ * through a mapping and generalize sums/unions and products/joins respectively. Given a single 
+ * schema mapping, Delta can be paired with sigma on the left and pi on the right to create data 
+ * migration round trips.
  * 
  * To see this, consider schemas sA, sB, mapping m and instance iA of sA. Without yet specifying   
  * specifics the AQL syntax would be:
@@ -761,21 +781,22 @@ instance iB = literal : sB {...}
  
 instance iDlt_m_iB = delta m iB
  
- * Similarly, sigma can move this new instance forward through m into sB:
+ * Similarly, sigma can move this new instance forward through the same m into sB:
  
 instance iSgmDlt_m_iB = delta m iDlt_m_iB
  
  * A natural thing to ask is how iSgmDlt_m_iB and iB are related. The answer is they are related by
  * a transform known as the unit of the sigma --| delta adjoint pair. Notice we could also start
- * with an instance iA of sA and apply first sigma and then delta to an instance iDltSgm_m_iA. iA
- * and iDltSgm_m_iA are related by the counit of the sigma --| delta adjoint pair. In a similar way            
- * delta --| pi form an adjoint pair with associated unit and counit transforms. We say that delta 
- * is right adjoint to sigma and left adjoint to pi.
+ * with an instance iA of sA and apply first sigma m and then delta m to product an instance 
+ * iDltSgm_m_iA. iA and iDltSgm_m_iA are related by the counit of the sigma --| delta adjoint pair. 
+ * In a similar way delta --| pi form an adjoint pair with associated unit and counit transforms. 
+ * We say that delta is right adjoint to sigma and left adjoint to pi.
  * 
  * Of the three, sigma has the property that generators of the source instance are preserved in the 
  * target instance. This means we can move instances and transforms between schemas in a way that 
  * permits us to merge instance data. Let's see how we can use sigma to solve the problem at hand
- * and later we will return to broader questions about the category of instances typed by schemas.
+ * and later we will return to broader questions about the nature of sigma, pi and delta and their
+ * associated units and counits.
  * 
  * Recall we have a target schema that contains all of the entities from our three source schemas
  * we can use the sigma construction to push the instances in the source schemas forward through the 
@@ -852,7 +873,7 @@ schema sSTSpn = literal : TypeSide {
 /* Given the similarity of the source and target schemas the entity sub-blocks are all direct
  * mappings that reproduce exact copies of the source entities instances with those of the target
  * entities with the exception of the SkllNdFrTask target entity. In order to construct that entity 
- * we must have generators on both side of the new foreign keys we are introducing. By default when
+ * we must have generators on both sides of the new foreign keys we are introducing. By default when
  * multiple source generator variables are provided for a target entity each generator for the 
  * target comes from the Cartesian product of the source generators. The where clause has two
  * equations implicitly connected by a logical and. This effectively constrains the target entities
@@ -910,6 +931,12 @@ instance iSTSpn = eval qS_T_SnT_SumToSTSpn iS_T_SnT_Sum
 
 
 /* We export the instance iSTSpn to MySQL for use in later stages of this tutorial.
+ * 
+ * ******************************************WARNING!!!!********************************************
+ * If we enable this block of code the surrogate ids created by AQL in the export will change. Since 
+ * the literal transforms tLnkToSTSpnImp and tLnkToSPSpnImp defined below depend on the specific 
+ * values of these surrogates those transforms will no longer work.
+ * *************************************************************************************************
  * First clean out the target tables if present from a previous run. 
 schema sSTSpn = literal : TypeSide {
 	entities
@@ -950,7 +977,12 @@ pragma eSTS = export_jdbc_instance iSTSpn "com.mysql.jdbc.Driver" "jdbc:mysql://
 pragma pp2 = exec_jdbc "com.mysql.jdbc.Driver"	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
 "SHOW  TABLES"}
  */
-// Bring the exported instance back in for round trip (export iSTSpan import iSTSpnImp) comparison.
+
+/* The default AQL import process from a relational database submits an SQL query through the jdbc
+ * driver for the source RDBMS for each entity declared in the target schema sSTSpn above.
+ * Due to the extensive differences between AQL and RDBMS semantics, the translation process has a
+ * number of different options that can be used to provide flexibility. The default behavior
+ * requires a complete specification of all foreign key and attribute columns. */
 instance iSTSpnImp = import_jdbc "com.mysql.jdbc.Driver"
 "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn {
    // entities - create generators for each entity based on the primary key of each entity in the source database
@@ -962,12 +994,11 @@ options
    always_reload = true
 }
 
-
 /* Having constructed a span modeling the way skills are related to tasks, we now turn to another
  * model involving a span relating skills to people. We could build this model up piece by piece as
- * we did above, but in this case we illustrate how AQL can extract existing data from a relational
- * database into an AQL schema. The schema below defines the structure into which we target our  
- * import. */
+ * we did above, but AQL's schema declaration can build such a schema in one step. In this case we 
+ * illustrate how AQL can extract existing data from a relational database into an AQL schema. The 
+ * schema below defines the structure into which we target our import. */
 schema sSPSpn = literal : TypeSide {
 	entities
 	  SpecificSkill GeneralSkill SkillClass
@@ -992,8 +1023,8 @@ schema sSPSpn = literal : TypeSide {
 	  person = fk_SpP_P.PName
 }
 
-/* Here we use a Jdbc driver with each entity of the target schema populated by a select statement 
- * against the source database. */
+/* Analogous to the iSTSpnImp imported instance we also import an instance for the Skill - Person
+ * schema. */
 instance iSPSpnImp = import_jdbc "com.mysql.jdbc.Driver"
 	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSPSpn {
    SpecificSkill -> "select id, fk_IsType, SSName, SSGSName, SSSCName from sps_SpecificSkill"
@@ -1005,12 +1036,36 @@ options
    always_reload = true
 }
 
-/* More interesting colimit where we are gluing (equating) on a defined overlap. In this case we
- * are assuming that the Skill entity from sSTSpn can be equated with the SpecificSkill entity from
- * sSPSpn and likewise the SkillClass entities from both. We also note what this implies about
- * foreign keys. Since SpecificSkill has a foreign key path through GeneralSkill we equate that path
- * with the foreign key fk_HasClass from sSTSpn. In so doing we consolidate the two schemas in a way
- * that eliminates redundant entities and paths.
+/* In this example we begin to see for the first time a more representative example of the full 
+ * capability of the schema_colimit construction. In this more interesting colimit we are gluing 
+ * (equating) on a defined overlap that is associated with the slightly different strategies for 
+ * modeling skill taxonomies. In this case we are assuming that the Skill entity from sSTSpn can be
+ * equated with the SpecificSkill entity from sSPSpn and likewise the SkillClass entities from both. 
+ * We also note what this implies about foreign keys. Since SpecificSkill has a foreign key path 
+ * through GeneralSkill we equate that path with the foreign key fk_HasClass from sSTSpn. In so 
+ * doing we consolidate the two schemas in a way that eliminates redundant entities and paths.
+ * 
+ * Generally this is what a colimit does. It merges multiple objects of a category into a single
+ * object in a way that equates all paths from objects in the colimit diagram (in this case schemas)
+ * to the universal colimit (in this case the schema_colimit). These path equalities (in this case 
+ * the pair of paths from a link schema through sSTSpn and sSPSpn to sSTSpn_SPSpn_CoLim) serve to 
+ * define ways in which structure is merged across the objects in the colimit diagram. Although this
+ * approach is supported by AQL there is an equivalent alternative. 
+ * 
+ * One particularly intuitive way to implement a colimit involves deconstructing the colimit into 
+ * two steps. The first step is to take the coproduct. The coproduct is a special case of a colimit 
+ * where the colimit diagram consists of a set of discrete objects without any connecting arrows. 
+ * With such a diagram the colimit assembles the source objects disjointly. The second step is the 
+ * quotient which provides for the merging of structure across and within the source objects. What 
+ * is the structure being merged? It is the structure of a category, which consists of objects and 
+ * paths.
+ * 
+ * Recall the comparison we illustrated between the use of path equations in the instance 
+ * declaration associated with iSklSklCls1 and the use of a link instance and pair of transforms 
+ * used in the construction of isklSklCls2. Similarly the following sequence follows the sequence
+ * you have seen before where we disjointly assembled sS, sT and sSnT. In that sequence we followed
+ * with a query to create foreign keys. In this sequence we are doing something different. Instead
+ * of joining a set of disjoint entities we are gluing a pair of schema with some shared structure.
  */
 schema_colimit STSpn_SPSpn_CoLimAuto = quotient sSTSpn + sSPSpn : TypeSide {
 	entity_equations
@@ -1023,7 +1078,11 @@ schema_colimit STSpn_SPSpn_CoLimAuto = quotient sSTSpn + sSPSpn : TypeSide {
 //	  forall c. c.sSTSpn_SCName = c.sSPSpn_SCName
 }
 
-/* As before we can relabel components in the colimit schema using the modify command. */
+/* As we did in the construction of S_T_SnT_Sum we can relabel components in the colimit schema 
+ * using the modify command. An important point to notice is that attributes coming from different
+ * source schemas must be maintained as distinct attributes in the colimit. This must be done even
+ * though conceptually they may duplicate one another. This is essential as there is no guarantee
+ * that different sources will be consistent in labeling equivalent records. */
 schema_colimit STSpn_SPSpn_CoLim = modify STSpn_SPSpn_CoLimAuto {
 	rename entities
 		sSPSpn_GeneralSkill -> GeneralSkill
@@ -1061,19 +1120,27 @@ schema_colimit STSpn_SPSpn_CoLim = modify STSpn_SPSpn_CoLimAuto {
 		sSTSpn_fk_HasClass -> fk_IsType.fk_HasClass
 }
 
-// Provide addressable labels for the various components of the coproduct STSum
+/* Provide addressable labels for the various components of the schema_colimit STSpn_SPSpn_CoLim. */
 schema sSTSpn_SPSpn_CoLim = getSchema STSpn_SPSpn_CoLim
 mapping mSTSpnToSTSpn_SPSpn_CoLim = getMapping STSpn_SPSpn_CoLim sSTSpn
 mapping mSPSpnToSTSpn_SPSpn_CoLim = getMapping STSpn_SPSpn_CoLim sSPSpn
 
-// Build an instance for sS_T_SnT_Sum from iSTSpnImp and iSPSpnImp
+/* Again as we did with the instances coming from the disjoint schemas sS, sT and sSnT, we must deal 
+ * with the instance data coming from the two imports. We use coproduct_sigma to load those two
+ * instances into the assembled colimit_schema of the two sources schemas sSTSpn and sSPSpn. */
 instance iST_SP_Sum = coproduct_sigma
    mSTSpnToSTSpn_SPSpn_CoLim iSTSpnImp
    mSPSpnToSTSpn_SPSpn_CoLim iSPSpnImp  // check
    : sSTSpn_SPSpn_CoLim
 
-/* Merging records using literal transforms. Beware, this is VERY brittle. If you re-export the
- * instances all of the ids will change and this code segment will break.
+/* In order to make this instance assembly clear we illustrate a sequence of methods, each of which
+ * is equivalent. The final member of this sequence makes this all seem very easy, but it is useful 
+ * to expose some of the underlying machinery for transparency into the underlying implementation. 
+ * 
+ * In the first implementation of the instance we merging records using literal transforms. This is
+ * the most transparent of the three methods, but is not recommended. Beware, this is VERY brittle 
+ * and we only illustrate this here help bridge to the later strategies. Consider that if you 
+ * re-export the instances all of the ids will change and this code segment will break.
  */
 instance iSklLnk = literal : sSTSpn_SPSpn_CoLim {
 	generators
@@ -1082,9 +1149,8 @@ instance iSklLnk = literal : sSTSpn_SPSpn_CoLim {
 }
 
 /* What we are effectively doing is to equate records that are in the image of a link generator. For
- * example ids 100 and 81 are in the image of s0 and so are equated. We must manually construct 
- * these literal transforms by inspecting the imported instances. Clearly this approach does not
- * scale. */
+ * example ids 100 and 81 are in the image of s0 are equated. We must manually construct these 
+ * literal transforms by inspecting the imported instances. Clearly this approach does not scale. */
 transform tLnkToSTSpnImp = literal : iSklLnk -> iST_SP_Sum {
 	generators
 	  s0 -> 100
@@ -1164,17 +1230,32 @@ from
     on p.SCName = t.SCName"
 }
 
-/* Need to say something about options.
- */
+/* Notice that this instance import is very different than the ones we used to import iSTSpnImp and
+ * iSPSpnImp. We have neglected to specify all entities and of the entities we have specified we
+ * are only importing the ids. This is very different from the default behavior of the AQL import
+ * process.
+ * 
+ * In order to accomplish this we must first specify the import_joined option as false. This allows
+ * us to import each attribute in a separate select statement. In this case we are only interested
+ * in the generators and so only one select statement is specified for each incomming entity. The
+ * second option we need to override is specify that we import the instance as a theory. This
+ * incurs the theorem proving burden of a literal instance declaration but allows for a partial
+ * specification of the instance. The consequence of these two options is to allow us to import an
+ * instance that essentially the same as the literal iSklLnk instance above. */
 instance iSkillMatch = import_jdbc "com.mysql.jdbc.Driver"
 "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn_SPSpn_CoLim {
 	SpecificSkill -> "select sm_id from SkillMatch"
 	SkillClass -> "select scm_id from SkillClassMatch"
 options
-  import_as_theory = true
   import_joined = false
+  import_as_theory = true
 }
 
+/* The pair of transform imports below are again analogous to the literal transforms above. The
+ * advantage of these implementations is that if surrogate ids change they will be fetched again 
+ * from the RDBMS and so rerunning the exports will not break these transform definitions. Finally
+ * by virtue that the source SkillMatch tables from which these transforms are constructed using
+ * SQL select statements the process is entirely automated so this strategy can be made to scale. */
 transform tSMToSTSpn = import_jdbc "com.mysql.jdbc.Driver"
 	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : iSkillMatch -> iST_SP_Sum {
 	SpecificSkill -> "select sm_id, ts_id from SkillMatch"
@@ -1189,8 +1270,9 @@ transform tSMToSPSpn = import_jdbc "com.mysql.jdbc.Driver"
 
 instance iSTSpn_SPSpn_Merge2 = coequalize tSMToSTSpn tSMToSPSpn
 
-/* Importing everything in one go using the quotient_jdbc import
- */
+/* Finally we do this the easy way. We import everything in one go using the quotient_jdbc import.
+ * It is important to note that this does require the construction of the SkillMatch and
+ * SkillClassMatch tables in the source RDBMS as a precondition. */
 instance iSTSpn_SPSpn_Merge3 = quotient_jdbc "com.mysql.jdbc.Driver"
 	"jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" iST_SP_Sum { 
 "select
@@ -1205,3 +1287,84 @@ select
 from
    SkillClassMatch"
 }
+
+/* Prior to wrapping up let's return to an examination of the data migration functors sigma, delta 
+ * and pi as well as their connection with querying. We mentioned before that the coproduct_sigma 
+ * could be constructed into first the migration of instances separately into the colimit schema and 
+ * then taking the coproduct of each result. Let's examine what some of those intermediate steps do.
+ */
+instance iSTSpnImpInCoLim = sigma mSTSpnToSTSpn_SPSpn_CoLim iSTSpnImp
+/* As you can see by inspecting the runtime result we have loaded the instance iSTSpnImp into the
+ * assembled schema we created using the colimit. Since there are entities in the colimit schema
+ * not present in sSTSpn. You will notice that some entities are empty; in particular, those 
+ * entities that arose from sSPSpn. There are also skolum terms that are generated due to the 
+ * introduction GeneralSkill referenced by SpecialSkill not present in sSTSpn.
+ *
+ * Let's close the loop using delta right adjoint to sigma. We present the instance generated by
+ * sigma above to delta at the same map. We have pushed iSTSpnImp forward through sigma and then
+ * pulled the result back through the same schema map. */
+instance iSgmDltSTSpnImp = delta mSTSpnToSTSpn_SPSpn_CoLim iSTSpnImpInCoLim
+/* We see an instance that looks the same as iSTSpnImp originally imported. Intuitively we can think 
+ * of this as delta projecting the part of the colimit schema instance back into the schema from 
+ * which it came. It should not be surprising that this would yield the identity. This can be 
+ * verified by looking at the unit transform and comparing it to the identity transform. */
+transform tUnit = unit mSTSpnToSTSpn_SPSpn_CoLim iSTSpnImp
+transform tIdSTSpnImp = id iSTSpnImp
+/* The SkillClass transform output is not immediately obviously the identity, but if you unravel the 
+ * provenance you will find that it is. Start by looking at instance iSTSpnImp and you will see for
+ * entity Skill:
+ * 
+ * ID		SCNameOnSkl	fk_HasClass
+ * 100	Cognitive		122
+ * ...	...					...
+ * 102  Social			120
+ * ...	...					...
+ * 105	Psychomotor	121
+ * 
+ * Now look at the result of the quotient on the schema colimit in any of the three instances above, 
+ * say iSTSpn_SPSpn_Merge3. Specifically the SkillClass entity:
+ * 
+ * ID														ST_SCName
+ * [100.fk_IsType.fk_HasClass]	Cognitive
+ * [102.fk_IsType.fk_HasClass]	Social
+ * [105.fk_IsType.fk_HasClass]	Psychomotor
+ * 
+ * Finally look at the instance iSgmDltSTSpnImp and you will see for SkillClass:
+ * 
+ * ID																				ST_SCName
+ * <SkillClass[100.fk_IsType.fk_HasClass]>	Cognitive
+ * <SkillClass[102.fk_IsType.fk_HasClass]>	Social
+ * <SkillClass[105.fk_IsType.fk_HasClass]>	Psychomotor
+ * 
+ * We can conclude:
+ * 
+ * <SkillClass[100.fk_IsType.fk_HasClass]>	-> 122
+ * <SkillClass[102.fk_IsType.fk_HasClass]>	-> 120
+ * <SkillClass[105.fk_IsType.fk_HasClass]>	-> 121 
+ *
+ * Let's try the other direction. We start with the merged instance in the schema colimit and use 
+ * delta to project back through the mapping that inserted the schema sSTSpn into the schema 
+ * colimit. As you would expect you loose almost all of the data that was supplied by iSPSpnImp. We 
+ * now have 11 skills rather than the 10 skills provided by iSTSpnImp and so have picked up an 
+ * additional skolum term due to the "dancing" skill that came from iSPSpnImp. */ 
+instance iCoLimInSTSpn = delta mSTSpnToSTSpn_SPSpn_CoLim iSTSpn_SPSpn_Merge3
+/* Sigma then pushes this projected instance back into the schema colimit and we end up with an
+ * instance that looks like the one sigma pushed forward from iSTSpnImp but with the extra skill
+ * record. The round trip has eliminated all traces of iSTSpn_SPSpn_Merge3 that came from iSPSpnImp
+ * except the record that additional "Dancing" skill that is now skolumized. */
+instance iDltSgmCoLim = sigma mSTSpnToSTSpn_SPSpn_CoLim iCoLimInSTSpn
+transform tCounit = counit mSTSpnToSTSpn_SPSpn_CoLim iSTSpn_SPSpn_Merge3
+/* The counit transform injects iDltSgmColim back into the merged instance iSTSpn_SPSpn_Merge3. */
+
+/* Additional work that could be added to this tutorial in a later release:
+ *  
+ *  1) Examples of how relational nulls are handled when imported into AQL. This could be done
+ *     easily by creating an alternative to iS_T_SnT_Sum by replacing iSklSklCls1 with iSkl.
+ *     Following that repeat all dependent constructions to see how null values appear on export
+ *     and then are translated when imported.
+ *     
+ *  2) Follow the discussion above with additional constructions illustrating the connections
+ *     between sigma, delta and pi and eval and coeval.
+ *     
+ *  3) Develop some examples of how one can use uber flowers to create data warehouse marts.
+ */
