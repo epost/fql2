@@ -1,0 +1,1642 @@
+<link rel="stylesheet" type="text/css" href="http://www.catinf.com/css/simple.css" />
+<h1>AQL Tutorial</h1>
+<p><strong>Tasks <-> Skills <-> People</strong></p>
+<hr />
+<h2>INTRODUCTION</h2>
+<p>This file contains a sequence of models intended to illustrate the use of Algebraic Query
+Language (AQL) to formalize database concepts in a mathematically verifiable way. Each AQL file
+in this sequence will build on previous ideas, introducing AQL features in the context of
+conceptual models relating skills to tasks and people.</p>
+<p>The following is a brief outline of the sequence of models and what the reader should take away
+from reviewing each model in the sequence.</p>
+<p>This file introduces a series of AQL constructions and compares those constructions with
+analogous relational constructions where appropriate. We begin with a set of independent schemas
+and produce a single schema that is an an integrated assembly of the three source schemas. The
+following is a table of contents describing the structure of the sequence of AQL constructions
+and concepts developed in this file. The reader should not expect to understand this list at this
+point. Several passes through the tutorial may be required to fully grasp all that is presented.
+This file is an executable which when run will generate an execution graphical user interface
+where the results can be viewed. Similarly this file will be published to a series of web pages
+where the results of each construction will be displayed.</p>
+<ol>
+<li>typeside -- User defined kind for customization of data types.</li>
+<li>schema -- Extends the type side to define objects of kind schema.</li>
+<li>category -- Polymorphic abstraction that unifies many AQL concepts and constructions.</li>
+<li>schema as category -- Schemas interpreted through the abstract lens of categories.</li>
+<li>instance -- Extends the schema kind. Instance kinds can be thought of as the data that
+"fills" the schema.</li>
+<li>instance as category -- Instances interpreted through the abstract lens of categories.</li>
+<li>transform -- map from one instance to another of the same schema.</li>
+<li>the category of instances of a schema -- Instance kinds all typed by the same schema
+related by transforms as arrows.</li>
+<li>instance coproduct -- Universal construction that "adds" multiple instances associated
+with a schema.</li>
+<li>instance coequalizer -- Universal construction that uses a linking instance and a pair
+of transforms to merge records records within an instance.</li>
+<li>schema mappings, queries and the category of schemas -- Schema mappings define the
+arrows in the category of schemas. Queries generalize schema mappings and provide
+functionality similar to SQL queries.</li>
+<li>schema colimits -- A kind that unifies coproducts and coequalizers but in the context of
+the category of schemas rather than the category of instances of a schema. Generally
+formalizes a diagram of schemas connected by mappings that can be used to assemble
+source schemas into a single target schema.</li>
+<li>jdbc pragmas, imports and exports -- Integration of AQL with external data sources and
+targets. Pragmas are a kind that allows commands to be submitted to a JDBC driver to be
+executed against an external repository. Imports and exports are features the provide a
+mechanism for translating between traditional data repositories and AQL semantics.</li>
+<li>Migrating data between schemas -- This is the problem of Extracting - Transforming -
+Loading or ETL. This is where we tackle problems that involve moving data between
+schemas and the larger problem of bringing multiple source schemas together and
+integrating them.</li>
+<li>sigma --| delta --| pi -- The machinery AQL uses to move data around the enterprise.
+These mappings are the building blocks of the eval construction that moves data through
+AQL queries.</li>
+</ol>
+<hr />
+<p><strong>I will add additional items as I complete the merging of the other files into this file.</strong></p>
+<hr />
+<p>As we proceed we will draw analogies to relational constructions that may be more familiar to
+practicing database engineers. We open with a brief review of the essential features of
+relational algebra as they are related to AQL features.</p>
+<p>The structural element that forms the foundation of relational algebra is the relvar. A relvar is
+a mathematical definition that roughly corresponds to the structure of a single table. Commercial
+implementations of relvars are table definitions based on a set of fixed types provided by the
+relational database management system (RDBMS) that define the domain over which each column of
+the table is allowed to vary. Having defined one or more table structures, constraints can be
+added to further restrict the values over which a particular column may vary.</p>
+<p>In contrast, AQL provides a declarative structure that allows the user to define an algebraic
+definition of the type side. In its current implementation AQL defines this algebra by wrapping
+a selection of Java types and functions. In this sequence of files we will restrict the type side
+to a string type compatible with a MySQL Varchar. This will allow us to label records in a way
+that will provide human readable output associated with the sequence of models we produce. This
+will also allow us to integrate with an external RDBMS by exporting and importing various AQL
+constructions.</p>
+<p>AQL models always begin with a type side declaration. The type side defines a foundation that can
+then be extended to define schemas.</p>
+
+<hr />
+<h2>Type Sides</h2>
+<p>Type sides are an AQL construction that extends the built in types typically found in RDBMSs and
+provides the possibility of introducing programming language features that can be used to enhance
+the power of a database. These features are roughly analogous to stored functions that can be
+invoked inline within an SQL statement. To illustrate how this capability works we will create a
+type side that exposes a string type which we label Varchar in anticipation of later integration
+with an external RDBMS. To this we add the Java string matches method to illustrate how Java
+functions can be exposed to the AQL framework. For more details we refer the reader to the
+examples available by selecting the dropdown in the upper right hand corner of the application.
+Specifically, the AQL Tutorial example.</p>
+
+<pre>
+typeside TypeSide = literal {
+	java_types
+		Bool = "java.lang.Boolean"
+		Varchar = "java.lang.String"
+	java_constants
+		Bool = "return java.lang.Boolean.parseBoolean(input[0])"
+		Varchar = "return input[0]"
+	java_functions
+		Matches : Varchar, Varchar -> Bool = "return input[0].matches(input[1])"
+		true : Bool = "return true"
+}
+</pre>
+<hr />
+<h2>SCHEMAS</h2>
+<p>As mentioned above the schema is declared as an extension of the type side. Notice that in
+contrast with relational algebra there is no notion of an entity or relvar in isolation. The
+closest analog to a relvar in AQL is a schema with a single entity. With that in mind we proceed
+by creating a sequence of schemas, each with a single entity.</p>
+<p>The first schema we create is minimal in that it contains a single entity Task with a single
+attribute that allows us to label a task. AQL contains a variety of constructions that build on
+on previously defined constructions. Following the programming language literature we will refer
+to such constructions as kinds. In AQL a kind is either a typeside, schema, instance, (schema)
+mapping, (instance) transform, query, graph, pragma, schema_colimit, or constraints.</p>
+<p>By convention we prefix the schema name with the letter "s" to remind the reader when that name
+is encountered in the construction of a dependent kind that the object is of kind schema.</p>
+<p>By clicking on the run button AQL will construct a runtime viewing window that has a list of each
+of the constructions created in this model in a pane on the left hand side of the window. A view
+of each construction is available by clicking on the construction of interest in the left hand
+pane.</p>
+<p>Similarly this editor has a pane on the right hand side containing an outline of the
+constructions contained in this file. One can navigate to a construction by clicking on that
+construction in the outline.</p>
+
+<pre>
+schema sT = literal : TypeSide {
+	entities
+		Task
+	attributes
+		TName : Task -> Varchar
+}
+</pre>
+<p>Now we create a slightly more interesting schema. This schema still consists of only one entity,
+but that entity now has a pair of attributes.</p>
+
+<pre>
+schema sSnT = literal : TypeSide {
+	entities
+		SkillNeededForTask
+	attributes
+		skill : SkillNeededForTask -> Varchar
+		task : SkillNeededForTask -> Varchar
+}
+</pre>
+<hr />
+<h2>CATEGORIES INTRODUCED</h2>
+<p><em>Schemas as Categories</em></p>
+<p>The third schema we introduce has two entities, <code>Skill</code> and <code>SkillClass</code> that define a simple two
+level taxonomy for skills. This brings into play additional sections as part of the declarative
+structure of a schema. First the <code>foreign_keys</code> section. In AQL, schemas as first class objects come
+equipped with all of the machinery for defining a schema as a kind. This includes declaration of
+dependencies between entities. These dependencies are given the name foreign key so as to be
+consistent with relational nomenclature.</p>
+<p>Finally we have a third section that has no analog in SQL systems, the observation_equations section.
+To understand this section we must take time for a brief digression to introduce the abstract
+notion of a category.</p>
+<p>AQL is motivated by a branch of mathematics known as category theory. The reader who is
+interested in systematic development of category theory should refer to any one of a number of
+excellent introductions. Here are several such references:</p>
+<ul>
+<li><em>Category Theory</em> by Steve Awodey</li>
+<li><em>Category Theory for Computing Science</em> by Michael Barr and Charles Wells</li>
+<li><em>Category Theory for the Sciences</em> By David Spivak</li>
+<li><em>Conceptual Mathematics: A first introduction to categories</em> by F. William Lawverer and Stephen
+H. Schanuel.</li>
+</ul>
+<p>We begin with an intuitive description of categories and identify specific concrete examples as
+they relate to AQL. This is followed by a formal description of a category. A category consists
+of a set of objects connected by arrows. As such it is  related to a directed graph where the
+objects are nodes and arrows are edges with direction indicated by their associated arrow. In
+addition to the properties of a directed graph each object of a category is required to have a
+distinguished arrow that identifies that object and whose source and target are equal to the
+object it identifies.</p>
+<p>Let's consider the three schemas we have so far constructed, but with an empty type side (i.e. no
+attributes). Each could be viewed as an abstract category where the set of objects is the set of
+entities and its arrows are foreign keys. Hence schemas are the first example of an AQL
+construction that can be interpreted as a category.</p>
+<p>With this in mind <code>sT</code> and <code>sSnT</code> are both one object categories. By virtue of the fact that the set
+of identity arrows and the set of objects are essentially the same set (technically isomorphic
+to each other) we can unambiguously refer to each identity arrow using the same label as its
+corresponding entity. Similarly <code>sS</code> (again neglecting attributes) is a two object category with
+one non-identity arrow, the foreign key <code>fk_HasClass</code>. This category is sometimes called the "arrow
+category:. In future examples we will see that more generally schemas with empty type sides are
+not strictly speaking categories, but rather presentations of categories. This means they have
+all the information necessary to generate a category through a process known as saturation.</p>
+<p>Abstract categories are by design devoid of attachments to any specific context. In order to
+leverage the context free nature of category theory we need a mechanism by which we can anchor
+a category into a computational environment. Functional programming languages such as Haskell
+provide one strategy for doing this. AQL provides another strategy that is motivated by the
+capabilities of modern database management systems, so AQL extends the basic notion of an
+abstract category with a type side. We will rely on the above intuitive motivation and will not
+formally develop this idea here. The interested reader is referred to the research paper upon
+which the AQL implementation is based:</p>
+<p><a href="https://arxiv.org/abs/1602.03501">https://arxiv.org/abs/1602.03501</a></p>
+<p>There is an additional feature of categories that is critical to this discussion and that lies
+at the heart of the expressive power of category theory. This the notion of a path. A category
+by definition contains all paths that can be generated by composing arrows head to
+tail. This process of generating all paths implied by arrow composition is the aforementioned
+saturation.</p>
+<p>The order in which one chooses to compose arrows has no effect on the result so AQL provides a
+convenient syntax for indicating a path using the dot notation (elaborated below). Having added
+additional arrows for each path we now have the ability to declare two paths that begin and end
+on the same object to be equal and so the declarative structure of a category includes equations.</p>
+<p>Path equations can be used to complete an intuitive explanation of the properties of identity
+arrows. Any path that includes an identity arrow is equal to the path obtained when that identity
+arrow is omitted. Considering arrow composition as analogous to addition we can think of identity
+arrows as analogous to zero, but rather than having one zero we have one for each object in the
+category. Category theorists make this analogy by saying that identity arrows are paths of length
+zero. To further strengthen this analogy it can be shown that the counting numbers under the
+binary operation of addition define a one object category. Each arrow of the category is a
+counting number. Zero is the identity arrow. Addition is arrow composition.</p>
+<p><em>Category Definition</em></p>
+<p>Here is a formal definition of a category following the presentation in Category Theory for
+Computing Sciences chapter 2.</p>
+<p>We begin with a formal definition of a directed graph:
+A directed graph <code>C</code> is a pair of functions source: <code>C_0</code> -> <code>C_1</code> and target: <code>C_0</code> -> <code>C_1</code>. The elements
+of <code>C_0</code> we call nodes/objects and the elements of <code>C_1</code> we call edges/arrows. An arrow path of
+length <code>n</code> in <code>C</code> is a sequence of arrows arranged head to tail as follows:</p>
+<pre><code>     f_n    f_n-1    ...     f_2     f_1
+  . ----&gt; . ----&gt; .  ...  . ----&gt; . ----&gt; . 
+</code></pre>
+
+$$
+\begin{CD}
+ \cdot     @>f_n>> \cdot  @>f_{n-1}>> \cdot @. \ldots @. \cdot @>f_2>> \cdot @>f_1>> \cdot
+\end{CD}
+$$
+<p>For any adjacent pair of arrows in such a path we must have <code>target(f_k)</code> = <code>source(f_k-1)</code>. Such
+adjacent pairs we call composable pairs. In such a graph one can define sets of paths of length <code>n</code>
+which we designate <code>C_n</code>.</p>
+<p>The definition of a category extends the definition of a directed graph:
+A category is a graph <code>C</code> together with two functions <code>c: C_2</code> -> <code>C_1</code> and <code>u: C_0 -&gt; C_1</code> with
+properties <code>C-1</code> through <code>C-4</code> below. The function <code>c</code> we call composition, and if <code>(f, g)</code> is a
+composable pair, <code>c(f,g)</code> is written <code>f.g</code> and is called the composite of <code>f</code> followed by <code>g</code>. If <code>A</code> is an
+object of <code>C</code>, <code>u(A)</code> is denoted <code>id_A</code> or just <code>A</code>, which is called the identity of the object <code>A</code>.</p>
+<ul>
+<li>C-1 The source of <code>f.g</code> is the source of <code>f</code> and the target of <code>f.g</code> is the target of <code>g</code>.</li>
+<li>C-2 <code>(f.g).h = f.(g.h)</code> whenever either is defined.</li>
+<li>C-3 The source and target of <code>id_A</code> are both <code>A</code>.</li>
+<li>C-4 If <code>f: A -&gt; B</code>, <code>id_A.f = f.id_B = f</code> (alternatively <code>A.f = f.B = f</code>).</li>
+</ul>
+<p>We now introduce the fourth section in the schema declaration below, the <code>observation_equations</code>
+section. The <code>observation_equations</code> section is an example of a path equation. Notice that
+<code>SCNameOnSkill</code> is an arrow from <code>Skill</code> to <code>Varchar</code>. As such it is a path of length one. Similarly
+there is a path from <code>Skill</code> to <code>Varchar</code> that is a path of length two obtained by composing the
+foreign key arrow <code>fk_HasClass</code> with the attribute arrow <code>SCName</code>. The observation equation is a
+declaration that those two paths are equal.</p>
+<p>The practical significance of this is far reaching, but in this case it provides us with a
+mechanism to denormalize our schema while guaranteeing that no inconsistencies will be allowed.</p>
+<p>Much of the power of category theory comes from its polymorphic nature. Many different contexts
+can be interpreted through the abstract lens of category theory. We will see in the coming
+discussion that many of the kinds supported by AQL can be interpreted using category theory.</p>
+
+<pre>
+schema sS = literal : TypeSide {
+	entities
+		Skill SkillClass
+	foreign_keys
+		fk_HasClass : Skill -> SkillClass
+	attributes
+		SCName : SkillClass -> Varchar
+		SCNameOnSkl : Skill -> Varchar
+		SName : Skill -> Varchar
+	observation_equations
+		forall _x. _x.SCNameOnSkl = _x.fk_HasClass.SCName
+}
+</pre>
+<hr />
+<h2>INSTANCES</h2>
+<p>As schemas extend the type side so instances extend schemas. An AQL instance can be
+conceptualized as the data that "fills" a schema. Minimally, an instance consists of a set of
+generators for each entity in the schema. A generator is string used by AQL that serves to
+identify a particular record in an entity. The user can optionally create equational definitions
+which associate the generator of one entity with that of another or a generator with an attribute
+value. In the absence of such an association AQL will create what is called a Skolum term. Skolum
+terms are essential for creating a database instance that can be formally defined and verified as
+consistent. Skolum terms at a type are referred to as a labeled null. Skolum terms at an entity
+are referred to as a meaningless identifier. Notice that labeled nulls are very different than
+nulls in currently available RDBMSs.</p>
+<p>Every null in AQL is typed by its associated generator and the path to the location in a schema
+where a value is missing. For example, in the instance definition below we failed to provide any
+generators for skill classes and so AQL created a Skolum term for each unknown skill class
+beginning with a skill generator followed by the foreign key path. So for the Math skill there
+is an unknown generator <code>s0.fk_HasClass</code> whose unknown name is <code>s0.fk_HasClass.SCName</code>.</p>
+<p>The following is a representative instance of skills. The way to think about this representative
+is that it is one member of a universe of possible instances all of which are derived from the
+same schema type <code>sS</code>. To summarize, so far we have introduced the idea that AQL constructions are
+organized around the kind hierarchy:</p>
+<p>typeside &lt;- schema &lt;- instance.</p>
+<p>Running this file and selecting an instance below will display a tabular representation of each
+instance.</p>
+
+<pre>
+instance iSkl = literal : sS {
+	generators
+		s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
+	equations
+		s0.SName = CategoryTheory       s1.SName = CompSci              s2.SName = DBA                  
+		s3.SName = Pharma               s4.SName = Programming          s5.SName = Lecturing            
+		s6.SName = GrantWriting         s7.SName = Finance              s8.SName = Management           
+		s9.SName = PaperWriting         
+}
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr><tr><td>s0</td><td>s0.fk_HasClass.SCName</td><td>CategoryTheory</td><td>s0.fk_HasClass</td></tr><tr><td>s1</td><td>s1.fk_HasClass.SCName</td><td>CompSci</td><td>s1.fk_HasClass</td></tr><tr><td>s2</td><td>s2.fk_HasClass.SCName</td><td>DBA</td><td>s2.fk_HasClass</td></tr><tr><td>s3</td><td>s3.fk_HasClass.SCName</td><td>Pharma</td><td>s3.fk_HasClass</td></tr><tr><td>s4</td><td>s4.fk_HasClass.SCName</td><td>Programming</td><td>s4.fk_HasClass</td></tr><tr><td>s5</td><td>s5.fk_HasClass.SCName</td><td>Lecturing</td><td>s5.fk_HasClass</td></tr><tr><td>s6</td><td>s6.fk_HasClass.SCName</td><td>GrantWriting</td><td>s6.fk_HasClass</td></tr><tr><td>s7</td><td>s7.fk_HasClass.SCName</td><td>Finance</td><td>s7.fk_HasClass</td></tr><tr><td>s8</td><td>s8.fk_HasClass.SCName</td><td>Management</td><td>s8.fk_HasClass</td></tr><tr><td>s9</td><td>s9.fk_HasClass.SCName</td><td>PaperWriting</td><td>s9.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>s0.fk_HasClass</td><td>s0.fk_HasClass.SCName</td></tr><tr><td>s1.fk_HasClass</td><td>s1.fk_HasClass.SCName</td></tr><tr><td>s2.fk_HasClass</td><td>s2.fk_HasClass.SCName</td></tr><tr><td>s3.fk_HasClass</td><td>s3.fk_HasClass.SCName</td></tr><tr><td>s4.fk_HasClass</td><td>s4.fk_HasClass.SCName</td></tr><tr><td>s5.fk_HasClass</td><td>s5.fk_HasClass.SCName</td></tr><tr><td>s6.fk_HasClass</td><td>s6.fk_HasClass.SCName</td></tr><tr><td>s7.fk_HasClass</td><td>s7.fk_HasClass.SCName</td></tr><tr><td>s8.fk_HasClass</td><td>s8.fk_HasClass.SCName</td></tr><tr><td>s9.fk_HasClass</td><td>s9.fk_HasClass.SCName</td></tr></table></div><br style="clear:both;"/>
+<p>Analogous to the skills instance above we create a representative instance for tasks.</p>
+
+<pre>
+instance iTsk = literal : sT {
+	generators
+		t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 : Task
+	equations
+		t1.TName = LaunchCIStartup      t2.TName = BuildAQL             t3.TName = WriteAQLTutorial     
+		t4.TName = BuildPhrmColim       t5.TName = BuildFncColim        t6.TName = WriteCTPaper         
+		t7.TName = TeachCT              t8.TName = TeachCS              t9.TName = RunPhrmIntProject    
+		t10.TName = RunFncIntProject    
+}
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Task</th><th>TName</th></tr><tr><td>t1</td><td>LaunchCIStartup</td></tr><tr><td>t2</td><td>BuildAQL</td></tr><tr><td>t3</td><td>WriteAQLTutorial</td></tr><tr><td>t4</td><td>BuildPhrmColim</td></tr><tr><td>t5</td><td>BuildFncColim</td></tr><tr><td>t6</td><td>WriteCTPaper</td></tr><tr><td>t7</td><td>TeachCT</td></tr><tr><td>t8</td><td>TeachCS</td></tr><tr><td>t9</td><td>RunPhrmIntProject</td></tr><tr><td>t10</td><td>RunFncIntProject</td></tr></table></div><br style="clear:both;"/>
+<p>The definition of an entity with a pair of attributes provides us with the ability to create an
+instance that associates each such pair with the same generator. Here we illustrate this idea
+with such a representative instance.</p>
+
+<pre>
+instance iSnT = literal : sSnT {
+	generators
+		st1 st2 st3 st4 st5 st6 st7 st8 st9 st10 st11 st12 st13 st14 st15 st16 st17 st18 st19 st20 st21 st22 st23 st24 : SkillNeededForTask
+	equations
+		st1.skill = CompSci             st1.task = LaunchCIStartup      st2.skill = Programming         
+		st2.task = LaunchCIStartup      st3.skill = GrantWriting        st3.task = LaunchCIStartup      
+		st4.skill = PaperWriting        st4.task = LaunchCIStartup      st5.skill = CompSci             
+		st5.task = BuildAQL             st6.skill = Programming         st6.task = BuildAQL             
+		st7.skill = Management          st7.task = BuildAQL             st8.skill = Programming         
+		st8.task = WriteAQLTutorial     st9.skill = Lecturing           st9.task = WriteAQLTutorial     
+		st10.skill = PaperWriting       st10.task = WriteAQLTutorial    st11.skill = Pharma             
+		st11.task = BuildPhrmColim      st12.skill = Programming        st12.task = BuildPhrmColim      
+		st13.skill = Finance            st13.task = BuildFncColim       st14.skill = Programming        
+		st14.task = BuildFncColim       st15.skill = CategoryTheory     st15.task = WriteCTPaper        
+		st16.skill = PaperWriting       st16.task = WriteCTPaper        st17.skill = CategoryTheory     
+		st17.task = TeachCT             st18.skill = Lecturing          st18.task = TeachCT             
+		st19.skill = Pharma             st19.task = RunPhrmIntProject   st20.skill = Management         
+		st20.task = RunPhrmIntProject   st21.skill = Finance            st21.task = RunFncIntProject    
+		st22.skill = Management         st22.task = RunFncIntProject    st23.skill = CompSci            
+		st23.task = TeachCS             st24.skill = Lecturing          st24.task = TeachCS             
+}
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillNeededForTask</th><th>skill</th><th>task</th></tr><tr><td>st1</td><td>CompSci</td><td>LaunchCIStartup</td></tr><tr><td>st2</td><td>Programming</td><td>LaunchCIStartup</td></tr><tr><td>st3</td><td>GrantWriting</td><td>LaunchCIStartup</td></tr><tr><td>st4</td><td>PaperWriting</td><td>LaunchCIStartup</td></tr><tr><td>st5</td><td>CompSci</td><td>BuildAQL</td></tr><tr><td>st6</td><td>Programming</td><td>BuildAQL</td></tr><tr><td>st7</td><td>Management</td><td>BuildAQL</td></tr><tr><td>st8</td><td>Programming</td><td>WriteAQLTutorial</td></tr><tr><td>st9</td><td>Lecturing</td><td>WriteAQLTutorial</td></tr><tr><td>st10</td><td>PaperWriting</td><td>WriteAQLTutorial</td></tr><tr><td>st11</td><td>Pharma</td><td>BuildPhrmColim</td></tr><tr><td>st12</td><td>Programming</td><td>BuildPhrmColim</td></tr><tr><td>st13</td><td>Finance</td><td>BuildFncColim</td></tr><tr><td>st14</td><td>Programming</td><td>BuildFncColim</td></tr><tr><td>st15</td><td>CategoryTheory</td><td>WriteCTPaper</td></tr><tr><td>st16</td><td>PaperWriting</td><td>WriteCTPaper</td></tr><tr><td>st17</td><td>CategoryTheory</td><td>TeachCT</td></tr><tr><td>st18</td><td>Lecturing</td><td>TeachCT</td></tr><tr><td>st19</td><td>Pharma</td><td>RunPhrmIntProject</td></tr><tr><td>st20</td><td>Management</td><td>RunPhrmIntProject</td></tr><tr><td>st21</td><td>Finance</td><td>RunFncIntProject</td></tr><tr><td>st22</td><td>Management</td><td>RunFncIntProject</td></tr><tr><td>st23</td><td>CompSci</td><td>TeachCS</td></tr><tr><td>st24</td><td>Lecturing</td><td>TeachCS</td></tr></table></div><br style="clear:both;"/>
+<p><em>Instance Categories</em></p>
+<p>Like schemas, instances can also be viewed as categories. To make this clearer consider these
+alternative syntaxes for declaring an instance using the equations keyword. The following are
+both equivalent to the <code>sSkl</code> declaration above:</p>
+<pre><code>instance iSkl = literal : sS {
+    generators
+        s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
+    equations
+      s0.SName = CategoryTheory    s1.SName = CompSci        s2.SName = DBA
+      s3.SName = Pharma            s4.SName = Programming    s5.SName = Lecturing
+      s6.SName = GrantWriting      s7.SName = Finance        s8.SName = Management
+      s9.SName = PaperWriting
+}
+instance iSkl = literal : sS {
+    generators
+        s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 : Skill
+    equations
+      SName(s0) = CategoryTheory    SName(s1) = CompSci        SName(s2) = DBA
+      SName(s3) = Pharma            SName(s4) = Programming    SName(s5) = Lecturing
+      SName(s6) = GrantWriting      SName(s7) = Finance        SName(s8) = Management
+      SName(s9) = PaperWriting
+}
+</code></pre>
+<p>The objects of an instance category are the generators plus the Skolum terms produced by those
+generators. The arrows are either a foreign key evaluated at a generator/Skolum term or an
+attribute evaluated at a generator/Skolum term. Like a schema the literal declaration of an
+instance is a presentation of an instance category. As you will see when you run an AQL model
+with a literal instance declaration AQL will fill Skolum terms as implied by the schema and the
+provided generators.</p>
+<p>Notice these equations declare instance arrows in a way that is closely analogous to an RDF
+triple. The subject of a triple is a generator/Skolum term, the object of a triple is either a
+literal (value on the type side) or another generator/Skolum term and the predicate is the type
+on the arrow as determined by the underlying schema. As such AQL instances are closely related to
+graph databases although they are very strongly typed by their underlying schema.</p>
+<p>In order to extend the instance <code>iSkl</code> to include classes we need to decide how we want to
+partition the skills we have into broad equivalence classes (we list the generators for
+convenience):</p>
+<ul>
+<li>Class 1: CategoryTheory, CompSci, DBA, Programming (s0, s1, s2, s4)</li>
+<li>Class 2: Pharma, Lecturing, Finance, Management (s3, s5, s7, s8)</li>
+<li>Class 3: GrantWriting, PaperWriting (s6, s9)</li>
+</ul>
+<p>AQL provides the ability to extend any construction by importing a construction already in place,
+so using the path dot notation we extend the <code>iSkl</code> instance as follows:</p>
+
+<pre>
+instance iSklExt = literal : sS {
+	imports
+		iSkl
+	equations
+		s0.fk_HasClass = s1.fk_HasClass
+		s0.fk_HasClass = s2.fk_HasClass
+		s0.fk_HasClass = s4.fk_HasClass
+		s3.fk_HasClass = s5.fk_HasClass
+		s3.fk_HasClass = s7.fk_HasClass
+		s3.fk_HasClass = s8.fk_HasClass
+		s6.fk_HasClass = s9.fk_HasClass
+}
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr><tr><td>s0</td><td>s0.fk_HasClass.SCName</td><td>CategoryTheory</td><td>s0.fk_HasClass</td></tr><tr><td>s1</td><td>s0.fk_HasClass.SCName</td><td>CompSci</td><td>s0.fk_HasClass</td></tr><tr><td>s2</td><td>s0.fk_HasClass.SCName</td><td>DBA</td><td>s0.fk_HasClass</td></tr><tr><td>s3</td><td>s5.fk_HasClass.SCName</td><td>Pharma</td><td>s5.fk_HasClass</td></tr><tr><td>s4</td><td>s0.fk_HasClass.SCName</td><td>Programming</td><td>s0.fk_HasClass</td></tr><tr><td>s5</td><td>s5.fk_HasClass.SCName</td><td>Lecturing</td><td>s5.fk_HasClass</td></tr><tr><td>s6</td><td>s9.fk_HasClass.SCName</td><td>GrantWriting</td><td>s9.fk_HasClass</td></tr><tr><td>s7</td><td>s5.fk_HasClass.SCName</td><td>Finance</td><td>s5.fk_HasClass</td></tr><tr><td>s8</td><td>s5.fk_HasClass.SCName</td><td>Management</td><td>s5.fk_HasClass</td></tr><tr><td>s9</td><td>s9.fk_HasClass.SCName</td><td>PaperWriting</td><td>s9.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>s0.fk_HasClass</td><td>s0.fk_HasClass.SCName</td></tr><tr><td>s5.fk_HasClass</td><td>s5.fk_HasClass.SCName</td></tr><tr><td>s9.fk_HasClass</td><td>s9.fk_HasClass.SCName</td></tr></table></div><br style="clear:both;"/>
+<p>Notice that each of the paths in the equations above have a direct correspondence with a Skolum
+term. Hence, in contrast with traditional database NULL values, Skolum terms can be manipulated
+in the same way any other value can be manipulated. If you compare <code>iSkl</code> and <code>iSklExt</code> in the
+runtime GUI you will note that the number of Skolum terms has decreased from ten (one for each
+skill) to three (one for each equivalence class).</p>
+
+<p><em>The Category of Instances of a Schema</em></p>
+<p>Now lets see if we can give these skill class labeled nulls labels. To do this we have to
+introduce another example of a category, the universe of possible instances that are all based on
+a particular schema. For example all instances of <code>sS</code> define a category. The objects are instances
+of <code>sS</code> and we already have two examples, <code>iSkl</code> and <code>iSklExt</code>. The arrows are transforms from one
+instance of <code>sS</code> to another instance of <code>sS</code>. A transform is an instance map that preserves the
+structure of the instance. We will return to transforms in a moment, but for now lets create a
+third instance with labels for our three skill classes.</p>
+
+<pre>
+instance iSklCls = literal : sS {
+	generators
+		sc0 sc1 sc2 : SkillClass
+	equations
+		sc0.SCName = Cognitive
+		sc1.SCName = Social
+		sc2.SCName = Psychomotor
+}
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>sc0</td><td>Cognitive</td></tr><tr><td>sc1</td><td>Social</td></tr><tr><td>sc2</td><td>Psychomotor</td></tr></table></div><br style="clear:both;"/>
+<p>An important idea in category theory is the notion of a universal construction. We now introduce
+the AQL implementation of such a construction. The idea is that given a particular structure
+defined by a diagram one can consider all possible examples of that structure in a particular
+category. By that we mean all examples that have the same shape as the diagram in question. Let's
+consider a diagram called a cospan. It has this shape: <code>t1: A --&gt; X &lt;-- B :t2</code>. As we were
+currently talking about the category of instances of the schema <code>sS</code>, the objects <code>A</code>, <code>X</code>, and <code>B</code> are
+instances and the two arrows are transforms. A cospan in this category is any valid collection of
+three instances of <code>sS</code> that are related to one another via a pair of transforms.</p>
+<p>Given a choice of instances say <code>iSklExt</code> and <code>iSklCls</code> we can consider all possible ways of
+combining <code>iSklExt</code> and <code>iSklCls</code> with a pair of transforms to get a third instance <code>X</code>. The universal
+way of combining <code>iSklExt</code> and <code>iSklCls</code> to get an <code>X</code> is the one to which all others can be related in
+a unique way. That is to say, for any <code>X</code> and any pair of valid transforms <code>t1</code> and <code>t2</code> the universal
+cospan <code>iA: iSklExt --&gt; iSklCP &lt;-- iSklCls :iB</code> is the cospan such that there exists a unique
+transform:</p>
+<pre><code>t(t1,t2): iSklCP --&gt; X such that
+iA.t(t1,t2) = t1 and
+iB.t(t1,t2) = t2
+</code></pre>
+<p>for any <code>X</code> and any pair of transforms <code>(t1, t2)</code>. What this means is that the pair of arrows <code>t1</code> and
+<code>t2</code> can be replaced with the single arrow <code>t(t1,t2)</code>.</p>
+<hr />
+<p><em></em>                                      Add diagram here.                                      <em></em></p>
+<hr />
+<p>Conceptually this construction is a generalization of the SQL "UNION ALL" statement. It is a
+generalization in that it applies to a pair of instances of a schema rather than a pair of
+relations of a relvar. This construction is known as a coproduct. We say that <code>iA</code> and <code>iB</code> are
+injections of the instances <code>iSklExt</code> and <code>iSklCls</code> into the coproduct. You can see the effect of
+this construction by running this file and selecting <code>iSklCP</code> in the viewer. Notice the result is
+an instance <code>sS</code> that is the disjoint union of the records of <code>iSklExt</code> and <code>iSklCls</code> that has
+respected the foreign key <code>fk_HasClass</code>.</p>
+
+<pre>
+instance iSklCP = coproduct (iSklExt) + (iSklCls) : sS
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr><tr><td>s0</td><td>s0.fk_HasClass.SCName</td><td>CategoryTheory</td><td>s0.fk_HasClass</td></tr><tr><td>s1</td><td>s0.fk_HasClass.SCName</td><td>CompSci</td><td>s0.fk_HasClass</td></tr><tr><td>s2</td><td>s0.fk_HasClass.SCName</td><td>DBA</td><td>s0.fk_HasClass</td></tr><tr><td>s3</td><td>s5.fk_HasClass.SCName</td><td>Pharma</td><td>s5.fk_HasClass</td></tr><tr><td>s4</td><td>s0.fk_HasClass.SCName</td><td>Programming</td><td>s0.fk_HasClass</td></tr><tr><td>s5</td><td>s5.fk_HasClass.SCName</td><td>Lecturing</td><td>s5.fk_HasClass</td></tr><tr><td>s6</td><td>s9.fk_HasClass.SCName</td><td>GrantWriting</td><td>s9.fk_HasClass</td></tr><tr><td>s7</td><td>s5.fk_HasClass.SCName</td><td>Finance</td><td>s5.fk_HasClass</td></tr><tr><td>s8</td><td>s5.fk_HasClass.SCName</td><td>Management</td><td>s5.fk_HasClass</td></tr><tr><td>s9</td><td>s9.fk_HasClass.SCName</td><td>PaperWriting</td><td>s9.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>s0.fk_HasClass</td><td>s0.fk_HasClass.SCName</td></tr><tr><td>s5.fk_HasClass</td><td>s5.fk_HasClass.SCName</td></tr><tr><td>s9.fk_HasClass</td><td>s9.fk_HasClass.SCName</td></tr><tr><td>sc0</td><td>Cognitive</td></tr><tr><td>sc1</td><td>Social</td></tr><tr><td>sc2</td><td>Psychomotor</td></tr></table></div><br style="clear:both;"/>
+<p>Now that we have all of the desired records in the same instance we want to identify the
+generators that came from <code>iSklCls</code> with the Skolum terms that came from the <code>iSklExt</code> instance. To
+achieve this result we would like to declare that each of the Skolum terms from <code>iSklExt</code> should be
+merged with the appropriate generator coming from <code>iSklCls</code>. Recall we have already done this by
+importing an existing instance into a new instance and adding equations. Here is the solution
+using that approach.</p>
+
+<pre>
+instance iSklSklCls1 = literal : sS {
+	imports
+		iSklCP
+	equations
+		s0.fk_HasClass = sc0
+		s3.fk_HasClass = sc1
+		s6.fk_HasClass = sc2
+}
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr><tr><td>s0</td><td>Cognitive</td><td>CategoryTheory</td><td>s0.fk_HasClass</td></tr><tr><td>s1</td><td>Cognitive</td><td>CompSci</td><td>s0.fk_HasClass</td></tr><tr><td>s2</td><td>Cognitive</td><td>DBA</td><td>s0.fk_HasClass</td></tr><tr><td>s3</td><td>Social</td><td>Pharma</td><td>s5.fk_HasClass</td></tr><tr><td>s4</td><td>Cognitive</td><td>Programming</td><td>s0.fk_HasClass</td></tr><tr><td>s5</td><td>Social</td><td>Lecturing</td><td>s5.fk_HasClass</td></tr><tr><td>s6</td><td>Psychomotor</td><td>GrantWriting</td><td>s9.fk_HasClass</td></tr><tr><td>s7</td><td>Social</td><td>Finance</td><td>s5.fk_HasClass</td></tr><tr><td>s8</td><td>Social</td><td>Management</td><td>s5.fk_HasClass</td></tr><tr><td>s9</td><td>Psychomotor</td><td>PaperWriting</td><td>s9.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>s0.fk_HasClass</td><td>Cognitive</td></tr><tr><td>s5.fk_HasClass</td><td>Social</td></tr><tr><td>s9.fk_HasClass</td><td>Psychomotor</td></tr></table></div><br style="clear:both;"/>
+<p>There is an alternative construction that is universal. First we create an instance <code>iSLnk</code> with a
+generator for each of the skill classes. We then create two instance transforms, the first
+mapping each link generator to a <code>iSklExt</code> Skolum term and the second mapping each link generator
+to our <code>iSklCls</code> generators. The new universal construction is known as a coequalizer. An instance
+coequalizer uses a pair of transforms to define collections of records that are identified as
+equal. This approach has the advantage that linking instances and transforms can be imported from
+an external database using SQL queries.</p>
+<hr />
+<p><em></em>                                      Add diagram here.                                      <em></em></p>
+<hr />
+<p>This construction is a generalization of the notion of partitioning a set into equivalence
+classes. Later we will see how these constructions can be applied to other categories in AQL.</p>
+
+<pre>
+instance iSLnk = literal : sS {
+	generators
+		scLnk0 scLnk1 scLnk2 : SkillClass
+}
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>scLnk0</td><td>scLnk0.SCName</td></tr><tr><td>scLnk1</td><td>scLnk1.SCName</td></tr><tr><td>scLnk2</td><td>scLnk2.SCName</td></tr></table></div><br style="clear:both;"/>
+<pre>
+transform tS1 = literal : iSLnk -> iSklCP {
+	entities
+		scLnk0 -> s0.fk_HasClass
+		scLnk1 -> s3.fk_HasClass
+		scLnk2 -> s6.fk_HasClass
+}
+</pre>
+<pre>
+transform tS2 = literal : iSLnk -> iSklCP {
+	entities
+		scLnk0 -> sc0
+		scLnk1 -> sc1
+		scLnk2 -> sc2
+}
+</pre>
+<pre>
+instance iSklSklCls2 = coequalize tS1 tS2
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr><tr><td>s0</td><td>Cognitive</td><td>CategoryTheory</td><td>s0.fk_HasClass</td></tr><tr><td>s1</td><td>Cognitive</td><td>CompSci</td><td>s0.fk_HasClass</td></tr><tr><td>s2</td><td>Cognitive</td><td>DBA</td><td>s0.fk_HasClass</td></tr><tr><td>s3</td><td>Social</td><td>Pharma</td><td>s5.fk_HasClass</td></tr><tr><td>s4</td><td>Cognitive</td><td>Programming</td><td>s0.fk_HasClass</td></tr><tr><td>s5</td><td>Social</td><td>Lecturing</td><td>s5.fk_HasClass</td></tr><tr><td>s6</td><td>Psychomotor</td><td>GrantWriting</td><td>s9.fk_HasClass</td></tr><tr><td>s7</td><td>Social</td><td>Finance</td><td>s5.fk_HasClass</td></tr><tr><td>s8</td><td>Social</td><td>Management</td><td>s5.fk_HasClass</td></tr><tr><td>s9</td><td>Psychomotor</td><td>PaperWriting</td><td>s9.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>s0.fk_HasClass</td><td>Cognitive</td></tr><tr><td>s5.fk_HasClass</td><td>Social</td></tr><tr><td>s9.fk_HasClass</td><td>Psychomotor</td></tr></table></div><br style="clear:both;"/>
+<p>Notice we can summarize the sequence of constructions above this as follows:</p>
+<pre><code>s0.fk_HasClass &lt;- scLnk0 -&gt; sc0
+s3.fk_HasClass &lt;- scLnk1 -&gt; sc1
+s6.fk_HasClass &lt;- scLnk2 -&gt; sc2,
+</code></pre>
+<p>which in turn is structurally equivalent to the equations in <code>iSklSklCls1</code>.</p>
+
+<hr />
+<h2>AQL QUERIES</h2>
+<p><em>And the Category of Schemas</em></p>
+<p>The next example of a category we need is the category of schemas. Since a schema can be viewed
+as a presentation of a category the category of schemas is closely related to the category of
+categories. The objects of the category of schemas are of course schemas and the arrows are
+referred to in AQL as mappings. There is a syntax for the literal declaration of a mapping that
+is provided by AQL, but we will not elaborate on that syntax as you will see that most
+applications of mappings are either implicit in other constructions or generalizations to
+mappings as in the case of queries which we introduce in this section.</p>
+<p>Conceptually mappings preserve the structure of a schema, that is, they map entities and foreign
+keys/attributes in a consistent way. For the interested reader the name given mappings in the
+mathematical literature is functor, as a functor can be viewed as a generalized function. Queries
+further generalize mappings in the same way that a cospan <code>A -&gt; B &lt;- C</code> generalizes a single arrow
+<code>A -&gt; C</code>.</p>
+<p>AQL queries can be used to extract some part of a schema instance as well as to calculate derived
+results. This construction is the query kind. We illustrate in our first example a simple form of
+an AQL query that is very similar to an SQL query.</p>
+<ul>
+<li>The from clause: like SQL lists the entities from which the query is constructed. AQL differs
+in that each entity must be provided with a variable that serves as a representative generator
+for that entity. This is syntactically similar to an SQL alias though not optional.</li>
+<li>The where clause: Again similar to the where clause in SQL in that it provides a means for
+filtering records and joining entities.</li>
+<li>The return clause: The return clause is analogous to the select clause in SQL and defines what
+the query output is.</li>
+</ul>
+<p>We make use of the Java string method "matches" we have exposed through the type side. This
+method allows us to pass a regular expression that can be used as a filter for any skill name
+ending in the string "Writing".</p>
+
+<pre>
+query qWrtngSklS = simple : sS {
+			from	s : Skill
+				where	Matches(s.SName, .*Writing) = true
+				return	Skill_Class_Name -> s.SCNameOnSkl
+					Skill_Name -> s.SName
+
+}
+</pre>
+<p>By virtue of AQL's ability to define multiple instances associated with a schema, to execute a
+query it must be evaluated on an instance to define a new instance. When queries are of the
+simple type as in this example the schema is implicitly defined as having a single entity with
+attributes as listed in the return clause.</p>
+
+<pre>
+instance iWrtngSklS = eval qWrtngSklS iSkl
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Q</th><th>Skill_Class_Name</th><th>Skill_Name</th></tr><tr><td>(s=s6)</td><td>s6.fk_HasClass.SCName</td><td>GrantWriting</td></tr><tr><td>(s=s9)</td><td>s9.fk_HasClass.SCName</td><td>PaperWriting</td></tr></table></div><br style="clear:both;"/>
+<p>To illustrate the more complete query syntax we must explicitly declare a target schema. Below
+we rewrite <code>qWrtngSklS</code> to illustrate the more complete syntax. First we define the target schema
+with a single entity <code>tSkill</code> and the two attributes listed in the return clause above:</p>
+
+<pre>
+schema sSkl = literal : TypeSide {
+	entities
+		tSkill
+	attributes
+		Skill_Class_Name : tSkill -> Varchar
+		Skill_Name : tSkill -> Varchar
+}
+</pre>
+<p>Next we create a query whose kind is an arrow from the source schema <code>sS</code> to the target schema
+<code>sSkl</code>. This complete syntax requires a query sub-section for each entity in the target schema.
+Additionally the complete syntax requires an assignment for all attributes defined in the target
+schema. The query <code>qWrtngSklC</code> is functionally equivalent to <code>qWrtngSklS</code>. If you run this model you
+will notice that the instance <code>iWrtngSklS</code> is identical to the instance <code>iWrtngSklC</code>.</p>
+
+<pre>
+query qWrtngSklC = literal : sS -> sSkl {
+	entities
+		tSkill -> {	from	s : Skill
+				where	Matches(s.SName, .*Writing) = true
+				return	Skill_Class_Name -> s.SCNameOnSkl
+					Skill_Name -> s.SName}
+}
+</pre>
+<pre>
+instance iWrtngSklC = eval qWrtngSklC iSkl
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>tSkill</th><th>Skill_Class_Name</th><th>Skill_Name</th></tr><tr><td>(s=s6)</td><td>s6.fk_HasClass.SCName</td><td>GrantWriting</td></tr><tr><td>(s=s9)</td><td>s9.fk_HasClass.SCName</td><td>PaperWriting</td></tr></table></div><br style="clear:both;"/>
+<p>Queries as structure preserving maps of schemas have the capability of mapping not only entities
+but also foreign keys. In this example we will build a query that has as its source and target
+schemas <code>sS</code> but is not an identity. This example filters for those skills that are classified as
+social skills.</p>
+<p>Given its novel nature, let's take a moment to elaborate on the syntax of the <code>foreign_keys</code>
+section. We have duplicated the declaration of the foreign key we are constructing in a comment as
+reference. The <code>fk_HasClass</code> foreign key enforces a functional dependency between the generators of
+the entity Skill and the generators of of the entity <code>SkillClass</code>. In the entities section we have
+generator variables sc for the <code>SkillClass</code> entity and <code>s</code> for the <code>Skill</code> entity. These are variables
+that vary over the generators and Skolum terms created by the saturation process. The task at
+hand is to use those variables and the source foreign key to construct a functional dependency in
+the target schema. We do this by taking a <code>SkillClass</code> generator and assigning it as the return
+value of the target foreign key <code>fk_HasClass</code>. Which generator do we assign? The one we get by
+taking a skill generator and following it to its skill class. Notice that this is opposite to the
+direction of the arrow associated with the <code>fk_SkillClass</code> functional dependency.</p>
+<p>Note: If you removed the where clause from each entity sub-section you would have the identity
+mapping.</p>
+
+<pre>
+query qScl = literal : sS -> sS {
+	entities
+		Skill -> {from	s : Skill
+				where	s.fk_HasClass.SCName = Social
+				return	SCNameOnSkl -> s.SCNameOnSkl
+					SName -> s.SName}
+
+		SkillClass -> {from	sc : SkillClass
+				where	sc.SCName = Social
+				return	SCName -> sc.SCName}
+	foreign_keys
+		fk_HasClass -> { 	{sc -> s.fk_HasClass} }
+}
+</pre>
+<pre>
+instance iSclSkl = eval qScl iSklSklCls1
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr><tr><td>(s=s3)</td><td>Social</td><td>Pharma</td><td>(sc=s5.fk_HasClass)</td></tr><tr><td>(s=s5)</td><td>Social</td><td>Lecturing</td><td>(sc=s5.fk_HasClass)</td></tr><tr><td>(s=s7)</td><td>Social</td><td>Finance</td><td>(sc=s5.fk_HasClass)</td></tr><tr><td>(s=s8)</td><td>Social</td><td>Management</td><td>(sc=s5.fk_HasClass)</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>(sc=s5.fk_HasClass)</td><td>Social</td></tr></table></div><br style="clear:both;"/>
+<hr />
+<h2>SCHEMA COLIMIT</h2>
+<p>Next we introduce an AQL feature that allows us to assemble multiple source schemas into a single
+target schema. This construction is called a schema colimit by virtue of its mathematical origins
+in category theory. Generally colimits are a class of universal constructions that take a diagram
+of objects connected by arrows and assemble those objects in a way consistent with the diagram.
+We have already seen an example of a colimit in the instance coproduct. Now we apply AQL's
+implementation of that same universal construction to the category of schemas. When applied to
+schemas the coproduct results in a construction analogous to what is sometimes called "landing"
+tables from multiple source schemas into a single schema where data transforms can be
+conveniently developed.</p>
+<p>In this particular case we "land" the three schemas <code>sT</code>, <code>sS</code>, <code>sSnT</code> using the single structure
+<code>S_T_SnT_SumAuto</code> whose kind is <code>schema_colimit</code>. We will develop the connection of a schema
+coproduct with a instance coproduct in a moment, but for now examine the automatically generated
+coproduct in the runtime viewer.</p>
+
+<pre>
+schema_colimit S_T_SnT_SumAuto = coproduct sT + sS + sSnT
+</pre>
+<p>The automatically generated schema colimit prefixes each object within the target schema with the
+label associated with the source schema from which that object originated. With the modify
+command we have the option of providing whatever names we choose independent of the names
+associated with the source schemas from which they originated. In this case we designate each
+entity with the prefix <code>l</code> to indicate that it was landed using the coproduct operation.</p>
+
+<pre>
+schema_colimit S_T_SnT_Sum = modify S_T_SnT_SumAuto {
+	rename entities
+		sS_Skill -> lSkill
+		sS_SkillClass -> lSkillClass
+		sT_Task -> lTask
+		sSnT_SkillNeededForTask -> lSkillNeededForTask
+	rename foreign_keys
+		sS_Skill -> lSkill
+		sS_SkillClass -> lSkillClass
+		sT_Task -> lTask
+		sSnT_SkillNeededForTask -> lSkillNeededForTask
+		sS_fk_HasClass -> lfk_HasClass
+	rename attributes
+		sS_Skill -> lSkill
+		sS_SkillClass -> lSkillClass
+		sT_Task -> lTask
+		sSnT_SkillNeededForTask -> lSkillNeededForTask
+		sS_fk_HasClass -> lfk_HasClass
+		sS_SName -> lSName
+		sS_SCNameOnSkl -> lSCNameOnSkl
+		sS_SCName -> lSCName
+		sT_TName -> lTName
+		sSnT_skill -> lskill
+		sSnT_task -> ltask
+}
+</pre>
+<p><em>Schema Colimit Diagram</em></p>
+<p>Recalling our earlier description of the instance coproduct which was a cospan of instances, a
+schema coproduct is a cospan of schemas and as such includes a schema and a pair of structure
+preserving maps of schemas.</p>
+<p>With the sequence of constructions below we reveal that inner structure of the schema colimit.
+This structure consists of a target schema and a schema mapping from each source schema to that
+target. This means that a schema colimit can be thought of as a diagram of schemas and schema
+mappings. In this particular case, using the labels assigned below, we have the following
+diagram:</p>
+<pre><code>                 mSToS_T_SnT_Sum        mTToS_T_Snt_Sum
+                 sS --------&gt; sS_T_Snt_Sum &lt;-------- sT
+                                   /\
+                 mSnTToS_T_SnT_Sum |
+                                   |
+                                 sSnT
+</code></pre>
+
+<pre>
+schema sS_T_SnT_Sum = getSchema S_T_SnT_Sum
+</pre>
+<pre>
+mapping mSToS_T_SnT_Sum = getMapping S_T_SnT_Sum sS
+</pre>
+<pre>
+mapping mTToS_T_Snt_Sum = getMapping S_T_SnT_Sum sT
+</pre>
+<pre>
+mapping mSnTToS_T_SnT_Sum = getMapping S_T_SnT_Sum sSnT
+</pre>
+<hr />
+<h2>Migrating Data Between Schemas</h2>
+<p><em>Sigma --| Delta --| Pi</em></p>
+<p>Let's recap where we are. We have a set of three source schemas <code>sS</code>, <code>sT</code>, and <code>sSnT</code>, each with an
+instance; <code>iSklSklCls1</code>, <code>iTsk</code>, and <code>iSnT</code> respectively. We have a target schema <code>sS_T_SnT_Sum</code>. We also
+have mappings that take each source schema to the target schema. What we want is a construction
+similar to eval that can be applied to a mapping rather than a query, but the schema colimit is
+giving us mappings not queries.</p>
+<p>Recall that queries generalize mappings. It so happens there are three constructions that are
+related to eval in the same way mappings are related to queries. In fact eval and it's dual
+coeval, which we have not discussed, are generalizations of these constructions. To develop these
+ideas would be a lengthy digression so we will only mention them in passing along with some
+informal remarks about their properties.</p>
+<p>These three constructions are called sigma, pi and delta. They all can be understood as moving
+instance data through mappings in a way that is analogous to how eval moves instances through
+queries. This family of functors collectively define AQL's implementation of Extration,
+Transformation and Load abbreviated ETL processes. Sigma, pi and delta are all structure
+preserving maps between the category of instances of one schema to the category of instances of
+another schema, so they are functors. This means that sigma, pi and delta map not only instances
+but instance transforms. These three mappings are related as follows. Delta pulls data backward
+through a mapping and generalizes the notion of projection. Both Sigma and Pi push data forward
+through a mapping and generalize sums/unions and products/joins respectively. Given a single
+schema mapping, Delta can be paired with sigma on the left and pi on the right to create data
+migration round trips.</p>
+<p>To see this, consider schemas <code>sA</code>, <code>sB</code>, mapping <code>m</code> and instance <code>iA</code> of <code>sA</code>. Without yet specifying
+specifics the AQL syntax would be:</p>
+<pre><code>mapping m = literal : sA -&gt; sB {...} 
+instance iB = literal : sB {...}
+</code></pre>
+<p>Delta can move the instance <code>iB</code> backward through <code>m</code> into <code>sA</code> as follows:</p>
+<pre><code>instance iDlt_m_iB = delta m iB
+</code></pre>
+<p>Similarly, sigma can move this new instance forward through the same <code>m</code> into <code>sB</code>:</p>
+<pre><code>instance iSgmDlt_m_iB = delta m iDlt_m_iB
+</code></pre>
+<p>A natural thing to ask is how <code>iSgmDlt_m_iB</code> and <code>iB</code> are related. The answer is they are related by
+a transform known as the unit of the sigma --| delta adjoint pair. Notice we could also start
+with an instance <code>iA</code> of <code>sA</code> and apply first sigma <code>m</code> and then delta <code>m</code> to product an instance
+<code>iDltSgm_m_iA</code>. <code>iA</code> and <code>iDltSgm_m_iA</code> are related by the counit of the sigma --| delta adjoint pair.
+In a similar way delta --| pi form an adjoint pair with associated unit and counit transforms.
+We say that delta is right adjoint to sigma and left adjoint to pi.</p>
+<p>Of the three, sigma has the property that generators of the source instance are preserved in the
+target instance. This means we can move instances and transforms between schemas in a way that
+permits us to merge instance data. Let's see how we can use sigma to solve the problem at hand
+and later we will return to broader questions about the nature of sigma, pi and delta and their
+associated units and counits.</p>
+<p>Recall we have a target schema that contains all of the entities from our three source schemas
+we can use the sigma construction to push the instances in the source schemas forward through the
+mappings generated by the <code>schema_colimit</code> construction to create an instance in the <code>sS_T_SnT_Sum</code>
+assembly. Having done so we would have three separate instances in the target schema
+<code>sS_T_SnT_Sum</code>. With all of these instances in the same schema we can make use of our familiar
+instance coproduct construction. This would look like the following:</p>
+<pre><code>instance iSklSklCls_In_S_T_SnT_Sum = sigma mSToS_T_SnT_Sum iSklSklCls1
+instance iTsk_In_S_T_SnT_Sum = sigma mSToT_T_SnT_Sum iTsk
+instance iSnT_In_S_T_SnT_Sum = sigma mSnTToS_T_SnT_Sum iSnT
+instance iS_T_SnT_Sum = coproduct
+    iSklSklCls_In_S_T_SnT_Sum
+    iTsk_In_S_T_SnT_Sum
+    iSnT_In_S_T_SnT_Sum
+    : sS_T_SnT_Sum
+</code></pre>
+<p>AQL provides the <code>coproduct_sigma</code> construction which performs the above sequence in one step:</p>
+
+<pre>
+instance iS_T_SnT_Sum = coproduct_sigma (mSToS_T_SnT_Sum) (iSklSklCls1) (mTToS_T_Snt_Sum) (iTsk) (mSnTToS_T_SnT_Sum) (iSnT) : sS_T_SnT_Sum
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>lSkill</th><th>lSCNameOnSkl</th><th>lSName</th><th>lfk_HasClass</th></tr><tr><td>s0</td><td>Cognitive</td><td>CategoryTheory</td><td>s0.lfk_HasClass</td></tr><tr><td>s1</td><td>Cognitive</td><td>CompSci</td><td>s0.lfk_HasClass</td></tr><tr><td>s2</td><td>Cognitive</td><td>DBA</td><td>s0.lfk_HasClass</td></tr><tr><td>s3</td><td>Social</td><td>Pharma</td><td>s5.lfk_HasClass</td></tr><tr><td>s4</td><td>Cognitive</td><td>Programming</td><td>s0.lfk_HasClass</td></tr><tr><td>s5</td><td>Social</td><td>Lecturing</td><td>s5.lfk_HasClass</td></tr><tr><td>s6</td><td>Psychomotor</td><td>GrantWriting</td><td>s9.lfk_HasClass</td></tr><tr><td>s7</td><td>Social</td><td>Finance</td><td>s5.lfk_HasClass</td></tr><tr><td>s8</td><td>Social</td><td>Management</td><td>s5.lfk_HasClass</td></tr><tr><td>s9</td><td>Psychomotor</td><td>PaperWriting</td><td>s9.lfk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>lSkillClass</th><th>lSCName</th></tr><tr><td>s0.lfk_HasClass</td><td>Cognitive</td></tr><tr><td>s5.lfk_HasClass</td><td>Social</td></tr><tr><td>s9.lfk_HasClass</td><td>Psychomotor</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>lSkillNeededForTask</th><th>lskill</th><th>ltask</th></tr><tr><td>st1</td><td>CompSci</td><td>LaunchCIStartup</td></tr><tr><td>st2</td><td>Programming</td><td>LaunchCIStartup</td></tr><tr><td>st3</td><td>GrantWriting</td><td>LaunchCIStartup</td></tr><tr><td>st4</td><td>PaperWriting</td><td>LaunchCIStartup</td></tr><tr><td>st5</td><td>CompSci</td><td>BuildAQL</td></tr><tr><td>st6</td><td>Programming</td><td>BuildAQL</td></tr><tr><td>st7</td><td>Management</td><td>BuildAQL</td></tr><tr><td>st8</td><td>Programming</td><td>WriteAQLTutorial</td></tr><tr><td>st9</td><td>Lecturing</td><td>WriteAQLTutorial</td></tr><tr><td>st10</td><td>PaperWriting</td><td>WriteAQLTutorial</td></tr><tr><td>st11</td><td>Pharma</td><td>BuildPhrmColim</td></tr><tr><td>st12</td><td>Programming</td><td>BuildPhrmColim</td></tr><tr><td>st13</td><td>Finance</td><td>BuildFncColim</td></tr><tr><td>st14</td><td>Programming</td><td>BuildFncColim</td></tr><tr><td>st15</td><td>CategoryTheory</td><td>WriteCTPaper</td></tr><tr><td>st16</td><td>PaperWriting</td><td>WriteCTPaper</td></tr><tr><td>st17</td><td>CategoryTheory</td><td>TeachCT</td></tr><tr><td>st18</td><td>Lecturing</td><td>TeachCT</td></tr><tr><td>st19</td><td>Pharma</td><td>RunPhrmIntProject</td></tr><tr><td>st20</td><td>Management</td><td>RunPhrmIntProject</td></tr><tr><td>st21</td><td>Finance</td><td>RunFncIntProject</td></tr><tr><td>st22</td><td>Management</td><td>RunFncIntProject</td></tr><tr><td>st23</td><td>CompSci</td><td>TeachCS</td></tr><tr><td>st24</td><td>Lecturing</td><td>TeachCS</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>lTask</th><th>lTName</th></tr><tr><td>t1</td><td>LaunchCIStartup</td></tr><tr><td>t2</td><td>BuildAQL</td></tr><tr><td>t3</td><td>WriteAQLTutorial</td></tr><tr><td>t4</td><td>BuildPhrmColim</td></tr><tr><td>t5</td><td>BuildFncColim</td></tr><tr><td>t6</td><td>WriteCTPaper</td></tr><tr><td>t7</td><td>TeachCT</td></tr><tr><td>t8</td><td>TeachCS</td></tr><tr><td>t9</td><td>RunPhrmIntProject</td></tr><tr><td>t10</td><td>RunFncIntProject</td></tr></table></div><br style="clear:both;"/>
+<hr />
+<h2>AQL Queries Continued</h2>
+<p>In the current context we have as source schema the result of the colimit construction. If you
+run this file and look at the colimit schema <code>sS_T_SnT_Sum</code> and associated instance you will
+discover the we have assembled a target schema where the entities of the source schemas
+are independent of one another. We now use the query construction to introduce foreign key
+constraints in a way that is analogous to the addition of the foreign key constraints supported
+in RDBMSs.</p>
+<p>Recall that a non-simple AQL query requires we define the target schema first. This schema is
+identical to the output of the colimit construction but with the addition of a pair of foreign
+keys from the <code>SkillNdFrTask</code> entity with the (skill, task) attribute pair to the Skill and Task
+entities respectively. This produces a schema which is known in category theory as a span and it
+can again be summarized as a diagram, but in contrast with the case of the colimit construction
+this is a diagram of entities rather than schemas. We have enclosed the <code>Skill</code> and <code>SkillClass</code>
+entities with parentheses to indicate that they serve as a reference taxonomy.</p>
+<pre><code>          fk_HasClass    fk_SnT_S             fk_SnT_T
+(SkillClass &lt;----- Skill) &lt;----- SkillNdFrTask -----&gt; Task
+</code></pre>
+<p>We again make use of the <code>observation_equations</code> section to denormalize all of the attributes that
+are available through paths as attributes directly available to the <code>SkillNdFrTask</code> entity.</p>
+
+<pre>
+schema sSTSpn = literal : TypeSide {
+	entities
+		Skill SkillClass SkillNdFrTask Task
+	foreign_keys
+		fk_ForTask : SkillNdFrTask -> Task
+		fk_HasClass : Skill -> SkillClass
+		fk_SkillNeeded : SkillNdFrTask -> Skill
+	attributes
+		SCName : SkillClass -> Varchar
+		SCNameOnSkl : Skill -> Varchar
+		SName : Skill -> Varchar
+		TName : Task -> Varchar
+		skill : SkillNdFrTask -> Varchar
+		skillclass : SkillNdFrTask -> Varchar
+		task : SkillNdFrTask -> Varchar
+	observation_equations
+		forall _x. _x.SCNameOnSkl = _x.fk_HasClass.SCName
+		forall _x. _x.skill = _x.fk_SkillNeeded.SName
+		forall _x. _x.skillclass = _x.fk_SkillNeeded.fk_HasClass.SCName
+		forall _x. _x.task = _x.fk_ForTask.TName
+}
+</pre>
+<p>Given the similarity of the source and target schemas the entity sub-sections are all direct
+mappings that reproduce exact copies of the source entities instances with those of the target
+entities with the exception of the <code>SkllNdFrTask</code> target entity. In order to construct that entity
+we must have generators on both sides of the new foreign keys we are introducing. By default when
+multiple source generator variables are provided for a target entity each generator for the
+target comes from the Cartesian product of the source generators. The where clause has two
+equations implicitly connected by a logical and. This effectively constrains the target entities
+to an equationally defined subset of a Cartesian product, also known as a join, so this
+construction effectively joins the three source entities and makes all of their generators
+available for the creation of the new foreign keys. The foreign keys can now be assigned the
+values for the <code>Skill</code> and <code>Task</code> generators based on the values in the <code>SkillNdFrTask</code> section.</p>
+
+<pre>
+query qS_T_SnT_SumToSTSpn = literal : sS_T_SnT_Sum -> sSTSpn {
+	entities
+		Skill -> {from	ss : lSkill
+				return	SCNameOnSkl -> ss.lSCNameOnSkl
+					SName -> ss.lSName}
+
+		SkillClass -> {from	scsc : lSkillClass
+				return	SCName -> scsc.lSCName}
+
+		SkillNdFrTask -> {from	sn : lSkill
+					snt : lSkillNeededForTask
+					nt : lTask
+				where	snt.lskill = sn.lSName
+					snt.ltask = nt.lTName
+				return	skill -> snt.lskill
+					skillclass -> sn.lfk_HasClass.lSCName
+					task -> snt.ltask}
+
+		Task -> {from	tt : lTask
+				return	TName -> tt.lTName}
+	foreign_keys
+		fk_ForTask -> { tt -> nt }
+
+		fk_HasClass -> { scsc -> ss.lfk_HasClass }
+
+		fk_SkillNeeded -> { ss -> sn }
+}
+</pre>
+<p>Pushing the instance generated by the <code>coproduct_sigma</code> construction through the query above using
+eval produces an instance reflecting the foreign keys introduced in the target schema we set up
+as part of the query definition.</p>
+
+<pre>
+instance iSTSpn = eval qS_T_SnT_SumToSTSpn iS_T_SnT_Sum
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr><tr><td>(ss=s0)</td><td>Cognitive</td><td>CategoryTheory</td><td>(scsc=s0.lfk_HasClass)</td></tr><tr><td>(ss=s1)</td><td>Cognitive</td><td>CompSci</td><td>(scsc=s0.lfk_HasClass)</td></tr><tr><td>(ss=s2)</td><td>Cognitive</td><td>DBA</td><td>(scsc=s0.lfk_HasClass)</td></tr><tr><td>(ss=s3)</td><td>Social</td><td>Pharma</td><td>(scsc=s5.lfk_HasClass)</td></tr><tr><td>(ss=s4)</td><td>Cognitive</td><td>Programming</td><td>(scsc=s0.lfk_HasClass)</td></tr><tr><td>(ss=s5)</td><td>Social</td><td>Lecturing</td><td>(scsc=s5.lfk_HasClass)</td></tr><tr><td>(ss=s6)</td><td>Psychomotor</td><td>GrantWriting</td><td>(scsc=s9.lfk_HasClass)</td></tr><tr><td>(ss=s7)</td><td>Social</td><td>Finance</td><td>(scsc=s5.lfk_HasClass)</td></tr><tr><td>(ss=s8)</td><td>Social</td><td>Management</td><td>(scsc=s5.lfk_HasClass)</td></tr><tr><td>(ss=s9)</td><td>Psychomotor</td><td>PaperWriting</td><td>(scsc=s9.lfk_HasClass)</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>(scsc=s0.lfk_HasClass)</td><td>Cognitive</td></tr><tr><td>(scsc=s5.lfk_HasClass)</td><td>Social</td></tr><tr><td>(scsc=s9.lfk_HasClass)</td><td>Psychomotor</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillNdFrTask</th><th>skill</th><th>skillclass</th><th>task</th><th>fk_ForTask</th><th>fk_SkillNeeded</th></tr><tr><td>(snt=st1)(sn=s1)(nt=t1)</td><td>CompSci</td><td>Cognitive</td><td>LaunchCIStartup</td><td>(tt=t1)</td><td>(ss=s1)</td></tr><tr><td>(snt=st2)(sn=s4)(nt=t1)</td><td>Programming</td><td>Cognitive</td><td>LaunchCIStartup</td><td>(tt=t1)</td><td>(ss=s4)</td></tr><tr><td>(snt=st3)(sn=s6)(nt=t1)</td><td>GrantWriting</td><td>Psychomotor</td><td>LaunchCIStartup</td><td>(tt=t1)</td><td>(ss=s6)</td></tr><tr><td>(snt=st4)(sn=s9)(nt=t1)</td><td>PaperWriting</td><td>Psychomotor</td><td>LaunchCIStartup</td><td>(tt=t1)</td><td>(ss=s9)</td></tr><tr><td>(snt=st5)(sn=s1)(nt=t2)</td><td>CompSci</td><td>Cognitive</td><td>BuildAQL</td><td>(tt=t2)</td><td>(ss=s1)</td></tr><tr><td>(snt=st6)(sn=s4)(nt=t2)</td><td>Programming</td><td>Cognitive</td><td>BuildAQL</td><td>(tt=t2)</td><td>(ss=s4)</td></tr><tr><td>(snt=st7)(sn=s8)(nt=t2)</td><td>Management</td><td>Social</td><td>BuildAQL</td><td>(tt=t2)</td><td>(ss=s8)</td></tr><tr><td>(snt=st8)(sn=s4)(nt=t3)</td><td>Programming</td><td>Cognitive</td><td>WriteAQLTutorial</td><td>(tt=t3)</td><td>(ss=s4)</td></tr><tr><td>(snt=st9)(sn=s5)(nt=t3)</td><td>Lecturing</td><td>Social</td><td>WriteAQLTutorial</td><td>(tt=t3)</td><td>(ss=s5)</td></tr><tr><td>(snt=st10)(sn=s9)(nt=t3)</td><td>PaperWriting</td><td>Psychomotor</td><td>WriteAQLTutorial</td><td>(tt=t3)</td><td>(ss=s9)</td></tr><tr><td>(snt=st11)(sn=s3)(nt=t4)</td><td>Pharma</td><td>Social</td><td>BuildPhrmColim</td><td>(tt=t4)</td><td>(ss=s3)</td></tr><tr><td>(snt=st12)(sn=s4)(nt=t4)</td><td>Programming</td><td>Cognitive</td><td>BuildPhrmColim</td><td>(tt=t4)</td><td>(ss=s4)</td></tr><tr><td>(snt=st13)(sn=s7)(nt=t5)</td><td>Finance</td><td>Social</td><td>BuildFncColim</td><td>(tt=t5)</td><td>(ss=s7)</td></tr><tr><td>(snt=st14)(sn=s4)(nt=t5)</td><td>Programming</td><td>Cognitive</td><td>BuildFncColim</td><td>(tt=t5)</td><td>(ss=s4)</td></tr><tr><td>(snt=st15)(sn=s0)(nt=t6)</td><td>CategoryTheory</td><td>Cognitive</td><td>WriteCTPaper</td><td>(tt=t6)</td><td>(ss=s0)</td></tr><tr><td>(snt=st16)(sn=s9)(nt=t6)</td><td>PaperWriting</td><td>Psychomotor</td><td>WriteCTPaper</td><td>(tt=t6)</td><td>(ss=s9)</td></tr><tr><td>(snt=st17)(sn=s0)(nt=t7)</td><td>CategoryTheory</td><td>Cognitive</td><td>TeachCT</td><td>(tt=t7)</td><td>(ss=s0)</td></tr><tr><td>(snt=st18)(sn=s5)(nt=t7)</td><td>Lecturing</td><td>Social</td><td>TeachCT</td><td>(tt=t7)</td><td>(ss=s5)</td></tr><tr><td>(snt=st19)(sn=s3)(nt=t9)</td><td>Pharma</td><td>Social</td><td>RunPhrmIntProject</td><td>(tt=t9)</td><td>(ss=s3)</td></tr><tr><td>(snt=st20)(sn=s8)(nt=t9)</td><td>Management</td><td>Social</td><td>RunPhrmIntProject</td><td>(tt=t9)</td><td>(ss=s8)</td></tr><tr><td>(snt=st21)(sn=s7)(nt=t10)</td><td>Finance</td><td>Social</td><td>RunFncIntProject</td><td>(tt=t10)</td><td>(ss=s7)</td></tr><tr><td>(snt=st22)(sn=s8)(nt=t10)</td><td>Management</td><td>Social</td><td>RunFncIntProject</td><td>(tt=t10)</td><td>(ss=s8)</td></tr><tr><td>(snt=st23)(sn=s1)(nt=t8)</td><td>CompSci</td><td>Cognitive</td><td>TeachCS</td><td>(tt=t8)</td><td>(ss=s1)</td></tr><tr><td>(snt=st24)(sn=s5)(nt=t8)</td><td>Lecturing</td><td>Social</td><td>TeachCS</td><td>(tt=t8)</td><td>(ss=s5)</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Task</th><th>TName</th></tr><tr><td>(tt=t1)</td><td>LaunchCIStartup</td></tr><tr><td>(tt=t2)</td><td>BuildAQL</td></tr><tr><td>(tt=t3)</td><td>WriteAQLTutorial</td></tr><tr><td>(tt=t4)</td><td>BuildPhrmColim</td></tr><tr><td>(tt=t5)</td><td>BuildFncColim</td></tr><tr><td>(tt=t6)</td><td>WriteCTPaper</td></tr><tr><td>(tt=t7)</td><td>TeachCT</td></tr><tr><td>(tt=t8)</td><td>TeachCS</td></tr><tr><td>(tt=t9)</td><td>RunPhrmIntProject</td></tr><tr><td>(tt=t10)</td><td>RunFncIntProject</td></tr></table></div><br style="clear:both;"/>
+<hr />
+<h2>JDBC Pragmas, Imports and Exports</h2>
+<p>This first sequence exports the <code>iSTSpn</code> created above. Exporting a JDBC instance consolidates
+several sets of commands. First the export issues data definition (DDL) commands against the
+target RDBMS that create tables and foreign keys that are as close as possible to the associated
+AQL schema kind. The second sequence of commands inserts instance records into the tables just
+created. Since this file can be executed several times we must first chech to see if
+the table structure already exists and if so drop those tables. This task is performed using the
+pragma <code>pCleanUp</code>. In order to display the results of these commands the set of tables in the
+target schema are listed using the <code>pShwTbls</code> pragma.</p>
+<p>First clean out the target tables if present from a previous run.</p>
+
+<pre>
+pragma pCleanUp = sql "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"DROP TABLE IF EXISTS sts_SkillNdFrTask"
+"DROP TABLE IF EXISTS sts_Skill"
+"DROP TABLE IF EXISTS sts_SkillClass"
+"DROP TABLE IF EXISTS sts_Task"
+}
+</pre>
+<pre>START
+DROP TABLE IF EXISTS sts_SkillNdFrTask
+
+Updated 0 rows.
+END
+
+START
+DROP TABLE IF EXISTS sts_Skill
+
+Updated 0 rows.
+END
+
+START
+DROP TABLE IF EXISTS sts_SkillClass
+
+Updated 0 rows.
+END
+
+START
+DROP TABLE IF EXISTS sts_Task
+
+Updated 0 rows.
+END
+</pre>
+<p>Export the results of the above construction of the span and its representative instance. The
+export<em>jdbc</em>instance defaults strings varchar(64). In this case we illustrate how that default
+can be overridden using the varchar_length option.</p>
+
+<pre>
+pragma eSTS = export_jdbc_instance iSTSpn "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" sts_ {
+	optionsvarchar_length
+		256
+}
+</pre>
+<pre>export_jdbc_instance com.mysql.jdbc.Driver jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr sts_
+
+generating entities
+	(ss=id8) : Skill
+	(ss=id12) : Skill
+	(ss=id9) : Skill
+	(ss=id11) : Skill
+	(ss=id4) : Skill
+	(ss=id6) : Skill
+	(ss=id7) : Skill
+	(ss=id0) : Skill
+	(ss=id2) : Skill
+	(ss=id3) : Skill
+	(tt=id22) : Task
+	(tt=id21) : Task
+	(tt=id20) : Task
+	(tt=id16) : Task
+	(tt=id15) : Task
+	(tt=id14) : Task
+	(tt=id13) : Task
+	(tt=id19) : Task
+	(tt=id18) : Task
+	(tt=id17) : Task
+	(scsc=id10) : SkillClass
+	(scsc=id5) : SkillClass
+	(scsc=id1) : SkillClass
+	(snt=id27)(sn=id7)(nt=id22) : SkillNdFrTask
+	(snt=id41)(sn=id3)(nt=id22) : SkillNdFrTask
+	(snt=id28)(sn=id8)(nt=id21) : SkillNdFrTask
+	(snt=id31)(sn=id12)(nt=id21) : SkillNdFrTask
+	(snt=id30)(sn=id9)(nt=id20) : SkillNdFrTask
+	(snt=id34)(sn=id4)(nt=id20) : SkillNdFrTask
+	(snt=id32)(sn=id3)(nt=id20) : SkillNdFrTask
+	(snt=id38)(sn=id4)(nt=id16) : SkillNdFrTask
+	(snt=id35)(sn=id0)(nt=id16) : SkillNdFrTask
+	(snt=id24)(sn=id8)(nt=id15) : SkillNdFrTask
+	(snt=id37)(sn=id7)(nt=id15) : SkillNdFrTask
+	(snt=id33)(sn=id8)(nt=id14) : SkillNdFrTask
+	(snt=id29)(sn=id2)(nt=id14) : SkillNdFrTask
+	(snt=id26)(sn=id3)(nt=id14) : SkillNdFrTask
+	(snt=id23)(sn=id9)(nt=id13) : SkillNdFrTask
+	(snt=id25)(sn=id11)(nt=id13) : SkillNdFrTask
+	(snt=id45)(sn=id2)(nt=id13) : SkillNdFrTask
+	(snt=id43)(sn=id3)(nt=id13) : SkillNdFrTask
+	(snt=id36)(sn=id9)(nt=id19) : SkillNdFrTask
+	(snt=id44)(sn=id0)(nt=id19) : SkillNdFrTask
+	(snt=id39)(sn=id12)(nt=id18) : SkillNdFrTask
+	(snt=id46)(sn=id3)(nt=id18) : SkillNdFrTask
+	(snt=id40)(sn=id4)(nt=id17) : SkillNdFrTask
+	(snt=id42)(sn=id2)(nt=id17) : SkillNdFrTask
+
+generating nulls
+	
+
+equations
+	(ss=id4).fk_HasClass = (scsc=id5)
+	(snt=id25)(sn=id11)(nt=id13).skill = GrantWriting
+	(snt=id46)(sn=id3)(nt=id18).skill = Programming
+	(snt=id42)(sn=id2)(nt=id17).skillclass = Cognitive
+	(snt=id37)(sn=id7)(nt=id15).skill = Pharma
+	(ss=id11).fk_HasClass = (scsc=id10)
+	(snt=id44)(sn=id0)(nt=id19).skillclass = Cognitive
+	(snt=id41)(sn=id3)(nt=id22).skill = Programming
+	(snt=id30)(sn=id9)(nt=id20).skill = PaperWriting
+	(snt=id40)(sn=id4)(nt=id17).fk_SkillNeeded = (ss=id4)
+	(ss=id8).SName = Management
+	(ss=id0).SCNameOnSkl = Cognitive
+	(tt=id16).TName = TeachCT
+	(snt=id39)(sn=id12)(nt=id18).fk_ForTask = (tt=id18)
+	(snt=id24)(sn=id8)(nt=id15).task = RunPhrmIntProject
+	(snt=id45)(sn=id2)(nt=id13).skillclass = Cognitive
+	(tt=id13).TName = LaunchCIStartup
+	(tt=id18).TName = BuildFncColim
+	(snt=id45)(sn=id2)(nt=id13).skill = CompSci
+	(snt=id33)(sn=id8)(nt=id14).fk_ForTask = (tt=id14)
+	(snt=id23)(sn=id9)(nt=id13).task = LaunchCIStartup
+	(ss=id9).SName = PaperWriting
+	(ss=id3).fk_HasClass = (scsc=id1)
+	(snt=id27)(sn=id7)(nt=id22).task = BuildPhrmColim
+	(ss=id6).fk_HasClass = (scsc=id1)
+	(snt=id28)(sn=id8)(nt=id21).fk_SkillNeeded = (ss=id8)
+	(snt=id31)(sn=id12)(nt=id21).skill = Finance
+	(snt=id29)(sn=id2)(nt=id14).fk_SkillNeeded = (ss=id2)
+	(ss=id3).SCNameOnSkl = Cognitive
+	(snt=id41)(sn=id3)(nt=id22).fk_ForTask = (tt=id22)
+	(ss=id4).SCNameOnSkl = Social
+	(tt=id17).TName = TeachCS
+	(ss=id12).SName = Finance
+	(snt=id43)(sn=id3)(nt=id13).fk_ForTask = (tt=id13)
+	(snt=id37)(sn=id7)(nt=id15).skillclass = Social
+	(snt=id46)(sn=id3)(nt=id18).fk_SkillNeeded = (ss=id3)
+	(ss=id6).SName = DBA
+	(scsc=id5).SCName = Social
+	(snt=id40)(sn=id4)(nt=id17).skill = Lecturing
+	(snt=id42)(sn=id2)(nt=id17).task = TeachCS
+	(snt=id44)(sn=id0)(nt=id19).fk_SkillNeeded = (ss=id0)
+	(snt=id42)(sn=id2)(nt=id17).skill = CompSci
+	(snt=id46)(sn=id3)(nt=id18).fk_ForTask = (tt=id18)
+	(snt=id29)(sn=id2)(nt=id14).fk_ForTask = (tt=id14)
+	(snt=id23)(sn=id9)(nt=id13).skill = PaperWriting
+	(snt=id33)(sn=id8)(nt=id14).skillclass = Social
+	(snt=id35)(sn=id0)(nt=id16).skill = CategoryTheory
+	(ss=id11).SName = GrantWriting
+	(snt=id31)(sn=id12)(nt=id21).task = RunFncIntProject
+	(snt=id26)(sn=id3)(nt=id14).fk_ForTask = (tt=id14)
+	(ss=id2).fk_HasClass = (scsc=id1)
+	(snt=id30)(sn=id9)(nt=id20).fk_SkillNeeded = (ss=id9)
+	(snt=id38)(sn=id4)(nt=id16).skill = Lecturing
+	(ss=id6).SCNameOnSkl = Cognitive
+	(snt=id40)(sn=id4)(nt=id17).skillclass = Social
+	(snt=id30)(sn=id9)(nt=id20).fk_ForTask = (tt=id20)
+	(snt=id39)(sn=id12)(nt=id18).skill = Finance
+	(snt=id25)(sn=id11)(nt=id13).task = LaunchCIStartup
+	(ss=id7).SName = Pharma
+	(snt=id30)(sn=id9)(nt=id20).task = WriteAQLTutorial
+	(ss=id8).fk_HasClass = (scsc=id5)
+	(snt=id27)(sn=id7)(nt=id22).fk_ForTask = (tt=id22)
+	(scsc=id10).SCName = Psychomotor
+	(snt=id24)(sn=id8)(nt=id15).skill = Management
+	(snt=id29)(sn=id2)(nt=id14).skillclass = Cognitive
+	(snt=id33)(sn=id8)(nt=id14).skill = Management
+	(snt=id35)(sn=id0)(nt=id16).task = TeachCT
+	(snt=id42)(sn=id2)(nt=id17).fk_ForTask = (tt=id17)
+	(snt=id26)(sn=id3)(nt=id14).skill = Programming
+	(ss=id0).fk_HasClass = (scsc=id1)
+	(snt=id44)(sn=id0)(nt=id19).task = WriteCTPaper
+	(ss=id0).SName = CategoryTheory
+	(snt=id27)(sn=id7)(nt=id22).skill = Pharma
+	(snt=id43)(sn=id3)(nt=id13).skill = Programming
+	(snt=id33)(sn=id8)(nt=id14).task = BuildAQL
+	(snt=id41)(sn=id3)(nt=id22).fk_SkillNeeded = (ss=id3)
+	(tt=id21).TName = RunFncIntProject
+	(snt=id34)(sn=id4)(nt=id20).skillclass = Social
+	(snt=id24)(sn=id8)(nt=id15).fk_SkillNeeded = (ss=id8)
+	(snt=id25)(sn=id11)(nt=id13).skillclass = Psychomotor
+	(snt=id45)(sn=id2)(nt=id13).fk_ForTask = (tt=id13)
+	(ss=id8).SCNameOnSkl = Social
+	(snt=id35)(sn=id0)(nt=id16).fk_SkillNeeded = (ss=id0)
+	(snt=id37)(sn=id7)(nt=id15).fk_SkillNeeded = (ss=id7)
+	(scsc=id1).SCName = Cognitive
+	(snt=id24)(sn=id8)(nt=id15).skillclass = Social
+	(snt=id38)(sn=id4)(nt=id16).fk_ForTask = (tt=id16)
+	(snt=id24)(sn=id8)(nt=id15).fk_ForTask = (tt=id15)
+	(snt=id39)(sn=id12)(nt=id18).skillclass = Social
+	(snt=id45)(sn=id2)(nt=id13).task = LaunchCIStartup
+	(snt=id43)(sn=id3)(nt=id13).fk_SkillNeeded = (ss=id3)
+	(snt=id36)(sn=id9)(nt=id19).skill = PaperWriting
+	(snt=id39)(sn=id12)(nt=id18).fk_SkillNeeded = (ss=id12)
+	(snt=id46)(sn=id3)(nt=id18).skillclass = Cognitive
+	(snt=id23)(sn=id9)(nt=id13).fk_ForTask = (tt=id13)
+	(snt=id46)(sn=id3)(nt=id18).task = BuildFncColim
+	(snt=id38)(sn=id4)(nt=id16).task = TeachCT
+	(snt=id26)(sn=id3)(nt=id14).fk_SkillNeeded = (ss=id3)
+	(snt=id31)(sn=id12)(nt=id21).skillclass = Social
+	(snt=id32)(sn=id3)(nt=id20).skill = Programming
+	(snt=id38)(sn=id4)(nt=id16).skillclass = Social
+	(snt=id32)(sn=id3)(nt=id20).fk_ForTask = (tt=id20)
+	(snt=id35)(sn=id0)(nt=id16).fk_ForTask = (tt=id16)
+	(snt=id44)(sn=id0)(nt=id19).fk_ForTask = (tt=id19)
+	(ss=id12).SCNameOnSkl = Social
+	(ss=id3).SName = Programming
+	(snt=id32)(sn=id3)(nt=id20).fk_SkillNeeded = (ss=id3)
+	(ss=id11).SCNameOnSkl = Psychomotor
+	(snt=id32)(sn=id3)(nt=id20).task = WriteAQLTutorial
+	(tt=id20).TName = WriteAQLTutorial
+	(snt=id26)(sn=id3)(nt=id14).task = BuildAQL
+	(snt=id23)(sn=id9)(nt=id13).skillclass = Psychomotor
+	(snt=id28)(sn=id8)(nt=id21).skillclass = Social
+	(snt=id34)(sn=id4)(nt=id20).fk_SkillNeeded = (ss=id4)
+	(snt=id28)(sn=id8)(nt=id21).fk_ForTask = (tt=id21)
+	(snt=id45)(sn=id2)(nt=id13).fk_SkillNeeded = (ss=id2)
+	(snt=id30)(sn=id9)(nt=id20).skillclass = Psychomotor
+	(snt=id25)(sn=id11)(nt=id13).fk_ForTask = (tt=id13)
+	(ss=id12).fk_HasClass = (scsc=id5)
+	(snt=id40)(sn=id4)(nt=id17).task = TeachCS
+	(tt=id14).TName = BuildAQL
+	(snt=id41)(sn=id3)(nt=id22).skillclass = Cognitive
+	(snt=id37)(sn=id7)(nt=id15).task = RunPhrmIntProject
+	(snt=id27)(sn=id7)(nt=id22).skillclass = Social
+	(snt=id28)(sn=id8)(nt=id21).skill = Management
+	(snt=id34)(sn=id4)(nt=id20).task = WriteAQLTutorial
+	(snt=id29)(sn=id2)(nt=id14).task = BuildAQL
+	(snt=id37)(sn=id7)(nt=id15).fk_ForTask = (tt=id15)
+	(snt=id41)(sn=id3)(nt=id22).task = BuildPhrmColim
+	(snt=id33)(sn=id8)(nt=id14).fk_SkillNeeded = (ss=id8)
+	(snt=id35)(sn=id0)(nt=id16).skillclass = Cognitive
+	(ss=id7).SCNameOnSkl = Social
+	(tt=id19).TName = WriteCTPaper
+	(ss=id9).fk_HasClass = (scsc=id10)
+	(ss=id2).SName = CompSci
+	(ss=id9).SCNameOnSkl = Psychomotor
+	(tt=id22).TName = BuildPhrmColim
+	(snt=id42)(sn=id2)(nt=id17).fk_SkillNeeded = (ss=id2)
+	(snt=id36)(sn=id9)(nt=id19).skillclass = Psychomotor
+	(ss=id4).SName = Lecturing
+	(snt=id36)(sn=id9)(nt=id19).fk_SkillNeeded = (ss=id9)
+	(snt=id31)(sn=id12)(nt=id21).fk_ForTask = (tt=id21)
+	(snt=id23)(sn=id9)(nt=id13).fk_SkillNeeded = (ss=id9)
+	(snt=id40)(sn=id4)(nt=id17).fk_ForTask = (tt=id17)
+	(snt=id38)(sn=id4)(nt=id16).fk_SkillNeeded = (ss=id4)
+	(snt=id28)(sn=id8)(nt=id21).task = RunFncIntProject
+	(ss=id7).fk_HasClass = (scsc=id5)
+	(snt=id36)(sn=id9)(nt=id19).fk_ForTask = (tt=id19)
+	(snt=id36)(sn=id9)(nt=id19).task = WriteCTPaper
+	(tt=id15).TName = RunPhrmIntProject
+	(ss=id2).SCNameOnSkl = Cognitive
+	(snt=id27)(sn=id7)(nt=id22).fk_SkillNeeded = (ss=id7)
+	(snt=id43)(sn=id3)(nt=id13).task = LaunchCIStartup
+	(snt=id31)(sn=id12)(nt=id21).fk_SkillNeeded = (ss=id12)
+	(snt=id34)(sn=id4)(nt=id20).fk_ForTask = (tt=id20)
+	(snt=id43)(sn=id3)(nt=id13).skillclass = Cognitive
+	(snt=id34)(sn=id4)(nt=id20).skill = Lecturing
+	(snt=id25)(sn=id11)(nt=id13).fk_SkillNeeded = (ss=id11)
+	(snt=id39)(sn=id12)(nt=id18).task = BuildFncColim
+	(snt=id32)(sn=id3)(nt=id20).skillclass = Cognitive
+	(snt=id44)(sn=id0)(nt=id19).skill = CategoryTheory
+	(snt=id29)(sn=id2)(nt=id14).skill = CompSci
+	(snt=id26)(sn=id3)(nt=id14).skillclass = Cognitive</pre>
+<p>Display the contents of the <code>ci_test</code> schema in MySQL.</p>
+
+<pre>
+pragma pShwTbls = sql "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"SHOW  TABLES"
+}
+</pre>
+<pre>START
+SHOW  TABLES
+
+TABLE_NAME SkillClassMatch
+TABLE_NAME SkillMatch
+TABLE_NAME edge
+TABLE_NAME edgeAuto
+TABLE_NAME edgeAutoFull
+TABLE_NAME edgeKind
+TABLE_NAME edge_128k
+TABLE_NAME edge_16k
+TABLE_NAME edge_1k
+TABLE_NAME edge_2k
+TABLE_NAME edge_32k
+TABLE_NAME edge_4k
+TABLE_NAME edge_64k
+TABLE_NAME edge_8k
+TABLE_NAME node
+TABLE_NAME nodeKind
+TABLE_NAME nodeKindAuto
+TABLE_NAME nodeKindTest
+TABLE_NAME nodeKindTest2
+TABLE_NAME sample_edge
+TABLE_NAME sample_node
+TABLE_NAME sps_GeneralSkill
+TABLE_NAME sps_Person
+TABLE_NAME sps_SkillClass
+TABLE_NAME sps_SkillPrvdByPerson
+TABLE_NAME sps_SpecificSkill
+TABLE_NAME sts_Skill
+TABLE_NAME sts_SkillClass
+TABLE_NAME sts_SkillNdFrTask
+TABLE_NAME sts_Task
+END
+</pre>
+<p>The default AQL import process from a relational database submits an SQL query through the JDBC
+driver for the source RDBMS for each entity declared in the target schema <code>sSTSpn</code> above. Due to
+the extensive differences between AQL and RDBMS semantics, the translation process has a number
+of different options that can be used to provide flexibility. We make use of the default behavior
+for this import but will return to import options in a later example. The import defaults require
+a complete specification of all foreign key and attribute columns.</p>
+
+<pre>
+instance iSTSpnImp = import_jdbc sSTSpn "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+	Task -> select id, TName from sts_Task
+	Skill -> select id, fk_HasClass, SName, SCNameOnSkl from sts_Skill
+	SkillClass -> select id, SCName from sts_SkillClass
+	SkillNdFrTask -> select id, fk_SkillNeeded, fk_ForTask, skill, task, skillclass from sts_SkillNdFrTaskoptionsalways_reload
+		true
+}
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr><tr><td>0</td><td>Social</td><td>Management</td><td>21</td></tr><tr><td>1</td><td>Social</td><td>Finance</td><td>21</td></tr><tr><td>2</td><td>Psychomotor</td><td>PaperWriting</td><td>20</td></tr><tr><td>3</td><td>Psychomotor</td><td>GrantWriting</td><td>20</td></tr><tr><td>4</td><td>Social</td><td>Lecturing</td><td>21</td></tr><tr><td>5</td><td>Cognitive</td><td>DBA</td><td>22</td></tr><tr><td>6</td><td>Social</td><td>Pharma</td><td>21</td></tr><tr><td>7</td><td>Cognitive</td><td>CategoryTheory</td><td>22</td></tr><tr><td>8</td><td>Cognitive</td><td>CompSci</td><td>22</td></tr><tr><td>9</td><td>Cognitive</td><td>Programming</td><td>22</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>20</td><td>Psychomotor</td></tr><tr><td>21</td><td>Social</td></tr><tr><td>22</td><td>Cognitive</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillNdFrTask</th><th>skill</th><th>skillclass</th><th>task</th><th>fk_ForTask</th><th>fk_SkillNeeded</th></tr><tr><td>23</td><td>Pharma</td><td>Social</td><td>BuildPhrmColim</td><td>10</td><td>6</td></tr><tr><td>24</td><td>Programming</td><td>Cognitive</td><td>BuildPhrmColim</td><td>10</td><td>9</td></tr><tr><td>25</td><td>Management</td><td>Social</td><td>RunFncIntProject</td><td>11</td><td>0</td></tr><tr><td>26</td><td>Finance</td><td>Social</td><td>RunFncIntProject</td><td>11</td><td>1</td></tr><tr><td>27</td><td>PaperWriting</td><td>Psychomotor</td><td>WriteAQLTutorial</td><td>12</td><td>2</td></tr><tr><td>28</td><td>Lecturing</td><td>Social</td><td>WriteAQLTutorial</td><td>12</td><td>4</td></tr><tr><td>29</td><td>Programming</td><td>Cognitive</td><td>WriteAQLTutorial</td><td>12</td><td>9</td></tr><tr><td>30</td><td>Lecturing</td><td>Social</td><td>TeachCT</td><td>13</td><td>4</td></tr><tr><td>31</td><td>CategoryTheory</td><td>Cognitive</td><td>TeachCT</td><td>13</td><td>7</td></tr><tr><td>32</td><td>Management</td><td>Social</td><td>RunPhrmIntProject</td><td>14</td><td>0</td></tr><tr><td>33</td><td>Pharma</td><td>Social</td><td>RunPhrmIntProject</td><td>14</td><td>6</td></tr><tr><td>34</td><td>Management</td><td>Social</td><td>BuildAQL</td><td>15</td><td>0</td></tr><tr><td>35</td><td>CompSci</td><td>Cognitive</td><td>BuildAQL</td><td>15</td><td>8</td></tr><tr><td>36</td><td>Programming</td><td>Cognitive</td><td>BuildAQL</td><td>15</td><td>9</td></tr><tr><td>37</td><td>PaperWriting</td><td>Psychomotor</td><td>LaunchCIStartup</td><td>16</td><td>2</td></tr><tr><td>38</td><td>GrantWriting</td><td>Psychomotor</td><td>LaunchCIStartup</td><td>16</td><td>3</td></tr><tr><td>39</td><td>CompSci</td><td>Cognitive</td><td>LaunchCIStartup</td><td>16</td><td>8</td></tr><tr><td>40</td><td>Programming</td><td>Cognitive</td><td>LaunchCIStartup</td><td>16</td><td>9</td></tr><tr><td>41</td><td>PaperWriting</td><td>Psychomotor</td><td>WriteCTPaper</td><td>17</td><td>2</td></tr><tr><td>42</td><td>CategoryTheory</td><td>Cognitive</td><td>WriteCTPaper</td><td>17</td><td>7</td></tr><tr><td>43</td><td>Finance</td><td>Social</td><td>BuildFncColim</td><td>18</td><td>1</td></tr><tr><td>44</td><td>Programming</td><td>Cognitive</td><td>BuildFncColim</td><td>18</td><td>9</td></tr><tr><td>45</td><td>Lecturing</td><td>Social</td><td>TeachCS</td><td>19</td><td>4</td></tr><tr><td>46</td><td>CompSci</td><td>Cognitive</td><td>TeachCS</td><td>19</td><td>8</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Task</th><th>TName</th></tr><tr><td>10</td><td>BuildPhrmColim</td></tr><tr><td>11</td><td>RunFncIntProject</td></tr><tr><td>12</td><td>WriteAQLTutorial</td></tr><tr><td>13</td><td>TeachCT</td></tr><tr><td>14</td><td>RunPhrmIntProject</td></tr><tr><td>15</td><td>BuildAQL</td></tr><tr><td>16</td><td>LaunchCIStartup</td></tr><tr><td>17</td><td>WriteCTPaper</td></tr><tr><td>18</td><td>BuildFncColim</td></tr><tr><td>19</td><td>TeachCS</td></tr></table></div><br style="clear:both;"/>
+<p>Having constructed a span modeling the way skills are related to tasks, we now turn to another
+model involving a span relating skills to people. We could build this model up piece by piece as
+we did above, but AQL's schema declaration can build such a schema in one step. To illustrate a
+more elaborate example of AQL's integration capabilities the set of tables used to model skills
+for this schema has an additional level to the taxonomy. The creation of this schema is a
+precondition for the upcoming import. In order to extract existing data from a relational
+database into an AQL schema we must first define an AQL schema that is compatible with the
+external SQL system. The schema below defines the structure into which we target our import.</p>
+
+<pre>
+schema sSPSpn = literal : TypeSide {
+	entities
+		GeneralSkill Person SkillClass SkillPrvdByPerson SpecificSkill
+	foreign_keys
+		fk_HasClass : GeneralSkill -> SkillClass
+		fk_IsType : SpecificSkill -> GeneralSkill
+		fk_SpP_P : SkillPrvdByPerson -> Person
+		fk_SpP_S : SkillPrvdByPerson -> SpecificSkill
+	attributes
+		GSName : GeneralSkill -> Varchar
+		GSSCName : GeneralSkill -> Varchar
+		PName : Person -> Varchar
+		SCName : SkillClass -> Varchar
+		SSGSName : SpecificSkill -> Varchar
+		SSName : SpecificSkill -> Varchar
+		SSSCName : SpecificSkill -> Varchar
+		person : SkillPrvdByPerson -> Varchar
+		skill : SkillPrvdByPerson -> Varchar
+	observation_equations
+		forall _x. _x.GSSCName = _x.fk_HasClass.SCName
+		forall _x. _x.SSGSName = _x.fk_IsType.GSName
+		forall _x. _x.SSSCName = _x.fk_IsType.fk_HasClass.SCName
+		forall _x. _x.person = _x.fk_SpP_P.PName
+		forall _x. _x.skill = _x.fk_SpP_S.SSName
+}
+</pre>
+<p>We have already set up a set of tables and associated instance in our source RDBMS so we import
+that instance using a command analogous to the <code>iSTSpnImp</code> imported instance.</p>
+
+<pre>
+instance iSPSpnImp = import_jdbc sSPSpn "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+	SkillClass -> select id, SCName from sps_SkillClass
+	SkillPrvdByPerson -> select id, fk_SpP_S, fk_SpP_P, skill, person from sps_SkillPrvdByPerson
+	GeneralSkill -> select id, fk_HasClass, GSName, GSSCName from sps_GeneralSkill
+	Person -> select id, PName from sps_Person
+	SpecificSkill -> select id, fk_IsType, SSName, SSGSName, SSSCName from sps_SpecificSkilloptionsalways_reload
+		true
+}
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>GeneralSkill</th><th>GSName</th><th>GSSCName</th><th>fk_HasClass</th></tr><tr><td>66</td><td>Computing</td><td>Cognitive</td><td>49</td></tr><tr><td>67</td><td>Teaching</td><td>Social</td><td>48</td></tr><tr><td>68</td><td>Performing</td><td>Psychomotor</td><td>47</td></tr><tr><td>69</td><td>Business</td><td>Social</td><td>48</td></tr><tr><td>70</td><td>Writing</td><td>Psychomotor</td><td>47</td></tr><tr><td>71</td><td>Math</td><td>Cognitive</td><td>49</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Person</th><th>PName</th></tr><tr><td>72</td><td>Jim</td></tr><tr><td>73</td><td>Joan</td></tr><tr><td>74</td><td>John</td></tr><tr><td>75</td><td>Jane</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>47</td><td>Psychomotor</td></tr><tr><td>48</td><td>Social</td></tr><tr><td>49</td><td>Cognitive</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillPrvdByPerson</th><th>person</th><th>skill</th><th>fk_SpP_P</th><th>fk_SpP_S</th></tr><tr><td>50</td><td>Jim</td><td>CompSci</td><td>72</td><td>81</td></tr><tr><td>51</td><td>Jim</td><td>GrantWriting</td><td>72</td><td>84</td></tr><tr><td>52</td><td>Jim</td><td>PaperWriting</td><td>72</td><td>79</td></tr><tr><td>53</td><td>Jim</td><td>Management</td><td>72</td><td>82</td></tr><tr><td>54</td><td>Joan</td><td>Management</td><td>73</td><td>82</td></tr><tr><td>55</td><td>Joan</td><td>PaperWriting</td><td>73</td><td>79</td></tr><tr><td>56</td><td>Joan</td><td>CategoryTheory</td><td>73</td><td>86</td></tr><tr><td>57</td><td>Joan</td><td>GrantWriting</td><td>73</td><td>84</td></tr><tr><td>58</td><td>John</td><td>Finance</td><td>74</td><td>83</td></tr><tr><td>59</td><td>John</td><td>DBA</td><td>74</td><td>80</td></tr><tr><td>60</td><td>John</td><td>PaperWriting</td><td>74</td><td>79</td></tr><tr><td>61</td><td>John</td><td>Management</td><td>74</td><td>82</td></tr><tr><td>62</td><td>Jane</td><td>DBA</td><td>75</td><td>80</td></tr><tr><td>63</td><td>Jane</td><td>Pharma</td><td>75</td><td>78</td></tr><tr><td>64</td><td>Jane</td><td>PaperWriting</td><td>75</td><td>79</td></tr><tr><td>65</td><td>Jane</td><td>Management</td><td>75</td><td>82</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SpecificSkill</th><th>SSGSName</th><th>SSName</th><th>SSSCName</th><th>fk_IsType</th></tr><tr><td>76</td><td>Performing</td><td>Dancing</td><td>Psychomotor</td><td>68</td></tr><tr><td>77</td><td>Computing</td><td>Programming</td><td>Cognitive</td><td>66</td></tr><tr><td>78</td><td>Business</td><td>Pharma</td><td>Social</td><td>69</td></tr><tr><td>79</td><td>Writing</td><td>PaperWriting</td><td>Psychomotor</td><td>70</td></tr><tr><td>80</td><td>Computing</td><td>DBA</td><td>Cognitive</td><td>66</td></tr><tr><td>81</td><td>Computing</td><td>CompSci</td><td>Cognitive</td><td>66</td></tr><tr><td>82</td><td>Business</td><td>Management</td><td>Social</td><td>69</td></tr><tr><td>83</td><td>Business</td><td>Finance</td><td>Social</td><td>69</td></tr><tr><td>84</td><td>Writing</td><td>GrantWriting</td><td>Psychomotor</td><td>70</td></tr><tr><td>85</td><td>Teaching</td><td>Lecturing</td><td>Social</td><td>67</td></tr><tr><td>86</td><td>Math</td><td>CategoryTheory</td><td>Cognitive</td><td>71</td></tr></table></div><br style="clear:both;"/>
+<p>In this example we begin to see for the first time a more representative example of the full
+capability of the <code>schema_colimit</code> construction. In this more interesting colimit we are gluing
+(equating) on a defined overlap that is associated with the slightly different strategies for
+modeling skill taxonomies. In this case we are assuming that the Skill entity from <code>sSTSpn</code> can be
+equated with the <code>SpecificSkill</code> entity from <code>sSPSpn</code> and likewise the <code>SkillClass</code> entities from both.
+We also note what this implies about foreign keys. Since <code>SpecificSkill</code> has a foreign key path
+through <code>GeneralSkill</code> we equate that path with the foreign key <code>fk_HasClass</code> from <code>sSTSpn</code>. In so
+doing we consolidate the two schemas in a way that eliminates redundant entities and paths.</p>
+<p>Generally this is what a colimit does. It merges multiple objects of a category into a single
+object in a way that equates all paths from objects in the colimit diagram (in this case schemas)
+to the universal colimit (in this case the <code>schema_colimit</code>). These path equalities (in this case
+the pair of paths from a link schema through <code>sSTSpn</code> and <code>sSPSpn</code> to <code>sSTSpn_SPSpn_CoLim</code>) serve to
+define ways in which structure is merged across the objects in the colimit diagram. Although this
+approach is supported by AQL there is an equivalent alternative.</p>
+<p>One particularly intuitive way to implement a colimit involves deconstructing the colimit into
+two steps. The first step is to take the coproduct. The coproduct is a special case of a colimit
+where the colimit diagram consists of a set of discrete objects without any connecting arrows.
+With such a diagram the colimit assembles the source objects disjointly. The second step is the
+quotient which provides for the merging of structure across and within the source objects. What
+is the structure being merged? It is the structure of a category, which consists of objects and
+paths.</p>
+<p>Recall the comparison we illustrated between the use of path equations in the instance
+declaration associated with <code>iSklSklCls1</code> and the use of a link instance and pair of transforms
+used in the construction of <code>isklSklCls2</code>. Similarly the following sequence follows the sequence
+you have seen before where we disjointly assembled <code>sS</code>, <code>sT</code> and <code>sSnT</code>. In that sequence we followed
+with a query to create foreign keys. In this sequence we are doing something different. Instead
+of joining a set of disjoint entities we are gluing a pair of schema with some shared structure.</p>
+
+<pre>
+schema_colimit STSpn_SPSpn_CoLimAuto = quotient sSTSpn + sSPSpn {
+	entity equations
+		sSTSpn.SkillClass = sSPSpn.SkillClass
+		sSTSpn.Skill = sSPSpn.SpecificSkill
+	path equations
+		sSTSpn.SkillClass = sSPSpn.SkillClass
+		sSTSpn.Skill = sSPSpn.SpecificSkill
+		sSTSpn_fk_HasClass = sSPSpn_fk_IsType.sSPSpn_fk_HasClass
+
+}
+</pre>
+<p>As we did in the construction of <code>S_T_SnT_Sum</code> we can relabel components in the colimit schema
+using the modify command. An important point to notice is that attributes coming from different
+source schemas must be maintained as distinct attributes in the colimit. This must be done even
+though conceptually they may duplicate one another. This is essential as there is no guarantee
+that different sources will be consistent in labeling equivalent records.</p>
+
+<pre>
+schema_colimit STSpn_SPSpn_CoLim = modify STSpn_SPSpn_CoLimAuto {
+	rename entities
+		sSPSpn_GeneralSkill -> GeneralSkill
+		sSPSpn_Person -> Person
+		sSPSpn_SkillClass__sSTSpn_SkillClass -> SkillClass
+		sSPSpn_SkillPrvdByPerson -> SkillPrvdByPerson
+		sSPSpn_SpecificSkill__sSTSpn_Skill -> SpecificSkill
+		sSTSpn_SkillNdFrTask -> SkillNdFrTask
+		sSTSpn_Task -> Task
+	rename foreign_keys
+		sSPSpn_GeneralSkill -> GeneralSkill
+		sSPSpn_Person -> Person
+		sSPSpn_SkillClass__sSTSpn_SkillClass -> SkillClass
+		sSPSpn_SkillPrvdByPerson -> SkillPrvdByPerson
+		sSPSpn_SpecificSkill__sSTSpn_Skill -> SpecificSkill
+		sSTSpn_SkillNdFrTask -> SkillNdFrTask
+		sSTSpn_Task -> Task
+		sSTSpn_fk_SkillNeeded -> fk_SkillNeeded
+		sSTSpn_fk_ForTask -> fk_ForTask
+		sSPSpn_fk_SpP_S -> fk_SpP_S
+		sSPSpn_fk_SpP_P -> fk_SpP_P
+		sSPSpn_fk_IsType -> fk_IsType
+		sSPSpn_fk_HasClass -> fk_HasClass
+	rename attributes
+		sSPSpn_GeneralSkill -> GeneralSkill
+		sSPSpn_Person -> Person
+		sSPSpn_SkillClass__sSTSpn_SkillClass -> SkillClass
+		sSPSpn_SkillPrvdByPerson -> SkillPrvdByPerson
+		sSPSpn_SpecificSkill__sSTSpn_Skill -> SpecificSkill
+		sSTSpn_SkillNdFrTask -> SkillNdFrTask
+		sSTSpn_Task -> Task
+		sSTSpn_fk_SkillNeeded -> fk_SkillNeeded
+		sSTSpn_fk_ForTask -> fk_ForTask
+		sSPSpn_fk_SpP_S -> fk_SpP_S
+		sSPSpn_fk_SpP_P -> fk_SpP_P
+		sSPSpn_fk_IsType -> fk_IsType
+		sSPSpn_fk_HasClass -> fk_HasClass
+		sSTSpn_skillclass -> ST_SCNameOnSnT
+		sSPSpn_SCName -> SP_SCName
+		sSTSpn_task -> ST_TNameOnSnT
+		sSTSpn_skill -> ST_SNameOnSnT
+		sSTSpn_SName -> ST_SklName
+		sSTSpn_TName -> ST_TName
+		sSTSpn_SCName -> ST_SCName
+		sSTSpn_SCNameOnSkl -> ST_SCNameOnSS
+		sSPSpn_SSGSName -> SP_GSNameOnSS
+		sSPSpn_SSName -> SP_SSName
+		sSPSpn_SSSCName -> SP_SCNameOnSS
+		sSPSpn_person -> SP_PNameOnSnP
+		sSPSpn_skill -> SP_SNameOnSnP
+		sSPSpn_PName -> SP_PName
+		sSPSpn_GSSCName -> SP_SCNameOnGS
+		sSPSpn_GSName -> SP_GSName
+	remove foreign_keys
+		sSTSpn_fk_HasClass -> fk_IsType.fk_HasClass
+	remove attributes
+		
+}
+</pre>
+<p>Provide addressable labels for the various components of the <code>schema_colimit</code> <code>STSpn_SPSpn_CoLim</code>.</p>
+
+<pre>
+schema sSTSpn_SPSpn_CoLim = getSchema STSpn_SPSpn_CoLim
+</pre>
+<pre>
+mapping mSTSpnToSTSpn_SPSpn_CoLim = getMapping STSpn_SPSpn_CoLim sSTSpn
+</pre>
+<pre>
+mapping mSPSpnToSTSpn_SPSpn_CoLim = getMapping STSpn_SPSpn_CoLim sSPSpn
+</pre>
+<p>Again as we did with the instances coming from the disjoint schemas <code>sS</code>, <code>sT</code>, and <code>sSnT</code>, we must deal
+with the instance data coming from the two imports. We use <code>coproduct_sigma</code> to land those two
+instances into the assembled <code>colimit_schema</code> of the two sources schemas <code>sSTSpn</code> and <code>sSPSpn</code>.</p>
+
+<pre>
+instance iST_SP_Sum = coproduct_sigma (mSTSpnToSTSpn_SPSpn_CoLim) (iSTSpnImp) (mSPSpnToSTSpn_SPSpn_CoLim) (iSPSpnImp) : sSTSpn_SPSpn_CoLim
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>GeneralSkill</th><th>SP_GSName</th><th>SP_SCNameOnGS</th><th>fk_HasClass</th></tr><tr><td>0.fk_IsType</td><td>0.SP_GSNameOnSS</td><td>1.SP_SCNameOnSS</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>1.fk_IsType</td><td>1.SP_GSNameOnSS</td><td>1.SP_SCNameOnSS</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>2.fk_IsType</td><td>2.SP_GSNameOnSS</td><td>2.SP_SCNameOnSS</td><td>2.fk_IsType.fk_HasClass</td></tr><tr><td>3.fk_IsType</td><td>3.SP_GSNameOnSS</td><td>2.SP_SCNameOnSS</td><td>2.fk_IsType.fk_HasClass</td></tr><tr><td>4.fk_IsType</td><td>4.SP_GSNameOnSS</td><td>1.SP_SCNameOnSS</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>5.fk_IsType</td><td>5.SP_GSNameOnSS</td><td>7.SP_SCNameOnSS</td><td>5.fk_IsType.fk_HasClass</td></tr><tr><td>6.fk_IsType</td><td>6.SP_GSNameOnSS</td><td>1.SP_SCNameOnSS</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>7.fk_IsType</td><td>7.SP_GSNameOnSS</td><td>7.SP_SCNameOnSS</td><td>5.fk_IsType.fk_HasClass</td></tr><tr><td>8.fk_IsType</td><td>8.SP_GSNameOnSS</td><td>7.SP_SCNameOnSS</td><td>5.fk_IsType.fk_HasClass</td></tr><tr><td>9.fk_IsType</td><td>9.SP_GSNameOnSS</td><td>7.SP_SCNameOnSS</td><td>5.fk_IsType.fk_HasClass</td></tr><tr><td>55.fk_SpP_S.fk_IsType</td><td>Writing</td><td>Psychomotor</td><td>47</td></tr><tr><td>56.fk_SpP_S.fk_IsType</td><td>Math</td><td>Cognitive</td><td>49</td></tr><tr><td>58.fk_SpP_S.fk_IsType</td><td>Business</td><td>Social</td><td>48</td></tr><tr><td>59.fk_SpP_S.fk_IsType</td><td>Computing</td><td>Cognitive</td><td>49</td></tr><tr><td>67</td><td>Teaching</td><td>Social</td><td>48</td></tr><tr><td>68</td><td>Performing</td><td>Psychomotor</td><td>47</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Person</th><th>SP_PName</th></tr><tr><td>50.fk_SpP_P</td><td>Jim</td></tr><tr><td>55.fk_SpP_P</td><td>Joan</td></tr><tr><td>58.fk_SpP_P</td><td>John</td></tr><tr><td>62.fk_SpP_P</td><td>Jane</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SP_SCName</th><th>ST_SCName</th></tr><tr><td>0.fk_IsType.fk_HasClass</td><td>1.SP_SCNameOnSS</td><td>Social</td></tr><tr><td>2.fk_IsType.fk_HasClass</td><td>2.SP_SCNameOnSS</td><td>Psychomotor</td></tr><tr><td>5.fk_IsType.fk_HasClass</td><td>7.SP_SCNameOnSS</td><td>Cognitive</td></tr><tr><td>47</td><td>Psychomotor</td><td>55.fk_SpP_S.ST_SCNameOnSS</td></tr><tr><td>48</td><td>Social</td><td>61.fk_SpP_S.ST_SCNameOnSS</td></tr><tr><td>49</td><td>Cognitive</td><td>77.ST_SCNameOnSS</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillNdFrTask</th><th>ST_SCNameOnSnT</th><th>ST_SNameOnSnT</th><th>ST_TNameOnSnT</th><th>fk_ForTask</th><th>fk_SkillNeeded</th></tr><tr><td>23</td><td>Social</td><td>Pharma</td><td>BuildPhrmColim</td><td>10</td><td>6</td></tr><tr><td>24</td><td>Cognitive</td><td>Programming</td><td>BuildPhrmColim</td><td>10</td><td>9</td></tr><tr><td>25</td><td>Social</td><td>Management</td><td>RunFncIntProject</td><td>11</td><td>0</td></tr><tr><td>26</td><td>Social</td><td>Finance</td><td>RunFncIntProject</td><td>11</td><td>1</td></tr><tr><td>27</td><td>Psychomotor</td><td>PaperWriting</td><td>WriteAQLTutorial</td><td>12</td><td>2</td></tr><tr><td>28</td><td>Social</td><td>Lecturing</td><td>WriteAQLTutorial</td><td>12</td><td>4</td></tr><tr><td>29</td><td>Cognitive</td><td>Programming</td><td>WriteAQLTutorial</td><td>12</td><td>9</td></tr><tr><td>30</td><td>Social</td><td>Lecturing</td><td>TeachCT</td><td>13</td><td>4</td></tr><tr><td>31</td><td>Cognitive</td><td>CategoryTheory</td><td>TeachCT</td><td>13</td><td>7</td></tr><tr><td>32</td><td>Social</td><td>Management</td><td>RunPhrmIntProject</td><td>14</td><td>0</td></tr><tr><td>33</td><td>Social</td><td>Pharma</td><td>RunPhrmIntProject</td><td>14</td><td>6</td></tr><tr><td>34</td><td>Social</td><td>Management</td><td>BuildAQL</td><td>15</td><td>0</td></tr><tr><td>35</td><td>Cognitive</td><td>CompSci</td><td>BuildAQL</td><td>15</td><td>8</td></tr><tr><td>36</td><td>Cognitive</td><td>Programming</td><td>BuildAQL</td><td>15</td><td>9</td></tr><tr><td>37</td><td>Psychomotor</td><td>PaperWriting</td><td>LaunchCIStartup</td><td>16</td><td>2</td></tr><tr><td>38</td><td>Psychomotor</td><td>GrantWriting</td><td>LaunchCIStartup</td><td>16</td><td>3</td></tr><tr><td>39</td><td>Cognitive</td><td>CompSci</td><td>LaunchCIStartup</td><td>16</td><td>8</td></tr><tr><td>40</td><td>Cognitive</td><td>Programming</td><td>LaunchCIStartup</td><td>16</td><td>9</td></tr><tr><td>41</td><td>Psychomotor</td><td>PaperWriting</td><td>WriteCTPaper</td><td>17</td><td>2</td></tr><tr><td>42</td><td>Cognitive</td><td>CategoryTheory</td><td>WriteCTPaper</td><td>17</td><td>7</td></tr><tr><td>43</td><td>Social</td><td>Finance</td><td>BuildFncColim</td><td>18</td><td>1</td></tr><tr><td>44</td><td>Cognitive</td><td>Programming</td><td>BuildFncColim</td><td>18</td><td>9</td></tr><tr><td>45</td><td>Social</td><td>Lecturing</td><td>TeachCS</td><td>19</td><td>4</td></tr><tr><td>46</td><td>Cognitive</td><td>CompSci</td><td>TeachCS</td><td>19</td><td>8</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillPrvdByPerson</th><th>SP_PNameOnSnP</th><th>SP_SNameOnSnP</th><th>fk_SpP_P</th><th>fk_SpP_S</th></tr><tr><td>50</td><td>Jim</td><td>CompSci</td><td>50.fk_SpP_P</td><td>50.fk_SpP_S</td></tr><tr><td>51</td><td>Jim</td><td>GrantWriting</td><td>50.fk_SpP_P</td><td>57.fk_SpP_S</td></tr><tr><td>52</td><td>Jim</td><td>PaperWriting</td><td>50.fk_SpP_P</td><td>55.fk_SpP_S</td></tr><tr><td>53</td><td>Jim</td><td>Management</td><td>50.fk_SpP_P</td><td>61.fk_SpP_S</td></tr><tr><td>54</td><td>Joan</td><td>Management</td><td>55.fk_SpP_P</td><td>61.fk_SpP_S</td></tr><tr><td>55</td><td>Joan</td><td>PaperWriting</td><td>55.fk_SpP_P</td><td>55.fk_SpP_S</td></tr><tr><td>56</td><td>Joan</td><td>CategoryTheory</td><td>55.fk_SpP_P</td><td>56.fk_SpP_S</td></tr><tr><td>57</td><td>Joan</td><td>GrantWriting</td><td>55.fk_SpP_P</td><td>57.fk_SpP_S</td></tr><tr><td>58</td><td>John</td><td>Finance</td><td>58.fk_SpP_P</td><td>58.fk_SpP_S</td></tr><tr><td>59</td><td>John</td><td>DBA</td><td>58.fk_SpP_P</td><td>59.fk_SpP_S</td></tr><tr><td>60</td><td>John</td><td>PaperWriting</td><td>58.fk_SpP_P</td><td>55.fk_SpP_S</td></tr><tr><td>61</td><td>John</td><td>Management</td><td>58.fk_SpP_P</td><td>61.fk_SpP_S</td></tr><tr><td>62</td><td>Jane</td><td>DBA</td><td>62.fk_SpP_P</td><td>59.fk_SpP_S</td></tr><tr><td>63</td><td>Jane</td><td>Pharma</td><td>62.fk_SpP_P</td><td>63.fk_SpP_S</td></tr><tr><td>64</td><td>Jane</td><td>PaperWriting</td><td>62.fk_SpP_P</td><td>55.fk_SpP_S</td></tr><tr><td>65</td><td>Jane</td><td>Management</td><td>62.fk_SpP_P</td><td>61.fk_SpP_S</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SpecificSkill</th><th>SP_GSNameOnSS</th><th>SP_SCNameOnSS</th><th>SP_SSName</th><th>ST_SCNameOnSS</th><th>ST_SklName</th><th>fk_IsType</th></tr><tr><td>0</td><td>0.SP_GSNameOnSS</td><td>1.SP_SCNameOnSS</td><td>0.SP_SSName</td><td>Social</td><td>Management</td><td>0.fk_IsType</td></tr><tr><td>1</td><td>1.SP_GSNameOnSS</td><td>1.SP_SCNameOnSS</td><td>1.SP_SSName</td><td>Social</td><td>Finance</td><td>1.fk_IsType</td></tr><tr><td>2</td><td>2.SP_GSNameOnSS</td><td>2.SP_SCNameOnSS</td><td>2.SP_SSName</td><td>Psychomotor</td><td>PaperWriting</td><td>2.fk_IsType</td></tr><tr><td>3</td><td>3.SP_GSNameOnSS</td><td>2.SP_SCNameOnSS</td><td>3.SP_SSName</td><td>Psychomotor</td><td>GrantWriting</td><td>3.fk_IsType</td></tr><tr><td>4</td><td>4.SP_GSNameOnSS</td><td>1.SP_SCNameOnSS</td><td>4.SP_SSName</td><td>Social</td><td>Lecturing</td><td>4.fk_IsType</td></tr><tr><td>5</td><td>5.SP_GSNameOnSS</td><td>7.SP_SCNameOnSS</td><td>5.SP_SSName</td><td>Cognitive</td><td>DBA</td><td>5.fk_IsType</td></tr><tr><td>6</td><td>6.SP_GSNameOnSS</td><td>1.SP_SCNameOnSS</td><td>6.SP_SSName</td><td>Social</td><td>Pharma</td><td>6.fk_IsType</td></tr><tr><td>7</td><td>7.SP_GSNameOnSS</td><td>7.SP_SCNameOnSS</td><td>7.SP_SSName</td><td>Cognitive</td><td>CategoryTheory</td><td>7.fk_IsType</td></tr><tr><td>8</td><td>8.SP_GSNameOnSS</td><td>7.SP_SCNameOnSS</td><td>8.SP_SSName</td><td>Cognitive</td><td>CompSci</td><td>8.fk_IsType</td></tr><tr><td>9</td><td>9.SP_GSNameOnSS</td><td>7.SP_SCNameOnSS</td><td>9.SP_SSName</td><td>Cognitive</td><td>Programming</td><td>9.fk_IsType</td></tr><tr><td>50.fk_SpP_S</td><td>Computing</td><td>Cognitive</td><td>CompSci</td><td>77.ST_SCNameOnSS</td><td>50.fk_SpP_S.ST_SklName</td><td>59.fk_SpP_S.fk_IsType</td></tr><tr><td>55.fk_SpP_S</td><td>Writing</td><td>Psychomotor</td><td>PaperWriting</td><td>55.fk_SpP_S.ST_SCNameOnSS</td><td>55.fk_SpP_S.ST_SklName</td><td>55.fk_SpP_S.fk_IsType</td></tr><tr><td>56.fk_SpP_S</td><td>Math</td><td>Cognitive</td><td>CategoryTheory</td><td>77.ST_SCNameOnSS</td><td>56.fk_SpP_S.ST_SklName</td><td>56.fk_SpP_S.fk_IsType</td></tr><tr><td>57.fk_SpP_S</td><td>Writing</td><td>Psychomotor</td><td>GrantWriting</td><td>55.fk_SpP_S.ST_SCNameOnSS</td><td>57.fk_SpP_S.ST_SklName</td><td>55.fk_SpP_S.fk_IsType</td></tr><tr><td>58.fk_SpP_S</td><td>Business</td><td>Social</td><td>Finance</td><td>61.fk_SpP_S.ST_SCNameOnSS</td><td>58.fk_SpP_S.ST_SklName</td><td>58.fk_SpP_S.fk_IsType</td></tr><tr><td>59.fk_SpP_S</td><td>Computing</td><td>Cognitive</td><td>DBA</td><td>77.ST_SCNameOnSS</td><td>59.fk_SpP_S.ST_SklName</td><td>59.fk_SpP_S.fk_IsType</td></tr><tr><td>61.fk_SpP_S</td><td>Business</td><td>Social</td><td>Management</td><td>61.fk_SpP_S.ST_SCNameOnSS</td><td>61.fk_SpP_S.ST_SklName</td><td>58.fk_SpP_S.fk_IsType</td></tr><tr><td>63.fk_SpP_S</td><td>Business</td><td>Social</td><td>Pharma</td><td>61.fk_SpP_S.ST_SCNameOnSS</td><td>63.fk_SpP_S.ST_SklName</td><td>58.fk_SpP_S.fk_IsType</td></tr><tr><td>76</td><td>Performing</td><td>Psychomotor</td><td>Dancing</td><td>55.fk_SpP_S.ST_SCNameOnSS</td><td>76.ST_SklName</td><td>68</td></tr><tr><td>77</td><td>Computing</td><td>Cognitive</td><td>Programming</td><td>77.ST_SCNameOnSS</td><td>77.ST_SklName</td><td>59.fk_SpP_S.fk_IsType</td></tr><tr><td>85</td><td>Teaching</td><td>Social</td><td>Lecturing</td><td>61.fk_SpP_S.ST_SCNameOnSS</td><td>85.ST_SklName</td><td>67</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Task</th><th>ST_TName</th></tr><tr><td>10</td><td>BuildPhrmColim</td></tr><tr><td>11</td><td>RunFncIntProject</td></tr><tr><td>12</td><td>WriteAQLTutorial</td></tr><tr><td>13</td><td>TeachCT</td></tr><tr><td>14</td><td>RunPhrmIntProject</td></tr><tr><td>15</td><td>BuildAQL</td></tr><tr><td>16</td><td>LaunchCIStartup</td></tr><tr><td>17</td><td>WriteCTPaper</td></tr><tr><td>18</td><td>BuildFncColim</td></tr><tr><td>19</td><td>TeachCS</td></tr></table></div><br style="clear:both;"/>
+<p>In order to make instance assembly clear we illustrate two equivalent methods. The second method
+has the same preconditions as the first but performs the record linking transparently as part of
+the import process.</p>
+<p>Merging records by importing a link table and transforms from tables constructed externally.</p>
+<p>In this sequence we create external tables using SQL statements against the tables generated in
+the export. The essence of this approach is matching records based on attributes. Clearly this
+will only work if we can get exact string matches. This process can be generalized using any
+number of technical enhancements to include fuzzing matching using things like edit distance or
+matching through machine learning approaches.</p>
+<p>As is well known reliable integration depends on standardization and/or investment in the
+construction of translations between systems that make use of different reference information,
+e.g. skill classification in this case.</p>
+
+<pre>
+pragma pSetUpSkillMatch = sql "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+"DROP TABLE IF EXISTS SkillMatch"
+"DROP TABLE IF EXISTS SkillClassMatch"
+"create table SkillMatch as
+select
+  concat('s', t.id) as sm_id,
+  p.id as ps_id,
+  t.id as ts_id,
+  t.fk_HasClass
+from
+  sps_SpecificSkill p
+  join sts_Skill t
+    on p.SSName = t.SName
+  join sps_GeneralSkill gs
+    on p.fk_IsType = gs.id"
+"create table SkillClassMatch as
+select
+  concat('sc', t.id) as scm_id,
+  p.id as psc_id,
+  t.id as tsc_id
+from
+  sps_SkillClass as p
+  join sts_SkillClass as t
+    on p.SCName = t.SCName"
+}
+</pre>
+<pre>START
+DROP TABLE IF EXISTS SkillMatch
+
+Updated 0 rows.
+END
+
+START
+DROP TABLE IF EXISTS SkillClassMatch
+
+Updated 0 rows.
+END
+
+START
+create table SkillMatch as
+select
+  concat('s', t.id) as sm_id,
+  p.id as ps_id,
+  t.id as ts_id,
+  t.fk_HasClass
+from
+  sps_SpecificSkill p
+  join sts_Skill t
+    on p.SSName = t.SName
+  join sps_GeneralSkill gs
+    on p.fk_IsType = gs.id
+
+Updated 10 rows.
+END
+
+START
+create table SkillClassMatch as
+select
+  concat('sc', t.id) as scm_id,
+  p.id as psc_id,
+  t.id as tsc_id
+from
+  sps_SkillClass as p
+  join sts_SkillClass as t
+    on p.SCName = t.SCName
+
+Updated 3 rows.
+END
+</pre>
+<p>Notice that this instance import is very different than the ones we used to import <code>iSTSpnImp</code> and
+<code>iSPSpnImp</code>. We have neglected to specify all entities and of the entities we have specified we
+are only importing the ids. In order to accomplish this we must first specify the <code>import_joined</code>
+option as false. This allows us to import each attribute in a separate select statement. In this
+case we are only interested in the generators and so only one select statement is specified for
+each incomming entity. The second option we need to override is specify that we import the
+instance as a theory. This incurs the theorem proving burden of a literal instance declaration
+but allows for a partial specification of the instance. The consequence of these two options is
+to allow us to import an instance that essentially the same as the literal <code>iSklLnk</code> instance
+above.</p>
+
+<pre>
+instance iSkillMatch = import_jdbc sSTSpn_SPSpn_CoLim "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
+	SkillClass -> select scm_id from SkillClassMatch
+	SpecificSkill -> select sm_id from SkillMatchoptionsimport_joined
+		false = import_as_theory
+		true
+}
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>GeneralSkill</th><th>SP_GSName</th><th>SP_SCNameOnGS</th><th>fk_HasClass</th></tr><tr><td>s0.fk_IsType</td><td>s0.SP_GSNameOnSS</td><td>s0.SP_SCNameOnSS</td><td>s0.fk_IsType.fk_HasClass</td></tr><tr><td>s1.fk_IsType</td><td>s1.SP_GSNameOnSS</td><td>s1.SP_SCNameOnSS</td><td>s1.fk_IsType.fk_HasClass</td></tr><tr><td>s2.fk_IsType</td><td>s2.SP_GSNameOnSS</td><td>s2.SP_SCNameOnSS</td><td>s2.fk_IsType.fk_HasClass</td></tr><tr><td>s3.fk_IsType</td><td>s3.SP_GSNameOnSS</td><td>s3.SP_SCNameOnSS</td><td>s3.fk_IsType.fk_HasClass</td></tr><tr><td>s4.fk_IsType</td><td>s4.SP_GSNameOnSS</td><td>s4.SP_SCNameOnSS</td><td>s4.fk_IsType.fk_HasClass</td></tr><tr><td>s5.fk_IsType</td><td>s5.SP_GSNameOnSS</td><td>s5.SP_SCNameOnSS</td><td>s5.fk_IsType.fk_HasClass</td></tr><tr><td>s6.fk_IsType</td><td>s6.SP_GSNameOnSS</td><td>s6.SP_SCNameOnSS</td><td>s6.fk_IsType.fk_HasClass</td></tr><tr><td>s7.fk_IsType</td><td>s7.SP_GSNameOnSS</td><td>s7.SP_SCNameOnSS</td><td>s7.fk_IsType.fk_HasClass</td></tr><tr><td>s8.fk_IsType</td><td>s8.SP_GSNameOnSS</td><td>s8.SP_SCNameOnSS</td><td>s8.fk_IsType.fk_HasClass</td></tr><tr><td>s9.fk_IsType</td><td>s9.SP_GSNameOnSS</td><td>s9.SP_SCNameOnSS</td><td>s9.fk_IsType.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Person</th><th>SP_PName</th></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SP_SCName</th><th>ST_SCName</th></tr><tr><td>s0.fk_IsType.fk_HasClass</td><td>s0.SP_SCNameOnSS</td><td>s0.ST_SCNameOnSS</td></tr><tr><td>s1.fk_IsType.fk_HasClass</td><td>s1.SP_SCNameOnSS</td><td>s1.ST_SCNameOnSS</td></tr><tr><td>s2.fk_IsType.fk_HasClass</td><td>s2.SP_SCNameOnSS</td><td>s2.ST_SCNameOnSS</td></tr><tr><td>s3.fk_IsType.fk_HasClass</td><td>s3.SP_SCNameOnSS</td><td>s3.ST_SCNameOnSS</td></tr><tr><td>s4.fk_IsType.fk_HasClass</td><td>s4.SP_SCNameOnSS</td><td>s4.ST_SCNameOnSS</td></tr><tr><td>s5.fk_IsType.fk_HasClass</td><td>s5.SP_SCNameOnSS</td><td>s5.ST_SCNameOnSS</td></tr><tr><td>s6.fk_IsType.fk_HasClass</td><td>s6.SP_SCNameOnSS</td><td>s6.ST_SCNameOnSS</td></tr><tr><td>s7.fk_IsType.fk_HasClass</td><td>s7.SP_SCNameOnSS</td><td>s7.ST_SCNameOnSS</td></tr><tr><td>s8.fk_IsType.fk_HasClass</td><td>s8.SP_SCNameOnSS</td><td>s8.ST_SCNameOnSS</td></tr><tr><td>s9.fk_IsType.fk_HasClass</td><td>s9.SP_SCNameOnSS</td><td>s9.ST_SCNameOnSS</td></tr><tr><td>sc20</td><td>sc20.SP_SCName</td><td>sc20.ST_SCName</td></tr><tr><td>sc21</td><td>sc21.SP_SCName</td><td>sc21.ST_SCName</td></tr><tr><td>sc22</td><td>sc22.SP_SCName</td><td>sc22.ST_SCName</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillNdFrTask</th><th>ST_SCNameOnSnT</th><th>ST_SNameOnSnT</th><th>ST_TNameOnSnT</th><th>fk_ForTask</th><th>fk_SkillNeeded</th></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillPrvdByPerson</th><th>SP_PNameOnSnP</th><th>SP_SNameOnSnP</th><th>fk_SpP_P</th><th>fk_SpP_S</th></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SpecificSkill</th><th>SP_GSNameOnSS</th><th>SP_SCNameOnSS</th><th>SP_SSName</th><th>ST_SCNameOnSS</th><th>ST_SklName</th><th>fk_IsType</th></tr><tr><td>s0</td><td>s0.SP_GSNameOnSS</td><td>s0.SP_SCNameOnSS</td><td>s0.SP_SSName</td><td>s0.ST_SCNameOnSS</td><td>s0.ST_SklName</td><td>s0.fk_IsType</td></tr><tr><td>s1</td><td>s1.SP_GSNameOnSS</td><td>s1.SP_SCNameOnSS</td><td>s1.SP_SSName</td><td>s1.ST_SCNameOnSS</td><td>s1.ST_SklName</td><td>s1.fk_IsType</td></tr><tr><td>s2</td><td>s2.SP_GSNameOnSS</td><td>s2.SP_SCNameOnSS</td><td>s2.SP_SSName</td><td>s2.ST_SCNameOnSS</td><td>s2.ST_SklName</td><td>s2.fk_IsType</td></tr><tr><td>s3</td><td>s3.SP_GSNameOnSS</td><td>s3.SP_SCNameOnSS</td><td>s3.SP_SSName</td><td>s3.ST_SCNameOnSS</td><td>s3.ST_SklName</td><td>s3.fk_IsType</td></tr><tr><td>s4</td><td>s4.SP_GSNameOnSS</td><td>s4.SP_SCNameOnSS</td><td>s4.SP_SSName</td><td>s4.ST_SCNameOnSS</td><td>s4.ST_SklName</td><td>s4.fk_IsType</td></tr><tr><td>s5</td><td>s5.SP_GSNameOnSS</td><td>s5.SP_SCNameOnSS</td><td>s5.SP_SSName</td><td>s5.ST_SCNameOnSS</td><td>s5.ST_SklName</td><td>s5.fk_IsType</td></tr><tr><td>s6</td><td>s6.SP_GSNameOnSS</td><td>s6.SP_SCNameOnSS</td><td>s6.SP_SSName</td><td>s6.ST_SCNameOnSS</td><td>s6.ST_SklName</td><td>s6.fk_IsType</td></tr><tr><td>s7</td><td>s7.SP_GSNameOnSS</td><td>s7.SP_SCNameOnSS</td><td>s7.SP_SSName</td><td>s7.ST_SCNameOnSS</td><td>s7.ST_SklName</td><td>s7.fk_IsType</td></tr><tr><td>s8</td><td>s8.SP_GSNameOnSS</td><td>s8.SP_SCNameOnSS</td><td>s8.SP_SSName</td><td>s8.ST_SCNameOnSS</td><td>s8.ST_SklName</td><td>s8.fk_IsType</td></tr><tr><td>s9</td><td>s9.SP_GSNameOnSS</td><td>s9.SP_SCNameOnSS</td><td>s9.SP_SSName</td><td>s9.ST_SCNameOnSS</td><td>s9.ST_SklName</td><td>s9.fk_IsType</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Task</th><th>ST_TName</th></tr></table></div><br style="clear:both;"/>
+<p>The pair of transform imports below like the instance transform above are restricted to record
+ids. It may be instructive to compare the results of the <code>iSkillMatch</code> instance and <code>tSMToSTSpn</code> and
+<code>tSMToSPSpn</code> transforms with the literal <code>iSLnk</code> instance and the literial <code>tS1</code> and <code>tS2</code> transforms we
+created to merge skill class Skolum terms with skill class generators and labels.</p>
+
+<pre>
+transform tSMToSTSpn = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : iSkillMatch -> iST_SP_Sum {
+	SkillClass -> select scm_id, tsc_id from SkillClassMatch
+	SpecificSkill -> select sm_id, ts_id from SkillMatch
+}
+</pre>
+<pre>
+transform tSMToSPSpn = import_jdbc "com.mysql.jdbc.Driver" "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : iSkillMatch -> iST_SP_Sum {
+	SkillClass -> select scm_id, psc_id from SkillClassMatch
+	SpecificSkill -> select sm_id, ps_id from SkillMatch
+}
+</pre>
+<pre>
+instance iSTSpn_SPSpn_Merge1 = coequalize tSMToSTSpn tSMToSPSpn
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>GeneralSkill</th><th>SP_GSName</th><th>SP_SCNameOnGS</th><th>fk_HasClass</th></tr><tr><td>0.fk_IsType</td><td>Business</td><td>Social</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>2.fk_IsType</td><td>Writing</td><td>Psychomotor</td><td>2.fk_IsType.fk_HasClass</td></tr><tr><td>4.fk_IsType</td><td>Teaching</td><td>Social</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>5.fk_IsType</td><td>Computing</td><td>Cognitive</td><td>5.fk_IsType.fk_HasClass</td></tr><tr><td>7.fk_IsType</td><td>Math</td><td>Cognitive</td><td>5.fk_IsType.fk_HasClass</td></tr><tr><td>68</td><td>Performing</td><td>Psychomotor</td><td>2.fk_IsType.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Person</th><th>SP_PName</th></tr><tr><td>50.fk_SpP_P</td><td>Jim</td></tr><tr><td>55.fk_SpP_P</td><td>Joan</td></tr><tr><td>58.fk_SpP_P</td><td>John</td></tr><tr><td>62.fk_SpP_P</td><td>Jane</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SP_SCName</th><th>ST_SCName</th></tr><tr><td>0.fk_IsType.fk_HasClass</td><td>Social</td><td>Social</td></tr><tr><td>2.fk_IsType.fk_HasClass</td><td>Psychomotor</td><td>Psychomotor</td></tr><tr><td>5.fk_IsType.fk_HasClass</td><td>Cognitive</td><td>Cognitive</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillNdFrTask</th><th>ST_SCNameOnSnT</th><th>ST_SNameOnSnT</th><th>ST_TNameOnSnT</th><th>fk_ForTask</th><th>fk_SkillNeeded</th></tr><tr><td>23</td><td>Social</td><td>Pharma</td><td>BuildPhrmColim</td><td>10</td><td>6</td></tr><tr><td>24</td><td>Cognitive</td><td>Programming</td><td>BuildPhrmColim</td><td>10</td><td>9</td></tr><tr><td>25</td><td>Social</td><td>Management</td><td>RunFncIntProject</td><td>11</td><td>0</td></tr><tr><td>26</td><td>Social</td><td>Finance</td><td>RunFncIntProject</td><td>11</td><td>1</td></tr><tr><td>27</td><td>Psychomotor</td><td>PaperWriting</td><td>WriteAQLTutorial</td><td>12</td><td>2</td></tr><tr><td>28</td><td>Social</td><td>Lecturing</td><td>WriteAQLTutorial</td><td>12</td><td>4</td></tr><tr><td>29</td><td>Cognitive</td><td>Programming</td><td>WriteAQLTutorial</td><td>12</td><td>9</td></tr><tr><td>30</td><td>Social</td><td>Lecturing</td><td>TeachCT</td><td>13</td><td>4</td></tr><tr><td>31</td><td>Cognitive</td><td>CategoryTheory</td><td>TeachCT</td><td>13</td><td>7</td></tr><tr><td>32</td><td>Social</td><td>Management</td><td>RunPhrmIntProject</td><td>14</td><td>0</td></tr><tr><td>33</td><td>Social</td><td>Pharma</td><td>RunPhrmIntProject</td><td>14</td><td>6</td></tr><tr><td>34</td><td>Social</td><td>Management</td><td>BuildAQL</td><td>15</td><td>0</td></tr><tr><td>35</td><td>Cognitive</td><td>CompSci</td><td>BuildAQL</td><td>15</td><td>8</td></tr><tr><td>36</td><td>Cognitive</td><td>Programming</td><td>BuildAQL</td><td>15</td><td>9</td></tr><tr><td>37</td><td>Psychomotor</td><td>PaperWriting</td><td>LaunchCIStartup</td><td>16</td><td>2</td></tr><tr><td>38</td><td>Psychomotor</td><td>GrantWriting</td><td>LaunchCIStartup</td><td>16</td><td>3</td></tr><tr><td>39</td><td>Cognitive</td><td>CompSci</td><td>LaunchCIStartup</td><td>16</td><td>8</td></tr><tr><td>40</td><td>Cognitive</td><td>Programming</td><td>LaunchCIStartup</td><td>16</td><td>9</td></tr><tr><td>41</td><td>Psychomotor</td><td>PaperWriting</td><td>WriteCTPaper</td><td>17</td><td>2</td></tr><tr><td>42</td><td>Cognitive</td><td>CategoryTheory</td><td>WriteCTPaper</td><td>17</td><td>7</td></tr><tr><td>43</td><td>Social</td><td>Finance</td><td>BuildFncColim</td><td>18</td><td>1</td></tr><tr><td>44</td><td>Cognitive</td><td>Programming</td><td>BuildFncColim</td><td>18</td><td>9</td></tr><tr><td>45</td><td>Social</td><td>Lecturing</td><td>TeachCS</td><td>19</td><td>4</td></tr><tr><td>46</td><td>Cognitive</td><td>CompSci</td><td>TeachCS</td><td>19</td><td>8</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillPrvdByPerson</th><th>SP_PNameOnSnP</th><th>SP_SNameOnSnP</th><th>fk_SpP_P</th><th>fk_SpP_S</th></tr><tr><td>50</td><td>Jim</td><td>CompSci</td><td>50.fk_SpP_P</td><td>8</td></tr><tr><td>51</td><td>Jim</td><td>GrantWriting</td><td>50.fk_SpP_P</td><td>3</td></tr><tr><td>52</td><td>Jim</td><td>PaperWriting</td><td>50.fk_SpP_P</td><td>2</td></tr><tr><td>53</td><td>Jim</td><td>Management</td><td>50.fk_SpP_P</td><td>0</td></tr><tr><td>54</td><td>Joan</td><td>Management</td><td>55.fk_SpP_P</td><td>0</td></tr><tr><td>55</td><td>Joan</td><td>PaperWriting</td><td>55.fk_SpP_P</td><td>2</td></tr><tr><td>56</td><td>Joan</td><td>CategoryTheory</td><td>55.fk_SpP_P</td><td>7</td></tr><tr><td>57</td><td>Joan</td><td>GrantWriting</td><td>55.fk_SpP_P</td><td>3</td></tr><tr><td>58</td><td>John</td><td>Finance</td><td>58.fk_SpP_P</td><td>1</td></tr><tr><td>59</td><td>John</td><td>DBA</td><td>58.fk_SpP_P</td><td>5</td></tr><tr><td>60</td><td>John</td><td>PaperWriting</td><td>58.fk_SpP_P</td><td>2</td></tr><tr><td>61</td><td>John</td><td>Management</td><td>58.fk_SpP_P</td><td>0</td></tr><tr><td>62</td><td>Jane</td><td>DBA</td><td>62.fk_SpP_P</td><td>5</td></tr><tr><td>63</td><td>Jane</td><td>Pharma</td><td>62.fk_SpP_P</td><td>6</td></tr><tr><td>64</td><td>Jane</td><td>PaperWriting</td><td>62.fk_SpP_P</td><td>2</td></tr><tr><td>65</td><td>Jane</td><td>Management</td><td>62.fk_SpP_P</td><td>0</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SpecificSkill</th><th>SP_GSNameOnSS</th><th>SP_SCNameOnSS</th><th>SP_SSName</th><th>ST_SCNameOnSS</th><th>ST_SklName</th><th>fk_IsType</th></tr><tr><td>0</td><td>Business</td><td>Social</td><td>Management</td><td>Social</td><td>Management</td><td>0.fk_IsType</td></tr><tr><td>1</td><td>Business</td><td>Social</td><td>Finance</td><td>Social</td><td>Finance</td><td>0.fk_IsType</td></tr><tr><td>2</td><td>Writing</td><td>Psychomotor</td><td>PaperWriting</td><td>Psychomotor</td><td>PaperWriting</td><td>2.fk_IsType</td></tr><tr><td>3</td><td>Writing</td><td>Psychomotor</td><td>GrantWriting</td><td>Psychomotor</td><td>GrantWriting</td><td>2.fk_IsType</td></tr><tr><td>4</td><td>Teaching</td><td>Social</td><td>Lecturing</td><td>Social</td><td>Lecturing</td><td>4.fk_IsType</td></tr><tr><td>5</td><td>Computing</td><td>Cognitive</td><td>DBA</td><td>Cognitive</td><td>DBA</td><td>5.fk_IsType</td></tr><tr><td>6</td><td>Business</td><td>Social</td><td>Pharma</td><td>Social</td><td>Pharma</td><td>0.fk_IsType</td></tr><tr><td>7</td><td>Math</td><td>Cognitive</td><td>CategoryTheory</td><td>Cognitive</td><td>CategoryTheory</td><td>7.fk_IsType</td></tr><tr><td>8</td><td>Computing</td><td>Cognitive</td><td>CompSci</td><td>Cognitive</td><td>CompSci</td><td>5.fk_IsType</td></tr><tr><td>9</td><td>Computing</td><td>Cognitive</td><td>Programming</td><td>Cognitive</td><td>Programming</td><td>5.fk_IsType</td></tr><tr><td>76</td><td>Performing</td><td>Psychomotor</td><td>Dancing</td><td>Psychomotor</td><td>76.ST_SklName</td><td>68</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Task</th><th>ST_TName</th></tr><tr><td>10</td><td>BuildPhrmColim</td></tr><tr><td>11</td><td>RunFncIntProject</td></tr><tr><td>12</td><td>WriteAQLTutorial</td></tr><tr><td>13</td><td>TeachCT</td></tr><tr><td>14</td><td>RunPhrmIntProject</td></tr><tr><td>15</td><td>BuildAQL</td></tr><tr><td>16</td><td>LaunchCIStartup</td></tr><tr><td>17</td><td>WriteCTPaper</td></tr><tr><td>18</td><td>BuildFncColim</td></tr><tr><td>19</td><td>TeachCS</td></tr></table></div><br style="clear:both;"/>
+<p>Finally we do this the easy way. We import everything in one go using the <code>quotient_jdbc</code> import.
+It is important to note that this does require the construction of the <code>SkillMatch</code> and
+<code>SkillClassMatch</code> tables in the source RDBMS as a precondition.</p>
+
+<pre>
+instance iSTSpn_SPSpn_Merge2 = quotient_jdbc com.mysql.jdbc.Driver jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr {
+select
+   ps_id as sp_id,
+   ts_id as st_id
+from
+   SkillMatch
+union
+select
+   psc_id as sp_id,
+   tsc_id as st_id
+from
+   SkillClassMatch
+}
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>GeneralSkill</th><th>SP_GSName</th><th>SP_SCNameOnGS</th><th>fk_HasClass</th></tr><tr><td>0.fk_IsType</td><td>Business</td><td>Social</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>2.fk_IsType</td><td>Writing</td><td>Psychomotor</td><td>2.fk_IsType.fk_HasClass</td></tr><tr><td>4.fk_IsType</td><td>Teaching</td><td>Social</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>5.fk_IsType</td><td>Computing</td><td>Cognitive</td><td>5.fk_IsType.fk_HasClass</td></tr><tr><td>7.fk_IsType</td><td>Math</td><td>Cognitive</td><td>5.fk_IsType.fk_HasClass</td></tr><tr><td>68</td><td>Performing</td><td>Psychomotor</td><td>2.fk_IsType.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Person</th><th>SP_PName</th></tr><tr><td>50.fk_SpP_P</td><td>Jim</td></tr><tr><td>55.fk_SpP_P</td><td>Joan</td></tr><tr><td>58.fk_SpP_P</td><td>John</td></tr><tr><td>62.fk_SpP_P</td><td>Jane</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SP_SCName</th><th>ST_SCName</th></tr><tr><td>0.fk_IsType.fk_HasClass</td><td>Social</td><td>Social</td></tr><tr><td>2.fk_IsType.fk_HasClass</td><td>Psychomotor</td><td>Psychomotor</td></tr><tr><td>5.fk_IsType.fk_HasClass</td><td>Cognitive</td><td>Cognitive</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillNdFrTask</th><th>ST_SCNameOnSnT</th><th>ST_SNameOnSnT</th><th>ST_TNameOnSnT</th><th>fk_ForTask</th><th>fk_SkillNeeded</th></tr><tr><td>23</td><td>Social</td><td>Pharma</td><td>BuildPhrmColim</td><td>10</td><td>6</td></tr><tr><td>24</td><td>Cognitive</td><td>Programming</td><td>BuildPhrmColim</td><td>10</td><td>9</td></tr><tr><td>25</td><td>Social</td><td>Management</td><td>RunFncIntProject</td><td>11</td><td>0</td></tr><tr><td>26</td><td>Social</td><td>Finance</td><td>RunFncIntProject</td><td>11</td><td>1</td></tr><tr><td>27</td><td>Psychomotor</td><td>PaperWriting</td><td>WriteAQLTutorial</td><td>12</td><td>2</td></tr><tr><td>28</td><td>Social</td><td>Lecturing</td><td>WriteAQLTutorial</td><td>12</td><td>4</td></tr><tr><td>29</td><td>Cognitive</td><td>Programming</td><td>WriteAQLTutorial</td><td>12</td><td>9</td></tr><tr><td>30</td><td>Social</td><td>Lecturing</td><td>TeachCT</td><td>13</td><td>4</td></tr><tr><td>31</td><td>Cognitive</td><td>CategoryTheory</td><td>TeachCT</td><td>13</td><td>7</td></tr><tr><td>32</td><td>Social</td><td>Management</td><td>RunPhrmIntProject</td><td>14</td><td>0</td></tr><tr><td>33</td><td>Social</td><td>Pharma</td><td>RunPhrmIntProject</td><td>14</td><td>6</td></tr><tr><td>34</td><td>Social</td><td>Management</td><td>BuildAQL</td><td>15</td><td>0</td></tr><tr><td>35</td><td>Cognitive</td><td>CompSci</td><td>BuildAQL</td><td>15</td><td>8</td></tr><tr><td>36</td><td>Cognitive</td><td>Programming</td><td>BuildAQL</td><td>15</td><td>9</td></tr><tr><td>37</td><td>Psychomotor</td><td>PaperWriting</td><td>LaunchCIStartup</td><td>16</td><td>2</td></tr><tr><td>38</td><td>Psychomotor</td><td>GrantWriting</td><td>LaunchCIStartup</td><td>16</td><td>3</td></tr><tr><td>39</td><td>Cognitive</td><td>CompSci</td><td>LaunchCIStartup</td><td>16</td><td>8</td></tr><tr><td>40</td><td>Cognitive</td><td>Programming</td><td>LaunchCIStartup</td><td>16</td><td>9</td></tr><tr><td>41</td><td>Psychomotor</td><td>PaperWriting</td><td>WriteCTPaper</td><td>17</td><td>2</td></tr><tr><td>42</td><td>Cognitive</td><td>CategoryTheory</td><td>WriteCTPaper</td><td>17</td><td>7</td></tr><tr><td>43</td><td>Social</td><td>Finance</td><td>BuildFncColim</td><td>18</td><td>1</td></tr><tr><td>44</td><td>Cognitive</td><td>Programming</td><td>BuildFncColim</td><td>18</td><td>9</td></tr><tr><td>45</td><td>Social</td><td>Lecturing</td><td>TeachCS</td><td>19</td><td>4</td></tr><tr><td>46</td><td>Cognitive</td><td>CompSci</td><td>TeachCS</td><td>19</td><td>8</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillPrvdByPerson</th><th>SP_PNameOnSnP</th><th>SP_SNameOnSnP</th><th>fk_SpP_P</th><th>fk_SpP_S</th></tr><tr><td>50</td><td>Jim</td><td>CompSci</td><td>50.fk_SpP_P</td><td>8</td></tr><tr><td>51</td><td>Jim</td><td>GrantWriting</td><td>50.fk_SpP_P</td><td>3</td></tr><tr><td>52</td><td>Jim</td><td>PaperWriting</td><td>50.fk_SpP_P</td><td>2</td></tr><tr><td>53</td><td>Jim</td><td>Management</td><td>50.fk_SpP_P</td><td>0</td></tr><tr><td>54</td><td>Joan</td><td>Management</td><td>55.fk_SpP_P</td><td>0</td></tr><tr><td>55</td><td>Joan</td><td>PaperWriting</td><td>55.fk_SpP_P</td><td>2</td></tr><tr><td>56</td><td>Joan</td><td>CategoryTheory</td><td>55.fk_SpP_P</td><td>7</td></tr><tr><td>57</td><td>Joan</td><td>GrantWriting</td><td>55.fk_SpP_P</td><td>3</td></tr><tr><td>58</td><td>John</td><td>Finance</td><td>58.fk_SpP_P</td><td>1</td></tr><tr><td>59</td><td>John</td><td>DBA</td><td>58.fk_SpP_P</td><td>5</td></tr><tr><td>60</td><td>John</td><td>PaperWriting</td><td>58.fk_SpP_P</td><td>2</td></tr><tr><td>61</td><td>John</td><td>Management</td><td>58.fk_SpP_P</td><td>0</td></tr><tr><td>62</td><td>Jane</td><td>DBA</td><td>62.fk_SpP_P</td><td>5</td></tr><tr><td>63</td><td>Jane</td><td>Pharma</td><td>62.fk_SpP_P</td><td>6</td></tr><tr><td>64</td><td>Jane</td><td>PaperWriting</td><td>62.fk_SpP_P</td><td>2</td></tr><tr><td>65</td><td>Jane</td><td>Management</td><td>62.fk_SpP_P</td><td>0</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SpecificSkill</th><th>SP_GSNameOnSS</th><th>SP_SCNameOnSS</th><th>SP_SSName</th><th>ST_SCNameOnSS</th><th>ST_SklName</th><th>fk_IsType</th></tr><tr><td>0</td><td>Business</td><td>Social</td><td>Management</td><td>Social</td><td>Management</td><td>0.fk_IsType</td></tr><tr><td>1</td><td>Business</td><td>Social</td><td>Finance</td><td>Social</td><td>Finance</td><td>0.fk_IsType</td></tr><tr><td>2</td><td>Writing</td><td>Psychomotor</td><td>PaperWriting</td><td>Psychomotor</td><td>PaperWriting</td><td>2.fk_IsType</td></tr><tr><td>3</td><td>Writing</td><td>Psychomotor</td><td>GrantWriting</td><td>Psychomotor</td><td>GrantWriting</td><td>2.fk_IsType</td></tr><tr><td>4</td><td>Teaching</td><td>Social</td><td>Lecturing</td><td>Social</td><td>Lecturing</td><td>4.fk_IsType</td></tr><tr><td>5</td><td>Computing</td><td>Cognitive</td><td>DBA</td><td>Cognitive</td><td>DBA</td><td>5.fk_IsType</td></tr><tr><td>6</td><td>Business</td><td>Social</td><td>Pharma</td><td>Social</td><td>Pharma</td><td>0.fk_IsType</td></tr><tr><td>7</td><td>Math</td><td>Cognitive</td><td>CategoryTheory</td><td>Cognitive</td><td>CategoryTheory</td><td>7.fk_IsType</td></tr><tr><td>8</td><td>Computing</td><td>Cognitive</td><td>CompSci</td><td>Cognitive</td><td>CompSci</td><td>5.fk_IsType</td></tr><tr><td>9</td><td>Computing</td><td>Cognitive</td><td>Programming</td><td>Cognitive</td><td>Programming</td><td>5.fk_IsType</td></tr><tr><td>76</td><td>Performing</td><td>Psychomotor</td><td>Dancing</td><td>Psychomotor</td><td>76.ST_SklName</td><td>68</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Task</th><th>ST_TName</th></tr><tr><td>10</td><td>BuildPhrmColim</td></tr><tr><td>11</td><td>RunFncIntProject</td></tr><tr><td>12</td><td>WriteAQLTutorial</td></tr><tr><td>13</td><td>TeachCT</td></tr><tr><td>14</td><td>RunPhrmIntProject</td></tr><tr><td>15</td><td>BuildAQL</td></tr><tr><td>16</td><td>LaunchCIStartup</td></tr><tr><td>17</td><td>WriteCTPaper</td></tr><tr><td>18</td><td>BuildFncColim</td></tr><tr><td>19</td><td>TeachCS</td></tr></table></div><br style="clear:both;"/>
+<p>Prior to wrapping up let's return to an examination of the data migration functors sigma, delta
+and pi as well as their connection with querying. We mentioned before that the <code>coproduct_sigma</code>
+could be constructed into first the migration of instances separately into the colimit schema and
+then taking the coproduct of each result. Let's examine what some of those intermediate steps do.</p>
+
+<pre>
+instance iSTSpnImpInCoLim = sigma mSTSpnToSTSpn_SPSpn_CoLim iSTSpnImp
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>GeneralSkill</th><th>SP_GSName</th><th>SP_SCNameOnGS</th><th>fk_HasClass</th></tr><tr><td>0.fk_IsType</td><td>0.SP_GSNameOnSS</td><td>0.SP_SCNameOnSS</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>1.fk_IsType</td><td>1.SP_GSNameOnSS</td><td>0.SP_SCNameOnSS</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>2.fk_IsType</td><td>2.SP_GSNameOnSS</td><td>3.SP_SCNameOnSS</td><td>2.fk_IsType.fk_HasClass</td></tr><tr><td>3.fk_IsType</td><td>3.SP_GSNameOnSS</td><td>3.SP_SCNameOnSS</td><td>2.fk_IsType.fk_HasClass</td></tr><tr><td>4.fk_IsType</td><td>4.SP_GSNameOnSS</td><td>0.SP_SCNameOnSS</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>5.fk_IsType</td><td>5.SP_GSNameOnSS</td><td>8.SP_SCNameOnSS</td><td>5.fk_IsType.fk_HasClass</td></tr><tr><td>6.fk_IsType</td><td>6.SP_GSNameOnSS</td><td>0.SP_SCNameOnSS</td><td>0.fk_IsType.fk_HasClass</td></tr><tr><td>7.fk_IsType</td><td>7.SP_GSNameOnSS</td><td>8.SP_SCNameOnSS</td><td>5.fk_IsType.fk_HasClass</td></tr><tr><td>8.fk_IsType</td><td>8.SP_GSNameOnSS</td><td>8.SP_SCNameOnSS</td><td>5.fk_IsType.fk_HasClass</td></tr><tr><td>9.fk_IsType</td><td>9.SP_GSNameOnSS</td><td>8.SP_SCNameOnSS</td><td>5.fk_IsType.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Person</th><th>SP_PName</th></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SP_SCName</th><th>ST_SCName</th></tr><tr><td>0.fk_IsType.fk_HasClass</td><td>0.SP_SCNameOnSS</td><td>Social</td></tr><tr><td>2.fk_IsType.fk_HasClass</td><td>3.SP_SCNameOnSS</td><td>Psychomotor</td></tr><tr><td>5.fk_IsType.fk_HasClass</td><td>8.SP_SCNameOnSS</td><td>Cognitive</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillNdFrTask</th><th>ST_SCNameOnSnT</th><th>ST_SNameOnSnT</th><th>ST_TNameOnSnT</th><th>fk_ForTask</th><th>fk_SkillNeeded</th></tr><tr><td>23</td><td>Social</td><td>Pharma</td><td>BuildPhrmColim</td><td>10</td><td>6</td></tr><tr><td>24</td><td>Cognitive</td><td>Programming</td><td>BuildPhrmColim</td><td>10</td><td>9</td></tr><tr><td>25</td><td>Social</td><td>Management</td><td>RunFncIntProject</td><td>11</td><td>0</td></tr><tr><td>26</td><td>Social</td><td>Finance</td><td>RunFncIntProject</td><td>11</td><td>1</td></tr><tr><td>27</td><td>Psychomotor</td><td>PaperWriting</td><td>WriteAQLTutorial</td><td>12</td><td>2</td></tr><tr><td>28</td><td>Social</td><td>Lecturing</td><td>WriteAQLTutorial</td><td>12</td><td>4</td></tr><tr><td>29</td><td>Cognitive</td><td>Programming</td><td>WriteAQLTutorial</td><td>12</td><td>9</td></tr><tr><td>30</td><td>Social</td><td>Lecturing</td><td>TeachCT</td><td>13</td><td>4</td></tr><tr><td>31</td><td>Cognitive</td><td>CategoryTheory</td><td>TeachCT</td><td>13</td><td>7</td></tr><tr><td>32</td><td>Social</td><td>Management</td><td>RunPhrmIntProject</td><td>14</td><td>0</td></tr><tr><td>33</td><td>Social</td><td>Pharma</td><td>RunPhrmIntProject</td><td>14</td><td>6</td></tr><tr><td>34</td><td>Social</td><td>Management</td><td>BuildAQL</td><td>15</td><td>0</td></tr><tr><td>35</td><td>Cognitive</td><td>CompSci</td><td>BuildAQL</td><td>15</td><td>8</td></tr><tr><td>36</td><td>Cognitive</td><td>Programming</td><td>BuildAQL</td><td>15</td><td>9</td></tr><tr><td>37</td><td>Psychomotor</td><td>PaperWriting</td><td>LaunchCIStartup</td><td>16</td><td>2</td></tr><tr><td>38</td><td>Psychomotor</td><td>GrantWriting</td><td>LaunchCIStartup</td><td>16</td><td>3</td></tr><tr><td>39</td><td>Cognitive</td><td>CompSci</td><td>LaunchCIStartup</td><td>16</td><td>8</td></tr><tr><td>40</td><td>Cognitive</td><td>Programming</td><td>LaunchCIStartup</td><td>16</td><td>9</td></tr><tr><td>41</td><td>Psychomotor</td><td>PaperWriting</td><td>WriteCTPaper</td><td>17</td><td>2</td></tr><tr><td>42</td><td>Cognitive</td><td>CategoryTheory</td><td>WriteCTPaper</td><td>17</td><td>7</td></tr><tr><td>43</td><td>Social</td><td>Finance</td><td>BuildFncColim</td><td>18</td><td>1</td></tr><tr><td>44</td><td>Cognitive</td><td>Programming</td><td>BuildFncColim</td><td>18</td><td>9</td></tr><tr><td>45</td><td>Social</td><td>Lecturing</td><td>TeachCS</td><td>19</td><td>4</td></tr><tr><td>46</td><td>Cognitive</td><td>CompSci</td><td>TeachCS</td><td>19</td><td>8</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillPrvdByPerson</th><th>SP_PNameOnSnP</th><th>SP_SNameOnSnP</th><th>fk_SpP_P</th><th>fk_SpP_S</th></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SpecificSkill</th><th>SP_GSNameOnSS</th><th>SP_SCNameOnSS</th><th>SP_SSName</th><th>ST_SCNameOnSS</th><th>ST_SklName</th><th>fk_IsType</th></tr><tr><td>0</td><td>0.SP_GSNameOnSS</td><td>0.SP_SCNameOnSS</td><td>0.SP_SSName</td><td>Social</td><td>Management</td><td>0.fk_IsType</td></tr><tr><td>1</td><td>1.SP_GSNameOnSS</td><td>0.SP_SCNameOnSS</td><td>1.SP_SSName</td><td>Social</td><td>Finance</td><td>1.fk_IsType</td></tr><tr><td>2</td><td>2.SP_GSNameOnSS</td><td>3.SP_SCNameOnSS</td><td>2.SP_SSName</td><td>Psychomotor</td><td>PaperWriting</td><td>2.fk_IsType</td></tr><tr><td>3</td><td>3.SP_GSNameOnSS</td><td>3.SP_SCNameOnSS</td><td>3.SP_SSName</td><td>Psychomotor</td><td>GrantWriting</td><td>3.fk_IsType</td></tr><tr><td>4</td><td>4.SP_GSNameOnSS</td><td>0.SP_SCNameOnSS</td><td>4.SP_SSName</td><td>Social</td><td>Lecturing</td><td>4.fk_IsType</td></tr><tr><td>5</td><td>5.SP_GSNameOnSS</td><td>8.SP_SCNameOnSS</td><td>5.SP_SSName</td><td>Cognitive</td><td>DBA</td><td>5.fk_IsType</td></tr><tr><td>6</td><td>6.SP_GSNameOnSS</td><td>0.SP_SCNameOnSS</td><td>6.SP_SSName</td><td>Social</td><td>Pharma</td><td>6.fk_IsType</td></tr><tr><td>7</td><td>7.SP_GSNameOnSS</td><td>8.SP_SCNameOnSS</td><td>7.SP_SSName</td><td>Cognitive</td><td>CategoryTheory</td><td>7.fk_IsType</td></tr><tr><td>8</td><td>8.SP_GSNameOnSS</td><td>8.SP_SCNameOnSS</td><td>8.SP_SSName</td><td>Cognitive</td><td>CompSci</td><td>8.fk_IsType</td></tr><tr><td>9</td><td>9.SP_GSNameOnSS</td><td>8.SP_SCNameOnSS</td><td>9.SP_SSName</td><td>Cognitive</td><td>Programming</td><td>9.fk_IsType</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Task</th><th>ST_TName</th></tr><tr><td>10</td><td>BuildPhrmColim</td></tr><tr><td>11</td><td>RunFncIntProject</td></tr><tr><td>12</td><td>WriteAQLTutorial</td></tr><tr><td>13</td><td>TeachCT</td></tr><tr><td>14</td><td>RunPhrmIntProject</td></tr><tr><td>15</td><td>BuildAQL</td></tr><tr><td>16</td><td>LaunchCIStartup</td></tr><tr><td>17</td><td>WriteCTPaper</td></tr><tr><td>18</td><td>BuildFncColim</td></tr><tr><td>19</td><td>TeachCS</td></tr></table></div><br style="clear:both;"/>
+<p>As you can see by inspecting the runtime result we have loaded the instance <code>iSTSpnImp</code> into the
+assembled schema we created using the colimit. Since there are entities in the colimit schema
+not present in <code>sSTSpn</code>. You will notice that some entities are empty; in particular, those
+entities that arose from <code>sSPSpn</code>. There are also Skolum terms that are generated due to the
+introduction <code>GeneralSkill</code> referenced by <code>SpecialSkill</code> not present in <code>sSTSpn</code>.</p>
+<p>Let's close the loop using delta right adjoint to sigma. We present the instance generated by
+sigma above to delta at the same map. We have pushed <code>iSTSpnImp</code> forward through sigma and then
+pulled the result back through the same schema map.</p>
+
+<pre>
+instance iSgmDltSTSpnImp = delta mSTSpnToSTSpn_SPSpn_CoLim iSTSpnImpInCoLim
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr><tr><td>Skill 0</td><td>Social</td><td>Management</td><td>SkillClass 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 1</td><td>Social</td><td>Finance</td><td>SkillClass 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 2</td><td>Psychomotor</td><td>PaperWriting</td><td>SkillClass 2.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 3</td><td>Psychomotor</td><td>GrantWriting</td><td>SkillClass 2.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 4</td><td>Social</td><td>Lecturing</td><td>SkillClass 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 5</td><td>Cognitive</td><td>DBA</td><td>SkillClass 5.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 6</td><td>Social</td><td>Pharma</td><td>SkillClass 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 7</td><td>Cognitive</td><td>CategoryTheory</td><td>SkillClass 5.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 8</td><td>Cognitive</td><td>CompSci</td><td>SkillClass 5.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 9</td><td>Cognitive</td><td>Programming</td><td>SkillClass 5.fk_IsType.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>SkillClass 0.fk_IsType.fk_HasClass</td><td>Social</td></tr><tr><td>SkillClass 2.fk_IsType.fk_HasClass</td><td>Psychomotor</td></tr><tr><td>SkillClass 5.fk_IsType.fk_HasClass</td><td>Cognitive</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillNdFrTask</th><th>skill</th><th>skillclass</th><th>task</th><th>fk_ForTask</th><th>fk_SkillNeeded</th></tr><tr><td>SkillNdFrTask 23</td><td>Pharma</td><td>Social</td><td>BuildPhrmColim</td><td>Task 10</td><td>Skill 6</td></tr><tr><td>SkillNdFrTask 24</td><td>Programming</td><td>Cognitive</td><td>BuildPhrmColim</td><td>Task 10</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 25</td><td>Management</td><td>Social</td><td>RunFncIntProject</td><td>Task 11</td><td>Skill 0</td></tr><tr><td>SkillNdFrTask 26</td><td>Finance</td><td>Social</td><td>RunFncIntProject</td><td>Task 11</td><td>Skill 1</td></tr><tr><td>SkillNdFrTask 27</td><td>PaperWriting</td><td>Psychomotor</td><td>WriteAQLTutorial</td><td>Task 12</td><td>Skill 2</td></tr><tr><td>SkillNdFrTask 28</td><td>Lecturing</td><td>Social</td><td>WriteAQLTutorial</td><td>Task 12</td><td>Skill 4</td></tr><tr><td>SkillNdFrTask 29</td><td>Programming</td><td>Cognitive</td><td>WriteAQLTutorial</td><td>Task 12</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 30</td><td>Lecturing</td><td>Social</td><td>TeachCT</td><td>Task 13</td><td>Skill 4</td></tr><tr><td>SkillNdFrTask 31</td><td>CategoryTheory</td><td>Cognitive</td><td>TeachCT</td><td>Task 13</td><td>Skill 7</td></tr><tr><td>SkillNdFrTask 32</td><td>Management</td><td>Social</td><td>RunPhrmIntProject</td><td>Task 14</td><td>Skill 0</td></tr><tr><td>SkillNdFrTask 33</td><td>Pharma</td><td>Social</td><td>RunPhrmIntProject</td><td>Task 14</td><td>Skill 6</td></tr><tr><td>SkillNdFrTask 34</td><td>Management</td><td>Social</td><td>BuildAQL</td><td>Task 15</td><td>Skill 0</td></tr><tr><td>SkillNdFrTask 35</td><td>CompSci</td><td>Cognitive</td><td>BuildAQL</td><td>Task 15</td><td>Skill 8</td></tr><tr><td>SkillNdFrTask 36</td><td>Programming</td><td>Cognitive</td><td>BuildAQL</td><td>Task 15</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 37</td><td>PaperWriting</td><td>Psychomotor</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 2</td></tr><tr><td>SkillNdFrTask 38</td><td>GrantWriting</td><td>Psychomotor</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 3</td></tr><tr><td>SkillNdFrTask 39</td><td>CompSci</td><td>Cognitive</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 8</td></tr><tr><td>SkillNdFrTask 40</td><td>Programming</td><td>Cognitive</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 41</td><td>PaperWriting</td><td>Psychomotor</td><td>WriteCTPaper</td><td>Task 17</td><td>Skill 2</td></tr><tr><td>SkillNdFrTask 42</td><td>CategoryTheory</td><td>Cognitive</td><td>WriteCTPaper</td><td>Task 17</td><td>Skill 7</td></tr><tr><td>SkillNdFrTask 43</td><td>Finance</td><td>Social</td><td>BuildFncColim</td><td>Task 18</td><td>Skill 1</td></tr><tr><td>SkillNdFrTask 44</td><td>Programming</td><td>Cognitive</td><td>BuildFncColim</td><td>Task 18</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 45</td><td>Lecturing</td><td>Social</td><td>TeachCS</td><td>Task 19</td><td>Skill 4</td></tr><tr><td>SkillNdFrTask 46</td><td>CompSci</td><td>Cognitive</td><td>TeachCS</td><td>Task 19</td><td>Skill 8</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Task</th><th>TName</th></tr><tr><td>Task 10</td><td>BuildPhrmColim</td></tr><tr><td>Task 11</td><td>RunFncIntProject</td></tr><tr><td>Task 12</td><td>WriteAQLTutorial</td></tr><tr><td>Task 13</td><td>TeachCT</td></tr><tr><td>Task 14</td><td>RunPhrmIntProject</td></tr><tr><td>Task 15</td><td>BuildAQL</td></tr><tr><td>Task 16</td><td>LaunchCIStartup</td></tr><tr><td>Task 17</td><td>WriteCTPaper</td></tr><tr><td>Task 18</td><td>BuildFncColim</td></tr><tr><td>Task 19</td><td>TeachCS</td></tr></table></div><br style="clear:both;"/>
+<p>We see an instance that looks the same as <code>iSTSpnImp</code> originally imported. Intuitively we can think
+of this as delta projecting the part of the colimit schema instance back into the schema from
+which it came. It should not be surprising that this would yield the identity. This can be
+verified by looking at the unit transform and comparing it to the identity transform.</p>
+
+<pre>
+transform tUnit = unit mSTSpnToSTSpn_SPSpn_CoLim iSTSpnImp
+</pre>
+<pre>
+transform tIdSTSpnImp = id iSTSpnImp
+</pre>
+<p>The <code>SkillClass</code> transform output is not immediately obviously the identity, but if you unravel the
+provenance you will find that it is. Start by looking at instance <code>iSTSpnImp</code> and you will see for
+entity Skill:</p>
+<pre><code>ID     SCNameOnSkl    fk_HasClass
+---    -----------    -----------
+100    Cognitive      122
+...    ...            ...
+102    Social         120
+...    ...            ...
+105    Psychomotor    121
+</code></pre>
+<p>Now look at the result of the quotient on the schema colimit in any of the three instances above,
+say <code>iSTSpn_SPSpn_Merge3</code>. Specifically the <code>SkillClass</code> entity:</p>
+<pre><code>ID                             ST_SCName
+---------------------------    -----------
+[100.fk_IsType.fk_HasClass]    Cognitive
+[102.fk_IsType.fk_HasClass]    Social
+[105.fk_IsType.fk_HasClass]    Psychomotor
+</code></pre>
+<p>Finally look at the instance <code>iSgmDltSTSpnImp</code> and you will see for <code>SkillClass</code>:</p>
+<pre><code>ID                                         ST_SCName
+---------------------------------------    -----------
+&lt;SkillClass[100.fk_IsType.fk_HasClass]&gt;    Cognitive
+&lt;SkillClass[102.fk_IsType.fk_HasClass]&gt;    Social
+&lt;SkillClass[105.fk_IsType.fk_HasClass]&gt;    Psychomotor
+</code></pre>
+<p>We can conclude:</p>
+<pre><code>&lt;SkillClass[100.fk_IsType.fk_HasClass]&gt;    -&gt; 122
+&lt;SkillClass[102.fk_IsType.fk_HasClass]&gt;    -&gt; 120
+&lt;SkillClass[105.fk_IsType.fk_HasClass]&gt;    -&gt; 121 
+</code></pre>
+<p>Let's try the other direction. We start with the merged instance in the schema colimit and use
+delta to project back through the mapping that inserted the schema <code>sSTSpn</code> into the schema
+colimit. As you would expect you loose almost all of the data that was supplied by <code>iSPSpnImp</code>. We
+now have 11 skills rather than the 10 skills provided by <code>iSTSpnImp</code> and so have picked up an
+dditional Skolum term due to the "dancing" skill that came from <code>iSPSpnImp</code>.</p>
+
+<pre>
+instance iCoLimInSTSpn = delta mSTSpnToSTSpn_SPSpn_CoLim iSTSpn_SPSpn_Merge2
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Skill</th><th>SCNameOnSkl</th><th>SName</th><th>fk_HasClass</th></tr><tr><td>Skill 0</td><td>Social</td><td>Management</td><td>SkillClass 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 1</td><td>Social</td><td>Finance</td><td>SkillClass 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 2</td><td>Psychomotor</td><td>PaperWriting</td><td>SkillClass 2.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 3</td><td>Psychomotor</td><td>GrantWriting</td><td>SkillClass 2.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 4</td><td>Social</td><td>Lecturing</td><td>SkillClass 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 5</td><td>Cognitive</td><td>DBA</td><td>SkillClass 5.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 6</td><td>Social</td><td>Pharma</td><td>SkillClass 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 7</td><td>Cognitive</td><td>CategoryTheory</td><td>SkillClass 5.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 8</td><td>Cognitive</td><td>CompSci</td><td>SkillClass 5.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 9</td><td>Cognitive</td><td>Programming</td><td>SkillClass 5.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 76</td><td>Psychomotor</td><td>76.ST_SklName</td><td>SkillClass 2.fk_IsType.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SCName</th></tr><tr><td>SkillClass 0.fk_IsType.fk_HasClass</td><td>Social</td></tr><tr><td>SkillClass 2.fk_IsType.fk_HasClass</td><td>Psychomotor</td></tr><tr><td>SkillClass 5.fk_IsType.fk_HasClass</td><td>Cognitive</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillNdFrTask</th><th>skill</th><th>skillclass</th><th>task</th><th>fk_ForTask</th><th>fk_SkillNeeded</th></tr><tr><td>SkillNdFrTask 23</td><td>Pharma</td><td>Social</td><td>BuildPhrmColim</td><td>Task 10</td><td>Skill 6</td></tr><tr><td>SkillNdFrTask 24</td><td>Programming</td><td>Cognitive</td><td>BuildPhrmColim</td><td>Task 10</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 25</td><td>Management</td><td>Social</td><td>RunFncIntProject</td><td>Task 11</td><td>Skill 0</td></tr><tr><td>SkillNdFrTask 26</td><td>Finance</td><td>Social</td><td>RunFncIntProject</td><td>Task 11</td><td>Skill 1</td></tr><tr><td>SkillNdFrTask 27</td><td>PaperWriting</td><td>Psychomotor</td><td>WriteAQLTutorial</td><td>Task 12</td><td>Skill 2</td></tr><tr><td>SkillNdFrTask 28</td><td>Lecturing</td><td>Social</td><td>WriteAQLTutorial</td><td>Task 12</td><td>Skill 4</td></tr><tr><td>SkillNdFrTask 29</td><td>Programming</td><td>Cognitive</td><td>WriteAQLTutorial</td><td>Task 12</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 30</td><td>Lecturing</td><td>Social</td><td>TeachCT</td><td>Task 13</td><td>Skill 4</td></tr><tr><td>SkillNdFrTask 31</td><td>CategoryTheory</td><td>Cognitive</td><td>TeachCT</td><td>Task 13</td><td>Skill 7</td></tr><tr><td>SkillNdFrTask 32</td><td>Management</td><td>Social</td><td>RunPhrmIntProject</td><td>Task 14</td><td>Skill 0</td></tr><tr><td>SkillNdFrTask 33</td><td>Pharma</td><td>Social</td><td>RunPhrmIntProject</td><td>Task 14</td><td>Skill 6</td></tr><tr><td>SkillNdFrTask 34</td><td>Management</td><td>Social</td><td>BuildAQL</td><td>Task 15</td><td>Skill 0</td></tr><tr><td>SkillNdFrTask 35</td><td>CompSci</td><td>Cognitive</td><td>BuildAQL</td><td>Task 15</td><td>Skill 8</td></tr><tr><td>SkillNdFrTask 36</td><td>Programming</td><td>Cognitive</td><td>BuildAQL</td><td>Task 15</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 37</td><td>PaperWriting</td><td>Psychomotor</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 2</td></tr><tr><td>SkillNdFrTask 38</td><td>GrantWriting</td><td>Psychomotor</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 3</td></tr><tr><td>SkillNdFrTask 39</td><td>CompSci</td><td>Cognitive</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 8</td></tr><tr><td>SkillNdFrTask 40</td><td>Programming</td><td>Cognitive</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 41</td><td>PaperWriting</td><td>Psychomotor</td><td>WriteCTPaper</td><td>Task 17</td><td>Skill 2</td></tr><tr><td>SkillNdFrTask 42</td><td>CategoryTheory</td><td>Cognitive</td><td>WriteCTPaper</td><td>Task 17</td><td>Skill 7</td></tr><tr><td>SkillNdFrTask 43</td><td>Finance</td><td>Social</td><td>BuildFncColim</td><td>Task 18</td><td>Skill 1</td></tr><tr><td>SkillNdFrTask 44</td><td>Programming</td><td>Cognitive</td><td>BuildFncColim</td><td>Task 18</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 45</td><td>Lecturing</td><td>Social</td><td>TeachCS</td><td>Task 19</td><td>Skill 4</td></tr><tr><td>SkillNdFrTask 46</td><td>CompSci</td><td>Cognitive</td><td>TeachCS</td><td>Task 19</td><td>Skill 8</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Task</th><th>TName</th></tr><tr><td>Task 10</td><td>BuildPhrmColim</td></tr><tr><td>Task 11</td><td>RunFncIntProject</td></tr><tr><td>Task 12</td><td>WriteAQLTutorial</td></tr><tr><td>Task 13</td><td>TeachCT</td></tr><tr><td>Task 14</td><td>RunPhrmIntProject</td></tr><tr><td>Task 15</td><td>BuildAQL</td></tr><tr><td>Task 16</td><td>LaunchCIStartup</td></tr><tr><td>Task 17</td><td>WriteCTPaper</td></tr><tr><td>Task 18</td><td>BuildFncColim</td></tr><tr><td>Task 19</td><td>TeachCS</td></tr></table></div><br style="clear:both;"/>
+<p>Sigma then pushes this projected instance back into the schema colimit and we end up with an
+instance that looks like the one sigma pushed forward from <code>iSTSpnImp</code> but with the extra skill
+record. The round trip has eliminated all traces of <code>iSTSpn_SPSpn_Merge3</code> that came from <code>iSPSpnImp</code>
+except the record that additional "Dancing" skill that is now Skolumized.</p>
+
+<pre>
+instance iDltSgmCoLim = sigma mSTSpnToSTSpn_SPSpn_CoLim iCoLimInSTSpn
+</pre>
+<div><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>GeneralSkill</th><th>SP_GSName</th><th>SP_SCNameOnGS</th><th>fk_HasClass</th></tr><tr><td>Skill 0.fk_IsType</td><td>Skill 0.SP_GSNameOnSS</td><td>Skill 1.SP_SCNameOnSS</td><td>Skill 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 1.fk_IsType</td><td>Skill 1.SP_GSNameOnSS</td><td>Skill 1.SP_SCNameOnSS</td><td>Skill 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 2.fk_IsType</td><td>Skill 2.SP_GSNameOnSS</td><td>Skill 76.SP_SCNameOnSS</td><td>Skill 3.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 3.fk_IsType</td><td>Skill 3.SP_GSNameOnSS</td><td>Skill 76.SP_SCNameOnSS</td><td>Skill 3.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 4.fk_IsType</td><td>Skill 4.SP_GSNameOnSS</td><td>Skill 1.SP_SCNameOnSS</td><td>Skill 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 5.fk_IsType</td><td>Skill 5.SP_GSNameOnSS</td><td>Skill 8.SP_SCNameOnSS</td><td>Skill 8.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 6.fk_IsType</td><td>Skill 6.SP_GSNameOnSS</td><td>Skill 1.SP_SCNameOnSS</td><td>Skill 0.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 7.fk_IsType</td><td>Skill 7.SP_GSNameOnSS</td><td>Skill 8.SP_SCNameOnSS</td><td>Skill 8.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 8.fk_IsType</td><td>Skill 8.SP_GSNameOnSS</td><td>Skill 8.SP_SCNameOnSS</td><td>Skill 8.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 9.fk_IsType</td><td>Skill 9.SP_GSNameOnSS</td><td>Skill 8.SP_SCNameOnSS</td><td>Skill 8.fk_IsType.fk_HasClass</td></tr><tr><td>Skill 76.fk_IsType</td><td>Skill 76.SP_GSNameOnSS</td><td>Skill 76.SP_SCNameOnSS</td><td>Skill 3.fk_IsType.fk_HasClass</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Person</th><th>SP_PName</th></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillClass</th><th>SP_SCName</th><th>ST_SCName</th></tr><tr><td>Skill 0.fk_IsType.fk_HasClass</td><td>Skill 1.SP_SCNameOnSS</td><td>Social</td></tr><tr><td>Skill 3.fk_IsType.fk_HasClass</td><td>Skill 76.SP_SCNameOnSS</td><td>Psychomotor</td></tr><tr><td>Skill 8.fk_IsType.fk_HasClass</td><td>Skill 8.SP_SCNameOnSS</td><td>Cognitive</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillNdFrTask</th><th>ST_SCNameOnSnT</th><th>ST_SNameOnSnT</th><th>ST_TNameOnSnT</th><th>fk_ForTask</th><th>fk_SkillNeeded</th></tr><tr><td>SkillNdFrTask 23</td><td>Social</td><td>Pharma</td><td>BuildPhrmColim</td><td>Task 10</td><td>Skill 6</td></tr><tr><td>SkillNdFrTask 24</td><td>Cognitive</td><td>Programming</td><td>BuildPhrmColim</td><td>Task 10</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 25</td><td>Social</td><td>Management</td><td>RunFncIntProject</td><td>Task 11</td><td>Skill 0</td></tr><tr><td>SkillNdFrTask 26</td><td>Social</td><td>Finance</td><td>RunFncIntProject</td><td>Task 11</td><td>Skill 1</td></tr><tr><td>SkillNdFrTask 27</td><td>Psychomotor</td><td>PaperWriting</td><td>WriteAQLTutorial</td><td>Task 12</td><td>Skill 2</td></tr><tr><td>SkillNdFrTask 28</td><td>Social</td><td>Lecturing</td><td>WriteAQLTutorial</td><td>Task 12</td><td>Skill 4</td></tr><tr><td>SkillNdFrTask 29</td><td>Cognitive</td><td>Programming</td><td>WriteAQLTutorial</td><td>Task 12</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 30</td><td>Social</td><td>Lecturing</td><td>TeachCT</td><td>Task 13</td><td>Skill 4</td></tr><tr><td>SkillNdFrTask 31</td><td>Cognitive</td><td>CategoryTheory</td><td>TeachCT</td><td>Task 13</td><td>Skill 7</td></tr><tr><td>SkillNdFrTask 32</td><td>Social</td><td>Management</td><td>RunPhrmIntProject</td><td>Task 14</td><td>Skill 0</td></tr><tr><td>SkillNdFrTask 33</td><td>Social</td><td>Pharma</td><td>RunPhrmIntProject</td><td>Task 14</td><td>Skill 6</td></tr><tr><td>SkillNdFrTask 34</td><td>Social</td><td>Management</td><td>BuildAQL</td><td>Task 15</td><td>Skill 0</td></tr><tr><td>SkillNdFrTask 35</td><td>Cognitive</td><td>CompSci</td><td>BuildAQL</td><td>Task 15</td><td>Skill 8</td></tr><tr><td>SkillNdFrTask 36</td><td>Cognitive</td><td>Programming</td><td>BuildAQL</td><td>Task 15</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 37</td><td>Psychomotor</td><td>PaperWriting</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 2</td></tr><tr><td>SkillNdFrTask 38</td><td>Psychomotor</td><td>GrantWriting</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 3</td></tr><tr><td>SkillNdFrTask 39</td><td>Cognitive</td><td>CompSci</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 8</td></tr><tr><td>SkillNdFrTask 40</td><td>Cognitive</td><td>Programming</td><td>LaunchCIStartup</td><td>Task 16</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 41</td><td>Psychomotor</td><td>PaperWriting</td><td>WriteCTPaper</td><td>Task 17</td><td>Skill 2</td></tr><tr><td>SkillNdFrTask 42</td><td>Cognitive</td><td>CategoryTheory</td><td>WriteCTPaper</td><td>Task 17</td><td>Skill 7</td></tr><tr><td>SkillNdFrTask 43</td><td>Social</td><td>Finance</td><td>BuildFncColim</td><td>Task 18</td><td>Skill 1</td></tr><tr><td>SkillNdFrTask 44</td><td>Cognitive</td><td>Programming</td><td>BuildFncColim</td><td>Task 18</td><td>Skill 9</td></tr><tr><td>SkillNdFrTask 45</td><td>Social</td><td>Lecturing</td><td>TeachCS</td><td>Task 19</td><td>Skill 4</td></tr><tr><td>SkillNdFrTask 46</td><td>Cognitive</td><td>CompSci</td><td>TeachCS</td><td>Task 19</td><td>Skill 8</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SkillPrvdByPerson</th><th>SP_PNameOnSnP</th><th>SP_SNameOnSnP</th><th>fk_SpP_P</th><th>fk_SpP_S</th></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>SpecificSkill</th><th>SP_GSNameOnSS</th><th>SP_SCNameOnSS</th><th>SP_SSName</th><th>ST_SCNameOnSS</th><th>ST_SklName</th><th>fk_IsType</th></tr><tr><td>Skill 0</td><td>Skill 0.SP_GSNameOnSS</td><td>Skill 1.SP_SCNameOnSS</td><td>Skill 0.SP_SSName</td><td>Social</td><td>Management</td><td>Skill 0.fk_IsType</td></tr><tr><td>Skill 1</td><td>Skill 1.SP_GSNameOnSS</td><td>Skill 1.SP_SCNameOnSS</td><td>Skill 1.SP_SSName</td><td>Social</td><td>Finance</td><td>Skill 1.fk_IsType</td></tr><tr><td>Skill 2</td><td>Skill 2.SP_GSNameOnSS</td><td>Skill 76.SP_SCNameOnSS</td><td>Skill 2.SP_SSName</td><td>Psychomotor</td><td>PaperWriting</td><td>Skill 2.fk_IsType</td></tr><tr><td>Skill 3</td><td>Skill 3.SP_GSNameOnSS</td><td>Skill 76.SP_SCNameOnSS</td><td>Skill 3.SP_SSName</td><td>Psychomotor</td><td>GrantWriting</td><td>Skill 3.fk_IsType</td></tr><tr><td>Skill 4</td><td>Skill 4.SP_GSNameOnSS</td><td>Skill 1.SP_SCNameOnSS</td><td>Skill 4.SP_SSName</td><td>Social</td><td>Lecturing</td><td>Skill 4.fk_IsType</td></tr><tr><td>Skill 5</td><td>Skill 5.SP_GSNameOnSS</td><td>Skill 8.SP_SCNameOnSS</td><td>Skill 5.SP_SSName</td><td>Cognitive</td><td>DBA</td><td>Skill 5.fk_IsType</td></tr><tr><td>Skill 6</td><td>Skill 6.SP_GSNameOnSS</td><td>Skill 1.SP_SCNameOnSS</td><td>Skill 6.SP_SSName</td><td>Social</td><td>Pharma</td><td>Skill 6.fk_IsType</td></tr><tr><td>Skill 7</td><td>Skill 7.SP_GSNameOnSS</td><td>Skill 8.SP_SCNameOnSS</td><td>Skill 7.SP_SSName</td><td>Cognitive</td><td>CategoryTheory</td><td>Skill 7.fk_IsType</td></tr><tr><td>Skill 8</td><td>Skill 8.SP_GSNameOnSS</td><td>Skill 8.SP_SCNameOnSS</td><td>Skill 8.SP_SSName</td><td>Cognitive</td><td>CompSci</td><td>Skill 8.fk_IsType</td></tr><tr><td>Skill 9</td><td>Skill 9.SP_GSNameOnSS</td><td>Skill 8.SP_SCNameOnSS</td><td>Skill 9.SP_SSName</td><td>Cognitive</td><td>Programming</td><td>Skill 9.fk_IsType</td></tr><tr><td>Skill 76</td><td>Skill 76.SP_GSNameOnSS</td><td>Skill 76.SP_SCNameOnSS</td><td>Skill 76.SP_SSName</td><td>Psychomotor</td><td>Skill 76.ST_SklName</td><td>Skill 76.fk_IsType</td></tr></table><table style="float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px" border="1"  cellpadding="3"><tr><th>Task</th><th>ST_TName</th></tr><tr><td>Task 10</td><td>BuildPhrmColim</td></tr><tr><td>Task 11</td><td>RunFncIntProject</td></tr><tr><td>Task 12</td><td>WriteAQLTutorial</td></tr><tr><td>Task 13</td><td>TeachCT</td></tr><tr><td>Task 14</td><td>RunPhrmIntProject</td></tr><tr><td>Task 15</td><td>BuildAQL</td></tr><tr><td>Task 16</td><td>LaunchCIStartup</td></tr><tr><td>Task 17</td><td>WriteCTPaper</td></tr><tr><td>Task 18</td><td>BuildFncColim</td></tr><tr><td>Task 19</td><td>TeachCS</td></tr></table></div><br style="clear:both;"/>
+<pre>
+transform tCounit = counit mSTSpnToSTSpn_SPSpn_CoLim iSTSpn_SPSpn_Merge2
+</pre>
+<p>The counit transform injects <code>iDltSgmColim</code> back into the merged instance <code>iSTSpn_SPSpn_Merge3</code>.</p>
+
+<p>Additional work that could be added to this tutorial in a later release:</p>
+<ol>
+<li><p>Examples of how relational nulls are handled when imported into AQL. This could be done
+easily by creating an alternative to <code>iS_T_SnT_Sum</code> by replacing <code>iSklSklCls1</code> with <code>iSkl</code>.
+Following that repeat all dependent constructions to see how null values appear on export
+and then are translated when imported.</p>
+</li>
+<li><p>Follow the discussion above with additional constructions illustrating the connections
+between sigma, delta and pi and eval and coeval.</p>
+</li>
+<li><p>Develop some examples of how one can use uber flowers to create data warehouse marts.</p>
+</li>
+</ol>
+
+
