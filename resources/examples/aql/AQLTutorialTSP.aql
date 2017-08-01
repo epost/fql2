@@ -59,10 +59,7 @@ where the results of each construction will be displayed.
  15. sigma --| delta --| pi -- The machinery AQL uses to move data around the enterprise. 
      These mappings are the building blocks of the eval construction that moves data through 
      AQL queries.
-     	
-************************************************************************************************* 
-**I will add additional items as I complete the merging of the other files into this file.**
-*************************************************************************************************
+
 As we proceed we will draw analogies to relational constructions that may be more familiar to
 practicing database engineers. We open with a brief review of the essential features of
 relational algebra as they are related to AQL features.
@@ -169,7 +166,7 @@ md { (* "
 ---
 
 ## CATEGORIES INTRODUCED
-*Schemas as Categories*
+**Schemas as Categories**
 
 The third schema we introduce has two entities, `Skill` and `SkillClass` that define a simple two
 level taxonomy for skills. This brings into play additional sections as part of the declarative
@@ -246,7 +243,7 @@ binary operation of addition define a one object category. Each arrow of the cat
 counting number. Zero is the identity arrow. Addition is arrow composition.
 
 
-*Category Definition*
+**Category Definition**
 
 Here is a formal definition of a category following the presentation in Category Theory for 
 Computing Sciences chapter 2.
@@ -403,7 +400,7 @@ instance iSnT = literal : sSnT {
 
 
 md { (* "
-*Instance Categories*
+**Instance Categories**
 
 Like schemas, instances can also be viewed as categories. To make this clearer consider these
 alternative syntaxes for declaring an instance using the equations keyword. The following are
@@ -475,7 +472,7 @@ skill) to three (one for each equivalence class).
 " *) }
 
 md { (* "
-*The Category of Instances of a Schema*
+**The Category of Instances of a Schema**
 
 Now lets see if we can give these skill class labeled nulls labels. To do this we have to
 introduce another example of a category, the universe of possible instances that are all based on 
@@ -519,10 +516,6 @@ transform:
 for any `X` and any pair of transforms `(t1, t2)`. What this means is that the pair of arrows `t1` and 
 `t2` can be replaced with the single arrow `t(t1,t2)`.
 
-*************************************************************************************************
-**                                      Add diagram here.                                      **
-*************************************************************************************************
-
 Conceptually this construction is a generalization of the SQL \"UNION ALL\" statement. It is a 
 generalization in that it applies to a pair of instances of a schema rather than a pair of 
 relations of a relvar. This construction is known as a coproduct. We say that `iA` and `iB` are 
@@ -560,10 +553,6 @@ coequalizer uses a pair of transforms to define collections of records that are 
 equal. This approach has the advantage that linking instances and transforms can be imported from 
 an external database using SQL queries.
 
-*************************************************************************************************
-**                                      Add diagram here.                                      **
-*************************************************************************************************
-
 This construction is a generalization of the notion of partitioning a set into equivalence
 classes. Later we will see how these constructions can be applied to other categories in AQL.
 " *) }
@@ -600,7 +589,7 @@ md { (* "
 ---
 
 ## AQL QUERIES
-*And the Category of Schemas*
+**And the Category of Schemas**
 
 The next example of a category we need is the category of schemas. Since a schema can be viewed
 as a presentation of a category the category of schemas is closely related to the category of
@@ -780,7 +769,7 @@ schema_colimit S_T_SnT_Sum = modify S_T_SnT_SumAuto {
 }
 
 md { (* "
-*Schema Colimit Diagram*
+**Schema Colimit Diagram**
 
 Recalling our earlier description of the instance coproduct which was a cospan of instances, a 
 schema coproduct is a cospan of schemas and as such includes a schema and a pair of structure
@@ -809,7 +798,7 @@ md { (* "
 ---
 
 ## Migrating Data Between Schemas
-*Sigma --| Delta --| Pi*
+**Sigma --| Delta --| Pi**
 
 Let's recap where we are. We have a set of three source schemas `sS`, `sT`, and `sSnT`, each with an
 instance; `iSklSklCls1`, `iTsk`, and `iSnT` respectively. We have a target schema `sS_T_SnT_Sum`. We also
