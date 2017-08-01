@@ -142,7 +142,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			List<String> temp = new LinkedList<>();
 			
 			if (!eqEn.isEmpty()) {
-				toString += "\tentity equations";
+				toString += "\tentity_equations";
 						
 				for (Quad<N, En, N, En> x : eqEn) {
 					temp.add(x.first + "." + x.second + " = " + x.third + "." + x.fourth);
@@ -152,7 +152,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			}
 			
 			if (!eqTerms2.isEmpty()) {
-				toString += "\tpath equations";
+				toString += "\tpath_equations";
 						
 				for (Pair<List<String>, List<String>> x : eqTerms2) {
 					temp.add(Util.sep(x.first, ".") + " = " + Util.sep(x.second, "."));
@@ -162,7 +162,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			}
 			
 			if (!eqTerms.isEmpty()) {
-				toString += "\trename attributes";
+				toString += "\tobservation_equations";
 						
 				for (Quad<String, String, RawTerm, RawTerm> x : eqTerms) {
 					temp.add("forall " + x.first + ". " + x.third + " = " + x.fourth);
@@ -638,38 +638,38 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 						
 			List<InteriorLabel<Object>> f = new LinkedList<>();
 			for (Pair<LocStr, String> p : ens) {
-				f.add(new InteriorLabel<>("rename entities", new Pair<>(p.first.str, p.second), p.first.loc,
+				f.add(new InteriorLabel<>("rename_entities", new Pair<>(p.first.str, p.second), p.first.loc,
 						x -> x.first + " -> " + x.second).conv());
 			}
-			raw.put("rename entities", f);
+			raw.put("rename_entities", f);
 			
 			f = new LinkedList<>();
 			for (Pair<LocStr, String> p : fks0) {
-				f.add(new InteriorLabel<>("rename fks", new Pair<>(p.first.str, p.second), p.first.loc,
+				f.add(new InteriorLabel<>("rename_fks", new Pair<>(p.first.str, p.second), p.first.loc,
 						x -> x.first + " -> " + x.second).conv());
 			}
-			raw.put("rename fks", f);
+			raw.put("rename_fks", f);
 			
 			f = new LinkedList<>();
 			for (Pair<LocStr, String> p : atts0) {
-				f.add(new InteriorLabel<>("rename atts", new Pair<>(p.first.str, p.second), p.first.loc,
+				f.add(new InteriorLabel<>("rename_atts", new Pair<>(p.first.str, p.second), p.first.loc,
 						x -> x.first + " -> " + x.second).conv());
 			}
-			raw.put("rename atts", f);
+			raw.put("rename_atts", f);
 			
 			f = new LinkedList<>();
 			for (Pair<LocStr, List<String>> p : fks) {
-				f.add(new InteriorLabel<>("remove fks", new Pair<>(p.first.str, p.second), p.first.loc,
+				f.add(new InteriorLabel<>("remove_fks", new Pair<>(p.first.str, p.second), p.first.loc,
 						x -> x.first + " -> " + Util.sep(x.second, ".")).conv());
 			}
-			raw.put("remove fks", f);
+			raw.put("remove_fks", f);
 			
 			f = new LinkedList<>();
 			for (Pair<LocStr, Triple<String, String, RawTerm>> p : atts) {
-				f.add(new InteriorLabel<>("remove atts", new Pair<>(p.first.str, p.second), p.first.loc,
+				f.add(new InteriorLabel<>("remove_atts", new Pair<>(p.first.str, p.second), p.first.loc,
 						x -> x.first + " -> \\" + x.second.first + ". " + x.second.third).conv());
 			}
-			raw.put("remove atts", f);
+			raw.put("remove_atts", f);
 		}
 
 

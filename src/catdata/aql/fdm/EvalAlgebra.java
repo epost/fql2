@@ -316,10 +316,12 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 				Pair<Collection<Fk1>, Collection<Att1>> l = this.Q.fksAndAttsOfWhere();
 				xx = I.schema().toSQL_srcIdxs(l);
 			} 
+			int startId = (Integer) options.get(AqlOption.jdbc_start_ids_at);
+			Pair<Map<X,Integer>, Map<Integer, X>> J = I.algebra().intifyX(startId);
 			if (persistentIndices()) {
-				conn = I.algebra().addIndices(xx);
+				conn = I.algebra().addIndices(J, xx);
 			} else {
-				conn = I.algebra().createAndLoad(xx);
+				conn = I.algebra().createAndLoad(xx, J);
 			}
 		} else {
 			this.Q = q;
@@ -366,7 +368,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		Collection<Row<En2, X>> ret = null; 
 		Integer k = maxTempSize();
 		if (useSql) {
-			Pair<List<Var>, Collection<Row<En2, X>>> ret2 = evalSql(en2, q, I, conn);
+			Pair<List<Var>, Collection<Row<En2, X>>> ret2 = evalSql(en2, q, I.algebra().intifyX((int)options.getOrDefault(AqlOption.jdbc_start_ids_at)), conn);
 			//TODO aql should also stop on max temp size?
 			return ret2;
 		} else {
@@ -383,7 +385,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 	
 	
 	private Pair<List<Var>, Collection<Row<En2, X>>> evalSql(En2 en2, Frozen<Ty, En1, Sym, Fk1, Att1> q,
-			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I, Connection conn) {
+			Pair<Map<X,Integer>, Map<Integer, X>> I, Connection conn) {
 		
 			if (q.gens.isEmpty()) {
 				Collection<Row<En2, X>> ret = new LinkedList<>();
@@ -398,7 +400,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 			while (rs.next()) {
 				Row<En2, X> r = new Row<>(en2);
 				for (Var v : order) {
-					X x = I.algebra().intifyX().second.get(rs.getInt(v.var)); 
+					X x = I.second.get(rs.getInt(v.var)); 
 					if (x == null) {
 						stmt.close();
 						rs.close();

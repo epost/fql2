@@ -238,9 +238,9 @@ public class AqlParser {
 
 				jdbcTrans = Parsers
 						.tuple(Parsers.tuple(token("export_jdbc_transform"), trans_ref.lazy()), ident, ident, ident,
-								options.between(token("{"), token("}")).optional())
+								Parsers.tuple(options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional()))
 						.map(x -> new PragmaExpToJdbcTrans(x.a.b, x.b, x.c, x.d,
-								x.e == null ? new LinkedList<>() : x.e)),
+								x.e.a == null ? new LinkedList<>() : x.e.a, x.e.b == null ? new LinkedList<>() : x.e.b)),
 
 				match = Parsers
 						.tuple(token("match"), ident.followedBy(token(":")), graph_ref.lazy().followedBy(token("->")),

@@ -1,4 +1,10 @@
-html { (* "<link rel=\"stylesheet\" type=\"text/css\" href=\"http://www.catinf.com/css/simple.css\" />" *) }
+html { (* "
+<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> 
+ <html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">
+ <body>
+" *) }
+
+html { (* "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://categoricaldata.net/css/simple.css\" />" *) }
 
 md { (* "
 
@@ -7,6 +13,22 @@ md { (* "
 
 ---
 
+" *) }
+
+md { (* "
+## PREFACE - AQL and SQL
+
+This AQL file interacts with a MySQL database running on <a href=\"http://catinf.com\">catinf.com</a>.  To run the tutorial, it
+is necessary to <a href=\"https://dev.mysql.com/downloads/connector/j/5.1.html\">download the
+MySQL JDBC driver</a>.  The following command (updated with
+the correct path to the MySQL JDBC driver jar file) then places that driver on the java classpath:
+	" *) }
+
+pragma setup_classpath = add_to_classpath {
+	"/Users/ryan/Desktop/mysql.jar"
+}
+
+md { (* "
 ## INTRODUCTION
 
 This file contains a sequence of models intended to illustrate the use of Algebraic Query
@@ -186,7 +208,7 @@ excellent introductions. Here are several such references:
   * _Category Theory_ by Steve Awodey
   * _Category Theory for Computing Science_ by Michael Barr and Charles Wells
   * _Category Theory for the Sciences_ By David Spivak
-  * _Conceptual Mathematics: A first introduction to categories_ by F. William Lawverer and Stephen
+  * _Conceptual Mathematics: A first introduction to categories_ by F. William Lawvere and Stephen
     H. Schanuel.
 
 We begin with an intuitive description of categories and identify specific concrete examples as 
@@ -258,7 +280,7 @@ length `n` in `C` is a sequence of arrows arranged head to tail as follows:
 
 " *) }
 
-/* Rendered using Javascript:*/
+/* Rendered using Javascript:
 html { (* "
 $$
 \\begin{CD}
@@ -267,6 +289,7 @@ $$
 $$
 " *)
 }
+*/
 
 md { (* "
 For any adjacent pair of arrows in such a path we must have `target(f_k)` = `source(f_k-1)`. Such
@@ -276,7 +299,8 @@ which we designate `C_n`.
 The definition of a category extends the definition of a directed graph:
 A category is a graph `C` together with two functions `c: C_2` -> `C_1` and `u: C_0 -> C_1` with
 properties `C-1` through `C-4` below. The function `c` we call composition, and if `(f, g)` is a
-composable pair, `c(f,g)` is written `f.g` and is called the composite of `f` followed by `g`. If `A` is an 
+composable pair, `c(f,g)` is written `f.g` and is called the composite of `f` followed by `g`. 
+If `A` is an 
 object of `C`, `u(A)` is denoted `id_A` or just `A`, which is called the identity of the object `A`.
 
   * C-1 The source of `f.g` is the source of `f` and the target of `f.g` is the target of `g`.
@@ -323,15 +347,15 @@ conceptualized as the data that \"fills\" a schema. Minimally, an instance consi
 generators for each entity in the schema. A generator is string used by AQL that serves to
 identify a particular record in an entity. The user can optionally create equational definitions 
 which associate the generator of one entity with that of another or a generator with an attribute 
-value. In the absence of such an association AQL will create what is called a Skolum term. Skolum 
+value. In the absence of such an association AQL will create what is called a Skolem term. Skolem 
 terms are essential for creating a database instance that can be formally defined and verified as 
-consistent. Skolum terms at a type are referred to as a labeled null. Skolum terms at an entity 
+consistent. Skolem terms at a type are referred to as a labeled null. Skolem terms at an entity 
 are referred to as a meaningless identifier. Notice that labeled nulls are very different than 
 nulls in currently available RDBMSs.
 
 Every null in AQL is typed by its associated generator and the path to the location in a schema 
 where a value is missing. For example, in the instance definition below we failed to provide any 
-generators for skill classes and so AQL created a Skolum term for each unknown skill class 
+generators for skill classes and so AQL created a Skolem term for each unknown skill class 
 beginning with a skill generator followed by the foreign key path. So for the Math skill there 
 is an unknown generator `s0.fk_HasClass` whose unknown name is `s0.fk_HasClass.SCName`.
 
@@ -425,11 +449,11 @@ both equivalent to the `sSkl` declaration above:
           SName(s9) = PaperWriting
     }
 
-The objects of an instance category are the generators plus the Skolum terms produced by those
+The objects of an instance category are the generators plus the Skolem terms produced by those
 generators. The arrows are either a foreign key evaluated at a generator/Skolum term or an 
 attribute evaluated at a generator/Skolum term. Like a schema the literal declaration of an 
 instance is a presentation of an instance category. As you will see when you run an AQL model 
-with a literal instance declaration AQL will fill Skolum terms as implied by the schema and the 
+with a literal instance declaration AQL will fill Skolem terms as implied by the schema and the 
 provided generators.
 
 Notice these equations declare instance arrows in a way that is closely analogous to an RDF 
@@ -464,10 +488,10 @@ instance iSklExt = literal : sS {
 }
 
 md { (* "
-Notice that each of the paths in the equations above have a direct correspondence with a Skolum 
-term. Hence, in contrast with traditional database NULL values, Skolum terms can be manipulated 
+Notice that each of the paths in the equations above have a direct correspondence with a Skolem 
+term. Hence, in contrast with traditional database NULL values, Skolem terms can be manipulated 
 in the same way any other value can be manipulated. If you compare `iSkl` and `iSklExt` in the 
-runtime GUI you will note that the number of Skolum terms has decreased from ten (one for each 
+runtime GUI you will note that the number of Skolem terms has decreased from ten (one for each 
 skill) to three (one for each equivalence class).
 " *) }
 
@@ -999,7 +1023,7 @@ This first sequence exports the `iSTSpn` created above. Exporting a JDBC instanc
 several sets of commands. First the export issues data definition (DDL) commands against the
 target RDBMS that create tables and foreign keys that are as close as possible to the associated
 AQL schema kind. The second sequence of commands inserts instance records into the tables just 
-created. Since this file can be executed several times we must first chech to see if
+created. Since this file can be executed several times we must first check to see if
 the table structure already exists and if so drop those tables. This task is performed using the
 pragma `pCleanUp`. In order to display the results of these commands the set of tables in the 
 target schema are listed using the `pShwTbls` pragma.
@@ -1015,7 +1039,7 @@ pragma pCleanUp = exec_jdbc "com.mysql.jdbc.Driver"
 
 md { (* "
 Export the results of the above construction of the span and its representative instance. The
-export_jdbc_instance defaults strings varchar(64). In this case we illustrate how that default 
+`export_jdbc_instance` defaults strings varchar(64). In this case we illustrate how that default 
 can be overridden using the varchar_length option.
 " *) }
 pragma eSTS = export_jdbc_instance iSTSpn "com.mysql.jdbc.Driver"
@@ -1043,8 +1067,8 @@ instance iSTSpnImp = import_jdbc "com.mysql.jdbc.Driver"
    SkillClass -> "select id, SCName from sts_SkillClass"
    Task -> "select id, TName from sts_Task"
    SkillNdFrTask -> "select id, fk_SkillNeeded, fk_ForTask, skill, task, skillclass from sts_SkillNdFrTask"
-options
-   always_reload = true
+//options
+  // always_reload = true -- why?
 }
 
 md { (* "
@@ -1092,8 +1116,8 @@ instance iSPSpnImp = import_jdbc "com.mysql.jdbc.Driver"
    SkillClass -> "select id, SCName from sps_SkillClass"
    Person -> "select id, PName from sps_Person"
    SkillPrvdByPerson -> "select id, fk_SpP_S, fk_SpP_P, skill, person from sps_SkillPrvdByPerson"
-options
-   always_reload = true
+//options
+  // always_reload = true - why?
 }
 
 md { (* "
@@ -1254,7 +1278,7 @@ Notice that this instance import is very different than the ones we used to impo
 are only importing the ids. In order to accomplish this we must first specify the `import_joined` 
 option as false. This allows us to import each attribute in a separate select statement. In this 
 case we are only interested in the generators and so only one select statement is specified for 
-each incomming entity. The second option we need to override is specify that we import the 
+each incoming entity. The second option we need to override is specify that we import the 
 instance as a theory. This incurs the theorem proving burden of a literal instance declaration 
 but allows for a partial specification of the instance. The consequence of these two options is 
 to allow us to import an instance that essentially the same as the literal `iSklLnk` instance
@@ -1272,8 +1296,8 @@ options
 md { (* "
 The pair of transform imports below like the instance transform above are restricted to record
 ids. It may be instructive to compare the results of the `iSkillMatch` instance and `tSMToSTSpn` and 
-`tSMToSPSpn` transforms with the literal `iSLnk` instance and the literial `tS1` and `tS2` transforms we
-created to merge skill class Skolum terms with skill class generators and labels.
+`tSMToSPSpn` transforms with the literal `iSLnk` instance and the literal `tS1` and `tS2` transforms we
+created to merge skill class Skolem terms with skill class generators and labels.
 " *) }
 transform tSMToSTSpn = import_jdbc "com.mysql.jdbc.Driver"
     "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : iSkillMatch -> iST_SP_Sum {
@@ -1321,7 +1345,7 @@ md { (* "
 As you can see by inspecting the runtime result we have loaded the instance `iSTSpnImp` into the
 assembled schema we created using the colimit. Since there are entities in the colimit schema
 not present in `sSTSpn`. You will notice that some entities are empty; in particular, those 
-entities that arose from `sSPSpn`. There are also Skolum terms that are generated due to the 
+entities that arose from `sSPSpn`. There are also Skolem terms that are generated due to the 
 introduction `GeneralSkill` referenced by `SpecialSkill` not present in `sSTSpn`.
 
 Let's close the loop using delta right adjoint to sigma. We present the instance generated by
@@ -1380,7 +1404,7 @@ Let's try the other direction. We start with the merged instance in the schema c
 delta to project back through the mapping that inserted the schema `sSTSpn` into the schema 
 colimit. As you would expect you loose almost all of the data that was supplied by `iSPSpnImp`. We 
 now have 11 skills rather than the 10 skills provided by `iSTSpnImp` and so have picked up an 
-dditional Skolum term due to the \"dancing\" skill that came from `iSPSpnImp`.
+additional Skolem term due to the \"dancing\" skill that came from `iSPSpnImp`.
 " *) }
 instance iCoLimInSTSpn = delta mSTSpnToSTSpn_SPSpn_CoLim iSTSpn_SPSpn_Merge2
 
@@ -1388,7 +1412,7 @@ md { (* "
 Sigma then pushes this projected instance back into the schema colimit and we end up with an
 instance that looks like the one sigma pushed forward from `iSTSpnImp` but with the extra skill
 record. The round trip has eliminated all traces of `iSTSpn_SPSpn_Merge3` that came from `iSPSpnImp`
-except the record that additional \"Dancing\" skill that is now Skolumized.
+except the record that additional \"Dancing\" skill that is now Skolemized.
 " *) }
 instance iDltSgmCoLim = sigma mSTSpnToSTSpn_SPSpn_CoLim iCoLimInSTSpn
 transform tCounit = counit mSTSpnToSTSpn_SPSpn_CoLim iSTSpn_SPSpn_Merge2
@@ -1397,6 +1421,7 @@ md { (* "
 The counit transform injects `iDltSgmColim` back into the merged instance `iSTSpn_SPSpn_Merge3`.
 " *) }
 
+/*
 md { (* "
 Additional work that could be added to this tutorial in a later release:
  
@@ -1411,3 +1436,9 @@ Additional work that could be added to this tutorial in a later release:
   3. Develop some examples of how one can use uber flowers to create data warehouse marts.
 
 " *) }
+*/
+
+html { (* "
+</body></html>" *) }	
+
+

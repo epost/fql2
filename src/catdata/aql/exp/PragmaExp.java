@@ -281,9 +281,9 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			return new Pragma() {
 				@Override
 				public String toString() {
-					URL[] urls = ((URLClassLoader) ClassLoader.getSystemClassLoader()).getURLs();
-					List<URL> urls0 = Arrays.asList(urls);
-					return "Classpath:\n\n" + Util.sep(urls0, "\n");
+					//URL[] urls = ((URLClassLoader) ClassLoader.getSystemClassLoader()).getURLs();
+					//List<URL> urls0 = Arrays.asList(urls);
+					return ""; //"Classpath:\n\n" + Util.sep(urls0, "\n");
 				}
 				@Override
 				public void execute() { }
@@ -933,7 +933,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public String toString() {
 			String s = "";
 			if (!options.isEmpty()) {
-				s = " {\n\toptions" + Util.sep(options, "\n\t\t", " = ")  + "\n}";;
+				s = " {\n\toptions\n\t\t" + Util.sep(options, " = ", "\n\t\t")  + "\n}";
 			}
 		
 			return "export_jdbc_instance " + I + " " + Util.quote(clazz) + " " + Util.quote(jdbcString) + " " + prefix + s;
@@ -999,20 +999,22 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public final String prefix;
 		public final String clazz;
 
-		public final Map<String, String> options;
+		public final Map<String, String> options1;
+		public final Map<String, String> options2;
 
 		public final TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
 
 		@Override
 		public Map<String, String> options() {
-			return options;
+			return options1;
 		}
 
-		public PragmaExpToJdbcTrans(TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h, String clazz, String jdbcString, String prefix, List<Pair<String, String>> options) {
+		public PragmaExpToJdbcTrans(TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h, String clazz, String jdbcString, String prefix, List<Pair<String, String>> options1, List<Pair<String, String>> options2) {
 			this.jdbcString = jdbcString;
 			this.prefix = prefix;
 			this.clazz = clazz;
-			this.options = Util.toMapSafely(options);
+			this.options1 = Util.toMapSafely(options1);
+			this.options2 = Util.toMapSafely(options2);
 			this.h = h;
 			Util.checkClass(clazz);
 		}
@@ -1026,15 +1028,17 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public Pragma eval(AqlEnv env) {
 			String toGet = jdbcString;
 			String driver = clazz;
-			AqlOptions op = new AqlOptions(options, null, env.defaults);
+			AqlOptions op1 = new AqlOptions(options1, null, env.defaults);
+			AqlOptions op2 = new AqlOptions(options2, null, env.defaults);
+
 			if (clazz.trim().isEmpty()) {
-				driver = (String) op.getOrDefault(AqlOption.jdbc_default_class);
+				driver = (String) op1.getOrDefault(AqlOption.jdbc_default_class);
 				Util.checkClass(driver);
 			}
 			if (jdbcString.trim().isEmpty()) {
-				toGet = (String) op.getOrDefault(AqlOption.jdbc_default_string);
+				toGet = (String) op1.getOrDefault(AqlOption.jdbc_default_string);
 			}
-			return new ToJdbcPragmaTransform<>(prefix, h.eval(env), driver, toGet, op);
+			return new ToJdbcPragmaTransform<>(prefix, h.eval(env), driver, toGet, op1, op2);
 		}
 
 		//TODO aql maybe quote for RHS of options
@@ -1042,8 +1046,11 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		@Override
 		public String toString() {
 			String s = "";
-			if (!options.isEmpty()) {
-				s = " {\n\toptions" + Util.sep(options, "\n\t\t", " = ")  + "\n}";;
+			if (!options1.isEmpty()) {
+				s += " {\n\toptions" + Util.sep(options1, "\n\t\t", " = ")  + "\n}\n";
+			}
+			if (!options1.isEmpty()) {
+				s += " {\n\toptions" + Util.sep(options2, "\n\t\t", " = ")  + "\n}";
 			}
 		
 			return "export_jdbc_transform " + h + " " + Util.quote(clazz) + " " + Util.quote(jdbcString) + " " + prefix + s;
@@ -1056,7 +1063,8 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			result = prime * result + ((h == null) ? 0 : h.hashCode());
 			result = prime * result + ((clazz == null) ? 0 : clazz.hashCode());
 			result = prime * result + ((jdbcString == null) ? 0 : jdbcString.hashCode());
-			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((options1 == null) ? 0 : options1.hashCode());
+			result = prime * result + ((options2 == null) ? 0 : options2.hashCode());
 			result = prime * result + ((prefix == null) ? 0 : prefix.hashCode());
 			return result;
 		}
@@ -1086,10 +1094,15 @@ public abstract class PragmaExp extends Exp<Pragma> {
 					return false;
 			} else if (!jdbcString.equals(other.jdbcString))
 				return false;
-			if (options == null) {
-				if (other.options != null)
+			if (options1 == null) {
+				if (other.options1 != null)
 					return false;
-			} else if (!options.equals(other.options))
+			} else if (!options1.equals(other.options1))
+				return false;
+			if (options2 == null) {
+				if (other.options2 != null)
+					return false;
+			} else if (!options2.equals(other.options2))
 				return false;
 			if (prefix == null) {
 				if (other.prefix != null)
