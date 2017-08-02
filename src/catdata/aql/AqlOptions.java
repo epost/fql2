@@ -34,6 +34,7 @@ public final class AqlOptions {
 	//TODO: aql each typeside/instance/etc should make sure only appropriate options are given to it
 
 	public enum AqlOption {
+		interpret_as_algebra,
 		csv_charset,
 		csv_line_delim_string,
 		csv_field_delim_char,
@@ -64,6 +65,7 @@ public final class AqlOptions {
 		map_nulls_arbitrarily_unsafe,
 		jdbc_default_class,
 		jdbc_default_string,
+		schema_only,
 
 		program_allow_nontermination_unsafe,
 		completion_precedence,
@@ -78,6 +80,7 @@ public final class AqlOptions {
 		dont_validate_unsafe,
 		static_typing,
 		prover, 
+		jdbc_start_ids_at,
 		coproduct_allow_entity_collisions_unsafe,
 		coproduct_allow_type_collisions_unsafe;
 		
@@ -178,6 +181,10 @@ public final class AqlOptions {
 	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
+		case jdbc_start_ids_at:
+			return 0;
+		case schema_only:
+			return false;
 		case map_nulls_arbitrarily_unsafe:
 			return false;
 		case import_joined:
@@ -268,6 +275,8 @@ public final class AqlOptions {
 			return "org.h2.Driver";
 		case jdbc_default_string:
 			return "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1";
+		case interpret_as_algebra:
+			return false;
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -314,6 +323,8 @@ public final class AqlOptions {
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case schema_only:
+			return op.getBoolean(map);
 		case map_nulls_arbitrarily_unsafe:
 			return op.getBoolean(map);
 		case import_joined:
@@ -324,6 +335,8 @@ public final class AqlOptions {
 			return op.getBoolean(map);
 		case import_as_theory:
 			return op.getBoolean(map);
+		case jdbc_start_ids_at:
+			return op.getInteger(map);
 		case eval_max_temp_size:
 			return op.getInteger(map);
 		case eval_reorder_joins:
@@ -404,6 +417,8 @@ public final class AqlOptions {
 			return op.getString(map);
 		case jdbc_default_string:
 			return op.getString(map);
+		case interpret_as_algebra:
+			return op.getBoolean(map);
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		}

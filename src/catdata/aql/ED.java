@@ -23,13 +23,13 @@ public class ED<Ty, En, Sym, Fk, Att> {
 	
 	public final boolean isUnique;
 	
-	public static <Ty,Sym> Schema<Ty,WHICH,Sym,Unit,Void> getEDSchema(TypeSide<Ty,Sym> ty) {
+	public static <Ty,Sym> Schema<Ty,WHICH,Sym,Unit,Void> getEDSchema(TypeSide<Ty,Sym> ty, AqlOptions ops) {
 		Collage<Ty, WHICH, Sym, Unit, Void, Void, Void> col = new Collage<>(ty.collage());
 		col.ens.add(WHICH.FRONT);
 		col.ens.add(WHICH.BACK);
 		col.fks.put(new Unit(), new Pair<>(WHICH.BACK, WHICH.FRONT));
 		
-		Schema<Ty,WHICH,Sym,Unit,Void> ret = new Schema<>(ty, col.ens, col.atts.map, col.fks.map, new HashSet<>(), AqlProver.create(new AqlOptions(ProverName.auto), col, ty.js), true); //TODO aq;
+		Schema<Ty,WHICH,Sym,Unit,Void> ret = new Schema<>(ty, col.ens, col.atts.map, col.fks.map, new HashSet<>(), AqlProver.create(ops, col, ty.js), true); //TODO aq;
 		return ret;
 	}
 	
@@ -135,7 +135,7 @@ public class ED<Ty, En, Sym, Fk, Att> {
 		fks = new Ctx<>();
 		fks.put(new Unit(), new Pair<>(ctx, true));
 		
-		Q = Query.makeQuery(is, new Ctx<>(), fks, schema, getEDSchema(schema.typeSide), false, false); //TODO AQL speed these can be set to true
+		Q = Query.makeQuery(is, new Ctx<>(), fks, schema, getEDSchema(schema.typeSide, options), false, false); //TODO AQL speed these can be set to true
 	}
 	
 	@Override

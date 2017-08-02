@@ -15,7 +15,7 @@ public interface Raw {
 				return il.loc;
 			}
 		}
-		return Util.anomaly();
+		throw new RuntimeException("For section " + section + ", cannot find " + o + ". Please report");
 	}
 
 	

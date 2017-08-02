@@ -53,6 +53,8 @@ To run the AQL IDE with a particular JDBC driver requires placing the driver on 
 java -cp "./mysql-connector-java-5.1.27-bin.jar:./aql.jar" catdata.ide.IDE 
 \end{verbatim}
 
+On some systems, especially windows systems, the colon in the classpath may need to be replaced with a semi-colon.
+
 \section{Using AQL without a GUI}
 
 The AQL IDE also supports command-line execution: an AQL program is passed to stdin, and an HTML view of the result is output on stdout:
@@ -144,7 +146,8 @@ The abstract syntax for an {\it equation} is:
 \end{verbatim}
 The  type (or entity) of each term must match.  A {\it path equation} is an equation of terms that are paths terminating on a variable.
 
-\section{Sections, Literals, Imports, Options}
+\section{Sections, Literals, Options}
+\label{section10}
 
 Many AQL expressions are written using {\it sections}. In the example below, {\tt imports}, {\tt types}, {\tt constants}, and {\tt options} are the sections.
 \begin{verbatim}
@@ -161,11 +164,13 @@ typeside Ty = literal {
 \end{verbatim}
 The type side $Ty$ is an example of a {\it literal}; i.e., an expression that evaluates to itself.  All AQL kinds except for pragmas have literals.  Literals are also called {\it constants}, but they should not be confused with the {\tt constants} declared in AQL type sides.  All sections are optional, but they must appear in the order specified in this manual. 
 
-Many expressions contain import sections.  For example, a typeside $T$ can import another typeside $T'$, whose effect is the same as if $T'$ were textually included in $T$.  In the above example, $Ty$ imports the typeside for arithmetic.
-
 Many expressions contain lists of key-value pairs that specify options in an option section.  The defaults of these options many change with new releases of AQL and are displayed in the AQL pane of the AQL IDE options menu.  The effect of these options is described in the rest of the manual.  In the above example, the execution timeout for the type side is set to five seconds.  Every expression that supports options supports the timeout option, as well as the GUI (display) options and the always reload option.  
 
-Every AQL file may contain an optional options section before the list of declarations.  These options are inherited by every expression (e.g., so you can set the timeout globally to 30, rather than having to specify that for every expression).  
+Every AQL file may contain an optional options section before the list of declarations.  These options are inherited by every expression (e.g., so you can set the timeout globally to 30 seconds, rather than having to specify that for every expression).  
+
+\section{Imports}
+
+Many literal expressions, including type sides, schemas, mappings, queries, instances, and transforms can contain {\tt import} sections.  Each import section must contain a list of names.  For example, a typeside $T$ can import another typeside $T'$, whose effect is the same as if $T'$ were {\it textually included} in $T$.  Almost always each imported name should be a literal or an identity.  In the above example (Section~\ref{section10}), $Ty$ imports the typeside for arithmetic.
  
 \section{AQL's Typing Discipline}
 
@@ -221,9 +226,6 @@ The AQL engine generates fresh IDs during execution.  These IDs are exported via
 \chapter{Kind {\tt graph}}
 AQL graphs are directed multi-graphs with labels on nodes and edges.
 
-\section{{\tt empty}}
-The empty graph with no nodes and no edges.
-
 \section{{\tt literal}}
 \subsection{{\tt imports}}
 A list of names of {\tt graph}s.
@@ -274,21 +276,21 @@ The empty {\tt schema} with no entities, foreign keys, or attributes, on a parti
 \section{{\tt schemaOf <instance>}}
 The {\tt schema} of an {\tt instance}.
 
-\section{{\tt dom <mapping>}}
-%check
-The source of a schema mapping.
-
-\section{{\tt cod <mapping>}}
-%check
-The target of a schema mapping.
-
-\section{{\tt src <query>}}
-%check
-The source of a query.
-
-\section{{\tt dst <query>}}
-%check
-The target of a query.
+%\section{{\tt dom <mapping>}}
+%%check
+%The source of a schema mapping.
+%
+%\section{{\tt cod <mapping>}}
+%%check
+%The target of a schema mapping.
+%
+%\section{{\tt src <query>}}
+%%check
+%The source of a query.
+%
+%\section{{\tt dst <query>}}
+%%check
+%The target of a query.
 
 \section{{\tt literal : <typeside>}}
 \subsection{{\tt imports}}
@@ -401,12 +403,10 @@ A list of ground (non quantified) equations.
 \section{{\tt empty : <schema>}}
 The empty instance with no generators or labelled nulls on a particular schema.
 
-\section{{\tt dom <transform>}}
-%check
+\section{{\tt src <transform>}}
 The source of a transform.
 
-\section{{\tt cod <transform>}}
-%check
+\section{{\tt dst <transform>}}
 The target of a transform.
 
 \section{{\tt distinct <instance>}}
@@ -429,6 +429,9 @@ If $F : S \to T$ is a mapping and $I$ is an $S$-instance, then $\Sigma_F I$ is a
 
 \section{{\tt coproduct\_sigma (<mapping> <instance>)+ : <schema>}}
 The expression {\tt coproduct\_sigma}  $F \ I \ G \ J \ : S$ means $\Sigma_F(I) + \Sigma_G(J)$, where $+$ is $S$-instance co-product.  Arbitrarily many mapping-instance pairs can be used.  This operation is provided to help minimize the number of intermediate materializations required to execute an AQL program.
+
+\section{{\tt coproduct <instance> + ... + <instance> : <schema>}}
+Takes the coproduct of the input instances.  Desugars into {\tt coproduct\_sigma} along the identity mapping.
 
 \section{{\tt coequalize <transform> <transform>}}
 Computes the coqualizer of two transforms.
@@ -463,15 +466,17 @@ Expects a list of (single) SQL commands inside a section.  Each SQL query should
 Imports a SQL database onto an autogenerated AQL schema.  The AQL schema will have one attribute per column in the input DB, and one foreign key per foreign key in the input DB, and equations capturing the input DB's foreign key constraints.  The type side will have a single type, ``dom''.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
 
 \subsection{{\tt options}}
-Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, and {\tt require\_consistency}. 
+Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, {\tt require\_consistency}, and {\tt schema\_only} (imports the empty instance).
 
-\section{{\tt import\_csv : schema}}
+\section{{\tt import\_csv\_instance : schema}}
 \subsection{entities}
 A {\tt ctx(<entity> | [filename])}.  The file for $en$ should be a CSV file with a header; the fields of the header should be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.  Records can contain nulls (using the string specified in options).  Note that these tables must be complete: this keyword imports a model (set of tables) of a schema, not a presentation of a model of a schema (i.e., as {\tt literal} does).  To import an instance as a theory, use the {\tt import\_as\_theory} option.
 
 
 \subsection{{\tt options}}
 Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, {\tt csv} related options, {\tt id\_column\_name}, and and {\tt require\_consistency}. 
+
+
 \section{{\tt literal : <schema>}}
 
 An instance is a collection of generators at entities and labelled nulls at types, as well as ground equations.
@@ -500,7 +505,12 @@ equations
 The key-value pairs in multi-equations must be comma separated (necessary for readability and error correction).
 
 \subsection{{\tt options}}
-Allowable options are {\tt timeout}, {\tt prover} and related options, and {\tt require\_consistency}.
+Allowable options are {\tt timeout}, {\tt prover} and related options, {\tt require\_consistency}, and {\tt interpret\_as\_algebra}, which interprets the instance as a model, similar to JDBC / CSV import.  This behavior can be useful when writing down an instance that is already saturated and for which one wants to check the schema constraints, rather than impose them. See employees example.
+
+\section{{\tt quotient : <instance>}}
+
+\subsection{{\tt equations}}
+A list of ground (non quantified) equations to quotient by.  Allowable options are {\tt timeout}, {\tt prover} and related options, and {\tt require\_consistency}.
 
 \section{{\tt chase <constraints> <instance> [number]}}
 
@@ -607,14 +617,14 @@ Expects a list of strings inside a section.  Each string will be executed by the
 
 Allowable options are {\tt timeout} and {\tt always\_reload}.
 
-\section{{\tt exec\_javascript}} 
+\section{{\tt exec\_js}} 
 Expects a list of strings inside a section.  Each string will be executed by the Java VM's Nashorn javascript execution engine.  The return value of each command is displayed in the viewer.
 
 \subsection{{\tt options}}
 
 Allowable options are {\tt timeout} and {\tt always\_reload}.
 
-\section{{\tt exec\_sql [jdbcclass] [jdbcuri]}}
+\section{{\tt exec\_jdbc [jdbcclass] [jdbcuri]}}
 Expects a list of (single) SQL commands inside a section.  Each string will be executed by JDBC.  The return value of each command is displayed in the viewer.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
 
 \subsection{{\tt options}}
@@ -631,7 +641,7 @@ Conservatively checks that an instance is consistent (e.g., does not prove $1=2$
 
 %%%%%%%%%%
 
-\section{{\tt export\_instance\_csv [jdbcclass] [jdbcuri] <instance>}} 
+\section{{\tt export\_csv\_instance [jdbcclass] [jdbcuri] <instance>}} 
 
 Exports an instance as CSV.  The directory name will contain one file named $en.csv$ per entity $en$, and if non-empty, one file named $t.csv$ per type $t$.  The file for $en$ will be a CSV file with a header; the fields of the header will be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.  For types, the file will have a header and one column.  AQL rows that are not constants will be exported using the null string specified in options.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
 
@@ -639,7 +649,7 @@ Exports an instance as CSV.  The directory name will contain one file named $en.
 Allowed are {\tt timeout}, {\tt always\_reload}, {\tt csv} related options, and {\tt id\_column\_name}.
 
 %%
-\section{{\tt export\_transform\_csv [filename] <transform>}}
+\section{{\tt export\_csv\_transform [filename] <transform>}}
 
 Exports a transform as CSV.  The filename will be a CSV file without a header and with two columns (src, tgt).  AQL rows that are not constants will be exported using the null string specified in options.
 
@@ -647,14 +657,14 @@ Exports a transform as CSV.  The filename will be a CSV file without a header an
 Allowable options are {\tt timeout} and {\tt always\_reload}  and {\tt csv} related options.
 
 %%%%%%%%%%%
-\section{{\tt export\_instance\_jdbc <instance> [jdbcclass] [jdbcuri] [prefix] }}
+\section{{\tt export\_jdbc\_instance <instance> [jdbcclass] [jdbcuri] [prefix] }}
 
 Exports an instance (on SQL typeside) using JDBC.  There will be a table $prefixen$ for each entity $en$.  The columns will be the attributes and foreign keys whose domain is $en$, and an ID column whose name is set in options.  AQL rows that are not constants will be exported as NULL.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
 
 \subsection{options}
 Allowable options are {\tt timeout}  and {\tt always\_reload} and  {\tt id\_column\_name} and {\tt varchar\_length}.
 
-\section{{\tt export\_query\_jdbc <query> [jdbcclass] [jdbcuri] [prefixSrc] [prefixDst] }}
+\section{{\tt export\_jdbc\_query <query> [jdbcclass] [jdbcuri] [prefixSrc] [prefixDst] }}
 
 Exports a query (on SQL typeside) as a set of views using JDBC.  There will be a view $prefixen$ for each entity $en$.  The columns will be the attributes and foreign keys whose domain is $en$, and an ID column whose name is set in options.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
 
@@ -664,7 +674,7 @@ Allowable options are {\tt timeout}  and {\tt always\_reload} and  {\tt id\_colu
 
 %%
 
-\section{{\tt export\_transform\_jdbc [jdbcclass] [jdbcuri] [prefix] <transform>}}
+\section{{\tt export\_jdbc\_transform [jdbcclass] [jdbcuri] [prefix] <transform>}}
 Exports a transform using JDBC.  There will be a two-column table $prefixen$ for each entity $en$ and a two-column 
 table $prefixty$ for each type $ty$.  The two columns will be $srcidcol$ and $dstidcol$, where $idcol$ is the ID column name set in the options.  Every column will be a VARCHAR type whose length is set in the options.  AQL rows that are not constants will be exported as NULL.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
 
@@ -689,6 +699,9 @@ Each equation has the form {\tt <path>=<path>}, where the foreign keys in each p
 
 Each equation has the form {\tt forall x. <term> = <term>}, where the symbols in each term have the form $v\_f(\ldots)$, where $v$ is a schema name and $f$ is a symbol in $v$.   Alternatively, equations of the form $\forall x. \ p(x) = q(x)$, where $p,q$ are paths, can simply be written as $p = q$.
 
+\section{{\tt coproduct <schema> + ... + <schema> : <typeside>}}
+
+Constructs a degenerate colimit of schemas as a co-product. 
 
 \section{\tt modify <schema\_colimit>}
 
@@ -723,6 +736,10 @@ Causes execution to halt after {\tt number} seconds.
 
 \section{{\tt require\_consistency = boolean}}
 When enabled, requires AQL instances to be consistent (e.g., to not prove 1=2).  (This is checked at runtime.)
+
+\section{{\tt schema\_only = boolean}}
+
+Used with {\tt import\_jdbc\_all} to import no data (only schema).
 
 \section{{\tt static\_typing = boolean}}
 When disabled, relaxes AQL's nominal typing discipline for colimit instances.

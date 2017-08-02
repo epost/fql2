@@ -281,10 +281,8 @@ public class GUI extends JPanel {
 
 	private static Menu makeEditMenu() {
 		Menu editMenu = new Menu("Edit");
-		MenuItem findItem = new MenuItem("Find");
+		MenuItem findItem = new MenuItem("Find/Replace");
 		editMenu.add(findItem);
-		MenuItem replaceItem = new MenuItem("Replace");
-		editMenu.add(replaceItem);
 		MenuItem gotoItem = new MenuItem("Goto Line");
 		editMenu.add(gotoItem);
 		
@@ -403,17 +401,11 @@ public class GUI extends JPanel {
 			delay();
 			CodeEditor<?, ?, ?> ed = getSelectedEditor();
 			if (ed != null) {
-				ed.findAction();
-			}
-		});
-		
-		replaceItem.addActionListener(e -> {
-			delay();
-			CodeEditor<?, ?, ?> ed = getSelectedEditor();
-			if (ed != null) {
 				ed.replaceAction();
 			}
 		});
+		
+		
 		
 		gotoItem.addActionListener(e -> {
 			delay();

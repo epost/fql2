@@ -116,10 +116,10 @@ class AqlInACan {
 		
 		for (En t : Util.alphabetical(tables.keySet())) {
 			ret += "<table style=\"float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px\" border=\"1\"  cellpadding=\"3\">";
-	
+			ret += "<caption><b>" + t.toString() + "</b></caption>";
 			List<String> cols = tables.get(t).first;
 			cols.remove(0);
-			cols.add(0, t.toString());
+			cols.add(0, "ID");
 			Object[][] rows = tables.get(t).second;
 			ret += "<tr>";
 			for (String col : cols) {
