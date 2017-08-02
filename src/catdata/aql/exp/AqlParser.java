@@ -889,8 +889,8 @@ public class AqlParser {
 				ret3 = Parsers.tuple(token("wrap"), colim_ref.lazy(), map_ref.lazy(), map_ref.lazy())
 						.map(x -> new ColimSchExpWrap(x.b, x.c, x.d));
 
-		Parser<ColimSchExp<?, ?, ?, ?, ?, ?, ?>> retX = Parsers.or(ret, ret2, ret3, colimExpModify(),
-				colimSchExpQuotient(), parens(colim_ref));
+		Parser<ColimSchExp<?, ?, ?, ?, ?, ?, ?>> retX = Parsers.or(ret, ret2, ret3); //, colimExpModify(),
+				// colimSchExpQuotient(), parens(colim_ref));
 
 		colim_ref.set(retX);
 
