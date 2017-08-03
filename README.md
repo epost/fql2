@@ -62,6 +62,7 @@ jparsec (Apache License),
 JUNG (BSD License),
 RSyntaxTextArea and autocomplete (BSD License),
 Commons Generics, CSV, and Exec (Apache License),
+OpenCSV (Apache license)
 JFlex (BSD License),
 H2 (Mozilla Public License or Eclipse Public License),
 JGraph (BSD License)
@@ -81,6 +82,10 @@ which is dual licensed and available under the MPL 2.0
 (Mozilla Public License) or under the EPL 1.0 (Eclipse Public License).
 An original copy of the license agreement can be found at:
 http://www.h2database.com/html/license.html
+
+### OpenCSV (Apache 2.0 License)
+
+See http://opencsv.sourceforge.net/index.html for copyright information.
 
 ### txtmark (Apache 2.0 License)
 

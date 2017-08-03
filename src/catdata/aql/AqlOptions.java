@@ -76,7 +76,7 @@ public final class AqlOptions {
 		dont_validate_unsafe,
 		static_typing,
 		prover, 
-		jdbc_start_ids_at,
+		start_ids_at,
 		coproduct_allow_entity_collisions_unsafe,
 		coproduct_allow_type_collisions_unsafe;
 		
@@ -177,7 +177,7 @@ public final class AqlOptions {
 	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
-		case jdbc_start_ids_at:
+		case start_ids_at:
 			return 0;
 		case schema_only:
 			return false;
@@ -326,7 +326,7 @@ public final class AqlOptions {
 			return op.getBoolean(map);
 		case import_as_theory:
 			return op.getBoolean(map);
-		case jdbc_start_ids_at:
+		case start_ids_at:
 			return op.getInteger(map);
 		case eval_max_temp_size:
 			return op.getInteger(map);

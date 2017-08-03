@@ -105,7 +105,7 @@ public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 			Map<En, String> ens = new HashMap<>();
 
 			String idCol = (String) op.getOrDefault(AqlOption.id_column_name);
-			int startId = (int) op.getOrDefault(AqlOption.jdbc_start_ids_at);
+			int startId = (int) op.getOrDefault(AqlOption.start_ids_at);
 
 			
 			for (En en : I.schema().ens) {

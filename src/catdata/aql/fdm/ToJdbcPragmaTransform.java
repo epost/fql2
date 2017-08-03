@@ -86,8 +86,8 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 		try {
 			Connection conn = DriverManager.getConnection(jdbcString);
 			deleteThenCreate(conn);
-			int s1 = (int) options1.getOrDefault(AqlOption.jdbc_start_ids_at);
-			int s2 = (int) options2.getOrDefault(AqlOption.jdbc_start_ids_at);
+			int s1 = (int) options1.getOrDefault(AqlOption.start_ids_at);
+			int s2 = (int) options2.getOrDefault(AqlOption.start_ids_at);
 			Pair<Map<X1, Integer>, Map<Integer, X1>> I = h.src().algebra().intifyX(s1);
 			Pair<Map<X2, Integer>, Map<Integer, X2>> J = h.dst().algebra().intifyX(s2);
 			for (En en : h.src().schema().ens) {
