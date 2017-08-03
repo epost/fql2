@@ -35,13 +35,9 @@ public final class AqlOptions {
 
 	public enum AqlOption {
 		interpret_as_algebra,
-		csv_charset,
-		csv_line_delim_string,
 		csv_field_delim_char,
 		csv_escape_char,
 		csv_quote_char,
-		csv_format,
-		csv_null_string,
 		id_column_name,
 		always_reload,
 		varchar_length,
@@ -229,24 +225,19 @@ public final class AqlOptions {
 			return false;
 		case always_reload:
 			return false;
-		case csv_charset:
-			return "UTF-8";
 		case csv_escape_char:
 			return '\\';
 		case csv_field_delim_char:
 			return ',';
-		case csv_format:
-			return "Default";
+		
 		case id_column_name:
 			return "id";
-		case csv_line_delim_string:
-			return "\n";
+		
 		case csv_quote_char:
 			return '\"';
 		case varchar_length:
 			return 256;
-		case csv_null_string:
-			return null;
+		
 		case program_allow_nontermination_unsafe:
 			return false;
 		case gui_max_table_size:
@@ -377,24 +368,16 @@ public final class AqlOptions {
 			return op.getBoolean(map);
 		case always_reload:
 			return op.getBoolean(map);
-		case csv_charset:
-			return op.getString(map);
 		case csv_escape_char:
 			return op.getChar(map);
 		case csv_field_delim_char:
-			return op.getString(map);
-		case csv_format:
-			return op.getString(map);
+			return op.getChar(map);
 		case id_column_name:
 			return op.getString(map);
-		case csv_line_delim_string:
-			return op.getChar(map);
 		case csv_quote_char:
 			return op.getChar(map);
 		case varchar_length:
 			return op.getInteger(map);
-		case csv_null_string:
-			return op.getString(map);
 		case program_allow_nontermination_unsafe:
 			return op.getBoolean(map);
 		case eval_join_selectivity:

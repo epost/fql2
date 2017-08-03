@@ -15,7 +15,7 @@ html { (* "
 	<head>
 		<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
 		<title>AQL Tutorial</title>
-		<link rel=\"stylesheet\" type=\"text/css\" href=\"https://categoricaldata.net/css/simple.css\" />
+		<link rel=\"stylesheet\" type=\"text/css\" href=\"http://categoricaldata.net/css/simple.css\" />
 	</head>
 	<body>
 		<h1>AQL Tutorial</h1>

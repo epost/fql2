@@ -55,7 +55,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		Statement stmt = conn.createStatement();
 		for (En en : I.schema().ens) {		
 			for (String x : m.get(en).second) {
-				stmt.execute(x.replace("Varchar", "Varchar(" + len + ")"));
+				stmt.execute(x.replace("Varchar", "Varchar(" + len + ")").replace("Nvarchar", "Nvarchar(" + len + ")"));
 			}			
 		}
 		stmt.close();

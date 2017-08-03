@@ -117,7 +117,8 @@ transform Jid = import_jdbc "" "" : J -> J {
 }
 
 //export the instance to SQL
-pragma store1 = export_jdbc_instance J "" "" "Exported" 
+pragma store1 = export_jdbc_instance J "" "" "Exported"
+{ options jdbc_start_ids_at = 100 }
 
 //view exported SQL instance
 pragma view1 = exec_jdbc "" "" { 
@@ -126,7 +127,9 @@ pragma view1 = exec_jdbc "" "" {
 }
 
 //export the transform to SQL
-pragma store2 = export_jdbc_transform Jid "" "" "ExportedTrans"
+pragma store2 = export_jdbc_transform Jid "" "" "ExportedTrans" 
+ { options jdbc_start_ids_at = 100 } //src
+ { options jdbc_start_ids_at = 100 } //dst
 
 //view the exported SQL transform
 pragma view2 = exec_jdbc "" "" { 

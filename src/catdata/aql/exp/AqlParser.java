@@ -216,8 +216,8 @@ public class AqlParser {
 
 				csvTrans = Parsers
 						.tuple(token("export_csv_transform"), trans_ref.lazy(), ident,
-								options.between(token("{"), token("}")).optional())
-						.map(x -> new PragmaExpToCsvTrans(x.b, x.c, x.d == null ? new LinkedList<>() : x.d)),
+								options.between(token("{"), token("}")).optional(), options.between(token("{"), token("}")).optional())
+						.map(x -> new PragmaExpToCsvTrans(x.b, x.c, x.d == null ? new LinkedList<>() : x.d, x.e == null ? new LinkedList<>() : x.e)),
 
 				sql = Parsers.tuple(token("exec_jdbc"), ident, ident, p)
 						.map(x -> new PragmaExpSql(x.b, x.c, x.d.a, x.d.b)),

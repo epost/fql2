@@ -49,7 +49,7 @@ public class ToJdbcPragmaQuery<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>  extends
 			Connection conn = DriverManager.getConnection(jdbcString);
 			Statement stmt = conn.createStatement();
 			for (String s : Q.unnest().toSQLViews(prefixSrc, prefixDst, idCol)) {
-				stmt.execute(s.replace("varchar", "varchar(" + len + ")"));	
+				stmt.execute(s.replace("Varchar", "Varchar(" + len + ")").replace("Nvarchar", "Nvarchar(" + len + ")"));
 			}
 			stmt.close();
 			conn.close();

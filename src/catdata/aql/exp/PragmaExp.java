@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.csv.CSVFormat;
+
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
@@ -46,7 +48,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		return Kind.PRAGMA;
 	}
 	
-	
+		
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -546,7 +548,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		@Override
 		public Pragma eval(AqlEnv env) {
 			AqlOptions op = new AqlOptions(options, null, env.defaults);
-			return new ToCsvPragmaInstance<>(inst.eval(env), file, InstExpCsv.getFormat(op), (String) op.getOrDefault(AqlOption.id_column_name));
+			return new ToCsvPragmaInstance<>(inst.eval(env), file, op);
 		}
 
 		@Override
@@ -608,18 +610,20 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		public final String file;
 
-		public final Map<String, String> options;
+		public final Map<String, String> options1;
+		public final Map<String, String> options2;
 
 		public final TransExp<Ty, En, Sym, Att, Fk, Gen1, Sk1, X1, Y1, Gen2, Sk2, X2, Y2> trans;
 
 		@Override
 		public Map<String, String> options() {
-			return options;
+			return options1;
 		}
 
-		public PragmaExpToCsvTrans(TransExp<Ty, En, Sym, Att, Fk, Gen1, Sk1, X1, Y1, Gen2, Sk2, X2, Y2> trans, String file, List<Pair<String, String>> options) {
+		public PragmaExpToCsvTrans(TransExp<Ty, En, Sym, Att, Fk, Gen1, Sk1, X1, Y1, Gen2, Sk2, X2, Y2> trans, String file, List<Pair<String, String>> options1, List<Pair<String, String>> options2) {
 			this.file = file;
-			this.options = Util.toMapSafely(options);
+			this.options1 = Util.toMapSafely(options1);
+			this.options2 = Util.toMapSafely(options2);
 			this.trans = trans;
 		}
 
@@ -628,7 +632,8 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			int prime = 31;
 			int result = 1;
 			result = prime * result + ((file == null) ? 0 : file.hashCode());
-			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			result = prime * result + ((options1 == null) ? 0 : options1.hashCode());
+			result = prime * result + ((options2 == null) ? 0 : options2.hashCode());
 			result = prime * result + ((trans == null) ? 0 : trans.hashCode());
 			return result;
 		}
@@ -647,10 +652,15 @@ public abstract class PragmaExp extends Exp<Pragma> {
 					return false;
 			} else if (!file.equals(other.file))
 				return false;
-			if (options == null) {
-				if (other.options != null)
+			if (options1 == null) {
+				if (other.options1 != null)
 					return false;
-			} else if (!options.equals(other.options))
+			} else if (!options1.equals(other.options1))
+				return false;
+			if (options2 == null) {
+				if (other.options2 != null)
+					return false;
+			} else if (!options2.equals(other.options2))
 				return false;
 			if (trans == null) {
 				if (other.trans != null)
@@ -668,8 +678,11 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		@Override
 		public String toString() {
 			String s = "";
-			if (!options.isEmpty()) {
-				s = " {\n\toptions" + Util.sep(options, "\n\t\t", " = ")  + "\n}";
+			if (!options1.isEmpty()) {
+				s = " {\n\toptions" + Util.sep(options1, "\n\t\t", " = ")  + "\n}";
+			}
+			if (!options2.isEmpty()) {
+				s += "\n {\n\toptions" + Util.sep(options2, "\n\t\t", " = ")  + "\n}";
 			}
 		
 			return "export_csv " + trans + " " + Util.quote(file) + s;
@@ -677,7 +690,9 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public Pragma eval(AqlEnv env) {
-			return new ToCsvPragmaTransform<>(trans.eval(env), file, InstExpCsv.getFormat(new AqlOptions(options, null, env.defaults)));
+			AqlOptions op1 = new AqlOptions(options1, null, env.defaults);
+			AqlOptions op2 = new AqlOptions(options2, null, env.defaults);
+			return new ToCsvPragmaTransform<>(trans.eval(env), file, op1, op2);
 		}
 	}
 

@@ -754,17 +754,17 @@ When enabled, mappings and transforms and queries are not checked to be equality
 When enabled, pragmas (which can have side effects, like loading data from CSV files) are always executed and are not cached between runs of the AQL program.
 
 \section{Import options}
-\subsection{{\tt csv\_charset = string}}
-Sets the java character set to be used for CSV import/export.  Should be one of 
-US-ASCII, 	
-ISO-8859-1,  	
-UTF-8, 	
-UTF-16BE,	
-UTF-16LE, 	
-UTF-16.
-
-\subsection{{\tt csv\_line\_delim\_string = string}}
-Sets the line delimiter for use in CSV import/export.
+%\subsection{{\tt csv\_charset = string}}
+%Sets the java character set to be used for CSV import/export.  Should be one of 
+%US-ASCII, 	
+%ISO-8859-1,  	
+%UTF-8, 	
+%UTF-16BE,	
+%UTF-16LE, 	
+%UTF-16.
+%
+%\subsection{{\tt csv\_line\_delim\_string = string}}
+%Sets the line delimiter for use in CSV import/export.
 
 \subsection{{\tt csv\_field\_delim\_char = char}}
 Sets the field delimiter for use in CSV import/export.
@@ -774,20 +774,20 @@ Sets the escape character for use in CSV import/export.
 
 \subsection{{\tt csv\_quote\_char = char}}
 Sets the quote character for use in CSV import/export.
+%
+%\subsection{{\tt csv\_format = string}}
+%Sets the Apache Commons CSV format to use.  Should be one of 
+%    DEFAULT,
+%    EXCEL,
+%    MYSQL,
+%    RFC4180,
+%    TDF.
 
-\subsection{{\tt csv\_format = string}}
-Sets the Apache Commons CSV format to use.  Should be one of 
-    DEFAULT,
-    EXCEL,
-    MYSQL,
-    RFC4180,
-    TDF.
-
-
-\subsection{{\tt csv\_null\_string = string}}
-
-Sets the string that indicates null fields for use in CSV import/export.
-
+%
+%\subsection{{\tt csv\_null\_string = string}}
+%
+%Sets the string that indicates null fields for use in CSV import/export.
+%
 \section{{\tt id\_column\_name = string}}
 Specifies the name of the ID columns for CSV and JDBC import/export.
 

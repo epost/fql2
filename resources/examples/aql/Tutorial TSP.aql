@@ -450,15 +450,15 @@ both equivalent to the `sSkl` declaration above:
     }
 
 The objects of an instance category are the generators plus the Skolem terms produced by those
-generators. The arrows are either a foreign key evaluated at a generator/Skolum term or an 
-attribute evaluated at a generator/Skolum term. Like a schema the literal declaration of an 
+generators. The arrows are either a foreign key evaluated at a generator/Skolem term or an 
+attribute evaluated at a generator/Skolem term. Like a schema the literal declaration of an 
 instance is a presentation of an instance category. As you will see when you run an AQL model 
 with a literal instance declaration AQL will fill Skolem terms as implied by the schema and the 
 provided generators.
 
 Notice these equations declare instance arrows in a way that is closely analogous to an RDF 
-triple. The subject of a triple is a generator/Skolum term, the object of a triple is either a 
-literal (value on the type side) or another generator/Skolum term and the predicate is the type 
+triple. The subject of a triple is a generator/Skolem term, the object of a triple is either a 
+literal (value on the type side) or another generator/Skolem term and the predicate is the type 
 on the arrow as determined by the underlying schema. As such AQL instances are closely related to 
 graph databases although they are very strongly typed by their underlying schema.
 
@@ -552,8 +552,8 @@ instance iSklCP = coproduct iSklExt + iSklCls : sS
 
 md { (* "
 Now that we have all of the desired records in the same instance we want to identify the
-generators that came from `iSklCls` with the Skolum terms that came from the `iSklExt` instance. To 
-achieve this result we would like to declare that each of the Skolum terms from `iSklExt` should be 
+generators that came from `iSklCls` with the Skolem terms that came from the `iSklExt` instance. To 
+achieve this result we would like to declare that each of the Skolem terms from `iSklExt` should be 
 merged with the appropriate generator coming from `iSklCls`. Recall we have already done this by 
 importing an existing instance into a new instance and adding equations. Here is the solution
 using that approach.
@@ -571,7 +571,7 @@ instance iSklSklCls1 = literal : sS {
 md { (* "
 There is an alternative construction that is universal. First we create an instance `iSLnk` with a 
 generator for each of the skill classes. We then create two instance transforms, the first 
-mapping each link generator to a `iSklExt` Skolum term and the second mapping each link generator 
+mapping each link generator to a `iSklExt` Skolem term and the second mapping each link generator 
 to our `iSklCls` generators. The new universal construction is known as a coequalizer. An instance 
 coequalizer uses a pair of transforms to define collections of records that are identified as 
 equal. This approach has the advantage that linking instances and transforms can be imported from 
@@ -709,7 +709,7 @@ section. We have duplicated the declaration of the foreign key we are constructi
 reference. The `fk_HasClass` foreign key enforces a functional dependency between the generators of
 the entity Skill and the generators of of the entity `SkillClass`. In the entities section we have
 generator variables sc for the `SkillClass` entity and `s` for the `Skill` entity. These are variables 
-that vary over the generators and Skolum terms created by the saturation process. The task at 
+that vary over the generators and Skolem terms created by the saturation process. The task at 
 hand is to use those variables and the source foreign key to construct a functional dependency in 
 the target schema. We do this by taking a `SkillClass` generator and assigning it as the return 
 value of the target foreign key `fk_HasClass`. Which generator do we assign? The one we get by 

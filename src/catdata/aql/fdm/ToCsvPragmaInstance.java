@@ -10,86 +10,56 @@ import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.QuoteMode;
 
+import catdata.Pair;
 import catdata.Util;
+import catdata.aql.AqlOptions;
 import catdata.aql.Instance;
 import catdata.aql.Pragma;
 import catdata.aql.Term;
+import catdata.aql.AqlOptions.AqlOption;
 
 public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 	
 	private final String fil;
 		
-	private final Map<En, String> ens = new HashMap<>();
-	private final Map<Ty, String> tys = new HashMap<>();
+	
+	private final Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I;
 
-	public ToCsvPragmaInstance(Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I, String s, CSVFormat format, String idCol) {
+
+	private final AqlOptions op;
+	
+	
+	public static CSVFormat getFormat(AqlOptions op) {
+		String format0 = "Default";
+		CSVFormat format = CSVFormat.valueOf(format0);
+
+		format = format.withDelimiter((Character) op.getOrDefault(AqlOption.csv_field_delim_char));
+		format = format.withQuote((Character) op.getOrDefault(AqlOption.csv_quote_char));
+		format = format.withEscape((Character) op.getOrDefault(AqlOption.csv_escape_char));
+		format = format.withQuoteMode(QuoteMode.ALL);
+		format = format.withNullString(null);
+
+		return format;
+	} 
+	
+	public ToCsvPragmaInstance(Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I, String s, AqlOptions op) {
 		if (!s.endsWith("/")) {
             s += "/";
 		}
         fil = s;
-	
-		try {
-			for (En en : I.schema().ens) {
-				StringBuffer sb = new StringBuffer();
-				CSVPrinter printer = new CSVPrinter(sb, format);
-				
-				List<String> header = new LinkedList<>();
-				header.add(idCol);
-				for (Att att : I.schema().attsFrom(en)) {
-					header.add(att.toString());
-				}
-				for (Fk fk : I.schema().fksFrom(en)) {
-					header.add(fk.toString());
-				}
-				printer.printRecord(header);
-				for (X x : I.algebra().en(en)) {
-					List<String> row = new LinkedList<>();
-					row.add(x.toString());
-					for (Att att : I.schema().attsFrom(en)) {
-						row.add(print(I.algebra().att(att, x), format.getNullString() != null));
-					}
-					for (Fk fk : I.schema().fksFrom(en)) {
-						row.add(I.algebra().fk(fk, x).toString());
-					}
-					printer.printRecord(row);
-				}
-				ens.put(en, sb.toString());
-				printer.close();
-			}
-			for (Ty ty : I.schema().typeSide.tys) {
-				StringBuffer sb = new StringBuffer();
-				CSVPrinter printer = new CSVPrinter(sb, format);
-				List<String> header = new LinkedList<>();
-				header.add(idCol);
-				printer.printRecord(header);
-				for (Y y : I.algebra().talg().sks.keySet()) {
-					List<String> row = new LinkedList<>();
-					row.add(y.toString());
-					printer.printRecord(row);
-				}
-				tys.put(ty, sb.toString());
-				printer.close();
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} 			
+        this.op = op;
+		this.I = I;
 	}
 	
-	public static <Ty, Sym, Y> String print(Term<Ty, Void, Sym, Void, Void, Void, Y> term, Boolean nullSet) {
+	public static <Ty, Sym, Y> String print(Term<Ty, Void, Sym, Void, Void, Void, Y> term) {
 		if (term.obj != null) {
 			return term.obj.toString();
 		} else if (term.sym != null && term.args.isEmpty()) {
 			return term.sym.toString();
-		} else if (term.sym != null && !term.args.isEmpty()) {
-			if (nullSet) {
-				return null;
-			} 
-			throw new RuntimeException(term + " exports as NULL, but csv_null_string is not set");
-		} else if (term.sk != null) {
-			return term.sk.toString(); 
-		}
-		throw new RuntimeException("anomaly: please report");
+		} 
+		return null;
 	}
 
 	
@@ -131,16 +101,46 @@ public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 
 	@Override
 	public void execute() {
-		delete();
 		try {
+			Map<En, String> ens = new HashMap<>();
+
+			String idCol = (String) op.getOrDefault(AqlOption.id_column_name);
+			int startId = (int) op.getOrDefault(AqlOption.jdbc_start_ids_at);
+
+			
+			for (En en : I.schema().ens) {
+				StringBuffer sb = new StringBuffer();
+				CSVPrinter printer = new CSVPrinter(sb, getFormat(op));
+				
+				List<String> header = new LinkedList<>();
+				header.add(idCol);
+				for (Fk fk : Util.alphabetical(I.schema().fksFrom(en))) {
+					header.add(fk.toString());
+				}
+				for (Att att : Util.alphabetical(I.schema().attsFrom(en))) {
+					header.add(att.toString());
+				}
+				printer.printRecord(header);
+				Pair<Map<X, Integer>, Map<Integer, X>> J = I.algebra().intifyX(startId);
+				for (X x : Util.alphabetical(I.algebra().en(en))) {
+					List<String> row = new LinkedList<>();
+					row.add(J.first.get(x).toString());
+					for (Fk fk : Util.alphabetical(I.schema().fksFrom(en))) {
+						row.add(J.first.get(I.algebra().fk(fk, x)).toString());
+					}
+					for (Att att : Util.alphabetical(I.schema().attsFrom(en))) {
+						row.add(print(I.algebra().att(att, x)));
+					}
+					printer.printRecord(row);
+				}
+				ens.put(en, sb.toString());
+				printer.close();
+			}
+			
+			delete();
 			for (En en : ens.keySet()) {
 				FileWriter out = new FileWriter(fil + en + ".csv");
 				out.write(ens.get(en));		
-				out.close();
-			}
-			for (Ty ty : tys.keySet()) {
-				FileWriter out = new FileWriter(fil + ty + ".csv");
-				out.write(tys.get(ty));					
 				out.close();
 			}
 		} catch (IOException e) {
@@ -150,7 +150,7 @@ public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 	
 	@Override
 	public String toString() {
-		return Util.sep(ens, "\n\n", "\n----\n\n") + Util.sep(tys, "\n\n", "\n----\n\n");
+		return "Export to " + fil + ".";
 	}
 	
 }
