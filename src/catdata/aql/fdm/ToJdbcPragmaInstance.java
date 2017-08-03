@@ -70,7 +70,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 			for (En en : I.schema().ens) {
 				List<Chc<Fk, Att>> header = headerFor(en);
 				for (X x : I.algebra().en(en)) {
-					I.algebra().storeMyRecord(I.algebra().intifyX((int)options.getOrDefault(AqlOption.jdbc_start_ids_at)), conn, x, header, enToString(en), prefix);
+					I.algebra().storeMyRecord(I.algebra().intifyX((int)options.getOrDefault(AqlOption.start_ids_at)), conn, x, header, enToString(en), prefix);
 				}
 			}
 			Statement stmt = conn.createStatement();

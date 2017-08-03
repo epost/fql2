@@ -50,8 +50,8 @@ public class ToCsvPragmaTransform<Ty,En,Sym,Att,Fk,Gen1, Sk1, Gen2, Sk2, X1, Y1,
 		try {
 			StringBuffer sb = new StringBuffer();
 			CSVPrinter printer = new CSVPrinter(sb, ToCsvPragmaInstance.getFormat(options1));
-			int srcId = (int) options1.getOrDefault(AqlOption.jdbc_start_ids_at);
-			int dstId = (int) options2.getOrDefault(AqlOption.jdbc_start_ids_at);
+			int srcId = (int) options1.getOrDefault(AqlOption.start_ids_at);
+			int dstId = (int) options2.getOrDefault(AqlOption.start_ids_at);
 			
 			Pair<Map<X1, Integer>, Map<Integer, X1>> a = h.src().algebra().intifyX(srcId);
 			Pair<Map<X1, Integer>, Map<Integer, X1>> b = h.src().algebra().intifyX(dstId);
