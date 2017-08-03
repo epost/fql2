@@ -21,7 +21,6 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 
 	private final String jdbcString;
 	private final String prefix;
-	private final String clazz;
 	private final String idCol;
 
 	
@@ -42,7 +41,6 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		this.jdbcString = jdbcString;
 		this.prefix = prefix;
 		this.I = I;
-		this.clazz = clazz;
 		idCol = (String) options.getOrDefault(AqlOption.id_column_name);
 		len = (Integer) options.getOrDefault(AqlOption.varchar_length);
 		this.options = options;

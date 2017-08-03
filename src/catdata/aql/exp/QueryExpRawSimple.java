@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import catdata.Chc;
 import catdata.Ctx;
@@ -25,7 +24,6 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
 import catdata.aql.exp.QueryExpRaw.Block;
-import catdata.aql.exp.QueryExpRaw.Trans;
 import catdata.aql.exp.SchExp.SchExpCod;
 
 public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Raw {
@@ -65,6 +63,7 @@ public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends 
 
 	private final Block<En1, Att2> block;
 	
+	@SuppressWarnings("unchecked")
 	public QueryExpRawSimple(SchExp<?, ?, ?, ?, ?> src,
 			Block<En1, Att2> block
 			) {

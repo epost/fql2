@@ -146,6 +146,7 @@ Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	public TransExpRaw(InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?> src, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?> dst, List<LocStr> imports, List<Pair<LocStr, RawTerm>> gens, List<Pair<String, String>> options) {
 		this.src = (InstExp<String, String, String, String, String, String, String, String, String>) src;
 		this.dst = (InstExp<String, String, String, String, String, String, String, String, String>) dst;

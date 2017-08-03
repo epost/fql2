@@ -634,7 +634,7 @@ public class AqlParser {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private static Parser<ColimSchExpQuotient> colimSchExpQuotient() {
+	private static Parser<ColimSchExpQuotient<?, ?, ?, ?, ?, ?>> colimSchExpQuotient() {
 		Parser<catdata.Pair<Integer, Quad<String, String, String, String>>> q = Parsers.tuple(Parsers.INDEX,
 				Parsers.tuple(ident.followedBy(token(".")), ident, token("="), ident.followedBy(token(".")), ident)
 						.map(x -> new Quad<>(x.a, x.b, x.d, x.e)))
@@ -681,7 +681,7 @@ public class AqlParser {
 		ppp = Parsers.tuple(token("{"), pa, token("}")).map(x -> x.b).optional();
 
 		@SuppressWarnings("unchecked")
-		Parser<ColimSchExpQuotient> ret = Parsers.tuple(l, ppp).map(x -> {
+		Parser<ColimSchExpQuotient<?, ?, ?, ?, ?, ?>> ret = Parsers.tuple(l, ppp).map(x -> {
 			TyExp<?, ?> ty = x.a.d;
 			List<LocStr> nodes = x.a.b;
 			
@@ -773,7 +773,7 @@ public class AqlParser {
 				inst_ref.lazy(), token("{")); // .map(x -> x.c);
 
 		Parser<InstExpQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?>> ret = Parsers.tuple(l, pa, token("}"))
-				.map(x -> new InstExpQuotient
+				.map(x -> new InstExpQuotient<>
 				(x.a.b, new LinkedList<>(Util.append(Util.newIfNull(x.b.a), Util.newIfNull(x.b.b))), x.b.c));
 
 		return ret;
@@ -877,20 +877,20 @@ public class AqlParser {
 																			// ->
 																			// x.c);
 
-		Parser<ColimSchExp<Object, Object, Object, Object, Object, Object, Object>> ret = Parsers
+		Parser<ColimSchExp<?, ?, ?, ?, ?, ?, ?>> ret = Parsers
 				.tuple(l, pa, token("}")).map(x -> {
 
 					// schema graph nodes edges options imports
 					return new ColimSchExpRaw(x.a.b, x.a.d, Util.newIfNull(x.b.b), Util.newIfNull(x.b.c), x.b.d);
 				});
 
-		Parser<ColimSchExp<Object, Object, Object, Object, Object, Object, Object>> ret2 = ident
+		Parser<ColimSchExp<?, ?, ?, ?, ?, ?, ?>> ret2 = ident
 				.map(x -> new ColimSchExpVar(x)),
 				ret3 = Parsers.tuple(token("wrap"), colim_ref.lazy(), map_ref.lazy(), map_ref.lazy())
 						.map(x -> new ColimSchExpWrap(x.b, x.c, x.d));
 
-		Parser<ColimSchExp<?, ?, ?, ?, ?, ?, ?>> retX = Parsers.or(ret, ret2, ret3);
-			// , colimExpModify(), colimSchExpQuotient(), parens(colim_ref));
+		Parser<ColimSchExp<?, ?, ?, ?, ?, ?, ?>> retX = Parsers.or(ret, ret2, ret3
+			 , colimExpModify(), colimSchExpQuotient(), parens(colim_ref));
 
 		colim_ref.set(retX);
 
@@ -1062,7 +1062,7 @@ public class AqlParser {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static Parser<ColimSchExpModify> colimExpModify() {
+	private static Parser<ColimSchExpModify<?, ?, ?, ?, ?, ?, ?>> colimExpModify() {
 		Parser<List<catdata.Pair<LocStr, String>>> ens = Parsers
 				.tuple(token("rename").followedBy(token("entities")), env(ident, "->")).map(x -> x.b);
 
@@ -1093,7 +1093,7 @@ public class AqlParser {
 		Parser<Tuple3<Token, ColimSchExp<?, ?, ?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("modify"),
 				colim_ref.lazy(), token("{")); // .map(x -> x.c);
 
-		Parser<ColimSchExpModify> ret = Parsers.tuple(l, pa, pb, token("}"))
+		Parser<ColimSchExpModify<?, ?, ?, ?, ?, ?, ?>> ret = Parsers.tuple(l, pa, pb, token("}"))
 				.map(x -> new ColimSchExpModify(x.a.b, Util.newIfNull(x.b.a), Util.newIfNull(x.b.b),
 						Util.newIfNull(x.b.c), Util.newIfNull(x.c.a), Util.newIfNull(x.c.b), x.c.c));
 

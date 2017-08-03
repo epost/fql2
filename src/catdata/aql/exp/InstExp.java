@@ -74,6 +74,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			return options;
 		}
 		
+		@SuppressWarnings("unchecked")
 		public InstExpRandom(SchExp<?,?,?,?,?> sch, List<Pair<LocStr, String>> ens, List<Pair<String, String>> options) {
 			this.ens = Util.toMapSafely(LocStr.set2y(ens, x -> Integer.parseInt(x)));
 			this.options = Util.toMapSafely(options);

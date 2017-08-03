@@ -50,7 +50,7 @@ public final class InstExpQuotient<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends InstExp<
 			return false;
 		if (!(obj instanceof InstExpQuotient))
 			return false;
-		InstExpQuotient other = (InstExpQuotient) obj;
+		InstExpQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
 		if (I == null) {
 			if (other.I != null)
 				return false;

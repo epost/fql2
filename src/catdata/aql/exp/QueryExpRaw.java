@@ -497,6 +497,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 	 * }
 	 */
 
+	@SuppressWarnings("unchecked")
 	public QueryExpRaw(SchExp<?, ?, ?, ?, ?> c, SchExp<?, ?, ?, ?, ?> d, List<LocStr> imports,
 			List<Pair<LocStr, Pair<Block<En1, Att2>, List<Pair<LocStr, RawTerm>>>>> list, List<Pair<LocStr, Trans>> fks,
 			List<Pair<String, String>> options) {

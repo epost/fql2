@@ -62,6 +62,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> eqs0 = new HashSet<>();
 
 		for (String k : imports) {
+			@SuppressWarnings("unchecked")
 			Schema<Ty, String, Sym, String, String> v = env.defs.schs.get(k);
 			col.ens.addAll(v.ens);
 			col.fks.putAll(v.fks.map);
@@ -296,6 +297,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	public SchExpRaw(TyExp<?, ?> typeSide, List<LocStr> imports, List<LocStr> ens, List<Pair<LocStr, Pair<String, String>>> fks, List<Pair<Integer, Pair<List<String>, List<String>>>> list, List<Pair<LocStr, Pair<String, String>>> atts, List<Pair<Integer, Quad<String, String, RawTerm, RawTerm>>> list2, List<Pair<String, String>> options) {
 		this.typeSide = (TyExp<Ty, Sym>) typeSide;
 		this.imports = LocStr.set1(imports);
@@ -340,6 +342,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 		
 	} 
 	
+	@SuppressWarnings("unchecked")
 	public SchExpRaw(TyExp<?, ?> typeSide, List<String> imports, List<String> ens, List<Pair<String, Pair<String, String>>> fks, List<Pair<List<String>, List<String>>> list, List<Pair<String, Pair<String, Ty>>> atts, List<Quad<String, String, RawTerm, RawTerm>> list2, List<Pair<String, String>> options, @SuppressWarnings("unused") Object o) {
 		this.typeSide = (TyExp<Ty, Sym>) typeSide;
 		this.imports = new HashSet<>(imports);
