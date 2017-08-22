@@ -25,7 +25,7 @@ the correct path to the MySQL JDBC driver jar file) then places that driver on t
 	" *) }
 
 pragma setup_classpath = add_to_classpath {
-	"/Users/ryan/Desktop/mysql.jar"
+	"/opt/mysql/latest/mysql-connector-java-5.1.43-bin.jar"
 }
 
 md { (* "
@@ -271,9 +271,9 @@ Here is a formal definition of a category following the presentation in Category
 Computing Sciences chapter 2.
 
 We begin with a formal definition of a directed graph:
-A directed graph `C` is a pair of functions source: `C_0` -> `C_1` and target: `C_0` -> `C_1`. The elements
-of `C_0` we call nodes/objects and the elements of `C_1` we call edges/arrows. An arrow path of
-length `n` in `C` is a sequence of arrows arranged head to tail as follows:
+A directed graph `C` is a pair of functions source: `C_1` -> `C_0` and target: `C_1` -> `C_0`.
+The elements of `C_0` we call nodes/objects and the elements of `C_1` we call edges/arrows.
+An arrow path of length `n` in `C` is a sequence of arrows arranged head to tail as follows:
 
          f_n    f_n-1    ...     f_2     f_1
       . ----> . ----> .  ...  . ----> . ----> . 
