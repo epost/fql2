@@ -544,7 +544,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 	public QueryExpRaw(SchExp<Ty, En1, Sym, Fk1, Att1> src, SchExp<Ty, En2, Sym, Fk2, Att2> dst, List<String> imports,
 			List<Pair<En2, Pair<Block<En1, Att2>, List<Pair<Att2, RawTerm>>>>> blocks, List<Pair<Fk2, Trans>> fks,
-			List<Pair<String, String>> options, @SuppressWarnings("unused") Object o) {
+			List<Pair<String, String>> options, Object o) {
 		this.src = src;
 		this.dst = dst;
 		this.imports = new HashSet<>(imports);

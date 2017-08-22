@@ -85,7 +85,6 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 		Character sepChar = (Character) op.getOrDefault(AqlOption.csv_field_delim_char);
 		Character quoteChar = (Character) op.getOrDefault(AqlOption.csv_quote_char);
 		Character escapeChar = (Character) op.getOrDefault(AqlOption.csv_escape_char);
-		
 		final CSVParser parser =
 				new CSVParserBuilder()
 				.withSeparator(sepChar)
@@ -111,7 +110,6 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 			 List<String[]> rows = reader.readAll();
 			 
 			 fileReader.close();
-			
 			ret.put((En)k, rows);
 		}
 		for (En en : sch.ens) {

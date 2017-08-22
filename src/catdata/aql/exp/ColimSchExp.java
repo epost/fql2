@@ -26,6 +26,7 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
 import catdata.aql.exp.SchExp.SchExpVar;
+import catdata.ClassUtil;
 
 //TODO aql E shouldn't really be a type param here
 public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<ColimitSchema<N, Ty, En, Sym, Fk, Att>> {
@@ -473,11 +474,12 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			return nodes.get(n);
 		}
 
+		
 		public ColimSchExpRaw(GraphExp<N, E> shape, TyExp<Ty, Sym> ty, List<Pair<LocStr, SchExp<Ty, En, Sym, Fk, Att>>> nodes, List<Pair<LocStr, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>>> edges, List<Pair<String, String>> options) {
 			this.shape = shape;
 			this.ty = ty;
-			this.nodes = new Ctx<>(LocStr.list2(nodes, x -> (N) x));
-			this.edges = new Ctx<>(LocStr.list2(edges, x -> (E) x));
+			this.nodes = new Ctx<>(LocStr.list2(nodes, x -> ClassUtil.<N>unchecked_cast(x)));
+			this.edges = new Ctx<>(LocStr.list2(edges, x -> ClassUtil.<E>unchecked_cast(x)));
 			this.options = Util.toMapSafely(options);
 			
 			List<InteriorLabel<Object>> f = new LinkedList<>();

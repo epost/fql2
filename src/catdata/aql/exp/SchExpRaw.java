@@ -53,7 +53,6 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 
 	//TODO: aql printing of contexts broken when conitain choices
 	
-	@SuppressWarnings("unused")
 	@Override
 	public Schema<Ty, String, Sym, String, String> eval(AqlEnv env) {
 		TypeSide<Ty, Sym> ts = typeSide.eval(env);
@@ -343,7 +342,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 	} 
 	
 	@SuppressWarnings("unchecked")
-	public SchExpRaw(TyExp<?, ?> typeSide, List<String> imports, List<String> ens, List<Pair<String, Pair<String, String>>> fks, List<Pair<List<String>, List<String>>> list, List<Pair<String, Pair<String, Ty>>> atts, List<Quad<String, String, RawTerm, RawTerm>> list2, List<Pair<String, String>> options, @SuppressWarnings("unused") Object o) {
+	public SchExpRaw(TyExp<?, ?> typeSide, List<String> imports, List<String> ens, List<Pair<String, Pair<String, String>>> fks, List<Pair<List<String>, List<String>>> list, List<Pair<String, Pair<String, Ty>>> atts, List<Quad<String, String, RawTerm, RawTerm>> list2, List<Pair<String, String>> options, Object o) {
 		this.typeSide = (TyExp<Ty, Sym>) typeSide;
 		this.imports = new HashSet<>(imports);
 		this.ens = new HashSet<>(ens);

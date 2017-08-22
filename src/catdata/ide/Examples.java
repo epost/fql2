@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -82,7 +83,7 @@ public class Examples {
 			if (url == null) {
 				URL l = Object.class.getResource("/examples");
 				if (l == null) {
-					new RuntimeException("Cannot locate examples").printStackTrace();
+					new RuntimeException("Cannot locate examples (nor /help.txt)").printStackTrace();
 					HashMap<Language, List<Example>> ret = new HashMap<>();
 					for (Language ll : Language.values()) {
 						ret.put(ll, new LinkedList<>());

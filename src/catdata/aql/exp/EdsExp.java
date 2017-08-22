@@ -156,7 +156,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			return true;
 		}
 		
-		public EdExpRaw(List<Pair<String, String>> as, List<Pair<RawTerm, RawTerm>> list, List<Pair<String, String>> es, List<Pair<RawTerm, RawTerm>> list2, boolean isUnique, @SuppressWarnings("unused") Object u) {
+		public EdExpRaw(List<Pair<String, String>> as, List<Pair<RawTerm, RawTerm>> list, List<Pair<String, String>> es, List<Pair<RawTerm, RawTerm>> list2, boolean isUnique, Object u) {
 			As = new LinkedList<>(as);
 			Es = new LinkedList<>(es);
 			Awh = new HashSet<>(list);
@@ -373,7 +373,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 		}
 
 		@SuppressWarnings("unchecked")
-		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<EdExpRaw> eds, @SuppressWarnings("unused") Object o) {
+		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<EdExpRaw> eds, Object o) {
 			this.schema = (SchExp<Object, Object, Object, Object, Object>) schema;
 			this.imports = new HashSet<>(imports);
 			this.eds = new HashSet<>(eds);
