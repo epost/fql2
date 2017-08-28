@@ -9,6 +9,9 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
@@ -19,16 +22,19 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 
 	private final String jdbcString;
 	private final String prefix;
-	private final String clazz;
+//	private final String clazz;
 	private final String idCol;
 
 	private final Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h;
 	
 	private final String colTy;
 	private final int colTy0;
-
+	
+	private final AqlOptions options1;
+	private final AqlOptions options2;
+	
 	//TODO aql column type mapping for jdbc instance export
-	public ToJdbcPragmaTransform(String prefix, Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h, String clazz, String jdbcString, AqlOptions options) {
+	public ToJdbcPragmaTransform(String prefix, Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h, String clazz, String jdbcString, AqlOptions options1, AqlOptions options2) {
 		try {
 			Class.forName(clazz);
 		} catch (ClassNotFoundException e) {
@@ -37,11 +43,13 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 		this.jdbcString = jdbcString;
 		this.prefix = prefix;
 		this.h = h;
-		this.clazz = clazz;
-		idCol = (String) options.getOrDefault(AqlOption.id_column_name);
-		colTy = "VARCHAR(" + options.getOrDefault(AqlOption.varchar_length) + ")";
+	//s	this.clazz = clazz;
+		idCol = (String) options1.getOrDefault(AqlOption.id_column_name);
+		colTy = "VARCHAR(" + options1.getOrDefault(AqlOption.varchar_length) + ")";
 		colTy0 = Types.VARCHAR;
 		assertDisjoint();
+		this.options1 = options1;
+		this.options2 = options2;
 	}
 
 	private void deleteThenCreate(Connection conn) throws SQLException {
@@ -54,7 +62,7 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 		}
 	}
 	
-	private void storeMyRecord(Connection conn, X1 x, String table) throws Exception {
+	private void storeMyRecord(Pair<Map<X1,Integer>, Map<Integer, X1>> I, Pair<Map<X2,Integer>, Map<Integer, X2>> J, Connection conn, X1 x, String table) throws Exception {
 		  List<String> hdrQ = new LinkedList<>();
 		  List<String> hdr = new LinkedList<>();
 		  hdr.add("src" + idCol);
@@ -65,8 +73,8 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 		  String insertSQL = "INSERT INTO " + table + "(" + Util.sep(hdr,"," )+ ") values (" + Util.sep(hdrQ,",") + ")";
 		  PreparedStatement ps = conn.prepareStatement(insertSQL);
 		
-		  ps.setObject(1, x.toString(), colTy0);
-		  ps.setObject(2, h.repr(x).toString(), colTy0);
+		  ps.setObject(1, I.first.get(x), colTy0);
+		  ps.setObject(2, J.first.get(h.repr(x)), colTy0);
 		
 		  ps.executeUpdate();
 	} 
@@ -78,9 +86,13 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 		try {
 			Connection conn = DriverManager.getConnection(jdbcString);
 			deleteThenCreate(conn);
+			int s1 = (int) options1.getOrDefault(AqlOption.start_ids_at);
+			int s2 = (int) options2.getOrDefault(AqlOption.start_ids_at);
+			Pair<Map<X1, Integer>, Map<Integer, X1>> I = h.src().algebra().intifyX(s1);
+			Pair<Map<X2, Integer>, Map<Integer, X2>> J = h.dst().algebra().intifyX(s2);
 			for (En en : h.src().schema().ens) {
 				for (X1 x : h.src().algebra().en(en)) {
-					storeMyRecord(conn, x, prefix + enToString(en));
+					storeMyRecord(I, J, conn, x, prefix + enToString(en));
 				}
 			}
 		} catch (Exception e) {
@@ -102,7 +114,7 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 
 	@Override
 	public String toString() {
-		return "export_jdbc_transform " + clazz + " " + jdbcString + " " + prefix + "\n\n" + h;
+		return "Exported " + h.size() + " rows.";
 	}
 
 }

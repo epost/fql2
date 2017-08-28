@@ -503,12 +503,12 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 	}
 
-	void findAction() {
+	/*void findAction() {
 		if (replaceDialog.isVisible()) {
 			replaceDialog.setVisible(false);
 		}
 		findDialog.setVisible(true);
-	}
+	}*/
 
 	void replaceAction() {
 		if (findDialog.isVisible()) {

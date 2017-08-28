@@ -13,9 +13,8 @@ import java.util.Set;
 import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
-import catdata.aql.AqlOptions;
-import catdata.aql.Schema;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.Schema;
 
 //TODO this type is actually a lie bc of import_as_theory option
 public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En, Sym, Fk, Att, Gen, Connection> {
@@ -70,7 +69,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 	public String toString() {
 		String s = "";
 		if (!options.isEmpty()) {
-			s = "options" + Util.sep(options, "\n\t\t", " = ");
+			s = "\n\toptions\n\t\t" + Util.sep(options, " = ", "\n\t\t");
 		}
 		return "import_jdbc " + schema + " " + Util.quote(clazz) + " " + Util.quote(jdbcString) + " {\n\t"
 				+ Util.sep(map, " -> ", "\n\t") + s + "\n}";

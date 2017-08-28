@@ -23,7 +23,7 @@ import catdata.ide.IdeOptions.IdeOption;
  * 
  *         Program entry point.
  */
-class IDE {
+public class IDE {
 /*
 	public static final class OldEntryPoint {
 		public static void main(String... args) {

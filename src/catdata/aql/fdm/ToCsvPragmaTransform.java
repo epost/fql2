@@ -5,45 +5,32 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
+import catdata.Pair;
+import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Pragma;
 import catdata.aql.Transform;
 
-public class ToCsvPragmaTransform<Ty,En,Sym,Att,Fk> extends Pragma {
+public class ToCsvPragmaTransform<Ty,En,Sym,Att,Fk,Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends Pragma {
+	
 	
 	private final File file;
+
+	private AqlOptions options1;
+
+	private AqlOptions options2;
+
+	private Transform<Ty, En, Sym, Att, Fk, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> h;
 	
-	private final String str;
-	
-	public <Gen1,Sk1,X1,Y1,Gen2,Sk2,X2,Y2> ToCsvPragmaTransform(Transform<Ty,En,Sym,Att,Fk,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h, String s, CSVFormat format) {
-        file = new File(s);
-		
-		try {
-			StringBuffer sb = new StringBuffer();
-			CSVPrinter printer = new CSVPrinter(sb, format);
-			
-			for (En en : h.src().schema().ens) {
-				for (X1 x1 : h.src().algebra().en(en)) {
-					List<String> row = new LinkedList<>();
-					row.add(x1.toString());
-					row.add(h.repr(x1).toString());
-					printer.printRecord(row);
-				}
-			}
-/*			for (Y1 y1 : h.src().algebra().talg().sks.keySet()) {
-				List<String> row = new LinkedList<>();
-				row.add(y1.toString());
-				row.add(ToCsvPragmaInstance.print(h.dst().algebra().intoY(h.reprT(y1)), format.getNullString() != null));
-				printer.printRecord(row);		
-			} */
-			str = sb.toString();
-			printer.close();				
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} 			
+	public ToCsvPragmaTransform(Transform<Ty,En,Sym,Att,Fk,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> h, String s, AqlOptions options1, AqlOptions options2) {
+		this.options1 = options1;
+		this.options2 = options2;
+		this.file = new File(s);
+		this.h = h;
 	}
 	
 	private void delete() {
@@ -60,10 +47,28 @@ public class ToCsvPragmaTransform<Ty,En,Sym,Att,Fk> extends Pragma {
 
 	@Override
 	public void execute() {
-		delete();
 		try {
+			StringBuffer sb = new StringBuffer();
+			CSVPrinter printer = new CSVPrinter(sb, ToCsvPragmaInstance.getFormat(options1));
+			int srcId = (int) options1.getOrDefault(AqlOption.start_ids_at);
+			int dstId = (int) options2.getOrDefault(AqlOption.start_ids_at);
+			
+			Pair<Map<X1, Integer>, Map<Integer, X1>> a = h.src().algebra().intifyX(srcId);
+			Pair<Map<X1, Integer>, Map<Integer, X1>> b = h.src().algebra().intifyX(dstId);
+			
+			for (En en : h.src().schema().ens) {
+				for (X1 x1 : h.src().algebra().en(en)) {
+					List<String> row = new LinkedList<>();
+					row.add(a.first.get(x1).toString());
+					row.add(b.first.get(h.repr(x1)).toString());
+					printer.printRecord(row);
+				}
+			}
+
+			printer.close();				
+			delete();
 			FileWriter out = new FileWriter(file);
-			out.write(str);		
+			out.write(sb.toString());		
 			out.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -72,7 +77,7 @@ public class ToCsvPragmaTransform<Ty,En,Sym,Att,Fk> extends Pragma {
 	
 	@Override
 	public String toString() {
-		return str;
+		return "Exported to " + file + ".";
 	}
 	
 }

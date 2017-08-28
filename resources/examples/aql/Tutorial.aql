@@ -15,10 +15,9 @@ html { (* "
 	<head>
 		<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
 		<title>AQL Tutorial</title>
-		<link rel=\"stylesheet\" type=\"text/css\" href=\"http://catinf.com/css/simple.css\" />
+		<link rel=\"stylesheet\" type=\"text/css\" href=\"http://categoricaldata.net/css/simple.css\" />
 	</head>
 	<body>
-		<script src=\"http://catinf.com/js/ci.js\"></script>
 		<h1>AQL Tutorial</h1>
 		
 			<p> This online AQL tutorial is built-in to the IDE as the Tutorial example.
@@ -34,7 +33,7 @@ html { (* "
 			</p>	  
 	
 		<hr/> <div id=\"typesides\">
-		<h2>typesides</h2>
+		<h2>Typesides</h2>
 			<p>Every AQL file begins with a <b>typeside</b>.  
 				The typeside for this tutorial contains two <b>java_types</b>: <i>String</i>, 
 				which is bound to <i>java.lang.String</i>;

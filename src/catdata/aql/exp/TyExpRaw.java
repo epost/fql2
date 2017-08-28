@@ -324,6 +324,7 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 		AqlOptions strat = new AqlOptions(options, col, env.defaults);
 
 		for (String k : imports) {
+			@SuppressWarnings("unchecked")
 			TypeSide<String, String> v = env.defs.tys.get(k);
 			col.tys.addAll(v.tys);
 			col.syms.putAll(v.syms.map);

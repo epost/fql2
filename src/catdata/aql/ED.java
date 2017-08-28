@@ -15,7 +15,6 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
 import catdata.Util;
-import catdata.aql.AqlProver.ProverName;
 
 public class ED<Ty, En, Sym, Fk, Att> {
 	

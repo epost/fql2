@@ -372,6 +372,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			return raw;
 		}
 
+		@SuppressWarnings("unchecked")
 		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<EdExpRaw> eds, @SuppressWarnings("unused") Object o) {
 			this.schema = (SchExp<Object, Object, Object, Object, Object>) schema;
 			this.imports = new HashSet<>(imports);

@@ -1,9 +1,8 @@
 package catdata.aql.exp;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.csv.CSVRecord;
 
 import catdata.Pair;
 import catdata.Util;
@@ -11,7 +10,7 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 
 public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
-	extends TransExpImport<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2,Map<En, List<CSVRecord>>> {
+	extends TransExpImport<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2,Map<En, List<String[]>>> {
 
 	public TransExpCsv(InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src, InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst, List<Pair<LocStr, String>> files, List<Pair<String, String>> options) {
 		super(src, dst, files, options);
@@ -45,14 +44,17 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 	}
 
 	@Override
-	protected void stop(Map<En, List<CSVRecord>> h) throws Exception {
+	protected void stop(Map<En, List<String[]>> h) throws Exception {
 	}
 
 	@Override
-	protected void processEn(En en, Schema<Ty, En, Sym, Fk, Att> sch, Map<En, List<CSVRecord>> h, String q) throws Exception {
-		for (CSVRecord row : h.get(en)) {
-			String gen = row.get(0);
-			String gen2 = row.get(1);
+	protected void processEn(En en, Schema<Ty, En, Sym, Fk, Att> sch, Map<En, List<String[]>> h, String q) throws Exception {
+		for (String[] row : h.get(en)) {
+			if (row.length != 2) {
+				throw new RuntimeException("On " + en + ", encountered a row of length != 2: " + Arrays.toString(row) );
+			}
+			String gen = row[0];
+			String gen2 = row[1];
 			if (gen == null) {
 				throw new RuntimeException("Encountered a NULL generator in column 1 of " + en);
 			}
@@ -64,8 +66,8 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 	}
 
 	@Override
-	protected Map<En, List<CSVRecord>> start(Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
-		Map<En, List<CSVRecord>> ret = InstExpCsv.start(false, map, op, sch);
+	protected Map<En, List<String[]>> start(Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		Map<En, List<String[]>> ret = InstExpCsv.start2(map, op, sch);
 		return ret;
 	}
 	

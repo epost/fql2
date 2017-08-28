@@ -68,6 +68,7 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 	}
 
 	//typesafe by covariance of read-only collections
+	@SuppressWarnings("unchecked")
 	public InstExpRaw(SchExp<?,?,?,?,?> schema, List<LocStr> imports, List<Pair<LocStr, String>> gens, List<Pair<Integer,Pair<RawTerm, RawTerm>>> eqs, List<Pair<String, String>> options) {
 		this.schema =  (SchExp<Ty, En, Sym, Fk, Att>) schema;
 		this.imports = LocStr.set1(imports);
@@ -277,6 +278,7 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		boolean interpret_as_algebra = (boolean) strat.getOrDefault(AqlOption.interpret_as_algebra);
 	
 		if (interpret_as_algebra) {
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			Ctx<En, Collection<String>> ens0 = new Ctx(Util.revS(col.gens.map));
 			if (!col.sks.isEmpty()) {
 				throw new RuntimeException("Cannot have generating labelled nulls with import_as_theory");

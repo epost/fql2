@@ -9,6 +9,7 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -167,7 +168,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	 * @param y the T of Y must be obtained from a call to att or sk only!
 	 * @return not a true normal form, but a 'simplified' term for e.g., display purposes
 	 */
-	public final Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT(Term<Ty, Void, Sym, Void, Void, Void, Y> y) {
+	public synchronized final Term<Ty,En,Sym,Fk,Att,Gen,Sk> reprT(Term<Ty, Void, Sym, Void, Void, Void, Y> y) {
 		Term<Ty,En,Sym,Fk,Att,Gen,Sk> ret = reprT_cache.get(y);
 		if (ret != null) {
 			return ret;
@@ -186,7 +187,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	/**
 	 * @param term of type sort
 	 */
-	public Term<Ty, Void, Sym, Void, Void, Void, Y> intoY(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+	public synchronized Term<Ty, Void, Sym, Void, Void, Void, Y> intoY(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		Term<Ty, Void, Sym, Void, Void, Void, Y> ret = intoY_cache.get(term);
 		if (ret != null) {
 			return ret;
@@ -212,7 +213,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	/**
 	 * @param term term of type entity
 	 */
-		public X intoX(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+		public synchronized X intoX(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 			if (term.gen != null) {
 				return nf(term.asGen());
 			} else if (term.fk != null) {
@@ -312,20 +313,12 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 		return ret;
 	}
 	
-	private Object intify_idx_lock = new Object();
-	private static int intify_idx = 0;
+//	private Object intify_idx_lock = new Object();
+//	private static volatile int intify_idx = 0;
 	
-	private Pair<Map<X,Integer>, Map<Integer, X>> intifyX;
-	public synchronized Pair<Map<X,Integer>, Map<Integer, X>> intifyX() {
-		if (intifyX != null) {
-			return intifyX;
-		}
-		int i = 0;
-		synchronized (intify_idx_lock) {
-			i = intify_idx;
-			intify_idx += size();
-		}
-		intifyX = new Pair<>(new HashMap<>(), new HashMap<>());
+//	private Pair<Map<X,Integer>, Map<Integer, X>> intifyX;
+	public Pair<Map<X,Integer>, Map<Integer, X>> intifyX(int i) {
+		Pair<Map<X,Integer>, Map<Integer, X>> intifyX = new Pair<>(new LinkedHashMap<>(), new LinkedHashMap<>());
 		for (En en : schema().ens) {
 			for (X x : en(en)) {
 				intifyX.first.put(x, i);
@@ -367,7 +360,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	/**
 	 * MUST close this connection
 	 */
-	public Connection createAndLoad(Map<En, List<String>> indices) {
+	public Connection createAndLoad(Map<En, List<String>> indices, Pair<Map<X,Integer>, Map<Integer, X>> I) {
 		try {
 			Connection conn = DriverManager.getConnection("jdbc:h2:mem:db_temp_" + session_id++ + ";DB_CLOSE_DELAY=-1");
 			try (Statement stmt = conn.createStatement()) {
@@ -386,7 +379,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 						stmt.execute(s);
 					}
 					for (X x : en(en1)) {
-						storeMyRecord(conn, x, qqq.first, en1.toString(), "");
+						storeMyRecord(I, conn, x, qqq.first, en1.toString(), "");
 					}
 				}
 				
@@ -408,9 +401,9 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	 * DO NOT close this connection
 	 */
 	//client should not remove
-	public synchronized Connection addIndices(Map<En, List<String>> indices) {
+	public synchronized Connection addIndices(Pair<Map<X,Integer>, Map<Integer, X>> I, Map<En, List<String>> indices) {
 		if (conn == null) {
-			conn = createAndLoad(indices);
+			conn = createAndLoad(indices, I);
 			this.indicesLoaded = new LinkedList<>();
 			for (List<String> l : indices.values()) {
 				this.indicesLoaded.addAll(l);
@@ -435,7 +428,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	}
 	
 	//TODO aql refactor
-		public void storeMyRecord(Connection conn2, X x, List<Chc<Fk, Att>> header, String table, String prefix) throws Exception {
+		public synchronized void storeMyRecord(Pair<Map<X,Integer>, Map<Integer, X>> I, Connection conn2, X x, List<Chc<Fk, Att>> header, String table, String prefix) throws Exception {
 			  List<String> hdrQ = new LinkedList<>();
 			  List<String> hdr = new LinkedList<>();
 			  hdr.add("id");
@@ -453,12 +446,12 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 			  String insertSQL = "INSERT INTO " + prefix + table + "(" + Util.sep(hdr,"," )+ ") values (" + Util.sep(hdrQ,",") + ")";
 			  PreparedStatement ps = conn2.prepareStatement(insertSQL);
 			
-			  ps.setObject(1, intifyX().first.get(x), Types.INTEGER);
+			  ps.setObject(1, I.first.get(x), Types.INTEGER);
 			
 			  for (int i = 0; i < header.size(); i++) {
 				  Chc<Fk,Att> chc = header.get(i);
 				  if (chc.left) {
-					  ps.setObject(i+1+1, intifyX().first.get(fk(chc.l, x)), Types.INTEGER);			   
+					  ps.setObject(i+1+1, I.first.get(fk(chc.l, x)), Types.INTEGER);			   
 				  } else {
 					  Object o = fromTerm(att(chc.r, x));
 					  ps.setObject(i+1+1, o, SqlTypeSide.getSqlType(schema().atts.get(chc.r).second.toString()));			   			  

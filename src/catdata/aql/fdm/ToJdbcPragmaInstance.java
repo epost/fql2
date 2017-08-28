@@ -21,13 +21,13 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 
 	private final String jdbcString;
 	private final String prefix;
-	private final String clazz;
 	private final String idCol;
 
 	
 	private final Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
 	
 	private final int len;
+	private AqlOptions options;
 
 	//TODO aql have pragma for tojdbc inst print queries
 	//TODO aql multi-line quoting doesn't colorize correctly
@@ -41,9 +41,9 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		this.jdbcString = jdbcString;
 		this.prefix = prefix;
 		this.I = I;
-		this.clazz = clazz;
 		idCol = (String) options.getOrDefault(AqlOption.id_column_name);
 		len = (Integer) options.getOrDefault(AqlOption.varchar_length);
+		this.options = options;
 		
 		assertDisjoint(idCol);
 	}
@@ -53,7 +53,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		Statement stmt = conn.createStatement();
 		for (En en : I.schema().ens) {		
 			for (String x : m.get(en).second) {
-				stmt.execute(x.replace("Varchar", "Varchar(" + len + ")"));
+				stmt.execute(x.replace("Varchar", "Varchar(" + len + ")").replace("Nvarchar", "Nvarchar(" + len + ")"));
 			}			
 		}
 		stmt.close();
@@ -70,7 +70,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 			for (En en : I.schema().ens) {
 				List<Chc<Fk, Att>> header = headerFor(en);
 				for (X x : I.algebra().en(en)) {
-					I.algebra().storeMyRecord(conn, x, header, enToString(en), prefix);
+					I.algebra().storeMyRecord(I.algebra().intifyX((int)options.getOrDefault(AqlOption.start_ids_at)), conn, x, header, enToString(en), prefix);
 				}
 			}
 			Statement stmt = conn.createStatement();
@@ -143,7 +143,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 
 	@Override
 	public String toString() {
-		return "export_jdbc_instance " + clazz + " " + jdbcString + " " + prefix + "\n\n" + I;
+		return "Exported " + I.algebra().size() + " rows.";
 	}
 	
 	

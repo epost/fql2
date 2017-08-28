@@ -643,7 +643,7 @@ Conservatively checks that an instance is consistent (e.g., does not prove $1=2$
 
 \section{{\tt export\_csv\_instance [jdbcclass] [jdbcuri] <instance>}} 
 
-Exports an instance as CSV.  The directory name will contain one file named $en.csv$ per entity $en$, and if non-empty, one file named $t.csv$ per type $t$.  The file for $en$ will be a CSV file with a header; the fields of the header will be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.  For types, the file will have a header and one column.  AQL rows that are not constants will be exported using the null string specified in options.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
+Exports an instance as CSV.  The directory name will contain one file named $en.csv$ per entity $en$, and if non-empty, one file named $t.csv$ per type $t$.  The file for $en$ will be a CSV file with a header; the fields of the header will be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.   AQL rows that are not constants will be exported as nulls.
 
 \subsection{{\tt options}}
 Allowed are {\tt timeout}, {\tt always\_reload}, {\tt csv} related options, and {\tt id\_column\_name}.
@@ -651,9 +651,12 @@ Allowed are {\tt timeout}, {\tt always\_reload}, {\tt csv} related options, and 
 %%
 \section{{\tt export\_csv\_transform [filename] <transform>}}
 
-Exports a transform as CSV.  The filename will be a CSV file without a header and with two columns (src, tgt).  AQL rows that are not constants will be exported using the null string specified in options.
+Exports a transform as CSV.  The filename will be a CSV file without a header and with two columns (src, tgt).  
 
-\subsection{options}
+\subsection{options1}
+Allowable options are {\tt timeout} and {\tt always\_reload}  and {\tt csv} related options.
+
+\subsection{options1}
 Allowable options are {\tt timeout} and {\tt always\_reload}  and {\tt csv} related options.
 
 %%%%%%%%%%%
@@ -675,10 +678,12 @@ Allowable options are {\tt timeout}  and {\tt always\_reload} and  {\tt id\_colu
 %%
 
 \section{{\tt export\_jdbc\_transform [jdbcclass] [jdbcuri] [prefix] <transform>}}
-Exports a transform using JDBC.  There will be a two-column table $prefixen$ for each entity $en$ and a two-column 
-table $prefixty$ for each type $ty$.  The two columns will be $srcidcol$ and $dstidcol$, where $idcol$ is the ID column name set in the options.  Every column will be a VARCHAR type whose length is set in the options.  AQL rows that are not constants will be exported as NULL.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
+Exports a transform using JDBC.  There will be a two-column table $prefixen$ for each entity $en$.  The two columns will be $srcidcol$ and $dstidcol$, where $idcol$ is the ID column name set in the options.   When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
 
-\subsection{options}
+\subsection{options1}
+Allowed are {\tt timeout}, {\tt always\_reload},  {\tt id\_column\_name} and {\tt varchar\_length}.
+
+\subsection{options1}
 Allowed are {\tt timeout}, {\tt always\_reload},  {\tt id\_column\_name} and {\tt varchar\_length}.
 
 \chapter{{\tt schema\_colimit}}
@@ -754,17 +759,17 @@ When enabled, mappings and transforms and queries are not checked to be equality
 When enabled, pragmas (which can have side effects, like loading data from CSV files) are always executed and are not cached between runs of the AQL program.
 
 \section{Import options}
-\subsection{{\tt csv\_charset = string}}
-Sets the java character set to be used for CSV import/export.  Should be one of 
-US-ASCII, 	
-ISO-8859-1,  	
-UTF-8, 	
-UTF-16BE,	
-UTF-16LE, 	
-UTF-16.
-
-\subsection{{\tt csv\_line\_delim\_string = string}}
-Sets the line delimiter for use in CSV import/export.
+%\subsection{{\tt csv\_charset = string}}
+%Sets the java character set to be used for CSV import/export.  Should be one of 
+%US-ASCII, 	
+%ISO-8859-1,  	
+%UTF-8, 	
+%UTF-16BE,	
+%UTF-16LE, 	
+%UTF-16.
+%
+%\subsection{{\tt csv\_line\_delim\_string = string}}
+%Sets the line delimiter for use in CSV import/export.
 
 \subsection{{\tt csv\_field\_delim\_char = char}}
 Sets the field delimiter for use in CSV import/export.
@@ -774,20 +779,20 @@ Sets the escape character for use in CSV import/export.
 
 \subsection{{\tt csv\_quote\_char = char}}
 Sets the quote character for use in CSV import/export.
+%
+%\subsection{{\tt csv\_format = string}}
+%Sets the Apache Commons CSV format to use.  Should be one of 
+%    DEFAULT,
+%    EXCEL,
+%    MYSQL,
+%    RFC4180,
+%    TDF.
 
-\subsection{{\tt csv\_format = string}}
-Sets the Apache Commons CSV format to use.  Should be one of 
-    DEFAULT,
-    EXCEL,
-    MYSQL,
-    RFC4180,
-    TDF.
-
-
-\subsection{{\tt csv\_null\_string = string}}
-
-Sets the string that indicates null fields for use in CSV import/export.
-
+%
+%\subsection{{\tt csv\_null\_string = string}}
+%
+%Sets the string that indicates null fields for use in CSV import/export.
+%
 \section{{\tt id\_column\_name = string}}
 Specifies the name of the ID columns for CSV and JDBC import/export.
 

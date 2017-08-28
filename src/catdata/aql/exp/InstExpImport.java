@@ -239,6 +239,7 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 				(Boolean) op.getOrDefault(AqlOption.require_consistency),
 				(Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe));
 
+		@SuppressWarnings("unchecked")
 		Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> J = (Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>>) ((Object) I);
 
 		return J;

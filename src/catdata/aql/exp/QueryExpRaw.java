@@ -144,7 +144,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		private String toString;
 
 		@Override
-		public String toString() {
+		public synchronized String toString() {
 			if (toString != null) {
 				return toString;
 			}
@@ -428,7 +428,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			toString += "\tforeign_keys";
 			temp = new LinkedList<>();
 			for (Pair<Fk2, Trans> sym : Util.alphabetical(fks)) {
-				temp.add(sym.first + " -> { " + sym.second + " }");
+				temp.add(sym.first + " -> " + sym.second + "");
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\n\t\t") + "\n";
 		}
@@ -497,6 +497,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 	 * }
 	 */
 
+	@SuppressWarnings("unchecked")
 	public QueryExpRaw(SchExp<?, ?, ?, ?, ?> c, SchExp<?, ?, ?, ?, ?> d, List<LocStr> imports,
 			List<Pair<LocStr, Pair<Block<En1, Att2>, List<Pair<LocStr, RawTerm>>>>> list, List<Pair<LocStr, Trans>> fks,
 			List<Pair<String, String>> options) {

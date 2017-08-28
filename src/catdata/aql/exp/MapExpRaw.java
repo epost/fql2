@@ -54,6 +54,7 @@ public final class MapExpRaw extends MapExp<String, String, String, String, Stri
 	}
 
 	// typesafe by covariance of read only collections
+	@SuppressWarnings("unchecked")
 	public MapExpRaw(SchExp<?, ?, ?, ?, ?> src, SchExp<?, ?, ?, ?, ?> dst, List<LocStr> imports,
 			List<Pair<LocStr, String>> ens, List<Pair<LocStr, List<String>>> fks,
 			List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {

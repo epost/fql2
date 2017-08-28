@@ -14,6 +14,7 @@ public class InteriorLabel<X> {
 	
 	private Function<X, String> toString;
 	
+	@SuppressWarnings("unchecked")
 	public InteriorLabel<Object> conv() {
 		return (InteriorLabel<Object>) this;
 	}

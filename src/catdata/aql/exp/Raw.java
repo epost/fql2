@@ -3,7 +3,6 @@ package catdata.aql.exp;
 import java.util.List;
 
 import catdata.Ctx;
-import catdata.Util;
 
 public interface Raw {
 

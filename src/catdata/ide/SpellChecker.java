@@ -46,7 +46,7 @@ class SpellChecker extends AbstractParser {
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				words0.add(line);
+				words0.add(line.toLowerCase().trim());
 			}				
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -93,61 +93,23 @@ class SpellChecker extends AbstractParser {
 			if (t.isComment()) {
 				int startOffs = t.getOffset();
 				String comment = t.getLexeme();
-				if (comment.startsWith("//")) {
-					comment = comment.substring(2);
-					startOffs += 2;
-				}
+								
 				Matcher matcher = pattern.matcher(comment); 
-				outer: while (matcher.find()) {
-					String word = matcher.group().toLowerCase();
+				while (matcher.find()) {
+					String word = matcher.group();
+					String word2= word.toLowerCase().replaceAll("[^a-z ]", "");
 					
-					if (word.contains(",") || word.contains(")") || word.contains(")") || word.contains("<") || word.contains(">") || word.contains("+") || word.contains("*") || word.contains("-") || word.contains("_") || word.contains("/") || word.contains("\\") || word.contains("\"") ) {
-						continue;
-					}
-					if (word.endsWith(".") || word.endsWith(",") || word.endsWith("!") || word.endsWith(";") || (word.endsWith(":") && word.length()!=1) || word.endsWith(")") || word.endsWith("]") || word.endsWith("\"") || word.endsWith("'")) {
-						word = word.substring(0, word.length() - 1);
-					} 
-					if (word.startsWith("(") || word.startsWith("[") || word.startsWith("\"") || word.startsWith("'")) {
-						word = word.substring(1);
-						startOffs += 1;
-					}
-					if (word.startsWith("//")) {
-						word = word.substring(2);
-						startOffs += 2;
-					}
-					for (int i = 0; i < 10; i++) {
-						if (word.contains(Integer.toString(i))) {
-							continue outer;
-						}
-					}
-					for (String a : local.apply(new Unit())) {
-						if (word.toLowerCase().equals(a.toLowerCase())) {
-							continue outer;
-						}
-					}
-					
-					
-					
-					if (word.contains("#") || word.contains(")") || word.contains("(") || word.contains(":") || word.contains(",") || word.contains("/") || word.contains("*") || word.contains("-") || word.contains("{") || word.contains("}")) {
-						continue;
-					}
-						
-					try {
-						Integer.parseInt(word);
-						continue;
-					} catch (Exception e) {
-						
-					}
-
-					if (!getWords().contains(word) && !word.contains("<") && !word.contains(">")&& !word.contains("=") && !word.contains("_") && !word.contains("@") && !word.contains("\"") && !word.contains("'") && !word.contains("\\") && !word.contains("%") && !word.contains(".") && !word.contains("$") && !word.contains("^")) {
+					if (word2.length() > 0 && !getWords().contains(word2) && !local.apply(new Unit()).contains(word.replace("`", "").replaceAll("\"", "").replaceAll(".", "").replaceAll(",", "").replaceAll(":", "")))  {
 						spellingError(word, startOffs + matcher.start());
 					} 
+
 				}
+
+				
+			
+				
 			}
 		}
-		//} catch (StackOverflowError err) {
-		//	err.printStackTrace(); //TODO aql wtf
-		//}
 		return result;
 
 	}
