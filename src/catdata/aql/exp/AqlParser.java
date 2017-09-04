@@ -98,6 +98,7 @@ public class AqlParser {
 			"*)", "+", "[", "]" };
 
 	public static final String[] res = new String[] { "md", "quotient_jdbc", "random", "sql", "chase", "check",
+			"import_csv", "quotient_csv",
 			"simple", "assert_consistent", "coproduct_sigma", "coequalize", "html", "quotient", "entity_equations",
 			"schema_colimit", "exists", "constraints", "getMapping", "getSchema", "typeside", "schema", "mapping",
 			"instance", "transform", "query", "pragma", "graph", "exec_jdbc", "exec_js", "exec_cmdline", "literal",
@@ -288,7 +289,7 @@ public class AqlParser {
 								options.between(token("{"), token("}")).optional())
 						.map(x -> new InstExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d));
 
-		Parser ret = Parsers.or(instExpJdbcQuot(), instExpCoProd(), instExpRand(), instExpCoEq(), instExpJdbcAll(),
+		Parser ret = Parsers.or(instExpCsvQuot(), instExpJdbcQuot(), instExpCoProd(), instExpRand(), instExpCoEq(), instExpJdbcAll(),
 				chase, instExpJdbc(), empty, instExpRaw(), var, sigma, delta, distinct, eval, colimInstExp(), dom, cod,
 				instExpCsv(), coeval, parens(inst_ref), instExpQuotient());
 
@@ -999,6 +1000,17 @@ public class AqlParser {
 
 		Parser<InstExpJdbcQuotient> ret = Parsers.tuple(token("quotient_jdbc"), ident, ident, inst_ref.lazy(), p)
 				.map(x -> new InstExpJdbcQuotient(x.b, x.c, x.d, x.e.a, x.e.b));
+
+		return ret;
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static Parser<InstExpCsvQuotient> instExpCsvQuot() {
+		Parser<Pair<List<String>, List<catdata.Pair<String, String>>>> p = Parsers.tuple(ident.many(), options)
+				.between(token("{"), token("}"));
+
+		Parser<InstExpCsvQuotient> ret = Parsers.tuple(token("quotient_csv"), inst_ref.lazy(), p)
+				.map(x -> new InstExpCsvQuotient(x.b, x.c.a, x.c.b));
 
 		return ret;
 	}

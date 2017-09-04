@@ -107,7 +107,6 @@ public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 			String idCol = (String) op.getOrDefault(AqlOption.id_column_name);
 			int startId = (int) op.getOrDefault(AqlOption.start_ids_at);
 
-			
 			for (En en : I.schema().ens) {
 				StringBuffer sb = new StringBuffer();
 				CSVPrinter printer = new CSVPrinter(sb, getFormat(op));
@@ -138,8 +137,9 @@ public class ToCsvPragmaInstance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Pragma {
 			}
 			
 			delete();
+			String ext = (String) op.getOrDefault(AqlOption.csv_file_extension); 
 			for (En en : ens.keySet()) {
-				FileWriter out = new FileWriter(fil + en + ".csv");
+				FileWriter out = new FileWriter(fil + en + "." + ext);
 				out.write(ens.get(en));		
 				out.close();
 			}

@@ -67,8 +67,8 @@ public class SqlTypeSide extends TypeSide<String, String> {
 
 	private static Map<String, String> jts() {
 		Map<String, String> m = new HashMap<>();
-		m.put("Longvarbinary", "java.lang.Object"); //TODO aql
-		m.put("Varbinary", "java.lang.Object"); //TODO aql
+		m.put("Longvarbinary", "[B"); //TODO aql
+		m.put("Varbinary", "[B"); //TODO aql
 		
 		m.put("Bigint", "java.lang.Long");
 		m.put("Boolean", "java.lang.Boolean");
@@ -94,15 +94,18 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		m.put("Custom", "java.lang.Object");
 		m.put("Dom", "java.lang.Object");
 		m.put("Other", "java.lang.Object");
-
+		
+		
+/*
 		m.put("Date", "java.lang.Object"); //TODO aql
 		m.put("Time", "java.lang.Object"); //TODO aql
 		m.put("Timestamp", "java.lang.Object"); //TODO aql
-/*(
+		*/
+
 		m.put("Date", "java.sql.Date");
 		m.put("Time", "java.sql.Time");
 		m.put("Timestamp", "java.sql.Timestamp");
-		*/
+		
 
 		return m;
 	}
@@ -112,14 +115,15 @@ public class SqlTypeSide extends TypeSide<String, String> {
 
 		m.put("Longvarbinary", "return input[0]"); //TODO AQL
 		m.put("Varbinary", "return nput[0]"); //TODO AQL
-
+/*
 		m.put("Date", "return input[0]");
 		m.put("Time", "return input[0]");
 		m.put("Timestamp", "return input[0]");
+		*/
 
-/*		m.put("Date", "return java.sql.Date.valueOf(input[0])");
+		m.put("Date", "return java.sql.Date.valueOf(input[0])");
 		m.put("Time", "return java.sql.Time.valueOf(input[0])");
-		m.put("Timestamp", "return java.sql.Timestamp.valueOf(input[0])"); */
+		m.put("Timestamp", "return java.sql.Timestamp.valueOf(input[0])"); 
 		
 		m.put("Bigint", "return new java.lang.Long(input[0])");
 		m.put("Boolean", "return new java.lang.Boolean(input[0])");

@@ -117,7 +117,7 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
 
 	@Override
 	public String toString() {
-		return "quotient_jdbc " + clazz + " " + jdbcString + " {\n" + Util.sep(queries, "\n") + "\n}"; 
+		return "quotient_jdbc " + clazz + " " + jdbcString + " " + I + " {\n" + Util.sep(queries, "\n") + "\n}"; 
 	} 
 
 	@Override

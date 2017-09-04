@@ -169,21 +169,28 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	}	
 
 	
-	private static <Ty, En, Sym, Fk, Att> JComponent viewSchema(Schema<Ty, En, Sym, Fk, Att> schema) {
+	private  <Ty, En, Sym, Fk, Att> JComponent viewSchema(Schema<Ty, En, Sym, Fk, Att> schema) {
 		Graph<Chc<Ty, En>, Chc<Fk, Att>> sgv = new DirectedSparseMultigraph<>();
 
+		//int i = 0;
 		for (En en : schema.ens) {
+			///if (i >= maxrows) {
+			//	break;
+			//}
 			sgv.addVertex(Chc.inRight(en));
+			//i++;
 		}
-		for (Ty ty : schema.typeSide.tys) {
-			sgv.addVertex(Chc.inLeft(ty));
-		}
-		for (Att att : schema.atts.keySet()) {
-			sgv.addEdge(Chc.inRight(att), Chc.inRight(schema.atts.get(att).first), Chc.inLeft(schema.atts.get(att).second));
-		}
-		for (Fk fk : schema.fks.keySet()) {
-			sgv.addEdge(Chc.inLeft(fk), Chc.inRight(schema.fks.get(fk).first), Chc.inRight(schema.fks.get(fk).second));
-		}
+//		if (i <= maxrows) {
+			for (Ty ty : schema.typeSide.tys) {
+				sgv.addVertex(Chc.inLeft(ty));
+			}
+			for (Att att : schema.atts.keySet()) {
+				sgv.addEdge(Chc.inRight(att), Chc.inRight(schema.atts.get(att).first), Chc.inLeft(schema.atts.get(att).second));
+			}
+			for (Fk fk : schema.fks.keySet()) {
+				sgv.addEdge(Chc.inLeft(fk), Chc.inRight(schema.fks.get(fk).first), Chc.inRight(schema.fks.get(fk).second));
+			}
+	//	}
 
 		if (sgv.getVertexCount() == 0) {
 			return new JPanel();

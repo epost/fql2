@@ -249,6 +249,7 @@ public class IdeOptions {
 				p2.add(viewerFor(o));
 			}		
 		}
+		p.setPreferredSize(theD);
 
 		return p;
 	}
@@ -267,7 +268,7 @@ public class IdeOptions {
 				p2.add(viewerFor(o));
 			}		
 		}
-
+		p.setPreferredSize(theD);
 		return p;
 	}
 	
@@ -276,6 +277,7 @@ public class IdeOptions {
 		JPanel p2 = new JPanel(new GridLayout(size(), 1));
 
 		JSplitPane p = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		p.setPreferredSize(theD);
 
 		p.add(p1);
 		p.add(p2);
@@ -844,6 +846,8 @@ public class IdeOptions {
 	public static void showOptions() {
 		IdeOptions.theCurrentOptions.showOptions0();
 	}
+	
+	static Dimension theD = new Dimension(600,600);
 	public void showOptions0() {
 		IdeOptions o = this; //new IdeOptions(IdeOptions.theCurrentOptions);
 
@@ -853,11 +857,12 @@ public class IdeOptions {
 		jtb.add("Outline", outline());
 		CodeTextPanel cc = new CodeTextPanel("", AqlOptions.getMsg());
 		jtb.addTab("AQL", cc);
+		cc.setPreferredSize(theD);
 
 		jtb.setSelectedIndex(selected_tab);
 		//outline at top otherwise weird sizing collapse on screen
 		JOptionPane pane = new JOptionPane(new JScrollPane(jtb), JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, new String[] { "OK", "Cancel", "Reset", "Save", "Load", "Delete" }, "OK");
-
+		pane.setPreferredSize(theD);
 		JDialog dialog = pane.createDialog(null, "Options");
 		dialog.setModal(false);
 		dialog.setResizable(true);
@@ -892,10 +897,10 @@ public class IdeOptions {
 			}
 
 		});
-		dialog.setPreferredSize(new Dimension(800,800));
+		dialog.setPreferredSize(theD);
 		dialog.pack();
+		dialog.setLocationRelativeTo(null);
 		dialog.setVisible(true);
-		
 	}
 
 	public static void showAbout() {

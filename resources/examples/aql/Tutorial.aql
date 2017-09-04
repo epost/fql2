@@ -11,11 +11,11 @@ html { (* "
 <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> 
  <html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">
  
-	<html>
 	<head>
 		<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />
 		<title>AQL Tutorial</title>
-		<link rel=\"stylesheet\" type=\"text/css\" href=\"http://categoricaldata.net/css/simple.css\" />
+		<link rel=\"stylesheet\" type=\"text/css\" href=\"https://categoricaldata.net/css/simple.css\" />
+		<script src=\"https://categoricaldata.net/js/simple.js\"></script>
 	</head>
 	<body>
 		<h1>AQL Tutorial</h1>
@@ -123,7 +123,9 @@ html { (* " <hr/> <div id=\"instances\">
 			but <i>b.manager</i> does).  Note also that the tables contain nulls: 
 			<i>a.last</i>, for example.  Finally, note that
 			the <i>cummulative_age</i> attribute is automatically populated in the tables.
-		</p>	</div>  " *) }
+		</p>	
+		<p>Tables can be sorted by clicking on their column headers.</p>
+		</div>  " *) }
 
 //Readers are advised that it is easy to create infinite instances on this schema unless
 //care is taken to assign every employee a manager.  Simply adding a new employee d,

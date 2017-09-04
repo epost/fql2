@@ -109,7 +109,7 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 		raw.put("equations", e);
 
 		List<InteriorLabel<Object>> jt = new LinkedList<>();
-		raw.put("java_tys", jt);
+		raw.put("java_types", jt);
 		for (Pair<LocStr, String> p : java_tys_string) {
 			jt.add(new InteriorLabel<>("java_types", new Pair<>(p.first.str, p.second), p.first.loc,
 					x -> x.first + " = " + x.second).conv());

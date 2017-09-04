@@ -109,6 +109,11 @@ instance J_again = import_jdbc "" "" : S {
 instance K = quotient_jdbc "" "" J {
 	"SELECT id, id FROM Employee"
 }
+/*
+instance K2 = quotient_csv J {
+	"/Users/ryan/Desktop/csv_test.csv"
+}
+*/
 
 //import a transform by providing queries for each entity
 transform Jid = import_jdbc "" "" : J -> J {

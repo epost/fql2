@@ -142,6 +142,7 @@ instance i12 = chase literal : s3 { } i3 1
 //import_jdbc -- see JDBC example
 //import_jdbc_all -- see JDBC example
 //quotient_jdbc -- see JDBC example
+//quotient_csv -- see JDBC example (yes, JDBC example)
 //import_csv -- See FinanceColim1 example
 
 instance i13 = literal : s3 {
@@ -222,6 +223,6 @@ pragma p4 = exec_js {
 //coproduct - see PharmaColim2
 //modify - see PharmaColim2
 //colimit - unnecessarily verbose; recommend quotient instead 
-
+//wrap - see manual; recommend quotient instead 
 
 

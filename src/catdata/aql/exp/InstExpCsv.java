@@ -53,35 +53,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 	}
 
 
-	/*
-	public static <Ty, En, Sym, Fk, Att> Map<En, List<CSVRecord>> start(boolean firstRecHeader, Map<String, String> map, AqlOptions op, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
-		String charset0 = (String) op.getOrDefault(AqlOption.csv_charset);
-		Charset charset = Charset.forName(charset0);
-		CSVFormat format = getFormat(op);
-		if (firstRecHeader) {
-			format = format.withFirstRecordAsHeader();
-		}
-		
-		Map<En, List<CSVRecord>> ret = new HashMap<>();
-		for (String k : map.keySet()) {
-			if (!sch.ens.contains(k)) {
-				throw new RuntimeException("Not an entity: " + k);
-			}
-			File file = new File(map.get(k));
-			org.apache.commons.csv.CSVParser parser = org.apache.commons.csv.CSVParser.parse(file, charset, format);
-			List<CSVRecord> rows = parser.getRecords();
-			parser.close();
-			ret.put((En)k, rows);
-		}
-		for (En en : sch.ens) {
-			if (!ret.containsKey(en)) {
-				ret.put(en, new LinkedList<>());
-			}
-		}
-		return ret;
-	} */
-	
-	public static <Ty, En, Sym, Fk, Att> Map<En, List<String[]>> start2(Map<String, String> map, AqlOptions op, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+	public static <Ty, En, Sym, Fk, Att> Map<En, List<String[]>> start2(Map<String, String> map, AqlOptions op, Schema<Ty, En, Sym, Fk, Att> sch, boolean omitCheck) throws Exception {
 		Character sepChar = (Character) op.getOrDefault(AqlOption.csv_field_delim_char);
 		Character quoteChar = (Character) op.getOrDefault(AqlOption.csv_quote_char);
 		Character escapeChar = (Character) op.getOrDefault(AqlOption.csv_escape_char);
@@ -96,8 +68,10 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 	
 		Map<En, List<String[]>> ret = new HashMap<>();
 		for (String k : map.keySet()) {
-			if (!sch.ens.contains(k)) {
-				throw new RuntimeException("Not an entity: " + k);
+			if (!omitCheck) {
+				if (!sch.ens.contains(k)) {
+					throw new RuntimeException("Not an entity: " + k);
+				}
 			}
 			File file = new File(map.get(k));
 			FileReader fileReader = new FileReader(file);
@@ -114,9 +88,11 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 			
 			ret.put((En)k, rows);
 		}
-		for (En en : sch.ens) {
-			if (!ret.containsKey(en)) {
-				ret.put(en, new LinkedList<>(Util.singList(Util.union(sch.attsFrom(en),sch.fksFrom(en)).toArray(new String[0]))));
+		if (!omitCheck) {
+			for (En en : sch.ens) {
+				if (!ret.containsKey(en)) {
+					ret.put(en, new LinkedList<>(Util.singList(Util.union(sch.attsFrom(en),sch.fksFrom(en)).toArray(new String[0]))));
+				}
 			}
 		}
 		return ret;
@@ -124,7 +100,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 	
 	@Override
 	protected Map<En, List<String[]>> start(Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
-		return start2(map, op, sch);
+		return start2(map, op, sch, false);
 	}
 
 	@Override
