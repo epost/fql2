@@ -43,7 +43,7 @@ from reviewing each model in the sequence.
 
 This file introduces a series of AQL constructions and compares those constructions with
 analogous relational constructions where appropriate. We begin with a set of independent schemas
-and produce a single schema that is an an integrated assembly of the three source schemas. The
+and produce a single schema that is an integrated assembly of the three source schemas. The
 following is a table of contents describing the structure of the sequence of AQL constructions
 and concepts developed in this file. The reader should not expect to understand this list at this
 point. Several passes through the tutorial may be required to fully grasp all that is presented. 
@@ -74,7 +74,7 @@ where the results of each construction will be displayed.
      source schemas into a single target schema.
  13. jdbc pragmas, imports and exports -- Integration of AQL with external data sources and 
      targets. Pragmas are a kind that allows commands to be submitted to a JDBC driver to be 
-     executed against an external repository. Imports and exports are features the provide a 
+     executed against an external repository. Imports and exports are features that provide a 
      mechanism for translating between traditional data repositories and AQL semantics.
  14. Migrating data between schemas -- This is the problem of Extracting - Transforming -
      Loading or ETL. This is where we tackle problems that involve moving data between 
@@ -144,7 +144,8 @@ md { (* "
 As mentioned above the schema is declared as an extension of the type side. Notice that in
 contrast with relational algebra there is no notion of an entity or relvar in isolation. The
 closest analog to a relvar in AQL is a schema with a single entity. With that in mind we proceed
-by creating a sequence of schemas, each with a single entity.
+by creating a pair of schemas, each with a single entity, followed by the schema with a pair of
+entities connected by a foreign key.
 
 The first schema we create is minimal in that it contains a single entity Task with a single
 attribute that allows us to label a task. AQL contains a variety of constructions that build on 
@@ -203,9 +204,9 @@ Finally we have a third section that has no analog in SQL systems, the observati
 To understand this section we must take time for a brief digression to introduce the abstract 
 notion of a category. 
 
-AQL is motivated by a branch of mathematics known as category theory. The reader who is
-interested in systematic development of category theory should refer to any one of a number of
-excellent introductions. Here are several such references:
+AQL is motivated by a branch of mathematics known as category theory. The reader who is interested 
+in a systematic development of category theory should refer to any one of a number of excellent
+introductions. Here are several such references:
 
   * _Category Theory_ by Steve Awodey
   * _Category Theory for Computing Science_ by Michael Barr and Charles Wells
@@ -214,16 +215,17 @@ excellent introductions. Here are several such references:
     H. Schanuel.
 
 We begin with an intuitive description of categories and identify specific concrete examples as 
-they relate to AQL. This is followed by a formal description of a category. A category consists 
-of a set of objects connected by arrows. As such it is  related to a directed graph where the 
-objects are nodes and arrows are edges with direction indicated by their associated arrow. In 
-addition to the properties of a directed graph each object of a category is required to have a 
-distinguished arrow that identifies that object and whose source and target are equal to the 
-object it identifies.
+they relate to AQL. This is followed by a formal description of a category.
+
+A category consists of a set of objects connected by arrows. As such, a category is related to a
+directed graph where the objects are nodes and arrows are edges with direction indicated by their
+associated arrow. In addition to the properties of a directed graph each object of a category is
+required to have a distinguished arrow that identifies that object and whose source and target are
+equal to the object it identifies.
 
 Let's consider the three schemas we have so far constructed, but with an empty type side (i.e. no
-attributes). Each could be viewed as an abstract category where the set of objects is the set of
-entities and its arrows are foreign keys. Hence schemas are the first example of an AQL 
+attributes). Each such schema could be viewed as an abstract category where the set of objects is
+the set of entities and its arrows are foreign keys. Hence schemas are the first example of an AQL 
 construction that can be interpreted as a category.
 
 With this in mind `sT` and `sSnT` are both one object categories. By virtue of the fact that the set 
@@ -231,7 +233,7 @@ of identity arrows and the set of objects are essentially the same set (technica
 to each other) we can unambiguously refer to each identity arrow using the same label as its
 corresponding entity. Similarly `sS` (again neglecting attributes) is a two object category with
 one non-identity arrow, the foreign key `fk_HasClass`. This category is sometimes called the \"arrow
-category\:. In future examples we will see that more generally schemas with empty type sides are
+category\". In future examples we will see that more generally schemas with empty type sides are
 not strictly speaking categories, but rather presentations of categories. This means they have
 all the information necessary to generate a category through a process known as saturation.
 
@@ -248,9 +250,8 @@ which the AQL implementation is based:
 
 There is an additional feature of categories that is critical to this discussion and that lies
 at the heart of the expressive power of category theory. This the notion of a path. A category
-by definition contains all paths that can be generated by composing arrows head to 
-tail. This process of generating all paths implied by arrow composition is the aforementioned 
-saturation.
+by definition contains all paths that can be generated by composing arrows head to tail. This
+process of generating all paths implied by arrow composition is the aforementioned saturation.
 
 The order in which one chooses to compose arrows has no effect on the result so AQL provides a
 convenient syntax for indicating a path using the dot notation (elaborated below). Having added
@@ -273,7 +274,7 @@ Here is a formal definition of a category following the presentation in Category
 Computing Sciences chapter 2.
 
 We begin with a formal definition of a directed graph:
-A directed graph `C` is a pair of functions source: `C_0` -> `C_1` and target: `C_0` -> `C_1`. The elements
+A directed graph `C` is a pair of functions source: `C_1` -> `C_0` and target: `C_1` -> `C_0`. The elements
 of `C_0` we call nodes/objects and the elements of `C_1` we call edges/arrows. An arrow path of
 length `n` in `C` is a sequence of arrows arranged head to tail as follows:
 
@@ -302,8 +303,8 @@ The definition of a category extends the definition of a directed graph:
 A category is a graph `C` together with two functions `c: C_2` -> `C_1` and `u: C_0 -> C_1` with
 properties `C-1` through `C-4` below. The function `c` we call composition, and if `(f, g)` is a
 composable pair, `c(f,g)` is written `f.g` and is called the composite of `f` followed by `g`. 
-If `A` is an 
-object of `C`, `u(A)` is denoted `id_A` or just `A`, which is called the identity of the object `A`.
+If `A` is an object of `C`, `u(A)` is denoted `id_A` or just `A`, which is called the identity of
+the object `A`.
 
   * C-1 The source of `f.g` is the source of `f` and the target of `f.g` is the target of `g`.
   * C-2 `(f.g).h = f.(g.h)` whenever either is defined.
@@ -346,7 +347,7 @@ md { (* "
 
 As schemas extend the type side so instances extend schemas. An AQL instance can be
 conceptualized as the data that \"fills\" a schema. Minimally, an instance consists of a set of 
-generators for each entity in the schema. A generator is string used by AQL that serves to
+generators for each entity in the schema. A generator is a string used by AQL that serves to
 identify a particular record in an entity. The user can optionally create equational definitions 
 which associate the generator of one entity with that of another or a generator with an attribute 
 value. In the absence of such an association AQL will create what is called a Skolem term. Skolem 
@@ -430,7 +431,7 @@ md { (* "
 
 Like schemas, instances can also be viewed as categories. To make this clearer consider these
 alternative syntaxes for declaring an instance using the equations keyword. The following are
-both equivalent to the `sSkl` declaration above:
+both equivalent to the `iSkl` declaration above:
 
     instance iSkl = literal : sS {
         generators
@@ -524,23 +525,23 @@ the AQL implementation of such a construction. The idea is that given a particul
 defined by a diagram one can consider all possible examples of that structure in a particular
 category. By that we mean all examples that have the same shape as the diagram in question. Let's
 consider a diagram called a cospan. It has this shape: `t1: A --> X <-- B :t2`. As we were 
-currently talking about the category of instances of the schema `sS`, the objects `A`, `X`, and `B` are 
-instances and the two arrows are transforms. A cospan in this category is any valid collection of
-three instances of `sS` that are related to one another via a pair of transforms.
+currently talking about the category of instances of the schema `sS`, the objects `A`, `X`, and `B`
+are instances and the two arrows are transforms. A cospan in this category is any valid collection
+of three instances of `sS` that are related to one another via a pair of transforms.
 
 Given a choice of instances say `iSklExt` and `iSklCls` we can consider all possible ways of 
-combining `iSklExt` and `iSklCls` with a pair of transforms to get a third instance `X`. The universal 
-way of combining `iSklExt` and `iSklCls` to get an `X` is the one to which all others can be related in 
-a unique way. That is to say, for any `X` and any pair of valid transforms `t1` and `t2` the universal 
-cospan `iA: iSklExt --> iSklCP <-- iSklCls :iB` is the cospan such that there exists a unique 
-transform:
+combining `iSklExt` and `iSklCls` with a pair of transforms to get a third instance `X`. The
+universal way of combining `iSklExt` and `iSklCls` to get an `X` is the one to which all others can
+be related in a unique way. That is to say, for any `X` and any pair of valid transforms `t1` and
+`t2` the universal cospan `iA: iSklExt --> iSklCP <-- iSklCls :iB` is the cospan such that there
+exists a unique transform:
 
     t(t1,t2): iSklCP --> X such that
     iA.t(t1,t2) = t1 and
     iB.t(t1,t2) = t2
 
-for any `X` and any pair of transforms `(t1, t2)`. What this means is that the pair of arrows `t1` and 
-`t2` can be replaced with the single arrow `t(t1,t2)`.
+for any `X` and any pair of transforms `(t1, t2)`. What this means is that the pair of arrows `t1`
+and `t2` can be replaced with the single arrow `t(t1,t2)`.
 
 Conceptually this construction is a generalization of the SQL \"UNION ALL\" statement. It is a 
 generalization in that it applies to a pair of instances of a schema rather than a pair of 
@@ -602,7 +603,7 @@ transform tS2 = literal : iSLnk -> iSklCP {
 instance iSklSklCls2 = coequalize tS1 tS2
 
 md { (* "
-Notice we can summarize the sequence of constructions above this as follows:
+Notice we can summarize the sequence of constructions above as follows:
  
     s0.fk_HasClass <- scLnk0 -> sc0
     s3.fk_HasClass <- scLnk1 -> sc1
@@ -801,11 +802,14 @@ Recalling our earlier description of the instance coproduct which was a cospan o
 schema coproduct is a cospan of schemas and as such includes a schema and a pair of structure
 preserving maps of schemas.
 
-With the sequence of constructions below we reveal that inner structure of the schema colimit.
-This structure consists of a target schema and a schema mapping from each source schema to that 
-target. This means that a schema colimit can be thought of as a diagram of schemas and schema 
-mappings. In this particular case, using the labels assigned below, we have the following 
-diagram:
+With the sequence of constructions below we reveal the inner structure of the particular schema
+colimit we have created. In this case there are three source objects and three associated arrows
+rather than two as was the case with the instance coproduct. We would call this a wide cospan which
+extends the concept of a span to include any number of source objects. Specifically, for this
+schema colimit we have a target schema and a schema mapping which lands (injects) each source schema
+into that landing (target) schema. This means that a schema colimit can be thought of as a diagram
+of schemas and schema mappings. In this particular case, using the labels assigned below, we have
+the following diagram:
 
                      mSToS_T_SnT_Sum        mTToS_T_Snt_Sum
                      sS --------> sS_T_Snt_Sum <-------- sT
@@ -827,16 +831,16 @@ md { (* "
 **Sigma --| Delta --| Pi**
 
 Let's recap where we are. We have a set of three source schemas `sS`, `sT`, and `sSnT`, each with an
-instance; `iSklSklCls1`, `iTsk`, and `iSnT` respectively. We have a target schema `sS_T_SnT_Sum`. We also
-have mappings that take each source schema to the target schema. What we want is a construction
+instance; `iSklSklCls1`, `iTsk`, and `iSnT` respectively. We have a target schema `sS_T_SnT_Sum`. We
+also have mappings that take each source schema to the target schema. What we want is a construction
 similar to eval that can be applied to a mapping rather than a query, but the schema colimit is
 giving us mappings not queries.
 
 Recall that queries generalize mappings. It so happens there are three constructions that are 
-related to eval in the same way mappings are related to queries. In fact eval and it's dual 
-coeval, which we have not discussed, are generalizations of these constructions. To develop these 
-ideas would be a lengthy digression so we will only mention them in passing along with some 
-informal remarks about their properties. 
+related to eval in the same way mappings are related to queries. In fact eval and it's dual coeval,
+which we have not discussed, are generalizations of these constructions. To develop these ideas
+would be a lengthy digression so we will only mention them in passing along with some informal
+remarks about their properties. 
 
 These three constructions are called sigma, pi and delta. They all can be understood as moving 
 instance data through mappings in a way that is analogous to how eval moves instances through 
@@ -850,8 +854,8 @@ through a mapping and generalize sums/unions and products/joins respectively. Gi
 schema mapping, Delta can be paired with sigma on the left and pi on the right to create data 
 migration round trips.
 
-To see this, consider schemas `sA`, `sB`, mapping `m` and instance `iA` of `sA`. Without yet specifying
-specifics the AQL syntax would be:
+To see this, consider schemas `sA`, `sB`, mapping `m` and instance `iA` of `sA`. Without yet
+specifying specifics the AQL syntax would be:
  
     mapping m = literal : sA -> sB {...} 
     instance iB = literal : sB {...}
@@ -1025,10 +1029,10 @@ This first sequence exports the `iSTSpn` created above. Exporting a JDBC instanc
 several sets of commands. First the export issues data definition (DDL) commands against the
 target RDBMS that create tables and foreign keys that are as close as possible to the associated
 AQL schema kind. The second sequence of commands inserts instance records into the tables just 
-created. Since this file can be executed several times we must first check to see if
-the table structure already exists and if so drop those tables. This task is performed using the
-pragma `pCleanUp`. In order to display the results of these commands the set of tables in the 
-target schema are listed using the `pShwTbls` pragma.
+created. Since this file can be executed several times we must first check to see if the table
+structure already exists and if so drop those tables. This task is performed using the pragma
+`pCleanUp`. In order to display the results of these commands the set of tables in the target schema
+are listed using the `pShwTbls` pragma.
 
 First clean out the target tables if present from a previous run.
 " *) }
