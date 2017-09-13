@@ -37,6 +37,7 @@
     <keyword>colimit</keyword>
     <keyword>constants</keyword>
     <keyword>coproduct</keyword>
+    <keyword>coproduct_unrestricted</keyword>
     <keyword>counit</keyword>
     <keyword>counit_query</keyword>
 <keyword>coproduct_sigma</keyword>

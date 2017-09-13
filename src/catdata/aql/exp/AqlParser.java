@@ -39,6 +39,7 @@ import catdata.aql.exp.GraphExp.GraphExpVar;
 import catdata.aql.exp.InstExp.InstExpChase;
 import catdata.aql.exp.InstExp.InstExpCoEq;
 import catdata.aql.exp.InstExp.InstExpCoEval;
+import catdata.aql.exp.InstExp.InstExpCoProdFull;
 import catdata.aql.exp.InstExp.InstExpCoProdSigma;
 import catdata.aql.exp.InstExp.InstExpCod;
 import catdata.aql.exp.InstExp.InstExpColim;
@@ -98,7 +99,7 @@ public class AqlParser {
 			"*)", "+", "[", "]" };
 
 	public static final String[] res = new String[] { "md", "quotient_jdbc", "random", "sql", "chase", "check",
-			"import_csv", "quotient_csv",
+			"import_csv", "quotient_csv", "coproduct_unrestricted",
 			"simple", "assert_consistent", "coproduct_sigma", "coequalize", "html", "quotient", "entity_equations",
 			"schema_colimit", "exists", "constraints", "getMapping", "getSchema", "typeside", "schema", "mapping",
 			"instance", "transform", "query", "pragma", "graph", "exec_jdbc", "exec_js", "exec_cmdline", "literal",
@@ -264,6 +265,12 @@ public class AqlParser {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void instExp() {
+		
+		Parser<InstExpCoProdFull> l2 = Parsers.tuple(token("coproduct_unrestricted"),
+				ident.sepBy(token("+")), token(":"), sch_ref.lazy(), options.between(token("{"), token("}")).optional()).
+				map(x -> new InstExpCoProdFull(x.b, x.d, Util.newIfNull(x.e)));
+
+		
 		Parser<InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>> var = ident.map(InstExpVar::new),
 				empty = Parsers.tuple(token("empty"), token(":"), sch_ref.get()).map(x -> new InstExpEmpty<>(x.c)),
 				sigma = Parsers
@@ -284,12 +291,13 @@ public class AqlParser {
 								options.between(token("{"), token("}")).optional())
 						.map(x -> new InstExpChase(x.b, x.c, Integer.parseInt(x.d),
 								x.e == null ? new LinkedList<>() : x.e)),
+			
 				coeval = Parsers
 						.tuple(token("coeval"), query_ref.lazy(), inst_ref.lazy(),
 								options.between(token("{"), token("}")).optional())
 						.map(x -> new InstExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d));
 
-		Parser ret = Parsers.or(instExpCsvQuot(), instExpJdbcQuot(), instExpCoProd(), instExpRand(), instExpCoEq(), instExpJdbcAll(),
+		Parser ret = Parsers.or(l2, instExpCsvQuot(), instExpJdbcQuot(), instExpCoProd(), instExpRand(), instExpCoEq(), instExpJdbcAll(),
 				chase, instExpJdbc(), empty, instExpRaw(), var, sigma, delta, distinct, eval, colimInstExp(), dom, cod,
 				instExpCsv(), coeval, parens(inst_ref), instExpQuotient());
 
@@ -677,7 +685,7 @@ public class AqlParser {
 
 		Parser<Tuple4<Token, List<LocStr>, Token, TyExp<?, ?>>> l = Parsers.tuple(Parsers.or(token("coproduct"), token("quotient")),
 				locstr.sepBy(token("+")), token(":"), ty_ref.lazy());
-		
+
 		Parser<Tuple4<List<catdata.Pair<Integer, Quad<String, String, String, String>>>, List<catdata.Pair<Integer, catdata.Pair<List<String>, List<String>>>>, List<catdata.Pair<Integer, Quad<String, String, RawTerm, RawTerm>>>, List<catdata.Pair<String, String>>>> 
 		ppp = Parsers.tuple(token("{"), pa, token("}")).map(x -> x.b).optional();
 

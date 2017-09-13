@@ -440,6 +440,9 @@ The expression {\tt coproduct\_sigma}  $F \ I \ G \ J \ : S$ means $\Sigma_F(I) 
 \section{{\tt coproduct <instance> + ... + <instance> : <schema>}}
 Takes the coproduct of the input instances.  Desugars into {\tt coproduct\_sigma} along the identity mapping.
 
+\section{{\tt coproduct\_unrestricted <instance> + ... + <instance> : <schema>}}
+Takes the coproduct of the input instances.  Note that the instances must be names; unlike the other coproduct expressions, there is no requirement that generators not overlap in this expression.
+
 \section{{\tt coequalize <transform> <transform>}}
 Computes the coqualizer of two transforms.
 

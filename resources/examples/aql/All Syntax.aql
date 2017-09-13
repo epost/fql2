@@ -136,6 +136,7 @@ instance i7 = sigma (id s3) i1 { options prover = completion }
 instance i8 = delta (id s3) i1
 instance i9 = coproduct i1 + i1 : s3 { options prover = completion }
 instance i10 = coproduct_sigma (id s3) i1 (id s3) i1 : s3 { options prover = completion }
+instance i20 = coproduct_unrestricted i1 + i2 : s3 { options prover = completion }
 instance i11 = coequalize (id i1) (id i1) { options prover = completion }
 instance i12 = chase literal : s3 { } i3 1
 //random -- see Employees example
