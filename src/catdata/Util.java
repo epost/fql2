@@ -38,12 +38,14 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JViewport;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
@@ -434,6 +436,9 @@ public class Util {
 				continue;
 			}
 			V v = m.get(k);
+			if (v == null) {
+				throw new RuntimeException("Anomaly: please report: k=" + k + " m=" + m + " and m2=" + m2);
+			}
 			if (!v.equals(v2)) {
 				throw new RuntimeException("Collision on " + k + " was " + v + " becomes " + v2);
 			}
@@ -1369,6 +1374,24 @@ public class Util {
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static JList<String> makeList() {
+		JList<String> list = new JList<String>() {
+			private static final long serialVersionUID = 1L;
+	
+			@Override
+			public int locationToIndex(Point location) {
+				int index = super.locationToIndex(location);
+				if (index != -1 && !getCellBounds(index, index).contains(location)) {
+					return -1;
+				} else {
+					return index;
+				}
+			}
+		};
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		return list;
 	}
 
 }

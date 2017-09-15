@@ -1,5 +1,6 @@
 package catdata.ide;
 
+import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Event;
@@ -24,13 +25,19 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.InputMap;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
@@ -61,6 +68,7 @@ import catdata.LineException;
 import catdata.Prog;
 import catdata.Unit;
 import catdata.Util;
+import catdata.aql.Kind;
 import catdata.aql.exp.LocException;
 
 /**
@@ -71,6 +79,130 @@ import catdata.aql.exp.LocException;
  */
 public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> extends JPanel
 		implements SearchListener, Runnable {
+
+	public void showGotoDialog() {
+		JPanel panel = new JPanel(new BorderLayout());
+		
+		JList<String> list = Util.makeList();
+		
+		DefaultListModel<String> model = new DefaultListModel<>();
+		synchronized (parsed_prog_lock) {
+			if (parsed_prog != null) {
+				for (String s : Util.alphabetical(parsed_prog.keySet())) {
+					if (Kind.COMMENT.toString() != parsed_prog.kind(s)) {
+						model.addElement(s);
+					}
+				}
+			}
+		}
+		list.setModel(model);
+		JTextField field = new JTextField();
+		//field.setBorder(BorderFactory.createTitledBorder("Goto definition:"));
+		
+		panel.add(field, BorderLayout.NORTH);
+		panel.add(new JScrollPane(list), BorderLayout.CENTER);
+		
+		JDialog dialog = new JDialog((Dialog) null, "Goto Definition:", true);
+		
+		JPanel bot = new JPanel(new GridLayout(1,4));
+		JButton ok = new JButton("Goto");
+		JButton cancel = new JButton("Cancel");
+		bot.add(new JLabel(""));
+		bot.add(new JLabel(""));
+		bot.add(ok);
+		bot.add(cancel);
+		
+		Boolean[] canceled = new Boolean[1]; 
+		canceled[0] = false;
+		cancel.addActionListener(x -> { canceled[0] = true; dialog.setVisible(false); });
+		ok.addActionListener(x -> dialog.setVisible(false));
+		
+		panel.add(bot, BorderLayout.SOUTH);
+		
+		KeyAdapter adapter = new KeyAdapter() {
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {	
+					dialog.setVisible(false);
+				} else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+					list.clearSelection();
+					dialog.setVisible(false);
+				}
+			}
+			
+		};
+		
+		field.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				SwingUtilities.invokeLater(() -> {
+					DefaultListModel<String> model = new DefaultListModel<>();
+					synchronized (parsed_prog_lock) {
+						if (parsed_prog != null) {
+							for (String s : Util.alphabetical(parsed_prog.keySet())) {
+								if (Kind.COMMENT.toString() != parsed_prog.kind(s)) {
+									if (s.toLowerCase().contains(field.getText().toLowerCase())) {
+										model.addElement(s);
+									}
+								}
+							}
+						}
+					}
+					list.setModel(model);
+				}
+				);
+		}
+		});
+			
+		
+		field.addKeyListener(adapter);
+		list.addKeyListener(adapter);
+		dialog.addKeyListener(adapter);
+		panel.addKeyListener(adapter);
+		bot.addKeyListener(adapter);
+		
+		list.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mousePressed(MouseEvent me) {
+				 if (me.getClickCount() != 2) {
+			            return;
+			     }
+				 dialog.setVisible(false);
+			}
+		});
+		
+		dialog.setContentPane(panel);
+		dialog.setSize(new Dimension(300,600));	
+		dialog.setLocationRelativeTo(null);
+		dialog.setVisible(true);	
+		
+		if (canceled[0]) {
+			return;
+		}
+		
+		String selected = list.getSelectedValue();
+		if (selected == null) {
+			if (list.getModel().getSize() == 1) {
+				selected = list.getModel().getElementAt(0);
+			} else if (!field.getText().isEmpty()) {
+				selected = field.getText();
+			} else {
+				return;
+			}
+		}
+		
+		synchronized (parsed_prog_lock) {
+			if (parsed_prog != null) {
+				Integer line = parsed_prog.getLine(selected);
+				if (line != null) {
+					setCaretPos(line);
+				}
+			}
+		}
+	}
 
 	public void copyAsRtf() {
 		topArea.copyAsRtf();
@@ -114,7 +246,6 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		frame.getRootPane().registerKeyboardAction(escListener, ctrlW, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		frame.getRootPane().registerKeyboardAction(escListener, commandW, JComponent.WHEN_IN_FOCUSED_WINDOW);
 	}
-
 
 	public void setText(String s) {
 		SwingUtilities.invokeLater(() -> {
@@ -357,6 +488,10 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		unfoldall.addActionListener(x -> foldAll(false));
 		topArea.getPopupMenu().add(unfoldall, 0);
 
+		JMenuItem gotox = new JMenuItem("Goto Definition");
+		gotox.addActionListener(x -> showGotoDialog());
+		topArea.getPopupMenu().add(gotox, 0);
+
 		// TODO aql real DAWG?
 		spc = new SpellChecker(z -> reservedWords());
 		topArea.addParser(spc);
@@ -503,12 +638,10 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		}
 	}
 
-	/*void findAction() {
-		if (replaceDialog.isVisible()) {
-			replaceDialog.setVisible(false);
-		}
-		findDialog.setVisible(true);
-	}*/
+	/*
+	 * void findAction() { if (replaceDialog.isVisible()) {
+	 * replaceDialog.setVisible(false); } findDialog.setVisible(true); }
+	 */
 
 	void replaceAction() {
 		if (findDialog.isVisible()) {
@@ -680,7 +813,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		} catch (ParserException e) {
 			int col = e.getLocation().column;
 			int line = e.getLocation().line;
-			
+
 			moveTo(col, line);
 
 			toDisplay = "Syntax error: " + e.getLocalizedMessage();
@@ -724,8 +857,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			} catch (Throwable t) {
 				// t.printStackTrace();
 			}
-		}
-		);
+		});
 	}
 
 	@SuppressWarnings("static-method")

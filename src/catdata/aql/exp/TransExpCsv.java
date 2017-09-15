@@ -67,7 +67,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 
 	@Override
 	protected Map<En, List<String[]>> start(Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
-		Map<En, List<String[]>> ret = InstExpCsv.start2(map, op, sch);
+		Map<En, List<String[]>> ret = InstExpCsv.start2(map, op, sch, false);
 		return ret;
 	}
 	

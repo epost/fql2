@@ -1,3 +1,7 @@
+HTML
+XML
+categoricaldata
+catinf
 equationally
 cartesian
 deconstructing

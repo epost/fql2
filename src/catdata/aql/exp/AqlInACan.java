@@ -79,13 +79,11 @@ class AqlInACan {
 //		System.out.println(makeHtml());
 		System.out.println(openCan(args[0]));
 	}
-
-
 	
 	private static String openCan(String can) {
 		try {
 			Program<Exp<?>> program = AqlParser.parseProgram(can);
-			String html = "<html><head><title>Result</title></head><body>\n\n";
+			String html = "<html><head><script src=\"http://categoricaldata.net/js/simple.js\"></script><title>Result</title></head><body>\n\n";
 			AqlEnv env = new AqlEnv();
 			env.typing = new AqlTyping(program, env.defaults, false);	
 			for (String n : program.order) {
@@ -109,21 +107,25 @@ class AqlInACan {
 		}
 	}
 	
+	private static int i = 0;
+
 	public static <Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> String toHtml(Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I) {
 		String ret = "<div>";
 		
 		Map<En, Pair<List<String>,Object[][]>> tables = new AqlViewer(256).makeEnTables(I.algebra()); //TODO aql hardcoded
 		
 		for (En t : Util.alphabetical(tables.keySet())) {
-			ret += "<table style=\"float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px\" border=\"1\"  cellpadding=\"3\">";
+			ret += "<table id=\"table" + i + "\" style=\"float: left; border: 1px solid black; padding: 5px; border-collapse: collapse; margin-right:10px\" border=\"1\"  cellpadding=\"3\">";
 			ret += "<caption><b>" + t.toString() + "</b></caption>";
 			List<String> cols = tables.get(t).first;
 			cols.remove(0);
 			cols.add(0, "ID");
 			Object[][] rows = tables.get(t).second;
 			ret += "<tr>";
+			int j = 0;
 			for (String col : cols) {
-				ret += "<th>" + col + "</th>";
+				ret += "<th onclick=\"sortTable('table" + i + "', " + j + ")\">" + col + "</th>";
+				j++;
 			}
 			ret += "</tr>";
 			for (Object[] row : rows) {
@@ -135,6 +137,7 @@ class AqlInACan {
 				ret += "</tr>";
 			}
 			ret += "</table>";
+			i++;
 		} 
 		return ret + "</div><br style=\"clear:both;\"/>"; 
 	}

@@ -286,6 +286,18 @@ public class GUI extends JPanel {
 		MenuItem gotoItem = new MenuItem("Goto Line");
 		editMenu.add(gotoItem);
 		
+		MenuItem gotoDef = new MenuItem("Goto Definition");
+		editMenu.add(gotoDef);
+		KeyStroke ctrlShiftR = KeyStroke.getKeyStroke(KeyEvent.VK_R, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+		MenuShortcut fx = new MenuShortcut(ctrlShiftR.getKeyCode(), true);
+		gotoDef.setShortcut(fx);
+		gotoDef.addActionListener(x -> {
+			CodeEditor<?, ?, ?> ed = getSelectedEditor();
+			if (ed != null) {
+				ed.showGotoDialog();
+			}
+		});
+		
 		KeyStroke ctrlF = KeyStroke.getKeyStroke(KeyEvent.VK_F,  Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
 		MenuShortcut f = new MenuShortcut(ctrlF.getKeyCode());
 		findItem.setShortcut(f);
@@ -957,6 +969,9 @@ public class GUI extends JPanel {
 		untitled_count++;
 		if (title == null) {
 			title = "Untitled " + untitled_count + "." + lang.fileExtension();
+		}
+		if (lang.equals(Language.EASIK)) {
+			easik.Easik.main(new String[0]);
 		}
 		CodeEditor<?, ?, ?> c = lang.createEditor(title, untitled_count, content);
 	

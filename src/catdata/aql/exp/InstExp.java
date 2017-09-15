@@ -301,6 +301,130 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		
 	}
 	
+	
+	///////////////////////////////////////////////////////////////////////
+	
+	public static final class InstExpCoProdFull<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> 
+	extends InstExp<Ty,En,Sym,Fk,Att,Pair<String,Gen>,Pair<String,Sk>,ID,Chc<Pair<String,Sk>, Pair<ID, Att>>> {
+
+	public final List<String> Is;
+	
+	public final SchExp<Ty,En,Sym,Fk,Att> sch;
+	
+	public final Map<String, String> options;
+	
+	@Override
+	public Map<String, String> options() {
+		return options;
+	}
+
+	public InstExpCoProdFull(List<String> is, SchExp<Ty, En, Sym, Fk, Att> sch, List<Pair<String, String>> options) {
+		Is = is;
+		if (is.size() != new HashSet<>(Is).size()) {
+			throw new RuntimeException("Duplicate name in " + Util.sep(is, ", "));
+		}
+		this.sch = sch;
+		this.options = Util.toMapSafely(options);
+	}
+	
+	@Override
+	public Collection<Pair<String, Kind>> deps() {
+		Set<Pair<String, Kind>> ret = new HashSet<>(sch.deps());	
+		for(String i : Is) {
+			ret.add(new Pair<>(i, Kind.INSTANCE));
+		}
+		return ret;
+	}
+	
+	@Override
+	public String toString() {
+		return "coproduct_unrestricted " + Util.sep(Is, " ") + " : " + sch;  
+	}
+
+	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((Is == null) ? 0 : Is.hashCode());
+		result = prime * result + ((options == null) ? 0 : options.hashCode());
+		result = prime * result + ((sch == null) ? 0 : sch.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		InstExpCoProdFull<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpCoProdFull<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		if (Is == null) {
+			if (other.Is != null)
+				return false;
+		} else if (!Is.equals(other.Is))
+			return false;
+		if (options == null) {
+			if (other.options != null)
+				return false;
+		} else if (!options.equals(other.options))
+			return false;
+		if (sch == null) {
+			if (other.sch != null)
+				return false;
+		} else if (!sch.equals(other.sch))
+			return false;
+		return true;
+	}
+
+	@Override
+	public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+		for (String x : Is) {
+			SchExp t = new InstExpVar(x).type(G);
+			if (!G.eq(t,sch)) { //TODO aql schema equality
+				throw new RuntimeException("Instance " + x + " has schema " + t + ",\n\nnot " + sch + "\n\nas expected");
+			}
+		}
+		return sch;
+	}
+
+	@Override
+	public Instance<Ty, En, Sym, Fk, Att, Pair<String,Gen>, Pair<String,Sk>, ID, Chc<Pair<String,Sk>, Pair<ID, Att>>> eval(AqlEnv env) {
+		Schema<Ty, En, Sym, Fk, Att> sch0 = sch.eval(env);
+		Collage<Ty, En, Sym, Fk, Att, Pair<String, Gen>, Pair<String, Sk>> col = new Collage<>(sch0.collage());
+		AqlOptions strat = new AqlOptions(options, col, env.defaults);
+		Set<Pair<Term<Ty, En, Sym, Fk, Att, Pair<String, Gen>, Pair<String, Sk>>, 
+		Term<Ty, En, Sym, Fk, Att, Pair<String, Gen>, Pair<String, Sk>>>> eqs0 = new HashSet<>();
+
+		for (String x : Is) {
+			Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I 
+			= (Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>) new InstExpVar(x).eval(env);
+			for (Gen g : I.gens().keySet()) {
+				col.gens.put(new Pair<>(x, g), I.gens().get(g));
+			}
+			for (Sk g : I.sks().keySet()) {
+				col.sks.put(new Pair<>(x, g), I.sks().get(g));
+			}
+			Function<Gen,Pair<String,Gen>> f1 = z -> new Pair<>(x, z); 
+			Function<Sk,Pair<String,Sk>> f2 = z -> new Pair<>(x, z); 
+			for (Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> eq : I.eqs()) {
+				eqs0.add(new Pair<>(eq.first.mapGenSk(f1, f2), eq.second.mapGenSk(f1, f2)));
+				col.eqs.add(new Eq<>(new Ctx<>(), eq.first.mapGenSk(f1, f2), eq.second.mapGenSk(f1, f2)));
+			}
+		}		
+		InitialAlgebra<Ty, En, Sym, Fk, Att, Pair<String,Gen>, Pair<String,Sk>, ID> 
+		initial0 = new InitialAlgebra<>(strat, sch0, col, new It(), Object::toString, Object::toString);			 
+		
+		return new LiteralInstance<>(sch0, col.gens.map, col.sks.map, eqs0, initial0.dp(), initial0, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
+	}
+	
+	
+	
+}
+	
 	///////////////////////////////////////////////////////////////////////
 	
 	//TODO aql the types here are lies

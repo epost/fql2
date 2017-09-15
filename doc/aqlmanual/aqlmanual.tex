@@ -37,7 +37,7 @@ AQL is implemented within the {\it functorial query language integrated developm
 %\includegraphics[width=5in]{initial}
 %\end{center}
 
-The AQL IDE contains a multi-tabbed text file editor that supports saving, opening, copy-paste, undo-redo, RTF export, code folding, outline-view, and search-replace through right-click context menus, menu bars, and keyboard shortcuts.  A variety of options are available in the options menu (text size, default file path, etc.)  Below each AQL text editor is a response text area that displays error and status messages.  The built-in AQL examples are loaded by selecting them from load-example combo-box in the upper-right of the IDE.  AQL programs are executed by pressing the run button in the upper-left of the IDE.  While an AQL program is running its status will be continually updated in the response area.  AQL programs that are running can be manually terminated using the abort menu option.   When an AQL program finishes running, the AQL IDE displays a graphical viewer allowing the result of the AQL program to be visually inspected.  Manual termination of AQL programs is best-effort and terminated AQL programs may leave resources (e.g., JDBC connections) open.
+The AQL IDE contains a multi-tabbed text file editor that supports saving, opening, copy-paste, undo-redo, RTF export, code folding, outline-view, goto-definition, and search-replace through right-click context menus, menu bars, and keyboard shortcuts.  A variety of options are available in the options menu (text size, default file path, etc.)  Below each AQL text editor is a response text area that displays error and status messages.  The built-in AQL examples are loaded by selecting them from load-example combo-box in the upper-right of the IDE.  AQL programs are executed by pressing the run button in the upper-left of the IDE.  While an AQL program is running its status will be continually updated in the response area.  AQL programs that are running can be manually terminated using the abort menu option.   When an AQL program finishes running, the AQL IDE displays a graphical viewer allowing the result of the AQL program to be visually inspected.  Manual termination of AQL programs is best-effort and terminated AQL programs may leave resources (e.g., JDBC connections) open.
 
 \section{Changing the Memory Limit}
 
@@ -72,7 +72,14 @@ html { (* "<html>Hello world<a href=\"main.html\">link</a></html>" *) }
 instance J = ...
 \end{verbatim}
 
-The AQL tutorial, built-in as the Tutorial example, illustrates HTML output.  Alternatively, {\bf markdown} (a simplified way to write HTML) can be used; use the keyword {\tt md} instead of {\tt html}.
+The AQL tutorial, built-in as the Tutorial example, illustrates HTML output.  Alternatively, {\bf markdown} (a simplified way to write HTML) can be used; use the keyword {\tt md} instead of {\tt html}.  Note that AQL emits HTML tables that, when clicked, sort themselves by invoking javascript code from
+\begin{verbatim}
+https://categoricaldata.net/js/simple.js
+\end{verbatim}
+and a CSS style file is at
+\begin{verbatim}
+https://categoricaldata.net/css/simple.js
+\end{verbatim}
 
 \section{Just in time compilation}
 
@@ -433,6 +440,9 @@ The expression {\tt coproduct\_sigma}  $F \ I \ G \ J \ : S$ means $\Sigma_F(I) 
 \section{{\tt coproduct <instance> + ... + <instance> : <schema>}}
 Takes the coproduct of the input instances.  Desugars into {\tt coproduct\_sigma} along the identity mapping.
 
+\section{{\tt coproduct\_unrestricted <instance> + ... + <instance> : <schema>}}
+Takes the coproduct of the input instances.  Note that the instances must be names; unlike the other coproduct expressions, there is no requirement that generators not overlap in this expression.
+
 \section{{\tt coequalize <transform> <transform>}}
 Computes the coqualizer of two transforms.
 
@@ -460,6 +470,9 @@ Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload
 
 \section{{\tt quotient\_jdbc [jdbcclass] [jdbcuri] <instance>}}
 Expects a list of (single) SQL commands inside a section.  Each SQL query should return a 2 column table, where each column has a generator from the input instance.  The union of these tables defines an equivalence relation and this expression quotients the input instance by this relation.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
+
+\section{{\tt quotient\_csv <instance>}}
+Expects a list of filenames inside a section.  Each file should have 2 columns, where each column has a generator from the input instance.  The union of these files defines an equivalence relation and this expression quotients the input instance by this relation. 
 
 \section{{\tt import\_jdbc\_all [jdbcclass] [jdbcuri]}}
 
@@ -646,7 +659,7 @@ Conservatively checks that an instance is consistent (e.g., does not prove $1=2$
 Exports an instance as CSV.  The directory name will contain one file named $en.csv$ per entity $en$, and if non-empty, one file named $t.csv$ per type $t$.  The file for $en$ will be a CSV file with a header; the fields of the header will be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.   AQL rows that are not constants will be exported as nulls.
 
 \subsection{{\tt options}}
-Allowed are {\tt timeout}, {\tt always\_reload}, {\tt csv} related options, and {\tt id\_column\_name}.
+Allowed are {\tt timeout}, {\tt always\_reload}, {\tt csv} related options, and {\tt id\_column\_name}, and {\it start\_ids\_at}.
 
 %%
 \section{{\tt export\_csv\_transform [filename] <transform>}}
@@ -654,15 +667,15 @@ Allowed are {\tt timeout}, {\tt always\_reload}, {\tt csv} related options, and 
 Exports a transform as CSV.  The filename will be a CSV file without a header and with two columns (src, tgt).  
 
 \subsection{options1}
-Allowable options are {\tt timeout} and {\tt always\_reload}  and {\tt csv} related options.
+Allowable options are {\tt timeout} and {\tt always\_reload}  and {\tt csv} related options, and {\tt start\_ids\_at}.  Note that {\tt start\_ids\_at} is not inherited from the source instance.
 
 \subsection{options1}
-Allowable options are {\tt timeout} and {\tt always\_reload}  and {\tt csv} related options.
+Allowable options are {\tt timeout} and {\tt always\_reload}  and {\tt csv} related options, and {\it start\_ids\_at}.  Note that {\tt start\_ids\_at} is not inherited from the source instance.
 
 %%%%%%%%%%%
 \section{{\tt export\_jdbc\_instance <instance> [jdbcclass] [jdbcuri] [prefix] }}
 
-Exports an instance (on SQL typeside) using JDBC.  There will be a table $prefixen$ for each entity $en$.  The columns will be the attributes and foreign keys whose domain is $en$, and an ID column whose name is set in options.  AQL rows that are not constants will be exported as NULL.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
+Exports an instance (on SQL typeside) using JDBC.  There will be a table $prefixen$ for each entity $en$.  The columns will be the attributes and foreign keys whose domain is $en$, and an ID column whose name is set in options.  AQL rows that are not constants will be exported as NULL.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options, and {\tt start\_ids\_at}.
 
 \subsection{options}
 Allowable options are {\tt timeout}  and {\tt always\_reload} and  {\tt id\_column\_name} and {\tt varchar\_length}.
@@ -681,10 +694,9 @@ Allowable options are {\tt timeout}  and {\tt always\_reload} and  {\tt id\_colu
 Exports a transform using JDBC.  There will be a two-column table $prefixen$ for each entity $en$.  The two columns will be $srcidcol$ and $dstidcol$, where $idcol$ is the ID column name set in the options.   When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
 
 \subsection{options1}
-Allowed are {\tt timeout}, {\tt always\_reload},  {\tt id\_column\_name} and {\tt varchar\_length}.
-
-\subsection{options1}
-Allowed are {\tt timeout}, {\tt always\_reload},  {\tt id\_column\_name} and {\tt varchar\_length}.
+Allowed are {\tt timeout}, {\tt always\_reload},  {\tt id\_column\_name} and {\tt varchar\_length}, and {\tt start\_ids\_at}.  Note that {\tt start\_ids\_at} is not inherited from the source instance.
+\subsection{options2}
+Allowed are {\tt timeout}, {\tt always\_reload},  {\tt id\_column\_name} and {\tt varchar\_length, and {\tt start\_ids\_at}}.  Note that {\tt start\_ids\_at} is not inherited from the target instance.
 
 \chapter{{\tt schema\_colimit}}
 
@@ -727,6 +739,9 @@ A $Ctx(name,path)$ specifying that the foreign key named by name can be deleted 
 \subsection{{\tt remove attributes}}
 
 A $Ctx(name,\lambda x. \ term)$ specifying that the attribute named by name can be deleted by replacing all occurrences of it by the given term.  AQL checks if the removal is semantics-preserving. 
+		
+\section{{\tt wrap <schema\_colimit> <mapping> <mapping>}}
+In $wrap X F G$, $F$ and $G$ must be inverses, and the result is the image of $X$ under $F$.
 		
 \chapter{{\tt options}}
 
@@ -779,6 +794,9 @@ Sets the escape character for use in CSV import/export.
 
 \subsection{{\tt csv\_quote\_char = char}}
 Sets the quote character for use in CSV import/export.
+
+\subsection{{\tt csv\_file\_extension}}
+Sets the file extension to expect during CSV import.
 %
 %\subsection{{\tt csv\_format = string}}
 %Sets the Apache Commons CSV format to use.  Should be one of 
@@ -798,6 +816,10 @@ Specifies the name of the ID columns for CSV and JDBC import/export.
 
 \section{{\tt varchar\_length = number}}
 Specifies the length of the VARCHAR fields to use for JDBC export.
+
+\section{ {\tt start\_ids\_at = integer}}
+
+Specifies the integer to use as the initial integer when exporting data.
 
 \section{ {\tt import\_as\_theory = boolean}}
 
@@ -943,7 +965,6 @@ Queries executed by translation to SQL can store any computed indicies for futur
 \section{{\tt query\_remove\_redundancy = boolean}}
 
 Sets whether redundant joins (i.e., containing a binding $v$ and an equation $v = e$ where $v \notin e$) should be eliminated.
-
 \section{Coproduct options}
 
 The generators and labelled nulls of instances participating in a coproduct are required to be unique.  The following two options disable the uniqueness check.  These options are marked unsafe because they can result in an instance that is not a coproduct, but is rather a coproduct followed by a quotient.

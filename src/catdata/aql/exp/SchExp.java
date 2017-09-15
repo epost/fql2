@@ -200,7 +200,7 @@ public abstract class SchExp<Ty,En,Sym,Fk,Att> extends Exp<Schema<Ty,En,Sym,Fk,A
 
 		@Override
 		public String toString() {
-			return "schemaOf " + inst + "]";
+			return "schemaOf " + inst;
 		}
 
 		@Override

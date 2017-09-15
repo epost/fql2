@@ -37,6 +37,7 @@
     <keyword>colimit</keyword>
     <keyword>constants</keyword>
     <keyword>coproduct</keyword>
+    <keyword>coproduct_unrestricted</keyword>
     <keyword>counit</keyword>
     <keyword>counit_query</keyword>
 <keyword>coproduct_sigma</keyword>
@@ -85,6 +86,7 @@
     <keyword>path_equations</keyword>
 <keyword>quotient</keyword>
 <keyword>quotient_jdbc</keyword>
+<keyword>quotient_csv</keyword>
     <keyword>random</keyword>
 <keyword>remove</keyword>
 <keyword>rename</keyword>

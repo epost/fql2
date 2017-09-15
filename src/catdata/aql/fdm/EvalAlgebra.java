@@ -69,7 +69,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 					return map;
 				}
 				map.put(v, x);
-				r = tail;
+				r = r.tail;
 			}
 		}
 
@@ -92,6 +92,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		}
 
 		public Row(En2 en2) {
+			Util.assertNotNull(en2);
 			this.en2 = en2;
 			this.v = null;
 			this.x = null;
@@ -102,7 +103,11 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 			this.v = v;
 			this.x = x;
 			this.tail = tail;
+			Util.assertNotNull(v,x,tail);
 			this.en2 = null;
+			if (tail.equals(this) || tail == this) {
+				Util.anomaly();
+			}
 		}
 
 		public static <X, En2> Row<En2, X> mkRow(Ctx<Var, X> ctx, En2 en2) {

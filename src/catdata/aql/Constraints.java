@@ -168,11 +168,15 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 			Query<Ty, En, Sym, Fk, Att, WHICH, Unit, Void> Q = ed.Q;
 			EvalInstance<Ty, En, Sym, Fk, Att, Gen, Sk, WHICH, Unit, Void, X, Y> QI = new EvalInstance<>(Q, I, options);
 			outer: for (Row<WHICH, X> e : QI.algebra().en(WHICH.FRONT)) {
+				System.out.println("e is " + e);
 				for (Row<WHICH, X> a : QI.algebra().en(WHICH.BACK)) {
+					System.out.println("a is " + a);
 					if (QI.algebra().fk(new Unit(), a).equals(e)) {
+						System.out.println("continued");
 						continue outer;
 					}
 				}
+				System.out.println("Added");
 				T.add(new Pair<>(ed, e));
 			}
 		}
