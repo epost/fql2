@@ -72,6 +72,7 @@ import catdata.aql.exp.QueryExp.QueryExpId;
 import catdata.aql.exp.QueryExp.QueryExpVar;
 import catdata.aql.exp.QueryExpRaw.Block;
 import catdata.aql.exp.QueryExpRaw.Trans;
+import catdata.aql.exp.SchExp.SchExpCod;
 import catdata.aql.exp.SchExp.SchExpColim;
 import catdata.aql.exp.SchExp.SchExpEmpty;
 import catdata.aql.exp.SchExp.SchExpInst;
@@ -96,7 +97,7 @@ import catdata.aql.exp.TyExp.TyExpVar;
 public class AqlParser {
 
 	public static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(", ")", "=", "->", "@", "(*",
-			"*)", "+", "[", "]" };
+			"*)", "+", "[", "]", "<-" };
 
 	public static final String[] res = new String[] { "md", "quotient_jdbc", "random", "sql", "chase", "check",
 			"import_csv", "quotient_csv", "coproduct_unrestricted",
@@ -199,7 +200,8 @@ public class AqlParser {
 				empty = Parsers.tuple(token("empty"), token(":"), ty_ref.get()).map(x -> new SchExpEmpty<>(x.c)),
 				inst = Parsers.tuple(token("schemaOf"), inst_ref.lazy()).map(x -> new SchExpInst<>(x.b)),
 				colim = Parsers.tuple(token("getSchema"), colim_ref.lazy()).map(x -> new SchExpColim<>(x.b)),
-				ret = Parsers.or(inst, empty, schExpRaw(), var, colim, parens(sch_ref));
+				cod = Parsers.tuple(token("dst"), query_ref.lazy()).map(x -> new SchExpCod<>(x.b)),
+				ret = Parsers.or(inst, empty, schExpRaw(), var, colim, parens(sch_ref), cod);
 
 		sch_ref.set(ret);
 	}
@@ -408,6 +410,18 @@ public class AqlParser {
 				}
 				return ret;
 			});
+	/*
+	private static <X> Parser<List<catdata.Pair<LocStr, X>>> env_backwards(Parser<X> p, String t) {
+		return Parsers.tuple(Parsers.tuple(p, token(t)), locstr.many1()).many().map(x -> {
+			List<catdata.Pair<LocStr, X>> ret = new LinkedList<>();
+			for (Pair<Pair<X, Token>, List<LocStr>> y : x) {
+				for (LocStr z : y.b) {
+					ret.add(new catdata.Pair<>(z, y.a.a));
+				}
+			}
+			return ret;
+		});
+	} */
 
 	private static <X> Parser<List<catdata.Pair<LocStr, X>>> env(Parser<X> p, String t) {
 		return Parsers.tuple(locstr.many1(), Parsers.tuple(token(t), p)).many().map(x -> {
@@ -1121,11 +1135,15 @@ public class AqlParser {
 	}
 
 	private static Parser<TransExpRaw> transExpRaw() {
-		Parser<List<catdata.Pair<LocStr, RawTerm>>> gens = Parsers.tuple(token("generators"), env(term(), "->"))
+		Parser<List<catdata.Pair<LocStr, RawTerm>>> gens1 = Parsers.tuple(token("generators"), env(term(), "->"))
 				.map(x -> x.b);
+	//	Parser<List<catdata.Pair<LocStr, RawTerm>>> gens2 = Parsers.tuple(token("generators"), env_backwards(term(), "<-"))
+		//		.map(x -> x.b);
+		//Parser<List<catdata.Pair<LocStr, RawTerm>>> gens = Parsers.or(gens1, gens2);
+	
 
 		Parser<Tuple3<List<LocStr>, List<catdata.Pair<LocStr, RawTerm>>, List<catdata.Pair<String, String>>>> pa = Parsers
-				.tuple(imports, gens.optional(), options);
+				.tuple(imports, gens1.optional(), options);
 
 		Parser<Tuple5<Token, Token, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>, Token>> l = Parsers
 				.tuple(token("literal"), token(":"), inst_ref.lazy().followedBy(token("->")), inst_ref.lazy(),
@@ -1139,7 +1157,10 @@ public class AqlParser {
 
 	private static Parser<Trans> trans() {
 		Parser<List<catdata.Pair<LocStr, RawTerm>>> gens = env(term(), "->");
-
+		//Parser<List<catdata.Pair<LocStr, RawTerm>>> gens2 = env_backwards(term(), "<-");
+		
+		//Parser<List<catdata.Pair<LocStr, RawTerm>>> gens = Parsers.or(gens2, gens1);
+		
 		Parser<Pair<List<catdata.Pair<LocStr, RawTerm>>, List<catdata.Pair<String, String>>>> pa = Parsers
 				.tuple(gens.optional(), options);
 

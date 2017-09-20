@@ -86,7 +86,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 			 
 			 fileReader.close();
 			
-			ret.put((En)k, rows);
+			 ret.put((En)k, rows);
 		}
 		if (!omitCheck) {
 			for (En en : sch.ens) {
@@ -111,6 +111,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 	@Override
 	protected void joinedEn(Map<En, List<String[]>> map, En en, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
 		String idCol = (String) op.getOrDefault(AqlOption.id_column_name);
+		boolean autoGenIds = (Boolean) op.getOrDefault(AqlOption.csv_generate_ids);
 		if (map.size() == 0) {
 			throw new RuntimeException("No header in CSV file for " + en);
 		}
@@ -119,9 +120,17 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 			m.put(map.get(en).get(0)[i], i);
 		}
 		
+		int startId = 0;
 		for (String[] row : map.get(en).subList(1, map.get(en).size())) {
-			Gen l0 = (Gen) row[m.get(idCol)];
-
+			Gen l0;
+			if (autoGenIds && !m.containsKey(idCol)) {
+				l0 = (Gen) ("" + startId++);
+			} else if (!autoGenIds && !m.containsKey(idCol)) {
+				throw new RuntimeException("ID column " + idCol + " not found in headers " + m.keySet() + ". \n\nPossible solution: set csv_generate_ids=true to auto-generate IDs.\n\nPossible solution: rename the headers in the CSV file.\n\nPossible solution: add an ID column to the CSV file.");
+			} else {
+				l0 = (Gen) row[m.get(idCol)];
+			}
+			
 			ens0.get(en).add(l0);
 			
 			for (Fk fk : sch.fksFrom(en)) {
@@ -136,7 +145,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 				if (!atts0.containsKey(l0)) {
 					atts0.put(l0, new Ctx<>());
 				}
-				Object o = row[m.get((String) att)];
+				String o = row[m.get((String) att)];
 				Term<Ty, Void, Sym, Void, Void, Void, Null<?>> r 
 				= objectToSk(sch, o, l0.toString(), att, tys0, extraRepr, true); 
 				atts0.get(l0).put(att, r);
