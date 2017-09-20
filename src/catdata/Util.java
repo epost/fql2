@@ -59,6 +59,8 @@ import javax.swing.text.JTextComponent;
 
 import org.apache.commons.collections15.CollectionUtils;
 
+import catdata.aql.It.ID;
+
 public class Util {
 
 	public static String quote(String s) {
@@ -833,12 +835,20 @@ public class Util {
 	}
 
 	public static <X, Y> Y lookup(Set<Pair<X, Y>> s, X x) {
+		Y y = lookupNull(s, x);
+		if (y == null) {
+			throw new RuntimeException("Cannot find " + nice(x.toString()) + " in " + nice(s.toString()));
+		}
+		return y;
+	}
+	
+	public static <X, Y> Y lookupNull(Set<Pair<X, Y>> s, X x) {
 		for (Pair<X, Y> o : s) {
 			if (o.first.equals(x)) {
 				return o.second;
 			}
 		}
-		throw new RuntimeException("Cannot find " + nice(x.toString()) + " in " + nice(s.toString()));
+		return null;
 	}
 
 	public static <X, Y, Z> Set<Pair<X, Z>> compose(Set<Pair<X, Y>> x, Set<Pair<Y, Z>> y) {
@@ -875,6 +885,20 @@ public class Util {
 
 		return ret;
 	}
+	
+	public static <X, Y> Map<X, Set<Y>> convertMulti(Set<Pair<X, Y>> t) {
+		Map<X, Set<Y>> ret = new HashMap<>();
+
+		for (Pair<X, Y> p : t) {
+			if (!ret.containsKey(p.first)) {
+				ret.put(p.first, new HashSet<>());
+			}
+			ret.get(p.first).add(p.second);
+		}
+
+		return ret;
+	}
+
 
 	public static <X, Y> void putSafely(Map<X, Y> ret, X k, Y v) {
 		if (ret.containsKey(k) && !ret.get(k).equals(v)) {
@@ -1392,6 +1416,15 @@ public class Util {
 		};
 		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		return list;
+	}
+
+	public static <X,Y> boolean containsKey(Set<Pair<X,Y>> set, X x) {
+		for (Pair<X, Y> p : set) {
+			if (p.first.equals(x)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

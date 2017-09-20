@@ -39,6 +39,7 @@ public final class AqlOptions {
 		csv_escape_char,
 		csv_quote_char,
 		csv_file_extension,
+		csv_generate_ids,
 		id_column_name,
 		always_reload,
 		varchar_length,
@@ -178,6 +179,8 @@ public final class AqlOptions {
 	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
+		case csv_generate_ids:
+			return false;
 		case csv_file_extension:
 			return "csv";
 		case start_ids_at:
@@ -317,6 +320,8 @@ public final class AqlOptions {
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case csv_generate_ids:
+			return op.getBoolean(map);
 		case csv_file_extension:
 			return op.getString(map);
 		case schema_only:

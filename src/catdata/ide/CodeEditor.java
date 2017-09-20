@@ -647,6 +647,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		if (findDialog.isVisible()) {
 			findDialog.setVisible(false);
 		}
+		
 		replaceDialog.setVisible(true);
 	}
 
