@@ -84,8 +84,10 @@ extends Instance<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y>
 			return true;
 		} else if (term.fk != null) {
 			return false;
+		} else if (term.sym != null) {
+			return true;
 		}
-		throw new RuntimeException("Anomaly: please report");
+		throw new RuntimeException("Anomaly: please report: EvalInstance.atType called with " + term);
 	}
 
 	@Override
