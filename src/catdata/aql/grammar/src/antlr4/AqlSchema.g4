@@ -1,3 +1,6 @@
+parser grammar AqlSchema;
+options { tokenVocab=AqlLexerRules; }
+
 schemaId: IDENTIFIER;
 schemaKindAssignment: 'schema' schemaId '=' schemaDef ;
 schemaDef:
@@ -6,7 +9,7 @@ schemaDef:
     | 'dst' queryId                       #Schema_Destination
     | 'literal' ':' typesideId
             '{' schemaLiteralExpr '}'     #Schema_Literal
-    | 'getSchema' shemaColimitId          #Schema_GetSchemaColimit
+    | 'getSchema' schemaColimitId          #Schema_GetSchemaColimit
     ;
 schemaKind: schemaId | '(' schemaDef ')';
 

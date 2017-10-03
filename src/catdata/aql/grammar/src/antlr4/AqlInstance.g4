@@ -1,3 +1,6 @@
+parser grammar AqlInstance;
+options { tokenVocab=AqlLexerRules; }
+
 instanceId: IDENTIFIER;
 instanceKindAssignment: 'instance' instanceId '=' instanceDef ;
 instanceDef:
@@ -17,10 +20,10 @@ instanceDef:
   | 'coequalize' transformKind transformKind
   | 'colimit' graphKind schemaKind '{'
       'nodes' (instanceId '->' instanceDef)+
-      'edges' (arrowId '->' transformKind)+
+      'edges' (schemaArrowId '->' transformKind)+
       ('options' (timeoutOption | 'static_typing' '=' boolean)*)?
       '}'
-  | 'import_jdbc' jdbcClass jdbcUri ":" schemaDef '{' instanceImportJdbc '}'
+  | 'import_jdbc' jdbcClass jdbcUri ':' schemaDef '{' instanceImportJdbc '}'
   | 'quotient_jdbc' jdbcClass jdbcUri  schemaDef '{' instanceSql+ '}'
   | 'quotient_csv' schemaDef '{' instanceFile+ '}'
   | 'import_jdbc_all' jdbcClass jdbcUri
@@ -46,33 +49,36 @@ instanceLiteralExpr:
   ('generators' (instanceGen ':' schemaEntityId)+)?
   ('equations' instanceEquation*)?
   ('multi_equations' instanceMultiEquation*)?
-  ('options' timeout | proverOptions
+  ('options' timeoutOption | proverOptions
             | requireConsistencyOption
-            | interpretAsAlgebraOption)*)?
+            | interpretAsAlgebraOption*)?
   ;
 
 instanceImportJdbc:
   (schemaEntityId | schemaAttributeId | schemaForeignId | typesideTypeId)
   instanceSql
   ('options' (
-      timeout | proverOptions
+      timeoutOption | proverOptions
     | alwaysReloadOption | requireConsistencyOption)*)?
   ;
 
 jdbcClass: STRING;
-jdbcUri: STRING:
+jdbcUri: STRING;
 instanceSql: STRING;
 instanceFile: STRING;
-instanceEntityFile: entityId '->' instanceFile;
+instanceEntityFile: schemaEntityId '->' instanceFile;
 
 instanceGen: IDENTIFIER;
 
 instanceEquation: instancePath '=' instancePath;
 
 instanceMultiEquation:
-  equationId '->' '{' instanceMultiValue (',' instanceMultiValue)* '}';
+  instanceEquationId '->' '{' instanceMultiValue (',' instanceMultiValue)* '}';
+
+instanceEquationId: STRING;
 
 instanceMultiValue:
+  instancePath STRING;
 
 instancePath:
   instanceArrowId

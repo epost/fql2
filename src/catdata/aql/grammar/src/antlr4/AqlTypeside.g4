@@ -1,3 +1,5 @@
+parser grammar AqlTypeside;
+options { tokenVocab=AqlLexerRules; }
 
 typesideId: IDENTIFIER;
 
@@ -46,11 +48,10 @@ typesideEquations:
   'forall' typesideLambdaSig;
 
 typesideLambdaSig:
-  IDENTIFIER (',' IDENTIFIER) '.' typesideEval) '=' typesideEval);
+  IDENTIFIER (',' IDENTIFIER) '.' typesideEval '=' typesideEval;
 
 typesideEval:
     NUMBER                       #Typeside_EvalNumber
   | IDENTIFIER                   #Typeside_EvalGen
   | IDENTIFIER '(' typesideEval (',' typesideEval)* ')'      #Typeside_EvalFunction
   ;
- 

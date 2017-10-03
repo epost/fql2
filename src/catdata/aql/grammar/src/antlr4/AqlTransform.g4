@@ -1,3 +1,5 @@
+parser grammar AqlTransform;
+options { tokenVocab=AqlLexerRules; }
 
 
 transformId: IDENTIFIER;
@@ -7,27 +9,29 @@ transformDef:
     | '[' transformId ';' transformId ']'    #Transform_Compose
     | 'distinct' transformId                 #Transform_Destination
     | 'delta' mappingKind transformId        #Transform_Delta
-    | 'sigma' mappingKind transformId        #Transform_Sigma
-        transformSigmaSection? transformSigmaSection?
+    | 'sigma' mappingKind transformId
+        transformSigmaSection?
+        transformSigmaSection?               #Transform_Sigma
     | 'eval' queryId transformId             #Transform_Eval
-    | 'coeval' queryId transformId           #Transform_Coeval
-        transformCoevalSection? transformCoevalSection?
-    | 'unit' mappingKind instanceId          #Transform_Unit
-        transformUnitSection?
-    | 'counit' mappingKind instanceId        #Transform_Counit
-        transformUnitSection?
-    | 'unit_query' queryKind instanceId      #Transform_UnitQuery
-        transformUnitQuerySection?
-    | 'counit_query' queryKind instanceId    #Transform_CounitQuery
-        transformCounitQuerySection?
+    | 'coeval' queryId transformId
+        transformCoevalSection?
+        transformCoevalSection?              #Transform_Coeval
+    | 'unit' mappingKind instanceId
+        transformUnitSection?                #Transform_Unit
+    | 'counit' mappingKind instanceId
+        transformUnitSection?                #Transform_Counit
+    | 'unit_query' queryKind instanceId
+        transformUnitQuerySection?           #Transform_UnitQuery
+    | 'counit_query' queryKind instanceId
+        transformCounitQuerySection?         #Transform_CounitQuery
     | 'import_jdbc' transformJdbcClass transformJdbcUri ':'
-          instanceId '->' instanceId         #Transform_ImportJdbc
-        transformImportJdbcSection?
-    | 'import_csv' transformCsvFile ':'
-          instanceId '->' instanceId         #Transform_ImportCsv
-        transformImportCsvSection?
-    | 'literal' ':' instanceId '->' instanceId #Transform_Literal
-        transformLiteralSection
+        instanceId '->' instanceId
+        transformImportJdbcSection?         #Transform_ImportJdbc
+    | 'import_csv' transformFile ':'
+        instanceId '->' instanceId
+        transformImportCsvSection?          #Transform_ImportCsv
+    | 'literal' ':' instanceId '->' instanceId
+        transformLiteralSection             #Transform_Literal
     ;
 transformKind: transformId | '(' transformDef ')';
 
@@ -36,18 +40,18 @@ transformJdbcUri: STRING;
 transformFile: STRING;
 transformSqlExpr: STRING;
 
-transformSigmaSection: '{' ('options' (proverOption)?)? '}';
-transformCoevalSection: '{' ('options' (proverOption)?)? '}';
-transformUnitSection: '{' ('options' (proverOption)?)? '}';
-transformUnitQuerySection: '{' ('options' (proverOption)?)? '}';
-transformCounitQuerySection: '{' ('options' (proverOption)?)? '}';
+transformSigmaSection: '{' ('options' (proverOptions)?)? '}';
+transformCoevalSection: '{' ('options' (proverOptions)?)? '}';
+transformUnitSection: '{' ('options' (proverOptions)?)? '}';
+transformUnitQuerySection: '{' ('options' (proverOptions)?)? '}';
+transformCounitQuerySection: '{' ('options' (proverOptions)?)? '}';
 
 transformImportJdbcSection: '{'
   transformSqlEntityExpr*
   ('options' (timeoutOption | alwaysReloadOption)*)?
   '}';
 
-transformCsvFileSection: '{'
+transformImportCsvSection: '{'
   transformFileExpr*
   ('options' (timeoutOption | alwaysReloadOption | csvOptions)*)?
   '}';
@@ -57,6 +61,8 @@ transformFileExpr: schemaEntityId '->' transformFile;
 
 transformLiteralSection: '{' transformLiteralExpr '}';
 transformLiteralExpr:
-  ('generators' (transformGen '->' transformPath)*)?
+  ('generators' (transformGen '->' schemaPath)*)?
   ('options' ('transform' '=' boolean | dontValidateUnsafeOption)*)?
   ;
+
+transformGen: STRING;

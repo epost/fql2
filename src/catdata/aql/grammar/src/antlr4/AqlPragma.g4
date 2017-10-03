@@ -1,3 +1,6 @@
+parser grammar AqlPragma;
+options { tokenVocab=AqlLexerRules; }
+
 pragmaId: IDENTIFIER;
 pragmaKindAssignment: 'pragma' pragmaId '=' pragmaDef ;
 pragmaDef:
@@ -56,6 +59,7 @@ pragmaExportJdbcSection: '{'
     | varcharLengthOption)*)?
   '}'  ;
 
+pragmaFile: STRING;
 pragmaJdbcClass: STRING;
 pragmaJdbcUri: STRING;
 pragmaPrefix: STRING;

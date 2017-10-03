@@ -1,3 +1,6 @@
+parser grammar AqlQuery;
+options { tokenVocab=AqlLexerRules; }
+
 queryId: IDENTIFIER;
 queryFromSchema: '(' 'id' schemaId ')';
 
@@ -7,8 +10,9 @@ queryDef:
     | 'literal' ':' schemaId '->' schemaId
             '{' queryLiteralExpr '}'      #QueryExp_Literal
     | 'simple' ':' schemaId
-            '{' queryEntityExpr '}'      #QueryExp_Simple
-    | 'getMapping' schemaColimitId schemaId
+            '{' queryEntityExpr '}'       #QueryExp_Simple
+    | 'getMapping' schemaColimitId
+            schemaId                      #QueryExp_Get
     ;
 queryKind: queryId | '(' queryDef ')';
 
@@ -31,4 +35,4 @@ queryForeignSig:
 
 queryPathMapping: queryGen '->' queryPath;
 queryGen: IDENTIFIER;
-queryPath: queryGen ('.' arrowId)*;
+queryPath: queryGen ('.' schemaArrowId)*;

@@ -1,3 +1,5 @@
+parser grammar AqlMapping;
+options { tokenVocab=AqlLexerRules; }
 
 mappingId: IDENTIFIER;
 mappingKindAssignment: 'mapping' mappingId '=' mappingDef ;
@@ -20,19 +22,19 @@ mappingLiteralExpr:
 mappingEntitySig: schemaEntityId '->' schemaEntityId;
 
 mappingForeignSig:
-  mappingForeignId '->' mappingForeignPath;
+  schemaForeignId '->' mappingForeignPath;
 
 mappingForeignPath:
     mappingArrowId
-  | schemaPath '.' arrowId
-  | arrowId '(' schemaPath ')'
+  | schemaPath '.' schemaArrowId
+  | schemaArrowId '(' schemaPath ')'
   ;
 
 // identity arrows are indicated with entity-names.
 mappingArrowId: schemaEntityId | schemaForeignId;
 
 mappingAttributeSig:
-  mappingAttributeName '->' (mappingLambda | mappingPath);
+  schemaAttributeId '->' (mappingLambda | schemaPath);
 
 mappingLambda:
   'lambda' mappingGen (',' mappingGen) '.' evalMappingFn ;
@@ -42,4 +44,5 @@ evalMappingFn:
     mappingGen
   | mappingFn '(' evalMappingFn ')'
   ;
+
 mappingFn: typesideFnName | schemaAttributeId | schemaForeignId ;

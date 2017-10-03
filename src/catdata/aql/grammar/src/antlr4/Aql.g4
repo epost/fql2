@@ -5,10 +5,10 @@
     This grammar follows the grammar as outlined
     in 'All Syntax.aql'.
  */
-grammar AQL;
+grammar Aql;
+options { tokenVocab=AqlLexerRules; }
 import
   AqlComment,
-  AqlLexerRules,
   AqlOptions,
   AqlTypeside,
   AqlSchema,
@@ -18,7 +18,7 @@ import
   AqlQuery,
   AqlGraph,
   AqlPragma,
-  AqlColimit,;
+  AqlSchemaColimit,
   AqlConstraint;
 
 program:
@@ -37,11 +37,11 @@ kindDeclaration:
   | schemaKindAssignment
   | instanceKindAssignment
   | mappingKindAssignment
-  | transKindAssignment
+  | transformKindAssignment
   | queryKindAssignment
   | graphKindAssignment
   | pragmaKindAssignment
-  | colimitKindAssignment
+  | schemaColimitKindAssignment
   | constraintKindAssignment
   ;
 

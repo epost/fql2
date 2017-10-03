@@ -1,3 +1,5 @@
+parser grammar AqlOptions;
+options { tokenVocab=AqlLexerRules; }
 
 optionsDeclaration:
     numThreadsOption
@@ -107,3 +109,4 @@ provers:
   | 'monoidal'
   | 'program'
   | 'completion'
+  ;

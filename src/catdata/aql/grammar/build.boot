@@ -20,24 +20,16 @@
                     "http://www.eclipse.org/legal/epl-v10.html"}
       :developers  {"Fred Eisele" ""}})
 
+
 ;; (import '(org.antlr.v4.gui TestRig))
 (require '[babeloff.boot-antlr4 :as antlr :refer [antlr4]])
 (import '(org.antlr.v4 Tool))
 
-(defn tool
-  []
-  (let [args ["-o" "/home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/oc9/qphubc"
-              "-lib" "/home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/oc9/-ueasqk"
-              "-no-listener" "-no-visitor"
-              "/home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/oc9/uanrg/AqlLexerRules.g4"]
-        args' (into-array args)]
-    (antlr/Tool. args')))
 
 (deftask build
   [s show bool "show the arguments"]
   (comp
+    (watch)
     (antlr4 :grammar "AqlLexerRules.g4" :show show)
-    ;;(show)
-    (antlr4 :grammar "AqlCommentTest.g4" :show show)
-    ;;(show)
+    (antlr4 :grammar "Aql.g4" :show show)
     (target :dir #{"target"})))

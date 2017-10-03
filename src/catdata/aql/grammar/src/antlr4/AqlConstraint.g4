@@ -1,9 +1,13 @@
+parser grammar AqlConstraint;
+options { tokenVocab=AqlLexerRules; }
+
 constraintId: IDENTIFIER;
-constraintKindAssignment: 'constraint' constraintId '=' constraint ;
-constraint:
+constraintKindAssignment: 'constraint' constraintId '=' constraintDef ;
+constraintDef:
   'literal' ':' schemaId
             '{' constraintLiteralExpr '}'      #constraintExp_Literal
     ;
+constraintKind: constraintId | '(' constraintDef ')';
 
 constraintLiteralExpr:
   ('imports' constraintId*)?
@@ -22,4 +26,4 @@ constraintExpr:
 constraintGen: IDENTIFIER;
 
 constraintEquation: constraintPath '=' constraintPath;
-constraintPath: constraintGen ('.' arrowId)*;
+constraintPath: constraintGen ('.' schemaArrowId)*;
