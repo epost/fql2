@@ -1,0 +1,19 @@
+options not mentioned in the manual
+  'import_joined' '=' boolean
+  'map_nulls_arbitrarily_unsafe' '=' boolean
+  'interpret_as_algebra' '=' boolean
+
+timeoutOption:  'timeout' '=' INTEGER;
+
+
+query simple does not have an entities.
+
+constraints have options.
+
+id function missing from schema.
+
+instance/quotient missing from  "All Syntax".
+
+What are the instance/chase/options?
+
+pragma/export_csv_instance documentation is weird.
