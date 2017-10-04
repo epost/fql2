@@ -30,6 +30,18 @@
   [s show bool "show the arguments"]
   (comp
     (watch)
-    (antlr4 :grammar "AqlLexerRules.g4" :show show)
-    (antlr4 :grammar "Aql.g4" :show show)
+    (antlr4 :grammar "AqlLexerRules.g4" :show true)
+    (antlr4 :grammar "Aql.g4" :show true)
     (target :dir #{"target"})))
+
+(defn poll
+  "https://adzerk.com/blog/2017/02/faster-clojure-metadevelopment-with-boot/"
+  [task]
+  (let [f (java.io.File. "build.boot")]
+    (loop [mtime (.lastModified f)]
+      (let [new-mtime (.lastModified f)]
+        (when (> new-mtime mtime)
+          (load-file "build.boot")
+          (boot (task)))
+        (Thread/sleep 1000)
+        (recur new-mtime)))))

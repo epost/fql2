@@ -62,7 +62,7 @@ transformFileExpr: schemaEntityId '->' transformFile;
 transformLiteralSection: '{' transformLiteralExpr '}';
 transformLiteralExpr:
   ('generators' (transformGen '->' schemaPath)*)?
-  ('options' ('transform' '=' boolean | dontValidateUnsafeOption)*)?
+  ('options' ('transform' '=' truthy | dontValidateUnsafeOption)*)?
   ;
 
 transformGen: STRING;

@@ -7,6 +7,7 @@
  */
 grammar Aql;
 options { tokenVocab=AqlLexerRules; }
+
 import
   AqlComment,
   AqlOptions,

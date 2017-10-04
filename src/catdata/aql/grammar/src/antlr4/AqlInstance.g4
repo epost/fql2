@@ -21,7 +21,7 @@ instanceDef:
   | 'colimit' graphKind schemaKind '{'
       'nodes' (instanceId '->' instanceDef)+
       'edges' (schemaArrowId '->' transformKind)+
-      ('options' (timeoutOption | 'static_typing' '=' boolean)*)?
+      ('options' (timeoutOption | 'static_typing' '=' truthy)*)?
       '}'
   | 'import_jdbc' jdbcClass jdbcUri ':' schemaDef '{' instanceImportJdbc '}'
   | 'quotient_jdbc' jdbcClass jdbcUri  schemaDef '{' instanceSql+ '}'
@@ -46,12 +46,12 @@ instanceKind: instanceId | '(' instanceDef ')';
 
 instanceLiteralExpr:
   ('imports' instanceId*)?
-  ('generators' (instanceGen ':' schemaEntityId)+)?
+  'generators' (instanceGen ':' schemaEntityId)+ 
   ('equations' instanceEquation*)?
   ('multi_equations' instanceMultiEquation*)?
-  ('options' timeoutOption | proverOptions
+  ('options' (timeoutOption | proverOptions
             | requireConsistencyOption
-            | interpretAsAlgebraOption*)?
+            | interpretAsAlgebraOption)*)?
   ;
 
 instanceImportJdbc:
