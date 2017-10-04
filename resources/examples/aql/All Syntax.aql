@@ -3,7 +3,7 @@
 //global options at start of file, see manual or options button
 options
 	timeout = 30
-	
+
 //////////// Kind comment
 
 html { (* "some html" *) } //be sure to escape slashes and quotes
@@ -15,7 +15,7 @@ graph g1 = literal {
 	nodes
 		n1 n2
 	edges
-		f : n1 -> n2		
+		f : n1 -> n2
 }
 
 //////////// Kind typeside
@@ -25,9 +25,9 @@ typeside ty2 = sql
 typeside ty3 = typesideOf (empty : ty1)
 typeside ty4 = literal {
 	imports //order of sections (imports, types, ...) matters, but sections can be omitted
-		ty1 
+		ty1
 	types
-		Nat	
+		Nat
 	constants
 		zero : Nat
 	functions
@@ -36,14 +36,14 @@ typeside ty4 = literal {
 	java_types
 	 	String = "java.lang.String"
 	java_constants
-	 	String = "return input[0].toString()"	
+	 	String = "return input[0].toString()"
 	java_functions
-	 	append : String, String -> String = "return input[0] + input[1]"		
-	equations	
+	 	append : String, String -> String = "return input[0] + input[1]"
+	equations
 		forall x. plus(zero, x) = x
 	 	forall x, y. plus(succ(x),y) = succ(plus(x,y))
 	 options
-	 	prover = completion	
+	 	prover = completion
 }
 
 //////////// Kind schema
@@ -51,16 +51,16 @@ typeside ty4 = literal {
 schema s1 = empty : ty2
 schema s2 = schemaOf (empty : s1)
 schema s3 = literal : ty4 {
-	imports 
+	imports
 		s1
 	entities
-		Employee 
+		Employee
 		Department
 	foreign_keys
 		manager   : Employee -> Employee
 		worksIn   : Employee -> Department
 		secretary : Department -> Employee
-	path_equations 
+	path_equations
 		manager.worksIn = worksIn
   		secretary.worksIn = Department //use entity name for empty (identity) path
   	attributes
@@ -71,9 +71,9 @@ schema s3 = literal : ty4 {
      observation_equations
      	forall e. cummulative_age(e) = plus(age(e), age(manager(e)))
 	options
-		prover = completion		
+		prover = completion
 }
-//getSchema - see PharmaColim1 example
+// getSchema - see Tutorial\ TSP.aql for an example
 
 //////////// Kind mapping
 
@@ -91,9 +91,9 @@ mapping m3 = literal : s3 -> s3 {
 		ename -> manager.ename
 		age -> manager.age
 		cummulative_age -> lambda e. (age(e) plus age(e))
-		dname -> dname	
+		dname -> dname
 	options
-		dont_validate_unsafe = true // this isn't a real mapping		
+		dont_validate_unsafe = true // this isn't a real mapping
 }
 //getMapping - see FinanceColim2
 
@@ -114,7 +114,7 @@ query q2 = literal : s3 -> s3 {
 		worksIn -> {d -> e.worksIn}
 		secretary -> {d -> d e -> d.secretary}
 	options
-		dont_validate_unsafe = true // this isn't a real query		
+		dont_validate_unsafe = true // this isn't a real query
 }
 query q3 = simple : s3 {
 	from e:Employee
@@ -147,16 +147,16 @@ instance i12 = chase literal : s3 { } i3 1
 //import_csv -- See FinanceColim1 example
 
 instance i13 = literal : s3 {
-	generators 
+	generators
 		e : Employee
-	equations 
+	equations
 		e.manager = e
 		e.worksIn.secretary = e
 	multi_equations
-		ename -> {e Al, e.manager Al}		
+		ename -> {e Al, e.manager Al}
 	options
 		prover = completion
-} 
+}
 
 
 
@@ -167,11 +167,11 @@ transform t2 = [t1 ; t1]
 transform t3 = distinct t1
 transform t4 = eval (id s3) t1
 //the { options } blocks are optional
-transform t5 = coeval (id s3) t1 { options prover = completion } { options prover = completion } 
-transform t6 = sigma (id s3) t1 { options prover = completion } { options prover = completion } 
+transform t5 = coeval (id s3) t1 { options prover = completion } { options prover = completion }
+transform t6 = sigma (id s3) t1 { options prover = completion } { options prover = completion }
 transform t7 = delta (id s3) t1
-transform t8 = unit (id s3) i1 { options prover = completion } 
-transform t9 = counit (id s3) i1 { options prover = completion } 
+transform t8 = unit (id s3) i1 { options prover = completion }
+transform t9 = counit (id s3) i1 { options prover = completion }
 transform t10= counit_query (id s3) i1 { options prover = completion }
 //import_jdbc - see JDBC example
 //import_csv - see Finance Colim example
@@ -199,7 +199,7 @@ constraints c1 = literal : s3 {
 //////////// Kind pragma
 
 pragma p1 = check c1 i3 //check instance against constraints
-pragma p2 = assert_consistent i3 
+pragma p2 = assert_consistent i3
 pragma p3 = exec_cmdline {
 	"echo hello"
 	"echo world"
@@ -223,7 +223,5 @@ pragma p4 = exec_js {
 //quotient - see PharmaColim2
 //coproduct - see PharmaColim2
 //modify - see PharmaColim2
-//colimit - unnecessarily verbose; recommend quotient instead 
-//wrap - see manual; recommend quotient instead 
-
-
+//colimit - unnecessarily verbose; recommend quotient instead
+//wrap - see manual; recommend quotient instead

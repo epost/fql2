@@ -866,7 +866,7 @@ Delta can move the instance `iB` backward through `m` into `sA` as follows:
  
 Similarly, sigma can move this new instance forward through the same `m` into `sB`:
  
-    instance iSgmDlt_m_iB = delta m iDlt_m_iB
+    instance iSgmDlt_m_iB = sigma m iDlt_m_iB
  
 A natural thing to ask is how `iSgmDlt_m_iB` and `iB` are related. The answer is they are related by
 a transform known as the unit of the sigma --| delta adjoint pair. Notice we could also start
