@@ -68,6 +68,8 @@ import catdata.aql.exp.PragmaExp.PragmaExpToJdbcInst;
 import catdata.aql.exp.PragmaExp.PragmaExpToJdbcQuery;
 import catdata.aql.exp.PragmaExp.PragmaExpToJdbcTrans;
 import catdata.aql.exp.PragmaExp.PragmaExpVar;
+import catdata.aql.exp.QueryExp.QueryExpDeltaCoEval;
+import catdata.aql.exp.QueryExp.QueryExpDeltaEval;
 import catdata.aql.exp.QueryExp.QueryExpId;
 import catdata.aql.exp.QueryExp.QueryExpVar;
 import catdata.aql.exp.QueryExpRaw.Block;
@@ -107,7 +109,8 @@ public class AqlParser {
 			"add_to_classpath", // TODO aql not officially supported
 			"id", "match", "attributes", "empty", "imports", "types", "constants", "functions", "equations", "forall",
 			"java_types", "multi_equations", // TODO aql colorize multi
-												// equations
+			"toQuery",
+			"toCoQuery",									// equations
 			"java_constants", "java_functions", "options", "entities", "src", "unique", "dst", "path_equations",
 			"observation_equations", "generators", "rename", "remove", "modify",
 			// "labelled nulls",
@@ -878,8 +881,11 @@ public class AqlParser {
 
 	private static void queryExp() {
 		Parser<QueryExp<?, ?, ?, ?, ?, ?, ?, ?>> var = ident.map(QueryExpVar::new),
+				deltaQueryEval = Parsers.tuple(token("toQuery"), map_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new QueryExpDeltaEval<>(x.b, Util.newIfNull(x.c))),
+				deltaQueryCoEval = Parsers.tuple(token("toCoQuery"), map_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new QueryExpDeltaCoEval<>(x.b, Util.newIfNull(x.c))),
+
 				id = Parsers.tuple(token("id"), sch_ref.lazy()).map(x -> new QueryExpId<>(x.b)),
-				ret = Parsers.or(id, queryExpRaw(), queryExpRawSimple(), var, parens(query_ref));
+				ret = Parsers.or(id, queryExpRaw(), queryExpRawSimple(), var, deltaQueryEval, deltaQueryCoEval, parens(query_ref));
 
 		query_ref.set(ret);
 	}
@@ -896,9 +902,7 @@ public class AqlParser {
 				.tuple(Parsers.always(), nodes.optional(), edges.optional(), options);
 
 		Parser<Tuple5<Token, GraphExp<?, ?>, Token, TyExp<?, ?>, Token>> l = Parsers.tuple(token("literal"),
-				graph_ref.lazy(), token(":"), ty_ref.lazy(), token("{")); // .map(x
-																			// ->
-																			// x.c);
+				graph_ref.lazy(), token(":"), ty_ref.lazy(), token("{")); 
 
 		Parser<ColimSchExp<?, ?, ?, ?, ?, ?, ?>> ret = Parsers
 				.tuple(l, pa, token("}")).map(x -> {

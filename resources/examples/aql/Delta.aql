@@ -50,6 +50,9 @@ instance J = literal : D {
 }  
 
 instance deltaFJ = delta F J
+instance deltaFJ_alt1 = eval (toQuery F) J
+instance deltaFJ_alt2 = coeval (toCoQuery F) J
+
 
 instance J0 = literal : D {
  generators 

@@ -28,6 +28,8 @@
     <keyword>constraints</keyword>
   </keywords>
   <keywords2>
+<keyword>toQuery</keyword>
+<keyword>toCoQuery</keyword>
   	<keyword>chase</keyword>
   	<keyword>check</keyword>
   	<keyword>assert_consistent</keyword>

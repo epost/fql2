@@ -23,6 +23,7 @@ import catdata.aql.Mapping;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.graph.UnionFind;
 
 public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		extends Algebra<Ty, En2, Sym, Fk2, Att2, Chc<ID, X>, Chc<ID, Y>, Chc<ID, X>, Chc<ID, Y>> {
@@ -94,8 +95,11 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2,
 			boolean changed = toAdd.isEmpty();
 			
 			theContent.addFrom(toAdd);
-			// changed = changed | fireEgds();
-
+			
+			Content newContent = new Content();
+			changed = fireEgds(newContent) || changed;
+			theContent = newContent;
+			
 			if (!changed) {
 				success = true;
 				break;
@@ -104,6 +108,39 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2,
 		if (!success) {
 			throw new RuntimeException("No convergence after " + max + " iterations.");
 		}
+	}
+
+	private boolean fireEgds(Content newContent) {
+		UnionFind<Chc<ID, X>> ufE = new UnionFind<>(new HashSet<>());
+		
+		for (Set<Pair<Chc<ID, X>, Chc<ID, X>>> set : theContent.ids.values()) {
+			for (Pair<Chc<ID, X>, Chc<ID, X>> p : set) {
+				ufE.union(p.first, p.second);
+			}
+		}
+		for (Set<Pair<Term<Ty, Void, Sym, Void, Void, Void, Chc<ID, Y>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<ID, Y>>>> set : theContent.idsT.values()) {
+			for (Pair<Term<Ty, Void, Sym, Void, Void, Void, Chc<ID, Y>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<ID, Y>>> p : set) {
+				fireEgds(p.first, p.second, ufE);
+			}
+		}
+		
+		return true;
+	}
+
+	private void fireEgds(Term<Ty, Void, Sym, Void, Void, Void, Chc<ID, Y>> l,
+			Term<Ty, Void, Sym, Void, Void, Void, Chc<ID, Y>> r, UnionFind<Chc<ID, X>> ufE) {
+		if (l.obj != null && r.obj != null) {
+			
+		} else if (l.sk != null && r.sk != null) {
+			
+		} else if (l.sym != null && r.sym != null) {
+			
+		} else if (l.sk != null && r.obj != null) {
+			
+		} else if (r.sk != null && l.obj != null) {
+			
+		}
+		
 	}
 
 	private It fr = new It();

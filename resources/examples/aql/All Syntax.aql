@@ -61,6 +61,7 @@ schema s3 = literal : ty4 {
 		worksIn   : Employee -> Department
 		secretary : Department -> Employee
 	path_equations 
+		manager.manager = manager
 		manager.worksIn = worksIn
   		secretary.worksIn = Department //use entity name for empty (identity) path
   	attributes
@@ -123,6 +124,8 @@ query q3 = simple : s3 {
 	options
 		prover = completion
 }
+query q4 = toQuery m3 { options dont_validate_unsafe = true } // this isn't a real query 
+query q5 = toCoQuery id s3 { options prover = completion }
 
 //////////// Kind instance
 

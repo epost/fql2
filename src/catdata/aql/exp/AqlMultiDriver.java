@@ -202,7 +202,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		}
 		Exp<?> prev = last_prog.exps.get(n);
 		//System.out.println(xprog.exps.get(n));
-		if (prev == null || (Boolean) prog.exps.get(n).getOrDefault(env, AqlOption.always_reload) || last_env == null || !last_env.defs.keySet().contains(n)) {
+		if (prev == null || !last_env.defs.keySet().contains(n) || last_env == null || (Boolean) prog.exps.get(n).getOrDefault(env, AqlOption.always_reload) ) {
 			changed.put(n, true);
 			return true;
 		}

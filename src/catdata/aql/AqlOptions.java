@@ -64,7 +64,7 @@ public final class AqlOptions {
 		jdbc_default_class,
 		jdbc_default_string,
 		schema_only,
-
+		toCoQuery_max_term_size,
 		program_allow_nontermination_unsafe,
 		completion_precedence,
 		completion_sort,
@@ -179,6 +179,8 @@ public final class AqlOptions {
 	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
+		case toCoQuery_max_term_size:
+			return 3;
 		case csv_generate_ids:
 			return false;
 		case csv_file_extension:
@@ -320,6 +322,8 @@ public final class AqlOptions {
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case toCoQuery_max_term_size:
+			return op.getBoolean(map);
 		case csv_generate_ids:
 			return op.getBoolean(map);
 		case csv_file_extension:

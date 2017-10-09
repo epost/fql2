@@ -350,6 +350,12 @@ A query $S \to T$ assigns to each entity $en$ in $S$ a (``frozen'') instance on 
 \section{{\tt id <schema>}}
 The identity query on a schema.
 
+\section{{\tt toQuery <mapping>}}
+Constructs the query $Q^F$ such that $eval(Q^F) \cong \Delta_F$ and $coeval(Q_F) \cong \Sigma_F$ for the mapping F.
+
+\section{{\tt toCoQuery <mapping>}}
+Constructs the query $Q_F$ such that $coeval(Q_F) \cong \Delta_F$ and $eval(Q_F) \cong \Pi_F$ for the mapping F.  The option {\tt toCoQuery\_max\_term\_size} controls the maximum size of the terms to be searched.
+
 %\section{{\tt compose <mapping> <mapping>}}
 %%todo
 %Composes two queries: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt compose f g : A -> C}.
@@ -976,6 +982,10 @@ The generators and labelled nulls of instances participating in a coproduct are 
 \subsection{{\tt coproduct\_allow\_type\_collisions\_unsafe = boolean}}
 
 \subsection{{\tt coproduct\_allow\_entity\_collisions\_unsafe = boolean}}
+
+\subsection{{\tt toCoQuery\_max\_term\_size}}
+
+Controls the maximum size of the terms to be searched. 
 
 \end{document}
 
