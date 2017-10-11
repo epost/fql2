@@ -68,6 +68,7 @@ import catdata.aql.exp.PragmaExp.PragmaExpToJdbcInst;
 import catdata.aql.exp.PragmaExp.PragmaExpToJdbcQuery;
 import catdata.aql.exp.PragmaExp.PragmaExpToJdbcTrans;
 import catdata.aql.exp.PragmaExp.PragmaExpVar;
+import catdata.aql.exp.QueryExp.QueryExpCompose;
 import catdata.aql.exp.QueryExp.QueryExpDeltaCoEval;
 import catdata.aql.exp.QueryExp.QueryExpDeltaEval;
 import catdata.aql.exp.QueryExp.QueryExpId;
@@ -884,8 +885,12 @@ public class AqlParser {
 				deltaQueryEval = Parsers.tuple(token("toQuery"), map_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new QueryExpDeltaEval<>(x.b, Util.newIfNull(x.c))),
 				deltaQueryCoEval = Parsers.tuple(token("toCoQuery"), map_ref.lazy(), options.between(token("{"), token("}")).optional()).map(x -> new QueryExpDeltaCoEval<>(x.b, Util.newIfNull(x.c))),
 
+				comp = Parsers.tuple(token("["), query_ref.lazy(), token(";"), query_ref.lazy().followedBy(token("]")), options.between(token("{"), token("}")).optional())
+						.map(x -> new QueryExpCompose(x.b, x.d, Util.newIfNull(x.e))),								
+
+						
 				id = Parsers.tuple(token("id"), sch_ref.lazy()).map(x -> new QueryExpId<>(x.b)),
-				ret = Parsers.or(id, queryExpRaw(), queryExpRawSimple(), var, deltaQueryEval, deltaQueryCoEval, parens(query_ref));
+				ret = Parsers.or(id, queryExpRaw(), queryExpRawSimple(), var, deltaQueryEval, deltaQueryCoEval, comp, parens(query_ref));
 
 		query_ref.set(ret);
 	}

@@ -328,7 +328,6 @@ A schema mapping $F : S \to T$ takes entities in $S$ to entities in $T$, foreign
 The identity schema mapping on a particular schema.
 
 \section{{\tt [<mapping> ; <mapping>]}}
-%todo
 Composes two mappings: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt (f ; g) : A -> C}.
 
 \section{{\tt literal : <schema1> -> <schema2>}}
@@ -356,9 +355,8 @@ Constructs the query $Q^F$ such that $eval(Q^F) \cong \Delta_F$ and $coeval(Q_F)
 \section{{\tt toCoQuery <mapping>}}
 Constructs the query $Q_F$ such that $coeval(Q_F) \cong \Delta_F$ and $eval(Q_F) \cong \Pi_F$ for the mapping F.  The option {\tt toCoQuery\_max\_term\_size} controls the maximum size of the terms to be searched.
 
-%\section{{\tt compose <mapping> <mapping>}}
-%%todo
-%Composes two queries: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt compose f g : A -> C}.
+\section{{\tt [ <query> ; <query> ]}}
+Composes two queries: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt [ f ; g ] : A -> C}.   Uses the {\tt toCoQuery\_max\_term\_size} option.
 
 \section{{\tt literal : <schema> -> <schema>}}
 \subsection{{\tt imports}}

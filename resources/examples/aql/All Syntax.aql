@@ -126,6 +126,7 @@ query q3 = simple : s3 {
 }
 query q4 = toQuery m3 { options dont_validate_unsafe = true } // this isn't a real query 
 query q5 = toCoQuery id s3 { options prover = completion }
+query q6 = [ id s2 ; id s2 ]
 
 //////////// Kind instance
 
