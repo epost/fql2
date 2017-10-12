@@ -81,7 +81,10 @@ public class ProcPragma extends Pragma {
 					}
 				} catch (IOException e) {
 					responses.add(cmd + " " + pre + " " + result + " and "  + e.getMessage());
-					throw new RuntimeException(e);
+					
+					if (!e.getLocalizedMessage().equals("Stream closed")) {
+						throw new RuntimeException(e);
+					}
 				}
 
 				responses.add(cmd + " " + pre + " " + result);

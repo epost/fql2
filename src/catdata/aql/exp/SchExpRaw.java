@@ -54,7 +54,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 	//TODO: aql printing of contexts broken when conitain choices
 	
 	@Override
-	public Schema<Ty, String, Sym, String, String> eval(AqlEnv env) {
+	public synchronized Schema<Ty, String, Sym, String, String> eval(AqlEnv env) {
 		TypeSide<Ty, Sym> ts = typeSide.eval(env);
 		Collage<Ty, String, Sym, String, String, Void, Void> col = new Collage<>(ts.collage());
 		

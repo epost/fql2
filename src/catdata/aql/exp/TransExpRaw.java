@@ -167,7 +167,7 @@ Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 	}
 
 	@Override
-	public LiteralTransform<String, String, String, String, String, String, String, String, String, String, String, String, String> eval(AqlEnv env) {
+	public synchronized LiteralTransform<String, String, String, String, String, String, String, String, String, String, String, String, String> eval(AqlEnv env) {
 		Instance<String, String, String, String, String, String, String, String, String> src0 = src.eval(env), dst0 = dst.eval(env);
 		//Collage<String, String, String, String, String, Void, Void> scol = new Collage<>(src0);
 		Collage<String, String, String, String, String, String, String> dcol = new Collage<>(dst0.collage());

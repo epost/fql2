@@ -31,6 +31,65 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	// TODO: aql hang onto the typesides, schemas, instances where came from? factor
 	// (split into 3 parts) method?
+	
+	/**
+	 * only works on closed terms
+	 */
+	public Set<Term<Ty, En, Sym, Fk, Att, Gen, Void>> applyAllSymbolsNotSk(Set<Term<Ty, En, Sym, Fk, Att, Gen, Void>> set) {
+		Set<Term<Ty, En, Sym, Fk, Att, Gen, Void>> ret = new HashSet<>();
+		
+		for (Gen gen : gens.keySet()) {
+			ret.add(Term.Gen(gen));
+		}
+//		for (Sk sk : sks.keySet()) {
+	//		ret.add(Term.Sk(sk));
+//		}
+		for (Fk fk : fks.keySet()) {
+			for (Term<Ty, En, Sym, Fk, Att, Gen, Void> arg : set) {
+				Chc<Ty, En> x = type(new Ctx<>(), arg.mapGenSk(Function.identity(), Util.voidFn()));
+				if (x.equals(Chc.inRight(fks.get(fk).first))) {
+					ret.add(Term.Fk(fk, arg));
+				}
+			}
+		}
+		for (Att att : atts.keySet()) {
+			for (Term<Ty, En, Sym, Fk, Att, Gen, Void> arg : set) {
+				Chc<Ty, En> x = type(new Ctx<>(), arg.mapGenSk(Function.identity(), Util.voidFn()));
+				if (x.equals(Chc.inRight(atts.get(att).first))) {
+					ret.add(Term.Att(att, arg));
+				}
+			}
+		}
+		for (Sym sym : syms.keySet()) {
+			for (List<Term<Ty, En, Sym, Fk, Att, Gen, Void>> args : helper(syms.get(sym), set)) {
+				ret.add(Term.Sym(sym, args));
+			}
+		}
+		
+		return ret;
+	}
+	
+	private List<Term<Ty, En, Sym, Fk, Att, Gen, Void>> getForTy(Chc<Ty,En> t, Collection<Term<Ty, En, Sym, Fk, Att, Gen, Void>> set) {
+		return set.stream().filter(x -> type(new Ctx<>(), x.mapGenSk(Function.identity(), Util.voidFn())).equals(t)).collect(Collectors.toList());
+	}
+
+	private List<List<Term<Ty, En, Sym, Fk, Att, Gen, Void>>> helper(Pair<List<Ty>, Ty> ty, Collection<Term<Ty, En, Sym, Fk, Att, Gen, Void>> set) {
+		List<List<Term<Ty, En, Sym, Fk, Att, Gen, Void>>> ret = new LinkedList<>();
+		ret.add(new LinkedList<>());
+		
+		for (Ty t : ty.first) {
+			List<List<Term<Ty, En, Sym, Fk, Att, Gen, Void>>> ret2 = new LinkedList<>();
+			for (Term<Ty, En, Sym, Fk, Att, Gen, Void> l : getForTy(Chc.inLeft(t), set)) {
+				for (List<Term<Ty, En, Sym, Fk, Att, Gen, Void>> x : ret) {
+					List<Term<Ty, En, Sym, Fk, Att, Gen, Void>> z = new LinkedList<>(x);
+					z.add(l);
+					ret2.add(z);
+				}
+			}
+			ret = ret2;
+		}
+		return ret;
+	}
 
 	public final Set<Ty> tys = new HashSet<>();
 	public final Ctx<Sym, Pair<List<Ty>, Ty>> syms = new Ctx<>();

@@ -304,7 +304,7 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 	private final Collage<String, Void, String, Void, Void, Void, Void> col = new Collage<>();
 
 	@Override
-	public TypeSide<String, String> eval(AqlEnv env) {
+	public synchronized TypeSide<String, String> eval(AqlEnv env) {
 		// defer equation checking since invokes javascript
 		AqlJs<String, String> js = new AqlJs<>(col.syms, col.java_tys, col.java_parsers, col.java_fns);
 		

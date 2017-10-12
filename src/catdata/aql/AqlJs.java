@@ -73,7 +73,8 @@ public class AqlJs<Ty, Sym> {
 		}
 	}
 	
-	public Object parse(Ty name, String o) {
+	//TODO does this fix Fred's Heisenbug?
+	public synchronized Object parse(Ty name, String o) {
 		if (!iso1.containsKey(name)) {
 			throw new RuntimeException("In javascript execution of " + o + " no javascript definition for " + name);
 		}

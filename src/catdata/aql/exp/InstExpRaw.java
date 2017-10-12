@@ -218,7 +218,7 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 	}
 
 	@Override
-	public Instance<Ty, En, Sym, Fk, Att, String, String, ID, Chc<String, Pair<ID, Att>>> eval(AqlEnv env) {
+	public synchronized Instance<Ty, En, Sym, Fk, Att, String, String, ID, Chc<String, Pair<ID, Att>>> eval(AqlEnv env) {
 		Schema<Ty, En, Sym, Fk, Att> sch = schema.eval(env);
 		Collage<Ty,En,Sym,Fk,Att,String,String> col = new Collage<>(sch.collage());
 		
