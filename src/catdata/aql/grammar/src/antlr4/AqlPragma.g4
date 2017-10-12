@@ -2,27 +2,27 @@ parser grammar AqlPragma;
 options { tokenVocab=AqlLexerRules; }
 
 pragmaId: IDENTIFIER;
-pragmaKindAssignment: 'pragma' pragmaId Equal pragmaDef ;
+pragmaKindAssignment: PRAGMA pragmaId Equal pragmaDef ;
 pragmaDef:
-      'exec_cmdline' pragmaCmdLineSection    #Pragma_CmdLine
-    | 'exec_js' pragmaExecJsSection          #Pragma_ExecJs
-    | 'exec_jdbc' pragmaJdbcClass pragmaJdbcUri
+      EXEC_CMDLINE pragmaCmdLineSection    #Pragma_CmdLine
+    | EXEC_JS pragmaExecJsSection          #Pragma_ExecJs
+    | EXEC_JDBC pragmaJdbcClass pragmaJdbcUri
               pragmaExecJdbcSection          #Pragma_ExecJdbc
-    | 'check' COLON constraintId instanceId    #Pragma_Check
-    | 'assert_consistent' instanceId         #Pragma_AssertConsistent
-    | 'export_csv_instance' instanceId pragmaFile
+    | CHECK COLON constraintId instanceId    #Pragma_Check
+    | ASSERT_CONSISTENT instanceId         #Pragma_AssertConsistent
+    | EXPORT_CSV_INSTANCE instanceId pragmaFile
               pragmaExportCsvSection          #Pragma_ExportCsvInstance
-    | 'export_csv_transform' transformId pragmaFile
+    | EXPORT_CSV_TRANSFORM transformId pragmaFile
               pragmaExportCsvSection          #Pragma_ExportCsvTransform
-    | 'export_jdbc_instance' instanceId
+    | EXPORT_JDBC_INSTANCE instanceId
         (pragmaJdbcClass (pragmaJdbcUri
           pragmaPrefixDst?)?)?
           pragmaExportJdbcSection  #Pragma_ExportJdbcInstance
-    | 'export_jdbc_query' queryId
+    | EXPORT_JDBC_QUERY queryId
         (pragmaJdbcClass (pragmaJdbcUri
           (pragmaPrefixSrc pragmaPrefixDst?)?)?)?
           pragmaExportJdbcSection  #Pragma_ExportJdbcQuery
-    | 'export_jdbc_transform' transformId
+    | EXPORT_JDBC_TRANSFORM transformId
         (pragmaJdbcClass (pragmaJdbcUri pragmaPrefix?)?)?
           pragmaExportJdbcSection  #Pragma_ExportJdbcTransform
     ;

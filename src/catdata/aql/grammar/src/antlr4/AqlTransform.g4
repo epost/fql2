@@ -3,7 +3,7 @@ options { tokenVocab=AqlLexerRules; }
 
 
 transformId: IDENTIFIER;
-transformKindAssignment: 'transform' transformId Equal transformDef ;
+transformKindAssignment: TRANSFORM transformId Equal transformDef ;
 transformDef:
       ID COLON instanceKind              #Transform_Id
     | LBrack transformId SEMI transformId RBrack    #Transform_Compose
@@ -16,13 +16,13 @@ transformDef:
     | COEVAL queryId transformId
         transformCoevalSection?
         transformCoevalSection?              #Transform_Coeval
-    | 'unit' mappingKind instanceId
+    | UNIT mappingKind instanceId
         transformUnitSection?                #Transform_Unit
-    | 'counit' mappingKind instanceId
+    | COUNIT mappingKind instanceId
         transformUnitSection?                #Transform_Counit
-    | 'unit_query' queryKind instanceId
+    | UNIT_QUERY queryKind instanceId
         transformUnitQuerySection?           #Transform_UnitQuery
-    | 'counit_query' queryKind instanceId
+    | COUNIT_QUERY queryKind instanceId
         transformCounitQuerySection?         #Transform_CounitQuery
     | IMPORT_JDBC transformJdbcClass transformJdbcUri COLON
         instanceId RARROW instanceId
@@ -62,7 +62,7 @@ transformFileExpr: schemaEntityId RARROW transformFile;
 transformLiteralSection: LBrace transformLiteralExpr RBrace;
 transformLiteralExpr:
   (GENERATORS (transformGen RARROW schemaPath)*)?
-  (OPTIONS ('transform' Equal truthy | dontValidateUnsafeOption)*)?
+  (OPTIONS (TRANSFORM Equal truthy | dontValidateUnsafeOption)*)?
   ;
 
 transformGen: STRING;

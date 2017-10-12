@@ -2,23 +2,23 @@ parser grammar AqlSchemaColimit;
 options { tokenVocab=AqlLexerRules; }
 
 schemaColimitId: IDENTIFIER;
-schemaColimitKindAssignment: 'schema_colimit' schemaColimitId Equal schemaColimitDef ;
+schemaColimitKindAssignment: SCHEMA_COLIMIT schemaColimitId Equal schemaColimitDef ;
 schemaColimitDef:
       QUOTIENT schemaId (PLUS schemaId)* COLON typesideId
         schemaColimitQuotientSection        #SchemaColimit_Quotient
     | COPRODUCT schemaId (PLUS schemaId)* COLON typesideId
                                             #SchemaColimit_Coproduct
-    | 'modify' schemaColimitId
+    | MODIFY schemaColimitId
         schemaColimitModifySection          #SchemaColimit_Modify
-    | 'wrap' schemaColimitId mappingId mappingId
+    | WRAP schemaColimitId mappingId mappingId
                                             #SchemaColimit_Wrap
     ;
 schemaColimitKind: schemaColimitId | LParen schemaColimitDef RParen;
 
 schemaColimitQuotientSection: LBrace
-  ('entity_equations' (scEntityPath Equal scEntityPath)*)?
-  ('path_equations' (scFkPath Equal scFkPath)*)?
-  ('observation_equations' scObsEquation )?
+  (ENTITY_EQUATIONS (scEntityPath Equal scEntityPath)*)?
+  (PATH_EQUATIONS (scFkPath Equal scFkPath)*)?
+  (OBSERVATION_EQUATIONS scObsEquation )?
   RBrace  ;
 
 scObsEquation:
@@ -30,9 +30,9 @@ scEntityPath: schemaId Dot schemaTermId;
 scFkPath: schemaId '_' schemaArrowId;
 
 schemaColimitModifySection: LBrace
-  ('rename' ENTITIES (scEntityPath Equal scEntityPath)*)?
-  ('rename' FOREIGN_KEYS (scFkPath Equal scFkPath)*)?
-  ('rename' ATTRIBUTES scObsEquation )?
-  ('remove' FOREIGN_KEYS scObsEquation )?
-  ('remove' ATTRIBUTES scObsEquation )?
+  (RENAME ENTITIES (scEntityPath Equal scEntityPath)*)?
+  (RENAME FOREIGN_KEYS (scFkPath Equal scFkPath)*)?
+  (RENAME ATTRIBUTES scObsEquation )?
+  (REMOVE FOREIGN_KEYS scObsEquation )?
+  (REMOVE ATTRIBUTES scObsEquation )?
   RBrace  ;

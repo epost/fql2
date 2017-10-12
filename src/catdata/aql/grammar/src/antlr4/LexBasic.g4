@@ -111,7 +111,7 @@ fragment DecDigit
 // Literals
 
 fragment BoolLiteral
-   : 'true' | 'false'
+   : TRUE | FALSE
    ;
 
 

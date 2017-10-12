@@ -4,14 +4,14 @@ options { tokenVocab=AqlLexerRules; }
 queryId: IDENTIFIER;
 queryFromSchema: LParen ID schemaId RParen;
 
-queryKindAssignment: 'query' queryId Equal queryDef ;
+queryKindAssignment: QUERY queryId Equal queryDef ;
 queryDef:
       ID schemaId                       #QueryExp_Id
     | LITERAL COLON schemaId RARROW schemaId
             LBrace queryLiteralExpr RBrace      #QueryExp_Literal
-    | 'simple' COLON schemaId
+    | SIMPLE COLON schemaId
             LBrace queryEntityExpr RBrace       #QueryExp_Simple
-    | 'getMapping' schemaColimitId
+    | GET_MAPPING schemaColimitId
             schemaId                      #QueryExp_Get
     ;
 queryKind: queryId | LParen queryDef RParen;
@@ -25,9 +25,9 @@ queryLiteralExpr:
 
 queryEntityExpr: schemaEntityId RARROW LBrace selectClause RBrace;
 selectClause:
-  'from' (queryGen COLON schemaEntityId)+
+  FROM (queryGen COLON schemaEntityId)+
   (WHERE (queryPath Equal queryPath)+)
-  'return' (schemaEntityId RARROW queryPath)+
+  RETURN (schemaEntityId RARROW queryPath)+
   ;
 
 queryForeignSig:

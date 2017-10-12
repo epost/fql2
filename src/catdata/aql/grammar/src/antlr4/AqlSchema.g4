@@ -2,14 +2,14 @@ parser grammar AqlSchema;
 options { tokenVocab=AqlLexerRules; }
 
 schemaId: IDENTIFIER;
-schemaKindAssignment: 'schema' schemaId Equal schemaDef ;
+schemaKindAssignment: SCHEMA schemaId Equal schemaDef ;
 schemaDef:
       EMPTY COLON typesideId              #Schema_Empty
-    | 'schemaOf' LParen schemaDef RParen        #Schema_OfInstance
+    | SCHEMA_OF LParen schemaDef RParen        #Schema_OfInstance
     | DST queryId                       #Schema_Destination
     | LITERAL COLON typesideId
             LBrace schemaLiteralExpr RBrace     #Schema_Literal
-    | 'getSchema' schemaColimitId          #Schema_GetSchemaColimit
+    | GET_SCHEMA schemaColimitId          #Schema_GetSchemaColimit
     ;
 schemaKind: schemaId | LParen schemaDef RParen;
 
@@ -19,9 +19,9 @@ schemaLiteralExpr:
     (IMPORTS typesideId*)?
     (ENTITIES schemaEntityId*)?
     (FOREIGN_KEYS schemaForeignSig*)?
-    ('path_equations' schemaPathEquation*)?
+    (PATH_EQUATIONS schemaPathEquation*)?
     (ATTRIBUTES schemaAttributeSig*)?
-    ('observation_equations' schemaObservationEquationSig*)?
+    (OBSERVATION_EQUATIONS schemaObservationEquationSig*)?
     (OPTIONS (timeoutOption | proverOptions | allowJavaEqsUnsafeOption)*)?
     ;
 
