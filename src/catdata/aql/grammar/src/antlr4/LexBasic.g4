@@ -183,37 +183,37 @@ fragment DQuote
 
 
 fragment LParen
-   : LParen
+   : '('
    ;
 
 
 fragment RParen
-   : RParen
+   : ')'
    ;
 
 
 fragment LBrace
-   : LBrace
+   : '{'
    ;
 
 
 fragment RBrace
-   : RBrace
+   : '}'
    ;
 
 
 fragment LBrack
-   : LBrack
+   : '['
    ;
 
 
 fragment RBrack
-   : RBrack
+   : ']'
    ;
 
 
 fragment RArrow
-   : RARROW
+   : '->'
    ;
 
 
@@ -268,7 +268,7 @@ fragment Dollar
 
 
 fragment Comma
-   : COMMA
+   : ','
    ;
 
 
@@ -278,7 +278,7 @@ fragment Semi
 
 
 fragment Dot
-   : Dot
+   : '.'
    ;
 
 
