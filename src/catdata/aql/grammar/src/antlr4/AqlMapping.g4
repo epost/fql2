@@ -2,14 +2,14 @@ parser grammar AqlMapping;
 options { tokenVocab=AqlLexerRules; }
 
 mappingId: IDENTIFIER;
-mappingKindAssignment: MAPPING mappingId Equal mappingDef ;
+mappingKindAssignment: MAPPING mappingId EQUAL mappingDef ;
 mappingDef:
       ID schemaId                       #MapExp_Id
-    | LBrack mappingId SEMI mappingId RBrack   #MapExp_Compose
+    | LBRACK mappingId SEMI mappingId RBRACK   #MapExp_Compose
     | LITERAL COLON schemaId RARROW schemaId
-            LBrace mappingLiteralExpr RBrace      #MapExp_Literal
+            LBRACE mappingLiteralExpr RBRACE      #MapExp_Literal
     ;
-mappingKind: mappingId | LParen mappingDef RParen;
+mappingKind: mappingId | LPAREN mappingDef RPAREN;
 
 mappingLiteralExpr:
   (IMPORTS mappingId*)?
@@ -26,8 +26,8 @@ mappingForeignSig:
 
 mappingForeignPath:
     mappingArrowId
-  | schemaPath Dot schemaArrowId
-  | schemaArrowId LParen schemaPath RParen
+  | schemaPath DOT schemaArrowId
+  | schemaArrowId LPAREN schemaPath RPAREN
   ;
 
 // identity arrows are indicated with entity-names.
@@ -37,12 +37,12 @@ mappingAttributeSig:
   schemaAttributeId RARROW (mappingLambda | schemaPath);
 
 mappingLambda:
-  LAMBDA mappingGen (COMMA mappingGen) Dot evalMappingFn ;
+  LAMBDA mappingGen (COMMA mappingGen) DOT evalMappingFn ;
 
 mappingGen: IDENTIFIER;
 evalMappingFn:
     mappingGen
-  | mappingFn LParen evalMappingFn RParen
+  | mappingFn LPAREN evalMappingFn RPAREN
   ;
 
 mappingFn: typesideFnName | schemaAttributeId | schemaForeignId ;

@@ -2,7 +2,7 @@ parser grammar AqlInstance;
 options { tokenVocab=AqlLexerRules; }
 
 instanceId: IDENTIFIER;
-instanceKindAssignment: INSTANCE instanceId Equal instanceDef ;
+instanceKindAssignment: INSTANCE instanceId EQUAL instanceDef ;
 instanceDef:
     EMPTY COLON schemaKind
   | SRC transformKind
@@ -18,31 +18,31 @@ instanceDef:
   | COPRODUCT instanceKind (PLUS instanceKind)* COLON schemaKind
   | COPRODUCT_UNRESTRICTED instanceId (PLUS instanceId)* COLON schemaKind
   | COEQUALIZE transformKind transformKind
-  | COLIMIT graphKind schemaKind LBrace
+  | COLIMIT graphKind schemaKind LBRACE
       NODES (instanceId RARROW instanceDef)+
       EDGES (schemaArrowId RARROW transformKind)+
-      (OPTIONS (timeoutOption | STATIC_TYPING Equal truthy)*)?
-      RBrace
-  | IMPORT_JDBC jdbcClass jdbcUri COLON schemaDef LBrace instanceImportJdbc RBrace
-  | QUOTIENT_JDBC jdbcClass jdbcUri  schemaDef LBrace instanceSql+ RBrace
-  | QUOTIENT_CSV schemaDef LBrace instanceFile+ RBrace
+      (OPTIONS (timeoutOption | STATIC_TYPING EQUAL truthy)*)?
+      RBRACE
+  | IMPORT_JDBC jdbcClass jdbcUri COLON schemaDef LBRACE instanceImportJdbc RBRACE
+  | QUOTIENT_JDBC jdbcClass jdbcUri  schemaDef LBRACE instanceSql+ RBRACE
+  | QUOTIENT_CSV schemaDef LBRACE instanceFile+ RBRACE
   | IMPORT_JDBC_ALL jdbcClass jdbcUri
         (OPTIONS (timeoutOption | proverOptions
                   | alwaysReloadOption
                   | requireConsistencyOption
                   | schemaOnlyOption)*)?
-  | IMPORT_CSV COLON schemaDef LBrace instanceEntityFile+ RBrace
+  | IMPORT_CSV COLON schemaDef LBRACE instanceEntityFile+ RBRACE
         (OPTIONS (timeoutOption | proverOptions
                   | alwaysReloadOption
                   | csvOptions
                   | idColumnNameOption
                   | requireConsistencyOption)*)?
-  | LITERAL COLON schemaKind LBrace instanceLiteralExpr RBrace
-  | QUOTIENT instanceKind LBrace instanceQuotientExpr RBrace
+  | LITERAL COLON schemaKind LBRACE instanceLiteralExpr RBRACE
+  | QUOTIENT instanceKind LBRACE instanceQuotientExpr RBRACE
   | CHASE constraintKind* instanceKind INTEGER?
-  | RANDOM COLON schemaId LBrace instanceRandomExpr RBrace
+  | RANDOM COLON schemaId LBRACE instanceRandomExpr RBRACE
     ;
-instanceKind: instanceId | LParen instanceDef RParen;
+instanceKind: instanceId | LPAREN instanceDef RPAREN;
 
 instanceLiteralExpr:
   (IMPORTS instanceId*)?
@@ -70,10 +70,10 @@ instanceEntityFile: schemaEntityId RARROW instanceFile;
 
 instanceGen: IDENTIFIER;
 
-instanceEquation: instancePath Equal instancePath;
+instanceEquation: instancePath EQUAL instancePath;
 
 instanceMultiEquation:
-  instanceEquationId RARROW LBrace instanceMultiValue (COMMA instanceMultiValue)* RBrace;
+  instanceEquationId RARROW LBRACE instanceMultiValue (COMMA instanceMultiValue)* RBRACE;
 
 instanceEquationId: STRING;
 
@@ -82,17 +82,17 @@ instanceMultiValue:
 
 instancePath:
   instanceArrowId
-  | instancePath Dot instanceArrowId
-  | instanceArrowId LParen instancePath RParen
+  | instancePath DOT instanceArrowId
+  | instanceArrowId LPAREN instancePath RPAREN
   ;
 
 // identity arrows are indicated with entity-names.
 instanceArrowId: schemaEntityId | schemaForeignId;
 
 instanceQuotientExpr:
-    EQUATIONS (schemaEntityId Equal schemaEntityId)* ;
+    EQUATIONS (schemaEntityId EQUAL schemaEntityId)* ;
 
 instanceRandomExpr:
   GENERATORS (schemaEntityId RARROW INTEGER)*
-  | OPTIONS (RANDOM_SEED Equal INTEGER)
+  | OPTIONS (RANDOM_SEED EQUAL INTEGER)
   ;

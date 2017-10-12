@@ -2,37 +2,37 @@ parser grammar AqlQuery;
 options { tokenVocab=AqlLexerRules; }
 
 queryId: IDENTIFIER;
-queryFromSchema: LParen ID schemaId RParen;
+queryFromSchema: LPAREN ID schemaId RPAREN;
 
-queryKindAssignment: QUERY queryId Equal queryDef ;
+queryKindAssignment: QUERY queryId EQUAL queryDef ;
 queryDef:
       ID schemaId                       #QueryExp_Id
     | LITERAL COLON schemaId RARROW schemaId
-            LBrace queryLiteralExpr RBrace      #QueryExp_Literal
+            LBRACE queryLiteralExpr RBRACE      #QueryExp_Literal
     | SIMPLE COLON schemaId
-            LBrace queryEntityExpr RBrace       #QueryExp_Simple
+            LBRACE queryEntityExpr RBRACE       #QueryExp_Simple
     | GET_MAPPING schemaColimitId
             schemaId                      #QueryExp_Get
     ;
-queryKind: queryId | LParen queryDef RParen;
+queryKind: queryId | LPAREN queryDef RPAREN;
 
 queryLiteralExpr:
   (IMPORTS queryId*)?
-  (ENTITIES (schemaEntityId RARROW LBrace queryEntityExpr RBrace)*)?
+  (ENTITIES (schemaEntityId RARROW LBRACE queryEntityExpr RBRACE)*)?
   (FOREIGN_KEYS queryForeignSig*)?
   (OPTIONS (timeoutOption | dontValidateUnsafeOption)*)?
   ;
 
-queryEntityExpr: schemaEntityId RARROW LBrace selectClause RBrace;
+queryEntityExpr: schemaEntityId RARROW LBRACE selectClause RBRACE;
 selectClause:
   FROM (queryGen COLON schemaEntityId)+
-  (WHERE (queryPath Equal queryPath)+)
+  (WHERE (queryPath EQUAL queryPath)+)
   RETURN (schemaEntityId RARROW queryPath)+
   ;
 
 queryForeignSig:
-  schemaForeignId RARROW LBrace queryPathMapping+ RBrace;
+  schemaForeignId RARROW LBRACE queryPathMapping+ RBRACE;
 
 queryPathMapping: queryGen RARROW queryPath;
 queryGen: IDENTIFIER;
-queryPath: queryGen (Dot schemaArrowId)*;
+queryPath: queryGen (DOT schemaArrowId)*;

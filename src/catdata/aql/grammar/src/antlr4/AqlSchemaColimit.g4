@@ -2,7 +2,7 @@ parser grammar AqlSchemaColimit;
 options { tokenVocab=AqlLexerRules; }
 
 schemaColimitId: IDENTIFIER;
-schemaColimitKindAssignment: SCHEMA_COLIMIT schemaColimitId Equal schemaColimitDef ;
+schemaColimitKindAssignment: SCHEMA_COLIMIT schemaColimitId EQUAL schemaColimitDef ;
 schemaColimitDef:
       QUOTIENT schemaId (PLUS schemaId)* COLON typesideId
         schemaColimitQuotientSection        #SchemaColimit_Quotient
@@ -13,26 +13,26 @@ schemaColimitDef:
     | WRAP schemaColimitId mappingId mappingId
                                             #SchemaColimit_Wrap
     ;
-schemaColimitKind: schemaColimitId | LParen schemaColimitDef RParen;
+schemaColimitKind: schemaColimitId | LPAREN schemaColimitDef RPAREN;
 
-schemaColimitQuotientSection: LBrace
-  (ENTITY_EQUATIONS (scEntityPath Equal scEntityPath)*)?
-  (PATH_EQUATIONS (scFkPath Equal scFkPath)*)?
+schemaColimitQuotientSection: LBRACE
+  (ENTITY_EQUATIONS (scEntityPath EQUAL scEntityPath)*)?
+  (PATH_EQUATIONS (scFkPath EQUAL scFkPath)*)?
   (OBSERVATION_EQUATIONS scObsEquation )?
-  RBrace  ;
+  RBRACE  ;
 
 scObsEquation:
-    FORALL scGen (COMMA scGen)* Dot scEntityPath Equal scEntityPath
+    FORALL scGen (COMMA scGen)* DOT scEntityPath EQUAL scEntityPath
   | ;
 
 scGen: STRING;
-scEntityPath: schemaId Dot schemaTermId;
-scFkPath: schemaId '_' schemaArrowId;
+scEntityPath: schemaId DOT schemaTermId;
+scFkPath: schemaId UNDERSCORE schemaArrowId;
 
-schemaColimitModifySection: LBrace
-  (RENAME ENTITIES (scEntityPath Equal scEntityPath)*)?
-  (RENAME FOREIGN_KEYS (scFkPath Equal scFkPath)*)?
+schemaColimitModifySection: LBRACE
+  (RENAME ENTITIES (scEntityPath EQUAL scEntityPath)*)?
+  (RENAME FOREIGN_KEYS (scFkPath EQUAL scFkPath)*)?
   (RENAME ATTRIBUTES scObsEquation )?
   (REMOVE FOREIGN_KEYS scObsEquation )?
   (REMOVE ATTRIBUTES scObsEquation )?
-  RBrace  ;
+  RBRACE  ;

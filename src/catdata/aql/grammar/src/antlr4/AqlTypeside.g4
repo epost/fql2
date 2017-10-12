@@ -4,25 +4,25 @@ options { tokenVocab=AqlLexerRules; }
 typesideId: IDENTIFIER;
 
 typesideKindAssignment:
-  TYPESIDE typesideId Equal typesideInstance;
+  TYPESIDE typesideId EQUAL typesideInstance;
 
 typesideInstance:
     EMPTY | SQL
-  | TYPESIDE_OF LParen EMPTY COLON IDENTIFIER RParen
+  | TYPESIDE_OF LPAREN EMPTY COLON IDENTIFIER RPAREN
   | typesideLiteralExpr;
 
 typesideLiteralExpr:
-  LITERAL LBrace
+  LITERAL LBRACE
     (IMPORTS typesideImport*)?
     (TYPES typesideTypeSig*)?
     (CONSTANTS typesideConstantSig*)?
     (FUNCTIONS typesideFunctionSig*)?
-    (JAVA_TYPES (typesideTypeSig Equal STRING)*)?
-    (JAVA_CONSTANTS (typesideConstantSig Equal STRING)*)?
-    (JAVA_FUNCTIONS (typesideFunctionSig Equal STRING)*)?
+    (JAVA_TYPES (typesideTypeSig EQUAL STRING)*)?
+    (JAVA_CONSTANTS (typesideConstantSig EQUAL STRING)*)?
+    (JAVA_FUNCTIONS (typesideFunctionSig EQUAL STRING)*)?
     (EQUATIONS typesideEquations*)?
     (OPTIONS (timeoutOption | proverOptions | allowJavaEqsUnsafeOption)*)?
-    RBrace;
+    RBRACE;
 
 typesideImport:
   IDENTIFIER                #Typeside_ImportName
@@ -48,10 +48,10 @@ typesideEquations:
   FORALL typesideLambdaSig;
 
 typesideLambdaSig:
-  IDENTIFIER (COMMA IDENTIFIER) Dot typesideEval Equal typesideEval;
+  IDENTIFIER (COMMA IDENTIFIER) DOT typesideEval EQUAL typesideEval;
 
 typesideEval:
     NUMBER                       #Typeside_EvalNumber
   | IDENTIFIER                   #Typeside_EvalGen
-  | IDENTIFIER LParen typesideEval (COMMA typesideEval)* RParen      #Typeside_EvalFunction
+  | IDENTIFIER LPAREN typesideEval (COMMA typesideEval)* RPAREN      #Typeside_EvalFunction
   ;

@@ -3,11 +3,11 @@ options { tokenVocab=AqlLexerRules; }
 
 graphId: IDENTIFIER;
 
-graphKindAssignment: GRAPH graphId Equal graphDef ;
+graphKindAssignment: GRAPH graphId EQUAL graphDef ;
 graphDef:
-      LITERAL LBrace graphLiteralExpr RBrace      #GraphExp_Literal
+      LITERAL LBRACE graphLiteralExpr RBRACE      #GraphExp_Literal
     ;
-graphKind: graphId | LParen graphDef RParen;
+graphKind: graphId | LPAREN graphDef RPAREN;
 
 graphLiteralExpr:
   (IMPORTS graphId*)?

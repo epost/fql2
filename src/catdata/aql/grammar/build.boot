@@ -26,14 +26,21 @@
 (import '(org.antlr.v4 Tool))
 
 
+(deftask store
+  [s show bool "show the arguments"]
+  (comp
+    (target :dir #{"target"})))
+
+
 (deftask build
   [s show bool "show the arguments"]
   (comp
     (antlr4 :grammar "AqlLexerRules.g4" 
             :package "org.aql")
-    (antlr4 :grammar "Aql.g4"
+    (antlr4 :grammar "AqlParser.g4"
             :package "org.aql")
     (javac)))
+
 
 (deftask exercise 
   [] 
@@ -44,11 +51,6 @@
               :tree false
               :postscript false
               :tokens true)))
-
-(deftask store
-  [s show bool "show the arguments"]
-  (comp
-    (target :dir #{"target"})))
 
 (deftask my-repl
   [s show bool "show the arguments"]
@@ -74,7 +76,8 @@
  
 (deftask live 
   []
-  (comp ;(watch) 
+  (comp 
+    (watch) 
     (build)
     (exercise) 
     ;; (show :fileset true) 

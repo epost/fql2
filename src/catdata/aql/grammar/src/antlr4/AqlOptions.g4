@@ -1,8 +1,9 @@
+
 parser grammar AqlOptions;
 options { tokenVocab=AqlLexerRules; }
 
-optionsDeclaration:
-    numThreadsOption
+optionsDeclaration
+  : numThreadsOption
   | randomSeedOption
   | timeoutOption
   | requireConsistencyOption
@@ -26,77 +27,78 @@ optionsDeclaration:
   ;
 
 // options not mentioned in the manual
-importJoinedOption:  IMPORT_JOINED Equal truthy;
-mapNullsArbitrarilyUnsafeOption:
-  MAP_NULLS_ARBITRARILY_UNSAFE Equal truthy;
-interpretAsAlgebraOption:  INTERPRET_AS_ALGEGRA Equal truthy;
+importJoinedOption :  IMPORT_JOINED EQUAL truthy;
 
-numThreadsOption: NUM_THREADS Equal INTEGER;
-randomSeedOption:  RANDOM_SEED Equal INTEGER;
-timeoutOption:  TIMEOUT Equal INTEGER;
-requireConsistencyOption: REQUIRE_CONSISTENCY Equal truthy;
-schemaOnlyOption:  SCHEMA_ONLY Equal truthy;
-allowJavaEqsUnsafeOption: ALLOW_JAVA_EQS_UNSAFE Equal truthy;
-dontValidateUnsafeOption: DONT_VALIDATE_UNSAFE Equal truthy;
-alwaysReloadOption:  ALWAYS_RELOAD Equal truthy;
+mapNullsArbitrarilyUnsafeOption:
+  MAP_NULLS_ARBITRARILY_UNSAFE EQUAL truthy;
+interpretAsAlgebraOption:  INTERPRET_AS_ALGEGRA EQUAL truthy;
+
+numThreadsOption: NUM_THREADS EQUAL INTEGER;
+randomSeedOption:  RANDOM_SEED EQUAL INTEGER;
+timeoutOption:  TIMEOUT EQUAL INTEGER;
+requireConsistencyOption: REQUIRE_CONSISTENCY EQUAL truthy;
+schemaOnlyOption:  SCHEMA_ONLY EQUAL truthy;
+allowJavaEqsUnsafeOption: ALLOW_JAVA_EQS_UNSAFE EQUAL truthy;
+dontValidateUnsafeOption: DONT_VALIDATE_UNSAFE EQUAL truthy;
+alwaysReloadOption:  ALWAYS_RELOAD EQUAL truthy;
 
 // docs/aqlmanual/aqlmanual.tex ch 13.10 Import Options
 csvOptions:
-    CSV_FIELD_DELIM_CHAR Equal CHAR
-  | CSV_ESCAPE_CHAR Equal CHAR
-  | CSV_QUOTE_CHAR Equal CHAR
-  | CSV_FILE_EXTENSION Equal STRING
-  | CSV_GENERATE_IDS Equal truthy
+    CSV_FIELD_DELIM_CHAR EQUAL CHAR
+  | CSV_ESCAPE_CHAR EQUAL CHAR
+  | CSV_QUOTE_CHAR EQUAL CHAR
+  | CSV_FILE_EXTENSION EQUAL STRING
+  | CSV_GENERATE_IDS EQUAL truthy
   ;
 
-idColumnNameOption: ID_COLUMN_NAME Equal STRING;
-varcharLengthOption: VARCHAR_LENGTH Equal NUMBER;
-startIdsAtOption: START_IDS_AT Equal INTEGER;
-importAsTheoryOption: IMPORT_AS_THEORY Equal truthy;
-jdbcDefaultClassOption: JDBC_DEFAULT_CLASS Equal STRING;
-jdbDefaultStringOption: JDBC_DEFAULT_STRING Equal STRING;
+idColumnNameOption: ID_COLUMN_NAME EQUAL STRING;
+varcharLengthOption: VARCHAR_LENGTH EQUAL NUMBER;
+startIdsAtOption: START_IDS_AT EQUAL INTEGER;
+importAsTheoryOption: IMPORT_AS_THEORY EQUAL truthy;
+jdbcDefaultClassOption: JDBC_DEFAULT_CLASS EQUAL STRING;
+jdbDefaultStringOption: JDBC_DEFAULT_STRING EQUAL STRING;
 dVIAFProverUnsafeOption:
-  DONT_VERIFY_FOR_UNSAFE Equal truthy;
+  DONT_VERIFY_FOR_UNSAFE EQUAL truthy;
 
 // provers and their options
 proverOptions:
-    PROVER Equal  provers
-  | PROGRAM_ALLOW_NONTERM_UNSAFE Equal truthy
-  | COMPLETION_PRECEDENCE Equal LBrack STRING+ RBrack
-  | COMPLETION_SORT Equal truthy
-  | COMPLETION_COMPOSE Equal truthy
-  | COMPLETION_FILTER_SUBSUMED Equal truthy
-  | COMPLETION_SYNTACTIC_AC Equal truthy
+    PROVER EQUAL  provers
+  | PROGRAM_ALLOW_NONTERM_UNSAFE EQUAL truthy
+  | COMPLETION_PRECEDENCE EQUAL LBRACK STRING+ RBRACK
+  | COMPLETION_SORT EQUAL truthy
+  | COMPLETION_COMPOSE EQUAL truthy
+  | COMPLETION_FILTER_SUBSUMED EQUAL truthy
+  | COMPLETION_SYNTACTIC_AC EQUAL truthy
   ;
 
 // docs/aqlmanual/aqlmanual.tex ch 13.19 GUI Options
 guiOptions:
-    GUI_MAX_TABLE_SIZE Equal INTEGER
-  | GUI_MAX_GRAPH_SIZE Equal INTEGER
-  | GUI_MAX_STRING_SIZE Equal INTEGER
-  | GUI_ROWS_TO_DISPLAY Equal INTEGER
+    GUI_MAX_TABLE_SIZE EQUAL INTEGER
+  | GUI_MAX_GRAPH_SIZE EQUAL INTEGER
+  | GUI_MAX_STRING_SIZE EQUAL INTEGER
+  | GUI_ROWS_TO_DISPLAY EQUAL INTEGER
   ;
 
 // docs/aqlmanual/aqlmanual.tex ch 13.20 Evaluation Options
 evalOptions:
-    EVAL_MAX_TEMP_SIZE Equal INTEGER
-  | EVAL_REORDER_JOINS Equal truthy
-  | EVAL_MAX_PLAN_DEPTH Equal INTEGER
-  | EVAL_JOIN_SELECTIVITY Equal truthy
-  | EVAL_USE_INDICES Equal truthy
-  | EVAL_USE_SQL_ABOVE Equal truthy
-  | EVAL_APPROX_SQL_UNSAFE Equal truthy
-  | EVAL_SQL_PERSISTENT_INDICIES Equal truthy
+    EVAL_MAX_TEMP_SIZE EQUAL INTEGER
+  | EVAL_REORDER_JOINS EQUAL truthy
+  | EVAL_MAX_PLAN_DEPTH EQUAL INTEGER
+  | EVAL_JOIN_SELECTIVITY EQUAL truthy
+  | EVAL_USE_INDICES EQUAL truthy
+  | EVAL_USE_SQL_ABOVE EQUAL truthy
+  | EVAL_APPROX_SQL_UNSAFE EQUAL truthy
+  | EVAL_SQL_PERSISTENT_INDICIES EQUAL truthy
   ;
 
 
 // docs/aqlmanual/aqlmanual.tex ch 13.22 Coproduct Options
 coproductOptions
-  : COPRODUCT_ALLOW_ENTITY Equal truthy
-  | COPRODUCT_ALLOW_TYPE Equal truthy
+  : COPRODUCT_ALLOW_ENTITY EQUAL truthy
+  | COPRODUCT_ALLOW_TYPE EQUAL truthy
   ;
 
-queryRemoveRedundancyOption: QUERY_REMOVE_REDUNDANCY Equal truthy;
+queryRemoveRedundancyOption: QUERY_REMOVE_REDUNDANCY EQUAL truthy;
 
 truthy : TRUE | FALSE;
 

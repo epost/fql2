@@ -273,10 +273,12 @@ LPAREN : LParen ;
 RPAREN : RParen ;
 LBRACE : LBrace ;
 RBRACE : RBrace ;
+LBRACK : LBrack ;
+RBRACK : RBrack ;
 RARROW : RArrow ;
 LT : Lt ;
 GT : Gt ;
-ASSIGN : Equal  ;
+EQUAL : Equal  ;
 QUESTION : Question ;
 STAR : Star ;
 PLUS_ASSIGN : PlusAssign ;
@@ -288,6 +290,7 @@ DOT : Dot ;
 AT : At ;
 POUND : Pound ;
 NOT : Tilde ;
+UNDERSCORE : Underscore ;
 
 // -------------------------
 // Identifiers - allows unicode rule/token names

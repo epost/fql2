@@ -2,7 +2,7 @@ parser grammar AqlPragma;
 options { tokenVocab=AqlLexerRules; }
 
 pragmaId: IDENTIFIER;
-pragmaKindAssignment: PRAGMA pragmaId Equal pragmaDef ;
+pragmaKindAssignment: PRAGMA pragmaId EQUAL pragmaDef ;
 pragmaDef:
       EXEC_CMDLINE pragmaCmdLineSection    #Pragma_CmdLine
     | EXEC_JS pragmaExecJsSection          #Pragma_ExecJs
@@ -26,38 +26,38 @@ pragmaDef:
         (pragmaJdbcClass (pragmaJdbcUri pragmaPrefix?)?)?
           pragmaExportJdbcSection  #Pragma_ExportJdbcTransform
     ;
-pragmaKind: pragmaId | LParen pragmaDef RParen;
+pragmaKind: pragmaId | LPAREN pragmaDef RPAREN;
 
-pragmaCmdLineSection: LBrace
+pragmaCmdLineSection: LBRACE
   STRING
   (OPTIONS (timeoutOption|alwaysReloadOption)*)?
-  RBrace  ;
+  RBRACE  ;
 
-pragmaExecJsSection: LBrace
+pragmaExecJsSection: LBRACE
   STRING
   (OPTIONS (timeoutOption|alwaysReloadOption)*)?
-  RBrace  ;
+  RBRACE  ;
 
-pragmaExecJdbcSection: LBrace
+pragmaExecJdbcSection: LBRACE
   STRING
   (OPTIONS (timeoutOption|alwaysReloadOption)*)?
-  RBrace  ;
+  RBRACE  ;
 
-pragmaExportCsvSection: LBrace
+pragmaExportCsvSection: LBRACE
   STRING
   (OPTIONS (timeoutOption
     | alwaysReloadOption
     | csvOptions | idColumnNameOption
     | startIdsAtOption)*)?
-  RBrace  ;
+  RBRACE  ;
 
-pragmaExportJdbcSection: LBrace
+pragmaExportJdbcSection: LBRACE
   STRING
   (OPTIONS (timeoutOption
     | alwaysReloadOption
     | idColumnNameOption
     | varcharLengthOption)*)?
-  RBrace  ;
+  RBRACE  ;
 
 pragmaFile: STRING;
 pragmaJdbcClass: STRING;

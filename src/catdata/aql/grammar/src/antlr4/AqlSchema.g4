@@ -2,16 +2,16 @@ parser grammar AqlSchema;
 options { tokenVocab=AqlLexerRules; }
 
 schemaId: IDENTIFIER;
-schemaKindAssignment: SCHEMA schemaId Equal schemaDef ;
+schemaKindAssignment: SCHEMA schemaId EQUAL schemaDef ;
 schemaDef:
       EMPTY COLON typesideId              #Schema_Empty
-    | SCHEMA_OF LParen schemaDef RParen        #Schema_OfInstance
+    | SCHEMA_OF LPAREN schemaDef RPAREN        #Schema_OfInstance
     | DST queryId                       #Schema_Destination
     | LITERAL COLON typesideId
-            LBrace schemaLiteralExpr RBrace     #Schema_Literal
+            LBRACE schemaLiteralExpr RBRACE     #Schema_Literal
     | GET_SCHEMA schemaColimitId          #Schema_GetSchemaColimit
     ;
-schemaKind: schemaId | LParen schemaDef RParen;
+schemaKind: schemaId | LPAREN schemaDef RPAREN;
 
 schemaColimitId: IDENTIFIER;
 
@@ -31,12 +31,12 @@ schemaForeignSig:
   schemaForeignId COLON schemaEntityId RARROW schemaEntityId;
 
 schemaPathEquation:
-  schemaPath Equal schemaPath;
+  schemaPath EQUAL schemaPath;
 
 schemaPath:
     schemaArrowId
-  | schemaPath Dot schemaArrowId
-  | schemaArrowId LParen schemaPath RParen
+  | schemaPath DOT schemaArrowId
+  | schemaArrowId LPAREN schemaPath RPAREN
   ;
 
 // identity arrows are indicated with entity-names.
@@ -52,11 +52,11 @@ schemaObservationEquationSig:
   FORALL schemaEquationSig;
 
 schemaEquationSig:
-  schemaGen (COMMA schemaGen)* Dot evalSchemaFn Equal evalSchemaFn;
+  schemaGen (COMMA schemaGen)* DOT evalSchemaFn EQUAL evalSchemaFn;
 
 evalSchemaFn:
     schemaGen
-  | schemaFn LParen evalSchemaFn RParen
+  | schemaFn LPAREN evalSchemaFn RPAREN
   ;
 
 schemaGen: IDENTIFIER;

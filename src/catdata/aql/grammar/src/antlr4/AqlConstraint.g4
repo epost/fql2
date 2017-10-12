@@ -1,13 +1,14 @@
+
 parser grammar AqlConstraint;
 options { tokenVocab=AqlLexerRules; }
 
 constraintId: IDENTIFIER;
-constraintKindAssignment: CONSTRAINT constraintId Equal constraintDef ;
+constraintKindAssignment: CONSTRAINT constraintId EQUAL constraintDef ;
 constraintDef:
   LITERAL COLON schemaId
-            LBrace constraintLiteralExpr RBrace      #constraintExp_Literal
+            LBRACE constraintLiteralExpr RBRACE      #constraintExp_Literal
     ;
-constraintKind: constraintId | LParen constraintDef RParen;
+constraintKind: constraintId | LPAREN constraintDef RPAREN;
 
 constraintLiteralExpr:
   (IMPORTS constraintId*)?
@@ -25,5 +26,5 @@ constraintExpr:
 
 constraintGen: IDENTIFIER;
 
-constraintEquation: constraintPath Equal constraintPath;
-constraintPath: constraintGen (Dot schemaArrowId)*;
+constraintEquation: constraintPath EQUAL constraintPath;
+constraintPath: constraintGen (DOT schemaArrowId)*;
