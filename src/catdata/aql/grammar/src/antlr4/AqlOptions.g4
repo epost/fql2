@@ -91,19 +91,19 @@ evalOptions:
 
 
 // docs/aqlmanual/aqlmanual.tex ch 13.22 Coproduct Options
-coproductOptions:
-    'coproduct_allow_entity_collisions_unsafe' Equal truthy
+coproductOptions
+  : 'coproduct_allow_entity_collisions_unsafe' Equal truthy
   | 'coproduct_allow_type_collisions_unsafe' Equal truthy
   ;
 
 queryRemoveRedundancyOption: 'query_remove_redundancy' Equal truthy;
 
-truthy: 'true' | 'false';
+truthy : 'true' | 'false';
 
-provers:
-    'auto'
+provers
+  : 'auto'
   | 'fail'
-  |  'free'
+  | 'free'
   | 'saturated'
   | 'congruence'
   | 'monoidal'

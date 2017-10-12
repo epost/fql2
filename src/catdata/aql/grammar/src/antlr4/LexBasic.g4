@@ -243,7 +243,7 @@ fragment Star
 
 
 fragment Plus
-   : '+'
+   : PLUS
    ;
 
 

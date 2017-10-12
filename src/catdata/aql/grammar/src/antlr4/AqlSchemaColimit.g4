@@ -4,9 +4,9 @@ options { tokenVocab=AqlLexerRules; }
 schemaColimitId: IDENTIFIER;
 schemaColimitKindAssignment: 'schema_colimit' schemaColimitId Equal schemaColimitDef ;
 schemaColimitDef:
-      QUOTIENT schemaId ('+' schemaId)* COLON typesideId
+      QUOTIENT schemaId (PLUS schemaId)* COLON typesideId
         schemaColimitQuotientSection        #SchemaColimit_Quotient
-    | COPRODUCT schemaId ('+' schemaId)* COLON typesideId
+    | COPRODUCT schemaId (PLUS schemaId)* COLON typesideId
                                             #SchemaColimit_Coproduct
     | 'modify' schemaColimitId
         schemaColimitModifySection          #SchemaColimit_Modify

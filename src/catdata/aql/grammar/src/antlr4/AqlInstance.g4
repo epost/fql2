@@ -16,7 +16,7 @@ instanceDef:
   | SIGMA mappingKind instanceKind
   | COPRODUCT_SIGMA (mappingKind instanceKind)+ COLON schemaKind
   | COPRODUCT instanceKind (PLUS instanceKind)* COLON schemaKind
-  | COPRODUCT_UNRESTRICTED instanceId ('+' instanceId)* COLON schemaKind
+  | COPRODUCT_UNRESTRICTED instanceId (PLUS instanceId)* COLON schemaKind
   | COEQUALIZE transformKind transformKind
   | COLIMIT graphKind schemaKind LBrace
       NODES (instanceId RARROW instanceDef)+
