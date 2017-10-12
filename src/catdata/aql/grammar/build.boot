@@ -29,17 +29,28 @@
 (deftask build
   [s show bool "show the arguments"]
   (comp
-    (watch)
-    (antlr4 :grammar "AqlLexerRules.g4" :show true)
-    (antlr4 :grammar "Aql.g4" :show true)
-    (javac)
-    (test-rig :parser "AqlParser"
-              :lexer "AqlLexerRules"
+    (antlr4 :grammar "AqlLexerRules.g4" 
+            :package "org.aql")
+    (antlr4 :grammar "Aql.g4"
+            :package "org.aql")
+    (javac)))
+
+(deftask exercise 
+  [] 
+  (comp 
+    (test-rig :parser "org.aql.AqlParser"
+              :lexer "org.aql.AqlLexerRules"
               :start-rule "program"
-              :tree true)
+              :tree false
+              :postscript false
+              :tokens true)))
+
+(deftask store
+  [s show bool "show the arguments"]
+  (comp
     (target :dir #{"target"})))
 
-(deftask rerepl
+(deftask my-repl
   [s show bool "show the arguments"]
   (comp (repl) (build)))
 
@@ -60,39 +71,7 @@
                 [util :as util]
                 [task-helpers :as helper]))
 
-(deftask store
-  [s show bool "show the arguments"]
-  (comp
-    (target :dir #{"target"})))
-
-(deftask build
-  [s show bool "show the arguments"]
-  (comp
-    (antlr4 :grammar "ANTLRv4Lexer.g4"
-            :package "org.antlr.parser.antlr4"
-            :show true)
-    (antlr4 :grammar "ANTLRv4Parser.g4"
-            :package "org.antlr.parser.antlr4"
-            :show true)
-    (javac)))
-
-(deftask exercise
-  [s show bool "show the arguments"]
-  (comp 
-    (test-rig :parser "org.antlr.parser.antlr4.ANTLRv4Parser"
-              :lexer "org.antlr.parser.antlr4.ANTLRv4Lexer"
-              :start-rule "grammarSpec"
-              :input ["src/antlr4/ANTLRv4Lexer.g4"
-                      "src/antlr4/ANTLRv4Parser.g4"]
-              :tree true
-              :postscript true
-              :tokens true
-              :show true)))
-
-(deftask my-repl
-  []
-  (comp (repl) (build) (store)))
-
+ 
 (deftask live 
   []
   (comp ;(watch) 

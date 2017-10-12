@@ -7,7 +7,9 @@
 lexer grammar AqlLexerRules;
 
 options
-   { superClass = 'LexerAdaptor'; }
+   { 
+     // superClass = 'LexerAdaptor'; 
+   }
 
 // Common set of fragments
 import LexBasic;
@@ -18,8 +20,9 @@ tokens
 channels {
   HIDDEN_CHANNEL,
   WHITESPACE_CHANNEL,
-  BLOCK_COMMMENT_CHANNEL,
-  LINE_COMMENT_CHANNEL
+  BLOCK_COMMENT_CHANNEL,
+  LINE_COMMENT_CHANNEL,
+  DOC_COMMENT_CHANNEL
 }
 
 // ======================================================
@@ -80,8 +83,8 @@ UNTERMINATED_STRING_LITERAL
    : USQuoteLiteral
    ;
 
-STRING :  '"' (ESC | CHAR)* '"' ;
-CHAR : '"' (ESC | ~["\\]) '"' ;
+STRING :  DQuoteLiteral ;
+CHAR : CharLiteral ;
 
 // -------------------------
 // Keywords
@@ -110,7 +113,6 @@ CONSTRAINT : 'constraint' ;
 IMPORTS : 'imports' ;
 FORALL : 'forall' ;
 WHERE : 'where' ;
-RARROW : RArrow ;
 EXISTS : 'exists' ;
 
 GRAPH : 'graph' ;
@@ -152,113 +154,112 @@ FOREIGN_KEYS : 'foreign_keys' ;
 ATTRIBUTES : 'attributes' ;
 LAMBDA : 'lambda' ;
 
-IMPORT_JOINED : IMPORT_JOINED;
-MAP_NULLS_ARBITRARILY_UNSAFE :  MAP_NULLS_ARBITRARILY_UNSAFE;
-INTERPRET_AS_ALGEGRA :  INTERPRET_AS_ALGEGRA;
-NUM_THREADS :  NUM_THREADS;
-TIMEOUT :  TIMEOUT;
-REQUIRE_CONSISTENCY :  REQUIRE_CONSISTENCY;
-SCHEMA_ONLY :  SCHEMA_ONLY;
-ALLOW_JAVA_EQS_UNSAFE :  ALLOW_JAVA_EQS_UNSAFE;
-DONT_VALIDATE_UNSAFE :  DONT_VALIDATE_UNSAFE;
-ALWAYS_RELOAD :  ALWAYS_RELOAD;
-CSV_FIELD_DELIM_CHAR :  CSV_FIELD_DELIM_CHAR;
-CSV_ESCAPE_CHAR :  CSV_ESCAPE_CHAR;
-CSV_QUOTE_CHAR :  CSV_QUOTE_CHAR;
-CSV_FILE_EXTENSION :  CSV_FILE_EXTENSION;
-CSV_GENERATE_IDS :  CSV_GENERATE_IDS;
-ID_COLUMN_NAME :  ID_COLUMN_NAME;
-VARCHAR_LENGTH :  VARCHAR_LENGTH;
-START_IDS_AT :  START_IDS_AT;
-IMPORT_AS_THEORY :  IMPORT_AS_THEORY;
-JDBC_DEFAULT_CLASS :  JDBC_DEFAULT_CLASS;
-JDBC_DEFAULT_STRING :  JDBC_DEFAULT_STRING;
-DONT_VERIFY_FOR_UNSAFE :  DONT_VERIFY_FOR_UNSAFE;
-PROVER :  PROVER;
-PROGRAM_ALLOW_NONTERM_UNSAFE :  PROGRAM_ALLOW_NONTERM_UNSAFE;
-COMPLETION_PRECEDENCE :  COMPLETION_PRECEDENCE;
-COMPLETION_SORT :  COMPLETION_SORT;
-COMPLETION_COMPOSE :  COMPLETION_COMPOSE;
-COMPLETION_FILTER_SUBSUMED :  COMPLETION_FILTER_SUBSUMED;
-COMPLETION_SYNTACTIC_AC :  COMPLETION_SYNTACTIC_AC;
+IMPORT_JOINED : 'import_joined';
+MAP_NULLS_ARBITRARILY_UNSAFE :  'map_nulls_arbitrarily_unsafe';
+INTERPRET_AS_ALGEGRA :  'interpret_as_algebra';
+NUM_THREADS :  'num_threads';
+TIMEOUT :  'timeout';
+REQUIRE_CONSISTENCY :  'require_consistency';
+SCHEMA_ONLY :  'schema_only';
+ALLOW_JAVA_EQS_UNSAFE :  'allow_java_eqs_unsafe';
+DONT_VALIDATE_UNSAFE :  'dont_validate_unsafe';
+ALWAYS_RELOAD :  'always_reload';
+CSV_FIELD_DELIM_CHAR :  'csv_field_delim_char';
+CSV_ESCAPE_CHAR :  'csv_escape_char';
+CSV_QUOTE_CHAR :  'csv_quote_char';
+CSV_FILE_EXTENSION :  'csv_file_extension';
+CSV_GENERATE_IDS :  'csv_generate_ids';
+ID_COLUMN_NAME :  'id_column_name';
+VARCHAR_LENGTH :  'varchar_length';
+START_IDS_AT :  'start_ids_at';
+IMPORT_AS_THEORY :  'import_as_theory';
+JDBC_DEFAULT_CLASS :  'jdbc_default_class';
+JDBC_DEFAULT_STRING :  'jdbc_default_string';
+DONT_VERIFY_FOR_UNSAFE :  'dont_verify_is_appropriate_for_prover_unsafe';
+PROVER :  'prover';
+PROGRAM_ALLOW_NONTERM_UNSAFE :  'program_allow_nontermination_unsafe';
+COMPLETION_PRECEDENCE :  'completion_precedence';
+COMPLETION_SORT :  'completion_sort';
+COMPLETION_COMPOSE :  'completion_compose';
+COMPLETION_FILTER_SUBSUMED :  'completion_filter_subsumed';
+COMPLETION_SYNTACTIC_AC :  'completion_syntactic_ac';
 
-GUI_MAX_TABLE_SIZE : GUI_MAX_TABLE_SIZE;
-GUI_MAX_GRAPH_SIZE : GUI_MAX_GRAPH_SIZE;
-GUI_MAX_STRING_SIZE : GUI_MAX_STRING_SIZE;
-GUI_ROWS_TO_DISPLAY : GUI_ROWS_TO_DISPLAY;
+GUI_MAX_TABLE_SIZE : 'gui_max_table_size';
+GUI_MAX_GRAPH_SIZE : 'gui_max_graph_size';
+GUI_MAX_STRING_SIZE : 'gui_max_string_size';
+GUI_ROWS_TO_DISPLAY : 'gui_rows_to_display';
 
-EVAL_MAX_TEMP_SIZE : EVAL_MAX_TEMP_SIZE;
-EVAL_REORDER_JOINS : EVAL_REORDER_JOINS;
-EVAL_MAX_PLAN_DEPTH : EVAL_MAX_PLAN_DEPTH;
-EVAL_JOIN_SELECTIVITY : EVAL_JOIN_SELECTIVITY;
-EVAL_USE_INDICES : EVAL_USE_INDICES;
-EVAL_USE_SQL_ABOVE : EVAL_USE_SQL_ABOVE;
-EVAL_APPROX_SQL_UNSAFE : EVAL_APPROX_SQL_UNSAFE;
-EVAL_SQL_PERSISTENT_INDICIES : EVAL_SQL_PERSISTENT_INDICIES;
-
-
-COPRODUCT_ALLOW_ENTITY : COPRODUCT_ALLOW_ENTITY;
-COPRODUCT_ALLOW_TYPE : COPRODUCT_ALLOW_TYPE;
-QUERY_REMOVE_REDUNDANCY : QUERY_REMOVE_REDUNDANCY;
-TRUE : TRUE;
-FALSE : FALSE;
-
-AUTO : AUTO;
-FAIL : FAIL;
-FREE : FREE;
-SATURATED : SATURATED;
-CONGRUENCE : CONGRUENCE;
-MONOIDAL : MONOIDAL;
-PROGRAM : PROGRAM;
-COMPLETION : COMPLETION;
+EVAL_MAX_TEMP_SIZE : 'eval_max_temp_size';
+EVAL_REORDER_JOINS : 'eval_reorder_joins';
+EVAL_MAX_PLAN_DEPTH : 'eval_max_plan_depth';
+EVAL_JOIN_SELECTIVITY : 'eval_join_selectivity';
+EVAL_USE_INDICES : 'eval_use_indices';
+EVAL_USE_SQL_ABOVE : 'eval_use_sql_above';
+EVAL_APPROX_SQL_UNSAFE : 'eval_approx_sql_unsafe';
+EVAL_SQL_PERSISTENT_INDICIES : 'eval_sql_persistent_indices';
 
 
-PRAGMA : PRAGMA;
-EXEC_CMDLINE : EXEC_CMDLINE;
-EXEC_JS : EXEC_JS;
-EXEC_JDBC : EXEC_JDBC;
-CHECK : CHECK;
-ASSERT_CONSISTENT : ASSERT_CONSISTENT;
-EXPORT_CSV_INSTANCE : EXPORT_CSV_INSTANCE;
-EXPORT_CSV_TRANSFORM : EXPORT_CSV_TRANSFORM;
-EXPORT_JDBC_INSTANCE : EXPORT_JDBC_INSTANCE;
-EXPORT_JDBC_QUERY : EXPORT_JDBC_QUERY;
-EXPORT_JDBC_TRANSFORM : EXPORT_JDBC_TRANSFORM ;
+COPRODUCT_ALLOW_ENTITY : 'coproduct_allow_entity_collisions_unsafe';
+COPRODUCT_ALLOW_TYPE : 'coproduct_allow_type_collisions_unsafe';
+QUERY_REMOVE_REDUNDANCY : 'query_remove_redundancy';
+TRUE : 'true';
+FALSE : 'false';
 
-QUERY : QUERY;
-SIMPLE : SIMPLE;
-GET_MAPPING : GET_MAPPING;
-FROM : FROM;
-RETURN : RETURN ;
+AUTO : 'auto';
+FAIL : 'fail';
+FREE : 'free';
+SATURATED : 'saturated';
+CONGRUENCE : 'congruence';
+MONOIDAL : 'monoidal';
+PROGRAM : 'program';
+COMPLETION : 'completion';
 
-SCHEMA : SCHEMA;
-SCHEMA_OF : SCHEMA_OF;
-GET_SCHEMA : GET_SCHEMA;
+PRAGMA : 'pragma';
+EXEC_CMDLINE : 'exec_cmdline';
+EXEC_JS : 'exec_js';
+EXEC_JDBC : 'exec_jdbc';
+CHECK : 'check';
+ASSERT_CONSISTENT : 'assert_consistent';
+EXPORT_CSV_INSTANCE : 'export_csv_instance';
+EXPORT_CSV_TRANSFORM : 'export_csv_transform';
+EXPORT_JDBC_INSTANCE : 'export_jdbc_instance';
+EXPORT_JDBC_QUERY : 'export_jdbc_query';
+EXPORT_JDBC_TRANSFORM : 'export_jdbc_transform' ;
 
-SCHEMA_COLIMIT : SCHEMA_COLIMIT;
-MODIFY : MODIFY;
-WRAP : WRAP;
-ENTITY_EQUATIONS : ENTITY_EQUATIONS;
-PATH_EQUATIONS : PATH_EQUATIONS;
-OBSERVATION_EQUATIONS : OBSERVATION_EQUATIONS;
-RENAME : RENAME;
-REMOVE : REMOVE;
+QUERY : 'query';
+SIMPLE : 'simple';
+GET_MAPPING : 'getMapping';
+FROM : 'from';
+RETURN : 'return' ;
 
-TRANSFORM : TRANSFORM;
-UNIT : UNIT;
-COUNIT : COUNIT;
-UNIT_QUERY : UNIT_QUERY;
-COUNIT_QUERY : COUNIT_QUERY;
+SCHEMA : 'schema';
+SCHEMA_OF : 'schemaOf';
+GET_SCHEMA : 'getSchema';
 
-TYPESIDE : TYPESIDE;
-SQL : SQL;
-TYPESIDE_OF : TYPESIDE_OF;
-TYPES : TYPES;
-CONSTANTS : CONSTANTS;
-FUNCTIONS : FUNCTIONS;
-JAVA_TYPES : JAVA_TYPES;
-JAVA_CONSTANTS : JAVA_CONSTANTS;
-JAVA_FUNCTIONS : JAVA_FUNCTIONS;
+SCHEMA_COLIMIT : 'schema_colimit';
+MODIFY : 'modify';
+WRAP : 'wrap';
+ENTITY_EQUATIONS : 'entity_equations';
+PATH_EQUATIONS : 'path_equations';
+OBSERVATION_EQUATIONS : 'observation_equations';
+RENAME : 'rename';
+REMOVE : 'remove';
+
+TRANSFORM : 'transform';
+UNIT : 'unit';
+COUNIT : 'counit';
+UNIT_QUERY : 'unit_query';
+COUNIT_QUERY : 'counit_query';
+
+TYPESIDE : 'typeside';
+SQL : 'sql';
+TYPESIDE_OF : 'typesideOf';
+TYPES : 'types';
+CONSTANTS : 'constants';
+FUNCTIONS : 'functions';
+JAVA_TYPES : 'java_types';
+JAVA_CONSTANTS : 'java_constants';
+JAVA_FUNCTIONS : 'java_functions';
 
 
 // -------------------------
@@ -329,7 +330,7 @@ HTML_END
    : RDocQuote -> popMode;
 
 
-mode Markdown ;
+mode MarkDown ;
 
 MD_END
    : RDocQuote -> popMode;
@@ -341,7 +342,7 @@ MD_END
 
 fragment IdLetter : 'a'..'z'|'A'..'Z'|'_'|'$' ;
 
-fragment LDocQuote : LBrace Ws+ LParen Star Ws+ Dquote ;
+fragment LDocQuote : LBrace Ws+ LParen Star Ws+ DQuote ;
 fragment RDocQuote : DQuote Ws+ Star RParen Ws+ LBrace ;
 
 fragment Exponent :   [Ee] [+\-]? DecimalNumeral ;
