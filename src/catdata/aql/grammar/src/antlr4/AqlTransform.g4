@@ -3,17 +3,17 @@ options { tokenVocab=AqlLexerRules; }
 
 
 transformId: IDENTIFIER;
-transformKindAssignment: 'transform' transformId '=' transformDef ;
+transformKindAssignment: 'transform' transformId Equal transformDef ;
 transformDef:
-      'id' ':' instanceKind              #Transform_Id
-    | '[' transformId ';' transformId ']'    #Transform_Compose
-    | 'distinct' transformId                 #Transform_Destination
-    | 'delta' mappingKind transformId        #Transform_Delta
-    | 'sigma' mappingKind transformId
+      ID COLON instanceKind              #Transform_Id
+    | LBrack transformId SEMI transformId RBrack    #Transform_Compose
+    | DISTINCT transformId                 #Transform_Destination
+    | DELTA mappingKind transformId        #Transform_Delta
+    | SIGMA mappingKind transformId
         transformSigmaSection?
         transformSigmaSection?               #Transform_Sigma
-    | 'eval' queryId transformId             #Transform_Eval
-    | 'coeval' queryId transformId
+    | EVAL queryId transformId             #Transform_Eval
+    | COEVAL queryId transformId
         transformCoevalSection?
         transformCoevalSection?              #Transform_Coeval
     | 'unit' mappingKind instanceId
@@ -24,45 +24,45 @@ transformDef:
         transformUnitQuerySection?           #Transform_UnitQuery
     | 'counit_query' queryKind instanceId
         transformCounitQuerySection?         #Transform_CounitQuery
-    | 'import_jdbc' transformJdbcClass transformJdbcUri ':'
-        instanceId '->' instanceId
+    | IMPORT_JDBC transformJdbcClass transformJdbcUri COLON
+        instanceId RARROW instanceId
         transformImportJdbcSection?         #Transform_ImportJdbc
-    | 'import_csv' transformFile ':'
-        instanceId '->' instanceId
+    | IMPORT_CSV transformFile COLON
+        instanceId RARROW instanceId
         transformImportCsvSection?          #Transform_ImportCsv
-    | 'literal' ':' instanceId '->' instanceId
+    | LITERAL COLON instanceId RARROW instanceId
         transformLiteralSection             #Transform_Literal
     ;
-transformKind: transformId | '(' transformDef ')';
+transformKind: transformId | LParen transformDef RParen;
 
 transformJdbcClass: STRING;
 transformJdbcUri: STRING;
 transformFile: STRING;
 transformSqlExpr: STRING;
 
-transformSigmaSection: '{' ('options' (proverOptions)?)? '}';
-transformCoevalSection: '{' ('options' (proverOptions)?)? '}';
-transformUnitSection: '{' ('options' (proverOptions)?)? '}';
-transformUnitQuerySection: '{' ('options' (proverOptions)?)? '}';
-transformCounitQuerySection: '{' ('options' (proverOptions)?)? '}';
+transformSigmaSection: LBrace (OPTIONS (proverOptions)?)? RBrace;
+transformCoevalSection: LBrace (OPTIONS (proverOptions)?)? RBrace;
+transformUnitSection: LBrace (OPTIONS (proverOptions)?)? RBrace;
+transformUnitQuerySection: LBrace (OPTIONS (proverOptions)?)? RBrace;
+transformCounitQuerySection: LBrace (OPTIONS (proverOptions)?)? RBrace;
 
-transformImportJdbcSection: '{'
+transformImportJdbcSection: LBrace
   transformSqlEntityExpr*
-  ('options' (timeoutOption | alwaysReloadOption)*)?
-  '}';
+  (OPTIONS (timeoutOption | alwaysReloadOption)*)?
+  RBrace;
 
-transformImportCsvSection: '{'
+transformImportCsvSection: LBrace
   transformFileExpr*
-  ('options' (timeoutOption | alwaysReloadOption | csvOptions)*)?
-  '}';
+  (OPTIONS (timeoutOption | alwaysReloadOption | csvOptions)*)?
+  RBrace;
 
-transformSqlEntityExpr: schemaEntityId '->' transformSqlExpr;
-transformFileExpr: schemaEntityId '->' transformFile;
+transformSqlEntityExpr: schemaEntityId RARROW transformSqlExpr;
+transformFileExpr: schemaEntityId RARROW transformFile;
 
-transformLiteralSection: '{' transformLiteralExpr '}';
+transformLiteralSection: LBrace transformLiteralExpr RBrace;
 transformLiteralExpr:
-  ('generators' (transformGen '->' schemaPath)*)?
-  ('options' ('transform' '=' truthy | dontValidateUnsafeOption)*)?
+  (GENERATORS (transformGen RARROW schemaPath)*)?
+  (OPTIONS ('transform' Equal truthy | dontValidateUnsafeOption)*)?
   ;
 
 transformGen: STRING;

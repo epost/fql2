@@ -4,54 +4,54 @@ options { tokenVocab=AqlLexerRules; }
 typesideId: IDENTIFIER;
 
 typesideKindAssignment:
-  'typeside' typesideId '=' typesideInstance;
+  'typeside' typesideId Equal typesideInstance;
 
 typesideInstance:
-    'empty' | 'sql'
-  | 'typesideOf' '(' 'empty' ':' IDENTIFIER ')'
+    EMPTY | 'sql'
+  | 'typesideOf' LParen EMPTY COLON IDENTIFIER RParen
   | typesideLiteralExpr;
 
 typesideLiteralExpr:
-  'literal' '{'
-    ('imports' typesideImport*)?
+  LITERAL LBrace
+    (IMPORTS typesideImport*)?
     ('types' typesideTypeSig*)?
     ('constants' typesideConstantSig*)?
     ('functions' typesideFunctionSig*)?
-    ('java_types' (typesideTypeSig '=' STRING)*)?
-    ('java_constants' (typesideConstantSig '=' STRING)*)?
-    ('java_functions' (typesideFunctionSig '=' STRING)*)?
-    ('equations' typesideEquations*)?
-    ('options' (timeoutOption | proverOptions | allowJavaEqsUnsafeOption)*)?
-    '}';
+    ('java_types' (typesideTypeSig Equal STRING)*)?
+    ('java_constants' (typesideConstantSig Equal STRING)*)?
+    ('java_functions' (typesideFunctionSig Equal STRING)*)?
+    (EQUATIONS typesideEquations*)?
+    (OPTIONS (timeoutOption | proverOptions | allowJavaEqsUnsafeOption)*)?
+    RBrace;
 
 typesideImport:
   IDENTIFIER                #Typeside_ImportName
   ;
 
 typesideTypeSig:
-  typesideTypeId ':' IDENTIFIER
+  typesideTypeId COLON IDENTIFIER
   ;
 
 typesideTypeId: IDENTIFIER;
 
 typesideConstantSig:
-  typesideConstantName ':' IDENTIFIER;
+  typesideConstantName COLON IDENTIFIER;
 
 typesideConstantName: IDENTIFIER;
 
 typesideFunctionSig:
-  typesideFnName ':' IDENTIFIER (',' IDENTIFIER)* '->' IDENTIFIER;
+  typesideFnName COLON IDENTIFIER (COMMA IDENTIFIER)* RARROW IDENTIFIER;
 
 typesideFnName: IDENTIFIER;
 
 typesideEquations:
-  'forall' typesideLambdaSig;
+  FORALL typesideLambdaSig;
 
 typesideLambdaSig:
-  IDENTIFIER (',' IDENTIFIER) '.' typesideEval '=' typesideEval;
+  IDENTIFIER (COMMA IDENTIFIER) Dot typesideEval Equal typesideEval;
 
 typesideEval:
     NUMBER                       #Typeside_EvalNumber
   | IDENTIFIER                   #Typeside_EvalGen
-  | IDENTIFIER '(' typesideEval (',' typesideEval)* ')'      #Typeside_EvalFunction
+  | IDENTIFIER LParen typesideEval (COMMA typesideEval)* RParen      #Typeside_EvalFunction
   ;

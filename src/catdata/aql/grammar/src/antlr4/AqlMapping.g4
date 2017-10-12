@@ -2,47 +2,47 @@ parser grammar AqlMapping;
 options { tokenVocab=AqlLexerRules; }
 
 mappingId: IDENTIFIER;
-mappingKindAssignment: 'mapping' mappingId '=' mappingDef ;
+mappingKindAssignment: MAPPING mappingId Equal mappingDef ;
 mappingDef:
-      'id' schemaId                       #MapExp_Id
-    | '[' mappingId ';' mappingId ']'   #MapExp_Compose
-    | 'literal' ':' schemaId '->' schemaId
-            '{' mappingLiteralExpr '}'      #MapExp_Literal
+      ID schemaId                       #MapExp_Id
+    | LBrack mappingId SEMI mappingId RBrack   #MapExp_Compose
+    | LITERAL COLON schemaId RARROW schemaId
+            LBrace mappingLiteralExpr RBrace      #MapExp_Literal
     ;
-mappingKind: mappingId | '(' mappingDef ')';
+mappingKind: mappingId | LParen mappingDef RParen;
 
 mappingLiteralExpr:
-  ('imports' mappingId*)?
-  ('entities' mappingEntitySig*)?
-  ('foreign_keys' mappingForeignSig*)?
-  ('attributes' mappingAttributeSig*)?
-  ('options' (timeoutOption | dontValidateUnsafeOption)*)?
+  (IMPORTS mappingId*)?
+  (ENTITIES mappingEntitySig*)?
+  (FOREIGN_KEYS mappingForeignSig*)?
+  (ATTRIBUTES mappingAttributeSig*)?
+  (OPTIONS (timeoutOption | dontValidateUnsafeOption)*)?
   ;
 
-mappingEntitySig: schemaEntityId '->' schemaEntityId;
+mappingEntitySig: schemaEntityId RARROW schemaEntityId;
 
 mappingForeignSig:
-  schemaForeignId '->' mappingForeignPath;
+  schemaForeignId RARROW mappingForeignPath;
 
 mappingForeignPath:
     mappingArrowId
-  | schemaPath '.' schemaArrowId
-  | schemaArrowId '(' schemaPath ')'
+  | schemaPath Dot schemaArrowId
+  | schemaArrowId LParen schemaPath RParen
   ;
 
 // identity arrows are indicated with entity-names.
 mappingArrowId: schemaEntityId | schemaForeignId;
 
 mappingAttributeSig:
-  schemaAttributeId '->' (mappingLambda | schemaPath);
+  schemaAttributeId RARROW (mappingLambda | schemaPath);
 
 mappingLambda:
-  'lambda' mappingGen (',' mappingGen) '.' evalMappingFn ;
+  LAMBDA mappingGen (COMMA mappingGen) Dot evalMappingFn ;
 
 mappingGen: IDENTIFIER;
 evalMappingFn:
     mappingGen
-  | mappingFn '(' evalMappingFn ')'
+  | mappingFn LParen evalMappingFn RParen
   ;
 
 mappingFn: typesideFnName | schemaAttributeId | schemaForeignId ;

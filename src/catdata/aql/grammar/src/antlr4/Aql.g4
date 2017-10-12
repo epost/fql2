@@ -5,7 +5,7 @@
     This grammar follows the grammar as outlined
     in 'All Syntax.aql'.
  */
-grammar Aql;
+parser grammar AqlParser;
 options { tokenVocab=AqlLexerRules; }
 
 import
@@ -27,7 +27,7 @@ program:
   (commentDeclaration | kindDeclaration)+;
 
 optionsDeclarationSection:
-  'options' '{' optionsDeclaration* '}';
+  OPTIONS LBrace optionsDeclaration* RBrace;
 
 commentDeclaration:
     htmlCommentDeclaration     #Comment_HTML
@@ -47,7 +47,7 @@ kindDeclaration:
   ;
 
 
-path: IDENTIFIER ('.' IDENTIFIER)* ;
+path: IDENTIFIER (Dot IDENTIFIER)* ;
 
 value:
         STRING

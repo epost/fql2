@@ -2,37 +2,37 @@ parser grammar AqlSchemaColimit;
 options { tokenVocab=AqlLexerRules; }
 
 schemaColimitId: IDENTIFIER;
-schemaColimitKindAssignment: 'schema_colimit' schemaColimitId '=' schemaColimitDef ;
+schemaColimitKindAssignment: 'schema_colimit' schemaColimitId Equal schemaColimitDef ;
 schemaColimitDef:
-      'quotient' schemaId ('+' schemaId)* ':' typesideId
+      QUOTIENT schemaId ('+' schemaId)* COLON typesideId
         schemaColimitQuotientSection        #SchemaColimit_Quotient
-    | 'coproduct' schemaId ('+' schemaId)* ':' typesideId
+    | COPRODUCT schemaId ('+' schemaId)* COLON typesideId
                                             #SchemaColimit_Coproduct
     | 'modify' schemaColimitId
         schemaColimitModifySection          #SchemaColimit_Modify
     | 'wrap' schemaColimitId mappingId mappingId
                                             #SchemaColimit_Wrap
     ;
-schemaColimitKind: schemaColimitId | '(' schemaColimitDef ')';
+schemaColimitKind: schemaColimitId | LParen schemaColimitDef RParen;
 
-schemaColimitQuotientSection: '{'
-  ('entity_equations' (scEntityPath '=' scEntityPath)*)?
-  ('path_equations' (scFkPath '=' scFkPath)*)?
+schemaColimitQuotientSection: LBrace
+  ('entity_equations' (scEntityPath Equal scEntityPath)*)?
+  ('path_equations' (scFkPath Equal scFkPath)*)?
   ('observation_equations' scObsEquation )?
-  '}'  ;
+  RBrace  ;
 
 scObsEquation:
-    'forall' scGen (',' scGen)* '.' scEntityPath '=' scEntityPath
+    FORALL scGen (COMMA scGen)* Dot scEntityPath Equal scEntityPath
   | ;
 
 scGen: STRING;
-scEntityPath: schemaId '.' schemaTermId;
+scEntityPath: schemaId Dot schemaTermId;
 scFkPath: schemaId '_' schemaArrowId;
 
-schemaColimitModifySection: '{'
-  ('rename' 'entities' (scEntityPath '=' scEntityPath)*)?
-  ('rename' 'foreign_keys' (scFkPath '=' scFkPath)*)?
-  ('rename' 'attributes' scObsEquation )?
-  ('remove' 'foreign_keys' scObsEquation )?
-  ('remove' 'attributes' scObsEquation )?
-  '}'  ;
+schemaColimitModifySection: LBrace
+  ('rename' ENTITIES (scEntityPath Equal scEntityPath)*)?
+  ('rename' FOREIGN_KEYS (scFkPath Equal scFkPath)*)?
+  ('rename' ATTRIBUTES scObsEquation )?
+  ('remove' FOREIGN_KEYS scObsEquation )?
+  ('remove' ATTRIBUTES scObsEquation )?
+  RBrace  ;

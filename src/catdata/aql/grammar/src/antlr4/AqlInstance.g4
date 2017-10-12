@@ -2,54 +2,54 @@ parser grammar AqlInstance;
 options { tokenVocab=AqlLexerRules; }
 
 instanceId: IDENTIFIER;
-instanceKindAssignment: 'instance' instanceId '=' instanceDef ;
+instanceKindAssignment: INSTANCE instanceId Equal instanceDef ;
 instanceDef:
-    'empty' ':' schemaKind
-  | 'src' transformKind
-  | 'dst' transformKind
-  | 'distinct' instanceKind
-  | 'eval' queryKind instanceKind
-          ('options' evalOptions*)?
-  | 'coeval' queryKind instanceKind
-          ('options' (timeoutOption | proverOptions)*)?
-  | 'delta' mappingKind instanceKind
-  | 'sigma' mappingKind instanceKind
-  | 'coproduct_sigma' (mappingKind instanceKind)+ ':' schemaKind
-  | 'coproduct' instanceKind ('+' instanceKind)* ':' schemaKind
-  | 'coproduct_unrestricted' instanceId ('+' instanceId)* ':' schemaKind
-  | 'coequalize' transformKind transformKind
-  | 'colimit' graphKind schemaKind '{'
-      'nodes' (instanceId '->' instanceDef)+
-      'edges' (schemaArrowId '->' transformKind)+
-      ('options' (timeoutOption | 'static_typing' '=' truthy)*)?
-      '}'
-  | 'import_jdbc' jdbcClass jdbcUri ':' schemaDef '{' instanceImportJdbc '}'
-  | 'quotient_jdbc' jdbcClass jdbcUri  schemaDef '{' instanceSql+ '}'
-  | 'quotient_csv' schemaDef '{' instanceFile+ '}'
-  | 'import_jdbc_all' jdbcClass jdbcUri
-        ('options' (timeoutOption | proverOptions
+    EMPTY COLON schemaKind
+  | SRC transformKind
+  | DST transformKind
+  | DISTINCT instanceKind
+  | EVAL queryKind instanceKind
+          (OPTIONS evalOptions*)?
+  | COEVAL queryKind instanceKind
+          (OPTIONS (timeoutOption | proverOptions)*)?
+  | DELTA mappingKind instanceKind
+  | SIGMA mappingKind instanceKind
+  | COPRODUCT_SIGMA (mappingKind instanceKind)+ COLON schemaKind
+  | COPRODUCT instanceKind (PLUS instanceKind)* COLON schemaKind
+  | COPRODUCT_UNRESTRICTED instanceId ('+' instanceId)* COLON schemaKind
+  | COEQUALIZE transformKind transformKind
+  | COLIMIT graphKind schemaKind LBrace
+      NODES (instanceId RARROW instanceDef)+
+      EDGES (schemaArrowId RARROW transformKind)+
+      (OPTIONS (timeoutOption | STATIC_TYPING Equal truthy)*)?
+      RBrace
+  | IMPORT_JDBC jdbcClass jdbcUri COLON schemaDef LBrace instanceImportJdbc RBrace
+  | QUOTIENT_JDBC jdbcClass jdbcUri  schemaDef LBrace instanceSql+ RBrace
+  | QUOTIENT_CSV schemaDef LBrace instanceFile+ RBrace
+  | IMPORT_JDBC_ALL jdbcClass jdbcUri
+        (OPTIONS (timeoutOption | proverOptions
                   | alwaysReloadOption
                   | requireConsistencyOption
                   | schemaOnlyOption)*)?
-  | 'import_csv' ':' schemaDef '{' instanceEntityFile+ '}'
-        ('options' (timeoutOption | proverOptions
+  | IMPORT_CSV COLON schemaDef LBrace instanceEntityFile+ RBrace
+        (OPTIONS (timeoutOption | proverOptions
                   | alwaysReloadOption
                   | csvOptions
                   | idColumnNameOption
                   | requireConsistencyOption)*)?
-  | 'literal' ':' schemaKind '{' instanceLiteralExpr '}'
-  | 'quotient' instanceKind '{' instanceQuotientExpr '}'
-  | 'chase' constraintKind* instanceKind INTEGER?
-  | 'random' ':' schemaId '{' instanceRandomExpr '}'
+  | LITERAL COLON schemaKind LBrace instanceLiteralExpr RBrace
+  | QUOTIENT instanceKind LBrace instanceQuotientExpr RBrace
+  | CHASE constraintKind* instanceKind INTEGER?
+  | RANDOM COLON schemaId LBrace instanceRandomExpr RBrace
     ;
-instanceKind: instanceId | '(' instanceDef ')';
+instanceKind: instanceId | LParen instanceDef RParen;
 
 instanceLiteralExpr:
-  ('imports' instanceId*)?
-  'generators' (instanceGen ':' schemaEntityId)+ 
-  ('equations' instanceEquation*)?
-  ('multi_equations' instanceMultiEquation*)?
-  ('options' (timeoutOption | proverOptions
+  (IMPORTS instanceId*)?
+  GENERATORS (instanceGen COLON schemaEntityId)+
+  (EQUATIONS instanceEquation*)?
+  (MULTI_EQUATIONS instanceMultiEquation*)?
+  (OPTIONS (timeoutOption | proverOptions
             | requireConsistencyOption
             | interpretAsAlgebraOption)*)?
   ;
@@ -57,7 +57,7 @@ instanceLiteralExpr:
 instanceImportJdbc:
   (schemaEntityId | schemaAttributeId | schemaForeignId | typesideTypeId)
   instanceSql
-  ('options' (
+  (OPTIONS (
       timeoutOption | proverOptions
     | alwaysReloadOption | requireConsistencyOption)*)?
   ;
@@ -66,14 +66,14 @@ jdbcClass: STRING;
 jdbcUri: STRING;
 instanceSql: STRING;
 instanceFile: STRING;
-instanceEntityFile: schemaEntityId '->' instanceFile;
+instanceEntityFile: schemaEntityId RARROW instanceFile;
 
 instanceGen: IDENTIFIER;
 
-instanceEquation: instancePath '=' instancePath;
+instanceEquation: instancePath Equal instancePath;
 
 instanceMultiEquation:
-  instanceEquationId '->' '{' instanceMultiValue (',' instanceMultiValue)* '}';
+  instanceEquationId RARROW LBrace instanceMultiValue (COMMA instanceMultiValue)* RBrace;
 
 instanceEquationId: STRING;
 
@@ -82,17 +82,17 @@ instanceMultiValue:
 
 instancePath:
   instanceArrowId
-  | instancePath '.' instanceArrowId
-  | instanceArrowId '(' instancePath ')'
+  | instancePath Dot instanceArrowId
+  | instanceArrowId LParen instancePath RParen
   ;
 
 // identity arrows are indicated with entity-names.
 instanceArrowId: schemaEntityId | schemaForeignId;
 
 instanceQuotientExpr:
-    'equations' (schemaEntityId '=' schemaEntityId)* ;
+    EQUATIONS (schemaEntityId Equal schemaEntityId)* ;
 
 instanceRandomExpr:
-  'generators' (schemaEntityId '->' INTEGER)*
-  | 'options' ('random_seed' '=' INTEGER)
+  GENERATORS (schemaEntityId RARROW INTEGER)*
+  | OPTIONS (RANDOM_SEED Equal INTEGER)
   ;

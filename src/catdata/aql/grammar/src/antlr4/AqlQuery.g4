@@ -2,37 +2,37 @@ parser grammar AqlQuery;
 options { tokenVocab=AqlLexerRules; }
 
 queryId: IDENTIFIER;
-queryFromSchema: '(' 'id' schemaId ')';
+queryFromSchema: LParen ID schemaId RParen;
 
-queryKindAssignment: 'query' queryId '=' queryDef ;
+queryKindAssignment: 'query' queryId Equal queryDef ;
 queryDef:
-      'id' schemaId                       #QueryExp_Id
-    | 'literal' ':' schemaId '->' schemaId
-            '{' queryLiteralExpr '}'      #QueryExp_Literal
-    | 'simple' ':' schemaId
-            '{' queryEntityExpr '}'       #QueryExp_Simple
+      ID schemaId                       #QueryExp_Id
+    | LITERAL COLON schemaId RARROW schemaId
+            LBrace queryLiteralExpr RBrace      #QueryExp_Literal
+    | 'simple' COLON schemaId
+            LBrace queryEntityExpr RBrace       #QueryExp_Simple
     | 'getMapping' schemaColimitId
             schemaId                      #QueryExp_Get
     ;
-queryKind: queryId | '(' queryDef ')';
+queryKind: queryId | LParen queryDef RParen;
 
 queryLiteralExpr:
-  ('imports' queryId*)?
-  ('entities' (schemaEntityId '->' '{' queryEntityExpr '}')*)?
-  ('foreign_keys' queryForeignSig*)?
-  ('options' (timeoutOption | dontValidateUnsafeOption)*)?
+  (IMPORTS queryId*)?
+  (ENTITIES (schemaEntityId RARROW LBrace queryEntityExpr RBrace)*)?
+  (FOREIGN_KEYS queryForeignSig*)?
+  (OPTIONS (timeoutOption | dontValidateUnsafeOption)*)?
   ;
 
-queryEntityExpr: schemaEntityId '->' '{' selectClause '}';
+queryEntityExpr: schemaEntityId RARROW LBrace selectClause RBrace;
 selectClause:
-  'from' (queryGen ':' schemaEntityId)+
-  ('where' (queryPath '=' queryPath)+)
-  'return' (schemaEntityId '->' queryPath)+
+  'from' (queryGen COLON schemaEntityId)+
+  (WHERE (queryPath Equal queryPath)+)
+  'return' (schemaEntityId RARROW queryPath)+
   ;
 
 queryForeignSig:
-  schemaForeignId '->' '{' queryPathMapping+ '}';
+  schemaForeignId RARROW LBrace queryPathMapping+ RBrace;
 
-queryPathMapping: queryGen '->' queryPath;
+queryPathMapping: queryGen RARROW queryPath;
 queryGen: IDENTIFIER;
-queryPath: queryGen ('.' schemaArrowId)*;
+queryPath: queryGen (Dot schemaArrowId)*;

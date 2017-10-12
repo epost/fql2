@@ -2,28 +2,28 @@ parser grammar AqlConstraint;
 options { tokenVocab=AqlLexerRules; }
 
 constraintId: IDENTIFIER;
-constraintKindAssignment: 'constraint' constraintId '=' constraintDef ;
+constraintKindAssignment: CONSTRAINT constraintId Equal constraintDef ;
 constraintDef:
-  'literal' ':' schemaId
-            '{' constraintLiteralExpr '}'      #constraintExp_Literal
+  LITERAL COLON schemaId
+            LBrace constraintLiteralExpr RBrace      #constraintExp_Literal
     ;
-constraintKind: constraintId | '(' constraintDef ')';
+constraintKind: constraintId | LParen constraintDef RParen;
 
 constraintLiteralExpr:
-  ('imports' constraintId*)?
+  (IMPORTS constraintId*)?
   (constraintExpr)+
-  ('options' (timeoutOption | dontValidateUnsafeOption)*)?
+  (OPTIONS (timeoutOption | dontValidateUnsafeOption)*)?
   ;
 
 constraintExpr:
-  'forall' (constraintGen ':' schemaEntityId)+
-  'where' constraintEquation+
-  '->'
-  ('exists' (constraintGen ':' schemaEntityId)+)?
-  'where' constraintEquation+
+  FORALL (constraintGen COLON schemaEntityId)+
+  WHERE constraintEquation+
+  RARROW
+  (EXISTS (constraintGen COLON schemaEntityId)+)?
+  WHERE constraintEquation+
   ;
 
 constraintGen: IDENTIFIER;
 
-constraintEquation: constraintPath '=' constraintPath;
-constraintPath: constraintGen ('.' schemaArrowId)*;
+constraintEquation: constraintPath Equal constraintPath;
+constraintPath: constraintGen (Dot schemaArrowId)*;

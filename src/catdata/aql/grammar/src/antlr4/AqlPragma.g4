@@ -2,13 +2,13 @@ parser grammar AqlPragma;
 options { tokenVocab=AqlLexerRules; }
 
 pragmaId: IDENTIFIER;
-pragmaKindAssignment: 'pragma' pragmaId '=' pragmaDef ;
+pragmaKindAssignment: 'pragma' pragmaId Equal pragmaDef ;
 pragmaDef:
       'exec_cmdline' pragmaCmdLineSection    #Pragma_CmdLine
     | 'exec_js' pragmaExecJsSection          #Pragma_ExecJs
     | 'exec_jdbc' pragmaJdbcClass pragmaJdbcUri
               pragmaExecJdbcSection          #Pragma_ExecJdbc
-    | 'check' ':' constraintId instanceId    #Pragma_Check
+    | 'check' COLON constraintId instanceId    #Pragma_Check
     | 'assert_consistent' instanceId         #Pragma_AssertConsistent
     | 'export_csv_instance' instanceId pragmaFile
               pragmaExportCsvSection          #Pragma_ExportCsvInstance
@@ -26,38 +26,38 @@ pragmaDef:
         (pragmaJdbcClass (pragmaJdbcUri pragmaPrefix?)?)?
           pragmaExportJdbcSection  #Pragma_ExportJdbcTransform
     ;
-pragmaKind: pragmaId | '(' pragmaDef ')';
+pragmaKind: pragmaId | LParen pragmaDef RParen;
 
-pragmaCmdLineSection: '{'
+pragmaCmdLineSection: LBrace
   STRING
-  ('options' (timeoutOption|alwaysReloadOption)*)?
-  '}'  ;
+  (OPTIONS (timeoutOption|alwaysReloadOption)*)?
+  RBrace  ;
 
-pragmaExecJsSection: '{'
+pragmaExecJsSection: LBrace
   STRING
-  ('options' (timeoutOption|alwaysReloadOption)*)?
-  '}'  ;
+  (OPTIONS (timeoutOption|alwaysReloadOption)*)?
+  RBrace  ;
 
-pragmaExecJdbcSection: '{'
+pragmaExecJdbcSection: LBrace
   STRING
-  ('options' (timeoutOption|alwaysReloadOption)*)?
-  '}'  ;
+  (OPTIONS (timeoutOption|alwaysReloadOption)*)?
+  RBrace  ;
 
-pragmaExportCsvSection: '{'
+pragmaExportCsvSection: LBrace
   STRING
-  ('options' (timeoutOption
+  (OPTIONS (timeoutOption
     | alwaysReloadOption
     | csvOptions | idColumnNameOption
     | startIdsAtOption)*)?
-  '}'  ;
+  RBrace  ;
 
-pragmaExportJdbcSection: '{'
+pragmaExportJdbcSection: LBrace
   STRING
-  ('options' (timeoutOption
+  (OPTIONS (timeoutOption
     | alwaysReloadOption
     | idColumnNameOption
     | varcharLengthOption)*)?
-  '}'  ;
+  RBrace  ;
 
 pragmaFile: STRING;
 pragmaJdbcClass: STRING;

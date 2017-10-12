@@ -3,16 +3,16 @@ options { tokenVocab=AqlLexerRules; }
 
 graphId: IDENTIFIER;
 
-graphKindAssignment: 'graph' graphId '=' graphDef ;
+graphKindAssignment: GRAPH graphId Equal graphDef ;
 graphDef:
-      'literal' '{' graphLiteralExpr '}'      #GraphExp_Literal
+      LITERAL LBrace graphLiteralExpr RBrace      #GraphExp_Literal
     ;
-graphKind: graphId | '(' graphDef ')';
+graphKind: graphId | LParen graphDef RParen;
 
 graphLiteralExpr:
-  ('imports' graphId*)?
-  'nodes' graphNodeId*
-  'edges' (graphEdgeId ':' graphNodeId '->' graphNodeId)*
+  (IMPORTS graphId*)?
+  NODES graphNodeId*
+  EDGES (graphEdgeId COLON graphNodeId RARROW graphNodeId)*
   ;
 
 graphNodeId: IDENTIFIER;
