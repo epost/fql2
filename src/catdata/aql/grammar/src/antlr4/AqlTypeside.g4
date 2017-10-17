@@ -1,14 +1,14 @@
 parser grammar AqlTypeside;
 options { tokenVocab=AqlLexerRules; }
 
-typesideId: IDENTIFIER;
+typesideId: LOWER_ID;
 
 typesideKindAssignment:
   TYPESIDE typesideId EQUAL typesideInstance;
 
 typesideInstance:
     EMPTY | SQL
-  | TYPESIDE_OF LPAREN EMPTY COLON IDENTIFIER RPAREN
+  | TYPESIDE_OF LPAREN EMPTY COLON LOWER_ID RPAREN
   | typesideLiteralExpr;
 
 typesideLiteralExpr:
@@ -17,41 +17,47 @@ typesideLiteralExpr:
     (TYPES typesideTypeSig*)?
     (CONSTANTS typesideConstantSig*)?
     (FUNCTIONS typesideFunctionSig*)?
-    (JAVA_TYPES (typesideTypeSig EQUAL STRING)*)?
-    (JAVA_CONSTANTS (typesideConstantSig EQUAL STRING)*)?
-    (JAVA_FUNCTIONS (typesideFunctionSig EQUAL STRING)*)?
-    (EQUATIONS typesideEquations*)?
+    (JAVA_TYPES typesideJavaTypeSig*)?
+    (JAVA_CONSTANTS typesideJavaConstantSig*)?
+    (JAVA_FUNCTIONS typesideJavaFunctionSig*)?
+    (EQUATIONS typesideEquationSig*)?
     (OPTIONS (timeoutOption | proverOptions | allowJavaEqsUnsafeOption)*)?
     RBRACE;
 
 typesideImport:
-  IDENTIFIER                #Typeside_ImportName
+  LOWER_ID                #Typeside_ImportName
   ;
 
-typesideTypeSig:
-  typesideTypeId COLON IDENTIFIER
-  ;
-
-typesideTypeId: IDENTIFIER;
+typesideTypeSig : typesideTypeId ;
+typesideJavaTypeSig : typesideTypeId EQUAL STRING;
+typesideTypeId : UPPER_ID;
 
 typesideConstantSig:
-  typesideConstantName COLON IDENTIFIER;
+  typesideConstantName COLON UPPER_ID;
 
-typesideConstantName: IDENTIFIER;
+typesideJavaConstantSig:
+  typesideConstantName EQUAL STRING;
+
+typesideConstantName: (LOWER_ID | UPPER_ID);
 
 typesideFunctionSig:
-  typesideFnName COLON IDENTIFIER (COMMA IDENTIFIER)* RARROW IDENTIFIER;
+  typesideFnName COLON UPPER_ID (COMMA UPPER_ID)* RARROW UPPER_ID;
 
-typesideFnName: IDENTIFIER;
+typesideJavaFunctionSig:
+  typesideFnName COLON UPPER_ID (COMMA UPPER_ID)*
+  RARROW UPPER_ID
+  EQUAL STRING ;
 
-typesideEquations:
-  FORALL typesideLambdaSig;
+typesideFnName: LOWER_ID;
 
-typesideLambdaSig:
-  IDENTIFIER (COMMA IDENTIFIER) DOT typesideEval EQUAL typesideEval;
+typesideEquationSig:
+  FORALL typesideEqFnSig ;
+
+typesideEqFnSig:
+  LOWER_ID (COMMA LOWER_ID)* DOT typesideEval EQUAL typesideEval;
 
 typesideEval:
     NUMBER                       #Typeside_EvalNumber
-  | IDENTIFIER                   #Typeside_EvalGen
-  | IDENTIFIER LPAREN typesideEval (COMMA typesideEval)* RPAREN      #Typeside_EvalFunction
+  | LOWER_ID                   #Typeside_EvalGen
+  | LOWER_ID LPAREN typesideEval (COMMA typesideEval)* RPAREN      #Typeside_EvalFunction
   ;

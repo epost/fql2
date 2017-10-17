@@ -2,7 +2,7 @@
 parser grammar AqlConstraint;
 options { tokenVocab=AqlLexerRules; }
 
-constraintId: IDENTIFIER;
+constraintId: LOWER_ID;
 constraintKindAssignment: CONSTRAINT constraintId EQUAL constraintDef ;
 constraintDef:
   LITERAL COLON schemaId
@@ -24,7 +24,7 @@ constraintExpr:
   WHERE constraintEquation+
   ;
 
-constraintGen: IDENTIFIER;
+constraintGen: LOWER_ID;
 
 constraintEquation: constraintPath EQUAL constraintPath;
 constraintPath: constraintGen (DOT schemaArrowId)*;

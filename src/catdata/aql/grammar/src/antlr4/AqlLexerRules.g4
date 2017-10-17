@@ -7,15 +7,12 @@
 lexer grammar AqlLexerRules;
 
 options
-   { 
-     // superClass = 'LexerAdaptor'; 
+   {
+     // superClass = 'LexerAdaptor';
    }
 
 // Common set of fragments
 import LexBasic;
-
-tokens
-   { TOKEN_REF , RULE_REF , LEXER_CHAR_SET }
 
 channels {
   HIDDEN_CHANNEL,
@@ -94,19 +91,19 @@ CHAR : CharLiteral ;
 // Some blocks are handled idiomatically
 // as island grammars in dedicated lexical modes.
 
-OPTIONS
-   : 'options' // -> pushMode (Options)
-   ;
-
-
 HTML
-   : 'html' LDocQuote  -> pushMode (Html)
+   : 'html' Ws* LDocQuote  -> pushMode (Html)
    ;
 
 
 MARKDOWN
-   : 'md' LDocQuote -> pushMode (MarkDown)
+   : 'md' Ws* LDocQuote -> pushMode (MarkDown)
    ;
+
+OPTIONS
+   : 'options' // -> pushMode (Options)
+   ;
+
 
 LITERAL : 'literal' ;
 CONSTRAINT : 'constraint' ;
@@ -231,6 +228,8 @@ SIMPLE : 'simple';
 GET_MAPPING : 'getMapping';
 FROM : 'from';
 RETURN : 'return' ;
+TO_QUERY : 'toQuery' ;
+TO_COQUERY : 'toCoQuery' ;
 
 SCHEMA : 'schema';
 SCHEMA_OF : 'schemaOf';
@@ -295,8 +294,8 @@ UNDERSCORE : Underscore ;
 // -------------------------
 // Identifiers - allows unicode rule/token names
 
-IDENTIFIER: IdLetter (IdLetter | DecDigit)+ ;
-
+UPPER_ID: UpperIdLetter (IdLetter | DecDigit)* ;
+LOWER_ID: LowerIdLetter (IdLetter | DecDigit)* ;
 
 // -------------------------
 // Whitespace
@@ -319,7 +318,7 @@ WS
 // Comment this rule out to allow the error to be propagated to the parser
 
 ERRCHAR
-   : . -> channel (HIDDEN)
+   : . -> channel (HIDDEN_CHANNEL)
    ;
 
 
@@ -332,20 +331,24 @@ mode Html ;
 HTML_END
    : RDocQuote -> popMode;
 
+HTML_CHAR : . ;
 
 mode MarkDown ;
 
 MD_END
    : RDocQuote -> popMode;
 
+MD_CHAR : . ;
 
 // ======================================================
 // Grammar specific fragments
 // ------------------------------------------------------
 
 fragment IdLetter : 'a'..'z'|'A'..'Z'|'_'|'$' ;
+fragment UpperIdLetter : 'A'..'Z' ;
+fragment LowerIdLetter : 'a'..'z' ;
 
 fragment LDocQuote : LBrace Ws+ LParen Star Ws+ DQuote ;
-fragment RDocQuote : DQuote Ws+ Star RParen Ws+ LBrace ;
+fragment RDocQuote : DQuote Ws+ Star RParen Ws+ RBrace ;
 
-fragment Exponent :   [Ee] [+\-]? DecimalNumeral ;
+fragment Exponent : [Ee] [+\-]? DecimalNumeral ;

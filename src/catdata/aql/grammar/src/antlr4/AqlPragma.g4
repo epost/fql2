@@ -1,7 +1,7 @@
 parser grammar AqlPragma;
 options { tokenVocab=AqlLexerRules; }
 
-pragmaId: IDENTIFIER;
+pragmaId: LOWER_ID;
 pragmaKindAssignment: PRAGMA pragmaId EQUAL pragmaDef ;
 pragmaDef:
       EXEC_CMDLINE pragmaCmdLineSection    #Pragma_CmdLine
@@ -29,7 +29,7 @@ pragmaDef:
 pragmaKind: pragmaId | LPAREN pragmaDef RPAREN;
 
 pragmaCmdLineSection: LBRACE
-  STRING
+  STRING+
   (OPTIONS (timeoutOption|alwaysReloadOption)*)?
   RBRACE  ;
 

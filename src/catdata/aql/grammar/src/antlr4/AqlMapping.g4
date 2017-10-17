@@ -1,7 +1,7 @@
 parser grammar AqlMapping;
 options { tokenVocab=AqlLexerRules; }
 
-mappingId: IDENTIFIER;
+mappingId: LOWER_ID;
 mappingKindAssignment: MAPPING mappingId EQUAL mappingDef ;
 mappingDef:
       ID schemaId                       #MapExp_Id
@@ -37,12 +37,13 @@ mappingAttributeSig:
   schemaAttributeId RARROW (mappingLambda | schemaPath);
 
 mappingLambda:
-  LAMBDA mappingGen (COMMA mappingGen) DOT evalMappingFn ;
+  LAMBDA mappingGen (COMMA mappingGen)* DOT evalMappingFn ;
 
-mappingGen: IDENTIFIER;
+mappingGen: LOWER_ID;
 evalMappingFn:
     mappingGen
-  | mappingFn LPAREN evalMappingFn RPAREN
+  | mappingFn LPAREN evalMappingFn (COMMA evalMappingFn)* RPAREN
+  | LPAREN evalMappingFn (typesideFnName evalMappingFn)* RPAREN
   ;
 
 mappingFn: typesideFnName | schemaAttributeId | schemaForeignId ;

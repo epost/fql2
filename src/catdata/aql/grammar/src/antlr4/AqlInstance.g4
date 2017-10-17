@@ -1,7 +1,7 @@
 parser grammar AqlInstance;
 options { tokenVocab=AqlLexerRules; }
 
-instanceId: IDENTIFIER;
+instanceId: LOWER_ID;
 instanceKindAssignment: INSTANCE instanceId EQUAL instanceDef ;
 instanceDef:
     EMPTY COLON schemaKind
@@ -68,7 +68,7 @@ instanceSql: STRING;
 instanceFile: STRING;
 instanceEntityFile: schemaEntityId RARROW instanceFile;
 
-instanceGen: IDENTIFIER;
+instanceGen: LOWER_ID;
 
 instanceEquation: instancePath EQUAL instancePath;
 

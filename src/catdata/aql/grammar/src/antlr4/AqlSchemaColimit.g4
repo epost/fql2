@@ -1,7 +1,7 @@
 parser grammar AqlSchemaColimit;
 options { tokenVocab=AqlLexerRules; }
 
-schemaColimitId: IDENTIFIER;
+schemaColimitId: LOWER_ID;
 schemaColimitKindAssignment: SCHEMA_COLIMIT schemaColimitId EQUAL schemaColimitDef ;
 schemaColimitDef:
       QUOTIENT schemaId (PLUS schemaId)* COLON typesideId

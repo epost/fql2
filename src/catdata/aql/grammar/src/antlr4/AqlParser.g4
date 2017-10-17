@@ -22,14 +22,17 @@ import
   AqlSchemaColimit,
   AqlConstraint;
 
+file : program  EOF ;
+
 program
-  : optionsDeclarationSection
-       (commentDeclaration | kindDeclaration)+;
+  : optionsDeclarationSection?
+    (commentDeclarationSection | kindDeclaration)* 
+  ;
 
 optionsDeclarationSection
-  : OPTIONS LBRACE optionsDeclaration* RBRACE;
+  : OPTIONS optionsDeclaration* ;
 
-commentDeclaration
+commentDeclarationSection
   : htmlCommentDeclaration     #Comment_HTML
   | mdCommentDeclaration       #Comment_MD;
 
@@ -47,10 +50,10 @@ kindDeclaration
   ;
 
 
-path : IDENTIFIER (DOT IDENTIFIER)* ;
+path : LOWER_ID (DOT LOWER_ID)* ;
 
 value
   : STRING
   | NUMBER
-  | IDENTIFIER
+  | LOWER_ID
   ;

@@ -3,11 +3,14 @@
 (def version "0.1.0-SNAPSHOT")
 
 (set-env!
-    :source-paths #{"src/antlr4"}
-    :dependencies '[[org.clojure/clojure "1.9.0-beta1"]
+    :source-paths #{"src/antlr4" "resource/sample"}
+    :dependencies '[[org.clojure/clojure "1.9.0-beta2"]
                     [boot/core "RELEASE" :scope "test"]
-                    [babeloff/boot-antlr4 "0.1.0"]
-                    [org.antlr/antlr4 "4.7"]])
+                    [babeloff/boot-antlr4 "0.1.1-SNAPSHOT"]
+                    [org.antlr/antlr4 "4.7"]
+                    [clj-jgit "0.8.10"]
+                    [byte-streams "0.2.3"]
+                    [me.raynes/fs "1.4.6"]])
 
 (task-options!
  pom {:project     project
@@ -23,8 +26,6 @@
 
 ;; (import '(org.antlr.v4.gui TestRig))
 (require '[babeloff.boot-antlr4 :as antlr :refer [antlr4 test-rig]])
-(import '(org.antlr.v4 Tool))
-
 
 (deftask store
   [s show bool "show the arguments"]
@@ -35,20 +36,24 @@
 (deftask build
   [s show bool "show the arguments"]
   (comp
-    (antlr4 :grammar "AqlLexerRules.g4" 
+    (antlr4 :grammar "AqlLexerRules.g4"
             :package "org.aql")
     (antlr4 :grammar "AqlParser.g4"
             :package "org.aql")
     (javac)))
 
 
-(deftask exercise 
-  [] 
-  (comp 
+(deftask exercise
+  []
+  (comp
     (test-rig :parser "org.aql.AqlParser"
               :lexer "org.aql.AqlLexerRules"
-              :start-rule "program"
-              :tree false
+              :start-rule "file"
+              :input ["resource/sample/AqlOptionsSample.aql"
+                      "resource/sample/AqlCommentSample.aql"
+                      "../../../../resources/examples/aql/All_Syntax.aql"]
+                      ;"resource/sample/cp2_1_db.aql"]
+              :tree true
               :postscript false
               :tokens true)))
 
@@ -73,13 +78,12 @@
                 [util :as util]
                 [task-helpers :as helper]))
 
- 
-(deftask live 
+
+(deftask live
   []
-  (comp 
-    (watch) 
+  (comp
+    (watch)
     (build)
-    (exercise) 
-    ;; (show :fileset true) 
+    (exercise)
+    ;; (show :fileset true)
     (store)))
- 

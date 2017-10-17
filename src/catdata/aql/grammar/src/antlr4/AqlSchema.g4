@@ -1,7 +1,7 @@
 parser grammar AqlSchema;
 options { tokenVocab=AqlLexerRules; }
 
-schemaId: IDENTIFIER;
+schemaId: LOWER_ID;
 schemaKindAssignment: SCHEMA schemaId EQUAL schemaDef ;
 schemaDef:
       EMPTY COLON typesideId              #Schema_Empty
@@ -13,7 +13,7 @@ schemaDef:
     ;
 schemaKind: schemaId | LPAREN schemaDef RPAREN;
 
-schemaColimitId: IDENTIFIER;
+schemaColimitId: LOWER_ID;
 
 schemaLiteralExpr:
     (IMPORTS typesideId*)?
@@ -25,7 +25,7 @@ schemaLiteralExpr:
     (OPTIONS (timeoutOption | proverOptions | allowJavaEqsUnsafeOption)*)?
     ;
 
-schemaEntityId: IDENTIFIER;
+schemaEntityId: UPPER_ID;
 
 schemaForeignSig:
   schemaForeignId COLON schemaEntityId RARROW schemaEntityId;
@@ -46,7 +46,7 @@ schemaTermId: schemaEntityId | schemaForeignId | schemaAttributeId;
 schemaAttributeSig:
        schemaAttributeId COLON schemaEntityId RARROW typesideTypeId;
 
-schemaAttributeId: IDENTIFIER;
+schemaAttributeId: LOWER_ID;
 
 schemaObservationEquationSig:
   FORALL schemaEquationSig;
@@ -56,10 +56,10 @@ schemaEquationSig:
 
 evalSchemaFn:
     schemaGen
-  | schemaFn LPAREN evalSchemaFn RPAREN
+  | schemaFn LPAREN evalSchemaFn (COMMA evalSchemaFn)* RPAREN
   ;
 
-schemaGen: IDENTIFIER;
+schemaGen: LOWER_ID;
 schemaFn: typesideFnName | schemaAttributeId | schemaForeignId ;
 
-schemaForeignId: IDENTIFIER;
+schemaForeignId: LOWER_ID;

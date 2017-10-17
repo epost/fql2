@@ -1,5 +1,5 @@
 
-options
+options  
 	timeout = 30
 	gui_max_table_size = 1600
 

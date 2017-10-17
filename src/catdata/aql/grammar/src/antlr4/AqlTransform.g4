@@ -2,7 +2,7 @@ parser grammar AqlTransform;
 options { tokenVocab=AqlLexerRules; }
 
 
-transformId: IDENTIFIER;
+transformId: LOWER_ID;
 transformKindAssignment: TRANSFORM transformId EQUAL transformDef ;
 transformDef:
       ID COLON instanceKind              #Transform_Id

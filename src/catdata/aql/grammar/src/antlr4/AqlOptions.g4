@@ -62,7 +62,7 @@ dVIAFProverUnsafeOption:
 
 // provers and their options
 proverOptions:
-    PROVER EQUAL  provers
+    PROVER EQUAL  proverType
   | PROGRAM_ALLOW_NONTERM_UNSAFE EQUAL truthy
   | COMPLETION_PRECEDENCE EQUAL LBRACK STRING+ RBRACK
   | COMPLETION_SORT EQUAL truthy
@@ -102,7 +102,7 @@ queryRemoveRedundancyOption: QUERY_REMOVE_REDUNDANCY EQUAL truthy;
 
 truthy : TRUE | FALSE;
 
-provers
+proverType
   : AUTO
   | FAIL
   | FREE
