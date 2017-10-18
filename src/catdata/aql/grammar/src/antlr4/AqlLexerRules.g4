@@ -106,7 +106,6 @@ OPTIONS
 
 
 LITERAL : 'literal' ;
-CONSTRAINT : 'constraint' ;
 IMPORTS : 'imports' ;
 FORALL : 'forall' ;
 WHERE : 'where' ;
@@ -260,6 +259,8 @@ JAVA_TYPES : 'java_types';
 JAVA_CONSTANTS : 'java_constants';
 JAVA_FUNCTIONS : 'java_functions';
 
+
+CONSTRAINTS : 'constraints' ;
 
 // -------------------------
 // Punctuation

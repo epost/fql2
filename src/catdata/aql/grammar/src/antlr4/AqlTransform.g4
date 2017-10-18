@@ -5,15 +5,15 @@ options { tokenVocab=AqlLexerRules; }
 transformId: LOWER_ID;
 transformKindAssignment: TRANSFORM transformId EQUAL transformDef ;
 transformDef:
-      ID COLON instanceKind              #Transform_Id
+      ID instanceKind              #Transform_Id
     | LBRACK transformId SEMI transformId RBRACK    #Transform_Compose
     | DISTINCT transformId                 #Transform_Destination
     | DELTA mappingKind transformId        #Transform_Delta
     | SIGMA mappingKind transformId
         transformSigmaSection?
         transformSigmaSection?               #Transform_Sigma
-    | EVAL queryId transformId             #Transform_Eval
-    | COEVAL queryId transformId
+    | EVAL queryKind transformId             #Transform_Eval
+    | COEVAL queryKind transformId
         transformCoevalSection?
         transformCoevalSection?              #Transform_Coeval
     | UNIT mappingKind instanceId
@@ -65,4 +65,4 @@ transformLiteralExpr:
   (OPTIONS (TRANSFORM EQUAL truthy | dontValidateUnsafeOption)*)?
   ;
 
-transformGen: STRING;
+transformGen: LOWER_ID;

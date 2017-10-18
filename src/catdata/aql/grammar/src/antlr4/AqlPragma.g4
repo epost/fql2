@@ -8,7 +8,7 @@ pragmaDef:
     | EXEC_JS pragmaExecJsSection          #Pragma_ExecJs
     | EXEC_JDBC pragmaJdbcClass pragmaJdbcUri
               pragmaExecJdbcSection          #Pragma_ExecJdbc
-    | CHECK COLON constraintId instanceId    #Pragma_Check
+    | CHECK constraintId instanceId    #Pragma_Check
     | ASSERT_CONSISTENT instanceId         #Pragma_AssertConsistent
     | EXPORT_CSV_INSTANCE instanceId pragmaFile
               pragmaExportCsvSection          #Pragma_ExportCsvInstance
@@ -34,7 +34,7 @@ pragmaCmdLineSection: LBRACE
   RBRACE  ;
 
 pragmaExecJsSection: LBRACE
-  STRING
+  STRING+
   (OPTIONS (timeoutOption|alwaysReloadOption)*)?
   RBRACE  ;
 

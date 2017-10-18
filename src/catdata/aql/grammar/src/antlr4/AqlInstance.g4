@@ -8,16 +8,18 @@ instanceDef:
   | SRC transformKind
   | DST transformKind
   | DISTINCT instanceKind
-  | EVAL queryKind instanceKind
-          (OPTIONS evalOptions*)?
-  | COEVAL queryKind instanceKind
-          (OPTIONS (timeoutOption | proverOptions)*)?
+  | EVAL queryKind instanceKind (LBRACE instanceEvalSection RBRACE)?
+  | COEVAL queryKind instanceKind (LBRACE instanceCoevalSection RBRACE)?
   | DELTA mappingKind instanceKind
-  | SIGMA mappingKind instanceKind
+  | SIGMA mappingKind instanceKind (LBRACE instanceSigmaSection RBRACE)?
   | COPRODUCT_SIGMA (mappingKind instanceKind)+ COLON schemaKind
+      (LBRACE instanceCoprodSigmaSection RBRACE)?
   | COPRODUCT instanceKind (PLUS instanceKind)* COLON schemaKind
+      (LBRACE instanceCoprodSection RBRACE)?
   | COPRODUCT_UNRESTRICTED instanceId (PLUS instanceId)* COLON schemaKind
+      (LBRACE instanceCoprodUnrestrictSection RBRACE)?
   | COEQUALIZE transformKind transformKind
+      (LBRACE instanceCoequalizeSection RBRACE)?
   | COLIMIT graphKind schemaKind LBRACE
       NODES (instanceId RARROW instanceDef)+
       EDGES (schemaArrowId RARROW transformKind)+
@@ -39,10 +41,16 @@ instanceDef:
                   | requireConsistencyOption)*)?
   | LITERAL COLON schemaKind LBRACE instanceLiteralExpr RBRACE
   | QUOTIENT instanceKind LBRACE instanceQuotientExpr RBRACE
-  | CHASE constraintKind* instanceKind INTEGER?
+  | CHASE LITERAL COLON instanceConstraint* instanceKind INTEGER?
   | RANDOM COLON schemaId LBRACE instanceRandomExpr RBRACE
-    ;
+  ;
 instanceKind: instanceId | LPAREN instanceDef RPAREN;
+
+// the documentation for the chase constrants is unclear
+instanceConstraint
+  : schemaId
+  | LBRACE RBRACE
+  ;
 
 instanceLiteralExpr:
   (IMPORTS instanceId*)?
@@ -73,12 +81,12 @@ instanceGen: LOWER_ID;
 instanceEquation: instancePath EQUAL instancePath;
 
 instanceMultiEquation:
-  instanceEquationId RARROW LBRACE instanceMultiValue (COMMA instanceMultiValue)* RBRACE;
+  instanceEquationId RARROW LBRACE instanceMultiBind (COMMA instanceMultiBind)* RBRACE;
 
-instanceEquationId: STRING;
+instanceEquationId: LOWER_ID;
 
-instanceMultiValue:
-  instancePath STRING;
+instanceMultiBind:
+  instancePath UPPER_ID;
 
 instancePath:
   instanceArrowId
@@ -96,3 +104,11 @@ instanceRandomExpr:
   GENERATORS (schemaEntityId RARROW INTEGER)*
   | OPTIONS (RANDOM_SEED EQUAL INTEGER)
   ;
+
+instanceEvalSection : (OPTIONS evalOptions*)? ;
+instanceCoevalSection : (OPTIONS (timeoutOption | proverOptions)*)?  ;
+instanceSigmaSection : (OPTIONS (timeoutOption | proverOptions)*)? ;
+instanceCoprodSection : (OPTIONS (timeoutOption | proverOptions)*)? ;
+instanceCoprodSigmaSection : (OPTIONS (timeoutOption | proverOptions)*)? ;
+instanceCoprodUnrestrictSection : (OPTIONS (timeoutOption | proverOptions)*)? ;
+instanceCoequalizeSection : (OPTIONS (timeoutOption | proverOptions)*)? ;

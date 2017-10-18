@@ -3,22 +3,22 @@ parser grammar AqlConstraint;
 options { tokenVocab=AqlLexerRules; }
 
 constraintId: LOWER_ID;
-constraintKindAssignment: CONSTRAINT constraintId EQUAL constraintDef ;
-constraintDef:
-  LITERAL COLON schemaId
-            LBRACE constraintLiteralExpr RBRACE      #constraintExp_Literal
-    ;
+constraintKindAssignment: CONSTRAINTS constraintId EQUAL constraintDef ;
+constraintDef
+  : LITERAL COLON schemaId
+      LBRACE constraintLiteralExpr RBRACE      #constraintExp_Literal
+  ;
 constraintKind: constraintId | LPAREN constraintDef RPAREN;
 
 constraintLiteralExpr:
   (IMPORTS constraintId*)?
   (constraintExpr)+
-  (OPTIONS (timeoutOption | dontValidateUnsafeOption)*)?
+  (OPTIONS (timeoutOption | dontValidateUnsafeOption | proverOptions)*)?
   ;
 
 constraintExpr:
   FORALL (constraintGen COLON schemaEntityId)+
-  WHERE constraintEquation+
+  (WHERE constraintEquation+)?
   RARROW
   (EXISTS (constraintGen COLON schemaEntityId)+)?
   WHERE constraintEquation+
