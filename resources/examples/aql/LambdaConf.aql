@@ -96,6 +96,16 @@ instance sigmaFI = sigma F I
 instance deltaFsigmaFI = delta F sigmaFI
 transform unitSigmaFDeltaF = unit F I //is identity
 
+query Q = literal : T -> S {
+	entities
+		N1 -> {from n1:N return name -> n1.name salary -> n1.salary}
+		N2 -> {from n2:N return age -> n2.age}
+	foreign_keys
+		f -> {n2 -> n1}
+}
+
+instance coevalQI = coeval Q I
+instance evalcoevalQI = eval Q coevalQI
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // select-from-where syntax to find the name of every manager's department

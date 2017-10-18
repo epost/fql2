@@ -58,6 +58,7 @@ public final class AqlOptions {
 		eval_approx_sql_unsafe,
 		eval_sql_persistent_indices,
 		query_remove_redundancy,
+		query_compose_use_incomplete,
 		import_as_theory,
 		import_joined,
 		map_nulls_arbitrarily_unsafe,
@@ -179,6 +180,8 @@ public final class AqlOptions {
 	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
+		case query_compose_use_incomplete :
+			return false;
 		case toCoQuery_max_term_size:
 			return 3;
 		case csv_generate_ids:
@@ -322,6 +325,8 @@ public final class AqlOptions {
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case query_compose_use_incomplete:
+			return op.getBoolean(map);
 		case toCoQuery_max_term_size:
 			return op.getBoolean(map);
 		case csv_generate_ids:

@@ -627,16 +627,18 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		throw new RuntimeException("Anomaly: please report");
 	}
 
-	private List<Fk2> transP(Term<Ty, En2, Sym, Fk2, Att2, Void, Void> term) {
+	public <Z> List<Fk2> transP(Term<Ty, En2, Sym, Fk2, Att2, Z, Void> term) {
 		if (term.var != null) {
 			return Collections.emptyList();
 		} else if (term.fk != null) {
 			return Util.append(Util.singList(term.fk), transP(term.arg));
+		} else if (term.gen != null) {
+			return Collections.emptyList();
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
 
-	private Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> compose(
+	public Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> compose(
 			List<Fk2> l, En2 en2) {
 		if (l.isEmpty()) {
 			return new IdentityTransform<>(ens.get(en2));
@@ -649,7 +651,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		}
 	}
 
-	private Term<Ty, En1, Sym, Fk1, Att1, Var, Void> transP(Term<Ty, En2, Sym, Fk2, Att2, Void, Void> term,
+	public <Z> Term<Ty, En1, Sym, Fk1, Att1, Var, Void> transP(Term<Ty, En2, Sym, Fk2, Att2, Z, Void> term,
 			Term<Ty, En1, Sym, Fk1, Att1, Var, Void> u, En2 en2) {
 		List<Fk2> l = transP(term);
 		Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> t = compose(

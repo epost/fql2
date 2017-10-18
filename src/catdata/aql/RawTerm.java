@@ -94,7 +94,7 @@ public final class RawTerm {
 			rhs_t.set(lhs_t);
 		} 
 		if (!lhs_t.x.equals(rhs_t.x)) {
-			throw new RuntimeException("In term " + lhs + ", the infered sort of subterm " + rhs + " is " + lhs_t.x.toStringMash() + " but " + rhs + " actually has sort " + rhs_t.x.toStringMash());
+			throw new RuntimeException("For LHS " + lhs + ", the infered sort of RHS " + rhs + " is " + lhs_t.x.toStringMash() + " but " + rhs + " actually has sort " + rhs_t.x.toStringMash());
 		}
 		Ctx<String, Chc<Ty,En>> ret = new Ctx<>();
 		for (String var : ctx0.keySet()) {
