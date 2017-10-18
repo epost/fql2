@@ -33,7 +33,7 @@ instanceDef:
                   | alwaysReloadOption
                   | requireConsistencyOption
                   | schemaOnlyOption)*)?
-  | IMPORT_CSV COLON schemaDef LBRACE instanceEntityFile+ RBRACE
+  | IMPORT_CSV COLON schemaId LBRACE instanceEntityFile+ RBRACE
         (OPTIONS (timeoutOption | proverOptions
                   | alwaysReloadOption
                   | csvOptions

@@ -28,16 +28,18 @@ queryLiteralExpr:
   (OPTIONS (timeoutOption | dontValidateUnsafeOption)*)?
   ;
 
-queryEntityExpr: schemaEntityId RARROW LBRACE selectClauseExpr RBRACE;
+queryEntityExpr: schemaEntityId RARROW LBRACE queryClauseExpr RBRACE;
 
 querySimpleExpr:
-  selectClauseExpr
+  queryClauseExpr
   (OPTIONS (timeoutOption | dontValidateUnsafeOption | proverOptions)*)?
   ;
 
-selectClauseExpr:
+queryLiteralValue : STRING | NUMBER | INTEGER | TRUE | FALSE ;
+
+queryClauseExpr:
   FROM (queryGen COLON schemaEntityId)+
-  (WHERE (queryPath EQUAL queryPath)+)?
+  (WHERE (queryPath EQUAL (queryLiteralValue | queryPath))+)?
   RETURN (schemaAttributeId RARROW queryPath)+
   ;
 
@@ -46,7 +48,12 @@ queryForeignSig:
 
 queryPathMapping: queryGen RARROW queryPath;
 queryGen: LOWER_ID;
-queryPath: queryGen (DOT schemaArrowId)*;
+queryPath
+   : queryLiteralValue | typesideConstantName
+   | queryGen
+   | queryGen (DOT schemaArrowId)+
+   | queryGen LPAREN queryPath (COMMA queryPath)* RPAREN
+   ;
 
 queryFromMappingExpr :
   (OPTIONS (timeoutOption | dontValidateUnsafeOption | proverOptions)*)?

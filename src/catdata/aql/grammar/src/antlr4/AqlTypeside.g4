@@ -1,7 +1,7 @@
 parser grammar AqlTypeside;
 options { tokenVocab=AqlLexerRules; }
 
-typesideId: LOWER_ID;
+typesideId: LOWER_ID ;
 
 typesideKindAssignment:
   TYPESIDE typesideId EQUAL typesideInstance;
@@ -29,14 +29,14 @@ typesideImport:
   ;
 
 typesideTypeSig : typesideTypeId ;
-typesideJavaTypeSig : typesideTypeId EQUAL STRING;
-typesideTypeId : UPPER_ID;
+typesideJavaTypeSig : (TRUE | FALSE | typesideTypeId) EQUAL STRING;
+typesideTypeId : UPPER_ID ;
 
 typesideConstantSig:
   typesideConstantName COLON UPPER_ID;
 
 typesideJavaConstantSig:
-  typesideConstantName EQUAL STRING;
+  (TRUE | FALSE | typesideConstantName) EQUAL STRING;
 
 typesideConstantName: (LOWER_ID | UPPER_ID);
 

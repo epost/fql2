@@ -1,10 +1,10 @@
 
-options  
+options
 	timeout = 30
 	gui_max_table_size = 1600
 
 html { (* "
-<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> 
+<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
  <html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">
  <head>
  <link rel=\"stylesheet\" type=\"text/css\" href=\"https://categoricaldata.net/css/simple.css\" />
@@ -66,7 +66,7 @@ Jump to section:
 " *) }
 
 html { (* "
-  <svg width='300px' height='300px' 
+  <svg width='300px' height='300px'
     xmlns='http://www.w3.org/2000/svg'>
     <text x='10' y='50' font-size='30'>My SVG</text>
   </svg>
@@ -80,19 +80,19 @@ md { (* "
 <div id='typesides'/>
 
 Every AQL file begins with a __typeside__.
-The typeside for this tutorial contains two __java_types__: 
+The typeside for this tutorial contains two __java_types__:
 *String*, which is bound to *java.lang.String*; and
 <i>Integer</i>, which is bound to <i>java.lang.Integer</i>.
 The <b>java_constants</b> section defines, for each java_type, javascript code that
-creates a value of that type from a string.  
-For example, when the string 100 is encountered in an 
-AQL program and needs to be interpreted as an <i>Integer</i>, 
+creates a value of that type from a string.
+For example, when the string 100 is encountered in an
+AQL program and needs to be interpreted as an <i>Integer</i>,
 AQL will execute the <i>parseInt</i> function on the string 100,
 yielding a <i>java.lang.Integer</i>.
 Similarly, the <b>java_functions</b> section defines the <i>plus</i> function.
 " *) }
 
-typeside Ty = literal {
+typeside ts0 = literal {
 	java_types
 		TEXT = "java.lang.String"
 		VARCHAR = "java.lang.String"
@@ -113,6 +113,7 @@ typeside Ty = literal {
 		GEO = "return java.lang.Long.decode(input[0])"
 		BOOLEAN = "return new java.lang.Boolean(input[0])"
 		true = "return true;"
+		Now = "return java.util.Date.from(java.time.Instant.now())"
 	java_functions
 		int_to_real : INTEGER -> REAL = "return 0.0 + input[0]"
 		real_to_int : REAL -> INTEGER = "return Math.round(input[0]).longValue()"
@@ -122,7 +123,6 @@ typeside Ty = literal {
 		vc_to_txt : VARCHAR -> TEXT = "return input[0]"
 		real_to_geo : REAL -> GEO = "return Math.round(input[0] * 1E6).longValue()"
 		geo_to_real : GEO -> REAL = "return input[0] / 1E6"
-		now : -> DATETIME = "return java.util.Date.from(java.time.Instant.now())"
 		eqVc : VARCHAR, VARCHAR -> BOOLEAN = "return input[0].equals(input[1])"
 		eqInt : INTEGER, INTEGER -> BOOLEAN = "return input[0] == input[1]"
 		or : BOOLEAN, BOOLEAN -> BOOLEAN = "return input[0] || input[1]"
@@ -131,11 +131,11 @@ typeside Ty = literal {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 md { (* "
----------	
+---------
 	<div id=\"schemas\">
 	<h2>Schemas</h2>
 
-	<p>A <b>schema</b> on a typeside <i>Ty</i> contains
+	<p>A <b>schema</b> on a typeside <i>ts0</i> contains
 	    a set of <b>entities</b>,
 	    a set of <b>attributes</b> taking entities to types,
 	    a set of <b>foreign_keys</b> taking entities to entities,
@@ -144,7 +144,7 @@ md { (* "
 	</p>
 " *) }
 
-schema S0 = literal : Ty {
+schema s0 = literal : ts0 {
 	entities
 		Source
 		CotEvent
@@ -158,12 +158,12 @@ schema S0 = literal : Ty {
  		// id : Source -> INTEGER
   		name	 : Source -> VARCHAR
   		channel  : Source -> INTEGER
-  		
+
      	cot_type : CotEvent -> VARCHAR
      	how : CotEvent -> VARCHAR
      	detail	: CotEvent -> TEXT
      	servertime : CotEvent -> INTEGER
-     	
+
      	point_hae : CotEventPosition -> INTEGER
      	point_ce : CotEventPosition -> INTEGER
      	point_le : CotEventPosition -> INTEGER
@@ -174,13 +174,13 @@ schema S0 = literal : Ty {
      observation_equations
 }
 
-instance s0_inst = import_csv : S0 {
+instance s0_inst = import_csv : s0 {
 		Source -> "./data/sample_small/source.csv"
 		CotEvent -> "./data/sample_small/cot_event.csv"
 		CotEventPosition -> "./data/sample_small/cot_event_position.csv"
 }
 
-schema S2 = literal : Ty {
+schema s2 = literal : ts0 {
 	entities
 		Source
 		CotEvent
@@ -193,12 +193,12 @@ schema S2 = literal : Ty {
   	attributes
   		name	 : Source -> VARCHAR
   		channel  : Source -> INTEGER
-  		
+
      	cot_type : CotEvent -> VARCHAR
      	how : CotEvent -> VARCHAR
      	detail	: CotEvent -> TEXT
      	server_time : CotEvent -> INTEGER
-     	
+
      	point_hae : CotEventPosition -> INTEGER
      	point_ce : CotEventPosition -> INTEGER
      	point_le : CotEventPosition -> INTEGER
@@ -208,12 +208,12 @@ schema S2 = literal : Ty {
 }
 
 md { (* "
-## F: S1 -> S0
+## f0: s1 -> s0
 The functor which makes (potentially) lossy adjustments to the schema.
 
 " *) }
 
-mapping F = literal : S2 -> S0 {
+mapping f0 = literal : s2 -> s0 {
 	entities
 		Source -> Source
 		CotEvent -> CotEvent
@@ -224,7 +224,7 @@ mapping F = literal : S2 -> S0 {
 	attributes
 		name -> name
 		channel -> channel
-		
+
 		detail 	->  detail
 		how 	->  how
 		server_time ->  servertime
@@ -237,7 +237,7 @@ mapping F = literal : S2 -> S0 {
 		tile_y ->  tiley
 }
 
-instance s2_inst = delta F s0_inst
+instance s2_inst = delta f0 s0_inst
 
 
 md { (* "
@@ -271,10 +271,10 @@ then a uuid on the source entity is probably what is meant.
 	where ce.cot_type = 'a-n-A-C-F-s'
 " *) }
 
-query q1 = simple : S2 {
+query q1 = simple : s2 {
 	from ce : CotEvent
 	where ce.cot_type = "a-n-A-C-F-m"
-	return 
+	return
 		cot_type -> ce.cot_type
 }
 
@@ -290,7 +290,7 @@ Like query 1 except filter on non-projected column.
 
 " *) }
 
-query q2 = simple : S2 {
+query q2 = simple : s2 {
 	from ce : CotEvent
 	where ce.server_time = 201705071635
 	return
@@ -312,9 +312,9 @@ Query with a simple compound filter
 
 " *) }
 
-query q3 = simple : S2 {
+query q3 = simple : s2 {
 	from ce : CotEvent
-	where 
+	where
 		ce.server_time = 201705071635
 		ce.cot_type = "a-n-A-C-F-m"
 	return
@@ -334,9 +334,9 @@ Simple join with filter
 	join cot_event as ce on s.id = ce.source_id
 	where s.channel = 7
 
-" *) }	
+" *) }
 
-query q4 = simple : S2 {
+query q4 = simple : s2 {
 	from
 		ce : CotEvent
 		s : Source
@@ -349,7 +349,7 @@ query q4 = simple : S2 {
 		time -> ce.server_time
 }
 
-instance q4_inst = eval q4 s2_inst 
+instance q4_inst = eval q4 s2_inst
 
 md { (* "
 ## Query 5 : cotEventsForConstantChannelJoin2
@@ -361,7 +361,7 @@ Same as query4 but no projection of column from joined table.
 	where s.channel = 5 or ce.cot_type = 'a-n-A-C-F-s'
 " *) }
 
-query q5s = simple : S2 {
+query q5s = simple : s2 {
 	from
 		ce : CotEvent
 		s : Source
@@ -377,7 +377,7 @@ query q5s = simple : S2 {
 
 instance q5s_inst = eval q5s s2_inst
 
-schema S5 = literal : Ty {
+schema s5 = literal : ts0 {
 	entities
         Q
     attributes
@@ -387,8 +387,8 @@ schema S5 = literal : Ty {
         channel : Q -> INTEGER
 }
 
-query q5c = literal : S2 -> S5 {
-	entities Q -> {	
+query q5c = literal : s2 -> s5 {
+	entities Q -> {
 	from
 		ce : CotEvent
 		s : Source
@@ -402,9 +402,9 @@ query q5c = literal : S2 -> S5 {
 }}
 
 instance s5_inst = eval q5c s2_inst
-schema S5simple = dst q5c
+schema s5simple = dst q5c
 
-query q5a = literal : S5 -> S5 {
+query q5a = literal : s5 -> s5 {
 	entities
 		Q -> {
 			from q: Q
@@ -418,11 +418,11 @@ query q5a = literal : S5 -> S5 {
 }
 instance q5a_inst = eval q5a s5_inst
 
-query q5b = literal : S5 -> S5 {
+query q5b = literal : s5 -> s5 {
 	entities
 		Q -> {
 			from q: Q
-			where 
+			where
 				q.type = "a-n-A-C-F-m"
 				eqInt(q.channel,3) = false
 			return
@@ -434,7 +434,7 @@ query q5b = literal : S5 -> S5 {
 }
 instance q5b_inst = eval q5b s5_inst
 
-instance q5c_inst = coproduct q5a_inst + q5b_inst : S5
+instance q5c_inst = coproduct q5a_inst + q5b_inst : s5
 
 md { (* "
 ## Query 6 : cotEventsForConstantMixedJoin
@@ -443,12 +443,12 @@ Same as query5 except join across tables.
 	select s.name, ce.cot_type, ce.servertime
 	from source as s
 	join cot_event as ce on s.id = ce.source_id
-	where  s.channel = 5 
+	where  s.channel = 5
 		or ce.cot_type = 'a-n-A-C-F-m'
 
 " *) }
 
-query q6 = simple : S2 {
+query q6 = simple : s2 {
 	from
 		ce : CotEvent
 		s : Source
@@ -475,7 +475,7 @@ More complex join and filter
 
 " *) }
 
-query q7 = simple : S2 {
+query q7 = simple : s2 {
 	from
 		ce : CotEvent
 		cep : CotEventPosition
@@ -491,14 +491,14 @@ query q7 = simple : S2 {
 }
 
 /*
-query q7a = simple : S2 {
+query q7a = simple : s2 {
 	import q7
-	where cep.tilex = 18830 cep.tiley = 25704		
+	where cep.tilex = 18830 cep.tiley = 25704
 }
 
-query q7b = simple : S2 {
+query q7b = simple : s2 {
 	import q7
-	where s.channel = 3		
+	where s.channel = 3
 }
 */
 
@@ -514,7 +514,7 @@ Simple parameterized query.
 	where s.name = ? and ce.server_time = ?
 " *)}
 
-schema S8 = literal : Ty {
+schema S8 = literal : ts0 {
 	entities
         Q
     attributes
@@ -524,7 +524,7 @@ schema S8 = literal : Ty {
         tileY : Q -> GEO
 }
 
-query q8 = literal : S2 -> S8 {
+query q8 = literal : s2 -> S8 {
 	entities
       Q -> {
 		from
@@ -547,9 +547,9 @@ instance q8_inst = eval q8 s2_inst
 
 query q8a = simple : S8 {
 	from q : Q
-	where 
-		q.name = "A6A7DC"	
-		q.time = 201705071635	
+	where
+		q.name = "A6A7DC"
+		q.time = 201705071635
 	return
 			name -> q.name
 			time -> q.time
@@ -618,7 +618,7 @@ Samples:
 
 " *) }
 
-schema S9 = literal : Ty {
+schema s9 = literal : ts0 {
 	entities
         Q
     attributes
@@ -628,8 +628,8 @@ schema S9 = literal : Ty {
         tileY : Q -> GEO
 }
 
-query q9 = literal : S2 -> S9 {
-	entities 
+query q9 = literal : s2 -> s9 {
+	entities
 		Q -> {
 			from
 				s : Source

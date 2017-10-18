@@ -42,7 +42,7 @@ schemaOnlyOption :  SCHEMA_ONLY EQUAL truthy;
 allowJavaEqsUnsafeOption : ALLOW_JAVA_EQS_UNSAFE EQUAL truthy;
 dontValidateUnsafeOption : DONT_VALIDATE_UNSAFE EQUAL truthy;
 alwaysReloadOption :  ALWAYS_RELOAD EQUAL truthy;
-queryComposeUseIncomplete : QUERY_COMPOSE_USE_INCOMPLETE EQLAL truthy ;
+queryComposeUseIncomplete : QUERY_COMPOSE_USE_INCOMPLETE EQUAL truthy ;
 
 // docs/aqlmanual/aqlmanual.tex ch 13.10 Import Options
 csvOptions:

@@ -51,8 +51,8 @@
               :start-rule "file"
               :input ["resource/sample/AqlOptionsSample.aql"
                       "resource/sample/AqlCommentSample.aql"
-                      "../../../../resources/examples/aql/All_Syntax.aql"]
-                      ;"resource/sample/cp2_1_db.aql"]
+                      "../../../../resources/examples/aql/All_Syntax.aql"
+                      "resource/sample/cp2_1_db.aql"]
               :tree true
               :postscript false
               :tokens true)))
