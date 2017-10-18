@@ -11,6 +11,7 @@ optionsDeclaration
   | allowJavaEqsUnsafeOption
   | dontValidateUnsafeOption
   | alwaysReloadOption
+  | queryComposeUseIncomplete
   | csvOptions
   | idColumnNameOption
   | varcharLengthOption
@@ -33,14 +34,15 @@ mapNullsArbitrarilyUnsafeOption:
   MAP_NULLS_ARBITRARILY_UNSAFE EQUAL truthy;
 interpretAsAlgebraOption:  INTERPRET_AS_ALGEGRA EQUAL truthy;
 
-numThreadsOption: NUM_THREADS EQUAL INTEGER;
-randomSeedOption:  RANDOM_SEED EQUAL INTEGER;
-timeoutOption:  TIMEOUT EQUAL INTEGER;
-requireConsistencyOption: REQUIRE_CONSISTENCY EQUAL truthy;
-schemaOnlyOption:  SCHEMA_ONLY EQUAL truthy;
-allowJavaEqsUnsafeOption: ALLOW_JAVA_EQS_UNSAFE EQUAL truthy;
-dontValidateUnsafeOption: DONT_VALIDATE_UNSAFE EQUAL truthy;
-alwaysReloadOption:  ALWAYS_RELOAD EQUAL truthy;
+numThreadsOption : NUM_THREADS EQUAL INTEGER;
+randomSeedOption :  RANDOM_SEED EQUAL INTEGER;
+timeoutOption :  TIMEOUT EQUAL INTEGER;
+requireConsistencyOption : REQUIRE_CONSISTENCY EQUAL truthy;
+schemaOnlyOption :  SCHEMA_ONLY EQUAL truthy;
+allowJavaEqsUnsafeOption : ALLOW_JAVA_EQS_UNSAFE EQUAL truthy;
+dontValidateUnsafeOption : DONT_VALIDATE_UNSAFE EQUAL truthy;
+alwaysReloadOption :  ALWAYS_RELOAD EQUAL truthy;
+queryComposeUseIncomplete : QUERY_COMPOSE_USE_INCOMPLETE EQLAL truthy ;
 
 // docs/aqlmanual/aqlmanual.tex ch 13.10 Import Options
 csvOptions:

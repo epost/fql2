@@ -179,6 +179,7 @@ COMPLETION_SORT :  'completion_sort';
 COMPLETION_COMPOSE :  'completion_compose';
 COMPLETION_FILTER_SUBSUMED :  'completion_filter_subsumed';
 COMPLETION_SYNTACTIC_AC :  'completion_syntactic_ac';
+QUERY_COMPOSE_USE_INCOMPLETE : 'query_compose_use_incomplete';
 
 GUI_MAX_TABLE_SIZE : 'gui_max_table_size';
 GUI_MAX_GRAPH_SIZE : 'gui_max_graph_size';
