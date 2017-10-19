@@ -65,6 +65,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 	@Override
 	public void execute() {
 		try {
+			Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> zzz = I.schema().toSQL_srcSchemas(prefix, "integer", idCol);
 			Connection conn = DriverManager.getConnection(jdbcString);
 			deleteThenCreate(conn);
 			for (En en : I.schema().ens) {
@@ -75,7 +76,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 			}
 			Statement stmt = conn.createStatement();
 			for (En en : I.schema().ens) {
-				for (String x : I.schema().toSQL_srcSchemas(prefix, "integer", idCol).get(en).third) {
+				for (String x : zzz.get(en).third) {
 					stmt.execute(x);
 				}
 			}

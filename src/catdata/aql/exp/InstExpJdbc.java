@@ -30,10 +30,21 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
 		Util.checkClass(clazz);
+		
+		
 	}
 
 	@Override
 	protected Connection start(Schema<Ty, En, Sym, Fk, Att> sch) throws SQLException {
+		
+		if(isJoined) {
+			for (String s : map.keySet()) {
+				if (!sch.ens.contains(s)) {
+					throw new RuntimeException(s + " is not an entity in " + sch);
+				}
+			}
+		}
+		
 		String toGet = jdbcString;
 		String driver = clazz;
 		if (clazz.trim().isEmpty()) {

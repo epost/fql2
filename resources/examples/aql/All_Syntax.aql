@@ -161,6 +161,12 @@ instance i13 = literal : s3 {
 	options
 		prover = completion
 } 
+instance i14 = quotient i13 {
+	equations
+		e.manager = e
+	options
+		prover = completion	
+}
 
 
 

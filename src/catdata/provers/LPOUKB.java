@@ -1389,7 +1389,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			ret = and(ret, gt_lpoInfer(R.first, R.second));
 		}
 		if (ret.isEmpty()) {
-			throw new RuntimeException("There is no LPO precedence that can orient all rules from left to right.  (Unfailing) completion can still be used, but you will have to specify a precedence manually.");
+			throw new RuntimeException("There is no LPO precedence that can orient all rules in their given left to right order.  (Unfailing) completion can still be used, but you will have to specify a precedence manually.  Or, try swapping the left and right hand sides of equations.");
 		}
 		DAG<C> g = Util.get0X(ret);
 		return toPrec(symbols, g); // TODO: aql just pick one randomly and make it total randomly.
