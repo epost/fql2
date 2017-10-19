@@ -280,6 +280,9 @@ All schemas are ``on'' a typeside, and contain entities, foreign keys, attribute
 \section{{\tt empty : <typeside>}}
 The empty {\tt schema} with no entities, foreign keys, or attributes, on a particular {\tt typeside}.
 
+\section{{\tt id <schema>}}
+The identity mapping on a schema.
+
 \section{{\tt schemaOf <instance>}}
 The {\tt schema} of an {\tt instance}.
 
@@ -372,7 +375,7 @@ Allowed are {\tt timeout} and {\tt dont\_validate\_unsafe}.  Note that each inst
 
 \section{{\tt simple : <schema>}} 
 
-\subsection{{\tt entities}}
+%\subsection{{\tt entities}}
 A {\tt <instance>, ctx(<attribute>, <term>)}, i.e., a single from/where/return (sub) query of the form found in the {\tt literal} queries.  The target schema associated with these simple one-table queries has one entity and the attributes are generated automatically by the return clause. 
 
 \section{{\tt getMapping <schema\_colimit> <schema>}}
@@ -409,6 +412,9 @@ A {\tt ctx(<generator> , <entity>)}.  Optionally, {\tt exists unique} can be use
 
 \subsubsection{{\tt where}}
 A list of ground (non quantified) equations.
+
+\subsubsection{{\tt options}}
+These options are used during the construction of the frozen instances associated with the front and back of the constraint.
 
 \chapter{Kind {\tt instance}}
 \section{{\tt empty : <schema>}}
@@ -466,7 +472,7 @@ Allowable options are {\tt timeout} and {\tt static\_typing}, which when disable
 \section{{\tt import\_jdbc [jdbcclass] [jdbcuri] : <schema>}}
 
 \subsection{entities}
-A {\tt ctx(<entity> | <attribute> | <foreign key> | <type> , [sql code])}.  The SQL code for each entity should return a table with an ID column and one column per attribute/foreign key from that table.  (See the {\tt import\_joined} option for an alternative inpurt format.). Note that these tables must be complete: this keyword imports a model (set of tables) of a schema, not a presentation of a model of a schema (i.e., as {\tt literal} does).  To import an instance as a theory, use the {\tt import\_as\_theory} option.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options. 
+A {\tt ctx(<entity> | <attribute> | <foreign key> | <type> , [sql code])}.  The SQL code for each entity should return a table with an ID column and one column per attribute/foreign key from that table.  (See the {\tt import\_joined} option for an alternative input format.). Note that these tables must be complete: this keyword imports a model (set of tables) of a schema, not a presentation of a model of a schema (i.e., as {\tt literal} does).  To import an instance as a theory, use the {\tt import\_as\_theory} option.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options. 
 
 \subsection{{\tt options}}
 Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, and {\tt require\_consistency}.  
@@ -532,7 +538,7 @@ A list of ground (non quantified) equations to quotient by.  Allowable options a
 
 \section{{\tt chase <constraints> <instance> [number]}}
 
-Chases the input instance with the input constraints up to a maximum number of iterations.  If the chase succeeds, the result instance will satisfy the constraints.
+Chases the input instance with the input constraints up to the given maximum number of iterations.  If the chase succeeds, the result instance will satisfy the constraints.  The options will be used for the construction of the intermediate instances during the chase process.
 
 \subsection{{\tt options}}
 Allowable options are the same as for an instance.
@@ -600,7 +606,7 @@ If $Q : S \to T$ is a query and $I$ is an $S$ instance, then $counit_Q(I) : coev
 Passed to $coeval_Q(eval_Q(I))$.
 
 \section{{\tt import\_jdbc  [jdbcclass] [jdbcuri] : <instance> -> <instance>}}
-Imports a transform using JDBC. When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.
+Imports a transform using JDBC. When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.  The {\tt map\_nulls\_arbitrarily\_unsafe} option can be used to automatically map labelled nulls during import.
 
 \subsection{entities}
 A {\tt ctx(<entity> | [sql code])} section assigns each entity $en$ to a SQL query.  The first column is interpreted as the source and the second column as the target.
@@ -659,9 +665,9 @@ Conservatively checks that an instance is consistent (e.g., does not prove $1=2$
 
 %%%%%%%%%%
 
-\section{{\tt export\_csv\_instance [jdbcclass] [jdbcuri] <instance>}} 
+\section{{\tt export\_csv\_instance <instance> [directory]}} 
 
-Exports an instance as CSV.  The directory name will contain one file named $en.csv$ per entity $en$, and if non-empty, one file named $t.csv$ per type $t$.  The file for $en$ will be a CSV file with a header; the fields of the header will be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.   AQL rows that are not constants will be exported as nulls.
+Exports an instance as CSV.  The directory name will contain one file named $en.csv$ per entity $en$.  The file for $en$ will be a CSV file with a header; the fields of the header will be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.   AQL rows that are not constants will be exported as nulls.  
 
 \subsection{{\tt options}}
 Allowed are {\tt timeout}, {\tt always\_reload}, {\tt csv} related options, and {\tt id\_column\_name}, and {\it start\_ids\_at}.
@@ -982,6 +988,8 @@ The generators and labelled nulls of instances participating in a coproduct are 
 
 \subsection{{\tt coproduct\_allow\_entity\_collisions\_unsafe = boolean}}
 
+\section{Misc}
+
 \subsection{{\tt toCoQuery\_max\_term\_size}}
 
 Controls the maximum size of the terms to be searched. 
@@ -989,6 +997,18 @@ Controls the maximum size of the terms to be searched.
 \subsection{{\tt query\_compose\_use\_incomplete}}
 
 Controls whether to use the incomplete co-evaluation based method for query composition.
+
+\subsection{{\tt import\_joined} = boolean} 
+
+In JDBC import, toggles whether attributes and foreign keys should be their own binary tables (false) or should be columns in the entity table (true).
+
+\subsection{{\tt map\_nulls\_arbitrarily\_unsafe} = boolean}
+
+In transform import, specifies whether labelled nulls can be mapped into the target by choosing arbitrarily.
+
+\subsection{{\tt interpret\_as\_algebra} = true}
+
+Interprets the set of equations in an instance as being the saturation of a model, similar to JDBC / CSV import.  Enabling this options bypasses the construction of a decision procedure, increasing performance, potentially greatly.
 
 \end{document}
 
