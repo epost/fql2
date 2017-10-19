@@ -255,7 +255,7 @@ e.g.
 	order by random()
 	limit 1000
 
-" *)}
+" *) }
 
 
 md { (* "

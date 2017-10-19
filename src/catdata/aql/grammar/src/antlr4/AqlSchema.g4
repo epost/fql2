@@ -1,19 +1,22 @@
 parser grammar AqlSchema;
 options { tokenVocab=AqlLexerRules; }
 
-schemaId: LOWER_ID;
-schemaKindAssignment: SCHEMA schemaId EQUAL schemaDef ;
-schemaDef:
-      EMPTY COLON typesideId              #Schema_Empty
-    | SCHEMA_OF LPAREN schemaDef RPAREN        #Schema_OfInstance
-    | DST queryId                       #Schema_Destination
-    | LITERAL COLON typesideId
-            LBRACE schemaLiteralExpr RBRACE     #Schema_Literal
-    | GET_SCHEMA schemaColimitId          #Schema_GetSchemaColimit
-    ;
-schemaKind: schemaId | LPAREN schemaDef RPAREN;
+schemaId : LOWER_ID | UPPER_ID ;
 
-schemaColimitId: LOWER_ID;
+schemaKindAssignment : SCHEMA schemaId EQUAL schemaDef ;
+
+schemaDef
+  : EMPTY COLON typesideId              #Schema_Empty
+  | SCHEMA_OF LPAREN schemaDef RPAREN        #Schema_OfInstance
+  | DST queryId                       #Schema_Destination
+  | LITERAL COLON typesideId
+            LBRACE schemaLiteralExpr RBRACE     #Schema_Literal
+  | GET_SCHEMA schemaColimitId          #Schema_GetSchemaColimit
+  ;
+
+schemaKind : schemaId | LPAREN schemaDef RPAREN ;
+
+schemaColimitId : LOWER_ID | UPPER_ID ;
 
 schemaLiteralExpr:
     (IMPORTS typesideId*)?
@@ -25,7 +28,7 @@ schemaLiteralExpr:
     (OPTIONS (timeoutOption | proverOptions | allowJavaEqsUnsafeOption)*)?
     ;
 
-schemaEntityId: UPPER_ID;
+schemaEntityId: LOWER_ID | UPPER_ID;
 
 schemaForeignSig:
   schemaForeignId COLON schemaEntityId RARROW schemaEntityId;
@@ -40,16 +43,19 @@ schemaPath:
   ;
 
 // identity arrows are indicated with entity-names.
-schemaArrowId: schemaEntityId | schemaForeignId;
-schemaTermId: schemaEntityId | schemaForeignId | schemaAttributeId;
+schemaArrowId : schemaEntityId | schemaForeignId;
+
+schemaTermId : schemaEntityId | schemaForeignId | schemaAttributeId;
 
 schemaAttributeSig:
-       schemaAttributeId COLON schemaEntityId RARROW typesideTypeId;
+  schemaAttributeId+ COLON schemaEntityId RARROW typesideTypeId;
 
-schemaAttributeId: LOWER_ID;
+schemaAttributeId: LOWER_ID | UPPER_ID ;
 
-schemaObservationEquationSig:
-  FORALL schemaEquationSig;
+schemaObservationEquationSig
+  : FORALL schemaEquationSig
+  | schemaPath EQUAL schemaPath
+  ;
 
 schemaEquationSig:
   schemaGen (COMMA schemaGen)* DOT evalSchemaFn EQUAL evalSchemaFn;

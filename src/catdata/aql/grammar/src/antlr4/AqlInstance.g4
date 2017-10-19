@@ -1,17 +1,21 @@
 parser grammar AqlInstance;
 options { tokenVocab=AqlLexerRules; }
 
-instanceId: LOWER_ID;
-instanceKindAssignment: INSTANCE instanceId EQUAL instanceDef ;
-instanceDef:
-    EMPTY COLON schemaKind
+instanceId : LOWER_ID | UPPER_ID ;
+instanceKindAssignment : INSTANCE instanceId EQUAL instanceDef ;
+
+instanceDef
+  : EMPTY COLON schemaKind
   | SRC transformKind
   | DST transformKind
   | DISTINCT instanceKind
-  | EVAL queryKind instanceKind (LBRACE instanceEvalSection RBRACE)?
-  | COEVAL queryKind instanceKind (LBRACE instanceCoevalSection RBRACE)?
+  | EVAL queryKind instanceKind
+      (LBRACE instanceEvalSection RBRACE)?
+  | COEVAL queryKind instanceKind
+      (LBRACE instanceCoevalSection RBRACE)?
   | DELTA mappingKind instanceKind
-  | SIGMA mappingKind instanceKind (LBRACE instanceSigmaSection RBRACE)?
+  | SIGMA mappingKind instanceKind
+      (LBRACE instanceSigmaSection RBRACE)?
   | COPRODUCT_SIGMA (mappingKind instanceKind)+ COLON schemaKind
       (LBRACE instanceCoprodSigmaSection RBRACE)?
   | COPRODUCT instanceKind (PLUS instanceKind)* COLON schemaKind
@@ -25,10 +29,12 @@ instanceDef:
       EDGES (schemaArrowId RARROW transformKind)+
       (OPTIONS (timeoutOption | STATIC_TYPING EQUAL truthy)*)?
       RBRACE
-  | IMPORT_JDBC jdbcClass jdbcUri COLON schemaDef LBRACE instanceImportJdbc RBRACE
-  | QUOTIENT_JDBC jdbcClass jdbcUri  schemaDef LBRACE instanceSql+ RBRACE
+  | IMPORT_JDBC jdbcClass jdbcUri COLON schemaKind
+      LBRACE instanceImportJdbc RBRACE
+  | QUOTIENT_JDBC (jdbcClass (jdbcUri)?)? instanceKind
+      LBRACE instanceSql+ RBRACE
   | QUOTIENT_CSV schemaDef LBRACE instanceFile+ RBRACE
-  | IMPORT_JDBC_ALL jdbcClass jdbcUri
+  | IMPORT_JDBC_ALL (jdbcClass (jdbcUri)?)?
         (OPTIONS (timeoutOption | proverOptions
                   | alwaysReloadOption
                   | requireConsistencyOption
@@ -52,9 +58,10 @@ instanceConstraint
   | LBRACE RBRACE
   ;
 
-instanceLiteralExpr:
+instanceLiteralExpr
+  :
   (IMPORTS instanceId*)?
-  GENERATORS (instanceGen COLON schemaEntityId)+
+  (GENERATORS (instanceGen+ COLON schemaEntityId)+)?
   (EQUATIONS instanceEquation*)?
   (MULTI_EQUATIONS instanceMultiEquation*)?
   (OPTIONS (timeoutOption | proverOptions
@@ -62,46 +69,49 @@ instanceLiteralExpr:
             | interpretAsAlgebraOption)*)?
   ;
 
-instanceImportJdbc:
-  (schemaEntityId | schemaAttributeId | schemaForeignId | typesideTypeId)
-  instanceSql
+instanceImportJdbc
+  :
+  ((schemaEntityId | schemaAttributeId | schemaForeignId | typesideTypeId)
+  RARROW
+  instanceSql)+
   (OPTIONS (
-      timeoutOption | proverOptions
-    | alwaysReloadOption | requireConsistencyOption)*)?
+      timeoutOption | proverOptions | importJoinedOption
+    | alwaysReloadOption | requireConsistencyOption
+    | importAsTheoryOption)*)?
   ;
 
-jdbcClass: STRING;
-jdbcUri: STRING;
-instanceSql: STRING;
-instanceFile: STRING;
-instanceEntityFile: schemaEntityId RARROW instanceFile;
+jdbcClass : STRING;
+jdbcUri : STRING;
+instanceSql : STRING | MULTI_STRING ;
+instanceFile : STRING;
+instanceEntityFile : schemaEntityId RARROW instanceFile;
 
-instanceGen: LOWER_ID;
+instanceGen : LOWER_ID;
 
-instanceEquation: instancePath EQUAL instancePath;
+instanceEquation : instancePath EQUAL instancePath;
 
-instanceMultiEquation:
+instanceMultiEquation :
   instanceEquationId RARROW LBRACE instanceMultiBind (COMMA instanceMultiBind)* RBRACE;
 
-instanceEquationId: LOWER_ID;
+instanceEquationId : LOWER_ID | UPPER_ID ;
 
-instanceMultiBind:
+instanceMultiBind :
   instancePath UPPER_ID;
 
-instancePath:
-  instanceArrowId
+instancePath
+  : instanceArrowId
   | instancePath DOT instanceArrowId
   | instanceArrowId LPAREN instancePath RPAREN
   ;
 
 // identity arrows are indicated with entity-names.
-instanceArrowId: schemaEntityId | schemaForeignId;
+instanceArrowId : schemaEntityId | schemaForeignId;
 
-instanceQuotientExpr:
+instanceQuotientExpr :
     EQUATIONS (schemaEntityId EQUAL schemaEntityId)* ;
 
-instanceRandomExpr:
-  GENERATORS (schemaEntityId RARROW INTEGER)*
+instanceRandomExpr
+  : GENERATORS (schemaEntityId RARROW INTEGER)*
   | OPTIONS (RANDOM_SEED EQUAL INTEGER)
   ;
 

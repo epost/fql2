@@ -1,14 +1,17 @@
 parser grammar AqlMapping;
 options { tokenVocab=AqlLexerRules; }
 
-mappingId: LOWER_ID;
-mappingKindAssignment: MAPPING mappingId EQUAL mappingDef ;
-mappingDef:
-      ID schemaId                       #MapExp_Id
-    | LBRACK mappingId SEMI mappingId RBRACK   #MapExp_Compose
-    | LITERAL COLON schemaId RARROW schemaId
+mappingId : LOWER_ID | UPPER_ID ;
+
+mappingKindAssignment : MAPPING mappingId EQUAL mappingDef ;
+
+mappingDef
+  : ID schemaId                       #MapExp_Id
+  | LBRACK mappingId SEMI mappingId RBRACK   #MapExp_Compose
+  | LITERAL COLON schemaId RARROW schemaId
             LBRACE mappingLiteralExpr RBRACE      #MapExp_Literal
-    ;
+  | GET_MAPPING schemaColimitId schemaId #MapExp_Get
+  ;
 mappingKind: mappingId | LPAREN mappingDef RPAREN;
 
 mappingLiteralExpr:

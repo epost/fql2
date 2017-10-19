@@ -80,8 +80,9 @@ UNTERMINATED_STRING_LITERAL
    : USQuoteLiteral
    ;
 
-STRING :  DQuoteLiteral ;
 CHAR : CharLiteral ;
+STRING :  DQuoteLiteral ;
+MULTI_STRING : DQuoteMulti ;
 
 // -------------------------
 // Keywords
@@ -222,6 +223,7 @@ EXPORT_CSV_TRANSFORM : 'export_csv_transform';
 EXPORT_JDBC_INSTANCE : 'export_jdbc_instance';
 EXPORT_JDBC_QUERY : 'export_jdbc_query';
 EXPORT_JDBC_TRANSFORM : 'export_jdbc_transform' ;
+ADD_TO_CLASSPATH : 'add_to_classpath' ;
 
 QUERY : 'query';
 SIMPLE : 'simple';
@@ -333,14 +335,14 @@ mode Html ;
 HTML_END
    : RDocQuote -> popMode;
 
-HTML_CHAR : . ;
+HTML_MULTI_STRING : DQuoteMulti ;
 
 mode MarkDown ;
 
 MD_END
    : RDocQuote -> popMode;
 
-MD_CHAR : . ;
+MD_MULTI_STRING : DQuoteMulti ;
 
 // ======================================================
 // Grammar specific fragments
@@ -350,7 +352,8 @@ fragment IdLetter : 'a'..'z'|'A'..'Z'|'_'|'$' ;
 fragment UpperIdLetter : 'A'..'Z' ;
 fragment LowerIdLetter : 'a'..'z' ;
 
-fragment LDocQuote : LBrace Ws+ LParen Star Ws+ DQuote ;
-fragment RDocQuote : DQuote Ws+ Star RParen Ws+ RBrace ;
+fragment LDocQuote : LBrace Ws* LParen Star Ws+ ;
+fragment RDocQuote : Ws+ Star RParen Ws* RBrace ;
 
 fragment Exponent : [Ee] [+\-]? DecimalNumeral ;
+fragment DQuoteMulti : DQuote (EscSeq | ~ ["\\])* DQuote  ;

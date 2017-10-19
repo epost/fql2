@@ -6,7 +6,7 @@
     :source-paths #{"src/antlr4" "resource/sample"}
     :dependencies '[[org.clojure/clojure "1.9.0-beta2"]
                     [boot/core "RELEASE" :scope "test"]
-                    [babeloff/boot-antlr4 "0.1.1-SNAPSHOT"]
+                    [babeloff/boot-antlr4 "2017.10.19"]
                     [org.antlr/antlr4 "4.7"]
                     [clj-jgit "0.8.10"]
                     [byte-streams "0.2.3"]
@@ -39,23 +39,27 @@
     (antlr4 :grammar "AqlLexerRules.g4"
             :package "org.aql")
     (antlr4 :grammar "AqlParser.g4"
-            :package "org.aql")
+            :package "org.aql"
+            :visitor true
+            :listener true)
     (javac)))
 
 
-(deftask exercise
+(deftask run-tests
   []
-  (comp
-    (test-rig :parser "org.aql.AqlParser"
-              :lexer "org.aql.AqlLexerRules"
-              :start-rule "file"
-              :input ["resource/sample/AqlOptionsSample.aql"
-                      "resource/sample/AqlCommentSample.aql"
-                      "../../../../resources/examples/aql/All_Syntax.aql"
-                      "resource/sample/cp2_1_db.aql"]
-              :tree true
-              :postscript false
-              :tokens true)))
+  (test-rig :parser "org.aql.AqlParser"
+                 :lexer "org.aql.AqlLexerRules"
+                 :start-rule "file"
+                 :input ["resource/sample/cp2_1_db.aql"
+                         "../../../../resources/examples/aql/All_Syntax.aql"
+                         "../../../../resources/examples/aql/Tutorial TSP.aql"]
+                 :tree true
+                 :postscript false
+                 :tokens true))
+
+(deftask make-rdf
+  []
+  ())
 
 (deftask my-repl
   [s show bool "show the arguments"]
@@ -84,6 +88,6 @@
   (comp
     (watch)
     (build)
-    (exercise)
+    (run-tests)
     ;; (show :fileset true)
     (store)))

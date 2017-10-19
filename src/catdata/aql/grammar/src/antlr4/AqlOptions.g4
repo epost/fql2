@@ -54,7 +54,7 @@ csvOptions:
   ;
 
 idColumnNameOption: ID_COLUMN_NAME EQUAL STRING;
-varcharLengthOption: VARCHAR_LENGTH EQUAL NUMBER;
+varcharLengthOption: VARCHAR_LENGTH EQUAL INTEGER;
 startIdsAtOption: START_IDS_AT EQUAL INTEGER;
 importAsTheoryOption: IMPORT_AS_THEORY EQUAL truthy;
 jdbcDefaultClassOption: JDBC_DEFAULT_CLASS EQUAL STRING;
