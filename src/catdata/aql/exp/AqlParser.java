@@ -467,8 +467,8 @@ public class AqlParser {
 		Parser<Pair<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<String, String>>>> qs = Parsers
 				.tuple(env(ident, "->"), options).between(token("{"), token("}"));
 
-		Parser<InstExpCsv> ret = Parsers.tuple(token("import_csv").followedBy(token(":")), sch_ref.lazy(), qs)
-				.map(x -> new InstExpCsv(x.b, x.c.a, x.c.b));
+		Parser<InstExpCsv> ret = Parsers.tuple(token("import_csv"), ident.followedBy(token(":")), sch_ref.lazy(), qs)
+				.map(x -> new InstExpCsv(x.c, x.d.a, x.d.b, x.b));
 		return ret;
 	}
 

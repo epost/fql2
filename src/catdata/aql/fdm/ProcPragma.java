@@ -35,6 +35,7 @@ public class ProcPragma extends Pragma {
 	public void execute() {
 		try {
 			for (String cmd : cmds) {
+			//	CommandLine.
 				CommandLine cmdLine = CommandLine.parse(cmd);
 				DefaultExecutor executor = new DefaultExecutor();
 				executor.setStreamHandler(new Handler(cmd));

@@ -11,6 +11,7 @@ import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -63,6 +64,14 @@ import catdata.aql.It.ID;
 
 public class Util {
 
+	public static void writeFile(String text, String file) throws IOException {
+		File f = new File(file);
+		FileWriter w = new FileWriter(file);
+		w.write(text);
+		w.close();
+	}
+	
+	
 	public static String quote(String s) {
 		s = s.replace("\\", "\\" + "\\"); // \ --> \\
 		s = s.replace("\"", "\\\""); // " --> \"

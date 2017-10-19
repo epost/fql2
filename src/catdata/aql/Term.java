@@ -788,6 +788,16 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		atts(ret);
 		return ret;
 	}
+	
+	public void toFkList(List<Fk> l) {
+		if (var != null || gen != null) {
+		} else if (fk != null) {
+			arg.toFkList(l);
+			l.add(fk); 
+		} else {
+			Util.anomaly();
+		}
+	}
 
 	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replace(Map<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> g) {
 		if (g.containsKey(this)) {

@@ -215,9 +215,22 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 			return toString;
 		}
 		List<En> ens0 = Util.alphabetical(ens);
-		List<String> eqs0 = eqs.stream()
+		
+		List<String> obsEqs = eqs.stream().filter(x -> type(x.first, x.second).left)
 				.map(x -> "forall " + x.first.first + ":" + x.first.second + ". " + x.second + " = " + x.third)
 				.collect(Collectors.toList());
+
+		List<String> pathEqs = eqs.stream().filter(x -> !type(x.first, x.second).left)
+				.map(x -> { 
+					List<Fk> l = new LinkedList<>(), r = new LinkedList<>();
+					x.second.toFkList(l);
+					x.third.toFkList(r);
+					
+					return x.first.second + "." + Util.sep(l, ".") + " = " + 
+					x.first.second + "." + Util.sep(r, ".");
+					})
+				.collect(Collectors.toList());
+
 		List<String> fks0 = new LinkedList<>();
 		for (Fk fk : fks.keySet()) {
 			fks0.add(fk + " : " + fks.get(fk).first + " -> " + fks.get(fk).second);
@@ -232,11 +245,14 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 		toString += "\nforeign_keys";
 		toString += "\n\t" + Util.sep(fks0, "\n\t");
 
+		toString += "\npath_equations";
+		toString += "\n\t" + Util.sep(pathEqs, "\n\t");
+
 		toString += "\nattributes";
 		toString += "\n\t" + Util.sep(atts0, "\n\t");
 
-		toString += "\nequations";
-		toString += "\n\t" + Util.sep(eqs0, "\n\t");
+		toString += "\nobservation_equations";
+		toString += "\n\t" + Util.sep(obsEqs, "\n\t");
 
 		return toString;
 	}
@@ -275,6 +291,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 						" foreign key (" + fk1 + ") references " + prefix + fks.get(fk1).second + "(" + idCol + ")");
 			}
 			for (Att att1 : attsFrom(en1)) {
+				//System.out.println("Doing att " + att1);
 				l.add(att1 + " " + SqlTypeSide.mediate(atts.get(att1).second.toString())); 
 				k.add(Chc.inRight(att1));
 			}

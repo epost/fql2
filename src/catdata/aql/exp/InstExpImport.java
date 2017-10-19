@@ -95,7 +95,7 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 
 	protected String idCol;
 	private boolean import_as_theory;
-	private boolean isJoined;
+	protected boolean isJoined;
 
 	protected Ctx<En, Collection<Gen>> ens0;
 	protected Ctx<Ty, Collection<Null<?>>> tys0;
@@ -159,11 +159,8 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 				}
 	
 			} else {
-				for (String s : map.keySet()) {
-					if (!sch.ens.contains(s)) {
-						throw new RuntimeException(s + " is not an entity in " + sch);
-					}
-					joinedEn(h, (En) s, map.get(s), sch);
+				for (En en : sch.ens) {
+					joinedEn(h, en, map.get((String)en), sch);
 				}
 			}
 			
