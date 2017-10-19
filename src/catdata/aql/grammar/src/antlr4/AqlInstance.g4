@@ -32,7 +32,7 @@ instanceDef
   | IMPORT_JDBC jdbcClass jdbcUri COLON schemaKind
       LBRACE instanceImportJdbc RBRACE
   | QUOTIENT_JDBC (jdbcClass (jdbcUri)?)? instanceKind
-      LBRACE instanceSql+ RBRACE
+      LBRACE instanceQuotientSection RBRACE
   | QUOTIENT_CSV schemaDef LBRACE instanceFile+ RBRACE
   | IMPORT_JDBC_ALL (jdbcClass (jdbcUri)?)?
         (OPTIONS (timeoutOption | proverOptions
@@ -107,8 +107,15 @@ instancePath
 // identity arrows are indicated with entity-names.
 instanceArrowId : schemaEntityId | schemaForeignId;
 
-instanceQuotientExpr :
-    EQUATIONS (schemaEntityId EQUAL schemaEntityId)* ;
+instanceQuotientSection
+  : instanceSql+
+    (OPTIONS (timeoutOption | proverOptions)*)?
+  ;
+
+instanceQuotientExpr
+  : EQUATIONS (instancePath EQUAL instancePath)*
+    (OPTIONS (timeoutOption | proverOptions)*)?
+  ;
 
 instanceRandomExpr
   : GENERATORS (schemaEntityId RARROW INTEGER)*
