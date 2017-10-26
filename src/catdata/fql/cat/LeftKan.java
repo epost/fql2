@@ -159,6 +159,8 @@ class LeftKan {
 	//true = success
 	public boolean compute() {
 		for (int i = 0; i < DefunctGlobalOptions.debug.fql.MAX_DENOTE_ITERATIONS; i++) {
+			//System.out.println(i + "FQL: " + toString());
+
 			if (!step()) {
 				return true;
 			}
@@ -175,6 +177,9 @@ class LeftKan {
 				Path g = F.appy(B, new Path(A, e));
 				Set<Pair<Object, Integer>> lhs = Instance.compose(X.data.get(e.name), ua.get(e.target));
 				Set<Pair<Object, Integer>> rhs = Instance.compose(ua.get(e.source), eval(g));
+			//	System.out.println(lhs);
+			//	System.out.println(rhs);
+			
 				Node n = g.target;
 				ret = ret || addCoincidences(lhs, rhs, n);
 			}
@@ -360,6 +365,8 @@ class LeftKan {
 			}
 			ua.put(n, j);
 		}
+		
+		//System.out.println("init: " + toString());
 	}
 	
 	private static Object lookup(Set<Pair<Object, Object>> set, Object i) {
@@ -379,7 +386,7 @@ class LeftKan {
 	
 	@Override
 	public String toString() {
-		return "LeftKan [lineage=" + lineage + ", Pb=" + Pb + ", Pg=" + Pg
+		return "LeftKan [Pb=" + Pb + ", Pg=" + Pg
 				+ ", ua=" + ua + ", Sb=" + Sb + "]";
 	}
 

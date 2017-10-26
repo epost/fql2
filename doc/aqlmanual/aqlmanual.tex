@@ -444,6 +444,9 @@ If $F : S \to T$ is a mapping and $J$ is an $T$-instance, then $\Delta_F J$ is a
 \section{{\tt sigma <mapping> <instance>}}
 If $F : S \to T$ is a mapping and $I$ is an $S$-instance, then $\Sigma_F I$ is a $T$-instance. 
 
+\section{{\tt sigma\_chase <mapping> <instance> number}}
+Like {\tt sigma}, but uses an alternative chase/left-kan extension based algorithm.
+
 \section{{\tt coproduct\_sigma (<mapping> <instance>)+ : <schema>}}
 The expression {\tt coproduct\_sigma}  $F \ I \ G \ J \ : S$ means $\Sigma_F(I) + \Sigma_G(J)$, where $+$ is $S$-instance co-product.  Arbitrarily many mapping-instance pairs can be used.  This operation is provided to help minimize the number of intermediate materializations required to execute an AQL program.
 

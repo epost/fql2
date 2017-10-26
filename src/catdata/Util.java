@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -59,8 +60,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 
 import org.apache.commons.collections15.CollectionUtils;
-
-import catdata.aql.It.ID;
 
 public class Util {
 
@@ -603,6 +602,19 @@ public class Util {
 	public static <X, Y> Map<Y, X> rev0(Map<X, Y> m) {
 		return rev(m, new HashSet<>(m.values()));
 	}
+	
+	public static <X, Y> LinkedHashMap<X, LinkedHashSet<Y>> toRel(Set<Pair<X, Y>> m) {
+		LinkedHashMap<X, LinkedHashSet<Y>> ret = new LinkedHashMap<>();
+		for (Pair<X, Y> p : m) {
+			LinkedHashSet<Y> ys = ret.get(p.first);
+			if (ys == null) {
+				ys = new LinkedHashSet<>();
+				ret.put(p.first, ys);
+			}
+			ys.add(p.second);
+		}
+		return ret;
+	}
 
 	public static <X, Y> Map<Y, Set<X>> revS(Map<X, Y> m) {
 		Map<Y, Set<X>> ret = new HashMap<>();
@@ -843,7 +855,7 @@ public class Util {
 		return s;
 	}
 
-	public static <X, Y> Y lookup(Set<Pair<X, Y>> s, X x) {
+	public static <X, Y> Y lookup(Collection<Pair<X, Y>> s, X x) {
 		Y y = lookupNull(s, x);
 		if (y == null) {
 			throw new RuntimeException("Cannot find " + nice(x.toString()) + " in " + nice(s.toString()));
@@ -851,7 +863,7 @@ public class Util {
 		return y;
 	}
 	
-	public static <X, Y> Y lookupNull(Set<Pair<X, Y>> s, X x) {
+	public static <X, Y> Y lookupNull(Collection<Pair<X, Y>> s, X x) {
 		for (Pair<X, Y> o : s) {
 			if (o.first.equals(x)) {
 				return o.second;
@@ -860,7 +872,7 @@ public class Util {
 		return null;
 	}
 
-	public static <X, Y, Z> Set<Pair<X, Z>> compose(Set<Pair<X, Y>> x, Set<Pair<Y, Z>> y) {
+	public static <X, Y, Z> Set<Pair<X, Z>> compose(Collection<Pair<X, Y>> x, Collection<Pair<Y, Z>> y) {
 		Set<Pair<X, Z>> ret = new HashSet<>();
 
 		for (Pair<X, Y> p1 : x) {
