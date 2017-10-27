@@ -49,7 +49,7 @@ public class LeftKanSigma {
 			JJJ0 = JJJ0X.first;
 			inter.guid = kkk;
 		}
-
+//System.out.println("!!!!!!!!!!!!!!!");
 		LeftKan D = new LeftKan(inter.guid, F, I.first, ttt, JJJ0);
 
 		Pair<Instance, Map<Object, List<Pair<String, Object>>>> hhh = sigma(D);

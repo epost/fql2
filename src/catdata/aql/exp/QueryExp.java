@@ -246,7 +246,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 		@Override
 		public Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En3, Sym, Fk3, Att3>> type(AqlTyping G) {
-			if (!Q1.type(G).second.equals(Q2.type(G).first)) { // TODO aql type
+			if (!G.eq(Q1.type(G).second, Q2.type(G).first)) { // TODO aql type
 																// equality
 				throw new RuntimeException("Cannot compose: target of first, " + Q1.type(G).second
 						+ " is not the same as source of second, " + Q2.type(G).first);

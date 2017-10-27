@@ -2,6 +2,7 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +27,8 @@ import catdata.aql.Kind;
 import catdata.aql.Mapping;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
+import catdata.aql.SigmaLeftKanAlgebra;
+import catdata.aql.SigmaLeftKanAlgebra.Lineage;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.Var;
@@ -1342,6 +1345,125 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f = F.eval(env);
 			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i = I.eval(env);		
 			return new SigmaInstance<>(f, i, new AqlOptions(options, null, env.defaults));
+		}
+		
+	}
+	
+	public static final class InstExpSigmaChase<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
+	extends InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Ty,En2,Sym,Fk2,Att2,Gen,Sk>, Chc<Sk, Pair<Lineage<Ty,En2,Sym,Fk2,Att2,Gen,Sk>, Att2>>> {
+
+		public final InstExp<Ty,En1,Sym,Fk1,Att1,Gen,Sk,X,Y> I;
+		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
+		public final Map<String, String> options;
+		public final Integer max;
+		
+		@Override
+		public Map<String, String> options() {
+			return options;
+		}
+	
+		
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(I.deps(), F.deps());
+		}
+
+		public InstExpSigmaChase(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f, InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options, int max) {
+			I = i;
+			F = f;
+			this.options = options;
+			this.max = max;
+		}
+
+		@Override
+		public int hashCode() {
+			int prime = 31;
+			int result = 1;
+			result = prime * result + ((max == null) ? 0 : max.hashCode());
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			return result;
+		}
+
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpSigmaChase<?,?,?,?,?,?,?,?,?,?,?,?> other = (InstExpSigmaChase<?,?,?,?,?,?,?,?,?,?,?,?>) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			if (max == null) {
+				if (other.max != null)
+					return false;
+			} else if (!max.equals(other.max))
+				return false;
+			return true;
+		}
+
+		@Override
+		public SchExp<Ty, En2, Sym, Fk2, Att2> type(AqlTyping G) {
+			SchExp<Ty, En1, Sym, Fk1, Att1> t0 = I.type(G);
+			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(G);
+			
+			if (!G.eq(t1.first, t0)) { //TODO aql schema equality
+				throw new RuntimeException("Type error: In " + this + " domain of mapping is " + t1.first + " but instance has schema " + t0);
+			} 
+			
+			return t1.second;
+		}
+
+		@Override
+		public String toString() {
+			return "sigma_chase " + F + " " + I + " " + max;
+		}
+
+		@Override
+		public Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>, Chc<Sk, Pair<Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>, Att2>>> eval(AqlEnv env) {
+			Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> f = F.eval(env);
+			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i = I.eval(env);
+			AqlOptions op = new AqlOptions(options, null, env.defaults);
+			 			
+			Collage<Ty, En2, Sym, Fk2, Att2, Gen, Sk> col = new Collage<>(f.dst.collage());
+			
+			col.sks.putAll(i.sks().map);
+			for (Gen gen : i.gens().keySet()) {
+				col.gens.put(gen, f.ens.get(i.gens().get(gen)));
+			}
+			
+			Set<Pair<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>, Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> eqs = new HashSet<>();
+			for (Pair<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> eq : i.eqs()) {
+				eqs.add(new Pair<>(f.trans(eq.first), f.trans(eq.second)));
+				col.eqs.add(new Eq<>(new Ctx<>(), f.trans(eq.first), f.trans(eq.second)));
+			}
+			
+			SigmaLeftKanAlgebra<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk,X,Y> 
+			alg = new SigmaLeftKanAlgebra<>(f, i, col, max.intValue());
+
+			
+	//		Function<Gen,String> printGen = x -> i.algebra().printX(i.algebra().nf(Term.Gen(x)));
+	//		Function<Sk, String> printSk = x -> i.algebra().sk(x).toString(i.algebra()::printY, Util.voidFn());
+			
+			return new LiteralInstance<>
+			(alg.schema(), col.gens.map, col.sks.map, eqs, alg, alg, (Boolean)op.getOrDefault(AqlOption.require_consistency), (Boolean)op.getOrDefault(AqlOption.allow_java_eqs_unsafe));
 		}
 		
 	}

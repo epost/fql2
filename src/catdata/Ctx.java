@@ -182,5 +182,9 @@ public final class Ctx<K,V> implements Serializable {
 		}
 		return ret;
 	}
+
+	public Set<Entry<K, V>> entrySet() {
+		return map.entrySet();
+	}
 	
 }

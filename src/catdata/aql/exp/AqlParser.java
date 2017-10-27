@@ -50,6 +50,7 @@ import catdata.aql.exp.InstExp.InstExpEmpty;
 import catdata.aql.exp.InstExp.InstExpEval;
 import catdata.aql.exp.InstExp.InstExpRandom;
 import catdata.aql.exp.InstExp.InstExpSigma;
+import catdata.aql.exp.InstExp.InstExpSigmaChase;
 import catdata.aql.exp.InstExp.InstExpVar;
 import catdata.aql.exp.MapExp.MapExpColim;
 import catdata.aql.exp.MapExp.MapExpComp;
@@ -102,7 +103,9 @@ public class AqlParser {
 	public static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(", ")", "=", "->", "@", "(*",
 			"*)", "+", "[", "]", "<-" };
 
-	public static final String[] res = new String[] { "md", "quotient_jdbc", "random", "sql", "chase", "check",
+	public static final String[] res = new String[] { 
+			"sigma_chase",
+			"md", "quotient_jdbc", "random", "sql", "chase", "check",
 			"import_csv", "quotient_csv", "coproduct_unrestricted",
 			"simple", "assert_consistent", "coproduct_sigma", "coequalize", "html", "quotient", "entity_equations",
 			"schema_colimit", "exists", "constraints", "getMapping", "getSchema", "typeside", "schema", "mapping",
@@ -283,6 +286,11 @@ public class AqlParser {
 						.tuple(token("sigma"), map_ref.lazy(), inst_ref.lazy(),
 								options.between(token("{"), token("}")).optional())
 						.map(x -> new InstExpSigma(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
+				sigma_chase = Parsers
+						.tuple(token("sigma_chase"), map_ref.lazy(), inst_ref.lazy(), IntegerLiteral.PARSER,
+								options.between(token("{"), token("}")).optional())
+						.map(x -> new InstExpSigmaChase(x.b, x.c, x.e == null ? new HashMap<>() : Util.toMapSafely(x.e), Integer.parseInt(x.d))),
+			
 				delta = Parsers.tuple(token("delta"), map_ref.lazy(), inst_ref.lazy())
 						.map(x -> new InstExpDelta(x.b, x.c)),
 				distinct = Parsers.tuple(token("distinct"), inst_ref.lazy()).map(x -> new InstExpDistinct(x.b)),
@@ -303,7 +311,7 @@ public class AqlParser {
 								options.between(token("{"), token("}")).optional())
 						.map(x -> new InstExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d));
 
-		Parser ret = Parsers.or(l2, instExpCsvQuot(), instExpJdbcQuot(), instExpCoProd(), instExpRand(), instExpCoEq(), instExpJdbcAll(),
+		Parser ret = Parsers.or(sigma_chase, l2, instExpCsvQuot(), instExpJdbcQuot(), instExpCoProd(), instExpRand(), instExpCoEq(), instExpJdbcAll(),
 				chase, instExpJdbc(), empty, instExpRaw(), var, sigma, delta, distinct, eval, colimInstExp(), dom, cod,
 				instExpCsv(), coeval, parens(inst_ref), instExpQuotient());
 

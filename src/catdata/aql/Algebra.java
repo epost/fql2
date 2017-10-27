@@ -9,10 +9,12 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -207,7 +209,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 			} else if (term.att != null) {
 				return att(term.att, intoX(term.arg));
 			}
-			throw new RuntimeException("Anomaly: please report");
+			throw new RuntimeException("Anomaly: please report: " + term);
 		}
 
 	/**
@@ -356,6 +358,33 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	private static int session_id = 0;
 	private Connection conn;
 	private Collection<String> indicesLoaded = new LinkedList<>();
+	
+	
+	private final Map<Fk, Set<Pair<X,X>>> fkAsSet0 = new HashMap<>();
+	public synchronized Set<Pair<X, X>> fkAsSet(Fk fk) {
+		if (fkAsSet0.containsKey(fk)) {
+			return fkAsSet0.get(fk);
+		}
+		Set<Pair<X,X>> set = new HashSet<>();
+		for (X x : en(schema().fks.get(fk).first)) {
+			set.add(new Pair<>(x,fk(fk, x)));
+		}
+		fkAsSet0.put(fk, set);
+		return set;
+	}
+	
+	private final Map<Att, Set<Pair<X, Term<Ty, Void, Sym, Void, Void, Void, Y>>>> attsAsSet0 = new HashMap<>();
+	public synchronized Set<Pair<X, Term<Ty, Void, Sym, Void, Void, Void, Y>>> attAsSet(Att att) {
+		if (attsAsSet0.containsKey(att)) {
+			return attsAsSet0.get(att);
+		}
+		Set<Pair<X,Term<Ty, Void, Sym, Void, Void, Void, Y>>> set = new HashSet<>();
+		for (X x : en(schema().atts.get(att).first)) {
+			set.add(new Pair<>(x,att(att, x)));
+		}
+		attsAsSet0.put(att, set);
+		return set;
+	}
 	
 	/**
 	 * MUST close this connection

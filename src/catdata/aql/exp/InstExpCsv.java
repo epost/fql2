@@ -201,7 +201,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 					atts0.put(l0, new Ctx<>());
 				}
 				Object o = row.get((String) att);
-				System.out.println("is " + o);
+				//System.out.println("is " + o);
 				Term<Ty, Void, Sym, Void, Void, Void, Null<?>> r 
 				= objectToSk(sch, o, l0.toString(), att, tys0, extraRepr, true); 
 				atts0.get(l0).put(att, r);

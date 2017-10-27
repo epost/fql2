@@ -798,6 +798,12 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			Util.anomaly();
 		}
 	}
+	
+	public List<Fk> toFkList() {
+		List<Fk> l = new LinkedList<>();
+		toFkList(l);
+		return l;
+	}
 
 	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replace(Map<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> g) {
 		if (g.containsKey(this)) {

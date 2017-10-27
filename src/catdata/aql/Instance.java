@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
+import catdata.Triple;
 import catdata.Util;  
 
 public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements Semantics {
@@ -53,6 +54,8 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements S
 		if (!allowUnsafeJava() && !algebra().hasFreeTypeAlgebraOnJava()) {
 			throw new RuntimeException("Unsafe use of java - AQL's behavior is undefined.  Possible solution: add allow_java_eqs_unsafe=true, change the equations, or contact support at info@catinf.com.  Type algebra is\n\n" + algebra().talg());
 		}
+		
+		
 	}
 
 	public final void validateNoTalg() {		

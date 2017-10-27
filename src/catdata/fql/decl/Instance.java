@@ -256,7 +256,7 @@ public class Instance {
 		}
 		return ret;
 	} 
-	
+	//TODO aql why 4 copies of compose?
 	private static <X, Y, Z> Set<Pair<X, Z>> compose2(Set<Pair<X, Y>> x,
 													  Set<Pair<Y, Z>> y) {
 		Set<Pair<X, Z>> ret = new HashSet<>();

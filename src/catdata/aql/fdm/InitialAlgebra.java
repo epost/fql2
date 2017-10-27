@@ -221,13 +221,14 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 	}
 	
 	
-	private Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> talg_full() {
+	private static <Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> 
+	talg_full(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> talg = new Collage<>();
 		for (Sk sk : col.sks.keySet()) {
 			talg.sks.put(Chc.inLeft(sk), col.sks.get(sk));
 		}
 		for (En en : col.ens) {
-			for (X x : ens.get(en)) {
+			for (X x : alg.en(en)) {
 				for (Att att : col.atts.keySet()) {
 					Pair<En, Ty> ty = col.atts.get(att);
 					if (!ty.first.equals(en)) {
@@ -245,18 +246,18 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 				continue; //in type side or schema
 			}
                         //TODO aql need convert
-			if (schema.typeSide.eqs.contains(new Triple<>(new Ctx<>(), eq.lhs, eq.rhs))) {
+			if (alg.schema().typeSide.eqs.contains(new Triple<>(new Ctx<>(), eq.lhs, eq.rhs))) {
 				continue; //in type side
 			}
-			talg.eqs.add(new Eq<>(new Ctx<>(), transX(eq.lhs), transX(eq.rhs)));
+			talg.eqs.add(new Eq<>(new Ctx<>(), transX(alg, eq.lhs), transX(alg, eq.rhs)));
 		}
 		
-		for (Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : schema().eqs) {
-			if (schema().type(eq.first, eq.second).left) { //type
-				for (X x : ens.get(eq.first.second)) {
+		for (Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : alg.schema().eqs) {
+			if (alg.schema().type(eq.first, eq.second).left) { //type
+				for (X x : alg.en(eq.first.second)) {
 					Map<Var, Term<Ty, En, Sym, Fk, Att, Void, Void>> map = new HashMap<>();
-					Term<Ty, En, Sym, Fk, Att, Void, Void> q = repr(x).convert(); map.put(eq.first.first, q);
-					talg.eqs.add(new Eq<>(new Ctx<>(), transX(eq.second.subst(map).convert()), transX(eq.third.subst(map).convert())));
+					Term<Ty, En, Sym, Fk, Att, Void, Void> q = alg.repr(x).convert(); map.put(eq.first.first, q);
+					talg.eqs.add(new Eq<>(new Ctx<>(), transX(alg, eq.second.subst(map).convert()), transX(alg, eq.third.subst(map).convert())));
 				}
 			} 
 		}
@@ -320,9 +321,15 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 		if (talg != null) {
 			return talg;
 		}
+		talg = talg(list, this, col);
+		return talg;
+	}
+	
+	public static <En,Ty,Sym,Fk,Att,Gen,Sk,X,Y> Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> 
+	talg(List<Pair<Chc<Sk, Pair<X, Att>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X,Att>>>>> list, Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, ?> alg, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col) {
 
-		List<Eq<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>>> eqs = new LinkedList<>(talg_full().eqs);
-		List<Chc<Sk, Pair<X, Att>>> sks = new LinkedList<>(talg_full().sks.keySet());
+		List<Eq<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>>> eqs = new LinkedList<>(talg_full(alg, col).eqs);
+		List<Chc<Sk, Pair<X, Att>>> sks = new LinkedList<>(talg_full(alg, col).sks.keySet());
 		Iterator<Chc<Sk, Pair<X, Att>>> sks_it = sks.iterator();
 		
 		while (sks_it.hasNext()) {
@@ -355,14 +362,14 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 
 		eqs.removeIf(eq -> eq.lhs.equals(eq.rhs));
 
-		talg = new Collage<>();
-		talg.syms.putAll(schema.typeSide.syms.map);
-		talg.tys.addAll(schema.typeSide.tys);
-		talg.java_fns.putAll(schema.typeSide.js.java_fns.map);
-		talg.java_parsers.putAll(schema.typeSide.js.java_parsers.map);
-		talg.java_tys.putAll(schema.typeSide.js.java_tys.map);
+		Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>>  talg = new Collage<>();
+		talg.syms.putAll(alg.schema().typeSide.syms.map);
+		talg.tys.addAll(alg.schema().typeSide.tys);
+		talg.java_fns.putAll(alg.schema().typeSide.js.java_fns.map);
+		talg.java_parsers.putAll(alg.schema().typeSide.js.java_parsers.map);
+		talg.java_tys.putAll(alg.schema().typeSide.js.java_tys.map);
 		for (Chc<Sk, Pair<X, Att>> sk : sks) {
-			talg.sks.put(sk, talg_full().sks.get(sk));
+			talg.sks.put(sk, talg_full(alg, col).sks.get(sk));
 		}
 		talg.eqs.addAll(eqs);
 		return talg;
@@ -407,24 +414,24 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 	
 	
 	//TODO aql why does using algebra's version cause infinite loop?
-	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> transX(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
+	private static <Ty, Sym, Att, Sk, En, Fk, Gen, X, Y> Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> transX(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		if (term.obj != null) {
 			return Term.Obj(term.obj, term.ty);
 		} else if (term.sym != null) {
-			return Term.Sym(term.sym, term.args().stream().map(this::transX).collect(Collectors.toList()));
+			return Term.Sym(term.sym, term.args().stream().map(x -> transX(alg, x)).collect(Collectors.toList()));
 		} else if (term.sk != null) {
 			return Term.Sk(Chc.inLeft(term.sk));
 		} else if (term.att != null) {
-			return Term.Sk(Chc.inRight(new Pair<>(trans1X(term.arg.asArgForAtt()), term.att)));
+			return Term.Sk(Chc.inRight(new Pair<>(trans1X(alg, term.arg.asArgForAtt()), term.att)));
 		}
 		throw new RuntimeException("Anomaly: please report: " + term + ", gen " + term.gen + " fk " + term.fk + ", var " + term.var);
 	}
 
-	private X trans1X(Term<Void, En, Void, Fk, Void, Gen, Void> term) {
+	private static <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> X trans1X(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg, Term<Void, En, Void, Fk, Void, Gen, Void> term) {
 		if (term.gen != null) {
-			return nf(term);
+			return alg.nf(term);
 		} else if (term.fk != null) {
-			return fk(term.fk, nf(term.arg));
+			return alg.fk(term.fk, alg.nf(term.arg));
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
