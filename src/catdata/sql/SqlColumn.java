@@ -62,4 +62,8 @@ public class SqlColumn {
 		return table + "_" + name;
 	}
 	
+	public String toString(String x) {
+		return table + x + name;
+	}
+	
 }

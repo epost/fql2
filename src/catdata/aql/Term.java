@@ -298,16 +298,16 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			if (args.isEmpty()) {
 				return sym.toString();
 			} else if (args.size() == 1) {
-				return args.get(0).toString(sk_printer, gen_printer) + "." + sym;
+				return args.get(0).toString(sk_printer, gen_printer) + "." + sym.toString();
 			} else if (args.size() == 2) {
-				return "(" + args.get(0).toString(sk_printer, gen_printer) + " " + sym + " " + args.get(1).toString(sk_printer, gen_printer) + ")";
+				return "(" + args.get(0).toString(sk_printer, gen_printer) + " " + sym.toString() + " " + args.get(1).toString(sk_printer, gen_printer) + ")";
 			} else {
-				return sym + "(" + Util.sep(args, ", ") + ")";
+				return sym.toString() + "(" + Util.sep(args.stream().map(x -> x.toString(sk_printer, gen_printer)).collect(Collectors.toList()), ", ") + ")";
 			}
 		} else if (att != null) {
-			return arg.toString(sk_printer, gen_printer) + "." + att;
+			return arg.toString(sk_printer, gen_printer)+ "." + att.toString();
 		} else if (fk != null) {
-			return arg.toString(sk_printer, gen_printer) + "." + fk;
+			return arg.toString(sk_printer, gen_printer)+ "." + fk.toString();
 		} else if (gen != null) {
 			return gen_printer.apply(gen); 
 		} else if (sk != null) {
@@ -317,6 +317,33 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
+	/*
+	public String toString(Function<Sk, String> sk_printer, Function<Gen, String> gen_printer) {
+		if (var != null) {
+			return Util.maybeQuote(var.toString());
+		} else if (sym != null) {
+			if (args.isEmpty()) {
+				return Util.maybeQuote(sym.toString());
+			} else if (args.size() == 1) {
+				return Util.maybeQuote(args.get(0).toString(sk_printer, gen_printer)) + "." + Util.maybeQuote(sym.toString());
+			} else if (args.size() == 2) {
+				return "(" + Util.maybeQuote(args.get(0).toString(sk_printer, gen_printer)) + " " + Util.maybeQuote(sym.toString()) + " " + Util.maybeQuote(args.get(1).toString(sk_printer, gen_printer)) + ")";
+			} else {
+				return Util.maybeQuote(sym.toString()) + "(" + Util.sep(args.stream().map(x -> x.toString(sk_printer, gen_printer)).collect(Collectors.toList()), ", ") + ")";
+			}
+		} else if (att != null) {
+			return Util.maybeQuote(arg.toString(sk_printer, gen_printer)) + "." + Util.maybeQuote(att.toString());
+		} else if (fk != null) {
+			return Util.maybeQuote(arg.toString(sk_printer, gen_printer)) + "." + Util.maybeQuote(fk.toString());
+		} else if (gen != null) {
+			return Util.maybeQuote(gen_printer.apply(gen)); 
+		} else if (sk != null) {
+			return Util.maybeQuote(sk_printer.apply(sk));
+		} else if (obj != null) {
+			return Util.maybeQuote(obj.toString()); // + "@" + ty;
+		}
+		throw new RuntimeException("Anomaly: please report");
+	} */
 	
 	@Override
 	public String toString() {

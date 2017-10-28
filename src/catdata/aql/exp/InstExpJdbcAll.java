@@ -77,7 +77,10 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 		}
 		
 		boolean schemaOnly = (Boolean) ops.getOrDefault(AqlOption.schema_only);
+		boolean nullOnErr = (Boolean) ops.getOrDefault(AqlOption.import_null_on_err_unsafe);
 
+		String sep = (String) ops.getOrDefault(AqlOption.import_col_seperator);
+		
 		if (!schemaOnly) {
 
 			int fr = 0;
@@ -98,8 +101,8 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 						}
 						Optional<Object> val = tuple.get(c);
 						Term<String, Void, String, Void, Void, Void, Null<?>> xxx
-						 = InstExpJdbc.objectToSk(sch, val.orElse(null), i, c.toString(), tys0, extraRepr, false);
-						atts0.get(i).put(c.toString(), xxx);
+						 = InstExpJdbc.objectToSk(sch, val.orElse(null), i, c.toString(sep), tys0, extraRepr, false, nullOnErr);
+						atts0.get(i).put(c.toString(sep), xxx);
 					}
 				}
 				iso1.put(table, i1);
@@ -132,10 +135,15 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 		Collage<String, String, String, String, String, Void, Void> col0 = new Collage<>(typeSide.collage());
 		Set<Triple<Pair<Var, String>, Term<String, String, String, String, String, Void, Void>, Term<String, String, String, String, String, Void, Void>>> eqs = new HashSet<>();
 
+		String sep = (String) ops.getOrDefault(AqlOption.import_col_seperator);
+		
 		for (SqlTable table : info.tables) {
 			col0.ens.add(table.name);
 			for (SqlColumn c : table.columns) {
-				col0.atts.put(c.toString(), new Pair<>(table.name, sqlTypeToAqlType(c.type.name)));
+				if (col0.atts.containsKey(c.toString(sep))) {
+					throw new RuntimeException("Name collision: table " + c.table.name + " col " + c.name + " against table " + col0.atts.get(c.toString(sep)).first + "\n\n.Possible solution: set option jdbc_import_col_seperator so as to avoid name collisions.");
+				}
+				col0.atts.put(c.toString(sep), new Pair<>(table.name, sqlTypeToAqlType(c.type.name)));
 			}
 		}
 
@@ -146,8 +154,8 @@ public class InstExpJdbcAll extends InstExp<String, String, String, String, Stri
 
 			for (SqlColumn tcol : fk.map.keySet()) {
 				SqlColumn scol = fk.map.get(tcol);
-				String l = scol.toString();
-				String r = tcol.toString();
+				String l = scol.toString(sep);
+				String r = tcol.toString(sep);
 				Term<String, String, String, String, String, Void, Void> lhs = Term.Att(l, Term.Var(v));
 				Term<String, String, String, String, String, Void, Void> rhs = Term.Att(r, Term.Fk(fk.toString(), Term.Var(v)));
 				eqs.add(new Triple<>(new Pair<>(v, fk.source.name), lhs, rhs));

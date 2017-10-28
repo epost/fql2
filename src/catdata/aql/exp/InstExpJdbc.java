@@ -113,7 +113,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 				atts0.put((Gen) lhs.toString(), new Ctx<>());
 			}
 			atts0.get((Gen) lhs.toString()).put(att, objectToSk(sch, rhs, lhs.toString(), att,
-					tys0, extraRepr, false));
+					tys0, extraRepr, false, nullOnErr));
 		}
 		stmt.close();
 		rs.close();
@@ -224,7 +224,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 					atts0.put(g1, new Ctx<>());
 				}
 				atts0.get(g1).put(att, objectToSk(sch, rhs, gen.toString(), att,
-						tys0, extraRepr, false));
+						tys0, extraRepr, false, nullOnErr));
 			}
 			
 		}

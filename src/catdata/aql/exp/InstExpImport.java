@@ -75,7 +75,7 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 	public static <Ty, Sym, En, Fk, Att, Gen> Term<Ty, Void, Sym, Void, Void, Void, Null<?>> objectToSk(
 			Schema<Ty, En, Sym, Fk, Att> sch, Object rhs, String x, Att att,
 			Ctx<Ty, Collection<Null<?>>> sks, 
-			Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>> extraRepr, boolean shouldJS) {
+			Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>> extraRepr, boolean shouldJS, boolean errMeansNull) {
 		Ty ty = sch.atts.get(att).second;
 		if (rhs == null) {
 			Null<?> n = new Null<>(Term.Att(att, Term.Gen((Gen)x)));
@@ -84,7 +84,27 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 			return Term.Sk(n);
 		} else if (sch.typeSide.js.java_tys.containsKey(ty)) {
 			if (shouldJS) {
-				return Term.Obj(sch.typeSide.js.parse(ty, (String) rhs), ty);
+				try {
+					return Term.Obj(sch.typeSide.js.parse(ty, (String) rhs), ty);		
+				} catch (Exception ex) {
+					if (errMeansNull) {
+						return objectToSk(sch, null, x, att, sks, extraRepr, shouldJS, errMeansNull);
+					} else {
+						ex.printStackTrace();
+						throw new RuntimeException("Error while importing " + rhs + " of class " + rhs.getClass() + ".  Consider option import_null_on_err_unsafe.  Error was " + ex.getMessage() );
+					}
+				}
+			}
+			try {
+				if (!Class.forName(sch.typeSide.js.java_tys.get(ty)).isInstance(rhs)) {
+					if (errMeansNull) {
+						return objectToSk(sch, null, x, att, sks, extraRepr, shouldJS, errMeansNull);
+					} else {
+						throw new RuntimeException("Error while importing " + rhs + " of class " + rhs.getClass() + " was expecting " + sch.typeSide.js.java_tys.get(ty) + ".  Consider option import_null_on_err_unsafe.");
+					}
+				}
+			} catch (ClassNotFoundException ex) {
+				Util.anomaly();
 			}
 			return Term.Obj(rhs, ty);
 		} 
@@ -96,6 +116,7 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 	protected String idCol;
 	private boolean import_as_theory;
 	protected boolean isJoined;
+	protected boolean nullOnErr;
 
 	protected Ctx<En, Collection<Gen>> ens0;
 	protected Ctx<Ty, Collection<Null<?>>> tys0;
@@ -117,7 +138,9 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 		 import_as_theory = (boolean) op.getOrDefault(AqlOption.import_as_theory);
 		 isJoined = (boolean) op.getOrDefault(AqlOption.import_joined);
 		 idCol = (String) op.getOrDefault(AqlOption.id_column_name);
+		 nullOnErr = (Boolean) op.getOrDefault(AqlOption.import_null_on_err_unsafe);
 
+		 
 		 ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
 		 tys0 = new Ctx<>(Util.newSetsFor0(sch.typeSide.tys));
 		 fks0 = new Ctx<>();

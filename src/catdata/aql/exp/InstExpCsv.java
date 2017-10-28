@@ -2,6 +2,7 @@ package catdata.aql.exp;
 
 import java.io.File;
 import java.io.FileReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -109,7 +110,15 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 	protected Map<En, List<String[]>> start(Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
 		Map<String, String> m = new HashMap<>();
 		for (En en : sch.ens) {
-			m.put((String)en, new File(f, en.toString() + "." + op.getOrDefault(AqlOption.csv_file_extension)).getAbsolutePath());
+			File file = new File(f, op.getOrDefault(AqlOption.csv_import_file_prefix) + en.toString() + "." + op.getOrDefault(AqlOption.csv_file_extension));
+			if (file.exists()) {
+				m.put((String)en, file.getAbsolutePath());
+			} else if (!(boolean)op.getOrDefault(AqlOption.csv_import_missing_is_empty)) {
+				throw new RuntimeException("Missing file: " + file.getAbsolutePath() + ". \n\nPossible options to consider: " 
+			+ AqlOption.csv_import_missing_is_empty + " and " 
+						+ AqlOption.csv_import_file_prefix + " and " 
+			+ AqlOption.csv_file_extension);
+			}
 		}
 		return start2(m, op, sch, false);
 	}
@@ -131,8 +140,16 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 		for (int i = 0; i < rows.get(en).get(0).length; i++) {
 			m.put(rows.get(en).get(0)[i], i);
 		}
+		boolean prepend = (boolean) op.getOrDefault(AqlOption.csv_prepend_entity);
+		String sep = (String) op.getOrDefault(AqlOption.import_col_seperator);
 		
-		Function<String, String> mediate = x -> map.containsKey((String)x) ? map.get((String) x) : x;
+		Function<String, String> mediate = x -> {
+			String z = map.containsKey(x) ? map.get(x) : x;
+			if (prepend) {
+				return en + sep + z;
+			}
+			return z;
+		};
 		//System.out.println(rows);
 		int startId = 0;
 		for (String[] row : rows.get(en).subList(1, rows.get(en).size())) {
@@ -163,9 +180,17 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En,
 				if (!atts0.containsKey(l0)) {
 					atts0.put(l0, new Ctx<>());
 				}
-				String o = row[m.get(mediate.apply((String) att))];
+				String zz = mediate.apply((String) att);
+				if (!m.containsKey(zz)) {
+					throw new RuntimeException("No column " + att + " in file nor explicit mapping for " + att + " given.");
+				}
+				int z = m.get(zz);
+				if (z >= row.length) {
+					throw new RuntimeException("Cannot get index " + z + " from " + Arrays.toString(row));
+				}
+				String o = row[z];
 				Term<Ty, Void, Sym, Void, Void, Void, Null<?>> r 
-				= objectToSk(sch, o, l0.toString(), att, tys0, extraRepr, true); 
+				= objectToSk(sch, o, l0.toString(), att, tys0, extraRepr, true, nullOnErr); 
 				atts0.get(l0).put(att, r);
 			}
 		}

@@ -505,15 +505,15 @@ public class Util {
 
 	public static String maybeQuote(String s) {
 		if (s.trim().isEmpty()) {
-			return "\"" + s + "\"";
+			return "\"" + s.replace("\"", "\\\"") + "\"";
 		}
 		Character x = s.charAt(0);
 		if (!Character.isLetter(x) && !x.equals('_')) {
-			return "\"" + s + "\"";
+			return "\"" + s.replace("\"", "\\\"") + "\"";
 		}
 		for (Character c : s.toCharArray()) {
 			if (!Character.isLetterOrDigit(c) && !c.equals('_')) {
-				return "\"" + s + "\"";
+				return "\"" + s.replace("\"", "\\\"") + "\"";
 			}
 		}
 		return s;
