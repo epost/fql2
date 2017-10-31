@@ -97,3 +97,265 @@ target
 (apply io/file (concat [target-dir] tgt-file-path ["token.txt"]))
 (def tgt-dir (apply io/file target-dir tgt-file-path))
 tgt-dir
+(def fs (java.nio.file.FileSystems/getDefault))
+(def gm (.getPathMatcher fs "glob:*.{g4,md}"))
+(def d (.getPath fs "."))
+(with-open [ch (file/walk "." 1)] (first (stream/stream-seq ch))) 
+(require
+  '(boot [core :as boot :refer [deftask]]
+         [util :as util]
+         [task-helpers :as helper])
+  '(babeloff
+    [boot-antlr4 :as antlr]
+    [boot-antlr4-parser :as parser])
+  '(clojure.spec [alpha :as s])
+  '(clojure.java [io :as io])
+  '(ike.cljj [file :as file]))
+(with-open [ch (file/walk "." 1)] (first (stream/stream-seq ch)))
+(require
+  '(boot [core :as boot :refer [deftask]]
+         [util :as util]
+         [task-helpers :as helper])
+  '(babeloff
+    [boot-antlr4 :as antlr]
+    [boot-antlr4-parser :as parser])
+  '(clojure.spec [alpha :as s])
+  '(clojure.java [io :as io])
+  '(ike.cljj [file :as file]
+             [strean :as stream]))
+(require
+  '(boot [core :as boot :refer [deftask]]
+         [util :as util]
+         [task-helpers :as helper])
+  '(babeloff
+    [boot-antlr4 :as antlr]
+    [boot-antlr4-parser :as parser])
+  '(clojure.spec [alpha :as s])
+  '(clojure.java [io :as io])
+  '(ike.cljj [file :as file]
+             [stream :as stream]))
+(with-open [ch (file/walk "." 1)] (first (stream/stream-seq ch)))
+(with-open [ch (file/walk "." 1)] (take 4 (stream/stream-seq ch)))
+(with-open [ch (file/walk "." 1)] (second (stream/stream-seq ch)))
+(with-open [ch (file/walk "." 1)] (-> (stream/stream-seq ch) ))
+(with-open [ch (file/walk "." 1)] (-> (stream/stream-seq ch) (into []))
+)
+(with-open [ch (file/walk "." 1)] (into [] (map .getFileName (stream/stream-seq ch) ))
+)
+(with-open [ch (file/walk "." 1)] (into [] (map .getFileName) (stream/stream-seq ch) )))
+(with-open [ch (file/walk "." 1)] (into [] (map .getFileName) (stream/stream-seq ch) ))
+(file/walk ".")
+(into [] (map .getFileName) (file/walk path))
+(def path ".")
+(into [] (map .getFileName) (file/walk path))
+(into [] (map #(.getFileName %)) (file/walk path))
+(into [] (map #(.getFileName %)) (file/walk path 1))
+(defn foo [x & y] (type y))
+(foo 4 6 6 8)
+(defn foo [x & y] (into-array Integer y))
+(foo 4 6 6 8)
+(defn foo [x & y] (into-array Object y))
+(foo 4 6 6 8)
+(doc into-array)
+(foo 4)
+(Paths/get "." (into-array String []))
+(def cwd (Paths/get "." (into-array String [])))
+(def input-dir-str "../../../../resources/examples/aql")
+(def input-dir cwd (Paths/get input-dir-str (into-array String [])))
+(dnput-dir cwd (Paths/get input-dir-str (into-array String [])))
+(def input-dir  (Paths/get input-dir-str (into-array String [])))
+(def input-file-s 
+        (with-open [children (Files/walk input-dir 1 fs (into-array FileVisitOption []))]
+          (-> children .iterator iterator-seq))
+)
+(def input-dir-str "../../../../resources/examples/aql")
+(def input-dir cwd (Paths/get input-dir-str (into-array String [])))
+(def input-dir  (Paths/get input-dir-str (into-array String [])))
+(def input-file-s
+        (with-open [children (Files/walk input-dir 1 fs (into-array FileVisitOption []))]
+          (-> children .iterator iterator-seq)))
+(def input-file-s (with-open [children (Files/walk input-dir 1 (into-array FileVisitOption []))]
+          (-> children .iterator iterator-seq)))
+input-file-s
+(with-open [children (Files/walk input-dir 1 (into-array FileVisitOption []))]
+                       (-> children .iterator iterator-seq
+                         (filter #(.isFile %))
+                         (mapv #(.. % (asFile) (getAbsolutePath)))))
+(with-open [children (Files/walk input-dir 1 (into-array FileVisitOption []))]
+                       (-> children .iterator iterator-seq
+                         (filter #(.isFile %)))
+)
+(with-open [children (Files/walk input-dir 1 (into-array FileVisitOption []))]
+                       (-> children .iterator iterator-seq)))
+(with-open [children (Files/walk input-dir 1 (into-array FileVisitOption []))]
+                       (-> children .iterator iterator-seq))
+(def input-dir-str "../../../../resources/examples/aql")
+        (def input-dir (Paths/get input-dir-str empty-path-extention))
+        (def input-file-s 
+          (with-open [children (Files/walk input-dir 1 empty-file-visit-options)]
+            (-> children .iterator iterator-seq
+              (filter #(.isFile %))
+              (mapv #(.. % (asFile) (getAbsolutePath))))))
+input-dir
+(def input-file-s 
+          (with-open [children (Files/walk input-dir 1 no-file-visit-options)])
+          (-> children #(.iterator) iterator-seq
+              (map #(.getFileName %))
+              (filter #(.isFile %))
+              (mapv #(.. % (asFile) (getAbsolutePath)))))
+(def input-file-s 
+          (with-open [children (Files/walk input-dir 1 no-file-visit-options)]
+            (-> children #(.iterator) iterator-seq
+                (map #(.getFileName %))
+                (filter #(.isFile %))
+                (mapv #(.. % (asFile) (getAbsolutePath))))))
+(def no-path-extention (into-array String []))
+(def no-file-visit-options (into-array FileVisitOption []))
+(def input-file-s 
+          (with-open [children (Files/walk input-dir 1 no-file-visit-options)]
+            (-> children #(.iterator) iterator-seq
+                (map #(.getFileName %))
+                (filter #(.isFile %))
+                (mapv #(.. % (asFile) (getAbsolutePath))))))
+(def input-file-s
+          (with-open [children (Files/walk input-dir 1 no-file-visit-options)]
+            (-> children #(.iterator %) iterator-seq
+                (map #(.getFileName %))
+                (filter #(.isFile %))
+                (mapv #(.. % (asFile) (getAbsolutePath))))))
+(def input-file-s
+          (with-open [children (Files/walk input-dir 1 no-file-visit-options)]
+            (-> children #(.iterator %) iterator-seq
+                (map #(.getFileName %)))
+)
+(def input-file-s
+          (with-open [children (Files/walk input-dir 1 no-file-visit-options)]
+            (-> children #(.iterator %) iterator-seq
+                (map #(.getFileName %))))
+)
+(Files/walk input-dir 1 no-file-visit-options)
+(def stream (Files/walk input-dir 1 no-file-visit-options) )
+(.iterator stream)
+(interator-seq (.iterator stream))
+(iterator-seq (.iterator stream))
+(def stream (Files/walk input-dir 1 no-file-visit-options) )
+(iterator-seq (.iterator stream))
+(def stream (Files/walk input-dir 1 no-file-visit-options) )
+(.getFileName (iterator-seq (.iterator stream)))
+(map (.getFileName %) (iterator-seq (.iterator stream)))
+(map #(.getFileName %) (iterator-seq (.iterator stream)))
+(def stream (Files/walk input-dir 1 no-file-visit-options) )
+(map #(.getFileName %) (iterator-seq (.iterator stream)))
+(map #(.toAbsolutePath %) (iterator-seq (.iterator stream)))
+(def stream (Files/walk input-dir 1 no-file-visit-options) )
+(map #(.toAbsolutePath %) (iterator-seq (.iterator stream)))
+(def stream (Files/walk input-dir 1 no-file-visit-options) )
+(map #(.toRealPath %) (iterator-seq (.iterator stream)))
+(map #(.toRealPath %) (iterator-seq 
+))))))
+(map #(.toRealPath % (into-array ) (iterator-seq (.iterator stream)))
+))))
+(def no-path-extensions (into-array String []))
+(def no-file-visit-options (into-array FileVisitOption []))
+(def no-link-options (into-array LinkOption []))
+(def input-dir-str "../../../../resources/examples/aql")
+        (def input-dir (Paths/get input-dir-str no-path-extensions))
+(def input-file-s
+          (with-open [children (Files/walk input-dir 1 no-file-visit-options)]
+            (map #(.toRealPath % no-link-options)
+                (iterator-seq (.iterator children)))))
+input-file-s
+(def children (Files/walk input-dir 1 no-file-visit-options))
+(map #(.toRealPath % no-link-options) (iterator-seq (.iterator children)))
+(with-open [children (Files/walk input-dir 1 no-file-visit-options)]
+            (map #(.toRealPath % no-link-options)
+                (iterator-seq (.iterator children))))
+(with-open [children (Files/walk input-dir 1 no-file-visit-options)]
+            (map str 
+              (map #(.toRealPath % no-link-options)
+                (iterator-seq (.iterator children))))
+)
+(with-open [children (Files/walk input-dir 1 no-file-visit-options)] (map #(.toRealPath % no-link-options) (iterator-seq (.iterator children))))
+(let [children (Files/walk input-dir 1 no-file-visit-options)] (map #(.toRealPath % no-link-options) (iterator-seq (.iterator children))))
+(def input-file-s
+          (let [children (Files/walk input-dir 1 no-file-visit-options)]
+            (-> children 
+              #(iterator-seq (.iterator %))
+              #(map #(.toRealPath % no-link-options)))))
+input-file-s
+(def input-file-s
+          (let [children (Files/walk input-dir 1 no-file-visit-options)]
+            (-> children
+              #(iterator-seq (.iterator %))
+              (fn [sq]
+                (map #(.toRealPath % no-link-options)
+                     sq)))))
+(def input-file-s
+          (let [children (Files/walk input-dir 1 no-file-visit-options)]
+            (->
+              (iterator-seq (.iterator children))
+              (fn [sq]
+                (map #(.toRealPath % no-link-options)
+                     sq)))))
+(def input-file-s
+          (let [children (Files/walk input-dir 1 no-file-visit-options)]
+            (map #(.toRealPath % no-link-options)
+                (iterator-seq (.iterator children)))))
+input-file-s
+(.getPathMatcher fs "glob:.{g4}"
+)
+(def fs (java.nio.file.FileSystems/getDefault))
+        (def gm (.getPathMatcher fs "glob:.{g4}"))
+(def input-raw-s
+          (let [children (Files/walk input-dir 1 no-file-visit-options)]
+            (map #(.toRealPath % no-link-options)
+                (iterator-seq (.iterator children)))))
+        (def fs (java.nio.file.FileSystems/getDefault))
+(def input-raw-s
+          (let [children (Files/walk input-dir 1 no-file-visit-options)]
+            (map #(.toRealPath % no-link-options)
+                (iterator-seq (.iterator children)))))
+        (def fs (java.nio.file.FileSystems/getDefault))
+(def gm (.getPathMatcher fs "glob:.{g4}"))
+        (def input-file-s (filter #(.matches gm (.getName %)) input-raw-s))
+input-file-s
+(def input-file-s (filter #(.matches gm (.getFileName %)) input-raw-s))
+input-file-s
+input-raw-s
+(def gm (.getPathMatcher fs "glob:.{aql}"))
+        (def input-file-s (filter #(.matches gm (.getFileName %)) input-raw-s))
+input-file-s
+(-> input-raw-s first #(.getFileName %))
+(-> input-raw-s first)
+(def f (-> input-raw-s first))
+(.getFileName f)
+(-> input-raw-s first (fn [x] (.getFileName x)))
+(macroexpand (-> input-raw-s first (fn [x] (.getFileName x))))
+(defn get-file-name [f] (.getFileName f))
+(-> input-raw-s first get-file-name)
+(defn get-file-name [f] (.getFileName f))
+(defn matches-aql [gm f] (.matches gm (get-file-name f)))
+(def input-file-s (filter  #(matches-aql gm %1) input-raw-s))
+input-file-s
+input-raw-s
+(def gm (get-path-matcher "glob:.{aql}"))
+        (def input-file-s (filter  #(matches-aql gm %1) input-raw-s))
+(defn get-path-matcher [pattern] 
+  (.getPathMatcher (java.nio.file.FileSystems/getDefault) pattern)) 
+(def gm (get-path-matcher "glob:.{aql}"))
+        (def input-file-s (filter  #(matches-aql gm %1) input-raw-s))
+input-file-s
+(def gm (get-path-matcher "glob:*.{aql}"))
+        (def input-file-s (filter  #(matches-aql gm %1) input-raw-s))
+input-file-s
+(mapv str input-file-s)
+(let [children (Files/walk input-dir 1 no-file-visit-options)]
+            ;(map #(.toRealPath % no-link-options)
+            (iterator-seq (.iterator children)))
+(def input-dir-str "../../../../resources/examples/aql")
+        (def input-dir (Paths/get input-dir-str no-path-extensions))
+        (def input-raw-s
+          (let [children (Files/walk input-dir 1 no-file-visit-options)]
+            ;(map #(.toRealPath % no-link-options)
+            (iterator-seq (.iterator children))))
+input-raw-s
