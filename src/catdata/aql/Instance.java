@@ -144,19 +144,26 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements S
 			return false;
 		return true;
 	}
-
-	@Override
-	public final String toString() {
+	
+	public final String toString(String g, String w) {
 		String toString;
 		List<String> eqs0 = eqs().stream().map(x -> x.first + " = " + x.second).collect(Collectors.toList());
-		toString = "generating entities";
-		toString += "\n\t" + Util.sep(gens().map, " : ", "\n\t");
-		toString += "\n\ngenerating nulls";
-		toString += "\n\t" + Util.sep(sks().map, " : " , "\n\t");			
-		toString += "\n\nequations";
-		toString += "\n\t" + Util.sep(eqs0, "\n\t");
-		
-		return toString;
+		toString = g;
+		if (!gens().isEmpty()) {
+			toString += "\n\t" + Util.sep(gens().map, " : ", "\n\t");
+		}
+		if (!sks().isEmpty()) {
+			toString += "\n\t" + Util.sep(sks().map, " : " , "\n\t");			
+		}
+		if (!eqs0.isEmpty()) {
+			toString += "\n\n" + w + "\n\t" + Util.sep(eqs0, "\n\t");
+		}
+		return toString.trim();
+	} 
+
+	@Override
+	public String toString() {
+		return toString("generators", "equations");
 	} 
 
 	//TODO aql validate instances against algebras
