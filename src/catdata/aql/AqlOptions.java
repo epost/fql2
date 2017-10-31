@@ -34,6 +34,7 @@ public final class AqlOptions {
 	//TODO: aql each typeside/instance/etc should make sure only appropriate options are given to it
 
 	public enum AqlOption {
+		js_env_name,
 		interpret_as_algebra,
 		csv_field_delim_char,
 		csv_escape_char,
@@ -294,6 +295,8 @@ public final class AqlOptions {
 			return "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1";
 		case interpret_as_algebra:
 			return false;
+		case js_env_name:
+			return "aql_env";
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -446,7 +449,9 @@ public final class AqlOptions {
 			return op.getString(map);
 		case interpret_as_algebra:
 			return op.getBoolean(map);
-		default:
+		case js_env_name:
+			return op.getString(map);
+			default:
 			throw new RuntimeException("Anomaly: please report");
 		}
 		

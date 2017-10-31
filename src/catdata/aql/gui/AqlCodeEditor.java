@@ -195,13 +195,13 @@ public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, Aql
 	}
 
 	// private String last_str;
-	private Program<Exp<?>> last_prog;
+	private Program<Exp<?>> last_prog; //different that env's
 	public AqlEnv last_env;
 	private AqlMultiDriver driver;
 
 	@Override
 	protected AqlEnv makeEnv(String str, Program<Exp<?>> init) {
-		driver = new AqlMultiDriver(init, toUpdate, last_prog, last_env);
+		driver = new AqlMultiDriver(init, toUpdate, last_env);
 		driver.start();
 		last_env = driver.env; // constructor blocks
 		last_prog = init;

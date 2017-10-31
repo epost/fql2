@@ -1,6 +1,8 @@
 package catdata.aql.exp;
 
 import catdata.Ctx;
+import catdata.Program;
+import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.ColimitSchema;
 import catdata.aql.Comment;
@@ -18,6 +20,13 @@ import catdata.graph.DMG;
 
 public final class AqlEnv {
 
+	public AqlEnv(Program<Exp<?>> prog) {
+		Util.assertNotNull(prog);
+		this.prog = prog;
+	}
+	
+	public final Program<Exp<?>> prog;
+	
 	@SuppressWarnings("rawtypes")
 	public final KindCtx<String, DMG, TypeSide, Schema, Instance, Transform, Mapping, Query, Pragma, Comment, ColimitSchema,Constraints> defs = new KindCtx<>();
 	

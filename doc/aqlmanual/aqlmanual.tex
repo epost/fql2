@@ -645,7 +645,7 @@ Expects a list of strings inside a section.  Each string will be executed by the
 Allowable options are {\tt timeout} and {\tt always\_reload}.
 
 \section{{\tt exec\_js}} 
-Expects a list of strings inside a section.  Each string will be executed by the Java VM's Nashorn javascript execution engine.  The return value of each command is displayed in the viewer.
+Expects a list of strings inside a section.  Each string will be executed by the Java VM's Nashorn javascript execution engine.  The return value of each command is displayed in the viewer.  The AQL environment being constructed can be accessed by the variable named by the option {\tt js\_env\_name}.
 
 \subsection{{\tt options}}
 
@@ -1029,6 +1029,10 @@ In transform import, specifies whether labelled nulls can be mapped into the tar
 \subsection{{\tt interpret\_as\_algebra} = true}
 
 Interprets the set of equations in an instance as being the saturation of a model, similar to JDBC / CSV import.  Enabling this options bypasses the construction of a decision procedure, increasing performance, potentially greatly.
+
+\subsection{{\tt js\_env\_name} = string}
+
+Defines the name of the AQL environment being constructed for use with the {\tt exec\_js} command.
 
 \end{document}
 
