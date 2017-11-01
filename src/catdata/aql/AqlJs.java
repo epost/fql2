@@ -2,7 +2,9 @@ package catdata.aql;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import javax.script.Bindings;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -230,10 +232,12 @@ public class AqlJs<Ty, Sym> {
 	}
 	
 	@Deprecated
-	public static Object exec(String s) {
+	public static synchronized Object exec(String s, Map<String, Object> m) {
 		ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");	
 		try {
-			return engine.eval(s);
+			Bindings b = engine.createBindings();
+			b.putAll(m);
+			return engine.eval(s, b);
 		} catch (ScriptException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Error executing " + s + ": " + e.getMessage() + postfix);

@@ -84,7 +84,7 @@ class AqlInACan {
 		try {
 			Program<Exp<?>> program = AqlParser.parseProgram(can);
 			String html = "<html><head><script src=\"http://categoricaldata.net/js/simple.js\"></script><title>Result</title></head><body>\n\n";
-			AqlEnv env = new AqlEnv();
+			AqlEnv env = new AqlEnv(program);
 			env.typing = new AqlTyping(program, env.defaults, false);	
 			for (String n : program.order) {
 				Exp<?> exp = program.exps.get(n);

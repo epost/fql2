@@ -66,29 +66,32 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	@Override
 	public synchronized String toString() {
-		return "Completed: " + Util.sep(completed.stream().filter(x -> !prog.exps.get(x).kind().equals(Kind.COMMENT)).collect(Collectors.toList()), " ") + "\nTodo: " + Util.sep(todo.stream().filter(x -> !prog.exps.get(x).kind().equals(Kind.COMMENT)).collect(Collectors.toList()), " ") + "\nProcessing: " + Util.sep(processing.stream().filter(x -> !prog.exps.get(x).kind().equals(Kind.COMMENT)).collect(Collectors.toList()), " ");
+		return "Completed: " + Util.sep(completed.stream().filter(x -> !env.prog.exps.get(x).kind().equals(Kind.COMMENT)).collect(Collectors.toList()), " ") + "\nTodo: " + Util.sep(todo.stream().filter(x -> !env.prog.exps.get(x).kind().equals(Kind.COMMENT)).collect(Collectors.toList()), " ") + "\nProcessing: " + Util.sep(processing.stream().filter(x -> !env.prog.exps.get(x).kind().equals(Kind.COMMENT)).collect(Collectors.toList()), " ");
 	}
 
-	public final AqlEnv env = new AqlEnv();
+	public final AqlEnv env;
 
 	private final List<String> todo = Collections.synchronizedList(new LinkedList<>());
 	private final List<String> processing = Collections.synchronizedList(new LinkedList<>());
 	private final List<String> completed =Collections.synchronizedList(new LinkedList<>());
 
-	private final Program<Exp<?>> prog;
+	//private final Program<Exp<?>> env.prog;
 	private final String[] toUpdate;
-	private final Program<Exp<?>> last_prog;
+	//private final Program<Exp<?>> last_prog;
 	private final AqlEnv last_env;
 
 	private final List<RuntimeException> exn = Collections.synchronizedList(new LinkedList<>());
 
 //	boolean stop = false;
 
-	public AqlMultiDriver(Program<Exp<?>> prog, String[] toUpdate, Program<Exp<?>> last_prog, AqlEnv last_env) {
-		this.prog = prog;
-		this.toUpdate = toUpdate;
-		this.last_prog = last_prog;
+	public AqlMultiDriver(Program<Exp<?>> prog, String[] toUpdate, /*Program<Exp<?>> last_prog, */ AqlEnv last_env) {
+		this.env = new AqlEnv(prog);
+		this.toUpdate = toUpdate;		
 		this.last_env = last_env;
+		//this.last_env.env.prog = last_env.env.prog;
+		//this.env.env.prog = env.env.env.prog;
+
+
 		this.env.defaults = new AqlOptions(prog.options, null, AqlOptions.initialOptions);
 		this.numProcs = (int) this.env.defaults.getOrDefault(AqlOption.num_threads);
 		if (numProcs < 1) {
@@ -99,7 +102,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	public void start() {
 		checkAcyclic();
 		//set the defaults here
-		env.typing = new AqlTyping(prog, env.defaults, false); // TODO aql line exceptions in typing
+		env.typing = new AqlTyping(env.prog, env.defaults, false); // TODO aql line exceptions in typing
 		init();
 		update();
 		process();
@@ -107,15 +110,15 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	private void checkAcyclic() {
 		DAG<String> dag = new DAG<>();
-		for (String n : prog.order) {
-			for (Pair<String, Kind> d : /* wrapDeps(n, */ prog.exps.get(n).deps() /* , prog) */) { // crushes
+		for (String n : env.prog.order) {
+			for (Pair<String, Kind> d : /* wrapDeps(n, */ env.prog.exps.get(n).deps() /* , env.prog) */) { // crushes
 																									// performance
-				if (!prog.order.contains(d.first)) {
-					throw new LineException("Undefined dependency: " + d, n, prog.exps.get(n).kind().toString());
+				if (!env.prog.order.contains(d.first)) {
+					throw new LineException("Undefined dependency: " + d, n, env.prog.exps.get(n).kind().toString());
 				}
 				boolean ok = dag.addEdge(n, d.first);
 				if (!ok) {
-					throw new LineException("Adding dependency on " + d + " causes circularity", n, prog.exps.get(n).kind().toString());
+					throw new LineException("Adding dependency on " + d + " causes circularity", n, env.prog.exps.get(n).kind().toString());
 				}
 			}
 		}
@@ -179,16 +182,16 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	private final Map<String, Boolean> changed = new HashMap<>();
 
 	private void init() {
-		if (last_prog == null || !last_prog.options.equals(prog.options)) {
-			todo.addAll(prog.order);
+		if (last_env == null || !last_env.prog.options.equals(env.prog.options)) {
+			todo.addAll(env.prog.order);
 			return;
 		}
 		
-		for (String n : prog.order) {
+		for (String n : env.prog.order) {
 			if (/* (!last_env.defs.keySet().contains(n)) || */ changed(n)) {
 				todo.add(n);
 			} else {
-				Kind k = prog.exps.get(n).kind();
+				Kind k = env.prog.exps.get(n).kind();
 				env.defs.put(n, k, last_env.defs.get(n, k));
 				env.performance.put(n, last_env.performance.get(n));
 				completed.add(n);
@@ -200,19 +203,19 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		if (changed.containsKey(n)) {
 			return changed.get(n);
 		}
-		Exp<?> prev = last_prog.exps.get(n);
+		Exp<?> prev = last_env.prog.exps.get(n);
 		//System.out.println(xprog.exps.get(n));
-		if (prev == null || !last_env.defs.keySet().contains(n) || last_env == null || (Boolean) prog.exps.get(n).getOrDefault(env, AqlOption.always_reload) ) {
+		if (prev == null || last_env == null || !last_env.defs.keySet().contains(n) || (Boolean) env.prog.exps.get(n).getOrDefault(env, AqlOption.always_reload) ) {
 			changed.put(n, true);
 			return true;
 		}
-		for (Pair<String, Kind> d : wrapDeps(n, prev, prog)) {
+		for (Pair<String, Kind> d : wrapDeps(n, prev, env.prog)) {
 			if (changed(d.first)) {
 				changed.put(n, true);
 				return true;
 			}
 		}
-		boolean b = !prev.equals(prog.exps.get(n));
+		boolean b = !prev.equals(env.prog.exps.get(n));
 		changed.put(n, b);
 		return b;
 	}
@@ -251,7 +254,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 					todo.remove(n);
 					update();
 				}
-				Exp<?> exp = prog.exps.get(n);
+				Exp<?> exp = env.prog.exps.get(n);
 				Kind k = exp.kind();
 				k2 = k.toString();
 				long time1 = System.currentTimeMillis();
@@ -295,7 +298,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	private String nextAvailable() {
 		outer: for (String s : todo) {
-			for (Pair<String, Kind> d : wrapDeps(s, prog.exps.get(s), prog)) {
+			for (Pair<String, Kind> d : wrapDeps(s, env.prog.exps.get(s), env.prog)) {
 				if (!completed.contains(d.first)) {
 					continue outer;
 				}

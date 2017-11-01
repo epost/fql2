@@ -67,6 +67,7 @@ JFlex (BSD License),
 H2 (Mozilla Public License or Eclipse Public License),
 JGraph (BSD License)
 txtmark (Apache)
+commons-lang-3 (Apache)
 
 And a source distribution of:
 
@@ -95,7 +96,7 @@ Copyright (C) 2011-2015 René Jeschke
 
 Copyright (c) The Codehaus
 
-### Apache Commons Collections Generics and CSV and Exec (Apache 2.0 License)
+### Apache Commons Collections Generics and CSV and Exec and Lang-3 (Apache 2.0 License)
 
 Copyright (c) The Apache Software Foundation
 

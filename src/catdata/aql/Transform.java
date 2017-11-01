@@ -133,12 +133,16 @@ public abstract class Transform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
 			return toString;
 		}
 	
-		toString = "generators";
-		toString += "\n\t" + Util.sep(gens().map, " -> ", "\n\t");
-
-		toString += "\nlabelled nulls";
-		toString += "\n\t" + Util.sep(sks().map, " -> ", "\n\t");
+		toString = toString("generators" , "");
 		
+		return toString;
+	}
+	
+	public final String toString(String s, String t) {
+		toString = s;
+		toString += "\n\t" + Util.sep(gens().map, " -> ", "\n\t");
+		toString += "\n" + t;
+		toString += "\n\t" + Util.sep(sks().map, " -> ", "\n\t");
 		return toString;
 	}
 	

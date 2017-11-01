@@ -312,7 +312,7 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			for (String gen : col.gens.keySet()) {
 				for (Att att : sch.attsFrom(col.gens.get(gen))) {
 					if (!atts0.get(gen).containsKey(att)) {
-						atts0.get(gen).put(att, InstExpImport.objectToSk(sch, null, gen, att, tys0, extraRepr, false));
+						atts0.get(gen).put(att, InstExpImport.objectToSk(sch, null, gen, att, tys0, extraRepr, false, false));
 					}
 				}
 			}

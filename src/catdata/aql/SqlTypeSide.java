@@ -32,10 +32,12 @@ public class SqlTypeSide extends TypeSide<String, String> {
 	}
 	
 	//bit tinyint real numeric date time timestamp
+	//TODO aql do this generically
 	public static int getSqlType(String s) {
 		switch (s.toLowerCase()) {
 		case "varbinary": return Types.VARBINARY;
 		case "longvarbinary": return Types.LONGVARBINARY;
+		case "binary": return Types.BINARY;
 		case "date" : return Types.DATE;
 		case "time" : return Types.TIME;
 		case "timestamp" : return Types.TIMESTAMP;
@@ -52,9 +54,9 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		case "tinyint": return Types.TINYINT;
 		case "bit": return Types.BIT;
 		case "smallint": return Types.SMALLINT;
-		case "text": return Types.VARCHAR;
 		case "nvarchar": return Types.NVARCHAR;
 		case "longvarchar": return Types.LONGVARCHAR;
+		case "text": return Types.VARCHAR;
 		case "varchar": return Types.VARCHAR;
 		case "string": return Types.VARCHAR;
 		case "int": return Types.INTEGER;
@@ -69,12 +71,13 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		Map<String, String> m = new HashMap<>();
 		m.put("Longvarbinary", "[B"); //TODO aql
 		m.put("Varbinary", "[B"); //TODO aql
+		m.put("Binary", "[B"); //TODO aql
 		
 		m.put("Bigint", "java.lang.Long");
 		m.put("Boolean", "java.lang.Boolean");
 		m.put("Bit", "java.lang.Boolean");
 		m.put("Bool", "java.lang.Boolean");
-		m.put("Char", "java.lang.Character");
+		m.put("Char", "java.lang.String"); //TODO aql
 		m.put("Double", "java.lang.Double");
 		m.put("Doubleprecision", "java.lang.Double");
 		m.put("Decimal", "java.math.BigDecimal");
@@ -84,7 +87,7 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		m.put("Integer", "java.lang.Integer");
 		m.put("Int", "java.lang.Integer");
 		m.put("Smallint", "java.lang.Short");
-		m.put("Tinyint", "java.lang.Short"); 
+		m.put("Tinyint", "java.lang.Integer"); 
 
 		m.put("Text", "java.lang.String");
 		m.put("Nvarchar", "java.lang.String");
@@ -114,8 +117,10 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		Map<String, String> m = new HashMap<>();
 
 		m.put("Longvarbinary", "return input[0]"); //TODO AQL
-		m.put("Varbinary", "return nput[0]"); //TODO AQL
-/*
+		m.put("Varbinary", "return input[0]"); //TODO AQL
+		m.put("Binary", "return input[0]"); //TODO AQL
+
+		/*
 		m.put("Date", "return input[0]");
 		m.put("Time", "return input[0]");
 		m.put("Timestamp", "return input[0]");
@@ -128,7 +133,7 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		m.put("Bigint", "return new java.lang.Long(input[0])");
 		m.put("Boolean", "return new java.lang.Boolean(input[0])");
 		m.put("Bool", "return new java.lang.Boolean(input[0])");
-		m.put("Char", "return input[0]");
+		m.put("Char", "return input[0]"); //TODO aql
 		m.put("Bit", "return new java.lang.Boolean(input[0])");
 
 		m.put("Double", "return new java.lang.Double(input[0])");
@@ -142,7 +147,7 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		m.put("Integer", "return new java.lang.Integer(input[0])");
 		m.put("Int", "return new java.lang.Integer(input[0])");
 
-		m.put("Tinyint", "return new java.lang.Short(input[0])");
+		m.put("Tinyint", "return new java.lang.Integer(input[0])");
 		m.put("Smallint", "return new java.lang.Short(input[0])");
 		m.put("Text", "return input[0]");
 		m.put("String", "return input[0]");

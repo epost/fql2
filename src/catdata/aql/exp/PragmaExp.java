@@ -802,7 +802,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 		@Override
 		public Pragma eval(AqlEnv env) {
-			return new JsPragma(jss, options);
+			return new JsPragma(jss, options, env);
 		}
 
 		@Override

@@ -444,6 +444,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 	public static class Frozen<Ty, En1, Sym, Fk1, Att1>
 			extends Instance<Ty, En1, Sym, Fk1, Att1, Var, Void, ID, Chc<Void, Pair<ID, Att1>>> {
 
+			
 		public <Gen, Sk, X, Y> List<Var> order(AqlOptions options, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
 			if (!(Boolean) options.getOrDefault(AqlOption.eval_reorder_joins)
 					|| gens().size() > (Integer) options.getOrDefault(AqlOption.eval_max_plan_depth)) { 
@@ -606,13 +607,27 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 	public final String toString() {
 		String ret = "";
 
-		ret += "---- entities ---------------------------\n\n";
-		ret += Util.sep(ens.map, "\n\n", "\n----\n\n");
-		ret += "\n\n---- foreign keys------------------------\n\n";
-		ret += Util.sep(fks.map, "\n\n", "\n----\n\n");
-		ret += "\n\n---- attributes---------------------\n\n";
-		ret += Util.sep(atts.map, "\n\n", "\n----\n\n");
-
+		Map<En2, String> m1 = new HashMap<>();
+		Map<Fk2, String> m2 = new HashMap<>();
+		
+		for (Fk2 fk2 : fks.keySet()) {
+			m2.put(fk2, "{" + fks.get(fk2).toString("", "") + "}");
+		}
+		
+		for (En2 en2 : ens.keySet()) {
+			Map<String, String> m3 = new HashMap<>();
+			for (Att2 att : dst.attsFrom(en2)) {
+				m3.put(att.toString(), atts.get(att).toString());
+			}
+			String x = m3.isEmpty() ? "" : " \nreturn\n\t";
+			m1.put(en2, "{" + ens.get(en2).toString("\nfrom", "where").trim() + x + Util.sep(m3, " -> ", "\n\t") + "\n}");
+		}
+		
+		ret += "entities\n";
+		ret += Util.sep(m1, " -> ", "\n\n");
+		ret += "\n\nforeign_keys\n\n";
+		ret += Util.sep(m2, " -> ", "\n\n");
+		
 		return ret;
 	}
 

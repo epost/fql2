@@ -34,6 +34,7 @@ public final class AqlOptions {
 	//TODO: aql each typeside/instance/etc should make sure only appropriate options are given to it
 
 	public enum AqlOption {
+		js_env_name,
 		interpret_as_algebra,
 		csv_field_delim_char,
 		csv_escape_char,
@@ -60,6 +61,7 @@ public final class AqlOptions {
 		query_remove_redundancy,
 		query_compose_use_incomplete,
 		import_as_theory,
+		import_null_on_err_unsafe,
 		import_joined,
 		map_nulls_arbitrarily_unsafe,
 		jdbc_default_class,
@@ -81,7 +83,11 @@ public final class AqlOptions {
 		prover, 
 		start_ids_at,
 		coproduct_allow_entity_collisions_unsafe,
-		coproduct_allow_type_collisions_unsafe;
+		coproduct_allow_type_collisions_unsafe, 
+		import_col_seperator, 
+		csv_import_file_prefix, 
+		csv_prepend_entity,
+		csv_import_missing_is_empty;
 		
 		
 		private String getString(Map<String, String> map) {
@@ -180,6 +186,16 @@ public final class AqlOptions {
 	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
+		case csv_prepend_entity:
+			return false;
+		case import_null_on_err_unsafe:
+			return false;
+		case csv_import_file_prefix :
+			return "";
+		case csv_import_missing_is_empty :
+			return false;
+		case import_col_seperator :
+			return "_";
 		case query_compose_use_incomplete :
 			return false;
 		case toCoQuery_max_term_size:
@@ -279,6 +295,8 @@ public final class AqlOptions {
 			return "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1";
 		case interpret_as_algebra:
 			return false;
+		case js_env_name:
+			return "aql_env";
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -325,6 +343,16 @@ public final class AqlOptions {
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case csv_prepend_entity:
+			return op.getBoolean(map);
+		case import_null_on_err_unsafe:
+			return op.getString(map);
+		case csv_import_file_prefix :
+			return op.getString(map);
+		case csv_import_missing_is_empty :
+			return op.getBoolean(map);
+		case import_col_seperator:
+			return op.getString(map);
 		case query_compose_use_incomplete:
 			return op.getBoolean(map);
 		case toCoQuery_max_term_size:
@@ -421,7 +449,9 @@ public final class AqlOptions {
 			return op.getString(map);
 		case interpret_as_algebra:
 			return op.getBoolean(map);
-		default:
+		case js_env_name:
+			return op.getString(map);
+			default:
 			throw new RuntimeException("Anomaly: please report");
 		}
 		
