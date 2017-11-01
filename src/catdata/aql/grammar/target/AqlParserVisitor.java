@@ -1,4 +1,4 @@
-// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/nsz/uanrg/AqlParser.g4 by ANTLR 4.7
+// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/oby/uanrg/AqlParser.g4 by ANTLR 4.7
 package org.aql;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -374,11 +374,17 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTypesideEquationSig(AqlParser.TypesideEquationSigContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#typesideEqFnSig}.
+	 * Visit a parse tree produced by {@link AqlParser#typesideLocal}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTypesideEqFnSig(AqlParser.TypesideEqFnSigContext ctx);
+	T visitTypesideLocal(AqlParser.TypesideLocalContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#typesideLocalType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code Typeside_EvalNumber}
 	 * labeled alternative in {@link AqlParser#typesideEval}.
@@ -407,18 +413,6 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitTypeside_EvalFunction(AqlParser.Typeside_EvalFunctionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link AqlParser#typeSideLocal}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypeSideLocal(AqlParser.TypeSideLocalContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link AqlParser#typesideLocalType}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#typesideLiteral}.
 	 * @param ctx the parse tree

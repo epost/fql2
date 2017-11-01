@@ -62,11 +62,15 @@ typesideJavaFunctionSig
 
 typesideFnName : symbol ;
 
-typesideEquationSig : FORALL typesideEqFnSig ;
-
-typesideEqFnSig
-  : typeSideLocal+ DOT typesideEval EQUAL typesideEval
+typesideEquationSig
+  : FORALL
+    (typesideLocal (COMMA typesideLocal)*
+      | typesideLocal+)
+    DOT typesideEval EQUAL typesideEval
   ;
+
+typesideLocal : symbol (COLON typesideLocalType)? ;
+typesideLocalType : symbol ;
 
 typesideEval
   : NUMBER
@@ -81,9 +85,6 @@ typesideEval
   | typesideFnName LPAREN typesideEval (COMMA typesideEval)* RPAREN
   #Typeside_EvalFunction
   ;
-
-typeSideLocal : symbol (COLON typesideLocalType)? ;
-typesideLocalType : symbol ;
 
 typesideLiteral
   : LOWER_ID

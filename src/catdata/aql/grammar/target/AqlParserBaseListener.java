@@ -1,4 +1,4 @@
-// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/nsz/uanrg/AqlParser.g4 by ANTLR 4.7
+// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/oby/uanrg/AqlParser.g4 by ANTLR 4.7
 package org.aql;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -736,13 +736,25 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypesideEqFnSig(AqlParser.TypesideEqFnSigContext ctx) { }
+	@Override public void enterTypesideLocal(AqlParser.TypesideLocalContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypesideEqFnSig(AqlParser.TypesideEqFnSigContext ctx) { }
+	@Override public void exitTypesideLocal(AqlParser.TypesideLocalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -791,30 +803,6 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTypeside_EvalFunction(AqlParser.Typeside_EvalFunctionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTypeSideLocal(AqlParser.TypeSideLocalContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTypeSideLocal(AqlParser.TypeSideLocalContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

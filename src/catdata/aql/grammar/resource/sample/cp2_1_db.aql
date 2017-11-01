@@ -174,10 +174,10 @@ schema s0 = literal : ts0 {
      observation_equations
 }
 
-instance s0_inst = import_csv : s0 {
-		Source -> "./data/sample_small/source.csv"
-		CotEvent -> "./data/sample_small/cot_event.csv"
-		CotEventPosition -> "./data/sample_small/cot_event_position.csv"
+instance s0_inst = import_csv "./data/sample_small/" : s0 {
+		Source -> source
+		CotEvent -> cot_event
+		CotEventPosition -> cot_event_position
 }
 
 schema s2 = literal : ts0 {

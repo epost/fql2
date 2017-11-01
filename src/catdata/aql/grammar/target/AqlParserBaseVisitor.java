@@ -1,4 +1,4 @@
-// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/nsz/uanrg/AqlParser.g4 by ANTLR 4.7
+// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/oby/uanrg/AqlParser.g4 by ANTLR 4.7
 package org.aql;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
@@ -437,7 +437,14 @@ public class AqlParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitTypesideEqFnSig(AqlParser.TypesideEqFnSigContext ctx) { return visitChildren(ctx); }
+	@Override public T visitTypesideLocal(AqlParser.TypesideLocalContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -466,20 +473,6 @@ public class AqlParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitTypeside_EvalFunction(AqlParser.Typeside_EvalFunctionContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitTypeSideLocal(AqlParser.TypeSideLocalContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

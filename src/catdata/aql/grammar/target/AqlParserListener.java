@@ -1,4 +1,4 @@
-// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/nsz/uanrg/AqlParser.g4 by ANTLR 4.7
+// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/oby/uanrg/AqlParser.g4 by ANTLR 4.7
 package org.aql;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -614,15 +614,25 @@ public interface AqlParserListener extends ParseTreeListener {
 	 */
 	void exitTypesideEquationSig(AqlParser.TypesideEquationSigContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link AqlParser#typesideEqFnSig}.
+	 * Enter a parse tree produced by {@link AqlParser#typesideLocal}.
 	 * @param ctx the parse tree
 	 */
-	void enterTypesideEqFnSig(AqlParser.TypesideEqFnSigContext ctx);
+	void enterTypesideLocal(AqlParser.TypesideLocalContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link AqlParser#typesideEqFnSig}.
+	 * Exit a parse tree produced by {@link AqlParser#typesideLocal}.
 	 * @param ctx the parse tree
 	 */
-	void exitTypesideEqFnSig(AqlParser.TypesideEqFnSigContext ctx);
+	void exitTypesideLocal(AqlParser.TypesideLocalContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link AqlParser#typesideLocalType}.
+	 * @param ctx the parse tree
+	 */
+	void enterTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AqlParser#typesideLocalType}.
+	 * @param ctx the parse tree
+	 */
+	void exitTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code Typeside_EvalNumber}
 	 * labeled alternative in {@link AqlParser#typesideEval}.
@@ -671,26 +681,6 @@ public interface AqlParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitTypeside_EvalFunction(AqlParser.Typeside_EvalFunctionContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link AqlParser#typeSideLocal}.
-	 * @param ctx the parse tree
-	 */
-	void enterTypeSideLocal(AqlParser.TypeSideLocalContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link AqlParser#typeSideLocal}.
-	 * @param ctx the parse tree
-	 */
-	void exitTypeSideLocal(AqlParser.TypeSideLocalContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link AqlParser#typesideLocalType}.
-	 * @param ctx the parse tree
-	 */
-	void enterTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link AqlParser#typesideLocalType}.
-	 * @param ctx the parse tree
-	 */
-	void exitTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link AqlParser#typesideLiteral}.
 	 * @param ctx the parse tree
