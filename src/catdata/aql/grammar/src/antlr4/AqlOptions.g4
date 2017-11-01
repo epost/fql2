@@ -28,10 +28,12 @@ optionsDeclaration
   | queryRemoveRedundancyOption
   | coproductOptions
   | importJoinedOption
+  | completionPresedenceOption
   ;
 
 // options not mentioned in the manual
 importJoinedOption : IMPORT_JOINED EQUAL truthy;
+completionPresedenceOption : COMPLETION_PRECEDENCE EQUAL STRING;
 
 mapNullsArbitrarilyUnsafeOption:
   MAP_NULLS_ARBITRARILY_UNSAFE EQUAL truthy;

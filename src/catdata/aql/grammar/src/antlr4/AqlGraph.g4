@@ -1,7 +1,7 @@
 parser grammar AqlGraph;
 options { tokenVocab=AqlLexerRules; }
 
-graphId : (LOWER_ID | UPPER_ID) ;
+graphId : symbol ;
 
 graphKindAssignment : GRAPH graphId EQUAL graphDef ;
 graphDef
@@ -15,5 +15,5 @@ graphLiteralExpr
     EDGES (graphEdgeId COLON graphNodeId RARROW graphNodeId)*
   ;
 
-graphNodeId : (LOWER_ID | UPPER_ID) ;
-graphEdgeId : (LOWER_ID | UPPER_ID) ;
+graphNodeId : symbol ;
+graphEdgeId : symbol ;

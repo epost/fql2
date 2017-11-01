@@ -1,7 +1,7 @@
 parser grammar AqlQuery;
 options { tokenVocab=AqlLexerRules; }
 
-queryId : (LOWER_ID | UPPER_ID) ;
+queryId : symbol ;
 
 queryFromSchema : LPAREN ID schemaId RPAREN ;
 
@@ -64,7 +64,7 @@ queryForeignSig
 
 queryPathMapping : queryGen RARROW queryPath ;
 
-queryGen : (LOWER_ID | UPPER_ID) ;
+queryGen : symbol ;
 
 queryPath
    : queryLiteralValue

@@ -1,4 +1,4 @@
-// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/kyt/uanrg/AqlParser.g4 by ANTLR 4.7
+// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/nsz/uanrg/AqlParser.g4 by ANTLR 4.7
 package org.aql;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -16,6 +16,12 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitFile(AqlParser.FileContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#symbol}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSymbol(AqlParser.SymbolContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#program}.
 	 * @param ctx the parse tree
@@ -96,6 +102,12 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitImportJoinedOption(AqlParser.ImportJoinedOptionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#completionPresedenceOption}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCompletionPresedenceOption(AqlParser.CompletionPresedenceOptionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#mapNullsArbitrarilyUnsafeOption}.
 	 * @param ctx the parse tree
@@ -271,6 +283,12 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTypesideDef(AqlParser.TypesideDefContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link AqlParser#typesideKind}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypesideKind(AqlParser.TypesideKindContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link AqlParser#typesideLiteralSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -376,12 +394,37 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTypeside_EvalGen(AqlParser.Typeside_EvalGenContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code Typeside_InfixFunction}
+	 * labeled alternative in {@link AqlParser#typesideEval}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeside_InfixFunction(AqlParser.Typeside_InfixFunctionContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code Typeside_EvalFunction}
 	 * labeled alternative in {@link AqlParser#typesideEval}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitTypeside_EvalFunction(AqlParser.Typeside_EvalFunctionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#typeSideLocal}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypeSideLocal(AqlParser.TypeSideLocalContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#typesideLocalType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypesideLocalType(AqlParser.TypesideLocalTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#typesideLiteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypesideLiteral(AqlParser.TypesideLiteralContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#schemaId}.
 	 * @param ctx the parse tree
@@ -537,6 +580,12 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSchemaForeignId(AqlParser.SchemaForeignIdContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#schemaLiteralValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSchemaLiteralValue(AqlParser.SchemaLiteralValueContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#instanceId}.
 	 * @param ctx the parse tree

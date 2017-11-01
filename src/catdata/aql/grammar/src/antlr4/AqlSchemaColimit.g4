@@ -1,7 +1,7 @@
 parser grammar AqlSchemaColimit;
 options { tokenVocab=AqlLexerRules; }
 
-schemaColimitId: (LOWER_ID | UPPER_ID) ;
+schemaColimitId: symbol ;
 
 schemaColimitKindAssignment: SCHEMA_COLIMIT schemaColimitId EQUAL schemaColimitDef ;
 
@@ -27,7 +27,7 @@ scObsEquation
   : FORALL scGen (COMMA scGen)* DOT scEntityPath EQUAL scEntityPath
   ;
 
-scGen : (LOWER_ID | UPPER_ID) ;
+scGen : symbol ;
 
 scEntityPath
   : schemaId DOT schemaTermId

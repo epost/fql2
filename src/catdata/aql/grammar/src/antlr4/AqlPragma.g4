@@ -1,7 +1,7 @@
 parser grammar AqlPragma;
 options { tokenVocab=AqlLexerRules; }
 
-pragmaId : LOWER_ID | UPPER_ID ;
+pragmaId : symbol ;
 
 pragmaKindAssignment : PRAGMA pragmaId EQUAL pragmaDef ;
 

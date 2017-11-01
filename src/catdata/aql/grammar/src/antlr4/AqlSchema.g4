@@ -1,22 +1,22 @@
 parser grammar AqlSchema;
 options { tokenVocab=AqlLexerRules; }
 
-schemaId : (LOWER_ID | UPPER_ID) ;
+schemaId : symbol ;
 
 schemaKindAssignment : SCHEMA schemaId EQUAL schemaDef ;
 
 schemaDef
-  : EMPTY COLON typesideId                   #Schema_Empty
-  | SCHEMA_OF LPAREN schemaDef RPAREN        #Schema_OfInstance
+  : EMPTY COLON typesideKind                 #Schema_Empty
+  | SCHEMA_OF (INSTANCE_ALL | instanceKind)  #Schema_OfInstance
   | DST queryId                              #Schema_Destination
-  | LITERAL COLON (typesideId | SQL)
-      (LBRACE schemaLiteralSection RBRACE)?  #Schema_Literal
+  | LITERAL COLON typesideKind
+      (LBRACE schemaLiteralSection RBRACE)? #Schema_Literal
   | GET_SCHEMA schemaColimitId               #Schema_GetSchemaColimit
   ;
 
 schemaKind : schemaId | schemaDef | (LPAREN schemaDef RPAREN) ;
 
-schemaColimitId : (LOWER_ID | UPPER_ID) ;
+schemaColimitId : symbol ;
 
 schemaLiteralSection
   : (IMPORTS typesideId*)?
@@ -28,10 +28,10 @@ schemaLiteralSection
     allOptions
   ;
 
-schemaEntityId : (LOWER_ID | UPPER_ID) ;
+schemaEntityId : symbol ;
 
 schemaForeignSig
-  : schemaForeignId COLON schemaEntityId RARROW schemaEntityId ;
+  : schemaForeignId+ COLON schemaEntityId RARROW schemaEntityId ;
 
 schemaPathEquation : schemaPath EQUAL schemaPath ;
 
@@ -49,7 +49,7 @@ schemaTermId : schemaEntityId | schemaForeignId | schemaAttributeId ;
 schemaAttributeSig
   : schemaAttributeId+ COLON schemaEntityId RARROW typesideTypeId ;
 
-schemaAttributeId : (LOWER_ID | UPPER_ID) ;
+schemaAttributeId : symbol ;
 
 schemaObservationEquationSig
   : FORALL schemaEquationSig
@@ -60,14 +60,26 @@ schemaEquationSig
   : schemaGen (COMMA schemaGen)* DOT evalSchemaFn EQUAL evalSchemaFn ;
 
 evalSchemaFn
-  : schemaGen
+  : schemaLiteralValue
+  | schemaGen
   | schemaFn LPAREN evalSchemaFn (COMMA evalSchemaFn)* RPAREN
   | schemaFn DOT evalSchemaFn
   ;
 
-schemaGen : (LOWER_ID | UPPER_ID) (COLON schemaGenType)? ;
-schemaGenType : (LOWER_ID | UPPER_ID) ;
+schemaGen : symbol (COLON schemaGenType)? ;
+schemaGenType : symbol ;
 
-schemaFn : typesideFnName | schemaAttributeId | schemaForeignId ;
+schemaFn
+  : typesideFnName
+  | schemaAttributeId
+  | schemaForeignId
+  ;
 
-schemaForeignId : (LOWER_ID | UPPER_ID) ;
+schemaForeignId : symbol ;
+
+schemaLiteralValue
+  : INTEGER
+  | NUMBER
+  | truthy
+  | STRING
+  ;

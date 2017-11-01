@@ -1,7 +1,7 @@
 parser grammar AqlTypeside;
 options { tokenVocab=AqlLexerRules; }
 
-typesideId: (LOWER_ID | UPPER_ID) ;
+typesideId: symbol ;
 
 typesideKindAssignment
   : TYPESIDE typesideId EQUAL typesideDef ;
@@ -9,9 +9,11 @@ typesideKindAssignment
 typesideDef
   : EMPTY
   | SQL
-  | TYPESIDE_OF LPAREN EMPTY COLON (LOWER_ID | UPPER_ID) RPAREN
+  | TYPESIDE_OF schemaKind
   | LITERAL (LBRACE typesideLiteralSection RBRACE)?
   ;
+
+typesideKind : typesideId | typesideDef | (LPAREN typesideDef RPAREN) ;
 
 typesideLiteralSection
   : (IMPORTS typesideImport*)?
@@ -26,21 +28,21 @@ typesideLiteralSection
   ;
 
 typesideImport
-  : (LOWER_ID | UPPER_ID)          #Typeside_ImportName
+  : symbol          #Typeside_ImportName
   ;
 
 typesideTypeSig : typesideTypeId ;
 typesideJavaTypeSig : (TRUE | FALSE | typesideTypeId) EQUAL STRING ;
-typesideTypeId : (LOWER_ID | UPPER_ID) ;
+typesideTypeId : symbol ;
 
 typesideConstantSig
   : typesideConstantLiteral+ COLON typesideConstantValue
 ;
 
-typesideConstantValue : (LOWER_ID | UPPER_ID) ;
+typesideConstantValue : symbol ;
 
 typesideJavaConstantSig
-  : (TRUE | FALSE | typesideConstantLiteral) EQUAL STRING ;
+  : (truthy | typesideConstantLiteral) EQUAL STRING ;
 
 typesideConstantLiteral : (STRING | LOWER_ID | UPPER_ID) ;
 
@@ -49,25 +51,41 @@ typesideFunctionSig
         (COMMA typesideFnLocal)*
         RARROW typesideFnLocal ;
 
-typesideFnLocal : (LOWER_ID | UPPER_ID) ;
+typesideFnLocal : symbol ;
 
 typesideJavaFunctionSig
-  : (TRUE | FALSE | typesideFnName) COLON typesideFnLocal
-        (COMMA typesideFnLocal)*
+  : (truthy | typesideFnName) COLON
+        (typesideFnLocal (COMMA typesideFnLocal)*)?
         (RARROW typesideFnLocal)?
         EQUAL STRING
   ;
 
-typesideFnName : (LOWER_ID | UPPER_ID) ;
+typesideFnName : symbol ;
 
 typesideEquationSig : FORALL typesideEqFnSig ;
 
 typesideEqFnSig
-  : LOWER_ID (COMMA LOWER_ID)* DOT typesideEval EQUAL typesideEval ;
+  : typeSideLocal+ DOT typesideEval EQUAL typesideEval
+  ;
 
 typesideEval
-  : NUMBER                       #Typeside_EvalNumber
-  | LOWER_ID                   #Typeside_EvalGen
-  | LOWER_ID LPAREN typesideEval
-      (COMMA typesideEval)* RPAREN      #Typeside_EvalFunction
+  : NUMBER
+  #Typeside_EvalNumber
+
+  | typesideLiteral
+  #Typeside_EvalGen
+
+  | LPAREN typesideEval typesideFnName typesideEval RPAREN
+  #Typeside_InfixFunction
+
+  | typesideFnName LPAREN typesideEval (COMMA typesideEval)* RPAREN
+  #Typeside_EvalFunction
+  ;
+
+typeSideLocal : symbol (COLON typesideLocalType)? ;
+typesideLocalType : symbol ;
+
+typesideLiteral
+  : LOWER_ID
+  | UPPER_ID
   ;

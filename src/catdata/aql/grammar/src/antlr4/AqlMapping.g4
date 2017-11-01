@@ -1,7 +1,7 @@
 parser grammar AqlMapping;
 options { tokenVocab=AqlLexerRules; }
 
-mappingId : (LOWER_ID | UPPER_ID) ;
+mappingId : symbol ;
 
 mappingKindAssignment : MAPPING mappingId EQUAL mappingDef ;
 
@@ -47,8 +47,8 @@ mappingAttributeSig
 mappingLambda
   : LAMBDA mappingGen (COMMA mappingGen)* DOT evalMappingFn ;
 
-mappingGen : (LOWER_ID | UPPER_ID) (COLON mappingGenType)? ;
-mappingGenType : (LOWER_ID | UPPER_ID) ;
+mappingGen : symbol (COLON mappingGenType)? ;
+mappingGenType : symbol ;
 
 evalMappingFn
   : mappingGen

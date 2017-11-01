@@ -1,7 +1,7 @@
 parser grammar AqlTransform;
 options { tokenVocab=AqlLexerRules; }
 
-transformId : (LOWER_ID | UPPER_ID) ;
+transformId : symbol ;
 
 transformKindAssignment : TRANSFORM transformId EQUAL transformDef ;
 
@@ -60,4 +60,4 @@ transformLiteralSection
     allOptions
   ;
 
-transformGen : (LOWER_ID | UPPER_ID) ;
+transformGen : symbol ;

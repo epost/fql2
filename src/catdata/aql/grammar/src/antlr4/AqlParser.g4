@@ -24,6 +24,12 @@ import
 
 file : program  EOF ;
 
+symbol
+  : LOWER_ID
+  | UPPER_ID
+  | SPECIAL_ID
+  ;
+
 program
   : optionsDeclarationSection?
     (commentDeclarationSection | kindDeclaration)*
@@ -52,7 +58,7 @@ kindDeclaration
 
 path : pathNodeId (DOT pathNodeId)* ;
 
-pathNodeId : (LOWER_ID | UPPER_ID) ;
+pathNodeId : symbol ;
 
 value
   : STRING

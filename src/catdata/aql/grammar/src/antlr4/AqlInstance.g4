@@ -1,7 +1,7 @@
 parser grammar AqlInstance;
 options { tokenVocab=AqlLexerRules; }
 
-instanceId : (LOWER_ID | UPPER_ID) ;
+instanceId : symbol ;
 
 instanceKindAssignment : INSTANCE instanceId EQUAL instanceDef ;
 
@@ -78,7 +78,10 @@ instanceSql : STRING | MULTI_STRING ;
 instanceQuotientCsvSection : instanceFile+ ;
 instanceFile : STRING ;
 
-instanceGen : (LOWER_ID | UPPER_ID) ;
+instanceGen
+  : symbol
+  | instanceLiteralValue
+  ;
 
 instanceEquation : instancePath EQUAL (instanceLiteral | instancePath) ;
 
@@ -87,12 +90,12 @@ instanceMultiEquation
     LBRACE instanceMultiBind (COMMA instanceMultiBind)* RBRACE
   ;
 
-instanceEquationId : (LOWER_ID | UPPER_ID) ;
+instanceEquationId : symbol ;
 
 instanceMultiBind
   : instancePath (instanceSymbol | instanceLiteral) ;
 
-instanceSymbol : (LOWER_ID | UPPER_ID) ;
+instanceSymbol : symbol ;
 
 instanceLiteral :  instanceLiteralValue (AT instanceSymbol)? ;
 
@@ -105,6 +108,7 @@ instanceLiteralValue
 
 instancePath
   : instanceArrowId
+  | instanceLiteralValue
   | instancePath DOT instanceArrowId
   | instanceArrowId LPAREN instancePath RPAREN
   ;
@@ -140,4 +144,4 @@ instanceImportCsvSection
     allOptions
   ;
 
-instanceCsvId : (LOWER_ID | UPPER_ID) ;
+instanceCsvId : symbol ;
