@@ -1,4 +1,4 @@
-// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/djt/uanrg/AqlParser.g4 by ANTLR 4.7
+// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/kyt/uanrg/AqlParser.g4 by ANTLR 4.7
 package org.aql;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -55,6 +55,12 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPath(AqlParser.PathContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link AqlParser#pathNodeId}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPathNodeId(AqlParser.PathNodeIdContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link AqlParser#value}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -72,6 +78,12 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMdCommentDeclaration(AqlParser.MdCommentDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#allOptions}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAllOptions(AqlParser.AllOptionsContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#optionsDeclaration}.
 	 * @param ctx the parse tree
@@ -253,17 +265,17 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTypesideKindAssignment(AqlParser.TypesideKindAssignmentContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#typesideInstance}.
+	 * Visit a parse tree produced by {@link AqlParser#typesideDef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTypesideInstance(AqlParser.TypesideInstanceContext ctx);
+	T visitTypesideDef(AqlParser.TypesideDefContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#typesideLiteralExpr}.
+	 * Visit a parse tree produced by {@link AqlParser#typesideLiteralSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTypesideLiteralExpr(AqlParser.TypesideLiteralExprContext ctx);
+	T visitTypesideLiteralSection(AqlParser.TypesideLiteralSectionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code Typeside_ImportName}
 	 * labeled alternative in {@link AqlParser#typesideImport}.
@@ -296,23 +308,35 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTypesideConstantSig(AqlParser.TypesideConstantSigContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link AqlParser#typesideConstantValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypesideConstantValue(AqlParser.TypesideConstantValueContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link AqlParser#typesideJavaConstantSig}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitTypesideJavaConstantSig(AqlParser.TypesideJavaConstantSigContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#typesideConstantName}.
+	 * Visit a parse tree produced by {@link AqlParser#typesideConstantLiteral}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTypesideConstantName(AqlParser.TypesideConstantNameContext ctx);
+	T visitTypesideConstantLiteral(AqlParser.TypesideConstantLiteralContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#typesideFunctionSig}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitTypesideFunctionSig(AqlParser.TypesideFunctionSigContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#typesideFnLocal}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypesideFnLocal(AqlParser.TypesideFnLocalContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#typesideJavaFunctionSig}.
 	 * @param ctx the parse tree
@@ -418,11 +442,11 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSchemaColimitId(AqlParser.SchemaColimitIdContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#schemaLiteralExpr}.
+	 * Visit a parse tree produced by {@link AqlParser#schemaLiteralSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitSchemaLiteralExpr(AqlParser.SchemaLiteralExprContext ctx);
+	T visitSchemaLiteralSection(AqlParser.SchemaLiteralSectionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#schemaEntityId}.
 	 * @param ctx the parse tree
@@ -496,6 +520,12 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSchemaGen(AqlParser.SchemaGenContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link AqlParser#schemaGenType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSchemaGenType(AqlParser.SchemaGenTypeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link AqlParser#schemaFn}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -532,23 +562,29 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInstanceKind(AqlParser.InstanceKindContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#instanceConstraint}.
+	 * Visit a parse tree produced by {@link AqlParser#instanceImportJdbcAllSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitInstanceConstraint(AqlParser.InstanceConstraintContext ctx);
+	T visitInstanceImportJdbcAllSection(AqlParser.InstanceImportJdbcAllSectionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#instanceLiteralExpr}.
+	 * Visit a parse tree produced by {@link AqlParser#instanceColimitSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitInstanceLiteralExpr(AqlParser.InstanceLiteralExprContext ctx);
+	T visitInstanceColimitSection(AqlParser.InstanceColimitSectionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#instanceImportJdbc}.
+	 * Visit a parse tree produced by {@link AqlParser#instanceLiteralSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitInstanceImportJdbc(AqlParser.InstanceImportJdbcContext ctx);
+	T visitInstanceLiteralSection(AqlParser.InstanceLiteralSectionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#instanceImportJdbcSection}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstanceImportJdbcSection(AqlParser.InstanceImportJdbcSectionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#jdbcClass}.
 	 * @param ctx the parse tree
@@ -568,17 +604,17 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInstanceSql(AqlParser.InstanceSqlContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link AqlParser#instanceQuotientCsvSection}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstanceQuotientCsvSection(AqlParser.InstanceQuotientCsvSectionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link AqlParser#instanceFile}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitInstanceFile(AqlParser.InstanceFileContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link AqlParser#instanceEntityFile}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitInstanceEntityFile(AqlParser.InstanceEntityFileContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#instanceGen}.
 	 * @param ctx the parse tree
@@ -610,6 +646,24 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInstanceMultiBind(AqlParser.InstanceMultiBindContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link AqlParser#instanceSymbol}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstanceSymbol(AqlParser.InstanceSymbolContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#instanceLiteral}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstanceLiteral(AqlParser.InstanceLiteralContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#instanceLiteralValue}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstanceLiteralValue(AqlParser.InstanceLiteralValueContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link AqlParser#instancePath}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -622,23 +676,23 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInstanceArrowId(AqlParser.InstanceArrowIdContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link AqlParser#instanceQuotientJdbcSection}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstanceQuotientJdbcSection(AqlParser.InstanceQuotientJdbcSectionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link AqlParser#instanceQuotientSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitInstanceQuotientSection(AqlParser.InstanceQuotientSectionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#instanceQuotientExpr}.
+	 * Visit a parse tree produced by {@link AqlParser#instanceRandomSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitInstanceQuotientExpr(AqlParser.InstanceQuotientExprContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link AqlParser#instanceRandomExpr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitInstanceRandomExpr(AqlParser.InstanceRandomExprContext ctx);
+	T visitInstanceRandomSection(AqlParser.InstanceRandomSectionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#instanceEvalSection}.
 	 * @param ctx the parse tree
@@ -681,6 +735,18 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitInstanceCoequalizeSection(AqlParser.InstanceCoequalizeSectionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#instanceImportCsvSection}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstanceImportCsvSection(AqlParser.InstanceImportCsvSectionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#instanceCsvId}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstanceCsvId(AqlParser.InstanceCsvIdContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#mappingId}.
 	 * @param ctx the parse tree
@@ -728,11 +794,11 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitMappingKind(AqlParser.MappingKindContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#mappingLiteralExpr}.
+	 * Visit a parse tree produced by {@link AqlParser#mappingLiteralSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitMappingLiteralExpr(AqlParser.MappingLiteralExprContext ctx);
+	T visitMappingLiteralSection(AqlParser.MappingLiteralSectionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#mappingEntitySig}.
 	 * @param ctx the parse tree
@@ -775,6 +841,12 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMappingGen(AqlParser.MappingGenContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#mappingGenType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMappingGenType(AqlParser.MappingGenTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#evalMappingFn}.
 	 * @param ctx the parse tree
@@ -988,12 +1060,6 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTransformLiteralSection(AqlParser.TransformLiteralSectionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#transformLiteralExpr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitTransformLiteralExpr(AqlParser.TransformLiteralExprContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link AqlParser#transformGen}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -1066,11 +1132,11 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitQueryKind(AqlParser.QueryKindContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#queryLiteralExpr}.
+	 * Visit a parse tree produced by {@link AqlParser#queryLiteralSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitQueryLiteralExpr(AqlParser.QueryLiteralExprContext ctx);
+	T visitQueryLiteralSection(AqlParser.QueryLiteralSectionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#queryEntityExpr}.
 	 * @param ctx the parse tree
@@ -1078,11 +1144,11 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitQueryEntityExpr(AqlParser.QueryEntityExprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#querySimpleExpr}.
+	 * Visit a parse tree produced by {@link AqlParser#querySimpleSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitQuerySimpleExpr(AqlParser.QuerySimpleExprContext ctx);
+	T visitQuerySimpleSection(AqlParser.QuerySimpleSectionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#queryLiteralValue}.
 	 * @param ctx the parse tree
@@ -1120,17 +1186,17 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitQueryPath(AqlParser.QueryPathContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#queryFromMappingExpr}.
+	 * Visit a parse tree produced by {@link AqlParser#queryFromMappingSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitQueryFromMappingExpr(AqlParser.QueryFromMappingExprContext ctx);
+	T visitQueryFromMappingSection(AqlParser.QueryFromMappingSectionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#queryFromSchemaExpr}.
+	 * Visit a parse tree produced by {@link AqlParser#queryFromSchemaSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitQueryFromSchemaExpr(AqlParser.QueryFromSchemaExprContext ctx);
+	T visitQueryFromSchemaSection(AqlParser.QueryFromSchemaSectionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#queryCompositionExpr}.
 	 * @param ctx the parse tree
@@ -1275,6 +1341,12 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPragmaKind(AqlParser.PragmaKindContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link AqlParser#pragmaAddClasspathSection}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPragmaAddClasspathSection(AqlParser.PragmaAddClasspathSectionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#pragmaCmdLineSection}.
 	 * @param ctx the parse tree
@@ -1436,7 +1508,7 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConstraintKindAssignment(AqlParser.ConstraintKindAssignmentContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code constraintExp_Literal}
+	 * Visit a parse tree produced by the {@code ConstraintExp_Literal}
 	 * labeled alternative in {@link AqlParser#constraintDef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -1449,11 +1521,11 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConstraintKind(AqlParser.ConstraintKindContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#constraintLiteralExpr}.
+	 * Visit a parse tree produced by {@link AqlParser#constraintLiteralSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitConstraintLiteralExpr(AqlParser.ConstraintLiteralExprContext ctx);
+	T visitConstraintLiteralSection(AqlParser.ConstraintLiteralSectionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#constraintExpr}.
 	 * @param ctx the parse tree

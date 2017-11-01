@@ -1,7 +1,8 @@
 parser grammar AqlInstance;
 options { tokenVocab=AqlLexerRules; }
 
-instanceId : LOWER_ID | UPPER_ID ;
+instanceId : (LOWER_ID | UPPER_ID) ;
+
 instanceKindAssignment : INSTANCE instanceId EQUAL instanceDef ;
 
 instanceDef
@@ -24,79 +25,83 @@ instanceDef
       (LBRACE instanceCoprodUnrestrictSection RBRACE)?
   | COEQUALIZE transformKind transformKind
       (LBRACE instanceCoequalizeSection RBRACE)?
-  | COLIMIT graphKind schemaKind LBRACE
-      NODES (instanceId RARROW instanceDef)+
-      EDGES (schemaArrowId RARROW transformKind)+
-      (OPTIONS (timeoutOption | STATIC_TYPING EQUAL truthy)*)?
-      RBRACE
+  | COLIMIT graphKind schemaKind
+      (LBRACE instanceColimitSection RBRACE)?
   | IMPORT_JDBC jdbcClass jdbcUri COLON schemaKind
-      LBRACE instanceImportJdbc RBRACE
+      (LBRACE instanceImportJdbcSection RBRACE)?
   | QUOTIENT_JDBC (jdbcClass (jdbcUri)?)? instanceKind
-      LBRACE instanceQuotientSection RBRACE
-  | QUOTIENT_CSV schemaDef LBRACE instanceFile+ RBRACE
+      (LBRACE instanceQuotientJdbcSection RBRACE)?
+  | QUOTIENT_CSV schemaDef
+      (LBRACE instanceQuotientCsvSection RBRACE)?
   | IMPORT_JDBC_ALL (jdbcClass (jdbcUri)?)?
-        (OPTIONS (timeoutOption | proverOptions
-                  | alwaysReloadOption
-                  | requireConsistencyOption
-                  | schemaOnlyOption)*)?
-  | IMPORT_CSV COLON schemaId LBRACE instanceEntityFile+ RBRACE
-        (OPTIONS (timeoutOption | proverOptions
-                  | alwaysReloadOption
-                  | csvOptions
-                  | idColumnNameOption
-                  | requireConsistencyOption)*)?
-  | LITERAL COLON schemaKind LBRACE instanceLiteralExpr RBRACE
-  | QUOTIENT instanceKind LBRACE instanceQuotientExpr RBRACE
-  | CHASE LITERAL COLON instanceConstraint* instanceKind INTEGER?
-  | RANDOM COLON schemaId LBRACE instanceRandomExpr RBRACE
-  ;
-instanceKind: instanceId | LPAREN instanceDef RPAREN;
-
-// the documentation for the chase constrants is unclear
-instanceConstraint
-  : schemaId
-  | LBRACE RBRACE
+      (LBRACE instanceImportJdbcAllSection RBRACE)?
+  | IMPORT_CSV instanceFile COLON schemaId
+      (LBRACE instanceImportCsvSection RBRACE)?
+  | LITERAL COLON schemaKind
+      (LBRACE instanceLiteralSection RBRACE)?
+  | QUOTIENT instanceId
+      (LBRACE instanceQuotientSection RBRACE)?
+  | CHASE constraintKind+ instanceKind INTEGER?
+  | RANDOM COLON schemaId
+      (LBRACE instanceRandomSection RBRACE)?
   ;
 
-instanceLiteralExpr
-  :
-  (IMPORTS instanceId*)?
-  (GENERATORS (instanceGen+ COLON schemaEntityId)+)?
-  (EQUATIONS instanceEquation*)?
-  (MULTI_EQUATIONS instanceMultiEquation*)?
-  (OPTIONS (timeoutOption | proverOptions
-            | requireConsistencyOption
-            | interpretAsAlgebraOption)*)?
+instanceKind: instanceId | instanceDef | (LPAREN instanceKind RPAREN);
+
+instanceImportJdbcAllSection : allOptions ;
+
+instanceColimitSection
+  : NODES (instanceId RARROW instanceKind)+
+    EDGES (schemaArrowId RARROW transformKind)+
+    allOptions
   ;
 
-instanceImportJdbc
-  :
-  ((schemaEntityId | schemaAttributeId | schemaForeignId | typesideTypeId)
-  RARROW
-  instanceSql)+
-  (OPTIONS (
-      timeoutOption | proverOptions | importJoinedOption
-    | alwaysReloadOption | requireConsistencyOption
-    | importAsTheoryOption)*)?
+instanceLiteralSection
+  : (IMPORTS instanceId*)?
+    (GENERATORS (instanceGen+ COLON schemaEntityId)+)?
+    (EQUATIONS instanceEquation*)?
+    (MULTI_EQUATIONS instanceMultiEquation*)?
+    allOptions
   ;
 
-jdbcClass : STRING;
-jdbcUri : STRING;
+instanceImportJdbcSection
+  : ((schemaEntityId | schemaAttributeId | schemaForeignId | typesideTypeId)
+      RARROW
+      instanceSql)+
+    allOptions
+  ;
+
+jdbcClass : STRING ;
+jdbcUri : STRING ;
 instanceSql : STRING | MULTI_STRING ;
-instanceFile : STRING;
-instanceEntityFile : schemaEntityId RARROW instanceFile;
 
-instanceGen : LOWER_ID;
+instanceQuotientCsvSection : instanceFile+ ;
+instanceFile : STRING ;
 
-instanceEquation : instancePath EQUAL instancePath;
+instanceGen : (LOWER_ID | UPPER_ID) ;
 
-instanceMultiEquation :
-  instanceEquationId RARROW LBRACE instanceMultiBind (COMMA instanceMultiBind)* RBRACE;
+instanceEquation : instancePath EQUAL (instanceLiteral | instancePath) ;
 
-instanceEquationId : LOWER_ID | UPPER_ID ;
+instanceMultiEquation
+  : instanceEquationId RARROW
+    LBRACE instanceMultiBind (COMMA instanceMultiBind)* RBRACE
+  ;
 
-instanceMultiBind :
-  instancePath UPPER_ID;
+instanceEquationId : (LOWER_ID | UPPER_ID) ;
+
+instanceMultiBind
+  : instancePath (instanceSymbol | instanceLiteral) ;
+
+instanceSymbol : (LOWER_ID | UPPER_ID) ;
+
+instanceLiteral :  instanceLiteralValue (AT instanceSymbol)? ;
+
+instanceLiteralValue
+  : truthy
+  | INTEGER
+  | NUMBER
+  | STRING
+  ;
 
 instancePath
   : instanceArrowId
@@ -107,25 +112,32 @@ instancePath
 // identity arrows are indicated with entity-names.
 instanceArrowId : schemaEntityId | schemaForeignId;
 
-instanceQuotientSection
+instanceQuotientJdbcSection
   : instanceSql+
-    (OPTIONS (timeoutOption | proverOptions)*)?
+    allOptions
   ;
 
-instanceQuotientExpr
+instanceQuotientSection
   : EQUATIONS (instancePath EQUAL instancePath)*
-    (OPTIONS (timeoutOption | proverOptions)*)?
+    allOptions
   ;
 
-instanceRandomExpr
+instanceRandomSection
   : GENERATORS (schemaEntityId RARROW INTEGER)*
   | OPTIONS (RANDOM_SEED EQUAL INTEGER)
   ;
 
-instanceEvalSection : (OPTIONS evalOptions*)? ;
-instanceCoevalSection : (OPTIONS (timeoutOption | proverOptions)*)?  ;
-instanceSigmaSection : (OPTIONS (timeoutOption | proverOptions)*)? ;
-instanceCoprodSection : (OPTIONS (timeoutOption | proverOptions)*)? ;
-instanceCoprodSigmaSection : (OPTIONS (timeoutOption | proverOptions)*)? ;
-instanceCoprodUnrestrictSection : (OPTIONS (timeoutOption | proverOptions)*)? ;
-instanceCoequalizeSection : (OPTIONS (timeoutOption | proverOptions)*)? ;
+instanceEvalSection : allOptions ;
+instanceCoevalSection : allOptions  ;
+instanceSigmaSection : allOptions ;
+instanceCoprodSection : allOptions ;
+instanceCoprodSigmaSection : allOptions ;
+instanceCoprodUnrestrictSection : allOptions ;
+instanceCoequalizeSection : allOptions ;
+
+instanceImportCsvSection
+  : (schemaEntityId RARROW instanceCsvId)*
+    allOptions
+  ;
+
+instanceCsvId : (LOWER_ID | UPPER_ID) ;

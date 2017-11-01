@@ -2,6 +2,8 @@
 parser grammar AqlOptions;
 options { tokenVocab=AqlLexerRules; }
 
+allOptions :  (OPTIONS optionsDeclaration*)? ;
+
 optionsDeclaration
   : numThreadsOption
   | randomSeedOption
@@ -25,10 +27,11 @@ optionsDeclaration
   | evalOptions
   | queryRemoveRedundancyOption
   | coproductOptions
+  | importJoinedOption
   ;
 
 // options not mentioned in the manual
-importJoinedOption :  IMPORT_JOINED EQUAL truthy;
+importJoinedOption : IMPORT_JOINED EQUAL truthy;
 
 mapNullsArbitrarilyUnsafeOption:
   MAP_NULLS_ARBITRARILY_UNSAFE EQUAL truthy;

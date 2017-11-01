@@ -1,19 +1,20 @@
 parser grammar AqlTypeside;
 options { tokenVocab=AqlLexerRules; }
 
-typesideId: LOWER_ID | UPPER_ID ;
+typesideId: (LOWER_ID | UPPER_ID) ;
 
-typesideKindAssignment:
-  TYPESIDE typesideId EQUAL typesideInstance;
+typesideKindAssignment
+  : TYPESIDE typesideId EQUAL typesideDef ;
 
-typesideInstance:
-    EMPTY | SQL
-  | TYPESIDE_OF LPAREN EMPTY COLON LOWER_ID RPAREN
-  | typesideLiteralExpr;
+typesideDef
+  : EMPTY
+  | SQL
+  | TYPESIDE_OF LPAREN EMPTY COLON (LOWER_ID | UPPER_ID) RPAREN
+  | LITERAL (LBRACE typesideLiteralSection RBRACE)?
+  ;
 
-typesideLiteralExpr:
-  LITERAL LBRACE
-    (IMPORTS typesideImport*)?
+typesideLiteralSection
+  : (IMPORTS typesideImport*)?
     (TYPES typesideTypeSig*)?
     (CONSTANTS typesideConstantSig*)?
     (FUNCTIONS typesideFunctionSig*)?
@@ -21,43 +22,52 @@ typesideLiteralExpr:
     (JAVA_CONSTANTS typesideJavaConstantSig*)?
     (JAVA_FUNCTIONS typesideJavaFunctionSig*)?
     (EQUATIONS typesideEquationSig*)?
-    (OPTIONS (timeoutOption | proverOptions | allowJavaEqsUnsafeOption)*)?
-    RBRACE;
+    allOptions
+  ;
 
-typesideImport:
-  LOWER_ID                #Typeside_ImportName
+typesideImport
+  : (LOWER_ID | UPPER_ID)          #Typeside_ImportName
   ;
 
 typesideTypeSig : typesideTypeId ;
-typesideJavaTypeSig : (TRUE | FALSE | typesideTypeId) EQUAL STRING;
-typesideTypeId : UPPER_ID ;
+typesideJavaTypeSig : (TRUE | FALSE | typesideTypeId) EQUAL STRING ;
+typesideTypeId : (LOWER_ID | UPPER_ID) ;
 
-typesideConstantSig:
-  typesideConstantName COLON UPPER_ID;
+typesideConstantSig
+  : typesideConstantLiteral+ COLON typesideConstantValue
+;
 
-typesideJavaConstantSig:
-  (TRUE | FALSE | typesideConstantName) EQUAL STRING;
+typesideConstantValue : (LOWER_ID | UPPER_ID) ;
 
-typesideConstantName: (LOWER_ID | UPPER_ID);
+typesideJavaConstantSig
+  : (TRUE | FALSE | typesideConstantLiteral) EQUAL STRING ;
 
-typesideFunctionSig:
-  typesideFnName COLON UPPER_ID (COMMA UPPER_ID)* RARROW UPPER_ID;
+typesideConstantLiteral : (STRING | LOWER_ID | UPPER_ID) ;
 
-typesideJavaFunctionSig:
-  (TRUE | FALSE | typesideFnName) COLON UPPER_ID (COMMA UPPER_ID)*
-  (RARROW UPPER_ID)?
-  EQUAL STRING ;
+typesideFunctionSig
+  : typesideFnName COLON typesideFnLocal
+        (COMMA typesideFnLocal)*
+        RARROW typesideFnLocal ;
 
-typesideFnName: LOWER_ID | UPPER_ID ;
+typesideFnLocal : (LOWER_ID | UPPER_ID) ;
 
-typesideEquationSig:
-  FORALL typesideEqFnSig ;
+typesideJavaFunctionSig
+  : (TRUE | FALSE | typesideFnName) COLON typesideFnLocal
+        (COMMA typesideFnLocal)*
+        (RARROW typesideFnLocal)?
+        EQUAL STRING
+  ;
 
-typesideEqFnSig:
-  LOWER_ID (COMMA LOWER_ID)* DOT typesideEval EQUAL typesideEval;
+typesideFnName : (LOWER_ID | UPPER_ID) ;
 
-typesideEval:
-    NUMBER                       #Typeside_EvalNumber
+typesideEquationSig : FORALL typesideEqFnSig ;
+
+typesideEqFnSig
+  : LOWER_ID (COMMA LOWER_ID)* DOT typesideEval EQUAL typesideEval ;
+
+typesideEval
+  : NUMBER                       #Typeside_EvalNumber
   | LOWER_ID                   #Typeside_EvalGen
-  | LOWER_ID LPAREN typesideEval (COMMA typesideEval)* RPAREN      #Typeside_EvalFunction
+  | LOWER_ID LPAREN typesideEval
+      (COMMA typesideEval)* RPAREN      #Typeside_EvalFunction
   ;

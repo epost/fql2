@@ -1,69 +1,82 @@
 parser grammar AqlQuery;
 options { tokenVocab=AqlLexerRules; }
 
-queryId: LOWER_ID;
-queryFromSchema: LPAREN ID schemaId RPAREN;
+queryId : (LOWER_ID | UPPER_ID) ;
 
-queryKindAssignment: QUERY queryId EQUAL queryDef ;
-queryDef:
-      ID schemaId                               #QueryExp_Id
-    | LITERAL COLON schemaId RARROW schemaId
-            LBRACE queryLiteralExpr RBRACE      #QueryExp_Literal
-    | SIMPLE COLON schemaId
-            LBRACE querySimpleExpr RBRACE       #QueryExp_Simple
-    | GET_MAPPING schemaColimitId
-            schemaId                      #QueryExp_Get
-    | TO_QUERY mappingId
-            (LBRACE queryFromMappingExpr RBRACE)?  #QueryExp_FromMapping
-    | TO_COQUERY ID schemaId
-            (LBRACE queryFromSchemaExpr RBRACE)?  #QueryExp_FromMapping
-    | queryCompositionExpr  #QueryExp_Composition
-    ;
-queryKind: queryId | LPAREN queryDef RPAREN;
+queryFromSchema : LPAREN ID schemaId RPAREN ;
 
-queryLiteralExpr:
-  (IMPORTS queryId*)?
-  (ENTITIES queryEntityExpr*)?
-  (FOREIGN_KEYS queryForeignSig*)?
-  (OPTIONS (timeoutOption | dontValidateUnsafeOption)*)?
+queryKindAssignment : QUERY queryId EQUAL queryDef ;
+
+queryDef
+  : ID schemaId
+  #QueryExp_Id
+
+  | LITERAL COLON schemaKind RARROW schemaId
+      (LBRACE queryLiteralSection RBRACE)?
+  #QueryExp_Literal
+
+  | SIMPLE COLON schemaKind
+      (LBRACE querySimpleSection RBRACE)?
+  #QueryExp_Simple
+
+  | GET_MAPPING schemaColimitId schemaKind
+  #QueryExp_Get
+
+  | TO_QUERY mappingKind
+      (LBRACE queryFromMappingSection RBRACE)?
+  #QueryExp_FromMapping
+
+  | TO_COQUERY mappingKind
+      (LBRACE queryFromSchemaSection RBRACE)?
+  #QueryExp_FromMapping
+
+  | queryCompositionExpr
+  #QueryExp_Composition
   ;
 
-queryEntityExpr: schemaEntityId RARROW LBRACE queryClauseExpr RBRACE;
-
-querySimpleExpr:
-  queryClauseExpr
-  (OPTIONS (timeoutOption | dontValidateUnsafeOption | proverOptions)*)?
+queryKind
+  : queryId
+  | queryDef
+  | LPAREN queryDef RPAREN
   ;
+
+queryLiteralSection
+  : (IMPORTS queryId*)?
+    (ENTITIES queryEntityExpr*)?
+    (FOREIGN_KEYS queryForeignSig*)?
+    allOptions
+  ;
+
+queryEntityExpr : schemaEntityId RARROW LBRACE queryClauseExpr RBRACE ;
+
+querySimpleSection : queryClauseExpr allOptions ;
 
 queryLiteralValue : STRING | NUMBER | INTEGER | TRUE | FALSE ;
 
-queryClauseExpr:
-  FROM (queryGen COLON schemaEntityId)+
-  (WHERE (queryPath EQUAL (queryLiteralValue | queryPath))+)?
-  RETURN (schemaAttributeId RARROW queryPath)+
+queryClauseExpr
+  : FROM (queryGen COLON schemaEntityId)+
+    (WHERE (queryPath EQUAL (queryLiteralValue | queryPath))+)?
+    (RETURN (schemaAttributeId RARROW queryPath)+)?
   ;
 
-queryForeignSig:
-  schemaForeignId RARROW LBRACE queryPathMapping+ RBRACE;
+queryForeignSig
+  : schemaForeignId RARROW LBRACE queryPathMapping+ RBRACE ;
 
-queryPathMapping: queryGen RARROW queryPath;
+queryPathMapping : queryGen RARROW queryPath ;
 
-queryGen: LOWER_ID | UPPER_ID ;
+queryGen : (LOWER_ID | UPPER_ID) ;
 
 queryPath
-   : queryLiteralValue | typesideConstantName
+   : queryLiteralValue
+   | typesideConstantLiteral
    | queryGen
    | queryGen (DOT schemaArrowId)+
    | queryGen LPAREN queryPath (COMMA queryPath)* RPAREN
    ;
 
-queryFromMappingExpr :
-  (OPTIONS (timeoutOption | dontValidateUnsafeOption | proverOptions)*)?
-  ;
+queryFromMappingSection : allOptions ;
 
-queryFromSchemaExpr :
-  (OPTIONS (timeoutOption | dontValidateUnsafeOption | proverOptions)*)?
-  ;
+queryFromSchemaSection : allOptions ;
 
-queryCompositionExpr :
-  LBRACK ID schemaId SEMI ID schemaId RBRACK ;
+queryCompositionExpr
+  : LBRACK queryKind SEMI queryKind RBRACK ;

@@ -26,7 +26,7 @@ file : program  EOF ;
 
 program
   : optionsDeclarationSection?
-    (commentDeclarationSection | kindDeclaration)* 
+    (commentDeclarationSection | kindDeclaration)*
   ;
 
 optionsDeclarationSection
@@ -50,10 +50,13 @@ kindDeclaration
   ;
 
 
-path : LOWER_ID (DOT LOWER_ID)* ;
+path : pathNodeId (DOT pathNodeId)* ;
+
+pathNodeId : (LOWER_ID | UPPER_ID) ;
 
 value
   : STRING
   | NUMBER
   | LOWER_ID
+  | UPPER_ID
   ;

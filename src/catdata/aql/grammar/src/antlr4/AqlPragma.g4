@@ -6,77 +6,70 @@ pragmaId : LOWER_ID | UPPER_ID ;
 pragmaKindAssignment : PRAGMA pragmaId EQUAL pragmaDef ;
 
 pragmaDef
-  : EXEC_CMDLINE pragmaCmdLineSection
+  : EXEC_CMDLINE
+      (LBRACE pragmaCmdLineSection RBRACE)?
     #Pragma_CmdLine
-  | EXEC_JS pragmaExecJsSection
+
+  | EXEC_JS
+      (LBRACE pragmaExecJsSection RBRACE)?
     #Pragma_ExecJs
+
   | EXEC_JDBC pragmaJdbcClass pragmaJdbcUri
-            pragmaExecJdbcSection
+      (LBRACE pragmaExecJdbcSection RBRACE)?
     #Pragma_ExecJdbc
+
   | CHECK constraintId instanceId
     #Pragma_Check
+
   | ASSERT_CONSISTENT instanceId
     #Pragma_AssertConsistent
+
   | EXPORT_CSV_INSTANCE instanceId pragmaFile
-            pragmaExportCsvSection
+      (LBRACE pragmaExportCsvSection RBRACE)?
     #Pragma_ExportCsvInstance
+
   | EXPORT_CSV_TRANSFORM transformId pragmaFile
-            pragmaExportCsvSection
+      (LBRACE pragmaExportCsvSection RBRACE)?
     #Pragma_ExportCsvTransform
+
   | EXPORT_JDBC_INSTANCE instanceId
       (pragmaJdbcClass (pragmaJdbcUri pragmaPrefixDst?)?)?
-      pragmaExportJdbcSection
+      (LBRACE pragmaExportJdbcSection RBRACE)?
     #Pragma_ExportJdbcInstance
+
   | EXPORT_JDBC_QUERY queryId
       (pragmaJdbcClass (pragmaJdbcUri (pragmaPrefixSrc pragmaPrefixDst?)?)?)?
-      pragmaExportJdbcSection
+      (LBRACE pragmaExportJdbcSection RBRACE)?
     #Pragma_ExportJdbcQuery
+
   | EXPORT_JDBC_TRANSFORM transformId
       (pragmaJdbcClass (pragmaJdbcUri pragmaPrefix?)?)?
-      pragmaExportJdbcSection
+      (LBRACE pragmaExportJdbcSection RBRACE)?
+      (LBRACE pragmaExportJdbcSection RBRACE)?
     #Pragma_ExportJdbcTransform
-  | ADD_TO_CLASSPATH LBRACE STRING+ RBRACE
+
+  | ADD_TO_CLASSPATH
+      (LBRACE pragmaAddClasspathSection RBRACE)?
     #Pragma_AddToClasspath
   ;
 
 pragmaKind: pragmaId | LPAREN pragmaDef RPAREN;
 
-pragmaCmdLineSection: LBRACE
-  STRING+
-  (OPTIONS (timeoutOption|alwaysReloadOption)*)?
-  RBRACE  ;
+pragmaAddClasspathSection : STRING+ ;
 
-pragmaExecJsSection: LBRACE
-  STRING+
-  (OPTIONS (timeoutOption|alwaysReloadOption)*)?
-  RBRACE  ;
+pragmaCmdLineSection : STRING+ allOptions ;
 
-pragmaExecJdbcSection: LBRACE
-  (STRING | MULTI_STRING)+
-  (OPTIONS (timeoutOption|alwaysReloadOption)*)?
-  RBRACE  ;
+pragmaExecJsSection : STRING+ allOptions ;
 
-pragmaExportCsvSection
-  : LBRACE
-    STRING*
-    (OPTIONS (timeoutOption
-      | alwaysReloadOption
-      | csvOptions | idColumnNameOption
-      | startIdsAtOption)*)?
-    RBRACE  ;
+pragmaExecJdbcSection : (STRING | MULTI_STRING)+ allOptions ;
 
-pragmaExportJdbcSection
-  : LBRACE
-    STRING*
-    (OPTIONS  (timeoutOption
-              | alwaysReloadOption
-              | idColumnNameOption
-              | varcharLengthOption)*)?
-    RBRACE  ;
+pragmaExportCsvSection : STRING* allOptions ;
 
-pragmaFile: STRING;
-pragmaJdbcClass: STRING;
-pragmaJdbcUri: STRING;
-pragmaPrefix: STRING;
-pragmaPrefixSrc: STRING;
-pragmaPrefixDst: STRING;
+pragmaExportJdbcSection : STRING* allOptions ;
+
+pragmaFile : STRING ;
+pragmaJdbcClass : STRING ;
+pragmaJdbcUri : STRING ;
+pragmaPrefix : STRING ;
+pragmaPrefixSrc : STRING ;
+pragmaPrefixDst : STRING ;

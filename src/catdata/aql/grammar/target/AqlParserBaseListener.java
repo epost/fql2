@@ -1,4 +1,4 @@
-// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/djt/uanrg/AqlParser.g4 by ANTLR 4.7
+// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/kyt/uanrg/AqlParser.g4 by ANTLR 4.7
 package org.aql;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -100,6 +100,18 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterPathNodeId(AqlParser.PathNodeIdContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPathNodeId(AqlParser.PathNodeIdContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterValue(AqlParser.ValueContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -131,6 +143,18 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitMdCommentDeclaration(AqlParser.MdCommentDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterAllOptions(AqlParser.AllOptionsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitAllOptions(AqlParser.AllOptionsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -496,25 +520,25 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypesideInstance(AqlParser.TypesideInstanceContext ctx) { }
+	@Override public void enterTypesideDef(AqlParser.TypesideDefContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypesideInstance(AqlParser.TypesideInstanceContext ctx) { }
+	@Override public void exitTypesideDef(AqlParser.TypesideDefContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypesideLiteralExpr(AqlParser.TypesideLiteralExprContext ctx) { }
+	@Override public void enterTypesideLiteralSection(AqlParser.TypesideLiteralSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypesideLiteralExpr(AqlParser.TypesideLiteralExprContext ctx) { }
+	@Override public void exitTypesideLiteralSection(AqlParser.TypesideLiteralSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -580,6 +604,18 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTypesideConstantValue(AqlParser.TypesideConstantValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTypesideConstantValue(AqlParser.TypesideConstantValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterTypesideJavaConstantSig(AqlParser.TypesideJavaConstantSigContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -592,13 +628,13 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTypesideConstantName(AqlParser.TypesideConstantNameContext ctx) { }
+	@Override public void enterTypesideConstantLiteral(AqlParser.TypesideConstantLiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTypesideConstantName(AqlParser.TypesideConstantNameContext ctx) { }
+	@Override public void exitTypesideConstantLiteral(AqlParser.TypesideConstantLiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -611,6 +647,18 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTypesideFunctionSig(AqlParser.TypesideFunctionSigContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTypesideFnLocal(AqlParser.TypesideFnLocalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTypesideFnLocal(AqlParser.TypesideFnLocalContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -808,13 +856,13 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterSchemaLiteralExpr(AqlParser.SchemaLiteralExprContext ctx) { }
+	@Override public void enterSchemaLiteralSection(AqlParser.SchemaLiteralSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitSchemaLiteralExpr(AqlParser.SchemaLiteralExprContext ctx) { }
+	@Override public void exitSchemaLiteralSection(AqlParser.SchemaLiteralSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -964,6 +1012,18 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterSchemaGenType(AqlParser.SchemaGenTypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSchemaGenType(AqlParser.SchemaGenTypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterSchemaFn(AqlParser.SchemaFnContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1036,37 +1096,49 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInstanceConstraint(AqlParser.InstanceConstraintContext ctx) { }
+	@Override public void enterInstanceImportJdbcAllSection(AqlParser.InstanceImportJdbcAllSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInstanceConstraint(AqlParser.InstanceConstraintContext ctx) { }
+	@Override public void exitInstanceImportJdbcAllSection(AqlParser.InstanceImportJdbcAllSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInstanceLiteralExpr(AqlParser.InstanceLiteralExprContext ctx) { }
+	@Override public void enterInstanceColimitSection(AqlParser.InstanceColimitSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInstanceLiteralExpr(AqlParser.InstanceLiteralExprContext ctx) { }
+	@Override public void exitInstanceColimitSection(AqlParser.InstanceColimitSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInstanceImportJdbc(AqlParser.InstanceImportJdbcContext ctx) { }
+	@Override public void enterInstanceLiteralSection(AqlParser.InstanceLiteralSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInstanceImportJdbc(AqlParser.InstanceImportJdbcContext ctx) { }
+	@Override public void exitInstanceLiteralSection(AqlParser.InstanceLiteralSectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInstanceImportJdbcSection(AqlParser.InstanceImportJdbcSectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInstanceImportJdbcSection(AqlParser.InstanceImportJdbcSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1108,6 +1180,18 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterInstanceQuotientCsvSection(AqlParser.InstanceQuotientCsvSectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInstanceQuotientCsvSection(AqlParser.InstanceQuotientCsvSectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterInstanceFile(AqlParser.InstanceFileContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1115,18 +1199,6 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitInstanceFile(AqlParser.InstanceFileContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterInstanceEntityFile(AqlParser.InstanceEntityFileContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitInstanceEntityFile(AqlParser.InstanceEntityFileContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1192,6 +1264,42 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterInstanceSymbol(AqlParser.InstanceSymbolContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInstanceSymbol(AqlParser.InstanceSymbolContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInstanceLiteral(AqlParser.InstanceLiteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInstanceLiteral(AqlParser.InstanceLiteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInstanceLiteralValue(AqlParser.InstanceLiteralValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInstanceLiteralValue(AqlParser.InstanceLiteralValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterInstancePath(AqlParser.InstancePathContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1216,6 +1324,18 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterInstanceQuotientJdbcSection(AqlParser.InstanceQuotientJdbcSectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInstanceQuotientJdbcSection(AqlParser.InstanceQuotientJdbcSectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterInstanceQuotientSection(AqlParser.InstanceQuotientSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1228,25 +1348,13 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterInstanceQuotientExpr(AqlParser.InstanceQuotientExprContext ctx) { }
+	@Override public void enterInstanceRandomSection(AqlParser.InstanceRandomSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitInstanceQuotientExpr(AqlParser.InstanceQuotientExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterInstanceRandomExpr(AqlParser.InstanceRandomExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitInstanceRandomExpr(AqlParser.InstanceRandomExprContext ctx) { }
+	@Override public void exitInstanceRandomSection(AqlParser.InstanceRandomSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1336,6 +1444,30 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterInstanceImportCsvSection(AqlParser.InstanceImportCsvSectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInstanceImportCsvSection(AqlParser.InstanceImportCsvSectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterInstanceCsvId(AqlParser.InstanceCsvIdContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitInstanceCsvId(AqlParser.InstanceCsvIdContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterMappingId(AqlParser.MappingIdContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1420,13 +1552,13 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMappingLiteralExpr(AqlParser.MappingLiteralExprContext ctx) { }
+	@Override public void enterMappingLiteralSection(AqlParser.MappingLiteralSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMappingLiteralExpr(AqlParser.MappingLiteralExprContext ctx) { }
+	@Override public void exitMappingLiteralSection(AqlParser.MappingLiteralSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1511,6 +1643,18 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitMappingGen(AqlParser.MappingGenContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterMappingGenType(AqlParser.MappingGenTypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMappingGenType(AqlParser.MappingGenTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1912,18 +2056,6 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTransformLiteralExpr(AqlParser.TransformLiteralExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTransformLiteralExpr(AqlParser.TransformLiteralExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterTransformGen(AqlParser.TransformGenContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -2056,13 +2188,13 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterQueryLiteralExpr(AqlParser.QueryLiteralExprContext ctx) { }
+	@Override public void enterQueryLiteralSection(AqlParser.QueryLiteralSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitQueryLiteralExpr(AqlParser.QueryLiteralExprContext ctx) { }
+	@Override public void exitQueryLiteralSection(AqlParser.QueryLiteralSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -2080,13 +2212,13 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterQuerySimpleExpr(AqlParser.QuerySimpleExprContext ctx) { }
+	@Override public void enterQuerySimpleSection(AqlParser.QuerySimpleSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitQuerySimpleExpr(AqlParser.QuerySimpleExprContext ctx) { }
+	@Override public void exitQuerySimpleSection(AqlParser.QuerySimpleSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -2164,25 +2296,25 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterQueryFromMappingExpr(AqlParser.QueryFromMappingExprContext ctx) { }
+	@Override public void enterQueryFromMappingSection(AqlParser.QueryFromMappingSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitQueryFromMappingExpr(AqlParser.QueryFromMappingExprContext ctx) { }
+	@Override public void exitQueryFromMappingSection(AqlParser.QueryFromMappingSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterQueryFromSchemaExpr(AqlParser.QueryFromSchemaExprContext ctx) { }
+	@Override public void enterQueryFromSchemaSection(AqlParser.QueryFromSchemaSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitQueryFromSchemaExpr(AqlParser.QueryFromSchemaExprContext ctx) { }
+	@Override public void exitQueryFromSchemaSection(AqlParser.QueryFromSchemaSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -2447,6 +2579,18 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPragmaKind(AqlParser.PragmaKindContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPragmaAddClasspathSection(AqlParser.PragmaAddClasspathSectionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPragmaAddClasspathSection(AqlParser.PragmaAddClasspathSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -2788,13 +2932,13 @@ public class AqlParserBaseListener implements AqlParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterConstraintLiteralExpr(AqlParser.ConstraintLiteralExprContext ctx) { }
+	@Override public void enterConstraintLiteralSection(AqlParser.ConstraintLiteralSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitConstraintLiteralExpr(AqlParser.ConstraintLiteralExprContext ctx) { }
+	@Override public void exitConstraintLiteralSection(AqlParser.ConstraintLiteralSectionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
