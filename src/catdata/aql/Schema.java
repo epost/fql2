@@ -275,24 +275,37 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 		}
 		return head;
 	}
+	
+	public static String truncate(String x, int truncate) {
+		if (truncate == -1) {
+			return x;
+		}
+		if (x.length() > truncate) {
+			return x.substring(x.length() - truncate, x.length());
+		}
+		return x;	
+	}
 
 	static int constraint_static = 0;
-	public Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> toSQL_srcSchemas(String prefix, String idTy, String idCol) {
+	public Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> toSQL_srcSchemas(String prefix, String idTy, String idCol, int truncate) {
 		Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> sqlSrcSchs = new HashMap<>();
+		
+	
+
 		for (En en1 : ens) {
 			List<String> l = new LinkedList<>();
 			List<Chc<Fk, Att>> k = new LinkedList<>();
 			l.add(idCol + " " + idTy + " primary key");
 			List<String> f = new LinkedList<>();
 			for (Fk fk1 : fksFrom(en1)) {
-				l.add(fk1 + " " + idTy + " not null ");
+				l.add(		truncate(fk1.toString(), truncate) + " " + idTy + " not null ");
 				k.add(Chc.inLeft(fk1));
-				f.add("alter table " + prefix + en1 + " add constraint " + prefix + en1 + fk1 + constraint_static++ + 
-						" foreign key (" + fk1 + ") references " + prefix + fks.get(fk1).second + "(" + idCol + ")");
+				f.add("alter table " + 		truncate(prefix + en1, truncate) + " add constraint " + 		truncate(prefix + en1 + fk1 + constraint_static++, truncate) + 
+						" foreign key (" + 		truncate(fk1.toString(), truncate) + ") references " + 		truncate(prefix + fks.get(fk1).second, truncate) + "(" + idCol + ")");
 			}
 			for (Att att1 : attsFrom(en1)) {
 				//System.out.println("Doing att " + att1);
-				l.add(att1 + " " + SqlTypeSide.mediate(atts.get(att1).second.toString())); 
+				l.add(		truncate(att1.toString(), truncate) + " " + SqlTypeSide.mediate(atts.get(att1).second.toString())); 
 				k.add(Chc.inRight(att1));
 			}
 			String str = "create table " + prefix + en1 + "(" + Util.sep(l, ", ") + ")";

@@ -51,6 +51,7 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle, Q>
 	public static <Gen,En> Gen toGen(En en, String o, AqlOptions op) {
 		boolean b = (boolean) op.getOrDefault(AqlOption.prepend_entity_on_ids);
 		String sep = (String) op.getOrDefault(AqlOption.import_col_seperator);
+//		String pre = (String) op.getOrDefault(AqlOption.csv_import_prefix);
 		return toGen(en, o, b, sep);
 	}
 
@@ -137,6 +138,7 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle, Q>
 	protected boolean nullOnErr;
 	protected boolean prepend_entity_on_ids;
 	protected String import_col_seperator;
+	protected String prefix;
 
 	protected Ctx<En, Collection<Gen>> ens0;
 	protected Ctx<Ty, Collection<Null<?>>> tys0;
@@ -161,6 +163,7 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle, Q>
 		 nullOnErr = (Boolean) op.getOrDefault(AqlOption.import_null_on_err_unsafe);
 		 prepend_entity_on_ids = (Boolean) op.getOrDefault(AqlOption.prepend_entity_on_ids);
 		 import_col_seperator = (String) op.getOrDefault(AqlOption.import_col_seperator);
+		 prefix = (String) op.getOrDefault(AqlOption.csv_import_prefix);
 		 
 		 ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
 		 tys0 = new Ctx<>(Util.newSetsFor0(sch.typeSide.tys));

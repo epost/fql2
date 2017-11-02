@@ -62,6 +62,7 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		case "int": return Types.INTEGER;
 		case "bool": return Types.BOOLEAN;
 		case "dom": return Types.BLOB;
+		case "blob": return Types.BLOB;
 		case "other": return Types.OTHER;
 		}
 		return Util.anomaly();
@@ -96,6 +97,7 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		m.put("String", "java.lang.String");
 		m.put("Custom", "java.lang.Object");
 		m.put("Dom", "java.lang.Object");
+		m.put("Blob", "java.lang.Object");
 		m.put("Other", "java.lang.Object");
 		
 		
@@ -158,6 +160,7 @@ public class SqlTypeSide extends TypeSide<String, String> {
 		m.put("Custom", "return input[0]");
 		m.put("Dom", "return input[0]");
 		m.put("Other", "return input[0]");
+		m.put("Blob", "return input[0]");
 		return m;
 	}
 

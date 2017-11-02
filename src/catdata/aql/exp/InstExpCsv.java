@@ -104,14 +104,14 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 	protected Map<En, List<String[]>> start(Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
 		Map<String, String> m = new HashMap<>();
 		for (En en : sch.ens) {
-			File file = new File(f, op.getOrDefault(AqlOption.csv_import_file_prefix) + en.toString() + "."
+			File file = new File(f, op.getOrDefault(AqlOption.csv_import_prefix) + en.toString() + "."
 					+ op.getOrDefault(AqlOption.csv_file_extension));
 			if (file.exists()) {
 				m.put((String) en, file.getAbsolutePath());
 			} else if (!(boolean) op.getOrDefault(AqlOption.csv_import_missing_is_empty)) {
 				throw new RuntimeException("Missing file: " + file.getAbsolutePath()
 						+ ". \n\nPossible options to consider: " + AqlOption.csv_import_missing_is_empty + " and "
-						+ AqlOption.csv_import_file_prefix + " and " + AqlOption.csv_file_extension);
+						+ AqlOption.csv_import_prefix + " and " + AqlOption.csv_file_extension);
 			}
 		}
 		return start2(m, op, sch, false);
@@ -125,7 +125,12 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 	@Override
 	protected void joinedEn(Map<En, List<String[]>> rows, En en, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>> s, Schema<Ty, En, Sym, Fk, Att> sch)
 			throws Exception {
-		Map<String, String> inner = Util.toMapSafely(s.second);
+		Map<String, String> inner;
+		if (s == null) {
+			inner = new HashMap<>(); 
+		} else {
+			inner = Util.toMapSafely(s.second);
+		}
 		boolean autoGenIds = (Boolean) op.getOrDefault(inner, AqlOption.csv_generate_ids);
 		for (En en2 : rows.keySet()) {
 			if (rows.get(en2).size() == 0) {
@@ -140,7 +145,16 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 		}
 		boolean prepend = (boolean) op.getOrDefault(inner, AqlOption.csv_prepend_entity);
 		String sep = (String) op.getOrDefault(inner, AqlOption.import_col_seperator);
-		Map<String, String> map = new Ctx<>(Util.toMapSafely(s.first)).map((x,y)->new Pair<>(x.str,y)).map;
+		String pre = (String) op.getOrDefault(inner, AqlOption.csv_import_prefix);
+		//System.out.println("prefix is " + pre);
+		
+		Map<String, String> map;
+		if (s != null) {
+			map = new Ctx<>(Util.toMapSafely(s.first)).map((x,y)->new Pair<>(x.str,y)).map;
+		} else {
+			map = new HashMap<>();
+		}
+		
 		Function<String, String> mediate = x -> {
 			if (map.containsKey(x)) {
 				return map.get(x);
@@ -149,20 +163,15 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 			if (prepend) {
 				int i = x.indexOf(en + sep);
 				if (i != 0) {
-					// System.out.println("couldn't find " + en + sep + " in " +
-					// x);
-					return z;
+					return pre + z;
 				}
 				String temp = x.substring((en + sep).length());
-				// System.out.println("tried " + temp);
-				return temp;
+				return pre + temp;
 			}
-			return z;
+			return pre + z;
 		};
-		// System.out.println(rows);
 		int startId = 0;
 		for (String[] row : rows.get(en).subList(1, rows.get(en).size())) {
-			// System.out.println("xx");
 			Gen l0;
 
 			String idCol = map.containsKey(en) ? map.get(en) : 
@@ -171,7 +180,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 			if (autoGenIds && !m.containsKey(idCol)) {
 				l0 = toGen(en, "" + startId++);
 			} else if (!autoGenIds && !m.containsKey(idCol)) {
-				throw new RuntimeException("ID column " + idCol + " not found in headers " + m.keySet()
+				throw new RuntimeException("On " + en + ", ID column " + idCol + " not found in headers " + m.keySet()
 						+ ". \n\nPossible solution: set csv_generate_ids=true to auto-generate IDs.\n\nPossible solution: rename the headers in the CSV file.\n\nPossible solution: add an ID column to the CSV file.");
 			} else {
 				l0 = toGen(en, row[m.get(idCol)]);
