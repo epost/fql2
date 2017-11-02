@@ -40,7 +40,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 
 	@Override
 	protected String getHelpStr() {
-		return InstExpCsv.helpStr;
+		return "";
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 			if (gen2 == null) {
 				throw new RuntimeException("Encountered a NULL generator in column 2 of " + en);
 			}
-			gens.put((Gen1) gen, Term.Gen((Gen2) gen2));
+			gens.put(InstExpImport.toGen(en, gen, op), Term.Gen(InstExpImport.toGen(en, gen2, op)));
 		}
 	}
 

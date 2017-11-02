@@ -1,3 +1,6 @@
+options
+	prepend_entity_on_ids = false
+
 html { (* "
 <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> 
  <html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\">
@@ -1326,13 +1329,15 @@ It is important to note that this does require the construction of the `SkillMat
 " *) }
 instance iSTSpn_SPSpn_Merge2 = quotient_jdbc "com.mysql.jdbc.Driver"
     "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" iST_SP_Sum { 
+SpecificSkill->
 "select
    ps_id as sp_id,
    ts_id as st_id
 from
-   SkillMatch
-union
-select
+   SkillMatch"
+
+SkillClass->
+"select
    psc_id as sp_id,
    tsc_id as st_id
 from

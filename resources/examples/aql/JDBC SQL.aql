@@ -89,6 +89,11 @@ instance J = import_jdbc "" "" : S {
   //use id as age	
 	Employee -> "SELECT id, manager, worksIn, name AS first, NULL as last, id AS age FROM Employee"
 	Department -> "SELECT id, secretary, name FROM Department"
+
+	options
+		//aql by default prepends the entity to each imported ID, to get uniqueness across entities.
+		//to import the IDs verbatim, set the option below to false
+		prepend_entity_on_ids = false
 }
 
 //or, import an instance by providing queries for each entity/foreign key/attribute 
@@ -107,7 +112,7 @@ instance J_again = import_jdbc "" "" : S {
 }
 
 instance K = quotient_jdbc "" "" J {
-	"SELECT id, id FROM Employee"
+	Employee -> "SELECT id, id FROM Employee"
 }
 /*
 instance K2 = quotient_csv J {
@@ -119,6 +124,9 @@ instance K2 = quotient_csv J {
 transform Jid = import_jdbc "" "" : J -> J {
 	Employee -> "SELECT id, id FROM Employee"
 	Department -> "SELECT id, id FROM Department"
+
+	options
+		prepend_entity_on_ids = false
 }
 
 //export the instance to SQL

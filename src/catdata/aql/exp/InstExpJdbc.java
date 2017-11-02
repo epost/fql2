@@ -17,7 +17,7 @@ import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Schema;
 
 //TODO this type is actually a lie bc of import_as_theory option
-public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En, Sym, Fk, Att, Gen, Connection> {
+public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En, Sym, Fk, Att, Gen, Connection, String> {
 
 	public final String clazz;
 	public final String jdbcString;
@@ -61,7 +61,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 	protected void end(Connection conn) throws SQLException {
 		conn.close();
 	}
-	
+	/*
 	public final static String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example,"
 			+ "\n" + "\n	0:Employee" + "\n	0:Department" + "\n"
 			+ "\nPossible solution: Distinguish the IDs prior to import, or distinguish them during import, for example, "
@@ -70,10 +70,10 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 			+ "\n		Department -> \"SELECT concat(\"dept\",id) FROM Dept\""
 			+ "\n		worksIn -> \"SELECT concat(\"emp\",id), concat(\"dept\",worksIn) FROM Employee\"" + "\n	}"
 			+ "\nRemember also that by default imports are of entire sets of tables with no missing data; see the import_as_theory option in the manual to change this behavior";
-	
+	*/
 	@Override
 	protected String getHelpStr() {
-		return helpStr;
+		return "";
 	}
 	
 	@Override
@@ -109,10 +109,11 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 				throw new RuntimeException("Error in " + att + ": Encountered a NULL column 1");
 			}
 			Object rhs = rs.getObject(2);
-			if (!atts0.map.containsKey(lhs.toString())) {
-				atts0.put((Gen) lhs.toString(), new Ctx<>());
+			En en = sch.atts.get(att).first;
+			if (!atts0.map.containsKey(toGen(en, lhs.toString()))) {
+				atts0.put(toGen(en, lhs.toString()), new Ctx<>());
 			}
-			atts0.get((Gen) lhs.toString()).put(att, objectToSk(sch, rhs, lhs.toString(), att,
+			atts0.get(toGen(en, lhs.toString())).put(att, objectToSk(sch, rhs, toGen(en, lhs.toString()), att,
 					tys0, extraRepr, false, nullOnErr));
 		}
 		stmt.close();
@@ -147,8 +148,8 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 				conn.close();
 				throw new RuntimeException("Error in " + fk + ": Encountered a NULL in column 2");
 			}
-			Gen g1 = (Gen) lhs.toString();
-			Gen g2 = (Gen) rhs.toString(); //store strings
+			Gen g1 = toGen(sch.fks.get(fk).first, lhs.toString());
+			Gen g2 = toGen(sch.fks.get(fk).second, rhs.toString()); //store strings
 			if (!fks0.containsKey(g1)) {
 				fks0.put(g1, new Ctx<>());
 			}
@@ -179,7 +180,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 				conn.close();
 				throw new RuntimeException("Encountered a NULL generator");
 			}
-			ens0.get(en).add((Gen) gen.toString()); //store strings 
+			ens0.get(en).add(toGen(en, gen.toString())); //store strings 
 		}
 		rs.close();
 		stmt.close();
@@ -201,7 +202,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 				conn.close();
 				throw new RuntimeException("Encountered a NULL generator in ID column " + idCol);
 			}
-			Gen g1 = (Gen) gen.toString();
+			Gen g1 = toGen(en, gen.toString());
 			ens0.get(en).add(g1); //store strings 
 			
 			for (Fk fk : sch.fksFrom(en)) {
@@ -211,19 +212,20 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 					rs.close();
 					conn.close();
 					throw new RuntimeException("ID " + gen + " has a NULL foreign key value on " + fk);
-				}	
-				Gen g2 = (Gen) rhs.toString(); //store strings
+				}
+				En en2 = sch.fks.get(fk).second;
+				Gen g2 = toGen(en2, rhs.toString()); //store strings
 				if (!fks0.containsKey(g1)) {
 					fks0.put(g1, new Ctx<>());
 				}
 				fks0.get(g1).put(fk, g2);
 			}
 			for (Att att : sch.attsFrom(en)) {
-				Object rhs = rs.getObject((String) att);
+				Object rhs =  rs.getObject((String) att);
 				if (!atts0.map.containsKey(g1)) {
 					atts0.put(g1, new Ctx<>());
 				}
-				atts0.get(g1).put(att, objectToSk(sch, rhs, gen.toString(), att,
+				atts0.get(g1).put(att, objectToSk(sch, rhs, g1, att,
 						tys0, extraRepr, false, nullOnErr));
 			}
 			

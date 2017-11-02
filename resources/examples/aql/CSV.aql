@@ -32,12 +32,10 @@ pragma createCsvData = exec_js {
 }
 
 instance I0 = import_csv "/Users/ryan/Desktop/" : S0 {
-	Employee -> eId
-	Person -> pId
-	eAsP -> is
-	ssn -> pId
-	eSsn -> is
+	Employee -> {Employee -> eId   eAsP -> is    eSsn -> is}
 	//eId -> eId can be ommitted
+	
+	Person -> {Person -> pId  ssn -> pId}
 }
 
 
@@ -86,9 +84,10 @@ pragma createCsvData2 = exec_js {
 }
 
 instance I = import_csv "/Users/ryan/Desktop/" : S {
-	Person -> ssn
-	name -> nameOf
-	likes -> Likes
+	Person -> {
+		Person -> ssn
+		name -> nameOf
+		likes -> Likes}
 }
 
 schema T = literal : Ty {

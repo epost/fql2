@@ -100,11 +100,12 @@ public class Examples {
 				} else { //TODO AQL this is really messed up what's going on with Eclipse
 					URL l = Object.class.getResource("/examples");
 					if (l == null) {
-						new RuntimeException("Cannot locate built-in examples").printStackTrace();
+						//new RuntimeException("Cannot locate built-in examples").printStackTrace();
 						HashMap<Language, List<Example>> ret = new HashMap<>();
 						for (Language ll : Language.values()) {
 							ret.put(ll, new LinkedList<>());
 						}
+						return ret;
 					}
 					File f = new File(l.toURI());
 					examples2 = getExamples(f);

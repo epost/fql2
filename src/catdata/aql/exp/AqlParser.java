@@ -472,11 +472,14 @@ public class AqlParser {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static Parser<InstExpCsv> instExpCsv() {
-		Parser<Pair<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<String, String>>>> qs = Parsers
-				.tuple(env(ident, "->"), options).between(token("{"), token("}"));
+		Parser<catdata.Pair<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<String, String>>>> b = Parsers.tuple(token("{"), env(ident, "->"), options, token("}"))
+				.map(x -> new catdata.Pair<>(x.b, x.c));
+		
+		Parser<Pair<List<catdata.Pair<LocStr, catdata.Pair<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<String, String>>>>>, List<catdata.Pair<String, String>>>> qs = Parsers
+				.tuple(env(b, "->"), options).between(token("{"), token("}"));
 
 		Parser<InstExpCsv> ret = Parsers.tuple(token("import_csv"), ident.followedBy(token(":")), sch_ref.lazy(), qs)
-				.map(x -> new InstExpCsv(x.c, x.d.a, x.d.b, x.b));
+				.map(x -> new InstExpCsv<String,String,String,String,String,String>((SchExp<String, String, String, String, String>) x.c, x.d.a, x.d.b, x.b));
 		return ret;
 	}
 
@@ -1034,7 +1037,8 @@ public class AqlParser {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static Parser<InstExpJdbcQuotient> instExpJdbcQuot() {
-		Parser<Pair<List<String>, List<catdata.Pair<String, String>>>> p = Parsers.tuple(ident.many(), options)
+		Parser<Pair<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<String, String>>>> 
+		p = Parsers.tuple(env(ident, "->"), options)
 				.between(token("{"), token("}"));
 
 		Parser<InstExpJdbcQuotient> ret = Parsers.tuple(token("quotient_jdbc"), ident, ident, inst_ref.lazy(), p)

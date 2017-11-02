@@ -30,7 +30,7 @@ import catdata.aql.fdm.LiteralInstance;
 import catdata.aql.fdm.SaturatedInstance;
 
 //TODO: aql change type of this to not be a lie
-public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
+public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle, Q>
 		extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> implements Raw {
 
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
@@ -39,12 +39,30 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 	public Ctx<String, List<InteriorLabel<Object>>> raw() {
 		return raw;
 	}
+	
+	public static <Gen,En> Gen toGen(En en, String o, boolean b, String sep) {
+		if (b) {
+			return (Gen) (en + sep + o);
+		} else {
+			return (Gen) o;
+		}
+	}
+	
+	public static <Gen,En> Gen toGen(En en, String o, AqlOptions op) {
+		boolean b = (boolean) op.getOrDefault(AqlOption.prepend_entity_on_ids);
+		String sep = (String) op.getOrDefault(AqlOption.import_col_seperator);
+		return toGen(en, o, b, sep);
+	}
 
+	public Gen toGen(En en, String o) {
+		return toGen(en, o, prepend_entity_on_ids, import_col_seperator);
+	}
+	
 	public final SchExp<Ty, En, Sym, Fk, Att> schema;
 
 	public final Map<String, String> options;
 
-	public final Map<String, String> map;
+	public final Map<String, Q> map;
 
 	@Override
 	public Map<String, String> options() {
@@ -53,14 +71,14 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 
 	public static IntRef counter = new IntRef(0);
 
-	public InstExpImport(SchExp<Ty, En, Sym, Fk, Att> schema, List<Pair<LocStr, String>> map, List<Pair<String, String>> options) {
+	public InstExpImport(SchExp<Ty, En, Sym, Fk, Att> schema, List<Pair<LocStr, Q>> map, List<Pair<String, String>> options) {
 		this.schema = schema;
 
 		this.options = Util.toMapSafely(options);
 		this.map = Util.toMapSafely(LocStr.set2(map));
 
 		List<InteriorLabel<Object>> f = new LinkedList<>();
-		for (Pair<LocStr, String> p : map) {
+		for (Pair<LocStr, Q> p : map) {
 			f.add(new InteriorLabel<>("imports", new Pair<>(p.first.str, p.second), p.first.loc,
 					x -> x.first + " -> " + x.second).conv());
 		}
@@ -73,13 +91,13 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 	}
 
 	public static <Ty, Sym, En, Fk, Att, Gen> Term<Ty, Void, Sym, Void, Void, Void, Null<?>> objectToSk(
-			Schema<Ty, En, Sym, Fk, Att> sch, Object rhs, String x, Att att,
+			Schema<Ty, En, Sym, Fk, Att> sch, Object rhs, Gen x, Att att,
 			Ctx<Ty, Collection<Null<?>>> sks, 
 			Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>> extraRepr, boolean shouldJS, boolean errMeansNull) {
 		Ty ty = sch.atts.get(att).second;
 		if (rhs == null) {
-			Null<?> n = new Null<>(Term.Att(att, Term.Gen((Gen)x)));
-			extraRepr.put(n, Term.Att(att, Term.Gen((Gen)x)));
+			Null<?> n = new Null<>(Term.Att(att, Term.Gen(x)));
+			extraRepr.put(n, Term.Att(att, Term.Gen(x)));
 			sks.get(ty).add(n);
 			return Term.Sk(n);
 		} else if (sch.typeSide.js.java_tys.containsKey(ty)) {
@@ -117,6 +135,8 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 	private boolean import_as_theory;
 	protected boolean isJoined;
 	protected boolean nullOnErr;
+	protected boolean prepend_entity_on_ids;
+	protected String import_col_seperator;
 
 	protected Ctx<En, Collection<Gen>> ens0;
 	protected Ctx<Ty, Collection<Null<?>>> tys0;
@@ -139,7 +159,8 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 		 isJoined = (boolean) op.getOrDefault(AqlOption.import_joined);
 		 idCol = (String) op.getOrDefault(AqlOption.id_column_name);
 		 nullOnErr = (Boolean) op.getOrDefault(AqlOption.import_null_on_err_unsafe);
-
+		 prepend_entity_on_ids = (Boolean) op.getOrDefault(AqlOption.prepend_entity_on_ids);
+		 import_col_seperator = (String) op.getOrDefault(AqlOption.import_col_seperator);
 		 
 		 ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
 		 tys0 = new Ctx<>(Util.newSetsFor0(sch.typeSide.tys));
@@ -151,14 +172,14 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 			Handle h = start(sch);
 
 			if (!isJoined) {
-				Map<En, String> ens = new HashMap<>();
-				Map<Ty, String> tys = new HashMap<>();
-				Map<Att, String> atts = new HashMap<>();
-				Map<Fk, String> fks = new HashMap<>();
+				Map<En, Q> ens = new HashMap<>();
+				Map<Ty, Q> tys = new HashMap<>();
+				Map<Att, Q> atts = new HashMap<>();
+				Map<Fk, Q> fks = new HashMap<>();
 	
 				for (String o : map.keySet()) {
 					assertUnambig(o, sch);
-					String q = map.get(o);
+					Q q = map.get(o);
 					if (sch.typeSide.tys.contains(o)) {
 						tys.put((Ty) o, q);
 					} else if (sch.ens.contains(o)) {
@@ -212,13 +233,13 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 	
 	protected abstract void end(Handle h) throws Exception;
 
-	protected abstract void shreddedAtt(Handle h, Att att, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception;
+	protected abstract void shreddedAtt(Handle h, Att att, Q s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception;
 
-	protected abstract void shreddedFk(Handle h, Fk fk, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception;
+	protected abstract void shreddedFk(Handle h, Fk fk, Q s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception;
 
-	protected abstract void shreddedEn(Handle h, En en, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception;
+	protected abstract void shreddedEn(Handle h, En en, Q s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception;
 	
-	protected abstract void joinedEn(Handle h, En en, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception;
+	protected abstract void joinedEn(Handle h, En en, Q s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception;
 	
 
 	public static <Ty, En, Sym, Fk, Att, Gen> Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> forTheory(
@@ -288,8 +309,8 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 		}
 	}
 	
-	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, String> ens, Map<Ty, String> tys,
-			Map<Att, String> atts, Map<Fk, String> fks) {
+	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, Q> ens, Map<Ty, Q> tys,
+			Map<Att, Q> atts, Map<Fk, Q> fks) {
 		// for (En En : sch.ens) {
 		// if (!ens.containsKey(En)) {
 		// throw new RuntimeException("no query for " + En);
@@ -351,7 +372,7 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle>
 			return false;
 		if (!(obj instanceof InstExpImport))
 			return false;
-		InstExpImport<?, ?, ?, ?, ?, ?, ?> other = (InstExpImport<?, ?, ?, ?, ?, ?, ?>) obj;
+		InstExpImport<?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpImport<?, ?, ?, ?, ?, ?, ?, ?>) obj;
 		if (map == null) {
 			if (other.map != null)
 				return false;

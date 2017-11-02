@@ -87,6 +87,7 @@ public final class AqlOptions {
 		import_col_seperator, 
 		csv_import_file_prefix, 
 		csv_prepend_entity,
+		prepend_entity_on_ids,
 		csv_import_missing_is_empty;
 		
 		
@@ -186,6 +187,8 @@ public final class AqlOptions {
 	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
+		case prepend_entity_on_ids:
+			return true;
 		case csv_prepend_entity:
 			return false;
 		case import_null_on_err_unsafe:
@@ -343,6 +346,8 @@ public final class AqlOptions {
 
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case prepend_entity_on_ids:
+			return op.getBoolean(map);
 		case csv_prepend_entity:
 			return op.getBoolean(map);
 		case import_null_on_err_unsafe:

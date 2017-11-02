@@ -94,7 +94,7 @@ extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y
 
 	@Override
 	protected String getHelpStr() {
-		return InstExpJdbc.helpStr;
+		return ""; //helpStr;
 	}
 
 	@Override
@@ -140,7 +140,7 @@ extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y
 				rs.close();
 				throw new RuntimeException("Error in " + en + ": Encountered a NULL generator in column 2");
 			 }						 
-			 gens.put((Gen1) gen.toString(), Term.Gen((Gen2) gen2.toString()));
+			 gens.put(InstExpImport.toGen(en, gen.toString(), op), Term.Gen(InstExpImport.toGen(en, gen2.toString(), op)));
 		}
 		stmt.close();
 		rs.close();		

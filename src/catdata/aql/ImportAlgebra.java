@@ -53,7 +53,7 @@ public class ImportAlgebra<Ty,En,Sym,Fk,Att,X,Y> extends Algebra<Ty,En,Sym,Fk,At
 				}
 				for (Att att : schema.attsFrom(en)) {
 					if (!atts.containsKey(x)) {
-						throw new RuntimeException("Incomplete import: no attribute values specified for ID " + x + " in entity " + en);
+						throw new RuntimeException("Incomplete import: no attribute " + att + " specified for ID " + x + " in entity " + en);
 					}
 					if (!atts.get(x).containsKey(att)) {
 						throw new RuntimeException("Incomplete import: no value for attribute " + att + " specified for  ID " + x + " in entity " + en);
