@@ -87,7 +87,7 @@ public class Examples {
 					for (Language ll : Language.values()) {
 						ret.put(ll, new LinkedList<>());
 					}
-					
+					return ret;
 				}
 				File f = new File(l.toURI());
 				examples2 = getExamples(f);
