@@ -7,43 +7,86 @@ instanceKindAssignment : INSTANCE instanceId EQUAL instanceDef ;
 
 instanceDef
   : EMPTY COLON schemaKind
+  #Instance_Empty
+
   | SRC transformKind
+  #Instance_Src
+
   | DST transformKind
+  #Instance_Dst
+
   | DISTINCT instanceKind
+  #Instance_Distinct
+
   | EVAL queryKind instanceKind
-      (LBRACE instanceEvalSection RBRACE)?
+    (LBRACE instanceEvalSection RBRACE)?
+  #Instance_Eval
+
   | COEVAL queryKind instanceKind
-      (LBRACE instanceCoevalSection RBRACE)?
+    (LBRACE instanceCoevalSection RBRACE)?
+  #Instance_Coeval
+
   | DELTA mappingKind instanceKind
+  #Instance_Delta
+
   | SIGMA mappingKind instanceKind
-      (LBRACE instanceSigmaSection RBRACE)?
+    (LBRACE instanceSigmaSection RBRACE)?
+  #Instance_Sigma
+
   | COPRODUCT_SIGMA (mappingKind instanceKind)+ COLON schemaKind
-      (LBRACE instanceCoprodSigmaSection RBRACE)?
+    (LBRACE instanceCoprodSigmaSection RBRACE)?
+  #Instance_CoSigma
+
   | COPRODUCT instanceKind (PLUS instanceKind)* COLON schemaKind
-      (LBRACE instanceCoprodSection RBRACE)?
+    (LBRACE instanceCoprodSection RBRACE)?
+  #Instance_Coprod
+
   | COPRODUCT_UNRESTRICTED instanceId (PLUS instanceId)* COLON schemaKind
-      (LBRACE instanceCoprodUnrestrictSection RBRACE)?
+    (LBRACE instanceCoprodUnrestrictSection RBRACE)?
+  #Instance_CoprodUn
+
   | COEQUALIZE transformKind transformKind
-      (LBRACE instanceCoequalizeSection RBRACE)?
+    (LBRACE instanceCoequalizeSection RBRACE)?
+  #Instance_CoEqual
+
   | COLIMIT graphKind schemaKind
-      (LBRACE instanceColimitSection RBRACE)?
+    (LBRACE instanceColimitSection RBRACE)?
+  #Instance_CoLimit
+
   | IMPORT_JDBC jdbcClass jdbcUri COLON schemaKind
-      (LBRACE instanceImportJdbcSection RBRACE)?
+    (LBRACE instanceImportJdbcSection RBRACE)?
+  #Instance_ImportJdbc
+
   | QUOTIENT_JDBC (jdbcClass (jdbcUri)?)? instanceKind
-      (LBRACE instanceQuotientJdbcSection RBRACE)?
+    (LBRACE instanceQuotientJdbcSection RBRACE)?
+  #Instance_QuotientJdbc
+
   | QUOTIENT_CSV schemaDef
-      (LBRACE instanceQuotientCsvSection RBRACE)?
+    (LBRACE instanceQuotientCsvSection RBRACE)?
+  #Instance_QuotientCsv
+
   | IMPORT_JDBC_ALL (jdbcClass (jdbcUri)?)?
-      (LBRACE instanceImportJdbcAllSection RBRACE)?
+    (LBRACE instanceImportJdbcAllSection RBRACE)?
+  #Instance_ImportJdbcAll
+
   | IMPORT_CSV instanceFile COLON schemaId
-      (LBRACE instanceImportCsvSection RBRACE)?
+    (LBRACE instanceImportCsvSection RBRACE)?
+  #Instance_ImportCsv
+
   | LITERAL COLON schemaKind
-      (LBRACE instanceLiteralSection RBRACE)?
+    (LBRACE instanceLiteralSection RBRACE)?
+  #Instance_Literal
+
   | QUOTIENT instanceId
-      (LBRACE instanceQuotientSection RBRACE)?
-  | CHASE constraintKind+ instanceKind INTEGER?
+    (LBRACE instanceQuotientSection RBRACE)?
+  #Instance_Quotient
+
+  | CHASE constraintKind+ instanceKind INTEGER
+  #Instance_Chase
+
   | RANDOM COLON schemaId
-      (LBRACE instanceRandomSection RBRACE)?
+    (LBRACE instanceRandomSection RBRACE)?
+  #Instance_Random
   ;
 
 instanceKind: instanceId | instanceDef | (LPAREN instanceKind RPAREN);

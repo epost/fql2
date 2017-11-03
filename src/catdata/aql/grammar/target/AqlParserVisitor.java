@@ -1,4 +1,4 @@
-// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/oby/uanrg/AqlParser.g4 by ANTLR 4.7
+// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/5r0/uanrg/AqlParser.g4 by ANTLR 4.7
 package org.aql;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -593,11 +593,159 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInstanceKindAssignment(AqlParser.InstanceKindAssignmentContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#instanceDef}.
+	 * Visit a parse tree produced by the {@code Instance_Empty}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitInstanceDef(AqlParser.InstanceDefContext ctx);
+	T visitInstance_Empty(AqlParser.Instance_EmptyContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Src}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Src(AqlParser.Instance_SrcContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Dst}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Dst(AqlParser.Instance_DstContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Distinct}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Distinct(AqlParser.Instance_DistinctContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Eval}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Eval(AqlParser.Instance_EvalContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Coeval}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Coeval(AqlParser.Instance_CoevalContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Delta}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Delta(AqlParser.Instance_DeltaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Sigma}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Sigma(AqlParser.Instance_SigmaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_CoSigma}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_CoSigma(AqlParser.Instance_CoSigmaContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Coprod}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Coprod(AqlParser.Instance_CoprodContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_CoprodUn}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_CoprodUn(AqlParser.Instance_CoprodUnContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_CoEqual}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_CoEqual(AqlParser.Instance_CoEqualContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_CoLimit}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_CoLimit(AqlParser.Instance_CoLimitContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_ImportJdbc}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_ImportJdbc(AqlParser.Instance_ImportJdbcContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_QuotientJdbc}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_QuotientJdbc(AqlParser.Instance_QuotientJdbcContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_QuotientCsv}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_QuotientCsv(AqlParser.Instance_QuotientCsvContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_ImportJdbcAll}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_ImportJdbcAll(AqlParser.Instance_ImportJdbcAllContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_ImportCsv}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_ImportCsv(AqlParser.Instance_ImportCsvContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Literal}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Literal(AqlParser.Instance_LiteralContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Quotient}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Quotient(AqlParser.Instance_QuotientContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Chase}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Chase(AqlParser.Instance_ChaseContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code Instance_Random}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInstance_Random(AqlParser.Instance_RandomContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#instanceKind}.
 	 * @param ctx the parse tree
@@ -1241,12 +1389,6 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitQueryFromSchemaSection(AqlParser.QueryFromSchemaSectionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#queryCompositionExpr}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitQueryCompositionExpr(AqlParser.QueryCompositionExprContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link AqlParser#graphId}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -1272,11 +1414,11 @@ public interface AqlParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitGraphKind(AqlParser.GraphKindContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link AqlParser#graphLiteralExpr}.
+	 * Visit a parse tree produced by {@link AqlParser#graphLiteralSection}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitGraphLiteralExpr(AqlParser.GraphLiteralExprContext ctx);
+	T visitGraphLiteralSection(AqlParser.GraphLiteralSectionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link AqlParser#graphNodeId}.
 	 * @param ctx the parse tree

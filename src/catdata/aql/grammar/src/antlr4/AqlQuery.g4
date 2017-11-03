@@ -30,7 +30,7 @@ queryDef
       (LBRACE queryFromSchemaSection RBRACE)?
   #QueryExp_FromMapping
 
-  | queryCompositionExpr
+  | LBRACK queryKind SEMI queryKind RBRACK
   #QueryExp_Composition
   ;
 
@@ -51,7 +51,12 @@ queryEntityExpr : schemaEntityId RARROW LBRACE queryClauseExpr RBRACE ;
 
 querySimpleSection : queryClauseExpr allOptions ;
 
-queryLiteralValue : STRING | NUMBER | INTEGER | TRUE | FALSE ;
+queryLiteralValue
+  : STRING
+  | NUMBER
+  | INTEGER
+  | TRUE
+  | FALSE ;
 
 queryClauseExpr
   : FROM (queryGen COLON schemaEntityId)+
@@ -77,6 +82,3 @@ queryPath
 queryFromMappingSection : allOptions ;
 
 queryFromSchemaSection : allOptions ;
-
-queryCompositionExpr
-  : LBRACK queryKind SEMI queryKind RBRACK ;

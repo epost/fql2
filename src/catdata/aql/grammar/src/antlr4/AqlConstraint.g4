@@ -28,7 +28,7 @@ constraintExpr
     (WHERE constraintEquation+)?
     RARROW
     (EXISTS (constraintGen COLON schemaEntityId)+)?
-    WHERE constraintEquation+
+    (WHERE constraintEquation+)?
   ;
 
 constraintGen : symbol ;

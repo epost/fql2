@@ -1,4 +1,4 @@
-// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/oby/uanrg/AqlParser.g4 by ANTLR 4.7
+// Generated from /home/fred/.boot/cache/tmp/home/fred/projects/fql/src/catdata/aql/grammar/5r0/uanrg/AqlParser.g4 by ANTLR 4.7
 package org.aql;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -982,15 +982,269 @@ public interface AqlParserListener extends ParseTreeListener {
 	 */
 	void exitInstanceKindAssignment(AqlParser.InstanceKindAssignmentContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link AqlParser#instanceDef}.
+	 * Enter a parse tree produced by the {@code Instance_Empty}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
 	 * @param ctx the parse tree
 	 */
-	void enterInstanceDef(AqlParser.InstanceDefContext ctx);
+	void enterInstance_Empty(AqlParser.Instance_EmptyContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link AqlParser#instanceDef}.
+	 * Exit a parse tree produced by the {@code Instance_Empty}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
 	 * @param ctx the parse tree
 	 */
-	void exitInstanceDef(AqlParser.InstanceDefContext ctx);
+	void exitInstance_Empty(AqlParser.Instance_EmptyContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Src}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Src(AqlParser.Instance_SrcContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Src}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Src(AqlParser.Instance_SrcContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Dst}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Dst(AqlParser.Instance_DstContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Dst}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Dst(AqlParser.Instance_DstContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Distinct}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Distinct(AqlParser.Instance_DistinctContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Distinct}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Distinct(AqlParser.Instance_DistinctContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Eval}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Eval(AqlParser.Instance_EvalContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Eval}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Eval(AqlParser.Instance_EvalContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Coeval}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Coeval(AqlParser.Instance_CoevalContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Coeval}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Coeval(AqlParser.Instance_CoevalContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Delta}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Delta(AqlParser.Instance_DeltaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Delta}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Delta(AqlParser.Instance_DeltaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Sigma}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Sigma(AqlParser.Instance_SigmaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Sigma}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Sigma(AqlParser.Instance_SigmaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_CoSigma}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_CoSigma(AqlParser.Instance_CoSigmaContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_CoSigma}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_CoSigma(AqlParser.Instance_CoSigmaContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Coprod}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Coprod(AqlParser.Instance_CoprodContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Coprod}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Coprod(AqlParser.Instance_CoprodContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_CoprodUn}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_CoprodUn(AqlParser.Instance_CoprodUnContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_CoprodUn}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_CoprodUn(AqlParser.Instance_CoprodUnContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_CoEqual}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_CoEqual(AqlParser.Instance_CoEqualContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_CoEqual}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_CoEqual(AqlParser.Instance_CoEqualContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_CoLimit}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_CoLimit(AqlParser.Instance_CoLimitContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_CoLimit}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_CoLimit(AqlParser.Instance_CoLimitContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_ImportJdbc}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_ImportJdbc(AqlParser.Instance_ImportJdbcContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_ImportJdbc}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_ImportJdbc(AqlParser.Instance_ImportJdbcContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_QuotientJdbc}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_QuotientJdbc(AqlParser.Instance_QuotientJdbcContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_QuotientJdbc}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_QuotientJdbc(AqlParser.Instance_QuotientJdbcContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_QuotientCsv}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_QuotientCsv(AqlParser.Instance_QuotientCsvContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_QuotientCsv}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_QuotientCsv(AqlParser.Instance_QuotientCsvContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_ImportJdbcAll}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_ImportJdbcAll(AqlParser.Instance_ImportJdbcAllContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_ImportJdbcAll}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_ImportJdbcAll(AqlParser.Instance_ImportJdbcAllContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_ImportCsv}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_ImportCsv(AqlParser.Instance_ImportCsvContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_ImportCsv}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_ImportCsv(AqlParser.Instance_ImportCsvContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Literal}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Literal(AqlParser.Instance_LiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Literal}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Literal(AqlParser.Instance_LiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Quotient}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Quotient(AqlParser.Instance_QuotientContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Quotient}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Quotient(AqlParser.Instance_QuotientContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Chase}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Chase(AqlParser.Instance_ChaseContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Chase}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Chase(AqlParser.Instance_ChaseContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code Instance_Random}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void enterInstance_Random(AqlParser.Instance_RandomContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code Instance_Random}
+	 * labeled alternative in {@link AqlParser#instanceDef}.
+	 * @param ctx the parse tree
+	 */
+	void exitInstance_Random(AqlParser.Instance_RandomContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link AqlParser#instanceKind}.
 	 * @param ctx the parse tree
@@ -2070,16 +2324,6 @@ public interface AqlParserListener extends ParseTreeListener {
 	 */
 	void exitQueryFromSchemaSection(AqlParser.QueryFromSchemaSectionContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link AqlParser#queryCompositionExpr}.
-	 * @param ctx the parse tree
-	 */
-	void enterQueryCompositionExpr(AqlParser.QueryCompositionExprContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link AqlParser#queryCompositionExpr}.
-	 * @param ctx the parse tree
-	 */
-	void exitQueryCompositionExpr(AqlParser.QueryCompositionExprContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link AqlParser#graphId}.
 	 * @param ctx the parse tree
 	 */
@@ -2122,15 +2366,15 @@ public interface AqlParserListener extends ParseTreeListener {
 	 */
 	void exitGraphKind(AqlParser.GraphKindContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link AqlParser#graphLiteralExpr}.
+	 * Enter a parse tree produced by {@link AqlParser#graphLiteralSection}.
 	 * @param ctx the parse tree
 	 */
-	void enterGraphLiteralExpr(AqlParser.GraphLiteralExprContext ctx);
+	void enterGraphLiteralSection(AqlParser.GraphLiteralSectionContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link AqlParser#graphLiteralExpr}.
+	 * Exit a parse tree produced by {@link AqlParser#graphLiteralSection}.
 	 * @param ctx the parse tree
 	 */
-	void exitGraphLiteralExpr(AqlParser.GraphLiteralExprContext ctx);
+	void exitGraphLiteralSection(AqlParser.GraphLiteralSectionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link AqlParser#graphNodeId}.
 	 * @param ctx the parse tree
