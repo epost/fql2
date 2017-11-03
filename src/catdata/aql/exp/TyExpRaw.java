@@ -363,12 +363,12 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 				ctx.put(p.first, null);
 			}
 		}
-		Triple<Ctx<String, Chc<String, Void>>, Term<String, Void, String, Void, Void, Void, Void>, Term<String, Void, String, Void, Void, Void, Void>> eq0 = RawTerm
-				.infer1(ctx, eq.second, eq.third, col, js);
+		Triple<Ctx<Var, Chc<String, Void>>, Term<String, Void, String, Void, Void, Void, Void>, Term<String, Void, String, Void, Void, Void, Void>> eq0 = RawTerm
+				.infer1x(ctx, eq.second, eq.third, null, col, "In equation " + eq.first + " = " + eq.second + ", ", js).first3();
 
 		LinkedHashMap<Var, String> map = new LinkedHashMap<>();
 		for (String k : ctx.keySet()) {
-			Chc<String, Void> v = eq0.first.get(k);
+			Chc<String, Void> v = eq0.first.get(new Var(k));
 			if (!v.left) {
 				throw new RuntimeException("Anomaly: please report");
 			}

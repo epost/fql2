@@ -197,7 +197,7 @@ Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 					throw new RuntimeException(gen.first + " is not a source generator/labelled null");
 				}
 				
-				Term<String, String, String, String, String, String, String> term0 = RawTerm.infer0(ctx, term, required, dcol, "", src0.schema().typeSide.js);
+				Term<String, String, String, String, String, String, String> term0 = RawTerm.infer1x(ctx, term, null, required, dcol, "", src0.schema().typeSide.js).second;
 							
 				if (required.left) {
 					Util.putSafely(sks0, gen.first, term0);				

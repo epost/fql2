@@ -79,10 +79,10 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 			try {
 				Map<String, Chc<Ty, String>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
 				
-				Triple<Ctx<String,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>>
-				eq0 = RawTerm.infer1(ctx, eq.third, eq.fourth, col, ts.js);
+				Triple<Ctx<Var,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>>
+				eq0 = RawTerm.infer1x(ctx, eq.third, eq.fourth, null, col, "", ts.js).first3();
 				
-				Chc<Ty, String> v = eq0.first.get(eq.first);
+				Chc<Ty, String> v = eq0.first.get(new Var(eq.first));
 				if (v.left) {
 					throw new RuntimeException(eq.first + " has type " + v.l + " which is not an entity");
 				}
@@ -105,10 +105,10 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 				RawTerm lhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.first, vv);
 				RawTerm rhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.second,vv);
 				
-				Triple<Ctx<String,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>>
-				eq0 = RawTerm.infer1(ctx, lhs, rhs, col, ts.js);
+				Triple<Ctx<Var,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>>
+				eq0 = RawTerm.infer1x(ctx, lhs, rhs, null, col, "", ts.js).first3();
 			
-				Chc<Ty, String> v = eq0.first.get(vv);
+				Chc<Ty, String> v = eq0.first.get(var);
 				if (v.left) {
 					throw new RuntimeException("the equation's source " + eq.first + " is type " + v.l + " which is not an entity");
 				}

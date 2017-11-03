@@ -626,8 +626,8 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 					Ctx<String, Chc<Ty, En1>> ctx = unVar(ens0.get(dst0.fks.get(p.first).first).first.inRight());
 					Collage<Ty, En1, Sym, Fk1, Att1, Var, Void> col = cols.get(dst0.fks.get(p.first).first);
 					Chc<Ty, En1> required = Chc.inRight(ens0.get(dst0.fks.get(p.first).second).first.get(v.first));
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term = RawTerm.infer0(ctx.map, v.second, required, col,
-							"in foreign key " + p.first + ", ", src0.typeSide.js);
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term = RawTerm.infer1x(ctx.map, v.second, null, required, col,
+							"in foreign key " + p.first + ", ", src0.typeSide.js).second;
 					trans.put(v.first, freeze(term).convert());
 				}
 				boolean doNotCheckEqs = (Boolean) new AqlOptions(p.second.options, null, env.defaults)
@@ -656,8 +656,8 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		Ctx<String, Chc<Ty, En1>> ctx = unVar(ens0.get(dst0.atts.get(p.first).first).first.inRight());
 		Collage<Ty, En1, Sym, Fk1, Att1, Var, Void> col = cols.get(dst0.atts.get(p.first).first);
 		Chc<Ty, En1> required = Chc.inLeft(dst0.atts.get(p.first).second);
-		Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term = RawTerm.infer0(ctx.map, p.second, required, col, "",
-				src0.typeSide.js);
+		Term<Ty, En1, Sym, Fk1, Att1, Var, Void> term = RawTerm.infer1x(ctx.map, p.second, null, required, col, "",
+				src0.typeSide.js).second;
 		atts0.put(p.first, freeze(term));
 	}
 
@@ -679,14 +679,9 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		cols.put(p.first, col);
 		Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs = new HashSet<>();
 		for (Pair<RawTerm, RawTerm> eq : p.second.eqs) {
-			try {
-				Triple<Ctx<String, Chc<Ty, En1>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> x = RawTerm
-						.infer1(ctx0.map, eq.first, eq.second, col, src0.typeSide.js);
+				Triple<Ctx<Var, Chc<Ty, En1>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> x = RawTerm
+						.infer1x(ctx0.map, eq.first, eq.second, null, col, "In equation " + eq.first + " = " + eq.second + ", ", src0.typeSide.js).first3();
 				eqs.add(new Eq<>(new Ctx<>(), freeze(x.second), freeze(x.third)));
-			} catch (RuntimeException ex) {
-				ex.printStackTrace();
-				throw new RuntimeException("In equation " + eq.first + " = " + eq.second + ", " + ex.getMessage());
-			}
 		}
 		Map<String, String> uu = new HashMap<>(options);
 		uu.putAll(p.second.options);

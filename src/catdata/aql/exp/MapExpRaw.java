@@ -316,8 +316,8 @@ public final class MapExpRaw extends MapExp<String, String, String, String, Stri
 
 				Map<String, Chc<String, String>> ctx = Util.singMap(var, var_en2);
 
-				Term<String, String, String, String, String, Void, Void> term0 = RawTerm.infer0(ctx, term, proposed_ty2,
-						dcol, "", src0.typeSide.js);
+				Term<String, String, String, String, String, Void, Void> term0 = RawTerm.infer1x(ctx, term, null, proposed_ty2,
+						dcol, "", src0.typeSide.js).second;
 
 				Util.putSafely(atts0, att.first, new Triple<>(new Var(var), dst_att_dom_en, term0));
 			} catch (RuntimeException ex) {

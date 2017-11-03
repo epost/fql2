@@ -835,8 +835,8 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 					throw new RuntimeException(pre + " given type is " + k.second.second + " but expected " + r.first);
 				}
 				Ctx<String,Chc<Ty,String>> ctx = new Ctx<>(k.second.first, Chc.inRight(r.first));
-				Term<Ty, String, Sym, String, String, Void, Void> t = 
-				RawTerm.infer0(ctx.map, k.second.third, Chc.inLeft(r.second), colim0.schemaStr.collage(), pre, colim0.schemaStr.typeSide.js);
+				Term /*<Ty, String, Sym, String, String, Void, Void> */ t = 
+				RawTerm.infer1x(ctx.map, k.second.third, null, Chc.inLeft(r.second), colim0.schemaStr.collage(), pre, colim0.schemaStr.typeSide.js).second;
 				colim0 = colim0.removeAtt(k.first, new Var(k.second.first), t, checkJava);
 			}
 			

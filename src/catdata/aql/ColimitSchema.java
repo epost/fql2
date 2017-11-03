@@ -421,10 +421,10 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		for (Quad<String, String, RawTerm, RawTerm> eq : eqTerms) {
 			Map<String, Chc<Ty, String>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
 			
-			Triple<Ctx<String,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>> 
-			eq0 = RawTerm.infer1(ctx, eq.third, eq.fourth, col, ty.js);
+			Triple<Ctx<Var,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>> 
+			eq0 = RawTerm.infer1x(ctx, eq.third, eq.fourth, null, col, "", ty.js).first3();
 			
-			Chc<Ty, String> v = eq0.first.get(eq.first);
+			Chc<Ty, String> v = eq0.first.get(new Var(eq.first));
 			if (v.left) {
 				throw new RuntimeException("In " + eq.third + " = " + eq.fourth + ", variable " + eq.first + " has type " + v.l + " which is not an entity");
 			}

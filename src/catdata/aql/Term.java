@@ -317,6 +317,25 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
+	
+	public String toStringUnambig() {
+		if (var != null) {
+			return "VAR " + var;
+		} else if (sym != null) {
+			return "SYM " + sym + "(" + Util.sep(args.stream().map(x -> x.toStringUnambig()).collect(Collectors.toList()), ", ") + ")";
+		} else if (att != null) {
+			return "ATT " + arg + "." + att.toString();
+		} else if (fk != null) {
+			return "FK " + arg + "." + fk.toString();
+		} else if (gen != null) {
+			return "GEN " + gen;
+		} else if (sk != null) {
+			return "SK " + sk;
+		} else if (obj != null) {
+			return obj.toString() + "@" + ty;
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
 	/*
 	public String toString(Function<Sk, String> sk_printer, Function<Gen, String> gen_printer) {
 		if (var != null) {
@@ -378,6 +397,9 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		throw new RuntimeException("Anomaly: please report: " + head + "(" + args + ")");
 	}
 	
+	
+
+
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> Var(Var var) {
 		if (var == null) {
 			throw new RuntimeException("Attempt to create a term with a null variable");

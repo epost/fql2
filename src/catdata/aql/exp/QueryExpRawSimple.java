@@ -123,7 +123,7 @@ public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends 
 		for (Pair<Att2, RawTerm> p : block.atts) {
 			Map<String, Chc<Ty, En1>> s = QueryExpRaw.unVar(cols.get(en2).gens).<Ty>inRight().map;
 			Term<Ty, En1, Sym, Fk1, Att1, Void, Void> term 
-			= RawTerm.infer1(s, p.second, p.second, srcCol, 
+			= RawTerm.infer1x(s, p.second, p.second, null, srcCol, "",
 					src0.typeSide.js).second;
 			Chc<Ty, En1> ty = srcCol.type(new Ctx<>(s).map((k,v) -> new Pair<>(new Var(k), v)), term);
 			if (!ty.left) {

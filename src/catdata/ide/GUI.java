@@ -572,7 +572,10 @@ public class GUI extends JPanel {
 		});
 		menu.add(ih);
 		
-		
+		MenuItem formatItem = new MenuItem("Code Format");
+		menu.add(formatItem);
+		formatItem.addActionListener(x -> formatActionAql());
+
 		return menu;
 		
 	}
@@ -1006,6 +1009,15 @@ public class GUI extends JPanel {
 		FqlCodeEditor cc = (FqlCodeEditor) c;
 		cc.format();
 	}
+	
+	private static void formatActionAql() {
+		CodeEditor<?, ?, ?> c = getSelectedEditor();
+		if (c == null || !c.lang().equals(Language.AQL)) {
+			return;
+		}
+		AqlCodeEditor cc = (AqlCodeEditor) c;
+		cc.format();
+	}
 
 	private static void veditAction() {
 		CodeEditor<?, ?, ?> c = getSelectedEditor();
@@ -1028,15 +1040,15 @@ public class GUI extends JPanel {
 	}
 	
 	private static void populateFql(Menu menu) {
-		MenuItem formatItem = new MenuItem("FQL Code Format");
+		MenuItem formatItem = new MenuItem("Code Format");
 		menu.add(formatItem);
 		formatItem.addActionListener(x -> formatAction());
 
-		MenuItem visItem = new MenuItem("FQL Visual Edit");
+		MenuItem visItem = new MenuItem("Visual Edit");
 		menu.add(visItem);
 		visItem.addActionListener(x -> veditAction());
 		
-			MenuItem checkItem = new MenuItem("FQL Type Checker");
+			MenuItem checkItem = new MenuItem("Type Checker");
 			menu.add(checkItem);
 			checkItem.addActionListener(x -> checkAction());
 

@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.aql.Term;
+import catdata.aql.Var;
 
 @SuppressWarnings("serial")
 public final class Ctx<K,V> implements Serializable {
@@ -185,6 +186,31 @@ public final class Ctx<K,V> implements Serializable {
 
 	public Set<Entry<K, V>> entrySet() {
 		return map.entrySet();
+	}
+
+	private boolean agreeOnOverlap0(Ctx<K, V> ret) {
+		for (K k : map.keySet()) {
+			if (ret.containsKey(k)) {
+				if (!ret.get(k).equals(get(k))) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	public boolean agreeOnOverlap(Ctx<K, V> ret) {
+		return agreeOnOverlap0(ret) && ret.agreeOnOverlap0(this);
+	}
+	
+	public static <K,V> Ctx<K,V> fromNullable(Map<K,V> m) {
+		Ctx<K,V> ret = new Ctx<>();
+		for (K k : m.keySet()) {
+			if (m.get(k) != null) {
+				ret.put(k, m.get(k));
+			}
+		}
+		return ret;
 	}
 	
 }

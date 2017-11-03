@@ -30,6 +30,7 @@ import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.Var;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 import catdata.aql.fdm.SaturatedInstance;
@@ -262,8 +263,8 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			try {
 				Map<String, Chc<Ty, En>> ctx = Collections.emptyMap();
 				
-				Triple<Ctx<String,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,String,String>,Term<Ty,En,Sym,Fk,Att,String,String>>
-				eq0 = RawTerm.infer1(ctx, eq.first, eq.second, col, sch.typeSide.js);
+				Triple<Ctx<Var,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,String,String>,Term<Ty,En,Sym,Fk,Att,String,String>>
+				eq0 = RawTerm.infer1x(ctx, eq.first, eq.second, null, col, "", sch.typeSide.js).first3();
 						
 				eqs0.add(new Pair<>(eq0.second, eq0.third));
 				col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));

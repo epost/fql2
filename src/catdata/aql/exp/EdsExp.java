@@ -224,7 +224,8 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			Ctx<Var, Object> As0 = new Ctx<>();
 			Set<Pair<Term<Object, Object, Object, Object, Object, Void, Void>, Term<Object, Object, Object, Object, Object, Void, Void>>> 
 			Awh0 = new HashSet<>();
-		
+			Ctx<String, Chc<Object,Object>> As1 = new Ctx<>();
+			
 			Collage<Object, Object, Object, Object, Object, Object, Object> 
 			col = new Collage<>(sch.collage());
 			
@@ -233,6 +234,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 				String ty = p.second;
 				if (col.ens.contains(ty)) {
 					As0.put(new Var(gen), ty);
+					As1.put(gen, Chc.inRight(ty));
 				} else {
 					throw new RuntimeException("The sort for " + gen + ", namely " + ty + ", is not declared as an entity");
 				}
@@ -241,7 +243,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			for (Pair<RawTerm, RawTerm> eq : Awh) {
 					Triple<Ctx<Var,Chc<Object,Object>>,Term<Object,Object,Object,Object,Object,Object,Object>,Term<Object,Object,Object,Object,Object,Object,Object>>
 					eq0 =
-					RawTerm.infer2(As, eq.first, eq.second, col, sch.typeSide.js);
+					RawTerm.infer1x(As1.map, eq.first, eq.second, null, col, "", sch.typeSide.js).first3();
 							
 					Awh0.add(new Pair<>(eq0.second.convert(), eq0.third.convert()));
 			}

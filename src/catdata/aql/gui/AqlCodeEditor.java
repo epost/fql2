@@ -11,6 +11,7 @@ import java.util.Collection;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
@@ -22,6 +23,7 @@ import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
 import org.jparsec.error.ParserException;
 
+import catdata.Pair;
 import catdata.Program;
 import catdata.Util;
 import catdata.aql.Kind;
@@ -30,6 +32,12 @@ import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.AqlMultiDriver;
 import catdata.aql.exp.AqlParser;
 import catdata.aql.exp.Exp;
+import catdata.fql.decl.FQLProgram;
+import catdata.fql.decl.InstExp;
+import catdata.fql.decl.MapExp;
+import catdata.fql.decl.Type;
+import catdata.fql.decl.TransExp.Const;
+import catdata.fql.parse.PrettyPrinter;
 import catdata.ide.CodeEditor;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.GUI;
@@ -39,6 +47,32 @@ import catdata.ide.Outline;
 @SuppressWarnings("serial")
 public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 
+	public void format() {
+		String input = topArea.getText();
+		Program<Exp<?>> p = parse(input);
+		if (p == null) {
+			return;
+		}
+		if (input.contains("//") || input.contains("/*")) {
+			int x = JOptionPane.showConfirmDialog(null, "Formatting will erase all comments - continue?", "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			if (x != JOptionPane.YES_OPTION) {
+				return;
+			}
+		}
+		//order does not contain enums or drops
+		StringBuilder sb = new StringBuilder();
+		for (String k : p.order) {
+			Exp<?> o = p.exps.get(k);
+			if (o.kind().equals(Kind.COMMENT)) {
+				sb.append("md { (* " + o + " *) }\n\n" );
+			} else {
+				sb.append(k + " = " + o.toString() + "\n\n");
+			}
+		}
+		topArea.setText(sb.toString().trim());
+		topArea.setCaretPosition(0);
+	}
+	
 	@Override
 	public void abortAction() {
 		super.abortAction();

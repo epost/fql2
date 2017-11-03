@@ -88,7 +88,7 @@ public class AqlJs<Ty, Sym> {
 			if (e.getMessage() != null && e.getMessage().contains("jdk.nashorn.internal.codegen.TypeMap")) {
 				throw new RuntimeException("The Java Runtime has suffered an internal error and the IDE must be restarted.\n\n" + e.getMessage());
 			}
-			e.printStackTrace();
+		//	e.printStackTrace();
 			throw new RuntimeException("In javascript execution of " + o + " (of " + o.getClass() + ") cannot convert to " + name + " error: "  + e.getMessage() + postfix + "\n\nPossible fix: check the java_constants of the typeside for type conversion errors.");
 		}
 	}

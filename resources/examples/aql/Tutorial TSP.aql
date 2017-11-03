@@ -134,7 +134,6 @@ typeside TypeSide = literal {
         Varchar = "return input[0]"
         Bool = "return java.lang.Boolean.parseBoolean(input[0])"
     java_functions
-        true : Bool = "return true"
         Matches : Varchar, Varchar -> Bool = "return input[0].matches(input[1])"
 }
 
