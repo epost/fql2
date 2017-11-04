@@ -894,16 +894,11 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	// TODO: aql when filtering for subsumed, can also take G into account
 	private boolean step() throws InterruptedException {
+		//System.out.println(this);
+		//System.out.println("-----");
 		checkParentDead();
 	
-		/*
-		 * if (options.semantic_ac) { //TODO aql not really sure why these were here
-		 * filterStrongGroundJoinable(); checkParentDead(); }
-		 * 
-		 * if (options.syntactic_ac) { filterStrongGroundJoinableSyntactic();
-		 * checkParentDead(); }
-		 */
-
+	
 		if (checkEmpty()) {
 			return true;
 		}
@@ -1391,6 +1386,7 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 		if (ret.isEmpty()) {
 			throw new RuntimeException("There is no LPO precedence that can orient all rules in their given left to right order.  (Unfailing) completion can still be used, but you will have to specify a precedence manually.  Or, try swapping the left and right hand sides of equations.");
 		}
+		//System.out.println("ops " + ret);
 		DAG<C> g = Util.get0X(ret);
 		return toPrec(symbols, g); // TODO: aql just pick one randomly and make it total randomly.
 

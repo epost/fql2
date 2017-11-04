@@ -25,8 +25,10 @@ import catdata.aql.Term;
 import catdata.aql.Var;
 import catdata.aql.exp.QueryExpRaw.Block;
 import catdata.aql.exp.SchExp.SchExpCod;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
-public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Raw {
+public class QueryExpRawSimple<En1, Fk1, Att1, En2, Fk2, Att2> extends QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Raw {
 
 	@Override
 	public int hashCode() {
@@ -45,7 +47,7 @@ public class QueryExpRawSimple<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> extends 
 			return false;
 		if (!(obj instanceof QueryExpRawSimple))
 			return false;
-		QueryExpRawSimple<?, ?, ?, ?, ?, ?, ?, ?> other = (QueryExpRawSimple<?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		QueryExpRawSimple<?, ?, ?, ?, ?, ?> other = (QueryExpRawSimple<?, ?, ?, ?, ?, ?>) obj;
 		if (block == null) {
 			if (other.block != null)
 				return false;

@@ -26,9 +26,11 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
 //TODO aql add type params to all raws?
-public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
+public class QueryExpRaw<En1, Fk1, Att1, En2, Fk2, Att2>
 		extends QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Raw {
 
 	
@@ -359,7 +361,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		QueryExpRaw<?, ?, ?, ?, ?, ?, ?, ?> other = (QueryExpRaw<?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		QueryExpRaw<?, ?, ?, ?, ?, ?> other = (QueryExpRaw<?, ?, ?, ?, ?, ?>) obj;
 		if (atts == null) {
 			if (other.atts != null)
 				return false;
@@ -649,7 +651,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		return Query.makeQuery(ens0, atts0, fks0, src0, dst0, doNotCheckEqs, elimRed);
 	}
 
-	public static <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> void processAtt(Schema<Ty, En1, Sym, Fk1, Att1> src0, Schema<Ty, En2, Sym, Fk2, Att2> dst0,
+	public static <En1, Fk1, Att1, En2, Fk2, Att2> void processAtt(Schema<Ty, En1, Sym, Fk1, Att1> src0, Schema<Ty, En2, Sym, Fk2, Att2> dst0,
 			Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens0,
 			Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts0,
 			Ctx<En2, Collage<Ty, En1, Sym, Fk1, Att1, Var, Void>> cols, Pair<Att2, RawTerm> p) {
@@ -661,7 +663,7 @@ public class QueryExpRaw<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		atts0.put(p.first, freeze(term));
 	}
 
-	public static <Ty, En1, Sym, Fk1, Att1, En2, Att2> void processBlock(Map<String, String> options, AqlEnv env, Schema<Ty, En1, Sym, Fk1, Att1> src0,
+	public static <En1, Fk1, Att1, En2, Att2> void processBlock(Map<String, String> options, AqlEnv env, Schema<Ty, En1, Sym, Fk1, Att1> src0,
 			Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens0,
 			Ctx<En2, Collage<Ty, En1, Sym, Fk1, Att1, Var, Void>> cols, Pair<En2, Block<En1, Att2>> p) {
 

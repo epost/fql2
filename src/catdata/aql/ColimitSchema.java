@@ -15,6 +15,7 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.exp.TyExpRaw;
 import catdata.graph.DMG;
 import catdata.graph.UnionFind;
 
@@ -398,33 +399,33 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		Pair<Schema<Ty, String, Sym, String, String>, Ctx<N, Mapping<Ty, En, Sym, Fk, Att, String, String, String>>> 
 		x = initialUser(options, col, eqs, eqcs, schema);
 		
-		Schema<Ty, String, Sym, String, String>
-		q = quotient(x.first, eqTerms, options);
+		Schema<catdata.aql.exp.TyExpRaw.Ty, String, catdata.aql.exp.TyExpRaw.Sym, String, String>
+		q = quotient((Schema<catdata.aql.exp.TyExpRaw.Ty, String, catdata.aql.exp.TyExpRaw.Sym, String, String>) x.first, eqTerms, options);
 		
-		schemaStr = q;
+		schemaStr = (Schema<Ty, String, Sym, String, String>) q;
 		mappingsStr = new Ctx<>();
 		for (N n : x.second.keySet()) {
 			Mapping<Ty, En, Sym, Fk, Att, String, String, String> f = x.second.get(n);
 			
-			Mapping<Ty, En, Sym, Fk, Att, String, String, String> g 
-			= new Mapping<>(f.ens.map, f.atts.map, f.fks.map, f.src, q, b);
+			Mapping g 
+			= new Mapping(f.ens.map, f.atts.map, f.fks.map, f.src, q, b);
 			
 			mappingsStr.put(n, g);
 		}
 	}
 	
-	private Schema<Ty, String, Sym, String, String> quotient(Schema<Ty, String, Sym, String, String> sch, Set<Quad<String, String, RawTerm, RawTerm>> eqTerms, AqlOptions options) {
-		Collage<Ty, String, Sym, String, String, Void, Void> col = new Collage<>(sch.collage()); 
-		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> 
+	private static Schema<TyExpRaw.Ty, String, TyExpRaw.Sym, String, String> quotient(Schema<TyExpRaw.Ty, String, TyExpRaw.Sym, String, String> sch, Set<Quad<String, String, RawTerm, RawTerm>> eqTerms, AqlOptions options) {
+		Collage<TyExpRaw.Ty, String, TyExpRaw.Sym, String, String, Void, Void> col = new Collage<>(sch.collage()); 
+		Set<Triple<Pair<Var, String>, Term<TyExpRaw.Ty, String, TyExpRaw.Sym, String, String, Void, Void>, Term<TyExpRaw.Ty, String, TyExpRaw.Sym, String, String, Void, Void>>> 
 		eqs0 = new HashSet<>(sch.eqs);
 
 		for (Quad<String, String, RawTerm, RawTerm> eq : eqTerms) {
-			Map<String, Chc<Ty, String>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
+			Map<String, Chc<TyExpRaw.Ty, String>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
 			
-			Triple<Ctx<Var,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>> 
-			eq0 = RawTerm.infer1x(ctx, eq.third, eq.fourth, null, col, "", ty.js).first3();
+			Triple<Ctx<Var,Chc<TyExpRaw.Ty,String>>,Term<TyExpRaw.Ty,String,TyExpRaw.Sym,String,String,Void,Void>,Term<TyExpRaw.Ty,String,TyExpRaw.Sym,String,String,Void,Void>> 
+			eq0 = RawTerm.infer1x(ctx, eq.third, eq.fourth, null, col, "", sch.typeSide.js).first3();
 			
-			Chc<Ty, String> v = eq0.first.get(new Var(eq.first));
+			Chc<TyExpRaw.Ty, String> v = eq0.first.get(new Var(eq.first));
 			if (v.left) {
 				throw new RuntimeException("In " + eq.third + " = " + eq.fourth + ", variable " + eq.first + " has type " + v.l + " which is not an entity");
 			}
@@ -434,8 +435,8 @@ public class ColimitSchema<N, Ty, En, Sym, Fk, Att> implements Semantics {
 		}
 	
 		boolean b = ! (Boolean) options.getOrDefault(AqlOption.allow_java_eqs_unsafe);
-		DP<Ty,String,Sym,String,String,Void,Void> dp = AqlProver.create(options, col, ty.js);
-		Schema<Ty, String, Sym, String, String> ret = new Schema<>(ty, col.ens, col.atts.map, col.fks.map, eqs0, dp, b);
+		DP<TyExpRaw.Ty,String,TyExpRaw.Sym,String,String,Void,Void> dp = AqlProver.create(options, col, sch.typeSide.js);
+		Schema<TyExpRaw.Ty, String, TyExpRaw.Sym, String, String> ret = new Schema<>(sch.typeSide, col.ens, col.atts.map, col.fks.map, eqs0, dp, b);
 		return ret;
 	}
 

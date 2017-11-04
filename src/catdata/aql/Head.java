@@ -1,5 +1,8 @@
 package catdata.aql;
 
+import catdata.Util;
+import catdata.aql.exp.TyExpRaw;
+
 public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	public final Sym sym;
@@ -11,6 +14,9 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	public final Ty ty;
 	
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Head<Ty, En, Sym, Fk, Att, Gen, Sk> Sym(Sym sym) {
+		if (!(sym instanceof TyExpRaw.Sym)) {
+			Util.anomaly();
+		}
 		if (sym == null) {
 			throw new RuntimeException("Anomaly, please report");
 		}
@@ -43,6 +49,9 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Head<Ty, En, Sym, Fk, Att, Gen, Sk> Obj(Object obj, Ty ty) {
 		if (obj == null || ty == null) {
 			throw new RuntimeException("Anomaly, please report");
+		}
+		if (!(ty instanceof TyExpRaw.Ty)) {
+			Util.anomaly();
 		}
 		return new Head<>(null, null, null, null, null, obj, ty);
 	}

@@ -22,10 +22,11 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
-import catdata.aql.exp.EdsExp.EdExpRaw;
-import catdata.aql.exp.EdsExp.EdsExpRaw;
+import catdata.aql.exp.EdsExpRaw.EdExpRaw;
 import catdata.aql.exp.SchExp.SchExpVar;
 import catdata.aql.exp.TyExp.TyExpVar;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
 public class EasikAql {
 	
@@ -158,7 +159,7 @@ public class EasikAql {
 
 	private static Pair<SchExp<?, ?, ?, ?, ?>,List<Pair<String,EdsExpRaw>>> translate1(Node sketch, Set<String> used, Set<String> warnings, String sname) {
 		List<String> ens = new LinkedList<>();
-		List<Pair<String, Pair<String, String>>> atts = new LinkedList<>();
+		List<Pair<String, Pair<String, Ty>>> atts = new LinkedList<>();
 		List<Pair<String, Pair<String, String>>> fks = new LinkedList<>();
 		List<Pair<List<String>, List<String>>> eqs = new LinkedList<>();
 		// there shouldn't be observation equations in easik
@@ -183,7 +184,7 @@ public class EasikAql {
 							String attName = safe(w.getAttributes().getNamedItem("name").getTextContent());
 							String tyName = w.getAttributes().getNamedItem("attributeTypeClass").getTextContent();
 							used.add(tyName);
-							atts.add(new Pair<>(nodeName + "_" + attName.replace(" ", "_"), new Pair<>(nodeName, easikTypeToString(tyName))));
+							atts.add(new Pair<>(nodeName + "_" + attName.replace(" ", "_"), new Pair<>(nodeName, new Ty(easikTypeToString(tyName)))));
 						}
 					}
 				} else if (m.getNodeName().equals("edge")) {
@@ -275,7 +276,8 @@ public class EasikAql {
 				}
 			}
 		}
-		SchExp<?, ?, ?, ?, ?> schExp = new SchExpRaw<String, String>(new TyExpVar("SqlTypeSide"), new LinkedList<>(), ens, fks, eqs, atts, new LinkedList<>(), new LinkedList<>(), null);
+		SchExp<?, ?, ?, ?, ?> schExp = 
+				new SchExpRaw(new TyExpVar<>("sql"), new LinkedList<>(), ens, fks, eqs, atts, new LinkedList<>(), new LinkedList<>(), null);
 		
 		return new Pair<>(schExp, edsExps);
 	}
@@ -446,7 +448,7 @@ public class EasikAql {
 					continue;
 				}
 				
-				EdsExpRaw edsExp = new EdsExp.EdsExpRaw(schExp, new LinkedList<>(), edExps, null);
+				EdsExpRaw edsExp = new EdsExpRaw(schExp, new LinkedList<>(), edExps, null);
 				edsExps.add(new Pair<>(name, edsExp));
 			}
 		}

@@ -30,7 +30,8 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 		boolean compose = (Boolean) ops.getOrDefault(AqlOption.completion_compose);
 		boolean syntactic_ac = (Boolean) ops.getOrDefault(AqlOption.completion_syntactic_ac);
 		
-		Set<Triple<KBExp<Head<Ty,En,Sym,Fk,Att,Gen,Sk>,Var>, KBExp<Head<Ty,En,Sym,Fk,Att,Gen,Sk>,Var>, Map<Var, Chc<Ty,En>>>> E0 = theory.stream().map(x -> new Triple<>(x.second, x.third, x.first)).collect(Collectors.toSet());
+		Set<Triple<KBExp<Head<Ty,En,Sym,Fk,Att,Gen,Sk>,Var>, KBExp<Head<Ty,En,Sym,Fk,Att,Gen,Sk>,Var>, Map<Var, Chc<Ty,En>>>>
+		E0 = theory.stream().map(x -> new Triple<>(x.second, x.third, x.first)).collect(Collectors.toSet());
 		@SuppressWarnings("unchecked")
 		List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> prec2 = (List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>>) ops.getOrDefault(AqlOption.completion_precedence);
 		if (prec2 == null) {
@@ -39,6 +40,7 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 				m.put(c, signature.get(c).first.size());
 			}
 			prec2 = LPOUKB.inferPrec(m, E0); 
+		//	System.out.println("prec2 " + prec2);
 		}
 		List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> prec = new LinkedList<>(prec2);
 		for (Head<Ty, En, Sym, Fk, Att, Gen, Sk> c : init) {
@@ -60,7 +62,7 @@ public class CompletionProver<Ty, En, Sym, Fk, Att, Gen, Sk> extends DPKB<Chc<Ty
 			sigMinusPrec.removeAll(prec);
 			throw new RuntimeException("Incorrect precedence. Symbols in precedence but not signature: " + precMinusSig + " and symbols in signature but not precedence: " + sigMinusPrec);
 		}		
-		
+	//	System.out.println("prec: " + prec);
 		cp = new LPOUKB<>(E0, Var.it, Collections.emptySet(), options, prec, col.toKB().syms, new HashSet<>(col.toKB().tys));	
 		
 	}

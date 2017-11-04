@@ -28,8 +28,10 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
-public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String> implements Raw {
+public final class SchExpRaw extends SchExp<Ty,String,Sym,String,String> implements Raw {
 	
 	
 	
@@ -253,7 +255,7 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SchExpRaw<?, ?> other = (SchExpRaw<?, ?>) obj;
+		SchExpRaw other = (SchExpRaw) obj;
 		if (atts == null) {
 			if (other.atts != null)
 				return false;
@@ -297,19 +299,25 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
-	public SchExpRaw(TyExp<?, ?> typeSide, List<LocStr> imports, List<LocStr> ens, List<Pair<LocStr, Pair<String, String>>> fks, List<Pair<Integer, Pair<List<String>, List<String>>>> list, List<Pair<LocStr, Pair<String, String>>> atts, List<Pair<Integer, Quad<String, String, RawTerm, RawTerm>>> list2, List<Pair<String, String>> options) {
-		this.typeSide = (TyExp<Ty, Sym>) typeSide;
+	public SchExpRaw(TyExp<Ty, Sym> typeSide, List<LocStr> imports, List<LocStr> ens, List<Pair<LocStr, Pair<String, String>>> fks, List<Pair<Integer, Pair<List<String>, List<String>>>> list, List<Pair<LocStr, Pair<String, String>>> atts, List<Pair<Integer, Quad<String, String, RawTerm, RawTerm>>> list2, List<Pair<String, String>> options) {
+		this.typeSide = typeSide;
 		this.imports = LocStr.set1(imports);
 		this.ens = LocStr.set1(ens);
 		this.fks = LocStr.set2(fks);
 		this.p_eqs = LocStr.proj2(list);
-		this.atts = LocStr.set2x(atts, x ->  (Ty) x);
+		this.atts = LocStr.set2x(atts, x ->  new Ty(x));
 		this.t_eqs = LocStr.proj2(list2);
 		this.options = Util.toMapSafely(options);
 		Util.toMapSafely(fks); //check no dups here rather than wait until eval
 		Util.toMapSafely(atts);	
 		
+		doGuiIndexing(imports, ens, fks, list, atts, list2);
+		
+	}
+
+	public void doGuiIndexing(List<LocStr> imports, List<LocStr> ens, List<Pair<LocStr, Pair<String, String>>> fks,
+			List<Pair<Integer, Pair<List<String>, List<String>>>> list, List<Pair<LocStr, Pair<String, String>>> atts,
+			List<Pair<Integer, Quad<String, String, RawTerm, RawTerm>>> list2) {
 		List<InteriorLabel<Object>> i = InteriorLabel.imports( "imports", imports);
 		raw.put("imports", i);
 		List<InteriorLabel<Object>> t = InteriorLabel.imports( "entities", ens);
@@ -339,12 +347,11 @@ public final class SchExpRaw<Ty,Sym> extends SchExp<Ty,String,Sym,String,String>
 			jc.add(new InteriorLabel<>("obs equations", p.second, p.first,  x -> x.third + " = " + x.fourth).conv());
 		}
 		raw.put("obs equations", jc);
-		
 	} 
 	
-	@SuppressWarnings("unchecked")
-	public SchExpRaw(TyExp<?, ?> typeSide, List<String> imports, List<String> ens, List<Pair<String, Pair<String, String>>> fks, List<Pair<List<String>, List<String>>> list, List<Pair<String, Pair<String, Ty>>> atts, List<Quad<String, String, RawTerm, RawTerm>> list2, List<Pair<String, String>> options, @SuppressWarnings("unused") Object o) {
-		this.typeSide = (TyExp<Ty, Sym>) typeSide;
+	//for easik
+	public SchExpRaw(TyExp<Ty, Sym> typeSide, List<String> imports, List<String> ens, List<Pair<String, Pair<String, String>>> fks, List<Pair<List<String>, List<String>>> list, List<Pair<String, Pair<String, Ty>>> atts, List<Quad<String, String, RawTerm, RawTerm>> list2, List<Pair<String, String>> options, @SuppressWarnings("unused") Object o) {
+		this.typeSide = typeSide;
 		this.imports = new HashSet<>(imports);
 		this.ens = new HashSet<>(ens);
 		this.fks = new HashSet<>(fks);

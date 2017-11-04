@@ -26,14 +26,12 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.RawTerm;
-import catdata.aql.exp.ColimSchExp.ColimSchExpModify;
 import catdata.aql.exp.ColimSchExp.ColimSchExpQuotient;
 import catdata.aql.exp.ColimSchExp.ColimSchExpRaw;
 import catdata.aql.exp.ColimSchExp.ColimSchExpVar;
 import catdata.aql.exp.ColimSchExp.ColimSchExpWrap;
-import catdata.aql.exp.EdsExp.EdExpRaw;
-import catdata.aql.exp.EdsExp.EdsExpRaw;
 import catdata.aql.exp.EdsExp.EdsExpVar;
+import catdata.aql.exp.EdsExpRaw.EdExpRaw;
 import catdata.aql.exp.GraphExp.GraphExpRaw;
 import catdata.aql.exp.GraphExp.GraphExpVar;
 import catdata.aql.exp.InstExp.InstExpChase;
@@ -48,7 +46,6 @@ import catdata.aql.exp.InstExp.InstExpDistinct;
 import catdata.aql.exp.InstExp.InstExpDom;
 import catdata.aql.exp.InstExp.InstExpEmpty;
 import catdata.aql.exp.InstExp.InstExpEval;
-import catdata.aql.exp.InstExp.InstExpRandom;
 import catdata.aql.exp.InstExp.InstExpSigma;
 import catdata.aql.exp.InstExp.InstExpSigmaChase;
 import catdata.aql.exp.InstExp.InstExpVar;
@@ -94,8 +91,9 @@ import catdata.aql.exp.TransExp.TransExpSigmaDeltaUnit;
 import catdata.aql.exp.TransExp.TransExpVar;
 import catdata.aql.exp.TyExp.TyExpEmpty;
 import catdata.aql.exp.TyExp.TyExpSch;
-import catdata.aql.exp.TyExp.TyExpSql;
 import catdata.aql.exp.TyExp.TyExpVar;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
 @SuppressWarnings("deprecation")
 public class AqlParser {
@@ -602,7 +600,7 @@ public class AqlParser {
 		return ret.between(token("literal").followedBy(token("{")), token("}"));
 	}
 
-	private static Parser<SchExpRaw<String, String>> schExpRaw() {
+	private static Parser<SchExpRaw> schExpRaw() {
 		Parser<List<LocStr>> entities = Parsers.tuple(token("entities"), locstr.many()).map(x -> x.b);
 
 		Parser<Pair<Token, List<Tuple5<List<LocStr>, Token, String, Token, String>>>> fks = Parsers.tuple(
@@ -664,8 +662,8 @@ public class AqlParser {
 				token("{")); // .map(x -> x.c);
 
 		// needs tyexp
-		Parser<SchExpRaw<String, String>> ret = Parsers.tuple(l, pa, pb, token("}"))
-				.map(x -> new SchExpRaw<String, String>(x.a.c, x.b.a, Util.newIfNull(x.b.b), Util.newIfNull(x.b.c),
+		Parser<SchExpRaw> ret = Parsers.tuple(l, pa, pb, token("}"))
+				.map(x -> new SchExpRaw((TyExp<Ty, Sym>) x.a.c, x.b.a, Util.newIfNull(x.b.b), Util.newIfNull(x.b.c),
 						Util.newIfNull(x.b.d), Util.newIfNull(x.c.a), Util.newIfNull(x.c.b), x.c.c));
 
 		return ret;
@@ -782,7 +780,7 @@ public class AqlParser {
 		return ret;
 	}
 	
-	private static Parser<InstExpQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?>> instExpQuotient() {
+	private static Parser<InstExpQuotient<?, ?, ?, ?, ?, ?, ?>> instExpQuotient() {
 
 		Parser<catdata.Pair<Integer, catdata.Pair<RawTerm, RawTerm>>> eq = Parsers
 				.tuple(Parsers.INDEX, Parsers.tuple(term(), token("="), term()))
@@ -810,14 +808,14 @@ public class AqlParser {
 		Parser<Tuple3<Token, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("quotient"), 
 				inst_ref.lazy(), token("{")); // .map(x -> x.c);
 
-		Parser<InstExpQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?>> ret = Parsers.tuple(l, pa, token("}"))
-				.map(x -> new InstExpQuotient<>
+		Parser<InstExpQuotient<?, ?, ?, ?, ?, ?, ?>> ret = Parsers.tuple(l, pa, token("}"))
+				.map(x -> new InstExpQuotient
 				(x.a.b, new LinkedList<>(Util.append(Util.newIfNull(x.b.a), Util.newIfNull(x.b.b))), x.b.c));
 
 		return ret;
 	}
 
-	private static Parser<InstExpRaw<?, ?, ?, ?, ?>> instExpRaw() {
+	private static Parser<InstExpRaw<?, ?, ?>> instExpRaw() {
 		Parser<List<catdata.Pair<LocStr, String>>> generators = Parsers.tuple(token("generators"), env(ident, ":"))
 				.map(x -> x.b);
 
@@ -847,8 +845,8 @@ public class AqlParser {
 		Parser<Tuple4<Token, Token, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("literal"), token(":"),
 				sch_ref.lazy(), token("{")); // .map(x -> x.c);
 
-		Parser<InstExpRaw<?, ?, ?, ?, ?>> ret = Parsers.tuple(l, pa, token("}"))
-				.map(x -> new InstExpRaw<String, String, String, String, String>(x.a.c, Util.newIfNull(x.b.a),
+		Parser<InstExpRaw<?, ?, ?>> ret = Parsers.tuple(l, pa, token("}"))
+				.map(x -> new InstExpRaw<String, String, String>(x.a.c, Util.newIfNull(x.b.a),
 						Util.newIfNull(x.b.b),
 						new LinkedList<>(Util.append(Util.newIfNull(x.b.c), Util.newIfNull(x.b.d))), x.b.e));
 
@@ -966,18 +964,18 @@ public class AqlParser {
 		return ret;
 	}
 
-	private static Parser<QueryExpRawSimple<String, String, String, String, String, String, String, String>> queryExpRawSimple() {
+	private static Parser<QueryExpRawSimple<String, String, String, String, String, String>> queryExpRawSimple() {
 		Parser<Tuple4<Token, Token, SchExp<?, ?, ?, ?, ?>, catdata.Pair<Block<String, String>, List<catdata.Pair<LocStr, RawTerm>>>>> l = Parsers
 				.tuple(token("simple"), token(":"), sch_ref.lazy(), block());
 
-		Parser<QueryExpRawSimple<String, String, String, String, String, String, String, String>> ret = l
-				.map(x -> new QueryExpRawSimple<String, String, String, String, String, String, String, String>(x.c,
+		Parser<QueryExpRawSimple<String, String, String, String, String, String>> ret = l
+				.map(x -> new QueryExpRawSimple<String, String, String, String, String, String>(x.c,
 						x.d.first));
 
 		return ret;
 	}
 
-	private static Parser<QueryExpRaw<String, String, String, String, String, String, String, String>> queryExpRaw() {
+	private static Parser<QueryExpRaw<String, String, String, String, String, String>> queryExpRaw() {
 		Parser<List<catdata.Pair<LocStr, catdata.Pair<Block<String, String>, List<catdata.Pair<LocStr, RawTerm>>>>>> ens = Parsers
 				.tuple(token("entities"), env(block(), "->")).map(x -> x.b);
 
@@ -992,9 +990,9 @@ public class AqlParser {
 																													// ->
 																													// x.c);
 
-		Parser<QueryExpRaw<String, String, String, String, String, String, String, String>> ret = Parsers
+		Parser<QueryExpRaw<String, String, String, String, String, String>> ret = Parsers
 				.tuple(l, pa, token("}"))
-				.map(x -> new QueryExpRaw<String, String, String, String, String, String, String, String>(x.a.c, x.a.d,
+				.map(x -> new QueryExpRaw<String, String, String, String, String, String>(x.a.c, x.a.d,
 						x.b.a, Util.newIfNull(x.b.b), Util.newIfNull(x.b.c), x.b.d));
 
 		return ret;
@@ -1117,7 +1115,7 @@ public class AqlParser {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static Parser<ColimSchExpModify<?, ?, ?, ?, ?, ?, ?>> colimExpModify() {
+	private static Parser<ColimSchExpModify<?, ?, ?, ?, ?>> colimExpModify() {
 		Parser<List<catdata.Pair<LocStr, String>>> ens = Parsers
 				.tuple(token("rename").followedBy(token("entities")), env(ident, "->")).map(x -> x.b);
 
@@ -1148,7 +1146,7 @@ public class AqlParser {
 		Parser<Tuple3<Token, ColimSchExp<?, ?, ?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("modify"),
 				colim_ref.lazy(), token("{")); // .map(x -> x.c);
 
-		Parser<ColimSchExpModify<?, ?, ?, ?, ?, ?, ?>> ret = Parsers.tuple(l, pa, pb, token("}"))
+		Parser<ColimSchExpModify<?, ?, ?, ?, ?>> ret = Parsers.tuple(l, pa, pb, token("}"))
 				.map(x -> new ColimSchExpModify(x.a.b, Util.newIfNull(x.b.a), Util.newIfNull(x.b.b),
 						Util.newIfNull(x.b.c), Util.newIfNull(x.c.a), Util.newIfNull(x.c.b), x.c.c));
 

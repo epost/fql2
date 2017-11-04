@@ -575,4 +575,19 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return ret;
 	}
 
+	public void addAll(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> v) {
+		tys.addAll(v.tys);
+		ens.addAll(v.ens);
+		syms.putAll(v.syms.map);
+		atts.putAll(v.atts.map);
+		fks.putAll(v.fks.map);
+		gens.putAll(v.gens.map);
+		sks.putAll(v.sks.map);	
+		eqs.addAll(v.eqs);
+		java_tys.putAll(v.java_tys.map);
+		java_fns.putAll(v.java_fns.map);
+		java_parsers.putAll(v.java_parsers.map);
+
+	}
+
 }

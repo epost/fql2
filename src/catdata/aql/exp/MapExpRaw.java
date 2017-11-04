@@ -24,8 +24,10 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
-public final class MapExpRaw extends MapExp<String, String, String, String, String, String, String, String>
+public final class MapExpRaw extends MapExp<Ty, String, Sym, String, String, String, String, String>
 		implements Raw {
 
 	@Override
@@ -37,8 +39,8 @@ public final class MapExpRaw extends MapExp<String, String, String, String, Stri
 		return ret;
 	}
 
-	public final SchExp<String, String, String, String, String> src;
-	public final SchExp<String, String, String, String, String> dst;
+	public final SchExp<Ty, String, Sym, String, String> src;
+	public final SchExp<Ty, String, Sym, String, String> dst;
 
 	public final Set<String> imports;
 
@@ -58,8 +60,8 @@ public final class MapExpRaw extends MapExp<String, String, String, String, Stri
 	public MapExpRaw(SchExp<?, ?, ?, ?, ?> src, SchExp<?, ?, ?, ?, ?> dst, List<LocStr> imports,
 			List<Pair<LocStr, String>> ens, List<Pair<LocStr, List<String>>> fks,
 			List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
-		this.src = (SchExp<String, String, String, String, String>) src;
-		this.dst = (SchExp<String, String, String, String, String>) dst;
+		this.src = (SchExp<Ty, String, Sym, String, String>) src;
+		this.dst = (SchExp<Ty, String, Sym, String, String>) dst;
 		this.imports = LocStr.set1(imports);
 		this.ens = LocStr.set2(ens);
 		this.fks = LocStr.set2(fks);
@@ -220,19 +222,19 @@ public final class MapExpRaw extends MapExp<String, String, String, String, Stri
 	}
 
 	@Override
-	public Mapping<String, String, String, String, String, String, String, String> eval(AqlEnv env) {
-		Schema<String, String, String, String, String> src0 = src.eval(env);
-		Schema<String, String, String, String, String> dst0 = dst.eval(env);
+	public Mapping<Ty, String, Sym, String, String, String, String, String> eval(AqlEnv env) {
+		Schema<Ty, String, Sym, String, String> src0 = src.eval(env);
+		Schema<Ty, String, Sym, String, String> dst0 = dst.eval(env);
 		// Collage<String, String, String, String, String, Void, Void> scol =
 		// new Collage<>(src0);
-		Collage<String, String, String, String, String, Void, Void> dcol = new Collage<>(dst0.collage());
+		Collage<Ty, String, Sym, String, String, Void, Void> dcol = new Collage<>(dst0.collage());
 
 		Map<String, String> ens0 = new HashMap<>();
 		Map<String, Pair<String, List<String>>> fks0 = new HashMap<>();
-		Map<String, Triple<Var, String, Term<String, String, String, String, String, Void, Void>>> atts0 = new HashMap<>();
+		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> atts0 = new HashMap<>();
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
-			Mapping<String, String, String, String, String, String, String, String> v = env.defs.maps.get(k);
+			Mapping<Ty, String, Sym, String, String, String, String, String> v = env.defs.maps.get(k);
 			Util.putAllSafely(ens0, v.ens.map);
 			Util.putAllSafely(fks0, v.fks.map);
 			Util.putAllSafely(atts0, v.atts.map);
@@ -290,7 +292,7 @@ public final class MapExpRaw extends MapExp<String, String, String, String, Stri
 				String var_en = att.second.second;
 				RawTerm term = att.second.third;
 
-				Pair<String, String> p = src0.atts.map.get(att.first);
+				Pair<String, Ty> p = src0.atts.map.get(att.first);
 				if (p == null) {
 					throw new RuntimeException(att.first + " is not a source attribute.");
 				}
@@ -306,17 +308,17 @@ public final class MapExpRaw extends MapExp<String, String, String, String, Stri
 							+ dst_att_dom_en + " as expected.");
 				}
 
-				String src_att_cod_ty = p.second;
+				Ty src_att_cod_ty = p.second;
 				if (!dst0.typeSide.tys.contains(src_att_cod_ty)) {
 					throw new RuntimeException("type " + p.second + " does not exist in target typeside.");
 				}
-				Chc<String, String> proposed_ty2 = Chc.inLeft(src_att_cod_ty);
+				Chc<Ty, String> proposed_ty2 = Chc.inLeft(src_att_cod_ty);
 
-				Chc<String, String> var_en2 = Chc.inRight(dst_att_dom_en);
+				Chc<Ty, String> var_en2 = Chc.inRight(dst_att_dom_en);
 
-				Map<String, Chc<String, String>> ctx = Util.singMap(var, var_en2);
+				Map<String, Chc<Ty, String>> ctx = Util.singMap(var, var_en2);
 
-				Term<String, String, String, String, String, Void, Void> term0 = RawTerm.infer1x(ctx, term, null, proposed_ty2,
+				Term<Ty, String, Sym, String, String, Void, Void> term0 = RawTerm.infer1x(ctx, term, null, proposed_ty2,
 						dcol, "", src0.typeSide.js).second;
 
 				Util.putSafely(atts0, att.first, new Triple<>(new Var(var), dst_att_dom_en, term0));
@@ -328,13 +330,13 @@ public final class MapExpRaw extends MapExp<String, String, String, String, Stri
 
 		AqlOptions ops = new AqlOptions(options, null, env.defaults);
 
-		Mapping<String, String, String, String, String, String, String, String> ret = new Mapping<>(ens0, atts0, fks0,
+		Mapping<Ty, String, Sym, String, String, String, String, String> ret = new Mapping<>(ens0, atts0, fks0,
 				src0, dst0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
 		return ret;
 	}
 
 	@Override
-	public Pair<SchExp<String, String, String, String, String>, SchExp<String, String, String, String, String>> type(
+	public Pair<SchExp<Ty, String, Sym, String, String>, SchExp<Ty, String, Sym, String, String>> type(
 			AqlTyping G) {
 		return new Pair<>(src, dst);
 	}

@@ -17,6 +17,8 @@ import catdata.Quad;
 import catdata.Ref;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
 public final class RawTerm {
 
@@ -37,11 +39,11 @@ public final class RawTerm {
 		return head + "(" + Util.sep(args, ", ") + ")";
 	}
 
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> 
+	public static <En, Fk, Att, Gen, Sk> 
 	Set<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>> infer_good(
 			RawTerm e, Chc<Ty, En> expected, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, String pre,
 			AqlJs<Ty, Sym> js, Map<Var, Chc<Ty, En>> vars) {
-		if (e.annotation != null && !col.tys.contains(e.annotation)) {
+		if (e.annotation != null && !col.tys.contains(new Ty(e.annotation))) {
 			throw new RuntimeException(pre + "Annotation " + e.annotation + " is not a type (" + col.tys + ").");
 		}
 
@@ -73,7 +75,7 @@ public final class RawTerm {
 			}
 		}
 		
-		if (col.syms.containsKey((Sym) e.head) && e.annotation == null) {
+		if (col.syms.containsKey(new Sym(e.head)) && e.annotation == null) {
 			//System.out.println("a " + e);
 			
 			List<List<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>>> 
@@ -83,7 +85,7 @@ public final class RawTerm {
 				RawTerm arg = e.args.get(i);
 			//	System.out.println("arg " + arg);
 				
-				Ty ty = col.syms.get((Sym) e.head).first.get(i); 
+				Ty ty = col.syms.get(new Sym(e.head)).first.get(i); 
 				Set<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>>
 				z = infer_good(arg, Chc.inLeft(ty), col, pre, js, vars);
 				
@@ -110,7 +112,7 @@ public final class RawTerm {
 			//	System.out.println("outcome " + outcome);
 				
 				List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> w = outcome.stream().map(x -> x.first).collect(Collectors.toList());
-				Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Sym((Sym) e.head, w );
+				Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Sym(new Sym(e.head), w );
 				Ctx<Var, Chc<Ty, En>> ret2 = new Ctx<>();
 				for (Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>> ctx0 : outcome) {
 				//	System.out.println("ctx0 " + ctx0);
@@ -125,7 +127,7 @@ public final class RawTerm {
 				for (int i = 0; i < e.args.size(); i++) {
 					RawTerm arg = e.args.get(i);
 				//	System.out.println("2arx " + arg);
-					Chc<Ty,En> ty = Chc.inLeft(col.syms.get((Sym)e.head).first.get(i));
+					Chc<Ty,En> ty = Chc.inLeft(col.syms.get(new Sym(e.head)).first.get(i));
 					Var v = new Var((String)arg.head);
 					if (vars.keySet().contains(v)) {
 					//	System.out.println("a " + v);
@@ -139,7 +141,7 @@ public final class RawTerm {
 					}
 				}
 				
-				Chc<Ty, En> ret3 = Chc.inLeft(col.syms.get((Sym) e.head).second);
+				Chc<Ty, En> ret3 = Chc.inLeft(col.syms.get(new Sym(e.head)).second);
 				if (expected != null && !expected.equals(ret3)) {
 					//System.out.println("d " );
 				} else {
@@ -235,7 +237,7 @@ public final class RawTerm {
 		// as primitive - only if not a variable/generator/etc in scope 
 		if (e.args.isEmpty() && !vars.keySet().contains(new Var((String) e.head))) {
 			for (Ty ty : col.tys) {
-				if (e.annotation != null && !e.annotation.equals(ty)) {
+				if (e.annotation != null && !new Ty(e.annotation).equals(ty)) {
 					continue;
 				}
 				try {
@@ -284,7 +286,7 @@ public final class RawTerm {
 
 	// TODO aql inefficient bitwise operations
 	
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> 
+	public static <En, Fk, Att, Gen, Sk> 
 	Quad<Ctx<Var, Chc<Ty, En>>, 
 	Term<Ty, En, Sym, Fk, Att, Gen, Sk>, 
 	Term<Ty, En, Sym, Fk, Att, Gen, Sk>,
@@ -552,15 +554,14 @@ public final class RawTerm {
 		throw new RuntimeException("Anomaly, please report");
 	}
 
-	@SuppressWarnings("unchecked")
-	private static <X> X resolve(String name) {
-		return (X) name; // TODO aql make this smarter
+	private static <X> X resolve(String head) {
+		return (X) head;
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Head<Ty, En, Sym, Fk, Att, Gen, Sk> toHeadNoPrim(String head,
+	public static <En, Fk, Att, Gen, Sk> Head<Ty, En, Sym, Fk, Att, Gen, Sk> toHeadNoPrim(String head,
 			Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
-		int n = boolToInt(col.syms.containsKey(resolve(head))) + boolToInt(col.atts.containsKey(resolve(head)))
+		int n = boolToInt(col.syms.containsKey(new Sym(head))) + boolToInt(col.atts.containsKey(resolve(head)))
 				+ boolToInt(col.fks.containsKey(resolve(head))) + boolToInt(col.gens.containsKey(resolve(head)))
 				+ boolToInt(col.sks.containsKey(resolve(head)));
 		if (n == 0) {
@@ -568,8 +569,8 @@ public final class RawTerm {
 		} else if (n > 1) {
 			throw new RuntimeException(head + " is ambiguous");
 		}
-		if (col.syms.containsKey(resolve(head))) {
-			return Head.Sym((Sym) head);
+		if (col.syms.containsKey(new Sym(head))) {
+			return Head.Sym(new Sym(head));
 		} else if (col.atts.containsKey(resolve(head))) {
 			return Head.Att((Att) head);
 		} else if (col.fks.containsKey(resolve(head))) {
@@ -582,7 +583,7 @@ public final class RawTerm {
 		}
 		throw new RuntimeException("Anomaly: please report");
 	}
-
+/*
 	private <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> trans(Set<String> vars,
 			Map<String, Ref<Chc<Ty, En>>> ctx0, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlJs<Ty, Sym> js) {
 		List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> args0 = args.stream().map(x -> x.trans(vars, ctx0, col, js))
@@ -639,11 +640,11 @@ public final class RawTerm {
 		}
 		throw new RuntimeException("Anomaly, please report: " + this);
 	}
-
+*/
 	private static int boolToInt(boolean b) {
 		return b ? 1 : 0;
 	}
-
+/*
 	@SuppressWarnings({ "ConstantConditions" })
 	private <Ty, En, Sym, Fk, Att, Gen, Sk> Ref<Chc<Ty, En>> infer(Set<String> vars, Map<String, Ref<Chc<Ty, En>>> ctx,
 			Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
@@ -736,7 +737,7 @@ public final class RawTerm {
 		}
 
 	}
-
+*/
 	@Override
 	public int hashCode() {
 		int prime = 31;
@@ -824,11 +825,11 @@ public final class RawTerm {
 		return ret;
 	}
 
-	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> infer2(
+	public static <En, Fk, Att, Gen, Sk> Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> infer2(
 			List<Pair<String, String>> l, RawTerm a, RawTerm b, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col,
 			AqlJs<Ty, Sym> js) {
 		Map<String, Chc<Ty, En>> ctx = new HashMap<>();
-		for (Pair<String, ?> p : l) {
+		for (Pair<String, String> p : l) {
 			if (ctx.containsKey(p.first)) {
 				throw new RuntimeException("Duplicate variable " + p.first + " in context " + Ctx.toString(l));
 			}
@@ -836,12 +837,10 @@ public final class RawTerm {
 				if (col.tys.contains(p.second) && col.ens.contains(p.second)) {
 					throw new RuntimeException("Ambiguous: " + p.second + " is an entity and a type");
 				} else if (col.tys.contains(p.second)) {
-					@SuppressWarnings("unchecked")
-					Ty tt = (Ty) p.second;
+					Ty tt = new Ty(p.second);
 					ctx.put(p.first, Chc.inLeft(tt)); // TODO aql remove for
 														// loops for other ones
 				} else if (col.ens.contains(p.second)) {
-					@SuppressWarnings("unchecked")
 					En tt = (En) p.second;
 					ctx.put(p.first, Chc.inRight(tt));
 				} else {

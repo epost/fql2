@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import catdata.Util;
 import catdata.aql.AqlProver.ProverName;
 import catdata.aql.exp.AqlParser;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
 public final class AqlOptions {
 	
@@ -145,7 +147,7 @@ public final class AqlOptions {
 			return ret;
 		}
 		
-		public static <Ty, En, Sym, Fk, Att, Gen, Sk> List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> getPrec(String str, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+		public static <En, Fk, Att, Gen, Sk> List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> getPrec(String str, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 			if (str == null) {
 				throw new RuntimeException("Anomaly: please report");
 			}
@@ -324,7 +326,7 @@ public final class AqlOptions {
 	 * @param map
 	 * @param col possibly null
 	 */ 
-	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(Map<String, String> map, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col, AqlOptions defaults) {
+	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(Map<String, String> map, Collage col, AqlOptions defaults) {
 		options = new HashMap<>(defaults.options);
 		for (String key : map.keySet()) {
 			AqlOption op = AqlOption.valueOf(key);
@@ -347,7 +349,7 @@ public final class AqlOptions {
 		}		
 	} */
 
-	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
+	private static <En, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
 		case jdbc_export_truncate_after:
 			return op.getInteger(map);

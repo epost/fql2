@@ -31,12 +31,14 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 import catdata.aql.fdm.SaturatedInstance;
 
 
-public final class InstExpRaw<Ty,En,Sym,Fk,Att> extends InstExp<Ty,En,Sym,Fk,Att,String,String,ID,Chc<String,Pair<ID,Att>>> implements Raw {
+public final class InstExpRaw<En,Fk,Att> extends InstExp<Ty,En,Sym,Fk,Att,String,String,ID,Chc<String,Pair<ID,Att>>> implements Raw {
 
 	
 private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
@@ -189,7 +191,7 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InstExpRaw<?, ?, ?, ?, ?> other = (InstExpRaw<?, ?, ?, ?, ?>) obj;
+		InstExpRaw<?, ?, ?> other = (InstExpRaw<?, ?, ?>) obj;
 		if (eqs == null) {
 			if (other.eqs != null)
 				return false;
@@ -253,7 +255,7 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			if (col.ens.contains(ty)) {
 				col.gens.put(gen, (En) ty);
 			} else if (col.tys.contains(ty)) {
-				col.sks.put(gen, (Ty) ty);
+				col.sks.put(gen, new Ty(ty));
 			} else {
 				throw new LocException(find("generators", p), "The sort for " + gen + ", namely " + ty + ", is not declared as a type or entity");
 			}
