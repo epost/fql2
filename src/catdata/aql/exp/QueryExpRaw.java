@@ -26,6 +26,8 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
@@ -582,9 +584,9 @@ public class QueryExpRaw
 					Ctx<String, Chc<Ty, En>> ctx = unVar(ens0.get(dst0.fks.get(p.first).first).first.inRight());
 					Collage<Ty, En, Sym, Fk, Att, Var, Void> col = cols.get(dst0.fks.get(p.first).first);
 					Chc<Ty, En> required = Chc.inRight(ens0.get(dst0.fks.get(p.first).second).first.get(v.first));
-					Term<Ty, En, Sym, Fk, Att, Var, Void> term = RawTerm.infer1x(ctx.map, v.second, null, required, col,
+					Term<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, Gen, Sk> term = RawTerm.infer1x(ctx.map, v.second, null, required, col.convert(),
 							"in foreign key " + p.first + ", ", src0.typeSide.js).second;
-					trans.put(v.first, freeze(term).convert());
+					trans.put(v.first, freeze(term.convert()).convert());
 				}
 				boolean doNotCheckEqs = (Boolean) new AqlOptions(p.second.options, null, env.defaults)
 						.getOrDefault(AqlOption.dont_validate_unsafe);
@@ -612,9 +614,9 @@ public class QueryExpRaw
 		Ctx<String, Chc<Ty, En>> ctx = unVar(ens0.get(dst0.atts.get(p.first).first).first.inRight());
 		Collage<Ty, En, Sym, Fk, Att, Var, Void> col = cols.get(dst0.atts.get(p.first).first);
 		Chc<Ty, En> required = Chc.inLeft(dst0.atts.get(p.first).second);
-		Term<Ty, En, Sym, Fk, Att, Var, Void> term = RawTerm.infer1x(ctx.map, p.second, null, required, col, "",
+		Term<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, Gen, Sk> term = RawTerm.infer1x(ctx.map, p.second, null, required, col.convert(), "",
 				src0.typeSide.js).second;
-		atts0.put(p.first, freeze(term));
+		atts0.put(p.first, freeze(term.convert()));
 	}
 
 	public static  void processBlock(Map<String, String> options, AqlEnv env, Schema<Ty, En, Sym, Fk, Att> src0,
@@ -635,9 +637,9 @@ public class QueryExpRaw
 		cols.put(p.first, col);
 		Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>> eqs = new HashSet<>();
 		for (Pair<RawTerm, RawTerm> eq : p.second.eqs) {
-				Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Var, Void>, Term<Ty, En, Sym, Fk, Att, Var, Void>> x = RawTerm
-						.infer1x(ctx0.map, eq.first, eq.second, null, col, "In equation " + eq.first + " = " + eq.second + ", ", src0.typeSide.js).first3();
-				eqs.add(new Eq<>(new Ctx<>(), freeze(x.second), freeze(x.third)));
+				Triple<Ctx<Var, Chc<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En>>, Term<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, Gen, Sk>, Term<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, Gen, Sk>> x = RawTerm
+						.infer1x(ctx0.map, eq.first, eq.second, null, col.convert(), "In equation " + eq.first + " = " + eq.second + ", ", src0.typeSide.js).first3();
+				eqs.add(new Eq<>(new Ctx<>(), freeze(x.second.convert()), freeze(x.third.convert())));
 		}
 		Map<String, String> uu = new HashMap<>(options);
 		uu.putAll(p.second.options);

@@ -25,6 +25,9 @@ import catdata.provers.KBTheory;
 //TODO: aql validate collage
 public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
+	public <Ty, En, Sym, Fk, Att, Gen, Sk> Collage<Ty, En, Sym, Fk, Att, Gen, Sk> convert() {
+		return (Collage<Ty, En, Sym, Fk, Att, Gen, Sk>) this;
+	}
 	// TODO: aql eep equations segregated?
 
 	// TODO: aql make this an interface implemented by TypeSide, Schema, Instance?

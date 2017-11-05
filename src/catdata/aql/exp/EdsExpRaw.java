@@ -23,6 +23,8 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
@@ -377,9 +379,9 @@ public class EdsExpRaw extends EdsExp<Ty, En, Sym, Fk, Att> implements Raw {
 				}
 			
 				for (Pair<RawTerm, RawTerm> eq : Awh) {
-						Triple<Ctx<Var,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Void,Void>,Term<Ty,En,Sym,Fk,Att,Void,Void>>
+						Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
 						eq0 =
-						RawTerm.infer1x(As1.map, eq.first, eq.second, null, col, "", sch.typeSide.js).first3();
+						RawTerm.infer1x(As1.map, eq.first, eq.second, null, col.convert(), "", sch.typeSide.js).first3();
 								
 						Awh0.add(new Pair<>(eq0.second.convert(), eq0.third.convert()));
 				}

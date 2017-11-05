@@ -16,6 +16,8 @@ import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
@@ -41,7 +43,7 @@ public final class RawTerm {
 		return head + "(" + Util.sep(args, ", ") + ")";
 	}
 
-	public static <Gen, Sk> Set<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>> infer_good(
+	public static Set<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>> infer_good(
 			RawTerm e, Chc<Ty, En> expected, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, String pre, AqlJs<Ty, Sym> js,
 			Map<Var, Chc<Ty, En>> vars) {
 		if (e.annotation != null && !col.tys.contains(new Ty(e.annotation))) {
@@ -222,24 +224,34 @@ public final class RawTerm {
 				}
 			}
 		}
-		if (col.gens.containsKey((Gen) e.head) && e.args.isEmpty() && e.annotation == null) {
-			Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Gen((Gen) e.head);
-			Chc<Ty, En> ret3 = Chc.inRight(col.gens.get((Gen) e.head));
+		if (col.gens.containsKey(new Gen(e.head)) && e.args.isEmpty() && e.annotation == null) {
+			Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Gen(new Gen(e.head));
+			Chc<Ty, En> ret3 = Chc.inRight(col.gens.get(new Gen(e.head)));
 			if (expected != null && !expected.equals(ret3)) {
 			} else {
 				ret.add(new Triple<>(ret1, new Ctx<>(), ret3));
 			}
 		}
-		if (col.sks.containsKey((Sk) e.head) && e.args.isEmpty() && e.annotation == null) {
-			Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Sk((Sk) e.head);
-			Chc<Ty, En> ret3 = Chc.inLeft(col.sks.get((Sk) e.head));
+		if (col.sks.containsKey(new Sk(e.head)) && e.args.isEmpty() && e.annotation == null) {
+			Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Sk(new Sk(e.head));
+			Chc<Ty, En> ret3 = Chc.inLeft(col.sks.get(new Sk(e.head)));
 			if (expected != null && !expected.equals(ret3)) {
 			} else {
 				ret.add(new Triple<>(ret1, new Ctx<>(), ret3));
 			}
 		}
-		// as primitive - only if not a variable/generator/etc in scope
-		if (e.args.isEmpty() && !vars.keySet().contains(new Var((String) e.head))) {
+		if (e.args.isEmpty() && e.annotation != null) {
+			Ty ty = new Ty(e.annotation);
+			Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Obj(js.parse(ty, e.head), ty);
+			Chc<Ty, En> ret3 = Chc.inLeft(ty);
+			if (expected != null && !expected.equals(ret3)) {
+			} else {
+					ret.add(new Triple<>(ret1, new Ctx<>(), ret3));
+				
+			}
+		}
+		// as primitive - only if not a variable/generator/etc in scope i.e. none above fired
+		if (e.args.isEmpty() && e.annotation == null && ret.isEmpty()) {
 			for (Ty ty : col.tys) {
 				if (e.annotation != null && !new Ty(e.annotation).equals(ty)) {
 					continue;
@@ -249,7 +261,7 @@ public final class RawTerm {
 					Chc<Ty, En> ret3 = Chc.inLeft(ty);
 					if (expected != null && !expected.equals(ret3)) {
 					} else {
-						if (e.annotation != null || !isSymbol(col, (String) e.head)) {
+						if (e.annotation != null || !isSymbol(col, e.head)) {
 							ret.add(new Triple<>(ret1, new Ctx<>(), ret3));
 						}
 					}
@@ -259,7 +271,7 @@ public final class RawTerm {
 		}
 		if (ret.isEmpty()) {
 			String msg = "Cannot infer a well-sorted term for " + e + ".\n";
-			if (!vars.keySet().contains(new Var((String) e.head)) && !isSymbolAll(col, (String) e.head)
+			if (!vars.keySet().contains(new Var((String) e.head)) && !isSymbolAll(col, e.head)
 					&& e.annotation == null) {
 				msg += "Undefined symbol: " + e.head + "\n";
 			}
@@ -291,7 +303,7 @@ public final class RawTerm {
 
 	// TODO aql inefficient bitwise operations
 
-	public static <Gen, Sk> Quad<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Chc<Ty, En>> infer1x(
+	public static Quad<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Chc<Ty, En>> infer1x(
 			Map<String, Chc<Ty, En>> ctx0, RawTerm e0, RawTerm f, Chc<Ty, En> expected,
 			Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, String pre, AqlJs<Ty, Sym> js) {
 		Set<Quad<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Chc<Ty, En>>> ret = new HashSet<>();
@@ -519,15 +531,12 @@ public final class RawTerm {
 		throw new RuntimeException("Anomaly, please report");
 	}*/
 
-	private static <X> X resolve(String head) {
-		return (X) head;
-	}
-
-	 public static <Gen, Sk> void assertUnambig(String head,
+	
+	 public static void assertUnambig(String head,
 				Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 			int n = boolToInt(col.syms.containsKey(new Sym(head))) + boolToInt(col.atts.containsKey(new Att(head)))
-					+ boolToInt(col.fks.containsKey(new Fk(head))) + boolToInt(col.gens.containsKey(resolve(head)))
-					+ boolToInt(col.sks.containsKey(resolve(head)));
+					+ boolToInt(col.fks.containsKey(new Fk(head))) + boolToInt(col.gens.containsKey(new Gen(head)))
+					+ boolToInt(col.sks.containsKey(new Sk(head)));
 			if (n == 0) {
 				throw new RuntimeException(head + " is not a symbol");
 			} else if (n > 1) {
@@ -538,7 +547,7 @@ public final class RawTerm {
 	
 	//@SuppressWarnings("unchecked")
 	//only used for precedences with aql options
-	 public static <Gen, Sk> Head<Ty, En, Sym, Fk, Att, Gen, Sk> toHeadNoPrim(String head,
+	 public static  Head<Ty, En, Sym, Fk, Att, Gen, Sk> toHeadNoPrim(String head,
 			Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 		
 		 assertUnambig(head, col);
@@ -549,10 +558,10 @@ public final class RawTerm {
 			return Head.Att(new Att(head));
 		} else if (col.fks.containsKey(new Fk(head))) {
 			return Head.Fk(new Fk(head));
-		} else if (col.gens.containsKey(resolve(head))) {
-			return Head.Gen((Gen) head);
-		} else if (col.sks.containsKey(resolve(head))) {
-			return Head.Sk((Sk) head);
+		} else if (col.gens.containsKey(new Gen(head))) {
+			return Head.Gen(new Gen(head));
+		} else if (col.sks.containsKey(new Sk(head))) {
+			return Head.Sk(new Sk(head));
 		}
 		throw new RuntimeException("Anomaly: please report");
 	} 
@@ -764,7 +773,7 @@ public final class RawTerm {
 		return ret;
 	}
 
-	public static <Gen, Sk> Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> infer2(
+	public static Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> infer2(
 			List<Pair<String, String>> l, RawTerm a, RawTerm b, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col,
 			AqlJs<Ty, Sym> js) {
 		Map<String, Chc<Ty, En>> ctx = new HashMap<>();

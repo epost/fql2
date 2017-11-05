@@ -28,6 +28,8 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
@@ -223,8 +225,8 @@ public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 			try {
 				Map<String, Chc<Ty, En>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(new En(eq.second)));
 				
-				Triple<Ctx<Var,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Void,Void>,Term<Ty,En,Sym,Fk,Att,Void,Void>>
-				eq0 = RawTerm.infer1x(ctx, eq.third, eq.fourth, null, col, "", ts.js).first3();
+				Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
+				eq0 = RawTerm.infer1x(ctx, eq.third, eq.fourth, null, col.convert(), "", ts.js).first3();
 				
 				Chc<Ty, En> v = eq0.first.get(new Var(eq.first));
 				if (v.left) {
@@ -232,7 +234,7 @@ public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 				}
 				En t = v.r;
 			
-				eqs0.add(new Triple<>(new Pair<>(new Var(eq.first), t), eq0.second, eq0.third));
+				eqs0.add(new Triple<>(new Pair<>(new Var(eq.first), t), eq0.second.convert(), eq0.third.convert()));
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LocException(find("obs equations", eq), "In equation " + eq.third + " = " + eq.fourth + ", " + ex.getMessage());
@@ -249,8 +251,8 @@ public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 				RawTerm lhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.first, vv);
 				RawTerm rhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.second,vv);
 				
-				Triple<Ctx<Var,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Void,Void>,Term<Ty,En,Sym,Fk,Att,Void,Void>>
-				eq0 = RawTerm.infer1x(ctx, lhs, rhs, null, col, "", ts.js).first3();
+				Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
+				eq0 = RawTerm.infer1x(ctx, lhs, rhs, null, col.convert(), "", ts.js).first3();
 			
 				Chc<Ty, En> v = eq0.first.get(var);
 				if (v.left) {
@@ -262,7 +264,7 @@ public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 					throw new RuntimeException("java constants cannot be used ");
 				}
 	
-				eqs0.add(new Triple<>(new Pair<>(var, t), eq0.second, eq0.third));
+				eqs0.add(new Triple<>(new Pair<>(var, t), eq0.second.convert(), eq0.third.convert()));
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LocException(find("path equations", eq), "In equation " + Util.sep(eq.first, ".") + " = " + Util.sep(eq.second, ".") + ", " + ex.getMessage());

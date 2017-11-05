@@ -24,6 +24,8 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
@@ -322,10 +324,10 @@ public final class MapExpRaw extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>
 
 				Map<String, Chc<Ty, En>> ctx = Util.singMap(var, var_en2);
 
-				Term<Ty, En, Sym, Fk, Att, Void, Void> term0 = RawTerm.infer1x(ctx, term, null, proposed_ty2,
-						dcol, "", src0.typeSide.js).second;
+				Term<Ty, En, Sym, Fk, Att, Gen, Sk> term0 = RawTerm.infer1x(ctx, term, null, proposed_ty2,
+						dcol.convert(), "", src0.typeSide.js).second;
 
-				Util.putSafely(atts0, new Att(att.first), new Triple<>(new Var(var), dst_att_dom_en, term0));
+				Util.putSafely(atts0, new Att(att.first), new Triple<>(new Var(var), dst_att_dom_en, term0.convert()));
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LocException(find("attributes", att), "in mapping for " + att.first + ", " + ex.getMessage());

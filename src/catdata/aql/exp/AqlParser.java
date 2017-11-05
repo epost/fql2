@@ -778,7 +778,7 @@ public class AqlParser {
 		return ret;
 	}
 	
-	private static Parser<InstExpQuotient<?, ?, ?, ?>> instExpQuotient() {
+	private static Parser<InstExpQuotient<?, ?>> instExpQuotient() {
 
 		Parser<catdata.Pair<Integer, catdata.Pair<RawTerm, RawTerm>>> eq = Parsers
 				.tuple(Parsers.INDEX, Parsers.tuple(term(), token("="), term()))
@@ -806,7 +806,7 @@ public class AqlParser {
 		Parser<Tuple3<Token, InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(token("quotient"), 
 				inst_ref.lazy(), token("{")); // .map(x -> x.c);
 
-		Parser<InstExpQuotient<?, ?, ?, ?>> ret = Parsers.tuple(l, pa, token("}"))
+		Parser<InstExpQuotient<?, ?>> ret = Parsers.tuple(l, pa, token("}"))
 				.map(x -> new InstExpQuotient
 				(x.a.b, new LinkedList<>(Util.append(Util.newIfNull(x.b.a), Util.newIfNull(x.b.b))), x.b.c));
 

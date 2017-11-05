@@ -27,6 +27,8 @@ import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
@@ -36,7 +38,7 @@ import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 
 //TODO aql merge with InstExpRaw
-public final class InstExpQuotient<Gen,Sk,X,Y> extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw {
+public final class InstExpQuotient<X,Y> extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw {
 	
 	@Override
 	public int hashCode() {
@@ -56,7 +58,7 @@ public final class InstExpQuotient<Gen,Sk,X,Y> extends InstExp<Ty,En,Sym,Fk,Att,
 			return false;
 		if (!(obj instanceof InstExpQuotient))
 			return false;
-		InstExpQuotient<?, ?, ?, ?> other = (InstExpQuotient<?, ?, ?, ?>) obj;
+		InstExpQuotient<?, ?> other = (InstExpQuotient<?, ?>) obj;
 		if (I == null) {
 			if (other.I != null)
 				return false;

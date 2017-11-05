@@ -19,6 +19,8 @@ import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
@@ -268,9 +270,9 @@ public final class ColimSchExpModify<N, E> extends ColimSchExp<N> implements Raw
 			}
 			Collage<Ty, En, Sym, Fk, Att,Void,Void> xxx = colim0.schemaStr.collage();
 			Ctx<String,Chc<Ty,En>> ctx = new Ctx<>(k.second.first, Chc.inRight(r.first));
-			Term<Ty, En, Sym, Fk, Att, Void, Void> t = 
-			RawTerm.infer1x(ctx.map, k.second.third, null, Chc.inLeft(r.second), xxx, pre, colim0.schemaStr.typeSide.js).second;
-			colim0 = colim0.removeAtt(new Att(k.first), new Var(k.second.first), t, checkJava);
+			Term<Ty, En, Sym, Fk, Att, Gen, Sk> t = 
+			RawTerm.infer1x(ctx.map, k.second.third, null, Chc.inLeft(r.second), xxx.convert(), pre, colim0.schemaStr.typeSide.js).second;
+			colim0 = colim0.removeAtt(new Att(k.first), new Var(k.second.first), t.convert(), checkJava);
 		}
 		
 		return colim0;

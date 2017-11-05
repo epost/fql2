@@ -23,6 +23,8 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.QueryExpRaw.Block;
 import catdata.aql.exp.SchExp.SchExpCod;
 import catdata.aql.exp.SchExpRaw.Att;
@@ -127,10 +129,10 @@ public class QueryExpRawSimple extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, At
 		colForDst.ens.add(En);
 		for (Pair<Att, RawTerm> p : block.atts) {
 			Map<String, Chc<Ty, En>> s = QueryExpRaw.unVar(cols.get(En).gens).<Ty>inRight().map;
-			Term<Ty, En, Sym, Fk, Att, Void, Void> term 
-			= RawTerm.infer1x(s, p.second, p.second, null, srcCol, "",
+			Term<Ty, catdata.aql.exp.SchExpRaw.En, Sym, Fk, Att, Gen, Sk> term 
+			= RawTerm.infer1x(s, p.second, p.second, null, srcCol.convert(), "",
 					src0.typeSide.js).second;
-			Chc<Ty, En> ty = srcCol.type(new Ctx<>(s).map((k,v) -> new Pair<>(new Var(k), v)), term);
+			Chc<Ty, En> ty = srcCol.type(new Ctx<>(s).map((k,v) -> new Pair<>(new Var(k), v)), term.convert());
 			if (!ty.left) {
 				throw new LocException(find("attributes", p),
 						"In return clause for " + p.first + ", the type is " + ty.r + ", which is an entity.");

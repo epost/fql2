@@ -15,6 +15,8 @@ import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.SchExpRaw;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
@@ -428,16 +430,16 @@ public class ColimitSchema<N> implements Semantics {
 		for (Quad<String, String, RawTerm, RawTerm> eq : eqTerms) {
 			Map<String, Chc<Ty, En>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(new En(eq.second)));
 			
-			Triple<Ctx<Var,Chc<Ty,En>>,Term<Ty, En, Sym, Fk, Att, Void, Void>,Term<Ty, En, Sym, Fk, Att, Void, Void>> 
-			eq0 = RawTerm.infer1x(ctx, eq.third, eq.fourth, null, col, "", sch.typeSide.js).first3();
+			Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> 
+			eq0 = RawTerm.infer1x(ctx, eq.third, eq.fourth, null, col.convert(), "", sch.typeSide.js).first3();
 			
 			Chc<Ty, En> v = eq0.first.get(new Var(eq.first));
 			if (v.left) {
 				throw new RuntimeException("In " + eq.third + " = " + eq.fourth + ", variable " + eq.first + " has type " + v.l + " which is not an entity");
 			}
 		
-			eqs0.add(new Triple<>(new Pair<>(new Var(eq.first), v.r), eq0.second, eq0.third));
-			col.eqs.add(new Eq<>(new Ctx<>(new Var(eq.first), v), eq0.second, eq0.third));
+			eqs0.add(new Triple<>(new Pair<>(new Var(eq.first), v.r), eq0.second.convert(), eq0.third.convert()));
+			col.eqs.add(new Eq<>(new Ctx<>(new Var(eq.first), v), eq0.second.convert(), eq0.third.convert()));
 		}
 	
 		boolean b = ! (Boolean) options.getOrDefault(AqlOption.allow_java_eqs_unsafe);
