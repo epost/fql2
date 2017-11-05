@@ -25,12 +25,17 @@ import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 import catdata.aql.fdm.SaturatedInstance;
 
 //TODO: aql change type of this to not be a lie
-public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle, Q>
+public abstract class InstExpImport<Gen, Handle, Q>
 		extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> implements Raw {
 
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
@@ -183,15 +188,15 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle, Q>
 				for (String o : map.keySet()) {
 					assertUnambig(o, sch);
 					Q q = map.get(o);
-					if (sch.typeSide.tys.contains(o)) {
-						tys.put((Ty) o, q);
-					} else if (sch.ens.contains(o)) {
-						ens.put((En) o, q);
-					} else if (sch.atts.map.containsKey(o)) {
-						atts.put((Att) o, q);
-					} else if (sch.fks.map.containsKey(o)) {
-						fks.put((Fk) o, q);
-					}
+					if (sch.typeSide.tys.contains(new Ty(o))) {
+						tys.put(new Ty(o), q);
+					} else if (sch.ens.contains(new En(o))) {
+						ens.put(new En(o), q);
+					} else if (sch.atts.map.containsKey(new Att(o))) {
+						atts.put(new Att(o), q);
+					} else if (sch.fks.map.containsKey(new Fk(o))) {
+						fks.put(new Fk(o), q);
+					} //TODO aql
 				}
 				totalityCheck(sch, ens, tys, atts, fks);
 	
@@ -207,7 +212,11 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle, Q>
 	
 			} else {
 				for (En en : sch.ens) {
-					joinedEn(h, en, map.get((String)en), sch);
+					Q z = map.get(en.str);
+					if (z == null) {
+						throw new RuntimeException("No binding given for " + en);
+					}
+					joinedEn(h, en, z, sch);
 				}
 			}
 			
@@ -290,19 +299,19 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle, Q>
 	}
 
 	
-	
-	private void assertUnambig(Object o, Schema<Ty, En, Sym, Fk, Att> sch) {
+	//different than rawterms
+	private void assertUnambig(String o, Schema<Ty, En, Sym, Fk, Att> sch) {
 		int i = 0;
-		if (sch.typeSide.tys.contains(o)) {
+		if (sch.typeSide.tys.contains(new Ty(o))) {
 			i++;
 		}
-		if (sch.ens.contains(o)) {
+		if (sch.ens.contains(new En(o))) {
 			i++;
 		}
-		if (sch.atts.map.containsKey(o)) {
+		if (sch.atts.map.containsKey(new Att(o))) {
 			i++;
 		}
-		if (sch.fks.map.containsKey(o)) {
+		if (sch.fks.map.containsKey(new Fk(o))) {
 			i++;
 		}
 		if (i > 1) {
@@ -375,7 +384,7 @@ public abstract class InstExpImport<Ty, En, Sym, Fk, Att, Gen, Handle, Q>
 			return false;
 		if (!(obj instanceof InstExpImport))
 			return false;
-		InstExpImport<?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpImport<?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		InstExpImport<?, ?, ?> other = (InstExpImport<?, ?, ?>) obj;
 		if (map == null) {
 			if (other.map != null)
 				return false;

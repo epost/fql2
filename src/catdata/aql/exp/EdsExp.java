@@ -2,26 +2,11 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import catdata.Chc;
-import catdata.Ctx;
 import catdata.Pair;
-import catdata.Triple;
 import catdata.Util;
-import catdata.aql.AqlOptions;
-import catdata.aql.Collage;
 import catdata.aql.Constraints;
-import catdata.aql.ED;
 import catdata.aql.Kind;
-import catdata.aql.RawTerm;
-import catdata.aql.Schema;
-import catdata.aql.Term;
-import catdata.aql.Var;
 
 public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, En, Sym, Fk, Att>> {
 

@@ -15,9 +15,14 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Schema;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
 //TODO this type is actually a lie bc of import_as_theory option
-public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En, Sym, Fk, Att, Gen, Connection, String> {
+public class InstExpJdbc<Gen> extends InstExpImport<Gen, Connection, String> {
 
 	public final String clazz;
 	public final String jdbcString;
@@ -39,7 +44,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 		
 		if(isJoined) {
 			for (String s : map.keySet()) {
-				if (!sch.ens.contains(s)) {
+				if (!sch.ens.contains(new En(s))) {
 					throw new RuntimeException(s + " is not an entity in " + sch);
 				}
 			}
@@ -206,7 +211,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 			ens0.get(en).add(g1); //store strings 
 			
 			for (Fk fk : sch.fksFrom(en)) {
-				Object rhs = rs.getObject((String) fk);
+				Object rhs = rs.getObject(fk.toString());
 				if (rhs == null) {
 					stmt.close();
 					rs.close();
@@ -221,7 +226,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 				fks0.get(g1).put(fk, g2);
 			}
 			for (Att att : sch.attsFrom(en)) {
-				Object rhs =  rs.getObject((String) att);
+				Object rhs =  rs.getObject(att.toString());
 				if (!atts0.map.containsKey(g1)) {
 					atts0.put(g1, new Ctx<>());
 				}
@@ -281,7 +286,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InstExpJdbc<?, ?, ?, ?, ?, ?> other = (InstExpJdbc<?, ?, ?, ?, ?, ?>) obj;
+		InstExpJdbc<?> other = (InstExpJdbc<?>) obj;
 		if (clazz == null) {
 			if (other.clazz != null)
 				return false;

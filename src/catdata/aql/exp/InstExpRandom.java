@@ -18,11 +18,14 @@ import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
 public  final class InstExpRandom
-extends InstExp<Ty,String,Sym,String,String,String,String,ID,Chc<String,Pair<ID,String>>> implements Raw {
+extends InstExp<Ty,En,Sym,Fk,Att,String,String,ID,Chc<String,Pair<ID,Att>>> implements Raw {
 
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 	
@@ -34,18 +37,17 @@ extends InstExp<Ty,String,Sym,String,String,String,String,ID,Chc<String,Pair<ID,
 			
 	public final Map<String, String> options;
 	
-	public final SchExp<Ty, String, Sym, String, String> sch;
+	public final SchExp<Ty, En, Sym, Fk, Att> sch;
 	
 	@Override
 	public Map<String, String> options() {
 		return options;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public InstExpRandom(SchExp<?,?,?,?,?> sch, List<Pair<LocStr, String>> ens, List<Pair<String, String>> options) {
 		this.ens = Util.toMapSafely(LocStr.set2y(ens, x -> Integer.parseInt(x)));
 		this.options = Util.toMapSafely(options);
-		this.sch = (SchExp<Ty, String, Sym, String, String>) sch;
+		this.sch = (SchExp<Ty, En, Sym, Fk, Att>) sch;
 		List<InteriorLabel<Object>> f = new LinkedList<>();
 		for (Pair<LocStr, String> p : ens) {
 			f.add(new InteriorLabel<>("generators", new Pair<>(p.first.str, p.second), p.first.loc,
@@ -109,24 +111,24 @@ extends InstExp<Ty,String,Sym,String,String,String,String,ID,Chc<String,Pair<ID,
 	}
 
 	@Override
-	public SchExp<Ty, String, Sym, String, String> type(AqlTyping G) {
+	public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 		return sch;
 	}
 
 	//not exactly the smartest way
 	@Override
-	public Instance<Ty, String, Sym, String, String, String, String, ID, Chc<String, Pair<ID, String>>> eval(AqlEnv env) {
+	public Instance<Ty, En, Sym, Fk, Att, String, String, ID, Chc<String, Pair<ID, Att>>> eval(AqlEnv env) {
 		int seed = (Integer) new AqlOptions(options, null, env.defaults).getOrDefault(AqlOption.random_seed);
 		Random rand = new Random(seed);
 		List<Pair<LocStr, String>> gens = new LinkedList<>();
 		List<Pair<Integer, Pair<RawTerm, RawTerm>>> eqs = new LinkedList<>();
-		Schema<Ty, String, Sym, String, String> schema = sch.eval(env);
+		Schema<Ty, En, Sym, Fk, Att> schema = sch.eval(env);
 		for (String en : ens.keySet()) {
 			int size = ens.get(en);
 			for (int i = 0; i < size; i++) {
 				String src = en + i;
 				gens.add(new Pair<>(new LocStr(0, src), en)); 
-				for (String fk : schema.fksFrom(en)) {
+				for (Fk fk : schema.fksFrom(new En(en))) {
 					Object dst_en = schema.fks.get(fk).second;
 					int dst_size = ens.containsKey(dst_en) ? ens.get(dst_en) : 0;
 					if (dst_size == 0) {
@@ -135,8 +137,8 @@ extends InstExp<Ty,String,Sym,String,String,String,String,ID,Chc<String,Pair<ID,
 					String dst = dst_en.toString() + rand.nextInt(dst_size);
 					eqs.add(new Pair<>(0, new Pair<>(new RawTerm(fk.toString(), Util.singList(new RawTerm(src))), new RawTerm(dst))));
 				}
-				for (String att : schema.attsFrom(en)) {
-					Object dst_ty = schema.atts.get(att).second;
+				for (Att att : schema.attsFrom(new En(en))) {
+					Ty dst_ty = schema.atts.get(att).second;
 					int dst_size = ens.containsKey(dst_ty) ? ens.get(dst_ty) : 0;
 
 					if (dst_size == 0) {
@@ -148,7 +150,7 @@ extends InstExp<Ty,String,Sym,String,String,String,String,ID,Chc<String,Pair<ID,
 			}
 		}
 				
-		return new InstExpRaw<String, String, String>(sch, Collections.emptyList(), gens, eqs, Util.toList(options)).eval(env);  //inherits options
+		return new InstExpRaw(sch, Collections.emptyList(), gens, eqs, Util.toList(options)).eval(env);  //inherits options
 	}
 
 	

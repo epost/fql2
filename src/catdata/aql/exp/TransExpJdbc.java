@@ -9,12 +9,17 @@ import java.util.List;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Schema;
 import catdata.aql.Term;
-import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
-public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> 
-extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2, Connection>  {
+public class TransExpJdbc<Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> 
+extends TransExpImport<Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2, Connection>  {
 
 
 	public final String clazz;
@@ -57,7 +62,7 @@ extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		TransExpJdbc<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpJdbc<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		TransExpJdbc<?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpJdbc<?, ?, ?, ?, ?, ?, ?, ?>) obj;
 		if (clazz == null) {
 			if (other.clazz != null)
 				return false;

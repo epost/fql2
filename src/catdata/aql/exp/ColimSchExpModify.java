@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Ctx;
@@ -13,14 +14,18 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.ColimitSchema;
+import catdata.aql.Collage;
 import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
-public final class ColimSchExpModify<N, E, En, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> implements Raw {
+public final class ColimSchExpModify<N, E> extends ColimSchExp<N> implements Raw {
 	
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 	
@@ -34,7 +39,7 @@ public final class ColimSchExpModify<N, E, En, Fk, Att> extends ColimSchExp<N, E
 		return colim.getNode(n, G);
 	}
 	
-	public final ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim;
+	public final ColimSchExp<N> colim;
 	
 	public final List<Pair<String, String>> ens;
 
@@ -51,7 +56,7 @@ public final class ColimSchExpModify<N, E, En, Fk, Att> extends ColimSchExp<N, E
 		return options;
 	}
 	
-	public ColimSchExpModify(ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim, List<Pair<LocStr, String>> ens, List<Pair<LocStr, String>> fks0, List<Pair<LocStr, String>> atts0, List<Pair<LocStr, List<String>>> fks, List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
+	public ColimSchExpModify(ColimSchExp<N> colim, List<Pair<LocStr, String>> ens, List<Pair<LocStr, String>> fks0, List<Pair<LocStr, String>> atts0, List<Pair<LocStr, List<String>>> fks, List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
 		this.ens = LocStr.list2(ens);
 		this.fks = LocStr.list2(fks);
 		this.atts = LocStr.list2(atts);
@@ -122,7 +127,7 @@ public final class ColimSchExpModify<N, E, En, Fk, Att> extends ColimSchExp<N, E
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ColimSchExpModify<?, ?, ?, ?, ?> other = (ColimSchExpModify<?, ?, ?, ?, ?>) obj;
+		ColimSchExpModify<?, ?> other = (ColimSchExpModify<?, ?>) obj;
 		if (atts == null) {
 			if (other.atts != null)
 				return false;
@@ -237,34 +242,35 @@ public final class ColimSchExpModify<N, E, En, Fk, Att> extends ColimSchExp<N, E
 
 	//TODO aql add options
 	@Override
-	public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+	public ColimitSchema<N> eval(AqlEnv env) {
 		boolean checkJava = ! (Boolean) env.defaults.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
-		ColimitSchema<N, Ty, En, Sym, Fk, Att> colim0 = colim.eval(env);
+		ColimitSchema<N> colim0 = colim.eval(env);
 		for (Pair<String, String> k : ens) {
-			colim0 = colim0.renameEntity(k.first, k.second, checkJava);
+			colim0 = colim0.renameEntity(new En(k.first), new En(k.second), checkJava);
 		}
 		for (Pair<String, String> k : fks0) {
-			colim0 = colim0.renameFk(k.first, k.second, checkJava);
+			colim0 = colim0.renameFk(new Fk(k.first), new Fk(k.second), checkJava);
 		}
 		for (Pair<String, String> k : atts0) {
-			colim0 = colim0.renameAtt(k.first, k.second, checkJava);
+			colim0 = colim0.renameAtt(new Att(k.first), new Att(k.second), checkJava);
 		}
 		for (Pair<String, List<String>> k : fks) {
-			colim0 = colim0.removeFk(k.first, k.second, checkJava);
+			colim0 = colim0.removeFk(new Fk(k.first), k.second.stream().map(Fk::new).collect(Collectors.toList()), checkJava);
 		}
 		for (Pair<String, Triple<String, String, RawTerm>> k : atts) {
-			if (!colim0.schemaStr.atts.containsKey(k.first)) {
+			if (!colim0.schemaStr.atts.containsKey(new Att(k.first))) {
 				throw new RuntimeException("Not an attribute: " + k.first + " in\n\n" + colim0.schemaStr);
 			}
 			String pre = "In processing " + k.first + " -> lambda " + k.second.first + "." + k.second.third + ", ";
-			Pair<String, Ty> r = colim0.schemaStr.atts.get(k.first);
+			Pair<En, Ty> r = colim0.schemaStr.atts.get(new Att(k.first));
 			if (k.second.second != null && !k.second.second.equals(r.first)) {
 				throw new RuntimeException(pre + " given type is " + k.second.second + " but expected " + r.first);
 			}
-			Ctx<String,Chc<Ty,String>> ctx = new Ctx<>(k.second.first, Chc.inRight(r.first));
-			Term /*<Ty, String, Sym, String, String, Void, Void> */ t = 
-			RawTerm.infer1x(ctx.map, k.second.third, null, Chc.inLeft(r.second), colim0.schemaStr.collage(), pre, colim0.schemaStr.typeSide.js).second;
-			colim0 = colim0.removeAtt(k.first, new Var(k.second.first), t, checkJava);
+			Collage<Ty, En, Sym, Fk, Att,Void,Void> xxx = colim0.schemaStr.collage();
+			Ctx<String,Chc<Ty,En>> ctx = new Ctx<>(k.second.first, Chc.inRight(r.first));
+			Term<Ty, En, Sym, Fk, Att, Void, Void> t = 
+			RawTerm.infer1x(ctx.map, k.second.third, null, Chc.inLeft(r.second), xxx, pre, colim0.schemaStr.typeSide.js).second;
+			colim0 = colim0.removeAtt(new Att(k.first), new Var(k.second.first), t, checkJava);
 		}
 		
 		return colim0;
@@ -273,7 +279,7 @@ public final class ColimSchExpModify<N, E, En, Fk, Att> extends ColimSchExp<N, E
 
 
 	@Override
-	public ColimSchExp<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+	public ColimSchExp<N> type(AqlTyping G) {
 		return colim.type(G);
 	}
 

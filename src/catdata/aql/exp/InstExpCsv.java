@@ -23,13 +23,18 @@ import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
-public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
-		extends InstExpImport<Ty, En, Sym, Fk, Att, Gen, Map<En, List<String[]>>, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>>> {
+public class InstExpCsv<Gen>
+		extends InstExpImport<Gen, Map<En, List<String[]>>, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>>> {
 
 	public final File f;
 
-	public InstExpCsv(SchExp<Ty, En, Sym, Fk, Att> schema, List<Pair<LocStr, Pair<List<Pair<LocStr, String>>, List<Pair<String, String>>>>> map,
+	public InstExpCsv(SchExp schema, List<Pair<LocStr, Pair<List<Pair<LocStr, String>>, List<Pair<String, String>>>>> map,
 			List<Pair<String, String>> options, String f) {
 		super(schema, map, options);
 		this.f = new File(f);
@@ -61,7 +66,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 	/**
 	 * Expects filenames in the map
 	 */
-	public static <Ty, En, Sym, Fk, Att> Map<En, List<String[]>> start2(Map<String, String> map, AqlOptions op,
+	public static Map<En, List<String[]>> start2(Map<String, String> map, AqlOptions op,
 			Schema<Ty, En, Sym, Fk, Att> sch, boolean omitCheck) throws Exception {
 		Character sepChar = (Character) op.getOrDefault(AqlOption.csv_field_delim_char);
 		Character quoteChar = (Character) op.getOrDefault(AqlOption.csv_quote_char);
@@ -73,7 +78,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 		Map<En, List<String[]>> ret = new HashMap<>();
 		for (String k : map.keySet()) {
 			if (!omitCheck) {
-				if (!sch.ens.contains(k)) {
+				if (!sch.ens.contains(new En(k))) {
 					throw new RuntimeException("Not an entity: " + k);
 				}
 			}
@@ -87,7 +92,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 
 			fileReader.close();
 
-			ret.put((En) k, rows);
+			ret.put(new En(k), rows);
 		}
 		if (!omitCheck) {
 			for (En en : sch.ens) {
@@ -107,7 +112,7 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 			File file = new File(f, op.getOrDefault(AqlOption.csv_import_prefix) + en.toString() + "."
 					+ op.getOrDefault(AqlOption.csv_file_extension));
 			if (file.exists()) {
-				m.put((String) en, file.getAbsolutePath());
+				m.put(en.str, file.getAbsolutePath());
 			} else if (!(boolean) op.getOrDefault(AqlOption.csv_import_missing_is_empty)) {
 				throw new RuntimeException("Missing file: " + file.getAbsolutePath()
 						+ ". \n\nPossible options to consider: " + AqlOption.csv_import_missing_is_empty + " and "
@@ -123,8 +128,9 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 	}
 
 	@Override
-	protected void joinedEn(Map<En, List<String[]>> rows, En en, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>> s, Schema<Ty, En, Sym, Fk, Att> sch)
+	protected void joinedEn(Map<En, List<String[]>> rows, En en0, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>> s, Schema<Ty, En, Sym, Fk, Att> sch)
 			throws Exception {
+		String en = en0.str;
 		Map<String, String> inner;
 		if (s == null) {
 			inner = new HashMap<>(); 
@@ -140,8 +146,8 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 
 		// index of each column name
 		Ctx<String, Integer> m = new Ctx<>();
-		for (int i = 0; i < rows.get(en).get(0).length; i++) {
-			m.put(rows.get(en).get(0)[i], i);
+		for (int i = 0; i < rows.get(en0).get(0).length; i++) {
+			m.put(rows.get(en0).get(0)[i], i);
 		}
 		boolean prepend = (boolean) op.getOrDefault(inner, AqlOption.csv_prepend_entity);
 		String sep = (String) op.getOrDefault(inner, AqlOption.import_col_seperator);
@@ -171,36 +177,36 @@ public class InstExpCsv<Ty, En, Sym, Fk, Att, Gen>
 			return pre + z;
 		};
 		int startId = 0;
-		for (String[] row : rows.get(en).subList(1, rows.get(en).size())) {
+		for (String[] row : rows.get(en0).subList(1, rows.get(en0).size())) {
 			Gen l0;
 
 			String idCol = map.containsKey(en) ? map.get(en) : 
 				(String) op.getOrDefault(inner, AqlOption.id_column_name);
 
 			if (autoGenIds && !m.containsKey(idCol)) {
-				l0 = toGen(en, "" + startId++);
+				l0 = toGen(en0, "" + startId++);
 			} else if (!autoGenIds && !m.containsKey(idCol)) {
 				throw new RuntimeException("On " + en + ", ID column " + idCol + " not found in headers " + m.keySet()
-						+ ". \n\nPossible solution: set csv_generate_ids=true to auto-generate IDs.\n\nPossible solution: rename the headers in the CSV file.\n\nPossible solution: add an ID column to the CSV file.");
+						+ ". \n\nPossible solution: provide a mapping.\n\nPossible solution: set csv_generate_ids=true to auto-generate IDs.\n\nPossible solution: rename the headers in the CSV file.\n\nPossible solution: add an ID column to the CSV file.");
 			} else {
-				l0 = toGen(en, row[m.get(idCol)]);
+				l0 = toGen(en0, row[m.get(idCol)]);
 			}
 
-			ens0.get(en).add(l0);
+			ens0.get(en0).add(l0);
 
-			for (Fk fk : sch.fksFrom(en)) {
+			for (Fk fk : sch.fksFrom(en0)) {
 				if (!fks0.containsKey(l0)) {
 					fks0.put(l0, new Ctx<>());
 				}
-				Gen g = toGen(sch.fks.get(fk).second, row[m.get(mediate.apply((String) fk))]);
+				Gen g = toGen(sch.fks.get(fk).second, row[m.get(mediate.apply(fk.str))]);
 				fks0.get(l0).put(fk, g);
 			}
 
-			for (Att att : sch.attsFrom(en)) {
+			for (Att att : sch.attsFrom(en0)) {
 				if (!atts0.containsKey(l0)) {
 					atts0.put(l0, new Ctx<>());
 				}
-				String zz = mediate.apply((String) att);
+				String zz = mediate.apply(att.str);
 				if (!m.containsKey(zz)) {
 					throw new RuntimeException("No column " + att + " in file for " + en + " nor explicit mapping for "
 							+ att + " given. Tried " + zz + " and options are " + m.keySet());

@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashSet;
@@ -27,12 +26,17 @@ import catdata.aql.It;
 import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.Term;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 
 //TODO AQL CSV version of this
 //TODO merge this with coproduct sigma
-public final class InstExpJdbcQuotient<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
+public final class InstExpJdbcQuotient<Gen, Sk, X, Y>
 extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>>  implements Raw {
 	
 	public final InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
@@ -101,7 +105,7 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>>  implements R
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InstExpJdbcQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpJdbcQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		InstExpJdbcQuotient<?, ?, ?, ?> other = (InstExpJdbcQuotient<?, ?, ?, ?>) obj;
 		if (I == null) {
 			if (other.I != null)
 				return false;
@@ -165,7 +169,7 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>>  implements R
 		try (Connection conn = DriverManager.getConnection(toGet)) {
 		
 			for (Entry<LocStr, String> q : queries.entrySet()) {
-				if (!J.schema().ens.contains(q.getKey().str)){
+				if (!J.schema().ens.contains(new En(q.getKey().str))){
 					throw new LocException(q.getKey().loc, "Not an entity: " + q.getKey().str + ", expected one of " + J.schema().ens);
 				}
 				Statement stmt = conn.createStatement();
@@ -200,12 +204,12 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>>  implements R
 				stmt.close();
 				rs.close();
 			}
-		} catch (SQLException exn) {
-			exn.printStackTrace();
-			throw new RuntimeException("JDBC exception: " + exn.getMessage());
+	//	} catch (SQLException exn) {
+	//		exn.printStackTrace();
+	//		throw new RuntimeException(/*"JDBC exception: " + */ exn /*.getMessage() */);
 		} catch (Throwable thr) {
-			thr.printStackTrace();
-			throw new RuntimeException(thr.getMessage());
+//			thr.printStackTrace();
+			throw new RuntimeException(thr);
 		}
 		
 		InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, ID> initial0 = new InitialAlgebra<>(strat, J.schema(), col, new It(), Object::toString, Object::toString);			 

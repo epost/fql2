@@ -154,9 +154,8 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 		return "";
 	}
 
-	@SuppressWarnings("unused")
 	@Override
-	public <N, E0, Ty, En, Sym, Fk, Att> String visit(Unit arg, ColimitSchema<N, Ty, En, Sym, Fk, Att> S) throws RuntimeException {
+	public <N> String visit(Unit arg, ColimitSchema<N> S) throws RuntimeException {
 		return "";
 	}
 

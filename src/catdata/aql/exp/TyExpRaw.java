@@ -24,6 +24,7 @@ import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
+import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
@@ -192,7 +193,7 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 		for (Triple<List<Pair<String, String>>, RawTerm, RawTerm> eq : eqs) {
 			try {
 				Triple<Ctx<Var, Chc<Ty, Void>>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> 
-				tr = RawTerm.infer1x(yyy(eq.first), eq.second, eq.third, null, col, "", js).first3();
+				tr = infer1x(yyy(eq.first), eq.second, eq.third, null, col, "", js);
 				col.eqs.add(new Eq<>(tr.first, tr.second, tr.third));
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
@@ -204,6 +205,12 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 		doGuiIndex(imports, types, functions, eqsX, java_tys_string, java_parser_string, java_fns_string);
 
 	}
+
+	private Triple<Ctx<Var, Chc<Ty, Void>>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> infer1x(
+		Map<String, Chc<Ty, En>> ctx0, RawTerm e0, RawTerm f, Chc<Ty, Void> expected,
+		Collage col, String pre, AqlJs<Ty, Sym> js) {
+	return RawTerm.infer1x(ctx0, e0, f, (Chc<Ty,En>)((Object)expected), col, pre, js).first3();
+}
 
 	private Map<Ty, String> conv3(Map<String, String> m) {
 		return Util.map(m, (x,y) -> new Pair<>(new Ty(x), y));
@@ -460,13 +467,13 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 		return x.map((k,v)->new Pair<>(k,v.l));
 	}
 	
-	private static Map<String, Chc<Ty,Void>> yyy(List<Pair<String, String>> l) {
-		Map<String, Chc<Ty,Void>> ret = new HashMap<>();
+	private static Map<String, Chc<Ty,En>> yyy(List<Pair<String, String>> l) {
+		Map<String, Chc<Ty,En>> ret = new HashMap<>();
 		for (Pair<String, String> p : l) {
 			if (ret.containsKey(p.first)) {
 				throw new RuntimeException("Duplicate bound variable: " + p.first);
 			}
-			Chc<Ty, Void> x = p.second == null ? null : Chc.inLeft(new Ty(p.second));
+			Chc<Ty, En> x = p.second == null ? null : Chc.inLeft(new Ty(p.second));
 			ret.put(p.first, x);
 		}
 		return ret; 

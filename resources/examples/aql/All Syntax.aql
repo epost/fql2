@@ -36,7 +36,7 @@ typeside ty4 = literal {
 	java_types
 	 	String = "java.lang.String"
 	java_constants
-	 	String = "return input[0].toString()"	
+	 	String = "return input[0]"	
 	java_functions
 	 	append : String, String -> String = "return input[0] + input[1]"		
 	equations	

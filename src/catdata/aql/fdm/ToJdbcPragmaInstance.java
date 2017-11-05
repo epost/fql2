@@ -138,7 +138,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 	
 
 	private String enToString(En en) {
-		return (String) en;
+		return en.toString();
 	}
 
 	/*private String tyToString(Ty ty) {

@@ -23,6 +23,11 @@ import catdata.aql.ED.WHICH;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
 import catdata.aql.Pragma;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.fdm.EvalAlgebra.Row;
 import catdata.aql.fdm.JdbcPragma;
 import catdata.aql.fdm.JsPragma;
@@ -1005,7 +1010,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static class PragmaExpToJdbcTrans<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends PragmaExp {
+	public static class PragmaExpToJdbcTrans<Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> extends PragmaExp {
 
 		public final String jdbcString;
 		public final String prefix;
@@ -1089,7 +1094,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			PragmaExpToJdbcTrans<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (PragmaExpToJdbcTrans<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			PragmaExpToJdbcTrans<?, ?, ?, ?, ?, ?, ?, ?> other = (PragmaExpToJdbcTrans<?, ?, ?, ?, ?, ?, ?, ?>) obj;
 
 			if (h == null) {
 				if (other.h != null)

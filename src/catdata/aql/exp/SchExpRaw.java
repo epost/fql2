@@ -28,15 +28,159 @@ import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
-public final class SchExpRaw extends SchExp<Ty,String,Sym,String,String> implements Raw {
+public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 	
+	public static class En implements Comparable<En> {
+		public final String str;
+
+		public En(String str) {
+			Util.assertNotNull(str);
+			this.str = str;
+		}
+
+		@Override
+		public int hashCode() {
+			return str.hashCode(); //must work with compareTo - cant use auto gen one
+		} 
+
+		@Override
+		public int compareTo(En o) {
+			if (!(o instanceof En)) {
+				Util.anomaly();
+			}
+			return str.compareTo(o.str);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			//if (!(obj instanceof Sym)) {
+			//	Util.anomaly();
+		//	}
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof En))
+				return false;
+			En other = (En) obj;
+			if (str == null) {
+				if (other.str != null)
+					return false;
+			} else if (!str.equals(other.str))
+				return false;
+			return true;
+		} 
+
+		@Override
+		public String toString() {
+			return str;
+		}
+
+	}
 	
+	public static class Fk implements Comparable<Fk> {
+		public final String str;
+
+		public Fk(String str) {
+			Util.assertNotNull(str);
+			this.str = str;
+		}
+
+		@Override
+		public int hashCode() {
+			return str.hashCode(); //must work with compareTo - cant use auto gen one
+		} 
+
+		@Override
+		public int compareTo(Fk o) {
+			if (!(o instanceof Fk)) {
+				Util.anomaly();
+			}
+			return str.compareTo(o.str);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			//if (!(obj instanceof Sym)) {
+			//	Util.anomaly();
+		//	}
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof Fk))
+				return false;
+			Fk other = (Fk) obj;
+			if (str == null) {
+				if (other.str != null)
+					return false;
+			} else if (!str.equals(other.str))
+				return false;
+			return true;
+		} 
+
+		@Override
+		public String toString() {
+			return str;
+		}
+
+	}
 	
+	public static class Att implements Comparable<Att> {
+		public final String str;
+
+		public Att(String str) {
+			Util.assertNotNull(str);
+			this.str = str;
+		}
+
+		@Override
+		public int hashCode() {
+			return str.hashCode(); //must work with compareTo - cant use auto gen one
+		} 
+
+		@Override
+		public int compareTo(Att o) {
+			if (!(o instanceof Att)) {
+				Util.anomaly();
+			}
+			return str.compareTo(o.str);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			//if (!(obj instanceof Sym)) {
+			//	Util.anomaly();
+		//	}
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof Att))
+				return false;
+			Att other = (Att) obj;
+			if (str == null) {
+				if (other.str != null)
+					return false;
+			} else if (!str.equals(other.str))
+				return false;
+			return true;
+		} 
+
+		@Override
+		public String toString() {
+			return str;
+		}
+
+	}
 	
-	public SchExp<Ty,String,Sym,String,String> resolve(AqlTyping G, Program<Exp<?>> prog) {
+	public SchExp<Ty, En, Sym, Fk, Att> resolve(AqlTyping G, Program<Exp<?>> prog) {
 		return this;
 	}
 
@@ -57,38 +201,36 @@ public final class SchExpRaw extends SchExp<Ty,String,Sym,String,String> impleme
 	
 	@SuppressWarnings("unused")
 	@Override
-	public synchronized Schema<Ty, String, Sym, String, String> eval(AqlEnv env) {
+	public synchronized Schema<Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
 		TypeSide<Ty, Sym> ts = typeSide.eval(env);
-		Collage<Ty, String, Sym, String, String, Void, Void> col = new Collage<>(ts.collage());
+		Collage<Ty, En, Sym, Fk, Att, Void, Void> col = new Collage<>(ts.collage());
 		
-		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> eqs0 = new HashSet<>();
+		Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs0 = new HashSet<>();
 
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
-			Schema<Ty, String, Sym, String, String> v = env.defs.schs.get(k);
-			col.ens.addAll(v.ens);
-			col.fks.putAll(v.fks.map);
-			col.atts.putAll(v.atts.map);
+			Schema<Ty, En, Sym, Fk, Att> v = env.defs.schs.get(k);
+			col.addAll(v.collage());
 			eqs0.addAll(v.eqs);
 		}
 		
-		col.ens.addAll(ens);
+		col.ens.addAll(ens.stream().map(x -> new En(x)).collect(Collectors.toList()));
 		
-		col.fks.putAll(Util.toMapSafely(fks));
-		col.atts.putAll(Util.toMapSafely(atts));
+		col.fks.putAll(conv1(Util.toMapSafely(fks)));
+		col.atts.putAll(conv2(Util.toMapSafely(atts)));
 		
 		for (Quad<String, String, RawTerm, RawTerm> eq : t_eqs) {
 			try {
-				Map<String, Chc<Ty, String>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(eq.second));
+				Map<String, Chc<Ty, En>> ctx = Util.singMap(eq.first, eq.second == null ? null : Chc.inRight(new En(eq.second)));
 				
-				Triple<Ctx<Var,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>>
+				Triple<Ctx<Var,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Void,Void>,Term<Ty,En,Sym,Fk,Att,Void,Void>>
 				eq0 = RawTerm.infer1x(ctx, eq.third, eq.fourth, null, col, "", ts.js).first3();
 				
-				Chc<Ty, String> v = eq0.first.get(new Var(eq.first));
+				Chc<Ty, En> v = eq0.first.get(new Var(eq.first));
 				if (v.left) {
 					throw new RuntimeException(eq.first + " has type " + v.l + " which is not an entity");
 				}
-				String t = v.r;
+				En t = v.r;
 			
 				eqs0.add(new Triple<>(new Pair<>(new Var(eq.first), t), eq0.second, eq0.third));
 			} catch (RuntimeException ex) {
@@ -102,19 +244,19 @@ public final class SchExpRaw extends SchExp<Ty,String,Sym,String,String> impleme
 				String vv = "v";
 				Var var = new Var(vv);
 				
-				Map<String, Chc<Ty, String>> ctx = Util.singMap(vv, null);
+				Map<String, Chc<Ty, En>> ctx = Util.singMap(vv, null);
 				
 				RawTerm lhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.first, vv);
 				RawTerm rhs = RawTerm.fold(col.fks.keySet(), col.ens, eq.second,vv);
 				
-				Triple<Ctx<Var,Chc<Ty,String>>,Term<Ty,String,Sym,String,String,Void,Void>,Term<Ty,String,Sym,String,String,Void,Void>>
+				Triple<Ctx<Var,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Void,Void>,Term<Ty,En,Sym,Fk,Att,Void,Void>>
 				eq0 = RawTerm.infer1x(ctx, lhs, rhs, null, col, "", ts.js).first3();
 			
-				Chc<Ty, String> v = eq0.first.get(var);
+				Chc<Ty, En> v = eq0.first.get(var);
 				if (v.left) {
 					throw new RuntimeException("the equation's source " + eq.first + " is type " + v.l + " which is not an entity");
 				}
-				String t = v.r;
+				En t = v.r;
 			
 				if (eq0.first.size() != 1) {
 					throw new RuntimeException("java constants cannot be used ");
@@ -126,7 +268,7 @@ public final class SchExpRaw extends SchExp<Ty,String,Sym,String,String> impleme
 				throw new LocException(find("path equations", eq), "In equation " + Util.sep(eq.first, ".") + " = " + Util.sep(eq.second, ".") + ", " + ex.getMessage());
 			}
 		}
-		for (Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>> eq : eqs0) {
+		for (Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : eqs0) {
 			col.eqs.add(new Eq<>(new Ctx<>(eq.first).inRight(), eq.second, eq.third));
 		}
 		
@@ -137,13 +279,23 @@ public final class SchExpRaw extends SchExp<Ty,String,Sym,String,String> impleme
 		//forces type checking before prover construction
 		new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(s, col, ts.js), false);
 		
-		Schema<Ty, String, Sym, String, String> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col, ts.js), !((Boolean)strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
+		Schema<Ty, En, Sym, Fk, Att> ret = new Schema<>(ts, col.ens, col.atts.map, col.fks.map, eqs0, AqlProver.create(strat, col, ts.js), !((Boolean)strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)));
 		return ret; 
 		
 	}
 
 	
 	
+	private Map<Att, Pair<En, Ty>> conv2(Map<String, Pair<String, Ty>> map) {
+		return Util.map(map, (k,v) -> new Pair<>(new Att(k), new Pair<>(new En(v.first), v.second)));
+	}
+
+	private Map<Fk, Pair<En, En>> conv1(Map<String, Pair<String, String>> map) {
+		return Util.map(map, (k,v) -> new Pair<>(new Fk(k), new Pair<>(new En(v.first), new En(v.second))));
+	}
+
+
+
 	public final TyExp<Ty,Sym> typeSide;
 	
 	public final Set<String> imports;

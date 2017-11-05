@@ -15,7 +15,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -470,9 +469,9 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	          hdrQ.add("?");
 	          Chc<Fk, Att> chc = aHeader;
 	          if (chc.left) {
-	              hdr.add( Schema.truncate( (String)chc.l, truncate) ); //TODO aql unsafe
+	              hdr.add( Schema.truncate( chc.l.toString(), truncate) ); //TODO aql unsafe
 	          } else {
-	              hdr.add( Schema.truncate( (String)chc.r, truncate ) ); //TODO aql unsafe
+	              hdr.add( Schema.truncate( chc.r.toString(), truncate ) ); //TODO aql unsafe
 	          }
 	      }
 			  

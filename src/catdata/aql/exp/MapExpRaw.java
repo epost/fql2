@@ -24,10 +24,13 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
-public final class MapExpRaw extends MapExp<Ty, String, Sym, String, String, String, String, String>
+public final class MapExpRaw extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>
 		implements Raw {
 
 	@Override
@@ -39,8 +42,8 @@ public final class MapExpRaw extends MapExp<Ty, String, Sym, String, String, Str
 		return ret;
 	}
 
-	public final SchExp<Ty, String, Sym, String, String> src;
-	public final SchExp<Ty, String, Sym, String, String> dst;
+	public final SchExp<Ty, En, Sym, Fk, Att> src;
+	public final SchExp<Ty, En, Sym, Fk, Att> dst;
 
 	public final Set<String> imports;
 
@@ -60,8 +63,8 @@ public final class MapExpRaw extends MapExp<Ty, String, Sym, String, String, Str
 	public MapExpRaw(SchExp<?, ?, ?, ?, ?> src, SchExp<?, ?, ?, ?, ?> dst, List<LocStr> imports,
 			List<Pair<LocStr, String>> ens, List<Pair<LocStr, List<String>>> fks,
 			List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
-		this.src = (SchExp<Ty, String, Sym, String, String>) src;
-		this.dst = (SchExp<Ty, String, Sym, String, String>) dst;
+		this.src = (SchExp<Ty, En, Sym, Fk, Att>) src;
+		this.dst = (SchExp<Ty, En, Sym, Fk, Att>) dst;
 		this.imports = LocStr.set1(imports);
 		this.ens = LocStr.set2(ens);
 		this.fks = LocStr.set2(fks);
@@ -222,26 +225,28 @@ public final class MapExpRaw extends MapExp<Ty, String, Sym, String, String, Str
 	}
 
 	@Override
-	public Mapping<Ty, String, Sym, String, String, String, String, String> eval(AqlEnv env) {
-		Schema<Ty, String, Sym, String, String> src0 = src.eval(env);
-		Schema<Ty, String, Sym, String, String> dst0 = dst.eval(env);
+	public Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> eval(AqlEnv env) {
+		Schema<Ty, En, Sym, Fk, Att> src0 = src.eval(env);
+		Schema<Ty, En, Sym, Fk, Att> dst0 = dst.eval(env);
 		// Collage<String, String, String, String, String, Void, Void> scol =
 		// new Collage<>(src0);
-		Collage<Ty, String, Sym, String, String, Void, Void> dcol = new Collage<>(dst0.collage());
+		Collage<Ty, En, Sym, Fk, Att, Void, Void> dcol = new Collage<>(dst0.collage());
 
-		Map<String, String> ens0 = new HashMap<>();
-		Map<String, Pair<String, List<String>>> fks0 = new HashMap<>();
-		Map<String, Triple<Var, String, Term<Ty, String, Sym, String, String, Void, Void>>> atts0 = new HashMap<>();
+		Map<En, En> ens0 = new HashMap<>();
+		//Map<String, Pair<String, List<String>>> fks0 = new HashMap<>();
+		Map<Att, Triple<Var, En, Term<Ty, En, Sym, Fk, Att, Void, Void>>> atts0 = new HashMap<>();
+		Map<Fk, Pair<En, List<Fk>>> fksX = new HashMap<>();
+		
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
-			Mapping<Ty, String, Sym, String, String, String, String, String> v = env.defs.maps.get(k);
+			Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> v = env.defs.maps.get(k);
 			Util.putAllSafely(ens0, v.ens.map);
-			Util.putAllSafely(fks0, v.fks.map);
+			Util.putAllSafely(fksX, v.fks.map);
 			Util.putAllSafely(atts0, v.atts.map);
 		}
 
-		Util.putAllSafely(ens0, Util.toMapSafely(ens));
-		for (String k : ens0.keySet()) {
+		Util.putAllSafely(ens0, Util.toMapSafely(ens.stream().map(x -> new Pair<>(new En(x.first), new En(x.second))).collect(Collectors.toList())));
+		for (En k : ens0.keySet()) {
 			if (!dst0.ens.contains(ens0.get(k))) {
 				throw new LocException(find("entities", new Pair<>(k, ens0.get(k))), "The mapping for " + k + ", namely " + ens0.get(k) + ", does not appear in the target schema");
 			} else if (!src0.ens.contains(k)) {
@@ -249,42 +254,41 @@ public final class MapExpRaw extends MapExp<Ty, String, Sym, String, String, Str
 			}
 		}
 		
-		List<Pair<String, Pair<String, List<String>>>> fksX = new LinkedList<>();
 		for (Pair<String, List<String>> p : fks) {
 			try {
-				String start_en = null;
-				List<String> r = new LinkedList<>();
+				En start_en = null;
+				List<Fk> r = new LinkedList<>();
 				for (String o : p.second) {
-					if (ens0.containsValue(o)) {
-						if (fks0.containsKey(o)) {
+					if (ens0.containsValue(new En(o))) {
+						if (fksX.containsKey(new Fk(o))) {
 							throw new RuntimeException(
 									o + " is both a target foreign key and a target entity, so the path is ambiguous");
 						}
 						if (start_en == null) {
-							start_en = p.second.get(0);
+							start_en = new En(p.second.get(0));
 						}
 					} else {
 						if (start_en == null) {
-							Pair<String, String> j = dst0.fks.get(o);
+							Pair<En, En> j = dst0.fks.get(new Fk(o));
 							if (j == null) {
 								throw new RuntimeException(p.second.get(0) + " is not a foreign key in the target");
 							}
 							start_en = j.first;
 						}
-						r.add(o);
+						r.add(new Fk(o));
 					}
 				}
 				if (start_en == null) {
 					throw new RuntimeException("Anomaly: please report");
 				}
-				fksX.add(new Pair<>(p.first, new Pair<>(start_en, r)));
+				fksX.put(new Fk(p.first), new Pair<>(start_en, r));
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LocException(find("foreign keys", p), "In foreign key mapping " + p.first + " -> "
 						+ Util.sep(p.second, ".") + ", " + ex.getMessage());
 			}
 		}
-		Util.putAllSafely(fks0, Util.toMapSafely(fksX));
+//		Util.putAllSafely(fks0, Util.toMapSafely(fksX));
 
 		for (Pair<String, Triple<String, String, RawTerm>> att : atts) {
 			try {
@@ -292,18 +296,18 @@ public final class MapExpRaw extends MapExp<Ty, String, Sym, String, String, Str
 				String var_en = att.second.second;
 				RawTerm term = att.second.third;
 
-				Pair<String, Ty> p = src0.atts.map.get(att.first);
+				Pair<En, Ty> p = src0.atts.map.get(new Att(att.first));
 				if (p == null) {
 					throw new RuntimeException(att.first + " is not a source attribute.");
 				}
-				String src_att_dom_en = p.first;
-				String dst_att_dom_en = ens0.get(src_att_dom_en);
+				En src_att_dom_en = p.first;
+				En dst_att_dom_en = ens0.get(src_att_dom_en);
 				if (dst_att_dom_en == null) {
 					throw new RuntimeException(
 							"no entity mapping for " + src_att_dom_en + " , required for domain for " + att.first);
 				}
 
-				if (var_en != null && !var_en.equals(dst_att_dom_en)) {
+				if (var_en != null && !new En(var_en).equals(dst_att_dom_en)) {
 					throw new RuntimeException("the given source entity for the variable, " + var_en + ", is not "
 							+ dst_att_dom_en + " as expected.");
 				}
@@ -312,16 +316,16 @@ public final class MapExpRaw extends MapExp<Ty, String, Sym, String, String, Str
 				if (!dst0.typeSide.tys.contains(src_att_cod_ty)) {
 					throw new RuntimeException("type " + p.second + " does not exist in target typeside.");
 				}
-				Chc<Ty, String> proposed_ty2 = Chc.inLeft(src_att_cod_ty);
+				Chc<Ty, En> proposed_ty2 = Chc.inLeft(src_att_cod_ty);
 
-				Chc<Ty, String> var_en2 = Chc.inRight(dst_att_dom_en);
+				Chc<Ty, En> var_en2 = Chc.inRight(dst_att_dom_en);
 
-				Map<String, Chc<Ty, String>> ctx = Util.singMap(var, var_en2);
+				Map<String, Chc<Ty, En>> ctx = Util.singMap(var, var_en2);
 
-				Term<Ty, String, Sym, String, String, Void, Void> term0 = RawTerm.infer1x(ctx, term, null, proposed_ty2,
+				Term<Ty, En, Sym, Fk, Att, Void, Void> term0 = RawTerm.infer1x(ctx, term, null, proposed_ty2,
 						dcol, "", src0.typeSide.js).second;
 
-				Util.putSafely(atts0, att.first, new Triple<>(new Var(var), dst_att_dom_en, term0));
+				Util.putSafely(atts0, new Att(att.first), new Triple<>(new Var(var), dst_att_dom_en, term0));
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LocException(find("attributes", att), "in mapping for " + att.first + ", " + ex.getMessage());
@@ -330,13 +334,13 @@ public final class MapExpRaw extends MapExp<Ty, String, Sym, String, String, Str
 
 		AqlOptions ops = new AqlOptions(options, null, env.defaults);
 
-		Mapping<Ty, String, Sym, String, String, String, String, String> ret = new Mapping<>(ens0, atts0, fks0,
+		Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> ret = new Mapping<>(ens0, atts0, fksX,
 				src0, dst0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
 		return ret;
 	}
 
 	@Override
-	public Pair<SchExp<Ty, String, Sym, String, String>, SchExp<Ty, String, Sym, String, String>> type(
+	public Pair<SchExp<Ty, En, Sym, Fk, Att>, SchExp<Ty, En, Sym, Fk, Att>> type(
 			AqlTyping G) {
 		return new Pair<>(src, dst);
 	}

@@ -17,9 +17,14 @@ import catdata.aql.Kind;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Transform;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.fdm.LiteralTransform;
 
-public abstract class TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2, Handle>
+public abstract class TransExpImport<Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2, Handle>
 		extends TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> implements Raw {
 
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
@@ -75,7 +80,7 @@ public abstract class TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2,
 		Schema<Ty, En, Sym, Fk, Att> sch = src0.schema();
 
 		for (String o : map.keySet()) {
-			if (!sch.ens.contains(o)) {
+			if (!sch.ens.contains(new En(o))) {
 				throw new RuntimeException("there is an import for " + o + ", which is not an entity in the schema ");
 			}
 		}
@@ -113,15 +118,15 @@ public abstract class TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2,
 			Handle h = start(sch);
 
 			for (En en : sch.ens) {
-				if (map.containsKey(en)) {
-					processEn(en, sch, h, map.get(en));
+				if (map.containsKey(en.str)) {
+					processEn(en, sch, h, map.get(en.str));
 				}
 			}
 
 			stop(h);
 		} catch (Exception exn) {
-			exn.printStackTrace();
-			throw new RuntimeException(exn.getMessage() + "\n\n" + getHelpStr());
+		//	exn.printStackTrace();
+			throw new RuntimeException(exn); //.getMessage() + "\n\n" + getHelpStr());
 		}
 
 		return new LiteralTransform<>(gens.map, sks.map, src0, dst0, dontValidateEqs);
@@ -163,7 +168,7 @@ public abstract class TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2,
 			return false;
 		if (!(obj instanceof TransExpImport)) // TODO aql note!!!!
 			return false;
-		TransExpImport<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpImport<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		TransExpImport<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpImport<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
 		if (map == null) {
 			if (other.map != null)
 				return false;

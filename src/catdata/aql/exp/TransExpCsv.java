@@ -8,9 +8,14 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
-public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
-	extends TransExpImport<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2,Map<En, List<String[]>>> {
+public class TransExpCsv<Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
+	extends TransExpImport<Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2,Map<En, List<String[]>>> {
 
 	public TransExpCsv(InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src, InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst, List<Pair<LocStr, String>> files, List<Pair<String, String>> options) {
 		super(src, dst, files, options);

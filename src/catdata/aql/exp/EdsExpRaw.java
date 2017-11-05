@@ -23,10 +23,13 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
-public class EdsExpRaw extends EdsExp<Ty, Object, Sym, Object, Object> implements Raw {
+public class EdsExpRaw extends EdsExp<Ty, En, Sym, Fk, Att> implements Raw {
 
 
 	
@@ -81,7 +84,7 @@ public class EdsExpRaw extends EdsExp<Ty, Object, Sym, Object, Object> implement
 		return ret;
 	}
 
-	public final SchExp<Ty, Object, Sym, Object, Object> schema;
+	public final SchExp<Ty, En, Sym, Fk, Att> schema;
 
 	public final Set<String> imports;
 
@@ -94,9 +97,8 @@ public class EdsExpRaw extends EdsExp<Ty, Object, Sym, Object, Object> implement
 		return options;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<LocStr> imports, List<Pair<Integer, EdExpRaw>> eds, List<Pair<String, String>> options) {
-		this.schema = (SchExp<Ty, Object, Sym, Object, Object>) schema;
+		this.schema = (SchExp<Ty, En, Sym, Fk, Att>) schema;
 		this.imports = LocStr.set1(imports);
 		this.eds = LocStr.proj2(eds);
 		this.options = Util.toMapSafely(options);
@@ -118,9 +120,8 @@ public class EdsExpRaw extends EdsExp<Ty, Object, Sym, Object, Object> implement
 		return raw;
 	}
 
-	@SuppressWarnings("unchecked")
 	public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<EdExpRaw> eds, @SuppressWarnings("unused") Object o) {
-		this.schema = (SchExp<Ty, Object, Sym, Object, Object>) schema;
+		this.schema = (SchExp<Ty, En, Sym, Fk, Att>) schema;
 		this.imports = new HashSet<>(imports);
 		this.eds = new HashSet<>(eds);
 		this.options = Collections.emptyMap();
@@ -146,12 +147,12 @@ public class EdsExpRaw extends EdsExp<Ty, Object, Sym, Object, Object> implement
 	}
 
 	@Override
-	public Constraints<Ty, Object, Sym, Object, Object> eval(AqlEnv env) {
-		Schema<Ty, Object, Sym, Object, Object> sch = schema.eval(env);
-		Collection<ED<Ty, Object, Sym, Object, Object>> l = new LinkedList<>();
+	public Constraints<Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+		Schema<Ty, En, Sym, Fk, Att> sch = schema.eval(env);
+		Collection<ED<Ty, En, Sym, Fk, Att>> l = new LinkedList<>();
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
-			Constraints<Ty, Object, Sym, Object, Object> v = env.defs.eds.get(k);
+			Constraints<Ty, En, Sym, Fk, Att> v = env.defs.eds.get(k);
 			l.addAll(v.eds);
 		}
 		for (EdExpRaw e : eds) {
@@ -163,7 +164,7 @@ public class EdsExpRaw extends EdsExp<Ty, Object, Sym, Object, Object> implement
 	}
 
 	@Override
-	public SchExp<Ty, Object, Sym, Object, Object> type(AqlTyping G) {
+	public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 		return schema;
 	}
 	
@@ -340,11 +341,11 @@ public class EdsExpRaw extends EdsExp<Ty, Object, Sym, Object, Object> implement
 				raw.put("where ", f);
 			}
 
-			public ED<Ty, Object, Sym, Object, Object> eval(Schema<Ty, Object, Sym, Object, Object> sch, AqlOptions ops) {
-				Pair<Ctx<Var, Object>, Set<Pair<Term<Ty, Object, Sym, Object, Object, Void, Void>, Term<Ty, Object, Sym, Object, Object, Void, Void>>>> 
+			public ED<Ty, En, Sym, Fk, Att> eval(Schema<Ty, En, Sym, Fk, Att> sch, AqlOptions ops) {
+				Pair<Ctx<Var, En>, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>>> 
 				x = eval1(sch, As, Awh);
 			
-				Pair<Ctx<Var, Object>, Set<Pair<Term<Ty, Object, Sym, Object, Object, Void, Void>, Term<Ty, Object, Sym, Object, Object, Void, Void>>>> 
+				Pair<Ctx<Var, En>, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>>> 
 				y = eval1(sch, Util.append(As, Es), Ewh);
 				
 				for (Var k : x.first.keySet()) {
@@ -355,28 +356,28 @@ public class EdsExpRaw extends EdsExp<Ty, Object, Sym, Object, Object> implement
 
 
 
-			private static Pair<Ctx<Var, Object>, Set<Pair<Term<Ty, Object, Sym, Object, Object, Void, Void>, Term<Ty, Object, Sym, Object, Object, Void, Void>>>> eval1(Schema<Ty, Object, Sym, Object, Object> sch, List<Pair<String, String>> As, Set<Pair<RawTerm, RawTerm>> Awh) {
-				Ctx<Var, Object> As0 = new Ctx<>();
-				Set<Pair<Term<Ty, Object, Sym, Object, Object, Void, Void>, Term<Ty, Object, Sym, Object, Object, Void, Void>>> 
+			private static Pair<Ctx<Var, En>, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>>> eval1(Schema<Ty, En, Sym, Fk, Att> sch, List<Pair<String, String>> As, Set<Pair<RawTerm, RawTerm>> Awh) {
+				Ctx<Var, En> As0 = new Ctx<>();
+				Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> 
 				Awh0 = new HashSet<>();
-				Ctx<String, Chc<Ty,Object>> As1 = new Ctx<>();
+				Ctx<String, Chc<Ty,En>> As1 = new Ctx<>();
 				
-				Collage<Ty, Object, Sym, Object, Object, Object, Object> 
+				Collage<Ty, En, Sym, Fk, Att, Void, Void> 
 				col = new Collage<>(sch.collage());
 				
 				for (Pair<String, String> p : As) {
 					String gen = p.first;
 					String ty = p.second;
-					if (col.ens.contains(ty)) {
-						As0.put(new Var(gen), ty);
-						As1.put(gen, Chc.inRight(ty));
+					if (col.ens.contains(new En(ty))) {
+						As0.put(new Var(gen), new En(ty));
+						As1.put(gen, Chc.inRight(new En(ty)));
 					} else {
 						throw new RuntimeException("The sort for " + gen + ", namely " + ty + ", is not declared as an entity");
 					}
 				}
 			
 				for (Pair<RawTerm, RawTerm> eq : Awh) {
-						Triple<Ctx<Var,Chc<Ty,Object>>,Term<Ty,Object,Sym,Object,Object,Object,Object>,Term<Ty,Object,Sym,Object,Object,Object,Object>>
+						Triple<Ctx<Var,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Void,Void>,Term<Ty,En,Sym,Fk,Att,Void,Void>>
 						eq0 =
 						RawTerm.infer1x(As1.map, eq.first, eq.second, null, col, "", sch.typeSide.js).first3();
 								

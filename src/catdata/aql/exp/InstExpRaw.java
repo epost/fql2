@@ -31,6 +31,9 @@ import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
 import catdata.aql.Var;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.fdm.InitialAlgebra;
@@ -38,8 +41,103 @@ import catdata.aql.fdm.LiteralInstance;
 import catdata.aql.fdm.SaturatedInstance;
 
 
-public final class InstExpRaw<En,Fk,Att> extends InstExp<Ty,En,Sym,Fk,Att,String,String,ID,Chc<String,Pair<ID,Att>>> implements Raw {
+public final class InstExpRaw extends InstExp<Ty,En,Sym,Fk,Att,String,String,ID,Chc<String,Pair<ID,Att>>> implements Raw {
 
+	public static class Gen implements Comparable<Gen> {
+		public final String str;
+
+		public Gen(String str) {
+			Util.assertNotNull(str);
+			this.str = str;
+		}
+
+		@Override
+		public int hashCode() {
+			return str.hashCode(); //must work with compareTo - cant use auto gen one
+		} 
+
+		@Override
+		public int compareTo(Gen o) {
+			if (!(o instanceof Gen)) {
+				Util.anomaly();
+			}
+			return str.compareTo(o.str);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			//if (!(obj instanceof Sym)) {
+			//	Util.anomaly();
+		//	}
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof Gen))
+				return false;
+			Gen other = (Gen) obj;
+			if (str == null) {
+				if (other.str != null)
+					return false;
+			} else if (!str.equals(other.str))
+				return false;
+			return true;
+		} 
+
+		@Override
+		public String toString() {
+			return str;
+		}
+
+	}
+	
+	public static class Sk implements Comparable<Sk> {
+		public final String str;
+
+		public Sk(String str) {
+			Util.assertNotNull(str);
+			this.str = str;
+		}
+
+		@Override
+		public int hashCode() {
+			return str.hashCode(); //must work with compareTo - cant use auto gen one
+		} 
+
+		@Override
+		public int compareTo(Sk o) {
+			if (!(o instanceof Sk)) {
+				Util.anomaly();
+			}
+			return str.compareTo(o.str);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			//if (!(obj instanceof Sym)) {
+			//	Util.anomaly();
+		//	}
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof Sym))
+				return false;
+			Sk other = (Sk) obj;
+			if (str == null) {
+				if (other.str != null)
+					return false;
+			} else if (!str.equals(other.str))
+				return false;
+			return true;
+		} 
+
+		@Override
+		public String toString() {
+			return str;
+		}
+
+	}
 	
 private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 	
@@ -191,7 +289,7 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InstExpRaw<?, ?, ?> other = (InstExpRaw<?, ?, ?>) obj;
+		InstExpRaw other = (InstExpRaw) obj;
 		if (eqs == null) {
 			if (other.eqs != null)
 				return false;
@@ -252,9 +350,9 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		for (Pair<String, String> p : gens) {
 			String gen = p.first;
 			String ty = p.second;
-			if (col.ens.contains(ty)) {
-				col.gens.put(gen, (En) ty);
-			} else if (col.tys.contains(ty)) {
+			if (col.ens.contains(new En(ty))) {
+				col.gens.put(gen, new En(ty));
+			} else if (col.tys.contains(new Ty(ty))) {
 				col.sks.put(gen, new Ty(ty));
 			} else {
 				throw new LocException(find("generators", p), "The sort for " + gen + ", namely " + ty + ", is not declared as a type or entity");

@@ -12,7 +12,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.aql.Term;
-import catdata.aql.Var;
 
 @SuppressWarnings("serial")
 public final class Ctx<K,V> implements Serializable {
