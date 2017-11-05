@@ -9,6 +9,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
@@ -88,49 +92,38 @@ public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 	
 	public static class Fk implements Comparable<Fk> {
 		public final String str;
+		public final En en;
 
-		public Fk(String str) {
-			Util.assertNotNull(str);
+		public Fk(String str /*, En en */) {
+			Util.assertNotNull(str); //, en);
 			this.str = str;
-		}
-
-		@Override
-		public int hashCode() {
-			return str.hashCode(); //must work with compareTo - cant use auto gen one
-		} 
-
-		@Override
-		public int compareTo(Fk o) {
-			if (!(o instanceof Fk)) {
-				Util.anomaly();
-			}
-			return str.compareTo(o.str);
+			this.en = null;
+			//this.en = en;
 		}
 		
 		@Override
-		public boolean equals(Object obj) {
-			//if (!(obj instanceof Sym)) {
-			//	Util.anomaly();
-		//	}
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (!(obj instanceof Fk))
-				return false;
-			Fk other = (Fk) obj;
-			if (str == null) {
-				if (other.str != null)
-					return false;
-			} else if (!str.equals(other.str))
-				return false;
-			return true;
+		 public int compareTo(Fk o) {
+			 return CompareToBuilder.reflectionCompare(this, o);
+		   }
+
+		@Override
+		public int hashCode() {
+			return HashCodeBuilder.reflectionHashCode(this);
+			//return str.hashCode(); //must work with compareTo - cant use auto gen one
 		} 
+
+			@Override
+		public boolean equals(Object obj) {
+			return EqualsBuilder.reflectionEquals(this, obj);
+		}
+			
 
 		@Override
 		public String toString() {
 			return str;
 		}
+
+	
 
 	}
 	

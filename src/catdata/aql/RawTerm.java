@@ -261,9 +261,8 @@ public final class RawTerm {
 					Chc<Ty, En> ret3 = Chc.inLeft(ty);
 					if (expected != null && !expected.equals(ret3)) {
 					} else {
-						if (e.annotation != null || !isSymbol(col, e.head)) {
 							ret.add(new Triple<>(ret1, new Ctx<>(), ret3));
-						}
+						
 					}
 				} catch (Exception ex) {
 				}
@@ -271,7 +270,7 @@ public final class RawTerm {
 		}
 		if (ret.isEmpty()) {
 			String msg = "Cannot infer a well-sorted term for " + e + ".\n";
-			if (!vars.keySet().contains(new Var((String) e.head)) && !isSymbolAll(col, e.head)
+			if (!vars.keySet().contains(new Var(e.head)) && !isSymbolAll(col, e.head)
 					&& e.annotation == null) {
 				msg += "Undefined symbol: " + e.head + "\n";
 			}
@@ -285,22 +284,25 @@ public final class RawTerm {
 
 		return ret;
 	}
-
+/*
 	private static <Ty, En, Sym, Fk, Att, Gen, Sk> boolean isSymbol(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col,
 			String s) {
 		return /*
 				 * col.syms.map.containsKey(s) || col.fks.map.containsKey(s) ||
 				 * col.atts.map.containsKey(s) ||
-				 */
+				 */ /*
 		col.gens.map.containsKey(s) || col.sks.map.containsKey(s);
-	}
+	} */
 
-	private static <Gen, Sk> boolean isSymbolAll(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col,
+	private static  boolean isSymbolAll(Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col,
 			String s) {
-		return col.syms.map.containsKey(s) || col.fks.map.containsKey(s) || col.atts.map.containsKey(s)
-				|| col.gens.map.containsKey(s) || col.sks.map.containsKey(s);
+		return col.syms.containsKey(new Sym(s)) || 
+				col.fks.containsKey(new Fk(s)) ||
+				col.atts.map.containsKey(new Att(s)) ||
+				col.gens.map.containsKey(new Gen(s)) ||
+				col.sks.map.containsKey(new Sk(s));
 	}
-
+ 
 	// TODO aql inefficient bitwise operations
 
 	public static Quad<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Chc<Ty, En>> infer1x(
