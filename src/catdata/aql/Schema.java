@@ -136,7 +136,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 	private Collage<Ty, En, Sym, Fk, Att, Void, Void> collage;
 
 	@SuppressWarnings("unchecked")
-	public final <Gen, Sk> Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
+	public final synchronized<Gen, Sk> Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
 		if (collage != null) {
 			if (!collage.gens.isEmpty() || !collage.sks.isEmpty()) {
 				throw new RuntimeException("Anomaly: please report");
@@ -287,7 +287,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 	}
 
 	static int constraint_static = 0;
-	public Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> toSQL_srcSchemas(String prefix, String idTy, String idCol, int truncate) {
+	public Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> toSQL_srcSchemas(String prefix, String idTy, String idCol, int truncate, Function<Fk, String> fun) {
 		Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> sqlSrcSchs = new HashMap<>();
 		
 	
@@ -298,10 +298,10 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 			l.add(idCol + " " + idTy + " primary key");
 			List<String> f = new LinkedList<>();
 			for (Fk fk1 : fksFrom(en1)) {
-				l.add(		truncate(fk1.toString(), truncate) + " " + idTy + " not null ");
+				l.add(		truncate(fun.apply(fk1), truncate) + " " + idTy + " not null ");
 				k.add(Chc.inLeft(fk1));
 				f.add("alter table " + 		truncate(prefix + en1, truncate) + " add constraint " + 		truncate(prefix + en1 + fk1 + constraint_static++, truncate) + 
-						" foreign key (" + 		truncate(fk1.toString(), truncate) + ") references " + 		truncate(prefix + fks.get(fk1).second, truncate) + "(" + idCol + ")");
+						" foreign key (" + 		truncate(fun.apply(fk1), truncate) + ") references " + 		truncate(prefix + fks.get(fk1).second, truncate) + "(" + idCol + ")");
 			}
 			for (Att att1 : attsFrom(en1)) {
 				//System.out.println("Doing att " + att1);

@@ -248,7 +248,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			}
 			Pair<En, En> t = fks.get(fk);
 			if (t == null) {
-				throw new RuntimeException("In " + this + ", " + fk + " is not a foreign key");
+				throw new RuntimeException("In " + this + ", " + fk + " is not a foreign key.  Possibilities: " + fks.keySet());
 			}		
 			if (!Chc.inRight(t.first).equals(u)) {
 				throw new RuntimeException("In " + this + ", " + "argument " + arg + " has sort " + u.toStringMash() + " but requires " + t.first);

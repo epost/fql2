@@ -698,9 +698,11 @@ public class Util {
 		ret.add(sofar);
 		return ret;
 	}
+	
+
 
 	public static JPanel makeGrid(List<JComponent> list) {
-		int n = (int) Math.ceil(Math.sqrt(list.size()));
+		int n = 2; //(int) Math.ceil(Math.sqrt(list.size()));
 
 		List<JComponent> list2 = new LinkedList<>();
 		for (int i = 0; i < list.size(); i += n) {
@@ -712,7 +714,7 @@ public class Util {
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 		ret.add(jsp);
 		return ret;
-	}
+	} 
 
 	/*public static JPanel makeTable(Border b, String border, Object[][] rowData, Object... colNames) {
 		return makeTable(null, b, border, rowData, colNames);

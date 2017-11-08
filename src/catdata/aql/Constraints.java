@@ -26,7 +26,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 
 	@Override
 	public int size() {
-		return toString().length();
+		return eds.size();
 	}
 	
 	public final Schema<Ty, En, Sym, Fk, Att> schema;

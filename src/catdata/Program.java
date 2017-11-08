@@ -14,6 +14,13 @@ import org.jparsec.error.ParserException;
 
 public class Program<X> implements Prog {
 
+	//TODO aql
+	public long timeout() {
+		if (options.containsKey("timeout")) {
+			return Long.parseLong(options.get("timeout"));
+		}
+		return 30;
+	}
 	
 	public final List<String> order = new LinkedList<>();
 	public final LinkedHashMap<String, Integer> lines = new LinkedHashMap<>();

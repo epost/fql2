@@ -291,7 +291,7 @@ public final class AqlOptions {
 		case eval_use_indices:
 			return true;
 		case gui_rows_to_display:
-			return 256;
+			return 128;
 		case query_remove_redundancy:
 			return true;
 		case eval_approx_sql_unsafe:

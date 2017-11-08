@@ -55,17 +55,15 @@ query pushout = literal : Square -> Span {
  entities
  		
 	B -> {from b:B 
-		 return B_att -> b.f2.D_attB}
+		 attributes B_att -> b.f2.D_attB}
 
 	C -> {from c:C 
-		 return C_att -> c.g2.D_attC}
+		 attributes C_att -> c.g2.D_attC}
 
-	A -> {from a:A} 
-
-foreign_keys		 	   
-
-	f -> {b -> a.f}
-	g -> {c -> a.g}
+	A -> {from a:A
+			foreign_keys		 	   
+			f -> {b -> a.f}
+			g -> {c -> a.g}} 
 
 }
 

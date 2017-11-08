@@ -1,7 +1,6 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +24,7 @@ import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.exp.InstExpRaw.Gen;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
@@ -35,7 +35,7 @@ import catdata.aql.fdm.LiteralInstance;
 import catdata.aql.fdm.SaturatedInstance;
 
 //TODO: aql change type of this to not be a lie
-public abstract class InstExpImport<Gen, Handle, Q>
+public abstract class InstExpImport<Handle, Q>
 		extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> implements Raw {
 
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
@@ -45,15 +45,15 @@ public abstract class InstExpImport<Gen, Handle, Q>
 		return raw;
 	}
 	
-	public static <Gen,En> Gen toGen(En en, String o, boolean b, String sep) {
+	public static <En> Gen toGen(En en, String o, boolean b, String sep) {
 		if (b) {
-			return (Gen) (en + sep + o);
+			return new Gen(en + sep + o);
 		} else {
-			return (Gen) o;
+			return new Gen(o);
 		}
 	}
 	
-	public static <Gen,En> Gen toGen(En en, String o, AqlOptions op) {
+	public static Gen toGen(En en, String o, AqlOptions op) {
 		boolean b = (boolean) op.getOrDefault(AqlOption.prepend_entity_on_ids);
 		String sep = (String) op.getOrDefault(AqlOption.import_col_seperator);
 //		String pre = (String) op.getOrDefault(AqlOption.csv_import_prefix);
@@ -180,6 +180,8 @@ public abstract class InstExpImport<Gen, Handle, Q>
 			Handle h = start(sch);
 
 			if (!isJoined) {
+				
+				/*
 				Map<En, Q> ens = new HashMap<>();
 				Map<Ty, Q> tys = new HashMap<>();
 				Map<Att, Q> atts = new HashMap<>();
@@ -209,7 +211,8 @@ public abstract class InstExpImport<Gen, Handle, Q>
 				for (Att att : atts.keySet()) {
 					shreddedAtt(h, att, atts.get(att), sch);
 				}
-	
+	*/
+				throw new RuntimeException("Unjoined form no longer supported.  To request, contact us.");
 			} else {
 				for (En en : sch.ens) {
 					Q z = map.get(en.str);
@@ -311,8 +314,10 @@ public abstract class InstExpImport<Gen, Handle, Q>
 		if (sch.atts.map.containsKey(new Att(o))) {
 			i++;
 		}
-		if (sch.fks.map.containsKey(new Fk(o))) {
-			i++;
+		for (En en : sch.ens) {
+			if (sch.fks.map.containsKey(new Fk(en, o))) {
+				i++;
+			}
 		}
 		if (i > 1) {
 			throw new RuntimeException(o + " is ambiguously a type/entity/attribute/foreign key");
@@ -384,7 +389,7 @@ public abstract class InstExpImport<Gen, Handle, Q>
 			return false;
 		if (!(obj instanceof InstExpImport))
 			return false;
-		InstExpImport<?, ?, ?> other = (InstExpImport<?, ?, ?>) obj;
+		InstExpImport<?, ?> other = (InstExpImport<?, ?>) obj;
 		if (map == null) {
 			if (other.map != null)
 				return false;

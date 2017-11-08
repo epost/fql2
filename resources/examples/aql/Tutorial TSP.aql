@@ -643,7 +643,7 @@ an AQL query that is very similar to an SQL query.
     for that entity. This is syntactically similar to an SQL alias though not optional.
   * The where clause: Again similar to the where clause in SQL in that it provides a means for
     filtering records and joining entities.
-  * The return clause: The return clause is analogous to the select clause in SQL and defines what
+  * The attributes clause: The attributes clause is analogous to the select clause in SQL and defines what
     the query output is.
   
 We make use of the Java string method \"matches\" we have exposed through the type side. This
@@ -656,7 +656,7 @@ query qWrtngSklS = simple : sS {
       s: Skill
     where
       Matches(s.SName, ".*Writing") = true
-    return
+    attributes
       Skill_Name -> s.SName
       Skill_Class_Name -> s.SCNameOnSkl
 }
@@ -696,7 +696,7 @@ query qWrtngSklC = literal : sS -> sSkl {
             s: Skill
           where
           Matches(s.SName, ".*Writing") = true
-          return
+          attributes
           Skill_Name -> s.SName
           Skill_Class_Name -> s.SCNameOnSkl
       }
@@ -731,7 +731,7 @@ query qScl = literal : sS -> sS {
             sc: SkillClass
           where
             sc.SCName = Social
-          return
+          attributes
             SCName -> sc.SCName
       }
       Skill -> {
@@ -739,13 +739,14 @@ query qScl = literal : sS -> sS {
             s: Skill
           where
             s.fk_HasClass.SCName = Social
-          return
+          attributes
             SName -> s.SName
             SCNameOnSkl -> s.SCNameOnSkl
-      }
-    foreign_keys
+          foreign_keys
       // fk_HasClass : Skill -> SkillClass
       fk_HasClass -> {sc -> s.fk_HasClass}
+      }
+   
 }
 instance iSclSkl = eval qScl iSklSklCls1
 
@@ -787,7 +788,7 @@ schema_colimit S_T_SnT_Sum = modify S_T_SnT_SumAuto {
         sT_Task -> lTask
         sSnT_SkillNeededForTask -> lSkillNeededForTask
     rename foreign_keys
-        sS_fk_HasClass -> lfk_HasClass
+        lSkill.sS_fk_HasClass -> lfk_HasClass
     rename attributes
         sS_SName -> lSName
         sS_SCNameOnSkl -> lSCNameOnSkl
@@ -976,15 +977,19 @@ query qS_T_SnT_SumToSTSpn = literal : sS_T_SnT_Sum -> sSTSpn {
         Skill -> {
             from
                 ss : lSkill
-            return
+            attributes
                 SName -> ss.lSName
                 SCNameOnSkl -> ss.lSCNameOnSkl
+               foreign_keys 
+                      // fk_HasClass : Skill -> SkillClass
+        fk_HasClass    -> {scsc -> ss.lfk_HasClass}
         }
         SkillClass -> {
             from
                 scsc : lSkillClass
-            return
+            attributes
                 SCName -> scsc.lSCName
+                
         }
         SkillNdFrTask -> {
             from
@@ -994,24 +999,23 @@ query qS_T_SnT_SumToSTSpn = literal : sS_T_SnT_Sum -> sSTSpn {
             where
                 snt.lskill = sn.lSName
                 snt.ltask = nt.lTName
-            return
+            attributes
                 skill -> snt.lskill
                 skillclass -> sn.lfk_HasClass.lSCName
                 task  -> snt.ltask
-        }
-        Task -> {
-            from
-                tt : lTask
-            return
-                TName -> tt.lTName
-        }
-    foreign_keys
-        // fk_HasClass : Skill -> SkillClass
-        fk_HasClass    -> {scsc -> ss.lfk_HasClass}
+                foreign_keys
         // fk_SnT_S    : SkillNdFrTask -> Skill
         fk_SkillNeeded -> {ss -> sn}
         // fk_SnT_T    : SkillNdFrTask -> Task
         fk_ForTask     -> {tt -> nt}
+        }
+        Task -> {
+            from
+                tt : lTask
+            attributes
+                TName -> tt.lTName
+        }
+    
 }
 
 md { (* "
@@ -1188,12 +1192,12 @@ schema_colimit STSpn_SPSpn_CoLim = modify STSpn_SPSpn_CoLimAuto {
         sSTSpn_SkillNdFrTask -> SkillNdFrTask
         sSTSpn_Task -> Task
     rename foreign_keys
-        sSTSpn_fk_SkillNeeded -> fk_SkillNeeded
-        sSTSpn_fk_ForTask -> fk_ForTask
-        sSPSpn_fk_SpP_S -> fk_SpP_S
-        sSPSpn_fk_SpP_P -> fk_SpP_P
-        sSPSpn_fk_IsType -> fk_IsType 
-        sSPSpn_fk_HasClass -> fk_HasClass
+        SkillNdFrTask. sSTSpn_fk_SkillNeeded -> fk_SkillNeeded
+        SkillNdFrTask. sSTSpn_fk_ForTask -> fk_ForTask
+        SkillPrvdByPerson. sSPSpn_fk_SpP_S -> fk_SpP_S
+        SkillPrvdByPerson. sSPSpn_fk_SpP_P -> fk_SpP_P
+        SpecificSkill. sSPSpn_fk_IsType -> fk_IsType 
+        GeneralSkill. sSPSpn_fk_HasClass -> fk_HasClass
     rename attributes
         sSTSpn_skillclass -> ST_SCNameOnSnT
         sSPSpn_SCName -> SP_SCName
@@ -1212,7 +1216,7 @@ schema_colimit STSpn_SPSpn_CoLim = modify STSpn_SPSpn_CoLimAuto {
         sSPSpn_GSSCName -> SP_SCNameOnGS
         sSPSpn_GSName -> SP_GSName
     remove foreign_keys    
-        sSTSpn_fk_HasClass -> fk_IsType.fk_HasClass
+        SpecificSkill. sSTSpn_fk_HasClass -> fk_IsType.fk_HasClass
 }
 
 md { (* "
@@ -1280,6 +1284,7 @@ from
     on p.SCName = t.SCName"
 }
 
+/* import joined and import as theory are both discouraged
 md { (* "
 Notice that this instance import is very different than the ones we used to import `iSTSpnImp` and
 `iSPSpnImp`. We have neglected to specify all entities and of the entities we have specified we
@@ -1294,8 +1299,8 @@ above.
 " *) }
 instance iSkillMatch = import_jdbc "com.mysql.jdbc.Driver"
 "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" : sSTSpn_SPSpn_CoLim {
-    SpecificSkill -> "select sm_id from SkillMatch"
-    SkillClass -> "select scm_id from SkillClassMatch"
+    SpecificSkill -> "select * from SkillMatch"
+    SkillClass -> "select * from SkillClassMatch"
 options
   import_joined = false
   import_as_theory = true
@@ -1320,9 +1325,11 @@ transform tSMToSPSpn = import_jdbc "com.mysql.jdbc.Driver"
 }
 
 instance iSTSpn_SPSpn_Merge1 = coequalize tSMToSTSpn tSMToSPSpn
-
+*
+*
+ */
 md { (* "
-Finally we do this the easy way. We import everything in one go using the `quotient_jdbc` import.
+We import everything in one go using the `quotient_jdbc` import.
 It is important to note that this does require the construction of the `SkillMatch` and
 `SkillClassMatch` tables in the source RDBMS as a precondition.
 " *) }

@@ -83,16 +83,21 @@ mapping m2 = [m1 ; m1]
 mapping m3 = literal : s3 -> s3 {
 	entities
 		Employee -> Employee
-		Department -> Department
 	foreign_keys
 		manager -> manager.manager
 		worksIn -> worksIn
-		secretary -> secretary
 	attributes
 		ename -> manager.ename
 		age -> manager.age
 		cummulative_age -> lambda e. (age(e) plus age(e))
+
+	entities
+		Department -> Department
+	foreign_keys	
+		secretary -> secretary
+	attributes
 		dname -> dname	
+		
 	options
 		dont_validate_unsafe = true // this isn't a real mapping		
 }
@@ -105,22 +110,23 @@ query q2 = literal : s3 -> s3 {
 	entities
 		Employee -> {from e:Employee d:Department
 		 		      where e.worksIn = d
-		 		      return ename -> e.ename
+		 		      attributes ename -> e.ename
 		 		      	     age -> e.age
-		 		      	     cummulative_age -> e.cummulative_age}
+		 		      	     cummulative_age -> e.cummulative_age
+		 		      foreign_keys 
+		 		      manager -> {e -> e.manager d -> d}
+					worksIn -> {d -> e.worksIn}
+   }
 		Department -> {from d:Department
-						return dname -> d.dname}
-	foreign_keys
-		manager -> {e -> e.manager d -> d}
-		worksIn -> {d -> e.worksIn}
-		secretary -> {d -> d e -> d.secretary}
+						attributes dname -> d.dname
+						foreign_keys secretary -> {d -> d e -> d.secretary} }
 	options
 		dont_validate_unsafe = true // this isn't a real query		
 }
 query q3 = simple : s3 {
 	from e:Employee
 	where e.ename = bill
-	return mgrName -> e.manager.ename
+	attributes mgrName -> e.manager.ename
 	options
 		prover = completion
 }

@@ -69,12 +69,15 @@ schema T = literal : Ty {
 mapping F = literal : S -> T {
 	entities
 		N1 -> N
-		N2 -> N
 	foreign_keys
 		f -> N //
 	attributes
 		name -> name
 		salary -> salary
+
+	entities
+		N2 -> N
+	attributes
 		age -> age
 }
 
@@ -98,10 +101,10 @@ transform unitSigmaFDeltaF = unit F I //is identity
 
 query Q = literal : T -> S {
 	entities
-		N1 -> {from n1:N return name -> n1.name salary -> n1.salary}
-		N2 -> {from n2:N return age -> n2.age}
-	foreign_keys
-		f -> {n2 -> n1}
+		N1 -> {from n1:N attributes name -> n1.name salary -> n1.salary 
+		foreign_keys f -> {n2 -> n1}}
+		N2 -> {from n2:N attributes age -> n2.age}
+	
 }
 
 instance coevalQI = coeval Q I
@@ -120,7 +123,7 @@ schema DeptNameSchema = literal : Ty {
 query Query = literal : EmpSchema -> DeptNameSchema {
 	entities
 		Manager -> {from e:Employee
-					return deptName -> e.manager.worksIn.name}		
+					attributes deptName -> e.manager.worksIn.name}		
 }
 
 instance QueryResult = eval Query EmpInstance //has bag semantics

@@ -64,17 +64,19 @@ query qUT = literal : U -> T {
 	entities
 		t1 -> {from u11:u11 u12:u12
 			   where u11.l.l.f1 = u12.f2   neg(u11.l.l.f1.att3) = neg(u12.f2.att3)
-			   return att1 -> neg(u12.att2x)}
+			   attributes att1 -> neg(u12.att2x)
+			   foreign_keys f -> {u3 -> u11.f1  u3x -> u12.f2x}
+			  	 l -> {u11 -> u11  u12 -> u12} 
+			   }
 		t2 -> {from u21:u21 u22:u22 
 			   where u21.g1 = u22.g2  u21.h2.l.l.f1 = u22.h3.f2
-			   return att2 -> neg(u21.att2)}
+			   attributes att2 -> neg(u21.att2)
+			   foreign_keys g -> {u3 -> u21.g1  u3x -> u21.h.f1x}		
+							h -> {u11 -> u21.h2  u12 -> u22.h3}
+			   }
 		t3 -> {from u3:u3 u3x:u3x}
 
-	foreign_keys
-		f -> {u3 -> u11.f1  u3x -> u12.f2x}
-		g -> {u3 -> u21.g1  u3x -> u21.h.f1x}
-		l -> {u11 -> u11  u12 -> u12} 
-		h -> {u11 -> u21.h2  u12 -> u22.h3}
+		
 	
 }
 
@@ -83,11 +85,11 @@ query qTS = literal : T -> S {
 	entities
 		s -> {from t1:t1 t2:t2
 		      where t1.f = t2.g       t1.att1=t2.att2
-		return att -> t1.l.att1}
+		attributes att -> t1.l.att1}
 		s0 -> { from x:t2
-		          where x.h.f = x.g     x.h.att1=x.att2}
+		          where x.h.f = x.g     x.h.att1=x.att2
 	foreign_keys
-		ss -> {t1 -> x.h t2 -> x }	
+		ss -> {t1 -> x.h t2 -> x }	}
 }
 query qUS = [qUT ; qTS]
 

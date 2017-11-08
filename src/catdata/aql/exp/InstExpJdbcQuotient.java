@@ -26,6 +26,8 @@ import catdata.aql.It;
 import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.Term;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
@@ -36,7 +38,7 @@ import catdata.aql.fdm.LiteralInstance;
 
 //TODO AQL CSV version of this
 //TODO merge this with coproduct sigma
-public final class InstExpJdbcQuotient<Gen, Sk, X, Y>
+public final class InstExpJdbcQuotient<X, Y>
 extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>>  implements Raw {
 	
 	public final InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
@@ -105,7 +107,7 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>>  implements R
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InstExpJdbcQuotient<?, ?, ?, ?> other = (InstExpJdbcQuotient<?, ?, ?, ?>) obj;
+		InstExpJdbcQuotient<?, ?> other = (InstExpJdbcQuotient<?, ?>) obj;
 		if (I == null) {
 			if (other.I != null)
 				return false;
@@ -185,8 +187,8 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>>  implements R
 				}
 				while (rs.next()) {
 					//input instance need not be jdbc, so dont call toGen from import here
-					Gen gen1 = (Gen) rs.getObject(1).toString(); //(Gen) ;
-					Gen gen2 = (Gen) rs.getObject(2).toString(); //(Gen) rs.getObject(2).toString();
+					Gen gen1 = new Gen(rs.getObject(1).toString()); //(Gen) ;
+					Gen gen2 = new Gen(rs.getObject(2).toString()); //(Gen) rs.getObject(2).toString();
 					if (gen1 == null || gen2 == null) {
 						stmt.close();
 						rs.close();

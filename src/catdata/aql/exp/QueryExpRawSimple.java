@@ -70,7 +70,6 @@ public class QueryExpRawSimple extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, At
 
 	private final Block block;
 	
-	@SuppressWarnings("unchecked")
 	public QueryExpRawSimple(SchExp<?, ?, ?, ?, ?> src,
 			Block block
 			) {
@@ -169,7 +168,7 @@ public class QueryExpRawSimple extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, At
 		
 			List<String> temp = new LinkedList<>();
 
-			temp.add(block.toString());
+			temp.add(block.toString(new HashSet<>()));
 			
 				toString += "\t\t" + Util.sep(temp, "\n\n\t\t") + "\n";
 			

@@ -391,7 +391,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	 */
 	public Connection createAndLoad(Map<En, List<String>> indices, Pair<Map<X,Integer>, Map<Integer, X>> I) {
 		try {
-			Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> xxx = schema().toSQL_srcSchemas("", "integer", "id", -1);
+			Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> xxx = schema().toSQL_srcSchemas("", "integer", "id", -1, Object::toString);
 			Connection conn = DriverManager.getConnection("jdbc:h2:mem:db_temp_" + session_id++ + ";DB_CLOSE_DELAY=-1");
 			try (Statement stmt = conn.createStatement()) {
 				for (En en1 : schema().ens) {

@@ -26,7 +26,7 @@ schema EuropeanAirplane = literal : Ty {
 query AmericanToEuropean = literal : AmericanAirplane -> EuropeanAirplane {
 	entities 
 		Wing -> {from w:Wing
-			    return wingLength -> inToCm(w.wingLength)}
+			    attributes wingLength -> inToCm(w.wingLength)}
 }
 
 instance Boeing747 = literal : AmericanAirplane {

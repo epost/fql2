@@ -10,6 +10,10 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
@@ -25,6 +29,7 @@ import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
 import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
@@ -36,46 +41,29 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 
 		public Ty(String str) {
 			Util.assertNotNull(str);
-
 			this.str = str;
 		}
 
-		@Override
-		public int hashCode() {
-			return str.hashCode();
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (!(obj instanceof Ty)) {
-				Util.anomaly();
-			}
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (!(obj instanceof Ty))
-				return false;
-			Ty other = (Ty) obj;
-			if (str == null) {
-				if (other.str != null)
-					return false;
-			} else if (!str.equals(other.str))
-				return false;
-			return true;
-		}
-
+		
 		@Override
 		public String toString() {
 			return str;
 		}
 
 		@Override
-		public int compareTo(Ty o) {
-			if (!(o instanceof Ty)) {
-				Util.anomaly();
-			}
-			return str.compareTo(o.str);
+		 public int compareTo(Ty o) {
+			 return CompareToBuilder.reflectionCompare(this, o);
+		   }
+
+		@Override
+		public int hashCode() {
+			return HashCodeBuilder.reflectionHashCode(this);
+			//return str.hashCode(); //must work with compareTo - cant use auto gen one
+		} 
+
+			@Override
+		public boolean equals(Object obj) {
+			return EqualsBuilder.reflectionEquals(this, obj);
 		}
 		
 	}
@@ -89,38 +77,21 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 		}
 
 		@Override
+		 public int compareTo(Sym o) {
+			 return CompareToBuilder.reflectionCompare(this, o);
+		   }
+
+		@Override
 		public int hashCode() {
-			return str.hashCode(); //must work with compareTo - cant use auto gen one
+			return HashCodeBuilder.reflectionHashCode(this);
+			//return str.hashCode(); //must work with compareTo - cant use auto gen one
 		} 
 
-		@Override
-		public int compareTo(Sym o) {
-			if (!(o instanceof Sym)) {
-				Util.anomaly();
-			}
-			return str.compareTo(o.str);
-		}
-		
-		@Override
+			@Override
 		public boolean equals(Object obj) {
-			//if (!(obj instanceof Sym)) {
-			//	Util.anomaly();
-		//	}
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (!(obj instanceof Sym))
-				return false;
-			Sym other = (Sym) obj;
-			if (str == null) {
-				if (other.str != null)
-					return false;
-			} else if (!str.equals(other.str))
-				return false;
-			return true;
-		} 
-
+			return EqualsBuilder.reflectionEquals(this, obj);
+		}
+			
 		@Override
 		public String toString() {
 			return str;

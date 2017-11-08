@@ -23,14 +23,15 @@ import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.exp.InstExpRaw.Gen;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
-public class InstExpCsv<Gen>
-		extends InstExpImport<Gen, Map<En, List<String[]>>, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>>> {
+public class InstExpCsv
+		extends InstExpImport<Map<En, List<String[]>>, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>>> {
 
 	public final File f;
 

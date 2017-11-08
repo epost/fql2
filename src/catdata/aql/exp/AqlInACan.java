@@ -9,6 +9,13 @@ import catdata.Program;
 import catdata.Util;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.gui.AqlViewer;
 import catdata.ide.Example;
 import catdata.ide.Examples;
@@ -94,7 +101,7 @@ class AqlInACan {
 				Object o = Util.timeout(() -> exp.eval(env), 10 * 1000); //hardcode timeout, do not exec pragmas
 				env.defs.put(n, exp.kind(), o);
 				if (exp.kind().equals(Kind.INSTANCE)) {
-					html += "<p><h2>" + n + " =\n</h2>" + toHtml((Instance<?,?,?,?,?,?,?,?,?>) o) 
+					html += "<p><h2>" + n + " =\n</h2>" + toHtml((Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ?, ?>) o) 
 						+ "\n</p><br><hr>\n";
 				} 
 				//TODO aql revisit if this should print html or javascript graphs
@@ -109,7 +116,7 @@ class AqlInACan {
 	
 	private static int i = 0;
 
-	public static <Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> String toHtml(Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I) {
+	public static <X,Y> String toHtml(Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> I) {
 		String ret = "<div>";
 		
 		Map<En, Pair<List<String>,Object[][]>> tables = new AqlViewer(256).makeEnTables(I.algebra()); //TODO aql hardcoded

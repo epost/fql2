@@ -62,6 +62,20 @@ public class ColimitSchema<N> implements Semantics {
 		Mapping<Ty,En,Sym,Fk,Att,En,Fk,Att> isoToUser = Mapping.id(schemaStr);
 		Mapping<Ty,En,Sym,Fk,Att,En,Fk,Att> isoFromUser = Mapping.id(schemaStr);
 	
+			Function<Fk,Fk> updateFk = x -> {
+				if (x.en.equals(src)) {
+					return new Fk(dst, x.str);
+				}
+				return x;
+			};
+			
+			Function<Fk,Fk> deUpdateFk = x -> {
+				if (x.en.equals(dst)) {
+					return new Fk(src, x.str);
+				}
+				return x;
+			};
+			
 		Set<En> ens = new HashSet<>(schemaStr.ens);
 		ens.remove(src);
 		ens.add(dst);
@@ -76,13 +90,13 @@ public class ColimitSchema<N> implements Semantics {
 			Pair<En, En> v = schemaStr.fks.get(k);
 			En s = v.first.equals(src) ? dst : v.first;
 			En t = v.second.equals(src) ? dst : v.second;
-			fks.put(k, new Pair<>(s, t));
+			fks.put(updateFk.apply(k), new Pair<>(s, t));
 		}
 		Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs = new HashSet<>();
 		for (Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : schemaStr.eqs) {
 			Pair<Var, En> v = eq.first;
 			En t = v.second.equals(src) ? dst : v.second;
-			eqs.add(new Triple<>(new Pair<>(v.first, t), eq.second, eq.third));				
+			eqs.add(new Triple<>(new Pair<>(v.first, t), eq.second.mapFk(updateFk), eq.third.mapFk(updateFk)));				
 		}			
 		DP<Ty, En, Sym, Fk, Att, Void, Void> dp = new DP<Ty, En, Sym, Fk, Att, Void, Void>() {
 			@Override
@@ -92,7 +106,7 @@ public class ColimitSchema<N> implements Semantics {
 			@Override
 			//TODO aql check this
 			public boolean eq(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Void, Void> lhs, Term<Ty, En, Sym, Fk, Att, Void, Void> rhs) {
-				return schemaStr.dp.eq(ctx.map(v -> v.left ? v : (v.r.equals(dst) ? Chc.inRight(src) : v)), lhs, rhs);
+				return schemaStr.dp.eq(ctx.map(v -> v.left ? v : (v.r.equals(dst) ? Chc.inRight(src) : v)), lhs.mapFk(deUpdateFk), rhs.mapFk(deUpdateFk));
 			}
 		};
 		Schema<Ty, En, Sym, Fk, Att> schemaStr2 
@@ -107,7 +121,7 @@ public class ColimitSchema<N> implements Semantics {
 		}
 		Map<Fk, Pair<En, List<Fk>>> fksM = new HashMap<>();
 		for (Fk k : schemaStr.fks.keySet()) {
-			fksM.put(k, new Pair<>(isoToUser.fks.get(k).first.equals(src) ? dst : isoToUser.fks.get(k).first, isoToUser.fks.get(k).second));
+			fksM.put(k, new Pair<>(isoToUser.fks.get(k).first.equals(src) ? dst : isoToUser.fks.get(k).first, isoToUser.fks.get(k).second.stream().map(updateFk).collect(Collectors.toList())));
 		}
 		isoToUser = new Mapping<>(ensM, attsM, fksM, schemaStr, schemaStr2, checkJava);
 		Map<En, En> ensM2 = new HashMap<>(); 
@@ -120,7 +134,7 @@ public class ColimitSchema<N> implements Semantics {
 		}
 		Map<Fk, Pair<En, List<Fk>>> fksM2 = new HashMap<>();
 		for (Fk k : schemaStr2.fks.keySet()) {
-			fksM2.put(k, new Pair<>(isoFromUser.fks.get(k).first.equals(dst) ? src : isoFromUser.fks.get(k).first, isoFromUser.fks.get(k).second));
+			fksM2.put(updateFk.apply(k), new Pair<>(isoFromUser.fks.get(deUpdateFk.apply(k)).first.equals(dst) ? src : isoFromUser.fks.get(deUpdateFk.apply(k)).first, isoFromUser.fks.get(deUpdateFk.apply(k)).second.stream().map(deUpdateFk).collect(Collectors.toList())));
 		}
 		isoFromUser = new Mapping<>(ensM2, attsM2, fksM2, schemaStr2, schemaStr, checkJava);
 	
@@ -130,7 +144,7 @@ public class ColimitSchema<N> implements Semantics {
 	
 	public ColimitSchema<N> renameFk(Fk src, Fk dst, boolean checkJava) {
 		if (!schemaStr.fks.containsKey(src)) {
-			throw new RuntimeException(src + " is not a foreign_key in \n" + schemaStr);
+			throw new RuntimeException(src.en + "." + src.str + " is not a foreign_key in \n" + schemaStr);
 		}
 		if (schemaStr.fks.containsKey(dst)) {
 			throw new RuntimeException(dst + " is already a foreign_key in \n" + schemaStr);
@@ -354,11 +368,11 @@ public class ColimitSchema<N> implements Semantics {
 	}
 	
 	private static <X,Y> String conv2(Pair<X,Y> p) {
-		return p.first + "_" + p.second;
+		return p.first + "_" + p.second; //TODO aql
 	}
 	
-	private static <N> Term<Ty, En, Sym, Fk, Att, Void, Void> conv3(Term<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>, Void, Void> t) {
-		return t.map(Function.identity(), Function.identity(), x -> new Fk(conv2(x)), x -> new Att(conv2(x)), Function.identity(), Function.identity());
+	private static <N> Term<Ty, En, Sym, Fk, Att, Void, Void> conv3(Collage<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>  col, Term<Ty, Set<Pair<N,En>>, Sym, Pair<N,Fk>, Pair<N,Att>, Void, Void> t) {
+		return t.map(Function.identity(), Function.identity(), x -> new Fk(conv1(col.fks.get(x).first), conv2(x)) , x -> new Att(conv2(x)), Function.identity(), Function.identity());
 	}
 	
 	private Chc<Ty, En> conv4(Chc<Ty, Set<Pair<N, En>>> v) {
@@ -392,6 +406,8 @@ public class ColimitSchema<N> implements Semantics {
 		Ctx<Pair<N, En>, Set<Pair<N, En>>> eqcs = new Ctx<>(uf.toMap());
 		col.ens.addAll(eqcs.values());
 		Set<Triple<Pair<Var, Set<Pair<N, En>>>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>, Term<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void>>> eqs = new HashSet<>();		
+	
+		
 		makeCoprodSchema(col, eqs, eqcs);
 	
 		DP<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> dp = AqlProver.create(options, col, ty.js);
@@ -555,11 +571,11 @@ public class ColimitSchema<N> implements Semantics {
 		
 		colX.ens.addAll(col.ens.stream().map(ColimitSchema::conv1).collect(Collectors.toSet()));
 		colX.atts.map.putAll(col.atts.map((k,v) -> new Pair<>(new Att(conv2(k)), new Pair<>(conv1(v.first), v.second))).map);
-		colX.fks.putAll(col.fks.map((k,v) -> new Pair<>(new Fk(conv2(k)), new Pair<>(conv1(v.first), conv1(v.second)))).map);
+		colX.fks.putAll(col.fks.map((k,v) -> new Pair<>(new Fk(conv1(col.fks.get(k).first), conv2(k)), new Pair<>(conv1(v.first), conv1(v.second)))).map);
 		
 		Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> 
-		eqsX = eqs.stream().map(t -> new Triple<>(new Pair<>(t.first.first, conv1(t.first.second)), conv3(t.second), conv3(t.third))).collect(Collectors.toSet());
-		colX.eqs.addAll(col.eqs.stream().map(t -> new Eq<>(t.ctx.map((k,v) -> new Pair<>(k, conv4(v))), conv3(t.lhs), conv3(t.rhs))).collect(Collectors.toSet()));
+		eqsX = eqs.stream().map(t -> new Triple<>(new Pair<>(t.first.first, conv1(t.first.second)), conv3(col, t.second), conv3(col, t.third))).collect(Collectors.toSet());
+		colX.eqs.addAll(col.eqs.stream().map(t -> new Eq<>(t.ctx.map((k,v) -> new Pair<>(k, conv4(v))), conv3(col, t.lhs), conv3(col, t.rhs))).collect(Collectors.toSet()));
 		
 		//AqlOptions opsX = new AqlOptions(options, colX);
 		DP<Ty, En, Sym, Fk, Att, Void, Void> dpX = AqlProver.create(options, colX, ty.js);
@@ -568,7 +584,7 @@ public class ColimitSchema<N> implements Semantics {
 		
 		Ctx<N, Mapping<Ty,En,Sym,Fk,Att,En,Fk,Att>> mappingsStr = new Ctx<>();
 		for (N n : mappings.keySet()) {
-			mappingsStr.put(n, conv5(schemaStr, mappings.get(n)));
+			mappingsStr.put(n, conv5(col, schemaStr, mappings.get(n)));
 		}
 		
 		return new Pair<>(schemaStr, mappingsStr);
@@ -595,6 +611,7 @@ public class ColimitSchema<N> implements Semantics {
 				col.eqs.add(new Eq<>(new Ctx<>(x).inRight(), lhs, rhs));
 			}
 		}
+		
 	}
 	
 	private void checkIso(Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> F, Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> G) {
@@ -635,12 +652,12 @@ public class ColimitSchema<N> implements Semantics {
 		}
 	}
 
-	private Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> conv5(Schema<Ty, En, Sym, Fk, Att> schemaStr, Mapping<Ty, En, Sym, Fk, Att, Set<Pair<N, En>>, Pair<N, Fk>, Pair<N, Att>> m) {
+	private Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> conv5(Collage<Ty, Set<Pair<N, En>>, Sym, Pair<N, Fk>, Pair<N, Att>, Void, Void> col, Schema<Ty, En, Sym, Fk, Att> schemaStr, Mapping<Ty, En, Sym, Fk, Att, Set<Pair<N, En>>, Pair<N, Fk>, Pair<N, Att>> m) {
 		Map<En, En> ens = m.ens.map((k,v) -> new Pair<>(k, conv1(v))).map;
 		Map<Att, Triple<Var, En, Term<Ty, En, Sym, Fk, Att, Void, Void>>> 
-		atts = m.atts.map((k,v) -> new Pair<>(k, new Triple<>(v.first, conv1(v.second), conv3(v.third)))).map;
+		atts = m.atts.map((k,v) -> new Pair<>(k, new Triple<>(v.first, conv1(v.second), conv3(col, v.third)))).map;
 		Map<Fk, Pair<En, List<Fk>>> fks = m.fks.map((k,v) -> new Pair<>(k, new Pair<>(conv1(v.first), 
-				v.second.stream().map(x -> new Fk(conv2(x))).collect(Collectors.toList())))).map;
+				v.second.stream().map(x -> new Fk(conv1(v.first), conv2(x))).collect(Collectors.toList())))).map;
 		return new Mapping<>(ens, atts, fks, m.src, schemaStr, false);
 	}
 

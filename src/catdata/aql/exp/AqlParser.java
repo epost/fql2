@@ -442,6 +442,18 @@ public class AqlParser {
 			return ret;
 		});
 	}
+	
+	private static <X> Parser<List<catdata.Pair<catdata.Pair<String,LocStr>, X>>> env2(Parser<X> p, String t) {
+		return Parsers.tuple(Parsers.tuple(ident.followedBy(token(".")),locstr).many1(), Parsers.tuple(token(t), p)).many().map(x -> {
+			List<catdata.Pair<catdata.Pair<String,LocStr>, X>> ret = new LinkedList<>();
+			for (Pair<List<Pair<String, LocStr>>, Pair<Token, X>> y : x) {
+				for (Pair<String, LocStr> z : y.a) {
+					ret.add(new catdata.Pair<>(new catdata.Pair<>(z.a,z.b), y.b.b));
+				}
+			}
+			return ret;
+		});
+	}
 
 	private static Parser<GraphExpRaw> graphExpRaw() {
 		Parser<List<LocStr>> nodes = Parsers.tuple(token("nodes"), locstr.many()).map(x -> x.b);
@@ -475,7 +487,7 @@ public class AqlParser {
 				.tuple(env(b, "->"), options).between(token("{"), token("}"));
 
 		Parser<InstExpCsv> ret = Parsers.tuple(token("import_csv"), ident.followedBy(token(":")), sch_ref.lazy(), qs)
-				.map(x -> new InstExpCsv<String>((SchExp<String, String, String, String, String>) x.c, x.d.a, x.d.b, x.b));
+				.map(x -> new InstExpCsv((SchExp<String, String, String, String, String>) x.c, x.d.a, x.d.b, x.b));
 		return ret;
 	}
 
@@ -851,7 +863,8 @@ public class AqlParser {
 		return ret;
 	}
 
-	private static Parser<catdata.Pair<Block, List<catdata.Pair<LocStr, RawTerm>>>> block() {
+	private static Parser<Triple<Block, List<catdata.Pair<LocStr, RawTerm>>,List<catdata.Pair<LocStr, Trans>>>>
+ block() {
 		Parser<List<catdata.Pair<LocStr, String>>> generators = Parsers.tuple(token("from"), env(ident, ":"))
 				.map(x -> x.b);
 
@@ -863,19 +876,25 @@ public class AqlParser {
 				.tuple(token("where"), eq.many()).map(x -> x.b);
 
 		Parser<List<catdata.Pair<LocStr, RawTerm>>> atts = Parsers
-				.tuple(token("return"),
+				.tuple(token("attributes"),
 						Parsers.tuple(locstr, token("->"), term()).map(x -> new catdata.Pair<>(x.a, x.c)).many())
 				.map(x -> x.b);
+	
+		Parser<List<catdata.Pair<LocStr, Trans>>> fks = Parsers
+				.tuple(token("foreign_keys"),
+						Parsers.tuple(locstr, token("->"), trans()).map(x -> new catdata.Pair<>(x.a, x.c)).many())
+				.map(x -> x.b);
+	
 
-		Parser<Tuple4<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<Integer, catdata.Pair<RawTerm, RawTerm>>>, List<catdata.Pair<LocStr, RawTerm>>, List<catdata.Pair<String, String>>>> pa = Parsers
-				.tuple(generators.optional(), eqs.optional(), atts.optional(), options);
+		Parser<Tuple5<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<Integer, catdata.Pair<RawTerm, RawTerm>>>, List<catdata.Pair<LocStr, RawTerm>>, List<catdata.Pair<LocStr, Trans>>, List<catdata.Pair<String, String>>>> pa = Parsers
+				.tuple(generators.optional(), eqs.optional(), atts.optional(), fks.optional(), options);
 
-		Parser<catdata.Pair<Block, List<catdata.Pair<LocStr, RawTerm>>>> ret = Parsers
+		Parser<Triple<Block, List<catdata.Pair<LocStr, RawTerm>>, List<catdata.Pair<LocStr, Trans>>>> ret = Parsers
 				.tuple(token("{"), pa, token("}"))
-				.map(x -> new catdata.Pair<Block, List<catdata.Pair<LocStr, RawTerm>>>(
-						new Block(x.b.a, Util.newIfNull(x.b.b), x.b.d, Util.newIfNull(x.b.c)),
+				.map(x -> new Triple<>(
+						new Block(x.b.a, Util.newIfNull(x.b.b), x.b.e, Util.newIfNull(x.b.c)),
 
-						Util.newIfNull(x.b.c)));
+						Util.newIfNull(x.b.c), Util.newIfNull(x.b.d)));
 
 		return ret;
 	}
@@ -963,7 +982,7 @@ public class AqlParser {
 	}
 
 	private static Parser<QueryExpRawSimple> queryExpRawSimple() {
-		Parser<Tuple4<Token, Token, SchExp<?, ?, ?, ?, ?>, catdata.Pair<Block, List<catdata.Pair<LocStr, RawTerm>>>>> l = Parsers
+		Parser<Tuple4<Token, Token, SchExp<?, ?, ?, ?, ?>, Triple<Block, List<catdata.Pair<LocStr, RawTerm>>, List<catdata.Pair<LocStr, Trans>>>>> l = Parsers
 				.tuple(token("simple"), token(":"), sch_ref.lazy(), block());
 
 		Parser<QueryExpRawSimple> ret = l
@@ -974,14 +993,14 @@ public class AqlParser {
 	}
 
 	private static Parser<QueryExpRaw> queryExpRaw() {
-		Parser<List<catdata.Pair<LocStr, catdata.Pair<Block, List<catdata.Pair<LocStr, RawTerm>>>>>> ens = Parsers
+		
+		
+		Parser<List<catdata.Pair<LocStr, Triple<Block, List<catdata.Pair<LocStr, RawTerm>>,List<catdata.Pair<LocStr, Trans>>>>>> ens = Parsers
 				.tuple(token("entities"), env(block(), "->")).map(x -> x.b);
 
-		Parser<List<catdata.Pair<LocStr, Trans>>> trans = Parsers.tuple(token("foreign_keys"), env(trans(), "->"))
-				.map(x -> x.b);
-
-		Parser<Tuple4<List<LocStr>, List<catdata.Pair<LocStr, catdata.Pair<Block, List<catdata.Pair<LocStr, RawTerm>>>>>, List<catdata.Pair<LocStr, Trans>>, List<catdata.Pair<String, String>>>> pa = Parsers
-				.tuple(imports, ens.optional(), trans.optional(), options);
+		Parser<Tuple3<List<LocStr>, List<catdata.Pair<LocStr, Triple<Block, List<catdata.Pair<LocStr, RawTerm>>, List<catdata.Pair<LocStr, Trans>>>>>, List<catdata.Pair<String, String>>>> 
+		pa = Parsers
+				.tuple(imports, ens.optional(), options);
 
 		Parser<Tuple5<Token, Token, SchExp<?, ?, ?, ?, ?>, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(
 				token("literal"), token(":"), sch_ref.lazy().followedBy(token("->")), sch_ref.lazy(), token("{")); // .map(x
@@ -991,7 +1010,7 @@ public class AqlParser {
 		Parser<QueryExpRaw> ret = Parsers
 				.tuple(l, pa, token("}"))
 				.map(x -> new QueryExpRaw(x.a.c, x.a.d,
-						x.b.a, Util.newIfNull(x.b.b), Util.newIfNull(x.b.c), x.b.d));
+						x.b.a, Util.newIfNull(x.b.b), Util.newIfNull(x.b.c)));
 
 		return ret;
 	}
@@ -1076,9 +1095,8 @@ public class AqlParser {
 
 	// TODO: aql reverse order on arguments env
 	private static Parser<MapExpRaw> mapExpRaw() {
-		Parser<List<catdata.Pair<LocStr, String>>> ens = Parsers.tuple(token("entities"), env(ident, "->"))
-				.map(x -> x.b);
-
+		
+	
 		Parser<List<catdata.Pair<LocStr, List<String>>>> fks = Parsers
 				.tuple(token("foreign_keys"), env(ident.sepBy1(token(".")), "->")).map(x -> x.b);
 
@@ -1097,34 +1115,43 @@ public class AqlParser {
 
 		Parser<List<catdata.Pair<LocStr, Triple<String, String, RawTerm>>>> atts = Parsers
 				.tuple(token("attributes"), envp).map(x -> x.b);
+		
+//		List<Pair<LocStr, Triple<String, List<Pair<LocStr, List<String>>>, List<Pair<LocStr, Triple<String, String, RawTerm>>>>>> list,	
+		
+			Parser<List<catdata.Pair<LocStr, String>>> ens = Parsers.tuple(token("entities"), env(ident, "->"))
+					.map(x -> x.b);
 
-		Parser<Tuple5<List<LocStr>, List<catdata.Pair<LocStr, String>>, List<catdata.Pair<LocStr, List<String>>>, List<catdata.Pair<LocStr, Triple<String, String, RawTerm>>>, List<catdata.Pair<String, String>>>> pa = Parsers
-				.tuple(imports, ens.optional(), fks.optional(), atts.optional(), options);
+
+			Parser<Tuple3<List<LocStr>, List<catdata.Pair<LocStr, Triple<String, List<catdata.Pair<LocStr, List<String>>>, List<catdata.Pair<LocStr, Triple<String, String, RawTerm>>>>>>, List<catdata.Pair<String, String>>>>
+			pa = 
+				Parsers
+				.tuple(imports, Parsers.tuple(token("entities"), locstr.followedBy(token("->")), ident, fks.optional(), atts.optional())
+						.map(x -> new catdata.Pair<>(x.b, new Triple<>(x.c,Util.newIfNull(x.d),Util.newIfNull(x.e)))).many(), options);
 
 		Parser<Tuple5<Token, Token, SchExp<?, ?, ?, ?, ?>, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(
-				token("literal"), token(":"), sch_ref.lazy().followedBy(token("->")), sch_ref.lazy(), token("{")); // .map(x
-																													// ->
-																													// x.c);
-
-		Parser<MapExpRaw> ret = Parsers.tuple(l, pa, token("}")).map(x -> new MapExpRaw(x.a.c, x.a.d, x.b.a,
-				Util.newIfNull(x.b.b), Util.newIfNull(x.b.c), Util.newIfNull(x.b.d), x.b.e));
+				token("literal"), token(":"), sch_ref.lazy().followedBy(token("->")), sch_ref.lazy(), token("{")); 
+//	List<Pair<LocStr, Triple<String, List<Pair<LocStr, List<String>>>, List<Pair<LocStr, Triple<String, String, RawTerm>>>>>> list,	
+		
+		Parser<MapExpRaw> ret = Parsers.tuple(l, pa, token("}")).
+				map(x -> new MapExpRaw(x.a.c, x.a.d, 
+				x.b.a, x.b.b, x.b.c));
 
 		return ret;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static Parser<ColimSchExpModify<?,?>> colimExpModify() {
+	private static Parser<ColimSchExpModify<?>> colimExpModify() {
 		Parser<List<catdata.Pair<LocStr, String>>> ens = Parsers
 				.tuple(token("rename").followedBy(token("entities")), env(ident, "->")).map(x -> x.b);
 
-		Parser<List<catdata.Pair<LocStr, String>>> fks0 = Parsers
-				.tuple(token("rename").followedBy(token("foreign_keys")), env(ident, "->")).map(x -> x.b);
+		Parser<List<catdata.Pair<catdata.Pair<String,LocStr>, String>>> fks0 = Parsers
+				.tuple(token("rename").followedBy(token("foreign_keys")), env2(ident, "->")).map(x -> x.b);
 
 		Parser<List<catdata.Pair<LocStr, String>>> atts0 = Parsers
 				.tuple(token("rename").followedBy(token("attributes")), env(ident, "->")).map(x -> x.b);
 
-		Parser<List<catdata.Pair<LocStr, List<String>>>> fks = Parsers
-				.tuple(token("remove").followedBy(token("foreign_keys")), env(ident.sepBy1(token(".")), "->"))
+		Parser<List<catdata.Pair<catdata.Pair<String,LocStr>, List<String>>>> fks = Parsers
+				.tuple(token("remove").followedBy(token("foreign_keys")), env2(ident.sepBy1(token(".")), "->"))
 				.map(x -> x.b);
 
 		Parser<List<catdata.Pair<LocStr, Triple<String, String, RawTerm>>>> envp = env(
@@ -1135,18 +1162,19 @@ public class AqlParser {
 		Parser<List<catdata.Pair<LocStr, Triple<String, String, RawTerm>>>> atts = Parsers
 				.tuple(token("remove").followedBy(token("attributes")), envp).map(x -> x.b);
 
-		Parser<Tuple3<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<LocStr, String>>, List<catdata.Pair<LocStr, String>>>> pa = Parsers
+		Parser<Tuple3<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<catdata.Pair<String, LocStr>, String>>, List<catdata.Pair<LocStr, String>>>> pa = Parsers
 				.tuple(ens.optional(), fks0.optional(), atts0.optional());
 
-		Parser<Tuple3<List<catdata.Pair<LocStr, List<String>>>, List<catdata.Pair<LocStr, Triple<String, String, RawTerm>>>, List<catdata.Pair<String, String>>>> pb = Parsers
+		Parser<Tuple3<List<catdata.Pair<catdata.Pair<String, LocStr>, List<String>>>, List<catdata.Pair<LocStr, Triple<String, String, RawTerm>>>, List<catdata.Pair<String, String>>>> pb = Parsers
 				.tuple(fks.optional(), atts.optional(), options);
 
 		Parser<Tuple3<Token, ColimSchExp<?>, Token>> l = Parsers.tuple(token("modify"),
 				colim_ref.lazy(), token("{")); // .map(x -> x.c);
-
-		Parser<ColimSchExpModify<?,?>> ret = Parsers.tuple(l, pa, pb, token("}"))
-				.map(x -> new ColimSchExpModify(x.a.b, Util.newIfNull(x.b.a), Util.newIfNull(x.b.b),
-						Util.newIfNull(x.b.c), Util.newIfNull(x.c.a), Util.newIfNull(x.c.b), x.c.c));
+//public ColimSchExpModify(ColimSchExp<N> colim, List<Pair<LocStr, String>> ens, List<Pair<Pair<String, LocStr>, String>> fks0, List<Pair<LocStr, String>> atts0, List<Pair<Pair<String, LocStr>, List<String>>> fks, List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
+		
+		Parser<ColimSchExpModify<?>> ret = Parsers.tuple(l, pa, pb, token("}"))
+				.map(x -> new ColimSchExpModify<>(x.a.b, Util.newIfNull(x.b.a), Util.newIfNull(x.b.b), //x.b.b
+						Util.newIfNull(x.b.c), Util.newIfNull(x.c.a), Util.newIfNull(x.c.b), x.c.c));//x.c.a
 
 		return ret;
 	}

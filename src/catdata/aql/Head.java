@@ -1,10 +1,32 @@
 package catdata.aql;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import catdata.Util;
 import catdata.aql.exp.TyExpRaw;
 
-public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
+public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> implements Comparable<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> {
 
+	//these are necessary for KB
+	
+	@Override
+	 public int compareTo(Head<Ty, En, Sym, Fk, Att, Gen, Sk> o) {
+		 return CompareToBuilder.reflectionCompare(this, o);
+	   }
+
+	@Override
+	public int hashCode() {
+		return HashCodeBuilder.reflectionHashCode(this);
+		//return str.hashCode(); //must work with compareTo - cant use auto gen one
+	} 
+
+		@Override
+	public boolean equals(Object obj) {
+		return EqualsBuilder.reflectionEquals(this, obj);
+	}
+		
 	public final Sym sym;
 	public final Fk fk; 
 	public final Att att;
@@ -87,6 +109,7 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		}
 	}
 
+	/*
 	@Override
 	public int hashCode() {
 		int prime = 31;
@@ -164,8 +187,8 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (!ty.equals(other.ty))
 			return false;
 		return true; */
-	}
-
+//	}
+	
 	@Override
 	public String toString() {
 		if (att != null) {

@@ -343,6 +343,8 @@ A {\tt ctx(<foreign\_key1>, <path2>)}.
 \subsection{{\tt attributes}}
 A {\tt ctx(<attribute1>, lambda x:<entity>. <term> : <type> )}, where {\tt type} is the type of {\tt attribute1} and $x$ occurs free in {\tt term}.  Any variable can be used in place of $x$.  Alternatively, attribute mappings of the form $\lambda x. \ x.p$, where $p$ is a path, can simply be written as $p$.
 
+Note: AQL now requires mapping literals to be a list of mappings $m_1, \ldots$ of the above form, where each mapping $m$ in the list specifies the action of a single entity $e$ and all the attributes and foreign keys out of that entity.  I.e., mappings now  "package" together each ``table''. 
+
 \subsection{{\tt options}}
 Allowable options are {\tt timeout} and {\tt dont\_validate\_unsafe}, which disables checking that equations preserved.
 
@@ -365,10 +367,8 @@ Composes two queries: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt [ f ; 
 \subsection{{\tt imports}}
 A list of names of queries.
 \subsection{{\tt entities}}
-A {\tt ctx(<entity>, <instance>, ctx(<attribute>, <term>))}.  The instance uses keywords {\tt from} and {\tt where} instead of {\tt generators} and {\tt equations}.  Note that only only generators, not labelled nulls, can be used in the instance (i.e., {\tt from} $\ v:Integer \ $ is not allowed).  Associated with each entity is a context mapping attributes to terms (the {\tt return} clause).
+A {\tt ctx(<entity>, <instance>, ctx(<attribute>, <term>), {\tt ctx(<foreign key>, <transform>)})}.  The instance uses keywords {\tt from} and {\tt where} instead of {\tt generators} and {\tt equations}.  Note that only only generators, not labelled nulls, can be used in the instance (i.e., {\tt from} $\ v:Integer \ $ is not allowed).  Associated with each entity $e$ is a context mapping attributes to terms (the {\tt attributes} clause) and foreign keys $e \to e'$ to transforms $e' \to e$. 
 
-\subsection{{\tt foreign\_keys}}
-A {\tt ctx(<foreign key>, <transform>)}.
 
 \subsection{{\tt options}}
 Allowed are {\tt timeout} and {\tt dont\_validate\_unsafe}.  Note that each instance and transform in the query can have its own options.  See the {\tt query}-prefixed options.

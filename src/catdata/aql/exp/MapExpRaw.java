@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import catdata.Chc;
 import catdata.Ctx;
@@ -32,8 +33,7 @@ import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
-public final class MapExpRaw extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>
-		implements Raw {
+public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> implements Raw {
 
 	@Override
 	public Collection<Pair<String, Kind>> deps() {
@@ -49,9 +49,9 @@ public final class MapExpRaw extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>
 
 	public final Set<String> imports;
 
-	public final Set<Pair<String, String>> ens;
-	public final Set<Pair<String, List<String>>> fks;
-	public final Set<Pair<String, Triple<String, String, RawTerm>>> atts;
+	public final Set<Pair<LocStr, String>> ens;
+	public final Set<Pair<Pair<String, LocStr>, List<String>>> fks;
+	public final Set<Pair<Pair<String, LocStr>, Triple<String, String, RawTerm>>> atts;
 
 	public final Map<String, String> options;
 
@@ -60,17 +60,36 @@ public final class MapExpRaw extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>
 		return options;
 	}
 
-	// typesafe by covariance of read only collections
-	@SuppressWarnings("unchecked")
+	//
+
 	public MapExpRaw(SchExp<?, ?, ?, ?, ?> src, SchExp<?, ?, ?, ?, ?> dst, List<LocStr> imports,
-			List<Pair<LocStr, String>> ens, List<Pair<LocStr, List<String>>> fks,
-			List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
+			List<Pair<LocStr, Triple<String, List<Pair<LocStr, List<String>>>, List<Pair<LocStr, Triple<String, String, RawTerm>>>>>> list,
+			List<Pair<String, String>> options) {
 		this.src = (SchExp<Ty, En, Sym, Fk, Att>) src;
 		this.dst = (SchExp<Ty, En, Sym, Fk, Att>) dst;
 		this.imports = LocStr.set1(imports);
-		this.ens = LocStr.set2(ens);
-		this.fks = LocStr.set2(fks);
-		this.atts = LocStr.set2(atts);
+
+		Map<LocStr, Triple<String, List<Pair<LocStr, List<String>>>, List<Pair<LocStr, Triple<String, String, RawTerm>>>>> list2 = Util
+				.toMapSafely(list);
+
+		this.ens = new HashSet<>(); 
+		this.fks = new HashSet<>(); 
+		this.atts = new HashSet<>(); 
+
+		for (LocStr en : list2.keySet()) {
+			Triple<String, List<Pair<LocStr, List<String>>>, List<Pair<LocStr, Triple<String, String, RawTerm>>>> v = list2
+					.get(en);
+			this.ens.add(new Pair<>(en, v.first));
+
+			for (Pair<LocStr, List<String>> fk : v.second) {
+				this.fks.add(new Pair<>(new Pair<>(en.str, fk.first), fk.second));
+			}
+			for (Pair<LocStr, Triple<String, String, RawTerm>> att : v.third) {
+				this.atts.add(new Pair<>(new Pair<>(en.str, att.first), att.second));
+
+			}
+		}
+
 		this.options = Util.toMapSafely(options);
 		Util.toMapSafely(this.ens);
 		Util.toMapSafely(this.fks);
@@ -79,26 +98,28 @@ public final class MapExpRaw extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>
 		List<InteriorLabel<Object>> t = InteriorLabel.imports("imports", imports);
 		raw.put("imports", t);
 
-		List<InteriorLabel<Object>> f = new LinkedList<>();
+		raw.put("entities", new LinkedList<>());
+		raw.put("foreign keys", new LinkedList<>());
+		raw.put("attributes", new LinkedList<>());
+
 		for (Pair<LocStr, String> p : ens) {
-			f.add(new InteriorLabel<>("entities", new Pair<>(p.first.str, p.second), p.first.loc,
+			List<InteriorLabel<Object>> inner = new LinkedList<>();
+			raw.put(p.first.str, inner);
+			
+			inner.add(new InteriorLabel<>("entities", new Pair<>(p.first.str, p.second), p.first.loc,
 					x -> x.first + " -> " + x.second).conv());
+		
+			for (Pair<Pair<String, LocStr>, List<String>> q : this.fks.stream().filter(x -> x.first.first.equals(p.first.str)).collect(Collectors.toList())) {
+				inner.add(new InteriorLabel<>("foreign keys",
+						q /* new Pair<>(p.first.second.str, p.second) */, q.first.second.loc,
+						x -> x.first + " -> " + Util.sep(x.second, ".")).conv());
+			}
+	
+			for (Pair<Pair<String, LocStr>, Triple<String, String, RawTerm>> q : atts.stream().filter(x -> x.first.first.equals(p.first.str)).collect(Collectors.toList())) {
+				inner.add(new InteriorLabel<>("attributes", new Pair<>(q.first.second.str, q.second), q.first.second.loc,
+						x -> x.first + " -> \\" + x.second.first + ". " + x.second.third).conv());
+			}
 		}
-		raw.put("entities", f);
-
-		f = new LinkedList<>();
-		for (Pair<LocStr, List<String>> p : fks) {
-			f.add(new InteriorLabel<>("foreign keys", new Pair<>(p.first.str, p.second), p.first.loc,
-					x -> x.first + " -> " + Util.sep(x.second, ".")).conv());
-		}
-		raw.put("foreign keys", f);
-
-		f = new LinkedList<>();
-		for (Pair<LocStr, Triple<String, String, RawTerm>> p : atts) {
-			f.add(new InteriorLabel<>("attributes", new Pair<>(p.first.str, p.second), p.first.loc,
-					x -> x.first + " -> \\" + x.second.first + ". " + x.second.third).conv());
-		}
-		raw.put("attributes", f);
 	}
 
 	Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
@@ -122,39 +143,45 @@ public final class MapExpRaw extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>
 			toString += "\n\t\t" + Util.sep(imports, " ") + "\n";
 		}
 
-		List<String> temp = new LinkedList<>();
+		
+		for (Pair<LocStr, String> en : Util.alphabetical(ens)) {
+			List<String> temp = new LinkedList<>();
 
-		if (!ens.isEmpty()) {
 			toString += "\tentities";
 
-			for (Pair<String, String> x : Util.alphabetical(ens)) {
-				temp.add(x.first + " -> " + x.second);
-			}
+			//for (Pair<LocStr, String> x : Util.alphabetical(ens)) {
+				temp.add(en.first.str + " -> " + en.second);
+			//}
 
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			
+			List<Pair<Pair<String, LocStr>, List<String>>> x = fks.stream().filter(z -> z.first.first.equals(en.first.str)).collect(Collectors.toList());
+			if (!x.isEmpty()) {
+				toString += "\tforeign keys";
+				temp = new LinkedList<>();
+				for (Pair<Pair<String, LocStr>, List<String>> sym : Util.alphabetical(x)) {
+					temp.add(sym.first.second + " -> " + Util.sep(sym.second, "."));
+				}
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			}
+
+			List<Pair<Pair<String, LocStr>, Triple<String, String, RawTerm>>> y = atts.stream().filter(z -> z.first.first.equals(en.first.str)).collect(Collectors.toList());
+			
+			if (!y.isEmpty()) {
+				toString += "\tattributes";
+				temp = new LinkedList<>();
+				for (Pair<Pair<String, LocStr>, Triple<String, String, RawTerm>> sym : Util.alphabetical(y)) {
+					temp.add(sym.first.second + " -> lambda " + sym.second.first + ". " + sym.second.third);
+				}
+				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
+			}
 		}
 
-		if (!fks.isEmpty()) {
-			toString += "\tforeign_keys";
-			temp = new LinkedList<>();
-			for (Pair<String, List<String>> sym : Util.alphabetical(fks)) {
-				temp.add(sym.first + " -> " + Util.sep(sym.second, "."));
-			}
-			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
-		}
-
-		if (!fks.isEmpty()) {
-			toString += "\tattributes";
-			temp = new LinkedList<>();
-			for (Pair<String, Triple<String, String, RawTerm>> sym : Util.alphabetical(atts)) {
-				temp.add(sym.first + " -> lambda " + sym.second.first + ". " + sym.second.third);
-			}
-			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
-		}
+		
 
 		if (!options.isEmpty()) {
 			toString += "\toptions";
-			temp = new LinkedList<>();
+			List<String> temp = new LinkedList<>();
 			for (Entry<String, String> sym : options.entrySet()) {
 				temp.add(sym.getKey() + " = " + sym.getValue());
 			}
@@ -235,10 +262,10 @@ public final class MapExpRaw extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>
 		Collage<Ty, En, Sym, Fk, Att, Void, Void> dcol = new Collage<>(dst0.collage());
 
 		Map<En, En> ens0 = new HashMap<>();
-		//Map<String, Pair<String, List<String>>> fks0 = new HashMap<>();
+		// Map<String, Pair<String, List<String>>> fks0 = new HashMap<>();
 		Map<Att, Triple<Var, En, Term<Ty, En, Sym, Fk, Att, Void, Void>>> atts0 = new HashMap<>();
 		Map<Fk, Pair<En, List<Fk>>> fksX = new HashMap<>();
-		
+
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
 			Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> v = env.defs.maps.get(k);
@@ -247,58 +274,70 @@ public final class MapExpRaw extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>
 			Util.putAllSafely(atts0, v.atts.map);
 		}
 
-		Util.putAllSafely(ens0, Util.toMapSafely(ens.stream().map(x -> new Pair<>(new En(x.first), new En(x.second))).collect(Collectors.toList())));
+		Util.putAllSafely(ens0, Util.toMapSafely(
+				ens.stream().map(x -> new Pair<>(new En(x.first.str), new En(x.second))).collect(Collectors.toList())));
 		for (En k : ens0.keySet()) {
 			if (!dst0.ens.contains(ens0.get(k))) {
-				throw new LocException(find("entities", new Pair<>(k, ens0.get(k))), "The mapping for " + k + ", namely " + ens0.get(k) + ", does not appear in the target schema");
+				throw new LocException(find("entities", new Pair<>(k, ens0.get(k))),
+						"The mapping for " + k + ", namely " + ens0.get(k) + ", does not appear in the target schema");
 			} else if (!src0.ens.contains(k)) {
-				throw new LocException(find("entities", new Pair<>(k, ens0.get(k))), k + " does not appear in the source schema");				
+				throw new LocException(find("entities", new Pair<>(k, ens0.get(k))),
+						k + " does not appear in the source schema");
 			}
 		}
-		
-		for (Pair<String, List<String>> p : fks) {
+
+		for (Pair<Pair<String, LocStr>, List<String>> p : this.fks) {
+			Fk theFk = new Fk(new En(p.first.first), p.first.second.str);
+			if (!src0.fks.containsKey(theFk)) {
+				throw new RuntimeException("Not a foreign key in source: " + theFk.en + "." + theFk.str); 
+			}
 			try {
-				En start_en = null;
+				En start_en_fixed = ens0.get(new En(p.first.first));
+
+				En start_en = ens0.get(new En(p.first.first));
 				List<Fk> r = new LinkedList<>();
 				for (String o : p.second) {
 					if (ens0.containsValue(new En(o))) {
-						if (fksX.containsKey(new Fk(o))) {
+						if (fksX.containsKey(new Fk(start_en, o))) {
 							throw new RuntimeException(
 									o + " is both a target foreign key and a target entity, so the path is ambiguous");
 						}
-						if (start_en == null) {
-							start_en = new En(p.second.get(0));
-						}
+						// if (start_en == null) {
+						// start_en = new En(p.second.get(0));
+						// }
 					} else {
-						if (start_en == null) {
-							Pair<En, En> j = dst0.fks.get(new Fk(o));
-							if (j == null) {
-								throw new RuntimeException(p.second.get(0) + " is not a foreign key in the target");
-							}
-							start_en = j.first;
-						}
-						r.add(new Fk(o));
+						/*
+						 * if (start_en == null) { Pair<En, En> j =
+						 * dst0.fks.get(new Fk(o)); if (j == null) { throw new
+						 * RuntimeException(p.second.get(0) +
+						 * " is not a foreign key in the target"); } start_en =
+						 * j.first; }
+						 */
+						// }
+						r.add(new Fk(start_en, o));
+						start_en = dst0.fks.get(new Fk(start_en, o)).second;
+
 					}
 				}
-				if (start_en == null) {
-					throw new RuntimeException("Anomaly: please report");
-				}
-				fksX.put(new Fk(p.first), new Pair<>(start_en, r));
+				// if (start_en == null) {
+				// throw new RuntimeException("Anomaly: please report");
+				// }
+				fksX.put(new Fk(new En(p.first.first), p.first.second.str), new Pair<>(start_en_fixed, r));
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
-				throw new LocException(find("foreign keys", p), "In foreign key mapping " + p.first + " -> "
+				throw new LocException(p.first.second.loc, "In foreign key mapping " + p.first + " -> "
 						+ Util.sep(p.second, ".") + ", " + ex.getMessage());
 			}
 		}
-//		Util.putAllSafely(fks0, Util.toMapSafely(fksX));
+		// Util.putAllSafely(fks0, Util.toMapSafely(fksX));
 
-		for (Pair<String, Triple<String, String, RawTerm>> att : atts) {
+		for (Pair<Pair<String, LocStr>, Triple<String, String, RawTerm>> att : atts) {
 			try {
 				String var = att.second.first;
 				String var_en = att.second.second;
 				RawTerm term = att.second.third;
 
-				Pair<En, Ty> p = src0.atts.map.get(new Att(att.first));
+				Pair<En, Ty> p = src0.atts.map.get(new Att(att.first.second.str));
 				if (p == null) {
 					throw new RuntimeException(att.first + " is not a source attribute.");
 				}
@@ -327,23 +366,23 @@ public final class MapExpRaw extends MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att>
 				Term<Ty, En, Sym, Fk, Att, Gen, Sk> term0 = RawTerm.infer1x(ctx, term, null, proposed_ty2,
 						dcol.convert(), "", src0.typeSide.js).second;
 
-				Util.putSafely(atts0, new Att(att.first), new Triple<>(new Var(var), dst_att_dom_en, term0.convert()));
+				Util.putSafely(atts0, new Att(att.first.second.str),
+						new Triple<>(new Var(var), dst_att_dom_en, term0.convert()));
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
-				throw new LocException(find("attributes", att), "in mapping for " + att.first + ", " + ex.getMessage());
+				throw new LocException(att.first.second.loc, "in mapping for " + att.first + ", " + ex.getMessage());
 			}
 		}
 
 		AqlOptions ops = new AqlOptions(options, null, env.defaults);
 
-		Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> ret = new Mapping<>(ens0, atts0, fksX,
-				src0, dst0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
+		Mapping<Ty, En, Sym, Fk, Att, En, Fk, Att> ret = new Mapping<>(ens0, atts0, fksX, src0, dst0,
+				(Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
 		return ret;
 	}
 
 	@Override
-	public Pair<SchExp<Ty, En, Sym, Fk, Att>, SchExp<Ty, En, Sym, Fk, Att>> type(
-			AqlTyping G) {
+	public Pair<SchExp<Ty, En, Sym, Fk, Att>, SchExp<Ty, En, Sym, Fk, Att>> type(AqlTyping G) {
 		return new Pair<>(src, dst);
 	}
 }

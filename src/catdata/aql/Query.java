@@ -74,7 +74,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		return p;
 	}
 
-	public static <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> makeQuery(
+	public static synchronized <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> makeQuery(
 			Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens,
 			Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts,
 			Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> fks,
@@ -610,23 +610,27 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		Map<En2, String> m1 = new HashMap<>();
 		Map<Fk2, String> m2 = new HashMap<>();
 		
-		for (Fk2 fk2 : fks.keySet()) {
-			m2.put(fk2, "{" + fks.get(fk2).toString("", "") + "}");
-		}
 		
 		for (En2 en2 : ens.keySet()) {
 			Map<String, String> m3 = new HashMap<>();
 			for (Att2 att : dst.attsFrom(en2)) {
 				m3.put(att.toString(), atts.get(att).toString());
 			}
-			String x = m3.isEmpty() ? "" : " \nreturn\n\t";
-			m1.put(en2, "{" + ens.get(en2).toString("\nfrom", "where").trim() + x + Util.sep(m3, " -> ", "\n\t") + "\n}");
+		//	Map<String, String> m4 = new HashMap<>();
+			for (Fk2 fk : dst.fksFrom(en2)) {
+				m2.put(fk, "{" + fks.get(fk).toString("", "") + "}");
+			}
+			String x = m3.isEmpty() ? "" : " \nattributes\n\t";
+			String y = m2.isEmpty() ? "" : " \nforeign_keys\n\t";
+			m1.put(en2, "{" + ens.get(en2).toString("\nfrom", "where").trim() + x + Util.sep(m3, " -> ", "\n\t") + "\n" + y + Util.sep(m2, " -> ", "\n\t") + "\n}");
+
+//			ret += "\n\nforeign_keys\n\n";
+	//		ret += Util.sep(m2, " -> ", "\n\n");
+
 		}
 		
 		ret += "entities\n";
 		ret += Util.sep(m1, " -> ", "\n\n");
-		ret += "\n\nforeign_keys\n\n";
-		ret += Util.sep(m2, " -> ", "\n\n");
 		
 		return ret;
 	}

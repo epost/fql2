@@ -49,10 +49,15 @@ public class QueryExpRaw
 
 	private final Set<Pair<En, Block>> blocks;
 
-	private final Set<Pair<Fk, Trans>> fks;
+	private final Set<Pair<Pair<En,Fk>, Trans>> fks;
 
 	private final Set<Pair<Att, RawTerm>> atts;
 
+	private final Ctx<En, Integer> b1=new Ctx<>();
+	private final Ctx<Fk, Integer> b2=new Ctx<>();
+	private final Ctx<Att, Integer> b3=new Ctx<>();
+
+	
 	@Override
 	public Map<String, String> options() {
 		return options;
@@ -270,18 +275,17 @@ public class QueryExpRaw
 			}
 			raw.put("where", xx);
 
-			xx = new LinkedList<>();
+		/*	xx = new LinkedList<>();
 			for (Pair<LocStr, RawTerm> p : atts) {
 				xx.add(new InteriorLabel<>("return", new Pair<>(p.first.str, p.second), p.first.loc,
 						x -> x.first + " -> " + x.second).conv());
 			}
-			raw.put("return", xx);
+			raw.put("return", xx); */
 		}
 
 		private String toString;
 
-		@Override
-		public synchronized String toString() {
+		public synchronized String toString(Set<Pair<Pair<catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.SchExpRaw.Fk>, Trans>> l) {
 			if (toString != null) {
 				return toString;
 			}
@@ -311,13 +315,23 @@ public class QueryExpRaw
 			}
 
 			if (!atts.isEmpty()) {
-				toString += "\n\t\t\t\treturn\t";
+				toString += "\n\t\t\t\tattributes\t";
 				temp = new LinkedList<>();
 				for (Pair<Att, RawTerm> sym : Util.alphabetical(atts)) {
 					temp.add(sym.first + " -> " + sym.second);
 				}
 				toString += Util.sep(temp, "\n\t\t\t\t\t");
 			}
+			
+			if (!l.isEmpty()) {
+				toString += "\n\t\t\t\tforeign_keys\t";
+				temp = new LinkedList<>();
+				for (Pair<Pair<catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.SchExpRaw.Fk>, Trans> sym : Util.alphabetical(l)) {
+					temp.add(sym.first.second.str + " -> {" + sym.second + "}");
+				}
+				toString += Util.sep(temp, "\n\t\t\t\t\t");
+			}
+
 
 			if (!options.isEmpty()) {
 				toString += "\n\t\t\t\toptions";
@@ -340,6 +354,11 @@ public class QueryExpRaw
 		@Override
 		protected Map<String, String> options() {
 			return options;
+		}
+
+		@Override
+		public String toString() {
+			return Util.anomaly();
 		}
 
 	}
@@ -424,21 +443,14 @@ public class QueryExpRaw
 		if (!blocks.isEmpty()) {
 			toString += "\tentities";
 
-			for (Pair<En, Block> x : Util.alphabetical(blocks)) {
-				temp.add(x.first + " -> {" + x.second.toString() + "}");
+			for (Pair<catdata.aql.exp.SchExpRaw.En, Block> x : blocks) {
+				Set<Pair<Pair<catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.SchExpRaw.Fk>, Trans>> l = fks.stream().filter(z -> z.first.first.equals(new En(x.first.str))).collect(Collectors.toSet());
+				temp.add(x.first + " -> {" + x.second.toString(l) + "}");
 			}
 
 			toString += "\n\t\t" + Util.sep(temp, "\n\n\t\t") + "\n";
 		}
 
-		if (!fks.isEmpty()) {
-			toString += "\tforeign_keys";
-			temp = new LinkedList<>();
-			for (Pair<Fk, Trans> sym : Util.alphabetical(fks)) {
-				temp.add(sym.first + " -> " + sym.second + "");
-			}
-			toString += "\n\t\t" + Util.sep(temp, "\n\n\t\t") + "\n";
-		}
 
 		if (!options.isEmpty()) {
 			toString += "\toptions";
@@ -455,42 +467,56 @@ public class QueryExpRaw
 
 
 
-	@SuppressWarnings("unchecked")
 	public QueryExpRaw(SchExp<?, ?, ?, ?, ?> c, SchExp<?, ?, ?, ?, ?> d, List<LocStr> imports,
-			List<Pair<LocStr, Pair<Block, List<Pair<LocStr, RawTerm>>>>> list, List<Pair<LocStr, Trans>> fks,
+			List<Pair<LocStr, Triple<Block, List<Pair<LocStr, RawTerm>>, List<Pair<LocStr, Trans>>>>> list, 
 			List<Pair<String, String>> options) {
 		this.src = (SchExp<Ty, En, Sym, Fk, Att>) c;
 		this.dst = (SchExp<Ty, En, Sym, Fk, Att>) d;
 		this.imports = LocStr.set1(imports);
 		this.options = Util.toMapSafely(options);
 		this.blocks = list.stream().map(x -> new Pair<>(new En(x.first.str), x.second.first)).collect(Collectors.toSet());
-		this.fks = LocStr.set2(fks).stream().map(x -> new Pair<>(new Fk(x.first), x.second)).collect(Collectors.toSet());
+		
+		this.fks = new HashSet<>();// LocStr.set2(list).stream().map(x -> new Pair<>(new Fk(new En(x.first), x.second.third), x.third.second)).collect(Collectors.toSet());
+		for (Pair<LocStr, Triple<Block, List<Pair<LocStr, RawTerm>>, List<Pair<LocStr, Trans>>>> x : list) {
+			b1.put(new En(x.first.str),x.first.loc);
+			
+			for (Pair<LocStr, Trans> y : x.second.third) {
+				this.fks.add(new Pair<>(new Pair<>(new En(x.first.str),new Fk(new En(x.first.str),y.first.str)), y.second));
+				b2.put(new Fk(new En(x.first.str),y.first.str), y.first.loc);
+			}
+			
+			for (Pair<LocStr, RawTerm> y : x.second.second) {
+				b3.put(new Att(y.first.str), y.first.loc);
+			}
+		}
+		
 		atts = new HashSet<>();
-		for (Pair<LocStr, Pair<Block, List<Pair<LocStr, RawTerm>>>> block : list) {
+		for (Pair<LocStr, Triple<Block, List<Pair<LocStr, RawTerm>>, List<Pair<LocStr, Trans>>>> block : list) {
 			atts.addAll(block.second.second.stream().map(x -> new Pair<>(new Att(x.first.str), x.second))
 					.collect(Collectors.toList()));
+					
 		}
 
 		raw.put("imports", InteriorLabel.imports("imports", imports));
 
-		List<InteriorLabel<Object>> f = new LinkedList<>();
-		List<InteriorLabel<Object>> g = new LinkedList<>();
-		for (Pair<LocStr, Pair<Block, List<Pair<LocStr, RawTerm>>>> p : list) {
-			f.add(new InteriorLabel<>("entities", p.second.first, p.first.loc, x -> p.first.str).conv());
+	
+		for (Pair<LocStr, Triple<Block, List<Pair<LocStr, RawTerm>>, List<Pair<LocStr, Trans>>>> p : list) {
+			List<InteriorLabel<Object>> f = new LinkedList<>();
+			
+			f.add(new InteriorLabel<>("entities", p.second.first, p.first.loc, x -> "instance").conv());
 			
 			for (Pair<LocStr, RawTerm> q : p.second.second) {
-				g.add(new InteriorLabel<>("attributes", new Pair<>(q.first.str, q.second), q.first.loc, x -> x.first + " -> " + x.second).conv());
+				f.add(new InteriorLabel<>("attributes", new Pair<>(q.first.str, q.second), q.first.loc, x -> x.first + " -> " + x.second).conv());
+			}
+			for (Pair<LocStr, Trans> px : p.second.third) {
+				f.add(new InteriorLabel<>("foreign keys", px.second, px.first.loc, x -> px.first.str).conv());
 			}
 			
+			raw.put(p.first.str, f);
 		}
-		raw.put("entities", f);
-		raw.put("attributes", g);
-
-		f = new LinkedList<>();
-		for (Pair<LocStr, Trans> p : fks) {
-			f.add(new InteriorLabel<>("foreign keys", p.second, p.first.loc, x -> p.first.str).conv());
-		}
-		raw.put("foreign keys", f);
+		
+		//raw.put("attributes", g);
+		//raw.put("foreign keys", h);
 	}
 
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
@@ -499,7 +525,7 @@ public class QueryExpRaw
 	public Ctx<String, List<InteriorLabel<Object>>> raw() {
 		return raw;
 	}
-
+/*
 	public QueryExpRaw(SchExp<Ty, En, Sym, Fk, Att> src, SchExp<Ty, En, Sym, Fk, Att> dst, List<String> imports,
 			List<Pair<En, Pair<Block, List<Pair<Att, RawTerm>>>>> blocks, List<Pair<Fk, Trans>> fks,
 			List<Pair<String, String>> options, @SuppressWarnings("unused") Object o) {
@@ -514,7 +540,7 @@ public class QueryExpRaw
 			atts.addAll(block.second.second);
 		}
 	}
-
+*/
 	@Override
 	public Collection<Pair<String, Kind>> deps() {
 		return Util.union(src.deps(), Util.union(dst.deps(),
@@ -550,7 +576,7 @@ public class QueryExpRaw
 		}
 
 		Ctx<En, Collage<Ty, En, Sym, Fk, Att, Var, Void>> cols = new Ctx<>();
-		for (Pair<En, Block> p : blocks) {
+		for (Pair<catdata.aql.exp.SchExpRaw.En, Block> p : blocks) {
 			
 			try {
 					if (!dst0.ens.contains(p.first)) {
@@ -560,41 +586,41 @@ public class QueryExpRaw
 				processBlock(options, env, src0, ens0, cols, p);
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
-				throw new LocException(find("entities", p.second),
+				throw new LocException(b1.get(p.first),
 						"In block for target entity " + p.first + ", " + ex.getMessage());
 			}
 		}
 
-		for (Pair<Att, RawTerm> p : atts) {
+		for (Pair<catdata.aql.exp.SchExpRaw.Att, RawTerm> p : atts) {
 			try {
 			
 				processAtt(src0, dst0, ens0, atts0, cols, p);
 
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
-				throw new LocException(find("attributes", p),
+				throw new LocException(b3.get(p.first),
 						"In return clause for " + p.first + ", " + ex.getMessage());
 			}
 		}
 
-		for (Pair<Fk, Trans> p : fks) {
+		for (Pair<Pair<catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.SchExpRaw.Fk>, Trans> p : fks) {
 			try {
 				Ctx<Var, Term<Void, En, Void, Fk, Void, Var, Void>> trans = new Ctx<>();
 				for (Pair<Var, RawTerm> v : p.second.gens) {
-					Ctx<String, Chc<Ty, En>> ctx = unVar(ens0.get(dst0.fks.get(p.first).first).first.inRight());
-					Collage<Ty, En, Sym, Fk, Att, Var, Void> col = cols.get(dst0.fks.get(p.first).first);
-					Chc<Ty, En> required = Chc.inRight(ens0.get(dst0.fks.get(p.first).second).first.get(v.first));
+					Ctx<String, Chc<Ty, En>> ctx = unVar(ens0.get(dst0.fks.get(p.first.second).first).first.inRight());
+					Collage<Ty, En, Sym, Fk, Att, Var, Void> col = cols.get(dst0.fks.get(p.first.second).first);
+					Chc<Ty, En> required = Chc.inRight(ens0.get(dst0.fks.get(p.first.second).second).first.get(v.first));
 					Term<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, Gen, Sk> term = RawTerm.infer1x(ctx.map, v.second, null, required, col.convert(),
-							"in foreign key " + p.first + ", ", src0.typeSide.js).second;
+							"in foreign key " + p.first.second.str + ", ", src0.typeSide.js).second;
 					trans.put(v.first, freeze(term.convert()).convert());
 				}
 				boolean doNotCheckEqs = (Boolean) new AqlOptions(p.second.options, null, env.defaults)
 						.getOrDefault(AqlOption.dont_validate_unsafe);
-				fks0.put(p.first, new Pair<>(trans, doNotCheckEqs));
+				fks0.put(p.first.second, new Pair<>(trans, doNotCheckEqs));
 
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
-				throw new LocException(find("foreign keys", p.second), ex.getMessage());
+				throw new LocException(b2.get(p.first.second), ex.getMessage());
 			}
 		}
 

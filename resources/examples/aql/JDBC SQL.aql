@@ -96,6 +96,7 @@ instance J = import_jdbc "" "" : S {
 		prepend_entity_on_ids = false
 }
 
+/*
 //or, import an instance by providing queries for each entity/foreign key/attribute 
 instance J_again = import_jdbc "" "" : S {
 	Employee -> "SELECT id FROM Employee"
@@ -110,6 +111,7 @@ instance J_again = import_jdbc "" "" : S {
   options
      import_joined = false      
 }
+*/
 
 instance K = quotient_jdbc "" "" J {
 	Employee -> "SELECT id, id FROM Employee"
@@ -181,19 +183,21 @@ query Q = literal : S -> S {
 		Employee -> 
 		{from e:Employee d:Department
 		 where e.worksIn = d
-		 return first -> e.manager.first 
+		 attributes first -> e.manager.first 
 		        last -> d.name 
-		        age -> e.age}
-		
-		Department -> {from d:Department 
-		               return name -> d.name}
-		
-	foreign_keys
-		manager -> {e -> e.manager
+		        age -> e.age
+		        foreign_keys manager -> {e -> e.manager
 		            d -> e.manager.worksIn}
 		worksIn -> {d -> e.worksIn}
-		secretary -> {e -> d.secretary 
-		              d -> d}
+		}
+		
+		Department -> {from d:Department 
+		               attributes name -> d.name
+		               foreign_keys secretary -> {e -> d.secretary 
+		              d -> d}}
+		
+	
+		
 }
 
 pragma store_id_query = export_jdbc_query Q "" "" "Exported" "View"

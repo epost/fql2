@@ -69,6 +69,7 @@ import catdata.Prog;
 import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Kind;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.exp.LocException;
 
 /**
@@ -786,12 +787,16 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			env = makeEnv(program, init);
 			middle = System.currentTimeMillis();
 
-			toDisplay = "Computation finished, creating viewer...";
-
+			toDisplay = "Computation finished, creating viewer... (max " + init.timeout() + " seconds)";
 			DateFormat format = DateFormat.getTimeInstance();
-			String foo = title;
-			foo += " - " + format.format(new Date(start));
-			display = makeDisplay(foo, init, env, start, middle);
+			String foo2 = title;
+			foo2 += " - " + format.format(new Date(start));
+			foo2 += " - " + format.format(new Date(start));
+			String foo = foo2;
+			long t = (Long)init.timeout() * 1000;
+			display  = Util.timeout( () -> makeDisplay(foo, init, env, start, middle), t );
+			
+		//	display = makeDisplay(foo, init, env, start, middle);
 			if (display.exn() == null) {
 				toDisplay = textFor(env); // "Done";
 				respArea.setText(textFor(env)); // "Done");

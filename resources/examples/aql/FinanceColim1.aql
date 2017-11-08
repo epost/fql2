@@ -466,11 +466,14 @@ schema RefTransLinkage = literal : Ty {
 mapping RefTransLinkageToRef = literal : RefTransLinkage -> Ref	 {
 	entities
 		currency -> currency
-		asset -> asset
 	attributes
 		currency_id -> currency_id
 		currency_code -> currency_code
 		currency_name -> currency_name	
+
+	entities
+		asset -> asset
+	attributes
 		asset_id -> asset_id
 		asset_name -> asset_name
 		asset_description -> asset_description
@@ -480,11 +483,14 @@ mapping RefTransLinkageToRef = literal : RefTransLinkage -> Ref	 {
 mapping RefTransLinkageToTrans = literal : RefTransLinkage -> Trans {
 	entities
 		currency -> currency
-		asset -> asset
 	attributes
 		currency_id -> currency_id
 		currency_code -> currency_code
 		currency_name -> currency_name
+
+	entities		
+		asset -> asset
+	attributes
 		asset_id -> asset_id	
 		asset_name -> asset_name
 		asset_description -> asset_description
@@ -853,38 +859,43 @@ query ETL = literal : Colimit -> Target {
  
 	//identity
 	currency -> {from c:currency
-		 return currency_code -> c.currency_code
+		 attributes currency_code -> c.currency_code
 			currency_name -> c.currency_name
 			currency_id -> c.currency_id
 			currency_country_id -> c.currency_country_id
+		foreign_keys		currency_country -> {c -> c.currency_country} 		
+
 	} 
 
 
 	//identity
 	strategy -> {from s:strategy
-		 return strategy_name -> s.strategy_name
+		 attributes strategy_name -> s.strategy_name
 		 	strategy_description -> s.strategy_description
 		 	strategy_id -> s.strategy_id
 	}
 
 	//identity
 	asset -> {from a:asset
-		 return asset_id -> a.asset_id
+		 attributes asset_id -> a.asset_id
 		 	asset_description -> a.asset_description
 		 	asset_name -> a.asset_name
 		 	asset_strategy_id -> a.asset_strategy_id
+		 foreign_keys
+		 asset_strategy -> {s -> a.asset_strategy} 		
+		
 	} 
 
 	//identity
 	client -> {from c:client
-		 return client_description -> c.client_description 
+		 attributes client_description -> c.client_description 
 			client_name -> c.client_name
 			client_id -> c.client_id
 	} 
 
 	//identity
 	country -> {from c:country
-		 return country_code -> c.country_code
+		 attributes country_code -> c.country_code
 		 	country_name -> c.country_name
 		 	country_id -> c.country_id
 	} 
@@ -892,7 +903,7 @@ query ETL = literal : Colimit -> Target {
 	//not identity
 	transaction -> {from t:transaction p:portfolio c:client c1:client
 		 where t.transaction_portfolio_id = p.portfolio_id
-		 return transaction_id -> t.transaction_id 
+		 attributes transaction_id -> t.transaction_id 
 			transaction_asset_id -> t.transaction_asset_id 
 			transaction_buy_sell_ind -> t.transaction_buy_sell_ind 
 			transaction_quantity -> t.transaction_quantity
@@ -900,6 +911,11 @@ query ETL = literal : Colimit -> Target {
 			transaction_date -> t.transaction_date
 			transaction_currency_id -> t.transaction_currency_id 			
 			transaction_portfolio_id -> t.transaction_portfolio_id
+		foreign_keys	
+			transaction_currency -> {c -> t.transaction_currency} 
+	transaction_asset -> {a -> t.transaction_asset} 
+	transaction_portfolio -> {p -> p} 	//NEW	
+	
 	}
 
 	//not identity
@@ -907,7 +923,7 @@ query ETL = literal : Colimit -> Target {
 		 where p.position_asset_id = a.asset_id
 		 	p.position_current_value_currency_code = cv.currency_code
 		 	p.position_cost_basis_currency_code = cb.currency_code
-		 return position_quantity -> p.position_quantity
+		 attributes position_quantity -> p.position_quantity
 		 	position_current_value -> p.position_current_value
 		 	position_cost_basis -> p.position_cost_basis
 		 	position_id -> p.position_id 
@@ -915,22 +931,32 @@ query ETL = literal : Colimit -> Target {
 		 	position_asset_id -> p.position_asset_id
 		 	position_current_value_currency_id -> cv.currency_id
 		 	position_cost_basis_currency_id -> cb.currency_id
+		 	foreign_keys
+		 	position_client -> {c -> p.position_client} 
+	position_asset -> {a -> a}  //NEW
+	position_current_value_currency -> {c -> cv}  //NEW
+	position_cost_basis_currency -> {c -> cb}  //NEW
+
 		} 
 
 	//not identity
 	portfolio -> {from p:portfolio
-		 return portfolio_parent_portfolio_id -> p.portfolio_parent_portfolio_id //added
+		 attributes portfolio_parent_portfolio_id -> p.portfolio_parent_portfolio_id //added
 		 	portfolio_name -> p.portfolio_name
 		 	portfolio_description -> p.portfolio_description
 		 	portfolio_id -> p.portfolio_id
 		 	portfolio_strategy_id -> p.portfolio_strategy_id
+		 	foreign_keys
+		 		portfolio_parent_portfolio -> {p -> p.portfolio_parent_portfolio}  //added
+	portfolio_strategy -> {s -> p.portfolio_strategy} 
+	
 	} 
 
 	//not identity
 	holding -> {from h:holding c:currency a:asset
 		 where a.asset_id = h.holding_asset_id
 		 	h.holding_currency_code = c.currency_code
-		 return holding_id -> h.holding_id			
+		 attributes holding_id -> h.holding_id			
 			holding_asset_id -> h.holding_asset_id
 			holding_currency_id -> c.currency_id 			
 			holding_purchase_price -> h.holding_purchase_price 
@@ -938,6 +964,10 @@ query ETL = literal : Colimit -> Target {
 			holding_purchase_date -> h.holding_purchase_date 
 			holding_begin_date -> h.holding_begin_date 
 			holding_end_date -> h.holding_end_date
+		foreign_keys
+		holding_asset -> {a -> a} 
+	holding_currency -> {c -> c}  //NEW
+		
 	} 
    
 	//not identity 
@@ -948,31 +978,19 @@ query ETL = literal : Colimit -> Target {
 		 	h.holding_currency_code = cur.currency_code
 		 	p.portfolio_client_id = h.holding_client.client_id
 		 	h.holding_portfolio_id = p.portfolio_id
-		 return portfolioholding_id -> keygen(h.holding_id, h.holding_client.client_id, p.portfolio_id) //added by ryan
+		 attributes portfolioholding_id -> keygen(h.holding_id, h.holding_client.client_id, p.portfolio_id) //added by ryan
 		 	portfolioholding_holding_id -> h.holding_id
 			portfolioholding_client_id -> c1.client_id
 			portfolioholding_portfolio_id -> p.portfolio_id
-		} 
-
- foreign_keys
-
- 	currency_country -> {c -> c.currency_country} 		
-	asset_strategy -> {s -> a.asset_strategy} 		
-	transaction_currency -> {c -> t.transaction_currency} 
-	transaction_asset -> {a -> t.transaction_asset} 
-	transaction_portfolio -> {p -> p} 	//NEW	
-	position_client -> {c -> p.position_client} 
-	position_asset -> {a -> a}  //NEW
-	position_current_value_currency -> {c -> cv}  //NEW
-	position_cost_basis_currency -> {c -> cb}  //NEW
-	portfolio_parent_portfolio -> {p -> p.portfolio_parent_portfolio}  //added
-	portfolio_strategy -> {s -> p.portfolio_strategy} 
-	holding_asset -> {a -> a} 
-	holding_currency -> {c -> c}  //NEW
-	portfolioholding_holding -> {h -> h c -> cur a -> a}
+		foreign_keys
+		portfolioholding_holding -> {h -> h c -> cur a -> a}
 	portfolioholding_client -> {c -> h.holding_client}  
 	portfolioholding_portfolio -> {p -> p} 	
+	
+		} 
 
+ 
+ 	
 } 
 
 instance Output = eval ETL ColimitInstance
@@ -1108,47 +1126,58 @@ query ETL_Cyc = literal : Target -> CycTarget {
  entities
  	
 	client -> {from c:client
-		 return client_id -> c.client_id
+		 attributes client_id -> c.client_id
 			client_name -> c.client_name
 			client_description -> c.client_description
+	
 	} 
 
 	country -> {from c:country
-		 return country_id -> c.country_id
+		 attributes country_id -> c.country_id
 			country_code -> c.country_code
 			country_name -> c.country_name
 		 } 
 
 	currency -> {from c:currency
-		 return currency_id -> c.currency_id
+		 attributes currency_id -> c.currency_id
 			currency_code -> c.currency_code
 			currency_name -> c.currency_name
 			currency_country_id -> c.currency_country_id
+		foreign_keys
+			currency_country -> {c -> c.currency_country} 
+	
 	} 
 
 	asset -> {from a:asset
-		 return asset_id -> a.asset_id
+		 attributes asset_id -> a.asset_id
 			asset_name -> a.asset_name
 			asset_description -> a.asset_description
 			asset_strategy_id -> a.asset_strategy_id
+		foreign_keys
+		asset_strategy -> {s -> a.asset_strategy} 
+		
 	} 
 
 	strategy -> {from s:strategy
-		 return strategy_id -> s.strategy_id
+		 attributes strategy_id -> s.strategy_id
 			strategy_name -> s.strategy_name
 			strategy_description -> s.strategy_description
 	}
 
 	portfolio -> {from p:portfolio
-		 return portfolio_id -> p.portfolio_id
+		 attributes portfolio_id -> p.portfolio_id
 			portfolio_name -> p.portfolio_name
 			portfolio_description -> p.portfolio_description
 			portfolio_strategy_id -> p.portfolio_strategy_id
 			portfolio_parent_portfolio_id -> p.portfolio_parent_portfolio_id
+		foreign_keys
+		portfolio_parent_portfolio -> {p -> p.portfolio_parent_portfolio} 
+	portfolio_strategy -> {s->p.portfolio_strategy} 
+		
 	} 
 
 	transaction -> {from t:transaction
-		 return transaction_id -> t.transaction_id
+		 attributes transaction_id -> t.transaction_id
 			transaction_date -> t.transaction_date
 			transaction_portfolio_id -> t.transaction_portfolio_id
 			transaction_portfolio_name -> t.transaction_portfolio.portfolio_name
@@ -1158,10 +1187,15 @@ query ETL_Cyc = literal : Target -> CycTarget {
 			transaction_quantity -> t.transaction_quantity
 			transaction_price -> t.transaction_price
 			transaction_currency_id -> t.transaction_currency_id
+		foreign_keys
+		transaction_currency -> {c -> t.transaction_currency} 
+	transaction_asset -> {a -> t.transaction_asset} 
+	transaction_portfolio -> {p -> t.transaction_portfolio} 
+		
 		} 
 
 	clientposition -> {from p:position
-		 return clientposition_id -> p.position_id
+		 attributes clientposition_id -> p.position_id
 			clientposition_begin_date -> "1/1/2011" // fake this for now source doesn't have it
 			clientposition_end_date -> "1/1/2011" // fake this for now source doesn't have it
 			clientposition_client_id -> p.position_client.client_id
@@ -1171,10 +1205,14 @@ query ETL_Cyc = literal : Target -> CycTarget {
 			clientposition_quantity -> p.position_quantity
 			clientposition_current_value -> p.position_current_value
 			clientposition_current_value_currency_code -> p.position_current_value_currency.currency_code
+	foreign_keys
+	clientposition_client -> {c -> p.position_client} 
+	clientposition_asset -> {a -> p.position_asset} 
+	
 	} 
 
 	clientportfolioholding -> {from ph:portfolioholding
-		 return clientportfolioholding_id -> ph.portfolioholding_holding.holding_id
+		 attributes clientportfolioholding_id -> ph.portfolioholding_holding.holding_id
 			clientportfolioholding_begin_date -> ph.portfolioholding_holding.holding_begin_date
 			clientportfolioholding_end_date -> ph.portfolioholding_holding.holding_end_date
 			clientportfolioholding_asset_id -> ph.portfolioholding_holding.holding_asset.asset_id
@@ -1187,22 +1225,13 @@ query ETL_Cyc = literal : Target -> CycTarget {
 			clientportfolioholding_portfolio_id -> ph.portfolioholding_portfolio.portfolio_id
 			clientportfolioholding_portfolio_name -> ph.portfolioholding_portfolio.portfolio_name
 			clientportfolioholding_currency_code -> ph.portfolioholding_holding.holding_currency.currency_code
+		foreign_keys
+		clientportfolioholding_asset -> {a -> ph.portfolioholding_holding.holding_asset} 
+	clientportfolioholding_portfolio -> {p -> ph.portfolioholding_portfolio} 
+			clientportfolioholding_client -> {c -> ph.portfolioholding_client} 
+ 	
 	} 
 
- foreign_keys
-
-	clientportfolioholding_client -> {c -> ph.portfolioholding_client} 
- 	clientportfolioholding_asset -> {a -> ph.portfolioholding_holding.holding_asset} 
-	clientportfolioholding_portfolio -> {p -> ph.portfolioholding_portfolio} 
-	clientposition_client -> {c -> p.position_client} 
-	clientposition_asset -> {a -> p.position_asset} 
-	transaction_currency -> {c -> t.transaction_currency} 
-	transaction_asset -> {a -> t.transaction_asset} 
-	transaction_portfolio -> {p -> t.transaction_portfolio} 
-	portfolio_parent_portfolio -> {p -> p.portfolio_parent_portfolio} 
-	portfolio_strategy -> {s->p.portfolio_strategy} 
-	asset_strategy -> {s -> a.asset_strategy} 
-	currency_country -> {c -> c.currency_country} 
 	
 
 } 

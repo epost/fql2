@@ -72,7 +72,7 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 
 	@Override
 	public <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> String visit(Unit arg, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I)  {
-		return "\n" + AqlInACan.toHtml(I);
+		return "\n" + AqlInACan.toHtml((Instance<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, catdata.aql.exp.InstExpRaw.Gen, catdata.aql.exp.InstExpRaw.Sk, X, Y>) I);
 	}
 
 	@Override

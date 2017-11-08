@@ -27,7 +27,7 @@ import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
-public final class ColimSchExpModify<N, E> extends ColimSchExp<N> implements Raw {
+public final class ColimSchExpModify<N> extends ColimSchExp<N> implements Raw {
 	
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 	
@@ -45,10 +45,10 @@ public final class ColimSchExpModify<N, E> extends ColimSchExp<N> implements Raw
 	
 	public final List<Pair<String, String>> ens;
 
-	public final List<Pair<String, String>> fks0;
+	public final List<Pair<Pair<String,String>, String>> fks0;
 
 	public final List<Pair<String, String>> atts0;
-	public final List<Pair<String, List<String>>> fks;
+	public final List<Pair<Pair<String,String>, List<String>>> fks;
 	public final List<Pair<String, Triple<String, String, RawTerm>>> atts;
 	
 	public final Map<String, String> options; 
@@ -58,11 +58,12 @@ public final class ColimSchExpModify<N, E> extends ColimSchExp<N> implements Raw
 		return options;
 	}
 	
-	public ColimSchExpModify(ColimSchExp<N> colim, List<Pair<LocStr, String>> ens, List<Pair<LocStr, String>> fks0, List<Pair<LocStr, String>> atts0, List<Pair<LocStr, List<String>>> fks, List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
+	public ColimSchExpModify(ColimSchExp<N> colim, List<Pair<LocStr, String>> ens, List<Pair<Pair<String, LocStr>, String>> fks0, List<Pair<LocStr, String>> atts0, List<Pair<Pair<String, LocStr>, List<String>>> fks, List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
 		this.ens = LocStr.list2(ens);
-		this.fks = LocStr.list2(fks);
 		this.atts = LocStr.list2(atts);
-		this.fks0 = LocStr.list2(fks0);
+		this.fks = LocStr.list2x(fks);
+		this.fks0 = LocStr.list2x(fks0);
+		
 		this.atts0= LocStr.list2(atts0);
 		this.options = Util.toMapSafely(options);
 		Util.toMapSafely(this.ens);
@@ -78,8 +79,8 @@ public final class ColimSchExpModify<N, E> extends ColimSchExp<N> implements Raw
 		raw.put("rename_entities", f);
 		
 		f = new LinkedList<>();
-		for (Pair<LocStr, String> p : fks0) {
-			f.add(new InteriorLabel<>("rename_fks", new Pair<>(p.first.str, p.second), p.first.loc,
+		for (Pair<Pair<String, LocStr>, String> p : fks0) {
+			f.add(new InteriorLabel<>("rename_fks", new Pair<>(p.first.second.str, p.second), p.first.second.loc,
 					x -> x.first + " -> " + x.second).conv());
 		}
 		raw.put("rename_fks", f);
@@ -92,8 +93,8 @@ public final class ColimSchExpModify<N, E> extends ColimSchExp<N> implements Raw
 		raw.put("rename_atts", f);
 		
 		f = new LinkedList<>();
-		for (Pair<LocStr, List<String>> p : fks) {
-			f.add(new InteriorLabel<>("remove_fks", new Pair<>(p.first.str, p.second), p.first.loc,
+		for (Pair<Pair<String, LocStr>, List<String>> p : fks) {
+			f.add(new InteriorLabel<>("remove_fks", new Pair<>(p.first.second.str, p.second), p.first.second.loc,
 					x -> x.first + " -> " + Util.sep(x.second, ".")).conv());
 		}
 		raw.put("remove_fks", f);
@@ -129,7 +130,7 @@ public final class ColimSchExpModify<N, E> extends ColimSchExp<N> implements Raw
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ColimSchExpModify<?, ?> other = (ColimSchExpModify<?, ?>) obj;
+		ColimSchExpModify<?> other = (ColimSchExpModify<?>) obj;
 		if (atts == null) {
 			if (other.atts != null)
 				return false;
@@ -193,8 +194,8 @@ public final class ColimSchExpModify<N, E> extends ColimSchExp<N> implements Raw
 		if (!fks0.isEmpty()) {
 			toString += "\trename foreign_keys";
 					
-			for (Pair<String, String> x : fks0) {
-				temp.add(x.first + " -> " + x.second);
+			for (Pair<Pair<String, String>, String> x : fks0) {
+				temp.add(x.first.first + "." + x.first.second + " -> " + x.second);
 			}
 			
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -213,8 +214,8 @@ public final class ColimSchExpModify<N, E> extends ColimSchExp<N> implements Raw
 		if (!fks.isEmpty()) {
 			toString += "\tremove foreign_keys";
 			temp = new LinkedList<>();
-			for (Pair<String, List<String>> sym : fks) {
-				temp.add(sym.first + " -> " + Util.sep(sym.second, "."));
+			for (Pair<Pair<String, String>, List<String>> sym : fks) {
+				temp.add(sym.first.first + "." + sym.first.second + " -> " + Util.sep(sym.second, "."));
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 		}
@@ -247,17 +248,32 @@ public final class ColimSchExpModify<N, E> extends ColimSchExp<N> implements Raw
 	public ColimitSchema<N> eval(AqlEnv env) {
 		boolean checkJava = ! (Boolean) env.defaults.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
 		ColimitSchema<N> colim0 = colim.eval(env);
+		//colim0.schemaStr.co
 		for (Pair<String, String> k : ens) {
 			colim0 = colim0.renameEntity(new En(k.first), new En(k.second), checkJava);
 		}
-		for (Pair<String, String> k : fks0) {
-			colim0 = colim0.renameFk(new Fk(k.first), new Fk(k.second), checkJava);
+		for (Pair<Pair<String, String>, String> k : fks0) {
+			colim0 = colim0.renameFk(new Fk(new En(k.first.first), k.first.second), new Fk(new En(k.first.first), k.second), checkJava);
 		}
 		for (Pair<String, String> k : atts0) {
 			colim0 = colim0.renameAtt(new Att(k.first), new Att(k.second), checkJava);
 		}
-		for (Pair<String, List<String>> k : fks) {
-			colim0 = colim0.removeFk(new Fk(k.first), k.second.stream().map(Fk::new).collect(Collectors.toList()), checkJava);
+		for (Pair<Pair<String, String>, List<String>> k : fks) {
+			if (!colim0.schemaStr.fks.containsKey(new Fk(new En(k.first.first),k.first.second))) {
+				throw new RuntimeException("Not an fk: " + k.first + " in\n\n" + colim0.schemaStr);
+			}
+			String pre = "In processing " + k.first + " -> " + k.second  +", ";
+			Collage<Ty, En, Sym, Fk, Att,Void,Void> xxx = colim0.schemaStr.collage();
+			RawTerm term = RawTerm.fold(k.second, "v");
+			En tr = colim0.schemaStr.fks.get(new Fk(new En(k.first.first),k.first.second)).second;
+
+			Ctx<String,Chc<Ty,En>> ctx = new Ctx<>("v", Chc.inRight(new En(k.first.first)));
+			Term<Ty, En, Sym, Fk, Att, Gen, Sk> t = 
+			RawTerm.infer1x(ctx.map, term, null, Chc.inRight(tr), xxx.convert(), pre, colim0.schemaStr.typeSide.js).second;
+			//colim0 = colim0.removeAtt(new Att(k.first), new Var(k.second.first), t.convert(), checkJava);
+			
+			
+			colim0 = colim0.removeFk(new Fk(new En(k.first.first), k.first.second), t.toFkList(), checkJava);
 		}
 		for (Pair<String, Triple<String, String, RawTerm>> k : atts) {
 			if (!colim0.schemaStr.atts.containsKey(new Att(k.first))) {

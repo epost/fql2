@@ -109,10 +109,10 @@ public class ED<Ty, En, Sym, Fk, Att> {
 	
 	public ED(Schema<Ty, En, Sym, Fk, Att> schema, Ctx<Var, En> as, Ctx<Var, En> es, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> awh, Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> ewh, boolean isUnique, AqlOptions options) {
 		this.schema = schema;
-		As = as;
-		Es = es;
-		Awh = awh;
-		Ewh = ewh;
+		As = new Ctx<>(as.map);
+		Es = new Ctx<>(es.map);
+		Awh = new HashSet<>(awh);
+		Ewh = new HashSet<>(ewh);
 		this.isUnique = isUnique;
 		if (!Collections.disjoint(As.keySet(), Es.keySet())) {
 			throw new RuntimeException("The forall and exists clauses do not use disjoint variables.");

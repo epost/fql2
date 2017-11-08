@@ -9,12 +9,14 @@ import java.sql.Statement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Schema;
+import catdata.aql.exp.InstExpRaw.Gen;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
@@ -22,15 +24,15 @@ import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
 //TODO this type is actually a lie bc of import_as_theory option
-public class InstExpJdbc<Gen> extends InstExpImport<Gen, Connection, String> {
+public class InstExpJdbc extends InstExpImport<Connection, String> {
 
 	public final String clazz;
 	public final String jdbcString;
 
-	public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema,
+	public InstExpJdbc(SchExp<?, ?, ?, ?, ?> schema,
 			List<Pair<String, String>> options, String clazz, String jdbcString,
 			List<Pair<LocStr, String>> map) {
-		super(schema, map, options);
+		super((SchExp<Ty, En, Sym, Fk, Att>) schema, map, options);
 
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
@@ -211,7 +213,7 @@ public class InstExpJdbc<Gen> extends InstExpImport<Gen, Connection, String> {
 			ens0.get(en).add(g1); //store strings 
 			
 			for (Fk fk : sch.fksFrom(en)) {
-				Object rhs = rs.getObject(fk.toString());
+				Object rhs = rs.getObject(fk.str);
 				if (rhs == null) {
 					stmt.close();
 					rs.close();
@@ -226,7 +228,7 @@ public class InstExpJdbc<Gen> extends InstExpImport<Gen, Connection, String> {
 				fks0.get(g1).put(fk, g2);
 			}
 			for (Att att : sch.attsFrom(en)) {
-				Object rhs =  rs.getObject(att.toString());
+				Object rhs =  rs.getObject(att.str);
 				if (!atts0.map.containsKey(g1)) {
 					atts0.put(g1, new Ctx<>());
 				}
@@ -243,18 +245,18 @@ public class InstExpJdbc<Gen> extends InstExpImport<Gen, Connection, String> {
 		Set<String> colNames = new HashSet<>();
 		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 			String colName = rsmd.getColumnLabel(i);
-			if (!(colName.equalsIgnoreCase(idCol) || Util.containsUpToCase(sch.attsFrom(en), colName) || Util.containsUpToCase(sch.fksFrom(en), colName))) {
+			if (!(colName.equalsIgnoreCase(idCol) || Util.containsUpToCase(sch.attsFrom(en).stream().map(x -> x.str).collect(Collectors.toList()), colName) || Util.containsUpToCase(sch.fksFrom(en).stream().map(x -> x.str).collect(Collectors.toList()), colName))) {
 				throw new RuntimeException("Column name " + colName + " does not refer to a foreign key or attribute in \n\n" + s);
 			}
 			colNames.add(colName);
 		}
 		for (Att att : sch.attsFrom(en)) {
-			if (! Util.containsUpToCase(colNames, att)) {
+			if (! Util.containsUpToCase(colNames, att.str)) {
 				throw new RuntimeException("Attribute " + att + " has no column in \n\n" + s);
 			}
 		}
 		for (Fk fk : sch.fksFrom(en)) {
-			if (! Util.containsUpToCase(colNames, fk)) {
+			if (! Util.containsUpToCase(colNames, fk.str)) {
 				throw new RuntimeException("Foreign key " + fk + " has no column in \n\n" + s);
 			}
 		}
@@ -286,7 +288,7 @@ public class InstExpJdbc<Gen> extends InstExpImport<Gen, Connection, String> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InstExpJdbc<?> other = (InstExpJdbc<?>) obj;
+		InstExpJdbc other = (InstExpJdbc) obj;
 		if (clazz == null) {
 			if (other.clazz != null)
 				return false;

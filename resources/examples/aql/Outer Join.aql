@@ -46,7 +46,7 @@ schema T = literal : Ty {
 query OuterJoin = literal : S -> T {
  	entities 
 	 	C  -> {from a:A b:B
- 			  return Cid -> ifNat(eqNat(a.Aid, b.Bid), inNat(a.Aid), null)
+ 			  attributes Cid -> ifNat(eqNat(a.Aid, b.Bid), inNat(a.Aid), null)
  			         CAname -> a.Aname
  		     	    CBname -> b.Bname
  		  	} 

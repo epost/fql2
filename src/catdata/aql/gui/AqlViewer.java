@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -48,6 +49,14 @@ import catdata.aql.Transform;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
 import catdata.aql.exp.AqlParser;
+import catdata.aql.exp.Exp;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.graph.DMG;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Split;
@@ -75,10 +84,12 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		return obj.toString().replace("\n", "<br>").replace("\t", "&nbsp;");
 	}
 
-	public static JComponent view(float time, Semantics s, int maxrows) {
+	public static JComponent view(float time, Semantics s, int maxrows, Exp<?> exp) {
 		JTabbedPane ret = new JTabbedPane();
 		new AqlViewer(maxrows).visit(ret, s);
 		ret.addTab("Text", new CodeTextPanel("", s.toString()));
+		ret.addTab("Expression", new CodeTextPanel("", exp.toString()));
+
 		ret.addTab("Performance", new CodeTextPanel("",  "Compute time: " + time + " seconds"));
 		return ret;
 	}
@@ -395,16 +406,16 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 			return ret;
 		}
 
-		public  <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Map<En, Pair<List<String>, Object[][]>> makeEnTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+		public  <X, Y>  Map<En, Pair<List<String>, Object[][]>> makeEnTables(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
 			Map<En, Pair<List<String>, Object[][]>> ret = new LinkedHashMap<>();
 
 			List<En> ens = Util.alphabetical(alg.schema().ens);
 		
 			for (En en : ens) {
-				List<Att> atts0 = Util.alphabetical(alg.schema().attsFrom(en));
-				List<Fk> fks0 = Util.alphabetical(alg.schema().fksFrom(en));
+				List<String> atts0 = Util.alphabetical(alg.schema().attsFrom(en).stream().map((Att x)->x.str).collect(Collectors.toList()));
+				List<String> fks0 = Util.alphabetical(alg.schema().fksFrom(en).stream().map((Fk x)->x.str).collect(Collectors.toList()));
 
-				List<String> header = Util.append(Util.toString(atts0), Util.toString(fks0));
+				List<String> header = Util.<String>append(atts0, fks0);
 				header.add(0, "ID");
 				int n = Integer.min(maxrows, alg.en(en).size());
 				Object[][] data = new Object[n][];
@@ -414,11 +425,11 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 				for (X x : lll) {
 					List<Object> row = new LinkedList<>();
 					row.add(alg.printX(x));
-					for (Att att0 : atts0) {
-						row.add(alg.att(att0, x).toString(alg::printY, Util.voidFn()));
+					for (String att0 : atts0) {
+						row.add(alg.att(new Att(att0), x).toString(alg::printY, Util.voidFn()));
 					}
-					for (Fk fk0 : fks0) {
-						row.add(alg.printX(alg.fk(fk0, x)));
+					for (String fk0 : fks0) {
+						row.add(alg.printX(alg.fk(new Fk(en,fk0), x)));
 					}
 					data[i] = row.toArray();
 					i++;
@@ -433,7 +444,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 			return ret;
 		}
 		
-	private <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>  Component viewAlgebra(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
+	private <X, Y>  Component viewAlgebra(Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> alg) {
 		List<JComponent> list = new LinkedList<>();
 
 		Map<En,Pair<List<String>,Object[][]>> entables = makeEnTables(alg);
@@ -489,7 +500,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 	@Override
 	public <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Unit visit(JTabbedPane ret, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I)  {
-		ret.addTab("Tables", viewAlgebra(I.algebra()));
+		ret.addTab("Tables", viewAlgebra((Algebra<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, catdata.aql.exp.InstExpRaw.Gen, catdata.aql.exp.InstExpRaw.Sk, X, Y>) I.algebra()));
 		ret.addTab("Type Algebra", new CodeTextPanel("", I.algebra().talg().toString()));
 		ret.addTab("DP", viewDP(I.dp(), I.collage(), I.schema().typeSide.js));
 		return new Unit();

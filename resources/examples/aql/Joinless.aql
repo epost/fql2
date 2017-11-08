@@ -48,7 +48,7 @@ query BiggestDeptIsMathQuery = literal : Schools -> Person {
 	entities
 		Person -> {from   p:Person
 				 where  p.instituteOf.biggestDept.deptName = Mathematics
-				 return lastName -> p.lastName 
+				 attributes lastName -> p.lastName 
 			  		   schoolName -> p.instituteOf.schoolName}
 } 
 
@@ -56,7 +56,7 @@ query BiggestDeptIsMathQuery = literal : Schools -> Person {
 query BiggestDeptIsMathQuery_simple = simple : Schools  {
 	from   p:Person
 	where  p.instituteOf.biggestDept.deptName = Mathematics
-    return lastName -> p.lastName 
+    attributes lastName -> p.lastName 
     schoolName -> p.instituteOf.schoolName
 } 
 

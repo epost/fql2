@@ -26,7 +26,7 @@ import catdata.aql.exp.Raw;
 import catdata.ide.CodeEditor;
 import catdata.ide.Outline;
 
-public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
+public class AqlOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 
 	private class TreeLabel {
 		private final String s;
@@ -73,8 +73,8 @@ public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 			return true;
 		}
 
-		private TreeOutline getOuterType() {
-			return TreeOutline.this;
+		private AqlOutline getOuterType() {
+			return AqlOutline.this;
 		}
 
 		public String toString() {
@@ -198,7 +198,7 @@ public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 	private boolean nodeEq(DefaultMutableTreeNode m, DefaultMutableTreeNode n) {
 		if (!n.getUserObject().equals(m.getUserObject())) {
 			return false;
-		}
+		} 
 		if (m.getChildCount() != n.getChildCount()) {
 			return false;
 		}
@@ -222,11 +222,12 @@ public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 	protected void setComp(List<String> set) {
 		TreePath t1 = getComp().getSelectionPath();
 
+		Enumeration<TreePath> p = getComp().getExpandedDescendants(new TreePath(getComp().getModel().getRoot()));
+
 		getComp().setModel(new DefaultTreeModel(makeTree(set, codeEditor.parsed_prog, codeEditor.outline_prefix_kind,
 				codeEditor.outline_alphabetical, codeEditor.outline_types)));
 		tree.setCellRenderer(makeRenderer());
 
-		Enumeration<TreePath> p = getComp().getExpandedDescendants(new TreePath(getComp().getModel().getRoot()));
 		if (p == null) {
 			return;
 		}
@@ -235,10 +236,9 @@ public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 			try {
 
 				TreePath path = p.nextElement();
-
 				if (conv(path) != null) {
 					getComp().expandPath(conv(path));
-				}
+				} 
 			} catch (Exception ex) {
 			}
 		}
@@ -276,7 +276,7 @@ public class TreeOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 		return true; */
 	}
 
-	public TreeOutline(CodeEditor<Program<Exp<?>>, AqlEnv, AqlDisplay> codeEditor) {
+	public AqlOutline(CodeEditor<Program<Exp<?>>, AqlEnv, AqlDisplay> codeEditor) {
 		super(codeEditor);
 
 	}

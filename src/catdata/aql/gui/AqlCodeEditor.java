@@ -275,7 +275,7 @@ public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, Aql
 
 	protected synchronized Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> getOutline() {
 		if (outline == null) {
-			outline = new TreeOutline(this);
+			outline = new AqlOutline(this);
 		}
 		return outline;
 	}

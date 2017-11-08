@@ -35,21 +35,21 @@ query Q = literal : Source -> Target {
 	GoodMatch -> {
 		from m:Man w:Woman
 		where fav_book_m(m) = fav_book_w(w)
-		return woman_name -> name_w(w)
+		attributes woman_name -> name_w(w)
+		foreign_keys for_man -> {man -> m}
 	} 
 	Male -> {
 		from man:Man
-		return man_name -> name_m(man)
+		attributes man_name -> name_m(man)
 	} 
 	PayingGoodMatch -> {
 		from man:Man woman:Woman
 		where fav_book_m(man) = fav_book_w(woman)
 			 paying(man) = true
+		foreign_keys is_a -> {m -> man w -> woman}	 
 	} 
 	
- foreign_keys
- 	is_a -> {m -> man w -> woman}	
- 	for_man -> {man -> m}  
+   
 } 
 
 instance I = literal : Source {

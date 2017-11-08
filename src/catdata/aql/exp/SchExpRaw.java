@@ -51,37 +51,20 @@ public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 		}
 
 		@Override
-		public int hashCode() {
-			return str.hashCode(); //must work with compareTo - cant use auto gen one
-		} 
+		 public int compareTo(En o) {
+			 return CompareToBuilder.reflectionCompare(this, o);
+		   }
 
 		@Override
-		public int compareTo(En o) {
-			if (!(o instanceof En)) {
-				Util.anomaly();
-			}
-			return str.compareTo(o.str);
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			//if (!(obj instanceof Sym)) {
-			//	Util.anomaly();
-		//	}
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (!(obj instanceof En))
-				return false;
-			En other = (En) obj;
-			if (str == null) {
-				if (other.str != null)
-					return false;
-			} else if (!str.equals(other.str))
-				return false;
-			return true;
+		public int hashCode() {
+			return HashCodeBuilder.reflectionHashCode(this);
+			//return str.hashCode(); //must work with compareTo - cant use auto gen one
 		} 
+
+			@Override
+		public boolean equals(Object obj) {
+			return EqualsBuilder.reflectionEquals(this, obj);
+		}
 
 		@Override
 		public String toString() {
@@ -94,11 +77,10 @@ public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 		public final String str;
 		public final En en;
 
-		public Fk(String str /*, En en */) {
-			Util.assertNotNull(str); //, en);
+		public Fk(En en, String str) {
+			Util.assertNotNull(str, en); 
 			this.str = str;
-			this.en = null;
-			//this.en = en;
+			this.en = en;
 		}
 		
 		@Override
@@ -120,7 +102,9 @@ public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 
 		@Override
 		public String toString() {
-			return str;
+			//Util.anomaly();
+		return str;
+		//	return "(" + str + "@" + en + ")";
 		}
 
 	
@@ -136,38 +120,20 @@ public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 		}
 
 		@Override
+		 public int compareTo(Att o) {
+			 return CompareToBuilder.reflectionCompare(this, o);
+		   }
+
+		@Override
 		public int hashCode() {
-			return str.hashCode(); //must work with compareTo - cant use auto gen one
+			return HashCodeBuilder.reflectionHashCode(this);
+			//return str.hashCode(); //must work with compareTo - cant use auto gen one
 		} 
 
-		@Override
-		public int compareTo(Att o) {
-			if (!(o instanceof Att)) {
-				Util.anomaly();
-			}
-			return str.compareTo(o.str);
-		}
-		
-		@Override
+			@Override
 		public boolean equals(Object obj) {
-			//if (!(obj instanceof Sym)) {
-			//	Util.anomaly();
-		//	}
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (!(obj instanceof Att))
-				return false;
-			Att other = (Att) obj;
-			if (str == null) {
-				if (other.str != null)
-					return false;
-			} else if (!str.equals(other.str))
-				return false;
-			return true;
-		} 
-
+			return EqualsBuilder.reflectionEquals(this, obj);
+		}
 		@Override
 		public String toString() {
 			return str;
@@ -211,7 +177,7 @@ public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 		
 		col.ens.addAll(ens.stream().map(x -> new En(x)).collect(Collectors.toList()));
 		
-		col.fks.putAll(conv1(Util.toMapSafely(fks)));
+		col.fks.putAll(conv1(fks));
 		col.atts.putAll(conv2(Util.toMapSafely(atts)));
 		
 		for (Quad<String, String, RawTerm, RawTerm> eq : t_eqs) {
@@ -285,8 +251,10 @@ public final class SchExpRaw extends SchExp<Ty,En,Sym,Fk,Att> implements Raw {
 		return Util.map(map, (k,v) -> new Pair<>(new Att(k), new Pair<>(new En(v.first), v.second)));
 	}
 
-	private Map<Fk, Pair<En, En>> conv1(Map<String, Pair<String, String>> map) {
-		return Util.map(map, (k,v) -> new Pair<>(new Fk(k), new Pair<>(new En(v.first), new En(v.second))));
+	private Map<Fk, Pair<En, En>> conv1(Set<Pair<String, Pair<String, String>>> map) {
+		Set<Pair<SchExpRaw.Fk,Pair<SchExpRaw.En,SchExpRaw.En>>> x  = map.stream().map(p -> new Pair<>(new Fk(new En(p.second.first), p.first), 
+				         new Pair<>(new En(p.second.first), new En(p.second.second)))).collect(Collectors.toSet());
+		return Util.toMapSafely(x);
 	}
 
 
