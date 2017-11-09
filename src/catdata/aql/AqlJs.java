@@ -3,6 +3,7 @@ package catdata.aql;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.script.Bindings;
 import javax.script.Invocable;
@@ -71,7 +72,7 @@ public class AqlJs<Ty, Sym> {
 			check(syms.get(name).second, ret);
 			return ret;
 		} catch (Throwable e) {
-			throw new RuntimeException("In javascript execution of " + name + " on arguments " + args + ", " + e.getClass() + " error: "  + e.getMessage() + postfix);
+			throw new RuntimeException("In javascript execution of " + name + " on arguments " + args + ", " + Util.sep(args.stream().map(x->x.getClass()).collect(Collectors.toList()), ",") + " , " + e.getClass() + " error: "  + e.getMessage() + postfix);
 		}
 	}
 	

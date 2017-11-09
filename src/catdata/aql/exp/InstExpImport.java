@@ -216,9 +216,10 @@ public abstract class InstExpImport<Handle, Q>
 			} else {
 				for (En en : sch.ens) {
 					Q z = map.get(en.str);
-					if (z == null) {
-						throw new RuntimeException("No binding given for " + en);
-					}
+					//TODO: aql: this check isn't needed
+					//if (z == null) {
+					//	throw new RuntimeException("No binding given for " + en);
+					//}
 					joinedEn(h, en, z, sch);
 				}
 			}

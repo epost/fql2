@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -95,11 +96,12 @@ public class InstExpCsv
 
 			ret.put(new En(k), rows);
 		}
+		
 		if (!omitCheck) {
 			for (En en : sch.ens) {
 				if (!ret.containsKey(en)) {
 					ret.put(en, new LinkedList<>(
-							Util.singList(Util.union(sch.attsFrom(en), sch.fksFrom(en)).toArray(new String[0]))));
+							Util.singList(Util.union(sch.attsFrom(en).stream().map(Object::toString).collect(Collectors.toList()), sch.fksFrom(en).stream().map(Object::toString).collect(Collectors.toList())).toArray(new String[0]))));
 				}
 			}
 		}
