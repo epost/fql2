@@ -59,6 +59,10 @@ public class Quad<A,B,C,D> {
 				+ third + ", " + fourth + ")";
 	}
 	
+	public Triple<A,B,C> first3() {
+		return new Triple<>(first, second, third);
+	}
+	
 	public Quad(A first, B second, C third, D fourth) {
 		this.first = first;
 		this.second = second;

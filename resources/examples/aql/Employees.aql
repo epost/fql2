@@ -116,7 +116,7 @@ instance IJava = literal : SJava {
 query Q = simple : SJava {
 	from e:Employee
 	where e.first = Al
-	return deptName -> e.worksIn.name
+	attributes deptName -> e.worksIn.name
 }
 
 instance J = eval Q IJava

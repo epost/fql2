@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -697,9 +698,11 @@ public class Util {
 		ret.add(sofar);
 		return ret;
 	}
+	
+
 
 	public static JPanel makeGrid(List<JComponent> list) {
-		int n = (int) Math.ceil(Math.sqrt(list.size()));
+		int n = 2; //(int) Math.ceil(Math.sqrt(list.size()));
 
 		List<JComponent> list2 = new LinkedList<>();
 		for (int i = 0; i < list.size(); i += n) {
@@ -711,7 +714,7 @@ public class Util {
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 		ret.add(jsp);
 		return ret;
-	}
+	} 
 
 	/*public static JPanel makeTable(Border b, String border, Object[][] rowData, Object... colNames) {
 		return makeTable(null, b, border, rowData, colNames);
@@ -1446,6 +1449,16 @@ public class Util {
 			}
 		}
 		return false;
+	}
+
+
+	public static <K1,V1,K2,V2> Map<K2,V2> map(Map<K1, V1> m, BiFunction<K1,V1,Pair<K2,V2>> f) {
+		Map<K2,V2> ret = new HashMap<>();
+		for (K1 k1 : m.keySet()) {
+			Pair<K2,V2> p = f.apply(k1, m.get(k1));
+			ret.put(p.first, p.second);
+		}
+		return ret;
 	}
 
 }

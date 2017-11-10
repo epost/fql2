@@ -21,12 +21,17 @@ import catdata.aql.It;
 import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.Term;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 
 //TODO AQL CSV version of this
 //TODO merge this with coproduct sigma
-public final class InstExpCsvQuotient<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
+public final class InstExpCsvQuotient<Gen, Sk, X, Y>
 		extends InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> {
 
 	public final InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
@@ -70,7 +75,7 @@ public final class InstExpCsvQuotient<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InstExpCsvQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpCsvQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		InstExpCsvQuotient<?, ?, ?, ?> other = (InstExpCsvQuotient<?, ?, ?, ?>) obj;
 		if (I == null) {
 			if (other.I != null)
 				return false;

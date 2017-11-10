@@ -4,12 +4,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import catdata.Chc;
@@ -25,19 +26,26 @@ import catdata.aql.It;
 import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.Term;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 
 //TODO AQL CSV version of this
 //TODO merge this with coproduct sigma
-public final class InstExpJdbcQuotient<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
-extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
+public final class InstExpJdbcQuotient<X, Y>
+extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>>  implements Raw {
 	
 	public final InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
 	
 	public final Map<String, String> options;
 	
-	public final List<String> queries;
+	public final Map<LocStr,String> queries;
 	
 	public final String clazz;
 	
@@ -56,16 +64,29 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
 
 
 	public InstExpJdbcQuotient(String clazz, String jdbcString, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i, 
-			List<String> queries,
+			List<Pair<LocStr,String>> queries,
 			List<Pair<String, String>> options) {
 		I = i;
 		this.options = Util.toMapSafely(options);
-		this.queries = queries;
+		this.queries = Util.toMapSafely(queries);
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
 		Util.checkClass(clazz);
+		
+		List<InteriorLabel<Object>> f = new LinkedList<>();
+		for (Pair<LocStr, String> p : queries) {
+			f.add(new InteriorLabel<>("entities", new Pair<>(p.first.str, p.second), p.first.loc,
+					x -> x.first + " -> " + x.second).conv());
+		}
+		raw.put("entities", f);
 	}
-
+	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
+	
+	@Override 
+	public Ctx<String, List<InteriorLabel<Object>>> raw() {
+		return raw;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -86,7 +107,7 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InstExpJdbcQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpJdbcQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		InstExpJdbcQuotient<?, ?> other = (InstExpJdbcQuotient<?, ?>) obj;
 		if (I == null) {
 			if (other.I != null)
 				return false;
@@ -117,7 +138,7 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
 
 	@Override
 	public String toString() {
-		return "quotient_jdbc " + clazz + " " + jdbcString + " " + I + " {\n" + Util.sep(queries, "\n") + "\n}"; 
+		return "quotient_jdbc " + clazz + " " + jdbcString + " " + I + " {\n" + Util.sep(queries, " -> ", "\n") + "\n}"; 
 	} 
 
 	@Override
@@ -148,29 +169,34 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
 //		Collection<Pair<Gen, Gen>> q = new HashSet<>(); //TODO aql
 		
 		try (Connection conn = DriverManager.getConnection(toGet)) {
-			Statement stmt = conn.createStatement();
+		
+			for (Entry<LocStr, String> q : queries.entrySet()) {
+				if (!J.schema().ens.contains(new En(q.getKey().str))){
+					throw new LocException(q.getKey().loc, "Not an entity: " + q.getKey().str + ", expected one of " + J.schema().ens);
+				}
+				Statement stmt = conn.createStatement();
 
-			for (String q : queries) {
-				stmt.execute(q);
+				stmt.execute(q.getValue());
 				ResultSet rs = stmt.getResultSet();
 				ResultSetMetaData rsmd = rs.getMetaData();
 				int columnsNumber = rsmd.getColumnCount();
 				if (columnsNumber != 2) {
 					stmt.close();
 					rs.close();
-					throw new RuntimeException("Expected 2 columns but received " + columnsNumber);
+					throw new LocException(q.getKey().loc, "Expected 2 columns but received " + columnsNumber);
 				}
 				while (rs.next()) {
-					Gen gen1 = (Gen) rs.getObject(1).toString();
-					Gen gen2 = (Gen) rs.getObject(2).toString();
+					//input instance need not be jdbc, so dont call toGen from import here
+					Gen gen1 = new Gen(rs.getObject(1).toString()); //(Gen) ;
+					Gen gen2 = new Gen(rs.getObject(2).toString()); //(Gen) rs.getObject(2).toString();
 					if (gen1 == null || gen2 == null) {
 						stmt.close();
 						rs.close();
-						throw new RuntimeException("Encountered a NULL generator");
+						throw new LocException(q.getKey().loc, "Encountered a NULL generator");
 					} else if (!J.gens().containsKey(gen1)) {
-						throw new RuntimeException("Cannot import record linkage: " + gen1 + " is not a generator in the input instance");
+						throw new LocException(q.getKey().loc, "Cannot import record linkage: " + gen1 + " is not a generator in the input instance");
 					} else if (!J.gens().containsKey(gen2)) {
-						throw new RuntimeException("Cannot import record linkage: " + gen2 + " is not a generator in the input instance");
+						throw new LocException(q.getKey().loc, "Cannot import record linkage: " + gen2 + " is not a generator in the input instance");
 					}
 					Term<Ty, En, Sym, Fk, Att, Gen, Sk> l = Term.Gen(gen1);
 					Term<Ty, En, Sym, Fk, Att, Gen, Sk> r = Term.Gen(gen2);
@@ -180,12 +206,12 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk, Pair<ID, Att>>> {
 				stmt.close();
 				rs.close();
 			}
-		} catch (SQLException exn) {
-			exn.printStackTrace();
-			throw new RuntimeException("JDBC exception: " + exn.getMessage());
+	//	} catch (SQLException exn) {
+	//		exn.printStackTrace();
+	//		throw new RuntimeException(/*"JDBC exception: " + */ exn /*.getMessage() */);
 		} catch (Throwable thr) {
-			thr.printStackTrace();
-			throw new RuntimeException(thr.getMessage());
+//			thr.printStackTrace();
+			throw new RuntimeException(thr);
 		}
 		
 		InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, ID> initial0 = new InitialAlgebra<>(strat, J.schema(), col, new It(), Object::toString, Object::toString);			 

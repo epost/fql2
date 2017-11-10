@@ -17,8 +17,13 @@ import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Pragma;
 import catdata.aql.Transform;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
-public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> extends Pragma {
+public class ToJdbcPragmaTransform<Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> extends Pragma {
 
 	private final String jdbcString;
 	private final String prefix;
@@ -96,6 +101,7 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 				}
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 	}
@@ -109,7 +115,7 @@ public class ToJdbcPragmaTransform<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y
 	}
 
 	private String enToString(En en) {
-		return (String) en;
+		return en.str;
 	}
 
 	@Override

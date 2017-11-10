@@ -239,7 +239,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantic
 		for (Fk1 fk1 : src.fks.keySet()) {
 			Pair<En2, List<Fk2>> p = fks.map.get(fk1);
 			if (p == null) {
-				throw new RuntimeException("source foreign key " + fk1 + " has no mapping");
+				throw new RuntimeException("source foreign key " + fk1 + " : " + src.fks.get(fk1).first + " -> " + src.fks.get(fk1).second + " has no mapping");
 			}
 			En1 en1_s = src.fks.get(fk1).first;
 			En1 en1_t = src.fks.get(fk1).second;
@@ -335,28 +335,35 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantic
 		return true;
 	}
 
-	private String toString = null;
+	private String toString = "";
 	@Override
 	public String toString() {
 		if (toString != null) {
 			return toString;
 		}
-		List<String> fks0 = new LinkedList<>();
-		for (Fk1 fk : fks.keySet()) {
-			fks0.add(fk + " -> " + fks.get(fk).first + (fks.get(fk).second.isEmpty() ? "" : "." + Util.sep(fks.get(fk).second, "."))); 
-		}
-		List<String> atts0 = new LinkedList<>();
-		for (Att1 att : atts.keySet()) {
-			atts0.add(att + " -> lambda " + atts.get(att).first + ":" + atts.get(att).second  + ". " + atts.get(att).third); 
-		}
-		toString = "entities";
-		toString += "\n\t" + Util.sep(ens.map, " -> ", "\n\t");
 		
-		toString += "\nforeign_keys";
-		toString += "\n\t" + Util.sep(fks0, "\n\t");
+		for (En1 en : src.ens) {
+			toString += "\n\nentities";
+			toString += "\n\t" + en + " -> " +ens.get(en);
 		
-		toString += "\nattributes";
-		toString += "\n\t" + Util.sep(atts0, "\n\t");
+			List<String> fks0 = new LinkedList<>();
+			for (Fk1 fk : src.fksFrom(en)) {
+				fks0.add(fk + " -> " + fks.get(fk).first + (fks.get(fk).second.isEmpty() ? "" : "." + Util.sep(fks.get(fk).second, "."))); 
+			}
+			List<String> atts0 = new LinkedList<>();
+			for (Att1 att : src.attsFrom(en)) {
+				atts0.add(att + " -> lambda " + atts.get(att).first + ":" + atts.get(att).second  + ". " + atts.get(att).third); 
+			}
+		
+			if (!fks0.isEmpty()) {
+			toString += "\nforeign_keys";
+			toString += "\n\t" + Util.sep(fks0, "\n\t");
+			}
+			if (!atts0.isEmpty()) {
+			toString += "\nattributes";
+			toString += "\n\t" + Util.sep(atts0, "\n\t");
+			}
+		}
 		
 		return toString;
 	} 

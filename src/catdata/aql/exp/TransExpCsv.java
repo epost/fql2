@@ -8,11 +8,18 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
-public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2> 
-	extends TransExpImport<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2,Map<En, List<String[]>>> {
+public class TransExpCsv<X1,Y1,X2,Y2> 
+	extends TransExpImport<Gen,Sk,Gen,Sk,X1,Y1,X2,Y2,Map<En, List<String[]>>> {
 
-	public TransExpCsv(InstExp<Ty,En,Sym,Fk,Att,Gen1,Sk1,X1,Y1> src, InstExp<Ty,En,Sym,Fk,Att,Gen2,Sk2,X2,Y2> dst, List<Pair<LocStr, String>> files, List<Pair<String, String>> options) {
+	public TransExpCsv(InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X1,Y1> src, InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X2,Y2> dst, List<Pair<LocStr, String>> files, List<Pair<String, String>> options) {
 		super(src, dst, files, options);
 	}
 
@@ -40,7 +47,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 
 	@Override
 	protected String getHelpStr() {
-		return InstExpCsv.helpStr;
+		return "";
 	}
 
 	@Override
@@ -61,7 +68,7 @@ public class TransExpCsv<Ty,En,Sym,Fk,Att,Gen1,Sk1,Gen2,Sk2,X1,Y1,X2,Y2>
 			if (gen2 == null) {
 				throw new RuntimeException("Encountered a NULL generator in column 2 of " + en);
 			}
-			gens.put((Gen1) gen, Term.Gen((Gen2) gen2));
+			gens.put(InstExpImport.toGen(en, gen, op), Term.Gen(InstExpImport.toGen(en, gen2, op)));
 		}
 	}
 

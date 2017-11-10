@@ -2,27 +2,11 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import catdata.Chc;
-import catdata.Ctx;
 import catdata.Pair;
-import catdata.Triple;
 import catdata.Util;
-import catdata.aql.AqlOptions;
-import catdata.aql.Collage;
 import catdata.aql.Constraints;
-import catdata.aql.ED;
 import catdata.aql.Kind;
-import catdata.aql.RawTerm;
-import catdata.aql.Schema;
-import catdata.aql.Term;
-import catdata.aql.Var;
 
 public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, En, Sym, Fk, Att>> {
 
@@ -34,7 +18,6 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 	public abstract SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G);
 
-	public static class EdExpRaw extends Exp<Void> implements Raw {
 		
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		
@@ -156,7 +139,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 			return true;
 		}
 		
-		public EdExpRaw(List<Pair<String, String>> as, List<Pair<RawTerm, RawTerm>> list, List<Pair<String, String>> es, List<Pair<RawTerm, RawTerm>> list2, boolean isUnique, Object u) {
+		public EdExpRaw(List<Pair<String, String>> as, List<Pair<RawTerm, RawTerm>> list, List<Pair<String, String>> es, List<Pair<RawTerm, RawTerm>> list2, boolean isUnique, @SuppressWarnings("unused") Object u) {
 			As = new LinkedList<>(as);
 			Es = new LinkedList<>(es);
 			Awh = new HashSet<>(list);
@@ -280,7 +263,6 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 
 	/////////////////////////////////////////////////////////////////////////////////////////
 
-	public static class EdsExpRaw extends EdsExp<Object, Object, Object, Object, Object> implements Raw {
 
 	
 		
@@ -373,7 +355,7 @@ public abstract class EdsExp<Ty, En, Sym, Fk, Att> extends Exp<Constraints<Ty, E
 		}
 
 		@SuppressWarnings("unchecked")
-		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<EdExpRaw> eds, Object o) {
+		public EdsExpRaw(SchExp<?, ?, ?, ?, ?> schema, List<String> imports, List<EdExpRaw> eds, @SuppressWarnings("unused") Object o) {
 			this.schema = (SchExp<Object, Object, Object, Object, Object>) schema;
 			this.imports = new HashSet<>(imports);
 			this.eds = new HashSet<>(eds);

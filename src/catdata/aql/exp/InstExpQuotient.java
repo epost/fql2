@@ -26,11 +26,19 @@ import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Term;
+import catdata.aql.Var;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 
 //TODO aql merge with InstExpRaw
-public final class InstExpQuotient<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw {
+public final class InstExpQuotient<X,Y> extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw {
 	
 	@Override
 	public int hashCode() {
@@ -50,7 +58,7 @@ public final class InstExpQuotient<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends InstExp<
 			return false;
 		if (!(obj instanceof InstExpQuotient))
 			return false;
-		InstExpQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpQuotient<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		InstExpQuotient<?, ?> other = (InstExpQuotient<?, ?>) obj;
 		if (I == null) {
 			if (other.I != null)
 				return false;
@@ -176,8 +184,8 @@ public final class InstExpQuotient<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends InstExp<
 			try {
 				Map<String, Chc<Ty, En>> ctx = Collections.emptyMap();
 				
-				Triple<Ctx<String,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>>
-				eq0 = RawTerm.infer1(ctx, eq.first, eq.second, col, J.schema().typeSide.js);
+				Triple<Ctx<Var,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>>
+				eq0 = RawTerm.infer1x(ctx, eq.first, eq.second, null, col, "", J.schema().typeSide.js).first3();
 						
 				eqs0.add(new Pair<>(eq0.second, eq0.third));
 				col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));

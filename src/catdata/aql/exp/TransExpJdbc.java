@@ -9,19 +9,26 @@ import java.util.List;
 
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Schema;
 import catdata.aql.Term;
-import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
-public class TransExpJdbc<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2> 
-extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y2, Connection>  {
+public class TransExpJdbc<X1, Y1, X2, Y2> 
+extends TransExpImport<Gen, Sk, Gen, Sk, X1, Y1, X2, Y2, Connection>  {
 
 
 	public final String clazz;
 	public final String jdbcString;
 
 
-	public TransExpJdbc(String clazz, String jdbcString, InstExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, X1, Y1> src, InstExp<Ty, En, Sym, Fk, Att, Gen2, Sk2, X2, Y2> dst, List<Pair<LocStr, String>> map, List<Pair<String, String>> options) {
+	public TransExpJdbc(String clazz, String jdbcString, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X1, Y1> src, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X2, Y2> dst, List<Pair<LocStr, String>> map, List<Pair<String, String>> options) {
 		super(src, dst, map, options);
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
@@ -57,7 +64,7 @@ extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		TransExpJdbc<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (TransExpJdbc<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+		TransExpJdbc<?, ?, ?, ?> other = (TransExpJdbc<?, ?, ?, ?>) obj;
 		if (clazz == null) {
 			if (other.clazz != null)
 				return false;
@@ -94,7 +101,7 @@ extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y
 
 	@Override
 	protected String getHelpStr() {
-		return InstExpJdbc.helpStr;
+		return ""; //helpStr;
 	}
 
 	@Override
@@ -140,7 +147,7 @@ extends TransExpImport<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y1, X2, Y
 				rs.close();
 				throw new RuntimeException("Error in " + en + ": Encountered a NULL generator in column 2");
 			 }						 
-			 gens.put((Gen1) gen.toString(), Term.Gen((Gen2) gen2.toString()));
+			 gens.put(InstExpImport.toGen(en, gen.toString(), op), Term.Gen(InstExpImport.toGen(en, gen2.toString(), op)));
 		}
 		stmt.close();
 		rs.close();		

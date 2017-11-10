@@ -188,12 +188,15 @@ schema D = literal : Ty {
 mapping F = literal : C -> D {
  	entities 
 		N1 -> N
-		N2 -> N
 	foreign_keys
 		f -> N	
- 	attributes
+	attributes	
 		name -> name //shorter, path-based notation
 		salary -> lambda x. salary(x)
+
+	entities
+		N2 -> N
+ 	attributes
 		age -> lambda x. age(x) //plus(1,age(x)) interesting to try this - sigma no longer inverse to delta, results in non-trivial type algebra
 } 
 
@@ -255,10 +258,8 @@ html { (* " <hr/> <div id=\"uberflowers\">
  
 query deltaFAsQuery = literal : D -> C {
 	entities
-		N1 -> {from x:N return name -> name(x) salary -> salary(x)}
-		N2 -> {from y:N return age -> age(y)}
-	foreign_keys
-		f -> {y -> x}
+		N1 -> {from x:N attributes name -> name(x) salary -> salary(x) foreign_keys f -> {y -> x}}
+		N2 -> {from y:N attributes age -> age(y)}	
 }
 
 instance deltaFJ_prime = eval deltaFAsQuery J
@@ -272,7 +273,7 @@ html { (* " <br/>Here is a query corresponding to the previous section's sigma: 
 //is natural, and the latter contains labeled nulls and has a non-trivial type algebra.
 query sigmaFAsQuery = literal : C -> D {
 	entities
-		N -> {from n1:N1 return name -> name(n1) salary -> salary(n1) age -> age(f(n1))}
+		N -> {from n1:N1 attributes name -> name(n1) salary -> salary(n1) age -> age(f(n1))}
 }
 
 instance sigmaFdeltaFJ_prime = eval sigmaFAsQuery deltaFJ_prime

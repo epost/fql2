@@ -11,6 +11,7 @@ import java.util.Collection;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
@@ -39,6 +40,32 @@ import catdata.ide.Outline;
 @SuppressWarnings("serial")
 public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 
+	public void format() {
+		String input = topArea.getText();
+		Program<Exp<?>> p = parse(input);
+		if (p == null) {
+			return;
+		}
+		if (input.contains("//") || input.contains("/*")) {
+			int x = JOptionPane.showConfirmDialog(null, "Formatting will erase all comments - continue?", "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			if (x != JOptionPane.YES_OPTION) {
+				return;
+			}
+		}
+		//order does not contain enums or drops
+		StringBuilder sb = new StringBuilder();
+		for (String k : p.order) {
+			Exp<?> o = p.exps.get(k);
+			if (o.kind().equals(Kind.COMMENT)) {
+				sb.append("md { (* " + o + " *) }\n\n" );
+			} else {
+				sb.append(k + " = " + o.toString() + "\n\n");
+			}
+		}
+		topArea.setText(sb.toString().trim());
+		topArea.setCaretPosition(0);
+	}
+	
 	@Override
 	public void abortAction() {
 		super.abortAction();
@@ -248,7 +275,7 @@ public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, Aql
 
 	protected synchronized Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> getOutline() {
 		if (outline == null) {
-			outline = new TreeOutline(this);
+			outline = new AqlOutline(this);
 		}
 		return outline;
 	}

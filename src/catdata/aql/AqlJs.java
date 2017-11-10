@@ -3,6 +3,7 @@ package catdata.aql;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.script.Bindings;
 import javax.script.Invocable;
@@ -71,7 +72,7 @@ public class AqlJs<Ty, Sym> {
 			check(syms.get(name).second, ret);
 			return ret;
 		} catch (Throwable e) {
-			throw new RuntimeException("In javascript execution of " + name + " on arguments " + args + ", " + e.getClass() + " error: "  + e.getMessage() + postfix);
+			throw new RuntimeException("In javascript execution of " + name + " on arguments " + args + ", " + Util.sep(args.stream().map(x->x.getClass()).collect(Collectors.toList()), ",") + " , " + e.getClass() + " error: "  + e.getMessage() + postfix);
 		}
 	}
 	
@@ -88,7 +89,7 @@ public class AqlJs<Ty, Sym> {
 			if (e.getMessage() != null && e.getMessage().contains("jdk.nashorn.internal.codegen.TypeMap")) {
 				throw new RuntimeException("The Java Runtime has suffered an internal error and the IDE must be restarted.\n\n" + e.getMessage());
 			}
-			e.printStackTrace();
+		//	e.printStackTrace();
 			throw new RuntimeException("In javascript execution of " + o + " (of " + o.getClass() + ") cannot convert to " + name + " error: "  + e.getMessage() + postfix + "\n\nPossible fix: check the java_constants of the typeside for type conversion errors.");
 		}
 	}

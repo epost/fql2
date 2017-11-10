@@ -11,6 +11,13 @@ import java.util.stream.Collectors;
 import catdata.Util;
 import catdata.aql.AqlProver.ProverName;
 import catdata.aql.exp.AqlParser;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
 public final class AqlOptions {
 	
@@ -85,8 +92,10 @@ public final class AqlOptions {
 		coproduct_allow_entity_collisions_unsafe,
 		coproduct_allow_type_collisions_unsafe, 
 		import_col_seperator, 
-		csv_import_file_prefix, 
+		csv_import_prefix, 
 		csv_prepend_entity,
+		prepend_entity_on_ids,
+		jdbc_export_truncate_after,
 		csv_import_missing_is_empty;
 		
 		
@@ -143,10 +152,8 @@ public final class AqlOptions {
 			return ret;
 		}
 		
-		public static <Ty, En, Sym, Fk, Att, Gen, Sk> List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> getPrec(String str, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
-			if (str == null) {
-				throw new RuntimeException("Anomaly: please report");
-			}
+		public static List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> getPrec(String str, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
+			Util.assertNotNull(str);
 			return AqlParser.parseManyIdent(str).stream().map(x -> RawTerm.toHeadNoPrim(x, col)).collect(Collectors.toList());		
 		}
 		
@@ -186,11 +193,15 @@ public final class AqlOptions {
 	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
+		case jdbc_export_truncate_after:
+			return -1;
+		case prepend_entity_on_ids:
+			return true;
 		case csv_prepend_entity:
 			return false;
 		case import_null_on_err_unsafe:
 			return false;
-		case csv_import_file_prefix :
+		case csv_import_prefix :
 			return "";
 		case csv_import_missing_is_empty :
 			return false;
@@ -280,7 +291,7 @@ public final class AqlOptions {
 		case eval_use_indices:
 			return true;
 		case gui_rows_to_display:
-			return 256;
+			return 128;
 		case query_remove_redundancy:
 			return true;
 		case eval_approx_sql_unsafe:
@@ -318,7 +329,7 @@ public final class AqlOptions {
 	 * @param map
 	 * @param col possibly null
 	 */ 
-	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(Map<String, String> map, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col, AqlOptions defaults) {
+	public <Ty, En, Sym, Fk, Att, Gen, Sk> AqlOptions(Map<String, String> map, Collage col, AqlOptions defaults) {
 		options = new HashMap<>(defaults.options);
 		for (String key : map.keySet()) {
 			AqlOption op = AqlOption.valueOf(key);
@@ -341,13 +352,17 @@ public final class AqlOptions {
 		}		
 	} */
 
-	private static <Ty, En, Sym, Fk, Att, Gen, Sk> Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
+	private static Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case jdbc_export_truncate_after:
+			return op.getInteger(map);
+		case prepend_entity_on_ids:
+			return op.getBoolean(map);
 		case csv_prepend_entity:
 			return op.getBoolean(map);
 		case import_null_on_err_unsafe:
 			return op.getString(map);
-		case csv_import_file_prefix :
+		case csv_import_prefix :
 			return op.getString(map);
 		case csv_import_missing_is_empty :
 			return op.getBoolean(map);

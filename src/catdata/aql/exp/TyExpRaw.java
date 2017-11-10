@@ -2,8 +2,6 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +9,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import catdata.Chc;
 import catdata.Ctx;
@@ -26,10 +28,76 @@ import catdata.aql.RawTerm;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
 //TODO aql quoting (reuse example maker?)
-public final class TyExpRaw extends TyExp<String, String> implements Raw {
-	// Pair<String, Object>
+public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
+	
+	public static class Ty implements Comparable<Ty> {
+		public final String str;
+
+		public Ty(String str) {
+			Util.assertNotNull(str);
+			this.str = str;
+		}
+
+		
+		@Override
+		public String toString() {
+			return str;
+		}
+
+		@Override
+		 public int compareTo(Ty o) {
+			 return CompareToBuilder.reflectionCompare(this, o);
+		   }
+
+		@Override
+		public int hashCode() {
+			return HashCodeBuilder.reflectionHashCode(this);
+			//return str.hashCode(); //must work with compareTo - cant use auto gen one
+		} 
+
+			@Override
+		public boolean equals(Object obj) {
+			return EqualsBuilder.reflectionEquals(this, obj);
+		}
+		
+	}
+	
+	public static class Sym implements Comparable<Sym> {
+		public final String str;
+
+		public Sym(String str) {
+			Util.assertNotNull(str);
+			this.str = str;
+		}
+
+		@Override
+		 public int compareTo(Sym o) {
+			 return CompareToBuilder.reflectionCompare(this, o);
+		   }
+
+		@Override
+		public int hashCode() {
+			return HashCodeBuilder.reflectionHashCode(this);
+			//return str.hashCode(); //must work with compareTo - cant use auto gen one
+		} 
+
+			@Override
+		public boolean equals(Object obj) {
+			return EqualsBuilder.reflectionEquals(this, obj);
+		}
+			
+		@Override
+		public String toString() {
+			return str;
+		}
+
+	}
 
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 
@@ -47,47 +115,93 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 	public final Set<Pair<String, Pair<List<String>, String>>> functions;
 	public final Set<Triple<List<Pair<String, String>>, RawTerm, RawTerm>> eqs;
 
-	public final Set<Pair<String, String>> java_tys_string;
-	public final Set<Pair<String, String>> java_parser_string;
-	public final Set<Pair<String, Triple<List<String>, String, String>>> java_fns_string;
+	public final Set<Pair<String, String>> java_tys;
+	public final Set<Pair<String, String>> java_parser;
+	public final Set<Pair<String, Triple<List<String>, String, String>>> java_fns;
 
 	public final Map<String, String> options;
-	// private final AqlOptions strat;
+	
+	private final Collage<Ty, Void, Sym, Void, Void, Void, Void> col = new Collage<>();
+
 
 	@Override
 	public Map<String, String> options() {
 		return options;
 	}
 
-	private final Set<Triple<Ctx<Var, String>, Term<String, Void, String, Void, Void, Void, Void>, Term<String, Void, String, Void, Void, Void, Void>>> eqs0 = new HashSet<>();
+//	private final Set<Triple<Ctx<Var, String>, Term<String, Void, String, Void, Void, Void, Void>, Term<String, Void, String, Void, Void, Void, Void>>> eqs0 = new HashSet<>();
 
-	// typesafe by covariance of read-only collections
-	// @SuppressWarnings({ "rawtypes", "unchecked" })
 	public TyExpRaw(List<LocStr> imports, List<LocStr> types, List<Pair<LocStr, Pair<List<String>, String>>> functions,
-			List<Pair<Integer, Triple<List<Pair<String, String>>, RawTerm, RawTerm>>> eqs,
+			List<Pair<Integer, Triple<List<Pair<String, String>>, RawTerm, RawTerm>>> eqsX,
 			List<Pair<LocStr, String>> java_tys_string, List<Pair<LocStr, String>> java_parser_string,
 			List<Pair<LocStr, Triple<List<String>, String, String>>> java_fns_string,
 			List<Pair<String, String>> options) {
 		this.imports = LocStr.set1(imports);
 		this.types = LocStr.set1(types);
 		this.functions = LocStr.functions1(functions);
-		this.eqs = LocStr.eqs1(eqs);
-		this.java_tys_string = LocStr.set2(java_tys_string);
-		this.java_parser_string = LocStr.set2(java_parser_string);
-		this.java_fns_string = LocStr.functions2(java_fns_string);
+		this.eqs = LocStr.eqs1(eqsX);
+		this.java_tys = LocStr.set2(java_tys_string);
+		this.java_parser = LocStr.set2(java_parser_string);
+		this.java_fns = LocStr.functions2(java_fns_string);
 		this.options = Util.toMapSafely(options);
 
-		col.tys.addAll(this.types);
-		col.syms.putAll(Util.toMapSafely(this.functions));
-		col.java_tys.putAll(Util.toMapSafely(this.java_tys_string));
+		col.tys.addAll(this.types.stream().map(x -> new Ty(x)).collect(Collectors.toList()));
+		col.syms.putAll(conv1(Util.toMapSafely(this.functions)));
+		col.java_tys.putAll(conv3(Util.toMapSafely(this.java_tys)));
 		col.tys.addAll(col.java_tys.keySet());
-		col.java_parsers.putAll(Util.toMapSafely(this.java_parser_string));
-		for (Entry<String, Triple<List<String>, String, String>> kv : Util.toMapSafely(this.java_fns_string)
+		col.java_parsers.putAll(conv3(Util.toMapSafely(this.java_parser)));
+		for (Entry<String, Triple<List<String>, String, String>> kv : Util.toMapSafely(this.java_fns)
 				.entrySet()) {
-			col.syms.put(kv.getKey(), new Pair<>(kv.getValue().first, kv.getValue().second));
-			col.java_fns.put(kv.getKey(), kv.getValue().third);
+			List<Ty> l1 = kv.getValue().first.stream().map(x -> new Ty(x)).collect(Collectors.toList());
+			col.syms.put(new Sym(kv.getKey()), new Pair<>(l1, new Ty(kv.getValue().second)));
+			col.java_fns.put(new Sym(kv.getKey()), kv.getValue().third);
+		}
+		
+		// changed my mind: do not defer equation checking since invokes javascript
+		//col.
+		AqlJs<Ty, Sym> js = new AqlJs<>(col.syms, col.java_tys, col.java_parsers, col.java_fns);
+		
+		for (Triple<List<Pair<String, String>>, RawTerm, RawTerm> eq : eqs) {
+			try {
+				Triple<Ctx<Var, Chc<Ty, Void>>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> 
+				tr = infer1x(yyy(eq.first), eq.second, eq.third, null, col, "", js);
+				col.eqs.add(new Eq<>(tr.first, tr.second, tr.third));
+			} catch (RuntimeException ex) {
+				ex.printStackTrace();
+				throw new LocException(find("equations", eq), "In equation " + eq.second + " = " + eq.third + ", " + ex.getMessage());
+			}
+
 		}
 
+		doGuiIndex(imports, types, functions, eqsX, java_tys_string, java_parser_string, java_fns_string);
+
+	}
+
+	private Triple<Ctx<Var, Chc<Ty, Void>>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> infer1x(
+		Map<String, Chc<Ty, En>> ctx0, RawTerm e0, RawTerm f, Chc<Ty, Void> expected,
+		Collage col, String pre, AqlJs<Ty, Sym> js) {
+	return RawTerm.infer1x(ctx0, e0, f, (Chc<Ty,En>)((Object)expected), col, pre, js).first3();
+}
+
+	private Map<Ty, String> conv3(Map<String, String> m) {
+		return Util.map(m, (x,y) -> new Pair<>(new Ty(x), y));
+	}
+
+	
+	private Pair<List<Ty>, Ty> conv2(List<String> k, String v) {
+		List<Ty> l1 = k.stream().map(x -> new Ty(x)).collect(Collectors.toList());
+		return new Pair<>(l1, new Ty(v));
+	}
+	
+	private Map<Sym, Pair<List<Ty>, Ty>> conv1(Map<String, Pair<List<String>, String>> m) {
+		return Util.map(m, (k,v) ->  new Pair<>(new Sym(k), conv2(v.first, v.second)));		
+	}
+
+	public void doGuiIndex(List<LocStr> imports, List<LocStr> types,
+			List<Pair<LocStr, Pair<List<String>, String>>> functions,
+			List<Pair<Integer, Triple<List<Pair<String, String>>, RawTerm, RawTerm>>> eqs,
+			List<Pair<LocStr, String>> java_tys_string, List<Pair<LocStr, String>> java_parser_string,
+			List<Pair<LocStr, Triple<List<String>, String, String>>> java_fns_string) {
 		List<InteriorLabel<Object>> i = InteriorLabel.imports("imports", imports);
 		raw.put("imports", i);
 		List<InteriorLabel<Object>> t = InteriorLabel.imports("types", types);
@@ -128,7 +242,6 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 			jf.add(new InteriorLabel<>("java_functions", new Triple<>(p.first.str, p.second.first, p.second.second),
 					p.first.loc, x -> x.first + " : " + Util.sep(x.second, ",") + " -> " + x.third).conv());
 		}
-
 	}
 
 	@Override
@@ -138,9 +251,9 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 		result = prime * result + ((eqs == null) ? 0 : eqs.hashCode());
 		result = prime * result + ((functions == null) ? 0 : functions.hashCode());
 		result = prime * result + ((imports == null) ? 0 : imports.hashCode());
-		result = prime * result + ((java_fns_string == null) ? 0 : java_fns_string.hashCode());
-		result = prime * result + ((java_parser_string == null) ? 0 : java_parser_string.hashCode());
-		result = prime * result + ((java_tys_string == null) ? 0 : java_tys_string.hashCode());
+		result = prime * result + ((java_fns == null) ? 0 : java_fns.hashCode());
+		result = prime * result + ((java_parser == null) ? 0 : java_parser.hashCode());
+		result = prime * result + ((java_tys == null) ? 0 : java_tys.hashCode());
 		result = prime * result + ((options == null) ? 0 : options.hashCode());
 		result = prime * result + ((types == null) ? 0 : types.hashCode());
 		return result;
@@ -170,20 +283,20 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 				return false;
 		} else if (!imports.equals(other.imports))
 			return false;
-		if (java_fns_string == null) {
-			if (other.java_fns_string != null)
+		if (java_fns == null) {
+			if (other.java_fns != null)
 				return false;
-		} else if (!java_fns_string.equals(other.java_fns_string))
+		} else if (!java_fns.equals(other.java_fns))
 			return false;
-		if (java_parser_string == null) {
-			if (other.java_parser_string != null)
+		if (java_parser == null) {
+			if (other.java_parser != null)
 				return false;
-		} else if (!java_parser_string.equals(other.java_parser_string))
+		} else if (!java_parser.equals(other.java_parser))
 			return false;
-		if (java_tys_string == null) {
-			if (other.java_tys_string != null)
+		if (java_tys == null) {
+			if (other.java_tys != null)
 				return false;
-		} else if (!java_tys_string.equals(other.java_tys_string))
+		} else if (!java_tys.equals(other.java_tys))
 			return false;
 		if (options == null) {
 			if (other.options != null)
@@ -258,29 +371,29 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 		}
 
-		if (!java_tys_string.isEmpty()) {
+		if (!java_tys.isEmpty()) {
 			toString += "\tjava_types";
 			temp = new LinkedList<>();
-			for (Pair<String, String> sym : Util.alphabetical(java_tys_string)) {
+			for (Pair<String, String> sym : Util.alphabetical(java_tys)) {
 				temp.add(sym.first + " = " + Util.quote(sym.second));
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 		}
 
-		if (!java_parser_string.isEmpty()) {
+		if (!java_parser.isEmpty()) {
 			toString += "\tjava_constants";
 			temp = new LinkedList<>();
-			for (Pair<String, String> sym : Util.alphabetical(java_parser_string)) {
+			for (Pair<String, String> sym : Util.alphabetical(java_parser)) {
 				temp.add(sym.first + " = " + Util.quote(sym.second));
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 		}
 
 		Function<List<String>, String> fff = x -> x.isEmpty() ? "" : (Util.sep(x, ", ") + " -> ");
-		if (!java_fns_string.isEmpty()) {
+		if (!java_fns.isEmpty()) {
 			toString += "\tjava_functions";
 			temp = new LinkedList<>();
-			for (Pair<String, Triple<List<String>, String, String>> sym : Util.alphabetical(java_fns_string)) {
+			for (Pair<String, Triple<List<String>, String, String>> sym : Util.alphabetical(java_fns)) {
 				temp.add(sym.first + " : " + fff.apply(sym.second.first) + sym.second.second + " = "
 						+ Util.quote(sym.second.third));
 			}
@@ -301,87 +414,42 @@ public final class TyExpRaw extends TyExp<String, String> implements Raw {
 		return "literal {\n" + toString + "}";
 	}
 
-	private final Collage<String, Void, String, Void, Void, Void, Void> col = new Collage<>();
 
 	@Override
-	public synchronized TypeSide<String, String> eval(AqlEnv env) {
-		// defer equation checking since invokes javascript
-		AqlJs<String, String> js = new AqlJs<>(col.syms, col.java_tys, col.java_parsers, col.java_fns);
-		
-		for (Triple<List<Pair<String, String>>, RawTerm, RawTerm> eq : eqs) {
-			try {
-				Triple<Ctx<Var, String>, Term<String, Void, String, Void, Void, Void, Void>, Term<String, Void, String, Void, Void, Void, Void>> tr = inferEq(
-						col, eq, js);
-				col.eqs.add(new Eq<>(tr.first.inLeft(), tr.second, tr.third));
-				eqs0.add(tr);
-			} catch (RuntimeException ex) {
-				ex.printStackTrace();
-				throw new LocException(find("equations", eq), "In equation " + eq.second + " = " + eq.third + ", " + ex.getMessage());
-			}
-
-		}
-
-		AqlOptions strat = new AqlOptions(options, col, env.defaults);
+	public synchronized TypeSide<Ty, Sym> eval(AqlEnv env) {
+		AqlOptions ops = new AqlOptions(options, col, env.defaults);
 
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
-			TypeSide<String, String> v = env.defs.tys.get(k);
-			col.tys.addAll(v.tys);
-			col.syms.putAll(v.syms.map);
-			col.addEqs(v.eqs);
-			col.java_tys.putAll(v.js.java_tys.map);
-			col.java_fns.putAll(v.js.java_fns.map);
-			col.java_parsers.putAll(v.js.java_parsers.map);
-			eqs0.addAll(v.eqs);
+			TypeSide<Ty, Sym> v = env.defs.tys.get(k);
+			col.addAll(v.collage());
 		}
-		//try {
-			TypeSide<String, String> ret = new TypeSide<>(col.tys, col.syms.map, eqs0, col.java_tys.map,
-					col.java_parsers.map, col.java_fns.map, strat);
+		
+		Set<Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>>> 
+		eqs0 = col.eqsAsTriples().stream().map(x -> new Triple<>(xxx(x.first),x.second,x.third)).collect(Collectors.toSet());
+	
+		TypeSide<Ty, Sym> ret = new TypeSide<Ty, Sym>(col.tys, col.syms.map, eqs0, col.java_tys.map,
+					col.java_parsers.map, col.java_fns.map, ops);
 
 			return ret;
-		/* } catch (SecException ex) {
-			int loc = find(ex.section, ex.o);
-			if (loc == -1) {
-				throw ex;
+	}
+
+	private static Ctx<Var, Ty> xxx(Ctx<Var, Chc<Ty,Void>> x) {
+		return x.map((k,v)->new Pair<>(k,v.l));
+	}
+	
+	private static Map<String, Chc<Ty,En>> yyy(List<Pair<String, String>> l) {
+		Map<String, Chc<Ty,En>> ret = new HashMap<>();
+		for (Pair<String, String> p : l) {
+			if (ret.containsKey(p.first)) {
+				throw new RuntimeException("Duplicate bound variable: " + p.first);
 			}
-			throw new LocException(loc, ex.msg);
-		} */
+			Chc<Ty, En> x = p.second == null ? null : Chc.inLeft(new Ty(p.second));
+			ret.put(p.first, x);
+		}
+		return ret; 
 	}
 
 	
-	private static Triple<Ctx<Var, String>, Term<String, Void, String, Void, Void, Void, Void>, Term<String, Void, String, Void, Void, Void, Void>> inferEq(
-			Collage<String, Void, String, Void, Void, Void, Void> col,
-			Triple<List<Pair<String, String>>, RawTerm, RawTerm> eq, AqlJs<String, String> js) {
-		Map<String, Chc<String, Void>> ctx = new HashMap<>();
-		for (Pair<String, String> p : eq.first) {
-			if (ctx.containsKey(p.first)) {
-				throw new RuntimeException("Duplicate variable " + p.first + " in context " + Ctx.toString(eq.first));
-			}
-			if (p.second != null) {
-				ctx.put(p.first, Chc.inLeft(p.second));
-			} else {
-				ctx.put(p.first, null);
-			}
-		}
-		Triple<Ctx<String, Chc<String, Void>>, Term<String, Void, String, Void, Void, Void, Void>, Term<String, Void, String, Void, Void, Void, Void>> eq0 = RawTerm
-				.infer1(ctx, eq.second, eq.third, col, js);
-
-		LinkedHashMap<Var, String> map = new LinkedHashMap<>();
-		for (String k : ctx.keySet()) {
-			Chc<String, Void> v = eq0.first.get(k);
-			if (!v.left) {
-				throw new RuntimeException("Anomaly: please report");
-			}
-			map.put(new Var(k), v.l);
-		}
-
-		Ctx<Var, String> ctx2 = new Ctx<>(map);
-		Term<String, Void, String, Void, Void, Void, Void> lhs = eq0.second;
-		Term<String, Void, String, Void, Void, Void, Void> rhs = eq0.third;
-
-		Triple<Ctx<Var, String>, Term<String, Void, String, Void, Void, Void, Void>, Term<String, Void, String, Void, Void, Void, Void>> tr = new Triple<>(
-				ctx2, lhs, rhs);
-		return tr;
-	}
-
+	
 }

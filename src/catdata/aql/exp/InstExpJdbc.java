@@ -9,23 +9,30 @@ import java.sql.Statement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Schema;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
 //TODO this type is actually a lie bc of import_as_theory option
-public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En, Sym, Fk, Att, Gen, Connection> {
+public class InstExpJdbc extends InstExpImport<Connection, String> {
 
 	public final String clazz;
 	public final String jdbcString;
 
-	public InstExpJdbc(SchExp<Ty, En, Sym, Fk, Att> schema,
+	public InstExpJdbc(SchExp<?, ?, ?, ?, ?> schema,
 			List<Pair<String, String>> options, String clazz, String jdbcString,
 			List<Pair<LocStr, String>> map) {
-		super(schema, map, options);
+		super((SchExp<Ty, En, Sym, Fk, Att>) schema, map, options);
 
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
@@ -39,7 +46,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 		
 		if(isJoined) {
 			for (String s : map.keySet()) {
-				if (!sch.ens.contains(s)) {
+				if (!sch.ens.contains(new En(s))) {
 					throw new RuntimeException(s + " is not an entity in " + sch);
 				}
 			}
@@ -61,7 +68,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 	protected void end(Connection conn) throws SQLException {
 		conn.close();
 	}
-	
+	/*
 	public final static String helpStr = "Possible problem: AQL IDs be unique among all entities and types; it is not possible to have, for example,"
 			+ "\n" + "\n	0:Employee" + "\n	0:Department" + "\n"
 			+ "\nPossible solution: Distinguish the IDs prior to import, or distinguish them during import, for example, "
@@ -70,10 +77,10 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 			+ "\n		Department -> \"SELECT concat(\"dept\",id) FROM Dept\""
 			+ "\n		worksIn -> \"SELECT concat(\"emp\",id), concat(\"dept\",worksIn) FROM Employee\"" + "\n	}"
 			+ "\nRemember also that by default imports are of entire sets of tables with no missing data; see the import_as_theory option in the manual to change this behavior";
-	
+	*/
 	@Override
 	protected String getHelpStr() {
-		return helpStr;
+		return "";
 	}
 	
 	@Override
@@ -109,10 +116,11 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 				throw new RuntimeException("Error in " + att + ": Encountered a NULL column 1");
 			}
 			Object rhs = rs.getObject(2);
-			if (!atts0.map.containsKey(lhs.toString())) {
-				atts0.put((Gen) lhs.toString(), new Ctx<>());
+			En en = sch.atts.get(att).first;
+			if (!atts0.map.containsKey(toGen(en, lhs.toString()))) {
+				atts0.put(toGen(en, lhs.toString()), new Ctx<>());
 			}
-			atts0.get((Gen) lhs.toString()).put(att, objectToSk(sch, rhs, lhs.toString(), att,
+			atts0.get(toGen(en, lhs.toString())).put(att, objectToSk(sch, rhs, toGen(en, lhs.toString()), att,
 					tys0, extraRepr, false, nullOnErr));
 		}
 		stmt.close();
@@ -147,8 +155,8 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 				conn.close();
 				throw new RuntimeException("Error in " + fk + ": Encountered a NULL in column 2");
 			}
-			Gen g1 = (Gen) lhs.toString();
-			Gen g2 = (Gen) rhs.toString(); //store strings
+			Gen g1 = toGen(sch.fks.get(fk).first, lhs.toString());
+			Gen g2 = toGen(sch.fks.get(fk).second, rhs.toString()); //store strings
 			if (!fks0.containsKey(g1)) {
 				fks0.put(g1, new Ctx<>());
 			}
@@ -179,7 +187,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 				conn.close();
 				throw new RuntimeException("Encountered a NULL generator");
 			}
-			ens0.get(en).add((Gen) gen.toString()); //store strings 
+			ens0.get(en).add(toGen(en, gen.toString())); //store strings 
 		}
 		rs.close();
 		stmt.close();
@@ -201,29 +209,30 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 				conn.close();
 				throw new RuntimeException("Encountered a NULL generator in ID column " + idCol);
 			}
-			Gen g1 = (Gen) gen.toString();
+			Gen g1 = toGen(en, gen.toString());
 			ens0.get(en).add(g1); //store strings 
 			
 			for (Fk fk : sch.fksFrom(en)) {
-				Object rhs = rs.getObject((String) fk);
+				Object rhs = rs.getObject(fk.str);
 				if (rhs == null) {
 					stmt.close();
 					rs.close();
 					conn.close();
 					throw new RuntimeException("ID " + gen + " has a NULL foreign key value on " + fk);
-				}	
-				Gen g2 = (Gen) rhs.toString(); //store strings
+				}
+				En en2 = sch.fks.get(fk).second;
+				Gen g2 = toGen(en2, rhs.toString()); //store strings
 				if (!fks0.containsKey(g1)) {
 					fks0.put(g1, new Ctx<>());
 				}
 				fks0.get(g1).put(fk, g2);
 			}
 			for (Att att : sch.attsFrom(en)) {
-				Object rhs = rs.getObject((String) att);
+				Object rhs =  rs.getObject(att.str);
 				if (!atts0.map.containsKey(g1)) {
 					atts0.put(g1, new Ctx<>());
 				}
-				atts0.get(g1).put(att, objectToSk(sch, rhs, gen.toString(), att,
+				atts0.get(g1).put(att, objectToSk(sch, rhs, g1, att,
 						tys0, extraRepr, false, nullOnErr));
 			}
 			
@@ -236,18 +245,18 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 		Set<String> colNames = new HashSet<>();
 		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 			String colName = rsmd.getColumnLabel(i);
-			if (!(colName.equalsIgnoreCase(idCol) || Util.containsUpToCase(sch.attsFrom(en), colName) || Util.containsUpToCase(sch.fksFrom(en), colName))) {
+			if (!(colName.equalsIgnoreCase(idCol) || Util.containsUpToCase(sch.attsFrom(en).stream().map(x -> x.str).collect(Collectors.toList()), colName) || Util.containsUpToCase(sch.fksFrom(en).stream().map(x -> x.str).collect(Collectors.toList()), colName))) {
 				throw new RuntimeException("Column name " + colName + " does not refer to a foreign key or attribute in \n\n" + s);
 			}
 			colNames.add(colName);
 		}
 		for (Att att : sch.attsFrom(en)) {
-			if (! Util.containsUpToCase(colNames, att)) {
+			if (! Util.containsUpToCase(colNames, att.str)) {
 				throw new RuntimeException("Attribute " + att + " has no column in \n\n" + s);
 			}
 		}
 		for (Fk fk : sch.fksFrom(en)) {
-			if (! Util.containsUpToCase(colNames, fk)) {
+			if (! Util.containsUpToCase(colNames, fk.str)) {
 				throw new RuntimeException("Foreign key " + fk + " has no column in \n\n" + s);
 			}
 		}
@@ -279,7 +288,7 @@ public class InstExpJdbc<Ty, En, Sym, Fk, Att, Gen> extends InstExpImport<Ty, En
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InstExpJdbc<?, ?, ?, ?, ?, ?> other = (InstExpJdbc<?, ?, ?, ?, ?, ?>) obj;
+		InstExpJdbc other = (InstExpJdbc) obj;
 		if (clazz == null) {
 			if (other.clazz != null)
 				return false;

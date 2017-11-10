@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
-import catdata.Triple;
 import catdata.Util;  
 
 public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements Semantics {

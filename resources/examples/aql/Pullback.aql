@@ -58,23 +58,23 @@ query pullback = literal : CoSpan -> Square {
 	D -> {from d:D}
 		
 	B -> {from b:B 
-		 return B_att -> b.B_att}
+		 attributes B_att -> b.B_att
+		 foreign_keys f -> {d -> b.f}}
 
 	C -> {from c:C 
-		 return C_att -> c.C_att}
+		 attributes C_att -> c.C_att
+		 foreign_keys g -> {d -> c.g}}
 
 	A -> {from b0:B c0:C 
 		 where b0.f = c0.g 
-		 return A_attB -> b0.B_att 
-		 	   A_attC -> c0.C_att} 
+		 attributes A_attB -> b0.B_att 
+		 	   A_attC -> c0.C_att
+		  foreign_keys
+		  f2 -> {b -> b0}
+		  g2 -> {c -> c0}
+		 } 
 
- foreign_keys		 	   
-
-	f -> {d -> b.f}
-	g -> {d -> c.g}
-	f2 -> {b -> b0}
-	g2 -> {c -> c0}
-
+		
 }
 
 instance J = eval pullback I

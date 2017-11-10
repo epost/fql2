@@ -42,6 +42,7 @@ public class AqlTester {
 		Ctx<String, Throwable> result = new Ctx<>();
 		for (String k : progs.keySet()) {
 			try {
+				System.out.println(k);
 				Program<Exp<?>> prog = AqlParser.parseProgram(progs.get(k));
 				String[] toUpdate = new String[] { "" };
 				AqlMultiDriver driver = new AqlMultiDriver(prog, toUpdate, null);

@@ -22,6 +22,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 	private final String jdbcString;
 	private final String prefix;
 	private final String idCol;
+	private final int truncate;
 
 	
 	private final Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
@@ -43,17 +44,19 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 		this.I = I;
 		idCol = (String) options.getOrDefault(AqlOption.id_column_name);
 		len = (Integer) options.getOrDefault(AqlOption.varchar_length);
+		truncate = (Integer) options.getOrDefault(AqlOption.jdbc_export_truncate_after);
 		this.options = options;
 		
 		assertDisjoint(idCol);
 	}
 
 	private void deleteThenCreate(Connection conn) throws SQLException {
-		Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> m = I.schema().toSQL_srcSchemas(prefix, "integer", "id");
+		Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> m = I.schema().toSQL_srcSchemas(prefix, "integer", "id", truncate, Object::toString);
 		Statement stmt = conn.createStatement();
 		for (En en : I.schema().ens) {		
 			for (String x : m.get(en).second) {
-				stmt.execute(x.replace("Varchar", "Varchar(" + len + ")").replace("Nvarchar", "Nvarchar(" + len + ")"));
+				//System.out.println(x);
+				stmt.execute(x.replace("Varchar", "Varchar(" + len + ")").replace("Nvarchar", "Nvarchar(" + len + ")").replace("varchar", "Varchar(" + len + ")"));
 			}			
 		}
 		stmt.close();
@@ -65,13 +68,13 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 	@Override
 	public void execute() {
 		try {
-			Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> zzz = I.schema().toSQL_srcSchemas(prefix, "integer", idCol);
+			Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> zzz = I.schema().toSQL_srcSchemas(prefix, "integer", idCol, truncate, Object::toString);
 			Connection conn = DriverManager.getConnection(jdbcString);
 			deleteThenCreate(conn);
 			for (En en : I.schema().ens) {
 				List<Chc<Fk, Att>> header = headerFor(en);
 				for (X x : I.algebra().en(en)) {
-					I.algebra().storeMyRecord(I.algebra().intifyX((int)options.getOrDefault(AqlOption.start_ids_at)), conn, x, header, enToString(en), prefix);
+					I.algebra().storeMyRecord(I.algebra().intifyX((int)options.getOrDefault(AqlOption.start_ids_at)), conn, x, header, enToString(en), prefix, truncate);
 				}
 			}
 			Statement stmt = conn.createStatement();
@@ -135,7 +138,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 	
 
 	private String enToString(En en) {
-		return (String) en;
+		return en.toString();
 	}
 
 	/*private String tyToString(Ty ty) {

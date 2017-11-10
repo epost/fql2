@@ -13,4 +13,8 @@ public interface Prog {
 		return "";
 	}
 	
+	default long timeout() {
+		return 30;
+	}
+	
 }

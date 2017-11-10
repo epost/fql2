@@ -13,6 +13,12 @@ import catdata.Triple;
 import catdata.aql.RawTerm;
 
 public class LocStr {
+	
+	@Override
+	public String toString() {
+		return str;
+	}
+
 	public final Integer loc;
 	public final String str;
 	
@@ -79,6 +85,11 @@ public class LocStr {
 	public static <X> Set<X> proj2(Collection<Pair<Integer, X>> eqs) {
 		return eqs.stream().map(x -> x.second).collect(Collectors.toSet());
 	}
+	
+	public static <X,Y> List<Pair<Pair<Y, String>, X>> list2x(List<Pair<Pair<Y,LocStr>, X>> as) {
+		return as.stream().map(x -> new Pair<>(new Pair<>(x.first.first, x.first.second.str),x.second)).collect(Collectors.toList());
+	}
+
 
 	public static <X> List<Pair<String, X>> list2(List<Pair<LocStr, X>> as) {
 		return as.stream().map(x -> new Pair<>(x.first.str, x.second)).collect(Collectors.toList());

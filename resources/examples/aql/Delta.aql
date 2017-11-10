@@ -29,14 +29,19 @@ schema D = literal : Ty {
 mapping F = literal : C -> D {
  	entities 
 		T1 -> T
-		T2 -> T
- 	attributes
+		attributes
 		t1_ssn    -> lambda x:T. ssn0(x) //lambda syntax
 		t1_first  -> lambda x. first0(x) //shorter lambda syntax
-		t2_first  -> first0 //path syntax
 		t1_last   -> last0
+		
+	entities	
+			T2 -> T
+ 	attributes
 		t2_last   -> last0
 		t2_salary -> salary0
+		t2_first  -> first0 //path syntax
+		
+	
 } 
 
 instance J = literal : D {

@@ -61,11 +61,11 @@ schema_colimit Colim = modify ColimAuto {
 		S1_ObsType__S2_Type -> T
 		S1_Gender -> G
 		S2_Method -> M
-	rename foreign_keys
-		S1_f -> f
-		S1_h -> h
-		S2_g1 -> g1
-		S2_g2 -> g2
+ rename foreign_keys
+		O.S1_f -> f
+		P.S1_h -> h
+		O.S2_g1 -> g1
+		M.S2_g2 -> g2 
 	rename attributes
 		S1_ObsType_att -> T_att1
 		S1_Gender_att -> G_att
@@ -73,8 +73,8 @@ schema_colimit Colim = modify ColimAuto {
 		S2_Type_att -> T_att2
 		S2_Patient_att -> P_att2
 	remove foreign_keys	
-		S2_f -> f
-		S1_g -> g1.g2
+		O.S2_f -> f
+		O.S1_g -> g1.g2 
 	/* e.g. remove attributes
 		B_ObsType_att -> lambda x. x.T_att1 */
 }

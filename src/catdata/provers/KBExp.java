@@ -257,6 +257,11 @@ public abstract class KBExp<C, V> {
 		public KBExp<Chc<V, C>, V> skolemize() {
 			return new KBApp<>(Chc.inLeft(var), Collections.emptyList());
 		}
+
+		@Override
+		public int size() {
+			return 0;
+		}
 	}
 
 	// //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -593,6 +598,15 @@ public abstract class KBExp<C, V> {
 			skolemize = new KBApp<>(Chc.inRight(f), new_args);
 			return skolemize;
 		}
+
+		@Override
+		public int size() {
+			int i = 0;
+			for (KBExp<C, V> x: args) {
+				i += x.size();
+			}
+			return i+1;
+		}
 	}
 
 	// public abstract void allSubExps(Set<KBExp<C, V>> set);
@@ -635,5 +649,7 @@ public abstract class KBExp<C, V> {
 			return new KBApp<>(e.getApp().f.r, l);
 		}
 	}
+
+	public abstract int size();
 
 }

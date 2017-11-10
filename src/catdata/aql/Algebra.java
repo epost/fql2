@@ -391,7 +391,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	 */
 	public Connection createAndLoad(Map<En, List<String>> indices, Pair<Map<X,Integer>, Map<Integer, X>> I) {
 		try {
-			Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> xxx = schema().toSQL_srcSchemas("", "integer", "id");
+			Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> xxx = schema().toSQL_srcSchemas("", "integer", "id", -1, Object::toString);
 			Connection conn = DriverManager.getConnection("jdbc:h2:mem:db_temp_" + session_id++ + ";DB_CLOSE_DELAY=-1");
 			try (Statement stmt = conn.createStatement()) {
 				for (En en1 : schema().ens) {
@@ -409,7 +409,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 						stmt.execute(s);
 					}
 					for (X x : en(en1)) {
-						storeMyRecord(I, conn, x, qqq.first, en1.toString(), "");
+						storeMyRecord(I, conn, x, qqq.first, en1.toString(), "", -1);
 					}
 				}
 				
@@ -458,8 +458,10 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	}
 	
 	//TODO aql refactor
-		public synchronized void storeMyRecord(Pair<Map<X,Integer>, Map<Integer, X>> I, Connection conn2, X x, List<Chc<Fk, Att>> header, String table, String prefix) throws Exception {
-			  List<String> hdrQ = new LinkedList<>();
+		public synchronized void storeMyRecord(Pair<Map<X,Integer>, Map<Integer, X>> I, Connection conn2, X x, List<Chc<Fk, Att>> header, String table, String prefix, int truncate) throws Exception {
+			
+			
+			List<String> hdrQ = new LinkedList<>();
 			  List<String> hdr = new LinkedList<>();
 			  hdr.add("id");
 			  hdrQ.add("?");
@@ -467,9 +469,9 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	          hdrQ.add("?");
 	          Chc<Fk, Att> chc = aHeader;
 	          if (chc.left) {
-	              hdr.add( (String)chc.l); //TODO aql unsafe
+	              hdr.add( Schema.truncate( chc.l.toString(), truncate) ); //TODO aql unsafe
 	          } else {
-	              hdr.add( (String)chc.r); //TODO aql unsafe
+	              hdr.add( Schema.truncate( chc.r.toString(), truncate ) ); //TODO aql unsafe
 	          }
 	      }
 			  

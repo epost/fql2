@@ -2,7 +2,7 @@ package catdata.aql;
 
 import java.util.Iterator;
 
-public final class Var {
+public final class Var implements Comparable<Var> {
 
 	
 	public final String var;
@@ -58,6 +58,11 @@ public final class Var {
 		Var other = (Var) obj;
         return var.equals(other.var);
     }
+
+	@Override
+	public int compareTo(Var o) {
+		return this.var.compareTo(o.var);
+	}
 	
 	
 	

@@ -8,7 +8,6 @@ import catdata.Pair;
 import catdata.Program;
 import catdata.Util;
 import catdata.aql.Kind;
-import catdata.aql.SqlTypeSide;
 import catdata.aql.TypeSide;
 
 public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
@@ -114,38 +113,7 @@ public abstract class TyExp<Ty, Sym> extends Exp<TypeSide<Ty, Sym>> {
 	
 	//////////////////////////////////////////////////////////
 	
-public static final class TyExpSql extends TyExp<String,String> {
-		
-		@Override
-		public Collection<Pair<String, Kind>> deps() {
-			return Collections.emptyList();
-		}
-		@Override
-		public Map<String, String> options() {
-			return Collections.emptyMap();
-		}
-			
-		@Override
-		public TypeSide<String,String> eval(AqlEnv env) {
-			return new SqlTypeSide(env.defaults);
-		}
-	
-		@Override
-		public String toString() {
-			return "sql";
-		}
-	
-		@Override
-		public int hashCode() {
-			return 0;
-		}
-	
-		@Override
-		public boolean equals(Object o) {
-			return (o != null && o instanceof TyExpSql);
-		}
-		
-	}
+
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -204,11 +172,11 @@ public static final class TyExpSql extends TyExp<String,String> {
 	
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	public static final class TyExpVar extends TyExp<String, String> {
+	public static final class TyExpVar<X,Y> extends TyExp<X, Y> {
 		public final String var;
 		
 		@Override
-		public TyExp<String, String> resolve(Program<Exp<?>> prog) {
+		public TyExp<X, Y> resolve(Program<Exp<?>> prog) {
 			if (!prog.exps.containsKey(var)) {
 				throw new RuntimeException("Unbound typeside variable: " + var);
 			}
@@ -217,7 +185,7 @@ public static final class TyExpSql extends TyExp<String,String> {
 				throw new RuntimeException("Variable " + var + " is bound to something that is not a typeside, namely\n\n" + x);
 			}
 			@SuppressWarnings("unchecked")
-			TyExp<String,String> texp = (TyExp<String,String>) x;
+			TyExp<X,Y> texp = (TyExp<X,Y>) x;
 			return texp.resolve(prog);
 		}
 		
@@ -240,7 +208,7 @@ public static final class TyExpSql extends TyExp<String,String> {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public TypeSide<String, String> eval(AqlEnv env) {
+		public TypeSide<X, Y> eval(AqlEnv env) {
 			return env.defs.tys.get(var);
 		}
 

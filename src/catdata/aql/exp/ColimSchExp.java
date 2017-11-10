@@ -10,26 +10,25 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
 import catdata.Quad;
-import catdata.Triple;
 import catdata.Util;
 import catdata.aql.AqlOptions;
-import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.ColimitSchema;
 import catdata.aql.Kind;
 import catdata.aql.Mapping;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
-import catdata.aql.Term;
-import catdata.aql.Var;
 import catdata.aql.exp.SchExp.SchExpVar;
-import catdata.ClassUtil;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 
 //TODO aql E shouldn't really be a type param here
-public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<ColimitSchema<N, Ty, En, Sym, Fk, Att>> {
+public abstract class ColimSchExp<N> extends Exp<ColimitSchema<N>> {
 
 	@Override
 	public Kind kind() {
@@ -38,13 +37,13 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	
 	public abstract SchExp<Ty, En, Sym, Fk, Att> getNode(N n, AqlTyping G);
 	
-	public abstract ColimSchExp<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G); 
+	public abstract ColimSchExp<N> type(AqlTyping G); 
 
 	/////////////////////////////////////////////////////////////////
 	
 	
-	public static class ColimSchExpQuotient<N, Ty, En, Sym, Fk, Att> 
-	extends ColimSchExp<N, Void, Ty, En, Sym, Fk, Att> implements Raw {
+	public static class ColimSchExpQuotient<N> 
+	extends ColimSchExp<N> implements Raw {
 
 		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		
@@ -73,11 +72,10 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		
 		
 
-		@SuppressWarnings("unchecked")
-		public ColimSchExpQuotient(TyExp<Ty, Sym> ty, List<LocStr> nodes, List<Pair<Integer, Quad<N, En, N, En>>> eqEn, List<Pair<Integer, Quad<String, String, RawTerm, RawTerm>>> eqTerms, List<Pair<Integer, Pair<List<String>, List<String>>>> eqTerms2, List<Pair<String, String>> options) {
+		public ColimSchExpQuotient(TyExp<Ty, Sym> ty, List<LocStr> nodes, List<Pair<Integer, Quad<String, String, String, String>>> eqEn, List<Pair<Integer, Quad<String, String, RawTerm, RawTerm>>> eqTerms, List<Pair<Integer, Pair<List<String>, List<String>>>> eqTerms2, List<Pair<String, String>> options) {
 			this.ty = ty;
 			this.nodes = new Ctx<>();
-			this.eqEn = LocStr.proj2(eqEn);
+			this.eqEn = LocStr.proj2(eqEn).stream().map(x -> new Quad<>((N)x.first,new En(x.second),(N)x.third, new En(x.fourth))).collect(Collectors.toSet());
 			this.eqTerms = LocStr.proj2(eqTerms);
 			this.eqTerms2 = LocStr.proj2(eqTerms2);
 			this.options = Util.toMapSafely(options);
@@ -85,11 +83,11 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 				if (this.nodes.containsKey((N)n.str)) {
 					throw new RuntimeException("In schema colimit " + this + " duplicate schema " + n + " - please create new schema variable if necessary.");
 				}
-				this.nodes.put((N)n.str, (SchExp<Ty, En, Sym, Fk, Att>) new SchExpVar(n.str));
+				this.nodes.put((N)n.str,  new SchExpVar<>(n.str));
 			}
 			
 			List<InteriorLabel<Object>> f = new LinkedList<>();
-			for (Pair<Integer, Quad<N, En, N, En>> p : eqEn) {
+			for (Pair<Integer, Quad<String, String, String, String>> p : eqEn) {
 				f.add(new InteriorLabel<>("entities", p.second, p.first,
 						x -> x.first + "." + x.second + " = " + x.third + "." + x.fourth).conv());
 			}
@@ -112,12 +110,12 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 
 	
 		@Override
-		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+		public ColimitSchema<N> eval(AqlEnv env) {
 			Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes0 = new Ctx<>();
-			Set<String> ens = new HashSet<>();
+			Set<En> ens = new HashSet<>();
 			for (N n : nodes.keySet()) {
 				nodes0.put(n, nodes.get(n).eval(env));
-				ens.addAll(nodes0.get(n).ens.stream().map(x -> n + "_" + x).collect(Collectors.toSet()));
+				ens.addAll(nodes0.get(n).ens.stream().map(x -> new En( n + "_" + x)).collect(Collectors.toSet()));
 			}
 			Set<Quad<String,String,RawTerm,RawTerm>> eqs = new HashSet<>(eqTerms);
 			for (Pair<List<String>, List<String>> t : eqTerms2) {
@@ -126,8 +124,8 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			return new ColimitSchema<>(ty.eval(env), nodes0, eqEn, eqs, new AqlOptions(options, null, env.defaults));		
 		}
 	
-		private static RawTerm tr(List<String> l, Set<?> ens) {
-			l = l.stream().filter(x -> !ens.contains(x)).collect(Collectors.toList());
+		private static RawTerm tr(List<String> l, Set<En> ens) {
+			l = l.stream().filter(x -> !ens.contains(new En(x))).collect(Collectors.toList());
 			return RawTerm.fold(l, "_v0");  
 		}
 
@@ -221,7 +219,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			ColimSchExpQuotient<?, ?, ?, ?, ?, ?> other = (ColimSchExpQuotient<?, ?, ?, ?, ?, ?>) obj;
+			ColimSchExpQuotient<?> other = (ColimSchExpQuotient<?>) obj;
 			if (eqEn == null) {
 				if (other.eqEn != null)
 					return false;
@@ -256,7 +254,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		}
 
 		@Override
-		public ColimSchExp<N, Void, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+		public ColimSchExp<N> type(AqlTyping G) {
 			return this;
 		}
 
@@ -280,7 +278,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	
 	
 	
-	public static final class ColimSchExpVar extends ColimSchExp<Object, Object, Object, Object, Object, Object, Object> {
+	public static final class ColimSchExpVar<N> extends ColimSchExp<N> {
 		public final String var;
 		
 		@Override
@@ -289,7 +287,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		}
 
 		@Override
-		public SchExp<Object, Object, Object, Object, Object> getNode(Object n, AqlTyping G) {
+		public SchExp<Ty, En, Sym, Fk, Att> getNode(N n, AqlTyping G) {
 			return type(G).getNode(n, G);
 		}
 		
@@ -332,14 +330,14 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	
 			@SuppressWarnings("unchecked")
 		@Override
-		public ColimSchExp<Object, Object, Object, Object, Object, Object, Object> type(AqlTyping G) {
-			return (catdata.aql.exp.ColimSchExp<Object, Object, Object, Object, Object, Object, Object>) 
-					G.defs.scs.get(var); 
+		public ColimSchExp<N> type(AqlTyping G) {
+			return 
+					(ColimSchExp<N>) G.defs.scs.get(var); 
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public ColimitSchema<Object, Object, Object, Object, Object, Object> eval(AqlEnv env) {
+		public ColimitSchema<N> eval(AqlEnv env) {
 			return env.defs.scs.get(var);
 		}
 
@@ -350,15 +348,15 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	
 	////////////////////////////////////////
 	
-	public static class ColimSchExpWrap<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> {
+	public static class ColimSchExpWrap<N> extends ColimSchExp<N> {
 
 		
 		
-		public final ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim;
+		public final ColimSchExp<N> colim;
 		
-		public final MapExp<Ty,String,Sym,String,String,String,String,String> toUser;
+		public final MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att> toUser;
 		
-		public final MapExp<Ty,String,Sym,String,String,String,String,String> fromUser;
+		public final MapExp<Ty,En,Sym,Fk,Att,En,Fk,Att> fromUser;
 		
 		@Override
 		public Map<String, String> options() {
@@ -388,7 +386,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			ColimSchExpWrap<?, ?, ?, ?, ?, ?, ?> other = (ColimSchExpWrap<?, ?, ?, ?, ?, ?, ?>) obj;
+			ColimSchExpWrap<?> other = (ColimSchExpWrap<?>) obj;
 			if (colim == null) {
 				if (other.colim != null)
 					return false;
@@ -409,21 +407,21 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 
 		
 
-		public ColimSchExpWrap(ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim, MapExp<Ty, String, Sym, String, String, String, String, String> toUser, MapExp<Ty, String, Sym, String, String, String, String, String> fromUser) {
+		public ColimSchExpWrap(ColimSchExp<N> colim, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> toUser, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> fromUser) {
 			this.colim = colim;
 			this.toUser = toUser;
 			this.fromUser = fromUser;
 		}
 
 		@Override
-		public ColimSchExp<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+		public ColimSchExp<N> type(AqlTyping G) {
 			return colim.type(G);
 		}
 
 	
 
 		@Override
-		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+		public ColimitSchema<N> eval(AqlEnv env) {
 			return colim.eval(env).wrap(toUser.eval(env), fromUser.eval(env));
 		}
 
@@ -442,7 +440,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 	
 	////////////////////////////////////////
 
-	public static class ColimSchExpRaw<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> implements Raw {
+	public static class ColimSchExpRaw<N, E> extends ColimSchExp<N> implements Raw {
 		
 		
 		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
@@ -474,12 +472,11 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 			return nodes.get(n);
 		}
 
-		
 		public ColimSchExpRaw(GraphExp<N, E> shape, TyExp<Ty, Sym> ty, List<Pair<LocStr, SchExp<Ty, En, Sym, Fk, Att>>> nodes, List<Pair<LocStr, MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att>>> edges, List<Pair<String, String>> options) {
 			this.shape = shape;
 			this.ty = ty;
-			this.nodes = new Ctx<>(LocStr.list2(nodes, x -> ClassUtil.<N>unchecked_cast(x)));
-			this.edges = new Ctx<>(LocStr.list2(edges, x -> ClassUtil.<E>unchecked_cast(x)));
+			this.nodes = new Ctx<>(LocStr.list2(nodes, x -> (N) x));
+			this.edges = new Ctx<>(LocStr.list2(edges, x -> (E) x));
 			this.options = Util.toMapSafely(options);
 			
 			List<InteriorLabel<Object>> f = new LinkedList<>();
@@ -530,7 +527,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			ColimSchExpRaw<?, ?, ?, ?, ?, ?, ?> other = (ColimSchExpRaw<?, ?, ?, ?, ?, ?, ?>) obj;
+			ColimSchExpRaw<?, ?> other = (ColimSchExpRaw<?, ?>) obj;
 			if (edges == null) {
 				if (other.edges != null)
 					return false;
@@ -574,7 +571,7 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		}
 
 		@Override
-		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
+		public ColimitSchema<N> eval(AqlEnv env) {
 			Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes0 = new Ctx<>();
 			for (N n : nodes.keySet()) {
 				nodes0.put(n, nodes.get(n).eval(env));
@@ -587,276 +584,12 @@ public abstract class ColimSchExp<N, E, Ty, En, Sym, Fk, Att> extends Exp<Colimi
 		}
 
 		@Override
-		public ColimSchExpRaw<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+		public ColimSchExpRaw<N,E> type(AqlTyping G) {
 			return this;
 		}
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	
-	public static final class ColimSchExpModify<N, E, Ty, En, Sym, Fk, Att> extends ColimSchExp<N, E, Ty, En, Sym, Fk, Att> implements Raw {
-		
-		private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
-		
-		@Override 
-		public Ctx<String, List<InteriorLabel<Object>>> raw() {
-			return raw;
-		}
-		
-		@Override
-		public SchExp<Ty, En, Sym, Fk, Att> getNode(N n, AqlTyping G) {
-			return colim.getNode(n, G);
-		}
-		
-		public final ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim;
-		
-		public final List<Pair<String, String>> ens;
-
-		public final List<Pair<String, String>> fks0;
-
-		public final List<Pair<String, String>> atts0;
-		public final List<Pair<String, List<String>>> fks;
-		public final List<Pair<String, Triple<String, String, RawTerm>>> atts;
-		
-		public final Map<String, String> options; 
-		
-		@Override
-		public Map<String, String> options() {
-			return options;
-		}
-		
-		public ColimSchExpModify(ColimSchExp<N, E, Ty, En, Sym, Fk, Att> colim, List<Pair<LocStr, String>> ens, List<Pair<LocStr, String>> fks0, List<Pair<LocStr, String>> atts0, List<Pair<LocStr, List<String>>> fks, List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
-			this.ens = LocStr.list2(ens);
-			this.fks = LocStr.list2(fks);
-			this.atts = LocStr.list2(atts);
-			this.fks0 = LocStr.list2(fks0);
-			this.atts0= LocStr.list2(atts0);
-			this.options = Util.toMapSafely(options);
-			Util.toMapSafely(this.ens);
-			Util.toMapSafely(this.fks);
-			Util.toMapSafely(this.atts); //do here rather than wait
-			this.colim = colim;
-						
-			List<InteriorLabel<Object>> f = new LinkedList<>();
-			for (Pair<LocStr, String> p : ens) {
-				f.add(new InteriorLabel<>("rename_entities", new Pair<>(p.first.str, p.second), p.first.loc,
-						x -> x.first + " -> " + x.second).conv());
-			}
-			raw.put("rename_entities", f);
-			
-			f = new LinkedList<>();
-			for (Pair<LocStr, String> p : fks0) {
-				f.add(new InteriorLabel<>("rename_fks", new Pair<>(p.first.str, p.second), p.first.loc,
-						x -> x.first + " -> " + x.second).conv());
-			}
-			raw.put("rename_fks", f);
-			
-			f = new LinkedList<>();
-			for (Pair<LocStr, String> p : atts0) {
-				f.add(new InteriorLabel<>("rename_atts", new Pair<>(p.first.str, p.second), p.first.loc,
-						x -> x.first + " -> " + x.second).conv());
-			}
-			raw.put("rename_atts", f);
-			
-			f = new LinkedList<>();
-			for (Pair<LocStr, List<String>> p : fks) {
-				f.add(new InteriorLabel<>("remove_fks", new Pair<>(p.first.str, p.second), p.first.loc,
-						x -> x.first + " -> " + Util.sep(x.second, ".")).conv());
-			}
-			raw.put("remove_fks", f);
-			
-			f = new LinkedList<>();
-			for (Pair<LocStr, Triple<String, String, RawTerm>> p : atts) {
-				f.add(new InteriorLabel<>("remove_atts", new Pair<>(p.first.str, p.second), p.first.loc,
-						x -> x.first + " -> \\" + x.second.first + ". " + x.second.third).conv());
-			}
-			raw.put("remove_atts", f);
-		}
-
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((atts == null) ? 0 : atts.hashCode());
-			result = prime * result + ((atts0 == null) ? 0 : atts0.hashCode());
-			result = prime * result + ((colim == null) ? 0 : colim.hashCode());
-			result = prime * result + ((ens == null) ? 0 : ens.hashCode());
-			result = prime * result + ((fks == null) ? 0 : fks.hashCode());
-			result = prime * result + ((fks0 == null) ? 0 : fks0.hashCode());
-			result = prime * result + ((options == null) ? 0 : options.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			ColimSchExpModify<?, ?, ?, ?, ?, ?, ?> other = (ColimSchExpModify<?, ?, ?, ?, ?, ?, ?>) obj;
-			if (atts == null) {
-				if (other.atts != null)
-					return false;
-			} else if (!atts.equals(other.atts))
-				return false;
-			if (atts0 == null) {
-				if (other.atts0 != null)
-					return false;
-			} else if (!atts0.equals(other.atts0))
-				return false;
-			if (colim == null) {
-				if (other.colim != null)
-					return false;
-			} else if (!colim.equals(other.colim))
-				return false;
-			if (ens == null) {
-				if (other.ens != null)
-					return false;
-			} else if (!ens.equals(other.ens))
-				return false;
-			if (fks == null) {
-				if (other.fks != null)
-					return false;
-			} else if (!fks.equals(other.fks))
-				return false;
-			if (fks0 == null) {
-				if (other.fks0 != null)
-					return false;
-			} else if (!fks0.equals(other.fks0))
-				return false;
-			if (options == null) {
-				if (other.options != null)
-					return false;
-			} else if (!options.equals(other.options))
-				return false;
-			return true;
-		}
-
-
-		private String toString;
-		
-		@Override
-		public synchronized String toString() {
-			if (toString != null) {
-				return toString;
-			}
-			toString = "";
-				
-			List<String> temp = new LinkedList<>();
-			
-			if (!ens.isEmpty()) {
-				toString += "\trename entities";
-						
-				for (Pair<String, String> x : ens) {
-					temp.add(x.first + " -> " + x.second);
-				}
-				
-				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
-			}
-			
-			if (!fks0.isEmpty()) {
-				toString += "\trename foreign_keys";
-						
-				for (Pair<String, String> x : fks0) {
-					temp.add(x.first + " -> " + x.second);
-				}
-				
-				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
-			}
-			
-			if (!atts0.isEmpty()) {
-				toString += "\trename attributes";
-						
-				for (Pair<String, String> x : atts0) {
-					temp.add(x.first + " -> " + x.second);
-				}
-				
-				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
-			}
-			
-			if (!fks.isEmpty()) {
-				toString += "\tremove foreign_keys";
-				temp = new LinkedList<>();
-				for (Pair<String, List<String>> sym : fks) {
-					temp.add(sym.first + " -> " + Util.sep(sym.second, "."));
-				}
-				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
-			}
-			
-			if (!fks.isEmpty()) {
-				toString += "\tremove attributes";
-				temp = new LinkedList<>();
-				for (Pair<String, Triple<String, String, RawTerm>> sym : atts) {
-					temp.add(sym.first + " -> lambda " + sym.second.first + ". " + sym.second.third);
-				}
-				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
-			}
-			
-			if (!options.isEmpty()) {
-				toString += "\toptions";
-				temp = new LinkedList<>();
-				for (Entry<String, String> sym : options.entrySet()) {
-					temp.add(sym.getKey() + " = " + sym.getValue());
-				}
-				
-				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
-			}
-			
-			toString = "modify " + colim + " {\n" + toString + "}";
-			return toString;
-		} 
-
-		//TODO aql add options
-		@Override
-		public ColimitSchema<N, Ty, En, Sym, Fk, Att> eval(AqlEnv env) {
-			boolean checkJava = ! (Boolean) env.defaults.getOrDefault(options, AqlOption.allow_java_eqs_unsafe);
-			ColimitSchema<N, Ty, En, Sym, Fk, Att> colim0 = colim.eval(env);
-			for (Pair<String, String> k : ens) {
-				colim0 = colim0.renameEntity(k.first, k.second, checkJava);
-			}
-			for (Pair<String, String> k : fks0) {
-				colim0 = colim0.renameFk(k.first, k.second, checkJava);
-			}
-			for (Pair<String, String> k : atts0) {
-				colim0 = colim0.renameAtt(k.first, k.second, checkJava);
-			}
-			for (Pair<String, List<String>> k : fks) {
-				colim0 = colim0.removeFk(k.first, k.second, checkJava);
-			}
-			for (Pair<String, Triple<String, String, RawTerm>> k : atts) {
-				if (!colim0.schemaStr.atts.containsKey(k.first)) {
-					throw new RuntimeException("Not an attribute: " + k.first + " in\n\n" + colim0.schemaStr);
-				}
-				String pre = "In processing " + k.first + " -> lambda " + k.second.first + "." + k.second.third + ", ";
-				Pair<String, Ty> r = colim0.schemaStr.atts.get(k.first);
-				if (k.second.second != null && !k.second.second.equals(r.first)) {
-					throw new RuntimeException(pre + " given type is " + k.second.second + " but expected " + r.first);
-				}
-				Ctx<String,Chc<Ty,String>> ctx = new Ctx<>(k.second.first, Chc.inRight(r.first));
-				Term<Ty, String, Sym, String, String, Void, Void> t = 
-				RawTerm.infer0(ctx.map, k.second.third, Chc.inLeft(r.second), colim0.schemaStr.collage(), pre, colim0.schemaStr.typeSide.js);
-				colim0 = colim0.removeAtt(k.first, new Var(k.second.first), t, checkJava);
-			}
-			
-			return colim0;
-		
-		}
-
-
-		@Override
-		public ColimSchExp<N, E, Ty, En, Sym, Fk, Att> type(AqlTyping G) {
-			return colim.type(G);
-		}
-
-		@Override
-		public Collection<Pair<String, Kind>> deps() {
-			return colim.deps();
-		}
-		
-	}
 
 }

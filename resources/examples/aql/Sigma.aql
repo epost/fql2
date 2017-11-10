@@ -56,15 +56,21 @@ schema D = literal : Type {
 mapping F = literal : C -> D {
 	entities 
 		Amphibian->yAmphibian
-		LandAnimal->yLandAnimal
-		WaterAnimal->yWaterAnimal
 	foreign_keys
 		IsAL -> yIsAL
 		IsAW -> yIsAW
 	attributes
-		attW -> yattW
-		attL -> yattL
 		attA -> yattA
+
+	entities
+		LandAnimal->yLandAnimal
+	attributes
+		attL -> yattL
+
+	entities
+		WaterAnimal->yWaterAnimal
+	attributes
+		attW -> yattW
 } 
 
 instance J = sigma F I

@@ -4,7 +4,7 @@ public interface SemanticsVisitor<R,G,E extends Throwable> {
 	
 	public <T,C> R visit(G arg, TypeSide<T,C> T) throws E;
 
-	public <N, E0, Ty, En, Sym, Fk, Att> R visit(G arg, ColimitSchema<N, Ty, En, Sym, Fk, Att> S) throws E;
+	public <N> R visit(G arg, ColimitSchema<N> S) throws E;
 
 	public <Ty, En, Sym, Fk, Att> R visit(G arg, Schema<Ty, En, Sym, Fk, Att> S) throws E;
 	

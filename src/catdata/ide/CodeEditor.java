@@ -69,6 +69,7 @@ import catdata.Prog;
 import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Kind;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.exp.LocException;
 
 /**
@@ -80,6 +81,52 @@ import catdata.aql.exp.LocException;
 public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> extends JPanel
 		implements SearchListener, Runnable {
 
+	public String getClickedWord() {
+		String content = topArea.getText();
+		int caretPosition = topArea.getCaretPosition();
+	    try {
+	        if (content.length() == 0) {
+	            return "";
+	        }
+	        //replace non breaking character with space
+	        content = content.replace(String.valueOf((char) 160), " ");
+	        int selectionStart = content.lastIndexOf(" ", caretPosition - 1);
+	        if (selectionStart == -1) {
+	            selectionStart = 0;
+	        } else {
+	            //ignore space character
+	            selectionStart += 1;
+	        }
+	        content = content.substring(selectionStart);
+	        int i = 0;
+	        String temp;
+	        int length = content.length();
+	        while (i != length && !(temp = content.substring(i, i + 1)).equals(" ") && !temp.equals("\n")) {
+	            i++;
+	        }
+	        content = content.substring(0, i);
+	        //int selectionEnd = content.length() + selectionStart;
+	        return content;
+	    } catch (StringIndexOutOfBoundsException e) {
+	        return "";
+	    }
+	    
+	}
+	public void showGotoDialog2() {
+		String selected = getClickedWord().trim();
+		synchronized (parsed_prog_lock) {
+			if (parsed_prog != null) {
+				Integer line = parsed_prog.getLine(selected);
+				if (line != null) {
+					setCaretPos(line);
+				} else {
+					showGotoDialog();
+				}
+			}
+		}
+	}
+	
+	
 	public void showGotoDialog() {
 		JPanel panel = new JPanel(new BorderLayout());
 		
@@ -489,7 +536,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 		topArea.getPopupMenu().add(unfoldall, 0);
 
 		JMenuItem gotox = new JMenuItem("Goto Definition");
-		gotox.addActionListener(x -> showGotoDialog());
+		gotox.addActionListener(x -> showGotoDialog2());
 		topArea.getPopupMenu().add(gotox, 0);
 
 		// TODO aql real DAWG?
@@ -740,12 +787,16 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			env = makeEnv(program, init);
 			middle = System.currentTimeMillis();
 
-			toDisplay = "Computation finished, creating viewer...";
-
+			toDisplay = "Computation finished, creating viewer... (max " + init.timeout() + " seconds)";
 			DateFormat format = DateFormat.getTimeInstance();
-			String foo = title;
-			foo += " - " + format.format(new Date(start));
-			display = makeDisplay(foo, init, env, start, middle);
+			String foo2 = title;
+			foo2 += " - " + format.format(new Date(start));
+			foo2 += " - " + format.format(new Date(start));
+			String foo = foo2;
+			long t = (Long)init.timeout() * 1000;
+			display  = Util.timeout( () -> makeDisplay(foo, init, env, start, middle), t );
+			
+		//	display = makeDisplay(foo, init, env, start, middle);
 			if (display.exn() == null) {
 				toDisplay = textFor(env); // "Done";
 				respArea.setText(textFor(env)); // "Done");

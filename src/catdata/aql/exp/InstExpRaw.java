@@ -12,6 +12,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Null;
@@ -30,13 +34,81 @@ import catdata.aql.Kind;
 import catdata.aql.RawTerm;
 import catdata.aql.Schema;
 import catdata.aql.Term;
+import catdata.aql.Var;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.InstExpRaw.Sk;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
+import catdata.aql.exp.TyExpRaw.Sym;
+import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.fdm.InitialAlgebra;
 import catdata.aql.fdm.LiteralInstance;
 import catdata.aql.fdm.SaturatedInstance;
 
 
-public final class InstExpRaw<Ty,En,Sym,Fk,Att> extends InstExp<Ty,En,Sym,Fk,Att,String,String,ID,Chc<String,Pair<ID,Att>>> implements Raw {
+public final class InstExpRaw extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw {
 
+	public static class Gen implements Comparable<Gen> {
+		public final String str;
+
+		public Gen(String str) {
+			Util.assertNotNull(str);
+			this.str = str;
+		}
+
+		@Override
+		 public int compareTo(Gen o) {
+			 return CompareToBuilder.reflectionCompare(this, o);
+		   }
+
+		@Override
+		public int hashCode() {
+			return HashCodeBuilder.reflectionHashCode(this);
+			//return str.hashCode(); //must work with compareTo - cant use auto gen one
+		} 
+
+			@Override
+		public boolean equals(Object obj) {
+			return EqualsBuilder.reflectionEquals(this, obj);
+		}
+		@Override
+		public String toString() {
+			return str;
+		}
+
+	}
+	
+	public static class Sk implements Comparable<Sk> {
+		public final String str;
+
+		public Sk(String str) {
+			Util.assertNotNull(str);
+			this.str = str;
+		}
+
+		@Override
+		 public int compareTo(Sk o) {
+			 return CompareToBuilder.reflectionCompare(this, o);
+		   }
+
+		@Override
+		public int hashCode() {
+			return HashCodeBuilder.reflectionHashCode(this);
+			//return str.hashCode(); //must work with compareTo - cant use auto gen one
+		} 
+
+			@Override
+		public boolean equals(Object obj) {
+			return EqualsBuilder.reflectionEquals(this, obj);
+		}
+
+		@Override
+		public String toString() {
+			return str;
+		}
+
+	}
 	
 private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 	
@@ -188,7 +260,7 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		InstExpRaw<?, ?, ?, ?, ?> other = (InstExpRaw<?, ?, ?, ?, ?>) obj;
+		InstExpRaw other = (InstExpRaw) obj;
 		if (eqs == null) {
 			if (other.eqs != null)
 				return false;
@@ -218,22 +290,30 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 	}
 
 	@Override
-	public synchronized Instance<Ty, En, Sym, Fk, Att, String, String, ID, Chc<String, Pair<ID, Att>>> eval(AqlEnv env) {
+	public synchronized Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> eval(AqlEnv env) {
 		Schema<Ty, En, Sym, Fk, Att> sch = schema.eval(env);
-		Collage<Ty,En,Sym,Fk,Att,String,String> col = new Collage<>(sch.collage());
+		Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col = new Collage<>(sch.collage());
 		
-		Set<Pair<Term<Ty,En,Sym,Fk,Att,String,String>, Term<Ty,En,Sym,Fk,Att,String,String>>> eqs0 = new HashSet<>();
+		Set<Pair<Term<Ty,En,Sym,Fk,Att,Gen,Sk>, Term<Ty,En,Sym,Fk,Att,Gen,Sk>>> eqs0 = new HashSet<>();
 
+		
 		for (String k : imports) {
-			Instance<?, ?, ?, ?, ?, ?, ?, ?, ?> u = env.defs.insts.get(k);
+			@SuppressWarnings("unchecked")
+			Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> v = env.defs.insts.get(k);
+			col.addAll(v.collage());
+			eqs0.addAll(v.eqs());
+		}
+	
+		/* for (String k : imports) {
+			Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> u = env.defs.insts.get(k);
 			for (Object o : u.gens().keySet()) {
-				if (!(o instanceof String)) {
-					throw new RuntimeException("Cannot import " + o + " from " + k + " because it is not a string");
+				if (!(o instanceof Gen)) {
+					throw new RuntimeException("Cannot import " + o + " from " + k + " because it is not a generator");
 				}
 			}
 			for (Object o : u.sks().keySet()) {
-				if (!(o instanceof String)) {
-					throw new RuntimeException("Cannot import " + o + " from " + k + " because it is not a string");
+				if (!(o instanceof Sk)) {
+					throw new RuntimeException("Cannot import " + o + " from " + k + " because it is not a labelled null");
 				}
 			}
 			
@@ -244,15 +324,15 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			col.sks.putAll(v.sks().map);
 			eqs0.addAll(v.eqs());
 			col.eqs.addAll(v.eqs().stream().map(x -> new Eq<>(new Ctx<>(), x.first, x.second)).collect(Collectors.toList()));
-		}
+		} */
 		
 		for (Pair<String, String> p : gens) {
 			String gen = p.first;
 			String ty = p.second;
-			if (col.ens.contains(ty)) {
-				col.gens.put(gen, (En) ty);
-			} else if (col.tys.contains(ty)) {
-				col.sks.put(gen, (Ty) ty);
+			if (col.ens.contains(new En(ty))) {
+				col.gens.put(new Gen(gen), new En(ty));
+			} else if (col.tys.contains(new Ty(ty))) {
+				col.sks.put(new Sk(gen), new Ty(ty));
 			} else {
 				throw new LocException(find("generators", p), "The sort for " + gen + ", namely " + ty + ", is not declared as a type or entity");
 			}
@@ -262,8 +342,8 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			try {
 				Map<String, Chc<Ty, En>> ctx = Collections.emptyMap();
 				
-				Triple<Ctx<String,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,String,String>,Term<Ty,En,Sym,Fk,Att,String,String>>
-				eq0 = RawTerm.infer1(ctx, eq.first, eq.second, col, sch.typeSide.js);
+				Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>
+				eq0 = RawTerm.infer1x(ctx, eq.first, eq.second, null, col, "", sch.typeSide.js).first3();
 						
 				eqs0.add(new Pair<>(eq0.second, eq0.third));
 				col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));
@@ -278,8 +358,9 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 		boolean interpret_as_algebra = (boolean) strat.getOrDefault(AqlOption.interpret_as_algebra);
 	
 		if (interpret_as_algebra) {
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			Ctx<En, Collection<String>> ens0 = new Ctx(Util.revS(col.gens.map));
+			Ctx<En, Set<Gen>> ens0x= new Ctx<>(Util.revS(col.gens.map));
+			Ctx<En, Collection<Gen>> ens0 = ens0x.map(x -> (Collection<Gen>)x);
+			
 			if (!col.sks.isEmpty()) {
 				throw new RuntimeException("Cannot have generating labelled nulls with import_as_theory");
 			}
@@ -287,15 +368,15 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			for (Ty ty : sch.typeSide.tys) {
 				tys0.put(ty, new HashSet<>());
 			}
-			Ctx<String, Ctx<Fk, String>> fks0 = new Ctx<>();
-			Ctx<String, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<?>>>> atts0 = new Ctx<>();
-			for (String gen : col.gens.keySet()) {
+			Ctx<Gen, Ctx<Fk, Gen>> fks0 = new Ctx<>();
+			Ctx<Gen, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<?>>>> atts0 = new Ctx<>();
+			for (Gen gen : col.gens.keySet()) {
 				fks0.put(gen, new Ctx<>());
 				atts0.put(gen, new Ctx<>());
 			}
-			for (Pair<Term<Ty, En, Sym, Fk, Att, String, String>, Term<Ty, En, Sym, Fk, Att, String, String>> e : eqs0) {
-				Term<Ty, En, Sym, Fk, Att, String, String> lhs = e.first;
-				Term<Ty, En, Sym, Fk, Att, String, String> rhs = e.second;
+			for (Pair<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> e : eqs0) {
+				Term<Ty, En, Sym, Fk, Att, Gen, Sk> lhs = e.first;
+				Term<Ty, En, Sym, Fk, Att, Gen, Sk> rhs = e.second;
 				if (rhs.gen != null && lhs.fk != null && lhs.arg.gen != null) {
 					fks0.get(lhs.arg.gen).put(lhs.fk, rhs.gen);
 				} else if (lhs.gen != null && rhs.fk != null && rhs.arg.gen != null) {
@@ -308,8 +389,8 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 					throw new RuntimeException("import_as_theory not compatible with equation " + lhs + " = " + rhs + "; each equation must be of the form gen.fk=gen or gen.att=javaobject");
 				}
 			}
-			Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, String, Null<?>>> extraRepr = new Ctx<>();
-			for (String gen : col.gens.keySet()) {
+			Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>> extraRepr = new Ctx<>();
+			for (Gen gen : col.gens.keySet()) {
 				for (Att att : sch.attsFrom(col.gens.get(gen))) {
 					if (!atts0.get(gen).containsKey(att)) {
 						atts0.get(gen).put(att, InstExpImport.objectToSk(sch, null, gen, att, tys0, extraRepr, false, false));
@@ -317,7 +398,8 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 				}
 			}
 			
-			ImportAlgebra<Ty, En, Sym, Fk, Att, String, Null<?>> alg = new ImportAlgebra<>(sch, ens0, tys0, fks0, atts0,
+			ImportAlgebra<Ty, En, Sym, Fk, Att, Gen, Null<?>> alg = 
+					new ImportAlgebra<Ty, En, Sym, Fk, Att, Gen, Null<?>>(sch, ens0, tys0, fks0, atts0,
 					Object::toString, Object::toString);
 
 			return new SaturatedInstance(alg, alg, (Boolean) strat.getOrDefault(AqlOption.require_consistency),
@@ -325,7 +407,7 @@ private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 			
 		}
 		
-		InitialAlgebra<Ty,En,Sym,Fk,Att,String,String,ID> 
+		InitialAlgebra<Ty,En,Sym,Fk,Att,Gen,Sk,ID> 
 		initial = new InitialAlgebra<>(strat, sch, col, new It(), Object::toString, Object::toString);
 				 
 		return new LiteralInstance<>(sch, col.gens.map, col.sks.map, eqs0, initial.dp(), initial, (Boolean) strat.getOrDefault(AqlOption.require_consistency), (Boolean) strat.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
