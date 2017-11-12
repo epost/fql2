@@ -1166,7 +1166,9 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 			}
 			if (lhs.left && rhs.left) {
 				if (min.contains(lhs) && min.contains(rhs) || !min.contains(lhs) && !min.contains(rhs)) { // both minimal
-					return ((Comparable)lhs.l)./*toString(). */compareTo(rhs.l /*.toString()*/) > 0;
+					return lhs.l.toString().compareTo(rhs.l.toString()) > 0;
+					
+//					return ((Comparable)lhs.l)./*toString(). */compareTo(rhs.l /*.toString()*/) > 0;
 				} else if (min.contains(lhs) && !min.contains(rhs)) { // lhs
 																		// minimal,
 																		// rhs
@@ -1384,15 +1386,15 @@ public class LPOUKB<T, C, V> extends DPKB<T, C, V> {
 
 	public static <C, V, T> List<C> inferPrec(Map<C, Integer> symbols, Set<Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>>> R0) throws InterruptedException {
 		Set<DAG<C>> ret = tru();
-		//System.out.println("start");
+	//	System.out.println("rules " + R0);
 		for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, T>> R : R0) {
-		//	System.out.println("x" + ret);
+		//	System.out.println("x" + ret + " and " + R);
 			ret = and(ret, gt_lpoInfer(R.first, R.second));
 		}
 		if (ret.isEmpty()) {
-			throw new RuntimeException("There is no LPO precedence that can orient all rules in their given left to right order.  (Unfailing) completion can still be used, but you will have to specify a precedence manually.  Or, try swapping the left and right hand sides of equations.");
+			throw new RuntimeException("There is no LPO precedence that can orient all rules in their given left to right order.  (Unfailing) completion can still be used, but you will have to specify a precedence manually.  Or, try swapping the left and right hand sides of equations.\n\n" + Util.sep(R0, "\n"));
 		}
-	//	System.out.println("ops " + ret);
+		//System.out.println("ops " + ret);
 		DAG<C> g = Util.get0X(ret);
 		return toPrec(symbols, g); // TODO: aql just pick one randomly and make it total randomly.
 

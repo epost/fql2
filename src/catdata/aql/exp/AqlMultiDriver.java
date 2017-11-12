@@ -200,6 +200,12 @@ public final class AqlMultiDriver implements Callable<Unit> {
 	}
 
 	private boolean changed(String n) {
+		if (n == null) {
+			Util.anomaly();
+		}
+		if (env.prog.exps.get(n) == null) {
+			Util.anomaly();
+		}
 		if (changed.containsKey(n)) {
 			return changed.get(n);
 		}

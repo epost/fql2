@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
@@ -36,7 +39,7 @@ public class InstExpJdbc extends InstExpImport<Connection, String> {
 
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
-		Util.checkClass(clazz);
+		//Util.checkClass(clazz);
 		
 		
 	}
@@ -195,6 +198,15 @@ public class InstExpJdbc extends InstExpImport<Connection, String> {
 
 	@Override
 	protected void joinedEn(Connection conn, En en, String s, Schema<Ty, En, Sym, Fk, Att> sch) throws Exception {
+		
+		if (s == null) {
+			if (!(boolean) op.getOrDefault(AqlOption.import_missing_is_empty)) {
+			throw new RuntimeException("Missing query for entity: " + en
+					+ ". \n\nPossible options to consider: " + AqlOption.import_missing_is_empty);
+			} else {
+				return;
+			}
+		}
 		Statement stmt = conn.createStatement();
 		stmt.execute(s);
 		ResultSet rs = stmt.getResultSet();
@@ -265,6 +277,16 @@ public class InstExpJdbc extends InstExpImport<Connection, String> {
 		}
 	}
 
+	@Override
+	public int hashCode() {
+		return HashCodeBuilder.reflectionHashCode(this);
+	} 
+
+	@Override
+	public boolean equals(Object obj) {
+		return EqualsBuilder.reflectionEquals(this, obj); //includes super
+	}
+	/*
 	//TODO AQL *******************************************************************
 	// must invoke super
 
@@ -302,6 +324,6 @@ public class InstExpJdbc extends InstExpImport<Connection, String> {
 		return super.equals(obj);
 	}
 
-	
+	*/
 
 }

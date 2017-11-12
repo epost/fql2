@@ -96,7 +96,7 @@ public abstract class InstExpImport<Handle, Q>
 		return schema;
 	}
 
-	public static <Ty, Sym, En, Fk, Att, Gen> Term<Ty, Void, Sym, Void, Void, Void, Null<?>> objectToSk(
+	public static  Term<Ty, Void, Sym, Void, Void, Void, Null<?>> objectToSk(
 			Schema<Ty, En, Sym, Fk, Att> sch, Object rhs, Gen x, Att att,
 			Ctx<Ty, Collection<Null<?>>> sks, 
 			Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>> extraRepr, boolean shouldJS, boolean errMeansNull) {
@@ -124,8 +124,8 @@ public abstract class InstExpImport<Handle, Q>
 					if (errMeansNull) {
 						return objectToSk(sch, null, x, att, sks, extraRepr, shouldJS, errMeansNull);
 					} else {
-						throw new RuntimeException("Error while importing " + rhs + " of class " + rhs.getClass() + " was expecting " + sch.typeSide.js.java_tys.get(ty) + ".  Consider option import_null_on_err_unsafe.");
-					}
+						throw new RuntimeException("Error while importing " + rhs + " of class " + rhs.getClass() + " was expecting " + sch.typeSide.js.java_tys.get(ty) + ".  Consider option " + AqlOption.import_null_on_err_unsafe);
+				}
 				}
 			} catch (ClassNotFoundException ex) {
 				Util.anomaly();
@@ -144,6 +144,7 @@ public abstract class InstExpImport<Handle, Q>
 	protected boolean prepend_entity_on_ids;
 	protected String import_col_seperator;
 	protected String prefix;
+	protected boolean dont_check_closure;
 
 	protected Ctx<En, Collection<Gen>> ens0;
 	protected Ctx<Ty, Collection<Null<?>>> tys0;
@@ -169,7 +170,7 @@ public abstract class InstExpImport<Handle, Q>
 		 prepend_entity_on_ids = (Boolean) op.getOrDefault(AqlOption.prepend_entity_on_ids);
 		 import_col_seperator = (String) op.getOrDefault(AqlOption.import_col_seperator);
 		 prefix = (String) op.getOrDefault(AqlOption.csv_import_prefix);
-		 
+		 dont_check_closure = (boolean) op.getOrDefault(AqlOption.import_dont_check_closure_unsafe);
 		 ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
 		 tys0 = new Ctx<>(Util.newSetsFor0(sch.typeSide.tys));
 		 fks0 = new Ctx<>();
@@ -236,7 +237,7 @@ public abstract class InstExpImport<Handle, Q>
 		}
 
 		ImportAlgebra<Ty, En, Sym, Fk, Att, Gen, Null<?>> alg = new ImportAlgebra<>(sch, ens0, tys0, fks0, atts0,
-				Object::toString, Object::toString);
+				Object::toString, Object::toString, dont_check_closure);
 
 		return new SaturatedInstance<>(alg, alg, (Boolean) op.getOrDefault(AqlOption.require_consistency),
 				(Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe), true, extraRepr);
@@ -370,7 +371,7 @@ public abstract class InstExpImport<Handle, Q>
 	public Collection<Pair<String, Kind>> deps() {
 		return schema.deps();
 	}
-
+/*
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -409,7 +410,7 @@ public abstract class InstExpImport<Handle, Q>
 		return true;
 	}
 
-	
+	*/
 
 }
 

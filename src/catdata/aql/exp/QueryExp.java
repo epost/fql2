@@ -241,7 +241,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 		@Override
 		public String toString() {
-			return "(" + Q1 + " ; " + Q2 + ")";
+			return "[" + Q1 + " ; " + Q2 + "]";
 		}
 
 		@Override
@@ -356,8 +356,8 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			}
 			
 
-			return new Query<Ty, En1, Sym, Fk1, Att1, En3, Fk3, Att3>(ens, atts, fks, q1.src, q2.dst,
-					(Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
+			return Query.makeQuery(ens, atts, fks, q1.src, q2.dst,
+					(Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe), (Boolean) ops.getOrDefault(AqlOption.query_remove_redundancy));
 
 		}
 
@@ -556,8 +556,8 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				atts.put(att3, tt);
 			}
 
-			return new Query<Ty, En1, Sym, Fk1, Att1, En3, Fk3, Att3>(ens, atts, fks, q1.src, q2.dst,
-					(Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
+			return Query.makeQuery(ens, atts, fks, q1.src, q2.dst,
+					(Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe), (Boolean) ops.getOrDefault(AqlOption.query_remove_redundancy));
 
 		}
 
@@ -655,8 +655,8 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				fks.put(fk1, new Pair<>(g, false));
 			}
 
-			return new Query<>(ens, atts, fks, F0.dst, F0.src,
-					(Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
+			return Query.makeQuery(ens, atts, fks, F0.dst, F0.src,
+					(Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe), (Boolean) ops.getOrDefault(AqlOption.query_remove_redundancy));
 		}
 
 	}
@@ -765,9 +765,9 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 				for (En1 en1 : J.schema().ens) {
 					for (Pair<En1, ID> id : J.algebra().en(en1)) {
-				//		fr.put(new Var(iso.first.get(id).toString()), en1);
-
-						fr.put(new Var(iso.first.get(id) + " " + J.algebra().printX(id)), en1);
+						fr.put(new Var(iso.first.get(id).toString()), en1);
+//TODO: aql: this printing stategy is 100% wrong - it leads to queries that print correctly but don't load correctly directly!
+			//			fr.put(new Var("\"(" + iso.first.get(id) + " " + J.algebra().printX(id) + ")\""), en1);
 					}
 				}
 
@@ -783,9 +783,9 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 							if (J.type(Term.Sk(p)).equals(J.type(s.mapGenSk(Function.identity(), Util.voidFn())))) {
 								if (J.dp().eq(new Ctx<>(), Term.Sk(p),
 										s.mapGenSk(Function.identity(), Util.voidFn()))) {
-							//		u = s.mapGen(pp -> new Var(iso.first.get(pp).toString() ));
+									u = s.mapGen(pp -> new Var(iso.first.get(pp).toString() ));
 
-									u = s.mapGen(pp -> new Var(iso.first.get(pp) + " " + J.algebra().printX(pp)));
+								//	u = s.mapGen(pp -> new Var("\"(" + iso.first.get(pp) + " " + J.algebra().printX(pp)+ ")\""));
 									break outer;
 								}
 							}
@@ -804,9 +804,9 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 				for (Pair<Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Chc<Void, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Chc<Void, Pair<ID, Att2>>>> eq : J
 						.eqs()) {
-				//	Function<Pair<En1, ID>, Var> genf = x -> new Var(iso.first.get(x).toString() );
-//TODO aql revert total 3
-					Function<Pair<En1, ID>, Var> genf = x -> new Var(iso.first.get(x) + " " + J.algebra().printX(x));
+					Function<Pair<En1, ID>, Var> genf = x -> new Var(iso.first.get(x).toString() );
+//TODO aql revert total 46
+					//Function<Pair<En1, ID>, Var> genf = x -> new Var("\"(" + iso.first.get(x) + " " + J.algebra().printX(x)+ ")\"");
 
 					Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>> tz = eq.first.mapGen(genf);
 					Term tt0 = tz;
@@ -843,17 +843,17 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 							.get(F0.dst.fks.get(fk2).first);
 					Pair<Map<Pair<En1, ID>, Integer>, Map<Integer, Pair<En1, ID>>> iso2 = isos
 							.get(F0.dst.fks.get(fk2).second);
-					//		Integer u0 = Integer.parseInt(u.getKey().var);
+							Integer u0 = Integer.parseInt(u.getKey().var);
 					
-							Integer u0 = Integer.parseInt(u.getKey().var.substring(0, u.getKey().var.indexOf(" ")));
+					//		Integer u0 = Integer.parseInt(u.getKey().var.substring(2, u.getKey().var.indexOf(" ")));
 					Pair<En1, ID> x = iso2.second.get(u0);
 					Pair<En1, ID> y = h.repr(x);
 
 					Function<Pair<En1, ID>, Var> genf = p -> {
 						Integer y1 = iso1.first.get(p);
-				//		return new Var(y1.toString()); // + " " + js.get(F0.dst.fks.get(fk2).first).algebra().printX(p));
+						return new Var(y1.toString()); // + " " + js.get(F0.dst.fks.get(fk2).first).algebra().printX(p));
 
-						return new Var(y1 + " " + js.get(F0.dst.fks.get(fk2).first).algebra().printX(p));
+				//		return new Var("\"(" + y1 + " " + js.get(F0.dst.fks.get(fk2).first).algebra().printX(p)+ ")\"");
 					};
 					Term<Void, En1, Void, Fk1, Void, Var, Void> tt = h.dst().algebra().repr(y).mapGen(genf);
 					g.put(u.getKey(), tt);
@@ -878,8 +878,11 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 				Function<Pair<En1, ID>, Var> genf = p -> {
 					Integer y1 = iso1.first.get(p);
-					return new Var(y1.toString());
+			return new Var(y1.toString()); // + " " + js.get(F0.dst.fks.get(fk2).first).algebra().printX(p));
+
+				//	return new Var("\"(" + y1 + " " + js.get(F0.dst.atts.get(att2).first).algebra().printX(p)+ ")\"");
 				};
+	
 				// Function<Void, Pair<ID, Att2>> skf = vv -> Util.abort(vv);
 				Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>> tz = s.mapGen(genf);
 				Term tt0 = tz;
@@ -891,8 +894,8 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 									// Util.anomaly()));
 			}
 
-			return new Query<>(ens, atts, fks, F0.src, F0.dst,
-					(Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
+			return Query.makeQuery(ens, atts, fks, F0.src, F0.dst,
+					(Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe), (Boolean) ops.getOrDefault(AqlOption.query_remove_redundancy));
 		}
 
 	}

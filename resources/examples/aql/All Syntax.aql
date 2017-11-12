@@ -131,7 +131,11 @@ query q3 = simple : s3 {
 		prover = completion
 }
 query q4 = toQuery m3 { options dont_validate_unsafe = true } // this isn't a real query 
-query q5 = toCoQuery id s3 { options prover = completion }
+query q5 = toCoQuery id s3 { 
+	options 
+		prover = completion 
+		query_remove_redundancy = false //this increases the proving burden on this example
+}
 query q6 = [ id s2 ; id s2 ]
 
 //////////// Kind instance

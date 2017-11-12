@@ -184,23 +184,41 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	private  <Ty, En, Sym, Fk, Att> JComponent viewSchema(Schema<Ty, En, Sym, Fk, Att> schema) {
 		Graph<Chc<Ty, En>, Chc<Fk, Att>> sgv = new DirectedSparseMultigraph<>();
 
-		//int i = 0;
+		int i = 0;
+		boolean triggered = false;
 		for (En en : schema.ens) {
-			///if (i >= maxrows) {
-			//	break;
-			//}
 			sgv.addVertex(Chc.inRight(en));
-			//i++;
+			i++;
+			if (i >= maxrows) {
+				triggered = true;
+				break;
+			}
 		}
 //		if (i <= maxrows) {
+			i = 0;
 			for (Ty ty : schema.typeSide.tys) {
 				sgv.addVertex(Chc.inLeft(ty));
+				i++;
+				if (i >= maxrows*maxrows) {
+					triggered = true;
+					break;
+				}
 			}
 			for (Att att : schema.atts.keySet()) {
 				sgv.addEdge(Chc.inRight(att), Chc.inRight(schema.atts.get(att).first), Chc.inLeft(schema.atts.get(att).second));
+				i++;
+				if (i >= maxrows*maxrows) {
+					triggered = true;
+					break;
+				}
 			}
 			for (Fk fk : schema.fks.keySet()) {
 				sgv.addEdge(Chc.inLeft(fk), Chc.inRight(schema.fks.get(fk).first), Chc.inRight(schema.fks.get(fk).second));
+				i++;
+				if (i >= maxrows*maxrows) {
+					triggered = true;
+					break;
+				}
 			}
 	//	}
 
@@ -233,12 +251,9 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		//vv.getRenderContext().set
 		vv.setBackground(Color.white);
 		
-		//vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
-		
-		//AbstractEdgeShapeTransformer aesf = (AbstractEdgeShapeTransformer)
-			//	vv.getRenderContext().getEdgeShapeTransformer();
-			//	aesf.		
-		//		aesf.setControlOffsetIncrement(0);
+		if (triggered) {
+			ret.setBorder(BorderFactory.createTitledBorder("Partial"));
+		}
 		
 		return ret;
 	}	
@@ -454,7 +469,9 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		for (En en : entables.keySet()) {
 			Pair<List<String>,Object[][]> x = entables.get(en);
 			String str;
-			if (x.second.length < alg.en(en).size()) {
+			if (x.second.length == 0) {
+				continue;
+			} else if (x.second.length < alg.en(en).size()) {
 				str = en + " (" + x.second.length + " of " + alg.en(en).size() + ")";
 			} else {
 				str = en + " (" + x.second.length + ")";
@@ -480,7 +497,9 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), str, arr, header.toArray())); // TODO: aql boldify attributes
 		}
 
-		return Util.makeGrid(list);
+		JComponent c = Util.makeGrid(list);
+		c.setPreferredSize(new Dimension(600,600));
+		return c;
 	}
 
 	@Override
@@ -501,7 +520,11 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	@Override
 	public <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Unit visit(JTabbedPane ret, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I)  {
 		ret.addTab("Tables", viewAlgebra((Algebra<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, catdata.aql.exp.InstExpRaw.Gen, catdata.aql.exp.InstExpRaw.Sk, X, Y>) I.algebra()));
-		ret.addTab("Type Algebra", new CodeTextPanel("", I.algebra().talg().toString()));
+		if (I.algebra().talg().sks.size() < 1024) {
+			ret.addTab("Type Algebra", new CodeTextPanel("", I.algebra().talg().toString()));
+		} else {
+			ret.addTab("Type Algebra", new CodeTextPanel("", "Suppressed, size " + I.algebra().talg().sks.size() + "."));
+		}
 		ret.addTab("DP", viewDP(I.dp(), I.collage(), I.schema().typeSide.js));
 		return new Unit();
 	}

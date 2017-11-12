@@ -76,6 +76,9 @@ import catdata.aql.exp.SchExp.SchExpCod;
 import catdata.aql.exp.SchExp.SchExpEmpty;
 import catdata.aql.exp.SchExp.SchExpInst;
 import catdata.aql.exp.SchExp.SchExpVar;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TransExp.TransExpCoEval;
 import catdata.aql.exp.TransExp.TransExpCoEvalEvalCoUnit;
 import catdata.aql.exp.TransExp.TransExpCoEvalEvalUnit;
@@ -487,7 +490,7 @@ public class AqlParser {
 				.tuple(env(b, "->"), options).between(token("{"), token("}"));
 
 		Parser<InstExpCsv> ret = Parsers.tuple(token("import_csv"), ident.followedBy(token(":")), sch_ref.lazy(), qs)
-				.map(x -> new InstExpCsv((SchExp<String, String, String, String, String>) x.c, x.d.a, x.d.b, x.b));
+				.map(x -> new InstExpCsv( (SchExp<Ty, En, Sym, Fk, Att>) x.c, x.d.a, x.d.b, x.b));
 		return ret;
 	}
 

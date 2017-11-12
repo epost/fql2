@@ -52,18 +52,21 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 
 		@Override
 		 public int compareTo(Ty o) {
-			 return CompareToBuilder.reflectionCompare(this, o);
+			 return str.compareTo(o.str);
 		   }
 
 		@Override
 		public int hashCode() {
-			return HashCodeBuilder.reflectionHashCode(this);
+			return str.hashCode();
 			//return str.hashCode(); //must work with compareTo - cant use auto gen one
 		} 
 
 			@Override
 		public boolean equals(Object obj) {
-			return EqualsBuilder.reflectionEquals(this, obj);
+				if (obj == null) {
+					return false;
+				}
+			return ((Ty)obj).str.equals(this.str);
 		}
 		
 	}
@@ -78,18 +81,21 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 
 		@Override
 		 public int compareTo(Sym o) {
-			 return CompareToBuilder.reflectionCompare(this, o);
+			 return str.compareTo(o.str);
 		   }
 
 		@Override
 		public int hashCode() {
-			return HashCodeBuilder.reflectionHashCode(this);
+			return str.hashCode();
 			//return str.hashCode(); //must work with compareTo - cant use auto gen one
 		} 
 
 			@Override
 		public boolean equals(Object obj) {
-			return EqualsBuilder.reflectionEquals(this, obj);
+				if (obj == null) {
+					return false;
+				}
+			return ((Sym)obj).str.equals(this.str);
 		}
 			
 		@Override

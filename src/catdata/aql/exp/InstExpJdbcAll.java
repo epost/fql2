@@ -31,6 +31,10 @@ import catdata.aql.SqlTypeSide;
 import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
+import catdata.aql.exp.InstExpRaw.Gen;
+import catdata.aql.exp.SchExpRaw.Att;
+import catdata.aql.exp.SchExpRaw.En;
+import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.aql.fdm.SaturatedInstance;
@@ -40,7 +44,7 @@ import catdata.sql.SqlInstance;
 import catdata.sql.SqlSchema;
 import catdata.sql.SqlTable;
 
-public class InstExpJdbcAll extends InstExp<Ty, String, Sym, String, String, String, Null<?>, String, Null<?>> {
+public class InstExpJdbcAll extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> {
 
 	private final Map<String, String> options;
 
@@ -55,7 +59,7 @@ public class InstExpJdbcAll extends InstExp<Ty, String, Sym, String, String, Str
 	public InstExpJdbcAll(String clazz, String jdbcString, List<Pair<String, String>> options) {
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
-		Util.checkClass(clazz);
+	//	Util.checkClass(clazz);
 		this.options = Util.toMapSafely(options);
 	}
 
@@ -64,15 +68,15 @@ public class InstExpJdbcAll extends InstExp<Ty, String, Sym, String, String, Str
 		return x.substring(0, 1).toUpperCase() + x.substring(1, x.length());
 	}
 	
-	private Instance<Ty, String, Sym, String, String, String, Null<?>, String, Null<?>> toInstance(AqlEnv env, SqlInstance inst, SqlSchema info) {
+	private Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> toInstance(AqlEnv env, SqlInstance inst, SqlSchema info) {
 		AqlOptions ops = new AqlOptions(options, null, env.defaults);
-		Schema<Ty, String, Sym, String, String> sch = makeSchema(env, info, ops);
+		Schema<Ty, En, Sym, Fk, Att> sch = makeSchema(env, info, ops);
 
-		Ctx<String, Collection<String>> ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
+		Ctx<En, Collection<Gen>> ens0 = new Ctx<>(Util.newSetsFor0(sch.ens));
 		Ctx<Ty, Collection<Null<?>>> tys0 = new Ctx<>();
-		Ctx<String, Ctx<String, String>> fks0 = new Ctx<>();
-		Ctx<String, Ctx<String, Term<Ty, Void, Sym, Void, Void, Void, Null<?>>>> atts0 = new Ctx<>();
-		Ctx<Null<?>, Term<Ty, String, Sym, String, String, String, Null<?>>> extraRepr = new Ctx<>();
+		Ctx<Gen, Ctx<Fk, Gen>> fks0 = new Ctx<>();
+		Ctx<Gen, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Null<?>>>> atts0 = new Ctx<>();
+		Ctx<Null<?>, Term<Ty, En, Sym, Fk, Att, Gen, Null<?>>> extraRepr = new Ctx<>();
 
 		for (Ty ty : sch.typeSide.tys) {
 			tys0.put(ty, new HashSet<>());
@@ -80,31 +84,32 @@ public class InstExpJdbcAll extends InstExp<Ty, String, Sym, String, String, Str
 		
 		boolean schemaOnly = (Boolean) ops.getOrDefault(AqlOption.schema_only);
 		boolean nullOnErr = (Boolean) ops.getOrDefault(AqlOption.import_null_on_err_unsafe);
+		boolean dontCheckClosure = (Boolean) ops.getOrDefault(AqlOption.import_dont_check_closure_unsafe);
 
 		String sep = (String) ops.getOrDefault(AqlOption.import_col_seperator);
 		
 		if (!schemaOnly) {
 
 			int fr = 0;
-			Map<SqlTable, Map<Map<SqlColumn, Optional<Object>>, String>> iso1 = new HashMap<>();
+			Map<SqlTable, Map<Map<SqlColumn, Optional<Object>>, Gen>> iso1 = new HashMap<>();
 		
 			for (SqlTable table : info.tables) {
 				Set<Map<SqlColumn, Optional<Object>>> tuples = inst.get(table);
 	
-				Map<Map<SqlColumn, Optional<Object>>, String> i1 = new HashMap<>();
+				Map<Map<SqlColumn, Optional<Object>>, Gen> i1 = new HashMap<>();
 				for (Map<SqlColumn, Optional<Object>> tuple : tuples) {
-					String i = "v" + (fr++);
+					Gen i = new Gen("v" + (fr++));
 					i1.put(tuple, i);
 					// i2.put(i, tuple);
-					ens0.get(table.name).add(i);
+					ens0.get(new En(table.name)).add(i);
 					for (SqlColumn c : table.columns) {
 						if (!atts0.containsKey(i)) {
 							atts0.put(i, new Ctx<>());
 						}
 						Optional<Object> val = tuple.get(c);
 						Term<Ty, Void, Sym, Void, Void, Void, Null<?>> xxx
-						 = InstExpJdbc.objectToSk(sch, val.orElse(null), i, c.toString(sep), tys0, extraRepr, false, nullOnErr);
-						atts0.get(i).put(c.toString(sep), xxx);
+						 = InstExpJdbc.objectToSk(sch, val.orElse(null), i, new Att(c.toString(sep)), tys0, extraRepr, false, nullOnErr);
+						atts0.get(i).put(new Att(c.toString(sep)), xxx);
 					}
 				}
 				iso1.put(table, i1);
@@ -114,67 +119,67 @@ public class InstExpJdbcAll extends InstExp<Ty, String, Sym, String, String, Str
 			for (SqlForeignKey fk : info.fks) {
 				for (Map<SqlColumn, Optional<Object>> in : inst.get(fk.source)) {
 					Map<SqlColumn, Optional<Object>> out = inst.follow(in, fk);
-					String tgen = iso1.get(fk.target).get(out);
-					String sgen = iso1.get(fk.source).get(in);
+					Gen tgen = iso1.get(fk.target).get(out);
+					Gen sgen = iso1.get(fk.source).get(in);
 					if (!fks0.containsKey(sgen)) {
 						fks0.put(sgen, new Ctx<>());
 					}
-					fks0.get(sgen).put(fk.toString(), tgen);
+					fks0.get(sgen).put(new Fk(new En(fk.source.name), fk.toString()), tgen);
 				}
 			}
 		}
 
-		ImportAlgebra<Ty, String, Sym, String, String, String, Null<?>> alg = new ImportAlgebra<Ty,String,Sym,String,String,String,Null<?>>(sch, ens0, tys0, fks0, atts0, Object::toString, Object::toString);
+		ImportAlgebra<Ty, En, Sym, Fk, Att, Gen, Null<?>> alg = new ImportAlgebra<Ty,En,Sym,Fk,Att,Gen,Null<?>>(sch, ens0, tys0, fks0, atts0, Object::toString, Object::toString, dontCheckClosure);
 
 		return new SaturatedInstance<>(alg, alg, (Boolean) ops.getOrDefault(AqlOption.require_consistency), (Boolean) ops.getOrDefault(AqlOption.allow_java_eqs_unsafe), true, extraRepr);
 	}
 
-	public Schema<Ty, String, Sym, String, String> makeSchema(AqlEnv env, SqlSchema info, AqlOptions ops) {
+	public Schema<Ty, En, Sym, Fk, Att> makeSchema(AqlEnv env, SqlSchema info, AqlOptions ops) {
 		boolean checkJava = !(Boolean) ops.getOrDefault(AqlOption.allow_java_eqs_unsafe);
 	
 		TypeSide<Ty, Sym> typeSide = new SqlTypeSide(ops);
 		//typeSide.validate(true);
-		Collage<Ty, String, Sym, String, String, Void, Void> col0 = new Collage<>(typeSide.collage());
-		Set<Triple<Pair<Var, String>, Term<Ty, String, Sym, String, String, Void, Void>, Term<Ty, String, Sym, String, String, Void, Void>>> eqs = new HashSet<>();
+		Collage<Ty, En, Sym, Fk, Att, Void, Void> col0 = new Collage<>(typeSide.collage());
+		Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs = new HashSet<>();
 
 		String sep = (String) ops.getOrDefault(AqlOption.import_col_seperator);
 		
 		for (SqlTable table : info.tables) {
-			col0.ens.add(table.name);
+			col0.ens.add(new En(table.name));
 			for (SqlColumn c : table.columns) {
-				if (col0.atts.containsKey(c.toString(sep))) {
-					throw new RuntimeException("Name collision: table " + c.table.name + " col " + c.name + " against table " + col0.atts.get(c.toString(sep)).first + "\n\n.Possible solution: set option jdbc_import_col_seperator so as to avoid name collisions.");
+				if (col0.atts.containsKey(new Att(c.toString(sep)))) {
+					throw new RuntimeException("Name collision: table " + c.table.name + " col " + c.name + " against table " + col0.atts.get(new Att(c.toString(sep))).first + "\n\n.Possible solution: set option jdbc_import_col_seperator so as to avoid name collisions.");
 				}
-				col0.atts.put(c.toString(sep), new Pair<>(table.name, new Ty(sqlTypeToAqlType(c.type.name))));
+				col0.atts.put(new Att(c.toString(sep)), new Pair<>(new En(table.name), new Ty(sqlTypeToAqlType(c.type.name))));
 			}
 		}
 
 		for (SqlForeignKey fk : info.fks) {
-			col0.fks.put(fk.toString(), new Pair<>(fk.source.name, fk.target.name));
+			col0.fks.put(new Fk(new En(fk.source.name),fk.toString()), new Pair<>(new En(fk.source.name), new En(fk.target.name)));
 
 			Var v = new Var("x");
 
 			for (SqlColumn tcol : fk.map.keySet()) {
 				SqlColumn scol = fk.map.get(tcol);
-				String l = scol.toString(sep);
-				String r = tcol.toString(sep);
-				Term<Ty, String, Sym, String, String, Void, Void> lhs = Term.Att(l, Term.Var(v));
-				Term<Ty, String, Sym, String, String, Void, Void> rhs = Term.Att(r, Term.Fk(fk.toString(), Term.Var(v)));
-				eqs.add(new Triple<>(new Pair<>(v, fk.source.name), lhs, rhs));
-				col0.eqs.add(new Eq<>(new Ctx<>(new Pair<>(v, Chc.inRight(fk.source.name))), lhs, rhs));
+				Att l = new Att(scol.toString(sep));
+				Att r = new Att(tcol.toString(sep));
+				Term<Ty, En, Sym, Fk, Att, Void, Void> lhs = Term.Att(l, Term.Var(v));
+				Term<Ty, En, Sym, Fk, Att, Void, Void> rhs = Term.Att(r, Term.Fk(new Fk(new En(fk.source.name), fk.toString()), Term.Var(v)));
+				eqs.add(new Triple<>(new Pair<>(v, new En(fk.source.name)), lhs, rhs));
+				col0.eqs.add(new Eq<>(new Ctx<>(new Pair<>(v, Chc.inRight(new En(fk.source.name)))), lhs, rhs));
 			}
 		}
 
-		DP<Ty, String, Sym, String, String, Void, Void> dp = AqlProver.create(new AqlOptions(options, col0, env.defaults), col0, typeSide.js);
+		DP<Ty, En, Sym, Fk, Att, Void, Void> dp = AqlProver.create(new AqlOptions(options, col0, env.defaults), col0, typeSide.js);
 
-		Schema<Ty, String, Sym, String, String> sch = new Schema<>(typeSide, col0.ens, col0.atts.map, col0.fks.map, eqs, dp, checkJava);
+		Schema<Ty, En, Sym, Fk, Att> sch = new Schema<>(typeSide, col0.ens, col0.atts.map, col0.fks.map, eqs, dp, checkJava);
 		return sch;
 	}
 
 	
 
 	@Override
-	public Instance<Ty, String, Sym, String, String, String, Null<?>, String, Null<?>> eval(AqlEnv env) {
+	public Instance<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> eval(AqlEnv env) {
 		String toGet = jdbcString;
 		String driver = clazz;
 		AqlOptions op = new AqlOptions(options, null, env.defaults);
@@ -188,8 +193,9 @@ public class InstExpJdbcAll extends InstExp<Ty, String, Sym, String, String, Str
 		try (Connection conn = DriverManager.getConnection(toGet)) {
 			SqlSchema sch = new SqlSchema(conn.getMetaData());
 			boolean schemaOnly = (Boolean) op.getOrDefault(AqlOption.schema_only);
+			boolean nullOnErr = (Boolean) op.getOrDefault(AqlOption.import_null_on_err_unsafe);
 			if (!schemaOnly) {
-				SqlInstance inst = new SqlInstance(sch, conn);
+				SqlInstance inst = new SqlInstance(sch, conn, nullOnErr);
 				return toInstance(env, inst, sch);
 			}
 			return toInstance(env, null, sch);	
@@ -211,8 +217,7 @@ public class InstExpJdbcAll extends InstExp<Ty, String, Sym, String, String, Str
 
 	@Override
 	public Collection<Pair<String, Kind>> deps() {
-		Set<Pair<String, Kind>> ret = new HashSet<>();
-		return ret;
+		return new HashSet<>();
 	}
 
 	@Override
@@ -253,7 +258,7 @@ public class InstExpJdbcAll extends InstExp<Ty, String, Sym, String, String, Str
 	}
 
 	@Override
-	public SchExp<Ty, String, Sym, String, String> type(AqlTyping G) {
+	public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
 		return new SchExp.SchExpInst<>(this);
 	}
 

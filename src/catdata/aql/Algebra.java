@@ -138,6 +138,7 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 
 	public abstract Term<Void, En, Void, Fk, Void, Gen, Void> repr(X x);
 	
+	//rows
 	public int size() {
 		int i = 0;
 		for (En en : schema().ens) {

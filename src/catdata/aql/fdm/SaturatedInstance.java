@@ -98,7 +98,7 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 		if (alg.talg().sks.map.containsKey(new Null<>(Term.Att(att, Term.Gen(x))))) {
 			return null;
 		} else {
-			return alg.att(att, x).map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity()); 
+			return alg.att(att, x).convert(); //.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity()); 
 		}
 	}
 

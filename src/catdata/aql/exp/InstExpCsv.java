@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -34,9 +37,19 @@ import catdata.aql.exp.TyExpRaw.Ty;
 public class InstExpCsv
 		extends InstExpImport<Map<En, List<String[]>>, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>>> {
 
+	@Override
+	public int hashCode() {
+		return HashCodeBuilder.reflectionHashCode(this);
+	} 
+
+		@Override
+	public boolean equals(Object obj) {
+		return EqualsBuilder.reflectionEquals(this, obj); //includes super
+	}
+	
 	public final File f;
 
-	public InstExpCsv(SchExp schema, List<Pair<LocStr, Pair<List<Pair<LocStr, String>>, List<Pair<String, String>>>>> map,
+	public InstExpCsv(SchExp<Ty, En, Sym, Fk, Att> schema, List<Pair<LocStr, Pair<List<Pair<LocStr, String>>, List<Pair<String, String>>>>> map,
 			List<Pair<String, String>> options, String f) {
 		super(schema, map, options);
 		this.f = new File(f);
@@ -59,11 +72,11 @@ public class InstExpCsv
 	public String toString() {
 		return "import_csv " + f + " : " + schema + " {\n\t" + Util.sep(map, " -> ", "\n\t") + "\n}";
 	}
-
+/*
 	@Override
 	public boolean equals(Object obj) {
 		return (obj instanceof InstExpCsv) && super.equals(obj);
-	}
+	} */
 
 	/**
 	 * Expects filenames in the map
@@ -116,9 +129,9 @@ public class InstExpCsv
 					+ op.getOrDefault(AqlOption.csv_file_extension));
 			if (file.exists()) {
 				m.put(en.str, file.getAbsolutePath());
-			} else if (!(boolean) op.getOrDefault(AqlOption.csv_import_missing_is_empty)) {
+			} else if (!(boolean) op.getOrDefault(AqlOption.import_missing_is_empty)) {
 				throw new RuntimeException("Missing file: " + file.getAbsolutePath()
-						+ ". \n\nPossible options to consider: " + AqlOption.csv_import_missing_is_empty + " and "
+						+ ". \n\nPossible options to consider: " + AqlOption.import_missing_is_empty + " and "
 						+ AqlOption.csv_import_prefix + " and " + AqlOption.csv_file_extension);
 			}
 		}

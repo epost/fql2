@@ -124,13 +124,18 @@ public final class AqlDisplay implements Disp {
 
 	private static JComponent wrapDisplay(String c, Exp<?> exp, Semantics obj, AqlEnv env, float time) {
 		int maxSize = getMaxSize(exp, env);
+		int sampleSize = (int) exp.getOrDefault(env, AqlOption.gui_sample_size);
+		boolean doSample = (boolean) exp.getOrDefault(env, AqlOption.gui_sample);
 		if (obj.size() > maxSize) {
+			String s = doSample ? obj.sample(sampleSize) : null;
+			s = s == null ? "" : "\n\nSample (may not include all tables, columns, or rows):\n\n" + s;
 			return new CodeTextPanel("",
 					"Display supressed, size > " + maxSize
 							+ ".\n\nSee manual for a description of size, or try options gui_max_Z_size = X for X > "
 							+ obj.size()
 							+ " (the size of this object) and Z one of table, graph, string.  \n\nWarning: sizes that are too large will hang the viewer.\n\nCompute time: "
-							+ env.performance.get(c));
+							+ env.performance.get(c)
+							+ s);
 		}
 		int max_rows = (int) exp.getOrDefault(env, AqlOption.gui_rows_to_display);
 		return AqlViewer.view(time, obj, max_rows, exp);

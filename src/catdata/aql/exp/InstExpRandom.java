@@ -35,7 +35,7 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw 
 	public Ctx<String, List<InteriorLabel<Object>>> raw() {
 		return raw;
 	}
-	public final Map<String, Integer> ens;
+	public final Ctx<String, Integer> ens;
 			
 	public final Map<String, String> options;
 	
@@ -47,7 +47,7 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw 
 	}
 	
 	public InstExpRandom(SchExp<?,?,?,?,?> sch, List<Pair<LocStr, String>> ens, List<Pair<String, String>> options) {
-		this.ens = Util.toMapSafely(LocStr.set2y(ens, x -> Integer.parseInt(x)));
+		this.ens = new Ctx<>(Util.toMapSafely(LocStr.set2y(ens, x -> Integer.parseInt(x))));
 		this.options = Util.toMapSafely(options);
 		this.sch = (SchExp<Ty, En, Sym, Fk, Att>) sch;
 		List<InteriorLabel<Object>> f = new LinkedList<>();
@@ -106,7 +106,7 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw 
 		String s = "random : " + sch + " {\n";
 		String x = "";
 		if (ens.size() > 0) {
-			x = "generators\n" + Util.sep(ens, " -> ", "\n");
+			x = "generators\n" + Util.sep(ens.map, " -> ", "\n");
 		}
 		
 		return s + x + "\n}";
@@ -131,8 +131,8 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw 
 				String src = en + i;
 				gens.add(new Pair<>(new LocStr(0, src), en)); 
 				for (Fk fk : schema.fksFrom(new En(en))) {
-					Object dst_en = schema.fks.get(fk).second;
-					int dst_size = ens.containsKey(dst_en) ? ens.get(dst_en) : 0;
+					En dst_en = schema.fks.get(fk).second;
+					int dst_size = ens.containsKey(dst_en.str) ? ens.get(dst_en.str) : 0;
 					if (dst_size == 0) {
 						continue;
 					}
@@ -141,7 +141,7 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw 
 				}
 				for (Att att : schema.attsFrom(new En(en))) {
 					Ty dst_ty = schema.atts.get(att).second;
-					int dst_size = ens.containsKey(dst_ty) ? ens.get(dst_ty) : 0;
+					int dst_size = ens.containsKey(dst_ty.str) ? ens.get(dst_ty.str) : 0;
 
 					if (dst_size == 0) {
 						continue;

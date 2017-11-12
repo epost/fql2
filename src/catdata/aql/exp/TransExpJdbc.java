@@ -32,7 +32,7 @@ extends TransExpImport<Gen, Sk, Gen, Sk, X1, Y1, X2, Y2, Connection>  {
 		super(src, dst, map, options);
 		this.clazz = clazz;
 		this.jdbcString = jdbcString;
-		Util.checkClass(clazz);
+	//	Util.checkClass(clazz);
 	}
 
 	

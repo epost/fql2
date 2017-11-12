@@ -2,6 +2,10 @@ package catdata.aql;
 
 public interface Semantics {
 
+	public default String sample(int size) {
+		return null;
+	};
+	
 	public Kind kind();
 	
 	public int size();

@@ -17,6 +17,8 @@ import catdata.aql.exp.TyExpRaw.Ty;
 //TODO AQL add dates
 public class SqlTypeSide extends TypeSide<Ty, Sym> {
 
+	//TODO AQL varchar length can go here, or can add annotations on types
+	//TODO AQL get rid of String
 	public SqlTypeSide(AqlOptions ops) {
 		super(tys(), syms(), eqs(), jts(), jps(), jfs(), ops);
 	}
@@ -89,7 +91,7 @@ public class SqlTypeSide extends TypeSide<Ty, Sym> {
 		m.put(new Ty("Real"), "java.lang.Float");
 		m.put(new Ty("Integer"), "java.lang.Integer");
 		m.put(new Ty("Int"), "java.lang.Integer");
-		m.put(new Ty("Smallint"), "java.lang.Short");
+		m.put(new Ty("Smallint"), "java.lang.Integer");
 		m.put(new Ty("Tinyint"), "java.lang.Integer"); 
 
 		m.put(new Ty("Text"), "java.lang.String");
@@ -109,7 +111,7 @@ public class SqlTypeSide extends TypeSide<Ty, Sym> {
 		m.put("Timestamp", "java.lang.Object"); //TODO aql
 		*/
 
-		m.put(new Ty("Date"), "java.sql.Date");
+		m.put(new Ty("Date"), "java.lang.Object");
 		m.put(new Ty("Time"), "java.sql.Time");
 		m.put(new Ty("Timestamp"), "java.sql.Timestamp");
 		
@@ -130,7 +132,7 @@ public class SqlTypeSide extends TypeSide<Ty, Sym> {
 		m.put("Timestamp", "return input[0]");
 		*/
 
-		m.put(new Ty("Date"), "return java.sql.Date.valueOf(input[0])");
+		m.put(new Ty("Date"), "return input[0]"); //java.sql.Date.valueOf(input[0])");
 		m.put(new Ty("Time"), "return java.sql.Time.valueOf(input[0])");
 		m.put(new Ty("Timestamp"), "return java.sql.Timestamp.valueOf(input[0])"); 
 		
@@ -152,7 +154,7 @@ public class SqlTypeSide extends TypeSide<Ty, Sym> {
 		m.put(new Ty("Int"), "return new java.lang.Integer(input[0])");
 
 		m.put(new Ty("Tinyint"), "return new java.lang.Integer(input[0])");
-		m.put(new Ty("Smallint"), "return new java.lang.Short(input[0])");
+		m.put(new Ty("Smallint"), "return new java.lang.Integer(input[0])");
 		m.put(new Ty("Text"), "return input[0]");
 		m.put(new Ty("String"), "return input[0]");
 

@@ -259,14 +259,14 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	}
 
 	private <Ty1, En1, Sym1, Fk1, Att1, Gen1, Sk1> String toString(Collage<Ty1, En1, Sym1, Fk1, Att1, Gen1, Sk1> skip) {
-		String toString = "";
-		toString += "\nfunctions";
+		StringBuilder toString = new StringBuilder("");
+		toString.append("\nfunctions");
 		List<String> temp = new LinkedList<>();
 		for (Sym sym : Util.diff(syms.keySet(), skip.syms.keySet())) {
 			Pair<List<Ty>, Ty> t = syms.get(sym);
 			temp.add(sym + " : " + Util.sep(t.first, ", ") + " -> " + t.second);
 		}
-		toString += "\n\t" + Util.sep(temp, "\n\t");
+		toString.append("\n\t" + Util.sep(temp, "\n\t"));
 
 		List<String> fks0 = new LinkedList<>();
 		for (Fk fk : Util.diff(fks.keySet(), skip.fks.keySet())) {
@@ -277,31 +277,36 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			atts0.add(att + " : " + atts.get(att).first + " -> " + atts.get(att).second);
 		}
 
-		toString += "\nforeign keys";
-		toString += "\n\t" + Util.sep(fks0, "\n\t");
+		toString.append("\nforeign keys");
+		toString.append("\n\t");
+		toString.append(Util.sep(fks0, "\n\t"));
 
-		toString += "\nattributes";
-		toString += "\n\t" + Util.sep(atts0, "\n\t");
+		toString.append("\nattributes");
+		toString.append("\n\t"); 		
+		toString.append(Util.sep(atts0, "\n\t"));
 
-		toString += "\ngenerating entities";
-		toString += "\n\t" + Util.sep(Util.diff(gens.map, skip.gens.map), " : ", "\n\t");
+		toString.append("\ngenerating entities");
+		toString.append("\n\t");	
+		toString.append(Util.sep(Util.diff(gens.map, skip.gens.map), " : ", "\n\t"));
 
-		toString += "\ngenerating nulls";
-		toString += "\n\t" + Util.sep(Util.diff(sks.map, skip.sks.map), " : ", "\n\t");
+		toString.append("\ngenerating nulls");
+		toString.append("\n\t");
+		toString.append(Util.sep(Util.diff(sks.map, skip.sks.map), " : ", "\n\t"));
 
 		List<String> eqs0 = new LinkedList<>();
 		for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : Util.diff(eqs, skip.eqs)) {
 			eqs0.add(eq.ctx.toString(eq.lhs, eq.rhs));
 		}
-		toString += "\nequations";
-		toString += "\n\t" + Util.sep(eqs0, "\n\t");
+		toString.append("\nequations");
+		toString.append("\n\t");
+		toString.append(Util.sep(eqs0, "\n\t"));
 
 /*		if (list != null) {
 			toString += "\ndefinitions";
 			toString += "\n\t" + Util.sep(list, ",");	
 		} */
 		
-		return toString;
+		return toString.toString();
 	}
 	
 	private Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplified_pair;

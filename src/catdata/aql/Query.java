@@ -80,15 +80,18 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> fks,
 			Schema<Ty, En1, Sym, Fk1, Att1> src, Schema<Ty, En2, Sym, Fk2, Att2> dst, boolean doNotCheckPathEqs,
 			boolean removeRedundantVars) {
+		
+		if (!removeRedundantVars) {
+			return new Query<>(ens, atts, fks, src, dst, doNotCheckPathEqs);	
+		}
+		
 		// do this first to type check
 		@SuppressWarnings("unused")
 		Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q = new Query<>(ens, atts, fks, src, dst, true);
 		
 		Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> b = new Blob<>(ens, atts, fks, src, dst);
-		if (removeRedundantVars) {
-			b = removeRedundantVars(b);
-		}
-
+		b = removeRedundantVars(b);
+		
 		//for testing
 		//b = unfoldNestedApplications(b);
 
@@ -115,7 +118,6 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 
 	private static <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> removeRedundantVars(
 			Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> b) {
-
 		for (;;) {
 			Triple<Var, En2, Term<Void, En1, Void, Fk1, Void, Var, Void>> p = findRedundant(b);
 			if (p == null) {
@@ -309,7 +311,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : b.ens.get(en2).second) { 
 				if (eq.lhs.gen != null && !eq.rhs.gens().contains(eq.lhs.gen)) {
 					return new Triple<>(eq.lhs.gen, en2, eq.rhs.convert());
-				} else if (eq.rhs.gen != null && !eq.lhs.vars().contains(eq.rhs.gen)) {
+				} else if (eq.rhs.gen != null && !eq.lhs.gens().contains(eq.rhs.gen)) {
 					return new Triple<>(eq.rhs.gen, en2, eq.lhs.convert());
 				}
 			}
@@ -344,7 +346,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 	}
 
 	// doNotCheckPathEqs will stop construction of dps
-	public Query(Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens,
+	private Query(Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens,
 			Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts,
 			Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> fks,
 			Schema<Ty, En1, Sym, Fk1, Att1> src, Schema<Ty, En2, Sym, Fk2, Att2> dst, boolean doNotCheckPathEqs) {
@@ -353,6 +355,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		this.dst = dst;
 		totalityCheck(ens, atts, fks);
 
+		
 		for (En2 en2 : ens.keySet()) {
 			try {
 				this.ens.put(en2, new Frozen<>(ens.get(en2).first, ens.get(en2).second, src, ens.get(en2).third,
@@ -546,9 +549,10 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			this.gens = gens;
 			this.eqs = eqs;
 			this.schema = schema;
+			validateNoTalg();
+			
 			if (!dont_validate_unsafe) {
 				dp = AqlProver.create(options, collage(), schema.typeSide.js);
-				validateNoTalg();
 			} else {
 				dp = null;
 			}
@@ -608,11 +612,12 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		String ret = "";
 
 		Map<En2, String> m1 = new HashMap<>();
-		Map<Fk2, String> m2 = new HashMap<>();
 		
 		
 		for (En2 en2 : ens.keySet()) {
 			Map<String, String> m3 = new HashMap<>();
+			Map<Fk2, String> m2 = new HashMap<>();
+
 			for (Att2 att : dst.attsFrom(en2)) {
 				m3.put(att.toString(), atts.get(att).toString());
 			}

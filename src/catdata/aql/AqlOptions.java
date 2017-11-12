@@ -41,6 +41,9 @@ public final class AqlOptions {
 	//TODO: aql each typeside/instance/etc should make sure only appropriate options are given to it
 
 	public enum AqlOption {
+		gui_sample,
+		gui_sample_size,
+		import_dont_check_closure_unsafe,
 		js_env_name,
 		interpret_as_algebra,
 		csv_field_delim_char,
@@ -95,8 +98,9 @@ public final class AqlOptions {
 		csv_import_prefix, 
 		csv_prepend_entity,
 		prepend_entity_on_ids,
-		jdbc_export_truncate_after,
-		csv_import_missing_is_empty;
+		jdbc_export_truncate_after
+		,import_missing_is_empty
+		;
 		
 		
 		private String getString(Map<String, String> map) {
@@ -203,7 +207,7 @@ public final class AqlOptions {
 			return false;
 		case csv_import_prefix :
 			return "";
-		case csv_import_missing_is_empty :
+		case import_missing_is_empty :
 			return false;
 		case import_col_seperator :
 			return "_";
@@ -291,7 +295,7 @@ public final class AqlOptions {
 		case eval_use_indices:
 			return true;
 		case gui_rows_to_display:
-			return 128;
+			return 8;
 		case query_remove_redundancy:
 			return true;
 		case eval_approx_sql_unsafe:
@@ -308,6 +312,12 @@ public final class AqlOptions {
 			return false;
 		case js_env_name:
 			return "aql_env";
+		case import_dont_check_closure_unsafe:
+			return false;
+		case gui_sample:
+			return true;
+		case gui_sample_size:
+			return 2;
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -354,6 +364,7 @@ public final class AqlOptions {
 
 	private static Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		
 		case jdbc_export_truncate_after:
 			return op.getInteger(map);
 		case prepend_entity_on_ids:
@@ -361,10 +372,10 @@ public final class AqlOptions {
 		case csv_prepend_entity:
 			return op.getBoolean(map);
 		case import_null_on_err_unsafe:
-			return op.getString(map);
+			return op.getBoolean(map);
 		case csv_import_prefix :
 			return op.getString(map);
-		case csv_import_missing_is_empty :
+		case import_missing_is_empty :
 			return op.getBoolean(map);
 		case import_col_seperator:
 			return op.getString(map);
@@ -466,6 +477,12 @@ public final class AqlOptions {
 			return op.getBoolean(map);
 		case js_env_name:
 			return op.getString(map);
+		case import_dont_check_closure_unsafe:
+			return op.getBoolean(map);
+		case gui_sample:
+			return op.getBoolean(map);
+		case gui_sample_size:
+			return op.getInteger(map);
 			default:
 			throw new RuntimeException("Anomaly: please report");
 		}

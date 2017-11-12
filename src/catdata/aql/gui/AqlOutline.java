@@ -149,14 +149,14 @@ public class AqlOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 					InteriorLabel<?> l = (InteriorLabel<?>) o;
 					codeEditor.setCaretPos(l.loc);
 					codeEditor.addToHistory(l.loc);
-				} else if (node.getChildCount() != 0) {
+				} /* else if (node.getChildCount() != 0) {
 					DefaultMutableTreeNode n = (DefaultMutableTreeNode) node.getChildAt(0);
 					if (n.getUserObject() instanceof InteriorLabel) {
 						InteriorLabel<?> lx = (InteriorLabel<?>) n.getUserObject();
 						codeEditor.setCaretPos(lx.loc);
 						codeEditor.addToHistory(lx.loc);
 					}
-				}
+				} */
 
 			}
 		});

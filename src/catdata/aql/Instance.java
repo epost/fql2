@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,6 +12,59 @@ import catdata.Util;
 
 public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements Semantics {
 
+	@Override
+
+	public String sample(int size) {
+		int en_i = 0;
+		List<String> u = new LinkedList<>();
+		for (En en : schema().ens) {
+			if (algebra().en(en).isEmpty()) {
+				continue;
+			}
+			int x_i = 0;
+			List<String> h = new LinkedList<>();
+			h.add(en.toString() + " (" + algebra().en(en).size() + " rows)");
+		//	h.add("========");
+			for (X x : algebra().en(en)) {
+				List<String> l = new LinkedList<>();
+				l.add("ID: " + x);
+				/* int fk_i = 0;
+				for (Fk fk : schema().fksFrom(en)) {
+					l.add(fk.toString() + ": " + algebra().fk(fk, x));
+					fk_i++;
+					if (fk_i > size) {
+						break;
+					}
+				} */
+				
+				int att_i = 0;
+				for (Att att : schema().attsFrom(en)) {
+					l.add(att.toString() + ": " + algebra().att(att, x));
+					att_i++;
+					if (att_i > (2*size)) {
+						break;
+					}
+				}
+						
+				x_i++;
+				h.add(Util.sep(l, "\n"));
+				
+				if (x_i > size) {
+					break;
+				}
+			}
+			
+			en_i++;
+			u.add(Util.sep(h, "\n"));
+			
+			if (en_i > size*size) {
+				break;
+			}
+		}
+		
+		return Util.sep(u, "\n\n");
+	}
+	
 	@Override
 	public Kind kind() {
 		return Kind.INSTANCE;

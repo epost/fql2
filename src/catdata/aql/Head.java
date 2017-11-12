@@ -1,32 +1,168 @@
 package catdata.aql;
 
-import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import catdata.Util;
-import catdata.aql.exp.TyExpRaw;
 
 public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> implements Comparable<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> {
 
 	//these are necessary for KB
+	/*
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null)
+			return false;
+		if (getClass() != o.getClass())
+			return false;
+		Head<?,?,?,?,?,?,?> other = (Head<?,?,?,?,?,?,?>) o;
+		
+		if (att != null) {
+			return att.equals(other.att);
+		} else if (fk != null) {
+			return fk.equals(other.fk);
+		} else if (gen != null) {
+			return gen.equals(other.gen);
+		} else if (sk != null) {
+			return sk.equals(other.sk);
+		} else if ()
+		else if (obj != null) {
+			return obj.equals(other.obj) && ty.equals(other.ty); //not quite - ignore for now bug what if ty null TODO aql
+		} else if (sym != null) {
+			return sym.equals(other.sym);
+		} 
+		
+		throw new RuntimeException("Anomaly: please report");
+	}*/
+		
+	
 	
 	@Override
-	 public int compareTo(Head<Ty, En, Sym, Fk, Att, Gen, Sk> o) {
-		 return CompareToBuilder.reflectionCompare(this, o);
+	 public int compareTo(Head<Ty, En, Sym, Fk, Att, Gen, Sk> other) {
+	return	Util.anomaly();
+//			return toString().compareTo(other.toString()); //essentially an arbitrary precedence on ground symbols
 	   }
-
+	
+/*	int code = -1;
 	@Override
 	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-		//return str.hashCode(); //must work with compareTo - cant use auto gen one
-	} 
+		if (code != -1) {
+			return code;
+		}
+		code = new HashCodeBuilder()
+				.append(ty)
+				.append(sym)
+				.append(fk)
+				.append(att)
+				.append(gen)
+				.append(sk)
+				.append(obj)
+				.toHashCode();
+		return code;
+	} */
+	/*
+	@Override
+	public int compareTo(Head<Ty, En, Sym, Fk, Att, Gen, Sk> o) {
+		return new CompareToBuilder()
+				.append(ty, o.ty)
+				.append(sym, o.sym)
+				.append(fk, o.fk)
+				.append(att, o.att)
+				.append(gen, o.gen)
+				.append(sk, o.sk)
+				.append(obj, o.obj)
+				.toComparison();
 
-		@Override
-	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj);
 	}
-		
+
+	
+*/ /*
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (obj == this) {
+			return true;
+		}
+		if (obj.getClass() != getClass()) {
+			return false;
+		}
+		Head<Ty, En, Sym, Fk, Att, Gen, Sk> o = (Head<Ty, En, Sym, Fk, Att, Gen, Sk>) obj;
+		return new EqualsBuilder()
+				.append(ty, o.ty)
+				.append(sym, o.sym)
+				.append(fk, o.fk)
+				.append(att, o.att)
+				.append(gen, o.gen)
+				.append(sk, o.sk)
+				.append(obj, o.obj).isEquals();
+	}
+*/
+	
+		/*
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((att == null) ? 0 : att.hashCode());
+		result = prime * result + ((fk == null) ? 0 : fk.hashCode());
+		result = prime * result + ((gen == null) ? 0 : gen.hashCode());
+		result = prime * result + ((obj == null) ? 0 : obj.hashCode());
+		result = prime * result + ((sk == null) ? 0 : sk.hashCode());
+		result = prime * result + ((sym == null) ? 0 : sym.hashCode());
+		result = prime * result + ((ty == null) ? 0 : ty.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Head))
+			return false;
+		Head other = (Head) obj;
+		if (att == null) {
+			if (other.att != null)
+				return false;
+		} else if (!att.equals(other.att))
+			return false;
+		if (fk == null) {
+			if (other.fk != null)
+				return false;
+		} else if (!fk.equals(other.fk))
+			return false;
+		if (gen == null) {
+			if (other.gen != null)
+				return false;
+		} else if (!gen.equals(other.gen))
+			return false;
+		if (this.obj == null) {
+			if (other.obj != null)
+				return false;
+		} else if (!this.obj.equals(other.obj))
+			return false;
+		if (sk == null) {
+			if (other.sk != null)
+				return false;
+		} else if (!sk.equals(other.sk))
+			return false;
+		if (sym == null) {
+			if (other.sym != null)
+				return false;
+		} else if (!sym.equals(other.sym))
+			return false;
+		if (ty == null) {
+			if (other.ty != null)
+				return false;
+		} else if (!ty.equals(other.ty))
+			return false;
+		return true;
+	}*/
+
 	public final Sym sym;
 	public final Fk fk; 
 	public final Att att;
@@ -36,9 +172,6 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> implements Comparable<Head<Ty, 
 	public final Ty ty;
 	
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Head<Ty, En, Sym, Fk, Att, Gen, Sk> Sym(Sym sym) {
-		if (!(sym instanceof TyExpRaw.Sym)) {
-			Util.anomaly();
-		}
 		if (sym == null) {
 			throw new RuntimeException("Anomaly, please report");
 		}
@@ -71,9 +204,6 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> implements Comparable<Head<Ty, 
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Head<Ty, En, Sym, Fk, Att, Gen, Sk> Obj(Object obj, Ty ty) {
 		if (obj == null || ty == null) {
 			throw new RuntimeException("Anomaly, please report");
-		}
-		if (!(ty instanceof TyExpRaw.Ty)) {
-			Util.anomaly();
 		}
 		return new Head<>(null, null, null, null, null, obj, ty);
 	}
@@ -108,8 +238,7 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> implements Comparable<Head<Ty, 
 			throw new RuntimeException("Anomaly, please report");
 		}
 	}
-
-	/*
+/*
 	@Override
 	public int hashCode() {
 		int prime = 31;
@@ -124,32 +253,8 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> implements Comparable<Head<Ty, 
 		return result;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null)
-			return false;
-		if (getClass() != o.getClass())
-			return false;
-		Head<?,?,?,?,?,?,?> other = (Head<?,?,?,?,?,?,?>) o;
-		
-		if (att != null) {
-			return att.equals(other.att);
-		} else if (fk != null) {
-			return fk.equals(other.fk);
-		} else if (gen != null) {
-			return gen.equals(other.gen);
-		} else if (sk != null) {
-			return sk.equals(other.sk);
-		} else if (obj != null) {
-			return obj.equals(other.obj) && ty.equals(other.ty);
-		} else if (sym != null) {
-			return sym.equals(other.sym);
-		} 
-		
-		throw new RuntimeException("Anomaly: please report");
-		
+	
+
 		/*
 		if (att == null) {
 			if (other.att != null)
@@ -187,8 +292,9 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> implements Comparable<Head<Ty, 
 		} else if (!ty.equals(other.ty))
 			return false;
 		return true; */
-//	}
+//}
 	
+		
 	@Override
 	public String toString() {
 		if (att != null) {
@@ -208,6 +314,60 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> implements Comparable<Head<Ty, 
 	}
 	
 	
+	///////////////////////
+	
+	//works 
+	
+	/* @Override
+	public int hashCode() {
+		return HashCodeBuilder.reflectionHashCode(this);
+	} */
+
+	/*	@Override
+	public boolean equals(Object obj) {
+		return EqualsBuilder.reflectionEquals(this, obj); //includes super
+	} */
 	
 	
+	int code = -1;
+		public int hashCode() {
+		if (code != -1) {
+				return code;
+			}
+			code = new HashCodeBuilder()
+					.append(true) //there's a bug in HashCodeBuilder first append in null TODO aql rqport
+					.append(ty)
+					.append(sym)
+					.append(fk)
+					.append(att)
+					.append(gen)
+					.append(sk)
+					.append(obj)
+					.toHashCode();
+			return code;
+		}
+	
+		
+		@Override
+		public boolean equals(Object x) { //name collision on obj
+			if (x == null) {
+				return false;
+			}
+			if (x == this) {
+				return true;
+			}
+			if (x.getClass() != getClass()) {
+				return false;
+			}
+			Head<Ty, En, Sym, Fk, Att, Gen, Sk> o = (Head<Ty, En, Sym, Fk, Att, Gen, Sk>) x;
+			return new EqualsBuilder()
+					.append(true, true) //just in case
+					.append(ty, o.ty)
+					.append(sym, o.sym)
+					.append(fk, o.fk)
+					.append(att, o.att)
+					.append(gen, o.gen)
+					.append(sk, o.sk)
+					.append(obj, o.obj).isEquals();
+		} 
 }

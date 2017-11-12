@@ -478,7 +478,7 @@ Allowable options are {\tt timeout} and {\tt static\_typing}, which when disable
 A {\tt ctx(<entity> | <attribute> | <foreign key> | <type> , [sql code])}.  The SQL code for each entity should return a table with an ID column and one column per attribute/foreign key from that table.  (See the {\tt import\_joined} option for an alternative input format.). Note that these tables must be complete: this keyword imports a model (set of tables) of a schema, not a presentation of a model of a schema (i.e., as {\tt literal} does).  To import an instance as a theory, use the {\tt import\_as\_theory} option.  When the [jdbcclass] and [jdbcuri] are the empty string, their values will be determined by the {\tt jdbc\_default\_class} and {\tt jdbc\_default\_string} options.  
 
 \subsection{{\tt options}}
-Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, and {\tt require\_consistency}.  
+Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload}, and {\tt require\_consistency}.  See also {\tt import\_missing\_is\_empty}.
 
 
 \section{{\tt quotient\_jdbc [jdbcclass] [jdbcuri] <instance>}}
@@ -496,7 +496,7 @@ Allowed are {\tt timeout}, {\tt prover} and related options, {\tt always\_reload
 
 \section{{\tt import\_csv [directory] : schema}}
 %\subsection{entities}
-A {\tt ctx(<string> | ctx(<string>,<string>), options)}.  For each entity $en$, expects a file $pre + en$.csv in the directory, where $pre$ is controlled by option {\tt csv\_import\_file\_prefix}.  The file extension can be changed with the {\tt csv\_file\_extension} option.  The file for $en$ should be a CSV file with a header; the fields of the header should be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.  The mapping between the schemas entities (ID columns), attributes, and foreign keys and the headers of the CSV file are controlled by the options; see the CSV built-in example for details.  The {\tt csv\_import\_missing\_is\_empty} option will interpret missing files as empty files.  See also {\tt csv\_prepend\_entity}. 
+A {\tt ctx(<string> | ctx(<string>,<string>), options)}.  For each entity $en$, expects a file $pre + en$.csv in the directory, where $pre$ is controlled by option {\tt csv\_import\_file\_prefix}.  The file extension can be changed with the {\tt csv\_file\_extension} option.  The file for $en$ should be a CSV file with a header; the fields of the header should be an ID column name (specified using options), as well as any attributes and foreign keys whose domain is $en$.  The mapping between the schemas entities (ID columns), attributes, and foreign keys and the headers of the CSV file are controlled by the options; see the CSV built-in example for details.  The {\tt import\_missing\_is\_empty} option will interpret missing files as empty files.  See also {\tt csv\_prepend\_entity}. 
 
 Records can contain nulls (using the string specified in options).  Note that these tables must be complete: this keyword imports a model (set of tables) of a schema, not a presentation of a model of a schema (i.e., as {\tt literal} does).  To import an instance as a theory, use the {\tt import\_as\_theory} option.  To auto generate IDs, see {\tt csv\_generate\_ids} option.
 
@@ -815,9 +815,9 @@ Sets the file extension to expect during CSV import.
 \subsection{{\tt csv\_generate\_ids}}
 If no ID column is found, then AQL will create IDs during CSV import.
 
-\subsection{{\tt csv\_import\_missing\_is\_empty}}
+\subsection{{\tt import\_missing\_is\_empty}}
 
-When true missing CSV files are treated as empty.
+When true missing CSV files are treated as empty, and so are missing SQL queries.
 
 \subsection{{\tt csv\_import\_file\_prefix}}
 
@@ -868,8 +868,10 @@ When importing a SQL schema the column $c$ of table $t$ becomes AQL attribute $t
 During import, when enable this will import IDs $x$ as $en + sep + x$, where $en$ is the entity for $x$ and $sep$ is  {\tt import\_col\_seperator}. 
 
 \section{ {\tt jdbc\_default\_class = string } }
-
 This string will be used in JDBC-related expressions when the JDBC driver class is the empty string.
+
+\section{ {\tt jdbc_export_truncate_after = integer } }
+Truncates column names during SQL export to the given length.
 
 \section{ {\tt jdbc\_default\_string = string } }
 
@@ -964,6 +966,14 @@ For pragmas and constraints.
 
 Sets the maximum number of rows to display per table per instance in the viewer.  (I.e., the table in the viewer is conceptually similar to a SQL LIMIT query for the given number of rows).
 
+\subsection{{\tt gui\_sample = boolean}}
+
+When an object's display is suppressed, when set to to true this will display some sample data in the overflow message.
+
+\subsection{{\tt gui\_sample\_size = integer}}
+
+When an object's display is suppressed, sets how much sample data to display the overflow message.
+
 \section{Evaluation options}
 
 \subsection{{\tt eval\_max\_temp\_size = integer}}
@@ -1002,7 +1012,7 @@ Queries executed by translation to SQL can store any computed indicies for futur
 
 \section{{\tt query\_remove\_redundancy = boolean}}
 
-Sets whether redundant joins (i.e., containing a binding $v$ and an equation $v = e$ where $v \notin e$) should be eliminated.
+Sets whether redundant joins (i.e., containing a binding $v$ and an equation $v = e$ where $v \notin e$) should be eliminated.  Note that this only has an effect when specified at the top level of a query, not within each block.
 \section{Coproduct options}
 
 The generators and labelled nulls of instances participating in a coproduct are required to be unique.  The following two options disable the uniqueness check.  These options are marked unsafe because they can result in an instance that is not a coproduct, but is rather a coproduct followed by a quotient.
@@ -1025,6 +1035,10 @@ Controls whether to use the incomplete co-evaluation based method for query comp
 
 In JDBC import, toggles whether attributes and foreign keys should be their own binary tables (false) or should be columns in the entity table (true).
 
+\subsection{{\tt import\_dont\_check\_closure\_unsafe} = boolean} 
+
+When set to true, will skip some validation of the imported data.
+		
 \subsection{{\tt map\_nulls\_arbitrarily\_unsafe} = boolean}
 
 In transform import, specifies whether labelled nulls can be mapped into the target by choosing arbitrarily.

@@ -22,7 +22,7 @@ public class ImportAlgebra<Ty,En,Sym,Fk,Att,X,Y> extends Algebra<Ty,En,Sym,Fk,At
 	
 //	private final Ctx<Y, Term<Ty, En, Sym, Fk, Att, X, Y>> reprT_extra;
 	 
-	public ImportAlgebra(Schema<Ty, En, Sym, Fk, Att> schema, Ctx<En, Collection<X>> ens, Ctx<Ty, Collection<Y>> tys, Ctx<X, Ctx<Fk, X>> fks, Ctx<X, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Y>>> atts, Function<X, String> printX, Function<Y, String> printY) {
+	public ImportAlgebra(Schema<Ty, En, Sym, Fk, Att> schema, Ctx<En, Collection<X>> ens, Ctx<Ty, Collection<Y>> tys, Ctx<X, Ctx<Fk, X>> fks, Ctx<X, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Y>>> atts, Function<X, String> printX, Function<Y, String> printY, boolean dontCheckClosure) {
 		this.schema = schema;
 		this.ens = ens;
 		this.tys = tys;
@@ -31,8 +31,9 @@ public class ImportAlgebra<Ty,En,Sym,Fk,Att,X,Y> extends Algebra<Ty,En,Sym,Fk,At
 		this.printX = printX;
 		this.printY = printY; 
 		initTalg(); 
-		checkClosure();
-		
+		if (!dontCheckClosure) {
+			checkClosure();
+		}
 	}
 
 	private void checkClosure() {

@@ -53,7 +53,7 @@ public class SqlInstance {
 		return db.get(t);
 	}
 	
-	public SqlInstance(SqlSchema schema, Connection conn) throws SQLException {
+	public SqlInstance(SqlSchema schema, Connection conn, boolean errMeansNull) throws SQLException {
 		if (schema == null || conn == null) {
 			throw new RuntimeException();
 		}
@@ -68,11 +68,19 @@ public class SqlInstance {
 					while (resultSet.next()) {
 						Map<SqlColumn, Optional<Object>> row = new HashMap<>();
 						for (SqlColumn col : table.columns) {
-							Object o = resultSet.getObject(col.name);
-							if (o != null) {
-								row.put(col, Optional.of(o));
-							} else {
-								row.put(col, Optional.empty());
+							try {
+								Object o = resultSet.getObject(col.name);
+								if (o != null) {
+									row.put(col, Optional.of(o));
+								} else {
+									row.put(col, Optional.empty());
+								}
+							} catch (Exception ex) {
+								if (errMeansNull) {
+									row.put(col, Optional.empty());
+								} else {
+									throw ex;
+								}
 							}
 					    }
 						rows.add(row);

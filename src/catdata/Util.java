@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -298,18 +300,18 @@ public class Util {
 	}
 	
 	public static <X> String sep(Iterator<X> c, String sep, Function<X, String> fun) {
-		String ret = "";
+		StringBuffer ret = new StringBuffer("");
 		boolean b = false;
 		while (c.hasNext()) {
 			X o = c.next();
 			if (b) {
-				ret += sep;
+				ret.append(sep);
 			}
 			b = true;
 
-			ret += fun.apply(o);
+			ret.append(fun.apply(o));
 		}
-		return ret;
+		return ret.toString();
 	}
 
 	public static <X, Y> boolean isBijection(Map<X, Y> m, Set<X> X, Set<Y> Y) {
@@ -699,10 +701,32 @@ public class Util {
 		return ret;
 	}
 	
-
-
 	public static JPanel makeGrid(List<JComponent> list) {
-		int n = 2; //(int) Math.ceil(Math.sqrt(list.size()));
+		JPanel ret = new JPanel(new GridLayout(list.size(), 1));
+		
+		for (JComponent x : list) {
+			JScrollPane jsp = new JScrollPane(x);
+			/*
+			JPanel p = new JPanel(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();
+			c.anchor = GridBagConstraints.FIRST_LINE_START;
+			c.fill=GridBagConstraints.VERTICAL;
+			c.gridx = 0;
+			c.gridy = 0;
+			p.add(jsp, c); */
+			JPanel p = new JPanel(new GridLayout(1,1));
+			p.add(jsp);
+			ret.add(p);
+		}
+
+		JScrollPane jsp = new JScrollPane(ret);
+		JPanel p = new JPanel(new GridLayout(1,1));
+		p.add(jsp);
+		return p;
+	} 
+/*
+	public static JPanel makeGrid(List<JComponent> list) {
+		int n = (int) Math.ceil(Math.sqrt(list.size()));
 
 		List<JComponent> list2 = new LinkedList<>();
 		for (int i = 0; i < list.size(); i += n) {
@@ -714,7 +738,7 @@ public class Util {
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 		ret.add(jsp);
 		return ret;
-	} 
+	}  */
 
 	/*public static JPanel makeTable(Border b, String border, Object[][] rowData, Object... colNames) {
 		return makeTable(null, b, border, rowData, colNames);
@@ -827,7 +851,7 @@ public class Util {
 	}
 
 	public static String sep(Collection<?> order, Map<?, ?> m, String sep1, String sep2, boolean skip) {
-		String ret = "";
+		StringBuffer ret = new StringBuffer("");
 		boolean b = false;
 		for (Object o : order) {
 			Object z = m.get(o);
@@ -835,12 +859,14 @@ public class Util {
 				continue;
 			}
 			if (b) {
-				ret += sep2;
+				ret.append(sep2);
 			}
 			b = true;
-			ret += o + sep1 + m.get(o);
+			ret.append(o);
+			ret.append(sep1);
+			ret.append(m.get(o));
 		}
-		return ret;
+		return ret.toString();
 	}
 
 	public static String sep(Map<?, ?> m, String sep1, String sep2) {

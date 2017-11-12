@@ -258,15 +258,38 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 	}
 	// TODO aql alphabetical?
 
-	// TODO: aql cache;
-	public final Collection<Att> attsFrom(En en) {
-		return atts.keySet().stream().filter(att -> atts.get(att).first.equals(en)).collect(Collectors.toList());
+	private Map<En, List<Att>> attsFrom = new HashMap<>(); 
+	public synchronized final Collection<Att> attsFrom(En en) {
+		if (attsFrom.containsKey(en)) {
+			return attsFrom.get(en);
+		}
+		List<Att> l = new LinkedList<>();
+		for (Att att : atts.keySet()) {
+			if (atts.get(att).first.equals(en)) {
+				l.add(att);
+			}
+		}
+		attsFrom.put(en, l);
+		return l;
 	}
+	
+	private Map<En, List<Fk>> fksFrom = new HashMap<>(); 
+	public synchronized final Collection<Fk> fksFrom(En en) {
+		if (fksFrom.containsKey(en)) {
+			return fksFrom.get(en);
+		}
+		List<Fk> l = new LinkedList<>();
+		for (Fk fk : fks.keySet()) {
+			if (fks.get(fk).first.equals(en)) {
+				l.add(fk);
+			}
+		}
+		fksFrom.put(en, l);
+		return l;
+	}
+	
 
-	// TODO: aql cache
-	public final Collection<Fk> fksFrom(En en) {
-		return fks.keySet().stream().filter(fk -> fks.get(fk).first.equals(en)).collect(Collectors.toList());
-	}
+	
 
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> fold(List<Fk> fks,
 			Term<Ty, En, Sym, Fk, Att, Gen, Sk> head) {

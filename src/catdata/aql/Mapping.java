@@ -335,13 +335,14 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantic
 		return true;
 	}
 
-	private String toString = "";
+	private String toString = null;
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		if (toString != null) {
 			return toString;
 		}
 		
+		toString = "";
 		for (En1 en : src.ens) {
 			toString += "\n\nentities";
 			toString += "\n\t" + en + " -> " +ens.get(en);
@@ -365,6 +366,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantic
 			}
 		}
 		
+		toString = toString.trim();
 		return toString;
 	} 
 	//TODO aql alphabetical?

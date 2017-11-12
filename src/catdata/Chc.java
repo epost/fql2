@@ -6,11 +6,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
  * @author Ryan Wisnesky
  */
 @SuppressWarnings("serial")
-public class Chc<X,Y> implements Serializable {
+public class Chc<X,Y> implements Serializable /*, Comparable<Chc<X,Y>> */ {
 	public final boolean left;
 	
 	public final X l;
@@ -98,33 +102,34 @@ public class Chc<X,Y> implements Serializable {
 	}
 	
 	
-
+	private int hash = -1;
 	@Override
 	public int hashCode() {
-		int prime = 31;
-		int result = 1;
-		result = prime * result + ((l == null) ? 0 : l.hashCode());
-		result = prime * result + (left ? 1231 : 1237);
-		result = prime * result + ((r == null) ? 0 : r.hashCode());
-		return result;
+		if (hash != -1) {
+			return hash;
+		}
+			hash = new HashCodeBuilder()
+						.append(left)
+						.append(l)
+						.append(r).toHashCode();
+		return hash;
+			
 	} 
 	
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+    	if (this == obj)
             return true;
         if (obj == null)
             return false;
         if (getClass() != obj.getClass())
             return false;
         Chc<?,?> other = (Chc<?,?>) obj;
-        if (left != other.left)
-            return false;
-        if (left) {
-            return l.equals(other.l);
-        }
-        return r.equals(other.r);
+       return new EqualsBuilder()
+		.append(left, other.left)
+		.append(l, other.l)
+		.append(r, other.r).isEquals();
     }
 
 	public void assertNeitherNull() {
@@ -132,7 +137,16 @@ public class Chc<X,Y> implements Serializable {
 			throw new RuntimeException("Assertion failed: Chc containing both null");
 		}
 	}
-	
+
+	/*
+	@Override
+	public int compareTo(Chc<X, Y> other) {
+		 return new CompareToBuilder()
+			.append(left, other.left)
+			.append(l, other.l)
+			.append(r, other.r).toComparison();
+	}
+	*/
 	
 	
 }
