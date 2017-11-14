@@ -14,7 +14,6 @@ public interface DP<Ty,En,Sym,Fk,Att,Gen,Sk> {
 		return false;
 	}
 	
-	@SuppressWarnings("unused")
 	default Term<Ty,En,Sym,Fk,Att,Gen,Sk> nf(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {
 		throw new RuntimeException("Anomaly: please report");
 	}

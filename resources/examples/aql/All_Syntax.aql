@@ -74,7 +74,7 @@ schema s3 = literal : ty4 {
 	options
 		prover = completion		
 }
-//getSchema - see PharmaColim1 example
+// getSchema - see Tutorial\ TSP.aql for an example
 
 //////////// Kind mapping
 
