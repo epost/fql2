@@ -1,0 +1,20 @@
+
+options timeout = 50000
+   gui_max_string_size = 600
+
+
+html { (* "
+
+<html>
+<body>
+<h1>A Header</h1>
+<p>some content</p>
+</body>
+</html>
+" *) }
+
+md { (* "
+## A Header
+
+some text
+" *) }
