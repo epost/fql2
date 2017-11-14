@@ -7,3 +7,11 @@ doc/aqlmanual/aqlmanual.pdf
 doc/aqlmanual/aqlmanual.synctex.gz
 doc/aqlmanual/aqlmanual.toc
 /target/
+
+.classpath
+.idea/
+.project
+.settings/
+.vscode/
+fql.iml
+*.dvi
