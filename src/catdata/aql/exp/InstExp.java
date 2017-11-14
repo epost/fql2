@@ -42,7 +42,6 @@ import catdata.aql.fdm.InitialInstance;
 import catdata.aql.fdm.LiteralInstance;
 import catdata.aql.fdm.SigmaInstance;
 import catdata.graph.DMG;
-import catdata.ClassUtil;
 
 public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y>> {
 	
@@ -819,8 +818,8 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		public InstExpColim(GraphExp<N, E> shape, SchExp<Ty, En, Sym, Fk, Att> schema, List<Pair<LocStr, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>>> nodes, List<Pair<LocStr, TransExp<Ty, En, Sym, Fk, Att, Gen, Sk, Gen, Sk, X, Y, X, Y>>> edges, List<Pair<String, String>> options) {
 			this.schema = schema;
 			this.shape = shape;
-			this.nodes = new Ctx<>(LocStr.list2(nodes, x -> ClassUtil.<N>unchecked_cast(x)));
-			this.edges = new Ctx<>(LocStr.list2(edges, x -> ClassUtil.<E>unchecked_cast(x)));
+			this.nodes = new Ctx<>(LocStr.list2(nodes, x -> (N) x));
+			this.edges = new Ctx<>(LocStr.list2(edges, x -> (E) x));
 			this.options = Util.toMapSafely(options);
 			
 			List<InteriorLabel<Object>> f = new LinkedList<>();
