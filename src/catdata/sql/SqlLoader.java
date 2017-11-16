@@ -72,7 +72,7 @@ public class SqlLoader extends JPanel {
 		output.setText(schema.toString());
 		
 		if (loadInstBox.isSelected()) {
-			instance = new SqlInstance(schema, conn, false);
+			instance = new SqlInstance(schema, conn, false, true);
 			output.area.append("\n\n");
 			output.area.append(instance.toString());
 		}

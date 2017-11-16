@@ -53,16 +53,16 @@ public class SqlInstance {
 		return db.get(t);
 	}
 	
-	public SqlInstance(SqlSchema schema, Connection conn, boolean errMeansNull) throws SQLException {
+	public SqlInstance(SqlSchema schema, Connection conn, boolean errMeansNull, boolean useDistinct) throws SQLException {
 		if (schema == null || conn == null) {
 			throw new RuntimeException();
 		}
 		this.schema = schema;
 		//this.conn = conn;
-		
+		String d = useDistinct ? "DISTINCT" : "";
 		for (SqlTable table : schema.tables) {
 			try (Statement stmt = conn.createStatement()) {
-				stmt.execute("SELECT DISTINCT * FROM " + table.name);
+				stmt.execute("SELECT " + d + " * FROM " + table.name);
 				try (ResultSet resultSet = stmt.getResultSet()) {
 					Set<Map<SqlColumn, Optional<Object>>> rows = new HashSet<>();
 					while (resultSet.next()) {

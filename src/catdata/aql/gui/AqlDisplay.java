@@ -138,7 +138,7 @@ public final class AqlDisplay implements Disp {
 							+ s);
 		}
 		int max_rows = (int) exp.getOrDefault(env, AqlOption.gui_rows_to_display);
-		return AqlViewer.view(time, obj, max_rows, exp);
+		return AqlViewer.view(time, obj, max_rows, exp, env);
 	}
 
 	public AqlDisplay(String title, Program<Exp<?>> p, AqlEnv env, long start, long middle) {

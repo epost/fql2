@@ -17,7 +17,7 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements S
 	public String sample(int size) {
 		int en_i = 0;
 		List<String> u = new LinkedList<>();
-		for (En en : schema().ens) {
+		for (En en : Util.alphabetical(schema().ens)) {
 			if (algebra().en(en).isEmpty()) {
 				continue;
 			}
@@ -27,6 +27,7 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements S
 		//	h.add("========");
 			for (X x : algebra().en(en)) {
 				List<String> l = new LinkedList<>();
+				l.add("");
 				l.add("ID: " + x);
 				/* int fk_i = 0;
 				for (Fk fk : schema().fksFrom(en)) {

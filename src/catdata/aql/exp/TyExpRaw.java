@@ -2,6 +2,7 @@ package catdata.aql.exp;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,10 +10,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import catdata.Chc;
 import catdata.Ctx;
@@ -29,7 +26,6 @@ import catdata.aql.Term;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
 import catdata.aql.exp.SchExpRaw.En;
-import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
@@ -47,7 +43,7 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 		
 		@Override
 		public String toString() {
-			return str;
+			return Util.maybeQuote(str);
 		}
 
 		@Override
@@ -100,7 +96,7 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 			
 		@Override
 		public String toString() {
-			return str;
+			return Util.maybeQuote(str);
 		}
 
 	}
@@ -113,10 +109,14 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 
 	@Override
 	public Collection<Pair<String, Kind>> deps() {
-		return imports.stream().map(x -> new Pair<>(x, Kind.TYPESIDE)).collect(Collectors.toSet());
+		Set<Pair<String, Kind>> ret = new HashSet<>();
+		for (Pair<Integer, TyExp<Ty, Sym>> x : imports) {
+			ret.addAll(x.second.deps());
+		}
+		return ret;
 	}
 
-	public final Set<String> imports;
+	public final Set<Pair<Integer,TyExp<Ty,Sym>>> imports;
 	public final Set<String> types;
 	public final Set<Pair<String, Pair<List<String>, String>>> functions;
 	public final Set<Triple<List<Pair<String, String>>, RawTerm, RawTerm>> eqs;
@@ -137,12 +137,12 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 
 //	private final Set<Triple<Ctx<Var, String>, Term<String, Void, String, Void, Void, Void, Void>, Term<String, Void, String, Void, Void, Void, Void>>> eqs0 = new HashSet<>();
 
-	public TyExpRaw(List<LocStr> imports, List<LocStr> types, List<Pair<LocStr, Pair<List<String>, String>>> functions,
+	public TyExpRaw(List<Pair<Integer,TyExp<?,?>>> imports, List<LocStr> types, List<Pair<LocStr, Pair<List<String>, String>>> functions,
 			List<Pair<Integer, Triple<List<Pair<String, String>>, RawTerm, RawTerm>>> eqsX,
 			List<Pair<LocStr, String>> java_tys_string, List<Pair<LocStr, String>> java_parser_string,
 			List<Pair<LocStr, Triple<List<String>, String, String>>> java_fns_string,
 			List<Pair<String, String>> options) {
-		this.imports = LocStr.set1(imports);
+		this.imports = Util.toSetSafely((List<Pair<Integer,TyExp<Ty,Sym>>>)((Object)imports));
 		this.types = LocStr.set1(types);
 		this.functions = LocStr.functions1(functions);
 		this.eqs = LocStr.eqs1(eqsX);
@@ -203,12 +203,12 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 		return Util.map(m, (k,v) ->  new Pair<>(new Sym(k), conv2(v.first, v.second)));		
 	}
 
-	public void doGuiIndex(List<LocStr> imports, List<LocStr> types,
+	public void doGuiIndex(List<Pair<Integer,TyExp<?, ?>>> imports2, List<LocStr> types,
 			List<Pair<LocStr, Pair<List<String>, String>>> functions,
 			List<Pair<Integer, Triple<List<Pair<String, String>>, RawTerm, RawTerm>>> eqs,
 			List<Pair<LocStr, String>> java_tys_string, List<Pair<LocStr, String>> java_parser_string,
 			List<Pair<LocStr, Triple<List<String>, String, String>>> java_fns_string) {
-		List<InteriorLabel<Object>> i = InteriorLabel.imports("imports", imports);
+		List<InteriorLabel<Object>> i = imports2.stream().map(z -> new InteriorLabel<Object>(z.toString(), z.second, z.first, x->x.toString())).collect(Collectors.toList());
 		raw.put("imports", i);
 		List<InteriorLabel<Object>> t = InteriorLabel.imports("types", types);
 		raw.put("types", t);
@@ -425,9 +425,8 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 	public synchronized TypeSide<Ty, Sym> eval(AqlEnv env) {
 		AqlOptions ops = new AqlOptions(options, col, env.defaults);
 
-		for (String k : imports) {
-			@SuppressWarnings("unchecked")
-			TypeSide<Ty, Sym> v = env.defs.tys.get(k);
+		for (Pair<Integer, TyExp<Ty, Sym>> k : imports) {
+			TypeSide<Ty, Sym> v = k.second.eval(env); 
 			col.addAll(v.collage());
 		}
 		

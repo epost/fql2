@@ -592,8 +592,13 @@ public class AqlParser {
 			return ret;
 		});
 
-		Parser<Tuple5<List<LocStr>, List<LocStr>, List<catdata.Pair<LocStr, catdata.Pair<List<String>, String>>>, List<catdata.Pair<LocStr, catdata.Pair<List<String>, String>>>, List<catdata.Pair<LocStr, String>>>> pa = Parsers
-				.tuple(imports, types.optional(), consts0.optional(), fns0.optional(), java_typs0.optional());
+		Parser<catdata.Pair<Integer,TyExp<?,?>>> lx = Parsers.tuple(Parsers.INDEX,ty_ref.lazy()).map(x->new catdata.Pair<>(x.a,x.b));
+		Parser<List<catdata.Pair<Integer, TyExp<?, ?>>>> ly = Parsers.tuple(token("imports"), lx.many()).map(x->x.b).optional().map(x -> x == null ? new LinkedList<catdata.Pair<Integer,TyExp<?,?>>>() : x);
+		
+		Parser<Tuple5<List<catdata.Pair<Integer,TyExp<?,?>>>, List<LocStr>, List<catdata.Pair<LocStr, catdata.Pair<List<String>, String>>>, List<catdata.Pair<LocStr, catdata.Pair<List<String>, String>>>, List<catdata.Pair<LocStr, String>>>> pa
+		= Parsers
+				.tuple(ly, types.optional(), consts0.optional(), fns0.optional(), java_typs0.optional());
+		
 		Parser<Tuple4<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<LocStr, Triple<List<String>, String, String>>>, List<catdata.Pair<Integer, Triple<List<catdata.Pair<String, String>>, RawTerm, RawTerm>>>, List<catdata.Pair<String, String>>>> pb = Parsers
 				.tuple(java_consts0.optional(), java_fns0.optional(), eqs0.optional(), options);
 
