@@ -13,7 +13,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -825,7 +825,7 @@ public class Mpl implements MplObject {
 		Layout layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer vv = new VisualizationViewer<>(layout);
-		Transformer<Node<O,A>, Color> vertexPaint = x -> {
+		Function<Node<O,A>, Color> vertexPaint = x -> {
 			if (x.isInput) {
 				return src;
 			}
@@ -837,7 +837,7 @@ public class Mpl implements MplObject {
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer<Node<O,A>, String> ttt = arg0 -> {
+		Function<Node<O,A>, String> ttt = arg0 -> {
 			String w = arg0.isInput ? "in" : "out";
 			return arg0.term + " #" + arg0.which + " " + w;
 		};

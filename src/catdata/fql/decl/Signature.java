@@ -35,7 +35,8 @@ import javax.swing.UIManager;
 
 import catdata.fql.decl.SigExp.Const;
 import catdata.fql.decl.Type.Int;
-import org.apache.commons.collections15.Transformer;
+
+import com.google.common.base.Function;
 
 import catdata.IntRef;
 import catdata.Pair;
@@ -62,9 +63,9 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
 /**
- * 
+ *
  * @author ryan
- * 
+ *
  *         Signatures.
  */
 public class Signature {
@@ -227,7 +228,7 @@ public class Signature {
 //		doColors();
 	}
 
-	
+
 	public Signature(List<Node> n, List<Edge> e, List<Attribute<Node>> a,
 			Set<Eq> ee) {
 		// name0 = s;
@@ -358,7 +359,7 @@ public class Signature {
 		nodesTemp.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createEmptyBorder(2, 2, 2, 2), "Nodes (" + nodes.size() + ")"));
 		nodesTemp.add(new JScrollPane(nodesComponent));
-	
+
 		Object[][] es = new String[edges.size()][3];
 		int jj = 0;
 		for (Edge eq : edges) {
@@ -540,7 +541,7 @@ public class Signature {
 		return all().contains(s);
 	}
 
-	
+
 	public List<Path> pathsLessThan(int i) throws FQLException {
 		List<List<String>> paths = new LinkedList<>();
 
@@ -572,15 +573,15 @@ public class Signature {
 			}
 		}
 	}
-	
+
 	public Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> toCategory2()
 			throws FQLException {
 		if (cached != null) {
 			return cached;
 		}
-		
+
 		doInfiniteCheck();
-		
+
 		cached = LeftKanCat.toCategory(this);
 		cached.first.attrs = attrs;
 
@@ -653,20 +654,23 @@ public class Signature {
 	@SuppressWarnings("unchecked")
     private JComponent doView(Color clr,
 	/* final Environment env, */Graph<String, String> sgv) {
-	
+
 		try {
 			Class<?> c = Class.forName(FqlOptions.layout_prefix
 					+ DefunctGlobalOptions.debug.fql.schema_graph);
 			Constructor<?> x = c.getConstructor(Graph.class);
 			Layout<String, String> layout = (Layout<String, String>) x
 					.newInstance(sgv);
-	
+
 			layout.setSize(new Dimension(600, 400));
-	
-			VisualizationViewer<String, String> vv = new VisualizationViewer<>(
-					layout);
-	
-			Transformer<String, Paint> vertexPaint = (String i) -> isAttribute(i) ? UIManager.getColor("Panel.background") : clr;
+
+			VisualizationViewer<String, String> vv = new VisualizationViewer<>(layout);
+
+			Function<String,Paint> vertexPaints =
+      	(String name) -> isAttribute(name)
+									? UIManager.getColor("Panel.background")
+									: clr;
+
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			gm.setMode(Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
@@ -676,32 +680,18 @@ public class Signature {
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
 			Stroke bs = new BasicStroke();
-			Transformer<String, Stroke> edgeStrokeTransformer = (String s) -> {
-                            if (isAttribute(s)) {
-                                return edgeStroke;
-                            }
-                            return bs;
-                        };
-			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-			vv.getRenderContext().setEdgeStrokeTransformer(
-					edgeStrokeTransformer);
-			vv.getRenderContext().setVertexLabelTransformer(
-					new ToStringLabeller<>());
-			vv.getRenderContext().setEdgeLabelTransformer(
-					new ToStringLabeller<>());
-		
-			vv.getRenderContext().setVertexLabelTransformer(
-					new ToStringLabeller<String>() {
 
-						@Override
-						public String transform(String t) {
-							if (isAttribute(t)) {
-								return getTypeLabel(t);
-							}
-							return t;
-						}
+			Function<String, Stroke> edgeStrokeTransformer =
+            (String name) -> (isAttribute(name)) ? edgeStroke : bs;
 
-					});
+			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaints);
+			vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
+			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
+			vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
+
+			vv.getRenderContext().setVertexLabelTransformer(
+					(String t) -> (isAttribute(t)) ? getTypeLabel(t) : t
+					);
 
 			GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 			JPanel ret = new JPanel(new GridLayout(1, 1));
@@ -785,7 +775,7 @@ public class Signature {
 		return Instance.terminal(this, g);
 	}
 
-	
+
 	private JPanel den = null;
 
 	public JPanel denotation() {
@@ -893,7 +883,7 @@ public class Signature {
 		ret.sort(c);
 		return ret;
 	}
-	
+
 	private final Map<Node, List<Edge>> edgesFrom_cache = new HashMap<>();
 	public List<Edge> edgesFrom(Node n) {
 		List<Edge> a = edgesFrom_cache.get(n);
@@ -909,7 +899,7 @@ public class Signature {
 		edgesFrom_cache.put(n, a);
 		return a;
 	}
-	
+
 	private final Map<Node, List<Edge>> edgesTo_cache = new HashMap<>();
 	public List<Edge> edgesTo(Node n) {
 		List<Edge> a = edgesTo_cache.get(n);
@@ -1234,7 +1224,7 @@ public class Signature {
 		return ret;
 	}
 
-	
+
 
 	private Triple<Instance, Map<Object, Path>, Map<Path, Object>> rep(
 			IntRef idx, Node c) throws FQLException {
@@ -1272,14 +1262,14 @@ public class Signature {
 
 		return new Triple<>(new Instance(this, data), m1, m2);
 	}
-	
+
 	public Pair<Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>>, Pair<Instance, Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>>>> omega(IntRef ref) throws FQLException {
 		IntRef ix = new IntRef(0);
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
 		Map<Node, Pair<Map<Object, Instance>, Map<Instance, Object>>> m = new HashMap<>();
-		
+
 		Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> rx = repX(ix);
-		
+
 		for (Node n : nodes) {
 			Set<Pair<Object, Object>> set = new HashSet<>();
 			Map<Object, Instance> m1 = new HashMap<>();
@@ -1295,7 +1285,7 @@ public class Signature {
 			data.put(n.string, set);
 			m.put(n, new Pair<>(m1, m2));
 		}
-		
+
 		for (Edge e : edges) {
 			Set<Pair<Object, Object>> set = new HashSet<>();
 			for (Pair<Object, Object> j : data.get(e.source.string)) {
@@ -1303,14 +1293,14 @@ public class Signature {
 				Instance v = rx.second.get(e).preimage(u);
 				Object o = m.get(e.target).second.get(v);
 				set.add(new Pair<>(j.first, o));
-			}			
+			}
 			data.put(e.name, set);
 		}
-		
+
 		Instance omega = new Instance(this, data);
 		return new Pair<>(rx, new Pair<>(omega, m));
 	}
-	
+
 
 	public Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> repX(
 			IntRef i) throws FQLException {
@@ -1327,7 +1317,7 @@ public class Signature {
 					.get(e.source);
 			Triple<Instance, Map<Object, Path>, Map<Path, Object>> t = ret
 					.get(e.target);
-			
+
 			for (Node n : nodes) {
 				List<Pair<Object, Object>> set = new LinkedList<>();
 				for (Pair<Object, Object> id : t.first.data.get(n.string)) {
@@ -1367,14 +1357,14 @@ public class Signature {
 	}
 
 	private Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs_cached = null;
-	public  Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs() 
+	public  Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs()
 			throws FQLException {
 		if (obs_cached != null) {
 			return obs_cached;
 		}
 		Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> ret = new HashMap<>();
 
-		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = 
+		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx =
 				toCategory2();
 		FinCat<Node, Path> cat = xxx.first;
 
@@ -1392,16 +1382,16 @@ public class Signature {
 		obs_cached = ret;
 		return ret;
 	}
-	
+
 	private Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> obsbar_cached = null;
-	public  Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> obsbar() 
+	public  Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> obsbar()
 			throws FQLException {
 		if (obsbar_cached != null) {
 			return obsbar_cached;
 		}
 		Map<Node, List<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>> ret = new HashMap<>();
 
-		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx = 
+		Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>> xxx =
 				toCategory2();
 		FinCat<Node, Path> cat = xxx.first;
 
@@ -1422,26 +1412,26 @@ public class Signature {
 		obsbar_cached = ret;
 		return ret;
 	}
-	
+
 	public JPanel dot(String name) {
-		String str = "";		
+		String str = "";
 		for (Node p : nodes) {
 			String s = p.toString();
-			str += s + " [shape=box];\n"; 
+			str += s + " [shape=box];\n";
 		}
 
 		for (Attribute<Node> a : attrs) {
 			String s = a.name;
-			str += s + ";\n"; 
+			str += s + ";\n";
 			str += a.source + " -> " + s + " [dir=none];\n";
 		}
-		
+
 		for (Edge p : edges) {
 			str += p.source + " -> " + p.target + " [label=\"" + p.name + "\"];\n";
 		}
-		
-		
-		str = "digraph " + name + " {\n" + str.trim() + "\n}";		
+
+
+		str = "digraph " + name + " {\n" + str.trim() + "\n}";
 		JPanel p = new JPanel(new GridLayout(1,1));
 		JTextArea area = new JTextArea(str);
 		JScrollPane jsp = new JScrollPane(area);
@@ -1460,5 +1450,5 @@ public class Signature {
 		}
 		return new CodeTextPanel("", ret);
 	}
-	
+
 }

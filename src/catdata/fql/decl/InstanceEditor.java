@@ -33,7 +33,7 @@ import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Pair;
 import catdata.fql.FQLException;
@@ -153,8 +153,8 @@ public class InstanceEditor {
 		return doView(c, g);
 	}
 
-	
-	
+
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Const show(Color c) {
 		String title = "Visual Editor for Instance " + name;
@@ -222,7 +222,7 @@ public class InstanceEditor {
 			layout.setSize(new Dimension(500, 340));
 			VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
-			Transformer<String, Paint> vertexPaint = (String i) -> {
+			Function<String, Paint> vertexPaint = (String i) -> {
                 return thesig.isAttribute(i) ? UIManager.getColor("Panel.background") : clr;
                             // return color;
                         };
@@ -244,7 +244,7 @@ public class InstanceEditor {
                             }
                             vv.getPickedEdgeState().clear();
                             String str = ((String) e.getItem());
-                            
+
                             if (thesig.isNode(str)) {
                                 cards.show(vwr, str);
                                 card = str;
@@ -263,7 +263,7 @@ public class InstanceEditor {
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
 			Stroke bs = new BasicStroke();
-			Transformer<String, Stroke> edgeStrokeTransformer = (String s) -> {
+			Function<String, Stroke> edgeStrokeTransformer = (String s) -> {
                             if (thesig.isAttribute(s)) {
                                 return edgeStroke;
                             }
@@ -273,7 +273,7 @@ public class InstanceEditor {
 			vv.getRenderContext().setEdgeStrokeTransformer(
 					edgeStrokeTransformer);
 			vv.getRenderContext().setVertexLabelTransformer(
-					new ToStringLabeller<>());
+					new ToStringLabeller());
 
 			GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 			zzz.setPreferredSize(new Dimension(600, 400));
@@ -397,7 +397,7 @@ public class InstanceEditor {
 			int i = 0;
 			for (Pair<Object, Object> id : ids) {
 				arr[i][0] = id.first;
-		
+
 				int j = 1;
 				for (String col : cols2) {
 					if (col.equals("ID")) {
@@ -425,7 +425,7 @@ public class InstanceEditor {
 				}
 			};
 			JPanel p = new JPanel(new GridLayout(1, 1));
-		
+
 			TableRowSorter<?> sorter2 = new MyTableRowSorter(foo.getModel());
 
 			sorter2.toggleSortOrder(0);
@@ -438,7 +438,7 @@ public class InstanceEditor {
 							+ " rows)"));
 			vwr.add(p, name);
 			joined2.put(name, p);
-		
+
 			ret.put(name, foo);
 		}
 

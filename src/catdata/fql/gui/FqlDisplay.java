@@ -34,7 +34,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 
 import catdata.fql.decl.SigExp.Var;
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Pair;
 import catdata.Unit;
@@ -84,9 +84,9 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
 /**
- * 
+ *
  * @author ryan
- * 
+ *
  *         Class for showing all the viewers.
  */
 public class FqlDisplay implements Disp {
@@ -499,11 +499,11 @@ public class FqlDisplay implements Disp {
 		f.setVisible(true);
 	}
 
-	
+
 
 	@SuppressWarnings({ "unchecked" })
     private JComponent doView(Graph<String, Object> sgv) {
-	
+
 		try {
 			Class<?> c = Class
 					.forName(FqlOptions.layout_prefix + DefunctGlobalOptions.debug.fql.instFlow_graph);
@@ -512,14 +512,14 @@ public class FqlDisplay implements Disp {
 
 			layout.setSize(new Dimension(600, 540));
 			VisualizationViewer<String, Object> vv = new VisualizationViewer<>(layout);
-			Transformer<String, Paint> vertexPaint = prog.nmap::get;
+			Function<String, Paint> vertexPaint = prog.nmap::get;
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			gm.setMode(Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<>());
+			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
 			vv.getRenderContext().setEdgeLabelTransformer((Object arg0) -> ((Pair<?, ?>) arg0).second.toString());
 
 			vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
@@ -555,7 +555,7 @@ public class FqlDisplay implements Disp {
 	private final Set<String> extraInsts = new HashSet<>();
 	private void handleInstanceFlowEdge(Object o) {
 		InstExp i = (InstExp) o;
-		Object f = i.accept(new Unit(), 	
+		Object f = i.accept(new Unit(),
 		 new InstExpVisitor<Object, Unit>() {
 			@Override
 			public MapExp visit(Unit env, Zero e) {
@@ -727,16 +727,16 @@ public class FqlDisplay implements Disp {
 			Layout<String, Object> layout = (Layout<String, Object>) x.newInstance(sgv);
 			layout.setSize(new Dimension(600, 540));
 			VisualizationViewer<String, Object> vv = new VisualizationViewer<>(layout);
-			Transformer<String, Paint> vertexPaint = (String i) -> prog.smap(new Var(i));
+			Function<String, Paint> vertexPaint = (String i) -> prog.smap(new Var(i));
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			gm.setMode(Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
-		
+
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-			vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<>());
-			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<>());
-		
+			vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
+			vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
+
 			vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
                             if (e.getStateChange() != ItemEvent.SELECTED) {
                                 return;
@@ -756,7 +756,7 @@ public class FqlDisplay implements Disp {
                         });
 
 			vv.getRenderContext().setLabelOffset(20);
-		
+
 			GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 			JPanel ret = new JPanel(new GridLayout(1, 1));
 			ret.add(zzz);
@@ -778,6 +778,6 @@ public class FqlDisplay implements Disp {
 		frame.dispose();
 		frame = null;
 	}
-	
+
 
 }

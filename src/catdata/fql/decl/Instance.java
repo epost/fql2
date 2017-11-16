@@ -32,7 +32,7 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.IntRef;
 import catdata.Pair;
@@ -255,7 +255,7 @@ public class Instance {
 			}
 		}
 		return ret;
-	} 
+	}
 	//TODO aql why 4 copies of compose?
 	private static <X, Y, Z> Set<Pair<X, Z>> compose2(Set<Pair<X, Y>> x,
 													  Set<Pair<Y, Z>> y) {
@@ -270,7 +270,7 @@ public class Instance {
 			}
 		}
 		return ret;
-	} 
+	}
 	public static <X, Y, Z> Set<Pair<X, Z>> compose3(Set<Pair<X, Y>> x,
 			Set<Pair<Y, Z>> y) {
 		Set<Pair<X, Z>> ret = new HashSet<>();
@@ -285,7 +285,7 @@ public class Instance {
 		}
 		return ret;
 	}
-	
+
 	private static <X, Y, Z> Set<Pair<X, Z>> compose4(Set<Pair<X, Y>> x,
 													  Set<Pair<Y, Z>> y) {
 		Set<Pair<X, Z>> ret = new HashSet<>();
@@ -299,7 +299,7 @@ public class Instance {
 			}
 		}
 		return ret;
-	} 
+	}
 
 	private static boolean contained(Object second, Set<Pair<Object, Object>> set) {
 		for (Pair<Object, Object> p : set) {
@@ -431,7 +431,7 @@ public class Instance {
 		throw new FQLException("cannot find " + n + " in " + data2);
 	}
 
-	
+
 	private boolean typeCheck(Signature thesig2) {
 		for (String s : data.keySet()) {
 			if (!thesig2.contains(s) && !s.contains(" ")) {
@@ -546,7 +546,7 @@ public class Instance {
 		return "{\n " + x + ";\n}";
 	}
 
-	
+
 	@SuppressWarnings("unchecked")
 	public JPanel view() throws FQLException {
 		List<JPanel> panels = new LinkedList<>();
@@ -556,7 +556,7 @@ public class Instance {
 		for (String k : sorted) {
 			Set<Pair<Object, Object>> xxx = data.get(k);
 			List<Pair<Object, Object>> table = new LinkedList<>(xxx);
-	
+
 			Object[][] arr = new Object[table.size()][2];
 			int i = 0;
 			for (Pair<Object, Object> p : table) {
@@ -758,11 +758,11 @@ public class Instance {
 			cols2.sort(strcmp);
 			cols2.add(0, "ID");
 			Object[] cols3 = cols2.toArray();
-		
+
 			int i = 0;
 			for (Pair<Object, Object> id : ids) {
 				arr[i][0] = id.first;
-		
+
 				int j = 1;
 				for (String col : cols2) {
 					if (col.equals("ID")) {
@@ -853,7 +853,7 @@ public class Instance {
 					if (!a.source.equals(n)) {
 						continue;
 					}
-			
+
 					xxx += "    <arrow:" + a.name + " rdf:resource=\"" + prefix
 							+ lookupX(data.get(a.name), id) + "\"/>\n";
 				}
@@ -1111,13 +1111,13 @@ public class Instance {
 
 			VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
-			Transformer<String, Paint> vertexPaint = (String i) -> thesig.isAttribute(i) ? UIManager.getColor("Panel.background") : clr;
+			Function<String, Paint> vertexPaint = (String i) -> thesig.isAttribute(i) ? UIManager.getColor("Panel.background") : clr;
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			vv.setGraphMouse(gm);
 			gm.setMode(Mode.PICKING);
 			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 			vv.getRenderContext().setVertexLabelTransformer((String str) -> {
-                          
+
                             if (thesig.isAttribute(str)) {
                                 str = thesig.getTypeLabel(str);
                             }
@@ -1155,13 +1155,13 @@ public class Instance {
                             }
                             return s;
                         });
-		
+
 			float dash[] = { 1.0f };
 			Stroke edgeStroke = new BasicStroke(0.5f,
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
 			Stroke bs = new BasicStroke();
-			Transformer<String, Stroke> edgeStrokeTransformer = s -> {
+			Function<String, Stroke> edgeStrokeTransformer = s -> {
 				if (thesig.isAttribute(s)) {
 					return edgeStroke;
 				}
@@ -1171,12 +1171,12 @@ public class Instance {
 			vv.getRenderContext().setEdgeStrokeTransformer(
 					edgeStrokeTransformer);
 			vv.getRenderContext().setVertexLabelTransformer(
-					new ToStringLabeller<>());
+					new ToStringLabeller());
 
 			GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
-		
+
 			JSplitPane newthing = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-			newthing.setResizeWeight(.8d); 
+			newthing.setResizeWeight(.8d);
 			newthing.add(zzz);
 			newthing.add(vwr);
 			JPanel xxx = new JPanel(new GridLayout(1, 1));
@@ -1332,7 +1332,7 @@ public class Instance {
             x1.add(o1.second.name);
             List<String> x2 = o2.first.asList();
             x2.add(o2.second.name);
-            
+
             Iterator<String> i1 = x1.iterator();
             Iterator<String> i2 = x2.iterator();
             while (i1.hasNext() && i2.hasNext()) {
@@ -1402,7 +1402,7 @@ public class Instance {
 		return ret;
 	}
 
-	
+
 	/**
 	 * Quickly compares two instances by checking the counts of tuples in all
 	 * the rows.
@@ -1470,12 +1470,12 @@ public class Instance {
 		Map<Node, List<Pair<Arr<Node, Path>, Attribute<Node>>>> obs = I.thesig.obs();
 		Fn<Path, Arr<Node, Path>> fn = I.thesig.toCategory2().second;
 		FinCat<Node, Path> cat = I.thesig.toCategory2().first;
-		
+
 		Map<String, Set<Pair<Object, Object>>> data = new HashMap<>();
 		Map<Node, Map<Object, Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>>> map1 = new HashMap<>();
 		Map<Node, Map<Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>, Object>> map2 = new HashMap<>();
 		Map<Pair<Node, LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>>, Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>>> instances = new HashMap<>();
-		
+
 		for (Node n : I.thesig.nodes) {
 			Set<Pair<Object, Object>> d = new HashSet<>();
 			Map<Object, Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform>> m1 = new HashMap<>();
@@ -1509,10 +1509,10 @@ public class Instance {
 			for (Pair<Object, Object> k : data.get(e.source.string)) {
 				Pair<LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object>, Transform> k0 = map1.get(e.source).get(k.first);
 				LinkedHashMap<Pair<Arr<Node, Path>, Attribute<Node>>, Object> w0 = PropPSM.truncate2(I.thesig, k0.first, fn.of(new Path(I.thesig, e)), obs.get(e.target));
-			
+
 				Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>> Iw  = instances.get(new Pair<>(e.source, k0.first));
 				Triple<Instance, Map<Node, Map<Object, Pair<Arr<Node, Path>, Object>>>, Map<Node, Map<Pair<Arr<Node, Path>, Object>, Object>>> Iw0 = instances.get(new Pair<>(e.target, w0));
-				
+
 				List<Pair<String, List<Pair<Object, Object>>>> tbd = new LinkedList<>();
 				for (Node node : I.thesig.nodes) {
 					 List<Pair<Object, Object>> set = new LinkedList<>();
@@ -1525,7 +1525,7 @@ public class Instance {
 					 tbd.add(new Pair<>(node.string, set));
 				}
 				Transform f = new Transform(Iw0.first, Iw.first, tbd);
-			
+
 				Transform t = Transform.composeX(f, k0.second);
 				Object u = map2.get(e.target).get(new Pair<>(w0, t));
 				d.add(new Pair<>(k.first, u));
@@ -1542,7 +1542,7 @@ public class Instance {
 		if (!J.thesig.equals(I.thesig)) {
 			throw new RuntimeException();
 		}
-		
+
 		Pair<Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>>, Map<Edge, Transform>> xxx = I.thesig
 				.repX(idx);
 		Map<Node, Triple<Instance, Map<Object, Path>, Map<Path, Object>>> nm = xxx.first;
@@ -1587,7 +1587,7 @@ public class Instance {
 		Instance IJ = new Instance(I.thesig, data);
 
 		return new Quad<>(IJ, map1, map4, xxx);
-	} 
+	}
 
 	private List<Pair<Object, Object>> ids() {
 		List<Pair<Object, Object>> ret = new LinkedList<>();
@@ -1603,7 +1603,7 @@ public class Instance {
 		List<Instance> ret = new LinkedList<>();
 
 		List<Pair<Object, Object>> ids = ids();
-	
+
 		List<LinkedHashMap<Pair<Object, Object>, Boolean>> subsets = Inst
 				.homomorphs(ids, tf);
 		for (LinkedHashMap<Pair<Object, Object>, Boolean> subset : subsets) {
@@ -1640,7 +1640,7 @@ public class Instance {
 				ret.addAll(h);
 			}
 		}
-	
+
 		return ret;
 	}
 
@@ -1675,7 +1675,7 @@ public class Instance {
 
 	private static void remove(Set<Pair<Object, Object>> set, Object o) {
 		set.removeIf(objectObjectPair -> objectObjectPair.first.equals(o));
-	} 
+	}
 
 	private static Set<Object> clearX(Set<Pair<Object, Object>> set, Object o) {
 		Iterator<Pair<Object, Object>> it = set.iterator();
@@ -1865,7 +1865,7 @@ public class Instance {
 	public JPanel adom() {
 		String str2 = "";
 		Set<String> set = new HashSet<>();
-		
+
 		for (Attribute<Node> k : thesig.attrs) {
 			Set<String> setX = new HashSet<>();
 
@@ -1874,7 +1874,7 @@ public class Instance {
 				setX.add(v.second.toString());
 			}
 			str2 += k.name + ":\n";
-					
+
 			boolean first = true;
 			for (String s : setX) {
 				if (!first) {
@@ -1883,7 +1883,7 @@ public class Instance {
 				first = false;
 				str2 += ("\"" + s + "\"");
 			}
-			
+
 			str2 += "\n\n";
 		}
 
@@ -1899,7 +1899,7 @@ public class Instance {
 
 		str += "\n\n\n\n ------------------------------- \n\n\n\n";
 		str += str2;
-		
+
 		return new CodeTextPanel("Active Domain", str );
 	}
 

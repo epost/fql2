@@ -30,7 +30,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Chc;
 import catdata.Environment;
@@ -5566,14 +5566,14 @@ public abstract class OplExp implements OplObject {
 		Layout layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer vv = new VisualizationViewer<>(layout);
-		Transformer vertexPaint = x -> entities.contains(x) ? clr : null;
+		Function vertexPaint = x -> entities.contains(x) ? clr : null;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer ttt = arg0 -> OplTerm.strip(arg0.toString());
+		Function ttt = arg0 -> OplTerm.strip(arg0.toString());
 		vv.getRenderContext().setVertexLabelTransformer(ttt);
 		vv.getRenderContext().setEdgeLabelTransformer(ttt);
 

@@ -21,7 +21,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Pair;
 import catdata.fql.FQLException;
@@ -44,7 +44,7 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
 
 /**
- * 
+ *
  * @author ryan
  *
  *         Displays the category of elements of an instance, the Grothendieck
@@ -152,30 +152,19 @@ public class CategoryOfElements {
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Pair<Node, Object>, Pair<Path, Integer>> vv = new VisualizationViewer<>(
 				layout);
-		Transformer<Pair<Node, Object>, Paint> vertexPaint = (Pair<Node, Object> i) -> clr;
+		Function<Pair<Node, Object>, Paint> vertexPaint = (Pair<Node, Object> i) -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexLabelRenderer(new MyVertexT(cards));
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-		vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<Pair<Path, Integer>>() {
+		vv.getRenderContext().setEdgeLabelTransformer(
+			(Pair<Path, Integer> t) ->  t.first.toString()
+			);
 
-			@Override
-			public String transform(Pair<Path, Integer> t) {
-				return t.first.toString();
-			}
-
-		});
-
-		vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<Pair<Node, Object>>() {
-
-			@Override
-			public String transform(Pair<Node, Object> t) {
-				return t.second.toString();
-			}
-
-		});
+		vv.getRenderContext()
+			.setVertexLabelTransformer((Pair<Node, Object> t) -> t.second.toString() );
 
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 		JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -208,7 +197,7 @@ public class CategoryOfElements {
 		pane.add(cards);
 		pane.setResizeWeight(.8d);
 		ret.add(pane);
-	
+
 		return ret;
 	}
 

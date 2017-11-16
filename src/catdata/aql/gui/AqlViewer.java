@@ -20,7 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Chc;
 import catdata.Ctx;
@@ -157,15 +157,15 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<N, E> vv = new VisualizationViewer<>(layout);
-		Transformer<N, Paint> vertexPaint = x -> Color.black;
+		Function<N, Paint> vertexPaint = x -> Color.black;
 		DefaultModalGraphMouse<N, E> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer<E, String> et = Object::toString;
-		Transformer<N, String> vt = Object::toString;
+		Function<E, String> et = Object::toString;
+		Function<N, String> vt = Object::toString;
 		vv.getRenderContext().setEdgeLabelTransformer(et);
 		vv.getRenderContext().setVertexLabelTransformer(vt);
 
@@ -230,15 +230,15 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Chc<Ty, En>, Chc<Fk, Att>> vv = new VisualizationViewer<>(layout);
-		Transformer<Chc<Ty, En>, Paint> vertexPaint = x -> x.left ? Color.gray : Color.black;
+		Function<Chc<Ty, En>, Paint> vertexPaint = x -> x.left ? Color.gray : Color.black;
 		DefaultModalGraphMouse<Chc<Ty, En>, Chc<Fk, Att>> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer<Chc<Fk, Att>, String> et = Chc::toStringMash;
-		Transformer<Chc<Ty, En>, String> vt = Chc::toStringMash;
+		Function<Chc<Fk, Att>, String> et = Chc::toStringMash;
+		Function<Chc<Ty, En>, String> vt = Chc::toStringMash;
 		vv.getRenderContext().setEdgeLabelTransformer(et);
 		vv.getRenderContext().setVertexLabelTransformer(vt);
 

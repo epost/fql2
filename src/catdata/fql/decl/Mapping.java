@@ -20,7 +20,7 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
 import catdata.fql.decl.MapExp.Const;
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Pair;
 import catdata.Triple;
@@ -43,12 +43,11 @@ import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
-import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
 /**
- * 
+ *
  * @author ryan
- * 
+ *
  *         Implementation of signature morphisms
  */
 public class Mapping {
@@ -68,12 +67,12 @@ public class Mapping {
 		this.am = am;
 	}
 */
-	
+
 	public Const toConst() {
 		List<Pair<String, String>> objs = new LinkedList<>();
 		List<Pair<String, String>> attrs = new LinkedList<>();
 		List<Pair<String, List<String>>> arrows = new LinkedList<>();
-		
+
 		for (Node n : source.nodes) {
 			objs.add(new Pair<>(n.string, nm.get(n).string));
 		}
@@ -83,10 +82,10 @@ public class Mapping {
 		for (Edge e : source.edges) {
 			arrows.add(new Pair<>(e.name, em.get(e).asList()));
 		}
-		
+
 		return new Const(objs, attrs, arrows, source.toConst(), target.toConst());
 	}
-	
+
 	public Mapping(boolean b, Signature src, Signature dst, LinkedHashMap<Node, Node> nm,
 			LinkedHashMap<Edge, Path> em,
 			LinkedHashMap<Attribute<Node>, Attribute<Node>> am) throws FQLException {
@@ -99,7 +98,7 @@ public class Mapping {
 		this.am = am;
 		validate();
 	}
-	
+
 	private void validate() throws FQLException {
 		for (Attribute<Node> a : source.attrs) {
 			Attribute<Node> b = am.get(a);
@@ -156,7 +155,7 @@ public class Mapping {
 	 * public Mapping(String name, Environment env, MappingDecl md) throws
 	 * FQLException { this.name = name; switch (md.kind) { case COMPOSE: Mapping
 	 * m1 = env.mappings.get(md.m1); Mapping m2 = env.mappings.get(md.m2);
-	 * 
+	 *
 	 * if (m1 == null) { throw new FQLException("For " + name +
 	 * ", cannot find mapping " + md.m1); } if (m2 == null) { throw new
 	 * FQLException("For " + name + ", cannot find mapping " + md.m2); } if
@@ -165,7 +164,7 @@ public class Mapping {
 	 * m1.source.nodes) { Node v = m1.nm.get(k); nm.put(k, m2.nm.get(v)); } for
 	 * (Edge k : m1.source.edges) { Path v = m1.em.get(k); Path p0 = expand(v,
 	 * m2.nm, m2.em); em.put(k, p0); }
-	 * 
+	 *
 	 * break; case ID: Signature s = env.getSchema(md.schema); if
 	 * (!(md.schema.equals(md.source) && md.schema.equals(md.target))) { throw
 	 * new FQLException("Bad identity mapping : " + md.name); } identity(env,
@@ -594,7 +593,7 @@ public class Mapping {
 		}
 		nm = nm.trim();
 		nm += ";\n";
-		
+
 		nm += " arrows\n";
 		b = false;
 		for (Entry<Edge, Path> k : em.entrySet()) {
@@ -629,11 +628,11 @@ public class Mapping {
 				}
 				ret = Path.append(val, ret, p);
 			}
-	
+
 			if (!ret.target.equals(t)) {
 				throw new RuntimeException("Applying on " + path + " yields " + ret + " whose target is not " + t + " as required.");
 			}
-			
+
 			return ret;
 		} catch (FQLException fe) {
 			fe.printStackTrace();
@@ -642,7 +641,7 @@ public class Mapping {
 
 	}
 
-	
+
 	public Triple<FinFunctor<Node, Path, Node, Path>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>, Pair<FinCat<Node, Path>, Fn<Path, Arr<Node, Path>>>> toFunctor2()
 			throws FQLException {
 		HashMap<Node, Node> objMapping = new HashMap<>();
@@ -744,13 +743,7 @@ public class Mapping {
 				layout);
 		// vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
-		Transformer<String, Paint> vertexPaint = new Transformer<String, Paint>() {
-			@Override
-			public Paint transform(String i) {
-				return which(i);
-			}
-
-			private Color which(String t) {
+		Function<String, Paint> vertexPaint = (String t) -> {
 				int i = t.indexOf(".");
 				String j = t.substring(i + 1);
 				String p = t.substring(0, i);
@@ -761,7 +754,6 @@ public class Mapping {
 					return scolor;
 				}
 				return tcolor;
-			}
 		};
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
@@ -774,7 +766,7 @@ public class Mapping {
 				BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
 		Stroke bs = new BasicStroke();
 
-		Transformer<String, Stroke> edgeStrokeTransformer = (String s) -> {
+		Function<String, Stroke> edgeStrokeTransformer = (String s) -> {
                     if (s.contains(" ")) {
                         return edgeStroke;
                     }
@@ -783,16 +775,14 @@ public class Mapping {
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 		vv.getRenderContext().setVertexLabelTransformer(
-				new ToStringLabeller<String>() {
-					@Override
-					public String transform(String t) {
+				(String t) -> {
 						int i = t.indexOf(".");
 						String j = t.substring(i + 1);
 						// String p = t.substring(0, i);
 						return j;
 					}
-				});
-	
+				);
+
 		JPanel p = new JPanel(new GridLayout(1, 1));
 		p.setBorder(BorderFactory.createEtchedBorder());
 		p.add(new GraphZoomScrollPane(vv));
@@ -919,16 +909,16 @@ public class Mapping {
 		return ret;
 	}
 
-	
+
 	//does not add equations for attrs
-	public Triple<Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, 
-				  Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>, 
+	public Triple<Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>,
+				  Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>,
 				  Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>>> toEDs() throws FQLException {
-	
+
 		Signature sigma = Signature.sum("src", "dst", source, target);
 		Signature pi = Signature.sum("src", "dst", source, target);
 		Signature delta = Signature.sum("src", "dst", source, target);
-		
+
 		Map<Node, Edge> m_map = new HashMap<>();
 		Map<Node, Edge> l_map = new HashMap<>();
 		for (Node c : source.nodes) {
@@ -993,7 +983,7 @@ public class Mapping {
 			delta.eqs.add(new Eq(lhs0, rhs0));
 
 		}
-		
+
 		List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>> deltaXX = new LinkedList<>();
 		List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>> sigmaYY = new LinkedList<>();
 		List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>> piZZ = new LinkedList<>();
@@ -1001,14 +991,14 @@ public class Mapping {
 		for (Attribute<Node> a : source.attrs) {
 			Attribute<Node> a0 = new Attribute<>("src_" + a.name, new Node("src_" + a.source.string), a.target);
 			Attribute<Node> b0 = new Attribute<>("dst_" + am.get(a).name, new Node("dst_" + am.get(a).source.string), a.target);
-			
+
 			sigmaYY.add(new Pair<>(a0, new Pair<>(l_map.get(a.source), b0)));
 			deltaXX.add(new Pair<>(a0, new Pair<>(l_map.get(a.source), b0)));
 
 			piZZ.add(new Pair<>(b0, new Pair<>(m_map.get(a.source), a0)));
 			deltaXX.add(new Pair<>(b0, new Pair<>(m_map.get(a.source), a0)));
 		}
-		 
+
 		Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>> deltaX = new Pair<>(delta, deltaXX);
 		Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>> sigmaY = new Pair<>(delta, sigmaYY);
 		Pair<Signature, List<Pair<Attribute<Node>, Pair<Edge, Attribute<Node>>>>> piZ = new Pair<>(delta, piZZ);

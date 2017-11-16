@@ -16,7 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Pair;
 import catdata.fql.FqlOptions;
@@ -34,7 +34,7 @@ import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
 public abstract class FullQuery {
 
 	protected abstract Pair<Signature, Signature> type();
-	
+
 	protected abstract Color color();
 
 	protected abstract String kind();
@@ -121,7 +121,8 @@ public abstract class FullQuery {
 				layout);
 		// vv.setPreferredSize(new Dimension(600, 400));
 		// Setup up a new vertex to paint transformer...
-		Transformer<Pair<FullQuery, Integer>, Paint> vertexPaint = (Pair<FullQuery, Integer> i) -> i.first.color();
+		Function<Pair<FullQuery, Integer>, Paint> vertexPaint =
+			(Pair<FullQuery, Integer> i) -> i.first.color();
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -130,8 +131,8 @@ public abstract class FullQuery {
 		//float dash[] = { 1.0f };
 //		final Stroke edgeStroke = new BasicStroke(0.5f, BasicStroke.CAP_BUTT,
 	//			BasicStroke.JOIN_MITER, 10.0f, dash, 10.0f);
-		// Transformer<String, Stroke> edgeStrokeTransformer = new
-		// Transformer<String, Stroke>() {
+		// Function<String, Stroke> edgeStrokeTransformer = new
+		// Function<String, Stroke>() {
 		// public Stroke transform(String s) {
 		// return edgeStroke;
 		// }
@@ -139,29 +140,15 @@ public abstract class FullQuery {
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		vv.getRenderContext().setVertexLabelRenderer(new MyVertexT());
 
-		vv.getRenderContext().setEdgeLabelTransformer(
-				new ToStringLabeller<Integer>() {
-
-					@Override
-					public String transform(Integer t) {
-						return "";
-					}
-
-				});
-		// new ToStringLabeller<String>());
+		vv.getRenderContext().setEdgeLabelTransformer((Integer ix) -> "");
+		// new ToStringLabeller());
 		// vv.getRenderer().getVertexRenderer().
 		// vv.getRenderContext().setLabelOffset(20);
 		// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
 		vv.getRenderContext().setVertexLabelTransformer(
-				new ToStringLabeller<Pair<FullQuery, Integer>>() {
-
-					@Override
-					public String transform(Pair<FullQuery, Integer> t) {
-						return t.first.kind();
-					}
-
-				});
+			(Pair<FullQuery, Integer> t) -> t.first.kind()
+			);
 
 		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 		// JPanel ret = new JPanel(new GridLayout(1,1));
