@@ -337,7 +337,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		throw new RuntimeException("Anomaly: please report");
 	}
 	/*
-	public String toString(Function<Sk, String> sk_printer, Function<Gen, String> gen_printer) {
+	public String toStringQuote(Function<Sk, String> sk_printer, Function<Gen, String> gen_printer) {
 		if (var != null) {
 			return Util.maybeQuote(var.toString());
 		} else if (sym != null) {

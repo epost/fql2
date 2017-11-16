@@ -76,6 +76,7 @@ public final class AqlOptions {
 		map_nulls_arbitrarily_unsafe,
 		jdbc_default_class,
 		jdbc_default_string,
+		jdbc_no_distinct_unsafe,
 		schema_only,
 		toCoQuery_max_term_size,
 		program_allow_nontermination_unsafe,
@@ -197,6 +198,8 @@ public final class AqlOptions {
 	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
+		case jdbc_no_distinct_unsafe:
+			return false;
 		case jdbc_export_truncate_after:
 			return -1;
 		case prepend_entity_on_ids:
@@ -364,7 +367,8 @@ public final class AqlOptions {
 
 	private static Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
-		
+		case jdbc_no_distinct_unsafe:
+			return op.getBoolean(map);
 		case jdbc_export_truncate_after:
 			return op.getInteger(map);
 		case prepend_entity_on_ids:

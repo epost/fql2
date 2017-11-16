@@ -192,10 +192,11 @@ public class InstExpJdbcAll extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, 
 		}
 		try (Connection conn = DriverManager.getConnection(toGet)) {
 			SqlSchema sch = new SqlSchema(conn.getMetaData());
+			boolean noDistinct = (Boolean) op.getOrDefault(AqlOption.jdbc_no_distinct_unsafe);
 			boolean schemaOnly = (Boolean) op.getOrDefault(AqlOption.schema_only);
 			boolean nullOnErr = (Boolean) op.getOrDefault(AqlOption.import_null_on_err_unsafe);
 			if (!schemaOnly) {
-				SqlInstance inst = new SqlInstance(sch, conn, nullOnErr);
+				SqlInstance inst = new SqlInstance(sch, conn, nullOnErr, noDistinct);
 				return toInstance(env, inst, sch);
 			}
 			return toInstance(env, null, sch);	

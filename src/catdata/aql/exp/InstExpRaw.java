@@ -85,7 +85,7 @@ public final class InstExpRaw extends InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, ID,
 
 		@Override
 		public String toString() {
-			return str;
+			return Util.maybeQuote(str);
 		}
 
 	}
@@ -127,7 +127,7 @@ public final class InstExpRaw extends InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, ID,
 
 		@Override
 		public String toString() {
-			return str;
+			return Util.maybeQuote(str);
 		}
 
 	}

@@ -72,7 +72,7 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 
 		@Override
 		public String toString() {
-			return str;
+			return Util.maybeQuote(str);
 		}
 
 	}
@@ -119,7 +119,7 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 		@Override
 		public String toString() {
 			// Util.anomaly();
-			return str;
+			return Util.maybeQuote(str);
 			//return "(" + str + "@" + en + ")";
 		}
 
@@ -163,7 +163,7 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 
 		@Override
 		public String toString() {
-			return str;
+			return Util.maybeQuote(str);
 		}
 
 	}

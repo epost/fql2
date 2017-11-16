@@ -21,12 +21,17 @@ import catdata.graph.DMG;
 
 public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeException> {
 	
+	private final AqlEnv env ;
+	public AqlDoc(AqlEnv env) {
+		this.env =env;
+	}
+
 	public static String doc(AqlEnv env, Program<Exp<?>> prog) {
 		if (prog == null || env == null) {
 			throw new RuntimeException("Must compile before using HTML output");
 		}
 		StringBuffer sb = new StringBuffer();
-		AqlDoc doc = new AqlDoc();
+		AqlDoc doc = new AqlDoc(env);
 		for (String k : prog.order) {
 			Exp<?> e = prog.exps.get(k);
 			if (e.kind() != Kind.COMMENT) {
@@ -72,7 +77,7 @@ public final class AqlDoc implements SemanticsVisitor<String, Unit, RuntimeExcep
 
 	@Override
 	public <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> String visit(Unit arg, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I)  {
-		return "\n" + AqlInACan.toHtml((Instance<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, catdata.aql.exp.InstExpRaw.Gen, catdata.aql.exp.InstExpRaw.Sk, X, Y>) I);
+		return "\n" + AqlInACan.toHtml(env, (Instance<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, catdata.aql.exp.InstExpRaw.Gen, catdata.aql.exp.InstExpRaw.Sk, X, Y>) I);
 	}
 
 	@Override

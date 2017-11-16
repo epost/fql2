@@ -30,6 +30,7 @@ import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.AqlJs;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.ColimitSchema;
 import catdata.aql.Collage;
 import catdata.aql.Comment;
@@ -48,6 +49,7 @@ import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.TypeSide;
 import catdata.aql.Var;
+import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.AqlParser;
 import catdata.aql.exp.Exp;
 import catdata.aql.exp.InstExpRaw.Gen;
@@ -76,21 +78,31 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, RuntimeException> { 
 
 	private int maxrows;
-	public AqlViewer(int maxrows) {
+	private AqlEnv env;
+	public AqlViewer(int maxrows, AqlEnv env) {
 		this.maxrows = maxrows;
+		this.env = env;
 	}
 	
 	public static String html(Object obj) {
 		return obj.toString().replace("\n", "<br>").replace("\t", "&nbsp;");
 	}
 
-	public static JComponent view(float time, Semantics s, int maxrows, Exp<?> exp) {
+	public static JComponent view(float time, Semantics s, int maxrows, Exp<?> exp, AqlEnv env) {
 		JTabbedPane ret = new JTabbedPane();
-		new AqlViewer(maxrows).visit(ret, s);
+		new AqlViewer(maxrows, env).visit(ret, s);
 		ret.addTab("Text", new CodeTextPanel("", s.toString()));
 		ret.addTab("Expression", new CodeTextPanel("", exp.toString()));
-
-		ret.addTab("Performance", new CodeTextPanel("",  "Compute time: " + time + " seconds"));
+		int sampleSize = (int) exp.getOrDefault(env, AqlOption.gui_sample_size);
+		boolean doSample = (boolean) exp.getOrDefault(env, AqlOption.gui_sample);
+		if (doSample) {
+			String sample = s.sample(sampleSize);
+			if (sample != null) {
+				ret.addTab("Sample", new CodeTextPanel("", "May not include all tables, columns, or rows.\n\n" + sample));				
+			}
+		}
+	
+		ret.addTab("Performance", new CodeTextPanel("",  "Compute time: " + time + " seconds.\n\nSize: " + s.size()));
 		return ret;
 	}
 
@@ -520,6 +532,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	@Override
 	public <Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> Unit visit(JTabbedPane ret, Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I)  {
 		ret.addTab("Tables", viewAlgebra((Algebra<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, catdata.aql.exp.InstExpRaw.Gen, catdata.aql.exp.InstExpRaw.Sk, X, Y>) I.algebra()));
+		
 		if (I.algebra().talg().sks.size() < 1024) {
 			ret.addTab("Type Algebra", new CodeTextPanel("", I.algebra().talg().toString()));
 		} else {
