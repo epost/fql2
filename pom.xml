@@ -102,6 +102,26 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-dependency-plugin</artifactId>
+              <version>3.0.2</version>
+              <executions>
+                <execution>
+                  <id>copy-dependencies</id>
+                  <phase>package</phase>
+                  <goals>
+                    <goal>copy-dependencies</goal>
+                  </goals>
+                  <configuration>
+                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                    <overWriteReleases>false</overWriteReleases>
+                    <overWriteSnapshots>false</overWriteSnapshots>
+                    <overWriteIfNewer>true</overWriteIfNewer>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -132,7 +152,7 @@
             <version>1.4.196</version>
             <!--
             <scope>system</scope>
-            <systemPath>${project.basedir}/lib/h2-1.4.193.jar</systemPath>
+            <systemPath>${project.basedir}/lib/h2-1.4.196.jar</systemPath>
             -->
         </dependency>
         <dependency>
