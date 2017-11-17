@@ -29,7 +29,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Pair;
 import catdata.Quad;
@@ -48,7 +48,6 @@ import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
-import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.VertexLabelRenderer;
 
 public class Transform {
@@ -232,7 +231,7 @@ public class Transform {
 		for (String k : sorted) {
 			Set<Pair<Object, Object>> xxx = data.get(k);
 			List<Pair<Object, Object>> table = new LinkedList<>(xxx);
-		
+
 			Object[][] arr = new Object[table.size()][2];
 			int i = 0;
 			for (Pair<Object, Object> p : table) {
@@ -425,12 +424,12 @@ public class Transform {
 	/*
 	 * public JComponent lowerComp(String s, String d) { int size =
 	 * src.thesig.nodes.size();
-	 * 
+	 *
 	 * // JPanel pan = new JPanel(new GridLayout(1, size + 1)); // for (Node n :
 	 * src.thesig.nodes) {  // JLabel l = new JLabel(n.string); //
 	 * l.setOpaque(true); // l.setHorizontalAlignment(SwingConstants.CENTER); //
 	 * l.setBackground(sColor); // pan.add(l); // }
-	 * 
+	 *
 	 * //JPanel xxx = new JPanel(); // xxx.add(new JLabel(" ")); //JPanel yu =
 	 * new MyLabel2(); // yu.setSize(20, 12); //xxx.add(new MyLabel2()); //
 	 * xxx.add(new JLabel(s + " (source)")); // xxx.add(new JLabel("    ")); //
@@ -438,7 +437,7 @@ public class Transform {
 	 * xxx.add(new JLabel(d + " (target)")); // pan.add(xxx); // pan.set
 	 * JScrollPane p = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER,
 	 * JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-	 * 
+	 *
 	 * pan.setBorder(BorderFactory.createTitledBorder(
 	 * BorderFactory.createEmptyBorder(2, 2, 2, 2), "Legend"));
 	 * p.setViewportView(pan); return p; }
@@ -464,8 +463,9 @@ public class Transform {
 			layout.setSize(new Dimension(600, 350));
 			VisualizationViewer<Quad<Node, Object, String, Boolean>, Pair<Path, Integer>> vv = new VisualizationViewer<>(
 					layout);
-	
-			Transformer<Quad<Node, Object, String, Boolean>, Paint> vertexPaint = (Quad<Node, Object, String, Boolean> i) -> i.fourth ? scolor : tcolor;
+
+			Function<Quad<Node, Object, String, Boolean>, Paint> vertexPaint =
+			  (Quad<Node, Object, String, Boolean> i) -> i.fourth ? scolor : tcolor;
 
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			gm.setMode(Mode.TRANSFORMING);
@@ -476,54 +476,34 @@ public class Transform {
 			Stroke edgeStroke = new BasicStroke(0.5f,
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
-			// Transformer<String, Stroke> edgeStrokeTransformer = new
-			// Transformer<String, Stroke>() {
+			// Function<String, Stroke> edgeStrokeTransformer = new
+			// Function<String, Stroke>() {
 			// public Stroke transform(String s) {
 			// return edgeStroke;
 			// }
 			// };
 			vv.getRenderContext().setVertexLabelRenderer(new MyVertexT(cards));
 			Stroke bs = new BasicStroke();
-			Transformer<Pair<Path, Integer>, Stroke> edgeStrokeTransformer = (Pair<Path, Integer> s) -> {
-                            if (s.first == null) {
-                                return edgeStroke;
-                            }
-                            return bs;
-                        };
-			 vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-			vv.getRenderContext().setEdgeStrokeTransformer(
-					edgeStrokeTransformer);
+			Function<Pair<Path, Integer>, Stroke> edgeStrokeTransformer =
+				(Pair<Path, Integer> s) -> (s.first == null) ? edgeStroke : bs;
+
+			vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
+			vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 			// vv.getRenderContext().setVertexLabelTransformer(
-			// new ToStringLabeller<String>());
+			// new ToStringLabeller());
 			vv.getRenderContext().setEdgeLabelTransformer(
-					new ToStringLabeller<Pair<Path, Integer>>() {
-
-						@Override
-						public String transform(Pair<Path, Integer> t) {
-							if (t.first == null) {
-								return "";
-							}
-							return t.first.toString();
-						}
-
-					});
-			// new ToStringLabeller<String>());
+					(Pair<Path, Integer> t) -> (t.first == null) ? "" : t.first.toString()
+					);
+			// new ToStringLabeller());
 			// vv.getRenderer().getVertexRenderer().
 			// vv.getRenderContext().setLabelOffset(20);
 			// vv.getRenderer().getVertexLabelRenderer().setPosition(Position.CNTR);
 
 			vv.getRenderContext()
 					.setVertexLabelTransformer(
-							new ToStringLabeller<Quad<Node, Object, String, Boolean>>() {
-
-								@Override
-								public String transform(
-										Quad<Node, Object, String, Boolean> t) {
-									return t.third + "." + t.first + "."
-											+ t.second;
-								}
-
-							});
+							(Quad<Node, Object, String, Boolean> t) ->
+							 	t.third + "." + t.first + "." + t.second
+							);
 			// vv.getRenderer().setVertexRenderer(new MyRenderer());
 
 			JPanel ret = new JPanel(new BorderLayout());
@@ -624,7 +604,7 @@ public class Transform {
 		}
 	}
 
-	
+
 	public static Transform prod(
 			@SuppressWarnings("unused") Instance I,
 			Triple<Instance, Map<Object, Pair<Object, Object>>, Map<Pair<Object, Object>, Object>> IHc,
@@ -687,7 +667,7 @@ public class Transform {
 		return ret;
 	}
 
-	
+
 
 	public Instance apply() throws FQLException { //TODO !!!
 		Map<String, Set<Pair<Object, Object>>> map = new HashMap<>();
@@ -721,6 +701,6 @@ public class Transform {
 		}
 
 		return new Instance(src.thesig, map);
-	} 
+	}
 
 }

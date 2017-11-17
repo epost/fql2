@@ -34,7 +34,7 @@ import javax.swing.table.TableRowSorter;
 import java.util.Vector;
 
 import catdata.fql.decl.InstExp.Const;
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Pair;
 import catdata.fql.FqlOptions;
@@ -131,7 +131,7 @@ public class TransformEditor {
 	private JPanel doLower(String n) {
 		JPanel ret = new JPanel(new GridLayout(1,1));
 		ret.setBorder(BorderFactory.createEmptyBorder());
-		
+
 		JSplitPane outer = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		JSplitPane inner = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		outer.setBorder(BorderFactory.createEmptyBorder());
@@ -144,7 +144,7 @@ public class TransformEditor {
 		JPanel p = new JPanel(new GridLayout(1,1));
 		JScrollPane jsp = new JScrollPane();
 		p.add(jsp);
-		
+
 		Vector arr = new Vector();
 		List<Pair<Object, Object>> jjj = lookup(inst1.data, n);
 		if (jjj == null) {
@@ -165,7 +165,7 @@ public class TransformEditor {
 			}
 			arr.add(v);
 		}
-		
+
 		Vector cols3 = new Vector();
 		cols3.add("ID in " + trans.src);
 		cols3.add("ID in " + trans.dst);
@@ -183,27 +183,27 @@ public class TransformEditor {
 		sorter2.allRowsChanged();
 		tj.put(n, foo);
 		tjx.put(n, p);
-		
+
 		tjx.get(n).setBorder(
 				BorderFactory.createTitledBorder(
 						BorderFactory.createEmptyBorder(), name + "." + n
 								+ " (" + dtm.getRowCount()
 								+ " rows)"));
-		
+
 		jsp.setViewportView(tj.get(n));
 
 		outer.add(inner);
 		outer.add(p);
-		
+
 		inner.add(j1.get(n));
 		inner.add(j2.get(n));
-	
+
 		ret.add(outer);
-		
+
 		//ret.add(new JLabel(n));
 		return ret;
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public TransExp.Const show(Color c) {
 		String title = "Visual Editor for Transform " + name + " : " + trans.src + " -> " + trans.dst;
@@ -213,7 +213,7 @@ public class TransformEditor {
 
 		prejoin(trans.src, inst1, j1);
 		prejoin(trans.dst, inst2, j2);
-		
+
 		for (Node n : thesig.nodes) {
 			joined.put(n.string, doLower(n.string));
 			vwr.add(joined.get(n.string), n.string);
@@ -261,7 +261,7 @@ public class TransformEditor {
 			layout.setSize(new Dimension(500, 340));
 			VisualizationViewer<String, String> vv = new VisualizationViewer<>(
 					layout);
-			Transformer<String, Paint> vertexPaint = (String i) -> thesig.isAttribute(i) ? UIManager.getColor("Panel.background") : clr;
+			Function<String, Paint> vertexPaint = (String i) -> thesig.isAttribute(i) ? UIManager.getColor("Panel.background") : clr;
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			// gm.setMode(ModalGraphMouse.Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
@@ -280,7 +280,7 @@ public class TransformEditor {
                             }
                             vv.getPickedEdgeState().clear();
                             String str = ((String) e.getItem());
-                            
+
                             if (thesig.isNode(str)) {
                                 cards.show(vwr, str);
                                 card = str;
@@ -299,7 +299,7 @@ public class TransformEditor {
 					BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash,
 					10.0f);
 			Stroke bs = new BasicStroke();
-			Transformer<String, Stroke> edgeStrokeTransformer = (String s) -> {
+			Function<String, Stroke> edgeStrokeTransformer = (String s) -> {
                             if (thesig.isAttribute(s)) {
                                 return edgeStroke;
                             }
@@ -309,7 +309,7 @@ public class TransformEditor {
 			vv.getRenderContext().setEdgeStrokeTransformer(
 					edgeStrokeTransformer);
 			vv.getRenderContext().setVertexLabelTransformer(
-					new ToStringLabeller<>());
+					new ToStringLabeller());
 
 			GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 			zzz.setPreferredSize(new Dimension(600, 400));
@@ -370,7 +370,7 @@ public class TransformEditor {
 		}
 	}
 
-	
+
 	private static <X,Y> Y lookup(List<Pair<X,Y>> set, X x) {
 		for (Pair<X, Y> k : set) {
 			if (k.first.equals(x)) {
@@ -387,11 +387,11 @@ public class TransformEditor {
 	private final Map<String, JPanel> joined = new HashMap<>();
 	private final Map<String, JPanel> tjx = new HashMap<>();
 //	Map<String, JPanel> joined2y = new HashMap<>();
-	
+
 	private String card = "";
 
 	private void prejoin(String pre, Const I, Map<String, JPanel> pans) {
-		
+
 		Map<String, Map<String, Set<Pair<Object, Object>>>> jnd = new HashMap<>();
 		Map<String, Set<Pair<Object, Object>>> nd = new HashMap<>();
 
@@ -454,11 +454,11 @@ public class TransformEditor {
 			cols2.sort(strcmp);
 			cols2.add(0, "ID");
 			Object[] cols3 = cols2.toArray();
-			
+
 			int i = 0;
 			for (Pair<Object, Object> id : ids) {
 				arr[i][0] = id.first;
-			
+
 				int j = 1;
 				for (String col : cols2) {
 					if (col.equals("ID")) {
@@ -476,7 +476,7 @@ public class TransformEditor {
 				i++;
 			}
 
-		
+
 			// foo and t are for the graph and tabular pane, resp
 			DefaultTableModel dtm = new DefaultTableModel(arr, cols3);
 			JTable foo = new JTable(dtm) {
@@ -502,7 +502,7 @@ public class TransformEditor {
 			p.setBorder(BorderFactory.createTitledBorder(
 					BorderFactory.createEmptyBorder(), pre + "." + name + " (" + ids.size()
 							+ " rows)"));
-		
+
 			pans.put(name, p);
 		}
 

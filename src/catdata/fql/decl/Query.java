@@ -45,9 +45,9 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
 /**
- * 
+ *
  * @author ryan
- * 
+ *
  *         Queries, and composition.
  */
 public class Query {
@@ -83,7 +83,7 @@ public class Query {
 		union.okForSigma();
 	}
 
-	
+
 	public JPanel view() {
 		JPanel p = new JPanel(new GridLayout(3, 1));
 		p.setBorder(BorderFactory.createEmptyBorder());
@@ -163,9 +163,9 @@ public class Query {
 		gm.setMode(Mode.PICKING);
 
 		vv.getRenderContext().setEdgeLabelTransformer(
-                new ToStringLabeller<>());
+                new ToStringLabeller());
 		vv.getRenderContext().setVertexLabelTransformer(
-                new ToStringLabeller<>());
+                new ToStringLabeller());
 
 		return vv;
 	}
@@ -440,7 +440,7 @@ public class Query {
 				.toMapping(types);
 		Triple<Mapping, Quad<Signature, Pair<Map<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, String>, Map<String, Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>, Pair<Map<Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>, String>, Map<String, Arr<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>, Arr<Node, Path>>>>, Pair<Map<Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>, String>, Map<String, Attribute<Pair<Node, Value<Triple<Node, Node, Node>, Triple<Node, Node, Node>>>>>>>, Quad<Signature, Pair<Map<Node, String>, Map<String, Node>>, Pair<Map<Arr<Node, Path>, String>, Map<String, Arr<Node, Path>>>, Pair<Map<Attribute<Node>, String>, Map<String, Attribute<Node>>>>> union1 = ret.union
 				.toMapping(types);
-	
+
 		Map<String, Node> map1 = proj1.third.second.second;
 		List<Pair<String, String>> xxx = new LinkedList<>();
 		List<Pair<String, List<String>>> yyy = new LinkedList<>();
@@ -472,7 +472,7 @@ public class Query {
 				q1.getSource(), xxx, zzz, yyy);
 
 		Mapping newproj = Mapping.compose(/* name + "_delta", */proj1.first, xyz);
-	
+
 		map1 = union1.third.second.second;
 		xxx = new LinkedList<>();
 		yyy = new LinkedList<>();
@@ -499,7 +499,7 @@ public class Query {
 
 		Mapping newunion = Mapping.compose(/* name + "_sigma", */union1.first,
 				xyz);
-	
+
 		return new Query(newproj, join1.first, newunion);
 
 	}

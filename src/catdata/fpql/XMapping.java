@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Chc;
 import catdata.Pair;
@@ -1418,7 +1418,7 @@ public class XMapping<C, D> implements XObject {
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 
-		Transformer<Chc<C, D>, Paint> vertexPaint = x -> {
+		Function<Chc<C, D>, Paint> vertexPaint = x -> {
 			if (x.left) {
 				return Color.BLUE;
 			}
@@ -1426,13 +1426,13 @@ public class XMapping<C, D> implements XObject {
 		};
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		
-		Transformer<Chc<C, D>, String> ttt = arg0 -> {
+		Function<Chc<C, D>, String> ttt = arg0 -> {
 			if (arg0.left) {
 				return arg0.l.toString();
 			}
 			return arg0.r.toString();
 		};
-		Transformer<Object, String> hhh = arg0 -> {
+		Function<Object, String> hhh = arg0 -> {
 			if (!(arg0 instanceof Chc)) {
 				return "";
 			}
@@ -1451,7 +1451,7 @@ public class XMapping<C, D> implements XObject {
 				BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
 		Stroke bs = new BasicStroke();
 
-		Transformer<Object, Stroke> edgeStrokeTransformer = (Object s) -> {
+		Function<Object, Stroke> edgeStrokeTransformer = (Object s) -> {
                     if (!(s instanceof Chc)) {
                         return edgeStroke;
                     }

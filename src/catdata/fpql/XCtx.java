@@ -30,8 +30,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import org.apache.commons.collections15.Transformer;
-
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Unit;
@@ -53,13 +51,13 @@ import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 
 public class XCtx<C> implements XObject {
-	
+
 	String toStringX() {
 		String rec1 = schema == null ? "null" : schema.toStringX();
 		String rec2 = global == null ? "null" : global.toStringX();
 		return "[[[" + ids + " ||| " + types + " ||| " + eqs + " ||| " + rec1 + " ||| " + rec2 + "]]]";
 	}
-	
+
 	private Set<C> hom(C src, C dst, Set<C> set) {
 		Set<C> ret = new HashSet<>();
 		for (C c : set) {
@@ -70,7 +68,7 @@ public class XCtx<C> implements XObject {
 		}
 		return ret;
 	}
-	
+
 	public Set<C> localhom(C src, C dst) {
 		return hom(src, dst, terms());
 	}
@@ -89,7 +87,7 @@ public class XCtx<C> implements XObject {
 	private boolean initialized = false;
 
 	private boolean shouldAbbreviate = false;
-	
+
 	private String abbrPrint(List<?> l) {
 		if (!shouldAbbreviate) {
 			return Util.sep(l, ".");
@@ -102,7 +100,7 @@ public class XCtx<C> implements XObject {
 		}).collect(Collectors.toList());
 		return Util.sep(r, ".");
 	}
-	
+
 	private String kind = "TODO";
 
 	@Override
@@ -156,7 +154,7 @@ public class XCtx<C> implements XObject {
 			@SuppressWarnings("unchecked")
 			C ccc = (C) "_1";
 			return new Pair<>(ccc, x);
-		}		
+		}
 		Pair<C, C> ret = types.get(c);
 		if (ret != null) {
 			return ret;
@@ -172,7 +170,7 @@ public class XCtx<C> implements XObject {
 		// since used by
 		// expand()
 	}
-	
+
 	public Pair<C, C> type(C c) {
 		Pair<C, C> ret = types.get(c);
 		if (ret != null) {
@@ -195,19 +193,19 @@ public class XCtx<C> implements XObject {
 	// new HashSet<>(eqs), new HashSet<>(local));
 	// throw new RuntimeException();
 	// }
-	
+
 	public static <C> XCtx<C> empty_global() {
 		Set<C> i = new HashSet<>();
 		Map<C, Pair<C, C>> t = new HashMap<>();
-	
+
 		@SuppressWarnings("unchecked")
 		C ccc = (C) "_1";
 		i.add(ccc);
 		t.put(ccc, new Pair<>(ccc, ccc));
-		
-		return new XCtx<>(i, t, new HashSet<>(), null, null, "schema");		
+
+		return new XCtx<>(i, t, new HashSet<>(), null, null, "schema");
 	}
-	
+
 	public static <C> XCtx<C> empty_schema() {
 		return new XCtx<>(new HashSet<>(), new HashMap<>(), new HashSet<>(), empty_global(), null, "schema");
 
@@ -250,7 +248,7 @@ public class XCtx<C> implements XObject {
 	//	sane();
 		if (initialized) {
 			return;
-		}				
+		}
 		validate(true);
 	//	sane();
 		for (C c : ids) {
@@ -290,7 +288,7 @@ public class XCtx<C> implements XObject {
 			l.add(id);
 			rules.add(new Pair<>(l, new LinkedList<>()));
 		}
-		kb = new SemiThue<>(rules, 32); 
+		kb = new SemiThue<>(rules, 32);
 	}
 
 	private void validate(boolean initial) {
@@ -331,18 +329,18 @@ public class XCtx<C> implements XObject {
 			if (!initial
 					|| (!eq.second.toString().contains("!") && !eq.first.toString().contains("!"))) {
 				if (!type(eq.first).equals(type(eq.second))) {
-					throw new RuntimeException("Type mismatch on equation " + Util.sep(eq.first,".") + " : " +  type(eq.first).first + " -> " + type(eq.first).second 
-							+ " = " + 
+					throw new RuntimeException("Type mismatch on equation " + Util.sep(eq.first,".") + " : " +  type(eq.first).first + " -> " + type(eq.first).second
+							+ " = " +
 							Util.sep(eq.second, ".") + " : " + type(eq.second).first + " -> " + type(eq.second).second);
 				}
 			}
 		}
-		
+
 	//	sane();
 	}
-	
 
-	
+
+
 
 	public Pair<C, C> type(List<C> first) {
 		if (first.isEmpty()) {
@@ -359,7 +357,7 @@ public class XCtx<C> implements XObject {
 		}
 		return ret;
 	}
-	
+
 	public Pair<C,C> typeWith(List<C> first, Map<C, C> ctx) {
 		if (first.isEmpty()) {
 			throw new RuntimeException("Empty");
@@ -375,8 +373,8 @@ public class XCtx<C> implements XObject {
 		}
 		return ret;
 	}
-	
-	
+
+
 
 	private String toString = null;
 
@@ -478,15 +476,15 @@ public class XCtx<C> implements XObject {
 				ret.addTab("Adom Tables", makeTables(z -> foo(), global.ids));
 			}
 		}
-		
+
 		if (DefunctGlobalOptions.debug.fpql.x_graph) {
 			ret.addTab("Graph", makeGraph(schema != null));
 		}
-		
+
 		if (DefunctGlobalOptions.debug.fpql.x_graph && (schema != null)) {
 			ret.addTab("Elements", elements());
 		}
-		
+
 		if (DefunctGlobalOptions.debug.fpql.x_json) {
 			String tj = toJSON();
 			if (tj != null) {
@@ -511,26 +509,21 @@ public class XCtx<C> implements XObject {
 		gm.setMode(Mode.PICKING); //was TRANSFORMING
 		vv.setGraphMouse(gm);
 
-		Transformer<C, Paint> vertexPaint = x -> {
-			if (global.terms().contains(x)) {
-				return Color.RED;
-			}
-			return Color.GREEN;
-		};
-		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
-		
-		Transformer<C, String> ttt = arg0 -> {
-			String ret = arg0.toString();
-			if (ret.length() > 40) {
-				return ret.substring(0, 39) + "...";
-			}
-			return ret;
-		};
+		vv.getRenderContext().setVertexFillPaintTransformer(
+			(C x) -> global.terms().contains(x) ? Color.RED : Color.GREEN );
+
+		com.google.common.base.Function<C, String> ttt =
+			(C arg0) -> {
+				String ret = arg0.toString();
+				return (ret.length() > 40)
+					? ret.substring(0, 39) + "..."
+					: ret;
+			};
+
 		vv.getRenderContext().setVertexLabelTransformer(ttt);
 //		vv.getRenderer().setVertexRenderer(new MyRenderer());
 		vv.getRenderContext().setEdgeLabelTransformer(ttt);
-		
-		
+
 		vv.getPickedVertexState().addItemListener(e -> {
 				if (e.getStateChange() != ItemEvent.SELECTED) {
 					return;
@@ -540,14 +533,14 @@ public class XCtx<C> implements XObject {
 				if (cl == null) {
                 }
 //				cl.show(clx, xgrid.get(str));
-			
+
 		});
 
 		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
 		JPanel ret = new JPanel(new GridLayout(1, 1));
 		ret.add(zzz);
 		ret.setBorder(BorderFactory.createEtchedBorder());
-		
+
 		if (isInstance && DefunctGlobalOptions.debug.fpql.x_tables && xcat != null) {
 			JSplitPane jsp = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 			jsp.setResizeWeight(.8d); // setDividerLocation(.9d);
@@ -558,7 +551,7 @@ public class XCtx<C> implements XObject {
 		} else {
 			return ret;
 		}
-		
+
 	}
 
 	private Graph<C, C> buildFromSig() {
@@ -873,7 +866,7 @@ public class XCtx<C> implements XObject {
 		}
 		return null;
 	}*/
-	
+
 	private JComponent clx;
 	private CardLayout cl;
 //	private Map<C, String> xgrid;
@@ -887,7 +880,7 @@ public class XCtx<C> implements XObject {
 //		}
 //		return new JPanel();
 //	}
-	
+
 
 	//  have this suppress pair IDs when possible
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -906,7 +899,7 @@ public class XCtx<C> implements XObject {
 			// Category<C, Triple<C, C, List<C>>> cat = cat();
 			List<JComponent> grid = new LinkedList<>();
 			Collection<Triple<C, C, List<C>>> cat = fn.apply(new Unit());
-		
+
 			// Map<C, Set<List<C>>> entities = new HashMap<>();
 			Map entities = new HashMap<>();
 			Map<C, Set<C>> m = new HashMap<>();
@@ -945,7 +938,7 @@ public class XCtx<C> implements XObject {
 				List<C> cols = new LinkedList<>(m.get(c));
 				cols = cols.stream().filter(x -> !x.toString().startsWith("!"))
 						.collect(Collectors.toList());
-	
+
 				Object[][] rowData = new Object[src.size()][cols.size()];
 				int idx = cols.indexOf(c);
 				if (idx != -1) {
@@ -959,7 +952,7 @@ public class XCtx<C> implements XObject {
 						cols = colsX;
 					}
 				}
-		
+
 				List<String> colNames3 = cols
 						.stream()
 						.map(x -> type(x).second.equals(x) ? x.toString() : x + " ("
@@ -973,7 +966,7 @@ public class XCtx<C> implements XObject {
 					for (C col : cols) {
 						List<C> r = new LinkedList<>(l);
 						r.add(col);
-						for (Triple<C, C, List<C>> cand : cat) { 
+						for (Triple<C, C, List<C>> cand : cat) {
 							if (!cand.first.equals("_1")) {
 								continue;
 							}
@@ -1373,7 +1366,7 @@ public class XCtx<C> implements XObject {
 								throw new RuntimeException();
 							}
 							return ret;
-						} 
+						}
 					}
 
 					List<C> retl = new LinkedList<>();
@@ -1464,7 +1457,7 @@ public class XCtx<C> implements XObject {
 		};
 		// cache the composition table
 		if (DefunctGlobalOptions.debug.fpql.validate_amalgams) {
-			ret.validate(); 
+			ret.validate();
 		}
 		return ret;
 	}
@@ -1575,7 +1568,7 @@ public class XCtx<C> implements XObject {
 					p0.add(e);
 
 					Triple<C, C, List<C>> toAdd = new Triple<>(p.first, t.get(e).second, p0);
-					Triple<C, C, List<C>> found = find_old(kb, toAdd, paths); 
+					Triple<C, C, List<C>> found = find_old(kb, toAdd, paths);
 
 					if (found == null) {
 						found = find_old(kb, toAdd, newPaths);
@@ -1628,7 +1621,7 @@ public class XCtx<C> implements XObject {
 		for (Pair<List<String>, List<String>> k : I.eqs) {
 			// : must expand paths
 			// : supress variable check for now
-		
+
 			Set s = new HashSet<>();
 			s.add(new LinkedList<>());
 			List<List> lhs = new LinkedList<>(expand(s, k.first, S, tmp));
@@ -1647,24 +1640,24 @@ public class XCtx<C> implements XObject {
 				lhs = lhsX;
 			}
 			if (rhs.isEmpty()) {
-				throw new RuntimeException("In equation " 
+				throw new RuntimeException("In equation "
 			+ Util.sep(k.first, ".") + " = " + Util.sep(k.second, ".") + ", the right hand side refers to non-existent terms.  You should probably add terms at the global or instance level.");
 			}
 			if (lhs.isEmpty()) {
-				throw new RuntimeException("In equation " 
+				throw new RuntimeException("In equation "
 			+ Util.sep(k.first, ".") + " = " + Util.sep(k.second, ".") + ", the left hand side refers to non-existent terms.  You should probably add terms at the global or instance level.");
 			}
 			if (rhs.size() > 1) {
-				throw new RuntimeException("In equation " 
+				throw new RuntimeException("In equation "
 			+ Util.sep(k.first, ".") + " = " + Util.sep(k.second, ".") + ", the right hand is ambiguous, and could mean any of {"  +
 						printDirty(rhs) + "}");
-				
+
 			}
 			if (lhs.size() > 1) {
-				throw new RuntimeException("In equation " 
+				throw new RuntimeException("In equation "
 			+ Util.sep(k.first, ".") + " = " + Util.sep(k.second, ".") + ", the left hand is ambiguous, and could mean any of {"  +
 						printDirty(lhs) + "}");
-				
+
 			}
 
 			e.add(new Pair<>(new LinkedList<>(lhs).get(0), new LinkedList<>(rhs).get(0)));
@@ -2024,9 +2017,9 @@ public class XCtx<C> implements XObject {
 		ret.saturated = true;
 		return ret;
 	}
-	
+
 	private final Map<Pair<C,C>, XCtx<C>> y_cache = new HashMap<>();
-	
+
 	@SuppressWarnings("unchecked")
 	public XCtx<C> y(C name, C type) {
 		Pair<C,C> p = new Pair<>(name, type);
@@ -2034,25 +2027,25 @@ public class XCtx<C> implements XObject {
 		if (ret != null) {
 			return ret;
 		}
-		
+
 		Map<C, Pair<C, C>> types0 = new HashMap<>();
-		
+
 		types0.put(name, new Pair<>((C)"_1", type));
-		
+
 		ret = new XCtx<>(new HashSet<>(), types0, new HashSet<>(), global, this, "instance");
 		y_cache.put(p, ret);
 		return ret;
 	}
-	
+
 	public XCtx<C> hat() {
 		Map<C, Pair<C, C>> new_types = new HashMap<>();
 		for (C k : types.keySet()) {
 			Pair<C, C> v = types.get(k);
 			if (!global.ids.contains(v.first) && !global.ids.contains(v.second)) {
 				new_types.put(k,v);
-			} 
+			}
 		}
-		
+
 		Set<Pair<List<C>, List<C>>> new_eqs = new HashSet<>();
 		for (Pair<List<C>, List<C>> p : eqs) {
 			if (containsType(p.first) || containsType(p.second)) {
@@ -2060,16 +2053,16 @@ public class XCtx<C> implements XObject {
 			}
 			new_eqs.add(p);
 		}
-		
+
 		return new XCtx<>(ids, new_types, new_eqs, empty_global(), null, "schema");
 	}
-	
+
 	private boolean containsType(List<C> l) {
 		for (C k : l) {
 			Pair<C, C> v = type(k);
 			if (global.ids.contains(v.first) || global.ids.contains(v.second)) {
 				return true;
-			} 
+			}
 		}
 		return false;
 	}
@@ -2121,7 +2114,7 @@ public class XCtx<C> implements XObject {
 		}
 		return g;
 	}
-	
+
 	private JPanel elements() {
 		if (schema == null || global == null) {
 			throw new RuntimeException();
@@ -2134,7 +2127,7 @@ public class XCtx<C> implements XObject {
 		}
 		return ret;
 	}
-	
+
 	private static final Color[] colors = { Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.YELLOW, Color.CYAN, Color.WHITE, Color.GRAY, Color.BLACK, Color.PINK, Color.ORANGE };
 	private final Map<C, Color> colorMap = new HashMap<>();
 	private void initColors() {
@@ -2147,7 +2140,7 @@ public class XCtx<C> implements XObject {
 			}
 		}
 	}
-	
+
 	private final Map<Triple<C, C, List<C>>, JPanel> attPanels = new HashMap<>();
 	private JPanel attsFor(Triple<C, C, List<C>> arr) {
 		Map<C, String> tys = new HashMap<>();
@@ -2170,10 +2163,10 @@ public class XCtx<C> implements XObject {
 			Triple<C, C, List<C>> found = find_fast(tofind);
 			vals.put(c, abbrPrint(found.third));
 		}
-		
+
 		Object[][] rowData = new Object[tys.keySet().size()][3];
 		Object[] colNames = {"Attribute", "Type", "Value" };
-		
+
 		int i = 0;
 		for (C c : tys.keySet()) {
 			rowData[i][0] = c;
@@ -2181,13 +2174,13 @@ public class XCtx<C> implements XObject {
 			rowData[i][2] = vals.get(c);
 			i++;
 		}
-		
+
 		String str = "Attributes for " + abbrPrint(arr.third) + " (" + rowData.length + ")";
 		JPanel ret = new JPanel(new GridLayout(1,1));
 		ret.add(Util.makeTable(BorderFactory.createEmptyBorder(), str, rowData, colNames));
 		return ret;
 	}
-	
+
 	private JComponent makeElems() {
 		Graph<Triple<C,C,List<C>>, Pair<Integer, C>> sgv = elemGraph();
 		if (sgv.getVertexCount() > 64) {
@@ -2202,10 +2195,11 @@ public class XCtx<C> implements XObject {
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
-		
+
 		JPanel botPanel = new JPanel(new GridLayout(1,1));
 
-		Transformer<Triple<C,C,List<C>>, Paint> vertexPaint = x -> colorMap.get(x.second);
+		com.google.common.base.Function<Triple<C,C,List<C>>, Paint> vertexPaint =
+			(Triple<C,C,List<C>> x) -> colorMap.get(x.second);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 		vv.getPickedVertexState().addItemListener((ItemEvent e) -> {
                     if (e.getStateChange() != ItemEvent.SELECTED) {
@@ -2214,23 +2208,24 @@ public class XCtx<C> implements XObject {
                     vv.getPickedEdgeState().clear();
                     @SuppressWarnings("unchecked")
                             Triple<C, C, List<C>> arr = (Triple<C, C, List<C>>)e.getItem();
-                    
+
                     //		cl.show(clx, xgrid.get(str));
             JPanel foo = attPanels.computeIfAbsent(arr, k -> attsFor(arr));
             botPanel.removeAll();
                     botPanel.add(foo);
                     botPanel.revalidate();
                 });
-		
-		Transformer<Triple<C,C,List<C>>, String> ttt = arg0 -> {
-			String ret = abbrPrint(arg0.third); //.toString();
-			if (ret.length() > 32) {
-				return ret.substring(0, 31) + "...";
-			}
-			return ret;
-		};
-		Transformer<Pair<Integer, C>, String> ttt2 = arg0 -> arg0.second.toString();
-		
+
+		com.google.common.base.Function<Triple<C,C,List<C>>, String> ttt =
+			(Triple<C,C,List<C>> arg0) -> {
+				String ret = abbrPrint(arg0.third); //.toString();
+				return (ret.length() > 32)
+					? ret.substring(0, 31) + "..."
+					: ret;
+			};
+		com.google.common.base.Function<Pair<Integer, C>, String> ttt2 =
+			(Pair<Integer, C> arg0) -> arg0.second.toString();
+
 		vv.getRenderContext().setVertexLabelTransformer(ttt);
 		vv.getRenderContext().setEdgeLabelTransformer(ttt2);
 
@@ -2245,10 +2240,10 @@ public class XCtx<C> implements XObject {
 			jsp.add(ret);
 			jsp.add(botPanel);
 			return jsp;
-		
+
 	}
-	
-	
+
+
 	 /*re-implement the render functionality to work with internal frames(JInternalFrame)*/
    /*  private class MyRenderer extends JPanel implements Vertex<C, C>
     {
@@ -2267,9 +2262,9 @@ public class XCtx<C> implements XObject {
                 area.setWrapStyleWord(true);
                 sv.add(new JScrollPane(area));
                 //OK
-                graphicsContext.draw(sv, rc.getRendererPane(), (int)center.getX(), 
+                graphicsContext.draw(sv, rc.getRendererPane(), (int)center.getX(),
                                      (int)center.getY(), (int)size.getWidth(), (int)size.getHeight(), true);
-            
+
         }
     } */
 
@@ -2282,24 +2277,24 @@ public class XCtx<C> implements XObject {
     		 return null;
     	 }
      }
-     
+
      private String toJSONSchema() {
     	// String ns = "";
     	// String es = "";
-    	 
+
     	 Set<String> ns0 = new HashSet<>();
     	 Set<String> es0 = new HashSet<>();
     	 Set<String> eq0 = new HashSet<>();
     		 for (C k : global.ids) {
-    			 String s = "{\"id\": \"" + k + "\", \"type\":\"type\", \"label\":\"" + k + "\"}";  
+    			 String s = "{\"id\": \"" + k + "\", \"type\":\"type\", \"label\":\"" + k + "\"}";
         		 ns0.add(s);
     		 }
     		 for (C k : global.terms()) {
     			 if (global.ids.contains(k)) {
     				 continue;
     			 }
-    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
-    			 + global.type(k).first + "\", \"target\":\"" + global.type(k).second + "\"}";  
+    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\""
+    			 + global.type(k).first + "\", \"target\":\"" + global.type(k).second + "\"}";
         		 es0.add(s);
     		 }
     		 for (Pair<List<C>, List<C>> k : global.eqs) {
@@ -2309,15 +2304,15 @@ public class XCtx<C> implements XObject {
     			 eq0.add(s);
     		 }
     		 for (C k : ids) {
-    			 String s = "{\"id\": \"" + k + "\", \"type\":\"entity\", \"label\":\"" + k + "\"}";  
+    			 String s = "{\"id\": \"" + k + "\", \"type\":\"entity\", \"label\":\"" + k + "\"}";
         		 ns0.add(s);
     		 }
     		 for (C k : terms()) {
     			 if (ids.contains(k)) {
     				 continue;
     			 }
-    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
-    					 + type(k).first + "\", \"target\":\"" + type(k).second + "\"}";  
+    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\""
+    					 + type(k).first + "\", \"target\":\"" + type(k).second + "\"}";
     			 es0.add(s);
     		 }
     		 for (Pair<List<C>, List<C>> k : eqs) {
@@ -2326,52 +2321,52 @@ public class XCtx<C> implements XObject {
     			 String s = "{\"lhs\": [" + Util.sep(lhs, ", ") + "], \"rhs\": [" + Util.sep(rhs, ", ") + "]}";
     			 eq0.add(s);
     		 }
-    	 
-    	 return "{\"graph\": { \"directed\":true,\n\"nodes\":[\n" + Util.sep(ns0, ",\n") + 
-    			 	"],\n\"edges\":[\n" + Util.sep(es0, ",\n") + "\n]," + 
+
+    	 return "{\"graph\": { \"directed\":true,\n\"nodes\":[\n" + Util.sep(ns0, ",\n") +
+    			 	"],\n\"edges\":[\n" + Util.sep(es0, ",\n") + "\n]," +
     			 	"\n\"equations\":[\n" + Util.sep(eq0, ",\n") + "\n]}}";
      }
-     
+
 
 //     public String toJSONInstance() {
 //    	 String ns = "";
 //    	 String es = "";
-//    	 
+//
 //    	 Set<String> ns0 = new HashSet<>();
 //    	 Set<String> es0 = new HashSet<>();
 //    		 for (C k : global.ids) {
-//    			 String s = "{\"id\": \"" + k + "\", \"type\":\"type\", \"label\":\"" + k + "\"}";  
+//    			 String s = "{\"id\": \"" + k + "\", \"type\":\"type\", \"label\":\"" + k + "\"}";
 //        		 ns0.add(s);
 //    		 }
 //    		 for (C k : global.terms()) {
 //    			 if (global.ids.contains(k)) {
 //    				 continue;
 //    			 }
-//    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
-//    			 + global.type(k).first + "\", \"target\":\"" + global.type(k).second + "\"}";  
+//    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\""
+//    			 + global.type(k).first + "\", \"target\":\"" + global.type(k).second + "\"}";
 //        		 es0.add(s);
 //    		 }
 //    		 for (C k : schema.ids) {
-//    			 String s = "{\"id\": \"" + k + "\", \"type\":\"entity\", \"label\":\"" + k + "\"}";  
+//    			 String s = "{\"id\": \"" + k + "\", \"type\":\"entity\", \"label\":\"" + k + "\"}";
 //        		 ns0.add(s);
 //    		 }
 //    		 for (C k : schema.terms()) {
 //    			 if (schema.ids.contains(k)) {
 //    				 continue;
 //    			 }
-//    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
-//    					 + schema.type(k).first + "\", \"target\":\"" + schema.type(k).second + "\"}";  
+//    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\""
+//    					 + schema.type(k).first + "\", \"target\":\"" + schema.type(k).second + "\"}";
 //    			 es0.add(s);
 //    		 }
 //    		 for (C k : terms()) {
-//    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\"" 
-//    					 + type(k).first + "\", \"target\":\"" + type(k).second + "\"}";  
+//    			 String s = "{\"id\": \"" + k + "\", \"directed\":\"true\", \"label\":\"" + k + "\", \"source\":\""
+//    					 + type(k).first + "\", \"target\":\"" + type(k).second + "\"}";
 //    			 es0.add(s);
 //    		 }
-//    	 
+//
 //    	 return "{\"graph\": { \"directed\":true,\n\"nodes\":[\n" + Util.sep(ns0, ",\n") + "],\n\"edges\":[\n" + Util.sep(es0, ",\n") + "\n]}}";
 //     }
-	
-	
-	
+
+
+
 }

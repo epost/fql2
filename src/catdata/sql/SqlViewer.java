@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Chc;
 import catdata.Util;
@@ -120,7 +120,7 @@ class SqlViewer extends JPanel {
 		Layout<Chc<SqlType, SqlTable>, Chc<SqlColumn, SqlForeignKey>> layout = new FRLayout<>(graph);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Chc<SqlType, SqlTable>, Chc<SqlColumn, SqlForeignKey>> vv = new VisualizationViewer<>(layout);
-		Transformer<Chc<SqlType, SqlTable>, Paint> vertexPaint = x -> x.left ? UIManager.getColor("Panel.background") : color;
+		Function<Chc<SqlType, SqlTable>, Paint> vertexPaint = x -> x.left ? UIManager.getColor("Panel.background") : color;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
@@ -128,9 +128,9 @@ class SqlViewer extends JPanel {
 		
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer<Chc<SqlType, SqlTable>, String> vt = x -> x.left ? x.l.name : x.r.name;
+		Function<Chc<SqlType, SqlTable>, String> vt = x -> x.left ? x.l.name : x.r.name;
 		
-		Transformer<Chc<SqlColumn, SqlForeignKey>, String> et = x -> x.left ? x.l.name : "";
+		Function<Chc<SqlColumn, SqlForeignKey>, String> et = x -> x.left ? x.l.name : "";
 		
 		vv.getRenderContext().setVertexLabelTransformer(vt);
 		vv.getRenderContext().setEdgeLabelTransformer(et);

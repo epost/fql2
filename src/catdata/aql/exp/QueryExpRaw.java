@@ -57,7 +57,7 @@ public class QueryExpRaw
 	private final Ctx<Fk, Integer> b2=new Ctx<>();
 	private final Ctx<Att, Integer> b3=new Ctx<>();
 
-	
+
 	@Override
 	public Map<String, String> options() {
 		return options;
@@ -322,7 +322,7 @@ public class QueryExpRaw
 				}
 				toString += Util.sep(temp, "\n\t\t\t\t\t");
 			}
-			
+
 			if (!l.isEmpty()) {
 				toString += "\n\t\t\t\tforeign_keys\t";
 				temp = new LinkedList<>();
@@ -501,7 +501,7 @@ public class QueryExpRaw
 
 	
 		for (Pair<LocStr, Triple<Block, List<Pair<LocStr, RawTerm>>, List<Pair<LocStr, Trans>>>> p : list) {
-			List<InteriorLabel<Object>> f = new LinkedList<>();
+		List<InteriorLabel<Object>> f = new LinkedList<>();
 			
 			f.add(new InteriorLabel<>("entities", p.second.first, p.first.loc, x -> "instance").conv());
 			
@@ -514,7 +514,7 @@ public class QueryExpRaw
 			
 			raw.put(p.first.str, f);
 		}
-		
+
 		//raw.put("attributes", g);
 		//raw.put("foreign keys", h);
 	}

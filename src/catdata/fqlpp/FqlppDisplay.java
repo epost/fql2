@@ -29,7 +29,7 @@ import javax.swing.event.ListSelectionEvent;
 import catdata.fqlpp.CatExp.Const;
 import catdata.fqlpp.cat.Signature.Edge;
 import catdata.fqlpp.cat.Signature.Node;
-import org.apache.commons.collections15.Transformer;
+import com.google.common.base.Function;
 
 import catdata.Pair;
 import catdata.Quad;
@@ -48,7 +48,7 @@ import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
 import catdata.ide.GUI;
 import catdata.ide.DefunctGlobalOptions;
-//import org.apache.commons.collections15.Transformer;
+//import com.google.common.base.Function;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -59,9 +59,9 @@ import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse.Mode;
 
 /**
- * 
+ *
  * @author ryan
- * 
+ *
  */
 
 @SuppressWarnings({"rawtypes", "ConstantConditions"})
@@ -154,10 +154,10 @@ public class FqlppDisplay implements Disp {
 					px.add("Schema", xxx);
 				} else {
 					px.add("Schema", doSchemaView(c, g));
-				}	
+				}
 			}
 		}
-		
+
 		if (DefunctGlobalOptions.debug.fqlpp.cat_graph && !view.isInfinite()) {
 			JComponent gp = makeCatViewer(view, c);
 			px.add("Graph", gp);
@@ -173,7 +173,7 @@ public class FqlppDisplay implements Disp {
 					Util.nice(view.toString()));
 			px.add("Text", gp);
 		}
-		
+
 		JPanel top = new JPanel(new GridLayout(1, 1));
 		top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 		top.add(px);
@@ -456,14 +456,14 @@ public class FqlppDisplay implements Disp {
 					Util.nice(view.toString()));
 			px.add("Text", gp);
 		}
-		
+
 
 		JPanel top = new JPanel(new GridLayout(1, 1));
 		top.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 		top.add(px);
 		return top;
 	}
-	
+
 	@SuppressWarnings("unchecked")
     private JPanel showTrans(Transform view, Color c) {
 		JTabbedPane px = new JTabbedPane();
@@ -491,7 +491,7 @@ public class FqlppDisplay implements Disp {
 				src_sig = new Signature(sig0.nodes, sig0.arrows, sig0.eqs);
 			}
 		}
-	
+
 
 		if (src_sig != null && FinSet.FinSet.equals(view.target.target)) {
 		//	JPanel vwr = new JPanel(new GridLayout(1, 1));
@@ -562,8 +562,8 @@ public class FqlppDisplay implements Disp {
 		return top;
 	}
 
-	
-			 
+
+
 	private final FQLPPProgram prog;
 	private final FQLPPEnvironment env;
 	GUI gui;
@@ -747,10 +747,10 @@ public class FqlppDisplay implements Disp {
 
 		return ret;
 	}
-	
+
 	@SuppressWarnings("unchecked")
     private static Graph buildMapping(Signature<String, String> src, Signature<String, String> dst, Functor F) {
-	
+
 		Graph<Object, Object> ret = new DirectedSparseMultigraph<>();
 
 		for (Node n : src.nodes) {
@@ -919,7 +919,7 @@ public class FqlppDisplay implements Disp {
 			Layout<Pair<String, Color>, Integer> layout = new FRLayout<>(sgv);
 			// layout.setSize(new Dimension(600, 200));
 			VisualizationViewer<Pair<String, Color>, Integer> vv = new VisualizationViewer<>(layout);
-			Transformer<Pair<String, Color>, Paint> vertexPaint = x -> x.second;
+			Function<Pair<String, Color>, Paint> vertexPaint = x -> x.second;
 			DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 			gm.setMode(Mode.TRANSFORMING);
 			vv.setGraphMouse(gm);
@@ -945,14 +945,14 @@ public class FqlppDisplay implements Disp {
 		Layout<X, Y> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<X, Y> vv = new VisualizationViewer<>(layout);
-		Transformer<X, Paint> vertexPaint = x -> clr;
+		Function<X, Paint> vertexPaint = x -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer ttt = arg0 -> Util.nice(arg0.toString());
+		Function ttt = arg0 -> Util.nice(arg0.toString());
 		vv.getRenderContext().setVertexLabelTransformer(ttt);
 		vv.getRenderContext().setEdgeLabelTransformer(ttt);
 
@@ -968,14 +968,14 @@ public class FqlppDisplay implements Disp {
 		Layout<X, Y> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<X, Y> vv = new VisualizationViewer<>(layout);
-		Transformer<X, Paint> vertexPaint = z -> clr;
+		Function<X, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer fff = arg0 -> Util.nice(arg0.toString());
+		Function fff = arg0 -> Util.nice(arg0.toString());
 		vv.getRenderContext().setVertexLabelTransformer(fff);
 		vv.getRenderContext().setEdgeLabelTransformer(fff);
 
@@ -1041,19 +1041,19 @@ public class FqlppDisplay implements Disp {
 	}
 
 	@SuppressWarnings("unchecked")
-    private static <X, Y> JComponent doFNView2(Functor fn, JPanel p, Color clr, Graph<X, Y> sgv,
+  private static <X, Y> JComponent doFNView2(Functor fn, JPanel p, Color clr, Graph<X, Y> sgv,
                                                Signature sig) {
 		Layout<X, Y> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<X, Y> vv = new VisualizationViewer<>(layout);
-		Transformer<X, Paint> vertexPaint = z -> clr;
+		Function<X, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer ttt = arg0 -> Util.nice(arg0.toString());
+		Function ttt = arg0 -> Util.nice(arg0.toString());
 		vv.getRenderContext().setVertexLabelTransformer(ttt);
 		vv.getRenderContext().setEdgeLabelTransformer(ttt);
 
@@ -1094,14 +1094,14 @@ public class FqlppDisplay implements Disp {
 		Layout layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer vv = new VisualizationViewer<>(layout);
-		Transformer vertexPaint = x -> clr;
+		Function vertexPaint = x -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer ttt = arg0 -> Util.nice(arg0.toString());
+		Function ttt = arg0 -> Util.nice(arg0.toString());
 		vv.getRenderContext().setVertexLabelTransformer(ttt);
 		vv.getRenderContext().setEdgeLabelTransformer(ttt);
 
@@ -1117,17 +1117,17 @@ public class FqlppDisplay implements Disp {
 		Layout<Pair, Triple> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<Pair, Triple> vv = new VisualizationViewer<>(layout);
-		Transformer<Pair, Paint> vertexPaint = z -> clr;
+		Function<Pair, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer<Pair, String> ttt1 = arg0 -> Util.nice(arg0.second.toString());
+		Function<Pair, String> ttt1 = arg0 -> Util.nice(arg0.second.toString());
 		vv.getRenderContext().setVertexLabelTransformer(ttt1);
 
-		Transformer<Triple, String> ttt2 = arg0 -> Util.nice(arg0.first.toString());
+		Function<Triple, String> ttt2 = arg0 -> Util.nice(arg0.first.toString());
 		vv.getRenderContext().setEdgeLabelTransformer(ttt2);
 
 		GraphZoomScrollPane zzz = new GraphZoomScrollPane(vv);
@@ -1136,7 +1136,7 @@ public class FqlppDisplay implements Disp {
 		ret.setBorder(BorderFactory.createEtchedBorder());
 		return ret;
 	}
-	
+
 	private static JComponent doMappingView(Color clr1, Color clr2, Graph<Pair, Quad> sgv) {
 		Layout<Pair, Quad> layout = new FRLayout<>(sgv);
 		layout.setSize(new Dimension(600, 400));
@@ -1146,20 +1146,20 @@ public class FqlppDisplay implements Disp {
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 
-		Transformer<Pair, Paint> vertexPaint = x -> x.second.equals("src") ? clr1 : clr2;
+		Function<Pair, Paint> vertexPaint = x -> x.second.equals("src") ? clr1 : clr2;
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer<Pair, String> ttt1 = arg0 -> Util.nice(arg0.first.toString());
+		Function<Pair, String> ttt1 = arg0 -> Util.nice(arg0.first.toString());
 		vv.getRenderContext().setVertexLabelTransformer(ttt1);
 
-		Transformer<Quad, String> ttt2 = arg0 -> Util.nice(arg0.first.toString());
+		Function<Quad, String> ttt2 = arg0 -> Util.nice(arg0.first.toString());
 		vv.getRenderContext().setEdgeLabelTransformer(ttt2);
 
 		float dash[] = { 1.0f };
 		Stroke edgeStroke = new BasicStroke(0.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
 				10.0f, dash, 10.0f);
 		Stroke bs = new BasicStroke();
-		Transformer<Quad, Stroke> edgeStrokeTransformer = x -> x.fourth instanceof Integer ? edgeStroke
+		Function<Quad, Stroke> edgeStrokeTransformer = x -> x.fourth instanceof Integer ? edgeStroke
 				: bs;
 		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 
@@ -1182,20 +1182,20 @@ public class FqlppDisplay implements Disp {
 		Color clr1 = clr.brighter().brighter();
 		Color clr2 = clr.darker().darker();
 
-		Transformer<Triple, Paint> vertexPaint = x -> x.third.equals("src") ? clr1 : clr2;
+		Function<Triple, Paint> vertexPaint = x -> x.third.equals("src") ? clr1 : clr2;
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer<Triple, String> ttt1 = arg0 -> Util.nice(arg0.first.toString());
+		Function<Triple, String> ttt1 = arg0 -> Util.nice(arg0.first.toString());
 		vv.getRenderContext().setVertexLabelTransformer(ttt1);
 
-		Transformer<Quad, String> ttt2 = arg0 -> Util.nice(arg0.first.toString());
+		Function<Quad, String> ttt2 = arg0 -> Util.nice(arg0.first.toString());
 		vv.getRenderContext().setEdgeLabelTransformer(ttt2);
 
 		float dash[] = { 1.0f };
 		Stroke edgeStroke = new BasicStroke(0.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
 				10.0f, dash, 10.0f);
 		Stroke bs = new BasicStroke();
-		Transformer<Quad, Stroke> edgeStrokeTransformer = x -> x.fourth instanceof Integer ? edgeStroke
+		Function<Quad, Stroke> edgeStrokeTransformer = x -> x.fourth instanceof Integer ? edgeStroke
 				: bs;
 		vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
 
@@ -1212,14 +1212,14 @@ public class FqlppDisplay implements Disp {
 		Layout<X, Y> layout = new FRLayout(sgv);
 		layout.setSize(new Dimension(600, 400));
 		VisualizationViewer<X, Y> vv = new VisualizationViewer<>(layout);
-		Transformer<X, Paint> vertexPaint = z -> clr;
+		Function<X, Paint> vertexPaint = z -> clr;
 		DefaultModalGraphMouse<String, String> gm = new DefaultModalGraphMouse<>();
 		gm.setMode(Mode.TRANSFORMING);
 		vv.setGraphMouse(gm);
 		gm.setMode(Mode.PICKING);
 		vv.getRenderContext().setVertexFillPaintTransformer(vertexPaint);
 
-		Transformer www = arg0 -> Util.nice(arg0.toString());
+		Function www = arg0 -> Util.nice(arg0.toString());
 		vv.getRenderContext().setVertexLabelTransformer(www);
 		vv.getRenderContext().setEdgeLabelTransformer(www);
 
