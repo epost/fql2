@@ -30,7 +30,7 @@ the correct path to the MySQL JDBC driver jar file) then places that driver on t
 	" *) }
 
 pragma setup_classpath = add_to_classpath {
-	"/opt/mysql/latest/mysql-connector-java-5.1.43-bin.jar"
+	"/Users/ryan/Desktop/mysql.jar"
 }
 
 md { (* "

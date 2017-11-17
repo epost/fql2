@@ -237,20 +237,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 		public PragmaExpLoadJars(List<String> files) {
 			this.files = files;
 			//this isn't side effect free, but it should be benign, or at least as benign as having direct access to the classpath from the command line
-			try {
-				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-				method.setAccessible(true);
-				for (String f : files) {
-					File file = new File(f);
-					if (!file.exists()) {
-						throw new RuntimeException("Not a file: " + f);
-					}
-					method.invoke(ClassLoader.getSystemClassLoader(), file.toURI().toURL());
-				}
-			} catch (IllegalAccessException | NoSuchMethodException | RuntimeException | InvocationTargetException | MalformedURLException thr) {
-				thr.printStackTrace();
-				throw new RuntimeException(thr);
-			}
+			
 
 		}
 
@@ -290,7 +277,24 @@ public abstract class PragmaExp extends Exp<Pragma> {
 					return ""; //"Classpath:\n\n" + Util.sep(urls0, "\n");
 				}
 				@Override
-				public void execute() { }
+				public void execute() {
+					
+					try {
+						Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+						method.setAccessible(true);
+						for (String f : files) {
+							File file = new File(f);
+							if (!file.exists()) {
+								throw new RuntimeException("Not a file: " + f);
+							}
+							method.invoke(ClassLoader.getSystemClassLoader(), file.toURI().toURL());
+						}
+					} catch (IllegalAccessException | NoSuchMethodException | RuntimeException | InvocationTargetException | MalformedURLException thr) {
+						thr.printStackTrace();
+						throw new RuntimeException(thr);
+					}
+					
+				}
 			};
 		}
 
