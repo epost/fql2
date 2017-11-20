@@ -18,7 +18,7 @@
     <keyword>graph</keyword>
     <keyword>instance</keyword>
     <keyword>mapping</keyword>
-    <keyword>pragma</keyword>
+    <keyword>command</keyword>
     <keyword>query</keyword>
     <keyword>schema</keyword>
     <keyword>transform</keyword>
@@ -48,6 +48,7 @@
     <keyword>dst</keyword>
     <keyword>edges</keyword>
     <keyword>empty</keyword>
+	<keyword>entity</keyword>
     <keyword>entities</keyword>
     <keyword>entity_equations</keyword>
     <keyword>equations</keyword>
@@ -68,7 +69,7 @@
     <keyword>generators</keyword>
 <keyword>getMapping</keyword>
 <keyword>getSchema</keyword>
-    <keyword>id</keyword>
+    <keyword>identity</keyword>
     <keyword>import_csv</keyword>
     <keyword>import_jdbc</keyword>
     <keyword>import_jdbc_all</keyword>

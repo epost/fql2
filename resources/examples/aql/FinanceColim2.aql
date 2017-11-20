@@ -510,7 +510,7 @@ schema Target = literal : Ty {
 ////////////////////////////////////////////////////////////////////////
 
 query ETL = literal : getSchema Colimit -> Target {
- entities
+ entity
  
 	//identity
 	currency -> {from c:Ref_currency__Trans_currency
@@ -523,7 +523,7 @@ foreign_keys
 	} 
 
 	//identity
-	strategy -> {from s:Portfolio_strategy__Ref_strategy
+entity	strategy -> {from s:Portfolio_strategy__Ref_strategy
 		attributes strategy_name -> s.Ref_strategy_name
 			strategy_description -> s.Ref_strategy_description
 			strategy_id -> s.Ref_strategy_id
@@ -531,7 +531,7 @@ foreign_keys
 	}
 
 	//identity
-	asset -> {from a:Ref_asset__Trans_asset
+entity	asset -> {from a:Ref_asset__Trans_asset
 		attributes asset_id -> a.Ref_asset_id
 			asset_description -> a.Ref_asset_description
 			asset_name -> a.Ref_asset_name
@@ -542,7 +542,7 @@ foreign_keys
 	} 
 
 	//identity
-	client -> {from c:Client_client__HoldPos_client
+entity	client -> {from c:Client_client__HoldPos_client
 		attributes client_description -> c.Client_client_description 
 			client_name -> c.Client_client_name
 			client_id -> c.Client_client_id
@@ -550,7 +550,7 @@ foreign_keys
 	} 
 
 	//identity
-	country -> {from c:Ref_country
+entity	country -> {from c:Ref_country
 		attributes country_code -> c.Ref_country_code
 			country_name -> c.Ref_country_name
 			country_id -> c.Ref_country_id
@@ -558,7 +558,7 @@ foreign_keys
 	} 
 
 	//not identity
-	transaction -> {from t:Trans_transaction p:Portfolio_portfolio c:Client_client__HoldPos_client c1:Client_client__HoldPos_client
+entity	transaction -> {from t:Trans_transaction p:Portfolio_portfolio c:Client_client__HoldPos_client c1:Client_client__HoldPos_client
 		where t.Trans_transaction_portfolio_id = p.Portfolio_portfolio_id
 		attributes transaction_id -> t.Trans_transaction_id 
 			transaction_asset_id -> t.Trans_transaction_asset_id 
@@ -575,7 +575,7 @@ foreign_keys
 		}
 
 	//not identity
-	position -> {from p:HoldPos_position a:Ref_asset__Trans_asset cv:Ref_currency__Trans_currency cb:Ref_currency__Trans_currency
+entity	position -> {from p:HoldPos_position a:Ref_asset__Trans_asset cv:Ref_currency__Trans_currency cb:Ref_currency__Trans_currency
 		where p.HoldPos_position_asset_id = a.Ref_asset_id
 			p.HoldPos_position_current_value_currency_code = cv.Ref_currency_code
 			p.HoldPos_position_cost_basis_currency_code = cb.Ref_currency_code
@@ -587,7 +587,7 @@ foreign_keys
 			position_asset_id -> p.HoldPos_position_asset_id
 			position_current_value_currency_id -> cv.Ref_currency_id
 			position_cost_basis_currency_id -> cb.Ref_currency_id
-foreign_keys
+ foreign_keys
  	position_client -> {c -> p.HoldPos_position_client} 
 	position_asset -> {a -> a}  //NEW
 	position_current_value_currency -> {c -> cv}  //NEW
@@ -595,19 +595,19 @@ foreign_keys
 	} 
 
 	//not identity
-	portfolio -> {from p:Portfolio_portfolio
+	entity portfolio -> {from p:Portfolio_portfolio
 		attributes portfolio_parent_portfolio_id -> p.Portfolio_portfolio_parent_portfolio_id //added
 			portfolio_name -> p.Portfolio_portfolio_name
 			portfolio_description -> p.Portfolio_portfolio_description
 			portfolio_id -> p.Portfolio_portfolio_id
 			portfolio_strategy_id -> p.Portfolio_portfolio_strategy_id
-foreign_keys
+ foreign_keys
  	portfolio_parent_portfolio -> {p -> p.Portfolio_portfolio_parent_portfolio}  //added
 	portfolio_strategy -> {s -> p.Portfolio_portfolio_strategy} 
 	} 
 
 	//not identity
-	holding -> {from h:HoldPos_holding c:Ref_currency__Trans_currency a:Ref_asset__Trans_asset
+	entity holding -> {from h:HoldPos_holding c:Ref_currency__Trans_currency a:Ref_asset__Trans_asset
 		where a.Ref_asset_id = h.HoldPos_holding_asset_id
 			h.HoldPos_holding_currency_code = c.Ref_currency_code
 		attributes holding_id -> h.HoldPos_holding_id			
@@ -629,7 +629,7 @@ foreign_keys
 	//    to h.HoldPos_holding_client. I did not have to do that for
 	//    the other FKs. Why? There is a line in the foreign_keys
 	//    section that names portfolioholding_client to that.
-	portfolioholding -> {from h:HoldPos_holding p:Portfolio_portfolio cur:Ref_currency__Trans_currency c1:Client_client__HoldPos_client a:Ref_asset__Trans_asset
+entity	portfolioholding -> {from h:HoldPos_holding p:Portfolio_portfolio cur:Ref_currency__Trans_currency c1:Client_client__HoldPos_client a:Ref_asset__Trans_asset
 		where a.Ref_asset_id = h.HoldPos_holding_asset_id
 			p.Portfolio_portfolio_parent_portfolio.Portfolio_portfolio_client_id = c1.Client_client_id
 			c1.Client_client_id = h.HoldPos_holding_client.Client_client_id
@@ -779,7 +779,7 @@ schema CycTarget = literal : Ty {
 
 
 query ETL_Cyc = literal : Target -> CycTarget {
- entities
+ entity
  	
 	client -> {from c:client
 		 attributes client_id -> c.client_id
@@ -787,13 +787,13 @@ query ETL_Cyc = literal : Target -> CycTarget {
 			client_description -> c.client_description
 	} 
 
-	country -> {from c:country
+	entity country -> {from c:country
 		 attributes country_id -> c.country_id
 			country_code -> c.country_code
 			country_name -> c.country_name
 	} 
 
-	currency -> {from c:currency
+entity	currency -> {from c:currency
 		 attributes currency_id -> c.currency_id
 			currency_code -> c.currency_code
 			currency_name -> c.currency_name
@@ -803,7 +803,7 @@ query ETL_Cyc = literal : Target -> CycTarget {
 	
 	} 
 
-	asset -> {from a:asset
+entity	asset -> {from a:asset
 		 attributes asset_id -> a.asset_id
 			asset_name -> a.asset_name
 			asset_description -> a.asset_description
@@ -813,13 +813,13 @@ query ETL_Cyc = literal : Target -> CycTarget {
 	
 	} 
 
-	strategy -> {from s:strategy
+entity	strategy -> {from s:strategy
 		 attributes strategy_id -> s.strategy_id
 			strategy_name -> s.strategy_name
 			strategy_description -> s.strategy_description
 	}
 
-	portfolio -> {from p:portfolio
+entity	portfolio -> {from p:portfolio
 		 attributes portfolio_id -> p.portfolio_id
 			portfolio_name -> p.portfolio_name
 			portfolio_description -> p.portfolio_description
@@ -831,7 +831,7 @@ query ETL_Cyc = literal : Target -> CycTarget {
 	
 	} 
 
-	transaction -> {from t:transaction
+entity	transaction -> {from t:transaction
 		 attributes transaction_id -> t.transaction_id
 			transaction_date -> t.transaction_date
 			transaction_portfolio_id -> t.transaction_portfolio_id
@@ -849,7 +849,7 @@ query ETL_Cyc = literal : Target -> CycTarget {
 	
 	} 
 
-	clientposition -> {from p:position
+entity	clientposition -> {from p:position
 		 attributes clientposition_id -> p.position_id
 			clientposition_begin_date -> "1/1/2011" // fake this for now source doesn't have it
 			clientposition_end_date -> "1/1/2011" // fake this for now source doesn't have it
@@ -865,7 +865,7 @@ query ETL_Cyc = literal : Target -> CycTarget {
 			clientposition_asset -> {a -> p.position_asset} 
 	} 
 
-	clientportfolioholding -> {from ph:portfolioholding
+entity	clientportfolioholding -> {from ph:portfolioholding
 		 attributes clientportfolioholding_id -> ph.portfolioholding_holding.holding_id
 			clientportfolioholding_begin_date -> ph.portfolioholding_holding.holding_begin_date
 			clientportfolioholding_end_date -> ph.portfolioholding_holding.holding_end_date

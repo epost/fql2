@@ -59,11 +59,11 @@ public class SqlColumn {
 
 	@Override
 	public String toString() {
-		return table + "_" + name;
+		return name;
 	}
 	
-	public String toString(String x) {
-		return table + x + name;
-	}
+	//public String toString(String x) {
+	//	return table + x + name;
+//	}
 	
 }

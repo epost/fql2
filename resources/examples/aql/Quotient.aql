@@ -27,10 +27,10 @@ instance SimpsonsLikes = literal : Likes {
 }
 
 mapping FindConnections = literal : Likes -> Connections {
-	entities
+	entity
 		Person -> Connection
 
-	entities
+	entity
 		Like -> Connection
 	foreign_keys
 		likee -> Connection

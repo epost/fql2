@@ -68,6 +68,7 @@ H2 (Mozilla Public License or Eclipse Public License),
 JGraph (BSD License)
 txtmark (Apache)
 commons-lang-3 (Apache)
+Google Guava (Apache)
 
 And a source distribution of:
 

@@ -260,6 +260,13 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	private <Ty1, En1, Sym1, Fk1, Att1, Gen1, Sk1> String toString(Collage<Ty1, En1, Sym1, Fk1, Att1, Gen1, Sk1> skip) {
 		StringBuilder toString = new StringBuilder("");
+
+		toString.append("types\n\t");
+		toString.append(Util.sep(Util.diff(tys, skip.tys), "\n\t"));
+
+		toString.append("\nentities\n\t");
+		toString.append(Util.sep(Util.diff(ens, skip.ens), "\n\t"));
+		
 		toString.append("\nfunctions");
 		List<String> temp = new LinkedList<>();
 		for (Sym sym : Util.diff(syms.keySet(), skip.syms.keySet())) {
@@ -285,11 +292,11 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		toString.append("\n\t"); 		
 		toString.append(Util.sep(atts0, "\n\t"));
 
-		toString.append("\ngenerating entities");
+		toString.append("\ngenerators for entities");
 		toString.append("\n\t");	
 		toString.append(Util.sep(Util.diff(gens.map, skip.gens.map), " : ", "\n\t"));
 
-		toString.append("\ngenerating nulls");
+		toString.append("\ngenerators for nulls");
 		toString.append("\n\t");
 		toString.append(Util.sep(Util.diff(sks.map, skip.sks.map), " : ", "\n\t"));
 

@@ -45,7 +45,7 @@ schema Person = literal : Ty {
 
 //Find all the people whose school's biggest department is Mathematics
 query BiggestDeptIsMathQuery = literal : Schools -> Person {
-	entities
+	entity
 		Person -> {from   p:Person
 				 where  p.instituteOf.biggestDept.deptName = Mathematics
 				 attributes lastName -> p.lastName 

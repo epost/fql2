@@ -69,5 +69,10 @@ public class Quad<A,B,C,D> {
 		this.third = third;
 		this.fourth = fourth;
 	}
+
+	public Triple<B,C,D> last3() {
+		return new Triple<>(second, third, fourth);
+		
+	}
 	
 }

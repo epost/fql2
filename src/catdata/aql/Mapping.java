@@ -344,7 +344,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantic
 		
 		toString = "";
 		for (En1 en : src.ens) {
-			toString += "\n\nentities";
+			toString += "\n\nentity";
 			toString += "\n\t" + en + " -> " +ens.get(en);
 		
 			List<String> fks0 = new LinkedList<>();

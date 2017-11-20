@@ -54,7 +54,7 @@ schema D = literal : Type {
 } 
 
 mapping F = literal : C -> D {
-	entities 
+	entity
 		Amphibian->yAmphibian
 	foreign_keys
 		IsAL -> yIsAL
@@ -62,12 +62,12 @@ mapping F = literal : C -> D {
 	attributes
 		attA -> yattA
 
-	entities
+	entity
 		LandAnimal->yLandAnimal
 	attributes
 		attL -> yattL
 
-	entities
+	entity
 		WaterAnimal->yWaterAnimal
 	attributes
 		attW -> yattW

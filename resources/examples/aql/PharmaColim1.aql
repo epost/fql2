@@ -43,30 +43,30 @@ schema S2 = literal : Type {
 }
 
 mapping F1 = literal : S -> S1 {
-	entities 
+	entity
 		O -> Observation
 	foreign_keys 
 		f -> f
 		g -> g
 		
-	entities
+	entity
 		P -> Person
 	
-	entities
+	entity
 		T -> ObsType
 } 
 
 mapping F2 = literal : S -> S2 {
-	entities
+	entity
 		O -> Observation
 	foreign_keys 
 		f -> f
 		g -> g1.g2
 		
-	entities	
+	entity	
 		P -> Patient
 	
-	entities	
+	entity
 		T -> Type
 } 
 
@@ -74,7 +74,7 @@ mapping F2 = literal : S -> S2 {
 
 //Pushout schema, written out explicitly here by hand
 schema T = literal : Type {
-	entities 
+	entities
 		O P G T M
 	foreign_keys 
 		f : O -> P
@@ -90,48 +90,48 @@ schema T = literal : Type {
 } 
 
 mapping G1 = literal : S1 -> T {
-	entities 
+	entity
 		Observation -> O
 	foreign_keys 
 		f -> f 
 		g -> g1.g2
 
-	entities 		
+	entity		
 		Person -> P
 	foreign_keys 
 		h -> h
 	attributes
 		Person_att  ->  P_att1
 	
-	entities 
+	entity
 		ObsType -> T
 	attributes
 		ObsType_att ->  T_att1
 
-	entities	
+	entity	
 		Gender -> G
 	attributes
 		Gender_att  ->  G_att
 } 
 
 mapping G2 = literal : S2 -> T {
-	entities
+	entity
 		Observation -> O
 	foreign_keys 
 		f  -> f
 		g1 -> g1
 	
-	entities	
+	entity	
 		Patient -> P
 	attributes
 		Patient_att -> P_att2
 	
-	entities	
+	entity	
 		Method -> M
 	foreign_keys 
 		g2 -> g2
 	
-	entities	
+	entity	
 		Type -> T
 	attributes
 		Type_att    ->  T_att2	

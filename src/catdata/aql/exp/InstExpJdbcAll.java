@@ -44,6 +44,8 @@ import catdata.sql.SqlInstance;
 import catdata.sql.SqlSchema;
 import catdata.sql.SqlTable;
 
+//TODO: if has primary key column, use that instead of making one up
+//TODO: allow user to pick which
 public class InstExpJdbcAll extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> {
 
 	private final Map<String, String> options;
@@ -86,7 +88,7 @@ public class InstExpJdbcAll extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, 
 		boolean nullOnErr = (Boolean) ops.getOrDefault(AqlOption.import_null_on_err_unsafe);
 		boolean dontCheckClosure = (Boolean) ops.getOrDefault(AqlOption.import_dont_check_closure_unsafe);
 
-		String sep = (String) ops.getOrDefault(AqlOption.import_col_seperator);
+		//String sep = (String) ops.getOrDefault(AqlOption.import_col_seperator);
 		
 		if (!schemaOnly) {
 
@@ -97,9 +99,28 @@ public class InstExpJdbcAll extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, 
 				Set<Map<SqlColumn, Optional<Object>>> tuples = inst.get(table);
 	
 				Map<Map<SqlColumn, Optional<Object>>, Gen> i1 = new HashMap<>();
+				SqlColumn thePk = null;
+				if (table.pk.size() == 1) {
+					thePk = Util.get0(table.pk);
+				}
 				for (Map<SqlColumn, Optional<Object>> tuple : tuples) {
+					
 					Gen i = new Gen("v" + (fr++));
+					/* can't do this until Gen need not be unique
+					if (thePk == null) {
+						i = new Gen("v" + (fr++));
+					} else {
+						Optional<Object> x = tuple.get(thePk);
+						if (!x.isPresent()) {
+							throw new RuntimeException("Primary key col is null in " + tuple);
+						}
+						i = new Gen(x.get().toString()); //TODO aql
+					}
+					*/
 					i1.put(tuple, i);
+						
+//					tuple.keySet().
+					
 					// i2.put(i, tuple);
 					ens0.get(new En(table.name)).add(i);
 					for (SqlColumn c : table.columns) {
@@ -108,8 +129,8 @@ public class InstExpJdbcAll extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, 
 						}
 						Optional<Object> val = tuple.get(c);
 						Term<Ty, Void, Sym, Void, Void, Void, Null<?>> xxx
-						 = InstExpJdbc.objectToSk(sch, val.orElse(null), i, new Att(c.toString(sep)), tys0, extraRepr, false, nullOnErr);
-						atts0.get(i).put(new Att(c.toString(sep)), xxx);
+						 = InstExpJdbc.objectToSk(sch, val.orElse(null), i, new Att(new En(table.name), c.name), tys0, extraRepr, false, nullOnErr);
+						atts0.get(i).put(new Att(new En(table.name), c.name), xxx);
 					}
 				}
 				iso1.put(table, i1);
@@ -142,15 +163,15 @@ public class InstExpJdbcAll extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, 
 		Collage<Ty, En, Sym, Fk, Att, Void, Void> col0 = new Collage<>(typeSide.collage());
 		Set<Triple<Pair<Var, En>, Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs = new HashSet<>();
 
-		String sep = (String) ops.getOrDefault(AqlOption.import_col_seperator);
+		//String sep = (String) ops.getOrDefault(AqlOption.import_col_seperator);
 		
 		for (SqlTable table : info.tables) {
 			col0.ens.add(new En(table.name));
 			for (SqlColumn c : table.columns) {
-				if (col0.atts.containsKey(new Att(c.toString(sep)))) {
-					throw new RuntimeException("Name collision: table " + c.table.name + " col " + c.name + " against table " + col0.atts.get(new Att(c.toString(sep))).first + "\n\n.Possible solution: set option jdbc_import_col_seperator so as to avoid name collisions.");
+				if (col0.atts.containsKey(new Att(new En(table.name), c.name))) {
+					throw new RuntimeException("Name collision: table " + c.table.name + " col " + c.name + " against table " + col0.atts.get(new Att(new En(table.name), c.name)).first + "\n\n.Possible solution: set option jdbc_import_col_seperator so as to avoid name collisions.");
 				}
-				col0.atts.put(new Att(c.toString(sep)), new Pair<>(new En(table.name), new Ty(sqlTypeToAqlType(c.type.name))));
+				col0.atts.put(new Att(new En(table.name), c.name), new Pair<>(new En(table.name), new Ty(sqlTypeToAqlType(c.type.name))));
 			}
 		}
 
@@ -161,8 +182,8 @@ public class InstExpJdbcAll extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, 
 
 			for (SqlColumn tcol : fk.map.keySet()) {
 				SqlColumn scol = fk.map.get(tcol);
-				Att l = new Att(scol.toString(sep));
-				Att r = new Att(tcol.toString(sep));
+				Att l = new Att(new En(scol.table.name), scol.name);
+				Att r = new Att(new En(tcol.table.name), tcol.name);
 				Term<Ty, En, Sym, Fk, Att, Void, Void> lhs = Term.Att(l, Term.Var(v));
 				Term<Ty, En, Sym, Fk, Att, Void, Void> rhs = Term.Att(r, Term.Fk(new Fk(new En(fk.source.name), fk.toString()), Term.Var(v)));
 				eqs.add(new Triple<>(new Pair<>(v, new En(fk.source.name)), lhs, rhs));

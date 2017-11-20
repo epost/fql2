@@ -142,7 +142,7 @@ public abstract class MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> extends Exp<Mappi
 
 		@Override
 		public String toString() {
-			return "id " + sch;
+			return "identity " + sch;
 		}
 
 		@Override

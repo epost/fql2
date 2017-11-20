@@ -26,6 +26,7 @@ import catdata.aql.Var;
 import catdata.aql.exp.InstExpRaw.Gen;
 import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.QueryExpRaw.Block;
+import catdata.aql.exp.QueryExpRaw.PreBlock;
 import catdata.aql.exp.SchExp.SchExpCod;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
@@ -71,10 +72,10 @@ public class QueryExpRawSimple extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, At
 	private final Block block;
 	
 	public QueryExpRawSimple(SchExp<?, ?, ?, ?, ?> src,
-			Block block
+			Integer i, PreBlock block
 			) {
 		this.src = (SchExp<Ty, En, Sym, Fk, Att>) src;
-		this.block = block;
+		this.block = new Block(block, new LocStr(i, "Q"));
 	}
 
 	@Override
@@ -122,7 +123,7 @@ public class QueryExpRawSimple extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, At
 
 		Ctx<En, Collage<Ty, En, Sym, Fk, Att, Var, Void>> cols = new Ctx<>();
 			
-		QueryExpRaw.processBlock(block.options, env, src0, ens0, cols, new Pair<>(En, block));
+		QueryExpRaw.processBlock(block.options, env, src0, ens0, cols, block);
 		
 		Collage<Ty, En, Sym, Fk, Att, Void, Void> colForDst = new Collage<>(src0.typeSide.collage());
 		colForDst.ens.add(En);
@@ -168,7 +169,7 @@ public class QueryExpRawSimple extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, At
 		
 			List<String> temp = new LinkedList<>();
 
-			temp.add(block.toString(new HashSet<>()));
+			temp.add(block.toString());
 			
 				toString += "\t\t" + Util.sep(temp, "\n\n\t\t") + "\n";
 			

@@ -147,7 +147,7 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 		for (Pair<LocStr, String> en : Util.alphabetical(ens)) {
 			List<String> temp = new LinkedList<>();
 
-			toString += "\tentities";
+			toString += "\tentity";
 
 			//for (Pair<LocStr, String> x : Util.alphabetical(ens)) {
 				temp.add(en.first.str + " -> " + en.second);
@@ -337,7 +337,7 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 				String var_en = att.second.second;
 				RawTerm term = att.second.third;
 
-				Pair<En, Ty> p = src0.atts.map.get(new Att(att.first.second.str));
+				Pair<En, Ty> p = src0.atts.map.get(new Att(new En(att.first.first), att.first.second.str));
 				if (p == null) {
 					throw new RuntimeException(att.first + " is not a source attribute.");
 				}
@@ -366,7 +366,7 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 				Term<Ty, En, Sym, Fk, Att, Gen, Sk> term0 = RawTerm.infer1x(ctx, term, null, proposed_ty2,
 						dcol.convert(), "", src0.typeSide.js).second;
 
-				Util.putSafely(atts0, new Att(att.first.second.str),
+				Util.putSafely(atts0, new Att(new En(att.first.first), att.first.second.str),
 						new Triple<>(new Var(var), dst_att_dom_en, term0.convert()));
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();

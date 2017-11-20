@@ -1,5 +1,7 @@
 package catdata.aql.fdm;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
@@ -10,16 +12,16 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.Algebra;
 import catdata.aql.AqlOptions;
+import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
 import catdata.aql.DP;
 import catdata.aql.Eq;
 import catdata.aql.Instance;
 import catdata.aql.It;
+import catdata.aql.It.ID;
 import catdata.aql.Mapping;
 import catdata.aql.Schema;
 import catdata.aql.Term;
-import catdata.aql.AqlOptions.AqlOption;
-import catdata.aql.It.ID;
 
 public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> 
  extends Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID, Chc<Sk, Pair<ID, Att2>>> {
@@ -48,7 +50,8 @@ public class SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, 
 			eqs.add(new Pair<>(F.trans(eq.first), F.trans(eq.second)));
 			col.eqs.add(new Eq<>(new Ctx<>(), F.trans(eq.first), F.trans(eq.second)));
 		}
-				
+		
+			
 		Function<Gen,String> printGen = x -> I.algebra().printX(I.algebra().nf(Term.Gen(x)));
 		Function<Sk, String> printSk = x -> I.algebra().sk(x).toString(I.algebra()::printY, Util.voidFn());
 		InitialAlgebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, ID> initial 

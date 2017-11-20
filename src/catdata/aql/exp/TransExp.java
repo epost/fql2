@@ -760,7 +760,7 @@ public abstract class TransExp<Ty, En, Sym, Fk, Att, Gen1, Sk1, Gen2, Sk2, X1, Y
 
 		@Override
 		public String toString() {
-			return "id " + inst;
+			return "identity " + inst;
 		}
 
 		@Override

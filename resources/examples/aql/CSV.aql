@@ -26,7 +26,7 @@ schema S0 = literal : sql {
  *    11,1
  *    12,2
  */
-pragma createCsvData = exec_js {
+command createCsvData = exec_js {
 	"Java.type(\"catdata.Util\").writeFile(\"pId\\n0\\n1\\n2\", \"/Users/ryan/Desktop/Person.csv\")"
 	"Java.type(\"catdata.Util\").writeFile(\"eId,is\\n10,0\\n11,1\\n12,2\", \"/Users/ryan/Desktop/Employee.csv\")"
 }
@@ -79,7 +79,7 @@ schema S = literal : Ty {
 		likes: Person -> List 
 }
 
-pragma createCsvData2 = exec_js {
+command createCsvData2 = exec_js {
 	"Java.type(\"catdata.Util\").writeFile(\"ssn,nameOf,Likes\\n0,a,a\\n1,b,\\\"a,b,d\\\"\\n2,c,\\\"\\\"\\n\", \"/Users/ryan/Desktop/Person.csv\")"
 }
 

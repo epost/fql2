@@ -78,10 +78,10 @@ schema s3 = literal : ty4 {
 
 //////////// Kind mapping
 
-mapping m1 = id s1
+mapping m1 = identity s1
 mapping m2 = [m1 ; m1]
 mapping m3 = literal : s3 -> s3 {
-	entities
+	entity
 		Employee -> Employee
 	foreign_keys
 		manager -> manager.manager
@@ -91,7 +91,7 @@ mapping m3 = literal : s3 -> s3 {
 		age -> manager.age
 		cummulative_age -> lambda e. (age(e) plus age(e))
 
-	entities
+	entity
 		Department -> Department
 	foreign_keys	
 		secretary -> secretary
@@ -105,9 +105,9 @@ mapping m3 = literal : s3 -> s3 {
 
 //////////// Kind query
 
-query q1 = id s1
+query q1 = identity s1
 query q2 = literal : s3 -> s3 {
-	entities
+	entity
 		Employee -> {from e:Employee d:Department
 		 		      where e.worksIn = d
 		 		      attributes ename -> e.ename
@@ -117,7 +117,7 @@ query q2 = literal : s3 -> s3 {
 		 		      manager -> {e -> e.manager d -> d}
 					worksIn -> {d -> e.worksIn}
    }
-		Department -> {from d:Department
+	entity	Department -> {from d:Department
 						attributes dname -> d.dname
 						foreign_keys secretary -> {d -> d e -> d.secretary} }
 	options
@@ -131,27 +131,27 @@ query q3 = simple : s3 {
 		prover = completion
 }
 query q4 = toQuery m3 { options dont_validate_unsafe = true } // this isn't a real query 
-query q5 = toCoQuery id s3 { 
+query q5 = toCoQuery identity s3 { 
 	options 
 		prover = completion 
 		query_remove_redundancy = false //this increases the proving burden on this example
 }
-query q6 = [ id s2 ; id s2 ]
+query q6 = [ identity s2 ; identity s2 ]
 
 //////////// Kind instance
 
 instance i1 = empty : s3
 instance i2 = distinct i1
-instance i3 = src (id i1)
-instance i4 = dst (id i1)
-instance i5 = eval (id s3) i1
-instance i6 = coeval (id s3) i1 { options prover = completion }
-instance i7 = sigma (id s3) i1 { options prover = completion }
-instance i8 = delta (id s3) i1
+instance i3 = src (identity i1)
+instance i4 = dst (identity i1)
+instance i5 = eval (identity s3) i1
+instance i6 = coeval (identity s3) i1 { options prover = completion }
+instance i7 = sigma (identity s3) i1 { options prover = completion }
+instance i8 = delta (identity s3) i1
 instance i9 = coproduct i1 + i1 : s3 { options prover = completion }
-instance i10 = coproduct_sigma (id s3) i1 (id s3) i1 : s3 { options prover = completion }
+instance i10 = coproduct_sigma (identity s3) i1 (identity s3) i1 : s3 { options prover = completion }
 instance i20 = coproduct_unrestricted i1 + i2 : s3 { options prover = completion }
-instance i11 = coequalize (id i1) (id i1) { options prover = completion }
+instance i11 = coequalize (identity i1) (identity i1) { options prover = completion }
 instance i12 = chase literal : s3 { } i3 1
 //random -- see Employees example
 //import_jdbc -- see JDBC example
@@ -182,17 +182,17 @@ instance i14 = quotient i13 {
 
 //////////// Kind transform
 
-transform t1 = id i1
+transform t1 = identity i1
 transform t2 = [t1 ; t1]
 transform t3 = distinct t1
-transform t4 = eval (id s3) t1
+transform t4 = eval (identity s3) t1
 //the { options } blocks are optional
-transform t5 = coeval (id s3) t1 { options prover = completion } { options prover = completion } 
-transform t6 = sigma (id s3) t1 { options prover = completion } { options prover = completion } 
-transform t7 = delta (id s3) t1
-transform t8 = unit (id s3) i1 { options prover = completion } 
-transform t9 = counit (id s3) i1 { options prover = completion } 
-transform t10= counit_query (id s3) i1 { options prover = completion }
+transform t5 = coeval (identity s3) t1 { options prover = completion } { options prover = completion } 
+transform t6 = sigma (identity s3) t1 { options prover = completion } { options prover = completion } 
+transform t7 = delta (identity s3) t1
+transform t8 = unit (identity s3) i1 { options prover = completion } 
+transform t9 = counit (identity s3) i1 { options prover = completion } 
+transform t10= counit_query (identity s3) i1 { options prover = completion }
 //import_jdbc - see JDBC example
 //import_csv - see Finance Colim example
 transform t11= literal : i13 -> i13 {
@@ -218,13 +218,13 @@ constraints c1 = literal : s3 {
 
 //////////// Kind pragma
 
-pragma p1 = check c1 i3 //check instance against constraints
-pragma p2 = assert_consistent i3 
-pragma p3 = exec_cmdline {
+command p1 = check c1 i3 //check instance against constraints
+command p2 = assert_consistent i3 
+command p3 = exec_cmdline {
 	"echo hello"
 	"echo world"
 }
-pragma p4 = exec_js {
+command p4 = exec_js {
 	"1+2;"
 	"2+3;"
 }

@@ -93,7 +93,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 		@Override
 		public String toString() {
-			return "id " + sch;
+			return "identity " + sch;
 		}
 
 		@Override

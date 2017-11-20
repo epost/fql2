@@ -108,14 +108,14 @@ public abstract class ColimSchExp<N> extends Exp<ColimitSchema<N>> {
 			raw.put("obs eqs", f);
 		}
 
-	
+	//TODO aql user col sep here
 		@Override
 		public ColimitSchema<N> eval(AqlEnv env) {
 			Ctx<N, Schema<Ty, En, Sym, Fk, Att>> nodes0 = new Ctx<>();
 			Set<En> ens = new HashSet<>();
 			for (N n : nodes.keySet()) {
 				nodes0.put(n, nodes.get(n).eval(env));
-				ens.addAll(nodes0.get(n).ens.stream().map(x -> new En( n + "_" + x)).collect(Collectors.toSet()));
+				ens.addAll(nodes0.get(n).ens.stream().map(x -> new En(n + "_" + x)).collect(Collectors.toSet()));
 			}
 			Set<Quad<String,String,RawTerm,RawTerm>> eqs = new HashSet<>(eqTerms);
 			for (Pair<List<String>, List<String>> t : eqTerms2) {

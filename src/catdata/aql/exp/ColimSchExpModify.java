@@ -47,9 +47,9 @@ public final class ColimSchExpModify<N> extends ColimSchExp<N> implements Raw {
 
 	public final List<Pair<Pair<String,String>, String>> fks0;
 
-	public final List<Pair<String, String>> atts0;
+	public final List<Pair<Pair<String,String>, String>> atts0;
 	public final List<Pair<Pair<String,String>, List<String>>> fks;
-	public final List<Pair<String, Triple<String, String, RawTerm>>> atts;
+	public final List<Pair<Pair<String,String>, Triple<String, String, RawTerm>>> atts;
 	
 	public final Map<String, String> options; 
 	
@@ -58,13 +58,13 @@ public final class ColimSchExpModify<N> extends ColimSchExp<N> implements Raw {
 		return options;
 	}
 	
-	public ColimSchExpModify(ColimSchExp<N> colim, List<Pair<LocStr, String>> ens, List<Pair<Pair<String, LocStr>, String>> fks0, List<Pair<LocStr, String>> atts0, List<Pair<Pair<String, LocStr>, List<String>>> fks, List<Pair<LocStr, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
+	public ColimSchExpModify(ColimSchExp<N> colim, List<Pair<LocStr, String>> ens, List<Pair<Pair<String, LocStr>, String>> fks0, List<Pair<Pair<String,LocStr>, String>> atts0, List<Pair<Pair<String, LocStr>, List<String>>> fks, List<Pair<Pair<String,LocStr>, Triple<String, String, RawTerm>>> atts, List<Pair<String, String>> options) {
 		this.ens = LocStr.list2(ens);
-		this.atts = LocStr.list2(atts);
+		this.atts = LocStr.list2x(atts);
 		this.fks = LocStr.list2x(fks);
 		this.fks0 = LocStr.list2x(fks0);
 		
-		this.atts0= LocStr.list2(atts0);
+		this.atts0= LocStr.list2x(atts0);
 		this.options = Util.toMapSafely(options);
 		Util.toMapSafely(this.ens);
 		Util.toMapSafely(this.fks);
@@ -86,8 +86,8 @@ public final class ColimSchExpModify<N> extends ColimSchExp<N> implements Raw {
 		raw.put("rename_fks", f);
 		
 		f = new LinkedList<>();
-		for (Pair<LocStr, String> p : atts0) {
-			f.add(new InteriorLabel<>("rename_atts", new Pair<>(p.first.str, p.second), p.first.loc,
+		for (Pair<Pair<String, LocStr>, String> p : atts0) {
+			f.add(new InteriorLabel<>("rename_atts", new Pair<>(p.first.second.str, p.second), p.first.second.loc,
 					x -> x.first + " -> " + x.second).conv());
 		}
 		raw.put("rename_atts", f);
@@ -100,8 +100,8 @@ public final class ColimSchExpModify<N> extends ColimSchExp<N> implements Raw {
 		raw.put("remove_fks", f);
 		
 		f = new LinkedList<>();
-		for (Pair<LocStr, Triple<String, String, RawTerm>> p : atts) {
-			f.add(new InteriorLabel<>("remove_atts", new Pair<>(p.first.str, p.second), p.first.loc,
+		for (Pair<Pair<String, LocStr>, Triple<String, String, RawTerm>> p : atts) {
+			f.add(new InteriorLabel<>("remove_atts", new Pair<>(p.first.second.str, p.second), p.first.second.loc,
 					x -> x.first + " -> \\" + x.second.first + ". " + x.second.third).conv());
 		}
 		raw.put("remove_atts", f);
@@ -204,8 +204,8 @@ public final class ColimSchExpModify<N> extends ColimSchExp<N> implements Raw {
 		if (!atts0.isEmpty()) {
 			toString += "\trename attributes";
 					
-			for (Pair<String, String> x : atts0) {
-				temp.add(x.first + " -> " + x.second);
+			for (Pair<Pair<String, String>, String> x : atts0) {
+				temp.add(x.first.second + " -> " + x.second);
 			}
 			
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -223,8 +223,8 @@ public final class ColimSchExpModify<N> extends ColimSchExp<N> implements Raw {
 		if (!fks.isEmpty()) {
 			toString += "\tremove attributes";
 			temp = new LinkedList<>();
-			for (Pair<String, Triple<String, String, RawTerm>> sym : atts) {
-				temp.add(sym.first + " -> lambda " + sym.second.first + ". " + sym.second.third);
+			for (Pair<Pair<String, String>, Triple<String, String, RawTerm>> sym : atts) {
+				temp.add(sym.first.second + " -> lambda " + sym.second.first + ". " + sym.second.third);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 		}
@@ -255,8 +255,8 @@ public final class ColimSchExpModify<N> extends ColimSchExp<N> implements Raw {
 		for (Pair<Pair<String, String>, String> k : fks0) {
 			colim0 = colim0.renameFk(new Fk(new En(k.first.first), k.first.second), new Fk(new En(k.first.first), k.second), checkJava);
 		}
-		for (Pair<String, String> k : atts0) {
-			colim0 = colim0.renameAtt(new Att(k.first), new Att(k.second), checkJava);
+		for (Pair<Pair<String, String>, String> k : atts0) {
+			colim0 = colim0.renameAtt(new Att(new En(k.first.first), k.first.second), new Att(new En(k.first.first), k.second), checkJava);
 		}
 		for (Pair<Pair<String, String>, List<String>> k : fks) {
 			if (!colim0.schemaStr.fks.containsKey(new Fk(new En(k.first.first),k.first.second))) {
@@ -275,12 +275,12 @@ public final class ColimSchExpModify<N> extends ColimSchExp<N> implements Raw {
 			
 			colim0 = colim0.removeFk(new Fk(new En(k.first.first), k.first.second), t.toFkList(), checkJava);
 		}
-		for (Pair<String, Triple<String, String, RawTerm>> k : atts) {
-			if (!colim0.schemaStr.atts.containsKey(new Att(k.first))) {
+		for (Pair<Pair<String, String>, Triple<String, String, RawTerm>> k : atts) {
+			if (!colim0.schemaStr.atts.containsKey(new Att(new En(k.first.first), k.first.second))) {
 				throw new RuntimeException("Not an attribute: " + k.first + " in\n\n" + colim0.schemaStr);
 			}
 			String pre = "In processing " + k.first + " -> lambda " + k.second.first + "." + k.second.third + ", ";
-			Pair<En, Ty> r = colim0.schemaStr.atts.get(new Att(k.first));
+			Pair<En, Ty> r = colim0.schemaStr.atts.get(new Att(new En(k.first.first), k.first.second));
 			if (k.second.second != null && !k.second.second.equals(r.first)) {
 				throw new RuntimeException(pre + " given type is " + k.second.second + " but expected " + r.first);
 			}
@@ -288,7 +288,7 @@ public final class ColimSchExpModify<N> extends ColimSchExp<N> implements Raw {
 			Ctx<String,Chc<Ty,En>> ctx = new Ctx<>(k.second.first, Chc.inRight(r.first));
 			Term<Ty, En, Sym, Fk, Att, Gen, Sk> t = 
 			RawTerm.infer1x(ctx.map, k.second.third, null, Chc.inLeft(r.second), xxx.convert(), pre, colim0.schemaStr.typeSide.js).second;
-			colim0 = colim0.removeAtt(new Att(k.first), new Var(k.second.first), t.convert(), checkJava);
+			colim0 = colim0.removeAtt(new Att(new En(k.first.first), k.first.second), new Var(k.second.first), t.convert(), checkJava);
 		}
 		
 		return colim0;

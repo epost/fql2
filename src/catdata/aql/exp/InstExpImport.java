@@ -303,7 +303,7 @@ public abstract class InstExpImport<Handle, Q>
 		return J;
 	}
 
-	
+	/*
 	//different than rawterms
 	private void assertUnambig(String o, Schema<Ty, En, Sym, Fk, Att> sch) {
 		int i = 0;
@@ -313,11 +313,11 @@ public abstract class InstExpImport<Handle, Q>
 		if (sch.ens.contains(new En(o))) {
 			i++;
 		}
-		if (sch.atts.map.containsKey(new Att(o))) {
-			i++;
-		}
 		for (En en : sch.ens) {
 			if (sch.fks.map.containsKey(new Fk(en, o))) {
+				i++;
+			}
+			if (sch.atts.map.containsKey(new Att(en, o))) {
 				i++;
 			}
 		}
@@ -326,7 +326,7 @@ public abstract class InstExpImport<Handle, Q>
 		} else if (i == 0) {
 			throw new RuntimeException(o + " is not a type/entity/attribute/foreign key");
 		}
-	}
+	} */
 	
 	private void totalityCheck(Schema<Ty, En, Sym, Fk, Att> sch, Map<En, Q> ens, Map<Ty, Q> tys,
 			Map<Att, Q> atts, Map<Fk, Q> fks) {

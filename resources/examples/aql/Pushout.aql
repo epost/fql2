@@ -52,15 +52,15 @@ instance J = literal : Span {
 //pushouts, using queries
 
 query pushout = literal : Square -> Span {
- entities
+ 
  		
-	B -> {from b:B 
+entity	B -> {from b:B 
 		 attributes B_att -> b.f2.D_attB}
 
-	C -> {from c:C 
+entity	C -> {from c:C 
 		 attributes C_att -> c.g2.D_attC}
 
-	A -> {from a:A
+entity	A -> {from a:A
 			foreign_keys		 	   
 			f -> {b -> a.f}
 			g -> {c -> a.g}} 

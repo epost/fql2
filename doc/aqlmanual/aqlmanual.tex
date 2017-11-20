@@ -93,7 +93,7 @@ Comments in AQL are C style, either ``//'' or ``/* */''.
 
 \section{Kinds}
 
-A {\it kind} is either {\it typeside}, {\it schema},  {\it instance}, (schema) {\it  mapping}, (instance) {\it transform}, {\it query}, {\it graph},  {\it pragma}, {\it schema\_colimit}, or {\it constraints}. 
+A {\it kind} is either {\it typeside}, {\it schema},  {\it instance}, (schema) {\it  mapping}, (instance) {\it transform}, {\it query}, {\it graph},  {\it command}, {\it schema\_colimit}, or {\it constraints}. 
 
 \section{Identifiers}
 
@@ -105,7 +105,7 @@ An AQL program is an ordered list of {\it declarations} of the form $kind \ name
 
 \section{Caching}
 
-The AQL IDE will cache result artifacts to save time in subsequent executions; this behavior can be disabled per-expression through the {\tt always\_reload} option.  Disabling caching is can be useful when an AQL program contains side-effecting pragmas.
+The AQL IDE will cache result artifacts to save time in subsequent executions; this behavior can be disabled per-expression through the {\tt always\_reload} option.  Disabling caching is can be useful when an AQL program contains side-effecting commands.
 
 \section{Terms}
 
@@ -169,7 +169,7 @@ typeside Ty = literal {
     timeout = 5  
 }
 \end{verbatim}
-The type side $Ty$ is an example of a {\it literal}; i.e., an expression that evaluates to itself.  All AQL kinds except for pragmas have literals.  Literals are also called {\it constants}, but they should not be confused with the {\tt constants} declared in AQL type sides.  All sections are optional, but they must appear in the order specified in this manual. 
+The type side $Ty$ is an example of a {\it literal}; i.e., an expression that evaluates to itself.  All AQL kinds except for commands have literals.  Literals are also called {\it constants}, but they should not be confused with the {\tt constants} declared in AQL type sides.  All sections are optional, but they must appear in the order specified in this manual. 
 
 Many expressions contain lists of key-value pairs that specify options in an option section.  The defaults of these options many change with new releases of AQL and are displayed in the AQL pane of the AQL IDE options menu.  The effect of these options is described in the rest of the manual.  In the above example, the execution timeout for the type side is set to five seconds.  Every expression that supports options supports the timeout option, as well as the GUI (display) options and the always reload option.  
 
@@ -183,9 +183,9 @@ Many literal expressions, including type sides, schemas, mappings, queries, inst
 
 Officially, AQL programs are nominally typed.  For example, if {\tt schema X = Y} is a declaration, then {\tt id X} has type {\tt X -> X} {\it which is not equal to} {\tt Y -> Y} (beause {\tt X} and {\tt Y} are different {\it names}).  Unofficially, the AQL type-checker accepts many programs that are not nominally typed but are still well-typed.
 
-\section{Scripting with Side Effects using Pragmas}
+\section{Scripting with Side Effects using commands}
 
-All AQL expressions with the exception of pragmas are side-effect free.  Many pragmas have side effects; for example, {\tt export\_instance\_jdbc} can write data to a database via JDBC.  Therefore, the execution order for pragmas matters.  To establish an ordering, each pragma implicitly depends on all declarations before it.  Consequently, pragmas can bottleneck AQL execution (the AQL execution engine is multi-threaded).  Pragmas are provided to execute arbitrary SQL (via JDBC), Java (via Nashorn javascript), and command-line commands, thereby allowing AQL programs to ``script'' an entire data integration / ETL flow.
+All AQL expressions with the exception of commands are side-effect free.  Many commands have side effects; for example, {\tt export\_instance\_jdbc} can write data to a database via JDBC.  Therefore, the execution order for commands matters.  To establish an ordering, each command implicitly depends on all declarations before it.  Consequently, commands can bottleneck AQL execution (the AQL execution engine is multi-threaded).  commands are provided to execute arbitrary SQL (via JDBC), Java (via Nashorn javascript), and command-line commands, thereby allowing AQL programs to ``script'' an entire data integration / ETL flow.
 
 \section{Algebraic Databases are Deductive Databases}
 
@@ -636,7 +636,7 @@ A {\tt ctx(<generator> | <labelled null>, <term>)} that preserves types.  Note t
 \subsection{{\tt options}}
 Allowed are {\tt transform} and {\tt dont\_validate\_unsafe}.
 
-\chapter{Kind {\tt pragma}}
+\chapter{Kind {\tt command}}
 \section{{\tt exec\_cmdline}}
 Expects a list of strings inside a section.  Each string will be executed by the Java VM as an external process.  The return value of each command is displayed in the viewer.
 
@@ -785,7 +785,7 @@ When enabled, allows arbitrary equations involving java typeside symbols.
 When enabled, mappings and transforms and queries are not checked to be equality-preserving.  For a query, when true it also disables decision procedure construction for sub-queries.
 
 \section{{\tt always\_reload = boolean}}
-When enabled, pragmas (which can have side effects, like loading data from CSV files) are always executed and are not cached between runs of the AQL program.
+When enabled, commands (which can have side effects, like loading data from CSV files) are always executed and are not cached between runs of the AQL program.
 
 \section{Import options}
 %\subsection{{\tt csv\_charset = string}}
@@ -943,7 +943,7 @@ Enables special support for associative and commutative operators in Knuth-Bendi
 
 Associated with each object is a {\it size}, according to its kind:
 \begin{itemize}
-\item pragma, constraints: length of the text string
+\item command, constraints: length of the text string
 \item instance: rows in the algebra
 \item colimit schema: size of the schema
 \item graph: nodes + edges
@@ -964,7 +964,7 @@ For type sides, (colimit) schemas, mappings, transforms, queries.
 
 \subsection{{\tt gui\_max\_string\_size = integer}}
 
-For pragmas and constraints.
+For commands and constraints.
 
 \subsection{{\tt gui\_rows\_to\_display = integer}}
 

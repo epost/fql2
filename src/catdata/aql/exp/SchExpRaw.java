@@ -96,7 +96,6 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder().append(str).append(en).toHashCode();
-
 		}
 
 		@Override
@@ -127,20 +126,23 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 
 	public static class Att implements Comparable<Att> {
 		public final String str;
+		public final En en;
 
-		public Att(String str) {
-			Util.assertNotNull(str);
+		public Att(En en, String str) {
+			Util.assertNotNull(str, en);
 			this.str = str;
+			this.en = en;
+			
 		}
 
 		@Override
 		public int compareTo(Att o) {
-			return new CompareToBuilder().append(str, o.str).toComparison();
+			return new CompareToBuilder().append(str, o.str).append(en, o.en).toComparison();
 		}
 
 		@Override
-		public int hashCode() {
-			return new HashCodeBuilder().append(str).toHashCode();
+		public int hashCode() { //TODO aql cache
+			return new HashCodeBuilder().append(str).append(en).toHashCode();
 
 		}
 
@@ -158,12 +160,15 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 			Att rhs = (Att) obj;
 			return new EqualsBuilder()
 					// .appendSuper(super.equals(obj))
-					.append(str, rhs.str).isEquals(); //order matters?
+					.append(str, rhs.str).append(en, rhs.en).isEquals(); //order matters?
 		}
 
 		@Override
 		public String toString() {
-			return Util.maybeQuote(str);
+		//	Util.anomaly();
+			return Util.maybeQuote(str); // + "@" + en + ")";
+
+//			return "(" + Util.maybeQuote(str) + "@" + en + ")";
 		}
 
 	}
@@ -205,7 +210,7 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 		col.ens.addAll(ens.stream().map(x -> new En(x)).collect(Collectors.toList()));
 
 		col.fks.putAll(conv1(fks));
-		col.atts.putAll(conv2(Util.toMapSafely(atts)));
+		col.atts.putAll(conv2(atts));
 
 		for (Quad<String, String, RawTerm, RawTerm> eq : t_eqs) {
 			try {
@@ -278,8 +283,12 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 
 	}
 
-	private Map<Att, Pair<En, Ty>> conv2(Map<String, Pair<String, Ty>> map) {
-		return Util.map(map, (k, v) -> new Pair<>(new Att(k), new Pair<>(new En(v.first), v.second)));
+	private Map<Att, Pair<En, Ty>> conv2(Set<Pair<String, Pair<String, String>>> map) {
+		Set<Pair<Att, Pair<En, Ty>>> x = map.stream()
+				.map(p -> new Pair<>(new Att(new En(p.second.first), p.first),
+						new Pair<>(new En(p.second.first), new Ty(p.second.second))))
+				.collect(Collectors.toSet());
+		return Util.toMapSafely(x);
 	}
 
 	private Map<Fk, Pair<En, En>> conv1(Set<Pair<String, Pair<String, String>>> map) {
@@ -299,7 +308,7 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 	public final Set<Pair<String, Pair<String, String>>> fks;
 	public final Set<Pair<List<String>, List<String>>> p_eqs;
 
-	public final Set<Pair<String, Pair<String, Ty>>> atts;
+	public final Set<Pair<String, Pair<String, String>>> atts;
 	public final Set<Quad<String, String, RawTerm, RawTerm>> t_eqs;
 
 	public final Map<String, String> options;
@@ -348,7 +357,7 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 		if (!atts.isEmpty()) {
 			toString += "\tattributes";
 			temp = new LinkedList<>();
-			for (Pair<String, Pair<String, Ty>> sym : Util.alphabetical((atts))) {
+			for (Pair<String, Pair<String, String>> sym : Util.alphabetical((atts))) {
 				temp.add(sym.first + " : " + sym.second.first + " -> " + sym.second.second);
 			}
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -452,7 +461,7 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 		this.ens = LocStr.set1(ens);
 		this.fks = LocStr.set2(fks);
 		this.p_eqs = LocStr.proj2(list);
-		this.atts = LocStr.set2x(atts, x -> new Ty(x));
+		this.atts = LocStr.set2(atts);
 		this.t_eqs = LocStr.proj2(list2);
 		this.options = Util.toMapSafely(options);
 		Util.toMapSafely(fks); // check no dups here rather than wait until eval
@@ -508,7 +517,7 @@ public final class SchExpRaw extends SchExp<Ty, En, Sym, Fk, Att> implements Raw
 		this.ens = new HashSet<>(ens);
 		this.fks = new HashSet<>(fks);
 		this.p_eqs = new HashSet<>(list);
-		this.atts = new HashSet<>(atts);
+		this.atts = atts.stream().map(x->new Pair<>(x.first, new Pair<>(x.second.first, x.second.second.str))).collect(Collectors.toSet());
 		this.t_eqs = new HashSet<>(list2);
 		this.options = Util.toMapSafely(options);
 		Util.toMapSafely(fks); // check no dups here rather than wait until eval

@@ -21,11 +21,11 @@ schema AdvisorMatches = literal : Ty {
 } 
 
 query findMatches = literal : University -> AdvisorMatches {
- entities
+ entity
 	Department -> {from dept:Department}
-		
+entity		
 	Professor -> {from prof:Professor foreign_keys worksIn -> {dept -> prof.worksIn}}
-
+entity
 	Student -> {from stu:Student foreign_keys majoringIn -> {dept -> stu.majoringIn}}
 
 
@@ -38,7 +38,7 @@ query findMatches = literal : University -> AdvisorMatches {
  *   Error in query findMatches: 
  *     Target equation v.studentOf.majoringIn = v.professorOf.worksIn not respected: 
  *       transforms to s.majoringIn = p.worksIn, which is not provable in the sub-query for Match.
- */  Match -> {from p:Professor s:Student 
+ */entity  Match -> {from p:Professor s:Student 
 		     where p.worksIn = s.majoringIn
 		     foreign_keys professorOf -> {prof -> p}		
 			studentOf -> {stu -> s}

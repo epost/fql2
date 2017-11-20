@@ -453,10 +453,10 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 					List<Object> row = new LinkedList<>();
 					row.add(alg.printX(x));
 					for (String att0 : atts0) {
-						row.add(alg.att(new Att(att0), x).toString(alg::printY, Util.voidFn()));
+						row.add(alg.att(new Att(en, att0), x).toString(alg::printY, Util.voidFn()));
 					}
 					for (String fk0 : fks0) {
-						row.add(alg.printX(alg.fk(new Fk(en,fk0), x)));
+						row.add(alg.printX(alg.fk(new Fk(en, fk0), x)));
 					}
 					data[i] = row.toArray();
 					i++;

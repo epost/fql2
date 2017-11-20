@@ -24,7 +24,7 @@ schema EuropeanAirplane = literal : Ty {
 }
 
 query AmericanToEuropean = literal : AmericanAirplane -> EuropeanAirplane {
-	entities 
+	entity 
 		Wing -> {from w:Wing
 			    attributes wingLength -> inToCm(w.wingLength)}
 }

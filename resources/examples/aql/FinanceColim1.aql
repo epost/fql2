@@ -303,7 +303,7 @@ schema ClientHoldPosLinkage = literal : Ty {
 
 //compile time input
 mapping ClientHoldPosLinkageToClient = literal : ClientHoldPosLinkage -> Client {
-	entities
+	entity
 		client -> client
 	attributes
 		client_id -> client_id
@@ -313,7 +313,7 @@ mapping ClientHoldPosLinkageToClient = literal : ClientHoldPosLinkage -> Client 
 
 //compile time input
 mapping ClientHoldPosLinkageToHoldPos = literal : ClientHoldPosLinkage -> HoldPos {
-	entities
+	entity
 		client -> client
 	attributes
 		client_id -> client_no             // updated to reflect the new name
@@ -381,7 +381,7 @@ schema PortfolioRefLinkage = literal : Ty {
 
 //compile time input
 mapping PortfolioRefLinkageToPortfolio = literal  : PortfolioRefLinkage -> Portfolio {
-	entities
+	entity
 		strategy -> strategy
 	attributes
 		strategy_id -> strategy_id
@@ -391,7 +391,7 @@ mapping PortfolioRefLinkageToPortfolio = literal  : PortfolioRefLinkage -> Portf
 
 //compile time input
 mapping PortfolioRefLinkageToRef = literal : PortfolioRefLinkage -> Ref {
-	entities
+	entity
 		strategy -> strategy
 	attributes
 		strategy_id -> strategy_id
@@ -464,14 +464,14 @@ schema RefTransLinkage = literal : Ty {
 
 //compile time input		
 mapping RefTransLinkageToRef = literal : RefTransLinkage -> Ref	 {
-	entities
+	entity
 		currency -> currency
 	attributes
 		currency_id -> currency_id
 		currency_code -> currency_code
 		currency_name -> currency_name	
 
-	entities
+	entity
 		asset -> asset
 	attributes
 		asset_id -> asset_id
@@ -481,14 +481,14 @@ mapping RefTransLinkageToRef = literal : RefTransLinkage -> Ref	 {
 
 //compile time input				
 mapping RefTransLinkageToTrans = literal : RefTransLinkage -> Trans {
-	entities
+	entity
 		currency -> currency
 	attributes
 		currency_id -> currency_id
 		currency_code -> currency_code
 		currency_name -> currency_name
 
-	entities		
+	entity	
 		asset -> asset
 	attributes
 		asset_id -> asset_id	
@@ -582,11 +582,11 @@ schema Colimit = literal : Ty {
 //colimit schema we have to give the mappings into Colimit explicitly. 
 
 //the client mapping is just textual inclusion
-mapping ClientIdentityMapping = id Client
+mapping ClientIdentityMapping = identity Client
 
 //compile time input / computed at compile time
 mapping ClientToColimit = literal : Client -> Colimit  {
-	entities
+	entity
 		client -> client
 	attributes
 		client_id -> client_no
@@ -594,7 +594,7 @@ mapping ClientToColimit = literal : Client -> Colimit  {
 		client_description -> client_desc	
 } 
 
-mapping RefIdentityMapping = id Ref
+mapping RefIdentityMapping = identity Ref
 
 //compile time input / computed at compile time
 mapping RefToColimit = literal : Ref -> Colimit  {
@@ -602,7 +602,7 @@ mapping RefToColimit = literal : Ref -> Colimit  {
 		RefIdentityMapping
 } 
 
-mapping TransIdentityMapping = id Trans
+mapping TransIdentityMapping = identity Trans
 
 //compile time input / computed at compile time
 mapping TransToColimit = literal : Trans -> Colimit  {
@@ -610,7 +610,7 @@ mapping TransToColimit = literal : Trans -> Colimit  {
 		TransIdentityMapping
 } 
 
-mapping PortfolioIdentityMapping = id Portfolio
+mapping PortfolioIdentityMapping = identity Portfolio
 
 //compile time input / computed at compile time
 mapping PortfolioToColimit = literal : Portfolio -> Colimit  {
@@ -618,7 +618,7 @@ mapping PortfolioToColimit = literal : Portfolio -> Colimit  {
 		PortfolioIdentityMapping
 } 
 
-mapping HoldPosIdentityMapping = id HoldPos
+mapping HoldPosIdentityMapping = identity HoldPos
 
 //compile time input / computed at compile time
 //here we translate into Client, to make for an easier colimit later
@@ -627,7 +627,7 @@ mapping HoldPosToColimit = literal : HoldPos -> Colimit  {
 		HoldPosIdentityMapping
 } 
 
-mapping RefTransLinkageIdentityMapping = id RefTransLinkage
+mapping RefTransLinkageIdentityMapping = identity RefTransLinkage
 
 //compile time input / computed at compile time
 mapping RefTransLinkageToColimit = literal : RefTransLinkage -> Colimit {
@@ -635,7 +635,7 @@ mapping RefTransLinkageToColimit = literal : RefTransLinkage -> Colimit {
 		RefTransLinkageIdentityMapping
 } 
 
-mapping PortfolioRefLinkageIdentityMapping = id PortfolioRefLinkage
+mapping PortfolioRefLinkageIdentityMapping = identity PortfolioRefLinkage
 
 //compile time input / computed at compile time
 mapping PortfolioRefLinkageToColimit = literal : PortfolioRefLinkage -> Colimit {
@@ -643,10 +643,10 @@ mapping PortfolioRefLinkageToColimit = literal : PortfolioRefLinkage -> Colimit 
 		PortfolioRefLinkageIdentityMapping
 } 
 
-mapping ClientHoldPosLinkageIdentityMapping = id ClientHoldPosLinkage
+mapping ClientHoldPosLinkageIdentityMapping = identity ClientHoldPosLinkage
 
 mapping ClientHoldPosLinkageToColimit = literal : ClientHoldPosLinkage -> Colimit {
-	entities
+	entity
 		client -> client
 	attributes
 		client_id -> client_no
@@ -855,7 +855,7 @@ schema Target = literal : Ty {
 ////////////////////////////////////////////////////////////////////////
 		
 query ETL = literal : Colimit -> Target {
- entities
+ entity
  
 	//identity
 	currency -> {from c:currency
@@ -869,14 +869,14 @@ query ETL = literal : Colimit -> Target {
 
 
 	//identity
-	strategy -> {from s:strategy
+	entity strategy -> {from s:strategy
 		 attributes strategy_name -> s.strategy_name
 		 	strategy_description -> s.strategy_description
 		 	strategy_id -> s.strategy_id
 	}
 
 	//identity
-	asset -> {from a:asset
+	entity asset -> {from a:asset
 		 attributes asset_id -> a.asset_id
 		 	asset_description -> a.asset_description
 		 	asset_name -> a.asset_name
@@ -887,21 +887,21 @@ query ETL = literal : Colimit -> Target {
 	} 
 
 	//identity
-	client -> {from c:client
+	entity client -> {from c:client
 		 attributes client_description -> c.client_description 
 			client_name -> c.client_name
 			client_id -> c.client_id
 	} 
 
 	//identity
-	country -> {from c:country
+	entity country -> {from c:country
 		 attributes country_code -> c.country_code
 		 	country_name -> c.country_name
 		 	country_id -> c.country_id
 	} 
 
 	//not identity
-	transaction -> {from t:transaction p:portfolio c:client c1:client
+	entity transaction -> {from t:transaction p:portfolio c:client c1:client
 		 where t.transaction_portfolio_id = p.portfolio_id
 		 attributes transaction_id -> t.transaction_id 
 			transaction_asset_id -> t.transaction_asset_id 
@@ -919,7 +919,7 @@ query ETL = literal : Colimit -> Target {
 	}
 
 	//not identity
-	position -> {from p:position a:asset cv:currency cb:currency
+	entity position -> {from p:position a:asset cv:currency cb:currency
 		 where p.position_asset_id = a.asset_id
 		 	p.position_current_value_currency_code = cv.currency_code
 		 	p.position_cost_basis_currency_code = cb.currency_code
@@ -940,7 +940,7 @@ query ETL = literal : Colimit -> Target {
 		} 
 
 	//not identity
-	portfolio -> {from p:portfolio
+	entity portfolio -> {from p:portfolio
 		 attributes portfolio_parent_portfolio_id -> p.portfolio_parent_portfolio_id //added
 		 	portfolio_name -> p.portfolio_name
 		 	portfolio_description -> p.portfolio_description
@@ -953,7 +953,7 @@ query ETL = literal : Colimit -> Target {
 	} 
 
 	//not identity
-	holding -> {from h:holding c:currency a:asset
+	entity holding -> {from h:holding c:currency a:asset
 		 where a.asset_id = h.holding_asset_id
 		 	h.holding_currency_code = c.currency_code
 		 attributes holding_id -> h.holding_id			
@@ -971,7 +971,7 @@ query ETL = literal : Colimit -> Target {
 	} 
    
 	//not identity 
-	portfolioholding -> {from h:holding p:portfolio cur:currency c1:client a:asset
+	entity portfolioholding -> {from h:holding p:portfolio cur:currency c1:client a:asset
 		 where a.asset_id = h.holding_asset_id
 		     p.portfolio_parent_portfolio.portfolio_client_id = c1.client_id
 		 	c1.client_id = h.holding_client.client_id
@@ -1123,7 +1123,7 @@ schema CycTarget = literal : Ty {
 
 
 query ETL_Cyc = literal : Target -> CycTarget {
- entities
+ entity
  	
 	client -> {from c:client
 		 attributes client_id -> c.client_id
@@ -1132,13 +1132,13 @@ query ETL_Cyc = literal : Target -> CycTarget {
 	
 	} 
 
-	country -> {from c:country
+entity	country -> {from c:country
 		 attributes country_id -> c.country_id
 			country_code -> c.country_code
 			country_name -> c.country_name
 		 } 
 
-	currency -> {from c:currency
+entity	currency -> {from c:currency
 		 attributes currency_id -> c.currency_id
 			currency_code -> c.currency_code
 			currency_name -> c.currency_name
@@ -1148,7 +1148,7 @@ query ETL_Cyc = literal : Target -> CycTarget {
 	
 	} 
 
-	asset -> {from a:asset
+entity	asset -> {from a:asset
 		 attributes asset_id -> a.asset_id
 			asset_name -> a.asset_name
 			asset_description -> a.asset_description
@@ -1158,13 +1158,13 @@ query ETL_Cyc = literal : Target -> CycTarget {
 		
 	} 
 
-	strategy -> {from s:strategy
+entity	strategy -> {from s:strategy
 		 attributes strategy_id -> s.strategy_id
 			strategy_name -> s.strategy_name
 			strategy_description -> s.strategy_description
 	}
 
-	portfolio -> {from p:portfolio
+entity	portfolio -> {from p:portfolio
 		 attributes portfolio_id -> p.portfolio_id
 			portfolio_name -> p.portfolio_name
 			portfolio_description -> p.portfolio_description
@@ -1176,7 +1176,7 @@ query ETL_Cyc = literal : Target -> CycTarget {
 		
 	} 
 
-	transaction -> {from t:transaction
+entity	transaction -> {from t:transaction
 		 attributes transaction_id -> t.transaction_id
 			transaction_date -> t.transaction_date
 			transaction_portfolio_id -> t.transaction_portfolio_id
@@ -1194,7 +1194,7 @@ query ETL_Cyc = literal : Target -> CycTarget {
 		
 		} 
 
-	clientposition -> {from p:position
+entity	clientposition -> {from p:position
 		 attributes clientposition_id -> p.position_id
 			clientposition_begin_date -> "1/1/2011" // fake this for now source doesn't have it
 			clientposition_end_date -> "1/1/2011" // fake this for now source doesn't have it
@@ -1211,7 +1211,7 @@ query ETL_Cyc = literal : Target -> CycTarget {
 	
 	} 
 
-	clientportfolioholding -> {from ph:portfolioholding
+entity	clientportfolioholding -> {from ph:portfolioholding
 		 attributes clientportfolioholding_id -> ph.portfolioholding_holding.holding_id
 			clientportfolioholding_begin_date -> ph.portfolioholding_holding.holding_begin_date
 			clientportfolioholding_end_date -> ph.portfolioholding_holding.holding_end_date

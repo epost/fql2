@@ -185,48 +185,50 @@ public final class RawTerm {
 					}
 				}
 			}
-		}
-		
-		if (col.atts.containsKey(new Att(e.head)) && e.args.size() == 1 && e.annotation == null) {
-	//		 System.out.println("x " + e);
-			for (Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>> outcome : infer_good(
-					e.args.get(0), Chc.inRight(col.atts.get(new Att(e.head)).first), col, pre, js, vars)) {
-			//	 System.out.println("y " + outcome);
+			
+			if (col.atts.containsKey(new Att(en, e.head)) && e.args.size() == 1 && e.annotation == null) {
+				//		 System.out.println("x " + e);
+						for (Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>> outcome : infer_good(
+								e.args.get(0), Chc.inRight(col.atts.get(new Att(en, e.head)).first), col, pre, js, vars)) {
+						//	 System.out.println("y " + outcome);
 
-				Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Att(new Att(e.head), outcome.first);
-				Ctx<Var, Chc<Ty, En>> ret2 = new Ctx<>(outcome.second.map);
-				Var v = new Var(e.args.get(0).head);
-				Chc<Ty, En> ty = Chc.inRight(col.atts.get(new Att(e.head)).first);
-				if (vars.keySet().contains(v)) {
-			//		 System.out.println("z " + v);
+							Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Att(new Att(en, e.head), outcome.first);
+							Ctx<Var, Chc<Ty, En>> ret2 = new Ctx<>(outcome.second.map);
+							Var v = new Var(e.args.get(0).head);
+							Chc<Ty, En> ty = Chc.inRight(col.atts.get(new Att(en, e.head)).first);
+							if (vars.keySet().contains(v)) {
+						//		 System.out.println("z " + v);
 
-					if (ret2.containsKey(v) && !ret2.get(v).equals(ty)) {
-				//		 System.out.println("a " + v);
+								if (ret2.containsKey(v) && !ret2.get(v).equals(ty)) {
+							//		 System.out.println("a " + v);
 
-						continue;
-					} else if (!ret2.containsKey(v)) {
-				//		 System.out.println("b " + v);
+									continue;
+								} else if (!ret2.containsKey(v)) {
+							//		 System.out.println("b " + v);
 
-						ret2.put(v, ty);
-					}
-				}
+									ret2.put(v, ty);
+								}
+							}
 
-				Chc<Ty, En> ret3 = Chc.inLeft(col.atts.get(new Att(e.head)).second);
-				Chc<Ty, En> argt = Chc.inRight(col.atts.get(new Att(e.head)).first);
+							Chc<Ty, En> ret3 = Chc.inLeft(col.atts.get(new Att(en, e.head)).second);
+							Chc<Ty, En> argt = Chc.inRight(col.atts.get(new Att(en, e.head)).first);
 
-				if (expected != null && !expected.equals(ret3)) {
-				//	 System.out.println("d " + v);
-				} else {
-				//	 System.out.println("e " + v);
-					if (argt.equals(outcome.third)) {
-				//		 System.out.println("f " + v);
-						if (ret2.agreeOnOverlap(Ctx.fromNullable(vars))) {
-							ret.add(new Triple<>(ret1, ret2, ret3));
+							if (expected != null && !expected.equals(ret3)) {
+							//	 System.out.println("d " + v);
+							} else {
+							//	 System.out.println("e " + v);
+								if (argt.equals(outcome.third)) {
+							//		 System.out.println("f " + v);
+									if (ret2.agreeOnOverlap(Ctx.fromNullable(vars))) {
+										ret.add(new Triple<>(ret1, ret2, ret3));
+									}
+								}
+							}
 						}
 					}
-				}
-			}
 		}
+		
+		
 		if (col.gens.containsKey(new Gen(e.head)) && e.args.isEmpty() && e.annotation == null) {
 			Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Gen(new Gen(e.head));
 			Chc<Ty, En> ret3 = Chc.inRight(col.gens.get(new Gen(e.head)));
@@ -292,7 +294,7 @@ public final class RawTerm {
 			String s) {
 		return col.syms.containsKey(new Sym(s)) || 
 				col.fks.keySet().stream().map(x -> x.str).collect(Collectors.toSet()).contains(s) ||
-				col.atts.map.containsKey(new Att(s)) ||
+				col.atts.keySet().stream().map(x -> x.str).collect(Collectors.toSet()).contains(s) ||
 				col.gens.map.containsKey(new Gen(s)) ||
 				col.sks.map.containsKey(new Sk(s));
 	}
@@ -404,8 +406,10 @@ public final class RawTerm {
 	
 	 public static void assertUnambig(String head,
 				Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
-			int n = boolToInt(col.syms.containsKey(new Sym(head))) + boolToInt(col.atts.containsKey(new Att(head)))
-					+ boolToInt(col.fks.keySet().stream().map(x -> x.str).collect(Collectors.toSet()).contains(head)) + boolToInt(col.gens.containsKey(new Gen(head)))
+			int n = boolToInt(col.syms.containsKey(new Sym(head))) 
+					+ boolToInt(col.atts.keySet().stream().map(x -> x.str).collect(Collectors.toSet()).contains(head)) 
+					+ boolToInt(col.fks.keySet().stream().map(x -> x.str).collect(Collectors.toSet()).contains(head)) 
+					+ boolToInt(col.gens.containsKey(new Gen(head)))
 					+ boolToInt(col.sks.containsKey(new Sk(head)));
 			if (n == 0) {
 				throw new RuntimeException(head + " is not a symbol");
@@ -424,8 +428,6 @@ public final class RawTerm {
 		 
 		if (col.syms.containsKey(new Sym(head))) {
 			return Head.Sym(new Sym(head));
-		} else if (col.atts.containsKey(new Att(head))) {
-			return Head.Att(new Att(head));
 		} else if (col.gens.containsKey(new Gen(head))) {
 			return Head.Gen(new Gen(head));
 		} else if (col.sks.containsKey(new Sk(head))) {
@@ -434,6 +436,9 @@ public final class RawTerm {
 		for (En en : col.ens) { //TODO aql won't work with ambig
 			if (col.fks.containsKey(new Fk(en, head))) {
 				return Head.Fk(new Fk(en, head));
+			}
+			if (col.atts.containsKey(new Att(en, head))) {
+				return Head.Att(new Att(en, head));
 			}
 		}
 		throw new RuntimeException("Anomaly: please report");

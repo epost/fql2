@@ -30,7 +30,7 @@ schema T = literal : Ty {
 }
 
 mapping F = literal : S -> T {
-	entities
+	entity
 		S_E -> T_E
 	attributes
 		S_att_str -> T_att_int . int_to_str

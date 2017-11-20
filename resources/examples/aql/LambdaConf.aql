@@ -67,7 +67,7 @@ schema T = literal : Ty {
 }
 
 mapping F = literal : S -> T {
-	entities
+	entity
 		N1 -> N
 	foreign_keys
 		f -> N //
@@ -75,7 +75,7 @@ mapping F = literal : S -> T {
 		name -> name
 		salary -> salary
 
-	entities
+	entity
 		N2 -> N
 	attributes
 		age -> age
@@ -100,10 +100,10 @@ instance deltaFsigmaFI = delta F sigmaFI
 transform unitSigmaFDeltaF = unit F I //is identity
 
 query Q = literal : T -> S {
-	entities
+	entity
 		N1 -> {from n1:N attributes name -> n1.name salary -> n1.salary 
 		foreign_keys f -> {n2 -> n1}}
-		N2 -> {from n2:N attributes age -> n2.age}
+	entity	N2 -> {from n2:N attributes age -> n2.age}
 	
 }
 
@@ -121,7 +121,7 @@ schema DeptNameSchema = literal : Ty {
 }
 
 query Query = literal : EmpSchema -> DeptNameSchema {
-	entities
+	entity
 		Manager -> {from e:Employee
 					attributes deptName -> e.manager.worksIn.name}		
 }
@@ -140,7 +140,7 @@ constraints NameIsDeptKey = literal : EmpSchema {
 	where d1 = d2
 }
 
-pragma CheckNameIsDeptKey = check NameIsDeptKey EmpInstance //the constraint holds 
+command CheckNameIsDeptKey = check NameIsDeptKey EmpInstance //the constraint holds 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // see 'Pharma Colim' example for schema and data integration

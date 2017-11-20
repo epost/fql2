@@ -76,7 +76,7 @@ instance I = literal : ST {
 //3 is number of times to iterate the chase
 instance J = chase theEDs I 3
 
-pragma JisOk1 = check theEDs J //verify the chased instance satisfies the EDs
+command JisOk1 = check theEDs J //verify the chased instance satisfies the EDs
 
 //pragma InotOk = check theEDs I //the input instance does not satisfy the EDs
 

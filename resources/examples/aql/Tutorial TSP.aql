@@ -29,7 +29,7 @@ MySQL JDBC driver</a>.  The following command (updated with
 the correct path to the MySQL JDBC driver jar file) then places that driver on the java classpath:
 	" *) }
 
-pragma setup_classpath = add_to_classpath {
+command setup_classpath = add_to_classpath {
 	"/Users/ryan/Desktop/mysql.jar"
 }
 
@@ -690,7 +690,7 @@ schema. The query `qWrtngSklC` is functionally equivalent to `qWrtngSklS`. If yo
 will notice that the instance `iWrtngSklS` is identical to the instance `iWrtngSklC`.
 " *) }
 query qWrtngSklC = literal : sS -> sSkl {
-    entities
+    entity
       tSkill -> {
           from
             s: Skill
@@ -725,7 +725,7 @@ Note: If you removed the where clause from each entity sub-section you would hav
 mapping.
 " *) }
 query qScl = literal : sS -> sS {
-    entities
+    entity
       SkillClass -> {
           from
             sc: SkillClass
@@ -734,7 +734,7 @@ query qScl = literal : sS -> sS {
           attributes
             SCName -> sc.SCName
       }
-      Skill -> {
+   entity   Skill -> {
           from
             s: Skill
           where
@@ -790,12 +790,12 @@ schema_colimit S_T_SnT_Sum = modify S_T_SnT_SumAuto {
     rename foreign_keys
         lSkill.sS_fk_HasClass -> lfk_HasClass
     rename attributes
-        sS_SName -> lSName
-        sS_SCNameOnSkl -> lSCNameOnSkl
-        sS_SCName -> lSCName
-        sT_TName -> lTName
-        sSnT_skill -> lskill
-        sSnT_task -> ltask
+        lSkill.sS_SName -> lSName
+        lSkill.sS_SCNameOnSkl -> lSCNameOnSkl
+        lSkillClass.sS_SCName -> lSCName
+        lTask.sT_TName -> lTName
+        lSkillNeededForTask.sSnT_skill -> lskill
+        lSkillNeededForTask.sSnT_task -> ltask
 }
 
 md { (* "
@@ -973,7 +973,7 @@ available for the creation of the new foreign keys. The foreign keys can now be 
 values for the `Skill` and `Task` generators based on the values in the `SkillNdFrTask` section.
 " *) }
 query qS_T_SnT_SumToSTSpn = literal : sS_T_SnT_Sum -> sSTSpn {
-    entities
+    entity
         Skill -> {
             from
                 ss : lSkill
@@ -984,14 +984,14 @@ query qS_T_SnT_SumToSTSpn = literal : sS_T_SnT_Sum -> sSTSpn {
                       // fk_HasClass : Skill -> SkillClass
         fk_HasClass    -> {scsc -> ss.lfk_HasClass}
         }
-        SkillClass -> {
+    entity    SkillClass -> {
             from
                 scsc : lSkillClass
             attributes
                 SCName -> scsc.lSCName
                 
         }
-        SkillNdFrTask -> {
+   entity     SkillNdFrTask -> {
             from
                 snt : lSkillNeededForTask
                 sn  : lSkill
@@ -1009,7 +1009,7 @@ query qS_T_SnT_SumToSTSpn = literal : sS_T_SnT_Sum -> sSTSpn {
         // fk_SnT_T    : SkillNdFrTask -> Task
         fk_ForTask     -> {tt -> nt}
         }
-        Task -> {
+   entity     Task -> {
             from
                 tt : lTask
             attributes
@@ -1042,7 +1042,7 @@ are listed using the `pShwTbls` pragma.
 
 First clean out the target tables if present from a previous run.
 " *) }
-pragma pCleanUp = exec_jdbc "com.mysql.jdbc.Driver"
+command pCleanUp = exec_jdbc "com.mysql.jdbc.Driver"
 "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
 "DROP TABLE IF EXISTS sts_SkillNdFrTask"
 "DROP TABLE IF EXISTS sts_Skill"
@@ -1054,14 +1054,14 @@ Export the results of the above construction of the span and its representative 
 `export_jdbc_instance` defaults strings varchar(64). In this case we illustrate how that default 
 can be overridden using the varchar_length option.
 " *) }
-pragma eSTS = export_jdbc_instance iSTSpn "com.mysql.jdbc.Driver"
+command eSTS = export_jdbc_instance iSTSpn "com.mysql.jdbc.Driver"
 "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" "sts_"
   { options varchar_length = 256 }
 
 md { (* "
 Display the contents of the `ci_test` schema in MySQL.
 " *) }
-pragma pShwTbls = exec_jdbc "com.mysql.jdbc.Driver"
+command pShwTbls = exec_jdbc "com.mysql.jdbc.Driver"
 "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
 "SHOW  TABLES"}
  
@@ -1199,24 +1199,24 @@ schema_colimit STSpn_SPSpn_CoLim = modify STSpn_SPSpn_CoLimAuto {
         SpecificSkill. sSPSpn_fk_IsType -> fk_IsType 
         GeneralSkill. sSPSpn_fk_HasClass -> fk_HasClass
     rename attributes
-        sSTSpn_skillclass -> ST_SCNameOnSnT
-        sSPSpn_SCName -> SP_SCName
-        sSTSpn_task -> ST_TNameOnSnT
-        sSTSpn_skill -> ST_SNameOnSnT
-        sSTSpn_SName -> ST_SklName
-        sSTSpn_TName -> ST_TName
-        sSTSpn_SCName -> ST_SCName
-        sSTSpn_SCNameOnSkl -> ST_SCNameOnSS
-        sSPSpn_SSGSName -> SP_GSNameOnSS
-        sSPSpn_SSName -> SP_SSName
-        sSPSpn_SSSCName -> SP_SCNameOnSS
-        sSPSpn_person -> SP_PNameOnSnP
-        sSPSpn_skill -> SP_SNameOnSnP
-        sSPSpn_PName -> SP_PName
-        sSPSpn_GSSCName -> SP_SCNameOnGS
-        sSPSpn_GSName -> SP_GSName
+        SkillNdFrTask.sSTSpn_skillclass -> ST_SCNameOnSnT
+        SkillClass.sSPSpn_SCName -> SP_SCName
+        SkillNdFrTask.sSTSpn_task -> ST_TNameOnSnT
+        SkillNdFrTask.sSTSpn_skill -> ST_SNameOnSnT
+        SpecificSkill.sSTSpn_SName -> ST_SklName
+        Task.sSTSpn_TName -> ST_TName
+        SkillClass.sSTSpn_SCName -> ST_SCName
+        SpecificSkill.sSTSpn_SCNameOnSkl -> ST_SCNameOnSS
+        SpecificSkill.sSPSpn_SSGSName -> SP_GSNameOnSS
+        SpecificSkill.sSPSpn_SSName -> SP_SSName
+        SpecificSkill.sSPSpn_SSSCName -> SP_SCNameOnSS
+        SkillPrvdByPerson.sSPSpn_person -> SP_PNameOnSnP
+        SkillPrvdByPerson.sSPSpn_skill -> SP_SNameOnSnP
+        Person.sSPSpn_PName -> SP_PName
+        GeneralSkill.sSPSpn_GSSCName -> SP_SCNameOnGS
+        GeneralSkill.sSPSpn_GSName -> SP_GSName
     remove foreign_keys    
-        SpecificSkill. sSTSpn_fk_HasClass -> fk_IsType.fk_HasClass
+        SpecificSkill.sSTSpn_fk_HasClass -> fk_IsType.fk_HasClass
 }
 
 md { (* "
@@ -1255,7 +1255,7 @@ e.g. skill classification in this case.
 " *) }
 
 // Set up the SkillMatch and SkillClassMatch tables based on the exports.
-pragma pSetUpSkillMatch = exec_jdbc "com.mysql.jdbc.Driver"
+command pSetUpSkillMatch = exec_jdbc "com.mysql.jdbc.Driver"
 "jdbc:mysql://mysql.catinf.com:3306/ci_test?user=catinfcom&password=FDiUY!pr" {
 "DROP TABLE IF EXISTS SkillMatch"
 "DROP TABLE IF EXISTS SkillClassMatch"
@@ -1379,7 +1379,7 @@ which it came. It should not be surprising that this would yield the identity. T
 verified by looking at the unit transform and comparing it to the identity transform.
 " *) }
 transform tUnit = unit mSTSpnToSTSpn_SPSpn_CoLim iSTSpnImp
-transform tIdSTSpnImp = id iSTSpnImp
+transform tIdSTSpnImp = identity iSTSpnImp
 
 md { (* "
 The `SkillClass` transform output is not immediately obviously the identity, but if you unravel the 

@@ -22,7 +22,7 @@ public enum Kind {
 		case MAPPING:
 			return "mapping";
 		case PRAGMA:
-			return "pragma";
+			return "command";
 		case QUERY:
 			return "query";
 		case SCHEMA:

@@ -31,17 +31,21 @@ schema Target = literal : Ty {
 } 
 
 query Q = literal : Source -> Target {
- entities
+ entity
 	GoodMatch -> {
 		from m:Man w:Woman
 		where fav_book_m(m) = fav_book_w(w)
 		attributes woman_name -> name_w(w)
 		foreign_keys for_man -> {man -> m}
 	} 
+
+ entity	
 	Male -> {
 		from man:Man
 		attributes man_name -> name_m(man)
 	} 
+
+ entity	
 	PayingGoodMatch -> {
 		from man:Man woman:Woman
 		where fav_book_m(man) = fav_book_w(woman)

@@ -53,19 +53,19 @@ instance I = literal : CoSpan {
 //pullbacks, using queries
 
 query pullback = literal : CoSpan -> Square {
- entities
  
-	D -> {from d:D}
+ 
+entity	D -> {from d:D}
 		
-	B -> {from b:B 
+entity	B -> {from b:B 
 		 attributes B_att -> b.B_att
 		 foreign_keys f -> {d -> b.f}}
 
-	C -> {from c:C 
+entity	C -> {from c:C 
 		 attributes C_att -> c.C_att
 		 foreign_keys g -> {d -> c.g}}
 
-	A -> {from b0:B c0:C 
+entity	A -> {from b0:B c0:C 
 		 where b0.f = c0.g 
 		 attributes A_attB -> b0.B_att 
 		 	   A_attC -> c0.C_att
