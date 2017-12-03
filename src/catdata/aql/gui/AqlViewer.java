@@ -539,6 +539,8 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 			ret.addTab("Type Algebra", new CodeTextPanel("", "Suppressed, size " + I.algebra().talg().sks.size() + "."));
 		}
 		ret.addTab("DP", viewDP(I.dp(), I.collage(), I.schema().typeSide.js));
+		ret.addTab("TPTP",  new CodeTextPanel("", I.tptp()));
+
 		return new Unit();
 	}
 

@@ -875,4 +875,33 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 	public Term<Ty, En, Sym, Fk, Att, Gen, Sk> replace(Term<Ty, En, Sym, Fk, Att, Gen, Sk> s, Term<Ty, En, Sym, Fk, Att, Gen, Sk> t) {
 		return replace(Util.singMap(s, t));
 	}
+
+
+	public String tptp() {
+		if (var != null) {
+			return var.var.toUpperCase();
+		} else if (obj != null) {
+			return obj.toString().toLowerCase();
+		} else if (gen != null) {
+			return gen.toString().toLowerCase();
+		} else if (sk != null) {
+			return sk.toString().toLowerCase();
+		} else if (fk != null) {
+			return fk.toString().toLowerCase() + "(" + arg.tptp() + ")";
+		} else if (att != null) {
+			return att.toString().toLowerCase() + "(" + arg.tptp() + ")";
+		} else if (sym != null) {
+			if (args.isEmpty()) {
+				return sym.toString().toLowerCase();
+			}
+			List<String> l = args.stream().map(x->x.tptp()).collect(Collectors.toList());
+			return sym.toString().toLowerCase() + "(" + Util.sep(l, ",") + ")";
+		}
+		return Util.anomaly();
+	}
+	
+//	cnf(associativity_plus,axiom,
+	//	    ( plus(plus(X,Y), Z) = plus(X,plus(Y, Z)) )).
+
+	
 }
