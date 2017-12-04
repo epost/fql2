@@ -172,9 +172,10 @@ public class SqlTypeSide extends TypeSide<Ty, Sym> {
 		return Collections.emptyMap();
 	}
 
-	public static String mediate(String t) {
+	public static String mediate(int len, String t) {
 		switch (t.toLowerCase()) {
-		case "string": return "varchar";
+		case "varchar": return "varchar(" + len + ")";
+		case "string": return "varchar(" + len + ")";
 		case "int": return "integer";
 		case "bool": return "boolean";
 		case "dom": return "other";

@@ -49,9 +49,9 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 
 	public final Set<String> imports;
 
-	public final Set<Pair<LocStr, String>> ens;
-	public final Set<Pair<Pair<String, LocStr>, List<String>>> fks;
-	public final Set<Pair<Pair<String, LocStr>, Triple<String, String, RawTerm>>> atts;
+	public final Set<Pair<String, String>> ens;
+	public final Set<Pair<Pair<String, String>, List<String>>> fks;
+	public final Set<Pair<Pair<String, String>, Triple<String, String, RawTerm>>> atts;
 
 	public final Map<String, String> options;
 
@@ -61,6 +61,11 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 	}
 
 	//
+
+	
+	private Ctx<En, Integer> enPos = new Ctx<>();
+	private Ctx<Fk, Integer> fkPos = new Ctx<>();
+	private Ctx<Att, Integer> attPos = new Ctx<>();
 
 	public MapExpRaw(SchExp<?, ?, ?, ?, ?> src, SchExp<?, ?, ?, ?, ?> dst, List<LocStr> imports,
 			List<Pair<LocStr, Triple<String, List<Pair<LocStr, List<String>>>, List<Pair<LocStr, Triple<String, String, RawTerm>>>>>> list,
@@ -75,18 +80,20 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 		this.ens = new HashSet<>(); 
 		this.fks = new HashSet<>(); 
 		this.atts = new HashSet<>(); 
-
+	
 		for (LocStr en : list2.keySet()) {
 			Triple<String, List<Pair<LocStr, List<String>>>, List<Pair<LocStr, Triple<String, String, RawTerm>>>> v = list2
 					.get(en);
-			this.ens.add(new Pair<>(en, v.first));
+			this.ens.add(new Pair<>(en.str, v.first));
+			enPos.put(new En(en.str), en.loc);
 
 			for (Pair<LocStr, List<String>> fk : v.second) {
-				this.fks.add(new Pair<>(new Pair<>(en.str, fk.first), fk.second));
+				this.fks.add(new Pair<>(new Pair<>(en.str, fk.first.str), fk.second));
+				fkPos.put(new Fk(new En(en.str), fk.first.str), fk.first.loc);
 			}
 			for (Pair<LocStr, Triple<String, String, RawTerm>> att : v.third) {
-				this.atts.add(new Pair<>(new Pair<>(en.str, att.first), att.second));
-
+				this.atts.add(new Pair<>(new Pair<>(en.str, att.first.str), att.second));
+				attPos.put(new Att(new En(en.str), att.first.str), att.first.loc);
 			}
 		}
 
@@ -102,21 +109,21 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 		raw.put("foreign keys", new LinkedList<>());
 		raw.put("attributes", new LinkedList<>());
 
-		for (Pair<LocStr, String> p : ens) {
+		for (Pair<String, String> p : ens) {
 			List<InteriorLabel<Object>> inner = new LinkedList<>();
-			raw.put(p.first.str, inner);
+			raw.put(p.first, inner);
 			
-			inner.add(new InteriorLabel<>("entities", new Pair<>(p.first.str, p.second), p.first.loc,
+			inner.add(new InteriorLabel<>("entities", new Pair<>(p.first, p.second), enPos.get(new En(p.first)),
 					x -> x.first + " -> " + x.second).conv());
 		
-			for (Pair<Pair<String, LocStr>, List<String>> q : this.fks.stream().filter(x -> x.first.first.equals(p.first.str)).collect(Collectors.toList())) {
+			for (Pair<Pair<String, String>, List<String>> q : this.fks.stream().filter(x -> x.first.first.equals(p.first)).collect(Collectors.toList())) {
 				inner.add(new InteriorLabel<>("foreign keys",
-						q /* new Pair<>(p.first.second.str, p.second) */, q.first.second.loc,
+						q /* new Pair<>(p.first.second.str, p.second) */, fkPos.get(new Fk(new En(p.first),q.first.second)),
 						x -> x.first + " -> " + Util.sep(x.second, ".")).conv());
 			}
 	
-			for (Pair<Pair<String, LocStr>, Triple<String, String, RawTerm>> q : atts.stream().filter(x -> x.first.first.equals(p.first.str)).collect(Collectors.toList())) {
-				inner.add(new InteriorLabel<>("attributes", new Pair<>(q.first.second.str, q.second), q.first.second.loc,
+			for (Pair<Pair<String, String>, Triple<String, String, RawTerm>> q : atts.stream().filter(x -> x.first.first.equals(p.first)).collect(Collectors.toList())) {
+				inner.add(new InteriorLabel<>("attributes", new Pair<>(q.first.second, q.second), attPos.get(new Att(new En(p.first),q.first.second)),
 						x -> x.first + " -> \\" + x.second.first + ". " + x.second.third).conv());
 			}
 		}
@@ -144,33 +151,33 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 		}
 
 		
-		for (Pair<LocStr, String> en : Util.alphabetical(ens)) {
+		for (Pair<String, String> en : Util.alphabetical(ens)) {
 			List<String> temp = new LinkedList<>();
 
 			toString += "\tentity";
 
 			//for (Pair<LocStr, String> x : Util.alphabetical(ens)) {
-				temp.add(en.first.str + " -> " + en.second);
+				temp.add(en.first + " -> " + en.second);
 			//}
 
 			toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 			
-			List<Pair<Pair<String, LocStr>, List<String>>> x = fks.stream().filter(z -> z.first.first.equals(en.first.str)).collect(Collectors.toList());
+			List<Pair<Pair<String, String>, List<String>>> x = fks.stream().filter(z -> z.first.first.equals(en.first)).collect(Collectors.toList());
 			if (!x.isEmpty()) {
 				toString += "\tforeign keys";
 				temp = new LinkedList<>();
-				for (Pair<Pair<String, LocStr>, List<String>> sym : Util.alphabetical(x)) {
+				for (Pair<Pair<String, String>, List<String>> sym : Util.alphabetical(x)) {
 					temp.add(sym.first.second + " -> " + Util.sep(sym.second, "."));
 				}
 				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
 			}
 
-			List<Pair<Pair<String, LocStr>, Triple<String, String, RawTerm>>> y = atts.stream().filter(z -> z.first.first.equals(en.first.str)).collect(Collectors.toList());
+			List<Pair<Pair<String, String>, Triple<String, String, RawTerm>>> y = atts.stream().filter(z -> z.first.first.equals(en.first)).collect(Collectors.toList());
 			
 			if (!y.isEmpty()) {
 				toString += "\tattributes";
 				temp = new LinkedList<>();
-				for (Pair<Pair<String, LocStr>, Triple<String, String, RawTerm>> sym : Util.alphabetical(y)) {
+				for (Pair<Pair<String, String>, Triple<String, String, RawTerm>> sym : Util.alphabetical(y)) {
 					temp.add(sym.first.second + " -> lambda " + sym.second.first + ". " + sym.second.third);
 				}
 				toString += "\n\t\t" + Util.sep(temp, "\n\t\t") + "\n";
@@ -275,7 +282,7 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 		}
 
 		Util.putAllSafely(ens0, Util.toMapSafely(
-				ens.stream().map(x -> new Pair<>(new En(x.first.str), new En(x.second))).collect(Collectors.toList())));
+				ens.stream().map(x -> new Pair<>(new En(x.first), new En(x.second))).collect(Collectors.toList())));
 		for (En k : ens0.keySet()) {
 			if (!dst0.ens.contains(ens0.get(k))) {
 				throw new LocException(find("entities", new Pair<>(k, ens0.get(k))),
@@ -286,8 +293,8 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 			}
 		}
 
-		for (Pair<Pair<String, LocStr>, List<String>> p : this.fks) {
-			Fk theFk = new Fk(new En(p.first.first), p.first.second.str);
+		for (Pair<Pair<String, String>, List<String>> p : this.fks) {
+			Fk theFk = new Fk(new En(p.first.first), p.first.second);
 			if (!src0.fks.containsKey(theFk)) {
 				throw new RuntimeException("Not a foreign key in source: " + theFk.en + "." + theFk.str); 
 			}
@@ -322,22 +329,22 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 				// if (start_en == null) {
 				// throw new RuntimeException("Anomaly: please report");
 				// }
-				fksX.put(new Fk(new En(p.first.first), p.first.second.str), new Pair<>(start_en_fixed, r));
+				fksX.put(new Fk(new En(p.first.first), p.first.second), new Pair<>(start_en_fixed, r));
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
-				throw new LocException(p.first.second.loc, "In foreign key mapping " + p.first + " -> "
+				throw new LocException(fkPos.get(new Fk(new En(p.first.first), p.first.second)), "In foreign key mapping " + p.first + " -> "
 						+ Util.sep(p.second, ".") + ", " + ex.getMessage());
 			}
 		}
 		// Util.putAllSafely(fks0, Util.toMapSafely(fksX));
 
-		for (Pair<Pair<String, LocStr>, Triple<String, String, RawTerm>> att : atts) {
+		for (Pair<Pair<String, String>, Triple<String, String, RawTerm>> att : atts) {
 			try {
 				String var = att.second.first;
 				String var_en = att.second.second;
 				RawTerm term = att.second.third;
 
-				Pair<En, Ty> p = src0.atts.map.get(new Att(new En(att.first.first), att.first.second.str));
+				Pair<En, Ty> p = src0.atts.map.get(new Att(new En(att.first.first), att.first.second));
 				if (p == null) {
 					throw new RuntimeException(att.first + " is not a source attribute.");
 				}
@@ -366,11 +373,11 @@ public final class MapExpRaw extends MapExp<Ty, En, Sym, Fk, Att, En, Fk, Att> i
 				Term<Ty, En, Sym, Fk, Att, Gen, Sk> term0 = RawTerm.infer1x(ctx, term, null, proposed_ty2,
 						dcol.convert(), "", src0.typeSide.js).second;
 
-				Util.putSafely(atts0, new Att(new En(att.first.first), att.first.second.str),
+				Util.putSafely(atts0, new Att(new En(att.first.first), att.first.second),
 						new Triple<>(new Var(var), dst_att_dom_en, term0.convert()));
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
-				throw new LocException(att.first.second.loc, "in mapping for " + att.first + ", " + ex.getMessage());
+				throw new LocException(attPos.get(new Att(new En(att.first.first), att.first.second)), "in mapping for " + att.first + ", " + ex.getMessage());
 			}
 		}
 

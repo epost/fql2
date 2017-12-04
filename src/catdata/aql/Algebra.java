@@ -390,9 +390,9 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	/**
 	 * MUST close this connection
 	 */
-	public Connection createAndLoad(Map<En, List<String>> indices, Pair<Map<X,Integer>, Map<Integer, X>> I) {
+	public Connection createAndLoad(Map<En, List<String>> indices, Pair<Map<X,Integer>, Map<Integer, X>> I, int vlen) {
 		try {
-			Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> xxx = schema().toSQL_srcSchemas("", "integer", "id", -1, Object::toString);
+			Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> xxx = schema().toSQL_srcSchemas("", "integer", "id", -1, Object::toString, vlen);
 			Connection conn = DriverManager.getConnection("jdbc:h2:mem:db_temp_" + session_id++ + ";DB_CLOSE_DELAY=-1");
 			try (Statement stmt = conn.createStatement()) {
 				for (En en1 : schema().ens) {
@@ -432,9 +432,9 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	 * DO NOT close this connection
 	 */
 	//client should not remove
-	public synchronized Connection addIndices(Pair<Map<X,Integer>, Map<Integer, X>> I, Map<En, List<String>> indices) {
+	public synchronized Connection addIndices(Pair<Map<X,Integer>, Map<Integer, X>> I, Map<En, List<String>> indices, int vlen) {
 		if (conn == null) {
-			conn = createAndLoad(indices, I);
+			conn = createAndLoad(indices, I, vlen);
 			this.indicesLoaded = new LinkedList<>();
 			for (List<String> l : indices.values()) {
 				this.indicesLoaded.addAll(l);

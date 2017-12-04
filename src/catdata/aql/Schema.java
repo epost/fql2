@@ -310,7 +310,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 	}
 
 	static int constraint_static = 0;
-	public Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> toSQL_srcSchemas(String prefix, String idTy, String idCol, int truncate, Function<Fk, String> fun) {
+	public Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> toSQL_srcSchemas(String prefix, String idTy, String idCol, int truncate, Function<Fk, String> fun, int vlen) {
 		Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> sqlSrcSchs = new HashMap<>();
 		
 	
@@ -328,7 +328,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 			}
 			for (Att att1 : attsFrom(en1)) {
 				//System.out.println("Doing att " + att1);
-				l.add(		truncate(att1.toString(), truncate) + " " + SqlTypeSide.mediate(atts.get(att1).second.toString())); 
+				l.add(		truncate(att1.toString(), truncate) + " " + SqlTypeSide.mediate(vlen, atts.get(att1).second.toString())); 
 				k.add(Chc.inRight(att1));
 			}
 			String str = "create table " + prefix + en1 + "(" + Util.sep(l, ", ") + ")";

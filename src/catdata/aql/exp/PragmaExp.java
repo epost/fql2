@@ -927,7 +927,7 @@ public abstract class PragmaExp extends Exp<Pragma> {
 			this.clazz = clazz;
 			this.options = Util.toMapSafely(options);
 			I = i;
-			Util.checkClass(clazz);
+			//Util.checkClass(clazz);
 		}
 
 		@Override

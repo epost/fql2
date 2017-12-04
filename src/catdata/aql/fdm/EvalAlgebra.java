@@ -314,6 +314,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		Connection conn = null;
 		boolean safe = (I.algebra().talg().sks.isEmpty() && I.algebra().talg().eqs.isEmpty()) || allowUnsafeSql();
 		boolean useSql = I.size() >= minSizeForSql() && safe && (I.schema().typeSide instanceof SqlTypeSide);
+		int vlen = (int) options.getOrDefault(AqlOption.varchar_length);
 		if (useSql) {
 			this.Q = q.unnest();
 			Map<En1, List<String>> xx = Collections.emptyMap();
@@ -324,9 +325,9 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 			int startId = (Integer) options.get(AqlOption.start_ids_at);
 			Pair<Map<X,Integer>, Map<Integer, X>> J = I.algebra().intifyX(startId);
 			if (persistentIndices()) {
-				conn = I.algebra().addIndices(J, xx);
+				conn = I.algebra().addIndices(J, xx, vlen);
 			} else {
-				conn = I.algebra().createAndLoad(xx, J);
+				conn = I.algebra().createAndLoad(xx, J, vlen);
 			}
 		} else {
 			this.Q = q;
