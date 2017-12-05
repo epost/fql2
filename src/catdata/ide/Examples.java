@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.stream.Stream;
 
+import catdata.Ctx;
 import catdata.Util;
 
 //TODO aql: lazy example load?
@@ -71,44 +72,46 @@ public class Examples {
 		return es0;
 	}
 
-	private static Map<Language, List<Example>> examples2;
+	private static Ctx<Language, List<Example>> examples2;
 
-	public static Map<Language, List<Example>> getAllExamples2() {
+	public static Ctx<Language, List<Example>> getAllExamples2() {
 		if (examples2 != null) {
 			return examples2;
 		}
 		try {
-			URL url = Object.class.getResource("/help.txt");
+			URL url = ClassLoader.getSystemResource("help.txt");
 			if (url == null) {
-				URL l = Object.class.getResource("/examples");
+				URL l = ClassLoader.getSystemResource("examples");
 				if (l == null) {
 					new RuntimeException("Cannot locate examples").printStackTrace();
 					HashMap<Language, List<Example>> ret = new HashMap<>();
 					for (Language ll : Language.values()) {
 						ret.put(ll, new LinkedList<>());
 					}
-					return ret;
+					examples2 = new Ctx<>(ret);
+					return examples2;
 				}
 				File f = new File(l.toURI());
-				examples2 = getExamples(f);
+				examples2 = new Ctx<>(getExamples(f));
 				return examples2;
 			} else {
 				URI uri = url.toURI();
 				if (uri.getScheme().equals("jar")) {
-					examples2 = getExamplesFromJar(uri);
+					examples2 = new Ctx<>(getExamplesFromJar(uri));
 					return examples2;
 				} else { //TODO AQL this is really messed up what's going on with Eclipse
-					URL l = Object.class.getResource("/examples");
+					URL l = ClassLoader.getSystemResource("examples");
 					if (l == null) {
 						//new RuntimeException("Cannot locate built-in examples").printStackTrace();
 						HashMap<Language, List<Example>> ret = new HashMap<>();
 						for (Language ll : Language.values()) {
 							ret.put(ll, new LinkedList<>());
 						}
-						return ret;
+						examples2 = new Ctx<>(ret);
+						return examples2;
 					}
 					File f = new File(l.toURI());
-					examples2 = getExamples(f);
+					examples2 = new Ctx<>(getExamples(f));
 					return examples2;
 				}
 			}
@@ -116,7 +119,7 @@ public class Examples {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new HashMap<>();
+			return new Ctx<>();
 		}
 
 	}
@@ -133,16 +136,18 @@ public class Examples {
 				try (Stream<Path> walk = Files.walk(myPath, 1)) {
 					for (Iterator<Path> it = walk.iterator(); it.hasNext();) {
 						Path p = it.next();
-						String s = p.toString();
+						String s = p.toString().replace("/examples", "examples");
 						if (s.endsWith(l.fileExtension())) {
-							try (InputStream in = Object.class.getResourceAsStream(s)) {
+							try (InputStream in = ClassLoader.getSystemResourceAsStream(s)) {
+								System.out.println(s);
 								String text = Util.readFile(in);
+								Util.assertNotNull(text);
 								
 								list.add(new Example() {
 
 									@Override
 									public String getName() {
-										return s.replaceAll("." + l.fileExtension(), "").replaceAll("/examples/", "");
+										return s.replaceAll("." + l.fileExtension(), "").replaceAll("/examples/", "").replaceAll("examples/", "");
 									}
 
 									@Override

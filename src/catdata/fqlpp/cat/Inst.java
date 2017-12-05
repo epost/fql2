@@ -465,7 +465,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 				Transform<O,A,Set, Fn> xxx = new Transform<>(qqq, K, o -> new Fn<>(qqq.applyO(o), K.applyO(o), tx.get(o)::get)); //Hc * J -> K
 				s.put(x, xxx);
 			}
-			l.put(c, new Fn<>(I.applyO(c), JK.applyO(c), s::get));
+			l.put(c, new Fn(I.applyO(c), JK.applyO(c), s::get));
 		}
 		Transform zzz = new Transform(I, JK, l::get);
 		return zzz;
@@ -581,7 +581,7 @@ public class Inst<O, A> extends Category<Functor<O, A, Set, Fn>, Transform<O, A,
 				}
 				m.put(x, new Functor<>(cat, FinSet.FinSet, pb1::get, pb2::get));
 			}
-			map.put(c , new Fn<>(J.applyO(c), prop().applyO(c), m::get));
+			map.put(c , new Fn(J.applyO(c), prop().applyO(c), m::get));
 		}
 		
 		return new Transform<>(J, prop, map::get);

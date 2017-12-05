@@ -1287,6 +1287,7 @@ public class Util {
 	}
 
 	public static String readFile(InputStream file) {
+		Util.assertNotNull(file);
 		try (InputStreamReader r = new InputStreamReader(file)) {
 
 			return readFile(r);
