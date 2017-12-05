@@ -14,6 +14,7 @@ import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
 import catdata.Util;
+import catdata.aql.Anonymized;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.Collage;
@@ -1635,6 +1636,70 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 			if (getClass() != obj.getClass())
 				return false;
 			InstExpDistinct<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpDistinct<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			return true;
+		}
+	
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return I.deps();
+		}
+
+		
+		 
+	}
+	
+	///////////////////////////////////////////////////////////////////////////
+	
+	public static final class InstExpAnonymize<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> {
+
+		public final InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I;
+		
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
+		
+		public InstExpAnonymize(InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i) {
+			I = i;
+		}
+		
+		@Override
+		public SchExp<Ty, En, Sym, Fk, Att> type(AqlTyping G) {
+			return I.type(G);
+		}
+	
+		@Override
+		public Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> eval(AqlEnv env) {
+			return new Anonymized<>(I.eval(env));
+		}
+	
+		@Override
+		public String toString() {
+			return "anonymize " + I;
+		}
+	
+		@Override
+		public int hashCode() {
+			int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			return result;
+		}
+	
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpAnonymize<?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpAnonymize<?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
 			if (I == null) {
 				if (other.I != null)
 					return false;

@@ -429,6 +429,11 @@ The target of a transform.
 \section{{\tt distinct <instance>}}
 Returns an instance that equates all (entity) generators that are observationally equivalent (i.e., are provably equal on all attributes and foreign keys) in the input instance.  
 
+\section{{\tt anonymize <instance>}}
+Returns an instance where each string and integer have been replaced by a new string and integer, suitable for anonymize SQL data.
+
+Note: this operation can fail at runtime if there are observation equations or other uses of typeside function symbols.
+
 \section{{\tt eval <query> <instance>}}
 Evaluates a query on an instance.  If $Q : S \to T$, and $I$ is an instance on $S$, then $eval \ Q \ I$ is an instance on $T$.
 See the {\tt eval}-prefixed options.

@@ -34,6 +34,7 @@ import catdata.aql.exp.EdsExp.EdsExpVar;
 import catdata.aql.exp.EdsExpRaw.EdExpRaw;
 import catdata.aql.exp.GraphExp.GraphExpRaw;
 import catdata.aql.exp.GraphExp.GraphExpVar;
+import catdata.aql.exp.InstExp.InstExpAnonymize;
 import catdata.aql.exp.InstExp.InstExpChase;
 import catdata.aql.exp.InstExp.InstExpCoEq;
 import catdata.aql.exp.InstExp.InstExpCoEval;
@@ -70,7 +71,6 @@ import catdata.aql.exp.QueryExp.QueryExpDeltaCoEval;
 import catdata.aql.exp.QueryExp.QueryExpDeltaEval;
 import catdata.aql.exp.QueryExp.QueryExpId;
 import catdata.aql.exp.QueryExp.QueryExpVar;
-import catdata.aql.exp.QueryExpRaw.Block;
 import catdata.aql.exp.QueryExpRaw.PreBlock;
 import catdata.aql.exp.QueryExpRaw.Trans;
 import catdata.aql.exp.SchExp.SchExpCod;
@@ -103,19 +103,16 @@ public class AqlParser {
 	public static final String[] ops = new String[] { ",", ".", ";", ":", "{", "}", "(", ")", "=", "->", "@", "(*",
 			"*)", "+", "[", "]", "<-" };
 
+	// TODO aql not officially supported add to classpath
+	 // TODO aql colorize multi eqs
 	public static final String[] res = new String[] { "sigma_chase", "entity", "md", "quotient_jdbc", "random", "sql",
 			"chase", "check", "import_csv", "quotient_csv", "coproduct_unrestricted", "simple", "assert_consistent",
 			"coproduct_sigma", "coequalize", "html", "quotient", "entity_equations", "schema_colimit", "exists",
 			"constraints", "getMapping", "getSchema", "typeside", "schema", "mapping", "instance", "transform", "query",
-			"command", "graph", "exec_jdbc", "exec_js", "exec_cmdline", "literal", "add_to_classpath", // TODO
-																										// aql
-																										// not
-																										// officially
-																										// supported
+			"command", "graph", "exec_jdbc", "exec_js", "exec_cmdline", "literal", "add_to_classpath", 
 			"identity", "match", "attributes", "empty", "imports", "types", "constants", "functions", "equations",
-			"forall", "java_types", "multi_equations", // TODO aql colorize
-														// multi
-			"toQuery", "toCoQuery", // equations
+			"forall", "java_types", "multi_equations",
+			"toQuery", "toCoQuery", "anonymize",
 			"java_constants", "java_functions", "options", "entities", "src", "unique", "dst", "path_equations",
 			"observation_equations", "generators", "rename", "remove", "modify",
 			// "labelled nulls",
@@ -300,6 +297,8 @@ public class AqlParser {
 				delta = Parsers.tuple(token("delta"), map_ref.lazy(), inst_ref.lazy())
 						.map(x -> new InstExpDelta(x.b, x.c)),
 				distinct = Parsers.tuple(token("distinct"), inst_ref.lazy()).map(x -> new InstExpDistinct(x.b)),
+				anon = Parsers.tuple(token("anonymize"), inst_ref.lazy()).map(x -> new InstExpAnonymize(x.b)),
+						
 				eval = Parsers
 						.tuple(token("eval"), query_ref.lazy(), inst_ref.lazy(),
 								options.between(token("{"), token("}")).optional())
@@ -319,7 +318,7 @@ public class AqlParser {
 
 		Parser ret = Parsers.or(sigma_chase, l2, instExpCsvQuot(), instExpJdbcQuot(), instExpCoProd(), instExpRand(),
 				instExpCoEq(), instExpJdbcAll(), chase, instExpJdbc(), empty, instExpRaw(), var, sigma, delta, distinct,
-				eval, colimInstExp(), dom, cod, instExpCsv(), coeval, parens(inst_ref), instExpQuotient());
+				eval, colimInstExp(), dom, anon, cod, instExpCsv(), coeval, parens(inst_ref), instExpQuotient());
 
 		inst_ref.set(ret);
 	}
