@@ -404,9 +404,10 @@ public class IdeOptions {
 	}
 
 	private static String defaultLF() {
-	       return System.getProperty("os.name").toLowerCase().contains("mac") 
-         		  ? UIManager.getSystemLookAndFeelClassName() :
-         			  "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+	       return  UIManager.getSystemLookAndFeelClassName();
+//	    		   System.getProperty("os.name").toLowerCase().contains("mac") 
+  //       		  ? UIManager.getSystemLookAndFeelClassName() :
+    //     			  "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
 	}
 	
 	public void apply(JTextArea a) {

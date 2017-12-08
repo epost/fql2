@@ -11,6 +11,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -181,12 +182,12 @@ public class AqlOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 		TreePath rest = conv(parent);
 		DefaultMutableTreeNode last = (DefaultMutableTreeNode) rest.getLastPathComponent();
 		DefaultMutableTreeNode us = (DefaultMutableTreeNode) path.getLastPathComponent();
-		Enumeration<DefaultMutableTreeNode> cs = last.children();
+		Enumeration<TreeNode> cs = last.children();
 		if (cs == null) {
 			return null;
 		}
 		while (cs.hasMoreElements()) {
-			DefaultMutableTreeNode m = cs.nextElement();
+			DefaultMutableTreeNode m = (DefaultMutableTreeNode) cs.nextElement();
 			if (nodeEq(m, us)) {
 				return rest.pathByAddingChild(m);
 			}
@@ -202,8 +203,8 @@ public class AqlOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 		if (m.getChildCount() != n.getChildCount()) {
 			return false;
 		}
-		Enumeration<DefaultMutableTreeNode> e1 = m.children();
-		Enumeration<DefaultMutableTreeNode> e2 = m.children();
+		Enumeration<TreeNode> e1 = m.children();
+		Enumeration<TreeNode> e2 = m.children();
 		if (e1 == null && e2 == null) {
 			return true;
 		}
@@ -211,7 +212,7 @@ public class AqlOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 			return false;
 		}
 		while (e1.hasMoreElements()) {
-			boolean b = nodeEq(e1.nextElement(), e2.nextElement());
+			boolean b = nodeEq((DefaultMutableTreeNode)e1.nextElement(), (DefaultMutableTreeNode)e2.nextElement());
 			if (!b) {
 				return false;
 			}
