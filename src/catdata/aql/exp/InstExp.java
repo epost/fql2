@@ -419,7 +419,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 				for (Sk g : I.sks().keySet()) {
 					if (col.sks.containsKey(g)) {
 						if (!(boolean)strat.getOrDefault(AqlOption.coproduct_allow_type_collisions_unsafe)) {
-							throw new RuntimeException("The labelled nulls in the input instances of a coproduct must be unique, but there is more than one " + g + ". Possible solution: add options coproduct_allow_type_collisions_unsafe=true");
+							throw new RuntimeException("The labelled nulls in the input instances of a coproduct must be unique, but there is more than one " + g + ". Possible solution: use coproduct_unrestricted\nPossible solution: add options coproduct_allow_type_collisions_unsafe=true");
 						} else {
 							continue;
 						}

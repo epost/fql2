@@ -68,6 +68,7 @@ public class SqlTypeSide extends TypeSide<Ty, Sym> {
 		case "dom": return Types.BLOB;
 		case "blob": return Types.BLOB;
 		case "other": return Types.OTHER;
+		case "clob": return Types.CLOB;
 		}
 		return Util.anomaly();
 	}
@@ -102,6 +103,7 @@ public class SqlTypeSide extends TypeSide<Ty, Sym> {
 		m.put(new Ty("Custom"), "java.lang.Object");
 		m.put(new Ty("Dom"), "java.lang.Object");
 		m.put(new Ty("Blob"), "java.lang.Object");
+		m.put(new Ty("Clob"), "java.lang.Object");
 		m.put(new Ty("Other"), "java.lang.Object");
 		
 		
@@ -132,6 +134,7 @@ public class SqlTypeSide extends TypeSide<Ty, Sym> {
 		m.put("Timestamp", "return input[0]");
 		*/
 
+		m.put(new Ty("Clob"), "return input[0]"); 
 		m.put(new Ty("Date"), "return input[0]"); //java.sql.Date.valueOf(input[0])");
 		m.put(new Ty("Time"), "return java.sql.Time.valueOf(input[0])");
 		m.put(new Ty("Timestamp"), "return java.sql.Timestamp.valueOf(input[0])"); 

@@ -10,7 +10,7 @@ public class SqlForeignKey {
 	
 	@Override
 	public String toString() {
-		return source.name + "_" + name;
+		return name;
 	}
 	
 	@Override

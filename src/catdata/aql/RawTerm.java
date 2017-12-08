@@ -343,6 +343,7 @@ public final class RawTerm {
 			}
 		}
 
+		List<String> misses = new LinkedList<>();
 		for (Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>> p : lhs) {
 			for (Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>> q : rhs) {
 				if (!p.second.agreeOnOverlap(q.second)) {
@@ -355,6 +356,7 @@ public final class RawTerm {
 					continue;
 				}
 				if (!p.third.equals(q.third)) {
+					misses.add(p.third + " and " + q.third);
 					continue;
 				}
 				if (expected != null && !p.third.equals(expected)) {
@@ -380,7 +382,11 @@ public final class RawTerm {
 			if (expected != null) {
 				msg += "Expected sort: " + expected.toStringMash() + " (isType=" + expected.left + ")";
 			}
-			throw new RuntimeException(pre + msg);
+			if (!misses.isEmpty()) {
+				msg += "\nAttempted LHS and RHS types: " + Util.sep(misses, "\n");
+			}
+			
+			throw new RuntimeException((pre + msg).trim());
 		}
 		if (pre == null) {
 			Util.anomaly();

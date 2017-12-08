@@ -113,21 +113,23 @@ public class SqlSchema {
 						if (foreignTable != null || foreignColumn != null || localColumn != null) {
 							fks0.add(new Triple<>(l, r, lfk));
 						}
-						for (Triple<List<String>, List<Pair<String, String>>, String> xxx : fks0) {
-							SqlForeignKey fk = new SqlForeignKey();
-							fk.source = getTable(table.name);
-							fk.target = getTable(xxx.second.get(0).first);
-							fk.name = xxx.third == null ? "FK" + (fkidx++) : xxx.third;
-							int i = 0;
-							for (String lc : xxx.first) {
-								Pair<String, String> fc = xxx.second.get(i);
-								fk.map.put(fk.target.getColumn(fc.second), fk.source.getColumn(lc));
-								i++;
-							}
-							fks.add(fk);
-						}
 					}
-				}
+					
+					for (Triple<List<String>, List<Pair<String, String>>, String> xxx : fks0) {
+						SqlForeignKey fk = new SqlForeignKey();
+						fk.source = getTable(table.name);
+						fk.target = getTable(xxx.second.get(0).first);
+						fk.name = table.name + "__" + Util.sep(xxx.first, "_") + "__" + Util.sep(xxx.second.stream().map(x->x.first + "_" + x.second).collect(Collectors.toList()), "_");
+								//xxx.third == null ? "FK" + (fkidx++) : xxx.third;
+						int i = 0;
+						for (String lc : xxx.first) {
+							Pair<String, String> fc = xxx.second.get(i);
+							fk.map.put(fk.target.getColumn(fc.second), fk.source.getColumn(lc));
+							i++;
+						}
+						fks.add(fk);
+					}
+				}				
 			}
 		}
 

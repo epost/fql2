@@ -386,10 +386,10 @@ public class ColimitSchema<N> implements Semantics {
 	}
 	
 	private static <X> String conv2Fk(Pair<X,Fk> p) {
-		return p.first + "_" + p.second.str; //TODO aql
+		return p.first + "_" + p.second.en + "_" + p.second.str; //TODO aql
 	}
 	private static <X> String conv2Att(Pair<X,Att> p) {
-		return p.first + "_" + p.second.str; //TODO aql
+		return p.first + "_" + p.second.en + "_" + p.second.str; //TODO aql
 	}
 	
 	
@@ -421,6 +421,12 @@ public class ColimitSchema<N> implements Semantics {
 		}
 		UnionFind<Pair<N,En>> uf = new UnionFind<>(ens);
 		for (Quad<N, En, N, En> s : eqEn) {
+			if (!nodes.get(s.first).ens.contains(s.second)) {
+				throw new RuntimeException("Not an entity in " + s.first + ", " + s.second);
+			}
+			if (!nodes.get(s.third).ens.contains(s.fourth)) {
+				throw new RuntimeException("Not an entity in " + s.third + ", " + s.fourth);
+			}
 			uf.union(new Pair<>(s.first, s.second), new Pair<>(s.third, s.fourth));
 		}
 		
