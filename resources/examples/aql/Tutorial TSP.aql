@@ -29,9 +29,6 @@ MySQL JDBC driver</a>.  The following command (updated with
 the correct path to the MySQL JDBC driver jar file) then places that driver on the java classpath:
 	" *) }
 
-command setup_classpath = add_to_classpath {
-	"/Users/ryan/Desktop/mysql.jar"
-}
 
 md { (* "
 ## INTRODUCTION
@@ -788,14 +785,14 @@ schema_colimit S_T_SnT_Sum = modify S_T_SnT_SumAuto {
         sT_Task -> lTask
         sSnT_SkillNeededForTask -> lSkillNeededForTask
     rename foreign_keys
-        lSkill.sS_fk_HasClass -> lfk_HasClass
+        lSkill.sS_Skill_fk_HasClass -> lfk_HasClass
     rename attributes
-        lSkill.sS_SName -> lSName
-        lSkill.sS_SCNameOnSkl -> lSCNameOnSkl
-        lSkillClass.sS_SCName -> lSCName
-        lTask.sT_TName -> lTName
-        lSkillNeededForTask.sSnT_skill -> lskill
-        lSkillNeededForTask.sSnT_task -> ltask
+        lSkill.sS_Skill_SName -> lSName
+        lSkill.sS_Skill_SCNameOnSkl -> lSCNameOnSkl
+        lSkillClass.sS_SkillClass_SCName -> lSCName
+        lTask.sT_Task_TName -> lTName
+        lSkillNeededForTask.sSnT_SkillNeededForTask_skill -> lskill
+        lSkillNeededForTask.sSnT_SkillNeededForTask_task -> ltask
 }
 
 md { (* "
@@ -1169,7 +1166,7 @@ schema_colimit STSpn_SPSpn_CoLimAuto = quotient sSTSpn + sSPSpn : TypeSide {
       sSTSpn.Skill = sSPSpn.SpecificSkill
       sSTSpn.SkillClass = sSPSpn.SkillClass
     path_equations
-      sSTSpn_fk_HasClass = sSPSpn_fk_IsType.sSPSpn_fk_HasClass
+      sSTSpn_Skill_fk_HasClass = sSPSpn_SpecificSkill_fk_IsType.sSPSpn_GeneralSkill_fk_HasClass
 //    observation_equations
 //      forall s. s.sSTSpn_SName = s.sSPSpn_SName
 //      forall c. c.sSTSpn_SCName = c.sSPSpn_SCName
@@ -1192,31 +1189,31 @@ schema_colimit STSpn_SPSpn_CoLim = modify STSpn_SPSpn_CoLimAuto {
         sSTSpn_SkillNdFrTask -> SkillNdFrTask
         sSTSpn_Task -> Task
     rename foreign_keys
-        SkillNdFrTask. sSTSpn_fk_SkillNeeded -> fk_SkillNeeded
-        SkillNdFrTask. sSTSpn_fk_ForTask -> fk_ForTask
-        SkillPrvdByPerson. sSPSpn_fk_SpP_S -> fk_SpP_S
-        SkillPrvdByPerson. sSPSpn_fk_SpP_P -> fk_SpP_P
-        SpecificSkill. sSPSpn_fk_IsType -> fk_IsType 
-        GeneralSkill. sSPSpn_fk_HasClass -> fk_HasClass
+        SkillNdFrTask. sSTSpn_SkillNdFrTask_fk_SkillNeeded -> fk_SkillNeeded
+        SkillNdFrTask. sSTSpn_SkillNdFrTask_fk_ForTask -> fk_ForTask
+        SkillPrvdByPerson. sSPSpn_SkillPrvdByPerson_fk_SpP_S -> fk_SpP_S
+        SkillPrvdByPerson. sSPSpn_SkillPrvdByPerson_fk_SpP_P -> fk_SpP_P
+        SpecificSkill. sSPSpn_SpecificSkill_fk_IsType -> fk_IsType 
+        GeneralSkill. sSPSpn_GeneralSkill_fk_HasClass -> fk_HasClass
     rename attributes
-        SkillNdFrTask.sSTSpn_skillclass -> ST_SCNameOnSnT
-        SkillClass.sSPSpn_SCName -> SP_SCName
-        SkillNdFrTask.sSTSpn_task -> ST_TNameOnSnT
-        SkillNdFrTask.sSTSpn_skill -> ST_SNameOnSnT
-        SpecificSkill.sSTSpn_SName -> ST_SklName
-        Task.sSTSpn_TName -> ST_TName
-        SkillClass.sSTSpn_SCName -> ST_SCName
-        SpecificSkill.sSTSpn_SCNameOnSkl -> ST_SCNameOnSS
-        SpecificSkill.sSPSpn_SSGSName -> SP_GSNameOnSS
-        SpecificSkill.sSPSpn_SSName -> SP_SSName
-        SpecificSkill.sSPSpn_SSSCName -> SP_SCNameOnSS
-        SkillPrvdByPerson.sSPSpn_person -> SP_PNameOnSnP
-        SkillPrvdByPerson.sSPSpn_skill -> SP_SNameOnSnP
-        Person.sSPSpn_PName -> SP_PName
-        GeneralSkill.sSPSpn_GSSCName -> SP_SCNameOnGS
-        GeneralSkill.sSPSpn_GSName -> SP_GSName
+        SkillNdFrTask.sSTSpn_SkillNdFrTask_skillclass -> ST_SCNameOnSnT
+        SkillClass.sSPSpn_SkillClass_SCName -> SP_SCName
+        SkillNdFrTask.sSTSpn_SkillNdFrTask_task -> ST_TNameOnSnT
+        SkillPrvdByPerson.sSPSpn_SkillPrvdByPerson_skill -> ST_SNameOnSnT
+        SpecificSkill.sSTSpn_Skill_SName -> ST_SklName
+        Task.sSTSpn_Task_TName -> ST_TName
+        SkillClass.sSTSpn_SkillClass_SCName -> ST_SCName
+        SpecificSkill.sSTSpn_Skill_SCNameOnSkl -> ST_SCNameOnSS
+        SpecificSkill.sSPSpn_SpecificSkill_SSGSName -> SP_GSNameOnSS
+        SpecificSkill.sSPSpn_SpecificSkill_SSName -> SP_SSName
+        SpecificSkill.sSPSpn_SpecificSkill_SSSCName -> SP_SCNameOnSS
+        SkillPrvdByPerson.sSPSpn_SkillPrvdByPerson_person -> SP_PNameOnSnP
+        SkillNdFrTask.sSTSpn_SkillNdFrTask_skill -> SP_SNameOnSnP
+        Person.sSPSpn_Person_PName -> SP_PName
+        GeneralSkill.sSPSpn_GeneralSkill_GSSCName -> SP_SCNameOnGS
+        GeneralSkill.sSPSpn_GeneralSkill_GSName -> SP_GSName
     remove foreign_keys    
-        SpecificSkill.sSTSpn_fk_HasClass -> fk_IsType.fk_HasClass
+        SpecificSkill.sSTSpn_Skill_fk_HasClass -> fk_IsType.fk_HasClass
 }
 
 md { (* "

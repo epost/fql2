@@ -34,7 +34,7 @@ instance Boeing747 = literal : AmericanAirplane {
 		left right : Wing
 	equations
 		left.wingLength = right.wingLength
-		left.wingLength = 500	
+		left.wingLength = "500.1"	//apparently 500 can't be a double in javascript, it must be an integer
 }
 
 instance Boeing747Metric = eval AmericanToEuropean Boeing747

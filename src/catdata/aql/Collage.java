@@ -605,4 +605,13 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 
 	}
 
+	public Collection<String> allSymbolsAsStrings() {
+		 Collection<String> syms_ret = syms.keySet().stream().map(x->x.toString()).collect(Collectors.toList());
+		 Collection<String> atts_ret = atts.keySet().stream().map(x->x.toString()).collect(Collectors.toList());
+		 Collection<String> fks_ret = fks.keySet().stream().map(x->x.toString()).collect(Collectors.toList());
+		 Collection<String> gens_ret = gens.keySet().stream().map(x->x.toString()).collect(Collectors.toList());
+		 Collection<String> sks_ret = sks.keySet().stream().map(x->x.toString()).collect(Collectors.toList());
+		 return Util.union(syms_ret, Util.union(atts_ret, Util.union(fks_ret, Util.union(gens_ret, sks_ret))));
+	}
+
 }

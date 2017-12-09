@@ -221,8 +221,8 @@ constraints c1 = literal : s3 {
 command p1 = check c1 i3 //check instance against constraints
 command p2 = assert_consistent i3 
 command p3 = exec_cmdline {
-	"echo hello"
-	"echo world"
+//	"echo hello"
+//	"echo world"
 }
 command p4 = exec_js {
 	"1+2;"

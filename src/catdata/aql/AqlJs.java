@@ -89,7 +89,7 @@ public class AqlJs<Ty, Sym> {
 			if (e.getMessage() != null && e.getMessage().contains("jdk.nashorn.internal.codegen.TypeMap")) {
 				throw new RuntimeException("The Java Runtime has suffered an internal error and the IDE must be restarted.\n\n" + e.getMessage());
 			}
-		//	e.printStackTrace();
+			//e.printStackTrace();
 			throw new RuntimeException("In javascript execution of " + o + " (of " + o.getClass() + ") cannot convert to " + name + " error: "  + e.getMessage() + postfix + "\n\nPossible fix: check the java_constants of the typeside for type conversion errors.");
 		}
 	}
@@ -101,84 +101,9 @@ public class AqlJs<Ty, Sym> {
 		String clazz = java_tys.get(ty);
 		Class<?> c = Util.load(clazz);
 		if (!c.isInstance(o)) {
-			throw new RuntimeException(o + " is not an instance of " + c + postfix);
+			throw new RuntimeException(o + " does not have type " + c + ", has type " + o.getClass());
 		}
 	}
-	
-	//TODO: aql do not store classes, functions, etc in typesides 
-	//users of js like saturate and query eval can cache local copies of compiled code
-	
-	//private Map<String, Function<List<Object>, Object>> compiled = new HashMap<>();
-	
-	/*private static Function<List<Object>, Object> compile(String s) {
-		String ret =  "function aqljs(input) { " + s + " }\n\n";
-
-		ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-		
-		try {
-			engine.eval(ret);
-		} catch (ScriptException e) {
-			e.printStackTrace();
-			throw new RuntimeException(e.getMessage());
-		}
-			
-		Function<List<Object>, Object> fun = new Function<List<Object>, Object>() {
-
-			@Override
-			public final Object apply(List<Object> args) {
-				Object ret;
-				try {
-					ret = ((Invocable)engine).invokeFunction("aqljs", args);
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new RuntimeException("In javascript execution, " + e.getClass() + " error: "  + e.getMessage());
-				}
-				if (ret == null) {
-					throw new RuntimeException("javascript null from " + args + " on " + s);
-				}
-				return ret;
-			}
-			
-		};
-		
-		return fun;
-	}*/
-	/*
-	public static Function<List<Object>, Object> compile(String s) {
-		String ret =  "function aqljs(input) { " + s + " }\n\n";
-
-		ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-		
-		try {
-			engine.eval(ret);
-		} catch (ScriptException e) {
-			e.printStackTrace();
-			throw new RuntimeException(e.getMessage());
-		}
-			
-		Function<List<Object>, Object> fun = new Function<List<Object>, Object>() {
-
-			@Override
-			public final Object apply(List<Object> args) {
-				Object ret;
-				try {
-					ret = ((Invocable)engine).invokeFunction("aqljs", args);
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new RuntimeException("In javascript execution, " + e.getClass() + " error: "  + e.getMessage());
-				}
-				if (ret == null) {
-					throw new RuntimeException("javascript null from " + args + " on " + s);
-				}
-				return ret;
-			}
-			
-		};
-		
-		return fun;
-	}*/
-
-	//TODO aql move to util and point all places that load classes to it
 	
 
 	public <En, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> reduce(Term<Ty, En, Sym, Fk, Att, Gen, Sk> term) {

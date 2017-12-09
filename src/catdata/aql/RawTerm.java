@@ -43,7 +43,7 @@ public final class RawTerm {
 		return head + "(" + Util.sep(args, ", ") + ")";
 	}
 
-	public static Set<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>> infer_good(
+	private static Set<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>> infer_good(
 			RawTerm e, Chc<Ty, En> expected, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, String pre, AqlJs<Ty, Sym> js,
 			Map<Var, Chc<Ty, En>> vars) {
 		if (e.annotation != null && !col.tys.contains(new Ty(e.annotation))) {
@@ -65,7 +65,7 @@ public final class RawTerm {
 					ret2.put(new Var((String) e.head), Chc.inRight(en));
 					if (ret2.agreeOnOverlap(Ctx.fromNullable(vars))) {
 						ret.add(new Triple<>(ret1, ret2, Chc.inRight(en)));
-					}
+					} 
 				}
 				for (Ty ty : col.tys) {
 					Ctx<Var, Chc<Ty, En>> ret2 = new Ctx<>();
@@ -78,13 +78,13 @@ public final class RawTerm {
 		}
 
 		if (col.syms.containsKey(new Sym(e.head)) && e.annotation == null) {
-			// System.out.println("a " + e);
+			// //System.out.println("a " + e);
 
 			List<List<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>>> l = new LinkedList<>();
 			l.add(new LinkedList<>());
 			for (int i = 0; i < e.args.size(); i++) {
 				RawTerm arg = e.args.get(i);
-				// System.out.println("arg " + arg);
+				// //System.out.println("arg " + arg);
 
 				Ty ty = col.syms.get(new Sym(e.head)).first.get(i);
 				Set<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>> z = infer_good(arg,
@@ -93,15 +93,12 @@ public final class RawTerm {
 				List<List<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>>> l2 = new LinkedList<>();
 
 				for (List<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>> old : l) {
-					// System.out.println("old " + old);
+					// //System.out.println("old " + old);
 					for (Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>> y : z) {
-						// System.out.println("y " + y);
+						// //System.out.println("y " + y);
 
-						if (y.third.equals(Chc.inLeft(ty))) { // takes place of
-																// if
-																// (argt.equals(outcome.third))
-																// {
-							// System.out.println("z z");
+						if (y.third.equals(Chc.inLeft(ty))) {
+							// //System.out.println("z z");
 
 							l2.add(Util.append(old, Util.singList(y)));
 						}
@@ -109,37 +106,37 @@ public final class RawTerm {
 				}
 				l = l2;
 			}
-			// System.out.println("l " + l);
+			// //System.out.println("l " + l);
 
 			outer: for (List<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>> outcome : l) {
-				// System.out.println("outcome " + outcome);
+				// //System.out.println("outcome " + outcome);
 
 				List<Term<Ty, En, Sym, Fk, Att, Gen, Sk>> w = outcome.stream().map(x -> x.first)
 						.collect(Collectors.toList());
 				Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Sym(new Sym(e.head), w);
 				Ctx<Var, Chc<Ty, En>> ret2 = new Ctx<>();
 				for (Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>> ctx0 : outcome) {
-					// System.out.println("ctx0 " + ctx0);
+					// //System.out.println("ctx0 " + ctx0);
 
 					if (!ctx0.second.agreeOnOverlap(ret2) || !ctx0.second.agreeOnOverlap(Ctx.fromNullable(vars))) {
-						// System.out.println("xxx ");
+						// //System.out.println("xxx ");
 						continue outer;
 					}
-					// System.out.println("yyy");
+					// //System.out.println("yyy");
 					ret2.map.putAll(ctx0.second.map);
 				}
 				for (int i = 0; i < e.args.size(); i++) {
 					RawTerm arg = e.args.get(i);
-					// System.out.println("2arx " + arg);
+					// //System.out.println("2arx " + arg);
 					Chc<Ty, En> ty = Chc.inLeft(col.syms.get(new Sym(e.head)).first.get(i));
 					Var v = new Var((String) arg.head);
 					if (vars.keySet().contains(v)) {
-						// System.out.println("a " + v);
+						// //System.out.println("a " + v);
 						if (ret2.containsKey(v) && !ret2.get(v).equals(ty)) {
-							// System.out.println("b " + v);
+							// //System.out.println("b " + v);
 							continue;
 						} else if (!ret2.containsKey(v)) {
-							// System.out.println("c " + v);
+							// //System.out.println("c " + v);
 							ret2.put(new Var(e.args.get(i).head), ty);
 						}
 					}
@@ -147,9 +144,9 @@ public final class RawTerm {
 
 				Chc<Ty, En> ret3 = Chc.inLeft(col.syms.get(new Sym(e.head)).second);
 				if (expected != null && !expected.equals(ret3)) {
-					// System.out.println("d " );
+					// //System.out.println("d " );
 				} else {
-					// System.out.println("e " );
+					// //System.out.println("e " );
 					if (ret2.agreeOnOverlap(Ctx.fromNullable(vars))) {
 						ret.add(new Triple<>(ret1, ret2, ret3));
 					}
@@ -162,11 +159,13 @@ public final class RawTerm {
 				for (Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>> outcome : infer_good(
 						e.args.get(0), Chc.inRight(col.fks.get(new Fk(en, e.head)).first), col, pre, js, vars)) {
 					Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Fk(new Fk(en, e.head), outcome.first);
+					//System.out.println("trying " + en + " and " + e.head);
 					Ctx<Var, Chc<Ty, En>> ret2 = new Ctx<>(outcome.second.map);
 					Var v = new Var(e.args.get(0).head);
 					Chc<Ty, En> ty = Chc.inRight(col.fks.get(new Fk(en, e.head)).first);
 					if (vars.keySet().contains(v)) {
 						if (ret2.containsKey(v) && !ret2.get(v).equals(ty)) {
+							//System.out.println("no1");
 							continue;
 						} else if (!ret2.containsKey(v)) {
 							ret2.put(new Var(e.args.get(0).head), ty);
@@ -180,31 +179,35 @@ public final class RawTerm {
 						if (argt.equals(outcome.third)) {
 							if (ret2.agreeOnOverlap(Ctx.fromNullable(vars))) {
 								ret.add(new Triple<>(ret1, ret2, ret3));
+							} else {
+								//System.out.println("b3");
 							}
+						} else {
+							//System.out.println("c3");
 						}
 					}
 				}
 			}
 			
 			if (col.atts.containsKey(new Att(en, e.head)) && e.args.size() == 1 && e.annotation == null) {
-				//		 System.out.println("x " + e);
+						 //System.out.println("x " + e);
 						for (Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>> outcome : infer_good(
 								e.args.get(0), Chc.inRight(col.atts.get(new Att(en, e.head)).first), col, pre, js, vars)) {
-						//	 System.out.println("y " + outcome);
+							 //System.out.println("y " + outcome);
 
 							Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Att(new Att(en, e.head), outcome.first);
 							Ctx<Var, Chc<Ty, En>> ret2 = new Ctx<>(outcome.second.map);
 							Var v = new Var(e.args.get(0).head);
 							Chc<Ty, En> ty = Chc.inRight(col.atts.get(new Att(en, e.head)).first);
 							if (vars.keySet().contains(v)) {
-						//		 System.out.println("z " + v);
+								 //System.out.println("z " + v);
 
 								if (ret2.containsKey(v) && !ret2.get(v).equals(ty)) {
-							//		 System.out.println("a " + v);
+									 //System.out.println("a " + v);
 
 									continue;
 								} else if (!ret2.containsKey(v)) {
-							//		 System.out.println("b " + v);
+									 //System.out.println("b " + v);
 
 									ret2.put(v, ty);
 								}
@@ -214,11 +217,11 @@ public final class RawTerm {
 							Chc<Ty, En> argt = Chc.inRight(col.atts.get(new Att(en, e.head)).first);
 
 							if (expected != null && !expected.equals(ret3)) {
-							//	 System.out.println("d " + v);
+								 //System.out.println("d " + v);
 							} else {
-							//	 System.out.println("e " + v);
+								 //System.out.println("e " + v);
 								if (argt.equals(outcome.third)) {
-							//		 System.out.println("f " + v);
+									 //System.out.println("f " + v);
 									if (ret2.agreeOnOverlap(Ctx.fromNullable(vars))) {
 										ret.add(new Triple<>(ret1, ret2, ret3));
 									}
@@ -251,41 +254,34 @@ public final class RawTerm {
 			Chc<Ty, En> ret3 = Chc.inLeft(ty);
 			if (expected != null && !expected.equals(ret3)) {
 			} else {
-					ret.add(new Triple<>(ret1, new Ctx<>(), ret3));
-				
+				ret.add(new Triple<>(ret1, new Ctx<>(), ret3));
 			}
 		}
 		// as primitive - only if not a variable/generator/etc in scope i.e. none above fired
 		if (e.args.isEmpty() && e.annotation == null && ret.isEmpty()) {
 			for (Ty ty : col.tys) {
-				if (e.annotation != null && !new Ty(e.annotation).equals(ty)) {
+				if (expected != null && !expected.equals(Chc.inLeft(ty))) {
 					continue;
 				}
 				try {
 					Term<Ty, En, Sym, Fk, Att, Gen, Sk> ret1 = Term.Obj(js.parse(ty, e.head), ty);
 					Chc<Ty, En> ret3 = Chc.inLeft(ty);
 					if (expected != null && !expected.equals(ret3)) {
+						//System.out.println("zzz");
 					} else {
-							ret.add(new Triple<>(ret1, new Ctx<>(), ret3));
-						
+						ret.add(new Triple<>(ret1, new Ctx<>(), ret3));
+						//System.out.println("added " + ret + " and " + ret3);
 					}
 				} catch (Exception ex) {
+					if (expected != null) {
+						ex.printStackTrace();
+						//throw ex;
+					} 
+//					//ex.printStackTrace();
 				}
 			}
 		}
-		if (ret.isEmpty()) {
-			String msg = "Cannot infer a well-sorted term for " + e + ".\n";
-			if (!vars.keySet().contains(new Var(e.head)) && !isSymbolAll(col, e.head)
-					&& e.annotation == null) {
-				msg += "Undefined symbol: " + e.head + "\n";
-			}
-			if (expected != null) {
-				String msg2 = expected.left ? "type" : "entity";
-				msg += "Expected " + msg2 + ": " + expected.toStringMash();
-			}
-
-			throw new RuntimeException(pre + msg);
-		}
+		
 
 		return ret;
 	}
@@ -319,17 +315,43 @@ public final class RawTerm {
 		}
 		Set<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>> lhs = infer_good(e0,
 				expected, col, pre, js, vars0);
+		
 		if (lhs.isEmpty()) {
-			Util.anomaly();
+			String msg = "Cannot infer a well-sorted term for " + e0 + ".\n";
+			if (!vars.contains(new Var(e0.head)) && !isSymbolAll(col, e0.head)
+					&& e0.annotation == null) {
+				msg += "Undefined (or not java-parseable) symbol: " + e0.head + "\n";
+				msg += "\nAvailable symbols:\n\t" + Util.sep(Util.alphabetical(col.allSymbolsAsStrings()), "\n\t");
+				
+			}
+			if (expected != null) {
+				String msg2 = expected.left ? "type" : "entity";
+				msg += "Expected " + msg2 + ": " + expected.toStringMash();
+			}
+
+			throw new RuntimeException(pre + msg);
 		}
+		
 		Set<Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>>> rhs;
 		if (f == null) {
 			rhs = lhs;
 		} else {
 			rhs = infer_good(f, expected, col, pre, js, vars0);
 		}
+		
 		if (rhs.isEmpty()) {
-			Util.anomaly();
+			String msg = "Cannot infer a well-sorted term for " + f + ".\n"; //if f were null, above exn would have fired
+			if (!vars.contains(new Var(f.head)) && !isSymbolAll(col, f.head)
+					&& f.annotation == null) {
+				msg += "Undefined (or not java-parseable) symbol: " + f.head + "\n";
+				msg += "\nAvailable symbols:\n\t" + Util.sep(Util.alphabetical(col.allSymbolsAsStrings()), "\n\t");
+				//TODO aql merge this error message with the one above it
+			}
+			if (expected != null) {
+				String msg2 = expected.left ? "type" : "entity";
+				msg += "Expected " + msg2 + ": " + expected.toStringMash();
+			}
+			throw new RuntimeException(pre + msg);
 		}
 
 		for (Triple<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Ctx<Var, Chc<Ty, En>>, Chc<Ty, En>> outcome : lhs) {

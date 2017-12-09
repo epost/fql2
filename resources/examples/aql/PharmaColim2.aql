@@ -44,8 +44,8 @@ schema_colimit ColimAuto = quotient S1 + S2 : Type {
 		S1.Person = S2.Patient
 		S1.ObsType = S2.Type
 	path_equations
-		S1_f = S2_f
-		S1_g = S2_g1.S2_g2
+		S1_Observation_f = S2_Observation_f
+		S1_Observation_g = S2_Observation_g1.S2_Method_g2
 }
 
 //just for fun
@@ -62,19 +62,19 @@ schema_colimit Colim = modify ColimAuto {
 		S1_Gender -> G
 		S2_Method -> M
  rename foreign_keys
-		O.S1_f -> f
-		P.S1_h -> h
-		O.S2_g1 -> g1
-		M.S2_g2 -> g2 
+		O.S1_Observation_f  -> f
+		P.S1_Person_h -> h
+		O.S2_Observation_g1 -> g1
+		M.S2_Method_g2  -> g2 
 	rename attributes
-		T.S1_ObsType_att -> T_att1
-		G.S1_Gender_att -> G_att
-		P.S1_Person_att -> P_att1
-		T.S2_Type_att -> T_att2
-		P.S2_Patient_att -> P_att2
+		T.S1_ObsType_ObsType_att  -> T_att1
+		G.S1_Gender_Gender_att  -> G_att
+		P.S1_Person_Person_att -> P_att1
+		T.S2_Type_Type_att  -> T_att2
+		P.S2_Patient_Patient_att -> P_att2
 	remove foreign_keys	
-		O.S2_f -> f
-		O.S1_g -> g1.g2 
+		O.S2_Observation_f  -> f
+		O.S1_Observation_g  -> g1.g2 
 	/* e.g. remove attributes
 		B_ObsType_att -> lambda x. x.T_att1 */
 }
