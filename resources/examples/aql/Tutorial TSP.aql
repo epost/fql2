@@ -25,8 +25,7 @@ md { (* "
 
 This AQL file interacts with a MySQL database running on <a href=\"http://catinf.com\">catinf.com</a>.  To run the tutorial, it
 is necessary to <a href=\"https://dev.mysql.com/downloads/connector/j/5.1.html\">download the
-MySQL JDBC driver</a>.  The following command (updated with
-the correct path to the MySQL JDBC driver jar file) then places that driver on the java classpath:
+MySQL JDBC driver</a> and place it on the java classpath as described in the AQL manual. 
 	" *) }
 
 

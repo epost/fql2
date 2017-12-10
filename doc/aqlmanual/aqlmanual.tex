@@ -1060,6 +1060,10 @@ Interprets the set of equations in an instance as being the saturation of a mode
 
 Defines the name of the AQL environment being constructed for use with the {\tt exec\_js} command.
 
+\subsection{{\tt jdbc\_query\_export\_convert\_type} = string}
+
+Defines the SQL quasi-type to be used with CONVERT statements when emitting SQL for AQL queries.  A good initial guess is VARCHAR for H2 and CHAR for MySQL.
+
 \end{document}
 
 
