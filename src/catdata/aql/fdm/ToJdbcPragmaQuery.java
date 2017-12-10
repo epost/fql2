@@ -15,6 +15,7 @@ public class ToJdbcPragmaQuery<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>  extends
 	private final String jdbcString;
 	private final String prefixSrc;
 	private final String prefixDst;
+	private final String ty;
 	//private final String clazz;
 	private final String idCol;
 	private final int len;
@@ -33,6 +34,7 @@ public class ToJdbcPragmaQuery<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>  extends
 		this.jdbcString = jdbcString;
 		this.prefixSrc = prefixSrc;
 		this.prefixDst = prefixDst;
+		this.ty = (String) options.getOrDefault(AqlOption.jdbc_query_export_convert_type);
 		this.Q = Q;
 	//	this.clazz = clazz;
 		idCol = (String) options.getOrDefault(AqlOption.id_column_name);
@@ -48,8 +50,8 @@ public class ToJdbcPragmaQuery<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>  extends
 		try {
 			Connection conn = DriverManager.getConnection(jdbcString);
 			Statement stmt = conn.createStatement();
-			for (String s : Q.unnest().toSQLViews(prefixSrc, prefixDst, idCol)) {
-				stmt.execute(s.replace("Varchar", "Varchar(" + len + ")").replace("Nvarchar", "Nvarchar(" + len + ")"));
+			for (String s : Q.unnest().toSQLViews(prefixSrc, prefixDst, idCol, ty).first) {
+				stmt.execute(s); 
 			}
 			stmt.close();
 			conn.close();
@@ -72,7 +74,7 @@ public class ToJdbcPragmaQuery<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>  extends
 
 	@Override
 	public String toString() {
-		return "export_jdbc_query " + Util.sep(Q.unnest().toSQLViews(prefixSrc, prefixDst, idCol), "\n\n");
+		return "export_jdbc_query " + Util.sep(Q.unnest().toSQLViews(prefixSrc, prefixDst, idCol, ty).first, "\n\n");
 	}
 	
 	

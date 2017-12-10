@@ -569,18 +569,18 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			ret.add("SQL", new CodeTextPanel("Exception", ex.getMessage()));
-		} */
+		}  */
 		return new Unit();
 	}
-/*
+
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> JComponent makeQueryPanel(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q) {
 		try {
-			List<String> l = q.unnest().toSQLViews("input", "output", "id");
+			List<String> l = q.toSQLViews("input", "output", "id", "varchar").first;
 			return new CodeTextPanel("", Util.sep(l, ";\n\n"));
 		} catch (Exception ex) {
 			return new CodeTextPanel("", ex.getMessage());
 		}
-	} */
+	} 
 	
 	@Override
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> M) {

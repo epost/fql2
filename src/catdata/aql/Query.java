@@ -705,11 +705,13 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		
 	private Map<En2,String> ret;
 
+	//this is used internally
+	public static final String internal_id_col_name = "id";
 	public synchronized Map<En2,String> toSQL() {
 		if (ret != null) {
 			return ret;
 		}
-		String idCol = "id"; //used internally, so don't honor options
+		String idCol = internal_id_col_name; //used internally, so don't honor options
 		ret = new HashMap<>();
 		for (En2 en2 : ens.keySet()) {
 			Frozen<Ty, En1, Sym, Fk1, Att1> b = ens.get(en2);
@@ -748,12 +750,14 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		return ret;
 	}
 	
-	public List<String> toSQLViews(String pre, String post, String idCol) {
+	public Pair<List<String>,Map<En2,String>> toSQLViews(String pre, String post, String idCol, String ty) {
 		if (!(src.typeSide instanceof SqlTypeSide)) {
 			throw new RuntimeException("Not on SQL typeside");
 		}
 		
-		List<String> ret = new LinkedList<>();
+		List<String> ret1 = new LinkedList<>();
+		Map<En2,String> ret2 = new HashMap<>();
+
 		
 	/*	Map<En2, Triple<List<Chc<Fk2, Att2>>, List<String>, List<String>>> ss = dst.toSQL_srcSchemas(post, "Varchar");
 		for (En2 en2 : dst.ens) {
@@ -772,7 +776,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			List<String> from = new LinkedList<>();
 			List<String> select = new LinkedList<>();
 			
-			select.add(sk(gens.keySet(), idCol) + " as " + idCol); //add id column
+			select.add(sk(gens.keySet(), idCol, ty) + " as " + idCol); //add id column
 			for (Var v : gens.keySet()) {
 				from.add(pre + gens.get(v) + " as " + v);
 			}
@@ -780,20 +784,24 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 				select.add(atts.get(att2) + " as " + att2); 
 			}
 			for (Fk2 fk2 : dst.fksFrom(en2)) {
-				select.add(sk(fks.get(fk2), idCol) + " as " + fk2); 
+				select.add(sk(fks.get(fk2), idCol, ty) + " as " + fk2); 
 			}
 			//TODO ADD FOREIGN KEYS aql
 
-			ret.add("drop view if exists " + post + en2);
+			String xxx = "  select " + Util.sep(select, ", ") + "\nfrom " + Util.sep(from, ", ") + "\n " + whereToString(eqs, idCol);
 			
-			ret.add("create view " + post + en2 + " as select " + Util.sep(select, ", ") + "\nfrom " + Util.sep(from, ", ") + "\n " + whereToString(eqs, idCol));
-		}
+			ret1.add("drop view if exists " + post + en2);
+			
+			ret1.add("create view " + post + en2 + " as " + xxx);
+		
+			ret2.put(en2, xxx);
+  		}
 
-		return ret;
+		return new Pair<>(ret1, ret2);
 	}
 	
-	private String convert(String x) {
-		return "convert(" + x + ", varchar)";
+	private String convert(String x, String ty) {
+		return "convert(" + x + ", " + ty + ")";
 	}
 	
 	private String qdirty(Term<?,?,?,?,?,?,?> t, String idCol) {
@@ -805,16 +813,16 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		return Util.anomaly();
 	}
 	
-	private String sk(Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> h, String idCol) {
-		List<Pair<String, String>> l = h.src().gens().keySet().stream().map(v -> new Pair<>(v.var, convert(qdirty(h.gens().get(v), idCol)))).collect(Collectors.toList());
-		return sk(l);
+	private String sk(Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> h, String idCol, String ty) {
+		List<Pair<String, String>> l = h.src().gens().keySet().stream().map(v -> new Pair<>(v.var, convert(qdirty(h.gens().get(v), idCol), ty))).collect(Collectors.toList());
+		return sk(l, ty);
 	}
 	
-	private String sk(Collection<Pair<String,String>> vs) {
+	private String sk(Collection<Pair<String,String>> vs, String ty) {
 		if (vs.isEmpty()) {
 			Util.anomaly();
 		}
-		List<String> l = vs.stream().map(x -> "concat('(" + x.first + "=', concat(" + convert(x.second) + ", ')'))").collect(Collectors.toList());
+		List<String> l = vs.stream().map(x -> "concat('(" + x.first + "=', concat(" + convert(x.second, ty) + ", ')'))").collect(Collectors.toList());
 		
 		String s = l.get(0);
 		for (int i = 1; i < l.size(); i++) {
@@ -823,8 +831,8 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		return s;
 	}
 
-	private String sk(Set<Var> vs, String idCol) {
-		return sk(vs.stream().map(x -> new Pair<>(x.var, x.var + "." + idCol)).collect(Collectors.toList()));
+	private String sk(Set<Var> vs, String idCol, String ty) {
+		return sk(vs.stream().map(x -> new Pair<>(x.var, x.var + "." + idCol)).collect(Collectors.toList()), ty);
 		/*
 		if (vs.isEmpty()) {
 			Util.anomaly();

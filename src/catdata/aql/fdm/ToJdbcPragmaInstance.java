@@ -51,7 +51,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 	}
 
 	private void deleteThenCreate(Connection conn) throws SQLException {
-		Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> m = I.schema().toSQL_srcSchemas(prefix, "integer", "id", truncate, Object::toString, len);
+		Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> m = I.schema().toSQL(prefix, "integer", "id", truncate, Object::toString, len);
 		Statement stmt = conn.createStatement();
 		for (En en : I.schema().ens) {		
 			for (String x : m.get(en).second) {
@@ -69,7 +69,7 @@ public class ToJdbcPragmaInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends P
 	@Override
 	public void execute() {
 		try {
-			Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> zzz = I.schema().toSQL_srcSchemas(prefix, "integer", idCol, truncate, Object::toString, len);
+			Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> zzz = I.schema().toSQL(prefix, "integer", idCol, truncate, Object::toString, len);
 			Connection conn = DriverManager.getConnection(jdbcString);
 			deleteThenCreate(conn);
 			for (En en : I.schema().ens) {

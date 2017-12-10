@@ -99,8 +99,8 @@ public final class AqlOptions {
 		csv_import_prefix, 
 		csv_prepend_entity,
 		prepend_entity_on_ids,
-		jdbc_export_truncate_after
-		,import_missing_is_empty
+		jdbc_export_truncate_after,
+		import_missing_is_empty, jdbc_query_export_convert_type
 		;
 		
 		
@@ -309,6 +309,8 @@ public final class AqlOptions {
 			return false;
 		case jdbc_default_class:
 			return "org.h2.Driver";
+		case jdbc_query_export_convert_type:
+			return "varchar";
 		case jdbc_default_string:
 			return "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1";
 		case interpret_as_algebra:
@@ -367,6 +369,8 @@ public final class AqlOptions {
 
 	private static Object getFromMap(Map<String, String> map, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col, AqlOption op) {
 		switch (op) {
+		case jdbc_query_export_convert_type:
+			return op.getString(map);
 		case jdbc_no_distinct_unsafe:
 			return op.getBoolean(map);
 		case jdbc_export_truncate_after:

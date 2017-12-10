@@ -35,9 +35,14 @@ public class JsPragma extends Pragma {
 		Map<String, Object> m = new HashMap<>();
 		m.put(e, env);
 		for (String js : jss) {
-			@SuppressWarnings("deprecation")
-			Object o = AqlJs.exec(js, m);
-			ret.add(js + ": " + o);
+			try {
+				@SuppressWarnings("deprecation")
+				Object o = AqlJs.exec(js, m);
+				ret.add(js + " : " + o);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				ret.add(js + " : " + ex.getMessage());
+			}
 		}
 		responses.add(Util.sep(ret, "\n"));
 	}

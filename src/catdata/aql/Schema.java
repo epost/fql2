@@ -310,11 +310,10 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 	}
 
 	static int constraint_static = 0;
-	public Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> toSQL_srcSchemas(String prefix, String idTy, String idCol, int truncate, Function<Fk, String> fun, int vlen) {
+	//(k,q,f)  where q is a bunch of drops and then adds and f is the adding of constraints and
+	public Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> toSQL(String prefix, String idTy, String idCol, int truncate, Function<Fk, String> fun, int vlen) {
 		Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> sqlSrcSchs = new HashMap<>();
 		
-	
-
 		for (En en1 : ens) {
 			List<String> l = new LinkedList<>();
 			List<Chc<Fk, Att>> k = new LinkedList<>();
@@ -324,16 +323,16 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 				l.add(		truncate(fun.apply(fk1), truncate) + " " + idTy + " not null ");
 				k.add(Chc.inLeft(fk1));
 				f.add("alter table " + 		truncate(prefix + en1, truncate) + " add constraint " + 		truncate(prefix + en1 + fk1 + constraint_static++, truncate) + 
-						" foreign key (" + 		truncate(fun.apply(fk1), truncate) + ") references " + 		truncate(prefix + fks.get(fk1).second, truncate) + "(" + idCol + ")");
+						" foreign key (" + 		truncate(fun.apply(fk1), truncate) + ") references " + 		truncate(prefix + fks.get(fk1).second, truncate) + "(" + idCol + ");");
 			}
 			for (Att att1 : attsFrom(en1)) {
 				//System.out.println("Doing att " + att1);
 				l.add(		truncate(att1.toString(), truncate) + " " + SqlTypeSide.mediate(vlen, atts.get(att1).second.toString())); 
 				k.add(Chc.inRight(att1));
 			}
-			String str = "create table " + prefix + en1 + "(" + Util.sep(l, ", ") + ")";
+			String str = "create table " + prefix + en1 + "(" + Util.sep(l, ", ") + ");";
 			List<String> q = new LinkedList<>();
-			q.add("drop table if exists " + prefix + en1);
+		//	q.add("drop table if exists " + prefix + en1 + ";");
 			q.add(str);
 			sqlSrcSchs.put(en1, new Triple<>(k, q, f));
 		}

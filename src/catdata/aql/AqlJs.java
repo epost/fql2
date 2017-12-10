@@ -164,9 +164,9 @@ public class AqlJs<Ty, Sym> {
 			Bindings b = engine.createBindings();
 			b.putAll(m);
 			return engine.eval(s, b);
-		} catch (ScriptException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			throw new RuntimeException("Error executing " + s + ": " + e.getMessage() + postfix);
+			throw new RuntimeException("Error executing " + s + ": " + e.getMessage() + postfix, e);
 		}	
 	}
 

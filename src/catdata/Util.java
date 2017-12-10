@@ -67,7 +67,6 @@ import org.apache.commons.collections15.CollectionUtils;
 public class Util {
 
 	public static void writeFile(String text, String file) throws IOException {
-		File f = new File(file);
 		FileWriter w = new FileWriter(file);
 		w.write(text);
 		w.close();
