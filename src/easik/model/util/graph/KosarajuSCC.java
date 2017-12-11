@@ -74,7 +74,7 @@ public class KosarajuSCC {
 		sccList.add(v);
 		for (SketchEdge sk : graph.getEdges().values()) {
 			if (sk instanceof NormalEdge || sk instanceof InjectiveEdge) {
-				if (sk.getTargetEntity() == v) {
+				if (sk.getTargetEntity().equals(v)) {
 					EntityNode t = sk.getSourceEntity();
 					if (!visited.contains(t)) {
 						transposeDFS(t);

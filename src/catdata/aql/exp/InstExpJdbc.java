@@ -279,13 +279,26 @@ public class InstExpJdbc extends InstExpImport<Connection, String> {
 
 	@Override
 	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-	} 
+		return new HashCodeBuilder().append(clazz).append(jdbcString).append(map).append(options).append(schema).toHashCode();
+	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj); //includes super
+		if (obj == null) { return false; }
+		   if (obj == this) { return true; }
+		   if (obj.getClass() != getClass()) {
+		     return false;
+		   }
+		   InstExpJdbc rhs = (InstExpJdbc) obj;
+		   return new EqualsBuilder()
+		                 .append(clazz, rhs.clazz)
+		                 .append(jdbcString, rhs.jdbcString)
+		                 .append(map, rhs.map)
+		                 .append(options, rhs.options)
+		                 .append(schema, rhs.schema)
+		                 .isEquals();
 	}
+	
 	/*
 	//TODO AQL *******************************************************************
 	// must invoke super

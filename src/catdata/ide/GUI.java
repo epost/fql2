@@ -973,8 +973,9 @@ public class GUI extends JPanel {
 		if (title == null) {
 			title = "Untitled " + untitled_count + "." + lang.fileExtension();
 		}
-		if (lang.equals(Language.EASIK)) {
+		if (lang.equals(Language.EASIK) || lang.equals(Language.SKETCH)) {
 			easik.Easik.main(new String[0]);
+			return untitled_count;
 		}
 		CodeEditor<?, ?, ?> c = lang.createEditor(title, untitled_count, content);
 	

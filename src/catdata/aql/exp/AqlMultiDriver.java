@@ -189,8 +189,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 		
 		for (String n : env.prog.order) {
 			if (/* (!last_env.defs.keySet().contains(n)) || */ changed(n)) {
-				//System.out.println("changed: " + n);
-				todo.add(n);
+					todo.add(n);
 			} else {
 				Kind k = env.prog.exps.get(n).kind();
 				env.defs.put(n, k, last_env.defs.get(n, k));

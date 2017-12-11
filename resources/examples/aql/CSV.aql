@@ -39,6 +39,8 @@ instance I0 = import_csv "/Users/ryan/Desktop/" : S0 {
 }
 
 
+command exportCsvData = export_csv_instance I0 "/Users/ryan/Desktop/exported" 
+
 
 //////////////////////////////////////////////
 

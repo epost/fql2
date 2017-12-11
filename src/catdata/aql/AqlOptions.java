@@ -301,10 +301,6 @@ public final class AqlOptions {
 			return 8;
 		case query_remove_redundancy:
 			return true;
-		case eval_approx_sql_unsafe:
-			return false;
-		case eval_use_sql_above:
-			return 16*1024;
 		case eval_sql_persistent_indices:
 			return false;
 		case jdbc_default_class:
@@ -323,6 +319,16 @@ public final class AqlOptions {
 			return true;
 		case gui_sample_size:
 			return 2;
+			
+		case eval_approx_sql_unsafe:
+			return false;
+		case eval_use_sql_above:
+			return 16*1024;
+	
+			
+		
+	
+			
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}

@@ -37,6 +37,9 @@ import catdata.aql.fdm.SaturatedInstance;
 //TODO: aql change type of this to not be a lie
 public abstract class InstExpImport<Handle, Q>
 		extends InstExp<Ty, En, Sym, Fk, Att, Gen, Null<?>, Gen, Null<?>> implements Raw {
+	
+	public abstract boolean equals(Object o);
+	public abstract int hashCode();
 
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 

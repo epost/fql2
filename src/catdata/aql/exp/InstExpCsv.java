@@ -2,6 +2,7 @@ package catdata.aql.exp;
 
 import java.io.File;
 import java.io.FileReader;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,25 +35,52 @@ import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 
+//TODO aql reflection uses == instead of equals
 public class InstExpCsv
-		extends InstExpImport<Map<En, List<String[]>>, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>>> {
+		extends InstExpImport<Map<En, List<String[]>>, Pair<List<Pair<String, String>>, List<Pair<String, String>>>> {
 
 	@Override
 	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-	} 
-
-		@Override
-	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj); //includes super
+		return new HashCodeBuilder().append(f).append(map).append(options).append(schema).toHashCode();
 	}
-	
-	public final File f;
 
-	public InstExpCsv(SchExp<Ty, En, Sym, Fk, Att> schema, List<Pair<LocStr, Pair<List<Pair<LocStr, String>>, List<Pair<String, String>>>>> map,
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) { return false; }
+		   if (obj == this) { return true; }
+		   if (obj.getClass() != getClass()) {
+		     return false;
+		   }
+		   InstExpCsv rhs = (InstExpCsv) obj;
+		   return new EqualsBuilder()
+		                 .append(f, rhs.f)
+		                 .append(map, rhs.map)
+		                 .append(options, rhs.options)
+		                 .append(schema, rhs.schema)
+		                 .isEquals();
+	}
+
+	public final String f;
+
+	private static List<Pair<LocStr, Pair<List<Pair<String, String>>, List<Pair<String, String>>>>> conv(
+			List<Pair<LocStr, Pair<List<Pair<LocStr, String>>, List<Pair<String, String>>>>> l) {
+		List<Pair<LocStr, Pair<List<Pair<String, String>>, List<Pair<String, String>>>>> ret = new LinkedList<>();
+		for (Pair<LocStr, Pair<List<Pair<LocStr, String>>, List<Pair<String, String>>>> x : l) {
+			ret.add(new Pair<>(x.first, new Pair<>(conv2(x.second.first), x.second.second)));
+		}
+
+		return ret;
+	}
+
+	private static List<Pair<String, String>> conv2(List<Pair<LocStr, String>> l) {
+		return l.stream().map(x -> new Pair<>(x.first.str, x.second)).collect(Collectors.toList());
+	}
+
+	public InstExpCsv(SchExp<Ty, En, Sym, Fk, Att> schema,
+			List<Pair<LocStr, Pair<List<Pair<LocStr, String>>, List<Pair<String, String>>>>> map,
 			List<Pair<String, String>> options, String f) {
-		super(schema, map, options);
-		this.f = new File(f);
+		super(schema, conv(map), options);
+		this.f = f;
 	}
 
 	/*
@@ -72,11 +100,10 @@ public class InstExpCsv
 	public String toString() {
 		return "import_csv " + f + " : " + schema + " {\n\t" + Util.sep(map, " -> ", "\n\t") + "\n}";
 	}
-/*
-	@Override
-	public boolean equals(Object obj) {
-		return (obj instanceof InstExpCsv) && super.equals(obj);
-	} */
+	/*
+	 * @Override public boolean equals(Object obj) { return (obj instanceof
+	 * InstExpCsv) && super.equals(obj); }
+	 */
 
 	/**
 	 * Expects filenames in the map
@@ -109,12 +136,15 @@ public class InstExpCsv
 
 			ret.put(new En(k), rows);
 		}
-		
+
 		if (!omitCheck) {
 			for (En en : sch.ens) {
 				if (!ret.containsKey(en)) {
-					ret.put(en, new LinkedList<>(
-							Util.singList(Util.union(sch.attsFrom(en).stream().map(Object::toString).collect(Collectors.toList()), sch.fksFrom(en).stream().map(Object::toString).collect(Collectors.toList())).toArray(new String[0]))));
+					ret.put(en,
+							new LinkedList<>(Util.singList(Util
+									.union(sch.attsFrom(en).stream().map(Object::toString).collect(Collectors.toList()),
+											sch.fksFrom(en).stream().map(Object::toString).collect(Collectors.toList()))
+									.toArray(new String[0]))));
 				}
 			}
 		}
@@ -144,12 +174,13 @@ public class InstExpCsv
 	}
 
 	@Override
-	protected void joinedEn(Map<En, List<String[]>> rows, En en0, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>> s, Schema<Ty, En, Sym, Fk, Att> sch)
+	protected void joinedEn(Map<En, List<String[]>> rows, En en0,
+			Pair<List<Pair<String, String>>, List<Pair<String, String>>> s, Schema<Ty, En, Sym, Fk, Att> sch)
 			throws Exception {
 		String en = en0.str;
 		Map<String, String> inner;
 		if (s == null) {
-			inner = new HashMap<>(); 
+			inner = new HashMap<>();
 		} else {
 			inner = Util.toMapSafely(s.second);
 		}
@@ -168,15 +199,15 @@ public class InstExpCsv
 		boolean prepend = (boolean) op.getOrDefault(inner, AqlOption.csv_prepend_entity);
 		String sep = (String) op.getOrDefault(inner, AqlOption.import_col_seperator);
 		String pre = (String) op.getOrDefault(inner, AqlOption.csv_import_prefix);
-		//System.out.println("prefix is " + pre);
-		
+		// System.out.println("prefix is " + pre);
+
 		Map<String, String> map;
 		if (s != null) {
-			map = new Ctx<>(Util.toMapSafely(s.first)).map((x,y)->new Pair<>(x.str,y)).map;
+			map = new Ctx<>(Util.toMapSafely(s.first)).map;
 		} else {
 			map = new HashMap<>();
 		}
-		
+
 		Function<String, String> mediate = x -> {
 			if (map.containsKey(x)) {
 				return map.get(x);
@@ -196,8 +227,8 @@ public class InstExpCsv
 		for (String[] row : rows.get(en0).subList(1, rows.get(en0).size())) {
 			Gen l0;
 
-			String idCol = map.containsKey(en) ? map.get(en) : 
-				(String) op.getOrDefault(inner, AqlOption.id_column_name);
+			String idCol = map.containsKey(en) ? map.get(en)
+					: (String) op.getOrDefault(inner, AqlOption.id_column_name);
 
 			if (autoGenIds && !m.containsKey(idCol)) {
 				l0 = toGen(en0, "" + startId++);
@@ -242,42 +273,44 @@ public class InstExpCsv
 
 	/*
 	 * protected void joinedEn(Map<En, List<CSVRecord>> map, En en, String s,
-	 * Schema<Ty, En, Sym, Fk, Att> sch) throws Exception { String idCol =
-	 * (String) op.getOrDefault(AqlOption.id_column_name); for (CSVRecord row :
-	 * map.get(en)) { Gen l0 = (Gen) row.get(idCol);
+	 * Schema<Ty, En, Sym, Fk, Att> sch) throws Exception { String idCol = (String)
+	 * op.getOrDefault(AqlOption.id_column_name); for (CSVRecord row : map.get(en))
+	 * { Gen l0 = (Gen) row.get(idCol);
 	 * 
 	 * ens0.get(en).add(l0);
 	 * 
-	 * for (Fk fk : sch.fksFrom(en)) { if (!fks0.containsKey(l0)) { fks0.put(l0,
-	 * new Ctx<>()); } Gen g = (Gen) row.get((String) fk); fks0.get(l0).put(fk,
-	 * g); }
+	 * for (Fk fk : sch.fksFrom(en)) { if (!fks0.containsKey(l0)) { fks0.put(l0, new
+	 * Ctx<>()); } Gen g = (Gen) row.get((String) fk); fks0.get(l0).put(fk, g); }
 	 * 
 	 * for (Att att : sch.attsFrom(en)) { if (!atts0.containsKey(l0)) {
 	 * atts0.put(l0, new Ctx<>()); } Object o = row.get((String) att);
 	 * //System.out.println("is " + o); Term<Ty, Void, Sym, Void, Void, Void,
-	 * Null<?>> r = objectToSk(sch, o, l0.toString(), att, tys0, extraRepr,
-	 * true); atts0.get(l0).put(att, r); } }
+	 * Null<?>> r = objectToSk(sch, o, l0.toString(), att, tys0, extraRepr, true);
+	 * atts0.get(l0).put(att, r); } }
 	 * 
 	 * }
 	 */
 
 	// TODO aql shredded input format for CSV
 	@Override
-	protected void shreddedAtt(Map<En, List<String[]>> h, Att att, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>> s, Schema<Ty, En, Sym, Fk, Att> sch)
+	protected void shreddedAtt(Map<En, List<String[]>> h, Att att,
+			Pair<List<Pair<String, String>>, List<Pair<String, String>>> s, Schema<Ty, En, Sym, Fk, Att> sch)
 			throws Exception {
 		throw new RuntimeException(
 				"Shredded input format not avaiable for CSV (if desired, please email info@catinf.com)");
 	}
 
 	@Override
-	protected void shreddedFk(Map<En, List<String[]>> h, Fk fk, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>> s, Schema<Ty, En, Sym, Fk, Att> sch)
+	protected void shreddedFk(Map<En, List<String[]>> h, Fk fk,
+			Pair<List<Pair<String, String>>, List<Pair<String, String>>> s, Schema<Ty, En, Sym, Fk, Att> sch)
 			throws Exception {
 		throw new RuntimeException(
 				"Shredded input format not avaiable for CSV (if desired, please email info@catinf.com)");
 	}
 
 	@Override
-	protected void shreddedEn(Map<En, List<String[]>> h, En en, Pair<List<Pair<LocStr,String>>,List<Pair<String,String>>> s, Schema<Ty, En, Sym, Fk, Att> sch)
+	protected void shreddedEn(Map<En, List<String[]>> h, En en,
+			Pair<List<Pair<String, String>>, List<Pair<String, String>>> s, Schema<Ty, En, Sym, Fk, Att> sch)
 			throws Exception {
 		throw new RuntimeException(
 				"Shredded input format not avaiable for CSV (if desired, please email info@catinf.com)");
