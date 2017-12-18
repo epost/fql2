@@ -392,7 +392,7 @@ public class Chase {
 
 	}
 
-	private static final int chase_limit = 64;
+	private static final int chase_limit = 64*64;
 
 	private static Map<String, Set<Pair<Object, Object>>> minimize(
 			Set<String> keys,

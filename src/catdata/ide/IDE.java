@@ -58,8 +58,6 @@ public class IDE {
 			}
 			try {
 
-			//	String lf = System.getProperty("os.name").toLowerCase().contains("mac") ? UIManager.getSystemLookAndFeelClassName() : "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
-
 				UIManager.setLookAndFeel(IdeOptions.theCurrentOptions.getString(IdeOption.LOOK_AND_FEEL));
 
 				JFrame f = new JFrame("AQL IDE");
@@ -73,12 +71,6 @@ public class IDE {
 				f.setLocationRelativeTo(null);
 				f.setVisible(true);
 				
-				/*
-				 * ((Graphics2D)f.getGraphics()).setRenderingHint(
-				 * RenderingHints.KEY_TEXT_ANTIALIASING,
-				 * RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-				 */
-
 				f.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 				f.addWindowListener(new WindowAdapter() {
 					@Override

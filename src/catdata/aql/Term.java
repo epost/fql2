@@ -898,7 +898,7 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return sym.toString().toLowerCase() + "(" + Util.sep(l, ",") + ")";
 		}
 		return Util.anomaly();
-	}
+	} 
 	
 //	cnf(associativity_plus,axiom,
 	//	    ( plus(plus(X,Y), Z) = plus(X,plus(Y, Z)) )).

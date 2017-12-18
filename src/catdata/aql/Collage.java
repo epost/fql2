@@ -316,6 +316,16 @@ public class Collage<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		return toString.toString();
 	}
 	
+	public String tptp() {
+		List<String> l = new LinkedList<>();
+		int i = 0;
+		for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : eqs) {
+			l.add("cnf(eq" + i + ",axiom,(" + eq.lhs.tptp() + " = " + eq.rhs.tptp() + ")).");
+			i++;
+		}
+		return Util.sep(l, "\n\n");
+	}
+	
 	private Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplified_pair;
 
 	public synchronized Pair<Collage<Ty, En, Sym, Fk, Att, Gen, Sk>, Function<Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>>> simplify() {

@@ -220,15 +220,7 @@ public abstract class Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> implements S
 		return toString("generators", "equations");
 	} 
 
-	public String tptp() {
-		List<String> l = new LinkedList<>();
-		int i = 0;
-		for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : collage().eqs) {
-			l.add("cnf(eq" + i + ",axiom,(" + eq.lhs.tptp() + " = " + eq.rhs.tptp() + ")).");
-			i++;
-		}
-		return Util.sep(l, "\n\n");
-	}
+	
 	
 	//TODO aql validate instances against algebras
 	
