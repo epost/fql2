@@ -24,9 +24,10 @@ public class MaedmaxProver<T, C, V> extends DPKB<T, C, V>  {
 			writer.println("exit");
 			writer.close();
 			reader.close();
+			proc.destroyForcibly();
 		} catch (Exception ex) {
 			try {
-				proc.destroyForcibly();
+	
 			} catch (Exception ex2) {
 				
 			}
@@ -36,75 +37,29 @@ public class MaedmaxProver<T, C, V> extends DPKB<T, C, V>  {
 	private final Process proc;
 	private final BufferedReader reader;
 	private final PrintWriter writer;
-	
-	private final Ctx<C, String> iso1 = new Ctx<>();
-	private final Ctx<String, C> iso2 = new Ctx<>();
-	
-	private final String convert(KBExp<C,V> e) {
-		if (e.isVar) {
-			return convertV(e.getVar().var);
-		}
-		List<String> l = new LinkedList<>();
-		for (KBExp<C,V> arg : e.getApp().args) {
-			l.add(convert(arg));
-		}
-		if (l.isEmpty()) {
-			return convertC(e.getApp().f);
-		} 
-		return convertC(e.getApp().f) + "(" + Util.sep(l, ",") + ")";
-	}
-	
-	private final String convertV(V e) {
-		return "V" + e.toString();
-	}
-	
-	private final String convertC(C e) {
-		return iso1.get(e);
-	}
+	private final KBTheory<T,C,V> th;
 	
 	//done elsewhere for convenience
 	//TODO AQL empty sorts check
 	public MaedmaxProver(String exePath, KBTheory<T,C,V> th, boolean allowEmptySorts) {
 		super(th.tys, th.syms, th.eqs);
+		this.th = th;
 		
 		File f = new File(exePath);
 		if (!f.exists()) {
 			throw new RuntimeException("File does not exist: " + exePath);
 		}
 		
-		if (!allowEmptySorts) {
-	 		Set<T> es = new HashSet<>();
-			th.inhabGen(es);
-			if (!es.equals(th.tys)) {
-				throw new RuntimeException("Sorts " + Util.sep(Util.diff(th.tys, es), ", ") + " have no ground terms (required by maedmax; consider maedmax_allow_empty_sorts_unsafe = true).");
-			}
-		}
 		
-		int i = 0;
-		for (C c : th.syms.keySet()) {
-			iso1.put(c, "s" + i);
-			iso2.put("s" + i, c);			
-			i++;
-		}
-		
-		int j = 0;
-		StringBuilder sb = new StringBuilder();
-		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : th.eqs) {
-			if (!eq.first.keySet().equals(Util.union(eq.second.vars(), eq.third.vars()))) {
-				throw new RuntimeException("Maedmax does not currently support contexts.");
-			}
-			sb.append("cnf(eq" + j + ",axiom,(" + convert(eq.second) + " = " + convert(eq.third) + ")).");			
-			sb.append(System.lineSeparator());
-			j++;
-		}
 		
 		try {
 			File g = File.createTempFile("AqlMaedmax", ".tptp");
-			Util.writeFile(sb.toString(), g.getAbsolutePath());
+			Util.writeFile(th.tptp(allowEmptySorts), g.getAbsolutePath());
 			System.out.println(g.getAbsolutePath());
 			
 			String str = exePath + " --interactive --aql " + g.getAbsolutePath();
 			proc = Runtime.getRuntime().exec(str);
+			
 			
 			reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			writer = new PrintWriter(proc.getOutputStream());
@@ -128,7 +83,7 @@ public class MaedmaxProver<T, C, V> extends DPKB<T, C, V>  {
 		if (!ctx.keySet().equals(Util.union(lhs.vars(), rhs.vars()))) {
 			throw new RuntimeException("Maedmax does not currently support contexts.");
 		}
-		writer.println(convert(lhs) + " = " + convert(rhs));
+		writer.println(th.convert(lhs) + " = " + th.convert(rhs));
 		writer.flush();
 		try {
 			reader.readLine(); //enter ... :

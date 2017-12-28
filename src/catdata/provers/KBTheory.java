@@ -2,16 +2,15 @@ package catdata.provers;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import catdata.Chc;
+import catdata.Ctx;
 import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
-import catdata.aql.Head;
 
 public class KBTheory<T, C, V> {
 
@@ -100,9 +99,9 @@ public class KBTheory<T, C, V> {
 		validate(); // TODO aql disable for production
 	}
 
-	
 	public void inhabGen(Set<T> inhabited) {
-		while (inhabGen1(inhabited));
+		while (inhabGen1(inhabited))
+			;
 	}
 
 	private boolean inhabGen1(Set<T> ret) {
@@ -116,6 +115,68 @@ public class KBTheory<T, C, V> {
 			changed |= ret.add(syms.get(c).second);
 		}
 		return changed;
+	}
+
+	private final Ctx<C, String> iso1 = new Ctx<>();
+	private final Ctx<String, C> iso2 = new Ctx<>();
+
+	public final String convert(KBExp<C, V> e) {
+		if (e.isVar) {
+			return convertV(e.getVar().var);
+		}
+		List<String> l = new LinkedList<>();
+		for (KBExp<C, V> arg : e.getApp().args) {
+			l.add(convert(arg));
+		}
+		if (l.isEmpty()) {
+			return convertC(e.getApp().f);
+		}
+		return convertC(e.getApp().f) + "(" + Util.sep(l, ",") + ")";
+	}
+
+	private final String convertV(V e) {
+		return "V" + e.toString();
+	}
+
+	private final String convertC(C e) {
+		return iso1.get(e);
+	}
+
+	private String tptp = null;
+
+	public synchronized String tptp(boolean allowEmptySorts) {
+		if (tptp != null) {
+			return null;
+		}
+
+		if (!allowEmptySorts) {
+			Set<T> es = new HashSet<>();
+			inhabGen(es);
+			if (!es.equals(tys)) {
+				throw new RuntimeException("Sorts " + Util.sep(Util.diff(tys, es), ", ")
+						+ " have no ground terms (required by maedmax; consider maedmax_allow_empty_sorts_unsafe = true).");
+			}
+		}
+
+		int i = 0;
+		for (C c : syms.keySet()) {
+			iso1.put(c, "s" + i);
+			iso2.put("s" + i, c);
+			i++;
+		}
+
+		int j = 0;
+		StringBuilder sb = new StringBuilder();
+		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : eqs) {
+			if (!eq.first.keySet().equals(Util.union(eq.second.vars(), eq.third.vars()))) {
+				throw new RuntimeException("Maedmax does not currently support contexts.");
+			}
+			sb.append("cnf(eq" + j + ",axiom,(" + convert(eq.second) + " = " + convert(eq.third) + ")).");
+			sb.append(System.lineSeparator());
+			j++;
+		}
+		tptp = sb.toString();
+		return tptp;
 	}
 
 }
