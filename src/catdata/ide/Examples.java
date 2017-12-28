@@ -139,7 +139,6 @@ public class Examples {
 						String s = p.toString().replace("/examples", "examples");
 						if (s.endsWith(l.fileExtension())) {
 							try (InputStream in = ClassLoader.getSystemResourceAsStream(s)) {
-								System.out.println(s);
 								String text = Util.readFile(in);
 								Util.assertNotNull(text);
 								

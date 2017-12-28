@@ -143,7 +143,7 @@ public final class Ctx<K,V> implements Serializable {
 
 	public void put(K k, V v) {
 		if (map.containsKey(k)) {
-			throw new RuntimeException(" already contains " + k + "\n\n" + this);
+			throw new RuntimeException("already contains " + k + "\n\n" + this);
 		}
 		map.put(k, v);
 	}

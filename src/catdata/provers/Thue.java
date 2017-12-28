@@ -17,7 +17,7 @@ import catdata.Util;
 /**
  * @author Ryan Wisnesky
  * 
- *         Implementation of a Knuth-Bendix variant for Semi-Thue systems (monoid
+ *         Implementation of a Knuth-Bendix variant for Thue systems (monoid
  *         presentations), following the Kapur and Narendran 1985 paper.
  * 
  *         Note: In this variant of Knuth-Bendix, two terms can be equal without
@@ -29,7 +29,7 @@ import catdata.Util;
  * 
  * @param <Y> the alphabet
  */
-public class SemiThue<Y> {
+public class Thue<Y> {
 
 	private final List<Pair<List<Y>, List<Y>>> rules;
 	private boolean finished = false;
@@ -41,7 +41,7 @@ public class SemiThue<Y> {
 	 * @param rules to be completed. DOES NOT copy, and MUTATES IN PLACE the pairs inside of rules 
 	 * @param max_iterations to run (-1 for infinity)
 	 */
-	public SemiThue(List<Pair<List<Y>, List<Y>>> rules, int max_iterations) {
+	public Thue(List<Pair<List<Y>, List<Y>>> rules, int max_iterations) {
 		this.rules = rules;
 		this.max_iterations = max_iterations;
 		orient(this.rules);

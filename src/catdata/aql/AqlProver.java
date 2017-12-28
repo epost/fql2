@@ -6,6 +6,7 @@ import catdata.provers.CompletionProver;
 import catdata.provers.CongruenceProver;
 import catdata.provers.FailProver;
 import catdata.provers.FreeProver;
+import catdata.provers.MaedmaxProver;
 import catdata.provers.ProgramProver;
 
 //TODO: aql cache hashcode for term?
@@ -18,7 +19,7 @@ import catdata.provers.ProgramProver;
 public class AqlProver {
 
 	public enum ProverName {
-		auto, monoidal, program, completion, congruence, fail, free
+		auto, monoidal, program, completion, congruence, fail, free, maedmax
 	}
 
 	//these provers say that x = y when that is true when all java symbols are treated as free,
@@ -62,6 +63,11 @@ public class AqlProver {
 				return new KBtoDP<>(js, col1.simplify().second, new CompletionProver<>(col1.toKB().syms.keySet(), ops, col1.simplify().first));
 			case monoidal:
 				return new MonoidalFreeDP<>(js, col1.simplify().second, col1.simplify().first); // use																																					// simplified
+			case maedmax:
+				String exePath = (String) ops.getOrDefault(AqlOption.maedmax_path);
+				Boolean b = (Boolean) ops.getOrDefault(AqlOption.maedmax_allow_empty_sorts_unsafe);
+				return new KBtoDP<>(js, col1.simplify().second, new MaedmaxProver<>(exePath, col1.simplify().first.toKB(), b)); // use																																																		
+				
 			default:
 				throw new RuntimeException("Anomaly: please report");
 			}

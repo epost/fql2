@@ -38,7 +38,7 @@ public class ProcPragma extends Pragma {
 			//	CommandLine.
 				CommandLine cmdLine = CommandLine.parse(cmd);
 				DefaultExecutor executor = new DefaultExecutor();
-				executor.setStreamHandler(new Handler(cmd));
+				executor.setStreamHandler(new ProcHandler(cmd));
 				executor.execute(cmdLine);
 			}
 		} catch (IOException e) {
@@ -51,7 +51,7 @@ public class ProcPragma extends Pragma {
 		return Util.sep(responses, "\n\n--------------\n\n");
 	}
 
-	private class Handler implements ExecuteStreamHandler {
+	private class ProcHandler implements ExecuteStreamHandler {
 		
 		private final String cmd;
 		
@@ -59,7 +59,7 @@ public class ProcPragma extends Pragma {
 	
 		InputStream outs, errs;
 		
-		private Handler(String str) {
+		private ProcHandler(String str) {
 			cmd = str;
 		}
 		

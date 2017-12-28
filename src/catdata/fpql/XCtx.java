@@ -39,7 +39,7 @@ import catdata.fpql.XExp.XSchema;
 import catdata.fqlpp.cat.Category;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.DefunctGlobalOptions;
-import catdata.provers.SemiThue;
+import catdata.provers.Thue;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -78,7 +78,7 @@ public class XCtx<C> implements XObject {
 
 	public boolean saturated = false;
 
-	private SemiThue<C> kb;
+	private Thue<C> kb;
 	final Set<C> ids;
 	final XCtx<C> global;
 	final XCtx<C> schema;
@@ -238,7 +238,7 @@ public class XCtx<C> implements XObject {
 		this.kind = kind;
 	}
 
-	public SemiThue<C> getKB() {
+	public Thue<C> getKB() {
 		// init();
 		return kb;
 	}
@@ -288,7 +288,7 @@ public class XCtx<C> implements XObject {
 			l.add(id);
 			rules.add(new Pair<>(l, new LinkedList<>()));
 		}
-		kb = new SemiThue<>(rules, 32);
+		kb = new Thue<>(rules, 32);
 	}
 
 	private void validate(boolean initial) {
@@ -1030,7 +1030,7 @@ public class XCtx<C> implements XObject {
 	}
 
 	// test for inconsistency here?
-	private static <D> Triple<D, D, List<D>> find_old(SemiThue<D> kb, Triple<D, D, List<D>> tofind,
+	private static <D> Triple<D, D, List<D>> find_old(Thue<D> kb, Triple<D, D, List<D>> tofind,
                                                       Collection<Triple<D, D, List<D>>> cat) {
 		Set<Triple<D, D, List<D>>> ret = new HashSet<>();
 		for (Triple<D, D, List<D>> arr : cat) {
@@ -1557,7 +1557,7 @@ public class XCtx<C> implements XObject {
 	}
 
 	// mutate paths in place
-	private static <C> void extend(SemiThue<C> kb, Collection<Triple<C, C, List<C>>> paths,
+	private static <C> void extend(Thue<C> kb, Collection<Triple<C, C, List<C>>> paths,
                                    Map<C, Pair<C, C>> t, Collection<Triple<C, C, List<C>>> consts) {
 		int iter = 0;
 		for (; iter < DefunctGlobalOptions.debug.fpql.MAX_PATH_LENGTH; iter++) {

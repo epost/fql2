@@ -16,7 +16,7 @@ import catdata.Util;
  */
 public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 
-	private final SemiThue<Chc<Chc<Unit,T>,C>> kb;
+	private final Thue<Chc<Chc<Unit,T>,C>> kb;
 
 	public MonoidalProver(KBTheory<T,C,V> th) {
 		super(th.tys, th.syms, th.eqs);
@@ -41,7 +41,7 @@ public class MonoidalProver<T,C,V> extends DPKB<T,C,V> {
 		for (Triple<Map<V, T>, KBExp<C, V>, KBExp<C, V>> eq : th.eqs) {
 			rules.add(new Pair<>(trans(eq.first, eq.second), trans(eq.first, eq.third)));
 		}
-		kb = new SemiThue<>(rules, -1); 
+		kb = new Thue<>(rules, -1); 
 		kb.complete();
 	}
 	

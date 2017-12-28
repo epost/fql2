@@ -16,7 +16,7 @@ import catdata.Unit;
 import catdata.Util;
 import catdata.fqlpp.FUNCTION;
 import catdata.ide.DefunctGlobalOptions;
-import catdata.provers.SemiThue;
+import catdata.provers.Thue;
 
 //this requires finite denotations (paths always normalized)
 @SuppressWarnings("serial")
@@ -681,7 +681,7 @@ public class Signature<O,A> implements Serializable {
 		for (Eq eq : eqs) {
 			rules.add(new Pair<>(eq.lhs.path, eq.rhs.path));
 		}
-		SemiThue<Edge> kb = new SemiThue<>(rules, 100);
+		Thue<Edge> kb = new Thue<>(rules, 100);
 		for (Path path1 : paths) {
 			for (Path path2 : paths) {
 				if (path1.source.equals(path2.source) && path1.target.equals(path2.target)) {

@@ -127,7 +127,7 @@ public abstract class InstExpImport<Handle, Q>
 					if (errMeansNull) {
 						return objectToSk(sch, null, x, att, sks, extraRepr, shouldJS, errMeansNull);
 					} else {
-						throw new RuntimeException("Error while importing " + rhs + " of class " + rhs.getClass() + " was expecting " + sch.typeSide.js.java_tys.get(ty) + ".  Consider option " + AqlOption.import_null_on_err_unsafe);
+						throw new RuntimeException("On " + x + "." + att + ", error while importing " + rhs + " of " + rhs.getClass() + " was expecting " + sch.typeSide.js.java_tys.get(ty) + ".\n\nConsider option " + AqlOption.import_null_on_err_unsafe);
 				}
 				}
 			} catch (ClassNotFoundException ex) {
@@ -179,6 +179,7 @@ public abstract class InstExpImport<Handle, Q>
 		 fks0 = new Ctx<>();
 		 atts0 = new Ctx<>();
 		 extraRepr = new Ctx<>();
+			En last = null;
 
 		try {
 			Handle h = start(sch);
@@ -219,6 +220,7 @@ public abstract class InstExpImport<Handle, Q>
 				throw new RuntimeException("Unjoined form no longer supported.  To request, contact us.");
 			} else {
 				for (En en : sch.ens) {
+					last = en;
 					Q z = map.get(en.str);
 					//TODO: aql: this check isn't needed
 					//if (z == null) {
@@ -232,7 +234,11 @@ public abstract class InstExpImport<Handle, Q>
 			
 		} catch (Exception exn) {
 			exn.printStackTrace();
-			throw new RuntimeException(exn.getMessage() + "\n\n" + getHelpStr());
+			String pre = "";
+			if (last != null) {
+				pre = "On entity " + last + ", ";
+			}
+			throw new RuntimeException(pre + exn.getMessage() + "\n\n" + getHelpStr());
 		}
 		
 		if (import_as_theory) {

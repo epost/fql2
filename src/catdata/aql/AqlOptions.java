@@ -41,6 +41,8 @@ public final class AqlOptions {
 	//TODO: aql each typeside/instance/etc should make sure only appropriate options are given to it
 
 	public enum AqlOption {
+		maedmax_allow_empty_sorts_unsafe,
+		maedmax_path,
 		gui_sample,
 		gui_sample_size,
 		import_dont_check_closure_unsafe,
@@ -198,6 +200,7 @@ public final class AqlOptions {
 	//@SuppressWarnings("static-method")
 	private static Object getDefault(AqlOption option) {
 		switch (option) {
+		
 		case jdbc_no_distinct_unsafe:
 			return false;
 		case jdbc_export_truncate_after:
@@ -324,11 +327,10 @@ public final class AqlOptions {
 			return false;
 		case eval_use_sql_above:
 			return 16*1024;
-	
-			
-		
-	
-			
+		case maedmax_path:
+			return "/home/ryan/maedmax/maedmax";
+		case maedmax_allow_empty_sorts_unsafe:
+			return false;
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -497,7 +499,11 @@ public final class AqlOptions {
 			return op.getBoolean(map);
 		case gui_sample_size:
 			return op.getInteger(map);
-			default:
+		case maedmax_path:
+			return op.getString(map);
+		case maedmax_allow_empty_sorts_unsafe:
+			return op.getBoolean(map);
+		default:
 			throw new RuntimeException("Anomaly: please report");
 		}
 		

@@ -1,5 +1,22 @@
 package catdata.aql.fdm;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import catdata.Chc;
+import catdata.Ctx;
+import catdata.Pair;
+import catdata.Util;
+import catdata.aql.Algebra;
+import catdata.aql.AqlOptions;
+import catdata.aql.DP;
+import catdata.aql.Instance;
+import catdata.aql.It.ID;
+import catdata.aql.Mapping;
+import catdata.aql.Term;
+import catdata.graph.UnionFind;
+
 public class SigmaChaseAlgebra {
 /*
 <Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
@@ -34,7 +51,7 @@ public class SigmaChaseAlgebra {
 		final Ctx<Att2, Set<Pair<Chc<ID, X>, Term<Ty, Void, Sym, Void, Void, Void, Chc<ID, Y>>>>> atts = new Ctx<>(
 				Util.newSetsFor(F.dst.atts.keySet()));
 
-		//shoudl really be called "no tuples to add"
+		//should really be called "no tuples to add"
 		public boolean isEmpty() {
 			return isEmpty0(m.values()) && isEmpty0(ens.values()) && isEmpty0(tys.values()) && isEmpty0(fks.values())
 					&& isEmpty0(atts.values());
@@ -43,7 +60,7 @@ public class SigmaChaseAlgebra {
 		public void addFrom(Content other) {
 			for (Ty ty : schema().typeSide.tys) {
 				tys.get(ty).addAll(other.tys.get(ty));
-			} /*
+			} 
 			for (Ty ty : schema().typeSide.tys) {
 				idsT.get(ty).addAll(other.idsT.get(ty));
 			}

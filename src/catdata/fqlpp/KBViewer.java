@@ -27,7 +27,7 @@ import catdata.fqlpp.CatExp.Const;
 import catdata.fqlpp.cat.Signature;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
-import catdata.provers.SemiThue;
+import catdata.provers.Thue;
 
 public class KBViewer {
 
@@ -130,7 +130,7 @@ public class KBViewer {
 			rules.add(new Pair<>(eq.lhs.path.stream().map(x -> x.name).collect(Collectors.toList()), 
 					             eq.rhs.path.stream().map(x -> x.name).collect(Collectors.toList())));
 		}
-		SemiThue<String> kb = new SemiThue<>(rules, 16);
+		Thue<String> kb = new Thue<>(rules, 16);
 		kb.complete();
 		return kb.toString();
 	}
