@@ -585,6 +585,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 	@Override
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> M) {
 		ret.addTab("Translate", viewMorphism(M.semantics(), M.src.typeSide.js));
+		ret.addTab("Collage", new CodeTextPanel("", M.collage().toString()));
 		return new Unit();
 	}
 

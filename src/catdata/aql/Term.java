@@ -898,6 +898,12 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 			return sym.toString().toLowerCase() + "(" + Util.sep(l, ",") + ")";
 		}
 		return Util.anomaly();
+	}
+
+
+	@SuppressWarnings("unchecked")
+	public <En> Term<Ty, En, Sym, Fk, Att, Gen, Sk> mapEn() {
+		return (Term<Ty, En, Sym, Fk, Att, Gen, Sk>) this;
 	} 
 	
 //	cnf(associativity_plus,axiom,

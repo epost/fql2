@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -137,6 +138,19 @@ public class Chc<X,Y> implements Serializable /*, Comparable<Chc<X,Y>> */ {
 			throw new RuntimeException("Assertion failed: Chc containing both null");
 		}
 	}
+
+	public static <X,Y> Set<Chc<X, Y>> or(Set<X> xs, Set<Y> ys) {
+		Set<Chc<X,Y>> ret = new HashSet<>();
+		for (X x : xs) {
+			ret.add(Chc.inLeft(x));
+		}
+		for (Y y : ys) {
+			ret.add(Chc.inRight(y));
+		}
+		return ret;
+	}
+
+	
 
 	/*
 	@Override

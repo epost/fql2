@@ -1,10 +1,12 @@
 package catdata.aql;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,6 +19,102 @@ import catdata.Util;
 //apparently iteration of a set is not deterministic between calls, use linkedhashset if need deterministic order
 public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantics {
 	
+	private Schema<Ty,Chc<En1,En2>,Sym,Chc<Chc<Fk1,Fk2>,En1>,Chc<Att1,Att2>> collage;
+	public synchronized Schema<Ty,Chc<En1,En2>,Sym,Chc<Chc<Fk1,Fk2>,En1>,Chc<Att1,Att2>> collage() {
+		if (collage != null) {
+			return collage;
+		}
+		DP<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1, Fk2>,En1>, Chc<Att1, Att2>, Void, Void> dp = new DP<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1, Fk2>,En1>, Chc<Att1, Att2>, Void, Void>() {
+			@Override
+			public String toStringProver() {
+				return Util.anomaly();
+			}
+
+			@Override
+			public boolean eq(Ctx<Var, Chc<Ty, Chc<En1, En2>>> ctx,
+					Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1, Fk2>, En1>, Chc<Att1, Att2>, Void, Void> lhs,
+					Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1, Fk2>, En1>, Chc<Att1, Att2>, Void, Void> rhs) {
+				return Util.anomaly();
+			}
+
+			
+		};
+
+		Set<Chc<En1, En2>> ens2 = Chc.or(src.ens, dst.ens);
+		Map<Chc<Att1, Att2>, Pair<Chc<En1, En2>, Ty>> atts2 = or(src.atts, dst.atts); //TODO aql these don't need to be passed as params
+		Map<Chc<Chc<Fk1,Fk2>,En1>, Pair<Chc<En1, En2>, Chc<En1, En2>>> fks2 = or2(src.fks, dst.fks);
+		Set<Triple<Pair<Var, Chc<En1, En2>>, Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void>, Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void>>> 
+		eqs2 = new HashSet<>();
+		for (Triple<Pair<Var, En1>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>> eq : src.eqs) {
+			eqs2.add(new Triple<>(new Pair<>(eq.first.first, Chc.inLeft(eq.first.second)),eq.second.mapFk(x->Chc.inLeft(Chc.inLeft(x))).mapAtt(x->Chc.inLeft(x)), eq.third.mapFk(x->Chc.inLeft(Chc.inLeft(x))).mapAtt(x->Chc.inLeft(x))));
+		}
+		for (Triple<Pair<Var, En2>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>> eq : dst.eqs) {
+			eqs2.add(new Triple<>(new Pair<>(eq.first.first, Chc.inRight(eq.first.second)),eq.second.mapFk(x->Chc.inLeft(Chc.inRight(x))).mapAtt(x->Chc.inRight(x)), eq.third.mapFk(x->Chc.inLeft(Chc.inRight(x))).mapAtt(x->Chc.inRight(x))));
+		}
+		for (Fk1 a : src.fks.keySet()) {
+			En1 v = src.fks.get(a).first;
+			En1 w = src.fks.get(a).second;
+			//a.m_w = m_v.F(a)
+			Var x = new Var("x");
+			Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void> lhs
+			= Term.Fk(Chc.inRight(w), Term.Fk(Chc.inLeft(Chc.inLeft(a)), Term.Var(x)));
+			
+			Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void> rhs
+			= Term.Fks(Chc.inLeft(Chc.inRight(fks.get(a).second)), Term.Fk(Chc.inRight(v), Term.Var(x)));
+			
+			eqs2.add(new Triple<>(new Pair<>(x, Chc.inLeft(v)), lhs, rhs));
+		}
+		for (Att1 a : src.atts.keySet()) {
+			En1 v = src.atts.get(a).first;
+			Ty w = src.atts.get(a).second;
+			//a = m_v.F(a)
+			Var x = atts.get(a).first;
+			Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void> lhs
+			= Term.Att(Chc.inLeft(a), Term.Var(x));
+					
+			En2 en2 = atts.get(a).second;
+			Term<Ty, Chc<En1, En2>, Sym, Fk2, Att2, Void, Void> l = atts.get(a).third.mapEn();
+			Function<Fk2,Chc<Chc<Fk1,Fk2>,En1>> f = xx->Chc.inLeft(Chc.inRight(xx));
+			Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void> 
+			term = l.mapFk(f).mapAtt(xx->Chc.inRight(xx));
+			
+			Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void> rhs 
+			= term.subst(Util.singMap(x, Term.Fk(Chc.inRight(v), Term.Var(x))));
+			
+			eqs2.add(new Triple<>(new Pair<>(x, Chc.inLeft(v)), lhs, rhs));
+		}
+		
+		collage = new Schema<Ty,Chc<En1,En2>,Sym,Chc<Chc<Fk1,Fk2>,En1>,Chc<Att1,Att2>>(src.typeSide, ens2, atts2, fks2, eqs2, dp, false);
+		return collage;
+	}
+	
+	private Map<Chc<Att1, Att2>, Pair<Chc<En1, En2>, Ty>> or(Ctx<Att1, Pair<En1, Ty>> xs,
+			Ctx<Att2, Pair<En2, Ty>> ys) {
+		Map<Chc<Att1, Att2>, Pair<Chc<En1, En2>, Ty>> ret = new HashMap<>();
+		for (Att1 att : xs.keySet()) {
+			ret.put(Chc.inLeft(att), new Pair<>(Chc.inLeft(xs.get(att).first),xs.get(att).second));
+		}
+		for (Att2 att : ys.keySet()) {
+			ret.put(Chc.inRight(att), new Pair<>(Chc.inRight(ys.get(att).first),ys.get(att).second));
+		}
+		return ret;
+	}
+	
+	private <Att1, Att2> Map<Chc<Chc<Att1, Att2>,En1>, Pair<Chc<En1, En2>, Chc<En1,En2>>> or2(Ctx<Att1, Pair<En1, En1>> xs,
+			Ctx<Att2, Pair<En2, En2>> ys) {
+		Map<Chc<Chc<Att1, Att2>,En1>, Pair<Chc<En1, En2>, Chc<En1,En2>>> ret = new HashMap<>();
+		for (Att1 att : xs.keySet()) {
+			ret.put(Chc.inLeft(Chc.inLeft(att)), new Pair<>(Chc.inLeft(xs.get(att).first),Chc.inLeft(xs.get(att).second)));
+		}
+		for (Att2 att : ys.keySet()) {
+			ret.put(Chc.inLeft(Chc.inRight(att)), new Pair<>(Chc.inRight(ys.get(att).first),Chc.inRight(ys.get(att).second)));
+		}
+		for (En1 en1 : src.ens) {
+			ret.put(Chc.inRight(en1), new Pair<>(Chc.inLeft(en1), Chc.inRight(ens.get(en1))));
+		}
+		return ret;
+	}
+
 	@Override
 	public int size() {
 		return src.size();
@@ -200,6 +298,7 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantic
 		this.dst = dst;
 		validate(doNotCheckEquations);
 		semantics();
+		//collage();
 	}
 
 	private void validate(boolean doNotCheckEquations) {

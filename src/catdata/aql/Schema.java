@@ -68,11 +68,16 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 						+ " is not a declared entity.");
 			}
 			// check lhs and rhs types match in all eqs
-			Chc<Ty, En> lhs = type(eq.first, eq.second);
-			Chc<Ty, En> rhs = type(eq.first, eq.third);
-			if (!lhs.equals(rhs)) {
-				throw new RuntimeException("In schema equation " + toString(eq) + ", lhs sort is " + lhs.toStringMash()
-						+ " but rhs sort is " + rhs.toStringMash());
+			try {
+				Chc<Ty, En> lhs = type(eq.first, eq.second);
+				Chc<Ty, En> rhs = type(eq.first, eq.third);
+				if (!lhs.equals(rhs)) {
+					throw new RuntimeException(
+							"lhs sort is " + lhs.toStringMash() + " but rhs sort is " + rhs.toStringMash());
+				}
+
+			} catch (Exception ex) {
+				throw new RuntimeException("In schema equation " + toString(eq) + " : " + ex.getMessage());
 			}
 
 		}
@@ -136,7 +141,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 	private Collage<Ty, En, Sym, Fk, Att, Void, Void> collage;
 
 	@SuppressWarnings("unchecked")
-	public final synchronized<Gen, Sk> Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
+	public final synchronized <Gen, Sk> Collage<Ty, En, Sym, Fk, Att, Gen, Sk> collage() {
 		if (collage != null) {
 			if (!collage.gens.isEmpty() || !collage.sks.isEmpty()) {
 				throw new RuntimeException("Anomaly: please report");
@@ -215,21 +220,18 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 			return toString;
 		}
 		List<En> ens0 = Util.alphabetical(ens);
-		
+
 		List<String> obsEqs = eqs.stream().filter(x -> type(x.first, x.second).left)
 				.map(x -> "forall " + x.first.first + ":" + x.first.second + ". " + x.second + " = " + x.third)
 				.collect(Collectors.toList());
 
-		List<String> pathEqs = eqs.stream().filter(x -> !type(x.first, x.second).left)
-				.map(x -> { 
-					List<Fk> l = new LinkedList<>(), r = new LinkedList<>();
-					x.second.toFkList(l);
-					x.third.toFkList(r);
-					
-					return x.first.second + "." + Util.sep(l, ".") + " = " + 
-					x.first.second + "." + Util.sep(r, ".");
-					})
-				.collect(Collectors.toList());
+		List<String> pathEqs = eqs.stream().filter(x -> !type(x.first, x.second).left).map(x -> {
+			List<Fk> l = new LinkedList<>(), r = new LinkedList<>();
+			x.second.toFkList(l);
+			x.third.toFkList(r);
+
+			return x.first.second + "." + Util.sep(l, ".") + " = " + x.first.second + "." + Util.sep(r, ".");
+		}).collect(Collectors.toList());
 
 		List<String> fks0 = new LinkedList<>();
 		for (Fk fk : fks.keySet()) {
@@ -258,7 +260,8 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 	}
 	// TODO aql alphabetical?
 
-	private Map<En, List<Att>> attsFrom = new HashMap<>(); 
+	private Map<En, List<Att>> attsFrom = new HashMap<>();
+
 	public synchronized final Collection<Att> attsFrom(En en) {
 		if (attsFrom.containsKey(en)) {
 			return attsFrom.get(en);
@@ -272,8 +275,9 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 		attsFrom.put(en, l);
 		return l;
 	}
-	
-	private Map<En, List<Fk>> fksFrom = new HashMap<>(); 
+
+	private Map<En, List<Fk>> fksFrom = new HashMap<>();
+
 	public synchronized final Collection<Fk> fksFrom(En en) {
 		if (fksFrom.containsKey(en)) {
 			return fksFrom.get(en);
@@ -287,9 +291,6 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 		fksFrom.put(en, l);
 		return l;
 	}
-	
-
-	
 
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> Term<Ty, En, Sym, Fk, Att, Gen, Sk> fold(List<Fk> fks,
 			Term<Ty, En, Sym, Fk, Att, Gen, Sk> head) {
@@ -298,7 +299,7 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 		}
 		return head;
 	}
-	
+
 	public static String truncate(String x, int truncate) {
 		if (truncate == -1) {
 			return x;
@@ -306,33 +307,39 @@ public final class Schema<Ty, En, Sym, Fk, Att> implements Semantics {
 		if (x.length() > truncate) {
 			return x.substring(x.length() - truncate, x.length());
 		}
-		return x;	
+		return x;
 	}
 
 	static int constraint_static = 0;
-	//(k,q,f)  where q is a bunch of drops and then adds and f is the adding of constraints and
-	public Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> toSQL(String prefix, String idTy, String idCol, int truncate, Function<Fk, String> fun, int vlen) {
+
+	// (k,q,f) where q is a bunch of drops and then adds and f is the adding of
+	// constraints and
+	public Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> toSQL(String prefix, String idTy,
+			String idCol, int truncate, Function<Fk, String> fun, int vlen) {
 		Map<En, Triple<List<Chc<Fk, Att>>, List<String>, List<String>>> sqlSrcSchs = new HashMap<>();
-		
+
 		for (En en1 : ens) {
 			List<String> l = new LinkedList<>();
 			List<Chc<Fk, Att>> k = new LinkedList<>();
 			l.add(idCol + " " + idTy + " primary key");
 			List<String> f = new LinkedList<>();
 			for (Fk fk1 : fksFrom(en1)) {
-				l.add(		truncate(fun.apply(fk1), truncate) + " " + idTy + " not null ");
+				l.add(truncate(fun.apply(fk1), truncate) + " " + idTy + " not null ");
 				k.add(Chc.inLeft(fk1));
-				f.add("alter table " + 		truncate(prefix + en1, truncate) + " add constraint " + 		truncate(prefix + en1 + fk1 + constraint_static++, truncate) + 
-						" foreign key (" + 		truncate(fun.apply(fk1), truncate) + ") references " + 		truncate(prefix + fks.get(fk1).second, truncate) + "(" + idCol + ");");
+				f.add("alter table " + truncate(prefix + en1, truncate) + " add constraint "
+						+ truncate(prefix + en1 + fk1 + constraint_static++, truncate) + " foreign key ("
+						+ truncate(fun.apply(fk1), truncate) + ") references "
+						+ truncate(prefix + fks.get(fk1).second, truncate) + "(" + idCol + ");");
 			}
 			for (Att att1 : attsFrom(en1)) {
-				//System.out.println("Doing att " + att1);
-				l.add(		truncate(att1.toString(), truncate) + " " + SqlTypeSide.mediate(vlen, atts.get(att1).second.toString())); 
+				// System.out.println("Doing att " + att1);
+				l.add(truncate(att1.toString(), truncate) + " "
+						+ SqlTypeSide.mediate(vlen, atts.get(att1).second.toString()));
 				k.add(Chc.inRight(att1));
 			}
 			String str = "create table " + prefix + en1 + "(" + Util.sep(l, ", ") + ");";
 			List<String> q = new LinkedList<>();
-		//	q.add("drop table if exists " + prefix + en1 + ";");
+			// q.add("drop table if exists " + prefix + en1 + ";");
 			q.add(str);
 			sqlSrcSchs.put(en1, new Triple<>(k, q, f));
 		}

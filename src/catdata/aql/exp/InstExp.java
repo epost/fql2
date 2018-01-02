@@ -23,10 +23,10 @@ import catdata.aql.Instance;
 import catdata.aql.It;
 import catdata.aql.It.ID;
 import catdata.aql.Kind;
+import catdata.aql.Lineage;
 import catdata.aql.Mapping;
 import catdata.aql.Schema;
 import catdata.aql.SigmaLeftKanAlgebra;
-import catdata.aql.SigmaLeftKanAlgebra.Lineage;
 import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.Var;
@@ -1215,7 +1215,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 	}
 	
 	public static final class InstExpSigmaChase<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
-	extends InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Ty,En2,Sym,Fk2,Att2,Gen,Sk>, Chc<Sk, Pair<Lineage<Ty,En2,Sym,Fk2,Att2,Gen,Sk>, Att2>>> {
+	extends InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Chc<Sk, Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Att2>>> {
 
 		public final InstExp<Ty,En1,Sym,Fk1,Att1,Gen,Sk,X,Y> I;
 		public final MapExp<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> F;
@@ -1302,7 +1302,7 @@ public abstract class InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> extends Exp<Instance<
 		}
 
 		@Override
-		public Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>, Chc<Sk, Pair<Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>, Att2>>> eval(AqlEnv env) {
+		public Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> eval(AqlEnv env) {
 			Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> f = F.eval(env);
 			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i = I.eval(env);
 			AqlOptions op = new AqlOptions(options, null, env.defaults);
