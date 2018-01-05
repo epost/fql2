@@ -3,6 +3,7 @@ package catdata.aql.exp;
 import java.util.List;
 
 import catdata.Pair;
+import catdata.ParseException;
 import catdata.Program;
 import catdata.Triple;
 import catdata.aql.AqlOptions;
@@ -38,12 +39,14 @@ public abstract class AqlParser {
 
 	public static final String[] opts = AqlOptions.optionNames().toArray(new String[0]);
 
-	public abstract Program<Exp<?>> parseProgram(String s);
+	public abstract Program<Exp<?>> parseProgram(String s) throws ParseException;
 
-	public abstract Triple<List<Pair<String, String>>, RawTerm, RawTerm> parseEq(String s);
+	public abstract Triple<List<Pair<String, String>>, RawTerm, RawTerm> parseEq(String s) throws ParseException;
 
-	public abstract Pair<List<Pair<String, String>>, RawTerm> parseTermInCtx(String s);
+	public abstract Pair<List<Pair<String, String>>, RawTerm> parseTermInCtx(String s) throws ParseException;
 
-	public abstract RawTerm parseTermNoCtx(String s);
+	public abstract RawTerm parseTermNoCtx(String s) throws ParseException;
+	
+	
 	
 }

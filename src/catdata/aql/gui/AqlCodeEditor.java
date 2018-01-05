@@ -5,9 +5,7 @@ import java.awt.GridLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Collection;
 
 import javax.swing.JEditorPane;
@@ -23,8 +21,8 @@ import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.ShorthandCompletion;
-import org.jparsec.error.ParserException;
 
+import catdata.ParseException;
 import catdata.Program;
 import catdata.Util;
 import catdata.aql.Kind;
@@ -32,7 +30,6 @@ import catdata.aql.exp.AqlDoc;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.AqlMultiDriver;
 import catdata.aql.exp.AqlParser;
-import catdata.aql.exp.CombinatorParser;
 import catdata.aql.exp.Exp;
 import catdata.ide.CodeEditor;
 import catdata.ide.CodeTextPanel;
@@ -45,30 +42,38 @@ public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, Aql
 
 	public void format() {
 		String input = topArea.getText();
-		Program<Exp<?>> p = parse(input);
-		if (p == null) {
-			return;
-		}
-		if (input.contains("//") || input.contains("/*")) {
-			int x = JOptionPane.showConfirmDialog(null, "Formatting will erase all comments - continue?", "Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-			if (x != JOptionPane.YES_OPTION) {
+		try {
+			Program<Exp<?>> p = parse(input);
+			if (p == null) {
 				return;
 			}
-		}
-		//order does not contain enums or drops
-		StringBuilder sb = new StringBuilder();
-		for (String k : p.order) {
-			Exp<?> o = p.exps.get(k);
-			if (o.kind().equals(Kind.COMMENT)) {
-				sb.append("md { (* " + o + " *) }\n\n" );
-			} else {
-				sb.append(k + " = " + o.toString() + "\n\n");
+
+			if (input.contains("//") || input.contains("/*")) {
+				int x = JOptionPane.showConfirmDialog(null, "Formatting will erase all comments - continue?",
+						"Continue?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+				if (x != JOptionPane.YES_OPTION) {
+					return;
+				}
 			}
+			// order does not contain enums or drops
+			StringBuilder sb = new StringBuilder();
+			for (String k : p.order) {
+				Exp<?> o = p.exps.get(k);
+				if (o.kind().equals(Kind.COMMENT)) {
+					sb.append("md { (* " + o + " *) }\n\n");
+				} else {
+					sb.append(k + " = " + o.toString() + "\n\n");
+				}
+			}
+			topArea.setText(sb.toString().trim());
+			topArea.setCaretPosition(0);
+
+		} catch (Exception ex) {
+			return;
+
 		}
-		topArea.setText(sb.toString().trim());
-		topArea.setCaretPosition(0);
 	}
-	
+
 	@Override
 	public void abortAction() {
 		super.abortAction();
@@ -211,7 +216,7 @@ public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, Aql
 	}
 
 	@Override
-	protected Program<Exp<?>> parse(String program) throws ParserException {
+	protected Program<Exp<?>> parse(String program) throws ParseException {
 		return AqlParser.getParser().parseProgram(program);
 	}
 
@@ -225,13 +230,10 @@ public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, Aql
 	}
 
 	// private String last_str;
-	private Program<Exp<?>> last_prog; //different that env's
+	private Program<Exp<?>> last_prog; // different that env's
 	public AqlEnv last_env;
 	private AqlMultiDriver driver;
 
-	
-
-	
 	@Override
 	protected AqlEnv makeEnv(String str, Program<Exp<?>> init) {
 		driver = new AqlMultiDriver(init, toUpdate, last_env);
@@ -270,7 +272,7 @@ public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, Aql
 
 	@Override
 	protected Collection<String> reservedWords() {
-		Collection<String> ret = Util.union(Util.list(CombinatorParser.ops), Util.list(CombinatorParser.res));
+		Collection<String> ret = Util.union(Util.list(AqlParser.ops), Util.list(AqlParser.res));
 		synchronized (parsed_prog_lock) {
 			if (parsed_prog != null) {
 				ret = Util.union(ret, parsed_prog.exps.keySet());

@@ -131,7 +131,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 				z = RawTerm.infer2(y.first, y.second, y.second, m.src(), js);
 				Pair<Ctx<Var, Chc<Ty, En2>>, Term<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2>> a = m.translate(z.first, z.second);
 				output.setText(a.first.toString() + a.second);
-			} catch (RuntimeException ex) {
+			} catch (Exception ex) {
 				ex.printStackTrace();
 				output.setText(ex.getMessage());
 			}
@@ -334,7 +334,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 				= RawTerm.infer2(y.first, y.second, y.third, col, js);
 				boolean isEq = dp.eq(z.first, z.second, z.third);
 				output.setText(Boolean.toString(isEq));
-			} catch (RuntimeException ex) {
+			} catch (Exception ex) {
 				ex.printStackTrace();
 				output.setText(ex.getMessage());
 			}
@@ -345,7 +345,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 				Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> z = RawTerm.infer2(y.first, y.second, y.second, col, js);
 				Term<Ty, En, Sym, Fk, Att, Gen, Sk> w = dp.nf(z.first, z.second);
 				output.setText(w.toString());
-			} catch (RuntimeException ex) {
+			} catch (Exception ex) {
 				ex.printStackTrace();
 				output.setText(ex.getMessage());
 			}

@@ -62,9 +62,11 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
+//import org.jparsec.error.ParserException;
 import org.jparsec.error.ParserException;
 
 import catdata.LineException;
+import catdata.ParseException;
 import catdata.Prog;
 import catdata.Unit;
 import catdata.Util;
@@ -838,7 +840,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 
 	protected abstract Env makeEnv(String program, Progg init);
 
-	protected abstract Progg parse(String program) throws ParserException;
+	protected abstract Progg parse(String program) throws ParseException;
 
 	public void setCaretPos(int p) {
 		try {
@@ -861,7 +863,16 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	protected Progg tryParse(String program) {
 		try {
 			return parse(program);
-		} catch (ParserException e) {
+		} catch (ParseException e) {
+			int col = e.column;
+			int line = e.line;
+
+			moveTo(col, line);
+
+			toDisplay = "Syntax error: " + e.getLocalizedMessage();
+			e.printStackTrace();
+			return null;
+		} catch (ParserException e) { //legacy - for fql, etc
 			int col = e.getLocation().column;
 			int line = e.getLocation().line;
 
@@ -870,7 +881,9 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			toDisplay = "Syntax error: " + e.getLocalizedMessage();
 			e.printStackTrace();
 			return null;
-		} catch (LocException e) {
+		} 
+		
+		catch (LocException e) {
 			setCaretPos(e.loc);
 			toDisplay = "Type error: " + e.getLocalizedMessage();
 			e.printStackTrace();
