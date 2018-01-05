@@ -1,12 +1,41 @@
 package catdata;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import catdata.aql.Lineage;
+import catdata.aql.Term;
+
 public class BinRelMap<X, Y> implements Iterable<Pair<X, Y>> {
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((R == null) ? 0 : R.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof BinRelMap))
+			return false;
+		BinRelMap other = (BinRelMap) obj;
+		if (R == null) {
+			if (other.R != null)
+				return false;
+		} else if (!R.equals(other.R))
+			return false;
+		return true;
+	}
 
 	// does not allow empty sets
 	public class It implements Iterator<Pair<X, Y>> {
@@ -51,7 +80,7 @@ public class BinRelMap<X, Y> implements Iterable<Pair<X, Y>> {
 
 	}
 
-	public LinkedHashMap<X, LinkedHashSet<Y>> R;
+	private LinkedHashMap<X, LinkedHashSet<Y>> R;
 
 	public BinRelMap(Set<Pair<X, Y>> r) {
 		R = Util.toRel(r);
@@ -144,6 +173,19 @@ public class BinRelMap<X, Y> implements Iterable<Pair<X, Y>> {
 	@Override
 	public String toString() {
 		return "BinRelMap [R=" + R + "]";
+	}
+
+	public Collection<X> keySet() {
+		return R.keySet();
+	}
+
+	public Collection<Y> get(
+			X x) {
+		return R.get(x);
+	}
+
+	public boolean containsKey(X x) {
+		return R.containsKey(x);
 	}
 
 }

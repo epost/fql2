@@ -19,7 +19,7 @@ import javax.swing.UIManager;
 import com.google.common.base.Function;
 
 import catdata.Chc;
-import catdata.Util;
+import catdata.ide.GuiUtil;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -91,7 +91,7 @@ class SqlViewer extends JPanel {
 				r++;
 			}
 			
-			JPanel panel = Util.makeTable(BorderFactory.createEmptyBorder(), table.name + " (" + inst.get(table).size() + ")" , rowData, colNames.toArray());
+			JPanel panel = GuiUtil.makeTable(BorderFactory.createEmptyBorder(), table.name + " (" + inst.get(table).size() + ")" , rowData, colNames.toArray());
 			bottom.add(panel, table.name);
 		}
 		

@@ -10,13 +10,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-import catdata.Util;
 import catdata.ide.CodeTextPanel;
+import catdata.ide.GuiUtil;
 
 public class SqlMapper extends JPanel {
 
 	public static void showGuesser() {
-		Util.show(new SqlMapper(), 700, 600, "SQL Mapping Guesser");
+		GuiUtil.show(new SqlMapper(), 700, 600, "SQL Mapping Guesser");
 	}
 
 	private final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "Output", "");

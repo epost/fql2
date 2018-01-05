@@ -32,6 +32,7 @@ import catdata.aql.exp.AqlDoc;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.AqlMultiDriver;
 import catdata.aql.exp.AqlParser;
+import catdata.aql.exp.CombinatorParser;
 import catdata.aql.exp.Exp;
 import catdata.ide.CodeEditor;
 import catdata.ide.CodeTextPanel;
@@ -211,7 +212,7 @@ public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, Aql
 
 	@Override
 	protected Program<Exp<?>> parse(String program) throws ParserException {
-		return AqlParser.parseProgram(program);
+		return AqlParser.getParser().parseProgram(program);
 	}
 
 	@Override
@@ -269,7 +270,7 @@ public final class AqlCodeEditor extends CodeEditor<Program<Exp<?>>, AqlEnv, Aql
 
 	@Override
 	protected Collection<String> reservedWords() {
-		Collection<String> ret = Util.union(Util.list(AqlParser.ops), Util.list(AqlParser.res));
+		Collection<String> ret = Util.union(Util.list(CombinatorParser.ops), Util.list(CombinatorParser.res));
 		synchronized (parsed_prog_lock) {
 			if (parsed_prog != null) {
 				ret = Util.union(ret, parsed_prog.exps.keySet());

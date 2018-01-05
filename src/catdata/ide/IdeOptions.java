@@ -942,7 +942,7 @@ public class IdeOptions {
 			return helpErr;
 		}
 		try (InputStream in = Object.class.getResourceAsStream("/help.txt")) {
-			aboutString = in == null ? helpErr : Util.readFile(in);
+			aboutString = in == null ? helpErr : GuiUtil.readFile(in);
 		} catch (IOException e) {
 			e.printStackTrace();
 			aboutString = aboutErr;

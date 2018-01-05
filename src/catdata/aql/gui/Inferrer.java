@@ -11,7 +11,7 @@ import catdata.Util;
 import catdata.aql.Instance;
 import catdata.aql.Kind;
 import catdata.aql.Schema;
-import catdata.aql.exp.AqlParser;
+import catdata.aql.exp.CombinatorParser;
 
 class Inferrer {
 
@@ -24,7 +24,7 @@ class Inferrer {
 		String repl = " {\n";
 
 		if (k.equals(Kind.MAPPING) || k.equals(Kind.QUERY) || k.equals(Kind.TRANSFORM)) {
-			Pair<String, String> s = AqlParser.parseInfer(in);
+			Pair<String, String> s = CombinatorParser.parseInfer(in);
 			String a = s.first;
 			String b = s.second;
 			switch (k) {
@@ -49,7 +49,7 @@ class Inferrer {
 				break;
 			}
 		} else if (k.equals(Kind.INSTANCE)) {
-			String a = AqlParser.parseInfer1(in);
+			String a = CombinatorParser.parseInfer1(in);
 			repl += inferInstance(editor.last_env.defs.schs.map.get(a));
 		}
 		repl += "\n}";

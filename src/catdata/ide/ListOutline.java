@@ -21,7 +21,7 @@ public class ListOutline<Progg extends Prog, Env, DDisp extends Disp> extends Ou
 			return list;
 		}
 
-		list = Util.makeList();
+		list = GuiUtil.makeList();
 
 		return list;
 	}

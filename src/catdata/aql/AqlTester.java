@@ -8,6 +8,7 @@ import catdata.Program;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.AqlMultiDriver;
 import catdata.aql.exp.AqlParser;
+import catdata.aql.exp.CombinatorParser;
 import catdata.aql.exp.Exp;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
@@ -43,7 +44,7 @@ public class AqlTester {
 		for (String k : progs.keySet()) {
 			try {
 				System.out.println(k);
-				Program<Exp<?>> prog = AqlParser.parseProgram(progs.get(k));
+				Program<Exp<?>> prog = AqlParser.getParser().parseProgram(progs.get(k));
 				String[] toUpdate = new String[] { "" };
 				AqlMultiDriver driver = new AqlMultiDriver(prog, toUpdate, null);
 				driver.start(); //blocks

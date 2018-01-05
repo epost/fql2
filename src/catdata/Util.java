@@ -1,15 +1,5 @@
 package catdata;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -39,30 +29,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTable;
-import javax.swing.JViewport;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.JTextComponent;
-
-import org.apache.commons.collections15.CollectionUtils;
 
 public class Util {
 
@@ -194,67 +160,6 @@ public class Util {
 		return v -> {
 			throw new RuntimeException("Anomaly: please report");
 		};
-	}
-
-	/*
-	 * private static class VoidIter implements Iterator<Void> {
-	 * 
-	 * @Override public boolean hasNext() { return false; }
-	 * 
-	 * @Override public Void next() { throw new
-	 * RuntimeException("Anomaly: please report"); }
-	 * 
-	 * }
-	 */
-	public static class MyTableRowSorter extends TableRowSorter<TableModel> {
-
-		public MyTableRowSorter(TableModel model) {
-			super(model);
-		}
-
-		@Override
-		protected boolean useToString(int c) {
-			return false;
-		}
-
-		AlphanumComparator noc = new AlphanumComparator();
-//		NaturalOrderComparator noc = new NaturalOrderComparator();
-		
-		@Override
-		public Comparator<?> getComparator(int c) {
-			return (o1, o2) -> {
-				if (o1 instanceof Integer && o2 instanceof Integer) {
-					return ((Integer) o1).compareTo((Integer) o2);
-				}
-				return noc.compare(o1.toString(), o2.toString());
-			};
-		}
-	}
-
-	@SuppressWarnings("serial")
-	public static class BoldifyingColumnHeaderRenderer extends JLabel implements TableCellRenderer {
-
-		private final Collection<?> boldify;
-		private final Font normal = UIManager.getFont("TableHeader.font");
-		private final Font bold = normal.deriveFont(Font.BOLD);
-		private final TableCellRenderer r; // = new DefaultTableCellRenderer();
-
-		public BoldifyingColumnHeaderRenderer(Collection<?> boldify, TableCellRenderer r) {
-			this.boldify = boldify;
-			this.r = r;
-		}
-
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-			JLabel ret = (JLabel) r.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			if (boldify.contains(value)) {
-				ret.setFont(bold);
-			} else {
-				ret.setFont(normal);
-			}
-			return ret;
-		}
-
 	}
 
 	public static void assertNotNull(Object... O) {
@@ -521,16 +426,7 @@ public class Util {
 		return s;
 	}
 
-	public static void show(JComponent p, int w, int h, String title) {
-		JFrame f = new JFrame(title);
-		f.setContentPane(p);
-		f.pack();
-		if (w > 0 && h > 0) {
-			f.setSize(new Dimension(w, h));
-		}
-		f.setLocationRelativeTo(null);
-		f.setVisible(true);
-	}
+
 
 	public static List<List<Integer>> multiply_many(List<List<Integer>> l, List<List<List<Integer>>> r) {
 		List<List<Integer>> ret = l;
@@ -672,169 +568,6 @@ public class Util {
 		return ret;
 	}
 
-	private static JPanel makeRowOrCol(List<JComponent> list, int orientation) {
-		if (list.isEmpty()) {
-			JPanel ret = new JPanel();
-			ret.setBorder(BorderFactory.createEmptyBorder());
-			return ret;
-		}
-		JPanel ret = new JPanel(new GridLayout(1, 1));
-		if (list.size() == 1) {
-			ret.add(list.get(0));
-			return ret;
-		}
-		Iterator<JComponent> it = list.iterator();
-		JComponent sofar = it.next();
-		double n = 2;
-		while (it.hasNext()) {
-			JSplitPane jsp = new JSplitPane(orientation);
-			jsp.setResizeWeight(1.0d / n);
-			jsp.add(sofar);
-			jsp.add(it.next());
-			jsp.setDividerSize(2);
-			jsp.setBorder(BorderFactory.createEmptyBorder());
-			sofar = jsp;
-			n++;
-		}
-		ret.add(sofar);
-		return ret;
-	}
-	
-	public static JPanel makeGrid(List<JComponent> list) {
-		JPanel ret = new JPanel(new GridLayout(list.size(), 1));
-		
-		for (JComponent x : list) {
-			JScrollPane jsp = new JScrollPane(x);
-			/*
-			JPanel p = new JPanel(new GridBagLayout());
-			GridBagConstraints c = new GridBagConstraints();
-			c.anchor = GridBagConstraints.FIRST_LINE_START;
-			c.fill=GridBagConstraints.VERTICAL;
-			c.gridx = 0;
-			c.gridy = 0;
-			p.add(jsp, c); */
-			JPanel p = new JPanel(new GridLayout(1,1));
-			p.add(jsp);
-			ret.add(p);
-		}
-
-		JScrollPane jsp = new JScrollPane(ret);
-		JPanel p = new JPanel(new GridLayout(1,1));
-		p.add(jsp);
-		return p;
-	} 
-/*
-	public static JPanel makeGrid(List<JComponent> list) {
-		int n = (int) Math.ceil(Math.sqrt(list.size()));
-
-		List<JComponent> list2 = new LinkedList<>();
-		for (int i = 0; i < list.size(); i += n) {
-			int end = Math.min(list.size(), i + n);
-			list2.add(makeRowOrCol(list.subList(i, end), JSplitPane.HORIZONTAL_SPLIT));
-		}
-
-		JScrollPane jsp = new JScrollPane(makeRowOrCol(list2, JSplitPane.VERTICAL_SPLIT));
-		JPanel ret = new JPanel(new GridLayout(1, 1));
-		ret.add(jsp);
-		return ret;
-	}  */
-
-	/*public static JPanel makeTable(Border b, String border, Object[][] rowData, Object... colNames) {
-		return makeTable(null, b, border, rowData, colNames);
-	}*/
-
-	@SuppressWarnings("serial")
-	public static JPanel makeTable(Border b, String border, Object[][] rowData, Object... colNames) {
-		JTable t = new JTable(rowData, colNames) {
-			@Override
-			public Dimension getPreferredScrollableViewportSize() {
-				Dimension d = getPreferredSize();
-				return new Dimension(d.width, d.height);
-			}
-		};
-		/*if (f != null) {
-			t.setFont(f);
-		}*/
-		JPanel p = new JPanel(new GridLayout(1, 1));
-		TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
-		if (colNames.length > 0) {
-			sorter.toggleSortOrder(0);
-		}
-		t.setRowSorter(sorter);
-		sorter.allRowsChanged();
-		p.add(new JScrollPane(t));
-		
-		for (int row = 0; row < t.getRowCount(); row++) {
-			int rowHeight = t.getRowHeight();
-
-			for (int column = 0; column < t.getColumnCount(); column++) {
-				Component comp = t.prepareRenderer(t.getCellRenderer(row, column), row, column);
-				rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
-			}
-
-			t.setRowHeight(row, rowHeight);
-		}
-
-		Font font = UIManager.getFont("TableHeader.font");
-		p.setBorder(BorderFactory.createTitledBorder(b, border, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, font, Color.black));
-		return p;
-
-	}
-
-	@SuppressWarnings("serial")
-	//TODO aql merge with other makeTable method
-	public static JPanel makeBoldHeaderTable(Collection<String> atts, Border b, String border, Object[][] rowData, String... colNames) {
-		JTable t = new JTable(rowData, colNames) {
-			@Override
-			public Dimension getPreferredScrollableViewportSize() {
-				Dimension d = getPreferredSize();
-				return new Dimension(d.width, d.height);
-			}
-		};
-		/*if (f != null) {
-			t.setFont(f);
-		}*/
-		// PlusMinusCellRenderer r = new PlusMinusCellRenderer();
-		// t.setDefaultRenderer(Object.class, r);
-		// t.setDefaultEditor(Object.class, r);
-		// t.setModel(new NonEditableModel(rowData, colNames));
-		// t.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-		JPanel p = new JPanel(new GridLayout(1, 1));
-		TableRowSorter<?> sorter = new MyTableRowSorter(t.getModel());
-		if (colNames.length > 0) {
-			sorter.toggleSortOrder(0);
-		}
-		t.setRowSorter(sorter);
-		sorter.allRowsChanged();
-		p.add(new JScrollPane(t));
-
-		for (int row = 0; row < t.getRowCount(); row++) {
-			int rowHeight = t.getRowHeight();
-
-			for (int column = 0; column < t.getColumnCount(); column++) {
-				Component comp = t.prepareRenderer(t.getCellRenderer(row, column), row, column);
-				rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
-			}
-
-			t.setRowHeight(row, rowHeight);
-		}
-
-		p.setBorder(BorderFactory.createTitledBorder(b, border));
-		// t.getTableHeader().set
-		for (int i = 0; i < t.getColumnModel().getColumnCount(); i++) {
-			TableColumn col = t.getColumnModel().getColumn(i);
-
-			col.setHeaderRenderer(new BoldifyingColumnHeaderRenderer(atts, t.getTableHeader().getDefaultRenderer()));
-		}
-		
-		Font font = UIManager.getFont("TableHeader.font");
-		p.setBorder(BorderFactory.createTitledBorder(b, border, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, font, Color.black));
-
-
-		return p;
-
-	}
 
 	public static String nice(String s) {
 		return s;
@@ -1199,31 +932,12 @@ public class Util {
 		throw new RuntimeException("Anomaly: please report");
 	}
 
-	public static void centerLineInScrollPane(JTextComponent component)
-	{
-		Container container = SwingUtilities.getAncestorOfClass(JViewport.class, component);
-
-		if (container == null) return;
-
-		try
-		{
-			Rectangle r = component.modelToView(component.getCaretPosition());
-			JViewport viewport = (JViewport)container;
-			int extentHeight = viewport.getExtentSize().height;
-			int viewHeight = viewport.getViewSize().height;
-			if (r == null || viewport == null) {
-				return;
-			}
-			int y = Math.max(0, r.y - ((extentHeight - r.height) / 2));
-			y = Math.min(y, viewHeight - extentHeight);
-
-			viewport.setViewPosition(new Point(0, y));
-		}
-		catch(BadLocationException ble) {}
-	}
+	
 	
 	public static <X, Y> Collection<Object> isect(Collection<X> xs, Collection<Y> ys) {
-		return CollectionUtils.intersection(xs, ys);
+		List<Object> l = new LinkedList<>(xs);
+		l.removeIf(x -> !ys.contains(x));
+		return l;
 	}
 
 	/**
@@ -1285,37 +999,7 @@ public class Util {
 		}
 	}
 
-	public static String readFile(InputStream file) {
-		Util.assertNotNull(file);
-		try (InputStreamReader r = new InputStreamReader(file)) {
-
-			return readFile(r);
-		} catch (IOException e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Could not read from " + file);
-		}
-		return null;
-	}
-
-	public static String readFile(String file) {
-		try (FileReader r = new FileReader(file)) {
-			return readFile(r);
-		} catch (IOException e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Could not read from " + file);
-		}
-		return null;
-	}
-
-	public static String readFile(File file) {
-		try (FileReader r = new FileReader(file)) {
-			return readFile(r);
-		} catch (IOException e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Could not read from " + file);
-		}
-		return null;
-	} 
+	
 	
 	public static <T> Iterable<List<T>> permutationsOf(List<T> l) {
 		return new Iterable<List<T>>() {
@@ -1448,24 +1132,6 @@ public class Util {
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	public static JList<String> makeList() {
-		JList<String> list = new JList<String>() {
-			private static final long serialVersionUID = 1L;
-	
-			@Override
-			public int locationToIndex(Point location) {
-				int index = super.locationToIndex(location);
-				if (index != -1 && !getCellBounds(index, index).contains(location)) {
-					return -1;
-				} else {
-					return index;
-				}
-			}
-		};
-		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		return list;
 	}
 
 	public static <X,Y> boolean containsKey(Set<Pair<X,Y>> set, X x) {

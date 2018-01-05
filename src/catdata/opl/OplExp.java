@@ -41,6 +41,7 @@ import catdata.Util;
 import catdata.fqlpp.cat.FinSet;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.DefunctGlobalOptions;
+import catdata.ide.GuiUtil;
 import catdata.opl.OplParser.DoNotIgnore;
 import catdata.opl.OplQuery.Agg;
 import catdata.opl.OplQuery.Block;
@@ -2974,7 +2975,7 @@ public abstract class OplExp implements OplObject {
 				S2 f = sorts.get(n);
 				rs.add(new Object[] { n, f });
 			}
-			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), "Sorts", rs.toArray(new Object[][] {}), src0 + " (in)", dst0 + " (out)"));
+			list.add(GuiUtil.makeTable(BorderFactory.createEmptyBorder(), "Sorts", rs.toArray(new Object[][] {}), src0 + " (in)", dst0 + " (out)"));
 
 			List<Object[]> rows = new LinkedList<>();
 			for (C1 n : symbols.keySet()) {
@@ -2982,9 +2983,9 @@ public abstract class OplExp implements OplObject {
 				Object[] row = new Object[] { OplTerm.strip(n.toString()), OplTerm.strip("forall " + f.first + ". " + f.second) };
 				rows.add(row);
 			}
-			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), "Symbols", rows.toArray(new Object[][] {}), src0 + " (in)", dst0 + " (out)"));
+			list.add(GuiUtil.makeTable(BorderFactory.createEmptyBorder(), "Symbols", rows.toArray(new Object[][] {}), src0 + " (in)", dst0 + " (out)"));
 
-			return Util.makeGrid(list);
+			return GuiUtil.makeGrid(list);
 		}
 
 		@Override
@@ -3739,7 +3740,7 @@ public abstract class OplExp implements OplObject {
 					list.add(all.get(n));
 				}
 			}
-			return new Pair<>(skipGUI ? null : Util.makeGrid(list), forHtml);
+			return new Pair<>(skipGUI ? null : GuiUtil.makeGrid(list), forHtml);
 		}
 
 		public <V> void validate(OplSig<S, C, V> sig) {
@@ -4303,10 +4304,10 @@ public abstract class OplExp implements OplObject {
 					row[1] = f.get(arg);
 					rows.add(row);
 				}
-				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), n + " (" + rows.size() + ")", rows.toArray(new Object[][] {}), src + " (in)", dst + " (out)"));
+				list.add(GuiUtil.makeTable(BorderFactory.createEmptyBorder(), n + " (" + rows.size() + ")", rows.toArray(new Object[][] {}), src + " (in)", dst + " (out)"));
 			}
 
-			return Util.makeGrid(list);
+			return GuiUtil.makeGrid(list);
 		}
 
 		public OplSetTrans(Map<S, Map<X, X>> sorts, String src, String dst) {

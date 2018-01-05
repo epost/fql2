@@ -51,6 +51,7 @@ import catdata.aql.TypeSide;
 import catdata.aql.Var;
 import catdata.aql.exp.AqlEnv;
 import catdata.aql.exp.AqlParser;
+import catdata.aql.exp.CombinatorParser;
 import catdata.aql.exp.Exp;
 import catdata.aql.exp.InstExpRaw.Gen;
 import catdata.aql.exp.InstExpRaw.Sk;
@@ -61,6 +62,7 @@ import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
 import catdata.graph.DMG;
 import catdata.ide.CodeTextPanel;
+import catdata.ide.GuiUtil;
 import catdata.ide.Split;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -124,7 +126,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 		nf.addActionListener(x -> {
 			try {
-				Pair<List<Pair<String, String>>, RawTerm> y = AqlParser.parseTermInCtx(input.getText());
+				Pair<List<Pair<String, String>>, RawTerm> y = AqlParser.getParser().parseTermInCtx(input.getText());
 				Triple<Ctx<Var, Chc<Ty, En1>>, Term<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1>, Term<Ty, En1, Sym, Fk1, Att1, Gen1, Sk1>> 
 				z = RawTerm.infer2(y.first, y.second, y.second, m.src(), js);
 				Pair<Ctx<Var, Chc<Ty, En2>>, Term<Ty, En2, Sym, Fk2, Att2, Gen2, Sk2>> a = m.translate(z.first, z.second);
@@ -327,7 +329,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		print.addActionListener(x -> output.setText(dp.toStringProver()));
 		eq.addActionListener(x -> {
 			try {
-				Triple<List<Pair<String, String>>, RawTerm, RawTerm> y = AqlParser.parseEq(input.getText());
+				Triple<List<Pair<String, String>>, RawTerm, RawTerm> y = AqlParser.getParser().parseEq(input.getText());
 				Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> z 
 				= RawTerm.infer2(y.first, y.second, y.third, col, js);
 				boolean isEq = dp.eq(z.first, z.second, z.third);
@@ -339,7 +341,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		});
 		nf.addActionListener(x -> {
 			try {
-				Pair<List<Pair<String, String>>, RawTerm> y = AqlParser.parseTermInCtx(input.getText());
+				Pair<List<Pair<String, String>>, RawTerm> y = AqlParser.getParser().parseTermInCtx(input.getText());
 				Triple<Ctx<Var, Chc<Ty, En>>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>, Term<Ty, En, Sym, Fk, Att, Gen, Sk>> z = RawTerm.infer2(y.first, y.second, y.second, col, js);
 				Term<Ty, En, Sym, Fk, Att, Gen, Sk> w = dp.nf(z.first, z.second);
 				output.setText(w.toString());
@@ -374,7 +376,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 					data[i] = row;
 					i++;
 				}
-				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), en + " (" + n + ")", data, header.toArray())); // TODO: aql boldify attributes
+				list.add(GuiUtil.makeTable(BorderFactory.createEmptyBorder(), en + " (" + n + ")", data, header.toArray())); // TODO: aql boldify attributes
 			}
 			Map<Ty,Set<Y1>> z = Util.revS(t.src().algebra().talg().sks.map);
 			for (Ty ty : tys) {
@@ -396,10 +398,10 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 					data[i] = row;
 					i++;
 				}
-				list.add(Util.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + n + ")", data, header.toArray())); // TODO: aql boldify attributes
+				list.add(GuiUtil.makeTable(BorderFactory.createEmptyBorder(), ty + " (" + n + ")", data, header.toArray())); // TODO: aql boldify attributes
 			}
 
-			return Util.makeGrid(list);
+			return GuiUtil.makeGrid(list);
 		}
 	
 	
@@ -488,7 +490,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 			} else {
 				str = en + " (" + x.second.length + ")";
 			}
-			JPanel p = Util.makeBoldHeaderTable(Util.toString(alg.schema().attsFrom(en)), BorderFactory.createEmptyBorder(), str, x.second, x.first.toArray(new String[x.first.size()]));
+			JPanel p = GuiUtil.makeBoldHeaderTable(Util.toString(alg.schema().attsFrom(en)), BorderFactory.createEmptyBorder(), str, x.second, x.first.toArray(new String[x.first.size()]));
 			list.add(p);
 		}
 		
@@ -506,10 +508,10 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 				str = ty + " (" + arr.length + ")";
 			}
 
-			list.add(Util.makeTable(BorderFactory.createEmptyBorder(), str, arr, header.toArray())); // TODO: aql boldify attributes
+			list.add(GuiUtil.makeTable(BorderFactory.createEmptyBorder(), str, arr, header.toArray())); // TODO: aql boldify attributes
 		}
 
-		JComponent c = Util.makeGrid(list);
+		JComponent c = GuiUtil.makeGrid(list);
 		c.setPreferredSize(new Dimension(600,600));
 		return c;
 	}

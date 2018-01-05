@@ -69,7 +69,6 @@ import catdata.Prog;
 import catdata.Unit;
 import catdata.Util;
 import catdata.aql.Kind;
-import catdata.aql.AqlOptions.AqlOption;
 import catdata.aql.exp.LocException;
 
 /**
@@ -130,7 +129,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 	public void showGotoDialog() {
 		JPanel panel = new JPanel(new BorderLayout());
 		
-		JList<String> list = Util.makeList();
+		JList<String> list = GuiUtil.makeList();
 		
 		DefaultListModel<String> model = new DefaultListModel<>();
 		synchronized (parsed_prog_lock) {
@@ -846,7 +845,7 @@ public abstract class CodeEditor<Progg extends Prog, Env, DDisp extends Disp> ex
 			SwingUtilities.invokeLater(() -> {
 				topArea.requestFocusInWindow();
 				topArea.setCaretPosition(p);
-				Util.centerLineInScrollPane(topArea);
+				GuiUtil.centerLineInScrollPane(topArea);
 			});
 			// addToHistory(p); //seems to break lots of stuff
 		} catch (Throwable ex) {

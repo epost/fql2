@@ -55,6 +55,7 @@ import catdata.Triple;
 import catdata.Util;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
+import catdata.ide.GuiUtil;
 import catdata.sql.SqlColumn;
 import catdata.sql.SqlForeignKey;
 import catdata.sql.SqlLoader;
@@ -288,8 +289,8 @@ public class SqlChecker {
 				rhs_out.add(rhsM.get("O_" + tCol));
 			}
 			
-			JPanel inTable = Util.makeTable(BorderFactory.createEmptyBorder(), "Input " + src, new Object[][] { inRow.toArray() }, sCols.toArray());
-			JPanel diffTable = Util.makeTable(BorderFactory.createEmptyBorder(), "Output " + dst, new Object[][] { lhs_out.toArray(), rhs_out.toArray() }, tCols.toArray());
+			JPanel inTable = GuiUtil.makeTable(BorderFactory.createEmptyBorder(), "Input " + src, new Object[][] { inRow.toArray() }, sCols.toArray());
+			JPanel diffTable = GuiUtil.makeTable(BorderFactory.createEmptyBorder(), "Output " + dst, new Object[][] { lhs_out.toArray(), rhs_out.toArray() }, tCols.toArray());
 			JPanel p = new JPanel(new GridLayout(2, 1));
 			p.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), "Mismatch"));
 			p.add(inTable);

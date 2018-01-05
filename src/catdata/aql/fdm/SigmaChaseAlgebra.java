@@ -32,31 +32,20 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 
 	private final Schema<Ty, En1, Sym, Fk1, Att1> A;
 	private final Schema<Ty, En2, Sym, Fk2, Att2> B;
-	public final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
+	private final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
 	private final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> X;
-	public int fresh;
-
-	
-
-	// private final It fr = new It();
-	private int fresh() {
-		return fresh++;
-	}
-
+ 
 	private final int max;
 
 	private final Collage<Ty, En2, Sym, Fk2, Att2, Gen, Sk> col;
-	private Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2,Gen,Sk,X,Y> chase;
+	private Chase<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk,X,Y> chase;
 	
-	//private Ctx<En1Ctx<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>,X> iso2 = new Ctx<>();
-
 	public SigmaChaseAlgebra(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f2,
 			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i2, Collage<Ty, En2, Sym, Fk2, Att2, Gen, Sk> col, int max) {
 		A = f2.src;
 		B = f2.dst;
 		F = f2;
 		X = i2;
-		this.fresh = 0;
 		this.max = max;
 		this.col = col;
 		
@@ -64,55 +53,10 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 			throw new RuntimeException("Chase cannot be used: type algebra is not free");
 		}
 
-		Ctx<Chc<En1, En2>, Set<Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>>>> 
-		ens = new Ctx<>();
-		Ctx<Chc<Chc<Fk1, Fk2>, En1>, Set<Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>>>> 
-		fks = new Ctx<>();
-
-		Ctx<Chc<En1, En2>, Ctx<X, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> iso1 = new Ctx<>();
-		int num = 0;
-		for (En1 en1 : A.ens) {
-			Set<Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>>> s = new HashSet<>();
-			iso1.put(Chc.inLeft(en1), new Ctx<>());
-			for (X x : X.algebra().en(en1)) {
-				int i = num++;
-				Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk> xxx = X.algebra().repr(x).map(Util.voidFn(), Util.voidFn(), xx->xx, Util.voidFn(), xx->xx, Util.voidFn());
-				Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> yyy = F.trans(xxx);
-			/*	Term<Ty, En2, Sym, Chc<Chc<Fk1, Fk2>, En1>, Att2, Gen, Sk>
-				zzz = yyy.mapFk(xx->Chc.inLeft(Chc.inRight(xx)));
-				Term<Ty, En2, Sym, Chc<Chc<Fk1, Fk2>, En1>, Chc<Att1,Att2>, Gen, Sk>
-				aaa = zzz.mapAtt(xx->Chc.inRight(xx));
-				Term<Ty, Chc<En1,En2>, Sym, Chc<Chc<Fk1, Fk2>, En1>, Chc<Att1,Att2>, Gen, Sk>
-				bbb = aaa.mapEn(); */
-				Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>  
-				L = new Lineage<>(i, yyy);
-				iso1.get(Chc.inLeft(en1)).put(x, L);
-				s.add(new Pair<>(L,L));
-			}
-			ens.put(Chc.inLeft(en1), s);
-			fks.put(Chc.inRight(en1), new HashSet<>());
-		}
-		for (En2 en2 : B.ens) {
-			ens.put(Chc.inRight(en2), new HashSet<>());
-			iso1.put(Chc.inRight(en2), new Ctx<>());
-		}
-		for (Fk1 fk1 : A.fks.keySet()) {
-			fks.put(Chc.inLeft(Chc.inLeft(fk1)), new HashSet<>());
-		}
-		for (Fk2 fk2 : B.fks.keySet()) {
-			fks.put(Chc.inLeft(Chc.inRight(fk2)), new HashSet<>());
-		}
+	
+		chase = new Chase<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk,X,Y>(F, X, max);
 		
-		chase = new Chase<>(F, X, max, num);
-		
-		/* for (En2 en2 : B.ens) {
-			ens0.put(en2, new HashSet<>());
-			for (Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>> x : chase.T.ens.get(Chc.inRight(en2))) {
-				ens0.get(en2).add(x.first);
-			}
-			//for (String x : chase.T.)
-			
-		} */
+	
 	
 	
 	}
@@ -146,7 +90,7 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 	public Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>> gen(Gen gen) {
 		X x = X.algebra().gen(gen);
 		En1 en1 = X.type(Term.Gen(gen)).r;
-		return null; //chase.T.iso.get(Chc.inLeft(en1)).get(x);
+		return chase.T.us.get(en1).get(x);
 	}
 
 	
@@ -157,30 +101,9 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 	
 	@Override
 	public synchronized Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>> fk(Fk2 fk2, Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>> x) {
-		return null; //Util.get0(chase.T.fks.get(Chc.inLeft(Chc.inRight(fk2))).R.get(x));
+		return Util.get0(chase.T.fks.get(fk2).get(x));
 	}
 
-/*	@Override
-	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>>>> att(Att2 att, Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>> x) {
-		return reprT0(Chc.inRight(new Pair<>(x, att)));
-	//	return Util.anomaly();
-		// return Util.toMapSafely(theContent.atts.get(att)).get(x);
-	}
-
-	@Override
-	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>>>> sk(Sk sk) {
-		return reprT0(Chc.inLeft(sk));
-	}
-
-	
-	
-	@Override
-	public Term<Void, En2, Void, Fk2, Void, Gen, Void> repr(LLineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>> x) {
-		return Util.anomaly(); //x.t.convert(); //TODO
-	}
-
-	
-*/
 	private Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Att2>>> talg;
 	private final List<Pair<Chc<Sk, Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Att2>>, 
 	Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Att2>>>>> 
@@ -247,8 +170,7 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 	@Override
 	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Att2>>> att(
 			Att2 att, Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>> x) {
-		// TODO Auto-generated method stub
-		return null;
+		return reprT0(Chc.inRight(new Pair<>(x, att)));
 	}
 
 	@Override

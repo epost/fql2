@@ -7,8 +7,15 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.Stroke;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
@@ -28,6 +35,7 @@ import catdata.fpql.XExp.XTransConst;
 import catdata.fpql.XPoly.Block;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.DefunctGlobalOptions;
+import catdata.ide.GuiUtil;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -226,7 +234,7 @@ public class XMapping<C, D> implements XObject {
 				// i++;
 			}
 
-			return Util.makeTable(BorderFactory.createEtchedBorder(), "",
+			return GuiUtil.makeTable(BorderFactory.createEtchedBorder(), "",
 					rowData.toArray(new Object[0][0]), colNames);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -263,12 +271,12 @@ public class XMapping<C, D> implements XObject {
 					rowData[i][1] = Util.sep(k.getValue(), ".");
 					i++;
 				}
-				JPanel tbl = Util.makeTable(BorderFactory.createEtchedBorder(),
+				JPanel tbl = GuiUtil.makeTable(BorderFactory.createEtchedBorder(),
 						id + " (" + map.size() + " rows)", rowData, colNames);
 				grid.add(tbl);
 			}
 
-			return Util.makeGrid(grid);
+			return GuiUtil.makeGrid(grid);
 		} catch (Exception e) {
 			return new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR:\n\n"
 					+ e.getMessage());

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import catdata.Util;
 import catdata.aql.AqlProver.ProverName;
 import catdata.aql.exp.AqlParser;
+import catdata.aql.exp.CombinatorParser;
 import catdata.aql.exp.InstExpRaw.Gen;
 import catdata.aql.exp.InstExpRaw.Sk;
 import catdata.aql.exp.SchExpRaw.Att;
@@ -41,6 +42,7 @@ public final class AqlOptions {
 	//TODO: aql each typeside/instance/etc should make sure only appropriate options are given to it
 
 	public enum AqlOption {
+		chase_style,
 		maedmax_allow_empty_sorts_unsafe,
 		maedmax_path,
 		gui_sample,
@@ -161,7 +163,8 @@ public final class AqlOptions {
 		
 		public static List<Head<Ty, En, Sym, Fk, Att, Gen, Sk>> getPrec(String str, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
 			Util.assertNotNull(str);
-			return AqlParser.parseManyIdent(str).stream().map(x -> RawTerm.toHeadNoPrim(x, col)).collect(Collectors.toList());		
+			
+			return Arrays.asList(str.split("\\s+")).stream().map(x -> RawTerm.toHeadNoPrim(x, col)).collect(Collectors.toList());		
 		}
 		
 		public ProverName getDPName(Map<String, String> map) {
@@ -331,6 +334,8 @@ public final class AqlOptions {
 			return "/home/ryan/maedmax/maedmax";
 		case maedmax_allow_empty_sorts_unsafe:
 			return false;
+		case chase_style:
+			return "leftkan";
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}
@@ -503,6 +508,8 @@ public final class AqlOptions {
 			return op.getString(map);
 		case maedmax_allow_empty_sorts_unsafe:
 			return op.getBoolean(map);
+		case chase_style:
+			return op.getString(map);
 		default:
 			throw new RuntimeException("Anomaly: please report");
 		}

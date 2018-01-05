@@ -50,6 +50,7 @@ import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
 import catdata.ide.Examples;
 import catdata.ide.GUI;
+import catdata.ide.GuiUtil;
 import catdata.ide.Language;
 import easik.Easik;
 import easik.overview.Overview;
@@ -247,7 +248,7 @@ public class ApplicationFrame extends EasikFrame {
 			try {
 				File selFile = File.createTempFile("aql_easik", Language.AQL.fileExtension());
 				FileSaveAction.saveFileAql(getOverview(), selFile);
-				String str = Util.readFile(selFile);
+				String str = GuiUtil.readFile(selFile);
 				if (str == null) {
 					return;
 				}

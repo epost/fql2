@@ -21,6 +21,7 @@ import catdata.Pair;
 import catdata.Triple;
 import catdata.Util;
 import catdata.ide.CodeTextPanel;
+import catdata.ide.GuiUtil;
 import catdata.opl.OplExp.OplInst;
 import catdata.opl.OplExp.OplPres;
 import catdata.opl.OplExp.OplSchema;
@@ -37,7 +38,7 @@ import catdata.sql.SqlType;
 public class SqlToOpl extends JPanel {
 
 	public static void showPanel() {
-		Util.show(new SqlToOpl(), 700, 600, "SQL to OPL");
+		GuiUtil.show(new SqlToOpl(), 700, 600, "SQL to OPL");
 	}
 
 	private final CodeTextPanel output = new CodeTextPanel(BorderFactory.createEtchedBorder(), "OPL Output", "");

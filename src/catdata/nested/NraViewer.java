@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,11 +44,10 @@ import org.jparsec.functors.Tuple4;
 
 import catdata.Pair;
 import catdata.Triple;
-import catdata.Util;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
+import catdata.ide.GuiUtil;
 import catdata.ide.Language;
-import java.awt.HeadlessException;
 
 @SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
 public class NraViewer {
@@ -253,7 +253,7 @@ public class NraViewer {
 				}
 				r++;
 			}
-			JPanel tbl = Util.makeTable(BorderFactory.createEtchedBorder(), e.getKey().toString(), rowData, colNames);
+			JPanel tbl = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), e.getKey().toString(), rowData, colNames);
 			ret.add(tbl);
 		}
 		

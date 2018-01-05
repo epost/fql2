@@ -44,6 +44,7 @@ import catdata.aql.exp.PragmaExp.PragmaExpCheck;
 import catdata.aql.exp.PragmaExp.PragmaExpConsistent;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Disp;
+import catdata.ide.GuiUtil;
 
 //TODO aql suppress instance equations - do not compute/display if not required - maybe make instance an interface
 public final class AqlDisplay implements Disp {
@@ -210,7 +211,7 @@ public final class AqlDisplay implements Disp {
 			}
 		}
 
-		JPanel t = Util.makeTable(BorderFactory.createEmptyBorder(), "", rowData, "instance", "rows", "seconds");
+		JPanel t = GuiUtil.makeTable(BorderFactory.createEmptyBorder(), "", rowData, "instance", "rows", "seconds");
 		JPanel pan = new JPanel(new GridLayout(1, 1));
 		pan.add(new JScrollPane(t));
 		String tsv = "instance\trows\tseconds\n" + Util.sep(l, "\n");

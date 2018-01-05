@@ -801,11 +801,11 @@ public class GUI extends JPanel {
 	}
 */
 	private static void doOpen(File f, Language lang) {
-		String s = Util.readFile(f.getAbsolutePath());
+		String s = GuiUtil.readFile(f.getAbsolutePath());
 		if (s == null) {
 			return;
 		}
-		s = s.replace("\r", "");
+		s = s.replace("\r", ""); //TODO AQL may not be enough the \r make get added by output stream
 		if (lang.equals(Language.EASIK)) {
 			Easik.getInstance().getFrame().getOverview().openOverview(f);
 			return;

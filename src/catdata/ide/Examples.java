@@ -46,7 +46,7 @@ public class Examples {
 						if (ex.isHidden()) {
 							continue;
 						}
-						String s = Util.readFile(ex);
+						String s = GuiUtil.readFile(ex);
 						es0.get(l).add(new Example() {
 
 							@Override
@@ -139,7 +139,7 @@ public class Examples {
 						String s = p.toString().replace("/examples", "examples");
 						if (s.endsWith(l.fileExtension())) {
 							try (InputStream in = ClassLoader.getSystemResourceAsStream(s)) {
-								String text = Util.readFile(in);
+								String text = GuiUtil.readFile(in);
 								Util.assertNotNull(text);
 								
 								list.add(new Example() {

@@ -23,9 +23,9 @@ import javax.swing.table.TableRowSorter;
 
 import catdata.Pair;
 import catdata.Util;
-import catdata.Util.BoldifyingColumnHeaderRenderer;
-import catdata.Util.MyTableRowSorter;
+import catdata.ide.BoldifyingColumnHeaderRenderer;
 import catdata.ide.DefunctGlobalOptions;
+import catdata.ide.MyTableRowSorter;
 import catdata.opl.OplExp.NonEditableModel;
 
 public class JSWrapper {

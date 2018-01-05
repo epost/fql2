@@ -1,6 +1,13 @@
 package catdata.fqlpp;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Paint;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -26,15 +33,13 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 
-import catdata.fqlpp.CatExp.Const;
-import catdata.fqlpp.cat.Signature.Edge;
-import catdata.fqlpp.cat.Signature.Node;
 import com.google.common.base.Function;
 
 import catdata.Pair;
 import catdata.Quad;
 import catdata.Triple;
 import catdata.Util;
+import catdata.fqlpp.CatExp.Const;
 import catdata.fqlpp.cat.Category;
 import catdata.fqlpp.cat.FinCat;
 import catdata.fqlpp.cat.FinSet;
@@ -43,11 +48,14 @@ import catdata.fqlpp.cat.FunCat;
 import catdata.fqlpp.cat.Functor;
 import catdata.fqlpp.cat.Inst;
 import catdata.fqlpp.cat.Signature;
+import catdata.fqlpp.cat.Signature.Edge;
+import catdata.fqlpp.cat.Signature.Node;
 import catdata.fqlpp.cat.Transform;
 import catdata.ide.CodeTextPanel;
+import catdata.ide.DefunctGlobalOptions;
 import catdata.ide.Disp;
 import catdata.ide.GUI;
-import catdata.ide.DefunctGlobalOptions;
+import catdata.ide.GuiUtil;
 //import com.google.common.base.Function;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -112,7 +120,7 @@ public class FqlppDisplay implements Disp {
 				rowData[i++][0] = Util.nice(o.toString());
 			}
 			Object[] colNames = new Object[] { "Element" };
-			JPanel gp = Util.makeTable(BorderFactory.createEtchedBorder(), view.size()
+			JPanel gp = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), view.size()
 					+ " elements", rowData, colNames);
 			px.add("Table", gp);
 		}
@@ -190,7 +198,7 @@ public class FqlppDisplay implements Disp {
 			rowData1[i++][0] = Util.nice(o.toString());
 		}
 		Object[] colNames1 = new Object[] { "Object" };
-		JPanel gp1 = Util.makeTable(BorderFactory.createEtchedBorder(), "Objects ("
+		JPanel gp1 = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), "Objects ("
 				+ view.objects().size() + ")", rowData1, colNames1);
 
 		Object[][] rowData2 = new Object[view.arrows().size()][3];
@@ -202,7 +210,7 @@ public class FqlppDisplay implements Disp {
 			i++;
 		}
 		Object[] colNames2 = new Object[] { "Arrow", "Source", "Target" };
-		JPanel gp2 = Util.makeTable(BorderFactory.createEtchedBorder(), "Arrows ("
+		JPanel gp2 = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), "Arrows ("
 				+ view.arrows().size() + ")", rowData2, colNames2);
 
 		Object[][] rowData3 = new Object[view.objects().size()][2];
@@ -213,7 +221,7 @@ public class FqlppDisplay implements Disp {
 			i++;
 		}
 		Object[] colNames3 = new Object[] { "Object", "Arrow" };
-		JPanel gp3 = Util.makeTable(BorderFactory.createEtchedBorder(), "s ("
+		JPanel gp3 = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), "s ("
 				+ view.objects().size() + ")", rowData3, colNames3);
 
 		Object[][] rowData4 = new Object[view.arrows().size()][2];
@@ -224,7 +232,7 @@ public class FqlppDisplay implements Disp {
 			i++;
 		}
 		Object[] colNames4 = new Object[] { "Arrow", "Object" };
-		JPanel gp4 = Util.makeTable(BorderFactory.createEtchedBorder(), "Sources ("
+		JPanel gp4 = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), "Sources ("
 				+ view.arrows().size() + ")", rowData4, colNames4);
 
 		Object[][] rowData5 = new Object[view.arrows().size()][2];
@@ -235,7 +243,7 @@ public class FqlppDisplay implements Disp {
 			i++;
 		}
 		Object[] colNames5 = new Object[] { "Arrow", "Object" };
-		JPanel gp5 = Util.makeTable(BorderFactory.createEtchedBorder(), "Targets ("
+		JPanel gp5 = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), "Targets ("
 				+ view.arrows().size() + ")", rowData5, colNames5);
 
 		Object[][] rowData6 = new Object[view.compositionSize()][3];
@@ -252,7 +260,7 @@ public class FqlppDisplay implements Disp {
 			}
 		}
 		Object[] colNames6 = new Object[] { "A1", "A2", "A1 ; A2" };
-		JPanel gp6 = Util.makeTable(BorderFactory.createEtchedBorder(), "Composition (" + i + ")",
+		JPanel gp6 = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), "Composition (" + i + ")",
 				rowData6, colNames6);
 
 		gp.add(gp1);
@@ -261,7 +269,7 @@ public class FqlppDisplay implements Disp {
 		gp.add(gp2);
 		gp.add(gp5);
 		gp.add(gp6);
-		return Util.makeGrid(gp);
+		return GuiUtil.makeGrid(gp);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -283,7 +291,7 @@ public class FqlppDisplay implements Disp {
 			}
 			Object[] colNames = new Object[] { unr(env.sets, view.source, "..."),
 					unr(env.sets, view.target, "...") };
-			JPanel gp = Util.makeTable(BorderFactory.createEtchedBorder(), view.source.size()
+			JPanel gp = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), view.source.size()
 					+ " elements in domain, " + view.target.size() + " elements in codomain",
 					rowData, colNames);
 			px.add("Table", gp);
@@ -426,7 +434,7 @@ public class FqlppDisplay implements Disp {
 				i++;
 			}
 			Object[] colNames = new Object[] { "Input", "Output" };
-			JPanel gp1 = Util.makeTable(BorderFactory.createEtchedBorder(), "On Objects ("
+			JPanel gp1 = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), "On Objects ("
 					+ view.source.objects().size() + ")", rowData, colNames);
 
 			Object[][] rowData2 = new Object[view.source.arrows().size()][6];
@@ -442,13 +450,13 @@ public class FqlppDisplay implements Disp {
 			}
 			Object[] colNames2 = new Object[] { "Input", "Source", "Target", "Output", "Source",
 					"Target" };
-			JPanel gp2 = Util.makeTable(BorderFactory.createEtchedBorder(), "On Arrows ("
+			JPanel gp2 = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), "On Arrows ("
 					+ view.source.arrows().size() + ")", rowData2, colNames2);
 
 			gp.add(gp1);
 			gp.add(gp2);
 
-			px.add("Table", Util.makeGrid(gp));
+			px.add("Table", GuiUtil.makeGrid(gp));
 		}
 
 		if (DefunctGlobalOptions.debug.fqlpp.ftr_textual) {
@@ -542,7 +550,7 @@ public class FqlppDisplay implements Disp {
 				i++;
 			}
 			Object[] colNames = new Object[] { "Input", "Output" };
-			JPanel gp1 = Util.makeTable(BorderFactory.createEtchedBorder(), "On Objects ("
+			JPanel gp1 = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), "On Objects ("
 					+ view.source.source.objects().size() + ")", rowData, colNames);
 
 			gp.add(gp1);
@@ -1295,7 +1303,7 @@ public class FqlppDisplay implements Disp {
 				}
 				i++;
 			}
-			JPanel p = Util.makeTable(BorderFactory.createEtchedBorder(), n + " (" + set.size()
+			JPanel p = GuiUtil.makeTable(BorderFactory.createEtchedBorder(), n + " (" + set.size()
 					+ " rows)", rowData, colNames);
 			ret.add(p);
 			mapX.put(n, p);
@@ -1315,12 +1323,12 @@ public class FqlppDisplay implements Disp {
 				j++;
 			}
 
-			JPanel p = Util.makeTable(BorderFactory.createEtchedBorder(),
+			JPanel p = GuiUtil.makeTable(BorderFactory.createEtchedBorder(),
 					t.name + " (" + set.size() + " rows)", rowData, colNames);
 			mapX.put(t.name, p);
 		}
 
-		return new Pair<>(Util.makeGrid(ret), mapX);
+		return new Pair<>(GuiUtil.makeGrid(ret), mapX);
 	}
 
 

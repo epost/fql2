@@ -24,9 +24,9 @@ import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
-import catdata.Util;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.Example;
+import catdata.ide.GuiUtil;
 
 public class SqlLoader extends JPanel {
 
@@ -43,7 +43,7 @@ public class SqlLoader extends JPanel {
 		JPanel ret = new JPanel(new GridLayout(1,1));
 		ret.add(jsp);
 		
-		Util.show(ret, 700, 600, "SQL Loader");
+		GuiUtil.show(ret, 700, 600, "SQL Loader");
 	}
 	
 	public SqlSchema schema;
@@ -77,7 +77,7 @@ public class SqlLoader extends JPanel {
 			output.area.append(instance.toString());
 		}
 		if (showBox.isSelected()) {
-			Util.show(new SqlViewer(Color.RED, schema, instance), 600, 500, "Viewer");
+			GuiUtil.show(new SqlViewer(Color.RED, schema, instance), 600, 500, "Viewer");
 		}
 	}
 	

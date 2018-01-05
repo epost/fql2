@@ -35,7 +35,7 @@ public class Lineage<X> {
 
 	@Override
 	public String toString() {
-		return "[" + t + "]";
+		return "[" + t + " " + i + "]";
 	}
 
 }

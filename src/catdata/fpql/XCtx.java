@@ -39,6 +39,7 @@ import catdata.fpql.XExp.XSchema;
 import catdata.fqlpp.cat.Category;
 import catdata.ide.CodeTextPanel;
 import catdata.ide.DefunctGlobalOptions;
+import catdata.ide.GuiUtil;
 import catdata.provers.Thue;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
@@ -842,12 +843,12 @@ public class XCtx<C> implements XObject {
 					}
 					row++;
 				}
-				JPanel table = Util.makeTable(BorderFactory.createEtchedBorder(),
+				JPanel table = GuiUtil.makeTable(BorderFactory.createEtchedBorder(),
 						c + " (" + src.size() + ") rows", rowData, colNames);
 				grid.add(table);
 			}
 
-			return Util.makeGrid(grid);
+			return GuiUtil.makeGrid(grid);
 
 			// return new FQLTextPanel(BorderFactory.createEtchedBorder(), "",
 			// text);
@@ -982,9 +983,9 @@ public class XCtx<C> implements XObject {
 					}
 					row++;
 				}
-				JPanel table = Util.makeTable(BorderFactory.createEtchedBorder(),
+				JPanel table = GuiUtil.makeTable(BorderFactory.createEtchedBorder(),
 						c + " (" + src.size() + ") rows", rowData, colNames);
-				JPanel table2 = Util.makeTable(BorderFactory.createEtchedBorder(),
+				JPanel table2 = GuiUtil.makeTable(BorderFactory.createEtchedBorder(),
 						c + " (" + src.size() + ") rows", rowData, colNames);
 			//	xgrid.put(c, Integer.toString(www));
 				clx.add(new JScrollPane(table2), Integer.toString(www));
@@ -992,7 +993,7 @@ public class XCtx<C> implements XObject {
 				grid.add(table);
 			}
 
-			return Util.makeGrid(grid);
+			return GuiUtil.makeGrid(grid);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new CodeTextPanel(BorderFactory.createEtchedBorder(), "", "ERROR\n\n"
@@ -2177,7 +2178,7 @@ public class XCtx<C> implements XObject {
 
 		String str = "Attributes for " + abbrPrint(arr.third) + " (" + rowData.length + ")";
 		JPanel ret = new JPanel(new GridLayout(1,1));
-		ret.add(Util.makeTable(BorderFactory.createEmptyBorder(), str, rowData, colNames));
+		ret.add(GuiUtil.makeTable(BorderFactory.createEmptyBorder(), str, rowData, colNames));
 		return ret;
 	}
 
