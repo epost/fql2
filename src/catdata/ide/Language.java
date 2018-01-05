@@ -8,6 +8,7 @@ import catdata.aql.gui.AqlCodeEditor;
 import catdata.fpql.XCodeEditor;
 import catdata.fql.gui.FqlCodeEditor;
 import catdata.fqlpp.FQLPPCodeEditor;
+import catdata.mpl.MplCodeEditor;
 import catdata.opl.OplCodeEditor;
 
 public enum Language {
@@ -18,7 +19,7 @@ public enum Language {
 	FQLPP,
 	FPQL,
 	OPL,
-//	MPL,
+	MPL,
 	AQL;
 	
 	public static Language getDefault() {
@@ -40,7 +41,7 @@ public enum Language {
 		case FQLPP: return "FQL++";
 		case FPQL: return "FPQL";
 		case OPL: return "OPL";
-//		case MPL: return "MPL";
+		case MPL: return "MPL";
 		case AQL: return "AQL";
 		case EASIK: return "EASIK";
 		case SKETCH: return "Sketch";
@@ -56,7 +57,7 @@ public enum Language {
 		case FQLPP: return "+";
 		case FPQL: return "P";
 		case OPL: return "O";
-	//	case MPL: return "M";
+		case MPL: return "M";
 		case AQL: return " ";
 		case EASIK: return "E";
 		case SKETCH: return "S";
@@ -72,7 +73,7 @@ public enum Language {
 		case FQLPP: return "fqlpp";
 		case FPQL: return "fpql";
 		case OPL: return "opl";
-//		case MPL: return "mpl";
+		case MPL: return "mpl";
 		case AQL: return "aql";
 		case EASIK: return "easik";
 		case SKETCH: return "sketch";
@@ -89,7 +90,7 @@ public enum Language {
 		case FQLPP: return new FQLPPCodeEditor(title, id, content);
 		case OPL: return new OplCodeEditor(title, id, content);
 		case FQL: return new FqlCodeEditor(title,id, content);
-	//	case MPL: return new MplCodeEditor(title, id, content);
+		case MPL: return new MplCodeEditor(title, id, content);
 		case AQL: return new AqlCodeEditor(title, id, content);
 		case EASIK: 
 		case SKETCH: 
@@ -117,7 +118,7 @@ public enum Language {
 		case FQLPP: return Examples.getExamples(Language.FQLPP);
 		case OPL: return Examples.getExamples(Language.OPL);
 		case FQL: return Examples.getExamples(Language.FQL);
-//		case MPL: return Examples.getExamples(MplExamples.class);
+		case MPL: return Examples.getExamples(Language.MPL);
 		case AQL: return Examples.getExamples(Language.AQL);
 		case EASIK: return Examples.getExamples(Language.EASIK);
 		case SKETCH: return Examples.getExamples(Language.SKETCH);
