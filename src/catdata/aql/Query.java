@@ -611,7 +611,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 	public final String toString() {
 		String ret = "";
 
-		Map<En2, String> m1 = new HashMap<>();
+		Map<String, String> m1 = new HashMap<>();
 		
 		
 		for (En2 en2 : ens.keySet()) {
@@ -627,14 +627,13 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			}
 			String x = m3.isEmpty() ? "" : " \nattributes\n\t";
 			String y = m2.isEmpty() ? "" : " \nforeign_keys\n\t";
-			m1.put(en2, "{" + ens.get(en2).toString("\nfrom", "where").trim() + x + Util.sep(m3, " -> ", "\n\t") + "\n" + y + Util.sep(m2, " -> ", "\n\t") + "\n}");
+			m1.put("entity " + en2, "{" + ens.get(en2).toString("\nfrom", "where").trim() + x + Util.sep(m3, " -> ", "\n\t") + "\n" + y + Util.sep(m2, " -> ", "\n\t") + "\n}");
 
 //			ret += "\n\nforeign_keys\n\n";
 	//		ret += Util.sep(m2, " -> ", "\n\n");
 
 		}
 		
-		ret += "entities\n";
 		ret += Util.sep(m1, " -> ", "\n\n");
 		
 		return ret;
