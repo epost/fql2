@@ -46,10 +46,19 @@ public final class Mapping<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2> implements Semantic
 		Set<Triple<Pair<Var, Chc<En1, En2>>, Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void>, Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void>>> 
 		eqs2 = new HashSet<>();
 		for (Triple<Pair<Var, En1>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>, Term<Ty, En1, Sym, Fk1, Att1, Void, Void>> eq : src.eqs) {
-			eqs2.add(new Triple<>(new Pair<>(eq.first.first, Chc.inLeft(eq.first.second)),eq.second.mapFk(x->Chc.inLeft(Chc.inLeft(x))).mapAtt(x->Chc.inLeft(x)), eq.third.mapFk(x->Chc.inLeft(Chc.inLeft(x))).mapAtt(x->Chc.inLeft(x))));
+			Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void> 
+			t1 = eq.second.<Chc<En1,En2>>mapEn().mapFk(x->Chc.<Chc<Fk1,Fk2>,En1>inLeft(Chc.inLeft(x))).mapAtt(x->Chc.inLeft(x));
+			Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void> 
+			t2 = eq.third.<Chc<En1,En2>>mapEn().mapFk(x->Chc.<Chc<Fk1,Fk2>,En1>inLeft(Chc.inLeft(x))).mapAtt(x->Chc.inLeft(x));
+			eqs2.add(new Triple<>(new Pair<>(eq.first.first, Chc.inLeft(eq.first.second)), t1, t2));
 		}
 		for (Triple<Pair<Var, En2>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>> eq : dst.eqs) {
-			eqs2.add(new Triple<>(new Pair<>(eq.first.first, Chc.inRight(eq.first.second)),eq.second.mapFk(x->Chc.inLeft(Chc.inRight(x))).mapAtt(x->Chc.inRight(x)), eq.third.mapFk(x->Chc.inLeft(Chc.inRight(x))).mapAtt(x->Chc.inRight(x))));
+			Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void>
+			t1 = eq.second.<Chc<En1,En2>>mapEn().mapFk(x->Chc.<Chc<Fk1,Fk2>,En1>inLeft(Chc.inRight(x))).mapAtt(x->Chc.inRight(x));
+			Term<Ty, Chc<En1, En2>, Sym, Chc<Chc<Fk1,Fk2>,En1>, Chc<Att1, Att2>, Void, Void>
+			t2 = eq.third.<Chc<En1,En2>>mapEn().mapFk(x->Chc.<Chc<Fk1,Fk2>,En1>inLeft(Chc.inRight(x))).mapAtt(x->Chc.inRight(x));
+			
+			eqs2.add(new Triple<>(new Pair<>(eq.first.first, Chc.inRight(eq.first.second)),t1, t2));
 		}
 		for (Fk1 a : src.fks.keySet()) {
 			En1 v = src.fks.get(a).first;
