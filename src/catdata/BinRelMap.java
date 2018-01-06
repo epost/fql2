@@ -188,4 +188,12 @@ public class BinRelMap<X, Y> implements Iterable<Pair<X, Y>> {
 		return R.containsKey(x);
 	}
 
+	public int size() {
+		int i = 0;
+		for (Pair<X, Y> x : this) {
+			i++;
+		}
+		return i;
+	}
+
 }

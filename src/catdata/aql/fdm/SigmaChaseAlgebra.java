@@ -1,7 +1,7 @@
 package catdata.aql.fdm;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -56,13 +56,16 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 	
 		chase = new Chase<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk,X,Y>(F, X, max);
 		
-	
+		for (En2 en2 : B.ens) {
+			Collection<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> s = chase.T.ens.get(en2).keySet();
+			ens0.put(en2, s);
+		}
 	
 	
 	}
 
 	
-	private final Ctx<En2, Set<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>>> ens0 = new Ctx<>();
+	private final Ctx<En2, Collection<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>>> ens0 = new Ctx<>();
 
 
 	@Override
@@ -82,7 +85,7 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 	}
 
 	@Override
-	public Set<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>> en(En2 en) {
+	public Collection<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>> en(En2 en) {
 		return ens0.get(en);
 	}
 
@@ -95,8 +98,8 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 
 	
 	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Att2>>> reprT0(Chc<Sk, Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Att2>> y) {
-     return null;
-		//   return schema().typeSide.js.java_tys.isEmpty() ? simpl(Term.Sk(y)) : schema().typeSide.js.reduce(simpl(Term.Sk(y)));
+		return schema().typeSide.js.java_tys.isEmpty() ? simpl(Term.Sk(y))
+				: schema().typeSide.js.reduce(simpl(Term.Sk(y)));
 	} 
 	
 	@Override
@@ -170,6 +173,7 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 	@Override
 	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>, Att2>>> att(
 			Att2 att, Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>> x) {
+		
 		return reprT0(Chc.inRight(new Pair<>(x, att)));
 	}
 
