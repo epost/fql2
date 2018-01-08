@@ -355,7 +355,13 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 			}
 			Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> replacer2 = replacer;
 			sks_it.remove();
-			eqs = eqs.stream().map(x -> new Eq<>(x.ctx, x.lhs.replaceHead(new Head<>(Term.Sk(sk)), Collections.emptyList(), replacer2), x.rhs.replaceHead(new Head<>(Term.Sk(sk)), Collections.emptyList(), replacer2))).collect(Collectors.toList());
+			
+			List<Eq<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>>> eqs2 = new LinkedList<>();
+			
+			for (Eq<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>> x : eqs) {
+				eqs2.add(new Eq<>(x.ctx, x.lhs.replaceHead(new Head<>(Term.Sk(sk)), Collections.emptyList(), replacer2), x.rhs.replaceHead(new Head<>(Term.Sk(sk)), Collections.emptyList(), replacer2)));
+			}
+			eqs = eqs2;
 			
 			list.add(new Pair<>(sk, replacer));
 		}

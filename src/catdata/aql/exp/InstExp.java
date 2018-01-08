@@ -548,7 +548,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 
 		public final EdsExp<Ty, En, Sym, Fk, Att> eds;
 
-		public final int limit;
+		//public final int limit;
 
 		public final Map<String, String> options;
 
@@ -557,14 +557,10 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			return options;
 		}
 
-		public InstExpChase(EdsExp<Ty, En, Sym, Fk, Att> eds, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i, int limit,
+		public InstExpChase(EdsExp<Ty, En, Sym, Fk, Att> eds, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i, 
 				List<Pair<String, String>> options) {
-			if (limit < 0) {
-				throw new RuntimeException("In chase, expected positive number, received " + i);
-			}
 			I = i;
 			this.eds = eds;
-			this.limit = limit;
 			this.options = Util.toMapSafely(options);
 		}
 
@@ -575,7 +571,6 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((eds == null) ? 0 : eds.hashCode());
 			result = prime * result + ((options == null) ? 0 : options.hashCode());
-			result = prime * result + limit;
 			return result;
 		}
 
@@ -603,14 +598,12 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 					return false;
 			} else if (!options.equals(other.options))
 				return false;
-			if (limit != other.limit)
-				return false;
 			return true;
 		}
 
 		@Override
 		public String toString() {
-			return "chase " + I + " " + eds + " " + limit;
+			return "chase " + I + " " + eds ;
 		}
 
 		@Override
@@ -626,7 +619,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 		@SuppressWarnings("unchecked")
 		@Override
 		public Instance<Ty, En, Sym, Fk, Att, Object, Object, Object, Object> eval(AqlEnv env) {
-			Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret = eds.eval(env).chase(I.eval(env), limit,
+			Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret = eds.eval(env).chase(I.eval(env),
 					new AqlOptions(options, null, env.defaults));
 			return (Instance<Ty, En, Sym, Fk, Att, Object, Object, Object, Object>) ret;
 		}
@@ -1200,7 +1193,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
 		public final MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
 		public final Map<String, String> options;
-		public final Integer max;
+	//	public final Integer max;
 
 		@Override
 		public Map<String, String> options() {
@@ -1213,18 +1206,18 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 		}
 
 		public InstExpSigmaChase(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f,
-				InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options, int max) {
+				InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
 			I = i;
 			F = f;
 			this.options = options;
-			this.max = max;
+		//	this.max = max;
 		}
 
 		@Override
 		public int hashCode() {
 			int prime = 31;
 			int result = 1;
-			result = prime * result + ((max == null) ? 0 : max.hashCode());
+			//result = prime * result + ((max == null) ? 0 : max.hashCode());
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((options == null) ? 0 : options.hashCode());
@@ -1255,11 +1248,6 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 					return false;
 			} else if (!options.equals(other.options))
 				return false;
-			if (max == null) {
-				if (other.max != null)
-					return false;
-			} else if (!max.equals(other.max))
-				return false;
 			return true;
 		}
 
@@ -1282,7 +1270,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			if (!options.isEmpty()) {
 				l = " {\n" + Util.sep(options, " = ", "\n\t") + "\n}";
 			}
-			return "sigma_chase " + F + " " + I + " " + max + l;
+			return "sigma_chase " + F + " " + I;
 		}
 
 		@Override
@@ -1311,15 +1299,15 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			}
 
 			if (type.equals("leftkan")) {
-				SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> alg = new SigmaLeftKanAlgebra<>(
-						f, i, col, max.intValue());
+				SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> 
+				alg = new SigmaLeftKanAlgebra<>(f, i, col);
 
 				return new LiteralInstance<>(alg.schema(), col.gens.map, col.sks.map, eqs, alg, alg,
 						(Boolean) op.getOrDefault(AqlOption.require_consistency),
 						(Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe));
 			} else if (type.equals("parallel")) {
 				SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> alg = new SigmaChaseAlgebra<>(
-						f, i, col, max.intValue());
+						f, i, col);
 
 				return new LiteralInstance<>(alg.schema(), col.gens.map, col.sks.map, eqs, alg, alg,
 						(Boolean) op.getOrDefault(AqlOption.require_consistency),

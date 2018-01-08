@@ -73,8 +73,7 @@ instance I = literal : ST {
 //The three EDs are 'weakly acyclic'.  Thus we know any chase sequence will terminate in polynomial time.
 //J = Dept(cs, null1, null2), Emp(1, cs), Emp(null2, cs)
 //intuitively, null2 = alice's manager id, null3 = alice's manager's name 
-//3 is number of times to iterate the chase
-instance J = chase theEDs I 3
+instance J = chase theEDs I 
 
 command JisOk1 = check theEDs J //verify the chased instance satisfies the EDs
 

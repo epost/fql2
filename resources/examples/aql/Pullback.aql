@@ -99,7 +99,7 @@ constraints pullbackED = literal : Square {
 		c.C_att = a.A_attC
 }
 
-instance L = chase pullbackED K 3
+instance L = chase pullbackED K 
 
 
 

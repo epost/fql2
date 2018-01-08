@@ -152,7 +152,7 @@ instance i9 = coproduct i1 + i1 : s3 { options prover = completion }
 instance i10 = coproduct_sigma (identity s3) i1 (identity s3) i1 : s3 { options prover = completion }
 instance i20 = coproduct_unrestricted i1 + i2 : s3 { options prover = completion }
 instance i11 = coequalize (identity i1) (identity i1) { options prover = completion }
-instance i12 = chase literal : s3 { } i3 1
+instance i12 = chase literal : s3 { } i3 
 instance i15 = anonymize i12
 //random -- see Employees example
 //import_jdbc -- see JDBC example

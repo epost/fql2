@@ -156,13 +156,12 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 
 	private Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
 
-	public Chase(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I,
-			int max) {
+	public Chase(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
 		this.F = F;
 		this.I = I;
 		T = new Content(I);
 		// System.out.println(T.sizes());
-		for (int i = 0; i < max; i++) {
+		for (;;) {
 			boolean changed = step();
 			if (!changed) {
 				return;
@@ -170,7 +169,6 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 			// System.out.println(T.sizes());
 		}
 
-		throw new RuntimeException("No convergence after " + max + " rounds.");
 	}
 
 	private boolean step() {

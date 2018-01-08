@@ -360,6 +360,27 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> implements Comparable<Head<Ty, 
 				return false;
 			}
 			Head<Ty, En, Sym, Fk, Att, Gen, Sk> o = (Head<Ty, En, Sym, Fk, Att, Gen, Sk>) x;
+			if (ty != null) {
+				return (ty.equals(o.ty) && obj.equals(o.obj));
+			}
+			if (sym != null) {
+				return sym.equals(o.sym);
+			}
+			if (fk != null) {
+				return fk.equals(o.fk);
+			}
+			if (att != null) {
+				return att.equals(o.att);
+			}
+			if (gen != null) {
+				return gen.equals(o.gen);
+			}
+			if (sk != null) {
+				return sk.equals(o.sk);
+			}
+			return Util.anomaly();
+			
+			/*
 			return new EqualsBuilder()
 					.append(true, true) //just in case
 					.append(ty, o.ty)
@@ -368,6 +389,6 @@ public class Head<Ty, En, Sym, Fk, Att, Gen, Sk> implements Comparable<Head<Ty, 
 					.append(att, o.att)
 					.append(gen, o.gen)
 					.append(sk, o.sk)
-					.append(obj, o.obj).isEquals();
+					.append(obj, o.obj).isEquals(); */
 		} 
 }

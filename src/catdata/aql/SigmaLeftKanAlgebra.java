@@ -189,13 +189,13 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 
 	// true = success
 	public boolean compute() {
-		for (int i = 0; i < max; i++) {
+		for (;;) {
 			// System.out.println(i + "AQL: " + toString());
 			if (!step()) {
 				return true;
 			}
 		}
-		return false;
+		
 	}
 
 	// beta, delta, gamma
@@ -393,19 +393,18 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 		return ret;
 	}
 
-	private final int max;
+	//private final int max;
 
 	private final Collage<Ty, En2, Sym, Fk2, Att2, Gen, Sk> col;
 
 	public SigmaLeftKanAlgebra(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f2,
-			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i2, Collage<Ty, En2, Sym, Fk2, Att2, Gen, Sk> col,
-			int max) {
+			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i2, Collage<Ty, En2, Sym, Fk2, Att2, Gen, Sk> col) {
 		A = f2.src;
 		B = f2.dst;
 		F = f2;
 		X = i2;
 		this.fresh = 0;
-		this.max = max;
+		//this.max = max;
 		this.col = col;
 
 		if (!X.algebra().hasFreeTypeAlgebra()) {
@@ -452,7 +451,7 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 		 */
 
 		if (!compute()) {
-			throw new RuntimeException("Fixed point not reached after " + max + " generations.  ");
+			throw new RuntimeException("Fixed point not reached");
 		}
 
 		for (Fk2 fk : Pg.keySet()) {

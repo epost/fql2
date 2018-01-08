@@ -266,10 +266,10 @@ public class CombinatorParser extends AqlParser {
 								options.between(token("{"), token("}")).optional())
 						.map(x -> new InstExpSigma(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
 				sigma_chase = Parsers
-						.tuple(token("sigma_chase"), map_ref.lazy(), inst_ref.lazy(), IntegerLiteral.PARSER,
+						.tuple(token("sigma_chase"), map_ref.lazy(), inst_ref.lazy(), 
 								options.between(token("{"), token("}")).optional())
-						.map(x -> new InstExpSigmaChase(x.b, x.c, x.e == null ? new HashMap<>() : Util.toMapSafely(x.e),
-								Integer.parseInt(x.d))),
+						.map(x -> new InstExpSigmaChase(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d)
+								)),
 
 				delta = Parsers.tuple(token("delta"), map_ref.lazy(), inst_ref.lazy())
 						.map(x -> new InstExpDelta(x.b, x.c)),
@@ -283,10 +283,10 @@ public class CombinatorParser extends AqlParser {
 				dom = Parsers.tuple(token("src"), trans_ref.lazy()).map(x -> new InstExpDom(x.b)),
 				cod = Parsers.tuple(token("dst"), trans_ref.lazy()).map(x -> new InstExpCod(x.b)),
 				chase = Parsers
-						.tuple(token("chase"), edsExp(), inst_ref.lazy(), IntegerLiteral.PARSER,
+						.tuple(token("chase"), edsExp(), inst_ref.lazy(), 
 								options.between(token("{"), token("}")).optional())
-						.map(x -> new InstExpChase(x.b, x.c, Integer.parseInt(x.d),
-								x.e == null ? new LinkedList<>() : x.e)),
+						.map(x -> new InstExpChase(x.b, x.c, 
+								x.d == null ? new LinkedList<>() : x.d)),
 
 				coeval = Parsers
 						.tuple(token("coeval"), query_ref.lazy(), inst_ref.lazy(),

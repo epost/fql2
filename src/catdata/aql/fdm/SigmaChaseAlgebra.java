@@ -35,18 +35,15 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 	private final Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
 	private final Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> X;
  
-	private final int max;
-
 	private final Collage<Ty, En2, Sym, Fk2, Att2, Gen, Sk> col;
 	private Chase<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk,X,Y> chase;
 	
 	public SigmaChaseAlgebra(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f2,
-			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i2, Collage<Ty, En2, Sym, Fk2, Att2, Gen, Sk> col, int max) {
+			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i2, Collage<Ty, En2, Sym, Fk2, Att2, Gen, Sk> col) {
 		A = f2.src;
 		B = f2.dst;
 		F = f2;
 		X = i2;
-		this.max = max;
 		this.col = col;
 		
 		if (!X.algebra().hasFreeTypeAlgebra()) {
@@ -54,7 +51,7 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 		}
 
 	
-		chase = new Chase<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk,X,Y>(F, X, max);
+		chase = new Chase<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk,X,Y>(F, X);
 		
 		for (En2 en2 : B.ens) {
 			Collection<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> s = chase.T.ens.get(en2).keySet();

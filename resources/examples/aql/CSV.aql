@@ -171,5 +171,5 @@ instance I2 = literal : T2 {
 }
 
 //set the foreign keys to be the join of att and _id
-instance J2 = chase C I2 6
+instance J2 = chase C I2 
 

@@ -127,10 +127,11 @@ public class Chc<X,Y> implements Serializable /*, Comparable<Chc<X,Y>> */ {
         if (getClass() != obj.getClass())
             return false;
         Chc<?,?> other = (Chc<?,?>) obj;
-       return new EqualsBuilder()
-		.append(left, other.left)
-		.append(l, other.l)
-		.append(r, other.r).isEquals();
+       if (!(left == other.left)) {
+    	   		return false;
+       }
+       return (left && l.equals(other.l)) || ((!left) && r.equals(other.r));
+       
     }
 
 	public void assertNeitherNull() {

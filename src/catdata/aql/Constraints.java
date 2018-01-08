@@ -86,10 +86,7 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 		return Kind.CONSTRAINTS;
 	}
 	
-	public <Gen, Sk, X, Y> Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> chase(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I, int limit, AqlOptions options) {	
-		if (limit < 0) {
-			throw new IllegalArgumentException();
-		}
+	public <Gen, Sk, X, Y> Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> chase(Instance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> I, AqlOptions options) {	
 		for (ED<Ty, En, Sym, Fk, Att> ed : eds) {
 			Frozen<Ty, En, Sym, Fk, Att> f = ed.Q.ens.get(ED.WHICH.FRONT);
 			if (!f.algebra().hasFreeTypeAlgebraOnJava()) {
@@ -101,14 +98,13 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 			}
 		}
 		Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret = I;
-		for (int i = 0; i < limit; i++) {
+		for (;;) {
 			Instance<Ty, En, Sym, Fk, Att, ?, ?, ?, ?> ret2 = step(ret, options);
 			if (ret2 == null) {
 				return ret;
 			}
 			ret = ret2;
 		}		
-		throw new RuntimeException("Iteration limit exceeded.  Last instance had " + ret.algebra().size() + " rows.");
 	}
 
 	// TODO aql needs to be over all eds
