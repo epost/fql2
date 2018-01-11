@@ -228,14 +228,11 @@ public class AqlOutline extends Outline<Program<Exp<?>>, AqlEnv, AqlDisplay> {
 		getComp().setModel(new DefaultTreeModel(makeTree(set, codeEditor.parsed_prog, codeEditor.outline_prefix_kind,
 				codeEditor.outline_alphabetical, codeEditor.outline_types)));
 		tree.setCellRenderer(makeRenderer());
-
 		if (p == null) {
 			return;
 		}
-
 		while (p.hasMoreElements()) {
 			try {
-
 				TreePath path = p.nextElement();
 				if (conv(path) != null) {
 					getComp().expandPath(conv(path));
