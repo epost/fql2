@@ -23,7 +23,7 @@ public class SqlTypeSide extends TypeSide<Ty, Sym> {
 		super(tys(), syms(), eqs(), jts(), jps(), jfs(), ops);
 	}
 	
-	private static Set<Ty> tys() {
+	public static Set<Ty> tys() {
 		return jts().keySet();
 	}
 	

@@ -1,11 +1,11 @@
 package catdata.aql;
 
-public class Lineage<X> {
+public class Lineage<Ty,En,Sym,Fk,Att,Gen,Sk> {
 
 	public final Integer i;
-	public final X t; //Term<Ty,En,Sym,Fk,Att,Gen,Sk> t;
+	public final Term<Ty,En,Sym,Fk,Att,Gen,Sk> t;
 
-	public Lineage(Integer i, /*Term<Ty,En,Sym,Fk,Att,Gen,Sk>*/ X t) {
+	public Lineage(Integer i, Term<Ty,En,Sym,Fk,Att,Gen,Sk> t) {
 		this.i = i;
 		this.t = t;
 	}

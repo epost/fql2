@@ -1188,7 +1188,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 	}
 
 	public static final class InstExpSigmaChase<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> extends
-			InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> {
+			InstExp<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>> {
 
 		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
 		public final MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
@@ -1274,7 +1274,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 		}
 
 		@Override
-		public Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> eval(
+		public Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>> eval(
 				AqlEnv env) {
 			Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f = F.eval(env);
 			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i = I.eval(env);

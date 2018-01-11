@@ -1,5 +1,6 @@
 package catdata.aql;
 
+import java.lang.ref.Reference;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,6 +12,7 @@ import catdata.BinRelMap;
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
+import catdata.Ref;
 import catdata.Triple;
 import catdata.Util;
 import catdata.graph.UnionFind;
@@ -22,11 +24,15 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 	// Schema<Ty,Chc<En1,En2>,Sym,Chc<Chc<Fk1,Fk2>,En1>,Chc<Att1,Att2>> S;
 
 	public class Content {
-		public final Ctx<En2, BinRelMap<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> ens;
-		public final Ctx<Fk2, BinRelMap<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> fks;
+		public final Ctx<En2, BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ens;
+		public final Ctx<Fk2, BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> fks;
 
-		public final Ctx<En1, Ctx<X, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> us;
-		// public Ctx<En,Ctx<Z,Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>>> iso;
+		public final Ctx<En1, Ctx<X, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> us;
+
+		public final Ctx<Ty, BinRelMap<Lineage<Ty, Void, Sym, Void, Void, Void, Y>, Lineage<Ty, Void, Sym, Void, Void, Void, Y>>> tys;
+		public final Ctx<Att2, BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Ty, Void, Sym, Void, Void, Void, Y>>> atts;
+
+		public final Ctx<Ty, Ctx<Y, Lineage<Ty, Void, Sym, Void, Void, Void, Y>>> vs;
 
 		public Content() {
 			ens = new Ctx<>();
@@ -39,31 +45,51 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 				fks.put(fk2, new BinRelMap<>());
 			}
 			for (En1 en1 : F.src.ens) {
-				Ctx<X, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> ctx = new Ctx<>();
-				us.put(en1, ctx);
+				us.put(en1, new Ctx<>());
 			}
-		}
 
-		@Override
-		public String toString() {
-			return "Content [ens=" + ens + ", fks=" + fks + ", us=" + us + "]";
+			tys = new Ctx<>();
+			atts = new Ctx<>();
+			vs = new Ctx<>();
+			for (Ty ty : F.dst.typeSide.tys) {
+				tys.put(ty, new BinRelMap<>());
+			}
+			for (Att2 att : F.dst.atts.keySet()) {
+				atts.put(att, new BinRelMap<>());
+			}
+			for (Ty ty : F.src.typeSide.tys) {
+				vs.put(ty, new Ctx<>());
+			}
 		}
 
 		public void addAll(Content c) {
 			for (En2 en : ens.keySet()) {
-				BinRelMap<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> x = c.ens
+				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> x = c.ens
 						.get(en);
 				ens.get(en).addAll(x);
 			}
 			for (Fk2 fk : fks.keySet()) {
-				BinRelMap<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> x = c.fks
+				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> x = c.fks
 						.get(fk);
 				fks.get(fk).addAll(x);
 			}
 			for (En1 en1 : us.keySet()) {
 				us.get(en1).putAll(c.us.get(en1).map);
 			}
-			// iso.putAll(c.iso.map);
+
+			for (Ty ty : F.src.typeSide.tys) {
+				BinRelMap<Lineage<Ty, Void, Sym, Void, Void, Void, Y>, Lineage<Ty, Void, Sym, Void, Void, Void, Y>> x = c.tys
+						.get(ty);
+				tys.get(ty).addAll(x);
+			}
+			for (Att2 att : atts.keySet()) {
+				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Ty, Void, Sym, Void, Void, Void, Y>> x = c.atts
+						.get(att);
+				atts.get(att).addAll(x);
+			}
+			for (En1 en1 : us.keySet()) {
+				us.get(en1).putAll(c.us.get(en1).map);
+			}
 		}
 
 		public Content(Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
@@ -79,29 +105,45 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 			this.us = new Ctx<>();
 
 			for (En1 en1 : I.schema().ens) {
-				Ctx<X, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> ctx = new Ctx<>();
+				Ctx<X, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> ctx = new Ctx<>();
 				for (X x : I.algebra().en(en1)) {
 					Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> t = F.trans(I.algebra().repr(x).map(Util.voidFn(),
 							Util.voidFn(), q -> q, Util.voidFn(), q -> q, Util.voidFn()));
-					ctx.put(x, new Lineage<>(fresh.next(), t));
+					ctx.put(x, new Lineage<>(fresh.next(), t.convert()));
 				}
 				us.put(en1, ctx);
 			}
 
-			// this.ens = ens.map(x->new BinRelMap<>(x));
-			// this.fks = fks.map(x->new BinRelMap<>(x));
-			// this.iso = iso;
+			this.tys = new Ctx<>();
+			for (Ty ty : F.dst.typeSide.tys) {
+				tys.put(ty, new BinRelMap<>());
+			}
+			this.atts = new Ctx<>();
+			for (Att2 att : F.dst.atts.keySet()) {
+				atts.put(att, new BinRelMap<>());
+			}
+
+			this.vs = new Ctx<>();
+
+			for (Ty ty : I.schema().typeSide.tys) {
+				Ctx<Y, Lineage<Ty, Void, Sym, Void, Void, Void, Y>> ctx = new Ctx<>();
+				for (Y y : I.algebra().talg().sks.keySet()) {
+					ctx.put(y, new Lineage<>(fresh.next(), Term.Sk(y)));
+				}
+				vs.put(ty, ctx);
+			}
 		}
 
-		public Content merge(Ctx<En2, UnionFind<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> ufs) {
+		// TODO aql update
+		public Content merge(Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs) {
 			Content ret = new Content();
 			for (En2 en : F.dst.ens) {
-				for (Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> x : ens
+				for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> x : ens
 						.get(en)) {
 					if (!x.first.equals(x.second)) {
 						Util.anomaly();
 					}
-					Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> n = ufs.get(en).find(x.first);
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n = ufs.get(en).find(x.first);
 					ret.ens.get(en).add(n, n);
 				}
 			}
@@ -109,10 +151,10 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 			for (Fk2 fk : F.dst.fks.keySet()) {
 				En2 a = F.dst.fks.get(fk).first;
 				En2 b = F.dst.fks.get(fk).second;
-				for (Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> x : fks
+				for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> x : fks
 						.get(fk)) {
-					Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> n1 = ufs.get(a).find(x.first);
-					Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> n2 = ufs.get(b).find(x.second);
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n1 = ufs.get(a).find(x.first);
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n2 = ufs.get(b).find(x.second);
 					ret.fks.get(fk).add(n1, n2);
 					// System.out.println("on " + fk + " doing " + x + " is " + n1 + "," + n2);
 				}
@@ -120,7 +162,7 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 			// System.out.println("xxx " + ret);
 			for (En1 en : us.keySet()) {
 				for (X x : us.get(en).keySet()) {
-					Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> n = us.get(en).get(x);
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n = us.get(en).get(x);
 					ret.us.get(en).put(x, ufs.get(F.ens.get(en)).find(n));
 				}
 			}
@@ -133,6 +175,9 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 			String s = "";
 			for (En2 en2 : ens.keySet()) {
 				s += (en2 + ": " + ens.get(en2).size() + ", ");
+			}
+			for (Ty ty : tys.keySet()) {
+				s += (ty + ": " + tys.get(ty).size() + ", ");
 			}
 			return s;
 		}
@@ -156,7 +201,8 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 
 	private Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
 
-	public Chase(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
+	public Chase(Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F,
+			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
 		this.F = F;
 		this.I = I;
 		T = new Content(I);
@@ -173,80 +219,112 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 
 	private boolean step() {
 		Content toAdd = new Content();
-		Ctx<En2, UnionFind<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> ufs = new Ctx<>();
+		Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs = new Ctx<>();
 		for (En2 en : F.dst.ens) {
 			ufs.put(en, new UnionFind<>(new HashSet<>()));
 		}
-		boolean changed = false;
+		Boolean[] changed = new Boolean[] { false }; 
+		
+		makeArrowsTotal(toAdd, changed);
 
-		// a : v -> w
-		for (En2 v : F.dst.ens) {
-			BinRelMap<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> T_v = T.ens
-					.get(v);
-			for (Fk2 a : F.dst.fksFrom(v)) {
+		makeObjectsTotal(toAdd, changed);
 
-				// T_v(x) -> Ey. T_a(x,y)
-				BinRelMap<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> T_a = T.fks
-						.get(a);
-				for (Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x : T_v.keySet()) {
-					if (T_a.get(x) == null || T_a.get(x).isEmpty()) { // latter should be impossible
-						toAdd.fks.get(a).add(x, new Lineage<>(fresh.next(), Term.Fk(a, x.t)));
-						changed = true;
-					}
-				}
-			}
+		moveObjects(toAdd, changed);
+
+		doEqs(toAdd, ufs, changed);
+
+		T.addAll(toAdd);
+
+		makeFunctional(ufs, changed);
+		// System.out.println("E " + changed);
+
+		if (!changed[0]) {
+			return false;
 		}
-		// System.out.println("A " + changed);
-		// a : v -> w
+
+		T = T.merge(ufs);
+
+		return true;
+	}
+
+	public void makeFunctional(Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs,
+			Boolean[] changed) {
 		for (En2 v : F.dst.ens) {
-			BinRelMap<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> T_v = T.ens
-					.get(v);
 			for (Fk2 a : F.dst.fksFrom(v)) {
 
-				// T_v(x) -> Ey. T_a(x,y)
-				BinRelMap<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> T_a = T.fks
-						.get(a);
-
-				// T_a(x,y) -> T_v(x) /\ T_w(y)
+				// T_a(x,y1) /\ T_b(x,y2) -> y2=y1;
 				En2 w = F.dst.fks.get(a).second;
-				BinRelMap<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> T_w = T.ens
-						.get(w);
-				for (Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> xy : T_a) {
-					Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x = xy.first;
-					Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> y = xy.second;
-					if (!T_v.containsKey(x)) {
-						// System.out.println("B " + changed);
-						changed = changed | toAdd.ens.get(v).add(x, x);
-					}
-					if (!T_w.containsKey(y)) {
-						// System.out.println("B2 " + y + " and a=" + a + " and v=" + v + " and w=" + w
-						// + " and x=" + x + " tw = " + T_w);
-						changed = changed | toAdd.ens.get(w).add(y, y);
+				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> T_a = T.fks
+						.get(a);
+
+				for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x : T_a.keySet()) {
+					Collection<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> ys = T_a.get(x);
+					// System.out.println("collection is " + ys);
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> y1 = Util.get0X(ys);
+					for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> y2 : ys) {
+						if (!y1.equals(y2)) {
+							ufs.get(w).union(y1, y2);
+							// System.out.println("equating " + y1 + " = " + y2 + " at " + w);
+
+							changed[0] = true;
+						}
 					}
 				}
 			}
-
 		}
+	}
 
-		// a : a -> F(a)
-		for (En1 a : F.src.ens) {
-			// T_v(x) -> Ey. T_a(x,y)
-			// this is the 'loading' step in the Content constructor
+	public void doEqs(Content toAdd, Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs,
+			Boolean[] changed) {
 
-			// T_a(x,y) -> T_v(x) /\ T_w(y)
-			En2 w = F.ens.get(a);
-			Ctx<X, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> T_a = T.us.get(a);
-			BinRelMap<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> T_w = T.ens
-					.get(w);
-			for (X xy : T_a.keySet()) {
-				Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x = T_a.get(xy);
-				if (!T_w.containsKey(x)) {
-					changed = changed | toAdd.ens.get(w).add(x, x);
+		targetEqs(toAdd, ufs, changed);
+
+		collageEqs(toAdd, ufs, changed);
+	}
+
+	public void collageEqs(Content toAdd, Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs,
+			Boolean[] ref) {
+		for (Fk1 a : F.src.fks.keySet()) {
+			En1 v = F.src.fks.get(a).first;
+			En1 w = F.src.fks.get(a).second;
+			// a.m_w = m_v.F(a)
+
+			for (X x : I.algebra().en(v)) {
+				X a0 = I.algebra().fk(a, x);
+				Lineage<Void, En2, Void, Fk2, Void, Gen, Void> lhs = T.us.get(w).get(a0);
+
+				Lineage<Void, En2, Void, Fk2, Void, Gen, Void> initial = T.us.get(v).get(x);
+				Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> N = Util.singSet(initial);
+				for (Fk2 fk : F.fks.get(a).second) {
+					Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> M = new HashSet<>();
+					for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n : N) {
+						Collection<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> s = T.fks.get(fk).get(n);
+						if (s == null) {
+							s = new LinkedList<>();
+						}
+						M.addAll(s);
+					}
+					N = M;
+				}
+
+				if (!N.equals(Util.singSet(lhs))) {
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n = initial;
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> m = initial;
+					for (Fk2 fk : F.fks.get(a).second) {
+						m = new Lineage<>(fresh.next(), Term.Fk(fk, n.t));
+						toAdd.fks.get(fk).add(n, m);
+						n = m;
+					}
+
+					ufs.get(F.ens.get(w)).union(m, lhs);
+					ref[0] = true;
 				}
 			}
 		}
+	}
 
-		// System.out.println("C " + changed);
+	public void targetEqs(Content toAdd, Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs,
+			Boolean[] changed) {
 		for (Triple<Pair<Var, En2>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>, Term<Ty, En2, Sym, Fk2, Att2, Void, Void>> eq : F.dst.eqs) {
 			Chc<Ty, En2> t = F.dst.type(eq.first, eq.second);
 			if (t.left) {
@@ -257,15 +335,15 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 			List<Fk2> lhs = eq.second.toFkList();
 			List<Fk2> rhs = eq.third.toFkList();
 
-			Set<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> active = new HashSet<>();
-			for (Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> x : T.ens
+			Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> active = new HashSet<>();
+			for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> x : T.ens
 					.get(src)) {
-				Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> initial = x.first;
-				Set<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> N = Util.singSet(x.first);
+				Lineage<Void, En2, Void, Fk2, Void, Gen, Void> initial = x.first;
+				Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> N = Util.singSet(x.first);
 				for (Fk2 fk : lhs) {
-					Set<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> M = new HashSet<>();
-					for (Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> n : N) {
-						Collection<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> s = T.fks.get(fk).get(n);
+					Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> M = new HashSet<>();
+					for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n : N) {
+						Collection<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> s = T.fks.get(fk).get(n);
 						if (s == null) {
 							s = new LinkedList<>();
 						}
@@ -274,11 +352,11 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 					N = M;
 				}
 
-				Set<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> N2 = Util.singSet(x.first);
+				Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> N2 = Util.singSet(x.first);
 				for (Fk2 fk : rhs) {
-					Set<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> M = new HashSet<>();
-					for (Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> n : N2) {
-						Collection<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> s = T.fks.get(fk).get(n);
+					Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> M = new HashSet<>();
+					for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n : N2) {
+						Collection<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> s = T.fks.get(fk).get(n);
 						if (s == null) { // latter should be impossible
 							s = new LinkedList<>();
 						}
@@ -288,119 +366,96 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 				}
 
 				if (!N.equals(N2)) {
-					// System.out.println(N + " and " + N2 + " for initial " + initial);
-					active.add(initial);
-					changed = true;
-				}
-			}
-			// System.out.println("D active " + active.size() + " and actual " +
-			// T.ens.get(src).size());
-			for (Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x : active) {
-				Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> n = x;
-				Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> m = x;
-				for (Fk2 fk : lhs) {
-					m = new Lineage<>(fresh.next(), Term.Fk(fk, n.t));
-					toAdd.fks.get(fk).add(n, m);
-					n = m;
-				}
-
-				Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> n2 = x;
-				Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> m2 = x;
-				for (Fk2 fk2 : rhs) {
-					m2 = new Lineage<>(fresh.next(), Term.Fk(fk2, n2.t));
-					toAdd.fks.get(fk2).add(n2, m2);
-					n2 = m2;
-				}
-				// System.out.println("equating " + m + " = " + m2 + " at " + dst);
-				ufs.get(dst).union(m, m2);
-			}
-
-		}
-
-	
-		for (Fk1 a : F.src.fks.keySet()) {
-			En1 v = F.src.fks.get(a).first;
-			En1 w = F.src.fks.get(a).second;
-			// a.m_w = m_v.F(a)
-
-		
-			for (X x : I.algebra().en(v)) {
-				X a0 = I.algebra().fk(a, x);
-				Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> lhs = T.us.get(w).get(a0);
-
-//				for (X y : T.us.get(v).keySet()) {
-					Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> initial = T.us.get(v).get(x);
-					Set<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> N = Util.singSet(initial);
-					for (Fk2 fk : F.fks.get(a).second) {
-						Set<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> M = new HashSet<>();
-						for (Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> n : N) {
-							Collection<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> s = T.fks.get(fk).get(n);
-							if (s == null) {
-								s = new LinkedList<>();
-							}
-							M.addAll(s);
-						}
-						N = M;
-					}
-					Set<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> active = new HashSet<>();
-
-					if (!N.equals(Util.singSet(lhs))) {
-				//		 System.out.println(N + " for initial " + initial + " was not " + lhs);
-						active.add(initial);
-					//	changed = true;
-					}
-			//	}
-				// System.out.println("D active " + active.size() + " and actual " +
-				//		 T.us.get(v).keySet().size());
-				 
-				for (Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> y : active) {
-					Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> n = y;
-					Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> m = y;
-					for (Fk2 fk : F.fks.get(a).second) {
+					changed[0] = true;
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n = initial;
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> m = initial;
+					for (Fk2 fk : lhs) {
 						m = new Lineage<>(fresh.next(), Term.Fk(fk, n.t));
 						toAdd.fks.get(fk).add(n, m);
 						n = m;
 					}
 
-				//	System.out.println("equating " + m + " = " + lhs + " at " + F.ens.get(w));
-					ufs.get(F.ens.get(w)).union(m, lhs);
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n2 = initial;
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> m2 = initial;
+					for (Fk2 fk2 : rhs) {
+						m2 = new Lineage<>(fresh.next(), Term.Fk(fk2, n2.t));
+						toAdd.fks.get(fk2).add(n2, m2);
+						n2 = m2;
+					} // System.out.println("equating " + m + " = " + m2 + " at " + dst);
+					ufs.get(dst).union(m, m2);
 				}
 			}
 		}
-		T.addAll(toAdd);
+	}
 
+	public void moveObjects(Content toAdd, Boolean[] changed) {
+		// a : a -> F(a)
+
+		for (En1 a : F.src.ens) {
+			// T_v(x) -> Ey. T_a(x,y)
+			// this is the 'loading' step in the Content constructor
+
+			// T_a(x,y) -> T_v(x) /\ T_w(y)
+			En2 w = F.ens.get(a);
+			Ctx<X, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> T_a = T.us.get(a);
+			BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> T_w = T.ens
+					.get(w);
+			for (X xy : T_a.keySet()) {
+				Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x = T_a.get(xy);
+				if (!T_w.containsKey(x)) {
+					changed[0] = changed[0] | toAdd.ens.get(w).add(x, x);
+				}
+			}
+		}
+	}
+
+	public void makeObjectsTotal(Content toAdd, Boolean[] changed) {
+		// a : v -> w
 		for (En2 v : F.dst.ens) {
+			BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> T_v = T.ens
+					.get(v);
 			for (Fk2 a : F.dst.fksFrom(v)) {
-
-				// T_a(x,y1) /\ T_b(x,y2) -> y2=y1;
-				En2 w = F.dst.fks.get(a).second;
-				BinRelMap<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> T_a = T.fks
+				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> T_a = T.fks
 						.get(a);
 
-				for (Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x : T_a.keySet()) {
-					Collection<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> ys = T_a.get(x);
-					// System.out.println("collection is " + ys);
-					Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> y1 = Util.get0X(ys);
-					for (Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> y2 : ys) {
-						if (!y1.equals(y2)) {
-							ufs.get(w).union(y1, y2);
-							//System.out.println("equating " + y1 + " = " + y2 + " at " + w);
-
-							changed = true;
-						}
+				// T_a(x,y) -> T_v(x) /\ T_w(y)
+				En2 w = F.dst.fks.get(a).second;
+				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> T_w = T.ens
+						.get(w);
+				for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> xy : T_a) {
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x = xy.first;
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> y = xy.second;
+					if (!T_v.containsKey(x)) {
+						changed[0] = changed[0] | toAdd.ens.get(v).add(x, x);
+					}
+					if (!T_w.containsKey(y)) {
+						changed[0] = changed[0] | toAdd.ens.get(w).add(y, y);
 					}
 				}
 			}
+
 		}
-		// System.out.println("E " + changed);
+	}
 
-		if (!changed) {
-			return false;
+	public void makeArrowsTotal(Content toAdd, Boolean[] changed) {
+		// a : v -> w
+		for (En2 v : F.dst.ens) {
+			BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> T_v = T.ens
+					.get(v);
+			for (Fk2 a : F.dst.fksFrom(v)) {
+
+				// T_v(x) -> Ey. T_a(x,y)
+				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> T_a = T.fks
+						.get(a);
+				for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x : T_v.keySet()) {
+					if (T_a.get(x) == null || T_a.get(x).isEmpty()) { // latter should be impossible
+						toAdd.fks.get(a).add(x, new Lineage<>(fresh.next(), Term.Fk(a, x.t)));
+						changed[0] = true;
+					}
+				}
+			}
+
 		}
-
-		T = T.merge(ufs);
-
-		return true;
 	}
 
 }

@@ -23,7 +23,7 @@ import catdata.aql.fdm.InitialAlgebra;
 
 //TODO analyze || behavior - no apparent difference
 public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> extends
-		Algebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>>
+		Algebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>>
 		implements DP<Ty, En2, Sym, Fk2, Att2, Gen, Sk> {
 
 	private static class Path<Ty, En, Sym, Fk, Att> {
@@ -59,7 +59,7 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 		boolean ret = false;
 
 		while (true) {
-			Pair<En2, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> k = gamma0();
+			Pair<En2, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> k = gamma0();
 			if (k == null) {
 				return ret;
 			}
@@ -69,18 +69,18 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 	}
 
 	private static <Ty, En2, Sym, Fk2, Att2, Gen, Sk> void filter(
-			BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> set,
-			Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> d) {
+			BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> set,
+			Lineage<Void, En2, Void, Fk2, Void, Gen, Void> d) {
 		set.removeIf(p -> p.first.equals(d) || p.second.equals(d));
 	}
 
 	private void gamma1(En2 b1,
-			Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> xy) {
+			Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> xy) {
 		if (xy.first.equals(xy.second)) {
 			Sb.get(b1).remove(xy.first, xy.second);
 			return;
 		}
-		Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x, y;
+		Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x, y;
 		if (xy.first.i > xy.second.i) {
 			x = xy.second;
 			y = xy.first;
@@ -93,12 +93,12 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 
 		replace(x, y);
 
-		BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> set0 = new BinRelSet<>(
+		BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> set0 = new BinRelSet<>(
 				new HashSet<>(Sb.get(b1).R));
 		// BinRelSet<Lineage<En2,Fk2,Gen>, Lineage<En2,Fk2,Gen>> set0 = new
 		// BinRelSet<>(Sb.get(b1));
 
-		for (Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> k : Sb
+		for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> k : Sb
 				.get(b1)) {
 			if (k.first.equals(y)) {
 				set0.add(x, k.second);
@@ -111,15 +111,15 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 		Sb.map.put(b1, set0);
 
 		for (Fk2 g : Pg.keySet()) {
-			BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> set = Pg
+			BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> set = Pg
 					.get(g);
-			BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> a = new BinRelSet<>(
+			BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> a = new BinRelSet<>(
 					new HashSet<>());
 			En2 gs = schema().fks.get(g).first;
 			En2 gt = schema().fks.get(g).second;
 
 			if (gs.equals(b1) && gt.equals(b1)) {
-				for (Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> k : set) {
+				for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> k : set) {
 					if (k.first.equals(y) && k.second.equals(y)) {
 						a.add(x, x);
 					}
@@ -131,13 +131,13 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 					}
 				}
 			} else if (gs.equals(b1)) {
-				for (Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> k : set) {
+				for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> k : set) {
 					if (k.first.equals(y) && !k.second.equals(y)) {
 						a.add(x, k.second);
 					}
 				}
 			} else if (gt.equals(b1)) {
-				for (Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> k : set) {
+				for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> k : set) {
 					if (k.second.equals(y) && !k.first.equals(y)) {
 						a.add(k.first, x);
 					}
@@ -148,11 +148,11 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 		}
 	}
 
-	private void replace(Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x,
-			Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> y) {
+	private void replace(Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x,
+			Lineage<Void, En2, Void, Fk2, Void, Gen, Void> y) {
 
-		for (List<Pair<X, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> a : ua.map.values()) {
-			for (Pair<X, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> s : a) {
+		for (List<Pair<X, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> a : ua.map.values()) {
+			for (Pair<X, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> s : a) {
 				if (s.second.equals(y)) {
 					s.second = x;
 				}
@@ -160,13 +160,13 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 		}
 	}
 
-	private Pair<En2, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> gamma0() {
-		for (Entry<En2, BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> c : Sb
+	private Pair<En2, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> gamma0() {
+		for (Entry<En2, BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> c : Sb
 				.entrySet()) {
 			if (c.getValue().isEmpty()) {
 				continue;
 			}
-			for (Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> p0 : c
+			for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> p0 : c
 					.getValue()) {
 				return new Pair<>(c.getKey(), p0);
 			}
@@ -204,9 +204,9 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 		boolean ret = false;
 		for (Fk1 e : A.fks.keySet()) {
 			Path<Ty, En2, Sym, Fk2, Att2> g = new Path<>(F.dst, F.fks.get(e).first, F.fks.get(e).second);
-			BinRelSet<X, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> lhs = new BinRelSet<>(X.algebra().fkAsSet(e))
+			BinRelSet<X, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> lhs = new BinRelSet<>(X.algebra().fkAsSet(e))
 					.compose(new BinRelSet<>(new HashSet<>(ua.get(A.fks.get(e).second))));
-			BinRelSet<X, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> rhs = new BinRelSet<>(
+			BinRelSet<X, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> rhs = new BinRelSet<>(
 					new HashSet<>(ua.get(A.fks.get(e).first))).compose(eval2(g));
 			// System.out.println(lhs);
 			// System.out.println(rhs);
@@ -244,9 +244,9 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 				continue;
 			}
 
-			BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> lhs = eval2(
+			BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> lhs = eval2(
 					new Path<>(B, eq.second, eq.first.second));
-			BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> rhs = eval2(
+			BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> rhs = eval2(
 					new Path<>(B, eq.third, eq.first.second));
 
 			En2 n = nn.r;
@@ -263,11 +263,11 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 	 * Sb.get(n).add(r, l) || ret; } } return ret; }
 	 */
 
-	private <Z> boolean addCoincidences(BinRelSet<Z, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> lhs,
-			BinRelSet<Z, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> rhs, En2 n) {
+	private <Z> boolean addCoincidences(BinRelSet<Z, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> lhs,
+			BinRelSet<Z, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> rhs, En2 n) {
 		boolean ret = false;
-		for (Pair<Z, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> l : lhs) {
-			for (Pair<Z, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> r : rhs) {
+		for (Pair<Z, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> l : lhs) {
+			for (Pair<Z, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> r : rhs) {
 				if (!l.first.equals(r.first)) {
 					continue;
 				}
@@ -281,9 +281,9 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 		return ret;
 	}
 
-	public BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> eval2(
+	public BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> eval2(
 			Path<Ty, En2, Sym, Fk2, Att2> p) {
-		BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> ret = new BinRelSet<>(
+		BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> ret = new BinRelSet<>(
 				Util.refl(Pb.get(p.src)));
 		for (Fk2 e : p.edges) {
 			ret = ret.compose(Pg.get(e));
@@ -305,13 +305,13 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 		return fresh++;
 	}
 
-	private Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Fk2> smallest() {
-		Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Fk2> ret = null;
+	private Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Fk2> smallest() {
+		Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Fk2> ret = null;
 		for (Fk2 g : Pg.keySet()) {
-			BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> pg = Pg
+			BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> pg = Pg
 					.get(g);
-			outer: for (Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x : Pb.get(schema().fks.get(g).first)) {
-				for (Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> p : pg) {
+			outer: for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x : Pb.get(schema().fks.get(g).first)) {
+				for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> p : pg) {
 					if (p.first.equals(x)) {
 						continue outer;
 					}
@@ -337,15 +337,15 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 	 */
 
 	private boolean alpha() {
-		Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Fk2> p = smallest();
+		Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Fk2> p = smallest();
 		if (p == null) {
 			return false;
 		}
-		Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x = p.first;
+		Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x = p.first;
 
 		Fk2 g = p.second;
 		En2 b2 = schema().fks.get(g).second;
-		Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> y = new Lineage<>(fresh(), Term.Fk(p.second, x.t));
+		Lineage<Void, En2, Void, Fk2, Void, Gen, Void> y = new Lineage<>(fresh(), Term.Fk(p.second, x.t));
 
 		Pb.get(b2).add(y);
 		Pg.get(g).add(x, y);
@@ -369,12 +369,12 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 	private boolean delta() {
 		boolean ret = false;
 		for (Fk2 g : B.fks.keySet()) {
-			for (Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x : Pb.get(B.fks.get(g).first)) {
-				Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> y = null;
-				Iterator<Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> it = Pg
+			for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x : Pb.get(B.fks.get(g).first)) {
+				Lineage<Void, En2, Void, Fk2, Void, Gen, Void> y = null;
+				Iterator<Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> it = Pg
 						.get(g).iterator();
 				while (it.hasNext()) {
-					Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> z = it
+					Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> z = it
 							.next();
 					if (!x.equals(z.first)) {
 						continue;
@@ -422,8 +422,8 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 		Set<X> rank = new HashSet<>();
 
 		for (En1 n : A.ens) {
-			List<Pair<X, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> j = new LinkedList<>();
-			Set<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> i = Pb.get(F.ens.get(n));
+			List<Pair<X, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> j = new LinkedList<>();
+			Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> i = Pb.get(F.ens.get(n));
 			for (X v : X.algebra().en(n)) {
 				if (rank.contains(v)) {
 					throw new RuntimeException("Contains non-unique " + v);
@@ -431,8 +431,8 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 				Term<Ty, En2, Sym, Fk2, Att2, Gen, Void> tt = F.trans(X.algebra().repr(v).map(Util.voidFn(),
 						Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Function.identity()));
 
-				Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> ii = new Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>(
-						fresh(), tt.mapGenSk(Function.identity(), Util.voidFn()));
+				Lineage<Void, En2, Void, Fk2, Void, Gen, Void> ii = new Lineage<Void, En2, Void, Fk2, Void, Gen, Void>(
+						fresh(), tt.convert());
 				rank.add(v);
 				j.add(new Pair<>(v, ii));
 				i.add(ii);
@@ -476,10 +476,10 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 	 * BinRelSet<Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>,
 	 * Lineage<Term<Ty,En2,Sym,Fk2,Att2,Gen,Sk>>>> tSb = new Ctx<>();
 	 */
-	public final Ctx<En2, Set<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> Pb = new Ctx<>();
-	public final Ctx<Fk2, BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> Pg = new Ctx<>();
-	public final Ctx<En1, List<Pair<X, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>>> ua = new Ctx<>();
-	private final Ctx<En2, BinRelSet<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> Sb = new Ctx<>();
+	public final Ctx<En2, Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> Pb = new Ctx<>();
+	public final Ctx<Fk2, BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> Pg = new Ctx<>();
+	public final Ctx<En1, List<Pair<X, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>>> ua = new Ctx<>();
+	private final Ctx<En2, BinRelSet<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> Sb = new Ctx<>();
 
 	@Override
 	public boolean eq(Ctx<Var, Chc<Ty, En2>> ctx, Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> lhs,
@@ -498,55 +498,55 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 	}
 
 	@Override
-	public Collection<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> en(En2 en) {
+	public Collection<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> en(En2 en) {
 		return Pb.get(en);
 	}
 
 	@Override
-	public Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> gen(Gen x) {
+	public Lineage<Void, En2, Void, Fk2, Void, Gen, Void> gen(Gen x) {
 		return Util.lookup(ua.get(X.gens().get(x)), X.algebra().gen(x));
 	}
 
-	Map<Fk2, Map<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> fkMap = new HashMap<>();
+	Map<Fk2, Map<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> fkMap = new HashMap<>();
 
-	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> reprT0(
-			Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>> y) {
+	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>> reprT0(
+			Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>> y) {
 		return schema().typeSide.js.java_tys.isEmpty() ? simpl(Term.Sk(y))
 				: schema().typeSide.js.reduce(simpl(Term.Sk(y)));
 	}
 
 	@Override
-	public synchronized Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> fk(Fk2 fk,
-			Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x) {
+	public synchronized Lineage<Void, En2, Void, Fk2, Void, Gen, Void> fk(Fk2 fk,
+			Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x) {
 		// return Util.get0(Pg.get(fk).R.get(x));
 
 		return fkMap.get(fk).get(x);
 	}
 
 	@Override
-	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> att(
-			Att2 att, Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x) {
+	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>> att(
+			Att2 att, Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x) {
 		return reprT0(Chc.inRight(new Pair<>(x, att)));
 		// return Util.anomaly();
 		// return Util.toMapSafely(theContent.atts.get(att)).get(x);
 	}
 
 	@Override
-	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> sk(
+	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>> sk(
 			Sk sk) {
 		return reprT0(Chc.inLeft(sk));
 	}
 
 	@Override
-	public Term<Void, En2, Void, Fk2, Void, Gen, Void> repr(Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x) {
+	public Term<Void, En2, Void, Fk2, Void, Gen, Void> repr(Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x) {
 		return x.t.convert();
 	}
 
-	private Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> talg;
-	private final List<Pair<Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>>>> list = new LinkedList<>();
+	private Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>> talg;
+	private final List<Pair<Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>>>> list = new LinkedList<>();
 
 	@Override
-	public Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> talg() {
+	public Collage<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>> talg() {
 		// this is not simplfy from collage - this is how we get 'reduction' to happen,
 		// by processing the talg.
 		if (talg != null) {
@@ -562,28 +562,28 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 	}
 
 	@Override
-	public String printX(Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>> x) {
+	public String printX(Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x) {
 		// TODO Auto-generated method stub
 		return x.toString();
 	}
 
 	@Override
 	public Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> reprT_protected(
-			Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> y) {
+			Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>> y) {
 		return schema().typeSide.js.java_tys.isEmpty() ? unflatten(simpl(y))
 				: unflatten(schema().typeSide.js.reduce(simpl(y)));
 
 	}
 
 	@Override
-	public String printY(Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>> y) {
+	public String printY(Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>> y) {
 		// TODO Auto-generated method stub
 		return y.toString();
 	}
 
 	// TODO: aql merge with initial algebra
 	private Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk> unflatten(
-			Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> term) {
+			Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>> term) {
 		if (term.obj != null) {
 			return Term.Obj(term.obj, term.ty);
 		} else if (term.sym != null) {
@@ -596,10 +596,10 @@ public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, S
 		throw new RuntimeException("Anomaly: please report");
 	}
 
-	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> simpl(
-			Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>> y) {
+	private Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>> simpl(
+			Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>> y) {
 		// apparently trans can be called before talg()
-		for (Pair<Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>, Att2>>>> t : list) {
+		for (Pair<Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>>> t : list) {
 			y = y.replaceHead(new Head<>(Term.Sk(t.first)), Collections.emptyList(), t.second);
 		}
 		return y;

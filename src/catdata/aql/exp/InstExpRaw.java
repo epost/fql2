@@ -120,7 +120,7 @@ public final class InstExpRaw extends InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, ID,
 			if (obj.getClass() != getClass()) {
 				return false;
 			}
-			Gen rhs = (Gen) obj;
+			Sk rhs = (Sk) obj;
 			return new EqualsBuilder().append(str, rhs.str).isEquals();
 
 		}

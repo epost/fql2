@@ -750,7 +750,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 	}
 	
 	public Pair<List<String>,Map<En2,String>> toSQLViews(String pre, String post, String idCol, String ty) {
-		if (!(src.typeSide instanceof SqlTypeSide)) {
+		if (!(src.typeSide.tys.containsAll(SqlTypeSide.tys()))) {
 			throw new RuntimeException("Not on SQL typeside");
 		}
 		

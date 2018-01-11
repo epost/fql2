@@ -335,7 +335,7 @@ public final class AqlOptions {
 		case maedmax_allow_empty_sorts_unsafe:
 			return false;
 		case chase_style:
-			return "leftkan";
+			return "parallel";
 		default:
 			throw new RuntimeException("Anomaly: please report: "+ option);	
 		}

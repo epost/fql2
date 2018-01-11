@@ -206,7 +206,7 @@ Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 				}
 				
 				Term<Ty, En, Sym, Fk, Att, Gen, Sk> term0 = RawTerm.infer1x(ctx, term, null, required, dcol, "", src0.schema().typeSide.js).second;
-							
+				
 				if (required.left) {
 					Util.putSafely(sks0, new Sk(gen.first), term0.convert());				
 				} else {
