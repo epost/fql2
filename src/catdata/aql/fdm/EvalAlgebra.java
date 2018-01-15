@@ -313,7 +313,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		}
 		Connection conn = null;
 		boolean safe = (I.algebra().talg().sks.isEmpty() && I.algebra().talg().eqs.isEmpty()) || allowUnsafeSql();
-		boolean useSql = I.size() >= minSizeForSql() && safe && (I.schema().typeSide instanceof SqlTypeSide);
+		boolean useSql = I.size() >= minSizeForSql() && safe && (SqlTypeSide.tys().containsAll(I.schema().typeSide.tys));
 		int vlen = (int) options.getOrDefault(AqlOption.varchar_length);
 		if (useSql) {
 			this.Q = q.unnest();

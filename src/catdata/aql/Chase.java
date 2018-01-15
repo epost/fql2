@@ -1,6 +1,5 @@
 package catdata.aql;
 
-import java.lang.ref.Reference;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,7 +11,6 @@ import catdata.BinRelMap;
 import catdata.Chc;
 import catdata.Ctx;
 import catdata.Pair;
-import catdata.Ref;
 import catdata.Triple;
 import catdata.Util;
 import catdata.graph.UnionFind;
@@ -181,6 +179,11 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 			}
 			return s;
 		}
+
+		@Override
+		public String toString() {
+			return "Content [ens=" + ens + ", fks=" + fks + ", us=" + us + "]";
+		}
 	}
 
 	public Content T;
@@ -218,6 +221,7 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 	}
 
 	private boolean step() {
+		
 		Content toAdd = new Content();
 		Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs = new Ctx<>();
 		for (En2 en : F.dst.ens) {
@@ -236,17 +240,18 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 		T.addAll(toAdd);
 
 		makeFunctional(ufs, changed);
-		// System.out.println("E " + changed);
-
+	
 		if (!changed[0]) {
 			return false;
 		}
-
+		
 		T = T.merge(ufs);
+
 
 		return true;
 	}
-
+	static int x = 0;
+	
 	public void makeFunctional(Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs,
 			Boolean[] changed) {
 		for (En2 v : F.dst.ens) {
@@ -307,7 +312,7 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 					N = M;
 				}
 
-				if (!N.equals(Util.singSet(lhs))) {
+				if (!N.contains(lhs)) {
 					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n = initial;
 					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> m = initial;
 					for (Fk2 fk : F.fks.get(a).second) {
@@ -335,7 +340,6 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 			List<Fk2> lhs = eq.second.toFkList();
 			List<Fk2> rhs = eq.third.toFkList();
 
-			Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> active = new HashSet<>();
 			for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> x : T.ens
 					.get(src)) {
 				Lineage<Void, En2, Void, Fk2, Void, Gen, Void> initial = x.first;
@@ -365,8 +369,8 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 					N2 = M;
 				}
 
-				if (!N.equals(N2)) {
-					changed[0] = true;
+				if (Util.isect(N, N2).isEmpty()) {
+						changed[0] = true;
 					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n = initial;
 					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> m = initial;
 					for (Fk2 fk : lhs) {

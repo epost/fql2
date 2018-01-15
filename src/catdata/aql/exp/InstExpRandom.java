@@ -1,7 +1,6 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,21 +12,22 @@ import catdata.Pair;
 import catdata.Util;
 import catdata.aql.AqlOptions;
 import catdata.aql.AqlOptions.AqlOption;
+import catdata.aql.DP;
+import catdata.aql.ImportAlgebra;
 import catdata.aql.Instance;
-import catdata.aql.It.ID;
 import catdata.aql.Kind;
-import catdata.aql.RawTerm;
 import catdata.aql.Schema;
-import catdata.aql.exp.InstExpRaw.Gen;
-import catdata.aql.exp.InstExpRaw.Sk;
+import catdata.aql.Term;
+import catdata.aql.Var;
 import catdata.aql.exp.SchExpRaw.Att;
 import catdata.aql.exp.SchExpRaw.En;
 import catdata.aql.exp.SchExpRaw.Fk;
 import catdata.aql.exp.TyExpRaw.Sym;
 import catdata.aql.exp.TyExpRaw.Ty;
+import catdata.aql.fdm.SaturatedInstance;
 
 public  final class InstExpRandom
-extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw {
+extends InstExp<Ty,En,Sym,Fk,Att,Pair<Integer,En>, Pair<Integer, Att>,Pair<Integer,En>,Pair<Integer,Att>> implements Raw {
 
 	private Ctx<String, List<InteriorLabel<Object>>> raw = new Ctx<>();
 	
@@ -119,40 +119,68 @@ extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,ID,Chc<Sk,Pair<ID,Att>>> implements Raw 
 
 	//not exactly the smartest way
 	@Override
-	public Instance<Ty, En, Sym, Fk, Att, Gen, Sk, ID, Chc<Sk, Pair<ID, Att>>> eval(AqlEnv env) {
+	public SaturatedInstance<Ty, En, Sym, Fk, Att, Pair<Integer, En>, Pair<Integer, Att>, Pair<Integer, En>, Pair<Integer, Att>> eval(AqlEnv env) {
 		int seed = (Integer) new AqlOptions(options, null, env.defaults).getOrDefault(AqlOption.random_seed);
 		Random rand = new Random(seed);
-		List<Pair<LocStr, String>> gens = new LinkedList<>();
-		List<Pair<Integer, Pair<RawTerm, RawTerm>>> eqs = new LinkedList<>();
+	
 		Schema<Ty, En, Sym, Fk, Att> schema = sch.eval(env);
+
+		Ctx<En, Collection<Pair<Integer,En>>> ens0 = new Ctx<>();
+		Ctx<Ty, Collection<Pair<Integer,Att>>> tys = new Ctx<>();
+		Ctx<Pair<Integer, En>, Ctx<Fk, Pair<Integer, En>>> fks = new Ctx<>();
+		Ctx<Pair<Integer,En>, Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Pair<Integer, Att>>>> atts = new Ctx<>();
+		for (Ty ty : schema.typeSide.tys) {
+			tys.put(ty, new LinkedList<>());
+		}
 		for (String en : ens.keySet()) {
+			List<Pair<Integer,En>> l = new LinkedList<>();
 			int size = ens.get(en);
 			for (int i = 0; i < size; i++) {
-				String src = en + i;
-				gens.add(new Pair<>(new LocStr(0, src), en)); 
-				for (Fk fk : schema.fksFrom(new En(en))) {
-					En dst_en = schema.fks.get(fk).second;
-					int dst_size = ens.containsKey(dst_en.str) ? ens.get(dst_en.str) : 0;
-					if (dst_size == 0) {
-						continue;
-					}
-					String dst = dst_en.toString() + rand.nextInt(dst_size);
-					eqs.add(new Pair<>(0, new Pair<>(new RawTerm(fk.toString(), Util.singList(new RawTerm(src))), new RawTerm(dst))));
+				l.add(new Pair<>(i,new En(en)));
+				Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Pair<Integer, Att>>> ctx = new Ctx<>();
+				for (Att att : schema.atts.keySet()) {
+					ctx.put(att, Term.Sk(new Pair<>(i, att)));
+					tys.get(schema.atts.get(att).second).add(new Pair<>(i, att));
 				}
-				for (Att att : schema.attsFrom(new En(en))) {
-					Ty dst_ty = schema.atts.get(att).second;
-					int dst_size = ens.containsKey(dst_ty.str) ? ens.get(dst_ty.str) : 0;
-
-					if (dst_size == 0) {
-						continue;
-					}
-					String dst = dst_ty.toString() + rand.nextInt(dst_size);
-					eqs.add(new Pair<>(0, new Pair<>(new RawTerm(att.toString(), Util.singList(new RawTerm(src))), new RawTerm(dst))));
+				atts.put(new Pair<>(i,new En(en)), ctx);
+				
+				Ctx<Fk, Pair<Integer, En>> ctx0 = new Ctx<>();
+				for (Fk fk : schema.fks.keySet()) {
+					int size0 = ens.get(schema.fks.get(fk).second.str);
+					Integer k = rand.nextInt(size0);
+					ctx0.put(fk, new Pair<>(k, schema.fks.get(fk).second));
 				}
+				fks.put(new Pair<>(i,new En(en)), ctx0);
 			}
+			ens0.put(new En(en), l);	
 		}
 				
-		return new InstExpRaw(sch, Collections.emptyList(), gens, eqs, Util.toList(options)).eval(env);  //inherits options
+		ImportAlgebra<Ty, En, Sym, Fk, Att, Pair<Integer, En>, Pair<Integer, Att>> 
+		alg = new ImportAlgebra<Ty, En, Sym, Fk, Att, Pair<Integer, En>, Pair<Integer, Att>> 
+		(schema, ens0, tys, fks, atts, x->x.toString(), x->x.toString() , true); 
+		
+		
+		DP<Ty, En, Sym, Fk, Att, Pair<Integer,En>, Pair<Integer, Att>> dp = new DP<Ty, En, Sym, Fk, Att, Pair<Integer,En>, Pair<Integer, Att>>() {
+
+			@Override
+			public String toStringProver() {
+				return "Random";
+			}
+
+			@Override
+			public boolean eq(Ctx<Var, Chc<Ty, En>> ctx, Term<Ty, En, Sym, Fk, Att, Pair<Integer,En>, Pair<Integer, Att>> lhs,
+					Term<Ty, En, Sym, Fk, Att, Pair<Integer,En>, Pair<Integer, Att>> rhs) {
+				if (!ctx.isEmpty()) {
+					Util.anomaly();
+				}
+				return lhs.equals(rhs);
+			}
+			
+		};
+		
+		return new SaturatedInstance
+				<Ty, En, Sym, Fk, Att, Pair<Integer,En>, Pair<Integer, Att>, Pair<Integer,En>, Pair<Integer, Att>> 
+		(alg, dp, false, true, false, new Ctx<>());
 	}
 
 	
