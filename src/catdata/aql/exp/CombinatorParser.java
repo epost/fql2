@@ -49,6 +49,7 @@ import catdata.aql.exp.InstExp.InstExpDistinct;
 import catdata.aql.exp.InstExp.InstExpDom;
 import catdata.aql.exp.InstExp.InstExpEmpty;
 import catdata.aql.exp.InstExp.InstExpEval;
+import catdata.aql.exp.InstExp.InstExpFrozen;
 import catdata.aql.exp.InstExp.InstExpSigma;
 import catdata.aql.exp.InstExp.InstExpSigmaChase;
 import catdata.aql.exp.InstExp.InstExpVar;
@@ -271,12 +272,14 @@ public class CombinatorParser extends AqlParser {
 						.map(x -> new InstExpSigmaChase(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d)
 								)),
 
+				frozen = Parsers.tuple(token("frozen"), query_ref.lazy(), ident)
+				.map(x -> new InstExpFrozen(x.b, new En(x.c))),
 				delta = Parsers.tuple(token("delta"), map_ref.lazy(), inst_ref.lazy())
 						.map(x -> new InstExpDelta(x.b, x.c)),
 				distinct = Parsers.tuple(token("distinct"), inst_ref.lazy()).map(x -> new InstExpDistinct(x.b)),
 				anon = Parsers.tuple(token("anonymize"), inst_ref.lazy()).map(x -> new InstExpAnonymize(x.b)),
 
-				eval = Parsers
+				eval = Parsers 
 						.tuple(token("eval"), query_ref.lazy(), inst_ref.lazy(),
 								options.between(token("{"), token("}")).optional())
 						.map(x -> new InstExpEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d)),
@@ -293,7 +296,7 @@ public class CombinatorParser extends AqlParser {
 								options.between(token("{"), token("}")).optional())
 						.map(x -> new InstExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d));
 
-		Parser ret = Parsers.or(sigma_chase, l2, instExpCsvQuot(), instExpJdbcQuot(), instExpCoProd(), instExpRand(),
+		Parser ret = Parsers.or(sigma_chase, l2, frozen, instExpCsvQuot(), instExpJdbcQuot(), instExpCoProd(), instExpRand(),
 				instExpCoEq(), instExpJdbcAll(), chase, instExpJdbc(), empty, instExpRaw(), var, sigma, delta, distinct,
 				eval, colimInstExp(), dom, anon, cod, instExpCsv(), coeval, parens(inst_ref), instExpQuotient());
 

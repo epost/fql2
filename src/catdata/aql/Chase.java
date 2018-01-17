@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import catdata.BinRelMap;
 import catdata.Chc;
@@ -27,10 +28,10 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 
 		public final Ctx<En1, Ctx<X, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> us;
 
-		public final Ctx<Ty, BinRelMap<Lineage<Ty, Void, Sym, Void, Void, Void, Y>, Lineage<Ty, Void, Sym, Void, Void, Void, Y>>> tys;
-		public final Ctx<Att2, BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Ty, Void, Sym, Void, Void, Void, Y>>> atts;
+		public final Ctx<Ty, BinRelMap<Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>>> tys;
+		public final Ctx<Att2, BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>>> atts;
 
-		public final Ctx<Ty, Ctx<Y, Lineage<Ty, Void, Sym, Void, Void, Void, Y>>> vs;
+		public final Ctx<Ty, Ctx<Y, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>>> vs;
 
 		public Content() {
 			ens = new Ctx<>();
@@ -76,12 +77,12 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 			}
 
 			for (Ty ty : F.src.typeSide.tys) {
-				BinRelMap<Lineage<Ty, Void, Sym, Void, Void, Void, Y>, Lineage<Ty, Void, Sym, Void, Void, Void, Y>> x = c.tys
+				BinRelMap<Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> x = c.tys
 						.get(ty);
 				tys.get(ty).addAll(x);
 			}
 			for (Att2 att : atts.keySet()) {
-				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Ty, Void, Sym, Void, Void, Void, Y>> x = c.atts
+				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> x = c.atts
 						.get(att);
 				atts.get(att).addAll(x);
 			}
@@ -124,16 +125,17 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 			this.vs = new Ctx<>();
 
 			for (Ty ty : I.schema().typeSide.tys) {
-				Ctx<Y, Lineage<Ty, Void, Sym, Void, Void, Void, Y>> ctx = new Ctx<>();
+				Ctx<Y, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> ctx = new Ctx<>();
 				for (Y y : I.algebra().talg().sks.keySet()) {
-					ctx.put(y, new Lineage<>(fresh.next(), Term.Sk(y)));
+					ctx.put(y, Chc.inRight(I.algebra().reprT(Term.Sk(y))));
 				}
 				vs.put(ty, ctx);
 			}
 		}
 
 		// TODO aql update
-		public Content merge(Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs) {
+		public Content merge(Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs,
+				Ctx<Ty, UnionFind<Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>>> ufs2) {
 			Content ret = new Content();
 			for (En2 en : F.dst.ens) {
 				for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> x : ens
@@ -162,6 +164,67 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 				for (X x : us.get(en).keySet()) {
 					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n = us.get(en).get(x);
 					ret.us.get(en).put(x, ufs.get(F.ens.get(en)).find(n));
+				}
+			}
+
+			// partitions to their constants, if any
+			Ctx<Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> pars = new Ctx<>();
+			for (Ty ty : F.dst.typeSide.tys) {
+				for (Pair<Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> x : tys
+						.get(ty)) {
+					if (x.first.left) {
+						continue;
+					}
+
+					Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> par = ufs2.get(ty).find(x.first);
+					if (pars.containsKey(par)) {
+						Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk> parConst = pars.get(par);
+						if (!I.dp().eq(new Ctx<>(), x.first.r, parConst)) {
+							throw new RuntimeException("Collision: " + x.first.r + " not provably equal to " + parConst
+									+ " in input instance.");
+						}
+					} else {
+						pars.put(par, x.first.r);
+					}
+				}
+			}
+
+			BiFunction<Ty, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> nf = (
+					t, zz) -> {
+						Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> y = ufs2.get(t).find(zz);
+						if (pars.containsKey(y)) {
+							return Chc.inRight(pars.get(y));
+						}
+						return y;
+			};
+
+			for (Ty ty : F.dst.typeSide.tys) {
+				for (Pair<Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> x : tys
+						.get(ty)) {
+					if (!x.first.equals(x.second)) {
+						Util.anomaly();
+					}
+					Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> n = nf.apply(ty, x.first);
+					ret.tys.get(ty).add(n, n);
+				}
+			}
+			// System.out.println("yyy " + ret);
+			for (Att2 att : F.dst.atts.keySet()) {
+				En2 a = F.dst.atts.get(att).first;
+				Ty b = F.dst.atts.get(att).second;
+				for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> x : atts
+						.get(att)) {
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n1 = ufs.get(a).find(x.first);
+					Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> n2 = nf.apply(b, x.second);
+					ret.atts.get(att).add(n1, n2);
+					// System.out.println("on " + fk + " doing " + x + " is " + n1 + "," + n2);
+				}
+			}
+			// System.out.println("xxx " + ret);
+			for (Ty ty : vs.keySet()) {
+				for (Y x : vs.get(ty).keySet()) {
+					Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> n = vs.get(ty).get(x);
+					ret.vs.get(ty).put(x, nf.apply(ty, n));
 				}
 			}
 			// System.out.println("merged " + ret);
@@ -221,39 +284,44 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 	}
 
 	private boolean step() {
-		
+
 		Content toAdd = new Content();
 		Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs = new Ctx<>();
 		for (En2 en : F.dst.ens) {
 			ufs.put(en, new UnionFind<>(new HashSet<>()));
 		}
-		Boolean[] changed = new Boolean[] { false }; 
-		
+		Ctx<Ty, UnionFind<Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>>> ufs2 = new Ctx<>();
+		for (Ty ty : F.dst.typeSide.tys) {
+			ufs2.put(ty, new UnionFind<>(new HashSet<>()));
+		}
+		Boolean[] changed = new Boolean[] { false };
+
 		makeArrowsTotal(toAdd, changed);
 
 		makeObjectsTotal(toAdd, changed);
 
 		moveObjects(toAdd, changed);
 
+		//todo
 		doEqs(toAdd, ufs, changed);
 
 		T.addAll(toAdd);
 
-		makeFunctional(ufs, changed);
-	
+		makeFunctional(ufs, changed, ufs2);
+
 		if (!changed[0]) {
 			return false;
 		}
-		
-		T = T.merge(ufs);
 
+		T = T.merge(ufs, ufs2);
 
 		return true;
 	}
+
 	static int x = 0;
-	
+
 	public void makeFunctional(Ctx<En2, UnionFind<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>>> ufs,
-			Boolean[] changed) {
+			Boolean[] changed, Ctx<Ty, UnionFind<Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>>> ufs2) {
 		for (En2 v : F.dst.ens) {
 			for (Fk2 a : F.dst.fksFrom(v)) {
 
@@ -269,6 +337,27 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 					for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> y2 : ys) {
 						if (!y1.equals(y2)) {
 							ufs.get(w).union(y1, y2);
+							// System.out.println("equating " + y1 + " = " + y2 + " at " + w);
+
+							changed[0] = true;
+						}
+					}
+				}
+			}
+			for (Att2 a : F.dst.attsFrom(v)) {
+
+				// T_a(x,y1) /\ T_b(x,y2) -> y2=y1;
+				Ty w = F.dst.atts.get(a).second;
+				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>>
+				T_a = T.atts.get(a);
+
+				for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x : T_a.keySet()) {
+					Collection<Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> ys = T_a.get(x);
+					// System.out.println("collection is " + ys);
+					Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> y1 = Util.get0X(ys);
+					for (Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> y2 : ys) {
+						if (!y1.equals(y2)) {
+							ufs2.get(w).union(y1, y2);
 							// System.out.println("equating " + y1 + " = " + y2 + " at " + w);
 
 							changed[0] = true;
@@ -370,7 +459,7 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 				}
 
 				if (Util.isect(N, N2).isEmpty()) {
-						changed[0] = true;
+					changed[0] = true;
 					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n = initial;
 					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> m = initial;
 					for (Fk2 fk : lhs) {
@@ -411,6 +500,23 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 				}
 			}
 		}
+		
+		for (Ty a : F.src.typeSide.tys) {
+			// T_v(x) -> Ey. T_a(x,y)
+			// this is the 'loading' step in the Content constructor
+
+			// T_a(x,y) -> T_v(x) /\ T_w(y)
+			Ty w = a;
+			Ctx<Y, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> T_a = T.vs.get(a);
+			BinRelMap<Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> 
+			T_w = T.tys.get(w);
+			for (Y xy : T_a.keySet()) {
+				Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> x = T_a.get(xy);
+				if (!T_w.containsKey(x)) {
+					changed[0] = changed[0] | toAdd.tys.get(w).add(x, x);
+				}
+			}
+		}
 	}
 
 	public void makeObjectsTotal(Content toAdd, Boolean[] changed) {
@@ -437,15 +543,34 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 					}
 				}
 			}
+			
+			for (Att2 a : F.dst.attsFrom(v)) {
+				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> 
+				T_a = T.atts.get(a);
 
+				// T_a(x,y) -> T_v(x) /\ T_w(y)
+				Ty w = F.dst.atts.get(a).second;
+				BinRelMap<Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>>
+				T_w = T.tys.get(w);
+				for (Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>> xy : T_a) {
+					Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x = xy.first;
+					Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> y = xy.second;
+					if (!T_v.containsKey(x)) {
+						changed[0] = changed[0] | toAdd.ens.get(v).add(x, x);
+					}
+					if (!T_w.containsKey(y)) {
+						changed[0] = changed[0] | toAdd.tys.get(w).add(y, y);
+					}
+				}
+			}
 		}
 	}
 
 	public void makeArrowsTotal(Content toAdd, Boolean[] changed) {
 		// a : v -> w
 		for (En2 v : F.dst.ens) {
-			BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> T_v = T.ens
-					.get(v);
+			BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> 
+			T_v = T.ens.get(v);
 			for (Fk2 a : F.dst.fksFrom(v)) {
 
 				// T_v(x) -> Ey. T_a(x,y)
@@ -458,8 +583,26 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 					}
 				}
 			}
-
 		}
+		
+		for (En2 v : F.dst.ens) {
+			BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> 
+			T_v = T.ens.get(v);
+			for (Att2 a : F.dst.attsFrom(v)) {
+
+				// T_v(x) -> Ey. T_a(x,y)
+				BinRelMap<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Chc<Integer, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>>>
+				T_a = T.atts.get(a);
+				for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x : T_v.keySet()) {
+					if (T_a.get(x) == null || T_a.get(x).isEmpty()) { // latter should be impossible
+						toAdd.atts.get(a).add(x, Chc.inLeft(fresh.next()));
+						changed[0] = true;
+					}
+				}
+			}
+		}
+		
+		
 	}
 
 }

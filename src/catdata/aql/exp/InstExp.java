@@ -25,6 +25,7 @@ import catdata.aql.It.ID;
 import catdata.aql.Kind;
 import catdata.aql.Lineage;
 import catdata.aql.Mapping;
+import catdata.aql.Query.Frozen;
 import catdata.aql.Schema;
 import catdata.aql.SigmaLeftKanAlgebra;
 import catdata.aql.Term;
@@ -548,7 +549,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 
 		public final EdsExp<Ty, En, Sym, Fk, Att> eds;
 
-		//public final int limit;
+		// public final int limit;
 
 		public final Map<String, String> options;
 
@@ -557,7 +558,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			return options;
 		}
 
-		public InstExpChase(EdsExp<Ty, En, Sym, Fk, Att> eds, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i, 
+		public InstExpChase(EdsExp<Ty, En, Sym, Fk, Att> eds, InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> i,
 				List<Pair<String, String>> options) {
 			I = i;
 			this.eds = eds;
@@ -603,7 +604,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 
 		@Override
 		public String toString() {
-			return "chase " + I + " " + eds ;
+			return "chase " + I + " " + eds;
 		}
 
 		@Override
@@ -1193,7 +1194,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
 		public final MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
 		public final Map<String, String> options;
-	//	public final Integer max;
+		// public final Integer max;
 
 		@Override
 		public Map<String, String> options() {
@@ -1210,14 +1211,14 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			I = i;
 			F = f;
 			this.options = options;
-		//	this.max = max;
+			// this.max = max;
 		}
 
 		@Override
 		public int hashCode() {
 			int prime = 31;
 			int result = 1;
-			//result = prime * result + ((max == null) ? 0 : max.hashCode());
+			// result = prime * result + ((max == null) ? 0 : max.hashCode());
 			result = prime * result + ((F == null) ? 0 : F.hashCode());
 			result = prime * result + ((I == null) ? 0 : I.hashCode());
 			result = prime * result + ((options == null) ? 0 : options.hashCode());
@@ -1299,8 +1300,8 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 			}
 
 			if (type.equals("leftkan")) {
-				SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> 
-				alg = new SigmaLeftKanAlgebra<>(f, i, col);
+				SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> alg = new SigmaLeftKanAlgebra<>(
+						f, i, col);
 
 				return new LiteralInstance<>(alg.schema(), col.gens.map, col.sks.map, eqs, alg, alg,
 						(Boolean) op.getOrDefault(AqlOption.require_consistency),
@@ -1312,7 +1313,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 				return new LiteralInstance<>(alg.schema(), col.gens.map, col.sks.map, eqs, alg, alg,
 						(Boolean) op.getOrDefault(AqlOption.require_consistency),
 						(Boolean) op.getOrDefault(AqlOption.allow_java_eqs_unsafe));
-		
+
 			}
 			return Util.anomaly();
 		}
@@ -1707,4 +1708,73 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 
 	}
 
+	///////////////////////////////////////////////////////////////////////////////
+
+	public static final class InstExpFrozen<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
+			extends InstExp<Ty, En1, Sym, Fk1, Att1, Var, Void, ID, Chc<Void, Pair<ID, Att1>>> {
+
+		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
+		public final En2 I;
+
+		@Override
+		public Map<String, String> options() {
+			return Collections.emptyMap();
+		}
+
+		public InstExpFrozen(QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q, En2 i) {
+			Q = q;
+			I = i;
+		}
+
+		@Override
+		public int hashCode() {
+			int prime = 31;
+			int result = 1;
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((Q == null) ? 0 : Q.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpFrozen<?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpFrozen<?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (Q == null) {
+				if (other.Q != null)
+					return false;
+			} else if (!Q.equals(other.Q))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "frozen " + Q + " " + I;
+		}
+
+		@Override
+		public SchExp<Ty, En1, Sym, Fk1, Att1> type(AqlTyping G) {
+			return Q.type(G).first;
+		}
+
+		@Override
+		public Frozen<Ty, En1, Sym, Fk1, Att1> eval(AqlEnv env) {
+			return Q.eval(env).ens.get(I);
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Q.deps();
+		}
+	}
 }

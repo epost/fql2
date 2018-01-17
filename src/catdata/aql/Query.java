@@ -541,7 +541,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		public final Ctx<Var, En1> gens;
 		public final Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs;
 		public final Schema<Ty, En1, Sym, Fk1, Att1> schema;
-		private final DP<Ty, En1, Sym, Fk1, Att1, Var, Void> dp;
+		private  DP<Ty, En1, Sym, Fk1, Att1, Var, Void> dp;
 		public final AqlOptions options;
 
 		public Frozen(Ctx<Var, En1> gens, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> eqs,
@@ -580,7 +580,11 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		}
 
 		@Override
-		public DP<Ty, En1, Sym, Fk1, Att1, Var, Void> dp() {
+		public synchronized DP<Ty, En1, Sym, Fk1, Att1, Var, Void> dp() {
+			if (dp == null) {
+				dp = AqlProver.create(options, collage(), schema.typeSide.js);
+				return dp;
+			}
 			return dp;
 		}
 
@@ -591,7 +595,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			if (hidden != null) {
 				return hidden;
 			}
-			hidden = new InitialAlgebra<>(dp, schema, collage(), new It(), x -> x.toString(), x -> x.toString());
+			hidden = new InitialAlgebra<>(dp(), schema, collage(), new It(), x -> x.toString(), x -> x.toString());
 			return hidden;
 		}
 

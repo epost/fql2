@@ -358,7 +358,7 @@ The identity query on a schema.
 Constructs the query $Q^F$ such that $eval(Q^F) \cong \Delta_F$ and $coeval(Q_F) \cong \Sigma_F$ for the mapping F.
 
 \section{{\tt toCoQuery <mapping>}}
-Constructs the query $Q_F$ such that $coeval(Q_F) \cong \Delta_F$ and $eval(Q_F) \cong \Pi_F$ for the mapping F.  The option {\tt toCoQuery\_max\_term\_size} controls the maximum size of the terms to be searched.
+Constructs the query $Q_F$ such that $coeval(Q_F) \cong \Delta_F$ and $eval(Q_F) \cong \Pi_F$ for the mapping F.  The option {\tt toCoQuery\_max\_term\_size} controls the maximum size of the terms to be searched.  Note that $F$ must be surjective on attributes to succeed.
 
 \section{{\tt [ <query> ; <query> ]}}
 Composes two queries: if {\tt f : A -> B} and {\tt g : B -> C}, then {\tt [ f ; g ] : A -> C} using the complete ``view unfolding'' algorithm.   The incomplete co-evaluation based method can be used instead with the {\tt query\_compose\_use\_incomplete} option.
@@ -449,8 +449,11 @@ If $F : S \to T$ is a mapping and $J$ is an $T$-instance, then $\Delta_F J$ is a
 \section{{\tt sigma <mapping> <instance>}}
 If $F : S \to T$ is a mapping and $I$ is an $S$-instance, then $\Sigma_F I$ is a $T$-instance. 
 
-\section{{\tt sigma\_chase <mapping> <instance> number}}
-Like {\tt sigma}, but uses an alternative chase/left-kan extension based algorithm.
+\section{{\tt sigma\_chase <mapping> <instance>}}
+Like {\tt sigma}, but uses an alternative chase/left-kan extension based algorithm.  See {\tt chase\_style} option.
+
+\section{{\tt frozen <query> <target entity>}}
+If $Q : S \to T$ is a query and $t$ is a $T$-entity, then $frozen \ Q \ t$ is the ``frozen'' or ``canonical'' $S$-instance for $t$ in $Q$. 
 
 \section{{\tt coproduct\_sigma (<mapping> <instance>)+ : <schema>}}
 The expression {\tt coproduct\_sigma}  $F \ I \ G \ J \ : S$ means $\Sigma_F(I) + \Sigma_G(J)$, where $+$ is $S$-instance co-product.  Arbitrarily many mapping-instance pairs can be used.  This operation is provided to help minimize the number of intermediate materializations required to execute an AQL program.
@@ -1063,6 +1066,10 @@ Defines the name of the AQL environment being constructed for use with the {\tt 
 \subsection{{\tt jdbc\_query\_export\_convert\_type} = string}
 
 Defines the SQL quasi-type to be used with CONVERT statements when emitting SQL for AQL queries.  A good initial guess is VARCHAR for H2 and CHAR for MySQL.
+
+\subsection{{\tt chase\_style}}
+
+Either {\tt parallel} (faster, but uses more space) or {\tt leftkan} (slower, but uses less space).
 
 \end{document}
 
