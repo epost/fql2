@@ -28,7 +28,8 @@ public class Examples {
 
 	public static Map<Language, List<Example>> getExamples(File f) {
 		if (!f.exists()) {
-			System.err.println("File does not exist: " + f + " Warning: no built-in examples folder found.  If you are building from source, make sure words.txt is on the classpath.");
+			System.err.println("File does not exist: " + f
+					+ " Warning: no built-in examples folder found.  If you are building from source, make sure words.txt is on the classpath.");
 			return new HashMap<>();
 		}
 		Map<Language, List<Example>> es0 = new HashMap<>();
@@ -99,10 +100,10 @@ public class Examples {
 				if (uri.getScheme().equals("jar")) {
 					examples2 = new Ctx<>(getExamplesFromJar(uri));
 					return examples2;
-				} else { //TODO AQL this is really messed up what's going on with Eclipse
+				} else { // TODO AQL this is really messed up what's going on with Eclipse
 					URL l = ClassLoader.getSystemResource("examples");
 					if (l == null) {
-						//new RuntimeException("Cannot locate built-in examples").printStackTrace();
+						// new RuntimeException("Cannot locate built-in examples").printStackTrace();
 						HashMap<Language, List<Example>> ret = new HashMap<>();
 						for (Language ll : Language.values()) {
 							ret.put(ll, new LinkedList<>());
@@ -141,24 +142,27 @@ public class Examples {
 							try (InputStream in = ClassLoader.getSystemResourceAsStream(s)) {
 								String text = GuiUtil.readFile(in);
 								Util.assertNotNull(text);
-								
-								list.add(new Example() {
+								if (text.trim().length() != 0) {
 
-									@Override
-									public String getName() {
-										return s.replaceAll("." + l.fileExtension(), "").replaceAll("/examples/", "").replaceAll("examples/", "");
-									}
+									list.add(new Example() {
 
-									@Override
-									public String getText() {
-										return text;
-									}
+										@Override
+										public String getName() {
+											return s.replaceAll("." + l.fileExtension(), "")
+													.replaceAll("/examples/", "").replaceAll("examples/", "");
+										}
 
-									@Override
-									public Language lang() {
-										return l;
-									}
-								});
+										@Override
+										public String getText() {
+											return text;
+										}
+
+										@Override
+										public Language lang() {
+											return l;
+										}
+									});
+								}
 							}
 						}
 					}

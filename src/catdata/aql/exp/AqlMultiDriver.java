@@ -114,7 +114,7 @@ public final class AqlMultiDriver implements Callable<Unit> {
 			for (Pair<String, Kind> d : /* wrapDeps(n, */ env.prog.exps.get(n).deps() /* , env.prog) */) { // crushes
 																									// performance
 				if (!env.prog.order.contains(d.first)) {
-					throw new LineException("Undefined dependency: " + d, n, env.prog.exps.get(n).kind().toString());
+					throw new LineException("Does not exist: " + d.second + " " + d.first, n, env.prog.exps.get(n).kind().toString());
 				}
 				boolean ok = dag.addEdge(n, d.first);
 				if (!ok) {

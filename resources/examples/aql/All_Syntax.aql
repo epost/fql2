@@ -130,7 +130,10 @@ query q3 = simple : s3 {
 	options
 		prover = completion
 }
+//eval q4 ~ delta m3 and coeval q4 ~ sigma m3
 query q4 = toQuery m3 { options dont_validate_unsafe = true } // this isn't a real query 
+
+//coeval q4 ~ delta (id s3) and eval q4 ~ pi (id s3)
 query q5 = toCoQuery identity s3 { 
 	options 
 		prover = completion 
@@ -148,14 +151,15 @@ instance i5 = eval (identity s3) i1
 instance i6 = coeval (identity s3) i1 { options prover = completion }
 instance i7 = sigma (identity s3) i1 { options prover = completion }
 instance i8 = delta (identity s3) i1
-instance i9 = coproduct i1 + i1 : s3 { options prover = completion }
+instance i9 = union i1 + i1 : s3 { options prover = completion }
 instance i10 = coproduct_sigma (identity s3) i1 (identity s3) i1 : s3 { options prover = completion }
-instance i20 = coproduct_unrestricted i1 + i2 : s3 { options prover = completion }
+instance i20 = coproduct i1 + i2 : s3 { options prover = completion }
 instance i11 = coequalize (identity i1) (identity i1) { options prover = completion }
 instance i12 = chase literal : s3 { } i3 
 instance i15 = anonymize i12
 instance i16 = frozen q3 Q
-//random -- see Employees example
+instance i17 = pi (identity s2) (empty : s2) { options prover = completion }
+//random -- see delta example
 //import_jdbc -- see JDBC example
 //import_jdbc_all -- see JDBC example
 //quotient_jdbc -- see JDBC example

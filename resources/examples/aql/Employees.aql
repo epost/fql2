@@ -124,14 +124,6 @@ instance J = eval Q IJava
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-instance IRandom = random : SJava {
-	generators
-		Employee -> 10
-		Department -> 2
-	//options
-	//	random_seed = 2
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //demonstrates 'interpret as instance' option.   which interprets the instance as a model, 
 //similar to JDBC / CSV import.  This behavior can be useful when writing down an 

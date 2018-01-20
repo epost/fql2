@@ -138,14 +138,14 @@ extends InstExp<Ty,En,Sym,Fk,Att,Pair<Integer,En>, Pair<Integer, Att>,Pair<Integ
 			for (int i = 0; i < size; i++) {
 				l.add(new Pair<>(i,new En(en)));
 				Ctx<Att, Term<Ty, Void, Sym, Void, Void, Void, Pair<Integer, Att>>> ctx = new Ctx<>();
-				for (Att att : schema.atts.keySet()) {
+				for (Att att : schema.attsFrom(new En(en))) {
 					ctx.put(att, Term.Sk(new Pair<>(i, att)));
 					tys.get(schema.atts.get(att).second).add(new Pair<>(i, att));
 				}
 				atts.put(new Pair<>(i,new En(en)), ctx);
 				
 				Ctx<Fk, Pair<Integer, En>> ctx0 = new Ctx<>();
-				for (Fk fk : schema.fks.keySet()) {
+				for (Fk fk : schema.fksFrom(new En(en))) {
 					int size0 = ens.get(schema.fks.get(fk).second.str);
 					Integer k = rand.nextInt(size0);
 					ctx0.put(fk, new Pair<>(k, schema.fks.get(fk).second));

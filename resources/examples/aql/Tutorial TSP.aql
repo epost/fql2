@@ -549,7 +549,7 @@ this construction by running this file and selecting `iSklCP` in the viewer. Not
 an instance `sS` that is the disjoint union of the records of `iSklExt` and `iSklCls` that has
 respected the foreign key `fk_HasClass`.
 " *) }
-instance iSklCP = coproduct iSklExt + iSklCls : sS
+instance iSklCP = union iSklExt + iSklCls : sS
 
 md { (* "
 Now that we have all of the desired records in the same instance we want to identify the

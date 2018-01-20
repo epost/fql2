@@ -449,6 +449,9 @@ If $F : S \to T$ is a mapping and $J$ is an $T$-instance, then $\Delta_F J$ is a
 \section{{\tt sigma <mapping> <instance>}}
 If $F : S \to T$ is a mapping and $I$ is an $S$-instance, then $\Sigma_F I$ is a $T$-instance. 
 
+\section{{\tt pu <mapping> <instance>}}
+If $F : S \to T$ is a mapping and $I$ is an $S$-instance, then $\Pi_F I$ is a $T$-instance. 
+
 \section{{\tt sigma\_chase <mapping> <instance>}}
 Like {\tt sigma}, but uses an alternative chase/left-kan extension based algorithm.  See {\tt chase\_style} option.
 
@@ -458,10 +461,10 @@ If $Q : S \to T$ is a query and $t$ is a $T$-entity, then $frozen \ Q \ t$ is th
 \section{{\tt coproduct\_sigma (<mapping> <instance>)+ : <schema>}}
 The expression {\tt coproduct\_sigma}  $F \ I \ G \ J \ : S$ means $\Sigma_F(I) + \Sigma_G(J)$, where $+$ is $S$-instance co-product.  Arbitrarily many mapping-instance pairs can be used.  This operation is provided to help minimize the number of intermediate materializations required to execute an AQL program.
 
-\section{{\tt coproduct <instance> + ... + <instance> : <schema>}}
+\section{{\tt union <instance> + ... + <instance> : <schema>}}
 Takes the coproduct of the input instances.  Desugars into {\tt coproduct\_sigma} along the identity mapping.
 
-\section{{\tt coproduct\_unrestricted <instance> + ... + <instance> : <schema>}}
+\section{{\tt coproduct <instance> + ... + <instance> : <schema>}}
 Takes the coproduct of the input instances.  Note that the instances must be names; unlike the other coproduct expressions, there is no requirement that generators not overlap in this expression.
 
 \section{{\tt coequalize <transform> <transform>}}

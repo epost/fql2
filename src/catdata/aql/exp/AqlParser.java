@@ -22,12 +22,12 @@ public abstract class AqlParser {
 			"*)", "+", "[", "]", "<-" };
 
 	public static final String[] res = new String[] { "sigma_chase", "entity", "md", "quotient_jdbc", "random", "sql",
-			"chase", "check", "import_csv", "quotient_csv", "coproduct_unrestricted", "simple", "assert_consistent",
+			"chase", "check", "import_csv", "quotient_csv", "coproduct", "simple", "assert_consistent",
 			"coproduct_sigma", "coequalize", "html", "quotient", "entity_equations", "schema_colimit", "exists",
 			"constraints", "getMapping", "getSchema", "typeside", "schema", "mapping", "instance", "transform", "query",
 			"command", "graph", "exec_jdbc", "exec_js", "exec_cmdline", "literal", "add_to_classpath", 
 			"identity", "match", "attributes", "empty", "imports", "types", "constants", "functions", "equations",
-			"forall", "java_types", "multi_equations",
+			"forall", "java_types", "multi_equations", "pi",
 			"toQuery", "toCoQuery", "anonymize", "frozen", 
 			"java_constants", "java_functions", "options", "entities", "src", "unique", "dst", "path_equations",
 			"observation_equations", "generators", "rename", "remove", "modify",
@@ -35,7 +35,7 @@ public abstract class AqlParser {
 			"where", "return", "pivot", "copivot", "colimit", "nodes", "edges", "typesideOf", "schemaOf", "distinct",
 			"import_csv", "export_csv_instance", "export_csv_transform", "import_jdbc", "import_jdbc_all",
 			"export_jdbc_transform", "export_jdbc_instance", "export_jdbc_query", "unit_query", "counit_query",
-			"coproduct", "wrap" };
+			"union", "wrap" };
 
 	public static final String[] opts = AqlOptions.optionNames().toArray(new String[0]);
 

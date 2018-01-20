@@ -50,6 +50,7 @@ import catdata.aql.exp.InstExp.InstExpDom;
 import catdata.aql.exp.InstExp.InstExpEmpty;
 import catdata.aql.exp.InstExp.InstExpEval;
 import catdata.aql.exp.InstExp.InstExpFrozen;
+import catdata.aql.exp.InstExp.InstExpPi;
 import catdata.aql.exp.InstExp.InstExpSigma;
 import catdata.aql.exp.InstExp.InstExpSigmaChase;
 import catdata.aql.exp.InstExp.InstExpVar;
@@ -256,12 +257,17 @@ public class CombinatorParser extends AqlParser {
 	private static void instExp() {
 
 		Parser<InstExpCoProdFull> l2 = Parsers
-				.tuple(token("coproduct_unrestricted"), ident.sepBy(token("+")), token(":"), sch_ref.lazy(),
+				.tuple(token("coproduct"), ident.sepBy(token("+")), token(":"), sch_ref.lazy(),
 						options.between(token("{"), token("}")).optional())
 				.map(x -> new InstExpCoProdFull(x.b, x.d, Util.newIfNull(x.e)));
 
 		Parser<InstExp<?, ?, ?, ?, ?, ?, ?, ?, ?>> var = ident.map(InstExpVar::new),
 				empty = Parsers.tuple(token("empty"), token(":"), sch_ref.get()).map(x -> new InstExpEmpty<>(x.c)),
+						pi = Parsers
+						.tuple(token("pi"), map_ref.lazy(), inst_ref.lazy(),
+								options.between(token("{"), token("}")).optional())
+						.map(x -> new InstExpPi(x.b, x.c, x.d == null ? new HashMap<>() : Util.toMapSafely(x.d))),
+	
 				sigma = Parsers
 						.tuple(token("sigma"), map_ref.lazy(), inst_ref.lazy(),
 								options.between(token("{"), token("}")).optional())
@@ -296,7 +302,7 @@ public class CombinatorParser extends AqlParser {
 								options.between(token("{"), token("}")).optional())
 						.map(x -> new InstExpCoEval(x.b, x.c, x.d == null ? new LinkedList<>() : x.d));
 
-		Parser ret = Parsers.or(sigma_chase, l2, frozen, instExpCsvQuot(), instExpJdbcQuot(), instExpCoProd(), instExpRand(),
+		Parser ret = Parsers.or(sigma_chase, l2, pi, frozen, instExpCsvQuot(), instExpJdbcQuot(), instExpCoProd(), instExpRand(),
 				instExpCoEq(), instExpJdbcAll(), chase, instExpJdbc(), empty, instExpRaw(), var, sigma, delta, distinct,
 				eval, colimInstExp(), dom, anon, cod, instExpCsv(), coeval, parens(inst_ref), instExpQuotient());
 
@@ -1072,7 +1078,7 @@ public class CombinatorParser extends AqlParser {
 
 		//
 		Parser<InstExpCoProdSigma> ret2 = Parsers
-				.tuple(token("coproduct"), inst_ref.lazy().sepBy(token("+")), token(":"), sch_ref.lazy(),
+				.tuple(token("union"), inst_ref.lazy().sepBy(token("+")), token(":"), sch_ref.lazy(),
 						options.between(token("{"), token("}")).optional())
 				.map(x -> new InstExpCoProdSigma(
 						x.b.stream().map(y -> new catdata.Pair<>(new MapExpId(x.d), y)).collect(Collectors.toList()),

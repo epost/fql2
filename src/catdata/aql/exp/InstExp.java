@@ -32,6 +32,7 @@ import catdata.aql.Term;
 import catdata.aql.Transform;
 import catdata.aql.Var;
 import catdata.aql.exp.MapExp.MapExpId;
+import catdata.aql.exp.QueryExp.QueryExpDeltaCoEval;
 import catdata.aql.exp.SchExp.SchExpLit;
 import catdata.aql.fdm.CoEvalInstance;
 import catdata.aql.fdm.ColimitInstance;
@@ -211,7 +212,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 
 		@Override
 		public String toString() {
-			return "coproduct_unrestricted " + Util.sep(Is, " ") + " : " + sch;
+			return "coproduct " + Util.sep(Is, " ") + " : " + sch;
 		}
 
 		@Override
@@ -417,7 +418,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 							throw new RuntimeException(
 									"The generators in the input instances of a coproduct must be unique, but there is more than one "
 											+ g
-											+ ". Possible solution: add options coproduct_allow_entity_collisions_unsafe=true");
+											+ ". Possible solution: use coproduct_unrestricted\nPossible solution: add options coproduct_allow_type_collisions_unsafe=true or use coproduct_unrestricted");
 						} else {
 							continue;
 						}
@@ -431,7 +432,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 							throw new RuntimeException(
 									"The labelled nulls in the input instances of a coproduct must be unique, but there is more than one "
 											+ g
-											+ ". Possible solution: use coproduct_unrestricted\nPossible solution: add options coproduct_allow_type_collisions_unsafe=true");
+											+ ". Possible solution: use coproduct_unrestricted\nPossible solution: add options coproduct_allow_type_collisions_unsafe=true or use coproduct_unrestricted");
 						} else {
 							continue;
 						}
@@ -1776,5 +1777,96 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 		public Collection<Pair<String, Kind>> deps() {
 			return Q.deps();
 		}
+	}
+
+	//////////////////////
+
+	public static final class InstExpPi<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
+			extends InstExp<Ty, En2, Sym, Fk2, Att2, Row<En2, X>, Y, Row<En2, X>, Y> {
+
+		public final InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I;
+		public final MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F;
+		public final Map<String, String> options;
+
+		@Override
+		public Map<String, String> options() {
+			return options;
+		}
+
+		@Override
+		public Collection<Pair<String, Kind>> deps() {
+			return Util.union(I.deps(), F.deps());
+		}
+
+		public InstExpPi(MapExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f,
+				InstExp<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i, Map<String, String> options) {
+			I = i;
+			F = f;
+			this.options = options;
+		}
+
+		@Override
+		public int hashCode() {
+			int prime = 31;
+			int result = 1;
+			result = prime * result + ((F == null) ? 0 : F.hashCode());
+			result = prime * result + ((I == null) ? 0 : I.hashCode());
+			result = prime * result + ((options == null) ? 0 : options.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			InstExpPi<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = (InstExpPi<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>) obj;
+			if (F == null) {
+				if (other.F != null)
+					return false;
+			} else if (!F.equals(other.F))
+				return false;
+			if (I == null) {
+				if (other.I != null)
+					return false;
+			} else if (!I.equals(other.I))
+				return false;
+			if (options == null) {
+				if (other.options != null)
+					return false;
+			} else if (!options.equals(other.options))
+				return false;
+			return true;
+		}
+
+		@Override
+		public SchExp<Ty, En2, Sym, Fk2, Att2> type(AqlTyping G) {
+			SchExp<Ty, En1, Sym, Fk1, Att1> t0 = I.type(G);
+			Pair<SchExp<Ty, En1, Sym, Fk1, Att1>, SchExp<Ty, En2, Sym, Fk2, Att2>> t1 = F.type(G);
+
+			if (!G.eq(t1.first, t0)) { // TODO aql schema equality
+				throw new RuntimeException("Type error: In " + this + " domain of mapping is " + t1.first
+						+ " but instance has schema " + t0);
+			}
+
+			return t1.second;
+		}
+
+		@Override
+		public String toString() {
+			return "pi " + F + " " + I;
+		}
+
+		@Override
+		public Instance<Ty, En2, Sym, Fk2, Att2, Row<En2, X>, Y, Row<En2, X>, Y>  eval(AqlEnv env) {
+			QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q = new QueryExpDeltaCoEval<>(F, Util.toList(options));
+			InstExpEval<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> r = new InstExpEval<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>(q, I, Util.toList(options));
+			Instance<Ty, En2, Sym, Fk2, Att2, Row<En2,X>, Y, Row<En2,X>, Y>  w = r.eval(env);
+			return w;
+		}
+
 	}
 }

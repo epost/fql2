@@ -41,7 +41,7 @@
     <keyword>colimit</keyword>
     <keyword>constants</keyword>
     <keyword>coproduct</keyword>
-    <keyword>coproduct_unrestricted</keyword>
+    <keyword>union</keyword>
     <keyword>counit</keyword>
     <keyword>counit_query</keyword>
 <keyword>coproduct_sigma</keyword>
@@ -108,6 +108,7 @@
     <keyword>unit</keyword>
     <keyword>unit_query</keyword>
     <keyword>where</keyword>
+<keyword>pi</keyword>
   </keywords2>
   <dataTypes/>
   <functions/>
