@@ -1712,7 +1712,7 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 	///////////////////////////////////////////////////////////////////////////////
 
 	public static final class InstExpFrozen<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
-			extends InstExp<Ty, En1, Sym, Fk1, Att1, Var, Void, ID, Chc<Void, Pair<ID, Att1>>> {
+			extends InstExp<Ty, En1, Sym, Fk1, Att1, Var, Var, ID, Chc<Var, Pair<ID, Att1>>> {
 
 		public final QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q;
 		public final En2 I;

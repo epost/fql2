@@ -195,7 +195,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 								+ ", options eval_reorder_joins=false and choose a nested loops join order that results in smaller intermediate results.");
 					}
 					Row<En2, X> row = new Row<>(tuple, v, x);
-					for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : q.eqs) {
+					for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : q.eqsNoSks()) {
 						Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> lhs = trans1(row, eq.lhs, I);
 						Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> rhs = trans1(row, eq.rhs, I);
 						if (!lhs.isPresent() || !rhs.isPresent()) {
@@ -221,7 +221,8 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 
 	@Override
 	public Row<En2, X> fk(Fk2 fk, Row<En2, X> row) {
-		Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> t = Q.fks.get(fk);
+		Transform<Ty, En1, Sym, Fk1, Att1, Var, Var, Var, Var, ID, Chc<Var, Pair<ID, Att1>>, ID, Chc<Var, Pair<ID, Att1>>> 
+		t = Q.fks.get(fk);
 
 		Ctx<Var, X> ret = new Ctx<>();
 
@@ -248,7 +249,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 
 	@Override
 	public Term<Ty, Void, Sym, Void, Void, Void, Y> att(Att2 att, Row<En2, X> x) {
-		Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> l = trans1(x, Q.atts.get(att), I);
+		Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> l = trans1(x, Q.atts.get(att).convert(), I);
 		if (!l.isPresent()) {
 			System.out.flush();
 			throw new RuntimeException("Anomly: please report: cannot translate " + att + " on " + x + " alg is " + this.ens);
@@ -310,6 +311,8 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		this.options = options;
 		if (!I.schema().equals(q.src)) {
 			throw new RuntimeException("Anomaly: please report");
+		} else if (!q.params.isEmpty()) {
+			throw new RuntimeException("Eval with params not implemented yet"); //TODO aql
 		}
 		Connection conn = null;
 		boolean safe = (I.algebra().talg().sks.isEmpty() && I.algebra().talg().eqs.isEmpty()) || allowUnsafeSql();
@@ -431,7 +434,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 	
 	private static <Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y, En2> List<Pair<Fk1, X>> getAccessPath(Var v, Row<En2, X> tuple, Frozen<Ty, En1, Sym, Fk1, Att1> q2, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
 		List<Pair<Fk1, X>> ret = new LinkedList<>();
-		for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : q2.eqs) {
+		for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : q2.eqsNoSks()) {
 			if (eq.lhs.fk != null && eq.lhs.arg.equals(Term.Gen(v))) {
 				Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> rhs = trans1(tuple, eq.rhs, I);
 				if (!rhs.isPresent()) {
@@ -453,7 +456,7 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 
 	private static <Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y, En2> List<Pair<Att1, Object>> getAccessPath2(Var v, Row<En2, X> tuple, Frozen<Ty, En1, Sym, Fk1, Att1> q2, Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I) {
 		List<Pair<Att1, Object>> ret = new LinkedList<>();
-		for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : q2.eqs) {
+		for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : q2.eqsNoSks()) {
 			if (eq.lhs.att != null && eq.lhs.arg.equals(Term.Gen(v))) {
 				Optional<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> rhs = trans1(tuple, eq.rhs, I);
 				if (!rhs.isPresent()) {

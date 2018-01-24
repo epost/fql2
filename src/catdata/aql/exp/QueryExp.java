@@ -177,6 +177,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 	}
 
+	//TODO aql check compose
 	public static final class QueryExpCompose<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, En3, Fk3, Att3>
 			extends QueryExp<Ty, En1, Sym, Fk1, Att1, En3, Fk3, Att3> {
 
@@ -262,9 +263,10 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			
 			Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q1 = Q1.eval(env);
 			Query<Ty, En2, Sym, Fk2, Att2, En3, Fk3, Att3> q2 = Q2.eval(env);
+			
 
-			Ctx<En3, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens = new Ctx<>();
-			Ctx<Att3, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts = new Ctx<>();
+			Ctx<En3, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Var>>, AqlOptions>> ens = new Ctx<>();
+			Ctx<Att3, Term<Ty, En1, Sym, Fk1, Att1, Var, Var>> atts = new Ctx<>();
 			Ctx<Fk3, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> fks = new Ctx<>();
 
 
@@ -274,7 +276,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				Pair<Ctx<Var, Pair<Var, Var>>, Ctx<Pair<Var, Var>, Var>> iso = new Pair<>(new Ctx<>(), new Ctx<>());
 
 				Ctx<Var, En1> fr = new Ctx<>();
-				Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> wh = new LinkedList<>();
+				Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Var>> wh = new LinkedList<>();
 
 				for (Entry<Var, En2> v : q2.ens.get(en3).gens.map.entrySet()) {
 					Frozen<Ty, En1, Sym, Fk1, Att1> I = q1.ens.get(v.getValue());
@@ -285,7 +287,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 						fr.put(newV, u.getValue());
 					}
 					Function<Var, Var> genf = u -> iso.second.get(new Pair<>(v.getKey(), u));
-					for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Void> eq : I.eqs) {
+					for (Eq<Ty, En1, Sym, Fk1, Att1, Var, Var> eq : I.eqs) {
 						wh.add(new Eq<>(new Ctx<>(), eq.lhs.mapGen(genf), eq.rhs.mapGen(genf)));
 					}
 				}
@@ -295,11 +297,11 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			}
 
 			for (En3 en3 : q2.dst.ens) {
-				for (Eq<Ty, En2, Sym, Fk2, Att2, Var, Void> eq : q2.ens.get(en3).eqs) {
+				for (Eq<Ty, En2, Sym, Fk2, Att2, Var, Var> eq : q2.ens.get(en3).eqs) {
 					Chc<Ty, En2> ty = q2.ens.get(en3).type(eq.lhs);
 					if (!ty.left) {
 						
-						Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> lhs = q1
+						Transform<Ty, En1, Sym, Fk1, Att1, Var, Var, Var, Var, ID, Chc<Var, Pair<ID, Att1>>, ID, Chc<Var, Pair<ID, Att1>>> lhs = q1
 								.compose(q1.transP(eq.lhs), ty.r); 
 				
 						for (Var v : lhs.gens().keySet()) {
@@ -317,10 +319,10 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 					} else {
 						
 					//	q1.a
-						Term<Ty, En1, Sym, Fk1, Att1, Var, Void> xl 
+						Term<Ty, En1, Sym, Fk1, Att1, Var, Var> xl 
 						= transT(q1, isos, eq.lhs.convert(), en3);
 
-						Term<Ty, En1, Sym, Fk1, Att1, Var, Void> xr
+						Term<Ty, En1, Sym, Fk1, Att1, Var, Var> xr
 						= transT(q1, isos, eq.rhs.convert(), en3);
 						
 						ens.get(en3).second.add(
@@ -330,7 +332,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			}
 
 			for (Fk3 fk3 : q2.dst.fks.keySet()) {
-				Transform<Ty, En2, Sym, Fk2, Att2, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att2>>, ID, Chc<Void, Pair<ID, Att2>>> 
+				Transform<Ty, En2, Sym, Fk2, Att2, Var, Var, Var, Var, ID, Chc<Var, Pair<ID, Att2>>, ID, Chc<Var, Pair<ID, Att2>>> 
 				h = q2.fks.get(fk3);
 
 				Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>> g = new Ctx<>();
@@ -346,10 +348,10 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			}
 			
 			for (Att3 att3 : q2.dst.atts.keySet()) {
-				Term<Ty, En2, Sym, Fk2, Att2, Var, Void> 
+				Term<Ty, En2, Sym, Fk2, Att2, Var, Var> 
 				h = q2.atts.get(att3);
 				
-				Term<Ty, En1, Sym, Fk1, Att1, Var, Void> xl 
+				Term<Ty, En1, Sym, Fk1, Att1, Var, Var> xl 
 				= transT(q1, isos, h, q2.dst.atts.get(att3).first);
 				
 				atts.put(att3, xl);
@@ -361,14 +363,14 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 		}
 
-		public Term<Ty, En1, Sym, Fk1, Att1, Var, Void> transT(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q1,
+		public Term<Ty, En1, Sym, Fk1, Att1, Var, Var> transT(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q1,
 				Map<En3, Pair<Ctx<Var, Pair<Var, Var>>, Ctx<Pair<Var, Var>, Var>>> iso,
-				Term<Ty, En2, Sym, Fk2, Att2, Var, Void> t, En3 en3) {
+				Term<Ty, En2, Sym, Fk2, Att2, Var, Var> t, En3 en3) {
 			if (t.obj != null) {
 				return Term.Obj(t.obj, t.ty);
 			} else if (t.sym != null) {
-				List<Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> l = new LinkedList<>();
-				for (Term<Ty, En2, Sym, Fk2, Att2, Var, Void> arg : t.args) {
+				List<Term<Ty, En1, Sym, Fk1, Att1, Var, Var>> l = new LinkedList<>();
+				for (Term<Ty, En2, Sym, Fk2, Att2, Var, Var> arg : t.args) {
 					l.add(transT(q1, iso, arg, en3));
 				}
 				return Term.Sym(t.sym, l);
@@ -384,7 +386,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		public Term<Void, En1, Void, Fk1, Void, Var, Void> trans(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q1,
 				Map<En3, Pair<Ctx<Var, Pair<Var, Var>>, Ctx<Pair<Var, Var>, Var>>> iso, En2 en2, Var p,
 				Term<Void, En2, Void, Fk2, Void, Var, Void> t, En3 en3) {
-			Transform<Ty, En1, Sym, Fk1, Att1, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att1>>, ID, Chc<Void, Pair<ID, Att1>>> rhs = q1
+			Transform<Ty, En1, Sym, Fk1, Att1, Var, Var, Var, Var, ID, Chc<Var, Pair<ID, Att1>>, ID, Chc<Var, Pair<ID, Att1>>> rhs = q1
 					.compose(q1.transP(t.convert()), en2);
 
 			Var lhsGen = Util.get0(t.gens());
@@ -402,8 +404,8 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q1 = Q1.eval(env);
 			Query<Ty, En2, Sym, Fk2, Att2, En3, Fk3, Att3> q2 = Q2.eval(env);
 
-			Ctx<En3, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens = new Ctx<>();
-			Ctx<Att3, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts = new Ctx<>();
+			Ctx<En3, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Var>>, AqlOptions>> ens = new Ctx<>();
+			Ctx<Att3, Term<Ty, En1, Sym, Fk1, Att1, Var, Var>> atts = new Ctx<>();
 			Ctx<Fk3, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> fks = new Ctx<>();
 
 			AqlOptions ops = new AqlOptions(options, null, env.defaults);
@@ -412,7 +414,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 			Ctx<En3, Pair<Map<ID, Integer>, Map<Integer, ID>>> isos = new Ctx<>();
 			Var v = new Var("v");
-			Ctx<En3, Map<Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>>> surj = new Ctx<>();
+			Ctx<En3, Map<Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Var, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>>> surj = new Ctx<>();
 
 			for (Ty ty : q2.dst.typeSide.tys) {
 				Collage<Ty, En2, Sym, Fk2, Att2, Void, Var> col = new Collage<>(q2.src.collage());
@@ -428,23 +430,23 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			}
 
 			for (En3 en3 : q2.dst.ens) {
-				Collage<Ty, En2, Sym, Fk2, Att2, Var, Void> col = q2.ens.get(en3).collage();
+				Collage<Ty, En2, Sym, Fk2, Att2, Var, Var> col = q2.ens.get(en3).collage();
 
-				InitialAlgebra<Ty, En2, Sym, Fk2, Att2, Var, Void, ID> initial = new InitialAlgebra<>(ops, q2.src, col,
+				InitialAlgebra<Ty, En2, Sym, Fk2, Att2, Var, Var, ID> initial = new InitialAlgebra<>(ops, q2.src, col,
 						new It(), Object::toString, Object::toString);
-				LiteralInstance<Ty, En2, Sym, Fk2, Att2, Var, Void, ID, Chc<Void, Pair<ID, Att2>>> y = new LiteralInstance<>(
+				LiteralInstance<Ty, En2, Sym, Fk2, Att2, Var, Var, ID, Chc<Var, Pair<ID, Att2>>> y = new LiteralInstance<>(
 						q2.src, col.gens.map, col.sks.map, q2.ens.get(en3).eqs(), initial.dp(), initial,
 						(Boolean) ops.getOrDefault(AqlOption.require_consistency),
 						(Boolean) ops.getOrDefault(AqlOption.allow_java_eqs_unsafe)); 
 
-				CoEvalInstance<Ty, En1, Sym, Fk1, Att1, Var, Void, En2, Fk2, Att2, ID, Chc<Void, Pair<ID, Att2>>> J = new CoEvalInstance<>(
+				CoEvalInstance<Ty, En1, Sym, Fk1, Att1, Var, Var, En2, Fk2, Att2, ID, Chc<Var, Pair<ID, Att2>>> J = new CoEvalInstance<>(
 						q1, y, ops);
 			
 				Pair<Map<ID, Integer>, Map<Integer, ID>> iso = J.algebra().intifyX(0);
 				isos.put(en3, iso);
 
 				Ctx<Var, En1> fr = new Ctx<>();
-				Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> wh = new LinkedList<>();
+				Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Var>> wh = new LinkedList<>();
 
 				for (Pair<Var, ID> id : J.gens().keySet()) {
 					Var v2 = new Var(iso.first.get(J.algebra().nf(Term.Gen(id))) + " "
@@ -454,11 +456,11 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 					}
 				}
 
-				Map<Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> surjX = new HashMap<>();
+				Map<Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Var, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> surjX = new HashMap<>();
 				Function<Pair<Var, ID>, Var> genf = x -> new Var(
 						iso.first.get(J.algebra().gen(x)) + " " + J.algebra().printX(J.algebra().gen(x)));
 
-				for (Chc<Void, Pair<ID, Att2>> p : J.sks().keySet()) {
+				for (Chc<Var, Pair<ID, Att2>> p : J.sks().keySet()) {
 					Set<Term<Ty, En1, Sym, Fk1, Att1, Pair<Var, ID>, Void>> set = new HashSet<>();
 					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> u = null;
 
@@ -490,16 +492,16 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				}
 				surj.put(en3, surjX);
 
-				for (Pair<Term<Ty, En1, Sym, Fk1, Att1, Pair<Var, ID>, Chc<Void, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Pair<Var, ID>, Chc<Void, Pair<ID, Att2>>>> eq : J
+				for (Pair<Term<Ty, En1, Sym, Fk1, Att1, Pair<Var, ID>, Chc<Var, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Pair<Var, ID>, Chc<Var, Pair<ID, Att2>>>> eq : J
 						.eqs()) {
 
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>> tz = eq.first.mapGen(genf);
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Var, Pair<ID, Att2>>> tz = eq.first.mapGen(genf);
 					Term tt0 = tz;
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> lhs = tt0.replace(surjX);
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Var> lhs = tt0.replace(surjX);
 
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>> qw = eq.second.mapGen(genf);
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Var, Pair<ID, Att2>>> qw = eq.second.mapGen(genf);
 					Term qw1 = qw;
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> rhs = qw1.replace(surjX);
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Var> rhs = qw1.replace(surjX);
 
 					if (!lhs.equals(rhs)) {
 						wh.add(new Eq<>(new Ctx<>(), lhs, rhs));
@@ -508,7 +510,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				ens.put(en3, new Triple<>(fr, wh, ops));
 			}
 			for (Fk3 fk3 : q2.dst.fks.keySet()) {
-				CoEvalTransform<Ty, En1, Sym, Fk1, Att1, Var, Void, En2, Fk2, Att2, Var, Void, ID, Chc<Void, Pair<ID, Att2>>, ID, Chc<Void, Pair<ID, Att2>>> h = new CoEvalTransform<>(
+				CoEvalTransform<Ty, En1, Sym, Fk1, Att1, Var, Var, En2, Fk2, Att2, Var, Var, ID, Chc<Var, Pair<ID, Att2>>, ID, Chc<Var, Pair<ID, Att2>>> h = new CoEvalTransform<>(
 						q1, q2.fks.get(fk3), ops, ops);
 
 				Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>> g = new Ctx<>();
@@ -530,18 +532,18 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			for (Att3 att3 : q2.dst.atts.keySet()) {
 				Instance<Ty, En2, Sym, Fk2, Att2, Void, Var, ID, Chc<Var, Pair<ID, Att2>>> y0 = ys
 						.get(q2.dst.atts.get(att3).second);
-				Instance<Ty, En2, Sym, Fk2, Att2, Var, Void, ID, Chc<Void, Pair<ID, Att2>>> f0 = q2.ens
+				Instance<Ty, En2, Sym, Fk2, Att2, Var, Var, ID, Chc<Var, Pair<ID, Att2>>> f0 = q2.ens
 						.get(q2.dst.atts.get(att3).first);
 
-				Map<Var, Term<Ty, En2, Sym, Fk2, Att2, Var, Void>> w = new HashMap<>();
+				Map<Var, Term<Ty, En2, Sym, Fk2, Att2, Var, Var>> w = new HashMap<>();
 				w.put(v, q2.atts.get(att3));
 
-				Transform<Ty, En2, Sym, Fk2, Att2, Void, Var, Var, Void, ID, Chc<Var, Pair<ID, Att2>>, ID, Chc<Void, Pair<ID, Att2>>> m = new LiteralTransform<>(
-						new HashMap<>(), w, y0, f0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
-				CoEvalTransform<Ty, En1, Sym, Fk1, Att1, Void, Var, En2, Fk2, Att2, Var, Void, ID, Chc<Var, Pair<ID, Att2>>, ID, Chc<Void, Pair<ID, Att2>>> h = new CoEvalTransform<>(
-						q1, m, ops, ops);
+				Transform<Ty, En2, Sym, Fk2, Att2, Void, Var, Var, Var, ID, Chc<Var, Pair<ID, Att2>>, ID, Chc<Var, Pair<ID, Att2>>> 
+				m = new LiteralTransform<Ty, En2, Sym, Fk2, Att2, Void, Var, Var, Var, ID, Chc<Var, Pair<ID, Att2>>, ID, Chc<Var, Pair<ID, Att2>>>(new HashMap<>(), w, y0, f0, (Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe));
+				CoEvalTransform<Ty, En1, Sym, Fk1, Att1, Void, Var, En2, Fk2, Att2, Var, Var, ID, Chc<Var, Pair<ID, Att2>>, ID, Chc<Var, Pair<ID, Att2>>> 
+				h = 	new CoEvalTransform<>(q1, m, ops, ops);
 
-				Term<Ty, En1, Sym, Fk1, Att1, Pair<Var, ID>, Chc<Void, Pair<ID, Att2>>> u = h
+				Term<Ty, En1, Sym, Fk1, Att1, Pair<Var, ID>, Chc<Var, Pair<ID, Att2>>> u = h
 						.reprT(Chc.inLeft(Chc.inLeft(v)));
 
 				Pair<Map<ID, Integer>, Map<Integer, ID>> iso1 = isos.get(q2.dst.atts.get(att3).first);
@@ -549,9 +551,9 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				Function<Pair<Var, ID>, Var> genf = p -> new Var(iso1.first.get(h.dst().algebra().gen(p)) + " "
 						+ h.dst().algebra().printX(h.dst().algebra().gen(p)));
 
-				Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>> tz = u.mapGen(genf);
+				Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Var, Pair<ID, Att2>>> tz = u.mapGen(genf);
 				Term tt0 = tz;
-				Term<Ty, En1, Sym, Fk1, Att1, Var, Void> tt = tt0.replace(surj.get(q2.dst.atts.get(att3).first));
+				Term<Ty, En1, Sym, Fk1, Att1, Var, Var> tt = tt0.replace(surj.get(q2.dst.atts.get(att3).first));
 
 				atts.put(att3, tt);
 			}
@@ -631,8 +633,8 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 		public Query<Ty, En2, Sym, Fk2, Att2, En1, Fk1, Att1> eval(AqlEnv env) {
 			Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F0 = F.eval(env);
 
-			Ctx<En1, Triple<Ctx<Var, En2>, Collection<Eq<Ty, En2, Sym, Fk2, Att2, Var, Void>>, AqlOptions>> ens = new Ctx<>();
-			Ctx<Att1, Term<Ty, En2, Sym, Fk2, Att2, Var, Void>> atts = new Ctx<>();
+			Ctx<En1, Triple<Ctx<Var, En2>, Collection<Eq<Ty, En2, Sym, Fk2, Att2, Var, Var>>, AqlOptions>> ens = new Ctx<>();
+			Ctx<Att1, Term<Ty, En2, Sym, Fk2, Att2, Var, Var>> atts = new Ctx<>();
 			Ctx<Fk1, Pair<Ctx<Var, Term<Void, En2, Void, Fk2, Void, Var, Void>>, Boolean>> fks = new Ctx<>();
 
 			AqlOptions ops = new AqlOptions(options, null, env.defaults);
@@ -644,9 +646,9 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				ens.put(en1, new Triple<>(fr, new HashSet<>(), ops));
 			}
 			for (Att1 att1 : F0.src.atts.keySet()) {
-				Term<Ty, En2, Sym, Fk2, Att2, Var, Void> h = F0.atts.get(att1).third.mapGen(Util.voidFn());
-				Term<Ty, En2, Sym, Fk2, Att2, Var, Void> g = Term.Gen(v);
-				Term<Ty, En2, Sym, Fk2, Att2, Var, Void> t = h.subst(Util.singMap0(F0.atts.get(att1).first, g));
+				Term<Ty, En2, Sym, Fk2, Att2, Var, Var> h = F0.atts.get(att1).third.mapGenSk(Util.voidFn(),Util.voidFn());
+				Term<Ty, En2, Sym, Fk2, Att2, Var, Var> g = Term.Gen(v);
+				Term<Ty, En2, Sym, Fk2, Att2, Var, Var> t = h.subst(Util.singMap0(F0.atts.get(att1).first, g));
 				atts.put(att1, t);
 			}
 			for (Fk1 fk1 : F0.src.fks.keySet()) {
@@ -730,8 +732,8 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F0 = F.eval(env);
 			AqlOptions ops = new AqlOptions(options, null, env.defaults);
 
-			Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>>, AqlOptions>> ens = new Ctx<>();
-			Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> atts = new Ctx<>();
+			Ctx<En2, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Var>>, AqlOptions>> ens = new Ctx<>();
+			Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Var>> atts = new Ctx<>();
 			Ctx<Fk2, Pair<Ctx<Var, Term<Void, En1, Void, Fk1, Void, Var, Void>>, Boolean>> fks = new Ctx<>();
 
 			Map<En2, LiteralInstance<Ty, En2, Sym, Fk2, Att2, Var, Void, ID, Chc<Void, Pair<ID, Att2>>>> ys = new HashMap<>();
@@ -739,7 +741,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 			Map<En2, Pair<Map<Pair<En1, ID>, Integer>, Map<Integer, Pair<En1, ID>>>> isos = new HashMap<>();
 			Var v = new Var("v");
-			Map<En2, Map<Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>>> surj = new HashMap<>();
+			Map<En2, Map<Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Var>>> surj = new HashMap<>();
 
 			for (En2 en2 : F0.dst.ens) {
 				Collage<Ty, En2, Sym, Fk2, Att2, Var, Void> col = new Collage<>(F0.dst.collage());
@@ -761,7 +763,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				isos.put(en2, iso);
 
 				Ctx<Var, En1> fr = new Ctx<>();
-				Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Void>> wh = new LinkedList<>();
+				Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Var>> wh = new LinkedList<>();
 
 				for (En1 en1 : J.schema().ens) {
 					for (Pair<En1, ID> id : J.algebra().en(en1)) {
@@ -771,10 +773,10 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 					}
 				}
 
-				Map<Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Void>> surjX = new HashMap<>();
+				Map<Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Var, Var>> surjX = new HashMap<>();
 				for (Chc<Void, Pair<ID, Att2>> p : J.algebra().talg().sks.keySet()) {
 					Set<Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Void>> set = new HashSet<>();
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> u = null;
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Var> u = null;
 
 					outer: for (int i = 0; i < (int) ops.getOrDefault(AqlOption.toCoQuery_max_term_size); i++) {
 						Set<Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Void>> set2 = J.collage()
@@ -783,7 +785,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 							if (J.type(Term.Sk(p)).equals(J.type(s.mapGenSk(Function.identity(), Util.voidFn())))) {
 								if (J.dp().eq(new Ctx<>(), Term.Sk(p),
 										s.mapGenSk(Function.identity(), Util.voidFn()))) {
-									u = s.mapGen(pp -> new Var(iso.first.get(pp).toString() ));
+									u = s.mapGenSk(pp -> new Var(iso.first.get(pp).toString()), Util.voidFn() );
 
 								//	u = s.mapGen(pp -> new Var("\"(" + iso.first.get(pp) + " " + J.algebra().printX(pp)+ ")\""));
 									break outer;
@@ -805,16 +807,14 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				for (Pair<Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Chc<Void, Pair<ID, Att2>>>, Term<Ty, En1, Sym, Fk1, Att1, Pair<En1, ID>, Chc<Void, Pair<ID, Att2>>>> eq : J
 						.eqs()) {
 					Function<Pair<En1, ID>, Var> genf = x -> new Var(iso.first.get(x).toString() );
-//TODO aql revert total 46
-					//Function<Pair<En1, ID>, Var> genf = x -> new Var("\"(" + iso.first.get(x) + " " + J.algebra().printX(x)+ ")\"");
 
 					Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>> tz = eq.first.mapGen(genf);
 					Term tt0 = tz;
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> tt = tt0.replace(surjX);
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Var> tt = tt0.replace(surjX);
 
 					Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>> qw = eq.second.mapGen(genf);
 					Term qw1 = qw;
-					Term<Ty, En1, Sym, Fk1, Att1, Var, Void> ttA = qw1.replace(surjX);
+					Term<Ty, En1, Sym, Fk1, Att1, Var, Var> ttA = qw1.replace(surjX);
 
 					if (!tt.equals(ttA)) {
 						wh.add(new Eq<>(new Ctx<>(), tt, ttA));
@@ -886,7 +886,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				// Function<Void, Pair<ID, Att2>> skf = vv -> Util.abort(vv);
 				Term<Ty, En1, Sym, Fk1, Att1, Var, Chc<Void, Pair<ID, Att2>>> tz = s.mapGen(genf);
 				Term tt0 = tz;
-				Term<Ty, En1, Sym, Fk1, Att1, Var, Void> tt = tt0.replace(surj.get(F0.dst.atts.get(att2).first));
+				Term<Ty, En1, Sym, Fk1, Att1, Var, Var> tt = tt0.replace(surj.get(F0.dst.atts.get(att2).first));
 
 				atts.put(att2, tt); // t.map(Function.identity(),
 									// Function.identity(), Util.voidFn(),
@@ -894,6 +894,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 									// Util.anomaly()));
 			}
 
+			
 			return Query.makeQuery(ens, atts, fks, F0.src, F0.dst,
 					(Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe), (Boolean) ops.getOrDefault(AqlOption.query_remove_redundancy));
 		}

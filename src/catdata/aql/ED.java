@@ -91,16 +91,16 @@ public class ED<Ty, En, Sym, Fk, Att> {
 	
 	public final Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> Ewh;
 
-	private final Term<Ty, En, Sym, Fk, Att, Var, Void> freeze(Term<Ty, En, Sym, Fk, Att, Void, Void> t) {
-		Term<Ty, En, Sym, Fk, Att, Var, Void> ret = t.mapGen(Util.voidFn());
-		Map<Var, Term<Ty, En, Sym, Fk, Att, Var, Void>> m = new HashMap<>();
+	private final Term<Ty, En, Sym, Fk, Att, Var, Var> freeze(Term<Ty, En, Sym, Fk, Att, Void, Void> t) {
+		Term<Ty, En, Sym, Fk, Att, Var, Var> ret = t.mapGenSk(Util.voidFn(), Util.voidFn());
+		Map<Var, Term<Ty, En, Sym, Fk, Att, Var, Var>> m = new HashMap<>();
 		for (Var v : Util.union(As.keySet(), Es.keySet())) {
 			m.put(v, Term.Gen(v));
 		}
 		return ret.subst(m);
 	}
-	private final Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>> freeze(Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs) {
-		Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>> ret = new LinkedList<>();
+	private final Collection<Eq<Ty, En, Sym, Fk, Att, Var, Var>> freeze(Set<Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>>> eqs) {
+		Collection<Eq<Ty, En, Sym, Fk, Att, Var, Var>> ret = new LinkedList<>();
 		for (Pair<Term<Ty, En, Sym, Fk, Att, Void, Void>, Term<Ty, En, Sym, Fk, Att, Void, Void>> eq : eqs) {
 			ret.add(new Eq<>(new Ctx<>(), freeze(eq.first), freeze(eq.second)));
 		}
@@ -117,7 +117,7 @@ public class ED<Ty, En, Sym, Fk, Att> {
 		if (!Collections.disjoint(As.keySet(), Es.keySet())) {
 			throw new RuntimeException("The forall and exists clauses do not use disjoint variables.");
 		}
-		Ctx<WHICH, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>>, AqlOptions>> 
+		Ctx<WHICH, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Var>>, AqlOptions>> 
 		is = new Ctx<>();
 	
 		is.put(WHICH.FRONT, new Triple<>(As, freeze(Awh), options));
@@ -134,7 +134,8 @@ public class ED<Ty, En, Sym, Fk, Att> {
 		fks = new Ctx<>();
 		fks.put(new Unit(), new Pair<>(ctx, true));
 		
-		Q = Query.makeQuery(is, new Ctx<>(), fks, schema, getEDSchema(schema.typeSide, options), false, false); //TODO AQL speed these can be set to true
+		Schema<Ty, WHICH, Sym, Unit, Void> zzz = getEDSchema(schema.typeSide, options);
+		Q = Query.makeQuery(is, new Ctx<>(), fks, schema, zzz, false, false); //TODO AQL speed these can be set to true
 	}
 	
 	@Override

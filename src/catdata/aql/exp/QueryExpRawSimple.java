@@ -1,6 +1,7 @@
 package catdata.aql.exp;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -117,13 +118,13 @@ public class QueryExpRawSimple extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, At
 				ops.getOrDefault(AqlOption.allow_java_eqs_unsafe);
 
 
-		Ctx<En, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>>, AqlOptions>> ens0 = new Ctx<>();
-		Ctx<Att, Term<Ty, En, Sym, Fk, Att, Var, Void>> atts0 = new Ctx<>();
+		Ctx<En, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Var>>, AqlOptions>> ens0 = new Ctx<>();
+		Ctx<Att, Term<Ty, En, Sym, Fk, Att, Var, Var>> atts0 = new Ctx<>();
 		Ctx<Fk, Pair<Ctx<Var, Term<Void, En, Void, Fk, Void, Var, Void>>, Boolean>> fks0 = new Ctx<>();
 
-		Ctx<En, Collage<Ty, En, Sym, Fk, Att, Var, Void>> cols = new Ctx<>();
+		Ctx<En, Collage<Ty, En, Sym, Fk, Att, Var, Var>> cols = new Ctx<>();
 			
-		QueryExpRaw.processBlock(block.options, env, src0, ens0, cols, block);
+		QueryExpRaw.processBlock(block.options, env, src0, ens0, cols, block, Collections.emptyList());
 		
 		Collage<Ty, En, Sym, Fk, Att, Void, Void> colForDst = new Collage<>(src0.typeSide.collage());
 		colForDst.ens.add(En);
@@ -146,7 +147,7 @@ public class QueryExpRawSimple extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, At
 
 		for (Pair<Att, RawTerm> p : block.atts) {
 			try {
-				QueryExpRaw.processAtt(src0, dst0, ens0, atts0, cols, p);
+				QueryExpRaw.processAtt(src0, dst0, ens0, atts0, cols, p, Collections.emptyList());
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LocException(find("attributes", p),
@@ -154,7 +155,7 @@ public class QueryExpRawSimple extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, At
 			}
 		}
 
-
+		//TODO aql
 		return Query.makeQuery(ens0, atts0, fks0, src0, dst0, doNotCheckEqs, elimRed);
 	}
 

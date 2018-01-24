@@ -116,8 +116,8 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 		}
 
 		DMG<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void> shape = new DMG<>(T, new HashMap<>());
-		Ctx<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Instance<Ty, En, Sym, Fk, Att, Var, Void, ID, Chc<Void, Pair<ID, Att>>>> nodesA = new Ctx<>();
-		Ctx<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Instance<Ty, En, Sym, Fk, Att, Var, Void, ID, Chc<Void, Pair<ID, Att>>>> nodesE = new Ctx<>();
+		Ctx<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Instance<Ty, En, Sym, Fk, Att, Var, Var, ID, Chc<Var, Pair<ID, Att>>>> nodesA = new Ctx<>();
+		Ctx<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Instance<Ty, En, Sym, Fk, Att, Var, Var, ID, Chc<Var, Pair<ID, Att>>>> nodesE = new Ctx<>();
 	
 		Map<Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Term<Void, En, Void, Fk, Void, Gen, Void>> aaa = new HashMap<>();
 		Map<Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Term<Void, En, Void, Fk, Void, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Void>> xxx = new HashMap<>();
@@ -125,10 +125,10 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 
 		for (Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>> t : T) {
 			Query<Ty, En, Sym, Fk, Att, WHICH, Unit, Void> Q = t.first.Q;
-			Instance<Ty, En, Sym, Fk, Att, Var, Void, ID, Chc<Void, Pair<ID, Att>>> A = Q.ens.get(WHICH.FRONT);
-			Instance<Ty, En, Sym, Fk, Att, Var, Void, ID, Chc<Void, Pair<ID, Att>>> E = Q.ens.get(WHICH.BACK);
+			Instance<Ty, En, Sym, Fk, Att, Var, Var, ID, Chc<Var, Pair<ID, Att>>> A = Q.ens.get(WHICH.FRONT);
+			Instance<Ty, En, Sym, Fk, Att, Var, Var, ID, Chc<Var, Pair<ID, Att>>> E = Q.ens.get(WHICH.BACK);
 
-			Transform<Ty, En, Sym, Fk, Att, Var, Void, Var, Void, ID, Chc<Void, Pair<ID, Att>>, ID, Chc<Void, Pair<ID, Att>>> AE = Q.fks.get(new Unit());
+			Transform<Ty, En, Sym, Fk, Att, Var, Var, Var, Var, ID, Chc<Var, Pair<ID, Att>>, ID, Chc<Var, Pair<ID, Att>>> AE = Q.fks.get(new Unit());
 
 			nodesA.put(t, A);
 			nodesE.put(t, E);
@@ -142,15 +142,18 @@ public class Constraints<Ty, En, Sym, Fk, Att> implements Semantics {
 			}*/
 		}
 
-		ColimitInstance<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void, Ty, En, Sym, Fk, Att, Var, Void, ID, Chc<Void, Pair<ID, Att>>> A0 = new ColimitInstance<>(schema, shape, nodesA, new Ctx<>(), options);
+		ColimitInstance<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void, Ty, En, Sym, Fk, Att, Var, Var, ID, Chc<Var, Pair<ID, Att>>> 
+		A0 = new ColimitInstance<>(schema, shape, nodesA, new Ctx<>(), options);
 
-		ColimitInstance<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void, Ty, En, Sym, Fk, Att, Var, Void, ID, Chc<Void, Pair<ID, Att>>> E0 = new ColimitInstance<>(schema, shape, nodesE, new Ctx<>(), options);
+		ColimitInstance<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void, Ty, En, Sym, Fk, Att, Var, Var, ID, Chc<Var, Pair<ID, Att>>> 
+		E0 = new ColimitInstance<>(schema, shape, nodesE, new Ctx<>(), options);
 
-		LiteralTransform<Ty, En, Sym, Fk, Att, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, ID, Chc<Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, Pair<ID, Att>>, ID, Chc<Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, Pair<ID, Att>>> 
+		LiteralTransform<Ty, En, Sym, Fk, Att, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, ID, Chc<Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<ID, Att>>, ID, Chc<Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<ID, Att>>>
 		A0E0 = new LiteralTransform<>(xxx, new HashMap<>(), A0, E0, false);
 
-		LiteralTransform<Ty, En, Sym, Fk, Att, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, Gen, Sk, ID, Chc<Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Void>, Pair<ID, Att>>, X, Y> A0I 
-		= new LiteralTransform<>(aaa, new HashMap<>(), A0, I, false);
+		LiteralTransform<Ty, En, Sym, Fk, Att, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Gen, Sk, ID, Chc<Pair<Pair<ED<Ty, En, Sym, Fk, Att>, Row<WHICH, X>>, Var>, Pair<ID, Att>>, X, Y> A0I 
+		= 
+		new LiteralTransform<>(aaa, new HashMap<>(), A0, I, false);
 		
 		return pushout(A0E0, A0I, options);
 		// TODO aql disable checking for speed

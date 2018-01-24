@@ -47,6 +47,9 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 
 	private final Set<Block> blocks;
 
+	public final Ctx<String, String> params = new Ctx<>();
+	public final Ctx<String, RawTerm> consts = new Ctx<>();
+
 	private final Ctx<En, Integer> b1 = new Ctx<>();
 	private final Ctx<Fk, Integer> b2 = new Ctx<>();
 	private final Ctx<Att, Integer> b3 = new Ctx<>();
@@ -533,8 +536,8 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 		Schema<Ty, En, Sym, Fk, Att> src0 = src.eval(env);
 		Schema<Ty, En, Sym, Fk, Att> dst0 = dst.eval(env);
 
-		Ctx<En, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>>, AqlOptions>> ens0 = new Ctx<>();
-		Ctx<Att, Term<Ty, En, Sym, Fk, Att, Var, Void>> atts0 = new Ctx<>();
+		Ctx<En, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Var>>, AqlOptions>> ens0 = new Ctx<>();
+		Ctx<Att, Term<Ty, En, Sym, Fk, Att, Var, Var>> atts0 = new Ctx<>();
 		Ctx<Fk, Pair<Ctx<Var, Term<Void, En, Void, Fk, Void, Var, Void>>, Boolean>> fks0 = new Ctx<>();
 
 		for (String k : imports) {
@@ -551,14 +554,14 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 			}
 		}
 
-		Ctx<En, Collage<Ty, En, Sym, Fk, Att, Var, Void>> cols = new Ctx<>();
+		Ctx<En, Collage<Ty, En, Sym, Fk, Att, Var, Var>> cols = new Ctx<>();
 		for (Block p : blocks) {
 			try {
 				if (!dst0.ens.contains(p.en)) {
 					throw new RuntimeException(
 							"the proposed target entity " + p.en + " does not actually appear in the target schema");
 				}
-				processBlock(options, env, src0, ens0, cols, p);
+				processBlock(options, env, src0, ens0, cols, p, params.keySet());
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LocException(b1.get(p.en), "In block for target entity " + p.en + ", " + ex.getMessage());
@@ -567,7 +570,7 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 			for (Pair<catdata.aql.exp.SchExpRaw.Att, RawTerm> pp : p.atts) {
 				try {
 
-					processAtt(src0, dst0, ens0, atts0, cols, pp);
+					processAtt(src0, dst0, ens0, atts0, cols, pp, params.keySet());
 
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -585,12 +588,12 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 					Ctx<Var, Term<Void, En, Void, Fk, Void, Var, Void>> trans = new Ctx<>();
 					for (Pair<Var, RawTerm> v : pp.second.gens) {
 						Ctx<String, Chc<Ty, En>> ctx = unVar(ens0.get(dst0.fks.get(pp.first).first).first.inRight());
-						Collage<Ty, En, Sym, Fk, Att, Var, Void> col = cols.get(dst0.fks.get(pp.first).first);
+						Collage<Ty, En, Sym, Fk, Att, Var, Var> col = cols.get(dst0.fks.get(pp.first).first);
 						Chc<Ty, En> required = Chc.inRight(ens0.get(dst0.fks.get(pp.first).second).first.get(v.first));
 						Term<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, Gen, Sk> term = RawTerm
 								.infer1x(ctx.map, v.second, null, required, col.convert(),
 										"in foreign key " + pp.first.str + ", ", src0.typeSide.js).second;
-						trans.put(v.first, freeze(term.convert()).convert());
+						trans.put(v.first, freeze(term.convert(), params.keySet()).convert());
 					}
 					boolean doNotCheckEqs = (Boolean) new AqlOptions(pp.second.options, null, env.defaults)
 							.getOrDefault(AqlOption.dont_validate_unsafe);
@@ -613,20 +616,20 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 	}
 
 	public static void processAtt(Schema<Ty, En, Sym, Fk, Att> src0, Schema<Ty, En, Sym, Fk, Att> dst0,
-			Ctx<En, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>>, AqlOptions>> ens0,
-			Ctx<Att, Term<Ty, En, Sym, Fk, Att, Var, Void>> atts0,
-			Ctx<En, Collage<Ty, En, Sym, Fk, Att, Var, Void>> cols, Pair<Att, RawTerm> p) {
+			Ctx<En, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Var>>, AqlOptions>> ens0,
+			Ctx<Att, Term<Ty, En, Sym, Fk, Att, Var, Var>> atts0,
+			Ctx<En, Collage<Ty, En, Sym, Fk, Att, Var, Var>> cols, Pair<Att, RawTerm> p, Collection<String> params) {
 		Ctx<String, Chc<Ty, En>> ctx = unVar(ens0.get(dst0.atts.get(p.first).first).first.inRight());
-		Collage<Ty, En, Sym, Fk, Att, Var, Void> col = cols.get(dst0.atts.get(p.first).first);
+		Collage<Ty, En, Sym, Fk, Att, Var, Var> col = cols.get(dst0.atts.get(p.first).first);
 		Chc<Ty, En> required = Chc.inLeft(dst0.atts.get(p.first).second);
 		Term<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, Gen, Sk> term = RawTerm
 				.infer1x(ctx.map, p.second, null, required, col.convert(), "", src0.typeSide.js).second;
-		atts0.put(p.first, freeze(term.convert()));
+		atts0.put(p.first, freeze(term.convert(), params));
 	}
 
 	public static void processBlock(Map<String, String> options, AqlEnv env, Schema<Ty, En, Sym, Fk, Att> src0,
-			Ctx<En, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>>, AqlOptions>> ens0,
-			Ctx<En, Collage<Ty, En, Sym, Fk, Att, Var, Void>> cols, Block p) {
+			Ctx<En, Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Var>>, AqlOptions>> ens0,
+			Ctx<En, Collage<Ty, En, Sym, Fk, Att, Var, Var>> cols, Block p, Collection<String> params) {
 
 		Ctx<Var, En> ctx = new Ctx<Var, En>(Util.toMapSafely(p.gens)); // p.second.gens);
 		for (Var v : ctx.map.keySet()) {
@@ -636,31 +639,35 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 						"from clause contains " + v + ":" + en + ", but " + en + " is not a source entity");
 			}
 		}
-		Collage<Ty, En, Sym, Fk, Att, Var, Void> col = new Collage<>(src0.collage());
+		Collage<Ty, En, Sym, Fk, Att, Var, Var> col = new Collage<>(src0.collage());
 		Ctx<String, Chc<Ty, En>> ctx0 = unVar(ctx.inRight());
 		col.gens.putAll(ctx.map);
 		cols.put(p.en, col);
-		Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>> eqs = new HashSet<>();
+		Collection<Eq<Ty, En, Sym, Fk, Att, Var, Var>> eqs = new HashSet<>();
 		for (Pair<RawTerm, RawTerm> eq : p.eqs) {
 			Triple<Ctx<Var, Chc<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En>>, Term<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, Gen, Sk>, Term<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, Gen, Sk>> x = RawTerm
 					.infer1x(ctx0.map, eq.first, eq.second, null, col.convert(),
 							"In equation " + eq.first + " = " + eq.second + ", ", src0.typeSide.js)
 					.first3();
-			eqs.add(new Eq<>(new Ctx<>(), freeze(x.second.convert()), freeze(x.third.convert())));
+			eqs.add(new Eq<>(new Ctx<>(), freeze(x.second.convert(), params), freeze(x.third.convert(), params)));
 		}
 		Map<String, String> uu = new HashMap<>(options);
 		uu.putAll(p.options);
 		AqlOptions theops = new AqlOptions(uu, null, env.defaults);
-		Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Void>>, AqlOptions> b = new Triple<>(ctx, eqs,
+		Triple<Ctx<Var, En>, Collection<Eq<Ty, En, Sym, Fk, Att, Var, Var>>, AqlOptions> b = new Triple<>(ctx, eqs,
 				theops);
 		ens0.put(p.en, b);
 	}
 
-	public static <Ty, En, Sym, Fk, Att> Term<Ty, En, Sym, Fk, Att, Var, Void> freeze(
-			Term<Ty, En, Sym, Fk, Att, Var, Void> term) {
-		Map<Var, Term<Ty, En, Sym, Fk, Att, Var, Void>> m = new HashMap<>();
+	public static <Ty, En, Sym, Fk, Att> Term<Ty, En, Sym, Fk, Att, Var, Var> freeze(
+			Term<Ty, En, Sym, Fk, Att, Var, Var> term, Collection<String> params) {
+		Map<Var, Term<Ty, En, Sym, Fk, Att, Var, Var>> m = new HashMap<>();
 		for (Var v : term.vars()) {
-			m.put(v, Term.Gen(v));
+			if (params.contains(v.var)) {
+				m.put(v, Term.Sk(v));
+			} else {
+				m.put(v, Term.Gen(v));
+			}
 		}
 		return term.subst(m);
 	}
