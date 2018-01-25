@@ -124,7 +124,7 @@ public class QueryExpRawSimple extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, At
 
 		Ctx<En, Collage<Ty, En, Sym, Fk, Att, Var, Var>> cols = new Ctx<>();
 			
-		QueryExpRaw.processBlock(block.options, env, src0, ens0, cols, block, Collections.emptyList());
+		QueryExpRaw.processBlock(block.options, env, src0, ens0, cols, block, new Ctx<>());
 		
 		Collage<Ty, En, Sym, Fk, Att, Void, Void> colForDst = new Collage<>(src0.typeSide.collage());
 		colForDst.ens.add(En);
@@ -147,7 +147,7 @@ public class QueryExpRawSimple extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, At
 
 		for (Pair<Att, RawTerm> p : block.atts) {
 			try {
-				QueryExpRaw.processAtt(src0, dst0, ens0, atts0, cols, p, Collections.emptyList());
+				QueryExpRaw.processAtt(src0, dst0, ens0, atts0, cols, p, new Ctx<>());
 			} catch (RuntimeException ex) {
 				ex.printStackTrace();
 				throw new LocException(find("attributes", p),

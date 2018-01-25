@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import catdata.Chc;
@@ -39,8 +38,8 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		return Kind.QUERY;
 	}
 
-	public final Ctx<Var, Ty> params = new Ctx<>();
-	public final Ctx<Var, Term<Ty, Void, Sym, Void, Void, Void, Void>> consts = new Ctx<>();
+	public final Ctx<Var, Ty> params;
+	//public final Ctx<Var, Term<Ty, Void, Sym, Void, Void, Void, Void>> consts = new Ctx<>();
 
 	public final Ctx<En2, Frozen<Ty, En1, Sym, Fk1, Att1>> ens = new Ctx<>();
 	public final Ctx<Att2, Term<Ty, En1, Sym, Fk1, Att1, Var, Var>> atts;
@@ -72,8 +71,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> b = new Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>(conv1(ens),
 				atts, conv2(), src, dst);
 		b = unfoldNestedApplications(b);
-		Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> p = new Query<>(params, consts, b.ens, b.atts, b.fks, src, dst,
-				true);
+		Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> p = new Query<>(params, new Ctx<>(), b.ens, b.atts, b.fks, src, dst, true);
 		return p;
 	}
 
@@ -368,6 +366,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		Util.assertNotNull(ens, atts, fks, src, dst);
 		this.src = src;
 		this.dst = dst;
+		this.params = new Ctx<>(params.map);
 		totalityCheck(ens, atts, fks);
 
 		for (En2 en2 : ens.keySet()) {
@@ -379,11 +378,14 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 				throw new RuntimeException("In block for entity " + en2 + ", " + thr.getMessage());
 			}
 		}
-
+		Ctx<Var, Term<Ty, En1, Sym, Fk1, Att1, Var, Var>> www = new Ctx<>();
+		for (Var v : params.keySet()) {
+			www.put(v, Term.Sk(v));
+		}
 		for (Fk2 fk2 : fks.keySet()) {
 			try {
 				Boolean b = fks.get(fk2).second || doNotCheckPathEqs;
-				this.fks.put(fk2, new LiteralTransform<>(fks.get(fk2).first.map, new HashMap<>(),
+				this.fks.put(fk2, new LiteralTransform<>(fks.get(fk2).first.map, www.map,
 						this.ens.get(dst.fks.get(fk2).second), this.ens.get(dst.fks.get(fk2).first), b));
 				doNotValidate.put(fk2, b);
 			} catch (Throwable thr) {
@@ -556,7 +558,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		private DP<Ty, En1, Sym, Fk1, Att1, Var, Var> dp;
 		public final AqlOptions options;
 		private Ctx<Var, Ty> params;
-		private Ctx<Var, Term<Ty, Void, Sym, Void, Void, Void, Void>> consts;
+		//private Ctx<Var, Term<Ty, Void, Sym, Void, Void, Void, Void>> consts;
 
 		public Frozen(Ctx<Var, Ty> params, Ctx<Var, Term<Ty, Void, Sym, Void, Void, Void, Void>> consts,
 				Ctx<Var, En1> gens, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Var>> eqs,
@@ -565,8 +567,9 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			this.eqs = eqs;
 			this.schema = schema;
 			this.params = params;
-			this.consts = consts;
-
+		//	this.consts = consts;
+			//this.sks = params;
+			
 			validateNoTalg();
 
 			if (!dont_validate_unsafe) {
@@ -640,9 +643,9 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		if (!params.isEmpty()) {
 			ret += "params " + Util.sep(params.map, ":", " ");
 		}
-		if (!consts.isEmpty()) {
+		/* if (!consts.isEmpty()) {
 			ret += "consts " + Util.sep(params.map, "=", " ");
-		}
+		} */
 
 		Map<String, String> m1 = new HashMap<>();
 
@@ -786,12 +789,6 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		List<String> ret1 = new LinkedList<>();
 		Map<En2, String> ret2 = new HashMap<>();
 
-		/*
-		 * Map<En2, Triple<List<Chc<Fk2, Att2>>, List<String>, List<String>>> ss =
-		 * dst.toSQL_srcSchemas(post, "Varchar"); for (En2 en2 : dst.ens) {
-		 * ret.addAll(ss.get(en2).second); }
-		 */
-
 		for (En2 en2 : ens.keySet()) {
 			Frozen<Ty, En1, Sym, Fk1, Att1> b = ens.get(en2);
 			Ctx<Var, En1> gens = b.gens;
@@ -884,12 +881,16 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			String newLhs;
 			if (eq.lhs.gen != null) {
 				newLhs = eq.lhs.gen + "." + idCol;
+			} else if (eq.lhs.sk != null) {
+				newLhs = "?";
 			} else {
 				newLhs = quotePrim(eq.lhs).toString();
 			}
 			String newRhs;
 			if (eq.rhs.gen != null) {
 				newRhs = eq.rhs.gen + "." + idCol;
+			} else if (eq.rhs.sk != null) {
+				newRhs = "?";
 			} else {
 				newRhs = quotePrim(eq.rhs).toString();
 			}

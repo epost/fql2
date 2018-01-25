@@ -1027,41 +1027,19 @@ public class CombinatorParser extends AqlParser {
 	}
 
 	private static Parser<QueryExpRaw> queryExpRaw() {
-		/*
-		 * Parser<List<catdata.Pair<LocStr, String>>> fr = Parsers.tuple(token("from"),
-		 * env(ident, ":")).map(x -> x.b);
-		 * 
-		 * Parser<catdata.Pair<Integer, catdata.Pair<RawTerm, RawTerm>>> eq = Parsers
-		 * .tuple(Parsers.INDEX, Parsers.tuple(term(), token("="), term()).map(x -> new
-		 * catdata.Pair<>(x.a, x.c))) .map(x -> new catdata.Pair<>(x.a, x.b));
-		 * 
-		 * Parser<List<catdata.Pair<Integer, catdata.Pair<RawTerm, RawTerm>>>> eqs =
-		 * Parsers .tuple(token("where"), eq.many()).map(x -> x.b);
-		 * 
-		 * Parser<List<catdata.Pair<LocStr, RawTerm>>> atts = Parsers
-		 * .tuple(token("attributes"), Parsers.tuple(locstr, token("->"), term()).map(x
-		 * -> new catdata.Pair<>(x.a, x.c)).many()) .map(x -> x.b);
-		 * 
-		 * Parser<List<catdata.Pair<LocStr, Trans>>> fks = Parsers
-		 * .tuple(token("foreign_keys"), Parsers.tuple(locstr, token("->"),
-		 * trans()).map(x -> new catdata.Pair<>(x.a, x.c)).many()) .map(x -> x.b);
-		 * 
-		 * Parser<Tuple5<Token, LocStr, catdata.Pair<List<catdata.Pair<LocStr, String>>,
-		 * List<catdata.Pair<Integer, catdata.Pair<RawTerm, RawTerm>>>>,
-		 * Pair<List<catdata.Pair<LocStr, RawTerm>>, List<catdata.Pair<LocStr, Trans>>>,
-		 * List<catdata.Pair<String, String>>>> en = Parsers .tuple(token("entity"),
-		 * locstr.followedBy(token("->")), Parsers.tuple(token("{"), fr, eqs,
-		 * token("}")).map(x -> new catdata.Pair<>(x.b, x.c)),
-		 * Parsers.tuple(atts.optional(), fks.optional()), options);
-		 */
-		Parser<Tuple3<List<LocStr>, List<catdata.Pair<LocStr, PreBlock>>, List<catdata.Pair<String, String>>>> pa = Parsers
-				.tuple(imports, preblock(false).many(), options);
+		Parser<List<catdata.Pair<LocStr, String>>> q = Parsers.tuple(token("params"), env(ident, ":")).map(x->x.b).optional();
+		
+		Parser<Tuple4<List<catdata.Pair<LocStr, String>>, List<LocStr>, List<catdata.Pair<LocStr, PreBlock>>, List<catdata.Pair<String, String>>>> pa = Parsers
+				.tuple(q, imports, preblock(false).many(), options);
 
 		Parser<Tuple5<Token, Token, SchExp<?, ?, ?, ?, ?>, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(
 				token("literal"), token(":"), sch_ref.lazy().followedBy(token("->")), sch_ref.lazy(), token("{"));
-
+/*
+ * List<Pair<LocStr, String>> params, SchExp<?, ?, ?, ?, ?> c, SchExp<?, ?, ?, ?, ?> d, List<LocStr> imports,
+			List<Pair<LocStr, PreBlock>> list, List<Pair<String, String>> options
+ */
 		Parser<QueryExpRaw> ret = Parsers.tuple(l, pa, token("}"))
-				.map(x -> new QueryExpRaw(x.a.c, x.a.d, x.b.a, Util.newIfNull(x.b.b), Util.newIfNull(x.b.c)));
+				.map(x -> new QueryExpRaw(Util.newIfNull(x.b.a), x.a.c, x.a.d, x.b.b, Util.newIfNull(x.b.c), Util.newIfNull(x.b.d)));
 
 		return ret;
 	}

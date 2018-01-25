@@ -571,7 +571,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			ret.add("SQL", new CodeTextPanel("Exception", ex.getMessage()));
-		}  */
+		}   */
 		return new Unit();
 	}
 

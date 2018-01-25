@@ -263,7 +263,8 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		} else if (sk != null) {
 			Ty tye = sks.get(sk);
 			if (tye == null) {
-				throw new RuntimeException("In " + this + ", " + "the type for labelled null " + sk + " is not defined");	
+				String xxx = sks.size() > 64 ? " too big to print " : Util.sep(sks, ":", ", ");
+				throw new RuntimeException("In " + this + ", " + "the type for labelled null " + sk + " is not defined.\n\nAvailable: " + xxx);	
 			}
 			ret = Chc.inLeft(tye);
 		}
