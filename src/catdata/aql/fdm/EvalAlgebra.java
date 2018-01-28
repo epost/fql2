@@ -311,8 +311,10 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 		this.options = options;
 		if (!I.schema().equals(q.src)) {
 			throw new RuntimeException("Anomaly: please report");
-		} else if (!q.params.isEmpty()) {
-			throw new RuntimeException("Eval with params not implemented yet"); //TODO aql
+		} else if (!q.consts.keySet().containsAll(q.params.keySet())) {
+			throw new RuntimeException("Missing bindings: " + Util.sep(Util.diff(q.params.keySet(), q.consts.keySet()), ",")); //TODO aql
+		} else if (!q.consts.keySet().isEmpty()) {
+			q = q.deParam();
 		}
 		Connection conn = null;
 		boolean safe = (I.algebra().talg().sks.isEmpty() && I.algebra().talg().eqs.isEmpty()) || allowUnsafeSql();

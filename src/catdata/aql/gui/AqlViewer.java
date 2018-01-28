@@ -564,14 +564,14 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 	@Override
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Unit visit(JTabbedPane ret, Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q) {
-		/* try {
+		try {
 			Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q = Q.unnest();
 			JComponent comp = makeQueryPanel(q);
 			ret.add("SQL", comp); 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			ret.add("SQL", new CodeTextPanel("Exception", ex.getMessage()));
-		}   */
+		}   
 		return new Unit();
 	}
 

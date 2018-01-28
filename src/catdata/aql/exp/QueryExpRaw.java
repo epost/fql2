@@ -48,7 +48,7 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 	private final Set<Block> blocks;
 
 	public final Ctx<String, String> params;
-//	public final Ctx<String, RawTerm> consts = new Ctx<>();
+	public final Ctx<String, RawTerm>  consts;
 
 	private final Ctx<En, Integer> b1 = new Ctx<>();
 	private final Ctx<Fk, Integer> b2 = new Ctx<>();
@@ -383,6 +383,8 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 	public int hashCode() {
 		int prime = 31;
 		int result = 1;
+		result = prime * result + ((params == null) ? 0 : params.hashCode());
+		result = prime * result + ((consts == null) ? 0 : consts.hashCode());
 		result = prime * result + ((blocks == null) ? 0 : blocks.hashCode());
 		result = prime * result + ((dst == null) ? 0 : dst.hashCode());
 		result = prime * result + ((imports == null) ? 0 : imports.hashCode());
@@ -424,6 +426,16 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 			if (other.src != null)
 				return false;
 		} else if (!src.equals(other.src))
+			return false;
+		if (params == null) {
+			if (other.params != null)
+				return false;
+		} else if (!params.equals(other.params))
+			return false;
+		if (consts == null) {
+			if (other.consts != null)
+				return false;
+		} else if (!consts.equals(other.consts))
 			return false;
 		return true;
 	}
@@ -467,12 +479,13 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 		return "literal : " + src + " -> " + dst + " {\n" + toString + "}";
 	}
 
-	public QueryExpRaw(List<Pair<LocStr, String>> params, SchExp<?, ?, ?, ?, ?> c, SchExp<?, ?, ?, ?, ?> d, List<LocStr> imports,
+	public QueryExpRaw(List<Pair<LocStr, String>> params, List<Pair<LocStr, RawTerm>> consts, SchExp<?, ?, ?, ?, ?> c, SchExp<?, ?, ?, ?, ?> d, List<LocStr> imports,
 			List<Pair<LocStr, PreBlock>> list, List<Pair<String, String>> options) {
 		this.src = (SchExp<Ty, En, Sym, Fk, Att>) c;
 		this.dst = (SchExp<Ty, En, Sym, Fk, Att>) d;
 		this.imports = LocStr.set1(imports);
 		this.options = Util.toMapSafely(options);
+		this.consts = new Ctx<>(Util.toMapSafely(LocStr.set2(consts)));
 		this.params = new Ctx<>(Util.toMapSafely(LocStr.set2(params)));
 		this.blocks = Util.toSetSafely(list).stream().map(x -> new Block(x.second, x.first))
 				.collect(Collectors.toSet());
@@ -541,9 +554,19 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 		Ctx<Att, Term<Ty, En, Sym, Fk, Att, Var, Var>> atts0 = new Ctx<>();
 		Ctx<Fk, Pair<Ctx<Var, Term<Void, En, Void, Fk, Void, Var, Void>>, Boolean>> fks0 = new Ctx<>();
 
+		Ctx<Var, Ty> xxx = new Ctx<>();
+		Ctx<Var, Term<Ty, Void, Sym, Void, Void, Void, Void>> yyy = new Ctx<>();
+		
 		for (String k : imports) {
 			@SuppressWarnings("unchecked")
 			Query<Ty, En, Sym, Fk, Att, En, Fk, Att> v = env.defs.qs.get(k);
+			
+			for (Var var : v.params.keySet()) {
+				xxx.map.put(var, v.params.get(var)); //allow benign collisions
+			}
+			for (Var var : v.consts.keySet()) {
+				yyy.map.put(var, v.consts.get(var));
+			}
 			for (En En : v.ens.keySet()) {
 				ens0.put(En, new Triple<>(v.ens.get(En).gens, v.ens.get(En).eqs, v.ens.get(En).options));
 			}
@@ -613,11 +636,18 @@ public class QueryExpRaw extends QueryExp<Ty, En, Sym, Fk, Att, En, Fk, Att> imp
 		boolean elimRed = (Boolean) new AqlOptions(options, null, env.defaults)
 				.getOrDefault(AqlOption.query_remove_redundancy);
 
-		Ctx<Var, Ty> xxx = new Ctx<>();
 		for (String s : params.keySet()) {
 			xxx.put(new Var(s), new Ty(params.get(s)));
 		}
-		return Query.makeQuery2(xxx, new Ctx<>(), ens0, atts0, fks0, src0, dst0, doNotCheckEqs, elimRed);
+		for (String s : consts.keySet()) {
+			Chc<Ty, En> required = Chc.inLeft(xxx.get(new Var(s)));
+			Term<catdata.aql.exp.TyExpRaw.Ty, catdata.aql.exp.SchExpRaw.En, catdata.aql.exp.TyExpRaw.Sym, catdata.aql.exp.SchExpRaw.Fk, catdata.aql.exp.SchExpRaw.Att, Gen, Sk> term = RawTerm
+					.infer1x(new HashMap<>(), consts.get(s), null, required, src0.collage().convert(), "", src0.typeSide.js).second;
+			
+			yyy.put(new Var(s), term.convert());
+		}
+
+		return Query.makeQuery2(xxx, yyy, ens0, atts0, fks0, src0, dst0, doNotCheckEqs, elimRed);
 	}
 
 	public static void processAtt(Schema<Ty, En, Sym, Fk, Att> src0, Schema<Ty, En, Sym, Fk, Att> dst0,

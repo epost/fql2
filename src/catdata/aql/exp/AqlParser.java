@@ -27,7 +27,7 @@ public abstract class AqlParser {
 			"constraints", "getMapping", "getSchema", "typeside", "schema", "mapping", "instance", "transform", "query",
 			"command", "graph", "exec_jdbc", "exec_js", "exec_cmdline", "literal", "add_to_classpath", 
 			"identity", "match", "attributes", "empty", "imports", "types", "constants", "functions", "equations",
-			"forall", "java_types", "multi_equations", "pi",
+			"forall", "java_types", "multi_equations", "pi", "bindings", 
 			"toQuery", "toCoQuery", "anonymize", "frozen",  "params", 
 			"java_constants", "java_functions", "options", "entities", "src", "unique", "dst", "path_equations",
 			"observation_equations", "generators", "rename", "remove", "modify",

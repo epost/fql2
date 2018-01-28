@@ -35,8 +35,10 @@ extends Instance<Ty, En1, Sym, Fk1, Att1, Pair<Var,X>, Y, ID, Chc<Y, Pair<ID, At
 	public CoEvalInstance(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> Q, Instance<Ty, En2, Sym, Fk2, Att2, Gen, Sk, X, Y> J, AqlOptions options) {
 		if (!Q.dst.equals(J.schema())) {
 			throw new RuntimeException("In co-eval instance, target of query is " + Q.dst + ", but instance has type " + J.schema());
-		} else if (!Q.params.isEmpty()) {
-			throw new RuntimeException("Coeval with params not implemented yet"); //TODO aql
+		} else if (!Q.consts.keySet().containsAll(Q.params.keySet())) {
+			throw new RuntimeException("Missing bindings: " + Util.sep(Util.diff(Q.params.keySet(), Q.consts.keySet()), ",")); //TODO aql
+		} else if (!Q.consts.keySet().isEmpty()) {
+			Q = Q.deParam();
 		}
 		
 

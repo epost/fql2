@@ -1027,9 +1027,9 @@ public class CombinatorParser extends AqlParser {
 	}
 
 	private static Parser<QueryExpRaw> queryExpRaw() {
-		Parser<List<catdata.Pair<LocStr, String>>> q = Parsers.tuple(token("params"), env(ident, ":")).map(x->x.b).optional();
+		Parser<Pair<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<LocStr, RawTerm>>>> q = Parsers.tuple(Parsers.tuple(token("params"), env(ident, ":")).map(x->x.b).optional(), Parsers.tuple(token("bindings"), env(term(), "=")).map(x->x.b).optional()) ;
 		
-		Parser<Tuple4<List<catdata.Pair<LocStr, String>>, List<LocStr>, List<catdata.Pair<LocStr, PreBlock>>, List<catdata.Pair<String, String>>>> pa = Parsers
+		Parser<Tuple4<Pair<List<catdata.Pair<LocStr, String>>, List<catdata.Pair<LocStr, RawTerm>>>, List<LocStr>, List<catdata.Pair<LocStr, PreBlock>>, List<catdata.Pair<String, String>>>> pa = Parsers
 				.tuple(q, imports, preblock(false).many(), options);
 
 		Parser<Tuple5<Token, Token, SchExp<?, ?, ?, ?, ?>, SchExp<?, ?, ?, ?, ?>, Token>> l = Parsers.tuple(
@@ -1039,7 +1039,7 @@ public class CombinatorParser extends AqlParser {
 			List<Pair<LocStr, PreBlock>> list, List<Pair<String, String>> options
  */
 		Parser<QueryExpRaw> ret = Parsers.tuple(l, pa, token("}"))
-				.map(x -> new QueryExpRaw(Util.newIfNull(x.b.a), x.a.c, x.a.d, x.b.b, Util.newIfNull(x.b.c), Util.newIfNull(x.b.d)));
+				.map(x -> new QueryExpRaw(Util.newIfNull(x.b.a.a), Util.newIfNull(x.b.a.b), x.a.c, x.a.d, x.b.b, Util.newIfNull(x.b.c), Util.newIfNull(x.b.d)));
 
 		return ret;
 	}
