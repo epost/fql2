@@ -497,10 +497,11 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 
 				if (Util.isect(N, N2).isEmpty()) {
 					changed[0] = true;
-					//TODO aql
-			//		Lineage<Void, En2, Void, Fk2, Void, Gen, Void> m = populate(toAdd, eq.second, initial);
-			//		Lineage<Void, En2, Void, Fk2, Void, Gen, Void> m2 = populate(toAdd, eq.third, initial);
-			//		ufs.get(dst).union(m, m2);
+					
+			Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> 
+			m = populateT(toAdd, eq.second, initial), m2 = populateT(toAdd, eq.third, initial);
+					
+					ufs.get(dst).union(m, m2);
 				}
 			} 
 		}
@@ -518,6 +519,29 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 		return m;
 	}
 	
+	//TODO aql some notion of reduction here
+	
+	public Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> populateT(Content toAdd, Term<Ty, En2, Sym, Fk2, Att2, Void, Void> t,
+			Lineage<Void, En2, Void, Fk2, Void, Gen, Void> initial) {
+		
+		if (t.obj != null) {
+			return Term.Obj(t.obj, t.ty);
+		} else if (t.sym != null) {
+			List<Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> l = new LinkedList<>();
+			for (Term<Ty, En2, Sym, Fk2, Att2, Void, Void> s : t.args) {
+				l.add(populateT(toAdd, s, initial));
+			}
+			return Term.Sym(t.sym, l);
+		} else if (t.att != null) {
+			Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x = populate(toAdd, t.arg.toFkList(), initial);
+			Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>
+			y = Term.Sk(Chc.inRight(new Lineage<>(fresh.next(), Term.Att(t.att, x.t.convert()))));
+			toAdd.atts.get(t.att).add(x, y);
+			return y;
+		}
+		
+		return Util.anomaly();
+	}
 	public Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> eval(List<Fk2> lhs,
 			Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> N) {
 		for (Fk2 fk : lhs) {
@@ -537,34 +561,30 @@ public class Chase<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> {
 	public Set<Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> evalT(Term<Ty, En2, Sym, Fk2, Att2, Void, Void> t,
 			Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> N) {
 		if (t.obj != null) {
-			return null; //Util.singSet(Chc.inRight(Term.Obj(t.obj, t.ty)));
+			return Util.singSet(Term.Obj(t.obj, t.ty));
 		} else if (t.sym != null) {
 			List<Set<Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>>> l = new LinkedList<>();
 			for (Term<Ty, En2, Sym, Fk2, Att2, Void, Void> x : t.args) {
-				//Set<Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> r = eval(x, N);
-				//l.add(r);
-				//TODO aql
+				Set<Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> r = evalT(x, N);
+				l.add(r);
 			}
 			List<List<Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>>> z = Util.prod(l);
+			Set<Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> ret = new HashSet<>();
 			for (List<Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> y : z) {
-				
+				ret.add(Term.Sym(t.sym, y));
 			}
-			
-		}
-		/*
-		for (Fk2 fk : lhs) {
-			Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> M = new HashSet<>();
-			for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> n : N) {
-				Collection<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> s = T.fks.get(fk).get(n);
-				if (s == null) {
-					s = new LinkedList<>();
-				}
-				M.addAll(s);
+			return ret;
+		} else if (t.att != null) {
+			Set<Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>>> ret = new HashSet<>();
+			Set<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>> x = eval(t.arg.toFkList(), N);
+			for (Lineage<Void, En2, Void, Fk2, Void, Gen, Void> l : x) {
+				Term<Ty, Void, Sym, Void, Void, Void, Chc<Y, Lineage<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> 
+				z = Term.Sk(Chc.inRight(new Lineage<>(fresh.next(), Term.Att(t.att, l.t.map(Util.voidFn(), Util.voidFn(), Function.identity(), Util.voidFn(), Function.identity(), Util.voidFn())))));
+				ret.add(z);
 			}
-			N = M;
-		}
-		return N; */
-		return null;
+			return ret;
+		} 
+		return Util.anomaly();
 	}
 
 	public void moveObjects(Content toAdd, Boolean[] changed) {

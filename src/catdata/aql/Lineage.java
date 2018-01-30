@@ -4,6 +4,10 @@ public class Lineage<Ty,En,Sym,Fk,Att,Gen,Sk> {
 
 	public final Integer i;
 	public final Term<Ty,En,Sym,Fk,Att,Gen,Sk> t;
+	
+	public <Ty,En,Sym,Fk,Att,Gen,Sk> Lineage<Ty,En,Sym,Fk,Att,Gen,Sk> convert() {
+		return (Lineage<Ty, En, Sym, Fk, Att, Gen, Sk>) this;
+	}
 
 	public Lineage(Integer i, Term<Ty,En,Sym,Fk,Att,Gen,Sk> t) {
 		this.i = i;

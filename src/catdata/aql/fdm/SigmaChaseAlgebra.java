@@ -46,10 +46,9 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 		X = i2;
 		this.col = col;
 		
-		//TODO: move to correct spot
-	//	if (!X.algebra().hasFreeTypeAlgebra()) {
-	//		throw new RuntimeException("Chase cannot be used: type algebra is not free");
-	//	}
+		if (!X.algebra().hasFreeTypeAlgebra()) {
+			throw new RuntimeException("Chase cannot be used: type algebra is not free");
+		}
 
 	
 		chase = new Chase<Ty,En1,Sym,Fk1,Att1,En2,Fk2,Att2,Gen,Sk,X,Y>(F, X);
@@ -72,8 +71,7 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 		if (!lhs.hasTypeType()) {
 			return this.intoX(lhs).equals(intoX(rhs));
 		} else {
-			return Util.anomaly();
-			// return this.intoY(lhs).equals(intoY(rhs));
+			return this.intoY(lhs).equals(intoY(rhs));
 		}
 	}
 
