@@ -339,6 +339,15 @@ public class TypeSide<Ty, Sym> implements Semantics {
 		toString += "\njava_functions";
 		toString += "\n\t" + Util.sep(syms0, js.java_fns.map, " = " , "\n\t", true);
 		return toString;
+	}
+
+	public boolean hasImplicitJavaEqs() {
+		for (Sym x : js.java_fns.keySet()) {
+			if (!syms.get(x).first.isEmpty()) {
+				return true;
+			}
+		}
+		return false;
 	} 
 
 }

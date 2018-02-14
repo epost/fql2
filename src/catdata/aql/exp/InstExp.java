@@ -1182,9 +1182,21 @@ public abstract class InstExp<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y>
 
 		@Override
 		public SigmaInstance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y> eval(AqlEnv env) {
-			Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> f = F.eval(env);
-			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> i = I.eval(env);
-			return new SigmaInstance<>(f, i, new AqlOptions(options, null, env.defaults));
+			Mapping<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> F = this.F.eval(env);
+			Instance<Ty, En1, Sym, Fk1, Att1, Gen, Sk, X, Y> I = this.I.eval(env);
+			
+			Collage<Ty, En2, Sym, Fk2, Att2, Gen, Sk> col = new Collage<>(F.dst.collage());
+			
+			col.sks.putAll(I.sks().map);
+			for (Gen gen : I.gens().keySet()) {
+				col.gens.put(gen, F.ens.get(I.gens().get(gen)));
+			}
+			
+			Set<Pair<Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>, Term<Ty, En2, Sym, Fk2, Att2, Gen, Sk>>> eqs = new HashSet<>();
+			for (Pair<Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>, Term<Ty, En1, Sym, Fk1, Att1, Gen, Sk>> eq : I.eqs()) {
+				col.eqs.add(new Eq<>(new Ctx<>(), F.trans(eq.first), F.trans(eq.second)));
+			}
+			return new SigmaInstance<>(F, I, new AqlOptions(options, col, env.defaults));
 		}
 
 	}

@@ -175,6 +175,16 @@ extends Algebra<Ty, En1, Sym, Fk1, Att1, Pair<En1, X>, Y, Pair<En1, X>, Y> {
 		return t.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Function.identity());
 	}
 
+	@Override
+	public boolean hasFreeTypeAlgebra() {
+		return alg.hasFreeTypeAlgebra();
+	}
+
+	@Override
+	public boolean hasFreeTypeAlgebraOnJava() {
+		return alg.hasFreeTypeAlgebraOnJava();
+	}
+
 	
 
 }	

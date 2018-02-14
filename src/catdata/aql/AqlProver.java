@@ -29,7 +29,8 @@ public class AqlProver {
 	//x = y and y = z -> x = z when java is involved.  
 	public static <Ty, En, Sym, Fk, Att, Gen, Sk> DP<Ty, En, Sym, Fk, Att, Gen, Sk> create(AqlOptions ops, Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col1, AqlJs<Ty, Sym> js) {
 		ProverName name = (ProverName) ops.getOrDefault(AqlOption.prover);
-
+		long timeout = (Long) ops.getOrDefault(AqlOption.timeout);
+		
 		if (name.equals(ProverName.auto)) {
 			name = auto(ops, col1.simplify().first);
 		}
@@ -66,7 +67,7 @@ public class AqlProver {
 			case maedmax:
 				String exePath = (String) ops.getOrDefault(AqlOption.maedmax_path);
 				Boolean b = (Boolean) ops.getOrDefault(AqlOption.maedmax_allow_empty_sorts_unsafe);
-				return new KBtoDP<>(js, col1.simplify().second, new MaedmaxProver<>(exePath, col1.simplify().first.toKB(), b)); // use																																																		
+				return new KBtoDP<>(js, col1.simplify().second, new MaedmaxProver<>(exePath, col1.simplify().first.toKB(), b, timeout)); // use																																																		
 				
 			default:
 				throw new RuntimeException("Anomaly: please report");

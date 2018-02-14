@@ -41,7 +41,7 @@ public class MaedmaxProver<T, C, V> extends DPKB<T, C, V>  {
 	
 	//done elsewhere for convenience
 	//TODO AQL empty sorts check
-	public MaedmaxProver(String exePath, KBTheory<T,C,V> th, boolean allowEmptySorts) {
+	public MaedmaxProver(String exePath, KBTheory<T,C,V> th, boolean allowEmptySorts, long seconds) {
 		super(th.tys, th.syms, th.eqs);
 		this.th = th;
 		
@@ -57,7 +57,7 @@ public class MaedmaxProver<T, C, V> extends DPKB<T, C, V>  {
 			Util.writeFile(th.tptp(allowEmptySorts), g.getAbsolutePath());
 			System.out.println(g.getAbsolutePath());
 			
-			String str = exePath + " --interactive --aql " + g.getAbsolutePath();
+			String str = exePath + "-T " + seconds + " --interactive --aql " + g.getAbsolutePath();
 			proc = Runtime.getRuntime().exec(str);
 			
 			

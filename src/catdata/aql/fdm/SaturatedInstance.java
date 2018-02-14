@@ -203,6 +203,16 @@ extends Instance<Ty, En, Sym, Fk, Att, X, Y, X, Y>  {
 			return "Saturated Inner Algebra wrapper of " + alg.toStringProver();
 		}
 
+		@Override
+		public boolean hasFreeTypeAlgebra() {
+			return alg.hasFreeTypeAlgebra();
+		}
+
+		@Override
+		public boolean hasFreeTypeAlgebraOnJava() {
+			return alg.hasFreeTypeAlgebraOnJava();
+		}
+
 		/*
 		@Override
 		public DP<Ty, En, Sym, Fk, Att, X, Y> dp() {

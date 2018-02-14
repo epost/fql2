@@ -132,7 +132,7 @@ public final class Ctx<K,V> implements Serializable {
 		}
 		V ret = map.get(k);
 		if (ret == null) {
-			throw new RuntimeException("Encountered " + k + " but was expecting one of " + map.keySet() );
+			throw new RuntimeException("Attempt to lookup " + k + " failed; is not present in " + map.keySet() );
 		}
 		return ret;
 	}

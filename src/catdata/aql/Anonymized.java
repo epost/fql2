@@ -81,6 +81,14 @@ public class Anonymized<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Instance<Ty
 			}
 			return col;
 		}
+		
+		public boolean hasFreeTypeAlgebra() {
+			return talg().eqs.isEmpty();
+		}
+		
+		public boolean hasFreeTypeAlgebraOnJava() {
+			return talg().eqs.stream().filter(x -> talg().java_tys.containsKey(talg().type(x.ctx, x.lhs).l)).collect(Collectors.toList()).isEmpty();
+		}
 
 		@Override
 		public Term<Ty, En, Sym, Fk, Att, Gen, Sk> reprT_protected(Term<Ty, Void, Sym, Void, Void, Void, Y> y) {

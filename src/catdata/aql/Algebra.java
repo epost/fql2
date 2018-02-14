@@ -34,13 +34,15 @@ public abstract class Algebra<Ty,En,Sym,Fk,Att,Gen,Sk,X,Y> /* implements DP<Ty,E
 	
 	//TODO aql cant validate algebras bc are not dps
 	
-	public boolean hasFreeTypeAlgebra() {
+	 public abstract boolean hasFreeTypeAlgebra();
+	 
+	 /*{
 		return talg().eqs.isEmpty();
-	}
+	} */
 	
-	public boolean hasFreeTypeAlgebraOnJava() {
+	public abstract boolean hasFreeTypeAlgebraOnJava(); /* {
 		return talg().eqs.stream().filter(x -> talg().java_tys.containsKey(talg().type(x.ctx, x.lhs).l)).collect(Collectors.toList()).isEmpty();
-	}
+	} */
 	
 	/**
 	 * The Xs need be to be unique across ens, so that repr can invert.  Is it worth checking this? TODO aql

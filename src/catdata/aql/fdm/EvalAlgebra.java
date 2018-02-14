@@ -596,4 +596,14 @@ public class EvalAlgebra<Ty, En1, Sym, Fk1, Att1, Gen, Sk, En2, Fk2, Att2, X, Y>
 	 * 
 	 */
 
+	@Override
+	public boolean hasFreeTypeAlgebra() {
+		return I.algebra().hasFreeTypeAlgebra();
+	}
+
+	@Override
+	public boolean hasFreeTypeAlgebraOnJava() {
+		return I.algebra().hasFreeTypeAlgebraOnJava();
+	}
+
 }

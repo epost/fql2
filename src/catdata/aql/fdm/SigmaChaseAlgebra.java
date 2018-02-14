@@ -46,8 +46,11 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 		X = i2;
 		this.col = col;
 		
-		if (!X.algebra().hasFreeTypeAlgebra()) {
-			throw new RuntimeException("Chase cannot be used: type algebra is not free");
+		if (!X.algebra().talg().eqs.isEmpty()) {
+			throw new RuntimeException("Chase cannot be used: type algebra of input instance is not necessarily free");
+		}
+		if (X.schema().typeSide.hasImplicitJavaEqs()) {
+			throw new RuntimeException("Chase cannot be used: type algebra of input instance uses java functions");		
 		}
 
 	
@@ -183,6 +186,16 @@ public class SigmaChaseAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk,
 	public Term<Void, En2, Void, Fk2, Void, Gen, Void> repr(
 			Lineage<Void, En2, Void, Fk2, Void, Gen, Void> x) {
 		return x.t.convert(); //TODO aql convert lineage to use Voids
+	}
+
+	@Override
+	public boolean hasFreeTypeAlgebra() {
+		return true;
+	}
+
+	@Override
+	public boolean hasFreeTypeAlgebraOnJava() {
+		return true;
 	}
 	
 }

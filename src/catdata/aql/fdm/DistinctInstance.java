@@ -155,6 +155,16 @@ public class DistinctInstance<Ty, En, Sym, Fk, Att, Gen, Sk, X, Y> extends Insta
 		public String printY(Y y) {
 			return "|" + I.algebra().printY(y) + "|";
 		}
+
+		@Override
+		public boolean hasFreeTypeAlgebra() {
+			return I.algebra().hasFreeTypeAlgebra();
+		}
+
+		@Override
+		public boolean hasFreeTypeAlgebraOnJava() {
+			return I.algebra().hasFreeTypeAlgebraOnJava();
+		}
 		
 	}
 

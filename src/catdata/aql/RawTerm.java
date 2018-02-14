@@ -451,7 +451,8 @@ public final class RawTerm {
 	//only used for precedences with aql options
 	 public static  Head<Ty, En, Sym, Fk, Att, Gen, Sk> toHeadNoPrim(String head,
 			Collage<Ty, En, Sym, Fk, Att, Gen, Sk> col) {
-		
+		Util.assertNotNull(head);
+		Util.assertNotNull(col);
 		 assertUnambig(head, col);
 		 
 		if (col.syms.containsKey(new Sym(head))) {

@@ -2,9 +2,11 @@ package catdata.aql;
 
 import java.util.Collection;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import catdata.Chc;
 import catdata.Ctx;
+import catdata.Triple;
 import catdata.Util;
 
 public class ImportAlgebra<Ty,En,Sym,Fk,Att,X,Y> extends Algebra<Ty,En,Sym,Fk,Att,X,Y,X,Y>  implements DP<Ty,En,Sym,Fk,Att,X,Y>  {
@@ -93,6 +95,9 @@ public class ImportAlgebra<Ty,En,Sym,Fk,Att,X,Y> extends Algebra<Ty,En,Sym,Fk,At
 				talg.sks.put(y, ty);
 			}
 		}
+		for (Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> x : schema.typeSide.eqs) {
+			talg.eqs.add(new Eq<>(x.first.inLeft(), x.second.mapGenSk(Util.voidFn(), Util.voidFn()), x.third.mapGenSk(Util.voidFn(),Util.voidFn())));
+		}
 	}
 
 	@Override
@@ -166,6 +171,16 @@ public class ImportAlgebra<Ty,En,Sym,Fk,Att,X,Y> extends Algebra<Ty,En,Sym,Fk,At
 	@Override
 	public Collage<Ty, Void, Sym, Void, Void, Void, Y> talg() {
 		return talg;
+	}
+
+	@Override
+	public boolean hasFreeTypeAlgebra() {
+		return talg.eqs.isEmpty();
+	}
+
+	@Override
+	public boolean hasFreeTypeAlgebraOnJava() {
+		return talg.eqs.isEmpty(); //TODO aql guess
 	}
 
 

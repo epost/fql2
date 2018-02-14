@@ -16,6 +16,9 @@ public class UnionFind<X>  {
 		return "UnionFind [parent=" + parent + ", size=" + size + "]";
 	}
 
+    public Collection<X> values() {
+    		return parent.keySet();
+    }
 
 	private final Map<X,X> parent;  
     private final Map<X,Integer> size;    

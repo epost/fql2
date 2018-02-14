@@ -25,6 +25,14 @@ import catdata.aql.fdm.InitialAlgebra;
 public class SigmaLeftKanAlgebra<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2, Gen, Sk, X, Y> extends
 		Algebra<Ty, En2, Sym, Fk2, Att2, Gen, Sk, Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Chc<Sk, Pair<Lineage<Void, En2, Void, Fk2, Void, Gen, Void>, Att2>>>
 		implements DP<Ty, En2, Sym, Fk2, Att2, Gen, Sk> {
+	
+	public boolean hasFreeTypeAlgebra() {
+		return talg().eqs.isEmpty();
+	}
+	
+	public boolean hasFreeTypeAlgebraOnJava() {
+		return talg().eqs.stream().filter(x -> talg().java_tys.containsKey(talg().type(x.ctx, x.lhs).l)).collect(Collectors.toList()).isEmpty();
+	}
 
 	private static class Path<Ty, En, Sym, Fk, Att> {
 		public final En src;

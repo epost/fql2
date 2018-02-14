@@ -116,6 +116,16 @@ public class InitialInstance<Ty, En, Sym, Fk, Att> extends Instance<Ty, En, Sym,
 		public Void gen(Void gen) {
 			return Util.abort(gen);
 		}
+
+		@Override
+		public boolean hasFreeTypeAlgebra() {
+			return true;
+		}
+
+		@Override
+		public boolean hasFreeTypeAlgebraOnJava() {
+			return true;
+		}
 		
 	}
 

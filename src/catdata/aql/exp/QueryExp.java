@@ -263,9 +263,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 			
 			Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q1 = Q1.eval(env);
 			Query<Ty, En2, Sym, Fk2, Att2, En3, Fk3, Att3> q2 = Q2.eval(env);
-			if (!q1.params.equals(q2.params)) {
-				throw new RuntimeException("Params do not match: " + q1.params + " and then " + q2.params);
-			}
+			
 
 			Ctx<En3, Triple<Ctx<Var, En1>, Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Var>>, AqlOptions>> ens = new Ctx<>();
 			Ctx<Att3, Term<Ty, En1, Sym, Fk1, Att1, Var, Var>> atts = new Ctx<>();
@@ -358,9 +356,18 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				
 				atts.put(att3, xl);
 			}
+			if (!q1.params.agreeOnOverlap(q2.params)) {
+				throw new RuntimeException("Incompatible parameters: [" + q1.params + "] and [" + q2.params + "]");
+			}
+			Ctx<Var, Ty> zzz = new Ctx<>(q1.params.map);
+			for (Var v : q2.params.keySet()) {
+				if (!zzz.containsKey(v)) {
+					zzz.put(v, q2.params.get(v));
+				}
+			}
 			
 
-			return Query.makeQuery2(q1.params, new Ctx<>(), ens, atts, fks, q1.src, q2.dst,
+			return Query.makeQuery2(zzz, new Ctx<>(), ens, atts, fks, q1.src, q2.dst,
 					(Boolean) ops.getOrDefault(AqlOption.dont_validate_unsafe), (Boolean) ops.getOrDefault(AqlOption.query_remove_redundancy));
 
 		}
@@ -381,6 +388,8 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				Var head = Util.get0(q1.atts.get(t.att).gens());
 				Term<Void, En1, Void, Fk1, Void, Var, Void> u = trans(q1, iso, en2, head, t.arg.asArgForAtt(), en3);
 				return q1.atts.get(t.att).replace(Term.Gen(head), u.convert());
+			} else if (t.sk != null) {
+				return Term.Sk(t.sk);
 			}
 			return Util.anomaly();
 		}

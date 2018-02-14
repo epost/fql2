@@ -61,7 +61,7 @@ public class ProgramProver<T, C, V> extends DPKB<T, C, V>  {
 				for (Triple<KBExp<C, V>, KBExp<C, V>, Map<V, KBExp<C, V>>> cp : cps) {
 					if (!cp.first.equals(cp.second)) {
 						if (throwerror) {
-							throw new RuntimeException("Equation " + ab0.second + " = " + ab0.third + " overlaps with " + gd0.second + " = " + gd0.third + ", the critical pair is " + cp.first + " and " + cp.second);			
+							throw new RuntimeException("Is not a program: equation " + ab0.second + " = " + ab0.third + " overlaps with " + gd0.second + " = " + gd0.third + ", the critical pair is " + cp.first + " and " + cp.second);			
 						} else {
 							return false;
 						}

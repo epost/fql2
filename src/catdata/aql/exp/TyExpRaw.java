@@ -127,7 +127,7 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 
 	public final Map<String, String> options;
 	
-	private final Collage<Ty, Void, Sym, Void, Void, Void, Void> col = new Collage<>();
+	private final Collage<Ty, Void, Sym, Void, Void, Void, Void> col;
 
 
 	@Override
@@ -151,6 +151,7 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 		this.java_fns = LocStr.functions2(java_fns_string);
 		this.options = Util.toMapSafely(options);
 
+		this.col = new Collage<>();
 		col.tys.addAll(this.types.stream().map(x -> new Ty(x)).collect(Collectors.toList()));
 		col.syms.putAll(conv1(Util.toMapSafely(this.functions)));
 		col.java_tys.putAll(conv3(Util.toMapSafely(this.java_tys)));
@@ -163,24 +164,13 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 			col.java_fns.put(new Sym(kv.getKey()), kv.getValue().third);
 		}
 		
-		// changed my mind: do not defer equation checking since invokes javascript
-		//col.
-		AqlJs<Ty, Sym> js = new AqlJs<>(col.syms, col.java_tys, col.java_parsers, col.java_fns);
 		
-		for (Triple<List<Pair<String, String>>, RawTerm, RawTerm> eq : eqs) {
-			try {
-				Triple<Ctx<Var, Chc<Ty, Void>>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> 
-				tr = infer1x(yyy(eq.first), eq.second, eq.third, null, col, "", js);
-				col.eqs.add(new Eq<>(tr.first, tr.second, tr.third));
-			} catch (RuntimeException ex) {
-				ex.printStackTrace();
-				throw new LocException(find("equations", eq), "In equation " + eq.second + " = " + eq.third + ", " + ex.getMessage());
-			}
-
-		}
-
+		//do above because find() requires the index
 		doGuiIndex(imports, types, functions, eqsX, java_tys_string, java_parser_string, java_fns_string);
 
+		
+
+	
 	}
 
 	private Triple<Ctx<Var, Chc<Ty, Void>>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> infer1x(
@@ -425,6 +415,22 @@ public final class TyExpRaw extends TyExp<Ty, Sym> implements Raw {
 	public synchronized TypeSide<Ty, Sym> eval(AqlEnv env) {
 		AqlOptions ops = new AqlOptions(options, col, env.defaults);
 
+		// changed my mind: do not defer equation checking since invokes javascript
+		//col.
+		AqlJs<Ty, Sym> js = new AqlJs<>(col.syms, col.java_tys, col.java_parsers, col.java_fns);
+	
+		for (Triple<List<Pair<String, String>>, RawTerm, RawTerm> eq : eqs) {
+			try {
+				Triple<Ctx<Var, Chc<Ty, Void>>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> 
+				tr = infer1x(yyy(eq.first), eq.second, eq.third, null, col, "", js);
+				col.eqs.add(new Eq<>(tr.first, tr.second, tr.third));
+			} catch (RuntimeException ex) {
+				ex.printStackTrace();
+				throw new LocException(find("equations", eq), "In equation " + eq.second + " = " + eq.third + ", " + ex.getMessage());
+			}
+
+		}
+		
 		for (Pair<Integer, TyExp<Ty, Sym>> k : imports) {
 			TypeSide<Ty, Sym> v = k.second.eval(env); 
 			col.addAll(v.collage());

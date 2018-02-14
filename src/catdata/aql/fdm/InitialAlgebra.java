@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,7 +43,18 @@ public class InitialAlgebra<Ty, En, Sym, Fk, Att, Gen, Sk, X>
 extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
  implements DP<Ty, En, Sym, Fk, Att, Gen, Sk>  { //is DP for entire instance
 
+	public boolean hasFreeTypeAlgebra() {
+	//	return talg().eqs.isEmpty();
+		Set<Eq<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>>> l = new HashSet<>();		
+		for (Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq : schema().typeSide.eqs) {
+			l.add(new Eq<>(eq.first.inLeft(), transX(this, eq.second.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Util.voidFn())), transX(this, eq.third.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Util.voidFn()))));
+		}
+		return Util.diff(talg().eqs, l).isEmpty(); 
+	}
 	
+	public boolean hasFreeTypeAlgebraOnJava() {
+		return talg().eqs.stream().filter(x -> talg().java_tys.containsKey(talg().type(x.ctx, x.lhs).l)).collect(Collectors.toList()).isEmpty();
+	}
 	
 /*
 	private <Y> Collage<Ty, Void, Sym, Void, Void, Void, Y> addTy(TypeSide<Ty, Sym> ty, Collage<Ty, Void, Sym, Void, Void, Void, Y> talg) {
@@ -238,6 +250,8 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 				}
 			}
 		}
+		
+		
 		for (Eq<Ty, En, Sym, Fk, Att, Gen, Sk> eq : col.eqs) {
 			if (!col.type(eq.ctx, eq.lhs).left) {
 				continue; //entity
@@ -329,6 +343,7 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 	talg(List<Pair<Chc<Sk, Pair<X, Att>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X,Att>>>>> list, Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, ?> alg, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col) {
 
 		List<Eq<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>>> eqs = new LinkedList<>(talg_full(alg, col).eqs);
+		System.out.println(eqs);
 		List<Chc<Sk, Pair<X, Att>>> sks = new LinkedList<>(talg_full(alg, col).sks.keySet());
 		Iterator<Chc<Sk, Pair<X, Att>>> sks_it = sks.iterator();
 		
@@ -378,6 +393,11 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 			talg.sks.put(sk, talg_full(alg, col).sks.get(sk));
 		}
 		talg.eqs.addAll(eqs);
+		
+		for (Triple<Ctx<Var, Ty>, Term<Ty, Void, Sym, Void, Void, Void, Void>, Term<Ty, Void, Sym, Void, Void, Void, Void>> eq : alg.schema().typeSide.eqs) {
+			talg.eqs.add(new Eq<>(eq.first.inLeft(), transX(alg, eq.second.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Util.voidFn())), transX(alg, eq.third.map(Function.identity(), Function.identity(), Util.voidFn(), Util.voidFn(), Util.voidFn(), Util.voidFn()))));
+		}
+		
 		return talg;
 	}
 	
@@ -429,6 +449,8 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 			return Term.Sk(Chc.inLeft(term.sk));
 		} else if (term.att != null) {
 			return Term.Sk(Chc.inRight(new Pair<>(trans1X(alg, term.arg.asArgForAtt()), term.att)));
+		} else if (term.var != null) {
+			return Term.Var(term.var);
 		}
 		throw new RuntimeException("Anomaly: please report: " + term + ", gen " + term.gen + " fk " + term.fk + ", var " + term.var);
 	}
