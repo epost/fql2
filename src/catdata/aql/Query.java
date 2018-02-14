@@ -893,10 +893,10 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			} else if (eq.lhs.sk != null) {
 				newLhs = "?";
 				if (consts.containsKey(eq.lhs.sk)) {
-					newLhs = quotePrim(consts.get(eq.lhs.sk).convert()).toString();
+					newLhs = quotePrim(consts.get(eq.lhs.sk).convert()).toStringSql();
 				}
 			} else {
-				newLhs = quotePrim(eq.lhs).toString();
+				newLhs = quotePrim(eq.lhs).toStringSql();
 			}
 			String newRhs;
 			if (eq.rhs.gen != null) {
@@ -904,10 +904,10 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			} else if (eq.rhs.sk != null) {
 				newRhs = "?";
 			if (consts.containsKey(eq.rhs.sk)) {
-					newRhs = quotePrim(consts.get(eq.rhs.sk).convert()).toString();
+					newRhs = quotePrim(consts.get(eq.rhs.sk).convert()).toStringSql();
 				}
 			} else {
-				newRhs = quotePrim(eq.rhs).toString();
+				newRhs = quotePrim(eq.rhs).toStringSql();
 			}
 			temp.add(newLhs + " = " + newRhs);
 		}
@@ -916,7 +916,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 	}
 
 	private Term<Ty, En1, Sym, Fk1, Att1, Var, Var> quotePrim(Term<Ty, En1, Sym, Fk1, Att1, Var, Var> t) {
-		if (t.var != null || t.gen != null) {
+		if (t.var != null || t.gen != null || t.sk != null) {
 			return t;
 		} else if (t.sym != null && t.args.size() == 0) {
 			return t;
@@ -926,7 +926,13 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			return Term.Att(t.att, quotePrim(t.arg));
 		} else if (t.obj != null) {
 			return Term.Obj("'" + t.obj + "'", t.ty);
-		}
+		} else if (t.sym != null) {
+			List<Term<Ty, En1, Sym, Fk1, Att1, Var, Var>> l = new LinkedList<>();
+			for (Term<Ty, En1, Sym, Fk1, Att1, Var, Var> x : t.args) {
+				l.add(quotePrim(x));
+			}
+			return Term.Sym(t.sym, l);
+		} 
 		return Util.anomaly();
 	}
 

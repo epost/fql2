@@ -570,7 +570,7 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 			ret.add("SQL", comp); 
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			ret.add("SQL", new CodeTextPanel("Exception", ex.getMessage()));
+			ret.add("SQL Exn", new CodeTextPanel("Exception", ex.getMessage()));
 		}   
 		return new Unit();
 	}
@@ -580,7 +580,8 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 			List<String> l = q.toSQLViews("input", "output", "id", "varchar").first;
 			return new CodeTextPanel("", Util.sep(l, ";\n\n"));
 		} catch (Exception ex) {
-			return new CodeTextPanel("", ex.getMessage());
+			ex.printStackTrace();
+			return new CodeTextPanel("SQL exn", ex.getMessage());
 		}
 	} 
 	

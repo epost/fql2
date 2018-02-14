@@ -290,6 +290,29 @@ public final class Term<Ty, En, Sym, Fk, Att, Gen, Sk> {
 		this.obj = obj;
 		this.ty = ty;
 	}
+	
+	public String toStringSql() {
+		if (var != null) {
+			return var.toString();
+		} else if (sym != null) {
+			if (args.isEmpty()) {
+				return sym.toString();
+			} else {
+				return sym.toString() + "(" + Util.sep(args.stream().map(x -> x.toStringSql()).collect(Collectors.toList()), ", ") + ")";
+			}
+		} else if (att != null) {
+			return arg.toStringSql() + "." + att.toString();
+		} else if (fk != null) {
+			return arg.toStringSql() + "." + fk.toString();
+		} else if (gen != null) {
+			return gen.toString(); 
+		} else if (sk != null) {
+			return sk.toString();
+		} else if (obj != null) {
+			return obj.toString(); // + "@" + ty;
+		}
+		throw new RuntimeException("Anomaly: please report");
+	}
 
 	//TODO: eventually, will want to quote, escape, etc
 	public String toString(Function<Sk, String> sk_printer, Function<Gen, String> gen_printer) {
