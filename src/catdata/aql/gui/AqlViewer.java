@@ -577,7 +577,8 @@ public final class AqlViewer implements SemanticsVisitor<Unit, JTabbedPane, Runt
 
 	public <Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> JComponent makeQueryPanel(Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> q) {
 		try {
-			List<String> l = q.toSQLViews("input", "output", "id", "varchar").first;
+			
+			List<String> l = q.toSQLViews("", "", "id", "varchar").first;
 			return new CodeTextPanel("", Util.sep(l, ";\n\n"));
 		} catch (Exception ex) {
 			ex.printStackTrace();
