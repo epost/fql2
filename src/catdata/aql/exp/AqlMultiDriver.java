@@ -71,16 +71,16 @@ public final class AqlMultiDriver implements Callable<Unit> {
 
 	public final AqlEnv env;
 
-	private final List<String> todo = Collections.synchronizedList(new LinkedList<>());
-	private final List<String> processing = Collections.synchronizedList(new LinkedList<>());
-	private final List<String> completed =Collections.synchronizedList(new LinkedList<>());
+	public final List<String> todo = Collections.synchronizedList(new LinkedList<>());
+	public final List<String> processing = Collections.synchronizedList(new LinkedList<>());
+	public final List<String> completed =Collections.synchronizedList(new LinkedList<>());
 
 	//private final Program<Exp<?>> env.prog;
-	private final String[] toUpdate;
+	public final String[] toUpdate;
 	//private final Program<Exp<?>> last_prog;
-	private final AqlEnv last_env;
+	public final AqlEnv last_env;
 
-	private final List<RuntimeException> exn = Collections.synchronizedList(new LinkedList<>());
+	public final List<RuntimeException> exn = Collections.synchronizedList(new LinkedList<>());
 
 //	boolean stop = false;
 
