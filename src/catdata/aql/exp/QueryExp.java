@@ -271,7 +271,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 
 
 			Map<En3, Pair<Ctx<Var, Pair<Var, Var>>, Ctx<Pair<Var, Var>, Var>>> isos = new HashMap<>(); 
-		//	int i = 0;
+			int i = 0;
 			for (En3 en3 : q2.dst.ens) {
 				Pair<Ctx<Var, Pair<Var, Var>>, Ctx<Pair<Var, Var>, Var>> iso = new Pair<>(new Ctx<>(), new Ctx<>());
 
@@ -281,7 +281,7 @@ public abstract class QueryExp<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>
 				for (Entry<Var, En2> v : q2.ens.get(en3).gens.map.entrySet()) {
 					Frozen<Ty, En1, Sym, Fk1, Att1> I = q1.ens.get(v.getValue());
 					for (Entry<Var, En1> u : I.gens.map.entrySet()) {
-						Var newV = new Var("\"(" + v.getKey() + "," + u.getKey() + ")\"");
+						Var newV = new Var("v" + (i++)); //new Var("\"(" + v.getKey() + "," + u.getKey() + ")\"");
 						iso.first.put(newV, new Pair<>(v.getKey(), u.getKey()));
 						iso.second.put(new Pair<>(v.getKey(), u.getKey()), newV);
 						fr.put(newV, u.getValue());

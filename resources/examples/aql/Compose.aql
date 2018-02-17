@@ -1,9 +1,6 @@
 
 typeside ty = literal { 
-	java_types
-		Integer = "java.lang.Integer"
-	java_constants
-		Integer = "return java.lang.Integer.parseInt(input[0])"
+	imports sql
 	java_functions
 		neg : Integer -> Integer = "return (-input[0]).intValue()"
 }

@@ -877,6 +877,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		 * "concat('(" + x + "=', concat(" + convert(x.var + "." + idCol) +
 		 * ", ')'))").collect(Collectors.toList()); return Util.sep(l, " + ");
 		 */
+	
 	}
 
 	private String whereToString(Collection<Eq<Ty, En1, Sym, Fk1, Att1, Var, Var>> eqs, String idCol) {
