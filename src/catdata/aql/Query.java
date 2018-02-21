@@ -68,7 +68,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		return ret;
 	}
 
-	public Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> unnest() {
+	public synchronized Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> unnest() {
 		Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> b = new Blob<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2>(conv1(ens),
 				atts, conv2(), src, dst);
 		b = unfoldNestedApplications(b);
@@ -397,6 +397,8 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 			}
 		}
 		this.atts = new Ctx<>(atts.map);
+		
+		
 		if (!doNotCheckPathEqs) {
 			validate();
 		}
@@ -421,7 +423,7 @@ public final class Query<Ty, En1, Sym, Fk1, Att1, En2, Fk2, Att2> implements Sem
 		for (Att2 att2 : atts.keySet()) {
 			if (!dst.atts.containsKey(att2)) {
 				throw new RuntimeException(
-						"there is a return clause for " + att2 + ", which is not an attribute in the target");
+						"there is an attributes clause for " + att2 + ", which is not an attribute in the target");
 			}
 		}
 		for (Fk2 fk2 : dst.fks.keySet()) {
