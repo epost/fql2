@@ -343,7 +343,7 @@ extends Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, Chc<Sk, Pair<X, Att>>>
 	talg(List<Pair<Chc<Sk, Pair<X, Att>>, Term<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X,Att>>>>> list, Algebra<Ty, En, Sym, Fk, Att, Gen, Sk, X, ?> alg, Collage<Ty,En,Sym,Fk,Att,Gen,Sk> col) {
 
 		List<Eq<Ty, Void, Sym, Void, Void, Void, Chc<Sk, Pair<X, Att>>>> eqs = new LinkedList<>(talg_full(alg, col).eqs);
-		System.out.println(eqs);
+	//	System.out.println(eqs);
 		List<Chc<Sk, Pair<X, Att>>> sks = new LinkedList<>(talg_full(alg, col).sks.keySet());
 		Iterator<Chc<Sk, Pair<X, Att>>> sks_it = sks.iterator();
 		

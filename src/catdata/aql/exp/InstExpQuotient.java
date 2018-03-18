@@ -187,6 +187,13 @@ public final class InstExpQuotient<X,Y> extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,
 				Triple<Ctx<Var,Chc<Ty,En>>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>,Term<Ty,En,Sym,Fk,Att,Gen,Sk>>
 				eq0 = RawTerm.infer1x(ctx, eq.first, eq.second, null, col, "", J.schema().typeSide.js).first3();
 						
+				if (J.type(eq0.second).left) {
+					throw new RuntimeException("Attempt to equate values at type in quotient: " + eq0.second + " at type " + J.type(eq0.second).l);
+				}
+				if (J.type(eq0.third).left) {
+					throw new RuntimeException("Attempt to equate values at type in quotient: " + eq0.third + " at type " + J.type(eq0.third).l);
+				}
+			
 				eqs0.add(new Pair<>(eq0.second, eq0.third));
 				col.eqs.add(new Eq<>(new Ctx<>(), eq0.second, eq0.third));
 			} catch (RuntimeException ex) {
@@ -195,6 +202,8 @@ public final class InstExpQuotient<X,Y> extends InstExp<Ty,En,Sym,Fk,Att,Gen,Sk,
 			}
 		}
 
+		
+		
 		AqlOptions strat = new AqlOptions(options, col, env.defaults);
 		InitialAlgebra<Ty,En,Sym,Fk,Att,Gen,Sk,ID> 
 		initial = new InitialAlgebra<>(strat, J.schema(), col, new It(), Object::toString, Object::toString);
